@@ -17,19 +17,22 @@ module type_workspace_mod
     ! Everything is private except the derived data type itself
     private
 
-    ! Local variables confined to the module
-    integer, parameter    :: WP     = REAL64                    !! 64 bit real
-    integer, parameter    :: IP     = INT32                     !! 32 bit integer
-    character(200)        :: error_message                      !! Probably long enough
-    integer (IP)          :: allocate_status                    !! To check allocation status
-    integer (IP)          :: deallocate_status                  !! To check deallocation status
+    !--------------------------------------------------------------------------------
+    ! Dictionary: global variables confined to the module
+    !----------------------------------------- ---------------------------------------
+    integer, parameter      :: WP = REAL64              !! 64 bit real
+    integer, parameter      :: IP = INT32               !! 32 bit integer
+    character(200)          :: error_message            !! Probably long enough
+    integer (IP)            :: allocate_status          !! To check allocation status
+    integer (IP)            :: deallocate_status        !! To check deallocation status
+    !---------------------------------------------------------------------------------
 
     ! Declare derived data type
     type, public :: workspace_t
 
         ! Workspace arrays for Legendre transform
-        real (WP), dimension (:), allocatable :: work
-        real (WP), dimension (:), allocatable :: dwork
+        real (WP), dimension (:), allocatable          :: work
+        real (WP), dimension (:), allocatable, private :: dwork
 
         ! Workspace arrays for scalar transform - GAU
         real (WP), dimension (:), allocatable :: wshags
@@ -69,6 +72,7 @@ module type_workspace_mod
 
         procedure, non_overridable :: Create
         procedure, non_overridable :: Destroy
+        !final                      :: Finalize
 
     end type workspace_t
 
@@ -76,22 +80,22 @@ contains
     !
     !*****************************************************************************************
     !
-    subroutine Create( me, nlat, nlon, grid_type )
+    subroutine Create( this, nlat, nlon, grid_type )
         !
         ! Purpose:
         !
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        class (workspace_t), intent (in out) :: me
+        class (workspace_t), intent (in out) :: this
         integer (IP), intent (in)            :: nlat, nlon
         character (*), intent (in), optional :: grid_type
         !--------------------------------------------------------------------------------
 
         ! Check status
-        if ( me%initialized ) then
+        if ( this%initialized ) then
             print *, 'ERROR: You must destroy "workspace" before re-instantiating'
-            return
+            stop
         end if
 
         ! Check if optional grid type argument is present
@@ -101,15 +105,15 @@ contains
             if ( grid_type .eq. 'REG' ) then
 
                 ! Set up transforms for regular grids
-                call Initialize_scalar_transform_reg( me, nlat, nlon )
-                call Initialize_vector_transform_reg( me, nlat, nlon )
+                call Initialize_scalar_transform_reg( this, nlat, nlon )
+                call Initialize_vector_transform_reg( this, nlat, nlon )
 
             ! Check if the grid type is gaussian
             else if ( grid_type .eq. 'GAU' ) then
 
                 ! Set up transforms for gaussian grids
-                call Initialize_scalar_transform_gau( me, nlat, nlon )
-                call Initialize_vector_transform_gau( me, nlat, nlon )
+                call Initialize_scalar_transform_gau( this, nlat, nlon )
+                call Initialize_vector_transform_gau( this, nlat, nlon )
 
             else
 
@@ -122,35 +126,35 @@ contains
         else
 
             ! Set up default transforms for gaussian grids
-            call Initialize_scalar_transform_gau( me, nlat, nlon )
-            call Initialize_vector_transform_gau( me, nlat, nlon )
+            call Initialize_scalar_transform_gau( this, nlat, nlon )
+            call Initialize_vector_transform_gau( this, nlat, nlon )
 
         end if
 
 
         ! Set status
-        me%initialized = .true.
+        this%initialized = .true.
 
     end subroutine Create
     !
     !*****************************************************************************************
     !
-    subroutine Destroy( me )
+    subroutine Destroy( this )
         !
         ! Purpose:
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        class (workspace_t), intent (in out) :: me
+        class (workspace_t), intent (in out) :: this
         !--------------------------------------------------------------------------------
 
         ! Check status
-        if ( .not. me%initialized ) return
+        if ( .not. this%initialized ) return
 
         ! Deallocate workspace arrays for Legendre transform
-        if ( allocated( me%work ) ) then
+        if ( allocated( this%work ) ) then
             deallocate ( &
-                me%work, &
+                this%work, &
                 stat = deallocate_status, &
                 errmsg = error_message )
 
@@ -161,9 +165,9 @@ contains
             end if
         end if
 
-        if ( allocated( me%dwork ) ) then
+        if ( allocated( this%dwork ) ) then
             deallocate ( &
-                me%dwork, &
+                this%dwork, &
                 stat = deallocate_status, &
                 errmsg = error_message )
 
@@ -175,9 +179,9 @@ contains
         end if
 
         ! Deallocate workspace arrays for scalar transform - GAU
-        if ( allocated( me%wshags ) ) then
+        if ( allocated( this%wshags ) ) then
             deallocate ( &
-                me%wshags, &
+                this%wshags, &
                 stat = deallocate_status, &
                 errmsg = error_message )
 
@@ -188,9 +192,9 @@ contains
             end if
         end if
 
-        if ( allocated( me%wshsgs ) ) then
+        if ( allocated( this%wshsgs ) ) then
             deallocate ( &
-                me%wshsgs, &
+                this%wshsgs, &
                 stat = deallocate_status, &
                 errmsg = error_message )
 
@@ -202,9 +206,9 @@ contains
         end if
 
         ! Deallocate workspace arrays for scalar transform - REG
-        if ( allocated( me%wshaes ) ) then
+        if ( allocated( this%wshaes ) ) then
             deallocate ( &
-                me%wshaes, &
+                this%wshaes, &
                 stat = deallocate_status, &
                 errmsg = error_message )
 
@@ -215,9 +219,9 @@ contains
             end if
         end if
 
-        if ( allocated( me%wshses ) ) then
+        if ( allocated( this%wshses ) ) then
             deallocate ( &
-                me%wshses, &
+                this%wshses, &
                 stat = deallocate_status, &
                 errmsg = error_message )
 
@@ -229,9 +233,9 @@ contains
         end if
 
         ! Deallocate workspace arrays for vector transform - GAU
-        if ( allocated( me%wvhags ) ) then
+        if ( allocated( this%wvhags ) ) then
             deallocate ( &
-                me%wvhags, &
+                this%wvhags, &
                 stat = deallocate_status, &
                 errmsg = error_message )
 
@@ -242,9 +246,9 @@ contains
             end if
         end if
 
-        if ( allocated( me%wvhsgs ) ) then
+        if ( allocated( this%wvhsgs ) ) then
             deallocate ( &
-                me%wvhsgs, &
+                this%wvhsgs, &
                 stat = deallocate_status, &
                 errmsg = error_message )
 
@@ -256,9 +260,9 @@ contains
         end if
 
         ! Deallocate workspace arrays for vector transform - REG
-        if ( allocated( me%wvhaes ) ) then
+        if ( allocated( this%wvhaes ) ) then
             deallocate ( &
-                me%wvhaes, &
+                this%wvhaes, &
                 stat = deallocate_status, &
                 errmsg = error_message )
 
@@ -269,9 +273,9 @@ contains
             end if
         end if
 
-        if ( allocated( me%wvhses ) ) then
+        if ( allocated( this%wvhses ) ) then
             deallocate ( &
-                me%wvhses, &
+                this%wvhses, &
                 stat = deallocate_status, &
                 errmsg = error_message )
 
@@ -283,11 +287,11 @@ contains
         end if
 
         ! Deallocate scalar transform pointers
-        if ( associated(me%a) ) then
+        if ( associated(this%a) ) then
 
             ! Deallocate pointer
             deallocate( &
-                me%a, &
+                this%a, &
                 stat = deallocate_status, &
                 errmsg = error_message )
 
@@ -298,15 +302,15 @@ contains
             end if
 
             ! Nullify pointer
-            nullify( me%a )
+            nullify( this%a )
 
         end if
 
-        if ( associated(me%b) ) then
+        if ( associated(this%b) ) then
 
             ! Deallocate pointer
             deallocate( &
-                me%b, &
+                this%b, &
                 stat = deallocate_status, &
                 errmsg = error_message )
 
@@ -317,15 +321,15 @@ contains
             end if
 
             ! Nullify pointer
-            nullify( me%b )
+            nullify( this%b )
         end if
 
         ! Deallocate vector transform pointers
-        if ( associated(me%br) ) then
+        if ( associated(this%br) ) then
 
             ! Deallocate pointer
             deallocate( &
-                me%br, &
+                this%br, &
                 stat = deallocate_status, &
                 errmsg = error_message )
 
@@ -335,15 +339,15 @@ contains
             end if
 
             ! Nullify pointer
-            nullify( me%br )
+            nullify( this%br )
 
         end if
 
-        if ( associated(me%bi) ) then
+        if ( associated(this%bi) ) then
 
             ! Deallocate pointer
             deallocate( &
-                me%bi, &
+                this%bi, &
                 stat = deallocate_status, &
                 errmsg = error_message )
 
@@ -353,15 +357,15 @@ contains
             end if
 
             ! Nullify pointer
-            nullify( me%bi )
+            nullify( this%bi )
 
         end if
 
-        if ( associated(me%cr) ) then
+        if ( associated(this%cr) ) then
 
             ! Deallocate pointer
             deallocate( &
-                me%cr, &
+                this%cr, &
                 stat = deallocate_status, &
                 errmsg = error_message )
 
@@ -372,15 +376,15 @@ contains
             end if
 
             ! Nullify pointer
-            nullify( me%cr )
+            nullify( this%cr )
 
         end if
 
-        if ( associated(me%ci) ) then
+        if ( associated(this%ci) ) then
 
             ! Deallocate pointer
             deallocate( &
-                me%ci, &
+                this%ci, &
                 stat = deallocate_status, &
                 errmsg = error_message )
 
@@ -391,18 +395,38 @@ contains
             end if
 
             ! Nullify pointer
-            nullify( me%ci )
+            nullify( this%ci )
 
         end if
 
         ! Reset status
-        me%initialized = .false.
+        this%initialized = .false.
 
     end subroutine Destroy
     !
     !*****************************************************************************************
     !
-    subroutine Initialize_scalar_transform_gau( me, nlat, nlon )
+    subroutine Assert_initialized( this )
+        !
+        ! Purpose:
+        !--------------------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !--------------------------------------------------------------------------------
+        class (workspace_t), intent (in out)    :: this
+        !--------------------------------------------------------------------------------
+
+        ! Check status
+        if ( .not. this%initialized ) then
+            print *, 'ERROR: You must instantiate workspace" '&
+                &//'before calling methods'
+            stop
+        end if
+
+    end subroutine Assert_initialized
+    !
+    !*****************************************************************************************
+    !
+    subroutine Initialize_scalar_transform_gau( this, nlat, nlon )
         !
         ! Purpose:
         ! Set the various workspace arrays and pointer to perform the
@@ -415,7 +439,7 @@ contains
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        class (workspace_t), intent (in out) :: me
+        class (workspace_t), intent (in out) :: this
         integer (IP), intent (in)            :: nlat, nlon
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
@@ -425,7 +449,7 @@ contains
         !--------------------------------------------------------------------------------
 
         ! Check status
-        if ( me%initialized ) then
+        if ( this%initialized ) then
             print *, 'ERROR: You must destroy "workspace" before re-instantiating'
             return
         end if
@@ -443,9 +467,9 @@ contains
 
         ! Allocate arrays
         allocate ( &
-            me%work( 1:LWORK ), &
-            me%dwork( 1:LDWORK ), &
-            me%wshags( LSHAGS ), &
+            this%work( 1:LWORK ), &
+            this%dwork( 1:LDWORK ), &
+            this%wshags( LSHAGS ), &
             stat = allocate_status, &
             errmsg = error_message )
 
@@ -463,9 +487,9 @@ contains
         ! https://www2.cisl.ucar.edu/spherepack/documentation#shags.html
         call Shagsi( &
             nlat, nlon, &
-            me%wshags, LSHAGS, &
-            me%work, LWORK, &
-            me%dwork, LDWORK, ierror)
+            this%wshags, LSHAGS, &
+            this%work, LWORK, &
+            this%dwork, LDWORK, ierror)
 
         ! Check the error status
         if ( ierror /= 0 ) then
@@ -480,7 +504,7 @@ contains
 
         ! Allocate array
         allocate ( &
-            me%wshsgs( 1:LSHSGS ), &
+            this%wshsgs( 1:LSHSGS ), &
             stat = allocate_status, &
             errmsg = error_message )
 
@@ -497,9 +521,9 @@ contains
         ! https://www2.cisl.ucar.edu/spherepack/documentation#shsgs.html
         call Shsgsi( &
             nlat, nlon, &
-            me%wshsgs, LSHSGS, &
-            me%work, LWORK, &
-            me%dwork, LDWORK, ierror)
+            this%wshsgs, LSHSGS, &
+            this%work, LWORK, &
+            this%dwork, LDWORK, ierror)
 
         ! check error status
         if ( ierror /= 0 ) then
@@ -509,8 +533,8 @@ contains
 
         ! (STEP 3) Allocate pointers for the (real) scalar transform
         allocate ( &
-            me%a( 1:nlat, 1:nlat ), &
-            me%b( 1:nlat, 1:nlat ), &
+            this%a( 1:nlat, 1:nlat ), &
+            this%b( 1:nlat, 1:nlat ), &
             stat = allocate_status, &
             errmsg = error_message )
 
@@ -526,7 +550,7 @@ contains
     !
     !*****************************************************************************************
     !
-    subroutine Initialize_vector_transform_gau( me, nlat, nlon )
+    subroutine Initialize_vector_transform_gau( this, nlat, nlon )
         !
         ! Purpose:
         ! Sets the various workspace arrays and pointers
@@ -538,7 +562,7 @@ contains
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        class (workspace_t), intent (in out) :: me
+        class (workspace_t), intent (in out) :: this
         integer (IP), intent (in)            :: nlat, nlon
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
@@ -548,7 +572,7 @@ contains
         !--------------------------------------------------------------------------------
 
         ! Check status
-        if ( me%initialized ) then
+        if ( this%initialized ) then
             print *, 'ERROR: You must destroy "workspace" before re-instantiating'
             return
         end if
@@ -559,13 +583,13 @@ contains
         LVHAGS = Get_lvhags( nlat, nlon )
 
         ! Remark:
-        ! me%dwork was already initialized in the previous call to
+        ! this%dwork was already initialized in the previous call to
         ! in Set_work_space_arrays_for_scalar_transform
         LDWORK = Get_ldwork( nlat )
 
         ! Allocate array
         allocate ( &
-            me%wvhags( 1:LVHAGS ), &
+            this%wvhags( 1:LVHAGS ), &
             stat = allocate_status, &
             errmsg = error_message )
 
@@ -583,8 +607,8 @@ contains
         ! https://www2.cisl.ucar.edu/spherepack/documentation#vhags.html
         call Vhagsi( &
             nlat, nlon, &
-            me%wvhags, LVHAGS, &
-            me%dwork, LDWORK, ierror)
+            this%wvhags, LVHAGS, &
+            this%dwork, LDWORK, ierror)
 
         ! Check error status
         if ( ierror /= 0 ) then
@@ -599,7 +623,7 @@ contains
 
         ! Allocate array
         allocate ( &
-            me%wvhsgs( 1:LVHSGS ), &
+            this%wvhsgs( 1:LVHSGS ), &
             stat = allocate_status, &
             errmsg = error_message )
 
@@ -616,8 +640,8 @@ contains
         ! https://www2.cisl.ucar.edu/spherepack/documentation#vhsgs.html
         call Vhsgsi( &
             nlat, nlon, &
-            me%wvhsgs, LVHSGS, &
-            me%dwork, LDWORK, ierror )
+            this%wvhsgs, LVHSGS, &
+            this%dwork, LDWORK, ierror )
 
         ! check the error status
         if ( ierror /= 0 ) then
@@ -627,10 +651,10 @@ contains
 
         ! (Step 3) Allocate pointers for the vector transform coefficients
         allocate ( &
-            me%br( 1:nlat, 1:nlat ), &
-            me%bi( 1:nlat, 1:nlat ), &
-            me%cr( 1:nlat, 1:nlat ), &
-            me%ci( 1:nlat, 1:nlat ), &
+            this%br( 1:nlat, 1:nlat ), &
+            this%bi( 1:nlat, 1:nlat ), &
+            this%cr( 1:nlat, 1:nlat ), &
+            this%ci( 1:nlat, 1:nlat ), &
             stat = allocate_status, &
             errmsg = error_message )
 
@@ -646,7 +670,7 @@ contains
     !
     !*****************************************************************************************
     !
-    subroutine Initialize_scalar_transform_reg( me, nlat, nlon )
+    subroutine Initialize_scalar_transform_reg( this, nlat, nlon )
         !
         ! Purpose:
         ! Set the various workspace arrays and pointer to perform the
@@ -659,7 +683,7 @@ contains
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        class (workspace_t), intent (in out) :: me
+        class (workspace_t), intent (in out) :: this
         integer (IP), intent (in)            :: nlat, nlon
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
@@ -669,7 +693,7 @@ contains
         !--------------------------------------------------------------------------------
 
         ! Check status
-        if ( me%initialized ) then
+        if ( this%initialized ) then
             print *, 'ERROR: You must destroy "workspace" before re-instantiating'
             return
         end if
@@ -687,9 +711,9 @@ contains
 
         ! Allocate arrays
         allocate ( &
-            me%work( 1:LWORK ), &
-            me%dwork( 1:LDWORK ), &
-            me%wshaes( LSHAES ), &
+            this%work( 1:LWORK ), &
+            this%dwork( 1:LDWORK ), &
+            this%wshaes( LSHAES ), &
             stat = allocate_status, &
             errmsg = error_message )
 
@@ -707,9 +731,9 @@ contains
         ! https://www2.cisl.ucar.edu/spherepack/documentation#shags.html
         call Shaesi( &
             nlat, nlon, &
-            me%wshaes, LSHAES, &
-            me%work, LWORK, &
-            me%dwork, LDWORK, ierror)
+            this%wshaes, LSHAES, &
+            this%work, LWORK, &
+            this%dwork, LDWORK, ierror)
 
         ! Check the error status
         if ( ierror /= 0 ) then
@@ -724,7 +748,7 @@ contains
 
         ! Allocate array
         allocate ( &
-            me%wshses( 1:LSHSES ), &
+            this%wshses( 1:LSHSES ), &
             stat = allocate_status, &
             errmsg = error_message )
 
@@ -741,9 +765,9 @@ contains
         ! https://www2.cisl.ucar.edu/spherepack/documentation#shsgs.html
         call Shsesi( &
             nlat, nlon, &
-            me%wshses, LSHSES, &
-            me%work, LWORK, &
-            me%dwork, LDWORK, ierror)
+            this%wshses, LSHSES, &
+            this%work, LWORK, &
+            this%dwork, LDWORK, ierror)
 
         ! check error status
         if ( ierror /= 0 ) then
@@ -753,8 +777,8 @@ contains
 
         ! (STEP 3) Allocate pointers for the (real) scalar transform
         allocate ( &
-            me%a( 1:nlat, 1:nlat ), &
-            me%b( 1:nlat, 1:nlat ), &
+            this%a( 1:nlat, 1:nlat ), &
+            this%b( 1:nlat, 1:nlat ), &
             stat = allocate_status, &
             errmsg = error_message )
 
@@ -770,7 +794,7 @@ contains
     !
     !*****************************************************************************************
     !
-    subroutine Initialize_vector_transform_reg( me, nlat, nlon )
+    subroutine Initialize_vector_transform_reg( this, nlat, nlon )
         !
         ! Purpose:
         ! Sets the various workspace arrays and pointers
@@ -783,7 +807,7 @@ contains
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        class (workspace_t), intent (in out) :: me
+        class (workspace_t), intent (in out) :: this
         integer (IP), intent (in)            :: nlat, nlon
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
@@ -793,7 +817,7 @@ contains
         !--------------------------------------------------------------------------------
 
         ! Check status
-        if ( me%initialized ) then
+        if ( this%initialized ) then
             print *, 'ERROR: You must destroy "workspace" before re-instantiating'
             return
         end if
@@ -804,13 +828,13 @@ contains
         LVHAES = Get_lvhaes( nlat, nlon )
 
         ! Remark:
-        ! me%dwork was already initialized in the previous call to
+        ! this%dwork was already initialized in the previous call to
         ! in Set_work_space_arrays_for_scalar_transform
         LDWORK = Get_ldwork( nlat )
 
         ! Allocate array
         allocate ( &
-            me%wvhaes( 1:LVHAES ), &
+            this%wvhaes( 1:LVHAES ), &
             stat = allocate_status, &
             errmsg = error_message )
         if ( allocate_status /= 0 ) then
@@ -824,8 +848,8 @@ contains
         ! https://www2.cisl.ucar.edu/spherepack/documentation#vhags.html
         call Vhaesi( &
             nlat, nlon, &
-            me%wvhaes, LVHAES, &
-            me%dwork, LDWORK, ierror)
+            this%wvhaes, LVHAES, &
+            this%dwork, LDWORK, ierror)
 
         ! Check error status
         if ( ierror /= 0 ) then
@@ -840,7 +864,7 @@ contains
 
         ! Allocate array
         allocate ( &
-            me%wvhses( 1:LVHSES ), &
+            this%wvhses( 1:LVHSES ), &
             stat = allocate_status, &
             errmsg = error_message )
         if ( allocate_status /= 0 ) then
@@ -853,8 +877,8 @@ contains
         ! https://www2.cisl.ucar.edu/spherepack/documentation#vhsgs.html
         call Vhsesi( &
             nlat, nlon, &
-            me%wvhses, LVHSES, &
-            me%dwork, LDWORK, ierror )
+            this%wvhses, LVHSES, &
+            this%dwork, LDWORK, ierror )
 
         ! check the error status
         if ( ierror /= 0 ) then
@@ -864,10 +888,10 @@ contains
 
         ! (Step 3) Allocate pointers for the vector transform coefficients
         allocate ( &
-            me%br( 1:nlat, 1:nlat ), &
-            me%bi( 1:nlat, 1:nlat ), &
-            me%cr( 1:nlat, 1:nlat ), &
-            me%ci( 1:nlat, 1:nlat ), &
+            this%br( 1:nlat, 1:nlat ), &
+            this%bi( 1:nlat, 1:nlat ), &
+            this%cr( 1:nlat, 1:nlat ), &
+            this%ci( 1:nlat, 1:nlat ), &
             stat = allocate_status, &
             errmsg = error_message )
         if ( allocate_status /= 0 ) then
@@ -1178,6 +1202,23 @@ contains
             l1 * l2 * (nlat + nlat - l1 + 1) + nlon + 15
 
     end function Get_lvhses
+    !
+    !*****************************************************************************************
+    !
+    subroutine Finalize( this )
+        !
+        ! Purpose:
+        !< Finalize object
+        !
+        !--------------------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !--------------------------------------------------------------------------------
+        class (workspace_t), intent (in out) :: this
+        !--------------------------------------------------------------------------------
+
+        call this%Destroy()
+
+    end subroutine Finalize
     !
     !*****************************************************************************************
     !

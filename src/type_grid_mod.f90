@@ -10,7 +10,9 @@ module type_grid_mod
     ! Everything is private except the derived data type itself
     private
 
-    ! Local variables confined to the module
+    !---------------------------------------------------------------------------------
+    ! Dictionary: global variables confined to the module
+    !---------------------------------------------------------------------------------
     integer, parameter    :: WP     = REAL64                    !! 64 bit real
     integer, parameter    :: IP     = INT32                     !! 32 bit integer
     real (WP)             :: PI     = 4.0_WP * atan( 1.0_WP )   !! To calculate latitudes:   0 <= theta <= pi
@@ -18,13 +20,14 @@ module type_grid_mod
     character(200)        :: error_message                      !! Probably long enough
     integer (IP)          :: allocate_status                    !! To check allocation status
     integer (IP)          :: deallocate_status                  !! To check deallocation status
+    !---------------------------------------------------------------------------------
 
     ! Declare derived data type
     type, public ::  grid_t
 
         ! Derived data type components
         logical, private                      :: initialized      = .false. !! Flag to check if object is instantiated
-        character(3)                          :: grid_type        = 'GAU' !! either 'REG' or 'GAU'
+        character(3)                          :: grid_type        = 'GAU'   !! either 'REG' or 'GAU'
         real (WP)                             :: mesh_phi         = 0.0_WP  !! Uniform mesh in phi
         real (WP)                             :: mesh_theta       = 0.0_WP  !! Only used in 'REG' grid
         real (WP), dimension (:), allocatable :: gaussian_weights           !! Used for integration, requires 'GAU' for allocation
@@ -40,6 +43,7 @@ module type_grid_mod
         procedure                  :: Set_equally_spaced_longitudes
         procedure                  :: Set_equally_spaced_latitudes
         procedure                  :: Gaussian_weights_and_points !! Known as Gaqd in SPHEREPACK 3.2
+        !final, non_overridable               :: Finalize
 
     end type grid_t
 
@@ -47,20 +51,20 @@ contains
     !
     !*****************************************************************************************
     !
-    subroutine Create( me, nlat, nlon, grid_type )
+    subroutine Create( this, nlat, nlon, grid_type )
         !
         ! Purpose:
         !
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        class (grid_t), intent (in out)     :: me
+        class (grid_t), intent (in out)     :: this
         integer (IP), intent (in)           :: nlat, nlon
         character(*), intent (in), optional :: grid_type
         !--------------------------------------------------------------------------------
 
         ! Check status
-        if ( me%initialized ) then
+        if ( this%initialized ) then
             print *, 'ERROR: You must destroy "grid" before re-instantiating'
             return
         end if
@@ -71,13 +75,13 @@ contains
             ! Check if the grid type is regular
             if ( grid_type .eq. 'REG') then
 
-                me%grid_type = grid_type
-                call me%Set_equally_spaced_latitudes( nlat )
+                this%grid_type = grid_type
+                call this%Set_equally_spaced_latitudes( nlat )
 
             ! Check if the grid type is gaussian
             else if ( grid_type .eq. 'GAU') then
 
-                call me%Gaussian_weights_and_points( nlat )
+                call this%Gaussian_weights_and_points( nlat )
 
             else
 
@@ -91,46 +95,46 @@ contains
         else
 
             ! Set default '(GAU)' grid
-            call me%Gaussian_weights_and_points( nlat )
+            call this%Gaussian_weights_and_points( nlat )
 
         end if
 
 
         ! Set longitudes: 0 <= phi <= 2*pi
-        call me%Set_equally_spaced_longitudes( nlon )
+        call this%Set_equally_spaced_longitudes( nlon )
 
         ! Set status
-        me%initialized = .true.
+        this%initialized = .true.
 
     end subroutine Create
     !
     !*****************************************************************************************
     !
-    subroutine Destroy( me )
+    subroutine Destroy( this )
         !
         ! Purpose:
         !
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        class (grid_t), intent (in out) :: me
+        class (grid_t), intent (in out) :: this
         !--------------------------------------------------------------------------------
 
         ! Check status
-        if ( .not. me%initialized ) return
+        if ( .not. this%initialized ) return
 
         ! Reset default grid type
-        me%grid_type = 'GAU'
+        this%grid_type = 'GAU'
 
         ! Reset meshes
-        me%mesh_phi   = 0.0_WP
-        me%mesh_theta = 0.0_WP
+        this%mesh_phi   = 0.0_WP
+        this%mesh_theta = 0.0_WP
 
         ! Destroy gaussian_weights
-        if ( allocated( me%gaussian_weights ) ) then
+        if ( allocated( this%gaussian_weights ) ) then
 
             deallocate ( &
-                me%gaussian_weights, &
+                this%gaussian_weights, &
                 stat = deallocate_status, &
                 errmsg = error_message )
 
@@ -144,10 +148,10 @@ contains
         end if
 
         ! Destroy latitudes
-        if ( allocated( me%latitudes ) ) then
+        if ( allocated( this%latitudes ) ) then
 
             deallocate ( &
-                me%latitudes, &
+                this%latitudes, &
                 stat = deallocate_status, &
                 errmsg = error_message )
 
@@ -161,9 +165,9 @@ contains
         end if
 
         ! Destroy longitudes
-        if ( allocated( me%longitudes ) ) then
+        if ( allocated( this%longitudes ) ) then
             deallocate ( &
-                me%longitudes, &
+                this%longitudes, &
                 stat = deallocate_status, &
                 errmsg = error_message )
 
@@ -177,13 +181,13 @@ contains
         end if
 
         ! Reset status
-        me%initialized = .false.
+        this%initialized = .false.
 
     end subroutine Destroy
     !
     !*****************************************************************************************
     !
-    subroutine Gaussian_weights_and_points( me, nlat )
+    subroutine Gaussian_weights_and_points( this, nlat )
         !
         ! References:
         !
@@ -196,7 +200,7 @@ contains
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        class (grid_t), intent (in out)    :: me
+        class (grid_t), intent (in out)    :: this
         integer (IP), intent (in)          :: nlat
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
@@ -208,15 +212,15 @@ contains
         !--------------------------------------------------------------------------------
 
         ! Check status
-        if ( me%initialized ) then
+        if ( this%initialized ) then
             print *, 'ERROR: You must destroy "grid" before re-instantiating'
             return
         end if
 
         ! Allocate arrays
         allocate ( &
-            me%latitudes( 1:nlat ), &
-            me%gaussian_weights( 1:nlat ), &
+            this%latitudes( 1:nlat ), &
+            this%gaussian_weights( 1:nlat ), &
             stat = allocate_status, &
             errmsg = error_message )
 
@@ -233,8 +237,8 @@ contains
 
         ! Set latitudes and gaussian weights
         call Gaqd( &
-            nlat, me%latitudes, &
-            me%gaussian_weights, dummy_variable, &
+            nlat, this%latitudes, &
+            this%gaussian_weights, dummy_variable, &
             LWORK, ierror )
 
         ! Check error flag
@@ -247,14 +251,14 @@ contains
     !
     !*****************************************************************************************
     !
-    subroutine Set_equally_spaced_latitudes( me, nlat )
+    subroutine Set_equally_spaced_latitudes( this, nlat )
         !
         ! Purpose:
         !
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        class (grid_t), target, intent (in out) :: me
+        class (grid_t), target, intent (in out) :: this
         integer (IP), intent (in)               :: nlat
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
@@ -265,18 +269,18 @@ contains
         !--------------------------------------------------------------------------------
 
         ! Check status
-        if ( me%initialized ) then
+        if ( this%initialized ) then
             print *, 'ERROR: You must destroy "grid" before re-instantiating'
             return
         end if
 
         ! Set the uniform latitudinal mesh
         mesh_theta = PI / nlat
-        me%mesh_theta = mesh_theta
+        this%mesh_theta = mesh_theta
 
         ! Allocate array
         allocate ( &
-            me%latitudes( 1:nlat ), &
+            this%latitudes( 1:nlat ), &
             stat = allocate_status, &
             errmsg = error_message )
 
@@ -289,7 +293,7 @@ contains
         end if
 
         ! Associate pointer
-        if ( .not. associated( theta ) ) theta => me%latitudes
+        if ( .not. associated( theta ) ) theta => this%latitudes
 
         ! Compute longitudinal grid
         do k = 1, size( theta )
@@ -305,13 +309,13 @@ contains
     !
     !*****************************************************************************************
     !
-    subroutine Set_equally_spaced_longitudes( me, nlon )
+    subroutine Set_equally_spaced_longitudes( this, nlon )
         !
         ! Purpose:
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        class (grid_t), target, intent (in out) :: me
+        class (grid_t), target, intent (in out) :: this
         integer (IP), intent (in)               :: nlon !! number of longitudes
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
@@ -322,18 +326,18 @@ contains
         !--------------------------------------------------------------------------------
 
         ! Check status
-        if ( me%initialized ) then
+        if ( this%initialized ) then
             print *, 'ERROR: You must destroy "grid" before re-instantiating'
             return
         end if
 
         ! Set equally spaced (uniform) mesh size
         mesh_phi = TWO_PI / real(nlon, WP)
-        me%mesh_phi = mesh_phi
+        this%mesh_phi = mesh_phi
 
         ! Allocate array
         allocate ( &
-            me%longitudes( 1:nlon ), &
+            this%longitudes( 1:nlon ), &
             stat = allocate_status, &
             errmsg = error_message )
 
@@ -346,7 +350,7 @@ contains
         end if
 
         ! Associate pointer
-        if ( .not. associated( phi ) ) phi => me%longitudes
+        if ( .not. associated( phi ) ) phi => this%longitudes
 
         ! Compute longitudinal grid
         do l = 1, size( phi )
@@ -360,6 +364,23 @@ contains
 
 
     end subroutine Set_equally_spaced_longitudes
+    !
+    !*****************************************************************************************
+    !
+    subroutine Finalize( this )
+        !
+        ! Purpose:
+        !< Finalize object
+        !
+        !--------------------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !--------------------------------------------------------------------------------
+        class (grid_t), intent (in out) :: this
+        !--------------------------------------------------------------------------------
+
+        call this%Destroy()
+
+    end subroutine Finalize
     !
     !*****************************************************************************************
     !

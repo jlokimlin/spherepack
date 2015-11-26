@@ -94,39 +94,39 @@ contains
     !
     !*****************************************************************************************
     !
-    subroutine Get_array_to_vector( me_result, array )
+    subroutine Get_array_to_vector( this, array )
         !
         ! Purpose:
         !
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        class (vector_t), intent (out)         :: me_result
+        class (vector_t), intent (out)         :: this
         real (WP), dimension (3), intent (in)  :: array
         !--------------------------------------------------------------------------------
 
-        me_result%x = array(1)
-        me_result%y = array(2)
-        me_result%z = array(3)
+        this%x = array(1)
+        this%y = array(2)
+        this%z = array(3)
 
     end subroutine Get_array_to_vector
     !
     !*****************************************************************************************
     !
-    subroutine Get_vector_to_array( array_result, me )
+    subroutine Get_vector_to_array( array, this )
         !
         ! Purpose:
         !
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        real (WP), dimension (3), intent (out) :: array_result
-        class (vector_t), intent (in)         :: me
+        real (WP), dimension (3), intent (out) :: array
+        class (vector_t), intent (in)         :: this
         !--------------------------------------------------------------------------------
 
-        array_result(1) = me%x
-        array_result(2) = me%y
-        array_result(3) = me%z
+        array(1) = this%x
+        array(2) = this%y
+        array(3) = this%z
 
     end subroutine Get_vector_to_array
     !

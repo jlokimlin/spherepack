@@ -37,53 +37,53 @@ contains
         !--------------------------------------------------------------------------------
         integer (IP), parameter    :: nlon = 128
         integer (IP), parameter    :: nlat = nlon/2 + 1
-        type (sphere_t)            :: me
+        type (sphere_t)            :: this
         !--------------------------------------------------------------------------------
 
         ! Create sphere object
-        call me%Create( nlat, nlon )
+        call this%Create( nlat, nlon )
 
         print *, 'Spherepack wrapper validation tests'
         print *, ' '
         print *, 'nlat = ', nlat, 'nlon = ', nlon
 
         ! Test all the subroutines
-        call Test_scalar_analysis_and_synthesis( me )
-        call Test_vector_analysis_and_synthesis( me )
-        call Test_compute_surface_integral( me )
-        call Test_invert_helmholtz( me )
-        call Test_get_gradient( me )
-        call Test_get_vorticity( me )
-        call Test_get_rotation_operator( me )
+        call Test_scalar_analysis_and_synthesis( this )
+        call Test_vector_analysis_and_synthesis( this )
+        call Test_compute_surface_integral( this )
+        call Test_invert_helmholtz( this )
+        call Test_get_gradient( this )
+        call Test_get_vorticity( this )
+        call Test_get_rotation_operator( this )
 
         ! Destroy sphere object
-        call me%Destroy()
+        call this%Destroy()
 
     end subroutine Test_all
     !
     !o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o
     !
-    subroutine Test_scalar_analysis_and_synthesis( me )
+    subroutine Test_scalar_analysis_and_synthesis( this )
         !
         ! Purpose:
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        class (sphere_t), intent (in out)    :: me
+        class (sphere_t), intent (in out)    :: this
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
         !--------------------------------------------------------------------------------
         integer (IP)                            :: nlat, nlon, k, l
         real (WP)                               :: real_error, complex_error
         type (vector_t)                         :: u
-        real (WP), dimension (me%nlat, me%nlon) :: original_function
-        real (WP), dimension (me%nlat, me%nlon) :: real_synthesized_function
-        real (WP), dimension (me%nlat, me%nlon) :: complex_synthesized_function
+        real (WP), dimension (this%nlat, this%nlon) :: original_function
+        real (WP), dimension (this%nlat, this%nlon) :: real_synthesized_function
+        real (WP), dimension (this%nlat, this%nlon) :: complex_synthesized_function
         !--------------------------------------------------------------------------------
 
         ! Constants
-        nlat = me%nlat
-        nlon = me%nlon
+        nlat = this%nlat
+        nlon = this%nlon
 
         ! initialize arrays
         original_function = 0.0_WP
@@ -91,7 +91,7 @@ contains
         do l = 1, nlon
             do k = 1, nlat
 
-                u = me%radial_unit_vector(:,k,l)
+                u = this%radial_unit_vector(:,k,l)
 
                 original_function(k,l) = exp(u%x + u%y + u%z)
 
@@ -99,17 +99,17 @@ contains
         end do
 
         ! real case
-        call me%Perform_scalar_analysis( original_function )
+        call this%Perform_scalar_analysis( original_function )
 
-        call me%Perform_scalar_synthesis( real_synthesized_function )
+        call this%Perform_scalar_synthesis( real_synthesized_function )
 
         real_error = maxval(abs(original_function &
             - real_synthesized_function))
 
         ! complex case
-        call me%Perform_complex_analysis( original_function )
+        call this%Perform_complex_analysis( original_function )
 
-        call me% Perform_complex_synthesis( complex_synthesized_function )
+        call this% Perform_complex_synthesis( complex_synthesized_function )
 
         complex_error = maxval(abs(original_function &
             - complex_synthesized_function))
@@ -131,29 +131,29 @@ contains
     !
     !o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o
     !
-    subroutine Test_vector_analysis_and_synthesis( me )
+    subroutine Test_vector_analysis_and_synthesis( this )
         !
         ! Purpose:
         !
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        class (sphere_t), intent (in out)     :: me
+        class (sphere_t), intent (in out)     :: this
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
         !--------------------------------------------------------------------------------
         integer (IP)       :: nlat, nlon, k, l
         type (vector_t) :: u, phi, theta, vector_field
         real (WP)      :: polar_error, azimuthal_error
-        real (WP), dimension (3,me%nlat, me%nlon) :: &
+        real (WP), dimension (3,this%nlat, this%nlon) :: &
             vector_function
-        real (WP), dimension (me%nlat, me%nlon) :: &
+        real (WP), dimension (this%nlat, this%nlon) :: &
             original_polar_component, original_azimuthal_component, &
             approximate_polar_component, approximate_azimuthal_component
         !--------------------------------------------------------------------------------
 
-        nlat = me%nlat
-        nlon = me%nlon
+        nlat = this%nlat
+        nlon = this%nlon
 
         ! initialize arrays
         vector_function = 0.0_WP
@@ -164,9 +164,9 @@ contains
         do l = 1, nlon
             do k = 1, nlat
 
-                u = me%radial_unit_vector(:,k,l)
-                theta = me%polar_unit_vector(:,k,l)
-                phi = me%azimuthal_unit_vector(:,k,l)
+                u = this%radial_unit_vector(:,k,l)
+                theta = this%polar_unit_vector(:,k,l)
+                phi = this%azimuthal_unit_vector(:,k,l)
 
                 vector_field = [1.0E+3_WP, 1.0E+2_WP, 1.0E+1_WP]
 
@@ -181,10 +181,10 @@ contains
         end do
 
         ! analyze the vector function
-        call me%Perform_vector_analysis( vector_function )
+        call this%Perform_vector_analysis( vector_function )
 
         ! synthesize the function from the coefficients
-        call me%Perform_vector_synthesis( &
+        call this%Perform_vector_synthesis( &
             approximate_polar_component, &
             approximate_azimuthal_component)
 
@@ -215,17 +215,17 @@ contains
     !
     !o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o
     !
-    subroutine Test_compute_surface_integral( me )
+    subroutine Test_compute_surface_integral( this )
         !
         ! Purpose:
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        class (sphere_t), intent (in out)    :: me
+        class (sphere_t), intent (in out)    :: this
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
         !--------------------------------------------------------------------------------
-        real (WP),dimension (me%nlat, me%nlon) :: scalar_function, constant_function
+        real (WP),dimension (this%nlat, this%nlon) :: scalar_function, constant_function
         integer (IP)                           :: nlat, nlon, k,l
         real (WP)                              :: LAMBDA, exact_value, approximate_value
         real (WP)                              :: constant_exact_value, constant_approximate_value
@@ -233,8 +233,8 @@ contains
         real (WP), parameter                   :: FOUR_PI = 16.0_WP * atan( 1.0_WP ) !! To calculate integral
         !--------------------------------------------------------------------------------
 
-        nlat = me%nlat
-        nlon = me%nlon
+        nlat = this%nlat
+        nlon = this%nlon
 
         ! set the constant function
         constant_function = 1.0_WP
@@ -248,7 +248,7 @@ contains
         do k = 1, nlat
             do l = 1, nlon
 
-                u = me%radial_unit_vector(:,k,l)
+                u = this%radial_unit_vector(:,k,l)
                 jhat = [ 0.0_WP, 1.0_WP, 0.0_WP ]
                 scalar_function(k,l) = exp( u.dot.jhat)
 
@@ -256,8 +256,8 @@ contains
         end do
 
         ! compute the surface integral
-        approximate_value = me%Compute_surface_integral( scalar_function )
-        constant_approximate_value = me%Compute_surface_integral( constant_function )
+        approximate_value = this%Compute_surface_integral( scalar_function )
+        constant_approximate_value = this%Compute_surface_integral( constant_function )
 
         ! set the exact valuei
         constant_exact_value =  FOUR_PI
@@ -277,32 +277,32 @@ contains
     !
     !o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o
     !
-    subroutine Test_invert_helmholtz( me )
+    subroutine Test_invert_helmholtz( this )
         !
         ! Purpose:
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        class (sphere_t), intent (in out)    :: me
+        class (sphere_t), intent (in out)    :: this
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
         !--------------------------------------------------------------------------------
         integer (IP)                            :: nlat, nlon, k, l
         type (vector_t)                         :: u
         real (WP)                               :: error
-        real (WP), dimension (me%nlat, me%nlon) :: exact_solution
-        real (WP), dimension (me%nlat, me%nlon) :: source_term
-        real (WP), dimension (me%nlat, me%nlon) :: approximate_solution
+        real (WP), dimension (this%nlat, this%nlon) :: exact_solution
+        real (WP), dimension (this%nlat, this%nlon) :: source_term
+        real (WP), dimension (this%nlat, this%nlon) :: approximate_solution
         !--------------------------------------------------------------------------------
 
-        nlat = me%nlat
-        nlon = me%nlon
+        nlat = this%nlat
+        nlon = this%nlon
 
         ! initialize the scalar function and the exact solution
         do l = 1, nlon
             do k = 1, nlat
 
-                u = me%radial_unit_vector(:,k,l)
+                u = this%radial_unit_vector(:,k,l)
 
                 exact_solution(k,l) = (1.0_WP + u%x * u%y) * exp(u%z)
 
@@ -315,7 +315,7 @@ contains
         end do
 
         ! solve helmholtz's equation
-        call me%Invert_helmholtz( 1.0_WP, source_term, approximate_solution)
+        call this%Invert_helmholtz( 1.0_WP, source_term, approximate_solution)
 
         ! set error
         error = &
@@ -332,13 +332,13 @@ contains
     !
     !o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o
     !
-    subroutine Test_get_gradient( me )
+    subroutine Test_get_gradient( this )
         !
         ! Purpose:
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        class (sphere_t), intent (in out)    :: me
+        class (sphere_t), intent (in out)    :: this
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
         !--------------------------------------------------------------------------------
@@ -346,14 +346,14 @@ contains
         real (WP)         :: csc, sint, cost, sinp, cosp, &
             polar_error, azimuthal_error
         type (vector_t)   :: u
-        real (WP),dimension (me%nlat, me%nlon)  :: &
+        real (WP),dimension (this%nlat, this%nlon)  :: &
             scalar_function, &
             exact_polar_component, exact_azimuthal_component, &
             approximate_polar_component, approximate_azimuthal_component
         !--------------------------------------------------------------------------------
 
-        nlat = me%nlat
-        nlon = me%nlon
+        nlat = this%nlat
+        nlon = this%nlon
 
         ! initialize arrays
         scalar_function = 0.0_WP
@@ -363,13 +363,13 @@ contains
         do l = 1, nlon
             do k = 1, nlat
 
-                sint = me%sint(k)
-                cost = me%cost(k)
+                sint = this%sint(k)
+                cost = this%cost(k)
 
-                sinp = me%sinp(l)
-                cosp = me%cosp(l)
+                sinp = this%sinp(l)
+                cosp = this%cosp(l)
 
-                u = me%radial_unit_vector(:,k,l)
+                u = this%radial_unit_vector(:,k,l)
 
                 scalar_function(k,l) = exp( u%x + u%y + u%z )
 
@@ -386,7 +386,7 @@ contains
         end do
 
         ! Calculate the gradient
-        call me%Get_gradient( &
+        call this%Get_gradient( &
             scalar_function, &
             approximate_polar_component, &
             approximate_azimuthal_component )
@@ -416,13 +416,13 @@ contains
     !
     !o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o
     !
-    subroutine Test_get_vorticity( me )
+    subroutine Test_get_vorticity( this )
         !
         ! Purpose:
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        class (sphere_t), intent (in out)  :: me
+        class (sphere_t), intent (in out)  :: this
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
         !--------------------------------------------------------------------------------
@@ -430,14 +430,14 @@ contains
         type (vector_t) :: u, omega, rotation_operator
         real (WP)      :: scalar_function, sint, cost, sinp, cosp, &
             cot, phi_derivative, theta_derivative, error
-        real (WP), dimension (3,me%nlat, me%nlon) :: &
+        real (WP), dimension (3,this%nlat, this%nlon) :: &
             vector_function
-        real (WP),dimension (me%nlat, me%nlon)    :: &
+        real (WP),dimension (this%nlat, this%nlon)    :: &
             exact_solution, approximate_solution
         !--------------------------------------------------------------------------------
 
-        nlat = me%nlat
-        nlon = me%nlon
+        nlat = this%nlat
+        nlon = this%nlon
 
         ! initialize arrays
         vector_function = 0.0_WP
@@ -448,13 +448,13 @@ contains
         do l = 1, nlon
             do k = 1, nlat
 
-                u = me%radial_unit_vector(:,k,l)
+                u = this%radial_unit_vector(:,k,l)
 
-                sint = me%sint(k)
-                cost = me%cost(k)
+                sint = this%sint(k)
+                cost = this%cost(k)
 
-                sinp = me%sinp(l)
-                cosp = me%cosp(l)
+                sinp = this%sinp(l)
+                cosp = this%cosp(l)
 
                 scalar_function = exp(u%x + u%y + u%z)
 
@@ -467,7 +467,7 @@ contains
                 phi_derivative = (u%x - u%y) * scalar_function
 
                 cot = &
-                    1.0_WP/ tan(me%grid%latitudes(k))
+                    1.0_WP/ tan(this%grid%latitudes(k))
 
                 rotation_operator = &
                     [ -sinp * theta_derivative - cosp * cot * phi_derivative, &
@@ -480,7 +480,7 @@ contains
         end do
 
         ! check if the work space arrays are set up for the (real) vector transform
-        call me%Get_vorticity( vector_function, approximate_solution )
+        call this%Get_vorticity( vector_function, approximate_solution )
 
         ! set error
         error = maxval(abs(exact_solution - approximate_solution))
@@ -497,30 +497,28 @@ contains
     !
     !o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o
     !
-    subroutine Test_get_rotation_operator( me )
+    subroutine Test_get_rotation_operator( this )
         !
         ! Purpose:
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        class (sphere_t), intent (in out)    :: me
+        class (sphere_t), intent (in out)    :: this
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
         !--------------------------------------------------------------------------------
-        integer (IP)   :: nlat, nlon, k,l
-        real (WP) :: sint, cost, sinp, cosp
-        real (WP) :: cot, theta, phi_derivative, theta_derivative
-        real (WP) :: error
-        type (vector_t) :: u
-        real (WP), dimension (3, me%nlat, me%nlon) :: &
-            exact_solution, approximate_solution
-        real (WP),dimension (me%nlat, me%nlon)    :: &
-            scalar_function
+        integer (IP)                                   :: nlat, nlon, k,l
+        real (WP)                                      :: sint, cost, sinp, cosp
+        real (WP)                                      :: cot, theta, phi_derivative, theta_derivative
+        real (WP)                                      :: error
+        type (vector_t)                                :: u
+        real (WP), dimension (3, this%nlat, this%nlon) :: exact_solution, approximate_solution
+        real (WP),dimension (this%nlat, this%nlon)     :: scalar_function
         !--------------------------------------------------------------------------------
 
         ! Set constants
-        nlat = me%nlat
-        nlon = me%nlon
+        nlat = this%nlat
+        nlon = this%nlon
 
         ! initialize arrays
         scalar_function = 0.0_WP
@@ -529,22 +527,22 @@ contains
         do l = 1, nlon
             do k = 1, nlat
 
-                u = me%radial_unit_vector(:,k,l)
+                u = this%radial_unit_vector(:,k,l)
 
                 scalar_function(k,l) = exp(u%x + u%y + u%z)
 
-                sint = me%sint(k)
-                cost = me%cost(k)
+                sint = this%sint(k)
+                cost = this%cost(k)
 
-                sinp = me%sinp(l)
-                cosp = me%cosp(l)
+                sinp = this%sinp(l)
+                cosp = this%cosp(l)
 
                 theta_derivative = (cost * cosp &
                     + cost*sinp - sint) * exp(u%x + u%y + u%z)
 
                 phi_derivative = (u%x - u%y) * exp(u%x + u%y + u%z)
 
-                theta = me%grid%latitudes(k)
+                theta = this%grid%latitudes(k)
 
                 cot = 1.0_WP/ tan(theta)
 
@@ -563,7 +561,7 @@ contains
         end do
 
         ! compute the rotation operator applied to the scalar function
-        call me%Get_rotation_operator( scalar_function, approximate_solution)
+        call this%Get_rotation_operator( scalar_function, approximate_solution)
 
         ! set error
         error = &
