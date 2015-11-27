@@ -20,15 +20,18 @@ module type_workspace_mod
     !--------------------------------------------------------------------------------
     ! Dictionary: global variables confined to the module
     !----------------------------------------- ---------------------------------------
-    integer, parameter      :: WP = REAL64              !! 64 bit real
-    integer, parameter      :: IP = INT32               !! 32 bit integer
-    character(200)          :: error_message            !! Probably long enough
-    integer (IP)            :: allocate_status          !! To check allocation status
-    integer (IP)            :: deallocate_status        !! To check deallocation status
+    integer, parameter  :: WP = REAL64              !! 64 bit real
+    integer, parameter  :: IP = INT32               !! 32 bit integer
+    character(200)      :: error_message            !! Probably long enough
+    integer (IP)        :: allocate_status          !! To check allocation status
+    integer (IP)        :: deallocate_status        !! To check deallocation status
     !---------------------------------------------------------------------------------
 
     ! Declare derived data type
     type, public :: workspace_t
+
+        ! Components
+        logical  :: initialized = .false. !! Instantiation flag
 
         ! Workspace arrays for Legendre transform
         real (WP), dimension (:), allocatable          :: work
@@ -46,9 +49,9 @@ module type_workspace_mod
         real (WP), dimension (:), allocatable :: wvhags
         real (WP), dimension (:), allocatable :: wvhsgs
 
-        ! Workspace arrays for vector transform - GAU
-        real (WP), dimension (:), allocatable :: wvhaes
-        real (WP), dimension (:), allocatable :: wvhses
+        ! Workspace arrays for vector transform - REG
+        real (WP), dimension (:), allocatable :: wvhaes !! workspace array for vector analysis - REG
+        real (WP), dimension (:), allocatable :: wvhses !! workspace array for vector synthesis - REG
 
         ! Scalar transform coefficients
         real (WP), dimension (:,:), pointer :: a => null()
@@ -60,19 +63,22 @@ module type_workspace_mod
         real (WP), dimension (:,:), pointer :: cr => null()
         real (WP), dimension (:,:), pointer :: ci => null()
 
-        logical, private :: initialized = .false.
-
     contains
 
-        ! SPHEREPACK 3.2 methods
-        !        procedure :: Set_up_scalar_analysis
-        !        procedure :: Set_up_scalar_synthesis
-        !        procedure :: Set_up_vector_analysis
-        !        procedure :: Set_up_vector_synthesis
+        ! All methods are private unless stated otherwise
+        private
 
-        procedure, non_overridable :: Create
-        procedure, non_overridable :: Destroy
-        !final                      :: Finalize
+        ! Private methods
+        procedure :: Assert_initialized
+        procedure :: Initialize_scalar_transform_gau
+        procedure :: Initialize_scalar_transform_reg
+        procedure :: Initialize_vector_transform_gau
+        procedure :: Initialize_vector_transform_reg
+
+        ! Public methods
+        procedure, non_overridable, public :: Create
+        procedure, non_overridable, public :: Destroy
+        final                              :: Finalize
 
     end type workspace_t
 
@@ -416,10 +422,8 @@ contains
         !--------------------------------------------------------------------------------
 
         ! Check status
-        if ( .not. this%initialized ) then
-            print *, 'ERROR: You must instantiate workspace" '&
-                &//'before calling methods'
-            stop
+        if ( this%initialized ) then
+            error stop 'ERROR: You must re-instantiate workspace before calling methods'
         end if
 
     end subroutine Assert_initialized
@@ -449,10 +453,7 @@ contains
         !--------------------------------------------------------------------------------
 
         ! Check status
-        if ( this%initialized ) then
-            print *, 'ERROR: You must destroy "workspace" before re-instantiating'
-            return
-        end if
+        call this%Assert_initialized()
 
         ! (STEP 1) set up scalar analysis
 
@@ -572,10 +573,7 @@ contains
         !--------------------------------------------------------------------------------
 
         ! Check status
-        if ( this%initialized ) then
-            print *, 'ERROR: You must destroy "workspace" before re-instantiating'
-            return
-        end if
+        call this%Assert_initialized()
 
         ! (Step 1) set up vector analysis
 
@@ -693,10 +691,7 @@ contains
         !--------------------------------------------------------------------------------
 
         ! Check status
-        if ( this%initialized ) then
-            print *, 'ERROR: You must destroy "workspace" before re-instantiating'
-            return
-        end if
+        call this%Assert_initialized()
 
         ! (STEP 1) set up scalar analysis
 
@@ -817,10 +812,7 @@ contains
         !--------------------------------------------------------------------------------
 
         ! Check status
-        if ( this%initialized ) then
-            print *, 'ERROR: You must destroy "workspace" before re-instantiating'
-            return
-        end if
+        call this%Assert_initialized()
 
         ! (Step 1) set up vector analysis
 
@@ -1213,7 +1205,7 @@ contains
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        class (workspace_t), intent (in out) :: this
+        type (workspace_t), intent (in out) :: this
         !--------------------------------------------------------------------------------
 
         call this%Destroy()

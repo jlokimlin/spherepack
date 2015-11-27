@@ -16,47 +16,38 @@ module type_vector_mod
     private
     public :: &
         assignment(=), &
-        operator(*), &
-        ex, &
-        ey, &
-        ez
+        operator(*)
 
-    ! Local variables confined to the module
+    !---------------------------------------------------------------------------------
+    ! Dictionary: global variables confined to the module
+    !---------------------------------------------------------------------------------
     integer, parameter    :: WP   = REAL64  !! 64 bit real
     integer, parameter    :: IP   = INT32   !! 32 bit integer
-    real (WP), parameter  :: ZERO = 0.0_WP  !! To define the unit vectors
-    real (WP), parameter  :: ONE  = 1.0_WP  !! To define the unit vectors
+    !---------------------------------------------------------------------------------
 
     ! Declare derived data type
     type, public :: vector_t
 
+        ! Components
         real (WP) :: x = 0.0_WP
         real (WP) :: y = 0.0_WP
         real (WP) :: z = 0.0_WP
 
     contains
 
-        ! All procedures are private unless explicity stated otherwise
+        ! All methods are private unless stated otherwise
         private
 
-        procedure :: Get_vector_add
-        procedure :: Get_vector_subtract
-        procedure :: Get_vector_div_real
-        procedure :: Get_vector_div_int
-        procedure :: Get_dot_product
-
-        generic, public   :: operator (+) => &
-            Get_vector_add
-
-        generic, public  :: operator (-) => &
-            Get_vector_subtract
-
-        generic, public   :: operator (/) => &
-            Get_vector_div_real, &
-            Get_vector_div_int
-
-        generic, public   :: operator (.dot.) => &
-            Get_dot_product
+        procedure         :: Get_vector_add
+        procedure         :: Get_vector_subtract
+        procedure         :: Get_vector_div_real
+        procedure         :: Get_vector_div_int
+        procedure         :: Get_dot_product
+        generic, public   :: operator (.dot.) => Get_dot_product
+        generic, public   :: operator (+)     => Get_vector_add
+        generic, public   :: operator (-)     => Get_vector_subtract
+        generic, public   :: operator (/)     => Get_vector_div_real, Get_vector_div_int
+        final             :: Finalize
 
     end type vector_t
 
@@ -84,11 +75,6 @@ module type_vector_mod
         type(vector_t), pointer :: p => null()
 
     end type vector_ptr
-
-    ! The Cartesian unit vectors
-    type(vector_t), parameter :: ex = vector_t( ONE , ZERO, ZERO ) ! x-direction
-    type(vector_t), parameter :: ey = vector_t( ZERO, ONE , ZERO ) ! y-direction
-    type(vector_t), parameter :: ez = vector_t( ZERO, ZERO, ONE )  ! z-direction
 
 contains
     !
@@ -121,7 +107,7 @@ contains
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
         real (WP), dimension (3), intent (out) :: array
-        class (vector_t), intent (in)         :: this
+        class (vector_t), intent (in)          :: this
         !--------------------------------------------------------------------------------
 
         array(1) = this%x
@@ -162,7 +148,7 @@ contains
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        type (vector_t)              :: return_value
+        type (vector_t)               :: return_value
         class (vector_t), intent (in) :: vec_1
         class (vector_t), intent (in) :: vec_2
         !--------------------------------------------------------------------------------
@@ -203,7 +189,7 @@ contains
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
         type (vector_t)               :: return_value
-        real (WP), intent (in)         :: real_1
+        real (WP), intent (in)        :: real_1
         class (vector_t), intent (in) :: vec_2
         !--------------------------------------------------------------------------------
 
@@ -222,20 +208,20 @@ contains
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        type (vector_t)               :: return_value
-        class (vector_t), intent (in) :: vec_1
+        type (vector_t)                :: return_value
+        class (vector_t), intent (in)  :: vec_1
         integer (IP), intent (in)      :: int_2
         !--------------------------------------------------------------------------------
 
-        return_value%x = vec_1%x * real(int_2, WP)
-        return_value%y = vec_1%y * real(int_2, WP)
-        return_value%z = vec_1%z * real(int_2, WP)
+        return_value%x = vec_1%x * real( int_2, WP)
+        return_value%y = vec_1%y * real( int_2, WP)
+        return_value%z = vec_1%z * real( int_2, WP)
 
     end function Get_vector_times_int
     !
     !*****************************************************************************************
     !
-    function Get_int_times_vector(int_1, vec_2 ) result ( return_value )
+    function Get_int_times_vector( int_1, vec_2 ) result ( return_value )
         !
         ! Purpose:
         !
@@ -243,13 +229,13 @@ contains
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
         type (vector_t)               :: return_value
-        integer (IP), intent (in)      :: int_1
+        integer (IP), intent (in)     :: int_1
         class (vector_t), intent (in) :: vec_2
         !--------------------------------------------------------------------------------
 
-        return_value%x = real(int_1, WP) * vec_2%x
-        return_value%y = real(int_1, WP) * vec_2%y
-        return_value%z = real(int_1, WP) * vec_2%z
+        return_value%x = real( int_1, WP) * vec_2%x
+        return_value%y = real( int_1, WP) * vec_2%y
+        return_value%z = real( int_1, WP) * vec_2%z
 
     end function Get_int_times_vector
     !
@@ -264,7 +250,7 @@ contains
         !--------------------------------------------------------------------------------
         type (vector_t)                :: return_value
         class (vector_t), intent (in)  :: vec_1
-        real (WP), intent (in)          :: real_2
+        real (WP), intent (in)         :: real_2
         !--------------------------------------------------------------------------------
 
         return_value%x = vec_1%x / real_2
@@ -302,7 +288,7 @@ contains
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        real (WP)                      :: return_value
+        real (WP)                     :: return_value
         class (vector_t), intent (in) :: vec_1
         class (vector_t), intent (in) :: vec_2
         !--------------------------------------------------------------------------------
@@ -333,6 +319,25 @@ contains
         return_value%z = vec_1%x*vec_2%y - vec_1%y*vec_2%x
 
     end function Get_cross_product
+    !
+    !*****************************************************************************************
+    !
+    subroutine Finalize( this )
+        !
+        ! Purpose:
+        !< Finalize object
+        !
+        !--------------------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !--------------------------------------------------------------------------------
+        type (vector_t), intent (in out) :: this
+        !--------------------------------------------------------------------------------
+
+        this%x = 0.0_WP
+        this%y = 0.0_WP
+        this%z = 0.0_WP
+
+    end subroutine Finalize
     !
     !*****************************************************************************************
     !

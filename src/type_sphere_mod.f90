@@ -93,7 +93,7 @@ module type_sphere_mod
         procedure, public                    :: Get_Legendre_functions
         !procedure, public                    :: Get_Icosahedral_geodesic
         !procedure, public                    :: Get_Multiple_ffts
-        !procedure, public                    :: Get_Gaussian_weights_and_points !! Contained in type(grid)!! Known as GAQD in SPHEREPACK 3.2
+        procedure, nopass, public            :: Get_gaussian_weights_and_points !! Gaqd
         !procedure, public                    :: Get_Three_dimensional_sphere_graphics
         
         ! Complex methods
@@ -282,9 +282,7 @@ contains
 
         ! Check status
         if ( .not. this%initialized ) then
-            print *, 'ERROR: You must instantiate "sphere" object '&
-                &//'before calling methods'
-            stop
+            error stop 'ERROR: You must instantiate type(sphere_t) before calling methods'
         end if
 
     end subroutine Assert_initialized
@@ -1826,6 +1824,36 @@ contains
         end if
 
     end subroutine Perform_multiple_ffts
+    !
+    !*****************************************************************************************
+    !
+    subroutine Get_gaussian_weights_and_points( this, nlat, theta, wts )
+        !
+        ! Purpose:
+        !
+        ! Computes the nlat-many gaussian (co)latitudes and weights.
+        ! the colatitudes are in radians and lie in the interval (0,pi).
+        !
+        ! References:
+        !
+        ! [1] Swarztrauber, Paul N.
+        !     "On computing the points and weights for Gauss--Legendre quadrature."
+        !     SIAM Journal on Scientific Computing 24.3 (2003): 945-954.
+
+        ! [2]  http://www2.cisl.ucar.edu/spherepack/documentation#gaqd.html
+        !
+        !--------------------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !--------------------------------------------------------------------------------
+        class (sphere_t), intent (in out)     :: this
+        integer (IP), intent (in)             :: nlat  !! number of latitudinal points
+        real (WP), dimension (:), allocatable :: theta !! latitudinal points: 0 <= theta <= pi
+        real (WP), dimension (:), allocatable :: wts   !! gaussian weights
+        !--------------------------------------------------------------------------------
+
+        call this%grid%Get_gaussian_weights_and_points( nlat, theta, wts )
+
+    end subroutine Get_gaussian_weights_and_points
     !
     !*****************************************************************************************
     !
