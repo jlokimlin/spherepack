@@ -7,8 +7,11 @@ module type_grid_mod
     ! Explicit typing only
     implicit none
 
-    ! Everything is private except the derived data type itself
+    ! Everything is private unless stated otherwise
     private
+
+    ! Public derived data type
+    public :: grid_t
 
     !---------------------------------------------------------------------------------
     ! Dictionary: global variables confined to the module
@@ -18,16 +21,21 @@ module type_grid_mod
     character(200)        :: error_message        !! Probably long enough
     integer (IP)          :: allocate_status      !! To check allocation status
     integer (IP)          :: deallocate_status    !! To check deallocation status
+    real (WP), parameter  :: TWO_PI = 8.0_WP * atan( 1.0_WP )
+    real (WP), parameter  :: PI     = 4.0_WP * atan( 1.0_WP )
     !---------------------------------------------------------------------------------
 
     ! Declare derived data type
-    type, public ::  grid_t
+    type ::  grid_t
 
         ! Components
         logical, private                      :: initialized      = .false. !! Flag to check if object is instantiated
+
         character(3)                          :: grid_type        = 'GAU'   !! either 'REG' or 'GAU'
+
         real (WP)                             :: mesh_phi         = 0.0_WP  !! Uniform mesh in phi
         real (WP)                             :: mesh_theta       = 0.0_WP  !! Only used in 'REG' grid
+
         real (WP), dimension (:), allocatable :: gaussian_weights           !! Used for integration, requires 'GAU' for allocation
         real (WP), dimension (:), allocatable :: latitudes                  !! 0 <= theta <= pi
         real (WP), dimension (:), allocatable :: longitudes                 !! 0 <= phi <= 2*pi
@@ -38,10 +46,12 @@ module type_grid_mod
         ! All methods are private unless stated otherwise
         private
 
-        ! Methods
+        ! Public methods
         procedure, non_overridable, public :: Create
         procedure, non_overridable, public :: Destroy
         procedure, nopass, public          :: Get_gaussian_weights_and_points !! Gaqd
+
+        ! Private methods
         procedure                          :: Get_equally_spaced_longitudes
         procedure                          :: Get_equally_spaced_latitudes
         final                              :: Finalize
@@ -317,14 +327,8 @@ subroutine Get_equally_spaced_latitudes( this, nlat, theta )
     !--------------------------------------------------------------------------------
     ! Dictionary: local variables
     !--------------------------------------------------------------------------------
-    integer (IP)         :: k           !! counter
-    real (WP)            :: mesh_theta  !! equally space (uniform) mesh
-    real (WP), parameter :: PI = 4.0_WP * atan ( 1.0_WP )
+    integer (IP) :: k     !! counter
     !--------------------------------------------------------------------------------
-
-    ! Set equally spaced (uniform) mesh size
-    mesh_theta = PI / nlat
-    this%mesh_theta = mesh_theta
 
     ! Allocate array
     if ( allocated( theta ) ) then
@@ -361,13 +365,19 @@ subroutine Get_equally_spaced_latitudes( this, nlat, theta )
 
 end if
 
+! Set equally spaced (uniform) mesh size
+this%mesh_theta = PI / nlat
 
-! Compute latitudinal grid
-do concurrent (k = 1:nlat)
+associate( Dtheta => this%mesh_theta )
 
-    theta(k) = real(k - 1, WP) * mesh_theta
+    ! Compute latitudinal grid
+    do concurrent ( k = 1:nlat )
 
-end do
+        theta(k) = real(k - 1, WP) * Dtheta
+
+    end do
+
+end associate
 
 end subroutine Get_equally_spaced_latitudes
 !
@@ -385,14 +395,8 @@ subroutine Get_equally_spaced_longitudes( this, nlon, phi )
     !--------------------------------------------------------------------------------
     ! Dictionary: local variables
     !--------------------------------------------------------------------------------
-    integer (IP)         :: l           !! counter
-    real (WP)            :: mesh_phi    !! equally space (uniform) mesh
-    real (WP), parameter :: TWO_PI = 8.0_WP * atan( 1.0_WP )
+    integer (IP)  :: l   !! counter
     !--------------------------------------------------------------------------------
-
-    ! Set equally spaced (uniform) mesh size
-    mesh_phi = TWO_PI / nlon
-    this%mesh_phi = mesh_phi
 
     ! Allocate array
     if ( allocated( phi ) ) then
@@ -429,13 +433,19 @@ subroutine Get_equally_spaced_longitudes( this, nlon, phi )
 
 end if
 
+! Set equally spaced (uniform) mesh size
+this%mesh_phi = TWO_PI / nlon
 
-! Compute longitudinal grid
-do concurrent (l = 1:nlon)
+associate( Dphi => this%mesh_phi )
 
-    phi(l) = real(l - 1, WP) * mesh_phi
+    ! Compute longitudinal grid
+    do concurrent ( l = 1:nlon )
 
-end do
+        phi(l) = real(l - 1, WP) * Dphi
+
+    end do
+
+end associate
 
 end subroutine Get_equally_spaced_longitudes
 !

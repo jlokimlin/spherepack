@@ -40,7 +40,7 @@ module type_sphere_mod
     ! Declare derived data type
     type, public ::  sphere_t
 
-        ! Components
+        ! All components are public unless stated otherwise
         logical                               :: initialized = .false. !! Instantiation status
         integer (IP)                          :: nlon = 0              !! number of longitudinal points
         integer (IP)                          :: nlat = 0              !! number of latitudinal points
@@ -148,9 +148,9 @@ contains
         end if
 
         ! Set constants
-        this%nlat = nlat
+        this%NLAT = nlat
 
-        this%nlon = nlon
+        this%NLON = nlon
 
         this%ntrunc = nlat - 1 !! Set triangular truncation
 
@@ -229,11 +229,11 @@ contains
         if ( .not. this%initialized ) return
 
         ! Reset constants
-        this%nlon = 0
-        this%nlat = 0
+        this%NLON   = 0
+        this%NLAT   = 0
         this%ntrunc = 0
-        this%isym = 0
-        this%itype = 0
+        this%isym   = 0
+        this%itype  = 0
 
         ! Deallocate pointer
         if ( associated( this%spec ) ) then
@@ -560,76 +560,87 @@ contains
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
         !--------------------------------------------------------------------------------
-        integer (IP)  ::  nlat, nlon, k, l
+        integer (IP)  ::  k, l !! Counters
         !--------------------------------------------------------------------------------
 
-        ! Set constants
-        nlat = size( sint )
-        nlon = size( sinp )
+        dimensions: associate( &
+            nlat => this%NLAT, &
+            nlon => this%NLON &
+            )
 
-        ! Allocate arrays
-        allocate ( &
-            this%radial_unit_vector( 1:3, 1:nlat, 1:nlon ), &
-            this%polar_unit_vector( 1:3, 1:nlat, 1:nlon ), &
-            this%azimuthal_unit_vector( 1:3, 1:nlat, 1:nlon ), &
-            stat = allocate_status, &
-            errmsg = error_message )
+            ! Allocate arrays
+            allocate ( &
+                this%radial_unit_vector( 1:3, 1:nlat, 1:nlon ), &
+                this%polar_unit_vector( 1:3, 1:nlat, 1:nlon ), &
+                this%azimuthal_unit_vector( 1:3, 1:nlat, 1:nlon ), &
+                stat = allocate_status, &
+                errmsg = error_message )
 
-        ! Check allocate status
-        if ( allocate_status /= 0 ) then
-            print *, 'Allocation failed in '&
-                &'Set_spherical_unit_vectors: ',&
-                trim( error_message )
-            return
-        end if
+            ! Check allocate status
+            if ( allocate_status /= 0 ) then
+                print *, 'Allocation failed in '&
+                    &'Set_spherical_unit_vectors: ',&
+                    trim( error_message )
+                return
+            end if
 
-        ! Compute spherical unit vectors
-        do l = 1, nlon
-            do k = 1, nlat
+            unit_vectors: associate( &
+                r     => this%radial_unit_vector, &
+                theta => this%polar_unit_vector, &
+                phi   => this%azimuthal_unit_vector &
+                )
 
-                ! set radial unit vector
-                this%radial_unit_vector(:,k,l) = &
-                    [ sint(k) * cosp(l), &
-                    sint(k) * sinp(l), &
-                    cost(k) ]
+                ! Compute spherical unit vectors
+                do l = 1, nlon
+                    do k = 1, nlat
 
-                ! set polar unit vector
-                this%polar_unit_vector(:,k,l) = &
-                    [ cost(k) * cosp(l), &
-                    cost(k) * sinp(l), &
-                    -sint(k) ]
+                        ! set radial unit vector
+                        r(:,k,l) = &
+                            [ sint(k) * cosp(l), &
+                            sint(k) * sinp(l), &
+                            cost(k) ]
 
-                ! set azimuthal unit vector
-                this%azimuthal_unit_vector(:,k,l) = &
-                    [ -sinp(l), &
-                    cosp(l), &
-                    0.0_WP ]
-            end do
-        end do
+                        ! set polar unit vector
+                        theta(:,k,l) = &
+                            [ cost(k) * cosp(l), &
+                            cost(k) * sinp(l), &
+                            -sint(k) ]
+
+                        ! set azimuthal unit vector
+                        phi(:,k,l) = &
+                            [ -sinp(l), &
+                            cosp(l), &
+                            0.0_WP ]
+                    end do
+                end do
+
+            end associate unit_vectors
+
+        end associate dimensions
 
     end subroutine Set_spherical_unit_vectors
     !
     !*****************************************************************************************
     !
     subroutine Perform_complex_analysis( this, scalar_function )
-        ! 
-        ! Purpose: 
+        !
+        ! Purpose:
         ! converts gridded input array (scalar_function) to (complex) spherical harmonic coefficients
         ! (dataspec).
         !
         ! the spectral data is assumed to be in a complex array of dimension
         ! (mtrunc+1)*(mtrunc+2)/2. mtrunc is the triangular truncation limit
         ! (mtrunc = 42 for t42). mtrunc must be <= nlat-1. coefficients are
-        ! ordered so that first (nm=1) is m=0,n=0, second is m=0,n=1, 
+        ! ordered so that first (nm=1) is m=0,n=0, second is m=0,n=1,
         ! nm=mtrunc is m=0,n=mtrunc, nm=mtrunc+1 is m=1,n=1, etc.
         ! in fortran95 syntax, values of m (degree) and n (order) as a function
-        ! of the index nm are: 
+        ! of the index nm are:
 
         ! integer (IP), dimension ((mtrunc+1)*(mtrunc+2)/2) :: indxm,indxn
         ! indxm = [((m,n=m,mtrunc),m=0,mtrunc)]
         ! indxn = [((n,n=m,mtrunc),m=0,mtrunc)]
 
-        ! conversely, the index nm as a function of m and n is: 
+        ! conversely, the index nm as a function of m and n is:
         ! nm = sum([(i,i=mtrunc+1,mtrunc-m+2,-1)])+n-m+1
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
@@ -639,31 +650,37 @@ contains
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
         !--------------------------------------------------------------------------------
-        integer (IP) :: ntrunc !< Triangular truncation
         integer (IP) :: m,  n  !< counters
         !--------------------------------------------------------------------------------
         
         ! Check status
         call this%Assert_initialized()
-
-        ntrunc = this%ntrunc
         
         ! compute the (real) spherical harmonic coefficients
         call this%Perform_scalar_analysis( scalar_function )
-        
-        ! fill complex array dataspec with result
-        this%spec = cmplx( &
-            0.5_WP * [((this%workspace%a(m + 1,n + 1), n = m,ntrunc), m = 0,ntrunc)], &
-            0.5_WP * [((this%workspace%b(m + 1,n + 1), n = m,ntrunc), m = 0,ntrunc)] &
-            , WP)
+
+        associate( &
+            ntrunc => this%ntrunc, & ! set the triangular truncation limit
+            a      => this%workspace%a, &
+            b      => this%workspace%b &
+            )
+
+            ! fill complex array dataspec with result
+            this%spec = &
+                cmplx( &
+                0.5_WP * [((a(m + 1,n + 1), n = m,ntrunc), m = 0,ntrunc)], &
+                0.5_WP * [((b(m + 1,n + 1), n = m,ntrunc), m = 0,ntrunc)], &
+                WP )
  
+        end associate
+
     end subroutine Perform_complex_analysis
     !
     !*****************************************************************************************
     !
     subroutine Perform_complex_synthesis( this, scalar_function )
-        ! 
-        ! Purpose: 
+        !
+        ! Purpose:
         ! converts gridded input array (datagrid) to (complex) spherical harmonic coefficients
         ! (dataspec).
         !
@@ -675,34 +692,37 @@ contains
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
         !--------------------------------------------------------------------------------
-        integer (IP) :: ntrunc
-        integer (IP) :: m, n, nm
+        integer (IP) :: m, n  !! Counters
+        integer (IP) :: nm    !! Index
         !--------------------------------------------------------------------------------
 
         ! Check status
         call this%Assert_initialized()
 
-        ! set the truncation limit
-        ntrunc = this%ntrunc
+        associate( &
+            ntrunc => this%ntrunc, & ! set the triangular truncation limit
+            a      => this%workspace%a, &
+            b      => this%workspace%b &
+            )
  
-        ! Fill real arrays with contents of spec
-        do m = 0, ntrunc
-            do n = m, ntrunc
+            ! Fill real arrays with contents of spec
+            do m = 0, ntrunc
+                do n = m, ntrunc
                 
-                ! set the spectral index
-                nm = this%Get_index( n, m )
+                    ! set the spectral index
+                    nm = this%Get_index( n, m )
                 
-                ! set the real component
-                this%workspace%a( m + 1,n + 1 ) = &
-                    2.0_WP * real( this%spec(nm), WP )
+                    ! set the real component
+                    a( m + 1,n + 1 ) = 2.0_WP * real( this%spec(nm) )
                 
-                ! set the imaginary component
-                this%workspace%b( m + 1,n + 1 ) = &
-                    2.0_WP * aimag( this%spec(nm) )
+                    ! set the imaginary component
+                    b( m + 1,n + 1 ) = 2.0_WP * aimag( this%spec(nm) )
                 
+                end do
             end do
-        end do
         
+        end associate
+
         ! synthesise the scalar function from the (real) harmonic coeffiients
         call this%Perform_scalar_synthesis( scalar_function )
  
@@ -711,8 +731,8 @@ contains
     !*****************************************************************************************
     !
     subroutine Synthesize_from_spec( this, spec, scalar_function )
-        ! 
-        ! Purpose: 
+        !
+        ! Purpose:
         ! used mainly for testing the spectral method module
         !
         !--------------------------------------------------------------------------------
@@ -724,7 +744,6 @@ contains
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
         !--------------------------------------------------------------------------------
-        integer (IP):: ntrunc   !! Triangular truncation limit
         integer (IP):: m, n     !! Counters
         integer (IP):: nm       !! Index
         !--------------------------------------------------------------------------------
@@ -732,27 +751,30 @@ contains
         ! Check status
         call this%Assert_initialized()
 
-        ! set the truncation limit
-        ntrunc = this%ntrunc
+        associate( &
+            ntrunc => this%ntrunc, & ! set the triangular truncation limit
+            a      => this%workspace%a, &
+            b      => this%workspace%b &
+            )
  
-        ! fill real arrays with contents of spec
-        do m = 0, ntrunc
-            do n = m, ntrunc
+            ! fill real arrays with contents of spec
+            do m = 0, ntrunc
+                do n = m, ntrunc
                 
-                ! set the spectral index
-                nm = this%Get_index( n, m )
+                    ! set the spectral index
+                    nm = this%Get_index( n, m )
                 
-                ! set the real component
-                this%workspace%a(m + 1,n + 1) = &
-                    2.0_WP * real( spec(nm) )
+                    ! set the real component
+                    a(m + 1,n + 1) = 2.0_WP * real( spec(nm) )
                 
-                ! set the imaginary component
-                this%workspace%b(m + 1,n + 1) = &
-                    2.0_WP * aimag( spec(nm) )
+                    ! set the imaginary component
+                    b(m + 1,n + 1) = 2.0_WP * aimag( spec(nm) )
                 
+                end do
             end do
-        end do
         
+        end associate
+
         ! synthesise the scalar function from the (real) harmonic coeffiients
         call this%Perform_scalar_synthesis( scalar_function )
  
@@ -783,38 +805,41 @@ contains
         
         ! Check status
         call this%Assert_initialized()
-
-        ! Set constants
-        nlat = this%nlat
-        nlon = this%nlon
         
         ! initialize arrays
         polar_component = 0.0_WP
         azimuthal_component = 0.0_WP
         
-        ! calculate the spherical angle components
-        do l = 1, nlon
-            do k = 1, nlat
+        associate( &
+            nlat => this%NLAT, &
+            nlon => this%NLON &
+            )
+
+            ! calculate the spherical angle components
+            do l = 1, nlon
+                do k = 1, nlat
                 
-                ! set the vector function
-                vector_field = vector_function(:,k,l)
+                    ! set the vector function
+                    vector_field = vector_function(:,k,l)
 
-                ! set the latitudinal spherical unit vector
-                theta = this%polar_unit_vector(:,k,l)
+                    ! set the latitudinal spherical unit vector
+                    theta = this%polar_unit_vector(:,k,l)
 
-                ! set the longitudinal spherical unit vector
-                phi = this%azimuthal_unit_vector(:,k,l)
+                    ! set the longitudinal spherical unit vector
+                    phi = this%azimuthal_unit_vector(:,k,l)
 
-                ! set the theta component
-                polar_component(k,l) = &
-                    theta.dot.vector_field
+                    ! set the theta component
+                    polar_component(k,l) = &
+                        theta.dot.vector_field
                
-                ! set the azimuthal_component
-                azimuthal_component(k,l) = &
-                    phi.dot.vector_field
+                    ! set the azimuthal_component
+                    azimuthal_component(k,l) = &
+                        phi.dot.vector_field
 
+                end do
             end do
-        end do
+
+        end associate
 
     end subroutine Get_spherical_angle_components
     !
@@ -832,7 +857,6 @@ contains
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
         !--------------------------------------------------------------------------------
-        integer (IP)                            :: nlat, nlon
         integer (IP)                            :: k, l         !! Counters
         type (vector_t)                         :: theta,  phi
         real (WP), dimension (:,:), allocatable :: polar_gradient_component
@@ -843,53 +867,65 @@ contains
         call this%Assert_initialized()
 
         ! Set constants
-        nlat = this%nlat
-        nlon = this%nlon
+        associate( &
+            nlat => this%NLAT, &
+            nlon => this%NLON &
+            )
 
-        ! Allocate arrays
-        allocate ( &
-            polar_gradient_component( 1:nlat, 1:nlon ), &
-            azimuthal_gradient_component( 1:nlat, 1:nlon ), &
-            stat = allocate_status )
+            ! Allocate arrays
+            allocate ( &
+                polar_gradient_component( 1:nlat, 1:nlon ), &
+                azimuthal_gradient_component( 1:nlat, 1:nlon ), &
+                stat = allocate_status, &
+                errmsg = error_message )
 
-        ! Check allocation status
-        if ( allocate_status /= 0 ) then
-            print *, "Allocation failed!"
-            return
-        end if
+            ! Check allocation status
+            if ( allocate_status /= 0 ) then
+                print *, 'Allocation failed '&
+                    &//'in "Get_rotation_operator":', &
+                    trim( error_message )
+                return
+            end if
 
-        ! calculate the spherical surface gradient components
-        call this%Get_gradient( &
-            scalar_function, polar_gradient_component, azimuthal_gradient_component)
+            ! calculate the spherical surface gradient components
+            call this%Get_gradient( &
+                scalar_function, &
+                polar_gradient_component, azimuthal_gradient_component)
 
-        ! initialize array
-        rotation_operator = 0.0_WP
+            ! initialize array
+            rotation_operator = 0.0_WP
 
-        ! calculate the rotation operator applied to a scalar function
-        do l = 1, nlon
-            do k = 1, nlat
+            ! calculate the rotation operator applied to a scalar function
+            do l = 1, nlon
+                do k = 1, nlat
 
-                ! set the theta spherical unit vector
-                theta = this%polar_unit_vector(:,k,l)
+                    ! set the theta spherical unit vector
+                    theta = this%polar_unit_vector(:,k,l)
 
-                ! set the phi spherical unit vector
-                phi = this%azimuthal_unit_vector(:,k,l)
+                    ! set the phi spherical unit vector
+                    phi = this%azimuthal_unit_vector(:,k,l)
 
-                rotation_operator(:, k,l) = &
-                    phi * polar_gradient_component(k,l) &
-                    - theta * azimuthal_gradient_component(k,l)
+                    rotation_operator(:, k,l) = &
+                        phi * polar_gradient_component(k,l) &
+                        - theta * azimuthal_gradient_component(k,l)
+                end do
+
             end do
 
-        end do
+        end associate
 
         ! Deallocate arrays
         deallocate ( &
             polar_gradient_component, &
             azimuthal_gradient_component, &
-            stat = deallocate_status )
+            stat = deallocate_status, &
+            errmsg = error_message )
+
+        ! Check deallocate status
         if ( deallocate_status /= 0 ) then
-            print *, 'Deallocation failed in '&
-                &//'Get_rotation_operator'
+            print *, 'Deallocation failed '&
+                &//'in "Get_rotation_operator":', &
+                trim( error_message )
             return
         end if
 
@@ -920,7 +956,7 @@ contains
         ! Dictionary: local variables
         !--------------------------------------------------------------------------------
         integer (IP)                     :: k         !! counter
-        real (WP), dimension (this%nlat) :: integrant !! integrant
+        real (WP), dimension (this%NLAT) :: integrant !! integrant
         !--------------------------------------------------------------------------------
 
         ! Check status
@@ -930,16 +966,22 @@ contains
         integrant = 0.0_WP
 
         ! Compute the integrant
-        do k = 1, size(integrant)
+        associate( &
+            nlat => this%NLAT, &
+            Dphi => this%grid%mesh_phi, &
+            wts  => this%grid%gaussian_weights, &
+            f    => scalar_function &
+            )
 
-            integrant(k) = &
-                sum( scalar_function(k,:) ) &
-                * this%grid%mesh_phi
+            do k = 1, nlat
 
-        end do
+                integrant(k) = sum( f(k,:) ) * Dphi
 
-        integrant = &
-            this%grid%gaussian_weights * integrant
+            end do
+
+            integrant = integrant * wts
+
+        end associate
 
         return_value = sum( integrant )
 
@@ -963,15 +1005,15 @@ contains
         integer (IP)    :: nlon
         integer (IP)    :: k,  l
         type (vector_t) :: u
-        real (WP), dimension (this%nlat, this%nlon, 3) :: integrant
+        real (WP), dimension (this%NLAT, this%NLON, 3) :: integrant
         !--------------------------------------------------------------------------------
 
         ! Check status
         call this%Assert_initialized()
 
         ! Set constants
-        nlat = this%nlat
-        nlon = this%nlon
+        nlat = this%NLAT
+        nlon = this%NLON
 
         ! Initialize array
         integrant = 0.0_WP
@@ -1034,7 +1076,7 @@ contains
         !        call Vtsgs( &
         !            size( this%grid%latitudes ), size( this%grid%longitudes ),  this%ityp, 1, &
         !            polar_component, azimuthal_component, &
-        !            this%nlat, this%nlon, &
+        !            this%NLAT, this%NLON, &
         !            this%workspace%br, this%workspace%bi, &
         !            this%workspace%cr, this%workspace%ci, &
         !            size(this%workspace%br, dim = 1), size(this%workspace%br, dim = 2), &
@@ -1081,12 +1123,12 @@ contains
         !
         ! see: https://www2.cisl.ucar.edu/spherepack/documentation#gradgs.html
         call Gradgs( &
-            this%nlat, this%nlon, &
+            this%NLAT, this%NLON, &
             this%isym, 1, polar_gradient_component, &
             azimuthal_gradient_component, &
-            this%nlat, this%nlon, &
+            this%NLAT, this%NLON, &
             this%workspace%a, this%workspace%b, &
-            this%nlat, this%nlat, &
+            this%NLAT, this%NLAT, &
             this%workspace%wvhsgs, &
             size( this%workspace%wvhsgs ), this%workspace%work, &
             size( this%workspace%work ), ierror)
@@ -1153,10 +1195,10 @@ contains
 
         ! calculate the surface divergence
         call Divgs( &
-            this%nlat, this%nlon, &
-            this%isym, 1, divergence, this%nlat, this%nlon, &
+            this%NLAT, this%NLON, &
+            this%isym, 1, divergence, this%NLAT, this%NLON, &
             this%workspace%br, this%workspace%bi, &
-            this%nlat, this%nlat, &
+            this%NLAT, this%NLAT, &
             this%workspace%wshsgs, size( this%workspace%wshsgs ), &
             this%workspace%work, size( this%workspace%work ), ierror)
 
@@ -1222,12 +1264,12 @@ contains
 
         ! calculate the surface vorticity
         call Vrtgs( &
-            this%nlat,  &
-            this%nlon, &
+            this%NLAT,  &
+            this%NLON, &
             this%isym, 1, vorticity, &
-            this%nlat, this%nlon, &
+            this%NLAT, this%NLON, &
             this%workspace%cr, this%workspace%ci, &
-            this%nlat, this%nlon, &
+            this%NLAT, this%NLON, &
             this%workspace%wshsgs, size( this%workspace%wshsgs ), &
             this%workspace%work, size( this%workspace%work ), ierror)
 
@@ -1352,11 +1394,11 @@ contains
         !
         ! see: https://www2.cisl.ucar.edu/spherepack/documentation#islapgs.html
         call Islapgs( &
-            this%nlat, this%nlon, &
+            this%NLAT, this%NLON, &
             this%isym, 1, helmholtz_constant, &
-            solution, this%nlat, this%nlon, &
+            solution, this%NLAT, this%NLON, &
             this%workspace%a, this%workspace%b, &
-            this%nlat, this%nlat, &
+            this%NLAT, this%NLAT, &
             this%workspace%wshsgs, size( this%workspace%wshsgs ), &
             this%workspace%work, size( this%workspace%work ), &
             perturbation, ierror)
@@ -1413,6 +1455,9 @@ contains
         integer (IP):: ierror
         !--------------------------------------------------------------------------------
 
+        ! Check status
+        call this%Assert_initialized()
+
         ierror = 0
         ! check the error flag
         if (ierror  /=  0) then
@@ -1437,6 +1482,9 @@ contains
         !--------------------------------------------------------------------------------
         integer (IP):: ierror
         !--------------------------------------------------------------------------------
+
+        ! Check status
+        call this%Assert_initialized()
 
         ierror = 0
         ! check the error flag
@@ -1463,6 +1511,9 @@ contains
         integer (IP):: ierror
         !--------------------------------------------------------------------------------
 
+        ! Check status
+        call this%Assert_initialized()
+
         ierror = 0
         ! check the error flag
         if (ierror  /=  0) then
@@ -1488,6 +1539,9 @@ contains
         integer (IP):: ierror
         !--------------------------------------------------------------------------------
 
+        ! Check status
+        call this%Assert_initialized()
+
         ierror = 0
         ! check the error flag
         if (ierror  /=  0) then
@@ -1512,6 +1566,9 @@ contains
         !--------------------------------------------------------------------------------
         integer (IP):: ierror
         !--------------------------------------------------------------------------------
+
+        ! Check status
+        call this%Assert_initialized()
 
         ierror = 0
         ! check the error flag
@@ -1540,15 +1597,18 @@ contains
         integer (IP):: ierror
         !--------------------------------------------------------------------------------
 
+        ! Check status
+        call this%Assert_initialized()
+
         ! perform the (real) spherical harmonic analysis
         !
         ! see: https://www2.cisl.ucar.edu/spherepack/documentation#shags.html
         call Shags( &
-            this%nlat, this%nlon, &
+            this%NLAT, this%NLON, &
             this%isym, 1, scalar_function, &
-            this%nlat, this%nlon, &
+            this%NLAT, this%NLON, &
             this%workspace%a, this%workspace%b, &
-            this%nlat, this%nlat, &
+            this%NLAT, this%NLAT, &
             this%workspace%wshags, size( this%workspace%wshags ), &
             this%workspace%work, size( this%workspace%work ), ierror )
 
@@ -1581,11 +1641,11 @@ contains
         !
         ! see: https://www2.cisl.ucar.edu/spherepack/documentation#shsgs.html
         call Shsgs( &
-            this%nlat, this%nlon, &
+            this%NLAT, this%NLON, &
             this%isym, 1, scalar_function, &
-            this%nlat, this%nlon, &
+            this%NLAT, this%NLON, &
             this%workspace%a, this%workspace%b, &
-            this%nlat, this%nlat, &
+            this%NLAT, this%NLAT, &
             this%workspace%wshsgs, size( this%workspace%wshsgs ), &
             this%workspace%work, size( this%workspace%work ), ierror)
 
@@ -1618,16 +1678,19 @@ contains
         integer (IP):: ierror
         !--------------------------------------------------------------------------------
 
+        ! Check status
+        call this%Assert_initialized()
+
         ! TODO: Include driver program into type(workspace)
         !        call Shpgi( &
-        !            this%nlat, this%nlon, this%isym, this%ntrunc, &
+        !            this%NLAT, this%NLON, this%isym, this%ntrunc, &
         !            this%workspace%wshp, size( this%workspace%wshp ), &
         !            this%workspace%iwshp, size( this%workspace%iwshp ), &
         !            this%workspace%work, size( this%workspace%work ), ierror )
         !
         !        call Shpg( &
-        !            this%nlat, this%nlon, this%isym, this%ntrunc, &
-        !            scalar_function, scalar_projection, this%nlat, &
+        !            this%NLAT, this%NLON, this%isym, this%ntrunc, &
+        !            scalar_function, scalar_projection, this%NLAT, &
         !            this%workspace%wshp, size( this%workspace%wshp ), &
         !            this%workspace%iwshp, size( this%workspace%iwshp ), &
         !            this%workspace%work, size( this%workspace%work ), ierror )
@@ -1663,9 +1726,12 @@ contains
         real (WP), dimension (:,:), allocatable :: azimuthal_component
         !--------------------------------------------------------------------------------
 
+        ! Check status
+        call this%Assert_initialized()
+
         ! Set contants
-        nlat = this%nlat
-        nlon = this%nlon
+        nlat = this%NLAT
+        nlon = this%NLON
 
         ! Allocate arrays
         allocate ( &
@@ -1729,16 +1795,19 @@ contains
         integer (IP):: ierror
         !--------------------------------------------------------------------------------
 
+        ! Check status
+        call this%Assert_initialized()
+
         ! resynthesise the components from the (real) vector coefficients
         call Vhsgs( &
-            this%nlat, this%nlon, &
+            this%NLAT, this%NLON, &
             this%isym, 1, &
             polar_component,&
             azimuthal_component, &
-            this%nlat, this%nlon, &
+            this%NLAT, this%NLON, &
             this%workspace%br, this%workspace%bi, &
             this%workspace%cr, this%workspace%ci, &
-            this%nlat, this%nlat, &
+            this%NLAT, this%NLAT, &
             this%workspace%wvhsgs, size( this%workspace%wvhsgs ), &
             this%workspace%work, size( this%workspace%work ), ierror)
 
@@ -1766,6 +1835,9 @@ contains
         integer (IP):: ierror
         !--------------------------------------------------------------------------------
 
+        ! Check status
+        call this%Assert_initialized()
+
         ierror = 0
         ! check the error flag
         if (ierror  /=  0) then
@@ -1791,6 +1863,9 @@ contains
         integer (IP):: ierror
         !--------------------------------------------------------------------------------
 
+        ! Check status
+        call this%Assert_initialized()
+
         ierror = 0
         ! check the error flag
         if (ierror  /=  0) then
@@ -1815,6 +1890,9 @@ contains
         !--------------------------------------------------------------------------------
         integer (IP):: ierror
         !--------------------------------------------------------------------------------
+
+        ! Check status
+        call this%Assert_initialized()
 
         ierror = 0
         ! check the error flag
