@@ -87,7 +87,19 @@ module type_vector_mod
     ! Pointer of "vector_t" for creating array of pointers of "vector_t".
     type :: vector_ptr
 
-        type(vector_t), pointer :: p => null()
+        ! All components are public unless stated otherwise
+        type (vector_t), pointer :: p => null()
+
+    contains
+
+        ! All methods are private unless stated otherwise
+        private
+
+        !---------------------------------------------------------------------------------
+        ! Private methods
+        !---------------------------------------------------------------------------------
+        final             :: Finalize_vector_ptr
+        !---------------------------------------------------------------------------------
 
     end type vector_ptr
 
@@ -182,7 +194,7 @@ contains
         !--------------------------------------------------------------------------------
         type (vector_t)               :: return_value
         class (vector_t), intent (in) :: vec_1
-        real (WP), intent (in)         :: real_2
+        real (WP), intent (in)        :: real_2
         !--------------------------------------------------------------------------------
 
         return_value%x = vec_1%x * real_2
@@ -351,6 +363,30 @@ contains
         this%z = 0.0_WP
 
     end subroutine Finalize
+    !
+    !*****************************************************************************************
+    !
+    subroutine Finalize_vector_ptr( this )
+        !
+        ! Purpose:
+        !< Finalize object
+        !
+        !--------------------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !--------------------------------------------------------------------------------
+        type (vector_ptr), intent (in out) :: this
+        !--------------------------------------------------------------------------------
+
+        ! Check if pointer is associated
+        if ( associated( vector_ptr%p ) ) then
+
+            ! Nullify pointer
+            nullify( vector_ptr%p )
+
+        end if
+
+
+    end subroutine Finalize_vector_ptr
     !
     !*****************************************************************************************
     !
