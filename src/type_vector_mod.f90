@@ -54,10 +54,18 @@ module type_vector_mod
         procedure         :: Get_vector_divide_real
         procedure         :: Get_vector_divide_integer
         procedure         :: Get_dot_product
+        procedure         :: Convert_array_to_vector
+        procedure, nopass :: Convert_vector_to_array
+        procedure         :: Get_vector_times_real
+        procedure, nopass :: Get_real_times_vector
+        procedure         :: Get_vector_times_integer
+        procedure, nopass :: Get_integer_times_vector
+        procedure         :: Get_cross_product
         final             :: Finalize
         !---------------------------------------------------------------------------------
-        ! Public generic methods
+        ! Public methods
         !---------------------------------------------------------------------------------
+        procedure, public :: Get_norm
         generic, public   :: operator (.dot.) => Get_dot_product
         generic, public   :: operator (+)     => Add_vectors
         generic, public   :: operator (-)     => Subtract_vectors
@@ -343,6 +351,29 @@ contains
         return_value%z = vec_1%x*vec_2%y - vec_1%y*vec_2%x
 
     end function Get_cross_product
+    !
+    !*****************************************************************************************
+    !
+    function Get_norm( this ) result ( return_value )
+        !
+        ! Purpose:
+        !
+        !--------------------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !--------------------------------------------------------------------------------
+        real (WP)                         :: return_value
+        class (vector_t), intent (in out) :: this
+        !--------------------------------------------------------------------------------
+        ! Dictionary: local variables
+        !--------------------------------------------------------------------------------
+        real (WP), dimension (3)          :: array
+        !--------------------------------------------------------------------------------
+
+        array = this
+
+        return_value = norm2( array )
+
+    end function Get_norm
     !
     !*****************************************************************************************
     !
