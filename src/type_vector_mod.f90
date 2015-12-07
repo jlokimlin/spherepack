@@ -1,7 +1,10 @@
+!*****************************************************************************************
 !
 !  Purpose:
 !
-!  Defines a derived data type for 3 dimensional cartesian vector calculations
+!  Defines a derived data type for 3-dimensional cartesian vector calculations
+!
+!*****************************************************************************************
 !
 module type_vector_mod
 
@@ -14,9 +17,10 @@ module type_vector_mod
 
     ! Everything is private unless stated otherwise
     private
-    public :: &
-        assignment(=), &
-        operator(*)
+    public :: vector_t
+    public :: vector_ptr
+    public :: assignment(=)
+    public :: operator(*)
 
     !---------------------------------------------------------------------------------
     ! Dictionary: global variables confined to the module
@@ -26,28 +30,39 @@ module type_vector_mod
     !---------------------------------------------------------------------------------
 
     ! Declare derived data type
-    type, public :: vector_t
+    type :: vector_t
 
-        ! Components
-        real (WP) :: x = 0.0_WP
-        real (WP) :: y = 0.0_WP
-        real (WP) :: z = 0.0_WP
+        ! All components are public unless stated otherwise
+        !---------------------------------------------------------------------------------
+        ! Real constants
+        !---------------------------------------------------------------------------------
+        real (WP)          :: x = 0.0_WP
+        real (WP)          :: y = 0.0_WP
+        real (WP)          :: z = 0.0_WP
+        !---------------------------------------------------------------------------------
 
     contains
 
         ! All methods are private unless stated otherwise
         private
 
+        !---------------------------------------------------------------------------------
+        ! Private methods
+        !---------------------------------------------------------------------------------
         procedure         :: Get_vector_add
         procedure         :: Get_vector_subtract
         procedure         :: Get_vector_div_real
         procedure         :: Get_vector_div_int
         procedure         :: Get_dot_product
+        final             :: Finalize
+        !---------------------------------------------------------------------------------
+        ! Public generic methods
+        !---------------------------------------------------------------------------------
         generic, public   :: operator (.dot.) => Get_dot_product
         generic, public   :: operator (+)     => Get_vector_add
         generic, public   :: operator (-)     => Get_vector_subtract
         generic, public   :: operator (/)     => Get_vector_div_real, Get_vector_div_int
-        final             :: Finalize
+        !---------------------------------------------------------------------------------
 
     end type vector_t
 
@@ -70,7 +85,7 @@ module type_vector_mod
     end interface
 
     ! Pointer of "vector_t" for creating array of pointers of "vector_t".
-    type, public :: vector_ptr
+    type :: vector_ptr
 
         type(vector_t), pointer :: p => null()
 
@@ -333,6 +348,7 @@ contains
         type (vector_t), intent (in out) :: this
         !--------------------------------------------------------------------------------
 
+        ! Reset constants
         this%x = 0.0_WP
         this%y = 0.0_WP
         this%z = 0.0_WP

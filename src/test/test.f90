@@ -8,7 +8,8 @@ program test
 
     use type_vector_mod
 
-    use type_sphere_mod
+    use type_sphere_mod, only: &
+        sphere_t
 
     ! Explicit typing only
     implicit none
@@ -16,9 +17,8 @@ program test
     !--------------------------------------------------------------------------------
     ! Dictionary
     !--------------------------------------------------------------------------------
-    integer, parameter    :: WP     = REAL64  !! 64 bit real
+    integer, parameter    :: WP     = REAL64   !! 64 bit real
     integer, parameter    :: IP     = INT32    !! 32 bit integer
-
     !--------------------------------------------------------------------------------
 
     ! Test all the procedures
@@ -26,7 +26,7 @@ program test
 
 contains
     !
-    !o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o
+    !*****************************************************************************************
     !
     subroutine Test_all()
         !
@@ -61,7 +61,7 @@ contains
 
     end subroutine Test_all
     !
-    !o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o
+    !*****************************************************************************************
     !
     subroutine Test_scalar_analysis_and_synthesis( this )
         !
@@ -129,7 +129,7 @@ contains
 
     end subroutine Test_scalar_analysis_and_synthesis
     !
-    !o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o
+    !*****************************************************************************************
     !
     subroutine Test_vector_analysis_and_synthesis( this )
         !
@@ -213,7 +213,7 @@ contains
 
     end subroutine Test_vector_analysis_and_synthesis
     !
-    !o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o
+    !*****************************************************************************************
     !
     subroutine Test_compute_surface_integral( this )
         !
@@ -275,7 +275,7 @@ contains
 
     end subroutine Test_Compute_surface_integral
     !
-    !o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o
+    !*****************************************************************************************
     !
     subroutine Test_invert_helmholtz( this )
         !
@@ -330,7 +330,7 @@ contains
 
     end subroutine Test_invert_helmholtz
     !
-    !o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o
+    !*****************************************************************************************
     !
     subroutine Test_get_gradient( this )
         !
@@ -414,7 +414,7 @@ contains
 
     end subroutine Test_get_gradient
     !
-    !o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o
+    !*****************************************************************************************
     !
     subroutine Test_get_vorticity( this )
         !
@@ -495,7 +495,7 @@ contains
 
     end subroutine Test_get_vorticity
     !
-    !o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o
+    !*****************************************************************************************
     !
     subroutine Test_get_rotation_operator( this )
         !
@@ -579,6 +579,6 @@ contains
 
     end subroutine Test_get_rotation_operator
     !
-    !o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o
+    !*****************************************************************************************
     !
 end program test

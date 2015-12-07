@@ -5,6 +5,8 @@
 ! Defines the derived data type "workspace_t" required to
 ! invoke the spherepack library
 !
+!*****************************************************************************************
+!
 module type_workspace_mod
 
     use, intrinsic :: iso_fortran_env, only: &
@@ -14,71 +16,88 @@ module type_workspace_mod
     ! Explicit typing only
     implicit none
 
-    ! Everything is private except the derived data type itself
+    ! Everything is private unless stated otherwise
     private
+    public :: workspace_t
 
     !--------------------------------------------------------------------------------
     ! Dictionary: global variables confined to the module
     !----------------------------------------- ---------------------------------------
     integer, parameter  :: WP = REAL64              !! 64 bit real
     integer, parameter  :: IP = INT32               !! 32 bit integer
-    character(200)      :: error_message            !! Probably long enough
+    character (200)     :: error_message            !! Probably long enough
     integer (IP)        :: allocate_status          !! To check allocation status
     integer (IP)        :: deallocate_status        !! To check deallocation status
     !---------------------------------------------------------------------------------
 
     ! Declare derived data type
-    type, public :: workspace_t
+    type :: workspace_t
 
-        ! Components
-        logical  :: initialized = .false. !! Instantiation flag
+        ! All components are public unless stated otherwise
 
+        !---------------------------------------------------------------------------------
+        ! Initialization flag
+        !---------------------------------------------------------------------------------
+        logical                                         :: initialized = .false.
+        !---------------------------------------------------------------------------------
         ! Workspace arrays for Legendre transform
+        !---------------------------------------------------------------------------------
         real (WP), dimension (:), allocatable          :: work
         real (WP), dimension (:), allocatable, private :: dwork
-
+        !---------------------------------------------------------------------------------
         ! Workspace arrays for scalar transform - GAU
-        real (WP), dimension (:), allocatable :: wshags
-        real (WP), dimension (:), allocatable :: wshsgs
-
+        !---------------------------------------------------------------------------------
+        real (WP), dimension (:), allocatable          :: wshags
+        real (WP), dimension (:), allocatable          :: wshsgs
+        !---------------------------------------------------------------------------------
         ! Workspace arrays for scalar transform - REG
-        real (WP), dimension (:), allocatable :: wshaes
-        real (WP), dimension (:), allocatable :: wshses
-
+        !---------------------------------------------------------------------------------
+        real (WP), dimension (:), allocatable          :: wshaes
+        real (WP), dimension (:), allocatable          :: wshses
+        !---------------------------------------------------------------------------------
         ! Workspace arrays for vector transform - GAU
-        real (WP), dimension (:), allocatable :: wvhags
-        real (WP), dimension (:), allocatable :: wvhsgs
-
+        !---------------------------------------------------------------------------------
+        real (WP), dimension (:), allocatable          :: wvhags
+        real (WP), dimension (:), allocatable          :: wvhsgs
+        !---------------------------------------------------------------------------------
         ! Workspace arrays for vector transform - REG
-        real (WP), dimension (:), allocatable :: wvhaes !! workspace array for vector analysis - REG
-        real (WP), dimension (:), allocatable :: wvhses !! workspace array for vector synthesis - REG
-
+        !---------------------------------------------------------------------------------
+        real (WP), dimension (:), allocatable          :: wvhaes
+        real (WP), dimension (:), allocatable          :: wvhses
+        !---------------------------------------------------------------------------------
         ! Scalar transform coefficients
-        real (WP), dimension (:,:), pointer :: a => null()
-        real (WP), dimension (:,:), pointer :: b => null()
-
+        !---------------------------------------------------------------------------------
+        real (WP), dimension (:,:), pointer            :: a => null()
+        real (WP), dimension (:,:), pointer            :: b => null()
+        !---------------------------------------------------------------------------------
         ! Vector transform coefficients
-        real (WP), dimension (:,:), pointer :: br => null()
-        real (WP), dimension (:,:), pointer :: bi => null()
-        real (WP), dimension (:,:), pointer :: cr => null()
-        real (WP), dimension (:,:), pointer :: ci => null()
+        !---------------------------------------------------------------------------------
+        real (WP), dimension (:,:), pointer            :: br => null()
+        real (WP), dimension (:,:), pointer            :: bi => null()
+        real (WP), dimension (:,:), pointer            :: cr => null()
+        real (WP), dimension (:,:), pointer            :: ci => null()
+        !---------------------------------------------------------------------------------
 
     contains
 
         ! All methods are private unless stated otherwise
         private
 
-        ! Private methods
-        procedure :: Assert_initialized
-        procedure :: Initialize_scalar_transform_gau
-        procedure :: Initialize_scalar_transform_reg
-        procedure :: Initialize_vector_transform_gau
-        procedure :: Initialize_vector_transform_reg
-
+        !---------------------------------------------------------------------------------
         ! Public methods
-        procedure, non_overridable, public :: Create
-        procedure, non_overridable, public :: Destroy
-        final                              :: Finalize
+        !---------------------------------------------------------------------------------
+        procedure, non_overridable, public             :: Create
+        procedure, non_overridable, public             :: Destroy
+        !---------------------------------------------------------------------------------
+        ! Private methods
+        !---------------------------------------------------------------------------------
+        procedure                                      :: Assert_initialized
+        procedure                                      :: Initialize_scalar_transform_gau
+        procedure                                      :: Initialize_scalar_transform_reg
+        procedure                                      :: Initialize_vector_transform_gau
+        procedure                                      :: Initialize_vector_transform_reg
+        final                                          :: Finalize
+        !---------------------------------------------------------------------------------
 
     end type workspace_t
 
@@ -94,15 +113,23 @@ contains
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
         class (workspace_t), intent (in out) :: this
-        integer (IP), intent (in)            :: nlat, nlon
+        integer (IP), intent (in)            :: nlat
+        integer (IP), intent (in)            :: nlon
         character (*), intent (in), optional :: grid_type
         !--------------------------------------------------------------------------------
 
-        ! Check status
+        !--------------------------------------------------------------------------------
+        ! Check initialization status
+        !--------------------------------------------------------------------------------
+
         if ( this%initialized ) then
-            print *, 'ERROR: You must destroy "workspace" before re-instantiating'
+            print *, 'ERROR: You must destroy "workspace_t" before re-instantiating'
             stop
         end if
+
+        !--------------------------------------------------------------------------------
+        ! Allocate desired workspace arrays
+        !--------------------------------------------------------------------------------
 
         ! Check if optional grid type argument is present
         if ( present( grid_type ) ) then
@@ -111,15 +138,15 @@ contains
             if ( grid_type .eq. 'REG' ) then
 
                 ! Set up transforms for regular grids
-                call Initialize_scalar_transform_reg( this, nlat, nlon )
-                call Initialize_vector_transform_reg( this, nlat, nlon )
+                call this%Initialize_scalar_transform_reg( nlat, nlon )
+                call this%Initialize_vector_transform_reg( nlat, nlon )
 
             ! Check if the grid type is gaussian
             else if ( grid_type .eq. 'GAU' ) then
 
                 ! Set up transforms for gaussian grids
-                call Initialize_scalar_transform_gau( this, nlat, nlon )
-                call Initialize_vector_transform_gau( this, nlat, nlon )
+                call this%Initialize_scalar_transform_gau( nlat, nlon )
+                call this%Initialize_vector_transform_gau( nlat, nlon )
 
             else
 
@@ -132,13 +159,15 @@ contains
         else
 
             ! Set up default transforms for gaussian grids
-            call Initialize_scalar_transform_gau( this, nlat, nlon )
-            call Initialize_vector_transform_gau( this, nlat, nlon )
+            call this%Initialize_scalar_transform_gau( nlat, nlon )
+            call this%Initialize_vector_transform_gau( nlat, nlon )
 
         end if
 
+        !--------------------------------------------------------------------------------
+        ! Set initialization status
+        !--------------------------------------------------------------------------------
 
-        ! Set status
         this%initialized = .true.
 
     end subroutine Create
@@ -154,11 +183,20 @@ contains
         class (workspace_t), intent (in out) :: this
         !--------------------------------------------------------------------------------
 
-        ! Check status
+        !--------------------------------------------------------------------------------
+        ! Check initialization status
+        !--------------------------------------------------------------------------------
+
         if ( .not. this%initialized ) return
 
+        !--------------------------------------------------------------------------------
         ! Deallocate workspace arrays for Legendre transform
+        !--------------------------------------------------------------------------------
+
+        ! Check if array is allocated
         if ( allocated( this%work ) ) then
+
+            ! Deallocate array
             deallocate ( &
                 this%work, &
                 stat = deallocate_status, &
@@ -171,7 +209,10 @@ contains
             end if
         end if
 
+        ! Check if array is allocated
         if ( allocated( this%dwork ) ) then
+
+            ! Deallocate array
             deallocate ( &
                 this%dwork, &
                 stat = deallocate_status, &
@@ -184,8 +225,14 @@ contains
             end if
         end if
 
+        !--------------------------------------------------------------------------------
         ! Deallocate workspace arrays for scalar transform - GAU
+        !--------------------------------------------------------------------------------
+
+        ! Check if array is allocated
         if ( allocated( this%wshags ) ) then
+
+            ! Deallocate array
             deallocate ( &
                 this%wshags, &
                 stat = deallocate_status, &
@@ -198,6 +245,7 @@ contains
             end if
         end if
 
+        ! Check if array is allocated
         if ( allocated( this%wshsgs ) ) then
             deallocate ( &
                 this%wshsgs, &
@@ -211,8 +259,14 @@ contains
             end if
         end if
 
+        !--------------------------------------------------------------------------------
         ! Deallocate workspace arrays for scalar transform - REG
+        !--------------------------------------------------------------------------------
+
+        ! Check if array is allocated
         if ( allocated( this%wshaes ) ) then
+
+            ! Deallocate array
             deallocate ( &
                 this%wshaes, &
                 stat = deallocate_status, &
@@ -225,7 +279,10 @@ contains
             end if
         end if
 
+        ! Check if array is allocated
         if ( allocated( this%wshses ) ) then
+
+            ! Deallocate array
             deallocate ( &
                 this%wshses, &
                 stat = deallocate_status, &
@@ -238,8 +295,14 @@ contains
             end if
         end if
 
+        !--------------------------------------------------------------------------------
         ! Deallocate workspace arrays for vector transform - GAU
+        !--------------------------------------------------------------------------------
+
+        ! Check if array is allocated
         if ( allocated( this%wvhags ) ) then
+
+            ! Deallocate array
             deallocate ( &
                 this%wvhags, &
                 stat = deallocate_status, &
@@ -252,7 +315,10 @@ contains
             end if
         end if
 
+        ! Check if array is allocated
         if ( allocated( this%wvhsgs ) ) then
+
+            ! Deallocate array
             deallocate ( &
                 this%wvhsgs, &
                 stat = deallocate_status, &
@@ -265,8 +331,14 @@ contains
             end if
         end if
 
+        !--------------------------------------------------------------------------------
         ! Deallocate workspace arrays for vector transform - REG
+        !--------------------------------------------------------------------------------
+
+        ! Check if array is allocated
         if ( allocated( this%wvhaes ) ) then
+
+            ! Deallocate array
             deallocate ( &
                 this%wvhaes, &
                 stat = deallocate_status, &
@@ -279,7 +351,10 @@ contains
             end if
         end if
 
+        ! Check if array is allocated
         if ( allocated( this%wvhses ) ) then
+
+            ! Deallocate array
             deallocate ( &
                 this%wvhses, &
                 stat = deallocate_status, &
@@ -292,7 +367,11 @@ contains
             end if
         end if
 
-        ! Deallocate scalar transform pointers
+        !--------------------------------------------------------------------------------
+        ! Clean up scalar transform pointers
+        !--------------------------------------------------------------------------------
+
+        ! Check if pointer is associated
         if ( associated(this%a) ) then
 
             ! Deallocate pointer
@@ -312,6 +391,7 @@ contains
 
         end if
 
+        ! Check if pointer is associated
         if ( associated(this%b) ) then
 
             ! Deallocate pointer
@@ -328,9 +408,14 @@ contains
 
             ! Nullify pointer
             nullify( this%b )
+
         end if
 
-        ! Deallocate vector transform pointers
+        !--------------------------------------------------------------------------------
+        ! Clean up vector transform pointers
+        !--------------------------------------------------------------------------------
+
+        ! Check if pointer is associated
         if ( associated(this%br) ) then
 
             ! Deallocate pointer
@@ -349,6 +434,7 @@ contains
 
         end if
 
+        ! Check if pointer is associated
         if ( associated(this%bi) ) then
 
             ! Deallocate pointer
@@ -367,6 +453,7 @@ contains
 
         end if
 
+        ! Check if pointer is associated
         if ( associated(this%cr) ) then
 
             ! Deallocate pointer
@@ -386,6 +473,7 @@ contains
 
         end if
 
+        ! Check if pointer is associated
         if ( associated(this%ci) ) then
 
             ! Deallocate pointer
@@ -405,7 +493,10 @@ contains
 
         end if
 
-        ! Reset status
+        !--------------------------------------------------------------------------------
+        ! Reset initialization status
+        !--------------------------------------------------------------------------------
+
         this%initialized = .false.
 
     end subroutine Destroy

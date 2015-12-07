@@ -18,7 +18,7 @@ module type_grid_mod
     !---------------------------------------------------------------------------------
     integer, parameter    :: WP = REAL64          !! 64 bit real
     integer, parameter    :: IP = INT32           !! 32 bit integer
-    character(200)        :: error_message        !! Probably long enough
+    character (200)       :: error_message        !! Probably long enough
     integer (IP)          :: allocate_status      !! To check allocation status
     integer (IP)          :: deallocate_status    !! To check deallocation status
     real (WP), parameter  :: TWO_PI = 8.0_WP * atan( 1.0_WP )
@@ -28,33 +28,46 @@ module type_grid_mod
     ! Declare derived data type
     type ::  grid_t
 
-        ! Components
-        logical, private                      :: initialized      = .false. !! Flag to check if object is instantiated
-
-        character(3)                          :: grid_type        = 'GAU'   !! either 'REG' or 'GAU'
-
-        real (WP)                             :: mesh_phi         = 0.0_WP  !! Uniform mesh in phi
-        real (WP)                             :: mesh_theta       = 0.0_WP  !! Only used in 'REG' grid
-
-        real (WP), dimension (:), allocatable :: gaussian_weights           !! Used for integration, requires 'GAU' for allocation
-        real (WP), dimension (:), allocatable :: latitudes                  !! 0 <= theta <= pi
-        real (WP), dimension (:), allocatable :: longitudes                 !! 0 <= phi <= 2*pi
-
+        ! All components are public unless stated otherwise
+        !---------------------------------------------------------------------------------
+        ! Initialization flag
+        !---------------------------------------------------------------------------------
+        logical                               :: initialized  = .false.
+        !---------------------------------------------------------------------------------
+        ! Grid type: Either gaussian = 'GAU' (default) or equally-spaced = 'REG'
+        !---------------------------------------------------------------------------------
+        character (3)                          :: grid_type   = 'GAU'
+        !---------------------------------------------------------------------------------
+        ! Real constants
+        !---------------------------------------------------------------------------------
+        real (WP)                             :: MESH_PHI    = 0.0_WP  !! Uniform mesh in phi
+        real (WP)                             :: MESH_THETA  = 0.0_WP  !! Only used in 'REG' grid
+        !---------------------------------------------------------------------------------
+        ! Allocatable arrays
+        !---------------------------------------------------------------------------------
+        real (WP), dimension (:), allocatable :: gaussian_weights      !! Used for integration, requires 'GAU' for allocation
+        real (WP), dimension (:), allocatable :: latitudes             !! 0 <= theta <= pi
+        real (WP), dimension (:), allocatable :: longitudes            !! 0 <= phi <= 2*pi
+        !---------------------------------------------------------------------------------
 
     contains
 
         ! All methods are private unless stated otherwise
         private
 
+        !---------------------------------------------------------------------------------
         ! Public methods
+        !---------------------------------------------------------------------------------
         procedure, non_overridable, public :: Create
         procedure, non_overridable, public :: Destroy
         procedure, nopass, public          :: Get_gaussian_weights_and_points !! Gaqd
-
+        !---------------------------------------------------------------------------------
         ! Private methods
+        !---------------------------------------------------------------------------------
         procedure                          :: Get_equally_spaced_longitudes
         procedure                          :: Get_equally_spaced_latitudes
         final                              :: Finalize
+        !---------------------------------------------------------------------------------
 
     end type grid_t
 
@@ -69,22 +82,28 @@ contains
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        class (grid_t), intent (in out)     :: this
-        integer (IP), intent (in)           :: nlat         !! number of latitudinal points
-        integer (IP), intent (in)           :: nlon         !! number of longitudinal points
-        character(*), intent (in), optional :: grid_type    !! Either 'GAU' or 'REG'
+        class (grid_t), intent (in out)      :: this
+        integer (IP), intent (in)            :: nlat         !! number of latitudinal points
+        integer (IP), intent (in)            :: nlon         !! number of longitudinal points
+        character (*), intent (in), optional :: grid_type    !! Either gaussian = 'GAU' (default) or equally-spaced = 'REG'
         !--------------------------------------------------------------------------------
 
-        ! Check status
+        !--------------------------------------------------------------------------------
+        ! Check initialization flag
+        !--------------------------------------------------------------------------------
+
         if ( this%initialized ) then
-            print *, 'ERROR: You must destroy "grid" before re-instantiating'
-            return
+            error stop 'ERROR: You must destroy "grid" before re-instantiating'
         end if
 
-        ! Set latitudes: 0 <= theta <= pi
+        !--------------------------------------------------------------------------------
+        ! Set latitudinal grid: 0 <= theta <= pi
+        !--------------------------------------------------------------------------------
+
+        ! Check if user-specified grid type is present
         if ( present(grid_type) ) then
 
-            ! Check if the grid type is regular
+            ! Check if grid type is equally-spaced (regular) - 'REG'
             if ( grid_type .eq. 'REG') then
 
                 ! Set the grid type
@@ -111,16 +130,22 @@ contains
 
         else
 
-            ! Set default '(GAU)' grid
+            ! Set default gaussian grid - '(GAU)'
             call this%Get_gaussian_weights_and_points( &
                 nlat, this%latitudes, this%gaussian_weights )
 
         end if
 
-        ! Compute longitudes: 0 <= phi <= 2*pi
+        !--------------------------------------------------------------------------------
+        ! Set longitudinal grid: 0 <= phi <= 2*pi
+        !--------------------------------------------------------------------------------
+
         call this%Get_equally_spaced_longitudes( nlon, this%longitudes )
 
-        ! Set status
+        !--------------------------------------------------------------------------------
+        ! Set initialization flag
+        !--------------------------------------------------------------------------------
+
         this%initialized = .true.
 
     end subroutine Create
@@ -137,19 +162,33 @@ contains
         class (grid_t), intent (in out) :: this
         !--------------------------------------------------------------------------------
 
-        ! Check status
+        !--------------------------------------------------------------------------------
+        ! Check initialization flag
+        !--------------------------------------------------------------------------------
+
         if ( .not. this%initialized ) return
 
+        !--------------------------------------------------------------------------------
         ! Reset default grid type
+        !--------------------------------------------------------------------------------
+
         this%grid_type = 'GAU'
 
-        ! Reset meshes
-        this%mesh_phi   = 0.0_WP
-        this%mesh_theta = 0.0_WP
+        !--------------------------------------------------------------------------------
+        ! Reset constants
+        !--------------------------------------------------------------------------------
 
-        ! Destroy gaussian_weights
+        this%MESH_PHI   = 0.0_WP
+        this%MESH_THETA = 0.0_WP
+
+        !--------------------------------------------------------------------------------
+        ! Deallocate arrays
+        !--------------------------------------------------------------------------------
+
+        ! Check if array is allocated
         if ( allocated( this%gaussian_weights ) ) then
 
+            ! Deallocate array
             deallocate ( &
                 this%gaussian_weights, &
                 stat = deallocate_status, &
@@ -157,16 +196,17 @@ contains
 
             ! Check deallocate status
             if ( deallocate_status /= 0 ) then
-                print *, 'Deallocation failed '&
-                    &//'for "gaussian_weights":', &
+                print *, 'Deallocating "gaussian_weights" failed '&
+                    &//'in destruction of "grid_t" object: ', &
                     trim( error_message )
-                return
+                stop
             end if
         end if
 
-        ! Destroy latitudes
+        ! Check if array is allocated
         if ( allocated( this%latitudes ) ) then
 
+            ! Deallocate array
             deallocate ( &
                 this%latitudes, &
                 stat = deallocate_status, &
@@ -174,15 +214,17 @@ contains
 
             ! Check deallocate status
             if ( deallocate_status /= 0 ) then
-                print *, 'Deallocation failed '&
-                    &//'for "latitudes":', &
+                print *, 'Deallocating "latitudes" failed '&
+                    &//'in destruction of "grid_t" object: ', &
                     trim( error_message )
-                return
+                stop
             end if
         end if
 
-        ! Destroy longitudes
+        ! Check if array is allocated
         if ( allocated( this%longitudes ) ) then
+
+            ! Deallocate array
             deallocate ( &
                 this%longitudes, &
                 stat = deallocate_status, &
@@ -190,14 +232,17 @@ contains
 
             ! Check deallocate status
             if ( deallocate_status /= 0 ) then
-                print *, 'Deallocation failed '&
-                    &//'for "longitudes":', &
+                print *, 'Deallocating "longitudes" failed '&
+                    &//'in destruction of "grid_t" object: ', &
                     trim( error_message )
-                return
+                stop
             end if
         end if
 
+        !--------------------------------------------------------------------------------
         ! Reset status
+        !--------------------------------------------------------------------------------
+
         this%initialized = .false.
 
     end subroutine Destroy
@@ -366,9 +411,9 @@ subroutine Get_equally_spaced_latitudes( this, nlat, theta )
 end if
 
 ! Set equally spaced (uniform) mesh size
-this%mesh_theta = PI / nlat
+this%MESH_THETA = PI / nlat
 
-associate( Dtheta => this%mesh_theta )
+associate( Dtheta => this%MESH_THETA )
 
     ! Compute latitudinal grid
     do concurrent ( k = 1:nlat )
@@ -434,9 +479,9 @@ subroutine Get_equally_spaced_longitudes( this, nlon, phi )
 end if
 
 ! Set equally spaced (uniform) mesh size
-this%mesh_phi = TWO_PI / nlon
+this%MESH_PHI = TWO_PI / nlon
 
-associate( Dphi => this%mesh_phi )
+associate( Dphi => this%MESH_PHI )
 
     ! Compute longitudinal grid
     do concurrent ( l = 1:nlon )
