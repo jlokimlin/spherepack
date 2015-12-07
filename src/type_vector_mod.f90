@@ -49,19 +49,19 @@ module type_vector_mod
         !---------------------------------------------------------------------------------
         ! Private methods
         !---------------------------------------------------------------------------------
-        procedure         :: Get_vector_add
+        procedure         :: Add_vectors
         procedure         :: Get_vector_subtract
-        procedure         :: Get_vector_div_real
-        procedure         :: Get_vector_div_int
+        procedure         :: Get_vector_divide_real
+        procedure         :: Get_vector_divide_integer
         procedure         :: Get_dot_product
         final             :: Finalize
         !---------------------------------------------------------------------------------
         ! Public generic methods
         !---------------------------------------------------------------------------------
         generic, public   :: operator (.dot.) => Get_dot_product
-        generic, public   :: operator (+)     => Get_vector_add
+        generic, public   :: operator (+)     => Add_vectors
         generic, public   :: operator (-)     => Get_vector_subtract
-        generic, public   :: operator (/)     => Get_vector_div_real, Get_vector_div_int
+        generic, public   :: operator (/)     => Get_vector_divide_real, Get_vector_divide_integer
         !---------------------------------------------------------------------------------
 
     end type vector_t
@@ -69,8 +69,8 @@ module type_vector_mod
     ! declare interface operators
     interface assignment (=)
 
-        module procedure Get_array_to_vector
-        module procedure Get_vector_to_array
+        module procedure Convert_array_to_vector
+        module procedure Convert_vector_to_array
 
     end interface
 
@@ -78,8 +78,8 @@ module type_vector_mod
 
         module procedure Get_vector_times_real
         module procedure Get_real_times_vector
-        module procedure Get_vector_times_int
-        module procedure Get_int_times_vector
+        module procedure Get_vector_times_integer
+        module procedure Get_integer_times_vector
         module procedure Get_cross_product
 
     end interface
@@ -95,7 +95,7 @@ contains
     !
     !*****************************************************************************************
     !
-    subroutine Get_array_to_vector( this, array )
+    subroutine Convert_array_to_vector( this, array )
         !
         ! Purpose:
         !
@@ -110,11 +110,11 @@ contains
         this%y = array(2)
         this%z = array(3)
 
-    end subroutine Get_array_to_vector
+    end subroutine Convert_array_to_vector
     !
     !*****************************************************************************************
     !
-    subroutine Get_vector_to_array( array, this )
+    subroutine Convert_vector_to_array( array, this )
         !
         ! Purpose:
         !
@@ -129,11 +129,11 @@ contains
         array(2) = this%y
         array(3) = this%z
 
-    end subroutine Get_vector_to_array
+    end subroutine Convert_vector_to_array
     !
     !*****************************************************************************************
     !
-    function Get_vector_add( vec_1, vec_2 ) result ( return_value )
+    function Add_vectors( vec_1, vec_2 ) result ( return_value )
         !
         ! Purpose:
         !
@@ -149,10 +149,7 @@ contains
         return_value%y = vec_1%y + vec_2%y
         return_value%z = vec_1%z + vec_2%z
 
-    end function Get_vector_add
-    !
-    !*****************************************************************************************
-    !
+    end function Add_vectors
     !
     !*****************************************************************************************
     !
@@ -216,7 +213,7 @@ contains
     !
     !*****************************************************************************************
     !
-    function Get_vector_times_int( vec_1, int_2 ) result ( return_value )
+    function Get_vector_times_integer( vec_1, int_2 ) result ( return_value )
         !
         ! Purpose:
         !
@@ -232,11 +229,11 @@ contains
         return_value%y = vec_1%y * real( int_2, WP)
         return_value%z = vec_1%z * real( int_2, WP)
 
-    end function Get_vector_times_int
+    end function Get_vector_times_integer
     !
     !*****************************************************************************************
     !
-    function Get_int_times_vector( int_1, vec_2 ) result ( return_value )
+    function Get_integer_times_vector( int_1, vec_2 ) result ( return_value )
         !
         ! Purpose:
         !
@@ -252,11 +249,11 @@ contains
         return_value%y = real( int_1, WP) * vec_2%y
         return_value%z = real( int_1, WP) * vec_2%z
 
-    end function Get_int_times_vector
+    end function Get_integer_times_vector
     !
     !*****************************************************************************************
     !
-    function Get_vector_div_real( vec_1, real_2 ) result ( return_value )
+    function Get_vector_divide_real( vec_1, real_2 ) result ( return_value )
         !
         ! Purpose:
         !
@@ -272,11 +269,11 @@ contains
         return_value%y = vec_1%y / real_2
         return_value%z = vec_1%z / real_2
 
-    end function Get_vector_div_real
+    end function Get_vector_divide_real
     !
     !*****************************************************************************************
     !
-    function Get_vector_div_int( vec_1, int_2 ) result ( return_value )
+    function Get_vector_divide_integer( vec_1, int_2 ) result ( return_value )
         !
         ! Purpose:
         !
@@ -292,7 +289,7 @@ contains
         return_value%y = vec_1%y / int_2
         return_value%z = vec_1%z / int_2
 
-    end function Get_vector_div_int
+    end function Get_vector_divide_integer
     !
     !*****************************************************************************************
     !
