@@ -378,10 +378,10 @@ contains
         !--------------------------------------------------------------------------------
 
         ! Check if pointer is associated
-        if ( associated( vector_ptr%p ) ) then
+        if ( associated( this%p ) ) then
 
             ! Nullify pointer
-            nullify( vector_ptr%p )
+            nullify( this%p )
 
         end if
 
