@@ -50,7 +50,7 @@ module type_vector_mod
         ! Private methods
         !---------------------------------------------------------------------------------
         procedure         :: Add_vectors
-        procedure         :: Get_vector_subtract
+        procedure         :: Subtract_vectors
         procedure         :: Get_vector_divide_real
         procedure         :: Get_vector_divide_integer
         procedure         :: Get_dot_product
@@ -60,7 +60,7 @@ module type_vector_mod
         !---------------------------------------------------------------------------------
         generic, public   :: operator (.dot.) => Get_dot_product
         generic, public   :: operator (+)     => Add_vectors
-        generic, public   :: operator (-)     => Get_vector_subtract
+        generic, public   :: operator (-)     => Subtract_vectors
         generic, public   :: operator (/)     => Get_vector_divide_real, Get_vector_divide_integer
         !---------------------------------------------------------------------------------
 
@@ -153,7 +153,7 @@ contains
     !
     !*****************************************************************************************
     !
-    function Get_vector_subtract( vec_1, vec_2 ) result ( return_value )
+    function Subtract_vectors( vec_1, vec_2 ) result ( return_value )
         !
         ! Purpose:
         !
@@ -169,7 +169,7 @@ contains
         return_value%y = vec_1%y - vec_2%y
         return_value%z = vec_1%z - vec_2%z
 
-    end function Get_vector_subtract
+    end function Subtract_vectors
     !
     !*****************************************************************************************
     !
