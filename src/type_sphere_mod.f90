@@ -60,19 +60,19 @@ module type_sphere_mod
         !---------------------------------------------------------------------------------
         ! Complex spectal coefficients
         !---------------------------------------------------------------------------------
-        complex (WP), dimension (:), pointer  :: spec => null()        !! Complex (scalar) coefficients
+        complex (WP), dimension (:), allocatable    :: spec        !! Complex (scalar) coefficients
         !---------------------------------------------------------------------------------
         ! Derived data type
         !---------------------------------------------------------------------------------
-        type (workspace_t), private           :: workspace             !! Contains the various workspace arrays to invoke SPHERPACK 3.2
-        type (grid_t)                         :: grid                  !! Spherical grid
+        type (workspace_t), private                 :: workspace             !! Contains the various workspace arrays to invoke SPHERPACK 3.2
+        type (grid_t)                               :: grid                  !! Spherical grid
         !---------------------------------------------------------------------------------
         ! Commonly used trigonometric functions
         !---------------------------------------------------------------------------------
-        real (WP), dimension (:), allocatable :: sint                 !! sin(theta): 0 <= theta <= pi
-        real (WP), dimension (:), allocatable :: cost                 !! cos(theta): 0 <= theta <= pi
-        real (WP), dimension (:), allocatable :: sinp                 !! sin(phi):   0 <=  phi  <= 2*pi
-        real (WP), dimension (:), allocatable :: cosp                 !! cos(phi):   0 <=  phi  <= 2*pi
+        real (WP), dimension (:), allocatable       :: sint                 !! sin(theta): 0 <= theta <= pi
+        real (WP), dimension (:), allocatable       :: cost                 !! cos(theta): 0 <= theta <= pi
+        real (WP), dimension (:), allocatable       :: sinp                 !! sin(phi):   0 <=  phi  <= 2*pi
+        real (WP), dimension (:), allocatable       :: cosp                 !! cos(phi):   0 <=  phi  <= 2*pi
         !---------------------------------------------------------------------------------
         ! The spherical unit vectors
         !---------------------------------------------------------------------------------
@@ -195,7 +195,7 @@ contains
         end if
 
         !--------------------------------------------------------------------------------
-        ! Allocate pointer
+        ! Allocate array
         !--------------------------------------------------------------------------------
 
         associate( size_spec => nlat * (nlat + 1)/2 )
@@ -288,12 +288,13 @@ contains
         this%NUMBER_OF_SYNTHESES = 0
 
         !--------------------------------------------------------------------------------
-        ! Clean up pointer
+        ! Deallocate complex spectral coefficients
         !--------------------------------------------------------------------------------
 
-        if ( associated( this%spec ) ) then
+        ! Check if array is allocated
+        if ( allocated( this%spec ) ) then
 
-            ! Deallocate pointer
+            ! Deallocate array
             deallocate( &
                 this%spec, &
                 stat = deallocate_status, &
@@ -301,14 +302,11 @@ contains
 
             ! Check deallocation status
             if ( deallocate_status /= 0 ) then
-                print *, 'Pointer deallocation failed in '&
+                print *, 'Deallocating "spec" failed in '&
                     &'destruction of sphere_t object: ', &
                     trim( error_message )
-                return
+                stop
             end if
-
-            ! Nullify pointer
-            nullify( this%spec )
 
         end if
 
@@ -323,19 +321,142 @@ contains
         ! Deallocate trigonometric functions
         !--------------------------------------------------------------------------------
 
-        if ( allocated( this%sint )) deallocate ( this%sint )
-        if ( allocated( this%cost )) deallocate ( this%cost )
-        if ( allocated( this%sinp )) deallocate ( this%sinp )
-        if ( allocated( this%cosp )) deallocate ( this%cosp )
+         ! Check if array is allocated
+        if ( allocated( this%sint ) ) then
+
+            ! Deallocate array
+            deallocate( &
+                this%sint, &
+                stat = deallocate_status, &
+                errmsg = error_message )
+
+            ! Check deallocation status
+            if ( deallocate_status /= 0 ) then
+                print *, 'Deallocating "sint" failed in '&
+                    &'destruction of sphere_t object: ', &
+                    trim( error_message )
+                stop
+            end if
+
+        end if
+
+        ! Check if array is allocated
+        if ( allocated( this%cost ) ) then
+
+            ! Deallocate array
+            deallocate( &
+                this%cost, &
+                stat = deallocate_status, &
+                errmsg = error_message )
+
+            ! Check deallocation status
+            if ( deallocate_status /= 0 ) then
+                print *, 'Deallocating "cost" failed in '&
+                    &'destruction of sphere_t object: ', &
+                    trim( error_message )
+                stop
+            end if
+
+        end if
+
+        ! Check if array is allocated
+        if ( allocated( this%sinp ) ) then
+
+            ! Deallocate array
+            deallocate( &
+                this%sinp, &
+                stat = deallocate_status, &
+                errmsg = error_message )
+
+            ! Check deallocation status
+            if ( deallocate_status /= 0 ) then
+                print *, 'Deallocating "sinp" failed in '&
+                    &'destruction of sphere_t object: ', &
+                    trim( error_message )
+                stop
+            end if
+
+        end if
+
+        ! Check if array is allocated
+        if ( allocated( this%cosp ) ) then
+
+            ! Deallocate array
+            deallocate( &
+                this%cosp, &
+                stat = deallocate_status, &
+                errmsg = error_message )
+
+            ! Check deallocation status
+            if ( deallocate_status /= 0 ) then
+                print *, 'Deallocating "cosp" failed in '&
+                    &'destruction of sphere_t object: ', &
+                    trim( error_message )
+                stop
+            end if
+
+        end if
 
         !--------------------------------------------------------------------------------
         ! Deallocate spherical unit vectors
         !--------------------------------------------------------------------------------
 
-        if ( allocated( this%radial_unit_vector ))  deallocate ( this%radial_unit_vector )
-        if ( allocated( this%polar_unit_vector )) deallocate ( this%polar_unit_vector )
-        if ( allocated( this%azimuthal_unit_vector )) deallocate ( this%azimuthal_unit_vector )
+        ! Check if array is allocated
+        if ( allocated( this%radial_unit_vector ) ) then
+
+            ! Deallocate array
+            deallocate( &
+                this%radial_unit_vector, &
+                stat = deallocate_status, &
+                errmsg = error_message )
+
+            ! Check deallocation status
+            if ( deallocate_status /= 0 ) then
+                print *, 'Deallocating "radial_unit_vector" failed in '&
+                    &'destruction of sphere_t object: ', &
+                    trim( error_message )
+                stop
+            end if
+
+        end if
+
+        ! Check if array is allocated
+        if ( allocated( this%polar_unit_vector ) ) then
+
+            ! Deallocate array
+            deallocate( &
+                this%polar_unit_vector, &
+                stat = deallocate_status, &
+                errmsg = error_message )
+
+            ! Check deallocation status
+            if ( deallocate_status /= 0 ) then
+                print *, 'Deallocating "polar_unit_vector" failed in '&
+                    &'destruction of sphere_t object: ', &
+                    trim( error_message )
+                stop
+            end if
+
+        end if
         
+        ! Check if array is allocated
+        if ( allocated( this%azimuthal_unit_vector ) ) then
+
+            ! Deallocate array
+            deallocate( &
+                this%azimuthal_unit_vector, &
+                stat = deallocate_status, &
+                errmsg = error_message )
+
+            ! Check deallocation status
+            if ( deallocate_status /= 0 ) then
+                print *, 'Deallocating "azimuthal_unit_vector" failed in '&
+                    &'destruction of sphere_t object: ', &
+                    trim( error_message )
+                stop
+            end if
+
+        end if
 
         !--------------------------------------------------------------------------------
         ! Reset initialization flag
