@@ -5,11 +5,16 @@
 !
 !< Purpose:
 !
-! A modern Fortran (2003+) object-oriented spherepack wrapper for NCAR's SPHEREPACK 3.2
+! A modern Fortran (2008+) object-oriented spherepack wrapper for NCAR's SPHEREPACK 3.2
 !
 !*****************************************************************************************
 !
 module type_sphere_mod
+
+    use, intrinsic :: iso_fortran_env, only: &
+        WP     => REAL64, &
+        IP     => INT32, &
+        stderr => ERROR_UNIT
 
     use type_workspace_mod, only: &
         workspace_t
@@ -19,10 +24,6 @@ module type_sphere_mod
 
     use type_vector_mod
     
-    use, intrinsic :: iso_fortran_env, only: &
-        REAL64, &
-        INT32
-
     ! Explicit typing only
     implicit none
 
@@ -33,52 +34,51 @@ module type_sphere_mod
     !---------------------------------------------------------------------------------
     ! Dictionary: global variables confined to the module
     !---------------------------------------------------------------------------------
-    integer, parameter    :: WP = REAL64       !! 64 bit real
-    integer, parameter    :: IP = INT32        !! 32 bit integer
-    character (200)       :: error_message     !! Probably long enough
+    character (len=200)   :: error_message     !! Probably long enough
     integer (IP)          :: allocate_status   !! To check allocation status
     integer (IP)          :: deallocate_status !! To check deallocation status
     !---------------------------------------------------------------------------------
 
     ! Declare derived data type
-    type :: sphere_t
+    type, public :: sphere_t
 
         ! All components are public unless stated otherwise
+
         !---------------------------------------------------------------------------------
         ! Initialization flag
         !---------------------------------------------------------------------------------
-        logical                               :: initialized = .false. !! Instantiation status
+        logical                      :: initialized = .false. !! Instantiation status
         !---------------------------------------------------------------------------------
-        ! Named constants
+        ! Integer constants
         !---------------------------------------------------------------------------------
-        integer (IP)                          :: NLON   = 0              !! number of longitudinal points
-        integer (IP)                          :: NLAT   = 0              !! number of latitudinal points
-        integer (IP)                          :: NTRUNC = 0              !! triangular truncation limit
-        integer (IP)                          :: ISYM   = 0              !! symmetries about the equator for scalar calculations
-        integer (IP)                          :: ITYPE  = 0              !! symmetries about the equator for vector calculations
-        integer (IP)                          :: NUMBER_OF_SYNTHESES = 0 !!
+        integer (IP)                 :: NLON                = 0   !! number of longitudinal points
+        integer (IP)                 :: NLAT                = 0   !! number of latitudinal points
+        integer (IP)                 :: NTRUNC              = 0   !! triangular truncation limit
+        integer (IP)                 :: SCALAR_SYMMETRIES   = 0   !! symmetries about the equator for scalar calculations
+        integer (IP)                 :: VECTOR_SYMMETRIES   = 0   !! symmetries about the equator for vector calculations
+        integer (IP)                 :: NUMBER_OF_SYNTHESES = 0   !!
         !---------------------------------------------------------------------------------
-        ! Complex spectal coefficients
+        ! Complex spectral coefficients
         !---------------------------------------------------------------------------------
-        complex (WP), dimension (:), allocatable    :: spec        !! Complex (scalar) coefficients
+        complex (WP), allocatable    :: complex_spectral_coefficients(:)
         !---------------------------------------------------------------------------------
         ! Derived data type
         !---------------------------------------------------------------------------------
-        type (workspace_t), private                 :: workspace             !! Contains the various workspace arrays to invoke SPHERPACK 3.2
-        type (grid_t)                               :: grid                  !! Spherical grid
+        type (workspace_t), private  :: workspace             !! Contains the various workspace arrays to invoke SPHERPACK 3.2
+        type (grid_t)                :: grid                  !! Spherical grid
         !---------------------------------------------------------------------------------
         ! Commonly used trigonometric functions
         !---------------------------------------------------------------------------------
-        real (WP), dimension (:), allocatable       :: sint                 !! sin(theta): 0 <= theta <= pi
-        real (WP), dimension (:), allocatable       :: cost                 !! cos(theta): 0 <= theta <= pi
-        real (WP), dimension (:), allocatable       :: sinp                 !! sin(phi):   0 <=  phi  <= 2*pi
-        real (WP), dimension (:), allocatable       :: cosp                 !! cos(phi):   0 <=  phi  <= 2*pi
+        real (WP), allocatable       :: sint(:)                 !! sin(theta): 0 <= theta <= pi
+        real (WP), allocatable       :: cost(:)                 !! cos(theta): 0 <= theta <= pi
+        real (WP), allocatable       :: sinp(:)                 !! sin(phi):   0 <=  phi  <= 2*pi
+        real (WP), allocatable       :: cosp(:)                 !! cos(phi):   0 <=  phi  <= 2*pi
         !---------------------------------------------------------------------------------
         ! The spherical unit vectors
         !---------------------------------------------------------------------------------
-        real (WP), dimension (:, :, :), allocatable :: radial_unit_vector
-        real (WP), dimension (:, :, :), allocatable :: polar_unit_vector
-        real (WP), dimension (:, :, :), allocatable :: azimuthal_unit_vector
+        real (WP), allocatable       :: radial_unit_vector(:,:,:)
+        real (WP), allocatable       :: polar_unit_vector(:,:,:)
+        real (WP), allocatable       :: azimuthal_unit_vector(:,:,:)
         !---------------------------------------------------------------------------------
 
     contains
@@ -139,7 +139,7 @@ module type_sphere_mod
         procedure                            :: Get_spherical_angle_components
         procedure                            :: Set_scalar_symmetries
         procedure                            :: Set_vector_symmetries
-        final                                :: Finalize
+        final                                :: Finalize_sphere
         !---------------------------------------------------------------------------------
 
     end type sphere_t
@@ -148,18 +148,18 @@ contains
     !
     !*****************************************************************************************
     !
-    subroutine Create( this, nlat, nlon, isym, itype, grid_type )
+    subroutine Create( this, nlat, nlon, isym, itype )
         !
         ! Purpose:
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        class (sphere_t), intent (in out)    :: this
-        integer (IP), intent (in)            :: nlat
-        integer (IP), intent (in)            :: nlon
-        integer (IP), intent (in), optional  :: isym      !! Either 0, 1, or 2
-        integer (IP), intent (in), optional  :: itype     !! Either 0, 1, 2, 3, ..., 8
-        character (*), intent (in), optional :: grid_type !! Either '(GAU)' or '(REG)'
+        class (sphere_t), intent (in out)        :: this
+        integer (IP),     intent (in)            :: nlat
+        integer (IP),     intent (in)            :: nlon
+        integer (IP),     intent (in), optional  :: isym      !! Either 0, 1, or 2
+        integer (IP),     intent (in), optional  :: itype     !! Either 0, 1, 2, 3, ..., 8
+        !character (*), intent (in), optional :: grid_type !! Either '(GAU)' or '(REG)'
         !--------------------------------------------------------------------------------
 
         !--------------------------------------------------------------------------------
@@ -167,17 +167,19 @@ contains
         !--------------------------------------------------------------------------------
 
         if ( this%initialized ) then
-            print *, 'ERROR: You must destroy "sphere" before re-instantiating'
-            return
+
+            write( stderr, '(A)' ) 'ERROR: TYPE (sphere_t)'
+            write( stderr, '(A)' ) 'You must destroy object before calling CREATE'
+
         end if
 
         !--------------------------------------------------------------------------------
         ! Set constants
         !--------------------------------------------------------------------------------
 
-        this%NLAT   = nlat
-        this%NLON   = nlon
-        this%NTRUNC = nlat - 1 !! Set triangular truncation
+        this%NLAT                = nlat
+        this%NLON                = nlon
+        this%NTRUNC              = nlat - 1 !! Set triangular truncation
         this%NUMBER_OF_SYNTHESES = 1
 
         ! Set scalar symmetries
@@ -202,16 +204,17 @@ contains
 
             ! Allocate pointer for complex spectral coefficients
             allocate ( &
-                this%spec( 1:size_spec ), &
-                stat = allocate_status, &
+                this%complex_spectral_coefficients( 1:size_spec ), &
+                stat   = allocate_status, &
                 errmsg = error_message )
 
             ! Check allocate status
             if ( allocate_status /= 0 ) then
-                print *, 'Pointer allocation failed in '&
-                    &'creation of sphere_t object: ', &
-                    trim( error_message )
-                return
+
+                write( stderr, '(A)' ) 'TYPE (sphere_t)'
+                write( stderr, '(A)' ) 'Allocating COMPLEX_SPECTRAL_COEFFICIENTS failed in CREATE'
+                write( stderr, '(A)' ) trim( error_message )
+
             end if
 
         end associate
@@ -220,18 +223,9 @@ contains
         ! Create derived data types
         !--------------------------------------------------------------------------------
 
-        ! Set grid and workspace
-        if ( present( grid_type) ) then
+        call this%grid%Create( nlat, nlon )
+        call this%workspace%Create( nlat, nlon )
 
-            call this%grid%Create( nlat, nlon, grid_type )
-            call this%workspace%Create( nlat, nlon, grid_type )
-
-        else
-
-            call this%grid%Create( nlat, nlon )
-            call this%workspace%Create( nlat, nlon )
-
-        end if
 
         !--------------------------------------------------------------------------------
         ! Set frequently used trigonometric functions
@@ -283,8 +277,8 @@ contains
         this%NLON                = 0
         this%NLAT                = 0
         this%NTRUNC              = 0
-        this%ISYM                = 0
-        this%ITYPE               = 0
+        this%SCALAR_SYMMETRIES   = 0
+        this%VECTOR_SYMMETRIES   = 0
         this%NUMBER_OF_SYNTHESES = 0
 
         !--------------------------------------------------------------------------------
@@ -292,20 +286,21 @@ contains
         !--------------------------------------------------------------------------------
 
         ! Check if array is allocated
-        if ( allocated( this%spec ) ) then
+        if ( allocated( this%complex_spectral_coefficients ) ) then
 
             ! Deallocate array
             deallocate( &
-                this%spec, &
-                stat = deallocate_status, &
+                this%complex_spectral_coefficients, &
+                stat   = deallocate_status, &
                 errmsg = error_message )
 
             ! Check deallocation status
             if ( deallocate_status /= 0 ) then
-                print *, 'Deallocating "spec" failed in '&
-                    &'destruction of sphere_t object: ', &
-                    trim( error_message )
-                stop
+
+                write( stderr, '(A)' ) 'TYPE (sphere_t)'
+                write( stderr, '(A)' ) 'Deallocating COMPLEX_SPECTRAL_COEFFICIENTS failed in DESTROY'
+                write( stderr, '(A)' ) trim( error_message )
+
             end if
 
         end if
@@ -327,17 +322,17 @@ contains
             ! Deallocate array
             deallocate( &
                 this%sint, &
-                stat = deallocate_status, &
+                stat   = deallocate_status, &
                 errmsg = error_message )
 
             ! Check deallocation status
             if ( deallocate_status /= 0 ) then
-                print *, 'Deallocating "sint" failed in '&
-                    &'destruction of sphere_t object: ', &
-                    trim( error_message )
-                stop
-            end if
 
+                write( stderr, '(A)' ) 'TYPE (sphere_t)'
+                write( stderr, '(A)' ) 'Deallocating SINT failed in DESTROY'
+                write( stderr, '(A)' ) trim( error_message )
+
+            end if
         end if
 
         ! Check if array is allocated
@@ -346,17 +341,17 @@ contains
             ! Deallocate array
             deallocate( &
                 this%cost, &
-                stat = deallocate_status, &
+                stat   = deallocate_status, &
                 errmsg = error_message )
 
             ! Check deallocation status
             if ( deallocate_status /= 0 ) then
-                print *, 'Deallocating "cost" failed in '&
-                    &'destruction of sphere_t object: ', &
-                    trim( error_message )
-                stop
-            end if
 
+                write( stderr, '(A)' ) 'TYPE (sphere_t)'
+                write( stderr, '(A)' ) 'Deallocating COST failed in DESTROY'
+                write( stderr, '(A)' ) trim( error_message )
+
+            end if
         end if
 
         ! Check if array is allocated
@@ -365,15 +360,16 @@ contains
             ! Deallocate array
             deallocate( &
                 this%sinp, &
-                stat = deallocate_status, &
+                stat   = deallocate_status, &
                 errmsg = error_message )
 
             ! Check deallocation status
             if ( deallocate_status /= 0 ) then
-                print *, 'Deallocating "sinp" failed in '&
-                    &'destruction of sphere_t object: ', &
-                    trim( error_message )
-                stop
+
+                write( stderr, '(A)' ) 'TYPE (sphere_t)'
+                write( stderr, '(A)' ) 'Deallocating SINP failed in DESTROY'
+                write( stderr, '(A)' ) trim( error_message )
+
             end if
 
         end if
@@ -384,15 +380,16 @@ contains
             ! Deallocate array
             deallocate( &
                 this%cosp, &
-                stat = deallocate_status, &
+                stat   = deallocate_status, &
                 errmsg = error_message )
 
             ! Check deallocation status
             if ( deallocate_status /= 0 ) then
-                print *, 'Deallocating "cosp" failed in '&
-                    &'destruction of sphere_t object: ', &
-                    trim( error_message )
-                stop
+
+                write( stderr, '(A)' ) 'TYPE (sphere_t)'
+                write( stderr, '(A)' ) 'Deallocating COSP failed in DESTROY'
+                write( stderr, '(A)' ) trim( error_message )
+
             end if
 
         end if
@@ -407,17 +404,17 @@ contains
             ! Deallocate array
             deallocate( &
                 this%radial_unit_vector, &
-                stat = deallocate_status, &
+                stat   = deallocate_status, &
                 errmsg = error_message )
 
             ! Check deallocation status
             if ( deallocate_status /= 0 ) then
-                print *, 'Deallocating "radial_unit_vector" failed in '&
-                    &'destruction of sphere_t object: ', &
-                    trim( error_message )
-                stop
-            end if
 
+                write( stderr, '(A)' ) 'TYPE (sphere_t)'
+                write( stderr, '(A)' ) 'Deallocating RADIAL_UNIT_VECTOR failed in DESTROY'
+                write( stderr, '(A)' ) trim( error_message )
+
+            end if
         end if
 
         ! Check if array is allocated
@@ -426,17 +423,17 @@ contains
             ! Deallocate array
             deallocate( &
                 this%polar_unit_vector, &
-                stat = deallocate_status, &
+                stat   = deallocate_status, &
                 errmsg = error_message )
 
             ! Check deallocation status
             if ( deallocate_status /= 0 ) then
-                print *, 'Deallocating "polar_unit_vector" failed in '&
-                    &'destruction of sphere_t object: ', &
-                    trim( error_message )
-                stop
-            end if
 
+                write( stderr, '(A)' ) 'TYPE (sphere_t)'
+                write( stderr, '(A)' ) 'Deallocating POLAR_UNIT_VECTOR failed in DESTROY'
+                write( stderr, '(A)' ) trim( error_message )
+
+            end if
         end if
         
         ! Check if array is allocated
@@ -445,17 +442,17 @@ contains
             ! Deallocate array
             deallocate( &
                 this%azimuthal_unit_vector, &
-                stat = deallocate_status, &
+                stat   = deallocate_status, &
                 errmsg = error_message )
 
             ! Check deallocation status
             if ( deallocate_status /= 0 ) then
-                print *, 'Deallocating "azimuthal_unit_vector" failed in '&
-                    &'destruction of sphere_t object: ', &
-                    trim( error_message )
-                stop
-            end if
 
+                write( stderr, '(A)' ) 'TYPE (sphere_t)'
+                write( stderr, '(A)' ) 'Deallocating AZIMUTHAL_UNIT_VECTOR failed in DESTROY'
+                write( stderr, '(A)' ) trim( error_message )
+
+            end if
         end if
 
         !--------------------------------------------------------------------------------
@@ -522,9 +519,10 @@ contains
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        integer (IP)                       :: return_value
         class (sphere_t), intent (in out)  :: this
-        integer (IP), intent (in)          :: n, m
+        integer (IP),     intent (in)      :: n
+        integer (IP),     intent (in)      :: m
+        integer (IP)                       :: return_value
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
         !--------------------------------------------------------------------------------
@@ -557,24 +555,25 @@ contains
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
         class (sphere_t), intent (in out)    :: this
-        integer (IP), intent (in)            :: n, m
+        integer (IP),     intent (in)        :: n
+        integer (IP),     intent (in)        :: m
         complex (WP)                         :: return_value
         !--------------------------------------------------------------------------------
 
         associate( &
             ntrunc   => this%NTRUNC, &
             nm       => this%Get_index( n, m ), &
-            nm_conjg => this%Get_index(n, -m ) &
+            nm_conjg => this%Get_index(n, -m ), &
+            psi      => this%complex_spectral_coefficients &
             )
 
             if ( m < 0 .and. nm_conjg > 0 ) then
 
-                return_value = &
-                    ( (-1.0_WP)**(-m) ) * conjg( this%spec(nm_conjg) )
+                return_value = ( (-1.0_WP)**(-m) ) * conjg( psi(nm_conjg) )
 
             else if ( nm > 0 ) then
 
-                return_value = this%spec(nm)
+                return_value = psi(nm)
 
             else
 
@@ -596,26 +595,29 @@ contains
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
         class (sphere_t), intent (in out) :: this
-        integer (IP), intent (in)         :: isym
+        integer (IP),     intent (in)     :: isym
         !--------------------------------------------------------------------------------
 
         if ( isym == 2 ) then
 
-            this%ISYM = isym
+            this%SCALAR_SYMMETRIES = isym
 
         else if ( isym == 1) then
 
-            this%ISYM = isym
+            this%SCALAR_SYMMETRIES = isym
 
         else if ( isym == 0 ) then
 
-            this%ISYM = isym
+            this%SCALAR_SYMMETRIES = isym
 
         else
-            ! Handle invalid isym
-            print *, 'ERROR: optional argument isym = ', isym
-            print *, 'must be either 0, 1, or 2 (default isym = 0)'
-            stop
+
+            ! Handle invalid symmetry arguments
+            write( stderr, '(A)' )     'TYPE (sphere_t)'
+            write( stderr, '(A, I2)' ) 'Optional argument isym = ', isym
+            write( stderr, '(A)' )     'in SET_SCALAR_SYMMETRIES'
+            write( stderr, '(A)' )     'must be either 0, 1, or 2 (default isym = 0)'
+
         end if
 
     end subroutine Set_scalar_symmetries
@@ -635,46 +637,57 @@ contains
 
         if ( itype == 8 ) then
 
-            this%itype = itype
+            this%VECTOR_SYMMETRIES = itype
+            return
 
         else if ( itype == 7) then
 
-            this%itype = itype
+            this%VECTOR_SYMMETRIES = itype
+            return
 
         else if ( itype == 6) then
 
-            this%itype = itype
+            this%VECTOR_SYMMETRIES = itype
+            return
 
         else if ( itype == 5) then
 
-            this%itype = itype
+            this%VECTOR_SYMMETRIES = itype
+            return
 
         else if ( itype == 4) then
 
-            this%itype = itype
+            this%VECTOR_SYMMETRIES = itype
+            return
 
         else if ( itype == 3) then
 
-            this%itype = itype
+            this%VECTOR_SYMMETRIES = itype
+            return
 
         else if ( itype == 2) then
 
-            this%itype = itype
+            this%VECTOR_SYMMETRIES = itype
+            return
 
         else if ( itype == 1) then
 
-            this%itype = itype
+            this%VECTOR_SYMMETRIES = itype
+            return
 
 
         else if ( itype == 0 ) then
 
-            this%itype = itype
+            this%VECTOR_SYMMETRIES = itype
+            return
 
         else
-            ! Handle invalid isym
-            print *, 'ERROR: optional argument itype = ', itype
-            print *, 'must be either 0, 1, 2, ..., 8 (default itype = 0)'
-            stop
+
+            ! Handle invalid symmetry arguments
+            write( stderr, '(A)' )     'TYPE (sphere_t)'
+            write( stderr, '(A, I2)' ) 'Optional argument itype = ', itype
+            write( stderr, '(A)' )     'in SET_VECTOR_SYMMETRIES'
+            write( stderr, '(A)' )     'must be either 0, 1, 2, ..., 8 (default itype = 0)'
 
         end if
 
@@ -684,55 +697,72 @@ contains
     !
     subroutine Set_trigonometric_functions( this, theta, phi )
         !
-        ! Purpose:
-        !
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        class (sphere_t), intent (in out)       :: this
-        real (WP), dimension (:), intent (in)   :: theta, phi
+        class (sphere_t), intent (in out) :: this
+        real (WP),        intent (in)     :: theta(:)
+        real (WP),        intent (in)     :: phi(:)
         !--------------------------------------------------------------------------------
 
+        !--------------------------------------------------------------------------------
         ! Check if latitudes are allocated
+        !--------------------------------------------------------------------------------
+
         if ( .not. allocated( this%grid%latitudes ) ) then
 
-            print *, 'ERROR: You must allocate "latitudes" '&
-                &//'before calling "Set_trigonometric_functions"'
-            stop
-
-        ! Check if longitudes are allocated
-        else if ( .not. allocated( this%grid%longitudes ) ) then
-
-            print *, 'ERROR: You must allocate "longitudes" '&
-                &//'before calling "Set_trigonometric_functions"'
-            stop
+            write( stderr, '(A)' ) 'TYPE (sphere_t)'
+            write( stderr, '(A)' ) 'in SET_TRIGONOMETRIC_FUNCTIONS'
+            write( stderr, '(A)' ) 'You must allocate LATITUDES '
+            write( stderr, '(A)' ) 'before calling SET_TRIGONOMETRIC_FUNCTIONS'
 
         end if
+
+        !--------------------------------------------------------------------------------
+        ! Check if longitudes are allocated
+        !--------------------------------------------------------------------------------
+
+        if ( .not. allocated( this%grid%longitudes ) ) then
+
+            write( stderr, '(A)' ) 'TYPE (sphere_t)'
+            write( stderr, '(A)' ) 'in SET_TRIGONOMETRIC_FUNCTIONS'
+            write( stderr, '(A)' ) 'You must allocate LONGITUDES '
+            write( stderr, '(A)' ) 'before calling SET_TRIGONOMETRIC_FUNCTIONS'
+
+        end if
+
+        !--------------------------------------------------------------------------------
+        ! Allocate arrays
+        !--------------------------------------------------------------------------------
 
         associate( &
             nlat => size( theta ), &
             nlon => size( phi ) &
             )
-            ! Allocate arrays
+
             allocate ( &
                 this%sint( 1:nlat ), &
                 this%cost( 1:nlat ), &
                 this%sinp( 1:nlon ), &
                 this%cosp( 1:nlon ), &
-                stat = allocate_status, &
+                stat   = allocate_status, &
                 errmsg = error_message )
 
             ! Check allocation status
             if ( allocate_status /= 0 ) then
-                print *, 'Allocation failed in '&
-                    &'Set_trigonometric_functions: ', &
-                    trim( error_message )
-                stop
+
+                write( stderr, '(A)') 'TYPE (sphere_t)'
+                write( stderr, '(A)') 'Allocation failed in SET_TRIGONOMETRIC_FUNCTIONS'
+                write( stderr, '(A)') trim( error_message )
+
             end if
 
         end associate
 
+        !--------------------------------------------------------------------------------
         ! Compute trigonometric functions
+        !--------------------------------------------------------------------------------
+
         this%sint = sin( theta )
         this%cost = cos( theta )
         this%sinp = sin( phi )
@@ -754,8 +784,11 @@ contains
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        class (sphere_t), intent (in out)      :: this
-        real (WP), dimension (:), intent (in)  :: sint, cost, sinp, cosp
+        class (sphere_t), intent (in out)   :: this
+        real (WP),        intent (in)       :: sint(:)
+        real (WP),        intent (in)       :: cost(:)
+        real (WP),        intent (in)       :: sinp(:)
+        real (WP),        intent (in)       :: cosp(:)
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
         !--------------------------------------------------------------------------------
@@ -772,15 +805,16 @@ contains
                 this%radial_unit_vector( 1:3, 1:nlat, 1:nlon ), &
                 this%polar_unit_vector( 1:3, 1:nlat, 1:nlon ), &
                 this%azimuthal_unit_vector( 1:3, 1:nlat, 1:nlon ), &
-                stat = allocate_status, &
+                stat   = allocate_status, &
                 errmsg = error_message )
 
             ! Check allocate status
             if ( allocate_status /= 0 ) then
-                print *, 'Allocation failed in '&
-                    &'Set_spherical_unit_vectors: ', &
-                    trim( error_message )
-                return
+
+                write( stderr, '(A)') 'TYPE (sphere_t)'
+                write( stderr, '(A)') 'Allocation failed in SET_SPHERICAL_UNIT_VECTORS'
+                write( stderr, '(A)') trim( error_message )
+
             end if
 
             unit_vectors: associate( &
@@ -844,8 +878,8 @@ contains
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        class (sphere_t), intent (in out)        :: this
-        real (WP), dimension (:, :), intent (in)  :: scalar_function
+        class (sphere_t), intent (in out)  :: this
+        real (WP),        intent (in)      :: scalar_function(:,:)
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
         !--------------------------------------------------------------------------------
@@ -860,13 +894,13 @@ contains
 
         associate( &
             ntrunc => this%NTRUNC, & ! set the triangular truncation limit
-            a      => this%workspace%a, &
-            b      => this%workspace%b &
+            a      => this%workspace%real_harmonic_coefficients, &
+            b      => this%workspace%imaginary_harmonic_coefficients, &
+            psi    => this%complex_spectral_coefficients &
             )
 
-            ! fill complex array dataspec with result
-            this%spec = &
-                cmplx( &
+            ! Fill complex array
+            psi = cmplx( &
                 0.5_WP * [((a(m + 1, n + 1), n = m, ntrunc), m = 0, ntrunc)], &
                 0.5_WP * [((b(m + 1, n + 1), n = m, ntrunc), m = 0, ntrunc)], &
                 WP )
@@ -886,13 +920,12 @@ contains
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        class (sphere_t), intent (in out)         :: this
-        real (WP), dimension (:, :), intent (out)  :: scalar_function
+        class (sphere_t), intent (in out)  :: this
+        real (WP),        intent (out)     :: scalar_function(:,:)
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
         !--------------------------------------------------------------------------------
         integer (IP) :: m, n  !! Counters
-        integer (IP) :: nm    !! Index
         !--------------------------------------------------------------------------------
 
         ! Check status
@@ -900,8 +933,9 @@ contains
 
         associate( &
             ntrunc => this%NTRUNC, & ! set the triangular truncation limit
-            a      => this%workspace%a, &
-            b      => this%workspace%b &
+            a      => this%workspace%real_harmonic_coefficients, &
+            b      => this%workspace%imaginary_harmonic_coefficients, &
+            psi    => this%complex_spectral_coefficients &
             )
  
             ! Fill real arrays with contents of spec
@@ -909,14 +943,15 @@ contains
                 do n = m, ntrunc
                 
                     ! set the spectral index
-                    nm = this%Get_index( n, m )
+                    associate(nm => this%Get_index( n, m ))
                 
-                    ! set the real component
-                    a( m + 1, n + 1 ) = 2.0_WP * real( this%spec(nm) )
+                        ! set the real component
+                        a( m + 1, n + 1 ) = 2.0_WP * real( psi(nm) )
                 
-                    ! set the imaginary component
-                    b( m + 1, n + 1 ) = 2.0_WP * aimag( this%spec(nm) )
-                
+                        ! set the imaginary component
+                        b( m + 1, n + 1 ) = 2.0_WP * aimag( psi(nm) )
+
+                    end associate
                 end do
             end do
         
@@ -939,7 +974,7 @@ contains
         !--------------------------------------------------------------------------------
         class (sphere_t), intent (in out)          :: this
         complex (WP), dimension (:), intent (in)   :: spec
-        real (WP), dimension (:, :), intent (out)   :: scalar_function
+        real (WP), dimension (:,:), intent (out)   :: scalar_function
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
         !--------------------------------------------------------------------------------
@@ -951,8 +986,8 @@ contains
 
         associate( &
             ntrunc => this%NTRUNC, & ! set the triangular truncation limit
-            a      => this%workspace%a, &
-            b      => this%workspace%b &
+            a      => this%workspace%real_harmonic_coefficients, &
+            b      => this%workspace%imaginary_harmonic_coefficients &
             )
  
             ! fill real arrays with contents of spec
@@ -990,15 +1025,16 @@ contains
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        class (sphere_t), intent (in out)          :: this
+        class (sphere_t), intent (in out)            :: this
         real (WP), dimension (:, :, :), intent (in)  :: vector_function
-        real (WP), dimension (:, :), intent (out)   :: polar_component
-        real (WP), dimension (:, :), intent (out)   :: azimuthal_component
+        real (WP), dimension (:,:), intent (out)    :: polar_component
+        real (WP), dimension (:,:), intent (out)    :: azimuthal_component
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
         !--------------------------------------------------------------------------------
         integer (IP)    :: k,  l        !! Counters
-        type (vector_t) :: theta, phi   !! Spherical unit vectors
+        type (vector_t) :: theta        !! Polar unit vector
+        type (vector_t) :: phi          !! Azimuthal unit vector
         type (vector_t) :: vector_field
         !--------------------------------------------------------------------------------
         
@@ -1006,7 +1042,7 @@ contains
         call this%Assert_initialized()
         
         ! initialize arrays
-        polar_component = 0.0_WP
+        polar_component     = 0.0_WP
         azimuthal_component = 0.0_WP
         
         associate( &
@@ -1050,16 +1086,16 @@ contains
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        class (sphere_t), intent (in out)          :: this
-        real (WP), dimension (:, :), intent (in)    :: scalar_function
-        real (WP), dimension (:, :, :), intent (out) :: rotation_operator
+        class (sphere_t), intent (in out)             :: this
+        real (WP), dimension (:,:), intent (in)      :: scalar_function
+        real (WP), dimension (:, :, :), intent (out)  :: rotation_operator
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
         !--------------------------------------------------------------------------------
-        integer (IP)                            :: k, l         !! Counters
-        type (vector_t)                         :: theta,  phi
-        real (WP), dimension (:, :), allocatable :: polar_gradient_component
-        real (WP), dimension (:, :), allocatable :: azimuthal_gradient_component
+        integer (IP)                             :: k, l         !! Counters
+        type (vector_t)                          :: theta,  phi
+        real (WP), dimension (:,:), allocatable :: polar_gradient_component
+        real (WP), dimension (:,:), allocatable :: azimuthal_gradient_component
         !--------------------------------------------------------------------------------
 
         ! Check status
@@ -1075,7 +1111,7 @@ contains
             allocate ( &
                 polar_gradient_component( 1:nlat, 1:nlon ), &
                 azimuthal_gradient_component( 1:nlat, 1:nlon ), &
-                stat = allocate_status, &
+                stat   = allocate_status, &
                 errmsg = error_message )
 
             ! Check allocation status
@@ -1117,7 +1153,7 @@ contains
         deallocate ( &
             polar_gradient_component, &
             azimuthal_gradient_component, &
-            stat = deallocate_status, &
+            stat   = deallocate_status, &
             errmsg = error_message )
 
         ! Check deallocate status
@@ -1149,7 +1185,7 @@ contains
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
         class (sphere_t), intent (in out)        :: this
-        real (WP), dimension (:, :), intent (in)  :: scalar_function
+        real (WP), dimension (:,:), intent (in)  :: scalar_function
         real (WP)                                :: return_value
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
@@ -1195,7 +1231,7 @@ contains
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
         class (sphere_t), intent (in out)        :: this
-        real (WP), dimension (:, :), intent (in)  :: scalar_function
+        real (WP), dimension (:,:), intent (in)  :: scalar_function
         type (vector_t), intent (out)            :: first_moment
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
@@ -1260,8 +1296,8 @@ contains
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
         class (sphere_t), intent (in out)        :: this
-        real (WP), dimension (:, :), intent (out) :: polar_component     !! vt
-        real (WP), dimension (:, :), intent (out) :: azimuthal_component !! wt
+        real (WP), dimension (:,:), intent (out) :: polar_component     !! vt
+        real (WP), dimension (:,:), intent (out) :: azimuthal_component !! wt
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
         !--------------------------------------------------------------------------------
@@ -1278,9 +1314,9 @@ contains
         !            size( this%grid%latitudes ), size( this%grid%longitudes ),  this%ityp, 1, &
         !            polar_component, azimuthal_component, &
         !            this%NLAT, this%NLON, &
-        !            this%workspace%br, this%workspace%bi, &
-        !            this%workspace%cr, this%workspace%ci, &
-        !            size(this%workspace%br, dim = 1), size(this%workspace%br, dim = 2), &
+        !            this%workspace%real_polar_harmonic_coefficients, this%workspace%imaginary_polar_harmonic_coefficients, &
+        !            this%workspace%real_azimuthal_harmonic_coefficients, this%workspace%imaginary_azimuthal_harmonic_coefficients, &
+        !            size(this%workspace%real_polar_harmonic_coefficients, dim = 1), size(this%workspace%real_polar_harmonic_coefficients, dim = 2), &
         !            this%workspace%wvts, this%workspace%size(wvts), &
         !            this%workspace%work, size(this%workspace%work), ierror)
 
@@ -1487,10 +1523,10 @@ contains
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        class (sphere_t), intent (in out)        :: this
-        real (WP), dimension (:, :), intent (in)  :: scalar_function
-        real (WP), dimension (:, :), intent (out) :: polar_gradient_component
-        real (WP), dimension (:, :), intent (out) :: azimuthal_gradient_component
+        class (sphere_t), intent (in out)  :: this
+        real (WP),        intent (in)      :: scalar_function(:,:)
+        real (WP),        intent (out)     :: polar_gradient_component(:,:)
+        real (WP),        intent (out)     :: azimuthal_gradient_component(:,:)
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
         !--------------------------------------------------------------------------------
@@ -1506,14 +1542,14 @@ contains
         associate( &
             nlat   => this%NLAT, &
             nlon   => this%NLON, &
-            isym   => this%ISYM, &
+            isym   => this%SCALAR_SYMMETRIES, &
             nt     => this%NUMBER_OF_SYNTHESES, &
-            v      =>  polar_gradient_component, &
+            v      => polar_gradient_component, &
             w      => azimuthal_gradient_component, &
             idvw   => this%NLAT, &
             jdvw   => this%NLON, &
-            a      => this%workspace%a, &
-            b      => this%workspace%b, &
+            a      => this%workspace%real_harmonic_coefficients, &
+            b      => this%workspace%imaginary_harmonic_coefficients, &
             mdab   => this%NLAT, &
             ndab   => this%NLAT, &
             wvhsgs => this%workspace%wvhsgs, &
@@ -1573,9 +1609,9 @@ contains
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        class (sphere_t), intent (in out)          :: this
-        real (WP), dimension (:, :, :), intent (in)  :: vector_field
-        real (WP), dimension (:, :), intent (out)   :: divergence
+        class (sphere_t), intent (in out) :: this
+        real (WP),        intent (in)     :: vector_field (:, :, :)
+        real (WP),        intent (out)    :: divergence (:, :)
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
         !--------------------------------------------------------------------------------
@@ -1591,8 +1627,8 @@ contains
         ! calculate the surface divergence
         call Divgs( &
             this%NLAT, this%NLON, &
-            this%ISYM, 1, divergence, this%NLAT, this%NLON, &
-            this%workspace%br, this%workspace%bi, &
+            this%SCALAR_SYMMETRIES, 1, divergence, this%NLAT, this%NLON, &
+            this%workspace%real_polar_harmonic_coefficients, this%workspace%imaginary_polar_harmonic_coefficients, &
             this%NLAT, this%NLAT, &
             this%workspace%wshsgs, size( this%workspace%wshsgs ), &
             this%workspace%work, size( this%workspace%work ), ierror)
@@ -1635,43 +1671,309 @@ contains
     !
     !*****************************************************************************************
     !
-    subroutine Get_vorticity( this, vector_field, vorticity )
+    subroutine Get_vorticity( this, vector_function, vorticity )
         !
-        ! Purpose:
+        !--------------------------------------------------------------------------------
+        !
+        !    Documentation: SPHEREPACK 3.2
+        !
+        !    subroutine vrtgs(nlat,nlon,isym,nt,vort,ivrt,jvrt,cr,ci,mdc,ndc,
+        !                     wshsgs,lshsgs,work,lwork,ierror)
+        !
+        !     given the vector spherical harmonic coefficients cr and ci, precomputed
+        !     by subroutine vhags for a vector field (v,w), subroutine vrtgs
+        !     computes the vorticity of the vector field in the scalar array
+        !     vort.  vort(i,j) is the vorticity at the gaussian colatitude
+        !     theta(i) (see nlat as input parameter) and longitude
+        !     lambda(j) = (j-1)*2*pi/nlon on the sphere.  i.e.,
+        !
+        !            vort(i,j) =  [-dv/dlambda + d(sint*w)/dtheta]/sint
+        !
+        !     where sint = sin(theta(i)).  w is the east longitudinal and v
+        !     is the colatitudinal component of the vector field from which
+        !     cr,ci were precomputed.  required associated legendre polynomials
+        !     are stored rather than recomputed as they are in subroutine vrtgc.
+        !
+        !
+        !     input parameters
+        !
+        !     nlat   the number of points in the gaussian colatitude grid on the
+        !            full sphere. these lie in the interval (0,pi) and are computed
+        !            in radians in theta(1) <...< theta(nlat) by subroutine gaqd.
+        !            if nlat is odd the equator will be included as the grid point
+        !            theta((nlat+1)/2).  if nlat is even the equator will be
+        !            excluded as a grid point and will lie half way between
+        !            theta(nlat/2) and theta(nlat/2+1). nlat must be at least 3.
+        !            note: on the half sphere, the number of grid points in the
+        !            colatitudinal direction is nlat/2 if nlat is even or
+        !            (nlat+1)/2 if nlat is odd.
+        !
+        !     nlon   the number of distinct londitude points.  nlon determines
+        !            the grid increment in longitude as 2*pi/nlon. for example
+        !            nlon = 72 for a five degree grid. nlon must be greater
+        !            than 3. the axisymmetric case corresponds to nlon=1.
+        !            the efficiency of the computation is improved when nlon
+        !            is a product of small prime numbers.
+        !
+        !
+        !     isym   a parameter which determines whether the vorticity is
+        !            computed on the full or half sphere as follows:
+        !
+        !      = 0
+        !            the symmetries/antsymmetries described in isym=1,2 below
+        !            do not exist in (v,w) about the equator.  in this case the
+        !            vorticity is neither symmetric nor antisymmetric about
+        !            the equator.  the vorticity is computed on the entire
+        !            sphere.  i.e., in the array vort(i,j) for i=1,...,nlat and
+        !            j=1,...,nlon.
+        !
+        !      = 1
+        !            w is antisymmetric and v is symmetric about the equator.
+        !            in this case the vorticity is symmetyric about the
+        !            equator and is computed for the northern hemisphere
+        !            only.  i.e., if nlat is odd the vorticity is computed
+        !            in the array vort(i,j) for i=1,...,(nlat+1)/2 and for
+        !            j=1,...,nlon.  if nlat is even the vorticity is computed
+        !            in the array vort(i,j) for i=1,...,nlat/2 and j=1,...,nlon.
+        !
+        !      = 2
+        !            w is symmetric and v is antisymmetric about the equator
+        !            in this case the vorticity is antisymmetric about the
+        !            equator and is computed for the northern hemisphere
+        !            only.  i.e., if nlat is odd the vorticity is computed
+        !            in the array vort(i,j) for i=1,...,(nlat+1)/2 and for
+        !            j=1,...,nlon.  if nlat is even the vorticity is computed
+        !            in the array vort(i,j) for i=1,...,nlat/2 and j=1,...,nlon.
+        !
+        !
+        !      nt    nt is the number of scalar and vector fields.  some
+        !            computational efficiency is obtained for multiple fields.
+        !            in the program that calls vrtgs, the arrays cr,ci, and vort
+        !            can be three dimensional corresponding to an indexed multiple
+        !            vector field.  in this case multiple scalar synthesis will
+        !            be performed to compute the vorticity for each field.  the
+        !            third index is the synthesis index which assumes the values
+        !            k=1,...,nt.  for a single synthesis set nt = 1.  the
+        !            description of the remaining parameters is simplified by
+        !            assuming that nt=1 or that all the arrays are two dimensional.
+        !
+        !     ivrt   the first dimension of the array vort as it appears in
+        !            the program that calls vrtgs. if isym = 0 then ivrt
+        !            must be at least nlat.  if isym = 1 or 2 and nlat is
+        !            even then ivrt must be at least nlat/2. if isym = 1 or 2
+        !            and nlat is odd then ivrt must be at least (nlat+1)/2.
+        !
+        !     jvrt   the second dimension of the array vort as it appears in
+        !            the program that calls vrtgs. jvrt must be at least nlon.
+        !
+        !    cr,ci   two or three dimensional arrays (see input parameter nt)
+        !            that contain vector spherical harmonic coefficients
+        !            of the vector field (v,w) as computed by subroutine vhags.
+        !     ***    cr and ci must be computed by vhags prior to calling
+        !            vrtgs.
+        !
+        !      mdc   the first dimension of the arrays cr and ci as it
+        !            appears in the program that calls vrtgs. mdc must be at
+        !            least min0(nlat,nlon/2) if nlon is even or at least
+        !            min0(nlat,(nlon+1)/2) if nlon is odd.
+        !
+        !      ndc   the second dimension of the arrays cr and ci as it
+        !            appears in the program that calls vrtgs. ndc must be at
+        !            least nlat.
+        !
+        !   wshsgs   an array which must be initialized by subroutine shsgsi.
+        !            once initialized,
+        !            wshsgs can be used repeatedly by vrtgs as long as nlon
+        !            and nlat remain unchanged.  wshsgs must not be altered
+        !            between calls of vrtgs
+        !
+        !   lshsgs   the dimension of the array wshsgs   as it appears in the
+        !            program that calls vrtgs. define
+        !
+        !               l1 = min0(nlat,(nlon+2)/2) if nlon is even or
+        !               l1 = min0(nlat,(nlon+1)/2) if nlon is odd
+        !
+        !            and
+        !
+        !               l2 = nlat/2        if nlat is even or
+        !               l2 = (nlat+1)/2    if nlat is odd
+        !
+        !            then lshsgs must be at least
+        !
+        !            nlat*(3*(l1+l2)-2)+(l1-1)*(l2*(2*nlat-l1)-3*l1)/2+nlon+15
+        !
+        !     work   a work array that does not have to be saved.
+        !
+        !    lwork   the dimension of the array work as it appears in the
+        !            program that calls vrtgs. define
+        !
+        !               l1 = min0(nlat,nlon/2) if nlon is even or
+        !               l1 = min0(nlat,(nlon+1)/2) if nlon is odd
+        !
+        !            and
+        !
+        !               l2 = nlat/2        if nlat is even or
+        !               l2 = (nlat+1)/2    if nlat is odd.
+        !
+        !            if isym = 0 then lwork must be at least
+        !
+        !               nlat*((nt+1)*nlon+2*nt*l1+1)
+        !
+        !            if isym > 0 then lwork must be at least
+        !
+        !               (nt+1)*l2*nlon+nlat*(2*nt*l1+1)
+        !
+        !
+        !     **************************************************************
+        !
+        !     output parameters
+        !
+        !
+        !     vort   a two or three dimensional array (see input parameter nt)
+        !            that contains the vorticity of the vector field (v,w)
+        !            whose coefficients cr,ci where computed by subroutine vhags.
+        !            vort(i,j) is the vorticity at the gaussian colatitude point
+        !            theta(i) and longitude point lambda(j) = (j-1)*2*pi/nlon.
+        !            the index ranges are defined above at the input parameter
+        !            isym.
+        !
+        !
+        !   ierror   an error parameter which indicates fatal errors with input
+        !            parameters when returned positive.
+        !          = 0  no errors
+        !          = 1  error in the specification of nlat
+        !          = 2  error in the specification of nlon
+        !          = 3  error in the specification of isym
+        !          = 4  error in the specification of nt
+        !          = 5  error in the specification of ivrt
+        !          = 6  error in the specification of jvrt
+        !          = 7  error in the specification of mdc
+        !          = 8  error in the specification of ndc
+        !          = 9  error in the specification of lshsgs
+        !          = 10 error in the specification of lwork
         !
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        class (sphere_t), intent (in out)          :: this
-        real (WP), dimension (:, :, :), intent (in)  :: vector_field
-        real (WP), dimension (:, :), intent (out)   :: vorticity
+        class (sphere_t), intent (in out)  :: this
+        real (WP),        intent (in)      :: vector_function(:,:,:)
+        real (WP),        intent (out)     :: vorticity(:,:)
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
         !--------------------------------------------------------------------------------
-        integer (IP):: ierror
+        integer (IP)                        :: error_flag
         !--------------------------------------------------------------------------------
 
-        ! Check status
+        !--------------------------------------------------------------------------------
+        ! Check initialization flag
+        !--------------------------------------------------------------------------------
+
         call this%Assert_initialized()
 
+        !--------------------------------------------------------------------------------
         ! calculate the (real) vector harmonic coefficients
-        call this%Perform_vector_analysis( vector_field )
+        !--------------------------------------------------------------------------------
 
-        ! calculate the surface vorticity
-        call Vrtgs( &
-            this%NLAT,  &
-            this%NLON, &
-            this%ISYM, 1, vorticity, &
-            this%NLAT, this%NLON, &
-            this%workspace%cr, this%workspace%ci, &
-            this%NLAT, this%NLON, &
-            this%workspace%wshsgs, size( this%workspace%wshsgs ), &
-            this%workspace%work, size( this%workspace%work ), ierror)
+        call this%Perform_vector_analysis( vector_function )
 
-        ! check the error flag
-        if (ierror  /=  0)  then
-            print *, 'SPHEREPACK 3.2 error = ', ierror, ' in Vrtgs'
-            return
+        !--------------------------------------------------------------------------------
+        ! Invoke SPHEREPACK 3.2 routine
+        !--------------------------------------------------------------------------------
+
+        associate( &
+            nlat   => this%NLAT, &
+            nlon   => this%NLON, &
+            isym   => this%SCALAR_SYMMETRIES, &
+            nt     => this%NUMBER_OF_SYNTHESES, &
+            vort   => vorticity, &
+            ivrt   => size( vorticity, dim = 1 ), &
+            jvrt   => size( vorticity, dim = 2 ),&
+            cr     => this%workspace%real_azimuthal_harmonic_coefficients, &
+            ci     => this%workspace%imaginary_azimuthal_harmonic_coefficients, &
+            mdc    => size( this%workspace%real_azimuthal_harmonic_coefficients, dim = 1 ), &
+            ndc    => size( this%workspace%real_azimuthal_harmonic_coefficients, dim = 2 ), &
+            wshsgs => this%workspace%wshsgs, &
+            lshsgs => size( this%workspace%wshsgs ),&
+            work   => this%workspace%work, &
+            lwork  => size( this%workspace%work ), &
+            ierror => error_flag &
+            )
+
+            ! calculate the surface vorticity
+            call Vrtgs( nlat, nlon, isym, nt, vort, &
+                ivrt, jvrt, cr, ci, mdc, ndc, &
+                wshsgs, lshsgs, work, lwork, ierror )
+
+        end associate
+
+        !--------------------------------------------------------------------------------
+        ! Address the error flag
+        !--------------------------------------------------------------------------------
+
+        if ( error_flag /= 0 ) then
+
+            write( stderr, '(A)') 'ERROR: GET_VORTICITY'
+
+            if ( error_flag == 1 ) then
+
+                write( stderr, '(A)') 'Error in the specification of NLAT'
+
+
+            else if ( error_flag == 2 ) then
+
+                write( stderr, '(A)') 'Error in the specification of NLON'
+
+
+            else if ( error_flag == 3 ) then
+
+                write( stderr, '(A)') 'Error in the specification of SCALAR_SYMMETRIES'
+
+
+            else if (error_flag == 4) then
+
+                write( stderr, '(A)') 'Error in the specification of NUMBER_OF_SYNTHESES'
+
+
+
+            else if ( error_flag == 5 ) then
+
+                write( stderr, '(A)') 'Invalid extent for SOURCE_TERM'
+                write( stderr, '(A)') 'size( SOURCE_TERM, dim = 1)'
+
+
+            else if ( error_flag == 6 ) then
+
+                write( stderr, '(A)') 'Invalid extent for SOURCE_TERM'
+                write( stderr, '(A)') 'size( SOURCE_TERM, dim = 2)'
+
+
+            else if ( error_flag == 7 ) then
+
+                write( stderr, '(A)') 'Invalid extent for CR'
+                write( stderr, '(A)') 'size( CR, dim = 1)'
+
+
+            else if (error_flag == 8) then
+
+                write( stderr, '(A)') 'Invalid extent for CR'
+                write( stderr, '(A)') 'size( CR, dim = 2)'
+
+
+            else if (error_flag == 9) then
+
+                write( stderr, '(A)') 'Invalid extent for WSHSGS'
+                write( stderr, '(A)') 'size( WSHSGS )'
+
+            else if (error_flag == 10) then
+
+                write( stderr, '(A)') 'Invalid extent for WORK'
+                write( stderr, '(A)') 'size( WORK )'
+
+            else
+
+                write( stderr, '(A)') 'Undetermined error flag'
+
+            end if
         end if
 
     end subroutine Get_vorticity
@@ -1771,8 +2073,8 @@ contains
         !--------------------------------------------------------------------------------
         class (sphere_t), intent (in out)         :: this
         real (WP), intent (in)                    :: helmholtz_constant
-        real (WP), dimension (:, :), intent (in)   :: source_term
-        real (WP), dimension (:, :), intent (out)  :: solution
+        real (WP), dimension (:,:), intent (in)   :: source_term
+        real (WP), dimension (:,:), intent (out)  :: solution
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
         !--------------------------------------------------------------------------------
@@ -1790,9 +2092,9 @@ contains
         ! see: https://www2.cisl.ucar.edu/spherepack/documentation#islapgs.html
         call Islapgs( &
             this%NLAT, this%NLON, &
-            this%ISYM, 1, helmholtz_constant, &
+            this%SCALAR_SYMMETRIES, 1, helmholtz_constant, &
             solution, this%NLAT, this%NLON, &
-            this%workspace%a, this%workspace%b, &
+            this%workspace%real_harmonic_coefficients, this%workspace%imaginary_harmonic_coefficients, &
             this%NLAT, this%NLAT, &
             this%workspace%wshsgs, size( this%workspace%wshsgs ), &
             this%workspace%work, size( this%workspace%work ), &
@@ -2173,7 +2475,7 @@ contains
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
         class (sphere_t), intent (in out)         :: this
-        real (WP), dimension (:, :), intent (in)  :: scalar_function
+        real (WP), dimension (:,:), intent (in)  :: scalar_function
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
         !--------------------------------------------------------------------------------
@@ -2187,13 +2489,13 @@ contains
         associate( &
             nlat   => this%NLAT, &
             nlon   => this%NLON, &
-            isym   => this%ISYM, &
+            isym   => this%SCALAR_SYMMETRIES, &
             nt     => this%NUMBER_OF_SYNTHESES, &
             g      => scalar_function, &
             idg    => this%NLAT, &
             jdg    => this%NLON, &
-            a      => this%workspace%a, &
-            b      => this%workspace%b, &
+            a      => this%workspace%real_harmonic_coefficients, &
+            b      => this%workspace%imaginary_harmonic_coefficients, &
             mdab   => this%NLAT, &
             ndab   => this%NLAT, &
             wshags => this%workspace%wshags, &
@@ -2399,7 +2701,7 @@ contains
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
         class (sphere_t), intent (in out)          :: this
-        real (WP), dimension (:, :), intent (out)  :: scalar_function
+        real (WP), dimension (:,:), intent (out)  :: scalar_function
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
         !--------------------------------------------------------------------------------
@@ -2410,15 +2712,15 @@ contains
         associate( &
             nlat   => this%NLAT, &
             nlon   => this%NLON, &
-            isym   => this%ISYM, &
+            isym   => this%SCALAR_SYMMETRIES, &
             nt     => this%NUMBER_OF_SYNTHESES, &
             g      => scalar_function, &
             idg    => size( scalar_function, dim = 1), &
             jdg    => size( scalar_function, dim = 2), &
-            a      => this%workspace%a, &
-            b      => this%workspace%b, &
-            mdab   => this%NLAT, &
-            ndab   => this%NLAT, &
+            a      => this%workspace%real_harmonic_coefficients, &
+            b      => this%workspace%imaginary_harmonic_coefficients, &
+            mdab   => size( this%workspace%real_harmonic_coefficients, dim = 1), &
+            ndab   => size( this%workspace%real_harmonic_coefficients, dim = 2), &
             wshsgs => this%workspace%wshsgs, &
             lshsgs => size( this%workspace%wshsgs ), &
             work   => this%workspace%work, &
@@ -2452,8 +2754,8 @@ contains
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
         class (sphere_t), intent (in out)        :: this
-        real (WP), dimension (:, :), intent (in)  :: scalar_function
-        real (WP), dimension (:, :), intent (out) :: scalar_projection
+        real (WP), dimension (:,:), intent (in)  :: scalar_function
+        real (WP), dimension (:,:), intent (out) :: scalar_projection
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
         !--------------------------------------------------------------------------------
@@ -2465,13 +2767,13 @@ contains
 
         ! TODO: Include driver program into type(workspace)
         !        call Shpgi( &
-        !            this%NLAT, this%NLON, this%ISYM, this%NTRUNC, &
+        !            this%NLAT, this%NLON, this%SCALAR_SYMMETRIES, this%NTRUNC, &
         !            this%workspace%wshp, size( this%workspace%wshp ), &
         !            this%workspace%iwshp, size( this%workspace%iwshp ), &
         !            this%workspace%work, size( this%workspace%work ), ierror )
         !
         !        call Shpg( &
-        !            this%NLAT, this%NLON, this%ISYM, this%NTRUNC, &
+        !            this%NLAT, this%NLON, this%SCALAR_SYMMETRIES, this%NTRUNC, &
         !            scalar_function, scalar_projection, this%NLAT, &
         !            this%workspace%wshp, size( this%workspace%wshp ), &
         !            this%workspace%iwshp, size( this%workspace%iwshp ), &
@@ -2504,8 +2806,8 @@ contains
         integer (IP)                            :: nlat
         integer (IP)                            :: nlon
         integer (IP)                            :: ierror
-        real (WP), dimension (:, :), allocatable :: polar_component
-        real (WP), dimension (:, :), allocatable :: azimuthal_component
+        real (WP), dimension (:,:), allocatable :: polar_component
+        real (WP), dimension (:,:), allocatable :: azimuthal_component
         !--------------------------------------------------------------------------------
 
         ! Check status
@@ -2519,7 +2821,7 @@ contains
         allocate ( &
             polar_component( 1:nlat, 1:nlon), &
             azimuthal_component( 1:nlat, 1:nlon), &
-            stat = allocate_status )
+            stat   = allocate_status )
         if ( allocate_status /= 0 ) then
             print *, "Allocation failed!"
             return
@@ -2533,10 +2835,13 @@ contains
 
         ! calculate (real) vector spherical harmonic analysis
         call Vhags( nlat, nlon, &
-            this%ISYM, 1, polar_component, &
+            this%SCALAR_SYMMETRIES, 1, polar_component, &
             azimuthal_component, &
-            nlat, nlon, this%workspace%br, this%workspace%bi, &
-            this%workspace%cr, this%workspace%ci, nlat, nlat, &
+            nlat, nlon, this%workspace%real_polar_harmonic_coefficients, &
+            this%workspace%imaginary_polar_harmonic_coefficients, &
+            this%workspace%real_azimuthal_harmonic_coefficients, &
+            this%workspace%imaginary_azimuthal_harmonic_coefficients, &
+            nlat, nlat, &
             this%workspace%wvhags, size( this%workspace%wvhags ), &
             this%workspace%work, size( this%workspace%work ), ierror)
 
@@ -2550,7 +2855,7 @@ contains
         deallocate ( &
             polar_component, &
             azimuthal_component, &
-            stat = deallocate_status )
+            stat   = deallocate_status )
         if ( deallocate_status /= 0 ) then
             print *, 'Deallocation failed in '&
                 &//'Perform_vector_analysis'
@@ -2569,8 +2874,8 @@ contains
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
         class (sphere_t), intent (in out)        :: this
-        real (WP), dimension (:, :), intent (out) :: polar_component
-        real (WP), dimension (:, :), intent (out) :: azimuthal_component
+        real (WP), dimension (:,:), intent (out) :: polar_component
+        real (WP), dimension (:,:), intent (out) :: azimuthal_component
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
         !--------------------------------------------------------------------------------
@@ -2583,12 +2888,14 @@ contains
         ! resynthesise the components from the (real) vector coefficients
         call Vhsgs( &
             this%NLAT, this%NLON, &
-            this%ISYM, 1, &
+            this%SCALAR_SYMMETRIES, 1, &
             polar_component, &
             azimuthal_component, &
             this%NLAT, this%NLON, &
-            this%workspace%br, this%workspace%bi, &
-            this%workspace%cr, this%workspace%ci, &
+            this%workspace%real_polar_harmonic_coefficients, &
+            this%workspace%imaginary_polar_harmonic_coefficients, &
+            this%workspace%real_azimuthal_harmonic_coefficients, &
+            this%workspace%imaginary_azimuthal_harmonic_coefficients, &
             this%NLAT, this%NLAT, &
             this%workspace%wvhsgs, size( this%workspace%wvhsgs ), &
             this%workspace%work, size( this%workspace%work ), ierror)
@@ -2705,10 +3012,10 @@ contains
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        class (sphere_t), intent (in out)     :: this
-        integer (IP), intent (in)             :: nlat  !! number of latitudinal points
-        real (WP), dimension (:), allocatable :: theta !! latitudinal points: 0 <= theta <= pi
-        real (WP), dimension (:), allocatable :: wts   !! gaussian weights
+        class (sphere_t),       intent (in out)   :: this
+        integer (IP),           intent (in)       :: nlat  !! number of latitudinal points
+        real (WP), allocatable, intent (out)      :: theta(:) !! latitudinal points: 0 <= theta <= pi
+        real (WP), allocatable, intent (out)      :: wts(:)   !! gaussian weights
         !--------------------------------------------------------------------------------
 
         call this%grid%Get_gaussian_weights_and_points( nlat, theta, wts )
@@ -2717,7 +3024,7 @@ contains
     !
     !*****************************************************************************************
     !
-    subroutine Finalize( this )
+    subroutine Finalize_sphere( this )
         !
         ! Purpose:
         !< Finalize object
@@ -2730,7 +3037,7 @@ contains
 
         call this%Destroy()
 
-    end subroutine Finalize
+    end subroutine Finalize_sphere
     !
     !*****************************************************************************************
     !

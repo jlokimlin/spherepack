@@ -1,9 +1,13 @@
 program main
-    !
-    use type_vector_mod
-    use type_grid_mod
-    use type_sphere_mod
-    use type_workspace_mod
+
+    use spherepack_wrapper_mod, only: &
+        vector_t, &
+        vector_ptr, &
+        assignment(=), &
+        operator(*), &
+        grid_t, &
+        sphere_t, &
+        workspace_t
 
     ! Explicit typing only
     implicit none

@@ -9,8 +9,8 @@
 module type_vector_mod
 
     use, intrinsic :: iso_fortran_env, only: &
-        REAL64, &
-        INT32
+        WP => REAL64, &
+        IP => INT32
 
     ! Explicit typing only
     implicit none
@@ -22,15 +22,8 @@ module type_vector_mod
     public :: assignment(=)
     public :: operator(*)
 
-    !---------------------------------------------------------------------------------
-    ! Dictionary: global variables confined to the module
-    !---------------------------------------------------------------------------------
-    integer, parameter    :: WP   = REAL64  !! 64 bit real
-    integer, parameter    :: IP   = INT32   !! 32 bit integer
-    !---------------------------------------------------------------------------------
-
     ! Declare derived data type
-    type :: vector_t
+    type, public :: vector_t
 
         ! All components are public unless stated otherwise
         !---------------------------------------------------------------------------------
@@ -49,27 +42,31 @@ module type_vector_mod
         !---------------------------------------------------------------------------------
         ! Private methods
         !---------------------------------------------------------------------------------
-        procedure         :: Add_vectors
-        procedure         :: Subtract_vectors
-        procedure         :: Get_vector_divide_real
-        procedure         :: Get_vector_divide_integer
-        procedure         :: Get_dot_product
-        procedure         :: Convert_array_to_vector
-        procedure, nopass :: Convert_vector_to_array
-        procedure         :: Get_vector_times_real
-        procedure, nopass :: Get_real_times_vector
-        procedure         :: Get_vector_times_integer
-        procedure, nopass :: Get_integer_times_vector
-        procedure         :: Get_cross_product
-        final             :: Finalize
+        procedure          :: Add_vectors
+        procedure          :: Subtract_vectors
+        procedure          :: Get_vector_divide_real
+        procedure          :: Get_vector_divide_integer
+        procedure          :: Get_dot_product
+        procedure          :: Convert_array_to_vector
+        procedure, nopass  :: Convert_vector_to_array
+        procedure          :: Copy_vector_to_vector
+        procedure          :: Get_vector_times_real
+        procedure, nopass  :: Get_real_times_vector
+        procedure          :: Get_vector_times_integer
+        procedure, nopass  :: Get_integer_times_vector
+        procedure          :: Get_cross_product
         !---------------------------------------------------------------------------------
         ! Public methods
         !---------------------------------------------------------------------------------
-        procedure, public :: Get_norm
-        generic, public   :: operator (.dot.) => Get_dot_product
-        generic, public   :: operator (+)     => Add_vectors
-        generic, public   :: operator (-)     => Subtract_vectors
-        generic, public   :: operator (/)     => Get_vector_divide_real, Get_vector_divide_integer
+        procedure, public   :: Get_norm
+        generic,   public   :: operator (.dot.) => Get_dot_product
+        generic,   public   :: operator (+)     => Add_vectors
+        generic,   public   :: operator (-)     => Subtract_vectors
+        generic,   public   :: operator (/)     => Get_vector_divide_real, Get_vector_divide_integer
+        !---------------------------------------------------------------------------------
+        ! Finalizer
+        !---------------------------------------------------------------------------------
+        final              :: Finalize_vector
         !---------------------------------------------------------------------------------
 
     end type vector_t
@@ -79,6 +76,7 @@ module type_vector_mod
 
         module procedure Convert_array_to_vector
         module procedure Convert_vector_to_array
+        module procedure Copy_vector_to_vector
 
     end interface
 
@@ -93,7 +91,7 @@ module type_vector_mod
     end interface
 
     ! Pointer of "vector_t" for creating array of pointers of "vector_t".
-    type :: vector_ptr
+    type, public :: vector_ptr
 
         ! All components are public unless stated otherwise
         type (vector_t), pointer :: p => null()
@@ -122,8 +120,8 @@ contains
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        class (vector_t), intent (out)         :: this
-        real (WP), dimension (3), intent (in)  :: array
+        class (vector_t),   intent (out) :: this
+        real (WP),          intent (in)  :: array(:)
         !--------------------------------------------------------------------------------
 
         this%x = array(1)
@@ -141,8 +139,8 @@ contains
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        real (WP), dimension (3), intent (out) :: array
-        class (vector_t), intent (in)          :: this
+        real (WP),        intent (out) :: array(:)
+        class (vector_t), intent (in)  :: this
         !--------------------------------------------------------------------------------
 
         array(1) = this%x
@@ -150,6 +148,25 @@ contains
         array(3) = this%z
 
     end subroutine Convert_vector_to_array
+    !
+    !*****************************************************************************************
+    !
+    subroutine Copy_vector_to_vector( this, vector_to_be_copied )
+        !
+        ! Purpose:
+        !
+        !--------------------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !--------------------------------------------------------------------------------
+        class (vector_t), intent (out) :: this
+        class (vector_t), intent (in)  :: vector_to_be_copied
+        !--------------------------------------------------------------------------------
+
+        this%x = vector_to_be_copied%x
+        this%y = vector_to_be_copied%y
+        this%z = vector_to_be_copied%z
+
+    end subroutine Copy_vector_to_vector
     !
     !*****************************************************************************************
     !
@@ -202,7 +219,7 @@ contains
         !--------------------------------------------------------------------------------
         type (vector_t)               :: return_value
         class (vector_t), intent (in) :: vec_1
-        real (WP), intent (in)        :: real_2
+        real (WP),        intent (in) :: real_2
         !--------------------------------------------------------------------------------
 
         return_value%x = vec_1%x * real_2
@@ -221,7 +238,7 @@ contains
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
         type (vector_t)               :: return_value
-        real (WP), intent (in)        :: real_1
+        real (WP),        intent (in) :: real_1
         class (vector_t), intent (in) :: vec_2
         !--------------------------------------------------------------------------------
 
@@ -242,7 +259,7 @@ contains
         !--------------------------------------------------------------------------------
         type (vector_t)                :: return_value
         class (vector_t), intent (in)  :: vec_1
-        integer (IP), intent (in)      :: int_2
+        integer (IP),     intent (in)  :: int_2
         !--------------------------------------------------------------------------------
 
         return_value%x = vec_1%x * real( int_2, WP)
@@ -261,7 +278,7 @@ contains
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
         type (vector_t)               :: return_value
-        integer (IP), intent (in)     :: int_1
+        integer (IP),     intent (in) :: int_1
         class (vector_t), intent (in) :: vec_2
         !--------------------------------------------------------------------------------
 
@@ -282,7 +299,7 @@ contains
         !--------------------------------------------------------------------------------
         type (vector_t)                :: return_value
         class (vector_t), intent (in)  :: vec_1
-        real (WP), intent (in)         :: real_2
+        real (WP),        intent (in)  :: real_2
         !--------------------------------------------------------------------------------
 
         return_value%x = vec_1%x / real_2
@@ -302,7 +319,7 @@ contains
         !--------------------------------------------------------------------------------
         type (vector_t)                :: return_value
         class (vector_t), intent (in)  :: vec_1
-        integer (IP), intent (in)      :: int_2
+        integer (IP),     intent (in)  :: int_2
         !--------------------------------------------------------------------------------
 
         return_value%x = vec_1%x / int_2
@@ -366,10 +383,10 @@ contains
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
         !--------------------------------------------------------------------------------
-        real (WP), dimension (3)          :: array
+        real (WP)                         :: array(3)
         !--------------------------------------------------------------------------------
 
-        array = this
+        call Convert_vector_to_array( array, this )
 
         return_value = norm2( array )
 
@@ -377,7 +394,7 @@ contains
     !
     !*****************************************************************************************
     !
-    subroutine Finalize( this )
+    elemental subroutine Finalize_vector( this )
         !
         ! Purpose:
         !< Finalize object
@@ -389,15 +406,16 @@ contains
         !--------------------------------------------------------------------------------
 
         ! Reset constants
+
         this%x = 0.0_WP
         this%y = 0.0_WP
         this%z = 0.0_WP
 
-    end subroutine Finalize
+    end subroutine Finalize_vector
     !
     !*****************************************************************************************
     !
-    subroutine Finalize_vector_ptr( this )
+    elemental subroutine Finalize_vector_ptr( this )
         !
         ! Purpose:
         !< Finalize object
