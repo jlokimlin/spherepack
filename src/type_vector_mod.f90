@@ -115,7 +115,7 @@ contains
     !
     subroutine Convert_array_to_vector( this, array )
         !
-        ! Purpose:
+        !< Purpose:
         !
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
@@ -134,7 +134,7 @@ contains
     !
     subroutine Convert_vector_to_array( array, this )
         !
-        ! Purpose:
+        !< Purpose:
         !
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
@@ -153,7 +153,7 @@ contains
     !
     subroutine Copy_vector_to_vector( this, vector_to_be_copied )
         !
-        ! Purpose:
+        !< Purpose:
         !
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
@@ -172,7 +172,7 @@ contains
     !
     function Add_vectors( vec_1, vec_2 ) result ( return_value )
         !
-        ! Purpose:
+        !< Purpose:
         !
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
@@ -192,7 +192,7 @@ contains
     !
     function Subtract_vectors( vec_1, vec_2 ) result ( return_value )
         !
-        ! Purpose:
+        !< Purpose:
         !
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
@@ -212,7 +212,7 @@ contains
     !
     function Get_vector_times_real( vec_1, real_2 ) result ( return_value )
         !
-        ! Purpose:
+        !< Purpose:
         !
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
@@ -232,7 +232,7 @@ contains
     !
     function Get_real_times_vector(real_1, vec_2 ) result ( return_value )
         !
-        ! Purpose:
+        !< Purpose:
         !
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
@@ -252,7 +252,7 @@ contains
     !
     function Get_vector_times_integer( vec_1, int_2 ) result ( return_value )
         !
-        ! Purpose:
+        !< Purpose:
         !
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
@@ -272,7 +272,7 @@ contains
     !
     function Get_integer_times_vector( int_1, vec_2 ) result ( return_value )
         !
-        ! Purpose:
+        !< Purpose:
         !
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
@@ -292,7 +292,7 @@ contains
     !
     function Get_vector_divide_real( vec_1, real_2 ) result ( return_value )
         !
-        ! Purpose:
+        !< Purpose:
         !
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
@@ -312,7 +312,7 @@ contains
     !
     function Get_vector_divide_integer( vec_1, int_2 ) result ( return_value )
         !
-        ! Purpose:
+        !< Purpose:
         !
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
@@ -332,7 +332,7 @@ contains
     !
     function Get_dot_product( vec_1, vec_2 ) result ( return_value )
         !
-        ! Purpose:
+        !< Purpose:
         !
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
@@ -353,7 +353,7 @@ contains
     !
     function Get_cross_product( vec_1, vec_2 ) result ( return_value )
         !
-        ! Purpose:
+        !< Purpose:
         !
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
@@ -373,7 +373,7 @@ contains
     !
     function Get_norm( this ) result ( return_value )
         !
-        ! Purpose:
+        !< Purpose:
         !
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
@@ -396,7 +396,7 @@ contains
     !
     elemental subroutine Finalize_vector( this )
         !
-        ! Purpose:
+        !< Purpose:
         !< Finalize object
         !
         !--------------------------------------------------------------------------------
@@ -417,7 +417,7 @@ contains
     !
     elemental subroutine Finalize_vector_ptr( this )
         !
-        ! Purpose:
+        !< Purpose:
         !< Finalize object
         !
         !--------------------------------------------------------------------------------

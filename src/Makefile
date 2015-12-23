@@ -28,11 +28,17 @@ type_sphere_mod.f90
 	$(fcomp) -c type_sphere_mod.f90 $(libInclude)\
 	 -o $(obj_directory)/$@ -J$(obj_directory)
 
-main.o: \
+spherepack_wrapper_mod.o: \
 type_vector_mod.o \
 type_grid_mod.o\
 type_workspace_mod.o\
 type_sphere_mod.o \
+spherepack_wrapper_mod.f90
+	$(fcomp) -c spherepack_wrapper_mod.f90 $(libInclude)\
+	 -o $(obj_directory)/$@ -J$(obj_directory)
+
+main.o: \
+spherepack_wrapper_mod.o \
 main.f90
 	$(fcomp) -c main.f90 $(libInclude)\
 	 -o $(obj_directory)/$@
@@ -45,7 +51,9 @@ build_lib:
 	$(obj_directory)/type_vector_mod.o \
 	$(obj_directory)/type_grid_mod.o \
 	$(obj_directory)/type_workspace_mod.o \
-	$(obj_directory)/type_sphere_mod.o 
+	$(obj_directory)/type_sphere_mod.o \
+	$(obj_directory)/spherepack_wrapper_mod.o
+	
 	mv libspherepack_wrapper.a $(lib_directory)
 
 run:

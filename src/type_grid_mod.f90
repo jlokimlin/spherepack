@@ -81,7 +81,7 @@ contains
     !
     subroutine Create_gaussian_grid( this, nlat, nlon )
         !
-        ! Purpose:
+        !< Purpose:
         !
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
@@ -127,7 +127,7 @@ contains
     !
     subroutine Create_equally_spaced_grid( this, nlat, nlon )
         !
-        ! Purpose:
+        !< Purpose:
         !
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
@@ -176,7 +176,7 @@ contains
     !
     subroutine Destroy( this )
         !
-        ! Purpose:
+        !< Purpose:
         !
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
@@ -455,7 +455,7 @@ contains
     !
     subroutine Get_equally_spaced_latitudes( this, nlat, theta )
         !
-        ! Purpose:
+        !< Purpose:
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
@@ -532,7 +532,7 @@ contains
     !
     subroutine Get_equally_spaced_longitudes( this, nlon, phi )
         !
-        ! Purpose:
+        !< Purpose:
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
@@ -609,7 +609,7 @@ contains
     !
     subroutine Finalize_grid( this )
         !
-        ! Purpose:
+        !< Purpose:
         !< Finalize object
         !
         !--------------------------------------------------------------------------------

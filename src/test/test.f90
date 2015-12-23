@@ -1,6 +1,6 @@
 program test
     !
-    ! Purpose:
+    !< Purpose:
 
     use, intrinsic :: iso_fortran_env, only: &
         REAL64, &
@@ -30,7 +30,7 @@ contains
     !
     subroutine Test_all()
         !
-        ! Purpose:
+        !< Purpose:
         !
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
@@ -65,7 +65,7 @@ contains
     !
     subroutine Test_scalar_analysis_and_synthesis( this )
         !
-        ! Purpose:
+        !< Purpose:
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
@@ -133,7 +133,7 @@ contains
     !
     subroutine Test_vector_analysis_and_synthesis( this )
         !
-        ! Purpose:
+        !< Purpose:
         !
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
@@ -217,7 +217,7 @@ contains
     !
     subroutine Test_compute_surface_integral( this )
         !
-        ! Purpose:
+        !< Purpose:
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
@@ -279,7 +279,7 @@ contains
     !
     subroutine Test_invert_helmholtz( this )
         !
-        ! Purpose:
+        !< Purpose:
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
@@ -334,7 +334,7 @@ contains
     !
     subroutine Test_get_gradient( this )
         !
-        ! Purpose:
+        !< Purpose:
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
@@ -418,7 +418,7 @@ contains
     !
     subroutine Test_get_vorticity( this )
         !
-        ! Purpose:
+        !< Purpose:
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
@@ -499,7 +499,7 @@ contains
     !
     subroutine Test_get_rotation_operator( this )
         !
-        ! Purpose:
+        !< Purpose:
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------

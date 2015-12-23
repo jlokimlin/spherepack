@@ -1,6 +1,6 @@
 !*****************************************************************************************
 !
-! Purpose:
+!< Purpose:
 !
 ! Defines the derived data type "workspace_t" required to
 ! invoke the spherepack library
@@ -131,7 +131,7 @@ contains
     !
     subroutine Create( this, nlat, nlon, grid_type )
         !
-        ! Purpose:
+        !< Purpose:
         !
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
@@ -203,7 +203,7 @@ contains
     !
     subroutine Destroy( this )
         !
-        ! Purpose:
+        !< Purpose:
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
@@ -582,7 +582,7 @@ contains
     !
     subroutine Assert_initialized( this )
         !
-        ! Purpose:
+        !< Purpose:
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
@@ -2671,7 +2671,7 @@ contains
     !
     pure function Get_lwork( nlat, nlon ) result ( return_value )
         !
-        ! Purpose:
+        !< Purpose:
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
@@ -2688,7 +2688,7 @@ contains
     !
     pure function Get_ldwork( nlat ) result ( return_value )
         !
-        ! Purpose:
+        !< Purpose:
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
@@ -2704,7 +2704,7 @@ contains
     !
     pure function Get_lshags( nlat, nlon ) result ( return_value )
         !
-        ! Purpose:
+        !< Purpose:
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
@@ -2741,7 +2741,7 @@ contains
     !
     pure function Get_lshaes( nlat, nlon ) result ( return_value )
         !
-        ! Purpose:
+        !< Purpose:
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
@@ -2776,7 +2776,7 @@ contains
     !
     pure function Get_lshsgs( nlat, nlon ) result ( return_value )
         !
-        ! Purpose:
+        !< Purpose:
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
@@ -2813,7 +2813,7 @@ contains
     !
     pure function Get_lshses( nlat, nlon ) result ( return_value )
         !
-        ! Purpose:
+        !< Purpose:
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
@@ -2848,7 +2848,7 @@ contains
     !
     pure function Get_lvhags( nlat, nlon ) result ( return_value )
         !
-        ! Purpose:
+        !< Purpose:
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
@@ -2867,7 +2867,7 @@ contains
     !
     pure function Get_lvhaes( nlat, nlon ) result ( return_value )
         !
-        ! Purpose:
+        !< Purpose:
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
@@ -2900,7 +2900,7 @@ contains
     !
     pure function Get_lvhsgs( nlat, nlon ) result ( return_value )
         !
-        ! Purpose:
+        !< Purpose:
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
@@ -2936,7 +2936,7 @@ contains
     !
     pure function Get_lvhses( nlat, nlon ) result ( return_value )
         !
-        ! Purpose:
+        !< Purpose:
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
@@ -2971,7 +2971,7 @@ contains
     !
     subroutine Finalize_workspace( this )
         !
-        ! Purpose:
+        !< Purpose:
         !< Finalize object
         !
         !--------------------------------------------------------------------------------
