@@ -815,7 +815,11 @@ contains
         ! Address the error flag
         !--------------------------------------------------------------------------------
 
-        if ( error_flag /= 0 ) then
+        if ( error_flag == 0 ) then
+
+            return
+
+        else
 
             write( stderr, '(A)') 'TYPE (workspace_t) in INITIALIZE_SCALAR_ANALYSIS_GAU'
 
@@ -1067,7 +1071,11 @@ contains
         ! Address the error flag
         !--------------------------------------------------------------------------------
 
-        if ( error_flag /= 0 ) then
+        if ( error_flag == 0 ) then
+
+            return
+
+        else
 
             write( stderr, '(A)') 'TYPE (workspace_t) in INITIALIZE_SCALAR_SYNTHESIS_GAU'
 
@@ -1342,7 +1350,11 @@ contains
         ! Address the error flag
         !--------------------------------------------------------------------------------
 
-        if ( error_flag /= 0 ) then
+        if ( error_flag == 0 ) then
+
+            return
+
+        else
 
             write( stderr, '(A)') 'TYPE (workspace_t) in INITIALIZE_VECTOR_ANALYSIS_GAU'
 
@@ -1551,7 +1563,11 @@ contains
         ! Address the error flag
         !--------------------------------------------------------------------------------
 
-        if ( error_flag /= 0 ) then
+        if ( error_flag == 0 ) then
+
+            return
+
+        else
 
             write( stderr, '(A)') 'TYPE (workspace_t) in INITIALIZE_VECTOR_ANALYSIS_GAU'
 
@@ -1865,7 +1881,11 @@ contains
         ! Address the error flag
         !--------------------------------------------------------------------------------
 
-        if ( error_flag /= 0 ) then
+        if ( error_flag == 0 ) then
+
+            return
+
+        else
 
             write( stderr, '(A)') 'TYPE (workspace_t) in INITIALIZE_SCALAR_ANALYSIS_REG'
 
@@ -2101,7 +2121,11 @@ contains
         ! Address the error flag
         !--------------------------------------------------------------------------------
 
-        if ( error_flag /= 0 ) then
+        if ( error_flag == 0 ) then
+
+            return
+
+        else
 
             write( stderr, '(A)') 'TYPE (workspace_t) in INITIALIZE_SCALAR_SYNTHESIS_REG'
 
@@ -2367,7 +2391,11 @@ contains
         ! Address the error flag
         !--------------------------------------------------------------------------------
 
-        if ( error_flag /= 0 ) then
+        if ( error_flag == 0 ) then
+
+            return
+
+        else
 
             write( stderr, '(A)') 'TYPE (workspace_t) in INITIALIZE_VECTOR_ANALYSIS_REG'
 
@@ -2577,7 +2605,11 @@ contains
         ! Address the error flag
         !--------------------------------------------------------------------------------
 
-        if ( error_flag /= 0 ) then
+        if ( error_flag == 0 ) then
+
+            return
+
+        else
 
             write( stderr, '(A)') 'TYPE (workspace_t) in INITIALIZE_VECTOR_SYNTHESIS_REG'
 

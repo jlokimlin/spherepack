@@ -434,19 +434,24 @@ contains
         ! Address error flag
         !--------------------------------------------------------------------------------
 
-        if ( error_flag /= 0) then
+        if ( error_flag == 0 ) then
 
-            write( stderr, '(A)') 'ERROR: TYPE (grid_t) in GET_GAUSSIAN_WEIGHTS_AND_POINTS'
-
-        else if (error_flag == 1) then
-
-            write( stderr, '(A, I2)') 'Argument nlat = ', nlat
-            write( stderr, '(A)')     'fails to satisfy nlat >= 0'
+            return
 
         else
 
-            write( stderr, '(A)') 'Undetermined error'
+            write( stderr, '(A)') 'ERROR: TYPE (grid_t) in GET_GAUSSIAN_WEIGHTS_AND_POINTS'
 
+            if (error_flag == 1) then
+
+                write( stderr, '(A, I2)') 'Argument nlat = ', nlat
+                write( stderr, '(A)')     'fails to satisfy nlat >= 0'
+
+            else
+
+                write( stderr, '(A)') 'Undetermined error'
+
+            end if
         end if
 
     end subroutine Get_gaussian_weights_and_points

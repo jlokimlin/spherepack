@@ -93,21 +93,21 @@ module type_sphere_mod
         ! Public SPHEREPACK 3.2 methods
         !---------------------------------------------------------------------------------
         procedure, public                    :: Get_colatitude_derivative !! Vtsgs
-        procedure, public                    :: Get_Gradient !! Gradgs
+        procedure, public                    :: Get_gradient !! Gradgs
         procedure, public                    :: Invert_gradient !!  Igradgs
-        procedure, public                    :: Get_Divergence !! Divgs
+        procedure, public                    :: Get_divergence !! Divgs
         procedure, public                    :: Invert_divergence !!Idivgs
-        procedure, public                    :: Get_Vorticity !! Vrtgs
+        procedure, public                    :: Get_vorticity !! Vrtgs
         procedure, public                    :: Invert_vorticity !! Ivrtgs
         procedure, public                    :: Invert_divergence_and_vorticity !! Idvtgs
-        procedure, public                    :: Get_Scalar_laplacian !! Slapgs
+        procedure, public                    :: Get_scalar_laplacian !! Slapgs
         procedure, public                    :: Invert_helmholtz !! Islapgs
-        procedure, public                    :: Get_Vector_laplacian !! Vlapgs
+        procedure, public                    :: Get_vector_laplacian !! Vlapgs
         procedure, public                    :: Invert_vector_laplacian !! Ivlapgs
-        procedure, public                    :: Get_Stream_function_and_velocity_potential
+        procedure, public                    :: Get_stream_function_and_velocity_potential
         procedure, public                    :: Invert_stream_function_and_velocity_potential
         procedure, public                    :: Perform_grid_transfers
-        procedure, public                    :: Perform_Geo_math_coordinate_transfers
+        procedure, public                    :: Perform_geo_math_coordinate_transfers
         procedure, public                    :: Perform_scalar_analysis
         procedure, public                    :: Perform_scalar_synthesis
         procedure, public                    :: Perform_scalar_projection !! Shpg
@@ -615,9 +615,8 @@ contains
         else
 
             ! Handle invalid symmetry arguments
-            write( stderr, '(A)' )     'TYPE (sphere_t)'
+            write( stderr, '(A)' )     'TYPE (sphere_t) in SET_SCALAR_SYMMETRIES'
             write( stderr, '(A, I2)' ) 'Optional argument isym = ', isym
-            write( stderr, '(A)' )     'in SET_SCALAR_SYMMETRIES'
             write( stderr, '(A)' )     'must be either 0, 1, or 2 (default isym = 0)'
 
         end if
@@ -633,8 +632,8 @@ contains
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        class (sphere_t), intent (in out) :: this
-        integer (IP), intent (in)         :: itype
+        class (sphere_t), intent (in out)  :: this
+        integer (IP),     intent (in)      :: itype
         !--------------------------------------------------------------------------------
 
         if ( itype == 8 ) then
@@ -686,9 +685,8 @@ contains
         else
 
             ! Handle invalid symmetry arguments
-            write( stderr, '(A)' )     'TYPE (sphere_t)'
+            write( stderr, '(A)' )     'TYPE (sphere_t) in SET_VECTOR_SYMMETRIES'
             write( stderr, '(A, I2)' ) 'Optional argument itype = ', itype
-            write( stderr, '(A)' )     'in SET_VECTOR_SYMMETRIES'
             write( stderr, '(A)' )     'must be either 0, 1, 2, ..., 8 (default itype = 0)'
 
         end if
@@ -713,8 +711,7 @@ contains
 
         if ( .not. allocated( this%grid%latitudes ) ) then
 
-            write( stderr, '(A)' ) 'TYPE (sphere_t)'
-            write( stderr, '(A)' ) 'in SET_TRIGONOMETRIC_FUNCTIONS'
+            write( stderr, '(A)' ) 'TYPE (sphere_t) in SET_TRIGONOMETRIC_FUNCTIONS'
             write( stderr, '(A)' ) 'You must allocate LATITUDES '
             write( stderr, '(A)' ) 'before calling SET_TRIGONOMETRIC_FUNCTIONS'
 
@@ -726,8 +723,7 @@ contains
 
         if ( .not. allocated( this%grid%longitudes ) ) then
 
-            write( stderr, '(A)' ) 'TYPE (sphere_t)'
-            write( stderr, '(A)' ) 'in SET_TRIGONOMETRIC_FUNCTIONS'
+            write( stderr, '(A)' ) 'TYPE (sphere_t) in SET_TRIGONOMETRIC_FUNCTIONS'
             write( stderr, '(A)' ) 'You must allocate LONGITUDES '
             write( stderr, '(A)' ) 'before calling SET_TRIGONOMETRIC_FUNCTIONS'
 
@@ -1765,7 +1761,11 @@ contains
         ! Address the error flag
         !--------------------------------------------------------------------------------
 
-        if ( error_flag /= 0 ) then
+        if ( error_flag == 0 ) then
+
+            return
+
+        else
 
             write( stderr, '(A)') 'SPHEREPACK 3.2 error: GET_GRADIENT'
 
@@ -2341,7 +2341,11 @@ contains
         ! Address the error flag
         !--------------------------------------------------------------------------------
 
-        if ( error_flag /= 0 ) then
+        if ( error_flag == 0 ) then
+
+            return
+
+        else
 
             write( stderr, '(A)') 'SPHEREPACK 3.2 error: GET_DIVERGENCE'
 
@@ -2679,7 +2683,11 @@ contains
         ! Address the error flag
         !--------------------------------------------------------------------------------
 
-        if ( error_flag /= 0 ) then
+        if ( error_flag == 0 ) then
+
+            return
+
+        else
 
             write( stderr, '(A)') 'ERROR: GET_VORTICITY'
 
@@ -2805,80 +2813,678 @@ contains
     !
     !*****************************************************************************************
     !
-    subroutine Get_scalar_laplacian( this )
+    subroutine Get_scalar_laplacian( this, scalar_function, scalar_laplacian )
         !
-        !< Purpose:
+        ! References:
+        ! http://www2.cisl.ucar.edu/spherepack/documentation#slapgs.html
+        !
+        ! Documentation: SPHEREPACK 3.2
+        !
+        !
+        !     subroutine slapgs(nlat, nlon, isym, nt, slap, ids, jds, a, b,
+        !    mdab, ndab, wshsgs, lshsgs, work, lwork, ierror)
+        !
+        !
+        !     given the scalar spherical harmonic coefficients a and b, precomputed
+        !     by subroutine shags for a scalar field sf, subroutine slapgs computes
+        !     the laplacian of sf in the scalar array slap.  slap(i, j) is the
+        !     laplacian of sf at the gaussian colatitude theta(i) (see nlat as
+        !     an input parameter) and east longitude lambda(j) = (j-1)*2*pi/nlon
+        !     on the sphere.  i.e.
+        !
+        !         slap(i, j) =
+        !
+        !                  2                2
+        !         [1/sint*d (sf(i, j)/dlambda + d(sint*d(sf(i, j))/dtheta)/dtheta]/sint
+        !
+        !
+        !     where sint = sin(theta(i)).  the scalar laplacian in slap has the
+        !     same symmetry or absence of symmetry about the equator as the scalar
+        !     field sf.  the input parameters isym, nt, mdab, ndab must have the
+        !     same values used by shags to compute a and b for sf. the associated
+        !     legendre functions are stored rather than recomputed as they are
+        !     in subroutine slapgc.
+        !
+        !     input parameters
+        !
+        !     nlat   the number of points in the gaussian colatitude grid on the
+        !            full sphere. these lie in the interval (0, pi) and are computed
+        !            in radians in theta(1) <...< theta(nlat) by subroutine gaqd.
+        !            if nlat is odd the equator will be included as the grid point
+        !            theta((nlat+1)/2).  if nlat is even the equator will be
+        !            excluded as a grid point and will lie half way between
+        !            theta(nlat/2) and theta(nlat/2+1). nlat must be at least 3.
+        !            note: on the half sphere, the number of grid points in the
+        !            colatitudinal direction is nlat/2 if nlat is even or
+        !            (nlat+1)/2 if nlat is odd.
+        !
+        !     nlon   the number of distinct longitude points.  nlon determines
+        !            the grid increment in longitude as 2*pi/nlon. for example
+        !            nlon = 72 for a five degree grid. nlon must be greater
+        !            than zero. the axisymmetric case corresponds to nlon=1.
+        !            the efficiency of the computation is improved when nlon
+        !            is a product of small prime numbers.
+        !
+        !     isym   this parameter should have the same value input to subroutine
+        !            shags to compute the coefficients a and b for the scalar field
+        !            sf.  isym is set as follows:
+        !
+        !            = 0  no symmetries exist in sf about the equator. scalar
+        !                 synthesis is used to compute slap on the entire sphere.
+        !                 i.e., in the array slap(i, j) for i=1, ..., nlat and
+        !                 j=1, ..., nlon.
+        !
+        !           = 1  sf and slap are antisymmetric about the equator. the
+        !                synthesis used to compute slap is performed on the
+        !                northern hemisphere only.  if nlat is odd, slap(i, j) is
+        !                computed for i=1, ..., (nlat+1)/2 and j=1, ..., nlon.  if
+        !                nlat is even, slap(i, j) is computed for i=1, ..., nlat/2
+        !                and j=1, ..., nlon.
+        !
+        !
+        !           = 2  sf and slap are symmetric about the equator. the
+        !                synthesis used to compute slap is performed on the
+        !                northern hemisphere only.  if nlat is odd, slap(i, j) is
+        !                computed for i=1, ..., (nlat+1)/2 and j=1, ..., nlon.  if
+        !                nlat is even, slap(i, j) is computed for i=1, ..., nlat/2
+        !                and j=1, ..., nlon.
+        !
+        !
+        !     nt     the number of analyses.  in the program that calls slapgs
+        !            the arrays slap, a, and b can be three dimensional in which
+        !            case multiple synthesis will be performed.  the third index
+        !            is the synthesis index which assumes the values k=1, ..., nt.
+        !            for a single analysis set nt=1. the description of the
+        !            remaining parameters is simplified by assuming that nt=1
+        !            or that all the arrays are two dimensional.
+        !
+        !   ids      the first dimension of the array slap as it appears in the
+        !            program that calls slapgs.  if isym = 0 then ids must be at
+        !            least nlat.  if isym > 0 and nlat is even then ids must be
+        !            at least nlat/2. if isym > 0 and nlat is odd then ids must
+        !            be at least (nlat+1)/2.
+        !
+        !   jds      the second dimension of the array slap as it appears in the
+        !            program that calls slapgs. jds must be at least nlon.
+        !
+        !
+        !   a, b      two or three dimensional arrays (see input parameter nt)
+        !            that contain scalar spherical harmonic coefficients
+        !            of the scalar field sf as computed by subroutine shags.
+        !     ***    a, b must be computed by shags prior to calling slapgs.
+        !
+        !
+        !    mdab    the first dimension of the arrays a and b as it appears
+        !            in the program that calls slapgs.  mdab must be at
+        !            least min0(nlat, (nlon+2)/2) if nlon is even or at least
+        !            min0(nlat, (nlon+1)/2) if nlon is odd.
+        !
+        !    ndab    the second dimension of the arrays a and b as it appears
+        !            in the program that calls slapgs. ndbc must be at least
+        !            least nlat.
+        !
+        !            mdab, ndab should have the same values input to shags to
+        !            compute the coefficients a and b.
+        !
+        !
+        !    wshsgs  an array which must be initialized by subroutine slapgsi
+        !            (or equivalently by shsgsi).  once initialized, wshsgs
+        !            can be used repeatedly by slapgs as long as nlat and nlon
+        !            remain unchanged.  wshsgs must not be altered between calls
+        !            of slapgs.
+        !
+        !    lshsgs  the dimension of the array wshsgs as it appears in the
+        !            program that calls slapgs.  let
+        !
+        !               l1 = min0(nlat, (nlon+2)/2) if nlon is even or
+        !               l1 = min0(nlat, (nlon+1)/2) if nlon is odd
+        !
+        !            and
+        !
+        !               l2 = nlat/2        if nlat is even or
+        !               l2 = (nlat+1)/2    if nlat is odd
+        !
+        !            then lshsgs must be at least
+        !
+        !               nlat*(3*(l1+l2)-2)+(l1-1)*(l2*(2*nlat-l1)-3*l1)/2+nlon+15
+        !
+        !
+        !     work   a work array that does not have to be saved.
+        !
+        !     lwork  the dimension of the array work as it appears in the
+        !            program that calls slapgs. define
+        !
+        !               l2 = nlat/2                    if nlat is even or
+        !               l2 = (nlat+1)/2                if nlat is odd
+        !               l1 = min0(nlat, (nlon+2)/2) if nlon is even or
+        !               l1 = min0(nlat, (nlon+1)/2) if nlon is odd
+        !
+        !            if isym is zero then lwork must be at least
+        !
+        !               (nt+1)*nlat*nlon + nlat*(2*nt*l1+1)
+        !
+        !            if isym is nonzero lwork must be at least
+        !
+        !               (nt+1)*l2*nlon + nlat*(2*nt*l1+1)
+        !
+        !
+        !     **************************************************************
+        !
+        !     output parameters
+        !
+        !
+        !    slap    a two or three dimensional arrays (see input parameter nt) that
+        !            contain the scalar laplacian of the scalar field sf.  slap(i, j)
+        !            is the scalar laplacian at the gaussian colatitude theta(i)
+        !            and longitude lambda(j) = (j-1)*2*pi/nlon for i=1, ..., nlat
+        !            and j=1, ..., nlon.
+        !
+        !
+        !  ierror    a parameter which flags errors in input parameters as follows:
+        !
+        !            = 0  no errors detected
+        !
+        !            = 1  error in the specification of nlat
+        !
+        !            = 2  error in the specification of nlon
+        !
+        !            = 3  error in the specification of ityp
+        !
+        !            = 4  error in the specification of nt
+        !
+        !            = 5  error in the specification of ids
+        !
+        !            = 6  error in the specification of jds
+        !
+        !            = 7  error in the specification of mdbc
+        !
+        !            = 8  error in the specification of ndbc
+        !
+        !            = 9  error in the specification of lshsgs
+        !
+        !            = 10 error in the specification of lwork
         !
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
         class (sphere_t), intent (in out) :: this
+        real (WP),        intent (in)     :: scalar_function(:,:)
+        real (WP),        intent (out)    :: scalar_laplacian(:,:)
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
         !--------------------------------------------------------------------------------
-        integer (IP):: ierror
+        integer (IP)                      :: error_flag
         !--------------------------------------------------------------------------------
 
-        ! Check status
+        !--------------------------------------------------------------------------------
+        ! Check initialization flag
+        !--------------------------------------------------------------------------------
+
         call this%Assert_initialized()
 
-        ierror = 0
-        ! check the error flag
-        if (ierror  /=  0) then
-            print *, 'SPHEREPACK 3.2 error = ', ierror, ' in Vtsgs'
+        !--------------------------------------------------------------------------------
+        ! Set (real) scalar spherica harmonic coefficients
+        !--------------------------------------------------------------------------------
+
+        call this%Perform_scalar_analysis( scalar_function )
+
+        !--------------------------------------------------------------------------------
+        ! Invoke SPHEREPACK 3.2
+        !--------------------------------------------------------------------------------
+
+        associate( &
+            nlat   => this%NLAT, &
+            nlon   => this%NLON, &
+            isym   => this%SCALAR_SYMMETRIES, &
+            nt     => this%NUMBER_OF_SYNTHESES, &
+            slap   => scalar_laplacian, &
+            ids    => size( scalar_laplacian, dim = 1), &
+            jds    => size( scalar_laplacian, dim = 2), &
+            a      => this%workspace%real_harmonic_coefficients, &
+            b      => this%workspace%imaginary_harmonic_coefficients, &
+            mdab   => size( this%workspace%real_harmonic_coefficients, dim = 1 ), &
+            ndab   => size( this%workspace%real_harmonic_coefficients, dim = 2 ), &
+            wshsgs => this%workspace%wshsgs, &
+            lshsgs => size( this%workspace%wshsgs ), &
+            work   => this%workspace%work, &
+            lwork  => size( this%workspace%work ), &
+            ierror => error_flag &
+            )
+
+            call Slapgs( nlat, nlon, isym, nt, slap, ids, jds, a, b, &
+                mdab, ndab, wshsgs, lshsgs, work, lwork, ierror )
+
+        end associate
+
+        !--------------------------------------------------------------------------------
+        ! Address the error flag
+        !--------------------------------------------------------------------------------
+
+        if ( error_flag == 0 ) then
+
             return
+
+        else
+
+            write( stderr, '(A)') 'SPHEREPACK 3.2 error: GET_SCALAR_LAPLACIAN'
+
+            if ( error_flag == 1 ) then
+
+                write( stderr, '(A)') 'Error in the specification of NLAT'
+
+            else if ( error_flag == 2 ) then
+
+                write( stderr, '(A)') 'Error in the specification of NLON'
+
+            else if ( error_flag == 3 ) then
+
+                write( stderr, '(A)') 'Error in the specification of VECTOR_SYMMETRIES'
+
+            else if (error_flag == 4) then
+
+                write( stderr, '(A)') 'Error in the specification of NUMBER_OF_SYNTHESES'
+
+            else if ( error_flag == 5 ) then
+
+                write( stderr, '(A)') 'Invalid extent for SCALAR_LAPLACIAN'
+                write( stderr, '(A)') 'size( SCALAR_LAPLACIAN, dim = 1 )'
+
+            else if ( error_flag == 6 ) then
+
+                write( stderr, '(A)') 'Invalid extent for SCALAR_LAPLACIAN'
+                write( stderr, '(A)') 'size( SCALAR_LAPLACIAN, dim = 2 )'
+
+            else if ( error_flag == 7 ) then
+
+                write( stderr, '(A)') 'Invalid extent for '
+                write( stderr, '(A)') 'REAL_HARMONIC_COEFFICIENTS (A) '
+                write( stderr, '(A)') 'or'
+                write( stderr, '(A)') 'IMAGINARY_HARMONIC_COEFFICIENTS (B)'
+                write( stderr, '(A)') 'size( SOLUTION, dim = 1 )'
+
+            else if ( error_flag == 8 ) then
+
+                write( stderr, '(A)') 'Invalid extent for '
+                write( stderr, '(A)') 'REAL_HARMONIC_COEFFICIENTS (A) '
+                write( stderr, '(A)') 'or'
+                write( stderr, '(A)') 'IMAGINARY_HARMONIC_COEFFICIENTS (B)'
+                write( stderr, '(A)') 'size( SOLUTION, dim = 2 )'
+
+            else if ( error_flag == 9 ) then
+
+                write( stderr, '(A)') 'Invalid extent for WSHSGS'
+                write( stderr, '(A)') 'size( WSHSGS )'
+
+            else if ( error_flag == 10 ) then
+
+                write( stderr, '(A)') 'Invalid extent for WORK'
+                write( stderr, '(A)') 'size( WORK )'
+
+            else
+
+                write( stderr, '(A)') 'Undetermined error flag'
+
+            end if
         end if
 
     end subroutine Get_scalar_laplacian
     !
     !*****************************************************************************************
     !
-    subroutine Invert_helmholtz( this, helmholtz_constant, source_term, solution )
+    subroutine Invert_helmholtz( this, &
+        helmholtz_constant, source_term, solution, perturbation_optional )
         !
-        !< Purpose:
+        ! Reference:
+        ! http://www2.cisl.ucar.edu/spherepack/documentation#islapgs.html
+        !
+        ! Documentation: SPHEREPACK 3.2
+        !
+        !
+        !     subroutine islapgs(nlat, nlon, isym, nt, xlmbda, sf, ids, jds, a, b,
+        !    mdab, ndab, wshsgs, lshsgs, work, lwork, pertrb, ierror)
+        !
+        !     islapgs inverts the laplace or helmholz operator on a Gaussian grid.
+        !     Given the spherical harmonic coefficients a(m, n) and b(m, n) of the
+        !     right hand side slap(i, j), islapgc computes a solution sf(i, j) to
+        !     the following helmhotz equation :
+        !
+        !           2                2
+        !     [d(sf(i, j))/dlambda /sint + d(sint*d(sf(i, j))/dtheta)/dtheta]/sint
+        !
+        !                   - xlmbda * sf(i, j) = slap(i, j)
+        !
+        !      where sf(i, j) is computed at the Gaussian colatitude point theta(i)
+        !      (see nlat as an input argument) and longitude
+        !
+        !                 lambda(j) = (j-1)*2*pi/nlon
+        !
+        !            for i=1, ..., nlat and j=1, ..., nlon.
+        !
+        !
+        !
+        !     input parameters
+        !
+        !     nlat   the number of points in the gaussian colatitude grid on the
+        !            full sphere. these lie in the interval (0, pi) and are computed
+        !            in radians in theta(1) <...< theta(nlat) by subroutine gaqd.
+        !            if nlat is odd the equator will be included as the grid point
+        !            theta((nlat+1)/2).  if nlat is even the equator will be
+        !            excluded as a grid point and will lie half way between
+        !            theta(nlat/2) and theta(nlat/2+1). nlat must be at least 3.
+        !            note: on the half sphere, the number of grid points in the
+        !            colatitudinal direction is nlat/2 if nlat is even or
+        !            (nlat+1)/2 if nlat is odd.
+        !
+        !     nlon   the number of distinct longitude points.  nlon determines
+        !            the grid increment in longitude as 2*pi/nlon. for example
+        !            nlon = 72 for a five degree grid. nlon must be greater
+        !            than zero. the axisymmetric case corresponds to nlon=1.
+        !            the efficiency of the computation is improved when nlon
+        !            is a product of small prime numbers.
+        !
+        !     isym   this parameter should have the same value input to subroutine
+        !            shags to compute the coefficients a and b for the scalar field
+        !            slap.  isym is set as follows:
+        !
+        !            = 0  no symmetries exist in slap about the equator. scalar
+        !                 synthesis is used to compute sf on the entire sphere.
+        !                 i.e., in the array sf(i, j) for i=1, ..., nlat and
+        !                 j=1, ..., nlon.
+        !
+        !           = 1  sf and slap are antisymmetric about the equator. the
+        !                synthesis used to compute sf is performed on the
+        !                northern hemisphere only.  if nlat is odd, sf(i, j) is
+        !                computed for i=1, ..., (nlat+1)/2 and j=1, ..., nlon.  if
+        !                nlat is even, sf(i, j) is computed for i=1, ..., nlat/2
+        !                and j=1, ..., nlon.
+        !
+        !
+        !           = 2  sf and slap are symmetric about the equator. the
+        !                synthesis used to compute sf is performed on the
+        !                northern hemisphere only.  if nlat is odd, sf(i, j) is
+        !                computed for i=1, ..., (nlat+1)/2 and j=1, ..., nlon.  if
+        !                nlat is even, sf(i, j) is computed for i=1, ..., nlat/2
+        !                and j=1, ..., nlon.
+        !
+        !
+        !     nt     the number of analyses.  in the program that calls islapgs
+        !            the arrays sf, a, and b can be three dimensional in which
+        !            case multiple synthesis will be performed.  the third index
+        !            is the synthesis index which assumes the values k=1, ..., nt.
+        !            k is also the index for the perturbation array pertrb.
+        !            for a single analysis set nt=1. the description of the
+        !            remaining parameters is simplified by assuming that nt=1
+        !            or that sf, a, b are two dimensional and pertrb is a constant.
+        !
+        !   xlmbda   a one dimensional array with nt elements. if xlmbda is
+        !            is identically zero islapgc solves poisson's equation.
+        !            if xlmbda > 0.0 islapgc solves the helmholtz equation.
+        !            if xlmbda < 0.0 the nonfatal error flag ierror=-1 is
+        !            returned. negative xlambda could result in a division
+        !            by zero.
+        !
+        !   ids      the first dimension of the array sf as it appears in the
+        !            program that calls islapgs.  if isym = 0 then ids must be at
+        !            least nlat.  if isym > 0 and nlat is even then ids must be
+        !            at least nlat/2. if isym > 0 and nlat is odd then ids must
+        !            be at least (nlat+1)/2.
+        !
+        !   jds      the second dimension of the array sf as it appears in the
+        !            program that calls islapgs. jds must be at least nlon.
+        !
+        !
+        !   a, b      two or three dimensional arrays (see input parameter nt)
+        !            that contain scalar spherical harmonic coefficients
+        !            of the scalar field slap as computed by subroutine shags.
+        !     ***    a, b must be computed by shags prior to calling islapgs.
+        !
+        !
+        !    mdab    the first dimension of the arrays a and b as it appears
+        !            in the program that calls islapgs.  mdab must be at
+        !            least min0(nlat, (nlon+2)/2) if nlon is even or at least
+        !            min0(nlat, (nlon+1)/2) if nlon is odd.
+        !
+        !    ndab    the second dimension of the arrays a and b as it appears
+        !            in the program that calls islapgs. ndbc must be at least
+        !            least nlat.
+        !
+        !            mdab, ndab should have the same values input to shags to
+        !            compute the coefficients a and b.
+        !
+        !
+        !    wshsgs  an array which must be initialized by subroutine islapgsi
+        !            (or equivalently by shsesi).  once initialized, wshsgs
+        !            can be used repeatedly by islapgs as long as nlat and nlon
+        !            remain unchanged.  wshsgs  must not be altered between calls
+        !            of islapgs.
+        !
+        !    lshsgs  the dimension of the array wshsgs as it appears in the
+        !            program that calls islapgs.  let
+        !
+        !               l1 = min0(nlat, (nlon+2)/2) if nlon is even or
+        !               l1 = min0(nlat, (nlon+1)/2) if nlon is odd
+        !
+        !            and
+        !
+        !               l2 = nlat/2        if nlat is even or
+        !               l2 = (nlat+1)/2    if nlat is odd
+        !
+        !            then lshsgs must be at least
+        !
+        !            nlat*(3*(l1+l2)-2)+(l1-1)*(l2*(2*nlat-l1)-3*l1)/2+nlon+15
+        !
+        !     work   a work array that does not have to be saved.
+        !
+        !     lwork  the dimension of the array work as it appears in the
+        !            program that calls islapgs. define
+        !
+        !               l2 = nlat/2                    if nlat is even or
+        !               l2 = (nlat+1)/2                if nlat is odd
+        !               l1 = min0(nlat, (nlon+2)/2) if nlon is even or
+        !               l1 = min0(nlat, (nlon+1)/2) if nlon is odd
+        !
+        !            if isym is zero then lwork must be at least
+        !
+        !               (nt+1)*nlat*nlon + nlat*(2*nt*l1+1)
+        !
+        !            if isym is nonzero lwork must be at least
+        !
+        !               (nt+1)*l2*nlon + nlat*(2*nt*l1+1)
+        !
+        !
+        !     **************************************************************
+        !
+        !     output parameters
+        !
+        !
+        !    sf      a two or three dimensional arrays (see input parameter nt) that
+        !            inverts the scalar laplacian in slap.  sf(i, j) is given at
+        !            the colatitude
+        !
+        !                 theta(i) = (i-1)*pi/(nlat-1)
+        !
+        !            and longitude
+        !
+        !                 lambda(j) = (j-1)*2*pi/nlon
+        !
+        !            for i=1, ..., nlat and j=1, ..., nlon.
+        !
+        !   pertrb  a one dimensional array with nt elements (see input
+        !           parameter nt). in the discription that follows we assume
+        !           that nt=1. if xlmbda > 0.0 then pertrb=0.0 is always
+        !           returned because the helmholtz operator is invertible.
+        !           if xlmbda = 0.0 then a solution exists only if a(1, 1)
+        !           is zero. islapec sets a(1, 1) to zero. the resulting
+        !           solution sf(i, j) solves poisson's equation with
+        !           pertrb = a(1, 1)/(2.*sqrt(2.)) subtracted from the
+        !           right side slap(i, j).
+        !
+        !  ierror    a parameter which flags errors in input parameters as follows:
+        !
+        !            = 0  no errors detected
+        !
+        !            = 1  error in the specification of nlat
+        !
+        !            = 2  error in the specification of nlon
+        !
+        !            = 3  error in the specification of ityp
+        !
+        !            = 4  error in the specification of nt
+        !
+        !            = 5  error in the specification of ids
+        !
+        !            = 6  error in the specification of jds
+        !
+        !            = 7  error in the specification of mdbc
+        !
+        !            = 8  error in the specification of ndbc
+        !
+        !            = 9  error in the specification of lshsgs
+        !
+        !            = 10 error in the specification of lwork
         !
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        class (sphere_t), intent (in out)         :: this
-        real (WP), intent (in)                    :: helmholtz_constant
-        real (WP), dimension (:, :), intent (in)   :: source_term
-        real (WP), dimension (:, :), intent (out)  :: solution
+        class (sphere_t), intent (in out)        :: this
+        real (WP),        intent (in)            :: helmholtz_constant
+        real (WP),        intent (in)            :: source_term(:, :)
+        real (WP),        intent (out)           :: solution(:, :)
+        real (WP),        intent (out), optional :: perturbation_optional
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
         !--------------------------------------------------------------------------------
         real (WP)     :: perturbation
-        integer (IP)  :: ierror
+        integer (IP)  :: error_flag
         !--------------------------------------------------------------------------------
 
-        ! Check status
+        !--------------------------------------------------------------------------------
+        ! Check initialization flag
+        !--------------------------------------------------------------------------------
+
         call this%Assert_initialized()
+
+        !--------------------------------------------------------------------------------
+        ! Set (real) scalar spherica harmonic coefficients
+        !--------------------------------------------------------------------------------
 
         call this%Perform_scalar_analysis( source_term )
 
-        ! invert the helmholtz (or poisson) equation
-        !
-        ! see: https://www2.cisl.ucar.edu/spherepack/documentation#islapgs.html
-        call Islapgs( &
-            this%NLAT, this%NLON, &
-            this%SCALAR_SYMMETRIES, 1, helmholtz_constant, &
-            solution, this%NLAT, this%NLON, &
-            this%workspace%real_harmonic_coefficients, this%workspace%imaginary_harmonic_coefficients, &
-            this%NLAT, this%NLAT, &
-            this%workspace%wshsgs, size( this%workspace%wshsgs ), &
-            this%workspace%work, size( this%workspace%work ), &
-            perturbation, ierror)
+        !--------------------------------------------------------------------------------
+        ! Invoke SPHEREPACK 3.2
+        !--------------------------------------------------------------------------------
 
-        ! check for errors
-        if ( ierror /= 0 ) then
-            print *, 'SPHEREPACK 3.2 error = ', ierror, ' in Islapgs'
+        associate( &
+            nlat   => this%NLAT, &
+            nlon   => this%NLON, &
+            isym   => this%SCALAR_SYMMETRIES, &
+            nt     => this%NUMBER_OF_SYNTHESES, &
+            xlmbda => helmholtz_constant, &
+            sf     => solution, &
+            ids    => size( solution, dim = 1), &
+            jds    => size( solution, dim = 2), &
+            a      => this%workspace%real_harmonic_coefficients, &
+            b      => this%workspace%imaginary_harmonic_coefficients, &
+            mdab   => size( this%workspace%real_harmonic_coefficients, dim = 1 ), &
+            ndab   => size( this%workspace%real_harmonic_coefficients, dim = 2 ), &
+            wshsgs => this%workspace%wshsgs, &
+            lshsgs => size( this%workspace%wshsgs ), &
+            work   => this%workspace%work, &
+            lwork  => size( this%workspace%work ), &
+            pertrb => perturbation, &
+            ierror => error_flag &
+            )
+
+            call Islapgs( nlat, nlon, isym, nt, xlmbda, sf, ids, jds, a, b, &
+                mdab, ndab, wshsgs, lshsgs, work, lwork, pertrb, ierror )
+
+        end associate
+
+        !--------------------------------------------------------------------------------
+        ! Address the error flag
+        !--------------------------------------------------------------------------------
+
+        if ( error_flag == 0 ) then
+
             return
+
+        else
+
+            write( stderr, '(A)') 'SPHEREPACK 3.2 error: INVERT_HELMHOLTZ'
+
+            if ( error_flag == 1 ) then
+
+                write( stderr, '(A)') 'Error in the specification of NLAT'
+
+            else if ( error_flag == 2 ) then
+
+                write( stderr, '(A)') 'Error in the specification of NLON'
+
+            else if ( error_flag == 3 ) then
+
+                write( stderr, '(A)') 'Error in the specification of VECTOR_SYMMETRIES'
+
+            else if (error_flag == 4) then
+
+                write( stderr, '(A)') 'Error in the specification of NUMBER_OF_SYNTHESES'
+
+            else if ( error_flag == 5 ) then
+
+                write( stderr, '(A)') 'Invalid extent for SOLUTION'
+                write( stderr, '(A)') 'size( SOLUTION, dim = 1 )'
+
+            else if ( error_flag == 6 ) then
+
+                write( stderr, '(A)') 'Invalid extent for SOLUTION'
+                write( stderr, '(A)') 'size( SOLUTION, dim = 2 )'
+
+            else if ( error_flag == 7 ) then
+
+                write( stderr, '(A)') 'Invalid extent for '
+                write( stderr, '(A)') 'REAL_HARMONIC_COEFFICIENTS (A) '
+                write( stderr, '(A)') 'or'
+                write( stderr, '(A)') 'IMAGINARY_HARMONIC_COEFFICIENTS (B)'
+                write( stderr, '(A)') 'size( SOLUTION, dim = 1 )'
+
+            else if ( error_flag == 8 ) then
+
+                write( stderr, '(A)') 'Invalid extent for '
+                write( stderr, '(A)') 'REAL_HARMONIC_COEFFICIENTS (A) '
+                write( stderr, '(A)') 'or'
+                write( stderr, '(A)') 'IMAGINARY_HARMONIC_COEFFICIENTS (B)'
+                write( stderr, '(A)') 'size( SOLUTION, dim = 2 )'
+
+            else if ( error_flag == 9 ) then
+
+                write( stderr, '(A)') 'Invalid extent for WSHSGS'
+                write( stderr, '(A)') 'size( WSHSGS )'
+
+            else if ( error_flag == 10 ) then
+
+                write( stderr, '(A)') 'Invalid extent for WORK'
+                write( stderr, '(A)') 'size( WORK )'
+
+            else
+
+                write( stderr, '(A)') 'Undetermined error flag'
+
+            end if
+        end if
+
+        !--------------------------------------------------------------------------------
+        ! Address optional arguments
+        !--------------------------------------------------------------------------------
+
+        if ( present( perturbation_optional ) ) then
+
+            perturbation_optional = perturbation
+
         end if
 
     end subroutine Invert_helmholtz
     !
     !*****************************************************************************************
-    !
+    ! TODO
     subroutine Get_vector_laplacian( this )
         !
         !< Purpose:
@@ -2906,7 +3512,7 @@ contains
     end subroutine Get_vector_laplacian
     !
     !*****************************************************************************************
-    !
+    ! TODO
     subroutine Invert_vector_laplacian( this )
         !
         !< Purpose:
@@ -2934,7 +3540,7 @@ contains
     end subroutine Invert_vector_laplacian
     !
     !*****************************************************************************************
-    !
+    ! TODO
     subroutine Get_stream_function_and_velocity_potential( this )
         !
         !< Purpose:
@@ -2962,7 +3568,7 @@ contains
     end subroutine Get_stream_function_and_velocity_potential
     !
     !*****************************************************************************************
-    !
+    ! TODO
     subroutine Invert_stream_function_and_velocity_potential( this )
         !
         !< Purpose:
@@ -2990,7 +3596,7 @@ contains
     end subroutine Invert_stream_function_and_velocity_potential
     !
     !*****************************************************************************************
-    !
+    ! TODO
     subroutine Perform_grid_transfers( this )
         !
         !< Purpose:
@@ -3018,7 +3624,7 @@ contains
     end subroutine Perform_grid_transfers
     !
     !*****************************************************************************************
-    !
+    ! TODO
     subroutine Perform_geo_math_coordinate_transfers( this )
         !
         !< Purpose:
@@ -3243,8 +3849,8 @@ contains
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        class (sphere_t), intent (in out)         :: this
-        real (WP), dimension (:, :), intent (in)  :: scalar_function
+        class (sphere_t), intent (in out)   :: this
+        real (WP),        intent (in)       :: scalar_function(:, :)
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
         !--------------------------------------------------------------------------------
@@ -3279,10 +3885,51 @@ contains
 
         end associate
 
-        ! check the error status
-        if ( error_flag /= 0 ) then
-            print *, 'SPHEREPACK 3.2 error = ', error_flag, ' in Shags'
+        !--------------------------------------------------------------------------------
+        ! Address the error flag
+        !--------------------------------------------------------------------------------
+
+        if ( error_flag == 0 ) then
+
             return
+
+        else
+            write( stderr, '(A)') 'SPHEREPACK 3.2 error: PERFORM_SCALAR_ANALYSIS'
+
+            if ( error_flag == 1 ) then
+
+                write( stderr, '(A)') 'Error in the specification of NLAT'
+
+
+            else if ( error_flag == 2 ) then
+
+                write( stderr, '(A)') 'Error in the specification of NLON'
+
+            else if ( error_flag == 3 ) then
+
+                write( stderr, '(A)') 'Invalid extent for WSHAGS'
+                write( stderr, '(A)') 'size( WSHAGS )'
+
+            else if (error_flag == 4) then
+
+                write( stderr, '(A)') 'Invalid extent for WORK'
+                write( stderr, '(A)') 'size( WORK )'
+
+            else if ( error_flag == 5 ) then
+
+                write( stderr, '(A)') 'Invalid extent for DWORK'
+                write( stderr, '(A)') 'size( DWORK )'
+
+            else if ( error_flag == 6 ) then
+
+                write( stderr, '(A)') 'Failure in GAQD to compute gaussian points '
+                write( stderr, '(A)') '(due to failure in eigenvalue routine)'
+
+            else
+
+                write( stderr, '(A)') 'Undetermined error flag'
+
+            end if
         end if
 
     end subroutine Perform_scalar_analysis
@@ -3470,7 +4117,7 @@ contains
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
         class (sphere_t), intent (in out)  :: this
-        real (WP),        intent (out)     :: scalar_function(:,:)
+        real (WP),        intent (out)     :: scalar_function(:, :)
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
         !--------------------------------------------------------------------------------
@@ -3502,10 +4149,52 @@ contains
 
         end associate
 
-        ! check the error status
-        if ( error_flag /= 0 ) then
-            print *, 'SPHEREPACK 3.2 error = ', error_flag, ' in Shsgs'
+        !--------------------------------------------------------------------------------
+        ! Address the error flag
+        !--------------------------------------------------------------------------------
+
+        if ( error_flag == 0 ) then
+
             return
+
+        else
+
+            write( stderr, '(A)') 'SPHEREPACK 3.2 error: PERFORM_SCALAR_SYNTHESIS'
+
+            if ( error_flag == 1 ) then
+
+                write( stderr, '(A)') 'Error in the specification of NLAT'
+
+
+            else if ( error_flag == 2 ) then
+
+                write( stderr, '(A)') 'Error in the specification of NLON'
+
+            else if ( error_flag == 3 ) then
+
+                write( stderr, '(A)') 'Invalid extent for WSHSGS'
+                write( stderr, '(A)') 'size( WSHSGS )'
+
+            else if (error_flag == 4) then
+
+                write( stderr, '(A)') 'Invalid extent for WORK'
+                write( stderr, '(A)') 'size( WORK )'
+
+            else if ( error_flag == 5 ) then
+
+                write( stderr, '(A)') 'Invalid extent for DWORK'
+                write( stderr, '(A)') 'size( DWORK )'
+
+            else if ( error_flag == 6 ) then
+
+                write( stderr, '(A)') 'Failure in GAQD to compute gaussian points '
+                write( stderr, '(A)') '(due to failure in eigenvalue routine)'
+
+            else
+
+                write( stderr, '(A)') 'Undetermined error flag'
+
+            end if
         end if
 
     end subroutine Perform_scalar_synthesis
@@ -3884,7 +4573,11 @@ contains
         ! Address the error flag
         !--------------------------------------------------------------------------------
 
-        if ( error_flag /= 0 ) then
+        if ( error_flag == 0 ) then
+
+            return
+
+        else
 
             write( stderr, '(A)') 'ERROR: GET_VORTICITY'
 
@@ -4350,7 +5043,11 @@ contains
         ! Address the error flag
         !--------------------------------------------------------------------------------
 
-        if ( error_flag /= 0 ) then
+        if ( error_flag == 0 ) then
+
+            return
+
+        else
 
             write( stderr, '(A)') 'ERROR: GET_VORTICITY'
 
