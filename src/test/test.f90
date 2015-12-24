@@ -88,9 +88,9 @@ contains
             do l = 1, nlon
                 do k = 1, nlat
 
-                    u = this%radial_unit_vector(:,k,l)
+                    u = this%radial_unit_vector(:, k, l)
 
-                    f(k,l) = exp(u%x + u%y + u%z)
+                    f(k, l) = exp(u%x + u%y + u%z)
 
                 end do
             end do
@@ -115,7 +115,7 @@ contains
         write( stdout, '(A)' ) ' '
         write( stdout, '(A)' ) 'TEST_SCALAR_ANALYSIS_AND_SYNTHESIS'
         write( stdout, '(A)' ) ' '
-        write( stdout, '(A)' ) 'f(theta,phi) = exp( sin(theta)cos(phi) + sin(theta)sin(phi) + cos(phi) )'
+        write( stdout, '(A)' ) 'f(theta, phi) = exp( sin(theta)cos(phi) + sin(theta)sin(phi) + cos(phi) )'
         write( stdout, '(A)' ) ' '
         write( stdout, '(A, ES23.16)' ) 'Real discretization error    =', real_error
         write( stdout, '(A, ES23.16)' ) 'Complex discretization error =', real_error
@@ -140,7 +140,7 @@ contains
         integer (IP)    :: k, l !! Counters
         real (WP)       :: polar_error, azimuthal_error
         type (vector_t) :: u, phi, theta, vector_field
-        real (WP)       :: vector_function(3,this%NLAT, this%NLON)
+        real (WP)       :: vector_function(3, this%NLAT, this%NLON)
         real (WP)       :: original_polar_component(this%NLAT, this%NLON)
         real (WP)       :: original_azimuthal_component(this%NLAT, this%NLON)
         real (WP)       :: approximate_polar_component(this%NLAT, this%NLON)
@@ -167,17 +167,17 @@ contains
                 do k = 1, nlat
 
                     ! Convert arrays to vectors
-                    u            = this%radial_unit_vector(:,k,l)
-                    theta        = this%polar_unit_vector(:,k,l)
-                    phi          = this%azimuthal_unit_vector(:,k,l)
+                    u            = this%radial_unit_vector(:, k, l)
+                    theta        = this%polar_unit_vector(:, k, l)
+                    phi          = this%azimuthal_unit_vector(:, k, l)
                     vector_field = [1.0E+3_WP, 1.0E+2_WP, 1.0E+1_WP]
 
                     ! Set vector function
                     F(:, k, l) = vector_field
 
                      ! Set vector components
-                    F_theta(k,l) = theta.dot.vector_field
-                    F_phi(k,l)   = phi.dot.vector_field
+                    F_theta(k, l) = theta.dot.vector_field
+                    F_phi(k, l)   = phi.dot.vector_field
 
                 end do
             end do
@@ -240,9 +240,9 @@ contains
                 do l = 1, nlon
 
                     ! Convert array to vector
-                    associate( x => this%radial_unit_vector(1,k,l) )
+                    associate( x => this%radial_unit_vector(1, k, l) )
 
-                        f(k,l) = exp( x )
+                        f(k, l) = exp( x )
 
                     end associate
                 end do
@@ -262,7 +262,7 @@ contains
                 write( stdout, '(A)' ) ' '
                 write( stdout, '(A, ES23.16)' ) 'Surface area error = ', surface_area_error
                 write( stdout, '(A)' ) ' '
-                write( stdout, '(A)' ) 'f(theta,phi) = exp( sin(theta)cos(phi)  )'
+                write( stdout, '(A)' ) 'f(theta, phi) = exp( sin(theta)cos(phi)  )'
                 write( stdout, '(A)' ) ' '
                 write( stdout, '(A)' ) '\int_(S^2) f(theta, phi) dS '
                 write( stdout, '(A)' ) ' '
@@ -309,7 +309,7 @@ contains
                 do k = 1, nlat
 
                     ! Convert array to vector
-                    u = this%radial_unit_vector(:,k,l)
+                    u = this%radial_unit_vector(:, k, l)
 
                     associate( &
                         x  => u%x, &
@@ -318,9 +318,9 @@ contains
                         z2 => (u%z)**2 &
                         )
 
-                        f(k,l) = (1.0_WP + x * y) * exp( z )
+                        f(k, l) = (1.0_WP + x * y) * exp( z )
 
-                        rhs(k,l) = &
+                        rhs(k, l) = &
                             -(x * y * ( z2 + 6.0_WP * (z + 1.0_WP)) &
                             + z * ( z + 2.0_WP)) * exp( z )
 
@@ -337,8 +337,8 @@ contains
             write( stdout, '(A)' ) ' '
             write( stdout, '(A)' ) 'TEST_INVERT_HELMHOLTZ'
             write( stdout, '(A)' ) ' '
-             write( stdout, '(A)' ) 'f(theta, phi) = [1 + sin^2(theta)sin(phi)cos(phi)] * exp( cos(phi) )'
-              write( stdout, '(A)' ) ' '
+            write( stdout, '(A)' ) 'f(theta, phi) = [1 + sin^2(theta)sin(phi)cos(phi)] * exp( cos(phi) )'
+            write( stdout, '(A)' ) ' '
             write( stdout, '(A, ES23.16)' ) 'Discretization error = ', discretization_error
             write( stdout, '(A)' ) ' '
             write( stdout, '(A)' ) '*********************************************'
@@ -359,88 +359,79 @@ contains
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
         !--------------------------------------------------------------------------------
-        integer (IP)  :: nlat
-        integer (IP)  :: nlon
-        integer (IP)  :: k
-        integer (IP)  :: l
-        real (WP)  :: csc
-        real (WP)  :: sint
-        real (WP)  :: cost
-        real (WP)  :: sinp
-        real (WP)  :: cosp
-        real (WP)  :: &
-            polar_error
-        real (WP)  :: azimuthal_error
+        integer (IP)     :: k, l !! Counters
+        real (WP)        :: polar_error
+        real (WP)        :: azimuthal_error
         type (vector_t)  :: u
-        real (WP),dimension (this%NLAT, this%NLON)  :: &
-            scalar_function
-        real (WP),dimension (this%NLAT, this%NLON)  :: &
-            exact_polar_component
-        real (WP),dimension (this%NLAT, this%NLON)  :: exact_azimuthal_component
-        real (WP),dimension (this%NLAT, this%NLON)  :: &
-            approximate_polar_component
-        real (WP),dimension (this%NLAT, this%NLON)  :: approximate_azimuthal_component
+        real (WP)        :: scalar_function(this%NLAT, this%NLON)
+        real (WP)        :: exact_polar_component(this%NLAT, this%NLON)
+        real (WP)        :: exact_azimuthal_component(this%NLAT, this%NLON)
+        real (WP)        :: approximate_polar_component(this%NLAT, this%NLON)
+        real (WP)        :: approximate_azimuthal_component(this%NLAT, this%NLON)
         !--------------------------------------------------------------------------------
 
-        nlat = this%NLAT
-        nlon = this%NLON
+        associate( &
+            nlat           => this%NLAT, &
+            nlon           => this%NLON, &
+            f              => scalar_function, &
+            f_theta        => exact_polar_component, &
+            f_phi          => exact_azimuthal_component, &
+            f_theta_approx => approximate_polar_component, &
+            f_phi_approx   => approximate_azimuthal_component &
+            )
 
-        ! initialize arrays
-        scalar_function = 0.0_WP
-        exact_polar_component = 0.0_WP
-        exact_azimuthal_component = 0.0_WP
+            ! Initialize array
+            f       = 0.0_WP
+            f_theta = 0.0_WP
+            f_phi   = 0.0_WP
 
-        do l = 1, nlon
-            do k = 1, nlat
+            do l = 1, nlon
+                do k = 1, nlat
 
-                sint = this%sint(k)
-                cost = this%cost(k)
+                    outer: associate( &
+                        sint => this%sint(k), &
+                        cost => this%cost(k), &
+                        sinp => this%sinp(l), &
+                        cosp => this%cosp(l) &
+                        )
 
-                sinp = this%sinp(l)
-                cosp = this%cosp(l)
+                        u = this%radial_unit_vector(:, k, l)
 
-                u = this%radial_unit_vector(:,k,l)
+                        f(k, l) = exp( u%x + u%y + u%z )
 
-                scalar_function(k,l) = exp( u%x + u%y + u%z )
+                        inner: associate( csc => 1.0_WP /sint)
 
-                csc = 1.0_WP /sint
+                            f_theta(k, l) = &
+                                f(k, l) * (cost * cosp &
+                                - sint + cost * sinp)
 
-                exact_polar_component(k,l) = &
-                    scalar_function(k,l) * (cost * cosp &
-                    - sint + cost * sinp)
+                            f_phi(k, l) = &
+                                f(k, l) * csc * (u%x - u%y)
 
-                exact_azimuthal_component(k,l) = &
-                    scalar_function(k,l) * csc * (u%x - u%y)
+                        end associate inner
+                    end associate outer
+                end do
             end do
 
-        end do
+            ! Calculate the gradient
+            call this%Get_gradient( f, f_theta_approx, f_phi_approx )
 
-        ! Calculate the gradient
-        call this%Get_gradient( &
-            scalar_function, &
-            approximate_polar_component, &
-            approximate_azimuthal_component )
+            ! set errors
+            polar_error     = maxval( abs( f_theta - f_theta_approx ))
+            azimuthal_error = maxval( abs( f_phi   - f_phi_approx ) )
 
-        ! set errors
-        polar_error = maxval(abs(exact_polar_component &
-            - approximate_polar_component))
+            write( stdout, '(A)' ) ' '
+            write( stdout, '(A)' ) 'TEST_GET_GRADIENT'
+            write( stdout, '(A)' ) ' '
+            write( stdout, '(A)' ) 'f(theta, phi) = exp( sin(theta)cos(phi) + sin(theta)sin(phi) + cos(phi) )'
+            write( stdout, '(A)' ) ' '
+            write( stdout, '(A, ES23.16)' ) 'Discretization error polar component     = ', polar_error
+            write( stdout, '(A)' ) ' '
+            write( stdout, '(A, ES23.16)' ) 'Discretization error azimuthal component = ', azimuthal_error
+            write( stdout, '(A)' ) ' '
+            write( stdout, '(A)' ) '*********************************************'
 
-        azimuthal_error = maxval(abs(exact_azimuthal_component&
-            - approximate_azimuthal_component))
-
-        write( stdout, '(A)' ) ' '
-        write( stdout, '(A)' ) "Test_get_gradient"
-        ! print the polar error
-        write( stdout, '(A)' ) ' '
-        write( stdout, '(A)' ) "polar component"
-        write (*,101) polar_error
-        ! print the azimuthal error
-        write( stdout, '(A)' ) ' '
-        write( stdout, '(A)' ) "azimuthal component"
-        write (*,101) azimuthal_error
-101     format (1x, "l-infinity error = ", es23.16 )
-        write( stdout, '(A)' ) ' '
-        write( stdout, '(A)' ) '*********************************************'
+        end associate
 
     end subroutine Test_get_gradient
     !
@@ -456,86 +447,77 @@ contains
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
         !--------------------------------------------------------------------------------
-        integer (IP)  :: nlat
-        integer (IP)  :: nlon
-        integer (IP)  :: k
-        integer (IP)  :: l
+        integer (IP)     :: k, l !! Counters
         type (vector_t)  :: u
         type (vector_t)  :: omega
         type (vector_t)  :: rotation_operator
-        real (WP)  :: scalar_function
-        real (WP)  :: sint
-        real (WP)  :: cost
-        real (WP)  :: sinp
-        real (WP)  :: cosp
-        real (WP)  :: &
-            cot
-        real (WP)  :: phi_derivative
-        real (WP)  :: theta_derivative
-        real (WP)  :: error
-        real (WP), dimension (3,this%NLAT, this%NLON) :: &
-            vector_function
-        real (WP),dimension (this%NLAT, this%NLON)    :: &
-            exact_solution
-        real (WP),dimension (this%NLAT, this%NLON)    :: approximate_solution
+        real (WP)        :: discretization_error
+        real (WP)        :: vector_function(3, this%NLAT, this%NLON)
+        real (WP)        :: exact_vorticity(this%NLAT, this%NLON)
+        real (WP)        :: approximate_vorticity(this%NLAT, this%NLON)
         !--------------------------------------------------------------------------------
 
-        nlat = this%NLAT
-        nlon = this%NLON
+        associate( &
+            nlat     => this%NLAT, &
+            nlon     => this%NLON, &
+            F        => vector_function, &
+            V        => exact_vorticity, &
+            V_approx => approximate_vorticity &
+            )
 
-        ! initialize arrays
-        vector_function = 0.0_WP
-        exact_solution = 0.0_WP
+            ! initialize arrays
+            F  = 0.0_WP
+            V     = 0.0_WP
+            omega = vector_t( x = 1.0E+1_WP, y = 1.0E+2_WP, z = 1.0E+3_WP )
 
-        omega =  [ 1.0E+1_WP, 1.0E+2_WP, 1.0E+3_WP ]
+            do l = 1, nlon
+                do k = 1, nlat
 
-        do l = 1, nlon
-            do k = 1, nlat
+                    u = this%radial_unit_vector(:, k, l)
 
-                u = this%radial_unit_vector(:,k,l)
+                    outer: associate( &
+                        sint => this%sint(k), &
+                        cost => this%cost(k), &
+                        sinp => this%sinp(l), &
+                        cosp => this%cosp(l), &
+                        sf    => exp(u%x + u%y + u%z) & ! Scalar function
+                        )
 
-                sint = this%sint(k)
-                cost = this%cost(k)
+                        F(:, k, l) = omega * sf
 
-                sinp = this%sinp(l)
-                cosp = this%cosp(l)
+                        inner: associate( &
+                            D_theta => (cost * cosp  + cost * sinp - sint ) * sf, &
+                            D_phi   => (u%x - u%y) * sf, &
+                            cot     => 1.0_WP/ tan(this%grid%latitudes(k)) &
+                            )
 
-                scalar_function = exp(u%x + u%y + u%z)
+                            rotation_operator = &
+                                [ -sinp * D_theta - cosp * cot * D_phi, &
+                                cosp * D_theta - sinp * cot * D_phi, &
+                                D_phi ]
 
-                vector_function(:,k,l) = omega * scalar_function
+                            V(k, l) = rotation_operator.dot.omega
 
-                theta_derivative = &
-                    (cost * cosp  + cost * sinp - sint ) &
-                    * scalar_function
-
-                phi_derivative = (u%x - u%y) * scalar_function
-
-                cot = &
-                    1.0_WP/ tan(this%grid%latitudes(k))
-
-                rotation_operator = &
-                    [ -sinp * theta_derivative - cosp * cot * phi_derivative, &
-                    cosp * theta_derivative - sinp * cot * phi_derivative, &
-                    phi_derivative ]
-
-                exact_solution(k,l) = rotation_operator.dot.omega
+                        end associate inner
+                    end associate outer
+                end do
             end do
 
-        end do
+            ! check if the work space arrays are set up for the (real) vector transform
+            call this%Get_vorticity( F, V_approx )
 
-        ! check if the work space arrays are set up for the (real) vector transform
-        call this%Get_vorticity( vector_function, approximate_solution )
+            ! set error
+            discretization_error = maxval(abs( V - V_approx ))
 
-        ! set error
-        error = maxval(abs(exact_solution - approximate_solution))
+            ! print error to console
+            write( stdout, '(A)' ) ' '
+            write( stdout, '(A)' ) 'TEST_GET_VORTICITY'
+            write( stdout, '(A)' ) ' '
+            write( stdout, '(A, ES23.16)' ) 'Discretization error = ',  discretization_error
+            write( stdout, '(A)' ) ' '
+            write( stdout, '(A)' ) '*********************************************'
 
-        ! print error to console
-        write( stdout, '(A)' ) ' '
-        write( stdout, '(A)' ) "Test_get_vorticity"
-        write (*,101)  error
-101     format (1x, "l-infinity error = ", es23.16 )
-        write( stdout, '(A)' ) ' '
-        write( stdout, '(A)' ) '*********************************************'
+        end associate
 
     end subroutine Test_get_vorticity
     !
@@ -551,85 +533,74 @@ contains
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
         !--------------------------------------------------------------------------------
-        integer (IP)  :: nlat
-        integer (IP)  :: nlon
-        integer (IP)  :: k
-        integer (IP)  ::l
-        real (WP)  :: sint
-        real (WP)  :: cost
-        real (WP)  :: sinp
-        real (WP)  :: cosp
-        real (WP)  :: cot
-        real (WP)  :: theta
-        real (WP)  :: phi_derivative
-        real (WP)  :: theta_derivative
-        real (WP)  :: error
-        type (vector_t)  :: u
-        real (WP), dimension (3, this%NLAT, this%NLON) :: exact_solution
-        real (WP), dimension (3, this%NLAT, this%NLON) :: approximate_solution
-        real (WP),dimension (this%NLAT, this%NLON)     :: scalar_function
+        integer (IP)    :: k, l !! Counters
+        real (WP)       :: discretization_error
+        type (vector_t) :: u
+        real (WP)       :: exact_rotation(3, this%NLAT, this%NLON)
+        real (WP)       :: approximate_rotation(3, this%NLAT, this%NLON)
+        real (WP)       :: scalar_function(this%NLAT, this%NLON)
         !--------------------------------------------------------------------------------
 
         ! Set constants
-        nlat = this%NLAT
-        nlon = this%NLON
+        associate( &
+            nlat      => this%NLAT, &
+            nlon      => this%NLON, &
+            f         => scalar_function, &
+            Rf        => exact_rotation, &
+            Rf_approx => approximate_rotation &
+            )
 
-        ! initialize arrays
-        scalar_function = 0.0_WP
-        exact_solution = 0.0_WP
+            ! initialize arrays
+            f  = 0.0_WP
+            Rf = 0.0_WP
 
-        do l = 1, nlon
-            do k = 1, nlat
+            do l = 1, nlon
+                do k = 1, nlat
 
-                u = this%radial_unit_vector(:,k,l)
+                    u = this%radial_unit_vector(:, k, l)
 
-                scalar_function(k,l) = exp(u%x + u%y + u%z)
+                    f(k, l) = exp(u%x + u%y + u%z)
 
-                sint = this%sint(k)
-                cost = this%cost(k)
+                    outer: associate( &
+                        sint  => this%sint(k), &
+                        cost  => this%cost(k), &
+                        sinp  => this%sinp(l), &
+                        cosp  => this%cosp(l), &
+                        theta => this%grid%latitudes(k) &
+                        )
 
-                sinp = this%sinp(l)
-                cosp = this%cosp(l)
+                        inner: associate( &
+                            D_theta => ( cost * cosp + cost * sinp - sint ) * f(k, l), &
+                            D_phi   => ( u%x - u%y ) * f(k, l), &
+                            cot     => 1.0_WP/ tan(theta) &
+                            )
 
-                theta_derivative = (cost * cosp &
-                    + cost*sinp - sint) * exp(u%x + u%y + u%z)
+                            Rf(1, k, l) = -sinp * D_theta - cosp * cot * D_phi
 
-                phi_derivative = (u%x - u%y) * exp(u%x + u%y + u%z)
+                            Rf(2, k, l) = cosp * D_theta - sinp * cot * D_phi
 
-                theta = this%grid%latitudes(k)
+                            Rf(3, k, l) = D_phi
 
-                cot = 1.0_WP/ tan(theta)
-
-                exact_solution(1, k, l) = &
-                    -sinp * theta_derivative &
-                    - cosp * cot * phi_derivative
-
-                exact_solution(2,k,l) = &
-                    cosp * theta_derivative &
-                    - sinp * cot * phi_derivative
-
-                exact_solution(3,k,l) = &
-                    phi_derivative
+                        end associate inner
+                    end associate outer
+                end do
             end do
 
-        end do
+            ! compute the rotation operator applied to the scalar function
+            call this%Get_rotation_operator( f, Rf_approx )
 
-        ! compute the rotation operator applied to the scalar function
-        call this%Get_rotation_operator( scalar_function, approximate_solution)
+            ! set error
+            discretization_error = maxval( abs( Rf - Rf_approx ) )
 
-        ! set error
-        error = &
-            maxval( &
-            abs( exact_solution &
-            -approximate_solution ) )
+            ! print error to console
+            write( stdout, '(A)' ) ' '
+            write( stdout, '(A)' ) 'TEST_GET_ROTATION_OPERATOR'
+            write( stdout, '(A)' ) ' '
+            write( stdout, '(A, ES23.16 )' ) 'Discretization error = ', discretization_error
+            write( stdout, '(A)' ) ' '
+            write( stdout, '(A)' ) '*********************************************'
 
-        ! print error to console
-        write( stdout, '(A)' ) ' '
-        write( stdout, '(A)' ) 'Test_get_rotation_operator'
-        write (*,101)  error
-101     format (1x, "l-infinity error = ", es23.16 )
-        write( stdout, '(A)' ) ' '
-        write( stdout, '(A)' ) '*********************************************'
+        end associate
 
     end subroutine Test_get_rotation_operator
     !
