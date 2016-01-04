@@ -142,7 +142,7 @@ module type_sphere_mod
         procedure                            :: Get_spherical_angle_components
         procedure                            :: Set_scalar_symmetries
         procedure                            :: Set_vector_symmetries
-        final                                :: Finalize_sphere
+        !final                                :: Finalize_sphere
         !---------------------------------------------------------------------------------
 
     end type sphere_t

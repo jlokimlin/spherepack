@@ -12,6 +12,6 @@ program main
     ! Explicit typing only
     implicit none
     
-    print *, 'Successful build!'
+    print '(A)', 'Successful build!'
 
 end program main
