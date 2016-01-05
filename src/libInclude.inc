@@ -1,5 +1,6 @@
 # Include the required external libraries
 
+externalLibraryPath = /usr/local/lib
+
 libInclude = \
--lspherepack -L/usr/local/bin/spherepack3.2/lib \
--I/usr/local/bin/spherepack3.2/objs
+-lspherepack -L$(externalLibraryPath)

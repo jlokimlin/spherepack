@@ -18,4 +18,14 @@ module spherepack_wrapper_mod
     ! Explicit typing only
     implicit none
     
+    ! Everything is private unless stated otherwise
+    private
+    public :: vector_t
+    public :: vector_ptr
+    public :: assignment(=)
+    public :: operator(*)
+    public :: grid_t
+    public :: sphere_t
+    public :: workspace_t
+
 end module spherepack_wrapper_mod

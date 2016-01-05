@@ -3,9 +3,10 @@ include ./relative_directories.inc
 include ../libInclude.inc
 
 # Add the required internal libraries
+
 libInclude += \
 -I$(obj_directory) \
--lspherepack_wrapper -L$(lib_directory)
+-lspherepack_wrapper -L$(externalLibraryPath)
 
 executable = ./exe
 	 

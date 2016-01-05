@@ -54,6 +54,7 @@ build_lib:
 	$(obj_directory)/type_sphere_mod.o \
 	$(obj_directory)/spherepack_wrapper_mod.o
 	
+	cp libspherepack_wrapper.a /usr/local/lib
 	mv libspherepack_wrapper.a $(lib_directory)
 
 run:
