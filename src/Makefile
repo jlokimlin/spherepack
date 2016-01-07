@@ -6,7 +6,8 @@ externalLibraryPath = /usr/local/lib
 
 libInclude = \
 -I$(obj_directory) \
--lspherepack -L$(externalLibraryPath)
+-lspherepack -L$(externalLibraryPath) \
+-I/usr/local/bin/spherepack3.2/objs
 
 executable = ./exe
 

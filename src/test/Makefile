@@ -5,15 +5,16 @@ include ./relative_directories.inc
 externalLibraryPath = /usr/local/lib
 
 libInclude = \
--I$(obj_directory) \
 -lspherepack -L$(externalLibraryPath) \
--lspherepack_wrapper -L$(externalLibraryPath)
+-I/usr/local/bin/spherepack3.2/objs \
+-lspherepack_wrapper -L$(externalLibraryPath) \
+-I$(obj_directory)
 
 executable = ./exe
 	 
 test.o: \
 test.f90
-	$(fcomp) -c test.f90 $(libInclude)\
+	$(fcomp) -c test.f90 $(libInclude) \
 	 -o $(obj_directory)/$@
 
 exec: $(objects)
