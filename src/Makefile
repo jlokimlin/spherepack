@@ -1,10 +1,12 @@
 include ./fcomp.inc
 include ./directories.inc
-include ./libInclude.inc
 
 # Add the required internal libraries
-libInclude += \
--I$(obj_directory)
+externalLibraryPath = /usr/local/lib
+
+libInclude = \
+-I$(obj_directory) \
+-lspherepack -L$(externalLibraryPath)
 
 executable = ./exe
 
