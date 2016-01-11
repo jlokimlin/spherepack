@@ -17,7 +17,7 @@ test.f90
 	$(fcomp) -c test.f90 $(libInclude) -o $(obj_directory)/$@
 
 exec: $(objects)
-	$(fcomp) $(libInclude) -o $(executable) $(objects_with_prefix) 
+	$(fcomp) -o $(executable) $(objects_with_prefix) $(libInclude)
 
 run:
 	make clean
