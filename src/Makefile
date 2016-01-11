@@ -4,6 +4,8 @@ include ./directories.inc
 # Add the required internal libraries
 externalLibraryPath = /usr/local/lib
 
+spherepackObjectPath = /usr/local/bin/spherepack3.2/objs
+
 libInclude = \
 -lspherepack -L$(externalLibraryPath) \
 -I$(obj_directory)
@@ -54,7 +56,8 @@ build_lib:
 	$(obj_directory)/type_grid_mod.o \
 	$(obj_directory)/type_workspace_mod.o \
 	$(obj_directory)/type_sphere_mod.o \
-	$(obj_directory)/spherepack_wrapper_mod.o
+	$(obj_directory)/spherepack_wrapper_mod.o \
+	$(spherepackObjectPath)/*.o
 	
 	cp libspherepack_wrapper.a /usr/local/lib
 	mv libspherepack_wrapper.a $(lib_directory)

@@ -7,7 +7,6 @@ externalLibraryPath = /usr/local/lib
 spherepack_wrapperModulePath = ../../obj
 
 libInclude = \
--lspherepack -L$(externalLibraryPath) \
 -lspherepack_wrapper -L$(externalLibraryPath) \
 -I$(spherepack_wrapperModulePath)
 
@@ -18,7 +17,7 @@ test.f90
 	$(fcomp) -c test.f90 $(libInclude) -o $(obj_directory)/$@
 
 exec: $(objects)
-	$(fcomp) -o $(executable) $(objects_with_prefix) $(libInclude)
+	$(fcomp) $(libInclude) -o $(executable) $(objects_with_prefix) 
 
 run:
 	make clean
