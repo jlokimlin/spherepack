@@ -1,14 +1,21 @@
-include ../fcomp.inc
+include ../compiler_flags.inc
 include ./relative_directories.inc
+
+# Add module paths
+
+spherepack_wrapperModulePath = ../../obj
+
+modulePath = \
+-I$(spherepack_wrapperModulePath) \
+-I$(obj_directory)
 
 # Add the required internal libraries
 externalLibraryPath = /usr/local/lib
 
-spherepack_wrapperModulePath = ../../obj
-
 libInclude = \
--lspherepack_wrapper -L$(externalLibraryPath) \
--I$(spherepack_wrapperModulePath)
+-L$(externalLibraryPath) \
+-lspherepack_wrapper -lspherepack \
+$(modulePath)
 
 executable = ./exe
 	 

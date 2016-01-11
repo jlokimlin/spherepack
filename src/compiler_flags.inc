@@ -1,21 +1,21 @@
-# Set the compiler options
+# Set gfortran compiler options
 
 fcomp = \
 gfortran \
 -O3 \
-$(LANGUAGE_OPTIONS) \
-$(ERROR_WARNING_OPTIONS) \
-$(CODE_GENERATION_OPTIONS)
+$(languageOptions) \
+$(errorWarningOptions) \
+$(codeGenerationOptions)
 
-#LANGUAGE_OPTIONS = \
+languageOptions = \
 -fimplicit-none \
 -fdefault-real-8 \
 -fdefault-double-8
 
-ERROR_WARNING_OPTIONS = \
+errorWarningOptions = \
 -Wall
 
-CODE_GENERATION_OPTIONS = \
+codeGenerationOptions = \
 -fcheck=all \
 -fbounds-check \
 -fno-backtrace \
@@ -23,7 +23,7 @@ CODE_GENERATION_OPTIONS = \
 -frounding-math \
 -fsignaling-nans
 
-#References:
+# References:
 # https://gcc.gnu.org/onlinedocs/gfortran/Code-Gen-Options.html#Code-Gen-Options
 # https://gcc.gnu.org/onlinedocs/gfortran/Error-and-Warning-Options.html#Error-and-Warning-Options
 # https://gcc.gnu.org/onlinedocs/gfortran/Option-Summary.html
