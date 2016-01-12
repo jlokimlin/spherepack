@@ -1,36 +1,33 @@
 include ../compiler_flags.inc
 include ./relative_directories.inc
 
-# Add module paths
+SPHEREPACK_WRAPPER_MODULE_PATH = ../../obj
 
-spherepack_wrapperModulePath = ../../obj
+MODULE_PATH = \
+-I$(SPHEREPACK_WRAPPER_MODULE_PATH) \
+-I$(OBJ_DIRECTORY)
 
-modulePath = \
--I$(spherepack_wrapperModulePath) \
--I$(obj_directory)
+EXTERNAL_LIBRARY_PATH = /usr/local/lib
 
-# Add the required internal libraries
-externalLibraryPath = /usr/local/lib
-
-libInclude = \
--L$(externalLibraryPath) \
+LINKS = \
+-L$(EXTERNAL_LIBRARY_PATH) \
 -lspherepack_wrapper -lspherepack \
-$(modulePath)
+$(MODULE_PATH)
 
-executable = ./exe
+EXECUTABLE = ./exe
 	 
 test.o: \
 test.f90
-	$(fcomp) -c test.f90 $(libInclude) -o $(obj_directory)/$@
+	$(FC) $(FFLAGS) -c test.f90 $(LINKS) -o $(OBJ_DIRECTORY)/$@
 
-exec: $(objects)
-	$(fcomp) -o $(executable) $(objects_with_prefix) $(libInclude)
+exec: $(OBJECTS)
+	$(FC) $(FFLAGS) -o $(EXECUTABLE) $(OBJECTS_WITH_PREFIX) $(LINKS)
 
 run:
 	make clean
 	make exec
 	./exe
-	 
+
 clean:
-	rm -f $(objects)
-	rm -f $(executable)
+	rm -f $(OBJECTS)
+	rm -f $(EXECUTABLE)

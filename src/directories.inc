@@ -1,13 +1,13 @@
-src_directory = ./
+SRC_DIRECTORY = ./
 
-sources = $(wildcard $(src_directory)/*.f90)
+SOURCES = $(wildcard $(SRC_DIRECTORY)/*.f90)
 
-sources_with_prefix = $(addprefix $(src_directory)/, $(sources))
+SOURCES_WITH_PREFIX = $(addprefix $(SRC_DIRECTORY)/, $(SOURCES))
 
-objects := $(patsubst %.f90, %.o, $(wildcard *.f90))
+OBJECTS := $(patsubst %.f90, %.o, $(wildcard *.f90))
 
-obj_directory = ../obj
+OBJ_DIRECTORY = ../obj
 
-lib_directory = ../lib
+LIB_DIRECTORY = ../lib
 
-objects_with_prefix = $(addprefix $(obj_directory)/, $(objects))
+OBJECTS_WITH_PREFIX = $(addprefix $(OBJ_DIRECTORY)/, $(OBJECTS))
