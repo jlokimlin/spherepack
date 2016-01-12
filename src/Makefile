@@ -49,7 +49,7 @@ main.f90
 exec: $(OBJECTS)
 	$(FC) $(FFLAGS) -o $(EXECUTABLE) $(OBJECTS_WITH_PREFIX) $(LINKS)
 
-build_lib: 
+lib: 
 	ar rc libspherepack_wrapper.a \
 	$(OBJ_DIRECTORY)/type_vector_mod.o \
 	$(OBJ_DIRECTORY)/type_grid_mod.o \
@@ -60,10 +60,15 @@ build_lib:
 	cp libspherepack_wrapper.a /usr/local/lib
 	mv libspherepack_wrapper.a $(LIB_DIRECTORY)
 
+
+all: 
+	make run
+	cd ./test; make run
+
 run:
 	make clean
 	make exec
-	make build_lib
+	make lib
 	./exe
 	 
 clean:
