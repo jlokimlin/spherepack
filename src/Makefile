@@ -60,7 +60,6 @@ lib:
 	cp libspherepack_wrapper.a /usr/local/lib
 	mv libspherepack_wrapper.a $(LIB_DIRECTORY)
 
-
 all: 
 	make run
 	cd ./test; make run

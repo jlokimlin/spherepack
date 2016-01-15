@@ -66,7 +66,7 @@ module type_vector_mod
         !---------------------------------------------------------------------------------
         ! Finalizer
         !---------------------------------------------------------------------------------
-        !final              :: Finalize_vector
+        final              :: Finalize_vector
         !---------------------------------------------------------------------------------
 
     end type vector_t
@@ -90,7 +90,7 @@ module type_vector_mod
 
     end interface
 
-    ! Pointer of "vector_t" for creating array of pointers of "vector_t".
+    ! To create array of pointers of TYPE (vector_t).
     type, public :: vector_ptr
 
         ! All components are public unless stated otherwise
@@ -104,7 +104,7 @@ module type_vector_mod
         !---------------------------------------------------------------------------------
         ! Private methods
         !---------------------------------------------------------------------------------
-        !final             :: Finalize_vector_ptr
+        final             :: Finalize_vector_ptr
         !---------------------------------------------------------------------------------
 
     end type vector_ptr

@@ -46,35 +46,35 @@ module type_workspace_mod
         !---------------------------------------------------------------------------------
         ! Workspace arrays for scalar transform - GAU
         !---------------------------------------------------------------------------------
-        real (WP), allocatable          :: wshags(:)
-        real (WP), allocatable          :: wshsgs(:)
+        real (WP), allocatable   :: wshags(:)
+        real (WP), allocatable   :: wshsgs(:)
         !---------------------------------------------------------------------------------
         ! Workspace arrays for scalar transform - REG
         !---------------------------------------------------------------------------------
-        real (WP), allocatable          :: wshaes(:)
-        real (WP), allocatable          :: wshses(:)
+        real (WP), allocatable   :: wshaes(:)
+        real (WP), allocatable   :: wshses(:)
         !---------------------------------------------------------------------------------
         ! Workspace arrays for vector transform - GAU
         !---------------------------------------------------------------------------------
-        real (WP), allocatable          :: wvhags(:)
-        real (WP), allocatable          :: wvhsgs(:)
+        real (WP), allocatable   :: wvhags(:)
+        real (WP), allocatable   :: wvhsgs(:)
         !---------------------------------------------------------------------------------
         ! Workspace arrays for vector transform - REG
         !---------------------------------------------------------------------------------
-        real (WP), allocatable         :: wvhaes(:)
-        real (WP), allocatable         :: wvhses(:)
+        real (WP), allocatable   :: wvhaes(:)
+        real (WP), allocatable   :: wvhses(:)
         !---------------------------------------------------------------------------------
         ! Scalar transform coefficients
         !---------------------------------------------------------------------------------
-        real (WP), pointer            :: real_harmonic_coefficients(:,:)      => null()
-        real (WP), pointer            :: imaginary_harmonic_coefficients(:,:) => null()
+        real (WP), pointer        :: real_harmonic_coefficients(:,:)      => null()
+        real (WP), pointer        :: imaginary_harmonic_coefficients(:,:) => null()
         !---------------------------------------------------------------------------------
         ! Vector transform coefficients
         !---------------------------------------------------------------------------------
-        real (WP), pointer            :: real_polar_harmonic_coefficients(:,:)          => null()
-        real (WP), pointer            :: imaginary_polar_harmonic_coefficients(:,:)     => null()
-        real (WP), pointer            :: real_azimuthal_harmonic_coefficients(:,:)      => null()
-        real (WP), pointer            :: imaginary_azimuthal_harmonic_coefficients(:,:) => null()
+        real (WP), pointer   :: real_polar_harmonic_coefficients(:,:)          => null()
+        real (WP), pointer   :: imaginary_polar_harmonic_coefficients(:,:)     => null()
+        real (WP), pointer   :: real_azimuthal_harmonic_coefficients(:,:)      => null()
+        real (WP), pointer   :: imaginary_azimuthal_harmonic_coefficients(:,:) => null()
         !---------------------------------------------------------------------------------
 
     contains
