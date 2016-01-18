@@ -136,13 +136,16 @@ module type_sphere_mod
         !---------------------------------------------------------------------------------
         ! Private methods
         !---------------------------------------------------------------------------------
-        procedure, non_overridable           :: Assert_initialized
+        procedure, non_overridable         :: Assert_initialized
         procedure                            :: Set_trigonometric_functions
         procedure                            :: Set_spherical_unit_vectors
         procedure                            :: Get_spherical_angle_components
         procedure                            :: Set_scalar_symmetries
         procedure                            :: Set_vector_symmetries
-        !final                                :: Finalize_sphere
+        !---------------------------------------------------------------------------------
+        ! Finalizer
+        !---------------------------------------------------------------------------------
+        final                                :: Finalize_sphere
         !---------------------------------------------------------------------------------
 
     end type sphere_t

@@ -3,7 +3,10 @@ include ./directories.inc
 
 MODULE_PATH = $(OBJ_DIRECTORY)
 
-EXTERNAL_LIBRARY_PATH = /usr/local/lib
+#EXTERNAL_LIBRARY_PATH = /usr/local/lib
+EXTERNAL_LIBRARY_PATH = /usr/local/lib64
+
+BIN_PATH = /usr/local/bin
 
 LINKS = \
 -lspherepack -L$(EXTERNAL_LIBRARY_PATH) \
@@ -56,20 +59,22 @@ lib:
 	$(OBJ_DIRECTORY)/type_workspace_mod.o \
 	$(OBJ_DIRECTORY)/type_sphere_mod.o \
 	$(OBJ_DIRECTORY)/spherepack_wrapper_mod.o
-	
-	cp libspherepack_wrapper.a /usr/local/lib
+
 	mv libspherepack_wrapper.a $(LIB_DIRECTORY)
 
-all: 
-	make run
+all:
+	make clean
+	make exec; ./exe
+	make lib
+	make testspherepack_wrapper
+
+testspherepack_wrapper:
 	cd ./test; make run
 
-run:
-	make clean
-	make exec
-	make lib
-	./exe
-	 
+install:
+	cp $(LIB_DIRECTORY)/libspherepack_wrapper.a $(EXTERNAL_LIBRARY_PATH)
+	cp -r ../../spherepack_wrapper $(BIN_PATH)
+
 clean:
-	rm -f $(OBJ_DIRECTORY)/*.o $(OBJ_DIRECTORY)/*.mod
+	rm -f $(OBJ_DIRECTORY)/*.o $(OBJ_DIRECTORY)/*.mod $(LIB_DIRECTORY)/*.a
 	rm -f $(EXECUTABLE)

@@ -1,3 +1,4 @@
+
 include ../compiler_flags.inc
 include ./relative_directories.inc
 
@@ -7,15 +8,16 @@ MODULE_PATH = \
 -I$(SPHEREPACK_WRAPPER_MODULE_PATH) \
 -I$(OBJ_DIRECTORY)
 
-EXTERNAL_LIBRARY_PATH = /usr/local/lib
+#EXTERNAL_LIBRARY_PATH = /usr/local/lib
+EXTERNAL_LIBRARY_PATH = /usr/local/lib64
 
 LINKS = \
--L$(EXTERNAL_LIBRARY_PATH) \
--lspherepack_wrapper -lspherepack \
+-L$(LIB_DIRECTORY) -lspherepack_wrapper \
+-L$(EXTERNAL_LIBRARY_PATH) -lspherepack \
 $(MODULE_PATH)
 
 EXECUTABLE = ./exe
-	 
+
 test.o: \
 test.f90
 	$(FC) $(FFLAGS) -c test.f90 $(LINKS) -o $(OBJ_DIRECTORY)/$@
@@ -25,8 +27,7 @@ exec: $(OBJECTS)
 
 run:
 	make clean
-	make exec
-	./exe
+	make exec; ./exe
 
 clean:
 	rm -f $(OBJECTS)
