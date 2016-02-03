@@ -14,9 +14,20 @@ LINKS = \
 
 EXECUTABLE = ./exe
 
+type_trigonometricfunctions.o: \
+type_trigonometricfunctions.f90
+	$(FC) $(FFLAGS) -c type_trigonometricfunctions.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(OBJ_DIRECTORY)
+
 type_threedimensionalvector.o: \
 type_threedimensionalvector.f90
 	$(FC) $(FFLAGS) -c type_threedimensionalvector.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(OBJ_DIRECTORY)
+
+type_sphericalunitvectors.o: \
+type_threedimensionalvector.o \
+type_sphericalunitvectors.f90
+	$(FC) $(FFLAGS) -c type_sphericalunitvectors.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(OBJ_DIRECTORY)
 
 type_gaussiangrid.o: \
@@ -30,6 +41,10 @@ type_spherepackworkspace.f90
 	 -o $(OBJ_DIRECTORY)/$@ -J$(OBJ_DIRECTORY)
 
 type_spherepackwrapper.o: \
+type_trigonometricfunctions.o \
+type_threedimensionalvector.o \
+type_gaussiangrid.o\
+type_spherepackworkspace.o\
 type_spherepackwrapper.f90
 	$(FC) $(FFLAGS) -c type_spherepackwrapper.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(OBJ_DIRECTORY)

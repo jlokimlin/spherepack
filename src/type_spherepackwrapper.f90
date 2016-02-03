@@ -22,6 +22,12 @@ module type_SpherepackWrapper
     use type_GaussianGrid, only: &
         GaussianGrid
 
+    use type_SphericalUnitVectors, only: &
+        SphericalUnitVectors
+
+    use type_TrigonometricFunctions, only: &
+        TrigonometricFunctions
+
     use type_ThreeDimensionalVector, only: &
         ThreeDimensionalVector, &
         assignment(=), &
@@ -46,24 +52,18 @@ module type_SpherepackWrapper
     type, public :: SpherepackWrapper
 
         ! All components are public unless stated otherwise
-
-        logical                             :: initialized = .false. !! Instantiation status
-        integer (ip)                        :: NLON                = 0   !! number of longitudinal points
-        integer (ip)                        :: NLAT                = 0   !! number of latitudinal points
-        integer (ip)                        :: NTRUNC              = 0   !! triangular truncation limit
-        integer (ip)                        :: SCALAR_SYMMETRIES   = 0   !! symmetries about the equator for scalar calculations
-        integer (ip)                        :: VECTOR_SYMMETRIES   = 0   !! symmetries about the equator for vector calculations
-        integer (ip)                        :: NUMBER_OF_SYNTHESES = 0   !!
-        real (wp),    allocatable           :: sint(:)                 !! sin(theta): 0 <= theta <= pi
-        real (wp),    allocatable           :: cost(:)                 !! cos(theta): 0 <= theta <= pi
-        real (wp),    allocatable           :: sinp(:)                 !! sin(phi):   0 <=  phi  <= 2*pi
-        real (wp),    allocatable           :: cosp(:)                 !! cos(phi):   0 <=  phi  <= 2*pi
-        real (wp),    allocatable           :: radial_unit_vector(:, :, :)
-        real (wp),    allocatable           :: polar_unit_vector(:, :, :)
-        real (wp),    allocatable           :: azimuthal_unit_vector(:, :, :)
+        logical                              :: initialized         = .false. !! Instantiation status
+        integer (ip)                         :: NLON                = 0   !! number of longitudinal points
+        integer (ip)                         :: NLAT                = 0   !! number of latitudinal points
+        integer (ip)                         :: NTRUNC              = 0   !! triangular truncation limit
+        integer (ip)                         :: SCALAR_SYMMETRIES   = 0   !! symmetries about the equator for scalar calculations
+        integer (ip)                         :: VECTOR_SYMMETRIES   = 0   !! symmetries about the equator for vector calculations
+        integer (ip)                         :: NUMBER_OF_SYNTHESES = 0
         complex (wp), allocatable           :: complex_spectral_coefficients(:)
-        type (SpherepackWorkspace), private  :: workspace
-        type (GaussianGrid)                   :: grid
+        type (SpherepackWorkspace), private :: workspace
+        type (GaussianGrid)                  :: grid
+        type (TrigonometricFunctions)        :: trigonometric_functions
+        type (SphericalUnitVectors)          :: unit_vectors
 
     contains
         
@@ -97,7 +97,6 @@ module type_SpherepackWrapper
         procedure, public                    :: get_Legendre_functions
         !procedure, public                    :: get_Icosahedral_geodesic
         !procedure, public                    :: get_Multiple_ffts
-        procedure, nopass, public            :: get_gaussian_weights_and_points !! Gaqd
         !procedure, public                    :: get_Three_dimensional_sphere_graphics
         !---------------------------------------------------------------------------------
         ! Public complex methods
@@ -113,16 +112,13 @@ module type_SpherepackWrapper
         procedure, non_overridable, public   :: get_coefficient
         procedure,                   public    :: compute_surface_integral
         procedure,                   public    :: get_rotation_operator
-        procedure,                   public    :: Synthesize_from_spec
+        procedure,                   public    :: synthesize_from_spec
         !---------------------------------------------------------------------------------
         ! Private methods
         !---------------------------------------------------------------------------------
         procedure, non_overridable         :: create_spherepackwrapper
         procedure, non_overridable         :: destroy_spherepackwrapper
-        procedure, non_overridable         :: assert_initialized
-        procedure                            :: get_trigonometric_functions
-        procedure                            :: get_spherical_unit_vectors
-        procedure                            :: get_spherical_angle_components
+        procedure                            :: assert_initialized
         procedure                            :: get_scalar_symmetries
         procedure                            :: get_vector_symmetries
         !---------------------------------------------------------------------------------
@@ -143,21 +139,19 @@ contains
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        class (SpherepackWrapper), intent (in out)        :: this
-        integer (ip),     intent (in)            :: nlat
-        integer (ip),     intent (in)            :: nlon
-        integer (ip),     intent (in), optional  :: isym      !! Either 0, 1, or 2
-        integer (ip),     intent (in), optional  :: itype     !! Either 0, 1, 2, 3, ..., 8
+        class (SpherepackWrapper), intent (in out)  :: this
+        integer (ip),     intent (in)               :: nlat
+        integer (ip),     intent (in)               :: nlon
+        integer (ip),     intent (in), optional    :: isym      !! Either 0, 1, or 2
+        integer (ip),     intent (in), optional    :: itype     !! Either 0, 1, 2, 3, ..., 8
         !--------------------------------------------------------------------------------
 
         !--------------------------------------------------------------------------------
         ! Check initialization flag
+        !--------------------------------------------------------------------------------
 
         if ( this%initialized ) then
-
-            write( stderr, '(A)' ) 'ERROR: TYPE (SpherepackWrapper)'
-            write( stderr, '(A)' ) 'You must destroy object before calling create_spherepackwrapper'
-
+            call this%destroy()
         end if
 
         !--------------------------------------------------------------------------------
@@ -171,16 +165,12 @@ contains
 
         ! Set scalar symmetries
         if ( present( isym ) ) then
-
             call this%get_scalar_symmetries( isym )
-
         end if
 
         ! Set vector symmetries
         if (present (itype) ) then
-
             call this%get_vector_symmetries( itype )
-
         end if
 
         !--------------------------------------------------------------------------------
@@ -197,11 +187,9 @@ contains
 
             ! Check allocate status
             if ( allocate_status /= 0 ) then
-
                 write( stderr, '(A)' ) 'TYPE (SpherepackWrapper)'
-                write( stderr, '(A)' ) 'Allocating COMPLEX_SPECTRAL_COEFFICIENTS failed in create_spherepackwrapper'
+                write( stderr, '(A)' ) 'Allocating COMPLEX_SPECTRAL_COEFFICIENTS failed in CREATE_SPHEREPACKWRAPPER'
                 write( stderr, '(A)' ) trim( error_message )
-
             end if
 
         end associate
@@ -211,26 +199,30 @@ contains
         !--------------------------------------------------------------------------------
 
         call this%grid%create( nlat, nlon )
+
         call this%workspace%create( nlat, nlon )
 
+        ! Set grids to compute frequently used trigonometric functions
+        associate( &
+            theta => this%grid%latitudes, &
+            phi => this%grid%longitudes &
+            )
 
-        !--------------------------------------------------------------------------------
-        ! Set frequently used trigonometric functions
-        !--------------------------------------------------------------------------------
+            call this%trigonometric_functions%create( theta, phi )
 
-        call this%get_trigonometric_functions( &
-            this%grid%latitudes, &
-            this%grid%longitudes )
+        end associate
 
-        !--------------------------------------------------------------------------------
-        ! Set spherical unit vectors to compute polar and azimuthal components for vector functions
-        !--------------------------------------------------------------------------------
+        ! Compute spherical unit vectors
+        associate( &
+            sint => this%trigonometric_functions%sint, &
+            cost => this%trigonometric_functions%cost, &
+            sinp => this%trigonometric_functions%sinp, &
+            cosp => this%trigonometric_functions%cosp &
+            )
 
-        call this%get_spherical_unit_vectors( &
-            this%sint, &
-            this%cost, &
-            this%sinp, &
-            this%cosp )
+            call this%unit_vectors%create( sint, cost, sinp, cosp )
+
+        end associate
 
         !--------------------------------------------------------------------------------
         ! Set initialization flag
@@ -258,18 +250,7 @@ contains
         if ( .not. this%initialized ) return
 
         !--------------------------------------------------------------------------------
-        ! Reset constants
-        !--------------------------------------------------------------------------------
-
-        this%NLON                = 0
-        this%NLAT                = 0
-        this%NTRUNC              = 0
-        this%SCALAR_SYMMETRIES   = 0
-        this%VECTOR_SYMMETRIES   = 0
-        this%NUMBER_OF_SYNTHESES = 0
-
-        !--------------------------------------------------------------------------------
-        ! Deallocate complex spectral coefficients
+        ! Deallocate array
         !--------------------------------------------------------------------------------
 
         ! Check if array is allocated
@@ -283,13 +264,10 @@ contains
 
             ! Check deallocation status
             if ( deallocate_status /= 0 ) then
-
                 write( stderr, '(A)' ) 'TYPE (SpherepackWrapper)'
-                write( stderr, '(A)' ) 'Deallocating COMPLEX_SPECTRAL_COEFFICIENTS failed in destroy_spherepackwrapper'
+                write( stderr, '(A)' ) 'Deallocating COMPLEX_SPECTRAL_COEFFICIENTS failed in DESTROY_SPHEREPACKWRAPPER'
                 write( stderr, '(A)' ) trim( error_message )
-
             end if
-
         end if
 
         !--------------------------------------------------------------------------------
@@ -298,149 +276,19 @@ contains
 
         call this%grid%destroy()
         call this%workspace%destroy()
+        call this%trigonometric_functions%destroy()
+        call this%unit_vectors%destroy()
 
         !--------------------------------------------------------------------------------
-        ! Deallocate trigonometric functions
+        ! Reset constants
         !--------------------------------------------------------------------------------
 
-         ! Check if array is allocated
-        if ( allocated( this%sint ) ) then
-
-            ! Deallocate array
-            deallocate( &
-                this%sint, &
-                stat   = deallocate_status, &
-                errmsg = error_message )
-
-            ! Check deallocation status
-            if ( deallocate_status /= 0 ) then
-
-                write( stderr, '(A)' ) 'TYPE (SpherepackWrapper)'
-                write( stderr, '(A)' ) 'Deallocating SINT failed in destroy_spherepackwrapper'
-                write( stderr, '(A)' ) trim( error_message )
-
-            end if
-        end if
-
-        ! Check if array is allocated
-        if ( allocated( this%cost ) ) then
-
-            ! Deallocate array
-            deallocate( &
-                this%cost, &
-                stat   = deallocate_status, &
-                errmsg = error_message )
-
-            ! Check deallocation status
-            if ( deallocate_status /= 0 ) then
-
-                write( stderr, '(A)' ) 'TYPE (SpherepackWrapper)'
-                write( stderr, '(A)' ) 'Deallocating COST failed in destroy_spherepackwrapper'
-                write( stderr, '(A)' ) trim( error_message )
-
-            end if
-        end if
-
-        ! Check if array is allocated
-        if ( allocated( this%sinp ) ) then
-
-            ! Deallocate array
-            deallocate( &
-                this%sinp, &
-                stat   = deallocate_status, &
-                errmsg = error_message )
-
-            ! Check deallocation status
-            if ( deallocate_status /= 0 ) then
-
-                write( stderr, '(A)' ) 'TYPE (SpherepackWrapper)'
-                write( stderr, '(A)' ) 'Deallocating SINP failed in destroy_spherepackwrapper'
-                write( stderr, '(A)' ) trim( error_message )
-
-            end if
-
-        end if
-
-        ! Check if array is allocated
-        if ( allocated( this%cosp ) ) then
-
-            ! Deallocate array
-            deallocate( &
-                this%cosp, &
-                stat   = deallocate_status, &
-                errmsg = error_message )
-
-            ! Check deallocation status
-            if ( deallocate_status /= 0 ) then
-
-                write( stderr, '(A)' ) 'TYPE (SpherepackWrapper)'
-                write( stderr, '(A)' ) 'Deallocating COSP failed in destroy_spherepackwrapper'
-                write( stderr, '(A)' ) trim( error_message )
-
-            end if
-
-        end if
-
-        !--------------------------------------------------------------------------------
-        ! Deallocate spherical unit vectors
-        !--------------------------------------------------------------------------------
-
-        ! Check if array is allocated
-        if ( allocated( this%radial_unit_vector ) ) then
-
-            ! Deallocate array
-            deallocate( &
-                this%radial_unit_vector, &
-                stat   = deallocate_status, &
-                errmsg = error_message )
-
-            ! Check deallocation status
-            if ( deallocate_status /= 0 ) then
-
-                write( stderr, '(A)' ) 'TYPE (SpherepackWrapper)'
-                write( stderr, '(A)' ) 'Deallocating RADIAL_UNIT_VECTOR failed in destroy_spherepackwrapper'
-                write( stderr, '(A)' ) trim( error_message )
-
-            end if
-        end if
-
-        ! Check if array is allocated
-        if ( allocated( this%polar_unit_vector ) ) then
-
-            ! Deallocate array
-            deallocate( &
-                this%polar_unit_vector, &
-                stat   = deallocate_status, &
-                errmsg = error_message )
-
-            ! Check deallocation status
-            if ( deallocate_status /= 0 ) then
-
-                write( stderr, '(A)' ) 'TYPE (SpherepackWrapper)'
-                write( stderr, '(A)' ) 'Deallocating POLAR_UNIT_VECTOR failed in destroy_spherepackwrapper'
-                write( stderr, '(A)' ) trim( error_message )
-
-            end if
-        end if
-        
-        ! Check if array is allocated
-        if ( allocated( this%azimuthal_unit_vector ) ) then
-
-            ! Deallocate array
-            deallocate( &
-                this%azimuthal_unit_vector, &
-                stat   = deallocate_status, &
-                errmsg = error_message )
-
-            ! Check deallocation status
-            if ( deallocate_status /= 0 ) then
-
-                write( stderr, '(A)' ) 'TYPE (SpherepackWrapper)'
-                write( stderr, '(A)' ) 'Deallocating AZIMUTHAL_UNIT_VECTOR failed in destroy_spherepackwrapper'
-                write( stderr, '(A)' ) trim( error_message )
-
-            end if
-        end if
+        this%NLON                = 0
+        this%NLAT                = 0
+        this%NTRUNC              = 0
+        this%SCALAR_SYMMETRIES   = 0
+        this%VECTOR_SYMMETRIES   = 0
+        this%NUMBER_OF_SYNTHESES = 0
 
         !--------------------------------------------------------------------------------
         ! Reset initialization flag
@@ -463,7 +311,10 @@ contains
 
         ! Check status
         if ( .not. this%initialized ) then
-            error stop 'ERROR: You must instantiate type(sphere_t) before calling methods'
+
+            write( stderr, '(A)' ) 'TYPE (SpherepackWrapper)'
+            write( stderr, '(A)' ) 'You must instantiate object before calling methods'
+
         end if
 
     end subroutine assert_initialized
@@ -554,17 +405,11 @@ contains
             )
 
             if ( m < 0 .and. nm_conjg > 0 ) then
-
                 return_value = ( (-1.0_wp)**(-m) ) * conjg( psi(nm_conjg) )
-
             else if ( nm > 0 ) then
-
                 return_value = psi(nm)
-
             else
-
                 return_value = 0.0_wp
-
             end if
 
         end associate
@@ -581,7 +426,7 @@ contains
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
         class (SpherepackWrapper), intent (in out) :: this
-        integer (ip),     intent (in)     :: isym
+        integer (ip),              intent (in)     :: isym
         !--------------------------------------------------------------------------------
 
         select case (isym)
@@ -619,43 +464,24 @@ contains
 
         select case (itype)
             case (8)
-        		
                 this%VECTOR_SYMMETRIES = itype
-                return
             case (7)
-        		
                 this%VECTOR_SYMMETRIES = itype
-                return
             case (6)
-        		
                 this%VECTOR_SYMMETRIES = itype
-                return
             case (5)
-        		
                 this%VECTOR_SYMMETRIES = itype
-                return
             case (4)
-        		
                 this%VECTOR_SYMMETRIES = itype
-                return
             case (3)
-        		
                 this%VECTOR_SYMMETRIES = itype
-                return
             case (2)
-        		
                 this%VECTOR_SYMMETRIES = itype
-                return
             case (1)
-        		
                 this%VECTOR_SYMMETRIES = itype
-                return
             case (0)
-        		
                 this%VECTOR_SYMMETRIES = itype
-                return
             case default
-        		
                 ! Handle invalid symmetry arguments
                 write( stderr, '(A)' )     'TYPE (SpherepackWrapper) in get_VECTOR_SYMMETRIES'
                 write( stderr, '(A, I2)' ) 'Optional argument itype = ', itype
@@ -663,165 +489,6 @@ contains
         end select
 
     end subroutine get_vector_symmetries
-    !
-    !*****************************************************************************************
-    !
-    subroutine get_trigonometric_functions( this, theta, phi )
-        !
-        !--------------------------------------------------------------------------------
-        ! Dictionary: calling arguments
-        !--------------------------------------------------------------------------------
-        class (SpherepackWrapper), intent (in out) :: this
-        real (wp),        intent (in)     :: theta(:)
-        real (wp),        intent (in)     :: phi(:)
-        !--------------------------------------------------------------------------------
-
-        !--------------------------------------------------------------------------------
-        ! Check if latitudes are allocated
-        !--------------------------------------------------------------------------------
-
-        if ( .not. allocated( this%grid%latitudes ) ) then
-
-            write( stderr, '(A)' ) 'TYPE (SpherepackWrapper) in get_TRIGONOMETRIC_FUNCTIONS'
-            write( stderr, '(A)' ) 'You must allocate LATITUDES '
-            write( stderr, '(A)' ) 'before calling get_TRIGONOMETRIC_FUNCTIONS'
-
-        end if
-
-        !--------------------------------------------------------------------------------
-        ! Check if longitudes are allocated
-        !--------------------------------------------------------------------------------
-
-        if ( .not. allocated( this%grid%longitudes ) ) then
-
-            write( stderr, '(A)' ) 'TYPE (SpherepackWrapper) in get_TRIGONOMETRIC_FUNCTIONS'
-            write( stderr, '(A)' ) 'You must allocate LONGITUDES '
-            write( stderr, '(A)' ) 'before calling get_TRIGONOMETRIC_FUNCTIONS'
-
-        end if
-
-        !--------------------------------------------------------------------------------
-        ! Allocate arrays
-        !--------------------------------------------------------------------------------
-
-        associate( &
-            nlat => size( theta ), &
-            nlon => size( phi ) &
-            )
-
-            allocate ( &
-                this%sint( 1:nlat ), &
-                this%cost( 1:nlat ), &
-                this%sinp( 1:nlon ), &
-                this%cosp( 1:nlon ), &
-                stat   = allocate_status, &
-                errmsg = error_message )
-
-            ! Check allocation status
-            if ( allocate_status /= 0 ) then
-
-                write( stderr, '(A)') 'TYPE (SpherepackWrapper)'
-                write( stderr, '(A)') 'Allocation failed in get_TRIGONOMETRIC_FUNCTIONS'
-                write( stderr, '(A)') trim( error_message )
-
-            end if
-
-        end associate
-
-        !--------------------------------------------------------------------------------
-        ! compute trigonometric functions
-        !--------------------------------------------------------------------------------
-
-        this%sint = sin( theta )
-        this%cost = cos( theta )
-        this%sinp = sin( phi )
-        this%cosp = cos( phi )
-
-    end subroutine get_trigonometric_functions
-    !
-    !*****************************************************************************************
-    !
-    subroutine get_spherical_unit_vectors( this, sint, cost, sinp, cosp )
-        !
-        !< Purpose:
-        ! Sets the spherical unit vectors
-        !
-        ! Remark:
-        ! The "grid" component of sphere must be
-        ! initialized before calling this subroutine
-        !
-        !--------------------------------------------------------------------------------
-        ! Dictionary: calling arguments
-        !--------------------------------------------------------------------------------
-        class (SpherepackWrapper), intent (in out)   :: this
-        real (wp),        intent (in)       :: sint(:)
-        real (wp),        intent (in)       :: cost(:)
-        real (wp),        intent (in)       :: sinp(:)
-        real (wp),        intent (in)       :: cosp(:)
-        !--------------------------------------------------------------------------------
-        ! Dictionary: local variables
-        !--------------------------------------------------------------------------------
-        integer (ip)::  k !! Counters
-        integer (ip):: l !! Counters
-        !--------------------------------------------------------------------------------
-
-        dimensions: associate( &
-            nlat => this%NLAT, &
-            nlon => this%NLON &
-            )
-
-            ! Allocate arrays
-            allocate ( &
-                this%radial_unit_vector( 1:3, 1:nlat, 1:nlon ), &
-                this%polar_unit_vector( 1:3, 1:nlat, 1:nlon ), &
-                this%azimuthal_unit_vector( 1:3, 1:nlat, 1:nlon ), &
-                stat   = allocate_status, &
-                errmsg = error_message )
-
-            ! Check allocate status
-            if ( allocate_status /= 0 ) then
-
-                write( stderr, '(A)') 'TYPE (SpherepackWrapper)'
-                write( stderr, '(A)') 'Allocation failed in get_SPHERICAL_UNIT_VECTORS'
-                write( stderr, '(A)') trim( error_message )
-
-            end if
-
-            unit_vectors: associate( &
-                r     => this%radial_unit_vector, &
-                theta => this%polar_unit_vector, &
-                phi   => this%azimuthal_unit_vector &
-                )
-
-                ! compute spherical unit vectors
-                do l = 1, nlon
-                    do k = 1, nlat
-
-                        ! set radial unit vector
-                        r(:, k, l) = &
-                            [ sint(k) * cosp(l), &
-                            sint(k) * sinp(l), &
-                            cost(k) ]
-
-                        ! set polar unit vector
-                        theta(:, k, l) = &
-                            [ cost(k) * cosp(l), &
-                            cost(k) * sinp(l), &
-                            -sint(k) ]
-
-                        ! set azimuthal unit vector
-                        phi(:, k, l) = &
-                            [ -sinp(l), &
-                            cosp(l), &
-                            0.0_wp ]
-                    end do
-                end do
-
-            end associate unit_vectors
-
-        end associate dimensions
-
-    end subroutine get_spherical_unit_vectors
     !
     !*****************************************************************************************
     !
@@ -853,7 +520,7 @@ contains
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
         class (SpherepackWrapper), intent (in out)  :: this
-        real (wp),        intent (in)      :: scalar_function(:, :)
+        real (wp),                 intent (in)      :: scalar_function(:, :)
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
         !--------------------------------------------------------------------------------
@@ -862,7 +529,7 @@ contains
         !--------------------------------------------------------------------------------
         
         !--------------------------------------------------------------------------------
-        ! Check initialization flag
+        ! Check if object is usable
         !--------------------------------------------------------------------------------
 
         call this%assert_initialized()
@@ -906,7 +573,7 @@ contains
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
         class (SpherepackWrapper), intent (in out)  :: this
-        real (wp),        intent (out)     :: scalar_function(:, :)
+        real (wp),                 intent (out)     :: scalar_function(:, :)
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
         !--------------------------------------------------------------------------------
@@ -915,7 +582,7 @@ contains
         !--------------------------------------------------------------------------------
 
         !--------------------------------------------------------------------------------
-        ! Check initialization flag
+        ! Check if object is usable
         !--------------------------------------------------------------------------------
 
         call this%assert_initialized()
@@ -950,7 +617,7 @@ contains
         end associate
 
         !--------------------------------------------------------------------------------
-        ! Synthesise the scalar function from the (real) harmonic coefficients
+        ! synthesise the scalar function from the (real) harmonic coefficients
         !--------------------------------------------------------------------------------
 
         call this%perform_scalar_synthesis( scalar_function )
@@ -959,7 +626,7 @@ contains
     !
     !*****************************************************************************************
     !
-    subroutine Synthesize_from_spec( this, spec, scalar_function )
+    subroutine synthesize_from_spec( this, spec, scalar_function )
         !
         !< Purpose:
         !
@@ -969,8 +636,8 @@ contains
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
         class (SpherepackWrapper), intent (in out)  :: this
-        complex (wp),     intent (in)      :: spec(:)
-        real (wp),        intent (out)     :: scalar_function(:, :)
+        complex (wp),              intent (in)      :: spec(:)
+        real (wp),                 intent (out)     :: scalar_function(:, :)
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
         !--------------------------------------------------------------------------------
@@ -979,7 +646,7 @@ contains
         !--------------------------------------------------------------------------------
 
         !--------------------------------------------------------------------------------
-        ! Check initialization flag
+        ! Check if object is usable
         !--------------------------------------------------------------------------------
 
         call this%assert_initialized()
@@ -1015,78 +682,12 @@ contains
         end associate
 
         !--------------------------------------------------------------------------------
-        ! Synthesise the scalar function from the (real) harmonic coefficients
+        ! synthesise the scalar function from the (real) harmonic coefficients
         !--------------------------------------------------------------------------------
 
         call this%perform_scalar_synthesis( scalar_function )
  
-    end subroutine Synthesize_from_spec
-    !
-    !*****************************************************************************************
-    !
-    subroutine get_spherical_angle_components( this, &
-        vector_function, polar_component, azimuthal_component )
-        !
-        !< Purpose:
-        !
-        !--------------------------------------------------------------------------------
-        ! Dictionary: calling arguments
-        !--------------------------------------------------------------------------------
-        class (SpherepackWrapper), intent (in out)  :: this
-        real (wp),        intent (in)      :: vector_function(:, :, :)
-        real (wp),        intent (out)     :: polar_component(:, :)
-        real (wp),        intent (out)     :: azimuthal_component(:, :)
-        !--------------------------------------------------------------------------------
-        ! Dictionary: local variables
-        !--------------------------------------------------------------------------------
-        integer (ip):: k        !! Counters
-        integer (ip)::  l        !! Counters
-        type (ThreeDimensionalVector):: theta        !! Polar unit vector
-        type (ThreeDimensionalVector):: phi          !! Azimuthal unit vector
-        type (ThreeDimensionalVector):: vector_field !! To convert array to vector
-        !--------------------------------------------------------------------------------
-        
-        !--------------------------------------------------------------------------------
-        ! Check initialization flag
-        !--------------------------------------------------------------------------------
-
-        !--------------------------------------------------------------------------------
-        ! Initialize arrays
-        !--------------------------------------------------------------------------------
-        
-        polar_component     = 0.0_wp
-        azimuthal_component = 0.0_wp
-        
-        !--------------------------------------------------------------------------------
-        ! Calculate the spherical angle components
-        !--------------------------------------------------------------------------------
-
-        associate( &
-            nlat => this%NLAT, &
-            nlon => this%NLON &
-            )
-
-
-            do l = 1, nlon
-                do k = 1, nlat
-
-                    ! Convert arrays to vectors
-                    vector_field = vector_function(:, k, l)
-                    theta = this%polar_unit_vector(:, k, l)
-                    phi = this%azimuthal_unit_vector(:, k, l)
-
-                    ! set the theta component
-                    polar_component(k, l) = theta.dot.vector_field
-               
-                    ! set the azimuthal_component
-                    azimuthal_component(k, l) = phi.dot.vector_field
-
-                end do
-            end do
-
-        end associate
-
-    end subroutine get_spherical_angle_components
+    end subroutine synthesize_from_spec
     !
     !*****************************************************************************************
     !
@@ -1096,21 +697,18 @@ contains
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
         class (SpherepackWrapper), intent (in out)  :: this
-        real (wp),        intent (in)      :: scalar_function(:, :)
-        real (wp),        intent (out)     :: rotation_operator(:, :, :)
+        real (wp),                 intent (in)      :: scalar_function(:, :)
+        real (wp),                 intent (out)     :: rotation_operator(:, :, :)
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
         !--------------------------------------------------------------------------------
-        integer (ip):: k   !! Counters
-        integer (ip):: l   !! Counters
-        type (ThreeDimensionalVector):: theta  !! Polar unit vector
-        type (ThreeDimensionalVector):: phi    !! Azimuthal unit vector
+        integer (ip)            :: k, l   !! Counters
         real (wp), allocatable :: polar_gradient_component(:, :)
         real (wp), allocatable :: azimuthal_gradient_component(:, :)
         !--------------------------------------------------------------------------------
 
         !--------------------------------------------------------------------------------
-        ! Check initialization flag
+        ! Check if object is usable
         !--------------------------------------------------------------------------------
 
         call this%assert_initialized()
@@ -1126,8 +724,8 @@ contains
 
             ! Allocate arrays
             allocate ( &
-                polar_gradient_component(     1:nlat, 1:nlon ), &
-                azimuthal_gradient_component( 1:nlat, 1:nlon ), &
+                polar_gradient_component(     nlat, nlon ), &
+                azimuthal_gradient_component( nlat, nlon ), &
                 stat   = allocate_status, &
                 errmsg = error_message )
 
@@ -1135,7 +733,7 @@ contains
             if ( allocate_status /= 0 ) then
 
                 write( stderr, '(A)' ) 'TYPE (SpherepackWrapper)'
-                write( stderr, '(A)' ) 'Allocation failed in get_ROTATION_OPERATOR'
+                write( stderr, '(A)' ) 'Allocation failed in GET_ROTATION_OPERATOR'
                 write( stderr, '(A)' ) trim( error_message )
 
             end if
@@ -1161,27 +759,21 @@ contains
         !--------------------------------------------------------------------------------
 
         associate( &
-            nlat       => this%NLAT, &
-            nlon       => this%NLON, &
-            R          => rotation_operator &
+            nlat => this%NLAT, &
+            nlon => this%NLON &
             )
-
-            ! Initialize array
-            r = 0.0_wp
 
             do l = 1, nlon
                 do k = 1, nlat
 
-                    ! Convert arrays to vectors
-                    theta = this%polar_unit_vector(:, k, l)
-                    phi = this%azimuthal_unit_vector(:, k, l)
-
                     associate( &
+                        theta      => this%unit_vectors%polar(k, l), &
+                        phi        => this%unit_vectors%azimuthal( k, l), &
                         grad_theta => polar_gradient_component(k, l), &
                         grad_phi   => azimuthal_gradient_component(k, l) &
                         )
 
-                        r(:, k, l) = phi * grad_theta - theta * grad_phi
+                        rotation_operator(:, k, l) = phi * grad_theta - theta * grad_phi
 
                     end associate
                 end do
@@ -1202,7 +794,7 @@ contains
         if ( deallocate_status /= 0 ) then
 
             write( stderr, '(A)' ) 'TYPE (SpherepackWrapper)'
-            write( stderr, '(A)' ) 'Deallocation failed in get_ROTATION_OPERATOR'
+            write( stderr, '(A)' ) 'Deallocation failed in GET_ROTATION_OPERATOR'
             write( stderr, '(A)' ) trim( error_message )
 
         end if
@@ -1231,17 +823,17 @@ contains
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
         class (SpherepackWrapper), intent (in out) :: this
-        real (wp),        intent (in)     :: scalar_function(:, :)
-        real (wp):: return_value
+        real (wp),                 intent (in)     :: scalar_function(:, :)
+        real (wp)                                   :: return_value
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
         !--------------------------------------------------------------------------------
-        integer (ip):: k            !! counter
+        integer (ip)            :: k            !! counter
         real (wp), allocatable :: summation(:)
         !--------------------------------------------------------------------------------
 
         !--------------------------------------------------------------------------------
-        ! Check initialization flag
+        ! Check if object is usable
         !--------------------------------------------------------------------------------
 
         call this%assert_initialized()
@@ -1254,7 +846,7 @@ contains
 
             ! Allocate array
             allocate ( &
-                summation( 1:nlat ), &
+                summation( nlat ), &
                 stat   = allocate_status, &
                 errmsg = error_message )
 
@@ -1262,7 +854,7 @@ contains
             if ( allocate_status /= 0 ) then
 
                 write( stderr, '(A)' ) 'TYPE (SpherepackWrapper)'
-                write( stderr, '(A)' ) 'Allocation failed in compute_SURFACE_INTEGRAL'
+                write( stderr, '(A)' ) 'Allocation failed in COMPUTE_SURFACE_INTEGRAL'
                 write( stderr, '(A)' ) trim( error_message )
 
             end if
@@ -1310,11 +902,9 @@ contains
 
         ! Check deallocate status
         if ( deallocate_status /= 0 ) then
-
             write( stderr, '(A)' ) 'TYPE (SpherepackWrapper)'
-            write( stderr, '(A)' ) 'Deallocation failed in compute_SURFACE_INTEGRAL'
+            write( stderr, '(A)' ) 'Deallocation failed in COMPUTE_SURFACE_INTEGRAL'
             write( stderr, '(A)' ) trim( error_message )
-
         end if
 
     end function compute_surface_integral
@@ -1327,20 +917,18 @@ contains
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        class (SpherepackWrapper), intent (in out)  :: this
-        real (wp),        intent (in)      :: scalar_function(:, :)
+        class (SpherepackWrapper),      intent (in out)  :: this
+        real (wp),                      intent (in)      :: scalar_function(:, :)
         type (ThreeDimensionalVector),  intent (out)     :: first_moment
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
         !--------------------------------------------------------------------------------
-        integer (ip):: k             !! Counters
-        integer (ip)::  l             !! Counters
-        type (ThreeDimensionalVector):: u                 !! radial unit vector
+        integer (ip)            :: k, l !! Counters
         real (wp), allocatable :: integrant(:, :, :)
         !--------------------------------------------------------------------------------
 
         !--------------------------------------------------------------------------------
-        ! Check initialization flag
+        ! Check if object is usable
         !--------------------------------------------------------------------------------
 
         call this%assert_initialized()
@@ -1356,17 +944,15 @@ contains
 
             ! Allocate arrays
             allocate ( &
-                integrant( 1:nlat, 1:nlon, 1:3 ), &
+                integrant( nlat, nlon, 3 ), &
                 stat   = allocate_status, &
                 errmsg = error_message )
 
             ! Check allocation status
             if ( allocate_status /= 0 ) then
-
                 write( stderr, '(A)' ) 'TYPE (SpherepackWrapper)'
-                write( stderr, '(A)' ) 'Allocation failed in compute_FIRST_MOMENT'
+                write( stderr, '(A)' ) 'Allocation failed in COMPUTE_FIRST_MOMENT'
                 write( stderr, '(A)' ) trim( error_message )
-
             end if
 
         end associate
@@ -1380,17 +966,14 @@ contains
             nlon => this%NLON &
             )
 
-            ! Initialize array
-            integrant = 0.0_wp
-
             ! compute integrant
             do l = 1, nlon
                 do k = 1, nlat
 
-                    ! Convert array to vector
-                    u = this%radial_unit_vector(:, k, l)
-
-                    associate( f => scalar_function(k, l) )
+                    associate( &
+                        u => this%unit_vectors%radial( k, l ), &
+                        f => scalar_function(k, l) &
+                        )
 
                         integrant(k, l, 1) = u%x * f
                         integrant(k, l, 2) = u%y * f
@@ -1399,7 +982,6 @@ contains
                     end associate
                 end do
             end do
-
         end associate
 
         !--------------------------------------------------------------------------------
@@ -1435,7 +1017,7 @@ contains
         if ( deallocate_status /= 0 ) then
 
             write( stderr, '(A)' ) 'TYPE (SpherepackWrapper)'
-            write( stderr, '(A)' ) 'Deallocation failed in compute_FIRST_MOMENT'
+            write( stderr, '(A)' ) 'Deallocation failed in COMPUTE_FIRST_MOMENT'
             write( stderr, '(A)' ) trim( error_message )
 
         end if
@@ -1695,7 +1277,7 @@ contains
         !--------------------------------------------------------------------------------
         
         !--------------------------------------------------------------------------------
-        ! Check initialization flag
+        ! Check if object is usable
         !--------------------------------------------------------------------------------
 
         call this%assert_initialized()
@@ -1761,7 +1343,7 @@ contains
 
             else if (error_flag == 4) then
 
-                write( stderr, '(A)') 'Error in the specification of NUMBER_OF_SYNTHESES'
+                write( stderr, '(A)') 'Error in the specification of NUMBER_OF_synthESES'
 
             else if ( error_flag == 5 ) then
 
@@ -2027,7 +1609,7 @@ contains
         !--------------------------------------------------------------------------------
 
         !--------------------------------------------------------------------------------
-        ! Check initialization flag
+        ! Check if object is usable
         !--------------------------------------------------------------------------------
 
         call this%assert_initialized()
@@ -2276,7 +1858,7 @@ contains
         !--------------------------------------------------------------------------------
 
         !--------------------------------------------------------------------------------
-        ! Check initialization flag
+        ! Check if object is usable
         !--------------------------------------------------------------------------------
 
         call this%assert_initialized()
@@ -2341,7 +1923,7 @@ contains
 
             else if (error_flag == 4) then
 
-                write( stderr, '(A)') 'Error in the specification of NUMBER_OF_SYNTHESES'
+                write( stderr, '(A)') 'Error in the specification of NUMBER_OF_synthESES'
 
             else if ( error_flag == 5 ) then
 
@@ -2617,7 +2199,7 @@ contains
         !--------------------------------------------------------------------------------
 
         !--------------------------------------------------------------------------------
-        ! Check initialization flag
+        ! Check if object is usable
         !--------------------------------------------------------------------------------
 
         call this%assert_initialized()
@@ -2686,7 +2268,7 @@ contains
 
             else if (error_flag == 4) then
 
-                write( stderr, '(A)') 'Error in the specification of NUMBER_OF_SYNTHESES'
+                write( stderr, '(A)') 'Error in the specification of NUMBER_OF_synthESES'
 
 
 
@@ -2995,7 +2577,7 @@ contains
         !--------------------------------------------------------------------------------
 
         !--------------------------------------------------------------------------------
-        ! Check initialization flag
+        ! Check if object is usable
         !--------------------------------------------------------------------------------
 
         call this%assert_initialized()
@@ -3060,7 +2642,7 @@ contains
 
             else if (error_flag == 4) then
 
-                write( stderr, '(A)') 'Error in the specification of NUMBER_OF_SYNTHESES'
+                write( stderr, '(A)') 'Error in the specification of NUMBER_OF_synthESES'
 
             else if ( error_flag == 5 ) then
 
@@ -3337,7 +2919,7 @@ contains
         !--------------------------------------------------------------------------------
 
         !--------------------------------------------------------------------------------
-        ! Check initialization flag
+        ! Check if object is usable
         !--------------------------------------------------------------------------------
 
         call this%assert_initialized()
@@ -3404,7 +2986,7 @@ contains
 
             else if (error_flag == 4) then
 
-                write( stderr, '(A)') 'Error in the specification of NUMBER_OF_SYNTHESES'
+                write( stderr, '(A)') 'Error in the specification of NUMBER_OF_synthESES'
 
             else if ( error_flag == 5 ) then
 
@@ -4137,7 +3719,7 @@ contains
 
         else
 
-            write( stderr, '(A)') 'SPHEREPACK 3.2 error: perform_SCALAR_SYNTHESIS'
+            write( stderr, '(A)') 'SPHEREPACK 3.2 error: perform_SCALAR_synthESIS'
 
             if ( error_flag == 1 ) then
 
@@ -4470,7 +4052,7 @@ contains
         !--------------------------------------------------------------------------------
 
         !--------------------------------------------------------------------------------
-        ! Check initialization flag
+        ! Check if object is usable
         !--------------------------------------------------------------------------------
 
         call this%assert_initialized()
@@ -4512,7 +4094,7 @@ contains
             F_phi   => azimuthal_component &
             )
 
-            call this%get_spherical_angle_components( f, f_theta, f_phi )
+            call this%unit_vectors%get_spherical_angle_components( f, f_theta, f_phi )
 
         end associate
 
@@ -4574,7 +4156,7 @@ contains
 
             else if (error_flag == 4) then
 
-                write( stderr, '(A)') 'Error in the specification of NUMBER_OF_SYNTHESES'
+                write( stderr, '(A)') 'Error in the specification of NUMBER_OF_synthESES'
 
             else if ( error_flag == 5 ) then
 
@@ -4972,8 +4554,8 @@ contains
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
         class (SpherepackWrapper), intent (in out)   :: this
-        real (wp),        intent (out)      :: polar_component(:, :)
-        real (wp),        intent (out)      :: azimuthal_component(:, :)
+        real (wp),                 intent (out)      :: polar_component(:, :)
+        real (wp),                 intent (out)      :: azimuthal_component(:, :)
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
         !--------------------------------------------------------------------------------
@@ -4981,7 +4563,7 @@ contains
         !--------------------------------------------------------------------------------
 
         !--------------------------------------------------------------------------------
-        ! Check initialization flag
+        ! Check if object is usable
         !--------------------------------------------------------------------------------
 
         call this%assert_initialized()
@@ -5012,7 +4594,7 @@ contains
             ierror => error_flag &
             )
 
-            call Vhsgs( nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
+            call vhsgs( nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
                 mdab, ndab, wvhsgs, lvhsgs, work, lwork, ierror )
 
         end associate
@@ -5044,7 +4626,7 @@ contains
 
             else if (error_flag == 4) then
 
-                write( stderr, '(A)') 'Error in the specification of NUMBER_OF_SYNTHESES'
+                write( stderr, '(A)') 'Error in the specification of NUMBER_OF_synthESES'
 
             else if ( error_flag == 5 ) then
 
@@ -5175,36 +4757,6 @@ contains
         end if
 
     end subroutine perform_multiple_ffts
-    !
-    !*****************************************************************************************
-    !
-    subroutine get_gaussian_weights_and_points( this, nlat, theta, wts )
-        !
-        !< Purpose:
-        !
-        ! computes the nlat-many gaussian (co)latitudes and weights.
-        ! the colatitudes are in radians and lie in the interval (0, pi).
-        !
-        ! References:
-        !
-        ! [1] Swarztrauber, Paul N.
-        !     "On computing the points and weights for Gauss--Legendre quadrature."
-        !     SIAM Journal on Scientific Computing 24.3 (2003): 945-954.
-
-        ! [2]  http://www2.cisl.ucar.edu/spherepack/documentation#gaqd.html
-        !
-        !--------------------------------------------------------------------------------
-        ! Dictionary: calling arguments
-        !--------------------------------------------------------------------------------
-        class (SpherepackWrapper),       intent (in out)   :: this
-        integer (ip),           intent (in)       :: nlat     !! number of latitudinal points
-        real (wp), allocatable, intent (out)      :: theta(:) !! latitudinal points: 0 <= theta <= pi
-        real (wp), allocatable, intent (out)      :: wts(:)   !! gaussian weights
-        !--------------------------------------------------------------------------------
-
-        call this%grid%get_gaussian_weights_and_points( nlat, theta, wts )
-
-    end subroutine get_gaussian_weights_and_points
     !
     !*****************************************************************************************
     !
