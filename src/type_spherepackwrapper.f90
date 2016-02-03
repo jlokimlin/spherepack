@@ -9,21 +9,21 @@
 !
 !*****************************************************************************************
 !
-module type_sphere_mod
+module type_SpherepackWrapper
 
     use, intrinsic :: iso_fortran_env, only: &
-        WP     => REAL64, &
-        IP     => INT32, &
+        wp     => REAL64, &
+        ip     => INT32, &
         stderr => ERROR_UNIT
 
-    use type_workspace_mod, only: &
-        workspace_t
+    use type_SpherepackWorkspace, only: &
+        SpherepackWorkspace
 
-    use type_grid_mod, only: &
-        grid_t
+    use type_GaussianGrid, only: &
+        GaussianGrid
 
-    use type_vector_mod, only: &
-        vector_t, &
+    use type_ThreeDimensionalVector, only: &
+        ThreeDimensionalVector, &
         assignment(=), &
         operator(*)
     
@@ -32,57 +32,38 @@ module type_sphere_mod
 
     ! Everything is private unless stated otherwise
     private
-    public :: sphere_t
+    public :: SpherepackWrapper
 
     !---------------------------------------------------------------------------------
     ! Dictionary: global variables confined to the module
     !---------------------------------------------------------------------------------
-    character (len=200)   :: error_message     !! Probably long enough
-    integer (IP)          :: allocate_status   !! To check allocation status
-    integer (IP)          :: deallocate_status !! To check deallocation status
+    character (len=250) :: error_message     !! Probably long enough
+    integer (ip)        :: allocate_status   !! To check allocation status
+    integer (ip)        :: deallocate_status !! To check deallocation status
     !---------------------------------------------------------------------------------
 
     ! Declare derived data type
-    type, public :: sphere_t
+    type, public :: SpherepackWrapper
 
         ! All components are public unless stated otherwise
 
-        !---------------------------------------------------------------------------------
-        ! Initialization flag
-        !---------------------------------------------------------------------------------
-        logical                      :: initialized = .false. !! Instantiation status
-        !---------------------------------------------------------------------------------
-        ! Integer constants
-        !---------------------------------------------------------------------------------
-        integer (IP)                 :: NLON                = 0   !! number of longitudinal points
-        integer (IP)                 :: NLAT                = 0   !! number of latitudinal points
-        integer (IP)                 :: NTRUNC              = 0   !! triangular truncation limit
-        integer (IP)                 :: SCALAR_SYMMETRIES   = 0   !! symmetries about the equator for scalar calculations
-        integer (IP)                 :: VECTOR_SYMMETRIES   = 0   !! symmetries about the equator for vector calculations
-        integer (IP)                 :: NUMBER_OF_SYNTHESES = 0   !!
-        !---------------------------------------------------------------------------------
-        ! Complex spectral coefficients
-        !---------------------------------------------------------------------------------
-        complex (WP), allocatable    :: complex_spectral_coefficients(:)
-        !---------------------------------------------------------------------------------
-        ! Derived data type
-        !---------------------------------------------------------------------------------
-        type (workspace_t), private  :: workspace             !! Contains the various workspace arrays to invoke SPHERPACK 3.2
-        type (grid_t)                :: grid                  !! Spherical grid
-        !---------------------------------------------------------------------------------
-        ! Commonly used trigonometric functions
-        !---------------------------------------------------------------------------------
-        real (WP), allocatable       :: sint(:)                 !! sin(theta): 0 <= theta <= pi
-        real (WP), allocatable       :: cost(:)                 !! cos(theta): 0 <= theta <= pi
-        real (WP), allocatable       :: sinp(:)                 !! sin(phi):   0 <=  phi  <= 2*pi
-        real (WP), allocatable       :: cosp(:)                 !! cos(phi):   0 <=  phi  <= 2*pi
-        !---------------------------------------------------------------------------------
-        ! The spherical unit vectors
-        !---------------------------------------------------------------------------------
-        real (WP), allocatable       :: radial_unit_vector(:, :, :)
-        real (WP), allocatable       :: polar_unit_vector(:, :, :)
-        real (WP), allocatable       :: azimuthal_unit_vector(:, :, :)
-        !---------------------------------------------------------------------------------
+        logical                             :: initialized = .false. !! Instantiation status
+        integer (ip)                        :: NLON                = 0   !! number of longitudinal points
+        integer (ip)                        :: NLAT                = 0   !! number of latitudinal points
+        integer (ip)                        :: NTRUNC              = 0   !! triangular truncation limit
+        integer (ip)                        :: SCALAR_SYMMETRIES   = 0   !! symmetries about the equator for scalar calculations
+        integer (ip)                        :: VECTOR_SYMMETRIES   = 0   !! symmetries about the equator for vector calculations
+        integer (ip)                        :: NUMBER_OF_SYNTHESES = 0   !!
+        real (wp),    allocatable           :: sint(:)                 !! sin(theta): 0 <= theta <= pi
+        real (wp),    allocatable           :: cost(:)                 !! cos(theta): 0 <= theta <= pi
+        real (wp),    allocatable           :: sinp(:)                 !! sin(phi):   0 <=  phi  <= 2*pi
+        real (wp),    allocatable           :: cosp(:)                 !! cos(phi):   0 <=  phi  <= 2*pi
+        real (wp),    allocatable           :: radial_unit_vector(:, :, :)
+        real (wp),    allocatable           :: polar_unit_vector(:, :, :)
+        real (wp),    allocatable           :: azimuthal_unit_vector(:, :, :)
+        complex (wp), allocatable           :: complex_spectral_coefficients(:)
+        type (SpherepackWorkspace), private  :: workspace
+        type (GaussianGrid)                   :: grid
 
     contains
         
@@ -92,90 +73,90 @@ module type_sphere_mod
         !---------------------------------------------------------------------------------
         ! Public SPHEREPACK 3.2 methods
         !---------------------------------------------------------------------------------
-        procedure, public                    :: Get_colatitude_derivative !! Vtsgs
-        procedure, public                    :: Get_gradient !! Gradgs
-        procedure, public                    :: Invert_gradient !!  Igradgs
-        procedure, public                    :: Get_divergence !! Divgs
-        procedure, public                    :: Invert_divergence !!Idivgs
-        procedure, public                    :: Get_vorticity !! Vrtgs
-        procedure, public                    :: Invert_vorticity !! Ivrtgs
-        procedure, public                    :: Invert_divergence_and_vorticity !! Idvtgs
-        procedure, public                    :: Get_scalar_laplacian !! Slapgs
-        procedure, public                    :: Invert_helmholtz !! Islapgs
-        procedure, public                    :: Get_vector_laplacian !! Vlapgs
-        procedure, public                    :: Invert_vector_laplacian !! Ivlapgs
-        procedure, public                    :: Get_stream_function_and_velocity_potential
-        procedure, public                    :: Invert_stream_function_and_velocity_potential
-        procedure, public                    :: Perform_grid_transfers
-        procedure, public                    :: Perform_geo_math_coordinate_transfers
-        procedure, public                    :: Perform_scalar_analysis
-        procedure, public                    :: Perform_scalar_synthesis
-        procedure, public                    :: Perform_scalar_projection !! Shpg
-        procedure, public                    :: Perform_vector_analysis
-        procedure, public                    :: Perform_vector_synthesis
-        procedure, public                    :: Get_Legendre_functions
-        !procedure, public                    :: Get_Icosahedral_geodesic
-        !procedure, public                    :: Get_Multiple_ffts
-        procedure, nopass, public            :: Get_gaussian_weights_and_points !! Gaqd
-        !procedure, public                    :: Get_Three_dimensional_sphere_graphics
+        procedure, public                    :: get_colatitude_derivative !! Vtsgs
+        procedure, public                    :: get_gradient !! Gradgs
+        procedure, public                    :: invert_gradient !!  Igradgs
+        procedure, public                    :: get_divergence !! Divgs
+        procedure, public                    :: invert_divergence !!Idivgs
+        procedure, public                    :: get_vorticity !! Vrtgs
+        procedure, public                    :: invert_vorticity !! Ivrtgs
+        procedure, public                    :: invert_divergence_and_vorticity !! Idvtgs
+        procedure, public                    :: get_scalar_laplacian !! Slapgs
+        procedure, public                    :: invert_helmholtz !! Islapgs
+        procedure, public                    :: get_vector_laplacian !! Vlapgs
+        procedure, public                    :: invert_vector_laplacian !! Ivlapgs
+        procedure, public                    :: get_stream_function_and_velocity_potential
+        procedure, public                    :: invert_stream_function_and_velocity_potential
+        procedure, public                    :: perform_grid_transfers
+        procedure, public                    :: perform_geo_math_coordinate_transfers
+        procedure, public                    :: perform_scalar_analysis
+        procedure, public                    :: perform_scalar_synthesis
+        procedure, public                    :: perform_scalar_projection !! Shpg
+        procedure, public                    :: perform_vector_analysis
+        procedure, public                    :: perform_vector_synthesis
+        procedure, public                    :: get_Legendre_functions
+        !procedure, public                    :: get_Icosahedral_geodesic
+        !procedure, public                    :: get_Multiple_ffts
+        procedure, nopass, public            :: get_gaussian_weights_and_points !! Gaqd
+        !procedure, public                    :: get_Three_dimensional_sphere_graphics
         !---------------------------------------------------------------------------------
         ! Public complex methods
         !---------------------------------------------------------------------------------
-        procedure, public                    :: Perform_complex_analysis
-        procedure, public                    :: Perform_complex_synthesis
+        procedure, public                    :: perform_complex_analysis
+        procedure, public                    :: perform_complex_synthesis
         !---------------------------------------------------------------------------------
         ! Additional public methods
         !---------------------------------------------------------------------------------
-        procedure, non_overridable, public   :: Create
-        procedure, non_overridable, public   :: Destroy
-        procedure, non_overridable, public   :: Get_index
-        procedure, non_overridable, public   :: Get_coefficient
-        procedure, public                    :: Compute_surface_integral
-        procedure, public                    :: Get_rotation_operator
-        procedure, public                    :: Synthesize_from_spec
+        procedure,                    public   :: create => create_spherepackwrapper
+        procedure,                    public   :: destroy => destroy_spherepackwrapper
+        procedure, non_overridable, public   :: get_index
+        procedure, non_overridable, public   :: get_coefficient
+        procedure,                   public    :: compute_surface_integral
+        procedure,                   public    :: get_rotation_operator
+        procedure,                   public    :: Synthesize_from_spec
         !---------------------------------------------------------------------------------
         ! Private methods
         !---------------------------------------------------------------------------------
-        procedure, non_overridable         :: Assert_initialized
-        procedure                            :: Set_trigonometric_functions
-        procedure                            :: Set_spherical_unit_vectors
-        procedure                            :: Get_spherical_angle_components
-        procedure                            :: Set_scalar_symmetries
-        procedure                            :: Set_vector_symmetries
+        procedure, non_overridable         :: create_spherepackwrapper
+        procedure, non_overridable         :: destroy_spherepackwrapper
+        procedure, non_overridable         :: assert_initialized
+        procedure                            :: get_trigonometric_functions
+        procedure                            :: get_spherical_unit_vectors
+        procedure                            :: get_spherical_angle_components
+        procedure                            :: get_scalar_symmetries
+        procedure                            :: get_vector_symmetries
         !---------------------------------------------------------------------------------
         ! Finalizer
         !---------------------------------------------------------------------------------
-        final                                :: Finalize_sphere
+        final                                :: finalize_spherepackwrapper
         !---------------------------------------------------------------------------------
 
-    end type sphere_t
+    end type SpherepackWrapper
 
 contains
     !
     !*****************************************************************************************
     !
-    subroutine Create( this, nlat, nlon, isym, itype )
+    subroutine create_spherepackwrapper( this, nlat, nlon, isym, itype )
         !
         !< Purpose:
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        class (sphere_t), intent (in out)        :: this
-        integer (IP),     intent (in)            :: nlat
-        integer (IP),     intent (in)            :: nlon
-        integer (IP),     intent (in), optional  :: isym      !! Either 0, 1, or 2
-        integer (IP),     intent (in), optional  :: itype     !! Either 0, 1, 2, 3, ..., 8
-        !character (*), intent (in), optional :: grid_type !! Either '(GAU)' or '(REG)'
+        class (SpherepackWrapper), intent (in out)        :: this
+        integer (ip),     intent (in)            :: nlat
+        integer (ip),     intent (in)            :: nlon
+        integer (ip),     intent (in), optional  :: isym      !! Either 0, 1, or 2
+        integer (ip),     intent (in), optional  :: itype     !! Either 0, 1, 2, 3, ..., 8
         !--------------------------------------------------------------------------------
 
         !--------------------------------------------------------------------------------
         ! Check initialization flag
-        !--------------------------------------------------------------------------------
 
         if ( this%initialized ) then
 
-            write( stderr, '(A)' ) 'ERROR: TYPE (sphere_t)'
-            write( stderr, '(A)' ) 'You must destroy object before calling CREATE'
+            write( stderr, '(A)' ) 'ERROR: TYPE (SpherepackWrapper)'
+            write( stderr, '(A)' ) 'You must destroy object before calling create_spherepackwrapper'
 
         end if
 
@@ -191,14 +172,14 @@ contains
         ! Set scalar symmetries
         if ( present( isym ) ) then
 
-            call this%Set_scalar_symmetries( isym )
+            call this%get_scalar_symmetries( isym )
 
         end if
 
         ! Set vector symmetries
         if (present (itype) ) then
 
-            call this%Set_vector_symmetries( itype )
+            call this%get_vector_symmetries( itype )
 
         end if
 
@@ -217,8 +198,8 @@ contains
             ! Check allocate status
             if ( allocate_status /= 0 ) then
 
-                write( stderr, '(A)' ) 'TYPE (sphere_t)'
-                write( stderr, '(A)' ) 'Allocating COMPLEX_SPECTRAL_COEFFICIENTS failed in CREATE'
+                write( stderr, '(A)' ) 'TYPE (SpherepackWrapper)'
+                write( stderr, '(A)' ) 'Allocating COMPLEX_SPECTRAL_COEFFICIENTS failed in create_spherepackwrapper'
                 write( stderr, '(A)' ) trim( error_message )
 
             end if
@@ -226,18 +207,18 @@ contains
         end associate
 
         !--------------------------------------------------------------------------------
-        ! Create derived data types
+        ! create derived data types
         !--------------------------------------------------------------------------------
 
-        call this%grid%Create( nlat, nlon )
-        call this%workspace%Create( nlat, nlon )
+        call this%grid%create( nlat, nlon )
+        call this%workspace%create( nlat, nlon )
 
 
         !--------------------------------------------------------------------------------
         ! Set frequently used trigonometric functions
         !--------------------------------------------------------------------------------
 
-        call this%Set_trigonometric_functions( &
+        call this%get_trigonometric_functions( &
             this%grid%latitudes, &
             this%grid%longitudes )
 
@@ -245,7 +226,7 @@ contains
         ! Set spherical unit vectors to compute polar and azimuthal components for vector functions
         !--------------------------------------------------------------------------------
 
-        call this%Set_spherical_unit_vectors( &
+        call this%get_spherical_unit_vectors( &
             this%sint, &
             this%cost, &
             this%sinp, &
@@ -257,17 +238,17 @@ contains
 
         this%initialized = .true.
         
-    end subroutine Create
+    end subroutine create_spherepackwrapper
     !
     !*****************************************************************************************
     !
-    subroutine Destroy( this )
+    subroutine destroy_spherepackwrapper( this )
         !
         !< Purpose:
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        class (sphere_t), intent (in out) :: this
+        class (SpherepackWrapper), intent (in out) :: this
         !--------------------------------------------------------------------------------
 
         !--------------------------------------------------------------------------------
@@ -303,8 +284,8 @@ contains
             ! Check deallocation status
             if ( deallocate_status /= 0 ) then
 
-                write( stderr, '(A)' ) 'TYPE (sphere_t)'
-                write( stderr, '(A)' ) 'Deallocating COMPLEX_SPECTRAL_COEFFICIENTS failed in DESTROY'
+                write( stderr, '(A)' ) 'TYPE (SpherepackWrapper)'
+                write( stderr, '(A)' ) 'Deallocating COMPLEX_SPECTRAL_COEFFICIENTS failed in destroy_spherepackwrapper'
                 write( stderr, '(A)' ) trim( error_message )
 
             end if
@@ -312,11 +293,11 @@ contains
         end if
 
         !--------------------------------------------------------------------------------
-        ! Destroy derived data types
+        ! destroy derived data types
         !--------------------------------------------------------------------------------
 
-        call this%grid%Destroy()
-        call this%workspace%Destroy()
+        call this%grid%destroy()
+        call this%workspace%destroy()
 
         !--------------------------------------------------------------------------------
         ! Deallocate trigonometric functions
@@ -334,8 +315,8 @@ contains
             ! Check deallocation status
             if ( deallocate_status /= 0 ) then
 
-                write( stderr, '(A)' ) 'TYPE (sphere_t)'
-                write( stderr, '(A)' ) 'Deallocating SINT failed in DESTROY'
+                write( stderr, '(A)' ) 'TYPE (SpherepackWrapper)'
+                write( stderr, '(A)' ) 'Deallocating SINT failed in destroy_spherepackwrapper'
                 write( stderr, '(A)' ) trim( error_message )
 
             end if
@@ -353,8 +334,8 @@ contains
             ! Check deallocation status
             if ( deallocate_status /= 0 ) then
 
-                write( stderr, '(A)' ) 'TYPE (sphere_t)'
-                write( stderr, '(A)' ) 'Deallocating COST failed in DESTROY'
+                write( stderr, '(A)' ) 'TYPE (SpherepackWrapper)'
+                write( stderr, '(A)' ) 'Deallocating COST failed in destroy_spherepackwrapper'
                 write( stderr, '(A)' ) trim( error_message )
 
             end if
@@ -372,8 +353,8 @@ contains
             ! Check deallocation status
             if ( deallocate_status /= 0 ) then
 
-                write( stderr, '(A)' ) 'TYPE (sphere_t)'
-                write( stderr, '(A)' ) 'Deallocating SINP failed in DESTROY'
+                write( stderr, '(A)' ) 'TYPE (SpherepackWrapper)'
+                write( stderr, '(A)' ) 'Deallocating SINP failed in destroy_spherepackwrapper'
                 write( stderr, '(A)' ) trim( error_message )
 
             end if
@@ -392,8 +373,8 @@ contains
             ! Check deallocation status
             if ( deallocate_status /= 0 ) then
 
-                write( stderr, '(A)' ) 'TYPE (sphere_t)'
-                write( stderr, '(A)' ) 'Deallocating COSP failed in DESTROY'
+                write( stderr, '(A)' ) 'TYPE (SpherepackWrapper)'
+                write( stderr, '(A)' ) 'Deallocating COSP failed in destroy_spherepackwrapper'
                 write( stderr, '(A)' ) trim( error_message )
 
             end if
@@ -416,8 +397,8 @@ contains
             ! Check deallocation status
             if ( deallocate_status /= 0 ) then
 
-                write( stderr, '(A)' ) 'TYPE (sphere_t)'
-                write( stderr, '(A)' ) 'Deallocating RADIAL_UNIT_VECTOR failed in DESTROY'
+                write( stderr, '(A)' ) 'TYPE (SpherepackWrapper)'
+                write( stderr, '(A)' ) 'Deallocating RADIAL_UNIT_VECTOR failed in destroy_spherepackwrapper'
                 write( stderr, '(A)' ) trim( error_message )
 
             end if
@@ -435,8 +416,8 @@ contains
             ! Check deallocation status
             if ( deallocate_status /= 0 ) then
 
-                write( stderr, '(A)' ) 'TYPE (sphere_t)'
-                write( stderr, '(A)' ) 'Deallocating POLAR_UNIT_VECTOR failed in DESTROY'
+                write( stderr, '(A)' ) 'TYPE (SpherepackWrapper)'
+                write( stderr, '(A)' ) 'Deallocating POLAR_UNIT_VECTOR failed in destroy_spherepackwrapper'
                 write( stderr, '(A)' ) trim( error_message )
 
             end if
@@ -454,8 +435,8 @@ contains
             ! Check deallocation status
             if ( deallocate_status /= 0 ) then
 
-                write( stderr, '(A)' ) 'TYPE (sphere_t)'
-                write( stderr, '(A)' ) 'Deallocating AZIMUTHAL_UNIT_VECTOR failed in DESTROY'
+                write( stderr, '(A)' ) 'TYPE (SpherepackWrapper)'
+                write( stderr, '(A)' ) 'Deallocating AZIMUTHAL_UNIT_VECTOR failed in destroy_spherepackwrapper'
                 write( stderr, '(A)' ) trim( error_message )
 
             end if
@@ -467,17 +448,17 @@ contains
 
         this%initialized = .false.
 
-    end subroutine Destroy
+    end subroutine destroy_spherepackwrapper
     !
     !*****************************************************************************************
     !
-    subroutine Assert_initialized( this )
+    subroutine assert_initialized( this )
         !
         !< Purpose:
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        class (sphere_t), intent (in out)    :: this
+        class (SpherepackWrapper), intent (in out)    :: this
         !--------------------------------------------------------------------------------
 
         ! Check status
@@ -485,11 +466,11 @@ contains
             error stop 'ERROR: You must instantiate type(sphere_t) before calling methods'
         end if
 
-    end subroutine Assert_initialized
+    end subroutine assert_initialized
     !
     !*****************************************************************************************
     !
-    function Get_index( this, n, m ) result( return_value )
+    function get_index( this, n, m ) result( return_value )
         !
         !< Purpose:
         ! The spectral data is assumed to be in a complex array of dimension
@@ -515,7 +496,7 @@ contains
         ! In modern Fortran syntax, values of m (degree) and n (order)
         ! as a function of the index nm are:
         !
-        ! integer (IP), dimension ((MTRUNC+1)*(MTRUNC+2)/2) :: indxm, indxn
+        ! integer (ip), dimension ((MTRUNC+1)*(MTRUNC+2)/2) :: indxm, indxn
         ! indxm = [((m, n=m, MTRUNC), m=0, MTRUNC)]
         ! indxn = [((n, n=m, MTRUNC), m=0, MTRUNC)]
         !
@@ -525,14 +506,14 @@ contains
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        class (sphere_t), intent (in out)  :: this
-        integer (IP),     intent (in)      :: n
-        integer (IP),     intent (in)      :: m
-        integer (IP)                       :: return_value
+        class (SpherepackWrapper), intent (in out)  :: this
+        integer (ip),     intent (in)      :: n
+        integer (ip),     intent (in)      :: m
+        integer (ip):: return_value
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
         !--------------------------------------------------------------------------------
-        integer (IP) :: i !! Counter
+        integer (ip):: i !! Counter
         !--------------------------------------------------------------------------------
 
         associate( ntrunc => this%NTRUNC )
@@ -549,32 +530,32 @@ contains
 
         end associate
 
-    end function Get_index
+    end function get_index
     !
     !*****************************************************************************************
     !
-    function Get_coefficient( this, n, m ) result ( return_value )
+    function get_coefficient( this, n, m ) result ( return_value )
         !
         !< Purpose:
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        class (sphere_t), intent (in out)    :: this
-        integer (IP),     intent (in)        :: n
-        integer (IP),     intent (in)        :: m
-        complex (WP)                         :: return_value
+        class (SpherepackWrapper), intent (in out)    :: this
+        integer (ip),     intent (in)        :: n
+        integer (ip),     intent (in)        :: m
+        complex (wp):: return_value
         !--------------------------------------------------------------------------------
 
         associate( &
             ntrunc   => this%NTRUNC, &
-            nm       => this%Get_index( n, m ), &
-            nm_conjg => this%Get_index(n, -m ), &
+            nm       => this%get_index( n, m ), &
+            nm_conjg => this%get_index(n, -m ), &
             psi      => this%complex_spectral_coefficients &
             )
 
             if ( m < 0 .and. nm_conjg > 0 ) then
 
-                return_value = ( (-1.0_WP)**(-m) ) * conjg( psi(nm_conjg) )
+                return_value = ( (-1.0_wp)**(-m) ) * conjg( psi(nm_conjg) )
 
             else if ( nm > 0 ) then
 
@@ -582,130 +563,117 @@ contains
 
             else
 
-                return_value = 0.0_WP
+                return_value = 0.0_wp
 
             end if
 
         end associate
 
-    end function Get_coefficient
+    end function get_coefficient
     !
     !*****************************************************************************************
     !
-    subroutine Set_scalar_symmetries( this, isym )
+    subroutine get_scalar_symmetries( this, isym )
         !
         !< Purpose:
         !
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        class (sphere_t), intent (in out) :: this
-        integer (IP),     intent (in)     :: isym
+        class (SpherepackWrapper), intent (in out) :: this
+        integer (ip),     intent (in)     :: isym
         !--------------------------------------------------------------------------------
 
-        if ( isym == 2 ) then
+        select case (isym)
+            case (2)
+        		
+                this%SCALAR_SYMMETRIES = isym
+            case (1)
+        		
+                this%SCALAR_SYMMETRIES = isym
+            case (0)
+        		
+                this%SCALAR_SYMMETRIES = isym
+            case default
+        		
+                ! Handle invalid symmetry arguments
+                write( stderr, '(A)' )     'TYPE (SpherepackWrapper) in get_SCALAR_SYMMETRIES'
+                write( stderr, '(A, I2)' ) 'Optional argument isym = ', isym
+                write( stderr, '(A)' )     'must be either 0, 1, or 2 (default isym = 0)'
+        end select
 
-            this%SCALAR_SYMMETRIES = isym
-
-        else if ( isym == 1) then
-
-            this%SCALAR_SYMMETRIES = isym
-
-        else if ( isym == 0 ) then
-
-            this%SCALAR_SYMMETRIES = isym
-
-        else
-
-            ! Handle invalid symmetry arguments
-            write( stderr, '(A)' )     'TYPE (sphere_t) in SET_SCALAR_SYMMETRIES'
-            write( stderr, '(A, I2)' ) 'Optional argument isym = ', isym
-            write( stderr, '(A)' )     'must be either 0, 1, or 2 (default isym = 0)'
-
-        end if
-
-    end subroutine Set_scalar_symmetries
+    end subroutine get_scalar_symmetries
         !
     !*****************************************************************************************
     !
-    subroutine Set_vector_symmetries( this, itype )
+    subroutine get_vector_symmetries( this, itype )
         !
         !< Purpose:
         !
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        class (sphere_t), intent (in out)  :: this
-        integer (IP),     intent (in)      :: itype
+        class (SpherepackWrapper), intent (in out)  :: this
+        integer (ip),     intent (in)      :: itype
         !--------------------------------------------------------------------------------
 
-        if ( itype == 8 ) then
+        select case (itype)
+            case (8)
+        		
+                this%VECTOR_SYMMETRIES = itype
+                return
+            case (7)
+        		
+                this%VECTOR_SYMMETRIES = itype
+                return
+            case (6)
+        		
+                this%VECTOR_SYMMETRIES = itype
+                return
+            case (5)
+        		
+                this%VECTOR_SYMMETRIES = itype
+                return
+            case (4)
+        		
+                this%VECTOR_SYMMETRIES = itype
+                return
+            case (3)
+        		
+                this%VECTOR_SYMMETRIES = itype
+                return
+            case (2)
+        		
+                this%VECTOR_SYMMETRIES = itype
+                return
+            case (1)
+        		
+                this%VECTOR_SYMMETRIES = itype
+                return
+            case (0)
+        		
+                this%VECTOR_SYMMETRIES = itype
+                return
+            case default
+        		
+                ! Handle invalid symmetry arguments
+                write( stderr, '(A)' )     'TYPE (SpherepackWrapper) in get_VECTOR_SYMMETRIES'
+                write( stderr, '(A, I2)' ) 'Optional argument itype = ', itype
+                write( stderr, '(A)' )     'must be either 0, 1, 2, ..., 8 (default itype = 0)'
+        end select
 
-            this%VECTOR_SYMMETRIES = itype
-            return
-
-        else if ( itype == 7) then
-
-            this%VECTOR_SYMMETRIES = itype
-            return
-
-        else if ( itype == 6) then
-
-            this%VECTOR_SYMMETRIES = itype
-            return
-
-        else if ( itype == 5) then
-
-            this%VECTOR_SYMMETRIES = itype
-            return
-
-        else if ( itype == 4) then
-
-            this%VECTOR_SYMMETRIES = itype
-            return
-
-        else if ( itype == 3) then
-
-            this%VECTOR_SYMMETRIES = itype
-            return
-
-        else if ( itype == 2) then
-
-            this%VECTOR_SYMMETRIES = itype
-            return
-
-        else if ( itype == 1) then
-
-            this%VECTOR_SYMMETRIES = itype
-            return
-
-
-        else if ( itype == 0 ) then
-
-            this%VECTOR_SYMMETRIES = itype
-            return
-
-        else
-
-            ! Handle invalid symmetry arguments
-            write( stderr, '(A)' )     'TYPE (sphere_t) in SET_VECTOR_SYMMETRIES'
-            write( stderr, '(A, I2)' ) 'Optional argument itype = ', itype
-            write( stderr, '(A)' )     'must be either 0, 1, 2, ..., 8 (default itype = 0)'
-
-        end if
-
-    end subroutine Set_vector_symmetries
+    end subroutine get_vector_symmetries
     !
     !*****************************************************************************************
     !
-    subroutine Set_trigonometric_functions( this, theta, phi )
+    subroutine get_trigonometric_functions( this, theta, phi )
         !
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        class (sphere_t), intent (in out) :: this
-        real (WP),        intent (in)     :: theta(:)
-        real (WP),        intent (in)     :: phi(:)
+        class (SpherepackWrapper), intent (in out) :: this
+        real (wp),        intent (in)     :: theta(:)
+        real (wp),        intent (in)     :: phi(:)
         !--------------------------------------------------------------------------------
 
         !--------------------------------------------------------------------------------
@@ -714,9 +682,9 @@ contains
 
         if ( .not. allocated( this%grid%latitudes ) ) then
 
-            write( stderr, '(A)' ) 'TYPE (sphere_t) in SET_TRIGONOMETRIC_FUNCTIONS'
+            write( stderr, '(A)' ) 'TYPE (SpherepackWrapper) in get_TRIGONOMETRIC_FUNCTIONS'
             write( stderr, '(A)' ) 'You must allocate LATITUDES '
-            write( stderr, '(A)' ) 'before calling SET_TRIGONOMETRIC_FUNCTIONS'
+            write( stderr, '(A)' ) 'before calling get_TRIGONOMETRIC_FUNCTIONS'
 
         end if
 
@@ -726,9 +694,9 @@ contains
 
         if ( .not. allocated( this%grid%longitudes ) ) then
 
-            write( stderr, '(A)' ) 'TYPE (sphere_t) in SET_TRIGONOMETRIC_FUNCTIONS'
+            write( stderr, '(A)' ) 'TYPE (SpherepackWrapper) in get_TRIGONOMETRIC_FUNCTIONS'
             write( stderr, '(A)' ) 'You must allocate LONGITUDES '
-            write( stderr, '(A)' ) 'before calling SET_TRIGONOMETRIC_FUNCTIONS'
+            write( stderr, '(A)' ) 'before calling get_TRIGONOMETRIC_FUNCTIONS'
 
         end if
 
@@ -752,8 +720,8 @@ contains
             ! Check allocation status
             if ( allocate_status /= 0 ) then
 
-                write( stderr, '(A)') 'TYPE (sphere_t)'
-                write( stderr, '(A)') 'Allocation failed in SET_TRIGONOMETRIC_FUNCTIONS'
+                write( stderr, '(A)') 'TYPE (SpherepackWrapper)'
+                write( stderr, '(A)') 'Allocation failed in get_TRIGONOMETRIC_FUNCTIONS'
                 write( stderr, '(A)') trim( error_message )
 
             end if
@@ -761,7 +729,7 @@ contains
         end associate
 
         !--------------------------------------------------------------------------------
-        ! Compute trigonometric functions
+        ! compute trigonometric functions
         !--------------------------------------------------------------------------------
 
         this%sint = sin( theta )
@@ -769,11 +737,11 @@ contains
         this%sinp = sin( phi )
         this%cosp = cos( phi )
 
-    end subroutine Set_trigonometric_functions
+    end subroutine get_trigonometric_functions
     !
     !*****************************************************************************************
     !
-    subroutine Set_spherical_unit_vectors( this, sint, cost, sinp, cosp )
+    subroutine get_spherical_unit_vectors( this, sint, cost, sinp, cosp )
         !
         !< Purpose:
         ! Sets the spherical unit vectors
@@ -785,15 +753,16 @@ contains
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        class (sphere_t), intent (in out)   :: this
-        real (WP),        intent (in)       :: sint(:)
-        real (WP),        intent (in)       :: cost(:)
-        real (WP),        intent (in)       :: sinp(:)
-        real (WP),        intent (in)       :: cosp(:)
+        class (SpherepackWrapper), intent (in out)   :: this
+        real (wp),        intent (in)       :: sint(:)
+        real (wp),        intent (in)       :: cost(:)
+        real (wp),        intent (in)       :: sinp(:)
+        real (wp),        intent (in)       :: cosp(:)
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
         !--------------------------------------------------------------------------------
-        integer (IP)  ::  k, l !! Counters
+        integer (ip)::  k !! Counters
+        integer (ip):: l !! Counters
         !--------------------------------------------------------------------------------
 
         dimensions: associate( &
@@ -812,8 +781,8 @@ contains
             ! Check allocate status
             if ( allocate_status /= 0 ) then
 
-                write( stderr, '(A)') 'TYPE (sphere_t)'
-                write( stderr, '(A)') 'Allocation failed in SET_SPHERICAL_UNIT_VECTORS'
+                write( stderr, '(A)') 'TYPE (SpherepackWrapper)'
+                write( stderr, '(A)') 'Allocation failed in get_SPHERICAL_UNIT_VECTORS'
                 write( stderr, '(A)') trim( error_message )
 
             end if
@@ -824,7 +793,7 @@ contains
                 phi   => this%azimuthal_unit_vector &
                 )
 
-                ! Compute spherical unit vectors
+                ! compute spherical unit vectors
                 do l = 1, nlon
                     do k = 1, nlat
 
@@ -844,7 +813,7 @@ contains
                         phi(:, k, l) = &
                             [ -sinp(l), &
                             cosp(l), &
-                            0.0_WP ]
+                            0.0_wp ]
                     end do
                 end do
 
@@ -852,11 +821,11 @@ contains
 
         end associate dimensions
 
-    end subroutine Set_spherical_unit_vectors
+    end subroutine get_spherical_unit_vectors
     !
     !*****************************************************************************************
     !
-    subroutine Perform_complex_analysis( this, scalar_function )
+    subroutine perform_complex_analysis( this, scalar_function )
         !
         !<Purpose:
         !
@@ -873,7 +842,7 @@ contains
         ! In modern Fortran syntax, values of m (degree) and n (order) as a function
         ! of the index nm are:
         !
-        ! integer (IP), dimension ((mtrunc+1)*(mtrunc+2)/2) :: indxm, indxn
+        ! integer (ip), dimension ((mtrunc+1)*(mtrunc+2)/2) :: indxm, indxn
         ! indxm = [((m, n=m, mtrunc), m=0, mtrunc)]
         ! indxn = [((n, n=m, mtrunc), m=0, mtrunc)]
         !
@@ -883,25 +852,26 @@ contains
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        class (sphere_t), intent (in out)  :: this
-        real (WP),        intent (in)      :: scalar_function(:, :)
+        class (SpherepackWrapper), intent (in out)  :: this
+        real (wp),        intent (in)      :: scalar_function(:, :)
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
         !--------------------------------------------------------------------------------
-        integer (IP) :: m,  n  !< counters
+        integer (ip):: m  !< counters
+        integer (ip)::  n  !< counters
         !--------------------------------------------------------------------------------
         
         !--------------------------------------------------------------------------------
         ! Check initialization flag
         !--------------------------------------------------------------------------------
 
-        call this%Assert_initialized()
+        call this%assert_initialized()
         
         !--------------------------------------------------------------------------------
-        ! Compute the (real) spherical harmonic coefficients
+        ! compute the (real) spherical harmonic coefficients
         !--------------------------------------------------------------------------------
 
-        call this%Perform_scalar_analysis( scalar_function )
+        call this%perform_scalar_analysis( scalar_function )
 
         !--------------------------------------------------------------------------------
         ! Set complex spherical harmonic coefficients
@@ -916,17 +886,17 @@ contains
 
             ! Fill complex array
             psi = cmplx( &
-                0.5_WP * [((a(m + 1, n + 1), n = m, ntrunc), m = 0, ntrunc)], &
-                0.5_WP * [((b(m + 1, n + 1), n = m, ntrunc), m = 0, ntrunc)], &
-                WP )
+                0.5_wp * [((a(m + 1, n + 1), n = m, ntrunc), m = 0, ntrunc)], &
+                0.5_wp * [((b(m + 1, n + 1), n = m, ntrunc), m = 0, ntrunc)], &
+                wp )
  
         end associate
 
-    end subroutine Perform_complex_analysis
+    end subroutine perform_complex_analysis
     !
     !*****************************************************************************************
     !
-    subroutine Perform_complex_synthesis( this, scalar_function )
+    subroutine perform_complex_synthesis( this, scalar_function )
         !
         !< Purpose:
         ! converts gridded input array (datagrid) to (complex) spherical harmonic coefficients
@@ -935,19 +905,20 @@ contains
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        class (sphere_t), intent (in out)  :: this
-        real (WP),        intent (out)     :: scalar_function(:, :)
+        class (SpherepackWrapper), intent (in out)  :: this
+        real (wp),        intent (out)     :: scalar_function(:, :)
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
         !--------------------------------------------------------------------------------
-        integer (IP) :: m, n  !! Counters
+        integer (ip):: m  !! Counters
+        integer (ip):: n  !! Counters
         !--------------------------------------------------------------------------------
 
         !--------------------------------------------------------------------------------
         ! Check initialization flag
         !--------------------------------------------------------------------------------
 
-        call this%Assert_initialized()
+        call this%assert_initialized()
 
         !--------------------------------------------------------------------------------
         ! Convert complex spherical harmonic coefficients to real version
@@ -964,13 +935,13 @@ contains
                 do n = m, ntrunc
                 
                     ! set the spectral index
-                    associate(nm => this%Get_index( n, m ))
+                    associate(nm => this%get_index( n, m ))
                 
                         ! set the real component
-                        a( m + 1, n + 1 ) = 2.0_WP * real( psi(nm) )
+                        a( m + 1, n + 1 ) = 2.0_wp * real( psi(nm) )
                 
                         ! set the imaginary component
-                        b( m + 1, n + 1 ) = 2.0_WP * aimag( psi(nm) )
+                        b( m + 1, n + 1 ) = 2.0_wp * aimag( psi(nm) )
 
                     end associate
                 end do
@@ -982,9 +953,9 @@ contains
         ! Synthesise the scalar function from the (real) harmonic coefficients
         !--------------------------------------------------------------------------------
 
-        call this%Perform_scalar_synthesis( scalar_function )
+        call this%perform_scalar_synthesis( scalar_function )
  
-    end subroutine Perform_complex_synthesis
+    end subroutine perform_complex_synthesis
     !
     !*****************************************************************************************
     !
@@ -997,20 +968,21 @@ contains
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        class (sphere_t), intent (in out)  :: this
-        complex (WP),     intent (in)      :: spec(:)
-        real (WP),        intent (out)     :: scalar_function(:, :)
+        class (SpherepackWrapper), intent (in out)  :: this
+        complex (wp),     intent (in)      :: spec(:)
+        real (wp),        intent (out)     :: scalar_function(:, :)
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
         !--------------------------------------------------------------------------------
-        integer (IP)                       :: m, n  !! Counters
+        integer (ip):: m  !! Counters
+        integer (ip):: n  !! Counters
         !--------------------------------------------------------------------------------
 
         !--------------------------------------------------------------------------------
         ! Check initialization flag
         !--------------------------------------------------------------------------------
 
-        call this%Assert_initialized()
+        call this%assert_initialized()
 
         !--------------------------------------------------------------------------------
         ! Convert complex coefficients to real version
@@ -1027,13 +999,13 @@ contains
                 do n = m, ntrunc
                 
                     ! set the spectral index
-                    spec_index: associate( nm => this%Get_index( n, m ) )
+                    spec_index: associate( nm => this%get_index( n, m ) )
                 
                         ! set the real component
-                        a(m + 1, n + 1) = 2.0_WP * real( spec(nm) )
+                        a(m + 1, n + 1) = 2.0_wp * real( spec(nm) )
                 
                         ! set the imaginary component
-                        b(m + 1, n + 1) = 2.0_WP * aimag( spec(nm) )
+                        b(m + 1, n + 1) = 2.0_wp * aimag( spec(nm) )
 
                     end associate spec_index
 
@@ -1046,13 +1018,13 @@ contains
         ! Synthesise the scalar function from the (real) harmonic coefficients
         !--------------------------------------------------------------------------------
 
-        call this%Perform_scalar_synthesis( scalar_function )
+        call this%perform_scalar_synthesis( scalar_function )
  
     end subroutine Synthesize_from_spec
     !
     !*****************************************************************************************
     !
-    subroutine Get_spherical_angle_components( this, &
+    subroutine get_spherical_angle_components( this, &
         vector_function, polar_component, azimuthal_component )
         !
         !< Purpose:
@@ -1060,17 +1032,18 @@ contains
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        class (sphere_t), intent (in out)  :: this
-        real (WP),        intent (in)      :: vector_function(:, :, :)
-        real (WP),        intent (out)     :: polar_component(:, :)
-        real (WP),        intent (out)     :: azimuthal_component(:, :)
+        class (SpherepackWrapper), intent (in out)  :: this
+        real (wp),        intent (in)      :: vector_function(:, :, :)
+        real (wp),        intent (out)     :: polar_component(:, :)
+        real (wp),        intent (out)     :: azimuthal_component(:, :)
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
         !--------------------------------------------------------------------------------
-        integer (IP)    :: k,  l        !! Counters
-        type (vector_t) :: theta        !! Polar unit vector
-        type (vector_t) :: phi          !! Azimuthal unit vector
-        type (vector_t) :: vector_field !! To convert array to vector
+        integer (ip):: k        !! Counters
+        integer (ip)::  l        !! Counters
+        type (ThreeDimensionalVector):: theta        !! Polar unit vector
+        type (ThreeDimensionalVector):: phi          !! Azimuthal unit vector
+        type (ThreeDimensionalVector):: vector_field !! To convert array to vector
         !--------------------------------------------------------------------------------
         
         !--------------------------------------------------------------------------------
@@ -1081,8 +1054,8 @@ contains
         ! Initialize arrays
         !--------------------------------------------------------------------------------
         
-        polar_component     = 0.0_WP
-        azimuthal_component = 0.0_WP
+        polar_component     = 0.0_wp
+        azimuthal_component = 0.0_wp
         
         !--------------------------------------------------------------------------------
         ! Calculate the spherical angle components
@@ -1113,33 +1086,34 @@ contains
 
         end associate
 
-    end subroutine Get_spherical_angle_components
+    end subroutine get_spherical_angle_components
     !
     !*****************************************************************************************
     !
-    subroutine Get_rotation_operator( this, scalar_function, rotation_operator)
+    subroutine get_rotation_operator( this, scalar_function, rotation_operator)
         !
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        class (sphere_t), intent (in out)  :: this
-        real (WP),        intent (in)      :: scalar_function(:, :)
-        real (WP),        intent (out)     :: rotation_operator(:, :, :)
+        class (SpherepackWrapper), intent (in out)  :: this
+        real (wp),        intent (in)      :: scalar_function(:, :)
+        real (wp),        intent (out)     :: rotation_operator(:, :, :)
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
         !--------------------------------------------------------------------------------
-        integer (IP)           :: k, l   !! Counters
-        type (vector_t)        :: theta  !! Polar unit vector
-        type (vector_t)        :: phi    !! Azimuthal unit vector
-        real (WP), allocatable :: polar_gradient_component(:, :)
-        real (WP), allocatable :: azimuthal_gradient_component(:, :)
+        integer (ip):: k   !! Counters
+        integer (ip):: l   !! Counters
+        type (ThreeDimensionalVector):: theta  !! Polar unit vector
+        type (ThreeDimensionalVector):: phi    !! Azimuthal unit vector
+        real (wp), allocatable :: polar_gradient_component(:, :)
+        real (wp), allocatable :: azimuthal_gradient_component(:, :)
         !--------------------------------------------------------------------------------
 
         !--------------------------------------------------------------------------------
         ! Check initialization flag
         !--------------------------------------------------------------------------------
 
-        call this%Assert_initialized()
+        call this%assert_initialized()
 
         !--------------------------------------------------------------------------------
         ! Allocate arrays
@@ -1160,8 +1134,8 @@ contains
             ! Check allocation status
             if ( allocate_status /= 0 ) then
 
-                write( stderr, '(A)' ) 'TYPE (sphere_t)'
-                write( stderr, '(A)' ) 'Allocation failed in GET_ROTATION_OPERATOR'
+                write( stderr, '(A)' ) 'TYPE (SpherepackWrapper)'
+                write( stderr, '(A)' ) 'Allocation failed in get_ROTATION_OPERATOR'
                 write( stderr, '(A)' ) trim( error_message )
 
             end if
@@ -1178,7 +1152,7 @@ contains
             grad_phi   => azimuthal_gradient_component &
             )
 
-            call this%Get_gradient( f, grad_theta, grad_phi )
+            call this%get_gradient( f, grad_theta, grad_phi )
 
         end associate
 
@@ -1193,7 +1167,7 @@ contains
             )
 
             ! Initialize array
-            R = 0.0_WP
+            r = 0.0_wp
 
             do l = 1, nlon
                 do k = 1, nlat
@@ -1207,7 +1181,7 @@ contains
                         grad_phi   => azimuthal_gradient_component(k, l) &
                         )
 
-                        R(:, k, l) = phi * grad_theta - theta * grad_phi
+                        r(:, k, l) = phi * grad_theta - theta * grad_phi
 
                     end associate
                 end do
@@ -1227,21 +1201,21 @@ contains
         ! Check deallocate status
         if ( deallocate_status /= 0 ) then
 
-            write( stderr, '(A)' ) 'TYPE (sphere_t)'
-            write( stderr, '(A)' ) 'Deallocation failed in GET_ROTATION_OPERATOR'
+            write( stderr, '(A)' ) 'TYPE (SpherepackWrapper)'
+            write( stderr, '(A)' ) 'Deallocation failed in get_ROTATION_OPERATOR'
             write( stderr, '(A)' ) trim( error_message )
 
         end if
 
-    end subroutine Get_rotation_operator
+    end subroutine get_rotation_operator
     !
     !*****************************************************************************************
     !
-    function Compute_surface_integral( this, scalar_function ) result( return_value )
+    function compute_surface_integral( this, scalar_function ) result( return_value )
         !
         !< Purpose:
         !
-        ! Computes the (scalar) surface integral on the sphere (S^2):
+        ! computes the (scalar) surface integral on the sphere (S^2):
         !
         ! * Trapezoidal rule    in phi:   0 <=  phi  <= 2*pi
         ! * Gaussian quadrature in theta: 0 <= theta <= pi
@@ -1256,21 +1230,21 @@ contains
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        class (sphere_t), intent (in out) :: this
-        real (WP),        intent (in)     :: scalar_function(:, :)
-        real (WP)                         :: return_value
+        class (SpherepackWrapper), intent (in out) :: this
+        real (wp),        intent (in)     :: scalar_function(:, :)
+        real (wp):: return_value
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
         !--------------------------------------------------------------------------------
-        integer (IP)           :: k            !! counter
-        real (WP), allocatable :: summation(:)
+        integer (ip):: k            !! counter
+        real (wp), allocatable :: summation(:)
         !--------------------------------------------------------------------------------
 
         !--------------------------------------------------------------------------------
         ! Check initialization flag
         !--------------------------------------------------------------------------------
 
-        call this%Assert_initialized()
+        call this%assert_initialized()
 
         !--------------------------------------------------------------------------------
         ! Allocate array
@@ -1287,8 +1261,8 @@ contains
             ! Check allocation status
             if ( allocate_status /= 0 ) then
 
-                write( stderr, '(A)' ) 'TYPE (sphere_t)'
-                write( stderr, '(A)' ) 'Allocation failed in COMPUTE_SURFACE_INTEGRAL'
+                write( stderr, '(A)' ) 'TYPE (SpherepackWrapper)'
+                write( stderr, '(A)' ) 'Allocation failed in compute_SURFACE_INTEGRAL'
                 write( stderr, '(A)' ) trim( error_message )
 
             end if
@@ -1296,16 +1270,16 @@ contains
         end associate
 
         !--------------------------------------------------------------------------------
-        ! Compute integral
+        ! compute integral
         !--------------------------------------------------------------------------------
 
         ! Initialize array
-        summation = 0.0_WP
+        summation = 0.0_wp
 
-        ! Compute the integrant
+        ! compute the integrant
         associate( &
             nlat => this%NLAT, &
-            Dphi => this%grid%MESH_PHI, &
+            Dphi => this%grid%mesh_phi, &
             wts  => this%grid%gaussian_weights, &
             f    => scalar_function &
             )
@@ -1313,7 +1287,7 @@ contains
             ! Apply trapezoidal rule
             do k = 1, nlat
 
-                summation(k) = sum( f(k, :) ) * Dphi
+                summation(k) = sum( f(k, :) ) * dphi
 
             end do
 
@@ -1337,38 +1311,39 @@ contains
         ! Check deallocate status
         if ( deallocate_status /= 0 ) then
 
-            write( stderr, '(A)' ) 'TYPE (sphere_t)'
-            write( stderr, '(A)' ) 'Deallocation failed in COMPUTE_SURFACE_INTEGRAL'
+            write( stderr, '(A)' ) 'TYPE (SpherepackWrapper)'
+            write( stderr, '(A)' ) 'Deallocation failed in compute_SURFACE_INTEGRAL'
             write( stderr, '(A)' ) trim( error_message )
 
         end if
 
-    end function Compute_surface_integral
+    end function compute_surface_integral
     !
     !*****************************************************************************************
     !
-    subroutine Compute_first_moment( this, scalar_function, first_moment )
+    subroutine compute_first_moment( this, scalar_function, first_moment )
         !
         !< Purpose:
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        class (sphere_t), intent (in out)  :: this
-        real (WP),        intent (in)      :: scalar_function(:, :)
-        type (vector_t),  intent (out)     :: first_moment
+        class (SpherepackWrapper), intent (in out)  :: this
+        real (wp),        intent (in)      :: scalar_function(:, :)
+        type (ThreeDimensionalVector),  intent (out)     :: first_moment
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
         !--------------------------------------------------------------------------------
-        integer (IP)           :: k,  l             !! Counters
-        type (vector_t)        :: u                 !! radial unit vector
-        real (WP), allocatable :: integrant(:, :, :)
+        integer (ip):: k             !! Counters
+        integer (ip)::  l             !! Counters
+        type (ThreeDimensionalVector):: u                 !! radial unit vector
+        real (wp), allocatable :: integrant(:, :, :)
         !--------------------------------------------------------------------------------
 
         !--------------------------------------------------------------------------------
         ! Check initialization flag
         !--------------------------------------------------------------------------------
 
-        call this%Assert_initialized()
+        call this%assert_initialized()
 
         !--------------------------------------------------------------------------------
         ! Allocate array
@@ -1388,8 +1363,8 @@ contains
             ! Check allocation status
             if ( allocate_status /= 0 ) then
 
-                write( stderr, '(A)' ) 'TYPE (sphere_t)'
-                write( stderr, '(A)' ) 'Allocation failed in COMPUTE_FIRST_MOMENT'
+                write( stderr, '(A)' ) 'TYPE (SpherepackWrapper)'
+                write( stderr, '(A)' ) 'Allocation failed in compute_FIRST_MOMENT'
                 write( stderr, '(A)' ) trim( error_message )
 
             end if
@@ -1397,7 +1372,7 @@ contains
         end associate
 
         !--------------------------------------------------------------------------------
-        ! Compute integrant
+        ! compute integrant
         !--------------------------------------------------------------------------------
 
         associate( &
@@ -1406,9 +1381,9 @@ contains
             )
 
             ! Initialize array
-            integrant = 0.0_WP
+            integrant = 0.0_wp
 
-            ! Compute integrant
+            ! compute integrant
             do l = 1, nlon
                 do k = 1, nlat
 
@@ -1428,7 +1403,7 @@ contains
         end associate
 
         !--------------------------------------------------------------------------------
-        ! Compute first moment
+        ! compute first moment
         !--------------------------------------------------------------------------------
 
 
@@ -1439,11 +1414,11 @@ contains
             f3 => integrant(:, :, 3) &
             )
 
-            M%x = this%Compute_surface_integral( f1 )
+            m%x = this%compute_surface_integral( f1 )
 
-            M%y = this%Compute_surface_integral( f2 )
+            m%y = this%compute_surface_integral( f2 )
 
-            M%z = this%Compute_surface_integral( f3 )
+            m%z = this%compute_surface_integral( f3 )
 
         end associate
 
@@ -1459,13 +1434,13 @@ contains
         ! Check deallocate status
         if ( deallocate_status /= 0 ) then
 
-            write( stderr, '(A)' ) 'TYPE (sphere_t)'
-            write( stderr, '(A)' ) 'Deallocation failed in COMPUTE_FIRST_MOMENT'
+            write( stderr, '(A)' ) 'TYPE (SpherepackWrapper)'
+            write( stderr, '(A)' ) 'Deallocation failed in compute_FIRST_MOMENT'
             write( stderr, '(A)' ) trim( error_message )
 
         end if
 
-    end subroutine Compute_first_moment
+    end subroutine compute_first_moment
     !
     !*****************************************************************************************
     !
@@ -1473,7 +1448,7 @@ contains
     !
     !*****************************************************************************************
     !
-    subroutine Get_colatitude_derivative( this, polar_component, azimuthal_component )
+    subroutine get_colatitude_derivative( this, polar_component, azimuthal_component )
         !
         !< Purpose:
         !
@@ -1482,17 +1457,17 @@ contains
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        class (sphere_t), intent (in out)   :: this
-        real (WP),        intent (out)      :: polar_component(:)     !! vt
-        real (WP),        intent (out)      :: azimuthal_component(:) !! wt
+        class (SpherepackWrapper), intent (in out)   :: this
+        real (wp),        intent (out)      :: polar_component(:)     !! vt
+        real (wp),        intent (out)      :: azimuthal_component(:) !! wt
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
         !--------------------------------------------------------------------------------
-        integer (IP):: ierror
+        integer (ip):: ierror
         !--------------------------------------------------------------------------------
 
         ! Check status
-        call this%Assert_initialized()
+        call this%assert_initialized()
 
         !        ! TODO incorporate Vtsgsi into type(workspace)
         !        subroutine vtsgsi(nlat, nlon, wvts, lwvts, work, lwork, dwork, ldwork, ierror)
@@ -1514,11 +1489,11 @@ contains
             return
         end if
 
-    end subroutine Get_colatitude_derivative
+    end subroutine get_colatitude_derivative
     !
     !*****************************************************************************************
     !
-    subroutine Get_gradient( this, scalar_function, &
+    subroutine get_gradient( this, scalar_function, &
         polar_gradient_component, azimuthal_gradient_component )
         !
         ! SPHEREPACK 3.2 documentation
@@ -1709,30 +1684,30 @@ contains
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        class (sphere_t), intent (in out)  :: this
-        real (WP),        intent (in)      :: scalar_function(:, :)
-        real (WP),        intent (out)     :: polar_gradient_component(:, :)
-        real (WP),        intent (out)     :: azimuthal_gradient_component(:, :)
+        class (SpherepackWrapper), intent (in out)  :: this
+        real (wp),        intent (in)      :: scalar_function(:, :)
+        real (wp),        intent (out)     :: polar_gradient_component(:, :)
+        real (wp),        intent (out)     :: azimuthal_gradient_component(:, :)
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
         !--------------------------------------------------------------------------------
-        integer (IP):: error_flag
+        integer (ip):: error_flag
         !--------------------------------------------------------------------------------
         
         !--------------------------------------------------------------------------------
         ! Check initialization flag
         !--------------------------------------------------------------------------------
 
-        call this%Assert_initialized()
+        call this%assert_initialized()
 
         !--------------------------------------------------------------------------------
-        ! Compute the (real) spherical harmonic coefficients
+        ! compute the (real) spherical harmonic coefficients
         !--------------------------------------------------------------------------------
 
-        call this%Perform_scalar_analysis( scalar_function )
+        call this%perform_scalar_analysis( scalar_function )
 
         !--------------------------------------------------------------------------------
-        ! Compute gradient
+        ! compute gradient
         !--------------------------------------------------------------------------------
 
         associate( &
@@ -1770,7 +1745,7 @@ contains
 
         else
 
-            write( stderr, '(A)') 'SPHEREPACK 3.2 error: GET_GRADIENT'
+            write( stderr, '(A)') 'SPHEREPACK 3.2 error: get_GRADIENT'
 
             if ( error_flag == 1 ) then
 
@@ -1844,11 +1819,11 @@ contains
             end if
         end if
 
-    end subroutine Get_gradient
+    end subroutine get_gradient
     !
     !*****************************************************************************************
     !
-    subroutine Invert_gradient( this, &
+    subroutine invert_gradient( this, &
         polar_gradient_component, azimuthal_gradient_component, &
         scalar_function )
         !
@@ -2041,21 +2016,21 @@ contains
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        class (sphere_t), intent (in out) :: this
-        real (WP),        intent (in)     :: polar_gradient_component(:, :)
-        real (WP),        intent (in)     :: azimuthal_gradient_component(:, :)
-        real (WP),        intent (out)    :: scalar_function(:, :)
+        class (SpherepackWrapper), intent (in out) :: this
+        real (wp),        intent (in)     :: polar_gradient_component(:, :)
+        real (wp),        intent (in)     :: azimuthal_gradient_component(:, :)
+        real (wp),        intent (out)    :: scalar_function(:, :)
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
         !--------------------------------------------------------------------------------
-        integer (IP)                      :: error_flag
+        integer (ip):: error_flag
         !--------------------------------------------------------------------------------
 
         !--------------------------------------------------------------------------------
         ! Check initialization flag
         !--------------------------------------------------------------------------------
 
-        call this%Assert_initialized()
+        call this%assert_initialized()
 
         !--------------------------------------------------------------------------------
         ! Perform vector analysis
@@ -2097,11 +2072,11 @@ contains
 
          !!!!TODO
 
-    end subroutine Invert_gradient
+    end subroutine invert_gradient
     !
     !*****************************************************************************************
     !
-    subroutine Get_divergence( this, vector_field, divergence )
+    subroutine get_divergence( this, vector_field, divergence )
         !
         ! Reference:
         ! http://www2.cisl.ucar.edu/spherepack/documentation#divgs.html
@@ -2291,26 +2266,26 @@ contains
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        class (sphere_t), intent (in out) :: this
-        real (WP),        intent (in)     :: vector_field (:, :, :)
-        real (WP),        intent (out)    :: divergence (:, :)
+        class (SpherepackWrapper), intent (in out) :: this
+        real (wp),        intent (in)     :: vector_field (:, :, :)
+        real (wp),        intent (out)    :: divergence (:, :)
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
         !--------------------------------------------------------------------------------
-        integer (IP):: error_flag
+        integer (ip):: error_flag
         !--------------------------------------------------------------------------------
 
         !--------------------------------------------------------------------------------
         ! Check initialization flag
         !--------------------------------------------------------------------------------
 
-        call this%Assert_initialized()
+        call this%assert_initialized()
 
         !--------------------------------------------------------------------------------
         ! Calculate the (real) vector harmonic coefficients
         !--------------------------------------------------------------------------------
 
-        call this%Perform_vector_analysis( vector_field )
+        call this%perform_vector_analysis( vector_field )
 
         !--------------------------------------------------------------------------------
         ! Invoke SPHEREPACK 3.2
@@ -2350,7 +2325,7 @@ contains
 
         else
 
-            write( stderr, '(A)') 'SPHEREPACK 3.2 error: GET_DIVERGENCE'
+            write( stderr, '(A)') 'SPHEREPACK 3.2 error: get_DIVERGENCE'
 
             if ( error_flag == 1 ) then
 
@@ -2416,26 +2391,26 @@ contains
         end if
 
 
-    end subroutine Get_divergence
+    end subroutine get_divergence
     !
     !*****************************************************************************************
     !
-    subroutine Invert_divergence( this )
+    subroutine invert_divergence( this )
         !
         !< Purpose:
         !
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        class (sphere_t), intent (in out) :: this
+        class (SpherepackWrapper), intent (in out) :: this
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
         !--------------------------------------------------------------------------------
-        integer (IP):: ierror
+        integer (ip):: ierror
         !--------------------------------------------------------------------------------
 
         ! Check status
-        call this%Assert_initialized()
+        call this%assert_initialized()
 
         ierror = 0
         ! check the error flag
@@ -2444,11 +2419,11 @@ contains
             return
         end if
 
-    end subroutine Invert_divergence
+    end subroutine invert_divergence
     !
     !*****************************************************************************************
     !
-    subroutine Get_vorticity( this, vector_function, vorticity )
+    subroutine get_vorticity( this, vector_function, vorticity )
         !
         !--------------------------------------------------------------------------------
         !
@@ -2632,26 +2607,26 @@ contains
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        class (sphere_t), intent (in out)  :: this
-        real (WP),        intent (in)      :: vector_function(:, :, :)
-        real (WP),        intent (out)     :: vorticity(:, :)
+        class (SpherepackWrapper), intent (in out)  :: this
+        real (wp),        intent (in)      :: vector_function(:, :, :)
+        real (wp),        intent (out)     :: vorticity(:, :)
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
         !--------------------------------------------------------------------------------
-        integer (IP)                        :: error_flag
+        integer (ip):: error_flag
         !--------------------------------------------------------------------------------
 
         !--------------------------------------------------------------------------------
         ! Check initialization flag
         !--------------------------------------------------------------------------------
 
-        call this%Assert_initialized()
+        call this%assert_initialized()
 
         !--------------------------------------------------------------------------------
         ! calculate the (real) vector harmonic coefficients
         !--------------------------------------------------------------------------------
 
-        call this%Perform_vector_analysis( vector_function )
+        call this%perform_vector_analysis( vector_function )
 
         !--------------------------------------------------------------------------------
         ! Invoke SPHEREPACK 3.2 routine
@@ -2692,7 +2667,7 @@ contains
 
         else
 
-            write( stderr, '(A)') 'ERROR: GET_VORTICITY'
+            write( stderr, '(A)') 'ERROR: get_VORTICITY'
 
             if ( error_flag == 1 ) then
 
@@ -2756,26 +2731,26 @@ contains
             end if
         end if
 
-    end subroutine Get_vorticity
+    end subroutine get_vorticity
     !
     !*****************************************************************************************
     !
-    subroutine Invert_vorticity( this )
+    subroutine invert_vorticity( this )
         !
         !< Purpose:
         !
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        class (sphere_t), intent (in out) :: this
+        class (SpherepackWrapper), intent (in out) :: this
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
         !--------------------------------------------------------------------------------
-        integer (IP):: ierror
+        integer (ip):: ierror
         !--------------------------------------------------------------------------------
 
         ! Check status
-        call this%Assert_initialized()
+        call this%assert_initialized()
 
         ierror = 0
         ! check the error flag
@@ -2784,26 +2759,26 @@ contains
             return
         end if
 
-    end subroutine Invert_vorticity
+    end subroutine invert_vorticity
     !
     !*****************************************************************************************
     !
-    subroutine Invert_divergence_and_vorticity( this )
+    subroutine invert_divergence_and_vorticity( this )
         !
         !< Purpose:
         !
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        class (sphere_t), intent (in out) :: this
+        class (SpherepackWrapper), intent (in out) :: this
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
         !--------------------------------------------------------------------------------
-        integer (IP):: ierror
+        integer (ip):: ierror
         !--------------------------------------------------------------------------------
 
         ! Check status
-        call this%Assert_initialized()
+        call this%assert_initialized()
 
         ierror = 0
         ! check the error flag
@@ -2812,11 +2787,11 @@ contains
             return
         end if
 
-    end subroutine Invert_divergence_and_vorticity
+    end subroutine invert_divergence_and_vorticity
     !
     !*****************************************************************************************
     !
-    subroutine Get_scalar_laplacian( this, scalar_function, scalar_laplacian )
+    subroutine get_scalar_laplacian( this, scalar_function, scalar_laplacian )
         !
         ! References:
         ! http://www2.cisl.ucar.edu/spherepack/documentation#slapgs.html
@@ -3010,26 +2985,26 @@ contains
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        class (sphere_t), intent (in out) :: this
-        real (WP),        intent (in)     :: scalar_function(:,:)
-        real (WP),        intent (out)    :: scalar_laplacian(:,:)
+        class (SpherepackWrapper), intent (in out) :: this
+        real (wp),        intent (in)     :: scalar_function(:,:)
+        real (wp),        intent (out)    :: scalar_laplacian(:,:)
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
         !--------------------------------------------------------------------------------
-        integer (IP)                      :: error_flag
+        integer (ip):: error_flag
         !--------------------------------------------------------------------------------
 
         !--------------------------------------------------------------------------------
         ! Check initialization flag
         !--------------------------------------------------------------------------------
 
-        call this%Assert_initialized()
+        call this%assert_initialized()
 
         !--------------------------------------------------------------------------------
         ! Set (real) scalar spherica harmonic coefficients
         !--------------------------------------------------------------------------------
 
-        call this%Perform_scalar_analysis( scalar_function )
+        call this%perform_scalar_analysis( scalar_function )
 
         !--------------------------------------------------------------------------------
         ! Invoke SPHEREPACK 3.2
@@ -3069,7 +3044,7 @@ contains
 
         else
 
-            write( stderr, '(A)') 'SPHEREPACK 3.2 error: GET_SCALAR_LAPLACIAN'
+            write( stderr, '(A)') 'SPHEREPACK 3.2 error: get_SCALAR_LAPLACIAN'
 
             if ( error_flag == 1 ) then
 
@@ -3130,11 +3105,11 @@ contains
             end if
         end if
 
-    end subroutine Get_scalar_laplacian
+    end subroutine get_scalar_laplacian
     !
     !*****************************************************************************************
     !
-    subroutine Invert_helmholtz( this, &
+    subroutine invert_helmholtz( this, &
         helmholtz_constant, source_term, solution, perturbation_optional )
         !
         ! Reference:
@@ -3349,29 +3324,29 @@ contains
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        class (sphere_t), intent (in out)        :: this
-        real (WP),        intent (in)            :: helmholtz_constant
-        real (WP),        intent (in)            :: source_term(:, :)
-        real (WP),        intent (out)           :: solution(:, :)
-        real (WP),        intent (out), optional :: perturbation_optional
+        class (SpherepackWrapper), intent (in out)        :: this
+        real (wp),        intent (in)            :: helmholtz_constant
+        real (wp),        intent (in)            :: source_term(:, :)
+        real (wp),        intent (out)           :: solution(:, :)
+        real (wp),        intent (out), optional :: perturbation_optional
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
         !--------------------------------------------------------------------------------
-        real (WP)     :: perturbation
-        integer (IP)  :: error_flag
+        real (wp):: perturbation
+        integer (ip):: error_flag
         !--------------------------------------------------------------------------------
 
         !--------------------------------------------------------------------------------
         ! Check initialization flag
         !--------------------------------------------------------------------------------
 
-        call this%Assert_initialized()
+        call this%assert_initialized()
 
         !--------------------------------------------------------------------------------
         ! Set (real) scalar spherica harmonic coefficients
         !--------------------------------------------------------------------------------
 
-        call this%Perform_scalar_analysis( source_term )
+        call this%perform_scalar_analysis( source_term )
 
         !--------------------------------------------------------------------------------
         ! Invoke SPHEREPACK 3.2
@@ -3413,7 +3388,7 @@ contains
 
         else
 
-            write( stderr, '(A)') 'SPHEREPACK 3.2 error: INVERT_HELMHOLTZ'
+            write( stderr, '(A)') 'SPHEREPACK 3.2 error: invert_HELMHOLTZ'
 
             if ( error_flag == 1 ) then
 
@@ -3484,26 +3459,26 @@ contains
 
         end if
 
-    end subroutine Invert_helmholtz
+    end subroutine invert_helmholtz
     !
     !*****************************************************************************************
     ! TODO
-    subroutine Get_vector_laplacian( this )
+    subroutine get_vector_laplacian( this )
         !
         !< Purpose:
         !
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        class (sphere_t), intent (in out) :: this
+        class (SpherepackWrapper), intent (in out) :: this
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
         !--------------------------------------------------------------------------------
-        integer (IP):: ierror
+        integer (ip):: ierror
         !--------------------------------------------------------------------------------
 
         ! Check status
-        call this%Assert_initialized()
+        call this%assert_initialized()
 
         ierror = 0
         ! check the error flag
@@ -3512,26 +3487,26 @@ contains
             return
         end if
 
-    end subroutine Get_vector_laplacian
+    end subroutine get_vector_laplacian
     !
     !*****************************************************************************************
     ! TODO
-    subroutine Invert_vector_laplacian( this )
+    subroutine invert_vector_laplacian( this )
         !
         !< Purpose:
         !
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        class (sphere_t), intent (in out) :: this
+        class (SpherepackWrapper), intent (in out) :: this
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
         !--------------------------------------------------------------------------------
-        integer (IP):: ierror
+        integer (ip):: ierror
         !--------------------------------------------------------------------------------
 
         ! Check status
-        call this%Assert_initialized()
+        call this%assert_initialized()
 
         ierror = 0
         ! check the error flag
@@ -3540,26 +3515,26 @@ contains
             return
         end if
 
-    end subroutine Invert_vector_laplacian
+    end subroutine invert_vector_laplacian
     !
     !*****************************************************************************************
     ! TODO
-    subroutine Get_stream_function_and_velocity_potential( this )
+    subroutine get_stream_function_and_velocity_potential( this )
         !
         !< Purpose:
         !
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        class (sphere_t), intent (in out) :: this
+        class (SpherepackWrapper), intent (in out) :: this
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
         !--------------------------------------------------------------------------------
-        integer (IP):: ierror
+        integer (ip):: ierror
         !--------------------------------------------------------------------------------
 
         ! Check status
-        call this%Assert_initialized()
+        call this%assert_initialized()
 
         ierror = 0
         ! check the error flag
@@ -3568,26 +3543,26 @@ contains
             return
         end if
 
-    end subroutine Get_stream_function_and_velocity_potential
+    end subroutine get_stream_function_and_velocity_potential
     !
     !*****************************************************************************************
     ! TODO
-    subroutine Invert_stream_function_and_velocity_potential( this )
+    subroutine invert_stream_function_and_velocity_potential( this )
         !
         !< Purpose:
         !
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        class (sphere_t), intent (in out) :: this
+        class (SpherepackWrapper), intent (in out) :: this
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
         !--------------------------------------------------------------------------------
-        integer (IP):: ierror
+        integer (ip):: ierror
         !--------------------------------------------------------------------------------
 
         ! Check status
-        call this%Assert_initialized()
+        call this%assert_initialized()
 
         ierror = 0
         ! check the error flag
@@ -3596,26 +3571,26 @@ contains
             return
         end if
 
-    end subroutine Invert_stream_function_and_velocity_potential
+    end subroutine invert_stream_function_and_velocity_potential
     !
     !*****************************************************************************************
     ! TODO
-    subroutine Perform_grid_transfers( this )
+    subroutine perform_grid_transfers( this )
         !
         !< Purpose:
         !
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        class (sphere_t), intent (in out) :: this
+        class (SpherepackWrapper), intent (in out) :: this
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
         !--------------------------------------------------------------------------------
-        integer (IP):: ierror
+        integer (ip):: ierror
         !--------------------------------------------------------------------------------
 
         ! Check status
-        call this%Assert_initialized()
+        call this%assert_initialized()
 
         ierror = 0
         ! check the error flag
@@ -3624,26 +3599,26 @@ contains
             return
         end if
 
-    end subroutine Perform_grid_transfers
+    end subroutine perform_grid_transfers
     !
     !*****************************************************************************************
     ! TODO
-    subroutine Perform_geo_math_coordinate_transfers( this )
+    subroutine perform_geo_math_coordinate_transfers( this )
         !
         !< Purpose:
         !
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        class (sphere_t), intent (in out) :: this
+        class (SpherepackWrapper), intent (in out) :: this
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
         !--------------------------------------------------------------------------------
-        integer (IP):: ierror
+        integer (ip):: ierror
         !--------------------------------------------------------------------------------
 
         ! Check status
-        call this%Assert_initialized()
+        call this%assert_initialized()
 
         ierror = 0
         ! check the error flag
@@ -3652,11 +3627,11 @@ contains
             return
         end if
 
-    end subroutine Perform_geo_math_coordinate_transfers
+    end subroutine perform_geo_math_coordinate_transfers
     !
     !*****************************************************************************************
     !
-    subroutine Perform_scalar_analysis( this, scalar_function )
+    subroutine perform_scalar_analysis( this, scalar_function )
         !
         ! Reference:
         ! https://www2.cisl.ucar.edu/spherepack/documentation#shags.html
@@ -3852,16 +3827,16 @@ contains
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        class (sphere_t), intent (in out)   :: this
-        real (WP),        intent (in)       :: scalar_function(:, :)
+        class (SpherepackWrapper), intent (in out)   :: this
+        real (wp),        intent (in)       :: scalar_function(:, :)
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
         !--------------------------------------------------------------------------------
-        integer (IP):: error_flag
+        integer (ip):: error_flag
         !--------------------------------------------------------------------------------
 
         ! Check status
-        call this%Assert_initialized()
+        call this%assert_initialized()
 
         ! perform the (real) spherical harmonic analysis
         associate( &
@@ -3897,7 +3872,7 @@ contains
             return
 
         else
-            write( stderr, '(A)') 'SPHEREPACK 3.2 error: PERFORM_SCALAR_ANALYSIS'
+            write( stderr, '(A)') 'SPHEREPACK 3.2 error: perform_SCALAR_ANALYSIS'
 
             if ( error_flag == 1 ) then
 
@@ -3935,11 +3910,11 @@ contains
             end if
         end if
 
-    end subroutine Perform_scalar_analysis
+    end subroutine perform_scalar_analysis
     !
     !*****************************************************************************************
     !
-    subroutine Perform_scalar_synthesis( this, scalar_function )
+    subroutine perform_scalar_synthesis( this, scalar_function )
         !
         ! Reference:
         ! https://www2.cisl.ucar.edu/spherepack/documentation#shsgs.html
@@ -4119,12 +4094,12 @@ contains
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        class (sphere_t), intent (in out)  :: this
-        real (WP),        intent (out)     :: scalar_function(:, :)
+        class (SpherepackWrapper), intent (in out)  :: this
+        real (wp),        intent (out)     :: scalar_function(:, :)
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
         !--------------------------------------------------------------------------------
-        integer (IP):: error_flag
+        integer (ip):: error_flag
         !--------------------------------------------------------------------------------
 
         ! perform (real) spherical harmonic synthesis
@@ -4162,7 +4137,7 @@ contains
 
         else
 
-            write( stderr, '(A)') 'SPHEREPACK 3.2 error: PERFORM_SCALAR_SYNTHESIS'
+            write( stderr, '(A)') 'SPHEREPACK 3.2 error: perform_SCALAR_SYNTHESIS'
 
             if ( error_flag == 1 ) then
 
@@ -4200,11 +4175,11 @@ contains
             end if
         end if
 
-    end subroutine Perform_scalar_synthesis
+    end subroutine perform_scalar_synthesis
     !
     !*****************************************************************************************
     ! TODO
-    subroutine Perform_scalar_projection( this, scalar_function, scalar_projection )
+    subroutine perform_scalar_projection( this, scalar_function, scalar_projection )
         !
         !< Purpose:
         !
@@ -4214,17 +4189,17 @@ contains
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        class (sphere_t), intent (in out)        :: this
-        real (WP), dimension (:, :), intent (in)  :: scalar_function
-        real (WP), dimension (:, :), intent (out) :: scalar_projection
+        class (SpherepackWrapper), intent (in out)        :: this
+        real (wp), dimension (:, :), intent (in)  :: scalar_function
+        real (wp), dimension (:, :), intent (out) :: scalar_projection
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
         !--------------------------------------------------------------------------------
-        integer (IP):: ierror
+        integer (ip):: ierror
         !--------------------------------------------------------------------------------
 
         ! Check status
-        call this%Assert_initialized()
+        call this%assert_initialized()
 
         ! TODO: Include driver program into type(workspace)
         !        call Shpgi( &
@@ -4247,11 +4222,11 @@ contains
             return
         end if
 
-    end subroutine Perform_scalar_projection
+    end subroutine perform_scalar_projection
     !
     !*****************************************************************************************
     !
-    subroutine Perform_vector_analysis( this, vector_function )
+    subroutine perform_vector_analysis( this, vector_function )
         !
         ! Reference:
         ! http://www2.cisl.ucar.edu/spherepack/documentation#vhags.html
@@ -4484,21 +4459,21 @@ contains
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        class (sphere_t), intent (in out)  :: this
-        real (WP),        intent (in)      :: vector_function(:, :, :)
+        class (SpherepackWrapper), intent (in out)  :: this
+        real (wp),        intent (in)      :: vector_function(:, :, :)
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
         !--------------------------------------------------------------------------------
-        integer (IP)           :: error_flag
-        real (WP), allocatable :: polar_component(:, :)
-        real (WP), allocatable :: azimuthal_component(:, :)
+        integer (ip):: error_flag
+        real (wp), allocatable :: polar_component(:, :)
+        real (wp), allocatable :: azimuthal_component(:, :)
         !--------------------------------------------------------------------------------
 
         !--------------------------------------------------------------------------------
         ! Check initialization flag
         !--------------------------------------------------------------------------------
 
-        call this%Assert_initialized()
+        call this%assert_initialized()
 
         !--------------------------------------------------------------------------------
         ! Allocate arrays
@@ -4519,8 +4494,8 @@ contains
             ! Check allocation status
             if ( allocate_status /= 0 ) then
 
-                write( stderr, '(A)' ) 'TYPE (sphere_t)'
-                write( stderr, '(A)' ) 'Allocation failed in PERFORM_VECTOR_ANALYSIS'
+                write( stderr, '(A)' ) 'TYPE (SpherepackWrapper)'
+                write( stderr, '(A)' ) 'Allocation failed in perform_VECTOR_ANALYSIS'
                 write( stderr, '(A)' ) trim( error_message )
 
             end if
@@ -4528,7 +4503,7 @@ contains
         end associate
 
         !--------------------------------------------------------------------------------
-        ! Compute the spherical angle components
+        ! compute the spherical angle components
         !--------------------------------------------------------------------------------
 
         associate( &
@@ -4537,7 +4512,7 @@ contains
             F_phi   => azimuthal_component &
             )
 
-            call this%Get_spherical_angle_components( F, F_theta, F_phi )
+            call this%get_spherical_angle_components( f, f_theta, f_phi )
 
         end associate
 
@@ -4582,7 +4557,7 @@ contains
 
         else
 
-            write( stderr, '(A)') 'ERROR: GET_VORTICITY'
+            write( stderr, '(A)') 'ERROR: get_VORTICITY'
 
             if ( error_flag == 1 ) then
 
@@ -4658,18 +4633,18 @@ contains
         ! Check allocation status
         if ( deallocate_status /= 0 ) then
 
-            write( stderr, '(A)' ) 'TYPE (sphere_t)'
+            write( stderr, '(A)' ) 'TYPE (SpherepackWrapper)'
             write( stderr, '(A)' ) 'Deallocation failed in PERFORM_VECTOR_ANALYSIS'
             write( stderr, '(A)' ) trim( error_message )
 
         end if
 
 
-    end subroutine Perform_vector_analysis
+    end subroutine perform_vector_analysis
     !
     !*****************************************************************************************
     !
-    subroutine Perform_vector_synthesis( this, polar_component, azimuthal_component )
+    subroutine perform_vector_synthesis( this, polar_component, azimuthal_component )
         !
         ! Reference: http://www2.cisl.ucar.edu/spherepack/documentation#vhsgs.html
         !
@@ -4996,20 +4971,20 @@ contains
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        class (sphere_t), intent (in out)   :: this
-        real (WP),        intent (out)      :: polar_component(:, :)
-        real (WP),        intent (out)      :: azimuthal_component(:, :)
+        class (SpherepackWrapper), intent (in out)   :: this
+        real (wp),        intent (out)      :: polar_component(:, :)
+        real (wp),        intent (out)      :: azimuthal_component(:, :)
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
         !--------------------------------------------------------------------------------
-        integer (IP):: error_flag
+        integer (ip):: error_flag
         !--------------------------------------------------------------------------------
 
         !--------------------------------------------------------------------------------
         ! Check initialization flag
         !--------------------------------------------------------------------------------
 
-        call this%Assert_initialized()
+        call this%assert_initialized()
 
         !--------------------------------------------------------------------------------
         ! Invoke SPHEREPACK 3.2
@@ -5052,7 +5027,7 @@ contains
 
         else
 
-            write( stderr, '(A)') 'ERROR: GET_VORTICITY'
+            write( stderr, '(A)') 'ERROR: get_VORTICITY'
 
             if ( error_flag == 1 ) then
 
@@ -5115,26 +5090,26 @@ contains
             end if
         end if
 
-    end subroutine Perform_vector_synthesis
+    end subroutine perform_vector_synthesis
     !
     !*****************************************************************************************
     ! TODO
-    subroutine Get_legendre_functions( this )
+    subroutine get_legendre_functions( this )
         !
         !< Purpose:
         !
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        class (sphere_t), intent (in out) :: this
+        class (SpherepackWrapper), intent (in out) :: this
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
         !--------------------------------------------------------------------------------
-        integer (IP):: ierror
+        integer (ip):: ierror
         !--------------------------------------------------------------------------------
 
         ! Check status
-        call this%Assert_initialized()
+        call this%assert_initialized()
 
         ierror = 0
         ! check the error flag
@@ -5143,7 +5118,7 @@ contains
             return
         end if
 
-    end subroutine Get_legendre_functions
+    end subroutine get_legendre_functions
     !
     !*****************************************************************************************
     ! TODO
@@ -5154,15 +5129,15 @@ contains
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        class (sphere_t), intent (in out) :: this
+        class (SpherepackWrapper), intent (in out) :: this
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
         !--------------------------------------------------------------------------------
-        integer (IP):: ierror
+        integer (ip):: ierror
         !--------------------------------------------------------------------------------
 
         ! Check status
-        call this%Assert_initialized()
+        call this%assert_initialized()
 
         ierror = 0
         ! check the error flag
@@ -5175,22 +5150,22 @@ contains
     !
     !*****************************************************************************************
     ! TODO
-    subroutine Perform_multiple_ffts( this )
+    subroutine perform_multiple_ffts( this )
         !
         !< Purpose:
         !
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        class (sphere_t), intent (in out) :: this
+        class (SpherepackWrapper), intent (in out) :: this
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
         !--------------------------------------------------------------------------------
-        integer (IP):: ierror
+        integer (ip):: ierror
         !--------------------------------------------------------------------------------
 
         ! Check status
-        call this%Assert_initialized()
+        call this%assert_initialized()
 
         ierror = 0
         ! check the error flag
@@ -5199,15 +5174,15 @@ contains
             return
         end if
 
-    end subroutine Perform_multiple_ffts
+    end subroutine perform_multiple_ffts
     !
     !*****************************************************************************************
     !
-    subroutine Get_gaussian_weights_and_points( this, nlat, theta, wts )
+    subroutine get_gaussian_weights_and_points( this, nlat, theta, wts )
         !
         !< Purpose:
         !
-        ! Computes the nlat-many gaussian (co)latitudes and weights.
+        ! computes the nlat-many gaussian (co)latitudes and weights.
         ! the colatitudes are in radians and lie in the interval (0, pi).
         !
         ! References:
@@ -5221,33 +5196,32 @@ contains
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        class (sphere_t),       intent (in out)   :: this
-        integer (IP),           intent (in)       :: nlat     !! number of latitudinal points
-        real (WP), allocatable, intent (out)      :: theta(:) !! latitudinal points: 0 <= theta <= pi
-        real (WP), allocatable, intent (out)      :: wts(:)   !! gaussian weights
+        class (SpherepackWrapper),       intent (in out)   :: this
+        integer (ip),           intent (in)       :: nlat     !! number of latitudinal points
+        real (wp), allocatable, intent (out)      :: theta(:) !! latitudinal points: 0 <= theta <= pi
+        real (wp), allocatable, intent (out)      :: wts(:)   !! gaussian weights
         !--------------------------------------------------------------------------------
 
-        call this%grid%Get_gaussian_weights_and_points( nlat, theta, wts )
+        call this%grid%get_gaussian_weights_and_points( nlat, theta, wts )
 
-    end subroutine Get_gaussian_weights_and_points
+    end subroutine get_gaussian_weights_and_points
     !
     !*****************************************************************************************
     !
-    subroutine Finalize_sphere( this )
+    subroutine finalize_spherepackwrapper( this )
         !
         !< Purpose:
-        !< Finalize object
         !
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        type (sphere_t), intent (in out) :: this
+        type (SpherepackWrapper), intent (in out) :: this
         !--------------------------------------------------------------------------------
 
-        call this%Destroy()
+        call this%destroy()
 
-    end subroutine Finalize_sphere
+    end subroutine finalize_spherepackwrapper
     !
     !*****************************************************************************************
     !
-end module type_sphere_mod
+end module type_SpherepackWrapper

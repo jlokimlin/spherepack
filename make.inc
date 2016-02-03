@@ -24,7 +24,17 @@ CODE_GENERATION_OPTIONS = \
 -frounding-math \
 -fsignaling-nans
 
-#References:
-# https://gcc.gnu.org/onlinedocs/gfortran/Code-Gen-Options.html#Code-Gen-Options
-# https://gcc.gnu.org/onlinedocs/gfortran/Error-and-Warning-Options.html#Error-and-Warning-Options
-# https://gcc.gnu.org/onlinedocs/gfortran/Option-Summary.html
+# Set directories
+SRC_DIRECTORY = ./
+
+SOURCES = $(wildcard $(SRC_DIRECTORY)/*.f90)
+
+SOURCES_WITH_PREFIX = $(addprefix $(SRC_DIRECTORY)/, $(SOURCES))
+
+OBJECTS := $(patsubst %.f90, %.o, $(wildcard *.f90))
+
+OBJ_DIRECTORY = ../obj
+
+LIB_DIRECTORY = ../lib
+
+OBJECTS_WITH_PREFIX = $(addprefix $(OBJ_DIRECTORY)/, $(OBJECTS))

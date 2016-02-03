@@ -6,32 +6,32 @@
 !
 !*****************************************************************************************
 !
-module type_vector_mod
+module type_ThreeDimensionalVector
 
     use, intrinsic :: iso_fortran_env, only: &
-        WP => REAL64, &
-        IP => INT32
+        wp => REAL64, &
+        ip => INT32
 
     ! Explicit typing only
     implicit none
 
     ! Everything is private unless stated otherwise
     private
-    public :: vector_t
-    public :: vector_ptr
+    public :: ThreeDimensionalVector
+    public :: ThreeDimensionalVectorPointer
     public :: assignment(=)
     public :: operator(*)
 
     ! Declare derived data type
-    type, public :: vector_t
+    type, public :: ThreeDimensionalVector
 
         ! All components are public unless stated otherwise
         !---------------------------------------------------------------------------------
         ! Real constants
         !---------------------------------------------------------------------------------
-        real (WP)          :: x = 0.0_WP
-        real (WP)          :: y = 0.0_WP
-        real (WP)          :: z = 0.0_WP
+        real (wp)          :: x = 0.0_wp
+        real (wp)          :: y = 0.0_wp
+        real (wp)          :: z = 0.0_wp
         !---------------------------------------------------------------------------------
 
     contains
@@ -42,59 +42,59 @@ module type_vector_mod
         !---------------------------------------------------------------------------------
         ! Private methods
         !---------------------------------------------------------------------------------
-        procedure          :: Add_vectors
+        procedure          :: add_vectors
         procedure          :: Subtract_vectors
-        procedure          :: Get_vector_divide_real
-        procedure          :: Get_vector_divide_integer
-        procedure          :: Get_dot_product
-        procedure          :: Convert_array_to_vector
-        procedure, nopass  :: Convert_vector_to_array
-        procedure          :: Copy_vector_to_vector
-        procedure          :: Get_vector_times_real
-        procedure, nopass  :: Get_real_times_vector
-        procedure          :: Get_vector_times_integer
-        procedure, nopass  :: Get_integer_times_vector
-        procedure          :: Get_cross_product
+        procedure          :: get_vector_divide_real
+        procedure          :: get_vector_divide_integer
+        procedure          :: get_dot_product
+        procedure          :: convert_array_to_vector
+        procedure, nopass  :: convert_vector_to_array
+        procedure          :: copy_vector_to_vector
+        procedure          :: get_vector_times_real
+        procedure, nopass  :: get_real_times_vector
+        procedure          :: get_vector_times_integer
+        procedure, nopass  :: get_integer_times_vector
+        procedure          :: get_cross_product
         !---------------------------------------------------------------------------------
         ! Public methods
         !---------------------------------------------------------------------------------
-        procedure, public   :: Get_norm
-        generic,   public   :: operator (.dot.) => Get_dot_product
-        generic,   public   :: operator (+)     => Add_vectors
+        procedure, public   :: get_norm
+        generic,   public   :: operator (.dot.) => get_dot_product
+        generic,   public   :: operator (+)     => add_vectors
         generic,   public   :: operator (-)     => Subtract_vectors
-        generic,   public   :: operator (/)     => Get_vector_divide_real, Get_vector_divide_integer
+        generic,   public   :: operator (/)     => get_vector_divide_real, get_vector_divide_integer
         !---------------------------------------------------------------------------------
         ! Finalizer
         !---------------------------------------------------------------------------------
         final              :: Finalize_vector
         !---------------------------------------------------------------------------------
 
-    end type vector_t
+    end type ThreeDimensionalVector
 
     ! declare interface operators
     interface assignment (=)
 
-        module procedure Convert_array_to_vector
-        module procedure Convert_vector_to_array
-        module procedure Copy_vector_to_vector
+        module procedure convert_array_to_vector
+        module procedure convert_vector_to_array
+        module procedure copy_vector_to_vector
 
     end interface
 
     interface operator (*)
 
-        module procedure Get_vector_times_real
-        module procedure Get_real_times_vector
-        module procedure Get_vector_times_integer
-        module procedure Get_integer_times_vector
-        module procedure Get_cross_product
+        module procedure get_vector_times_real
+        module procedure get_real_times_vector
+        module procedure get_vector_times_integer
+        module procedure get_integer_times_vector
+        module procedure get_cross_product
 
     end interface
 
     ! To create array of pointers of TYPE (vector_t).
-    type, public :: vector_ptr
+    type, public :: ThreeDimensionalVectorPointer
 
         ! All components are public unless stated otherwise
-        type (vector_t), pointer :: p => null()
+        type (ThreeDimensionalVector), pointer :: p => null()
 
     contains
 
@@ -104,89 +104,89 @@ module type_vector_mod
         !---------------------------------------------------------------------------------
         ! Private methods
         !---------------------------------------------------------------------------------
-        final             :: Finalize_vector_ptr
+        final             :: finalize_threedimensionalvectorpointer
         !---------------------------------------------------------------------------------
 
-    end type vector_ptr
+    end type ThreeDimensionalVectorPointer
 
 contains
     !
     !*****************************************************************************************
     !
-    subroutine Convert_array_to_vector( this, array )
+    subroutine convert_array_to_vector( this, array )
         !
         !< Purpose:
         !
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        class (vector_t),   intent (out) :: this
-        real (WP),          intent (in)  :: array(:)
+        class (ThreeDimensionalVector),   intent (out) :: this
+        real (wp),          intent (in)  :: array(:)
         !--------------------------------------------------------------------------------
 
         this%x = array(1)
         this%y = array(2)
         this%z = array(3)
 
-    end subroutine Convert_array_to_vector
+    end subroutine convert_array_to_vector
     !
     !*****************************************************************************************
     !
-    subroutine Convert_vector_to_array( array, this )
+    subroutine convert_vector_to_array( array, this )
         !
         !< Purpose:
         !
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        real (WP),        intent (out) :: array(:)
-        class (vector_t), intent (in)  :: this
+        real (wp),        intent (out) :: array(:)
+        class (ThreeDimensionalVector), intent (in)  :: this
         !--------------------------------------------------------------------------------
 
         array(1) = this%x
         array(2) = this%y
         array(3) = this%z
 
-    end subroutine Convert_vector_to_array
+    end subroutine convert_vector_to_array
     !
     !*****************************************************************************************
     !
-    subroutine Copy_vector_to_vector( this, vector_to_be_copied )
+    subroutine copy_vector_to_vector( this, vector_to_be_copied )
         !
         !< Purpose:
         !
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        class (vector_t), intent (out) :: this
-        class (vector_t), intent (in)  :: vector_to_be_copied
+        class (ThreeDimensionalVector), intent (out) :: this
+        class (ThreeDimensionalVector), intent (in)  :: vector_to_be_copied
         !--------------------------------------------------------------------------------
 
         this%x = vector_to_be_copied%x
         this%y = vector_to_be_copied%y
         this%z = vector_to_be_copied%z
 
-    end subroutine Copy_vector_to_vector
+    end subroutine copy_vector_to_vector
     !
     !*****************************************************************************************
     !
-    function Add_vectors( vec_1, vec_2 ) result ( return_value )
+    function add_vectors( vec_1, vec_2 ) result ( return_value )
         !
         !< Purpose:
         !
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        type (vector_t)               :: return_value
-        class (vector_t), intent (in) :: vec_1
-        class (vector_t), intent (in) :: vec_2
+        type (ThreeDimensionalVector)               :: return_value
+        class (ThreeDimensionalVector), intent (in) :: vec_1
+        class (ThreeDimensionalVector), intent (in) :: vec_2
         !--------------------------------------------------------------------------------
 
         return_value%x = vec_1%x + vec_2%x
         return_value%y = vec_1%y + vec_2%y
         return_value%z = vec_1%z + vec_2%z
 
-    end function Add_vectors
+    end function add_vectors
     !
     !*****************************************************************************************
     !
@@ -197,9 +197,9 @@ contains
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        type (vector_t)               :: return_value
-        class (vector_t), intent (in) :: vec_1
-        class (vector_t), intent (in) :: vec_2
+        type (ThreeDimensionalVector)               :: return_value
+        class (ThreeDimensionalVector), intent (in) :: vec_1
+        class (ThreeDimensionalVector), intent (in) :: vec_2
         !--------------------------------------------------------------------------------
 
         return_value%x = vec_1%x - vec_2%x
@@ -210,136 +210,136 @@ contains
     !
     !*****************************************************************************************
     !
-    function Get_vector_times_real( vec_1, real_2 ) result ( return_value )
+    function get_vector_times_real( vec_1, real_2 ) result ( return_value )
         !
         !< Purpose:
         !
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        type (vector_t)               :: return_value
-        class (vector_t), intent (in) :: vec_1
-        real (WP),        intent (in) :: real_2
+        type (ThreeDimensionalVector)               :: return_value
+        class (ThreeDimensionalVector), intent (in) :: vec_1
+        real (wp),        intent (in) :: real_2
         !--------------------------------------------------------------------------------
 
         return_value%x = vec_1%x * real_2
         return_value%y = vec_1%y * real_2
         return_value%z = vec_1%z * real_2
 
-    end function Get_vector_times_real
+    end function get_vector_times_real
     !
     !*****************************************************************************************
     !
-    function Get_real_times_vector(real_1, vec_2 ) result ( return_value )
+    function get_real_times_vector(real_1, vec_2 ) result ( return_value )
         !
         !< Purpose:
         !
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        type (vector_t)               :: return_value
-        real (WP),        intent (in) :: real_1
-        class (vector_t), intent (in) :: vec_2
+        type (ThreeDimensionalVector)               :: return_value
+        real (wp),        intent (in) :: real_1
+        class (ThreeDimensionalVector), intent (in) :: vec_2
         !--------------------------------------------------------------------------------
 
         return_value%x = real_1 * vec_2%x
         return_value%y = real_1 * vec_2%y
         return_value%z = real_1 * vec_2%z
 
-    end function Get_real_times_vector
+    end function get_real_times_vector
     !
     !*****************************************************************************************
     !
-    function Get_vector_times_integer( vec_1, int_2 ) result ( return_value )
+    function get_vector_times_integer( vec_1, int_2 ) result ( return_value )
         !
         !< Purpose:
         !
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        type (vector_t)                :: return_value
-        class (vector_t), intent (in)  :: vec_1
-        integer (IP),     intent (in)  :: int_2
+        type (ThreeDimensionalVector)                :: return_value
+        class (ThreeDimensionalVector), intent (in)  :: vec_1
+        integer (ip),     intent (in)  :: int_2
         !--------------------------------------------------------------------------------
 
-        return_value%x = vec_1%x * real( int_2, WP)
-        return_value%y = vec_1%y * real( int_2, WP)
-        return_value%z = vec_1%z * real( int_2, WP)
+        return_value%x = vec_1%x * real( int_2, wp)
+        return_value%y = vec_1%y * real( int_2, wp)
+        return_value%z = vec_1%z * real( int_2, wp)
 
-    end function Get_vector_times_integer
+    end function get_vector_times_integer
     !
     !*****************************************************************************************
     !
-    function Get_integer_times_vector( int_1, vec_2 ) result ( return_value )
+    function get_integer_times_vector( int_1, vec_2 ) result ( return_value )
         !
         !< Purpose:
         !
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        type (vector_t)               :: return_value
-        integer (IP),     intent (in) :: int_1
-        class (vector_t), intent (in) :: vec_2
+        type (ThreeDimensionalVector)               :: return_value
+        integer (ip),     intent (in) :: int_1
+        class (ThreeDimensionalVector), intent (in) :: vec_2
         !--------------------------------------------------------------------------------
 
-        return_value%x = real( int_1, WP) * vec_2%x
-        return_value%y = real( int_1, WP) * vec_2%y
-        return_value%z = real( int_1, WP) * vec_2%z
+        return_value%x = real( int_1, wp) * vec_2%x
+        return_value%y = real( int_1, wp) * vec_2%y
+        return_value%z = real( int_1, wp) * vec_2%z
 
-    end function Get_integer_times_vector
+    end function get_integer_times_vector
     !
     !*****************************************************************************************
     !
-    function Get_vector_divide_real( vec_1, real_2 ) result ( return_value )
+    function get_vector_divide_real( vec_1, real_2 ) result ( return_value )
         !
         !< Purpose:
         !
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        type (vector_t)                :: return_value
-        class (vector_t), intent (in)  :: vec_1
-        real (WP),        intent (in)  :: real_2
+        type (ThreeDimensionalVector)                :: return_value
+        class (ThreeDimensionalVector), intent (in)  :: vec_1
+        real (wp),        intent (in)  :: real_2
         !--------------------------------------------------------------------------------
 
         return_value%x = vec_1%x / real_2
         return_value%y = vec_1%y / real_2
         return_value%z = vec_1%z / real_2
 
-    end function Get_vector_divide_real
+    end function get_vector_divide_real
     !
     !*****************************************************************************************
     !
-    function Get_vector_divide_integer( vec_1, int_2 ) result ( return_value )
+    function get_vector_divide_integer( vec_1, int_2 ) result ( return_value )
         !
         !< Purpose:
         !
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        type (vector_t)                :: return_value
-        class (vector_t), intent (in)  :: vec_1
-        integer (IP),     intent (in)  :: int_2
+        type (ThreeDimensionalVector)                :: return_value
+        class (ThreeDimensionalVector), intent (in)  :: vec_1
+        integer (ip),     intent (in)  :: int_2
         !--------------------------------------------------------------------------------
 
         return_value%x = vec_1%x / int_2
         return_value%y = vec_1%y / int_2
         return_value%z = vec_1%z / int_2
 
-    end function Get_vector_divide_integer
+    end function get_vector_divide_integer
     !
     !*****************************************************************************************
     !
-    function Get_dot_product( vec_1, vec_2 ) result ( return_value )
+    function get_dot_product( vec_1, vec_2 ) result ( return_value )
         !
         !< Purpose:
         !
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        real (WP)                     :: return_value
-        class (vector_t), intent (in) :: vec_1
-        class (vector_t), intent (in) :: vec_2
+        real (wp)                     :: return_value
+        class (ThreeDimensionalVector), intent (in) :: vec_1
+        class (ThreeDimensionalVector), intent (in) :: vec_2
         !--------------------------------------------------------------------------------
 
         return_value = &
@@ -347,50 +347,50 @@ contains
             + vec_1%y*vec_2%y &
             + vec_1%z*vec_2%z 
 
-    end function Get_dot_product
+    end function get_dot_product
     !
     !*****************************************************************************************
     !
-    function Get_cross_product( vec_1, vec_2 ) result ( return_value )
+    function get_cross_product( vec_1, vec_2 ) result ( return_value )
         !
         !< Purpose:
         !
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        type (vector_t)               :: return_value
-        class (vector_t), intent (in) :: vec_1
-        class (vector_t), intent (in) :: vec_2
+        type (ThreeDimensionalVector)               :: return_value
+        class (ThreeDimensionalVector), intent (in) :: vec_1
+        class (ThreeDimensionalVector), intent (in) :: vec_2
         !--------------------------------------------------------------------------------
 
         return_value%x = vec_1%y*vec_2%z - vec_1%z*vec_2%y
         return_value%y = vec_1%z*vec_2%x - vec_1%x*vec_2%z
         return_value%z = vec_1%x*vec_2%y - vec_1%y*vec_2%x
 
-    end function Get_cross_product
+    end function get_cross_product
     !
     !*****************************************************************************************
     !
-    function Get_norm( this ) result ( return_value )
+    function get_norm( this ) result ( return_value )
         !
         !< Purpose:
         !
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        real (WP)                         :: return_value
-        class (vector_t), intent (in out) :: this
+        real (wp)                         :: return_value
+        class (ThreeDimensionalVector), intent (in out) :: this
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
         !--------------------------------------------------------------------------------
-        real (WP)                         :: array(3)
+        real (wp)                         :: array(3)
         !--------------------------------------------------------------------------------
 
-        call Convert_vector_to_array( array, this )
+        call convert_vector_to_array( array, this )
 
         return_value = norm2( array )
 
-    end function Get_norm
+    end function get_norm
     !
     !*****************************************************************************************
     !
@@ -402,20 +402,20 @@ contains
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        type (vector_t), intent (in out) :: this
+        type (ThreeDimensionalVector), intent (in out) :: this
         !--------------------------------------------------------------------------------
 
         ! Reset constants
 
-        this%x = 0.0_WP
-        this%y = 0.0_WP
-        this%z = 0.0_WP
+        this%x = 0.0_wp
+        this%y = 0.0_wp
+        this%z = 0.0_wp
 
     end subroutine Finalize_vector
     !
     !*****************************************************************************************
     !
-    elemental subroutine Finalize_vector_ptr( this )
+    elemental subroutine finalize_threedimensionalvectorpointer( this )
         !
         !< Purpose:
         !< Finalize object
@@ -423,7 +423,7 @@ contains
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        type (vector_ptr), intent (in out) :: this
+        type (ThreeDimensionalVectorPointer), intent (in out) :: this
         !--------------------------------------------------------------------------------
 
         ! Check if pointer is associated
@@ -435,8 +435,8 @@ contains
         end if
 
 
-    end subroutine Finalize_vector_ptr
+    end subroutine finalize_threedimensionalvectorpointer
     !
     !*****************************************************************************************
     !
-end module type_vector_mod
+end module type_ThreeDimensionalVector

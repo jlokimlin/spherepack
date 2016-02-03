@@ -1,31 +1,31 @@
 module spherepack_wrapper_mod
     
-    use type_vector_mod, only: &
-        vector_t, &
-        vector_ptr, &
+    use type_ThreeDimensionalVector, only: &
+        ThreeDimensionalVector, &
+        ThreeDimensionalVectorPointer, &
         assignment(=), &
         operator(*)
     
-    use type_grid_mod, only:&
-        grid_t
+    use type_GaussianGrid, only:&
+        GaussianGrid
         
-    use type_sphere_mod, only: &
-        sphere_t
+    use type_SpherepackWrapper, only: &
+        SpherepackWrapper
     
-    use type_workspace_mod, only: &
-        workspace_t
+    use type_SpherepackWorkspace, only: &
+        SpherepackWorkspace
 
     ! Explicit typing only
     implicit none
     
     ! Everything is private unless stated otherwise
     private
-    public :: vector_t
-    public :: vector_ptr
+    public :: ThreeDimensionalVector
+    public :: ThreeDimensionalVectorPointer
     public :: assignment(=)
     public :: operator(*)
-    public :: grid_t
-    public :: sphere_t
-    public :: workspace_t
+    public :: GaussianGrid
+    public :: SpherepackWrapper
+    public :: SpherepackWorkspace
 
 end module spherepack_wrapper_mod

@@ -1,13 +1,13 @@
 program main
 
     use spherepack_wrapper_mod, only: &
-        vector_t, &
-        vector_ptr, &
+        ThreeDimensionalVector, &
+        ThreeDimensionalVectorPointer, &
         assignment(=), &
         operator(*), &
-        grid_t, &
-        sphere_t, &
-        workspace_t
+        GaussianGrid, &
+        SpherepackWrapper, &
+        SpherepackWorkspace
 
     ! Explicit typing only
     implicit none

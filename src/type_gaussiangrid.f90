@@ -1,8 +1,8 @@
-module type_grid_mod
+module type_GaussianGrid
 
     use, intrinsic :: iso_fortran_env, only: &
-        WP     => REAL64, &
-        IP     => INT32, &
+        wp     => REAL64, &
+        ip     => INT32, &
         stderr => ERROR_UNIT
 
 
@@ -13,42 +13,29 @@ module type_grid_mod
     private
 
     ! Public derived data type
-    public :: grid_t
+    public :: GaussianGrid
 
     !---------------------------------------------------------------------------------
     ! Dictionary: global variables confined to the module
     !---------------------------------------------------------------------------------
-    character (len=200)   :: error_message        !! Probably long enough
-    integer (IP)          :: allocate_status      !! To check allocation status
-    integer (IP)          :: deallocate_status    !! To check deallocation status
-    real (WP), parameter  :: PI     = acos( -1.0_WP )
-    real (WP), parameter  :: TWO_PI = 2.0_WP * PI
+    character (len=250)   :: error_message        !! Probably long enough
+    integer (ip)          :: allocate_status      !! To check allocation status
+    integer (ip)          :: deallocate_status    !! To check deallocation status
+    real (wp), parameter  :: PI     = acos( -1.0_wp )
+    real (wp), parameter  :: TWO_PI = 2.0_wp * PI
     !---------------------------------------------------------------------------------
 
     ! Declare derived data type
-    type, public ::  grid_t
+    type, public ::  GaussianGrid
 
         ! All components are public unless stated otherwise
-        !---------------------------------------------------------------------------------
-        ! Initialization flag
-        !---------------------------------------------------------------------------------
         logical                :: initialized  = .false.
-        !---------------------------------------------------------------------------------
-        ! Grid type: Either gaussian = 'GAU' (default) or equally-spaced = 'REG'
-        !---------------------------------------------------------------------------------
-        character (len=3)      :: grid_type   = 'GAU'
-        !---------------------------------------------------------------------------------
-        ! Real constants
-        !---------------------------------------------------------------------------------
-        real (WP)              :: MESH_PHI    = 0.0_WP  !! Uniform mesh in phi
-        real (WP)              :: MESH_THETA  = 0.0_WP  !! Only used in 'REG' grid
-        !---------------------------------------------------------------------------------
-        ! Allocatable arrays
-        !---------------------------------------------------------------------------------
-        real (WP), allocatable :: gaussian_weights(:)      !! Used for integration, requires 'GAU' for allocation
-        real (WP), allocatable :: latitudes(:)             !! 0 <= theta <= pi
-        real (WP), allocatable :: longitudes(:)            !! 0 <= phi <= 2*pi
-        !---------------------------------------------------------------------------------
+        character (len=3)      :: grid_type   = 'GAU' !! Either gaussian = 'GAU' (default) or equally-spaced = 'REG'
+        real (wp)               :: MESH_PHI    = 0.0_wp  !! Uniform mesh in phi
+        real (wp)               :: MESH_THETA  = 0.0_wp  !! Only used in 'REG' grid
+        real (wp), allocatable :: gaussian_weights(:)      !! Used for integration, requires 'GAU' for allocation
+        real (wp), allocatable :: latitudes(:)             !! 0 <= theta <= pi
+        real (wp), allocatable :: longitudes(:)            !! 0 <= phi <= 2*pi
 
     contains
 
@@ -58,37 +45,37 @@ module type_grid_mod
         !---------------------------------------------------------------------------------
         ! Public methods
         !---------------------------------------------------------------------------------
-        procedure, non_overridable, public :: Create => Create_gaussian_grid
-        procedure, non_overridable, public :: Create_equally_spaced_grid
-        procedure, non_overridable, public :: Destroy
-        procedure, nopass, public          :: Get_gaussian_weights_and_points !! GAQD
+        procedure, non_overridable, public :: create => create_gaussiangrid
+        procedure, non_overridable, public :: create_equally_spaced_grid
+        procedure, non_overridable, public :: destroy => destroy_gaussiangrid
+        procedure, nopass,           public :: get_gaussian_weights_and_points !! GAQD
         !---------------------------------------------------------------------------------
         ! Private methods
         !---------------------------------------------------------------------------------
-        procedure                          :: Get_equally_spaced_longitudes
-        procedure                          :: Get_equally_spaced_latitudes
+        procedure                          :: get_equally_spaced_longitudes
+        procedure                          :: get_equally_spaced_latitudes
         !---------------------------------------------------------------------------------
         ! Finalizer
         !---------------------------------------------------------------------------------
-        final                              :: Finalize_grid
+        final                              :: finalize_gaussiangrid
         !---------------------------------------------------------------------------------
 
-    end type grid_t
+    end type GaussianGrid
 
 contains
     !
     !*****************************************************************************************
     !
-    subroutine Create_gaussian_grid( this, nlat, nlon )
+    subroutine create_gaussiangrid( this, nlat, nlon )
         !
         !< Purpose:
         !
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        class (grid_t), intent (in out)       :: this
-        integer (IP),   intent (in)           :: nlat         !! number of latitudinal points
-        integer (IP),   intent (in)           :: nlon         !! number of longitudinal points
+        class (GaussianGrid), intent (in out)       :: this
+        integer (ip),   intent (in)           :: nlat         !! number of latitudinal points
+        integer (ip),   intent (in)           :: nlon         !! number of longitudinal points
         !--------------------------------------------------------------------------------
 
         !--------------------------------------------------------------------------------
@@ -97,8 +84,8 @@ contains
 
         if ( this%initialized ) then
 
-            write( stderr, '(A)' ) 'ERROR: TYPE (grid_t)'
-            write( stderr, '(A)' ) 'You must destroy object before calling CREATE_GAUSSIAN_GRID'
+            write( stderr, '(A)' ) 'ERROR: TYPE (GaussianGrid)'
+            write( stderr, '(A)' ) 'You must destroy_gaussiangrid object before calling create_gaussiangrid'
 
         end if
 
@@ -106,14 +93,14 @@ contains
         ! Set latitudinal grid: 0 <= theta <= pi
         !--------------------------------------------------------------------------------
 
-        call this%Get_gaussian_weights_and_points( &
+        call this%get_gaussian_weights_and_points( &
             nlat, this%latitudes, this%gaussian_weights )
 
         !--------------------------------------------------------------------------------
         ! Set longitudinal grid: 0 <= phi <= 2*pi
         !--------------------------------------------------------------------------------
 
-        call this%Get_equally_spaced_longitudes( nlon, this%longitudes )
+        call this%get_equally_spaced_longitudes( nlon, this%longitudes )
 
         !--------------------------------------------------------------------------------
         ! Set initialization flag
@@ -121,20 +108,20 @@ contains
 
         this%initialized = .true.
 
-    end subroutine Create_gaussian_grid
+    end subroutine create_gaussiangrid
     !
     !*****************************************************************************************
     !
-    subroutine Create_equally_spaced_grid( this, nlat, nlon )
+    subroutine create_equally_spaced_grid( this, nlat, nlon )
         !
         !< Purpose:
         !
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        class (grid_t), intent (in out)       :: this
-        integer (IP),   intent (in)           :: nlat         !! number of latitudinal points
-        integer (IP),   intent (in)           :: nlon         !! number of longitudinal points
+        class (GaussianGrid), intent (in out)       :: this
+        integer (ip),   intent (in)           :: nlat         !! number of latitudinal points
+        integer (ip),   intent (in)           :: nlon         !! number of longitudinal points
         !--------------------------------------------------------------------------------
 
         !--------------------------------------------------------------------------------
@@ -143,7 +130,7 @@ contains
 
         if ( this%initialized ) then
 
-            write( stderr, '(A)' ) 'TYPE (grid_t)'
+            write( stderr, '(A)' ) 'TYPE (GaussianGrid)'
             write( stderr, '(A)' ) 'You must destroy object before calling CREATE_EQUALLY_SPACED_GRID'
 
         end if
@@ -156,13 +143,13 @@ contains
         this%grid_type = 'REG'
 
         ! Compute equally-spaced latitudes: 0 <= theta <= pi
-        call this%Get_equally_spaced_latitudes( nlat, this%latitudes )
+        call this%get_equally_spaced_latitudes( nlat, this%latitudes )
 
         !--------------------------------------------------------------------------------
         ! Set longitudinal grid: 0 <= phi <= 2*pi
         !--------------------------------------------------------------------------------
 
-        call this%Get_equally_spaced_longitudes( nlon, this%longitudes )
+        call this%get_equally_spaced_longitudes( nlon, this%longitudes )
 
         !--------------------------------------------------------------------------------
         ! Set initialization flag
@@ -170,18 +157,18 @@ contains
 
         this%initialized = .true.
 
-    end subroutine Create_equally_spaced_grid
+    end subroutine create_equally_spaced_grid
     !
     !*****************************************************************************************
     !
-    subroutine Destroy( this )
+    subroutine destroy_gaussiangrid( this )
         !
         !< Purpose:
         !
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        class (grid_t), intent (in out) :: this
+        class (GaussianGrid), intent (in out) :: this
         !--------------------------------------------------------------------------------
 
         !--------------------------------------------------------------------------------
@@ -200,8 +187,8 @@ contains
         ! Reset constants
         !--------------------------------------------------------------------------------
 
-        this%MESH_PHI   = 0.0_WP
-        this%MESH_THETA = 0.0_WP
+        this%MESH_PHI   = 0.0_wp
+        this%MESH_THETA = 0.0_wp
 
         !--------------------------------------------------------------------------------
         ! Deallocate arrays
@@ -219,8 +206,8 @@ contains
             ! Check deallocate status
             if ( deallocate_status /= 0 ) then
 
-                write( stderr, '(A)' ) 'TYPE (grid_t)'
-                write( stderr, '(A)' ) 'Deallocating GAUSSIAN_WEIGHTS failed in DESTROY'
+                write( stderr, '(A)' ) 'TYPE (GaussianGrid)'
+                write( stderr, '(A)' ) 'Deallocating GAUSSIAN_WEIGHTS failed in DESTROY_GAUSSIANGRID'
                 write( stderr, '(A)' ) trim( error_message )
 
             end if
@@ -238,8 +225,8 @@ contains
             ! Check deallocate status
             if ( deallocate_status /= 0 ) then
 
-                write( stderr, '(A)' ) 'TYPE (grid_t)'
-                write( stderr, '(A)' ) 'Deallocating LATITUDES failed in DESTROY'
+                write( stderr, '(A)' ) 'TYPE (GaussianGrid)'
+                write( stderr, '(A)' ) 'Deallocating LATITUDES failed in DESTROY_GAUSSIANGRID'
                 write( stderr, '(A)' ) trim( error_message )
 
             end if
@@ -257,8 +244,8 @@ contains
             ! Check deallocate status
             if ( deallocate_status /= 0 ) then
 
-                write( stderr, '(A)' ) 'TYPE (grid_t)'
-                write( stderr, '(A)' ) 'Deallocating LONGITUDES failed in DESTROY'
+                write( stderr, '(A)' ) 'TYPE (GaussianGrid)'
+                write( stderr, '(A)' ) 'Deallocating LONGITUDES failed in DESTROY_GAUSSIANGRID'
                 write( stderr, '(A)' ) trim( error_message )
 
             end if
@@ -270,11 +257,11 @@ contains
 
         this%initialized = .false.
 
-    end subroutine Destroy
+    end subroutine destroy_gaussiangrid
     !
     !*****************************************************************************************
     !
-    subroutine Get_gaussian_weights_and_points( nlat, theta, wts )
+    subroutine get_gaussian_weights_and_points( nlat, theta, wts )
         !
         !<Purpose:
         !
@@ -329,15 +316,15 @@ contains
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        integer (IP),           intent (in)  :: nlat  !! number of latitudinal points
-        real (WP), allocatable, intent (out) :: theta(:) !! latitudinal points: 0 <= theta <= pi
-        real (WP), allocatable, intent (out) :: wts(:)   !! gaussian weights
+        integer (ip),            intent (in)  :: nlat  !! number of latitudinal points
+        real (wp), allocatable, intent (out) :: theta(:) !! latitudinal points: 0 <= theta <= pi
+        real (wp), allocatable, intent (out) :: wts(:)   !! gaussian weights
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
         !--------------------------------------------------------------------------------
-        integer (IP)  :: error_flag
-        integer (IP)  :: dummy_integer !! unused integer variable to maintain backwards compatibility
-        real (WP)     :: dummy_real    !! unused double precision variable to maintain backwards compatibility
+        integer (ip)  :: error_flag
+        integer (ip)  :: dummy_integer !! unused integer variable to maintain backwards compatibility
+        real (wp)     :: dummy_real    !! unused double precision variable to maintain backwards compatibility
         !--------------------------------------------------------------------------------
 
         !--------------------------------------------------------------------------------
@@ -356,8 +343,8 @@ contains
             ! Check deallocate status
             if ( deallocate_status /= 0 ) then
 
-                write( stderr, '(A)' ) 'TYPE (grid_t)'
-                write( stderr, '(A)' ) 'Deallocating THETA failed in GET_GAUSSIAN_WEIGHTS_AND_POINTS'
+                write( stderr, '(A)' ) 'TYPE (GaussianGrid)'
+                write( stderr, '(A)' ) 'Deallocating THETA failed in get_GAUSSIAN_WEIGHTS_AND_POINTS'
                 write( stderr, '(A)' ) trim( error_message )
 
             end if
@@ -372,8 +359,8 @@ contains
         ! Check allocate status
         if ( allocate_status /= 0 ) then
 
-            write( stderr, '(A)' ) 'TYPE (grid_t)'
-            write( stderr, '(A)' ) 'Allocating THETA failed in GET_GAUSSIAN_WEIGHTS_AND_POINTS'
+            write( stderr, '(A)' ) 'TYPE (GaussianGrid)'
+            write( stderr, '(A)' ) 'Allocating THETA failed in get_GAUSSIAN_WEIGHTS_AND_POINTS'
             write( stderr, '(A)' ) trim( error_message )
 
         end if
@@ -394,8 +381,8 @@ contains
             ! Check deallocate status
             if ( deallocate_status /= 0 ) then
 
-                write( stderr, '(A)' ) 'TYPE (grid_t)'
-                write( stderr, '(A)' ) 'Deallocating WTS failed in GET_GAUSSIAN_WEIGHTS_AND_POINTS'
+                write( stderr, '(A)' ) 'TYPE (GaussianGrid)'
+                write( stderr, '(A)' ) 'Deallocating WTS failed in get_GAUSSIAN_WEIGHTS_AND_POINTS'
                 write( stderr, '(A)' ) trim( error_message )
 
             end if
@@ -403,15 +390,15 @@ contains
 
         ! Allocate array
         allocate ( &
-            wts( 1:nlat ), &
+            wts( nlat ), &
             stat   = allocate_status, &
             errmsg = error_message )
 
         ! Check allocate status
         if ( allocate_status /= 0 ) then
 
-            write( stderr, '(A)' ) 'TYPE (grid_t)'
-            write( stderr, '(A)' ) 'Allocating WTS failed in GET_GAUSSIAN_WEIGHTS_AND_POINTS'
+            write( stderr, '(A)' ) 'TYPE (GaussianGrid)'
+            write( stderr, '(A)' ) 'Allocating WTS failed in get_GAUSSIAN_WEIGHTS_AND_POINTS'
             write( stderr, '(A)' ) trim( error_message )
 
         end if
@@ -440,7 +427,7 @@ contains
 
         else
 
-            write( stderr, '(A)') 'ERROR: TYPE (grid_t) in GET_GAUSSIAN_WEIGHTS_AND_POINTS'
+            write( stderr, '(A)') 'ERROR: TYPE (GaussianGrid) in get_GAUSSIAN_WEIGHTS_AND_POINTS'
 
             if (error_flag == 1) then
 
@@ -454,23 +441,23 @@ contains
             end if
         end if
 
-    end subroutine Get_gaussian_weights_and_points
+    end subroutine get_gaussian_weights_and_points
     !
     !*****************************************************************************************
     !
-    subroutine Get_equally_spaced_latitudes( this, nlat, theta )
+    subroutine get_equally_spaced_latitudes( this, nlat, theta )
         !
         !< Purpose:
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        class (grid_t),         intent (in out) :: this
-        integer (IP),           intent (in)     :: nlat  !! number of latitudinal points
-        real (WP), allocatable, intent (out)    :: theta(:) !! latitudes: 0 <= theta <= pi
+        class (GaussianGrid),    intent (in out) :: this
+        integer (ip),            intent (in)     :: nlat  !! number of latitudinal points
+        real (wp), allocatable, intent (out)    :: theta(:) !! latitudes: 0 <= theta <= pi
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
         !--------------------------------------------------------------------------------
-        integer (IP) :: k     !! counter
+        integer (ip) :: k     !! counter
         !--------------------------------------------------------------------------------
 
         !--------------------------------------------------------------------------------
@@ -489,8 +476,8 @@ contains
             ! Check deallocate status
             if ( deallocate_status /= 0 ) then
 
-                write( stderr, '(A)' ) 'TYPE (grid_t)'
-                write( stderr, '(A)' ) 'Deallocating THETA failed in GET_EQUALLY_SPACED_LATITUDES'
+                write( stderr, '(A)' ) 'TYPE (GaussianGrid)'
+                write( stderr, '(A)' ) 'Deallocating THETA failed in get_EQUALLY_SPACED_LATITUDES'
                 write( stderr, '(A)' ) trim( error_message )
 
             end if
@@ -498,15 +485,15 @@ contains
 
         ! Allocate array
         allocate ( &
-            theta( 1:nlat ), &
+            theta( nlat ), &
             stat   = allocate_status, &
             errmsg = error_message )
 
         ! Check allocate status
         if ( allocate_status /= 0 ) then
 
-            write( stderr, '(A)' ) 'TYPE (grid_t)'
-            write( stderr, '(A)' ) 'Allocating THETA failed in GET_EQUALLY_SPACED_LATITUDES'
+            write( stderr, '(A)' ) 'TYPE (GaussianGrid)'
+            write( stderr, '(A)' ) 'Allocating THETA failed in get_EQUALLY_SPACED_LATITUDES'
             write( stderr, '(A)' ) trim( error_message )
 
         end if
@@ -521,33 +508,33 @@ contains
         ! Compute latitudinal grid
         !--------------------------------------------------------------------------------
 
-        associate( Dtheta => this%MESH_THETA )
+        associate( dtheta => this%MESH_THETA )
 
             do concurrent ( k = 1:nlat )
 
-                theta(k) = real(k - 1, WP) * Dtheta
+                theta(k) = real(k - 1, wp) * dtheta
 
             end do
 
         end associate
 
-    end subroutine Get_equally_spaced_latitudes
+    end subroutine get_equally_spaced_latitudes
     !
     !*****************************************************************************************
     !
-    subroutine Get_equally_spaced_longitudes( this, nlon, phi )
+    subroutine get_equally_spaced_longitudes( this, nlon, phi )
         !
         !< Purpose:
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        class (grid_t),         intent (in out) :: this
-        integer (IP),           intent (in)     :: nlon !! number of longitudinal points
-        real (WP), allocatable, intent (out)    :: phi(:)  !! longitudes: 0 <= phi <= 2*pi
+        class (GaussianGrid),    intent (in out) :: this
+        integer (ip),            intent (in)     :: nlon !! number of longitudinal points
+        real (wp), allocatable, intent (out)    :: phi(:)  !! longitudes: 0 <= phi <= 2*pi
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
         !--------------------------------------------------------------------------------
-        integer (IP)                            :: l   !! counter
+        integer (ip)   :: l   !! counter
         !--------------------------------------------------------------------------------
 
         !--------------------------------------------------------------------------------
@@ -566,8 +553,8 @@ contains
             ! Check deallocation status
             if ( deallocate_status /= 0 ) then
 
-                write( stderr, '(A)' ) 'TYPE (grid_t)'
-                write( stderr, '(A)' ) 'Deallocating PHI failed in GET_EQUALLY_SPACED_LONGITUDES'
+                write( stderr, '(A)' ) 'TYPE (GaussianGrid)'
+                write( stderr, '(A)' ) 'Deallocating PHI failed in get_EQUALLY_SPACED_LONGITUDES'
                 write( stderr, '(A)' ) trim( error_message )
 
             end if
@@ -575,15 +562,15 @@ contains
 
         ! Allocate array
         allocate ( &
-            phi( 1:nlon ), &
+            phi( nlon ), &
             stat   = allocate_status, &
             errmsg = error_message )
 
         ! Check allocation status
         if ( allocate_status /= 0 ) then
 
-            write( stderr, '(A)' ) 'TYPE (grid_t)'
-            write( stderr, '(A)' ) 'Allocating PHI failed in GET_EQUALLY_SPACED_LONGITUDES'
+            write( stderr, '(A)' ) 'TYPE (GaussianGrid)'
+            write( stderr, '(A)' ) 'Allocating PHI failed in get_EQUALLY_SPACED_LONGITUDES'
             write( stderr, '(A)' ) trim( error_message )
 
         end if
@@ -598,21 +585,21 @@ contains
         ! Compute longitudinal grid
         !--------------------------------------------------------------------------------
 
-        associate( Dphi => this%MESH_PHI )
+        associate( dphi => this%MESH_PHI )
 
             do concurrent ( l = 1:nlon )
 
-                phi(l) = real(l - 1, WP) * Dphi
+                phi(l) = real(l - 1, wp) * dphi
 
             end do
 
         end associate
 
-    end subroutine Get_equally_spaced_longitudes
+    end subroutine get_equally_spaced_longitudes
     !
     !*****************************************************************************************
     !
-    subroutine Finalize_grid( this )
+    subroutine finalize_gaussiangrid( this )
         !
         !< Purpose:
         !< Finalize object
@@ -620,13 +607,13 @@ contains
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        type (grid_t), intent (in out) :: this
+        type (GaussianGrid), intent (in out) :: this
         !--------------------------------------------------------------------------------
 
-        call this%Destroy()
+        call this%destroy()
 
-    end subroutine Finalize_grid
+    end subroutine finalize_gaussiangrid
     !
     !*****************************************************************************************
     !
-end module type_grid_mod
+end module type_GaussianGrid

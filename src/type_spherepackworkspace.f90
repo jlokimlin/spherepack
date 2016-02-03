@@ -7,11 +7,11 @@
 !
 !*****************************************************************************************
 !
-module type_workspace_mod
+module type_SpherepackWorkspace
 
     use, intrinsic :: iso_fortran_env, only: &
-        WP     => REAL64, &
-        IP     => INT32, &
+        wp     => REAL64, &
+        ip     => INT32, &
         stderr => ERROR_UNIT
 
     ! Explicit typing only
@@ -19,18 +19,18 @@ module type_workspace_mod
 
     ! Everything is private unless stated otherwise
     private
-    public :: workspace_t
+    public :: SpherepackWorkspace
 
     !--------------------------------------------------------------------------------
     ! Dictionary: global variables confined to the module
     !----------------------------------------- ---------------------------------------
-    character (len=200) :: error_message            !! Probably long enough
-    integer (IP)        :: allocate_status          !! To check allocation status
-    integer (IP)        :: deallocate_status        !! To check deallocation status
+    character (len=250) :: error_message            !! Probably long enough
+    integer (ip)        :: allocate_status          !! To check allocation status
+    integer (ip)        :: deallocate_status        !! To check deallocation status
     !---------------------------------------------------------------------------------
 
     ! Declare derived data type
-    type, public :: workspace_t
+    type, public :: SpherepackWorkspace
 
         ! All components are public unless stated otherwise
 
@@ -41,40 +41,40 @@ module type_workspace_mod
         !---------------------------------------------------------------------------------
         ! Workspace arrays for Legendre transform
         !---------------------------------------------------------------------------------
-        real (WP), allocatable          :: work(:)
-        real (WP), allocatable, private :: dwork(:)
+        real (wp), allocatable           :: work(:)
+        real (wp), allocatable, private :: dwork(:)
         !---------------------------------------------------------------------------------
         ! Workspace arrays for scalar transform - GAU
         !---------------------------------------------------------------------------------
-        real (WP), allocatable   :: wshags(:)
-        real (WP), allocatable   :: wshsgs(:)
+        real (wp), allocatable     :: wshags(:)
+        real (wp), allocatable     :: wshsgs(:)
         !---------------------------------------------------------------------------------
         ! Workspace arrays for scalar transform - REG
         !---------------------------------------------------------------------------------
-        real (WP), allocatable   :: wshaes(:)
-        real (WP), allocatable   :: wshses(:)
+        real (wp), allocatable     :: wshaes(:)
+        real (wp), allocatable     :: wshses(:)
         !---------------------------------------------------------------------------------
         ! Workspace arrays for vector transform - GAU
         !---------------------------------------------------------------------------------
-        real (WP), allocatable   :: wvhags(:)
-        real (WP), allocatable   :: wvhsgs(:)
+        real (wp), allocatable     :: wvhags(:)
+        real (wp), allocatable     :: wvhsgs(:)
         !---------------------------------------------------------------------------------
         ! Workspace arrays for vector transform - REG
         !---------------------------------------------------------------------------------
-        real (WP), allocatable   :: wvhaes(:)
-        real (WP), allocatable   :: wvhses(:)
+        real (wp), allocatable     :: wvhaes(:)
+        real (wp), allocatable     :: wvhses(:)
         !---------------------------------------------------------------------------------
         ! Scalar transform coefficients
         !---------------------------------------------------------------------------------
-        real (WP), pointer        :: real_harmonic_coefficients(:,:)      => null()
-        real (WP), pointer        :: imaginary_harmonic_coefficients(:,:) => null()
+        real (wp), allocatable     :: real_harmonic_coefficients(:,:)
+        real (wp), allocatable     :: imaginary_harmonic_coefficients(:,:)
         !---------------------------------------------------------------------------------
         ! Vector transform coefficients
         !---------------------------------------------------------------------------------
-        real (WP), pointer   :: real_polar_harmonic_coefficients(:,:)          => null()
-        real (WP), pointer   :: imaginary_polar_harmonic_coefficients(:,:)     => null()
-        real (WP), pointer   :: real_azimuthal_harmonic_coefficients(:,:)      => null()
-        real (WP), pointer   :: imaginary_azimuthal_harmonic_coefficients(:,:) => null()
+        real (wp), allocatable     :: real_polar_harmonic_coefficients(:,:)
+        real (wp), allocatable     :: imaginary_polar_harmonic_coefficients(:,:)
+        real (wp), allocatable     :: real_azimuthal_harmonic_coefficients(:,:)
+        real (wp), allocatable     :: imaginary_azimuthal_harmonic_coefficients(:,:)
         !---------------------------------------------------------------------------------
 
     contains
@@ -83,62 +83,62 @@ module type_workspace_mod
         private
 
         !---------------------------------------------------------------------------------
-        procedure                          :: Assert_initialized
-        procedure, nopass                  :: Get_lwork
-        procedure, nopass                  :: Get_ldwork
+        procedure                          :: assert_initialized
+        procedure, nopass                  :: get_lwork
+        procedure, nopass                  :: get_ldwork
         !---------------------------------------------------------------------------------
         ! Public methods
         !---------------------------------------------------------------------------------
-        procedure, non_overridable, public :: Create
-        procedure, non_overridable, public :: Destroy
+        procedure, non_overridable, public :: create
+        procedure, non_overridable, public :: destroy
         !---------------------------------------------------------------------------------
         ! Private methods for gaussian grids
         !---------------------------------------------------------------------------------
-        procedure, nopass                  :: Get_lshags
-        procedure, nopass                  :: Get_lshsgs
-        procedure, nopass                  :: Get_lvhags
-        procedure, nopass                  :: Get_lvhsgs
-        procedure                          :: Initialize_scalar_analysis_gau
-        procedure                          :: Initialize_scalar_synthesis_gau
-        procedure                          :: Initialize_scalar_transform_gau
-        procedure                          :: Initialize_vector_analysis_gau
-        procedure                          :: Initialize_vector_synthesis_gau
-        procedure                          :: Initialize_vector_transform_gau
+        procedure, nopass                  :: get_lshags
+        procedure, nopass                  :: get_lshsgs
+        procedure, nopass                  :: get_lvhags
+        procedure, nopass                  :: get_lvhsgs
+        procedure                          :: initialize_scalar_analysis_gau
+        procedure                          :: initialize_scalar_synthesis_gau
+        procedure                          :: initialize_scalar_transform_gau
+        procedure                          :: initialize_vector_analysis_gau
+        procedure                          :: initialize_vector_synthesis_gau
+        procedure                          :: initialize_vector_transform_gau
         !---------------------------------------------------------------------------------
         ! Private methods for regular (equally-spaced) grids
         !---------------------------------------------------------------------------------
-        procedure, nopass                  :: Get_lshaes
-        procedure, nopass                  :: Get_lshses
-        procedure, nopass                  :: Get_lvhaes
-        procedure, nopass                  :: Get_lvhses
-        procedure                          :: Initialize_scalar_analysis_reg
-        procedure                          :: Initialize_scalar_synthesis_reg
-        procedure                          :: Initialize_scalar_transform_reg
-        procedure                          :: Initialize_vector_analysis_reg
-        procedure                          :: Initialize_vector_synthesis_reg
-        procedure                          :: Initialize_vector_transform_reg
+        procedure, nopass                  :: get_lshaes
+        procedure, nopass                  :: get_lshses
+        procedure, nopass                  :: get_lvhaes
+        procedure, nopass                  :: get_lvhses
+        procedure                          :: initialize_scalar_analysis_reg
+        procedure                          :: initialize_scalar_synthesis_reg
+        procedure                          :: initialize_scalar_transform_reg
+        procedure                          :: initialize_vector_analysis_reg
+        procedure                          :: initialize_vector_synthesis_reg
+        procedure                          :: initialize_vector_transform_reg
         !---------------------------------------------------------------------------------
         ! Finalizer
         !---------------------------------------------------------------------------------
-        final                              :: Finalize_workspace
+        final                              :: finalize_spherepackworkspace
         !---------------------------------------------------------------------------------
 
-    end type workspace_t
+    end type SpherepackWorkspace
 
 contains
     !
     !*****************************************************************************************
     !
-    subroutine Create( this, nlat, nlon, grid_type )
+    subroutine create( this, nlat, nlon, grid_type )
         !
         !< Purpose:
         !
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        class (workspace_t), intent (in out)       :: this
-        integer (IP),        intent (in)           :: nlat
-        integer (IP),        intent (in)           :: nlon
+        class (SpherepackWorkspace), intent (in out)        :: this
+        integer (ip),        intent (in)            :: nlat
+        integer (ip),        intent (in)            :: nlon
         character (len=*),   intent (in), optional :: grid_type
         !--------------------------------------------------------------------------------
 
@@ -148,7 +148,7 @@ contains
 
         if ( this%initialized ) then
 
-            write( stderr, '(A)' ) 'ERROR: TYPE(workspace_t)'
+            write( stderr, '(A)' ) 'ERROR: TYPE(SpherepackWorkspace)'
             write( stderr, '(A)')  ' You must destroy object before re-instantiating'
 
         end if
@@ -159,36 +159,26 @@ contains
 
         ! Check if optional grid type argument is present
         if ( present( grid_type ) ) then
-
             ! Check if the grid type is equally spaced
             if ( grid_type .eq. 'REG' ) then
-
                 ! Set up transforms for regular grids
-                call this%Initialize_scalar_transform_reg( nlat, nlon )
-                call this%Initialize_vector_transform_reg( nlat, nlon )
-
+                call this%initialize_scalar_transform_reg( nlat, nlon )
+                call this%initialize_vector_transform_reg( nlat, nlon )
             ! Check if the grid type is gaussian
             else if ( grid_type .eq. 'GAU' ) then
-
                 ! Set up transforms for gaussian grids
-                call this%Initialize_scalar_transform_gau( nlat, nlon )
-                call this%Initialize_vector_transform_gau( nlat, nlon )
-
+                call this%initialize_scalar_transform_gau( nlat, nlon )
+                call this%initialize_vector_transform_gau( nlat, nlon )
             else
-
                 ! Handle invalid grid type
-                write( stderr, '(A)' ) 'ERROR: TYPE(workspace_t)'
+                write( stderr, '(A)' ) 'ERROR: TYPE(SpherepackWorkspace)'
                 write( stderr, '(A)' ) 'ERROR: optional argument grid_type = ', grid_type
                 write( stderr, '(A)' ) 'must be either REG or GAU (default GAU)'
-                stop
-
             end if
         else
-
             ! Set up default transforms for gaussian grids
-            call this%Initialize_scalar_transform_gau( nlat, nlon )
-            call this%Initialize_vector_transform_gau( nlat, nlon )
-
+            call this%initialize_scalar_transform_gau( nlat, nlon )
+            call this%initialize_vector_transform_gau( nlat, nlon )
         end if
 
         !--------------------------------------------------------------------------------
@@ -197,17 +187,17 @@ contains
 
         this%initialized = .true.
 
-    end subroutine Create
+    end subroutine create
     !
     !*****************************************************************************************
     !
-    subroutine Destroy( this )
+    subroutine destroy( this )
         !
         !< Purpose:
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        class (workspace_t), intent (in out) :: this
+        class (SpherepackWorkspace), intent (in out) :: this
         !--------------------------------------------------------------------------------
 
         !--------------------------------------------------------------------------------
@@ -232,8 +222,8 @@ contains
             ! Check deallocate status
             if ( deallocate_status /= 0 ) then
 
-                write( stderr, '(A)' ) 'TYPE (workspace_t)'
-                write( stderr, '(A)' ) 'Deallocating WORK failed in DESTROY'
+                write( stderr, '(A)' ) 'TYPE (SpherepackWorkspace)'
+                write( stderr, '(A)' ) 'Deallocating WORK failed in destroy'
                 write( stderr, '(A)' ) trim( error_message )
 
             end if
@@ -251,8 +241,8 @@ contains
             ! Check deallocate status
             if ( deallocate_status /= 0 ) then
 
-                write( stderr, '(A)' ) 'TYPE (workspace_t)'
-                write( stderr, '(A)' ) 'Deallocating DWORK failed in DESTROY'
+                write( stderr, '(A)' ) 'TYPE (SpherepackWorkspace)'
+                write( stderr, '(A)' ) 'Deallocating DWORK failed in destroy'
                 write( stderr, '(A)' ) trim( error_message )
 
             end if
@@ -274,8 +264,8 @@ contains
             ! Check deallocate status
             if ( deallocate_status /= 0 ) then
 
-                write( stderr, '(A)' ) 'TYPE (workspace_t)'
-                write( stderr, '(A)' ) 'Deallocating WSHAGS failed in DESTROY'
+                write( stderr, '(A)' ) 'TYPE (SpherepackWorkspace)'
+                write( stderr, '(A)' ) 'Deallocating WSHAGS failed in destroy'
                 write( stderr, '(A)' ) trim( error_message )
 
             end if
@@ -291,8 +281,8 @@ contains
             ! Check deallocate status
             if ( deallocate_status /= 0 ) then
 
-                write( stderr, '(A)' ) 'TYPE (workspace_t)'
-                write( stderr, '(A)' ) 'Deallocating WSHSGS failed in DESTROY'
+                write( stderr, '(A)' ) 'TYPE (SpherepackWorkspace)'
+                write( stderr, '(A)' ) 'Deallocating WSHSGS failed in destroy'
                 write( stderr, '(A)' ) trim( error_message )
 
             end if
@@ -314,8 +304,8 @@ contains
             ! Check deallocate status
             if ( deallocate_status /= 0 ) then
 
-                write( stderr, '(A)' ) 'TYPE (workspace_t)'
-                write( stderr, '(A)' ) 'Deallocating WSHAES failed in DESTROY'
+                write( stderr, '(A)' ) 'TYPE (SpherepackWorkspace)'
+                write( stderr, '(A)' ) 'Deallocating WSHAES failed in destroy'
                 write( stderr, '(A)' ) trim( error_message )
 
             end if
@@ -333,8 +323,8 @@ contains
             ! Check deallocate status
             if ( deallocate_status /= 0 ) then
 
-                write( stderr, '(A)' ) 'TYPE (workspace_t)'
-                write( stderr, '(A)' ) 'Deallocating WSHSES failed in DESTROY'
+                write( stderr, '(A)' ) 'TYPE (SpherepackWorkspace)'
+                write( stderr, '(A)' ) 'Deallocating WSHSES failed in destroy'
                 write( stderr, '(A)' ) trim( error_message )
 
             end if
@@ -356,8 +346,8 @@ contains
             ! Check deallocate status
             if ( deallocate_status /= 0 ) then
 
-                write( stderr, '(A)' ) 'TYPE (workspace_t)'
-                write( stderr, '(A)' ) 'Deallocating WVHAGS failed in DESTROY'
+                write( stderr, '(A)' ) 'TYPE (SpherepackWorkspace)'
+                write( stderr, '(A)' ) 'Deallocating WVHAGS failed in destroy'
                 write( stderr, '(A)' ) trim( error_message )
 
             end if
@@ -375,8 +365,8 @@ contains
             ! Check deallocate status
             if ( deallocate_status /= 0 ) then
 
-                write( stderr, '(A)' ) 'TYPE (workspace_t)'
-                write( stderr, '(A)' ) 'Deallocating WVHSGS failed in DESTROY'
+                write( stderr, '(A)' ) 'TYPE (SpherepackWorkspace)'
+                write( stderr, '(A)' ) 'Deallocating WVHSGS failed in destroy'
                 write( stderr, '(A)' ) trim( error_message )
 
             end if
@@ -398,8 +388,8 @@ contains
             ! Check deallocate status
             if ( deallocate_status /= 0 ) then
 
-                write( stderr, '(A)' ) 'TYPE (workspace_t)'
-                write( stderr, '(A)' ) 'Deallocating WVHAES failed in DESTROY'
+                write( stderr, '(A)' ) 'TYPE (SpherepackWorkspace)'
+                write( stderr, '(A)' ) 'Deallocating WVHAES failed in destroy'
                 write( stderr, '(A)' ) trim( error_message )
 
             end if
@@ -417,8 +407,8 @@ contains
             ! Check deallocate status
             if ( deallocate_status /= 0 ) then
 
-                write( stderr, '(A)' ) 'TYPE (workspace_t)'
-                write( stderr, '(A)' ) 'Deallocating WVHSES failed in DESTROY'
+                write( stderr, '(A)' ) 'TYPE (SpherepackWorkspace)'
+                write( stderr, '(A)' ) 'Deallocating WVHSES failed in destroy'
                 write( stderr, '(A)' ) trim( error_message )
 
             end if
@@ -428,10 +418,10 @@ contains
         ! Clean up scalar transform pointers
         !--------------------------------------------------------------------------------
 
-        ! Check if pointer is associated
-        if ( associated(this%real_harmonic_coefficients) ) then
+        ! Check if array is allocated
+        if ( allocated( this%real_harmonic_coefficients) ) then
 
-            ! Deallocate pointer
+            ! Deallocate array
             deallocate( &
                 this%real_harmonic_coefficients, &
                 stat   = deallocate_status, &
@@ -440,21 +430,17 @@ contains
             ! Check deallocate status
             if ( deallocate_status /= 0 ) then
 
-                write( stderr, '(A)' ) 'TYPE (workspace_t)'
-                write( stderr, '(A)' ) 'Deallocating REAL_HARMONIC_COEFFICIENTS failed in DESTROY'
+                write( stderr, '(A)' ) 'TYPE (SpherepackWorkspace)'
+                write( stderr, '(A)' ) 'Deallocating REAL_HARMONIC_COEFFICIENTS failed in destroy'
                 write( stderr, '(A)' ) trim( error_message )
 
             end if
-
-            ! Nullify pointer
-            nullify( this%real_harmonic_coefficients )
-
         end if
 
-        ! Check if pointer is associated
-        if ( associated(this%imaginary_harmonic_coefficients) ) then
+        ! Check if array is allocated
+        if ( allocated( this%imaginary_harmonic_coefficients) ) then
 
-            ! Deallocate pointer
+            ! Deallocate array
             deallocate( &
                 this%imaginary_harmonic_coefficients, &
                 stat   = deallocate_status, &
@@ -463,25 +449,21 @@ contains
             ! Check deallocate status
             if ( deallocate_status /= 0 ) then
 
-                write( stderr, '(A)' ) 'TYPE (workspace_t)'
-                write( stderr, '(A)' ) 'Deallocating IMAGINARY_HARMONIC_COEFFICIENTS failed in DESTROY'
+                write( stderr, '(A)' ) 'TYPE (SpherepackWorkspace)'
+                write( stderr, '(A)' ) 'Deallocating IMAGINARY_HARMONIC_COEFFICIENTS failed in destroy'
                 write( stderr, '(A)' ) trim( error_message )
 
             end if
-
-            ! Nullify pointer
-            nullify( this%imaginary_harmonic_coefficients )
-
         end if
 
         !--------------------------------------------------------------------------------
         ! Clean up vector transform pointers
         !--------------------------------------------------------------------------------
 
-        ! Check if pointer is associated
-        if ( associated(this%real_polar_harmonic_coefficients) ) then
+        ! Check if array is allocated
+        if ( allocated( this%real_polar_harmonic_coefficients) ) then
 
-            ! Deallocate pointer
+            ! Deallocate array
             deallocate( &
                 this%real_polar_harmonic_coefficients, &
                 stat   = deallocate_status, &
@@ -490,21 +472,17 @@ contains
             ! Check deallocate status
             if ( deallocate_status /= 0 ) then
 
-                write( stderr, '(A)' ) 'TYPE (workspace_t)'
-                write( stderr, '(A)' ) 'Deallocating REAL_POLAR_HARMONIC_COEFFICIENTS failed in DESTROY'
+                write( stderr, '(A)' ) 'TYPE (SpherepackWorkspace)'
+                write( stderr, '(A)' ) 'Deallocating REAL_POLAR_HARMONIC_COEFFICIENTS failed in destroy'
                 write( stderr, '(A)' ) trim( error_message )
 
             end if
-
-            ! Nullify pointer
-            nullify( this%real_polar_harmonic_coefficients )
-
         end if
 
-        ! Check if pointer is associated
-        if ( associated(this%imaginary_polar_harmonic_coefficients) ) then
+        ! Check if array is allocated
+        if ( allocated( this%imaginary_polar_harmonic_coefficients) ) then
 
-            ! Deallocate pointer
+            ! Deallocate array
             deallocate( &
                 this%imaginary_polar_harmonic_coefficients, &
                 stat   = deallocate_status, &
@@ -513,21 +491,17 @@ contains
             ! Check deallocate status
             if ( deallocate_status /= 0 ) then
 
-                write( stderr, '(A)' ) 'TYPE (workspace_t)'
-                write( stderr, '(A)' ) 'Deallocating IMAGINARY_POLAR_HARMONIC_COEFFICIENTS failed in DESTROY'
+                write( stderr, '(A)' ) 'TYPE (SpherepackWorkspace)'
+                write( stderr, '(A)' ) 'Deallocating IMAGINARY_POLAR_HARMONIC_COEFFICIENTS failed in destroy'
                 write( stderr, '(A)' ) trim( error_message )
 
             end if
-
-            ! Nullify pointer
-            nullify( this%imaginary_polar_harmonic_coefficients )
-
         end if
 
-        ! Check if pointer is associated
-        if ( associated(this%real_azimuthal_harmonic_coefficients) ) then
+        ! Check if array is allocated
+        if ( allocated( this%real_azimuthal_harmonic_coefficients) ) then
 
-            ! Deallocate pointer
+            ! Deallocate array
             deallocate( &
                 this%real_azimuthal_harmonic_coefficients, &
                 stat   = deallocate_status, &
@@ -536,21 +510,17 @@ contains
             ! Check deallocate status
             if ( deallocate_status /= 0 ) then
 
-                write( stderr, '(A)' ) 'TYPE (workspace_t)'
-                write( stderr, '(A)' ) 'Deallocating REAL_AZIMUTHAL_HARMONIC_COEFFICIENTS failed in DESTROY'
+                write( stderr, '(A)' ) 'TYPE (SpherepackWorkspace)'
+                write( stderr, '(A)' ) 'Deallocating REAL_AZIMUTHAL_HARMONIC_COEFFICIENTS failed in destroy'
                 write( stderr, '(A)' ) trim( error_message )
 
             end if
-
-            ! Nullify pointer
-            nullify( this%real_azimuthal_harmonic_coefficients )
-
         end if
 
-        ! Check if pointer is associated
-        if ( associated(this%imaginary_azimuthal_harmonic_coefficients) ) then
+        ! Check if array is allocated
+        if ( allocated( this%imaginary_azimuthal_harmonic_coefficients) ) then
 
-            ! Deallocate pointer
+            ! Deallocate array
             deallocate( &
                 this%imaginary_azimuthal_harmonic_coefficients, &
                 stat   = deallocate_status, &
@@ -559,15 +529,11 @@ contains
             ! Check deallocate status
             if ( deallocate_status /= 0 ) then
 
-                write( stderr, '(A)' ) 'TYPE (workspace_t)'
-                write( stderr, '(A)' ) 'Deallocating IMAGINARY_AZIMUTHAL_HARMONIC_COEFFICIENTS failed in DESTROY'
+                write( stderr, '(A)' ) 'TYPE (SpherepackWorkspace)'
+                write( stderr, '(A)' ) 'Deallocating IMAGINARY_AZIMUTHAL_HARMONIC_COEFFICIENTS failed in destroy'
                 write( stderr, '(A)' ) trim( error_message )
 
             end if
-
-            ! Nullify pointer
-            nullify( this%imaginary_azimuthal_harmonic_coefficients )
-
         end if
 
         !--------------------------------------------------------------------------------
@@ -576,28 +542,28 @@ contains
 
         this%initialized = .false.
 
-    end subroutine Destroy
+    end subroutine destroy
     !
     !*****************************************************************************************
     !
-    subroutine Assert_initialized( this )
+    subroutine assert_initialized( this )
         !
         !< Purpose:
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        class (workspace_t), intent (in out)    :: this
+        class (SpherepackWorkspace), intent (in out)    :: this
         !--------------------------------------------------------------------------------
 
         ! Check status
         if ( this%initialized ) then
 
-            write( stderr, '(A)' ) 'TYPE (workspace_t)'
-            write( stderr, '(A)' ) 'You must re-instantiate object with a call to DESTROY before calling methods'
+            write( stderr, '(A)' ) 'TYPE (SpherepackWorkspace)'
+            write( stderr, '(A)' ) 'You must re-instantiate object with a call to destroy before calling methods'
 
         end if
 
-    end subroutine Assert_initialized
+    end subroutine assert_initialized
     !
     !*****************************************************************************************
     !
@@ -605,7 +571,7 @@ contains
     !
     !*****************************************************************************************
     !
-    subroutine Initialize_scalar_analysis_gau( this, nlat, nlon )
+    subroutine initialize_scalar_analysis_gau( this, nlat, nlon )
         !
         !< Purpose:
         !
@@ -696,23 +662,25 @@ contains
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        class (workspace_t), intent (in out) :: this
-        integer (IP),        intent (in)     :: nlat
-        integer (IP),        intent (in)     :: nlon
+        class (SpherepackWorkspace), intent (in out) :: this
+        integer (ip),        intent (in)     :: nlat
+        integer (ip),        intent (in)     :: nlon
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
         !--------------------------------------------------------------------------------
-        integer (IP) :: error_flag
-        integer (IP) :: lwork, ldwork, lshags
+        integer (ip):: error_flag
+        integer (ip):: lwork
+        integer (ip):: ldwork
+        integer (ip):: lshags
         !--------------------------------------------------------------------------------
 
         !--------------------------------------------------------------------------------
         ! Compute dimensions of various workspace arrays
         !--------------------------------------------------------------------------------
 
-        lwork  = Get_lwork( nlat, nlon )
-        ldwork = Get_ldwork( nlat )
-        lshags = Get_lshags( nlat, nlon )
+        lwork  = get_lwork( nlat, nlon )
+        ldwork = get_ldwork( nlat )
+        lshags = get_lshags( nlat, nlon )
 
         !--------------------------------------------------------------------------------
         ! Deallocatea arrays ( if necessary )
@@ -730,8 +698,8 @@ contains
             ! Check deallocate status
             if ( deallocate_status /= 0 ) then
 
-                write( stderr, '(A)' ) 'TYPE (workspace_t)'
-                write( stderr, '(A)' ) 'Deallocating WORK failed in INITIALIZE_SCALAR_ANALYSIS_GAU'
+                write( stderr, '(A)' ) 'TYPE (SpherepackWorkspace)'
+                write( stderr, '(A)' ) 'Deallocating WORK failed in initialize_SCALAR_ANALYSIS_GAU'
                 write( stderr, '(A)' ) trim( error_message )
 
             end if
@@ -749,8 +717,8 @@ contains
             ! Check deallocate status
             if ( deallocate_status /= 0 ) then
 
-                write( stderr, '(A)' ) 'TYPE (workspace_t)'
-                write( stderr, '(A)' ) 'Deallocating DWORK failed in INITIALIZE_SCALAR_ANALYSIS_GAU'
+                write( stderr, '(A)' ) 'TYPE (SpherepackWorkspace)'
+                write( stderr, '(A)' ) 'Deallocating DWORK failed in initialize_SCALAR_ANALYSIS_GAU'
                 write( stderr, '(A)' ) trim( error_message )
 
             end if
@@ -768,8 +736,8 @@ contains
             ! Check deallocate status
             if ( deallocate_status /= 0 ) then
 
-                write( stderr, '(A)' ) 'TYPE (workspace_t)'
-                write( stderr, '(A)' ) 'Deallocating WSHAGS failed in INITIALIZE_SCALAR_ANALYSIS_GAU'
+                write( stderr, '(A)' ) 'TYPE (SpherepackWorkspace)'
+                write( stderr, '(A)' ) 'Deallocating WSHAGS failed in initialize_SCALAR_ANALYSIS_GAU'
                 write( stderr, '(A)' ) trim( error_message )
 
             end if
@@ -789,7 +757,7 @@ contains
         ! Check allocation status
         if ( allocate_status /= 0 ) then
 
-            write( stderr, '(A)' ) 'TYPE (workspace_t)'
+            write( stderr, '(A)' ) 'TYPE (SpherepackWorkspace)'
             write( stderr, '(A)' ) 'Allocation failed in INITIALIZE_SCALAR_ANALYSIS_GAU'
             write( stderr, '(A)' ) trim( error_message )
 
@@ -821,7 +789,7 @@ contains
 
         else
 
-            write( stderr, '(A)') 'TYPE (workspace_t) in INITIALIZE_SCALAR_ANALYSIS_GAU'
+            write( stderr, '(A)') 'TYPE (SpherepackWorkspace) in INITIALIZE_SCALAR_ANALYSIS_GAU'
 
             if ( error_flag == 1 ) then
 
@@ -858,11 +826,11 @@ contains
             end if
         end if
 
-    end subroutine Initialize_scalar_analysis_gau
+    end subroutine initialize_scalar_analysis_gau
     !
     !*****************************************************************************************
     !
-    subroutine Initialize_scalar_synthesis_gau( this, nlat, nlon )
+    subroutine initialize_scalar_synthesis_gau( this, nlat, nlon )
         !
         !< Purpose:
         !
@@ -953,23 +921,25 @@ contains
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        class (workspace_t), intent (in out) :: this
-        integer (IP),        intent (in)     :: nlat
-        integer (IP),        intent (in)     :: nlon
+        class (SpherepackWorkspace), intent (in out) :: this
+        integer (ip),        intent (in)     :: nlat
+        integer (ip),        intent (in)     :: nlon
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
         !--------------------------------------------------------------------------------
-        integer (IP) :: error_flag
-        integer (IP) :: lwork, ldwork, lshsgs
+        integer (ip):: error_flag
+        integer (ip):: lwork
+        integer (ip):: ldwork
+        integer (ip):: lshsgs
         !--------------------------------------------------------------------------------
 
         !--------------------------------------------------------------------------------
         ! Compute dimensions of various workspace arrays
         !--------------------------------------------------------------------------------
 
-        lwork  = Get_lwork( nlat, nlon )
-        ldwork = Get_ldwork( nlat )
-        lshsgs = Get_lshsgs( nlat, nlon )
+        lwork  = get_lwork( nlat, nlon )
+        ldwork = get_ldwork( nlat )
+        lshsgs = get_lshsgs( nlat, nlon )
 
         !--------------------------------------------------------------------------------
         ! Deallocatea arrays ( if necessary )
@@ -987,8 +957,8 @@ contains
             ! Check deallocate status
             if ( deallocate_status /= 0 ) then
 
-                write( stderr, '(A)' ) 'TYPE (workspace_t)'
-                write( stderr, '(A)' ) 'Deallocating WORK failed in INITIALIZE_SCALAR_SYNTHESIS_GAU'
+                write( stderr, '(A)' ) 'TYPE (SpherepackWorkspace)'
+                write( stderr, '(A)' ) 'Deallocating WORK failed in initialize_SCALAR_SYNTHESIS_GAU'
                 write( stderr, '(A)' ) trim( error_message )
 
             end if
@@ -1006,8 +976,8 @@ contains
             ! Check deallocate status
             if ( deallocate_status /= 0 ) then
 
-                write( stderr, '(A)' ) 'TYPE (workspace_t)'
-                write( stderr, '(A)' ) 'Deallocating DWORK failed in INITIALIZE_SCALAR_SYNTHESIS_GAU'
+                write( stderr, '(A)' ) 'TYPE (SpherepackWorkspace)'
+                write( stderr, '(A)' ) 'Deallocating DWORK failed in initialize_SCALAR_SYNTHESIS_GAU'
                 write( stderr, '(A)' ) trim( error_message )
 
             end if
@@ -1023,7 +993,7 @@ contains
             ! Check deallocate status
             if ( deallocate_status /= 0 ) then
 
-                write( stderr, '(A)' ) 'TYPE (workspace_t)'
+                write( stderr, '(A)' ) 'TYPE (SpherepackWorkspace)'
                 write( stderr, '(A)' ) 'Deallocating WSHSGS failed in INITIALIZE_SCALAR_SYNTHESIS_GAU'
                 write( stderr, '(A)' ) trim( error_message )
 
@@ -1036,16 +1006,16 @@ contains
 
         ! Allocate arrays
         allocate ( &
-            this%work(   1:lwork ), &
-            this%dwork(  1:ldwork ), &
-            this%wshsgs( 1:lshsgs ), &
+            this%work(   lwork ), &
+            this%dwork(  ldwork ), &
+            this%wshsgs( lshsgs ), &
             stat   = allocate_status, &
             errmsg = error_message )
 
         ! Check allocation status
         if ( allocate_status /= 0 ) then
 
-            write( stderr, '(A)' ) 'TYPE (workspace_t)'
+            write( stderr, '(A)' ) 'TYPE (SpherepackWorkspace)'
             write( stderr, '(A)' ) 'Allocation failed in INITIALIZE_SCALAR_SYNTHESIS_GAU'
             write( stderr, '(A)' ) trim( error_message )
 
@@ -1062,7 +1032,7 @@ contains
             ierror => error_flag &
             )
 
-            call Shsgsi( nlat, nlon, wshsgs, lshsgs, work, lwork, dwork, ldwork, &
+            call shsgsi( nlat, nlon, wshsgs, lshsgs, work, lwork, dwork, ldwork, &
                 ierror)
 
         end associate
@@ -1077,7 +1047,7 @@ contains
 
         else
 
-            write( stderr, '(A)') 'TYPE (workspace_t) in INITIALIZE_SCALAR_SYNTHESIS_GAU'
+            write( stderr, '(A)') 'TYPE (SpherepackWorkspace) in INITIALIZE_SCALAR_SYNTHESIS_GAU'
 
             if ( error_flag == 1 ) then
 
@@ -1114,11 +1084,11 @@ contains
             end if
         end if
 
-    end subroutine Initialize_scalar_synthesis_gau
+    end subroutine initialize_scalar_synthesis_gau
     !
     !*****************************************************************************************
     !
-    subroutine Initialize_scalar_transform_gau( this, nlat, nlon )
+    subroutine initialize_scalar_transform_gau( this, nlat, nlon )
         !
         !< Purpose:
         !
@@ -1128,53 +1098,50 @@ contains
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        class (workspace_t), intent (in out) :: this
-        integer (IP),        intent (in)     :: nlat
-        integer (IP),        intent (in)     :: nlon
+        class (SpherepackWorkspace), intent (in out) :: this
+        integer (ip),        intent (in)     :: nlat
+        integer (ip),        intent (in)     :: nlon
         !--------------------------------------------------------------------------------
 
-        !--------------------------------------------------------------------------------
-        ! Check initialization flag
-        !--------------------------------------------------------------------------------
-
-        call this%Assert_initialized()
+        ! Check if object is useable
+        call this%assert_initialized()
 
         !--------------------------------------------------------------------------------
         ! Set up scalar analysis
         !--------------------------------------------------------------------------------
 
-        call this%Initialize_scalar_analysis_gau( nlat, nlon )
+        call this%initialize_scalar_analysis_gau( nlat, nlon )
 
         !--------------------------------------------------------------------------------
         ! Set up scalar synthesis
         !--------------------------------------------------------------------------------
 
-        call this%Initialize_scalar_synthesis_gau( nlat, nlon )
+        call this%initialize_scalar_synthesis_gau( nlat, nlon )
 
         !--------------------------------------------------------------------------------
         ! Allocate pointers for the (real) scalar transform
         !--------------------------------------------------------------------------------
 
         allocate ( &
-            this%real_harmonic_coefficients( 1:nlat, 1:nlat ), &
-            this%imaginary_harmonic_coefficients( 1:nlat, 1:nlat ), &
+            this%real_harmonic_coefficients(      nlat, nlat ), &
+            this%imaginary_harmonic_coefficients( nlat, nlat ), &
             stat   = allocate_status, &
             errmsg = error_message )
 
         ! Check allocation status
         if ( allocate_status /= 0 ) then
 
-            write( stderr, '(A)' ) 'TYPE (workspace_t)'
+            write( stderr, '(A)' ) 'TYPE (SpherepackWorkspace)'
             write( stderr, '(A)' ) 'Pointer allocation failed in INITIALIZE_SCALAR_TRANSFORM_GAU'
             write( stderr, '(A)' )  trim( error_message )
 
         end if
 
-    end subroutine Initialize_scalar_transform_gau
+    end subroutine initialize_scalar_transform_gau
     !
     !*****************************************************************************************
     !
-    subroutine Initialize_vector_analysis_gau( this, nlat, nlon )
+    subroutine initialize_vector_analysis_gau( this, nlat, nlon )
         !
         !< Purpose:
         !
@@ -1254,22 +1221,23 @@ contains
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        class (workspace_t), intent (in out) :: this
-        integer (IP), intent (in)            :: nlat
-        integer (IP), intent (in)            :: nlon
+        class (SpherepackWorkspace), intent (in out) :: this
+        integer (ip), intent (in)            :: nlat
+        integer (ip), intent (in)            :: nlon
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
         !--------------------------------------------------------------------------------
-        integer (IP)    :: error_flag
-        integer (IP)    :: ldwork, lvhags
+        integer (ip):: error_flag
+        integer (ip):: ldwork
+        integer (ip):: lvhags
         !--------------------------------------------------------------------------------
 
         !--------------------------------------------------------------------------------
         ! Compute dimensions of various workspace arrays
         !--------------------------------------------------------------------------------
 
-        ldwork = Get_ldwork( nlat )
-        lvhags = Get_lvhags( nlat, nlon )
+        ldwork = get_ldwork( nlat )
+        lvhags = get_lvhags( nlat, nlon )
 
         !--------------------------------------------------------------------------------
         ! Deallocatea arrays ( if necessary )
@@ -1287,7 +1255,7 @@ contains
             ! Check deallocate status
             if ( deallocate_status /= 0 ) then
 
-                write( stderr, '(A)' ) 'TYPE (workspace_t)'
+                write( stderr, '(A)' ) 'TYPE (SpherepackWorkspace)'
                 write( stderr, '(A)' ) 'Deallocating DWORK failed in INITIALIZE_SCALAR_ANALYSIS_GAU'
                 write( stderr, '(A)' ) trim( error_message )
 
@@ -1306,7 +1274,7 @@ contains
             ! Check deallocate status
             if ( deallocate_status /= 0 ) then
 
-                write( stderr, '(A)' ) 'TYPE (workspace_t)'
+                write( stderr, '(A)' ) 'TYPE (SpherepackWorkspace)'
                 write( stderr, '(A)' ) 'Deallocating WVHAGS failed in INITIALIZE_SCALAR_ANALYSIS_GAU'
                 write( stderr, '(A)' ) trim( error_message )
 
@@ -1326,7 +1294,7 @@ contains
         ! Check allocation status
         if ( allocate_status /= 0 ) then
 
-            write( stderr, '(A)' ) 'TYPE (workspace_t)'
+            write( stderr, '(A)' ) 'TYPE (SpherepackWorkspace)'
             write( stderr, '(A)' ) 'Allocation failed in INITIALIZE_SCALAR_ANALYSIS_GAU'
             write( stderr, '(A)' ) trim( error_message )
 
@@ -1356,7 +1324,7 @@ contains
 
         else
 
-            write( stderr, '(A)') 'TYPE (workspace_t) in INITIALIZE_VECTOR_ANALYSIS_GAU'
+            write( stderr, '(A)') 'TYPE (SpherepackWorkspace) in INITIALIZE_VECTOR_ANALYSIS_GAU'
 
             if ( error_flag == 1 ) then
 
@@ -1383,11 +1351,11 @@ contains
             end if
         end if
 
-    end subroutine Initialize_vector_analysis_gau
+    end subroutine initialize_vector_analysis_gau
     !
     !*****************************************************************************************
     !
-    subroutine Initialize_vector_synthesis_gau( this, nlat, nlon )
+    subroutine initialize_vector_synthesis_gau( this, nlat, nlon )
         !
         !< Purpose:
         !
@@ -1465,22 +1433,23 @@ contains
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        class (workspace_t), intent (in out) :: this
-        integer (IP),        intent (in)     :: nlat
-        integer (IP),        intent (in)     :: nlon
+        class (SpherepackWorkspace), intent (in out) :: this
+        integer (ip),        intent (in)     :: nlat
+        integer (ip),        intent (in)     :: nlon
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
         !--------------------------------------------------------------------------------
-        integer (IP)    :: error_flag
-        integer (IP)    :: ldwork, lvhsgs
+        integer (ip):: error_flag
+        integer (ip):: ldwork
+        integer (ip):: lvhsgs
         !--------------------------------------------------------------------------------
 
         !--------------------------------------------------------------------------------
         ! Compute dimensions of various workspace arrays
         !--------------------------------------------------------------------------------
 
-        ldwork = Get_ldwork( nlat )
-        lvhsgs = Get_lvhsgs( nlat, nlon )
+        ldwork = get_ldwork( nlat )
+        lvhsgs = get_lvhsgs( nlat, nlon )
 
         !--------------------------------------------------------------------------------
         ! Deallocatea arrays ( if necessary )
@@ -1498,7 +1467,7 @@ contains
             ! Check deallocate status
             if ( deallocate_status /= 0 ) then
 
-                write( stderr, '(A)' ) 'TYPE (workspace_t)'
+                write( stderr, '(A)' ) 'TYPE (SpherepackWorkspace)'
                 write( stderr, '(A)' ) 'Deallocating DWORK failed in INITIALIZE_VECTOR_SYNTHESIS_GAU'
                 write( stderr, '(A)' ) trim( error_message )
 
@@ -1517,7 +1486,7 @@ contains
             ! Check deallocate status
             if ( deallocate_status /= 0 ) then
 
-                write( stderr, '(A)' ) 'TYPE (workspace_t)'
+                write( stderr, '(A)' ) 'TYPE (SpherepackWorkspace)'
                 write( stderr, '(A)' ) 'Deallocating WVHSGS failed in INITIALIZE_VECTOR_SYNTHESIS_GAU'
                 write( stderr, '(A)' ) trim( error_message )
 
@@ -1537,7 +1506,7 @@ contains
         ! Check allocation status
         if ( allocate_status /= 0 ) then
 
-            write( stderr, '(A)' ) 'TYPE (workspace_t)'
+            write( stderr, '(A)' ) 'TYPE (SpherepackWorkspace)'
             write( stderr, '(A)' ) 'Allocation failed in in INITIALIZE_VECTOR_SYNTHESIS_GAU'
             write( stderr, '(A)' ) trim( error_message )
 
@@ -1569,7 +1538,7 @@ contains
 
         else
 
-            write( stderr, '(A)') 'TYPE (workspace_t) in INITIALIZE_VECTOR_ANALYSIS_GAU'
+            write( stderr, '(A)') 'TYPE (SpherepackWorkspace) in INITIALIZE_VECTOR_ANALYSIS_GAU'
 
             if ( error_flag == 1 ) then
 
@@ -1596,11 +1565,11 @@ contains
             end if
         end if
 
-    end subroutine Initialize_vector_synthesis_gau
+    end subroutine initialize_vector_synthesis_gau
     !
     !*****************************************************************************************
     !
-    subroutine Initialize_vector_transform_gau( this, nlat, nlon )
+    subroutine initialize_vector_transform_gau( this, nlat, nlon )
         !
         !< Purpose:
         !
@@ -1610,28 +1579,28 @@ contains
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        class (workspace_t), intent (in out) :: this
-        integer (IP),        intent (in)     :: nlat
-        integer (IP),        intent (in)     :: nlon
+        class (SpherepackWorkspace), intent (in out) :: this
+        integer (ip),        intent (in)     :: nlat
+        integer (ip),        intent (in)     :: nlon
         !--------------------------------------------------------------------------------
 
         !--------------------------------------------------------------------------------
         ! Check initialization flag
         !--------------------------------------------------------------------------------
 
-        call this%Assert_initialized()
+        call this%assert_initialized()
 
         !--------------------------------------------------------------------------------
         ! Set up vector analysis
         !--------------------------------------------------------------------------------
 
-        call this%Initialize_vector_analysis_gau( nlat, nlon )
+        call this%initialize_vector_analysis_gau( nlat, nlon )
 
         !--------------------------------------------------------------------------------
         ! Set up vector analysis
         !--------------------------------------------------------------------------------
 
-        call this%Initialize_vector_synthesis_gau( nlat, nlon )
+        call this%initialize_vector_synthesis_gau( nlat, nlon )
 
         !--------------------------------------------------------------------------------
         ! Allocate pointers for the (real) vector harmonic transform coefficients
@@ -1648,13 +1617,13 @@ contains
         ! Check allocation status
         if ( allocate_status /= 0 ) then
 
-            write( stderr, '(A)' ) 'TYPE (workspace_t)'
+            write( stderr, '(A)' ) 'TYPE (SpherepackWorkspace)'
             write( stderr, '(A)' ) 'Allocating pointers failed in INITIALIZE_VECTOR_TRANSFORM_GAU'
             write( stderr, '(A)' ) trim( error_message )
 
         end if
 
-    end subroutine Initialize_vector_transform_gau
+    end subroutine initialize_vector_transform_gau
     !
     !*****************************************************************************************
     !
@@ -1662,7 +1631,7 @@ contains
     !
     !*****************************************************************************************
     !
-    subroutine Initialize_scalar_analysis_reg( this, nlat, nlon )
+    subroutine initialize_scalar_analysis_reg( this, nlat, nlon )
         !
         !< Purpose:
         !
@@ -1757,29 +1726,31 @@ contains
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        class (workspace_t), intent (in out) :: this
-        integer (IP),        intent (in)     :: nlat
-        integer (IP),        intent (in)     :: nlon
+        class (SpherepackWorkspace), intent (in out) :: this
+        integer (ip),        intent (in)     :: nlat
+        integer (ip),        intent (in)     :: nlon
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
         !--------------------------------------------------------------------------------
-        integer (IP) :: error_flag
-        integer (IP) :: lwork, ldwork, lshaes
+        integer (ip):: error_flag
+        integer (ip):: lwork
+        integer (ip):: ldwork
+        integer (ip):: lshaes
         !--------------------------------------------------------------------------------
 
         !--------------------------------------------------------------------------------
         ! Check initialization flag
         !--------------------------------------------------------------------------------
 
-        call this%Assert_initialized()
+        call this%assert_initialized()
 
         !--------------------------------------------------------------------------------
         ! Compute dimensions of various workspace arrays
         !--------------------------------------------------------------------------------
 
-        lwork  = this%Get_lwork(  nlat, nlon )
-        ldwork = this%Get_ldwork( nlat )
-        lshaes = this%Get_lshaes( nlat, nlon )
+        lwork  = this%get_lwork(  nlat, nlon )
+        ldwork = this%get_ldwork( nlat )
+        lshaes = this%get_lshaes( nlat, nlon )
 
         !--------------------------------------------------------------------------------
         ! Deallocatea arrays ( if necessary )
@@ -1797,8 +1768,8 @@ contains
             ! Check deallocate status
             if ( deallocate_status /= 0 ) then
 
-                write( stderr, '(A)' ) 'TYPE (workspace_t)'
-                write( stderr, '(A)' ) 'Deallocating WORK failed in INITIALIZE_SCALAR_ANALYSIS_REG'
+                write( stderr, '(A)' ) 'TYPE (SpherepackWorkspace)'
+                write( stderr, '(A)' ) 'Deallocating WORK failed in initialize_SCALAR_ANALYSIS_REG'
                 write( stderr, '(A)' ) trim( error_message )
 
             end if
@@ -1816,8 +1787,8 @@ contains
             ! Check deallocate status
             if ( deallocate_status /= 0 ) then
 
-                write( stderr, '(A)' ) 'TYPE (workspace_t)'
-                write( stderr, '(A)' ) 'Deallocating DWORK failed in INITIALIZE_SCALAR_ANALYSIS_REG'
+                write( stderr, '(A)' ) 'TYPE (SpherepackWorkspace)'
+                write( stderr, '(A)' ) 'Deallocating DWORK failed in initialize_SCALAR_ANALYSIS_REG'
                 write( stderr, '(A)' ) trim( error_message )
 
             end if
@@ -1835,7 +1806,7 @@ contains
             ! Check deallocate status
             if ( deallocate_status /= 0 ) then
 
-                write( stderr, '(A)' ) 'TYPE (workspace_t)'
+                write( stderr, '(A)' ) 'TYPE (SpherepackWorkspace)'
                 write( stderr, '(A)' ) 'Deallocating WSHAES failed in INITIALIZE_SCALAR_ANALYSIS_REG'
                 write( stderr, '(A)' ) trim( error_message )
 
@@ -1847,16 +1818,16 @@ contains
         !--------------------------------------------------------------------------------
 
         allocate ( &
-            this%work(   1:lwork ), &
-            this%dwork(  1:ldwork ), &
-            this%wshaes( 1:lshaes ), &
+            this%work(   lwork ), &
+            this%dwork(  ldwork ), &
+            this%wshaes( lshaes ), &
             stat   = allocate_status, &
             errmsg = error_message )
 
         ! Check allocation status
         if ( allocate_status /= 0 ) then
 
-            write( stderr, '(A)' ) 'TYPE (workspace_t)'
+            write( stderr, '(A)' ) 'TYPE (SpherepackWorkspace)'
             write( stderr, '(A)' ) 'Allocation failed in INITIALIZE_SCALAR_ANALYSIS_REG'
             write( stderr, '(A)' ) trim( error_message )
 
@@ -1887,7 +1858,7 @@ contains
 
         else
 
-            write( stderr, '(A)') 'TYPE (workspace_t) in INITIALIZE_SCALAR_ANALYSIS_REG'
+            write( stderr, '(A)') 'TYPE (SpherepackWorkspace) in INITIALIZE_SCALAR_ANALYSIS_REG'
 
             if ( error_flag == 1 ) then
 
@@ -1914,11 +1885,11 @@ contains
             end if
         end if
 
-    end subroutine Initialize_scalar_analysis_reg
+    end subroutine initialize_scalar_analysis_reg
     !
     !*****************************************************************************************
     !
-    subroutine Initialize_scalar_synthesis_reg( this, nlat, nlon )
+    subroutine initialize_scalar_synthesis_reg( this, nlat, nlon )
         !
         !< Purpose:
         !
@@ -2003,23 +1974,25 @@ contains
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        class (workspace_t), intent (in out) :: this
-        integer (IP),        intent (in)     :: nlat
-        integer (IP),        intent (in)     :: nlon
+        class (SpherepackWorkspace), intent (in out) :: this
+        integer (ip),        intent (in)     :: nlat
+        integer (ip),        intent (in)     :: nlon
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
         !--------------------------------------------------------------------------------
-        integer (IP) :: error_flag
-        integer (IP) :: lwork, ldwork, lshses
+        integer (ip):: error_flag
+        integer (ip):: lwork
+        integer (ip):: ldwork
+        integer (ip):: lshses
         !--------------------------------------------------------------------------------
 
         !--------------------------------------------------------------------------------
         ! Set up various workspace dimensions
         !--------------------------------------------------------------------------------
 
-        lwork  = this%Get_lwork(  nlat, nlon )
-        ldwork = this%Get_ldwork( nlat )
-        lshses = this%Get_lshses( nlat, nlon )
+        lwork  = this%get_lwork(  nlat, nlon )
+        ldwork = this%get_ldwork( nlat )
+        lshses = this%get_lshses( nlat, nlon )
 
         !--------------------------------------------------------------------------------
         ! Deallocatea arrays ( if necessary )
@@ -2037,7 +2010,7 @@ contains
             ! Check deallocate status
             if ( deallocate_status /= 0 ) then
 
-                write( stderr, '(A)' ) 'TYPE (workspace_t)'
+                write( stderr, '(A)' ) 'TYPE (SpherepackWorkspace)'
                 write( stderr, '(A)' ) 'Deallocating WORK failed in INITIALIZE_SCALAR_ANALYSIS_REG'
                 write( stderr, '(A)' ) trim( error_message )
 
@@ -2056,7 +2029,7 @@ contains
             ! Check deallocate status
             if ( deallocate_status /= 0 ) then
 
-                write( stderr, '(A)' ) 'TYPE (workspace_t)'
+                write( stderr, '(A)' ) 'TYPE (SpherepackWorkspace)'
                 write( stderr, '(A)' ) 'Deallocating DWORK failed in INITIALIZE_SCALAR_ANALYSIS_REG'
                 write( stderr, '(A)' ) trim( error_message )
 
@@ -2075,7 +2048,7 @@ contains
             ! Check deallocate status
             if ( deallocate_status /= 0 ) then
 
-                write( stderr, '(A)' ) 'TYPE (workspace_t)'
+                write( stderr, '(A)' ) 'TYPE (SpherepackWorkspace)'
                 write( stderr, '(A)' ) 'Deallocating WSHSES failed in INITIALIZE_SCALAR_SYNTHESIS_REG'
                 write( stderr, '(A)' ) trim( error_message )
 
@@ -2087,16 +2060,16 @@ contains
         !--------------------------------------------------------------------------------
 
         allocate ( &
-            this%work(   1:lwork ), &
-            this%dwork(  1:ldwork ), &
-            this%wshses( 1:lshses ), &
+            this%work(   lwork ), &
+            this%dwork(  ldwork ), &
+            this%wshses( lshses ), &
             stat   = allocate_status, &
             errmsg = error_message )
 
         ! Check allocation status
         if ( allocate_status /= 0 ) then
 
-            write( stderr, '(A)' ) 'TYPE (workspace_t)'
+            write( stderr, '(A)' ) 'TYPE (SpherepackWorkspace)'
             write( stderr, '(A)' ) 'Allocation failed in INITIALIZE_SCALAR_SYNTHESIS_REG'
             write( stderr, '(A)' ) trim( error_message )
 
@@ -2127,7 +2100,7 @@ contains
 
         else
 
-            write( stderr, '(A)') 'TYPE (workspace_t) in INITIALIZE_SCALAR_SYNTHESIS_REG'
+            write( stderr, '(A)') 'TYPE (SpherepackWorkspace) in initialize_SCALAR_SYNTHESIS_REG'
 
             if ( error_flag == 1 ) then
 
@@ -2154,11 +2127,11 @@ contains
             end if
         end if
 
-    end subroutine Initialize_scalar_synthesis_reg
+    end subroutine initialize_scalar_synthesis_reg
     !
     !*****************************************************************************************
     !
-    subroutine Initialize_scalar_transform_reg( this, nlat, nlon )
+    subroutine initialize_scalar_transform_reg( this, nlat, nlon )
         !
         !< Purpose:
         !
@@ -2168,53 +2141,50 @@ contains
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        class (workspace_t), intent (in out) :: this
-        integer (IP),        intent (in)     :: nlat
-        integer (IP),        intent (in)     :: nlon
+        class (SpherepackWorkspace), intent (in out) :: this
+        integer (ip),        intent (in)     :: nlat
+        integer (ip),        intent (in)     :: nlon
         !--------------------------------------------------------------------------------
 
-        !--------------------------------------------------------------------------------
-        ! Check initialization flag
-        !--------------------------------------------------------------------------------
-
-        call this%Assert_initialized()
+        ! Check if object is useable
+        call this%assert_initialized()
 
         !--------------------------------------------------------------------------------
         ! Set up scalar analysis - REG
         !--------------------------------------------------------------------------------
 
-        call this%Initialize_scalar_analysis_reg( nlat, nlon )
+        call this%initialize_scalar_analysis_reg( nlat, nlon )
 
         !--------------------------------------------------------------------------------
         ! Set up scalar synthesis - REG
         !--------------------------------------------------------------------------------
 
-        call this%Initialize_scalar_synthesis_reg( nlat, nlon )
+        call this%initialize_scalar_synthesis_reg( nlat, nlon )
 
         !--------------------------------------------------------------------------------
         ! Allocate pointers for the (real) scalar harmonic transform - REG
         !--------------------------------------------------------------------------------
 
         allocate ( &
-            this%real_harmonic_coefficients(      1:nlat, 1:nlat ), &
-            this%imaginary_harmonic_coefficients( 1:nlat, 1:nlat ), &
+            this%real_harmonic_coefficients(      nlat, nlat ), &
+            this%imaginary_harmonic_coefficients( nlat, nlat ), &
             stat   = allocate_status, &
             errmsg = error_message )
 
         ! Check allocation status
         if ( allocate_status /= 0 ) then
 
-            write( stderr, '(A)') 'TYPE (workspace_t)'
-            write( stderr, '(A)' ) 'Pointer allocation failed in INITIALIZE_SCALAR_TRANSFORM_REG'
+            write( stderr, '(A)') 'TYPE (SpherepackWorkspace)'
+            write( stderr, '(A)' ) 'Pointer allocation failed in initialize_SCALAR_TRANSFORM_REG'
             write( stderr, '(A)' ) trim( error_message )
 
         end if
 
-    end subroutine Initialize_scalar_transform_reg
+    end subroutine initialize_scalar_transform_reg
     !
     !*****************************************************************************************
     !
-    subroutine Initialize_vector_analysis_reg( this, nlat, nlon )
+    subroutine initialize_vector_analysis_reg( this, nlat, nlon )
         !
         !< Purpose:
         !
@@ -2295,22 +2265,23 @@ contains
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        class (workspace_t), intent (in out) :: this
-        integer (IP),        intent (in)     :: nlat
-        integer (IP),        intent (in)     :: nlon
+        class (SpherepackWorkspace), intent (in out) :: this
+        integer (ip),        intent (in)     :: nlat
+        integer (ip),        intent (in)     :: nlon
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
         !--------------------------------------------------------------------------------
-        integer (IP)    :: error_flag
-        integer (IP)    :: lvhaes, ldwork
+        integer (ip):: error_flag
+        integer (ip):: lvhaes
+        integer (ip):: ldwork
         !--------------------------------------------------------------------------------
 
         !--------------------------------------------------------------------------------
         ! Compute various workspace dimensions
         !--------------------------------------------------------------------------------
 
-        ldwork = this%Get_ldwork( nlat )
-        lvhaes = this%Get_lvhaes( nlat, nlon )
+        ldwork = this%get_ldwork( nlat )
+        lvhaes = this%get_lvhaes( nlat, nlon )
 
         !--------------------------------------------------------------------------------
         ! Deallocatea arrays ( if necessary )
@@ -2328,8 +2299,8 @@ contains
             ! Check deallocate status
             if ( deallocate_status /= 0 ) then
 
-                write( stderr, '(A)' ) 'TYPE (workspace_t)'
-                write( stderr, '(A)' ) 'Deallocating DWORK failed in INITIALIZE_VECTOR_ANALYSIS_REG'
+                write( stderr, '(A)' ) 'TYPE (SpherepackWorkspace)'
+                write( stderr, '(A)' ) 'Deallocating DWORK failed in initialize_VECTOR_ANALYSIS_REG'
                 write( stderr, '(A)' ) trim( error_message )
 
             end if
@@ -2347,8 +2318,8 @@ contains
             ! Check deallocate status
             if ( deallocate_status /= 0 ) then
 
-                write( stderr, '(A)' ) 'TYPE (workspace_t)'
-                write( stderr, '(A)' ) 'Deallocating WVHAES failed in INITIALIZE_VECTOR_ANALYSIS_REG'
+                write( stderr, '(A)' ) 'TYPE (SpherepackWorkspace)'
+                write( stderr, '(A)' ) 'Deallocating WVHAES failed in initialize_VECTOR_ANALYSIS_REG'
                 write( stderr, '(A)' ) trim( error_message )
 
             end if
@@ -2367,8 +2338,8 @@ contains
         ! Check allocation status
         if ( allocate_status /= 0 ) then
 
-            write( stderr, '(A)' ) 'TYPE (workspace_t)'
-            write( stderr, '(A)' ) 'Allocation failed in INITIALIZE_VECTOR_ANALYSIS_REG'
+            write( stderr, '(A)' ) 'TYPE (SpherepackWorkspace)'
+            write( stderr, '(A)' ) 'Allocation failed in initialize_VECTOR_ANALYSIS_REG'
             write( stderr, '(A)')  trim( error_message )
 
         end if
@@ -2397,7 +2368,7 @@ contains
 
         else
 
-            write( stderr, '(A)') 'TYPE (workspace_t) in INITIALIZE_VECTOR_ANALYSIS_REG'
+            write( stderr, '(A)') 'TYPE (SpherepackWorkspace) in initialize_VECTOR_ANALYSIS_REG'
 
             if ( error_flag == 1 ) then
 
@@ -2424,11 +2395,11 @@ contains
             end if
         end if
 
-    end subroutine Initialize_vector_analysis_reg
+    end subroutine initialize_vector_analysis_reg
     !
     !*****************************************************************************************
     !
-    subroutine Initialize_vector_synthesis_reg( this, nlat, nlon )
+    subroutine initialize_vector_synthesis_reg( this, nlat, nlon )
         !
         !< Purpose:
         !
@@ -2509,22 +2480,23 @@ contains
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        class (workspace_t), intent (in out) :: this
-        integer (IP),        intent (in)     :: nlat
-        integer (IP),        intent (in)     :: nlon
+        class (SpherepackWorkspace), intent (in out) :: this
+        integer (ip),        intent (in)     :: nlat
+        integer (ip),        intent (in)     :: nlon
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
         !--------------------------------------------------------------------------------
-        integer (IP)    :: error_flag
-        integer (IP)    :: ldwork, lvhses
+        integer (ip):: error_flag
+        integer (ip):: ldwork
+        integer (ip):: lvhses
         !--------------------------------------------------------------------------------
 
         !--------------------------------------------------------------------------------
         ! Compute various workspace dimensions
         !--------------------------------------------------------------------------------
 
-        ldwork = this%Get_ldwork( nlat )
-        lvhses = this%Get_lvhses( nlat, nlon )
+        ldwork = this%get_ldwork( nlat )
+        lvhses = this%get_lvhses( nlat, nlon )
 
         !--------------------------------------------------------------------------------
         ! Deallocatea arrays ( if necessary )
@@ -2542,8 +2514,8 @@ contains
             ! Check deallocate status
             if ( deallocate_status /= 0 ) then
 
-                write( stderr, '(A)' ) 'TYPE (workspace_t)'
-                write( stderr, '(A)' ) 'Deallocating DWORK failed in INITIALIZE_VECTOR_SYNTHESIS_REG'
+                write( stderr, '(A)' ) 'TYPE (SpherepackWorkspace)'
+                write( stderr, '(A)' ) 'Deallocating DWORK failed in initialize_VECTOR_SYNTHESIS_REG'
                 write( stderr, '(A)' ) trim( error_message )
 
             end if
@@ -2561,8 +2533,8 @@ contains
             ! Check deallocate status
             if ( deallocate_status /= 0 ) then
 
-                write( stderr, '(A)' ) 'TYPE (workspace_t)'
-                write( stderr, '(A)' ) 'Deallocating WVHSES failed in INITIALIZE_VECTOR_SYNTHESIS_REG'
+                write( stderr, '(A)' ) 'TYPE (SpherepackWorkspace)'
+                write( stderr, '(A)' ) 'Deallocating WVHSES failed in initialize_VECTOR_SYNTHESIS_REG'
                 write( stderr, '(A)' ) trim( error_message )
 
             end if
@@ -2573,15 +2545,15 @@ contains
         !--------------------------------------------------------------------------------
 
         allocate ( &
-            this%dwork(  1:ldwork ), &
-            this%wvhses( 1:lvhses ), &
+            this%dwork(  ldwork ), &
+            this%wvhses( lvhses ), &
             stat   = allocate_status, &
             errmsg = error_message )
 
         ! Check allocation status
         if ( allocate_status /= 0 ) then
 
-            write( stderr, '(A)' ) 'TYPE (workspace_t)'
+            write( stderr, '(A)' ) 'TYPE (SpherepackWorkspace)'
             write( stderr, '(A)' ) 'Allocation failed in INITIALIZE_VECTOR_SYNTHESIS_REG'
             write( stderr, '(A)')  trim( error_message )
 
@@ -2597,7 +2569,7 @@ contains
             ierror => error_flag &
             )
 
-            call Vhsesi( nlat, nlon, wvhses, lvhses, dwork, ldwork, ierror )
+            call vhsesi( nlat, nlon, wvhses, lvhses, dwork, ldwork, ierror )
 
         end associate
 
@@ -2611,7 +2583,7 @@ contains
 
         else
 
-            write( stderr, '(A)') 'TYPE (workspace_t) in INITIALIZE_VECTOR_SYNTHESIS_REG'
+            write( stderr, '(A)') 'TYPE (SpherepackWorkspace) in INITIALIZE_VECTOR_SYNTHESIS_REG'
 
             if ( error_flag == 1 ) then
 
@@ -2638,11 +2610,11 @@ contains
             end if
         end if
 
-    end subroutine Initialize_vector_synthesis_reg
+    end subroutine initialize_vector_synthesis_reg
     !
     !*****************************************************************************************
     !
-    subroutine Initialize_vector_transform_reg( this, nlat, nlon )
+    subroutine initialize_vector_transform_reg( this, nlat, nlon )
         !
         !< Purpose:
         !
@@ -2653,100 +2625,101 @@ contains
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        class (workspace_t), intent (in out) :: this
-        integer (IP),        intent (in)     :: nlat
-        integer (IP),        intent (in)     :: nlon
+        class (SpherepackWorkspace), intent (in out) :: this
+        integer (ip),        intent (in)     :: nlat
+        integer (ip),        intent (in)     :: nlon
         !--------------------------------------------------------------------------------
 
         !--------------------------------------------------------------------------------
         ! Check initialization flag
         !--------------------------------------------------------------------------------
 
-        call this%Assert_initialized()
+        call this%assert_initialized()
 
         !--------------------------------------------------------------------------------
         ! Set up vector analysis - REG
         !--------------------------------------------------------------------------------
 
-        call this%Initialize_vector_analysis_reg( nlat, nlon )
+        call this%initialize_vector_analysis_reg( nlat, nlon )
 
         !--------------------------------------------------------------------------------
         ! Set up vector synthesis - REG
         !--------------------------------------------------------------------------------
 
-        call this%Initialize_vector_synthesis_reg( nlat, nlon )
+        call this%initialize_vector_synthesis_reg( nlat, nlon )
 
         !--------------------------------------------------------------------------------
         ! Allocate pointers for the vector transform coefficients - REG
         !--------------------------------------------------------------------------------
 
         allocate ( &
-            this%real_polar_harmonic_coefficients(          1:nlat, 1:nlat ), &
-            this%imaginary_polar_harmonic_coefficients(     1:nlat, 1:nlat ), &
-            this%real_azimuthal_harmonic_coefficients(      1:nlat, 1:nlat ), &
-            this%imaginary_azimuthal_harmonic_coefficients( 1:nlat, 1:nlat ), &
+            this%real_polar_harmonic_coefficients(          nlat, nlat ), &
+            this%imaginary_polar_harmonic_coefficients(     nlat, nlat ), &
+            this%real_azimuthal_harmonic_coefficients(      nlat, nlat ), &
+            this%imaginary_azimuthal_harmonic_coefficients( nlat, nlat ), &
             stat   = allocate_status, &
             errmsg = error_message )
 
         ! Check allocation status
         if ( allocate_status /= 0 ) then
 
-            write( stderr, '(A)' ) 'TYPE (workspace_t)'
+            write( stderr, '(A)' ) 'TYPE (SpherepackWorkspace)'
             write( stderr, '(A)' ) 'Allocation failed in INITIALIZE_VECTOR_TRANSFORM_REG'
             write( stderr, '(A)' ) trim( error_message )
 
         end if
 
-    end subroutine Initialize_vector_transform_reg
+    end subroutine initialize_vector_transform_reg
     !
     !*****************************************************************************************
     !
-    pure function Get_lwork( nlat, nlon ) result ( return_value )
+    pure function get_lwork( nlat, nlon ) result ( return_value )
         !
         !< Purpose:
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        integer (IP)              :: return_value
-        integer (IP), intent (in) :: nlat
-        integer (IP), intent (in) :: nlon
+        integer (ip), intent (in) :: nlat
+        integer (ip), intent (in) :: nlon
+        integer (ip)               :: return_value
         !--------------------------------------------------------------------------------
 
         return_value = (4 * nlon + 2) * nlat
 
-    end function Get_lwork
+    end function get_lwork
     !
     !*****************************************************************************************
     !
-    pure function Get_ldwork( nlat ) result ( return_value )
+    pure function get_ldwork( nlat ) result ( return_value )
         !
         !< Purpose:
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        integer (IP)              :: return_value
-        integer (IP), intent (in) :: nlat
+        integer (ip):: return_value
+        integer (ip), intent (in) :: nlat
         !--------------------------------------------------------------------------------
 
         return_value = (3 * nlat * (nlat + 3) + 2)/2
 
-    end function Get_ldwork
+    end function get_ldwork
     !
     !*****************************************************************************************
     !
-    pure function Get_lshags( nlat, nlon ) result ( return_value )
+    pure function get_lshags( nlat, nlon ) result ( return_value )
         !
         !< Purpose:
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        integer (IP)               :: return_value
-        integer (IP), intent (in)  :: nlat
-        integer (IP), intent (in)  :: nlon
+        integer (ip):: return_value
+        integer (ip), intent (in)  :: nlat
+        integer (ip), intent (in)  :: nlon
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
         !--------------------------------------------------------------------------------
-        integer (IP)  ::  l1, l2
+        integer (ip)::  l1
+        integer (ip):: l2
         !--------------------------------------------------------------------------------
 
         ! Compute parity
@@ -2767,23 +2740,24 @@ contains
             +(l1 - 1) * (l2 * (2 * nlat - l1) - 3 * l1)/2 &
             + nlon + 15
 
-    end function Get_lshags
+    end function get_lshags
     !
     !*****************************************************************************************
     !
-    pure function Get_lshaes( nlat, nlon ) result ( return_value )
+    pure function get_lshaes( nlat, nlon ) result ( return_value )
         !
         !< Purpose:
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        integer (IP)               :: return_value
-        integer (IP), intent (in)  :: nlat
-        integer (IP), intent (in)  :: nlon
+        integer (ip):: return_value
+        integer (ip), intent (in)  :: nlat
+        integer (ip), intent (in)  :: nlon
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
         !--------------------------------------------------------------------------------
-        integer (IP)  ::  l1, l2
+        integer (ip)::  l1
+        integer (ip):: l2
         !--------------------------------------------------------------------------------
 
         ! Compute parity
@@ -2802,23 +2776,24 @@ contains
         return_value = &
             (l1 * l2 * (nlat + nlat - l1 + 1))/2 + nlon + 15
 
-    end function Get_lshaes
+    end function get_lshaes
     !
     !*****************************************************************************************
     !
-    pure function Get_lshsgs( nlat, nlon ) result ( return_value )
+    pure function get_lshsgs( nlat, nlon ) result ( return_value )
         !
         !< Purpose:
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        integer (IP)              :: return_value
-        integer (IP), intent (in) :: nlat
-        integer (IP), intent (in) :: nlon
+        integer (ip):: return_value
+        integer (ip), intent (in) :: nlat
+        integer (ip), intent (in) :: nlon
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
         !--------------------------------------------------------------------------------
-        integer (IP)    ::  l1, l2
+        integer (ip)::  l1
+        integer (ip):: l2
         !--------------------------------------------------------------------------------
 
         ! Compute parity
@@ -2839,23 +2814,24 @@ contains
             +(l1 - 1) * (l2 * (2 * nlat - l1) - 3 * l1)/2 &
             + nlon + 15
 
-    end function Get_lshsgs
+    end function get_lshsgs
     !
     !*****************************************************************************************
     !
-    pure function Get_lshses( nlat, nlon ) result ( return_value )
+    pure function get_lshses( nlat, nlon ) result ( return_value )
         !
         !< Purpose:
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        integer (IP)              :: return_value
-        integer (IP), intent (in) :: nlat
-        integer (IP), intent (in) :: nlon
+        integer (ip):: return_value
+        integer (ip), intent (in) :: nlat
+        integer (ip), intent (in) :: nlon
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
         !--------------------------------------------------------------------------------
-        integer (IP)    ::  l1, l2
+        integer (ip)::  l1
+        integer (ip):: l2
         !--------------------------------------------------------------------------------
 
         ! Compute parity
@@ -2874,40 +2850,41 @@ contains
         return_value = &
             (l1 * l2 * (nlat + nlat - l1 + 1))/2 + nlon + 15
 
-    end function Get_lshses
+    end function get_lshses
     !
     !*****************************************************************************************
     !
-    pure function Get_lvhags( nlat, nlon ) result ( return_value )
+    pure function get_lvhags( nlat, nlon ) result ( return_value )
         !
         !< Purpose:
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        integer (IP)              :: return_value
-        integer (IP), intent (in) :: nlat
-        integer (IP), intent (in) :: nlon
+        integer (ip):: return_value
+        integer (ip), intent (in) :: nlat
+        integer (ip), intent (in) :: nlon
         !--------------------------------------------------------------------------------
 
         return_value = &
             (nlat + 1) * (nlat + 1) * nlat / 2 &
             + nlon + 15
 
-    end function Get_lvhags
+    end function get_lvhags
     !
     !*****************************************************************************************
     !
-    pure function Get_lvhaes( nlat, nlon ) result ( return_value )
+    pure function get_lvhaes( nlat, nlon ) result ( return_value )
         !
         !< Purpose:
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        integer (IP)               :: return_value
-        integer (IP), intent (in)  :: nlat
-        integer (IP), intent (in)  :: nlon
+        integer (ip):: return_value
+        integer (ip), intent (in)  :: nlat
+        integer (ip), intent (in)  :: nlon
         !--------------------------------------------------------------------------------
-        integer (IP) ::  l1, l2
+        integer (ip)::  l1
+        integer (ip):: l2
         !--------------------------------------------------------------------------------
 
         ! Compute parity
@@ -2926,23 +2903,24 @@ contains
         return_value = &
             l1 * l2 * (nlat + nlat - l1 + 1) + nlon + 15
 
-    end function Get_lvhaes
+    end function get_lvhaes
     !
     !*****************************************************************************************
     !
-    pure function Get_lvhsgs( nlat, nlon ) result ( return_value )
+    pure function get_lvhsgs( nlat, nlon ) result ( return_value )
         !
         !< Purpose:
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        integer (IP)              :: return_value
-        integer (IP), intent (in) :: nlat
-        integer (IP), intent (in) :: nlon
+        integer (ip):: return_value
+        integer (ip), intent (in) :: nlat
+        integer (ip), intent (in) :: nlon
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
         !--------------------------------------------------------------------------------
-        integer (IP)  ::  l1, l2
+        integer (ip)::  l1
+        integer (ip):: l2
         !--------------------------------------------------------------------------------
 
         ! Compute parity
@@ -2962,23 +2940,24 @@ contains
             l1 * l2 * (nlat + nlat - l1 + 1) &
             + nlon + 15 + 2 * nlat
 
-    end function Get_lvhsgs
+    end function get_lvhsgs
     !
     !*****************************************************************************************
     !
-    pure function Get_lvhses( nlat, nlon ) result ( return_value )
+    pure function get_lvhses( nlat, nlon ) result ( return_value )
         !
         !< Purpose:
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        integer (IP)               :: return_value
-        integer (IP), intent (in)  :: nlat
-        integer (IP), intent (in)  :: nlon
+        integer (ip):: return_value
+        integer (ip), intent (in)  :: nlat
+        integer (ip), intent (in)  :: nlon
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
         !--------------------------------------------------------------------------------
-        integer (IP) ::  l1, l2
+        integer (ip)::  l1
+        integer (ip):: l2
         !--------------------------------------------------------------------------------
 
         ! Compute parity
@@ -2997,11 +2976,11 @@ contains
         return_value =  &
             l1 * l2 * (nlat + nlat - l1 + 1) + nlon + 15
 
-    end function Get_lvhses
+    end function get_lvhses
     !
     !*****************************************************************************************
     !
-    subroutine Finalize_workspace( this )
+    subroutine finalize_spherepackworkspace( this )
         !
         !< Purpose:
         !< Finalize object
@@ -3009,13 +2988,13 @@ contains
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        type (workspace_t), intent (in out) :: this
+        type (SpherepackWorkspace), intent (in out) :: this
         !--------------------------------------------------------------------------------
 
-        call this%Destroy()
+        call this%destroy()
 
-    end subroutine Finalize_workspace
+    end subroutine finalize_spherepackworkspace
     !
     !*****************************************************************************************
     !
-end module type_workspace_mod
+end module type_SpherepackWorkspace

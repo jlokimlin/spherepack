@@ -1,5 +1,5 @@
-include ./compiler_flags.inc
-include ./directories.inc
+
+include ../make.inc
 
 MODULE_PATH = $(OBJ_DIRECTORY)
 
@@ -14,31 +14,31 @@ LINKS = \
 
 EXECUTABLE = ./exe
 
-type_vector_mod.o: \
-type_vector_mod.f90
-	$(FC) $(FFLAGS) -c type_vector_mod.f90 $(LINKS)\
+type_threedimensionalvector.o: \
+type_threedimensionalvector.f90
+	$(FC) $(FFLAGS) -c type_threedimensionalvector.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(OBJ_DIRECTORY)
 
-type_grid_mod.o: \
-type_grid_mod.f90
-	$(FC) $(FFLAGS) -c type_grid_mod.f90 $(LINKS)\
+type_gaussiangrid.o: \
+type_gaussiangrid.f90
+	$(FC) $(FFLAGS) -c type_gaussiangrid.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(OBJ_DIRECTORY)
 
-type_workspace_mod.o: \
-type_workspace_mod.f90
-	$(FC) $(FFLAGS) -c type_workspace_mod.f90 $(LINKS)\
+type_spherepackworkspace.o: \
+type_spherepackworkspace.f90
+	$(FC) $(FFLAGS) -c type_spherepackworkspace.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(OBJ_DIRECTORY)
 
-type_sphere_mod.o: \
-type_sphere_mod.f90
-	$(FC) $(FFLAGS) -c type_sphere_mod.f90 $(LINKS)\
+type_spherepackwrapper.o: \
+type_spherepackwrapper.f90
+	$(FC) $(FFLAGS) -c type_spherepackwrapper.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(OBJ_DIRECTORY)
 
 spherepack_wrapper_mod.o: \
-type_vector_mod.o \
-type_grid_mod.o\
-type_workspace_mod.o\
-type_sphere_mod.o \
+type_threedimensionalvector.o \
+type_gaussiangrid.o\
+type_spherepackworkspace.o\
+type_spherepackwrapper.o \
 spherepack_wrapper_mod.f90
 	$(FC) $(FFLAGS) -c spherepack_wrapper_mod.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(OBJ_DIRECTORY)
@@ -53,27 +53,13 @@ exec: $(OBJECTS)
 	$(FC) $(FFLAGS) -o $(EXECUTABLE) $(OBJECTS_WITH_PREFIX) $(LINKS)
 
 lib: 
-	ar rc libspherepack_wrapper.a \
-	$(OBJ_DIRECTORY)/type_vector_mod.o \
-	$(OBJ_DIRECTORY)/type_grid_mod.o \
-	$(OBJ_DIRECTORY)/type_workspace_mod.o \
-	$(OBJ_DIRECTORY)/type_sphere_mod.o \
-	$(OBJ_DIRECTORY)/spherepack_wrapper_mod.o
-
+	ar rc libspherepack_wrapper.a $(OBJ_DIRECTORY)/*.o
 	mv libspherepack_wrapper.a $(LIB_DIRECTORY)
 
 all:
 	make clean
 	make exec; ./exe
 	make lib
-	make testspherepack_wrapper
-
-testspherepack_wrapper:
-	cd ./test; make run
-
-install:
-	cp $(LIB_DIRECTORY)/libspherepack_wrapper.a $(EXTERNAL_LIBRARY_PATH)
-	cp -r ../../spherepack_wrapper $(BIN_PATH)
 
 clean:
 	rm -f $(OBJ_DIRECTORY)/*.o $(OBJ_DIRECTORY)/*.mod $(LIB_DIRECTORY)/*.a

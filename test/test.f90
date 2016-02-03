@@ -1,13 +1,13 @@
 program test
 
     use, intrinsic :: iso_fortran_env, only: &
-        WP     => REAL64, &
-        IP     => INT32, &
+        wp     => REAL64, &
+        ip     => INT32, &
         stdout => OUTPUT_UNIT
 
     use spherepack_wrapper_mod, only: &
-        sphere_t, &
-        vector_t, &
+        SpherepackWrapper, &
+        ThreeDimensionalVector, &
         assignment(=), &
         operator(*)
 
@@ -28,13 +28,13 @@ contains
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
         !--------------------------------------------------------------------------------
-        integer (IP), parameter    :: nlon = 36
-        integer (IP), parameter    :: nlat = nlon/2 + 1
-        type (sphere_t)            :: this
+        integer (ip), parameter    :: nlon = 36
+        integer (ip), parameter    :: nlat = nlon/2 + 1
+        type (SpherepackWrapper)    :: this
         !--------------------------------------------------------------------------------
 
-        ! Create sphere object
-        call this%Create( nlat, nlon )
+        ! create sphere object
+        call this%create( nlat, nlon )
 
         write( stdout, '(A)' ) 'SPHEREPACK WRAPPER VALIDATION TESTS'
         write( stdout, '(A)' ) ' '
@@ -62,16 +62,16 @@ contains
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        class (sphere_t), intent (in out)    :: this
+        class (SpherepackWrapper), intent (in out)    :: this
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
         !--------------------------------------------------------------------------------
-        integer (IP)    :: k, l !! Counters
-        real (WP)       :: real_error, complex_error
-        type (vector_t) :: u
-        real (WP)       :: original_function(this%NLAT, this%NLON)
-        real (WP)       :: real_synthesized_function(this%NLAT, this%NLON)
-        real (WP)       :: complex_synthesized_function(this%NLAT, this%NLON)
+        integer (ip)    :: k, l !! Counters
+        real (wp)       :: real_error, complex_error
+        type (ThreeDimensionalVector) :: u
+        real (wp)       :: original_function(this%NLAT, this%NLON)
+        real (wp)       :: real_synthesized_function(this%NLAT, this%NLON)
+        real (wp)       :: complex_synthesized_function(this%NLAT, this%NLON)
         !--------------------------------------------------------------------------------
 
         associate( &
@@ -83,7 +83,7 @@ contains
             )
 
             ! Initialize array
-            f = 0.0_WP
+            f = 0.0_wp
 
             do l = 1, nlon
                 do k = 1, nlat
@@ -133,18 +133,18 @@ contains
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        class (sphere_t), intent (in out)     :: this
+        class (SpherepackWrapper), intent (in out)     :: this
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
         !--------------------------------------------------------------------------------
-        integer (IP)    :: k, l !! Counters
-        real (WP)       :: polar_error, azimuthal_error
-        type (vector_t) :: u, phi, theta, vector_field
-        real (WP)       :: vector_function(3, this%NLAT, this%NLON)
-        real (WP)       :: original_polar_component(this%NLAT, this%NLON)
-        real (WP)       :: original_azimuthal_component(this%NLAT, this%NLON)
-        real (WP)       :: approximate_polar_component(this%NLAT, this%NLON)
-        real (WP)       :: approximate_azimuthal_component(this%NLAT, this%NLON)
+        integer (ip)    :: k, l !! Counters
+        real (wp)       :: polar_error, azimuthal_error
+        type (ThreeDimensionalVector) :: u, phi, theta, vector_field
+        real (wp)       :: vector_function(3, this%NLAT, this%NLON)
+        real (wp)       :: original_polar_component(this%NLAT, this%NLON)
+        real (wp)       :: original_azimuthal_component(this%NLAT, this%NLON)
+        real (wp)       :: approximate_polar_component(this%NLAT, this%NLON)
+        real (wp)       :: approximate_azimuthal_component(this%NLAT, this%NLON)
         !--------------------------------------------------------------------------------
 
         associate( &
@@ -158,9 +158,9 @@ contains
             )
 
             ! Initialize arrays
-            F       = 0.0_WP
-            F_theta = 0.0_WP
-            F_phi   = 0.0_WP
+            F       = 0.0_wp
+            F_theta = 0.0_wp
+            F_phi   = 0.0_wp
 
             ! compute the vector field that gives rise original components
             do l = 1, nlon
@@ -170,7 +170,7 @@ contains
                     u            = this%radial_unit_vector(:, k, l)
                     theta        = this%polar_unit_vector(:, k, l)
                     phi          = this%azimuthal_unit_vector(:, k, l)
-                    vector_field = [1.0E+3_WP, 1.0E+2_WP, 1.0E+1_WP]
+                    vector_field = [1.0E+3_wp, 1.0E+2_wp, 1.0E+1_wp]
 
                     ! Set vector function
                     F(:, k, l) = vector_field
@@ -214,14 +214,14 @@ contains
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        class (sphere_t), intent (in out)    :: this
+        class (SpherepackWrapper), intent (in out)    :: this
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
         !--------------------------------------------------------------------------------
-        integer (IP)         :: k, l !! Counters
-        real (WP)            :: scalar_function(this%NLAT, this%NLON)
-        real (WP)            :: constant_function(this%NLAT, this%NLON)
-        real (WP), parameter :: FOUR_PI = 4.0_WP * acos( -1.0_WP )
+        integer (ip)         :: k, l !! Counters
+        real (wp)            :: scalar_function(this%NLAT, this%NLON)
+        real (wp)            :: constant_function(this%NLAT, this%NLON)
+        real (wp), parameter :: FOUR_PI = 4.0_wp * acos( -1.0_wp )
         !--------------------------------------------------------------------------------
 
         associate( &
@@ -232,8 +232,8 @@ contains
             )
 
             ! Initialize the array
-            C = 1.0_WP
-            f = 0.0_WP
+            C = 1.0_wp
+            f = 0.0_wp
 
             ! set the scalar function
             do k = 1, nlat
@@ -251,7 +251,7 @@ contains
             ! Compute discretization errors
             associate( &
                 surface_area_error => abs( FOUR_PI - this%Compute_surface_integral( C ) ), &
-                integral_error     => abs( 14.768_WP - this%Compute_surface_integral( f ) ) &
+                integral_error     => abs( 14.768_wp - this%Compute_surface_integral( f ) ) &
                 )
 
                 ! print the error to the console
@@ -283,16 +283,16 @@ contains
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        class (sphere_t), intent (in out)    :: this
+        class (SpherepackWrapper), intent (in out)    :: this
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
         !--------------------------------------------------------------------------------
-        integer (IP)     :: k, l !! Counters
-        type (vector_t)  :: u
-        real (WP)        :: discretization_error
-        real (WP)        :: exact_solution(this%NLAT, this%NLON)
-        real (WP)        :: source_term(this%NLAT, this%NLON)
-        real (WP)        :: approximate_solution(this%NLAT, this%NLON)
+        integer (ip)     :: k, l !! Counters
+        type (ThreeDimensionalVector)  :: u
+        real (wp)        :: discretization_error
+        real (wp)        :: exact_solution(this%NLAT, this%NLON)
+        real (wp)        :: source_term(this%NLAT, this%NLON)
+        real (wp)        :: approximate_solution(this%NLAT, this%NLON)
         !--------------------------------------------------------------------------------
 
         associate( &
@@ -301,7 +301,7 @@ contains
             f                  => exact_solution, &
             f_approx           => approximate_solution, &
             rhs                => source_term, &
-            HELMHOLTZ_CONSTANT => 1.0_WP &
+            HELMHOLTZ_CONSTANT => 1.0_wp &
             )
 
             ! initialize the scalar function and the exact solution
@@ -318,11 +318,11 @@ contains
                         z2 => (u%z)**2 &
                         )
 
-                        f(k, l) = (1.0_WP + x * y) * exp( z )
+                        f(k, l) = (1.0_wp + x * y) * exp( z )
 
                         rhs(k, l) = &
-                            -(x * y * ( z2 + 6.0_WP * (z + 1.0_WP)) &
-                            + z * ( z + 2.0_WP)) * exp( z )
+                            -(x * y * ( z2 + 6.0_wp * (z + 1.0_wp)) &
+                            + z * ( z + 2.0_wp)) * exp( z )
 
                     end associate
                 end do
@@ -355,19 +355,19 @@ contains
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        class (sphere_t), intent (in out)    :: this
+        class (SpherepackWrapper), intent (in out)    :: this
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
         !--------------------------------------------------------------------------------
-        integer (IP)     :: k, l !! Counters
-        real (WP)        :: polar_error
-        real (WP)        :: azimuthal_error
-        type (vector_t)  :: u
-        real (WP)        :: scalar_function(this%NLAT, this%NLON)
-        real (WP)        :: exact_polar_component(this%NLAT, this%NLON)
-        real (WP)        :: exact_azimuthal_component(this%NLAT, this%NLON)
-        real (WP)        :: approximate_polar_component(this%NLAT, this%NLON)
-        real (WP)        :: approximate_azimuthal_component(this%NLAT, this%NLON)
+        integer (ip)     :: k, l !! Counters
+        real (wp)        :: polar_error
+        real (wp)        :: azimuthal_error
+        type (ThreeDimensionalVector)  :: u
+        real (wp)        :: scalar_function(this%NLAT, this%NLON)
+        real (wp)        :: exact_polar_component(this%NLAT, this%NLON)
+        real (wp)        :: exact_azimuthal_component(this%NLAT, this%NLON)
+        real (wp)        :: approximate_polar_component(this%NLAT, this%NLON)
+        real (wp)        :: approximate_azimuthal_component(this%NLAT, this%NLON)
         !--------------------------------------------------------------------------------
 
         associate( &
@@ -381,9 +381,9 @@ contains
             )
 
             ! Initialize array
-            f       = 0.0_WP
-            f_theta = 0.0_WP
-            f_phi   = 0.0_WP
+            f       = 0.0_wp
+            f_theta = 0.0_wp
+            f_phi   = 0.0_wp
 
             do l = 1, nlon
                 do k = 1, nlat
@@ -399,7 +399,7 @@ contains
 
                         f(k, l) = exp( u%x + u%y + u%z )
 
-                        inner: associate( csc => 1.0_WP /sint)
+                        inner: associate( csc => 1.0_wp /sint)
 
                             f_theta(k, l) = &
                                 f(k, l) * (cost * cosp &
@@ -443,18 +443,18 @@ contains
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        class (sphere_t), intent (in out)  :: this
+        class (SpherepackWrapper), intent (in out)  :: this
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
         !--------------------------------------------------------------------------------
-        integer (IP)     :: k, l !! Counters
-        type (vector_t)  :: u
-        type (vector_t)  :: omega
-        type (vector_t)  :: rotation_operator
-        real (WP)        :: discretization_error
-        real (WP)        :: vector_function(3, this%NLAT, this%NLON)
-        real (WP)        :: exact_vorticity(this%NLAT, this%NLON)
-        real (WP)        :: approximate_vorticity(this%NLAT, this%NLON)
+        integer (ip)     :: k, l !! Counters
+        type (ThreeDimensionalVector)  :: u
+        type (ThreeDimensionalVector)  :: omega
+        type (ThreeDimensionalVector)  :: rotation_operator
+        real (wp)        :: discretization_error
+        real (wp)        :: vector_function(3, this%NLAT, this%NLON)
+        real (wp)        :: exact_vorticity(this%NLAT, this%NLON)
+        real (wp)        :: approximate_vorticity(this%NLAT, this%NLON)
         !--------------------------------------------------------------------------------
 
         associate( &
@@ -466,9 +466,9 @@ contains
             )
 
             ! initialize arrays
-            F  = 0.0_WP
-            V     = 0.0_WP
-            omega = vector_t( x = 1.0E+1_WP, y = 1.0E+2_WP, z = 1.0E+3_WP )
+            F  = 0.0_wp
+            V     = 0.0_wp
+            omega = ThreeDimensionalVector( x = 1.0E+1_wp, y = 1.0E+2_wp, z = 1.0E+3_wp )
 
             do l = 1, nlon
                 do k = 1, nlat
@@ -488,7 +488,7 @@ contains
                         inner: associate( &
                             D_theta => (cost * cosp  + cost * sinp - sint ) * sf, &
                             D_phi   => (u%x - u%y) * sf, &
-                            cot     => 1.0_WP/ tan(this%grid%latitudes(k)) &
+                            cot     => 1.0_wp/ tan(this%grid%latitudes(k)) &
                             )
 
                             rotation_operator = &
@@ -529,16 +529,16 @@ contains
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
-        class (sphere_t), intent (in out)    :: this
+        class (SpherepackWrapper), intent (in out)    :: this
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
         !--------------------------------------------------------------------------------
-        integer (IP)    :: k, l !! Counters
-        real (WP)       :: discretization_error
-        type (vector_t) :: u
-        real (WP)       :: exact_rotation(3, this%NLAT, this%NLON)
-        real (WP)       :: approximate_rotation(3, this%NLAT, this%NLON)
-        real (WP)       :: scalar_function(this%NLAT, this%NLON)
+        integer (ip)    :: k, l !! Counters
+        real (wp)       :: discretization_error
+        type (ThreeDimensionalVector) :: u
+        real (wp)       :: exact_rotation(3, this%NLAT, this%NLON)
+        real (wp)       :: approximate_rotation(3, this%NLAT, this%NLON)
+        real (wp)       :: scalar_function(this%NLAT, this%NLON)
         !--------------------------------------------------------------------------------
 
         ! Set constants
@@ -551,8 +551,8 @@ contains
             )
 
             ! initialize arrays
-            f  = 0.0_WP
-            Rf = 0.0_WP
+            f  = 0.0_wp
+            Rf = 0.0_wp
 
             do l = 1, nlon
                 do k = 1, nlat
@@ -572,7 +572,7 @@ contains
                         inner: associate( &
                             D_theta => ( cost * cosp + cost * sinp - sint ) * f(k, l), &
                             D_phi   => ( u%x - u%y ) * f(k, l), &
-                            cot     => 1.0_WP/ tan(theta) &
+                            cot     => 1.0_wp/ tan(theta) &
                             )
 
                             Rf(1, k, l) = -sinp * D_theta - cosp * cot * D_phi

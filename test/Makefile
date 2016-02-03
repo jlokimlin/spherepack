@@ -1,8 +1,7 @@
 
-include ../compiler_flags.inc
-include ./relative_directories.inc
+include ../make.inc
 
-SPHEREPACK_WRAPPER_MODULE_PATH = ../../obj
+SPHEREPACK_WRAPPER_MODULE_PATH = $(OBJ_DIRECTORY)
 
 MODULE_PATH = \
 -I$(SPHEREPACK_WRAPPER_MODULE_PATH) \
