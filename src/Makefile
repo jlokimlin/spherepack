@@ -1,12 +1,7 @@
 
 include ../make.inc
 
-MODULE_PATH = $(OBJ_DIRECTORY)
-
-#EXTERNAL_LIBRARY_PATH = /usr/local/lib
-EXTERNAL_LIBRARY_PATH = /usr/local/lib64
-
-BIN_PATH = /usr/local/bin
+MODULE_PATH = $(LIB_DIRECTORY)
 
 LINKS = \
 -lspherepack -L$(EXTERNAL_LIBRARY_PATH) \
@@ -17,28 +12,28 @@ EXECUTABLE = ./exe
 type_trigonometricfunctions.o: \
 type_trigonometricfunctions.f90
 	$(FC) $(FFLAGS) -c type_trigonometricfunctions.f90 $(LINKS)\
-	 -o $(OBJ_DIRECTORY)/$@ -J$(OBJ_DIRECTORY)
+	 -o $(OBJ_DIRECTORY)/$@ -J$(LIB_DIRECTORY)
 
 type_threedimensionalvector.o: \
 type_threedimensionalvector.f90
 	$(FC) $(FFLAGS) -c type_threedimensionalvector.f90 $(LINKS)\
-	 -o $(OBJ_DIRECTORY)/$@ -J$(OBJ_DIRECTORY)
+	 -o $(OBJ_DIRECTORY)/$@ -J$(LIB_DIRECTORY)
 
 type_sphericalunitvectors.o: \
 type_threedimensionalvector.o \
 type_sphericalunitvectors.f90
 	$(FC) $(FFLAGS) -c type_sphericalunitvectors.f90 $(LINKS)\
-	 -o $(OBJ_DIRECTORY)/$@ -J$(OBJ_DIRECTORY)
+	 -o $(OBJ_DIRECTORY)/$@ -J$(LIB_DIRECTORY)
 
 type_gaussiangrid.o: \
 type_gaussiangrid.f90
 	$(FC) $(FFLAGS) -c type_gaussiangrid.f90 $(LINKS)\
-	 -o $(OBJ_DIRECTORY)/$@ -J$(OBJ_DIRECTORY)
+	 -o $(OBJ_DIRECTORY)/$@ -J$(LIB_DIRECTORY)
 
 type_spherepackworkspace.o: \
 type_spherepackworkspace.f90
 	$(FC) $(FFLAGS) -c type_spherepackworkspace.f90 $(LINKS)\
-	 -o $(OBJ_DIRECTORY)/$@ -J$(OBJ_DIRECTORY)
+	 -o $(OBJ_DIRECTORY)/$@ -J$(LIB_DIRECTORY)
 
 type_spherepackwrapper.o: \
 type_trigonometricfunctions.o \
@@ -47,7 +42,7 @@ type_gaussiangrid.o\
 type_spherepackworkspace.o\
 type_spherepackwrapper.f90
 	$(FC) $(FFLAGS) -c type_spherepackwrapper.f90 $(LINKS)\
-	 -o $(OBJ_DIRECTORY)/$@ -J$(OBJ_DIRECTORY)
+	 -o $(OBJ_DIRECTORY)/$@ -J$(LIB_DIRECTORY)
 
 spherepack_wrapper_mod.o: \
 type_threedimensionalvector.o \
@@ -56,7 +51,7 @@ type_spherepackworkspace.o\
 type_spherepackwrapper.o \
 spherepack_wrapper_mod.f90
 	$(FC) $(FFLAGS) -c spherepack_wrapper_mod.f90 $(LINKS)\
-	 -o $(OBJ_DIRECTORY)/$@ -J$(OBJ_DIRECTORY)
+	 -o $(OBJ_DIRECTORY)/$@ -J$(LIB_DIRECTORY)
 
 main.o: \
 spherepack_wrapper_mod.o \
@@ -77,5 +72,5 @@ all:
 	make lib
 
 clean:
-	rm -f $(OBJ_DIRECTORY)/*.o $(OBJ_DIRECTORY)/*.mod $(LIB_DIRECTORY)/*.a
+	rm -f $(OBJ_DIRECTORY)/*.o $(LIB_DIRECTORY)/*.mod $(LIB_DIRECTORY)/*.a
 	rm -f $(EXECUTABLE)

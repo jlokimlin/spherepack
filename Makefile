@@ -9,6 +9,8 @@ BIN_PATH = /usr/local/bin
 all: lib testlib
 
 lib: 
+	mkdir -p ./lib
+	mkdir -p ./objs
 	cd ./src; make all
 
 testlib:

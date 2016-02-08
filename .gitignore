@@ -1,8 +1,11 @@
-# Modules
-*.mod
-
-# Libraries
+# libraries
 *.a
 
-# Objects
+# modules
+*.mod
+
+# objects
 *.o
+
+# executables
+exe
