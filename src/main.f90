@@ -1,6 +1,6 @@
 program main
 
-    use spherepack_wrapper_mod, only: &
+    use module_spherepack_wrapper, only: &
         ThreeDimensionalVector, &
         ThreeDimensionalVectorPointer, &
         assignment(=), &

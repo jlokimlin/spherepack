@@ -9,52 +9,53 @@ LINKS = \
 
 EXECUTABLE = ./exe
 
-type_trigonometricfunctions.o: \
-type_trigonometricfunctions.f90
-	$(FC) $(FFLAGS) -c type_trigonometricfunctions.f90 $(LINKS)\
+type_TrigonometricFunctions.o: \
+type_TrigonometricFunctions.f90
+	$(FC) $(FFLAGS) -c type_TrigonometricFunctions.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(LIB_DIRECTORY)
 
-type_threedimensionalvector.o: \
-type_threedimensionalvector.f90
-	$(FC) $(FFLAGS) -c type_threedimensionalvector.f90 $(LINKS)\
+type_ThreeDimensionalVector.o: \
+type_ThreeDimensionalVector.f90
+	$(FC) $(FFLAGS) -c type_ThreeDimensionalVector.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(LIB_DIRECTORY)
 
-type_sphericalunitvectors.o: \
-type_threedimensionalvector.o \
-type_sphericalunitvectors.f90
-	$(FC) $(FFLAGS) -c type_sphericalunitvectors.f90 $(LINKS)\
+type_SphericalUnitVectors.o: \
+type_ThreeDimensionalVector.o \
+type_SphericalUnitVectors.f90
+	$(FC) $(FFLAGS) -c type_SphericalUnitVectors.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(LIB_DIRECTORY)
 
-type_gaussiangrid.o: \
-type_gaussiangrid.f90
-	$(FC) $(FFLAGS) -c type_gaussiangrid.f90 $(LINKS)\
+type_GaussianGrid.o: \
+type_GaussianGrid.f90
+	$(FC) $(FFLAGS) -c type_GaussianGrid.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(LIB_DIRECTORY)
 
-type_spherepackworkspace.o: \
-type_spherepackworkspace.f90
-	$(FC) $(FFLAGS) -c type_spherepackworkspace.f90 $(LINKS)\
+type_SpherepackWorkspace.o: \
+type_SpherepackWorkspace.f90
+	$(FC) $(FFLAGS) -c type_SpherepackWorkspace.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(LIB_DIRECTORY)
 
-type_spherepackwrapper.o: \
-type_trigonometricfunctions.o \
-type_threedimensionalvector.o \
-type_gaussiangrid.o\
-type_spherepackworkspace.o\
-type_spherepackwrapper.f90
-	$(FC) $(FFLAGS) -c type_spherepackwrapper.f90 $(LINKS)\
+type_SpherepackWrapper.o: \
+type_TrigonometricFunctions.o \
+type_ThreeDimensionalVector.o \
+type_GaussianGrid.o\
+type_SpherepackWorkspace.o\
+type_SphericalUnitVectors.o \
+type_SpherepackWrapper.f90
+	$(FC) $(FFLAGS) -c type_SpherepackWrapper.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(LIB_DIRECTORY)
 
-spherepack_wrapper_mod.o: \
-type_threedimensionalvector.o \
-type_gaussiangrid.o\
-type_spherepackworkspace.o\
-type_spherepackwrapper.o \
-spherepack_wrapper_mod.f90
-	$(FC) $(FFLAGS) -c spherepack_wrapper_mod.f90 $(LINKS)\
+module_spherepack_wrapper.o: \
+type_ThreeDimensionalVector.o \
+type_GaussianGrid.o\
+type_SpherepackWorkspace.o\
+type_SpherepackWrapper.o \
+module_spherepack_wrapper.f90
+	$(FC) $(FFLAGS) -c module_spherepack_wrapper.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(LIB_DIRECTORY)
 
 main.o: \
-spherepack_wrapper_mod.o \
+module_spherepack_wrapper.o \
 main.f90
 	$(FC) $(FFLAGS) -c main.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@

@@ -5,7 +5,7 @@ program test
         ip     => INT32, &
         stdout => OUTPUT_UNIT
 
-    use spherepack_wrapper_mod, only: &
+    use module_spherepack_wrapper, only: &
         SpherepackWrapper, &
         ThreeDimensionalVector, &
         assignment(=), &
