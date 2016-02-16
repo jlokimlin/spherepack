@@ -29,40 +29,32 @@ module type_TrigonometricFunctions
 
     ! Declare derived data type
     type, public :: TrigonometricFunctions
-
-        ! All components are public unless stated otherwise
-
-        logical                           :: initialized = .false. !! Instantiation status
-        integer (ip)                      :: NLON        = 0        !! number of longitudinal points
-        integer (ip)                      :: NLAT        = 0        !! number of latitudinal points
-        real (wp), allocatable           :: sint(:)                !! sin(theta): 0 <= theta <= pi
-        real (wp), allocatable           :: cost(:)                !! cos(theta): 0 <= theta <= pi
-        real (wp), allocatable           :: sinp(:)                !! sin(phi):   0 <=  phi  <= 2*pi
-        real (wp), allocatable           :: cosp(:)                !! cos(phi):   0 <=  phi  <= 2*pi
-
+        !---------------------------------------------------------------------------------
+        ! Class variables
+        !---------------------------------------------------------------------------------
+        logical,                 public :: initialized = .false. !! Initialization flag
+        integer (ip),            public :: NLON = 0 !! number of longitudinal points in phi
+        integer (ip),            public :: NLAT = 0 !! number of latitudinal points in theta
+        real (wp), allocatable, public :: sint(:)  !! sin(theta): 0 <= theta <= pi
+        real (wp), allocatable, public :: cost(:)  !! cos(theta): 0 <= theta <= pi
+        real (wp), allocatable, public :: sinp(:)  !! sin(phi):   0 <=  phi  <= 2*pi
+        real (wp), allocatable, public :: cosp(:)  !! cos(phi):   0 <=  phi  <= 2*pi
+        !---------------------------------------------------------------------------------
     contains
-
-        ! All method are private unless stated otherwise
-        private
-
         !---------------------------------------------------------------------------------
-        ! Public methods
+        ! Class methods
         !---------------------------------------------------------------------------------
-        procedure,                    public   :: create => create_trigonometricfunctions
-        procedure,                    public   :: destroy => destroy_trigonometricfunctions
+        procedure, public :: create => create_trigonometric_functions
+        procedure, public :: destroy => destroy_trigonometric_functions
+        final              :: finalize_trigonometric_functions
         !---------------------------------------------------------------------------------
-        ! Finalizer
-        !---------------------------------------------------------------------------------
-        final                                :: finalize_trigonometricfunctions
-        !---------------------------------------------------------------------------------
-
     end type TrigonometricFunctions
 
 contains
     !
     !*****************************************************************************************
     !
-    subroutine create_trigonometricfunctions( this, latitudinal_grid, longitudinal_grid )
+    subroutine create_trigonometric_functions( this, latitudinal_grid, longitudinal_grid )
         !
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
@@ -104,7 +96,7 @@ contains
             ! Check allocation status
             if ( allocate_status /= 0 ) then
                 write( stderr, '(A)') 'TYPE (TrigonometricFunctions)'
-                write( stderr, '(A)') 'Allocation failed in CREATE_TRIGONOMETRICFUNCTIONS'
+                write( stderr, '(A)') 'Allocation failed in create_trigonometric_functions'
                 write( stderr, '(A)') trim( error_message )
             end if
 
@@ -136,11 +128,11 @@ contains
 
         this%initialized = .true.
 
-    end subroutine create_trigonometricfunctions
+    end subroutine create_trigonometric_functions
     !
     !*****************************************************************************************
     !
-    subroutine destroy_trigonometricfunctions( this )
+    subroutine destroy_trigonometric_functions( this )
         !
         !< Purpose:
         !--------------------------------------------------------------------------------
@@ -171,7 +163,7 @@ contains
             ! Check deallocation status
             if ( deallocate_status /= 0 ) then
                 write( stderr, '(A)' ) 'TYPE (TrigonometricFunctions)'
-                write( stderr, '(A)' ) 'Deallocating SINT failed in DESTROY_TRIGONOMETRICFUNCTIONS'
+                write( stderr, '(A)' ) 'Deallocating SINT failed in destroy_trigonometric_functions'
                 write( stderr, '(A)' ) trim( error_message )
             end if
         end if
@@ -188,7 +180,7 @@ contains
             ! Check deallocation status
             if ( deallocate_status /= 0 ) then
                 write( stderr, '(A)' ) 'TYPE (TrigonometricFunctions)'
-                write( stderr, '(A)' ) 'Deallocating COST failed in DESTROY_TRIGONOMETRICFUNCTIONS'
+                write( stderr, '(A)' ) 'Deallocating COST failed in destroy_trigonometric_functions'
                 write( stderr, '(A)' ) trim( error_message )
             end if
         end if
@@ -205,7 +197,7 @@ contains
             ! Check deallocation status
             if ( deallocate_status /= 0 ) then
                 write( stderr, '(A)' ) 'TYPE (TrigonometricFunctions)'
-                write( stderr, '(A)' ) 'Deallocating SINP failed in DESTROY_TRIGONOMETRICFUNCTIONS'
+                write( stderr, '(A)' ) 'Deallocating SINP failed in destroy_trigonometric_functions'
                 write( stderr, '(A)' ) trim( error_message )
             end if
         end if
@@ -222,7 +214,7 @@ contains
             ! Check deallocation status
             if ( deallocate_status /= 0 ) then
                 write( stderr, '(A)' ) 'TYPE (TrigonometricFunctions)'
-                write( stderr, '(A)' ) 'Deallocating COSP failed in DESTROY_TRIGONOMETRICFUNCTIONS'
+                write( stderr, '(A)' ) 'Deallocating COSP failed in destroy_trigonometric_functions'
                 write( stderr, '(A)' ) trim( error_message )
             end if
         end if
@@ -240,13 +232,12 @@ contains
 
         this%initialized = .false.
 
-    end subroutine destroy_trigonometricfunctions
+    end subroutine destroy_trigonometric_functions
     !
     !*****************************************************************************************
     !
-    subroutine finalize_trigonometricfunctions( this )
+    subroutine finalize_trigonometric_functions( this )
         !
-        !< Purpose:
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
@@ -255,7 +246,7 @@ contains
 
         call this%destroy()
 
-    end subroutine finalize_trigonometricfunctions
+    end subroutine finalize_trigonometric_functions
     !
     !*****************************************************************************************
     !
