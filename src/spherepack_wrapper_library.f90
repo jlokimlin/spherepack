@@ -1,4 +1,4 @@
-module module_spherepack_wrapper
+module spherepack_wrapper_library
     
     use type_ThreeDimensionalVector, only: &
         ThreeDimensionalVector, &
@@ -28,4 +28,4 @@ module module_spherepack_wrapper
     public :: SpherepackWrapper
     public :: SpherepackWorkspace
 
-end module module_spherepack_wrapper
+end module spherepack_wrapper_library

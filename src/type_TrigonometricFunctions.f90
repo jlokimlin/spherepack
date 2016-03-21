@@ -1,9 +1,9 @@
-!*****************************************************************************************
+
 !
 !< Author:
 ! Jon Lo Kim Lin
 !
-!*****************************************************************************************
+
 !
 module type_TrigonometricFunctions
 
@@ -19,19 +19,19 @@ module type_TrigonometricFunctions
     private
     public :: TrigonometricFunctions
 
-    !---------------------------------------------------------------------------------
+    !----------------------------------------------------------------------
     ! Dictionary: global variables confined to the module
-    !---------------------------------------------------------------------------------
+    !----------------------------------------------------------------------
     character (len=250) :: error_message     !! Probably long enough
     integer (ip)        :: allocate_status   !! To check allocation status
     integer (ip)        :: deallocate_status !! To check deallocation status
-    !---------------------------------------------------------------------------------
+    !----------------------------------------------------------------------
 
     ! Declare derived data type
     type, public :: TrigonometricFunctions
-        !---------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Class variables
-        !---------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         logical,                 public :: initialized = .false. !! Initialization flag
         integer (ip),            public :: NLON = 0 !! number of longitudinal points in phi
         integer (ip),            public :: NLAT = 0 !! number of latitudinal points in theta
@@ -39,20 +39,20 @@ module type_TrigonometricFunctions
         real (wp), allocatable, public :: cost(:)  !! cos(theta): 0 <= theta <= pi
         real (wp), allocatable, public :: sinp(:)  !! sin(phi):   0 <=  phi  <= 2*pi
         real (wp), allocatable, public :: cosp(:)  !! cos(phi):   0 <=  phi  <= 2*pi
-        !---------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
     contains
-        !---------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Class methods
-        !---------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         procedure, public :: create => create_trigonometric_functions
         procedure, public :: destroy => destroy_trigonometric_functions
         final              :: finalize_trigonometric_functions
-        !---------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
     end type TrigonometricFunctions
 
 contains
     !
-    !*****************************************************************************************
+    
     !
     subroutine create_trigonometric_functions( this, latitudinal_grid, longitudinal_grid )
         !
@@ -85,12 +85,12 @@ contains
             nlon => this%NLON &
             )
 
-            allocate ( &
+            allocate( &
                 this%sint( nlat ), &
                 this%cost( nlat ), &
                 this%sinp( nlon ), &
                 this%cosp( nlon ), &
-                stat   = allocate_status, &
+                stat=allocate_status, &
                 errmsg = error_message )
 
             ! Check allocation status
@@ -130,7 +130,7 @@ contains
 
     end subroutine create_trigonometric_functions
     !
-    !*****************************************************************************************
+    
     !
     subroutine destroy_trigonometric_functions( this )
         !
@@ -148,7 +148,7 @@ contains
         if ( .not. this%initialized ) return
 
         !--------------------------------------------------------------------------------
-        ! Deallocate arrays
+        ! Release memory
         !--------------------------------------------------------------------------------
 
          ! Check if array is allocated
@@ -157,7 +157,7 @@ contains
             ! Deallocate array
             deallocate( &
                 this%sint, &
-                stat   = deallocate_status, &
+                stat=deallocate_status, &
                 errmsg = error_message )
 
             ! Check deallocation status
@@ -174,7 +174,7 @@ contains
             ! Deallocate array
             deallocate( &
                 this%cost, &
-                stat   = deallocate_status, &
+                stat=deallocate_status, &
                 errmsg = error_message )
 
             ! Check deallocation status
@@ -191,7 +191,7 @@ contains
             ! Deallocate array
             deallocate( &
                 this%sinp, &
-                stat   = deallocate_status, &
+                stat=deallocate_status, &
                 errmsg = error_message )
 
             ! Check deallocation status
@@ -208,7 +208,7 @@ contains
             ! Deallocate array
             deallocate( &
                 this%cosp, &
-                stat   = deallocate_status, &
+                stat=deallocate_status, &
                 errmsg = error_message )
 
             ! Check deallocation status
@@ -234,7 +234,7 @@ contains
 
     end subroutine destroy_trigonometric_functions
     !
-    !*****************************************************************************************
+    
     !
     subroutine finalize_trigonometric_functions( this )
         !
@@ -248,6 +248,6 @@ contains
 
     end subroutine finalize_trigonometric_functions
     !
-    !*****************************************************************************************
+    
     !
 end module type_TrigonometricFunctions

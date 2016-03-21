@@ -1,11 +1,11 @@
-!*****************************************************************************************
+
 !
 !< Purpose:
 !
 ! Defines the derived data type "workspace_t" required to
 ! invoke the spherepack library
 !
-!*****************************************************************************************
+
 !
 module type_SpherepackWorkspace
 
@@ -27,73 +27,73 @@ module type_SpherepackWorkspace
     character (len=250) :: error_message            !! Probably long enough
     integer (ip)        :: allocate_status          !! To check allocation status
     integer (ip)        :: deallocate_status        !! To check deallocation status
-    !---------------------------------------------------------------------------------
+    !----------------------------------------------------------------------
 
     ! Declare derived data type
     type, public :: SpherepackWorkspace
 
         ! All components are public unless stated otherwise
 
-        !---------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Initialization flag
-        !---------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         logical                         :: initialized = .false.
-        !---------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Workspace arrays for Legendre transform
-        !---------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         real (wp), allocatable           :: work(:)
         real (wp), allocatable, private :: dwork(:)
-        !---------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Workspace arrays for scalar transform - GAU
-        !---------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         real (wp), allocatable     :: wshags(:)
         real (wp), allocatable     :: wshsgs(:)
-        !---------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Workspace arrays for scalar transform - REG
-        !---------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         real (wp), allocatable     :: wshaes(:)
         real (wp), allocatable     :: wshses(:)
-        !---------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Workspace arrays for vector transform - GAU
-        !---------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         real (wp), allocatable     :: wvhags(:)
         real (wp), allocatable     :: wvhsgs(:)
-        !---------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Workspace arrays for vector transform - REG
-        !---------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         real (wp), allocatable     :: wvhaes(:)
         real (wp), allocatable     :: wvhses(:)
-        !---------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Scalar transform coefficients
-        !---------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         real (wp), allocatable     :: real_harmonic_coefficients(:,:)
         real (wp), allocatable     :: imaginary_harmonic_coefficients(:,:)
-        !---------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Vector transform coefficients
-        !---------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         real (wp), allocatable     :: real_polar_harmonic_coefficients(:,:)
         real (wp), allocatable     :: imaginary_polar_harmonic_coefficients(:,:)
         real (wp), allocatable     :: real_azimuthal_harmonic_coefficients(:,:)
         real (wp), allocatable     :: imaginary_azimuthal_harmonic_coefficients(:,:)
-        !---------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
 
     contains
 
         ! All methods are private unless stated otherwise
         private
 
-        !---------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         procedure                          :: assert_initialized
         procedure, nopass                  :: get_lwork
         procedure, nopass                  :: get_ldwork
-        !---------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Public methods
-        !---------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         procedure, non_overridable, public :: create
         procedure, non_overridable, public :: destroy
-        !---------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Private methods for gaussian grids
-        !---------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         procedure, nopass                  :: get_lshags
         procedure, nopass                  :: get_lshsgs
         procedure, nopass                  :: get_lvhags
@@ -104,9 +104,9 @@ module type_SpherepackWorkspace
         procedure                          :: initialize_vector_analysis_gau
         procedure                          :: initialize_vector_synthesis_gau
         procedure                          :: initialize_vector_transform_gau
-        !---------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Private methods for regular (equally-spaced) grids
-        !---------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         procedure, nopass                  :: get_lshaes
         procedure, nopass                  :: get_lshses
         procedure, nopass                  :: get_lvhaes
@@ -117,17 +117,17 @@ module type_SpherepackWorkspace
         procedure                          :: initialize_vector_analysis_reg
         procedure                          :: initialize_vector_synthesis_reg
         procedure                          :: initialize_vector_transform_reg
-        !---------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Finalizer
-        !---------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         final                              :: finalize_spherepackworkspace
-        !---------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
 
     end type SpherepackWorkspace
 
 contains
     !
-    !*****************************************************************************************
+    
     !
     subroutine create( this, nlat, nlon, grid_type )
         !
@@ -189,7 +189,7 @@ contains
 
     end subroutine create
     !
-    !*****************************************************************************************
+    
     !
     subroutine destroy( this )
         !
@@ -214,9 +214,9 @@ contains
         if ( allocated( this%work ) ) then
 
             ! Deallocate array
-            deallocate ( &
+            deallocate( &
                 this%work, &
-                stat   = deallocate_status, &
+                stat=deallocate_status, &
                 errmsg = error_message )
 
             ! Check deallocate status
@@ -233,9 +233,9 @@ contains
         if ( allocated( this%dwork ) ) then
 
             ! Deallocate array
-            deallocate ( &
+            deallocate( &
                 this%dwork, &
-                stat   = deallocate_status, &
+                stat=deallocate_status, &
                 errmsg = error_message )
 
             ! Check deallocate status
@@ -256,9 +256,9 @@ contains
         if ( allocated( this%wshags ) ) then
 
             ! Deallocate array
-            deallocate ( &
+            deallocate( &
                 this%wshags, &
-                stat   = deallocate_status, &
+                stat=deallocate_status, &
                 errmsg = error_message )
 
             ! Check deallocate status
@@ -273,9 +273,9 @@ contains
 
         ! Check if array is allocated
         if ( allocated( this%wshsgs ) ) then
-            deallocate ( &
+            deallocate( &
                 this%wshsgs, &
-                stat   = deallocate_status, &
+                stat=deallocate_status, &
                 errmsg = error_message )
 
             ! Check deallocate status
@@ -296,9 +296,9 @@ contains
         if ( allocated( this%wshaes ) ) then
 
             ! Deallocate array
-            deallocate ( &
+            deallocate( &
                 this%wshaes, &
-                stat   = deallocate_status, &
+                stat=deallocate_status, &
                 errmsg = error_message )
 
             ! Check deallocate status
@@ -315,9 +315,9 @@ contains
         if ( allocated( this%wshses ) ) then
 
             ! Deallocate array
-            deallocate ( &
+            deallocate( &
                 this%wshses, &
-                stat   = deallocate_status, &
+                stat=deallocate_status, &
                 errmsg = error_message )
 
             ! Check deallocate status
@@ -338,9 +338,9 @@ contains
         if ( allocated( this%wvhags ) ) then
 
             ! Deallocate array
-            deallocate ( &
+            deallocate( &
                 this%wvhags, &
-                stat   = deallocate_status, &
+                stat=deallocate_status, &
                 errmsg = error_message )
 
             ! Check deallocate status
@@ -357,9 +357,9 @@ contains
         if ( allocated( this%wvhsgs ) ) then
 
             ! Deallocate array
-            deallocate ( &
+            deallocate( &
                 this%wvhsgs, &
-                stat   = deallocate_status, &
+                stat=deallocate_status, &
                 errmsg = error_message )
 
             ! Check deallocate status
@@ -380,9 +380,9 @@ contains
         if ( allocated( this%wvhaes ) ) then
 
             ! Deallocate array
-            deallocate ( &
+            deallocate( &
                 this%wvhaes, &
-                stat   = deallocate_status, &
+                stat=deallocate_status, &
                 errmsg = error_message )
 
             ! Check deallocate status
@@ -399,9 +399,9 @@ contains
         if ( allocated( this%wvhses ) ) then
 
             ! Deallocate array
-            deallocate ( &
+            deallocate( &
                 this%wvhses, &
-                stat   = deallocate_status, &
+                stat=deallocate_status, &
                 errmsg = error_message )
 
             ! Check deallocate status
@@ -424,7 +424,7 @@ contains
             ! Deallocate array
             deallocate( &
                 this%real_harmonic_coefficients, &
-                stat   = deallocate_status, &
+                stat=deallocate_status, &
                 errmsg = error_message )
 
             ! Check deallocate status
@@ -443,7 +443,7 @@ contains
             ! Deallocate array
             deallocate( &
                 this%imaginary_harmonic_coefficients, &
-                stat   = deallocate_status, &
+                stat=deallocate_status, &
                 errmsg = error_message )
 
             ! Check deallocate status
@@ -466,7 +466,7 @@ contains
             ! Deallocate array
             deallocate( &
                 this%real_polar_harmonic_coefficients, &
-                stat   = deallocate_status, &
+                stat=deallocate_status, &
                 errmsg = error_message )
 
             ! Check deallocate status
@@ -485,7 +485,7 @@ contains
             ! Deallocate array
             deallocate( &
                 this%imaginary_polar_harmonic_coefficients, &
-                stat   = deallocate_status, &
+                stat=deallocate_status, &
                 errmsg = error_message )
 
             ! Check deallocate status
@@ -504,7 +504,7 @@ contains
             ! Deallocate array
             deallocate( &
                 this%real_azimuthal_harmonic_coefficients, &
-                stat   = deallocate_status, &
+                stat=deallocate_status, &
                 errmsg = error_message )
 
             ! Check deallocate status
@@ -523,7 +523,7 @@ contains
             ! Deallocate array
             deallocate( &
                 this%imaginary_azimuthal_harmonic_coefficients, &
-                stat   = deallocate_status, &
+                stat=deallocate_status, &
                 errmsg = error_message )
 
             ! Check deallocate status
@@ -544,7 +544,7 @@ contains
 
     end subroutine destroy
     !
-    !*****************************************************************************************
+    
     !
     subroutine assert_initialized( this )
         !
@@ -565,11 +565,11 @@ contains
 
     end subroutine assert_initialized
     !
-    !*****************************************************************************************
+    
     !
     ! Private methods for gaussian grids
     !
-    !*****************************************************************************************
+    
     !
     subroutine initialize_scalar_analysis_gau( this, nlat, nlon )
         !
@@ -690,9 +690,9 @@ contains
         if ( allocated( this%work ) ) then
 
             ! Deallocate array
-            deallocate ( &
+            deallocate( &
                 this%work, &
-                stat   = deallocate_status, &
+                stat=deallocate_status, &
                 errmsg = error_message )
 
             ! Check deallocate status
@@ -709,9 +709,9 @@ contains
         if ( allocated( this%dwork ) ) then
 
             ! Deallocate array
-            deallocate ( &
+            deallocate( &
                 this%dwork, &
-                stat   = deallocate_status, &
+                stat=deallocate_status, &
                 errmsg = error_message )
 
             ! Check deallocate status
@@ -728,9 +728,9 @@ contains
         if ( allocated( this%wshags ) ) then
 
             ! Deallocate array
-            deallocate ( &
+            deallocate( &
                 this%wshags, &
-                stat   = deallocate_status, &
+                stat=deallocate_status, &
                 errmsg = error_message )
 
             ! Check deallocate status
@@ -747,11 +747,11 @@ contains
         ! Allocate arrays
         !--------------------------------------------------------------------------------
 
-        allocate ( &
+        allocate( &
             this%work(   1:lwork ), &
             this%dwork(  1:ldwork ), &
             this%wshags( 1:lshags ), &
-            stat   = allocate_status, &
+            stat=allocate_status, &
             errmsg = error_message )
 
         ! Check allocation status
@@ -828,7 +828,7 @@ contains
 
     end subroutine initialize_scalar_analysis_gau
     !
-    !*****************************************************************************************
+    
     !
     subroutine initialize_scalar_synthesis_gau( this, nlat, nlon )
         !
@@ -949,9 +949,9 @@ contains
         if ( allocated( this%work ) ) then
 
             ! Deallocate array
-            deallocate ( &
+            deallocate( &
                 this%work, &
-                stat   = deallocate_status, &
+                stat=deallocate_status, &
                 errmsg = error_message )
 
             ! Check deallocate status
@@ -968,9 +968,9 @@ contains
         if ( allocated( this%dwork ) ) then
 
             ! Deallocate array
-            deallocate ( &
+            deallocate( &
                 this%dwork, &
-                stat   = deallocate_status, &
+                stat=deallocate_status, &
                 errmsg = error_message )
 
             ! Check deallocate status
@@ -985,9 +985,9 @@ contains
 
         ! Check if array is allocated
         if ( allocated( this%wshsgs ) ) then
-            deallocate ( &
+            deallocate( &
                 this%wshsgs, &
-                stat   = deallocate_status, &
+                stat=deallocate_status, &
                 errmsg = error_message )
 
             ! Check deallocate status
@@ -1005,11 +1005,11 @@ contains
         !--------------------------------------------------------------------------------
 
         ! Allocate arrays
-        allocate ( &
+        allocate( &
             this%work(   lwork ), &
             this%dwork(  ldwork ), &
             this%wshsgs( lshsgs ), &
-            stat   = allocate_status, &
+            stat=allocate_status, &
             errmsg = error_message )
 
         ! Check allocation status
@@ -1086,7 +1086,7 @@ contains
 
     end subroutine initialize_scalar_synthesis_gau
     !
-    !*****************************************************************************************
+    
     !
     subroutine initialize_scalar_transform_gau( this, nlat, nlon )
         !
@@ -1122,10 +1122,10 @@ contains
         ! Allocate pointers for the (real) scalar transform
         !--------------------------------------------------------------------------------
 
-        allocate ( &
+        allocate( &
             this%real_harmonic_coefficients(      nlat, nlat ), &
             this%imaginary_harmonic_coefficients( nlat, nlat ), &
-            stat   = allocate_status, &
+            stat=allocate_status, &
             errmsg = error_message )
 
         ! Check allocation status
@@ -1139,7 +1139,7 @@ contains
 
     end subroutine initialize_scalar_transform_gau
     !
-    !*****************************************************************************************
+    
     !
     subroutine initialize_vector_analysis_gau( this, nlat, nlon )
         !
@@ -1247,9 +1247,9 @@ contains
         if ( allocated( this%dwork ) ) then
 
             ! Deallocate array
-            deallocate ( &
+            deallocate( &
                 this%dwork, &
-                stat   = deallocate_status, &
+                stat=deallocate_status, &
                 errmsg = error_message )
 
             ! Check deallocate status
@@ -1266,9 +1266,9 @@ contains
         if ( allocated( this%wvhags ) ) then
 
             ! Deallocate array
-            deallocate ( &
+            deallocate( &
                 this%wvhags, &
-                stat   = deallocate_status, &
+                stat=deallocate_status, &
                 errmsg = error_message )
 
             ! Check deallocate status
@@ -1285,10 +1285,10 @@ contains
         ! Allocate arrays
         !--------------------------------------------------------------------------------
 
-        allocate ( &
+        allocate( &
             this%dwork(  1:ldwork ), &
             this%wvhags( 1:lvhags ), &
-            stat   = allocate_status, &
+            stat=allocate_status, &
             errmsg = error_message )
 
         ! Check allocation status
@@ -1353,7 +1353,7 @@ contains
 
     end subroutine initialize_vector_analysis_gau
     !
-    !*****************************************************************************************
+    
     !
     subroutine initialize_vector_synthesis_gau( this, nlat, nlon )
         !
@@ -1459,9 +1459,9 @@ contains
         if ( allocated( this%dwork ) ) then
 
             ! Deallocate array
-            deallocate ( &
+            deallocate( &
                 this%dwork, &
-                stat   = deallocate_status, &
+                stat=deallocate_status, &
                 errmsg = error_message )
 
             ! Check deallocate status
@@ -1478,9 +1478,9 @@ contains
         if ( allocated( this%wvhsgs ) ) then
 
             ! Deallocate array
-            deallocate ( &
+            deallocate( &
                 this%wvhsgs, &
-                stat   = deallocate_status, &
+                stat=deallocate_status, &
                 errmsg = error_message )
 
             ! Check deallocate status
@@ -1497,10 +1497,10 @@ contains
         ! Allocate arrays
         !--------------------------------------------------------------------------------
 
-        allocate ( &
+        allocate( &
             this%dwork(  1:ldwork ), &
             this%wvhsgs( 1:lvhsgs ), &
-            stat   = allocate_status, &
+            stat=allocate_status, &
             errmsg = error_message )
 
         ! Check allocation status
@@ -1567,7 +1567,7 @@ contains
 
     end subroutine initialize_vector_synthesis_gau
     !
-    !*****************************************************************************************
+    
     !
     subroutine initialize_vector_transform_gau( this, nlat, nlon )
         !
@@ -1606,12 +1606,12 @@ contains
         ! Allocate pointers for the (real) vector harmonic transform coefficients
         !--------------------------------------------------------------------------------
 
-        allocate ( &
+        allocate( &
             this%real_polar_harmonic_coefficients( 1:nlat, 1:nlat ), &
             this%imaginary_polar_harmonic_coefficients( 1:nlat, 1:nlat ), &
             this%real_azimuthal_harmonic_coefficients( 1:nlat, 1:nlat ), &
             this%imaginary_azimuthal_harmonic_coefficients( 1:nlat, 1:nlat ), &
-            stat   = allocate_status, &
+            stat=allocate_status, &
             errmsg = error_message )
 
         ! Check allocation status
@@ -1625,11 +1625,11 @@ contains
 
     end subroutine initialize_vector_transform_gau
     !
-    !*****************************************************************************************
+    
     !
     ! Private methods for regular (equally_spaced) grids
     !
-    !*****************************************************************************************
+    
     !
     subroutine initialize_scalar_analysis_reg( this, nlat, nlon )
         !
@@ -1760,9 +1760,9 @@ contains
         if ( allocated( this%work ) ) then
 
             ! Deallocate array
-            deallocate ( &
+            deallocate( &
                 this%work, &
-                stat   = deallocate_status, &
+                stat=deallocate_status, &
                 errmsg = error_message )
 
             ! Check deallocate status
@@ -1779,9 +1779,9 @@ contains
         if ( allocated( this%dwork ) ) then
 
             ! Deallocate array
-            deallocate ( &
+            deallocate( &
                 this%dwork, &
-                stat   = deallocate_status, &
+                stat=deallocate_status, &
                 errmsg = error_message )
 
             ! Check deallocate status
@@ -1798,9 +1798,9 @@ contains
         if ( allocated( this%wshaes ) ) then
 
             ! Deallocate array
-            deallocate ( &
+            deallocate( &
                 this%wshaes, &
-                stat   = deallocate_status, &
+                stat=deallocate_status, &
                 errmsg = error_message )
 
             ! Check deallocate status
@@ -1817,11 +1817,11 @@ contains
         ! Allocate arrays
         !--------------------------------------------------------------------------------
 
-        allocate ( &
+        allocate( &
             this%work(   lwork ), &
             this%dwork(  ldwork ), &
             this%wshaes( lshaes ), &
-            stat   = allocate_status, &
+            stat=allocate_status, &
             errmsg = error_message )
 
         ! Check allocation status
@@ -1887,7 +1887,7 @@ contains
 
     end subroutine initialize_scalar_analysis_reg
     !
-    !*****************************************************************************************
+    
     !
     subroutine initialize_scalar_synthesis_reg( this, nlat, nlon )
         !
@@ -2002,9 +2002,9 @@ contains
         if ( allocated( this%work ) ) then
 
             ! Deallocate array
-            deallocate ( &
+            deallocate( &
                 this%work, &
-                stat   = deallocate_status, &
+                stat=deallocate_status, &
                 errmsg = error_message )
 
             ! Check deallocate status
@@ -2021,9 +2021,9 @@ contains
         if ( allocated( this%dwork ) ) then
 
             ! Deallocate array
-            deallocate ( &
+            deallocate( &
                 this%dwork, &
-                stat   = deallocate_status, &
+                stat=deallocate_status, &
                 errmsg = error_message )
 
             ! Check deallocate status
@@ -2040,9 +2040,9 @@ contains
         if ( allocated( this%wshses ) ) then
 
             ! Deallocate array
-            deallocate ( &
+            deallocate( &
                 this%wshses, &
-                stat   = deallocate_status, &
+                stat=deallocate_status, &
                 errmsg = error_message )
 
             ! Check deallocate status
@@ -2059,11 +2059,11 @@ contains
         ! Allocate arrays
         !--------------------------------------------------------------------------------
 
-        allocate ( &
+        allocate( &
             this%work(   lwork ), &
             this%dwork(  ldwork ), &
             this%wshses( lshses ), &
-            stat   = allocate_status, &
+            stat=allocate_status, &
             errmsg = error_message )
 
         ! Check allocation status
@@ -2129,7 +2129,7 @@ contains
 
     end subroutine initialize_scalar_synthesis_reg
     !
-    !*****************************************************************************************
+    
     !
     subroutine initialize_scalar_transform_reg( this, nlat, nlon )
         !
@@ -2165,10 +2165,10 @@ contains
         ! Allocate pointers for the (real) scalar harmonic transform - REG
         !--------------------------------------------------------------------------------
 
-        allocate ( &
+        allocate( &
             this%real_harmonic_coefficients(      nlat, nlat ), &
             this%imaginary_harmonic_coefficients( nlat, nlat ), &
-            stat   = allocate_status, &
+            stat=allocate_status, &
             errmsg = error_message )
 
         ! Check allocation status
@@ -2182,7 +2182,7 @@ contains
 
     end subroutine initialize_scalar_transform_reg
     !
-    !*****************************************************************************************
+    
     !
     subroutine initialize_vector_analysis_reg( this, nlat, nlon )
         !
@@ -2291,9 +2291,9 @@ contains
         if ( allocated( this%dwork ) ) then
 
             ! Deallocate array
-            deallocate ( &
+            deallocate( &
                 this%dwork, &
-                stat   = deallocate_status, &
+                stat=deallocate_status, &
                 errmsg = error_message )
 
             ! Check deallocate status
@@ -2310,9 +2310,9 @@ contains
         if ( allocated( this%wvhaes ) ) then
 
             ! Deallocate array
-            deallocate ( &
+            deallocate( &
                 this%wvhaes, &
-                stat   = deallocate_status, &
+                stat=deallocate_status, &
                 errmsg = error_message )
 
             ! Check deallocate status
@@ -2329,10 +2329,10 @@ contains
         ! Allocate arrays
         !--------------------------------------------------------------------------------
 
-        allocate ( &
+        allocate( &
             this%dwork(  1:ldwork ), &
             this%wvhaes( 1:lvhaes ), &
-            stat   = allocate_status, &
+            stat=allocate_status, &
             errmsg = error_message )
 
         ! Check allocation status
@@ -2397,7 +2397,7 @@ contains
 
     end subroutine initialize_vector_analysis_reg
     !
-    !*****************************************************************************************
+    
     !
     subroutine initialize_vector_synthesis_reg( this, nlat, nlon )
         !
@@ -2506,9 +2506,9 @@ contains
         if ( allocated( this%dwork ) ) then
 
             ! Deallocate array
-            deallocate ( &
+            deallocate( &
                 this%dwork, &
-                stat   = deallocate_status, &
+                stat=deallocate_status, &
                 errmsg = error_message )
 
             ! Check deallocate status
@@ -2525,9 +2525,9 @@ contains
         if ( allocated( this%wvhses ) ) then
 
             ! Deallocate array
-            deallocate ( &
+            deallocate( &
                 this%wvhses, &
-                stat   = deallocate_status, &
+                stat=deallocate_status, &
                 errmsg = error_message )
 
             ! Check deallocate status
@@ -2544,10 +2544,10 @@ contains
         ! Allocate arrays
         !--------------------------------------------------------------------------------
 
-        allocate ( &
+        allocate( &
             this%dwork(  ldwork ), &
             this%wvhses( lvhses ), &
-            stat   = allocate_status, &
+            stat=allocate_status, &
             errmsg = error_message )
 
         ! Check allocation status
@@ -2612,7 +2612,7 @@ contains
 
     end subroutine initialize_vector_synthesis_reg
     !
-    !*****************************************************************************************
+    
     !
     subroutine initialize_vector_transform_reg( this, nlat, nlon )
         !
@@ -2652,12 +2652,12 @@ contains
         ! Allocate pointers for the vector transform coefficients - REG
         !--------------------------------------------------------------------------------
 
-        allocate ( &
+        allocate( &
             this%real_polar_harmonic_coefficients(          nlat, nlat ), &
             this%imaginary_polar_harmonic_coefficients(     nlat, nlat ), &
             this%real_azimuthal_harmonic_coefficients(      nlat, nlat ), &
             this%imaginary_azimuthal_harmonic_coefficients( nlat, nlat ), &
-            stat   = allocate_status, &
+            stat=allocate_status, &
             errmsg = error_message )
 
         ! Check allocation status
@@ -2671,7 +2671,7 @@ contains
 
     end subroutine initialize_vector_transform_reg
     !
-    !*****************************************************************************************
+    
     !
     pure function get_lwork( nlat, nlon ) result ( return_value )
         !
@@ -2688,7 +2688,7 @@ contains
 
     end function get_lwork
     !
-    !*****************************************************************************************
+    
     !
     pure function get_ldwork( nlat ) result ( return_value )
         !
@@ -2704,7 +2704,7 @@ contains
 
     end function get_ldwork
     !
-    !*****************************************************************************************
+    
     !
     pure function get_lshags( nlat, nlon ) result ( return_value )
         !
@@ -2742,7 +2742,7 @@ contains
 
     end function get_lshags
     !
-    !*****************************************************************************************
+    
     !
     pure function get_lshaes( nlat, nlon ) result ( return_value )
         !
@@ -2778,7 +2778,7 @@ contains
 
     end function get_lshaes
     !
-    !*****************************************************************************************
+    
     !
     pure function get_lshsgs( nlat, nlon ) result ( return_value )
         !
@@ -2816,7 +2816,7 @@ contains
 
     end function get_lshsgs
     !
-    !*****************************************************************************************
+    
     !
     pure function get_lshses( nlat, nlon ) result ( return_value )
         !
@@ -2852,7 +2852,7 @@ contains
 
     end function get_lshses
     !
-    !*****************************************************************************************
+    
     !
     pure function get_lvhags( nlat, nlon ) result ( return_value )
         !
@@ -2871,7 +2871,7 @@ contains
 
     end function get_lvhags
     !
-    !*****************************************************************************************
+    
     !
     pure function get_lvhaes( nlat, nlon ) result ( return_value )
         !
@@ -2905,7 +2905,7 @@ contains
 
     end function get_lvhaes
     !
-    !*****************************************************************************************
+    
     !
     pure function get_lvhsgs( nlat, nlon ) result ( return_value )
         !
@@ -2942,7 +2942,7 @@ contains
 
     end function get_lvhsgs
     !
-    !*****************************************************************************************
+    
     !
     pure function get_lvhses( nlat, nlon ) result ( return_value )
         !
@@ -2978,7 +2978,7 @@ contains
 
     end function get_lvhses
     !
-    !*****************************************************************************************
+    
     !
     subroutine finalize_spherepackworkspace( this )
         !
@@ -2995,6 +2995,6 @@ contains
 
     end subroutine finalize_spherepackworkspace
     !
-    !*****************************************************************************************
+    
     !
 end module type_SpherepackWorkspace

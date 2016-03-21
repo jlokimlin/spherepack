@@ -1,32 +1,30 @@
 
-# Set directories
+MAKE = /usr/bin/make
+
+AR = /usr/bin/ar
+
+LIB_NAME = spherepack_wrapper
+
+LIB = ../lib/lib$(LIB_NAME).a
 
 #EXTERNAL_LIBRARY_PATH = /usr/local/lib
 EXTERNAL_LIBRARY_PATH = /usr/local/lib64
 
 BIN_PATH = /usr/local/bin
 
-SRC_DIRECTORY = ./
-
-SOURCES = $(wildcard $(SRC_DIRECTORY)/*.f90)
-
-SOURCES_WITH_PREFIX = $(addprefix $(SRC_DIRECTORY)/, $(SOURCES))
-
-OBJECTS := $(patsubst %.f90, %.o, $(wildcard *.f90))
+OBJ := $(patsubst %.f90, %.o, $(wildcard *.f90))
 
 OBJ_DIRECTORY = ../objs
 
 LIB_DIRECTORY = ../lib
 
-OBJECTS_WITH_PREFIX = $(addprefix $(OBJ_DIRECTORY)/, $(OBJECTS))
-
-# Set the compiler options
+OBJS = $(addprefix $(OBJ_DIRECTORY)/, $(OBJ))
 
 FC = gfortran
 
 FFLAGS = \
 -O3 \
-$(LANGUAGE_OPTIONS) \
+$(LANGUAGE_OPTIONS)
 $(ERROR_WARNING_OPTIONS) \
 $(CODE_GENERATION_OPTIONS)
 
@@ -37,10 +35,4 @@ ERROR_WARNING_OPTIONS = \
 -Wall
 
 CODE_GENERATION_OPTIONS = \
--fcheck=all \
--fbounds-check \
--fno-backtrace \
--fno-unsafe-math-optimizations \
--frounding-math \
--fsignaling-nans
-
+-fcheck=all

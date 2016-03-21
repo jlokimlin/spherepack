@@ -1,4 +1,4 @@
-!*****************************************************************************************
+
 !
 !< Author:
 ! Jon Lo Kim Lin
@@ -7,7 +7,7 @@
 !
 ! A modern Fortran (2008+) object-oriented spherepack wrapper for NCAR's SPHEREPACK 3.2
 !
-!*****************************************************************************************
+
 !
 module type_SpherepackWrapper
 
@@ -40,13 +40,13 @@ module type_SpherepackWrapper
     private
     public :: SpherepackWrapper
 
-    !---------------------------------------------------------------------------------
+    !----------------------------------------------------------------------
     ! Dictionary: global variables confined to the module
-    !---------------------------------------------------------------------------------
+    !----------------------------------------------------------------------
     character (len=250) :: error_message     !! Probably long enough
     integer (ip)        :: allocate_status   !! To check allocation status
     integer (ip)        :: deallocate_status !! To check deallocation status
-    !---------------------------------------------------------------------------------
+    !----------------------------------------------------------------------
 
     ! Declare derived data type
     type, public :: SpherepackWrapper
@@ -70,9 +70,9 @@ module type_SpherepackWrapper
         ! All method are private unless stated otherwise
         private
 
-        !---------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Public SPHEREPACK 3.2 methods
-        !---------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         procedure, public                    :: get_colatitude_derivative !! Vtsgs
         procedure, public                    :: get_gradient !! Gradgs
         procedure, public                    :: invert_gradient !!  Igradgs
@@ -98,42 +98,42 @@ module type_SpherepackWrapper
         !procedure, public                    :: get_Icosahedral_geodesic
         !procedure, public                    :: get_Multiple_ffts
         !procedure, public                    :: get_Three_dimensional_sphere_graphics
-        !---------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Public complex methods
-        !---------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         procedure, public                    :: perform_complex_analysis
         procedure, public                    :: perform_complex_synthesis
-        !---------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Additional public methods
-        !---------------------------------------------------------------------------------
-        procedure,                    public   :: create => create_spherepackwrapper
-        procedure,                    public   :: destroy => destroy_spherepackwrapper
+        !----------------------------------------------------------------------
+        procedure,                    public   :: create => create_spherepack_wrapper
+        procedure,                    public   :: destroy => destroy_spherepack_wrapper
         procedure, non_overridable, public   :: get_index
         procedure, non_overridable, public   :: get_coefficient
         procedure,                   public    :: compute_surface_integral
         procedure,                   public    :: get_rotation_operator
         procedure,                   public    :: synthesize_from_spec
-        !---------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Private methods
-        !---------------------------------------------------------------------------------
-        procedure, non_overridable         :: create_spherepackwrapper
-        procedure, non_overridable         :: destroy_spherepackwrapper
+        !----------------------------------------------------------------------
+        procedure, non_overridable         :: create_spherepack_wrapper
+        procedure, non_overridable         :: destroy_spherepack_wrapper
         procedure                            :: assert_initialized
         procedure                            :: get_scalar_symmetries
         procedure                            :: get_vector_symmetries
-        !---------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Finalizer
-        !---------------------------------------------------------------------------------
-        final                                :: finalize_spherepackwrapper
-        !---------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
+        final                                :: finalize_spherepack_wrapper
+        !----------------------------------------------------------------------
 
     end type SpherepackWrapper
 
 contains
     !
-    !*****************************************************************************************
+    
     !
-    subroutine create_spherepackwrapper( this, nlat, nlon, isym, itype )
+    subroutine create_spherepack_wrapper( this, nlat, nlon, isym, itype )
         !
         !< Purpose:
         !--------------------------------------------------------------------------------
@@ -180,15 +180,15 @@ contains
         associate( size_spec => nlat * (nlat + 1)/2 )
 
             ! Allocate pointer for complex spectral coefficients
-            allocate ( &
+            allocate( &
                 this%complex_spectral_coefficients( 1:size_spec ), &
-                stat   = allocate_status, &
+                stat=allocate_status, &
                 errmsg = error_message )
 
             ! Check allocate status
             if ( allocate_status /= 0 ) then
                 write( stderr, '(A)' ) 'TYPE (SpherepackWrapper)'
-                write( stderr, '(A)' ) 'Allocating COMPLEX_SPECTRAL_COEFFICIENTS failed in CREATE_SPHEREPACKWRAPPER'
+                write( stderr, '(A)' ) 'Allocating COMPLEX_SPECTRAL_COEFFICIENTS failed in CREATE_spherepack_wrapper'
                 write( stderr, '(A)' ) trim( error_message )
             end if
 
@@ -230,11 +230,11 @@ contains
 
         this%initialized = .true.
         
-    end subroutine create_spherepackwrapper
+    end subroutine create_spherepack_wrapper
     !
-    !*****************************************************************************************
+    
     !
-    subroutine destroy_spherepackwrapper( this )
+    subroutine destroy_spherepack_wrapper( this )
         !
         !< Purpose:
         !--------------------------------------------------------------------------------
@@ -259,13 +259,13 @@ contains
             ! Deallocate array
             deallocate( &
                 this%complex_spectral_coefficients, &
-                stat   = deallocate_status, &
+                stat=deallocate_status, &
                 errmsg = error_message )
 
             ! Check deallocation status
             if ( deallocate_status /= 0 ) then
                 write( stderr, '(A)' ) 'TYPE (SpherepackWrapper)'
-                write( stderr, '(A)' ) 'Deallocating COMPLEX_SPECTRAL_COEFFICIENTS failed in DESTROY_SPHEREPACKWRAPPER'
+                write( stderr, '(A)' ) 'Deallocating COMPLEX_SPECTRAL_COEFFICIENTS failed in DESTROY_spherepack_wrapper'
                 write( stderr, '(A)' ) trim( error_message )
             end if
         end if
@@ -296,9 +296,9 @@ contains
 
         this%initialized = .false.
 
-    end subroutine destroy_spherepackwrapper
+    end subroutine destroy_spherepack_wrapper
     !
-    !*****************************************************************************************
+    
     !
     subroutine assert_initialized( this )
         !
@@ -319,7 +319,7 @@ contains
 
     end subroutine assert_initialized
     !
-    !*****************************************************************************************
+    
     !
     function get_index( this, n, m ) result( return_value )
         !
@@ -383,7 +383,7 @@ contains
 
     end function get_index
     !
-    !*****************************************************************************************
+    
     !
     function get_coefficient( this, n, m ) result ( return_value )
         !
@@ -416,7 +416,7 @@ contains
 
     end function get_coefficient
     !
-    !*****************************************************************************************
+    
     !
     subroutine get_scalar_symmetries( this, isym )
         !
@@ -449,7 +449,7 @@ contains
 
     end subroutine get_scalar_symmetries
         !
-    !*****************************************************************************************
+    
     !
     subroutine get_vector_symmetries( this, itype )
         !
@@ -490,7 +490,7 @@ contains
 
     end subroutine get_vector_symmetries
     !
-    !*****************************************************************************************
+    
     !
     subroutine perform_complex_analysis( this, scalar_function )
         !
@@ -561,7 +561,7 @@ contains
 
     end subroutine perform_complex_analysis
     !
-    !*****************************************************************************************
+    
     !
     subroutine perform_complex_synthesis( this, scalar_function )
         !
@@ -624,7 +624,7 @@ contains
  
     end subroutine perform_complex_synthesis
     !
-    !*****************************************************************************************
+    
     !
     subroutine synthesize_from_spec( this, spec, scalar_function )
         !
@@ -689,7 +689,7 @@ contains
  
     end subroutine synthesize_from_spec
     !
-    !*****************************************************************************************
+    
     !
     subroutine get_rotation_operator( this, scalar_function, rotation_operator)
         !
@@ -723,10 +723,10 @@ contains
             )
 
             ! Allocate arrays
-            allocate ( &
+            allocate( &
                 polar_gradient_component(     nlat, nlon ), &
                 azimuthal_gradient_component( nlat, nlon ), &
-                stat   = allocate_status, &
+                stat=allocate_status, &
                 errmsg = error_message )
 
             ! Check allocation status
@@ -781,13 +781,13 @@ contains
         end associate
 
         !--------------------------------------------------------------------------------
-        ! Deallocate arrays
+        ! Release memory
         !--------------------------------------------------------------------------------
 
-        deallocate ( &
+        deallocate( &
             polar_gradient_component, &
             azimuthal_gradient_component, &
-            stat   = deallocate_status, &
+            stat=deallocate_status, &
             errmsg = error_message )
 
         ! Check deallocate status
@@ -801,7 +801,7 @@ contains
 
     end subroutine get_rotation_operator
     !
-    !*****************************************************************************************
+    
     !
     function compute_surface_integral( this, scalar_function ) result( return_value )
         !
@@ -845,9 +845,9 @@ contains
         associate( nlat => this%NLAT )
 
             ! Allocate array
-            allocate ( &
+            allocate( &
                 summation( nlat ), &
-                stat   = allocate_status, &
+                stat=allocate_status, &
                 errmsg = error_message )
 
             ! Check allocation status
@@ -895,9 +895,9 @@ contains
         ! Deallocate array
         !--------------------------------------------------------------------------------
 
-        deallocate ( &
+        deallocate( &
             summation, &
-            stat   = deallocate_status, &
+            stat=deallocate_status, &
             errmsg = error_message )
 
         ! Check deallocate status
@@ -909,7 +909,7 @@ contains
 
     end function compute_surface_integral
     !
-    !*****************************************************************************************
+    
     !
     subroutine compute_first_moment( this, scalar_function, first_moment )
         !
@@ -943,9 +943,9 @@ contains
             )
 
             ! Allocate arrays
-            allocate ( &
+            allocate( &
                 integrant( nlat, nlon, 3 ), &
-                stat   = allocate_status, &
+                stat=allocate_status, &
                 errmsg = error_message )
 
             ! Check allocation status
@@ -1008,9 +1008,9 @@ contains
         ! Deallocate array
         !--------------------------------------------------------------------------------
 
-        deallocate ( &
+        deallocate( &
             integrant, &
-            stat   = deallocate_status, &
+            stat=deallocate_status, &
             errmsg = error_message )
 
         ! Check deallocate status
@@ -1024,11 +1024,11 @@ contains
 
     end subroutine compute_first_moment
     !
-    !*****************************************************************************************
+    
     !
     ! Public SPHEREPACK 3.2 methods
     !
-    !*****************************************************************************************
+    
     !
     subroutine get_colatitude_derivative( this, polar_component, azimuthal_component )
         !
@@ -1073,7 +1073,7 @@ contains
 
     end subroutine get_colatitude_derivative
     !
-    !*****************************************************************************************
+    
     !
     subroutine get_gradient( this, scalar_function, &
         polar_gradient_component, azimuthal_gradient_component )
@@ -1403,7 +1403,7 @@ contains
 
     end subroutine get_gradient
     !
-    !*****************************************************************************************
+    
     !
     subroutine invert_gradient( this, &
         polar_gradient_component, azimuthal_gradient_component, &
@@ -1656,7 +1656,7 @@ contains
 
     end subroutine invert_gradient
     !
-    !*****************************************************************************************
+    
     !
     subroutine get_divergence( this, vector_field, divergence )
         !
@@ -1975,7 +1975,7 @@ contains
 
     end subroutine get_divergence
     !
-    !*****************************************************************************************
+    
     !
     subroutine invert_divergence( this )
         !
@@ -2003,7 +2003,7 @@ contains
 
     end subroutine invert_divergence
     !
-    !*****************************************************************************************
+    
     !
     subroutine get_vorticity( this, vector_function, vorticity )
         !
@@ -2315,7 +2315,7 @@ contains
 
     end subroutine get_vorticity
     !
-    !*****************************************************************************************
+    
     !
     subroutine invert_vorticity( this )
         !
@@ -2343,7 +2343,7 @@ contains
 
     end subroutine invert_vorticity
     !
-    !*****************************************************************************************
+    
     !
     subroutine invert_divergence_and_vorticity( this )
         !
@@ -2371,7 +2371,7 @@ contains
 
     end subroutine invert_divergence_and_vorticity
     !
-    !*****************************************************************************************
+    
     !
     subroutine get_scalar_laplacian( this, scalar_function, scalar_laplacian )
         !
@@ -2689,7 +2689,7 @@ contains
 
     end subroutine get_scalar_laplacian
     !
-    !*****************************************************************************************
+    
     !
     subroutine invert_helmholtz( this, &
         helmholtz_constant, source_term, solution, perturbation_optional )
@@ -3043,7 +3043,7 @@ contains
 
     end subroutine invert_helmholtz
     !
-    !*****************************************************************************************
+    
     ! TODO
     subroutine get_vector_laplacian( this )
         !
@@ -3071,7 +3071,7 @@ contains
 
     end subroutine get_vector_laplacian
     !
-    !*****************************************************************************************
+    
     ! TODO
     subroutine invert_vector_laplacian( this )
         !
@@ -3099,7 +3099,7 @@ contains
 
     end subroutine invert_vector_laplacian
     !
-    !*****************************************************************************************
+    
     ! TODO
     subroutine get_stream_function_and_velocity_potential( this )
         !
@@ -3127,7 +3127,7 @@ contains
 
     end subroutine get_stream_function_and_velocity_potential
     !
-    !*****************************************************************************************
+    
     ! TODO
     subroutine invert_stream_function_and_velocity_potential( this )
         !
@@ -3155,7 +3155,7 @@ contains
 
     end subroutine invert_stream_function_and_velocity_potential
     !
-    !*****************************************************************************************
+    
     ! TODO
     subroutine perform_grid_transfers( this )
         !
@@ -3183,7 +3183,7 @@ contains
 
     end subroutine perform_grid_transfers
     !
-    !*****************************************************************************************
+    
     ! TODO
     subroutine perform_geo_math_coordinate_transfers( this )
         !
@@ -3211,7 +3211,7 @@ contains
 
     end subroutine perform_geo_math_coordinate_transfers
     !
-    !*****************************************************************************************
+    
     !
     subroutine perform_scalar_analysis( this, scalar_function )
         !
@@ -3494,7 +3494,7 @@ contains
 
     end subroutine perform_scalar_analysis
     !
-    !*****************************************************************************************
+    
     !
     subroutine perform_scalar_synthesis( this, scalar_function )
         !
@@ -3759,7 +3759,7 @@ contains
 
     end subroutine perform_scalar_synthesis
     !
-    !*****************************************************************************************
+    
     ! TODO
     subroutine perform_scalar_projection( this, scalar_function, scalar_projection )
         !
@@ -3806,7 +3806,7 @@ contains
 
     end subroutine perform_scalar_projection
     !
-    !*****************************************************************************************
+    
     !
     subroutine perform_vector_analysis( this, vector_function )
         !
@@ -4067,10 +4067,10 @@ contains
             )
 
             ! Allocate arrays
-            allocate ( &
+            allocate( &
                 polar_component(     1:nlat, 1:nlon), &
                 azimuthal_component( 1:nlat, 1:nlon), &
-                stat   = allocate_status, &
+                stat=allocate_status, &
                 errmsg = error_message )
 
             ! Check allocation status
@@ -4203,13 +4203,13 @@ contains
         end if
 
         !--------------------------------------------------------------------------------
-        ! Deallocate arrays
+        ! Release memory
         !--------------------------------------------------------------------------------
 
-        deallocate ( &
+        deallocate( &
             polar_component, &
             azimuthal_component, &
-            stat   = allocate_status, &
+            stat=allocate_status, &
             errmsg = error_message )
 
         ! Check allocation status
@@ -4224,7 +4224,7 @@ contains
 
     end subroutine perform_vector_analysis
     !
-    !*****************************************************************************************
+    
     !
     subroutine perform_vector_synthesis( this, polar_component, azimuthal_component )
         !
@@ -4674,7 +4674,7 @@ contains
 
     end subroutine perform_vector_synthesis
     !
-    !*****************************************************************************************
+    
     ! TODO
     subroutine get_legendre_functions( this )
         !
@@ -4702,7 +4702,7 @@ contains
 
     end subroutine get_legendre_functions
     !
-    !*****************************************************************************************
+    
     ! TODO
     subroutine Icosahedral_geodesic( this )
         !
@@ -4730,7 +4730,7 @@ contains
 
     end subroutine Icosahedral_geodesic
     !
-    !*****************************************************************************************
+    
     ! TODO
     subroutine perform_multiple_ffts( this )
         !
@@ -4758,9 +4758,9 @@ contains
 
     end subroutine perform_multiple_ffts
     !
-    !*****************************************************************************************
+    
     !
-    subroutine finalize_spherepackwrapper( this )
+    subroutine finalize_spherepack_wrapper( this )
         !
         !< Purpose:
         !
@@ -4772,8 +4772,8 @@ contains
 
         call this%destroy()
 
-    end subroutine finalize_spherepackwrapper
+    end subroutine finalize_spherepack_wrapper
     !
-    !*****************************************************************************************
+    
     !
 end module type_SpherepackWrapper

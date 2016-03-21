@@ -1,9 +1,9 @@
-!*****************************************************************************************
+
 !
 !< Author:
 ! Jon Lo Kim Lin
 !
-!*****************************************************************************************
+
 !
 module type_SphericalUnitVectors
 
@@ -24,13 +24,13 @@ module type_SphericalUnitVectors
     private
     public :: SphericalUnitVectors
 
-    !---------------------------------------------------------------------------------
+    !----------------------------------------------------------------------
     ! Dictionary: global variables confined to the module
-    !---------------------------------------------------------------------------------
+    !----------------------------------------------------------------------
     character (len=250) :: error_message     !! Probably long enough
     integer (ip)        :: allocate_status   !! To check allocation status
     integer (ip)        :: deallocate_status !! To check deallocation status
-    !---------------------------------------------------------------------------------
+    !----------------------------------------------------------------------
 
     ! Declare derived data type
     type, public :: SphericalUnitVectors
@@ -49,21 +49,21 @@ module type_SphericalUnitVectors
         ! All method are private unless stated otherwise
         private
 
-        !---------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Methods
-        !---------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         procedure, public   :: create => create_sphericalunitvectors
         procedure, public   :: destroy => destroy_sphericalunitvectors
         procedure, public   :: get_spherical_angle_components
         procedure            :: assert_initialized
         final                :: finalize_sphericalunitvectors
-        !---------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
 
     end type SphericalUnitVectors
 
 contains
     !
-    !*****************************************************************************************
+    
     !
     subroutine create_sphericalunitvectors( this, sint, cost, sinp, cosp )
         !
@@ -106,11 +106,11 @@ contains
             )
 
             ! Allocate arrays
-            allocate ( &
+            allocate( &
                 this%radial(    nlat, nlon ), &
                 this%polar(     nlat, nlon ), &
                 this%azimuthal( nlat, nlon ), &
-                stat   = allocate_status, &
+                stat=allocate_status, &
                 errmsg = error_message )
 
             ! Check allocate status
@@ -172,7 +172,7 @@ contains
 
     end subroutine create_sphericalunitvectors
     !
-    !*****************************************************************************************
+    
     !
     subroutine destroy_sphericalunitvectors( this )
         !
@@ -190,7 +190,7 @@ contains
         if ( .not. this%initialized ) return
 
         !--------------------------------------------------------------------------------
-        ! Deallocate arrays
+        ! Release memory
         !--------------------------------------------------------------------------------
 
         ! Check if array is allocated
@@ -199,7 +199,7 @@ contains
             ! Deallocate array
             deallocate( &
                 this%radial, &
-                stat   = deallocate_status, &
+                stat=deallocate_status, &
                 errmsg = error_message )
 
             ! Check deallocation status
@@ -216,7 +216,7 @@ contains
             ! Deallocate array
             deallocate( &
                 this%polar, &
-                stat   = deallocate_status, &
+                stat=deallocate_status, &
                 errmsg = error_message )
 
             ! Check deallocation status
@@ -233,7 +233,7 @@ contains
             ! Deallocate array
             deallocate( &
                 this%azimuthal, &
-                stat   = deallocate_status, &
+                stat=deallocate_status, &
                 errmsg = error_message )
 
             ! Check deallocation status
@@ -259,7 +259,7 @@ contains
 
     end subroutine destroy_sphericalunitvectors
     !
-    !*****************************************************************************************
+    
     !
     subroutine assert_initialized( this )
         !
@@ -280,7 +280,7 @@ contains
 
     end subroutine assert_initialized
     !
-    !*****************************************************************************************
+    
     !
     subroutine get_spherical_angle_components( this, &
         vector_function, polar_component, azimuthal_component )
@@ -340,7 +340,7 @@ contains
 
     end subroutine get_spherical_angle_components
     !
-    !*****************************************************************************************
+    
     !
     subroutine finalize_sphericalunitvectors( this )
         !
@@ -355,6 +355,6 @@ contains
 
     end subroutine finalize_sphericalunitvectors
     !
-    !*****************************************************************************************
+    
     !
 end module type_SphericalUnitVectors

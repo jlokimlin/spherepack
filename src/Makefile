@@ -7,7 +7,7 @@ LINKS = \
 -lspherepack -L$(EXTERNAL_LIBRARY_PATH) \
 -I$(MODULE_PATH)
 
-EXECUTABLE = ./exe
+EXECUTABLE = ./build_lib.exe
 
 type_TrigonometricFunctions.o: \
 type_TrigonometricFunctions.f90
@@ -45,33 +45,33 @@ type_SpherepackWrapper.f90
 	$(FC) $(FFLAGS) -c type_SpherepackWrapper.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(LIB_DIRECTORY)
 
-module_spherepack_wrapper.o: \
+spherepack_wrapper_library.o: \
 type_ThreeDimensionalVector.o \
 type_GaussianGrid.o\
 type_SpherepackWorkspace.o\
 type_SpherepackWrapper.o \
-module_spherepack_wrapper.f90
-	$(FC) $(FFLAGS) -c module_spherepack_wrapper.f90 $(LINKS)\
+spherepack_wrapper_library.f90
+	$(FC) $(FFLAGS) -c spherepack_wrapper_library.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(LIB_DIRECTORY)
 
 main.o: \
-module_spherepack_wrapper.o \
+spherepack_wrapper_library.o \
 main.f90
 	$(FC) $(FFLAGS) -c main.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@
 
-exec: $(OBJECTS)
-	$(FC) $(FFLAGS) -o $(EXECUTABLE) $(OBJECTS_WITH_PREFIX) $(LINKS)
+exec: $(OBJ)
+	$(FC) $(FFLAGS) -o $(EXECUTABLE) $(OBJS) $(LINKS)
 
 lib: 
-	ar rc libspherepack_wrapper.a $(OBJ_DIRECTORY)/*.o
-	mv libspherepack_wrapper.a $(LIB_DIRECTORY)
+	$(AR) rc lib$(LIB_NAME).a $(OBJS)
+	mv lib$(LIB_NAME).a $(LIB_DIRECTORY)
 
 all:
 	make clean
-	make exec; ./exe
+	make exec; $(EXECUTABLE)
 	make lib
 
 clean:
-	rm -f $(OBJ_DIRECTORY)/*.o $(LIB_DIRECTORY)/*.mod $(LIB_DIRECTORY)/*.a
+	rm -f $(OBJS) $(LIB) $(LIB_DIRECTORY)/*.mod
 	rm -f $(EXECUTABLE)

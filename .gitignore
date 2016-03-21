@@ -8,4 +8,7 @@
 *.o
 
 # executables
-exe
+*.exe
+
+# data files
+*.dat

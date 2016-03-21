@@ -5,7 +5,7 @@ program test
         ip     => INT32, &
         stdout => OUTPUT_UNIT
 
-    use module_spherepack_wrapper, only: &
+    use spherepack_wrapper_library, only: &
         SpherepackWrapper, &
         ThreeDimensionalVector, &
         assignment(=), &
@@ -19,7 +19,7 @@ program test
 
 contains
     !
-    !*****************************************************************************************
+    
     !
     subroutine test_all()
         !
@@ -54,7 +54,7 @@ contains
 
     end subroutine test_all
     !
-    !*****************************************************************************************
+    
     !
     subroutine test_scalar_analysis_and_synthesis( solver )
         !
@@ -121,7 +121,7 @@ contains
 
     end subroutine test_scalar_analysis_and_synthesis
     !
-    !*****************************************************************************************
+    
     !
     subroutine test_vector_analysis_and_synthesis( solver )
         !
@@ -207,7 +207,7 @@ contains
 
     end subroutine test_vector_analysis_and_synthesis
     !
-    !*****************************************************************************************
+    
     !
     subroutine test_compute_surface_integral( solver )
         !
@@ -276,7 +276,7 @@ contains
 
     end subroutine test_Compute_surface_integral
     !
-    !*****************************************************************************************
+    
     !
     subroutine test_invert_helmholtz( solver )
         !
@@ -348,7 +348,7 @@ contains
 
     end subroutine test_invert_helmholtz
     !
-    !*****************************************************************************************
+    
     !
     subroutine test_get_gradient( solver )
         !
@@ -436,7 +436,7 @@ contains
 
     end subroutine test_get_gradient
     !
-    !*****************************************************************************************
+    
     !
     subroutine test_get_vorticity( solver )
         !
@@ -522,7 +522,7 @@ contains
 
     end subroutine test_get_vorticity
     !
-    !*****************************************************************************************
+    
     !
     subroutine test_get_rotation_operator( solver )
         !
@@ -605,6 +605,6 @@ contains
 
     end subroutine test_get_rotation_operator
     !
-    !*****************************************************************************************
+    
     !
 end program test
