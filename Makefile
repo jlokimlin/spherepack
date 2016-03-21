@@ -1,23 +1,21 @@
 
 include make.inc
 
-#EXTERNAL_LIBRARY_PATH = /usr/local/lib
-EXTERNAL_LIBRARY_PATH = /usr/local/lib64
-
-BIN_PATH = /usr/local/bin
-
 all: lib testlib
 
 lib: 
 	mkdir -p ./lib
 	mkdir -p ./objs
-	cd ./src; make all
+	( cd ./src; $(MAKE) all )
 
 testlib:
-	cd ./test; make run
+	( cd ./test; $(MAKE) run )
 
 install:
-	cp ./lib/libspherepack_wrapper.a $(EXTERNAL_LIBRARY_PATH)
-	cp -r ../spherepack_wrapper $(BIN_PATH)
+	cp ./lib/lib$(LIB_NAME).a $(EXTERNAL_LIBRARY_PATH)
+	cp -r ../$(LIB_NAME) $(BIN_PATH)
+
+clean: 
+	( cd ./src; $(MAKE) clean; cd ../test; $(MAKE) clean )
 
 .PHONY: all lib testlib install
