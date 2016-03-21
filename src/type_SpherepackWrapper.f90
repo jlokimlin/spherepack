@@ -1,19 +1,8 @@
-
-!
-!< Author:
-! Jon Lo Kim Lin
-!
-!< Purpose:
-!
-! A modern Fortran (2008+) object-oriented spherepack wrapper for NCAR's SPHEREPACK 3.2
-!
-
-!
 module type_SpherepackWrapper
 
     use, intrinsic :: iso_fortran_env, only: &
-        wp     => REAL64, &
-        ip     => INT32, &
+        wp => REAL64, &
+        ip => INT32, &
         stderr => ERROR_UNIT
 
     use type_SpherepackWorkspace, only: &
@@ -50,92 +39,71 @@ module type_SpherepackWrapper
 
     ! Declare derived data type
     type, public :: SpherepackWrapper
-
-        ! All components are public unless stated otherwise
-        logical                              :: initialized         = .false. !! Instantiation status
-        integer (ip)                         :: NLON                = 0   !! number of longitudinal points
-        integer (ip)                         :: NLAT                = 0   !! number of latitudinal points
-        integer (ip)                         :: NTRUNC              = 0   !! triangular truncation limit
-        integer (ip)                         :: SCALAR_SYMMETRIES   = 0   !! symmetries about the equator for scalar calculations
-        integer (ip)                         :: VECTOR_SYMMETRIES   = 0   !! symmetries about the equator for vector calculations
-        integer (ip)                         :: NUMBER_OF_SYNTHESES = 0
-        complex (wp), allocatable           :: complex_spectral_coefficients(:)
-        type (SpherepackWorkspace), private :: workspace
-        type (GaussianGrid)                  :: grid
-        type (TrigonometricFunctions)        :: trigonometric_functions
-        type (SphericalUnitVectors)          :: unit_vectors
-
+        !----------------------------------------------------------------------
+        ! Class variables
+        !----------------------------------------------------------------------
+        logical,                       public  :: initialized = .false. !! Instantiation status
+        integer (ip),                  public  :: NLON = 0   !! number of longitudinal points
+        integer (ip),                  public  :: NLAT = 0   !! number of latitudinal points
+        integer (ip),                  public  :: NTRUNC = 0 !! triangular truncation limit
+        integer (ip),                  public  :: SCALAR_SYMMETRIES = 0 !! symmetries about the equator for scalar calculations
+        integer (ip),                  public  :: VECTOR_SYMMETRIES = 0 !! symmetries about the equator for vector calculations
+        integer (ip),                  public  :: NUMBER_OF_SYNTHESES = 0
+        complex (wp), allocatable,     public  :: complex_spectral_coefficients(:)
+        type (SpherepackWorkspace),    private :: workspace
+        type (GaussianGrid),           public  :: grid
+        type (TrigonometricFunctions), public  :: trigonometric_functions
+        type (SphericalUnitVectors),   public  :: unit_vectors
+        !----------------------------------------------------------------------
     contains
-        
-        ! All method are private unless stated otherwise
-        private
-
         !----------------------------------------------------------------------
-        ! Public SPHEREPACK 3.2 methods
+        ! Class methods
         !----------------------------------------------------------------------
-        procedure, public                    :: get_colatitude_derivative !! Vtsgs
-        procedure, public                    :: get_gradient !! Gradgs
-        procedure, public                    :: invert_gradient !!  Igradgs
-        procedure, public                    :: get_divergence !! Divgs
-        procedure, public                    :: invert_divergence !!Idivgs
-        procedure, public                    :: get_vorticity !! Vrtgs
-        procedure, public                    :: invert_vorticity !! Ivrtgs
-        procedure, public                    :: invert_divergence_and_vorticity !! Idvtgs
-        procedure, public                    :: get_scalar_laplacian !! Slapgs
-        procedure, public                    :: invert_helmholtz !! Islapgs
-        procedure, public                    :: get_vector_laplacian !! Vlapgs
-        procedure, public                    :: invert_vector_laplacian !! Ivlapgs
-        procedure, public                    :: get_stream_function_and_velocity_potential
-        procedure, public                    :: invert_stream_function_and_velocity_potential
-        procedure, public                    :: perform_grid_transfers
-        procedure, public                    :: perform_geo_math_coordinate_transfers
-        procedure, public                    :: perform_scalar_analysis
-        procedure, public                    :: perform_scalar_synthesis
-        procedure, public                    :: perform_scalar_projection !! Shpg
-        procedure, public                    :: perform_vector_analysis
-        procedure, public                    :: perform_vector_synthesis
-        procedure, public                    :: get_Legendre_functions
-        !procedure, public                    :: get_Icosahedral_geodesic
-        !procedure, public                    :: get_Multiple_ffts
-        !procedure, public                    :: get_Three_dimensional_sphere_graphics
+        procedure, public  :: get_colatitude_derivative !! Vtsgs
+        procedure, public  :: get_gradient !! Gradgs
+        procedure, public  :: invert_gradient !!  Igradgs
+        procedure, public  :: get_divergence !! Divgs
+        procedure, public  :: invert_divergence !!Idivgs
+        procedure, public  :: get_vorticity !! Vrtgs
+        procedure, public  :: invert_vorticity !! Ivrtgs
+        procedure, public  :: invert_divergence_and_vorticity !! Idvtgs
+        procedure, public  :: get_scalar_laplacian !! Slapgs
+        procedure, public  :: invert_helmholtz !! Islapgs
+        procedure, public  :: get_vector_laplacian !! Vlapgs
+        procedure, public  :: invert_vector_laplacian !! Ivlapgs
+        procedure, public  :: get_stream_function_and_velocity_potential
+        procedure, public  :: invert_stream_function_and_velocity_potential
+        procedure, public  :: perform_grid_transfers
+        procedure, public  :: perform_geo_math_coordinate_transfers
+        procedure, public  :: perform_scalar_analysis
+        procedure, public  :: perform_scalar_synthesis
+        procedure, public  :: perform_scalar_projection !! Shpg
+        procedure, public  :: perform_vector_analysis
+        procedure, public  :: perform_vector_synthesis
+        procedure, public  :: get_Legendre_functions
+        procedure, public  :: perform_complex_analysis
+        procedure, public  :: perform_complex_synthesis
+        procedure, public  :: create => create_spherepack_wrapper
+        procedure, public  :: destroy => destroy_spherepack_wrapper
+        procedure, public  :: create_spherepack_wrapper
+        procedure, public  :: destroy_spherepack_wrapper
+        procedure, public  :: get_index
+        procedure, public  :: get_coefficient
+        procedure, public  :: compute_surface_integral
+        procedure, public  :: get_rotation_operator
+        procedure, public  :: synthesize_from_spec
+        procedure, private :: assert_initialized
+        procedure, private :: get_scalar_symmetries
+        procedure, private :: get_vector_symmetries
+        final              :: finalize_spherepack_wrapper
         !----------------------------------------------------------------------
-        ! Public complex methods
-        !----------------------------------------------------------------------
-        procedure, public                    :: perform_complex_analysis
-        procedure, public                    :: perform_complex_synthesis
-        !----------------------------------------------------------------------
-        ! Additional public methods
-        !----------------------------------------------------------------------
-        procedure,                    public   :: create => create_spherepack_wrapper
-        procedure,                    public   :: destroy => destroy_spherepack_wrapper
-        procedure, non_overridable, public   :: get_index
-        procedure, non_overridable, public   :: get_coefficient
-        procedure,                   public    :: compute_surface_integral
-        procedure,                   public    :: get_rotation_operator
-        procedure,                   public    :: synthesize_from_spec
-        !----------------------------------------------------------------------
-        ! Private methods
-        !----------------------------------------------------------------------
-        procedure, non_overridable         :: create_spherepack_wrapper
-        procedure, non_overridable         :: destroy_spherepack_wrapper
-        procedure                            :: assert_initialized
-        procedure                            :: get_scalar_symmetries
-        procedure                            :: get_vector_symmetries
-        !----------------------------------------------------------------------
-        ! Finalizer
-        !----------------------------------------------------------------------
-        final                                :: finalize_spherepack_wrapper
-        !----------------------------------------------------------------------
-
     end type SpherepackWrapper
 
+
 contains
-    !
-    
-    !
+
+
     subroutine create_spherepack_wrapper( this, nlat, nlon, isym, itype )
-        !
-        !< Purpose:
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
@@ -146,21 +114,13 @@ contains
         integer (ip),     intent (in), optional    :: itype     !! Either 0, 1, 2, 3, ..., 8
         !--------------------------------------------------------------------------------
 
-        !--------------------------------------------------------------------------------
-        ! Check initialization flag
-        !--------------------------------------------------------------------------------
+        ! Ensure that object is usable
+        call this%destroy_spherepack_wrapper()
 
-        if ( this%initialized ) then
-            call this%destroy()
-        end if
-
-        !--------------------------------------------------------------------------------
         ! Set constants
-        !--------------------------------------------------------------------------------
-
-        this%NLAT                = nlat
-        this%NLON                = nlon
-        this%NTRUNC              = nlat - 1 !! Set triangular truncation
+        this%NLAT = nlat
+        this%NLON = nlon
+        this%NTRUNC = nlat - 1 !! Set triangular truncation
         this%NUMBER_OF_SYNTHESES = 1
 
         ! Set scalar symmetries
@@ -224,10 +184,7 @@ contains
 
         end associate
 
-        !--------------------------------------------------------------------------------
         ! Set initialization flag
-        !--------------------------------------------------------------------------------
-
         this%initialized = .true.
         
     end subroutine create_spherepack_wrapper
@@ -235,8 +192,6 @@ contains
     
     !
     subroutine destroy_spherepack_wrapper( this )
-        !
-        !< Purpose:
         !--------------------------------------------------------------------------------
         ! Dictionary: calling arguments
         !--------------------------------------------------------------------------------
