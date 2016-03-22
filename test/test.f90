@@ -25,13 +25,13 @@ contains
         !
         !< Purpose:
         !
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Dictionary: local variables
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         integer (ip), parameter    :: nlon = 36
         integer (ip), parameter    :: nlat = nlon/2 + 1
         type (SpherepackWrapper)    :: solver
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
 
         ! Instantiate object
         call solver%create( nlat, nlon )
@@ -59,23 +59,23 @@ contains
     subroutine test_scalar_analysis_and_synthesis( solver )
         !
         !< Purpose:
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Dictionary: calling arguments
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         class (SpherepackWrapper), intent (in out)    :: solver
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Dictionary: local variables
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         integer (ip)    :: k, l !! Counters
         real (wp)       :: real_error, complex_error
-        real (wp)       :: original_function(solver%NLAT, solver%NLON)
-        real (wp)       :: real_synthesized_function(solver%NLAT, solver%NLON)
-        real (wp)       :: complex_synthesized_function(solver%NLAT, solver%NLON)
-        !--------------------------------------------------------------------------------
+        real (wp)       :: original_function(solver%NUMBER_OF_LATITUDES, solver%NUMBER_OF_LONGITUDES)
+        real (wp)       :: real_synthesized_function(solver%NUMBER_OF_LATITUDES, solver%NUMBER_OF_LONGITUDES)
+        real (wp)       :: complex_synthesized_function(solver%NUMBER_OF_LATITUDES, solver%NUMBER_OF_LONGITUDES)
+        !----------------------------------------------------------------------
 
         associate( &
-            nlat => solver%NLAT, &
-            nlon => solver%NLON, &
+            nlat => solver%NUMBER_OF_LATITUDES, &
+            nlon => solver%NUMBER_OF_LONGITUDES, &
             f    => original_function, &
             fr   => real_synthesized_function, &
             fc   => complex_synthesized_function &
@@ -127,26 +127,26 @@ contains
         !
         !< Purpose:
         !
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Dictionary: calling arguments
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         class (SpherepackWrapper), intent (in out)     :: solver
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Dictionary: local variables
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         integer (ip)    :: k, l !! Counters
         real (wp)       :: polar_error, azimuthal_error
         type (ThreeDimensionalVector) :: vector_field
-        real (wp)       :: vector_function(3, solver%NLAT, solver%NLON)
-        real (wp)       :: original_polar_component(solver%NLAT, solver%NLON)
-        real (wp)       :: original_azimuthal_component(solver%NLAT, solver%NLON)
-        real (wp)       :: approximate_polar_component(solver%NLAT, solver%NLON)
-        real (wp)       :: approximate_azimuthal_component(solver%NLAT, solver%NLON)
-        !--------------------------------------------------------------------------------
+        real (wp)       :: vector_function(3, solver%NUMBER_OF_LATITUDES, solver%NUMBER_OF_LONGITUDES)
+        real (wp)       :: original_polar_component(solver%NUMBER_OF_LATITUDES, solver%NUMBER_OF_LONGITUDES)
+        real (wp)       :: original_azimuthal_component(solver%NUMBER_OF_LATITUDES, solver%NUMBER_OF_LONGITUDES)
+        real (wp)       :: approximate_polar_component(solver%NUMBER_OF_LATITUDES, solver%NUMBER_OF_LONGITUDES)
+        real (wp)       :: approximate_azimuthal_component(solver%NUMBER_OF_LATITUDES, solver%NUMBER_OF_LONGITUDES)
+        !----------------------------------------------------------------------
 
         associate( &
-            nlat           => solver%NLAT, &
-            nlon           => solver%NLON, &
+            nlat           => solver%NUMBER_OF_LATITUDES, &
+            nlon           => solver%NUMBER_OF_LONGITUDES, &
             F              => vector_function, &
             F_theta        => original_polar_component, &
             F_phi          => original_azimuthal_component, &
@@ -212,22 +212,22 @@ contains
     subroutine test_compute_surface_integral( solver )
         !
         !< Purpose:
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Dictionary: calling arguments
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         class (SpherepackWrapper), intent (in out)    :: solver
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Dictionary: local variables
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         integer (ip)         :: k, l !! Counters
-        real (wp)            :: scalar_function(solver%NLAT, solver%NLON)
-        real (wp)            :: constant_function(solver%NLAT, solver%NLON)
+        real (wp)            :: scalar_function(solver%NUMBER_OF_LATITUDES, solver%NUMBER_OF_LONGITUDES)
+        real (wp)            :: constant_function(solver%NUMBER_OF_LATITUDES, solver%NUMBER_OF_LONGITUDES)
         real (wp), parameter :: FOUR_PI = 4.0_wp * acos( -1.0_wp )
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
 
         associate( &
-            nlat => solver%NLAT, &
-            nlon => solver%NLON, &
+            nlat => solver%NUMBER_OF_LATITUDES, &
+            nlon => solver%NUMBER_OF_LONGITUDES, &
             C    => constant_function, &
             f    => scalar_function &
             )
@@ -281,24 +281,24 @@ contains
     subroutine test_invert_helmholtz( solver )
         !
         !< Purpose:
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Dictionary: calling arguments
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         class (SpherepackWrapper), intent (in out)    :: solver
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Dictionary: local variables
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         integer (ip)     :: k, l !! Counters
         type (ThreeDimensionalVector)  :: u
         real (wp)        :: discretization_error
-        real (wp)        :: exact_solution(solver%NLAT, solver%NLON)
-        real (wp)        :: source_term(solver%NLAT, solver%NLON)
-        real (wp)        :: approximate_solution(solver%NLAT, solver%NLON)
-        !--------------------------------------------------------------------------------
+        real (wp)        :: exact_solution(solver%NUMBER_OF_LATITUDES, solver%NUMBER_OF_LONGITUDES)
+        real (wp)        :: source_term(solver%NUMBER_OF_LATITUDES, solver%NUMBER_OF_LONGITUDES)
+        real (wp)        :: approximate_solution(solver%NUMBER_OF_LATITUDES, solver%NUMBER_OF_LONGITUDES)
+        !----------------------------------------------------------------------
 
         associate( &
-            nlat               => solver%NLAT, &
-            nlon               => solver%NLON, &
+            nlat               => solver%NUMBER_OF_LATITUDES, &
+            nlon               => solver%NUMBER_OF_LONGITUDES, &
             f                  => exact_solution, &
             f_approx           => approximate_solution, &
             rhs                => source_term, &
@@ -353,27 +353,27 @@ contains
     subroutine test_get_gradient( solver )
         !
         !< Purpose:
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Dictionary: calling arguments
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         class (SpherepackWrapper), intent (in out)    :: solver
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Dictionary: local variables
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         integer (ip)     :: k, l !! Counters
         real (wp)        :: polar_error
         real (wp)        :: azimuthal_error
         type (ThreeDimensionalVector)  :: u
-        real (wp)        :: scalar_function(solver%NLAT, solver%NLON)
-        real (wp)        :: exact_polar_component(solver%NLAT, solver%NLON)
-        real (wp)        :: exact_azimuthal_component(solver%NLAT, solver%NLON)
-        real (wp)        :: approximate_polar_component(solver%NLAT, solver%NLON)
-        real (wp)        :: approximate_azimuthal_component(solver%NLAT, solver%NLON)
-        !--------------------------------------------------------------------------------
+        real (wp)        :: scalar_function(solver%NUMBER_OF_LATITUDES, solver%NUMBER_OF_LONGITUDES)
+        real (wp)        :: exact_polar_component(solver%NUMBER_OF_LATITUDES, solver%NUMBER_OF_LONGITUDES)
+        real (wp)        :: exact_azimuthal_component(solver%NUMBER_OF_LATITUDES, solver%NUMBER_OF_LONGITUDES)
+        real (wp)        :: approximate_polar_component(solver%NUMBER_OF_LATITUDES, solver%NUMBER_OF_LONGITUDES)
+        real (wp)        :: approximate_azimuthal_component(solver%NUMBER_OF_LATITUDES, solver%NUMBER_OF_LONGITUDES)
+        !----------------------------------------------------------------------
 
         associate( &
-            nlat           => solver%NLAT, &
-            nlon           => solver%NLON, &
+            nlat           => solver%NUMBER_OF_LATITUDES, &
+            nlon           => solver%NUMBER_OF_LONGITUDES, &
             f              => scalar_function, &
             f_theta        => exact_polar_component, &
             f_phi          => exact_azimuthal_component, &
@@ -441,26 +441,26 @@ contains
     subroutine test_get_vorticity( solver )
         !
         !< Purpose:
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Dictionary: calling arguments
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         class (SpherepackWrapper), intent (in out)  :: solver
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Dictionary: local variables
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         integer (ip)     :: k, l !! Counters
         type (ThreeDimensionalVector)  :: u
         type (ThreeDimensionalVector)  :: omega
         type (ThreeDimensionalVector)  :: rotation_operator
         real (wp)        :: discretization_error
-        real (wp)        :: vector_function(3, solver%NLAT, solver%NLON)
-        real (wp)        :: exact_vorticity(solver%NLAT, solver%NLON)
-        real (wp)        :: approximate_vorticity(solver%NLAT, solver%NLON)
-        !--------------------------------------------------------------------------------
+        real (wp)        :: vector_function(3, solver%NUMBER_OF_LATITUDES, solver%NUMBER_OF_LONGITUDES)
+        real (wp)        :: exact_vorticity(solver%NUMBER_OF_LATITUDES, solver%NUMBER_OF_LONGITUDES)
+        real (wp)        :: approximate_vorticity(solver%NUMBER_OF_LATITUDES, solver%NUMBER_OF_LONGITUDES)
+        !----------------------------------------------------------------------
 
         associate( &
-            nlat     => solver%NLAT, &
-            nlon     => solver%NLON, &
+            nlat     => solver%NUMBER_OF_LATITUDES, &
+            nlon     => solver%NUMBER_OF_LONGITUDES, &
             F        => vector_function, &
             V        => exact_vorticity, &
             V_approx => approximate_vorticity &
@@ -527,25 +527,25 @@ contains
     subroutine test_get_rotation_operator( solver )
         !
         !< Purpose:
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Dictionary: calling arguments
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         class (SpherepackWrapper), intent (in out)    :: solver
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Dictionary: local variables
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         integer (ip)    :: k, l !! Counters
         real (wp)       :: discretization_error
         type (ThreeDimensionalVector) :: u
-        real (wp)       :: exact_rotation(3, solver%NLAT, solver%NLON)
-        real (wp)       :: approximate_rotation(3, solver%NLAT, solver%NLON)
-        real (wp)       :: scalar_function(solver%NLAT, solver%NLON)
-        !--------------------------------------------------------------------------------
+        real (wp)       :: exact_rotation(3, solver%NUMBER_OF_LATITUDES, solver%NUMBER_OF_LONGITUDES)
+        real (wp)       :: approximate_rotation(3, solver%NUMBER_OF_LATITUDES, solver%NUMBER_OF_LONGITUDES)
+        real (wp)       :: scalar_function(solver%NUMBER_OF_LATITUDES, solver%NUMBER_OF_LONGITUDES)
+        !----------------------------------------------------------------------
 
         ! Set constants
         associate( &
-            nlat      => solver%NLAT, &
-            nlon      => solver%NLON, &
+            nlat      => solver%NUMBER_OF_LATITUDES, &
+            nlon      => solver%NUMBER_OF_LONGITUDES, &
             f         => scalar_function, &
             Rf        => exact_rotation, &
             Rf_approx => approximate_rotation &

@@ -43,12 +43,14 @@ module type_SpherepackWrapper
         ! Class variables
         !----------------------------------------------------------------------
         logical,                       public  :: initialized = .false. !! Instantiation status
-        integer (ip),                  public  :: NLON = 0   !! number of longitudinal points
-        integer (ip),                  public  :: NLAT = 0   !! number of latitudinal points
-        integer (ip),                  public  :: NTRUNC = 0 !! triangular truncation limit
+        integer (ip),                  public  :: NUMBER_OF_LONGITUDES = 0   !! number of longitudinal points
+        integer (ip),                  public  :: NUMBER_OF_LATITUDES = 0   !! number of latitudinal points
+        integer (ip),                  public  :: TRIANGULAR_TRUNCATION_LIMIT = 0 !! triangular truncation limit
         integer (ip),                  public  :: SCALAR_SYMMETRIES = 0 !! symmetries about the equator for scalar calculations
         integer (ip),                  public  :: VECTOR_SYMMETRIES = 0 !! symmetries about the equator for vector calculations
         integer (ip),                  public  :: NUMBER_OF_SYNTHESES = 0
+        integer (ip), allocatable,     public  :: INDEX_ORDER_M(:)
+        integer (ip), allocatable,     public  :: INDEX_DEGREE_N(:)
         complex (wp), allocatable,     public  :: complex_spectral_coefficients(:)
         type (SpherepackWorkspace),    private :: workspace
         type (GaussianGrid),           public  :: grid
@@ -104,23 +106,27 @@ contains
 
 
     subroutine create_spherepack_wrapper( this, nlat, nlon, isym, itype )
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Dictionary: calling arguments
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         class (SpherepackWrapper), intent (in out)  :: this
         integer (ip),     intent (in)               :: nlat
         integer (ip),     intent (in)               :: nlon
         integer (ip),     intent (in), optional    :: isym      !! Either 0, 1, or 2
         integer (ip),     intent (in), optional    :: itype     !! Either 0, 1, 2, 3, ..., 8
         !--------------------------------------------------------------------------------
+        ! Dictionary: local variables
+        !--------------------------------------------------------------------------------
+        integer (ip) :: m, n !! Counters
+        !--------------------------------------------------------------------------------
 
         ! Ensure that object is usable
         call this%destroy_spherepack_wrapper()
 
         ! Set constants
-        this%NLAT = nlat
-        this%NLON = nlon
-        this%NTRUNC = nlat - 1 !! Set triangular truncation
+        this%NUMBER_OF_LATITUDES = nlat
+        this%NUMBER_OF_LONGITUDES = nlon
+        this%TRIANGULAR_TRUNCATION_LIMIT = nlat - 1 !! Set triangular truncation
         this%NUMBER_OF_SYNTHESES = 1
 
         ! Set scalar symmetries
@@ -133,33 +139,34 @@ contains
             call this%get_vector_symmetries( itype )
         end if
 
-        !--------------------------------------------------------------------------------
-        ! Allocate array
-        !--------------------------------------------------------------------------------
-
-        associate( size_spec => nlat * (nlat + 1)/2 )
-
+        ! Allocate memory
+        associate( nm_dim => nlat * (nlat + 1)/2 )
             ! Allocate pointer for complex spectral coefficients
             allocate( &
-                this%complex_spectral_coefficients( 1:size_spec ), &
-                stat=allocate_status, &
-                errmsg = error_message )
-
+                this%INDEX_ORDER_M(nm_dim), &
+                this%INDEX_DEGREE_N(nm_dim), &
+                this%complex_spectral_coefficients(nm_dim), &
+                stat=allocate_status &
+                )
             ! Check allocate status
             if ( allocate_status /= 0 ) then
-                write( stderr, '(A)' ) 'TYPE (SpherepackWrapper)'
-                write( stderr, '(A)' ) 'Allocating COMPLEX_SPECTRAL_COEFFICIENTS failed in CREATE_spherepack_wrapper'
-                write( stderr, '(A)' ) trim( error_message )
+                error stop 'TYPE (SpherepackWrapper): '&
+                    //'Allocation failed in CREATE_spherepack_wrapper'
             end if
-
         end associate
 
-        !--------------------------------------------------------------------------------
-        ! create derived data types
-        !--------------------------------------------------------------------------------
+        ! Fill arrays
+        associate( &
+            ntrunc => this%TRIANGULAR_TRUNCATION_LIMIT, &
+            indxm => this%INDEX_ORDER_M, &
+            indxn => this%INDEX_DEGREE_N &
+            )
+            indxm = [ ((m, n = m, ntrunc), m = 0, ntrunc) ]
+            indxn = [ ((n, n = m, ntrunc), m = 0, ntrunc) ]
+        end associate
 
+        ! Allocate memory for derived data types
         call this%grid%create( nlat, nlon )
-
         call this%workspace%create( nlat, nlon )
 
         ! Set grids to compute frequently used trigonometric functions
@@ -167,9 +174,7 @@ contains
             theta => this%grid%latitudes, &
             phi => this%grid%longitudes &
             )
-
             call this%trigonometric_functions%create( theta, phi )
-
         end associate
 
         ! Compute spherical unit vectors
@@ -179,76 +184,46 @@ contains
             sinp => this%trigonometric_functions%sinp, &
             cosp => this%trigonometric_functions%cosp &
             )
-
             call this%unit_vectors%create( sint, cost, sinp, cosp )
-
         end associate
 
         ! Set initialization flag
         this%initialized = .true.
         
     end subroutine create_spherepack_wrapper
-    !
-    
-    !
+
     subroutine destroy_spherepack_wrapper( this )
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Dictionary: calling arguments
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         class (SpherepackWrapper), intent (in out) :: this
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
 
-        !--------------------------------------------------------------------------------
-        ! Check status
-        !--------------------------------------------------------------------------------
+        ! Check flag
+        if ( this%initialized .eqv. .false. ) return
 
-        if ( .not. this%initialized ) return
+        ! Release memory
+        if (allocated(this%INDEX_ORDER_M)) deallocate(this%INDEX_ORDER_M)
+        if (allocated(this%INDEX_DEGREE_N)) deallocate(this%INDEX_DEGREE_N)
+        if (allocated(this%complex_spectral_coefficients)) &
+            deallocate(this%complex_spectral_coefficients)
 
-        !--------------------------------------------------------------------------------
-        ! Deallocate array
-        !--------------------------------------------------------------------------------
 
-        ! Check if array is allocated
-        if ( allocated( this%complex_spectral_coefficients ) ) then
-
-            ! Deallocate array
-            deallocate( &
-                this%complex_spectral_coefficients, &
-                stat=deallocate_status, &
-                errmsg = error_message )
-
-            ! Check deallocation status
-            if ( deallocate_status /= 0 ) then
-                write( stderr, '(A)' ) 'TYPE (SpherepackWrapper)'
-                write( stderr, '(A)' ) 'Deallocating COMPLEX_SPECTRAL_COEFFICIENTS failed in DESTROY_spherepack_wrapper'
-                write( stderr, '(A)' ) trim( error_message )
-            end if
-        end if
-
-        !--------------------------------------------------------------------------------
-        ! destroy derived data types
-        !--------------------------------------------------------------------------------
-
+        ! Release memory from derived data types
         call this%grid%destroy()
         call this%workspace%destroy()
         call this%trigonometric_functions%destroy()
         call this%unit_vectors%destroy()
 
-        !--------------------------------------------------------------------------------
         ! Reset constants
-        !--------------------------------------------------------------------------------
-
-        this%NLON                = 0
-        this%NLAT                = 0
-        this%NTRUNC              = 0
-        this%SCALAR_SYMMETRIES   = 0
-        this%VECTOR_SYMMETRIES   = 0
+        this%NUMBER_OF_LONGITUDES = 0
+        this%NUMBER_OF_LATITUDES = 0
+        this%TRIANGULAR_TRUNCATION_LIMIT = 0
+        this%SCALAR_SYMMETRIES = 0
+        this%VECTOR_SYMMETRIES = 0
         this%NUMBER_OF_SYNTHESES = 0
 
-        !--------------------------------------------------------------------------------
         ! Reset initialization flag
-        !--------------------------------------------------------------------------------
-
         this%initialized = .false.
 
     end subroutine destroy_spherepack_wrapper
@@ -258,11 +233,11 @@ contains
     subroutine assert_initialized( this )
         !
         !< Purpose:
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Dictionary: calling arguments
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         class (SpherepackWrapper), intent (in out)    :: this
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
 
         ! Check status
         if ( .not. this%initialized ) then
@@ -309,56 +284,47 @@ contains
         ! Conversely, the index nm as a function of m and n is:
         ! nm = sum([(i, i=MTRUNC+1, MTRUNC-m+2, -1)])+n-m+1
         !
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Dictionary: calling arguments
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         class (SpherepackWrapper), intent (in out)  :: this
         integer (ip),     intent (in)      :: n
         integer (ip),     intent (in)      :: m
         integer (ip):: return_value
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Dictionary: local variables
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         integer (ip):: i !! Counter
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
 
-        associate( ntrunc => this%NTRUNC )
-
+        associate( ntrunc => this%TRIANGULAR_TRUNCATION_LIMIT )
             if ( m <= n .and. max( n, m ) <= ntrunc ) then
-
                 return_value = &
                     sum ( [ (i, i = ntrunc+1, ntrunc - m + 2, - 1) ] ) + n - m + 1
             else
-
                 return_value = -1
-
             end if
-
         end associate
 
     end function get_index
-    !
-    
-    !
+
+
     function get_coefficient( this, n, m ) result ( return_value )
-        !
-        !< Purpose:
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Dictionary: calling arguments
-        !--------------------------------------------------------------------------------
-        class (SpherepackWrapper), intent (in out)    :: this
-        integer (ip),     intent (in)        :: n
-        integer (ip),     intent (in)        :: m
-        complex (wp):: return_value
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
+        class (SpherepackWrapper), intent (in out) :: this
+        integer (ip),     intent (in)              :: n
+        integer (ip),     intent (in)              :: m
+        complex (wp)                               :: return_value
+        !----------------------------------------------------------------------
 
         associate( &
-            ntrunc   => this%NTRUNC, &
-            nm       => this%get_index( n, m ), &
+            ntrunc => this%TRIANGULAR_TRUNCATION_LIMIT, &
+            nm  => this%get_index( n, m ), &
             nm_conjg => this%get_index(n, -m ), &
-            psi      => this%complex_spectral_coefficients &
+            psi => this%complex_spectral_coefficients &
             )
-
             if ( m < 0 .and. nm_conjg > 0 ) then
                 return_value = ( (-1.0_wp)**(-m) ) * conjg( psi(nm_conjg) )
             else if ( nm > 0 ) then
@@ -366,36 +332,30 @@ contains
             else
                 return_value = 0.0_wp
             end if
-
         end associate
 
     end function get_coefficient
-    !
-    
-    !
+
+
     subroutine get_scalar_symmetries( this, isym )
         !
         !< Purpose:
         !
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Dictionary: calling arguments
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         class (SpherepackWrapper), intent (in out) :: this
         integer (ip),              intent (in)     :: isym
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
 
         select case (isym)
             case (2)
-        		
                 this%SCALAR_SYMMETRIES = isym
             case (1)
-        		
                 this%SCALAR_SYMMETRIES = isym
             case (0)
-        		
                 this%SCALAR_SYMMETRIES = isym
             case default
-        		
                 ! Handle invalid symmetry arguments
                 write( stderr, '(A)' )     'TYPE (SpherepackWrapper) in get_SCALAR_SYMMETRIES'
                 write( stderr, '(A, I2)' ) 'Optional argument isym = ', isym
@@ -410,12 +370,12 @@ contains
         !
         !< Purpose:
         !
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Dictionary: calling arguments
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         class (SpherepackWrapper), intent (in out)  :: this
         integer (ip),     intent (in)      :: itype
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
 
         select case (itype)
             case (8)
@@ -471,39 +431,39 @@ contains
         ! Conversely, the index nm as a function of m and n is:
         ! nm = sum([(i, i=mtrunc+1, mtrunc-m+2, -1)])+n-m+1
         !
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Dictionary: calling arguments
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         class (SpherepackWrapper), intent (in out)  :: this
         real (wp),                 intent (in)      :: scalar_function(:, :)
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Dictionary: local variables
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         integer (ip):: m  !< counters
         integer (ip)::  n  !< counters
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Check if object is usable
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
 
         call this%assert_initialized()
         
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! compute the (real) spherical harmonic coefficients
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
 
         call this%perform_scalar_analysis( scalar_function )
 
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Set complex spherical harmonic coefficients
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
 
         associate( &
-            ntrunc => this%NTRUNC, & ! set the triangular truncation limit
-            a      => this%workspace%real_harmonic_coefficients, &
-            b      => this%workspace%imaginary_harmonic_coefficients, &
-            psi    => this%complex_spectral_coefficients &
+            ntrunc => this%TRIANGULAR_TRUNCATION_LIMIT, & ! set the triangular truncation limit
+            a => this%workspace%real_harmonic_coefficients, &
+            b => this%workspace%imaginary_harmonic_coefficients, &
+            psi => this%complex_spectral_coefficients &
             )
 
             ! Fill complex array
@@ -511,70 +471,57 @@ contains
                 0.5_wp * [((a(m + 1, n + 1), n = m, ntrunc), m = 0, ntrunc)], &
                 0.5_wp * [((b(m + 1, n + 1), n = m, ntrunc), m = 0, ntrunc)], &
                 wp )
- 
         end associate
 
     end subroutine perform_complex_analysis
-    !
-    
-    !
+
+
     subroutine perform_complex_synthesis( this, scalar_function )
         !
         !< Purpose:
         ! converts gridded input array (datagrid) to (complex) spherical harmonic coefficients
         ! (dataspec).
         !
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Dictionary: calling arguments
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         class (SpherepackWrapper), intent (in out)  :: this
         real (wp),                 intent (out)     :: scalar_function(:, :)
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Dictionary: local variables
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         integer (ip):: m  !! Counters
         integer (ip):: n  !! Counters
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
 
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Check if object is usable
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
 
         call this%assert_initialized()
 
-        !--------------------------------------------------------------------------------
         ! Convert complex spherical harmonic coefficients to real version
-        !--------------------------------------------------------------------------------
         associate( &
-            ntrunc => this%NTRUNC, & ! set the triangular truncation limit
-            a      => this%workspace%real_harmonic_coefficients, &
-            b      => this%workspace%imaginary_harmonic_coefficients, &
-            psi    => this%complex_spectral_coefficients &
+            ntrunc => this%TRIANGULAR_TRUNCATION_LIMIT, & ! set the triangular truncation limit
+            a => this%workspace%real_harmonic_coefficients, &
+            b => this%workspace%imaginary_harmonic_coefficients, &
+            psi => this%complex_spectral_coefficients &
             )
- 
             ! Fill real arrays with contents of spec
             do m = 0, ntrunc
                 do n = m, ntrunc
-                
                     ! set the spectral index
                     associate(nm => this%get_index( n, m ))
-                
                         ! set the real component
                         a( m + 1, n + 1 ) = 2.0_wp * real( psi(nm) )
-                
                         ! set the imaginary component
                         b( m + 1, n + 1 ) = 2.0_wp * aimag( psi(nm) )
-
                     end associate
                 end do
             end do
-        
         end associate
 
-        !--------------------------------------------------------------------------------
         ! synthesise the scalar function from the (real) harmonic coefficients
-        !--------------------------------------------------------------------------------
-
         call this%perform_scalar_synthesis( scalar_function )
  
     end subroutine perform_complex_synthesis
@@ -587,31 +534,31 @@ contains
         !
         ! Used mainly for testing
         !
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Dictionary: calling arguments
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         class (SpherepackWrapper), intent (in out)  :: this
         complex (wp),              intent (in)      :: spec(:)
         real (wp),                 intent (out)     :: scalar_function(:, :)
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Dictionary: local variables
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         integer (ip):: m  !! Counters
         integer (ip):: n  !! Counters
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
 
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Check if object is usable
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
 
         call this%assert_initialized()
 
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Convert complex coefficients to real version
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
 
         associate( &
-            ntrunc => this%NTRUNC, & ! set the triangular truncation limit
+            ntrunc => this%TRIANGULAR_TRUNCATION_LIMIT, & ! set the triangular truncation limit
             a      => this%workspace%real_harmonic_coefficients, &
             b      => this%workspace%imaginary_harmonic_coefficients &
             )
@@ -636,9 +583,9 @@ contains
         
         end associate
 
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! synthesise the scalar function from the (real) harmonic coefficients
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
 
         call this%perform_scalar_synthesis( scalar_function )
  
@@ -648,56 +595,56 @@ contains
     !
     subroutine get_rotation_operator( this, scalar_function, rotation_operator)
         !
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Dictionary: calling arguments
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         class (SpherepackWrapper), intent (in out)  :: this
         real (wp),                 intent (in)      :: scalar_function(:, :)
         real (wp),                 intent (out)     :: rotation_operator(:, :, :)
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Dictionary: local variables
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         integer (ip)            :: k, l   !! Counters
         real (wp), allocatable :: polar_gradient_component(:, :)
         real (wp), allocatable :: azimuthal_gradient_component(:, :)
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
 
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Check if object is usable
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
 
         call this%assert_initialized()
 
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Allocate arrays
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
 
         associate( &
-            nlat => this%NLAT, &
-            nlon => this%NLON &
+            nlat => this%NUMBER_OF_LATITUDES, &
+            nlon => this%NUMBER_OF_LONGITUDES &
             )
 
             ! Allocate arrays
             allocate( &
                 polar_gradient_component(     nlat, nlon ), &
                 azimuthal_gradient_component( nlat, nlon ), &
-                stat=allocate_status, &
-                errmsg = error_message )
+                stat=allocate_status &
+                )
 
             ! Check allocation status
             if ( allocate_status /= 0 ) then
 
                 write( stderr, '(A)' ) 'TYPE (SpherepackWrapper)'
                 write( stderr, '(A)' ) 'Allocation failed in GET_ROTATION_OPERATOR'
-                write( stderr, '(A)' ) trim( error_message )
+
 
             end if
 
         end associate
 
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Calculate the spherical surface gradient components
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
 
         associate( &
             f          => scalar_function, &
@@ -709,13 +656,13 @@ contains
 
         end associate
 
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Calculate the rotation operator applied to a scalar function
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
 
         associate( &
-            nlat => this%NLAT, &
-            nlon => this%NLON &
+            nlat => this%NUMBER_OF_LATITUDES, &
+            nlon => this%NUMBER_OF_LONGITUDES &
             )
 
             do l = 1, nlon
@@ -735,22 +682,22 @@ contains
             end do
         end associate
 
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Release memory
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
 
         deallocate( &
             polar_gradient_component, &
             azimuthal_gradient_component, &
-            stat=deallocate_status, &
-            errmsg = error_message )
+            stat=deallocate_status &
+            )
 
         ! Check deallocate status
         if ( deallocate_status /= 0 ) then
 
             write( stderr, '(A)' ) 'TYPE (SpherepackWrapper)'
             write( stderr, '(A)' ) 'Deallocation failed in GET_ROTATION_OPERATOR'
-            write( stderr, '(A)' ) trim( error_message )
+
 
         end if
 
@@ -774,58 +721,58 @@ contains
         !   dS = sin(theta) dtheta dphi
         !
         !
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Dictionary: calling arguments
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         class (SpherepackWrapper), intent (in out) :: this
         real (wp),                 intent (in)     :: scalar_function(:, :)
         real (wp)                                   :: return_value
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Dictionary: local variables
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         integer (ip)            :: k            !! counter
         real (wp), allocatable :: summation(:)
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
 
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Check if object is usable
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
 
         call this%assert_initialized()
 
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Allocate array
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
 
-        associate( nlat => this%NLAT )
+        associate( nlat => this%NUMBER_OF_LATITUDES )
 
             ! Allocate array
             allocate( &
                 summation( nlat ), &
-                stat=allocate_status, &
-                errmsg = error_message )
+                stat=allocate_status &
+                )
 
             ! Check allocation status
             if ( allocate_status /= 0 ) then
 
                 write( stderr, '(A)' ) 'TYPE (SpherepackWrapper)'
                 write( stderr, '(A)' ) 'Allocation failed in COMPUTE_SURFACE_INTEGRAL'
-                write( stderr, '(A)' ) trim( error_message )
+
 
             end if
 
         end associate
 
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! compute integral
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
 
         ! Initialize array
         summation = 0.0_wp
 
         ! compute the integrant
         associate( &
-            nlat => this%NLAT, &
+            nlat => this%NUMBER_OF_LATITUDES, &
             Dphi => this%grid%mesh_phi, &
             wts  => this%grid%gaussian_weights, &
             f    => scalar_function &
@@ -846,20 +793,20 @@ contains
         ! Set integral \int_{S^2} f( theta, phi ) dS
         return_value = sum( summation )
 
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Deallocate array
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
 
         deallocate( &
             summation, &
-            stat=deallocate_status, &
-            errmsg = error_message )
+            stat=deallocate_status &
+            )
 
         ! Check deallocate status
         if ( deallocate_status /= 0 ) then
             write( stderr, '(A)' ) 'TYPE (SpherepackWrapper)'
             write( stderr, '(A)' ) 'Deallocation failed in COMPUTE_SURFACE_INTEGRAL'
-            write( stderr, '(A)' ) trim( error_message )
+
         end if
 
     end function compute_surface_integral
@@ -869,56 +816,56 @@ contains
     subroutine compute_first_moment( this, scalar_function, first_moment )
         !
         !< Purpose:
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Dictionary: calling arguments
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         class (SpherepackWrapper),      intent (in out)  :: this
         real (wp),                      intent (in)      :: scalar_function(:, :)
         type (ThreeDimensionalVector),  intent (out)     :: first_moment
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Dictionary: local variables
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         integer (ip)            :: k, l !! Counters
         real (wp), allocatable :: integrant(:, :, :)
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
 
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Check if object is usable
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
 
         call this%assert_initialized()
 
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Allocate array
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
 
         associate( &
-            nlat => this%NLAT, &
-            nlon => this%NLON &
+            nlat => this%NUMBER_OF_LATITUDES, &
+            nlon => this%NUMBER_OF_LONGITUDES &
             )
 
             ! Allocate arrays
             allocate( &
                 integrant( nlat, nlon, 3 ), &
-                stat=allocate_status, &
-                errmsg = error_message )
+                stat=allocate_status &
+                )
 
             ! Check allocation status
             if ( allocate_status /= 0 ) then
                 write( stderr, '(A)' ) 'TYPE (SpherepackWrapper)'
                 write( stderr, '(A)' ) 'Allocation failed in COMPUTE_FIRST_MOMENT'
-                write( stderr, '(A)' ) trim( error_message )
+
             end if
 
         end associate
 
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! compute integrant
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
 
         associate( &
-            nlat => this%NLAT, &
-            nlon => this%NLON &
+            nlat => this%NUMBER_OF_LATITUDES, &
+            nlon => this%NUMBER_OF_LONGITUDES &
             )
 
             ! compute integrant
@@ -939,9 +886,9 @@ contains
             end do
         end associate
 
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! compute first moment
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
 
 
         associate( &
@@ -959,21 +906,21 @@ contains
 
         end associate
 
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Deallocate array
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
 
         deallocate( &
             integrant, &
-            stat=deallocate_status, &
-            errmsg = error_message )
+            stat=deallocate_status &
+            )
 
         ! Check deallocate status
         if ( deallocate_status /= 0 ) then
 
             write( stderr, '(A)' ) 'TYPE (SpherepackWrapper)'
             write( stderr, '(A)' ) 'Deallocation failed in COMPUTE_FIRST_MOMENT'
-            write( stderr, '(A)' ) trim( error_message )
+
 
         end if
 
@@ -991,17 +938,17 @@ contains
         !
         ! Reference:
         ! https://www2.cisl.ucar.edu/spherepack/documentation#vtsgs.html
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Dictionary: calling arguments
-        !--------------------------------------------------------------------------------
-        class (SpherepackWrapper), intent (in out)   :: this
+        !----------------------------------------------------------------------
+        class (SpherepackWrapper), intent (in out) :: this
         real (wp),        intent (out)      :: polar_component(:)     !! vt
         real (wp),        intent (out)      :: azimuthal_component(:) !! wt
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Dictionary: local variables
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         integer (ip):: ierror
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
 
         ! Check status
         call this%assert_initialized()
@@ -1012,7 +959,7 @@ contains
         !        call Vtsgs( &
         !            size( this%grid%latitudes ), size( this%grid%longitudes ),  this%ityp, 1, &
         !            polar_component, azimuthal_component, &
-        !            this%NLAT, this%NLON, &
+        !            this%NUMBER_OF_LATITUDES, this%NUMBER_OF_LONGITUDES, &
         !            this%workspace%real_polar_harmonic_coefficients, this%workspace%imaginary_polar_harmonic_coefficients, &
         !            this%workspace%real_azimuthal_harmonic_coefficients, this%workspace%imaginary_azimuthal_harmonic_coefficients, &
         !            size(this%workspace%real_polar_harmonic_coefficients, dim = 1), size(this%workspace%real_polar_harmonic_coefficients, dim = 2), &
@@ -1218,48 +1165,48 @@ contains
         !           = 10 error in the specification of lwork
         !
         !
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Dictionary: calling arguments
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         class (SpherepackWrapper), intent (in out)  :: this
         real (wp),        intent (in)      :: scalar_function(:, :)
         real (wp),        intent (out)     :: polar_gradient_component(:, :)
         real (wp),        intent (out)     :: azimuthal_gradient_component(:, :)
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Dictionary: local variables
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         integer (ip):: error_flag
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Check if object is usable
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
 
         call this%assert_initialized()
 
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! compute the (real) spherical harmonic coefficients
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
 
         call this%perform_scalar_analysis( scalar_function )
 
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! compute gradient
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
 
         associate( &
-            nlat   => this%NLAT, &
-            nlon   => this%NLON, &
+            nlat   => this%NUMBER_OF_LATITUDES, &
+            nlon   => this%NUMBER_OF_LONGITUDES, &
             isym   => this%SCALAR_SYMMETRIES, &
             nt     => this%NUMBER_OF_SYNTHESES, &
             v      => polar_gradient_component, &
             w      => azimuthal_gradient_component, &
-            idvw   => this%NLAT, &
-            jdvw   => this%NLON, &
+            idvw   => this%NUMBER_OF_LATITUDES, &
+            jdvw   => this%NUMBER_OF_LONGITUDES, &
             a      => this%workspace%real_harmonic_coefficients, &
             b      => this%workspace%imaginary_harmonic_coefficients, &
-            mdab   => this%NLAT, &
-            ndab   => this%NLAT, &
+            mdab   => this%NUMBER_OF_LATITUDES, &
+            ndab   => this%NUMBER_OF_LATITUDES, &
             wvhsgs => this%workspace%wvhsgs, &
             lvhsgs => size( this%workspace%wvhsgs ), &
             work   => this%workspace%work, &
@@ -1272,9 +1219,9 @@ contains
 
         end associate
 
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Address the error flag
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
 
         if ( error_flag == 0 ) then
 
@@ -1550,38 +1497,38 @@ contains
         !           = 9  error in the specification of lshsgs
         !           = 10 error in the specification of lwork
         !
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Dictionary: calling arguments
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         class (SpherepackWrapper), intent (in out) :: this
         real (wp),        intent (in)     :: polar_gradient_component(:, :)
         real (wp),        intent (in)     :: azimuthal_gradient_component(:, :)
         real (wp),        intent (out)    :: scalar_function(:, :)
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Dictionary: local variables
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         integer (ip):: error_flag
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
 
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Check if object is usable
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
 
         call this%assert_initialized()
 
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Perform vector analysis
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
 
          !!!!TODO
 
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Invoke SPHEREPACK 3.2
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
 
     !        associate( &
-    !            nlat   => this%NLAT, &
-    !            nlon   => this%NLON, &
+    !            nlat   => this%NUMBER_OF_LATITUDES, &
+    !            nlon   => this%NUMBER_OF_LONGITUDES, &
     !            isym   => this%SCALAR_SYMMETRIES, &
     !            nt     => this%NUMBER_OF_SYNTHESES, &
     !            sf     => scalar_function, &
@@ -1603,9 +1550,9 @@ contains
     !
     !        end associate
 
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Address error flag
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
 
          !!!!TODO
 
@@ -1800,37 +1747,37 @@ contains
         !           = 9  error in the specification of lshsgs
         !           = 10 error in the specification of lwork
         !
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Dictionary: calling arguments
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         class (SpherepackWrapper), intent (in out) :: this
         real (wp),        intent (in)     :: vector_field (:, :, :)
         real (wp),        intent (out)    :: divergence (:, :)
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Dictionary: local variables
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         integer (ip):: error_flag
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
 
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Check if object is usable
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
 
         call this%assert_initialized()
 
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Calculate the (real) vector harmonic coefficients
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
 
         call this%perform_vector_analysis( vector_field )
 
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Invoke SPHEREPACK 3.2
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
 
         associate( &
-            nlat   => this%NLAT, &
-            nlon   => this%NLON, &
+            nlat   => this%NUMBER_OF_LATITUDES, &
+            nlon   => this%NUMBER_OF_LONGITUDES, &
             isym   => this%SCALAR_SYMMETRIES, &
             nt     => this%NUMBER_OF_SYNTHESES, &
             divg   => divergence, &
@@ -1852,9 +1799,9 @@ contains
 
         end associate
 
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Address the error flag
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
 
         if ( error_flag == 0 ) then
 
@@ -1936,15 +1883,15 @@ contains
         !
         !< Purpose:
         !
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Dictionary: calling arguments
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         class (SpherepackWrapper), intent (in out) :: this
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Dictionary: local variables
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         integer (ip):: ierror
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
 
         ! Check status
         call this%assert_initialized()
@@ -1962,7 +1909,7 @@ contains
     !
     subroutine get_vorticity( this, vector_function, vorticity )
         !
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         !
         !    Documentation: SPHEREPACK 3.2
         !
@@ -2141,37 +2088,37 @@ contains
         !          = 9  error in the specification of lshsgs
         !          = 10 error in the specification of lwork
         !
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Dictionary: calling arguments
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         class (SpherepackWrapper), intent (in out)  :: this
         real (wp),        intent (in)      :: vector_function(:, :, :)
         real (wp),        intent (out)     :: vorticity(:, :)
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Dictionary: local variables
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         integer (ip):: error_flag
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
 
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Check if object is usable
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
 
         call this%assert_initialized()
 
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! calculate the (real) vector harmonic coefficients
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
 
         call this%perform_vector_analysis( vector_function )
 
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Invoke SPHEREPACK 3.2 routine
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
 
         associate( &
-            nlat   => this%NLAT, &
-            nlon   => this%NLON, &
+            nlat   => this%NUMBER_OF_LATITUDES, &
+            nlon   => this%NUMBER_OF_LONGITUDES, &
             isym   => this%SCALAR_SYMMETRIES, &
             nt     => this%NUMBER_OF_SYNTHESES, &
             vort   => vorticity, &
@@ -2194,9 +2141,9 @@ contains
 
         end associate
 
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Address the error flag
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
 
         if ( error_flag == 0 ) then
 
@@ -2276,15 +2223,15 @@ contains
         !
         !< Purpose:
         !
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Dictionary: calling arguments
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         class (SpherepackWrapper), intent (in out) :: this
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Dictionary: local variables
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         integer (ip):: ierror
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
 
         ! Check status
         call this%assert_initialized()
@@ -2304,15 +2251,15 @@ contains
         !
         !< Purpose:
         !
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Dictionary: calling arguments
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         class (SpherepackWrapper), intent (in out) :: this
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Dictionary: local variables
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         integer (ip):: ierror
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
 
         ! Check status
         call this%assert_initialized()
@@ -2519,37 +2466,37 @@ contains
         !
         !            = 10 error in the specification of lwork
         !
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Dictionary: calling arguments
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         class (SpherepackWrapper), intent (in out) :: this
         real (wp),        intent (in)     :: scalar_function(:,:)
         real (wp),        intent (out)    :: scalar_laplacian(:,:)
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Dictionary: local variables
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         integer (ip):: error_flag
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
 
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Check if object is usable
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
 
         call this%assert_initialized()
 
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Set (real) scalar spherica harmonic coefficients
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
 
         call this%perform_scalar_analysis( scalar_function )
 
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Invoke SPHEREPACK 3.2
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
 
         associate( &
-            nlat   => this%NLAT, &
-            nlon   => this%NLON, &
+            nlat   => this%NUMBER_OF_LATITUDES, &
+            nlon   => this%NUMBER_OF_LONGITUDES, &
             isym   => this%SCALAR_SYMMETRIES, &
             nt     => this%NUMBER_OF_SYNTHESES, &
             slap   => scalar_laplacian, &
@@ -2571,9 +2518,9 @@ contains
 
         end associate
 
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Address the error flag
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
 
         if ( error_flag == 0 ) then
 
@@ -2858,40 +2805,40 @@ contains
         !
         !            = 10 error in the specification of lwork
         !
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Dictionary: calling arguments
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         class (SpherepackWrapper), intent (in out)        :: this
         real (wp),        intent (in)            :: helmholtz_constant
         real (wp),        intent (in)            :: source_term(:, :)
         real (wp),        intent (out)           :: solution(:, :)
         real (wp),        intent (out), optional :: perturbation_optional
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Dictionary: local variables
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         real (wp):: perturbation
         integer (ip):: error_flag
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
 
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Check if object is usable
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
 
         call this%assert_initialized()
 
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Set (real) scalar spherica harmonic coefficients
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
 
         call this%perform_scalar_analysis( source_term )
 
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Invoke SPHEREPACK 3.2
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
 
         associate( &
-            nlat   => this%NLAT, &
-            nlon   => this%NLON, &
+            nlat   => this%NUMBER_OF_LATITUDES, &
+            nlon   => this%NUMBER_OF_LONGITUDES, &
             isym   => this%SCALAR_SYMMETRIES, &
             nt     => this%NUMBER_OF_SYNTHESES, &
             xlmbda => helmholtz_constant, &
@@ -2915,9 +2862,9 @@ contains
 
         end associate
 
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Address the error flag
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
 
         if ( error_flag == 0 ) then
 
@@ -2986,9 +2933,9 @@ contains
             end if
         end if
 
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Address optional arguments
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
 
         if ( present( perturbation_optional ) ) then
 
@@ -3004,15 +2951,15 @@ contains
         !
         !< Purpose:
         !
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Dictionary: calling arguments
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         class (SpherepackWrapper), intent (in out) :: this
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Dictionary: local variables
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         integer (ip):: ierror
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
 
         ! Check status
         call this%assert_initialized()
@@ -3032,15 +2979,15 @@ contains
         !
         !< Purpose:
         !
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Dictionary: calling arguments
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         class (SpherepackWrapper), intent (in out) :: this
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Dictionary: local variables
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         integer (ip):: ierror
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
 
         ! Check status
         call this%assert_initialized()
@@ -3060,15 +3007,15 @@ contains
         !
         !< Purpose:
         !
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Dictionary: calling arguments
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         class (SpherepackWrapper), intent (in out) :: this
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Dictionary: local variables
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         integer (ip):: ierror
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
 
         ! Check status
         call this%assert_initialized()
@@ -3088,15 +3035,15 @@ contains
         !
         !< Purpose:
         !
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Dictionary: calling arguments
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         class (SpherepackWrapper), intent (in out) :: this
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Dictionary: local variables
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         integer (ip):: ierror
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
 
         ! Check status
         call this%assert_initialized()
@@ -3116,15 +3063,15 @@ contains
         !
         !< Purpose:
         !
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Dictionary: calling arguments
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         class (SpherepackWrapper), intent (in out) :: this
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Dictionary: local variables
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         integer (ip):: ierror
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
 
         ! Check status
         call this%assert_initialized()
@@ -3144,15 +3091,15 @@ contains
         !
         !< Purpose:
         !
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Dictionary: calling arguments
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         class (SpherepackWrapper), intent (in out) :: this
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Dictionary: local variables
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         integer (ip):: ierror
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
 
         ! Check status
         call this%assert_initialized()
@@ -3361,33 +3308,33 @@ contains
         !            = 9  error in the specification of lshags
         !            = 10 error in the specification of lwork
         !
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Dictionary: calling arguments
-        !--------------------------------------------------------------------------------
-        class (SpherepackWrapper), intent (in out)   :: this
+        !----------------------------------------------------------------------
+        class (SpherepackWrapper), intent (in out) :: this
         real (wp),        intent (in)       :: scalar_function(:, :)
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Dictionary: local variables
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         integer (ip):: error_flag
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
 
         ! Check status
         call this%assert_initialized()
 
         ! perform the (real) spherical harmonic analysis
         associate( &
-            nlat   => this%NLAT, &
-            nlon   => this%NLON, &
+            nlat   => this%NUMBER_OF_LATITUDES, &
+            nlon   => this%NUMBER_OF_LONGITUDES, &
             isym   => this%SCALAR_SYMMETRIES, &
             nt     => this%NUMBER_OF_SYNTHESES, &
             g      => scalar_function, &
-            idg    => this%NLAT, &
-            jdg    => this%NLON, &
+            idg    => this%NUMBER_OF_LATITUDES, &
+            jdg    => this%NUMBER_OF_LONGITUDES, &
             a      => this%workspace%real_harmonic_coefficients, &
             b      => this%workspace%imaginary_harmonic_coefficients, &
-            mdab   => this%NLAT, &
-            ndab   => this%NLAT, &
+            mdab   => this%NUMBER_OF_LATITUDES, &
+            ndab   => this%NUMBER_OF_LATITUDES, &
             wshags => this%workspace%wshags, &
             lshags => size( this%workspace%wshags ), &
             work   => this%workspace%work, &
@@ -3400,9 +3347,9 @@ contains
 
         end associate
 
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Address the error flag
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
 
         if ( error_flag == 0 ) then
 
@@ -3628,21 +3575,21 @@ contains
         !            = 9  error in the specification of lshsgs
         !            = 10 error in the specification of lwork
         !
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Dictionary: calling arguments
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         class (SpherepackWrapper), intent (in out)  :: this
         real (wp),        intent (out)     :: scalar_function(:, :)
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Dictionary: local variables
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         integer (ip):: error_flag
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
 
         ! perform (real) spherical harmonic synthesis
         associate( &
-            nlat   => this%NLAT, &
-            nlon   => this%NLON, &
+            nlat   => this%NUMBER_OF_LATITUDES, &
+            nlon   => this%NUMBER_OF_LONGITUDES, &
             isym   => this%SCALAR_SYMMETRIES, &
             nt     => this%NUMBER_OF_SYNTHESES, &
             g      => scalar_function, &
@@ -3664,9 +3611,9 @@ contains
 
         end associate
 
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Address the error flag
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
 
         if ( error_flag == 0 ) then
 
@@ -3723,31 +3670,31 @@ contains
         ! Reference:
         ! https://www2.cisl.ucar.edu/spherepack/documentation#shpg.html
         !
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Dictionary: calling arguments
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         class (SpherepackWrapper), intent (in out)        :: this
         real (wp), dimension (:, :), intent (in)  :: scalar_function
         real (wp), dimension (:, :), intent (out) :: scalar_projection
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Dictionary: local variables
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         integer (ip):: ierror
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
 
         ! Check status
         call this%assert_initialized()
 
         ! TODO: Include driver program into type(workspace)
         !        call Shpgi( &
-        !            this%NLAT, this%NLON, this%SCALAR_SYMMETRIES, this%NTRUNC, &
+        !            this%NUMBER_OF_LATITUDES, this%NUMBER_OF_LONGITUDES, this%SCALAR_SYMMETRIES, this%TRIANGULAR_TRUNCATION_LIMIT, &
         !            this%workspace%wshp, size( this%workspace%wshp ), &
         !            this%workspace%iwshp, size( this%workspace%iwshp ), &
         !            this%workspace%work, size( this%workspace%work ), ierror )
         !
         !        call Shpg( &
-        !            this%NLAT, this%NLON, this%SCALAR_SYMMETRIES, this%NTRUNC, &
-        !            scalar_function, scalar_projection, this%NLAT, &
+        !            this%NUMBER_OF_LATITUDES, this%NUMBER_OF_LONGITUDES, this%SCALAR_SYMMETRIES, this%TRIANGULAR_TRUNCATION_LIMIT, &
+        !            scalar_function, scalar_projection, this%NUMBER_OF_LATITUDES, &
         !            this%workspace%wshp, size( this%workspace%wshp ), &
         !            this%workspace%iwshp, size( this%workspace%iwshp ), &
         !            this%workspace%work, size( this%workspace%work ), ierror )
@@ -3993,55 +3940,55 @@ contains
         !            = 9  error in the specification of lvhags
         !            = 10 error in the specification of lwork
         !
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Dictionary: calling arguments
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         class (SpherepackWrapper), intent (in out)  :: this
         real (wp),        intent (in)      :: vector_function(:, :, :)
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Dictionary: local variables
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         integer (ip):: error_flag
         real (wp), allocatable :: polar_component(:, :)
         real (wp), allocatable :: azimuthal_component(:, :)
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
 
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Check if object is usable
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
 
         call this%assert_initialized()
 
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Allocate arrays
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
 
         associate( &
-            nlat => this%NLAT, &
-            nlon => this%NLON &
+            nlat => this%NUMBER_OF_LATITUDES, &
+            nlon => this%NUMBER_OF_LONGITUDES &
             )
 
             ! Allocate arrays
             allocate( &
                 polar_component(     1:nlat, 1:nlon), &
                 azimuthal_component( 1:nlat, 1:nlon), &
-                stat=allocate_status, &
-                errmsg = error_message )
+                stat=allocate_status &
+                )
 
             ! Check allocation status
             if ( allocate_status /= 0 ) then
 
                 write( stderr, '(A)' ) 'TYPE (SpherepackWrapper)'
                 write( stderr, '(A)' ) 'Allocation failed in perform_VECTOR_ANALYSIS'
-                write( stderr, '(A)' ) trim( error_message )
+
 
             end if
 
         end associate
 
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! compute the spherical angle components
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
 
         associate( &
             F       => vector_function, &
@@ -4053,13 +4000,13 @@ contains
 
         end associate
 
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Invoke SPHEREPACK 3.2
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
 
         associate( &
-            nlat   => this%NLAT, &
-            nlon   => this%NLON, &
+            nlat   => this%NUMBER_OF_LATITUDES, &
+            nlon   => this%NUMBER_OF_LONGITUDES, &
             ityp   => this%VECTOR_SYMMETRIES, &
             nt     => this%NUMBER_OF_SYNTHESES, &
             v      => polar_component, &
@@ -4084,9 +4031,9 @@ contains
 
         end associate
 
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Address the error flag
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
 
         if ( error_flag == 0 ) then
 
@@ -4157,22 +4104,22 @@ contains
             end if
         end if
 
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Release memory
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
 
         deallocate( &
             polar_component, &
             azimuthal_component, &
-            stat=allocate_status, &
-            errmsg = error_message )
+            stat=allocate_status &
+            )
 
         ! Check allocation status
         if ( deallocate_status /= 0 ) then
 
             write( stderr, '(A)' ) 'TYPE (SpherepackWrapper)'
             write( stderr, '(A)' ) 'Deallocation failed in PERFORM_VECTOR_ANALYSIS'
-            write( stderr, '(A)' ) trim( error_message )
+
 
         end if
 
@@ -4505,31 +4452,31 @@ contains
         !            = 9  error in the specification of lvhsgs
         !            = 10 error in the specification of lwork
         !
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Dictionary: calling arguments
-        !--------------------------------------------------------------------------------
-        class (SpherepackWrapper), intent (in out)   :: this
+        !----------------------------------------------------------------------
+        class (SpherepackWrapper), intent (in out) :: this
         real (wp),                 intent (out)      :: polar_component(:, :)
         real (wp),                 intent (out)      :: azimuthal_component(:, :)
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Dictionary: local variables
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         integer (ip):: error_flag
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
 
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Check if object is usable
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
 
         call this%assert_initialized()
 
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Invoke SPHEREPACK 3.2
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
 
         associate( &
-            nlat   => this%NLAT, &
-            nlon   => this%NLON, &
+            nlat   => this%NUMBER_OF_LATITUDES, &
+            nlon   => this%NUMBER_OF_LONGITUDES, &
             ityp   => this%VECTOR_SYMMETRIES, &
             nt     => this%NUMBER_OF_SYNTHESES, &
             v      => polar_component, &
@@ -4554,9 +4501,9 @@ contains
 
         end associate
 
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Address the error flag
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
 
         if ( error_flag == 0 ) then
 
@@ -4635,15 +4582,15 @@ contains
         !
         !< Purpose:
         !
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Dictionary: calling arguments
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         class (SpherepackWrapper), intent (in out) :: this
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Dictionary: local variables
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         integer (ip):: ierror
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
 
         ! Check status
         call this%assert_initialized()
@@ -4663,15 +4610,15 @@ contains
         !
         !< Purpose:
         !
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Dictionary: calling arguments
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         class (SpherepackWrapper), intent (in out) :: this
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Dictionary: local variables
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         integer (ip):: ierror
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
 
         ! Check status
         call this%assert_initialized()
@@ -4691,15 +4638,15 @@ contains
         !
         !< Purpose:
         !
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Dictionary: calling arguments
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         class (SpherepackWrapper), intent (in out) :: this
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Dictionary: local variables
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         integer (ip):: ierror
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
 
         ! Check status
         call this%assert_initialized()
@@ -4712,23 +4659,18 @@ contains
         end if
 
     end subroutine perform_multiple_ffts
-    !
-    
-    !
+
+
     subroutine finalize_spherepack_wrapper( this )
-        !
-        !< Purpose:
-        !
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         ! Dictionary: calling arguments
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
         type (SpherepackWrapper), intent (in out) :: this
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
 
         call this%destroy()
 
     end subroutine finalize_spherepack_wrapper
-    !
-    
-    !
+
+
 end module type_SpherepackWrapper
