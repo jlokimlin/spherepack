@@ -773,7 +773,7 @@ contains
         ! compute the integrant
         associate( &
             nlat => this%NUMBER_OF_LATITUDES, &
-            Dphi => this%grid%mesh_phi, &
+            Dphi => this%grid%LONGITUDINAL_MESH, &
             wts  => this%grid%gaussian_weights, &
             f    => scalar_function &
             )

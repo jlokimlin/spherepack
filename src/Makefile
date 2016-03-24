@@ -25,9 +25,38 @@ type_SphericalUnitVectors.f90
 	$(FC) $(FFLAGS) -c type_SphericalUnitVectors.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(LIB_DIRECTORY)
 
+type_Grid.o: \
+type_Grid.f90
+	$(FC) $(FFLAGS) -c type_Grid.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(LIB_DIRECTORY)
+	 
+type_RegularGrid.o: \
+type_Grid.o\
+type_RegularGrid.f90
+	$(FC) $(FFLAGS) -c type_RegularGrid.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(LIB_DIRECTORY)
+	 
 type_GaussianGrid.o: \
+type_Grid.o\
 type_GaussianGrid.f90
 	$(FC) $(FFLAGS) -c type_GaussianGrid.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(LIB_DIRECTORY)
+
+type_Workspace.o: \
+type_Workspace.f90
+	$(FC) $(FFLAGS) -c type_Workspace.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(LIB_DIRECTORY)
+
+type_RegularWorkspace.o: \
+type_Workspace.o\
+type_RegularWorkspace.f90
+	$(FC) $(FFLAGS) -c type_RegularWorkspace.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(LIB_DIRECTORY)
+
+type_GaussianWorkspace.o: \
+type_Workspace.o\
+type_GaussianWorkspace.f90
+	$(FC) $(FFLAGS) -c type_GaussianWorkspace.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(LIB_DIRECTORY)
 
 type_SpherepackWorkspace.o: \
