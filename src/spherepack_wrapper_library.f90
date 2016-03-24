@@ -9,12 +9,9 @@ module spherepack_wrapper_library
     use type_GaussianGrid, only:&
         GaussianGrid
         
-    use type_SpherepackWrapper, only: &
-        SpherepackWrapper
+    use type_GaussianSphere, only: &
+        GaussianSphere
     
-    use type_SpherepackWorkspace, only: &
-        SpherepackWorkspace
-
     ! Explicit typing only
     implicit none
     
@@ -25,7 +22,6 @@ module spherepack_wrapper_library
     public :: assignment(=)
     public :: operator(*)
     public :: GaussianGrid
-    public :: SpherepackWrapper
-    public :: SpherepackWorkspace
+    public :: GaussianSphere
 
 end module spherepack_wrapper_library

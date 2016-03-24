@@ -1,4 +1,4 @@
-module type_SpherepackWrapper
+module type_GaussianSphere
 
     use, intrinsic :: iso_fortran_env, only: &
         wp => REAL64, &
@@ -27,7 +27,7 @@ module type_SpherepackWrapper
 
     ! Everything is private unless stated otherwise
     private
-    public :: SpherepackWrapper
+    public :: GaussianSphere
 
     !----------------------------------------------------------------------
     ! Dictionary: global variables confined to the module
@@ -38,7 +38,7 @@ module type_SpherepackWrapper
     !----------------------------------------------------------------------
 
     ! Declare derived data type
-    type, public :: SpherepackWrapper
+    type, public :: GaussianSphere
         !----------------------------------------------------------------------
         ! Class variables
         !----------------------------------------------------------------------
@@ -99,7 +99,7 @@ module type_SpherepackWrapper
         procedure, private :: get_vector_symmetries
         final              :: finalize_spherepack_wrapper
         !----------------------------------------------------------------------
-    end type SpherepackWrapper
+    end type GaussianSphere
 
 
 contains
@@ -109,7 +109,7 @@ contains
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
-        class (SpherepackWrapper), intent (in out)  :: this
+        class (GaussianSphere), intent (in out)  :: this
         integer (ip),     intent (in)               :: nlat
         integer (ip),     intent (in)               :: nlon
         integer (ip),     intent (in), optional    :: isym      !! Either 0, 1, or 2
@@ -166,25 +166,16 @@ contains
         end associate
 
         ! Allocate memory for derived data types
-        call this%grid%create( nlat, nlon )
-        call this%workspace%create( nlat, nlon )
-
-        ! Set grids to compute frequently used trigonometric functions
         associate( &
-            theta => this%grid%latitudes, &
-            phi => this%grid%longitudes &
+            grid => this%grid, &
+            workspace => this%workspace, &
+            trig_func => this%trigonometric_functions, &
+            unit_vectors => this%unit_vectors &
             )
-            call this%trigonometric_functions%create( theta, phi )
-        end associate
-
-        ! Compute spherical unit vectors
-        associate( &
-            sint => this%trigonometric_functions%sint, &
-            cost => this%trigonometric_functions%cost, &
-            sinp => this%trigonometric_functions%sinp, &
-            cosp => this%trigonometric_functions%cosp &
-            )
-            call this%unit_vectors%create( sint, cost, sinp, cosp )
+            call grid%create( nlat, nlon )
+            call workspace%create( nlat, nlon )
+            call trig_func%create( grid )
+            call unit_vectors%create( grid, trig_func )
         end associate
 
         ! Set initialization flag
@@ -196,7 +187,7 @@ contains
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
-        class (SpherepackWrapper), intent (in out) :: this
+        class (GaussianSphere), intent (in out) :: this
         !----------------------------------------------------------------------
 
         ! Check flag
@@ -236,7 +227,7 @@ contains
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
-        class (SpherepackWrapper), intent (in out)    :: this
+        class (GaussianSphere), intent (in out)    :: this
         !----------------------------------------------------------------------
 
         ! Check status
@@ -287,7 +278,7 @@ contains
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
-        class (SpherepackWrapper), intent (in out)  :: this
+        class (GaussianSphere), intent (in out)  :: this
         integer (ip),     intent (in)      :: n
         integer (ip),     intent (in)      :: m
         integer (ip):: return_value
@@ -313,7 +304,7 @@ contains
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
-        class (SpherepackWrapper), intent (in out) :: this
+        class (GaussianSphere), intent (in out) :: this
         integer (ip),     intent (in)              :: n
         integer (ip),     intent (in)              :: m
         complex (wp)                               :: return_value
@@ -344,7 +335,7 @@ contains
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
-        class (SpherepackWrapper), intent (in out) :: this
+        class (GaussianSphere), intent (in out) :: this
         integer (ip),              intent (in)     :: isym
         !----------------------------------------------------------------------
 
@@ -373,7 +364,7 @@ contains
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
-        class (SpherepackWrapper), intent (in out)  :: this
+        class (GaussianSphere), intent (in out)  :: this
         integer (ip),     intent (in)      :: itype
         !----------------------------------------------------------------------
 
@@ -434,8 +425,8 @@ contains
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
-        class (SpherepackWrapper), intent (in out)  :: this
-        real (wp),                 intent (in)      :: scalar_function(:, :)
+        class (GaussianSphere), intent (in out)  :: this
+        real (wp),                 intent (in)      :: scalar_function(:,:)
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
@@ -485,8 +476,8 @@ contains
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
-        class (SpherepackWrapper), intent (in out)  :: this
-        real (wp),                 intent (out)     :: scalar_function(:, :)
+        class (GaussianSphere), intent (in out)  :: this
+        real (wp),                 intent (out)     :: scalar_function(:,:)
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
@@ -537,9 +528,9 @@ contains
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
-        class (SpherepackWrapper), intent (in out)  :: this
+        class (GaussianSphere), intent (in out)  :: this
         complex (wp),              intent (in)      :: spec(:)
-        real (wp),                 intent (out)     :: scalar_function(:, :)
+        real (wp),                 intent (out)     :: scalar_function(:,:)
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
@@ -598,15 +589,15 @@ contains
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
-        class (SpherepackWrapper), intent (in out)  :: this
-        real (wp),                 intent (in)      :: scalar_function(:, :)
+        class (GaussianSphere), intent (in out)  :: this
+        real (wp),                 intent (in)      :: scalar_function(:,:)
         real (wp),                 intent (out)     :: rotation_operator(:, :, :)
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
         integer (ip)            :: k, l   !! Counters
-        real (wp), allocatable :: polar_gradient_component(:, :)
-        real (wp), allocatable :: azimuthal_gradient_component(:, :)
+        real (wp), allocatable :: polar_gradient_component(:,:)
+        real (wp), allocatable :: azimuthal_gradient_component(:,:)
         !----------------------------------------------------------------------
 
         !----------------------------------------------------------------------
@@ -724,8 +715,8 @@ contains
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
-        class (SpherepackWrapper), intent (in out) :: this
-        real (wp),                 intent (in)     :: scalar_function(:, :)
+        class (GaussianSphere), intent (in out) :: this
+        real (wp),                 intent (in)     :: scalar_function(:,:)
         real (wp)                                   :: return_value
         !----------------------------------------------------------------------
         ! Dictionary: local variables
@@ -819,8 +810,8 @@ contains
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
-        class (SpherepackWrapper),      intent (in out)  :: this
-        real (wp),                      intent (in)      :: scalar_function(:, :)
+        class (GaussianSphere),      intent (in out)  :: this
+        real (wp),                      intent (in)      :: scalar_function(:,:)
         type (ThreeDimensionalVector),  intent (out)     :: first_moment
         !----------------------------------------------------------------------
         ! Dictionary: local variables
@@ -941,7 +932,7 @@ contains
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
-        class (SpherepackWrapper), intent (in out) :: this
+        class (GaussianSphere), intent (in out) :: this
         real (wp),        intent (out)      :: polar_component(:)     !! vt
         real (wp),        intent (out)      :: azimuthal_component(:) !! wt
         !----------------------------------------------------------------------
@@ -1168,10 +1159,10 @@ contains
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
-        class (SpherepackWrapper), intent (in out)  :: this
-        real (wp),        intent (in)      :: scalar_function(:, :)
-        real (wp),        intent (out)     :: polar_gradient_component(:, :)
-        real (wp),        intent (out)     :: azimuthal_gradient_component(:, :)
+        class (GaussianSphere), intent (in out)  :: this
+        real (wp),        intent (in)      :: scalar_function(:,:)
+        real (wp),        intent (out)     :: polar_gradient_component(:,:)
+        real (wp),        intent (out)     :: azimuthal_gradient_component(:,:)
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
@@ -1500,10 +1491,10 @@ contains
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
-        class (SpherepackWrapper), intent (in out) :: this
-        real (wp),        intent (in)     :: polar_gradient_component(:, :)
-        real (wp),        intent (in)     :: azimuthal_gradient_component(:, :)
-        real (wp),        intent (out)    :: scalar_function(:, :)
+        class (GaussianSphere), intent (in out) :: this
+        real (wp),        intent (in)     :: polar_gradient_component(:,:)
+        real (wp),        intent (in)     :: azimuthal_gradient_component(:,:)
+        real (wp),        intent (out)    :: scalar_function(:,:)
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
@@ -1750,9 +1741,9 @@ contains
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
-        class (SpherepackWrapper), intent (in out) :: this
+        class (GaussianSphere), intent (in out) :: this
         real (wp),        intent (in)     :: vector_field (:, :, :)
-        real (wp),        intent (out)    :: divergence (:, :)
+        real (wp),        intent (out)    :: divergence (:,:)
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
@@ -1886,7 +1877,7 @@ contains
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
-        class (SpherepackWrapper), intent (in out) :: this
+        class (GaussianSphere), intent (in out) :: this
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
@@ -2091,9 +2082,9 @@ contains
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
-        class (SpherepackWrapper), intent (in out)  :: this
+        class (GaussianSphere), intent (in out)  :: this
         real (wp),        intent (in)      :: vector_function(:, :, :)
-        real (wp),        intent (out)     :: vorticity(:, :)
+        real (wp),        intent (out)     :: vorticity(:,:)
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
@@ -2226,7 +2217,7 @@ contains
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
-        class (SpherepackWrapper), intent (in out) :: this
+        class (GaussianSphere), intent (in out) :: this
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
@@ -2254,7 +2245,7 @@ contains
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
-        class (SpherepackWrapper), intent (in out) :: this
+        class (GaussianSphere), intent (in out) :: this
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
@@ -2469,7 +2460,7 @@ contains
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
-        class (SpherepackWrapper), intent (in out) :: this
+        class (GaussianSphere), intent (in out) :: this
         real (wp),        intent (in)     :: scalar_function(:,:)
         real (wp),        intent (out)    :: scalar_laplacian(:,:)
         !----------------------------------------------------------------------
@@ -2808,10 +2799,10 @@ contains
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
-        class (SpherepackWrapper), intent (in out)        :: this
+        class (GaussianSphere), intent (in out)        :: this
         real (wp),        intent (in)            :: helmholtz_constant
-        real (wp),        intent (in)            :: source_term(:, :)
-        real (wp),        intent (out)           :: solution(:, :)
+        real (wp),        intent (in)            :: source_term(:,:)
+        real (wp),        intent (out)           :: solution(:,:)
         real (wp),        intent (out), optional :: perturbation_optional
         !----------------------------------------------------------------------
         ! Dictionary: local variables
@@ -2954,7 +2945,7 @@ contains
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
-        class (SpherepackWrapper), intent (in out) :: this
+        class (GaussianSphere), intent (in out) :: this
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
@@ -2982,7 +2973,7 @@ contains
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
-        class (SpherepackWrapper), intent (in out) :: this
+        class (GaussianSphere), intent (in out) :: this
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
@@ -3010,7 +3001,7 @@ contains
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
-        class (SpherepackWrapper), intent (in out) :: this
+        class (GaussianSphere), intent (in out) :: this
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
@@ -3038,7 +3029,7 @@ contains
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
-        class (SpherepackWrapper), intent (in out) :: this
+        class (GaussianSphere), intent (in out) :: this
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
@@ -3066,7 +3057,7 @@ contains
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
-        class (SpherepackWrapper), intent (in out) :: this
+        class (GaussianSphere), intent (in out) :: this
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
@@ -3094,7 +3085,7 @@ contains
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
-        class (SpherepackWrapper), intent (in out) :: this
+        class (GaussianSphere), intent (in out) :: this
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
@@ -3311,8 +3302,8 @@ contains
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
-        class (SpherepackWrapper), intent (in out) :: this
-        real (wp),        intent (in)       :: scalar_function(:, :)
+        class (GaussianSphere), intent (in out) :: this
+        real (wp),        intent (in)       :: scalar_function(:,:)
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
@@ -3578,8 +3569,8 @@ contains
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
-        class (SpherepackWrapper), intent (in out)  :: this
-        real (wp),        intent (out)     :: scalar_function(:, :)
+        class (GaussianSphere), intent (in out)  :: this
+        real (wp),        intent (out)     :: scalar_function(:,:)
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
@@ -3673,9 +3664,9 @@ contains
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
-        class (SpherepackWrapper), intent (in out)        :: this
-        real (wp), dimension (:, :), intent (in)  :: scalar_function
-        real (wp), dimension (:, :), intent (out) :: scalar_projection
+        class (GaussianSphere), intent (in out)        :: this
+        real (wp), dimension (:,:), intent (in)  :: scalar_function
+        real (wp), dimension (:,:), intent (out) :: scalar_projection
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
@@ -3943,14 +3934,14 @@ contains
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
-        class (SpherepackWrapper), intent (in out)  :: this
+        class (GaussianSphere), intent (in out)  :: this
         real (wp),        intent (in)      :: vector_function(:, :, :)
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
         integer (ip):: error_flag
-        real (wp), allocatable :: polar_component(:, :)
-        real (wp), allocatable :: azimuthal_component(:, :)
+        real (wp), allocatable :: polar_component(:,:)
+        real (wp), allocatable :: azimuthal_component(:,:)
         !----------------------------------------------------------------------
 
         !----------------------------------------------------------------------
@@ -4455,9 +4446,9 @@ contains
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
-        class (SpherepackWrapper), intent (in out) :: this
-        real (wp),                 intent (out)      :: polar_component(:, :)
-        real (wp),                 intent (out)      :: azimuthal_component(:, :)
+        class (GaussianSphere), intent (in out) :: this
+        real (wp),                 intent (out)      :: polar_component(:,:)
+        real (wp),                 intent (out)      :: azimuthal_component(:,:)
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
@@ -4585,7 +4576,7 @@ contains
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
-        class (SpherepackWrapper), intent (in out) :: this
+        class (GaussianSphere), intent (in out) :: this
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
@@ -4613,7 +4604,7 @@ contains
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
-        class (SpherepackWrapper), intent (in out) :: this
+        class (GaussianSphere), intent (in out) :: this
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
@@ -4641,7 +4632,7 @@ contains
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
-        class (SpherepackWrapper), intent (in out) :: this
+        class (GaussianSphere), intent (in out) :: this
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
@@ -4665,7 +4656,7 @@ contains
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
-        type (SpherepackWrapper), intent (in out) :: this
+        type (GaussianSphere), intent (in out) :: this
         !----------------------------------------------------------------------
 
         call this%destroy()
@@ -4673,4 +4664,4 @@ contains
     end subroutine finalize_spherepack_wrapper
 
 
-end module type_SpherepackWrapper
+end module type_GaussianSphere

@@ -1,16 +1,11 @@
-
-!
-!< Author:
-! Jon Lo Kim Lin
-!
-
-!
 module type_TrigonometricFunctions
 
     use, intrinsic :: iso_fortran_env, only: &
-        wp     => REAL64, &
-        ip     => INT32, &
-        stderr => ERROR_UNIT
+        wp => REAL64, &
+        ip => INT32
+
+    use type_Grid, only: &
+        Grid
 
     ! Explicit typing only
     implicit none
@@ -18,14 +13,6 @@ module type_TrigonometricFunctions
     ! Everything is private unless stated otherwise
     private
     public :: TrigonometricFunctions
-
-    !----------------------------------------------------------------------
-    ! Dictionary: global variables confined to the module
-    !----------------------------------------------------------------------
-    character (len=250) :: error_message     !! Probably long enough
-    integer (ip)        :: allocate_status   !! To check allocation status
-    integer (ip)        :: deallocate_status !! To check deallocation status
-    !----------------------------------------------------------------------
 
     ! Declare derived data type
     type, public :: TrigonometricFunctions
@@ -50,194 +37,95 @@ module type_TrigonometricFunctions
         !----------------------------------------------------------------------
     end type TrigonometricFunctions
 
+
 contains
-    !
-    
-    !
-    subroutine create_trigonometric_functions( this, latitudinal_grid, longitudinal_grid )
+
+
+    subroutine create_trigonometric_functions( this, grid_type )
         !
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
         class (TrigonometricFunctions), intent (in out) :: this
-        real (wp),                      intent (in)     :: latitudinal_grid(:)
-        real (wp),                      intent (in)     :: longitudinal_grid(:)
+        class (Grid),                   intent (in)     :: grid_type
         !----------------------------------------------------------------------
 
-        ! Check if object is usable
-        if ( this%initialized ) then
-            call this%destroy()
+        ! Ensure that object is usable
+        call this%destroy()
+
+        ! Check if polymorphic argument is usable
+        if ( grid_type%initialized .eqv. .false. ) then
+            error stop 'TYPE(TrigonometricFunctions): '&
+                //'initialized polymorphic argument CLASS(Grid)'
         end if
 
-        !----------------------------------------------------------------------
-        ! Set constants
-        !----------------------------------------------------------------------
-
-        this%NUMBER_OF_LATITUDES = size( latitudinal_grid )
-        this%NUMBER_OF_LONGITUDES = size( longitudinal_grid )
-
-        !----------------------------------------------------------------------
-        ! Allocate arrays
-        !----------------------------------------------------------------------
-
+        ! Allocate memory
         associate( &
-            nlat => this%NUMBER_OF_LATITUDES, &
-            nlon => this%NUMBER_OF_LONGITUDES &
+            nlat => grid_type%NUMBER_OF_LATITUDES, &
+            nlon => grid_type%NUMBER_OF_LONGITUDES &
             )
 
-            allocate( &
-                this%sint( nlat ), &
-                this%cost( nlat ), &
-                this%sinp( nlon ), &
-                this%cosp( nlon ), &
-                stat=allocate_status, &
-                errmsg = error_message )
+            ! Set contants
+            this%NUMBER_OF_LATITUDES = nlat
+            this%NUMBER_OF_LONGITUDES = nlon
 
-            ! Check allocation status
-            if ( allocate_status /= 0 ) then
-                write( stderr, '(A)') 'TYPE (TrigonometricFunctions)'
-                write( stderr, '(A)') 'Allocation failed in create_trigonometric_functions'
-                write( stderr, '(A)') trim( error_message )
-            end if
-
+            allocate( this%sint(nlat) )
+            allocate( this%cost(nlat) )
+            allocate( this%sinp(nlon) )
+            allocate( this%cosp(nlon) )
         end associate
 
-        !----------------------------------------------------------------------
         ! compute trigonometric functions
-        !----------------------------------------------------------------------
-
         associate( &
-            theta => latitudinal_grid, &
-            phi   => longitudinal_grid, &
-            sint  => this%sint, &
-            cost  => this%cost, &
-            sinp  => this%sinp, &
-            cosp  => this%cosp &
+            theta => grid_type%latitudes, &
+            phi => grid_type%longitudes, &
+            sint => this%sint, &
+            cost => this%cost, &
+            sinp => this%sinp, &
+            cosp => this%cosp &
             )
 
-            sint = sin( theta )
-            cost = cos( theta )
-            sinp = sin( phi )
-            cosp = cos( phi )
-
+            sint = sin(theta)
+            cost = cos(theta)
+            sinp = sin(phi)
+            cosp = cos(phi)
         end associate
 
-        !----------------------------------------------------------------------
-        ! Set initialization flag
-        !----------------------------------------------------------------------
-
+        ! Set flag
         this%initialized = .true.
 
     end subroutine create_trigonometric_functions
-    !
-    
-    !
+
+
+
     subroutine destroy_trigonometric_functions( this )
-        !
-        !< Purpose:
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
         class (TrigonometricFunctions), intent (in out) :: this
         !----------------------------------------------------------------------
 
-        !----------------------------------------------------------------------
-        ! Check status
-        !----------------------------------------------------------------------
+        ! Check flag
+        if ( this%initialized .eqv. .false. ) return
 
-        if ( .not. this%initialized ) return
-
-        !----------------------------------------------------------------------
         ! Release memory
-        !----------------------------------------------------------------------
+        if (allocated(this%sint)) deallocate(this%sint)
+        if (allocated(this%cost)) deallocate(this%cost)
+        if (allocated(this%sinp)) deallocate(this%sinp)
+        if (allocated(this%cosp)) deallocate(this%cosp)
 
-         ! Check if array is allocated
-        if ( allocated( this%sint ) ) then
-
-            ! Deallocate array
-            deallocate( &
-                this%sint, &
-                stat=deallocate_status, &
-                errmsg = error_message )
-
-            ! Check deallocation status
-            if ( deallocate_status /= 0 ) then
-                write( stderr, '(A)' ) 'TYPE (TrigonometricFunctions)'
-                write( stderr, '(A)' ) 'Deallocating SINT failed in destroy_trigonometric_functions'
-                write( stderr, '(A)' ) trim( error_message )
-            end if
-        end if
-
-        ! Check if array is allocated
-        if ( allocated( this%cost ) ) then
-
-            ! Deallocate array
-            deallocate( &
-                this%cost, &
-                stat=deallocate_status, &
-                errmsg = error_message )
-
-            ! Check deallocation status
-            if ( deallocate_status /= 0 ) then
-                write( stderr, '(A)' ) 'TYPE (TrigonometricFunctions)'
-                write( stderr, '(A)' ) 'Deallocating COST failed in destroy_trigonometric_functions'
-                write( stderr, '(A)' ) trim( error_message )
-            end if
-        end if
-
-        ! Check if array is allocated
-        if ( allocated( this%sinp ) ) then
-
-            ! Deallocate array
-            deallocate( &
-                this%sinp, &
-                stat=deallocate_status, &
-                errmsg = error_message )
-
-            ! Check deallocation status
-            if ( deallocate_status /= 0 ) then
-                write( stderr, '(A)' ) 'TYPE (TrigonometricFunctions)'
-                write( stderr, '(A)' ) 'Deallocating SINP failed in destroy_trigonometric_functions'
-                write( stderr, '(A)' ) trim( error_message )
-            end if
-        end if
-
-        ! Check if array is allocated
-        if ( allocated( this%cosp ) ) then
-
-            ! Deallocate array
-            deallocate( &
-                this%cosp, &
-                stat=deallocate_status, &
-                errmsg = error_message )
-
-            ! Check deallocation status
-            if ( deallocate_status /= 0 ) then
-                write( stderr, '(A)' ) 'TYPE (TrigonometricFunctions)'
-                write( stderr, '(A)' ) 'Deallocating COSP failed in destroy_trigonometric_functions'
-                write( stderr, '(A)' ) trim( error_message )
-            end if
-        end if
-
-        !----------------------------------------------------------------------
         ! Reset constants
-        !----------------------------------------------------------------------
+        this%NUMBER_OF_LONGITUDES = 0
+        this%NUMBER_OF_LATITUDES = 0
 
-        this%NUMBER_OF_LONGITUDES  = 0
-        this%NUMBER_OF_LATITUDES  = 0
-
-        !----------------------------------------------------------------------
-        ! Reset initialization flag
-        !----------------------------------------------------------------------
-
+        ! Reset flag
         this%initialized = .false.
 
     end subroutine destroy_trigonometric_functions
-    !
-    
-    !
+
+
+
     subroutine finalize_trigonometric_functions( this )
-        !
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
@@ -247,7 +135,6 @@ contains
         call this%destroy()
 
     end subroutine finalize_trigonometric_functions
-    !
-    
-    !
+
+
 end module type_TrigonometricFunctions

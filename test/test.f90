@@ -1,13 +1,13 @@
 program test
 
     use, intrinsic :: iso_fortran_env, only: &
-        wp     => REAL64, &
-        ip     => INT32, &
+        wp => REAL64, &
+        ip => INT32, &
         stdout => OUTPUT_UNIT
 
     use spherepack_wrapper_library, only: &
-        SpherepackWrapper, &
-        ThreeDimensionalVector, &
+        GaussianSphere, &
+        Vector => ThreeDimensionalVector, &
         assignment(=), &
         operator(*)
 
@@ -18,19 +18,15 @@ program test
     call test_all()
 
 contains
-    !
-    
-    !
+
+
     subroutine test_all()
-        !
-        !< Purpose:
-        !
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
-        integer (ip), parameter    :: nlon = 36
-        integer (ip), parameter    :: nlat = nlon/2 + 1
-        type (SpherepackWrapper)    :: solver
+        integer (ip), parameter  :: nlon = 36
+        integer (ip), parameter  :: nlat = nlon/2 + 1
+        type (GaussianSphere)    :: solver
         !----------------------------------------------------------------------
 
         ! Instantiate object
@@ -62,7 +58,7 @@ contains
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
-        class (SpherepackWrapper), intent (in out)    :: solver
+        class (GaussianSphere), intent (in out)    :: solver
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
@@ -130,13 +126,13 @@ contains
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
-        class (SpherepackWrapper), intent (in out)     :: solver
+        class (GaussianSphere), intent (in out)     :: solver
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
         integer (ip)    :: k, l !! Counters
         real (wp)       :: polar_error, azimuthal_error
-        type (ThreeDimensionalVector) :: vector_field
+        type (Vector) :: vector_field
         real (wp)       :: vector_function(3, solver%NUMBER_OF_LATITUDES, solver%NUMBER_OF_LONGITUDES)
         real (wp)       :: original_polar_component(solver%NUMBER_OF_LATITUDES, solver%NUMBER_OF_LONGITUDES)
         real (wp)       :: original_azimuthal_component(solver%NUMBER_OF_LATITUDES, solver%NUMBER_OF_LONGITUDES)
@@ -215,7 +211,7 @@ contains
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
-        class (SpherepackWrapper), intent (in out)    :: solver
+        class (GaussianSphere), intent (in out)    :: solver
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
@@ -284,12 +280,12 @@ contains
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
-        class (SpherepackWrapper), intent (in out)    :: solver
+        class (GaussianSphere), intent (in out)    :: solver
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
         integer (ip)     :: k, l !! Counters
-        type (ThreeDimensionalVector)  :: u
+        type (Vector)  :: u
         real (wp)        :: discretization_error
         real (wp)        :: exact_solution(solver%NUMBER_OF_LATITUDES, solver%NUMBER_OF_LONGITUDES)
         real (wp)        :: source_term(solver%NUMBER_OF_LATITUDES, solver%NUMBER_OF_LONGITUDES)
@@ -356,14 +352,14 @@ contains
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
-        class (SpherepackWrapper), intent (in out)    :: solver
+        class (GaussianSphere), intent (in out)    :: solver
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
         integer (ip)     :: k, l !! Counters
         real (wp)        :: polar_error
         real (wp)        :: azimuthal_error
-        type (ThreeDimensionalVector)  :: u
+        type (Vector)  :: u
         real (wp)        :: scalar_function(solver%NUMBER_OF_LATITUDES, solver%NUMBER_OF_LONGITUDES)
         real (wp)        :: exact_polar_component(solver%NUMBER_OF_LATITUDES, solver%NUMBER_OF_LONGITUDES)
         real (wp)        :: exact_azimuthal_component(solver%NUMBER_OF_LATITUDES, solver%NUMBER_OF_LONGITUDES)
@@ -444,14 +440,14 @@ contains
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
-        class (SpherepackWrapper), intent (in out)  :: solver
+        class (GaussianSphere), intent (in out)  :: solver
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
         integer (ip)     :: k, l !! Counters
-        type (ThreeDimensionalVector)  :: u
-        type (ThreeDimensionalVector)  :: omega
-        type (ThreeDimensionalVector)  :: rotation_operator
+        type (Vector)  :: u
+        type (Vector)  :: omega
+        type (Vector)  :: rotation_operator
         real (wp)        :: discretization_error
         real (wp)        :: vector_function(3, solver%NUMBER_OF_LATITUDES, solver%NUMBER_OF_LONGITUDES)
         real (wp)        :: exact_vorticity(solver%NUMBER_OF_LATITUDES, solver%NUMBER_OF_LONGITUDES)
@@ -469,7 +465,7 @@ contains
             ! initialize arrays
             F  = 0.0_wp
             V     = 0.0_wp
-            omega = ThreeDimensionalVector( x = 1.0e+1_wp, y = 1.0e+2_wp, z = 1.0e+3_wp )
+            omega = Vector( x = 1.0e+1_wp, y = 1.0e+2_wp, z = 1.0e+3_wp )
 
             do l = 1, nlon
                 do k = 1, nlat
@@ -530,13 +526,13 @@ contains
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
-        class (SpherepackWrapper), intent (in out)    :: solver
+        class (GaussianSphere), intent (in out)    :: solver
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
         integer (ip)    :: k, l !! Counters
         real (wp)       :: discretization_error
-        type (ThreeDimensionalVector) :: u
+        type (Vector) :: u
         real (wp)       :: exact_rotation(3, solver%NUMBER_OF_LATITUDES, solver%NUMBER_OF_LONGITUDES)
         real (wp)       :: approximate_rotation(3, solver%NUMBER_OF_LATITUDES, solver%NUMBER_OF_LONGITUDES)
         real (wp)       :: scalar_function(solver%NUMBER_OF_LATITUDES, solver%NUMBER_OF_LONGITUDES)

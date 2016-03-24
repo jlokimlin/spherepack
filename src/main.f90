@@ -6,8 +6,7 @@ program main
         assignment(=), &
         operator(*), &
         GaussianGrid, &
-        SpherepackWrapper, &
-        SpherepackWorkspace
+        GaussianSphere
 
     ! Explicit typing only
     implicit none

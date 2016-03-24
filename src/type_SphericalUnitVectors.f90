@@ -1,19 +1,17 @@
-
-!
-!< Author:
-! Jon Lo Kim Lin
-!
-
-!
 module type_SphericalUnitVectors
 
     use, intrinsic :: iso_fortran_env, only: &
-        wp     => REAL64, &
-        ip     => INT32, &
-        stderr => ERROR_UNIT
+        wp => REAL64, &
+        ip => INT32
+
+    use type_Grid, only: &
+        Grid
+
+    use type_TrigonometricFunctions, only: &
+        TrigFunctions => TrigonometricFunctions
 
     use type_ThreeDimensionalVector, only: &
-        ThreeDimensionalVector, &
+        Vector => ThreeDimensionalVector, &
         assignment(=), &
         operator(*)
 
@@ -24,322 +22,216 @@ module type_SphericalUnitVectors
     private
     public :: SphericalUnitVectors
 
-    !----------------------------------------------------------------------
-    ! Dictionary: global variables confined to the module
-    !----------------------------------------------------------------------
-    character (len=250) :: error_message     !! Probably long enough
-    integer (ip)        :: allocate_status   !! To check allocation status
-    integer (ip)        :: deallocate_status !! To check deallocation status
-    !----------------------------------------------------------------------
-
     ! Declare derived data type
     type, public :: SphericalUnitVectors
         !----------------------------------------------------------------------
         ! Class variables
         !----------------------------------------------------------------------
-        logical,                                    public  :: initialized = .false. !! Instantiation status
-        integer (ip),                               public  :: NUMBER_OF_LONGITUDES = 0        !! number of longitudinal points
-        integer (ip),                               public  :: NUMBER_OF_LATITUDES = 0        !! number of latitudinal points
-        type (ThreeDimensionalVector), allocatable, public  :: radial(:, :)
-        type (ThreeDimensionalVector), allocatable, public  :: polar(:, :)
-        type (ThreeDimensionalVector), allocatable, public  :: azimuthal(:, :)
-    !----------------------------------------------------------------------
+        logical,                    public :: initialized = .false.
+        integer (ip),               public :: NUMBER_OF_LONGITUDES = 0
+        integer (ip),               public :: NUMBER_OF_LATITUDES = 0
+        type (Vector), allocatable, public :: radial(:,:)
+        type (Vector), allocatable, public :: polar(:,:)
+        type (Vector), allocatable, public :: azimuthal(:,:)
+        !----------------------------------------------------------------------
     contains
         !----------------------------------------------------------------------
         ! Class methods
         !----------------------------------------------------------------------
-        procedure, public   :: create => create_sphericalunitvectors
-        procedure, public   :: destroy => destroy_sphericalunitvectors
-        procedure, public   :: get_spherical_angle_components
-        procedure           :: assert_initialized
-        final               :: finalize_sphericalunitvectors
+        procedure, public :: create => create_spherical_unit_vectors
+        procedure, public :: destroy => destroy_spherical_unit_vectors
+        procedure, public :: get_spherical_angle_components
+        final             :: finalize_spherical_unit_vectors
         !----------------------------------------------------------------------
     end type SphericalUnitVectors
 
+
 contains
-    !
-    
-    !
-    subroutine create_sphericalunitvectors( this, sint, cost, sinp, cosp )
-        !
-        !< Purpose:
-        ! Sets the spherical unit vectors
-        !
+
+
+    subroutine create_spherical_unit_vectors( this, grid_type, trig_functions )
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
-        class (SphericalUnitVectors), intent (in out) :: this
-        real (wp),                    intent (in)     :: sint(:)
-        real (wp),                    intent (in)     :: cost(:)
-        real (wp),                    intent (in)     :: sinp(:)
-        real (wp),                    intent (in)     :: cosp(:)
+        class (SphericalUnitVectors),            intent (in out) :: this
+        class (Grid),                            intent (in out) :: grid_type
+        class (TrigFunctions), optional, target, intent (in out) :: trig_functions
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
-        integer (ip)            ::  k,  l !! Counters
+        integer (ip)                   :: k,  l !! Counters
+        type (TrigFunctions), pointer :: ptr => null()
         !----------------------------------------------------------------------
 
         ! Check if object is usable
-        if ( this%initialized ) then
-            call this%destroy()
+        call this%destroy()
+
+        ! Check if polymorphic argument is usable
+        if ( grid_type%initialized .eqv. .false. ) then
+            error stop 'TYPE(SphericalUnitVectors): '&
+                //'initialized polymorphic argument CLASS(Grid)'
         end if
 
-        !----------------------------------------------------------------------
-        ! Allocate arrays
-        !----------------------------------------------------------------------
-
-        this%NUMBER_OF_LATITUDES = size( sint )
-        this%NUMBER_OF_LONGITUDES = size( cosp )
-
-        !----------------------------------------------------------------------
-        ! Allocate arrays
-        !----------------------------------------------------------------------
-
+        ! Associate array extends
         associate( &
-            nlat => this%NUMBER_OF_LATITUDES, &
-            nlon => this%NUMBER_OF_LONGITUDES  &
+            nlat => grid_type%NUMBER_OF_LATITUDES, &
+            nlon => grid_type%NUMBER_OF_LONGITUDES &
             )
 
-            ! Allocate arrays
-            allocate( &
-                this%radial(    nlat, nlon ), &
-                this%polar(     nlat, nlon ), &
-                this%azimuthal( nlat, nlon ), &
-                stat=allocate_status, &
-                errmsg = error_message )
+            this%NUMBER_OF_LATITUDES = nlat
+            this%NUMBER_OF_LONGITUDES = nlon
 
-            ! Check allocate status
-            if ( allocate_status /= 0 ) then
-                write( stderr, '(A)') 'TYPE (SphericalUnitVectors)'
-                write( stderr, '(A)') 'Allocation failed in CREATE_SPHERICALUNITVECTORS'
-                write( stderr, '(A)') trim( error_message )
+            ! Allocate memory
+            allocate( this%radial(nlat, nlon) )
+            allocate( this%polar(nlat, nlon) )
+            allocate( this%azimuthal(nlat, nlon) )
+
+            ! Address optional argument
+            if (present(trig_functions)) then
+
+                ! Check if polymorphic argument is usable
+                if ( trig_functions%initialized .eqv. .false. ) then
+                    error stop 'TYPE(SphericalUnitVectors): '&
+                        //'initialized polymorphic argument CLASS(Grid)'
+                else
+                    ! Assign pointer
+                    ptr => trig_functions
+                end if
+            else
+                ! Compute trigonometric functions from scratch
+                allocate( TrigFunctions :: ptr )
+                call ptr%create( grid_type )
             end if
-        end associate
 
-        !----------------------------------------------------------------------
-        ! Compute spherical unit vectors
-        !----------------------------------------------------------------------
+            ! Compute spherical unit vectors
+            associate( &
+                r => this%radial, &
+                theta => this%polar, &
+                phi => this%azimuthal, &
+                sint => ptr%sint, &
+                cost => ptr%cost, &
+                sinp => ptr%sinp, &
+                cosp => ptr%cosp &
+                )
+                do l = 1, nlon
+                    do k = 1, nlat
 
-        associate( &
-            nlat  => this%NUMBER_OF_LATITUDES, &
-            nlon  => this%NUMBER_OF_LONGITUDES, &
-            r     => this%radial, &
-            theta => this%polar, &
-            phi   => this%azimuthal &
-            )
+                        ! set radial unit vector
+                        r(k, l) = &
+                            Vector( &
+                            x = sint(k) * cosp(l), &
+                            y = sint(k) * sinp(l), &
+                            z = cost(k) &
+                            )
 
-            ! compute spherical unit vectors
-            do l = 1, nlon
-                do k = 1, nlat
+                        ! set polar unit vector
+                        theta(k, l) = &
+                            Vector( &
+                            x = cost(k) * cosp(l), &
+                            y = cost(k) * sinp(l), &
+                            z = -sint(k) &
+                            )
 
-                    ! set radial unit vector
-                    r(k, l) = &
-                        ThreeDimensionalVector( &
-                        x = sint(k) * cosp(l), &
-                        y = sint(k) * sinp(l), &
-                        z = cost(k) &
-                        )
-
-                    ! set polar unit vector
-                    theta(k, l) = &
-                        ThreeDimensionalVector( &
-                        x = cost(k) * cosp(l), &
-                        y = cost(k) * sinp(l), &
-                        z = -sint(k) &
-                        )
-
-                    ! set azimuthal unit vector
-                    phi(k, l) = &
-                        ThreeDimensionalVector( &
-                        x = -sinp(l), &
-                        y =  cosp(l), &
-                        z =  0.0_wp &
-                        )
+                        ! set azimuthal unit vector
+                        phi(k, l) = &
+                            Vector( &
+                            x = -sinp(l), &
+                            y =  cosp(l), &
+                            z =  0.0_wp &
+                            )
+                    end do
                 end do
-            end do
+            end associate
         end associate
 
-        !----------------------------------------------------------------------
-        ! Set initialization flag
-        !----------------------------------------------------------------------
+        ! Garbage collection
+        if (present(trig_functions)) then
+            nullify( ptr )
+        else
+            deallocate( ptr )
+        end if
 
+        ! Set flag
         this%initialized = .true.
 
-    end subroutine create_sphericalunitvectors
-    !
+    end subroutine create_spherical_unit_vectors
     
-    !
-    subroutine destroy_sphericalunitvectors( this )
-        !
-        !< Purpose:
+
+
+    subroutine destroy_spherical_unit_vectors( this )
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
         class (SphericalUnitVectors), intent (in out) :: this
         !----------------------------------------------------------------------
 
-        !----------------------------------------------------------------------
-        ! Check status
-        !----------------------------------------------------------------------
+        ! Check flag
+        if ( this%initialized .eqv. .false. ) return
 
-        if ( .not. this%initialized ) return
-
-        !----------------------------------------------------------------------
         ! Release memory
-        !----------------------------------------------------------------------
+        if ( allocated( this%radial ) ) deallocate ( this%radial )
+        if (allocated(this%polar)) deallocate(  this%polar )
+        if (allocated(this%azimuthal)) deallocate( this%azimuthal )
 
-        ! Check if array is allocated
-        if ( allocated( this%radial ) ) then
-
-            ! Deallocate array
-            deallocate( &
-                this%radial, &
-                stat=deallocate_status, &
-                errmsg = error_message )
-
-            ! Check deallocation status
-            if ( deallocate_status /= 0 ) then
-                write( stderr, '(A)' ) 'TYPE (SphericalUnitVectors)'
-                write( stderr, '(A)' ) 'Deallocating RADIAL failed in DESTROY_SPHERICALUNITVECTORS'
-                write( stderr, '(A)' ) trim( error_message )
-            end if
-        end if
-
-        ! Check if array is allocated
-        if ( allocated( this%polar ) ) then
-
-            ! Deallocate array
-            deallocate( &
-                this%polar, &
-                stat=deallocate_status, &
-                errmsg = error_message )
-
-            ! Check deallocation status
-            if ( deallocate_status /= 0 ) then
-                write( stderr, '(A)' ) 'TYPE (SphericalUnitVectors)'
-                write( stderr, '(A)' ) 'Deallocating POLAR failed in DESTROY_SPHERICALUNITVECTORS'
-                write( stderr, '(A)' ) trim( error_message )
-            end if
-        end if
-
-        ! Check if array is allocated
-        if ( allocated( this%azimuthal ) ) then
-
-            ! Deallocate array
-            deallocate( &
-                this%azimuthal, &
-                stat=deallocate_status, &
-                errmsg = error_message )
-
-            ! Check deallocation status
-            if ( deallocate_status /= 0 ) then
-                write( stderr, '(A)' ) 'TYPE (SphericalUnitVectors)'
-                write( stderr, '(A)' ) 'Deallocating AZIMUTHAL failed in DESTROY_SPHERICALUNITVECTORS'
-                write( stderr, '(A)' ) trim( error_message )
-            end if
-        end if
-
-        !----------------------------------------------------------------------
         ! Reset constants
-        !----------------------------------------------------------------------
+        this%NUMBER_OF_LONGITUDES = 0
+        this%NUMBER_OF_LATITUDES = 0
 
-        this%NUMBER_OF_LONGITUDES  = 0
-        this%NUMBER_OF_LATITUDES  = 0
-
-        !----------------------------------------------------------------------
-        ! Reset initialization flag
-        !----------------------------------------------------------------------
-
+        ! Reset flag
         this%initialized = .false.
 
-    end subroutine destroy_sphericalunitvectors
-    !
-    
-    !
-    subroutine assert_initialized( this )
-        !
-        !< Purpose:
-        !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
-        !----------------------------------------------------------------------
-        class (SphericalUnitVectors), intent (in out)    :: this
-        !----------------------------------------------------------------------
+    end subroutine destroy_spherical_unit_vectors
 
-        ! Check status
-        if ( .not. this%initialized ) then
 
-            write( stderr, '(A)' ) 'TYPE (SphericalUnitVectors)'
-            write( stderr, '(A)' ) 'You must instantiate object before calling methods'
 
-        end if
-
-    end subroutine assert_initialized
-    !
-    
-    !
     subroutine get_spherical_angle_components( this, &
         vector_function, polar_component, azimuthal_component )
-        !
-        !< Purpose:
-        !
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
-        class (SphericalUnitVectors), intent (in out)  :: this
-        real (wp),                    intent (in)      :: vector_function(:, :, :)
-        real (wp),                    intent (out)     :: polar_component(:, :)
-        real (wp),                    intent (out)     :: azimuthal_component(:, :)
+        class (SphericalUnitVectors), intent (in out) :: this
+        real (wp),                    intent (in)     :: vector_function(:,:,:)
+        real (wp),                    intent (out)    :: polar_component(:,:)
+        real (wp),                    intent (out)    :: azimuthal_component(:,:)
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
-        integer (ip)                  :: k, l         !! Counters
-        type (ThreeDimensionalVector) :: vector_field !! To convert array to vector
+        integer (ip)  :: k, l !! Counters
+        type (Vector) :: vector_field !! To cast array to vector
         !----------------------------------------------------------------------
 
-        !----------------------------------------------------------------------
         ! Check if object is usable
-        !----------------------------------------------------------------------
+        if ( this%initialized .eqv. .false. ) then
+            error stop 'TYPE(SphericalUnitVectors): '&
+                //'uninitialized object in GET_SPHERICAL_ANGLE_COMPONENTS'
+        end if
 
-        call this%assert_initialized()
-
-        !----------------------------------------------------------------------
         ! Calculate the spherical angle components
-        !----------------------------------------------------------------------
-
         associate( &
             nlat => this%NUMBER_OF_LATITUDES, &
             nlon => this%NUMBER_OF_LONGITUDES &
             )
-
             do l = 1, nlon
                 do k = 1, nlat
-
-                    ! Convert array to vector
-                    vector_field = vector_function(:, k, l)
-
+                    ! Cast array to vector
+                    vector_field = vector_function(:,k,l)
                     associate( &
-                        theta => this%polar( k, l ), &
-                        phi   => this%azimuthal( k, l ) &
+                        theta => this%polar(k,l), &
+                        phi => this%azimuthal(k,l) &
                         )
-
                         ! set the theta component
                         polar_component( k, l ) = theta.dot.vector_field
-
                         ! set the azimuthal_component
                         azimuthal_component( k, l ) = phi.dot.vector_field
-
                     end associate
                 end do
             end do
         end associate
 
     end subroutine get_spherical_angle_components
-    !
-    
-    !
-    subroutine finalize_sphericalunitvectors( this )
-        !
-        !< Purpose:
+
+
+    subroutine finalize_spherical_unit_vectors( this )
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
@@ -348,8 +240,7 @@ contains
 
         call this%destroy()
 
-    end subroutine finalize_sphericalunitvectors
-    !
-    
-    !
+    end subroutine finalize_spherical_unit_vectors
+
+
 end module type_SphericalUnitVectors
