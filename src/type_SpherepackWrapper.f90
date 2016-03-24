@@ -5,8 +5,8 @@ module type_SpherepackWrapper
         ip => INT32, &
         stderr => ERROR_UNIT
 
-    use type_SpherepackWorkspace, only: &
-        SpherepackWorkspace
+    use type_GaussianWorkspace, only: &
+        GaussianWorkspace
 
     use type_GaussianGrid, only: &
         GaussianGrid
@@ -52,7 +52,7 @@ module type_SpherepackWrapper
         integer (ip), allocatable,     public  :: INDEX_ORDER_M(:)
         integer (ip), allocatable,     public  :: INDEX_DEGREE_N(:)
         complex (wp), allocatable,     public  :: complex_spectral_coefficients(:)
-        type (SpherepackWorkspace),    private :: workspace
+        type (GaussianWorkspace),      private :: workspace
         type (GaussianGrid),           public  :: grid
         type (TrigonometricFunctions), public  :: trigonometric_functions
         type (SphericalUnitVectors),   public  :: unit_vectors
@@ -964,7 +964,7 @@ contains
         !            this%workspace%real_azimuthal_harmonic_coefficients, this%workspace%imaginary_azimuthal_harmonic_coefficients, &
         !            size(this%workspace%real_polar_harmonic_coefficients, dim = 1), size(this%workspace%real_polar_harmonic_coefficients, dim = 2), &
         !            this%workspace%wvts, this%workspace%size(wvts), &
-        !            this%workspace%work, size(this%workspace%work), ierror)
+        !            this%workspace%legendre_workspace, size(this%workspace%legendre_workspace), ierror)
 
         ierror = 0
         ! check the error flag
@@ -1207,10 +1207,10 @@ contains
             b      => this%workspace%imaginary_harmonic_coefficients, &
             mdab   => this%NUMBER_OF_LATITUDES, &
             ndab   => this%NUMBER_OF_LATITUDES, &
-            wvhsgs => this%workspace%wvhsgs, &
-            lvhsgs => size( this%workspace%wvhsgs ), &
-            work   => this%workspace%work, &
-            lwork  => size( this%workspace%work ), &
+            wvhsgs => this%workspace%backward_vector, &
+            lvhsgs => size( this%workspace%backward_vector ), &
+            work   => this%workspace%legendre_workspace, &
+            lwork  => size( this%workspace%legendre_workspace ), &
             ierror => error_flag &
             )
 
@@ -1538,10 +1538,10 @@ contains
     !            bi     => this%imaginary_polar_harmonic_coefficients, &
     !            mdb    => size( this%real_polar_harmonic_coefficients, dim = 1 ), &
     !            ndb    => size( this%real_polar_harmonic_coefficients, dim = 2 ), &
-    !            wshsgs => this%workspace%wshsgs, &
-    !            lshsgs => size( this%workspace%wshsgs ), &
-    !            work   => this%workspace%work, &
-    !            lwork  => size( this%workspace%work ), &
+    !            wshsgs => this%workspace%backward_scalar, &
+    !            lshsgs => size( this%workspace%backward_scalar ), &
+    !            work   => this%workspace%legendre_workspace, &
+    !            lwork  => size( this%workspace%legendre_workspace ), &
     !            ierror => error_flag &
     !            )
     !
@@ -1787,10 +1787,10 @@ contains
             bi     => this%workspace%imaginary_polar_harmonic_coefficients, &
             mdb    => size( this%workspace%real_polar_harmonic_coefficients, dim = 1 ), &
             ndb    => size( this%workspace%real_polar_harmonic_coefficients, dim = 2 ), &
-            wshsgs => this%workspace%wshsgs, &
-            lshsgs => size( this%workspace%wshsgs ), &
-            work   => this%workspace%work, &
-            lwork  => size( this%workspace%work ), &
+            wshsgs => this%workspace%backward_scalar, &
+            lshsgs => size( this%workspace%backward_scalar ), &
+            work   => this%workspace%legendre_workspace, &
+            lwork  => size( this%workspace%legendre_workspace ), &
             ierror => error_flag &
             )
 
@@ -2128,10 +2128,10 @@ contains
             ci     => this%workspace%imaginary_azimuthal_harmonic_coefficients, &
             mdc    => size( this%workspace%real_azimuthal_harmonic_coefficients, dim = 1 ), &
             ndc    => size( this%workspace%real_azimuthal_harmonic_coefficients, dim = 2 ), &
-            wshsgs => this%workspace%wshsgs, &
-            lshsgs => size( this%workspace%wshsgs ), &
-            work   => this%workspace%work, &
-            lwork  => size( this%workspace%work ), &
+            wshsgs => this%workspace%backward_scalar, &
+            lshsgs => size( this%workspace%backward_scalar ), &
+            work   => this%workspace%legendre_workspace, &
+            lwork  => size( this%workspace%legendre_workspace ), &
             ierror => error_flag &
             )
 
@@ -2506,10 +2506,10 @@ contains
             b      => this%workspace%imaginary_harmonic_coefficients, &
             mdab   => size( this%workspace%real_harmonic_coefficients, dim = 1 ), &
             ndab   => size( this%workspace%real_harmonic_coefficients, dim = 2 ), &
-            wshsgs => this%workspace%wshsgs, &
-            lshsgs => size( this%workspace%wshsgs ), &
-            work   => this%workspace%work, &
-            lwork  => size( this%workspace%work ), &
+            wshsgs => this%workspace%backward_scalar, &
+            lshsgs => size( this%workspace%backward_scalar ), &
+            work   => this%workspace%legendre_workspace, &
+            lwork  => size( this%workspace%legendre_workspace ), &
             ierror => error_flag &
             )
 
@@ -2849,10 +2849,10 @@ contains
             b      => this%workspace%imaginary_harmonic_coefficients, &
             mdab   => size( this%workspace%real_harmonic_coefficients, dim = 1 ), &
             ndab   => size( this%workspace%real_harmonic_coefficients, dim = 2 ), &
-            wshsgs => this%workspace%wshsgs, &
-            lshsgs => size( this%workspace%wshsgs ), &
-            work   => this%workspace%work, &
-            lwork  => size( this%workspace%work ), &
+            wshsgs => this%workspace%backward_scalar, &
+            lshsgs => size( this%workspace%backward_scalar ), &
+            work   => this%workspace%legendre_workspace, &
+            lwork  => size( this%workspace%legendre_workspace ), &
             pertrb => perturbation, &
             ierror => error_flag &
             )
@@ -3335,10 +3335,10 @@ contains
             b      => this%workspace%imaginary_harmonic_coefficients, &
             mdab   => this%NUMBER_OF_LATITUDES, &
             ndab   => this%NUMBER_OF_LATITUDES, &
-            wshags => this%workspace%wshags, &
-            lshags => size( this%workspace%wshags ), &
-            work   => this%workspace%work, &
-            lwork  => size( this%workspace%work ), &
+            wshags => this%workspace%forward_scalar, &
+            lshags => size( this%workspace%forward_scalar ), &
+            work   => this%workspace%legendre_workspace, &
+            lwork  => size( this%workspace%legendre_workspace ), &
             ierror => error_flag &
             )
 
@@ -3599,10 +3599,10 @@ contains
             b      => this%workspace%imaginary_harmonic_coefficients, &
             mdab   => size( this%workspace%real_harmonic_coefficients, dim = 1), &
             ndab   => size( this%workspace%real_harmonic_coefficients, dim = 2), &
-            wshsgs => this%workspace%wshsgs, &
-            lshsgs => size( this%workspace%wshsgs ), &
-            work   => this%workspace%work, &
-            lwork  => size( this%workspace%work ), &
+            wshsgs => this%workspace%backward_scalar, &
+            lshsgs => size( this%workspace%backward_scalar ), &
+            work   => this%workspace%legendre_workspace, &
+            lwork  => size( this%workspace%legendre_workspace ), &
             ierror => error_flag &
             )
 
@@ -3690,14 +3690,14 @@ contains
         !            this%NUMBER_OF_LATITUDES, this%NUMBER_OF_LONGITUDES, this%SCALAR_SYMMETRIES, this%TRIANGULAR_TRUNCATION_LIMIT, &
         !            this%workspace%wshp, size( this%workspace%wshp ), &
         !            this%workspace%iwshp, size( this%workspace%iwshp ), &
-        !            this%workspace%work, size( this%workspace%work ), ierror )
+        !            this%workspace%legendre_workspace, size( this%workspace%legendre_workspace ), ierror )
         !
         !        call Shpg( &
         !            this%NUMBER_OF_LATITUDES, this%NUMBER_OF_LONGITUDES, this%SCALAR_SYMMETRIES, this%TRIANGULAR_TRUNCATION_LIMIT, &
         !            scalar_function, scalar_projection, this%NUMBER_OF_LATITUDES, &
         !            this%workspace%wshp, size( this%workspace%wshp ), &
         !            this%workspace%iwshp, size( this%workspace%iwshp ), &
-        !            this%workspace%work, size( this%workspace%work ), ierror )
+        !            this%workspace%legendre_workspace, size( this%workspace%legendre_workspace ), ierror )
 
         ierror = 0
         ! check the error flag
@@ -4019,10 +4019,10 @@ contains
             ci     => this%workspace%imaginary_azimuthal_harmonic_coefficients, &
             mdab   => size( this%workspace%real_polar_harmonic_coefficients, dim = 1 ), &
             ndab   => size( this%workspace%real_polar_harmonic_coefficients, dim = 2 ), &
-            wvhags => this%workspace%wvhags, &
-            lvhags => size( this%workspace%wvhags ), &
-            work   => this%workspace%work, &
-            lwork  => size( this%workspace%work ), &
+            wvhags => this%workspace%forward_vector, &
+            lvhags => size( this%workspace%forward_vector ), &
+            work   => this%workspace%legendre_workspace, &
+            lwork  => size( this%workspace%legendre_workspace ), &
             ierror => error_flag &
             )
 
@@ -4489,10 +4489,10 @@ contains
             ci     => this%workspace%imaginary_azimuthal_harmonic_coefficients, &
             mdab   => size( this%workspace%real_polar_harmonic_coefficients, dim = 1 ), &
             ndab   => size( this%workspace%real_polar_harmonic_coefficients, dim = 2 ), &
-            wvhsgs => this%workspace%wvhsgs, &
-            lvhsgs => size( this%workspace%wvhsgs ), &
-            work   => this%workspace%work, &
-            lwork  => size( this%workspace%work ), &
+            wvhsgs => this%workspace%backward_vector, &
+            lvhsgs => size( this%workspace%backward_vector ), &
+            work   => this%workspace%legendre_workspace, &
+            lwork  => size( this%workspace%legendre_workspace ), &
             ierror => error_flag &
             )
 

@@ -68,7 +68,7 @@ type_SpherepackWrapper.o: \
 type_TrigonometricFunctions.o \
 type_ThreeDimensionalVector.o \
 type_GaussianGrid.o\
-type_SpherepackWorkspace.o\
+type_GaussianWorkspace.o\
 type_SphericalUnitVectors.o \
 type_SpherepackWrapper.f90
 	$(FC) $(FFLAGS) -c type_SpherepackWrapper.f90 $(LINKS)\
