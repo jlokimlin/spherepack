@@ -5,7 +5,7 @@ module type_TrigonometricFunctions
         ip => INT32
 
     use type_Grid, only: &
-        Grid
+        SphericalGrid
 
     ! Explicit typing only
     implicit none
@@ -47,7 +47,7 @@ contains
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
         class (TrigonometricFunctions), intent (in out) :: this
-        class (Grid),                   intent (in)     :: grid_type
+        class (SphericalGrid),                   intent (in)     :: grid_type
         !----------------------------------------------------------------------
 
         ! Ensure that object is usable

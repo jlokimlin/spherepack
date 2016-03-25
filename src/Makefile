@@ -9,19 +9,19 @@ LINKS = \
 
 EXECUTABLE = ./build_lib.exe
 
-type_Grid.o: \
-type_Grid.f90
-	$(FC) $(FFLAGS) -c type_Grid.f90 $(LINKS)\
+type_SphericalGrid.o: \
+type_SphericalGrid.f90
+	$(FC) $(FFLAGS) -c type_SphericalGrid.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(LIB_DIRECTORY)
 	 
 type_RegularGrid.o: \
-type_Grid.o\
+type_SphericalGrid.o\
 type_RegularGrid.f90
 	$(FC) $(FFLAGS) -c type_RegularGrid.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(LIB_DIRECTORY)
 	 
 type_GaussianGrid.o: \
-type_Grid.o\
+type_SphericalGrid.o\
 type_GaussianGrid.f90
 	$(FC) $(FFLAGS) -c type_GaussianGrid.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(LIB_DIRECTORY)
@@ -49,20 +49,31 @@ type_ThreeDimensionalVector.f90
 	 -o $(OBJ_DIRECTORY)/$@ -J$(LIB_DIRECTORY)
 
 type_TrigonometricFunctions.o: \
-type_Grid.o\
+type_SphericalGrid.o\
 type_TrigonometricFunctions.f90
 	$(FC) $(FFLAGS) -c type_TrigonometricFunctions.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(LIB_DIRECTORY)
 
 type_SphericalUnitVectors.o: \
-type_Grid.o\
+type_SphericalGrid.o\
 type_TrigonometricFunctions.o\
 type_ThreeDimensionalVector.o \
 type_SphericalUnitVectors.f90
 	$(FC) $(FFLAGS) -c type_SphericalUnitVectors.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(LIB_DIRECTORY)
 
+type_Sphere.o: \
+type_TrigonometricFunctions.o \
+type_ThreeDimensionalVector.o \
+type_SphericalGrid.o\
+type_Workspace.o\
+type_SphericalUnitVectors.o \
+type_Sphere.f90
+	$(FC) $(FFLAGS) -c type_Sphere.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(LIB_DIRECTORY)
+
 type_GaussianSphere.o: \
+type_Sphere.o \
 type_TrigonometricFunctions.o \
 type_ThreeDimensionalVector.o \
 type_GaussianGrid.o\
@@ -94,9 +105,9 @@ lib:
 	mv lib$(LIB_NAME).a $(LIB_DIRECTORY)
 
 all:
-	make clean
-	make exec; $(EXECUTABLE)
-	make lib
+	$(MAKE) clean
+	$(MAKE) exec; $(EXECUTABLE)
+	$(MAKE) lib
 
 clean:
 	rm -f $(OBJS) $(LIB) $(LIB_DIRECTORY)/*.mod

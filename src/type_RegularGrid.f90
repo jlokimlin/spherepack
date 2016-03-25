@@ -5,7 +5,7 @@ module type_RegularGrid
         ip => INT32
 
     use type_Grid, only: &
-        Grid
+        SphericalGrid
 
     ! Explicit typing only
     implicit none
@@ -22,7 +22,7 @@ module type_RegularGrid
     !----------------------------------------------------------------------
 
     ! Declare derived data type
-    type, extends (Grid), public :: RegularGrid
+    type, extends (SphericalGrid), public :: RegularGrid
         !----------------------------------------------------------------------
         ! Class variables
         !----------------------------------------------------------------------

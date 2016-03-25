@@ -9,7 +9,7 @@ module type_Grid
 
     ! Everything is private unless stated otherwise
     private
-    public :: Grid
+    public :: SphericalGrid
 
     !----------------------------------------------------------------------
     ! Dictionary: global variables confined to the module
@@ -19,7 +19,7 @@ module type_Grid
     !----------------------------------------------------------------------
 
     ! Declare derived data type
-    type, abstract, public ::  Grid
+    type, abstract, public ::  SphericalGrid
         !----------------------------------------------------------------------
         ! Class variables
         !----------------------------------------------------------------------
@@ -39,7 +39,7 @@ module type_Grid
         procedure, public :: get_equally_spaced_longitudes
         procedure, public :: print_to_unformatted_binary_files
         !----------------------------------------------------------------------
-    end type Grid
+    end type SphericalGrid
 
 
 contains
@@ -49,7 +49,7 @@ contains
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
-        class (Grid), intent (in out) :: this
+        class (SphericalGrid), intent (in out) :: this
         !----------------------------------------------------------------------
 
         if ( this%initialized .eqv. .false. ) return
@@ -74,7 +74,7 @@ contains
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
-        class (Grid),           intent (in out) :: this
+        class (SphericalGrid),           intent (in out) :: this
         integer (ip),           intent (in)     :: nlon !! number of longitudinal points
         real (wp), allocatable, intent (out)    :: phi(:)  !! longitudes: 0 <= phi <= 2*pi
         !----------------------------------------------------------------------
@@ -121,7 +121,7 @@ contains
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
-        class (Grid),       intent (in out) :: this
+        class (SphericalGrid),       intent (in out) :: this
         character (len=*),  intent (in)     :: header
         !----------------------------------------------------------------------
         ! Dictionary: local variables

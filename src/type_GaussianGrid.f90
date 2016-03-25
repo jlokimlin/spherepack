@@ -5,7 +5,7 @@ module type_GaussianGrid
         ip => INT32
 
     use type_Grid, only: &
-        Grid
+        SphericalGrid
 
     !!! gaqd
 
@@ -24,7 +24,7 @@ module type_GaussianGrid
     !----------------------------------------------------------------------
 
     ! Declare derived data type
-    type, extends (Grid), public ::  GaussianGrid
+    type, extends (SphericalGrid), public ::  GaussianGrid
         !----------------------------------------------------------------------
         ! Class variables
         !----------------------------------------------------------------------

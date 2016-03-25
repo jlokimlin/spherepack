@@ -5,7 +5,7 @@ module type_SphericalUnitVectors
         ip => INT32
 
     use type_Grid, only: &
-        Grid
+        SphericalGrid
 
     use type_TrigonometricFunctions, only: &
         TrigFunctions => TrigonometricFunctions
@@ -54,7 +54,7 @@ contains
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
         class (SphericalUnitVectors),            intent (in out) :: this
-        class (Grid),                            intent (in out) :: grid_type
+        class (SphericalGrid),                            intent (in out) :: grid_type
         class (TrigFunctions), optional, target, intent (in out) :: trig_functions
         !----------------------------------------------------------------------
         ! Dictionary: local variables

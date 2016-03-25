@@ -5,6 +5,9 @@ module type_GaussianSphere
         ip => INT32, &
         stderr => ERROR_UNIT
 
+    use type_Sphere, only: &
+        Sphere
+
     use type_GaussianWorkspace, only: &
         GaussianWorkspace
 
@@ -38,29 +41,16 @@ module type_GaussianSphere
     !----------------------------------------------------------------------
 
     ! Declare derived data type
-    type, public :: GaussianSphere
+    type, extends (Sphere), public :: GaussianSphere
         !----------------------------------------------------------------------
         ! Class variables
-        !----------------------------------------------------------------------
-        logical,                       public  :: initialized = .false. !! Instantiation status
-        integer (ip),                  public  :: NUMBER_OF_LONGITUDES = 0   !! number of longitudinal points
-        integer (ip),                  public  :: NUMBER_OF_LATITUDES = 0   !! number of latitudinal points
-        integer (ip),                  public  :: TRIANGULAR_TRUNCATION_LIMIT = 0 !! triangular truncation limit
-        integer (ip),                  public  :: SCALAR_SYMMETRIES = 0 !! symmetries about the equator for scalar calculations
-        integer (ip),                  public  :: VECTOR_SYMMETRIES = 0 !! symmetries about the equator for vector calculations
-        integer (ip),                  public  :: NUMBER_OF_SYNTHESES = 0
-        integer (ip), allocatable,     public  :: INDEX_ORDER_M(:)
-        integer (ip), allocatable,     public  :: INDEX_DEGREE_N(:)
-        complex (wp), allocatable,     public  :: complex_spectral_coefficients(:)
-        type (GaussianWorkspace),      private :: workspace
-        type (GaussianGrid),           public  :: grid
-        type (TrigonometricFunctions), public  :: trigonometric_functions
-        type (SphericalUnitVectors),   public  :: unit_vectors
         !----------------------------------------------------------------------
     contains
         !----------------------------------------------------------------------
         ! Class methods
         !----------------------------------------------------------------------
+        procedure, public  :: create => create_gaussian_sphere
+        procedure, public  :: destroy => destroy_gaussian_sphere
         procedure, public  :: get_colatitude_derivative !! Vtsgs
         procedure, public  :: get_gradient !! Gradgs
         procedure, public  :: invert_gradient !!  Igradgs
@@ -69,7 +59,6 @@ module type_GaussianSphere
         procedure, public  :: get_vorticity !! Vrtgs
         procedure, public  :: invert_vorticity !! Ivrtgs
         procedure, public  :: invert_divergence_and_vorticity !! Idvtgs
-        procedure, public  :: get_scalar_laplacian !! Slapgs
         procedure, public  :: invert_helmholtz !! Islapgs
         procedure, public  :: get_vector_laplacian !! Vlapgs
         procedure, public  :: invert_vector_laplacian !! Ivlapgs
@@ -77,27 +66,15 @@ module type_GaussianSphere
         procedure, public  :: invert_stream_function_and_velocity_potential
         procedure, public  :: perform_grid_transfers
         procedure, public  :: perform_geo_math_coordinate_transfers
-        procedure, public  :: perform_scalar_analysis
-        procedure, public  :: perform_scalar_synthesis
+        procedure, public  :: perform_scalar_analysis => gaussian_scalar_analysis
+        procedure, public  :: perform_scalar_synthesis => gaussian_scalar_synthesis
         procedure, public  :: perform_scalar_projection !! Shpg
         procedure, public  :: perform_vector_analysis
         procedure, public  :: perform_vector_synthesis
         procedure, public  :: get_Legendre_functions
-        procedure, public  :: perform_complex_analysis
-        procedure, public  :: perform_complex_synthesis
-        procedure, public  :: create => create_spherepack_wrapper
-        procedure, public  :: destroy => destroy_spherepack_wrapper
-        procedure, public  :: create_spherepack_wrapper
-        procedure, public  :: destroy_spherepack_wrapper
-        procedure, public  :: get_index
-        procedure, public  :: get_coefficient
         procedure, public  :: compute_surface_integral
         procedure, public  :: get_rotation_operator
-        procedure, public  :: synthesize_from_spec
-        procedure, private :: assert_initialized
-        procedure, private :: get_scalar_symmetries
-        procedure, private :: get_vector_symmetries
-        final              :: finalize_spherepack_wrapper
+        final              :: finalize_gaussian_sphere
         !----------------------------------------------------------------------
     end type GaussianSphere
 
@@ -105,85 +82,72 @@ module type_GaussianSphere
 contains
 
 
-    subroutine create_spherepack_wrapper( this, nlat, nlon, isym, itype )
+    subroutine create_gaussian_sphere( this, nlat, nlon, isym, itype, isynt, rsphere )
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
-        class (GaussianSphere), intent (in out)  :: this
-        integer (ip),     intent (in)               :: nlat
-        integer (ip),     intent (in)               :: nlon
-        integer (ip),     intent (in), optional    :: isym      !! Either 0, 1, or 2
-        integer (ip),     intent (in), optional    :: itype     !! Either 0, 1, 2, 3, ..., 8
+        class (GaussianSphere), intent (in out)        :: this
+        integer (ip),           intent (in)            :: nlat
+        integer (ip),           intent (in)            :: nlon
+        integer (ip),           intent (in), optional  :: isym      !! Either 0, 1, or 2
+        integer (ip),           intent (in), optional  :: itype     !! Either 0, 1, 2, 3, ..., 8
+        integer (ip),           intent (in), optional  :: isynt
+        real (wp),              intent (in), optional  :: rsphere
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
-        !--------------------------------------------------------------------------------
-        integer (ip) :: m, n !! Counters
-        !--------------------------------------------------------------------------------
+        !----------------------------------------------------------------------
+        integer (ip) :: scalar_sym
+        integer (ip) :: vector_sym
+        integer (ip) :: num_synt
+        real (wp)    :: radius
+        !----------------------------------------------------------------------
 
         ! Ensure that object is usable
-        call this%destroy_spherepack_wrapper()
+        call this%destroy()
 
-        ! Set constants
-        this%NUMBER_OF_LATITUDES = nlat
-        this%NUMBER_OF_LONGITUDES = nlon
-        this%TRIANGULAR_TRUNCATION_LIMIT = nlat - 1 !! Set triangular truncation
-        this%NUMBER_OF_SYNTHESES = 1
+        ! Allocate polymorphic components
+        allocate( GaussianGrid :: this%grid )
+        allocate( GaussianWorkspace :: this%workspace )
 
-        ! Set scalar symmetries
-        if ( present( isym ) ) then
-            call this%get_scalar_symmetries( isym )
-        end if
-
-        ! Set vector symmetries
-        if (present (itype) ) then
-            call this%get_vector_symmetries( itype )
-        end if
-
-        ! Allocate memory
-        associate( nm_dim => nlat * (nlat + 1)/2 )
-            ! Allocate pointer for complex spectral coefficients
-            allocate( &
-                this%INDEX_ORDER_M(nm_dim), &
-                this%INDEX_DEGREE_N(nm_dim), &
-                this%complex_spectral_coefficients(nm_dim), &
-                stat=allocate_status &
-                )
-            ! Check allocate status
-            if ( allocate_status /= 0 ) then
-                error stop 'TYPE (SpherepackWrapper): '&
-                    //'Allocation failed in CREATE_spherepack_wrapper'
-            end if
-        end associate
-
-        ! Fill arrays
-        associate( &
-            ntrunc => this%TRIANGULAR_TRUNCATION_LIMIT, &
-            indxm => this%INDEX_ORDER_M, &
-            indxn => this%INDEX_DEGREE_N &
-            )
-            indxm = [ ((m, n = m, ntrunc), m = 0, ntrunc) ]
-            indxn = [ ((n, n = m, ntrunc), m = 0, ntrunc) ]
-        end associate
-
-        ! Allocate memory for derived data types
+        ! Initialize polymorphic types
         associate( &
             grid => this%grid, &
-            workspace => this%workspace, &
-            trig_func => this%trigonometric_functions, &
-            unit_vectors => this%unit_vectors &
+            workspace => this%workspace &
             )
-            call grid%create( nlat, nlon )
-            call workspace%create( nlat, nlon )
-            call trig_func%create( grid )
-            call unit_vectors%create( grid, trig_func )
+            ! Initialize gaussian grid
+            select type (grid)
+                class is (GaussianGrid)
+                call grid%create( nlat, nlon )
+            end select
+            ! Initialize gaussian workspace
+            select type (workspace)
+                class is (GaussianWorkspace)
+                call workspace%create( nlat, nlon )
+            end select
         end associate
+
+        ! Initialize constants
+        scalar_sym = 0
+        vector_sym = 0
+        num_synt = 1
+        radius = 1.0_wp
+
+        ! Address optional arguments
+        if (present(isym)) scalar_sym = isym
+        if (present(itype)) vector_sym = itype
+        if (present(isynt)) num_synt = isynt
+        if (present(rsphere)) radius = rsphere
+
+        ! Create parent type
+        call this%create_sphere( nlat, nlon, scalar_sym, vector_sym, num_synt, radius )
 
         ! Set initialization flag
         this%initialized = .true.
         
-    end subroutine create_spherepack_wrapper
+    end subroutine create_gaussian_sphere
 
-    subroutine destroy_spherepack_wrapper( this )
+
+    subroutine destroy_gaussian_sphere( this )
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
@@ -193,397 +157,15 @@ contains
         ! Check flag
         if ( this%initialized .eqv. .false. ) return
 
-        ! Release memory
-        if (allocated(this%INDEX_ORDER_M)) deallocate(this%INDEX_ORDER_M)
-        if (allocated(this%INDEX_DEGREE_N)) deallocate(this%INDEX_DEGREE_N)
-        if (allocated(this%complex_spectral_coefficients)) &
-            deallocate(this%complex_spectral_coefficients)
-
-
-        ! Release memory from derived data types
-        call this%grid%destroy()
-        call this%workspace%destroy()
-        call this%trigonometric_functions%destroy()
-        call this%unit_vectors%destroy()
-
-        ! Reset constants
-        this%NUMBER_OF_LONGITUDES = 0
-        this%NUMBER_OF_LATITUDES = 0
-        this%TRIANGULAR_TRUNCATION_LIMIT = 0
-        this%SCALAR_SYMMETRIES = 0
-        this%VECTOR_SYMMETRIES = 0
-        this%NUMBER_OF_SYNTHESES = 0
+        ! Release memory from parent type
+        call this%destroy_sphere()
 
         ! Reset initialization flag
         this%initialized = .false.
 
-    end subroutine destroy_spherepack_wrapper
-    !
-    
-    !
-    subroutine assert_initialized( this )
-        !
-        !< Purpose:
-        !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
-        !----------------------------------------------------------------------
-        class (GaussianSphere), intent (in out)    :: this
-        !----------------------------------------------------------------------
-
-        ! Check status
-        if ( .not. this%initialized ) then
-
-            write( stderr, '(A)' ) 'TYPE (SpherepackWrapper)'
-            write( stderr, '(A)' ) 'You must instantiate object before calling methods'
-
-        end if
-
-    end subroutine assert_initialized
-    !
-    
-    !
-    function get_index( this, n, m ) result( return_value )
-        !
-        !< Purpose:
-        ! The spectral data is assumed to be in a complex array of dimension
-        ! (MTRUNC+1)*(MTRUNC+2)/2. MTRUNC is the triangular truncation limit
-        ! (MTRUNC = 42 for T42). MTRUNC must be <= nlat-1.
-        !
-        ! The coefficients are ordered so that
-        !
-        ! first (nm=1)  is m=0, n=0, second (nm=2) is m=0, n=1,
-        ! nm=MTRUNC is m=0, n=MTRUNC, nm=MTRUNC+1 is m=1, n=1, etc.
-        !
-        ! In other words,
-        !
-        ! 00, 01, 02, 03, 04.........0MTRUNC
-        !     11, 12, 13, 14.........1MTRUNC
-        !         22, 23, 24.........2MTRUNC
-        !             33, 34.........3MTRUNC
-        !                 44.........4MTRUNC
-        !                    .
-        !                      .
-        !                        .etc...
-        !
-        ! In modern Fortran syntax, values of m (degree) and n (order)
-        ! as a function of the index nm are:
-        !
-        ! integer (ip), dimension ((MTRUNC+1)*(MTRUNC+2)/2) :: indxm, indxn
-        ! indxm = [((m, n=m, MTRUNC), m=0, MTRUNC)]
-        ! indxn = [((n, n=m, MTRUNC), m=0, MTRUNC)]
-        !
-        ! Conversely, the index nm as a function of m and n is:
-        ! nm = sum([(i, i=MTRUNC+1, MTRUNC-m+2, -1)])+n-m+1
-        !
-        !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
-        !----------------------------------------------------------------------
-        class (GaussianSphere), intent (in out)  :: this
-        integer (ip),     intent (in)      :: n
-        integer (ip),     intent (in)      :: m
-        integer (ip):: return_value
-        !----------------------------------------------------------------------
-        ! Dictionary: local variables
-        !----------------------------------------------------------------------
-        integer (ip):: i !! Counter
-        !----------------------------------------------------------------------
-
-        associate( ntrunc => this%TRIANGULAR_TRUNCATION_LIMIT )
-            if ( m <= n .and. max( n, m ) <= ntrunc ) then
-                return_value = &
-                    sum ( [ (i, i = ntrunc+1, ntrunc - m + 2, - 1) ] ) + n - m + 1
-            else
-                return_value = -1
-            end if
-        end associate
-
-    end function get_index
+    end subroutine destroy_gaussian_sphere
 
 
-    function get_coefficient( this, n, m ) result ( return_value )
-        !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
-        !----------------------------------------------------------------------
-        class (GaussianSphere), intent (in out) :: this
-        integer (ip),     intent (in)              :: n
-        integer (ip),     intent (in)              :: m
-        complex (wp)                               :: return_value
-        !----------------------------------------------------------------------
-
-        associate( &
-            ntrunc => this%TRIANGULAR_TRUNCATION_LIMIT, &
-            nm  => this%get_index( n, m ), &
-            nm_conjg => this%get_index(n, -m ), &
-            psi => this%complex_spectral_coefficients &
-            )
-            if ( m < 0 .and. nm_conjg > 0 ) then
-                return_value = ( (-1.0_wp)**(-m) ) * conjg( psi(nm_conjg) )
-            else if ( nm > 0 ) then
-                return_value = psi(nm)
-            else
-                return_value = 0.0_wp
-            end if
-        end associate
-
-    end function get_coefficient
-
-
-    subroutine get_scalar_symmetries( this, isym )
-        !
-        !< Purpose:
-        !
-        !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
-        !----------------------------------------------------------------------
-        class (GaussianSphere), intent (in out) :: this
-        integer (ip),              intent (in)     :: isym
-        !----------------------------------------------------------------------
-
-        select case (isym)
-            case (2)
-                this%SCALAR_SYMMETRIES = isym
-            case (1)
-                this%SCALAR_SYMMETRIES = isym
-            case (0)
-                this%SCALAR_SYMMETRIES = isym
-            case default
-                ! Handle invalid symmetry arguments
-                write( stderr, '(A)' )     'TYPE (SpherepackWrapper) in get_SCALAR_SYMMETRIES'
-                write( stderr, '(A, I2)' ) 'Optional argument isym = ', isym
-                write( stderr, '(A)' )     'must be either 0, 1, or 2 (default isym = 0)'
-        end select
-
-    end subroutine get_scalar_symmetries
-        !
-    
-    !
-    subroutine get_vector_symmetries( this, itype )
-        !
-        !< Purpose:
-        !
-        !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
-        !----------------------------------------------------------------------
-        class (GaussianSphere), intent (in out)  :: this
-        integer (ip),     intent (in)      :: itype
-        !----------------------------------------------------------------------
-
-        select case (itype)
-            case (8)
-                this%VECTOR_SYMMETRIES = itype
-            case (7)
-                this%VECTOR_SYMMETRIES = itype
-            case (6)
-                this%VECTOR_SYMMETRIES = itype
-            case (5)
-                this%VECTOR_SYMMETRIES = itype
-            case (4)
-                this%VECTOR_SYMMETRIES = itype
-            case (3)
-                this%VECTOR_SYMMETRIES = itype
-            case (2)
-                this%VECTOR_SYMMETRIES = itype
-            case (1)
-                this%VECTOR_SYMMETRIES = itype
-            case (0)
-                this%VECTOR_SYMMETRIES = itype
-            case default
-                ! Handle invalid symmetry arguments
-                write( stderr, '(A)' )     'TYPE (SpherepackWrapper) in get_VECTOR_SYMMETRIES'
-                write( stderr, '(A, I2)' ) 'Optional argument itype = ', itype
-                write( stderr, '(A)' )     'must be either 0, 1, 2, ..., 8 (default itype = 0)'
-        end select
-
-    end subroutine get_vector_symmetries
-    !
-    
-    !
-    subroutine perform_complex_analysis( this, scalar_function )
-        !
-        !<Purpose:
-        !
-        ! Converts gridded input array (scalar_function) to (complex)
-        ! spherical harmonic coefficients (psi).
-        !
-        ! The spectral data is assumed to be in a complex array of dimension
-        ! (mtrunc+1)*(mtrunc+2)/2, whre mtrunc is the triangular truncation limit,
-        ! for instance, mtrunc = 42 for T42.
-        ! mtrunc must be <= nlat-1.
-        ! Coefficients are ordered so that first (nm=1) is m=0, n=0, second is m=0, n=1,
-        ! nm=mtrunc is m=0, n=mtrunc, nm=mtrunc+1 is m=1, n=1, etc.
-        !
-        ! In modern Fortran syntax, values of m (degree) and n (order) as a function
-        ! of the index nm are:
-        !
-        ! integer (ip), dimension ((mtrunc+1)*(mtrunc+2)/2) :: indxm, indxn
-        ! indxm = [((m, n=m, mtrunc), m=0, mtrunc)]
-        ! indxn = [((n, n=m, mtrunc), m=0, mtrunc)]
-        !
-        ! Conversely, the index nm as a function of m and n is:
-        ! nm = sum([(i, i=mtrunc+1, mtrunc-m+2, -1)])+n-m+1
-        !
-        !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
-        !----------------------------------------------------------------------
-        class (GaussianSphere), intent (in out)  :: this
-        real (wp),                 intent (in)      :: scalar_function(:,:)
-        !----------------------------------------------------------------------
-        ! Dictionary: local variables
-        !----------------------------------------------------------------------
-        integer (ip):: m  !< counters
-        integer (ip)::  n  !< counters
-        !----------------------------------------------------------------------
-        
-        !----------------------------------------------------------------------
-        ! Check if object is usable
-        !----------------------------------------------------------------------
-
-        call this%assert_initialized()
-        
-        !----------------------------------------------------------------------
-        ! compute the (real) spherical harmonic coefficients
-        !----------------------------------------------------------------------
-
-        call this%perform_scalar_analysis( scalar_function )
-
-        !----------------------------------------------------------------------
-        ! Set complex spherical harmonic coefficients
-        !----------------------------------------------------------------------
-
-        associate( &
-            ntrunc => this%TRIANGULAR_TRUNCATION_LIMIT, & ! set the triangular truncation limit
-            a => this%workspace%real_harmonic_coefficients, &
-            b => this%workspace%imaginary_harmonic_coefficients, &
-            psi => this%complex_spectral_coefficients &
-            )
-
-            ! Fill complex array
-            psi = cmplx( &
-                0.5_wp * [((a(m + 1, n + 1), n = m, ntrunc), m = 0, ntrunc)], &
-                0.5_wp * [((b(m + 1, n + 1), n = m, ntrunc), m = 0, ntrunc)], &
-                wp )
-        end associate
-
-    end subroutine perform_complex_analysis
-
-
-    subroutine perform_complex_synthesis( this, scalar_function )
-        !
-        !< Purpose:
-        ! converts gridded input array (datagrid) to (complex) spherical harmonic coefficients
-        ! (dataspec).
-        !
-        !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
-        !----------------------------------------------------------------------
-        class (GaussianSphere), intent (in out)  :: this
-        real (wp),                 intent (out)     :: scalar_function(:,:)
-        !----------------------------------------------------------------------
-        ! Dictionary: local variables
-        !----------------------------------------------------------------------
-        integer (ip):: m  !! Counters
-        integer (ip):: n  !! Counters
-        !----------------------------------------------------------------------
-
-        !----------------------------------------------------------------------
-        ! Check if object is usable
-        !----------------------------------------------------------------------
-
-        call this%assert_initialized()
-
-        ! Convert complex spherical harmonic coefficients to real version
-        associate( &
-            ntrunc => this%TRIANGULAR_TRUNCATION_LIMIT, & ! set the triangular truncation limit
-            a => this%workspace%real_harmonic_coefficients, &
-            b => this%workspace%imaginary_harmonic_coefficients, &
-            psi => this%complex_spectral_coefficients &
-            )
-            ! Fill real arrays with contents of spec
-            do m = 0, ntrunc
-                do n = m, ntrunc
-                    ! set the spectral index
-                    associate(nm => this%get_index( n, m ))
-                        ! set the real component
-                        a( m + 1, n + 1 ) = 2.0_wp * real( psi(nm) )
-                        ! set the imaginary component
-                        b( m + 1, n + 1 ) = 2.0_wp * aimag( psi(nm) )
-                    end associate
-                end do
-            end do
-        end associate
-
-        ! synthesise the scalar function from the (real) harmonic coefficients
-        call this%perform_scalar_synthesis( scalar_function )
- 
-    end subroutine perform_complex_synthesis
-    !
-    
-    !
-    subroutine synthesize_from_spec( this, spec, scalar_function )
-        !
-        !< Purpose:
-        !
-        ! Used mainly for testing
-        !
-        !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
-        !----------------------------------------------------------------------
-        class (GaussianSphere), intent (in out)  :: this
-        complex (wp),              intent (in)      :: spec(:)
-        real (wp),                 intent (out)     :: scalar_function(:,:)
-        !----------------------------------------------------------------------
-        ! Dictionary: local variables
-        !----------------------------------------------------------------------
-        integer (ip):: m  !! Counters
-        integer (ip):: n  !! Counters
-        !----------------------------------------------------------------------
-
-        !----------------------------------------------------------------------
-        ! Check if object is usable
-        !----------------------------------------------------------------------
-
-        call this%assert_initialized()
-
-        !----------------------------------------------------------------------
-        ! Convert complex coefficients to real version
-        !----------------------------------------------------------------------
-
-        associate( &
-            ntrunc => this%TRIANGULAR_TRUNCATION_LIMIT, & ! set the triangular truncation limit
-            a      => this%workspace%real_harmonic_coefficients, &
-            b      => this%workspace%imaginary_harmonic_coefficients &
-            )
- 
-            ! fill real arrays with contents of spec
-            do m = 0, ntrunc
-                do n = m, ntrunc
-                
-                    ! set the spectral index
-                    spec_index: associate( nm => this%get_index( n, m ) )
-                
-                        ! set the real component
-                        a(m + 1, n + 1) = 2.0_wp * real( spec(nm) )
-                
-                        ! set the imaginary component
-                        b(m + 1, n + 1) = 2.0_wp * aimag( spec(nm) )
-
-                    end associate spec_index
-
-                end do
-            end do
-        
-        end associate
-
-        !----------------------------------------------------------------------
-        ! synthesise the scalar function from the (real) harmonic coefficients
-        !----------------------------------------------------------------------
-
-        call this%perform_scalar_synthesis( scalar_function )
- 
-    end subroutine synthesize_from_spec
-    !
-    
-    !
     subroutine get_rotation_operator( this, scalar_function, rotation_operator)
         !
         !----------------------------------------------------------------------
@@ -716,12 +298,12 @@ contains
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
         class (GaussianSphere), intent (in out) :: this
-        real (wp),                 intent (in)     :: scalar_function(:,:)
-        real (wp)                                   :: return_value
+        real (wp),              intent (in)     :: scalar_function(:,:)
+        real (wp)                               :: return_value
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
-        integer (ip)            :: k            !! counter
+        integer (ip)           :: k  !! counter
         real (wp), allocatable :: summation(:)
         !----------------------------------------------------------------------
 
@@ -731,79 +313,41 @@ contains
 
         call this%assert_initialized()
 
-        !----------------------------------------------------------------------
-        ! Allocate array
-        !----------------------------------------------------------------------
-
+        ! Allocate memory
         associate( nlat => this%NUMBER_OF_LATITUDES )
-
-            ! Allocate array
-            allocate( &
-                summation( nlat ), &
-                stat=allocate_status &
-                )
-
-            ! Check allocation status
-            if ( allocate_status /= 0 ) then
-
-                write( stderr, '(A)' ) 'TYPE (SpherepackWrapper)'
-                write( stderr, '(A)' ) 'Allocation failed in COMPUTE_SURFACE_INTEGRAL'
-
-
-            end if
-
+            allocate(summation(nlat))
         end associate
 
-        !----------------------------------------------------------------------
-        ! compute integral
-        !----------------------------------------------------------------------
-
-        ! Initialize array
-        summation = 0.0_wp
-
         ! compute the integrant
-        associate( &
-            nlat => this%NUMBER_OF_LATITUDES, &
-            Dphi => this%grid%LONGITUDINAL_MESH, &
-            wts  => this%grid%gaussian_weights, &
-            f    => scalar_function &
-            )
-
-            ! Apply trapezoidal rule
-            do k = 1, nlat
-
-                summation(k) = sum( f(k, :) ) * dphi
-
-            end do
-
-            ! Apply gaussian quadrature
-            summation = summation * wts
-
+        associate( grid => this%grid )
+            select type(grid)
+                class is (GaussianGrid)
+                associate( &
+                    nlat => grid%NUMBER_OF_LATITUDES, &
+                    dphi => grid%LONGITUDINAL_MESH, &
+                    wts => grid%gaussian_weights, &
+                    f => scalar_function &
+                    )
+                    ! Apply trapezoidal rule
+                    do k = 1, nlat
+                        summation(k) = sum(f(k,:)) * dphi
+                    end do
+                    ! Apply gaussian quadrature
+                    summation = summation * wts
+                end associate
+            end select
         end associate
 
         ! Set integral \int_{S^2} f( theta, phi ) dS
         return_value = sum( summation )
 
-        !----------------------------------------------------------------------
-        ! Deallocate array
-        !----------------------------------------------------------------------
-
-        deallocate( &
-            summation, &
-            stat=deallocate_status &
-            )
-
-        ! Check deallocate status
-        if ( deallocate_status /= 0 ) then
-            write( stderr, '(A)' ) 'TYPE (SpherepackWrapper)'
-            write( stderr, '(A)' ) 'Deallocation failed in COMPUTE_SURFACE_INTEGRAL'
-
-        end if
+        ! Release memory
+        deallocate( summation )
 
     end function compute_surface_integral
-    !
     
-    !
+
+
     subroutine compute_first_moment( this, scalar_function, first_moment )
         !
         !< Purpose:
@@ -2265,323 +1809,6 @@ contains
     end subroutine invert_divergence_and_vorticity
     !
     
-    !
-    subroutine get_scalar_laplacian( this, scalar_function, scalar_laplacian )
-        !
-        ! References:
-        ! http://www2.cisl.ucar.edu/spherepack/documentation#slapgs.html
-        !
-        ! Documentation: SPHEREPACK 3.2
-        !
-        !
-        !     subroutine slapgs(nlat, nlon, isym, nt, slap, ids, jds, a, b,
-        !    mdab, ndab, wshsgs, lshsgs, work, lwork, ierror)
-        !
-        !
-        !     given the scalar spherical harmonic coefficients a and b, precomputed
-        !     by subroutine shags for a scalar field sf, subroutine slapgs computes
-        !     the laplacian of sf in the scalar array slap.  slap(i, j) is the
-        !     laplacian of sf at the gaussian colatitude theta(i) (see nlat as
-        !     an input parameter) and east longitude lambda(j) = (j-1)*2*pi/nlon
-        !     on the sphere.  i.e.
-        !
-        !         slap(i, j) =
-        !
-        !                  2                2
-        !         [1/sint*d (sf(i, j)/dlambda + d(sint*d(sf(i, j))/dtheta)/dtheta]/sint
-        !
-        !
-        !     where sint = sin(theta(i)).  the scalar laplacian in slap has the
-        !     same symmetry or absence of symmetry about the equator as the scalar
-        !     field sf.  the input parameters isym, nt, mdab, ndab must have the
-        !     same values used by shags to compute a and b for sf. the associated
-        !     legendre functions are stored rather than recomputed as they are
-        !     in subroutine slapgc.
-        !
-        !     input parameters
-        !
-        !     nlat   the number of points in the gaussian colatitude grid on the
-        !            full sphere. these lie in the interval (0, pi) and are computed
-        !            in radians in theta(1) <...< theta(nlat) by subroutine gaqd.
-        !            if nlat is odd the equator will be included as the grid point
-        !            theta((nlat+1)/2).  if nlat is even the equator will be
-        !            excluded as a grid point and will lie half way between
-        !            theta(nlat/2) and theta(nlat/2+1). nlat must be at least 3.
-        !            note: on the half sphere, the number of grid points in the
-        !            colatitudinal direction is nlat/2 if nlat is even or
-        !            (nlat+1)/2 if nlat is odd.
-        !
-        !     nlon   the number of distinct longitude points.  nlon determines
-        !            the grid increment in longitude as 2*pi/nlon. for example
-        !            nlon = 72 for a five degree grid. nlon must be greater
-        !            than zero. the axisymmetric case corresponds to nlon=1.
-        !            the efficiency of the computation is improved when nlon
-        !            is a product of small prime numbers.
-        !
-        !     isym   this parameter should have the same value input to subroutine
-        !            shags to compute the coefficients a and b for the scalar field
-        !            sf.  isym is set as follows:
-        !
-        !            = 0  no symmetries exist in sf about the equator. scalar
-        !                 synthesis is used to compute slap on the entire sphere.
-        !                 i.e., in the array slap(i, j) for i=1, ..., nlat and
-        !                 j=1, ..., nlon.
-        !
-        !           = 1  sf and slap are antisymmetric about the equator. the
-        !                synthesis used to compute slap is performed on the
-        !                northern hemisphere only.  if nlat is odd, slap(i, j) is
-        !                computed for i=1, ..., (nlat+1)/2 and j=1, ..., nlon.  if
-        !                nlat is even, slap(i, j) is computed for i=1, ..., nlat/2
-        !                and j=1, ..., nlon.
-        !
-        !
-        !           = 2  sf and slap are symmetric about the equator. the
-        !                synthesis used to compute slap is performed on the
-        !                northern hemisphere only.  if nlat is odd, slap(i, j) is
-        !                computed for i=1, ..., (nlat+1)/2 and j=1, ..., nlon.  if
-        !                nlat is even, slap(i, j) is computed for i=1, ..., nlat/2
-        !                and j=1, ..., nlon.
-        !
-        !
-        !     nt     the number of analyses.  in the program that calls slapgs
-        !            the arrays slap, a, and b can be three dimensional in which
-        !            case multiple synthesis will be performed.  the third index
-        !            is the synthesis index which assumes the values k=1, ..., nt.
-        !            for a single analysis set nt=1. the description of the
-        !            remaining parameters is simplified by assuming that nt=1
-        !            or that all the arrays are two dimensional.
-        !
-        !   ids      the first dimension of the array slap as it appears in the
-        !            program that calls slapgs.  if isym = 0 then ids must be at
-        !            least nlat.  if isym > 0 and nlat is even then ids must be
-        !            at least nlat/2. if isym > 0 and nlat is odd then ids must
-        !            be at least (nlat+1)/2.
-        !
-        !   jds      the second dimension of the array slap as it appears in the
-        !            program that calls slapgs. jds must be at least nlon.
-        !
-        !
-        !   a, b      two or three dimensional arrays (see input parameter nt)
-        !            that contain scalar spherical harmonic coefficients
-        !            of the scalar field sf as computed by subroutine shags.
-        !     ***    a, b must be computed by shags prior to calling slapgs.
-        !
-        !
-        !    mdab    the first dimension of the arrays a and b as it appears
-        !            in the program that calls slapgs.  mdab must be at
-        !            least min0(nlat, (nlon+2)/2) if nlon is even or at least
-        !            min0(nlat, (nlon+1)/2) if nlon is odd.
-        !
-        !    ndab    the second dimension of the arrays a and b as it appears
-        !            in the program that calls slapgs. ndbc must be at least
-        !            least nlat.
-        !
-        !            mdab, ndab should have the same values input to shags to
-        !            compute the coefficients a and b.
-        !
-        !
-        !    wshsgs  an array which must be initialized by subroutine slapgsi
-        !            (or equivalently by shsgsi).  once initialized, wshsgs
-        !            can be used repeatedly by slapgs as long as nlat and nlon
-        !            remain unchanged.  wshsgs must not be altered between calls
-        !            of slapgs.
-        !
-        !    lshsgs  the dimension of the array wshsgs as it appears in the
-        !            program that calls slapgs.  let
-        !
-        !               l1 = min0(nlat, (nlon+2)/2) if nlon is even or
-        !               l1 = min0(nlat, (nlon+1)/2) if nlon is odd
-        !
-        !            and
-        !
-        !               l2 = nlat/2        if nlat is even or
-        !               l2 = (nlat+1)/2    if nlat is odd
-        !
-        !            then lshsgs must be at least
-        !
-        !               nlat*(3*(l1+l2)-2)+(l1-1)*(l2*(2*nlat-l1)-3*l1)/2+nlon+15
-        !
-        !
-        !     work   a work array that does not have to be saved.
-        !
-        !     lwork  the dimension of the array work as it appears in the
-        !            program that calls slapgs. define
-        !
-        !               l2 = nlat/2                    if nlat is even or
-        !               l2 = (nlat+1)/2                if nlat is odd
-        !               l1 = min0(nlat, (nlon+2)/2) if nlon is even or
-        !               l1 = min0(nlat, (nlon+1)/2) if nlon is odd
-        !
-        !            if isym is zero then lwork must be at least
-        !
-        !               (nt+1)*nlat*nlon + nlat*(2*nt*l1+1)
-        !
-        !            if isym is nonzero lwork must be at least
-        !
-        !               (nt+1)*l2*nlon + nlat*(2*nt*l1+1)
-        !
-        !
-        !     **************************************************************
-        !
-        !     output parameters
-        !
-        !
-        !    slap    a two or three dimensional arrays (see input parameter nt) that
-        !            contain the scalar laplacian of the scalar field sf.  slap(i, j)
-        !            is the scalar laplacian at the gaussian colatitude theta(i)
-        !            and longitude lambda(j) = (j-1)*2*pi/nlon for i=1, ..., nlat
-        !            and j=1, ..., nlon.
-        !
-        !
-        !  ierror    a parameter which flags errors in input parameters as follows:
-        !
-        !            = 0  no errors detected
-        !
-        !            = 1  error in the specification of nlat
-        !
-        !            = 2  error in the specification of nlon
-        !
-        !            = 3  error in the specification of ityp
-        !
-        !            = 4  error in the specification of nt
-        !
-        !            = 5  error in the specification of ids
-        !
-        !            = 6  error in the specification of jds
-        !
-        !            = 7  error in the specification of mdbc
-        !
-        !            = 8  error in the specification of ndbc
-        !
-        !            = 9  error in the specification of lshsgs
-        !
-        !            = 10 error in the specification of lwork
-        !
-        !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
-        !----------------------------------------------------------------------
-        class (GaussianSphere), intent (in out) :: this
-        real (wp),        intent (in)     :: scalar_function(:,:)
-        real (wp),        intent (out)    :: scalar_laplacian(:,:)
-        !----------------------------------------------------------------------
-        ! Dictionary: local variables
-        !----------------------------------------------------------------------
-        integer (ip):: error_flag
-        !----------------------------------------------------------------------
-
-        !----------------------------------------------------------------------
-        ! Check if object is usable
-        !----------------------------------------------------------------------
-
-        call this%assert_initialized()
-
-        !----------------------------------------------------------------------
-        ! Set (real) scalar spherica harmonic coefficients
-        !----------------------------------------------------------------------
-
-        call this%perform_scalar_analysis( scalar_function )
-
-        !----------------------------------------------------------------------
-        ! Invoke SPHEREPACK 3.2
-        !----------------------------------------------------------------------
-
-        associate( &
-            nlat   => this%NUMBER_OF_LATITUDES, &
-            nlon   => this%NUMBER_OF_LONGITUDES, &
-            isym   => this%SCALAR_SYMMETRIES, &
-            nt     => this%NUMBER_OF_SYNTHESES, &
-            slap   => scalar_laplacian, &
-            ids    => size( scalar_laplacian, dim = 1), &
-            jds    => size( scalar_laplacian, dim = 2), &
-            a      => this%workspace%real_harmonic_coefficients, &
-            b      => this%workspace%imaginary_harmonic_coefficients, &
-            mdab   => size( this%workspace%real_harmonic_coefficients, dim = 1 ), &
-            ndab   => size( this%workspace%real_harmonic_coefficients, dim = 2 ), &
-            wshsgs => this%workspace%backward_scalar, &
-            lshsgs => size( this%workspace%backward_scalar ), &
-            work   => this%workspace%legendre_workspace, &
-            lwork  => size( this%workspace%legendre_workspace ), &
-            ierror => error_flag &
-            )
-
-            call Slapgs( nlat, nlon, isym, nt, slap, ids, jds, a, b, &
-                mdab, ndab, wshsgs, lshsgs, work, lwork, ierror )
-
-        end associate
-
-        !----------------------------------------------------------------------
-        ! Address the error flag
-        !----------------------------------------------------------------------
-
-        if ( error_flag == 0 ) then
-
-            return
-
-        else
-
-            write( stderr, '(A)') 'SPHEREPACK 3.2 error: get_SCALAR_LAPLACIAN'
-
-            if ( error_flag == 1 ) then
-
-                write( stderr, '(A)') 'Error in the specification of NLAT'
-
-            else if ( error_flag == 2 ) then
-
-                write( stderr, '(A)') 'Error in the specification of NLON'
-
-            else if ( error_flag == 3 ) then
-
-                write( stderr, '(A)') 'Error in the specification of VECTOR_SYMMETRIES'
-
-            else if (error_flag == 4) then
-
-                write( stderr, '(A)') 'Error in the specification of NUMBER_OF_synthESES'
-
-            else if ( error_flag == 5 ) then
-
-                write( stderr, '(A)') 'Invalid extent for SCALAR_LAPLACIAN'
-                write( stderr, '(A)') 'size( SCALAR_LAPLACIAN, dim = 1 )'
-
-            else if ( error_flag == 6 ) then
-
-                write( stderr, '(A)') 'Invalid extent for SCALAR_LAPLACIAN'
-                write( stderr, '(A)') 'size( SCALAR_LAPLACIAN, dim = 2 )'
-
-            else if ( error_flag == 7 ) then
-
-                write( stderr, '(A)') 'Invalid extent for '
-                write( stderr, '(A)') 'REAL_HARMONIC_COEFFICIENTS (A) '
-                write( stderr, '(A)') 'or'
-                write( stderr, '(A)') 'IMAGINARY_HARMONIC_COEFFICIENTS (B)'
-                write( stderr, '(A)') 'size( SOLUTION, dim = 1 )'
-
-            else if ( error_flag == 8 ) then
-
-                write( stderr, '(A)') 'Invalid extent for '
-                write( stderr, '(A)') 'REAL_HARMONIC_COEFFICIENTS (A) '
-                write( stderr, '(A)') 'or'
-                write( stderr, '(A)') 'IMAGINARY_HARMONIC_COEFFICIENTS (B)'
-                write( stderr, '(A)') 'size( SOLUTION, dim = 2 )'
-
-            else if ( error_flag == 9 ) then
-
-                write( stderr, '(A)') 'Invalid extent for WSHSGS'
-                write( stderr, '(A)') 'size( WSHSGS )'
-
-            else if ( error_flag == 10 ) then
-
-                write( stderr, '(A)') 'Invalid extent for WORK'
-                write( stderr, '(A)') 'size( WORK )'
-
-            else
-
-                write( stderr, '(A)') 'Undetermined error flag'
-
-            end if
-        end if
-
-    end subroutine get_scalar_laplacian
-    !
     
     !
     subroutine invert_helmholtz( this, &
@@ -3103,240 +2330,57 @@ contains
         end if
 
     end subroutine perform_geo_math_coordinate_transfers
-    !
     
-    !
-    subroutine perform_scalar_analysis( this, scalar_function )
-        !
-        ! Reference:
-        ! https://www2.cisl.ucar.edu/spherepack/documentation#shags.html
-        !
-        ! SPHEREPACK 3.2 documentation
-        !
-        !     subroutine shags(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, &
-        !                      wshags, lshags, work, lwork, ierror)
-        !
-        !     subroutine shags performs the spherical harmonic analysis
-        !     on the array g and stores the result in the arrays a and b.
-        !     the analysis is performed on a gaussian grid in colatitude
-        !     and an equally spaced grid in longitude.  the associated
-        !     legendre functions are stored rather than recomputed as they
-        !     are in subroutine shagc.  the analysis is described below
-        !     at output parameters a, b.
-        !
-        !     input parameters
-        !
-        !     nlat   the number of points in the gaussian colatitude grid on the
-        !            full sphere. these lie in the interval (0, pi) and are compu
-        !            in radians in theta(1), ..., theta(nlat) by subroutine gaqd.
-        !            if nlat is odd the equator will be included as the grid poi
-        !            theta((nlat+1)/2).  if nlat is even the equator will be
-        !            excluded as a grid point and will lie half way between
-        !            theta(nlat/2) and theta(nlat/2+1). nlat must be at least 3.
-        !            note: on the half sphere, the number of grid points in the
-        !            colatitudinal direction is nlat/2 if nlat is even or
-        !            (nlat+1)/2 if nlat is odd.
-        !
-        !     nlon   the number of distinct londitude points.  nlon determines
-        !            the grid increment in longitude as 2*pi/nlon. for example
-        !            nlon = 72 for a five degree grid. nlon must be greater
-        !            than or equal to 4. the efficiency of the computation is
-        !            improved when nlon is a product of small prime numbers.
-        !
-        !     isym   = 0  no symmetries exist about the equator. the analysis
-        !                 is performed on the entire sphere.  i.e. on the
-        !                 array g(i, j) for i=1, ..., nlat and j=1, ..., nlon.
-        !                 (see description of g below)
-        !
-        !            = 1  g is antisymmetric about the equator. the analysis
-        !                 is performed on the northern hemisphere only.  i.e.
-        !                 if nlat is odd the analysis is performed on the
-        !                 array g(i, j) for i=1, ..., (nlat+1)/2 and j=1, ..., nlon.
-        !                 if nlat is even the analysis is performed on the
-        !                 array g(i, j) for i=1, ..., nlat/2 and j=1, ..., nlon.
-        !
-        !
-        !            = 2  g is symmetric about the equator. the analysis is
-        !                 performed on the northern hemisphere only.  i.e.
-        !                 if nlat is odd the analysis is performed on the
-        !                 array g(i, j) for i=1, ..., (nlat+1)/2 and j=1, ..., nlon.
-        !                 if nlat is even the analysis is performed on the
-        !                 array g(i, j) for i=1, ..., nlat/2 and j=1, ..., nlon.
-        !
-        !     nt     the number of analyses.  in the program that calls shags,
-        !            the arrays g, a and b can be three dimensional in which
-        !            case multiple analyses will be performed.  the third
-        !            index is the analysis index which assumes the values
-        !            k=1, ..., nt.  for a single analysis set nt=1. the
-        !            discription of the remaining parameters is simplified
-        !            by assuming that nt=1 or that the arrays g, a and b
-        !            have only two dimensions.
-        !
-        !     g      a two or three dimensional array (see input parameter
-        !            nt) that contains the discrete function to be analyzed.
-        !            g(i, j) contains the value of the function at the gaussian
-        !            point theta(i) and longitude point phi(j) = (j-1)*2*pi/nlon
-        !            the index ranges are defined above at the input parameter
-        !            isym.
-        !
-        !     idg    the first dimension of the array g as it appears in the
-        !            program that calls shags. if isym equals zero then idg
-        !            must be at least nlat.  if isym is nonzero then idg must
-        !            be at least nlat/2 if nlat is even or at least (nlat+1)/2
-        !            if nlat is odd.
-        !
-        !     jdg    the second dimension of the array g as it appears in the
-        !            program that calls shags. jdg must be at least nlon.
-        !
-        !     mdab   the first dimension of the arrays a and b as it appears
-        !            in the program that calls shags. mdab must be at least
-        !            min0((nlon+2)/2, nlat) if nlon is even or at least
-        !            min0((nlon+1)/2, nlat) if nlon is odd.
-        !
-        !     ndab   the second dimension of the arrays a and b as it appears
-        !            in the program that calls shags. ndab must be at least nlat
-        !
-        !     wshags an array which must be initialized by subroutine shagsi.
-        !            once initialized, wshags can be used repeatedly by shags
-        !            as long as nlat and nlon remain unchanged.  wshags must
-        !            not be altered between calls of shags.
-        !
-        !     lshags the dimension of the array wshags as it appears in the
-        !            program that calls shags. define
-        !
-        !               l1 = min0(nlat, (nlon+2)/2) if nlon is even or
-        !               l1 = min0(nlat, (nlon+1)/2) if nlon is odd
-        !
-        !            and
-        !
-        !               l2 = nlat/2        if nlat is even or
-        !               l2 = (nlat+1)/2    if nlat is odd
-        !
-        !            then lshags must be at least
-        !
-        !            nlat*(3*(l1+l2)-2)+(l1-1)*(l2*(2*nlat-l1)-3*l1)/2+nlon+15
-        !
-        !     work   a real work space which need not be saved
-        !
-        !
-        !     lwork  the dimension of the array work as it appears in the
-        !            program that calls shags. define
-        !
-        !               l2 = nlat/2        if nlat is even or
-        !               l2 = (nlat+1)/2    if nlat is odd
-        !
-        !
-        !            if isym is zero then lwork must be at least
-        !
-        !                  nlat*nlon*(nt+1)
-        !
-        !            if isym is nonzero then lwork must be at least
-        !
-        !                  l2*nlon*(nt+1)
-        !
-        !     **************************************************************
-        !
-        !     output parameters
-        !
-        !     a, b    both a, b are two or three dimensional arrays (see input
-        !            parameter nt) that contain the spherical harmonic
-        !            coefficients in the representation of g(i, j) given in the
-        !            discription of subroutine shags. for isym=0, a(m, n) and
-        !            b(m, n) are given by the equations listed below. symmetric
-        !            versions are used when isym is greater than zero.
-        !
-        !     definitions
-        !
-        !     1. the normalized associated legendre functions
-        !
-        !     pbar(m, n, theta) = sqrt((2*n+1)*factorial(n-m)/(2*factorial(n+m)))
-        !                       *sin(theta)**m/(2**n*factorial(n)) times the
-        !                       (n+m)th derivative of (x**2-1)**n with respect
-        !                       to x=cos(theta).
-        !
-        !     2. the fourier transform of g(i, j).
-        !
-        !     c(m, i)          = 2/nlon times the sum from j=1 to j=nlon of
-        !                       g(i, j)*cos((m-1)*(j-1)*2*pi/nlon)
-        !                       (the first and last terms in this sum
-        !                       are divided by 2)
-        !
-        !     s(m, i)          = 2/nlon times the sum from j=2 to j=nlon of
-        !                       g(i, j)*sin((m-1)*(j-1)*2*pi/nlon)
-        !
-        !
-        !     3. the gaussian points and weights on the sphere
-        !        (computed by subroutine gaqd).
-        !
-        !        theta(1), ..., theta(nlat) (gaussian pts in radians)
-        !        wts(1), ..., wts(nlat) (corresponding gaussian weights)
-        !
-        !
-        !     4. the maximum (plus one) longitudinal wave number
-        !
-        !            mmax = min0(nlat, (nlon+2)/2) if nlon is even or
-        !            mmax = min0(nlat, (nlon+1)/2) if nlon is odd.
-        !
-        !
-        !     then for m=0, ..., mmax-1 and n=m, ..., nlat-1 the arrays a, b
-        !     are given by
-        !
-        !     a(m+1, n+1)     =  the sum from i=1 to i=nlat of
-        !                       c(m+1, i)*wts(i)*pbar(m, n, theta(i))
-        !
-        !     b(m+1, n+1)      = the sum from i=1 to nlat of
-        !                       s(m+1, i)*wts(i)*pbar(m, n, theta(i))
-        !
-        !     ierror = 0  no errors
-        !            = 1  error in the specification of nlat
-        !            = 2  error in the specification of nlon
-        !            = 3  error in the specification of isym
-        !            = 4  error in the specification of nt
-        !            = 5  error in the specification of idg
-        !            = 6  error in the specification of jdg
-        !            = 7  error in the specification of mdab
-        !            = 8  error in the specification of ndab
-        !            = 9  error in the specification of lshags
-        !            = 10 error in the specification of lwork
-        !
+
+
+    subroutine gaussian_scalar_analysis( this, scalar_function )
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
         class (GaussianSphere), intent (in out) :: this
-        real (wp),        intent (in)       :: scalar_function(:,:)
+        real (wp),              intent (in)     :: scalar_function(:,:)
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
         integer (ip):: error_flag
         !----------------------------------------------------------------------
 
-        ! Check status
-        call this%assert_initialized()
+        ! Check if object is usable
+        if ( this%initialized .eqv. .false. ) then
+            error stop 'TYPE(GaussianSphere): '&
+                //'uninitialized object in GAUSSIAN_SCALAR_ANALYSIS'
+        end if
 
-        ! perform the (real) spherical harmonic analysis
-        associate( &
-            nlat   => this%NUMBER_OF_LATITUDES, &
-            nlon   => this%NUMBER_OF_LONGITUDES, &
-            isym   => this%SCALAR_SYMMETRIES, &
-            nt     => this%NUMBER_OF_SYNTHESES, &
-            g      => scalar_function, &
-            idg    => this%NUMBER_OF_LATITUDES, &
-            jdg    => this%NUMBER_OF_LONGITUDES, &
-            a      => this%workspace%real_harmonic_coefficients, &
-            b      => this%workspace%imaginary_harmonic_coefficients, &
-            mdab   => this%NUMBER_OF_LATITUDES, &
-            ndab   => this%NUMBER_OF_LATITUDES, &
-            wshags => this%workspace%forward_scalar, &
-            lshags => size( this%workspace%forward_scalar ), &
-            work   => this%workspace%legendre_workspace, &
-            lwork  => size( this%workspace%legendre_workspace ), &
-            ierror => error_flag &
-            )
-
-            call shags( nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, &
-                wshags, lshags, work, lwork, ierror )
-
-        end associate
+        select type (this)
+            class is (GaussianSphere)
+            associate( workspace => this%workspace )
+                select type (workspace)
+                    class is (GaussianWorkspace)
+                    ! perform the (real) spherical harmonic analysis
+                    associate( &
+                        nlat => this%NUMBER_OF_LATITUDES, &
+                        nlon => this%NUMBER_OF_LONGITUDES, &
+                        isym => this%SCALAR_SYMMETRIES, &
+                        nt => this%NUMBER_OF_SYNTHESES, &
+                        g => scalar_function, &
+                        idg => this%NUMBER_OF_LATITUDES, &
+                        jdg => this%NUMBER_OF_LONGITUDES, &
+                        a => workspace%real_harmonic_coefficients, &
+                        b => workspace%imaginary_harmonic_coefficients, &
+                        mdab => this%NUMBER_OF_LATITUDES, &
+                        ndab => this%NUMBER_OF_LATITUDES, &
+                        wshags => workspace%forward_scalar, &
+                        lshags => size(workspace%forward_scalar), &
+                        work => workspace%legendre_workspace, &
+                        lwork => size(workspace%legendre_workspace), &
+                        ierror => error_flag &
+                        )
+                        call shags( nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, &
+                            wshags, lshags, work, lwork, ierror )
+                    end associate
+                end select
+            end associate
+        end select
 
         !----------------------------------------------------------------------
         ! Address the error flag
@@ -3385,222 +2429,58 @@ contains
             end if
         end if
 
-    end subroutine perform_scalar_analysis
-    !
+    end subroutine gaussian_scalar_analysis
     
-    !
-    subroutine perform_scalar_synthesis( this, scalar_function )
-        !
-        ! Reference:
-        ! https://www2.cisl.ucar.edu/spherepack/documentation#shsgs.html
-        !
-        ! SPHEREPACK 3.2 documentation
-        !     subroutine shsgs(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, &
-        !                        wshsgs, lshsgs, work, lwork, ierror)
-        !
-        !     subroutine shsgs performs the spherical harmonic synthesis
-        !     on the arrays a and b and stores the result in the array g.
-        !     the synthesis is performed on an equally spaced longitude grid
-        !     and a gaussian colatitude grid.  the associated legendre functions
-        !     are stored rather than recomputed as they are in subroutine
-        !     shsgc.  the synthesis is described below at output parameter
-        !     g.
-        !
-        !
-        !     input parameters
-        !
-        !     nlat   the number of points in the gaussian colatitude grid on the
-        !            full sphere. these lie in the interval (0, pi) and are compu
-        !            in radians in theta(1), ..., theta(nlat) by subroutine gaqd.
-        !            if nlat is odd the equator will be included as the grid poi
-        !            theta((nlat+1)/2).  if nlat is even the equator will be
-        !            excluded as a grid point and will lie half way between
-        !            theta(nlat/2) and theta(nlat/2+1). nlat must be at least 3.
-        !            note: on the half sphere, the number of grid points in the
-        !            colatitudinal direction is nlat/2 if nlat is even or
-        !            (nlat+1)/2 if nlat is odd.
-        !
-        !     nlon   the number of distinct londitude points.  nlon determines
-        !            the grid increment in longitude as 2*pi/nlon. for example
-        !            nlon = 72 for a five degree grid. nlon must be greater
-        !            than or equal to 4. the efficiency of the computation is
-        !            improved when nlon is a product of small prime numbers.
-        !
-        !     isym   = 0  no symmetries exist about the equator. the synthesis
-        !                 is performed on the entire sphere.  i.e. on the
-        !                 array g(i, j) for i=1, ..., nlat and j=1, ..., nlon.
-        !                 (see description of g below)
-        !
-        !            = 1  g is antisymmetric about the equator. the synthesis
-        !                 is performed on the northern hemisphere only.  i.e.
-        !                 if nlat is odd the synthesis is performed on the
-        !                 array g(i, j) for i=1, ..., (nlat+1)/2 and j=1, ..., nlon.
-        !                 if nlat is even the synthesis is performed on the
-        !                 array g(i, j) for i=1, ..., nlat/2 and j=1, ..., nlon.
-        !
-        !
-        !            = 2  g is symmetric about the equator. the synthesis is
-        !                 performed on the northern hemisphere only.  i.e.
-        !                 if nlat is odd the synthesis is performed on the
-        !                 array g(i, j) for i=1, ..., (nlat+1)/2 and j=1, ..., nlon.
-        !                 if nlat is even the synthesis is performed on the
-        !                 array g(i, j) for i=1, ..., nlat/2 and j=1, ..., nlon.
-        !
-        !     nt     the number of syntheses.  in the program that calls shsgs,
-        !            the arrays g, a and b can be three dimensional in which
-        !            case multiple synthesis will be performed.  the third
-        !            index is the synthesis index which assumes the values
-        !            k=1, ..., nt.  for a single synthesis set nt=1. the
-        !            discription of the remaining parameters is simplified
-        !            by assuming that nt=1 or that the arrays g, a and b
-        !            have only two dimensions.
-        !
-        !     idg    the first dimension of the array g as it appears in the
-        !            program that calls shagc. if isym equals zero then idg
-        !            must be at least nlat.  if isym is nonzero then idg must
-        !            be at least nlat/2 if nlat is even or at least (nlat+1)/2
-        !            if nlat is odd.
-        !
-        !     jdg    the second dimension of the array g as it appears in the
-        !            program that calls shagc. jdg must be at least nlon.
-        !
-        !     a, b    two or three dimensional arrays (see the input parameter
-        !            nt) that contain the coefficients in the spherical harmonic
-        !            expansion of g(i, j) given below at the definition of the
-        !            output parameter g.  a(m, n) and b(m, n) are defined for
-        !            indices m=1, ..., mmax and n=m, ..., nlat where mmax is the
-        !            maximum (plus one) longitudinal wave number given by
-        !            mmax = min0(nlat, (nlon+2)/2) if nlon is even or
-        !            mmax = min0(nlat, (nlon+1)/2) if nlon is odd.
-        !
-        !     mdab   the first dimension of the arrays a and b as it appears
-        !            in the program that calls shsgs. mdab must be at least
-        !            min0((nlon+2)/2, nlat) if nlon is even or at least
-        !            min0((nlon+1)/2, nlat) if nlon is odd.
-        !
-        !     ndab   the second dimension of the arrays a and b as it appears
-        !            in the program that calls shsgs. ndab must be at least nlat
-        !
-        !     wshsgs an array which must be initialized by subroutine shsgsi.
-        !            once initialized, wshsgs can be used repeatedly by shsgs
-        !            as long as nlat and nlon remain unchanged.  wshsgs must
-        !            not be altered between calls of shsgs.
-        !
-        !     lshsgs the dimension of the array wshsgs as it appears in the
-        !            program that calls shsgs. define
-        !
-        !               l1 = min0(nlat, (nlon+2)/2) if nlon is even or
-        !               l1 = min0(nlat, (nlon+1)/2) if nlon is odd
-        !
-        !            and
-        !
-        !               l2 = nlat/2        if nlat is even or
-        !               l2 = (nlat+1)/2    if nlat is odd
-        !
-        !            then lshsgs must be at least
-        !
-        !            nlat*(3*(l1+l2)-2)+(l1-1)*(l2*(2*nlat-l1)-3*l1)/2+nlon+15
-        !
-        !
-        !     lwork  the dimension of the array work as it appears in the
-        !            program that calls shsgs. define
-        !
-        !               l2 = nlat/2        if nlat is even or
-        !               l2 = (nlat+1)/2    if nlat is odd
-        !
-        !
-        !            if isym is zero then lwork must be at least
-        !
-        !                  nlat*nlon*(nt+1)
-        !
-        !            if isym is nonzero then lwork must be at least
-        !
-        !                  l2*nlon*(nt+1)
-        !
-        !
-        !     **************************************************************
-        !
-        !     output parameters
-        !
-        !     g      a two or three dimensional array (see input parameter nt)
-        !            that contains the discrete function which is synthesized.
-        !            g(i, j) contains the value of the function at the gaussian
-        !            colatitude point theta(i) and longitude point
-        !            phi(j) = (j-1)*2*pi/nlon. the index ranges are defined
-        !            above at the input parameter isym.  for isym=0, g(i, j)
-        !            is given by the the equations listed below.  symmetric
-        !            versions are used when isym is greater than zero.
-        !
-        !     the normalized associated legendre functions are given by
-        !
-        !     pbar(m, n, theta) = sqrt((2*n+1)*factorial(n-m)/(2*factorial(n+m)))
-        !                       *sin(theta)**m/(2**n*factorial(n)) times the
-        !                       (n+m)th derivative of (x**2-1)**n with respect
-        !                       to x=cos(theta)
-        !
-        !     define the maximum (plus one) longitudinal wave number
-        !     as   mmax = min0(nlat, (nlon+2)/2) if nlon is even or
-        !          mmax = min0(nlat, (nlon+1)/2) if nlon is odd.
-        !
-        !     then g(i, j) = the sum from n=0 to n=nlat-1 of
-        !
-        !                   .5*pbar(0, n, theta(i))*a(1, n+1)
-        !
-        !              plus the sum from m=1 to m=mmax-1 of
-        !
-        !                   the sum from n=m to n=nlat-1 of
-        !
-        !              pbar(m, n, theta(i))*(a(m+1, n+1)*cos(m*phi(j))
-        !                                    -b(m+1, n+1)*sin(m*phi(j)))
-        !
-        !
-        !     ierror = 0  no errors
-        !            = 1  error in the specification of nlat
-        !            = 2  error in the specification of nlon
-        !            = 3  error in the specification of isym
-        !            = 4  error in the specification of nt
-        !            = 5  error in the specification of idg
-        !            = 6  error in the specification of jdg
-        !            = 7  error in the specification of mdab
-        !            = 8  error in the specification of ndab
-        !            = 9  error in the specification of lshsgs
-        !            = 10 error in the specification of lwork
-        !
+
+
+    subroutine gaussian_scalar_synthesis( this, scalar_function )
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
-        class (GaussianSphere), intent (in out)  :: this
-        real (wp),        intent (out)     :: scalar_function(:,:)
+        class (GaussianSphere), intent (in out) :: this
+        real (wp),              intent (out)    :: scalar_function(:,:)
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
         integer (ip):: error_flag
         !----------------------------------------------------------------------
 
-        ! perform (real) spherical harmonic synthesis
-        associate( &
-            nlat   => this%NUMBER_OF_LATITUDES, &
-            nlon   => this%NUMBER_OF_LONGITUDES, &
-            isym   => this%SCALAR_SYMMETRIES, &
-            nt     => this%NUMBER_OF_SYNTHESES, &
-            g      => scalar_function, &
-            idg    => size( scalar_function, dim = 1), &
-            jdg    => size( scalar_function, dim = 2), &
-            a      => this%workspace%real_harmonic_coefficients, &
-            b      => this%workspace%imaginary_harmonic_coefficients, &
-            mdab   => size( this%workspace%real_harmonic_coefficients, dim = 1), &
-            ndab   => size( this%workspace%real_harmonic_coefficients, dim = 2), &
-            wshsgs => this%workspace%backward_scalar, &
-            lshsgs => size( this%workspace%backward_scalar ), &
-            work   => this%workspace%legendre_workspace, &
-            lwork  => size( this%workspace%legendre_workspace ), &
-            ierror => error_flag &
-            )
+                ! Check if object is usable
+        if ( this%initialized .eqv. .false. ) then
+            error stop 'TYPE(GaussianSphere): '&
+                //'uninitialized object in GAUSSIAN_SCALAR_ANALYSIS'
+        end if
 
-            call Shsgs( nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, &
-                wshsgs, lshsgs, work, lwork, ierror )
-
-        end associate
+        select type (this)
+            class is (GaussianSphere)
+            associate( workspace => this%workspace )
+                select type (workspace)
+                    class is (GaussianWorkspace)
+                    ! perform (real) spherical harmonic synthesis
+                    associate( &
+                        nlat => this%NUMBER_OF_LATITUDES, &
+                        nlon => this%NUMBER_OF_LONGITUDES, &
+                        isym => this%SCALAR_SYMMETRIES, &
+                        nt => this%NUMBER_OF_SYNTHESES, &
+                        g => scalar_function, &
+                        idg => size(scalar_function, dim = 1), &
+                        jdg => size(scalar_function, dim = 2), &
+                        a => workspace%real_harmonic_coefficients, &
+                        b => workspace%imaginary_harmonic_coefficients, &
+                        mdab => size(workspace%real_harmonic_coefficients, dim = 1), &
+                        ndab => size(workspace%real_harmonic_coefficients, dim = 2), &
+                        wshsgs => workspace%backward_scalar, &
+                        lshsgs => size( workspace%backward_scalar ), &
+                        work => workspace%legendre_workspace, &
+                        lwork => size( workspace%legendre_workspace ), &
+                        ierror => error_flag &
+                        )
+                        call shsgs(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, &
+                            wshsgs, lshsgs, work, lwork, ierror)
+                    end associate
+                end select
+            end associate
+        end select
 
         !----------------------------------------------------------------------
         ! Address the error flag
@@ -3650,7 +2530,7 @@ contains
             end if
         end if
 
-    end subroutine perform_scalar_synthesis
+    end subroutine gaussian_scalar_synthesis
     !
     
     ! TODO
@@ -4652,7 +3532,7 @@ contains
     end subroutine perform_multiple_ffts
 
 
-    subroutine finalize_spherepack_wrapper( this )
+    subroutine finalize_gaussian_sphere( this )
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
@@ -4661,7 +3541,7 @@ contains
 
         call this%destroy()
 
-    end subroutine finalize_spherepack_wrapper
+    end subroutine finalize_gaussian_sphere
 
 
 end module type_GaussianSphere
