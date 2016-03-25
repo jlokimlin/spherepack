@@ -2,8 +2,7 @@ module type_Sphere
 
     use, intrinsic :: iso_fortran_env, only: &
         wp => REAL64, &
-        ip => INT32, &
-        stderr => ERROR_UNIT
+        ip => INT32
 
     use type_Workspace, only: &
         Workspace
@@ -61,14 +60,15 @@ module type_Sphere
         procedure,                              public  :: destroy_sphere
         procedure,                              public  :: get_index
         procedure,                              public  :: get_coefficient
-        procedure,                              public  :: assert_initialized
         procedure,                              public  :: get_scalar_laplacian
         procedure,                              public  :: invert_scalar_laplacian
         procedure,                              public  :: invert_helmholtz
         procedure,                              public  :: get_gradient
         procedure,                              public  :: invert_gradient
         procedure,                              public  :: get_vorticity
+        procedure,                              public  :: invert_vorticity
         procedure,                              public  :: get_divergence
+        procedure,                              public  :: invert_divergence
         procedure,                              public  :: get_rotation_operator => compute_angular_momentum
         procedure,                              private :: get_scalar_symmetries
         procedure,                              private :: get_vector_symmetries
@@ -457,13 +457,15 @@ contains
 
     end subroutine get_scalar_laplacian
 
-    subroutine invert_scalar_laplacian( this, laplacian_source, scalar_function )
+
+
+    subroutine invert_scalar_laplacian( this, source, solution)
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
         class (Sphere), intent (in out) :: this
-        real (wp),      intent (in)     :: laplacian_source(:,:)
-        real (wp),      intent (out)    :: scalar_function(:,:)
+        real (wp),      intent (in)     :: source(:,:)
+        real (wp),      intent (out)    :: solution(:,:)
         !----------------------------------------------------------------------
 
         ! Check if object is usable
@@ -473,7 +475,7 @@ contains
         end if
 
         ! Set (real) scalar spherica harmonic coefficients
-        call this%perform_complex_analysis( laplacian_source )
+        call this%perform_complex_analysis( source )
 
         ! Associate various quantities
         associate( &
@@ -484,7 +486,7 @@ contains
         end associate
 
         ! Synthesize complex coefficients into gridded array
-        call this%perform_complex_synthesis( scalar_function )
+        call this%perform_complex_synthesis( solution )
 
     end subroutine invert_scalar_laplacian
 
@@ -601,13 +603,14 @@ contains
 
     end subroutine get_gradient
 
-    subroutine invert_gradient( this, vector_field, scalar_function )
+
+    subroutine invert_gradient( this, source, solution )
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
         class (Sphere), intent (in out) :: this
-        real (wp),      intent (in)     :: vector_field(:,:,:)
-        real (wp),      intent (out)    :: scalar_function(:,:)
+        real (wp),      intent (in)     :: source(:,:,:)
+        real (wp),      intent (out)    :: solution(:,:)
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
@@ -621,12 +624,12 @@ contains
         end if
 
         ! compute the (real) spherical harmonic coefficients
-        call this%perform_vector_analysis( vector_field )
+        call this%perform_vector_analysis( source )
 
         ! Invert gradient
         associate( &
             ntrunc => this%TRIANGULAR_TRUNCATION_LIMIT, &
-            f => scalar_function, &
+            f => solution, &
             sqnn => this%vorticity_and_divergence_coefficients, &
             a => this%workspace%real_harmonic_coefficients, &
             b => this%workspace%imaginary_harmonic_coefficients, &
@@ -696,13 +699,13 @@ contains
     end subroutine get_vorticity
 
 
-    subroutine invert_vorticity( this, vector_field, scalar_function )
+    subroutine invert_vorticity( this, source, solution )
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
         class (Sphere), intent (in out) :: this
-        real (wp),      intent (in)     :: vector_field(:,:,:)
-        real (wp),      intent (out)    :: scalar_function(:,:)
+        real (wp),      intent (in)     :: source(:,:,:)
+        real (wp),      intent (out)    :: solution(:,:)
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
@@ -716,13 +719,13 @@ contains
         end if
 
         ! compute the (real) spherical harmonic coefficients
-        call this%perform_vector_analysis( vector_field )
+        call this%perform_vector_analysis( source )
 
         ! Invert gradient
         associate( &
             nlat => this%NUMBER_OF_LATITUDES, &
             ntrunc => this%TRIANGULAR_TRUNCATION_LIMIT, &
-            f => scalar_function, &
+            f => solution, &
             sqnn => this%vorticity_and_divergence_coefficients, &
             a => this%workspace%real_harmonic_coefficients, &
             b => this%workspace%imaginary_harmonic_coefficients, &
@@ -801,6 +804,62 @@ contains
     end subroutine get_divergence
 
 
+    subroutine invert_divergence( this, source, solution )
+        !----------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !----------------------------------------------------------------------
+        class (Sphere), intent (in out) :: this
+        real (wp),      intent (in)     :: source(:,:,:)
+        real (wp),      intent (out)    :: solution(:,:)
+        !----------------------------------------------------------------------
+        ! Dictionary: local variables
+        !----------------------------------------------------------------------
+        integer (ip):: n, m !! Counters
+        !----------------------------------------------------------------------
+
+        ! Check if object is usable
+        if ( this%initialized .eqv. .false. ) then
+            error stop 'TYPE(Sphere): uninitialized object'&
+                //' in INVERT_DIVERGENCE'
+        end if
+
+        ! compute the (real) spherical harmonic coefficients
+        call this%perform_vector_analysis( source )
+
+        ! Invert gradient
+        associate( &
+            nlat => this%NUMBER_OF_LATITUDES, &
+            ntrunc => this%TRIANGULAR_TRUNCATION_LIMIT, &
+            f => solution, &
+            sqnn => this%vorticity_and_divergence_coefficients, &
+            a => this%workspace%real_harmonic_coefficients, &
+            b => this%workspace%imaginary_harmonic_coefficients, &
+            br => this%workspace%real_polar_harmonic_coefficients, &
+            bi => this%workspace%imaginary_polar_harmonic_coefficients &
+            )
+            ! Compute m = 0 coefficients
+            do n = 1, nlat
+                ! Set real coefficients
+                br(1,n) = a(1,n)/sqnn(n)
+                ! Set imaginary coeffients
+                bi(1,n) = b(1,n)/sqnn(n)
+            end do
+            ! Compute m >0 coefficients
+            do m=2, ntrunc+1
+                do n=m, ntrunc+1
+                    ! Set real coefficients
+                    br(m, n) = a(m, n)/sqnn(n)
+                    ! Set imaginary coefficients
+                    bi(m, n) = b(m, n)/sqnn(n)
+                end do
+            end do
+            ! Compute scalar synthesis
+            call this%perform_scalar_synthesis( f )
+        end associate
+
+    end subroutine invert_divergence
+
+
     subroutine compute_angular_momentum(this, scalar_function, angular_momentum)
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
@@ -865,25 +924,6 @@ contains
         deallocate( azimuthal_gradient_component)
 
     end subroutine compute_angular_momentum
-
-
-
-    subroutine assert_initialized( this )
-        !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
-        !----------------------------------------------------------------------
-        class (Sphere), intent (in out)    :: this
-        !----------------------------------------------------------------------
-
-        ! Check status
-        if ( .not. this%initialized ) then
-
-            write( stderr, '(A)' ) 'TYPE (SpherepackWrapper)'
-            write( stderr, '(A)' ) 'You must instantiate object before calling methods'
-
-        end if
-
-    end subroutine assert_initialized
     
 
 

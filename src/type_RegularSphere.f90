@@ -1,4 +1,4 @@
-module type_GaussianSphere
+module type_RegularSphere
 
     use, intrinsic :: iso_fortran_env, only: &
         wp => REAL64, &
@@ -7,11 +7,11 @@ module type_GaussianSphere
     use type_Sphere, only: &
         Sphere
 
-    use type_GaussianWorkspace, only: &
-        GaussianWorkspace
+    use type_RegularWorkspace, only: &
+        RegularWorkspace
 
-    use type_GaussianGrid, only: &
-        GaussianGrid
+    use type_RegularGrid, only: &
+        RegularGrid
 
     use type_SphericalUnitVectors, only: &
         SphericalUnitVectors
@@ -29,11 +29,11 @@ module type_GaussianSphere
 
     ! Everything is private unless stated otherwise
     private
-    public :: GaussianSphere
+    public :: RegularSphere
 
 
     ! Declare derived data type
-    type, extends (Sphere), public :: GaussianSphere
+    type, extends (Sphere), public :: RegularSphere
         !----------------------------------------------------------------------
         ! Class variables
         !----------------------------------------------------------------------
@@ -41,33 +41,31 @@ module type_GaussianSphere
         !----------------------------------------------------------------------
         ! Class methods
         !----------------------------------------------------------------------
-        procedure, public  :: create => create_gaussian_sphere
-        procedure, public  :: destroy => destroy_gaussian_sphere
-        procedure, public  :: perform_scalar_analysis => gaussian_scalar_analysis
-        procedure, public  :: perform_scalar_synthesis => gaussian_scalar_synthesis
-        procedure, public  :: perform_vector_analysis => gaussian_vector_analysis
-        procedure, public  :: perform_vector_synthesis => gaussian_vector_synthesis
-        procedure, public  :: compute_surface_integral
-        procedure, public  :: compute_first_moment
-        final              :: finalize_gaussian_sphere
+        procedure, public  :: create => create_regular_sphere
+        procedure, public  :: destroy => destroy_regular_sphere
+        procedure, public  :: perform_scalar_analysis => Regular_scalar_analysis
+        procedure, public  :: perform_scalar_synthesis => Regular_scalar_synthesis
+        procedure, public  :: perform_vector_analysis => Regular_vector_analysis
+        procedure, public  :: perform_vector_synthesis => Regular_vector_synthesis
+        final              :: finalize_regular_sphere
         !----------------------------------------------------------------------
-    end type GaussianSphere
+    end type RegularSphere
 
 
 contains
 
 
-    subroutine create_gaussian_sphere( this, nlat, nlon, isym, itype, isynt, rsphere )
+    subroutine create_regular_sphere( this, nlat, nlon, isym, itype, isynt, rsphere )
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
-        class (GaussianSphere), intent (in out)        :: this
-        integer (ip),           intent (in)            :: nlat
-        integer (ip),           intent (in)            :: nlon
-        integer (ip),           intent (in), optional  :: isym      !! Either 0, 1, or 2
-        integer (ip),           intent (in), optional  :: itype     !! Either 0, 1, 2, 3, ..., 8
-        integer (ip),           intent (in), optional  :: isynt
-        real (wp),              intent (in), optional  :: rsphere
+        class (RegularSphere), intent (in out)        :: this
+        integer (ip),          intent (in)            :: nlat
+        integer (ip),          intent (in)            :: nlon
+        integer (ip),          intent (in), optional  :: isym      !! Either 0, 1, or 2
+        integer (ip),          intent (in), optional  :: itype     !! Either 0, 1, 2, 3, ..., 8
+        integer (ip),          intent (in), optional  :: isynt
+        real (wp),             intent (in), optional  :: rsphere
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
@@ -81,22 +79,22 @@ contains
         call this%destroy()
 
         ! Allocate polymorphic components
-        allocate( GaussianGrid :: this%grid )
-        allocate( GaussianWorkspace :: this%workspace )
+        allocate( RegularGrid :: this%grid )
+        allocate( RegularWorkspace :: this%workspace )
 
         ! Initialize polymorphic types
         associate( &
             grid => this%grid, &
             workspace => this%workspace &
             )
-            ! Initialize gaussian grid
+            ! Initialize Regular grid
             select type (grid)
-                class is (GaussianGrid)
+                class is (RegularGrid)
                 call grid%create( nlat, nlon )
             end select
-            ! Initialize gaussian workspace
+            ! Initialize Regular workspace
             select type (workspace)
-                class is (GaussianWorkspace)
+                class is (RegularWorkspace)
                 call workspace%create( nlat, nlon )
             end select
         end associate
@@ -119,14 +117,14 @@ contains
         ! Set initialization flag
         this%initialized = .true.
         
-    end subroutine create_gaussian_sphere
+    end subroutine create_regular_sphere
 
 
-    subroutine destroy_gaussian_sphere( this )
+    subroutine destroy_regular_sphere( this )
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
-        class (GaussianSphere), intent (in out) :: this
+        class (RegularSphere), intent (in out) :: this
         !----------------------------------------------------------------------
 
         ! Check flag
@@ -138,15 +136,15 @@ contains
         ! Reset initialization flag
         this%initialized = .false.
 
-    end subroutine destroy_gaussian_sphere
+    end subroutine destroy_regular_sphere
 
 
-    subroutine gaussian_scalar_analysis( this, scalar_function )
+    subroutine Regular_scalar_analysis( this, scalar_function )
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
-        class (GaussianSphere), intent (in out) :: this
-        real (wp),              intent (in)     :: scalar_function(:,:)
+        class (RegularSphere), intent (in out) :: this
+        real (wp),             intent (in)     :: scalar_function(:,:)
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
@@ -155,15 +153,15 @@ contains
 
         ! Check if object is usable
         if ( this%initialized .eqv. .false. ) then
-            error stop 'TYPE(GaussianSphere): '&
-                //'uninitialized object in GAUSSIAN_SCALAR_ANALYSIS'
+            error stop 'TYPE(RegularSphere): '&
+                //'uninitialized object in Regular_SCALAR_ANALYSIS'
         end if
 
         select type (this)
-            class is (GaussianSphere)
+            class is (RegularSphere)
             associate( workspace => this%workspace )
                 select type (workspace)
-                    class is (GaussianWorkspace)
+                    class is (RegularWorkspace)
                     ! perform the (real) spherical harmonic analysis
                     associate( &
                         nlat => this%NUMBER_OF_LATITUDES, &
@@ -177,74 +175,72 @@ contains
                         b => workspace%imaginary_harmonic_coefficients, &
                         mdab => this%NUMBER_OF_LATITUDES, &
                         ndab => this%NUMBER_OF_LATITUDES, &
-                        wshags => workspace%forward_scalar, &
-                        lshags => size(workspace%forward_scalar), &
+                        wshaes => workspace%forward_scalar, &
+                        lshaes => size(workspace%forward_scalar), &
                         work => workspace%legendre_workspace, &
                         lwork => size(workspace%legendre_workspace), &
                         ierror => error_flag &
                         )
-                        call shags( nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, &
-                            wshags, lshags, work, lwork, ierror )
+                        call shaes( nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, &
+                            wshaes, lshaes, work, lwork, ierror )
                     end associate
                 end select
             end associate
         end select
 
-        ! Address error flag
+        ! Address the error flag
         select case (error_flag)
             case(0)
                 return
             case(1)
-                error stop 'TYPE(GaussianSphere) in GAUSSIAN_SCALAR_ANALYSIS'&
-                    //'Error in the specification of NLAT'
+                error stop 'TYPE(RegularSphere) in REGULAR_SCALAR_ANALYSIS'&
+                    // 'Error in the specification of NLAT'
             case(2)
-                error stop 'TYPE(GaussianSphere) in GAUSSIAN_SCALAR_ANALYSIS'&
+                error stop 'TYPE(RegularSphere) in REGULAR_SCALAR_ANALYSIS'&
                     //'Error in the specification of NLON'
             case(3)
-                error stop 'TYPE(GaussianSphere) in GAUSSIAN_SCALAR_ANALYSIS'&
+                error stop 'TYPE(RegularSphere) in REGULAR_SCALAR_ANALYSIS'&
                     //'Invalid extent for SCALAR_FORWARD'
             case(4)
-                error stop 'TYPE(GaussianSphere) in GAUSSIAN_SCALAR_ANALYSIS'&
+                error stop 'TYPE(RegularSphere) in REGULAR_SCALAR_ANALYSIS'&
                     //'Invalid extent for LEGENDRE_WORKSPACE'
             case(5)
-                error stop 'TYPE(GaussianSphere) in GAUSSIAN_SCALAR_ANALYSIS'&
+                error stop 'TYPE(RegularSphere) in REGULAR_SCALAR_ANALYSIS'&
                     //'Invalid extent for DWORK'
-            case(6)
-                error stop 'TYPE(GaussianSphere) in GAUSSIAN_SCALAR_ANALYSIS'&
-                    //'Failure in GAQD due to failure in eigenvalue routine'
             case default
-                error stop 'TYPE(GaussianSphere) in GAUSSIAN_SCALAR_ANALYSIS'&
-                    //'Undetermined error flag'
+                error stop 'TYPE(RegularSphere) in REGULAR_SCALAR_ANALYSIS'&
+                    // 'Undetermined error flag'
         end select
 
-    end subroutine gaussian_scalar_analysis
+    end subroutine Regular_scalar_analysis
     
 
 
-    subroutine gaussian_scalar_synthesis( this, scalar_function )
+    subroutine Regular_scalar_synthesis( this, scalar_function )
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
-        class (GaussianSphere), intent (in out) :: this
-        real (wp),              intent (out)    :: scalar_function(:,:)
+        class (RegularSphere), intent (in out) :: this
+        real (wp),             intent (out)    :: scalar_function(:,:)
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
         integer (ip):: error_flag
         !----------------------------------------------------------------------
 
-                ! Check if object is usable
+        ! Check if object is usable
         if ( this%initialized .eqv. .false. ) then
-            error stop 'TYPE(GaussianSphere): '&
-                //'uninitialized object in GAUSSIAN_SCALAR_SYNTHESIS'
+            error stop 'TYPE(RegularSphere): '&
+                //'uninitialized object in REGULAR_SCALAR_SYNTHESIS'
         end if
 
+        ! Perform (real) spherical harmonic synthesis
         select type (this)
-            class is (GaussianSphere)
+            class is (RegularSphere)
             associate( workspace => this%workspace )
                 select type (workspace)
-                    class is (GaussianWorkspace)
-                    ! perform (real) spherical harmonic synthesis
+                    class is (RegularWorkspace)
+                    ! Associate various quantities
                     associate( &
                         nlat => this%NUMBER_OF_LATITUDES, &
                         nlon => this%NUMBER_OF_LONGITUDES, &
@@ -257,57 +253,53 @@ contains
                         b => workspace%imaginary_harmonic_coefficients, &
                         mdab => size(workspace%real_harmonic_coefficients, dim=1), &
                         ndab => size(workspace%real_harmonic_coefficients, dim=2), &
-                        wshsgs => workspace%backward_scalar, &
-                        lshsgs => size(workspace%backward_scalar ), &
+                        wshses => workspace%backward_scalar, &
+                        lshses => size(workspace%backward_scalar ), &
                         work => workspace%legendre_workspace, &
                         lwork => size(workspace%legendre_workspace ), &
                         ierror => error_flag &
                         )
-                        call shsgs(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, &
-                            wshsgs, lshsgs, work, lwork, ierror)
+                        call shses(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, &
+                            wshses, lshses, work, lwork, ierror)
                     end associate
                 end select
             end associate
         end select
 
-        ! Address error flag
+        ! Address the error flag
         select case (error_flag)
             case(0)
                 return
             case(1)
-                error stop 'TYPE(GaussianSphere) in GAUSSIAN_SCALAR_SYNTHESIS'&
-                    //'Error in the specification of NLAT'
+                error stop 'TYPE(RegularSphere) in REGULAR_SCALAR_SYNTHESIS'&
+                    // 'Error in the specification of NLAT'
             case(2)
-                error stop 'TYPE(GaussianSphere) in GAUSSIAN_SCALAR_SYNTHESIS'&
+                error stop 'TYPE(RegularSphere) in REGULAR_SCALAR_SYNTHESIS'&
                     //'Error in the specification of NLON'
             case(3)
-                error stop 'TYPE(GaussianSphere) in GAUSSIAN_SCALAR_SYNTHESIS'&
-                    //'Invalid extent for SCALAR_BACKWARD'
+                error stop 'TYPE(RegularSphere) in REGULAR_SCALAR_SYNTHESIS'&
+                    //'Invalid extent for SCALAR_FORWARD'
             case(4)
-                error stop 'TYPE(GaussianSphere) in GAUSSIAN_SCALAR_SYNTHESIS'&
+                error stop 'TYPE(RegularSphere) in REGULAR_SCALAR_SYNTHESIS'&
                     //'Invalid extent for LEGENDRE_WORKSPACE'
             case(5)
-                error stop 'TYPE(GaussianSphere) in GAUSSIAN_SCALAR_SYNTHESIS'&
+                error stop 'TYPE(RegularSphere) in REGULAR_SCALAR_SYNTHESIS'&
                     //'Invalid extent for DWORK'
-            case(6)
-                error stop 'TYPE(GaussianSphere) in GAUSSIAN_SCALAR_SYNTHESIS'&
-                    //'Failure in GAQD due to failure in eigenvalue routine'
             case default
-                error stop 'TYPE(GaussianSphere) in GAUSSIAN_SCALAR_SYNTHESIS'&
-                    //'Undetermined error flag'
+                error stop 'TYPE(RegularSphere) in REGULAR_SCALAR_SYNTHESIS'&
+                    // 'Undetermined error flag'
         end select
 
-
-    end subroutine gaussian_scalar_synthesis
-
+    end subroutine Regular_scalar_synthesis
 
 
-    subroutine gaussian_vector_analysis( this, vector_field )
+
+    subroutine Regular_vector_analysis( this, vector_field )
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
-        class (GaussianSphere), intent (in out) :: this
-        real (wp),              intent (in)     :: vector_field(:,:,:)
+        class (RegularSphere), intent (in out) :: this
+        real (wp),             intent (in)     :: vector_field(:,:,:)
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
@@ -318,8 +310,8 @@ contains
 
         ! Check if object is usable
         if ( this%initialized .eqv. .false. ) then
-            error stop 'TYPE(GaussianSphere): '&
-                //'uninitialized object in GAUSSIAN_VECTOR_ANALYSIS'
+            error stop 'TYPE(RegularSphere): '&
+                //'uninitialized object in REGULAR_VECTOR_ANALYSIS'
         end if
 
         ! Allocate memory
@@ -342,10 +334,10 @@ contains
 
         ! Perform vector analysis
         select type (this)
-            class is (GaussianSphere)
+            class is (RegularSphere)
             associate( workspace => this%workspace )
                 select type (workspace)
-                    class is (GaussianWorkspace)
+                    class is (RegularWorkspace)
                     associate( &
                         nlat => this%NUMBER_OF_LATITUDES, &
                         nlon => this%NUMBER_OF_LONGITUDES, &
@@ -361,14 +353,14 @@ contains
                         ci => workspace%imaginary_azimuthal_harmonic_coefficients, &
                         mdab => size(workspace%real_polar_harmonic_coefficients, dim=1 ), &
                         ndab => size(workspace%real_polar_harmonic_coefficients, dim=2 ), &
-                        wvhags => workspace%forward_vector, &
-                        lvhags => size(workspace%forward_vector ), &
+                        wvhaes => workspace%forward_vector, &
+                        lvhaes => size(workspace%forward_vector ), &
                         work => workspace%legendre_workspace, &
                         lwork => size(workspace%legendre_workspace ), &
                         ierror => error_flag &
                         )
-                        call vhags( nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
-                            mdab, ndab, wvhags, lvhags, work, lwork, ierror )
+                        call vhaes(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
+                            mdab, ndab, wvhaes, lvhaes, work, lwork, ierror )
                     end associate
                 end select
             end associate
@@ -379,39 +371,39 @@ contains
             case(0)
                 return
             case(1)
-                error stop 'TYPE(GaussianSphere) in GAUSSIAN_VECTOR_ANALYSIS'&
+                error stop 'TYPE(RegularSphere) in REGULAR_VECTOR_ANALYSIS'&
                     //'Error in the specification of NLAT'
             case(2)
-                error stop 'TYPE(GaussianSphere) in GAUSSIAN_VECTOR_ANALYSIS'&
+                error stop 'TYPE(RegularSphere) in REGULAR_VECTOR_ANALYSIS'&
                     //'Error in the specification of NLON'
             case(3)
-                error stop 'TYPE(GaussianSphere) in GAUSSIAN_VECTOR_ANALYSIS'&
+                error stop 'TYPE(RegularSphere) in REGULAR_VECTOR_ANALYSIS'&
                     //'Error in the specification of VECTOR_SYMMETRIES'
             case(4)
-                error stop 'TYPE(GaussianSphere) in GAUSSIAN_VECTOR_ANALYSIS'&
+                error stop 'TYPE(RegularSphere) in REGULAR_VECTOR_ANALYSIS'&
                     //'Error in the specification of NUMBER_OF_synthESES'
             case(5)
-                error stop 'TYPE(GaussianSphere) in GAUSSIAN_VECTOR_ANALYSIS'&
+                error stop 'TYPE(RegularSphere) in REGULAR_VECTOR_ANALYSIS'&
                     //'Invalid DIM=1 extent for '&
                     //'POLAR_COMPONENT (THETA) or AZIMUTHAL_COMPONENT (PHI)'
             case(6)
-                error stop 'TYPE(GaussianSphere) in GAUSSIAN_VECTOR_ANALYSIS'&
+                error stop 'TYPE(RegularSphere) in REGULAR_VECTOR_ANALYSIS'&
                     //'Invalid DIM=2 extent '&
                     //'POLAR_COMPONENT (THETA) or AZIMUTHAL_COMPONENT (PHI)'
             case(7)
-                error stop 'TYPE(GaussianSphere) in GAUSSIAN_VECTOR_ANALYSIS'&
+                error stop 'TYPE(RegularSphere) in REGULAR_VECTOR_ANALYSIS'&
                     //'Invalid DIM=1 extent for BR or CR'
             case(8)
-                error stop 'TYPE(GaussianSphere) in GAUSSIAN_VECTOR_ANALYSIS'&
+                error stop 'TYPE(RegularSphere) in REGULAR_VECTOR_ANALYSIS'&
                     //'Invalid DIM=1 extent for BI or CI'
             case(9)
-                error stop 'TYPE(GaussianSphere) in GAUSSIAN_VECTOR_ANALYSIS'&
+                error stop 'TYPE(RegularSphere) in REGULAR_VECTOR_ANALYSIS'&
                     //'Invalid extent for FORWARD_VECTOR'
             case(10)
-                error stop 'TYPE(GaussianSphere) in GAUSSIAN_VECTOR_ANALYSIS'&
+                error stop 'TYPE(RegularSphere) in REGULAR_VECTOR_ANALYSIS'&
                     //'Invalid extent for LEGENDRE_WORKSPACE'
             case default
-                error stop 'TYPE(GaussianSphere) in GAUSSIAN_VECTOR_ANALYSIS'&
+                error stop 'TYPE(RegularSphere) in REGULAR_VECTOR_ANALYSIS'&
                     //'Undetermined error flag'
         end select
 
@@ -419,17 +411,17 @@ contains
         deallocate( polar_component)
         deallocate( azimuthal_component)
 
-    end subroutine gaussian_vector_analysis
+    end subroutine Regular_vector_analysis
 
 
 
-    subroutine gaussian_vector_synthesis( this, polar_component, azimuthal_component )
+    subroutine Regular_vector_synthesis( this, polar_component, azimuthal_component )
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
-        class (GaussianSphere), intent (in out) :: this
-        real (wp),              intent (out)    :: polar_component(:,:)
-        real (wp),              intent (out)    :: azimuthal_component(:,:)
+        class (RegularSphere), intent (in out) :: this
+        real (wp),             intent (out)    :: polar_component(:,:)
+        real (wp),             intent (out)    :: azimuthal_component(:,:)
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
@@ -438,16 +430,16 @@ contains
 
         ! Check if object is usable
         if ( this%initialized .eqv. .false. ) then
-            error stop 'TYPE(GaussianSphere): '&
-                //'uninitialized object in GAUSSIAN_VECTOR_SYNTHESIS'
+            error stop 'TYPE(RegularSphere): '&
+                //'uninitialized object in REGULAR_VECTOR_SYNTHESIS'
         end if
 
         ! Perform vector analysis
         select type (this)
-            class is (GaussianSphere)
+            class is (RegularSphere)
             associate( workspace => this%workspace )
                 select type (workspace)
-                    class is (GaussianWorkspace)
+                    class is (RegularWorkspace)
                     associate( &
                         nlat => this%NUMBER_OF_LATITUDES, &
                         nlon => this%NUMBER_OF_LONGITUDES, &
@@ -463,14 +455,14 @@ contains
                         ci => workspace%imaginary_azimuthal_harmonic_coefficients, &
                         mdab => size(workspace%real_polar_harmonic_coefficients, dim=1 ), &
                         ndab => size(workspace%real_polar_harmonic_coefficients, dim=2 ), &
-                        wvhsgs => workspace%backward_vector, &
-                        lvhsgs => size(workspace%backward_vector ), &
+                        wvhses => workspace%backward_vector, &
+                        lvhses => size(workspace%backward_vector ), &
                         work => workspace%legendre_workspace, &
                         lwork => size(workspace%legendre_workspace ), &
                         ierror => error_flag &
                         )
-                        call vhsgs( nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
-                            mdab, ndab, wvhsgs, lvhsgs, work, lwork, ierror )
+                        call vhses(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
+                            mdab, ndab, wvhses, lvhses, work, lwork, ierror )
                     end associate
                 end select
             end associate
@@ -481,187 +473,55 @@ contains
             case(0)
                 return
             case(1)
-                error stop 'TYPE(GaussianSphere) in GAUSSIAN_VECTOR_SYNTHESIS'&
+                error stop 'TYPE(RegularSphere) in REGULAR_VECTOR_SYNTHESIS'&
                     //'Error in the specification of NLAT'
             case(2)
-                error stop 'TYPE(GaussianSphere) in GAUSSIAN_VECTOR_SYNTHESIS'&
+                error stop 'TYPE(RegularSphere) in REGULAR_VECTOR_SYNTHESIS'&
                     //'Error in the specification of NLON'
             case(3)
-                error stop 'TYPE(GaussianSphere) in GAUSSIAN_VECTOR_SYNTHESIS'&
+                error stop 'TYPE(RegularSphere) in REGULAR_VECTOR_SYNTHESIS'&
                     //'Error in the specification of VECTOR_SYMMETRIES'
             case(4)
-                error stop 'TYPE(GaussianSphere) in GAUSSIAN_VECTOR_SYNTHESIS'&
+                error stop 'TYPE(RegularSphere) in REGULAR_VECTOR_SYNTHESIS'&
                     //'Error in the specification of NUMBER_OF_synthESES'
             case(5)
-                error stop 'TYPE(GaussianSphere) in GAUSSIAN_VECTOR_SYNTHESIS'&
+                error stop 'TYPE(RegularSphere) in REGULAR_VECTOR_SYNTHESIS'&
                     //'Invalid DIM=1 extent for '&
                     //'POLAR_COMPONENT (THETA) or AZIMUTHAL_COMPONENT (PHI)'
             case(6)
-                error stop 'TYPE(GaussianSphere) in GAUSSIAN_VECTOR_SYNTHESIS'&
+                error stop 'TYPE(RegularSphere) in REGULAR_VECTOR_SYNTHESIS'&
                     //'Invalid DIM=2 extent '&
                     //'POLAR_COMPONENT (THETA) or AZIMUTHAL_COMPONENT (PHI)'
             case(7)
-                error stop 'TYPE(GaussianSphere) in GAUSSIAN_VECTOR_SYNTHESIS'&
+                error stop 'TYPE(RegularSphere) in REGULAR_VECTOR_SYNTHESIS'&
                     //'Invalid DIM=1 extent for BR or CR'
             case(8)
-                error stop 'TYPE(GaussianSphere) in GAUSSIAN_VECTOR_SYNTHESIS'&
+                error stop 'TYPE(RegularSphere) in REGULAR_VECTOR_SYNTHESIS'&
                     //'Invalid DIM=1 extent for BI or CI'
             case(9)
-                error stop 'TYPE(GaussianSphere) in GAUSSIAN_VECTOR_SYNTHESIS'&
+                error stop 'TYPE(RegularSphere) in REGULAR_VECTOR_SYNTHESIS'&
                     //'Invalid extent for BACKWARD_VECTOR'
             case(10)
-                error stop 'TYPE(GaussianSphere) in GAUSSIAN_VECTOR_SYNTHESIS'&
+                error stop 'TYPE(RegularSphere) in REGULAR_VECTOR_SYNTHESIS'&
                     //'Invalid extent for LEGENDRE_WORKSPACE'
             case default
-                error stop 'TYPE(GaussianSphere) in GAUSSIAN_VECTOR_SYNTHESIS'&
+                error stop 'TYPE(RegularSphere) in REGULAR_VECTOR_SYNTHESIS'&
                     //'Undetermined error flag'
         end select
 
-    end subroutine gaussian_vector_synthesis
+    end subroutine Regular_vector_synthesis
     
 
-
-    function compute_surface_integral( this, scalar_function ) result( return_value )
-        !
-        ! Purpose:
-        !
-        ! computes the (scalar) surface integral on the sphere (S^2):
-        !
-        ! * Trapezoidal rule    in phi:   0 <=  phi  <= 2*pi
-        ! * Gaussian quadrature in theta: 0 <= theta <= pi
-        !
-        !   \int_{S^2} f( theta, phi ) dS
-        !
-        !   where
-        !
-        !   dS = sin(theta) dtheta dphi
-        !
-        !
+    subroutine finalize_regular_sphere( this )
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
-        class (GaussianSphere), intent (in out) :: this
-        real (wp),              intent (in)     :: scalar_function(:,:)
-        real (wp)                               :: return_value
-        !----------------------------------------------------------------------
-        ! Dictionary: local variables
-        !----------------------------------------------------------------------
-        integer (ip)           :: k  !! counter
-        real (wp), allocatable :: summation(:)
-        !----------------------------------------------------------------------
-
-        ! Check if object is usable
-        if ( this%initialized .eqv. .false. ) then
-            error stop 'TYPE(GaussianSphere): '&
-                //'uninitialized object in GET_SURFACE_INTEGRAL'
-        end if
-
-        ! Allocate memory
-        associate( nlat => this%NUMBER_OF_LATITUDES )
-            allocate(summation(nlat))
-        end associate
-
-        ! compute the integrant
-        associate( grid => this%grid )
-            select type(grid)
-                class is (GaussianGrid)
-                associate( &
-                    nlat => grid%NUMBER_OF_LATITUDES, &
-                    dphi => grid%LONGITUDINAL_MESH, &
-                    wts => grid%gaussian_weights, &
-                    f => scalar_function &
-                    )
-                    ! Apply trapezoidal rule
-                    do k = 1, nlat
-                        summation(k) = sum(f(k,:)) * dphi
-                    end do
-                    ! Apply gaussian quadrature
-                    summation = summation * wts
-                end associate
-            end select
-        end associate
-
-        ! Set integral \int_{S^2} f( theta, phi ) dS
-        return_value = sum( summation )
-
-        ! Release memory
-        deallocate( summation )
-
-    end function compute_surface_integral
-
-
-
-    subroutine compute_first_moment( this, scalar_function, first_moment )
-        !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
-        !----------------------------------------------------------------------
-        class (GaussianSphere),  intent (in out) :: this
-        real (wp),               intent (in)     :: scalar_function(:,:)
-        class (Vector),          intent (out)    :: first_moment
-        !----------------------------------------------------------------------
-        ! Dictionary: local variables
-        !----------------------------------------------------------------------
-        integer (ip)           :: k, l !! Counters
-        real (wp), allocatable :: integrant(:,:,:)
-        !----------------------------------------------------------------------
-
-        ! Check if object is usable
-        if ( this%initialized .eqv. .false. ) then
-            error stop 'TYPE(GaussianSphere): '&
-                //'uninitialized object in COMPUTE_FIRST_MOMENT'
-        end if
-
-        ! Allocate  memory
-        associate( &
-            nlat => this%NUMBER_OF_LATITUDES, &
-            nlon => this%NUMBER_OF_LONGITUDES &
-            )
-            allocate( integrant(nlat,nlon, 3) )
-
-            ! compute integrant
-            do l = 1, nlon
-                do k = 1, nlat
-                    associate( &
-                        u => this%unit_vectors%radial( k, l ), &
-                        f => scalar_function(k, l) &
-                        )
-                        integrant(k, l, 1) = u%x * f
-                        integrant(k, l, 2) = u%y * f
-                        integrant(k, l, 3) = u%z * f
-                    end associate
-                end do
-            end do
-        end associate
-
-        ! compute first moment
-        associate( &
-            M  => first_moment, &
-            f1 => integrant(:,:, 1), &
-            f2 => integrant(:,:, 2), &
-            f3 => integrant(:,:, 3) &
-            )
-            m%x = this%compute_surface_integral( f1 )
-            m%y = this%compute_surface_integral( f2 )
-            m%z = this%compute_surface_integral( f3 )
-        end associate
-
-        ! Release memory
-        deallocate( integrant )
-
-    end subroutine compute_first_moment
-
-    
-
-    subroutine finalize_gaussian_sphere( this )
-        !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
-        !----------------------------------------------------------------------
-        type (GaussianSphere), intent (in out) :: this
+        type (RegularSphere), intent (in out) :: this
         !----------------------------------------------------------------------
 
         call this%destroy()
 
-    end subroutine finalize_gaussian_sphere
+    end subroutine finalize_regular_sphere
 
 
-end module type_GaussianSphere
+end module type_RegularSphere

@@ -12,6 +12,12 @@ module spherepack_wrapper_library
     use type_GaussianSphere, only: &
         GaussianSphere
     
+    use type_RegularGrid, only: &
+        RegularGrid
+
+    use type_RegularSphere, only: &
+        RegularSphere
+
     ! Explicit typing only
     implicit none
     
@@ -23,5 +29,7 @@ module spherepack_wrapper_library
     public :: operator(*)
     public :: GaussianGrid
     public :: GaussianSphere
+    public :: RegularGrid
+    public :: RegularSphere
 
 end module spherepack_wrapper_library

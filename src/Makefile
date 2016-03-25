@@ -83,10 +83,21 @@ type_GaussianSphere.f90
 	$(FC) $(FFLAGS) -c type_GaussianSphere.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(LIB_DIRECTORY)
 
+type_RegularSphere.o: \
+type_Sphere.o \
+type_TrigonometricFunctions.o \
+type_ThreeDimensionalVector.o \
+type_RegularGrid.o\
+type_RegularWorkspace.o\
+type_SphericalUnitVectors.o \
+type_RegularSphere.f90
+	$(FC) $(FFLAGS) -c type_RegularSphere.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(LIB_DIRECTORY)
+
 spherepack_wrapper_library.o: \
 type_ThreeDimensionalVector.o \
-type_GaussianGrid.o\
 type_GaussianSphere.o \
+type_RegularSphere.o \
 spherepack_wrapper_library.f90
 	$(FC) $(FFLAGS) -c spherepack_wrapper_library.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(LIB_DIRECTORY)
