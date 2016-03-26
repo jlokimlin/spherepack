@@ -76,9 +76,13 @@ module type_Sphere
         procedure,                              public  :: perform_complex_synthesis
         procedure (scalar_analysis),  deferred, public  :: perform_scalar_analysis
         procedure (scalar_synthesis), deferred, public  :: perform_scalar_synthesis
-        procedure (vector_analysis),  deferred, public  :: perform_vector_analysis
+        procedure,                              public  :: perform_vector_analysis
+        procedure (vector_analysis),  deferred, public  :: vector_analysis_from_spherical_components
         procedure (vector_synthesis), deferred, public  :: perform_vector_synthesis
         procedure,                              public  :: synthesize_from_complex_spectral_coefficients
+        procedure,                              public  :: analyze_into_complex_spectral_coefficients
+        procedure,                              public  :: get_vorticity_and_divergence_coefficients_from_velocities
+        procedure,                              public  :: get_velocities_from_vorticity_and_divergence_coefficients
         !----------------------------------------------------------------------
     end type Sphere
 
@@ -108,17 +112,18 @@ module type_Sphere
     end interface
 
     abstract interface
-        subroutine vector_analysis(this, vector_field)
+        subroutine vector_analysis(this, &
+            polar_component, azimuthal_component)
             import :: Sphere, wp
             !----------------------------------------------------------------------
             ! Dictionary: calling arguments
             !----------------------------------------------------------------------
             class (Sphere), intent (in out) :: this
-            real (wp),      intent (in)     :: vector_field(:,:,:)
+            real (wp),      intent (in)     :: polar_component(:,:)
+            real (wp),      intent (in)     :: azimuthal_component(:,:)
             !----------------------------------------------------------------------
         end subroutine vector_analysis
     end interface
-
 
     abstract interface
         subroutine vector_synthesis(this, polar_component, azimuthal_component)
@@ -137,13 +142,14 @@ module type_Sphere
 contains
 
 
-    subroutine create_sphere( this, nlat, nlon, isym, itype, isynt, rsphere )
+    subroutine create_sphere( this, nlat, nlon, ntrunc, isym, itype, isynt, rsphere )
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
         class (Sphere), intent (in out) :: this
         integer (ip),   intent (in)     :: nlat
         integer (ip),   intent (in)     :: nlon
+        integer (ip),   intent (in)     :: ntrunc
         integer (ip),   intent (in)     :: isym  !! Either 0, 1, or 2
         integer (ip),   intent (in)     :: itype !! Either 0, 1, 2, 3, ..., 8
         integer (ip),   intent (in)     :: isynt
@@ -160,7 +166,7 @@ contains
         ! Set constants
         this%NUMBER_OF_LATITUDES = nlat
         this%NUMBER_OF_LONGITUDES = nlon
-        this%TRIANGULAR_TRUNCATION_LIMIT = nlat - 1 !! Set triangular truncation
+        this%TRIANGULAR_TRUNCATION_LIMIT = ntrunc
         this%NUMBER_OF_SYNTHESES = isynt
         this%RADIUS_OF_SPHERE = rsphere
 
@@ -171,7 +177,7 @@ contains
         call this%get_vector_symmetries( itype )
 
         ! Allocate memory
-        associate( nm_dim => nlat * (nlat + 1)/2 )
+        associate( nm_dim => (ntrunc+1)*(ntrunc+2)/2 )
             allocate( this%INDEX_ORDER_M(nm_dim) )
             allocate( this%INDEX_DEGREE_N(nm_dim) )
             allocate( this%laplacian_coefficients(nm_dim) )
@@ -355,6 +361,10 @@ contains
             b => this%workspace%imaginary_harmonic_coefficients, &
             psi => this%complex_spectral_coefficients &
             )
+            ! Initialize (real) coefficients
+            a = 0.0_wp
+            b = 0.0_wp
+
             ! Fill real arrays with contents of spec
             do m = 0, ntrunc
                 do n = m, ntrunc
@@ -374,6 +384,30 @@ contains
 
     end subroutine perform_complex_synthesis
 
+
+    subroutine analyze_into_complex_spectral_coefficients( this, &
+        scalar_function, spectral_coefficients )
+        !----------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !----------------------------------------------------------------------
+        class (Sphere), intent (in out)  :: this
+        real (wp),      intent (in)      :: scalar_function(:,:)
+        complex (wp),   intent (out)     :: spectral_coefficients(:)
+        !----------------------------------------------------------------------
+
+        ! Check if object is usable
+        if ( this%initialized .eqv. .false. ) then
+            error stop 'TYPE(Sphere): uninitialized object'&
+                //' in ANALYZE_INTO_COMPLEX_SPECTRAL_COEFFICIENTS'
+        end if
+
+        ! analyze the scalar function into (complex) harmonic coefficients
+        call this%perform_complex_analysis( scalar_function )
+
+        ! copy coefficients
+        spectral_coefficients = this%complex_spectral_coefficients
+
+    end subroutine analyze_into_complex_spectral_coefficients
 
 
     subroutine synthesize_from_complex_spectral_coefficients( this, &
@@ -403,8 +437,10 @@ contains
             b => this%workspace%imaginary_harmonic_coefficients, &
             psi => spectral_coefficients &
             )
+            ! Initialize (real) coefficients
             a = 0.0_wp
             b = 0.0_wp
+
             ! fill real arrays with contents of spec
             do m = 0, ntrunc
                 do n = m, ntrunc
@@ -424,6 +460,56 @@ contains
         call this%perform_scalar_synthesis( scalar_function )
 
     end subroutine synthesize_from_complex_spectral_coefficients
+
+
+
+    subroutine perform_vector_analysis( this, vector_field )
+        !----------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !----------------------------------------------------------------------
+        class (Sphere), intent (in out) :: this
+        real (wp),      intent (in)     :: vector_field(:,:,:)
+        !----------------------------------------------------------------------
+        ! Dictionary: local variables
+        !----------------------------------------------------------------------
+        integer (ip)           :: error_flag
+        real (wp), allocatable :: polar_component(:,:)
+        real (wp), allocatable :: azimuthal_component(:,:)
+        !----------------------------------------------------------------------
+
+        ! Check if object is usable
+        if ( this%initialized .eqv. .false. ) then
+            error stop 'TYPE(Sphere): '&
+                //'uninitialized object in PERFORM_VECTOR_ANALYSIS'
+        end if
+
+        ! Allocate memory
+        associate( &
+            nlat => this%NUMBER_OF_LATITUDES, &
+            nlon => this%NUMBER_OF_LONGITUDES &
+            )
+            allocate( polar_component(nlat, nlon) )
+            allocate( azimuthal_component(nlat, nlon) )
+        end associate
+
+        ! compute the spherical angle components
+        associate( &
+            F => vector_field, &
+            v => polar_component, &
+            w => azimuthal_component &
+            )
+            ! Get spherical components
+            call this%unit_vectors%get_spherical_angle_components( F, v, w )
+            ! Perform vector analysis
+            call this%vector_analysis_from_spherical_components( v, w )
+        end associate
+
+        ! Release memory
+        deallocate( polar_component)
+        deallocate( azimuthal_component)
+
+    end subroutine perform_vector_analysis
+
 
 
     subroutine get_scalar_laplacian( this, scalar_function, scalar_laplacian )
@@ -589,6 +675,10 @@ contains
             cr => this%workspace%real_azimuthal_harmonic_coefficients, &
             ci => this%workspace%imaginary_azimuthal_harmonic_coefficients &
             )
+            ! Initialize polar coefficients
+            br = 0.0_wp
+            bi = 0.0_wp
+
             ! Set polar coefficients
             do n=1, nlat
                 br(:,n) = a(:,n) * sqnn(n)
@@ -636,6 +726,10 @@ contains
             br => this%workspace%real_polar_harmonic_coefficients, &
             bi => this%workspace%imaginary_polar_harmonic_coefficients &
             )
+            ! Initialize (real) coefficients
+            a = 0.0_wp
+            b = 0.0_wp
+
             do m=1, ntrunc+1
                 do n=m, ntrunc+1
                     ! Set real coefficients
@@ -683,6 +777,10 @@ contains
             cr => this%workspace%real_azimuthal_harmonic_coefficients, &
             ci => this%workspace%imaginary_azimuthal_harmonic_coefficients &
             )
+            ! Initialize (real) coefficients
+            a = 0.0_wp
+            b = 0.0_wp
+
             do m=1, ntrunc+1
                 do n=m, ntrunc+1
                     ! Set real coefficients
@@ -732,6 +830,10 @@ contains
             cr => this%workspace%real_azimuthal_harmonic_coefficients, &
             ci => this%workspace%imaginary_azimuthal_harmonic_coefficients &
             )
+            ! Initialize azimuthal coefficients
+            cr = 0.0_wp
+            ci = 0.0_wp
+
             ! Compute m = 0 coefficients
             do n = 1, nlat
                 ! Set real coefficients
@@ -739,6 +841,7 @@ contains
                 ! Set imaginary coeffients
                 ci(1,n) = b(1,n)/sqnn(n)
             end do
+
             ! Compute m >0 coefficients
             do m=2, ntrunc+1
                 do n=m, ntrunc+1
@@ -789,6 +892,10 @@ contains
             br => this%workspace%real_polar_harmonic_coefficients, &
             bi => this%workspace%imaginary_polar_harmonic_coefficients &
             )
+            ! Initialize (real) coefficients
+            a = 0.0_wp
+            b = 0.0_wp
+
             do m=1, ntrunc+1
                 do n=m, ntrunc+1
                     ! Set real coefficients
@@ -837,6 +944,10 @@ contains
             br => this%workspace%real_polar_harmonic_coefficients, &
             bi => this%workspace%imaginary_polar_harmonic_coefficients &
             )
+            ! Initialize polar coefficients
+            br = 0.0_wp
+            bi = 0.0_wp
+
             ! Compute m = 0 coefficients
             do n = 1, nlat
                 ! Set real coefficients
@@ -844,6 +955,7 @@ contains
                 ! Set imaginary coeffients
                 bi(1,n) = b(1,n)/sqnn(n)
             end do
+
             ! Compute m >0 coefficients
             do m=2, ntrunc+1
                 do n=m, ntrunc+1
@@ -853,11 +965,182 @@ contains
                     bi(m, n) = b(m, n)/sqnn(n)
                 end do
             end do
+
             ! Compute scalar synthesis
             call this%perform_scalar_synthesis( f )
         end associate
 
     end subroutine invert_divergence
+
+
+    subroutine get_vorticity_and_divergence_coefficients_from_velocities(this, &
+        polar_component, azimuthal_component, vort_spec, div_spec)
+        !----------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !----------------------------------------------------------------------
+        class (Sphere),         intent (in out) :: this
+        real (wp),              intent (in)     :: polar_component(:,:)
+        real (wp),              intent (in)     :: azimuthal_component(:,:)
+        complex (wp),           intent (out)    :: vort_spec(:)
+        complex (wp),           intent (out)    :: div_spec(:)
+        !----------------------------------------------------------------------
+        ! Dictionary: local variables
+        !----------------------------------------------------------------------
+        integer (ip)  :: n, m  !! Counters
+        !----------------------------------------------------------------------
+
+        ! Check if object is usable
+        if ( this%initialized .eqv. .false. ) then
+            error stop 'TYPE(Sphere): uninitialized object'&
+                //' in GET_VORTICITY_AND_DIVERGENCE_COEFFICIENTS_FROM_VELOCITIES'
+        end if
+
+        ! Perform vector analysis
+        call this%vector_analysis_from_spherical_components( &
+            polar_component, azimuthal_component )
+
+        ! Associate various quantities
+        associate( &
+            nm_dim => size( this%complex_spectral_coefficients ), &
+            nlat => this%NUMBER_OF_LATITUDES, &
+            ntrunc => this%TRIANGULAR_TRUNCATION_LIMIT, &
+            rsphere => this%RADIUS_OF_SPHERE, &
+            sqnn => this%vorticity_and_divergence_coefficients, &
+            a => this%workspace%real_harmonic_coefficients, &
+            b => this%workspace%imaginary_harmonic_coefficients, &
+            br => this%workspace%real_polar_harmonic_coefficients, &
+            bi => this%workspace%imaginary_polar_harmonic_coefficients, &
+            cr => this%workspace%real_azimuthal_harmonic_coefficients, &
+            ci => this%workspace%imaginary_azimuthal_harmonic_coefficients &
+            )
+            ! Initialize real scalar coefficients
+            a = 0.0_wp
+            b = 0.0_wp
+            ! Set auxiliary coefficients for divergence
+            do n = 1, nlat
+                a(:,n) = -sqnn(n) * br(:,n)
+                b(:,n) = -sqnn(n) * bi(:,n)
+            end do
+            ! Set divergence coefficients
+            div_spec = 0.5_wp * cmplx( &
+                [((a(m, n), n=m, ntrunc+1), m=1, ntrunc+1)], &
+                [((b(m, n), n=m, ntrunc+1), m=1, ntrunc+1)], &
+                kind=wp )
+            ! Set auxiliary coefficients for vorticity
+            do n=1, nlat
+                a(:,n) = sqnn(n) * cr(:,n)
+                b(:,n) = sqnn(n) * ci(:,n)
+            end do
+            ! Set vorticity coefficients
+            vort_spec = 0.5_wp * cmplx( &
+                [((a(m, n), n=m, ntrunc+1), m=1, ntrunc+1)], &
+                [((b(m, n), n=m, ntrunc+1), m=1, ntrunc+1)], &
+                kind=wp )
+        end associate
+
+    end subroutine get_vorticity_and_divergence_coefficients_from_velocities
+
+
+    subroutine get_velocities_from_vorticity_and_divergence_coefficients(this, &
+        vort_spec, div_spec, polar_component, azimuthal_component)
+        !----------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !----------------------------------------------------------------------
+        class (Sphere), intent (in out) :: this
+        complex (wp),   intent (in)     :: vort_spec(:)
+        complex (wp),   intent (in)     :: div_spec(:)
+        real (wp),      intent (out)    :: polar_component(:,:)
+        real (wp),      intent (out)    :: azimuthal_component(:,:)
+        !----------------------------------------------------------------------
+        ! Dictionary: local variables
+        !----------------------------------------------------------------------
+        integer (ip)           :: nm, n, m, i  !! Counters
+        real (wp), allocatable :: isqnn(:)
+        !----------------------------------------------------------------------
+
+        ! Check if object is usable
+        if ( this%initialized .eqv. .false. ) then
+            error stop 'TYPE(Sphere): uninitialized object'&
+                //' in GET_VELOCITIES_FROM_VORTICITY_AND_DIVERGENCE_COEFFICIENTS'
+        end if
+
+        ! Associate various quantities
+        associate( &
+            v => polar_component, &
+            w => azimuthal_component, &
+            nlat => this%NUMBER_OF_LATITUDES, &
+            ntrunc => this%TRIANGULAR_TRUNCATION_LIMIT, &
+            sqnn => this%vorticity_and_divergence_coefficients, &
+            a => this%workspace%real_harmonic_coefficients, &
+            b => this%workspace%imaginary_harmonic_coefficients, &
+            br => this%workspace%real_polar_harmonic_coefficients, &
+            bi => this%workspace%imaginary_polar_harmonic_coefficients, &
+            cr => this%workspace%real_azimuthal_harmonic_coefficients, &
+            ci => this%workspace%imaginary_azimuthal_harmonic_coefficients &
+            )
+            ! Allocate memory
+            allocate( isqnn(size(sqnn)) )
+
+            isqnn(1) = 0.0_wp
+            do n = 2, nlat
+                isqnn(n) = 1.0_wp/sqnn(n)
+            end do
+
+            ! Initialize (real) coefficients
+            a = 0.0_wp
+            b = 0.0_wp
+
+            ! Set (real) coefficients
+            do m=1, ntrunc+1
+                do n=m, ntrunc+1
+                    nm = sum([(i, i=ntrunc+1, ntrunc-m+3, -1)])+n-m+1
+                    a(m, n) = -2.0_wp * real(div_spec(nm))
+                    b(m, n) = -2.0_wp * aimag(div_spec(nm))
+                end do
+            end do
+
+            ! Initialize polar coefficients
+            br = 0.0_wp
+            bi = 0.0_wp
+
+            ! Set polar coefficients
+            do n=1, nlat
+                br(:, n) = isqnn(n)*a(:, n)
+                bi(:, n) = isqnn(n)*b(:, n)
+            end do
+
+            ! Re-initialize (real) coefficients
+            a = 0.0_wp
+            b = 0.0_wp
+
+            ! Set azimuthal coefficients
+            do m=1, ntrunc+1
+                do n=m, ntrunc+1
+                    nm = sum([(i, i=ntrunc+1, ntrunc-m+3, -1)])+n-m+1
+                    a(m, n) = 2.0_wp * real(vort_spec(nm))
+                    b(m, n) = 2.0_wp * aimag(vort_spec(nm))
+                end do
+            end do
+
+            ! Initialize azimuthal coefficients
+            cr = 0.0_wp
+            ci = 0.0_wp
+
+            ! Set azimuthal coefficients
+            do n=1, nlat
+                cr(:, n) = isqnn(n)*a(:, n)
+                ci(:, n) = isqnn(n)*b(:, n)
+            end do
+
+            ! Compute vector harmonic sysnthesis to get components
+            call this%perform_vector_synthesis( v, w )
+        end associate
+
+        ! Release memory
+        deallocate( isqnn )
+
+    end subroutine get_velocities_from_vorticity_and_divergence_coefficients
+
 
 
     subroutine compute_angular_momentum(this, scalar_function, angular_momentum)

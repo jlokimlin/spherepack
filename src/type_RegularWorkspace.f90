@@ -36,6 +36,7 @@ module type_RegularWorkspace
         procedure, nopass, private :: get_lshses
         procedure, nopass, private :: get_lvhaes
         procedure, nopass, private :: get_lvhses
+        procedure, nopass, private :: get_lwork_unsaved
         final                      :: finalize_regular_workspace
         !----------------------------------------------------------------------
     end type RegularWorkspace
@@ -58,6 +59,7 @@ contains
 
         ! Set up transforms for regular grids
         call this%initialize_regular_scalar_transform(nlat, nlon)
+
         call this%initialize_regular_vector_transform(nlat, nlon)
 
         ! Set flag
@@ -68,8 +70,6 @@ contains
 
 
     subroutine destroy_regular_workspace( this )
-        !
-        !< Purpose:
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
@@ -144,10 +144,10 @@ contains
                 return
             case(1)
                 error stop 'TYPE (RegularWorkspace) in INITIALIZE_REGULAR_SCALAR_ANALYSIS'&
-                    //'Error in the specification of NLAT'
+                    //'Error in the specification of NUMBER_OF_LATITUDES'
             case(2)
                 error stop 'TYPE (RegularWorkspace) in INITIALIZE_REGULAR_SCALAR_ANALYSIS'&
-                    //'Error in the specification of NLON'
+                    //'Error in the specification of NUMBER_OF_LONGITUDES'
             case(3)
                 error stop 'TYPE (RegularWorkspace) in INITIALIZE_REGULAR_SCALAR_ANALYSIS'&
                     //'Error in the specification of extent for FORWARD_SCALAR'
@@ -219,10 +219,10 @@ contains
                 return
             case(1)
                 error stop 'TYPE (RegularWorkspace) in INITIALIZE_REGULAR_SCALAR_SYNTHESIS'&
-                    //'Error in the specification of NLAT'
+                    //'Error in the specification of NUMBER_OF_LATITUDES'
             case(2)
                 error stop 'TYPE (RegularWorkspace) in INITIALIZE_REGULAR_SCALAR_SYNTHESIS'&
-                    //'Error in the specification of NLON'
+                    //'Error in the specification of NUMBER_OF_LONGITUDES'
             case(3)
                 error stop 'TYPE (RegularWorkspace) in INITIALIZE_REGULAR_SCALAR_SYNTHESIS'&
                     //'Error in the specification of extent for FORWARD_SCALAR'
@@ -287,18 +287,20 @@ contains
         ! Dictionary: local variables
         !----------------------------------------------------------------------
         integer (ip)           :: error_flag
-        integer (ip)           :: lvhaes, ldwork
-        real (wp), allocatable :: dwork(:)
+        integer (ip)           :: lwork, ldwork, lvhaes
+        real (wp), allocatable :: work(:), dwork(:)
         !----------------------------------------------------------------------
 
         ! Compute various workspace dimensions
-        ldwork = this%get_ldwork( nlat )
+        lwork = this%get_lwork_unsaved(nlat, nlon)
+        ldwork = this%get_ldwork(nlat)
         lvhaes = this%get_lvhaes(nlat, nlon)
 
         ! Release memory ( if necessary )
-        if (allocated(this%forward_vector)) deallocate(  this%forward_vector )
+        if (allocated(this%forward_vector)) deallocate( this%forward_vector )
 
         ! Allocate memory
+        allocate( work(lwork) )
         allocate( dwork(ldwork) )
         allocate( this%forward_vector(lvhaes) )
 
@@ -307,8 +309,12 @@ contains
             wvhaes => this%forward_vector, &
             ierror => error_flag &
             )
-            call vhaesi( nlat, nlon, wvhaes, lvhaes, dwork, ldwork, ierror )
+            call vhaesi(nlat, nlon, wvhaes, lvhaes, work, lwork, dwork, ldwork, ierror)
         end associate
+
+        ! Release memory
+        deallocate( work )
+        deallocate( dwork )
 
         ! Address the error flag
         select case (error_flag)
@@ -316,20 +322,24 @@ contains
                 return
             case(1)
                 error stop 'TYPE (RegularWorkspace) in INITIALIZE_REGULAR_VECTOR_ANALYSIS'&
-                    //'Error in the specification of NLAT'
+                    //'Error in the specification of NUMBER_OF_LATITUDES'
             case(2)
                 error stop 'TYPE (RegularWorkspace) in INITIALIZE_REGULAR_VECTOR_ANALYSIS'&
-                    //'Error in the specification of NLON'
+                    //' Error in the specification of NUMBER_OF_LONGITUDES'
             case(3)
                 error stop 'TYPE (RegularWorkspace) in INITIALIZE_REGULAR_VECTOR_ANALYSIS'&
-                    //'Error in the specification of extent for FORWARD_VECTOR'
+                    //' Error in the specification of extent for FORWARD_VECTOR'
             case(4)
                 error stop 'TYPE (RegularWorkspace) in INITIALIZE_REGULAR_VECTOR_ANALYSIS'&
-                    //'Error in the specification of extent for DWORK'
+                    //' Error in the specification of extent for unsaved WORK'
+            case(5)
+                error stop 'TYPE (RegularWorkspace) in INITIALIZE_REGULAR_VECTOR_ANALYSIS'&
+                    //' Error in the specification of extent for unsaved DWORK'
             case default
                 error stop 'TYPE (RegularWorkspace) in INITIALIZE_REGULAR_VECTOR_ANALYSIS'&
-                    //'Undetermined error flag'
+                    //' Undetermined error flag'
         end select
+
 
     end subroutine initialize_regular_vector_analysis
 
@@ -356,11 +366,12 @@ contains
         ! Dictionary: local variables
         !----------------------------------------------------------------------
         integer (ip)           :: error_flag
-        integer (ip)           :: ldwork, lvhses
-        real (wp), allocatable :: dwork(:)
+        integer (ip)           :: lwork, ldwork, lvhses
+        real (wp), allocatable :: work(:), dwork(:)
         !----------------------------------------------------------------------
 
         ! Compute various workspace dimensions
+        lwork = this%get_lwork_unsaved(nlat, nlon)
         ldwork = this%get_ldwork(nlat)
         lvhses = this%get_lvhses(nlat, nlon)
 
@@ -368,6 +379,7 @@ contains
         if (allocated(this%backward_vector)) deallocate( this%backward_vector )
 
         ! Allocate memory
+        allocate( work(lwork) )
         allocate( dwork(ldwork) )
         allocate( this%backward_vector(lvhses) )
 
@@ -376,10 +388,11 @@ contains
             wvhses => this%backward_vector, &
             ierror => error_flag &
             )
-            call vhsesi(nlat, nlon, wvhses, lvhses, dwork, ldwork, ierror)
+            call vhsesi(nlat, nlon, wvhses, lvhses, work, lwork, dwork, ldwork, ierror)
         end associate
 
         ! Release memory
+        deallocate( work )
         deallocate( dwork )
 
         ! Address the error flag
@@ -388,20 +401,24 @@ contains
                 return
             case(1)
                 error stop 'TYPE (RegularWorkspace) in INITIALIZE_REGULAR_VECTOR_SYNTHESIS'&
-                    //'Error in the specification of NLAT'
+                    //'Error in the specification of NUMBER_OF_LATITUDES'
             case(2)
                 error stop 'TYPE (RegularWorkspace) in INITIALIZE_REGULAR_VECTOR_SYNTHESIS'&
-                    //'Error in the specification of NLON'
+                    //' Error in the specification of NUMBER_OF_LONGITUDES'
             case(3)
                 error stop 'TYPE (RegularWorkspace) in INITIALIZE_REGULAR_VECTOR_SYNTHESIS'&
-                    //'Error in the specification of extent for BACKWARD_VECTOR'
+                    //' Error in the specification of extent for BACKWARD_VECTOR'
             case(4)
                 error stop 'TYPE (RegularWorkspace) in INITIALIZE_REGULAR_VECTOR_SYNTHESIS'&
-                    //'Error in the specification of extent for DWORK'
+                    //' Error in the specification of extent for unsaved WORK'
+            case(5)
+                error stop 'TYPE (RegularWorkspace) in INITIALIZE_REGULAR_VECTOR_SYNTHESIS'&
+                    //' Error in the specification of extent for unsaved DWORK'
             case default
                 error stop 'TYPE (RegularWorkspace) in INITIALIZE_REGULAR_VECTOR_SYNTHESIS'&
-                    //'Undetermined error flag'
+                    //' Undetermined error flag'
         end select
+
 
     end subroutine initialize_regular_vector_synthesis
 
@@ -565,6 +582,36 @@ contains
 
     end function get_lvhses
 
+
+    pure function get_lwork_unsaved(nlat, nlon) result (return_value)
+        !----------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !----------------------------------------------------------------------
+        integer (ip), intent (in)  :: nlat
+        integer (ip), intent (in)  :: nlon
+        integer (ip)               :: return_value
+        !----------------------------------------------------------------------
+        ! Dictionary: local variables
+        !----------------------------------------------------------------------
+        integer (ip) :: l1, l2
+        !----------------------------------------------------------------------
+
+        ! Compute parity
+        if ( mod(nlon, 2) == 0 ) then
+            l1 = min( nlat, nlon/2 )
+        else
+            l1 = min( nlat,(nlon + 1)/2 )
+        end if
+
+        if ( mod(nlat, 2) == 0 ) then
+            l2 = nlat/2
+        else
+            l2 = (nlat + 1)/2
+        end if
+
+        return_value = 3 * (max(l1-2,0) * (nlat+nlat-l1-1))/2 + 5*l2*nlat
+
+    end function get_lwork_unsaved
 
 
     subroutine finalize_regular_workspace( this )

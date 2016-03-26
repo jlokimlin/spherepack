@@ -143,10 +143,10 @@ contains
                 return
             case(1)
                 error stop 'TYPE (GaussianWorkspace): '&
-                    //'Error in the specification of NLAT'
+                    //'Error in the specification of NUMBER_OF_LATITUDES'
             case(2)
                 error stop 'TYPE (GaussianWorkspace): '&
-                    //'Error in the specification of NLON'
+                    //'Error in the specification of NUMBER_OF_LONGITUDES'
             case(3)
                 error stop 'TYPE (GaussianWorkspace): '&
                     //'Error in the specification of extent for FORWARD_SCALAR'
@@ -221,10 +221,10 @@ contains
                 return
             case(1)
                 error stop 'TYPE (GaussianWorkspace) in INITIALIZE_GAUSSIAN_SCALAR_SYNTHESIS'&
-                    //'Error in the specification of NLAT'
+                    //'Error in the specification of NUMBER_OF_LATITUDES'
             case(2)
                 error stop 'TYPE (GaussianWorkspace) in INITIALIZE_GAUSSIAN_SCALAR_SYNTHESIS'&
-                    //'Error in the specification of NLON'
+                    //'Error in the specification of NUMBER_OF_LONGITUDES'
             case(3)
                 error stop 'TYPE (GaussianWorkspace) in INITIALIZE_GAUSSIAN_SCALAR_SYNTHESIS'&
                     //'Error in the specification of extent for BACKWARD_SCALAR'
@@ -325,10 +325,10 @@ contains
                 return
             case(1)
                 error stop 'TYPE (GaussianWorkspace) in INITIALIZE_GAUSSIAN_VECTOR_ANALYSIS'&
-                    //'Error in the specification of NLAT'
+                    //'Error in the specification of NUMBER_OF_LATITUDES'
             case(2)
                 error stop 'TYPE (GaussianWorkspace) in INITIALIZE_GAUSSIAN_VECTOR_ANALYSIS'&
-                    //'Error in the specification of NLON'
+                    //'Error in the specification of NUMBER_OF_LONGITUDES'
             case(3)
                 error stop 'TYPE (GaussianWorkspace) in INITIALIZE_GAUSSIAN_VECTOR_ANALYSIS'&
                     //'Error in the specification of extent for FORWARD_VECTOR'
@@ -395,10 +395,10 @@ contains
                 return
             case(1)
                 error stop 'TYPE (GaussianWorkspace) in INITIALIZE_VECTOR_synthesis'&
-                    //'Error in the specification of NLAT'
+                    //'Error in the specification of NUMBER_OF_LATITUDES'
             case(2)
                 error stop 'TYPE (GaussianWorkspace) in INITIALIZE_VECTOR_SYNTHESIS'&
-                    //'Error in the specification of NLON'
+                    //'Error in the specification of NUMBER_OF_LONGITUDES'
             case(3)
                 error stop 'TYPE (GaussianWorkspace) in INITIALIZE_VECTOR_SYNTHESIS'&
                     //'Error in the specification of extent for BACKWARD_VECTOR'

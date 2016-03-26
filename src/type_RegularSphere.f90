@@ -43,10 +43,10 @@ module type_RegularSphere
         !----------------------------------------------------------------------
         procedure, public  :: create => create_regular_sphere
         procedure, public  :: destroy => destroy_regular_sphere
-        procedure, public  :: perform_scalar_analysis => Regular_scalar_analysis
-        procedure, public  :: perform_scalar_synthesis => Regular_scalar_synthesis
-        procedure, public  :: perform_vector_analysis => Regular_vector_analysis
-        procedure, public  :: perform_vector_synthesis => Regular_vector_synthesis
+        procedure, public  :: perform_scalar_analysis => regular_scalar_analysis
+        procedure, public  :: perform_scalar_synthesis => regular_scalar_synthesis
+        procedure, public  :: vector_analysis_from_spherical_components => regular_vector_analysis
+        procedure, public  :: perform_vector_synthesis => regular_vector_synthesis
         final              :: finalize_regular_sphere
         !----------------------------------------------------------------------
     end type RegularSphere
@@ -55,13 +55,14 @@ module type_RegularSphere
 contains
 
 
-    subroutine create_regular_sphere( this, nlat, nlon, isym, itype, isynt, rsphere )
+    subroutine create_regular_sphere( this, nlat, nlon, ntrunc, isym, itype, isynt, rsphere )
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
         class (RegularSphere), intent (in out)        :: this
         integer (ip),          intent (in)            :: nlat
         integer (ip),          intent (in)            :: nlon
+        integer (ip),          intent (in), optional  :: ntrunc
         integer (ip),          intent (in), optional  :: isym      !! Either 0, 1, or 2
         integer (ip),          intent (in), optional  :: itype     !! Either 0, 1, 2, 3, ..., 8
         integer (ip),          intent (in), optional  :: isynt
@@ -69,10 +70,11 @@ contains
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
-        integer (ip) :: scalar_sym
-        integer (ip) :: vector_sym
-        integer (ip) :: num_synt
-        real (wp)    :: radius
+        integer (ip) :: ntrunc_op
+        integer (ip) :: isym_op
+        integer (ip) :: ityp_op
+        integer (ip) :: isynt_op
+        real (wp)    :: rsphere_op
         !----------------------------------------------------------------------
 
         ! Ensure that object is usable
@@ -100,24 +102,29 @@ contains
         end associate
 
         ! Initialize constants
-        scalar_sym = 0
-        vector_sym = 0
-        num_synt = 1
-        radius = 1.0_wp
+        ntrunc_op = nlat - 1
+        isym_op = 0
+        ityp_op = 0
+        isynt_op = 1
+        rsphere_op = 1.0_wp
 
         ! Address optional arguments
-        if (present(isym)) scalar_sym = isym
-        if (present(itype)) vector_sym = itype
-        if (present(isynt)) num_synt = isynt
-        if (present(rsphere)) radius = rsphere
+        if (present(ntrunc)) ntrunc_op = ntrunc
+        if (present(isym)) isym_op = isym
+        if (present(itype)) ityp_op = itype
+        if (present(isynt)) isynt_op = isynt
+        if (present(rsphere)) rsphere_op = rsphere
 
         ! Create parent type
-        call this%create_sphere( nlat, nlon, scalar_sym, vector_sym, num_synt, radius )
+        call this%create_sphere( &
+        nlat=nlat, nlon=nlon, ntrunc=ntrunc_op, &
+        isym=isym_op, itype=ityp_op, isynt=isynt_op, rsphere=rsphere_op )
 
         ! Set initialization flag
         this%initialized = .true.
         
     end subroutine create_regular_sphere
+
 
 
     subroutine destroy_regular_sphere( this )
@@ -139,7 +146,8 @@ contains
     end subroutine destroy_regular_sphere
 
 
-    subroutine Regular_scalar_analysis( this, scalar_function )
+
+    subroutine regular_scalar_analysis( this, scalar_function )
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
@@ -154,7 +162,7 @@ contains
         ! Check if object is usable
         if ( this%initialized .eqv. .false. ) then
             error stop 'TYPE(RegularSphere): '&
-                //'uninitialized object in Regular_SCALAR_ANALYSIS'
+                //'uninitialized object in regular_SCALAR_ANALYSIS'
         end if
 
         select type (this)
@@ -193,30 +201,30 @@ contains
             case(0)
                 return
             case(1)
-                error stop 'TYPE(RegularSphere) in REGULAR_SCALAR_ANALYSIS'&
-                    // 'Error in the specification of NLAT'
+                error stop 'TYPE(RegularSphere) in regular_SCALAR_ANALYSIS'&
+                    // 'Error in the specification of NUMBER_OF_LATITUDES'
             case(2)
-                error stop 'TYPE(RegularSphere) in REGULAR_SCALAR_ANALYSIS'&
-                    //'Error in the specification of NLON'
+                error stop 'TYPE(RegularSphere) in regular_SCALAR_ANALYSIS'&
+                    //'Error in the specification of NUMBER_OF_LONGITUDES'
             case(3)
-                error stop 'TYPE(RegularSphere) in REGULAR_SCALAR_ANALYSIS'&
+                error stop 'TYPE(RegularSphere) in regular_SCALAR_ANALYSIS'&
                     //'Invalid extent for SCALAR_FORWARD'
             case(4)
-                error stop 'TYPE(RegularSphere) in REGULAR_SCALAR_ANALYSIS'&
+                error stop 'TYPE(RegularSphere) in regular_SCALAR_ANALYSIS'&
                     //'Invalid extent for LEGENDRE_WORKSPACE'
             case(5)
-                error stop 'TYPE(RegularSphere) in REGULAR_SCALAR_ANALYSIS'&
+                error stop 'TYPE(RegularSphere) in regular_SCALAR_ANALYSIS'&
                     //'Invalid extent for DWORK'
             case default
-                error stop 'TYPE(RegularSphere) in REGULAR_SCALAR_ANALYSIS'&
+                error stop 'TYPE(RegularSphere) in regular_SCALAR_ANALYSIS'&
                     // 'Undetermined error flag'
         end select
 
-    end subroutine Regular_scalar_analysis
+    end subroutine regular_scalar_analysis
     
 
 
-    subroutine Regular_scalar_synthesis( this, scalar_function )
+    subroutine regular_scalar_synthesis( this, scalar_function )
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
@@ -231,7 +239,7 @@ contains
         ! Check if object is usable
         if ( this%initialized .eqv. .false. ) then
             error stop 'TYPE(RegularSphere): '&
-                //'uninitialized object in REGULAR_SCALAR_SYNTHESIS'
+                //'uninitialized object in regular_SCALAR_SYNTHESIS'
         end if
 
         ! Perform (real) spherical harmonic synthesis
@@ -271,41 +279,41 @@ contains
             case(0)
                 return
             case(1)
-                error stop 'TYPE(RegularSphere) in REGULAR_SCALAR_SYNTHESIS'&
-                    // 'Error in the specification of NLAT'
+                error stop 'TYPE(RegularSphere) in regular_SCALAR_SYNTHESIS'&
+                    // 'Error in the specification of NUMBER_OF_LATITUDES'
             case(2)
-                error stop 'TYPE(RegularSphere) in REGULAR_SCALAR_SYNTHESIS'&
-                    //'Error in the specification of NLON'
+                error stop 'TYPE(RegularSphere) in regular_SCALAR_SYNTHESIS'&
+                    //'Error in the specification of NUMBER_OF_LONGITUDES'
             case(3)
-                error stop 'TYPE(RegularSphere) in REGULAR_SCALAR_SYNTHESIS'&
+                error stop 'TYPE(RegularSphere) in regular_SCALAR_SYNTHESIS'&
                     //'Invalid extent for SCALAR_FORWARD'
             case(4)
-                error stop 'TYPE(RegularSphere) in REGULAR_SCALAR_SYNTHESIS'&
+                error stop 'TYPE(RegularSphere) in regular_SCALAR_SYNTHESIS'&
                     //'Invalid extent for LEGENDRE_WORKSPACE'
             case(5)
-                error stop 'TYPE(RegularSphere) in REGULAR_SCALAR_SYNTHESIS'&
+                error stop 'TYPE(RegularSphere) in regular_SCALAR_SYNTHESIS'&
                     //'Invalid extent for DWORK'
             case default
-                error stop 'TYPE(RegularSphere) in REGULAR_SCALAR_SYNTHESIS'&
+                error stop 'TYPE(RegularSphere) in regular_SCALAR_SYNTHESIS'&
                     // 'Undetermined error flag'
         end select
 
-    end subroutine Regular_scalar_synthesis
+    end subroutine regular_scalar_synthesis
 
 
 
-    subroutine Regular_vector_analysis( this, vector_field )
+    subroutine regular_vector_analysis( this, &
+        polar_component, azimuthal_component )
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
         class (RegularSphere), intent (in out) :: this
-        real (wp),             intent (in)     :: vector_field(:,:,:)
+        real (wp),             intent (in)     :: polar_component(:,:)
+        real (wp),             intent (in)     :: azimuthal_component(:,:)
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
-        integer (ip)           :: error_flag
-        real (wp), allocatable :: polar_component(:,:)
-        real (wp), allocatable :: azimuthal_component(:,:)
+        integer (ip) :: error_flag
         !----------------------------------------------------------------------
 
         ! Check if object is usable
@@ -313,24 +321,6 @@ contains
             error stop 'TYPE(RegularSphere): '&
                 //'uninitialized object in REGULAR_VECTOR_ANALYSIS'
         end if
-
-        ! Allocate memory
-        associate( &
-            nlat => this%NUMBER_OF_LATITUDES, &
-            nlon => this%NUMBER_OF_LONGITUDES &
-            )
-            allocate( polar_component(nlat, nlon) )
-            allocate( azimuthal_component(nlat, nlon) )
-        end associate
-
-        ! compute the spherical angle components
-        associate( &
-            F => vector_field, &
-            v => polar_component, &
-            w => azimuthal_component &
-            )
-            call this%unit_vectors%get_spherical_angle_components( F, v, w )
-        end associate
 
         ! Perform vector analysis
         select type (this)
@@ -371,51 +361,58 @@ contains
             case(0)
                 return
             case(1)
-                error stop 'TYPE(RegularSphere) in REGULAR_VECTOR_ANALYSIS'&
-                    //'Error in the specification of NLAT'
+                error stop 'TYPE(RegularSphere) in '&
+                    //'REGULAR_VECTOR_ANALYSIS'&
+                    //'Error in the specification of NUMBER_OF_LATITUDES'
             case(2)
-                error stop 'TYPE(RegularSphere) in REGULAR_VECTOR_ANALYSIS'&
-                    //'Error in the specification of NLON'
+                error stop 'TYPE(RegularSphere) in '&
+                    //'REGULAR_VECTOR_ANALYSIS'&
+                    //'Error in the specification of NUMBER_OF_LONGITUDES'
             case(3)
-                error stop 'TYPE(RegularSphere) in REGULAR_VECTOR_ANALYSIS'&
+                error stop 'TYPE(RegularSphere) in '&
+                    //'REGULAR_VECTOR_ANALYSIS'&
                     //'Error in the specification of VECTOR_SYMMETRIES'
             case(4)
-                error stop 'TYPE(RegularSphere) in REGULAR_VECTOR_ANALYSIS'&
-                    //'Error in the specification of NUMBER_OF_synthESES'
+                error stop 'TYPE(RegularSphere) in '&
+                    //'REGULAR_VECTOR_ANALYSIS'&
+                    //'Error in the specification of NUMBER_OF_SYNTHESES'
             case(5)
-                error stop 'TYPE(RegularSphere) in REGULAR_VECTOR_ANALYSIS'&
+                error stop 'TYPE(RegularSphere) in '&
+                    //'REGULAR_VECTOR_ANALYSIS'&
                     //'Invalid DIM=1 extent for '&
                     //'POLAR_COMPONENT (THETA) or AZIMUTHAL_COMPONENT (PHI)'
             case(6)
-                error stop 'TYPE(RegularSphere) in REGULAR_VECTOR_ANALYSIS'&
+                error stop 'TYPE(RegularSphere) in '&
+                    //'REGULAR_VECTOR_ANALYSIS'&
                     //'Invalid DIM=2 extent '&
                     //'POLAR_COMPONENT (THETA) or AZIMUTHAL_COMPONENT (PHI)'
             case(7)
-                error stop 'TYPE(RegularSphere) in REGULAR_VECTOR_ANALYSIS'&
+                error stop 'TYPE(RegularSphere) in '&
+                    //'REGULAR_VECTOR_ANALYSIS'&
                     //'Invalid DIM=1 extent for BR or CR'
             case(8)
-                error stop 'TYPE(RegularSphere) in REGULAR_VECTOR_ANALYSIS'&
+                error stop 'TYPE(RegularSphere) in '&
+                    //'REGULAR_VECTOR_ANALYSIS'&
                     //'Invalid DIM=1 extent for BI or CI'
             case(9)
-                error stop 'TYPE(RegularSphere) in REGULAR_VECTOR_ANALYSIS'&
+                error stop 'TYPE(RegularSphere) in '&
+                    //'REGULAR_VECTOR_ANALYSIS'&
                     //'Invalid extent for FORWARD_VECTOR'
             case(10)
-                error stop 'TYPE(RegularSphere) in REGULAR_VECTOR_ANALYSIS'&
+                error stop 'TYPE(RegularSphere) in '&
+                    //'REGULAR_VECTOR_ANALYSIS'&
                     //'Invalid extent for LEGENDRE_WORKSPACE'
             case default
-                error stop 'TYPE(RegularSphere) in REGULAR_VECTOR_ANALYSIS'&
+                error stop 'TYPE(RegularSphere) in '&
+                    //'REGULAR_VECTOR_ANALYSIS'&
                     //'Undetermined error flag'
         end select
 
-        ! Release memory
-        deallocate( polar_component)
-        deallocate( azimuthal_component)
-
-    end subroutine Regular_vector_analysis
+    end subroutine regular_vector_analysis
 
 
 
-    subroutine Regular_vector_synthesis( this, polar_component, azimuthal_component )
+    subroutine regular_vector_synthesis( this, polar_component, azimuthal_component )
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
@@ -431,7 +428,7 @@ contains
         ! Check if object is usable
         if ( this%initialized .eqv. .false. ) then
             error stop 'TYPE(RegularSphere): '&
-                //'uninitialized object in REGULAR_VECTOR_SYNTHESIS'
+                //'uninitialized object in regular_VECTOR_SYNTHESIS'
         end if
 
         ! Perform vector analysis
@@ -474,10 +471,10 @@ contains
                 return
             case(1)
                 error stop 'TYPE(RegularSphere) in REGULAR_VECTOR_SYNTHESIS'&
-                    //'Error in the specification of NLAT'
+                    //'Error in the specification of NUMBER_OF_LATITUDES'
             case(2)
                 error stop 'TYPE(RegularSphere) in REGULAR_VECTOR_SYNTHESIS'&
-                    //'Error in the specification of NLON'
+                    //'Error in the specification of NUMBER_OF_LONGITUDES'
             case(3)
                 error stop 'TYPE(RegularSphere) in REGULAR_VECTOR_SYNTHESIS'&
                     //'Error in the specification of VECTOR_SYMMETRIES'
@@ -509,7 +506,7 @@ contains
                     //'Undetermined error flag'
         end select
 
-    end subroutine Regular_vector_synthesis
+    end subroutine regular_vector_synthesis
     
 
     subroutine finalize_regular_sphere( this )

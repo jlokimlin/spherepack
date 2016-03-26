@@ -45,7 +45,7 @@ module type_GaussianSphere
         procedure, public  :: destroy => destroy_gaussian_sphere
         procedure, public  :: perform_scalar_analysis => gaussian_scalar_analysis
         procedure, public  :: perform_scalar_synthesis => gaussian_scalar_synthesis
-        procedure, public  :: perform_vector_analysis => gaussian_vector_analysis
+        procedure, public  :: vector_analysis_from_spherical_components => gaussian_vector_analysis
         procedure, public  :: perform_vector_synthesis => gaussian_vector_synthesis
         procedure, public  :: compute_surface_integral
         procedure, public  :: compute_first_moment
@@ -57,13 +57,14 @@ module type_GaussianSphere
 contains
 
 
-    subroutine create_gaussian_sphere( this, nlat, nlon, isym, itype, isynt, rsphere )
+    subroutine create_gaussian_sphere( this, nlat, nlon, ntrunc, isym, itype, isynt, rsphere )
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
         class (GaussianSphere), intent (in out)        :: this
         integer (ip),           intent (in)            :: nlat
         integer (ip),           intent (in)            :: nlon
+        integer (ip),           intent (in), optional  :: ntrunc
         integer (ip),           intent (in), optional  :: isym      !! Either 0, 1, or 2
         integer (ip),           intent (in), optional  :: itype     !! Either 0, 1, 2, 3, ..., 8
         integer (ip),           intent (in), optional  :: isynt
@@ -71,10 +72,11 @@ contains
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
-        integer (ip) :: scalar_sym
-        integer (ip) :: vector_sym
-        integer (ip) :: num_synt
-        real (wp)    :: radius
+        integer (ip) :: ntrunc_op
+        integer (ip) :: isym_op
+        integer (ip) :: ityp_op
+        integer (ip) :: isynth_op
+        real (wp)    :: rsphere_op
         !----------------------------------------------------------------------
 
         ! Ensure that object is usable
@@ -102,19 +104,21 @@ contains
         end associate
 
         ! Initialize constants
-        scalar_sym = 0
-        vector_sym = 0
-        num_synt = 1
-        radius = 1.0_wp
+        ntrunc_op = nlat - 1
+        isym_op = 0
+        ityp_op = 0
+        isynth_op = 1
+        rsphere_op = 1.0_wp
 
         ! Address optional arguments
-        if (present(isym)) scalar_sym = isym
-        if (present(itype)) vector_sym = itype
-        if (present(isynt)) num_synt = isynt
-        if (present(rsphere)) radius = rsphere
+        if (present(ntrunc)) ntrunc_op = ntrunc
+        if (present(isym)) isym_op = isym
+        if (present(itype)) ityp_op = itype
+        if (present(isynt)) isynth_op = isynt
+        if (present(rsphere)) rsphere_op = rsphere
 
         ! Create parent type
-        call this%create_sphere( nlat, nlon, scalar_sym, vector_sym, num_synt, radius )
+        call this%create_sphere( nlat, nlon, ntrunc_op, isym_op, ityp_op, isynth_op, rsphere_op )
 
         ! Set initialization flag
         this%initialized = .true.
@@ -196,10 +200,10 @@ contains
                 return
             case(1)
                 error stop 'TYPE(GaussianSphere) in GAUSSIAN_SCALAR_ANALYSIS'&
-                    //'Error in the specification of NLAT'
+                    //'Error in the specification of NUMBER_OF_LATITUDES'
             case(2)
                 error stop 'TYPE(GaussianSphere) in GAUSSIAN_SCALAR_ANALYSIS'&
-                    //'Error in the specification of NLON'
+                    //'Error in the specification of NUMBER_OF_LONGITUDES'
             case(3)
                 error stop 'TYPE(GaussianSphere) in GAUSSIAN_SCALAR_ANALYSIS'&
                     //'Invalid extent for SCALAR_FORWARD'
@@ -276,10 +280,10 @@ contains
                 return
             case(1)
                 error stop 'TYPE(GaussianSphere) in GAUSSIAN_SCALAR_SYNTHESIS'&
-                    //'Error in the specification of NLAT'
+                    //'Error in the specification of NUMBER_OF_LATITUDES'
             case(2)
                 error stop 'TYPE(GaussianSphere) in GAUSSIAN_SCALAR_SYNTHESIS'&
-                    //'Error in the specification of NLON'
+                    //'Error in the specification of NUMBER_OF_LONGITUDES'
             case(3)
                 error stop 'TYPE(GaussianSphere) in GAUSSIAN_SCALAR_SYNTHESIS'&
                     //'Invalid extent for SCALAR_BACKWARD'
@@ -302,43 +306,25 @@ contains
 
 
 
-    subroutine gaussian_vector_analysis( this, vector_field )
+    subroutine gaussian_vector_analysis(this, polar_component, azimuthal_component )
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
         class (GaussianSphere), intent (in out) :: this
-        real (wp),              intent (in)     :: vector_field(:,:,:)
+        real (wp),              intent (in)     :: polar_component(:,:)
+        real (wp),              intent (in)     :: azimuthal_component(:,:)
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
         integer (ip)           :: error_flag
-        real (wp), allocatable :: polar_component(:,:)
-        real (wp), allocatable :: azimuthal_component(:,:)
         !----------------------------------------------------------------------
 
         ! Check if object is usable
         if ( this%initialized .eqv. .false. ) then
             error stop 'TYPE(GaussianSphere): '&
-                //'uninitialized object in GAUSSIAN_VECTOR_ANALYSIS'
+                //'uninitialized object in '&
+                //'GAUSSIAN_VECTOR_ANALYSIS'
         end if
-
-        ! Allocate memory
-        associate( &
-            nlat => this%NUMBER_OF_LATITUDES, &
-            nlon => this%NUMBER_OF_LONGITUDES &
-            )
-            allocate( polar_component(nlat, nlon) )
-            allocate( azimuthal_component(nlat, nlon) )
-        end associate
-
-        ! compute the spherical angle components
-        associate( &
-            F => vector_field, &
-            v => polar_component, &
-            w => azimuthal_component &
-            )
-            call this%unit_vectors%get_spherical_angle_components( F, v, w )
-        end associate
 
         ! Perform vector analysis
         select type (this)
@@ -379,48 +365,54 @@ contains
             case(0)
                 return
             case(1)
-                error stop 'TYPE(GaussianSphere) in GAUSSIAN_VECTOR_ANALYSIS'&
-                    //'Error in the specification of NLAT'
+                error stop 'TYPE(GaussianSphere) in '&
+                    //'GAUSSIAN_VECTOR_ANALYSIS'&
+                    //'Error in the specification of NUMBER_OF_LATITUDES'
             case(2)
-                error stop 'TYPE(GaussianSphere) in GAUSSIAN_VECTOR_ANALYSIS'&
-                    //'Error in the specification of NLON'
+                error stop 'TYPE(GaussianSphere) in '&
+                    //'GAUSSIAN_VECTOR_ANALYSIS'&
+                    //'Error in the specification of NUMBER_OF_LONGITUDES'
             case(3)
-                error stop 'TYPE(GaussianSphere) in GAUSSIAN_VECTOR_ANALYSIS'&
+                error stop 'TYPE(GaussianSphere) in '&
+                    //'GAUSSIAN_VECTOR_ANALYSIS'&
                     //'Error in the specification of VECTOR_SYMMETRIES'
             case(4)
-                error stop 'TYPE(GaussianSphere) in GAUSSIAN_VECTOR_ANALYSIS'&
+                error stop 'TYPE(GaussianSphere) in '&
+                    //'GAUSSIAN_VECTOR_ANALYSIS'&
                     //'Error in the specification of NUMBER_OF_synthESES'
             case(5)
-                error stop 'TYPE(GaussianSphere) in GAUSSIAN_VECTOR_ANALYSIS'&
+                error stop 'TYPE(GaussianSphere) in '&
+                    //'GAUSSIAN_VECTOR_ANALYSIS'&
                     //'Invalid DIM=1 extent for '&
                     //'POLAR_COMPONENT (THETA) or AZIMUTHAL_COMPONENT (PHI)'
             case(6)
-                error stop 'TYPE(GaussianSphere) in GAUSSIAN_VECTOR_ANALYSIS'&
+                error stop 'TYPE(GaussianSphere) in '&
+                    //'GAUSSIAN_VECTOR_ANALYSIS'&
                     //'Invalid DIM=2 extent '&
                     //'POLAR_COMPONENT (THETA) or AZIMUTHAL_COMPONENT (PHI)'
             case(7)
-                error stop 'TYPE(GaussianSphere) in GAUSSIAN_VECTOR_ANALYSIS'&
+                error stop 'TYPE(GaussianSphere) in '&
+                    //'GAUSSIAN_VECTOR_ANALYSIS'&
                     //'Invalid DIM=1 extent for BR or CR'
             case(8)
-                error stop 'TYPE(GaussianSphere) in GAUSSIAN_VECTOR_ANALYSIS'&
+                error stop 'TYPE(GaussianSphere) in '&
+                    //'GAUSSIAN_VECTOR_ANALYSIS'&
                     //'Invalid DIM=1 extent for BI or CI'
             case(9)
-                error stop 'TYPE(GaussianSphere) in GAUSSIAN_VECTOR_ANALYSIS'&
+                error stop 'TYPE(GaussianSphere) in '&
+                    //'GAUSSIAN_VECTOR_ANALYSIS'&
                     //'Invalid extent for FORWARD_VECTOR'
             case(10)
-                error stop 'TYPE(GaussianSphere) in GAUSSIAN_VECTOR_ANALYSIS'&
+                error stop 'TYPE(GaussianSphere) in '&
+                    //'GAUSSIAN_VECTOR_ANALYSIS'&
                     //'Invalid extent for LEGENDRE_WORKSPACE'
             case default
-                error stop 'TYPE(GaussianSphere) in GAUSSIAN_VECTOR_ANALYSIS'&
+                error stop 'TYPE(GaussianSphere) in '&
+                    //'GAUSSIAN_VECTOR_ANALYSIS'&
                     //'Undetermined error flag'
         end select
 
-        ! Release memory
-        deallocate( polar_component)
-        deallocate( azimuthal_component)
-
     end subroutine gaussian_vector_analysis
-
 
 
     subroutine gaussian_vector_synthesis( this, polar_component, azimuthal_component )
@@ -482,10 +474,10 @@ contains
                 return
             case(1)
                 error stop 'TYPE(GaussianSphere) in GAUSSIAN_VECTOR_SYNTHESIS'&
-                    //'Error in the specification of NLAT'
+                    //'Error in the specification of NUMBER_OF_LATITUDES'
             case(2)
                 error stop 'TYPE(GaussianSphere) in GAUSSIAN_VECTOR_SYNTHESIS'&
-                    //'Error in the specification of NLON'
+                    //'Error in the specification of NUMBER_OF_LONGITUDES'
             case(3)
                 error stop 'TYPE(GaussianSphere) in GAUSSIAN_VECTOR_SYNTHESIS'&
                     //'Error in the specification of VECTOR_SYMMETRIES'

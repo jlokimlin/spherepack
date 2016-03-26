@@ -4,7 +4,7 @@ include ../make.inc
 MODULE_PATH = $(LIB_DIRECTORY)
 
 LINKS = \
--lspherepack -L$(EXTERNAL_LIBRARY_PATH) \
+-L$(LIB_DIRECTORY) -lspherepack \
 -I$(MODULE_PATH)
 
 EXECUTABLE = ./build_lib.exe
@@ -112,7 +112,7 @@ exec: $(OBJ)
 	$(FC) $(FFLAGS) -o $(EXECUTABLE) $(OBJS) $(LINKS)
 
 lib: 
-	$(AR) rc lib$(LIB_NAME).a $(OBJS)
+	$(AR) rc lib$(LIB_NAME).a $(OBJ_DIRECTORY)/*.o
 	mv lib$(LIB_NAME).a $(LIB_DIRECTORY)
 
 all:
