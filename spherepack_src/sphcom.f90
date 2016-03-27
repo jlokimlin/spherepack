@@ -344,24 +344,47 @@ km = kmt
 return
 end subroutine legin1
 
-
 subroutine zfin (isym, nlat, nlon, m, z, i3, wzfin)
-dimension       z(1)        , wzfin(1)
-imid = (nlat+1)/2
-lim = nlat*imid
-mmax = min(nlat, nlon/2+1)
-labc = ((mmax-2)*(nlat+nlat-mmax-1))/2
-iw1 = lim+1
-iw2 = iw1+lim
-iw3 = iw2+labc
-iw4 = iw3+labc
+implicit none
+!----------------------------------------------------------------------
+! Dictionary: calling arguments
+!----------------------------------------------------------------------
+integer, intent (in)     :: isym
+integer, intent (in)     :: nlat
+integer, intent (in)     :: nlon
+integer, intent (in)     :: m
+real,    intent (inout)  :: z(1)
+integer, intent (in)     :: i3
+real,    intent (in out) :: wzfin(1)
+!----------------------------------------------------------------------
+
+associate( imid => (nlat+1)/2 )
+associate( mmax => min(nlat, nlon/2+1) )
+associate( lim => nlat*imid )
+associate( labc => ((mmax-2)*(nlat+nlat-mmax-1))/2 )
+associate( iw1 => lim+1 )
+associate( iw2 => iw1+lim )
+associate( iw3 => iw2+labc )
+associate( iw4 => iw3+labc )
 !
 !     the length of wzfin is 2*lim+3*labc
 !
-call zfin1 (isym, nlat, m, z, imid, i3, wzfin, wzfin(iw1), wzfin(iw2), &
-            wzfin(iw3), wzfin(iw4))
-return
+call zfin1(isym, nlat, m, z, imid, i3, &
+wzfin, wzfin(iw1), wzfin(iw2), &
+wzfin(iw3), wzfin(iw4))
+end associate
+end associate
+end associate
+end associate
+end associate
+end associate
+end associate
+end associate
+
 end subroutine zfin
+
+
+
 subroutine zfin1 (isym, nlat, m, z, imid, i3, zz, z1, a, b, c)
 dimension       z(imid, nlat, 3), zz(imid, 1), z1(imid, 1), &
                 a(1), b(1), c(1)
@@ -429,23 +452,27 @@ subroutine zfini1 (nlat, nlon, imid, z, abc, cz, work)
 !
 dimension z(imid, nlat, 2), abc(1)
 real pi, dt, th, zh, cz(*), work(*)
-pi = 4.*atan(1.d0)
+pi = acos( -1.0 )
 dt = pi/(nlat-1)
-do 160 mp1=1, 2
+do mp1=1, 2
 m = mp1-1
-do 160 np1=mp1, nlat
+do np1=mp1, nlat
 n = np1-1
 call dnzfk(nlat, m, n, cz, work)
-do 165 i=1, imid
+do i=1, imid
 th = (i-1)*dt
 call dnzft(nlat, m, n, th, cz, zh)
 z(i, np1, mp1) = zh
-165 continue
+end do
 z(1, np1, mp1) = .5*z(1, np1, mp1)
-160 continue
+end do
+end do
+
 call rabcp(nlat, nlon, abc)
-return
+
 end subroutine zfini1
+
+
 subroutine dnzfk(nlat, m, n, cz, work)
 !
 !     dnzfk computes the coefficients in the trigonometric
@@ -735,7 +762,7 @@ end subroutine alinit
 subroutine alini1 (nlat, nlon, imid, p, abc, cp)
 dimension p(imid, nlat, 2), abc(1), cp(1)
 real pi, dt, th, cp, ph
-pi = 4.*atan(1.d0)
+pi = acos( -1.0 )
 dt = pi/(nlat-1)
 do 160 mp1=1, 2
 m = mp1-1
@@ -853,25 +880,30 @@ subroutine zvini1 (nlat, nlon, imid, zv, abc, czv, work)
 !     czv and work must each have nlat/2+1  locations
 !
 dimension zv(imid, nlat, 2), abc(1)
-real pi, dt, czv(1), zvh, th, work(1)
-pi = 4.*atan(1.d0)
+real dt, czv(1), zvh, th, work(1)
+real, parameter :: pi = acos( -1.0 )
 dt = pi/(nlat-1)
 mdo = min(2, nlat, (nlon+1)/2)
-do 160 mp1=1, mdo
+do mp1=1, mdo
 m = mp1-1
-do 160 np1=mp1, nlat
+do np1=mp1, nlat
 n = np1-1
 call dzvk(nlat, m, n, czv, work)
-do 165 i=1, imid
+do i=1, imid
 th = (i-1)*dt
 call dzvt(nlat, m, n, th, czv, zvh)
 zv(i, np1, mp1) = zvh
-165 continue
+end do
 zv(1, np1, mp1) = .5*zv(1, np1, mp1)
-160 continue
+end do
+end do
+
 call rabcv(nlat, nlon, abc)
-return
+
 end subroutine zvini1
+
+
+
 subroutine zwinit (nlat, nlon, wzwin, dwork)
 dimension       wzwin(1)
 real dwork(*)
@@ -892,26 +924,33 @@ subroutine zwini1 (nlat, nlon, imid, zw, abc, czw, work)
 !     czw and work must each have nlat+1 locations
 !
 dimension zw(imid, nlat, 2), abc(1)
-real  pi, dt, czw(1), zwh, th, work(1)
-pi = 4.*atan(1.d0)
+real  dt, czw(1), zwh, th, work(1)
+real, parameter :: pi = acos( -1.0 )
 dt = pi/(nlat-1)
 mdo = min(3, nlat, (nlon+1)/2)
+
 if(mdo < 2) return
-do 160 mp1=2, mdo
+
+do mp1=2, mdo
 m = mp1-1
-do 160 np1=mp1, nlat
+do np1=mp1, nlat
 n = np1-1
 call dzwk(nlat, m, n, czw, work)
-do 165 i=1, imid
+do i=1, imid
 th = (i-1)*dt
 call dzwt(nlat, m, n, th, czw, zwh)
 zw(i, np1, m) = zwh
-165 continue
+end do
 zw(1, np1, m) = .5*zw(1, np1, m)
-160 continue
+end do
+end do
+
 call rabcw(nlat, nlon, abc)
-return
+
 end subroutine zwini1
+
+
+
 subroutine zvin (ityp, nlat, nlon, m, zv, i3, wzvin)
 dimension       zv(1)        , wzvin(1)
 imid = (nlat+1)/2
@@ -1059,7 +1098,7 @@ subroutine vbini1 (nlat, nlon, imid, vb, abc, cvb, work)
 !
 dimension vb(imid, nlat, 2), abc(1)
 real pi, dt, cvb(1), th, vbh, work(1)
-pi = 4.*atan(1.d0)
+pi = acos( -1.0 )
 dt = pi/(nlat-1)
 mdo = min(2, nlat, (nlon+1)/2)
 do 160 mp1=1, mdo
@@ -1096,25 +1135,31 @@ subroutine wbini1 (nlat, nlon, imid, wb, abc, cwb, work)
 !     cwb and work must each have nlat/2+1 locations
 !
 dimension wb(imid, nlat, 2), abc(1)
-real pi, dt, cwb(1), wbh, th, work(1)
-pi = 4.*atan(1.d0)
+real dt, cwb(1), wbh, th, work(1)
+real, parameter :: pi = acos( -1.0 )
+
 dt = pi/(nlat-1)
 mdo = min(3, nlat, (nlon+1)/2)
 if(mdo < 2) return
-do 160 mp1=2, mdo
+do mp1=2, mdo
 m = mp1-1
-do 160 np1=mp1, nlat
+do np1=mp1, nlat
 n = np1-1
 call dwbk(m, n, cwb, work)
-do 165 i=1, imid
+do i=1, imid
 th = (i-1)*dt
 call dwbt(m, n, th, cwb, wbh)
 wb(i, np1, m) = wbh
-165 continue
-160 continue
+end do
+end do
+end do
+
 call rabcw(nlat, nlon, abc)
-return
+
 end subroutine wbini1
+
+
+
 subroutine vbin (ityp, nlat, nlon, m, vb, i3, wvbin)
 dimension       vb(1)        , wvbin(1)
 imid = (nlat+1)/2
@@ -2050,7 +2095,7 @@ subroutine vtini1 (nlat, nlon, imid, vb, abc, cvb, work)
 !
 dimension vb(imid, nlat, 2), abc(1), cvb(1)
 real pi, dt, cvb, th, vbh, work(*)
-pi = 4.*atan(1.d0)
+pi = acos( -1.0 )
 dt = pi/(nlat-1)
 mdo = min(2, nlat, (nlon+1)/2)
 do 160 mp1=1, mdo
@@ -2088,7 +2133,7 @@ subroutine wtini1 (nlat, nlon, imid, wb, abc, cwb, work)
 !
 dimension wb(imid, nlat, 2), abc(1)
 real pi, dt, cwb(*), wbh, th, work(*)
-pi = 4.*atan(1.d0)
+pi = acos( -1.0 )
 dt = pi/(nlat-1)
 mdo = min(3, nlat, (nlon+1)/2)
 if(mdo < 2) return
