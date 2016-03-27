@@ -54,12 +54,12 @@ contains
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
         class (SphericalUnitVectors),            intent (in out) :: this
-        class (SphericalGrid),                            intent (in out) :: grid_type
+        class (SphericalGrid),                   intent (in out) :: grid_type
         class (TrigFunctions), optional, target, intent (in out) :: trig_functions
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
-        integer (ip)                   :: k,  l !! Counters
+        integer (ip)                  :: k,  l !! Counters
         type (TrigFunctions), pointer :: ptr => null()
         !----------------------------------------------------------------------
 

@@ -618,7 +618,6 @@ subroutine shagss1(nlat, l, late, w, pmn, pmnf)
             mn = mml1+np1
             do i=1, late
                 pmnf(i, mn) = pmn(np1, i, km)
-
             end do
         end do
     end do
@@ -691,9 +690,8 @@ subroutine shagsp1(nlat, nlon, l, late, wts, p0n, p1n, abel, bbel, cbel, &
 
     !     store gaussian weights single precision to save computation
     !     in inner loops in analysis
-    do i=1, nlat
-        wts(i) = dwts(i)
-    end do
+    wts = dwts
+
     !     initialize p0n, p1n using real dnlfk, dnlft
     do np1=1, nlat
         do i=1, late

@@ -89,10 +89,10 @@ fden = fden+2.
 if(mod(ma/2, 2) /= 0) t1 = -t1
 t2 = 1.
 if(ma == 0) go to 26
-do 25 i=1, ma
+do i=1, ma
 t2 = fnmh*t2/(fnmh+pm1)
 fnmh = fnmh+2.
-25 continue
+end do
 26 cp2 = t1*sqrt((n+.5d0)*t2)
 fnnp1 = n*(n+1)
 fnmsq = fnnp1-2.d0*ma*ma
@@ -1088,8 +1088,11 @@ iw1 = 2*nlat*imid+1
 !
 call vbini1 (nlat, nlon, imid, wvbin, wvbin(iw1), dwork, &
                                        dwork(nlat/2+2))
-return
+
 end subroutine vbinit
+
+
+
 subroutine vbini1 (nlat, nlon, imid, vb, abc, cvb, work)
 !
 !     abc must have 3*(max(mmax-2, 0)*(nlat+nlat-mmax-1))/2
@@ -1097,24 +1100,29 @@ subroutine vbini1 (nlat, nlon, imid, vb, abc, cvb, work)
 !     cvb and work must each have nlat+1 locations
 !
 dimension vb(imid, nlat, 2), abc(1)
-real pi, dt, cvb(1), th, vbh, work(1)
-pi = acos( -1.0 )
+real dt, cvb(1), th, vbh, work(1)
+real, parameter :: pi = acos( -1.0 )
 dt = pi/(nlat-1)
 mdo = min(2, nlat, (nlon+1)/2)
-do 160 mp1=1, mdo
+do mp1=1, mdo
 m = mp1-1
-do 160 np1=mp1, nlat
+do np1=mp1, nlat
 n = np1-1
 call dvbk(m, n, cvb, work)
-do 165 i=1, imid
+do  i=1, imid
 th = (i-1)*dt
 call dvbt(m, n, th, cvb, vbh)
 vb(i, np1, mp1) = vbh
-165 continue
-160 continue
+end do
+end do
+end do
+
 call rabcv(nlat, nlon, abc)
-return
+
 end subroutine vbini1
+
+
+
 subroutine wbinit (nlat, nlon, wwbin, dwork)
 dimension       wwbin(1)
 real dwork(*)
@@ -2094,24 +2102,28 @@ subroutine vtini1 (nlat, nlon, imid, vb, abc, cvb, work)
 !     cvb and work must each have nlat/2+1 locations
 !
 dimension vb(imid, nlat, 2), abc(1), cvb(1)
-real pi, dt, cvb, th, vbh, work(*)
-pi = acos( -1.0 )
+real dt, cvb, th, vbh, work(*)
+real, parameter :: pi = acos( -1.0 )
 dt = pi/(nlat-1)
 mdo = min(2, nlat, (nlon+1)/2)
-do 160 mp1=1, mdo
+do mp1=1, mdo
 m = mp1-1
-do 160 np1=mp1, nlat
+do np1=mp1, nlat
 n = np1-1
 call dvtk(m, n, cvb, work)
-do 165 i=1, imid
+do i=1, imid
 th = (i-1)*dt
 call dvtt(m, n, th, cvb, vbh)
 vb(i, np1, mp1) = vbh
-165 continue
-160 continue
+end do
+end do
+end do
 call rabcv(nlat, nlon, abc)
-return
+
 end subroutine vtini1
+
+
+
 subroutine wtinit (nlat, nlon, wwbin, dwork)
 dimension       wwbin(1)
 real dwork(*)
@@ -2132,25 +2144,30 @@ subroutine wtini1 (nlat, nlon, imid, wb, abc, cwb, work)
 !     cwb and work must each have nlat/2+1 locations
 !
 dimension wb(imid, nlat, 2), abc(1)
-real pi, dt, cwb(*), wbh, th, work(*)
-pi = acos( -1.0 )
+real dt, cwb(*), wbh, th, work(*)
+real, parameter :: pi = acos( -1.0 )
 dt = pi/(nlat-1)
 mdo = min(3, nlat, (nlon+1)/2)
 if(mdo < 2) return
-do 160 mp1=2, mdo
+do mp1=2, mdo
 m = mp1-1
-do 160 np1=mp1, nlat
+do np1=mp1, nlat
 n = np1-1
 call dwtk(m, n, cwb, work)
-do 165 i=1, imid
+do i=1, imid
 th = (i-1)*dt
 call dwtt(m, n, th, cwb, wbh)
 wb(i, np1, m) = wbh
-165 continue
-160 continue
+end do
+end do
+end do
+
 call rabcw(nlat, nlon, abc)
-return
+
 end subroutine wtini1
+
+
+
 subroutine vtgint (nlat, nlon, theta, wvbin, work)
 dimension       wvbin(*)
 real theta(*), work(*)
@@ -2175,19 +2192,24 @@ subroutine vtgit1 (nlat, nlon, imid, theta, vb, abc, cvb, work)
 dimension vb(imid, nlat, 2), abc(*)
 real theta(*), cvb(*), work(*), vbh
 mdo = min(2, nlat, (nlon+1)/2)
-do 160 mp1=1, mdo
+do mp1=1, mdo
 m = mp1-1
-do 160 np1=mp1, nlat
+do np1=mp1, nlat
 n = np1-1
 call dvtk(m, n, cvb, work)
-do 165 i=1, imid
+do i=1, imid
 call dvtt(m, n, theta(i), cvb, vbh)
 vb(i, np1, mp1) = vbh
-165 continue
-160 continue
+end do
+end do
+end do
+
 call rabcv(nlat, nlon, abc)
-return
+
 end subroutine vtgit1
+
+
+
 subroutine wtgint (nlat, nlon, theta, wwbin, work)
 dimension       wwbin(*)
 real theta(*), work(*)
@@ -2212,19 +2234,24 @@ dimension wb(imid, nlat, 2), abc(1)
 real theta(*), cwb(*), work(*), wbh
 mdo = min(3, nlat, (nlon+1)/2)
 if(mdo < 2) return
-do 160 mp1=2, mdo
+do mp1=2, mdo
 m = mp1-1
-do 160 np1=mp1, nlat
+do np1=mp1, nlat
 n = np1-1
 call dwtk(m, n, cwb, work)
-do 165 i=1, imid
+do i=1, imid
 call dwtt(m, n, theta(i), cwb, wbh)
 wb(i, np1, m) = wbh
-165 continue
-160 continue
+end do
+end do
+end do
+
 call rabcw(nlat, nlon, abc)
-return
+
 end subroutine wtgit1
+
+
+
 subroutine dvtk(m, n, cv, work)
 real cv(*), work(*), fn, fk, cf, srnp1
 cv(1) = 0.
@@ -2481,19 +2508,23 @@ subroutine vbgit1 (nlat, nlon, imid, theta, vb, abc, cvb, work)
 dimension vb(imid, nlat, 2), abc(1)
 real cvb(1), theta(1), vbh, work(1)
 mdo = min(2, nlat, (nlon+1)/2)
-do 160 mp1=1, mdo
+do mp1=1, mdo
 m = mp1-1
-do 160 np1=mp1, nlat
+do np1=mp1, nlat
 n = np1-1
 call dvbk(m, n, cvb, work)
-do 165 i=1, imid
+do i=1, imid
 call dvbt(m, n, theta(i), cvb, vbh)
 vb(i, np1, mp1) = vbh
-165 continue
-160 continue
+end do
+end do
+end do
+
 call rabcv(nlat, nlon, abc)
-return
+
 end subroutine vbgit1
+
+
 subroutine wbgint (nlat, nlon, theta, wwbin, work)
 dimension       wwbin(1)
 real work(*), theta(*)
@@ -2518,16 +2549,18 @@ dimension wb(imid, nlat, 2), abc(1)
 real cwb(1), theta(1), wbh, work(1)
 mdo = min(3, nlat, (nlon+1)/2)
 if(mdo < 2) return
-do 160 mp1=2, mdo
+do mp1=2, mdo
 m = mp1-1
-do 160 np1=mp1, nlat
+do np1=mp1, nlat
 n = np1-1
 call dwbk(m, n, cwb, work)
-do 165 i=1, imid
+do i=1, imid
 call dwbt(m, n, theta(i), cwb, wbh)
 wb(i, np1, m) = wbh
-165 continue
-160 continue
+end do
+end do
+end do
+
 call rabcw(nlat, nlon, abc)
-return
+
 end subroutine wbgit1

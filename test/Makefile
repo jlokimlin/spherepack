@@ -8,34 +8,18 @@ LINKS = \
 -I$(SPHEREPACK_WRAPPER_MODULE_PATH) \
 -I$(OBJ_DIRECTORY)
 
-EXECUTABLE = ./tests.exe 
+SRC=$(subst .o,.f90, $(OBJ))
 
-#advec.o: \
-#advec.f90
-#	$(FC) $(FFLAGS) -c advec.f90 $(LINKS)\
-#	 -o $(OBJ_DIRECTORY)/$@
-#
-#helmsph.o: \
-#helmsph.f90
-#	$(FC) $(FFLAGS) -c helmsph.f90 $(LINKS)\
-#	 -o $(OBJ_DIRECTORY)/$@
+EXES=$(subst .o,.exe, $(OBJ))
 
-#shallow.o: \
-#shallow.f90
-#	$(FC) $(FFLAGS) -c shallow.f90 $(LINKS)\
-#	 -o $(OBJ_DIRECTORY)/$@
+run: $(EXES)
 
-test.o: \
-test.f90
-	$(FC) $(FFLAGS) -c test.f90 $(LINKS)\
-	 -o $(OBJ_DIRECTORY)/$@
-	
-exec: $(OBJ)
-	$(FC) $(FFLAGS) -o $(EXECUTABLE) $(OBJS) $(LINKS)
+$(EXES): $(SRC)
 
-run:
-	$(MAKE) clean
-	$(MAKE) exec; $(EXECUTABLE)
+%.exe : %.f90
+	rm -f $@
+	$(FC) $(FFLAGS) $< -o $@ $(LINKS)
+	./$@
 
 clean:
-	rm -f $(OBJS) $(EXECUTABLE)
+	rm -f $(OBJS) $(EXES)
