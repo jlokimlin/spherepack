@@ -43,13 +43,13 @@
 !
 !
 !
-!     subroutine slapec(nlat,nlon,isym,nt,slap,ids,jds,a,b,mdab,ndab,
-!    +                  wshsec,lshsec,work,lwork,ierror)
+!     subroutine slapec(nlat, nlon, isym, nt, slap, ids, jds, a, b, mdab, ndab, 
+!    +                  wshsec, lshsec, work, lwork, ierror)
 !
 !
 !     given the scalar spherical harmonic coefficients a and b, precomputed
 !     by subroutine shaec for a scalar field sf, subroutine slapec computes
-!     the laplacian of sf in the scalar array slap.  slap(i,j) is the
+!     the laplacian of sf in the scalar array slap.  slap(i, j) is the
 !     laplacian of sf at the colatitude
 !
 !         theta(i) = (i-1)*pi/(nlat-1)
@@ -60,15 +60,15 @@
 !
 !     on the sphere.  i.e.
 !
-!         slap(i,j) =
+!         slap(i, j) =
 !
 !                  2                2
-!         [1/sint*d (sf(i,j)/dlambda + d(sint*d(sf(i,j))/dtheta)/dtheta]/sint
+!         [1/sint*d (sf(i, j)/dlambda + d(sint*d(sf(i, j))/dtheta)/dtheta]/sint
 !
 !
 !     where sint = sin(theta(i)).  the scalar laplacian in slap has the
 !     same symmetry or absence of symmetry about the equator as the scalar
-!     field sf.  the input parameters isym,nt,mdab,ndab must have the
+!     field sf.  the input parameters isym, nt, mdab, ndab must have the
 !     same values used by shaec to compute a and b for sf. the associated
 !     legendre functions are recomputed rather than stored as they are
 !     in subroutine slapes.
@@ -99,29 +99,29 @@
 !
 !            = 0  no symmetries exist in sf about the equator. scalar
 !                 synthesis is used to compute slap on the entire sphere.
-!                 i.e., in the array slap(i,j) for i=1,...,nlat and
-!                 j=1,...,nlon.
+!                 i.e., in the array slap(i, j) for i=1, ..., nlat and
+!                 j=1, ..., nlon.
 !
 !           = 1  sf and slap are antisymmetric about the equator. the
 !                synthesis used to compute slap is performed on the
-!                northern hemisphere only.  if nlat is odd, slap(i,j) is
-!                computed for i=1,...,(nlat+1)/2 and j=1,...,nlon.  if
-!                nlat is even, slap(i,j) is computed for i=1,...,nlat/2
-!                and j=1,...,nlon.
+!                northern hemisphere only.  if nlat is odd, slap(i, j) is
+!                computed for i=1, ..., (nlat+1)/2 and j=1, ..., nlon.  if
+!                nlat is even, slap(i, j) is computed for i=1, ..., nlat/2
+!                and j=1, ..., nlon.
 !
 !
 !           = 2  sf and slap are symmetric about the equator. the
 !                synthesis used to compute slap is performed on the
-!                northern hemisphere only.  if nlat is odd, slap(i,j) is
-!                computed for i=1,...,(nlat+1)/2 and j=1,...,nlon.  if
-!                nlat is even, slap(i,j) is computed for i=1,...,nlat/2
-!                and j=1,...,nlon.
+!                northern hemisphere only.  if nlat is odd, slap(i, j) is
+!                computed for i=1, ..., (nlat+1)/2 and j=1, ..., nlon.  if
+!                nlat is even, slap(i, j) is computed for i=1, ..., nlat/2
+!                and j=1, ..., nlon.
 !
 !
 !     nt     the number of analyses.  in the program that calls slapec
-!            the arrays slap,a, and b can be three dimensional in which
+!            the arrays slap, a, and b can be three dimensional in which
 !            case multiple synthesis will be performed.  the third index
-!            is the synthesis index which assumes the values k=1,...,nt.
+!            is the synthesis index which assumes the values k=1, ..., nt.
 !            for a single analysis set nt=1. the description of the
 !            remaining parameters is simplified by assuming that nt=1
 !            or that all the arrays are two dimensional.
@@ -136,22 +136,22 @@
 !            program that calls slapec. jds must be at least nlon.
 !
 !
-!   a,b      two or three dimensional arrays (see input parameter nt)
+!   a, b      two or three dimensional arrays (see input parameter nt)
 !            that contain scalar spherical harmonic coefficients
 !            of the scalar field sf as computed by subroutine shaec.
-!     ***    a,b must be computed by shaec prior to calling slapec.
+!     ***    a, b must be computed by shaec prior to calling slapec.
 !
 !
 !    mdab    the first dimension of the arrays a and b as it appears
 !            in the program that calls slapec.  mdab must be at
-!            least min(nlat,(nlon+2)/2) if nlon is even or at least
-!            min(nlat,(nlon+1)/2) if nlon is odd.
+!            least min(nlat, (nlon+2)/2) if nlon is even or at least
+!            min(nlat, (nlon+1)/2) if nlon is odd.
 !
 !    ndab    the second dimension of the arrays a and b as it appears
 !            in the program that calls slapec. ndbc must be at least
 !            least nlat.
 !
-!            mdab,ndab should have the same values input to shaec to
+!            mdab, ndab should have the same values input to shaec to
 !            compute the coefficients a and b.
 !
 !
@@ -164,8 +164,8 @@
 !    lshsec  the dimension of the array wshsec as it appears in the
 !            program that calls slapec.  let
 !
-!               l1 = min(nlat,(nlon+2)/2) if nlon is even or
-!               l1 = min(nlat,(nlon+1)/2) if nlon is odd
+!               l1 = min(nlat, (nlon+2)/2) if nlon is even or
+!               l1 = min(nlat, (nlon+1)/2) if nlon is odd
 !
 !            and
 !
@@ -184,16 +184,16 @@
 !
 !               l2 = nlat/2                    if nlat is even or
 !               l2 = (nlat+1)/2                if nlat is odd
-!               l1 = min(nlat,(nlon+2)/2) if nlon is even or
-!               l1 = min(nlat,(nlon+1)/2) if nlon is odd
+!               l1 = min(nlat, (nlon+2)/2) if nlon is even or
+!               l1 = min(nlat, (nlon+1)/2) if nlon is odd
 !
 !            if isym = 0 let
 !
-!               lwkmin = nlat*(2*nt*nlon+max(6*l2,nlon)+2*nt*l1+1.
+!               lwkmin = nlat*(2*nt*nlon+max(6*l2, nlon)+2*nt*l1+1.
 !
 !            if isym > 0 let
 !
-!               lwkmin = l2*(2*nt*nlon+max(6*nlat,nlon))+nlat*(2*nt*l1+1)
+!               lwkmin = l2*(2*nt*nlon+max(6*nlat, nlon))+nlat*(2*nt*l1+1)
 !
 !
 !     then lwork must be greater than or equal to lwkmin (see ierror=10)
@@ -204,7 +204,7 @@
 !
 !
 !    slap    a two or three dimensional arrays (see input parameter nt) that
-!            contain the scalar laplacian of the scalar field sf.  slap(i,j)
+!            contain the scalar laplacian of the scalar field sf.  slap(i, j)
 !            is the scalar laplacian at the colatitude
 !
 !                 theta(i) = (i-1)*pi/(nlat-1)
@@ -213,7 +213,7 @@
 !
 !                 lambda(j) = (j-1)*2*pi/nlon
 !
-!            for i=1,...,nlat and j=1,...,nlon.
+!            for i=1, ..., nlat and j=1, ..., nlon.
 !
 !
 !  ierror    a parameter which flags errors in input parameters as follows:
@@ -248,10 +248,10 @@
 ! **********************************************************************
 !
 !
-subroutine slapec(nlat,nlon,isym,nt,slap,ids,jds,a,b,mdab,ndab, &
-                  wshsec,lshsec,work,lwork,ierror)
-dimension slap(ids,jds,nt),a(mdab,ndab,nt),b(mdab,ndab,nt)
-dimension wshsec(lshsec),work(lwork)
+subroutine slapec(nlat, nlon, isym, nt, slap, ids, jds, a, b, mdab, ndab, &
+                  wshsec, lshsec, work, lwork, ierror)
+dimension slap(ids, jds, nt), a(mdab, ndab, nt), b(mdab, ndab, nt)
+dimension wshsec(lshsec), work(lwork)
 !
 !     check input parameters
 !
@@ -270,7 +270,7 @@ if((isym==0 .and. ids<nlat) .or. &
 ierror = 6
 if(jds < nlon) return
 ierror = 7
-mmax = min(nlat,nlon/2+1)
+mmax = min(nlat, nlon/2+1)
 if(mdab < mmax) return
 ierror = 8
 if(ndab < nlat) return
@@ -279,7 +279,7 @@ ierror = 9
 !     set and verify saved work space length
 !
 !
-l1 = min(nlat,(nlon+2)/2)
+l1 = min(nlat, (nlon+2)/2)
 l2 = (nlat+1)/2
 lwmin = 2*nlat*l2+3*((l1-2)*(nlat+nlat-l1-1))/2+nlon+15
 if(lshsec < lwmin) return
@@ -294,11 +294,11 @@ mn = mmax*nlat*nt
 !     lwmin = nln+ls*nlon+2*mn+nlat
 !     if (lwork .lt. lwmin) return
 l2 = (nlat+1)/2
-l1 = min(nlat,nlon/2+1)
+l1 = min(nlat, nlon/2+1)
       if (isym == 0) then
-    lwkmin = nlat*(2*nt*nlon+max(6*l2,nlon)+2*nt*l1+1)
+    lwkmin = nlat*(2*nt*nlon+max(6*l2, nlon)+2*nt*l1+1)
       else
-    lwkmin = l2*(2*nt*nlon+max(6*nlat,nlon))+nlat*(2*nt*l1+1)
+    lwkmin = l2*(2*nt*nlon+max(6*nlat, nlon))+nlat*(2*nt*l1+1)
       end if
       if (lwork < lwkmin) return
 
@@ -312,55 +312,55 @@ ib = ia+mn
 ifn = ib+mn
 iwk = ifn+nlat
 lwk = lwork-2*mn-nlat
-call slapec1(nlat,nlon,isym,nt,slap,ids,jds,a,b,mdab,ndab, &
-work(ia),work(ib),mmax,work(ifn),wshsec,lshsec,work(iwk),lwk, &
+call slapec1(nlat, nlon, isym, nt, slap, ids, jds, a, b, mdab, ndab, &
+work(ia), work(ib), mmax, work(ifn), wshsec, lshsec, work(iwk), lwk, &
 ierror)
 return
 end subroutine slapec
 
-subroutine slapec1(nlat,nlon,isym,nt,slap,ids,jds,a,b,mdab,ndab, &
-                  alap,blap,mmax,fnn,wshsec,lshsec,wk,lwk,ierror)
-dimension slap(ids,jds,nt),a(mdab,ndab,nt),b(mdab,ndab,nt)
-dimension alap(mmax,nlat,nt),blap(mmax,nlat,nt),fnn(nlat)
-dimension wshsec(lshsec),wk(lwk)
+subroutine slapec1(nlat, nlon, isym, nt, slap, ids, jds, a, b, mdab, ndab, &
+                  alap, blap, mmax, fnn, wshsec, lshsec, wk, lwk, ierror)
+dimension slap(ids, jds, nt), a(mdab, ndab, nt), b(mdab, ndab, nt)
+dimension alap(mmax, nlat, nt), blap(mmax, nlat, nt), fnn(nlat)
+dimension wshsec(lshsec), wk(lwk)
 !
 !     set coefficient multiplyers
 !
-do 1 n=2,nlat
+do 1 n=2, nlat
 fn = real(n-1)
 fnn(n) = fn*(fn+1.)
 1 continue
 !
 !     compute scalar laplacian coefficients for each vector field
 !
-do 2 k=1,nt
-do 3 n=1,nlat
-do 4 m=1,mmax
-alap(m,n,k) = 0.0
-blap(m,n,k) = 0.0
+do 2 k=1, nt
+do 3 n=1, nlat
+do 4 m=1, mmax
+alap(m, n, k) = 0.0
+blap(m, n, k) = 0.0
 4 continue
 3 continue
 !
 !     compute m=0 coefficients
 !
-do 5 n=2,nlat
-alap(1,n,k) = -fnn(n)*a(1,n,k)
-blap(1,n,k) = -fnn(n)*b(1,n,k)
+do 5 n=2, nlat
+alap(1, n, k) = -fnn(n)*a(1, n, k)
+blap(1, n, k) = -fnn(n)*b(1, n, k)
 5 continue
 !
 !     compute m>0 coefficients
 !
-do 6 m=2,mmax
-do 7 n=m,nlat
-alap(m,n,k) = -fnn(n)*a(m,n,k)
-blap(m,n,k) = -fnn(n)*b(m,n,k)
+do 6 m=2, mmax
+do 7 n=m, nlat
+alap(m, n, k) = -fnn(n)*a(m, n, k)
+blap(m, n, k) = -fnn(n)*b(m, n, k)
 7 continue
 6 continue
 2 continue
 !
-!     synthesize alap,blap into slap
+!     synthesize alap, blap into slap
 !
-call shsec(nlat,nlon,isym,nt,slap,ids,jds,alap,blap, &
-           mmax,nlat,wshsec,lshsec,wk,lwk,ierror)
+call shsec(nlat, nlon, isym, nt, slap, ids, jds, alap, blap, &
+           mmax, nlat, wshsec, lshsec, wk, lwk, ierror)
 return
 end subroutine slapec1

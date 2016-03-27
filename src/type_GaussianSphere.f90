@@ -150,7 +150,7 @@ contains
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
         class (GaussianSphere), intent (in out) :: this
-        real (wp),              intent (in)     :: scalar_function(:,:)
+        real (wp),              intent (in)     :: scalar_function(:, :)
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
@@ -230,7 +230,7 @@ contains
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
         class (GaussianSphere), intent (in out) :: this
-        real (wp),              intent (out)    :: scalar_function(:,:)
+        real (wp),              intent (out)    :: scalar_function(:, :)
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
@@ -311,8 +311,8 @@ contains
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
         class (GaussianSphere), intent (in out) :: this
-        real (wp),              intent (in)     :: polar_component(:,:)
-        real (wp),              intent (in)     :: azimuthal_component(:,:)
+        real (wp),              intent (in)     :: polar_component(:, :)
+        real (wp),              intent (in)     :: azimuthal_component(:, :)
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
@@ -420,8 +420,8 @@ contains
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
         class (GaussianSphere), intent (in out) :: this
-        real (wp),              intent (out)    :: polar_component(:,:)
-        real (wp),              intent (out)    :: azimuthal_component(:,:)
+        real (wp),              intent (out)    :: polar_component(:, :)
+        real (wp),              intent (out)    :: azimuthal_component(:, :)
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
@@ -533,7 +533,7 @@ contains
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
         class (GaussianSphere), intent (in out) :: this
-        real (wp),              intent (in)     :: scalar_function(:,:)
+        real (wp),              intent (in)     :: scalar_function(:, :)
         real (wp)                               :: return_value
         !----------------------------------------------------------------------
         ! Dictionary: local variables
@@ -565,7 +565,7 @@ contains
                     )
                     ! Apply trapezoidal rule
                     do k = 1, nlat
-                        summation(k) = sum(f(k,:)) * dphi
+                        summation(k) = sum(f(k, :)) * dphi
                     end do
                     ! Apply gaussian quadrature
                     summation = summation * wts
@@ -588,13 +588,13 @@ contains
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
         class (GaussianSphere),  intent (in out) :: this
-        real (wp),               intent (in)     :: scalar_function(:,:)
+        real (wp),               intent (in)     :: scalar_function(:, :)
         class (Vector),          intent (out)    :: first_moment
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
         integer (ip)           :: k, l !! Counters
-        real (wp), allocatable :: integrant(:,:,:)
+        real (wp), allocatable :: integrant(:, :, :)
         !----------------------------------------------------------------------
 
         ! Check if object is usable
@@ -608,7 +608,7 @@ contains
             nlat => this%NUMBER_OF_LATITUDES, &
             nlon => this%NUMBER_OF_LONGITUDES &
             )
-            allocate( integrant(nlat,nlon, 3) )
+            allocate( integrant(nlat, nlon, 3) )
 
             ! compute integrant
             do l = 1, nlon
@@ -628,9 +628,9 @@ contains
         ! compute first moment
         associate( &
             M  => first_moment, &
-            f1 => integrant(:,:, 1), &
-            f2 => integrant(:,:, 2), &
-            f3 => integrant(:,:, 3) &
+            f1 => integrant(:, :, 1), &
+            f2 => integrant(:, :, 2), &
+            f3 => integrant(:, :, 3) &
             )
             m%x = this%compute_surface_integral( f1 )
             m%y = this%compute_surface_integral( f2 )

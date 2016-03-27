@@ -31,7 +31,7 @@
 !
 !
 !
-! subroutine lfpt (n,m,theta,cp,pb)
+! subroutine lfpt (n, m, theta, cp, pb)
 !
 ! dimension of
 ! arguments
@@ -39,21 +39,21 @@
 !
 ! purpose                routine lfpt uses coefficients computed by
 !                        routine alfk to compute the single precision
-!                        normalized associated legendre function pbar(n,
-!                        m,theta) at colatitude theta.
+!                        normalized associated legendre function pbar(n, 
+!                        m, theta) at colatitude theta.
 !
-! usage                  call lfpt(n,m,theta,cp,pb)
+! usage                  call lfpt(n, m, theta, cp, pb)
 !
 ! arguments
 !
 ! on input               n
 !                          nonnegative integer specifying the degree of
-!                          pbar(n,m,theta)
+!                          pbar(n, m, theta)
 !                        m
-!                          is the order of pbar(n,m,theta). m can be
-!                          any integer however pbar(n,m,theta) = 0
+!                          is the order of pbar(n, m, theta). m can be
+!                          any integer however pbar(n, m, theta) = 0
 !                          if abs(m) is greater than n and
-!                          pbar(n,m,theta) = (-1)**m*pbar(n,-m,theta)
+!                          pbar(n, m, theta) = (-1)**m*pbar(n, -m, theta)
 !                          for negative m.
 !
 !                        theta
@@ -66,7 +66,7 @@
 !
 ! on output              pb
 !                          single precision variable containing
-!                          pbar(n,m,theta)
+!                          pbar(n, m, theta)
 !
 ! special conditions     calls to routine lfpt must be preceded by an
 !                        appropriate call to routine alfk.
@@ -74,7 +74,7 @@
 ! precision              single
 !
 ! algorithm              the trigonometric series formula used by
-!                        routine lfpt to calculate pbar(n,m,th) at
+!                        routine lfpt to calculate pbar(n, m, th) at
 !                        colatitude th depends on m and n as follows:
 !
 !                           1) for n even and m even, the formula is
@@ -99,19 +99,19 @@
 ! timing                 time per call to routine lfpt is dependent on
 !                        the input parameter n.
 !
-subroutine lfpt (n,m,theta,cp,pb)
+subroutine lfpt (n, m, theta, cp, pb)
 dimension       cp(1)
 !
 pb = 0.
-ma = iabs(m)
+ma = abs(m)
 if(ma > n) return
 if (n)  10, 10, 30
 10 if (ma)  20, 20, 30
 20 pb= sqrt(.5)
 go to 140
 30 np1 = n+1
-nmod = mod(n,2)
-mmod = mod(ma,2)
+nmod = mod(n, 2)
+mmod = mod(ma, 2)
 if (nmod)  40, 40, 90
 40 if (mmod)  50, 50, 70
 50 kdo = n/2+1
@@ -120,7 +120,7 @@ sdt = sin(theta+theta)
 ct = 1.
 st = 0.
 sum = .5*cp(1)
-do  60 kp1=2,kdo
+do  60 kp1=2, kdo
    cth = cdt*ct-sdt*st
    st = sdt*ct+cdt*st
    ct = cth
@@ -134,7 +134,7 @@ sdt = sin(theta+theta)
 ct = 1.
 st = 0.
 sum = 0.
-do  80 k=1,kdo
+do  80 k=1, kdo
    cth = cdt*ct-sdt*st
    st = sdt*ct+cdt*st
    ct = cth
@@ -143,13 +143,13 @@ do  80 k=1,kdo
 pb= sum
 go to 140
 90 kdo = (n+1)/2
-if (mmod) 100,100,120
+if (mmod) 100, 100, 120
 100 cdt = cos(theta+theta)
 sdt = sin(theta+theta)
 ct = cos(theta)
 st = -sin(theta)
 sum = 0.
-do 110 k=1,kdo
+do 110 k=1, kdo
    cth = cdt*ct-sdt*st
    st = sdt*ct+cdt*st
    ct = cth
@@ -162,7 +162,7 @@ sdt = sin(theta+theta)
 ct = cos(theta)
 st = -sin(theta)
 sum = 0.
-do 130 k=1,kdo
+do 130 k=1, kdo
    cth = cdt*ct-sdt*st
    st = sdt*ct+cdt*st
    ct = cth

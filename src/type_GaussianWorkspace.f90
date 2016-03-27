@@ -458,13 +458,13 @@ contains
         !----------------------------------------------------------------------
 
         ! Compute parity
-        if ( mod(nlon,2) == 0 ) then
+        if ( mod(nlon, 2) == 0 ) then
             l1 = min( nlat, (nlon + 2)/2 )
         else
             l1 = min( nlat, (nlon + 1)/2 )
         end if
 
-        if ( mod(nlat,2) == 0 ) then
+        if ( mod(nlat, 2) == 0 ) then
             l2 = nlat/2
         else
             l2 = (nlat + 1)/2
@@ -492,13 +492,13 @@ contains
         !----------------------------------------------------------------------
 
         ! Compute parity
-        if ( mod(nlon,2) == 0 ) then
+        if ( mod(nlon, 2) == 0 ) then
             l1 = min( nlat, (nlon + 2)/2 )
         else
             l1 = min( nlat, (nlon + 1)/2 )
         end if
 
-        if ( mod(nlat,2) == 0 ) then
+        if ( mod(nlat, 2) == 0 ) then
             l2 = nlat/2
         else
             l2 = (nlat + 1)/2
@@ -542,13 +542,13 @@ contains
         !----------------------------------------------------------------------
 
         ! Compute parity
-        if ( mod(nlon,2) == 0 ) then
+        if ( mod(nlon, 2) == 0 ) then
             l1 = min( nlat, nlon/2 )
         else
-            l1 = min( nlat,(nlon + 1)/2 )
+            l1 = min( nlat, (nlon + 1)/2 )
         end if
 
-        if ( mod(nlat,2) == 0 ) then
+        if ( mod(nlat, 2) == 0 ) then
             l2 = nlat/2
         else
             l2 = (nlat + 1)/2

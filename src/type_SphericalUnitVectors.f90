@@ -30,9 +30,9 @@ module type_SphericalUnitVectors
         logical,                    public :: initialized = .false.
         integer (ip),               public :: NUMBER_OF_LONGITUDES = 0
         integer (ip),               public :: NUMBER_OF_LATITUDES = 0
-        type (Vector), allocatable, public :: radial(:,:)
-        type (Vector), allocatable, public :: polar(:,:)
-        type (Vector), allocatable, public :: azimuthal(:,:)
+        type (Vector), allocatable, public :: radial(:, :)
+        type (Vector), allocatable, public :: polar(:, :)
+        type (Vector), allocatable, public :: azimuthal(:, :)
         !----------------------------------------------------------------------
     contains
         !----------------------------------------------------------------------
@@ -190,9 +190,9 @@ contains
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
         class (SphericalUnitVectors), intent (in out) :: this
-        real (wp),                    intent (in)     :: vector_function(:,:,:)
-        real (wp),                    intent (out)    :: polar_component(:,:)
-        real (wp),                    intent (out)    :: azimuthal_component(:,:)
+        real (wp),                    intent (in)     :: vector_function(:, :, :)
+        real (wp),                    intent (out)    :: polar_component(:, :)
+        real (wp),                    intent (out)    :: azimuthal_component(:, :)
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
@@ -214,10 +214,10 @@ contains
             do l = 1, nlon
                 do k = 1, nlat
                     ! Cast array to vector
-                    vector_field = vector_function(:,k,l)
+                    vector_field = vector_function(:, k, l)
                     associate( &
-                        theta => this%polar(k,l), &
-                        phi => this%azimuthal(k,l) &
+                        theta => this%polar(k, l), &
+                        phi => this%azimuthal(k, l) &
                         )
                         ! set the theta component
                         polar_component( k, l ) = theta.dot.vector_field

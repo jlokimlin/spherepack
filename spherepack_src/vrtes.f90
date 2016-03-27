@@ -38,15 +38,15 @@
 !
 ! ... files which must be loaded with vrtes.f
 !
-!     sphcom.f, hrfft.f, vhaes.f,shses.f
+!     sphcom.f, hrfft.f, vhaes.f, shses.f
 !
-!     subroutine vrtes(nlat,nlon,isym,nt,vt,ivrt,jvrt,cr,ci,mdc,ndc,
-!    +                 wshses,lshses,work,lwork,ierror)
+!     subroutine vrtes(nlat, nlon, isym, nt, vt, ivrt, jvrt, cr, ci, mdc, ndc, 
+!    +                 wshses, lshses, work, lwork, ierror)
 !
 !     given the vector spherical harmonic coefficients cr and ci, precomputed
-!     by subroutine vhaes for a vector field (v,w), subroutine vrtes
+!     by subroutine vhaes for a vector field (v, w), subroutine vrtes
 !     computes the vorticity of the vector field in the scalar array
-!     vt.  vt(i,j) is the vorticity at the colatitude
+!     vt.  vt(i, j) is the vorticity at the colatitude
 !
 !            theta(i) = (i-1)*pi/(nlat-1)
 !
@@ -54,13 +54,13 @@
 !
 !            lambda(j) = (j-1)*2*pi/nlon
 !
-!     on the sphere.  i.e.,
+!     on the sphere.  i.e., 
 !
-!            vt(i,j) =  [-dv/dlambda + d(sint*w)/dtheta]/sint
+!            vt(i, j) =  [-dv/dlambda + d(sint*w)/dtheta]/sint
 !
 !     where sint = sin(theta(i)).  w is the east longitudinal and v
 !     is the colatitudinal component of the vector field from which
-!     cr,ci were precomputed.  required associated legendre polynomials
+!     cr, ci were precomputed.  required associated legendre polynomials
 !     are stored rather than recomputed  as they are in subroutine vrtec.
 !
 !
@@ -88,40 +88,40 @@
 !            computed on the full or half sphere as follows:
 !
 !      = 0
-!            the symmetries/antsymmetries described in isym=1,2 below
-!            do not exist in (v,w) about the equator.  in this case the
+!            the symmetries/antsymmetries described in isym=1, 2 below
+!            do not exist in (v, w) about the equator.  in this case the
 !            vorticity is neither symmetric nor antisymmetric about
 !            the equator.  the vorticity is computed on the entire
-!            sphere.  i.e., in the array vt(i,j) for i=1,...,nlat and
-!            j=1,...,nlon.
+!            sphere.  i.e., in the array vt(i, j) for i=1, ..., nlat and
+!            j=1, ..., nlon.
 !
 !      = 1
 !            w is antisymmetric and v is symmetric about the equator.
 !            in this case the vorticity is symmetyric about the
 !            equator and is computed for the northern hemisphere
 !            only.  i.e., if nlat is odd the vorticity is computed
-!            in the array vt(i,j) for i=1,...,(nlat+1)/2 and for
-!            j=1,...,nlon.  if nlat is even the vorticity is computed
-!            in the array vt(i,j) for i=1,...,nlat/2 and j=1,...,nlon.
+!            in the array vt(i, j) for i=1, ..., (nlat+1)/2 and for
+!            j=1, ..., nlon.  if nlat is even the vorticity is computed
+!            in the array vt(i, j) for i=1, ..., nlat/2 and j=1, ..., nlon.
 !
 !      = 2
 !            w is symmetric and v is antisymmetric about the equator
 !            in this case the vorticity is antisymmetric about the
 !            equator and is computed for the northern hemisphere
 !            only.  i.e., if nlat is odd the vorticity is computed
-!            in the array vt(i,j) for i=1,...,(nlat+1)/2 and for
-!            j=1,...,nlon.  if nlat is even the vorticity is computed
-!            in the array vt(i,j) for i=1,...,nlat/2 and j=1,...,nlon.
+!            in the array vt(i, j) for i=1, ..., (nlat+1)/2 and for
+!            j=1, ..., nlon.  if nlat is even the vorticity is computed
+!            in the array vt(i, j) for i=1, ..., nlat/2 and j=1, ..., nlon.
 !
 !
 !      nt    nt is the number of scalar and vector fields.  some
 !            computational efficiency is obtained for multiple fields.
-!            in the program that calls vrtes, the arrays cr,ci, and vort
+!            in the program that calls vrtes, the arrays cr, ci, and vort
 !            can be three dimensional corresponding to an indexed multiple
 !            vector field.  in this case multiple scalar synthesis will
 !            be performed to compute the vorticity for each field.  the
 !            third index is the synthesis index which assumes the values
-!            k=1,...,nt.  for a single synthesis set nt = 1.  the
+!            k=1, ..., nt.  for a single synthesis set nt = 1.  the
 !            description of the remaining parameters is simplified by
 !            assuming that nt=1 or that all the arrays are two dimensional.
 !
@@ -134,23 +134,23 @@
 !     jvrt   the second dimension of the array vt as it appears in
 !            the program that calls vrtes. jvrt must be at least nlon.
 !
-!    cr,ci   two or three dimensional arrays (see input parameter nt)
+!    cr, ci   two or three dimensional arrays (see input parameter nt)
 !            that contain vector spherical harmonic coefficients
-!            of the vector field (v,w) as computed by subroutine vhaes.
+!            of the vector field (v, w) as computed by subroutine vhaes.
 !     ***    cr and ci must be computed by vhaes prior to calling
 !            vrtes.
 !
 !      mdc   the first dimension of the arrays cr and ci as it
 !            appears in the program that calls vrtes. mdc must be at
-!            least min(nlat,nlon/2) if nlon is even or at least
-!            min(nlat,(nlon+1)/2) if nlon is odd.
+!            least min(nlat, nlon/2) if nlon is even or at least
+!            min(nlat, (nlon+1)/2) if nlon is odd.
 !
 !      ndc   the second dimension of the arrays cr and ci as it
 !            appears in the program that calls vrtes. ndc must be at
 !            least nlat.
 !
 !   wshses   an array which must be initialized by subroutine shsesi.
-!            once initialized,
+!            once initialized, 
 !            wshses can be used repeatedly by vrtes as long as nlon
 !            and nlat remain unchanged.  wshses must not be altered
 !            between calls of vrtes
@@ -158,8 +158,8 @@
 !   lshses   the dimension of the array wshses as it appears in the
 !            program that calls vrtes. define
 !
-!               l1 = min(nlat,(nlon+2)/2) if nlon is even or
-!               l1 = min(nlat,(nlon+1)/2) if nlon is odd
+!               l1 = min(nlat, (nlon+2)/2) if nlon is even or
+!               l1 = min(nlat, (nlon+1)/2) if nlon is odd
 !
 !            and
 !
@@ -175,8 +175,8 @@
 !    lwork   the dimension of the array work as it appears in the
 !            program that calls vrtes. define
 !
-!               l1 = min(nlat,nlon/2) if nlon is even or
-!               l1 = min(nlat,(nlon+1)/2) if nlon is odd
+!               l1 = min(nlat, nlon/2) if nlon is even or
+!               l1 = min(nlat, (nlon+1)/2) if nlon is odd
 !
 !            and
 !
@@ -198,9 +198,9 @@
 !
 !
 !     vt     a two or three dimensional array (see input parameter nt)
-!            that contains the vorticity of the vector field (v,w)
-!            whose coefficients cr,ci where computed by subroutine vhaes.
-!            vt(i,j) is the vorticity at the colatitude point theta(i) =
+!            that contains the vorticity of the vector field (v, w)
+!            whose coefficients cr, ci where computed by subroutine vhaes.
+!            vt(i, j) is the vorticity at the colatitude point theta(i) =
 !            (i-1)*pi/(nlat-1) and longitude point lambda(j) =
 !            (j-1)*2*pi/nlon. the index ranges are defined above at the
 !            input parameter isym.
@@ -222,11 +222,11 @@
 ! **********************************************************************
 !                                                                              
 !   
-subroutine vrtes(nlat,nlon,isym,nt,vort,ivrt,jvrt,cr,ci,mdc,ndc, &
-                 wshses,lshses,work,lwork,ierror)
+subroutine vrtes(nlat, nlon, isym, nt, vort, ivrt, jvrt, cr, ci, mdc, ndc, &
+                 wshses, lshses, work, lwork, ierror)
 
-dimension vort(ivrt,jvrt,nt),cr(mdc,ndc,nt),ci(mdc,ndc,nt)
-dimension wshses(lshses),work(lwork)
+dimension vort(ivrt, jvrt, nt), cr(mdc, ndc, nt), ci(mdc, ndc, nt)
+dimension wshses(lshses), work(lwork)
 !
 !     check input parameters
 !
@@ -245,8 +245,8 @@ if((isym==0 .and. ivrt<nlat) .or. &
 ierror = 6
 if(jvrt < nlon) return
 ierror = 7
-if(mdc < min(nlat,(nlon+1)/2)) return
-mmax = min(nlat,(nlon+2)/2)
+if(mdc < min(nlat, (nlon+1)/2)) return
+mmax = min(nlat, (nlon+2)/2)
 ierror = 8
 if(ndc < nlat) return
 ierror = 9
@@ -258,9 +258,9 @@ ierror = 10
 !     verify unsaved work space (add to what shses requires, file f3)
 !
 !
-!     set first dimension for a,b (as requried by shses)
+!     set first dimension for a, b (as requried by shses)
 !
-mab = min(nlat,nlon/2+1)
+mab = min(nlat, nlon/2+1)
 mn = mab*nlat*nt
 ls = nlat
 if(isym > 0) ls = imid
@@ -275,56 +275,56 @@ ib = ia+mn
 is = ib+mn
 iwk = is+nlat
 lwk = lwork-2*mn-nlat
-call vrtes1(nlat,nlon,isym,nt,vort,ivrt,jvrt,cr,ci,mdc,ndc, &
-work(ia),work(ib),mab,work(is),wshses,lshses,work(iwk),lwk, &
+call vrtes1(nlat, nlon, isym, nt, vort, ivrt, jvrt, cr, ci, mdc, ndc, &
+work(ia), work(ib), mab, work(is), wshses, lshses, work(iwk), lwk, &
 ierror)
 return
 end subroutine vrtes
 
-subroutine vrtes1(nlat,nlon,isym,nt,vort,ivrt,jvrt,cr,ci,mdc,ndc, &
-                  a,b,mab,sqnn,wsav,lwsav,wk,lwk,ierror)
-dimension vort(ivrt,jvrt,nt),cr(mdc,ndc,nt),ci(mdc,ndc,nt)
-dimension a(mab,nlat,nt),b(mab,nlat,nt),sqnn(nlat)
-dimension wsav(lwsav),wk(lwk)
+subroutine vrtes1(nlat, nlon, isym, nt, vort, ivrt, jvrt, cr, ci, mdc, ndc, &
+                  a, b, mab, sqnn, wsav, lwsav, wk, lwk, ierror)
+dimension vort(ivrt, jvrt, nt), cr(mdc, ndc, nt), ci(mdc, ndc, nt)
+dimension a(mab, nlat, nt), b(mab, nlat, nt), sqnn(nlat)
+dimension wsav(lwsav), wk(lwk)
 !
 !     set coefficient multiplyers
 !
-do 1 n=2,nlat
+do 1 n=2, nlat
 fn = real(n-1)
 sqnn(n) = sqrt(fn*(fn+1.))
 1 continue
 !
 !     compute divergence scalar coefficients for each vector field
 !
-do 2 k=1,nt
-do 3 n=1,nlat
-do 4 m=1,mab
-a(m,n,k) = 0.0
-b(m,n,k) = 0.0
+do 2 k=1, nt
+do 3 n=1, nlat
+do 4 m=1, mab
+a(m, n, k) = 0.0
+b(m, n, k) = 0.0
 4 continue
 3 continue
 !
 !     compute m=0 coefficients
 !
-do 5 n=2,nlat
-a(1,n,k) = sqnn(n)*cr(1,n,k)
-b(1,n,k) = sqnn(n)*ci(1,n,k)
+do 5 n=2, nlat
+a(1, n, k) = sqnn(n)*cr(1, n, k)
+b(1, n, k) = sqnn(n)*ci(1, n, k)
 5 continue
 !
 !     compute m>0 coefficients
 !
-mmax = min(nlat,(nlon+1)/2)
-do 6 m=2,mmax
-do 7 n=m,nlat
-a(m,n,k) = sqnn(n)*cr(m,n,k)
-b(m,n,k) = sqnn(n)*ci(m,n,k)
+mmax = min(nlat, (nlon+1)/2)
+do 6 m=2, mmax
+do 7 n=m, nlat
+a(m, n, k) = sqnn(n)*cr(m, n, k)
+b(m, n, k) = sqnn(n)*ci(m, n, k)
 7 continue
 6 continue
 2 continue
 !
-!     synthesize a,b into vort
+!     synthesize a, b into vort
 !
-call shses(nlat,nlon,isym,nt,vort,ivrt,jvrt,a,b, &
-           mab,nlat,wsav,lwsav,wk,lwk,ierror)
+call shses(nlat, nlon, isym, nt, vort, ivrt, jvrt, a, b, &
+           mab, nlat, wsav, lwsav, wk, lwk, ierror)
 return
 end subroutine vrtes1

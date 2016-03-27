@@ -568,7 +568,7 @@ contains
         if ( mod(nlon, 2) == 0 ) then
             l1 = min( nlat, nlon/2 )
         else
-            l1 = min( nlat,(nlon + 1)/2 )
+            l1 = min( nlat, (nlon + 1)/2 )
         end if
 
         if ( mod(nlat, 2) == 0 ) then
@@ -600,7 +600,7 @@ contains
         if ( mod(nlon, 2) == 0 ) then
             l1 = min( nlat, nlon/2 )
         else
-            l1 = min( nlat,(nlon + 1)/2 )
+            l1 = min( nlat, (nlon + 1)/2 )
         end if
 
         if ( mod(nlat, 2) == 0 ) then
@@ -609,7 +609,7 @@ contains
             l2 = (nlat + 1)/2
         end if
 
-        return_value = 3 * (max(l1-2,0) * (nlat+nlat-l1-1))/2 + 5*l2*nlat
+        return_value = 3 * (max(l1-2, 0) * (nlat+nlat-l1-1))/2 + 5*l2*nlat
 
     end function get_lwork_unsaved
 

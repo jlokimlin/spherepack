@@ -38,9 +38,9 @@
 !
 !     sphcom.f, hrfft.f, gaqd.f, vhaec.f, vhsec.f, vhagc.f, vhsgc.f
 !
-!     subroutine trvsph (intl,igrida,nlona,nlata,iveca,ua,va,
-!    +igridb,nlonb,nlatb,ivecb,ub,vb,wsave,lsave,lsvmin,work,
-!    +lwork,lwkmin,dwork,ldwork,ier)
+!     subroutine trvsph (intl, igrida, nlona, nlata, iveca, ua, va, 
+!    +igridb, nlonb, nlatb, ivecb, ub, vb, wsave, lsave, lsvmin, work, 
+!    +lwork, lwkmin, dwork, ldwork, ier)
 !
 ! *** author
 !
@@ -48,11 +48,11 @@
 !
 ! *** purpose
 !
-!     subroutine trvsph transfers vector data given in (ua,va) on a grid on
-!     the full sphere to vector data in (ub,vb) on a grid on the full sphere.
-!     the grids on which (ua,va) is given and (ub,vb) is generated can be
-!     specified independently of each other (see the input arguments igrida,
-!     igridb,iveca,ivecb).  ua and ub are the east longitudinal components of
+!     subroutine trvsph transfers vector data given in (ua, va) on a grid on
+!     the full sphere to vector data in (ub, vb) on a grid on the full sphere.
+!     the grids on which (ua, va) is given and (ub, vb) is generated can be
+!     specified independently of each other (see the input arguments igrida, 
+!     igridb, iveca, ivecb).  ua and ub are the east longitudinal components of
 !     the given and transformed vector fields.  va is either the latitudinal
 !     or colatitudinal component of the given vector field (see iveca).
 !     vb is either the latitudinal or colatitudinal component of the
@@ -74,42 +74,42 @@
 !     cases likely to be encountered when moving data from one grid format
 !     to another.
 !
-!     the grid on which (ua,va) is given must be equally spaced in longitude
+!     the grid on which (ua, va) is given must be equally spaced in longitude
 !     and either equally spaced or gaussian in latitude (or colatitude).
-!     longitude, which can be either the first or second dimension of ua,va
-!     subdivides [0,2pi) excluding the periodic point 2pi.  (co)latitude,
-!     which can be the second or first dimension of ua,va, has south
+!     longitude, which can be either the first or second dimension of ua, va
+!     subdivides [0, 2pi) excluding the periodic point 2pi.  (co)latitude, 
+!     which can be the second or first dimension of ua, va, has south
 !     to north or north to south orientation with increasing subscript
-!     value in ua,va (see the argument igrida).
+!     value in ua, va (see the argument igrida).
 !
-!     the grid on which ub,vb is generated must be equally spaced in longitude
+!     the grid on which ub, vb is generated must be equally spaced in longitude
 !     and either equally spaced or gaussian in latitude (or colatitude).
-!     longitude, which can be either the first or second dimension of ub,vb
-!     subdivides [0,2pi) excluding the periodic point 2pi.  (co)latitude,
-!     which can be the second or first dimension of ub,vb, has south
+!     longitude, which can be either the first or second dimension of ub, vb
+!     subdivides [0, 2pi) excluding the periodic point 2pi.  (co)latitude, 
+!     which can be the second or first dimension of ub, vb, has south
 !     to north or north to south orientation with increasing subscript
 !     value in db (see the argument igridb).
 !
 !     let nlon be either nlona or nlonb (the number of grid points in
-!     longitude.  the longitude grid subdivides [0,2pi) into nlon spaced
+!     longitude.  the longitude grid subdivides [0, 2pi) into nlon spaced
 !     points
 !
-!          (j-1)*2.*pi/nlon  (j=1,...,nlon).
+!          (j-1)*2.*pi/nlon  (j=1, ..., nlon).
 !
 !     it is not necessary to communicate to subroutine trvsph whether the
 !     underlying grids are in latitude or colatitude.  it is only necessary
 !     to communicate whether they run south to north or north to south with
 !     increasing subscripts.  a brief discussion of latitude and colatitude
 !     follows.  equally spaced latitude grids are assumed to subdivide
-!     [-pi/2,pi/2] with the south pole at -pi/2 and north pole at pi/2.
-!     equally spaced colatitude grids subdivide [0,pi] with the north pole
+!     [-pi/2, pi/2] with the south pole at -pi/2 and north pole at pi/2.
+!     equally spaced colatitude grids subdivide [0, pi] with the north pole
 !     at 0 and south pole at pi.  equally spaced partitions on the sphere
-!     include both poles.  gaussian latitude grids subdivide (-pi/2,pi/2)
-!     and gaussian colatitude grids subdivide (0,pi).  gaussian grids do not
+!     include both poles.  gaussian latitude grids subdivide (-pi/2, pi/2)
+!     and gaussian colatitude grids subdivide (0, pi).  gaussian grids do not
 !     include the poles.  the gaussian grid points are uniquely determined by
 !     the size of the partition.  they can be computed in colatitude in
-!     (0,pi) (north to south) in real by the spherepack subroutine
-!     gaqd.  let nlat be nlata or nlatb if either the ua,va or ub,vb grid is
+!     (0, pi) (north to south) in real by the spherepack subroutine
+!     gaqd.  let nlat be nlata or nlatb if either the ua, va or ub, vb grid is
 !     gaussian.  let
 !
 !        north pole                             south pole
@@ -117,21 +117,21 @@
 !           0.0    <  cth(1) < ... < cth(nlat)  <   pi
 !
 !
-!     be nlat gaussian colatitude points in the interval (0,pi) and let
+!     be nlat gaussian colatitude points in the interval (0, pi) and let
 !
 !        south pole                        north pole
 !        ----------                        ----------
 !           -pi/2  < th(1) < ... < th(nlat) < pi/2
 !
-!     be nlat gaussian latitude points in the open interval (-pi/2,pi/2).
+!     be nlat gaussian latitude points in the open interval (-pi/2, pi/2).
 !     these are related by
 !
-!          th(i) = -pi/2 + cth(i)  (i=1,...,nlat)
+!          th(i) = -pi/2 + cth(i)  (i=1, ..., nlat)
 !
-!     if the (ua,va) or (ub,vb) grid is equally spaced in (co)latitude then
+!     if the (ua, va) or (ub, vb) grid is equally spaced in (co)latitude then
 !
 !          ctht(i) = (i-1)*pi/(nlat-1)
-!                                               (i=1,...,nlat)
+!                                               (i=1, ..., nlat)
 !          tht(i) = -pi/2 + (i-1)*pi/(nlat-1)
 !
 !     define the equally spaced (north to south) colatitude and (south to
@@ -141,9 +141,9 @@
 !
 !    (1)
 !
-!     the vector field (ua,va) is reformated to a vector field in mathematical
+!     the vector field (ua, va) is reformated to a vector field in mathematical
 !     spherical coordinates using array transpositions, subscript reordering
-!     and negation of va as necessary (see arguments igrida,iveca).
+!     and negation of va as necessary (see arguments igrida, iveca).
 !
 !     (2)
 !
@@ -151,15 +151,15 @@
 !
 !     (3)
 !
-!     a vector harmonic synthesis is performed on the (ub,vb) grid
+!     a vector harmonic synthesis is performed on the (ub, vb) grid
 !     using as many coefficients from (2) as possible (i.e., as
-!     as is consistent with the size of the ub,vb grid).
+!     as is consistent with the size of the ub, vb grid).
 !
 !     (4)
 !
 !     the vector field generated in (3) is transformed from mathematical
 !     spherical coordinates to the form flagged by ivecb and igridb in
-!     (ub,vb) using array transpositions, subscript reordering and negation
+!     (ub, vb) using array transpositions, subscript reordering and negation
 !     as necessary
 !
 !
@@ -172,9 +172,9 @@
 !     induced by closeness of grid points near the poles (due to computational
 !     or observational errors) are smoothed.  the method is consistent with
 !     methods used to generate vector data in numerical spectral models based
-!     on spherical harmonics.  for more discussion of these and related issues,
+!     on spherical harmonics.  for more discussion of these and related issues, 
 !     see "on the spectral approximation of discrete scalar and vector
-!     functions on the sphere," siam j. numer. anal., vol. 16, december 1979,
+!     functions on the sphere, " siam j. numer. anal., vol. 16, december 1979, 
 !     pp. 934-949, by paul swarztrauber.
 !
 !
@@ -182,20 +182,20 @@
 !
 !     on a nlon by nlat or nlat by nlon grid (gaussian or equally spaced)
 !     spherical harmonic analysis generates and synthesis utilizes
-!     min(nlat,(nlon+2)/2)) by nlat coefficients.  consequently, for
-!     ua,va and ub,vb,  if either
+!     min(nlat, (nlon+2)/2)) by nlat coefficients.  consequently, for
+!     ua, va and ub, vb,  if either
 !
-!             min(nlatb,(nlonb+2)/2) < min(nlata,(nlona+2)/2)
+!             min(nlatb, (nlonb+2)/2) < min(nlata, (nlona+2)/2)
 !
 !     or if
 !
 !             nlatb < nlata
 !
-!     then all the coefficients generated by an analysis of ua,va cannot be
-!     used in the synthesis which generates ub,vb.  in this case "information"
-!     can be lost in generating ub,vb.  more precisely, information will be
-!     lost if the analysis of ua,va yields nonzero coefficients which are
-!     outside the coefficient bounds determined by the ub,vb grid. still
+!     then all the coefficients generated by an analysis of ua, va cannot be
+!     used in the synthesis which generates ub, vb.  in this case "information"
+!     can be lost in generating ub, vb.  more precisely, information will be
+!     lost if the analysis of ua, va yields nonzero coefficients which are
+!     outside the coefficient bounds determined by the ub, vb grid. still
 !     transference with vector spherical harmonics will yield results
 !     consistent with grid resolution and is highly accurate.
 !
@@ -206,10 +206,10 @@
 !     an initialization argument which should be zero on an initial call to
 !     trvsph.  intl should be one if trvsph is being recalled and
 !
-!          igrida,nlona,nlata,iveca,igridb,nlonb,nlatb,ivecb
+!          igrida, nlona, nlata, iveca, igridb, nlonb, nlatb, ivecb
 !
 !     have not changed from the previous call.  if any of these arguments have
-!     changed intl=0 must be used to avoid undetectable errors.  when allowed,
+!     changed intl=0 must be used to avoid undetectable errors.  when allowed, 
 !     calls with intl=1 bypass redundant computation and save time.  it can
 !     be used when transferring multiple vector data sets with the same
 !     underlying grids.
@@ -217,42 +217,42 @@
 ! ... igrida
 !
 !     an integer vector dimensioned two which identifies the underlying grid
-!     on the full sphere for the given vector data (ua,va) as follows:
+!     on the full sphere for the given vector data (ua, va) as follows:
 !
 !     igrida(1)
 !
 !     = -1
-!     if the latitude (or colatitude) grid for ua,va is an equally spaced
-!     partition of [-pi/2,pi/2] ( or [0,pi] ) including the poles which
+!     if the latitude (or colatitude) grid for ua, va is an equally spaced
+!     partition of [-pi/2, pi/2] ( or [0, pi] ) including the poles which
 !     runs north to south with increasing subscript value
 !
 !     = +1
-!     if the latitude (or colatitude) grid for ua,va is an equally spaced
-!     partition of [-pi/2,pi/2] ( or [0,pi] ) including the poles which
+!     if the latitude (or colatitude) grid for ua, va is an equally spaced
+!     partition of [-pi/2, pi/2] ( or [0, pi] ) including the poles which
 !     runs south to north with increasing subscript value
 !
 !     = -2
-!     if the latitude (or colatitude) grid for ua,va is a gaussian partition
-!     of (-pi/2,pi/2) ( or (0,pi) ) excluding the poles which runs north
+!     if the latitude (or colatitude) grid for ua, va is a gaussian partition
+!     of (-pi/2, pi/2) ( or (0, pi) ) excluding the poles which runs north
 !     to south with increasing subscript value
 !
 !     = +2
-!     if the latitude (or colatitude) grid for ua,va is a gaussian partition
-!     of (-pi/2,pi/2) ( or (0,pi) ) excluding the poles which runs south
+!     if the latitude (or colatitude) grid for ua, va is a gaussian partition
+!     of (-pi/2, pi/2) ( or (0, pi) ) excluding the poles which runs south
 !     north with increasing subscript value
 !
 !     igrida(2)
 !
-!     = 0 if the underlying grid for ua,va is a nlona by nlata
+!     = 0 if the underlying grid for ua, va is a nlona by nlata
 !
-!     = 1 if the underlying grid for ua,va is a nlata by nlona
+!     = 1 if the underlying grid for ua, va is a nlata by nlona
 !
 !
 ! ... nlona
 !
 !     the number of longitude points on the uniform grid which partitions
-!     [0,2pi) for the given vector (ua,va).  nlona is also the first or second
-!     dimension of ua,va (see igrida(2)) in the program which calls trvsph.
+!     [0, 2pi) for the given vector (ua, va).  nlona is also the first or second
+!     dimension of ua, va (see igrida(2)) in the program which calls trvsph.
 !     nlona determines the grid increment in longitude as 2*pi/nlona. for
 !     example nlona = 72 for a five degree grid.  nlona must be greater than
 !     or equal to 4.  the efficiency of the computation is improved when
@@ -261,7 +261,7 @@
 ! ... nlata
 !
 !     the number of points in the latitude (or colatitude) grid for the
-!     given vector (ua,va).  nlata is also the first or second dimension
+!     given vector (ua, va).  nlata is also the first or second dimension
 !     of ua and va (see igrida(2)) in the program which calls trvsph.
 !     if nlata is odd then the equator will be located at the (nlata+1)/2
 !     gaussian grid point.  if nlata is even then the equator will be
@@ -277,7 +277,7 @@
 ! *** note:
 !     igrida(1)=-1 or igrida(1)=-2, igrida(2)=1, and iveca=1 corresponds
 !     to the "usual" mathematical spherical coordinate system required
-!     by most of the drivers in spherepack2.  igrida(1)=1 or igrida(1)=2,
+!     by most of the drivers in spherepack2.  igrida(1)=1 or igrida(1)=2, 
 !     igrida(2)=0, and iveca=0 corresponds to the "usual" geophysical
 !     spherical coordinate system.
 !
@@ -307,41 +307,41 @@
 ! ... igridb
 !
 !     an integer vector dimensioned two which identifies the underlying grid
-!     on the full sphere for the transformed vector (ub,vb) as follows:
+!     on the full sphere for the transformed vector (ub, vb) as follows:
 !
 !     igridb(1)
 !
 !     = -1
-!     if the latitude (or colatitude) grid for ub,vb is an equally spaced
-!     partition of [-pi/2,pi/2] ( or [0,pi] ) including the poles which
+!     if the latitude (or colatitude) grid for ub, vb is an equally spaced
+!     partition of [-pi/2, pi/2] ( or [0, pi] ) including the poles which
 !     north to south
 !
 !     = +1
-!     if the latitude (or colatitude) grid for ub,vb is an equally spaced
-!     partition of [-pi/2,pi/2] ( or [0,pi] ) including the poles which
+!     if the latitude (or colatitude) grid for ub, vb is an equally spaced
+!     partition of [-pi/2, pi/2] ( or [0, pi] ) including the poles which
 !     south to north
 !
 !     = -2
-!     if the latitude (or colatitude) grid for ub,vb is a gaussian partition
-!     of (-pi/2,pi/2) ( or (0,pi) ) excluding the poles which runs north to
+!     if the latitude (or colatitude) grid for ub, vb is a gaussian partition
+!     of (-pi/2, pi/2) ( or (0, pi) ) excluding the poles which runs north to
 !     south
 !
 !     = +2
-!     if the latitude (or colatitude) grid for ub,vb is a gaussian partition
-!     of (-pi/2,pi/2) ( or (0,pi) ) excluding the poles which runs south to
+!     if the latitude (or colatitude) grid for ub, vb is a gaussian partition
+!     of (-pi/2, pi/2) ( or (0, pi) ) excluding the poles which runs south to
 !     north
 !
 !     igridb(2)
 !
-!     = 0 if the underlying grid for ub,vb is a nlonb by nlatb
+!     = 0 if the underlying grid for ub, vb is a nlonb by nlatb
 !
-!     = 1 if the underlying grid for ub,vb is a nlatb by nlonb
+!     = 1 if the underlying grid for ub, vb is a nlatb by nlonb
 !
 !
 ! ... nlonb
 !
 !     the number of longitude points on the uniform grid which partitions
-!     [0,2pi) for the transformed vector (ub,vb).  nlonb is also the first or
+!     [0, 2pi) for the transformed vector (ub, vb).  nlonb is also the first or
 !     second dimension of ub and vb (see igridb(2)) in the program which calls
 !     trvsph.  nlonb determines the grid increment in longitude as 2*pi/nlonb.
 !     for example nlonb = 72 for a five degree grid.  nlonb must be greater
@@ -351,7 +351,7 @@
 ! ... nlatb
 !
 !     the number of points in the latitude (or colatitude) grid for the
-!     transformed vector (ub,vb).  nlatb is also the first or second dimension
+!     transformed vector (ub, vb).  nlatb is also the first or second dimension
 !     of ub and vb (see igridb(2)) in the program which calls trvsph.
 !     if nlatb is odd then the equator will be located at the (nlatb+1)/2
 !     gaussian grid point.  if nlatb is even then the equator will be
@@ -367,14 +367,14 @@
 ! *** note:
 !     igridb(1)=-1 or igridb(1)=-2, igridb(2)=1, and ivecb=1 corresponds
 !     to the "usual" mathematical spherical coordinate system required
-!     by most of the drivers in spherepack2.  igridb(1)=1 or igridb(1)=2,
+!     by most of the drivers in spherepack2.  igridb(1)=1 or igridb(1)=2, 
 !     igridb(2)=0, and ivecb=0 corresponds to the "usual" geophysical
 !     spherical coordinate system.
 !
 ! ... wsave
 !
 !     a saved work space array that can be utilized repeatedly by trvsph
-!     as long as the arguments nlata,nlona,nlatb,nlonb remain unchanged.
+!     as long as the arguments nlata, nlona, nlatb, nlonb remain unchanged.
 !     wsave is set by a intl=0 call to trvsph.  wsave must not be altered
 !     when trvsph is being recalled with intl=1.
 !
@@ -385,13 +385,13 @@
 !     current set of input arguments is set in the output argument lsvmin.
 !     it can be determined by calling trvsph with lsave=0 and printing lsvmin.
 !
-!          la1 = min(nlata,(nlona+1)/2), la2 = (nlata+1)/2
+!          la1 = min(nlata, (nlona+1)/2), la2 = (nlata+1)/2
 !
-!          lb1 = min(nlatb,(nlonb+1)/2), lb2 = (nlatb+1)/2
+!          lb1 = min(nlatb, (nlonb+1)/2), lb2 = (nlatb+1)/2
 !
-!          lwa = 4*nlata*la2+3*max(la1-2,0)*(2*nlata-la1-1)+la2+nlona+15
+!          lwa = 4*nlata*la2+3*max(la1-2, 0)*(2*nlata-la1-1)+la2+nlona+15
 !
-!          lwb = 4*nlatb*lb2+3*max(lb1-2,0)*(2*nlatb-lb1-1)+nlonb+15
+!          lwb = 4*nlatb*lb2+3*max(lb1-2, 0)*(2*nlatb-lb1-1)+nlonb+15
 !
 !      then
 !
@@ -410,8 +410,8 @@
 !     calls trvsph. the minimum required value of lwork for the current
 !     set of input arguments is set in the output argument lwkmin.
 !     it can be determined by calling trvsph with lwork=0 and printing
-!     lwkmin.  an estimate for lwork follows.  let nlat = max(nlata,nlatb),
-!     nlon = max(nlona,nlonb) and l1 = min(nlat,(nlon+2)/2).  with these
+!     lwkmin.  an estimate for lwork follows.  let nlat = max(nlata, nlatb), 
+!     nlon = max(nlona, nlonb) and l1 = min(nlat, (nlon+2)/2).  with these
 !     these definitions, the quantity
 !
 !            2*nlat*(8*l1 + 4*nlon + 3)
@@ -430,7 +430,7 @@
 !     the length of dwork in the routine calling trvsph
 !     Let
 !
-!       nlat = max(nlata,nlatb)
+!       nlat = max(nlata, nlatb)
 !
 !     ldwork must be at least 2*nlat*(nlat+1)+1
 !
@@ -516,17 +516,17 @@
 ! *****************************************************
 ! *****************************************************
 !
-subroutine trvsph (intl,igrida,nlona,nlata,iveca,ua,va, &
-    igridb,nlonb,nlatb,ivecb,ub,vb,wsave,lsave,lsvmin,work, &
-    lwork,lwkmin,dwork,ldwork,ier)
+subroutine trvsph (intl, igrida, nlona, nlata, iveca, ua, va, &
+    igridb, nlonb, nlatb, ivecb, ub, vb, wsave, lsave, lsvmin, work, &
+    lwork, lwkmin, dwork, ldwork, ier)
     implicit none
-    integer intl,igrida(2),nlona,nlata,igridb(2),nlonb,nlatb
-    integer iveca,ivecb,lsave,lsvmin,lwork,lwkmin,ldwork,ier
-    real ua(*),va(*),ub(*),vb(*),wsave(*),work(*)
+    integer intl, igrida(2), nlona, nlata, igridb(2), nlonb, nlatb
+    integer iveca, ivecb, lsave, lsvmin, lwork, lwkmin, ldwork, ier
+    real ua(*), va(*), ub(*), vb(*), wsave(*), work(*)
     real dwork(*)
-    integer ig,igrda,igrdb,la1,la2,lb1,lb2,lwa,lwb
-    integer iabr,iabi,iacr,iaci,ibbr,ibbi,ibcr,ibci
-    integer nlat,lwk1,lwk2,lw,iw,jb,nt,ityp
+    integer ig, igrda, igrdb, la1, la2, lb1, lb2, lwa, lwb
+    integer iabr, iabi, iacr, iaci, ibbr, ibbi, ibcr, ibci
+    integer nlat, lwk1, lwk2, lw, iw, jb, nt, ityp
     !
     !     include a save statement to ensure local variables in trvsph, set during
     !     an intl=0 call, are preserved if trvsph is recalled with intl=1
@@ -562,21 +562,21 @@ subroutine trvsph (intl,igrida,nlona,nlata,iveca,ua,va, &
     ier = 11
     if (ivecb*(ivecb-1)/=0) return
     ier = 0
-    igrda = iabs(igrida(1))
-    igrdb = iabs(igridb(1))
+    igrda = abs(igrida(1))
+    igrdb = abs(igridb(1))
     if (intl==0) then
-        la1 = min(nlata,(nlona+1)/2)
+        la1 = min(nlata, (nlona+1)/2)
         la2 = (nlata+1)/2
-        lb1 = min(nlatb,(nlonb+1)/2)
+        lb1 = min(nlatb, (nlonb+1)/2)
         lb2 = (nlatb+1)/2
         !
         !     saved space for analysis on a grid
         !
-        lwa = 4*nlata*la2+3*max(la1-2,0)*(2*nlata-la1-1)+la2+nlona+15
+        lwa = 4*nlata*la2+3*max(la1-2, 0)*(2*nlata-la1-1)+la2+nlona+15
         !
         !     set saved work space length for synthesis on b grid
         !
-        lwb = 4*nlatb*lb2+3*max(lb1-2,0)*(2*nlatb-lb1-1)+nlonb+15
+        lwb = 4*nlatb*lb2+3*max(lb1-2, 0)*(2*nlatb-lb1-1)+nlonb+15
         !
         !     set minimum required saved work space length
         !
@@ -607,12 +607,12 @@ subroutine trvsph (intl,igrida,nlona,nlata,iveca,ua,va, &
         !
         !     compute unsaved space for analysis and synthesis
         !
-        lwk1 = 2*nlata*(2*nlona+max(6*la2,nlona))
-        lwk2 = 2*nlatb*(2*nlonb+max(6*lb2,nlonb))
+        lwk1 = 2*nlata*(2*nlona+max(6*la2, nlona))
+        lwk2 = 2*nlatb*(2*nlonb+max(6*lb2, nlonb))
         !
         !     set minimum unsaved work space required by trvsph
         !
-        lwkmin = iw + max(lwk1,lwk2)
+        lwkmin = iw + max(lwk1, lwk2)
         !
         !     set error flags if saved or unsaved work space is insufficient
         !
@@ -621,19 +621,19 @@ subroutine trvsph (intl,igrida,nlona,nlata,iveca,ua,va, &
         ier = 13
         if (lwork < lwkmin) return
         ier = 15
-        nlat = max(nlata,nlatb)
+        nlat = max(nlata, nlatb)
         if (ldwork < 2*nlat*(nlat+1)+1) return
         ier = 0
         if (igrda == 1) then
             !
             !     initialize wsave for equally spaced analysis
             !
-            call vhaeci(nlata,nlona,wsave,lwa,dwork,ldwork,ier)
+            call vhaeci(nlata, nlona, wsave, lwa, dwork, ldwork, ier)
         else
             !
             !     initialize wsave for gaussian analysis
             !
-            call vhagci(nlata,nlona,wsave,lwa,dwork,ldwork,ier)
+            call vhagci(nlata, nlona, wsave, lwa, dwork, ldwork, ier)
             if (ier/=0) then
                 !
                 !     flag failure in spherepack gaussian software
@@ -647,7 +647,7 @@ subroutine trvsph (intl,igrida,nlona,nlata,iveca,ua,va, &
             !
             !     initialize wsave for gaussian synthesis
             !
-            call vhsgci(nlatb,nlonb,wsave(jb),lwb,dwork,ldwork,ier)
+            call vhsgci(nlatb, nlonb, wsave(jb), lwb, dwork, ldwork, ier)
             if (ier/=0) then
                 !
                 !     flag failure in spherepack gaussian software
@@ -659,25 +659,25 @@ subroutine trvsph (intl,igrida,nlona,nlata,iveca,ua,va, &
             !
             !     initialize wsave for equally spaced synthesis
             !
-            call vhseci(nlatb,nlonb,wsave(jb),lwb,dwork,ldwork,ier)
+            call vhseci(nlatb, nlonb, wsave(jb), lwb, dwork, ldwork, ier)
         end if
     !
     !     end of initialization (intl=0) call
     !
     end if
     !
-    !     convert the vector field (ua,va) to mathematical spherical coordinates
+    !     convert the vector field (ua, va) to mathematical spherical coordinates
     !
     if (igrida(2)==0) then
-        call trvplat(nlona,nlata,ua,work)
-        call trvplat(nlona,nlata,va,work)
+        call trvplat(nlona, nlata, ua, work)
+        call trvplat(nlona, nlata, va, work)
     end if
     if (igrida(1) > 0) then
-        call covlat(nlata,nlona,ua)
-        call covlat(nlata,nlona,va)
+        call covlat(nlata, nlona, ua)
+        call covlat(nlata, nlona, va)
     end if
     if (iveca == 0) then
-        call negv(nlata,nlona,va)
+        call negv(nlata, nlona, va)
     end if
     nt = 1
     ityp = 0
@@ -685,128 +685,128 @@ subroutine trvsph (intl,igrida,nlona,nlata,iveca,ua,va, &
     !     analyze vector field
     !
     if (igrda == 2) then
-        call vhagc(nlata,nlona,ityp,nt,va,ua,nlata,nlona,work(iabr), &
-            work(iabi),work(iacr),work(iaci),la1,nlata,wsave,lwa,work(iw), &
-            lw,ier)
+        call vhagc(nlata, nlona, ityp, nt, va, ua, nlata, nlona, work(iabr), &
+            work(iabi), work(iacr), work(iaci), la1, nlata, wsave, lwa, work(iw), &
+            lw, ier)
     else
-        call vhaec(nlata,nlona,ityp,nt,va,ua,nlata,nlona,work(iabr), &
-            work(iabi),work(iacr),work(iaci),la1,nlata,wsave,lwa,work(iw), &
-            lw,ier)
+        call vhaec(nlata, nlona, ityp, nt, va, ua, nlata, nlona, work(iabr), &
+            work(iabi), work(iacr), work(iaci), la1, nlata, wsave, lwa, work(iw), &
+            lw, ier)
     end if
     !
     !     transfer a grid coefficients to b grid coefficients
     !
-    call trvab(la1,nlata,work(iabr),work(iabi),work(iacr),work(iaci), &
-        lb1,nlatb,work(ibbr),work(ibbi),work(ibcr),work(ibci))
+    call trvab(la1, nlata, work(iabr), work(iabi), work(iacr), work(iaci), &
+        lb1, nlatb, work(ibbr), work(ibbi), work(ibcr), work(ibci))
     !
     !     synthesize on b grid
     !
     if (igrdb == 1) then
-        call vhsec(nlatb,nlonb,ityp,nt,vb,ub,nlatb,nlonb,work(ibbr), &
-            work(ibbi),work(ibcr),work(ibci),lb1,nlatb,wsave(jb),lwb, &
-            work(iw),lw,ier)
+        call vhsec(nlatb, nlonb, ityp, nt, vb, ub, nlatb, nlonb, work(ibbr), &
+            work(ibbi), work(ibcr), work(ibci), lb1, nlatb, wsave(jb), lwb, &
+            work(iw), lw, ier)
     else
-        call vhsgc(nlatb,nlonb,ityp,nt,vb,ub,nlatb,nlonb,work(ibbr), &
-            work(ibbi),work(ibcr),work(ibci),lb1,nlatb,wsave(jb),lwb,work(iw), &
-            lw,ier)
+        call vhsgc(nlatb, nlonb, ityp, nt, vb, ub, nlatb, nlonb, work(ibbr), &
+            work(ibbi), work(ibcr), work(ibci), lb1, nlatb, wsave(jb), lwb, work(iw), &
+            lw, ier)
     end if
     !
     !     restore a grid and b grid vector fields (now in math coordinates) to
-    !     agree with grid flags in igrida,iveca,igridb,ivecb
+    !     agree with grid flags in igrida, iveca, igridb, ivecb
     !
     if (iveca == 0) then
-        call negv(nlata,nlona,va)
+        call negv(nlata, nlona, va)
     end if
     if (ivecb == 0) then
-        call negv(nlatb,nlonb,vb)
+        call negv(nlatb, nlonb, vb)
     end if
     if (igrida(1)> 0) then
-        call covlat(nlata,nlona,ua)
-        call covlat(nlata,nlona,va)
+        call covlat(nlata, nlona, ua)
+        call covlat(nlata, nlona, va)
     end if
     if (igridb(1) > 0) then
-        call covlat(nlatb,nlonb,ub)
-        call covlat(nlatb,nlonb,vb)
+        call covlat(nlatb, nlonb, ub)
+        call covlat(nlatb, nlonb, vb)
     end if
     if (igrida(2) == 0) then
-        call trvplat(nlata,nlona,ua,work)
-        call trvplat(nlata,nlona,va,work)
+        call trvplat(nlata, nlona, ua, work)
+        call trvplat(nlata, nlona, va, work)
     end if
     if (igridb(2) == 0) then
-        call trvplat(nlatb,nlonb,ub,work)
-        call trvplat(nlatb,nlonb,vb,work)
+        call trvplat(nlatb, nlonb, ub, work)
+        call trvplat(nlatb, nlonb, vb, work)
     end if
     return
 end subroutine trvsph
-subroutine negv(nlat,nlon,v)
+subroutine negv(nlat, nlon, v)
     !
     !     negate (co)latitudinal vector componenet
     !
     implicit none
-    integer nlat,nlon,i,j
-    real v(nlat,nlon)
-    do j=1,nlon
-        do i=1,nlat
-            v(i,j) = -v(i,j)
+    integer nlat, nlon, i, j
+    real v(nlat, nlon)
+    do j=1, nlon
+        do i=1, nlat
+            v(i, j) = -v(i, j)
         end do
     end do
     return
 end subroutine negv
-subroutine trvab(ma,na,abr,abi,acr,aci,mb,nb,bbr,bbi,bcr,bci)
+subroutine trvab(ma, na, abr, abi, acr, aci, mb, nb, bbr, bbi, bcr, bci)
     implicit none
-    integer ma,na,mb,nb,i,j,m,n
-    real abr(ma,na),abi(ma,na),acr(ma,na),aci(ma,na)
-    real bbr(mb,nb),bbi(mb,nb),bcr(mb,nb),bci(mb,nb)
+    integer ma, na, mb, nb, i, j, m, n
+    real abr(ma, na), abi(ma, na), acr(ma, na), aci(ma, na)
+    real bbr(mb, nb), bbi(mb, nb), bcr(mb, nb), bci(mb, nb)
     !
     !     set coefficients for b grid from coefficients for a grid
     !
-    m = min(ma,mb)
-    n = min(na,nb)
-    do j=1,n
-        do i=1,m
-            bbr(i,j) = abr(i,j)
-            bbi(i,j) = abi(i,j)
-            bcr(i,j) = acr(i,j)
-            bci(i,j) = aci(i,j)
+    m = min(ma, mb)
+    n = min(na, nb)
+    do j=1, n
+        do i=1, m
+            bbr(i, j) = abr(i, j)
+            bbi(i, j) = abi(i, j)
+            bcr(i, j) = acr(i, j)
+            bci(i, j) = aci(i, j)
         end do
     end do
     !
     !     set coefs outside triangle to zero
     !
-    do i=m+1,mb
-        do j=1,nb
-            bbr(i,j) = 0.0
-            bbi(i,j) = 0.0
-            bcr(i,j) = 0.0
-            bci(i,j) = 0.0
+    do i=m+1, mb
+        do j=1, nb
+            bbr(i, j) = 0.0
+            bbi(i, j) = 0.0
+            bcr(i, j) = 0.0
+            bci(i, j) = 0.0
         end do
     end do
-    do j=n+1,nb
-        do i=1,mb
-            bbr(i,j) = 0.0
-            bbi(i,j) = 0.0
-            bcr(i,j) = 0.0
-            bci(i,j) = 0.0
+    do j=n+1, nb
+        do i=1, mb
+            bbr(i, j) = 0.0
+            bbi(i, j) = 0.0
+            bcr(i, j) = 0.0
+            bci(i, j) = 0.0
         end do
     end do
     return
 end subroutine trvab
-subroutine trvplat(n,m,data,work)
+subroutine trvplat(n, m, data, work)
     !
     !     transpose the n by m array data to a m by n array data
     !     work must be at least n*m words long
     !
     implicit none
-    integer n,m,i,j,ij,ji
-    real data(*),work(*)
-    do j=1,m
-        do i=1,n
+    integer n, m, i, j, ij, ji
+    real data(*), work(*)
+    do j=1, m
+        do i=1, n
             ij = (j-1)*n+i
             work(ij) = data(ij)
         end do
     end do
-    do i=1,n
-        do j=1,m
+    do i=1, n
+        do j=1, m
             ji = (i-1)*m+j
             ij = (j-1)*n+i
             data(ji) = work(ij)
@@ -814,20 +814,20 @@ subroutine trvplat(n,m,data,work)
     end do
     return
 end subroutine trvplat
-subroutine covlat(nlat,nlon,data)
+subroutine covlat(nlat, nlon, data)
     !
     !     reverse order of latitude (colatitude) grids
     !
     implicit none
-    integer nlat,nlon,nlat2,i,ib,j
-    real data(nlat,nlon),temp
+    integer nlat, nlon, nlat2, i, ib, j
+    real data(nlat, nlon), temp
     nlat2 = nlat/2
-    do i=1,nlat2
+    do i=1, nlat2
         ib = nlat-i+1
-        do j=1,nlon
-            temp = data(i,j)
-            data(i,j) = data(ib,j)
-            data(ib,j) = temp
+        do j=1, nlon
+            temp = data(i, j)
+            data(i, j) = data(ib, j)
+            data(ib, j) = temp
         end do
     end do
     return

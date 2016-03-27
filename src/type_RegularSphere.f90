@@ -152,7 +152,7 @@ contains
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
         class (RegularSphere), intent (in out) :: this
-        real (wp),             intent (in)     :: scalar_function(:,:)
+        real (wp),             intent (in)     :: scalar_function(:, :)
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
@@ -229,7 +229,7 @@ contains
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
         class (RegularSphere), intent (in out) :: this
-        real (wp),             intent (out)    :: scalar_function(:,:)
+        real (wp),             intent (out)    :: scalar_function(:, :)
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
@@ -308,8 +308,8 @@ contains
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
         class (RegularSphere), intent (in out) :: this
-        real (wp),             intent (in)     :: polar_component(:,:)
-        real (wp),             intent (in)     :: azimuthal_component(:,:)
+        real (wp),             intent (in)     :: polar_component(:, :)
+        real (wp),             intent (in)     :: azimuthal_component(:, :)
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
@@ -417,8 +417,8 @@ contains
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
         class (RegularSphere), intent (in out) :: this
-        real (wp),             intent (out)    :: polar_component(:,:)
-        real (wp),             intent (out)    :: azimuthal_component(:,:)
+        real (wp),             intent (out)    :: polar_component(:, :)
+        real (wp),             intent (out)    :: azimuthal_component(:, :)
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------

@@ -39,8 +39,8 @@
 !     sphcom.f, hrfft.f, gaqd.f, shaec.f, shsec.f, shagc.f, shsgc.f
 !
 !
-!     subroutine trssph(intl,igrida,nlona,nlata,da,igridb,nlonb,nlatb,
-!    +db,wsave,lsave,lsvmin,work,lwork,lwkmin,dwork,ldwork,ier)
+!     subroutine trssph(intl, igrida, nlona, nlata, da, igridb, nlonb, nlatb, 
+!    +db, wsave, lsave, lsvmin, work, lwork, lwkmin, dwork, ldwork, ier)
 !
 ! *** purpose
 !
@@ -48,7 +48,7 @@
 !     full sphere to data in array db on a grid on the full sphere.  the
 !     grids on which da is given and db is generated can be specified
 !     independently of each other (see description below and the arguments
-!     igrida,igridb).  for transferring vector data on the sphere, use
+!     igrida, igridb).  for transferring vector data on the sphere, use
 !     subroutine trvsph.
 
 !     notice that scalar and vector quantities are fundamentally different
@@ -69,39 +69,39 @@
 !
 !     the grid on which da is given must be equally spaced in longitude
 !     and either equally spaced or gaussian in latitude (or colatitude).
-!     longitude, which can be either the first or second dimension of da,
-!     subdivides [0,2pi) excluding the periodic point 2pi.  (co)latitude,
+!     longitude, which can be either the first or second dimension of da, 
+!     subdivides [0, 2pi) excluding the periodic point 2pi.  (co)latitude, 
 !     which can be the second or first dimension of da, has south
 !     to north or north to south orientation with increasing subscript
 !     value in da (see the argument igrida).
 !
 !     the grid on which db is generated must be equally spaced in longitude
 !     and either equally spaced or gaussian in latitude (or colatitude).
-!     longitude, which can be either the first or second dimension of db,
-!     subdivides [0,2pi) excluding the periodic point 2pi.  (co)latitude,
+!     longitude, which can be either the first or second dimension of db, 
+!     subdivides [0, 2pi) excluding the periodic point 2pi.  (co)latitude, 
 !     which can be the second or first dimension of db, has south
 !     to north or north to south orientation with increasing subscript
 !     value in db (see the argument igridb).
 !
 !     let nlon be either nlona or nlonb (the number of grid points in
-!     longitude.  the longitude grid subdivides [0,2pi) into nlon spaced
+!     longitude.  the longitude grid subdivides [0, 2pi) into nlon spaced
 !     points
 !
-!          (j-1)*2.*pi/nlon  (j=1,...,nlon).
+!          (j-1)*2.*pi/nlon  (j=1, ..., nlon).
 !
 !     it is not necessary to communicate to subroutine trssph whether the
 !     underlying grids are in latitude or colatitude.  it is only necessary
 !     to communicate whether they run south to north or north to south with
 !     increasing subscripts.  a brief discussion of latitude and colatitude
 !     follows.  equally spaced latitude grids are assumed to subdivide
-!     [-pi/2,pi/2] with the south pole at -pi/2 and north pole at pi/2.
-!     equally spaced colatitude grids subdivide [0,pi] with the north pole
+!     [-pi/2, pi/2] with the south pole at -pi/2 and north pole at pi/2.
+!     equally spaced colatitude grids subdivide [0, pi] with the north pole
 !     at 0 and south pole at pi.  equally spaced partitions on the sphere
-!     include both poles.  gaussian latitude grids subdivide (-pi/2,pi/2)
-!     and gaussian colatitude grids subdivide (0,pi).  gaussian grids do not
+!     include both poles.  gaussian latitude grids subdivide (-pi/2, pi/2)
+!     and gaussian colatitude grids subdivide (0, pi).  gaussian grids do not
 !     include the poles.  the gaussian grid points are uniquely determined by
 !     the size of the partition.  they can be computed in colatitude in
-!     (0,pi) (north to south) in real by the spherepack subroutine
+!     (0, pi) (north to south) in real by the spherepack subroutine
 !     gaqd.  let nlat be nlata or nlatb if either the da or db grid is
 !     gaussian.  let
 !
@@ -110,21 +110,21 @@
 !           0.0    <  cth(1) < ... < cth(nlat)  <   pi
 !
 !
-!     be nlat gaussian colatitude points in the interval (0,pi) and let
+!     be nlat gaussian colatitude points in the interval (0, pi) and let
 !
 !        south pole                        north pole
 !        ----------                        ----------
 !           -pi/2  < th(1) < ... < th(nlat) < pi/2
 !
-!     be nlat gaussian latitude points in the open interval (-pi/2,pi/2).
+!     be nlat gaussian latitude points in the open interval (-pi/2, pi/2).
 !     these are related by
 !
-!          th(i) = -pi/2 + cth(i)  (i=1,...,nlat)
+!          th(i) = -pi/2 + cth(i)  (i=1, ..., nlat)
 !
 !     if the da or db grid is equally spaced in (co)latitude then
 !
 !          ctht(i) = (i-1)*pi/(nlat-1)
-!                                               (i=1,...,nlat)
+!                                               (i=1, ..., nlat)
 !          tht(i) = -pi/2 + (i-1)*pi/(nlat-1)
 !
 !     define the equally spaced (north to south) colatitude and (south to
@@ -133,21 +133,21 @@
 !
 ! *** method (simplified description)
 !
-!     for simplicity, assume da is a nlat by nlon data tabulation and da(i,j)
+!     for simplicity, assume da is a nlat by nlon data tabulation and da(i, j)
 !     is the value at latitude theta(i) and longitude phi(j).  then
-!     coefficients a(m,n) and b(m,n) can be determined so that da(i,j) is
+!     coefficients a(m, n) and b(m, n) can be determined so that da(i, j) is
 !     approximated by the sum
 !
 !         l-1  n
-!     (a) sum sum pbar(m,n,theta(i))*(a(m,n)*cos(m*phi(j)+b(m,n)*sin(m*phi(j))
+!     (a) sum sum pbar(m, n, theta(i))*(a(m, n)*cos(m*phi(j)+b(m, n)*sin(m*phi(j))
 !         n=0 m=0
 !
-!     here pbar(n,m,theta) are the normalized associated legendre functions
-!     and l = min(nlat,(nlon+2)/2).  the determination of a(m,n) and b(m,n)
+!     here pbar(n, m, theta) are the normalized associated legendre functions
+!     and l = min(nlat, (nlon+2)/2).  the determination of a(m, n) and b(m, n)
 !     is called spherical harmonic analysis. a sum of this form can then be
 !     used to regenerate the data in db on the new grid with the known
-!     a(m,n) and b(m,n).  this is referred to spherical harmonic synthesis.
-!     analysis and synthesis subroutines from the software package spherepack,
+!     a(m, n) and b(m, n).  this is referred to spherical harmonic synthesis.
+!     analysis and synthesis subroutines from the software package spherepack, 
 !     are used for these purposes.
 !
 !     if da or db is not in mathematical spherical coordinates then array
@@ -158,10 +158,10 @@
 !
 !     the use of surface spherical harmonics to transfer spherical grid data
 !     has advantages over pointwise grid interpolation schemes on the sphere.
-!     it is highly accurate.  if p(x,y,z) is any polynomial of degree n or
-!     less in x,y,z cartesian coordinates which is restricted to the surface
+!     it is highly accurate.  if p(x, y, z) is any polynomial of degree n or
+!     less in x, y, z cartesian coordinates which is restricted to the surface
 !     of the sphere, then p is exactly represented by sums of the form (a)
-!     whenever n = mino(nlat,nlon/2) (i.e., transfers with spherical harmonics
+!     whenever n = mino(nlat, nlon/2) (i.e., transfers with spherical harmonics
 !     have n(th) order accuracy.  by way of contrast, bilinear interpolation
 !     schemes are exact for polynomials of degree one.  bicubic interpolation
 !     is exact only for polynomials of degree three or less.  the method
@@ -172,7 +172,7 @@
 !     consistent with methods used to generate data in numerical spectral
 !     models based on spherical harmonics.  for more discussion of these and
 !     related issues,  see the article: "on the spectral approximation of
-!     discrete scalar and vector functions on the sphere," siam j. numer.
+!     discrete scalar and vector functions on the sphere, " siam j. numer.
 !     anal., vol 16. dec 1979, pp. 934-949, by paul swarztrauber.
 !
 !
@@ -180,10 +180,10 @@
 !
 !     on a nlon by nlat or nlat by nlon grid (gaussian or equally spaced)
 !     spherical harmonic analysis generates and synthesis utilizes
-!     min(nlat,(nlon+2)/2)) by nlat coefficients.  consequently, for
+!     min(nlat, (nlon+2)/2)) by nlat coefficients.  consequently, for
 !     da and db,  if either
 !
-!             min(nlatb,(nlonb+2)/2) < min(nlata,(nlona+2)/2)
+!             min(nlatb, (nlonb+2)/2) < min(nlata, (nlona+2)/2)
 !
 !     or if
 !
@@ -205,7 +205,7 @@
 !     an initialization argument which should be zero on an initial call to
 !     trssph.  intl should be one if trssph is being recalled and
 !
-!          igrida,nlona,nlata,igridb,nlonb,nlatb
+!          igrida, nlona, nlata, igridb, nlonb, nlatb
 !
 !     have not changed from the previous call.  if any of these arguments
 !     have changed, intl=0 must be used to avoid undetectable errors.  calls
@@ -222,22 +222,22 @@
 !
 !     = -1
 !     if the latitude (or colatitude) grid for da is an equally spaced
-!     partition of [-pi/2,pi/2] ( or [0,pi] ) including the poles which
+!     partition of [-pi/2, pi/2] ( or [0, pi] ) including the poles which
 !     runs north to south
 !
 !     = +1
 !     if the latitude (or colatitude) grid for da is an equally spaced
-!     partition of [-pi/2,pi/2] ( or [0,pi] ) including the poles which
+!     partition of [-pi/2, pi/2] ( or [0, pi] ) including the poles which
 !     runs south to north
 !
 !     = -2
 !     if the latitude (or colatitude) grid for da is a gaussian partition
-!     of (-pi/2,pi/2) ( or (0,pi) ) excluding the poles which runs north
+!     of (-pi/2, pi/2) ( or (0, pi) ) excluding the poles which runs north
 !     to south
 !
 !     = +2
 !     if the latitude (or colatitude) grid for da is a gaussian partition
-!     of (-pi/2,pi/2) ( or (0,pi) ) excluding the poles which runs south
+!     of (-pi/2, pi/2) ( or (0, pi) ) excluding the poles which runs south
 !     north
 !
 !     igrida(2)
@@ -250,7 +250,7 @@
 ! ... nlona
 !
 !     the number of longitude points on the uniform grid which partitions
-!     [0,2pi) for the given data array da.  nlona is also the first or second
+!     [0, 2pi) for the given data array da.  nlona is also the first or second
 !     dimension of da (see igrida(2)) in the program which calls trssph.
 !     nlona determines the grid increment in longitude as 2*pi/nlona. for
 !     example nlona = 72 for a five degree grid.  nlona must be greater than
@@ -292,22 +292,22 @@
 !
 !     = -1
 !     if the latitude (or colatitude) grid for db is an equally spaced
-!     partition of [-pi/2,pi/2] ( or [0,pi] ) including the poles which
+!     partition of [-pi/2, pi/2] ( or [0, pi] ) including the poles which
 !     north to south
 !
 !     = +1
 !     if the latitude (or colatitude) grid for db is an equally spaced
-!     partition of [-pi/2,pi/2] ( or [0,pi] ) including the poles which
+!     partition of [-pi/2, pi/2] ( or [0, pi] ) including the poles which
 !     south to north
 !
 !     = -2
 !     if the latitude (or colatitude) grid for db is a gaussian partition
-!     of (-pi/2,pi/2) ( or (0,pi) ) excluding the poles which runs north to
+!     of (-pi/2, pi/2) ( or (0, pi) ) excluding the poles which runs north to
 !     south
 !
 !     = +2
 !     if the latitude (or colatitude) grid for db is a gaussian partition
-!     of (-pi/2,pi/2) ( or (0,pi) ) excluding the poles which runs south to
+!     of (-pi/2, pi/2) ( or (0, pi) ) excluding the poles which runs south to
 !     north
 !
 !
@@ -321,7 +321,7 @@
 ! ... nlonb
 !
 !     the number of longitude points on the uniform grid which partitions
-!     [0,2pi) for the transformed data array db.  nlonb is also the first or
+!     [0, 2pi) for the transformed data array db.  nlonb is also the first or
 !     second dimension of db (see igridb(2)) in the program which calls
 !     trssph.  nlonb determines the grid increment in longitude as 2*pi/nlonb.
 !     for example nlonb = 72 for a five degree grid.  nlonb must be greater
@@ -340,7 +340,7 @@
 ! ... wsave
 !
 !     a saved work space array that can be utilized repeatedly by trssph
-!     as long as the arguments nlata,nlona,nlatb,nlonb remain unchanged.
+!     as long as the arguments nlata, nlona, nlatb, nlonb remain unchanged.
 !     wsave is set by a intl=0 call to trssph.  wsave must not be altered
 !     when trssph is being recalled with intl=1.
 !
@@ -385,11 +385,11 @@
 !     calling trssph. the minimum required value of lwork for the current
 !     set of input arguments is set in the output argument lwkmin.
 !     it can be determined by calling trssph with lwork=0 and printing
-!     lwkmin.  an estimate for lwork follows.  let nlat,nlon,l1,l2 be
+!     lwkmin.  an estimate for lwork follows.  let nlat, nlon, l1, l2 be
 !     defined by
 !
-!       nlat = max(nlata,nlatb), nlon = nax0(nlona,nlonb),
-!       l1 = min(nlat,(nlon+2)/2), l2 = (nlat+1)/2
+!       nlat = max(nlata, nlatb), nlon = nax0(nlona, nlonb), 
+!       l1 = min(nlat, (nlon+2)/2), l2 = (nlat+1)/2
 !
 !     then the quantity
 !
@@ -410,7 +410,7 @@
 !     The length of dwork in the routine calling trssph.
 !     Let
 !
-!       nlat = max(nlata,nlatb)
+!       nlat = max(nlata, nlatb)
 !
 !     ldwork must be at least nlat*(nlat+4)
 !
@@ -477,15 +477,15 @@
 ! *****************************************************
 ! *****************************************************
 !
-subroutine TRSSPH (intl,igrida,nlona,nlata,da,igridb,nlonb,nlatb, &
-    db,wsave,lsave,lsvmin,work,lwork,lwkmin,dwork,ldwork,ier)
+subroutine TRSSPH (intl, igrida, nlona, nlata, da, igridb, nlonb, nlatb, &
+    db, wsave, lsave, lsvmin, work, lwork, lwkmin, dwork, ldwork, ier)
     implicit none
-    integer intl,igrida(2),nlona,nlata,igridb(2),nlonb,nlatb
-    integer lsave,lsvmin,lwork,lwkmin,ldwork,ier
-    real da(*),db(*),wsave(*),work(*)
+    integer intl, igrida(2), nlona, nlata, igridb(2), nlonb, nlatb
+    integer lsave, lsvmin, lwork, lwkmin, ldwork, ier
+    real da(*), db(*), wsave(*), work(*)
     real dwork(*)
-    integer ig,igrda,igrdb,la1,la2,lb1,lb2,lwa,lwb,iaa,iab,iba,ibb
-    integer lwk3,lwk4,lw,iw,jb,nt,isym,nlat
+    integer ig, igrda, igrdb, la1, la2, lb1, lb2, lwa, lwb, iaa, iab, iba, ibb
+    integer lwk3, lwk4, lw, iw, jb, nt, isym, nlat
     !
     !     include a save statement to ensure local variables in trssph, set during
     !     an intl=0 call, are preserved if trssph is recalled with intl=1
@@ -518,12 +518,12 @@ subroutine TRSSPH (intl,igrida,nlona,nlata,da,igridb,nlonb,nlatb, &
     if (nlatb <3) return
     ier = 0
 
-    igrda = iabs(igrida(1))
-    igrdb = iabs(igridb(1))
+    igrda = abs(igrida(1))
+    igrdb = abs(igridb(1))
     if (intl==0) then
-        la1 = min(nlata,(nlona+2)/2)
+        la1 = min(nlata, (nlona+2)/2)
         la2 = (nlata+1)/2
-        lb1 = min(nlatb,(nlonb+2)/2)
+        lb1 = min(nlatb, (nlonb+2)/2)
         lb2 = (nlatb+1)/2
         !
         !     set saved work space length for analysis
@@ -581,7 +581,7 @@ subroutine TRSSPH (intl,igrida,nlona,nlata,da,igridb,nlonb,nlatb, &
         !
         !     set minimum unsaved work space required by trssph
         !
-        lwkmin = iw + max(lwk3,lwk4)
+        lwkmin = iw + max(lwk3, lwk4)
         !
         !     set error flags if saved or unsaved work spaces are insufficient
         !
@@ -590,19 +590,19 @@ subroutine TRSSPH (intl,igrida,nlona,nlata,da,igridb,nlonb,nlatb, &
         ier = 11
         if (lwork < lwkmin) return
         ier = 13
-        nlat = max(nlata,nlatb)
+        nlat = max(nlata, nlatb)
         if (ldwork < nlat*(nlat+4)) return
         ier = 0
         if (igrda == 1) then
             !
             !     initialize wsave for equally spaced analysis
             !
-            call shaeci(nlata,nlona,wsave,lwa,dwork,ldwork,ier)
+            call shaeci(nlata, nlona, wsave, lwa, dwork, ldwork, ier)
         else
             !
             !     initialize wsave for gaussian analysis
             !
-            call shagci(nlata,nlona,wsave,lwa,dwork,ldwork,ier)
+            call shagci(nlata, nlona, wsave, lwa, dwork, ldwork, ier)
             if (ier/=0) then
                 !
                 !     flag failure in spherepack gaussian software
@@ -616,7 +616,7 @@ subroutine TRSSPH (intl,igrida,nlona,nlata,da,igridb,nlonb,nlatb, &
             !
             !     initialize wsave for gaussian synthesis
             !
-            call shsgci(nlatb,nlonb,wsave(jb),lwb,dwork,ldwork,ier)
+            call shsgci(nlatb, nlonb, wsave(jb), lwb, dwork, ldwork, ier)
             if (ier/=0) then
                 !
                 !     flag failure in spherepack gaussian software
@@ -628,7 +628,7 @@ subroutine TRSSPH (intl,igrida,nlona,nlata,da,igridb,nlonb,nlatb, &
             !
             !     initialize wsave for equally spaced synthesis
             !
-            call shseci(nlatb,nlonb,wsave(jb),lwb,dwork,ldwork,ier)
+            call shseci(nlatb, nlonb, wsave(jb), lwb, dwork, ldwork, ier)
         end if
     !
     !     end of initialization (intl=0) call
@@ -639,8 +639,8 @@ subroutine TRSSPH (intl,igrida,nlona,nlata,da,igridb,nlonb,nlatb, &
     !     (arrays must have latitude (colatitude) as the first dimension
     !     and run north to south for spherepack software)
     !
-    if (igrida(2) == 0) call trsplat(nlona,nlata,da,work)
-    if (igrida(1) > 0) call convlat(nlata,nlona,da)
+    if (igrida(2) == 0) call trsplat(nlona, nlata, da, work)
+    if (igrida(1) > 0) call convlat(nlata, nlona, da)
 
     nt = 1
     isym = 0
@@ -648,95 +648,95 @@ subroutine TRSSPH (intl,igrida,nlona,nlata,da,igridb,nlonb,nlatb, &
         !
         !     do spherical harmonic analysis of "adjusted" da on gaussian grid
         !
-        call shagc(nlata,nlona,isym,nt,da,nlata,nlona,work(iaa), &
-            work(iba),la1,nlata,wsave,lwa,work(iw),lw,ier)
+        call shagc(nlata, nlona, isym, nt, da, nlata, nlona, work(iaa), &
+            work(iba), la1, nlata, wsave, lwa, work(iw), lw, ier)
     else
         !
         !     do spherical harmonic analysis of "adjusted" da on equally spaced grid
         !
-        call shaec(nlata,nlona,isym,nt,da,nlata,nlona,work(iaa), &
-            work(iba),la1,nlata,wsave,lwa,work(iw),lw,ier)
+        call shaec(nlata, nlona, isym, nt, da, nlata, nlona, work(iaa), &
+            work(iba), la1, nlata, wsave, lwa, work(iw), lw, ier)
     end if
     !
     !     transfer da grid coefficients to db grid coefficients
     !     truncating to zero as necessary
     !
-    call trab(la1,nlata,work(iaa),work(iba),lb1,nlatb,work(iab), &
+    call trab(la1, nlata, work(iaa), work(iba), lb1, nlatb, work(iab), &
         work(ibb))
 
     if (igrdb == 1) then
         !
         !     do spherical harmonic synthesis on nlatb by nlonb equally spaced grid
         !
-        call shsec(nlatb,nlonb,isym,nt,db,nlatb,nlonb,work(iab), &
-            work(ibb),lb1,nlatb,wsave(jb),lwb,work(iw),lw,ier)
+        call shsec(nlatb, nlonb, isym, nt, db, nlatb, nlonb, work(iab), &
+            work(ibb), lb1, nlatb, wsave(jb), lwb, work(iw), lw, ier)
     else
         !
         !     do spherical harmonic synthesis on nlatb by nlonb gaussian grid
         !
-        call shsgc(nlatb,nlonb,isym,nt,db,nlatb,nlonb,work(iab), &
-            work(ibb),lb1,nlatb,wsave(jb),lwb,work(iw),lw,ier)
+        call shsgc(nlatb, nlonb, isym, nt, db, nlatb, nlonb, work(iab), &
+            work(ibb), lb1, nlatb, wsave(jb), lwb, work(iw), lw, ier)
     end if
     !
-    !     both da,db are currently latitude by longitude north to south arrays
+    !     both da, db are currently latitude by longitude north to south arrays
     !     restore da and set db to agree with flags in igrida and igridb
     !
-    if (igrida(1) > 0) call convlat(nlata,nlona,da)
-    if (igridb(1) > 0) call convlat(nlatb,nlonb,db)
-    if (igrida(2) == 0) call trsplat(nlata,nlona,da,work)
-    if (igridb(2) == 0) call trsplat(nlatb,nlonb,db,work)
+    if (igrida(1) > 0) call convlat(nlata, nlona, da)
+    if (igridb(1) > 0) call convlat(nlatb, nlonb, db)
+    if (igrida(2) == 0) call trsplat(nlata, nlona, da, work)
+    if (igridb(2) == 0) call trsplat(nlatb, nlonb, db, work)
     return
 end subroutine TRSSPH
 
-subroutine trab(ma,na,aa,ba,mb,nb,ab,bb)
+subroutine trab(ma, na, aa, ba, mb, nb, ab, bb)
     implicit none
-    integer ma,na,mb,nb,i,j,m,n
-    real aa(ma,na),ba(ma,na),ab(mb,nb),bb(mb,nb)
+    integer ma, na, mb, nb, i, j, m, n
+    real aa(ma, na), ba(ma, na), ab(mb, nb), bb(mb, nb)
     !
     !     set coefficients for b grid from coefficients for a grid
     !
-    m = min(ma,mb)
-    n = min(na,nb)
-    do j=1,n
-        do i=1,m
-            ab(i,j) = aa(i,j)
-            bb(i,j) = ba(i,j)
+    m = min(ma, mb)
+    n = min(na, nb)
+    do j=1, n
+        do i=1, m
+            ab(i, j) = aa(i, j)
+            bb(i, j) = ba(i, j)
         end do
     end do
     !
     !     set coefs outside triangle to zero
     !
-    do i=m+1,mb
-        do j=1,nb
-            ab(i,j) = 0.0
-            bb(i,j) = 0.0
+    do i=m+1, mb
+        do j=1, nb
+            ab(i, j) = 0.0
+            bb(i, j) = 0.0
         end do
     end do
-    do j=n+1,nb
-        do i=1,mb
-            ab(i,j) = 0.0
-            bb(i,j) = 0.0
+    do j=n+1, nb
+        do i=1, mb
+            ab(i, j) = 0.0
+            bb(i, j) = 0.0
         end do
     end do
     return
 end subroutine trab
 
-subroutine trsplat(n,m,data,work)
+subroutine trsplat(n, m, data, work)
     !
     !     transpose the n by m array data to a m by n array data
     !     work must be at least n*m words long
     !
     implicit none
-    integer n,m,i,j,ij,ji
-    real data(*),work(*)
-    do j=1,m
-        do i=1,n
+    integer n, m, i, j, ij, ji
+    real data(*), work(*)
+    do j=1, m
+        do i=1, n
             ij = (j-1)*n+i
             work(ij) = data(ij)
         end do
     end do
-    do i=1,n
-        do j=1,m
+    do i=1, n
+        do j=1, m
             ji = (i-1)*m+j
             ij = (j-1)*n+i
             data(ji) = work(ij)
@@ -745,20 +745,20 @@ subroutine trsplat(n,m,data,work)
     return
 end subroutine trsplat
 
-subroutine convlat(nlat,nlon,data)
+subroutine convlat(nlat, nlon, data)
     !
     !     reverse order of latitude (colatitude) grids
     !
     implicit none
-    integer nlat,nlon,nlat2,i,ib,j
-    real data(nlat,nlon),temp
+    integer nlat, nlon, nlat2, i, ib, j
+    real data(nlat, nlon), temp
     nlat2 = nlat/2
-    do i=1,nlat2
+    do i=1, nlat2
         ib = nlat-i+1
-        do j=1,nlon
-            temp = data(i,j)
-            data(i,j) = data(ib,j)
-            data(ib,j) = temp
+        do j=1, nlon
+            temp = data(i, j)
+            data(i, j) = data(ib, j)
+            data(ib, j) = temp
         end do
     end do
     return

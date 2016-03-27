@@ -40,21 +40,21 @@
 !
 !     sphcom.f, hrfft.f, shaec.f, shsec.f
 !
-!     subroutine islapec(nlat,nlon,isym,nt,xlmbda,sf,ids,jds,a,b,
-!    +mdab,ndab,wshsec,lshsec,work,lwork,pertrb,ierror)
+!     subroutine islapec(nlat, nlon, isym, nt, xlmbda, sf, ids, jds, a, b, 
+!    +mdab, ndab, wshsec, lshsec, work, lwork, pertrb, ierror)
 !
 !     islapec inverts the laplace or helmholz operator on an equally
 !     spaced latitudinal grid using o(n**2) storage. given the
-!     spherical harmonic coefficients a(m,n) and b(m,n) of the right
-!     hand side slap(i,j), islapec computes a solution sf(i,j) to
+!     spherical harmonic coefficients a(m, n) and b(m, n) of the right
+!     hand side slap(i, j), islapec computes a solution sf(i, j) to
 !     the following helmhotz equation :
 !
 !           2                2
-!     [d(sf(i,j))/dlambda /sint + d(sint*d(sf(i,j))/dtheta)/dtheta]/sint
+!     [d(sf(i, j))/dlambda /sint + d(sint*d(sf(i, j))/dtheta)/dtheta]/sint
 !
-!                   - xlmbda * sf(i,j) = slap(i,j)
+!                   - xlmbda * sf(i, j) = slap(i, j)
 !
-!      where sf(i,j) is computed at colatitude
+!      where sf(i, j) is computed at colatitude
 !
 !                 theta(i) = (i-1)*pi/(nlat-1)
 !
@@ -62,7 +62,7 @@
 !
 !                 lambda(j) = (j-1)*2*pi/nlon
 !
-!            for i=1,...,nlat and j=1,...,nlon.
+!            for i=1, ..., nlat and j=1, ..., nlon.
 !
 !
 !     input parameters
@@ -90,32 +90,32 @@
 !
 !            = 0  no symmetries exist in slap about the equator. scalar
 !                 synthesis is used to compute sf on the entire sphere.
-!                 i.e., in the array sf(i,j) for i=1,...,nlat and
-!                 j=1,...,nlon.
+!                 i.e., in the array sf(i, j) for i=1, ..., nlat and
+!                 j=1, ..., nlon.
 !
 !           = 1  sf and slap are antisymmetric about the equator. the
 !                synthesis used to compute sf is performed on the
-!                northern hemisphere only.  if nlat is odd, sf(i,j) is
-!                computed for i=1,...,(nlat+1)/2 and j=1,...,nlon.  if
-!                nlat is even, sf(i,j) is computed for i=1,...,nlat/2
-!                and j=1,...,nlon.
+!                northern hemisphere only.  if nlat is odd, sf(i, j) is
+!                computed for i=1, ..., (nlat+1)/2 and j=1, ..., nlon.  if
+!                nlat is even, sf(i, j) is computed for i=1, ..., nlat/2
+!                and j=1, ..., nlon.
 !
 !
 !           = 2  sf and slap are symmetric about the equator. the
 !                synthesis used to compute sf is performed on the
-!                northern hemisphere only.  if nlat is odd, sf(i,j) is
-!                computed for i=1,...,(nlat+1)/2 and j=1,...,nlon.  if
-!                nlat is even, sf(i,j) is computed for i=1,...,nlat/2
-!                and j=1,...,nlon.
+!                northern hemisphere only.  if nlat is odd, sf(i, j) is
+!                computed for i=1, ..., (nlat+1)/2 and j=1, ..., nlon.  if
+!                nlat is even, sf(i, j) is computed for i=1, ..., nlat/2
+!                and j=1, ..., nlon.
 !
 !
 !   nt       the number of solutions. in the program that calls islapec
-!            the arrays sf,a, and b can be three dimensional in which
+!            the arrays sf, a, and b can be three dimensional in which
 !            case multiple solutions are computed. the third index
-!            is the solution index with values k=1,...,nt.
+!            is the solution index with values k=1, ..., nt.
 !            for a single solution set nt=1. the description of the
 !            remaining parameters is simplified by assuming that nt=1
-!            and sf,a,b are two dimensional.
+!            and sf, a, b are two dimensional.
 !
 !   xlmbda   a one dimensional array with nt elements. if xlmbda is
 !            is identically zero islapec solves poisson's equation.
@@ -134,22 +134,22 @@
 !            program that calls islapec. jds must be at least nlon.
 !
 !
-!   a,b      two or three dimensional arrays (see input parameter nt)
+!   a, b      two or three dimensional arrays (see input parameter nt)
 !            that contain scalar spherical harmonic coefficients
-!            of the scalar field slap. a,b must be computed by shaec
+!            of the scalar field slap. a, b must be computed by shaec
 !            prior to calling islapec.
 !
 !
 !   mdab     the first dimension of the arrays a and b as it appears
 !            in the program that calls islapec.  mdab must be at
-!            least min(nlat,(nlon+2)/2) if nlon is even or at least
-!            min(nlat,(nlon+1)/2) if nlon is odd.
+!            least min(nlat, (nlon+2)/2) if nlon is even or at least
+!            min(nlat, (nlon+1)/2) if nlon is odd.
 !
 !   ndab     the second dimension of the arrays a and b as it appears
 !            in the program that calls islapec. ndab must be at least
 !            least nlat.
 !
-!            mdab,ndab should have the same values input to shaec to
+!            mdab, ndab should have the same values input to shaec to
 !            compute the coefficients a and b.
 !
 !
@@ -161,8 +161,8 @@
 !   lshsec   the dimension of the array wshsec as it appears in the
 !            program that calls islapec.  let
 !
-!               l1 = min(nlat,(nlon+2)/2) if nlon is even or
-!               l1 = min(nlat,(nlon+1)/2) if nlon is odd
+!               l1 = min(nlat, (nlon+2)/2) if nlon is even or
+!               l1 = min(nlat, (nlon+1)/2) if nlon is odd
 !
 !            and
 !
@@ -181,16 +181,16 @@
 !
 !               l2 = nlat/2                    if nlat is even or
 !               l2 = (nlat+1)/2                if nlat is odd
-!               l1 = min(nlat,(nlon+2)/2) if nlon is even or
-!               l1 = min(nlat,(nlon+1)/2) if nlon is odd
+!               l1 = min(nlat, (nlon+2)/2) if nlon is even or
+!               l1 = min(nlat, (nlon+1)/2) if nlon is odd
 !
 !            if isym = 0 let
 !
-!               lwkmin = nlat*(2*nt*nlon+max(6*l2,nlon)+2*nt*l1+1).
+!               lwkmin = nlat*(2*nt*nlon+max(6*l2, nlon)+2*nt*l1+1).
 !
 !            if isym > 0 let
 !
-!               lwkmin = l2*(2*nt*nlon+max(6*nlat,nlon))+nlat*(2*nt*l1+1)
+!               lwkmin = l2*(2*nt*nlon+max(6*nlat, nlon))+nlat*(2*nt*l1+1)
 !
 !
 !     then lwork must be greater than or equal to lwkmin (see ierror=10)
@@ -202,7 +202,7 @@
 !
 !    sf      two or three dimensional arrays (see input parameter nt)
 !            that contain the solution to either the helmholtz 
-!            (xlmbda>0.0) or poisson's equation. sf(i,j) is computed
+!            (xlmbda>0.0) or poisson's equation. sf(i, j) is computed
 !            at colatitude
 !
 !                 theta(i) = (i-1)*pi/(nlat-1)
@@ -211,17 +211,17 @@
 !
 !                 lambda(j) = (j-1)*2*pi/nlon
 !
-!            for i=1,...,nlat and j=1,...,nlon.
+!            for i=1, ..., nlat and j=1, ..., nlon.
 !
 !   pertrb  a one dimensional array with nt elements (see input 
 !           parameter nt). in the discription that follows we assume 
 !           that nt=1. if xlmbda > 0.0 then pertrb=0.0 is always 
 !           returned because the helmholtz operator is invertible.
-!           if xlmbda = 0.0 then a solution exists only if a(1,1)
-!           is zero. islapec sets a(1,1) to zero. the resulting
-!           solution sf(i,j) solves poisson's equation with
-!           pertrb = a(1,1)/(2.*sqrt(2.)) subtracted from the
-!           right side slap(i,j).
+!           if xlmbda = 0.0 then a solution exists only if a(1, 1)
+!           is zero. islapec sets a(1, 1) to zero. the resulting
+!           solution sf(i, j) solves poisson's equation with
+!           pertrb = a(1, 1)/(2.*sqrt(2.)) subtracted from the
+!           right side slap(i, j).
 !
 !
 !  ierror   a parameter which flags errors in input parameters as follows:
@@ -259,10 +259,10 @@
 !
 
 
-subroutine islapec(nlat,nlon,isym,nt,xlmbda,sf,ids,jds,a,b, &
-    mdab,ndab,wshsec,lshsec,work,lwork,pertrb,ierror)
-    dimension sf(ids,jds,nt),a(mdab,ndab,nt),b(mdab,ndab,nt)
-    dimension wshsec(lshsec),work(lwork),pertrb(nt),xlmbda(nt)
+subroutine islapec(nlat, nlon, isym, nt, xlmbda, sf, ids, jds, a, b, &
+    mdab, ndab, wshsec, lshsec, work, lwork, pertrb, ierror)
+    dimension sf(ids, jds, nt), a(mdab, ndab, nt), b(mdab, ndab, nt)
+    dimension wshsec(lshsec), work(lwork), pertrb(nt), xlmbda(nt)
     !
     !     check input parameters
     !
@@ -281,7 +281,7 @@ subroutine islapec(nlat,nlon,isym,nt,xlmbda,sf,ids,jds,a,b, &
     ierror = 6
     if(jds < nlon) return
     ierror = 7
-    mmax = min(nlat,nlon/2+1)
+    mmax = min(nlat, nlon/2+1)
     if(mdab < mmax) return
     ierror = 8
     if(ndab < nlat) return
@@ -290,7 +290,7 @@ subroutine islapec(nlat,nlon,isym,nt,xlmbda,sf,ids,jds,a,b, &
     !     set and verify saved work space length
     !
     !
-    l1 = min(nlat,(nlon+2)/2)
+    l1 = min(nlat, (nlon+2)/2)
     l2 = (nlat+1)/2
     lwmin = 2*nlat*l2+3*((l1-2)*(nlat+nlat-l1-1))/2+nlon+15
     if(lshsec < lwmin) return
@@ -305,18 +305,18 @@ subroutine islapec(nlat,nlon,isym,nt,xlmbda,sf,ids,jds,a,b, &
     !     lwmin = nln+ls*nlon+2*mn+nlat
     !     if (lwork .lt. lwmin) return
     l2 = (nlat+1)/2
-    l1 = min(nlat,nlon/2+1)
+    l1 = min(nlat, nlon/2+1)
     if (isym == 0) then
-        lwkmin = nlat*(2*nt*nlon+max(6*l2,nlon)+2*nt*l1+1)
+        lwkmin = nlat*(2*nt*nlon+max(6*l2, nlon)+2*nt*l1+1)
     else
-        lwkmin = l2*(2*nt*nlon+max(6*nlat,nlon))+nlat*(2*nt*l1+1)
+        lwkmin = l2*(2*nt*nlon+max(6*nlat, nlon))+nlat*(2*nt*l1+1)
     end if
     if (lwork < lwkmin) return
     ierror = 0
     !
     !     check sign of xlmbda
     !
-    do  k=1,nt
+    do  k=1, nt
         if (xlmbda(k)<0.0) then
             ierror = -1
         end if
@@ -329,44 +329,44 @@ subroutine islapec(nlat,nlon,isym,nt,xlmbda,sf,ids,jds,a,b, &
     ifn = ib+mn
     iwk = ifn+nlat
     lwk = lwork-2*mn-nlat
-    call islpec1(nlat,nlon,isym,nt,xlmbda,sf,ids,jds,a,b,mdab,ndab, &
-        work(ia),work(ib),mmax,work(ifn),wshsec,lshsec,work(iwk),lwk, &
-        pertrb,ierror)
+    call islpec1(nlat, nlon, isym, nt, xlmbda, sf, ids, jds, a, b, mdab, ndab, &
+        work(ia), work(ib), mmax, work(ifn), wshsec, lshsec, work(iwk), lwk, &
+        pertrb, ierror)
     return
 end subroutine islapec
 
-subroutine islpec1(nlat,nlon,isym,nt,xlmbda,sf,ids,jds,a,b, &
-    mdab,ndab,as,bs,mmax,fnn,wshsec,lshsec,wk,lwk,pertrb,ierror)
-    dimension sf(ids,jds,nt),a(mdab,ndab,nt),b(mdab,ndab,nt)
-    dimension as(mmax,nlat,nt),bs(mmax,nlat,nt),fnn(nlat)
-    dimension wshsec(lshsec),wk(lwk),pertrb(nt),xlmbda(nt)
+subroutine islpec1(nlat, nlon, isym, nt, xlmbda, sf, ids, jds, a, b, &
+    mdab, ndab, as, bs, mmax, fnn, wshsec, lshsec, wk, lwk, pertrb, ierror)
+    dimension sf(ids, jds, nt), a(mdab, ndab, nt), b(mdab, ndab, nt)
+    dimension as(mmax, nlat, nt), bs(mmax, nlat, nt), fnn(nlat)
+    dimension wshsec(lshsec), wk(lwk), pertrb(nt), xlmbda(nt)
     !
     !     set multipliers and preset synthesis coefficients to zero
     !
-    do n=1,nlat
+    do n=1, nlat
         fn = real(n-1)
         fnn(n) = fn*(fn+1.0)
-        do m=1,mmax
-            do k=1,nt
-                as(m,n,k) = 0.0
-                bs(m,n,k) = 0.0
+        do m=1, mmax
+            do k=1, nt
+                as(m, n, k) = 0.0
+                bs(m, n, k) = 0.0
             end do
         end do
     end do
 
-    do k=1,nt
+    do k=1, nt
             !
             !     compute synthesis coefficients for xlmbda zero or nonzero
             !
         if (xlmbda(k) == 0.0) then
-            do n=2,nlat
-                as(1,n,k) = -a(1,n,k)/fnn(n)
-                bs(1,n,k) = -b(1,n,k)/fnn(n)
+            do n=2, nlat
+                as(1, n, k) = -a(1, n, k)/fnn(n)
+                bs(1, n, k) = -b(1, n, k)/fnn(n)
             end do
-            do m=2,mmax
-                do n=m,nlat
-                    as(m,n,k) = -a(m,n,k)/fnn(n)
-                    bs(m,n,k) = -b(m,n,k)/fnn(n)
+            do m=2, mmax
+                do n=m, nlat
+                    as(m, n, k) = -a(m, n, k)/fnn(n)
+                    bs(m, n, k) = -b(m, n, k)/fnn(n)
                 end do
             end do
         else
@@ -375,22 +375,22 @@ subroutine islpec1(nlat,nlon,isym,nt,xlmbda,sf,ids,jds,a,b, &
             !     -n*(n-1) = xlmbda(k) < 0.0  for some n
             !
             pertrb(k) = 0.0
-            do n=1,nlat
-                as(1,n,k) = -a(1,n,k)/(fnn(n)+xlmbda(k))
-                bs(1,n,k) = -b(1,n,k)/(fnn(n)+xlmbda(k))
+            do n=1, nlat
+                as(1, n, k) = -a(1, n, k)/(fnn(n)+xlmbda(k))
+                bs(1, n, k) = -b(1, n, k)/(fnn(n)+xlmbda(k))
             end do
-            do m=2,mmax
-                do n=m,nlat
-                    as(m,n,k) = -a(m,n,k)/(fnn(n)+xlmbda(k))
-                    bs(m,n,k) = -b(m,n,k)/(fnn(n)+xlmbda(k))
+            do m=2, mmax
+                do n=m, nlat
+                    as(m, n, k) = -a(m, n, k)/(fnn(n)+xlmbda(k))
+                    bs(m, n, k) = -b(m, n, k)/(fnn(n)+xlmbda(k))
                 end do
             end do
         end if
     end do
     !
-    !     synthesize as,bs into sf
+    !     synthesize as, bs into sf
     !
-    call shsec(nlat,nlon,isym,nt,sf,ids,jds,as,bs,mmax,nlat, &
-        wshsec,lshsec,wk,lwk,ierror)
+    call shsec(nlat, nlon, isym, nt, sf, ids, jds, as, bs, mmax, nlat, &
+        wshsec, lshsec, wk, lwk, ierror)
     return
 end subroutine islpec1

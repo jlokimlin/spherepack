@@ -38,20 +38,20 @@
 !
 ! ... files which must be loaded with ivrtes.f
 !
-!     sphcom.f, hrfft.f, vhses.f,shaes.f
+!     sphcom.f, hrfft.f, vhses.f, shaes.f
 !
 !
-!     subroutine ivrtes(nlat,nlon,isym,nt,v,w,idvw,jdvw,a,b,mdab,ndab,
-!    +                  wvhses,lvhses,work,lwork,pertrb,ierror)
+!     subroutine ivrtes(nlat, nlon, isym, nt, v, w, idvw, jdvw, a, b, mdab, ndab, 
+!    +                  wvhses, lvhses, work, lwork, pertrb, ierror)
 !
 !     given the scalar spherical harmonic coefficients a and b, precomputed
 !     by subroutine shaes for a scalar array vort, subroutine ivrtes computes
-!     a divergence free vector field (v,w) whose vorticity is vort - pertrb.
+!     a divergence free vector field (v, w) whose vorticity is vort - pertrb.
 !     w is the east longitude component and v is the colatitudinal component.
-!     pertrb is a constant which must be subtracted from vort for (v,w) to
+!     pertrb is a constant which must be subtracted from vort for (v, w) to
 !     exist (see the description of pertrb below).  usually pertrb is zero
-!     or small relative to vort.  the divergence of (v,w), as computed by
-!     ivrtes, is the zero scalar field.  i.e., v(i,j) and w(i,j) are the
+!     or small relative to vort.  the divergence of (v, w), as computed by
+!     ivrtes, is the zero scalar field.  i.e., v(i, j) and w(i, j) are the
 !     colaatitudinal and east longitude velocity components at colatitude
 !
 !            theta(i) = (i-1)*pi/(nlat-1)
@@ -62,15 +62,15 @@
 !
 !     the
 !
-!            vorticity(v(i,j),w(i,j))
+!            vorticity(v(i, j), w(i, j))
 !
 !         =  [-dv/dlambda + d(sint*w)/dtheta]/sint
 !
-!         =  vort(i,j) - pertrb
+!         =  vort(i, j) - pertrb
 !
 !     and
 !
-!            divergence(v(i,j),w(i,j))
+!            divergence(v(i, j), w(i, j))
 !
 !         =  [d(sint*v)/dtheta + dw/dlambda]/sint
 !
@@ -102,64 +102,64 @@
 !
 !     isym   this has the same value as the isym that was input to
 !            subroutine shaes to compute the arrays a and b.  isym
-!            determines whether (v,w) are computed on the full or half
+!            determines whether (v, w) are computed on the full or half
 !            sphere as follows:
 !
 !      = 0
 !            vort is not symmetric about the equator. in this case
-!            the vector field (v,w) is computed on the entire sphere.
-!            i.e., in the arrays  v(i,j),w(i,j) for i=1,...,nlat and
-!            j=1,...,nlon.
+!            the vector field (v, w) is computed on the entire sphere.
+!            i.e., in the arrays  v(i, j), w(i, j) for i=1, ..., nlat and
+!            j=1, ..., nlon.
 !
 !      = 1
 !
 !            vort is symmetric about the equator. in this case w is
 !            antiymmetric and v is symmetric about the equator. v
-!            and w are computed on the northern hemisphere only.  i.e.,
-!            if nlat is odd they are computed for i=1,...,(nlat+1)/2
-!            and j=1,...,nlon.  if nlat is even they are computed for
-!            i=1,...,nlat/2 and j=1,...,nlon.
+!            and w are computed on the northern hemisphere only.  i.e., 
+!            if nlat is odd they are computed for i=1, ..., (nlat+1)/2
+!            and j=1, ..., nlon.  if nlat is even they are computed for
+!            i=1, ..., nlat/2 and j=1, ..., nlon.
 !
 !       = 2
 !
 !            vort is antisymmetric about the equator. in this case w is
 !            symmetric and v is antisymmetric about the equator. w
-!            and v are computed on the northern hemisphere only.  i.e.,
-!            if nlat is odd they are computed for i=1,...,(nlat+1)/2
-!            and j=1,...,nlon.  if nlat is even they are computed for
-!            i=1,...,nlat/2 and j=1,...,nlon.
+!            and v are computed on the northern hemisphere only.  i.e., 
+!            if nlat is odd they are computed for i=1, ..., (nlat+1)/2
+!            and j=1, ..., nlon.  if nlat is even they are computed for
+!            i=1, ..., nlat/2 and j=1, ..., nlon.
 !
 !
 !     nt     in the program that calls ivrtes, nt is the number of vorticity
 !            and vector fields.  some computational efficiency is obtained
-!            for multiple fields.  the arrays a,b,v, and w can be three
+!            for multiple fields.  the arrays a, b, v, and w can be three
 !            dimensional and pertrb can be one dimensional corresponding
 !            to an indexed multiple array vort.  in this case, multiple vector
 !            synthesis will be performed to compute each vector field.  the
-!            third index for a,b,v,w and first for pertrb is the synthesis
-!            index which assumes the values k=1,...,nt.  for a single
+!            third index for a, b, v, w and first for pertrb is the synthesis
+!            index which assumes the values k=1, ..., nt.  for a single
 !            synthesis set nt=1. the description of the remaining parameters
-!            is simplified by assuming that nt=1 or that a,b,v,w are two
+!            is simplified by assuming that nt=1 or that a, b, v, w are two
 !            dimensional and pertrb is a constant.
 !
-!     idvw   the first dimension of the arrays v,w as it appears in
+!     idvw   the first dimension of the arrays v, w as it appears in
 !            the program that calls ivrtes. if isym = 0 then idvw
 !            must be at least nlat.  if isym = 1 or 2 and nlat is
 !            even then idvw must be at least nlat/2. if isym = 1 or 2
 !            and nlat is odd then idvw must be at least (nlat+1)/2.
 !
-!     jdvw   the second dimension of the arrays v,w as it appears in
+!     jdvw   the second dimension of the arrays v, w as it appears in
 !            the program that calls ivrtes. jdvw must be at least nlon.
 !
-!     a,b    two or three dimensional arrays (see input parameter nt)
+!     a, b    two or three dimensional arrays (see input parameter nt)
 !            that contain scalar spherical harmonic coefficients
 !            of the vorticity array vort as computed by subroutine shaes.
-!     ***    a,b must be computed by shaes prior to calling ivrtes.
+!     ***    a, b must be computed by shaes prior to calling ivrtes.
 !
 !     mdab   the first dimension of the arrays a and b as it appears in
 !            the program that calls ivrtes (and shaes). mdab must be at
-!            least min(nlat,(nlon+2)/2) if nlon is even or at least
-!            min(nlat,(nlon+1)/2) if nlon is odd.
+!            least min(nlat, (nlon+2)/2) if nlon is even or at least
+!            min(nlat, (nlon+1)/2) if nlon is odd.
 !
 !     ndab   the second dimension of the arrays a and b as it appears in
 !            the program that calls ivrtes (and shaes). ndab must be at
@@ -176,8 +176,8 @@
 !  lvhses    the dimension of the array wvhses as it appears in the
 !            program that calls ivrtes. define
 !
-!               l1 = min(nlat,nlon/2) if nlon is even or
-!               l1 = min(nlat,(nlon+1)/2) if nlon is odd
+!               l1 = min(nlat, nlon/2) if nlon is even or
+!               l1 = min(nlat, (nlon+1)/2) if nlon is odd
 !
 !            and
 !
@@ -196,8 +196,8 @@
 !
 !               l2 = nlat/2                    if nlat is even or
 !               l2 = (nlat+1)/2                if nlat is odd
-!               l1 = min(nlat,nlon/2)         if nlon is even or
-!               l1 = min(nlat,(nlon+1)/2)     if nlon is odd
+!               l1 = min(nlat, nlon/2)         if nlon is even or
+!               l1 = min(nlat, (nlon+1)/2)     if nlon is odd
 !
 !            if isym = 0 then lwork must be at least
 !
@@ -212,26 +212,26 @@
 !     output parameters
 !
 !
-!     v,w   two or three dimensional arrays (see input parameter nt) that
+!     v, w   two or three dimensional arrays (see input parameter nt) that
 !           contain a divergence free vector field whose vorticity is
 !           vort - pertrb at the lattitude point theta(i)=pi/2-(i-1)*pi/(nlat-1)
 !           and longitude point lambda(j)=(j-1)*2*pi/nlon.  w is the east
 !           longitude component and v is the colatitudinal component.  the
 !           indices for v and w are defined at the input parameter isym.
-!           the divergence of (v,w) is the zero scalar field.
+!           the divergence of (v, w) is the zero scalar field.
 !
 !   pertrb  a nt dimensional array (see input parameter nt and assume nt=1
 !           for the description that follows).  vort - pertrb is a scalar
-!           field which can be the vorticity of a vector field (v,w).
-!           pertrb is related to the scalar harmonic coefficients a,b
+!           field which can be the vorticity of a vector field (v, w).
+!           pertrb is related to the scalar harmonic coefficients a, b
 !           of vort (computed by shaes) by the formula
 !
-!                pertrb = a(1,1)/(2.*sqrt(2.))
+!                pertrb = a(1, 1)/(2.*sqrt(2.))
 !
 !           an unperturbed vort can be the vorticity of a vector field
-!           only if a(1,1) is zero.  if a(1,1) is nonzero (flagged by
+!           only if a(1, 1) is zero.  if a(1, 1) is nonzero (flagged by
 !           pertrb nonzero) then subtracting pertrb from vort yields a
-!           scalar field for which a(1,1) is zero.
+!           scalar field for which a(1, 1) is zero.
 !
 !    ierror = 0  no errors
 !           = 1  error in the specification of nlat
@@ -247,11 +247,11 @@
 ! **********************************************************************
 !                                                                              
 !   
-subroutine ivrtes(nlat,nlon,isym,nt,v,w,idvw,jdvw,a,b,mdab,ndab, &
-                  wvhses,lvhses,work,lwork,pertrb,ierror)
-dimension v(idvw,jdvw,nt),w(idvw,jdvw,nt),pertrb(nt)
-dimension a(mdab,ndab,nt),b(mdab,ndab,nt)
-dimension wvhses(lvhses),work(lwork)
+subroutine ivrtes(nlat, nlon, isym, nt, v, w, idvw, jdvw, a, b, mdab, ndab, &
+                  wvhses, lvhses, work, lwork, pertrb, ierror)
+dimension v(idvw, jdvw, nt), w(idvw, jdvw, nt), pertrb(nt)
+dimension a(mdab, ndab, nt), b(mdab, ndab, nt)
+dimension wvhses(lvhses), work(lwork)
 !
 !     check input parameters
 !
@@ -270,14 +270,14 @@ if((isym==0 .and. idvw<nlat) .or. &
 ierror = 6
 if(jdvw < nlon) return
 ierror = 7
-mmax = min(nlat,(nlon+1)/2)
-if(mdab < min(nlat,(nlon+2)/2)) return
+mmax = min(nlat, (nlon+1)/2)
+if(mdab < min(nlat, (nlon+2)/2)) return
 ierror = 8
 if(ndab < nlat) return
 ierror = 9
 lzz1 = 2*nlat*imid
-labc = 3*(max(mmax-2,0)*(nlat+nlat-mmax-1))/2
-l1 = min(nlat,(nlon+2)/2)
+labc = 3*(max(mmax-2, 0)*(nlat+nlat-mmax-1))/2
+l1 = min(nlat, (nlon+2)/2)
 l2 = (nlat+1)/2
 lwmin = (l1*l2*(nlat+nlat-l1+1))/2+nlon+15
 ierror = 10
@@ -286,9 +286,9 @@ ierror = 10
 !
 mn = mmax*nlat*nt
 if(isym/=0  .and. lwork < &
-nlat*(2*nt*nlon+max(6*imid,nlon))+2*mn+nlat) return
+nlat*(2*nt*nlon+max(6*imid, nlon))+2*mn+nlat) return
 if(isym==0  .and. lwork < &
-imid*(2*nt*nlon+max(6*nlat,nlon))+2*mn+nlat) return
+imid*(2*nt*nlon+max(6*nlat, nlon))+2*mn+nlat) return
 ierror = 0
 !
 !     set work space pointers
@@ -298,56 +298,56 @@ ici = icr + mn
 is = ici + mn
 iwk = is + nlat
 liwk = lwork-2*mn-nlat
-call ivtes1(nlat,nlon,isym,nt,v,w,idvw,jdvw,work(icr),work(ici), &
-            mmax,work(is),mdab,ndab,a,b,wvhses,lvhses,work(iwk), &
-            liwk,pertrb,ierror)
+call ivtes1(nlat, nlon, isym, nt, v, w, idvw, jdvw, work(icr), work(ici), &
+            mmax, work(is), mdab, ndab, a, b, wvhses, lvhses, work(iwk), &
+            liwk, pertrb, ierror)
 return
 end subroutine ivrtes
 
-subroutine ivtes1(nlat,nlon,isym,nt,v,w,idvw,jdvw,cr,ci,mmax, &
-sqnn,mdab,ndab,a,b,wsav,lwsav,wk,lwk,pertrb,ierror)
-dimension v(idvw,jdvw,nt),w(idvw,jdvw,nt),pertrb(nt)
-dimension cr(mmax,nlat,nt),ci(mmax,nlat,nt),sqnn(nlat)
-dimension a(mdab,ndab,nt),b(mdab,ndab,nt)
-dimension wsav(lwsav),wk(lwk)
+subroutine ivtes1(nlat, nlon, isym, nt, v, w, idvw, jdvw, cr, ci, mmax, &
+sqnn, mdab, ndab, a, b, wsav, lwsav, wk, lwk, pertrb, ierror)
+dimension v(idvw, jdvw, nt), w(idvw, jdvw, nt), pertrb(nt)
+dimension cr(mmax, nlat, nt), ci(mmax, nlat, nt), sqnn(nlat)
+dimension a(mdab, ndab, nt), b(mdab, ndab, nt)
+dimension wsav(lwsav), wk(lwk)
 !
 !     preset coefficient multiplyers in vector
 !
-do 1 n=2,nlat
+do 1 n=2, nlat
 fn = real(n-1)
 sqnn(n) = sqrt(fn*(fn+1.))
 1 continue
 !
 !     compute multiple vector fields coefficients
 !
-do 2 k=1,nt
+do 2 k=1, nt
 !
 !     set vorticity field perturbation adjustment
 !
-pertrb(k) = a(1,1,k)/(2.*sqrt(2.))
+pertrb(k) = a(1, 1, k)/(2.*sqrt(2.))
 !
-!     preset br,bi to 0.0
+!     preset br, bi to 0.0
 !
-do 3 n=1,nlat
-do 4 m=1,mmax
-cr(m,n,k) = 0.0
-ci(m,n,k) = 0.0
+do 3 n=1, nlat
+do 4 m=1, mmax
+cr(m, n, k) = 0.0
+ci(m, n, k) = 0.0
 4 continue
 3 continue
 !
 !     compute m=0 coefficients
 !
-do 5 n=2,nlat
-cr(1,n,k) = a(1,n,k)/sqnn(n)
-ci(1,n,k) = b(1,n,k)/sqnn(n)
+do 5 n=2, nlat
+cr(1, n, k) = a(1, n, k)/sqnn(n)
+ci(1, n, k) = b(1, n, k)/sqnn(n)
 5 continue
 !
 !     compute m>0 coefficients
 !
-do 6 m=2,mmax
-do 7 n=m,nlat
-cr(m,n,k) = a(m,n,k)/sqnn(n)
-ci(m,n,k) = b(m,n,k)/sqnn(n)
+do 6 m=2, mmax
+do 7 n=m, nlat
+cr(m, n, k) = a(m, n, k)/sqnn(n)
+ci(m, n, k) = b(m, n, k)/sqnn(n)
 7 continue
 6 continue
 2 continue
@@ -362,9 +362,9 @@ else if (isym==2) then
 ityp = 8
 end if
 !
-!     vector sythesize cr,ci into divergence free vector field (v,w)
+!     vector sythesize cr, ci into divergence free vector field (v, w)
 !
-call vhses(nlat,nlon,ityp,nt,v,w,idvw,jdvw,br,bi,cr,ci, &
-           mmax,nlat,wsav,lwsav,wk,lwk,ierror)
+call vhses(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
+           mmax, nlat, wsav, lwsav, wk, lwk, ierror)
 return
 end subroutine ivtes1

@@ -93,7 +93,7 @@ module type_Sphere
             ! Dictionary: calling arguments
             !----------------------------------------------------------------------
             class (Sphere), intent (in out) :: this
-            real (wp),      intent (in)     :: scalar_function(:,:)
+            real (wp),      intent (in)     :: scalar_function(:, :)
             !----------------------------------------------------------------------
         end subroutine scalar_analysis
     end interface
@@ -106,7 +106,7 @@ module type_Sphere
             ! Dictionary: calling arguments
             !----------------------------------------------------------------------
             class (Sphere), intent (in out) :: this
-            real (wp),      intent (out)    :: scalar_function(:,:)
+            real (wp),      intent (out)    :: scalar_function(:, :)
             !----------------------------------------------------------------------
         end subroutine scalar_synthesis
     end interface
@@ -119,8 +119,8 @@ module type_Sphere
             ! Dictionary: calling arguments
             !----------------------------------------------------------------------
             class (Sphere), intent (in out) :: this
-            real (wp),      intent (in)     :: polar_component(:,:)
-            real (wp),      intent (in)     :: azimuthal_component(:,:)
+            real (wp),      intent (in)     :: polar_component(:, :)
+            real (wp),      intent (in)     :: azimuthal_component(:, :)
             !----------------------------------------------------------------------
         end subroutine vector_analysis
     end interface
@@ -132,8 +132,8 @@ module type_Sphere
             ! Dictionary: calling arguments
             !----------------------------------------------------------------------
             class (Sphere), intent (in out) :: this
-            real (wp),      intent (out)    :: polar_component(:,:)
-            real (wp),      intent (out)    :: azimuthal_component(:,:)
+            real (wp),      intent (out)    :: polar_component(:, :)
+            real (wp),      intent (out)    :: azimuthal_component(:, :)
             !----------------------------------------------------------------------
         end subroutine vector_synthesis
     end interface
@@ -204,7 +204,7 @@ contains
                 ilap(1) = 0.0_wp
                 ilap(2:nm_dim) = 1.0_wp/lap(2:nm_dim)
                 ! Set vorticity and divergence coefficients
-                sqnn = [ (sqrt(real((n - 1) * n,kind=wp)/rsphere), n=1, nlat) ]
+                sqnn = [ (sqrt(real((n - 1) * n, kind=wp)/rsphere), n=1, nlat) ]
             end associate
         end associate
 
@@ -279,10 +279,10 @@ contains
         ! spherical harmonic coefficients (psi).
         !
         ! The spectral data is assumed to be in a complex array of dimension
-        ! (mtrunc+1)*(mtrunc+2)/2, whre mtrunc is the triangular truncation limit,
+        ! (mtrunc+1)*(mtrunc+2)/2, whre mtrunc is the triangular truncation limit, 
         ! for instance, mtrunc = 42 for T42.
         ! mtrunc must be <= nlat-1.
-        ! Coefficients are ordered so that first (nm=1) is m=0, n=0, second is m=0, n=1,
+        ! Coefficients are ordered so that first (nm=1) is m=0, n=0, second is m=0, n=1, 
         ! nm=mtrunc is m=0, n=mtrunc, nm=mtrunc+1 is m=1, n=1, etc.
         !
         ! In modern Fortran syntax, values of m (degree) and n (order) as a function
@@ -299,7 +299,7 @@ contains
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
         class (Sphere), intent (in out)  :: this
-        real (wp),      intent (in)      :: scalar_function(:,:)
+        real (wp),      intent (in)      :: scalar_function(:, :)
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
@@ -341,7 +341,7 @@ contains
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
         class (Sphere), intent (in out)  :: this
-        real (wp),      intent (out)     :: scalar_function(:,:)
+        real (wp),      intent (out)     :: scalar_function(:, :)
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
@@ -369,7 +369,7 @@ contains
             do m = 0, ntrunc
                 do n = m, ntrunc
                     ! set the spectral index
-                    associate( nm => sum ([(i,i=ntrunc+1, ntrunc-m+2, -1)]) + n-m+1 )
+                    associate( nm => sum ([(i, i=ntrunc+1, ntrunc-m+2, -1)]) + n-m+1 )
                         ! set the real component
                         a( m+1, n+1 ) = 2.0_wp * real( psi(nm) )
                         ! set the imaginary component
@@ -391,7 +391,7 @@ contains
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
         class (Sphere), intent (in out)  :: this
-        real (wp),      intent (in)      :: scalar_function(:,:)
+        real (wp),      intent (in)      :: scalar_function(:, :)
         complex (wp),   intent (out)     :: spectral_coefficients(:)
         !----------------------------------------------------------------------
 
@@ -417,7 +417,7 @@ contains
         !----------------------------------------------------------------------
         class (Sphere), intent (in out)  :: this
         complex (wp),   intent (in)      :: spectral_coefficients(:)
-        real (wp),      intent (out)     :: scalar_function(:,:)
+        real (wp),      intent (out)     :: scalar_function(:, :)
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
@@ -445,7 +445,7 @@ contains
             do m = 0, ntrunc
                 do n = m, ntrunc
                      ! set the spectral index
-                    associate( nm => sum ([(i,i=ntrunc+1, ntrunc-m+2, -1)]) + n-m+1 )
+                    associate( nm => sum ([(i, i=ntrunc+1, ntrunc-m+2, -1)]) + n-m+1 )
                         ! set the real component
                         a(m + 1, n + 1) = 2.0_wp * real( psi(nm) )
                         ! set the imaginary component
@@ -468,13 +468,13 @@ contains
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
         class (Sphere), intent (in out) :: this
-        real (wp),      intent (in)     :: vector_field(:,:,:)
+        real (wp),      intent (in)     :: vector_field(:, :, :)
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
         integer (ip)           :: error_flag
-        real (wp), allocatable :: polar_component(:,:)
-        real (wp), allocatable :: azimuthal_component(:,:)
+        real (wp), allocatable :: polar_component(:, :)
+        real (wp), allocatable :: azimuthal_component(:, :)
         !----------------------------------------------------------------------
 
         ! Check if object is usable
@@ -517,8 +517,8 @@ contains
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
         class (Sphere), intent (in out) :: this
-        real (wp),      intent (in)     :: scalar_function(:,:)
-        real (wp),      intent (out)    :: scalar_laplacian(:,:)
+        real (wp),      intent (in)     :: scalar_function(:, :)
+        real (wp),      intent (out)    :: scalar_laplacian(:, :)
         !----------------------------------------------------------------------
 
         ! Check if object is usable
@@ -550,8 +550,8 @@ contains
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
         class (Sphere), intent (in out) :: this
-        real (wp),      intent (in)     :: source(:,:)
-        real (wp),      intent (out)    :: solution(:,:)
+        real (wp),      intent (in)     :: source(:, :)
+        real (wp),      intent (out)    :: solution(:, :)
         !----------------------------------------------------------------------
 
         ! Check if object is usable
@@ -583,8 +583,8 @@ contains
         !----------------------------------------------------------------------
         class (Sphere), target, intent (in out) :: this
         real (wp),      intent (in)     :: helmholtz_constant
-        real (wp),      intent (in)     :: source(:,:)
-        real (wp),      intent (out)    :: solution(:,:)
+        real (wp),      intent (in)     :: source(:, :)
+        real (wp),      intent (out)    :: solution(:, :)
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
@@ -644,9 +644,9 @@ contains
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
         class (Sphere), intent (in out) :: this
-        real (wp),      intent (in)     :: scalar_function(:,:)
-        real (wp),      intent (out)    :: polar_gradient_component(:,:)
-        real (wp),      intent (out)    :: azimuthal_gradient_component(:,:)
+        real (wp),      intent (in)     :: scalar_function(:, :)
+        real (wp),      intent (out)    :: polar_gradient_component(:, :)
+        real (wp),      intent (out)    :: azimuthal_gradient_component(:, :)
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
@@ -681,8 +681,8 @@ contains
 
             ! Set polar coefficients
             do n=1, nlat
-                br(:,n) = a(:,n) * sqnn(n)
-                bi(:,n) = b(:,n) * sqnn(n)
+                br(:, n) = a(:, n) * sqnn(n)
+                bi(:, n) = b(:, n) * sqnn(n)
             end do
             ! Set azimuthal coefficients
             cr = 0.0_wp
@@ -699,8 +699,8 @@ contains
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
         class (Sphere), intent (in out) :: this
-        real (wp),      intent (in)     :: source(:,:,:)
-        real (wp),      intent (out)    :: solution(:,:)
+        real (wp),      intent (in)     :: source(:, :, :)
+        real (wp),      intent (out)    :: solution(:, :)
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
@@ -750,8 +750,8 @@ contains
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
         class (Sphere), intent (in out) :: this
-        real (wp),      intent (in)     :: vector_field(:,:,:)
-        real (wp),      intent (out)    :: vorticity(:,:)
+        real (wp),      intent (in)     :: vector_field(:, :, :)
+        real (wp),      intent (out)    :: vorticity(:, :)
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
@@ -802,8 +802,8 @@ contains
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
         class (Sphere), intent (in out) :: this
-        real (wp),      intent (in)     :: source(:,:,:)
-        real (wp),      intent (out)    :: solution(:,:)
+        real (wp),      intent (in)     :: source(:, :, :)
+        real (wp),      intent (out)    :: solution(:, :)
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
@@ -837,9 +837,9 @@ contains
             ! Compute m = 0 coefficients
             do n = 1, nlat
                 ! Set real coefficients
-                cr(1,n) = a(1,n)/sqnn(n)
+                cr(1, n) = a(1, n)/sqnn(n)
                 ! Set imaginary coeffients
-                ci(1,n) = b(1,n)/sqnn(n)
+                ci(1, n) = b(1, n)/sqnn(n)
             end do
 
             ! Compute m >0 coefficients
@@ -864,8 +864,8 @@ contains
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
         class (Sphere), intent (in out) :: this
-        real (wp),      intent (in)     :: vector_field (:,:,:)
-        real (wp),      intent (out)    :: divergence (:,:)
+        real (wp),      intent (in)     :: vector_field (:, :, :)
+        real (wp),      intent (out)    :: divergence (:, :)
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
@@ -916,8 +916,8 @@ contains
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
         class (Sphere), intent (in out) :: this
-        real (wp),      intent (in)     :: source(:,:,:)
-        real (wp),      intent (out)    :: solution(:,:)
+        real (wp),      intent (in)     :: source(:, :, :)
+        real (wp),      intent (out)    :: solution(:, :)
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
@@ -951,9 +951,9 @@ contains
             ! Compute m = 0 coefficients
             do n = 1, nlat
                 ! Set real coefficients
-                br(1,n) = a(1,n)/sqnn(n)
+                br(1, n) = a(1, n)/sqnn(n)
                 ! Set imaginary coeffients
-                bi(1,n) = b(1,n)/sqnn(n)
+                bi(1, n) = b(1, n)/sqnn(n)
             end do
 
             ! Compute m >0 coefficients
@@ -979,8 +979,8 @@ contains
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
         class (Sphere),         intent (in out) :: this
-        real (wp),              intent (in)     :: polar_component(:,:)
-        real (wp),              intent (in)     :: azimuthal_component(:,:)
+        real (wp),              intent (in)     :: polar_component(:, :)
+        real (wp),              intent (in)     :: azimuthal_component(:, :)
         complex (wp),           intent (out)    :: vort_spec(:)
         complex (wp),           intent (out)    :: div_spec(:)
         !----------------------------------------------------------------------
@@ -1018,8 +1018,8 @@ contains
             b = 0.0_wp
             ! Set auxiliary coefficients for divergence
             do n = 1, nlat
-                a(:,n) = -sqnn(n) * br(:,n)
-                b(:,n) = -sqnn(n) * bi(:,n)
+                a(:, n) = -sqnn(n) * br(:, n)
+                b(:, n) = -sqnn(n) * bi(:, n)
             end do
             ! Set divergence coefficients
             div_spec = 0.5_wp * cmplx( &
@@ -1028,8 +1028,8 @@ contains
                 kind=wp )
             ! Set auxiliary coefficients for vorticity
             do n=1, nlat
-                a(:,n) = sqnn(n) * cr(:,n)
-                b(:,n) = sqnn(n) * ci(:,n)
+                a(:, n) = sqnn(n) * cr(:, n)
+                b(:, n) = sqnn(n) * ci(:, n)
             end do
             ! Set vorticity coefficients
             vort_spec = 0.5_wp * cmplx( &
@@ -1049,8 +1049,8 @@ contains
         class (Sphere), intent (in out) :: this
         complex (wp),   intent (in)     :: vort_spec(:)
         complex (wp),   intent (in)     :: div_spec(:)
-        real (wp),      intent (out)    :: polar_component(:,:)
-        real (wp),      intent (out)    :: azimuthal_component(:,:)
+        real (wp),      intent (out)    :: polar_component(:, :)
+        real (wp),      intent (out)    :: azimuthal_component(:, :)
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
@@ -1148,14 +1148,14 @@ contains
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
         class (Sphere), intent (in out) :: this
-        real (wp),      intent (in)     :: scalar_function(:,:)
-        real (wp),      intent (out)    :: angular_momentum(:,:,:)
+        real (wp),      intent (in)     :: scalar_function(:, :)
+        real (wp),      intent (out)    :: angular_momentum(:, :, :)
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
         integer (ip)           :: k, l   !! Counters
-        real (wp), allocatable :: polar_gradient_component(:,:)
-        real (wp), allocatable :: azimuthal_gradient_component(:,:)
+        real (wp), allocatable :: polar_gradient_component(:, :)
+        real (wp), allocatable :: azimuthal_gradient_component(:, :)
         !----------------------------------------------------------------------
 
         ! Check if object is usable
@@ -1219,10 +1219,10 @@ contains
         !
         ! The coefficients are ordered so that
         !
-        ! first (nm=1)  is m=0, n=0, second (nm=2) is m=0, n=1,
+        ! first (nm=1)  is m=0, n=0, second (nm=2) is m=0, n=1, 
         ! nm=MTRUNC is m=0, n=MTRUNC, nm=MTRUNC+1 is m=1, n=1, etc.
         !
-        ! In other words,
+        ! In other words, 
         !
         ! 00, 01, 02, 03, 04.........0MTRUNC
         !     11, 12, 13, 14.........1MTRUNC

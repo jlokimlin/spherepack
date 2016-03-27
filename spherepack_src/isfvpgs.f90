@@ -41,15 +41,15 @@
 !     sphcom.f, hrfft.f, vhsgs.f, shags.f, gaqd.f
 !
 !
-!     subroutine isfvpgs(nlat,nlon,isym,nt,sf,vp,idv,jdv,as,bs,av,bv,
-!    +                   mdb,ndb,wvhsgs,lvhsgs,work,lwork,ierror)
+!     subroutine isfvpgs(nlat, nlon, isym, nt, sf, vp, idv, jdv, as, bs, av, bv, 
+!    +                   mdb, ndb, wvhsgs, lvhsgs, work, lwork, ierror)
 !
-!     given the scalar spherical harmonic coefficients as,bs precomputed
-!     by shags for the scalar stream function sf and av,bv precomputed by
+!     given the scalar spherical harmonic coefficients as, bs precomputed
+!     by shags for the scalar stream function sf and av, bv precomputed by
 !     shags for the scalar velocity potenital vp, subroutine isfvpgs computes
-!     the vector field (v,w) corresponding to sf and vp.  w is the east
+!     the vector field (v, w) corresponding to sf and vp.  w is the east
 !     longitudinal and v is the colatitudinal component of the vector field.
-!     (v,w) is expressed in terms of sf,vp by the helmholtz relations (in
+!     (v, w) is expressed in terms of sf, vp by the helmholtz relations (in
 !     mathematical spherical coordinates):
 !
 !          v = -1/sin(theta)*d(vp)/dlambda + d(st)/dtheta
@@ -57,14 +57,14 @@
 !          w =  1/sin(theta)*d(st)/dlambda + d(vp)/dtheta
 !
 !     required legendre functions are stored rather than recomputed as
-!     they are in subroutine isfvpgc.  v(i,j) and w(i,j) are given at
+!     they are in subroutine isfvpgc.  v(i, j) and w(i, j) are given at
 !     the i(th) gaussian colatitude point (see gaqd) theta(i) and east
 !     longitude lambda(j) = (j-1)*2.*pi/nlon on the sphere.
 !
 !     input parameters
 !
 !     nlat   the number of points in the gaussian colatitude grid on the
-!            full sphere. these lie in the interval (0,pi) and are computed
+!            full sphere. these lie in the interval (0, pi) and are computed
 !            in radians in theta(1) <...< theta(nlat) by subroutine gaqd.
 !            if nlat is odd the equator will be included as the grid point
 !            theta((nlat+1)/2).  if nlat is even the equator will be
@@ -86,66 +86,66 @@
 !
 !      = 0
 !
-!            the symmetries/antsymmetries described in isym=1,2 below
-!            do not exist in sf,vp about the equator.  in this case v
+!            the symmetries/antsymmetries described in isym=1, 2 below
+!            do not exist in sf, vp about the equator.  in this case v
 !            and w are not necessarily symmetric or antisymmetric about
 !            equator.  v and w are computed on the entire sphere.
-!            i.e., in arrays sf(i,j),vp(i,j) for i=1,...,nlat and
-!            j=1,...,nlon.
+!            i.e., in arrays sf(i, j), vp(i, j) for i=1, ..., nlat and
+!            j=1, ..., nlon.
 !
 !      = 1
 !
 !            vp is antisymmetric and sf is symmetric about the equator.
 !            in this case v is symmetric and w antisymmetric about
 !            the equator and are computed for the northern hemisphere
-!            only.  i.e., if nlat is odd the v(i,j),w(i,j) are computed
-!            for i=1,...,(nlat+1)/2 and for j=1,...,nlon.  if nlat is
-!            even then v(i,j),w(i,j) are computed for i=1,...,nlat/2
-!            and j=1,...,nlon.
+!            only.  i.e., if nlat is odd the v(i, j), w(i, j) are computed
+!            for i=1, ..., (nlat+1)/2 and for j=1, ..., nlon.  if nlat is
+!            even then v(i, j), w(i, j) are computed for i=1, ..., nlat/2
+!            and j=1, ..., nlon.
 !
 !      = 2
 !
 !            vp is symmetric and sf is antisymmetric about the equator.
 !            in this case v is antisymmetric and w symmetric about
 !            the equator and are computed for the northern hemisphere
-!            only.  i.e., if nlat is odd the v(i,j),w(i,j) are computed
-!            for i=1,...,(nlat+1)/2 and for j=1,...,nlon.  if nlat is
-!            even then v(i,j),w(i,j) are computed for i=1,...,nlat/2
-!            and j=1,...,nlon.
+!            only.  i.e., if nlat is odd the v(i, j), w(i, j) are computed
+!            for i=1, ..., (nlat+1)/2 and for j=1, ..., nlon.  if nlat is
+!            even then v(i, j), w(i, j) are computed for i=1, ..., nlat/2
+!            and j=1, ..., nlon.
 !
 !     nt     nt is the number of scalar and vector fields.  some
 !            computational efficiency is obtained for multiple fields. arrays
 !            can be three dimensional corresponding to an indexed multiple
 !            vector field.  in this case multiple vector synthesis will
-!            be performed to compute (v,w) for each field.  the
+!            be performed to compute (v, w) for each field.  the
 !            third index is the synthesis index which assumes the values
-!            k=1,...,nt.  for a single synthesis set nt = 1.  the
+!            k=1, ..., nt.  for a single synthesis set nt = 1.  the
 !            description of the remaining parameters is simplified by
 !            assuming that nt=1 or that all the arrays are two dimensional.
 !
-!     idv    the first dimension of the arrays v,w as it appears in
+!     idv    the first dimension of the arrays v, w as it appears in
 !            the program that calls isfvpgs. if isym = 0 then idv
 !            must be at least nlat.  if isym = 1 or 2 and nlat is
 !            even then idv must be at least nlat/2. if isym = 1 or 2
 !            and nlat is odd then idv must be at least (nlat+1)/2.
 !
-!     jdv    the second dimension of the arrays v,w as it appears in
+!     jdv    the second dimension of the arrays v, w as it appears in
 !            the program that calls isfvpgs. jdv must be at least nlon.
 !
-!     as,bs  two or three dimensional arrays (see input parameter nt)
+!     as, bs  two or three dimensional arrays (see input parameter nt)
 !            that contain the spherical harmonic coefficients of
 !            the scalar field sf as computed by subroutine shags.
 !
-!     av,bv  two or three dimensional arrays (see input parameter nt)
+!     av, bv  two or three dimensional arrays (see input parameter nt)
 !            that contain the spherical harmonic coefficients of
 !            the scalar field vp as computed by subroutine shags.
 !
-!     mdb    the first dimension of the arrays as,bs,av,bv as it
+!     mdb    the first dimension of the arrays as, bs, av, bv as it
 !            appears in the program that calls isfvpgs. mdb must be at
-!            least min(nlat,nlon/2) if nlon is even or at least
-!            min(nlat,(nlon+1)/2) if nlon is odd.
+!            least min(nlat, nlon/2) if nlon is even or at least
+!            min(nlat, (nlon+1)/2) if nlon is odd.
 !
-!     ndb    the second dimension of the arrays as,bs,av,bv as it
+!     ndb    the second dimension of the arrays as, bs, av, bv as it
 !            appears in the program that calls isfvpgs. ndb must be at
 !            least nlat.
 !
@@ -158,8 +158,8 @@
 !     lvhsgs the dimension of the array wvhsgs as it appears in the
 !            program that calls isfvpgs. define
 !
-!               l1 = min(nlat,nlon/2) if nlon is even or
-!               l1 = min(nlat,(nlon+1)/2) if nlon is odd
+!               l1 = min(nlat, nlon/2) if nlon is even or
+!               l1 = min(nlat, (nlon+1)/2) if nlon is odd
 !
 !            and
 !
@@ -176,8 +176,8 @@
 !     lwork  the dimension of the array work as it appears in the
 !            program that calls isfvpgs. define
 !
-!               l1 = min(nlat,nlon/2) if nlon is even or
-!               l1 = min(nlat,(nlon+1)/2) if nlon is odd
+!               l1 = min(nlat, nlon/2) if nlon is even or
+!               l1 = min(nlat, (nlon+1)/2) if nlon is odd
 !
 !            and
 !
@@ -196,11 +196,11 @@
 !
 !     output parameters
 !
-!    v,w    two or three dimensional arrays (see input parameter nt)
+!    v, w    two or three dimensional arrays (see input parameter nt)
 !           that contains the vector field corresponding to the stream
-!           function sf and velocity potential vp whose coefficients,
-!           as,bs (for sf) and av,bv (for vp), were precomputed by
-!           subroutine shags.  v(i,j) and w(i,j) are given at the
+!           function sf and velocity potential vp whose coefficients, 
+!           as, bs (for sf) and av, bv (for vp), were precomputed by
+!           subroutine shags.  v(i, j) and w(i, j) are given at the
 !           i(th) gaussian colatitude point theta(i) and east longitude
 !           point lambda(j) = (j-1)*2*pi/nlon.  the index ranges are
 !           defined above at the input parameter isym.
@@ -219,16 +219,16 @@
 !           = 10 error in the specification of lwork
 ! **********************************************************************
 !                                                                              
-subroutine isfvpgs(nlat,nlon,isym,nt,v,w,idv,jdv,as,bs,av,bv, &
-    mdb,ndb,wvhsgs,lvhsgs,work,lwork,ierror)
+subroutine isfvpgs(nlat, nlon, isym, nt, v, w, idv, jdv, as, bs, av, bv, &
+    mdb, ndb, wvhsgs, lvhsgs, work, lwork, ierror)
     implicit none
-    integer nlat,nlon,isym,nt,idv,jdv,mdb,ndb,lvhsgs,lwork,ierror
-    real v(idv,jdv,nt),w(idv,jdv,nt)
-    real as(mdb,ndb,nt),bs(mdb,ndb,nt)
-    real av(mdb,ndb,nt),bv(mdb,ndb,nt)
-    real wvhsgs(lvhsgs),work(lwork)
-    integer l1,l2,mn,is,lwk,iwk,lwmin
-    integer ibr,ibi,icr,ici
+    integer nlat, nlon, isym, nt, idv, jdv, mdb, ndb, lvhsgs, lwork, ierror
+    real v(idv, jdv, nt), w(idv, jdv, nt)
+    real as(mdb, ndb, nt), bs(mdb, ndb, nt)
+    real av(mdb, ndb, nt), bv(mdb, ndb, nt)
+    real wvhsgs(lvhsgs), work(lwork)
+    integer l1, l2, mn, is, lwk, iwk, lwmin
+    integer ibr, ibi, icr, ici
     !
     !     check input parameters
     !
@@ -247,8 +247,8 @@ subroutine isfvpgs(nlat,nlon,isym,nt,v,w,idv,jdv,as,bs,av,bv, &
     ierror = 6
     if(jdv < nlon) return
     ierror = 7
-    l1 = min(nlat,(nlon+1)/2)
-    if (mdb < min(nlat,(nlon+2)/2)) return
+    l1 = min(nlat, (nlon+1)/2)
+    if (mdb < min(nlat, (nlon+2)/2)) return
     ierror = 8
     if (ndb < nlat) return
     ierror = 9
@@ -263,7 +263,7 @@ subroutine isfvpgs(nlat,nlon,isym,nt,v,w,idv,jdv,as,bs,av,bv, &
     end if
     if (lwork < lwmin) return
     !
-    !     set first dimension for br,bi,cr,ci (as requried by vhsgs)
+    !     set first dimension for br, bi, cr, ci (as requried by vhsgs)
     !
     mn = l1*nlat*nt
     ierror = 0
@@ -277,65 +277,65 @@ subroutine isfvpgs(nlat,nlon,isym,nt,v,w,idv,jdv,as,bs,av,bv, &
     is = ici+mn
     iwk = is+nlat
     lwk = lwork-4*mn-nlat
-    call isfvpgs1(nlat,nlon,isym,nt,v,w,idv,jdv,as,bs,av,bv,mdb, &
-        ndb,work(ibr),work(ibi),work(icr),work(ici),l1,work(is), &
-        wvhsgs,lvhsgs,work(iwk),lwk,ierror)
+    call isfvpgs1(nlat, nlon, isym, nt, v, w, idv, jdv, as, bs, av, bv, mdb, &
+        ndb, work(ibr), work(ibi), work(icr), work(ici), l1, work(is), &
+        wvhsgs, lvhsgs, work(iwk), lwk, ierror)
     return
 end subroutine isfvpgs
 
-subroutine isfvpgs1(nlat,nlon,isym,nt,v,w,idv,jdv,as,bs,av,bv, &
-    mdb,ndb,br,bi,cr,ci,mab,fnn,wvhsgs,lvhsgs,wk,lwk,ierror)
+subroutine isfvpgs1(nlat, nlon, isym, nt, v, w, idv, jdv, as, bs, av, bv, &
+    mdb, ndb, br, bi, cr, ci, mab, fnn, wvhsgs, lvhsgs, wk, lwk, ierror)
     implicit none
-    integer nlat,nlon,isym,nt,idv,jdv,mdb,ndb,mab,lvhsgs,lwk,ierror
-    real v(idv,jdv,nt),w(idv,jdv,nt)
-    real as(mdb,ndb,nt),bs(mdb,ndb,nt)
-    real av(mdb,ndb,nt),bv(mdb,ndb,nt)
-    real br(mab,nlat,nt),bi(mab,nlat,nt)
-    real cr(mab,nlat,nt),ci(mab,nlat,nt)
-    real wvhsgs(lvhsgs),wk(lwk),fnn(nlat)
-    integer n,m,mmax,k,ityp
+    integer nlat, nlon, isym, nt, idv, jdv, mdb, ndb, mab, lvhsgs, lwk, ierror
+    real v(idv, jdv, nt), w(idv, jdv, nt)
+    real as(mdb, ndb, nt), bs(mdb, ndb, nt)
+    real av(mdb, ndb, nt), bv(mdb, ndb, nt)
+    real br(mab, nlat, nt), bi(mab, nlat, nt)
+    real cr(mab, nlat, nt), ci(mab, nlat, nt)
+    real wvhsgs(lvhsgs), wk(lwk), fnn(nlat)
+    integer n, m, mmax, k, ityp
     !
     !     set coefficient multiplyers
     !
-    do n=2,nlat
+    do n=2, nlat
         fnn(n) = -sqrt(real(n*(n-1)))
     end do
-    mmax = min(nlat,(nlon+1)/2)
+    mmax = min(nlat, (nlon+1)/2)
     !
-    !     compute (v,w) coefficients from as,bs,av,bv
+    !     compute (v, w) coefficients from as, bs, av, bv
     !
-    do k=1,nt
-        do n=1,nlat
-            do m=1,mab
-                br(m,n,k) = 0.0
-                bi(m,n,k) = 0.0
-                cr(m,n,k) = 0.0
-                ci(m,n,k) = 0.0
+    do k=1, nt
+        do n=1, nlat
+            do m=1, mab
+                br(m, n, k) = 0.0
+                bi(m, n, k) = 0.0
+                cr(m, n, k) = 0.0
+                ci(m, n, k) = 0.0
             end do
         end do
             !
             !     compute m=0 coefficients
             !
-        do n=2,nlat
-            br(1,n,k) = -fnn(n)*av(1,n,k)
-            bi(1,n,k) = -fnn(n)*bv(1,n,k)
-            cr(1,n,k) =  fnn(n)*as(1,n,k)
-            ci(1,n,k) =  fnn(n)*bs(1,n,k)
+        do n=2, nlat
+            br(1, n, k) = -fnn(n)*av(1, n, k)
+            bi(1, n, k) = -fnn(n)*bv(1, n, k)
+            cr(1, n, k) =  fnn(n)*as(1, n, k)
+            ci(1, n, k) =  fnn(n)*bs(1, n, k)
         end do
             !
             !     compute m>0 coefficients using vector spherepack value for mmax
             !
-        do m=2,mmax
-            do n=m,nlat
-                br(m,n,k) = -fnn(n)*av(m,n,k)
-                bi(m,n,k) = -fnn(n)*bv(m,n,k)
-                cr(m,n,k) =  fnn(n)*as(m,n,k)
-                ci(m,n,k) =  fnn(n)*bs(m,n,k)
+        do m=2, mmax
+            do n=m, nlat
+                br(m, n, k) = -fnn(n)*av(m, n, k)
+                bi(m, n, k) = -fnn(n)*bv(m, n, k)
+                cr(m, n, k) =  fnn(n)*as(m, n, k)
+                ci(m, n, k) =  fnn(n)*bs(m, n, k)
             end do
         end do
     end do
     !
-    !     synthesize br,bi,cr,ci into (v,w)
+    !     synthesize br, bi, cr, ci into (v, w)
     !
     if (isym ==0) then
         ityp = 0
@@ -344,7 +344,7 @@ subroutine isfvpgs1(nlat,nlon,isym,nt,v,w,idv,jdv,as,bs,av,bv, &
     else if (isym ==2) then
         ityp = 6
     end if
-    call vhsgs(nlat,nlon,ityp,nt,v,w,idv,jdv,br,bi,cr,ci, &
-        mab,nlat,wvhsgs,lvhsgs,wk,lwk,ierror)
+    call vhsgs(nlat, nlon, ityp, nt, v, w, idv, jdv, br, bi, cr, ci, &
+        mab, nlat, wvhsgs, lvhsgs, wk, lwk, ierror)
     return
 end subroutine isfvpgs1

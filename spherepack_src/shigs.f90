@@ -49,19 +49,19 @@
 !
 ! ****************************************************************
 !
-!     subroutine shigs(nlat,nlon,wshigs,lshigs,work,lwork,dwork,ldwork,
+!     subroutine shigs(nlat, nlon, wshigs, lshigs, work, lwork, dwork, ldwork, 
 !    +                 ierror)
 !
 !     subroutine shigs initializes the array wshigs which can then
-!     be used repeatedly by subroutines shags,shsgs. it precomputes
-!     and stores in wshigs quantities such as gaussian weights,
+!     be used repeatedly by subroutines shags, shsgs. it precomputes
+!     and stores in wshigs quantities such as gaussian weights, 
 !     legendre polynomial coefficients, and fft trigonometric tables.
 !
 !     input parameters
 !
 !     nlat   the number of points in the gaussian colatitude grid on the
-!            full sphere. these lie in the interval (0,pi) and are compu
-!            in radians in theta(1),...,theta(nlat) by subroutine gaqd.
+!            full sphere. these lie in the interval (0, pi) and are compu
+!            in radians in theta(1), ..., theta(nlat) by subroutine gaqd.
 !            if nlat is odd the equator will be included as the grid poi
 !            theta((nlat+1)/2).  if nlat is even the equator will be
 !            excluded as a grid point and will lie half way between
@@ -84,8 +84,8 @@
 !     lshigs the dimension of the array wshigs as it appears in the
 !            program that calls shigs. define
 !
-!               l1 = min(nlat,(nlon+2)/2) if nlon is even or
-!               l1 = min(nlat,(nlon+1)/2) if nlon is odd
+!               l1 = min(nlat, (nlon+2)/2) if nlon is even or
+!               l1 = min(nlat, (nlon+1)/2) if nlon is odd
 !
 !            and
 !
@@ -126,23 +126,23 @@
 !
 ! ****************************************************************
 !
-subroutine shigs(nlat,nlon,wshigs,lshigs,work,lwork,dwork, &
-    ldwork,ierror)
+subroutine shigs(nlat, nlon, wshigs, lshigs, work, lwork, dwork, &
+    ldwork, ierror)
     !
     !     this subroutine must be called before calling shags or shsgs with
-    !     fixed nlat,nlon. it precomputes the gaussian weights, points
+    !     fixed nlat, nlon. it precomputes the gaussian weights, points
     !     and all necessary legendre polys and stores them in wshigs.
     !     these quantities must be preserved when calling shsgs or shags
-    !     repeatedly with fixed nlat,nlon.
+    !     repeatedly with fixed nlat, nlon.
     !
-    dimension wshigs(lshigs),work(lwork)
+    dimension wshigs(lshigs), work(lwork)
     real dwork(ldwork)
     ierror = 1
     if (nlat<3) return
     ierror = 2
     if (nlon<4) return
     !     set triangular truncation limit for spherical harmonic basis
-    l = min((nlon+2)/2,nlat)
+    l = min((nlon+2)/2, nlat)
     !     set equator or nearest point (if excluded) pointer
     late = (nlat+1)/2
     l1 = l
@@ -159,42 +159,42 @@ subroutine shigs(nlat,nlon,wshigs,lshigs,work,lwork,dwork, &
     if (ldwork < nlat*(nlat+4)) return
     ierror = 0
     !     set preliminary quantites needed to compute and store legendre polys
-    call shigsp(nlat,nlon,wshigs,lshigs,dwork,ldwork,ierror)
+    call shigsp(nlat, nlon, wshigs, lshigs, dwork, ldwork, ierror)
     if (ierror/=0) return
     !     set legendre poly pointer in wshigs
     ipmnf = nlat+2*nlat*late+3*(l*(l-1)/2+(nlat-l)*(l-1))+nlon+16
-    call shigss1(nlat,l,late,wshigs,work,wshigs(ipmnf))
+    call shigss1(nlat, l, late, wshigs, work, wshigs(ipmnf))
     return
 end subroutine shigs
 
-subroutine shigss1(nlat,l,late,w,pmn,pmnf)
-    dimension w(1),pmn(nlat,late,3),pmnf(late,1)
-    !     compute and store legendre polys for i=1,...,late,m=0,...,l-1
-    !     and n=m,...,l-1
-    do i=1,nlat
-        do j=1,late
-            do k=1,3
-                pmn(i,j,k) = 0.0
+subroutine shigss1(nlat, l, late, w, pmn, pmnf)
+    dimension w(1), pmn(nlat, late, 3), pmnf(late, 1)
+    !     compute and store legendre polys for i=1, ..., late, m=0, ..., l-1
+    !     and n=m, ..., l-1
+    do i=1, nlat
+        do j=1, late
+            do k=1, 3
+                pmn(i, j, k) = 0.0
             end do
         end do
     end do
-    do 100 mp1=1,l
+    do 100 mp1=1, l
         m = mp1-1
         mml1 = m*(2*nlat-m-1)/2
-        !     compute pmn for n=m,...,nlat-1 and i=1,...,(l+1)/2
+        !     compute pmn for n=m, ..., nlat-1 and i=1, ..., (l+1)/2
         mode = 0
-        call legin(mode,l,nlat,m,w,pmn,km)
+        call legin(mode, l, nlat, m, w, pmn, km)
         !     store above in pmnf
-        do 101 np1=mp1,nlat
+        do 101 np1=mp1, nlat
             mn = mml1+np1
-            do 102 i=1,late
-                pmnf(i,mn) = pmn(np1,i,km)
+            do 102 i=1, late
+                pmnf(i, mn) = pmn(np1, i, km)
 102         continue
 101     continue
 100 continue
     return
 end subroutine shigss1
-subroutine shigsp(nlat,nlon,wshigs,lshigs,dwork,ldwork,ierror)
+subroutine shigsp(nlat, nlon, wshigs, lshigs, dwork, ldwork, ierror)
     dimension wshigs(lshigs)
     real dwork(ldwork)
     ierror = 1
@@ -202,9 +202,9 @@ subroutine shigsp(nlat,nlon,wshigs,lshigs,dwork,ldwork,ierror)
     ierror = 2
     if (nlon<4) return
     !     set triangular truncation limit for spherical harmonic basis
-    l = min((nlon+2)/2,nlat)
+    l = min((nlon+2)/2, nlat)
     !     set equator or nearest point (if excluded) pointer
-    late = (nlat+mod(nlat,2))/2
+    late = (nlat+mod(nlat, 2))/2
     l1 = l
     l2 = late
     ierror = 3
@@ -228,71 +228,71 @@ subroutine shigsp(nlat,nlon,wshigs,lshigs,dwork,ldwork,ierror)
     !     iw = idwts+2*nlat
     idwts = idth+nlat
     iw = idwts+nlat
-    call shigsp1(nlat,nlon,l,late,wshigs(i1),wshigs(i2),wshigs(i3), &
-        wshigs(i4),wshigs(i5),wshigs(i6),wshigs(i7),dwork(idth), &
-        dwork(idwts),dwork(iw),ierror)
+    call shigsp1(nlat, nlon, l, late, wshigs(i1), wshigs(i2), wshigs(i3), &
+        wshigs(i4), wshigs(i5), wshigs(i6), wshigs(i7), dwork(idth), &
+        dwork(idwts), dwork(iw), ierror)
     if (ierror/=0) ierror = 5
     return
 end subroutine shigsp
 
-subroutine shigsp1(nlat,nlon,l,late,wts,p0n,p1n,abel,bbel,cbel, &
-    wfft,dtheta,dwts,work,ier)
-    dimension wts(nlat),p0n(nlat,late),p1n(nlat,late),abel(1),bbel(1), &
-        cbel(1),wfft(1),dtheta(nlat),dwts(nlat)
-    real pb,dtheta,dwts,work(*)
-    indx(m,n) = (n-1)*(n-2)/2+m-1
-    imndx(m,n) = l*(l-1)/2+(n-l-1)*(l-1)+m-1
-    call hrffti(nlon,wfft)
+subroutine shigsp1(nlat, nlon, l, late, wts, p0n, p1n, abel, bbel, cbel, &
+    wfft, dtheta, dwts, work, ier)
+    dimension wts(nlat), p0n(nlat, late), p1n(nlat, late), abel(1), bbel(1), &
+        cbel(1), wfft(1), dtheta(nlat), dwts(nlat)
+    real pb, dtheta, dwts, work(*)
+    indx(m, n) = (n-1)*(n-2)/2+m-1
+    imndx(m, n) = l*(l-1)/2+(n-l-1)*(l-1)+m-1
+    call hrffti(nlon, wfft)
     !     compute real gaussian points and weights
     !     lw = 4*nlat*(nlat+2)
     lw = nlat*(nlat+2)
-    call gaqd(nlat,dtheta,dwts,work,lw,ier)
+    call gaqd(nlat, dtheta, dwts, work, lw, ier)
     if (ier/=0) return
     !     store gaussian weights single precision to save computation
     !     in inner loops in analysis
-    do 100 i=1,nlat
+    do 100 i=1, nlat
         wts(i) = dwts(i)
 100 continue
-    !     initialize p0n,p1n using real dnlfk,dnlft
-    do 101 np1=1,nlat
-        do 101 i=1,late
-            p0n(np1,i) = 0.0
-            p1n(np1,i) = 0.0
+    !     initialize p0n, p1n using real dnlfk, dnlft
+    do 101 np1=1, nlat
+        do 101 i=1, late
+            p0n(np1, i) = 0.0
+            p1n(np1, i) = 0.0
 101     continue
         !     compute m=n=0 legendre polynomials for all theta(i)
         np1 = 1
         n = 0
         m = 0
-        call dnlfk(m,n,work)
-        do 103 i=1,late
-            call dnlft(m,n,dtheta(i),work,pb)
-            p0n(1,i) = pb
+        call dnlfk(m, n, work)
+        do 103 i=1, late
+            call dnlft(m, n, dtheta(i), work, pb)
+            p0n(1, i) = pb
 103     continue
-        !     compute p0n,p1n for all theta(i) when n.gt.0
-        do 104 np1=2,nlat
+        !     compute p0n, p1n for all theta(i) when n.gt.0
+        do 104 np1=2, nlat
             n = np1-1
             m = 0
-            call dnlfk(m,n,work)
-            do 105 i=1,late
-                call dnlft(m,n,dtheta(i),work,pb)
-                p0n(np1,i) = pb
+            call dnlfk(m, n, work)
+            do 105 i=1, late
+                call dnlft(m, n, dtheta(i), work, pb)
+                p0n(np1, i) = pb
 105         continue
             !     compute m=1 legendre polynomials for all n and theta(i)
             m = 1
-            call dnlfk(m,n,work)
-            do 106 i=1,late
-                call dnlft(m,n,dtheta(i),work,pb)
-                p1n(np1,i) = pb
+            call dnlfk(m, n, work)
+            do 106 i=1, late
+                call dnlft(m, n, dtheta(i), work, pb)
+                p1n(np1, i) = pb
 106         continue
 104     continue
         !
         !     compute and store swarztrauber recursion coefficients
-        !     for 2.le.m.le.n and 2.le.n.le.nlat in abel,bbel,cbel
-        do 107 n=2,nlat
-            mlim = min(n,l)
-            do 107 m=2,mlim
-                imn = indx(m,n)
-                if (n>=l) imn = imndx(m,n)
+        !     for 2.le.m.le.n and 2.le.n.le.nlat in abel, bbel, cbel
+        do 107 n=2, nlat
+            mlim = min(n, l)
+            do 107 m=2, mlim
+                imn = indx(m, n)
+                if (n>=l) imn = imndx(m, n)
                 abel(imn)=sqrt(real((2*n+1)*(m+n-2)*(m+n-3))/ &
                     real(((2*n-3)*(m+n-1)*(m+n))))
                 bbel(imn)=sqrt(real((2*n+1)*(n-m-1)*(n-m))/ &

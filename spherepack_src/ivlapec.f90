@@ -42,19 +42,19 @@
 !
 !
 !
-!     subroutine ivlapec(nlat,nlon,ityp,nt,v,w,idvw,jdvw,br,bi,cr,ci,
-!    +mdbc,ndbc,wvhsec,lvhsec,work,lwork,ierror)
+!     subroutine ivlapec(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, 
+!    +mdbc, ndbc, wvhsec, lvhsec, work, lwork, ierror)
 !
 !
-!     subroutine ivlapec computes a the vector field (v,w) whose vector
-!     laplacian is (vlap,wlap).  w and wlap are east longitudinal
+!     subroutine ivlapec computes a the vector field (v, w) whose vector
+!     laplacian is (vlap, wlap).  w and wlap are east longitudinal
 !     components of the vectors.  v and vlap are colatitudinal components
-!     of the vectors.  br,bi,cr, and ci are the vector harmonic coefficients
-!     of (vlap,wlap).  these must be precomputed by vhaec and are input
-!     parameters to ivlapec.  (v,w) have the same symmetry or lack of
-!     symmetry about the about the equator as (vlap,wlap).  the input
-!     parameters ityp,nt,mdbc,ndbc must have the same values used by
-!     vhaec to compute br,bi,cr, and ci for (vlap,wlap).
+!     of the vectors.  br, bi, cr, and ci are the vector harmonic coefficients
+!     of (vlap, wlap).  these must be precomputed by vhaec and are input
+!     parameters to ivlapec.  (v, w) have the same symmetry or lack of
+!     symmetry about the about the equator as (vlap, wlap).  the input
+!     parameters ityp, nt, mdbc, ndbc must have the same values used by
+!     vhaec to compute br, bi, cr, and ci for (vlap, wlap).
 !
 !
 !     input parameters
@@ -77,99 +77,99 @@
 !            is a product of small prime numbers.
 !
 !     ityp   this parameter should have the same value input to subroutine
-!            vhaec to compute the coefficients br,bi,cr, and ci for the
-!            vector field (vlap,wlap).  ityp is set as follows:
+!            vhaec to compute the coefficients br, bi, cr, and ci for the
+!            vector field (vlap, wlap).  ityp is set as follows:
 !
-!            = 0  no symmetries exist in (vlap,wlap) about the equator. (v,w)
+!            = 0  no symmetries exist in (vlap, wlap) about the equator. (v, w)
 !                 is computed and stored on the entire sphere in the arrays
-!                 arrays v(i,j) and w(i,j) for i=1,...,nlat and j=1,...,nlon.
+!                 arrays v(i, j) and w(i, j) for i=1, ..., nlat and j=1, ..., nlon.
 !
-!            = 1  no symmetries exist in (vlap,wlap) about the equator. (v,w)
+!            = 1  no symmetries exist in (vlap, wlap) about the equator. (v, w)
 !                 is computed and stored on the entire sphere in the arrays
-!                 v(i,j) and w(i,j) for i=1,...,nlat and j=1,...,nlon.  the
-!                 vorticity of (vlap,wlap) is zero so the coefficients cr and
-!                 ci are zero and are not used.  the vorticity of (v,w) is
+!                 v(i, j) and w(i, j) for i=1, ..., nlat and j=1, ..., nlon.  the
+!                 vorticity of (vlap, wlap) is zero so the coefficients cr and
+!                 ci are zero and are not used.  the vorticity of (v, w) is
 !                 also zero.
 !
 !
-!            = 2  no symmetries exist in (vlap,wlap) about the equator. (v,w)
+!            = 2  no symmetries exist in (vlap, wlap) about the equator. (v, w)
 !                 is computed and stored on the entire sphere in the arrays
-!                 w(i,j) and v(i,j) for i=1,...,nlat and j=1,...,nlon.  the
-!                 divergence of (vlap,wlap) is zero so the coefficients br and
-!                 bi are zero and are not used.  the divergence of (v,w) is
+!                 w(i, j) and v(i, j) for i=1, ..., nlat and j=1, ..., nlon.  the
+!                 divergence of (vlap, wlap) is zero so the coefficients br and
+!                 bi are zero and are not used.  the divergence of (v, w) is
 !                 also zero.
 !
 !            = 3  wlap is antisymmetric and vlap is symmetric about the
 !                 equator. consequently w is antisymmetric and v is symmetric.
-!                 (v,w) is computed and stored on the northern hemisphere
-!                 only.  if nlat is odd, storage is in the arrays v(i,j),
-!                 w(i,j) for i=1,...,(nlat+1)/2 and j=1,...,nlon.  if nlat
-!                 is even, storage is in the arrays v(i,j),w(i,j) for
-!                 i=1,...,nlat/2 and j=1,...,nlon.
+!                 (v, w) is computed and stored on the northern hemisphere
+!                 only.  if nlat is odd, storage is in the arrays v(i, j), 
+!                 w(i, j) for i=1, ..., (nlat+1)/2 and j=1, ..., nlon.  if nlat
+!                 is even, storage is in the arrays v(i, j), w(i, j) for
+!                 i=1, ..., nlat/2 and j=1, ..., nlon.
 !
 !            = 4  wlap is antisymmetric and vlap is symmetric about the
 !                 equator. consequently w is antisymmetric and v is symmetric.
-!                 (v,w) is computed and stored on the northern hemisphere
-!                 only.  if nlat is odd, storage is in the arrays v(i,j),
-!                 w(i,j) for i=1,...,(nlat+1)/2 and j=1,...,nlon.  if nlat
-!                 is even, storage is in the arrays v(i,j),w(i,j) for
-!                 i=1,...,nlat/2 and j=1,...,nlon.  the vorticity of (vlap,
-!                 wlap) is zero so the coefficients cr,ci are zero and
-!                 are not used. the vorticity of (v,w) is also zero.
+!                 (v, w) is computed and stored on the northern hemisphere
+!                 only.  if nlat is odd, storage is in the arrays v(i, j), 
+!                 w(i, j) for i=1, ..., (nlat+1)/2 and j=1, ..., nlon.  if nlat
+!                 is even, storage is in the arrays v(i, j), w(i, j) for
+!                 i=1, ..., nlat/2 and j=1, ..., nlon.  the vorticity of (vlap, 
+!                 wlap) is zero so the coefficients cr, ci are zero and
+!                 are not used. the vorticity of (v, w) is also zero.
 !
 !            = 5  wlap is antisymmetric and vlap is symmetric about the
 !                 equator. consequently w is antisymmetric and v is symmetric.
-!                 (v,w) is computed and stored on the northern hemisphere
-!                 only.  if nlat is odd, storage is in the arrays w(i,j),
-!                 v(i,j) for i=1,...,(nlat+1)/2 and j=1,...,nlon.  if nlat
-!                 is even, storage is in the arrays w(i,j),v(i,j) for
-!                 i=1,...,nlat/2 and j=1,...,nlon.  the divergence of (vlap,
-!                 wlap) is zero so the coefficients br,bi are zero and
-!                 are not used. the divergence of (v,w) is also zero.
+!                 (v, w) is computed and stored on the northern hemisphere
+!                 only.  if nlat is odd, storage is in the arrays w(i, j), 
+!                 v(i, j) for i=1, ..., (nlat+1)/2 and j=1, ..., nlon.  if nlat
+!                 is even, storage is in the arrays w(i, j), v(i, j) for
+!                 i=1, ..., nlat/2 and j=1, ..., nlon.  the divergence of (vlap, 
+!                 wlap) is zero so the coefficients br, bi are zero and
+!                 are not used. the divergence of (v, w) is also zero.
 !
 !
 !            = 6  wlap is symmetric and vlap is antisymmetric about the
 !                 equator. consequently w is symmetric and v is antisymmetric.
-!                 (v,w) is computed and stored on the northern hemisphere
-!                 only.  if nlat is odd, storage is in the arrays w(i,j),
-!                 v(i,j) for i=1,...,(nlat+1)/2 and j=1,...,nlon.  if nlat
-!                 is even, storage is in the arrays w(i,j),v(i,j) for
-!                 i=1,...,nlat/2 and j=1,...,nlon.
+!                 (v, w) is computed and stored on the northern hemisphere
+!                 only.  if nlat is odd, storage is in the arrays w(i, j), 
+!                 v(i, j) for i=1, ..., (nlat+1)/2 and j=1, ..., nlon.  if nlat
+!                 is even, storage is in the arrays w(i, j), v(i, j) for
+!                 i=1, ..., nlat/2 and j=1, ..., nlon.
 !
 !            = 7  wlap is symmetric and vlap is antisymmetric about the
 !                 equator. consequently w is symmetric and v is antisymmetric.
-!                 (v,w) is computed and stored on the northern hemisphere
-!                 only.  if nlat is odd, storage is in the arrays w(i,j),
-!                 v(i,j) for i=1,...,(nlat+1)/2 and j=1,...,nlon.  if nlat
-!                 is even, storage is in the arrays w(i,j),v(i,j) for
-!                 i=1,...,nlat/2 and j=1,...,nlon.  the vorticity of (vlap,
-!                 wlap) is zero so the coefficients cr,ci are zero and
-!                 are not used. the vorticity of (v,w) is also zero.
+!                 (v, w) is computed and stored on the northern hemisphere
+!                 only.  if nlat is odd, storage is in the arrays w(i, j), 
+!                 v(i, j) for i=1, ..., (nlat+1)/2 and j=1, ..., nlon.  if nlat
+!                 is even, storage is in the arrays w(i, j), v(i, j) for
+!                 i=1, ..., nlat/2 and j=1, ..., nlon.  the vorticity of (vlap, 
+!                 wlap) is zero so the coefficients cr, ci are zero and
+!                 are not used. the vorticity of (v, w) is also zero.
 !
 !            = 8  wlap is symmetric and vlap is antisymmetric about the
 !                 equator. consequently w is symmetric and v is antisymmetric.
-!                 (v,w) is computed and stored on the northern hemisphere
-!                 only.  if nlat is odd, storage is in the arrays w(i,j),
-!                 v(i,j) for i=1,...,(nlat+1)/2 and j=1,...,nlon.  if nlat
-!                 is even, storage is in the arrays w(i,j),v(i,j) for
-!                 i=1,...,nlat/2 and j=1,...,nlon.  the divergence of (vlap,
-!                 wlap) is zero so the coefficients br,bi are zero and
-!                 are not used. the divergence of (v,w) is also zero.
+!                 (v, w) is computed and stored on the northern hemisphere
+!                 only.  if nlat is odd, storage is in the arrays w(i, j), 
+!                 v(i, j) for i=1, ..., (nlat+1)/2 and j=1, ..., nlon.  if nlat
+!                 is even, storage is in the arrays w(i, j), v(i, j) for
+!                 i=1, ..., nlat/2 and j=1, ..., nlon.  the divergence of (vlap, 
+!                 wlap) is zero so the coefficients br, bi are zero and
+!                 are not used. the divergence of (v, w) is also zero.
 !
 !
-!     nt     nt is the number of vector fields (vlap,wlap). some computational
+!     nt     nt is the number of vector fields (vlap, wlap). some computational
 !            efficiency is obtained for multiple fields.  in the program
-!            that calls ivlapec, the arrays v,w,br,bi,cr and ci can be
+!            that calls ivlapec, the arrays v, w, br, bi, cr and ci can be
 !            three dimensional corresponding to an indexed multiple vector
 !            field.  in this case multiple vector synthesis will be performed
-!            to compute the (v,w) for each field (vlap,wlap).  the third
-!            index is the synthesis index which assumes the values k=1,...,nt.
+!            to compute the (v, w) for each field (vlap, wlap).  the third
+!            index is the synthesis index which assumes the values k=1, ..., nt.
 !            for a single synthesis set nt=1.  the description of the
 !            remaining parameters is simplified by assuming that nt=1 or
 !            that all arrays are two dimensional.
 !
 !   idvw     the first dimension of the arrays w and v as it appears in
-!            the program that calls ivlapec.  if ityp=0,1, or 2  then idvw
+!            the program that calls ivlapec.  if ityp=0, 1, or 2  then idvw
 !            must be at least nlat.  if ityp > 2 and nlat is even then idvw
 !            must be at least nlat/2. if ityp > 2 and nlat is odd then idvw
 !            must be at least (nlat+1)/2.
@@ -178,20 +178,20 @@
 !            the program that calls ivlapec. jdvw must be at least nlon.
 !
 !
-!   br,bi    two or three dimensional arrays (see input parameter nt)
-!   cr,ci    that contain vector spherical harmonic coefficients of the
-!            vector field (vlap,wlap) as computed by subroutine vhaec.
-!            br,bi,cr and ci must be computed by vhaec prior to calling
-!            ivlapec.  if ityp=1,4, or 7 then cr,ci are not used and can
-!            be dummy arguments.  if ityp=2,5, or 8 then br,bi are not
+!   br, bi    two or three dimensional arrays (see input parameter nt)
+!   cr, ci    that contain vector spherical harmonic coefficients of the
+!            vector field (vlap, wlap) as computed by subroutine vhaec.
+!            br, bi, cr and ci must be computed by vhaec prior to calling
+!            ivlapec.  if ityp=1, 4, or 7 then cr, ci are not used and can
+!            be dummy arguments.  if ityp=2, 5, or 8 then br, bi are not
 !            used and can be dummy arguments.
 !
-!    mdbc    the first dimension of the arrays br,bi,cr and ci as it
+!    mdbc    the first dimension of the arrays br, bi, cr and ci as it
 !            appears in the program that calls ivlapec.  mdbc must be
-!            at least min(nlat,nlon/2) if nlon is even or at least
-!            min(nlat,(nlon+1)/2) if nlon is odd.
+!            at least min(nlat, nlon/2) if nlon is even or at least
+!            min(nlat, (nlon+1)/2) if nlon is odd.
 !
-!    ndbc    the second dimension of the arrays br,bi,cr and ci as it
+!    ndbc    the second dimension of the arrays br, bi, cr and ci as it
 !            appears in the program that calls ivlapec. ndbc must be at
 !            least nlat.
 !
@@ -204,8 +204,8 @@
 !    lvhsec  the dimension of the array wvhsec as it appears in the
 !            program that calls ivlapec.  let
 !
-!               l1 = min(nlat,nlon/2) if nlon is even or
-!               l1 = min(nlat,(nlon+1)/2) if nlon is odd
+!               l1 = min(nlat, nlon/2) if nlon is even or
+!               l1 = min(nlat, (nlon+1)/2) if nlon is odd
 !
 !            and
 !
@@ -214,7 +214,7 @@
 !
 !            then lvhsec must be at least
 !
-!            4*nlat*l2+3*max(l1-2,0)*(nlat+nlat-l1-1)+nlon+15
+!            4*nlat*l2+3*max(l1-2, 0)*(nlat+nlat-l1-1)+nlon+15
 !
 !     work   a work array that does not have to be saved.
 !
@@ -223,16 +223,16 @@
 !
 !               l2 = nlat/2                    if nlat is even or
 !               l2 = (nlat+1)/2                if nlat is odd
-!               l1 = min(nlat,nlon/2) if nlon is even or
-!               l1 = min(nlat,(nlon+1)/2) if nlon is odd
+!               l1 = min(nlat, nlon/2) if nlon is even or
+!               l1 = min(nlat, (nlon+1)/2) if nlon is odd
 !
 !            if ityp .le. 2 then
 !
-!               nlat*(2*nt*nlon+max(6*l2,nlon)) + nlat*(4*nt*l1+1)
+!               nlat*(2*nt*nlon+max(6*l2, nlon)) + nlat*(4*nt*l1+1)
 !
 !            or if ityp .gt. 2 let
 !
-!               l2*(2*nt*nlon+max(6*nlat,nlon)) + nlat*(4*nt*l1+1)
+!               l2*(2*nt*nlon+max(6*nlat, nlon)) + nlat*(4*nt*l1+1)
 !
 !            will suffice as a minimum length for lwork
 !            (see ierror=10 below)
@@ -242,19 +242,19 @@
 !     output parameters
 !
 !
-!    v,w     two or three dimensional arrays (see input parameter nt) that
-!            contain a vector field whose vector laplacian is (vlap,wlap).
-!            w(i,j) is the east longitude and v(i,j) is the colatitudinal
-!            component of the vector. v(i,j) and w(i,j) are given on the
+!    v, w     two or three dimensional arrays (see input parameter nt) that
+!            contain a vector field whose vector laplacian is (vlap, wlap).
+!            w(i, j) is the east longitude and v(i, j) is the colatitudinal
+!            component of the vector. v(i, j) and w(i, j) are given on the
 !            sphere at the colatitude
 !
 !                 theta(i) = (i-1)*pi/(nlat-1)
 !
-!            for i=1,...,nlat and east longitude
+!            for i=1, ..., nlat and east longitude
 !
 !                 lambda(j) = (j-1)*2*pi/nlon
 !
-!            for j=1,...,nlon.
+!            for j=1, ..., nlon.
 !
 !            let cost and sint be the cosine and sine at colatitude theta.
 !            let d( )/dlambda  and d( )/dtheta be the first order partial
@@ -265,7 +265,7 @@
 !                               2            2
 !                              d (sf)/dlambda /sint]/sint
 !
-!            then the vector laplacian of (v,w) in (vlap,wlap) satisfies
+!            then the vector laplacian of (v, w) in (vlap, wlap) satisfies
 !
 !                 vlap = del2s(v) + (2*cost*dw/dlambda - v)/sint**2
 !
@@ -305,12 +305,12 @@
 !
 ! **********************************************************************
 !
-subroutine ivlapec(nlat,nlon,ityp,nt,v,w,idvw,jdvw,br,bi,cr,ci, &
-    mdbc,ndbc,wvhsec,lvhsec,work,lwork,ierror)
-    dimension v(idvw,jdvw,nt),w(idvw,jdvw,nt)
-    dimension br(mdbc,ndbc,nt),bi(mdbc,ndbc,nt)
-    dimension cr(mdbc,ndbc,nt),ci(mdbc,ndbc,nt)
-    dimension wvhsec(lvhsec),work(lwork)
+subroutine ivlapec(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
+    mdbc, ndbc, wvhsec, lvhsec, work, lwork, ierror)
+    dimension v(idvw, jdvw, nt), w(idvw, jdvw, nt)
+    dimension br(mdbc, ndbc, nt), bi(mdbc, ndbc, nt)
+    dimension cr(mdbc, ndbc, nt), ci(mdbc, ndbc, nt)
+    dimension wvhsec(lvhsec), work(lwork)
     ierror = 1
     if(nlat < 3) return
     ierror = 2
@@ -326,7 +326,7 @@ subroutine ivlapec(nlat,nlon,ityp,nt,v,w,idvw,jdvw,br,bi,cr,ci, &
     ierror = 6
     if(jdvw < nlon) return
     ierror = 7
-    mmax = min(nlat,(nlon+1)/2)
+    mmax = min(nlat, (nlon+1)/2)
     if(mdbc < mmax) return
     ierror = 8
     if(ndbc < nlat) return
@@ -339,7 +339,7 @@ subroutine ivlapec(nlat,nlon,ityp,nt,v,w,idvw,jdvw,br,bi,cr,ci, &
     !     lsavmin = lzimn+lzimn+nlon+15
     !     if (lvhsec .lt. lsavmin) return
     lzz1 = 2*nlat*imid
-    labc = 3*(max(mmax-2,0)*(nlat+nlat-mmax-1))/2
+    labc = 3*(max(mmax-2, 0)*(nlat+nlat-mmax-1))/2
     if(lvhsec < 2*(lzz1+labc)+nlon+15) return
     !
     !     set minimum and verify unsaved work space length
@@ -349,20 +349,20 @@ subroutine ivlapec(nlat,nlon,ityp,nt,v,w,idvw,jdvw,br,bi,cr,ci, &
     if(ityp<3) then
         !     no symmetry
         if ( typ==0) then
-                !       br,bi,cr,ci nonzero
-            lwkmin = nlat*(2*nt*nlon+max(6*imid,nlon)+1)+4*mn
+                !       br, bi, cr, ci nonzero
+            lwkmin = nlat*(2*nt*nlon+max(6*imid, nlon)+1)+4*mn
         else
-            !       br,bi or cr,ci zero
-            lwkmin = nlat*(2*nt*nlon+max(6*imid,nlon)+1)+2*mn
+            !       br, bi or cr, ci zero
+            lwkmin = nlat*(2*nt*nlon+max(6*imid, nlon)+1)+2*mn
         end if
     else
         !     symmetry
         if ( typ==3 .or. ityp==6) then
-                    !       br,bi,cr,ci nonzero
-            lwkmin = imid*(2*nt*nlon+max(6*nlat,nlon))+4*mn+nlat
+                    !       br, bi, cr, ci nonzero
+            lwkmin = imid*(2*nt*nlon+max(6*nlat, nlon))+4*mn+nlat
         else
-            !       br,bi or cr,ci zero
-            lwkmin = imid*(2*nt*nlon+max(6*nlat,nlon))+2*mn+nlat
+            !       br, bi or cr, ci zero
+            lwkmin = imid*(2*nt*nlon+max(6*nlat, nlon))+2*mn+nlat
         end if
     end if
     if (lwork < lwkmin) return
@@ -393,108 +393,108 @@ subroutine ivlapec(nlat,nlon,ityp,nt,v,w,idvw,jdvw,br,bi,cr,ci, &
     else
         liwk = lwork-2*mn-nlat
     end if
-    call ivlapec1(nlat,nlon,ityp,nt,v,w,idvw,jdvw,work(ibr), &
-        work(ibi),work(icr),work(ici),mmax,work(ifn),mdbc,ndbc,br,bi, &
-        cr,ci,wvhsec,lvhsec,work(iwk),liwk,ierror)
+    call ivlapec1(nlat, nlon, ityp, nt, v, w, idvw, jdvw, work(ibr), &
+        work(ibi), work(icr), work(ici), mmax, work(ifn), mdbc, ndbc, br, bi, &
+        cr, ci, wvhsec, lvhsec, work(iwk), liwk, ierror)
     return
 end subroutine ivlapec
 
-subroutine ivlapec1(nlat,nlon,ityp,nt,v,w,idvw,jdvw,brvw, &
-    bivw,crvw,civw,mmax,fnn,mdbc,ndbc,br,bi,cr,ci,wsave,lwsav, &
-    wk,lwk,ierror)
-    dimension v(idvw,jdvw,nt),w(idvw,jdvw,nt)
-    dimension fnn(nlat),brvw(mmax,nlat,nt),bivw(mmax,nlat,nt)
-    dimension crvw(mmax,nlat,nt),civw(mmax,nlat,nt)
-    dimension br(mdbc,ndbc,nt),bi(mdbc,ndbc,nt)
-    dimension cr(mdbc,ndbc,nt),ci(mdbc,ndbc,nt)
-    dimension wsave(lwsav),wk(lwk)
+subroutine ivlapec1(nlat, nlon, ityp, nt, v, w, idvw, jdvw, brvw, &
+    bivw, crvw, civw, mmax, fnn, mdbc, ndbc, br, bi, cr, ci, wsave, lwsav, &
+    wk, lwk, ierror)
+    dimension v(idvw, jdvw, nt), w(idvw, jdvw, nt)
+    dimension fnn(nlat), brvw(mmax, nlat, nt), bivw(mmax, nlat, nt)
+    dimension crvw(mmax, nlat, nt), civw(mmax, nlat, nt)
+    dimension br(mdbc, ndbc, nt), bi(mdbc, ndbc, nt)
+    dimension cr(mdbc, ndbc, nt), ci(mdbc, ndbc, nt)
+    dimension wsave(lwsav), wk(lwk)
     !
     !     preset coefficient multiplyers
     !
-    do 1 n=2,nlat
+    do 1 n=2, nlat
         fn = real(n-1)
         fnn(n) = -1.0/(fn*(fn+1.))
 1   continue
     !
-    !     set (v,w) coefficients from br,bi,cr,ci
+    !     set (v, w) coefficients from br, bi, cr, ci
     !
     if (ityp==0 .or. ityp==3 .or. ityp==6) then
         !
         !     all coefficients needed
         !
-        do 2 k=1,nt
-            do 3 n=1,nlat
-                do 4 m=1,mmax
-                    brvw(m,n,k) = 0.0
-                    bivw(m,n,k) = 0.0
-                    crvw(m,n,k) = 0.0
-                    civw(m,n,k) = 0.0
+        do 2 k=1, nt
+            do 3 n=1, nlat
+                do 4 m=1, mmax
+                    brvw(m, n, k) = 0.0
+                    bivw(m, n, k) = 0.0
+                    crvw(m, n, k) = 0.0
+                    civw(m, n, k) = 0.0
 4               continue
 3           continue
-            do 5 n=2,nlat
-                brvw(1,n,k) = fnn(n)*br(1,n,k)
-                bivw(1,n,k) = fnn(n)*bi(1,n,k)
-                crvw(1,n,k) = fnn(n)*cr(1,n,k)
-                civw(1,n,k) = fnn(n)*ci(1,n,k)
+            do 5 n=2, nlat
+                brvw(1, n, k) = fnn(n)*br(1, n, k)
+                bivw(1, n, k) = fnn(n)*bi(1, n, k)
+                crvw(1, n, k) = fnn(n)*cr(1, n, k)
+                civw(1, n, k) = fnn(n)*ci(1, n, k)
 5           continue
-            do 6 m=2,mmax
-                do 7 n=m,nlat
-                    brvw(m,n,k) = fnn(n)*br(m,n,k)
-                    bivw(m,n,k) = fnn(n)*bi(m,n,k)
-                    crvw(m,n,k) = fnn(n)*cr(m,n,k)
-                    civw(m,n,k) = fnn(n)*ci(m,n,k)
+            do 6 m=2, mmax
+                do 7 n=m, nlat
+                    brvw(m, n, k) = fnn(n)*br(m, n, k)
+                    bivw(m, n, k) = fnn(n)*bi(m, n, k)
+                    crvw(m, n, k) = fnn(n)*cr(m, n, k)
+                    civw(m, n, k) = fnn(n)*ci(m, n, k)
 7               continue
 6           continue
 2       continue
     else if (ityp==1 .or. ityp==4 .or. ityp==7) then
         !
-        !     vorticity is zero so cr,ci=0 not used
+        !     vorticity is zero so cr, ci=0 not used
         !
-        do 12 k=1,nt
-            do 13 n=1,nlat
-                do 14 m=1,mmax
-                    brvw(m,n,k) = 0.0
-                    bivw(m,n,k) = 0.0
+        do 12 k=1, nt
+            do 13 n=1, nlat
+                do 14 m=1, mmax
+                    brvw(m, n, k) = 0.0
+                    bivw(m, n, k) = 0.0
 14              continue
 13          continue
-            do 15 n=2,nlat
-                brvw(1,n,k) = fnn(n)*br(1,n,k)
-                bivw(1,n,k) = fnn(n)*bi(1,n,k)
+            do 15 n=2, nlat
+                brvw(1, n, k) = fnn(n)*br(1, n, k)
+                bivw(1, n, k) = fnn(n)*bi(1, n, k)
 15          continue
-            do 16 m=2,mmax
-                do 17 n=m,nlat
-                    brvw(m,n,k) = fnn(n)*br(m,n,k)
-                    bivw(m,n,k) = fnn(n)*bi(m,n,k)
+            do 16 m=2, mmax
+                do 17 n=m, nlat
+                    brvw(m, n, k) = fnn(n)*br(m, n, k)
+                    bivw(m, n, k) = fnn(n)*bi(m, n, k)
 17              continue
 16          continue
 12      continue
     else
         !
-        !     divergence is zero so br,bi=0 not used
+        !     divergence is zero so br, bi=0 not used
         !
-        do 22 k=1,nt
-            do 23 n=1,nlat
-                do 24 m=1,mmax
-                    crvw(m,n,k) = 0.0
-                    civw(m,n,k) = 0.0
+        do 22 k=1, nt
+            do 23 n=1, nlat
+                do 24 m=1, mmax
+                    crvw(m, n, k) = 0.0
+                    civw(m, n, k) = 0.0
 24              continue
 23          continue
-            do 25 n=2,nlat
-                crvw(1,n,k) = fnn(n)*cr(1,n,k)
-                civw(1,n,k) = fnn(n)*ci(1,n,k)
+            do 25 n=2, nlat
+                crvw(1, n, k) = fnn(n)*cr(1, n, k)
+                civw(1, n, k) = fnn(n)*ci(1, n, k)
 25          continue
-            do 26 m=2,mmax
-                do 27 n=m,nlat
-                    crvw(m,n,k) = fnn(n)*cr(m,n,k)
-                    civw(m,n,k) = fnn(n)*ci(m,n,k)
+            do 26 m=2, mmax
+                do 27 n=m, nlat
+                    crvw(m, n, k) = fnn(n)*cr(m, n, k)
+                    civw(m, n, k) = fnn(n)*ci(m, n, k)
 27              continue
 26          continue
 22      continue
     end if
     !
-    !     sythesize coefs into vector field (v,w)
+    !     sythesize coefs into vector field (v, w)
     !
-    call vhsec(nlat,nlon,ityp,nt,v,w,idvw,jdvw,brvw,bivw, &
-        crvw,civw,mmax,nlat,wsave,lwsav,wk,lwk,ierror)
+    call vhsec(nlat, nlon, ityp, nt, v, w, idvw, jdvw, brvw, bivw, &
+        crvw, civw, mmax, nlat, wsave, lwsav, wk, lwk, ierror)
     return
 end subroutine ivlapec1

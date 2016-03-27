@@ -22,12 +22,12 @@ module type_Workspace
         real (wp), allocatable, public :: forward_vector(:)
         real (wp), allocatable, public :: backward_scalar(:)
         real (wp), allocatable, public :: backward_vector(:)
-        real (wp), allocatable, public :: real_harmonic_coefficients(:,:)
-        real (wp), allocatable, public :: imaginary_harmonic_coefficients(:,:)
-        real (wp), allocatable, public :: real_polar_harmonic_coefficients(:,:)
-        real (wp), allocatable, public :: imaginary_polar_harmonic_coefficients(:,:)
-        real (wp), allocatable, public :: real_azimuthal_harmonic_coefficients(:,:)
-        real (wp), allocatable, public :: imaginary_azimuthal_harmonic_coefficients(:,:)
+        real (wp), allocatable, public :: real_harmonic_coefficients(:, :)
+        real (wp), allocatable, public :: imaginary_harmonic_coefficients(:, :)
+        real (wp), allocatable, public :: real_polar_harmonic_coefficients(:, :)
+        real (wp), allocatable, public :: imaginary_polar_harmonic_coefficients(:, :)
+        real (wp), allocatable, public :: real_azimuthal_harmonic_coefficients(:, :)
+        real (wp), allocatable, public :: imaginary_azimuthal_harmonic_coefficients(:, :)
         !----------------------------------------------------------------------
     contains
         !----------------------------------------------------------------------

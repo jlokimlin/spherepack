@@ -105,7 +105,7 @@ contains
         !<Purpose:
         !
         ! Computes the nlat-many gaussian (co)latitudes and weights.
-        ! the colatitudes are in radians and lie in the interval (0,pi).
+        ! the colatitudes are in radians and lie in the interval (0, pi).
         !
         ! References:
         !

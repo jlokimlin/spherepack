@@ -26,6 +26,6 @@ cd spherepack_wrapper; make all
 -----------------------------------------------------------------------------
 
 ## TODO
-* Replace old-style **DO** loops
+* Replace old-style **do** loops
 * Replace all instances of **go to** statements with **exit**, **cycle** and **select case**
 * Introduce parameterized kinds to remove the compiler flags **-fdefault-real-8 -fdefault-double-8**

@@ -38,39 +38,39 @@
 !
 ! ... files which must be loaded with igradgc.f
 !
-!     sphcom.f, hrfft.f, shsgc.f,vhagc.f
+!     sphcom.f, hrfft.f, shsgc.f, vhagc.f
 !
-!     subroutine igradgc(nlat,nlon,isym,nt,sf,isf,jsf,br,bi,mdb,ndb,
-!    +                   wshsgc,lshsgc,work,lwork,ierror)
+!     subroutine igradgc(nlat, nlon, isym, nt, sf, isf, jsf, br, bi, mdb, ndb, 
+!    +                   wshsgc, lshsgc, work, lwork, ierror)
 !
-!     let br,bi,cr,ci be the vector spherical harmonic coefficients
-!     precomputed by vhagc for a vector field (v,w).  let (v',w') be
-!     the irrotational component of (v,w) (i.e., (v',w') is generated
-!     by assuming cr,ci are zero and synthesizing br,bi with vhsgs).
+!     let br, bi, cr, ci be the vector spherical harmonic coefficients
+!     precomputed by vhagc for a vector field (v, w).  let (v', w') be
+!     the irrotational component of (v, w) (i.e., (v', w') is generated
+!     by assuming cr, ci are zero and synthesizing br, bi with vhsgs).
 !     then subroutine igradgc computes a scalar field sf such that
 !
-!            gradient(sf) = (v',w').
+!            gradient(sf) = (v', w').
 !
-!     i.e.,
+!     i.e., 
 !
-!            v'(i,j) = d(sf(i,j))/dtheta          (colatitudinal component of
+!            v'(i, j) = d(sf(i, j))/dtheta          (colatitudinal component of
 !                                                 the gradient)
 !     and
 !
-!            w'(i,j) = 1/sint*d(sf(i,j))/dlambda  (east longitudinal component
+!            w'(i, j) = 1/sint*d(sf(i, j))/dlambda  (east longitudinal component
 !                                                 of the gradient)
 !
 !     at the gaussian colatitude theta(i) (see nlat as input parameter)
 !     and longitude lambda(j) = (j-1)*2*pi/nlon where sint = sin(theta(i)).
 !
-!     note:  for an irrotational vector field (v,w), subroutine igradgc
-!     computes a scalar field whose gradient is (v,w).  in ay case,
+!     note:  for an irrotational vector field (v, w), subroutine igradgc
+!     computes a scalar field whose gradient is (v, w).  in ay case, 
 !     subroutine igradgc "inverts" the gradient subroutine gradgc.
 !
 !     input parameters
 !
 !     nlat   the number of points in the gaussian colatitude grid on the
-!            full sphere. these lie in the interval (0,pi) and are computed
+!            full sphere. these lie in the interval (0, pi) and are computed
 !            in radians in theta(1) <...< theta(nlat) by subroutine gaqd.
 !            if nlat is odd the equator will be included as the grid point
 !            theta((nlat+1)/2).  if nlat is even the equator will be
@@ -92,42 +92,42 @@
 !
 !      = 0
 !
-!            the symmetries/antsymmetries described in isym=1,2 below
-!            do not exist in (v,w) about the equator.  in this case sf
+!            the symmetries/antsymmetries described in isym=1, 2 below
+!            do not exist in (v, w) about the equator.  in this case sf
 !            is neither symmetric nor antisymmetric about the equator.
 !            sf is computed on the entire sphere.  i.e., in the array
-!            sf(i,j) for i=1,...,nlat and  j=1,...,nlon
+!            sf(i, j) for i=1, ..., nlat and  j=1, ..., nlon
 !
 !      = 1
 !
 !            w is antisymmetric and v is symmetric about the equator.
 !            in this case sf is antisymmetyric about the equator and
-!            is computed for the northern hemisphere only.  i.e.,
-!            if nlat is odd sf is computed in the array sf(i,j) for
-!            i=1,...,(nlat+1)/2 and for j=1,...,nlon.  if nlat is even
-!            sf is computed in the array sf(i,j) for i=1,...,nlat/2
-!            and j=1,...,nlon.
+!            is computed for the northern hemisphere only.  i.e., 
+!            if nlat is odd sf is computed in the array sf(i, j) for
+!            i=1, ..., (nlat+1)/2 and for j=1, ..., nlon.  if nlat is even
+!            sf is computed in the array sf(i, j) for i=1, ..., nlat/2
+!            and j=1, ..., nlon.
 !
 !      = 2
 !
 !            w is symmetric and v is antisymmetric about the equator.
 !            in this case sf is symmetyric about the equator and
-!            is computed for the northern hemisphere only.  i.e.,
-!            if nlat is odd sf is computed in the array sf(i,j) for
-!            i=1,...,(nlat+1)/2 and for j=1,...,nlon.  if nlat is even
-!            sf is computed in the array sf(i,j) for i=1,...,nlat/2
-!            and j=1,...,nlon.
+!            is computed for the northern hemisphere only.  i.e., 
+!            if nlat is odd sf is computed in the array sf(i, j) for
+!            i=1, ..., (nlat+1)/2 and for j=1, ..., nlon.  if nlat is even
+!            sf is computed in the array sf(i, j) for i=1, ..., nlat/2
+!            and j=1, ..., nlon.
 !
 !
 !     nt     nt is the number of scalar and vector fields.  some
 !            computational efficiency is obtained for multiple fields.
-!            the arrays br,bi, and sf can be three dimensional corresponding
-!            to an indexed multiple vector field (v,w).  in this case,
+!            the arrays br, bi, and sf can be three dimensional corresponding
+!            to an indexed multiple vector field (v, w).  in this case, 
 !            multiple scalar synthesis will be performed to compute each
-!            scalar field.  the third index for br,bi, and sf is the synthesis
-!            index which assumes the values k = 1,...,nt.  for a single
+!            scalar field.  the third index for br, bi, and sf is the synthesis
+!            index which assumes the values k = 1, ..., nt.  for a single
 !            synthesis set nt = 1.  the description of the remaining
-!            parameters is simplified by assuming that nt=1 or that br,bi,
+!            parameters is simplified by assuming that nt=1 or that br, bi, 
 !            and sf are two dimensional arrays.
 !
 !     isf    the first dimension of the array sf as it appears in
@@ -139,15 +139,15 @@
 !     jsf    the second dimension of the array sf as it appears in
 !            the program that calls igradgc. jsf must be at least nlon.
 !
-!     br,bi  two or three dimensional arrays (see input parameter nt)
+!     br, bi  two or three dimensional arrays (see input parameter nt)
 !            that contain vector spherical harmonic coefficients
-!            of the vector field (v,w) as computed by subroutine vhagc.
-!     ***    br,bi must be computed by vhagc prior to calling igradgc.
+!            of the vector field (v, w) as computed by subroutine vhagc.
+!     ***    br, bi must be computed by vhagc prior to calling igradgc.
 !
 !     mdb    the first dimension of the arrays br and bi as it appears in
 !            the program that calls igradgc (and vhagc). mdb must be at
-!            least min(nlat,nlon/2) if nlon is even or at least
-!            min(nlat,(nlon+1)/2) if nlon is odd.
+!            least min(nlat, nlon/2) if nlon is even or at least
+!            min(nlat, (nlon+1)/2) if nlon is odd.
 !
 !     ndb    the second dimension of the arrays br and bi as it appears in
 !            the program that calls igradgc (and vhagc). ndb must be at
@@ -155,7 +155,7 @@
 !
 !
 !  wshsgc    an array which must be initialized by subroutine shsgci.
-!            once initialized,
+!            once initialized, 
 !            wshsgc can be used repeatedly by igradgc as long as nlon
 !            and nlat remain unchanged.  wshsgc must not be altered
 !            between calls of igradgc.
@@ -164,8 +164,8 @@
 !  lshsgc    the dimension of the array wshsgc as it appears in the
 !            program that calls igradgc. define
 !
-!               l1 = min(nlat,(nlon+2)/2) if nlon is even or
-!               l1 = min(nlat,(nlon+1)/2) if nlon is odd
+!               l1 = min(nlat, (nlon+2)/2) if nlon is even or
+!               l1 = min(nlat, (nlon+1)/2) if nlon is odd
 !
 !            and
 !
@@ -185,16 +185,16 @@
 !
 !               l2 = nlat/2                    if nlat is even or
 !               l2 = (nlat+1)/2                if nlat is odd
-!               l1 = min(nlat,(nlon+2)/2) if nlon is even or
-!               l1 = min(nlat,(nlon+1)/2) if nlon is odd
+!               l1 = min(nlat, (nlon+2)/2) if nlon is even or
+!               l1 = min(nlat, (nlon+1)/2) if nlon is odd
 
 !            if isym is zero then lwork must be at least
 !
-!               nlat*(nlon*nt+max(3*l2,nlon)+2*nt*l1+1)
+!               nlat*(nlon*nt+max(3*l2, nlon)+2*nt*l1+1)
 !
 !            if isym is not zero then lwork must be at least
 !
-!               l2*(nlon*nt+max(3*nlat,nlon)) + nlat*(2*nt*l1+1)
+!               l2*(nlon*nt+max(3*nlat, nlon)) + nlat*(2*nt*l1+1)
 !
 !
 !
@@ -205,9 +205,9 @@
 !
 !     sf    a two or three dimensional array (see input parameter nt) that
 !           contain a scalar field whose gradient is the irrotational
-!           component of the vector field (v,w).  the vector spherical
-!           harmonic coefficients br,bi were precomputed by subroutine
-!           vhagc.  sf(i,j) is given at the gaussian colatitude theta(i)
+!           component of the vector field (v, w).  the vector spherical
+!           harmonic coefficients br, bi were precomputed by subroutine
+!           vhagc.  sf(i, j) is given at the gaussian colatitude theta(i)
 !           and longitude lambda(j) = (j-1)*2*pi/nlon.  the index ranges
 !           are defined at input parameter isym.
 !
@@ -226,11 +226,11 @@
 !
 ! **********************************************************************
 !   
-subroutine igradgc(nlat,nlon,isym,nt,sf,isf,jsf,br,bi,mdb,ndb, &
-    wshsgc,lshsgc,work,lwork,ierror)
-    dimension sf(isf,jsf,nt)
-    dimension br(mdb,ndb,nt),bi(mdb,ndb,nt)
-    dimension wshsgc(lshsgc),work(lwork)
+subroutine igradgc(nlat, nlon, isym, nt, sf, isf, jsf, br, bi, mdb, ndb, &
+    wshsgc, lshsgc, work, lwork, ierror)
+    dimension sf(isf, jsf, nt)
+    dimension br(mdb, ndb, nt), bi(mdb, ndb, nt)
+    dimension wshsgc(lshsgc), work(lwork)
     !
     !     check input parameters
     !
@@ -249,16 +249,16 @@ subroutine igradgc(nlat,nlon,isym,nt,sf,isf,jsf,br,bi,mdb,ndb, &
     ierror = 6
     if(jsf < nlon) return
     ierror = 7
-    mmax = min(nlat,(nlon+2)/2)
-    if(mdb < min(nlat,(nlon+1)/2)) return
+    mmax = min(nlat, (nlon+2)/2)
+    if(mdb < min(nlat, (nlon+1)/2)) return
     ierror = 8
     if(ndb < nlat) return
     ierror = 9
     !
     !     verify saved work space length
     !
-    l2 = (nlat+mod(nlat,2))/2
-    l1 = min((nlon+2)/2,nlat)
+    l2 = (nlat+mod(nlat, 2))/2
+    l1 = min((nlon+2)/2, nlat)
     if (lshsgc < nlat*(2*l2+3*l1-2)+3*l1*(1-l1)/2+nlon+15)return
     ierror = 10
     !
@@ -268,15 +268,15 @@ subroutine igradgc(nlat,nlon,isym,nt,sf,isf,jsf,br,bi,mdb,ndb, &
     if(isym > 0) ls = imid
     nln = nt*ls*nlon
     !
-    !     set first dimension for a,b (as requried by shsgc)
+    !     set first dimension for a, b (as requried by shsgc)
     !
-    mab = min(nlat,nlon/2+1)
+    mab = min(nlat, nlon/2+1)
     mn = mab*nlat*nt
     !     lwkmin = nln+ls*nlon+2*mn+nlat
     if (isym == 0) then
-        lwkmin = nlat*(nt*nlon+max(3*l2,nlon)+2*nt*l1+1)
+        lwkmin = nlat*(nt*nlon+max(3*l2, nlon)+2*nt*l1+1)
     else
-        lwkmin = l2*(nt*nlon+max(3*nlat,nlon))+nlat*(2*nt*l1+1)
+        lwkmin = l2*(nt*nlon+max(3*nlat, nlon))+nlat*(2*nt*l1+1)
     end if
     if (lwork < lwkmin) return
     ierror = 0
@@ -288,62 +288,62 @@ subroutine igradgc(nlat,nlon,isym,nt,sf,isf,jsf,br,bi,mdb,ndb, &
     is = ib + mn
     iwk = is + nlat
     liwk = lwork-2*mn-nlat
-    call igrdgc1(nlat,nlon,isym,nt,sf,isf,jsf,work(ia),work(ib),mab, &
-        work(is),mdb,ndb,br,bi,wshsgc,lshsgc,work(iwk),liwk,ierror)
+    call igrdgc1(nlat, nlon, isym, nt, sf, isf, jsf, work(ia), work(ib), mab, &
+        work(is), mdb, ndb, br, bi, wshsgc, lshsgc, work(iwk), liwk, ierror)
     return
 end subroutine igradgc
 
-subroutine igrdgc1(nlat,nlon,isym,nt,sf,isf,jsf,a,b,mab, &
-    sqnn,mdb,ndb,br,bi,wsav,lsav,wk,lwk,ierror)
-    dimension sf(isf,jsf,nt)
-    dimension br(mdb,ndb,nt),bi(mdb,ndb,nt),sqnn(nlat)
-    dimension a(mab,nlat,nt),b(mab,nlat,nt)
-    dimension wsav(lsav),wk(lwk)
+subroutine igrdgc1(nlat, nlon, isym, nt, sf, isf, jsf, a, b, mab, &
+    sqnn, mdb, ndb, br, bi, wsav, lsav, wk, lwk, ierror)
+    dimension sf(isf, jsf, nt)
+    dimension br(mdb, ndb, nt), bi(mdb, ndb, nt), sqnn(nlat)
+    dimension a(mab, nlat, nt), b(mab, nlat, nt)
+    dimension wsav(lsav), wk(lwk)
     !
     !     preset coefficient multiplyers in vector
     !
-    do 1 n=2,nlat
+    do 1 n=2, nlat
         fn = real(n-1)
         sqnn(n) = 1.0/sqrt(fn*(fn+1.))
 1   continue
     !
     !     set upper limit for vector m subscript
     !
-    mmax = min(nlat,(nlon+1)/2)
+    mmax = min(nlat, (nlon+1)/2)
     !
     !     compute multiple scalar field coefficients
     !
-    do 2 k=1,nt
+    do 2 k=1, nt
         !
         !     preset to 0.0
         !
-        do 3 n=1,nlat
-            do 4 m=1,mab
-                a(m,n,k) = 0.0
-                b(m,n,k) = 0.0
+        do 3 n=1, nlat
+            do 4 m=1, mab
+                a(m, n, k) = 0.0
+                b(m, n, k) = 0.0
 4           continue
 3       continue
         !
         !     compute m=0 coefficients
         !
-        do 5 n=2,nlat
-            a(1,n,k) = br(1,n,k)*sqnn(n)
-            b(1,n,k)= bi(1,n,k)*sqnn(n)
+        do 5 n=2, nlat
+            a(1, n, k) = br(1, n, k)*sqnn(n)
+            b(1, n, k)= bi(1, n, k)*sqnn(n)
 5       continue
         !
         !     compute m>0 coefficients
         !
-        do 6 m=2,mmax
-            do 7 n=m,nlat
-                a(m,n,k) = sqnn(n)*br(m,n,k)
-                b(m,n,k) = sqnn(n)*bi(m,n,k)
+        do 6 m=2, mmax
+            do 7 n=m, nlat
+                a(m, n, k) = sqnn(n)*br(m, n, k)
+                b(m, n, k) = sqnn(n)*bi(m, n, k)
 7           continue
 6       continue
 2   continue
     !
-    !     scalar sythesize a,b into sf
+    !     scalar sythesize a, b into sf
     !
-    call shsgc(nlat,nlon,isym,nt,sf,isf,jsf,a,b,mab,nlat,wsav, &
-        lsav,wk,lwk,ierror)
+    call shsgc(nlat, nlon, isym, nt, sf, isf, jsf, a, b, mab, nlat, wsav, &
+        lsav, wk, lwk, ierror)
     return
 end subroutine igrdgc1

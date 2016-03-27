@@ -39,15 +39,15 @@
 !
 ! ... files which must be loaded with vrtec.f
 !
-!     sphcom.f, hrfft.f, vhaec.f,shsec.f
+!     sphcom.f, hrfft.f, vhaec.f, shsec.f
 !
-!     subroutine vrtec(nlat,nlon,isym,nt,vt,ivrt,jvrt,cr,ci,mdc,ndc,
-!    +                 wshsec,lshsec,work,lwork,ierror)
+!     subroutine vrtec(nlat, nlon, isym, nt, vt, ivrt, jvrt, cr, ci, mdc, ndc, 
+!    +                 wshsec, lshsec, work, lwork, ierror)
 !
 !     given the vector spherical harmonic coefficients cr and ci, precomputed
-!     by subroutine vhaec for a vector field (v,w), subroutine vrtec
+!     by subroutine vhaec for a vector field (v, w), subroutine vrtec
 !     computes the vorticity of the vector field in the scalar array
-!     vt.  vt(i,j) is the vorticity at the colatitude
+!     vt.  vt(i, j) is the vorticity at the colatitude
 !
 !            theta(i) = (i-1)*pi/(nlat-1)
 !
@@ -55,13 +55,13 @@
 !
 !            lambda(j) = (j-1)*2*pi/nlon
 !
-!     on the sphere.  i.e.,
+!     on the sphere.  i.e., 
 !
-!            vt(i,j) =  [-dv/dlambda + d(sint*w)/dtheta]/sint
+!            vt(i, j) =  [-dv/dlambda + d(sint*w)/dtheta]/sint
 !
 !     where sint = sin(theta(i)).  w is the east longitudinal and v
 !     is the colatitudinal component of the vector field from which
-!     cr,ci were precomputed.  required associated legendre polynomials
+!     cr, ci were precomputed.  required associated legendre polynomials
 !     are recomputed rather than stored as they are in subroutine vrtes.
 !
 !
@@ -89,40 +89,40 @@
 !            computed on the full or half sphere as follows:
 !
 !      = 0
-!            the symmetries/antsymmetries described in isym=1,2 below
-!            do not exist in (v,w) about the equator.  in this case the
+!            the symmetries/antsymmetries described in isym=1, 2 below
+!            do not exist in (v, w) about the equator.  in this case the
 !            vorticity is neither symmetric nor antisymmetric about
 !            the equator.  the vorticity is computed on the entire
-!            sphere.  i.e., in the array vt(i,j) for i=1,...,nlat and
-!            j=1,...,nlon.
+!            sphere.  i.e., in the array vt(i, j) for i=1, ..., nlat and
+!            j=1, ..., nlon.
 !
 !      = 1
 !            w is antisymmetric and v is symmetric about the equator.
 !            in this case the vorticity is symmetyric about the
 !            equator and is computed for the northern hemisphere
 !            only.  i.e., if nlat is odd the vorticity is computed
-!            in the array vt(i,j) for i=1,...,(nlat+1)/2 and for
-!            j=1,...,nlon.  if nlat is even the vorticity is computed
-!            in the array vt(i,j) for i=1,...,nlat/2 and j=1,...,nlon.
+!            in the array vt(i, j) for i=1, ..., (nlat+1)/2 and for
+!            j=1, ..., nlon.  if nlat is even the vorticity is computed
+!            in the array vt(i, j) for i=1, ..., nlat/2 and j=1, ..., nlon.
 !
 !      = 2
 !            w is symmetric and v is antisymmetric about the equator
 !            in this case the vorticity is antisymmetric about the
 !            equator and is computed for the northern hemisphere
 !            only.  i.e., if nlat is odd the vorticity is computed
-!            in the array vt(i,j) for i=1,...,(nlat+1)/2 and for
-!            j=1,...,nlon.  if nlat is even the vorticity is computed
-!            in the array vt(i,j) for i=1,...,nlat/2 and j=1,...,nlon.
+!            in the array vt(i, j) for i=1, ..., (nlat+1)/2 and for
+!            j=1, ..., nlon.  if nlat is even the vorticity is computed
+!            in the array vt(i, j) for i=1, ..., nlat/2 and j=1, ..., nlon.
 !
 !
 !      nt    nt is the number of scalar and vector fields.  some
 !            computational efficiency is obtained for multiple fields.
-!            in the program that calls vrtec, the arrays cr,ci, and vort
+!            in the program that calls vrtec, the arrays cr, ci, and vort
 !            can be three dimensional corresponding to an indexed multiple
 !            vector field.  in this case multiple scalar synthesis will
 !            be performed to compute the vorticity for each field.  the
 !            third index is the synthesis index which assumes the values
-!            k=1,...,nt.  for a single synthesis set nt = 1.  the
+!            k=1, ..., nt.  for a single synthesis set nt = 1.  the
 !            description of the remaining parameters is simplified by
 !            assuming that nt=1 or that all the arrays are two dimensional.
 !
@@ -135,23 +135,23 @@
 !     jvrt   the second dimension of the array vt as it appears in
 !            the program that calls vrtec. jvrt must be at least nlon.
 !
-!    cr,ci   two or three dimensional arrays (see input parameter nt)
+!    cr, ci   two or three dimensional arrays (see input parameter nt)
 !            that contain vector spherical harmonic coefficients
-!            of the vector field (v,w) as computed by subroutine vhaec.
+!            of the vector field (v, w) as computed by subroutine vhaec.
 !     ***    cr and ci must be computed by vhaec prior to calling
 !            vrtec.
 !
 !      mdc   the first dimension of the arrays cr and ci as it
 !            appears in the program that calls vrtec. mdc must be at
-!            least min(nlat,nlon/2) if nlon is even or at least
-!            min(nlat,(nlon+1)/2) if nlon is odd.
+!            least min(nlat, nlon/2) if nlon is even or at least
+!            min(nlat, (nlon+1)/2) if nlon is odd.
 !
 !      ndc   the second dimension of the arrays cr and ci as it
 !            appears in the program that calls vrtec. ndc must be at
 !            least nlat.
 !
 !   wshsec   an array which must be initialized by subroutine shseci.
-!            once initialized,
+!            once initialized, 
 !            wshsec can be used repeatedly by vrtec as long as nlon
 !            and nlat remain unchanged.  wshsec must not be altered
 !            between calls of vrtec
@@ -159,8 +159,8 @@
 !   lshsec   the dimension of the array wshsec as it appears in the
 !            program that calls vrtec. define
 !
-!               l1 = min(nlat,(nlon+2)/2) if nlon is even or
-!               l1 = min(nlat,(nlon+1)/2) if nlon is odd
+!               l1 = min(nlat, (nlon+2)/2) if nlon is even or
+!               l1 = min(nlat, (nlon+1)/2) if nlon is odd
 !
 !            and
 !
@@ -176,8 +176,8 @@
 !    lwork   the dimension of the array work as it appears in the
 !            program that calls vrtec. define
 !
-!               l1 = min(nlat,nlon/2) if nlon is even or
-!               l1 = min(nlat,(nlon+1)/2) if nlon is odd
+!               l1 = min(nlat, nlon/2) if nlon is even or
+!               l1 = min(nlat, (nlon+1)/2) if nlon is odd
 !
 !            and
 !
@@ -186,11 +186,11 @@
 !
 !            if isym is zero then lwork must be at least
 !
-!               nlat*(nt*nlon+max(3*l2,nlon)+2*nt*l1+1)
+!               nlat*(nt*nlon+max(3*l2, nlon)+2*nt*l1+1)
 !
 !            if isym is not zero then lwork must be at least
 !
-!               l2*(nt*nlon+max(3*nlat,nlon)) + nlat*(2*nt*l1+1)
+!               l2*(nt*nlon+max(3*nlat, nlon)) + nlat*(2*nt*l1+1)
 !
 !
 !
@@ -200,9 +200,9 @@
 !
 !
 !     vt     a two or three dimensional array (see input parameter nt)
-!            that contains the vorticity of the vector field (v,w)
-!            whose coefficients cr,ci where computed by subroutine vhaec.
-!            vt(i,j) is the vorticity at the colatitude point theta(i) =
+!            that contains the vorticity of the vector field (v, w)
+!            whose coefficients cr, ci where computed by subroutine vhaec.
+!            vt(i, j) is the vorticity at the colatitude point theta(i) =
 !            (i-1)*pi/(nlat-1) and longitude point lambda(j) =
 !            (j-1)*2*pi/nlon. the index ranges are defined above at the
 !            input parameter isym.
@@ -224,11 +224,11 @@
 ! **********************************************************************
 !                                                                              
 !   
-subroutine vrtec(nlat,nlon,isym,nt,vort,ivrt,jvrt,cr,ci,mdc,ndc, &
-    wshsec,lshsec,work,lwork,ierror)
+subroutine vrtec(nlat, nlon, isym, nt, vort, ivrt, jvrt, cr, ci, mdc, ndc, &
+    wshsec, lshsec, work, lwork, ierror)
 
-    dimension vort(ivrt,jvrt,nt),cr(mdc,ndc,nt),ci(mdc,ndc,nt)
-    dimension wshsec(lshsec),work(lwork)
+    dimension vort(ivrt, jvrt, nt), cr(mdc, ndc, nt), ci(mdc, ndc, nt)
+    dimension wshsec(lshsec), work(lwork)
     !
     !     check input parameters
     !
@@ -247,8 +247,8 @@ subroutine vrtec(nlat,nlon,isym,nt,vort,ivrt,jvrt,cr,ci,mdc,ndc, &
     ierror = 6
     if(jvrt < nlon) return
     ierror = 7
-    if(mdc < min(nlat,(nlon+1)/2)) return
-    mmax = min(nlat,(nlon+2)/2)
+    if(mdc < min(nlat, (nlon+1)/2)) return
+    mmax = min(nlat, (nlon+2)/2)
     ierror = 8
     if(ndc < nlat) return
     ierror = 9
@@ -256,7 +256,7 @@ subroutine vrtec(nlat,nlon,isym,nt,vort,ivrt,jvrt,cr,ci,mdc,ndc, &
     !     verify saved work space (same as shec)
     !
     lzz1 = 2*nlat*imid
-    labc = 3*(max(mmax-2,0)*(nlat+nlat-mmax-1))/2
+    labc = 3*(max(mmax-2, 0)*(nlat+nlat-mmax-1))/2
     if(lshsec < lzz1+labc+nlon+15) return
     ierror = 10
     !
@@ -266,17 +266,17 @@ subroutine vrtec(nlat,nlon,isym,nt,vort,ivrt,jvrt,cr,ci,mdc,ndc, &
     if(isym > 0) ls = imid
     nln = nt*ls*nlon
     !
-    !     set first dimension for a,b (as requried by shsec)
+    !     set first dimension for a, b (as requried by shsec)
     !
-    mab = min(nlat,nlon/2+1)
+    mab = min(nlat, nlon/2+1)
     mn = mab*nlat*nt
-    !     if(lwork.lt.nln+max(ls*nlon,3*nlat*imid)+2*mn+nlat) return
-    l1 = min(nlat,(nlon+2)/2)
+    !     if(lwork.lt.nln+max(ls*nlon, 3*nlat*imid)+2*mn+nlat) return
+    l1 = min(nlat, (nlon+2)/2)
     l2 = (nlat+1)/2
     if (isym == 0) then
-        lwkmin =  nlat*(nt*nlon+max(3*l2,nlon)+2*nt*l1+1)
+        lwkmin =  nlat*(nt*nlon+max(3*l2, nlon)+2*nt*l1+1)
     else
-        lwkmin = l2*(nt*nlon+max(3*nlat,nlon)) + nlat*(2*nt*l1+1)
+        lwkmin = l2*(nt*nlon+max(3*nlat, nlon)) + nlat*(2*nt*l1+1)
     end if
     if (lwork < lwkmin) return
     ierror = 0
@@ -288,56 +288,56 @@ subroutine vrtec(nlat,nlon,isym,nt,vort,ivrt,jvrt,cr,ci,mdc,ndc, &
     is = ib+mn
     iwk = is+nlat
     lwk = lwork-2*mn-nlat
-    call vrtec1(nlat,nlon,isym,nt,vort,ivrt,jvrt,cr,ci,mdc,ndc, &
-        work(ia),work(ib),mab,work(is),wshsec,lshsec,work(iwk),lwk, &
+    call vrtec1(nlat, nlon, isym, nt, vort, ivrt, jvrt, cr, ci, mdc, ndc, &
+        work(ia), work(ib), mab, work(is), wshsec, lshsec, work(iwk), lwk, &
         ierror)
     return
 end subroutine vrtec
 
-subroutine vrtec1(nlat,nlon,isym,nt,vort,ivrt,jvrt,cr,ci,mdc,ndc, &
-    a,b,mab,sqnn,wshsec,lshsec,wk,lwk,ierror)
-    dimension vort(ivrt,jvrt,nt),cr(mdc,ndc,nt),ci(mdc,ndc,nt)
-    dimension a(mab,nlat,nt),b(mab,nlat,nt),sqnn(nlat)
-    dimension wshsec(lshsec),wk(lwk)
+subroutine vrtec1(nlat, nlon, isym, nt, vort, ivrt, jvrt, cr, ci, mdc, ndc, &
+    a, b, mab, sqnn, wshsec, lshsec, wk, lwk, ierror)
+    dimension vort(ivrt, jvrt, nt), cr(mdc, ndc, nt), ci(mdc, ndc, nt)
+    dimension a(mab, nlat, nt), b(mab, nlat, nt), sqnn(nlat)
+    dimension wshsec(lshsec), wk(lwk)
     !
     !     set coefficient multiplyers
     !
-    do 1 n=2,nlat
+    do 1 n=2, nlat
         fn = real(n-1)
         sqnn(n) = sqrt(fn*(fn+1.))
 1   continue
     !
     !     compute vorticity scalar coefficients for each vector field
     !
-    do 2 k=1,nt
-        do 3 n=1,nlat
-            do 4 m=1,mab
-                a(m,n,k) = 0.0
-                b(m,n,k) = 0.0
+    do 2 k=1, nt
+        do 3 n=1, nlat
+            do 4 m=1, mab
+                a(m, n, k) = 0.0
+                b(m, n, k) = 0.0
 4           continue
 3       continue
         !
         !     compute m=0 coefficients
         !
-        do 5 n=2,nlat
-            a(1,n,k) = sqnn(n)*cr(1,n,k)
-            b(1,n,k) = sqnn(n)*ci(1,n,k)
+        do 5 n=2, nlat
+            a(1, n, k) = sqnn(n)*cr(1, n, k)
+            b(1, n, k) = sqnn(n)*ci(1, n, k)
 5       continue
         !
         !     compute m>0 coefficients, use mmax from vector coef range
         !
-        mmax = min(nlat,(nlon+1)/2)
-        do 6 m=2,mmax
-            do 7 n=m,nlat
-                a(m,n,k) = sqnn(n)*cr(m,n,k)
-                b(m,n,k) = sqnn(n)*ci(m,n,k)
+        mmax = min(nlat, (nlon+1)/2)
+        do 6 m=2, mmax
+            do 7 n=m, nlat
+                a(m, n, k) = sqnn(n)*cr(m, n, k)
+                b(m, n, k) = sqnn(n)*ci(m, n, k)
 7           continue
 6       continue
 2   continue
     !
-    !     synthesize a,b into vort
+    !     synthesize a, b into vort
     !
-    call shsec(nlat,nlon,isym,nt,vort,ivrt,jvrt,a,b, &
-        mab,nlat,wshsec,lshsec,wk,lwk,ierror)
+    call shsec(nlat, nlon, isym, nt, vort, ivrt, jvrt, a, b, &
+        mab, nlat, wshsec, lshsec, wk, lwk, ierror)
     return
 end subroutine vrtec1

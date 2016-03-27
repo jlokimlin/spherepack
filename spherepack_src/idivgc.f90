@@ -38,31 +38,31 @@
 !
 ! ... files which must be loaded with idivec.f
 !
-!     sphcom.f, hrfft.f, vhsgc.f,shagc.f
+!     sphcom.f, hrfft.f, vhsgc.f, shagc.f
 !
-!     subroutine idivgc(nlat,nlon,isym,nt,v,w,idvw,jdvw,a,b,mdab,ndab,
-!    +                  wvhsgc,lvhsgc,work,lwork,pertrb,ierror)
+!     subroutine idivgc(nlat, nlon, isym, nt, v, w, idvw, jdvw, a, b, mdab, ndab, 
+!    +                  wvhsgc, lvhsgc, work, lwork, pertrb, ierror)
 !
 !     given the scalar spherical harmonic coefficients a and b, precomputed
 !     by subroutine shagc for a scalar array dv, subroutine idivgc computes
-!     an irrotational vector field (v,w) whose divergence is dv - pertrb.
+!     an irrotational vector field (v, w) whose divergence is dv - pertrb.
 !     w is the east longitude component and v is the colatitudinal component.
-!     pertrb is a constant which must be subtracted from dv for (v,w) to
+!     pertrb is a constant which must be subtracted from dv for (v, w) to
 !     exist (see the description of pertrb below).  usually pertrb is zero
-!     or small relative to dv.  the vorticity of (v,w) is the zero scalar
-!     field.  v(i,j) and w(i,j) are the velocity components at the gaussian
+!     or small relative to dv.  the vorticity of (v, w) is the zero scalar
+!     field.  v(i, j) and w(i, j) are the velocity components at the gaussian
 !     colatitude theta(i) (see nlat) and longitude lambda(j)=(j-1)*2*pi/nlon.
 !     the
 !
-!            divergence[v(i,j),w(i,j)]
+!            divergence[v(i, j), w(i, j)]
 !
-!          = [d(w(i,j)/dlambda + d(sint*v(i,j))/dtheta]/sint
+!          = [d(w(i, j)/dlambda + d(sint*v(i, j))/dtheta]/sint
 !
-!          = dv(i,j) - pertrb
+!          = dv(i, j) - pertrb
 !
 !     and
 !
-!            vorticity(v(i,j),w(i,j))
+!            vorticity(v(i, j), w(i, j))
 !
 !         =  [dv/dlambda - d(sint*w)/dtheta]/sint
 !
@@ -74,7 +74,7 @@
 !
 !
 !     nlat   the number of points in the gaussian colatitude grid on the
-!            full sphere. these lie in the interval (0,pi) and are computed
+!            full sphere. these lie in the interval (0, pi) and are computed
 !            in radians in theta(1) <...< theta(nlat) by subroutine gaqd.
 !            if nlat is odd the equator will be included as the grid point
 !            theta((nlat+1)/2).  if nlat is even the equator will be
@@ -93,65 +93,65 @@
 !
 !     isym   this has the same value as the isym that was input to
 !            subroutine shagc to compute the arrays a and b from the
-!            scalar field dv.  isym determines whether (v,w) are
+!            scalar field dv.  isym determines whether (v, w) are
 !            computed on the full or half sphere as follows:
 !
 !      = 0
 !
 !           dv is not symmetric about the equator. in this case
-!           the vector field (v,w) is computed on the entire sphere.
-!           i.e., in the arrays  v(i,j),w(i,j) for i=1,...,nlat and
-!           j=1,...,nlon.
+!           the vector field (v, w) is computed on the entire sphere.
+!           i.e., in the arrays  v(i, j), w(i, j) for i=1, ..., nlat and
+!           j=1, ..., nlon.
 !
 !      = 1
 !
 !           dv is antisymmetric about the equator. in this case w is
 !           antisymmetric and v is symmetric about the equator. w
-!           and v are computed on the northern hemisphere only.  i.e.,
-!           if nlat is odd they are computed for i=1,...,(nlat+1)/2
-!           and j=1,...,nlon.  if nlat is even they are computed for
-!           i=1,...,nlat/2 and j=1,...,nlon.
+!           and v are computed on the northern hemisphere only.  i.e., 
+!           if nlat is odd they are computed for i=1, ..., (nlat+1)/2
+!           and j=1, ..., nlon.  if nlat is even they are computed for
+!           i=1, ..., nlat/2 and j=1, ..., nlon.
 !
 !      = 2
 !
 !           dv is symmetric about the equator. in this case w is
 !           symmetric and v is antisymmetric about the equator. w
-!           and v are computed on the northern hemisphere only.  i.e.,
-!           if nlat is odd they are computed for i=1,...,(nlat+1)/2
-!           and j=1,...,nlon.  if nlat is even they are computed for
-!           i=1,...,nlat/2 and j=1,...,nlon.
+!           and v are computed on the northern hemisphere only.  i.e., 
+!           if nlat is odd they are computed for i=1, ..., (nlat+1)/2
+!           and j=1, ..., nlon.  if nlat is even they are computed for
+!           i=1, ..., nlat/2 and j=1, ..., nlon.
 !
 !
 !     nt     nt is the number of divergence and vector fields.  some
 !            computational efficiency is obtained for multiple fields.
-!            the arrays a,b,v, and w can be three dimensional and pertrb
+!            the arrays a, b, v, and w can be three dimensional and pertrb
 !            can be one dimensional corresponding to an indexed multiple
 !            array dv.  in this case, multiple vector synthesis will be
 !            performed to compute each vector field.  the third index for
-!            a,b,v,w and first for pertrb is the synthesis index which
-!            assumes the values k = 1,...,nt.  for a single synthesis set
+!            a, b, v, w and first for pertrb is the synthesis index which
+!            assumes the values k = 1, ..., nt.  for a single synthesis set
 !            nt = 1.  the description of the remaining parameters is
-!            simplified by assuming that nt=1 or that a,b,v,w are two
+!            simplified by assuming that nt=1 or that a, b, v, w are two
 !            dimensional and pertrb is a constant.
 !
-!     idvw   the first dimension of the arrays v,w as it appears in
+!     idvw   the first dimension of the arrays v, w as it appears in
 !            the program that calls idivgc. if isym = 0 then idvw
 !            must be at least nlat.  if isym = 1 or 2 and nlat is
 !            even then idvw must be at least nlat/2. if isym = 1 or 2
 !            and nlat is odd then idvw must be at least (nlat+1)/2.
 !
-!     jdvw   the second dimension of the arrays v,w as it appears in
+!     jdvw   the second dimension of the arrays v, w as it appears in
 !            the program that calls idivgc. jdvw must be at least nlon.
 !
-!     a,b    two or three dimensional arrays (see input parameter nt)
+!     a, b    two or three dimensional arrays (see input parameter nt)
 !            that contain scalar spherical harmonic coefficients
 !            of the divergence array dv as computed by subroutine shagc.
-!     ***    a,b must be computed by shagc prior to calling idivgc.
+!     ***    a, b must be computed by shagc prior to calling idivgc.
 !
 !     mdab   the first dimension of the arrays a and b as it appears in
 !            the program that calls idivgc (and shagc). mdab must be at
-!            least min(nlat,(nlon+2)/2) if nlon is even or at least
-!            min(nlat,(nlon+1)/2) if nlon is odd.
+!            least min(nlat, (nlon+2)/2) if nlon is even or at least
+!            min(nlat, (nlon+1)/2) if nlon is odd.
 !
 !     ndab   the second dimension of the arrays a and b as it appears in
 !            the program that calls idivgc (and shagc). ndab must be at
@@ -159,7 +159,7 @@
 !
 !
 !  wvhsgc    an array which must be initialized by subroutine vhsgci.
-!            once initialized,
+!            once initialized, 
 !            wvhsgc can be used repeatedly by idivgc as long as nlon
 !            and nlat remain unchanged.  wvhsgc must not be altered
 !            between calls of idivgc.
@@ -168,8 +168,8 @@
 !  lvhsgc    the dimension of the array wvhsgc as it appears in the
 !            program that calls idivgc. define
 !
-!               l1 = min(nlat,nlon/2) if nlon is even or
-!               l1 = min(nlat,(nlon+1)/2) if nlon is odd
+!               l1 = min(nlat, nlon/2) if nlon is even or
+!               l1 = min(nlat, (nlon+1)/2) if nlon is odd
 !
 !            and
 !
@@ -178,7 +178,7 @@
 !
 !            then lvhsgc must be at least
 !
-!               4*nlat*l2+3*max(l1-2,0)*(2*nlat-l1-1)+nlon+15
+!               4*nlat*l2+3*max(l1-2, 0)*(2*nlat-l1-1)+nlon+15
 !
 !
 !     work   a work array that does not have to be saved.
@@ -186,8 +186,8 @@
 !     lwork  the dimension of the array work as it appears in the
 !            program that calls idivgc. define
 !
-!               l1 = min(nlat,nlon/2) if nlon is even or
-!               l1 = min(nlat,(nlon+1)/2) if nlon is odd
+!               l1 = min(nlat, nlon/2) if nlon is even or
+!               l1 = min(nlat, (nlon+1)/2) if nlon is odd
 !
 !            and
 !
@@ -196,11 +196,11 @@
 !
 !            if isym = 0 then lwork must be at least
 !
-!               nlat*(2*nt*nlon+max(6*l2,nlon) + 2*nt*l1 + 1)
+!               nlat*(2*nt*nlon+max(6*l2, nlon) + 2*nt*l1 + 1)
 !
 !            if isym = 1 or 2 then lwork must be at least
 !
-!               l2*(2*nt*nlon+max(6*nlat,nlon)) + nlat*(2*nt*l1+1)
+!               l2*(2*nt*nlon+max(6*nlat, nlon)) + nlat*(2*nt*l1+1)
 !
 !
 !     **************************************************************
@@ -208,30 +208,30 @@
 !     output parameters
 !
 !
-!     v,w   two or three dimensional arrays (see input parameter nt) that
+!     v, w   two or three dimensional arrays (see input parameter nt) that
 !           contain an irrotational vector field whose divergence is
 !           dv-pertrb at the guassian colatitude point theta(i) and
 !           longitude point lambda(j)=(j-1)*2*pi/nlon.  w is the east
 !           longitude component and v is the colatitudinal component.  the
 !           indices for w and v are defined at the input parameter isym.
-!           the curl or vorticity of (v,w) is the zero vector field.  note
+!           the curl or vorticity of (v, w) is the zero vector field.  note
 !           that any nonzero vector field on the sphere will be multiple
 !           valued at the poles [reference swarztrauber].
 !
 !   pertrb  a nt dimensional array (see input parameter nt and assume nt=1
 !           for the description that follows).  dv - pertrb is a scalar
-!           field which can be the divergence of a vector field (v,w).
-!           pertrb is related to the scalar harmonic coefficients a,b
+!           field which can be the divergence of a vector field (v, w).
+!           pertrb is related to the scalar harmonic coefficients a, b
 !           of dv (computed by shagc) by the formula
 !
-!                pertrb = a(1,1)/(2.*sqrt(2.))
+!                pertrb = a(1, 1)/(2.*sqrt(2.))
 !
 !
 !
 !           the unperturbed scalar field dv can be the divergence of a
-!           vector field only if a(1,1) is zero.  if a(1,1) is nonzero
+!           vector field only if a(1, 1) is zero.  if a(1, 1) is nonzero
 !           (flagged by pertrb nonzero) then subtracting pertrb from
-!           dv yields a scalar field for which a(1,1) is zero.
+!           dv yields a scalar field for which a(1, 1) is zero.
 !
 !    ierror = 0  no errors
 !           = 1  error in the specification of nlat
@@ -247,11 +247,11 @@
 ! **********************************************************************
 !                                                                              
 !   
-subroutine idivgc(nlat,nlon,isym,nt,v,w,idvw,jdvw,a,b,mdab,ndab, &
-                  wvhsgc,lvhsgc,work,lwork,pertrb,ierror)
-dimension v(idvw,jdvw,nt),w(idvw,jdvw,nt),pertrb(nt)
-dimension a(mdab,ndab,nt),b(mdab,ndab,nt)
-dimension wvhsgc(lvhsgc),work(lwork)
+subroutine idivgc(nlat, nlon, isym, nt, v, w, idvw, jdvw, a, b, mdab, ndab, &
+                  wvhsgc, lvhsgc, work, lwork, pertrb, ierror)
+dimension v(idvw, jdvw, nt), w(idvw, jdvw, nt), pertrb(nt)
+dimension a(mdab, ndab, nt), b(mdab, ndab, nt)
+dimension wvhsgc(lvhsgc), work(lwork)
 !
 !     check input parameters
 !
@@ -270,16 +270,16 @@ if((isym==0 .and. idvw<nlat) .or. &
 ierror = 6
 if(jdvw < nlon) return
 ierror = 7
-mmax = min(nlat,(nlon+1)/2)
-if(mdab < min(nlat,(nlon+2)/2)) return
+mmax = min(nlat, (nlon+1)/2)
+if(mdab < min(nlat, (nlon+2)/2)) return
 ierror = 8
 if(ndab < nlat) return
 ierror = 9
 idz = (mmax*(nlat+nlat-mmax+1))/2
 lzimn = idz*imid
-l1 = min(nlat,(nlon+1)/2)
+l1 = min(nlat, (nlon+1)/2)
 l2 = (nlat+1)/2
-lwmin = 4*nlat*l2+3*max(l1-2,0)*(2*nlat-l1-1)+nlon+15
+lwmin = 4*nlat*l2+3*max(l1-2, 0)*(2*nlat-l1-1)+nlon+15
 if(lvhsgc < lwmin) return
 ierror = 10
 !
@@ -287,9 +287,9 @@ ierror = 10
 !
 mn = mmax*nlat*nt
 if(isym/=0  .and. lwork < &
-nlat*(2*nt*nlon+max(6*imid,nlon))+2*mn+nlat) return
+nlat*(2*nt*nlon+max(6*imid, nlon))+2*mn+nlat) return
 if(isym==0  .and. lwork < &
-imid*(2*nt*nlon+max(6*nlat,nlon))+2*mn+nlat) return
+imid*(2*nt*nlon+max(6*nlat, nlon))+2*mn+nlat) return
 ierror = 0
 !
 !     set work space pointers
@@ -299,56 +299,56 @@ ibi = ibr + mn
 is = ibi + mn
 iwk = is + nlat
 liwk = lwork-2*mn-nlat
-call idvgc1(nlat,nlon,isym,nt,v,w,idvw,jdvw,work(ibr),work(ibi), &
-            mmax,work(is),mdab,ndab,a,b,wvhsgc,lvhsgc,work(iwk), &
-            liwk,pertrb,ierror)
+call idvgc1(nlat, nlon, isym, nt, v, w, idvw, jdvw, work(ibr), work(ibi), &
+            mmax, work(is), mdab, ndab, a, b, wvhsgc, lvhsgc, work(iwk), &
+            liwk, pertrb, ierror)
 return
 end subroutine idivgc
 
-subroutine idvgc1(nlat,nlon,isym,nt,v,w,idvw,jdvw,br,bi,mmax, &
-sqnn,mdab,ndab,a,b,wsav,lwsav,wk,lwk,pertrb,ierror)
-dimension v(idvw,jdvw,nt),w(idvw,jdvw,nt),pertrb(nt)
-dimension br(mmax,nlat,nt),bi(mmax,nlat,nt),sqnn(nlat)
-dimension a(mdab,ndab,nt),b(mdab,ndab,nt)
-dimension wsav(lwsav),wk(lwk)
+subroutine idvgc1(nlat, nlon, isym, nt, v, w, idvw, jdvw, br, bi, mmax, &
+sqnn, mdab, ndab, a, b, wsav, lwsav, wk, lwk, pertrb, ierror)
+dimension v(idvw, jdvw, nt), w(idvw, jdvw, nt), pertrb(nt)
+dimension br(mmax, nlat, nt), bi(mmax, nlat, nt), sqnn(nlat)
+dimension a(mdab, ndab, nt), b(mdab, ndab, nt)
+dimension wsav(lwsav), wk(lwk)
 !
 !     preset coefficient multiplyers in vector
 !
-do 1 n=2,nlat
+do 1 n=2, nlat
 fn = real(n-1)
 sqnn(n) = sqrt(fn*(fn+1.))
 1 continue
 !
 !     compute multiple vector fields coefficients
 !
-do 2 k=1,nt
+do 2 k=1, nt
 !
 !     set divergence field perturbation adjustment
 !
-pertrb(k) = a(1,1,k)/(2.*sqrt(2.))
+pertrb(k) = a(1, 1, k)/(2.*sqrt(2.))
 !
-!     preset br,bi to 0.0
+!     preset br, bi to 0.0
 !
-do 3 n=1,nlat
-do 4 m=1,mmax
-br(m,n,k) = 0.0
-bi(m,n,k) = 0.0
+do 3 n=1, nlat
+do 4 m=1, mmax
+br(m, n, k) = 0.0
+bi(m, n, k) = 0.0
 4 continue
 3 continue
 !
 !     compute m=0 coefficients
 !
-do 5 n=2,nlat
-br(1,n,k) = -a(1,n,k)/sqnn(n)
-bi(1,n,k) = -b(1,n,k)/sqnn(n)
+do 5 n=2, nlat
+br(1, n, k) = -a(1, n, k)/sqnn(n)
+bi(1, n, k) = -b(1, n, k)/sqnn(n)
 5 continue
 !
 !     compute m>0 coefficients
 !
-do 6 m=2,mmax
-do 7 n=m,nlat
-br(m,n,k) = -a(m,n,k)/sqnn(n)
-bi(m,n,k) = -b(m,n,k)/sqnn(n)
+do 6 m=2, mmax
+do 7 n=m, nlat
+br(m, n, k) = -a(m, n, k)/sqnn(n)
+bi(m, n, k) = -b(m, n, k)/sqnn(n)
 7 continue
 6 continue
 2 continue
@@ -363,9 +363,9 @@ else if (isym==2) then
 ityp = 7
 end if
 !
-!     vector sythesize br,bi into irrotational (v,w)
+!     vector sythesize br, bi into irrotational (v, w)
 !
-call vhsgc(nlat,nlon,ityp,nt,v,w,idvw,jdvw,br,bi,cr,ci, &
-           mmax,nlat,wsav,lwsav,wk,lwk,ierror)
+call vhsgc(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
+           mmax, nlat, wsav, lwsav, wk, lwk, ierror)
 return
 end subroutine idvgc1
