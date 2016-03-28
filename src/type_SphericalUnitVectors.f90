@@ -4,7 +4,7 @@ module type_SphericalUnitVectors
         wp => REAL64, &
         ip => INT32
 
-    use type_Grid, only: &
+    use type_SphericalGrid, only: &
         SphericalGrid
 
     use type_TrigonometricFunctions, only: &

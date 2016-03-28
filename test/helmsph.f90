@@ -95,6 +95,8 @@ program helmsph
     real (wp)               :: approximate_solution(NLATS, NLONS)
     real (wp)               :: source_term(NLATS, NLONS)
     real (wp)               :: helmholtz_constant, discretization_error
+    real (wp)               :: pertrb
+    integer (ip)            :: ierror
     !----------------------------------------------------------------------
 
     ! Set up workspace arrays
@@ -125,14 +127,33 @@ program helmsph
     !
     ! Solve Helmholtz equation on the sphere in u
     !
-    associate( &
-        xlmbda => helmholtz_constant, &
-        rhs => source_term, &
-        u => approximate_solution &
-        )
-        call sphere%invert_helmholtz( xlmbda, rhs, u)
-    end associate
+!    associate( &
+!        xlmbda => helmholtz_constant, &
+!        rhs => source_term, &
+!        u => approximate_solution &
+!        )
+!        call sphere%invert_helmholtz( xlmbda, rhs, u)
+!    end associate
 
+    associate( workspace => sphere%workspace)
+        associate( &
+            xlmbda => helmholtz_constant, &
+            nlat => sphere%NUMBER_OF_LATITUDES, &
+            nlon => sphere%NUMBER_OF_LONGITUDES, &
+            isym => sphere%SCALAR_SYMMETRIES, &
+            nt => sphere%NUMBER_OF_SYNTHESES, &
+            u => approximate_solution, &
+            a => workspace%real_harmonic_coefficients, &
+            b => workspace%imaginary_harmonic_coefficients, &
+            wshsec => workspace%backward_scalar, &
+            lshsec => size(workspace%backward_scalar), &
+            work => workspace%legendre_workspace, &
+            lwork => size(workspace%legendre_workspace) &
+            )
+            call islapec(nlat,nlon,isym,nt,xlmbda,u,nlat,nlon,a,b,nlat,nlat, &
+                wshsec,lshsec,work,lwork,pertrb,ierror)
+        end associate
+    end associate
     !
     ! Compute and print maximum error
     !
@@ -175,5 +196,4 @@ program helmsph
     call sphere%destroy()
 
 end program helmsph
-
 

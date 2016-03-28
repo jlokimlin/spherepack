@@ -1,4 +1,4 @@
-module type_Grid
+module type_SphericalGrid
 
     use, intrinsic :: iso_fortran_env, only: &
         wp => REAL64, &
@@ -156,4 +156,4 @@ contains
 
     end subroutine print_to_unformatted_binary_files
 
-end module type_Grid
+end module type_SphericalGrid

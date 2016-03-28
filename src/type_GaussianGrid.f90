@@ -4,7 +4,7 @@ module type_GaussianGrid
         wp => REAL64, &
         ip => INT32
 
-    use type_Grid, only: &
+    use type_SphericalGrid, only: &
         SphericalGrid
 
     !!! gaqd
@@ -187,6 +187,9 @@ contains
             error stop 'TYPE(GaussianGrid): '&
                 //'uninitialized object in UNFORMATTED_PRINT'
         end if
+
+        ! Write latitudes and longitudes
+        call this%print_to_unformatted_binary_files(header)
 
         ! Write gaussian weights
         associate( wts => this%gaussian_weights )

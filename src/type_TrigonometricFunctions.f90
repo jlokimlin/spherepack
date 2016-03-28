@@ -4,7 +4,7 @@ module type_TrigonometricFunctions
         wp => REAL64, &
         ip => INT32
 
-    use type_Grid, only: &
+    use type_SphericalGrid, only: &
         SphericalGrid
 
     ! Explicit typing only

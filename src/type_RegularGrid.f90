@@ -4,7 +4,7 @@ module type_RegularGrid
         wp => REAL64, &
         ip => INT32
 
-    use type_Grid, only: &
+    use type_SphericalGrid, only: &
         SphericalGrid
 
     ! Explicit typing only
@@ -153,7 +153,15 @@ contains
         character (len=*),   intent (in)     :: header
         !----------------------------------------------------------------------
 
-        call this%print_to_unformatted_binary_files( header )
+        ! Check if object is usable
+        if ( this%initialized .eqv. .false. ) then
+            error stop 'TYPE(RegularGrid): '&
+                //'uninitialized object in UNFORMATTED_PRINT'
+        end if
+
+        ! Write latitudes and longitudes
+        call this%print_to_unformatted_binary_files(header)
+
 
     end subroutine unformatted_print
 

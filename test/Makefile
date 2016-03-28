@@ -12,13 +12,19 @@ SRC=$(subst .o,.f90, $(OBJ))
 
 EXES=$(subst .o,.exe, $(OBJ))
 
+ENFORCE_64_BIT_PRECISION = \
+-fdefault-real-8 \
+-fdefault-double-8
+
+F90 := gfortran $(ENFORCE_64_BIT_PRECISION)
+
 run: $(EXES)
 
 $(EXES): $(SRC)
 
 %.exe : %.f90
 	rm -f $@
-	$(FC) $(FFLAGS) $< -o $@ $(LINKS)
+	$(F90) $(FFLAGS) $< -o $@ $(LINKS)
 	./$@
 
 clean:

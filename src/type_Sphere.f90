@@ -7,7 +7,7 @@ module type_Sphere
     use type_Workspace, only: &
         Workspace
 
-    use type_Grid, only: &
+    use type_SphericalGrid, only: &
         SphericalGrid
 
     use type_SphericalUnitVectors, only: &
