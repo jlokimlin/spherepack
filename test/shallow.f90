@@ -1,5 +1,4 @@
 !
-!
 !     * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !     *                                                               *
 !     *                  copyright (c) 1998 by UCAR                   *
@@ -31,18 +30,26 @@
 !     * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !
 !
-!     Non-linear steady-state geostropic flow in a shallow water model.
 !
-!     Errors should be O(10E-5) or less in 32-bit precision, O(10E-7) or less
-!     in 64-bit precision.
+! ... file shallow.f
 !
+!     program shallow solves the nonlinear shallow-water equations
+!     on the sphere using spherepack software.
 !
-!     The nonlinear shallow-water equations on the sphere are
-!     solved using a spectral method based on the spherical harmonics.
-!     the method is described in the paper:
+! ... required spherepack files
+!
+!     vtses.f, dives.f, vrtes.f, grades.f, sphcom.f, hrfft.f,
+!     vhaes.f,vhses.f,shaes.f,shses.f
+!
+
+program shallow
+!
+!     the nonlinear shallow-water equations on the sphere are
+!     solved using a spectral method based on the spherical
+!     vector harmonics. the method is described in the paper:
 !
 ! [1] p. n. swarztrauber, spectral transform methods for solving
-!     the shallow-water equations on the sphere, p.n. swarztrauber, 
+!     the shallow-water equations on the sphere, p.n. swarztrauber,
 !     monthly weather review, vol. 124, no. 4, april 1996, pp. 730-744.
 !
 !     this program implements test case 3 (steady nonlinear rotated flow)
@@ -51,15 +58,15 @@
 ! [2] d.l. williamson, j.b. drake, j.j. hack, r. jakob, and
 !     p.n. swarztrauber, j. comp. phys., a standard test set
 !     for numerical approximations to the shallow-water
-!     equations in spherical geometry, j. comp. phys., 
+!     equations in spherical geometry, j. comp. phys.,
 !     vol. 102, no. 1, sept. 1992, pp. 211-224.
 !
 ! definitions:
 !
 !
-!     nlat          number of latitudes
+!     nlat          number of latitudes including poles
 !     nlon          number of distinct longitudes
-!     ntrunc        max wave number
+!     mmode         max wave number
 !     omega         rotation rate of earth in radians per second
 !     aa            radius of earth in meters
 !     pzero         mean height of geopotential
@@ -71,574 +78,563 @@
 !     lambda        longitude
 !     theta         colatitude
 !
-!   the second dimension of the following two dimensional arrays
-!   corresponds to the latitude index with values j=1, ..., nlat
-!   going from north to south.
-!   the second dimension is longitude with values i=1, ..., nlon
-!   where i=1 corresponds to zero longitude and j=nlon corresponds
+!   the first dimension of the following two dimensional arrays
+!   corresponds to the latitude index with values i=1,...,nlat
+!   where i=1 is the north pole and i=nlat is the south pole.
+!   the second dimension is longitude with values j=1,...,nlon
+!   where j=1 corresponds to zero longitude and j=nlon corresponds
 !   to 2pi minus 2pi/nlon.
 !
-!     u(i, j)       east longitudinal velocity component at t=time
-!     v(i, j)       latitudinal velocity component at t=time
-!     p(i, j)       +pzero = geopotential at t=time
+!     u(i,j)       east longitudinal velocity component at t=time
+!     v(i,j)       latitudinal velocity component at t=time
+!     p(i,j)       +pzero = geopotential at t=time
 !
-!     divg(i, j)    divergence (d/dtheta (cos(theta) v)
+!     unew(i,j)    east longitudinal velocity component at t=time+dt
+!     vnew(i,j)    latitudinal velocity component at t=time+dt
+!     pnew(i,j)    +pzero = geopotential at t=time+dt
+!
+!     uold(i,j)    east longitudinal velocity component at t=time-dt
+!     vold(i,j)    latitudinal velocity component at t=time-dt
+!     pold(i,j)    +pzero = geopotential at t=time-dt
+!
+!     divg(i,j)    divergence (d/dtheta (cos(theta) v)
 !                                          + du/dlambda)/cos(theta)
-!     vrtg(i, j)    vorticity  (d/dtheta (cos(theta) u)
+!     vort(i,j)    vorticity  (d/dtheta (cos(theta) u)
 !                                          - dv/dlambda)/cos(theta)
 !
-!     uxact(i, j)   the "exact" longitudinal velocity component
-!     vxact(i, j)   the "exact" latitudinal  velocity component
-!     pxact(i, j)   the "exact" geopotential
+!     ut(i,j)      latitudinal derivative of longitudinal
+!                  velocity component
+!     vt(i,j)      latitudinal derivative of latitudinal
+!                  velocity component
 !
-program shallow
-
-    use, intrinsic :: iso_fortran_env, only: &
-        wp => REAL64, &
-        ip => INT32, &
-        stdout => OUTPUT_UNIT, &
-        compiler_version, &
-        compiler_options
-
-    use type_RegularSphere, only: &
-        RegularSphere
-    use type_GaussianSphere, only: &
-        GaussianSphere
-
-    ! Explicit typing only
-    implicit none
-
-    !--------------------------------------------------------------------------------
-    ! Dictionary
-    !--------------------------------------------------------------------------------
-    integer (ip), parameter :: NLONS=128
-    integer (ip), parameter :: NLATS=NLONS/2! + 1
-    integer (ip), parameter :: NTRUNC=NLATS-1
-    integer (ip), parameter :: NL = 90
-    integer (ip), parameter :: NMDIM = (NTRUNC+1)*(NTRUNC+2)/2
-    integer (ip)            :: MAXIMUM_NUMBER_OF_TIME_ITERATIONS
-    integer (ip)            :: MPRINT
-    integer (ip)            :: i, j !! Counters
-    integer (ip)            :: cycle_number
-    integer (ip)            :: n_save1, n_save2,  n_old, n_now, n_new !! Iteration counters
-    real (wp)               :: phlt(361)
-    real (wp), dimension(NLONS, NLATS) :: uxact
-    real (wp), dimension(NLONS, NLATS) :: vxact
-    real (wp), dimension(NLONS, NLATS) :: pxact
-    real (wp), dimension(NLONS, NLATS) :: u
-    real (wp), dimension(NLONS, NLATS) :: v
-    real (wp), dimension(NLONS, NLATS) :: p
-    real (wp), dimension(NLONS, NLATS) :: f
-    real (wp), dimension(NLONS, NLATS) :: coslat
-    real (wp), dimension(NLONS, NLATS) :: ug
-    real (wp), dimension(NLONS, NLATS) :: vg
-    real (wp), dimension(NLONS, NLATS) :: pg
-    real (wp), dimension(NLONS, NLATS) :: vrtg
-    real (wp), dimension(NLONS, NLATS) :: divg
-    real (wp), dimension(NLONS, NLATS) :: scrg1
-    real (wp), dimension(NLONS, NLATS) :: scrg2
-    real (wp), dimension(NLATS, NLONS) :: temp, temp1, temp2
-    complex (wp), dimension(NMDIM) :: vort_spec
-    complex (wp), dimension(NMDIM) :: div_spec
-    complex (wp), dimension(NMDIM) :: p_spec
-    complex (wp), dimension(NMDIM) :: scr_spec
-    complex (wp), dimension(NMDIM, 3) :: dvrtdt_spec
-    complex (wp), dimension(NMDIM, 3) :: ddivdt_spec
-    complex (wp), dimension(NMDIM, 3) :: dpdt_spec
-    real (wp), parameter :: RADIUS_OF_EARTH_IN_METERS = 6.37122e+6_wp
-    real (wp), parameter :: PI = acos( -1.0_wp )
-    real (wp), parameter :: HALF_PI = 0.5_wp * PI
-    real (wp), parameter :: RADIAN_UNIT = PI/180.0_wp
-    real (wp), parameter :: ROTATION_RATE_OF_EARTH = 7.292e-5_wp
-    real (wp), parameter :: DT = 600.0_wp
-    real (wp), parameter :: TILT_ANGLE = 60.0_wp
-    real (wp), parameter :: ALPHA = RADIAN_UNIT * TILT_ANGLE
-    
-    
-    real (wp), parameter :: U_ZERO = 40.0_wp
-    real (wp), parameter :: P_ZERO = 2.94e+4_wp
-    real (wp), parameter :: F_ZERO = 2.0_wp * ROTATION_RATE_OF_EARTH
-    real (wp) :: time
-    real (wp) :: lambda_hat
-    real (wp) :: u_hat
-    real (wp) :: theta_hat
-    real (wp) :: evmax
-    real (wp) :: epmax
-    real (wp) :: dvmax
-    real (wp) :: dpmax
-    real (wp) :: model_time_in_hours
-    real (wp) :: dvgm
-    real (wp) :: v2max
-    real (wp) :: p2max
-    real (wp) :: vmax
-    real (wp)                       :: pmax
-    character (len=:), allocatable  :: model_write_format, error_write_format
-    type (GaussianSphere)            :: sphere
-    !--------------------------------------------------------------------------------
-
-    write( stdout, '(A)' ) ''
-    write( stdout, '(A)') ' *** Test program for TYPE(GaussianSphericalHarmonic) ***'
-    write( stdout, '(A)') ''
-    write( stdout, '(A)') 'Non-linear steady-state geostropic flow in a shallow water model'
-    write( stdout, '(A)') ''
-    write( stdout, '(A, I11)') 'Triangular trunction number  = ', NTRUNC
-    write( stdout, '(A, I11)') 'Number of gaussian latitudes = ', NLATS
-    write( stdout, '(A)') ''
-
-    ! Set constants
-    MAXIMUM_NUMBER_OF_TIME_ITERATIONS = nint( 864.0e+2_wp * 5.0_wp/DT, kind=ip)
-    MPRINT = MAXIMUM_NUMBER_OF_TIME_ITERATIONS/10
-
-    !  ==> initialize regular (equally-spaced) spherical harmonic
-    call sphere%create( &
-        nlat=NLATS, nlon=NLONS, ntrunc=NTRUNC, rsphere=RADIUS_OF_EARTH_IN_METERS)
-
-    ! ==> compute the derivative of the unrotated geopotential
-    !     p as a function of latitude
-    associate( rsphere => sphere%RADIUS_OF_SPHERE )
-        do i = 1, NL - 2
-            associate( theta => real(i, kind=wp) * (PI/(NL-1)) )
-                u_hat = &
-                    initialize_unrotated_longitudinal_velocity( U_ZERO, HALF_PI - theta )
-
-                phlt(i) = &
-                    cos(theta) * u_hat * ( u_hat/sin(theta) + rsphere * F_ZERO )/(NL-1)
-            end associate
-        end do
-    end associate
-
-    !     compute sine transform of the derivative of the geopotential
-    !     for the purpose of computing the geopotential by integration
-    !     see equation (3.9) in reference [1] above
-
-    call compute_sine_transform(phlt(1:NL-2))
-
-    !     compute the cosine coefficients of the unrotated geopotential
-    !     by the formal integration of the sine series representation
-
-    do i = 1, NL - 2
-        phlt(i) = -phlt(i)/i
-    end do
-
-    !     phlt(i) contains the coefficients in the cosine series
-    !     representation of the unrotated geopotential that are used
-    !     below to compute the geopotential on the rotated grid.
-    !
-    !     compute the initial values of  east longitudinal
-    !     and latitudinal velocities u and v as well as the
-    !     geopotential p and coriolis f on the rotated grid.
-    !
-
-
-    do j = 1, NLONS
-        associate( &
-            latitudes => sphere%grid%latitudes, &
-            lambda => sphere%grid%longitudes(j) &
-            )
-            associate( &
-                cos_a => cos(ALPHA), &
-                sin_a => sin(ALPHA), &
-                cos_l => cos(lambda), &
-                sin_l => sin(lambda) &
-                )
-                do i = 1, NLATS
-
-                    !     lambda is longitude, theta is colatitude, and pi/2-theta is
-                    !     latitude on the rotated grid. lhat and that are longitude
-                    !     and colatitude on the unrotated grid. see text starting at
-                    !     equation (3.10)
-                    !
-                    associate( theta => HALF_PI-asin(latitudes(i)) )
-                        associate( &
-                            cos_t => cos(theta), &
-                            sin_t => sin(theta) &
-                            )
-                            associate( &
-                                sint   => cos_a*cos_t+sin_a*sin_t*cos_l, &
-                                cthclh => cos_a*sin_t*cos_l-sin_a*cos_t, &
-                                cthslh => sin_t*sin_l &
-                                )
-                                lambda_hat = atanxy(cthclh, cthslh)
-                                associate( &
-                                    cos_lh => cos(lambda_hat), &
-                                    sin_lh => sin(lambda_hat) &
-                                    )
-                                    associate( cost => cos_lh*cthclh+sin_lh*cthslh )
-                                        theta_hat = atanxy(sint, cost)
-                                        u_hat = initialize_unrotated_longitudinal_velocity(U_ZERO, HALF_PI-theta_hat)
-                                        pxact(j, i) = compute_cosine_transform(theta_hat, phlt)
-                                        uxact(j, i) = u_hat*(cos_a*sin_l*sin_lh+cos_l*cos_lh)
-                                        vxact(j, i) = u_hat*(cos_a*cos_l*sin_lh*cos_t-cos_lh*sin_l*cos_t+sin_a*sin_lh*sin_t)
-                                        f(j, i) = F_ZERO * sint
-                                        coslat(j, i) = sqrt(1.0_wp - latitudes(i)**2)
-                                    end associate
-                                end associate
-                            end associate
-                        end associate
-                    end associate
-                end do
-            end associate
-        end associate
-    end do
-
-    vmax = 0.0_wp
-    pmax = 0.0_wp
-    v2max = 0.0_wp
-    p2max = 0.0_wp
-    do j = 1, NLATS
-        do i = 1, NLONS
-            v2max = v2max + uxact(i, j)**2 + vxact(i, j)**2
-            p2max = p2max + pxact(i, j)**2
-            vmax = max(abs(uxact(i, j)), abs(vxact(i, j)), vmax)
-            pmax = max(abs(pxact(i, j)), pmax)
-        end do
-    end do
-    !
-    !==> initialize first time step
-    !
-    u = uxact
-    v = vxact
-    p = pxact
-    ug = u*coslat
-    vg = v*coslat
-    pg = p
-
-    !
-    !==>  compute spectral coeffs of initial vrt, div, p.
-    !
-    ! transpose data.
-    ! minus sign to account for difference between
-    ! mathematical and geophysical spherical coords.
-
-    temp1 = transpose(ug)
-    temp2 = -transpose(vg)
-    call sphere%get_vorticity_and_divergence_coefficients_from_velocities( &
-        temp1, temp2, vort_spec, div_spec)
-
-    temp = transpose(p)
-    call sphere%analyze_into_complex_spectral_coefficients( temp, p_spec)
-    !
-    !==> time step loop
-    !
-    n_new = 1
-    n_now = 2
-    n_old = 3
-
-    !
-    !==> Allocate memory for formatted model write statements
-    !
-    allocate( model_write_format, source=&
-        '(A, i10, A, f10.2/, A, f10.0, A, i10/, A, i10, '&
-        //'A, i10/, A, 1pe15.6, A, 1pe15.6, /A, 1pe15.6, A, 1pe15.6)' &
-        )
-
-    !
-    !==> Allocate memory for formatted error write statements
-    !
-    allocate( error_write_format, source='(2(A, 1pe15.6)/, A, 1pe15.6)' )
-
-    do cycle_number = 0, MAXIMUM_NUMBER_OF_TIME_ITERATIONS
-
-        time = real(cycle_number, kind=wp)*DT
-
-        !==> Inverse transform to get vort and phig on grid
-        !
-        call sphere%synthesize_from_complex_spectral_coefficients(vort_spec, temp )
-        vrtg = transpose(temp)
-
-        call sphere%synthesize_from_complex_spectral_coefficients(p_spec, temp)
-        pg = transpose(temp)
-
-        !
-        !==> synthesize velocites u and v from spectral coeffs. of vort and div
-        !
-        call sphere%get_velocities_from_vorticity_and_divergence_coefficients( &
-            vort_spec, div_spec, temp1, temp2 )
-        ug = transpose(temp1)
-        vg = -transpose(temp2)
-        !
-        !==> compute error statistics
-        !
-        if (mod(cycle_number, MPRINT) == 0) then
-            ! ==> synthesize divergence from spectral coefficients
-            call sphere%synthesize_from_complex_spectral_coefficients(div_spec, temp)
-            divg = transpose(temp)
-            u = ug
-            v = vg
-            p = pg
-            model_time_in_hours = time/3600.0_wp
-
-            !
-            !==> Write model to console
-            !
-            write( stdout, '(A)' ) ''
-            write( stdout, '(A)' ) ' steady nonlinear rotated flow:'
-            write( stdout, fmt = model_write_format ) &
-                ' cycle number              ', cycle_number, &
-                ' model time in  hours      ', model_time_in_hours, &
-                ' time step in seconds      ', DT, &
-                ' number of latitudes       ', NLATS,    &
-                ' number of longitudes      ', NLONS,    &
-                ' max wave number           ', NTRUNC,    &
-                ' rotation rate        ', ROTATION_RATE_OF_EARTH,   &
-                ' mean height          ', P_ZERO,     &
-                ' maximum velocity     ', U_ZERO,      &
-                ' tilt angle           ', TILT_ANGLE
-
-            !
-            !==> Initialize equantities
-            !
-            dvgm = 0.0_wp
-            dvmax = 0.0_wp
-            dpmax = 0.0_wp
-            evmax = 0.0_wp
-            epmax = 0.0_wp
-
-            do j=1, NLATS
-                do i=1, NLONS
-                    dvgm = &
-                        max(dvgm, abs(divg(i, j)))
-                    dvmax = &
-                        dvmax+(u(i, j)-uxact(i, j))**2+(v(i, j)-vxact(i, j))**2
-                    dpmax = &
-                        dpmax+(p(i, j)-pxact(i, j))**2
-                    evmax = &
-                        max(evmax, abs(v(i, j)-vxact(i, j)), abs(u(i, j)-uxact(i, j)))
-                    epmax = &
-                        max(epmax, abs(p(i, j)-pxact(i, j)))
-                end do
-            end do
-
-            dvmax = sqrt(dvmax/v2max)
-            dpmax = sqrt(dpmax/p2max)
-            evmax = evmax/vmax
-            epmax = epmax/pmax
-
-            !
-            !===> Write errors to console
-            !
-            write( stdout, fmt = error_write_format ) &
-                ' max error in velocity', evmax, &
-                ' max error in geopot. ', epmax, &
-                ' l2 error in velocity ', dvmax, &
-                ' l2 error in geopot.  ', dpmax, &
-                ' maximum divergence   ', dvgm
-        end if
-
-        !==> Compute right-hand sides of prognostic eqns.
-
-        scrg1 = ug * ( vrtg + f )
-        scrg2 = vg * ( vrtg + f )
-
-        temp1 = transpose(scrg1)
-        temp2 = -transpose(scrg2 )
-        call sphere%get_vorticity_and_divergence_coefficients_from_velocities( &
-            temp1, temp2, ddivdt_spec(:, n_new), dvrtdt_spec(:, n_new) )
-
-        dvrtdt_spec(:, n_new) = -dvrtdt_spec(:, n_new)
-
-        scrg1 = ug * ( pg + P_ZERO )
-        scrg2 = vg * ( pg + P_ZERO )
-
-        temp1 = transpose(scrg1)
-        temp2 = -transpose(scrg2)
-        call sphere%get_vorticity_and_divergence_coefficients_from_velocities( &
-            temp1, temp2, scr_spec, dpdt_spec(:, n_new))
-
-        dpdt_spec(:, n_new) = -dpdt_spec(:, n_new)
-
-        scrg1 = pg + 0.5_wp * ( (ug**2 + vg**2) )!/ coslat**2 )
-
-        temp1 = transpose(scrg1 )
-        call sphere%analyze_into_complex_spectral_coefficients( temp1, scr_spec)
-
-        associate( lap => sphere%laplacian_coefficients )
-            ddivdt_spec(:, n_new) = ddivdt_spec(:, n_new) - lap * scr_spec
-        end associate
-
-        !==> update vrt and div with third-order adams-bashforth.
-
-        !==> forward euler, then 2nd-order adams-bashforth time steps to start.
-
-        select case (cycle_number)
-            case (0)
-                dvrtdt_spec(:, n_now) = dvrtdt_spec(:, n_new)
-                dvrtdt_spec(:, n_old) = dvrtdt_spec(:, n_new)
-                ddivdt_spec(:, n_now) = ddivdt_spec(:, n_new)
-                ddivdt_spec(:, n_old) = ddivdt_spec(:, n_new)
-                dpdt_spec(:, n_now) = dpdt_spec(:, n_new)
-                dpdt_spec(:, n_old) = dpdt_spec(:, n_new)
-            case (1)
-                dvrtdt_spec(:, n_old) = dvrtdt_spec(:, n_new)
-                ddivdt_spec(:, n_old) = ddivdt_spec(:, n_new)
-                dpdt_spec(:, n_old) = dpdt_spec(:, n_new)
-        end select
-
-        vort_spec = &
-            vort_spec + DT * (&
-            (23.0_wp/12.0_wp) * dvrtdt_spec(:, n_new) &
-            - (16.0_wp/12.0_wp) * dvrtdt_spec(:, n_now) &
-            + (5.0_wp/12.0_wp) * dvrtdt_spec(:, n_old) )
-
-        div_spec = &
-            div_spec + DT *( &
-            (23.0_wp/12.0_wp) * ddivdt_spec(:, n_new) &
-            - (16.0_wp/12.0_wp) * ddivdt_spec(:, n_now) &
-            + (5.0_wp/12.0_wp) * ddivdt_spec(:, n_old) )
-
-        p_spec = &
-            p_spec + DT * (&
-            (23.0_wp/12.0_wp) * dpdt_spec(:, n_new) &
-            - (16.0_wp/12.0_wp) * dpdt_spec(:, n_now) &
-            + (5.0_wp/12.0_wp) * dpdt_spec(:, n_old) )
-
-        !==> switch indices
-
-        n_save1 = n_new
-        n_save2 = n_now
-        n_new = n_old
-        n_now = n_save1
-        n_old = n_save2
-
-    !==> end time step loop
-    end do
-
-    !
-    !==> Print compiler info
-    !
-    write( stdout, '(A)' ) ''
-    write( stdout, '(4A)' ) 'This file was compiled by ', &
-        compiler_version(), ' using the options ', &
-        compiler_options()
-    write( stdout, '(A)' ) ''
-
-    !
-    !==>  Release memory
-    !
-    call sphere%destroy()
-    deallocate( model_write_format )
-    deallocate( error_write_format )
-
-contains
-
-    pure function initialize_unrotated_longitudinal_velocity( &
-        amp, thetad ) result (return_value)
-        !
-        !     computes the initial unrotated longitudinal velocity
-        !     see section 3.3.
-        !--------------------------------------------------------------------------------
-        ! Dictionary: calling arguments
-        !--------------------------------------------------------------------------------
-        real (wp), intent (in) :: amp
-        real (wp), intent (in) :: thetad
-        real (wp)              :: return_value
-        !--------------------------------------------------------------------------------
-        ! Dictionary: local variables
-        !--------------------------------------------------------------------------------
-        real (wp), parameter :: ZERO = nearest(1.0_wp, 1.0_wp)-nearest(1.0_wp, -1.0_wp)
-        real (wp), parameter :: PI = acos( -1.0_wp )
-        real (wp)            :: x
-        !--------------------------------------------------------------------------------
-
-        associate( &
-            thetab => -PI/6.0_wp, &
-            thetae => PI/2.0_wp, &
-            xe => 3.0e-1_wp &
-            )
-
-            x =xe*(thetad-thetab)/(thetae-thetab)
-
-            return_value = 0.0_wp
-
-            if(x <= ZERO .or. x >= xe) return
-
-            associate( arg => (-1.0_wp/x) - (1.0_wp/(xe-x)) + (4.0_wp/xe) )
-                return_value = amp * exp( arg )
-            end associate
-        end associate
-
-    end function initialize_unrotated_longitudinal_velocity
-
-
-    pure function atanxy( x, y ) result (return_value)
-        !--------------------------------------------------------------------------------
-        ! Dictionary: calling arguments
-        !--------------------------------------------------------------------------------
-        real (wp), intent (in) :: x
-        real (wp), intent (in) :: y
-        real (wp)              :: return_value
-        !--------------------------------------------------------------------------------
-        real (wp), parameter :: ZERO = nearest(1.0_wp, 1.0_wp)-nearest(1.0_wp, -1.0_wp)
-        !--------------------------------------------------------------------------------
-
-        ! Initialize return value
-        return_value = 0.0_wp
-
-        if ( x == ZERO .and. y == ZERO ) return
-
-        return_value = atan2( y, x )
-
-    end function atanxy
-
-
-    subroutine compute_sine_transform( x )
-        !--------------------------------------------------------------------------------
-        ! Dictionary: calling arguments
-        !--------------------------------------------------------------------------------
-        real (wp), intent (in out) :: x(:)
-        !--------------------------------------------------------------------------------
-        ! Dictionary: local variables
-        !--------------------------------------------------------------------------------
-        integer (ip)           :: i, j !! Counters
-        real (wp), allocatable ::  w(:)
-        !--------------------------------------------------------------------------------
-
-        associate( n => size(x) )
-            ! Allocate memory
-            allocate( w(n) )
-            ! Associate various quantities
-            associate( arg => acos(-1.0_wp)/(n+1) )
-                do j = 1, n
-                    w(j) = 0.0_wp
-                    do i = 1, n
-                        associate( sin_arg => real(i*j, kind=wp)*arg )
-                            w(j) = w(j)+x(i)*sin(sin_arg)
-                        end associate
-                    end do
-                end do
-            end associate
-        end associate
-
-        x = 2.0_wp * w
-
-        ! Release memory
-        deallocate(w)
-
-    end subroutine compute_sine_transform
-
-
-    pure function compute_cosine_transform(theta, cf) result (return_value)
-        !--------------------------------------------------------------------------------
-        ! Dictionary: calling arguments
-        !--------------------------------------------------------------------------------
-        real (wp), intent(in) :: theta
-        real (wp), intent(in) :: cf(:)
-        real (wp)             :: return_value
-        !--------------------------------------------------------------------------------
-        ! Dictionary: local variables
-        !--------------------------------------------------------------------------------
-        integer (ip)          :: i !! Counter
-        !--------------------------------------------------------------------------------
-
-        return_value = 0.0_wp
-
-        associate( n => size(cf) )
-            do i=1, n
-                return_value = return_value + cf(i)*cos(i*theta)
-            end do
-        end associate
-
-    end function compute_cosine_transform
-
+!     dudt(i,j)    time derivative of longitudinal velocity component
+!     dvdt(i,j)    time derivative of latitudinal  velocity component
+!     dpdt(i,j)    time derivative of geopotential
+!
+!     gpdl(i,j)    first component of the gradient of p(i,j)
+!                  the longitudinal derivative of the geopotential
+!                  divided by the cosine of the latitude
+!
+!     gpdt(i,j)    second component of the gradient of p(i,j)
+!                  the latitudinal derivative of the geopotential
+!
+!     uxact(i,j)   the "exact" longitudinal veloctiy component
+!     vxact(i,j)   the "exact" latitudinal  veloctiy component
+!     uxact(i,j)   the "exact" geopotential
+!
+!     f(i,j)       the coriolis force on rotated grid
+!
+!   the following two dimensional arrays are nonzero in the triangle
+!   n=1,...,nlat and m less than or equal to n.
+!
+!     a(m,n),b(m,n)    spectral coefficients of the geopotential
+!
+!     br(m,n),bi(m,n)  spectral coefficients of the velocity
+!     cr(m,n),ci(m,n)  vector [u(i,j),v(i,j)]
+!
+!
+!     phlt(i)      the coefficients in the cosine series
+!                  representation of the unrotated geopotential
+!
+parameter (idp=73,jdp=144,mdab=73,ndab=73)
+parameter(lldwork = 2*(idp+1))
+!
+dimension u(idp,jdp),v(idp,jdp),p(idp,jdp),f(idp,jdp), &
+          unew(idp,jdp),vnew(idp,jdp),pnew(idp,jdp), &
+          uold(idp,jdp),vold(idp,jdp),pold(idp,jdp), &
+          uxact(idp,jdp),vxact(idp,jdp),pxact(idp,jdp), &
+          divg(idp,jdp),vort(idp,jdp),ut(idp,jdp), &
+          vt(idp,jdp),dudt(idp,jdp),dvdt(idp,jdp), &
+          dpdt(idp,jdp),gpdt(idp,jdp),gpdl(idp,jdp), &
+          a(mdab,ndab),b(mdab,ndab),br(mdab,ndab), &
+          bi(mdab,ndab),cr(mdab,ndab),ci(mdab,ndab), &
+          phlt(361)
+!
+!   the following work arrays are initialized and subsequently
+!   used repeatedly by spherepack routines.
+!
+dimension wsha(70928),wshs(70928),wvha(141647),wvhs(141647), &
+          wvts(141647),work(40000)
+real dwork(lldwork)
+!
+real lambda,lhat
+
+lwsha = 70928
+lwshs = 70928
+lwvha = 141647
+lwvhs = 141647
+lwvts = 141647
+lwork = 40000
+ldwork = lldwork
+pi = 4.*atan(1.)
+hpi = pi/2.
+dtr = pi/180.
+aa = 6.37122e6
+omega = 7.292e-5
+fzero = omega+omega
+uzero = 40.
+pzero = 2.94e4
+alphad = 60.
+alpha = dtr*alphad
+!
+itmax = 720
+mprint = 72
+mmode = 42
+nlat = 65
+nlon = 128
+dt = 600.
+tdt = dt+dt
+!
+!     initialize spherepack routines
+!
+call shaesi(nlat,nlon,wsha,lwsha,work,lwork,dwork,lwork,ierror)
+if(ierror /= 0) write(*,55) ierror
+55 format(' error' i4 ' in shaesi')
+call shsesi(nlat,nlon,wshs,lwshs,work,lwork,dwork,ldwork,ierror)
+if(ierror /= 0) write(*,56) ierror
+56 format(' error' i4 ' in shsesi')
+call vhaesi(nlat,nlon,wvha,lwvha,work,lwork,dwork,ldwork,ierror)
+if(ierror /= 0) write(*,57) ierror
+57 format(' error' i4 ' in vhaesi')
+call vhsesi(nlat,nlon,wvhs,lwvhs,work,lwork,dwork,ldwork,ierror)
+if(ierror /= 0) write(*,58) ierror
+58 format(' error' i4 ' in vhsesi')
+call vtsesi(nlat,nlon,wvts,lwvts,work,lwork,dwork,ldwork,ierror)
+if(ierror /= 0) write(*,59) ierror
+59 format(' error' i4 ' in vtsesi')
+!
+!
+!     compute the derivative of the unrotated geopotential
+!             p as a function of latitude
+!
+nl = 91
+nlm1 = nl-1
+nlm2 = nl-2
+cfn = 1./nlm1
+dlath = pi/nlm1
+do 10 i=1,nlm2
+theta = i*dlath
+sth = sin(theta)
+cth = cos(theta)
+uhat = ui(uzero,hpi-theta)
+phlt(i) = cfn*cth*uhat*(uhat/sth+aa*fzero)
+10 continue
+!
+!     compute sine transform of the derivative of the geopotential
+!     for the purpose of computing the geopotential by integration
+!     see equation (3.9) in reference [1] above
+!
+call sine(nlm2,phlt,work)
+!
+!     compute the cosine coefficients of the unrotated geopotential
+!     by the formal integration of the sine series representation
+!
+do 12 i=1,nlm2
+phlt(i) = -phlt(i)/i
+12 continue
+!
+!     phlt(i) contains the coefficients in the cosine series
+!     representation of the unrotated geopotential that are used
+!     below to compute the geopotential on the rotated grid.
+!
+!     compute the initial values of  east longitudinal
+!     and latitudinal velocities u and v as well as the
+!     geopotential p and coriolis f on the rotated grid.
+!
+ca = cos(alpha)
+sa = sin(alpha)
+dtheta = pi/(nlat-1)
+dlam = (pi+pi)/nlon
+do 50 j=1,nlon
+lambda = (j-1)*dlam
+cl = cos(lambda)
+sl = sin(lambda)
+do 50 i=1,nlat
+!
+!     lambda is longitude, theta is colatitude, and pi/2-theta is
+!     latitude on the rotated grid. lhat and that are longitude
+!     and colatitude on the unrotated grid. see text starting at
+!     equation (3.10)
+!
+theta = (i-1)*dtheta
+st = cos(theta)
+ct = sin(theta)
+sth = ca*st+sa*ct*cl
+cthclh = ca*ct*cl-sa*st
+cthslh = ct*sl
+lhat = atanxy(cthclh,cthslh)
+clh = cos(lhat)
+slh = sin(lhat)
+cth = clh*cthclh+slh*cthslh
+that = atanxy(sth,cth)
+uhat = ui(uzero,hpi-that)
+pxact(i,j) = cosine(that,nlm2,phlt)
+uxact(i,j) = uhat*(ca*sl*slh+cl*clh)
+vxact(i,j) = uhat*(ca*cl*slh*st-clh*sl*st+sa*slh*ct)
+f(i,j) = fzero*sth
+50 continue
+!
+vmax = 0.
+pmax = 0.
+v2max = 0.
+p2max = 0.
+do 54 j=1,nlon
+do 54 i=1,nlat
+v2max = v2max+uxact(i,j)**2+vxact(i,j)**2
+p2max = p2max+pxact(i,j)**2
+vmax = amax1(abs(uxact(i,j)),abs(vxact(i,j)),vmax)
+pmax = amax1(abs(pxact(i,j)),pmax)
+54 continue
+!
+!     initialize first time step
+!
+do 60 j=1,nlon
+do 60 i=1,nlat
+u(i,j) = uxact(i,j)
+v(i,j) = vxact(i,j)
+p(i,j) = pxact(i,j)
+60 continue
+!
+isym = 0
+nt = 1
+time = 0.
+ctime = 0.
+ncycle = 0
+!
+!     start of the time loop
+!
+!   begin step 1, section 3
+!
+!     analyze the velocity components (u,v)
+!
+90 call vhaesgo(nlat,nlon,isym,nt,u,v,idp,jdp,br,bi,cr,ci, &
+           mdab,ndab,wvha,lwvha,work,lwork,ierror)
+if(ierror /= 0) write(*,91) ierror
+91 format(' error' i4 ' in vhaes')
+!
+!     truncate spectrum to eliminate aliasing of the
+!     product terms in the shallow-water equations
+!
+call trunc(nlat,mmode,mdab,br,bi)
+call trunc(nlat,mmode,mdab,cr,ci)
+!
+!     resynthesize the velocity components
+!
+call vhsesgo(nlat,nlon,isym,nt,u,v,idp,jdp,br,bi,cr,ci, &
+           mdab,ndab,wvhs,lwvhs,work,lwork,ierror)
+if(ierror /= 0) write(*,92) ierror
+92 format(' error' i4 ' in vhses')
+!
+!   begin step 2, section 3
+!
+!     analyze geopotential p
+!
+call shaes(nlat,nlon,isym,nt,p,idp,jdp,a,b,mdab,ndab, &
+                    wsha,lwsha,work,lwork,ierror)
+if(ierror /= 0) write(*,93) ierror
+93 format(' error' i4 ' in shaes')
+!
+!     truncate spectrum to eliminate aliasing of the
+!     product terms in the shallow-water equations
+!
+call trunc(nlat,mmode,mdab,a,b)
+!
+!     resynthesize the geopotential p
+!
+call shses(nlat,nlon,isym,nt,p,idp,jdp,a,b,mdab,ndab, &
+                    wshs,lwshs,work,lwork,ierror)
+if(ierror /= 0) write(*,94) ierror
+94 format(' error' i4 ' in shses')
+!
+!
+!   begin step 3, section 3
+!
+!     compute the vorticity of the velocity (u,v)
+!
+call vrtes(nlat,nlon,isym,nt,vort,idp,jdp,cr,ci,mdab,ndab, &
+                 wshs,lwshs,work,lwork,ierror)
+if(ierror /= 0) write(*,95) ierror
+95 format(' error' i4 ' in vrtes')
+!
+!     compute the divergence of the velocity (u,v)
+!
+call dives(nlat,nlon,isym,nt,divg,idp,jdp,br,bi,mdab,ndab, &
+           wshs,lwshs,work,lwork,ierror)
+if(ierror /= 0) write(*,96) ierror
+96 format(' error' i4 ' in dives')
+!
+!   begin step 4, section 3
+!
+!     compute the derivative of the velocity (u,v) with
+!     respect to colatitude theta.
+!
+call vtsesgo(nlat,nlon,isym,nt,ut,vt,idp,jdp,br,bi,cr,ci, &
+           mdab,ndab,wvts,lwvts,work,lwork,ierror)
+if(ierror /= 0) write(*,97) ierror
+97 format(' error' i4 ' in vtsesgo')
+!
+!   begin step 5, section 3
+!
+!     compute the gradient of the geopotential p
+!
+call gradesgo(nlat,nlon,isym,nt,gpdl,gpdt,idp,jdp,a,b,mdab,ndab, &
+wvhs,lwvhs,work,lwork,ierror)
+if(ierror /= 0) write(*,98) ierror
+98 format(' error' i4 ' in grades')
+!
+!     compute the time derivatives of the velocity (u,v)
+!     and the geopotential p using the shallow-water
+!     equations (2.8), (2.9), and (2.10), section 3.
+!
+do 200 j=1,nlon
+do 200 i=1,nlat
+dudt(i,j) = (u(i,j)*(vt(i,j)-divg(i,j))-v(i,j)*ut(i,j) &
+            -gpdl(i,j))/aa+f(i,j)*v(i,j)
+dvdt(i,j) = -(u(i,j)*(vort(i,j)+ut(i,j))+v(i,j)*vt(i,j) &
+            +gpdt(i,j))/aa-f(i,j)*u(i,j)
+dpdt(i,j) = -((p(i,j)+pzero)*divg(i,j)+v(i,j)*gpdt(i,j) &
+             +u(i,j)*gpdl(i,j))/aa
+200 continue
+!
+if(mod(ncycle,mprint) /= 0) go to 370
+htime = time/3600.
+write(*,390) ncycle,htime,dt,nlat,nlon,mmode,omega,pzero, &
+             uzero,alphad
+390 format(//' steady nonlinear rotated flow, test case 3'/ &
+         ' cycle number              ' i10 &
+         ' model time in  hours      ' f10.2/ &
+         ' time step in seconds      ' f10.0 &
+         ' number of latitudes       ' i10/ &
+         ' number of longitudes      ' i10 &
+         ' max wave number           ' i10/ &
+         ' rotation rate        ' 1pe15.6 &
+         ' mean height          ' 1pe15.6/ &
+         ' maximum velocity     ' 1pe15.6 &
+         ' tilt angle                ' f10.2)
+dvgm = 0.
+dvmax = 0.
+dpmax = 0.
+evmax = 0.0
+epmax = 0.0
+do 217 j=1,nlon
+do 217 i=1,nlat
+dvgm = amax1(dvgm,abs(divg(i,j)))
+dvmax = dvmax+(u(i,j)-uxact(i,j))**2+(v(i,j)-vxact(i,j))**2
+dpmax = dpmax+(p(i,j)-pxact(i,j))**2
+evmax = amax1(evmax,abs(v(i,j)-vxact(i,j)),abs(u(i,j)-uxact(i,j)))
+epmax = amax1(epmax,abs(p(i,j)-pxact(i,j)))
+217 continue
+dvmax = sqrt(dvmax/v2max)
+dpmax = sqrt(dpmax/p2max)
+evmax = evmax/vmax
+epmax = epmax/pmax
+write(*,391) evmax,epmax,dvmax,dpmax,dvgm
+391 format(' max error in velocity' 1pe15.6 &
+       ' max error in geopot. ' 1pe15.6/ &
+       ' l2 error in velocity ' 1pe15.6 &
+       ' l2 error in geopot.  ' 1pe15.6/ &
+       ' maximum divergence   ' 1pe15.6)
+!
+!     set values at time = -dt to values at time = 0.
+!
+370 if(ncycle > 0) go to 206
+do 205 j=1,nlon
+do 205 i=1,nlat
+uold(i,j) = u(i,j)
+vold(i,j) = v(i,j)
+pold(i,j) = p(i,j)
+205 continue
+!
+!     compute values at next time level using leap frog
+!     time differencing
+!
+206 do 210 j=1,nlon
+do 210 i=1,nlat
+unew(i,j) = uold(i,j)+tdt*dudt(i,j)
+vnew(i,j) = vold(i,j)+tdt*dvdt(i,j)
+pnew(i,j) = pold(i,j)+tdt*dpdt(i,j)
+210 continue
+!
+!     update values to next time level
+!
+do 300 j=1,nlon
+do 300 i=1,nlat
+uold(i,j) = u(i,j)
+vold(i,j) = v(i,j)
+pold(i,j) = p(i,j)
+u(i,j) = unew(i,j)
+v(i,j) = vnew(i,j)
+p(i,j) = pnew(i,j)
+300 continue
+ncycle = ncycle+1
+time = time+dt
+if(ncycle <= itmax) go to 90
 
 end program shallow
+
+subroutine vtsesgo(nlat,nlon,ityp,nt,ut,vt,idvw,jdvw,br,bi,cr,ci, &
+           mdab,ndab,wvts,lwvts,work,lwork,ierror)
+!
+!     vtsesgo computes the latitudinal derivatives of the
+!     velocity components using subroutine vtses which
+!     assumes the velocity components are given in terms
+!     of mathematical coordinates
+!
+dimension ut(idvw,jdvw,1),vt(idvw,jdvw,1),br(mdab,ndab,1), &
+          bi(mdab,ndab,1),cr(mdab,ndab,1),ci(mdab,ndab,1), &
+          work(*),wvts(*)
+call vtses(nlat,nlon,ityp,nt,vt,ut,idvw,jdvw,br,bi,cr,ci, &
+           mdab,ndab,wvts,lwvts,work,lwork,ierror)
+      do k=1,nt
+    do j=1,nlon
+      do i=1,nlat
+        ut(i,j,k) = -ut(i,j,k)
+      end do
+    end do
+      end do
+      return
+      end subroutine vtsesgo
+
+!
+function ui(amp,thetad)
+!
+!     computes the initial unrotated longitudinal velocity
+!     see section 3.3.
+!
+pi=4.*atan(1.)
+thetab=-pi/6.
+thetae= pi/2.
+xe=3.e-1
+x =xe*(thetad-thetab)/(thetae-thetab)
+ui = 0.
+if(x<=0. .or. x>=xe) return
+ui=amp*exp(-1./x-1./(xe-x)+4./xe)
+return
+end function ui
+!
+function atanxy(x,y)
+atanxy = 0.
+if(x==0. .and. y==0.) return
+atanxy = atan2(y,x)
+return
+end function atanxy
+subroutine sine(n,x,w)
+!
+!     computes the sine transform
+!
+dimension x(n),w(n)
+arg = 4.*atan(1.)/(n+1)
+do 10 j=1,n
+w(j) = 0.
+do 10 i=1,n
+w(j) = w(j)+x(i)*sin(i*j*arg)
+10 continue
+do 15 i=1,n
+x(i) = 2.*w(i)
+15 continue
+return
+end subroutine sine
+!
+function cosine(theta,n,cf)
+!
+!     computes the cosine transform
+!
+dimension cf(n)
+cosine = 0.
+do 10 i=1,n
+cosine = cosine+cf(i)*cos(i*theta)
+10 continue
+return
+end function cosine
+!
+subroutine trunc(nm,ms,id,a,b)
+!
+!     truncates spectral coefficients so that aliasing
+!     does not occur when computing the spectral representations
+!     of the product terms.
+!
+dimension a(id,1),b(id,1)
+mp = ms+2
+do 10 n=mp,nm
+do 10 m=1,n
+a(m,n) = 0.
+b(m,n) = 0.
+10 continue
+return
+end subroutine trunc
+
+subroutine vhaesgo(nlat,nlon,ityp,nt,u,v,iduv,jduv, &
+br,bi,cr,ci,mdab,ndab,wsav,lwsav,work,lwork,ierror)
+dimension u(iduv,jduv,*),v(iduv,jduv,*),br(mdab,ndab,*), &
+          bi(mdab,ndab,*),cr(mdab,ndab,*),ci(mdab,ndab,*), &
+          work(1),wsav(1)
+!
+!     vhaesgo computes the vector harmonic analysis of (u,v) using vhaes which
+!     assumes the velocity components are given in mathematical coordinates
+!
+      do k=1,nt
+    do j=1,nlon
+      do i=1,nlat
+        v(i,j,k) = -v(i,j,k)
+      end do
+    end do
+      end do
+call vhaes(nlat,nlon,ityp,nt,v,u,iduv,jduv, &
+br,bi,cr,ci,mdab,ndab,wsav,lwsav,work,lwork,ierror)
+!
+!     restore v
+!
+      do k=1,nt
+    do j=1,nlon
+      do i=1,nlat
+        v(i,j,k) = -v(i,j,k)
+      end do
+    end do
+      end do
+      if (ierror/=0) return
+      return
+      end subroutine vhaesgo
+
+subroutine vhsesgo(nlat,nlon,ityp,nt,u,v,iduv,jduv, &
+br,bi,cr,ci,mdab,ndab,wsav,lwsav,work,lwork,ierror)
+dimension u(iduv,jduv,*),v(iduv,jduv,*),br(mdab,ndab,*), &
+          bi(mdab,ndab,*),cr(mdab,ndab,*),ci(mdab,ndab,*), &
+          work(1),wsav(1)
+!
+!     vhsesgo computes a vector harmonic synthesis in (u,v) using vhses which
+!     assumes the velocity components are given in mathematical coordinates
+!
+call vhses(nlat,nlon,ityp,nt,v,u,iduv,jduv, &
+br,bi,cr,ci,mdab,ndab,wsav,lwsav,work,lwork,ierror)
+      if (ierror/=0) return
+      do k=1,nt
+    do j=1,nlon
+      do i=1,nlat
+        v(i,j,k) = -v(i,j,k)
+      end do
+    end do
+      end do
+      return
+      end subroutine vhsesgo
+
+subroutine gradesgo(nlat,nlon,isym,nt,u,v,iduv,jduv,a,b, &
+mdab,ndab,wsav,lwsav,work,lwork,ierror)
+dimension u(iduv,jduv,nt),v(iduv,jduv,nt)
+dimension a(mdab,ndab,nt),b(mdab,ndab,nt)
+dimension wsav(lwsav),work(lwork)
+!
+!     gradesgo computes the gradient in (u,v) using grades which assumes
+!     the velocity components are given in mathematical coordinates
+!
+call grades(nlat,nlon,isym,nt,v,u,iduv,jduv,a,b, &
+mdab,ndab,wsav,lwsav,work,lwork,ierror)
+      if (ierror /=0) return
+      do k=1,nt
+    do j=1,nlon
+      do i=1,nlat
+        v(i,j,k) = -v(i,j,k)
+      end do
+    end do
+      end do
+      return
+      end subroutine gradesgo
