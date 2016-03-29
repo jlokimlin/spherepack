@@ -76,6 +76,9 @@ program helmsph
         wp => REAL64, &
         stdout => OUTPUT_UNIT
 
+    use type_Sphere, only: &
+        Sphere
+
     use type_RegularSphere, only: &
         Regularsphere
 
@@ -88,112 +91,116 @@ program helmsph
     !----------------------------------------------------------------------
     ! Dictionary
     !----------------------------------------------------------------------
-    type (GaussianSphere)   :: sphere
-    integer (ip), parameter :: NLONS = 36
-    integer (ip), parameter :: NLATS = NLONS/2 + 1
-    integer (ip)            :: i, j !! Counters
-    real (wp)               :: approximate_solution(NLATS, NLONS)
-    real (wp)               :: source_term(NLATS, NLONS)
-    real (wp)               :: helmholtz_constant, discretization_error
-    real (wp)               :: pertrb
-    integer (ip)            :: ierror
+    
+    type (GaussianSphere) :: gaussian_sphere
     !----------------------------------------------------------------------
 
-    ! Set up workspace arrays
-    call sphere%create(nlat=NLATS, nlon=NLONS, isym=0, isynt=1)
+    call test_helmsph( gaussian_sphere )
 
-    ! Set helmholtz constant
-    helmholtz_constant = 1.0_wp
+contains
 
-    ! Set right hand side as helmholtz operator
-    ! applied to ue = (1.+x*y)*exp(z)
-    associate( &
-        rhs => source_term, &
-        radial => sphere%unit_vectors%radial &
-        )
-        do j=1,NLONS
-            do i=1,NLATS
-                associate( &
-                    x => radial(i,j)%x, &
-                    y => radial(i,j)%y, &
-                    z => radial(i,j)%z &
-                    )
-                    rhs(i,j) = -(x*y*(z*z+6.0_wp*(z+1.0_wp))+z*(z+2.0_wp))*exp(z)
-                end associate
+    subroutine test_helmsph( sphere_type )
+        !----------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !----------------------------------------------------------------------
+        class (Sphere), intent (in out) :: sphere_type
+        !----------------------------------------------------------------------
+        ! Dictionary: local variables
+        !----------------------------------------------------------------------
+        integer (ip), parameter :: NLONS = 36
+        integer (ip), parameter :: NLATS = NLONS/2 + 1
+        integer (ip)            :: i, j !! Counters
+        real (wp)               :: approximate_solution(NLATS, NLONS)
+        real (wp)               :: source_term(NLATS, NLONS)
+        real (wp)               :: helmholtz_constant, discretization_error
+        !----------------------------------------------------------------------
+
+        ! Set up workspace arrays
+        select type (sphere_type)
+            class is (GaussianSphere)
+            call sphere_type%create(nlat=NLATS, nlon=NLONS, isym=0, isynt=1)
+            class is (RegularSphere)
+            call sphere_type%create(nlat=NLATS, nlon=NLONS, isym=0, isynt=1)
+        end select
+
+        ! Set helmholtz constant
+        helmholtz_constant = 1.0_wp
+
+        ! Set right hand side as helmholtz operator
+        ! applied to ue = (1.+x*y)*exp(z)
+        associate( &
+            rhs => source_term, &
+            radial => sphere_type%unit_vectors%radial &
+            )
+            do j=1,NLONS
+                do i=1,NLATS
+                    associate( &
+                        x => radial(i,j)%x, &
+                        y => radial(i,j)%y, &
+                        z => radial(i,j)%z &
+                        )
+                        rhs(i,j) = -(x*y*(z*z+6.0_wp*(z+1.0_wp))+z*(z+2.0_wp))*exp(z)
+                    end associate
+                end do
             end do
-        end do
-    end associate
+        end associate
 
-    !
-    ! Solve Helmholtz equation on the sphere in u
-    !
-!    associate( &
-!        xlmbda => helmholtz_constant, &
-!        rhs => source_term, &
-!        u => approximate_solution &
-!        )
-!        call sphere%invert_helmholtz( xlmbda, rhs, u)
-!    end associate
-
-    associate( workspace => sphere%workspace)
+        !
+        ! Solve Helmholtz equation on the sphere in u
+        !
         associate( &
             xlmbda => helmholtz_constant, &
-            nlat => sphere%NUMBER_OF_LATITUDES, &
-            nlon => sphere%NUMBER_OF_LONGITUDES, &
-            isym => sphere%SCALAR_SYMMETRIES, &
-            nt => sphere%NUMBER_OF_SYNTHESES, &
-            u => approximate_solution, &
-            a => workspace%real_harmonic_coefficients, &
-            b => workspace%imaginary_harmonic_coefficients, &
-            wshsec => workspace%backward_scalar, &
-            lshsec => size(workspace%backward_scalar), &
-            work => workspace%legendre_workspace, &
-            lwork => size(workspace%legendre_workspace) &
+            rhs => source_term, &
+            u => approximate_solution &
             )
-            call islapec(nlat,nlon,isym,nt,xlmbda,u,nlat,nlon,a,b,nlat,nlat, &
-                wshsec,lshsec,work,lwork,pertrb,ierror)
+            call sphere_type%invert_helmholtz( xlmbda, rhs, u)
         end associate
-    end associate
-    !
-    ! Compute and print maximum error
-    !
-    discretization_error = 0.0
-    associate( &
-        err_max => discretization_error, &
-        u => approximate_solution, &
-        radial => sphere%unit_vectors%radial &
-        )
-        do j=1,NLONS
-            do i=1,NLATS
-                associate( &
-                    x => radial(i,j)%x, &
-                    y => radial(i,j)%y, &
-                    z => radial(i,j)%z &
-                    )
-                    associate( ue => (1.0_wp + x * y) * exp(z) )
-                        err_max = max(err_max,abs(u(i,j)-ue))
+
+        !
+        ! Compute and print maximum error
+        associate( &
+            err_max => discretization_error, &
+            u => approximate_solution, &
+            radial => sphere_type%unit_vectors%radial &
+            )
+            ! Initialize error
+            err_max = 0.0_wp
+            do j=1,NLONS
+                do i=1,NLATS
+                    associate( &
+                        ! Associate radial components
+                        x => radial(i,j)%x, &
+                        y => radial(i,j)%y, &
+                        z => radial(i,j)%z &
+                        )
+                        ! Set exact solution
+                        associate( ue => (1.0_wp + x * y) * exp(z) )
+                            err_max = max(err_max,abs(u(i,j)-ue))
+                        end associate
                     end associate
-                end associate
+                end do
             end do
-        end do
-    end associate
+        end associate
 
-    ! Print earlier output from platform with 64-bit floating point
-    ! arithmetic followed by the output from this computer
-    write( stdout, '(A)') ''
-    write( stdout, '(A)') '     helmsph *** TEST RUN *** '
-    write( stdout, '(A)') ''
-    write( stdout, '(A)') '     Helmholtz approximation on a ten degree grid'
-    write( stdout, '(2(A,I2))') '     nlat = ', NLATS,' nlon = ', NLONS
-    write( stdout, '(A)') '     Previous 64 bit floating point arithmetic result '
-    write( stdout, '(A)') '     discretization error = 0.114E-12'
-    write( stdout, '(A)') '     The output from your computer is: '
-    write( stdout, '(A,1pe15.6)') '     discretization error = ', &
-        discretization_error
-    write( stdout, '(A)' ) ''
+        ! Print earlier output from platform with 64-bit floating point
+        ! arithmetic followed by the output from this computer
+        write( stdout, '(A)') ''
+        write( stdout, '(A)') '     helmsph *** TEST RUN *** '
+        write( stdout, '(A)') ''
+        write( stdout, '(A)') '     grid type = ', sphere_type%grid%grid_type
+        write( stdout, '(A)') '     Helmholtz approximation on a ten degree grid'
+        write( stdout, '(2(A,I2))') '     nlat = ', NLATS,' nlon = ', NLONS
+        write( stdout, '(A)') '     Previous 64 bit floating point arithmetic result '
+        write( stdout, '(A)') '     discretization error = 0.114E-12'
+        write( stdout, '(A)') '     The output from your computer is: '
+        write( stdout, '(A,1pe15.6)') '     discretization error = ', &
+            discretization_error
+        write( stdout, '(A)' ) ''
 
-    ! Release memory
-    call sphere%destroy()
+        ! Release memory
+        call sphere_type%destroy()
+
+    end subroutine test_helmsph
 
 end program helmsph
 

@@ -6,6 +6,9 @@ module spherepack_wrapper_library
         assignment(=), &
         operator(*)
     
+    use type_Sphere, only: &
+        Sphere
+
     use type_GaussianGrid, only:&
         GaussianGrid
         
@@ -27,6 +30,7 @@ module spherepack_wrapper_library
     public :: ThreeDimensionalVectorPointer
     public :: assignment(=)
     public :: operator(*)
+    public :: Sphere
     public :: GaussianGrid
     public :: GaussianSphere
     public :: RegularGrid

@@ -6,7 +6,9 @@ program test
         stdout => OUTPUT_UNIT
 
     use spherepack_wrapper_library, only: &
+        Sphere, &
         GaussianSphere, &
+        RegularSphere, &
         Vector => ThreeDimensionalVector, &
         assignment(=), &
         operator(*)
@@ -16,6 +18,7 @@ program test
 
     ! test all the procedures
     call test_all()
+
 
 contains
 
@@ -27,27 +30,32 @@ contains
         !----------------------------------------------------------------------
         integer (ip), parameter  :: nlon = 36
         integer (ip), parameter  :: nlat = nlon/2 + 1
-        type (GaussianSphere)    :: solver
+        type (GaussianSphere)    :: gaussian_sphere
+        type (RegularSphere) :: regular_sphere
         !----------------------------------------------------------------------
 
+        call regular_sphere%create(nlat, nlon)
+        call test_scalar_analysis_and_synthesis( regular_sphere )
+        call regular_sphere%destroy()
+
         ! Instantiate object
-        call solver%create( nlat, nlon )
+        call gaussian_sphere%create( nlat, nlon )
 
         write( stdout, '(A)' ) 'SPHEREPACK WRAPPER VALIDATION testS'
         write( stdout, '(A)' ) ' '
         write( stdout, '(A, I3, A, I3)' ) 'nlat = ', nlat, ' nlon = ', nlon
 
-        ! test all the subroutines
-        call test_scalar_analysis_and_synthesis( solver )
-        call test_vector_analysis_and_synthesis( solver )
-        call test_compute_surface_integral( solver )
-        call test_invert_helmholtz( solver )
-        call test_get_gradient( solver )
-        call test_get_vorticity( solver )
-        call test_get_rotation_operator( solver )
+!        ! test all the subroutines
+        call test_scalar_analysis_and_synthesis( gaussian_sphere )
+        call test_vector_analysis_and_synthesis( gaussian_sphere )
+        call test_compute_surface_integral( gaussian_sphere )
+        call test_invert_helmholtz( gaussian_sphere )
+        call test_get_gradient( gaussian_sphere )
+        call test_get_vorticity( gaussian_sphere )
+        call test_get_rotation_operator( gaussian_sphere )
 
         ! disembody object
-        call solver%destroy()
+        call gaussian_sphere%destroy()
 
     end subroutine test_all
     !
@@ -59,7 +67,7 @@ contains
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
-        class (GaussianSphere), intent (in out)    :: solver
+        class (Sphere), intent (in out)    :: solver
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------

@@ -24,7 +24,7 @@ $(EXES): $(SRC)
 
 %.exe : %.f90
 	rm -f $@
-	$(F90) $(FFLAGS) $< -o $@ $(LINKS)
+	$(F90) $< -o $@ $(LINKS)
 	./$@
 
 clean:

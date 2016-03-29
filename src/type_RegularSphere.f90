@@ -84,24 +84,31 @@ contains
         allocate( RegularGrid :: this%grid )
         allocate( RegularWorkspace :: this%workspace )
 
-        ! Initialize polymorphic types
-        associate( &
-            grid => this%grid, &
-            workspace => this%workspace &
-            )
-            ! Initialize Regular grid
+        !
+        !==> Initialize polymorphic types
+        !
+
+        ! Initialize Regular grid
+        associate( grid => this%grid )
             select type (grid)
                 class is (RegularGrid)
                 call grid%create( nlat, nlon )
             end select
-            ! Initialize Regular workspace
+        end associate
+
+        ! Initialize Regular workspace
+        associate( workspace => this%workspace )
             select type (workspace)
                 class is (RegularWorkspace)
                 call workspace%create( nlat, nlon )
             end select
         end associate
 
-        ! Initialize constants
+        !
+        !==> Initialize parent type
+        !
+
+        ! Initialize optional arguments
         ntrunc_op = nlat - 1
         isym_op = 0
         ityp_op = 0
@@ -117,10 +124,10 @@ contains
 
         ! Create parent type
         call this%create_sphere( &
-        nlat=nlat, nlon=nlon, ntrunc=ntrunc_op, &
-        isym=isym_op, itype=ityp_op, isynt=isynt_op, rsphere=rsphere_op )
+            nlat=nlat, nlon=nlon, ntrunc=ntrunc_op, &
+            isym=isym_op, itype=ityp_op, isynt=isynt_op, rsphere=rsphere_op )
 
-        ! Set initialization flag
+        ! Set flag
         this%initialized = .true.
         
     end subroutine create_regular_sphere

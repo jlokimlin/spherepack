@@ -57,6 +57,7 @@ module type_Sphere
         ! Class methods
         !----------------------------------------------------------------------
         procedure,                              public  :: create_sphere
+        procedure,                              public  :: destroy => destroy_sphere
         procedure,                              public  :: destroy_sphere
         procedure,                              public  :: get_index
         procedure,                              public  :: get_coefficient
