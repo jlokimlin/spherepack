@@ -372,9 +372,9 @@ contains
                     ! set the spectral index
                     associate( nm => sum ([(i, i=ntrunc+1, ntrunc-m+2, -1)]) + n-m+1 )
                         ! set the real component
-                        a( m+1, n+1 ) = 2.0_wp * real( psi(nm) )
+                        a( m+1, n+1 ) = 2.0_wp * real(psi(nm))
                         ! set the imaginary component
-                        b( m+1, n+1 ) = 2.0_wp * aimag( psi(nm) )
+                        b( m+1, n+1 ) = 2.0_wp * aimag(psi(nm))
                     end associate
                 end do
             end do
@@ -448,9 +448,9 @@ contains
                      ! set the spectral index
                     associate( nm => sum ([(i, i=ntrunc+1, ntrunc-m+2, -1)]) + n-m+1 )
                         ! set the real component
-                        a(m + 1, n + 1) = 2.0_wp * real( psi(nm) )
+                        a(m + 1, n + 1) = 2.0_wp * real(psi(nm))
                         ! set the imaginary component
-                        b(m + 1, n + 1) = 2.0_wp * aimag( psi(nm) )
+                        b(m + 1, n + 1) = 2.0_wp * aimag(psi(nm))
                     end associate
                 end do
             end do
@@ -583,9 +583,9 @@ contains
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
         class (Sphere), target, intent (in out) :: this
-        real (wp),      intent (in)     :: helmholtz_constant
-        real (wp),      intent (in)     :: source(:, :)
-        real (wp),      intent (out)    :: solution(:, :)
+        real (wp),              intent (in)     :: helmholtz_constant
+        real (wp),              intent (in)     :: source(:, :)
+        real (wp),              intent (out)    :: solution(:, :)
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
