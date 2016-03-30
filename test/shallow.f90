@@ -485,6 +485,7 @@ dimension ut(idvw,jdvw,1),vt(idvw,jdvw,1),br(mdab,ndab,1), &
           work(*),wvts(*)
 call vtses(nlat,nlon,ityp,nt,vt,ut,idvw,jdvw,br,bi,cr,ci, &
            mdab,ndab,wvts,lwvts,work,lwork,ierror)
+
       do k=1,nt
     do j=1,nlon
       do i=1,nlat
@@ -493,7 +494,7 @@ call vtses(nlat,nlon,ityp,nt,vt,ut,idvw,jdvw,br,bi,cr,ci, &
     end do
       end do
       return
-      end subroutine vtsesgo
+end subroutine vtsesgo
 
 !
 function ui(amp,thetad)
@@ -509,30 +510,38 @@ x =xe*(thetad-thetab)/(thetae-thetab)
 ui = 0.
 if(x<=0. .or. x>=xe) return
 ui=amp*exp(-1./x-1./(xe-x)+4./xe)
-return
+
 end function ui
-!
+
+
+
 function atanxy(x,y)
 atanxy = 0.
 if(x==0. .and. y==0.) return
 atanxy = atan2(y,x)
-return
+
 end function atanxy
+
+
 subroutine sine(n,x,w)
 !
 !     computes the sine transform
 !
 dimension x(n),w(n)
-arg = 4.*atan(1.)/(n+1)
-do 10 j=1,n
-w(j) = 0.
-do 10 i=1,n
+
+associate( arg => acos( -1.0 )/(n+1) )
+do j=1,n
+w(j) = 0.0
+do i=1,n
 w(j) = w(j)+x(i)*sin(i*j*arg)
-10 continue
-do 15 i=1,n
+end do
+end do
+end associate
+
+do i=1,n
 x(i) = 2.*w(i)
-15 continue
-return
+end do
+
 end subroutine sine
 !
 function cosine(theta,n,cf)
@@ -540,11 +549,11 @@ function cosine(theta,n,cf)
 !     computes the cosine transform
 !
 dimension cf(n)
-cosine = 0.
-do 10 i=1,n
+cosine = 0.0
+do i=1,n
 cosine = cosine+cf(i)*cos(i*theta)
-10 continue
-return
+end do
+
 end function cosine
 !
 subroutine trunc(nm,ms,id,a,b)
@@ -554,13 +563,16 @@ subroutine trunc(nm,ms,id,a,b)
 !     of the product terms.
 !
 dimension a(id,1),b(id,1)
-mp = ms+2
-do 10 n=mp,nm
-do 10 m=1,n
-a(m,n) = 0.
-b(m,n) = 0.
-10 continue
-return
+
+associate( mp => ms+2 )
+do n=mp,nm
+do m=1,n
+a(m,n) = 0.0
+b(m,n) = 0.0
+end do
+end do
+end associate
+
 end subroutine trunc
 
 subroutine vhaesgo(nlat,nlon,ityp,nt,u,v,iduv,jduv, &
@@ -572,27 +584,17 @@ dimension u(iduv,jduv,*),v(iduv,jduv,*),br(mdab,ndab,*), &
 !     vhaesgo computes the vector harmonic analysis of (u,v) using vhaes which
 !     assumes the velocity components are given in mathematical coordinates
 !
-      do k=1,nt
-    do j=1,nlon
-      do i=1,nlat
-        v(i,j,k) = -v(i,j,k)
-      end do
-    end do
-      end do
+v(:,:,1:nt) = -v(:,:,1:nt)
+
 call vhaes(nlat,nlon,ityp,nt,v,u,iduv,jduv, &
 br,bi,cr,ci,mdab,ndab,wsav,lwsav,work,lwork,ierror)
 !
 !     restore v
 !
-      do k=1,nt
-    do j=1,nlon
-      do i=1,nlat
-        v(i,j,k) = -v(i,j,k)
-      end do
-    end do
-      end do
+v(:,:,1:nt) = -v(:,:,1:nt)
+
       if (ierror/=0) return
-      return
+
       end subroutine vhaesgo
 
 subroutine vhsesgo(nlat,nlon,ityp,nt,u,v,iduv,jduv, &
@@ -606,16 +608,12 @@ dimension u(iduv,jduv,*),v(iduv,jduv,*),br(mdab,ndab,*), &
 !
 call vhses(nlat,nlon,ityp,nt,v,u,iduv,jduv, &
 br,bi,cr,ci,mdab,ndab,wsav,lwsav,work,lwork,ierror)
-      if (ierror/=0) return
-      do k=1,nt
-    do j=1,nlon
-      do i=1,nlat
-        v(i,j,k) = -v(i,j,k)
-      end do
-    end do
-      end do
-      return
-      end subroutine vhsesgo
+
+if (ierror/=0) return
+
+v(:,:,1:nt) = -v(:,:,1:nt)
+
+end subroutine vhsesgo
 
 subroutine gradesgo(nlat,nlon,isym,nt,u,v,iduv,jduv,a,b, &
 mdab,ndab,wsav,lwsav,work,lwork,ierror)
@@ -628,13 +626,9 @@ dimension wsav(lwsav),work(lwork)
 !
 call grades(nlat,nlon,isym,nt,v,u,iduv,jduv,a,b, &
 mdab,ndab,wsav,lwsav,work,lwork,ierror)
-      if (ierror /=0) return
-      do k=1,nt
-    do j=1,nlon
-      do i=1,nlat
-        v(i,j,k) = -v(i,j,k)
-      end do
-    end do
-      end do
-      return
-      end subroutine gradesgo
+
+v = -v
+
+if (ierror /=0) return
+
+end subroutine gradesgo
