@@ -91,11 +91,12 @@ program helmsph
     !----------------------------------------------------------------------
     ! Dictionary
     !----------------------------------------------------------------------
-    
     type (GaussianSphere) :: gaussian_sphere
+    type (RegularSphere)  :: regular_sphere
     !----------------------------------------------------------------------
 
     call test_helmsph( gaussian_sphere )
+    call test_helmsph( regular_sphere )
 
 contains
 
@@ -187,7 +188,7 @@ contains
         write( stdout, '(A)') ''
         write( stdout, '(A)') '     helmsph *** TEST RUN *** '
         write( stdout, '(A)') ''
-        write( stdout, '(A)') '     grid type = ', sphere_type%grid%grid_type
+        write( stdout, '(A)') '     grid type = '//sphere_type%grid%grid_type
         write( stdout, '(A)') '     Helmholtz approximation on a ten degree grid'
         write( stdout, '(2(A,I2))') '     nlat = ', NLATS,' nlon = ', NLONS
         write( stdout, '(A)') '     Previous 64 bit floating point arithmetic result '

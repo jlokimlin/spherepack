@@ -113,8 +113,8 @@ contains
         !----------------------------------------------------------------------
 
         ! Compute dimensions of various workspace arrays
-        lwork = this%get_lwork(nlat, nlon)
-        ldwork = this%get_ldwork(nlat)
+        lwork = (4*nlon+2)*nlat
+        ldwork = 2*(nlat+1)
         lshaes = this%get_lshaes(nlat, nlon)
 
         ! Release memory ( if necessary )
@@ -132,7 +132,7 @@ contains
             work => this%legendre_workspace, &
             ierror => error_flag &
             )
-            call shaesi( nlat, nlon, wshaes, lshaes, work, lwork, dwork, ldwork, ierror )
+            call shaesi(nlat, nlon, wshaes, lshaes, work, lwork, dwork, ldwork, ierror)
         end associate
 
         ! Release memory
@@ -188,8 +188,8 @@ contains
         !----------------------------------------------------------------------
 
         ! Set up various workspace dimensions
-        lwork = this%get_lwork(nlat, nlon)
-        ldwork = this%get_ldwork(nlat)
+        lwork = (4*nlon+2)*nlat
+        ldwork = 2*(nlat+1)
         lshses = this%get_lshses(nlat, nlon)
 
         ! Release memory ( if necessary )
@@ -450,7 +450,7 @@ contains
         allocate( this%real_polar_harmonic_coefficients(nlat, nlat) )
         allocate( this%imaginary_polar_harmonic_coefficients(nlat, nlat) )
         allocate( this%real_azimuthal_harmonic_coefficients(nlat, nlat) )
-        allocate( this%imaginary_azimuthal_harmonic_coefficients( nlat, nlat) )
+        allocate( this%imaginary_azimuthal_harmonic_coefficients(nlat, nlat) )
 
     end subroutine initialize_regular_vector_transform
 
@@ -469,20 +469,19 @@ contains
         !----------------------------------------------------------------------
 
         ! Compute parity
-        if ( mod(nlon, 2) == 0 ) then
-            l1 = min( nlat, (nlon + 2)/2 )
+        if (mod(nlon, 2) == 0) then
+            l1 = min(nlat, (nlon+2)/2)
         else
-            l1 = min( nlat, (nlon + 1)/2 )
+            l1 = min(nlat, (nlon+1)/2)
         end if
 
-        if ( mod(nlat, 2) == 0 ) then
+        if (mod(nlat, 2) == 0) then
             l2 = nlat/2
         else
             l2 = (nlat + 1)/2
         end if
 
-        return_value = &
-            (l1 * l2 * (nlat + nlat - l1 + 1))/2 + nlon + 15
+        return_value = ( l1 * l2 * (2*nlat-l1+1) )/2 + nlon+15
 
     end function get_lshaes
 
@@ -502,20 +501,20 @@ contains
         !----------------------------------------------------------------------
 
         ! Compute parity
-        if ( mod(nlon, 2) == 0 ) then
-            l1 = min( nlat, (nlon + 2)/2 )
+        if (mod(nlon, 2) == 0) then
+            l1 = min(nlat, (nlon+2)/2)
         else
-            l1 = min( nlat, (nlon + 1)/2 )
+            l1 = min(nlat, (nlon+1)/2)
         end if
 
-        if ( mod(nlat, 2) == 0 ) then
+        if (mod(nlat, 2) == 0) then
             l2 = nlat/2
         else
             l2 = (nlat + 1)/2
         end if
 
-        return_value = &
-            (l1 * l2 * (nlat + nlat - l1 + 1))/2 + nlon + 15
+        return_value = get_lshaes(nlat, nlon)
+
 
     end function get_lshses
 
@@ -532,20 +531,19 @@ contains
         !----------------------------------------------------------------------
 
         ! Compute parity
-        if ( mod(nlon, 2) == 0 ) then
-            l1 = min( nlat, (nlon + 2)/2 )
+        if (mod(nlon, 2) == 0) then
+            l1 = min(nlat, (nlon+2)/2)
         else
-            l1 = min( nlat, (nlon + 1)/2 )
+            l1 = min(nlat, (nlon+1)/2)
         end if
 
-        if ( mod(nlat, 2) == 0 ) then
+        if (mod(nlat, 2) == 0) then
             l2 = nlat/2
         else
             l2 = (nlat + 1)/2
         end if
 
-        return_value = &
-            l1 * l2 * (nlat + nlat - l1 + 1) + nlon + 15
+        return_value = l1 * l2 * (2*nlat-l1+1) + nlon+15
 
     end function get_lvhaes
 
@@ -565,22 +563,22 @@ contains
         !----------------------------------------------------------------------
 
         ! Compute parity
-        if ( mod(nlon, 2) == 0 ) then
-            l1 = min( nlat, nlon/2 )
+        if (mod(nlon, 2) == 0) then
+            l1 = min(nlat, nlon/2 )
         else
-            l1 = min( nlat, (nlon + 1)/2 )
+            l1 = min(nlat, (nlon+1)/2)
         end if
 
-        if ( mod(nlat, 2) == 0 ) then
+        if (mod(nlat, 2) == 0) then
             l2 = nlat/2
         else
             l2 = (nlat + 1)/2
         end if
 
-        return_value =  &
-            l1 * l2 * (nlat + nlat - l1 + 1) + nlon + 15
+        return_value = l1 * l2 * (2*nlat-l1+1) + nlon+15
 
     end function get_lvhses
+
 
 
     pure function get_lwork_unsaved(nlat, nlon) result (return_value)
@@ -597,19 +595,24 @@ contains
         !----------------------------------------------------------------------
 
         ! Compute parity
-        if ( mod(nlon, 2) == 0 ) then
-            l1 = min( nlat, nlon/2 )
+        if (mod(nlon, 2) == 0) then
+            l1 = min(nlat, nlon/2 )
         else
-            l1 = min( nlat, (nlon + 1)/2 )
+            l1 = min(nlat, (nlon+1)/2)
         end if
 
-        if ( mod(nlat, 2) == 0 ) then
+        if (mod(nlat, 2) == 0) then
             l2 = nlat/2
         else
             l2 = (nlat + 1)/2
         end if
 
-        return_value = 3 * (max(l1-2, 0) * (nlat+nlat-l1-1))/2 + 5*l2*nlat
+        associate( &
+            a => 3 * (max(l1-2, 0) * (nlat+nlat-l1-1))/2 + 5*l2*nlat, &
+            b => 5 * nlat * l2 + 3 * ( (l1-2)*(nlat+nlat-l1-1) )/2 &
+            )
+            return_value = max(a, b)
+        end associate
 
     end function get_lwork_unsaved
 

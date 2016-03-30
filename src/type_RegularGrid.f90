@@ -138,7 +138,7 @@ contains
             dtheta = PI / (nlat-1)
             ! Compute  equally spaced (uniform) longitudinal grid
             do k = 1, nlat
-                theta(k) = -(PI/2) + real(k - 1, kind=wp) * dtheta
+                theta(k) = real(k - 1, kind=wp) * dtheta
             end do
         end associate
 

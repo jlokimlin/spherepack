@@ -36,6 +36,7 @@ contains
 
         call regular_sphere%create(nlat, nlon)
         call test_scalar_analysis_and_synthesis( regular_sphere )
+        call test_vector_analysis_and_synthesis( regular_sphere )
         call regular_sphere%destroy()
 
         ! Instantiate object
@@ -46,13 +47,13 @@ contains
         write( stdout, '(A, I3, A, I3)' ) 'nlat = ', nlat, ' nlon = ', nlon
 
 !        ! test all the subroutines
-        call test_scalar_analysis_and_synthesis( gaussian_sphere )
-        call test_vector_analysis_and_synthesis( gaussian_sphere )
-        call test_compute_surface_integral( gaussian_sphere )
-        call test_invert_helmholtz( gaussian_sphere )
-        call test_get_gradient( gaussian_sphere )
-        call test_get_vorticity( gaussian_sphere )
-        call test_get_rotation_operator( gaussian_sphere )
+!        call test_scalar_analysis_and_synthesis( gaussian_sphere )
+!        call test_vector_analysis_and_synthesis( gaussian_sphere )
+!        call test_compute_surface_integral( gaussian_sphere )
+!        call test_invert_helmholtz( gaussian_sphere )
+!        call test_get_gradient( gaussian_sphere )
+!        call test_get_vorticity( gaussian_sphere )
+!        call test_get_rotation_operator( gaussian_sphere )
 
         ! disembody object
         call gaussian_sphere%destroy()
@@ -81,9 +82,9 @@ contains
         associate( &
             nlat => solver%NUMBER_OF_LATITUDES, &
             nlon => solver%NUMBER_OF_LONGITUDES, &
-            f    => original_function, &
-            fr   => real_synthesized_function, &
-            fc   => complex_synthesized_function &
+            f => original_function, &
+            fr => real_synthesized_function, &
+            fc => complex_synthesized_function &
             )
 
             ! Initialize array
@@ -135,7 +136,7 @@ contains
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
-        class (GaussianSphere), intent (in out)     :: solver
+        class (Sphere), intent (in out)     :: solver
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
