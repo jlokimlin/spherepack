@@ -36,7 +36,7 @@ Test programs are provided for solving these equations. Each program serves two 
     real (wp), allocatable :: solution(:,:)
     
     ! Create object
-    call sphere_dat%create(nlat=19, nlon=36, ntrunc=42)
+    call sphere_dat%create(nlat=19, nlon=36)
     
     !.... generate some data
     
