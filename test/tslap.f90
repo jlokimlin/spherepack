@@ -42,7 +42,6 @@
 !
 program tslap
 
-
     use, intrinsic :: iso_fortran_env, only: &
         ip => INT32, &
         wp => REAL64, &
@@ -84,7 +83,7 @@ contains
         real (wp)                      :: scalar_function(NLATS,NLONS,NSYNTHS)
         real (wp)                      :: approximate_laplacian(NLATS,NLONS,NSYNTHS)
         real (wp)                      :: exact_laplacian(NLATS,NLONS,NSYNTHS)
-        real (wp)                      :: err2, se
+        real (wp)                      :: discretization_error, se
         character (len=:), allocatable :: laplacian_error, inversion_error
         !----------------------------------------------------------------------
 
@@ -96,8 +95,10 @@ contains
             !==> For gaussian sphere
             !
             class is (GaussianSphere)
+
             !  Initialize gaussian sphere object
             call sphere_type%create(nlat=NLATS, nlon=NLONS)
+
             ! Allocate known error from previous platform
             allocate( laplacian_error, source='     discretization error = 1.682230e-13' )
             allocate( inversion_error, source='     discretization error = 9.988022e-16' )
@@ -105,8 +106,10 @@ contains
             !==> For regular sphere
             !
             class is (RegularSphere)
+
             ! Initialize regular sphere
             call sphere_type%create(nlat=NLATS, nlon=NLONS)
+
             ! Allocate known error from previous platform
             allocate( laplacian_error, source='     discretization error = 1.450713e-13' )
             allocate( inversion_error, source='     discretization error = 9.666880e-16' )
@@ -135,10 +138,10 @@ contains
                                     s(i,j,k) = x + y
                                     sclpe(i,j,k) = -2.0_wp * (x + y)
                                 case(2)
-                                    s(i,j,k) = x+z
+                                    s(i,j,k) = x + z
                                     sclpe(i,j,k) = -2.0_wp * (x + z)
                                 case(3)
-                                    s(i,j,k) = y+z
+                                    s(i,j,k) = y + z
                                     sclpe(i,j,k) = -2.0_wp * (y + z)
                             end select
                         end associate
@@ -162,8 +165,9 @@ contains
         !
         !==> Compute discretization error in sclp
         !
-        err2 = 0.0_wp
+        discretization_error = 0.0_wp
         associate( &
+        err2 => discretization_error, &
             sclp => approximate_laplacian, &
             sclpe => exact_laplacian &
             )
@@ -176,6 +180,7 @@ contains
             end do
             err2 = sqrt(err2/size(sclp))
         end associate
+
 
         !
         !==> Print earlier output from platform with 64-bit floating point
@@ -190,7 +195,7 @@ contains
         write( stdout, '(A)') '     Previous 64 bit floating point arithmetic result '
         write( stdout, '(A)') laplacian_error
         write( stdout, '(A)') '     The output from your computer is: '
-        write( stdout, '(A,1pe15.6)') '     discretization error = ', err2
+        write( stdout, '(A,1pe15.6)') '     discretization error = ', discretization_error
         write( stdout, '(A)' ) ''
 
         !
@@ -208,8 +213,9 @@ contains
         !
         !==> Compare s with original
         !
-        err2 = 0.0
+        discretization_error = 0.0_wp
         associate( &
+            err2 => discretization_error, &
             s => scalar_function, &
             radial => sphere_type%unit_vectors%radial &
             )
@@ -223,11 +229,11 @@ contains
                             )
                             select case (k)
                                 case (1)
-                                    se = x+y
+                                    se = x + y
                                 case (2)
-                                    se = x+z
+                                    se = x + z
                                 case (3)
-                                    se = y+z
+                                    se = y + z
                             end select
                             err2 = err2+(s(i,j,k) - se)**2
                         end associate
@@ -248,9 +254,9 @@ contains
         write( stdout, '(A)') '     scalar laplacian inversion'
         write( stdout, '(2(A,I2))') '     nlat = ', NLATS,' nlon = ', NLONS
         write( stdout, '(A)') '     Previous 64 bit floating point arithmetic result '
-        write( stdout, '(A)') laplacian_error
+        write( stdout, '(A)') inversion_error
         write( stdout, '(A)') '     The output from your computer is: '
-        write( stdout, '(A,1pe15.6)') '     discretization error = ', err2
+        write( stdout, '(A,1pe15.6)') '     discretization error = ', discretization_error
         write( stdout, '(A)' ) ''
 
         !
@@ -258,7 +264,7 @@ contains
         !
         call sphere_type%destroy()
         deallocate( laplacian_error )
-
+        deallocate( inversion_error )
 
     end subroutine test_scalar_laplacian_routines
 
