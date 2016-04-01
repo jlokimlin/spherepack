@@ -1,6 +1,6 @@
 # **modern\_spherepack**
 
-This Fortran project is a object-oriented programming (OOP) modernization of NCAR's SPHEREPACK3.2 library. The original work, written in FORTRAN 77, was heavily refactored to incorporate features of modern Fortran (2008+). 
+This Fortran project is a object-oriented programming (OOP) modernization of NCAR's SPHEREPACK library. The original work, written in FORTRAN 77, was heavily refactored to incorporate features of modern Fortran (2008+). 
 
 
 The arduous initialization procedures for analysis and synthesis are now confined to the polymorphic class variable **Sphere**. The OOP approach hides the various workspace arrays from the user.
@@ -24,7 +24,7 @@ Test programs are provided for solving these equations. Each program serves two 
 
 ```fortran
 
-    use spherepack_wrapper_library, only: &
+    use modern_spherepack_library, only: &
         GaussianSphere
 
     ! Explicit typing only

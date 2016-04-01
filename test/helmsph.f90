@@ -1,212 +1,209 @@
+!
+!     * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+!     *                                                               *
+!     *                  copyright (c) 1998 by UCAR                   *
+!     *                                                               *
+!     *       University Corporation for Atmospheric Research         *
+!     *                                                               *
+!     *                      all rights reserved                      *
+!     *                                                               *
+!     *                      SPHEREPACK version 3.2                   *
+!     *                                                               *
+!     *       A Package of Fortran77 Subroutines and Programs         *
+!     *                                                               *
+!     *              for Modeling Geophysical Processes               *
+!     *                                                               *
+!     *                             by                                *
+!     *                                                               *
+!     *                  John Adams and Paul Swarztrauber             *
+!     *                                                               *
+!     *                             of                                *
+!     *                                                               *
+!     *         the National Center for Atmospheric Research          *
+!     *                                                               *
+!     *                Boulder, Colorado  (80307)  U.S.A.             *
+!     *                                                               *
+!     *                   which is sponsored by                       *
+!     *                                                               *
+!     *              the National Science Foundation                  *
+!     *                                                               *
+!     * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+!
+!
+!
+! ... file helmsph.f
+!
+!     this file contains a program for solving the Helmholtz
+!     equation with constant 1.0 on a ten degree grid on the full sphere
+!
+! ... required spherepack files
+!
+!     islapec.f, shaec.f, shsec.f, sphcom.f, hrfft.f
+!
+! ... description
+!
+!     let theta be latitude and phi be east longitude in radians.
+!     and let
+!
+!
+!       x = cos(theta)*sin(phi)
+!       y = cos(theta)*cos(phi)
+!       z = sint(theta)
+!
+!     be the cartesian coordinates corresponding to theta and phi.
+!     on the unit sphere.  The exact solution
+!
+!        ue(theta,phi) = (1.+x*y)*exp(z)
+!
+!     is used to set the right hand side and compute error.
+!
+!
+! **********************************************************************
+!
+! OUTPUT FROM EXECUTING THE PROGRAM BELOW
+! WITH 32 AND 64 BIT FLOATING POINT ARITHMETIC
+!
+! Helmholtz approximation on a ten degree grid
+! nlat = 19   nlon = 36
+! xlmbda =  1.00   pertrb =  0.000E+00
+! maximum error =  0.715E-06 *** (32 BIT)
+! maximum error =  0.114E-12 *** (64 BIT)
+!
+! ***********************************************
+! ***********************************************
 program helmsph
-
-    use, intrinsic :: iso_fortran_env, only: &
-        ip => INT32, &
-        wp => REAL64, &
-        stdout => OUTPUT_UNIT
-
-    use modern_spherepack_library, only: &
-        Sphere, &
-        Regularsphere, &
-        GaussianSphere
-
-    ! Explicit typing only
+    !
+    !     set grid size with parameter statements
+    !
     implicit none
+    integer nnlat,nnlon,nn15,llsave,llwork,lldwork
+    parameter (nnlat=19,nnlon=36)
+    !
+    !     set saved and unsaved work space lengths in terms of nnlat,nnlon
+    !     (see documentation for shaec,shsec,islapec)
+    !
+    parameter (nn15=nnlon+15)
+    parameter (llsave=nnlat*(nnlat+1)+3*((nnlat-2)*(nnlat-1)+nn15))
+    parameter (llwork=nnlat*(2*nnlon+3*(nnlat+1)+2*nnlat+1))
+    !
+    !     set real work space length for initializations
+    !
+    parameter (lldwork = nnlat+1)
+    !
+    !     dimension arrays
+    !
+    real u(nnlat,nnlon),r(nnlat,nnlon)
+    real sint(nnlat),cost(nnlat),sinp(nnlon),cosp(nnlon)
+    real work(llwork),wshaec(llsave),wshsec(llsave)
+    real dwork(lldwork)
+    real a(nnlat,nnlat),b(nnlat,nnlat)
+    integer nlat,nlon,i,j,lshaec,lshsec,lwork,ierror,isym,nt
+    integer ldwork
+    real pi,x,y,z,dlat,dlon,theta,phi,xlmbda,pertrb,ez,ue,errm
+    pi = acos( -1.0 )
+    !
+    !     set helmholtz constant
+    !
+    xlmbda = 1.0
+    !
+    !     set work space length arguments
+    !
+    lwork = llwork
+    ldwork = lldwork
+    lshaec = llsave
+    lshsec = llsave
+    !
+    !     set grid size arguments
+    !
+    nlat = nnlat
+    nlon = nnlon
+    !
+    !     set sine and cosine vectors
+    !
+    dlat = pi/(nlat-1)
+    dlon = (pi+pi)/nlon
+    do i=1,nlat
+        theta = -0.5*pi+(i-1)*dlat
+        sint(i) = sin(theta)
+        cost(i) = cos(theta)
+    end do
 
-    !----------------------------------------------------------------------
-    ! Dictionary
-    !----------------------------------------------------------------------
-    type (GaussianSphere) :: gaussian_sphere
-    type (RegularSphere)  :: regular_sphere
-    !----------------------------------------------------------------------
-
-    call test_helmsph( gaussian_sphere )
-    call test_helmsph( regular_sphere )
-
-
-contains
-
-
-    subroutine test_helmsph( sphere_type )
-        !
-        !     * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-        !     *                                                               *
-        !     *                  copyright (c) 1998 by UCAR                   *
-        !     *                                                               *
-        !     *       University Corporation for Atmospheric Research         *
-        !     *                                                               *
-        !     *                      all rights reserved                      *
-        !     *                                                               *
-        !     *                      SPHEREPACK version 3.2                   *
-        !     *                                                               *
-        !     *       A Package of Fortran77 Subroutines and Programs         *
-        !     *                                                               *
-        !     *              for Modeling Geophysical Processes               *
-        !     *                                                               *
-        !     *                             by                                *
-        !     *                                                               *
-        !     *                  John Adams and Paul Swarztrauber             *
-        !     *                                                               *
-        !     *                             of                                *
-        !     *                                                               *
-        !     *         the National Center for Atmospheric Research          *
-        !     *                                                               *
-        !     *                Boulder, Colorado  (80307)  U.S.A.             *
-        !     *                                                               *
-        !     *                   which is sponsored by                       *
-        !     *                                                               *
-        !     *              the National Science Foundation                  *
-        !     *                                                               *
-        !     * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-        !
-        !
-        !
-        ! ... file helmsph.f
-        !
-        !     this file contains a program for solving the Helmholtz
-        !     equation with constant 1.0 on a ten degree grid on the full sphere
-        !
-        ! ... required spherepack files
-        !
-        !     islapec.f, shaec.f, shsec.f, sphcom.f, hrfft.f
-        !
-        ! ... description
-        !
-        !     let theta be latitude and phi be east longitude in radians.
-        !     and let
-        !
-        !
-        !       x = cos(theta)*sin(phi)
-        !       y = cos(theta)*cos(phi)
-        !       z = sint(theta)
-        !
-        !     be the cartesian coordinates corresponding to theta and phi.
-        !     on the unit sphere.  The exact solution
-        !
-        !        ue(theta,phi) = (1.+x*y)*exp(z)
-        !
-        !     is used to set the right hand side and compute error.
-        !
-        !
-        !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
-        !----------------------------------------------------------------------
-        class (Sphere), intent (in out) :: sphere_type
-        !----------------------------------------------------------------------
-        ! Dictionary: local variables
-        !----------------------------------------------------------------------
-        integer (ip), parameter        :: NLONS = 36
-        integer (ip), parameter        :: NLATS = NLONS/2 + 1
-        integer (ip)                   :: i, j !! Counters
-        real (wp)                      :: approximate_solution(NLATS, NLONS)
-        real (wp)                      :: source_term(NLATS, NLONS)
-        real (wp)                      :: helmholtz_constant, discretization_error
-        character (len=:), allocatable :: prev_error
-        !----------------------------------------------------------------------
-
-        !
-        !==> Set up workspace arrays
-        !
-        select type (sphere_type)
-            class is (GaussianSphere)
-            ! Create gaussian sphere
-            call sphere_type%create(nlat=NLATS, nlon=NLONS, isym=0, isynt=1)
-            ! Allocate prev known
-            allocate( prev_error, source='     discretization error = 3.552714e-15' )
-            class is (RegularSphere)
-            ! Create regular sphere
-            call sphere_type%create(nlat=NLATS, nlon=NLONS, isym=0, isynt=1)
-            ! Allocate prev known
-            allocate( prev_error, source='     discretization error = 2.331468e-15' )
-        end select
-
-        !
-        !==> Set helmholtz constant
-        !
-        helmholtz_constant = 1.0_wp
-
-        ! Set right hand side as helmholtz operator
-        ! applied to ue = (1.+x*y)*exp(z)
-        associate( &
-            rhs => source_term, &
-            radial => sphere_type%unit_vectors%radial &
-            )
-            do j=1,NLONS
-                do i=1,NLATS
-                    associate( &
-                        x => radial(i,j)%x, &
-                        y => radial(i,j)%y, &
-                        z => radial(i,j)%z &
-                        )
-                        rhs(i,j) = -(x*y*(z*z+6.0_wp*(z+1.0_wp))+z*(z+2.0_wp))*exp(z)
-                    end associate
-                end do
-            end do
-        end associate
-
-        !
-        !==> Solve Helmholtz equation on the sphere in u
-        !
-        associate( &
-            xlmbda => helmholtz_constant, &
-            rhs => source_term, &
-            u => approximate_solution &
-            )
-            call sphere_type%invert_helmholtz( xlmbda, rhs, u)
-        end associate
-
-        !
-        !==> Compute and print maximum error
-        !
-        associate( &
-            err_max => discretization_error, &
-            u => approximate_solution, &
-            radial => sphere_type%unit_vectors%radial &
-            )
-            ! Initialize error
-            err_max = 0.0_wp
-            do j=1,NLONS
-                do i=1,NLATS
-                    associate( &
-                        ! Associate radial components
-                        x => radial(i,j)%x, &
-                        y => radial(i,j)%y, &
-                        z => radial(i,j)%z &
-                        )
-                        ! Set exact solution
-                        associate( ue => (1.0_wp + x * y) * exp(z) )
-                            err_max = max(err_max,abs(u(i,j)-ue))
-                        end associate
-                    end associate
-                end do
-            end do
-        end associate
-
-        !
-        !==> Print earlier output from platform with 64-bit floating point
-        !    arithmetic followed by the output from this computer
-        !
-        write( stdout, '(A)') ''
-        write( stdout, '(A)') '     helmsph *** TEST RUN *** '
-        write( stdout, '(A)') ''
-        write( stdout, '(A)') '     grid type = '//sphere_type%grid%grid_type
-        write( stdout, '(A)') '     Helmholtz approximation on a ten degree grid'
-        write( stdout, '(2(A,I2))') '     nlat = ', NLATS,' nlon = ', NLONS
-        write( stdout, '(A)') '     Previous 64 bit floating point arithmetic result '
-        write( stdout, '(A)') prev_error
-        write( stdout, '(A)') '     The output from your computer is: '
-        write( stdout, '(A,1pe15.6)') '     discretization error = ', &
-            discretization_error
-        write( stdout, '(A)' ) ''
-
-        !
-        !==> Release memory
-        !
-        call sphere_type%destroy()
-        deallocate( prev_error )
-
-    end subroutine test_helmsph
-
-
+    do j=1,nlon
+        phi = (j-1)*dlon
+        sinp(j) = sin(phi)
+        cosp(j) = cos(phi)
+    end do
+    !
+    !     set right hand side as helmholtz operator
+    !     applied to ue = (1.+x*y)*exp(z)
+    !
+    do j=1,nlon
+        do i=1,nlat
+            x = cost(i)*cosp(j)
+            y = cost(i)*sinp(j)
+            z = sint(i)
+            r(i,j) = -(x*y*(z*z+6.*(z+1.))+z*(z+2.))*exp(z)
+        end do
+    end do
+    !
+    !     initialize saved work space arrays for scalar harmonic
+    !     analysis and Helmholtz inversion of r
+    !
+    call shaeci(nlat,nlon,wshaec,lshaec,dwork,ldwork,ierror)
+    if (ierror > 0) then
+        write (6,200) ierror
+200     format(' shaeci, ierror = ',i2)
+        call exit(0)
+    end if
+    call shseci(nlat,nlon,wshsec,lshsec,dwork,ldwork,ierror)
+    if (ierror > 0) then
+        write (6,201) ierror
+201     format(' shseci, ierror = ',i2)
+        call exit(0)
+    end if
+    !
+    !     set no symmetry and one array
+    !
+    isym = 0
+    nt = 1
+    !
+    !     compute coefficients of r for input to islapec
+    !
+    call shaec(nlat,nlon,isym,nt,r,nlat,nlon,a,b,nlat,nlat, &
+        wshaec,lshaec,work,lwork,ierror)
+    if (ierror > 0) then
+        write(*,202) ierror
+202     format(' shaec , ierror = ',i2)
+        call exit(0)
+    end if
+    !
+    !     solve Helmholtz equation on the sphere in u
+    !
+    write (6,100) nlat,nlon
+100 format(' helmholtz approximation on a ten degree grid' &
+        /' nlat = ',i3,2x,' nlon = ', i3)
+    call islapec(nlat,nlon,isym,nt,xlmbda,u,nlat,nlon,a,b,nlat,nlat, &
+        wshsec,lshsec,work,lwork,pertrb,ierror)
+    if (ierror /= 0) then
+        write (6,103) ierror
+103     format(' islapec, ierror = ',i2)
+        if (ierror > 0) call exit(0)
+    end if
+    !
+    !     compute and print maximum error in u
+    !
+    errm = 0.0
+    do j=1,nlon
+        do i=1,nlat
+            x = cost(i)*cosp(j)
+            y = cost(i)*sinp(j)
+            z = sint(i)
+            ez = exp(z)
+            ue = (1.+x*y)*ez
+                errm = amax1(errm,abs(u(i,j)-ue))
+        end do
+    end do
+    write(*,204) xlmbda,pertrb,errm
+204 format(' xlmbda = ',f5.2,2x, ' pertrb = ' ,e10.3, &
+        /' maximum error = ',e10.3)
 end program helmsph
-
