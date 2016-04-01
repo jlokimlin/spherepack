@@ -46,14 +46,14 @@ contains
         write( stdout, '(A)' ) ' '
         write( stdout, '(A, I3, A, I3)' ) 'nlat = ', nlat, ' nlon = ', nlon
 
-!        ! test all the subroutines
-!        call test_scalar_analysis_and_synthesis( gaussian_sphere )
-!        call test_vector_analysis_and_synthesis( gaussian_sphere )
-!        call test_compute_surface_integral( gaussian_sphere )
-!        call test_invert_helmholtz( gaussian_sphere )
-!        call test_get_gradient( gaussian_sphere )
-!        call test_get_vorticity( gaussian_sphere )
-!        call test_get_rotation_operator( gaussian_sphere )
+        !        ! test all the subroutines
+        !        call test_scalar_analysis_and_synthesis( gaussian_sphere )
+        !        call test_vector_analysis_and_synthesis( gaussian_sphere )
+        !        call test_compute_surface_integral( gaussian_sphere )
+        !        call test_invert_helmholtz( gaussian_sphere )
+        !        call test_get_gradient( gaussian_sphere )
+        !        call test_get_vorticity( gaussian_sphere )
+        !        call test_get_rotation_operator( gaussian_sphere )
 
         ! disembody object
         call gaussian_sphere%destroy()
@@ -141,9 +141,10 @@ contains
         ! Dictionary: local variables
         !----------------------------------------------------------------------
         integer (ip)    :: k, l !! Counters
-        real (wp)       :: polar_error, azimuthal_error
+        real (wp)       :: polar_error, azimuthal_error, vector_field_error
         type (Vector) :: vector_field
         real (wp)       :: vector_function(3, solver%NUMBER_OF_LATITUDES, solver%NUMBER_OF_LONGITUDES)
+        real (wp)       :: F_approx(3, solver%NUMBER_OF_LATITUDES, solver%NUMBER_OF_LONGITUDES)
         real (wp)       :: original_polar_component(solver%NUMBER_OF_LATITUDES, solver%NUMBER_OF_LONGITUDES)
         real (wp)       :: original_azimuthal_component(solver%NUMBER_OF_LATITUDES, solver%NUMBER_OF_LONGITUDES)
         real (wp)       :: approximate_polar_component(solver%NUMBER_OF_LATITUDES, solver%NUMBER_OF_LONGITUDES)
@@ -161,9 +162,9 @@ contains
             )
 
             ! Initialize arrays
-            F       = 0.0_wp
+            F  = 0.0_wp
             F_theta = 0.0_wp
-            F_phi   = 0.0_wp
+            F_phi = 0.0_wp
 
             ! compute the vector field that gives rise original components
             do l = 1, nlon
@@ -198,7 +199,7 @@ contains
             ! Set discretization errors
             polar_error     = maxval( abs( F_theta - F_theta_approx ))
             azimuthal_error = maxval( abs( F_phi   - F_phi_approx ))
-
+            vector_field_error = maxval( abs( F - F_approx ) )
         end associate
 
         ! Print the errors to console

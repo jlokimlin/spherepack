@@ -230,6 +230,53 @@ contains
 
     end subroutine get_spherical_angle_components
 
+    subroutine get_vector_function( this, &
+        radial_component, polar_component, azimuthal_component, vector_function )
+        !----------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !----------------------------------------------------------------------
+        class (SphericalUnitVectors), intent (in out) :: this
+        real (wp),                    intent (in)     :: radial_component(:,:)
+        real (wp),                    intent (in)     :: polar_component(:, :)
+        real (wp),                    intent (in)     :: azimuthal_component(:, :)
+        real (wp),                    intent (out)    :: vector_function(:, :, :)
+        !----------------------------------------------------------------------
+        ! Dictionary: local variables
+        !----------------------------------------------------------------------
+        integer (ip)  :: k, l !! Counters
+        type (Vector) :: vector_field !! To cast array to vector
+        !----------------------------------------------------------------------
+
+        ! Check if object is usable
+        if ( this%initialized .eqv. .false. ) then
+            error stop 'TYPE(SphericalUnitVectors): '&
+                //'uninitialized object in GET_VECTOR_FUNCTION'
+        end if
+
+        ! Calculate the spherical angle components
+        associate( &
+            nlat => this%NUMBER_OF_LATITUDES, &
+            nlon => this%NUMBER_OF_LONGITUDES &
+            )
+            do l = 1, nlon
+                do k = 1, nlat
+                    associate( &
+                        r => this%radial(k,l), &
+                        theta => this%polar(k, l), &
+                        phi => this%azimuthal(k, l) &
+                        )
+                        vector_function(:, k, l ) = &
+                            r * radial_component(k, l) &
+                            + theta * polar_component(k, l) &
+                            + phi * azimuthal_component(k,l)
+                    end associate
+                end do
+            end do
+        end associate
+
+    end subroutine get_vector_function
+
+
 
     subroutine finalize_spherical_unit_vectors( this )
         !----------------------------------------------------------------------

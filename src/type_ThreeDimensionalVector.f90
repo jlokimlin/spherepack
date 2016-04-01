@@ -19,7 +19,6 @@ module type_ThreeDimensionalVector
     public :: assignment(=)
     public :: operator(*)
 
-
     ! Declare derived data type
     type, public :: ThreeDimensionalVector
         !----------------------------------------------------------------------
@@ -35,13 +34,14 @@ module type_ThreeDimensionalVector
         !----------------------------------------------------------------------
         procedure,          private  :: add_vectors
         procedure,          private  :: subtract_vectors
-        procedure,          private  :: divide_vector_by_real
+        procedure,          private  :: divide_vector_by_float
         procedure,          private  :: divide_vector_by_integer
         procedure,          private  :: get_dot_product
-        procedure,          private  :: assign_vector_from_array
+        procedure,          private  :: assign_vector_from_int_array
+        procedure,          private  :: assign_vector_from_float_array
         procedure, nopass,  private  :: assign_array_from_vector
         procedure,          private  :: copy_vector
-        procedure,          private  :: multiply_vector_times_real
+        procedure,          private  :: multiply_vector_times_float
         procedure, nopass,  private  :: multiply_real_times_vector
         procedure,          private  :: multiply_vector_times_integer
         procedure, nopass,  private  :: multiply_integer_times_vector
@@ -52,7 +52,8 @@ module type_ThreeDimensionalVector
         generic,            public   :: operator (+) => add_vectors
         generic,            public   :: operator (-) => subtract_vectors
         generic,            public   :: operator (/) => &
-            divide_vector_by_real, divide_vector_by_integer
+            divide_vector_by_float,&
+            divide_vector_by_integer
         final                        :: finalize_three_dimensional_vector
         !----------------------------------------------------------------------
     end type ThreeDimensionalVector
@@ -66,10 +67,9 @@ module type_ThreeDimensionalVector
         module procedure copy_vector
     end interface
 
-
     ! Interface for multiplication operator
-    interface operator (*)
-        module procedure multiply_vector_times_real
+    interface  operator (*)
+        module procedure multiply_vector_times_float
         module procedure multiply_real_times_vector
         module procedure multiply_vector_times_integer
         module procedure multiply_integer_times_vector
@@ -97,7 +97,7 @@ module type_ThreeDimensionalVector
 contains
 
 
-    subroutine assign_vector_from_int_array( this, array )
+    subroutine assign_vector_from_int_array(this, array)
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
@@ -116,7 +116,7 @@ contains
 
 
 
-    subroutine assign_vector_from_float_array( this, array )
+    subroutine assign_vector_from_float_array(this, array)
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
@@ -152,7 +152,7 @@ contains
     end subroutine assign_array_from_vector
 
 
-    subroutine copy_vector( this, vector_to_be_copied )
+    subroutine copy_vector(this, vector_to_be_copied )
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
@@ -167,7 +167,7 @@ contains
     end subroutine copy_vector
 
 
-    function add_vectors( this, vec ) result ( return_value )
+    function add_vectors(this, vec) result (return_value)
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
@@ -183,7 +183,7 @@ contains
     end function add_vectors
 
 
-    function subtract_vectors( this, vec ) result ( return_value )
+    function subtract_vectors(this, vec) result (return_value)
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
@@ -199,7 +199,7 @@ contains
     end function subtract_vectors
 
 
-    pure function multiply_vector_times_real( this, float ) result ( return_value )
+    pure function multiply_vector_times_float(this, float) result (return_value)
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
@@ -212,10 +212,10 @@ contains
         return_value%y = this%y * float
         return_value%z = this%z * float
 
-    end function multiply_vector_times_real
+    end function multiply_vector_times_float
 
 
-    function multiply_real_times_vector(float, vec ) result ( return_value )
+    function multiply_real_times_vector(float, vec) result (return_value)
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
@@ -231,7 +231,7 @@ contains
     end function multiply_real_times_vector
 
 
-    function multiply_vector_times_integer( this, int ) result ( return_value )
+    function multiply_vector_times_integer(this, int) result (return_value)
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
@@ -240,14 +240,14 @@ contains
         type (ThreeDimensionalVector)                :: return_value
         !----------------------------------------------------------------------
 
-        return_value%x = this%x * real( int, kind=wp)
-        return_value%y = this%y * real( int, kind=wp)
-        return_value%z = this%z * real( int, kind=wp)
+        return_value%x = this%x * real(int, kind=wp)
+        return_value%y = this%y * real(int, kind=wp)
+        return_value%z = this%z * real(int, kind=wp)
 
     end function multiply_vector_times_integer
 
 
-    pure function multiply_integer_times_vector( int, vec ) result ( return_value )
+    pure function multiply_integer_times_vector(int, vec) result (return_value)
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
@@ -256,14 +256,14 @@ contains
         class (ThreeDimensionalVector), intent (in) :: vec
         !----------------------------------------------------------------------
 
-        return_value%x = real( int, kind=wp) * vec%x
-        return_value%y = real( int, kind=wp) * vec%y
-        return_value%z = real( int, kind=wp) * vec%z
+        return_value%x = real(int, kind=wp) * vec%x
+        return_value%y = real(int, kind=wp) * vec%y
+        return_value%z = real(int, kind=wp) * vec%z
 
     end function multiply_integer_times_vector
 
 
-    pure function divide_vector_by_real( this, float ) result ( return_value )
+    pure function divide_vector_by_float(this, float) result (return_value)
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
@@ -276,10 +276,11 @@ contains
         return_value%y = this%y / float
         return_value%z = this%z / float
 
-    end function divide_vector_by_real
+    end function divide_vector_by_float
 
 
-    pure function divide_vector_by_integer( this, int ) result ( return_value )
+
+    pure function divide_vector_by_integer(this, int) result (return_value)
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
@@ -296,7 +297,7 @@ contains
 
 
 
-    function get_dot_product( this, vec ) result ( return_value )
+    function get_dot_product(this, vec) result (return_value)
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
@@ -315,7 +316,7 @@ contains
     end function get_dot_product
 
 
-    function get_cross_product( this, vec ) result ( return_value )
+    function get_cross_product(this, vec) result (return_value)
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
@@ -331,7 +332,7 @@ contains
     end function get_cross_product
 
 
-    function get_norm( this ) result ( return_value )
+    function get_norm(this) result (return_value)
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
@@ -340,13 +341,13 @@ contains
         !----------------------------------------------------------------------
 
         associate( array => [ this%x, this%y, this%z ] )
-            return_value = norm2( array )
+            return_value = norm2(array)
         end associate
 
     end function get_norm
 
 
-    elemental subroutine finalize_three_dimensional_vector( this )
+    elemental subroutine finalize_three_dimensional_vector(this)
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
@@ -361,16 +362,15 @@ contains
     end subroutine finalize_three_dimensional_vector
 
 
-    elemental subroutine finalize_three_dimensional_vector_pointer( this )
+    elemental subroutine finalize_three_dimensional_vector_pointer(this)
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
         type (ThreeDimensionalVectorPointer), intent (in out) :: this
         !----------------------------------------------------------------------
-
         ! Check if pointer is associated
-        if ( associated( this%p ) ) then
-            nullify( this%p )
+        if ( associated(this%p ) ) then
+            nullify(this%p )
         end if
 
     end subroutine finalize_three_dimensional_vector_pointer
