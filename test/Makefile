@@ -1,11 +1,11 @@
 
 include ../make.inc
 
-SPHEREPACK_WRAPPER_MODULE_PATH = $(LIB_DIRECTORY)
+SPHEREPACK_MODULE_PATH = $(LIB_DIRECTORY)
 
 LINKS = \
--L$(LIB_DIRECTORY) -lspherepack_wrapper \
--I$(SPHEREPACK_WRAPPER_MODULE_PATH) \
+-L$(LIB_DIRECTORY) -lmodern_spherepack \
+-I$(SPHEREPACK_MODULE_PATH) \
 -I$(OBJ_DIRECTORY)
 
 SRC=$(subst .o,.f90, $(OBJ))

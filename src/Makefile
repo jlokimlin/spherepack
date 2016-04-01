@@ -94,16 +94,16 @@ type_RegularSphere.f90
 	$(FC) $(FFLAGS) -c type_RegularSphere.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(LIB_DIRECTORY)
 
-spherepack_wrapper_library.o: \
+modern_spherepack_library.o: \
 type_ThreeDimensionalVector.o \
 type_GaussianSphere.o \
 type_RegularSphere.o \
-spherepack_wrapper_library.f90
-	$(FC) $(FFLAGS) -c spherepack_wrapper_library.f90 $(LINKS)\
+modern_spherepack_library.f90
+	$(FC) $(FFLAGS) -c modern_spherepack_library.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(LIB_DIRECTORY)
 
 main.o: \
-spherepack_wrapper_library.o \
+modern_spherepack_library.o \
 main.f90
 	$(FC) $(FFLAGS) -c main.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@

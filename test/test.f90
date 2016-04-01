@@ -5,7 +5,7 @@ program test
         ip => INT32, &
         stdout => OUTPUT_UNIT
 
-    use spherepack_wrapper_library, only: &
+    use modern_spherepack_library, only: &
         Sphere, &
         GaussianSphere, &
         RegularSphere, &

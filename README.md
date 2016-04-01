@@ -1,4 +1,4 @@
-# **spherepack\_wrapper**
+# **modern\_spherepack**
 
 This Fortran project is a object-oriented programming (OOP) modernization of NCAR's SPHEREPACK3.2 library. The original work, written in FORTRAN 77, was heavily refactored to incorporate features of modern Fortran (2008+). 
 
@@ -65,9 +65,9 @@ Test programs are provided for solving these equations. Each program serves two 
 
 Type the following command line arguments
 ```
-git clone https://github.com/jlokimlin/spherepack_wrapper.git
+git clone https://github.com/jlokimlin/modern_spherepack.git
 
-cd spherepack_wrapper; make all
+cd modern_spherepack; make all
 ```
 
 -----------------------------------------------------------------------------

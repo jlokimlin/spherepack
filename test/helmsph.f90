@@ -5,7 +5,7 @@ program helmsph
         wp => REAL64, &
         stdout => OUTPUT_UNIT
 
-    use spherepack_wrapper_library, only: &
+    use modern_spherepack_library, only: &
         Sphere, &
         Regularsphere, &
         GaussianSphere
