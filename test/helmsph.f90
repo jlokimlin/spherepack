@@ -1,3 +1,63 @@
+!
+!     * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+!     *                                                               *
+!     *                  copyright (c) 1998 by UCAR                   *
+!     *                                                               *
+!     *       University Corporation for Atmospheric Research         *
+!     *                                                               *
+!     *                      all rights reserved                      *
+!     *                                                               *
+!     *                      SPHEREPACK version 3.2                   *
+!     *                                                               *
+!     *       A Package of Fortran77 Subroutines and Programs         *
+!     *                                                               *
+!     *              for Modeling Geophysical Processes               *
+!     *                                                               *
+!     *                             by                                *
+!     *                                                               *
+!     *                  John Adams and Paul Swarztrauber             *
+!     *                                                               *
+!     *                             of                                *
+!     *                                                               *
+!     *         the National Center for Atmospheric Research          *
+!     *                                                               *
+!     *                Boulder, Colorado  (80307)  U.S.A.             *
+!     *                                                               *
+!     *                   which is sponsored by                       *
+!     *                                                               *
+!     *              the National Science Foundation                  *
+!     *                                                               *
+!     * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+!
+!
+!
+! ... file helmsph.f
+!
+!     this file contains a program for solving the Helmholtz
+!     equation with constant 1.0 on a ten degree grid on the full sphere
+!
+! ... required spherepack files
+!
+!     islapec.f, shaec.f, shsec.f, sphcom.f, hrfft.f
+!
+! ... description
+!
+!     let theta be latitude and phi be east longitude in radians.
+!     and let
+!
+!
+!       x = cos(theta)*sin(phi)
+!       y = cos(theta)*cos(phi)
+!       z = sint(theta)
+!
+!     be the cartesian coordinates corresponding to theta and phi.
+!     on the unit sphere.  The exact solution
+!
+!        ue(theta,phi) = (1.+x*y)*exp(z)
+!
+!     is used to set the right hand side and compute error.
+!
+!
 program helmsph
 
     use, intrinsic :: iso_fortran_env, only: &
@@ -28,66 +88,6 @@ contains
 
 
     subroutine test_helmsph( sphere_type )
-        !
-        !     * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-        !     *                                                               *
-        !     *                  copyright (c) 1998 by UCAR                   *
-        !     *                                                               *
-        !     *       University Corporation for Atmospheric Research         *
-        !     *                                                               *
-        !     *                      all rights reserved                      *
-        !     *                                                               *
-        !     *                      SPHEREPACK version 3.2                   *
-        !     *                                                               *
-        !     *       A Package of Fortran77 Subroutines and Programs         *
-        !     *                                                               *
-        !     *              for Modeling Geophysical Processes               *
-        !     *                                                               *
-        !     *                             by                                *
-        !     *                                                               *
-        !     *                  John Adams and Paul Swarztrauber             *
-        !     *                                                               *
-        !     *                             of                                *
-        !     *                                                               *
-        !     *         the National Center for Atmospheric Research          *
-        !     *                                                               *
-        !     *                Boulder, Colorado  (80307)  U.S.A.             *
-        !     *                                                               *
-        !     *                   which is sponsored by                       *
-        !     *                                                               *
-        !     *              the National Science Foundation                  *
-        !     *                                                               *
-        !     * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-        !
-        !
-        !
-        ! ... file helmsph.f
-        !
-        !     this file contains a program for solving the Helmholtz
-        !     equation with constant 1.0 on a ten degree grid on the full sphere
-        !
-        ! ... required spherepack files
-        !
-        !     islapec.f, shaec.f, shsec.f, sphcom.f, hrfft.f
-        !
-        ! ... description
-        !
-        !     let theta be latitude and phi be east longitude in radians.
-        !     and let
-        !
-        !
-        !       x = cos(theta)*sin(phi)
-        !       y = cos(theta)*cos(phi)
-        !       z = sint(theta)
-        !
-        !     be the cartesian coordinates corresponding to theta and phi.
-        !     on the unit sphere.  The exact solution
-        !
-        !        ue(theta,phi) = (1.+x*y)*exp(z)
-        !
-        !     is used to set the right hand side and compute error.
-        !
-        !
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------

@@ -63,12 +63,18 @@ module type_Sphere
         procedure,                              public  :: get_coefficient
         procedure,                              public  :: get_scalar_laplacian
         procedure,                              public  :: invert_scalar_laplacian
+        generic, public :: get_laplacian => get_scalar_laplacian
+        generic, public :: invert_laplacian => invert_scalar_laplacian
         procedure,                              public  :: invert_helmholtz
         procedure,                              public  :: get_gradient
         procedure,                              public  :: invert_gradient
         procedure,                              public  :: get_vorticity
         procedure,                              public  :: invert_vorticity
-        procedure,                              public  :: get_divergence
+        procedure, private :: get_divergence_from_vector_field
+        procedure, private :: get_divergence_from_spherical_angles
+        generic,   public   :: get_divergence => &
+            get_divergence_from_vector_field, &
+            get_divergence_from_spherical_angles
         procedure,                              public  :: invert_divergence
         procedure,                              public  :: get_rotation_operator => compute_angular_momentum
         procedure,                              private :: get_scalar_symmetries
@@ -139,6 +145,11 @@ module type_Sphere
         end subroutine vector_synthesis
     end interface
 
+!    ! Overload class method
+!    interface get_divergence_interface
+!        module procedure get_divergence_from_vector_field
+!        module procedure get_divergence_from_spherical_angles
+!    end interface get_divergence_interface
 
 contains
 
@@ -858,15 +869,12 @@ contains
 
     end subroutine invert_vorticity
 
-
-
-    subroutine get_divergence( this, vector_field, divergence )
+    subroutine get_divergence_from_coefficients(this, divergence)
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
         class (Sphere), intent (in out) :: this
-        real (wp),      intent (in)     :: vector_field (:, :, :)
-        real (wp),      intent (out)    :: divergence (:, :)
+        real (wp),      intent (out)    :: divergence (:,:)
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
@@ -876,11 +884,8 @@ contains
         ! Check if object is usable
         if ( this%initialized .eqv. .false. ) then
             error stop 'TYPE(Sphere): uninitialized object'&
-                //' in GET_DIVERGENCE'
+                //' in GET_DIVERGENCE_FROM_COEFFICIENTS'
         end if
-
-        ! Calculate the (real) vector harmonic coefficients
-        call this%perform_vector_analysis( vector_field )
 
         ! compute gradient
         associate( &
@@ -909,16 +914,85 @@ contains
             call this%perform_scalar_synthesis( div )
         end associate
 
-    end subroutine get_divergence
+    end subroutine get_divergence_from_coefficients
 
 
-    subroutine invert_divergence( this, source, solution )
+
+    subroutine get_divergence_from_vector_field( this, vector_field, divergence )
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
         class (Sphere), intent (in out) :: this
-        real (wp),      intent (in)     :: source(:, :, :)
-        real (wp),      intent (out)    :: solution(:, :)
+        real (wp),      intent (in)     :: vector_field (:, :, :)
+        real (wp),      intent (out)    :: divergence (:, :)
+        !----------------------------------------------------------------------
+        ! Dictionary: local variables
+        !----------------------------------------------------------------------
+        integer (ip):: n, m !! Counters
+        !----------------------------------------------------------------------
+
+        ! Check if object is usable
+        if ( this%initialized .eqv. .false. ) then
+            error stop 'TYPE(Sphere): uninitialized object'&
+                //' in GET_DIVERGENCE_FROM_VECTOR_FIELD'
+        end if
+
+        ! Calculate the (real) vector harmonic coefficients
+        call this%perform_vector_analysis( vector_field )
+
+        ! compute divergence
+        call get_divergence_from_coefficients(this, divergence)
+
+    end subroutine get_divergence_from_vector_field
+
+
+    subroutine get_divergence_from_spherical_angles( this, &
+        polar_component, azimuthal_component, divergence )
+        !----------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !----------------------------------------------------------------------
+        class (Sphere), intent (in out) :: this
+        real (wp),      intent (in)     :: polar_component(:,:)
+        real (wp),      intent (in)     :: azimuthal_component(:,:)
+        real (wp),      intent (out)    :: divergence (:, :)
+        !----------------------------------------------------------------------
+        ! Dictionary: local variables
+        !----------------------------------------------------------------------
+        integer (ip):: n, m !! Counters
+        !----------------------------------------------------------------------
+
+        ! Check if object is usable
+        if ( this%initialized .eqv. .false. ) then
+            error stop 'TYPE(Sphere): uninitialized object'&
+                //' in GET_DIVERGENCE_FROM_SPHERICAL_ANGLES'
+        end if
+
+        ! Calculate the (real) vector harmonic coefficients
+        associate( &
+            v => polar_component, &
+            w => azimuthal_component &
+            )
+            call this%vector_analysis_from_spherical_components( v, w )
+        end associate
+
+        ! compute divergence
+        call get_divergence_from_coefficients(this, divergence)
+
+    end subroutine get_divergence_from_spherical_angles
+
+
+
+    subroutine invert_divergence(this, source, polar_solution, azimuthal_solution )
+        !----------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !----------------------------------------------------------------------
+        !----------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !----------------------------------------------------------------------
+        class (Sphere), intent (in out) :: this
+        real (wp),      intent (in)     :: source(:,:)
+        real (wp),      intent (out)    :: polar_solution(:,:)
+        real (wp),      intent (out)    :: azimuthal_solution(:,:)
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
@@ -931,19 +1005,24 @@ contains
                 //' in INVERT_DIVERGENCE'
         end if
 
-        ! compute the (real) spherical harmonic coefficients
-        call this%perform_vector_analysis( source )
+        ! Calculate the (real) scalar harmonic coefficients
+        associate( div => source )
+            call this%perform_scalar_analysis( div )
+        end associate
 
         ! Invert gradient
         associate( &
             nlat => this%NUMBER_OF_LATITUDES, &
             ntrunc => this%TRIANGULAR_TRUNCATION_LIMIT, &
-            f => solution, &
+            v => polar_solution, &
+            w => azimuthal_solution, &
             sqnn => this%vorticity_and_divergence_coefficients, &
             a => this%workspace%real_harmonic_coefficients, &
             b => this%workspace%imaginary_harmonic_coefficients, &
             br => this%workspace%real_polar_harmonic_coefficients, &
-            bi => this%workspace%imaginary_polar_harmonic_coefficients &
+            bi => this%workspace%imaginary_polar_harmonic_coefficients, &
+            cr => this%workspace%real_azimuthal_harmonic_coefficients, &
+            ci => this%workspace%imaginary_azimuthal_harmonic_coefficients &
             )
             ! Initialize polar coefficients
             br = 0.0_wp
@@ -952,23 +1031,25 @@ contains
             ! Compute m = 0 coefficients
             do n = 1, nlat
                 ! Set real coefficients
-                br(1, n) = a(1, n)/sqnn(n)
+                br(1, n) = -a(1, n)/sqnn(n)
                 ! Set imaginary coeffients
-                bi(1, n) = b(1, n)/sqnn(n)
+                bi(1, n) = -b(1, n)/sqnn(n)
             end do
 
             ! Compute m >0 coefficients
             do m=2, ntrunc+1
                 do n=m, ntrunc+1
                     ! Set real coefficients
-                    br(m, n) = a(m, n)/sqnn(n)
+                    br(m, n) = -a(m, n)/sqnn(n)
                     ! Set imaginary coefficients
-                    bi(m, n) = b(m, n)/sqnn(n)
+                    bi(m, n) = -b(m, n)/sqnn(n)
                 end do
             end do
-
+            ! Set azimuthal coefficients
+            cr = 0.0_wp !Not present in original source
+            ci = 0.0_wp
             ! Compute scalar synthesis
-            call this%perform_scalar_synthesis( f )
+            call this%perform_vector_synthesis(v, w)
         end associate
 
     end subroutine invert_divergence
@@ -1220,10 +1301,10 @@ contains
         !
         ! The coefficients are ordered so that
         !
-        ! first (nm=1)  is m=0, n=0, second (nm=2) is m=0, n=1, 
+        ! first (nm=1)  is m=0, n=0, second (nm=2) is m=0, n=1,
         ! nm=MTRUNC is m=0, n=MTRUNC, nm=MTRUNC+1 is m=1, n=1, etc.
         !
-        ! In other words, 
+        ! In other words,
         !
         ! 00, 01, 02, 03, 04.........0MTRUNC
         !     11, 12, 13, 14.........1MTRUNC

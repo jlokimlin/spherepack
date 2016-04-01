@@ -368,11 +368,11 @@ contains
         !----------------------------------------------------------------------
 
         ! Compute dimensions of various workspace arrays
-        ldwork = this%get_ldwork(nlat)
+        ldwork = max(this%get_ldwork(nlat), 12*nlat*nlon)
         lvhsgs = this%get_lvhsgs(nlat, nlon)
 
         ! Release memory ( if necessary )
-        if (allocated(this%backward_vector) ) deallocate( this%backward_vector )
+        if (allocated(this%backward_vector)) deallocate( this%backward_vector )
 
          ! Allocate memory
         allocate( dwork(ldwork) )
@@ -554,9 +554,7 @@ contains
             l2 = (nlat + 1)/2
         end if
 
-        return_value =  &
-            l1 * l2 * (nlat + nlat - l1 + 1) &
-            + nlon + 15 + 2 * nlat
+        return_value = l1 * l2 * (2*nlat - l1 + 1)  + nlon+15 + nlat**2
 
     end function get_lvhsgs
 
