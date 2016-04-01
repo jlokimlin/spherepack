@@ -100,8 +100,9 @@ contains
         integer (ip)                   :: i, j !! Counters
         real (wp)                      :: approximate_solution(NLATS, NLONS)
         real (wp)                      :: source_term(NLATS, NLONS)
-        real (wp)                      :: helmholtz_constant, discretization_error
-        character (len=:), allocatable :: error_prev_platform
+        real (wp), parameter           :: HELMHOLTZ_CONSTANT = 1.0_wp
+        real (wp)                      :: discretization_error
+        character (len=:), allocatable :: error_previous_platform
         !----------------------------------------------------------------------
 
         !
@@ -112,18 +113,13 @@ contains
             ! Create gaussian sphere
             call sphere_type%create(nlat=NLATS, nlon=NLONS, isym=0, isynt=1)
             ! Allocate prev known
-            allocate( error_prev_platform, source='     discretization error = 3.552714e-15' )
+            allocate( error_previous_platform, source='     discretization error = 3.552714e-15' )
             class is (RegularSphere)
             ! Create regular sphere
             call sphere_type%create(nlat=NLATS, nlon=NLONS, isym=0, isynt=1)
             ! Allocate prev known
-            allocate( error_prev_platform, source='     discretization error = 2.331468e-15' )
+            allocate( error_previous_platform, source='     discretization error = 2.331468e-15' )
         end select
-
-        !
-        !==> Set helmholtz constant
-        !
-        helmholtz_constant = 1.0_wp
 
         ! Set right hand side as helmholtz operator
         ! applied to ue = (1.+x*y)*exp(z)
@@ -148,7 +144,7 @@ contains
         !==> Solve Helmholtz equation on the sphere in u
         !
         associate( &
-            xlmbda => helmholtz_constant, &
+            xlmbda => HELMHOLTZ_CONSTANT, &
             rhs => source_term, &
             u => approximate_solution &
             )
@@ -193,17 +189,16 @@ contains
         write( stdout, '(A)') '     Helmholtz approximation on a ten degree grid'
         write( stdout, '(2(A,I2))') '     nlat = ', NLATS,' nlon = ', NLONS
         write( stdout, '(A)') '     Previous 64 bit floating point arithmetic result '
-        write( stdout, '(A)') error_prev_platform
+        write( stdout, '(A)') error_previous_platform
         write( stdout, '(A)') '     The output from your computer is: '
-        write( stdout, '(A,1pe15.6)') '     discretization error = ', &
-            discretization_error
+        write( stdout, '(A,1pe15.6)') '     discretization error = ', discretization_error
         write( stdout, '(A)' ) ''
 
         !
         !==> Release memory
         !
         call sphere_type%destroy()
-        deallocate( error_prev_platform )
+        deallocate( error_previous_platform )
 
     end subroutine test_helmsph
 
