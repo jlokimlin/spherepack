@@ -80,14 +80,14 @@ program helmsph
     type (RegularSphere)  :: regular_sphere
     !----------------------------------------------------------------------
 
-    call test_helmsph( gaussian_sphere )
-    call test_helmsph( regular_sphere )
+    call test_helmholtz_inversion( gaussian_sphere )
+    call test_helmholtz_inversion( regular_sphere )
 
 
 contains
 
 
-    subroutine test_helmsph( sphere_type )
+    subroutine test_helmholtz_inversion( sphere_type )
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
@@ -109,20 +109,32 @@ contains
         !==> Set up workspace arrays
         !
         select type (sphere_type)
+            !
+            !==> For gaussian sphere
+            !
             class is (GaussianSphere)
-            ! Create gaussian sphere
-            call sphere_type%create(nlat=NLATS, nlon=NLONS, isym=0, isynt=1)
-            ! Allocate prev known
+
+            !  Initialize gaussian sphere object
+            call sphere_type%create(nlat=NLATS, nlon=NLONS)
+
+            ! Allocate known error from previous platform
             allocate( error_previous_platform, source='     discretization error = 3.552714e-15' )
+            !
+            !==> For regular sphere
+            !
             class is (RegularSphere)
-            ! Create regular sphere
-            call sphere_type%create(nlat=NLATS, nlon=NLONS, isym=0, isynt=1)
-            ! Allocate prev known
+
+            ! Initialize regular sphere
+            call sphere_type%create(nlat=NLATS, nlon=NLONS)
+
+            ! Allocate known error from previous platform
             allocate( error_previous_platform, source='     discretization error = 2.331468e-15' )
         end select
 
-        ! Set right hand side as helmholtz operator
-        ! applied to ue = (1.+x*y)*exp(z)
+        !
+        !==> Set right hand side as helmholtz operator
+        !    applied to ue = (1.+x*y)*exp(z)
+        !
         associate( &
             rhs => source_term, &
             radial => sphere_type%unit_vectors%radial &
@@ -141,7 +153,7 @@ contains
         end associate
 
         !
-        !==> Solve Helmholtz equation on the sphere in u
+        !==> Solve Helmholtz equation on the sphere
         !
         associate( &
             xlmbda => HELMHOLTZ_CONSTANT, &
@@ -200,7 +212,7 @@ contains
         call sphere_type%destroy()
         deallocate( error_previous_platform )
 
-    end subroutine test_helmsph
+    end subroutine test_helmholtz_inversion
 
 
 end program helmsph
