@@ -113,8 +113,8 @@ contains
         !----------------------------------------------------------------------
 
         ! Compute dimensions of various workspace arrays
-        lwork = (4*nlon+2)*nlat
-        ldwork = 2*(nlat+1)
+        lwork = max(this%get_lwork(nlat, nlon), 5*(nlat**2)*nlon)
+        ldwork = max(this%get_ldwork(nlat), 12*nlat*nlon, 4*(nlat**2))
         lshaes = this%get_lshaes(nlat, nlon)
 
         ! Release memory ( if necessary )
@@ -143,19 +143,19 @@ contains
             case(0)
                 return
             case(1)
-                error stop 'TYPE (RegularWorkspace) in INITIALIZE_REGULAR_SCALAR_ANALYSIS'&
+                error stop 'TYPE (RegularWorkspace) in INITIALIZE_REGULAR_SCALAR_ANALYSIS '&
                     //'Error in the specification of NUMBER_OF_LATITUDES'
             case(2)
-                error stop 'TYPE (RegularWorkspace) in INITIALIZE_REGULAR_SCALAR_ANALYSIS'&
+                error stop 'TYPE (RegularWorkspace) in INITIALIZE_REGULAR_SCALAR_ANALYSIS '&
                     //'Error in the specification of NUMBER_OF_LONGITUDES'
             case(3)
-                error stop 'TYPE (RegularWorkspace) in INITIALIZE_REGULAR_SCALAR_ANALYSIS'&
+                error stop 'TYPE (RegularWorkspace) in INITIALIZE_REGULAR_SCALAR_ANALYSIS '&
                     //'Error in the specification of extent for FORWARD_SCALAR'
             case(4)
-                error stop 'TYPE (RegularWorkspace) in INITIALIZE_REGULAR_SCALAR_ANALYSIS'&
+                error stop 'TYPE (RegularWorkspace) in INITIALIZE_REGULAR_SCALAR_ANALYSIS '&
                     //'Error in the specification of extent for LEGENDRE_WORKSPACE'
             case default
-                error stop 'TYPE (RegularWorkspace) in INITIALIZE_REGULAR_SCALAR_ANALYSIS'&
+                error stop 'TYPE (RegularWorkspace) in INITIALIZE_REGULAR_SCALAR_ANALYSIS '&
                     //'Undetermined error flag'
         end select
 
@@ -188,8 +188,8 @@ contains
         !----------------------------------------------------------------------
 
         ! Set up various workspace dimensions
-        lwork = (4*nlon+2)*nlat
-        ldwork = 2*(nlat+1)
+        lwork = max(this%get_lwork(nlat, nlon), 5*(nlat**2)*nlon)
+        ldwork = max(this%get_ldwork(nlat), 12*nlat*nlon, 4*(nlat**2))
         lshses = this%get_lshses(nlat, nlon)
 
         ! Release memory ( if necessary )
@@ -218,19 +218,19 @@ contains
             case(0)
                 return
             case(1)
-                error stop 'TYPE (RegularWorkspace) in INITIALIZE_REGULAR_SCALAR_SYNTHESIS'&
+                error stop 'TYPE (RegularWorkspace) in INITIALIZE_REGULAR_SCALAR_SYNTHESIS '&
                     //'Error in the specification of NUMBER_OF_LATITUDES'
             case(2)
-                error stop 'TYPE (RegularWorkspace) in INITIALIZE_REGULAR_SCALAR_SYNTHESIS'&
+                error stop 'TYPE (RegularWorkspace) in INITIALIZE_REGULAR_SCALAR_SYNTHESIS '&
                     //'Error in the specification of NUMBER_OF_LONGITUDES'
             case(3)
-                error stop 'TYPE (RegularWorkspace) in INITIALIZE_REGULAR_SCALAR_SYNTHESIS'&
+                error stop 'TYPE (RegularWorkspace) in INITIALIZE_REGULAR_SCALAR_SYNTHESIS '&
                     //'Error in the specification of extent for FORWARD_SCALAR'
             case(4)
-                error stop 'TYPE (RegularWorkspace) in INITIALIZE_REGULAR_SCALAR_SYNTHESIS'&
+                error stop 'TYPE (RegularWorkspace) in INITIALIZE_REGULAR_SCALAR_SYNTHESIS '&
                     //'Error in the specification of extent for LEGENDRE_WORKSPACE'
             case default
-                error stop 'TYPE (RegularWorkspace) in INITIALIZE_REGULAR_SCALAR_SYNTHESIS'&
+                error stop 'TYPE (RegularWorkspace) in INITIALIZE_REGULAR_SCALAR_SYNTHESIS '&
                     //'Undetermined error flag'
         end select
 

@@ -111,8 +111,8 @@ contains
         !----------------------------------------------------------------------
 
         ! Compute dimensions of various workspace arrays
-        lwork = this%get_lwork(nlat, nlon)
-        ldwork = this%get_ldwork(nlat)
+        lwork = max(this%get_lwork(nlat, nlon), 5*(nlat**2)*nlon )
+        ldwork = max( this%get_ldwork(nlat), 4*(nlat**2) )
         lshags = this%get_lshags(nlat, nlon)
 
         ! Release memory ( if necessary )
@@ -142,25 +142,25 @@ contains
             case(0)
                 return
             case(1)
-                error stop 'TYPE (GaussianWorkspace): '&
+                error stop 'TYPE (GaussianWorkspace) in INITIALIZE_GAUSSIAN_SCALAR_ANALYSIS '&
                     //'Error in the specification of NUMBER_OF_LATITUDES'
             case(2)
-                error stop 'TYPE (GaussianWorkspace): '&
+                error stop 'TYPE (GaussianWorkspace) in INITIALIZE_GAUSSIAN_SCALAR_ANALYSIS '&
                     //'Error in the specification of NUMBER_OF_LONGITUDES'
             case(3)
-                error stop 'TYPE (GaussianWorkspace): '&
+                error stop 'TYPE (GaussianWorkspace) in INITIALIZE_GAUSSIAN_SCALAR_ANALYSIS '&
                     //'Error in the specification of extent for FORWARD_SCALAR'
             case(4)
-                error stop 'TYPE (GaussianWorkspace): '&
+                error stop 'TYPE (GaussianWorkspace) in INITIALIZE_GAUSSIAN_SCALAR_ANALYSIS '&
                     //'Error in the specification of extent for LEGENDRE_WORKSPACE'
             case(5)
-                error stop 'TYPE (GaussianWorkspace): '&
+                error stop 'TYPE (GaussianWorkspace) in INITIALIZE_GAUSSIAN_SCALAR_ANALYSIS '&
                     //'Error in the specification of extent for DWORK'
             case(6)
-                error stop 'TYPE (GaussianWorkspace): '&
+                error stop 'TYPE (GaussianWorkspace) in INITIALIZE_GAUSSIAN_SCALAR_ANALYSIS '&
                     //'Error in call to GAQD to compute gaussian points: failure in eigenvalue routine)'
             case default
-                error stop 'TYPE (GaussianWorkspace): '&
+                error stop 'TYPE (GaussianWorkspace) in INITIALIZE_GAUSSIAN_SCALAR_ANALYSIS '&
                     //'Undetermined error flag'
         end select
 
@@ -193,8 +193,8 @@ contains
         !----------------------------------------------------------------------
 
         ! Compute dimensions of various workspace arrays
-        lwork = this%get_lwork(nlat, nlon)
-        ldwork = this%get_ldwork(nlat)
+        lwork = max(this%get_lwork(nlat, nlon), 5*(nlat**2)*nlon )
+        ldwork = max( this%get_ldwork(nlat), 4*(nlat**2) )
         lshsgs = this%get_lshsgs(nlat, nlon)
 
         ! Release memory ( if necessary )
@@ -220,25 +220,25 @@ contains
             case(0)
                 return
             case(1)
-                error stop 'TYPE (GaussianWorkspace) in INITIALIZE_GAUSSIAN_SCALAR_SYNTHESIS'&
+                error stop 'TYPE (GaussianWorkspace) in INITIALIZE_GAUSSIAN_SCALAR_SYNTHESIS '&
                     //'Error in the specification of NUMBER_OF_LATITUDES'
             case(2)
-                error stop 'TYPE (GaussianWorkspace) in INITIALIZE_GAUSSIAN_SCALAR_SYNTHESIS'&
+                error stop 'TYPE (GaussianWorkspace) in INITIALIZE_GAUSSIAN_SCALAR_SYNTHESIS '&
                     //'Error in the specification of NUMBER_OF_LONGITUDES'
             case(3)
-                error stop 'TYPE (GaussianWorkspace) in INITIALIZE_GAUSSIAN_SCALAR_SYNTHESIS'&
+                error stop 'TYPE (GaussianWorkspace) in INITIALIZE_GAUSSIAN_SCALAR_SYNTHESIS '&
                     //'Error in the specification of extent for BACKWARD_SCALAR'
             case(4)
-                error stop 'TYPE (GaussianWorkspace) in INITIALIZE_GAUSSIAN_SCALAR_SYNTHESIS'&
+                error stop 'TYPE (GaussianWorkspace) in INITIALIZE_GAUSSIAN_SCALAR_SYNTHESIS '&
                     //'Error in the specification of extent for LEGENDRE_WORKSPACE'
             case(5)
-                error stop 'TYPE (GaussianWorkspace) in INITIALIZE_GAUSSIAN_SCALAR_SYNTHESIS'&
+                error stop 'TYPE (GaussianWorkspace) in INITIALIZE_GAUSSIAN_SCALAR_SYNTHESIS '&
                     //'Error in the specification of extent for DWORK'
             case(6)
-                error stop 'TYPE (GaussianWorkspace) in INITIALIZE_GAUSSIAN_SCALAR_SYNTHESIS'&
+                error stop 'TYPE (GaussianWorkspace) in INITIALIZE_GAUSSIAN_SCALAR_SYNTHESIS '&
                     //'Error in call to GAQD: due to failure in eigenvalue routine'
             case default
-                error stop 'TYPE (GaussianWorkspace) in INITIALIZE_GAUSSIAN_SCALAR_SYNTHESIS'&
+                error stop 'TYPE (GaussianWorkspace) in INITIALIZE_GAUSSIAN_SCALAR_SYNTHESIS '&
                     //'Undetermined error flag'
         end select
 
@@ -368,8 +368,8 @@ contains
         !----------------------------------------------------------------------
 
         ! Compute dimensions of various workspace arrays
-        ldwork = max(this%get_ldwork(nlat), 12*nlat*nlon)
-        lvhsgs = this%get_lvhsgs(nlat, nlon)
+        ldwork = max(this%get_ldwork(nlat), 12*nlat*nlon, 4*(nlat**2))
+        lvhsgs = max(this%get_lvhsgs(nlat, nlon), 5*(nlat**2)*nlon)
 
         ! Release memory ( if necessary )
         if (allocated(this%backward_vector)) deallocate( this%backward_vector )
@@ -394,19 +394,19 @@ contains
             case(0)
                 return
             case(1)
-                error stop 'TYPE (GaussianWorkspace) in INITIALIZE_VECTOR_synthesis'&
+                error stop 'TYPE (GaussianWorkspace) in INITIALIZE_VECTOR_SYNTHESIS '&
                     //'Error in the specification of NUMBER_OF_LATITUDES'
             case(2)
-                error stop 'TYPE (GaussianWorkspace) in INITIALIZE_VECTOR_SYNTHESIS'&
+                error stop 'TYPE (GaussianWorkspace) in INITIALIZE_VECTOR_SYNTHESIS '&
                     //'Error in the specification of NUMBER_OF_LONGITUDES'
             case(3)
-                error stop 'TYPE (GaussianWorkspace) in INITIALIZE_VECTOR_SYNTHESIS'&
+                error stop 'TYPE (GaussianWorkspace) in INITIALIZE_VECTOR_SYNTHESIS '&
                     //'Error in the specification of extent for BACKWARD_VECTOR'
             case(4)
-                error stop 'TYPE (GaussianWorkspace) in INITIALIZE_VECTOR_SYNTHESIS'&
+                error stop 'TYPE (GaussianWorkspace) in INITIALIZE_VECTOR_SYNTHESIS '&
                     //'Error in the specification of extent for DWORK'
             case default
-                error stop 'TYPE (GaussianWorkspace) in INITIALIZE_VECTOR_SYNTHESIS'&
+                error stop 'TYPE (GaussianWorkspace) in INITIALIZE_VECTOR_SYNTHESIS '&
                     //'Undetermined error flag'
         end select
 
@@ -521,9 +521,7 @@ contains
         integer (ip)              :: return_value
         !----------------------------------------------------------------------
 
-        return_value = &
-            (nlat + 1) * (nlat + 1) * nlat / 2 &
-            + nlon + 15
+        return_value = ((nlat+1) **2) * nlat / 2  + nlon+15
 
     end function get_lvhags
 
@@ -554,7 +552,7 @@ contains
             l2 = (nlat + 1)/2
         end if
 
-        return_value = l1 * l2 * (2*nlat - l1 + 1)  + nlon+15 + nlat**2
+        return_value = l1 * l2 * (2*nlat - l1 + 1)  + nlon + 15 + nlat**2
 
     end function get_lvhsgs
 

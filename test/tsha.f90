@@ -35,238 +35,155 @@
 !     a program for testing all scalar analysis and synthesis subroutines
 !
 program tsha
-    !
-    !     set dimensions with parameter statements
-    !
-    parameter(nnlat= 15,nnlon= 18, nnt = 3)
-    !     parameter(nnlat=14,nnlon=20,nnt=3)
-    parameter (lleng= 5*nnlat*nnlat*nnlon,llsav= 5*nnlat*nnlat*nnlon)
-    parameter (lldwork = nnlat*(nnlat+4))
-    real dwork(lldwork)
-    dimension work(lleng),wsave(llsav)
-    dimension a(nnlat,nnlat,nnt),b(nnlat,nnlat,nnt),s(nnlat,nnlon,nnt)
-    dimension thetag(nnlat),dtheta(nnlat),dwts(nnlat)
-    real dtheta, dwts
-    !
-    !     set dimension variables
-    !
-    nlat = nnlat
-    nlon = nnlon
-    lwork = lleng
-    lsave = llsav
-    nt = nnt
-    call iout(nlat,"nlat")
-    call iout(nlon,"nlon")
-    call iout(nt,"  nt")
-    isym = 0
-    !
-    !     set equally spaced colatitude and longitude increments
-    !
-    pi = acos( -1.0 )
-    dphi = (pi+pi)/nlon
-    dlat = pi/(nlat-1)
-    !
-    !     compute nlat gaussian points in thetag
-    !
-    ldwork = lldwork
-    call gaqd(nlat,dtheta,dwts,dwork,ldwork,ier)
-    do  i=1,nlat
-        thetag(i) = dtheta(i)
-    end do
-    call name("gaqd")
-    call iout(ier," ier")
-    call vecout(thetag,"thtg",nlat)
-    !
-    !     test all analysis and synthesis subroutines
-    !
-    do icase=1,4
+
+    use, intrinsic :: iso_fortran_env, only: &
+        ip => INT32, &
+        wp => REAL64, &
+        stdout => OUTPUT_UNIT
+
+    use modern_spherepack_library, only: &
+        Sphere, &
+        Regularsphere, &
+        GaussianSphere
+
+    ! Explicit typing only
+    implicit none
+
+    !----------------------------------------------------------------------
+    ! Dictionary
+    !----------------------------------------------------------------------
+    type (GaussianSphere) :: gaussian_sphere
+    type (RegularSphere)  :: regular_sphere
+    !----------------------------------------------------------------------
+
+    call test_analysis_and_synthesis_routines( gaussian_sphere )
+    call test_analysis_and_synthesis_routines( regular_sphere )
+
+
+contains
+
+    subroutine test_analysis_and_synthesis_routines( sphere_type )
+        !----------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !----------------------------------------------------------------------
+        class (Sphere), intent (in out) :: sphere_type
+        !----------------------------------------------------------------------
+        ! Dictionary: local variables
+        !----------------------------------------------------------------------
+        integer (ip), parameter        :: NLONS = 128
+        integer (ip), parameter        :: NLATS = NLONS/2 + 1
+        integer (ip), parameter        :: NSYNTHS = 3
+        integer (ip)                   :: i, j, k !! Counters
+        real (wp)                      :: original_scalar_function(NLATS,NLONS,NSYNTHS)
+        real (wp)                      :: synthesized_function(NLATS,NLONS,NSYNTHS)
+        real (wp)                      :: discretization_error
+        character (len=:), allocatable :: error_previous_platform
+        !----------------------------------------------------------------------
+
         !
-        !     icase=1 test shaec,shsec
-        !     icase=2 test shaes,shses
-        !     icase=3 test shagc,shsgc
-        !     icase=4 test shags,shsgs
+        !==> Set up workspace arrays
         !
-        call name("****")
-        call name("****")
-        call iout(icase,"icas")
+        select type (sphere_type)
+            !
+            !==> For gaussian sphere
+            !
+            class is (GaussianSphere)
+
+            !  Initialize gaussian sphere object
+            call sphere_type%create(nlat=NLATS, nlon=NLONS)
+
+            ! Allocate known error from previous platform
+            allocate( error_previous_platform, source='     discretization error = 6.517790e-13' )
+            !
+            !==> For regular sphere
+            !
+            class is (RegularSphere)
+
+            ! Initialize regular sphere
+            call sphere_type%create(nlat=NLATS, nlon=NLONS)
+
+            ! Allocate known error from previous platform
+            allocate( error_previous_platform, source='     discretization error = 5.415693e-13' )
+        end select
+
         !
+        !==> Test all analysis and synthesis subroutines.
+        !    Set scalar field as (x*y*z)**k) restricted to the sphere
         !
-        !     set scalar field as (x*y*z)**k) restricted to the sphere
-        !
-        do k=1,nt
-            do j=1,nlon
-                phi = (j-1)*dphi
-                sinp = sin(phi)
-                cosp = cos(phi)
-                do i=1,nlat
-                    theta = (i-1)*dlat
-                    if (icase>2) theta=thetag(i)
-                    cost = cos(theta)
-                    sint = sin(theta)
-                    xyzk = (sint*(sint*cost*sinp*cosp))**k
-                    !           s(i,j,k) = exp(xyzk)
-                    s(i,j,k) = xyzk
+        associate( &
+            se => original_scalar_function, &
+            radial => sphere_type%unit_vectors%radial &
+            )
+            do k=1,NSYNTHS
+                do j=1,NLONS
+                    do i=1,NLATS
+                        associate( &
+                            x => radial(i,j)%x, &
+                            y => radial(i,j)%y, &
+                            z => radial(i,j)%z &
+                            )
+                            select case (k)
+                                case(1)
+                                    se(i,j,k) = exp( x + y + z )
+                                case default
+                                    se(i,j,k) = (x*y*z)**k
+                            end select
+                        end associate
+                    end do
                 end do
             end do
-        !     call iout(k,"   k")
-        !     call aout(s(1,1,k),"   s",nlat,nlon)
-        end do
+        end associate
 
-        do l=1,lsave
-            wsave(l) = 0.0
-        end do
-        if (icase==1) then
-
-            call name("**ec")
-            call shaeci(nlat,nlon,wsave,lsave,dwork,ldwork,ierror)
-
-            call name("shai")
-            call iout(ierror,"ierr")
-
-            call shaec(nlat,nlon,isym,nt,s,nlat,nlon,a,b,nlat,nlat,wsave, &
-                lsave,work,lwork,ierror)
-
-            call name("sha ")
-            call iout(ierror,"ierr")
-
-            call shseci(nlat,nlon,wsave,lsave,dwork,ldwork,ierror)
-
-            call name("shsi")
-            call iout(ierror,"ierr")
-
-            call shsec(nlat,nlon,isym,nt,s,nlat,nlon,a,b,nlat,nlat,wsave, &
-                lsave,work,lwork,ierror)
-
-            call name("shs ")
-            call iout(ierror,"ierr")
-
-        else if (icase==2) then
-
-            call name("**es")
-            call shaesi(nlat,nlon,wsave,lsave,work,lwork,dwork,ldwork,ierror)
-
-            call name("shai")
-            call iout(ierror,"ierr")
-
-            call shaes(nlat,nlon,isym,nt,s,nlat,nlon,a,b,nlat,nlat,wsave, &
-                lsave,work,lwork,ierror)
-
-            call name("sha ")
-            call iout(ierror,"ierr")
-
-            call shsesi(nlat,nlon,wsave,lsave,work,lwork,dwork,ldwork,ierror)
-
-            call name("shsi")
-            call iout(ierror,"ierr")
-
-            call shses(nlat,nlon,isym,nt,s,nlat,nlon,a,b,nlat,nlat,wsave, &
-                lsave,work,lwork,ierror)
-
-            call name("shs ")
-            call iout(ierror,"ierr")
-
-        else if (icase==3) then
-
-            call name("**gc")
-
-            call shagci(nlat,nlon,wsave,lsave,dwork,ldwork,ierror)
-
-            call name("shai")
-            call iout(ierror,"ierr")
-
-            call shagc(nlat,nlon,isym,nt,s,nlat,nlon,a,b,nlat,nlat,wsave, &
-                lsave,work,lwork,ierror)
-
-            call name("sha ")
-            call iout(ierror,"ierr")
-
-            call shsgci(nlat,nlon,wsave,lsave,dwork,ldwork,ierror)
-
-            call name("shsi")
-            call iout(ierror,"ierr")
-
-            call shsgc(nlat,nlon,isym,nt,s,nlat,nlon,a,b,nlat,nlat,wsave, &
-                lsave,work,lwork,ierror)
-
-            call name("shs ")
-            call iout(ierror,"ierr")
-
-        else if (icase==4) then
-
-            call name("**gs")
-
-            call shagsi(nlat,nlon,wsave,lsave,work,lwork,dwork,ldwork,ierror)
-
-            call name("shai")
-            call iout(ierror,"ierr")
-
-            call shags(nlat,nlon,isym,nt,s,nlat,nlon,a,b,nlat,nlat,wsave, &
-                lsave,work,lwork,ierror)
-
-            call name("sha ")
-            call iout(ierror,"ierr")
-
-            call shsgsi(nlat,nlon,wsave,lsave,work,lwork,dwork,ldwork,ierror)
-            call name("shsi")
-            call iout(ierror,"ierr")
-
-            call shsgs(nlat,nlon,isym,nt,s,nlat,nlon,a,b,nlat,nlat,wsave, &
-                lsave,work,lwork,ierror)
-
-            call name("shs ")
-            call iout(ierror,"ierr")
-        end if
         !
-        !     compute "error" in s
+        !==> Perform analysis then synthesis
         !
-        err2 = 0.0
-        do k=1,nt
-            do j=1,nlon
-                phi = (j-1)*dphi
-                sinp = sin(phi)
-                cosp = cos(phi)
-                do i=1,nlat
-                    theta = (i-1)*dlat
-                    if (icase>2) theta = thetag(i)
-                    cost = cos(theta)
-                    sint = sin(theta)
-                    xyzk = (sint*(sint*cost*sinp*cosp))**k
-                    !           err2 = err2+ (exp(xyzk)-s(i,j,k))**2
-                    err2 = err2 + (xyzk-s(i,j,k))**2
-                end do
-            end do
-        !     call iout(k,"   k")
-        !     call aout(s(1,1,k),"   s",nlat,nlon)
+        do k = 1, NSYNTHS
+            associate( &
+                se => original_scalar_function(:,:,k), &
+                s => synthesized_function(:,:,k) &
+                )
+
+                ! Analyse function into (real) coefficients
+                call sphere_type%perform_scalar_analysis(se)
+
+                ! Synthesize function from (real) coefficients
+                call sphere_type%perform_scalar_synthesis(s)
+            end associate
         end do
-        err2 = sqrt(err2/(nt*nlat*nlon))
-        call vout(err2,"err2")
-    end do
+
+        !
+        !==> Compute discretization error
+        !
+        associate( &
+            err2 => discretization_error, &
+            se => original_scalar_function, &
+            s => synthesized_function &
+            )
+            err2 = norm2(s - se)
+        end associate
+
+        !
+        !==> Print earlier output from platform with 64-bit floating point
+        !    arithmetic followed by the output from this computer
+        !
+        write( stdout, '(A)') ''
+        write( stdout, '(A)') '     tsha *** TEST RUN *** '
+        write( stdout, '(A)') ''
+        write( stdout, '(A)') '     grid type = '//sphere_type%grid%grid_type
+        write( stdout, '(A)') '     Testing scalar analysis and synthesis'
+        write( stdout, '(2(A,I2))') '     nlat = ', NLATS,' nlon = ', NLONS
+        write( stdout, '(A)') '     Previous 64 bit floating point arithmetic result '
+        write( stdout, '(A)') error_previous_platform
+        write( stdout, '(A)') '     The output from your computer is: '
+        write( stdout, '(A,1pe15.6)') '     discretization error = ', discretization_error
+        write( stdout, '(A)' ) ''
+
+        !
+        !==> Release memory
+        !
+        call sphere_type%destroy()
+        deallocate( error_previous_platform )
+
+    end subroutine test_analysis_and_synthesis_routines
+
 end program tsha
-subroutine iout(ivar,nam)
-    real nam
-    write(6,10) nam , ivar
-10  format(1h a4, 3h = ,i8)
-    return
-end subroutine iout
-!
-subroutine vout(var,nam)
-    real nam
-    write(6,10) nam , var
-10  format(1h a4,3h = ,e12.5)
-    return
-end subroutine vout
-!
-subroutine name(nam)
-    real nam
-    write(6,100) nam
-100 format(1h a8)
-    return
-end subroutine name
-!
-subroutine vecout(vec,nam,len)
-    dimension vec(len)
-    real nam
-    write(6,109) nam, (vec(l),l=1,len)
-109 format(1h a4,/(1h 8e11.4))
-    return
-end subroutine vecout

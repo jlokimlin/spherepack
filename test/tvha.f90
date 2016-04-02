@@ -56,353 +56,198 @@
 !     note:  vhaec,vhaes,vhagc,vhags,vhsec,vhses,vhsgc,vhsgs are all tested!!
 !
 program tvha
-    !
-    !     set dimensions with parameter statements
-    !
-    parameter(nnlat= 25,nnlon= 19, nnt = 2)
-    parameter (lleng= 5*nnlat*nnlat*nnlon,llsav= 5*nnlat*nnlat*nnlon)
-    parameter (lldwork = 4*nnlat*nnlat )
-    real dwork(lldwork)
-    dimension work(lleng),wsave(llsav)
-    dimension br(nnlat,nnlat,nnt),bi(nnlat,nnlat,nnt)
-    dimension cr(nnlat,nnlat,nnt),ci(nnlat,nnlat,nnt)
-    dimension st(nnlat,nnlon,nnt),sv(nnlat,nnlon,nnt)
-    dimension thetag(nnlat),dtheta(nnlat),dwts(nnlat)
-    dimension v(nnlat,nnlon,nnt),w(nnlat,nnlon,nnt)
-    real dtheta, dwts
-    !
-    !     set dimension variables
-    !
-    nlat = nnlat
-    nlon = nnlon
-    lwork = lleng
-    lsave = llsav
-    nt = nnt
-    call iout(nlat,"nlat")
-    call iout(nlon,"nlon")
-    call iout(nt,"  nt")
-    ityp = 0
-    !
-    !     set equally spaced colatitude and longitude increments
-    !
-    pi = acos( -1.0 )
-    dphi = (pi+pi)/nlon
-    dlat = pi/(nlat-1)
-    !
-    !     compute nlat gaussian points in thetag
-    !
-    ldwork = lldwork
-    call gaqd(nlat,dtheta,dwts,dwork,ldwork,ier)
-    do  i=1,nlat
-        thetag(i) = dtheta(i)
-    end do
-    call name("gaqd")
-    call iout(ier," ier")
-    call vecout(thetag,"thtg",nlat)
-    !
-    !     test all analysis and synthesis subroutines
-    !
-    do icase=1,4
+
+    use, intrinsic :: iso_fortran_env, only: &
+        ip => INT32, &
+        wp => REAL64, &
+        stdout => OUTPUT_UNIT
+
+    use modern_spherepack_library, only: &
+        Sphere, &
+        Regularsphere, &
+        GaussianSphere
+
+    ! Explicit typing only
+    implicit none
+
+    !----------------------------------------------------------------------
+    ! Dictionary
+    !----------------------------------------------------------------------
+    type (GaussianSphere) :: gaussian_sphere
+    type (RegularSphere)  :: regular_sphere
+    !----------------------------------------------------------------------
+
+    call test_vector_analysis_and_synthesis_routines( gaussian_sphere )
+    call test_vector_analysis_and_synthesis_routines( regular_sphere )
+
+
+contains
+
+    subroutine test_vector_analysis_and_synthesis_routines( sphere_type )
+        !----------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !----------------------------------------------------------------------
+        class (Sphere), intent (in out) :: sphere_type
+        !----------------------------------------------------------------------
+        ! Dictionary: local variables
+        !----------------------------------------------------------------------
+        integer (ip), parameter        :: NLONS = 19
+        integer (ip), parameter        :: NLATS = 25
+        integer (ip), parameter        :: NSYNTHS = 2
+        integer (ip)                   :: i, j, k !! Counters
+        real (wp)                      :: polar_component(NLATS,NLONS,NSYNTHS)
+        real (wp)                      :: azimuthal_component(NLATS,NLONS,NSYNTHS)
+        real (wp)                      :: synthesized_polar(NLATS,NLONS,NSYNTHS)
+        real (wp)                      :: synthesized_azimuthal(NLATS,NLONS,NSYNTHS)
+        real (wp)                      :: polar_error, azimuthal_error
+        character (len=:), allocatable :: previous_polar_error, previous_azimuthal_error
+        !----------------------------------------------------------------------
+
         !
-        !     icase=1 test vhaec,vhsec
-        !     icase=2 test vhaes,vhses
-        !     icase=3 test vhagc,vhsgc
-        !     icase=4 test vhags,vhsgs
+        !==> Set up workspace arrays
         !
-        call name("****")
-        call name("****")
-        call iout(icase,"icas")
+        select type (sphere_type)
+            !
+            !==> For gaussian sphere
+            !
+            class is (GaussianSphere)
+
+            !  Initialize gaussian sphere object
+            call sphere_type%create(nlat=NLATS, nlon=NLONS)
+
+            ! Allocate known error from previous platform
+            allocate( previous_polar_error, source='     polar error     = 9.047386e-14' )
+            allocate( previous_azimuthal_error, source='     azimuthal error = 1.507082e-13' )
+            !
+            !==> For regular sphere
+            !
+            class is (RegularSphere)
+
+            ! Initialize regular sphere
+            call sphere_type%create(nlat=NLATS, nlon=NLONS)
+
+            ! Allocate known error from previous platform
+            allocate( previous_polar_error, source='     polar error     = 8.579997e-14' )
+            allocate( previous_azimuthal_error, source='     azimuthal error = 1.461516e-13' )
+        end select
+
         !
+        !==> Set scalar stream and velocity potential fields as polys in x,y,z
+        !    and then set v,w from st,sv scalar fields
         !
-        !     set scalar stream and velocity potential fields as polys in x,y,z
-        !     and then set v,w from st,sv scalar fields
-        !
-        do k=1,nt
-            do j=1,nlon
-                phi = (j-1)*dphi
-                sinp = sin(phi)
-                cosp = cos(phi)
-                do i=1,nlat
-                    theta = (i-1)*dlat
-                    ! if (icase.gt.2) theta=thetag(i)
-                    if (icase==3 .or. icase==4) theta = thetag(i)
-                    cost = cos(theta)
-                    sint = sin(theta)
-                    x = sint*cosp
-                    y = sint*sinp
-                    z = cost
-                    dxdt = cost*cosp
-                    dxdp = -sint*sinp
-                    dydt = cost*sinp
-                    dydp = sint*cosp
-                    dzdt = -sint
-                    dzdp = 0.0
-                    if (k==1) then
-                        st(i,j,k) = x*y
-                        sv(i,j,k) = y*z
-                        dstdt = x*dydt+y*dxdt
-                        dstdp = x*dydp+y*dxdp
-                        dsvdt = y*dzdt+z*dydt
-                        dsvdp = y*dzdp+z*dydp
-                        v(i,j,k) = -(cosp*dydp+sinp*dxdp) + dsvdt
-                        w(i,j,k) = sinp*dzdp + cost*cosp + dstdt
-                    else if (k==2) then
-                        st(i,j,k) = x*z
-                        sv(i,j,k) = x*y
-                        dstdp = x*dzdp+z*dxdp
-                        dstdt = x*dzdt+z*dxdt
-                        dsvdp = x*dydp+y*dxdp
-                        dsvdt = x*dydt+y*dxdt
-                        !
-                        !          v = -1/sin(theta)*d(st)/dphi + d(sv)/dtheta
-                        !
-                        !          w =  1/sin(theta)*d(sv)/dphi + d(st)/dtheta
-                        !
-                        v(i,j,k) = z*sinp + dsvdt
-                        w(i,j,k) = cosp*dydp+ sinp*dxdp + dstdt
-                    end if
+        associate( &
+            ve => polar_component, &
+            we => azimuthal_component, &
+            radial => sphere_type%unit_vectors%radial, &
+            theta => sphere_type%unit_vectors%polar, &
+            phi => sphere_type%unit_vectors%azimuthal &
+            )
+            do k=1, NSYNTHS
+                do j=1, NLONS
+                    do i=1, NLATS
+                        associate( &
+                            x => radial(i,j)%x, & !sint*cosp
+                            y => radial(i,j)%y, & !sint*sinp
+                            z => radial(i,j)%z, & !cost
+                            dxdt => theta(i,j)%x, &! cost*cosp
+                            dxdp => -radial(i,j)%y, & !-sint*sinp
+                            dydt => theta(i,j)%y, &! cost*sinp
+                            dydp => radial(i,j)%x, & ! sint*cosp
+                            dzdt => theta(i,j)%z, & ! -sint
+                            dzdp => phi(i,j)%z,& ! 0.0
+                            cosp => phi(i,j)%y, &
+                            sinp => -phi(i,j)%x &
+                            )
+                            select case (k)
+                                case (1)
+                                    associate( &
+                                        dstdt => x*dydt+y*dxdt, &
+                                        dsvdt => y*dzdt+z*dydt &
+                                        )
+                                        ve(i,j,k) = -(cosp*dydp+sinp*dxdp) + dsvdt
+                                        we(i,j,k) = sinp*dzdp + dxdt + dstdt
+                                    end associate
+                                case (2)
+                                    associate( &
+                                        dstdt => x*dzdt+z*dxdt, &
+                                        dsvdt => x*dydt+y*dxdt &
+                                        )
+                                        !
+                                        !          v = -1/sin(theta)*d(st)/dphi + d(sv)/dtheta
+                                        !
+                                        !          w =  1/sin(theta)*d(sv)/dphi + d(st)/dtheta
+                                        !
+                                        ve(i,j,k) = z*sinp + dsvdt
+                                        we(i,j,k) = cosp*dydp+ sinp*dxdp + dstdt
+                                    end associate
+                            end select
+                        end associate
+                    end do
                 end do
             end do
+        end associate
+
+
+        !
+        !==> Perform analysis then synthesis
+        !
+        do k = 1, NSYNTHS
+            associate( &
+                ve => polar_component(:,:,k), &
+                we => azimuthal_component(:,:,k), &
+                v => synthesized_polar(:,:,k), &
+                w => synthesized_azimuthal(:,:,k) &
+                )
+
+                ! Analyse function into (real) coefficients
+                call sphere_type%vector_analysis_from_spherical_components(ve, we)
+
+                ! Synthesize function from (real) coefficients
+                call sphere_type%perform_vector_synthesis(v, w)
+            end associate
         end do
 
-        !     do kk=1,nt
-        !     call iout(kk,"**kk")
-        !     call aout(v(1,1,kk),"   v",nlat,nlon)
-        !     call aout(w(1,1,kk),"   w",nlat,nlon)
-        !     end do
-
-        if (icase==1) then
-
-            call name("**ec")
-
-            call vhaeci(nlat,nlon,wsave,lsave,dwork,ldwork,ierror)
-            call name("vhai")
-            call iout(ierror,"ierr")
-
-            call vhaec(nlat,nlon,ityp,nt,v,w,nlat,nlon,br,bi,cr,ci,nlat, &
-                nlat,wsave,lsave,work,lwork,ierror)
-            call name("vha ")
-            call iout(ierror,"ierr")
-
-            !     call aout(br,"  br",nlat,nlat)
-            !     call aout(bi,"  bi",nlat,nlat)
-            !     call aout(cr,"  cr",nlat,nlat)
-            !     call aout(ci,"  ci",nlat,nlat)
-
-            !
-            !     now synthesize v,w from br,bi,cr,ci and compare with original
-            !
-            call vhseci(nlat,nlon,wsave,lsave,dwork,ldwork,ierror)
-            call name("vhsi")
-            call iout(ierror,"ierr")
-
-            call vhsec(nlat,nlon,ityp,nt,v,w,nlat,nlon,br,bi,cr,ci,nlat, &
-                nlat,wsave,lsave,work,lwork,ierror)
-            call name("vhs ")
-            call iout(ierror,"ierr")
-
-        !     call aout(v,"   v",nlat,nlon)
-        !     call aout(w,"   w",nlat,nlon)
-
-        else if (icase==2) then
-
-            call name("**es")
-
-            call vhaesi(nlat,nlon,wsave,lsave,work,lwork,dwork,ldwork,ierror)
-            call name("vhai")
-            call iout(ierror,"ierr")
-
-            call vhaes(nlat,nlon,ityp,nt,v,w,nlat,nlon,br,bi,cr,ci,nlat, &
-                nlat,wsave,lsave,work,lwork,ierror)
-
-            call name("vha ")
-            call iout(ierror,"ierr")
-
-            !     call aout(br,"  br",nlat,nlat)
-            !     call aout(bi,"  bi",nlat,nlat)
-            !     call aout(cr,"  cr",nlat,nlat)
-            !     call aout(ci,"  ci",nlat,nlat)
-
-            !
-            !     now synthesize v,w from br,bi,cr,ci and compare with original
-            !
-            call vhsesi(nlat,nlon,wsave,lsave,work,lwork,dwork,ldwork,ierror)
-            call name("vhsi")
-            call iout(ierror,"ierr")
-
-            call vhses(nlat,nlon,ityp,nt,v,w,nlat,nlon,br,bi,cr,ci,nlat, &
-                nlat,wsave,lsave,work,lwork,ierror)
-
-            call name("vhs ")
-            call iout(ierror,"ierr")
-
-        else if (icase==3) then
-
-            call name("**gc")
-
-            call name("vhgi")
-            call iout(nlat,"nlat")
-
-            call vhagci(nlat,nlon,wsave,lsave,dwork,ldwork,ierror)
-            call name("vhai")
-            call iout(ierror,"ierr")
-
-            call vhagc(nlat,nlon,ityp,nt,v,w,nlat,nlon,br,bi,cr,ci,nlat, &
-                nlat,wsave,lsave,work,lwork,ierror)
-            call name("vha ")
-            call iout(ierror,"ierr")
-
-            !     call aout(br,"  br",nlat,nlat)
-            !     call aout(bi,"  bi",nlat,nlat)
-            !     call aout(cr,"  cr",nlat,nlat)
-            !     call aout(ci,"  ci",nlat,nlat)
-
-            !
-            !     now synthesize v,w from br,bi,cr,ci and compare with original
-            !
-            call vhsgci(nlat,nlon,wsave,lsave,dwork,ldwork,ierror)
-            call name("vhsi")
-            call iout(ierror,"ierr")
-
-            call vhsgc(nlat,nlon,ityp,nt,v,w,nlat,nlon,br,bi,cr,ci,nlat, &
-                nlat,wsave,lsave,work,lwork,ierror)
-            call name("vhs ")
-            call iout(ierror,"ierr")
-
-        !     call aout(v,"   v",nlat,nlon)
-        !     call aout(w,"   w",nlat,nlon)
-        !     call exit(0)
 
         !
-        ! **** problem with vhags.f, function indx not defined!!!! talk to Paul
+        !==> Compute discretization error
         !
-
-        else if (icase==4) then
-
-            call name("**gs")
-
-            call vhagsi(nlat,nlon,wsave,lsave,dwork,ldwork,ierror)
-            call name("vhai")
-            call iout(ierror,"ierr")
-
-            call vhags(nlat,nlon,ityp,nt,v,w,nlat,nlon,br,bi,cr,ci,nlat, &
-                nlat,wsave,lsave,work,lwork,ierror)
-            call name("vha ")
-            call iout(ierror,"ierr")
-
-            !     call aout(br,"  br",nlat,nlat)
-            !     call aout(bi,"  bi",nlat,nlat)
-            !     call aout(cr,"  cr",nlat,nlat)
-            !     call aout(ci,"  ci",nlat,nlat)
-
-
-            !
-            !     now synthesize v,w from br,bi,cr,ci and compare with original
-            !
-            call vhsgsi(nlat,nlon,wsave,lsave,dwork,ldwork,ierror)
-            call name("vhsi")
-            call iout(ierror,"ierr")
-
-            call vhsgs(nlat,nlon,ityp,nt,v,w,nlat,nlon,br,bi,cr,ci,nlat, &
-                nlat,wsave,lsave,work,lwork,ierror)
-            call name("vhs ")
-            call iout(ierror,"ierr")
-
-        end if
-
-
-        !     do kk=1,nt
-        !     call iout(kk,"**kk")
-        !     call aout(v(1,1,kk),"   v",nlat,nlon)
-        !     call aout(w(1,1,kk),"   w",nlat,nlon)
-        !     end do
+        associate( &
+            err2v => polar_error, &
+            err2w => azimuthal_error, &
+            ve => polar_component, &
+            we => azimuthal_component, &
+            v => synthesized_polar, &
+            w => synthesized_azimuthal &
+            )
+            err2v = norm2(v - ve)
+            err2w = norm2(w - we)
+        end associate
 
         !
-        !     compute "error" in v,w
+        !==> Print earlier output from platform with 64-bit floating point
+        !    arithmetic followed by the output from this computer
         !
-        err2v = 0.0
-        err2w = 0.0
-        do k=1,nt
-            do j=1,nlon
-                phi = (j-1)*dphi
-                sinp = sin(phi)
-                cosp = cos(phi)
-                do i=1,nlat
-                    theta = (i-1)*dlat
-                    if (icase>2) theta=thetag(i)
-                    cost = cos(theta)
-                    sint = sin(theta)
-                    x = sint*cosp
-                    y = sint*sinp
-                    z = cost
-                    dxdt = cost*cosp
-                    dxdp = -sint*sinp
-                    dydt = cost*sinp
-                    dydp = sint*cosp
-                    dzdt = -sint
-                    dzdp = 0.0
-                    if (k==1) then
-                        st(i,j,k) = x*y
-                        sv(i,j,k) = y*z
-                        dstdt = x*dydt+y*dxdt
-                        dstdp = x*dydp+y*dxdp
-                        dsvdt = y*dzdt+z*dydt
-                        dsvdp = y*dzdp+z*dydp
-                        ve = -(cosp*dydp+sinp*dxdp) + dsvdt
-                        we = sinp*dzdp + cost*cosp + dstdt
-                    else if (k==2) then
-                        st(i,j,k) = x*z
-                        sv(i,j,k) = x*y
-                        dstdp = x*dzdp+z*dxdp
-                        dstdt = x*dzdt+z*dxdt
-                        dsvdp =  x*dydp+y*dxdp
-                        dsvdt = x*dydt+y*dxdt
-                        ve = z*sinp + dsvdt
-                        we = cosp*dydp+ sinp*dxdp + dstdt
-                    end if
-                    err2v = err2v + (v(i,j,k) - ve)**2
-                    err2w = err2w + (w(i,j,k) - we)**2
-                end do
-            end do
-        end do
+        write( stdout, '(A)') ''
+        write( stdout, '(A)') '     tvha *** TEST RUN *** '
+        write( stdout, '(A)') ''
+        write( stdout, '(A)') '     grid type = '//sphere_type%grid%grid_type
+        write( stdout, '(A)') '     Testing vector analysis and synthesis'
+        write( stdout, '(2(A,I2))') '     nlat = ', NLATS,' nlon = ', NLONS
+        write( stdout, '(A)') '     Previous 64 bit floating point arithmetic result '
+        write( stdout, '(A)') previous_polar_error
+        write( stdout, '(A)') previous_azimuthal_error
+        write( stdout, '(A)') '     The output from your computer is: '
+        write( stdout, '(A,1pe15.6)') '     polar error     = ', polar_error
+        write( stdout, '(A,1pe15.6)') '     azimuthal error = ', azimuthal_error
+        write( stdout, '(A)' ) ''
+
         !
-        !     set and print least squares error in v,w
+        !==> Release memory
         !
-        err2v = sqrt(err2v/(nt*nlat*nlon))
-        err2w = sqrt(err2w/(nt*nlat*nlon))
-        call vout(err2v,"errv")
-        call vout(err2w,"errw")
-    !
-    !     end of icase loop
-    !
-    end do
+        call sphere_type%destroy()
+        deallocate( previous_polar_error )
+        deallocate( previous_azimuthal_error )
+
+    end subroutine test_vector_analysis_and_synthesis_routines
+
 end program tvha
-!
-subroutine iout(ivar,nam)
-    real nam
-    write(6,10) nam , ivar
-10  format(1h a4, 3h = ,i8)
-    return
-end subroutine iout
-!
-subroutine vout(var,nam)
-    real nam
-    write(6,10) nam , var
-10  format(1h a4,3h = ,e12.5)
-    return
-end subroutine vout
-!
-subroutine name(nam)
-    real nam
-    write(6,100) nam
-100 format(1h a8)
-    return
-end subroutine name
-!
-subroutine vecout(vec,nam,len)
-    dimension vec(len)
-    real nam
-    write(6,109) nam, (vec(l),l=1,len)
-109 format(1h a4,/(1h 8e11.4))
-    return
-end subroutine vecout

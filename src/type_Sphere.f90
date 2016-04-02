@@ -33,63 +33,74 @@ module type_Sphere
         !----------------------------------------------------------------------
         ! Class variables
         !----------------------------------------------------------------------
-        logical,                            public  :: initialized = .false. !! Instantiation status
-        integer (ip),                       public  :: NUMBER_OF_LONGITUDES = 0   !! number of longitudinal points
-        integer (ip),                       public  :: NUMBER_OF_LATITUDES = 0   !! number of latitudinal points
-        integer (ip),                       public  :: TRIANGULAR_TRUNCATION_LIMIT = 0 !! triangular truncation limit
-        integer (ip),                       public  :: SCALAR_SYMMETRIES = 0 !! symmetries about the equator for scalar calculations
-        integer (ip),                       public  :: VECTOR_SYMMETRIES = 0 !! symmetries about the equator for vector calculations
-        integer (ip),                       public  :: NUMBER_OF_SYNTHESES = 0
-        integer (ip),          allocatable, public  :: INDEX_ORDER_M(:)
-        integer (ip),          allocatable, public  :: INDEX_DEGREE_N(:)
-        real (wp),                          public  :: RADIUS_OF_SPHERE = 0.0_wp
-        real (wp),             allocatable, public  :: vorticity_and_divergence_coefficients(:)
-        real (wp),             allocatable, public  :: laplacian_coefficients(:)
-        real (wp),             allocatable, public  :: inverse_laplacian_coefficients(:)
-        complex (wp),          allocatable, public  :: complex_spectral_coefficients(:)
-        class (Workspace),     allocatable, public  :: workspace
-        class (SphericalGrid), allocatable, public  :: grid
-        type (TrigonometricFunctions),      public  :: trigonometric_functions
-        type (SphericalUnitVectors),        public  :: unit_vectors
+        logical,                            public :: initialized = .false. !! Instantiation status
+        integer (ip),                       public :: NUMBER_OF_LONGITUDES = 0   !! number of longitudinal points
+        integer (ip),                       public :: NUMBER_OF_LATITUDES = 0   !! number of latitudinal points
+        integer (ip),                       public :: TRIANGULAR_TRUNCATION_LIMIT = 0 !! triangular truncation limit
+        integer (ip),                       public :: SCALAR_SYMMETRIES = 0 !! symmetries about the equator for scalar calculations
+        integer (ip),                       public :: VECTOR_SYMMETRIES = 0 !! symmetries about the equator for vector calculations
+        integer (ip),                       public :: NUMBER_OF_SYNTHESES = 0
+        integer (ip),          allocatable, public :: INDEX_ORDER_M(:)
+        integer (ip),          allocatable, public :: INDEX_DEGREE_N(:)
+        real (wp),                          public :: RADIUS_OF_SPHERE = 0.0_wp
+        real (wp),             allocatable, public :: vorticity_and_divergence_coefficients(:)
+        real (wp),             allocatable, public :: laplacian_coefficients(:)
+        real (wp),             allocatable, public :: inverse_laplacian_coefficients(:)
+        complex (wp),          allocatable, public :: complex_spectral_coefficients(:)
+        class (Workspace),     allocatable, public :: workspace
+        class (SphericalGrid), allocatable, public :: grid
+        type (TrigonometricFunctions),      public :: trigonometric_functions
+        type (SphericalUnitVectors),        public :: unit_vectors
         !----------------------------------------------------------------------
     contains
         !----------------------------------------------------------------------
         ! Class methods
         !----------------------------------------------------------------------
-        procedure,                              public  :: create_sphere
-        procedure,                              public  :: destroy => destroy_sphere
-        procedure,                              public  :: destroy_sphere
-        procedure,                              public  :: get_index
-        procedure,                              public  :: get_coefficient
-        procedure,                              public  :: get_scalar_laplacian
-        procedure,                              public  :: invert_scalar_laplacian
-        generic, public :: get_laplacian => get_scalar_laplacian
-        generic, public :: invert_laplacian => invert_scalar_laplacian
-        procedure,                              public  :: invert_helmholtz
-        procedure,                              public  :: get_gradient
-        procedure,                              public  :: invert_gradient
-        procedure,                              public  :: get_vorticity
-        procedure,                              public  :: invert_vorticity
+        procedure,                              public :: create_sphere
+        procedure,                              public :: destroy => destroy_sphere
+        procedure,                              public :: destroy_sphere
+        procedure,                              public :: get_index
+        procedure,                              public :: get_coefficient
+        procedure, private :: get_scalar_laplacian
+        procedure, private :: compute_vector_laplacian_coefficients
+        procedure, private :: get_vector_laplacian_from_spherical_angles
+        procedure, private :: get_vector_laplacian_from_vector_field
+        generic,   public  :: get_laplacian => &
+            get_scalar_laplacian, &
+            get_vector_laplacian_from_spherical_angles, &
+            get_vector_laplacian_from_vector_field
+        procedure, private :: invert_scalar_laplacian
+        procedure, private :: invert_vector_laplacian
+        generic,   public :: invert_laplacian => &
+            invert_scalar_laplacian, &
+            invert_vector_laplacian
+        procedure,                              public :: invert_helmholtz
+        procedure,                              public :: get_gradient
+        procedure,                              public :: invert_gradient
+        procedure,                              public :: get_vorticity
+        procedure,                              public :: invert_vorticity
         procedure, private :: get_divergence_from_vector_field
         procedure, private :: get_divergence_from_spherical_angles
-        generic,   public   :: get_divergence => &
+        generic,   public :: get_divergence => &
             get_divergence_from_vector_field, &
             get_divergence_from_spherical_angles
-        procedure,                              public  :: invert_divergence
-        procedure,                              public  :: get_rotation_operator => compute_angular_momentum
+        procedure,                              public :: invert_divergence
+        procedure,                              public :: get_rotation_operator => compute_angular_momentum
         procedure,                              private :: get_scalar_symmetries
         procedure,                              private :: get_vector_symmetries
-        procedure,                              public  :: perform_complex_analysis
-        procedure,                              public  :: perform_complex_synthesis
-        procedure (scalar_analysis),  deferred, public  :: perform_scalar_analysis
-        procedure (scalar_synthesis), deferred, public  :: perform_scalar_synthesis
-        procedure,                              public  :: perform_vector_analysis
-        procedure (vector_analysis),  deferred, public  :: vector_analysis_from_spherical_components
-        procedure (vector_synthesis), deferred, public  :: perform_vector_synthesis
-        procedure,                              public  :: synthesize_from_complex_spectral_coefficients
-        procedure,                              public  :: analyze_into_complex_spectral_coefficients
-        procedure,                              public  :: get_vorticity_and_divergence_coefficients_from_velocities
-        procedure,                              public  :: get_velocities_from_vorticity_and_divergence_coefficients
+        procedure,                              public :: perform_complex_analysis
+        procedure,                              public :: perform_complex_synthesis
+        procedure (scalar_analysis),  deferred, public :: perform_scalar_analysis
+        procedure (scalar_synthesis), deferred, public :: perform_scalar_synthesis
+        procedure,                              private :: perform_vector_analysis_from_vector_field
+        procedure (vector_analysis),  deferred, public :: vector_analysis_from_spherical_components
+        generic, public :: perform_vector_analysis => &
+            perform_vector_analysis_from_vector_field
+        procedure (vector_synthesis), deferred, public :: perform_vector_synthesis
+        procedure,                              public :: synthesize_from_complex_spectral_coefficients
+        procedure,                              public :: analyze_into_complex_spectral_coefficients
+        procedure,                              public :: get_vorticity_and_divergence_coefficients_from_velocities
+        procedure,                              public :: get_velocities_from_vorticity_and_divergence_coefficients
         !----------------------------------------------------------------------
     end type Sphere
 
@@ -100,7 +111,7 @@ module type_Sphere
             ! Dictionary: calling arguments
             !----------------------------------------------------------------------
             class (Sphere), intent (in out) :: this
-            real (wp),      intent (in)     :: scalar_function(:, :)
+            real (wp),      intent (in)    :: scalar_function(:,:)
             !----------------------------------------------------------------------
         end subroutine scalar_analysis
     end interface
@@ -113,7 +124,7 @@ module type_Sphere
             ! Dictionary: calling arguments
             !----------------------------------------------------------------------
             class (Sphere), intent (in out) :: this
-            real (wp),      intent (out)    :: scalar_function(:, :)
+            real (wp),      intent (out)   :: scalar_function(:,:)
             !----------------------------------------------------------------------
         end subroutine scalar_synthesis
     end interface
@@ -126,8 +137,8 @@ module type_Sphere
             ! Dictionary: calling arguments
             !----------------------------------------------------------------------
             class (Sphere), intent (in out) :: this
-            real (wp),      intent (in)     :: polar_component(:, :)
-            real (wp),      intent (in)     :: azimuthal_component(:, :)
+            real (wp),      intent (in)    :: polar_component(:,:)
+            real (wp),      intent (in)    :: azimuthal_component(:,:)
             !----------------------------------------------------------------------
         end subroutine vector_analysis
     end interface
@@ -139,17 +150,12 @@ module type_Sphere
             ! Dictionary: calling arguments
             !----------------------------------------------------------------------
             class (Sphere), intent (in out) :: this
-            real (wp),      intent (out)    :: polar_component(:, :)
-            real (wp),      intent (out)    :: azimuthal_component(:, :)
+            real (wp),      intent (out)   :: polar_component(:,:)
+            real (wp),      intent (out)   :: azimuthal_component(:,:)
             !----------------------------------------------------------------------
         end subroutine vector_synthesis
     end interface
 
-!    ! Overload class method
-!    interface get_divergence_interface
-!        module procedure get_divergence_from_vector_field
-!        module procedure get_divergence_from_spherical_angles
-!    end interface get_divergence_interface
 
 contains
 
@@ -159,13 +165,13 @@ contains
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
         class (Sphere), intent (in out) :: this
-        integer (ip),   intent (in)     :: nlat
-        integer (ip),   intent (in)     :: nlon
-        integer (ip),   intent (in)     :: ntrunc
-        integer (ip),   intent (in)     :: isym  !! Either 0, 1, or 2
-        integer (ip),   intent (in)     :: itype !! Either 0, 1, 2, 3, ..., 8
-        integer (ip),   intent (in)     :: isynt
-        real (wp),      intent (in)     :: rsphere
+        integer (ip),   intent (in)    :: nlat
+        integer (ip),   intent (in)    :: nlon
+        integer (ip),   intent (in)    :: ntrunc
+        integer (ip),   intent (in)    :: isym  !! Either 0, 1, or 2
+        integer (ip),   intent (in)    :: itype !! Either 0, 1, 2, 3, ..., 8
+        integer (ip),   intent (in)    :: isynt
+        real (wp),      intent (in)    :: rsphere
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
         !--------------------------------------------------------------------------------
@@ -310,8 +316,8 @@ contains
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
-        class (Sphere), intent (in out)  :: this
-        real (wp),      intent (in)      :: scalar_function(:, :)
+        class (Sphere), intent (in out) :: this
+        real (wp),      intent (in)     :: scalar_function(:,:)
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
@@ -352,12 +358,12 @@ contains
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
-        class (Sphere), intent (in out)  :: this
-        real (wp),      intent (out)     :: scalar_function(:, :)
+        class (Sphere), intent (in out) :: this
+        real (wp),      intent (out)    :: scalar_function(:,:)
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
-        integer (ip):: n, m, i !! Counters
+        integer (ip) :: n, m, i !! Counters
         !----------------------------------------------------------------------
 
         ! Check if object is usable
@@ -402,9 +408,9 @@ contains
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
-        class (Sphere), intent (in out)  :: this
-        real (wp),      intent (in)      :: scalar_function(:, :)
-        complex (wp),   intent (out)     :: spectral_coefficients(:)
+        class (Sphere), intent (in out) :: this
+        real (wp),      intent (in)     :: scalar_function(:,:)
+        complex (wp),   intent (out)    :: spectral_coefficients(:)
         !----------------------------------------------------------------------
 
         ! Check if object is usable
@@ -427,9 +433,9 @@ contains
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
-        class (Sphere), intent (in out)  :: this
-        complex (wp),   intent (in)      :: spectral_coefficients(:)
-        real (wp),      intent (out)     :: scalar_function(:, :)
+        class (Sphere), intent (in out) :: this
+        complex (wp),   intent (in)     :: spectral_coefficients(:)
+        real (wp),      intent (out)    :: scalar_function(:,:)
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
@@ -475,18 +481,18 @@ contains
 
 
 
-    subroutine perform_vector_analysis( this, vector_field )
+    subroutine perform_vector_analysis_from_vector_field( this, vector_field )
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
         class (Sphere), intent (in out) :: this
-        real (wp),      intent (in)     :: vector_field(:, :, :)
+        real (wp),      intent (in)    :: vector_field(:,:,:)
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
-        integer (ip)           :: error_flag
-        real (wp), allocatable :: polar_component(:, :)
-        real (wp), allocatable :: azimuthal_component(:, :)
+        integer (ip)          :: error_flag
+        real (wp), allocatable :: polar_component(:,:)
+        real (wp), allocatable :: azimuthal_component(:,:)
         !----------------------------------------------------------------------
 
         ! Check if object is usable
@@ -520,7 +526,7 @@ contains
         deallocate( polar_component)
         deallocate( azimuthal_component)
 
-    end subroutine perform_vector_analysis
+    end subroutine perform_vector_analysis_from_vector_field
 
 
 
@@ -529,8 +535,8 @@ contains
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
         class (Sphere), intent (in out) :: this
-        real (wp),      intent (in)     :: scalar_function(:, :)
-        real (wp),      intent (out)    :: scalar_laplacian(:, :)
+        real (wp),      intent (in)    :: scalar_function(:,:)
+        real (wp),      intent (out)   :: scalar_laplacian(:,:)
         !----------------------------------------------------------------------
 
         ! Check if object is usable
@@ -562,8 +568,8 @@ contains
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
         class (Sphere), intent (in out) :: this
-        real (wp),      intent (in)     :: source(:, :)
-        real (wp),      intent (out)    :: solution(:, :)
+        real (wp),      intent (in)    :: source(:,:)
+        real (wp),      intent (out)   :: solution(:,:)
         !----------------------------------------------------------------------
 
         ! Check if object is usable
@@ -589,19 +595,240 @@ contains
     end subroutine invert_scalar_laplacian
 
 
+
+    subroutine compute_vector_laplacian_coefficients( this )
+        !----------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !----------------------------------------------------------------------
+        class (Sphere), intent (in out) :: this
+        !----------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !----------------------------------------------------------------------
+        integer (ip) :: n !! Counter
+        !----------------------------------------------------------------------
+
+        ! Check if object is usable
+        if ( this%initialized .eqv. .false. ) then
+            error stop 'TYPE(Sphere): uninitialized object'&
+                //' in COMPUTE_VECTOR_LAPLACIAN_COEFFICIENTS'
+        end if
+
+        ! compute vector laplacian
+        associate( &
+            nlat => this%NUMBER_OF_LATITUDES, &
+            ityp => this%VECTOR_SYMMETRIES, &
+            lap => this%laplacian_coefficients, &
+            br => this%workspace%real_polar_harmonic_coefficients, &
+            bi => this%workspace%imaginary_polar_harmonic_coefficients, &
+            cr => this%workspace%real_azimuthal_harmonic_coefficients, &
+            ci => this%workspace%imaginary_azimuthal_harmonic_coefficients &
+            )
+            if (ityp==0 .or. ityp==3 .or. ityp==6) then
+                !
+                !==>  All coefficients needed
+                !
+                do n=1, nlat
+                    ! Set polar coefficients
+                    br(:,n) = lap(n) * br(:,n)
+                    bi(:,n) = lap(n) * bi(:,n)
+                    ! Set azimuthal coefficients
+                    cr(:,n) = lap(n) * cr(:,n)
+                    ci(:,n) = lap(n) * ci(:,n)
+                end do
+            else if (ityp==1 .or. ityp==4 .or. ityp==7) then
+                !
+                !==>     vorticity is zero so cr,ci=0 not used
+                !
+                do n=1, nlat
+                    ! Set polar coefficients
+                    br(:,n) = lap(n) * br(:,n)
+                    bi(:,n) = lap(n) * bi(:,n)
+                end do
+            else
+                !
+                !==> divergence is zero so br,bi=0 not used
+                !
+                do n=1, nlat
+                    ! Set azimuthal coefficients
+                    cr(:,n) = lap(n) * cr(:,n)
+                    ci(:,n) = lap(n) * ci(:,n)
+                end do
+            end if
+        end associate
+
+    end subroutine compute_vector_laplacian_coefficients
+
+
+
+    subroutine get_vector_laplacian_from_spherical_angles( this, &
+        polar_component, azimuthal_component, polar_laplacian, azimuthal_laplacian )
+        !----------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !----------------------------------------------------------------------
+        class (Sphere), intent (in out) :: this
+        real (wp),      intent (in)     :: polar_component(:,:)
+        real (wp),      intent (in)     :: azimuthal_component(:,:)
+        real (wp),      intent (out)    :: polar_laplacian(:,:)
+        real (wp),      intent (out)    :: azimuthal_laplacian(:,:)
+        !----------------------------------------------------------------------
+
+        ! Check if object is usable
+        if ( this%initialized .eqv. .false. ) then
+            error stop 'TYPE(Sphere): uninitialized object'&
+                //' in GET_VECTOR_LAPLACIAN_FROM_SPHERICAL_ANGLES'
+        end if
+
+        ! Set vector spherical harmonic coefficients
+        associate( &
+            v => polar_component, &
+            w => azimuthal_component &
+            )
+            call this%vector_analysis_from_spherical_components( v, w )
+        end associate
+
+        ! Compute vector laplacian coefficients
+        call this%compute_vector_laplacian_coefficients()
+
+
+        ! Synthesize vector laplacian from coefficients
+        associate( &
+            vlap => polar_laplacian, &
+            wlap => azimuthal_laplacian &
+            )
+            call this%perform_vector_synthesis( vlap, wlap )
+        end associate
+
+    end subroutine get_vector_laplacian_from_spherical_angles
+
+
+    subroutine get_vector_laplacian_from_vector_field( this, &
+        vector_field, polar_laplacian, azimuthal_laplacian )
+        !----------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !----------------------------------------------------------------------
+        class (Sphere), intent (in out) :: this
+        real (wp),      intent (in)     :: vector_field(:,:,:)
+        real (wp),      intent (out)    :: polar_laplacian(:,:)
+        real (wp),      intent (out)    :: azimuthal_laplacian(:,:)
+        !----------------------------------------------------------------------
+
+        ! Check if object is usable
+        if ( this%initialized .eqv. .false. ) then
+            error stop 'TYPE(Sphere): uninitialized object'&
+                //' in GET_VECTOR_LAPLACIAN_FROM_VECTOR_FIELD'
+        end if
+
+        ! Compute vector laplacian coefficients
+        call this%perform_vector_analysis( vector_field )
+
+
+        ! Synthesize vector laplacian from coefficients
+        associate( &
+            vlap => polar_laplacian, &
+            wlap => azimuthal_laplacian &
+            )
+            call this%perform_vector_synthesis( vlap, wlap )
+        end associate
+
+    end subroutine get_vector_laplacian_from_vector_field
+
+
+    subroutine invert_vector_laplacian( this, &
+        polar_source, azimuthal_source, polar_solution, azimuthal_solution)
+        !----------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !----------------------------------------------------------------------
+        class (Sphere), intent (in out) :: this
+        real (wp),      intent (in)     :: polar_source(:,:)
+        real (wp),      intent (in)     :: azimuthal_source(:,:)
+        real (wp),      intent (out)    :: polar_solution(:,:)
+        real (wp),      intent (out)    :: azimuthal_solution(:,:)
+        !----------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !----------------------------------------------------------------------
+        integer (ip) :: n !! Counter
+        !----------------------------------------------------------------------
+
+        ! Check if object is usable
+        if ( this%initialized .eqv. .false. ) then
+            error stop 'TYPE(Sphere): uninitialized object'&
+                //' in INVERT_VECTOR_LAPLACIAN'
+        end if
+
+        ! Set vector spherical harmonic coefficients
+        associate( &
+            vlap => polar_source, &
+            wlap => azimuthal_source &
+            )
+            call this%vector_analysis_from_spherical_components( vlap, wlap )
+        end associate
+
+        ! compute vector laplacian
+        associate( &
+            nlat => this%NUMBER_OF_LATITUDES, &
+            ityp => this%VECTOR_SYMMETRIES, &
+            ilap => this%inverse_laplacian_coefficients, &
+            br => this%workspace%real_polar_harmonic_coefficients, &
+            bi => this%workspace%imaginary_polar_harmonic_coefficients, &
+            cr => this%workspace%real_azimuthal_harmonic_coefficients, &
+            ci => this%workspace%imaginary_azimuthal_harmonic_coefficients, &
+            v => polar_solution, &
+            w => azimuthal_solution &
+            )
+            if (ityp==0 .or. ityp==3 .or. ityp==6) then
+                !
+                !==>  All coefficients needed
+                !
+                do n=1, nlat
+                    ! Set polar coefficients
+                    br(:,n) = ilap(n) * br(:,n)
+                    bi(:,n) = ilap(n) * bi(:,n)
+                    ! Set azimuthal coefficients
+                    cr(:,n) = ilap(n) * cr(:,n)
+                    ci(:,n) = ilap(n) * ci(:,n)
+                end do
+            else if (ityp==1 .or. ityp==4 .or. ityp==7) then
+                !
+                !==>     vorticity is zero so cr,ci=0 not used
+                !
+                do n=1, nlat
+                    ! Set polar coefficients
+                    br(:,n) = ilap(n) * br(:,n)
+                    bi(:,n) = ilap(n) * bi(:,n)
+                end do
+            else
+                !
+                !==> divergence is zero so br,bi=0 not used
+                !
+                do n=1, nlat
+                    ! Set azimuthal coefficients
+                    cr(:,n) = ilap(n) * cr(:,n)
+                    ci(:,n) = ilap(n) * ci(:,n)
+                end do
+            end if
+            !
+            !==> synthesize coefficients inot vector field (v,w)
+            !
+            call this%perform_vector_synthesis( v, w )
+        end associate
+
+
+    end subroutine invert_vector_laplacian
+
+
     subroutine invert_helmholtz( this, helmholtz_constant, source, solution )
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
         class (Sphere), target, intent (in out) :: this
-        real (wp),              intent (in)     :: helmholtz_constant
-        real (wp),              intent (in)     :: source(:, :)
-        real (wp),              intent (out)    :: solution(:, :)
+        real (wp),              intent (in)    :: helmholtz_constant
+        real (wp),              intent (in)    :: source(:,:)
+        real (wp),              intent (out)   :: solution(:,:)
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
         real (wp), parameter :: ZERO=nearest(1.0_wp, 1.0_wp)-nearest(1.0_wp, -1.0_wp)
-        real (wp), pointer   :: iptr(:) => null()
+        real (wp), pointer  :: iptr(:) => null()
         !----------------------------------------------------------------------
 
         ! Check if object is usable
@@ -656,13 +883,13 @@ contains
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
         class (Sphere), intent (in out) :: this
-        real (wp),      intent (in)     :: scalar_function(:, :)
-        real (wp),      intent (out)    :: polar_gradient_component(:, :)
-        real (wp),      intent (out)    :: azimuthal_gradient_component(:, :)
+        real (wp),      intent (in)    :: scalar_function(:,:)
+        real (wp),      intent (out)   :: polar_gradient_component(:,:)
+        real (wp),      intent (out)   :: azimuthal_gradient_component(:,:)
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
-        integer (ip):: n, m !! Counters
+        integer (ip) :: n, m !! Counters
         !----------------------------------------------------------------------
 
         ! Check if object is usable
@@ -711,12 +938,12 @@ contains
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
         class (Sphere), intent (in out) :: this
-        real (wp),      intent (in)     :: source(:, :, :)
-        real (wp),      intent (out)    :: solution(:, :)
+        real (wp),      intent (in)    :: source(:,:,:)
+        real (wp),      intent (out)   :: solution(:,:)
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
-        integer (ip):: n, m !! Counters
+        integer (ip) :: n, m !! Counters
         !----------------------------------------------------------------------
 
         ! Check if object is usable
@@ -762,12 +989,12 @@ contains
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
         class (Sphere), intent (in out) :: this
-        real (wp),      intent (in)     :: vector_field(:, :, :)
-        real (wp),      intent (out)    :: vorticity(:, :)
+        real (wp),      intent (in)    :: vector_field(:,:,:)
+        real (wp),      intent (out)   :: vorticity(:,:)
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
-        integer (ip):: n, m !! Counters
+        integer (ip) :: n, m !! Counters
         !----------------------------------------------------------------------
 
         ! Check if object is usable
@@ -814,12 +1041,12 @@ contains
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
         class (Sphere), intent (in out) :: this
-        real (wp),      intent (in)     :: source(:, :, :)
-        real (wp),      intent (out)    :: solution(:, :)
+        real (wp),      intent (in)    :: source(:,:,:)
+        real (wp),      intent (out)   :: solution(:,:)
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
-        integer (ip):: n, m !! Counters
+        integer (ip) :: n, m !! Counters
         !----------------------------------------------------------------------
 
         ! Check if object is usable
@@ -874,11 +1101,11 @@ contains
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
         class (Sphere), intent (in out) :: this
-        real (wp),      intent (out)    :: divergence (:,:)
+        real (wp),      intent (out)   :: divergence (:,:)
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
-        integer (ip):: n, m !! Counters
+        integer (ip) :: n, m !! Counters
         !----------------------------------------------------------------------
 
         ! Check if object is usable
@@ -923,12 +1150,12 @@ contains
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
         class (Sphere), intent (in out) :: this
-        real (wp),      intent (in)     :: vector_field (:, :, :)
-        real (wp),      intent (out)    :: divergence (:, :)
+        real (wp),      intent (in)    :: vector_field (:,:,:)
+        real (wp),      intent (out)   :: divergence (:,:)
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
-        integer (ip):: n, m !! Counters
+        integer (ip) :: n, m !! Counters
         !----------------------------------------------------------------------
 
         ! Check if object is usable
@@ -952,13 +1179,13 @@ contains
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
         class (Sphere), intent (in out) :: this
-        real (wp),      intent (in)     :: polar_component(:,:)
-        real (wp),      intent (in)     :: azimuthal_component(:,:)
-        real (wp),      intent (out)    :: divergence (:, :)
+        real (wp),      intent (in)    :: polar_component(:,:)
+        real (wp),      intent (in)    :: azimuthal_component(:,:)
+        real (wp),      intent (out)   :: divergence (:,:)
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
-        integer (ip):: n, m !! Counters
+        integer (ip) :: n, m !! Counters
         !----------------------------------------------------------------------
 
         ! Check if object is usable
@@ -990,13 +1217,13 @@ contains
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
         class (Sphere), intent (in out) :: this
-        real (wp),      intent (in)     :: source(:,:)
-        real (wp),      intent (out)    :: polar_solution(:,:)
-        real (wp),      intent (out)    :: azimuthal_solution(:,:)
+        real (wp),      intent (in)    :: source(:,:)
+        real (wp),      intent (out)   :: polar_solution(:,:)
+        real (wp),      intent (out)   :: azimuthal_solution(:,:)
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
-        integer (ip):: n, m !! Counters
+        integer (ip) :: n, m !! Counters
         !----------------------------------------------------------------------
 
         ! Check if object is usable
@@ -1061,14 +1288,14 @@ contains
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
         class (Sphere),         intent (in out) :: this
-        real (wp),              intent (in)     :: polar_component(:, :)
-        real (wp),              intent (in)     :: azimuthal_component(:, :)
-        complex (wp),           intent (out)    :: vort_spec(:)
-        complex (wp),           intent (out)    :: div_spec(:)
+        real (wp),              intent (in)    :: polar_component(:,:)
+        real (wp),              intent (in)    :: azimuthal_component(:,:)
+        complex (wp),           intent (out)   :: vort_spec(:)
+        complex (wp),           intent (out)   :: div_spec(:)
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
-        integer (ip)  :: n, m  !! Counters
+        integer (ip) :: n, m  !! Counters
         !----------------------------------------------------------------------
 
         ! Check if object is usable
@@ -1129,14 +1356,14 @@ contains
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
         class (Sphere), intent (in out) :: this
-        complex (wp),   intent (in)     :: vort_spec(:)
-        complex (wp),   intent (in)     :: div_spec(:)
-        real (wp),      intent (out)    :: polar_component(:, :)
-        real (wp),      intent (out)    :: azimuthal_component(:, :)
+        complex (wp),   intent (in)    :: vort_spec(:)
+        complex (wp),   intent (in)    :: div_spec(:)
+        real (wp),      intent (out)   :: polar_component(:,:)
+        real (wp),      intent (out)   :: azimuthal_component(:,:)
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
-        integer (ip)           :: nm, n, m, i  !! Counters
+        integer (ip)          :: nm, n, m, i  !! Counters
         real (wp), allocatable :: isqnn(:)
         !----------------------------------------------------------------------
 
@@ -1230,14 +1457,14 @@ contains
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
         class (Sphere), intent (in out) :: this
-        real (wp),      intent (in)     :: scalar_function(:, :)
-        real (wp),      intent (out)    :: angular_momentum(:, :, :)
+        real (wp),      intent (in)    :: scalar_function(:,:)
+        real (wp),      intent (out)   :: angular_momentum(:,:,:)
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
-        integer (ip)           :: k, l   !! Counters
-        real (wp), allocatable :: polar_gradient_component(:, :)
-        real (wp), allocatable :: azimuthal_gradient_component(:, :)
+        integer (ip)          :: k, l   !! Counters
+        real (wp), allocatable :: polar_gradient_component(:,:)
+        real (wp), allocatable :: azimuthal_gradient_component(:,:)
         !----------------------------------------------------------------------
 
         ! Check if object is usable
@@ -1328,10 +1555,10 @@ contains
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
-        class (Sphere), intent (in out)  :: this
-        integer (ip),   intent (in)      :: n
-        integer (ip),   intent (in)      :: m
-        integer (ip)                     :: return_value
+        class (Sphere), intent (in out) :: this
+        integer (ip),   intent (in)     :: n
+        integer (ip),   intent (in)     :: m
+        integer (ip)                    :: return_value
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
@@ -1355,9 +1582,9 @@ contains
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
         class (Sphere), intent (in out) :: this
-        integer (ip),   intent (in)     :: n
-        integer (ip),   intent (in)     :: m
-        complex (wp)                    :: return_value
+        integer (ip),   intent (in)    :: n
+        integer (ip),   intent (in)    :: m
+        complex (wp)                   :: return_value
         !----------------------------------------------------------------------
 
         associate( &
@@ -1383,7 +1610,7 @@ contains
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
         class (Sphere), intent (in out) :: this
-        integer (ip),   intent (in)     :: isym
+        integer (ip),   intent (in)    :: isym
         !----------------------------------------------------------------------
 
         select case (isym)
@@ -1407,7 +1634,7 @@ contains
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
         class (Sphere), intent (in out) :: this
-        integer (ip),   intent (in)     :: itype
+        integer (ip),   intent (in)    :: itype
         !----------------------------------------------------------------------
 
         select case (itype)
