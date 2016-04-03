@@ -306,57 +306,148 @@
 !
 subroutine shags(nlat, nlon, mode, nt, g, idg, jdg, a, b, mdab, ndab, &
     wshags, lshags, work, lwork, ierror)
-    !     subroutine shags performs the spherical harmonic analysis on
-    !     a gaussian grid on the array(s) in g and returns the coefficients
-    !     in array(s) a, b. the necessary legendre polynomials are fully
-    !     stored in this version.
+    implicit none
+    ! External routines: shags1
     !
-    dimension g(idg, jdg, 1), a(mdab, ndab, 1), b(mdab, ndab, 1), &
-        wshags(lshags), work(lwork)
-    !     check input parameters
-    ierror = 1
-    if (nlat<3) return
-    ierror = 2
-    if (nlon<4) return
-    ierror = 3
-    if (mode<0 .or.mode>2) return
-    !     set m limit for pmn
+    ! Purpose:
+    !
+    ! Performs the spherical harmonic analysis on
+    ! a gaussian grid on the array(s) in g and returns the coefficients
+    ! in array(s) a, b. the necessary legendre polynomials are fully
+    ! stored in this version.
+    !
+    !----------------------------------------------------------------------
+    ! Dictionary: calling arguments
+    !----------------------------------------------------------------------
+    integer, intent (in)     :: nlat
+    integer, intent (in)     :: nlon
+    integer, intent (in)     :: mode
+    integer, intent (in)     :: nt
+    real,    intent (in)     :: g(idg, jdg, 1)
+    integer, intent (in)     :: idg
+    integer, intent (in)     :: jdg
+    real,    intent (out)    :: a(mdab, ndab, 1)
+    real,    intent (out)    :: b(mdab, ndab, 1)
+    integer, intent (in)     :: mdab
+    integer, intent (in)     :: ndab
+    real,    intent (in out) :: wshags(lshags)
+    integer, intent (in)     :: lshags
+    real,    intent (in out) :: work(lwork)
+    integer, intent (in)     :: lwork
+    integer, intent (out)    :: ierror
+    !----------------------------------------------------------------------
+    ! Dictionary: local variables
+    !----------------------------------------------------------------------
+    integer :: l, l1, l2, lp, iw, lat, late, ifft, ipmn, iwts
+    !----------------------------------------------------------------------
+
+    !
+    !==> Check validity of input values
+    !
+
+    ! Initialize error flag
+    ierror = 0
+
+    ! Check case 1
+    if (nlat<3) then
+        ierror = 1
+        return
+    end if
+
+    ! Check case 2
+    if (nlon < 4) then
+        ierror = 2
+        return
+    end if
+
+    ! Check case 3
+    if (mode < 0 .or. mode > 2) then
+        ierror = 3
+        return
+    end if
+
+    !
+    !==> Set m limit for pmn
+    !
     l = min((nlon+2)/2, nlat)
-    !     set gaussian point nearest equator pointer
+
+    !
+    !==> Set gaussian point nearest equator pointer
+    !
     late = (nlat+mod(nlat, 2))/2
-    !     set number of grid points for analysis/synthesis
+
+    !
+    !==> set number of grid points for analysis/synthesis
+    !
     lat = nlat
-    if (mode/=0) lat = late
-    ierror = 4
-    if (nt<1) return
-    ierror = 5
-    if (idg<lat) return
-    ierror = 6
-    if (jdg<nlon) return
-    ierror = 7
-    if(mdab < l) return
-    ierror = 8
-    if(ndab < nlat) return
+    if (mode/=0) then
+        lat = late
+    end if
+
+    ! Check case 4
+    if (nt < 1) then
+        ierror = 4
+        return
+    end if
+
+    ! Check case 5
+    if (idg<lat) then
+        ierror = 5
+        return
+    end if
+
+    ! Check case 6
+    if (jdg < nlon) then
+        ierror = 6
+        return
+    end if
+
+    ! Check case 7
+    if (mdab < l) then
+        ierror = 7
+        return
+    end if
+
+    ! Check case 8
+    if (ndab < nlat) then
+        ierror = 8
+        return
+    end if
     l1 = l
     l2 = late
-    ierror = 9
-    !     check permanent work space length
+    lp = nlat*(3*(l1+l2)-2)+(l1-1)*(l2*(2*nlat-l1)-3*l1)/2+nlon+15
+
+    ! Check case 9: permanent work space length
+    if (lshags < lp) then
+        ierror = 9
+        return
+    end if
+
+    ! Check case 10: temporary work space length
+    if ( &
+        (mode==0 .and. lwork < nlat*nlon*(nt+1)) &
+        .or. &
+        (mode/=0 .and. lwork < l2*nlon*(nt+1))  &
+        ) then
+        ierror = 10
+        return
+    end if
+
     !
-    lp= nlat*(3*(l1+l2)-2)+(l1-1)*(l2*(2*nlat-l1)-3*l1)/2+nlon+15
-    if(lshags<lp) return
-    ierror = 10
-    !     check temporary work space length
-    if (mode==0 .and. lwork<nlat*nlon*(nt+1)) return
-    if (mode/=0 .and. lwork<l2*nlon*(nt+1)) return
-    ierror = 0
-    !     set starting address for gaussian wts , fft values, 
-    !     and fully stored legendre polys in wshags
+    !==> set starting address for gaussian wts , fft values,
+    !    and fully stored legendre polys in wshags
+    !
     iwts = 1
     ifft = nlat+2*nlat*late+3*(l*(l-1)/2+(nlat-l)*(l-1))+1
     ipmn = ifft+nlon+15
-    !     set pointer for internal storage of g
+    !
+    !==> set pointer for internal storage of g
+    !
     iw = lat*nlon*nt+1
 
+    !
+    !==> Perform analysis
+    !
     call shags1(nlat, nlon, l, lat, mode, g, idg, jdg, nt, a, b, mdab, ndab, &
         wshags(iwts), wshags(ifft), wshags(ipmn), late, work, work(iw))
 
@@ -577,7 +668,7 @@ subroutine shagsi(nlat, nlon, wshags, lshags, work, lwork, dwork, ldwork, &
     !     check permanent work space length
     ierror = 3
     lp=nlat*(3*(l1+l2)-2)+(l1-1)*(l2*(2*nlat-l1)-3*l1)/2+nlon+15
-    if(lshags<lp) return
+    if (lshags<lp) return
     ierror = 4
     !     check temporary work space
     if (lwork<4*nlat*(nlat+2)+2) return
@@ -601,13 +692,8 @@ subroutine shagss1(nlat, l, late, w, pmn, pmnf)
     dimension w(1), pmn(nlat, late, 3), pmnf(late, 1)
 
     !     compute and store legendre polys for i=1, ..., late, m=0, ..., l-1
-    do i=1, nlat
-        do j=1, late
-            do k=1, 3
-                pmn(i, j, k) = 0.0
-            end do
-        end do
-    end do
+    pmn = 0.0
+
     do mp1=1, l
         m = mp1-1
         mml1 = m*(2*nlat-m-1)/2
@@ -695,12 +781,9 @@ subroutine shagsp1(nlat, nlon, l, late, wts, p0n, p1n, abel, bbel, cbel, &
     wts = dwts
 
     !     initialize p0n, p1n using real dnlfk, dnlft
-    do np1=1, nlat
-        do i=1, late
-            p0n(np1, i) = 0.0
-            p1n(np1, i) = 0.0
-        end do
-    end do
+    p0n = 0.0
+    p1n = 0.0
+
     !     compute m=n=0 legendre polynomials for all theta(i)
     np1 = 1
     n = 0

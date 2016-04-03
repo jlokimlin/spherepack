@@ -176,7 +176,7 @@ subroutine shpei1(nlat, nlon, isym, mtrunc, idp, ierror, &
   pe, po, ze, zo, ipse, jzse, ipso, jzso, &
   cp, work, wx, s, e, thet, xx, z, a, b, we, ped, wo, pod, u)
 !
-real sum, eps, pi, dthet, v, a1, b1, c1
+real sum, eps, pi, dthet, v(1,1), a1, b1, c1
 parameter (eps=5.0d-8)
 real cp(idp), work(idp), wx(idp), s(idp+1), &
   e(idp), thet(idp), xx(idp), z(idp), u(idp, idp), &
@@ -218,7 +218,7 @@ end do
 if(m>0) ped(1, j, mp1) = 0.0
 end do
 call dsvdc(ped(m+1, 1, mp1), idp, nem, nem, s, e, u, &
-                        idp, v, idp, work, 10, info)
+                        idp, v(1,1), idp, work, 10, info)
 !
 do j=1, nem
 s(j) = 1.0/(s(j)*s(j)) 
@@ -411,7 +411,7 @@ end do
 if(modn==1) pod(nte, j, mp1) = 0.0
 end do
 call dsvdc(pod(m+1, 1, mp1), idp, nom, nom, s, e, u, &
-                        idp, v, idp, work, 10, info)
+                        idp, v(1,1), idp, work, 10, info)
 !
 do j=1, nom
 s(j) = 1.0/(s(j)*s(j)) 
