@@ -304,7 +304,6 @@
 !                 (due to failure in eigenvalue routine)
 !
 !
-! ****************************************************************
 subroutine shags(nlat, nlon, mode, nt, g, idg, jdg, a, b, mdab, ndab, &
     wshags, lshags, work, lwork, ierror)
     !     subroutine shags performs the spherical harmonic analysis on
@@ -597,6 +596,7 @@ subroutine shagsi(nlat, nlon, wshags, lshags, work, lwork, dwork, ldwork, &
 end subroutine shagsi
 
 
+
 subroutine shagss1(nlat, l, late, w, pmn, pmnf)
     dimension w(1), pmn(nlat, late, 3), pmnf(late, 1)
     !     compute and store legendre polys for i=1, ..., late, m=0, ..., l-1
@@ -623,6 +623,7 @@ subroutine shagss1(nlat, l, late, w, pmn, pmnf)
     end do
 
 end subroutine shagss1
+
 
 
 subroutine shagsp(nlat, nlon, wshags, lshags, dwork, ldwork, ierror)

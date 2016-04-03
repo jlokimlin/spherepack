@@ -623,37 +623,38 @@ contains
             cr => this%workspace%real_azimuthal_harmonic_coefficients, &
             ci => this%workspace%imaginary_azimuthal_harmonic_coefficients &
             )
-            if (ityp==0 .or. ityp==3 .or. ityp==6) then
-                !
-                !==>  All coefficients needed
-                !
-                do n=1, nlat
-                    ! Set polar coefficients
-                    br(:,n) = lap(n) * br(:,n)
-                    bi(:,n) = lap(n) * bi(:,n)
-                    ! Set azimuthal coefficients
-                    cr(:,n) = lap(n) * cr(:,n)
-                    ci(:,n) = lap(n) * ci(:,n)
-                end do
-            else if (ityp==1 .or. ityp==4 .or. ityp==7) then
-                !
-                !==>     vorticity is zero so cr,ci=0 not used
-                !
-                do n=1, nlat
-                    ! Set polar coefficients
-                    br(:,n) = lap(n) * br(:,n)
-                    bi(:,n) = lap(n) * bi(:,n)
-                end do
-            else
-                !
-                !==> divergence is zero so br,bi=0 not used
-                !
-                do n=1, nlat
-                    ! Set azimuthal coefficients
-                    cr(:,n) = lap(n) * cr(:,n)
-                    ci(:,n) = lap(n) * ci(:,n)
-                end do
-            end if
+            select case (ityp)
+                case (0, 3, 6)
+                    !
+                    !==>  All coefficients needed
+                    !
+                    do n=1, nlat
+                        ! Set polar coefficients
+                        br(:,n) = lap(n) * br(:,n)
+                        bi(:,n) = lap(n) * bi(:,n)
+                        ! Set azimuthal coefficients
+                        cr(:,n) = lap(n) * cr(:,n)
+                        ci(:,n) = lap(n) * ci(:,n)
+                    end do
+                case (1, 4, 7)
+                    !
+                    !==>     vorticity is zero so cr,ci=0 not used
+                    !
+                    do n=1, nlat
+                        ! Set polar coefficients
+                        br(:,n) = lap(n) * br(:,n)
+                        bi(:,n) = lap(n) * bi(:,n)
+                    end do
+                case default
+                    !
+                    !==> divergence is zero so br,bi=0 not used
+                    !
+                    do n=1, nlat
+                        ! Set azimuthal coefficients
+                        cr(:,n) = lap(n) * cr(:,n)
+                        ci(:,n) = lap(n) * ci(:,n)
+                    end do
+            end select
         end associate
 
     end subroutine compute_vector_laplacian_coefficients
@@ -775,37 +776,38 @@ contains
             v => polar_solution, &
             w => azimuthal_solution &
             )
-            if (ityp==0 .or. ityp==3 .or. ityp==6) then
-                !
-                !==>  All coefficients needed
-                !
-                do n=1, nlat
-                    ! Set polar coefficients
-                    br(:,n) = ilap(n) * br(:,n)
-                    bi(:,n) = ilap(n) * bi(:,n)
-                    ! Set azimuthal coefficients
-                    cr(:,n) = ilap(n) * cr(:,n)
-                    ci(:,n) = ilap(n) * ci(:,n)
-                end do
-            else if (ityp==1 .or. ityp==4 .or. ityp==7) then
-                !
-                !==>     vorticity is zero so cr,ci=0 not used
-                !
-                do n=1, nlat
-                    ! Set polar coefficients
-                    br(:,n) = ilap(n) * br(:,n)
-                    bi(:,n) = ilap(n) * bi(:,n)
-                end do
-            else
-                !
-                !==> divergence is zero so br,bi=0 not used
-                !
-                do n=1, nlat
-                    ! Set azimuthal coefficients
-                    cr(:,n) = ilap(n) * cr(:,n)
-                    ci(:,n) = ilap(n) * ci(:,n)
-                end do
-            end if
+            select case (ityp)
+                case (0, 3, 6)
+                    !
+                    !==>  All coefficients needed
+                    !
+                    do n=1, nlat
+                        ! Set polar coefficients
+                        br(:,n) = ilap(n) * br(:,n)
+                        bi(:,n) = ilap(n) * bi(:,n)
+                        ! Set azimuthal coefficients
+                        cr(:,n) = ilap(n) * cr(:,n)
+                        ci(:,n) = ilap(n) * ci(:,n)
+                    end do
+                case (1, 4, 7)
+                    !
+                    !==>     vorticity is zero so cr,ci=0 not used
+                    !
+                    do n=1, nlat
+                        ! Set polar coefficients
+                        br(:,n) = ilap(n) * br(:,n)
+                        bi(:,n) = ilap(n) * bi(:,n)
+                    end do
+                case default
+                    !
+                    !==> divergence is zero so br,bi=0 not used
+                    !
+                    do n=1, nlat
+                        ! Set azimuthal coefficients
+                        cr(:,n) = ilap(n) * cr(:,n)
+                        ci(:,n) = ilap(n) * ci(:,n)
+                    end do
+            end select
             !
             !==> synthesize coefficients inot vector field (v,w)
             !
