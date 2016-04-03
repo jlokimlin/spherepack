@@ -313,11 +313,26 @@
 !            = 5  error in the specification of ldwork
 !
 !
-! ****************************************************************
+!
 subroutine shaes(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, &
     wshaes, lshaes, work, lwork, ierror)
-    dimension g(idg, jdg, 1), a(mdab, ndab, 1), b(mdab, ndab, 1), wshaes(1), &
-        work(1)
+    !----------------------------------------------------------------------
+    ! Dictionary: calling arguments
+    !----------------------------------------------------------------------
+    integer, intent (in)     :: nlat
+    integer, intent (in)     :: nlon
+    integer, intent (in)     :: isym
+    integer, intent (in)     :: nt
+    real,    intent (in)     :: g(idg, jdg, 1)
+    integer, intent (in)     :: idg
+    integer, intent (in)     :: jdg
+    real,    intent (out)    :: a(mdab, ndab, 1)
+    real,    intent (out)    :: b(mdab, ndab, 1)
+    integer, intent (in)     :: mdab
+    integer, intent (in)     :: ndab
+    real,    intent (in out) :: wshaes(1)
+    real,    intent (in out) :: work(1)
+    !----------------------------------------------------------------------
 
     ierror = 1
     if(nlat<3) return
@@ -487,32 +502,83 @@ end subroutine shaes1
 
 subroutine shaesi(nlat, nlon, wshaes, lshaes, work, lwork, dwork, &
     ldwork, ierror)
-    dimension wshaes(*), work(*)
-    real dwork(*)
+    implicit none
+    !----------------------------------------------------------------------
+    ! Dictionary: calling arguments
+    !----------------------------------------------------------------------
+    integer, intent (in)     :: nlat
+    integer, intent (in)     :: nlon
+    real,    intent (in out) :: wshaes(*)
+    integer, intent (in)     :: lshaes
+    real,    intent (in)     :: work(*)
+    integer, intent (in)     :: lwork
+    real,    intent (in out) :: dwork(*)
+    integer, intent (in)     :: ldwork
+    integer, intent (out)    :: ierror
+    !----------------------------------------------------------------------
+
     !
-    !     length of wshaes is (l*(l+1)*imid)/2+nlon+15
-    !     length of work is 5*l*imid + 3*((l-3)*l+2)/2
+    !==> Remarks:
+    !    length of wshaes is (l*(l+1)*imid)/2+nlon+15
+    !    length of work is 5*l*imid + 3*((l-3)*l+2)/2
     !
-    ierror = 1
-    if(nlat<3) return
-    ierror = 2
-    if(nlon<4) return
-    ierror = 3
-    mmax = min(nlat, nlon/2+1)
-    imid = (nlat+1)/2
-    lzimn = (imid*mmax*(nlat+nlat-mmax+1))/2
-    if(lshaes < lzimn+nlon+15) return
-    ierror = 4
-    labc = 3*((mmax-2)*(nlat+nlat-mmax-1))/2
-    if(lwork < 5*nlat*imid + labc) return
-    ierror = 5
-    if (ldwork < nlat+1) return
+
+    !
+    !==> Check validity of input values
+    !
+
+    ! Initialize error flag
     ierror = 0
-    iw1 = 3*nlat*imid+1
-    idz = (mmax*(nlat+nlat-mmax+1))/2
 
-    call sea1(nlat, nlon, imid, wshaes, idz, work, work(iw1), dwork)
+    ! Check error case 1
+    if(nlat<3) then
+        ierror = 1
+        return
+    end if
 
-    call hrffti(nlon, wshaes(lzimn+1))
+    ! Check error case 2
+    if(nlon<4) then
+        ierror = 2
+        return
+    end if
+
+    associate( &
+        mmax => min(nlat, nlon/2+1), &
+        imid => (nlat+1)/2 &
+        )
+        associate( lzimn => (imid*mmax*(nlat+nlat-mmax+1))/2 )
+
+            ! Check error case 3
+            if(lshaes < lzimn+nlon+15) then
+                ierror = 3
+                return
+            end if
+
+            ! Check error case 4
+            associate( labc => 3*((mmax-2)*(nlat+nlat-mmax-1))/2 )
+                if(lwork < 5*nlat*imid + labc) then
+                    ierror = 4
+                    return
+                end if
+            end associate
+
+            ! Check error case 5
+            if (ldwork < nlat+1) then
+                ierror = 5
+                return
+            end if
+
+            !
+            !==> Compute workspace
+            !
+            associate( &
+                iw1 => 3*nlat*imid+1, &
+                idz => (mmax*(nlat+nlat-mmax+1))/2 &
+                )
+                call sea1(nlat, nlon, imid, wshaes, idz, work, work(iw1), dwork)
+                call hrffti(nlon, wshaes(lzimn+1))
+            end associate
+        end associate
+    end associate
 
 end subroutine shaesi
