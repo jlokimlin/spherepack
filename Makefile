@@ -12,7 +12,7 @@ lib:
 	( cd ./src; $(MAKE) all )
 
 testlib:
-	( cd ./test; $(MAKE) run )
+	( cd ./test; $(MAKE) clean; $(MAKE) run )
 
 install:
 	cp ./lib/lib$(LIB_NAME).a $(EXTERNAL_LIBRARY_PATH)

@@ -290,409 +290,446 @@
 !
 !
 subroutine shsgs(nlat, nlon, mode, nt, g, idg, jdg, a, b, mdab, ndab, &
-                    wshsgs, lshsgs, work, lwork, ierror)
-dimension g(idg, jdg, 1), a(mdab, ndab, 1), b(mdab, ndab, 1), &
-          wshsgs(lshsgs), work(lwork)
-!     check input parameters
-ierror = 1
-if (nlat<3) return
-ierror = 2
-if (nlon<4) return
-ierror = 3
-if (mode<0 .or.mode>2) return
-ierror = 4
-if (nt<1) return
-!     set limit on m subscript
-l = min((nlon+2)/2, nlat)
-!     set gaussian point nearest equator pointer
-late = (nlat+mod(nlat, 2))/2
-!     set number of grid points for analysis/synthesis
-lat = nlat
-if (mode/=0) lat = late
-ierror = 5
-if (idg<lat) return
-ierror = 6
-if (jdg<nlon) return
-ierror = 7
-if(mdab < l) return
-ierror = 8
-if(ndab < nlat) return
-l1 = l
-l2 = late
-ierror = 9
-!     check permanent work space length
-lp=nlat*(3*(l1+l2)-2)+(l1-1)*(l2*(2*nlat-l1)-3*l1)/2+nlon+15
-if(lshsgs<lp) return
-!     check temporary work space length
-ierror = 10
-if (mode==0 .and. lwork<nlat*nlon*(nt+1)) return
-if (mode/=0 .and. lwork<l2*nlon*(nt+1)) return
-ierror = 0
-!     starting address for fft values and legendre polys in wshsgs
-ifft = nlat+2*nlat*late+3*(l*(l-1)/2+(nlat-l)*(l-1))+1
-ipmn = ifft+nlon+15
-!     set pointer for internal storage of g
-iw = lat*nlon*nt+1
-call shsgs1(nlat, nlon, l, lat, mode, g, idg, jdg, nt, a, b, mdab, ndab, &
-          wshsgs(ifft), wshsgs(ipmn), late, work, work(iw))
-return
+    wshsgs, lshsgs, work, lwork, ierror)
+    dimension g(idg, jdg, 1), a(mdab, ndab, 1), b(mdab, ndab, 1), &
+        wshsgs(lshsgs), work(lwork)
+
+    !     check input parameters
+    ierror = 1
+    if (nlat<3) return
+    ierror = 2
+    if (nlon<4) return
+    ierror = 3
+    if (mode<0 .or.mode>2) return
+    ierror = 4
+    if (nt<1) return
+    !     set limit on m subscript
+    l = min((nlon+2)/2, nlat)
+    !     set gaussian point nearest equator pointer
+    late = (nlat+mod(nlat, 2))/2
+    !     set number of grid points for analysis/synthesis
+    lat = nlat
+    if (mode/=0) lat = late
+    ierror = 5
+    if (idg<lat) return
+    ierror = 6
+    if (jdg<nlon) return
+    ierror = 7
+    if(mdab < l) return
+    ierror = 8
+    if(ndab < nlat) return
+    l1 = l
+    l2 = late
+    ierror = 9
+    !     check permanent work space length
+    lp=nlat*(3*(l1+l2)-2)+(l1-1)*(l2*(2*nlat-l1)-3*l1)/2+nlon+15
+    if(lshsgs<lp) return
+    !     check temporary work space length
+    ierror = 10
+    if (mode==0 .and. lwork<nlat*nlon*(nt+1)) return
+    if (mode/=0 .and. lwork<l2*nlon*(nt+1)) return
+    ierror = 0
+    !     starting address for fft values and legendre polys in wshsgs
+    ifft = nlat+2*nlat*late+3*(l*(l-1)/2+(nlat-l)*(l-1))+1
+    ipmn = ifft+nlon+15
+    !     set pointer for internal storage of g
+    iw = lat*nlon*nt+1
+
+    call shsgs1(nlat, nlon, l, lat, mode, g, idg, jdg, nt, a, b, mdab, ndab, &
+        wshsgs(ifft), wshsgs(ipmn), late, work, work(iw))
+
 end subroutine shsgs
 
+
+
 subroutine shsgs1(nlat, nlon, l, lat, mode, gs, idg, jdg, nt, a, b, mdab, &
-                  ndab, wfft, pmn, late, g, work)
-dimension gs(idg, jdg, nt), a(mdab, ndab, nt), b(mdab, ndab, nt)
-dimension wfft(1), pmn(late, 1), g(lat, nlon, nt), work(1)
+    ndab, wfft, pmn, late, g, work)
+    dimension gs(idg, jdg, nt), a(mdab, ndab, nt), b(mdab, ndab, nt)
+    dimension wfft(1), pmn(late, 1), g(lat, nlon, nt), work(1)
 
-!     reconstruct fourier coefficients in g on gaussian grid
-!     using coefficients in a, b
+    !     reconstruct fourier coefficients in g on gaussian grid
+    !     using coefficients in a, b
 
-!     initialize to zero
-do 100 k=1, nt
-do 100 j=1, nlon
-do 100 i=1, lat
-g(i, j, k) = 0.0
-100 continue
+    !     initialize to zero
+    do k=1, nt
+        do j=1, nlon
+            do i=1, lat
+                g(i, j, k) = 0.0
+            end do
+        end do
+    end do
 
-lm1 = l
-if (nlon == l+l-2) lm1 = l-1
-if (mode==0) then
-!     set first column in g
-m = 0
-mml1 = m*(2*nlat-m-1)/2
-do 101 k=1, nt
-!     n even
-do 102 np1=1, nlat, 2
-mn = mml1+np1
-do 102 i=1, late
-g(i, 1, k) = g(i, 1, k)+a(1, np1, k)*pmn(i, mn)
-102 continue
-!     n odd
-nl2 = nlat/2
-do 103 np1=2, nlat, 2
-mn = mml1+np1
-do 103 i=1, nl2
-is = nlat-i+1
-g(is, 1, k) = g(is, 1, k)+a(1, np1, k)*pmn(i, mn)
-103 continue
-101 continue
+    lm1 = l
+    if (nlon == l+l-2) lm1 = l-1
+    if (mode==0) then
+        !     set first column in g
+        m = 0
+        mml1 = m*(2*nlat-m-1)/2
+        do k=1, nt
+            !     n even
+            do np1=1, nlat, 2
+                mn = mml1+np1
+                do i=1, late
+                    g(i, 1, k) = g(i, 1, k)+a(1, np1, k)*pmn(i, mn)
+                end do
+            end do
+            !     n odd
+            nl2 = nlat/2
+            do np1=2, nlat, 2
+                mn = mml1+np1
+                do i=1, nl2
+                    is = nlat-i+1
+                    g(is, 1, k) = g(is, 1, k)+a(1, np1, k)*pmn(i, mn)
+                end do
+            end do
+        end do
 
-!     restore m=0 coefficients from odd/even
-do 112 k=1, nt
-do 112 i=1, nl2
-is = nlat-i+1
-t1 = g(i, 1, k)
-t3 = g(is, 1, k)
-g(i, 1, k) = t1+t3
-g(is, 1, k) = t1-t3
-112 continue
+        !     restore m=0 coefficients from odd/even
+        do k=1, nt
+            do i=1, nl2
+                is = nlat-i+1
+                t1 = g(i, 1, k)
+                t3 = g(is, 1, k)
+                g(i, 1, k) = t1+t3
+                g(is, 1, k) = t1-t3
+            end do
+        end do
 
-!     sweep interior columns of g
-do 104 mp1=2, lm1
-m = mp1-1
-mml1 = m*(2*nlat-m-1)/2
-mp2 = m+2
-do 105 k=1, nt
-!     for n-m even store (g(i, p, k)+g(nlat-i+1, p, k))/2 in g(i, p, k) p=2*m, 2*m+1
-!     for i=1, ..., late
-do 106 np1=mp1, nlat, 2
-mn = mml1+np1
-do 107 i=1, late
-g(i, 2*m, k) = g(i, 2*m, k)+a(mp1, np1, k)*pmn(i, mn)
-g(i, 2*m+1, k) = g(i, 2*m+1, k)+b(mp1, np1, k)*pmn(i, mn)
-107 continue
-106 continue
+        !     sweep interior columns of g
+        do mp1=2, lm1
+            m = mp1-1
+            mml1 = m*(2*nlat-m-1)/2
+            mp2 = m+2
+            do k=1, nt
+                !     for n-m even store (g(i, p, k)+g(nlat-i+1, p, k))/2 in g(i, p, k) p=2*m, 2*m+1
+                !     for i=1, ..., late
+                do np1=mp1, nlat, 2
+                    mn = mml1+np1
+                    do i=1, late
+                        g(i, 2*m, k) = g(i, 2*m, k)+a(mp1, np1, k)*pmn(i, mn)
+                        g(i, 2*m+1, k) = g(i, 2*m+1, k)+b(mp1, np1, k)*pmn(i, mn)
+                    end do
+                end do
 
-!     for n-m odd store g(i, p, k)-g(nlat-i+1, p, k) in g(nlat-i+1, p, k)
-!     for i=1, ..., nlat/2 (p=2*m, p=2*m+1)
-do 108 np1=mp2, nlat, 2
-mn = mml1+np1
-do 109 i=1, nl2
-is = nlat-i+1
-g(is, 2*m, k) = g(is, 2*m, k)+a(mp1, np1, k)*pmn(i, mn)
-g(is, 2*m+1, k) = g(is, 2*m+1, k)+b(mp1, np1, k)*pmn(i, mn)
-109 continue
-108 continue
+                !     for n-m odd store g(i, p, k)-g(nlat-i+1, p, k) in g(nlat-i+1, p, k)
+                !     for i=1, ..., nlat/2 (p=2*m, p=2*m+1)
+                do np1=mp2, nlat, 2
+                    mn = mml1+np1
+                    do i=1, nl2
+                        is = nlat-i+1
+                        g(is, 2*m, k) = g(is, 2*m, k)+a(mp1, np1, k)*pmn(i, mn)
+                        g(is, 2*m+1, k) = g(is, 2*m+1, k)+b(mp1, np1, k)*pmn(i, mn)
+                    end do
+                end do
 
-!     now set fourier coefficients using even-odd reduction above
-do 110 i=1, nl2
-is = nlat-i+1
-t1 = g(i, 2*m, k)
-t2 = g(i, 2*m+1, k)
-t3 = g(is, 2*m, k)
-t4 = g(is, 2*m+1, k)
-g(i, 2*m, k) = t1+t3
-g(i, 2*m+1, k) = t2+t4
-g(is, 2*m, k) = t1-t3
-g(is, 2*m+1, k) = t2-t4
-110 continue
+                !     now set fourier coefficients using even-odd reduction above
+                do i=1, nl2
+                    is = nlat-i+1
+                    t1 = g(i, 2*m, k)
+                    t2 = g(i, 2*m+1, k)
+                    t3 = g(is, 2*m, k)
+                    t4 = g(is, 2*m+1, k)
+                    g(i, 2*m, k) = t1+t3
+                    g(i, 2*m+1, k) = t2+t4
+                    g(is, 2*m, k) = t1-t3
+                    g(is, 2*m+1, k) = t2-t4
+                end do
+            end do
+        end do
 
-105 continue
-104 continue
+        !     set last column (using a only) if necessary
+        if (nlon== l+l-2) then
+            m = l-1
+            mml1 = m*(2*nlat-m-1)/2
+            do k=1, nt
+                !     n-m even
+                do np1=l, nlat, 2
+                    mn = mml1+np1
+                    do i=1, late
+                        g(i, nlon, k) = g(i, nlon, k)+2.0*a(l, np1, k)*pmn(i, mn)
+                    end do
+                end do
 
-!     set last column (using a only) if necessary
-if (nlon== l+l-2) then
-m = l-1
-mml1 = m*(2*nlat-m-1)/2
-do 111 k=1, nt
-!     n-m even
-do 131 np1=l, nlat, 2
-mn = mml1+np1
-do 131 i=1, late
-g(i, nlon, k) = g(i, nlon, k)+2.0*a(l, np1, k)*pmn(i, mn)
+                lp1 = l+1
+                !     n-m odd
+                do np1=lp1, nlat, 2
+                    mn = mml1+np1
+                    do i=1, nl2
+                        is = nlat-i+1
+                        g(is, nlon, k) = g(is, nlon, k)+2.0*a(l, np1, k)*pmn(i, mn)
+                    end do
+                end do
 
-131 continue
-lp1 = l+1
-!     n-m odd
-do 132 np1=lp1, nlat, 2
-mn = mml1+np1
-do 132 i=1, nl2
-is = nlat-i+1
-g(is, nlon, k) = g(is, nlon, k)+2.0*a(l, np1, k)*pmn(i, mn)
-132 continue
-do 133 i=1, nl2
-is = nlat-i+1
-t1 = g(i, nlon, k)
-t3 = g(is, nlon, k)
-g(i, nlon, k)= t1+t3
-g(is, nlon, k)= t1-t3
-133 continue
-111 continue
-end if
+                do i=1, nl2
+                    is = nlat-i+1
+                    t1 = g(i, nlon, k)
+                    t3 = g(is, nlon, k)
+                    g(i, nlon, k)= t1+t3
+                    g(is, nlon, k)= t1-t3
+                end do
+            end do
+        end if
+    else
+        !     half sphere (mode.ne.0)
+        !     set first column in g
+        m = 0
+        mml1 = m*(2*nlat-m-1)/2
+        meo = 1
+        if (mode==1) meo = 2
+        ms = m+meo
+        do k=1, nt
+            do np1=ms, nlat, 2
+                mn = mml1+np1
+                do i=1, late
+                    g(i, 1, k) = g(i, 1, k)+a(1, np1, k)*pmn(i, mn)
+                end do
+            end do
+        end do
 
-else
-!     half sphere (mode.ne.0)
-!     set first column in g
-m = 0
-mml1 = m*(2*nlat-m-1)/2
-meo = 1
-if (mode==1) meo = 2
-ms = m+meo
-do 113 k=1, nt
-do 113 np1=ms, nlat, 2
-mn = mml1+np1
-do 113 i=1, late
-g(i, 1, k) = g(i, 1, k)+a(1, np1, k)*pmn(i, mn)
-113 continue
+        !     sweep interior columns of g
 
-!     sweep interior columns of g
+        do mp1=2, lm1
+            m = mp1-1
+            mml1 = m*(2*nlat-m-1)/2
+            ms = m+meo
+            do k=1, nt
+                do np1=ms, nlat, 2
+                    mn = mml1+np1
+                    do i=1, late
+                        g(i, 2*m, k) = g(i, 2*m, k)+a(mp1, np1, k)*pmn(i, mn)
+                        g(i, 2*m+1, k) = g(i, 2*m+1, k)+b(mp1, np1, k)*pmn(i, mn)
+                    end do
+                end do
+            end do
+        end do
 
-do 114 mp1=2, lm1
-m = mp1-1
-mml1 = m*(2*nlat-m-1)/2
-ms = m+meo
-do 115 k=1, nt
-do 115 np1=ms, nlat, 2
-mn = mml1+np1
-do 115 i=1, late
-g(i, 2*m, k) = g(i, 2*m, k)+a(mp1, np1, k)*pmn(i, mn)
-g(i, 2*m+1, k) = g(i, 2*m+1, k)+b(mp1, np1, k)*pmn(i, mn)
-115 continue
-114 continue
-
-if (nlon==l+l-2) then
-!     set last column
-m = l-1
-mml1 = m*(2*nlat-m-1)/2
-ns = l
-if (mode==1) ns = l+1
-do 116 k=1, nt
-do 116 np1=ns, nlat, 2
-mn = mml1+np1
-do 116 i=1, late
-g(i, nlon, k) = g(i, nlon, k)+2.0*a(l, np1, k)*pmn(i, mn)
-116 continue
-end if
-
-end if
+        if (nlon==l+l-2) then
+            !     set last column
+            m = l-1
+            mml1 = m*(2*nlat-m-1)/2
+            ns = l
+            if (mode==1) ns = l+1
+            do k=1, nt
+                do np1=ns, nlat, 2
+                    mn = mml1+np1
+                    do i=1, late
+                        g(i, nlon, k) = g(i, nlon, k)+2.0*a(l, np1, k)*pmn(i, mn)
+                    end do
+                end do
+            end do
+        end if
+    end if
 
 
-!     do inverse fourier transform
-do 120 k=1, nt
-call hrfftb(lat, nlon, g(1, 1, k), lat, wfft, work)
-120 continue
-!     scale output in gs
-do 122 k=1, nt
-do 122 j=1, nlon
-do 122 i=1, lat
-gs(i, j, k) = 0.5*g(i, j, k)
-122 continue
+    !     do inverse fourier transform
+    do k=1, nt
+        call hrfftb(lat, nlon, g(1, 1, k), lat, wfft, work)
+    end do
+    !     scale output in gs
+    do k=1, nt
+        do j=1, nlon
+            do i=1, lat
+                gs(i, j, k) = 0.5*g(i, j, k)
+            end do
+        end do
+    end do
 
-return
 end subroutine shsgs1
+
+
+
 subroutine shsgsi(nlat, nlon, wshsgs, lshsgs, work, lwork, dwork, ldwork, &
-                  ierror)
-!
-!     this subroutine must be called before calling shags or shsgs with
-!     fixed nlat, nlon. it precomputes the gaussian weights, points
-!     and all necessary legendre polys and stores them in wshsgs.
-!     these quantities must be preserved when calling shsgs
-!     repeatedly with fixed nlat, nlon.
-!
-dimension wshsgs(lshsgs), work(lwork)
-real dwork(ldwork)
-ierror = 1
-if (nlat<3) return
-ierror = 2
-if (nlon<4) return
-!     set triangular truncation limit for spherical harmonic basis
-l = min((nlon+2)/2, nlat)
-!     set equator or nearest point (if excluded) pointer
-late = (nlat+1)/2
-l1 = l
-l2 = late
-!     check permanent work space length
-ierror = 3
-lp=nlat*(3*(l1+l2)-2)+(l1-1)*(l2*(2*nlat-l1)-3*l1)/2+nlon+15
-if(lshsgs<lp) return
-ierror = 4
-!     check temporary work space
-if (lwork<4*nlat*(nlat+2)+2) return
-ierror = 5
-if (ldwork < nlat*(nlat+4)) return
-ierror = 0
-!     set preliminary quantites needed to compute and store legendre polys
-ldw = nlat*(nlat+4)
-call shsgsp(nlat, nlon, wshsgs, lshsgs, dwork, ldwork, ierror)
-if (ierror/=0) return
-!     set legendre poly pointer in wshsgs
-ipmnf = nlat+2*nlat*late+3*(l*(l-1)/2+(nlat-l)*(l-1))+nlon+16
-call shsgss1(nlat, l, late, wshsgs, work, wshsgs(ipmnf))
-return
+    ierror)
+    !
+    !     this subroutine must be called before calling shags or shsgs with
+    !     fixed nlat, nlon. it precomputes the gaussian weights, points
+    !     and all necessary legendre polys and stores them in wshsgs.
+    !     these quantities must be preserved when calling shsgs
+    !     repeatedly with fixed nlat, nlon.
+    !
+    dimension wshsgs(lshsgs), work(lwork)
+    real dwork(ldwork)
+
+    ierror = 1
+    if (nlat<3) return
+    ierror = 2
+    if (nlon<4) return
+    !     set triangular truncation limit for spherical harmonic basis
+    l = min((nlon+2)/2, nlat)
+    !     set equator or nearest point (if excluded) pointer
+    late = (nlat+1)/2
+    l1 = l
+    l2 = late
+    !     check permanent work space length
+    ierror = 3
+    lp=nlat*(3*(l1+l2)-2)+(l1-1)*(l2*(2*nlat-l1)-3*l1)/2+nlon+15
+    if(lshsgs<lp) return
+    ierror = 4
+    !     check temporary work space
+    if (lwork<4*nlat*(nlat+2)+2) return
+    ierror = 5
+    if (ldwork < nlat*(nlat+4)) return
+    ierror = 0
+    !     set preliminary quantites needed to compute and store legendre polys
+    ldw = nlat*(nlat+4)
+    call shsgsp(nlat, nlon, wshsgs, lshsgs, dwork, ldwork, ierror)
+    if (ierror/=0) return
+    !     set legendre poly pointer in wshsgs
+    ipmnf = nlat+2*nlat*late+3*(l*(l-1)/2+(nlat-l)*(l-1))+nlon+16
+
+    call shsgss1(nlat, l, late, wshsgs, work, wshsgs(ipmnf))
+
 end subroutine shsgsi
+
+
+
 subroutine shsgss1(nlat, l, late, w, pmn, pmnf)
-dimension w(1), pmn(nlat, late, 3), pmnf(late, 1)
-!     compute and store legendre polys for i=1, ..., late, m=0, ..., l-1
-!     and n=m, ..., l-1
-      do i=1, nlat
-    do j=1, late
-      do k=1, 3
-        pmn(i, j, k) = 0.0
-      end do
-     end do
-      end do
-do 100 mp1=1, l
-m = mp1-1
-mml1 = m*(2*nlat-m-1)/2
-!     compute pmn for n=m, ..., nlat-1 and i=1, ..., (l+1)/2
-mode = 0
-call legin(mode, l, nlat, m, w, pmn, km)
-!     store above in pmnf
-do 101 np1=mp1, nlat
-mn = mml1+np1
-do 102 i=1, late
-pmnf(i, mn) = pmn(np1, i, km)
-102 continue
-101 continue
-100 continue
-return
+    dimension w(1), pmn(nlat, late, 3), pmnf(late, 1)
+
+    !     compute and store legendre polys for i=1, ..., late, m=0, ..., l-1
+    !     and n=m, ..., l-1
+    do i=1, nlat
+        do j=1, late
+            do k=1, 3
+                pmn(i, j, k) = 0.0
+            end do
+        end do
+    end do
+
+    do mp1=1, l
+        m = mp1-1
+        mml1 = m*(2*nlat-m-1)/2
+        !     compute pmn for n=m, ..., nlat-1 and i=1, ..., (l+1)/2
+        mode = 0
+        call legin(mode, l, nlat, m, w, pmn, km)
+        !     store above in pmnf
+        do np1=mp1, nlat
+            mn = mml1+np1
+            do i=1, late
+                pmnf(i, mn) = pmn(np1, i, km)
+            end do
+        end do
+    end do
 end subroutine shsgss1
+
+
+
 subroutine shsgsp(nlat, nlon, wshsgs, lshsgs, dwork, ldwork, ierror)
-dimension wshsgs(lshsgs)
-real dwork(ldwork)
-ierror = 1
-if (nlat<3) return
-ierror = 2
-if (nlon<4) return
-!     set triangular truncation limit for spherical harmonic basis
-l = min((nlon+2)/2, nlat)
-!     set equator or nearest point (if excluded) pointer
-late = (nlat+mod(nlat, 2))/2
-l1 = l
-l2 = late
-ierror = 3
-!     check permanent work space length
-if (lshsgs < nlat*(2*l2+3*l1-2)+3*l1*(1-l1)/2+nlon+15)return
-ierror = 4
-!     if (lwork.lt.4*nlat*(nlat+2)+2) return
-if (ldwork < nlat*(nlat+4)) return
-ierror = 0
-!     set pointers
-i1 = 1
-i2 = i1+nlat
-i3 = i2+nlat*late
-i4 = i3+nlat*late
-i5 = i4+l*(l-1)/2 +(nlat-l)*(l-1)
-i6 = i5+l*(l-1)/2 +(nlat-l)*(l-1)
-i7 = i6+l*(l-1)/2 +(nlat-l)*(l-1)
-!     set indices in temp work for real gaussian wts and pts
-idth = 1
-!     idwts = idth+2*nlat
-!     iw = idwts+2*nlat
-idwts = idth+nlat
-iw = idwts+nlat
-call shsgsp1(nlat, nlon, l, late, wshsgs(i1), wshsgs(i2), wshsgs(i3), &
-wshsgs(i4), wshsgs(i5), wshsgs(i6), wshsgs(i7), dwork(idth), &
-dwork(idwts), dwork(iw), ierror)
-if (ierror/=0) ierror = 6
-return
+    dimension wshsgs(lshsgs)
+    real dwork(ldwork)
+
+    ierror = 1
+    if (nlat<3) return
+    ierror = 2
+    if (nlon<4) return
+    !     set triangular truncation limit for spherical harmonic basis
+    l = min((nlon+2)/2, nlat)
+    !     set equator or nearest point (if excluded) pointer
+    late = (nlat+mod(nlat, 2))/2
+    l1 = l
+    l2 = late
+    ierror = 3
+    !     check permanent work space length
+    if (lshsgs < nlat*(2*l2+3*l1-2)+3*l1*(1-l1)/2+nlon+15)return
+    ierror = 4
+    !     if (lwork.lt.4*nlat*(nlat+2)+2) return
+    if (ldwork < nlat*(nlat+4)) return
+    ierror = 0
+    !     set pointers
+    i1 = 1
+    i2 = i1+nlat
+    i3 = i2+nlat*late
+    i4 = i3+nlat*late
+    i5 = i4+l*(l-1)/2 +(nlat-l)*(l-1)
+    i6 = i5+l*(l-1)/2 +(nlat-l)*(l-1)
+    i7 = i6+l*(l-1)/2 +(nlat-l)*(l-1)
+    !     set indices in temp work for real gaussian wts and pts
+    idth = 1
+    !     idwts = idth+2*nlat
+    !     iw = idwts+2*nlat
+    idwts = idth+nlat
+    iw = idwts+nlat
+
+    call shsgsp1(nlat, nlon, l, late, wshsgs(i1), wshsgs(i2), wshsgs(i3), &
+        wshsgs(i4), wshsgs(i5), wshsgs(i6), wshsgs(i7), dwork(idth), &
+        dwork(idwts), dwork(iw), ierror)
+    if (ierror/=0) ierror = 6
+
 end subroutine shsgsp
+
+
+
 subroutine shsgsp1(nlat, nlon, l, late, wts, p0n, p1n, abel, bbel, cbel, &
-                   wfft, dtheta, dwts, work, ier)
-dimension wts(nlat), p0n(nlat, late), p1n(nlat, late), abel(1), bbel(1), &
- cbel(1), wfft(1), dtheta(nlat), dwts(nlat)
-real pb, dtheta, dwts, work(*)
-indx(m, n) = (n-1)*(n-2)/2+m-1
-imndx(m, n) = l*(l-1)/2+(n-l-1)*(l-1)+m-1
-call hrffti(nlon, wfft)
-!
-!     compute real gaussian points and weights
-!
-lw = nlat*(nlat+2)
-call gaqd(nlat, dtheta, dwts, work, lw, ier)
-if (ier/=0) return
+    wfft, dtheta, dwts, work, ier)
+    dimension wts(nlat), p0n(nlat, late), p1n(nlat, late), abel(1), bbel(1), &
+        cbel(1), wfft(1), dtheta(nlat), dwts(nlat)
+    real pb, dtheta, dwts, work(*)
 
-!     store gaussian weights single precision to save computation
-!     in inner loops in analysis
-do 100 i=1, nlat
-wts(i) = dwts(i)
-100 continue
+    indx(m, n) = (n-1)*(n-2)/2+m-1
+    imndx(m, n) = l*(l-1)/2+(n-l-1)*(l-1)+m-1
+    call hrffti(nlon, wfft)
+    !
+    !     compute real gaussian points and weights
+    !
+    lw = nlat*(nlat+2)
+    call gaqd(nlat, dtheta, dwts, work, lw, ier)
+    if (ier/=0) return
 
-!     initialize p0n, p1n using real dnlfk, dnlft
-do 101 np1=1, nlat
-do 101 i=1, late
-p0n(np1, i) = 0.0
-p1n(np1, i) = 0.0
-101 continue
-!     compute m=n=0 legendre polynomials for all theta(i)
-np1 = 1
-n = 0
-m = 0
-call dnlfk(m, n, work)
-do 103 i=1, late
-call dnlft(m, n, dtheta(i), work, pb)
-p0n(1, i) = pb
-103 continue
-!     compute p0n, p1n for all theta(i) when n.gt.0
-do 104 np1=2, nlat
-n = np1-1
-m = 0
-call dnlfk(m, n, work)
-do 105 i=1, late
-call dnlft(m, n, dtheta(i), work, pb)
-p0n(np1, i) = pb
-105 continue
-!     compute m=1 legendre polynomials for all n and theta(i)
-m = 1
-call dnlfk(m, n, work)
-do 106 i=1, late
-call dnlft(m, n, dtheta(i), work, pb)
-p1n(np1, i) = pb
-106 continue
-104 continue
-!
-!     compute and store swarztrauber recursion coefficients
-!     for 2.le.m.le.n and 2.le.n.le.nlat in abel, bbel, cbel
-do 107 n=2, nlat
-mlim = min(n, l)
-do 107 m=2, mlim
-imn = indx(m, n)
-if (n>=l) imn = imndx(m, n)
-abel(imn)=sqrt(real((2*n+1)*(m+n-2)*(m+n-3))/ &
-               real(((2*n-3)*(m+n-1)*(m+n))))
-bbel(imn)=sqrt(real((2*n+1)*(n-m-1)*(n-m))/ &
-               real(((2*n-3)*(m+n-1)*(m+n))))
-cbel(imn)=sqrt(real((n-m+1)*(n-m+2))/ &
-               real(((n+m-1)*(n+m))))
-107 continue
-return
+    !     store gaussian weights single precision to save computation
+    !     in inner loops in analysis
+    do i=1, nlat
+        wts(i) = dwts(i)
+    end do
+
+    !     initialize p0n, p1n using real dnlfk, dnlft
+    do np1=1, nlat
+        do i=1, late
+            p0n(np1, i) = 0.0
+            p1n(np1, i) = 0.0
+        end do
+    end do
+    !     compute m=n=0 legendre polynomials for all theta(i)
+    np1 = 1
+    n = 0
+    m = 0
+    call dnlfk(m, n, work)
+    do i=1, late
+        call dnlft(m, n, dtheta(i), work, pb)
+        p0n(1, i) = pb
+    end do
+    !     compute p0n, p1n for all theta(i) when n.gt.0
+    do np1=2, nlat
+        n = np1-1
+        m = 0
+        call dnlfk(m, n, work)
+        do i=1, late
+            call dnlft(m, n, dtheta(i), work, pb)
+            p0n(np1, i) = pb
+        end do
+        !     compute m=1 legendre polynomials for all n and theta(i)
+        m = 1
+        call dnlfk(m, n, work)
+        do i=1, late
+            call dnlft(m, n, dtheta(i), work, pb)
+            p1n(np1, i) = pb
+        end do
+    end do
+
+    !
+    !     compute and store swarztrauber recursion coefficients
+    !     for 2.le.m.le.n and 2.le.n.le.nlat in abel, bbel, cbel
+    do n=2, nlat
+        mlim = min(n, l)
+        do m=2, mlim
+            imn = indx(m, n)
+            if (n>=l) imn = imndx(m, n)
+            abel(imn)=sqrt(real((2*n+1)*(m+n-2)*(m+n-3))/ &
+                real(((2*n-3)*(m+n-1)*(m+n))))
+            bbel(imn)=sqrt(real((2*n+1)*(n-m-1)*(n-m))/ &
+                real(((2*n-3)*(m+n-1)*(m+n))))
+            cbel(imn)=sqrt(real((n-m+1)*(n-m+2))/ &
+                real(((n+m-1)*(n+m))))
+        end do
+    end do
+
 end subroutine shsgsp1
