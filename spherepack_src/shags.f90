@@ -599,6 +599,7 @@ end subroutine shagsi
 
 subroutine shagss1(nlat, l, late, w, pmn, pmnf)
     dimension w(1), pmn(nlat, late, 3), pmnf(late, 1)
+
     !     compute and store legendre polys for i=1, ..., late, m=0, ..., l-1
     do i=1, nlat
         do j=1, late

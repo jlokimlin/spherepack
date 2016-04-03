@@ -316,6 +316,8 @@
 !
 subroutine shaes(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, &
     wshaes, lshaes, work, lwork, ierror)
+    implicit none
+    ! External routines: shaes1
     !----------------------------------------------------------------------
     ! Dictionary: calling arguments
     !----------------------------------------------------------------------
@@ -331,40 +333,107 @@ subroutine shaes(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, &
     integer, intent (in)     :: mdab
     integer, intent (in)     :: ndab
     real,    intent (in out) :: wshaes(1)
+    integer, intent (in)     :: lshaes
     real,    intent (in out) :: work(1)
+    integer, intent (in)     :: lwork
+    integer, intent (out)    :: ierror
+    !----------------------------------------------------------------------
+    ! Dictionary: calling arguments
+    !----------------------------------------------------------------------
+    integer :: ist, mmax, imid, idz, lzimn, ls, nln
     !----------------------------------------------------------------------
 
-    ierror = 1
-    if(nlat<3) return
-    ierror = 2
-    if(nlon<4) return
-    ierror = 3
-    if(isym<0 .or. isym>2) return
-    ierror = 4
-    if(nt < 0) return
-    ierror = 5
-    if((isym==0 .and. idg<nlat) .or. &
-        (isym/=0 .and. idg<(nlat+1)/2)) return
-    ierror = 6
-    if(jdg < nlon) return
-    ierror = 7
+    !
+    !==> Set constants
     mmax = min(nlat, nlon/2+1)
-    if(mdab < mmax) return
-    ierror = 8
-    if(ndab < nlat) return
-    ierror = 9
     imid = (nlat+1)/2
     idz = (mmax*(nlat+nlat-mmax+1))/2
     lzimn = idz*imid
-    if(lshaes < lzimn+nlon+15) return
-    ierror = 10
     ls = nlat
-    if(isym > 0) ls = imid
+
+    if (isym > 0) then
+        ls = imid
+    end if
+
     nln = nt*ls*nlon
-    if(lwork < nln+ls*nlon) return
+
+    !
+    !==> Check validity of input arguments
+    !
+
+    ! Initialize error flag
     ierror = 0
-    ist = 0
-    if(isym == 0) ist = imid
+
+    ! Check case 1
+    if (nlat < 3) then
+        ierror = 1
+        return
+    end if
+
+    ! Check case 2
+    if (nlon < 4) then
+        ierror = 2
+        return
+    end if
+
+    ! Check case 3
+    if (isym < 0 .or. isym > 2) then
+        ierror = 3
+        return
+    end if
+
+    ! Check case 4
+    if (nt < 0) then
+        ierror = 4
+        return
+    end if
+
+    ! Check case 5
+    if ((isym == 0 .and. idg < nlat) .or. &
+        (isym /= 0 .and. idg < (nlat+1)/2)) then
+        ierror = 5
+        return
+    end if
+
+    ! Check case 6
+    if (jdg < nlon) then
+        ierror = 6
+        return
+    end if
+
+
+    ! Check case 7
+    if (mdab < mmax) then
+        ierror = 7
+        return
+    end if
+
+    ! Check case 8
+    if (ndab < nlat) then
+        ierror = 8
+        return
+    end if
+
+    ! Check case 9
+    if (lshaes < lzimn+nlon+15) then
+        ierror = 9
+        return
+    end if
+
+    ! Check case 10
+    if (lwork < nln+ls*nlon) then
+        ierror = 10
+        return
+    end if
+
+    ! Set calling argument for analsyis
+    select case (isym)
+        case (0)
+            ist = imid
+        case default
+            ist = 0
+    end select
+
 
     call shaes1(nlat, isym, nt, g, idg, jdg, a, b, mdab, ndab, wshaes, idz, &
         ls, nlon, work, work(ist+1), work(nln+1), wshaes(lzimn+1))
@@ -373,25 +442,64 @@ end subroutine shaes
 
 
 
-subroutine shaes1(nlat, isym, nt, g, idgs, jdgs, a, b, mdab, ndab, z, idz, &
-    idg, jdg, ge, go, work, whrfft)
-    dimension g(idgs, jdgs, 1), a(mdab, ndab, 1), b(mdab, ndab, 1), z(idz, 1), &
-        ge(idg, jdg, 1), go(idg, jdg, 1), work(1), whrfft(1)
+subroutine shaes1(nlat, isym, nt, g, idgs, jdgs, a, b, mdab, ndab, &
+    z, idz, idg, jdg, ge, go, work, whrfft)
+    implicit none
+    ! External routines: hrfftf
+    !----------------------------------------------------------------------
+    ! Dictionary: calling arguments
+    !----------------------------------------------------------------------
+    integer, intent (in)     :: nlat
+    integer, intent (in)     :: isym
+    integer, intent (in)     :: nt
+    real,    intent (in)     :: g(idgs, jdgs, 1)
+    integer, intent (in)     :: idgs
+    integer, intent (in)     :: jdgs
+    real,    intent (in out) :: a(mdab, ndab, 1)
+    real,    intent (in out) :: b(mdab, ndab, 1)
+    integer, intent (in)     :: mdab
+    integer, intent (in)     :: ndab
+    real,    intent (in out) :: z(idz, 1)
+    integer, intent (in)     :: idz
+    integer, intent (in)     :: idg
+    integer, intent (in)     :: jdg
+    real,    intent (in out) :: ge(idg, jdg, 1)
+    real,    intent (in out) :: go(idg, jdg, 1)
+    real,    intent (in out) :: work(1)
+    real,    intent (in out) :: whrfft(1)
+    !----------------------------------------------------------------------
+    ! Dictionary: local variables
+    !----------------------------------------------------------------------
+    integer :: i, j, k, m, mb, ls, mp1, np1, mp2, mdo, ndo
+    real    :: fsn, tsn
+    integer :: imm1, nlp1, imid, modl, mmax, nlon
+    !----------------------------------------------------------------------
 
 
     ls = idg
     nlon = jdg
     mmax = min(nlat, nlon/2+1)
     mdo = mmax
-    if(mdo+mdo-1 > nlon) mdo = mmax-1
+
+    if (mdo+mdo-1 > nlon) then
+        mdo = mmax-1
+    end if
+
     nlp1 = nlat+1
-    tsn = 2./nlon
-    fsn = 4./nlon
+    tsn = 2.0/nlon
+    fsn = 4.0/nlon
     imid = (nlat+1)/2
     modl = mod(nlat, 2)
     imm1 = imid
-    if(modl /= 0) imm1 = imid-1
-    if(isym /= 0) go to 15
+
+    if (modl /= 0) then
+        imm1 = imid-1
+    end if
+
+    if (isym /= 0) then
+        go to 15
+    end if
+
     do k=1, nt
         do i=1, imm1
             do j=1, nlon
@@ -409,29 +517,41 @@ subroutine shaes1(nlat, isym, nt, g, idgs, jdgs, a, b, mdab, ndab, z, idz, &
         end do
     end do
 
-    if(isym == 1) go to 27
-30  if(modl == 0) go to 27
+    if (isym == 1) then
+        go to 27
+    end if
+
+30  if (modl == 0) then
+        go to 27
+    end if
+
     do k=1, nt
         do j=1, nlon
             ge(imid, j, k) = tsn*g(imid, j, k)
         end do
     end do
+
     27 do k=1, nt
         call hrfftf(ls, nlon, ge(1, 1, k), ls, whrfft, work)
-        if(mod(nlon, 2) /= 0) cycle
+        if (mod(nlon, 2) /= 0) cycle
         do i=1, ls
             ge(i, nlon, k) = 0.5*ge(i, nlon, k)
         end do
     end do
+
     do k=1, nt
         do mp1=1, mmax
             do np1=mp1, nlat
-                a(mp1, np1, k) = 0.
-                b(mp1, np1, k) = 0.
+                a(mp1, np1, k) = 0.0
+                b(mp1, np1, k) = 0.0
             end do
         end do
     end do
-    if(isym == 1) go to 145
+
+    if (isym == 1) then
+        go to 145
+    end if
+
     do k=1, nt
         do i=1, imid
             do np1=1, nlat, 2
@@ -439,8 +559,13 @@ subroutine shaes1(nlat, isym, nt, g, idgs, jdgs, a, b, mdab, ndab, z, idz, &
             end do
         end do
     end do
+
     ndo = nlat
-    if(mod(nlat, 2) == 0) ndo = nlat-1
+
+    if (mod(nlat, 2) == 0) then
+        ndo = nlat-1
+    end if
+
     do mp1=2, mdo
         m = mp1-1
         mb = m*(nlat-1)-(m*(m-1))/2
@@ -453,8 +578,13 @@ subroutine shaes1(nlat, isym, nt, g, idgs, jdgs, a, b, mdab, ndab, z, idz, &
             end do
         end do
     end do
-    if(mdo == mmax .or. mmax > ndo) go to 135
+
+    if (mdo == mmax .or. mmax > ndo) then
+        go to 135
+    end if
+
     mb = mdo*(nlat-1)-(mdo*(mdo-1))/2
+
     do k=1, nt
         do i=1, imid
             do np1=mmax, ndo, 2
@@ -462,7 +592,11 @@ subroutine shaes1(nlat, isym, nt, g, idgs, jdgs, a, b, mdab, ndab, z, idz, &
             end do
         end do
     end do
-135 if(isym == 2) return
+
+135 if (isym == 2) then
+        return
+    end if
+
     145 do k=1, nt
         do i=1, imm1
             do np1=2, nlat, 2
@@ -470,8 +604,13 @@ subroutine shaes1(nlat, isym, nt, g, idgs, jdgs, a, b, mdab, ndab, z, idz, &
             end do
         end do
     end do
+
     ndo = nlat
-    if(mod(nlat, 2) /= 0) ndo = nlat-1
+
+    if (mod(nlat, 2) /= 0) then
+        ndo = nlat-1
+    end if
+
     do mp1=2, mdo
         m = mp1-1
         mp2 = mp1+1
@@ -485,9 +624,15 @@ subroutine shaes1(nlat, isym, nt, g, idgs, jdgs, a, b, mdab, ndab, z, idz, &
             end do
         end do
     end do
+
     mp2 = mmax+1
-    if(mdo == mmax .or. mp2 > ndo) return
+
+    if (mdo == mmax .or. mp2 > ndo) then
+        return
+    end if
+
     mb = mdo*(nlat-1)-(mdo*(mdo-1))/2
+
     do k=1, nt
         do i=1, imm1
             do np1=mp2, ndo, 2
@@ -503,6 +648,7 @@ end subroutine shaes1
 subroutine shaesi(nlat, nlon, wshaes, lshaes, work, lwork, dwork, &
     ldwork, ierror)
     implicit none
+    ! External routines: sea1, hrffti
     !----------------------------------------------------------------------
     ! Dictionary: calling arguments
     !----------------------------------------------------------------------
@@ -530,14 +676,14 @@ subroutine shaesi(nlat, nlon, wshaes, lshaes, work, lwork, dwork, &
     ! Initialize error flag
     ierror = 0
 
-    ! Check error case 1
-    if(nlat<3) then
+    ! Check case 1
+    if (nlat<3) then
         ierror = 1
         return
     end if
 
-    ! Check error case 2
-    if(nlon<4) then
+    ! Check case 2
+    if (nlon<4) then
         ierror = 2
         return
     end if
@@ -548,21 +694,21 @@ subroutine shaesi(nlat, nlon, wshaes, lshaes, work, lwork, dwork, &
         )
         associate( lzimn => (imid*mmax*(nlat+nlat-mmax+1))/2 )
 
-            ! Check error case 3
-            if(lshaes < lzimn+nlon+15) then
+            ! Check case 3
+            if (lshaes < lzimn+nlon+15) then
                 ierror = 3
                 return
             end if
 
-            ! Check error case 4
+            ! Check case 4
             associate( labc => 3*((mmax-2)*(nlat+nlat-mmax-1))/2 )
-                if(lwork < 5*nlat*imid + labc) then
+                if (lwork < 5*nlat*imid + labc) then
                     ierror = 4
                     return
                 end if
             end associate
 
-            ! Check error case 5
+            ! Check case 5
             if (ldwork < nlat+1) then
                 ierror = 5
                 return
