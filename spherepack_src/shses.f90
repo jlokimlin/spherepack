@@ -291,166 +291,216 @@
 !            = 4  error in the specification of lwork
 !            = 5  error in the specification of ldwork
 !
-! ****************************************************************
 subroutine shses(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, &
-                    wshses, lshses, work, lwork, ierror)
-dimension g(idg, jdg, 1), a(mdab, ndab, 1), b(mdab, ndab, 1), wshses(1), &
-          work(1)
-ierror = 1
-if(nlat<3) return
-ierror = 2
-if(nlon<4) return
-ierror = 3
-if(isym<0 .or. isym>2) return
-ierror = 4
-if(nt < 0) return
-ierror = 5
-if((isym==0 .and. idg<nlat) .or. &
-   (isym/=0 .and. idg<(nlat+1)/2)) return
-ierror = 6
-if(jdg < nlon) return
-ierror = 7
-mmax = min(nlat, nlon/2+1)
-if(mdab < mmax) return
-ierror = 8
-if(ndab < nlat) return
-ierror = 9
-imid = (nlat+1)/2
-lpimn = (imid*mmax*(nlat+nlat-mmax+1))/2
-if(lshses < lpimn+nlon+15) return
-ierror = 10
-ls = nlat
-if(isym > 0) ls = imid
-nln = nt*ls*nlon
-if(lwork< nln+ls*nlon) return
-ierror = 0
-ist = 0
-if(isym == 0) ist = imid
-call shses1(nlat, isym, nt, g, idg, jdg, a, b, mdab, ndab, wshses, imid, &
-       ls, nlon, work, work(ist+1), work(nln+1), wshses(lpimn+1))
-return
+    wshses, lshses, work, lwork, ierror)
+    dimension g(idg, jdg, 1), a(mdab, ndab, 1), b(mdab, ndab, 1), wshses(1), &
+        work(1)
+    ierror = 1
+    if (nlat<3) return
+    ierror = 2
+    if (nlon<4) return
+    ierror = 3
+    if (isym<0 .or. isym>2) return
+    ierror = 4
+    if (nt < 0) return
+    ierror = 5
+    if ((isym==0 .and. idg<nlat) .or. &
+        (isym/=0 .and. idg<(nlat+1)/2)) return
+    ierror = 6
+    if (jdg < nlon) return
+    ierror = 7
+    mmax = min(nlat, nlon/2+1)
+    if (mdab < mmax) return
+    ierror = 8
+    if (ndab < nlat) return
+    ierror = 9
+    imid = (nlat+1)/2
+    lpimn = (imid*mmax*(nlat+nlat-mmax+1))/2
+    if (lshses < lpimn+nlon+15) return
+    ierror = 10
+    ls = nlat
+    if (isym > 0) ls = imid
+    nln = nt*ls*nlon
+    if (lwork< nln+ls*nlon) return
+    ierror = 0
+    ist = 0
+    if (isym == 0) ist = imid
+
+    call shses1(nlat, isym, nt, g, idg, jdg, a, b, mdab, ndab, wshses, imid, &
+        ls, nlon, work, work(ist+1), work(nln+1), wshses(lpimn+1))
+
 end subroutine shses
+
+
 subroutine shses1(nlat, isym, nt, g, idgs, jdgs, a, b, mdab, ndab, p, imid, &
-                  idg, jdg, ge, go, work, whrfft)
-dimension g(idgs, jdgs, 1), a(mdab, ndab, 1), b(mdab, ndab, 1), p(imid, 1), &
-          ge(idg, jdg, 1), go(idg, jdg, 1), work(1), whrfft(1)
-ls = idg
-nlon = jdg
-mmax = min(nlat, nlon/2+1)
-mdo = mmax
-if(mdo+mdo-1 > nlon) mdo = mmax-1
-nlp1 = nlat+1
-modl = mod(nlat, 2)
-imm1 = imid
-if(modl /= 0) imm1 = imid-1
-do 80 k=1, nt
-do 80 j=1, nlon
-do 80 i=1, ls
-ge(i, j, k) = 0.
-8000 continue
-800 continue
-80 continue
-if(isym == 1) go to 125
-do 100 k=1, nt
-do 100 np1=1, nlat, 2
-do 100 i=1, imid
-ge(i, 1, k)=ge(i, 1, k)+a(1, np1, k)*p(i, np1)
-100 continue
-ndo = nlat
-if(mod(nlat, 2) == 0) ndo = nlat-1
-do 110 mp1=2, mdo
-m = mp1-1
-mb = m*(nlat-1)-(m*(m-1))/2
-do 110 np1=mp1, ndo, 2
-mn = mb+np1
-do 110 k=1, nt
-do 110 i=1, imid
-ge(i, 2*mp1-2, k) = ge(i, 2*mp1-2, k)+a(mp1, np1, k)*p(i, mn)
-ge(i, 2*mp1-1, k) = ge(i, 2*mp1-1, k)+b(mp1, np1, k)*p(i, mn)
-110 continue
-if(mdo == mmax .or. mmax > ndo) go to 122
-mb = mdo*(nlat-1)-(mdo*(mdo-1))/2
-do 120 np1=mmax, ndo, 2
-mn = mb+np1
-do 120 k=1, nt
-do 120 i=1, imid
-ge(i, 2*mmax-2, k) = ge(i, 2*mmax-2, k)+a(mmax, np1, k)*p(i, mn)
-120 continue
-122 if(isym == 2) go to 155
-125 do 140 k=1, nt
-do 140 np1=2, nlat, 2
-do 140 i=1, imm1
-go(i, 1, k)=go(i, 1, k)+a(1, np1, k)*p(i, np1)
-140 continue
-ndo = nlat
-if(mod(nlat, 2) /= 0) ndo = nlat-1
-do 150 mp1=2, mdo
-mp2 = mp1+1
-m = mp1-1
-mb = m*(nlat-1)-(m*(m-1))/2
-do 150 np1=mp2, ndo, 2
-mn = mb+np1
-do 150 k=1, nt
-do 150 i=1, imm1
-go(i, 2*mp1-2, k) = go(i, 2*mp1-2, k)+a(mp1, np1, k)*p(i, mn)
-go(i, 2*mp1-1, k) = go(i, 2*mp1-1, k)+b(mp1, np1, k)*p(i, mn)
-150 continue
-mp2 = mmax+1
-if(mdo == mmax .or. mp2 > ndo) go to 155
-mb = mdo*(nlat-1)-(mdo*(mdo-1))/2
-do 152 np1=mp2, ndo, 2
-mn = mb+np1
-do 152 k=1, nt
-do 152 i=1, imm1
-go(i, 2*mmax-2, k) = go(i, 2*mmax-2, k)+a(mmax, np1, k)*p(i, mn)
-152 continue
-155 do 160 k=1, nt
-if(mod(nlon, 2) /= 0) go to 157
-do 156 i=1, ls
-ge(i, nlon, k) = 2.*ge(i, nlon, k)
-156 continue
-157 call hrfftb(ls, nlon, ge(1, 1, k), ls, whrfft, work)
-160 continue
-if(isym /= 0) go to 180
-do 170 k=1, nt
-do 170 j=1, nlon
-do 175 i=1, imm1
-g(i, j, k) = .5*(ge(i, j, k)+go(i, j, k))
-g(nlp1-i, j, k) = .5*(ge(i, j, k)-go(i, j, k))
-175 continue
-if(modl == 0) go to 170
-g(imid, j, k) = .5*ge(imid, j, k)
-170 continue
-return
-180 do 185 k=1, nt
-do 185 i=1, imid
-do 185 j=1, nlon
-g(i, j, k) = .5*ge(i, j, k)
-185 continue
-return
+    idg, jdg, ge, go, work, whrfft)
+    dimension g(idgs, jdgs, 1), a(mdab, ndab, 1), b(mdab, ndab, 1), p(imid, 1), &
+        ge(idg, jdg, 1), go(idg, jdg, 1), work(1), whrfft(1)
+
+    ls = idg
+    nlon = jdg
+    mmax = min(nlat, nlon/2+1)
+    mdo = mmax
+
+    if (mdo+mdo-1 > nlon) mdo = mmax-1
+
+    nlp1 = nlat+1
+    modl = mod(nlat, 2)
+    imm1 = imid
+
+    if (modl /= 0) imm1 = imid-1
+
+    do k=1, nt
+        do j=1, nlon
+            do i=1, ls
+                ge(i, j, k) = 0.0
+            end do
+        end do
+    end do
+
+    if (isym == 1) go to 125
+
+    do k=1, nt
+        do np1=1, nlat, 2
+            do i=1, imid
+                ge(i, 1, k)=ge(i, 1, k)+a(1, np1, k)*p(i, np1)
+            end do
+        end do
+    end do
+
+    ndo = nlat
+    if (mod(nlat, 2) == 0) ndo = nlat-1
+
+    do mp1=2, mdo
+        m = mp1-1
+        mb = m*(nlat-1)-(m*(m-1))/2
+        do np1=mp1, ndo, 2
+            mn = mb+np1
+            do k=1, nt
+                do i=1, imid
+                    ge(i, 2*mp1-2, k) = ge(i, 2*mp1-2, k)+a(mp1, np1, k)*p(i, mn)
+                    ge(i, 2*mp1-1, k) = ge(i, 2*mp1-1, k)+b(mp1, np1, k)*p(i, mn)
+                end do
+            end do
+        end do
+    end do
+
+    if (mdo == mmax .or. mmax > ndo) go to 122
+
+    mb = mdo*(nlat-1)-(mdo*(mdo-1))/2
+
+    do np1=mmax, ndo, 2
+        mn = mb+np1
+        do k=1, nt
+            do i=1, imid
+                ge(i, 2*mmax-2, k) = ge(i, 2*mmax-2, k)+a(mmax, np1, k)*p(i, mn)
+            end do
+        end do
+    end do
+
+122 if (isym == 2) go to 155
+
+    125 do k=1, nt
+        do np1=2, nlat, 2
+            do i=1, imm1
+                go(i, 1, k)=go(i, 1, k)+a(1, np1, k)*p(i, np1)
+            end do
+        end do
+    end do
+
+    ndo = nlat
+
+    if (mod(nlat, 2) /= 0) ndo = nlat-1
+
+    do mp1=2, mdo
+        mp2 = mp1+1
+        m = mp1-1
+        mb = m*(nlat-1)-(m*(m-1))/2
+        do np1=mp2, ndo, 2
+            mn = mb+np1
+            do k=1, nt
+                do i=1, imm1
+                    go(i, 2*mp1-2, k) = go(i, 2*mp1-2, k)+a(mp1, np1, k)*p(i, mn)
+                    go(i, 2*mp1-1, k) = go(i, 2*mp1-1, k)+b(mp1, np1, k)*p(i, mn)
+                end do
+            end do
+        end do
+    end do
+
+    mp2 = mmax+1
+
+    if (mdo == mmax .or. mp2 > ndo) go to 155
+
+    mb = mdo*(nlat-1)-(mdo*(mdo-1))/2
+
+    do np1=mp2, ndo, 2
+        mn = mb+np1
+        do k=1, nt
+            do i=1, imm1
+                go(i, 2*mmax-2, k) = go(i, 2*mmax-2, k)+a(mmax, np1, k)*p(i, mn)
+            end do
+        end do
+    end do
+
+    155 do k=1, nt
+        if (mod(nlon, 2) /= 0) go to 157
+        do i=1, ls
+            ge(i, nlon, k) = 2.0 * ge(i, nlon, k)
+        end do
+157     call hrfftb(ls, nlon, ge(1, 1, k), ls, whrfft, work)
+    end do
+
+    if (isym /= 0) go to 180
+
+    do k=1, nt
+        do j=1, nlon
+            do i=1, imm1
+                g(i, j, k) = 0.5*(ge(i, j, k)+go(i, j, k))
+                g(nlp1-i, j, k) = 0.5*(ge(i, j, k)-go(i, j, k))
+            end do
+
+            if (modl == 0) cycle!go to 170
+
+            g(imid, j, k) = .5*ge(imid, j, k)
+
+        end do
+    end do
+    return
+    180 do k=1, nt
+        do i=1, imid
+            do j=1, nlon
+                g(i, j, k) = 0.5*ge(i, j, k)
+            end do
+        end do
+    end do
+
 end subroutine shses1
 
+
+
 subroutine shsesi(nlat, nlon, wshses, lshses, work, lwork, dwork, &
-                  ldwork, ierror)
-dimension wshses(*), work(*)
-real dwork(*)
-ierror = 1
-if(nlat<3) return
-ierror = 2
-if(nlon<4) return
-ierror = 3
-mmax = min(nlat, nlon/2+1)
-imid = (nlat+1)/2
-lpimn = (imid*mmax*(nlat+nlat-mmax+1))/2
-if(lshses < lpimn+nlon+15) return
-ierror = 4
-labc = 3*((mmax-2)*(nlat+nlat-mmax-1))/2
-if(lwork < 5*nlat*imid + labc) return
-ierror = 5
-if (ldwork < nlat+1) return
-ierror = 0
-iw1 = 3*nlat*imid+1
-call SES1(nlat, nlon, imid, wshses, work, WORK(iw1), dwork)
-call hrffti(nlon, wshses(lpimn+1))
-return
+    ldwork, ierror)
+    dimension wshses(*), work(*)
+    real dwork(*)
+
+    ierror = 1
+    if (nlat<3) return
+    ierror = 2
+    if (nlon<4) return
+    ierror = 3
+    mmax = min(nlat, nlon/2+1)
+    imid = (nlat+1)/2
+    lpimn = (imid*mmax*(nlat+nlat-mmax+1))/2
+    if (lshses < lpimn+nlon+15) return
+    ierror = 4
+    labc = 3*((mmax-2)*(nlat+nlat-mmax-1))/2
+    if (lwork < 5*nlat*imid + labc) return
+    ierror = 5
+    if (ldwork < nlat+1) return
+    ierror = 0
+    iw1 = 3*nlat*imid+1
+
+    call ses1(nlat, nlon, imid, wshses, work, work(iw1), dwork)
+    call hrffti(nlon, wshses(lpimn+1))
+
 end subroutine shsesi

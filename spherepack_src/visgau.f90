@@ -1041,17 +1041,21 @@ real    r
 !     returns i1 if i3.ge.0 and returns i2 if i3.lt.0 .
 !
 icvmg = i1
-if (r < 0.) icvmg = i2
-return
+if (r < 0.0) icvmg = i2
+
 end function icvmg
+
+
 subroutine projct(m, n, xeye, yeye, zeye, x, y, z, px, py)
 !     ****     projects point (x, y, z) onto plane thru origin and perp
 !     ****     to line joining origin and eye
 dimension x(n, m), y(n, m), z(n, m), px(n, m), py(n, m)
 call prjct(0, xeye, yeye, zeye, rdum1, rdum2, rdum3, rdum4, rdum5)
-do 100 i=1, m
-do 100 j=1, n
+
+do i=1, m
+do j=1, n
 call prjct(1, xeye, yeye, zeye, x(j, i), y(j, i), z(j, i), px(j, i), py(j, i))
-100 continue
-return
+end do
+end do
+
 end subroutine projct

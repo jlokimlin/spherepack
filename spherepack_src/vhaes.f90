@@ -366,11 +366,14 @@ iw3 = iw2+ist
 iw4 = iw2+lnl
 jw1 = lzimn+1
 jw2 = jw1+lzimn
+
 call vhaes1(nlat, nlon, ityp, nt, imid, idvw, jdvw, v, w, mdab, ndab, &
      br, bi, cr, ci, idv, work, work(iw1), work(iw2), work(iw3), &
      work(iw4), idz, wvhaes, wvhaes(jw1), wvhaes(jw2))
-return
+
 end subroutine vhaes
+
+
 
 subroutine vhaes1(nlat, nlon, ityp, nt, imid, idvw, jdvw, v, w, mdab, &
    ndab, br, bi, cr, ci, idv, ve, vo, we, wo, work, idz, zv, zw, wrfft)
@@ -863,13 +866,16 @@ cr(mp1, np1, k) = cr(mp1, np1, k)-zv(np1+mb, imid)*we(imid, 2*mp1-2, k)
 ci(mp1, np1, k) = ci(mp1, np1, k)-zv(np1+mb, imid)*we(imid, 2*mp1-1, k)
 822 continue
 820 continue
-return
+
 end subroutine vhaes1
+
+
+
+subroutine vhaesi(nlat, nlon, wvhaes, lvhaes, work, lwork, dwork, &
+                  ldwork, ierror)
 !
 !     dwork must be of length at least 2*(nlat+1)
 !
-subroutine vhaesi(nlat, nlon, wvhaes, lvhaes, work, lwork, dwork, &
-                  ldwork, ierror)
 dimension wvhaes(lvhaes), work(lwork)
 real dwork(ldwork)
 ierror = 1
@@ -889,32 +895,44 @@ if (ldwork < 2*(nlat+1)) return
 ierror = 0
 iw1 = 3*nlat*imid+1
 idz = (mmax*(nlat+nlat-mmax+1))/2
-call VEA1(nlat, nlon, imid, wvhaes, WVHAES(lzimn+1), idz, &
-          work, WORK(iw1), dwork)
+call vea1(nlat, nlon, imid, wvhaes, wvhaes(lzimn+1), idz, &
+          work, work(iw1), dwork)
 call hrffti(nlon, wvhaes(2*lzimn+1))
-return
+
 end subroutine vhaesi
+
+
+
 subroutine vea1(nlat, nlon, imid, zv, zw, idz, zin, wzvin, dwork)
 dimension zv(idz, 1), zw(idz, 1), zin(imid, nlat, 3), wzvin(1)
 real dwork(*)
+
 mmax = min(nlat, (nlon+1)/2)
+
 call zvinit (nlat, nlon, wzvin, dwork)
-do 33 mp1=1, mmax
+
+do mp1=1, mmax
 m = mp1-1
-call zvin (0, nlat, nlon, m, zin, i3, wzvin)
-do 33 np1=mp1, nlat
+call zvin(0, nlat, nlon, m, zin, i3, wzvin)
+do np1=mp1, nlat
 mn = m*(nlat-1)-(m*(m-1))/2+np1
-do 33 i=1, imid
+do i=1, imid
 zv(mn, i) = zin(i, np1, i3)
-33 continue
+end do
+end do
+end do
+
 call zwinit (nlat, nlon, wzvin, dwork)
-do 34 mp1=1, mmax
+
+do mp1=1, mmax
 m = mp1-1
-call zwin (0, nlat, nlon, m, zin, i3, wzvin)
-do 34 np1=mp1, nlat
+call zwin(0, nlat, nlon, m, zin, i3, wzvin)
+do np1=mp1, nlat
 mn = m*(nlat-1)-(m*(m-1))/2+np1
-do 34 i=1, imid
+do i=1, imid
 zw(mn, i) = zin(i, np1, i3)
-34 continue
-return
+end do
+end do
+end do
+
 end subroutine vea1
