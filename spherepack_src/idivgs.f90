@@ -248,124 +248,128 @@
 !                                                                              
 !   
 subroutine idivgs(nlat, nlon, isym, nt, v, w, idvw, jdvw, a, b, mdab, ndab, &
-                  wvhsgs, lvhsgs, work, lwork, pertrb, ierror)
-dimension v(idvw, jdvw, nt), w(idvw, jdvw, nt), pertrb(nt)
-dimension a(mdab, ndab, nt), b(mdab, ndab, nt)
-dimension wvhsgs(lvhsgs), work(lwork)
-!
-!     check input parameters
-!
-ierror = 1
-if(nlat < 3) return
-ierror = 2
-if(nlon < 4) return
-ierror = 3
-if(isym<0 .or. isym>2) return
-ierror = 4
-if(nt < 0) return
-ierror = 5
-imid = (nlat+1)/2
-if((isym==0 .and. idvw<nlat) .or. &
-   (isym/=0 .and. idvw<imid)) return
-ierror = 6
-if(jdvw < nlon) return
-ierror = 7
-mmax = min(nlat, (nlon+1)/2)
-if(mdab < min(nlat, (nlon+2)/2)) return
-ierror = 8
-if(ndab < nlat) return
-ierror = 9
-idz = (mmax*(nlat+nlat-mmax+1))/2
-lzimn = idz*imid
-l1 = min(nlat, (nlon+1)/2)
-l2 = (nlat+1)/2
-lwmin = l1*l2*(nlat+nlat-l1+1)+nlon+15
-if(lvhsgs < lwmin) return
-ierror = 10
-!
-!     verify unsaved work space length
-!
-mn = mmax*nlat*nt
-if(isym/=0  .and. lwork < &
-nlat*(2*nt*nlon+max(6*imid, nlon))+2*mn+nlat) return
-if(isym==0  .and. lwork < &
-imid*(2*nt*nlon+max(6*nlat, nlon))+2*mn+nlat) return
-ierror = 0
-!
-!     set work space pointers
-!
-ibr = 1
-ibi = ibr + mn
-is = ibi + mn
-iwk = is + nlat
-liwk = lwork-2*mn-nlat
-call idvgs1(nlat, nlon, isym, nt, v, w, idvw, jdvw, work(ibr), work(ibi), &
-            mmax, work(is), mdab, ndab, a, b, wvhsgs, lvhsgs, work(iwk), &
-            liwk, pertrb, ierror)
-return
+    wvhsgs, lvhsgs, work, lwork, pertrb, ierror)
+    dimension v(idvw, jdvw, nt), w(idvw, jdvw, nt), pertrb(nt)
+    dimension a(mdab, ndab, nt), b(mdab, ndab, nt)
+    dimension wvhsgs(lvhsgs), work(lwork)
+    !
+    !     check input parameters
+    !
+    ierror = 1
+    if(nlat < 3) return
+    ierror = 2
+    if(nlon < 4) return
+    ierror = 3
+    if(isym<0 .or. isym>2) return
+    ierror = 4
+    if(nt < 0) return
+    ierror = 5
+    imid = (nlat+1)/2
+    if((isym==0 .and. idvw<nlat) .or. &
+        (isym/=0 .and. idvw<imid)) return
+    ierror = 6
+    if(jdvw < nlon) return
+    ierror = 7
+    mmax = min(nlat, (nlon+1)/2)
+    if(mdab < min(nlat, (nlon+2)/2)) return
+    ierror = 8
+    if(ndab < nlat) return
+    ierror = 9
+    idz = (mmax*(nlat+nlat-mmax+1))/2
+    lzimn = idz*imid
+    l1 = min(nlat, (nlon+1)/2)
+    l2 = (nlat+1)/2
+    lwmin = l1*l2*(nlat+nlat-l1+1)+nlon+15
+    if(lvhsgs < lwmin) return
+    ierror = 10
+    !
+    !     verify unsaved work space length
+    !
+    mn = mmax*nlat*nt
+    if(isym/=0  .and. lwork < &
+        nlat*(2*nt*nlon+max(6*imid, nlon))+2*mn+nlat) return
+    if(isym==0  .and. lwork < &
+        imid*(2*nt*nlon+max(6*nlat, nlon))+2*mn+nlat) return
+    ierror = 0
+    !
+    !     set work space pointers
+    !
+    ibr = 1
+    ibi = ibr + mn
+    is = ibi + mn
+    iwk = is + nlat
+    liwk = lwork-2*mn-nlat
+    call idvgs1(nlat, nlon, isym, nt, v, w, idvw, jdvw, work(ibr), work(ibi), &
+        mmax, work(is), mdab, ndab, a, b, wvhsgs, lvhsgs, work(iwk), &
+        liwk, pertrb, ierror)
+
 end subroutine idivgs
 
+
+
 subroutine idvgs1(nlat, nlon, isym, nt, v, w, idvw, jdvw, br, bi, mmax, &
-sqnn, mdab, ndab, a, b, wsav, lwsav, wk, lwk, pertrb, ierror)
-dimension v(idvw, jdvw, nt), w(idvw, jdvw, nt), pertrb(nt)
-dimension br(mmax, nlat, nt), bi(mmax, nlat, nt), sqnn(nlat)
-dimension a(mdab, ndab, nt), b(mdab, ndab, nt)
-dimension wsav(lwsav), wk(lwk)
-!
-!     preset coefficient multiplyers in vector
-!
-do 1 n=2, nlat
-fn = real(n-1)
-sqnn(n) = sqrt(fn*(fn+1.))
-1 continue
-!
-!     compute multiple vector fields coefficients
-!
-do 2 k=1, nt
-!
-!     set divergence field perturbation adjustment
-!
-pertrb(k) = a(1, 1, k)/(2.*sqrt(2.))
-!
-!     preset br, bi to 0.0
-!
-do 3 n=1, nlat
-do 4 m=1, mmax
-br(m, n, k) = 0.0
-bi(m, n, k) = 0.0
-4 continue
-3 continue
-!
-!     compute m=0 coefficients
-!
-do 5 n=2, nlat
-br(1, n, k) = -a(1, n, k)/sqnn(n)
-bi(1, n, k) = -b(1, n, k)/sqnn(n)
-5 continue
-!
-!     compute m>0 coefficients
-!
-do 6 m=2, mmax
-do 7 n=m, nlat
-br(m, n, k) = -a(m, n, k)/sqnn(n)
-bi(m, n, k) = -b(m, n, k)/sqnn(n)
-7 continue
-6 continue
-2 continue
-!
-!     set ityp for vector synthesis with curl=0
-!
-if (isym==0) then
-ityp = 1
-else if (isym==1) then
-ityp = 4
-else if (isym==2) then
-ityp = 7
-end if
-!
-!     vector sythesize br, bi into irrotational (v, w)
-!
-call vhsgs(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
-           mmax, nlat, wsav, lwsav, wk, lwk, ierror)
-return
+    sqnn, mdab, ndab, a, b, wsav, lwsav, wk, lwk, pertrb, ierror)
+    dimension v(idvw, jdvw, nt), w(idvw, jdvw, nt), pertrb(nt)
+    dimension br(mmax, nlat, nt), bi(mmax, nlat, nt), sqnn(nlat)
+    dimension a(mdab, ndab, nt), b(mdab, ndab, nt)
+    dimension wsav(lwsav), wk(lwk)
+    !
+    !     preset coefficient multiplyers in vector
+    !
+    do n=2, nlat
+        fn = real(n - 1)
+        sqnn(n) = sqrt(fn * (fn + 1.0))
+    end do
+    !
+    !     compute multiple vector fields coefficients
+    !
+    do k=1, nt
+        !
+        !     set divergence field perturbation adjustment
+        !
+        pertrb(k) = a(1, 1, k)/(2.0 * sqrt(2.0))
+        !
+        !     preset br, bi to 0.0
+        !
+        do n=1, nlat
+            do m=1, mmax
+                br(m, n, k) = 0.0
+                bi(m, n, k) = 0.0
+            end do
+        end do
+        !
+        !     compute m=0 coefficients
+        !
+        do n=2, nlat
+            br(1, n, k) = -a(1, n, k)/sqnn(n)
+            bi(1, n, k) = -b(1, n, k)/sqnn(n)
+        end do
+        !
+        !     compute m>0 coefficients
+        !
+        do m=2, mmax
+            do n=m, nlat
+                br(m, n, k) = -a(m, n, k)/sqnn(n)
+                bi(m, n, k) = -b(m, n, k)/sqnn(n)
+            end do
+        end do
+    end do
+    !
+    !     set ityp for vector synthesis with curl=0
+    !
+    select case (isym)
+        case (0)
+            ityp = 1
+        case (1)
+            ityp = 4
+        case (2)
+            ityp = 7
+    end select
+    !
+    !     vector sythesize br, bi into irrotational (v, w)
+    !
+    call vhsgs(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
+        mmax, nlat, wsav, lwsav, wk, lwk, ierror)
+
 end subroutine idvgs1
+

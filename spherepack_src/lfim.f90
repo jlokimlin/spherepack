@@ -123,104 +123,147 @@
 !                        a four term recurrence relation. (unpublished
 !                        notes by paul n. swarztrauber)
 !
-subroutine lfim (init, theta, l, n, nm, pb, id, wlfim)
-dimension       pb(1)        , wlfim(1)
-!
-!     total length of wlfim is 4*l*(nm+1)
-!
-lnx = l*(nm+1)
-iw1 = lnx+1
-iw2 = iw1+lnx
-iw3 = iw2+lnx
-call lfim1(init, theta, l, n, nm, id, pb, wlfim, wlfim(iw1), &
-                wlfim(iw2), wlfim(iw3), wlfim(iw2))
-return
+subroutine lfim(init, theta, l, n, nm, pb, id, wlfim)
+    implicit none
+    !----------------------------------------------------------------------
+    ! Dictionary: calling arguments
+    !----------------------------------------------------------------------
+    integer, intent (in)     :: init
+    real,    intent (in)     :: theta(*)
+    integer, intent (in)     :: l
+    integer, intent (in)     :: n
+    integer, intent (in)     :: nm
+    real,    intent (in out) :: pb(1)
+    integer, intent (in)     :: id
+    real,    intent (in out) :: wlfim(1)
+    !----------------------------------------------------------------------
+
+    !
+    !     total length of wlfim is 4*l*(nm+1)
+    !
+    associate(lnx => l*(nm+1) )
+        associate( iw1=> lnx+1)
+            associate( iw2 => iw1+lnx)
+                associate( iw3 => iw2+lnx)
+                    call lfim1(init, theta, l, n, nm, id, pb, wlfim, wlfim(iw1), &
+                        wlfim(iw2), wlfim(iw3), wlfim(iw2))
+                end associate
+            end associate
+        end associate
+    end associate
+
 end subroutine lfim
+
+
 subroutine lfim1(init, theta, l, n, nm, id, p3, phz, ph1, p1, p2, cp)
-dimension       p1(l, *)    , p2(l, *)    , p3(id, *)   , phz(l, *)   , &
-                ph1(l, *)   , cp(*)      , theta(*)
-nmp1 = nm+1
-if(init /= 0) go to 5
-ssqrt2 = 1./sqrt(2.)
-do 10 i=1, l
-phz(i, 1) = ssqrt2
-10 continue
-do 15 np1=2, nmp1
-nh = np1-1
-call alfk(nh, 0, cp)
-do 16 i=1, l
-call lfpt(nh, 0, theta(i), cp, phz(i, np1))
-16 continue
-call alfk(nh, 1, cp)
-do 17 i=1, l
-call lfpt(nh, 1, theta(i), cp, ph1(i, np1))
-17 continue
-15 continue
-return
-5 if(n > 2) go to 60
-if(n-1)25, 30, 35
-25 do 45 i=1, l
-p3(i, 1)=phz(i, 1)
-45 continue
-return
-30 do 50 i=1, l
-p3(i, 1) = phz(i, 2)
-p3(i, 2) = ph1(i, 2)
-50 continue
-return
-35 sq5s6 = sqrt(5./6.)
-sq1s6 = sqrt(1./6.)
-do 55 i=1, l
-p3(i, 1) = phz(i, 3)
-p3(i, 2) = ph1(i, 3)
-p3(i, 3) = sq5s6*phz(i, 1)-sq1s6*p3(i, 1)
-p1(i, 1) = phz(i, 2)
-p1(i, 2) = ph1(i, 2)
-p2(i, 1) = phz(i, 3)
-p2(i, 2) = ph1(i, 3)
-p2(i, 3) = p3(i, 3)
-55 continue
-return
-60 nm1 = n-1
-np1 = n+1
-fn = real(n)
-tn = fn+fn
-cn = (tn+1.)/(tn-3.)
-do 65 i=1, l
-p3(i, 1) = phz(i, np1)
-p3(i, 2) = ph1(i, np1)
-65 continue
-if(nm1 < 3) go to 71
-do 70 mp1=3, nm1
-m = mp1-1
-fm = real(m)
-fnpm = fn+fm
-fnmm = fn-fm
-temp = fnpm*(fnpm-1.)
-cc = sqrt(cn*(fnpm-3.)*(fnpm-2.)/temp)
-dd = sqrt(cn*fnmm*(fnmm-1.)/temp)
-ee = sqrt((fnmm+1.)*(fnmm+2.)/temp)
-do 70 i=1, l
-p3(i, mp1) = cc*p1(i, mp1-2)+dd*p1(i, mp1)-ee*p3(i, mp1-2)
-70 continue
-71 fnpm = fn+fn-1.
-temp = fnpm*(fnpm-1.)
-cc = sqrt(cn*(fnpm-3.)*(fnpm-2.)/temp)
-ee = sqrt(6./temp)
-do 75 i=1, l
-p3(i, n) = cc*p1(i, n-2)-ee*p3(i, n-2)
-75 continue
-fnpm = fn+fn
-temp = fnpm*(fnpm-1.)
-cc = sqrt(cn*(fnpm-3.)*(fnpm-2.)/temp)
-ee = sqrt(2./temp)
-do 80 i=1, l
-p3(i, n+1) = cc*p1(i, n-1)-ee*p3(i, n-1)
-80 continue
-do 90 mp1=1, np1
-do 90 i=1, l
-p1(i, mp1) = p2(i, mp1)
-p2(i, mp1) = p3(i, mp1)
-90 continue
-return
+    implicit none
+    !----------------------------------------------------------------------
+    ! Dictionary: calling arguments
+    !----------------------------------------------------------------------
+    integer, intent (in)     :: init
+    real,    intent (in)     :: theta(*)
+    integer, intent (in)     :: l
+    integer, intent (in)     :: n
+    integer, intent (in)     :: nm
+    integer, intent (in)     :: id
+    real,    intent (in out) :: p3(id,*)
+    real,    intent (in out) :: phz(l,*)
+    real,    intent (in out) :: ph1(l,*)
+    real,    intent (in out) :: p1(l,*)
+    real,    intent (in out) :: p2(l,*)
+    real,    intent (in out) :: cp(*)
+    !----------------------------------------------------------------------
+    ! Dictionary: local variables
+    !----------------------------------------------------------------------
+    integer         :: i, m, nm1, nh, mp1, np1, mp3, nmp1
+    real            :: cc, dd, ee, cn, fm, fn, fnmm, fnpm
+    real            :: tm, tn, temp
+    real, parameter :: SQRT2 = sqrt(2.0)
+    real, parameter :: SQRT5 = sqrt(5.0)
+    real, parameter :: SQRT6 = sqrt(6.0)
+    real, parameter :: ONE_OVER_SQRT2 = 1.0/SQRT2
+    real, parameter :: ONE_OVER_SQRT6 = 1.0/SQRT6
+    real, parameter :: SQRT5_OVER_SQRT6 = SQRT5/SQRT6
+    !----------------------------------------------------------------------
+
+    nmp1 = nm+1
+
+    if (init /= 0) go to 5
+
+    phz(:, 1) = ONE_OVER_SQRT2
+
+    do np1=2, nmp1
+        nh = np1-1
+        call alfk(nh, 0, cp)
+        do i=1, l
+            call lfpt(nh, 0, theta(i), cp, phz(i, np1))
+        end do
+        call alfk(nh, 1, cp)
+        do  i=1, l
+            call lfpt(nh, 1, theta(i), cp, ph1(i, np1))
+        end do
+    end do
+
+
+    return
+5   if (n > 2) go to 60
+    if (n-1) 25, 30, 35
+
+25  p3(:, 1) = phz(:, 1)
+    return
+
+30  p3(:, 1) = phz(:, 2)
+    p3(:, 2) = ph1(:, 2)
+    return
+
+35  p3(:, 1) = phz(:, 3)
+    p3(:, 2) = ph1(:, 3)
+    p3(:, 3) = SQRT5_OVER_SQRT6 * phz(:, 1) - ONE_OVER_SQRT6 * p3(:, 1)
+    p1(:, 1) = phz(:, 2)
+    p1(:, 2) = ph1(:, 2)
+    p2(:, 1) = phz(:, 3)
+    p2(:, 2) = ph1(:, 3)
+    p2(:, 3) = p3(:, 3)
+    return
+60  nm1 = n-1
+    np1 = n+1
+    fn = real(n)
+    tn = fn+fn
+    cn = (tn+1.0)/(tn-3.0)
+    p3(:, 1) = phz(:, np1)
+    p3(:, 2) = ph1(:, np1)
+
+    if (nm1 < 3) go to 71
+
+    do mp1=3, nm1
+        m = mp1-1
+        fm = real(m)
+        fnpm = fn+fm
+        fnmm = fn-fm
+        temp = fnpm*(fnpm-1.0)
+        cc = sqrt(cn*(fnpm-3.0)*(fnpm-2.0)/temp)
+        dd = sqrt(cn*fnmm*(fnmm-1.0)/temp)
+        ee = sqrt((fnmm+1.0)*(fnmm+2.0)/temp)
+        p3(:, mp1) = cc*p1(i, mp1-2)+dd*p1(:, mp1)-ee*p3(:, mp1-2)
+    end do
+
+71  fnpm = fn+fn-1.
+    temp = fnpm*(fnpm-1.0)
+    cc = sqrt(cn*(fnpm-3.0)*(fnpm-2.0)/temp)
+    ee = sqrt(6.0/temp)
+
+    p3(:, n) = cc*p1(:, n-2)-ee*p3(:, n-2)
+
+    fnpm = fn+fn
+    temp = fnpm*(fnpm-1.0)
+    cc = sqrt(cn*(fnpm-3.0)*(fnpm-2.0)/temp)
+    ee = sqrt(2.0/temp)
+    p3(:, n+1) = cc*p1(:, n-1)-ee*p3(:, n-1)
+
+
+    do mp1=1, np1
+        p1(:, mp1) = p2(:, mp1)
+        p2(:, mp1) = p3(:, mp1)
+    end do
+
 end subroutine lfim1

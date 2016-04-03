@@ -122,90 +122,136 @@
 !                        a four term recurrence relation. (unpublished
 !                        notes by paul n. swarztrauber)
 !
-subroutine lfin (init, theta, l, m, nm, pb, id, wlfin)
-dimension       pb(1)        , wlfin(1)
-!
-!     total length of wlfin is 4*l*(nm+1)
-!
-lnx = l*(nm+1)
-iw1 = lnx+1
-iw2 = iw1+lnx
-iw3 = iw2+lnx
-call lfin1(init, theta, l, m, nm, id, pb, wlfin, wlfin(iw1), &
-                wlfin(iw2), wlfin(iw3), wlfin(iw2))
-return
-end subroutine lfin
-subroutine lfin1(init, theta, l, m, nm, id, p3, phz, ph1, p1, p2, cp)
-dimension       p1(l, 1)    , p2(l, 1)    , p3(id, 1)   , phz(l, 1)   , &
-                ph1(l, 1)   , cp(1)      , theta(1)
-nmp1 = nm+1
-if(init /= 0) go to 5
-ssqrt2 = 1./sqrt(2.)
-do 10 i=1, l
-phz(i, 1) = ssqrt2
-10 continue
-do 15 np1=2, nmp1
-nh = np1-1
-call alfk(nh, 0, cp)
-do 16 i=1, l
-call lfpt(nh, 0, theta(i), cp, phz(i, np1))
-16 continue
-call alfk(nh, 1, cp)
-do 17 i=1, l
-call lfpt(nh, 1, theta(i), cp, ph1(i, np1))
-17 continue
-15 continue
-return
-5 mp1 = m+1
-fm = real(m)
-tm = fm+fm
-if(m-1)25, 30, 35
-25 do 45 np1=1, nmp1
-do 45 i=1, l
-p3(i, np1) = phz(i, np1)
-p1(i, np1) = phz(i, np1)
-45 continue
-return
-30 do 50 np1=2, nmp1
-do 50 i=1, l
-p3(i, np1) = ph1(i, np1)
-p2(i, np1) = ph1(i, np1)
-50 continue
-return
-35 temp = tm*(tm-1.)
-cc = sqrt((tm+1.)*(tm-2.)/temp)
-ee = sqrt(2./temp)
-do 85 i=1, l
-p3(i, m+1) = cc*p1(i, m-1)-ee*p1(i, m+1)
-85 continue
-if(m == nm) return
-temp = tm*(tm+1.)
-cc = sqrt((tm+3.)*(tm-2.)/temp)
-ee = sqrt(6./temp)
-do 70 i=1, l
-p3(i, m+2) = cc*p1(i, m)-ee*p1(i, m+2)
-70 continue
-mp3 = m+3
-if(nmp1 < mp3) go to 80
-do 75 np1=mp3, nmp1
-n = np1-1
-fn = real(n)
-tn = fn+fn
-cn = (tn+1.)/(tn-3.)
-fnpm = fn+fm
-fnmm = fn-fm
-temp = fnpm*(fnpm-1.)
-cc = sqrt(cn*(fnpm-3.)*(fnpm-2.)/temp)
-dd = sqrt(cn*fnmm*(fnmm-1.)/temp)
-ee = sqrt((fnmm+1.)*(fnmm+2.)/temp)
-do 75 i=1, l
-p3(i, np1) = cc*p1(i, np1-2)+dd*p3(i, np1-2)-ee*p1(i, np1)
-75 continue
-80 do 90 np1=m, nmp1
-do 90 i=1, l
-p1(i, np1) = p2(i, np1)
-p2(i, np1) = p3(i, np1)
-90 continue
-return
-end subroutine lfin1
+subroutine lfin(init, theta, l, m, nm, pb, id, wlfin)
+    implicit none
+    !----------------------------------------------------------------------
+    ! Dictionary: calling arguments
+    !----------------------------------------------------------------------
+    integer, intent (in)     :: init
+    real,    intent (in)     :: theta(*)
+    integer, intent (in)     :: l
+    integer, intent (in)     :: m
+    integer, intent (in)     :: nm
+    real,    intent (in out) :: pb(1)
+    integer, intent (in)     ::  id
+    real,    intent (in out) :: wlfin(1)
+    !----------------------------------------------------------------------
 
+    !     total length of wlfin is 4*l*(nm+1)
+    !
+    associate( lnx => l*(nm+1) )
+        associate( iw1 => lnx+1 )
+            associate( iw2 => iw1+lnx )
+                associate( iw3 => iw2+lnx )
+                    call lfin1(init, theta, l, m, nm, id, pb, wlfin, wlfin(iw1), &
+                        wlfin(iw2), wlfin(iw3), wlfin(iw2))
+                end associate
+            end associate
+        end associate
+    end associate
+
+end subroutine lfin
+
+
+subroutine lfin1(init, theta, l, m, nm, id, p3, phz, ph1, p1, p2, cp)
+    implicit none
+    !----------------------------------------------------------------------
+    ! Dictionary: calling arguments
+    !----------------------------------------------------------------------
+    integer, intent (in) :: init
+    real,    intent (in) :: theta(*)!theta(1)
+    integer, intent (in) :: l
+    integer, intent (in) :: m
+    integer, intent (in) :: nm
+    integer, intent (in) :: id
+    real,    intent (in out) :: p3(id, 1)
+    real,    intent (in out) :: phz(l,1)
+    real,    intent (in out) :: ph1(l,1)
+    real,    intent (in out) :: p1(l,1)
+    real,    intent (in out) :: p2(l,1)
+    real,    intent (in out) :: cp(1)
+    !----------------------------------------------------------------------
+    ! Dictionary: local variables
+    !----------------------------------------------------------------------
+    integer         :: i, n, nh, mp1, np1, mp3, nmp1
+    real            :: cc, dd, ee, cn, fm, fn, fnmm, fnpm
+    real            :: tm, tn, temp
+    real, parameter :: SQRT2 = sqrt(2.0)
+    real, parameter :: ONE_OVER_SQRT2 = 1.0/sqrt2
+    !----------------------------------------------------------------------
+    nmp1 = nm+1
+
+    if (init /= 0) go to 5
+
+
+    phz(:, 1) = ONE_OVER_SQRT2
+
+    do np1=2, nmp1
+        nh = np1-1
+        call alfk(nh, 0, cp)
+        do i=1, l
+            call lfpt(nh, 0, theta(i), cp, phz(i, np1))
+        end do
+        call alfk(nh, 1, cp)
+        do i=1, l
+            call lfpt(nh, 1, theta(i), cp, ph1(i, np1))
+        end do
+    end do
+    return
+
+5   mp1 = m+1
+    fm = real(m)
+    tm = fm+fm
+    if (m-1)25, 30, 35
+
+    25 do np1=1, nmp1
+        p3(:, np1) = phz(:, np1)
+        p1(:, np1) = phz(:, np1)
+    end do
+    return
+
+    30 do np1=2, nmp1
+        p3(:, np1) = ph1(:, np1)
+        p2(:, np1) = ph1(:, np1)
+    end do
+    return
+
+35  temp = tm*(tm-1.0)
+    cc = sqrt((tm+1.0)*(tm-2.0)/temp)
+    ee = sqrt(2.0/temp)
+    p3(:, m+1) = cc*p1(:, m-1)-ee*p1(:, m+1)
+
+    if (m == nm) then
+        return
+    end if
+
+    temp = tm*(tm+1.0)
+    cc = sqrt((tm+3.0)*(tm-2.0)/temp)
+    ee = sqrt(6.0/temp)
+    p3(:, m+2) = cc*p1(:, m)-ee*p1(:, m+2)
+    mp3 = m+3
+
+    if (nmp1 < mp3) then
+        go to 80
+    end if
+
+    do np1=mp3, nmp1
+        n = np1-1
+        fn = real(n)
+        tn = fn+fn
+        cn = (tn+1.0)/(tn-3.0)
+        fnpm = fn+fm
+        fnmm = fn-fm
+        temp = fnpm*(fnpm-1.0)
+        cc = sqrt(cn*(fnpm-3.0)*(fnpm-2.0)/temp)
+        dd = sqrt(cn*fnmm*(fnmm-1.0)/temp)
+        ee = sqrt((fnmm+1.0)*(fnmm+2.0)/temp)
+        p3(:, np1) = cc*p1(:, np1-2)+dd*p3(:, np1-2)-ee*p1(:, np1)
+    end do
+
+    80 do np1=m, nmp1
+        p1(:, np1) = p2(:, np1)
+        p2(:, np1) = p3(:, np1)
+    end do
+
+end subroutine lfin1

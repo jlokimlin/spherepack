@@ -296,8 +296,10 @@ subroutine isfvpec(nlat, nlon, isym, nt, v, w, idv, jdv, as, bs, av, bv, &
     call isfvpec1(nlat, nlon, isym, nt, v, w, idv, jdv, as, bs, av, bv, mdb, &
         ndb, work(ibr), work(ibi), work(icr), work(ici), l1, work(is), &
         wvhsec, lvhsec, work(iwk), lwk, ierror)
-    return
+
 end subroutine isfvpec
+
+
 
 subroutine isfvpec1(nlat, nlon, isym, nt, v, w, idv, jdv, as, bs, av, bv, &
     mdb, ndb, br, bi, cr, ci, mab, fnn, wvhsec, lvhsec, wk, lwk, ierror)
@@ -353,14 +355,16 @@ subroutine isfvpec1(nlat, nlon, isym, nt, v, w, idv, jdv, as, bs, av, bv, &
     !
     !     synthesize br, bi, cr, ci into (v, w)
     !
-    if (isym ==0) then
-        ityp = 0
-    else if (isym ==1) then
-        ityp = 3
-    else if (isym ==2) then
-        ityp = 6
-    end if
+    select case (isym)
+        case (0)
+            ityp = 0
+        case (1)
+            ityp = 3
+        case (2)
+            ityp = 6
+    end select
+
     call vhsec(nlat, nlon, ityp, nt, v, w, idv, jdv, br, bi, cr, ci, &
         mab, nlat, wvhsec, lvhsec, wk, lwk, ierror)
-    return
+
 end subroutine isfvpec1

@@ -130,7 +130,7 @@ subroutine alfk (n, m, cp)
     real, parameter :: sc10 = 1024.0
     real, parameter :: sc20 = sc10**2
     real, parameter :: sc40 = sc20**2
-    real            ::  a1, b1, c1, t1, t2
+    real            :: a1, b1, c1, t1, t2
     real            :: fk, cp2, pm1
     real            :: fden, fnmh, fnum, fnnp1, fnmsq
     !----------------------------------------------------------------------
@@ -138,44 +138,50 @@ subroutine alfk (n, m, cp)
     cp(1) = 0.0
     ma = abs(m)
 
-    if(ma > n) return
+    if (ma > n) return
+    if (n-1) 2, 3, 5
 
-    if(n-1) 2, 3, 5
 2   cp(1) = sqrt(2.0)
     return
-3   if(ma /= 0) go to 4
+
+3   if (ma /= 0) go to 4
     cp(1) = sqrt(1.5)
     return
+
 4   cp(1) = sqrt(0.75)
-    if(m == -1) cp(1) = -cp(1)
+    if (m == -1) cp(1) = -cp(1)
     return
-5   if(mod(n+ma, 2) /= 0) go to 10
+
+5   if (mod(n+ma, 2) /= 0) go to 10
     nmms2 = (n-ma)/2
     fnum = n+ma+1
     fnmh = n-ma+1
-    pm1 = 1.
+    pm1 = 1.0
     go to 15
+
 10  nmms2 = (n-ma-1)/2
     fnum = n+ma+2
     fnmh = n-ma+2
-    pm1 = -1.
-15  t1 = 1./sc20
+    pm1 = -1.0
+
+15  t1 = 1.0/sc20
     nex = 20
-    fden = 2.
-    if(nmms2 < 1) go to 20
+    fden = 2.0
+    if (nmms2 < 1) go to 20
     do  i=1, nmms2
         t1 = fnum*t1/fden
-        if(t1 > sc20) then
+        if (t1 > sc20) then
             t1 = t1/sc40
             nex = nex+40
         end if
-        fnum = fnum+2.
-        fden = fden+2.
+        fnum = fnum+2.0
+        fden = fden+2.0
     end do
-20  t1 = t1/2.**(n-1-nex)
-    if(mod(ma/2, 2) /= 0) t1 = -t1
+
+20  t1 = t1/2.0**(n-1-nex)
+    if (mod(ma/2, 2) /= 0) t1 = -t1
     t2 = 1.0
-    if(ma == 0) go to 26
+    if (ma == 0) go to 26
 
     do  i=1, ma
         t2 = fnmh*t2/(fnmh+pm1)
@@ -186,22 +192,19 @@ subroutine alfk (n, m, cp)
     fnnp1 = real(n*(n+1))
     fnmsq = fnnp1-2.0*(ma**2)
     l = (n+1)/2
-
-    if(mod(n, 2) == 0 .and. mod(ma, 2) == 0) l = l+1
+    if (mod(n, 2) == 0 .and. mod(ma, 2) == 0) l = l+1
     cp(l) = cp2
+    if (m >= 0) go to 29
+    if (mod(ma, 2) /= 0) cp(l) = -cp(l)
 
-    if(m >= 0) go to 29
-
-    if(mod(ma, 2) /= 0) cp(l) = -cp(l)
-
-29  if(l <= 1) return
+29  if (l <= 1) return
     fk = n
-    a1 = (fk-2.)*(fk-1.)-fnnp1
-    b1 = 2.*(fk*fk-fnmsq)
+    a1 = (fk-2.0)*(fk-1.0)-fnnp1
+    b1 = 2.0*(fk*fk-fnmsq)
     cp(l-1) = b1*cp(l)/a1
-30  l = l-1
 
-    if(l <= 1) return
+30  l = l-1
+    if (l <= 1) return
     fk = fk-2.0
     a1 = (fk-2.0)*(fk-1.0)-fnnp1
     b1 = -2.0*(fk*fk-fnmsq)
@@ -309,7 +312,7 @@ subroutine lfim(init, theta, l, n, nm, pb, id, wlfim)
     ! Dictionary: calling arguments
     !----------------------------------------------------------------------
     integer, intent (in)     :: init
-    real,    intent (in)     :: theta
+    real,    intent (in)     :: theta(*)
     integer, intent (in)     :: l
     integer, intent (in)     :: n
     integer, intent (in)     :: nm
@@ -336,17 +339,41 @@ end subroutine lfim
 
 
 subroutine lfim1(init, theta, l, n, nm, id, p3, phz, ph1, p1, p2, cp)
-    dimension       p1(l, *)    , p2(l, *)    , p3(id, *)   , phz(l, *)   , &
-        ph1(l, *)   , cp(*)      , theta(*)
+    implicit none
+    !----------------------------------------------------------------------
+    ! Dictionary: calling arguments
+    !----------------------------------------------------------------------
+    integer, intent (in)     :: init
+    real,    intent (in)     :: theta(*)
+    integer, intent (in)     :: l
+    integer, intent (in)     :: n
+    integer, intent (in)     :: nm
+    integer, intent (in)     :: id
+    real,    intent (in out) :: p3(id,*)
+    real,    intent (in out) :: phz(l,*)
+    real,    intent (in out) :: ph1(l,*)
+    real,    intent (in out) :: p1(l,*)
+    real,    intent (in out) :: p2(l,*)
+    real,    intent (in out) :: cp(*)
+    !----------------------------------------------------------------------
+    ! Dictionary: local variables
+    !----------------------------------------------------------------------
+    integer         :: i, m, nm1, nh, mp1, np1, mp3, nmp1
+    real            :: cc, dd, ee, cn, fm, fn, fnmm, fnpm
+    real            :: tm, tn, temp
+    real, parameter :: SQRT2 = sqrt(2.0)
+    real, parameter :: SQRT5 = sqrt(5.0)
+    real, parameter :: SQRT6 = sqrt(6.0)
+    real, parameter :: ONE_OVER_SQRT2 = 1.0/SQRT2
+    real, parameter :: ONE_OVER_SQRT6 = 1.0/SQRT6
+    real, parameter :: SQRT5_OVER_SQRT6 = SQRT5/SQRT6
+    !----------------------------------------------------------------------
 
     nmp1 = nm+1
 
-    if(init /= 0) go to 5
-    ssqrt2 = 1.0/sqrt(2.0)
+    if (init /= 0) go to 5
 
-    do i=1, l
-        phz(i, 1) = ssqrt2
-    end do
+    phz(:, 1) = ONE_OVER_SQRT2
 
     do np1=2, nmp1
         nh = np1-1
@@ -362,80 +389,64 @@ subroutine lfim1(init, theta, l, n, nm, id, p3, phz, ph1, p1, p2, cp)
 
 
     return
-5   if(n > 2) go to 60
-    if(n-1) 25, 30, 35
-    25 do i=1, l
-        p3(i, 1)=phz(i, 1)
-    end do
+5   if (n > 2) go to 60
+    if (n-1) 25, 30, 35
+
+25  p3(:, 1) = phz(:, 1)
     return
-    30 do i=1, l
-        p3(i, 1) = phz(i, 2)
-        p3(i, 2) = ph1(i, 2)
-    end do
+
+30  p3(:, 1) = phz(:, 2)
+    p3(:, 2) = ph1(:, 2)
     return
-35  sq5s6 = sqrt(5.0/6.0)
-    sq1s6 = sqrt(1.0/6.0)
-    do i=1, l
-        p3(i, 1) = phz(i, 3)
-        p3(i, 2) = ph1(i, 3)
-        p3(i, 3) = sq5s6*phz(i, 1)-sq1s6*p3(i, 1)
-        p1(i, 1) = phz(i, 2)
-        p1(i, 2) = ph1(i, 2)
-        p2(i, 1) = phz(i, 3)
-        p2(i, 2) = ph1(i, 3)
-        p2(i, 3) = p3(i, 3)
-    end do
+
+35  p3(:, 1) = phz(:, 3)
+    p3(:, 2) = ph1(:, 3)
+    p3(:, 3) = SQRT5_OVER_SQRT6 * phz(:, 1) - ONE_OVER_SQRT6 * p3(:, 1)
+    p1(:, 1) = phz(:, 2)
+    p1(:, 2) = ph1(:, 2)
+    p2(:, 1) = phz(:, 3)
+    p2(:, 2) = ph1(:, 3)
+    p2(:, 3) = p3(:, 3)
     return
 60  nm1 = n-1
     np1 = n+1
     fn = real(n)
     tn = fn+fn
-    cn = (tn+1.)/(tn-3.)
+    cn = (tn+1.0)/(tn-3.0)
+    p3(:, 1) = phz(:, np1)
+    p3(:, 2) = ph1(:, np1)
 
-    do i=1, l
-        p3(i, 1) = phz(i, np1)
-        p3(i, 2) = ph1(i, np1)
-    end do
-
-    if(nm1 < 3) go to 71
+    if (nm1 < 3) go to 71
 
     do mp1=3, nm1
         m = mp1-1
         fm = real(m)
         fnpm = fn+fm
         fnmm = fn-fm
-        temp = fnpm*(fnpm-1.)
-        cc = sqrt(cn*(fnpm-3.)*(fnpm-2.)/temp)
-        dd = sqrt(cn*fnmm*(fnmm-1.)/temp)
-        ee = sqrt((fnmm+1.)*(fnmm+2.)/temp)
-        do i=1, l
-            p3(i, mp1) = cc*p1(i, mp1-2)+dd*p1(i, mp1)-ee*p3(i, mp1-2)
-        end do
+        temp = fnpm*(fnpm-1.0)
+        cc = sqrt(cn*(fnpm-3.0)*(fnpm-2.0)/temp)
+        dd = sqrt(cn*fnmm*(fnmm-1.0)/temp)
+        ee = sqrt((fnmm+1.0)*(fnmm+2.0)/temp)
+        p3(:, mp1) = cc*p1(i, mp1-2)+dd*p1(:, mp1)-ee*p3(:, mp1-2)
     end do
 
 71  fnpm = fn+fn-1.
-    temp = fnpm*(fnpm-1.)
-    cc = sqrt(cn*(fnpm-3.)*(fnpm-2.)/temp)
-    ee = sqrt(6./temp)
+    temp = fnpm*(fnpm-1.0)
+    cc = sqrt(cn*(fnpm-3.0)*(fnpm-2.0)/temp)
+    ee = sqrt(6.0/temp)
 
-    do i=1, l
-        p3(i, n) = cc*p1(i, n-2)-ee*p3(i, n-2)
-    end do
+    p3(:, n) = cc*p1(:, n-2)-ee*p3(:, n-2)
 
     fnpm = fn+fn
-    temp = fnpm*(fnpm-1.)
-    cc = sqrt(cn*(fnpm-3.)*(fnpm-2.)/temp)
-    ee = sqrt(2./temp)
+    temp = fnpm*(fnpm-1.0)
+    cc = sqrt(cn*(fnpm-3.0)*(fnpm-2.0)/temp)
+    ee = sqrt(2.0/temp)
+    p3(:, n+1) = cc*p1(:, n-1)-ee*p3(:, n-1)
 
-    do i=1, l
-        p3(i, n+1) = cc*p1(i, n-1)-ee*p3(i, n-1)
-    end do
 
     do mp1=1, np1
-        do i=1, l
-            p1(i, mp1) = p2(i, mp1)
-            p2(i, mp1) = p3(i, mp1)
-        end do
+        p1(:, mp1) = p2(:, mp1)
+        p2(:, mp1) = p3(:, mp1)
     end do
 
 end subroutine lfim1
@@ -536,7 +547,7 @@ subroutine lfin(init, theta, l, m, nm, pb, id, wlfin)
     ! Dictionary: calling arguments
     !----------------------------------------------------------------------
     integer, intent (in)     :: init
-    real,    intent (in)     :: theta
+    real,    intent (in)     :: theta(*)
     integer, intent (in)     :: l
     integer, intent (in)     :: m
     integer, intent (in)     :: nm
@@ -562,16 +573,37 @@ end subroutine lfin
 
 
 subroutine lfin1(init, theta, l, m, nm, id, p3, phz, ph1, p1, p2, cp)
-    dimension       p1(l, 1)    , p2(l, 1)    , p3(id, 1)   , phz(l, 1)   , &
-        ph1(l, 1)   , cp(1)      , theta(1)
-
+    implicit none
+    !----------------------------------------------------------------------
+    ! Dictionary: calling arguments
+    !----------------------------------------------------------------------
+    integer, intent (in) :: init
+    real,    intent (in) :: theta(*)!theta(1)
+    integer, intent (in) :: l
+    integer, intent (in) :: m
+    integer, intent (in) :: nm
+    integer, intent (in) :: id
+    real,    intent (in out) :: p3(id, 1)
+    real,    intent (in out) :: phz(l,1)
+    real,    intent (in out) :: ph1(l,1)
+    real,    intent (in out) :: p1(l,1)
+    real,    intent (in out) :: p2(l,1)
+    real,    intent (in out) :: cp(1)
+    !----------------------------------------------------------------------
+    ! Dictionary: local variables
+    !----------------------------------------------------------------------
+    integer         :: i, n, nh, mp1, np1, mp3, nmp1
+    real            :: cc, dd, ee, cn, fm, fn, fnmm, fnpm
+    real            :: tm, tn, temp
+    real, parameter :: SQRT2 = sqrt(2.0)
+    real, parameter :: ONE_OVER_SQRT2 = 1.0/sqrt2
+    !----------------------------------------------------------------------
     nmp1 = nm+1
-    if(init /= 0) go to 5
-    ssqrt2 = 1.0/sqrt(2.0)
 
-    do i=1, l
-        phz(i, 1) = ssqrt2
-    end do
+    if (init /= 0) go to 5
+
+
+    phz(:, 1) = ONE_OVER_SQRT2
 
     do np1=2, nmp1
         nh = np1-1
@@ -585,46 +617,40 @@ subroutine lfin1(init, theta, l, m, nm, id, p3, phz, ph1, p1, p2, cp)
         end do
     end do
     return
+
 5   mp1 = m+1
     fm = real(m)
     tm = fm+fm
-    if(m-1)25, 30, 35
-    25 do np1=1, nmp1
-        do i=1, l
-            p3(i, np1) = phz(i, np1)
-            p1(i, np1) = phz(i, np1)
-        end do
-    end do
-    return
-    30 do np1=2, nmp1
-        do i=1, l
-            p3(i, np1) = ph1(i, np1)
-            p2(i, np1) = ph1(i, np1)
-        end do
-    end do
-    return
-35  temp = tm*(tm-1.)
-    cc = sqrt((tm+1.)*(tm-2.)/temp)
-    ee = sqrt(2./temp)
-    do i=1, l
-        p3(i, m+1) = cc*p1(i, m-1)-ee*p1(i, m+1)
-    end do
+    if (m-1)25, 30, 35
 
-    if(m == nm) then
+    25 do np1=1, nmp1
+        p3(:, np1) = phz(:, np1)
+        p1(:, np1) = phz(:, np1)
+    end do
+    return
+
+    30 do np1=2, nmp1
+        p3(:, np1) = ph1(:, np1)
+        p2(:, np1) = ph1(:, np1)
+    end do
+    return
+
+35  temp = tm*(tm-1.0)
+    cc = sqrt((tm+1.0)*(tm-2.0)/temp)
+    ee = sqrt(2.0/temp)
+    p3(:, m+1) = cc*p1(:, m-1)-ee*p1(:, m+1)
+
+    if (m == nm) then
         return
     end if
 
-    temp = tm*(tm+1.)
-    cc = sqrt((tm+3.)*(tm-2.)/temp)
-    ee = sqrt(6./temp)
-
-    do i=1, l
-        p3(i, m+2) = cc*p1(i, m)-ee*p1(i, m+2)
-    end do
-
+    temp = tm*(tm+1.0)
+    cc = sqrt((tm+3.0)*(tm-2.0)/temp)
+    ee = sqrt(6.0/temp)
+    p3(:, m+2) = cc*p1(:, m)-ee*p1(:, m+2)
     mp3 = m+3
 
-    if(nmp1 < mp3) then
+    if (nmp1 < mp3) then
         go to 80
     end if
 
@@ -632,24 +658,19 @@ subroutine lfin1(init, theta, l, m, nm, id, p3, phz, ph1, p1, p2, cp)
         n = np1-1
         fn = real(n)
         tn = fn+fn
-        cn = (tn+1.)/(tn-3.)
+        cn = (tn+1.0)/(tn-3.0)
         fnpm = fn+fm
         fnmm = fn-fm
-        temp = fnpm*(fnpm-1.)
-        cc = sqrt(cn*(fnpm-3.)*(fnpm-2.)/temp)
-        dd = sqrt(cn*fnmm*(fnmm-1.)/temp)
-        ee = sqrt((fnmm+1.)*(fnmm+2.)/temp)
-
-        do i=1, l
-            p3(i, np1) = cc*p1(i, np1-2)+dd*p3(i, np1-2)-ee*p1(i, np1)
-        end do
+        temp = fnpm*(fnpm-1.0)
+        cc = sqrt(cn*(fnpm-3.0)*(fnpm-2.0)/temp)
+        dd = sqrt(cn*fnmm*(fnmm-1.0)/temp)
+        ee = sqrt((fnmm+1.0)*(fnmm+2.0)/temp)
+        p3(:, np1) = cc*p1(:, np1-2)+dd*p3(:, np1-2)-ee*p1(:, np1)
     end do
 
     80 do np1=m, nmp1
-        do i=1, l
-            p1(i, np1) = p2(i, np1)
-            p2(i, np1) = p3(i, np1)
-        end do
+        p1(:, np1) = p2(:, np1)
+        p2(:, np1) = p3(:, np1)
     end do
 
 end subroutine lfin1
@@ -724,7 +745,7 @@ end subroutine lfin1
 !                        the input parameter n.
 !
 subroutine lfpt(n, m, theta, cp, pb)
-implicit none
+    implicit none
     !----------------------------------------------------------------------
     ! Dictionary: calling arguments
     !----------------------------------------------------------------------
@@ -742,16 +763,21 @@ implicit none
 
     pb = 0.0
     ma = abs(m)
-    if(ma > n) return
+    if (ma > n) return
     if (n)  10, 10, 30
+
 10  if (ma)  20, 20, 30
-20  pb= sqrt(.5)
+
+20  pb= sqrt(0.5)
     go to 140
+
 30  np1 = n+1
     nmod = mod(n, 2)
     mmod = mod(ma, 2)
     if (nmod)  40, 40, 90
+
 40  if (mmod)  50, 50, 70
+
 50  kdo = n/2+1
     cdt = cos(theta+theta)
     sdt = sin(theta+theta)
@@ -768,6 +794,7 @@ implicit none
 
     pb= summation
     go to 140
+
 70  kdo = n/2
     cdt = cos(theta+theta)
     sdt = sin(theta+theta)
@@ -782,8 +809,10 @@ implicit none
     end do
     pb= summation
     go to 140
+
 90  kdo = (n+1)/2
     if (mmod) 100, 100, 120
+
 100 cdt = cos(theta+theta)
     sdt = sin(theta+theta)
     ct = cos(theta)
@@ -799,6 +828,7 @@ implicit none
 
     pb= summation
     go to 140
+
 120 cdt = cos(theta+theta)
     sdt = sin(theta+theta)
     ct = cos(theta)
@@ -813,6 +843,7 @@ implicit none
     end do
 
     pb= summation
+
 140 return
 
 end subroutine lfpt

@@ -424,61 +424,62 @@
 !            = 4  error in the specification of lwork
 !
 subroutine vhsgs(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
-                 mdab, ndab, wvhsgs, lvhsgs, work, lwork, ierror)
-dimension v(idvw, jdvw, 1), w(idvw, jdvw, 1), br(mdab, ndab, 1), &
-          bi(mdab, ndab, 1), cr(mdab, ndab, 1), ci(mdab, ndab, 1), &
-          work(1), wvhsgs(1)
-ierror = 1
-if(nlat < 3) return
-ierror = 2
-if(nlon < 1) return
-ierror = 3
-if(ityp<0 .or. ityp>8) return
-ierror = 4
-if(nt < 0) return
-ierror = 5
-imid = (nlat+1)/2
-if((ityp<=2 .and. idvw<nlat) .or. &
-   (ityp>2 .and. idvw<imid)) return
-ierror = 6
-if(jdvw < nlon) return
-ierror = 7
-mmax = min(nlat, (nlon+1)/2)
-if(mdab < mmax) return
-ierror = 8
-if(ndab < nlat) return
-ierror = 9
-idz = (mmax*(nlat+nlat-mmax+1))/2
-lzimn = idz*imid
-if(lvhsgs < lzimn+lzimn+nlon+15) return
-ierror = 10
-idv = nlat
-if(ityp > 2) idv = imid
-lnl = nt*idv*nlon
-if(lwork < lnl+lnl+idv*nlon) return
-ierror = 0
-ist = 0
-if(ityp <= 2) ist = imid
-!
-!     set wvhsgs pointers
-!
-lmn = nlat*(nlat+1)/2
-jw1 = 1
-jw2 = jw1+imid*lmn
-jw3 = jw2+imid*lmn
-!
-!     set work pointers
-!
-iw1 = ist+1
-iw2 = lnl+1
-iw3 = iw2+ist
-iw4 = iw2+lnl
+    mdab, ndab, wvhsgs, lvhsgs, work, lwork, ierror)
+    dimension v(idvw, jdvw, 1), w(idvw, jdvw, 1), br(mdab, ndab, 1), &
+        bi(mdab, ndab, 1), cr(mdab, ndab, 1), ci(mdab, ndab, 1), &
+        work(1), wvhsgs(1)
+    ierror = 1
+    if(nlat < 3) return
+    ierror = 2
+    if(nlon < 1) return
+    ierror = 3
+    if(ityp<0 .or. ityp>8) return
+    ierror = 4
+    if(nt < 0) return
+    ierror = 5
+    imid = (nlat+1)/2
+    if((ityp<=2 .and. idvw<nlat) .or. &
+        (ityp>2 .and. idvw<imid)) return
+    ierror = 6
+    if(jdvw < nlon) return
+    ierror = 7
+    mmax = min(nlat, (nlon+1)/2)
+    if(mdab < mmax) return
+    ierror = 8
+    if(ndab < nlat) return
+    ierror = 9
+    idz = (mmax*(nlat+nlat-mmax+1))/2
+    lzimn = idz*imid
+    if(lvhsgs < lzimn+lzimn+nlon+15) return
+    ierror = 10
+    idv = nlat
+    if(ityp > 2) idv = imid
+    lnl = nt*idv*nlon
+    if(lwork < lnl+lnl+idv*nlon) return
+    ierror = 0
+    ist = 0
+    if(ityp <= 2) ist = imid
+    !
+    !     set wvhsgs pointers
+    !
+    lmn = nlat*(nlat+1)/2
+    jw1 = 1
+    jw2 = jw1+imid*lmn
+    jw3 = jw2+imid*lmn
+    !
+    !     set work pointers
+    !
+    iw1 = ist+1
+    iw2 = lnl+1
+    iw3 = iw2+ist
+    iw4 = iw2+lnl
 
-call vhsgs1(nlat, nlon, ityp, nt, imid, idvw, jdvw, v, w, mdab, ndab, &
-           br, bi, cr, ci, idv, work, work(iw1), work(iw2), work(iw3), &
-          work(iw4), idz, wvhsgs(jw1), wvhsgs(jw2), wvhsgs(jw3))
-return
+    call vhsgs1(nlat, nlon, ityp, nt, imid, idvw, jdvw, v, w, mdab, ndab, &
+        br, bi, cr, ci, idv, work, work(iw1), work(iw2), work(iw3), &
+        work(iw4), idz, wvhsgs(jw1), wvhsgs(jw2), wvhsgs(jw3))
+
 end subroutine vhsgs
+
 
 subroutine vhsgs1(nlat, nlon, ityp, nt, imid, idvw, jdvw, v, w, mdab, &
    ndab, br, bi, cr, ci, idv, ve, vo, we, wo, work, idz, vb, wb, wrfft)
@@ -552,7 +553,7 @@ ve(imid, 2*mp1-2, k) = ve(imid, 2*mp1-2, k) &
 ve(imid, 2*mp1-1, k) = ve(imid, 2*mp1-1, k) &
                      +cr(mp1, np1, k)*wb(imid, mn)
 we(imid, 2*mp1-2, k) = we(imid, 2*mp1-2, k) &
-                     -bi(mp1, np1, k)*wb(imid, mn) 
+                     -bi(mp1, np1, k)*wb(imid, mn)
 we(imid, 2*mp1-1, k) = we(imid, 2*mp1-1, k) &
                      +br(mp1, np1, k)*wb(imid, mn)
 24 continue
@@ -573,7 +574,7 @@ wo(i, 2*mp1-1, k) = wo(i, 2*mp1-1, k)+br(mp1, np1, k)*wb(i, mn)
 27 continue
 if(mlat == 0) go to 28
 ve(imid, 2*mp1-2, k) = ve(imid, 2*mp1-2, k) &
-                     +br(mp1, np1, k)*vb(imid, mn) 
+                     +br(mp1, np1, k)*vb(imid, mn)
 ve(imid, 2*mp1-1, k) = ve(imid, 2*mp1-1, k) &
                      +bi(mp1, np1, k)*vb(imid, mn)
 we(imid, 2*mp1-2, k) = we(imid, 2*mp1-2, k) &
@@ -621,7 +622,7 @@ we(i, 2*mp1-1, k) = we(i, 2*mp1-1, k)+br(mp1, np1, k)*wb(i, mn)
 123 continue
 if(mlat == 0) go to 124
 we(imid, 2*mp1-2, k) = we(imid, 2*mp1-2, k) &
-                     -bi(mp1, np1, k)*wb(imid, mn) 
+                     -bi(mp1, np1, k)*wb(imid, mn)
 we(imid, 2*mp1-1, k) = we(imid, 2*mp1-1, k) &
                      +br(mp1, np1, k)*wb(imid, mn)
 124 continue
@@ -638,7 +639,7 @@ wo(i, 2*mp1-1, k) = wo(i, 2*mp1-1, k)+br(mp1, np1, k)*wb(i, mn)
 127 continue
 if(mlat == 0) go to 128
 ve(imid, 2*mp1-2, k) = ve(imid, 2*mp1-2, k) &
-                     +br(mp1, np1, k)*vb(imid, mn) 
+                     +br(mp1, np1, k)*vb(imid, mn)
 ve(imid, 2*mp1-1, k) = ve(imid, 2*mp1-1, k) &
                      +bi(mp1, np1, k)*vb(imid, mn)
 128 continue
@@ -706,7 +707,7 @@ we(imid, 2*mp1-1, k) = we(imid, 2*mp1-1, k) &
 230 continue
 go to 950
 !
-!     case ityp=3   v even,  w odd 
+!     case ityp=3   v even,  w odd
 !
 !     case m = 0
 !
@@ -758,7 +759,7 @@ wo(i, 2*mp1-1, k) = wo(i, 2*mp1-1, k)+br(mp1, np1, k)*wb(i, mn)
 327 continue
 if(mlat == 0) go to 328
 ve(imid, 2*mp1-2, k) = ve(imid, 2*mp1-2, k) &
-                     +br(mp1, np1, k)*vb(imid, mn) 
+                     +br(mp1, np1, k)*vb(imid, mn)
 ve(imid, 2*mp1-1, k) = ve(imid, 2*mp1-1, k) &
                      +bi(mp1, np1, k)*vb(imid, mn)
 328 continue
@@ -766,7 +767,7 @@ ve(imid, 2*mp1-1, k) = ve(imid, 2*mp1-1, k) &
 330 continue
 go to 950
 !
-!     case ityp=4   v even,  w odd, and both cr and ci equal zero 
+!     case ityp=4   v even,  w odd, and both cr and ci equal zero
 !
 !     case m = 0
 !
@@ -796,7 +797,7 @@ wo(i, 2*mp1-1, k) = wo(i, 2*mp1-1, k)+br(mp1, np1, k)*wb(i, mn)
 427 continue
 if(mlat == 0) go to 428
 ve(imid, 2*mp1-2, k) = ve(imid, 2*mp1-2, k) &
-                     +br(mp1, np1, k)*vb(imid, mn) 
+                     +br(mp1, np1, k)*vb(imid, mn)
 ve(imid, 2*mp1-1, k) = ve(imid, 2*mp1-1, k) &
                      +bi(mp1, np1, k)*vb(imid, mn)
 428 continue
@@ -804,7 +805,7 @@ ve(imid, 2*mp1-1, k) = ve(imid, 2*mp1-1, k) &
 430 continue
 go to 950
 !
-!     case ityp=5   v even,  w odd,     br and bi equal zero 
+!     case ityp=5   v even,  w odd,     br and bi equal zero
 !
 !     case m = 0
 !
@@ -877,7 +878,7 @@ we(i, 2*mp1-1, k) = we(i, 2*mp1-1, k)+br(mp1, np1, k)*wb(i, mn)
 623 continue
 if(mlat == 0) go to 624
 we(imid, 2*mp1-2, k) = we(imid, 2*mp1-2, k) &
-                     -bi(mp1, np1, k)*wb(imid, mn) 
+                     -bi(mp1, np1, k)*wb(imid, mn)
 we(imid, 2*mp1-1, k) = we(imid, 2*mp1-1, k) &
                      +br(mp1, np1, k)*wb(imid, mn)
 624 continue
@@ -932,7 +933,7 @@ we(i, 2*mp1-1, k) = we(i, 2*mp1-1, k)+br(mp1, np1, k)*wb(i, mn)
 723 continue
 if(mlat == 0) go to 724
 we(imid, 2*mp1-2, k) = we(imid, 2*mp1-2, k) &
-                     -bi(mp1, np1, k)*wb(imid, mn) 
+                     -bi(mp1, np1, k)*wb(imid, mn)
 we(imid, 2*mp1-1, k) = we(imid, 2*mp1-1, k) &
                      +br(mp1, np1, k)*wb(imid, mn)
 724 continue
@@ -1003,174 +1004,182 @@ do 65 j=1, nlon
 v(imid, j, k) = .5*ve(imid, j, k)
 w(imid, j, k) = .5*we(imid, j, k)
 65 continue
-return
+
 end subroutine vhsgs1
+
+
+
 subroutine vhsgsi(nlat, nlon, wvhsgs, lvhsgs, dwork, ldwork, ierror)
-!
-!     subroutine vhsfsi computes the gaussian points theta, gauss 
-!     weights wts, and the components vb and wb of the vector 
-!     harmonics. all quantities are computed internally in double 
-!     precision but returned in single precision and are therfore 
-!     accurate to single precision.
-!
-!     set imid = (nlat+1)/2 and lmn=(nlat*(nlat+1))/2 then
-!     wvhsgs must have 2*(imid*lmn+nlat)+nlon+15 locations
-!
-!     real array dwork must have
-!       3*nlat*(nlat+1)+5*nlat+1 = nlat*(3*nlat+8)+1 
-!     locations which is determined by the size of dthet, 
-!     dwts, dwork, and dpbar in vhsgs1
-!
-dimension wvhsgs(*)
-real dwork(*)
-ierror = 1
-if(nlat < 3) return
-ierror = 2
-if(nlon < 1) return
-ierror = 3
-imid = (nlat+1)/2
-lmn = (nlat*(nlat+1))/2
-if(lvhsgs < 2*(imid*lmn)+nlon+15) return
-ierror = 4
-if (ldwork < (nlat*3*(nlat+3)+2)/2) return
-ierror = 0
-!
-!     set saved work space pointers
-!
-jw1 = 1
-jw2 = jw1+imid*lmn
-jw3 = jw2+imid*lmn
-!
-!     set unsaved work space pointers
-!
-iw1 = 1
-iw2 = iw1+nlat
-iw3 = iw2+nlat
-iw4 = iw3+3*imid*nlat
-!     iw2 = iw1+nlat+nlat
-!     iw3 = iw2+nlat+nlat
-!     iw4 = iw3+6*imid*nlat
-call vhgsi1(nlat, imid, wvhsgs(jw1), wvhsgs(jw2), &
-dwork(iw1), dwork(iw2), dwork(iw3), dwork(iw4))
-call hrffti(nlon, wvhsgs(jw3))
-return
+    !
+    !     subroutine vhsfsi computes the gaussian points theta, gauss
+    !     weights wts, and the components vb and wb of the vector
+    !     harmonics. all quantities are computed internally in double
+    !     precision but returned in single precision and are therfore
+    !     accurate to single precision.
+    !
+    !     set imid = (nlat+1)/2 and lmn=(nlat*(nlat+1))/2 then
+    !     wvhsgs must have 2*(imid*lmn+nlat)+nlon+15 locations
+    !
+    !     real array dwork must have
+    !       3*nlat*(nlat+1)+5*nlat+1 = nlat*(3*nlat+8)+1
+    !     locations which is determined by the size of dthet,
+    !     dwts, dwork, and dpbar in vhsgs1
+    !
+    dimension wvhsgs(*)
+    real dwork(*)
+    ierror = 1
+    if(nlat < 3) return
+    ierror = 2
+    if(nlon < 1) return
+    ierror = 3
+    imid = (nlat+1)/2
+    lmn = (nlat*(nlat+1))/2
+    if(lvhsgs < 2*(imid*lmn)+nlon+15) return
+    ierror = 4
+    if (ldwork < (nlat*3*(nlat+3)+2)/2) return
+    ierror = 0
+    !
+    !     set saved work space pointers
+    !
+    jw1 = 1
+    jw2 = jw1+imid*lmn
+    jw3 = jw2+imid*lmn
+    !
+    !     set unsaved work space pointers
+    !
+    iw1 = 1
+    iw2 = iw1+nlat
+    iw3 = iw2+nlat
+    iw4 = iw3+3*imid*nlat
+    !     iw2 = iw1+nlat+nlat
+    !     iw3 = iw2+nlat+nlat
+    !     iw4 = iw3+6*imid*nlat
+    call vhgsi1(nlat, imid, wvhsgs(jw1), wvhsgs(jw2), &
+        dwork(iw1), dwork(iw2), dwork(iw3), dwork(iw4))
+    call hrffti(nlon, wvhsgs(jw3))
+
 end subroutine vhsgsi
+
+
+
 subroutine vhgsi1(nlat, imid, vb, wb, dthet, dwts, dpbar, work)
-dimension vb(imid, *), wb(imid, *)
-real abel, bbel, cbel, ssqr2, dcf
-real dthet(*), dwts(*), dpbar(imid, nlat, 3), work(*)
-!
-!     compute gauss points and weights
-!     use dpbar (length 3*nnlat*(nnlat+1)) as work space for gaqd
-!
-lwk = nlat*(nlat+2)
-call gaqd(nlat, dthet, dwts, dpbar, lwk, ierror)
-!
-!     compute associated legendre functions
-!
-!     compute m=n=0 legendre polynomials for all theta(i)
-!
-ssqr2 = 1./sqrt(2.d0)
-do 90 i=1, imid
-dpbar(i, 1, 1) = ssqr2
-vb(i, 1) = 0.
-wb(i, 1) = 0.
-90 continue
-!
-!     main loop for remaining vb, and wb
-!
-do 100 n=1, nlat-1
-nm = mod(n-2, 3)+1
-nz = mod(n-1, 3)+1
-np = mod(n, 3)+1
-!
-!     compute dpbar for m=0
-!
-call dnlfk(0, n, work)
-mn = indx(0, n, nlat)
-do 105 i=1, imid
-call dnlft(0, n, dthet(i), work, dpbar(i, 1, np))
-!      pbar(i, mn) = dpbar(i, 1, np)
-105 continue
-!
-!     compute dpbar for m=1
-!
-call dnlfk(1, n, work)
-mn = indx(1, n, nlat)
-do 106 i=1, imid
-call dnlft(1, n, dthet(i), work, dpbar(i, 2, np))
-!      pbar(i, mn) = dpbar(i, 2, np)
-106 continue
-104 continue
-!
-!     compute and store dpbar for m=2, n
-!
-if(n<2) go to 108
-do 107 m=2, n
-abel = sqrt(dble(real((2*n+1)*(m+n-2)*(m+n-3)))/ &
+    dimension vb(imid, *), wb(imid, *)
+    real abel, bbel, cbel, ssqr2, dcf
+    real dthet(*), dwts(*), dpbar(imid, nlat, 3), work(*)
+    !
+    !     compute gauss points and weights
+    !     use dpbar (length 3*nnlat*(nnlat+1)) as work space for gaqd
+    !
+    lwk = nlat*(nlat+2)
+    call gaqd(nlat, dthet, dwts, dpbar, lwk, ierror)
+    !
+    !     compute associated legendre functions
+    !
+    !     compute m=n=0 legendre polynomials for all theta(i)
+    !
+    ssqr2 = 1.0/sqrt(2.0)
+    do i=1, imid
+        dpbar(i, 1, 1) = ssqr2
+        vb(i, 1) = 0.0
+        wb(i, 1) = 0.0
+    end do
+    !
+    !     main loop for remaining vb, and wb
+    !
+    do n=1, nlat-1
+        nm = mod(n-2, 3)+1
+        nz = mod(n-1, 3)+1
+        np = mod(n, 3)+1
+        !
+        !     compute dpbar for m=0
+        !
+        call dnlfk(0, n, work)
+        mn = indx(0, n, nlat)
+        do i=1, imid
+            call dnlft(0, n, dthet(i), work, dpbar(i, 1, np))
+        !      pbar(i, mn) = dpbar(i, 1, np)
+        end do
+        !
+        !     compute dpbar for m=1
+        !
+        call dnlfk(1, n, work)
+        mn = indx(1, n, nlat)
+        do i=1, imid
+            call dnlft(1, n, dthet(i), work, dpbar(i, 2, np))
+        !      pbar(i, mn) = dpbar(i, 2, np)
+        end do
+        !
+        !     compute and store dpbar for m=2, n
+        !
+        if(n<2) go to 108
+        do m=2, n
+            abel = sqrt(dble(real((2*n+1)*(m+n-2)*(m+n-3)))/ &
                 dble(real((2*n-3)*(m+n-1)*(m+n))))
-bbel = sqrt(dble(real((2*n+1)*(n-m-1)*(n-m)))/ &
+            bbel = sqrt(dble(real((2*n+1)*(n-m-1)*(n-m)))/ &
                 dble(real((2*n-3)*(m+n-1)*(m+n))))
-cbel = sqrt(dble(real((n-m+1)*(n-m+2)))/ &
+            cbel = sqrt(dble(real((n-m+1)*(n-m+2)))/ &
                 dble(real((m+n-1)*(m+n))))
-id = indx(m, n, nlat)
-if (m>=n-1) go to 102
-do 103 i=1, imid
-dpbar(i, m+1, np) = abel*dpbar(i, m-1, nm)+bbel*dpbar(i, m+1, nm) &
-                                         -cbel*dpbar(i, m-1, np)
-!      pbar(i, id) = dpbar(i, m+1, np)
-103 continue
-go to 107
-102 do 101 i=1, imid
-dpbar(i, m+1, np) = abel*dpbar(i, m-1, nm)-cbel*dpbar(i, m-1, np)
-!      pbar(i, id) = dpbar(i, m+1, np)
-101 continue
-107 continue
-!
-!     compute the derivative of the functions
-!
-108 ix = indx(0, n, nlat)
-iy = indx(n, n, nlat)
-do 125 i=1, imid
-vb(i, ix) = -dpbar(i, 2, np)
-vb(i, iy) = dpbar(i, n, np)/sqrt(dble(real(2*(n+1))))
-125 continue
-!
-if(n==1) go to 131 
-dcf = sqrt(dble(real(4*n*(n+1))))
-do 130 m=1, n-1
-ix = indx(m, n, nlat)     
-abel = sqrt(dble(real((n+m)*(n-m+1))))/dcf
-bbel = sqrt(dble(real((n-m)*(n+m+1))))/dcf
-do 130 i=1, imid
-vb(i, ix) = abel*dpbar(i, m, np)-bbel*dpbar(i, m+2, np)
-130 continue
-!
-!     compute the vector harmonic w(theta) = m*pbar/cos(theta)
-!
-!     set wb=0 for m=0
-!
-131 ix = indx(0, n, nlat)
-do 220 i=1, imid
-wb(i, ix) = 0.d0
-220 continue
-!
-!     compute wb for m=1, n
-!
-dcf = sqrt(dble(real(n+n+1))/dble(real(4*n*(n+1)*(n+n-1))))
-do 230 m=1, n
-ix = indx(m, n, nlat)     
-abel = dcf*sqrt(dble(real((n+m)*(n+m-1))))
-bbel = dcf*sqrt(dble(real((n-m)*(n-m-1))))
-if(m>=n-1) go to 231
-do 229 i=1, imid
-wb(i, ix) = abel*dpbar(i, m, nz) + bbel*dpbar(i, m+2, nz)
-229 continue
-go to 230
-231 do 228 i=1, imid
-wb(i, ix) = abel*dpbar(i, m, nz)
-228 continue
-230 continue
-100 continue
-return 
+            id = indx(m, n, nlat)
+            if (m>=n-1) go to 102
+            do i=1, imid
+                dpbar(i, m+1, np) = abel*dpbar(i, m-1, nm)+bbel*dpbar(i, m+1, nm) &
+                    -cbel*dpbar(i, m-1, np)
+            !      pbar(i, id) = dpbar(i, m+1, np)
+            end do
+            cycle!go to 107
+            102 do i=1, imid
+                dpbar(i, m+1, np) = abel*dpbar(i, m-1, nm)-cbel*dpbar(i, m-1, np)
+            !      pbar(i, id) = dpbar(i, m+1, np)
+            end do
+        end do
+        !
+        !     compute the derivative of the functions
+        !
+108     ix = indx(0, n, nlat)
+        iy = indx(n, n, nlat)
+        do i=1, imid
+            vb(i, ix) = -dpbar(i, 2, np)
+            vb(i, iy) = dpbar(i, n, np)/sqrt(dble(real(2*(n+1))))
+        end do
+        !
+        if(n==1) go to 131
+        dcf = sqrt(dble(real(4*n*(n+1))))
+        do m=1, n-1
+            ix = indx(m, n, nlat)
+            abel = sqrt(dble(real((n+m)*(n-m+1))))/dcf
+            bbel = sqrt(dble(real((n-m)*(n+m+1))))/dcf
+            do i=1, imid
+                vb(i, ix) = abel*dpbar(i, m, np)-bbel*dpbar(i, m+2, np)
+            end do
+        end do
+        !
+        !     compute the vector harmonic w(theta) = m*pbar/cos(theta)
+        !
+        !     set wb=0 for m=0
+        !
+131     ix = indx(0, n, nlat)
+        do i=1, imid
+            wb(i, ix) = 0.d0
+        end do
+        !
+        !     compute wb for m=1, n
+        !
+        dcf = sqrt(dble(real(n+n+1))/dble(real(4*n*(n+1)*(n+n-1))))
+        do m=1, n
+            ix = indx(m, n, nlat)
+            abel = dcf*sqrt(dble(real((n+m)*(n+m-1))))
+            bbel = dcf*sqrt(dble(real((n-m)*(n-m-1))))
+            if(m>=n-1) go to 231
+
+            do i=1, imid
+                wb(i, ix) = abel*dpbar(i, m, nz) + bbel*dpbar(i, m+2, nz)
+            end do
+
+            cycle
+            231 do i=1, imid
+                wb(i, ix) = abel*dpbar(i, m, nz)
+            end do
+        end do
+    end do
+
 end subroutine vhgsi1

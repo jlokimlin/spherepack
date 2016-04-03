@@ -1020,11 +1020,20 @@ wb(i, ix) = abel*dpbar(i, m, nz)*dwts(i)
 228 continue
 230 continue
 100 continue
-return 
+
 end subroutine vhgai1
 
-function indx(m, n, nlat)
-integer indx
-indx = m*nlat-(m*(m+1))/2+n+1
-return
+pure function indx(m, n, nlat) result (return_value)
+implicit none
+!----------------------------------------------------------------------
+! Dictionary: calling arguments
+!----------------------------------------------------------------------
+integer, intent (in) :: m
+integer, intent (in) :: n
+integer, intent (in) :: nlat
+integer              :: return_value
+!----------------------------------------------------------------------
+
+return_value = m*nlat-(m*(m+1))/2+n+1
+
 end function indx

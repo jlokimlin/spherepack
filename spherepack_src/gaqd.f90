@@ -177,12 +177,17 @@ subroutine gaqd(nlat, theta, wts, w, lwork, ierror)
             !
             wts(nix) = (nlat+nlat+1)/(dpb+pb*cos(zlast)/sin(zlast))**2
             nix = nix-1
+
             if(nix==0) go to 30
+
             if(nix==nhalf-1)  then
-                zero = 3.0*zero-PI
+                zero = 3.0 * zero - PI
             end if
+
             if(nix<nhalf-1)  zero = zero+zero-zprev
+
             zprev = zhold
+
             go to 9
             !
             !     extend points and weights via symmetries
@@ -242,7 +247,7 @@ subroutine cpdp(n, cz, cp, dcp)
         t2 = real(n+1)
         t3 = 0.0
         t4 = real(2*n + 1)
-        if(mod(n, 2)==0) then
+        if(mod(n, 2) == 0) then
             cp(ncp) = 1.0
             do j = ncp, 2, -1
                 t1 = t1+2.0
@@ -257,7 +262,7 @@ subroutine cpdp(n, cz, cp, dcp)
             t4 = t4-2.0
             cz = (t1*t2)/(t3*t4)*cp(1)
             do j=1, ncp
-                dcp(j) = (j+j)*cp(j)
+                dcp(j) = real(2*j)*cp(j)
             end do
         else
             cp(ncp) = 1.0
@@ -269,7 +274,7 @@ subroutine cpdp(n, cz, cp, dcp)
                 cp(j) = (t1*t2)/(t3*t4)*cp(j+1)
             end do
             do j=1, ncp
-                dcp(j) = (j+j-1)*cp(j)
+                dcp(j) = real(2*j-1)*cp(j)
             end do
         end if
     end associate
@@ -277,7 +282,7 @@ subroutine cpdp(n, cz, cp, dcp)
 end subroutine cpdp
 
 
-subroutine tpdp (n, theta, cz, cp, dcp, pb, dpb)
+subroutine tpdp(n, theta, cz, cp, dcp, pb, dpb)
     implicit none
     !
     !     computes pn(theta) and its derivative dpb(theta) with
@@ -305,12 +310,12 @@ subroutine tpdp (n, theta, cz, cp, dcp, pb, dpb)
         sdt => sin(2.0*theta) &
         )
 
-        if(mod(n, 2) ==0) then
+        if(mod(n, 2) == 0) then
             !
             !     n even
             !
             kdo = n/2
-            pb = 0.5*cz
+            pb = 0.5 * cz
             dpb = 0.0
             if(n > 0) then
                 cth = cdt
