@@ -120,7 +120,7 @@ do 10 i=1, nlat
 if(eyer <= h(i, j)) return
 10 continue
 ierror = 0
-pi = 4.*atan(1.)
+pi = acos( -1.0 )
 dtr = pi/180.
 !
 !     ****     set up pointers to sub work arrays in wk and iwk
@@ -224,7 +224,7 @@ end subroutine interp
 subroutine sptc(r, len, m, n, clat, slat, x, y, z)
 !     ****     transforms from spherical to cartesian coordinates
 dimension r(len, 1), clat(n), slat(n), x(n, m), y(n, m), z(n, m)
-pi = 4.*atan(1.)
+pi = acos( -1.0 )
 dt = pi/(n-1)
 dp = (pi+pi)/(m-1)
 do 10 j=1, n
@@ -328,7 +328,7 @@ mfac(nf) = 4
 ns2 = n/2
 mf1 = mfac(nf)
 mst(1) = (m-1)/mf1
-pi = 4.*atan(1.)
+pi = acos( -1.0 )
 dt = pi/real(n-1)
 jf = nf-1
 do 110 jdo=2, ns2 

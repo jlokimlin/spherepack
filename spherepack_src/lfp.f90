@@ -176,7 +176,7 @@ return
 40 ls2 = (l+1)/2
 lm1 = l-1
 np1 = n+1
-pi = 4.*atan(1.)
+pi = acos( -1.0 )
 dt = pi/lm1
 nmod = mod(n, 2)
 mmod = mod(m, 2)

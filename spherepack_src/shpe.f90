@@ -321,7 +321,7 @@ if(ms2<=0.or.ms2>=nte) go to 200
 ! replacement code
 !
 call RANDOM_SEED()
-call RANDOM_NUMBER(xx(1:nte))
+call random_number(xx(1:nte))
 it = 0
 201 do i=1, nte
 z(i) = 0.0
@@ -510,7 +510,7 @@ if(ms2<=0.or.ms2>=nto) go to 300
 !     end do
 ! replacement code
 !
-call RANDOM_NUMBER(xx(1:nte))
+call random_number(xx(1:nte))
 if(modn==1) xx(nte) = 0.0
 it = 0
 306 do i=1, nte

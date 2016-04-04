@@ -156,7 +156,7 @@ call intrpg(wk(nz1), m, n, wk(nw1), wk(nw2), iwk(niflag))
 call sptcg(wk(nz1), m, n, theta, wk(nclat), wk(nslat), wk(nx), wk(ny), &
                                                       wk(nz))
 !     ****     transform eye position to cartesian coordinates
-pi = 4.*atan(1.)
+pi = acos( -1.0 )
 dtr = pi/180.
 xeye=eyer*sin(dtr*eyelat)
 yeye=xeye*sin(dtr*eyelon)
@@ -247,7 +247,7 @@ subroutine sptcg(r, m, n, theta, clat, slat, x, y, z)
 !     ****     transforms from spherical to cartesian coordinates
 dimension r(n, m), clat(n), slat(n), x(n, m), y(n, m), z(n, m)
 real theta(*)
-pi = 4.*atan(1.)
+pi = acos( -1.0 )
 dp = (pi+pi)/(m-1)
 clat(1) = 1.
 slat(1) = 0.
@@ -355,7 +355,7 @@ mfac(nf) = 4
 ns2 = n/2
 mf1 = mfac(nf)
 mst(1) = (m-1)/mf1
-pi = 4.*atan(1.)
+pi = acos( -1.0 )
 dt = pi/real(n-1)
 jf = nf-1
 do 110 jdo=2, ns2 

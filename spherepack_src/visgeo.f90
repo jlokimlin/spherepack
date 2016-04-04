@@ -210,7 +210,7 @@ itype(ntri) = 3
 !     1             x3(l2), y3(l2), z3(l2), l2=1, ntri)
 ! 23   format(9f10.7)
 !
-pi = 4.*atan(1.)
+pi = acos( -1.0 )
 dtr = pi/180.
 xeye=eyer*sin(dtr*eyelat)
 yeye=xeye*sin(dtr*eyelon)
@@ -225,7 +225,7 @@ r1 = x*x+y*y
 if(r1 /= 0.) go to 10
 phi = 0.
 theta = 0.
-if(z < 0.) theta = 4.*atan(1.)
+if(z < 0.) theta = acos( -1.0 )
 return
 10 r = sqrt(r1+z*z)
 r1 = sqrt(r1) 

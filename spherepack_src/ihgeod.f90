@@ -154,7 +154,7 @@ subroutine ctos(x, y, z, r, theta, phi)
     if(r1 /= 0.) go to 10
     phi = 0.
     theta = 0.
-    if(z < 0.) theta = 4.*atan(1.)
+    if(z < 0.) theta = acos( -1.0 )
     return
 10  r = sqrt(r1+z*z)
     r1 = sqrt(r1)

@@ -355,7 +355,7 @@ subroutine gpot(t,alpha,beta,omega,hzero,re,nlat,nlon,idim, &
     call stoc(1.,beta,lambdc,xc,yc,zc)
     ca = cos(alpha)
     sa = sin(alpha)
-    pi = 4.*atan(1.)
+    pi = acos( -1.0 )
     tpi = pi+pi
     dlon = tpi/nlon
     do 10 j=1,nlon
@@ -400,7 +400,7 @@ subroutine gpot(t,alpha,beta,omega,hzero,re,nlat,nlon,idim, &
         if(r1 /= 0.) go to 10
         phi = 0.
         theta = 0.
-        if(z < 0.) theta = 4.*atan(1.)
+        if(z < 0.) theta = acos( -1.0 )
         return
 10      r = sqrt(r1+z*z)
         r1 = sqrt(r1)

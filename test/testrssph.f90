@@ -122,7 +122,13 @@ program testrssph
     !
     !     set grid sizes with parameter statements
     !
-    integer nnlatg,nnlong,nnlate,nnlone,llwork,llsave,lldwork
+    integer :: nnlatg
+    integer :: nnlong
+    integer :: nnlate
+    integer :: nnlone
+    integer :: llwork
+    integer :: llsave
+    integer :: lldwork
     parameter (nnlatg=92, nnlong=194, nnlate=19,nnlone=36)
     !
     !     set predetermined minimum saved and unsaved work space lengths
@@ -135,14 +141,42 @@ program testrssph
     !
     !     dimension and type data arrays and grid vectors and internal variables
     !
-    real datae(nnlate,nnlone), datag(nnlong,nnlatg)
-    real work(llwork),wsave(llsave),thetag(nnlatg)
-    real dwork(lldwork)
-    real dtheta(nnlatg),dwts(nnlatg)
-    integer igride(2),igridg(2)
-    integer nlatg,nlong,nlate,nlone,lwork,lsave,ldwork
-    real pi,dlate,dlone,dlong,cp,sp,ct,st,xyz,err2,t,p,dif
-    integer i,j,intl,ier,lsvmin,lwkmin
+    real :: datae(nnlate,nnlone)
+    real :: datag(nnlong,nnlatg)
+    real :: work(llwork)
+    real :: wsave(llsave)
+    real :: thetag(nnlatg)
+    real :: dwork(lldwork)
+    real :: dtheta(nnlatg)
+    real :: dwts(nnlatg)
+    integer :: igride(2)
+    integer :: igridg(2)
+    integer :: nlatg
+    integer :: nlong
+    integer :: nlate
+    integer :: nlone
+    integer :: lwork
+    integer :: lsave
+    integer :: ldwork
+    real :: pi
+    real :: dlate
+    real :: dlone
+    real :: dlong
+    real :: cp
+    real :: sp
+    real :: ct
+    real :: st
+    real :: xyz
+    real :: err2
+    real :: t
+    real :: p
+    real :: dif
+    integer :: i
+    integer :: j
+    integer :: intl
+    integer :: ier
+    integer :: lsvmin
+    integer :: lwkmin
     !
     !     set grid sizes and dimensions from parameter statements
     !
@@ -277,7 +311,7 @@ program testrssph
     !
     !     transfer DATAG back to DATAE
     !
-    call TRSSPH(intl,igridg,nlong,nlatg,datag,igride,nlone, &
+    call trssph(intl,igridg,nlong,nlatg,datag,igride,nlone, &
         nlate,datae,wsave,lsave,lsvmin,work,lwork,lwkmin,dwork, &
         ldwork,ier)
     !
@@ -305,4 +339,5 @@ program testrssph
         err2 = sqrt(err2/(nlate*nlone))
         write (6,300) err2
     end if
+
 end program testrssph

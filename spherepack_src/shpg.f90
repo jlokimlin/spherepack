@@ -279,7 +279,7 @@ if(nec<=0) go to 200
 ! replacement code
 !
 call RANDOM_SEED()
-call RANDOM_NUMBER(xx(1:nte))
+call random_number(xx(1:nte))
 !
 it = 0
 201 do i=1, nte
@@ -437,7 +437,7 @@ if(noc<=0) go to 300
 !     replacement code with standard Fortran90 
 !     intrinsic
 !
-call RANDOM_NUMBER(xx(1:nte))
+call random_number(xx(1:nte))
 if(modn==1) xx(nte) = 0.0
 it = 0
 306 do i=1, nte

@@ -50,7 +50,7 @@
 !     grid" in (ureg, vreg) (which includes poles).  the transfer can go from
 !     (uoff, voff) to (ureg, vreg) or vice versa (see ioff).  the grids which
 !     underly the vector fields are described below.  the north and south
-!     pole are at 0.5*pi and-0.5*pi radians respectively (pi=4.*atan(1.)).
+!     pole are at 0.5*pi and-0.5*pi radians respectively (pi=acos( -1.0 )).
 !     uoff and ureg are the east longitudinal vector data components.  voff
 !     and vreg are the latitudinal vector data components.
 !
