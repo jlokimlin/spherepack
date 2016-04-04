@@ -533,7 +533,7 @@ subroutine shaes1(nlat, isym, nt, g, idgs, jdgs, a, b, mdab, ndab, &
 
     27 do k=1, nt
         call hrfftf(ls, nlon, ge(1, 1, k), ls, whrfft, work)
-        if (mod(nlon, 2) /= 0) cycle
+        if (mod(nlon, 2) /= 0) exit
         do i=1, ls
             ge(i, nlon, k) = 0.5*ge(i, nlon, k)
         end do

@@ -459,7 +459,7 @@ subroutine shses1(nlat, isym, nt, g, idgs, jdgs, a, b, mdab, ndab, p, imid, &
                 g(nlp1-i, j, k) = 0.5*(ge(i, j, k)-go(i, j, k))
             end do
 
-            if (modl == 0) cycle!go to 170
+            if (modl == 0) exit!go to 170
 
             g(imid, j, k) = .5*ge(imid, j, k)
 

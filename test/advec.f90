@@ -38,7 +38,7 @@
 !                   axis
 !     beta          latitude of the cosine bell
 !     aa            radius of earth in meters
-!     ncycle        cycle number
+!     ncycle        exit number
 !     time          model time in seconds
 !     dt            time step
 !     lambda        longitude
@@ -283,7 +283,7 @@ program advec
             write(*,390) ncycle,htime,dt,nlat,nlon,omega,hzero, &
                 alphad,errm,err2
 390         format(//' advecting cosine bell, test case 2',/ &
-                ,' cycle number              ',i10 &
+                ,' exit number              ',i10 &
                 ,' model time in  hours      ',f10.2/ &
                 ,' time step in seconds      ',f10.0 &
                 ,' number of latitudes       ',i10/ &

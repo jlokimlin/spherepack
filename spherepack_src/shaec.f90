@@ -451,7 +451,7 @@ subroutine shaec1(nlat, isym, nt, g, idgs, jdgs, a, b, mdab, ndab, imid, &
 
     27 do k=1, nt
         call hrfftf(ls, nlon, ge(1, 1, k), ls, whrfft, work)
-        if(mod(nlon, 2) /= 0) cycle !go to 35
+        if(mod(nlon, 2) /= 0) exit !go to 35
         do i=1, ls
             ge(i, nlon, k) = .5*ge(i, nlon, k)
         end do

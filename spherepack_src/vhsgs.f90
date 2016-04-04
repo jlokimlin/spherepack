@@ -1126,7 +1126,7 @@ subroutine vhgsi1(nlat, imid, vb, wb, dthet, dwts, dpbar, work)
                     -cbel*dpbar(i, m-1, np)
             !      pbar(i, id) = dpbar(i, m+1, np)
             end do
-            cycle!go to 107
+            exit!go to 107
             102 do i=1, imid
                 dpbar(i, m+1, np) = abel*dpbar(i, m-1, nm)-cbel*dpbar(i, m-1, np)
             !      pbar(i, id) = dpbar(i, m+1, np)
@@ -1175,7 +1175,7 @@ subroutine vhgsi1(nlat, imid, vb, wb, dthet, dwts, dpbar, work)
                 wb(i, ix) = abel*dpbar(i, m, nz) + bbel*dpbar(i, m+2, nz)
             end do
 
-            cycle
+            exit
             231 do i=1, imid
                 wb(i, ix) = abel*dpbar(i, m, nz)
             end do

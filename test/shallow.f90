@@ -72,7 +72,7 @@ program shallow
     !     pzero         mean height of geopotential
     !     uzero         maximum velocity
     !     alpha         tilt angle of the rotated grid
-    !     ncycle        cycle number
+    !     ncycle        exit number
     !     time          model time in seconds
     !     dt            time step
     !     lambda        longitude
@@ -406,7 +406,7 @@ program shallow
     write(*,390) ncycle,htime,dt,nlat,nlon,mmode,omega,pzero, &
         uzero,alphad
 390 format(//' steady nonlinear rotated flow, test case 3'/ &
-        ' cycle number              ' i10 &
+        ' exit number              ' i10 &
         ' model time in  hours      ' f10.2/ &
         ' time step in seconds      ' f10.0 &
         ' number of latitudes       ' i10/ &
