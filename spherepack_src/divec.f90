@@ -275,11 +275,13 @@ subroutine divec(nlat, nlon, isym, nt, dv, idv, jdv, br, bi, mdb, ndb, &
     !     if(lwork .lt. nln+max(ls*nlon, 3*nlat*imid)+2*mn+nlat) return
     l1 = min(nlat, (nlon+2)/2)
     l2 = (nlat+1)/2
+
     if (isym == 0) then
         lwkmin =  nlat*(nt*nlon+max(3*l2, nlon)+2*nt*l1+1)
     else
         lwkmin = l2*(nt*nlon+max(3*nlat, nlon)) + nlat*(2*nt*l1+1)
     end if
+
     if (lwork < lwkmin) return
     ierror = 0
     !
@@ -290,11 +292,14 @@ subroutine divec(nlat, nlon, isym, nt, dv, idv, jdv, br, bi, mdb, ndb, &
     is = ib+mn
     iwk = is+nlat
     lwk = lwork-2*mn-nlat
+
     call divec1(nlat, nlon, isym, nt, dv, idv, jdv, br, bi, mdb, ndb, &
         work(ia), work(ib), mab, work(is), wshsec, lshsec, work(iwk), lwk, &
         ierror)
-    return
+
 end subroutine divec
+
+
 
 subroutine divec1(nlat, nlon, isym, nt, dv, idv, jdv, br, bi, mdb, ndb, &
     a, b, mab, sqnn, wshsec, lshsec, wk, lwk, ierror)
@@ -304,42 +309,42 @@ subroutine divec1(nlat, nlon, isym, nt, dv, idv, jdv, br, bi, mdb, ndb, &
     !
     !     set coefficient multiplyers
     !
-    do 1 n=2, nlat
+    do n=2, nlat
         fn = real(n-1)
-        sqnn(n) = sqrt(fn*(fn+1.))
-1   continue
+        sqnn(n) = sqrt(fn*(fn + 1.0))
+    end do
     !
     !     compute divergence scalar coefficients for each vector field
     !
-    do 2 k=1, nt
-        do 3 n=1, nlat
-            do 4 m=1, mab
+    do k=1, nt
+        do n=1, nlat
+            do m=1, mab
                 a(m, n, k) = 0.0
                 b(m, n, k) = 0.0
-4           continue
-3       continue
+            end do
+        end do
         !
         !     compute m=0 coefficients
         !
-        do 5 n=2, nlat
+        do n=2, nlat
             a(1, n, k) = -sqnn(n)*br(1, n, k)
             b(1, n, k) = -sqnn(n)*bi(1, n, k)
-5       continue
+        end do
         !
         !     compute m>0 coefficients using vector spherepack value for mmax
         !
         mmax = min(nlat, (nlon+1)/2)
-        do 6 m=2, mmax
-            do 7 n=m, nlat
+        do m=2, mmax
+            do n=m, nlat
                 a(m, n, k) = -sqnn(n)*br(m, n, k)
                 b(m, n, k) = -sqnn(n)*bi(m, n, k)
-7           continue
-6       continue
-2   continue
+            end do
+        end do
+    end do
     !
     !     synthesize a, b into dv
     !
     call shsec(nlat, nlon, isym, nt, dv, idv, jdv, a, b, &
         mab, nlat, wshsec, lshsec, wk, lwk, ierror)
-    return
+
 end subroutine divec1

@@ -280,11 +280,14 @@ subroutine sfvpgs(nlat, nlon, isym, nt, sf, vp, idv, jdv, br, bi, cr, ci, &
     is = ib+mn
     iwk = is+nlat
     lwk = lwork-2*mn-nlat
+
     call stvpgs1(nlat, nlon, isym, nt, sf, vp, idv, jdv, br, bi, cr, ci, mdb, ndb, &
         work(ia), work(ib), mab, work(is), wshsgs, lshsgs, work(iwk), lwk, &
         ierror)
-    return
+
 end subroutine sfvpgs
+
+
 
 subroutine stvpgs1(nlat, nlon, isym, nt, sf, vp, idv, jdv, br, bi, cr, ci, &
     mdb, ndb, a, b, mab, fnn, wshsgs, lshsgs, wk, lwk, ierror)
@@ -368,5 +371,5 @@ subroutine stvpgs1(nlat, nlon, isym, nt, sf, vp, idv, jdv, br, bi, cr, ci, &
     !
     call shsgs(nlat, nlon, isym, nt, vp, idv, jdv, a, b, &
         mab, nlat, wshsgs, lshsgs, wk, lwk, ierror)
-    return
+
 end subroutine stvpgs1

@@ -223,108 +223,111 @@
 !                                                                              
 !   
 subroutine vrtes(nlat, nlon, isym, nt, vort, ivrt, jvrt, cr, ci, mdc, ndc, &
-                 wshses, lshses, work, lwork, ierror)
+    wshses, lshses, work, lwork, ierror)
 
-dimension vort(ivrt, jvrt, nt), cr(mdc, ndc, nt), ci(mdc, ndc, nt)
-dimension wshses(lshses), work(lwork)
-!
-!     check input parameters
-!
-ierror = 1
-if(nlat < 3) return
-ierror = 2
-if(nlon < 4) return
-ierror = 3
-if (isym<0 .or. isym>2) return
-ierror = 4
-if(nt < 0) return
-ierror = 5
-imid = (nlat+1)/2
-if((isym==0 .and. ivrt<nlat) .or. &
-   (isym>0 .and. ivrt<imid)) return
-ierror = 6
-if(jvrt < nlon) return
-ierror = 7
-if(mdc < min(nlat, (nlon+1)/2)) return
-mmax = min(nlat, (nlon+2)/2)
-ierror = 8
-if(ndc < nlat) return
-ierror = 9
-imid = (nlat+1)/2
-lpimn = (imid*mmax*(nlat+nlat-mmax+1))/2
-if(lshses < lpimn+nlon+15) return
-ierror = 10
-!
-!     verify unsaved work space (add to what shses requires, file f3)
-!
-!
-!     set first dimension for a, b (as requried by shses)
-!
-mab = min(nlat, nlon/2+1)
-mn = mab*nlat*nt
-ls = nlat
-if(isym > 0) ls = imid
-nln = nt*ls*nlon
-if(lwork< nln+ls*nlon+2*mn+nlat) return
-ierror = 0
-!
-!     set work space pointers
-!
-ia = 1
-ib = ia+mn
-is = ib+mn
-iwk = is+nlat
-lwk = lwork-2*mn-nlat
-call vrtes1(nlat, nlon, isym, nt, vort, ivrt, jvrt, cr, ci, mdc, ndc, &
-work(ia), work(ib), mab, work(is), wshses, lshses, work(iwk), lwk, &
-ierror)
-return
+    dimension vort(ivrt, jvrt, nt), cr(mdc, ndc, nt), ci(mdc, ndc, nt)
+    dimension wshses(lshses), work(lwork)
+    !
+    !     check input parameters
+    !
+    ierror = 1
+    if(nlat < 3) return
+    ierror = 2
+    if(nlon < 4) return
+    ierror = 3
+    if (isym<0 .or. isym>2) return
+    ierror = 4
+    if(nt < 0) return
+    ierror = 5
+    imid = (nlat+1)/2
+    if((isym==0 .and. ivrt<nlat) .or. &
+        (isym>0 .and. ivrt<imid)) return
+    ierror = 6
+    if(jvrt < nlon) return
+    ierror = 7
+    if(mdc < min(nlat, (nlon+1)/2)) return
+    mmax = min(nlat, (nlon+2)/2)
+    ierror = 8
+    if(ndc < nlat) return
+    ierror = 9
+    imid = (nlat+1)/2
+    lpimn = (imid*mmax*(nlat+nlat-mmax+1))/2
+    if(lshses < lpimn+nlon+15) return
+    ierror = 10
+    !
+    !     verify unsaved work space (add to what shses requires, file f3)
+    !
+    !
+    !     set first dimension for a, b (as requried by shses)
+    !
+    mab = min(nlat, nlon/2+1)
+    mn = mab*nlat*nt
+    ls = nlat
+    if(isym > 0) ls = imid
+    nln = nt*ls*nlon
+    if(lwork< nln+ls*nlon+2*mn+nlat) return
+    ierror = 0
+    !
+    !     set work space pointers
+    !
+    ia = 1
+    ib = ia+mn
+    is = ib+mn
+    iwk = is+nlat
+    lwk = lwork-2*mn-nlat
+
+    call vrtes1(nlat, nlon, isym, nt, vort, ivrt, jvrt, cr, ci, mdc, ndc, &
+        work(ia), work(ib), mab, work(is), wshses, lshses, work(iwk), lwk, &
+        ierror)
+
 end subroutine vrtes
 
+
+
 subroutine vrtes1(nlat, nlon, isym, nt, vort, ivrt, jvrt, cr, ci, mdc, ndc, &
-                  a, b, mab, sqnn, wsav, lwsav, wk, lwk, ierror)
-dimension vort(ivrt, jvrt, nt), cr(mdc, ndc, nt), ci(mdc, ndc, nt)
-dimension a(mab, nlat, nt), b(mab, nlat, nt), sqnn(nlat)
-dimension wsav(lwsav), wk(lwk)
-!
-!     set coefficient multiplyers
-!
-do 1 n=2, nlat
-fn = real(n-1)
-sqnn(n) = sqrt(fn*(fn+1.))
-1 continue
-!
-!     compute divergence scalar coefficients for each vector field
-!
-do 2 k=1, nt
-do 3 n=1, nlat
-do 4 m=1, mab
-a(m, n, k) = 0.0
-b(m, n, k) = 0.0
-4 continue
-3 continue
-!
-!     compute m=0 coefficients
-!
-do 5 n=2, nlat
-a(1, n, k) = sqnn(n)*cr(1, n, k)
-b(1, n, k) = sqnn(n)*ci(1, n, k)
-5 continue
-!
-!     compute m>0 coefficients
-!
-mmax = min(nlat, (nlon+1)/2)
-do 6 m=2, mmax
-do 7 n=m, nlat
-a(m, n, k) = sqnn(n)*cr(m, n, k)
-b(m, n, k) = sqnn(n)*ci(m, n, k)
-7 continue
-6 continue
-2 continue
-!
-!     synthesize a, b into vort
-!
-call shses(nlat, nlon, isym, nt, vort, ivrt, jvrt, a, b, &
-           mab, nlat, wsav, lwsav, wk, lwk, ierror)
-return
+    a, b, mab, sqnn, wsav, lwsav, wk, lwk, ierror)
+    dimension vort(ivrt, jvrt, nt), cr(mdc, ndc, nt), ci(mdc, ndc, nt)
+    dimension a(mab, nlat, nt), b(mab, nlat, nt), sqnn(nlat)
+    dimension wsav(lwsav), wk(lwk)
+    !
+    !     set coefficient multiplyers
+    !
+    do n=2, nlat
+        fn = real(n - 1)
+        sqnn(n) = sqrt(fn * (fn + 1.0))
+    end do
+    !
+    !     compute divergence scalar coefficients for each vector field
+    !
+    do k=1, nt
+        do n=1, nlat
+            do m=1, mab
+                a(m, n, k) = 0.0
+                b(m, n, k) = 0.0
+            end do
+        end do
+        !
+        !     compute m=0 coefficients
+        !
+        do n=2, nlat
+            a(1, n, k) = sqnn(n)*cr(1, n, k)
+            b(1, n, k) = sqnn(n)*ci(1, n, k)
+        end do
+        !
+        !     compute m>0 coefficients
+        !
+        mmax = min(nlat, (nlon+1)/2)
+        do m=2, mmax
+            do n=m, nlat
+                a(m, n, k) = sqnn(n)*cr(m, n, k)
+                b(m, n, k) = sqnn(n)*ci(m, n, k)
+            end do
+        end do
+    end do
+    !
+    !     synthesize a, b into vort
+    !
+    call shses(nlat, nlon, isym, nt, vort, ivrt, jvrt, a, b, &
+        mab, nlat, wsav, lwsav, wk, lwk, ierror)
+
 end subroutine vrtes1

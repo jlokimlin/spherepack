@@ -288,11 +288,14 @@ subroutine sfvpes(nlat, nlon, isym, nt, sf, vp, idv, jdv, br, bi, cr, ci, &
     is = ib+mn
     iwk = is+nlat
     lwk = lwork-2*mn-nlat
+
     call sfvpes1(nlat, nlon, isym, nt, sf, vp, idv, jdv, br, bi, cr, ci, mdb, ndb, &
         work(ia), work(ib), mab, work(is), wshses, lshses, work(iwk), lwk, &
         ierror)
-    return
+
 end subroutine sfvpes
+
+
 
 subroutine sfvpes1(nlat, nlon, isym, nt, sf, vp, idv, jdv, br, bi, cr, ci, &
     mdb, ndb, a, b, mab, fnn, wshses, lshses, wk, lwk, ierror)
@@ -375,5 +378,5 @@ subroutine sfvpes1(nlat, nlon, isym, nt, sf, vp, idv, jdv, br, bi, cr, ci, &
     !
     call shses(nlat, nlon, isym, nt, vp, idv, jdv, a, b, &
         mab, nlat, wshses, lshses, wk, lwk, ierror)
-    return
+
 end subroutine sfvpes1

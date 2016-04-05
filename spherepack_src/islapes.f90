@@ -305,7 +305,7 @@ subroutine islapes(nlat, nlon, isym, nt, xlmbda, sf, ids, jds, a, b, &
     !     check sign of xlmbda
     !
     do  k=1, nt
-        if (xlmbda(k)<0.0) then
+        if (xlmbda(k) < 0.0) then
             ierror = -1
         end if
     end do
@@ -317,11 +317,14 @@ subroutine islapes(nlat, nlon, isym, nt, xlmbda, sf, ids, jds, a, b, &
     ifn = ib+mn
     iwk = ifn+nlat
     lwk = lwork-2*mn-nlat
+
     call islpes1(nlat, nlon, isym, nt, xlmbda, sf, ids, jds, a, b, mdab, ndab, &
         work(ia), work(ib), mmax, work(ifn), wshses, lshses, work(iwk), lwk, &
         pertrb, ierror)
-    return
+
 end subroutine islapes
+
+
 
 subroutine islpes1(nlat, nlon, isym, nt, xlmbda, sf, ids, jds, a, b, &
     mdab, ndab, as, bs, mmax, fnn, wshses, lshses, wk, lwk, pertrb, ierror)
@@ -379,5 +382,5 @@ subroutine islpes1(nlat, nlon, isym, nt, xlmbda, sf, ids, jds, a, b, &
     !
     call shses(nlat, nlon, isym, nt, sf, ids, jds, as, bs, mmax, nlat, &
         wshses, lshses, wk, lwk, ierror)
-    return
+
 end subroutine islpes1

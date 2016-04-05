@@ -248,123 +248,127 @@
 !                                                                              
 !   
 subroutine ivrtes(nlat, nlon, isym, nt, v, w, idvw, jdvw, a, b, mdab, ndab, &
-                  wvhses, lvhses, work, lwork, pertrb, ierror)
-dimension v(idvw, jdvw, nt), w(idvw, jdvw, nt), pertrb(nt)
-dimension a(mdab, ndab, nt), b(mdab, ndab, nt)
-dimension wvhses(lvhses), work(lwork)
-!
-!     check input parameters
-!
-ierror = 1
-if(nlat < 3) return
-ierror = 2
-if(nlon < 4) return
-ierror = 3
-if(isym<0 .or. isym>2) return
-ierror = 4
-if(nt < 0) return
-ierror = 5
-imid = (nlat+1)/2
-if((isym==0 .and. idvw<nlat) .or. &
-   (isym/=0 .and. idvw<imid)) return
-ierror = 6
-if(jdvw < nlon) return
-ierror = 7
-mmax = min(nlat, (nlon+1)/2)
-if(mdab < min(nlat, (nlon+2)/2)) return
-ierror = 8
-if(ndab < nlat) return
-ierror = 9
-lzz1 = 2*nlat*imid
-labc = 3*(max(mmax-2, 0)*(nlat+nlat-mmax-1))/2
-l1 = min(nlat, (nlon+2)/2)
-l2 = (nlat+1)/2
-lwmin = (l1*l2*(nlat+nlat-l1+1))/2+nlon+15
-ierror = 10
-!
-!     verify unsaved work space length
-!
-mn = mmax*nlat*nt
-if(isym/=0  .and. lwork < &
-nlat*(2*nt*nlon+max(6*imid, nlon))+2*mn+nlat) return
-if(isym==0  .and. lwork < &
-imid*(2*nt*nlon+max(6*nlat, nlon))+2*mn+nlat) return
-ierror = 0
-!
-!     set work space pointers
-!
-icr = 1
-ici = icr + mn
-is = ici + mn
-iwk = is + nlat
-liwk = lwork-2*mn-nlat
-call ivtes1(nlat, nlon, isym, nt, v, w, idvw, jdvw, work(icr), work(ici), &
-            mmax, work(is), mdab, ndab, a, b, wvhses, lvhses, work(iwk), &
-            liwk, pertrb, ierror)
-return
+    wvhses, lvhses, work, lwork, pertrb, ierror)
+    dimension v(idvw, jdvw, nt), w(idvw, jdvw, nt), pertrb(nt)
+    dimension a(mdab, ndab, nt), b(mdab, ndab, nt)
+    dimension wvhses(lvhses), work(lwork)
+    !
+    !     check input parameters
+    !
+    ierror = 1
+    if(nlat < 3) return
+    ierror = 2
+    if(nlon < 4) return
+    ierror = 3
+    if(isym<0 .or. isym>2) return
+    ierror = 4
+    if(nt < 0) return
+    ierror = 5
+    imid = (nlat+1)/2
+    if((isym==0 .and. idvw<nlat) .or. &
+        (isym/=0 .and. idvw<imid)) return
+    ierror = 6
+    if(jdvw < nlon) return
+    ierror = 7
+    mmax = min(nlat, (nlon+1)/2)
+    if(mdab < min(nlat, (nlon+2)/2)) return
+    ierror = 8
+    if(ndab < nlat) return
+    ierror = 9
+    lzz1 = 2*nlat*imid
+    labc = 3*(max(mmax-2, 0)*(nlat+nlat-mmax-1))/2
+    l1 = min(nlat, (nlon+2)/2)
+    l2 = (nlat+1)/2
+    lwmin = (l1*l2*(nlat+nlat-l1+1))/2+nlon+15
+    ierror = 10
+    !
+    !     verify unsaved work space length
+    !
+    mn = mmax*nlat*nt
+    if(isym/=0  .and. lwork < &
+        nlat*(2*nt*nlon+max(6*imid, nlon))+2*mn+nlat) return
+    if(isym==0  .and. lwork < &
+        imid*(2*nt*nlon+max(6*nlat, nlon))+2*mn+nlat) return
+    ierror = 0
+    !
+    !     set work space pointers
+    !
+    icr = 1
+    ici = icr + mn
+    is = ici + mn
+    iwk = is + nlat
+    liwk = lwork-2*mn-nlat
+
+    call ivtes1(nlat, nlon, isym, nt, v, w, idvw, jdvw, work(icr), work(ici), &
+        mmax, work(is), mdab, ndab, a, b, wvhses, lvhses, work(iwk), &
+        liwk, pertrb, ierror)
+
 end subroutine ivrtes
 
+
+
 subroutine ivtes1(nlat, nlon, isym, nt, v, w, idvw, jdvw, cr, ci, mmax, &
-sqnn, mdab, ndab, a, b, wsav, lwsav, wk, lwk, pertrb, ierror)
-dimension v(idvw, jdvw, nt), w(idvw, jdvw, nt), pertrb(nt)
-dimension cr(mmax, nlat, nt), ci(mmax, nlat, nt), sqnn(nlat)
-dimension a(mdab, ndab, nt), b(mdab, ndab, nt)
-dimension wsav(lwsav), wk(lwk)
-!
-!     preset coefficient multiplyers in vector
-!
-do 1 n=2, nlat
-fn = real(n-1)
-sqnn(n) = sqrt(fn*(fn+1.))
-1 continue
-!
-!     compute multiple vector fields coefficients
-!
-do 2 k=1, nt
-!
-!     set vorticity field perturbation adjustment
-!
-pertrb(k) = a(1, 1, k)/(2.*sqrt(2.))
-!
-!     preset br, bi to 0.0
-!
-do 3 n=1, nlat
-do 4 m=1, mmax
-cr(m, n, k) = 0.0
-ci(m, n, k) = 0.0
-4 continue
-3 continue
-!
-!     compute m=0 coefficients
-!
-do 5 n=2, nlat
-cr(1, n, k) = a(1, n, k)/sqnn(n)
-ci(1, n, k) = b(1, n, k)/sqnn(n)
-5 continue
-!
-!     compute m>0 coefficients
-!
-do 6 m=2, mmax
-do 7 n=m, nlat
-cr(m, n, k) = a(m, n, k)/sqnn(n)
-ci(m, n, k) = b(m, n, k)/sqnn(n)
-7 continue
-6 continue
-2 continue
-!
-!     set ityp for vector synthesis with divergence=0
-!
-if (isym==0) then
-ityp = 2
-else if (isym==1) then
-ityp = 5
-else if (isym==2) then
-ityp = 8
-end if
-!
-!     vector sythesize cr, ci into divergence free vector field (v, w)
-!
-call vhses(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
-           mmax, nlat, wsav, lwsav, wk, lwk, ierror)
-return
+    sqnn, mdab, ndab, a, b, wsav, lwsav, wk, lwk, pertrb, ierror)
+    dimension v(idvw, jdvw, nt), w(idvw, jdvw, nt), pertrb(nt)
+    dimension cr(mmax, nlat, nt), ci(mmax, nlat, nt), sqnn(nlat)
+    dimension a(mdab, ndab, nt), b(mdab, ndab, nt)
+    dimension wsav(lwsav), wk(lwk)
+    !
+    !     preset coefficient multiplyers in vector
+    !
+    do n=2, nlat
+        fn = real(n-1)
+        sqnn(n) = sqrt(fn*(fn + 1.0))
+    end do
+    !
+    !     compute multiple vector fields coefficients
+    !
+    do k=1, nt
+        !
+        !     set vorticity field perturbation adjustment
+        !
+        pertrb(k) = a(1, 1, k)/(2.*sqrt(2.))
+        !
+        !     preset br, bi to 0.0
+        !
+        do n=1, nlat
+            do m=1, mmax
+                cr(m, n, k) = 0.0
+                ci(m, n, k) = 0.0
+            end do
+        end do
+        !
+        !     compute m=0 coefficients
+        !
+        do n=2, nlat
+            cr(1, n, k) = a(1, n, k)/sqnn(n)
+            ci(1, n, k) = b(1, n, k)/sqnn(n)
+        end do
+        !
+        !     compute m>0 coefficients
+        !
+        do m=2, mmax
+            do n=m, nlat
+                cr(m, n, k) = a(m, n, k)/sqnn(n)
+                ci(m, n, k) = b(m, n, k)/sqnn(n)
+            end do
+        end do
+    end do
+    !
+    !     set ityp for vector synthesis with divergence=0
+    !
+    select case (isym)
+        case (0)
+            ityp = 2
+        case (1)
+            ityp = 5
+        case (2)
+            ityp = 8
+    end select
+    !
+    !     vector sythesize cr, ci into divergence free vector field (v, w)
+    !
+    call vhses(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
+        mmax, nlat, wsav, lwsav, wk, lwk, ierror)
+
 end subroutine ivtes1

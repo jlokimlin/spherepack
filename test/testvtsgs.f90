@@ -360,7 +360,7 @@ subroutine dbdx(l,mdim,a,b,dxa,dxb)
         n = np1-1
         fn = real(n)
         cn = (fn+fn+3.)/(fn+fn+1.)
-        dxa(1,np1) = sqrt(cn*(fn+2.)*(fn+1.))*a(2,np1+1)
+        dxa(1,np1) = sqrt(cn*(fn+2.)*(fn + 1.0))*a(2,np1+1)
         dxb(1,np1) = 0.
         do mp1=2,np1
             fm = real(mp1-1)
@@ -402,7 +402,7 @@ subroutine dbdy(l,mdim,a,b,dya,dyb)
         n = np1-1
         fn = real(n)
         cn = (fn+fn+3.)/(fn+fn+1.)
-        dya(1,np1) = -sqrt(cn*(fn+2.)*(fn+1.))*b(2,np1+1)
+        dya(1,np1) = -sqrt(cn*(fn+2.)*(fn + 1.0))*b(2,np1+1)
         dyb(1,np1) = 0.
         do mp1=2,np1
             fm = real(mp1-1)

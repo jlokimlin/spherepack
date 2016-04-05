@@ -318,11 +318,14 @@ subroutine islapgc(nlat, nlon, isym, nt, xlmbda, sf, ids, jds, a, b, &
     ifn = ib+mn
     iwk = ifn+nlat
     lwk = lwork-2*mn-nlat
+
     call islpgc1(nlat, nlon, isym, nt, xlmbda, sf, ids, jds, a, b, mdab, ndab, &
         work(ia), work(ib), mmax, work(ifn), wshsgc, lshsgc, work(iwk), lwk, &
         pertrb, ierror)
-    return
+
 end subroutine islapgc
+
+
 
 subroutine islpgc1(nlat, nlon, isym, nt, xlmbda, sf, ids, jds, a, b, &
     mdab, ndab, as, bs, mmax, fnn, wsav, lsav, wk, lwk, pertrb, ierror)
@@ -381,5 +384,5 @@ subroutine islpgc1(nlat, nlon, isym, nt, xlmbda, sf, ids, jds, a, b, &
     !
     call shsgc(nlat, nlon, isym, nt, sf, ids, jds, as, bs, mmax, nlat, &
         wsav, lsav, wk, lwk, ierror)
-    return
+
 end subroutine islpgc1

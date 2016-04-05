@@ -304,7 +304,7 @@ subroutine vrtec1(nlat, nlon, isym, nt, vort, ivrt, jvrt, cr, ci, mdc, ndc, &
     !
     do 1 n=2, nlat
         fn = real(n-1)
-        sqnn(n) = sqrt(fn*(fn+1.))
+        sqnn(n) = sqrt(fn*(fn + 1.0))
 1   continue
     !
     !     compute vorticity scalar coefficients for each vector field

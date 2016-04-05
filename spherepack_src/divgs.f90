@@ -280,11 +280,14 @@ subroutine divgs(nlat, nlon, isym, nt, divg, idiv, jdiv, br, bi, mdb, ndb, &
     is = ib+mn
     iwk = is+nlat
     lwk = lwork-2*mn-nlat
+
     call divgs1(nlat, nlon, isym, nt, divg, idiv, jdiv, br, bi, mdb, ndb, &
         work(ia), work(ib), mab, work(is), wshsgs, lshsgs, work(iwk), lwk, &
         ierror)
 
 end subroutine divgs
+
+
 
 subroutine divgs1(nlat, nlon, isym, nt, divg, idiv, jdiv, br, bi, mdb, ndb, &
     a, b, mab, sqnn, wshsgs, lshsgs, wk, lwk, ierror)
@@ -296,7 +299,7 @@ subroutine divgs1(nlat, nlon, isym, nt, divg, idiv, jdiv, br, bi, mdb, ndb, &
     !
     do  n=2, nlat
         fn = real(n-1)
-        sqnn(n) = sqrt(fn*(fn+1.))
+        sqnn(n) = sqrt(fn*(fn + 1.0))
     end do
     !
     !     compute divergence scalar coefficients for each vector field

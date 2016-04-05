@@ -551,7 +551,7 @@ real le2
 !
 !     compute projections of 3-d points
 !
-le2 = .6931471805599453094172321d0
+le2 = log(2.0) !.6931471805599453094172321d0
 l2e = 1.d0/le2
 fntri = ntri
 irmax = .5*l2e*log(fntri)

@@ -234,118 +234,121 @@
 ! **********************************************************************
 !   
 subroutine igrades(nlat, nlon, isym, nt, sf, isf, jsf, br, bi, mdb, ndb, &
-wshses, lshses, work, lwork, ierror)
-dimension sf(isf, jsf, nt)
-dimension br(mdb, ndb, nt), bi(mdb, ndb, nt)
-dimension wshses(lshses), work(lwork)
-!
-!     check input parameters
-!
-ierror = 1
-if(nlat < 3) return
-ierror = 2
-if(nlon < 4) return
-ierror = 3
-if(isym<0 .or. isym>2) return
-ierror = 4
-if(nt < 0) return
-ierror = 5
-imid = (nlat+1)/2
-if((isym==0 .and. isf<nlat) .or. &
-   (isym/=0 .and. isf<imid)) return
-ierror = 6
-if(jsf < nlon) return
-ierror = 7
-mmax = min(nlat, (nlon+2)/2)
-if(mdb < min(nlat, (nlon+1)/2)) return
-ierror = 8
-if(ndb < nlat) return
-ierror = 9
-!
-!     verify saved work space length
-!
-imid = (nlat+1)/2
-lpimn = (imid*mmax*(nlat+nlat-mmax+1))/2
-if(lshses < lpimn+nlon+15) return
-ierror = 10
-!
-!     set minimum and verify unsaved work space
-!
-ls = nlat
-if(isym > 0) ls = imid
-nln = nt*ls*nlon
-!
-!     set first dimension for a, b (as requried by shses)
-!
-mab = min(nlat, nlon/2+1)
-mn = mab*nlat*nt
-lwkmin = nln+ls*nlon+2*mn+nlat
-if (lwork < lwkmin) return
-ierror = 0
-!
-!     set work space pointers
-!
-ia = 1
-ib = ia + mn
-is = ib + mn
-iwk = is + nlat
-liwk = lwork-2*mn-nlat
-call igrdes1(nlat, nlon, isym, nt, sf, isf, jsf, work(ia), work(ib), mab, &
-work(is), mdb, ndb, br, bi, wshses, lshses, work(iwk), liwk, ierror)
-return
+    wshses, lshses, work, lwork, ierror)
+    dimension sf(isf, jsf, nt)
+    dimension br(mdb, ndb, nt), bi(mdb, ndb, nt)
+    dimension wshses(lshses), work(lwork)
+    !
+    !     check input parameters
+    !
+    ierror = 1
+    if(nlat < 3) return
+    ierror = 2
+    if(nlon < 4) return
+    ierror = 3
+    if(isym<0 .or. isym>2) return
+    ierror = 4
+    if(nt < 0) return
+    ierror = 5
+    imid = (nlat+1)/2
+    if((isym==0 .and. isf<nlat) .or. &
+        (isym/=0 .and. isf<imid)) return
+    ierror = 6
+    if(jsf < nlon) return
+    ierror = 7
+    mmax = min(nlat, (nlon+2)/2)
+    if(mdb < min(nlat, (nlon+1)/2)) return
+    ierror = 8
+    if(ndb < nlat) return
+    ierror = 9
+    !
+    !     verify saved work space length
+    !
+    imid = (nlat+1)/2
+    lpimn = (imid*mmax*(nlat+nlat-mmax+1))/2
+    if(lshses < lpimn+nlon+15) return
+    ierror = 10
+    !
+    !     set minimum and verify unsaved work space
+    !
+    ls = nlat
+    if(isym > 0) ls = imid
+    nln = nt*ls*nlon
+    !
+    !     set first dimension for a, b (as requried by shses)
+    !
+    mab = min(nlat, nlon/2+1)
+    mn = mab*nlat*nt
+    lwkmin = nln+ls*nlon+2*mn+nlat
+    if (lwork < lwkmin) return
+    ierror = 0
+    !
+    !     set work space pointers
+    !
+    ia = 1
+    ib = ia + mn
+    is = ib + mn
+    iwk = is + nlat
+    liwk = lwork-2*mn-nlat
+
+    call igrdes1(nlat, nlon, isym, nt, sf, isf, jsf, work(ia), work(ib), mab, &
+        work(is), mdb, ndb, br, bi, wshses, lshses, work(iwk), liwk, ierror)
+
 end subroutine igrades
 
+
+
 subroutine igrdes1(nlat, nlon, isym, nt, sf, isf, jsf, a, b, mab, &
-sqnn, mdb, ndb, br, bi, wshses, lshses, wk, lwk, ierror)
-dimension sf(isf, jsf, nt)
-dimension br(mdb, ndb, nt), bi(mdb, ndb, nt), sqnn(nlat)
-dimension a(mab, nlat, nt), b(mab, nlat, nt)
-dimension wshses(lshses), wk(lwk)
-!
-!     preset coefficient multiplyers in vector
-!
-do 1 n=2, nlat
-fn = real(n-1)
-sqnn(n) = 1.0/sqrt(fn*(fn+1.))
-1 continue
-!
-!     set upper limit for vector m subscript
-!
-mmax = min(nlat, (nlon+1)/2)
-!
-!     compute multiple scalar field coefficients
-!
-do 2 k=1, nt
-!
-!     preset to 0.0
-!
-do 3 n=1, nlat
-do 4 m=1, mab
-a(m, n, k) = 0.0
-b(m, n, k) = 0.0
-4 continue
-3 continue
-!
-!     compute m=0 coefficients
-!
-do 5 n=2, nlat
-a(1, n, k) = br(1, n, k)*sqnn(n)
-b(1, n, k)= bi(1, n, k)*sqnn(n)
-5 continue
-!
-!     compute m>0 coefficients
-!
-do 6 m=2, mmax
-do 7 n=m, nlat
-a(m, n, k) = sqnn(n)*br(m, n, k)
-b(m, n, k) = sqnn(n)*bi(m, n, k)
-7 continue
-6 continue
-2 continue
-!
-!     scalar sythesize a, b into sf
-!
-call shses(nlat, nlon, isym, nt, sf, isf, jsf, a, b, mab, nlat, &
-wshses, lshses, wk, lwk, ierror)
-return
+    sqnn, mdb, ndb, br, bi, wshses, lshses, wk, lwk, ierror)
+    dimension sf(isf, jsf, nt)
+    dimension br(mdb, ndb, nt), bi(mdb, ndb, nt), sqnn(nlat)
+    dimension a(mab, nlat, nt), b(mab, nlat, nt)
+    dimension wshses(lshses), wk(lwk)
+    !
+    !     preset coefficient multiplyers in vector
+    !
+    do n=2, nlat
+        fn = real(n-1)
+        sqnn(n) = 1.0/sqrt(fn*(fn + 1.0))
+    end do
+    !
+    !     set upper limit for vector m subscript
+    !
+    mmax = min(nlat, (nlon+1)/2)
+    !
+    !     compute multiple scalar field coefficients
+    !
+    do k=1, nt
+        !
+        !     preset to 0.0
+        !
+        do n=1, nlat
+            do m=1, mab
+                a(m, n, k) = 0.0
+                b(m, n, k) = 0.0
+            end do
+        end do
+        !
+        !     compute m=0 coefficients
+        !
+        do n=2, nlat
+            a(1, n, k) = br(1, n, k)*sqnn(n)
+            b(1, n, k)= bi(1, n, k)*sqnn(n)
+        end do
+        !
+        !     compute m>0 coefficients
+        !
+        do m=2, mmax
+            do n=m, nlat
+                a(m, n, k) = sqnn(n)*br(m, n, k)
+                b(m, n, k) = sqnn(n)*bi(m, n, k)
+            end do
+        end do
+    end do
+    !
+    !     scalar sythesize a, b into sf
+    !
+    call shses(nlat, nlon, isym, nt, sf, isf, jsf, a, b, mab, nlat, &
+        wshses, lshses, wk, lwk, ierror)
+
 end subroutine igrdes1

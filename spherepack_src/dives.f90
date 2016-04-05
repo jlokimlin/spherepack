@@ -281,11 +281,14 @@ subroutine dives(nlat, nlon, isym, nt, dv, idv, jdv, br, bi, mdb, ndb, &
     is = ib+mn
     iwk = is+nlat
     lwk = lwork-2*mn-nlat
+
     call dives1(nlat, nlon, isym, nt, dv, idv, jdv, br, bi, mdb, ndb, &
         work(ia), work(ib), mab, work(is), wshses, lshses, work(iwk), lwk, &
         ierror)
 
 end subroutine dives
+
+
 
 subroutine dives1(nlat, nlon, isym, nt, dv, idv, jdv, br, bi, mdb, ndb, &
     a, b, mab, sqnn, wshses, lshses, wk, lwk, ierror)
@@ -297,7 +300,7 @@ subroutine dives1(nlat, nlon, isym, nt, dv, idv, jdv, br, bi, mdb, ndb, &
     !
     do n=2, nlat
         fn = real(n-1)
-        sqnn(n) = sqrt(fn*(fn+1.))
+        sqnn(n) = sqrt(fn*(fn + 1.0))
     end do
     !
     !     compute divergence scalar coefficients for each vector field

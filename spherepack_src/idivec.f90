@@ -339,7 +339,7 @@ subroutine idvec1(nlat, nlon, isym, nt, v, w, idvw, jdvw, br, bi, mmax, &
     !
     do n=2, nlat
         fn = real(n-1)
-        sqnn(n) = sqrt(fn*(fn+1.))
+        sqnn(n) = sqrt(fn*(fn + 1.0))
     end do
     !
     !     compute multiple vector fields coefficients

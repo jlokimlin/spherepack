@@ -409,7 +409,7 @@ subroutine vlapgc1(nlat, nlon, ityp, nt, vlap, wlap, idvw, jdvw, brlap, &
     !
     do 1 n=2, nlat
         fn = real(n-1)
-        fnn(n) = -fn*(fn+1.)
+        fnn(n) = -fn*(fn + 1.0)
 1   continue
     !
     !     set laplacian coefficients from br, bi, cr, ci

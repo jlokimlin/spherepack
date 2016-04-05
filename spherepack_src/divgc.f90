@@ -294,6 +294,8 @@ subroutine divgc(nlat, nlon, isym, nt, dv, idv, jdv, br, bi, mdb, ndb, &
 
 end subroutine divgc
 
+
+
 subroutine divgc1(nlat, nlon, isym, nt, dv, idv, jdv, br, bi, mdb, ndb, &
     a, b, mab, sqnn, wshsgc, lshsgc, wk, lwk, ierror)
     dimension dv(idv, jdv, nt), br(mdb, ndb, nt), bi(mdb, ndb, nt)
@@ -304,7 +306,7 @@ subroutine divgc1(nlat, nlon, isym, nt, dv, idv, jdv, br, bi, mdb, ndb, &
     !
     do  n=2, nlat
         fn = real(n-1)
-        sqnn(n) = sqrt(fn*(fn+1.))
+        sqnn(n) = sqrt(fn*(fn + 1.0))
     end do
     !
     !     compute divergence scalar coefficients for each vector field

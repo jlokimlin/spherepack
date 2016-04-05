@@ -299,10 +299,13 @@ subroutine igradec(nlat, nlon, isym, nt, sf, isf, jsf, br, bi, mdb, ndb, &
     is = ib + mn
     iwk = is + nlat
     liwk = lwork-2*mn-nlat
+
     call igrdec1(nlat, nlon, isym, nt, sf, isf, jsf, work(ia), work(ib), mab, &
         work(is), mdb, ndb, br, bi, wshsec, lshsec, work(iwk), liwk, ierror)
-    return
+
 end subroutine igradec
+
+
 
 subroutine igrdec1(nlat, nlon, isym, nt, sf, isf, jsf, a, b, mab, &
     sqnn, mdb, ndb, br, bi, wshsec, lshsec, wk, lwk, ierror)
@@ -313,10 +316,10 @@ subroutine igrdec1(nlat, nlon, isym, nt, sf, isf, jsf, a, b, mab, &
     !
     !     preset coefficient multiplyers in vector
     !
-    do 1 n=2, nlat
+    do n=2, nlat
         fn = real(n-1)
-        sqnn(n) = 1.0/sqrt(fn*(fn+1.))
-1   continue
+        sqnn(n) = 1.0/sqrt(fn*(fn + 1.0))
+    end do
     !
     !     set upper limit for vector m subscript
     !
@@ -324,37 +327,37 @@ subroutine igrdec1(nlat, nlon, isym, nt, sf, isf, jsf, a, b, mab, &
     !
     !     compute multiple scalar field coefficients
     !
-    do 2 k=1, nt
+    do k=1, nt
         !
         !     preset to 0.0
         !
-        do 3 n=1, nlat
-            do 4 m=1, mab
+        do n=1, nlat
+            do m=1, mab
                 a(m, n, k) = 0.0
                 b(m, n, k) = 0.0
-4           continue
-3       continue
+            end do
+        end do
         !
         !     compute m=0 coefficients
         !
-        do 5 n=2, nlat
+        do n=2, nlat
             a(1, n, k) = br(1, n, k)*sqnn(n)
             b(1, n, k)= bi(1, n, k)*sqnn(n)
-5       continue
+        end do
         !
         !     compute m>0 coefficients
         !
-        do 6 m=2, mmax
-            do 7 n=m, nlat
+        do m=2, mmax
+            do n=m, nlat
                 a(m, n, k) = sqnn(n)*br(m, n, k)
                 b(m, n, k) = sqnn(n)*bi(m, n, k)
-7           continue
-6       continue
-2   continue
+            end do
+        end do
+    end do
     !
     !     scalar sythesize a, b into sf
     !
     call shsec(nlat, nlon, isym, nt, sf, isf, jsf, a, b, mab, nlat, &
         wshsec, lshsec, wk, lwk, ierror)
-    return
+
 end subroutine igrdec1

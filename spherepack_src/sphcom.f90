@@ -1988,7 +1988,7 @@ real cv(1), work(1), fn, fk, cf
 cv(1) = 0.
 if(n <= 0) return
 fn = n
-srnp1 = sqrt(fn*(fn+1.))
+srnp1 = sqrt(fn*(fn + 1.0))
 cf = 2.*m/srnp1
 modn = mod(n, 2)
 modm = mod(m, 2)
@@ -2042,7 +2042,7 @@ real cw(1), work(1), fn, cf, srnp1
 cw(1) = 0.
 if(n<=0 .or. m<=0) return
 fn = n
-srnp1 = sqrt(fn*(fn+1.))
+srnp1 = sqrt(fn*(fn + 1.0))
 cf = 2.*m/srnp1
 modn = mod(n, 2)
 modm = mod(m, 2)
@@ -2272,7 +2272,7 @@ ns = ns+1
 fn = real(n)
 tn = fn+fn
 cn = (tn+1.)/(tn-3.)
-tpn = (fn-2.)*(fn-1.)/(fn*(fn+1.))
+tpn = (fn-2.)*(fn-1.)/(fn*(fn + 1.0))
 fnpm = fn+fm
 fnmm = fn-fm
 temp = fnpm*(fnpm-1.)
@@ -2339,7 +2339,7 @@ cn = (tn+1.)/(tn-3.)
 fnpm = fn+fm
 fnmm = fn-fm
 temp = fnpm*(fnpm-1.)
-tpn = (fn-2.)*(fn-1.)/(fn*(fn+1.))
+tpn = (fn-2.)*(fn-1.)/(fn*(fn + 1.0))
 tph = fm/(fm-2.)
 a(ns) = tph*sqrt(tpn*cn*(fnpm-3.)*(fnpm-2.)/temp)
 b(ns) = sqrt(tpn*cn*fnmm*(fnmm-1.)/temp)
@@ -2538,7 +2538,7 @@ real cv(*), work(*), fn, fk, cf, srnp1
 cv(1) = 0.
 if(n <= 0) return
 fn = n
-srnp1 = sqrt(fn*(fn+1.))
+srnp1 = sqrt(fn*(fn + 1.0))
 cf = 2.*m/srnp1
 modn = mod(n, 2)
 modm = mod(m, 2)
@@ -2592,7 +2592,7 @@ real cw(*), work(*), fn, cf, srnp1
 cw(1) = 0.
 if(n<=0 .or. m<=0) return
 fn = n
-srnp1 = sqrt(fn*(fn+1.))
+srnp1 = sqrt(fn*(fn + 1.0))
 cf = 2.*m/srnp1
 modn = mod(n, 2)
 modm = mod(m, 2)

@@ -312,7 +312,7 @@ subroutine slapgs1(nlat, nlon, isym, nt, slap, ids, jds, a, b, mdab, ndab, &
     !
     do 1 n=2, nlat
         fn = real(n-1)
-        fnn(n) = fn*(fn+1.)
+        fnn(n) = fn*(fn + 1.0)
 1   continue
     !
     !     compute scalar laplacian coefficients for each vector field
