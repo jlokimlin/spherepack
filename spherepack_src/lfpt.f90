@@ -105,15 +105,39 @@ dimension       cp(1)
 pb = 0.
 ma = abs(m)
 if(ma > n) return
-if (n)  10, 10, 30
-10 if (ma)  20, 20, 30
+if(n< 0) then
+    goto 10
+else if(n == 0) then 
+    goto 10
+else 
+    goto 30
+end if
+10 if(ma< 0) then
+    goto 20
+else if(ma == 0) then 
+    goto 20
+else 
+    goto 30
+end if
 20 pb= sqrt(.5)
 go to 140
 30 np1 = n+1
 nmod = mod(n, 2)
 mmod = mod(ma, 2)
-if (nmod)  40, 40, 90
-40 if (mmod)  50, 50, 70
+if(nmod< 0) then
+    goto 40
+else if(nmod == 0) then 
+    goto 40
+else 
+    goto 90
+end if
+40 if(mmod< 0) then
+    goto 50
+else if(mmod == 0) then 
+    goto 50
+else 
+    goto 70
+end if
 50 kdo = n/2+1
 cdt = cos(theta+theta)
 sdt = sin(theta+theta)
@@ -143,7 +167,13 @@ do  80 k=1, kdo
 pb= sum
 go to 140
 90 kdo = (n+1)/2
-if (mmod) 100, 100, 120
+   if(mmod< 0) then
+       goto 100
+   else if(mmod == 0) then 
+       goto 100
+   else 
+       goto 120
+   end if
 100 cdt = cos(theta+theta)
 sdt = sin(theta+theta)
 ct = cos(theta)

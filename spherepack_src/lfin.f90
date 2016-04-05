@@ -202,7 +202,13 @@ subroutine lfin1(init, theta, l, m, nm, id, p3, phz, ph1, p1, p2, cp)
 5   mp1 = m+1
     fm = real(m)
     tm = fm+fm
-    if (m-1)25, 30, 35
+    if(m-1< 0) then
+        goto 25
+    else if(m-1 == 0) then 
+        goto 30
+    else 
+        goto 35
+    end if
 
     25 do np1=1, nmp1
         p3(:, np1) = phz(:, np1)

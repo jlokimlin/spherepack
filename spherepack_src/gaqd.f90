@@ -106,7 +106,7 @@ subroutine gaqd(nlat, theta, wts, w, lwork, ierror)
     !     check work space length
     !
     ierror = 1
-    if (nlat<=0) return
+    if (nlat <= 0) return
     ierror = 0
     !
     !     compute weights and points analytically when nlat=1, 2

@@ -310,13 +310,25 @@ ml = m-1
 nf = 0           
 j = 0            
 101 j = j+1          
-if (j-3) 102, 102, 103                
+    if(j-3< 0) then                
+        goto 102
+    else if(j-3 == 0) then 
+        goto 102
+    else 
+        goto 103
+    end if
 102 mtry = mtryh(j)                     
 go to 104        
 103 mtry = mtry+2    
 104 mq = ml/mtry     
 mr = ml-mtry*mq                     
-if (mr) 101, 105, 101                 
+if(mr< 0) then                 
+    goto 101
+else if(mr == 0) then 
+    goto 105
+else 
+    goto 101
+end if
 105 nf = nf+1        
 mfac(nf) = mtry                    
 ml = mq          
@@ -837,20 +849,56 @@ c25 = vy2(k)*(px4-px2(k))-vx2(k)*(py4-py2(k))
 c36 = vy3(k)*(px4-px3(k))-vx3(k)*(py4-py3(k))
 tmin = 0.
 tmax = 1.
-if(c17) 151, 152, 153
+if(c17< 0) then
+    goto 151
+else if(c17 == 0) then 
+    goto 152
+else 
+    goto 153
+end if
 151 tmax = amin1(c14/c17, tmax)   
 go to 154
-152 if(c14) 154, 440, 440
+152 if(c14< 0) then
+    goto 154
+else if(c14 == 0) then 
+    goto 440
+else 
+    goto 440
+end if
 153 tmin = amax1(c14/c17, tmin)
-154 if(c27) 155, 156, 157
+154 if(c27< 0) then
+        goto 155
+    else if(c27 == 0) then 
+        goto 156
+    else 
+        goto 157
+    end if
 155 tmax = amin1(c25/c27, tmax)   
 go to 158
-156 if(c25) 158, 440, 440
+156 if(c25< 0) then
+    goto 158
+else if(c25 == 0) then 
+    goto 440
+else 
+    goto 440
+end if
 157 tmin = amax1(c25/c27, tmin)
-158 if(c37) 159, 160, 161
+158 if(c37< 0) then
+        goto 159
+    else if(c37 == 0) then 
+        goto 160
+    else 
+        goto 161
+    end if
 159 tmax = amin1(c36/c37, tmax)   
 go to 162
-160 if(c36) 162, 440, 440
+160 if(c36< 0) then
+    goto 162
+else if(c36 == 0) then 
+    goto 440
+else 
+    goto 440
+end if
 161 tmin = amax1(c36/c37, tmin)
 162 if(tmax-tmin < .00001) go to 440
 xpl = x4+tmin*(x5-x4)
@@ -906,7 +954,13 @@ tl(nseg) = tmin
 tr(nseg) = tmax
 440 continue
 maxs = max(maxs, nseg)
-if(nseg-1)171, 180, 172
+if(nseg-1< 0) then
+    goto 171
+else if(nseg-1 == 0) then 
+    goto 180
+else 
+    goto 172
+end if
 171 call line(px4, py4, px5, py5)
 go to 460
 !

@@ -166,8 +166,20 @@ call sinti(ls, wsave1)
 call costi(lc, wsave2)
 call cosqi(lq, wsave3)
 return
-41 if (n)  10, 10, 40
-10 if (m)  20, 20, 40
+41 if(n< 0) then
+    goto 10
+else if(n == 0) then 
+    goto 10
+else 
+    goto 40
+end if
+10 if(m< 0) then
+    goto 20
+else if(m == 0) then 
+    goto 20
+else 
+    goto 40
+end if
 20 ssqrt2 = 1./sqrt(2.)
 do  30 i=1, l
    p(i) = ssqrt2
@@ -180,8 +192,20 @@ pi = acos( -1.0 )
 dt = pi/lm1
 nmod = mod(n, 2)
 mmod = mod(m, 2)
-if (nmod)  50, 50, 120
-50 if (mmod)  60, 60, 90
+if(nmod< 0) then
+    goto 50
+else if(nmod == 0) then 
+    goto 50
+else 
+    goto 120
+end if
+50 if(mmod< 0) then
+    goto 60
+else if(mmod == 0) then 
+    goto 60
+else 
+    goto 90
+end if
 60 kdp = n/2+1
 do 70 i=1, kdp
 p(i)=.5*cp(i)
@@ -206,7 +230,13 @@ p(lmi)=-p(i+1)
 p(l)=0.
 go to 190
 120 kdp=(n+1)/2
-if(mmod)140, 140, 160
+    if(mmod< 0) then
+        goto 140
+    else if(mmod == 0) then 
+        goto 140
+    else 
+        goto 160
+    end if
 140 do 130 i=1, kdp
 p(i)=.25*cp(i)
 130 continue

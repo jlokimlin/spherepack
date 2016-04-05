@@ -50,7 +50,13 @@ parameter (sc40=sc20*sc20)
 cp(1) = 0.
 ma = abs(m)
 if(ma > n) return
-if(n-1) 2, 3, 5
+if(n-1< 0) then
+    goto 2
+else if(n-1 == 0) then 
+    goto 3
+else 
+    goto 5
+end if
 2 cp(1) = sqrt(2.d0)
 return
 3 if(ma /= 0) go to 4
@@ -121,8 +127,20 @@ cdt = cos(theta+theta)
 sdt = sin(theta+theta)
 nmod=mod(n, 2)
 mmod=mod(m, 2)
-if(nmod)1, 1, 2
-1 if(mmod)3, 3, 4
+if(nmod< 0) then
+    goto 1
+else if(nmod == 0) then 
+    goto 1
+else 
+    goto 2
+end if
+1 if(mmod< 0) then
+    goto 3
+else if(mmod == 0) then 
+    goto 3
+else 
+    goto 4
+end if
 !
 !     n even, m even
 !
@@ -154,7 +172,13 @@ sth = sdt*cth+cdt*sth
 cth = chh
 180 continue
 return
-2 if(mmod)13, 13, 14
+2 if(mmod< 0) then
+    goto 13
+else if(mmod == 0) then 
+    goto 13
+else 
+    goto 14
+end if
 !
 !     n odd, m even
 !
@@ -196,8 +220,20 @@ cdt = cos(theta+theta)
 sdt = sin(theta+theta)
 nmod=mod(n, 2)
 mmod=mod(abs(m), 2)
-if(nmod)1, 1, 2
-1 if(mmod)3, 3, 4
+if(nmod< 0) then
+    goto 1
+else if(nmod == 0) then 
+    goto 1
+else 
+    goto 2
+end if
+1 if(mmod< 0) then
+    goto 3
+else if(mmod == 0) then 
+    goto 3
+else 
+    goto 4
+end if
 !
 !     n even, m even
 !
@@ -229,7 +265,13 @@ sth = sdt*cth+cdt*sth
 cth = chh
 180 continue
 return
-2 if(mmod)13, 13, 14
+2 if(mmod< 0) then
+    goto 13
+else if(mmod == 0) then 
+    goto 13
+else 
+    goto 14
+end if
 !
 !     n odd, m even
 !
@@ -393,7 +435,13 @@ ihold = i1
 i1 = i2
 i2 = i3
 i3 = ihold
-if(m-1)25, 30, 35
+if(m-1< 0) then
+    goto 25
+else if(m-1 == 0) then 
+    goto 30
+else 
+    goto 35
+end if
 25 i1 = 1
 i2 = 2
 i3 = 3
@@ -489,8 +537,20 @@ sc1 = 2.d0/real(nlat-1)
 call dnlfk(m, n, work)
 nmod = mod(n, 2)
 mmod = mod(m, 2)
-if(nmod)1, 1, 2
-1 if(mmod)3, 3, 4
+if(nmod< 0) then
+    goto 1
+else if(nmod == 0) then 
+    goto 1
+else 
+    goto 2
+end if
+1 if(mmod< 0) then
+    goto 3
+else if(mmod == 0) then 
+    goto 3
+else 
+    goto 4
+end if
 !
 !     n even, m even
 !
@@ -523,7 +583,13 @@ t2 = 1.d0-(k+k-i)**2
 cz(idx) = sc1*sum
 9 continue
 return
-2 if(mmod)13, 13, 14
+2 if(mmod< 0) then
+    goto 13
+else if(mmod == 0) then 
+    goto 13
+else 
+    goto 14
+end if
 !
 !     n odd, m even
 !
@@ -564,12 +630,30 @@ sdt = sin(th+th)
 lmod = mod(nlat, 2)
 mmod = mod(m, 2)
 nmod = mod(n, 2)
-if(lmod)20, 20, 10
+if(lmod< 0) then
+    goto 20
+else if(lmod == 0) then 
+    goto 20
+else 
+    goto 10
+end if
 10 lc = (nlat+1)/2
 lq = lc-1
 ls = lc-2
-if(nmod)1, 1, 2
-1 if(mmod)3, 3, 4
+if(nmod< 0) then
+    goto 1
+else if(nmod == 0) then 
+    goto 1
+else 
+    goto 2
+end if
+1 if(mmod< 0) then
+    goto 3
+else if(mmod == 0) then 
+    goto 3
+else 
+    goto 4
+end if
 !
 !     nlat odd n even m even
 !
@@ -600,7 +684,13 @@ return
 !
 !     nlat odd n odd, m even
 !
-2 if(mmod)5, 5, 6
+2 if(mmod< 0) then
+    goto 5
+else if(mmod == 0) then 
+    goto 5
+else 
+    goto 6
+end if
 5 cth = cos(th)
 sth = sin(th)
 do 203 k=1, lq
@@ -626,8 +716,20 @@ cth = chh
 return
 20 lc = nlat/2
 lq = lc-1
-if(nmod)30, 30, 80
-30 if(mmod)40, 40, 60
+if(nmod< 0) then
+    goto 30
+else if(nmod == 0) then 
+    goto 30
+else 
+    goto 80
+end if
+30 if(mmod< 0) then
+    goto 40
+else if(mmod == 0) then 
+    goto 40
+else 
+    goto 60
+end if
 !
 !     nlat even n even m even
 !
@@ -658,7 +760,13 @@ return
 !
 !     nlat even n odd m even
 !
-80 if(mmod)90, 90, 110
+80 if(mmod< 0) then
+    goto 90
+else if(mmod == 0) then 
+    goto 90
+else 
+    goto 110
+end if
 90 zh = .5*cz(lc)*cos((nlat-1)*th)
 cth = cos(th)
 sth = sin(th)
@@ -709,7 +817,13 @@ ihold = i1
 i1 = i2
 i2 = i3
 i3 = ihold
-if(m-1)25, 30, 35
+if(m-1< 0) then
+    goto 25
+else if(m-1 == 0) then 
+    goto 30
+else 
+    goto 35
+end if
 25 i1 = 1
 i2 = 2
 i3 = 3
@@ -976,7 +1090,13 @@ ihold = i1
 i1 = i2
 i2 = i3
 i3 = ihold
-if(m-1)25, 30, 35
+if(m-1< 0) then
+    goto 25
+else if(m-1 == 0) then 
+    goto 30
+else 
+    goto 35
+end if
 25 i1 = 1
 i2 = 2
 i3 = 3
@@ -1039,7 +1159,13 @@ ihold = i1
 i1 = i2
 i2 = i3
 i3 = ihold
-if(m-2)25, 30, 35
+if(m-2< 0) then
+    goto 25
+else if(m-2 == 0) then 
+    goto 30
+else 
+    goto 35
+end if
 25 i1 = 1
 i2 = 2
 i3 = 3
@@ -1193,7 +1319,13 @@ ihold = i1
 i1 = i2
 i2 = i3
 i3 = ihold
-if(m-1)25, 30, 35
+if(m-1< 0) then
+    goto 25
+else if(m-1 == 0) then 
+    goto 30
+else 
+    goto 35
+end if
 25 i1 = 1
 i2 = 2
 i3 = 3
@@ -1256,7 +1388,13 @@ ihold = i1
 i1 = i2
 i2 = i3
 i3 = ihold
-if(m-2)25, 30, 35
+if(m-2< 0) then
+    goto 25
+else if(m-2 == 0) then 
+    goto 30
+else 
+    goto 35
+end if
 25 i1 = 1
 i2 = 2
 i3 = 3
@@ -2332,7 +2470,13 @@ go to 10
 !
 20 cw(l) = cf*work(l)
 25 l = l-1
-if(l) 50, 27, 26
+   if(l< 0) then
+       goto 50
+   else if(l == 0) then 
+       goto 27
+   else 
+       goto 26
+   end if
 26 cw(l) = cw(l+1)+cf*work(l)
 27 cw(l+1) = -(l+l+1)*cw(l+1)
 go to 25
@@ -2344,7 +2488,13 @@ if(l == 0) go to 50
 !
 cw(l) = -cf*work(l+1)
 35 l = l-1
-if(l) 50, 37, 36
+   if(l< 0) then
+       goto 50
+   else if(l == 0) then 
+       goto 37
+   else 
+       goto 36
+   end if
 36 cw(l) = cw(l+1)-cf*work(l+1)
 37 cw(l+1) = (l+l+2)*cw(l+1)
 go to 35
@@ -2354,7 +2504,13 @@ go to 35
 40 l = (n+1)/2
 cw(l) = cf*work(l)
 45 l = l-1
-if(l) 50, 47, 46
+   if(l< 0) then
+       goto 50
+   else if(l == 0) then 
+       goto 47
+   else 
+       goto 46
+   end if
 46 cw(l) = cw(l+1)+cf*work(l)
 47 cw(l+1) = -(l+l)*cw(l+1)
 go to 45

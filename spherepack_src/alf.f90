@@ -138,21 +138,40 @@ subroutine alfk (n, m, cp)
     cp(1) = 0.0
     ma = abs(m)
 
-    if (ma > n) return
-    if (n-1) 2, 3, 5
+    if (ma > n) then
+        return
+    end if
+
+    if (n-1 < 0) then
+        go to 2
+    else if (n-1 == 0) then
+        go to 3
+    else 
+        go to 5
+    end if
 
 2   cp(1) = sqrt(2.0)
     return
 
-3   if (ma /= 0) go to 4
+3   if (ma /= 0) then
+        go to 4
+    end if
+
     cp(1) = sqrt(1.5)
     return
 
 4   cp(1) = sqrt(0.75)
-    if (m == -1) cp(1) = -cp(1)
+
+    if (m == -1) then
+        cp(1) = -cp(1)
+    end if
+
     return
 
-5   if (mod(n+ma, 2) /= 0) go to 10
+5   if (mod(n+ma, 2) /= 0) then
+        go to 10
+    end if
+
     nmms2 = (n-ma)/2
     fnum = n+ma+1
     fnmh = n-ma+1
@@ -167,7 +186,10 @@ subroutine alfk (n, m, cp)
 15  t1 = 1.0/sc20
     nex = 20
     fden = 2.0
-    if (nmms2 < 1) go to 20
+    if (nmms2 < 1) then
+        go to 20
+    end if
+
     do  i=1, nmms2
         t1 = fnum*t1/fden
         if (t1 > sc20) then
@@ -179,9 +201,15 @@ subroutine alfk (n, m, cp)
     end do
 
 20  t1 = t1/2.0**(n-1-nex)
-    if (mod(ma/2, 2) /= 0) t1 = -t1
+
+    if (mod(ma/2, 2) /= 0) then
+        t1 = -t1
+    end if
+
     t2 = 1.0
-    if (ma == 0) go to 26
+    if (ma == 0) then
+        go to 26
+    end if
 
     do  i=1, ma
         t2 = fnmh*t2/(fnmh+pm1)
@@ -192,19 +220,34 @@ subroutine alfk (n, m, cp)
     fnnp1 = real(n*(n+1))
     fnmsq = fnnp1-2.0*(ma**2)
     l = (n+1)/2
-    if (mod(n, 2) == 0 .and. mod(ma, 2) == 0) l = l+1
+
+    if (mod(n, 2) == 0 .and. mod(ma, 2) == 0) then
+        l = l+1
+    end if
+
     cp(l) = cp2
-    if (m >= 0) go to 29
+
+    if (m >= 0) then
+        go to 29
+    end if
+
     if (mod(ma, 2) /= 0) cp(l) = -cp(l)
 
-29  if (l <= 1) return
+29  if (l <= 1) then
+        return
+    end if
+
     fk = n
     a1 = (fk-2.0)*(fk-1.0)-fnnp1
     b1 = 2.0*(fk*fk-fnmsq)
     cp(l-1) = b1*cp(l)/a1
 
 30  l = l-1
-    if (l <= 1) return
+
+    if (l <= 1) then
+        return
+    end if
+
     fk = fk-2.0
     a1 = (fk-2.0)*(fk-1.0)-fnnp1
     b1 = -2.0*(fk*fk-fnmsq)
@@ -371,7 +414,9 @@ subroutine lfim1(init, theta, l, n, nm, id, p3, phz, ph1, p1, p2, cp)
 
     nmp1 = nm+1
 
-    if (init /= 0) go to 5
+    if (init /= 0) then
+        go to 5
+    end if
 
     phz(:, 1) = ONE_OVER_SQRT2
 
@@ -389,8 +434,17 @@ subroutine lfim1(init, theta, l, n, nm, id, p3, phz, ph1, p1, p2, cp)
 
 
     return
-5   if (n > 2) go to 60
-    if (n-1) 25, 30, 35
+5   if (n > 2) then
+        go to 60
+    end if
+
+    if (n-1< 0) then
+        go to 25
+    else if (n-1 == 0) then
+        go to 30
+    else 
+        go to 35
+    end if
 
 25  p3(:, 1) = phz(:, 1)
     return
@@ -416,7 +470,9 @@ subroutine lfim1(init, theta, l, n, nm, id, p3, phz, ph1, p1, p2, cp)
     p3(:, 1) = phz(:, np1)
     p3(:, 2) = ph1(:, np1)
 
-    if (nm1 < 3) go to 71
+    if (nm1 < 3) then
+        go to 71
+    end if
 
     do mp1=3, nm1
         m = mp1-1
@@ -600,8 +656,9 @@ subroutine lfin1(init, theta, l, m, nm, id, p3, phz, ph1, p1, p2, cp)
     !----------------------------------------------------------------------
     nmp1 = nm+1
 
-    if (init /= 0) go to 5
-
+    if (init /= 0) then
+        go to 5
+    end if
 
     phz(:, 1) = ONE_OVER_SQRT2
 
@@ -621,7 +678,14 @@ subroutine lfin1(init, theta, l, m, nm, id, p3, phz, ph1, p1, p2, cp)
 5   mp1 = m+1
     fm = real(m)
     tm = fm+fm
-    if (m-1)25, 30, 35
+
+    if (m-1 < 0) then
+        go to 25
+    else if (m-1 == 0) then
+        go to 30
+    else 
+        go to 35
+    end if
 
     25 do np1=1, nmp1
         p3(:, np1) = phz(:, np1)
@@ -763,10 +827,26 @@ subroutine lfpt(n, m, theta, cp, pb)
 
     pb = 0.0
     ma = abs(m)
-    if (ma > n) return
-    if (n)  10, 10, 30
 
-10  if (ma)  20, 20, 30
+    if (ma > n) then
+        return
+    end if
+
+    if (n < 0) then
+        go to 10
+    else if (n == 0) then
+        go to 10
+    else 
+        go to 30
+    end if
+
+10  if (ma < 0) then
+        go to 20
+    else if (ma == 0) then
+        go to 20
+    else 
+        go to 30
+    end if
 
 20  pb= sqrt(0.5)
     go to 140
@@ -774,9 +854,22 @@ subroutine lfpt(n, m, theta, cp, pb)
 30  np1 = n+1
     nmod = mod(n, 2)
     mmod = mod(ma, 2)
-    if (nmod)  40, 40, 90
 
-40  if (mmod)  50, 50, 70
+    if (nmod < 0) then
+        go to 40
+    else if (nmod == 0) then
+        go to 40
+    else 
+        go to 90
+    end if
+
+40  if (mmod < 0) then
+        go to 50
+    else if (mmod == 0) then
+        go to 50
+    else 
+        go to 70
+    end if
 
 50  kdo = n/2+1
     cdt = cos(theta+theta)
@@ -811,7 +904,14 @@ subroutine lfpt(n, m, theta, cp, pb)
     go to 140
 
 90  kdo = (n+1)/2
-    if (mmod) 100, 100, 120
+
+    if (mmod < 0) then
+        go to 100
+    else if (mmod == 0) then
+        go to 100
+    else 
+        go to 120
+    end if
 
 100 cdt = cos(theta+theta)
     sdt = sin(theta+theta)

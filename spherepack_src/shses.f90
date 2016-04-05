@@ -324,7 +324,10 @@ subroutine shses(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, &
     if (lwork< nln+ls*nlon) return
     ierror = 0
     ist = 0
-    if (isym == 0) ist = imid
+
+    if (isym == 0) then
+        ist = imid
+    end if
 
     call shses1(nlat, isym, nt, g, idg, jdg, a, b, mdab, ndab, wshses, imid, &
         ls, nlon, work, work(ist+1), work(nln+1), wshses(lpimn+1))
@@ -342,13 +345,17 @@ subroutine shses1(nlat, isym, nt, g, idgs, jdgs, a, b, mdab, ndab, p, imid, &
     mmax = min(nlat, nlon/2+1)
     mdo = mmax
 
-    if (mdo+mdo-1 > nlon) mdo = mmax-1
+    if (mdo+mdo-1 > nlon) then
+        mdo = mmax-1
+    end if
 
     nlp1 = nlat+1
     modl = mod(nlat, 2)
     imm1 = imid
 
-    if (modl /= 0) imm1 = imid-1
+    if (modl /= 0) then
+        imm1 = imid-1
+    end if
 
     do k=1, nt
         do j=1, nlon
@@ -358,7 +365,9 @@ subroutine shses1(nlat, isym, nt, g, idgs, jdgs, a, b, mdab, ndab, p, imid, &
         end do
     end do
 
-    if (isym == 1) go to 125
+    if (isym == 1) then
+        go to 125
+    end if
 
     do k=1, nt
         do np1=1, nlat, 2
@@ -369,7 +378,9 @@ subroutine shses1(nlat, isym, nt, g, idgs, jdgs, a, b, mdab, ndab, p, imid, &
     end do
 
     ndo = nlat
-    if (mod(nlat, 2) == 0) ndo = nlat-1
+    if (mod(nlat, 2) == 0) then
+        ndo = nlat-1
+    end if
 
     do mp1=2, mdo
         m = mp1-1
@@ -385,7 +396,9 @@ subroutine shses1(nlat, isym, nt, g, idgs, jdgs, a, b, mdab, ndab, p, imid, &
         end do
     end do
 
-    if (mdo == mmax .or. mmax > ndo) go to 122
+    if (mdo == mmax .or. mmax > ndo) then
+        go to 122
+    end if
 
     mb = mdo*(nlat-1)-(mdo*(mdo-1))/2
 
@@ -398,7 +411,9 @@ subroutine shses1(nlat, isym, nt, g, idgs, jdgs, a, b, mdab, ndab, p, imid, &
         end do
     end do
 
-122 if (isym == 2) go to 155
+122 if (isym == 2) then
+        go to 155
+    end if
 
     125 do k=1, nt
         do np1=2, nlat, 2
@@ -410,7 +425,9 @@ subroutine shses1(nlat, isym, nt, g, idgs, jdgs, a, b, mdab, ndab, p, imid, &
 
     ndo = nlat
 
-    if (mod(nlat, 2) /= 0) ndo = nlat-1
+    if (mod(nlat, 2) /= 0) then
+        ndo = nlat-1
+    end if
 
     do mp1=2, mdo
         mp2 = mp1+1
@@ -429,7 +446,9 @@ subroutine shses1(nlat, isym, nt, g, idgs, jdgs, a, b, mdab, ndab, p, imid, &
 
     mp2 = mmax+1
 
-    if (mdo == mmax .or. mp2 > ndo) go to 155
+    if (mdo == mmax .or. mp2 > ndo) then
+        go to 155
+    end if
 
     mb = mdo*(nlat-1)-(mdo*(mdo-1))/2
 
@@ -443,33 +462,38 @@ subroutine shses1(nlat, isym, nt, g, idgs, jdgs, a, b, mdab, ndab, p, imid, &
     end do
 
     155 do k=1, nt
-        if (mod(nlon, 2) /= 0) go to 157
+        if (mod(nlon, 2) /= 0) then
+            go to 157
+        end if
         do i=1, ls
             ge(i, nlon, k) = 2.0 * ge(i, nlon, k)
         end do
 157     call hrfftb(ls, nlon, ge(1, 1, k), ls, whrfft, work)
     end do
 
-    if (isym /= 0) go to 180
+    if (isym /= 0) then
+        go to 180
+    end if
 
     do k=1, nt
         do j=1, nlon
             do i=1, imm1
-                g(i, j, k) = 0.5*(ge(i, j, k)+go(i, j, k))
-                g(nlp1-i, j, k) = 0.5*(ge(i, j, k)-go(i, j, k))
+                g(i, j, k) = 0.5 * (ge(i, j, k)+go(i, j, k))
+                g(nlp1-i, j, k) = 0.5 * (ge(i, j, k)-go(i, j, k))
             end do
-
-            if (modl == 0) exit!go to 170
-
-            g(imid, j, k) = .5*ge(imid, j, k)
-
+            if (modl == 0) then
+                exit
+            end if
+            g(imid, j, k) = 0.5 * ge(imid, j, k)
         end do
     end do
+
     return
+
     180 do k=1, nt
         do i=1, imid
             do j=1, nlon
-                g(i, j, k) = 0.5*ge(i, j, k)
+                g(i, j, k) = 0.5 * ge(i, j, k)
             end do
         end do
     end do

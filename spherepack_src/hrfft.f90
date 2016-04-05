@@ -222,13 +222,25 @@ subroutine hrfti1 (n, wa, fac)
     nf = 0
     j = 0
 101 j = j+1          
-    if (j-4) 102, 102, 103
+    if(j-4< 0) then
+        goto 102
+    else if(j-4 == 0) then 
+        goto 102
+    else 
+        goto 103
+    end if
 102 ntry = ntryh(j)                     
     go to 104
 103 ntry = ntry+2    
 104 nq = nl/ntry     
     nr = nl-ntry*nq
-    if (nr) 101, 105, 101
+    if(nr< 0) then
+        goto 101
+    else if(nr == 0) then 
+        goto 105
+    else 
+        goto 101
+    end if
 105 nf = nf+1        
     fac(nf+2) = ntry
     nl = nq
@@ -370,7 +382,13 @@ subroutine hrftf1 (m, n, c, mdimc, ch, wa, fac)
                 ch(m, 1, 3, k) = cc(m, 1, k, 4)-cc(m, 1, k, 2)
 1001        continue
 101     continue
-        if (ido-2) 107, 105, 102
+        if(ido-2< 0) then
+            goto 107
+        else if(ido-2 == 0) then 
+            goto 105
+        else 
+            goto 102
+        end if
 102     idp2 = ido+2
         do 104 k=1, l1
             do 103 i=3, ido, 2
@@ -439,7 +457,13 @@ subroutine hradf2 (mp, ido, l1, cc, mdimcc, ch, mdimch, wa1)
             ch(m, ido, 2, k) = cc(m, 1, k, 1)-cc(m, 1, k, 2)
 1001    continue      
 101 continue         
-    if (ido-2) 107, 105, 102
+    if(ido-2< 0) then
+        goto 107
+    else if(ido-2 == 0) then 
+        goto 105
+    else 
+        goto 102
+    end if
 102 idp2 = ido+2     
     do 104 k=1, l1
         do 103 i=3, ido, 2
@@ -1139,7 +1163,13 @@ subroutine hradb4 (mp, ido, l1, cc, mdimcc, ch, mdimch, wa1, wa2, wa3)
                 -(cc(m, 1, 3, k)+cc(m, 1, 3, k))
 1001    continue
 101 continue         
-    if (ido-2) 107, 105, 102
+    if(ido-2< 0) then
+        goto 107
+    else if(ido-2 == 0) then 
+        goto 105
+    else 
+        goto 102
+    end if
 102 idp2 = ido+2     
     do 104 k=1, l1
         do 103 i=3, ido, 2
@@ -1199,7 +1229,13 @@ subroutine hradb2 (mp, ido, l1, cc, mdimcc, ch, mdimch, wa1)
             ch(m, 1, k, 2) = cc(m, 1, 1, k)-cc(m, ido, 2, k)
 1001    continue
 101 continue         
-    if (ido-2) 107, 105, 102
+    if(ido-2< 0) then
+        goto 107
+    else if(ido-2 == 0) then 
+        goto 105
+    else 
+        goto 102
+    end if
 102 idp2 = ido+2     
     do 104 k=1, l1
         do 103 i=3, ido, 2

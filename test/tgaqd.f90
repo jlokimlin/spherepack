@@ -353,7 +353,13 @@ program testint
         cp(1) = 0.
         ma = iabs(m)
         if(ma > n) return
-        if(n-1) 2,3,5
+        if(n-1< 0) then
+            goto 2
+        else if(n-1 == 0) then 
+            goto 3
+        else 
+            goto 5
+        end if
 2       cp(1) = sqrt(2.d0)
         return
 3       if(ma /= 0) go to 4
@@ -424,8 +430,20 @@ program testint
         sdt = sin(theta+theta)
         nmod=mod(n,2)
         mmod=mod(m,2)
-        if(nmod)1,1,2
-1       if(mmod)3,3,4
+        if(nmod< 0) then
+            goto 1
+        else if(nmod == 0) then 
+            goto 1
+        else 
+            goto 2
+        end if
+1       if(mmod< 0) then
+            goto 3
+        else if(mmod == 0) then 
+            goto 3
+        else 
+            goto 4
+        end if
         !
         !     n even, m even
         !
@@ -457,7 +475,13 @@ program testint
             cth = chh
 180     continue
         return
-2       if(mmod)13,13,14
+2       if(mmod< 0) then
+            goto 13
+        else if(mmod == 0) then 
+            goto 13
+        else 
+            goto 14
+        end if
         !
         !     n odd, m even
         !
@@ -499,8 +523,20 @@ program testint
         sdt = sin(theta+theta)
         nmod=mod(n,2)
         mmod=mod(abs(m),2)
-        if(nmod)1,1,2
-1       if(mmod)3,3,4
+        if(nmod< 0) then
+            goto 1
+        else if(nmod == 0) then 
+            goto 1
+        else 
+            goto 2
+        end if
+1       if(mmod< 0) then
+            goto 3
+        else if(mmod == 0) then 
+            goto 3
+        else 
+            goto 4
+        end if
         !
         !     n even, m even
         !
@@ -532,7 +568,13 @@ program testint
             cth = chh
 180     continue
         return
-2       if(mmod)13,13,14
+2       if(mmod< 0) then
+            goto 13
+        else if(mmod == 0) then 
+            goto 13
+        else 
+            goto 14
+        end if
         !
         !     n odd, m even
         !

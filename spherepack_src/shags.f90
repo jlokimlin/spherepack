@@ -380,7 +380,7 @@ subroutine shags(nlat, nlon, mode, nt, g, idg, jdg, a, b, mdab, ndab, &
     !==> set number of grid points for analysis/synthesis
     !
     lat = nlat
-    if (mode/=0) then
+    if (mode /= 0) then
         lat = late
     end if
 
@@ -391,7 +391,7 @@ subroutine shags(nlat, nlon, mode, nt, g, idg, jdg, a, b, mdab, ndab, &
     end if
 
     ! Check case 5
-    if (idg<lat) then
+    if (idg < lat) then
         ierror = 5
         return
     end if
@@ -425,9 +425,9 @@ subroutine shags(nlat, nlon, mode, nt, g, idg, jdg, a, b, mdab, ndab, &
 
     ! Check case 10: temporary work space length
     if ( &
-        (mode==0 .and. lwork < nlat*nlon*(nt+1)) &
+        (mode == 0 .and. lwork < nlat*nlon*(nt+1)) &
         .or. &
-        (mode/=0 .and. lwork < l2*nlon*(nt+1))  &
+        (mode /= 0 .and. lwork < l2*nlon*(nt+1))  &
         ) then
         ierror = 10
         return
@@ -618,7 +618,7 @@ subroutine shags1(nlat, nlon, l, lat, mode, gs, idg, jdg, nt, a, b, mdab, &
             end do
         end do
 
-        if (nlon==l+l-2) then
+        if (nlon == l+l-2) then
             !     compute n=m=l-1 coefficients last
             m = l-1
             mml1 = m*(2*nlat-m-1)/2
@@ -653,35 +653,91 @@ subroutine shagsi(nlat, nlon, wshags, lshags, work, lwork, dwork, ldwork, &
     !     not checked.  undetectable errors will result if dwork is
     !     smaller than nlat*(nlat+4).
     !
-    dimension wshags(lshags), work(lwork)
-    real dwork(ldwork)
-    ierror = 1
-    if (nlat<3) return
-    ierror = 2
-    if (nlon<4) return
-    !     set triangular truncation limit for spherical harmonic basis
+    !----------------------------------------------------------------------
+    ! Dictionary: calling arguments
+    !----------------------------------------------------------------------
+    integer, intent (in)     :: nlat
+    integer, intent (in)     :: nlon
+    real,    intent (in out) :: wshags(lshags)
+    integer, intent (in)     :: lshags
+    real,    intent (in out) :: work(lwork)
+    integer, intent (in)     :: lwork
+    real,    intent (in out) :: dwork(ldwork)
+    integer, intent (in)     :: ldwork
+    integer, intent (out)    :: ierror
+     !----------------------------------------------------------------------
+     ! Dictionary: local variables
+     !----------------------------------------------------------------------
+    integer :: l, l1, l2, late, lp, ldw, ipmnf
+    !----------------------------------------------------------------------
+
+    !
+    !==> Check validity of input argument
+    !
+    ! Initialize error flag
+    ierror = 0
+
+    ! Check case 1
+    if (nlat < 3) then
+        ierror = 1
+        return
+    end if
+
+    ! Check case 2
+    if (nlon < 4) then
+        ierror = 2
+        return
+    end if
+
+
+    !
+    !==> set triangular truncation limit for spherical harmonic basis
+    !
     l = min((nlon+2)/2, nlat)
-    !     set equator or nearest point (if excluded) pointer
+
+    !
+    !==> set equator or nearest point (if excluded) pointer
+    !
     late = (nlat+1)/2
     l1 = l
     l2 = late
-    !     check permanent work space length
-    ierror = 3
-    lp=nlat*(3*(l1+l2)-2)+(l1-1)*(l2*(2*nlat-l1)-3*l1)/2+nlon+15
-    if (lshags<lp) return
-    ierror = 4
-    !     check temporary work space
-    if (lwork<4*nlat*(nlat+2)+2) return
-    ierror = 5
-    !     check real temporary space
-    if (ldwork < nlat*(nlat+4)) return
-    ierror = 0
-    !     set preliminary quantites needed to compute and store legendre polys
+
+    ! Check case 3: permanent work space length
+    lp = nlat*(3*(l1+l2)-2)+(l1-1)*(l2*(2*nlat-l1)-3*l1)/2+nlon+15
+    if (lshags < lp) then
+        ierror = 3
+        return
+    end if
+
+    ! Check case 4: temporary work space
+    if (lwork < 4*nlat*(nlat+2)+2) then
+        ierror = 4
+        return
+    end if
+
+    ! Check case 5: real temporary space
+    if (ldwork < nlat*(nlat+4)) then
+        ierror = 5
+        return
+    end if
+
+    !
+    !==> set preliminary quantites needed to compute and store legendre polys
+    !
     ldw = nlat*(nlat+4)
+
     call shagsp(nlat, nlon, wshags, lshags, dwork, ldwork, ierror)
-    if (ierror/=0) return
-    !     set legendre poly pointer in wshags
+
+    ! Check error flag
+    if (ierror/=0) then
+        return
+    end if
+
+    !
+    !==> set legendre poly pointer in wshags
+    !
     ipmnf = nlat+2*nlat*late+3*(l*(l-1)/2+(nlat-l)*(l-1))+nlon+16
+
     call shagss1(nlat, l, late, wshags, work, wshags(ipmnf))
 
 end subroutine shagsi
