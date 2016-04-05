@@ -477,7 +477,7 @@
 ! *****************************************************
 ! *****************************************************
 !
-subroutine TRSSPH (intl, igrida, nlona, nlata, da, igridb, nlonb, nlatb, &
+subroutine trssph (intl, igrida, nlona, nlata, da, igridb, nlonb, nlatb, &
     db, wsave, lsave, lsvmin, work, lwork, lwkmin, dwork, ldwork, ier)
     implicit none
     integer intl, igrida(2), nlona, nlata, igridb(2), nlonb, nlatb
@@ -685,8 +685,10 @@ subroutine TRSSPH (intl, igrida, nlona, nlata, da, igridb, nlonb, nlatb, &
     if (igridb(1) > 0) call convlat(nlatb, nlonb, db)
     if (igrida(2) == 0) call trsplat(nlata, nlona, da, work)
     if (igridb(2) == 0) call trsplat(nlatb, nlonb, db, work)
-    return
-end subroutine TRSSPH
+
+end subroutine trssph
+
+
 
 subroutine trab(ma, na, aa, ba, mb, nb, ab, bb)
     implicit none
@@ -697,6 +699,7 @@ subroutine trab(ma, na, aa, ba, mb, nb, ab, bb)
     !
     m = min(ma, mb)
     n = min(na, nb)
+
     do j=1, n
         do i=1, m
             ab(i, j) = aa(i, j)
@@ -712,14 +715,17 @@ subroutine trab(ma, na, aa, ba, mb, nb, ab, bb)
             bb(i, j) = 0.0
         end do
     end do
+
     do j=n+1, nb
         do i=1, mb
             ab(i, j) = 0.0
             bb(i, j) = 0.0
         end do
     end do
-    return
+
 end subroutine trab
+
+
 
 subroutine trsplat(n, m, data, work)
     !
@@ -729,12 +735,14 @@ subroutine trsplat(n, m, data, work)
     implicit none
     integer n, m, i, j, ij, ji
     real data(*), work(*)
+
     do j=1, m
         do i=1, n
             ij = (j-1)*n+i
             work(ij) = data(ij)
         end do
     end do
+
     do i=1, n
         do j=1, m
             ji = (i-1)*m+j
@@ -742,8 +750,10 @@ subroutine trsplat(n, m, data, work)
             data(ji) = work(ij)
         end do
     end do
-    return
+
 end subroutine trsplat
+
+
 
 subroutine convlat(nlat, nlon, data)
     !
@@ -761,6 +771,5 @@ subroutine convlat(nlat, nlon, data)
             data(ib, j) = temp
         end do
     end do
-    return
-end subroutine convlat
 
+end subroutine convlat

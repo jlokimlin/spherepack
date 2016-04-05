@@ -717,27 +717,35 @@ subroutine trvsph (intl, igrida, nlona, nlata, iveca, ua, va, &
     if (iveca == 0) then
         call negv(nlata, nlona, va)
     end if
+
     if (ivecb == 0) then
         call negv(nlatb, nlonb, vb)
     end if
+
     if (igrida(1)> 0) then
         call covlat(nlata, nlona, ua)
         call covlat(nlata, nlona, va)
     end if
+
     if (igridb(1) > 0) then
         call covlat(nlatb, nlonb, ub)
         call covlat(nlatb, nlonb, vb)
     end if
+
     if (igrida(2) == 0) then
         call trvplat(nlata, nlona, ua, work)
         call trvplat(nlata, nlona, va, work)
     end if
+
     if (igridb(2) == 0) then
         call trvplat(nlatb, nlonb, ub, work)
         call trvplat(nlatb, nlonb, vb, work)
     end if
-    return
+
 end subroutine trvsph
+
+
+
 subroutine negv(nlat, nlon, v)
     !
     !     negate (co)latitudinal vector componenet
@@ -750,8 +758,11 @@ subroutine negv(nlat, nlon, v)
             v(i, j) = -v(i, j)
         end do
     end do
-    return
+
 end subroutine negv
+
+
+
 subroutine trvab(ma, na, abr, abi, acr, aci, mb, nb, bbr, bbi, bcr, bci)
     implicit none
     integer ma, na, mb, nb, i, j, m, n
@@ -789,8 +800,11 @@ subroutine trvab(ma, na, abr, abi, acr, aci, mb, nb, bbr, bbi, bcr, bci)
             bci(i, j) = 0.0
         end do
     end do
-    return
+
 end subroutine trvab
+
+
+
 subroutine trvplat(n, m, data, work)
     !
     !     transpose the n by m array data to a m by n array data
@@ -799,12 +813,14 @@ subroutine trvplat(n, m, data, work)
     implicit none
     integer n, m, i, j, ij, ji
     real data(*), work(*)
+
     do j=1, m
         do i=1, n
             ij = (j-1)*n+i
             work(ij) = data(ij)
         end do
     end do
+
     do i=1, n
         do j=1, m
             ji = (i-1)*m+j
@@ -812,7 +828,7 @@ subroutine trvplat(n, m, data, work)
             data(ji) = work(ij)
         end do
     end do
-    return
+
 end subroutine trvplat
 
 
@@ -832,5 +848,5 @@ subroutine covlat(nlat, nlon, data)
             data(ib, j) = temp
         end do
     end do
-    return
+
 end subroutine covlat

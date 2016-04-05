@@ -120,13 +120,20 @@ b1 = -2.*(fk*fk-fnmsq)
 c1 = (fk+1.)*(fk+2.)-fnnp1
 cp(l-1) = -(b1*cp(l)+c1*cp(l+1))/a1
 go to 30
+
 end subroutine dnlfk
+
+
+
 subroutine dnlft (m, n, theta, cp, pb)
 real cp(*), pb, theta, cdt, sdt, cth, sth, chh
+
 cdt = cos(theta+theta)
 sdt = sin(theta+theta)
+
 nmod=mod(n, 2)
 mmod=mod(m, 2)
+
 if(nmod< 0) then
     goto 1
 else if(nmod == 0) then 
@@ -208,8 +215,11 @@ chh = cdt*cth-sdt*sth
 sth = sdt*cth+cdt*sth
 cth = chh
 200 continue
-return
+
 end subroutine dnlft
+
+
+
 subroutine dnlftd (m, n, theta, cp, pb)
 !
 !     computes the derivative of pmn(theta) with respect to theta
@@ -301,8 +311,11 @@ chh = cdt*cth-sdt*sth
 sth = sdt*cth+cdt*sth
 cth = chh
 200 continue
-return
+
 end subroutine dnlftd
+
+
+
 subroutine legin(mode, l, nlat, m, w, pmn, km)
 !     this subroutine computes legendre polynomials for n=m, ..., l-1
 !     and  i=1, ..., late (late=((nlat+mod(nlat, 2))/2)gaussian grid
@@ -322,8 +335,11 @@ i4 = i3+(2*nlat-l)*(l-1)/2
 i5 = i4+(2*nlat-l)*(l-1)/2
 call legin1(mode, l, nlat, late, m, w(i1), w(i2), w(i3), w(i4), &
             w(i5), pmn, km)
-return
+
 end subroutine legin
+
+
+
 subroutine legin1(mode, l, nlat, late, m, p0n, p1n, abel, bbel, cbel, &
                   pmn, km)
 dimension p0n(nlat, late), p1n(nlat, late)
@@ -340,15 +356,16 @@ imndx(m, n) = l*(l-1)/2+(n-l-1)*(l-1)+m-1
 !     set do loop indices for full or half sphere
 ms = m+1
 ninc = 1
-if (mode==1) then
-!     only compute pmn for n-m odd
-ms = m+2
-ninc = 2
-else if (mode==2) then
-!     only compute pmn for n-m even
-ms = m+1
-ninc = 2
-end if
+select case (mode)
+	case (1)
+		!     only compute pmn for n-m odd
+		ms = m+2
+		ninc = 2
+	case (2)
+		!     only compute pmn for n-m even
+		ms = m+1
+		ninc = 2
+end select
 
 
 if (m>1) then
@@ -383,8 +400,10 @@ km2 = km1
 km1 = kmt
 !     set current m index in output param km
 km = kmt
-return
+
 end subroutine legin1
+
+
 
 subroutine zfin (isym, nlat, nlon, m, z, i3, wzfin)
 implicit none
@@ -478,7 +497,11 @@ z(i, np1, i3) = a(ns)*z(i, np1-2, i1)+b(ns)*z(i, np1-2, i3) &
                               -c(ns)*z(i, np1, i1)
 75 continue
 80 return
+
 end subroutine zfin1
+
+
+
 subroutine zfinit (nlat, nlon, wzfin, dwork)
 dimension       wzfin(*)
 real dwork(*)
@@ -490,8 +513,11 @@ iw1 = 2*nlat*imid+1
 !
 call zfini1 (nlat, nlon, imid, wzfin, wzfin(iw1), dwork, &
                                        dwork(nlat/2+1))
-return
+
 end subroutine zfinit
+
+
+
 subroutine zfini1 (nlat, nlon, imid, z, abc, cz, work)
 !
 !     abc must have 3*((mmax-2)*(nlat+nlat-mmax-1))/2 locations
@@ -619,8 +645,11 @@ t2 = 1.d0-(k+k-1-i)**2
 20 continue
 cz(idx)=sc1*sum
 19 continue
-return
+
 end subroutine dnzfk
+
+
+
 subroutine dnzft(nlat, m, n, th, cz, zh)
 dimension cz(1)
 real cz, zh, th, cdt, sdt, cth, sth, chh
@@ -790,8 +819,11 @@ chh = cdt*cth-sdt*sth
 sth = sdt*cth+cdt*sth
 cth = chh
 120 continue
-return
+
 end subroutine dnzft
+
+
+
 subroutine alin (isym, nlat, nlon, m, p, i3, walin)
 dimension       p(1)        , walin(1)
 imid = (nlat+1)/2
@@ -807,9 +839,12 @@ iw4 = iw3+labc
 !
 call alin1 (isym, nlat, m, p, imid, i3, walin, walin(iw1), walin(iw2), &
             walin(iw3), walin(iw4))
-return
+
 end subroutine alin
-subroutine alin1 (isym, nlat, m, p, imid, i3, pz, p1, a, b, c)
+
+
+
+subroutine alin1(isym, nlat, m, p, imid, i3, pz, p1, a, b, c)
 dimension       p(imid, nlat, 3), pz(imid, 1), p1(imid, 1), &
                 a(1), b(1), c(1)
 save i1, i2
@@ -860,7 +895,10 @@ p(i, np1, i3) = a(ns)*p(i, np1-2, i1)+b(ns)*p(i, np1-2, i3) &
                               -c(ns)*p(i, np1, i1)
 75 continue
 80 return
+
 end subroutine alin1
+
+
 subroutine alinit (nlat, nlon, walin, dwork)
 dimension       walin(*)
 real dwork(*)
@@ -871,8 +909,11 @@ iw1 = 2*nlat*imid+1
 !     the length of work is nlat+1
 !
 call alini1 (nlat, nlon, imid, walin, walin(iw1), dwork)
-return
+
 end subroutine alinit
+
+
+
 subroutine alini1 (nlat, nlon, imid, p, abc, cp)
 dimension p(imid, nlat, 2), abc(1), cp(1)
 real pi, dt, th, cp, ph
@@ -889,8 +930,11 @@ call dnlft (m, n, th, cp, ph)
 p(i, np1, mp1) = ph
 160 continue
 call rabcp(nlat, nlon, abc)
-return
+
 end subroutine alini1
+
+
+
 subroutine rabcp(nlat, nlon, abc)
 !
 !     subroutine rabcp computes the coefficients in the recurrence
@@ -903,8 +947,11 @@ labc = ((mmax-2)*(nlat+nlat-mmax-1))/2
 iw1 = labc+1
 iw2 = iw1+labc
 call rabcp1(nlat, nlon, abc, abc(iw1), abc(iw2))
-return
+
 end subroutine rabcp
+
+
+
 subroutine rabcp1(nlat, nlon, a, b, c)
 !
 !     coefficients a, b, and c for computing pbar(m, n, theta) are
@@ -941,8 +988,11 @@ b(ns) = sqrt(cn*fnmm*(fnmm-1.)/temp)
 c(ns) = sqrt((fnmm+1.)*(fnmm+2.)/temp)
 210 continue
 215 continue
-return
+
 end subroutine rabcp1
+
+
+
 subroutine sea1(nlat, nlon, imid, z, idz, zin, wzfin, dwork)
 dimension z(idz, *), zin(imid, nlat, 3), wzfin(*)
 real dwork(*)
@@ -956,8 +1006,11 @@ mn = m*(nlat-1)-(m*(m-1))/2+np1
 do 33 i=1, imid
 z(mn, i) = zin(i, np1, i3)
 33 continue
-return
+
 end subroutine sea1
+
+
+
 subroutine ses1(nlat, nlon, imid, p, pin, walin, dwork)
 dimension p(imid, *), pin(imid, nlat, 3), walin(*)
 real dwork(*)
@@ -971,8 +1024,11 @@ mn = m*(nlat-1)-(m*(m-1))/2+np1
 do 10 i=1, imid
 p(i, mn) = pin(i, np1, i3)
 10 continue
-return
+
 end subroutine ses1
+
+
+
 subroutine zvinit (nlat, nlon, wzvin, dwork)
 dimension       wzvin(1)
 real dwork(*)
@@ -985,8 +1041,11 @@ iw1 = 2*nlat*imid+1
 !
 call zvini1 (nlat, nlon, imid, wzvin, wzvin(iw1), dwork, &
                                     dwork(nlat/2+2))
-return
+
 end subroutine zvinit
+
+
+
 subroutine zvini1 (nlat, nlon, imid, zv, abc, czv, work)
 !
 !     abc must have 3*(max(mmax-2, 0)*(nlat+nlat-mmax-1))/2
@@ -1029,8 +1088,11 @@ iw1 = 2*nlat*imid+1
 !
 call zwini1 (nlat, nlon, imid, wzwin, wzwin(iw1), dwork, &
                                         dwork(nlat/2+2))
-return
+
 end subroutine zwinit
+
+
+
 subroutine zwini1 (nlat, nlon, imid, zw, abc, czw, work)
 !
 !     abc must have 3*(max(mmax-2, 0)*(nlat+nlat-mmax-1))/2
@@ -1080,8 +1142,11 @@ iw4 = iw3+labc
 !
 call zvin1 (ityp, nlat, m, zv, imid, i3, wzvin, wzvin(iw1), wzvin(iw2), &
             wzvin(iw3), wzvin(iw4))
-return
+
 end subroutine zvin
+
+
+
 subroutine zvin1 (ityp, nlat, m, zv, imid, i3, zvz, zv1, a, b, c)
 dimension       zv(imid, nlat, 3), zvz(imid, 1), zv1(imid, 1), &
                 a(1), b(1), c(1)
@@ -1133,7 +1198,11 @@ zv(i, np1, i3) = a(ns)*zv(i, np1-2, i1)+b(ns)*zv(i, np1-2, i3) &
                               -c(ns)*zv(i, np1, i1)
 75 continue
 80 return
+
 end subroutine zvin1
+
+
+
 subroutine zwin (ityp, nlat, nlon, m, zw, i3, wzwin)
 dimension       zw(1)        , wzwin(1)
 imid = (nlat+1)/2
@@ -1149,8 +1218,11 @@ iw4 = iw3+labc
 !
 call zwin1 (ityp, nlat, m, zw, imid, i3, wzwin, wzwin(iw1), wzwin(iw2), &
             wzwin(iw3), wzwin(iw4))
-return
+
 end subroutine zwin
+
+
+
 subroutine zwin1 (ityp, nlat, m, zw, imid, i3, zw1, zw2, a, b, c)
 dimension       zw(imid, nlat, 3), zw1(imid, 1), zw2(imid, 1), &
                 a(1), b(1), c(1)
@@ -1202,7 +1274,11 @@ zw(i, np1, i3) = a(ns)*zw(i, np1-2, i1)+b(ns)*zw(i, np1-2, i3) &
                               -c(ns)*zw(i, np1, i1)
 75 continue
 80 return
+
 end subroutine zwin1
+
+
+
 subroutine vbinit (nlat, nlon, wvbin, dwork)
 dimension wvbin(1)
 real dwork(*)
@@ -1260,8 +1336,11 @@ iw1 = 2*nlat*imid+1
 !
 call wbini1 (nlat, nlon, imid, wwbin, wwbin(iw1), dwork, &
                                         dwork(nlat/2+2))
-return
+
 end subroutine wbinit
+
+
+
 subroutine wbini1 (nlat, nlon, imid, wb, abc, cwb, work)
 !
 !     abc must have 3*(max(mmax-2, 0)*(nlat+nlat-mmax-1))/2
@@ -1309,8 +1388,11 @@ iw4 = iw3+labc
 !
 call vbin1 (ityp, nlat, m, vb, imid, i3, wvbin, wvbin(iw1), wvbin(iw2), &
             wvbin(iw3), wvbin(iw4))
-return
+
 end subroutine vbin
+
+
+
 subroutine vbin1 (ityp, nlat, m, vb, imid, i3, vbz, vb1, a, b, c)
 dimension       vb(imid, nlat, 3), vbz(imid, 1), vb1(imid, 1), &
                 a(1), b(1), c(1)
@@ -1362,7 +1444,11 @@ vb(i, np1, i3) = a(ns)*vb(i, np1-2, i1)+b(ns)*vb(i, np1-2, i3) &
                               -c(ns)*vb(i, np1, i1)
 75 continue
 80 return
+
 end subroutine vbin1
+
+
+
 subroutine wbin (ityp, nlat, nlon, m, wb, i3, wwbin)
 dimension       wb(1)        , wwbin(1)
 imid = (nlat+1)/2
@@ -1378,8 +1464,11 @@ iw4 = iw3+labc
 !
 call wbin1 (ityp, nlat, m, wb, imid, i3, wwbin, wwbin(iw1), wwbin(iw2), &
             wwbin(iw3), wwbin(iw4))
-return
+
 end subroutine wbin
+
+
+
 subroutine wbin1 (ityp, nlat, m, wb, imid, i3, wb1, wb2, a, b, c)
 dimension       wb(imid, nlat, 3), wb1(imid, 1), wb2(imid, 1), &
                 a(1), b(1), c(1)
@@ -1431,8 +1520,13 @@ wb(i, np1, i3) = a(ns)*wb(i, np1-2, i1)+b(ns)*wb(i, np1-2, i3) &
                               -c(ns)*wb(i, np1, i1)
 75 continue
 80 return
+
+
 end subroutine wbin1
- subroutine dzvk(nlat, m, n, czv, work)
+
+
+
+subroutine dzvk(nlat, m, n, czv, work)
 !
 !     subroutine dzvk computes the coefficients in the trigonometric
 !     expansion of the quadrature function zvbar(n, m, theta)
@@ -1521,8 +1615,11 @@ sum = sum+work(k)*(t1+t2)/(t1*t2)
 16 continue
 czv(id) = sc1*sum
 15 continue
-return
+
 end subroutine dzvk
+
+
+
 subroutine dzvt(nlat, m, n, th, czv, zvh)
 !
 !     subroutine dzvt tabulates the function zvbar(n, m, theta)
@@ -1651,8 +1748,11 @@ chh = cdt*cth-sdt*sth
 sth = sdt*cth+cdt*sth
 cth = chh
 60 continue
-return
+
 end subroutine dzvt
+
+
+
 subroutine dzwk(nlat, m, n, czw, work)
 !
 !     subroutine dzwk computes the coefficients in the trigonometric
@@ -1744,8 +1844,11 @@ sum = sum+work(kp1)*(t1+t2)/(t1*t2)
 6 continue
 29 czw(id) = sc1*sum
 5 continue
-return
+
 end subroutine dzwk
+
+
+
 subroutine dzwt(nlat, m, n, th, czw, zwh)
 !
 !     subroutine dzwt tabulates the function zwbar(n, m, theta)
@@ -1875,8 +1978,11 @@ chh = cdt*cth-sdt*sth
 sth = sdt*cth+cdt*sth
 cth = chh
 70 continue
-return
+
 end subroutine dzwt
+
+
+
 subroutine dvbk(m, n, cv, work)
 real cv(1), work(1), fn, fk, cf
 cv(1) = 0.
@@ -1926,8 +2032,11 @@ return
 fk = fk+2.
 cv(l) = fk*work(l)/srnp1
 85 continue
-return
+
 end subroutine dvbk
+
+
+
 subroutine dwbk(m, n, cw, work)
 real cw(1), work(1), fn, cf, srnp1
 cw(1) = 0.
@@ -1980,7 +2089,11 @@ if(l <= 0) go to 50
 cw(l) = cw(l+1)+cf*work(l)
 go to 45
 50 return
+
 end subroutine dwbk
+
+
+
 subroutine dvbt(m, n, theta, cv, vh)
 dimension cv(1)
 real cv, vh, theta, cth, sth, cdt, sdt, chh
@@ -2040,8 +2153,11 @@ chh = cdt*cth-sdt*sth
 sth = sdt*cth+cdt*sth
 cth = chh
 25 continue
-return
+
 end subroutine dvbt
+
+
+
 subroutine dwbt(m, n, theta, cw, wh)
 dimension cw(1)
 real theta, cw, wh, cth, sth, cdt, sdt, chh
@@ -2103,8 +2219,11 @@ chh = cdt*cth-sdt*sth
 sth = sdt*cth+cdt*sth
 cth = chh
 25 continue
-return
+
 end subroutine dwbt
+
+
+
 subroutine rabcv(nlat, nlon, abc)
 !
 !     subroutine rabcp computes the coefficients in the recurrence
@@ -2117,8 +2236,11 @@ labc = (max(mmax-2, 0)*(nlat+nlat-mmax-1))/2
 iw1 = labc+1
 iw2 = iw1+labc
 call rabcv1(nlat, nlon, abc, abc(iw1), abc(iw2))
-return
+
 end subroutine rabcv
+
+
+
 subroutine rabcv1(nlat, nlon, a, b, c)
 !
 !     coefficients a, b, and c for computing vbar(m, n, theta) are
@@ -2159,8 +2281,11 @@ b(ns) = sqrt(tpn*cn*fnmm*(fnmm-1.)/temp)
 c(ns) = sqrt((fnmm+1.)*(fnmm+2.)/temp)
 210 continue
 215 continue
-return
+
 end subroutine rabcv1
+
+
+
 subroutine rabcw(nlat, nlon, abc)
 !
 !     subroutine rabcw computes the coefficients in the recurrence
@@ -2173,8 +2298,11 @@ labc = (max(mmax-2, 0)*(nlat+nlat-mmax-1))/2
 iw1 = labc+1
 iw2 = iw1+labc
 call rabcw1(nlat, nlon, abc, abc(iw1), abc(iw2))
-return
+
 end subroutine rabcw
+
+
+
 subroutine rabcw1(nlat, nlon, a, b, c)
 !
 !     coefficients a, b, and c for computing wbar(m, n, theta) are
@@ -2218,8 +2346,11 @@ b(ns) = sqrt(tpn*cn*fnmm*(fnmm-1.)/temp)
 c(ns) = tph*sqrt((fnmm+1.)*(fnmm+2.)/temp)
 210 continue
 215 continue
-return
+
 end subroutine rabcw1
+
+
+
 subroutine vtinit (nlat, nlon, wvbin, dwork)
 dimension       wvbin(*)
 real dwork(*)
@@ -2231,8 +2362,11 @@ iw1 = 2*nlat*imid+1
 !
 call vtini1 (nlat, nlon, imid, wvbin, wvbin(iw1), dwork, &
                                        dwork(nlat/2+2))
-return
+
 end subroutine vtinit
+
+
+
 subroutine vtini1 (nlat, nlon, imid, vb, abc, cvb, work)
 !
 !     abc must have 3*(max(mmax-2, 0)*(nlat+nlat-mmax-1))/2
@@ -2273,8 +2407,11 @@ iw1 = 2*nlat*imid+1
 !
 call wtini1 (nlat, nlon, imid, wwbin, wwbin(iw1), dwork, &
                                        dwork(nlat/2+2))
-return
+
 end subroutine wtinit
+
+
+
 subroutine wtini1 (nlat, nlon, imid, wb, abc, cwb, work)
 !
 !     abc must have 3*(max(mmax-2, 0)*(nlat+nlat-mmax-1))/2
@@ -2319,8 +2456,11 @@ iw1 = 2*nlat*imid+1
 !
 call vtgit1 (nlat, nlon, imid, theta, wvbin, wvbin(iw1), &
                         work, work(nlat/2+2))
-return
+
 end subroutine vtgint
+
+
+
 subroutine vtgit1 (nlat, nlon, imid, theta, vb, abc, cvb, work)
 !
 !     abc must have 3*(max(mmax-2, 0)*(nlat+nlat-mmax-1))/2
@@ -2361,8 +2501,11 @@ iw1 = 2*nlat*imid+1
 !
 call wtgit1 (nlat, nlon, imid, theta, wwbin, wwbin(iw1), &
                         work, work(nlat/2+2))
-return
+
 end subroutine wtgint
+
+
+
 subroutine wtgit1 (nlat, nlon, imid, theta, wb, abc, cwb, work)
 !
 !     abc must have 3*((nlat-3)*nlat+2)/2 locations
@@ -2439,8 +2582,11 @@ return
 fk = fk+2.
 cv(l) = -fk*fk*work(l)/srnp1
 85 continue
-return
+
 end subroutine dvtk
+
+
+
 subroutine dwtk(m, n, cw, work)
 real cw(*), work(*), fn, cf, srnp1
 cw(1) = 0.
@@ -2515,7 +2661,11 @@ cw(l) = cf*work(l)
 47 cw(l+1) = -(l+l)*cw(l+1)
 go to 45
 50 return
+
 end subroutine dwtk
+
+
+
 subroutine dvtt(m, n, theta, cv, vh)
 dimension cv(1)
 real cv, vh, theta, cth, sth, cdt, sdt, chh
@@ -2575,8 +2725,11 @@ chh = cdt*cth-sdt*sth
 sth = sdt*cth+cdt*sth
 cth = chh
 25 continue
-return
+
 end subroutine dvtt
+
+
+
 subroutine dwtt(m, n, theta, cw, wh)
 dimension cw(1)
 real theta, cw, wh, cth, sth, cdt, sdt, chh
@@ -2638,8 +2791,11 @@ chh = cdt*cth-sdt*sth
 sth = sdt*cth+cdt*sth
 cth = chh
 25 continue
-return
+
 end subroutine dwtt
+
+
+
 subroutine vbgint (nlat, nlon, theta, wvbin, work)
 dimension       wvbin(1)
 real theta(*), work(*)
@@ -2653,8 +2809,11 @@ iw1 = 2*nlat*imid+1
 !
 call vbgit1 (nlat, nlon, imid, theta, wvbin, wvbin(iw1), &
                         work, work(nlat/2+2))
-return
+
 end subroutine vbgint
+
+
+
 subroutine vbgit1 (nlat, nlon, imid, theta, vb, abc, cvb, work)
 !
 !     abc must have 3*(max(mmax-2, 0)*(nlat+nlat-mmax-1))/2
@@ -2681,6 +2840,7 @@ call rabcv(nlat, nlon, abc)
 end subroutine vbgit1
 
 
+
 subroutine wbgint (nlat, nlon, theta, wwbin, work)
 dimension       wwbin(1)
 real work(*), theta(*)
@@ -2694,8 +2854,11 @@ iw1 = 2*nlat*imid+1
 !
 call wbgit1 (nlat, nlon, imid, theta, wwbin, wwbin(iw1), &
                         work, work(nlat/2+2))
-return
+
 end subroutine wbgint
+
+
+
 subroutine wbgit1 (nlat, nlon, imid, theta, wb, abc, cwb, work)
 !
 !     abc must have 3*((nlat-3)*nlat+2)/2 locations

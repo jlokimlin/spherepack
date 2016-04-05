@@ -499,7 +499,7 @@ subroutine shags1(nlat, nlon, l, lat, mode, gs, idg, jdg, nt, a, b, mdab, &
         lm1 = l-1
     end if
 
-    if (mode==0) then
+    if (mode == 0) then
         !     for full sphere (mode=0) and even/odd reduction:
         !     overwrite g(i) with (g(i)+g(nlat-i+1))*wts(i)
         !     overwrite g(nlat-i+1) with (g(i)-g(nlat-i+1))*wts(i)
@@ -586,7 +586,9 @@ subroutine shags1(nlat, nlon, l, lat, mode, gs, idg, jdg, nt, a, b, mdab, &
                     g(i, j, k) = wts(i)*(g(i, j, k)+g(i, j, k))
                 end do
                 !     adjust equator separately if a grid point
-                if (nl2<late) g(late, j, k) = wts(late)*g(late, j, k)
+                if (nl2 < late) then
+                    g(late, j, k) = wts(late) * g(late, j, k)
+                end if
             end do
         end do
         !     set m = 0 coefficients first
@@ -594,7 +596,10 @@ subroutine shags1(nlat, nlon, l, lat, mode, gs, idg, jdg, nt, a, b, mdab, &
         m = 0
         mml1 = m*(2*nlat-m-1)/2
         ms = 1
-        if (mode==1) ms = 2
+        if (mode == 1) then
+            ms = 2
+        end if
+
         do k=1, nt
             do i=1, late
                 do np1=ms, nlat, 2
@@ -607,7 +612,9 @@ subroutine shags1(nlat, nlon, l, lat, mode, gs, idg, jdg, nt, a, b, mdab, &
             m = mp1-1
             mml1 = m*(2*nlat-m-1)/2
             ms = mp1
-            if (mode==1) ms = mp1+1
+            if (mode == 1) then
+                ms = mp1+1
+            end if
             do k=1, nt
                 do  i=1, late
                     do np1=ms, nlat, 2
@@ -625,7 +632,9 @@ subroutine shags1(nlat, nlon, l, lat, mode, gs, idg, jdg, nt, a, b, mdab, &
             !     set starting n for mode even
             ns = l
             !     set starting n for mode odd
-            if (mode==1) ns = l+1
+            if (mode==1) then
+                ns = l+1
+            end if
             do k=1, nt
                 do i=1, late
                     do np1=ns, nlat, 2
@@ -868,12 +877,14 @@ subroutine shagsp1(nlat, nlon, l, late, wts, p0n, p1n, abel, bbel, cbel, &
     end do
     !
     !     compute and store swarztrauber recursion coefficients
-    !     for 2.le.m.le.n and 2.le.n.le.nlat in abel, bbel, cbel
+    !     for 2 <= m <= n and 2 <= n <= nlat in abel, bbel, cbel
     do n=2, nlat
         mlim = min(n, l)
         do  m=2, mlim
             imn = indx(m, n)
-            if (n>=l) imn = imndx(m, n)
+            if (n >= l) then
+                imn = imndx(m, n)
+            end if
             abel(imn)=sqrt(real((2*n+1)*(m+n-2)*(m+n-3))/ &
                 real(((2*n-3)*(m+n-1)*(m+n))))
             bbel(imn)=sqrt(real((2*n+1)*(n-m-1)*(n-m))/ &
