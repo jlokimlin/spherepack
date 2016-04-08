@@ -457,9 +457,37 @@ end subroutine shags
 
 subroutine shags1(nlat, nlon, l, lat, mode, gs, idg, jdg, nt, a, b, mdab, &
     ndab, wts, wfft, pmn, late, g, work)
-    dimension gs(idg, jdg, nt), a(mdab, ndab, nt), &
-        b(mdab, ndab, nt), g(lat, nlon, nt)
-    dimension wfft(1), pmn(late, 1), wts(nlat), work(1)
+    implicit none
+    !external :: hrfftf
+    !----------------------------------------------------------------------
+    ! Dictionary: calling arguments
+    !----------------------------------------------------------------------
+    integer, intent (in)     :: nlat
+    integer, intent (in)     :: nlon
+    integer, intent (in)     :: l
+    integer, intent (in)     :: lat
+    integer, intent (in)     :: mode
+    real,    intent (in)     :: gs(idg, jdg, nt)
+    integer, intent (in)     :: idg
+    integer, intent (in)     :: jdg
+    integer, intent (in)     :: nt
+    real,    intent (in out) :: a(mdab, ndab, nt)
+    real,    intent (in out) :: b(mdab, ndab, nt)
+    integer, intent (in)     :: mdab
+    integer, intent (in)     :: ndab
+    integer, intent (in)     :: late
+    real,    intent (in out) :: g(lat, nlon, nt)
+    real,    intent (in out) :: wfft(1)
+    real,    intent (in out) :: pmn(late, 1)
+    real,    intent (in out) :: wts(nlat)
+    real,    intent (in out) :: work(1)
+    !----------------------------------------------------------------------
+    ! Dictionary: calling arguments
+    !----------------------------------------------------------------------
+    integer :: i, j, k, m, mml1
+    integer :: mn, is, ms, ns, lm1, nl2, lp1, mp1, np1, mp2
+    real    :: t1, t2, sfn
+    !----------------------------------------------------------------------
 
     !     set gs array internally in shags1
     do j=1, nlon
@@ -514,7 +542,9 @@ subroutine shags1(nlat, nlon, l, lat, mode, gs, idg, jdg, nt, a, b, mdab, &
                     g(is, j, k) = wts(i)*(t1-t2)
                 end do
                 !     adjust equator if necessary(nlat odd)
-                if (mod(nlat, 2)/=0) g(late, j, k) = wts(late)*g(late, j, k)
+                if (mod(nlat, 2) /= 0) then
+                    g(late, j, k) = wts(late)*g(late, j, k)
+                end if
             end do
         end do
         !     set m = 0 coefficients first
@@ -652,6 +682,7 @@ end subroutine shags1
 
 subroutine shagsi(nlat, nlon, wshags, lshags, work, lwork, dwork, ldwork, &
     ierror)
+    implicit none
     !
     !     this subroutine must be called before calling shags or shsgs with
     !     fixed nlat, nlon. it precomputes the gaussian weights, points
@@ -754,24 +785,41 @@ end subroutine shagsi
 
 
 subroutine shagss1(nlat, l, late, w, pmn, pmnf)
-    dimension w(1), pmn(nlat, late, 3), pmnf(late, 1)
+    implicit none
+    ! External subroutines  :: legin
+    !----------------------------------------------------------------------
+    ! Dictionary: calling arguments
+    !----------------------------------------------------------------------
+    integer, intent (in)     :: nlat
+    integer, intent (in)     :: l
+    integer, intent (in)     :: late
+    real,    intent (in out) :: w(1)
+    real,    intent (in out) :: pmn(nlat, late, 3)
+    real,    intent (in out) :: pmnf(late, 1)
+    !----------------------------------------------------------------------
+    ! Dictionary: calling arguments
+    !----------------------------------------------------------------------
+    integer :: mp1, m, mode, i, np1, km
+    !----------------------------------------------------------------------
 
     !     compute and store legendre polys for i=1, ..., late, m=0, ..., l-1
     pmn = 0.0
 
     do mp1=1, l
         m = mp1-1
-        mml1 = m*(2*nlat-m-1)/2
-        !     compute pmn for n=m, ..., nlat-1 and i=1, ..., (l+1)/2
-        mode = 0
-        call legin(mode, l, nlat, m, w, pmn, km)
-        !     store above in pmnf
-        do np1=mp1, nlat
-            mn = mml1+np1
-            do i=1, late
-                pmnf(i, mn) = pmn(np1, i, km)
+        associate( mml1 => m*(2*nlat-m-1)/2 )
+            !     compute pmn for n=m, ..., nlat-1 and i=1, ..., (l+1)/2
+            mode = 0
+            call legin(mode, l, nlat, m, w, pmn, km)
+            !     store above in pmnf
+            do np1=mp1, nlat
+                associate( mn => mml1+np1 )
+                    do i=1, late
+                        pmnf(i, mn) = pmn(np1, i, km)
+                    end do
+                end associate
             end do
-        end do
+        end associate
     end do
 
 end subroutine shagss1
@@ -824,12 +872,34 @@ end subroutine shagsp
 
 subroutine shagsp1(nlat, nlon, l, late, wts, p0n, p1n, abel, bbel, cbel, &
     wfft, dtheta, dwts, work, ier)
-    dimension wts(nlat), p0n(nlat, late), p1n(nlat, late), abel(1), bbel(1), &
-        cbel(1), wfft(1), dtheta(nlat), dwts(nlat)
-    real pb, dtheta, dwts, work(*)
-
-    indx(m, n) = (n-1)*(n-2)/2+m-1
-    imndx(m, n) = l*(l-1)/2+(n-l-1)*(l-1)+m-1
+    implicit none
+    ! External subroutines  :: hrffti, gaqd, dnlfk
+    ! External functions    :: indx, imndx
+    !----------------------------------------------------------------------
+    ! Dictionary: calling arguments
+    !----------------------------------------------------------------------
+    integer, intent (in)     :: nlat
+    integer, intent (in)     :: nlon
+    integer, intent (in)     :: l
+    integer, intent (in)     :: late
+    real,    intent (in out) :: wts(nlat)
+    real,    intent (in out) :: p0n(nlat, late)
+    real,    intent (in out) :: p1n(nlat, late)
+    real,    intent (in out) :: abel(1)
+    real,    intent (in out) :: bbel(1)
+    real,    intent (in out) :: cbel(1)
+    real,    intent (in out) :: wfft(1)
+    real,    intent (in out) :: dtheta(nlat)
+    real,    intent (in out) :: dwts(nlat)
+    real,    intent (in out) :: work(*)
+    integer, intent (out)    :: ier
+    !----------------------------------------------------------------------
+    ! Dictionary: local variables
+    !----------------------------------------------------------------------
+    integer :: i, m, n
+    integer :: lw, np1, imn, mlim
+    real    :: pb
+    !----------------------------------------------------------------------
 
     call hrffti(nlon, wfft)
 
@@ -839,7 +909,9 @@ subroutine shagsp1(nlat, nlon, l, late, wts, p0n, p1n, abel, bbel, cbel, &
 
     call gaqd(nlat, dtheta, dwts, work, lw, ier)
 
-    if (ier/=0) return
+    if (ier/=0) then
+        return
+    end if
 
     !     store gaussian weights single precision to save computation
     !     in inner loops in analysis
@@ -881,9 +953,9 @@ subroutine shagsp1(nlat, nlon, l, late, wts, p0n, p1n, abel, bbel, cbel, &
     do n=2, nlat
         mlim = min(n, l)
         do  m=2, mlim
-            imn = indx(m, n)
+            imn = (n-1)*(n-2)/2+m-1
             if (n >= l) then
-                imn = imndx(m, n)
+                imn = l*(l-1)/2+(n-l-1)*(l-1)+m-1
             end if
             abel(imn)=sqrt(real((2*n+1)*(m+n-2)*(m+n-3))/ &
                 real(((2*n-3)*(m+n-1)*(m+n))))
