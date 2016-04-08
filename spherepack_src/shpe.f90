@@ -177,7 +177,7 @@ subroutine shpei1(nlat, nlon, isym, mtrunc, idp, ierror, &
   cp, work, wx, s, e, thet, xx, z, a, b, we, ped, wo, pod, u)
 !
 real sum, eps, pi, dthet, v(1,1), a1, b1, c1
-parameter (eps=5.0d-8)
+parameter (eps=epsilon(1.0))
 real cp(idp), work(idp), wx(idp), s(idp+1), &
   e(idp), thet(idp), xx(idp), z(idp), u(idp, idp), &
   we(idp, idp, 2), ped(idp, idp, 2), a(4*idp), b(2*idp), &
@@ -957,7 +957,7 @@ return
 end subroutine tmxmx
 subroutine trunc(irc, n, idp, a, nrc, ijs)
 real a, eps
-parameter (eps=5.d-8)
+parameter (eps=epsilon(1.0))
 dimension a(idp, *), ijs(n)
 !
 !     irc = 0 for columns , or irc = 1 for rows
@@ -1175,8 +1175,8 @@ end subroutine dlfkp
 subroutine dlftp (m, n, theta, cp, pb)
 dimension cp(1)
 real cp, pb, theta, cdt, sdt, cth, sth, chh
-cdt = cos(theta+theta)
-sdt = sin(theta+theta)
+cdt = cos(2.0*theta)
+sdt = sin(2.0*theta)
 nmod=mod(n, 2)
 mmod=mod(abs(m), 2)
 if (nmod< 0) then

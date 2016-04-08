@@ -128,8 +128,8 @@ end subroutine dnlfk
 subroutine dnlft (m, n, theta, cp, pb)
 real cp(*), pb, theta, cdt, sdt, cth, sth, chh
 
-cdt = cos(theta+theta)
-sdt = sin(theta+theta)
+cdt = cos(2.0*theta)
+sdt = sin(2.0*theta)
 
 nmod=mod(n, 2)
 mmod=mod(m, 2)
@@ -226,8 +226,8 @@ subroutine dnlftd (m, n, theta, cp, pb)
 !
 dimension cp(1)
 real cp, pb, theta, cdt, sdt, cth, sth, chh
-cdt = cos(theta+theta)
-sdt = sin(theta+theta)
+cdt = cos(2.0*theta)
+sdt = sin(2.0*theta)
 nmod=mod(n, 2)
 mmod=mod(abs(m), 2)
 if (nmod< 0) then

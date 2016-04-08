@@ -139,8 +139,8 @@ else
     goto 70
 end if
 50 kdo = n/2+1
-cdt = cos(theta+theta)
-sdt = sin(theta+theta)
+cdt = cos(2.0*theta)
+sdt = sin(2.0*theta)
 ct = 1.
 st = 0.
 sum = .5*cp(1)
@@ -153,8 +153,8 @@ do  60 kp1=2, kdo
 pb= sum
 go to 140
 70 kdo = n/2
-cdt = cos(theta+theta)
-sdt = sin(theta+theta)
+cdt = cos(2.0*theta)
+sdt = sin(2.0*theta)
 ct = 1.
 st = 0.
 sum = 0.
@@ -174,8 +174,8 @@ go to 140
    else 
        goto 120
    end if
-100 cdt = cos(theta+theta)
-sdt = sin(theta+theta)
+100 cdt = cos(2.0*theta)
+sdt = sin(2.0*theta)
 ct = cos(theta)
 st = -sin(theta)
 sum = 0.
@@ -187,8 +187,8 @@ do 110 k=1, kdo
 110 continue
 pb= sum
 go to 140
-120 cdt = cos(theta+theta)
-sdt = sin(theta+theta)
+120 cdt = cos(2.0*theta)
+sdt = sin(2.0*theta)
 ct = cos(theta)
 st = -sin(theta)
 sum = 0.

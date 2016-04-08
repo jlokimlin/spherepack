@@ -171,29 +171,28 @@ subroutine shigss1(nlat, l, late, w, pmn, pmnf)
     dimension w(1), pmn(nlat, late, 3), pmnf(late, 1)
     !     compute and store legendre polys for i=1, ..., late, m=0, ..., l-1
     !     and n=m, ..., l-1
-    do i=1, nlat
-        do j=1, late
-            do k=1, 3
-                pmn(i, j, k) = 0.0
-            end do
-        end do
-    end do
-    do 100 mp1=1, l
+
+    ! Initialize
+    pmn = 0.0
+
+    do mp1=1, l
         m = mp1-1
         mml1 = m*(2*nlat-m-1)/2
         !     compute pmn for n=m, ..., nlat-1 and i=1, ..., (l+1)/2
         mode = 0
         call legin(mode, l, nlat, m, w, pmn, km)
         !     store above in pmnf
-        do 101 np1=mp1, nlat
+        do np1=mp1, nlat
             mn = mml1+np1
-            do 102 i=1, late
+            do i=1, late
                 pmnf(i, mn) = pmn(np1, i, km)
-102         continue
-101     continue
-100 continue
-    return
+            end do
+        end do
+    end do
+
 end subroutine shigss1
+
+
 subroutine shigsp(nlat, nlon, wshigs, lshigs, dwork, ldwork, ierror)
     dimension wshigs(lshigs)
     real dwork(ldwork)
@@ -231,74 +230,90 @@ subroutine shigsp(nlat, nlon, wshigs, lshigs, dwork, ldwork, ierror)
     call shigsp1(nlat, nlon, l, late, wshigs(i1), wshigs(i2), wshigs(i3), &
         wshigs(i4), wshigs(i5), wshigs(i6), wshigs(i7), dwork(idth), &
         dwork(idwts), dwork(iw), ierror)
-    if (ierror/=0) ierror = 5
-    return
+
+    if (ierror/=0) then
+        ierror = 5
+    end if
+
 end subroutine shigsp
+
+
 
 subroutine shigsp1(nlat, nlon, l, late, wts, p0n, p1n, abel, bbel, cbel, &
     wfft, dtheta, dwts, work, ier)
     dimension wts(nlat), p0n(nlat, late), p1n(nlat, late), abel(1), bbel(1), &
         cbel(1), wfft(1), dtheta(nlat), dwts(nlat)
-    real pb, dtheta, dwts, work(*)
+    real pb, dtheta, work(*)
+
     indx(m, n) = (n-1)*(n-2)/2+m-1
     imndx(m, n) = l*(l-1)/2+(n-l-1)*(l-1)+m-1
+
     call hrffti(nlon, wfft)
     !     compute real gaussian points and weights
     !     lw = 4*nlat*(nlat+2)
     lw = nlat*(nlat+2)
+
     call gaqd(nlat, dtheta, dwts, work, lw, ier)
-    if (ier/=0) return
+
+    if (ier/=0) then
+        return
+    end if
+
     !     store gaussian weights single precision to save computation
     !     in inner loops in analysis
-    do 100 i=1, nlat
-        wts(i) = dwts(i)
-100 continue
-    !     initialize p0n, p1n using real dnlfk, dnlft
-    do 101 np1=1, nlat
-        do 101 i=1, late
-            p0n(np1, i) = 0.0
-            p1n(np1, i) = 0.0
-101     continue
-        !     compute m=n=0 legendre polynomials for all theta(i)
-        np1 = 1
-        n = 0
+    wts = dwts
+
+    ! initialize p0n, p1n using real dnlfk, dnlft
+    p0n = 0.0
+    p1n = 0.0
+
+    !     compute m=n=0 legendre polynomials for all theta(i)
+    np1 = 1
+    n = 0
+    m = 0
+
+    call dnlfk(m, n, work)
+
+    do i=1, late
+        call dnlft(m, n, dtheta(i), work, pb)
+        p0n(1, i) = pb
+    end do
+
+    !     compute p0n, p1n for all theta(i) when n.gt.0
+    do np1=2, nlat
+
+        n = np1-1
         m = 0
+
         call dnlfk(m, n, work)
-        do 103 i=1, late
+
+        do i=1, late
             call dnlft(m, n, dtheta(i), work, pb)
-            p0n(1, i) = pb
-103     continue
-        !     compute p0n, p1n for all theta(i) when n.gt.0
-        do 104 np1=2, nlat
-            n = np1-1
-            m = 0
-            call dnlfk(m, n, work)
-            do 105 i=1, late
-                call dnlft(m, n, dtheta(i), work, pb)
-                p0n(np1, i) = pb
-105         continue
-            !     compute m=1 legendre polynomials for all n and theta(i)
-            m = 1
-            call dnlfk(m, n, work)
-            do 106 i=1, late
-                call dnlft(m, n, dtheta(i), work, pb)
-                p1n(np1, i) = pb
-106         continue
-104     continue
-        !
-        !     compute and store swarztrauber recursion coefficients
-        !     for 2.le.m.le.n and 2.le.n.le.nlat in abel, bbel, cbel
-        do 107 n=2, nlat
-            mlim = min(n, l)
-            do 107 m=2, mlim
-                imn = indx(m, n)
-                if (n>=l) imn = imndx(m, n)
-                abel(imn)=sqrt(real((2*n+1)*(m+n-2)*(m+n-3))/ &
-                    real(((2*n-3)*(m+n-1)*(m+n))))
-                bbel(imn)=sqrt(real((2*n+1)*(n-m-1)*(n-m))/ &
-                    real(((2*n-3)*(m+n-1)*(m+n))))
-                cbel(imn)=sqrt(real((n-m+1)*(n-m+2))/ &
-                    real(((n+m-1)*(n+m))))
-107         continue
-            return
-        end subroutine shigsp1
+            p0n(np1, i) = pb
+        end do
+        !     compute m=1 legendre polynomials for all n and theta(i)
+        m = 1
+        call dnlfk(m, n, work)
+        do i=1, late
+            call dnlft(m, n, dtheta(i), work, pb)
+            p1n(np1, i) = pb
+        end do
+    end do
+    !
+    !     compute and store swarztrauber recursion coefficients
+    !     for 2.le.m.le.n and 2.le.n.le.nlat in abel, bbel, cbel
+    do n=2, nlat
+        mlim = min(n, l)
+        do m=2, mlim
+            imn = indx(m, n)
+            if (n>=l) imn = imndx(m, n)
+            abel(imn)=sqrt(real((2*n+1)*(m+n-2)*(m+n-3))/ &
+                real(((2*n-3)*(m+n-1)*(m+n))))
+            bbel(imn)=sqrt(real((2*n+1)*(n-m-1)*(n-m))/ &
+                real(((2*n-3)*(m+n-1)*(m+n))))
+            cbel(imn)=sqrt(real((n-m+1)*(n-m+2))/ &
+                real(((n+m-1)*(n+m))))
+        end do
+    end do
+
+end subroutine shigsp1

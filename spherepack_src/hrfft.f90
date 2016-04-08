@@ -209,8 +209,10 @@ subroutine hrffti (n, wsave)
     tfft = 0.
     if (n == 1) return                                                    !
     call hrfti1 (n, wsave(1), wsave(n+1))
-    return                                                                  !
-end subroutine hrffti                                                                     !       
+                                                                 !
+end subroutine hrffti
+
+                                                                  !
 subroutine hrfti1 (n, wa, fac)
     !
     !     a multiple fft package for spherepack
@@ -296,7 +298,7 @@ subroutine hrfftf (m, n, r, mdimr, whrfft, work)
     !     tstart = second(dum)
     call hrftf1 (m, n, r, mdimr, work, whrfft, whrfft(n+1))
     !     tfft = tfft+second(dum)-tstart
-    return
+
 end subroutine hrfftf
 
 
@@ -361,7 +363,7 @@ subroutine hrftf1 (m, n, c, mdimc, ch, wa, fac)
         do 112 i=1, m
             c(i, j) = ch(i, j)
 112     continue
-        return
+
     end subroutine hrftf1
 
 
@@ -443,8 +445,12 @@ subroutine hrftf1 (m, n, c, mdimc, ch, wa, fac)
                 cc(m, ido, k, 3)
 1006    continue      
 106 continue         
-107 return           
-end subroutine hradf4              
+107 return
+
+end subroutine hradf4
+
+
+
 subroutine hradf2 (mp, ido, l1, cc, mdimcc, ch, mdimch, wa1)
     !
     !     a multiple fft package for spherepack
@@ -487,8 +493,12 @@ subroutine hradf2 (mp, ido, l1, cc, mdimcc, ch, mdimch, wa1)
             ch(m, ido, 1, k) = cc(m, ido, k, 1)
 1006    continue      
 106 continue         
-107 return           
-end subroutine hradf2              
+107 return
+
+end subroutine hradf2
+
+
+
 subroutine hradf3 (mp, ido, l1, cc, mdimcc, ch, mdimch, wa1, wa2)
     !
     !     a multiple fft package for spherepack
@@ -541,8 +551,11 @@ subroutine hradf3 (mp, ido, l1, cc, mdimcc, ch, mdimch, wa1, wa2)
 1002        continue
 102     continue
 103 continue         
-    return
-end subroutine hradf3              
+
+end subroutine hradf3
+
+
+
 subroutine hradf5 (mp, ido, l1, cc, mdimcc, ch, mdimch, &
     wa1, wa2, wa3, wa4)
     !
@@ -659,8 +672,9 @@ subroutine hradf5 (mp, ido, l1, cc, mdimcc, ch, mdimch, &
 1002        continue
 102     continue
 103 continue         
-    return
-end subroutine hradf5              
+
+end subroutine hradf5
+
 subroutine hradfg (mp, ido, ip, l1, idl1, cc, c1, c2, mdimcc, &
     ch, ch2, mdimch, wa)
     !
@@ -898,7 +912,7 @@ subroutine hrfftb(m, n, r, mdimr, whrfft, work)
     !     tstart = second(dum)
     call hrftb1 (m, n, r, mdimr, work, whrfft, whrfft(n+1))
     !     tfft = tfft+second(dum)-tstart
-    return
+
 end subroutine hrfftb
 
 
@@ -964,8 +978,11 @@ subroutine hrftb1 (m, n, c, mdimc, ch, wa, fac)
         do 117 i=1, m
             c(i, j) = ch(i, j)
 117     continue
-        return
+
     end subroutine hrftb1
+
+
+
     subroutine hradbg (mp, ido, ip, l1, idl1, cc, c1, c2, mdimcc, &
         ch, ch2, mdimch, wa)
         !
@@ -1163,7 +1180,10 @@ subroutine hrftb1 (m, n, c, mdimc, ch, wa, fac)
 141     continue
 142 continue         
 143 return           
-end subroutine hradbg              
+end subroutine hradbg
+
+
+
 subroutine hradb4 (mp, ido, l1, cc, mdimcc, ch, mdimch, wa1, wa2, wa3)
     !
     !     a multiple fft package for spherepack
@@ -1236,7 +1256,10 @@ subroutine hradb4 (mp, ido, l1, cc, mdimcc, ch, mdimch, wa1, wa2, wa3)
 1003    continue
 106 continue         
 107 return           
-end subroutine hradb4              
+end subroutine hradb4
+
+
+
 subroutine hradb2 (mp, ido, l1, cc, mdimcc, ch, mdimch, wa1)
     !
     !     a multiple fft package for spherepack
@@ -1278,7 +1301,10 @@ subroutine hradb2 (mp, ido, l1, cc, mdimcc, ch, mdimch, wa1)
 1003    continue
 106 continue         
 107 return           
-end subroutine hradb2              
+end subroutine hradb2
+
+
+
 subroutine hradb3 (mp, ido, l1, cc, mdimcc, ch, mdimch, wa1, wa2)
     !
     !     a multiple fft package for spherepack
@@ -1332,8 +1358,11 @@ subroutine hradb3 (mp, ido, l1, cc, mdimcc, ch, mdimch, wa1, wa2)
 1002        continue
 102     continue
 103 continue         
-    return
-end subroutine hradb3              
+
+end subroutine hradb3
+
+
+
 subroutine hradb5 (mp, ido, l1, cc, mdimcc, ch, mdimch, &
     wa1, wa2, wa3, wa4)
     !

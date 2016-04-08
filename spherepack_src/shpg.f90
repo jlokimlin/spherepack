@@ -174,7 +174,7 @@ subroutine shpgi1(nlat, nlon, isym, mtrunc, idp, ierror, &
   cp, wx, thet, gwts, xx, z, a, b, ped, pod, u)
 !
 real sum, eps, a1, b1, c1, work
-parameter (eps=5.0d-8)
+parameter (eps=epsilon(1.0))
 real cp(idp), wx(idp), &
   thet(nlat), gwts(nlat), xx(idp), z(idp), a(4*idp), &
   b(2*idp), ped(idp, idp, 2), pod(idp, idp, 2), u(idp, idp)
@@ -935,7 +935,7 @@ return
 end subroutine tmxmx
 subroutine trunc(irc, n, idp, a, nrc, ijs)
 real a, eps
-parameter (eps=5.d-8)
+parameter (eps=epsilon(1.0))
 dimension a(idp, *), ijs(n)
 !
 !     irc = 0 for columns , or irc = 1 for rows
@@ -1155,8 +1155,8 @@ end subroutine dlfkg
 subroutine dlftg (m, n, theta, cp, pb)
 dimension cp(1)
 real cp, pb, theta, cdt, sdt, cth, sth, chh
-cdt = cos(theta+theta)
-sdt = sin(theta+theta)
+cdt = cos(2.0*theta)
+sdt = sin(2.0*theta)
 nmod=mod(n, 2)
 mmod=mod(abs(m), 2)
 if (nmod< 0) then
@@ -1308,7 +1308,7 @@ wts(1) = 1.0
 wts(2) = 1.0
 return
 end if
-eps = sqrt(dzepp(1.0))
+eps = sqrt(epsilon(1.0))
 eps = eps*sqrt(eps)
 pis2 = 2.0*atan(1.0)
 pi = pis2+pis2 
@@ -1438,8 +1438,8 @@ real cp(n/2+1), dcp(n/2+1), cz, &
   pb, dpb, fn, theta, cdt, sdt, cth, sth, chh
 !
 fn = n
-cdt = cos(theta+theta)
-sdt = sin(theta+theta)
+cdt = cos(2.0*theta)
+sdt = sin(2.0*theta)
 if (mod(n, 2) ==0) then
 !
 !     n even
@@ -1482,49 +1482,3 @@ end if
 return
 end subroutine tpdp1
 
-    pure function dzepp(x) result (return_value)
-        implicit none
-        !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
-        !----------------------------------------------------------------------
-        real, intent (in) ::  x
-        real              :: return_value
-        !----------------------------------------------------------------------
-        !
-        ! Purpose: estimate unit roundoff in quantities of size x.
-        !
-        ! real :: a, b, c, eps
-        !
-        ! a = 4.0/3.0
-        ! 10 b = a - 1.0
-        ! c = b + b + b
-        ! eps = abs(c-1.0)
-        ! if (eps == 0.0) go to 10
-        ! dzepp = eps*abs(x)
-        !
-        !     this program should function properly on all systems
-        !     satisfying the following two assumptions,
-        !        1.  the base used in representing floating point
-        !            numbers is not a power of three.
-        !        2.  the quantity  a  in statement 10 is represented to
-        !            the accuracy used in floating point variables
-        !            that are stored in memory.
-        !     the statement number 10 and the go to 10 are intended to
-        !     force optimizing compilers to generate code satisfying
-        !     assumption 2.
-        !     under these assumptions, it should be true that,
-        !            a  is not exactly equal to four-thirds,
-        !            b  has a zero for its last bit or digit,
-        !            c  is not exactly equal to one,
-        !            eps  measures the separation of 1.0 from
-        !                 the next larger floating point number.
-        !     the developers of eispack would appreciate being informed
-        !     about any systems where these assumptions do not hold.
-        !
-        !     this version dated 4/6/83
-        !     04/08/16 - replaced with the intrinsic EPSILON
-        !
-
-        return_value = epsilon(x)
-
-    end function dzepp

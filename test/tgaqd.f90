@@ -426,8 +426,8 @@ program testint
     end subroutine lfc
     subroutine lft (m,n,theta,cp,pb)
         real cp(*),pb,theta,cdt,sdt,cth,sth,chh
-        cdt = cos(theta+theta)
-        sdt = sin(theta+theta)
+        cdt = cos(2.0*theta)
+        sdt = sin(2.0*theta)
         nmod=mod(n,2)
         mmod=mod(m,2)
         if (nmod< 0) then
@@ -519,8 +519,8 @@ program testint
         !
         dimension cp(1)
         real cp,pb,theta,cdt,sdt,cth,sth,chh
-        cdt = cos(theta+theta)
-        sdt = sin(theta+theta)
+        cdt = cos(2.0*theta)
+        sdt = sin(2.0*theta)
         nmod=mod(n,2)
         mmod=mod(abs(m),2)
         if (nmod< 0) then
@@ -851,8 +851,8 @@ program testint
         dimension cp(n/2+1),dcp(n/2+1)
         !
         fn = real(n)
-        cdt = cos(theta+theta)
-        sdt = sin(theta+theta)
+        cdt = cos(2.0*theta)
+        sdt = sin(2.0*theta)
         if (mod(n,2) ==0) then
             !
             !     n even
