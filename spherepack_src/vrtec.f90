@@ -233,44 +233,44 @@ subroutine vrtec(nlat, nlon, isym, nt, vort, ivrt, jvrt, cr, ci, mdc, ndc, &
     !     check input parameters
     !
     ierror = 1
-    if(nlat < 3) return
+    if (nlat < 3) return
     ierror = 2
-    if(nlon < 4) return
+    if (nlon < 4) return
     ierror = 3
     if (isym<0 .or. isym>2) return
     ierror = 4
-    if(nt < 0) return
+    if (nt < 0) return
     ierror = 5
     imid = (nlat+1)/2
-    if((isym==0 .and. ivrt<nlat) .or. &
+    if ((isym==0 .and. ivrt<nlat) .or. &
         (isym>0 .and. ivrt<imid)) return
     ierror = 6
-    if(jvrt < nlon) return
+    if (jvrt < nlon) return
     ierror = 7
-    if(mdc < min(nlat, (nlon+1)/2)) return
+    if (mdc < min(nlat, (nlon+1)/2)) return
     mmax = min(nlat, (nlon+2)/2)
     ierror = 8
-    if(ndc < nlat) return
+    if (ndc < nlat) return
     ierror = 9
     !
     !     verify saved work space (same as shec)
     !
     lzz1 = 2*nlat*imid
     labc = 3*(max(mmax-2, 0)*(nlat+nlat-mmax-1))/2
-    if(lshsec < lzz1+labc+nlon+15) return
+    if (lshsec < lzz1+labc+nlon+15) return
     ierror = 10
     !
     !     verify unsaved work space (add to what shec requires)
     !
     ls = nlat
-    if(isym > 0) ls = imid
+    if (isym > 0) ls = imid
     nln = nt*ls*nlon
     !
     !     set first dimension for a, b (as requried by shsec)
     !
     mab = min(nlat, nlon/2+1)
     mn = mab*nlat*nt
-    !     if(lwork.lt.nln+max(ls*nlon, 3*nlat*imid)+2*mn+nlat) return
+    !     if (lwork.lt.nln+max(ls*nlon, 3*nlat*imid)+2*mn+nlat) return
     l1 = min(nlat, (nlon+2)/2)
     l2 = (nlat+1)/2
     if (isym == 0) then
@@ -303,8 +303,8 @@ subroutine vrtec1(nlat, nlon, isym, nt, vort, ivrt, jvrt, cr, ci, mdc, ndc, &
     !     set coefficient multiplyers
     !
     do 1 n=2, nlat
-        fn = real(n-1)
-        sqnn(n) = sqrt(fn*(fn + 1.0))
+        fn = real(n - 1)
+        sqnn(n) = sqrt(fn * (fn + 1.0))
 1   continue
     !
     !     compute vorticity scalar coefficients for each vector field

@@ -150,7 +150,7 @@ subroutine shigs(nlat, nlon, wshigs, lshigs, work, lwork, dwork, &
     !     check permanent work space length
     ierror = 3
     lp=nlat*(3*(l1+l2)-2)+(l1-1)*(l2*(2*nlat-l1)-3*l1)/2+nlon+15
-    if(lshigs<lp) return
+    if (lshigs<lp) return
     ierror = 4
     !     check temporary work space
     if (lwork<4*nlat*(nlat+2)+2) return

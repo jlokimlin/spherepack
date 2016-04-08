@@ -118,23 +118,23 @@ real work(*)
 dimension wshp(*), iwshp(*)
 !
 ierror = 1
-if(nlat<3) return
+if (nlat<3) return
 ierror = 2
-if(nlon<4) return
+if (nlon<4) return
 !      ierror = 3
-!      if(isym.lt.0 .or. isym.gt.2) return
+!      if (isym.lt.0 .or. isym.gt.2) return
 ierror = 4
 mmax = min(nlat-1, nlon/2)
-if(mtrunc<0 .or. mtrunc>mmax) return
+if (mtrunc<0 .or. mtrunc>mmax) return
 ierror = 5
 lw1 = 2*(nlat+1)**2
 log2n = log(real(nlon))/log(2.0)
-if(lwshp<lw1+nlon+log2n) return
+if (lwshp<lw1+nlon+log2n) return
 ierror = 6
-if(liwshp<4*(nlat+1)) return
+if (liwshp<4*(nlat+1)) return
 ierror = 7
 mlwk = 1.25*(nlat+1)**2+7*nlat+8
-if(lwork<mlwk) return
+if (lwork<mlwk) return
 ierror = 0
 !
 call hrffti(nlon, wshp(lw1+1))
@@ -215,7 +215,7 @@ call dlfkp(m, n, cp)
 do i=1, nte
 call dlftp (m, n, thet(i), cp, ped(i, j, mp1))
 end do
-if(m>0) ped(1, j, mp1) = 0.0
+if (m>0) ped(1, j, mp1) = 0.0
 end do
 call dsvdc(ped(m+1, 1, mp1), idp, nem, nem, s, e, u, &
                         idp, v(1,1), idp, work, 10, info)
@@ -266,21 +266,21 @@ nem = (mrank+1)/2
 !
 !     compute associated legendre functions
 !
-if(m<=1) then
+if (m<=1) then
 do 205 j=1, nem
 n = j+j+m-2
 call dlfkp(m, n, cp)
 do i=1, nte
 call dlftp (m, n, thet(i), cp, ped(i, j+ms2, ip))
 end do
-202 if(m>0) ped(1, j+ms2, ip) = 0.0
+202 if (m>0) ped(1, j+ms2, ip) = 0.0
 205 continue
 !
 else
 !
 do 207 j=1, nem
 n = j+j+m-2
-if(m>1.and.n>mxtr) then
+if (m>1.and.n>mxtr) then
 do i=1, nte
 u(i, j+ms2) = ped(i, j+ms2, ip)
 end do
@@ -288,7 +288,7 @@ go to 207
 end if
 a1 = b(n-1)*a(n+m-3)/a(n+m-1)
 b1 = a(n-m+1)/a(n+m-1)
-if(n-m<=1) then
+if (n-m<=1) then
 do i=1, nte
 u(i, j+ms2) = a1*ped(i, j+ms2-1, ip) &
                    - b1*ped(i, j+ms2, ip)    
@@ -308,7 +308,7 @@ end do
 end do
 end if
 !
-if(ms2<=0.or.ms2>=nte) go to 200
+if (ms2<=0.or.ms2>=nte) go to 200
 !
 ! initialize array with random numbers using 
 ! Fortran90 intrinsics RANDOM_{SEED, NUMBER}
@@ -331,7 +331,7 @@ wx(i) = wx(i)+we(i, j, ip)*xx(j)
 end do
 end do
 do 220 j=1, nte
-if(j==ms2) go to 220
+if (j==ms2) go to 220
 call gs(nte, wx, ped(1, j, ip), z)
 220 continue
 !  
@@ -340,7 +340,7 @@ xx(i) = xx(i)-z(i)
 end do
 call normal(nte, xx, idp, we(1, 1, ip))
 it = it+1
-if(it<=2) go to 201
+if (it<=2) go to 201
 do i=1, nte
 ped(i, ms2, ip) = xx(i)
 end do
@@ -349,7 +349,7 @@ end do
 !     reorder if mtrunc is less than nlat-1 
 !         case of even functions
 !
-if(modn==0) then
+if (modn==0) then
 nshe(1) = (nlat-mtrunc-1)/2
 nshe(2) = (nlat-mtrunc-2)/2
 else
@@ -360,7 +360,7 @@ end if
 do 210 mp1=1, 2
 do j=1, nte
 js = j+nshe(mp1)
-if(js>nte) js = js-nte
+if (js>nte) js = js-nte
 do i=1, nte
 u(i, js) = ped(i, j, mp1)
 end do
@@ -387,7 +387,7 @@ sum = sum+ped(k, i, ip)*we(k, j, ip)
 end do
 pe(i, j, ip) = ped(i, j, ip)
 ze(j, i, ip) =  sum
-if(abs(sum)>eps .and. lock==0) then
+if (abs(sum)>eps .and. lock==0) then
 lock = 1
 jzse(i, ip) = j
 end if
@@ -408,7 +408,7 @@ call dlfkp(m, n, cp)
 do i=1, nte
 call dlftp (m, n, thet(i), cp, pod(i, j, mp1))
 end do
-if(modn==1) pod(nte, j, mp1) = 0.0
+if (modn==1) pod(nte, j, mp1) = 0.0
 end do
 call dsvdc(pod(m+1, 1, mp1), idp, nom, nom, s, e, u, &
                         idp, v(1,1), idp, work, 10, info)
@@ -435,7 +435,7 @@ end do
 end do
 50 continue
 wo(1, 1, 2) = 1.0  
-if(modn==1) then
+if (modn==1) then
 wo(nte, nte, 1) = 1.0  
 wo(nte, nte, 2) = 1.0  
 end if
@@ -454,22 +454,22 @@ nom = mrank-nem
 !
 !     compute associated legendre functions
 !
-if(m<=1) then
+if (m<=1) then
 do 305 j=1, nom
 n = j+j+m-1
 call dlfkp(m, n, cp)
 do i=1, nte
 call dlftp (m, n, thet(i), cp, pod(i, j+ms2, ip))
 end do
-302 if(modn==1) pod(nte, j+ms2, ip) = 0.0
-if(m>0) pod(1, j+ms2, ip) = 0.0
+302 if (modn==1) pod(nte, j+ms2, ip) = 0.0
+if (m>0) pod(1, j+ms2, ip) = 0.0
 305 continue
 !
 else
 !
 do 307 j=1, nom
 n = j+j+m-1
-if(m>1.and.n>mxtr) then
+if (m>1.and.n>mxtr) then
 do i=1, nte
 u(i, j+ms2) = pod(i, j+ms2, ip)
 end do
@@ -477,7 +477,7 @@ go to 304
 end if
 a1 = b(n-1)*a(n+m-3)/a(n+m-1)
 b1 = a(n-m+1)/a(n+m-1)
-if(n-m<=1) then
+if (n-m<=1) then
 do i=1, nte
 u(i, j+ms2) = a1*pod(i, j+ms2-1, ip) &
                    - b1*pod(i, j+ms2, ip)    
@@ -489,7 +489,7 @@ u(i, j+ms2) = a1*pod(i, j+ms2-1, ip) &
    - b1*pod(i, j+ms2, ip) + c1*u(i, j+ms2-1)    
 end do
 end if
-304 if(modn==1) u(nte, j+ms2) = 0.0
+304 if (modn==1) u(nte, j+ms2) = 0.0
 307 continue
 do j=1, nom
 do i=1, nte
@@ -498,7 +498,7 @@ end do
 end do
 end if
 !
-if(ms2<=0.or.ms2>=nto) go to 300
+if (ms2<=0.or.ms2>=nto) go to 300
 !
 ! initialize array with random numbers using 
 ! Fortran90 intrinsics RANDOM_{SEED, NUMBER}
@@ -511,7 +511,7 @@ if(ms2<=0.or.ms2>=nto) go to 300
 ! replacement code
 !
 call random_number(xx(1:nte))
-if(modn==1) xx(nte) = 0.0
+if (modn==1) xx(nte) = 0.0
 it = 0
 306 do i=1, nte
 z(i) = 0.
@@ -521,7 +521,7 @@ wx(i) = wx(i)+wo(i, j, ip)*xx(j)
 end do
 end do
 do 330 j=1, nto
-if(j==ms2) go to 330
+if (j==ms2) go to 330
 call gs(nte, wx, pod(1, j, ip), z(1))
 330 continue
 !  
@@ -530,17 +530,17 @@ xx(i) = xx(i)-z(i)
 end do
 call normal(nte, xx, idp, wo(1, 1, ip))
 it = it+1
-if(it<=2) go to 306
+if (it<=2) go to 306
 do i=1, nte
 pod(i, ms2, ip) = xx(i)
 end do
-if(modn==1) pod(nte, ms2, ip) = 0.0
+if (modn==1) pod(nte, ms2, ip) = 0.0
 300 continue
 !
 !     reorder if mtrunc is less than nlat-1
 !        case of odd functions  
 !
-if(modn==0) then
+if (modn==0) then
 nsho(1) = (nlat-mtrunc)/2
 nsho(2) = (nlat-mtrunc-1)/2
 else
@@ -551,7 +551,7 @@ end if
 do 310 mp1=1, 2
 do j=1, nto
 js = j+nsho(mp1)
-if(js>nto) js = js-nto
+if (js>nto) js = js-nto
 do i=1, nte
 u(i, js) = pod(i, j, mp1)
 end do
@@ -578,7 +578,7 @@ sum = sum+pod(k, i, ip)*wo(k, j, ip)
 end do
 po(i, j, ip) = pod(i, j, ip)
 zo(j, i, ip) = sum
-if(abs(sum)>eps .and. lock==0) then
+if (abs(sum)>eps .and. lock==0) then
 lock = 1
 jzso(i, ip) = j
 end if
@@ -693,23 +693,23 @@ subroutine shpe(nlat, nlon, isym, mtrunc, x, y, idxy, &
 dimension wshp(*), iwshp(*), work(*), x(idxy, nlon), y(idxy, nlon)
 !
 ierror = 1
-if(nlat<3) return
+if (nlat<3) return
 ierror = 2
-if(nlon<4) return
+if (nlon<4) return
 !      ierror = 3
-!      if(isym.lt.0 .or. isym.gt.2) return
+!      if (isym.lt.0 .or. isym.gt.2) return
 ierror = 4
 mmax = min(nlat-1, nlon/2)
-if(mtrunc<0 .or. mtrunc>mmax) return
+if (mtrunc<0 .or. mtrunc>mmax) return
 ierror = 5
 log2n = log(real(nlon))/log(2.0)
 lw1 = 2*(nlat+1)**2
-if(lwshp<lw1+nlon+log2n) return
+if (lwshp<lw1+nlon+log2n) return
 ierror = 6
-if(liwshp<4*(nlat+1)) return
+if (liwshp<4*(nlat+1)) return
 ierror = 7
 mwrk = max(nlat*nlon, 4*(nlat+1))
-if(lwork<mwrk) return
+if (lwork<mwrk) return
 ierror = 0
 !
 do j=1, nlon
@@ -759,7 +759,7 @@ modn = nlat-ns2-ns2
 nte = (nlat+1)/2
 nto = nlat-nte
 !
-if(modn==0) then
+if (modn==0) then
 nshe(1) = (nlat-mtrunc-1)/2
 nshe(2) = (nlat-mtrunc-2)/2
 nsho(1) = (nlat-mtrunc)/2
@@ -774,15 +774,15 @@ mxtr = min(nlat-1, nlon/2, mtrunc)
 ip = 2 
 do 100 mp1=1, mxtr+1
 ip = 3-ip
-if(mxtr==nlat-1.and.mp1<=2) then
+if (mxtr==nlat-1.and.mp1<=2) then
 do i=1, nlat
 sy(i, mp1) = sx(i, mp1)
 end do
-if(mp1==2) then
+if (mp1==2) then
 sy(1, 2) = 0.
 sy(nlat, 2) = 0.
 end if
-if(nlon>=3) then
+if (nlon>=3) then
 sy(1, 3) = 0.
 sy(nlat, 3) = 0.
 do i=2, nlat-1
@@ -806,19 +806,19 @@ do i=1, nte
 xe(i, 1) = .5*(sx(i, mpm)+sx(nlat+1-i, mpm))
 xo(i, 1) = .5*(sx(i, mpm)-sx(nlat+1-i, mpm))
 end do
-if(mpm<nlon) then
+if (mpm<nlon) then
 do i=1, nte
 xe(i, 2) = .5*(sx(i, mpm+1)+sx(nlat+1-i, mpm+1))
 xo(i, 2) = .5*(sx(i, mpm+1)-sx(nlat+1-i, mpm+1))
 end do
 end if
-if(3*nec<2*nem.or.nem==0) then
+if (3*nec<2*nem.or.nem==0) then
 call tmxmx(nte, nec, idp, pe(1, 1, ip), nte, idp, &
           ze(1, 1, ip), xe, ye, ipse(1, ip), jzse(1, ip))  
 do i=1, nte
 ye(i, 1) = xe(i, 1)-ye(i, 1)
 end do
-if(mpm<nlon.and.m/=0) then
+if (mpm<nlon.and.m/=0) then
 do i=1, nte
 ye(i, 2) = xe(i, 2)-ye(i, 2)
 end do
@@ -827,13 +827,13 @@ else
 call tmxmx(nte, nem, idp, pe(1, nec+1, ip), nte, idp, &
 ze(1, nec+1, ip), xe, ye, ipse(nec+1, ip), jzse(nec+1, ip))
 end if
-if(3*noc<2*nom.or.nom==0) then
+if (3*noc<2*nom.or.nom==0) then
 call tmxmx(nto, noc, idp, po(1, 1, ip), nto, idp, &
           zo(1, 1, ip), xo, yo, ipso(1, ip), jzso(1, ip))
 do i=1, nte
 yo(i, 1) = xo(i, 1)-yo(i, 1)
 end do
-if(mpm<nlon.and.m/=0) then
+if (mpm<nlon.and.m/=0) then
 do i=1, nte
 yo(i, 2) = xo(i, 2)-yo(i, 2)
 end do
@@ -846,7 +846,7 @@ do i=1, nte
 sy(i, mpm) = ye(i, 1)+yo(i, 1)
 sy(nlat+1-i, mpm) = ye(i, 1)-yo(i, 1)
 end do
-if(mpm<nlon.and.m/=0) then
+if (mpm<nlon.and.m/=0) then
 do i=1, nte
 sy(i, mpm+1) = ye(i, 2)+yo(i, 2)
 sy(nlat+1-i, mpm+1) = ye(i, 2)-yo(i, 2)
@@ -892,7 +892,7 @@ y(k, 1) = 0.
 y(k, 2) = 0.
 end do
 !
-if(lc<=0) return
+if (lc<=0) return
 do i=1, lc
 sum1 = 0.
 sum2 = 0.
@@ -915,7 +915,7 @@ y(k, 1) = 0.
 y(k, 2) = 0.
 end do
 !
-if(lc<=0) return
+if (lc<=0) return
 do i=1, lc
 sum1 = 0.
 sum2 = 0.
@@ -939,7 +939,7 @@ do k=1, kmx
 y(k, 1) = 0.
 y(k, 2) = 0.
 end do
-if(lc<=0) return
+if (lc<=0) return
 !
 do i=1, lc
 sum1 = 0.
@@ -962,18 +962,18 @@ dimension a(idp, *), ijs(n)
 !
 !     irc = 0 for columns , or irc = 1 for rows
 !
-if(irc/=0) go to 30
+if (irc/=0) go to 30
 do 20 j=1, nrc
 do i=1, n
 ijs(j) = i
-if(abs(a(i, j)) > eps) go to 20
+if (abs(a(i, j)) > eps) go to 20
 end do
 20 continue
 return
 30 do 50 i=1, nrc
 do j=1, n
 ijs(i) = j
-if(abs(a(i, j)) > eps) go to 50
+if (abs(a(i, j)) > eps) go to 50
 end do
 50 continue
 return
@@ -1018,7 +1018,7 @@ subroutine coe(moe, n, x, dmax)
 real x(n), dmax
 nh = (n+1)/2
 dmax = 0.
-if(moe/=0) go to 1
+if (moe/=0) go to 1
 do i=1, nh
 dmax = max(dmax, abs(x(i)-x(n-i+1)))
 x(i) = .5*(x(i)+x(n-i+1))
@@ -1030,7 +1030,7 @@ dmax = max(dmax, abs(x(i)+x(n-i+1)))
 x(i) = .5*(x(i)-x(n-i+1))
 x(n-i+1) = -x(i)
 end do
-if(mod(n, 2)/=0) x(nh) = 0.
+if (mod(n, 2)/=0) x(nh) = 0.
 return
 end subroutine coe
 !     subroutine dlfkp(m, n, cp)
@@ -1100,23 +1100,23 @@ parameter (sc40=sc20*sc20)
 !
 cp(1) = 0.
 ma = abs(m)
-if(ma > n) return
-if(n-1< 0) then
+if (ma > n) return
+if (n-1< 0) then
     goto 2
-else if(n-1 == 0) then 
+else if (n-1 == 0) then 
     goto 3
 else 
     goto 5
 end if
 2 cp(1) = sqrt(2.d0)
 return
-3 if(ma /= 0) go to 4
+3 if (ma /= 0) go to 4
 cp(1) = sqrt(1.5d0)
 return
 4 cp(1) = sqrt(.75d0)
-if(m == -1) cp(1) = -cp(1)
+if (m == -1) cp(1) = -cp(1)
 return
-5 if(mod(n+ma, 2) /= 0) go to 10
+5 if (mod(n+ma, 2) /= 0) go to 10
 nmms2 = (n-ma)/2
 fnum = n+ma+1
 fnmh = n-ma+1
@@ -1132,10 +1132,10 @@ pm1 = -1.d0
 15 t1 = 1.d0/sc20
 nex = 20
 fden = 2.d0
-if(nmms2 < 1) go to 20
+if (nmms2 < 1) go to 20
 do 18 i=1, nmms2
 t1 = fnum*t1/fden
-if(t1 > sc20) then
+if (t1 > sc20) then
 t1 = t1/sc40
 nex = nex+40
 end if
@@ -1143,9 +1143,9 @@ fnum = fnum+2.
 fden = fden+2.
 18 continue
 20 t1 = t1/2.d0**(n-1-nex)
-if(mod(ma/2, 2) /= 0) t1 = -t1
+if (mod(ma/2, 2) /= 0) t1 = -t1
 t2 = 1. 
-if(ma == 0) go to 26
+if (ma == 0) go to 26
 do 25 i=1, ma
 t2 = fnmh*t2/(fnmh+pm1)
 fnmh = fnmh+2.
@@ -1154,17 +1154,17 @@ fnmh = fnmh+2.
 fnnp1 = n*(n+1)
 fnmsq = fnnp1-2.d0*ma*ma
 l = (n+1)/2
-if(mod(n, 2) == 0 .and. mod(ma, 2) == 0) l = l+1
+if (mod(n, 2) == 0 .and. mod(ma, 2) == 0) l = l+1
 cp(l) = cp2
-if(m >= 0) go to 29
-if(mod(ma, 2) /= 0) cp(l) = -cp(l)
-29 if(l <= 1) return
+if (m >= 0) go to 29
+if (mod(ma, 2) /= 0) cp(l) = -cp(l)
+29 if (l <= 1) return
 fk = n
 a1 = (fk-2.)*(fk-1.)-fnnp1
 b1 = 2.*(fk*fk-fnmsq)
 cp(l-1) = b1*cp(l)/a1
 30 l = l-1
-if(l <= 1) return
+if (l <= 1) return
 fk = fk-2.
 a1 = (fk-2.)*(fk-1.)-fnnp1
 b1 = -2.*(fk*fk-fnmsq)
@@ -1179,16 +1179,16 @@ cdt = cos(theta+theta)
 sdt = sin(theta+theta)
 nmod=mod(n, 2)
 mmod=mod(abs(m), 2)
-if(nmod< 0) then
+if (nmod< 0) then
     goto 1
-else if(nmod == 0) then 
+else if (nmod == 0) then 
     goto 1
 else 
     goto 2
 end if
-1 if(mmod< 0) then
+1 if (mmod< 0) then
     goto 3
-else if(mmod == 0) then 
+else if (mmod == 0) then 
     goto 3
 else 
     goto 4
@@ -1198,7 +1198,7 @@ end if
 !
 3 kdo=n/2
 pb = .5*cp(1)
-if(n == 0) return
+if (n == 0) return
 cth = cdt
 sth = sdt
 do 170 k=1, kdo
@@ -1224,9 +1224,9 @@ sth = sdt*cth+cdt*sth
 cth = chh
 180 continue
 return
-2 if(mmod< 0) then
+2 if (mmod< 0) then
     goto 13
-else if(mmod == 0) then 
+else if (mmod == 0) then 
     goto 13
 else 
     goto 14
@@ -1755,17 +1755,17 @@ subroutine daxpy(n, da, dx, incx, dy, incy)
 real dx(*), dy(*), da
 integer i, incx, incy, ix, iy, m, mp1, n
 !
-if(n<=0)return
+if (n<=0)return
 if (da == 0.0) return
-if(incx==1.and.incy==1)go to 20
+if (incx==1.and.incy==1)go to 20
 !
 !        code for unequal increments or equal increments
 !          not equal to 1
 !
 ix = 1
 iy = 1
-if(incx<0)ix = (-n+1)*incx + 1
-if(incy<0)iy = (-n+1)*incy + 1
+if (incx<0)ix = (-n+1)*incx + 1
+if (incy<0)iy = (-n+1)*incy + 1
 do 10 i = 1, n
   dy(iy) = dy(iy) + da*dx(ix)
   ix = ix + incx
@@ -1779,11 +1779,11 @@ return
 !        clean-up loop
 !
 20 m = mod(n, 4)
-if( m == 0 ) go to 40
+if ( m == 0 ) go to 40
 do 30 i = 1, m
   dy(i) = dy(i) + da*dx(i)
 30 continue
-if( n < 4 ) return
+if ( n < 4 ) return
 40 mp1 = m + 1
 do 50 i = mp1, n, 4
   dy(i) = dy(i) + da*dx(i)
@@ -1805,16 +1805,16 @@ integer i, incx, incy, ix, iy, m, mp1, n
 !
 ddot = 0.0
 dtemp = 0.0
-if(n<=0)return
-if(incx==1.and.incy==1)go to 20
+if (n<=0)return
+if (incx==1.and.incy==1)go to 20
 !
 !        code for unequal increments or equal increments
 !          not equal to 1
 !
 ix = 1
 iy = 1
-if(incx<0)ix = (-n+1)*incx + 1
-if(incy<0)iy = (-n+1)*incy + 1
+if (incx<0)ix = (-n+1)*incx + 1
+if (incy<0)iy = (-n+1)*incy + 1
 do 10 i = 1, n
   dtemp = dtemp + dx(ix)*dy(iy)
   ix = ix + incx
@@ -1829,11 +1829,11 @@ return
 !        clean-up loop
 !
 20 m = mod(n, 5)
-if( m == 0 ) go to 40
+if ( m == 0 ) go to 40
 do 30 i = 1, m
   dtemp = dtemp + dx(i)*dy(i)
 30 continue
-if( n < 5 ) go to 60
+if ( n < 5 ) go to 60
 40 mp1 = m + 1
 do 50 i = mp1, n, 5
   dtemp = dtemp + dx(i)*dy(i) + dx(i + 1)*dy(i + 1) + &
@@ -1871,9 +1871,9 @@ real      absxi, norm, scale, ssq
 intrinsic             ABS, SQRT
 !     ..
 !     .. Executable Statements ..
-if( n<1 .or. incx<1 )then
+if ( n<1 .or. incx<1 )then
    norm  = zero
-else if( n==1 )then
+else if ( n==1 )then
    norm  = ABS( X( 1 ) )
 else
    scale = zero
@@ -1883,9 +1883,9 @@ else
 !        CALL DLASSQ( N, X, INCX, SCALE, SSQ )
 !
    do 10, ix = 1, 1 + ( n - 1 )*incx, incx
-      if( X( ix )/=zero )then
+      if ( X( ix )/=zero )then
          absxi = ABS( X( ix ) )
-         if( scale<absxi )then
+         if ( scale<absxi )then
             ssq   = one   + ssq*( scale/absxi )**2
             scale = absxi
          else
@@ -1911,16 +1911,16 @@ subroutine  drot (n, dx, incx, dy, incy, c, s)
 real dx(*), dy(*), dtemp, c, s
 integer i, incx, incy, ix, iy, n
 !
-if(n<=0)return
-if(incx==1.and.incy==1)go to 20
+if (n<=0)return
+if (incx==1.and.incy==1)go to 20
 !
 !       code for unequal increments or equal increments not equal
 !         to 1
 !
 ix = 1
 iy = 1
-if(incx<0)ix = (-n+1)*incx + 1
-if(incy<0)iy = (-n+1)*incy + 1
+if (incx<0)ix = (-n+1)*incx + 1
+if (incy<0)iy = (-n+1)*incy + 1
 do 10 i = 1, n
   dtemp = c*dx(ix) + s*dy(iy)
   dy(iy) = c*dy(iy) - s*dx(ix)
@@ -1947,9 +1947,9 @@ subroutine drotg(da, db, c, s)
 real da, db, c, s, roe, scale, r, z
 !
 roe = db
-if( abs(da) > abs(db) ) roe = da
+if ( abs(da) > abs(db) ) roe = da
 scale = abs(da) + abs(db)
-if( scale /= 0.0 ) go to 10
+if ( scale /= 0.0 ) go to 10
    c = 1.0
    s = 0.0
    r = 0.0
@@ -1960,8 +1960,8 @@ r = dsign(1.0, roe)*r
 c = da/r
 s = db/r
 z = 1.0
-if( abs(da) > abs(db) ) z = s
-if( abs(db) >= abs(da) .and. c /= 0.0 ) z = 1.0/c
+if ( abs(da) > abs(db) ) z = s
+if ( abs(db) >= abs(da) .and. c /= 0.0 ) z = 1.0/c
 20 da = r
 db = z
 return
@@ -1977,8 +1977,8 @@ subroutine  dscal(n, da, dx, incx)
 real da, dx(*)
 integer i, incx, m, mp1, n, nincx
 !
-if( n<=0 .or. incx<=0 )return
-if(incx==1)go to 20
+if ( n<=0 .or. incx<=0 )return
+if (incx==1)go to 20
 !
 !        code for increment not equal to 1
 !
@@ -1994,11 +1994,11 @@ return
 !        clean-up loop
 !
 20 m = mod(n, 5)
-if( m == 0 ) go to 40
+if ( m == 0 ) go to 40
 do 30 i = 1, m
   dx(i) = da*dx(i)
 30 continue
-if( n < 5 ) return
+if ( n < 5 ) return
 40 mp1 = m + 1
 do 50 i = mp1, n, 5
   dx(i) = da*dx(i)
@@ -2019,16 +2019,16 @@ subroutine  dswap (n, dx, incx, dy, incy)
 real dx(*), dy(*), dtemp
 integer i, incx, incy, ix, iy, m, mp1, n
 !
-if(n<=0)return
-if(incx==1.and.incy==1)go to 20
+if (n<=0)return
+if (incx==1.and.incy==1)go to 20
 !
 !       code for unequal increments or equal increments not equal
 !         to 1
 !
 ix = 1
 iy = 1
-if(incx<0)ix = (-n+1)*incx + 1
-if(incy<0)iy = (-n+1)*incy + 1
+if (incx<0)ix = (-n+1)*incx + 1
+if (incy<0)iy = (-n+1)*incy + 1
 do 10 i = 1, n
   dtemp = dx(ix)
   dx(ix) = dy(iy)
@@ -2044,13 +2044,13 @@ return
 !       clean-up loop
 !
 20 m = mod(n, 3)
-if( m == 0 ) go to 40
+if ( m == 0 ) go to 40
 do 30 i = 1, m
   dtemp = dx(i)
   dx(i) = dy(i)
   dy(i) = dtemp
 30 continue
-if( n < 3 ) return
+if ( n < 3 ) return
 40 mp1 = m + 1
 do 50 i = mp1, n, 3
   dtemp = dx(i)

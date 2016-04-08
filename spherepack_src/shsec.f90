@@ -279,36 +279,36 @@ subroutine shsec(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, &
 dimension g(idg, jdg, 1), a(mdab, ndab, 1), b(mdab, ndab, 1), wshsec(1), &
           work(1)
 ierror = 1
-if(nlat<3) return
+if (nlat<3) return
 ierror = 2
-if(nlon<4) return
+if (nlon<4) return
 ierror = 3
-if(isym<0 .or. isym>2) return
+if (isym<0 .or. isym>2) return
 ierror = 4
-if(nt < 0) return
+if (nt < 0) return
 ierror = 5
-if((isym==0 .and. idg<nlat) .or. &
+if ((isym==0 .and. idg<nlat) .or. &
    (isym/=0 .and. idg<(nlat+1)/2)) return
 ierror = 6
-if(jdg < nlon) return
+if (jdg < nlon) return
 ierror = 7
 mmax = min(nlat, nlon/2+1)
-if(mdab < mmax) return
+if (mdab < mmax) return
 ierror = 8
-if(ndab < nlat) return
+if (ndab < nlat) return
 ierror = 9
 imid = (nlat+1)/2
 lzz1 = 2*nlat*imid
 labc = 3*((mmax-2)*(nlat+nlat-mmax-1))/2
-if(lshsec < lzz1+labc+nlon+15) return
+if (lshsec < lzz1+labc+nlon+15) return
 ierror = 10
 ls = nlat
-if(isym > 0) ls = imid
+if (isym > 0) ls = imid
 nln = nt*ls*nlon
-if(lwork < nln+max(ls*nlon, 3*nlat*imid)) return
+if (lwork < nln+max(ls*nlon, 3*nlat*imid)) return
 ierror = 0
 ist = 0
-if(isym == 0) ist = imid
+if (isym == 0) ist = imid
 iw1 = lzz1+labc+1
 call shsec1(nlat, isym, nt, g, idg, jdg, a, b, mdab, ndab, imid, ls, nlon, &
      work, work(ist+1), work(nln+1), work(nln+1), wshsec, wshsec(iw1))
@@ -328,17 +328,17 @@ ls = idg
 nlon = jdg
 mmax = min(nlat, nlon/2+1)
 mdo = mmax
-if(mdo+mdo-1 > nlon) mdo = mmax-1
+if (mdo+mdo-1 > nlon) mdo = mmax-1
 nlp1 = nlat+1
 modl = mod(nlat, 2)
 imm1 = imid
-if(modl /= 0) imm1 = imid-1
+if (modl /= 0) imm1 = imid-1
 do 80 k=1, nt
 do 80 j=1, nlon
 do 80 i=1, ls
 ge(i, j, k)=0.
 80 continue
-if(isym == 1) go to 125
+if (isym == 1) go to 125
 call alin (2, nlat, nlon, 0, pb, i3, walin)
 do 100 k=1, nt
 do 100 np1=1, nlat, 2
@@ -346,7 +346,7 @@ do 100 i=1, imid
 ge(i, 1, k)=ge(i, 1, k)+a(1, np1, k)*pb(i, np1, i3)
 100 continue
 ndo = nlat
-if(mod(nlat, 2) == 0) ndo = nlat-1
+if (mod(nlat, 2) == 0) ndo = nlat-1
 do 110 mp1=2, mdo
 m = mp1-1
 call alin (2, nlat, nlon, m, pb, i3, walin)
@@ -356,14 +356,14 @@ do 110 i=1, imid
 ge(i, 2*mp1-2, k) = ge(i, 2*mp1-2, k)+a(mp1, np1, k)*pb(i, np1, i3)
 ge(i, 2*mp1-1, k) = ge(i, 2*mp1-1, k)+b(mp1, np1, k)*pb(i, np1, i3)
 110 continue
-if(mdo == mmax .or. mmax > ndo) go to 122
+if (mdo == mmax .or. mmax > ndo) go to 122
 call alin (2, nlat, nlon, mdo, pb, i3, walin)
 do 120 np1=mmax, ndo, 2
 do 120 k=1, nt
 do 120 i=1, imid
 ge(i, 2*mmax-2, k) = ge(i, 2*mmax-2, k)+a(mmax, np1, k)*pb(i, np1, i3)
 120 continue
-122 if(isym == 2) go to 155
+122 if (isym == 2) go to 155
 125 call alin(1, nlat, nlon, 0, pb, i3, walin)
 do 140 k=1, nt
 do 140 np1=2, nlat, 2
@@ -371,7 +371,7 @@ do 140 i=1, imm1
 go(i, 1, k)=go(i, 1, k)+a(1, np1, k)*pb(i, np1, i3)
 140 continue
 ndo = nlat
-if(mod(nlat, 2) /= 0) ndo = nlat-1
+if (mod(nlat, 2) /= 0) ndo = nlat-1
 do 150 mp1=2, mdo
 mp2 = mp1+1
 m = mp1-1
@@ -383,7 +383,7 @@ go(i, 2*mp1-2, k) = go(i, 2*mp1-2, k)+a(mp1, np1, k)*pb(i, np1, i3)
 go(i, 2*mp1-1, k) = go(i, 2*mp1-1, k)+b(mp1, np1, k)*pb(i, np1, i3)
 150 continue
 mp2 = mmax+1
-if(mdo == mmax .or. mp2 > ndo) go to 155
+if (mdo == mmax .or. mp2 > ndo) go to 155
 call alin(1, nlat, nlon, mdo, pb, i3, walin)
 do 152 np1=mp2, ndo, 2
 do 152 k=1, nt
@@ -391,20 +391,20 @@ do 152 i=1, imm1
 go(i, 2*mmax-2, k) = go(i, 2*mmax-2, k)+a(mmax, np1, k)*pb(i, np1, i3)
 152 continue
 155 do 160 k=1, nt
-if(mod(nlon, 2) /= 0) go to 157
+if (mod(nlon, 2) /= 0) go to 157
 do 156 i=1, ls
 ge(i, nlon, k) = 2.*ge(i, nlon, k)
 156 continue
 157 call hrfftb(ls, nlon, ge(1, 1, k), ls, whrfft, work)
 160 continue
-if(isym /= 0) go to 180
+if (isym /= 0) go to 180
 do 170 k=1, nt
 do 170 j=1, nlon
 do 175 i=1, imm1
 g(i, j, k) = .5*(ge(i, j, k)+go(i, j, k))
 g(nlp1-i, j, k) = .5*(ge(i, j, k)-go(i, j, k))
 175 continue
-if(modl == 0) go to 170
+if (modl == 0) go to 170
 g(imid, j, k) = .5*ge(imid, j, k)
 170 continue
 return
@@ -479,17 +479,17 @@ subroutine shseci(nlat, nlon, wshsec, lshsec, dwork, ldwork, ierror)
 dimension wshsec(*)
 real dwork(ldwork)
 ierror = 1
-if(nlat<3) return
+if (nlat<3) return
 ierror = 2
-if(nlon<4) return
+if (nlon<4) return
 ierror = 3
 imid = (nlat+1)/2
 mmax = min(nlat, nlon/2+1)
 lzz1 = 2*nlat*imid
 labc = 3*((mmax-2)*(nlat+nlat-mmax-1))/2
-if(lshsec < lzz1+labc+nlon+15) return
+if (lshsec < lzz1+labc+nlon+15) return
 ierror = 4
-if(ldwork < nlat+1) return
+if (ldwork < nlat+1) return
 ierror = 0
 call alinit(nlat, nlon, wshsec, dwork)
 iw1 = lzz1+labc+1

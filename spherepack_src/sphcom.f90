@@ -49,23 +49,23 @@ parameter (sc40=sc20*sc20)
 !
 cp(1) = 0.
 ma = abs(m)
-if(ma > n) return
-if(n-1< 0) then
+if (ma > n) return
+if (n-1< 0) then
     goto 2
-else if(n-1 == 0) then 
+else if (n-1 == 0) then 
     goto 3
 else 
     goto 5
 end if
 2 cp(1) = sqrt(2.d0)
 return
-3 if(ma /= 0) go to 4
+3 if (ma /= 0) go to 4
 cp(1) = sqrt(1.5d0)
 return
 4 cp(1) = sqrt(.75d0)
-if(m == -1) cp(1) = -cp(1)
+if (m == -1) cp(1) = -cp(1)
 return
-5 if(mod(n+ma, 2) /= 0) go to 10
+5 if (mod(n+ma, 2) /= 0) go to 10
 nmms2 = (n-ma)/2
 fnum = n+ma+1
 fnmh = n-ma+1
@@ -81,10 +81,10 @@ pm1 = -1.d0
 15 t1 = 1.d0/sc20
 nex = 20
 fden = 2.d0
-if(nmms2 < 1) go to 20
+if (nmms2 < 1) go to 20
 do 18 i=1, nmms2
 t1 = fnum*t1/fden
-if(t1 > sc20) then
+if (t1 > sc20) then
 t1 = t1/sc40
 nex = nex+40
 end if
@@ -92,9 +92,9 @@ fnum = fnum+2.
 fden = fden+2.
 18 continue
 20 t1 = t1/2.d0**(n-1-nex)
-if(mod(ma/2, 2) /= 0) t1 = -t1
+if (mod(ma/2, 2) /= 0) t1 = -t1
 t2 = 1.
-if(ma == 0) go to 26
+if (ma == 0) go to 26
 do i=1, ma
 t2 = fnmh*t2/(fnmh+pm1)
 fnmh = fnmh+2.
@@ -103,17 +103,17 @@ end do
 fnnp1 = n*(n+1)
 fnmsq = fnnp1-2.d0*ma*ma
 l = (n+1)/2
-if(mod(n, 2) == 0 .and. mod(ma, 2) == 0) l = l+1
+if (mod(n, 2) == 0 .and. mod(ma, 2) == 0) l = l+1
 cp(l) = cp2
-if(m >= 0) go to 29
-if(mod(ma, 2) /= 0) cp(l) = -cp(l)
-29 if(l <= 1) return
+if (m >= 0) go to 29
+if (mod(ma, 2) /= 0) cp(l) = -cp(l)
+29 if (l <= 1) return
 fk = n
 a1 = (fk-2.)*(fk-1.)-fnnp1
 b1 = 2.*(fk*fk-fnmsq)
 cp(l-1) = b1*cp(l)/a1
 30 l = l-1
-if(l <= 1) return
+if (l <= 1) return
 fk = fk-2.
 a1 = (fk-2.)*(fk-1.)-fnnp1
 b1 = -2.*(fk*fk-fnmsq)
@@ -134,16 +134,16 @@ sdt = sin(theta+theta)
 nmod=mod(n, 2)
 mmod=mod(m, 2)
 
-if(nmod< 0) then
+if (nmod< 0) then
     goto 1
-else if(nmod == 0) then 
+else if (nmod == 0) then 
     goto 1
 else 
     goto 2
 end if
-1 if(mmod< 0) then
+1 if (mmod< 0) then
     goto 3
-else if(mmod == 0) then 
+else if (mmod == 0) then 
     goto 3
 else 
     goto 4
@@ -153,7 +153,7 @@ end if
 !
 3 kdo=n/2
 pb = .5*cp(1)
-if(n == 0) return
+if (n == 0) return
 cth = cdt
 sth = sdt
 do 170 k=1, kdo
@@ -179,9 +179,9 @@ sth = sdt*cth+cdt*sth
 cth = chh
 180 continue
 return
-2 if(mmod< 0) then
+2 if (mmod< 0) then
     goto 13
-else if(mmod == 0) then 
+else if (mmod == 0) then 
     goto 13
 else 
     goto 14
@@ -230,16 +230,16 @@ cdt = cos(theta+theta)
 sdt = sin(theta+theta)
 nmod=mod(n, 2)
 mmod=mod(abs(m), 2)
-if(nmod< 0) then
+if (nmod< 0) then
     goto 1
-else if(nmod == 0) then 
+else if (nmod == 0) then 
     goto 1
 else 
     goto 2
 end if
-1 if(mmod< 0) then
+1 if (mmod< 0) then
     goto 3
-else if(mmod == 0) then 
+else if (mmod == 0) then 
     goto 3
 else 
     goto 4
@@ -249,7 +249,7 @@ end if
 !
 3 kdo=n/2
 pb = 0.d0
-if(n == 0) return
+if (n == 0) return
 cth = cdt
 sth = sdt
 do 170 k=1, kdo
@@ -275,9 +275,9 @@ sth = sdt*cth+cdt*sth
 cth = chh
 180 continue
 return
-2 if(mmod< 0) then
+2 if (mmod< 0) then
     goto 13
-else if(mmod == 0) then 
+else if (mmod == 0) then 
     goto 13
 else 
     goto 14
@@ -454,9 +454,9 @@ ihold = i1
 i1 = i2
 i2 = i3
 i3 = ihold
-if(m-1< 0) then
+if (m-1< 0) then
     goto 25
-else if(m-1 == 0) then 
+else if (m-1 == 0) then 
     goto 30
 else 
     goto 35
@@ -475,21 +475,21 @@ z(i, np1, i3) = z1(i, np1)
 50 continue
 return
 35 ns = ((m-2)*(nlat+nlat-m-1))/2+1
-if(isym == 1) go to 36
+if (isym == 1) go to 36
 do 85 i=1, imid
 z(i, m+1, i3) = a(ns)*z(i, m-1, i1)-c(ns)*z(i, m+1, i1)
 85 continue
-36 if(m == nlat-1) return
-if(isym == 2) go to 71
+36 if (m == nlat-1) return
+if (isym == 2) go to 71
 ns = ns+1
 do 70 i=1, imid
 z(i, m+2, i3) = a(ns)*z(i, m, i1)-c(ns)*z(i, m+2, i1)
 70 continue
 71 nstrt = m+3
-if(isym == 1) nstrt = m+4
-if(nstrt > nlat) go to 80
+if (isym == 1) nstrt = m+4
+if (nstrt > nlat) go to 80
 nstp = 2
-if(isym == 0) nstp = 1
+if (isym == 0) nstp = 1
 do 75 np1=nstrt, nlat, nstp
 ns = ns+nstp
 do 75 i=1, imid
@@ -563,16 +563,16 @@ sc1 = 2.d0/real(nlat-1)
 call dnlfk(m, n, work)
 nmod = mod(n, 2)
 mmod = mod(m, 2)
-if(nmod< 0) then
+if (nmod< 0) then
     goto 1
-else if(nmod == 0) then 
+else if (nmod == 0) then 
     goto 1
 else 
     goto 2
 end if
-1 if(mmod< 0) then
+1 if (mmod< 0) then
     goto 3
-else if(mmod == 0) then 
+else if (mmod == 0) then 
     goto 3
 else 
     goto 4
@@ -584,7 +584,7 @@ end if
 do 5 idx=1, lc
 i = idx+idx-2
 sum = work(1)/(1.d0-i*i)
-if(kdo<2) go to 29
+if (kdo<2) go to 29
 do 6 kp1=2, kdo
 k = kp1-1
 t1 = 1.d0-(k+k+i)**2
@@ -609,9 +609,9 @@ t2 = 1.d0-(k+k-i)**2
 cz(idx) = sc1*sum
 9 continue
 return
-2 if(mmod< 0) then
+2 if (mmod< 0) then
     goto 13
-else if(mmod == 0) then 
+else if (mmod == 0) then 
     goto 13
 else 
     goto 14
@@ -659,9 +659,9 @@ sdt = sin(th+th)
 lmod = mod(nlat, 2)
 mmod = mod(m, 2)
 nmod = mod(n, 2)
-if(lmod< 0) then
+if (lmod< 0) then
     goto 20
-else if(lmod == 0) then 
+else if (lmod == 0) then 
     goto 20
 else 
     goto 10
@@ -669,16 +669,16 @@ end if
 10 lc = (nlat+1)/2
 lq = lc-1
 ls = lc-2
-if(nmod< 0) then
+if (nmod< 0) then
     goto 1
-else if(nmod == 0) then 
+else if (nmod == 0) then 
     goto 1
 else 
     goto 2
 end if
-1 if(mmod< 0) then
+1 if (mmod< 0) then
     goto 3
-else if(mmod == 0) then 
+else if (mmod == 0) then 
     goto 3
 else 
     goto 4
@@ -713,9 +713,9 @@ return
 !
 !     nlat odd n odd, m even
 !
-2 if(mmod< 0) then
+2 if (mmod< 0) then
     goto 5
-else if(mmod == 0) then 
+else if (mmod == 0) then 
     goto 5
 else 
     goto 6
@@ -745,16 +745,16 @@ cth = chh
 return
 20 lc = nlat/2
 lq = lc-1
-if(nmod< 0) then
+if (nmod< 0) then
     goto 30
-else if(nmod == 0) then 
+else if (nmod == 0) then 
     goto 30
 else 
     goto 80
 end if
-30 if(mmod< 0) then
+30 if (mmod< 0) then
     goto 40
-else if(mmod == 0) then 
+else if (mmod == 0) then 
     goto 40
 else 
     goto 60
@@ -789,9 +789,9 @@ return
 !
 !     nlat even n odd m even
 !
-80 if(mmod< 0) then
+80 if (mmod< 0) then
     goto 90
-else if(mmod == 0) then 
+else if (mmod == 0) then 
     goto 90
 else 
     goto 110
@@ -852,9 +852,9 @@ ihold = i1
 i1 = i2
 i2 = i3
 i3 = ihold
-if(m-1< 0) then
+if (m-1< 0) then
     goto 25
-else if(m-1 == 0) then 
+else if (m-1 == 0) then 
     goto 30
 else 
     goto 35
@@ -873,21 +873,21 @@ p(i, np1, i3) = p1(i, np1)
 50 continue
 return
 35 ns = ((m-2)*(nlat+nlat-m-1))/2+1
-if(isym == 1) go to 36
+if (isym == 1) go to 36
 do 85 i=1, imid
 p(i, m+1, i3) = a(ns)*p(i, m-1, i1)-c(ns)*p(i, m+1, i1)
 85 continue
-36 if(m == nlat-1) return
-if(isym == 2) go to 71
+36 if (m == nlat-1) return
+if (isym == 2) go to 71
 ns = ns+1
 do 70 i=1, imid
 p(i, m+2, i3) = a(ns)*p(i, m, i1)-c(ns)*p(i, m+2, i1)
 70 continue
 71 nstrt = m+3
-if(isym == 1) nstrt = m+4
-if(nstrt > nlat) go to 80
+if (isym == 1) nstrt = m+4
+if (nstrt > nlat) go to 80
 nstp = 2
-if(isym == 0) nstp = 1
+if (isym == 0) nstp = 1
 do 75 np1=nstrt, nlat, nstp
 ns = ns+nstp
 do 75 i=1, imid
@@ -967,13 +967,13 @@ tm = fm+fm
 temp = tm*(tm-1.)
 a(ns) = sqrt((tm+1.)*(tm-2.)/temp)
 c(ns) = sqrt(2./temp)
-if(m == nlat-1) go to 215
+if (m == nlat-1) go to 215
 ns = ns+1
 temp = tm*(tm+1.)
 a(ns) = sqrt((tm+3.)*(tm-2.)/temp)
 c(ns) = sqrt(6./temp)
 mp3 = m+3
-if(mp3 > nlat) go to 215
+if (mp3 > nlat) go to 215
 do 210 np1=mp3, nlat
 n = np1-1
 ns = ns+1
@@ -1105,7 +1105,7 @@ real, parameter :: pi = acos( -1.0 )
 dt = pi/(nlat-1)
 mdo = min(3, nlat, (nlon+1)/2)
 
-if(mdo < 2) return
+if (mdo < 2) return
 
 do mp1=2, mdo
 m = mp1-1
@@ -1155,9 +1155,9 @@ ihold = i1
 i1 = i2
 i2 = i3
 i3 = ihold
-if(m-1< 0) then
+if (m-1< 0) then
     goto 25
-else if(m-1 == 0) then 
+else if (m-1 == 0) then 
     goto 30
 else 
     goto 35
@@ -1176,21 +1176,21 @@ zv(i, np1, i3) = zv1(i, np1)
 50 continue
 return
 35 ns = ((m-2)*(nlat+nlat-m-1))/2+1
-if(ityp == 1) go to 36
+if (ityp == 1) go to 36
 do 85 i=1, imid
 zv(i, m+1, i3) = a(ns)*zv(i, m-1, i1)-c(ns)*zv(i, m+1, i1)
 85 continue
-36 if(m == nlat-1) return
-if(ityp == 2) go to 71
+36 if (m == nlat-1) return
+if (ityp == 2) go to 71
 ns = ns+1
 do 70 i=1, imid
 zv(i, m+2, i3) = a(ns)*zv(i, m, i1)-c(ns)*zv(i, m+2, i1)
 70 continue
 71 nstrt = m+3
-if(ityp == 1) nstrt = m+4
-if(nstrt > nlat) go to 80
+if (ityp == 1) nstrt = m+4
+if (nstrt > nlat) go to 80
 nstp = 2
-if(ityp == 0) nstp = 1
+if (ityp == 0) nstp = 1
 do 75 np1=nstrt, nlat, nstp
 ns = ns+nstp
 do 75 i=1, imid
@@ -1231,9 +1231,9 @@ ihold = i1
 i1 = i2
 i2 = i3
 i3 = ihold
-if(m-2< 0) then
+if (m-2< 0) then
     goto 25
-else if(m-2 == 0) then 
+else if (m-2 == 0) then 
     goto 30
 else 
     goto 35
@@ -1252,21 +1252,21 @@ zw(i, np1, i3) = zw2(i, np1)
 50 continue
 return
 35 ns = ((m-2)*(nlat+nlat-m-1))/2+1
-if(ityp == 1) go to 36
+if (ityp == 1) go to 36
 do 85 i=1, imid
 zw(i, m+1, i3) = a(ns)*zw(i, m-1, i1)-c(ns)*zw(i, m+1, i1)
 85 continue
-36 if(m == nlat-1) return
-if(ityp == 2) go to 71
+36 if (m == nlat-1) return
+if (ityp == 2) go to 71
 ns = ns+1
 do 70 i=1, imid
 zw(i, m+2, i3) = a(ns)*zw(i, m, i1)-c(ns)*zw(i, m+2, i1)
 70 continue
 71 nstrt = m+3
-if(ityp == 1) nstrt = m+4
-if(nstrt > nlat) go to 80
+if (ityp == 1) nstrt = m+4
+if (nstrt > nlat) go to 80
 nstp = 2
-if(ityp == 0) nstp = 1
+if (ityp == 0) nstp = 1
 do 75 np1=nstrt, nlat, nstp
 ns = ns+nstp
 do 75 i=1, imid
@@ -1353,7 +1353,7 @@ real, parameter :: pi = acos( -1.0 )
 
 dt = pi/(nlat-1)
 mdo = min(3, nlat, (nlon+1)/2)
-if(mdo < 2) return
+if (mdo < 2) return
 do mp1=2, mdo
 m = mp1-1
 do np1=mp1, nlat
@@ -1401,9 +1401,9 @@ ihold = i1
 i1 = i2
 i2 = i3
 i3 = ihold
-if(m-1< 0) then
+if (m-1< 0) then
     goto 25
-else if(m-1 == 0) then 
+else if (m-1 == 0) then 
     goto 30
 else 
     goto 35
@@ -1422,21 +1422,21 @@ vb(i, np1, i3) = vb1(i, np1)
 50 continue
 return
 35 ns = ((m-2)*(nlat+nlat-m-1))/2+1
-if(ityp == 1) go to 36
+if (ityp == 1) go to 36
 do 85 i=1, imid
 vb(i, m+1, i3) = a(ns)*vb(i, m-1, i1)-c(ns)*vb(i, m+1, i1)
 85 continue
-36 if(m == nlat-1) return
-if(ityp == 2) go to 71
+36 if (m == nlat-1) return
+if (ityp == 2) go to 71
 ns = ns+1
 do 70 i=1, imid
 vb(i, m+2, i3) = a(ns)*vb(i, m, i1)-c(ns)*vb(i, m+2, i1)
 70 continue
 71 nstrt = m+3
-if(ityp == 1) nstrt = m+4
-if(nstrt > nlat) go to 80
+if (ityp == 1) nstrt = m+4
+if (nstrt > nlat) go to 80
 nstp = 2
-if(ityp == 0) nstp = 1
+if (ityp == 0) nstp = 1
 do 75 np1=nstrt, nlat, nstp
 ns = ns+nstp
 do 75 i=1, imid
@@ -1477,9 +1477,9 @@ ihold = i1
 i1 = i2
 i2 = i3
 i3 = ihold
-if(m-2< 0) then
+if (m-2< 0) then
     goto 25
-else if(m-2 == 0) then 
+else if (m-2 == 0) then 
     goto 30
 else 
     goto 35
@@ -1498,21 +1498,21 @@ wb(i, np1, i3) = wb2(i, np1)
 50 continue
 return
 35 ns = ((m-2)*(nlat+nlat-m-1))/2+1
-if(ityp == 1) go to 36
+if (ityp == 1) go to 36
 do 85 i=1, imid
 wb(i, m+1, i3) = a(ns)*wb(i, m-1, i1)-c(ns)*wb(i, m+1, i1)
 85 continue
-36 if(m == nlat-1) return
-if(ityp == 2) go to 71
+36 if (m == nlat-1) return
+if (ityp == 2) go to 71
 ns = ns+1
 do 70 i=1, imid
 wb(i, m+2, i3) = a(ns)*wb(i, m, i1)-c(ns)*wb(i, m+2, i1)
 70 continue
 71 nstrt = m+3
-if(ityp == 1) nstrt = m+4
-if(nstrt > nlat) go to 80
+if (ityp == 1) nstrt = m+4
+if (nstrt > nlat) go to 80
 nstp = 2
-if(ityp == 0) nstp = 1
+if (ityp == 0) nstp = 1
 do 75 np1=nstrt, nlat, nstp
 ns = ns+nstp
 do 75 i=1, imid
@@ -1547,14 +1547,14 @@ subroutine dzvk(nlat, m, n, czv, work)
 !
 dimension czv(1), work(1)
 real czv, sc1, sum, work, t1, t2
-if(n <= 0) return
+if (n <= 0) return
 lc = (nlat+1)/2
 sc1 = 2.d0/real(nlat-1)
 call dvbk(m, n, work, czv)
 nmod = mod(n, 2)
 mmod = mod(m, 2)
-if(nmod /= 0) go to 1
-if(mmod /= 0) go to 2
+if (nmod /= 0) go to 1
+if (mmod /= 0) go to 2
 !
 !     n even, m even
 !
@@ -1585,7 +1585,7 @@ sum = sum+work(k)*(t1+t2)/(t1*t2)
 czv(id) = sc1*sum
 5 continue
 return
-1 if(mmod /= 0) go to 3
+1 if (mmod /= 0) go to 3
 !
 !     n odd, m even
 !
@@ -1643,7 +1643,7 @@ subroutine dzvt(nlat, m, n, th, czv, zvh)
 dimension czv(1)
 real th, czv, zvh, cth, sth, cdt, sdt, chh
 zvh = 0.
-if(n <= 0) return
+if (n <= 0) return
 lc = (nlat+1)/2
 lq = lc-1
 ls = lc-2
@@ -1654,11 +1654,11 @@ sdt = 2.*sth*cth
 lmod = mod(nlat, 2)
 mmod = mod(m, 2)
 nmod = mod(n, 2)
-if(lmod == 0) go to 50
-if(nmod /= 0) go to 1
+if (lmod == 0) go to 50
+if (nmod /= 0) go to 1
 cth = cdt
 sth = sdt
-if(mmod /= 0) go to 2
+if (mmod /= 0) go to 2
 !
 !     nlat odd  n even  m even
 !
@@ -1681,7 +1681,7 @@ cth = chh
 20 continue
 zvh = zvh+.5*czv(lc)*cos((nlat-1)*th)
 return
-1 if(mmod /= 0) go to 3
+1 if (mmod /= 0) go to 3
 !
 !     nlat odd  n odd  m even
 !
@@ -1702,10 +1702,10 @@ sth = sdt*cth+cdt*sth
 cth = chh
 40 continue
 return
-50 if(nmod /= 0) go to 51
+50 if (nmod /= 0) go to 51
 cth = cdt
 sth = sdt
-if(mmod /= 0) go to 52
+if (mmod /= 0) go to 52
 !
 !     nlat even  n even  m even
 !
@@ -1727,7 +1727,7 @@ sth = sdt*cth+cdt*sth
 cth = chh
 57 continue
 return
-51 if(mmod /= 0) go to 53
+51 if (mmod /= 0) go to 53
 !
 !     nlat even  n odd  m even
 !
@@ -1774,14 +1774,14 @@ subroutine dzwk(nlat, m, n, czw, work)
 !
 dimension czw(1), work(1)
 real czw, work, sc1, sum, t1, t2
-if(n <= 0) return
+if (n <= 0) return
 lc = (nlat+1)/2
 sc1 = 2.d0/real(nlat-1)
 call dwbk(m, n, work, czw)
 nmod = mod(n, 2)
 mmod = mod(m, 2)
-if(nmod /= 0) go to 1
-if(mmod /= 0) go to 2
+if (nmod /= 0) go to 1
+if (mmod /= 0) go to 2
 !
 !     n even, m even
 !
@@ -1812,7 +1812,7 @@ sum = sum+work(k)*(t1+t2)/(t1*t2)
 czw(id) = sc1*sum
 15 continue
 return
-1 if(mmod /= 0) go to 3
+1 if (mmod /= 0) go to 3
 !
 !     n odd, m even
 !
@@ -1835,7 +1835,7 @@ return
 do 5 id=1, lc
 i = id+id-2
 sum = work(1)/(1.d0-i*i)
-if(kdo < 2) go to 29
+if (kdo < 2) go to 29
 do 6 kp1=2, kdo
 k = kp1-1
 t1 = 1.d0-(k+k+i)**2
@@ -1873,7 +1873,7 @@ subroutine dzwt(nlat, m, n, th, czw, zwh)
 dimension czw(1)
 real czw, zwh, th, cth, sth, cdt, sdt, chh
 zwh = 0.
-if(n <= 0) return
+if (n <= 0) return
 lc = (nlat+1)/2
 lq = lc-1
 ls = lc-2
@@ -1884,9 +1884,9 @@ sdt = 2.*sth*cth
 lmod = mod(nlat, 2)
 mmod = mod(m, 2)
 nmod = mod(n, 2)
-if(lmod == 0) go to 50
-if(nmod /= 0) go to 1
-if(mmod /= 0) go to 2
+if (lmod == 0) go to 50
+if (nmod /= 0) go to 1
+if (mmod /= 0) go to 2
 !
 !     nlat odd  n even  m even
 !
@@ -1909,7 +1909,7 @@ cth = chh
 return
 1 cth = cdt
 sth = sdt
-if(mmod /= 0) go to 3
+if (mmod /= 0) go to 3
 !
 !     nlat odd  n odd  m even
 !
@@ -1932,8 +1932,8 @@ cth = chh
 20 continue
 zwh = zwh+.5*czw(lc)*cos((nlat-1)*th)
 return
-50 if(nmod /= 0) go to 51
-if(mmod /= 0) go to 52
+50 if (nmod /= 0) go to 51
+if (mmod /= 0) go to 52
 !
 !     nlat even  n even  m even
 !
@@ -1957,7 +1957,7 @@ cth = chh
 return
 51 cth = cdt
 sth = sdt
-if(mmod /= 0) go to 53
+if (mmod /= 0) go to 53
 !
 !     nlat even  n odd  m even
 !
@@ -1986,18 +1986,18 @@ end subroutine dzwt
 subroutine dvbk(m, n, cv, work)
 real cv(1), work(1), fn, fk, cf
 cv(1) = 0.
-if(n <= 0) return
+if (n <= 0) return
 fn = n
-srnp1 = sqrt(fn*(fn + 1.0))
+srnp1 = sqrt(fn * (fn + 1.0))
 cf = 2.*m/srnp1
 modn = mod(n, 2)
 modm = mod(m, 2)
 call dnlfk(m, n, work)
-if(modn /= 0) go to 70
+if (modn /= 0) go to 70
 ncv = n/2
-if(ncv == 0) return
+if (ncv == 0) return
 fk = 0.
-if(modm /= 0) go to 60
+if (modm /= 0) go to 60
 !
 !     n even m even
 !
@@ -2016,7 +2016,7 @@ cv(l) = fk*work(l)/srnp1
 return
 70 ncv = (n+1)/2
 fk = -1.
-if(modm /= 0) go to 80
+if (modm /= 0) go to 80
 !
 !     n odd m even
 !
@@ -2040,24 +2040,24 @@ end subroutine dvbk
 subroutine dwbk(m, n, cw, work)
 real cw(1), work(1), fn, cf, srnp1
 cw(1) = 0.
-if(n<=0 .or. m<=0) return
+if (n<=0 .or. m<=0) return
 fn = n
-srnp1 = sqrt(fn*(fn + 1.0))
+srnp1 = sqrt(fn * (fn + 1.0))
 cf = 2.*m/srnp1
 modn = mod(n, 2)
 modm = mod(m, 2)
 call dnlfk(m, n, work)
-if(m == 0) go to 50
-if(modn /= 0) go to 30
+if (m == 0) go to 50
+if (modn /= 0) go to 30
 l = n/2
-if(l == 0) go to 50
-if(modm /= 0) go to 20
+if (l == 0) go to 50
+if (modm /= 0) go to 20
 !
 !     n even m even
 !
 cw(l) = -cf*work(l+1)
 10 l = l-1
-if(l <= 0) go to 50
+if (l <= 0) go to 50
 cw(l) = cw(l+1)-cf*work(l+1)
 go to 10
 !
@@ -2065,18 +2065,18 @@ go to 10
 !
 20 cw(l) = cf*work(l)
 25 l = l-1
-if(l <= 0) go to 50
+if (l <= 0) go to 50
 cw(l) = cw(l+1)+cf*work(l)
 go to 25
-30 if(modm /= 0) go to 40
+30 if (modm /= 0) go to 40
 l = (n-1)/2
-if(l == 0) go to 50
+if (l == 0) go to 50
 !
 !     n odd m even
 !
 cw(l) = -cf*work(l+1)
 35 l = l-1
-if(l <= 0) go to 50
+if (l <= 0) go to 50
 cw(l) = cw(l+1)-cf*work(l+1)
 go to 35
 !
@@ -2085,7 +2085,7 @@ go to 35
 40 l = (n+1)/2
 cw(l) = cf*work(l)
 45 l = l-1
-if(l <= 0) go to 50
+if (l <= 0) go to 50
 cw(l) = cw(l+1)+cf*work(l)
 go to 45
 50 return
@@ -2098,17 +2098,17 @@ subroutine dvbt(m, n, theta, cv, vh)
 dimension cv(1)
 real cv, vh, theta, cth, sth, cdt, sdt, chh
 vh = 0.
-if(n==0) return
+if (n==0) return
 cth = cos(theta)
 sth = sin(theta)
 cdt = cth*cth-sth*sth
 sdt = 2.*sth*cth
 mmod = mod(m, 2)
 nmod = mod(n, 2)
-if(nmod /= 0) go to 1
+if (nmod /= 0) go to 1
 cth = cdt
 sth = sdt
-if(mmod /= 0) go to 2
+if (mmod /= 0) go to 2
 !
 !     n even  m even
 !
@@ -2131,7 +2131,7 @@ sth = sdt*cth+cdt*sth
 cth = chh
 15 continue
 return
-1 if(mmod /= 0) go to 3
+1 if (mmod /= 0) go to 3
 !
 !     n odd m even
 !
@@ -2162,15 +2162,15 @@ subroutine dwbt(m, n, theta, cw, wh)
 dimension cw(1)
 real theta, cw, wh, cth, sth, cdt, sdt, chh
 wh = 0.
-if(n<=0 .or. m<=0) return
+if (n<=0 .or. m<=0) return
 cth = cos(theta)
 sth = sin(theta)
 cdt = cth*cth-sth*sth
 sdt = 2.*sth*cth
 mmod=mod(m, 2)
 nmod=mod(n, 2)
-if(nmod /= 0) go to 1
-if(mmod /= 0) go to 2
+if (nmod /= 0) go to 1
+if (mmod /= 0) go to 2
 !
 !     n even  m even
 !
@@ -2195,7 +2195,7 @@ cth = chh
 return
 1 cth = cdt
 sth = sdt
-if(mmod /= 0) go to 3
+if (mmod /= 0) go to 3
 !
 !     n odd m even
 !
@@ -2212,7 +2212,7 @@ return
 !
 3 ncw = (n+1)/2
 wh = .5*cw(1)
-if(ncw<2) return
+if (ncw<2) return
 do 25 k=2, ncw
 wh = wh+cw(k)*cth
 chh = cdt*cth-sdt*sth
@@ -2248,7 +2248,7 @@ subroutine rabcv1(nlat, nlon, a, b, c)
 !
 dimension a(1), b(1), c(1)
 mmax = min(nlat, (nlon+1)/2)
-if(mmax < 3) return
+if (mmax < 3) return
 do 215 mp1=3, mmax
 m = mp1-1
 ns = ((m-2)*(nlat+nlat-m-1))/2+1
@@ -2258,14 +2258,14 @@ temp = tm*(tm-1.)
 tpn = (fm-2.)*(fm-1.)/(fm*(fm+1.))
 a(ns) = sqrt(tpn*(tm+1.)*(tm-2.)/temp)
 c(ns) = sqrt(2./temp)
-if(m == nlat-1) go to 215
+if (m == nlat-1) go to 215
 ns = ns+1
 temp = tm*(tm+1.)
 tpn = (fm-1.)*fm/((fm+1.)*(fm+2.))
 a(ns) = sqrt(tpn*(tm+3.)*(tm-2.)/temp)
 c(ns) = sqrt(6./temp)
 mp3 = m+3
-if(mp3 > nlat) go to 215
+if (mp3 > nlat) go to 215
 do 210 np1=mp3, nlat
 n = np1-1
 ns = ns+1
@@ -2310,7 +2310,7 @@ subroutine rabcw1(nlat, nlon, a, b, c)
 !
 dimension a(1), b(1), c(1)
 mmax = min(nlat, (nlon+1)/2)
-if(mmax < 4) return
+if (mmax < 4) return
 do 215 mp1=4, mmax
 m = mp1-1
 ns = ((m-2)*(nlat+nlat-m-1))/2+1
@@ -2321,7 +2321,7 @@ tpn = (fm-2.)*(fm-1.)/(fm*(fm+1.))
 tph = fm/(fm-2.)
 a(ns) = tph*sqrt(tpn*(tm+1.)*(tm-2.)/temp)
 c(ns) = tph*sqrt(2./temp)
-if(m == nlat-1) go to 215
+if (m == nlat-1) go to 215
 ns = ns+1
 temp = tm*(tm+1.)
 tpn = (fm-1.)*fm/((fm+1.)*(fm+2.))
@@ -2329,7 +2329,7 @@ tph = fm/(fm-2.)
 a(ns) = tph*sqrt(tpn*(tm+3.)*(tm-2.)/temp)
 c(ns) = tph*sqrt(6./temp)
 mp3 = m+3
-if(mp3 > nlat) go to 215
+if (mp3 > nlat) go to 215
 do 210 np1=mp3, nlat
 n = np1-1
 ns = ns+1
@@ -2423,7 +2423,7 @@ real dt, cwb(*), wbh, th, work(*)
 real, parameter :: pi = acos( -1.0 )
 dt = pi/(nlat-1)
 mdo = min(3, nlat, (nlon+1)/2)
-if(mdo < 2) return
+if (mdo < 2) return
 do mp1=2, mdo
 m = mp1-1
 do np1=mp1, nlat
@@ -2514,7 +2514,7 @@ subroutine wtgit1 (nlat, nlon, imid, theta, wb, abc, cwb, work)
 dimension wb(imid, nlat, 2), abc(1)
 real theta(*), cwb(*), work(*), wbh
 mdo = min(3, nlat, (nlon+1)/2)
-if(mdo < 2) return
+if (mdo < 2) return
 do mp1=2, mdo
 m = mp1-1
 do np1=mp1, nlat
@@ -2536,18 +2536,18 @@ end subroutine wtgit1
 subroutine dvtk(m, n, cv, work)
 real cv(*), work(*), fn, fk, cf, srnp1
 cv(1) = 0.
-if(n <= 0) return
+if (n <= 0) return
 fn = n
-srnp1 = sqrt(fn*(fn + 1.0))
+srnp1 = sqrt(fn * (fn + 1.0))
 cf = 2.*m/srnp1
 modn = mod(n, 2)
 modm = mod(m, 2)
 call dnlfk(m, n, work)
-if(modn /= 0) go to 70
+if (modn /= 0) go to 70
 ncv = n/2
-if(ncv == 0) return
+if (ncv == 0) return
 fk = 0.
-if(modm /= 0) go to 60
+if (modm /= 0) go to 60
 !
 !     n even m even
 !
@@ -2566,7 +2566,7 @@ cv(l) = -fk*fk*work(l)/srnp1
 return
 70 ncv = (n+1)/2
 fk = -1.
-if(modm /= 0) go to 80
+if (modm /= 0) go to 80
 !
 !     n odd m even
 !
@@ -2590,24 +2590,24 @@ end subroutine dvtk
 subroutine dwtk(m, n, cw, work)
 real cw(*), work(*), fn, cf, srnp1
 cw(1) = 0.
-if(n<=0 .or. m<=0) return
+if (n<=0 .or. m<=0) return
 fn = n
-srnp1 = sqrt(fn*(fn + 1.0))
+srnp1 = sqrt(fn * (fn + 1.0))
 cf = 2.*m/srnp1
 modn = mod(n, 2)
 modm = mod(m, 2)
 call dnlfk(m, n, work)
-if(m == 0) go to 50
-if(modn /= 0) go to 30
+if (m == 0) go to 50
+if (modn /= 0) go to 30
 l = n/2
-if(l == 0) go to 50
-if(modm /= 0) go to 20
+if (l == 0) go to 50
+if (modm /= 0) go to 20
 !
 !     n even m even
 !
 cw(l) = -cf*work(l+1)
 10 l = l-1
-if(l <= 0) go to 50
+if (l <= 0) go to 50
 cw(l) = cw(l+1)-cf*work(l+1)
 cw(l+1) = (l+l+1)*cw(l+1)
 go to 10
@@ -2616,9 +2616,9 @@ go to 10
 !
 20 cw(l) = cf*work(l)
 25 l = l-1
-   if(l< 0) then
+   if (l< 0) then
        goto 50
-   else if(l == 0) then 
+   else if (l == 0) then 
        goto 27
    else 
        goto 26
@@ -2626,17 +2626,17 @@ go to 10
 26 cw(l) = cw(l+1)+cf*work(l)
 27 cw(l+1) = -(l+l+1)*cw(l+1)
 go to 25
-30 if(modm /= 0) go to 40
+30 if (modm /= 0) go to 40
 l = (n-1)/2
-if(l == 0) go to 50
+if (l == 0) go to 50
 !
 !     n odd m even
 !
 cw(l) = -cf*work(l+1)
 35 l = l-1
-   if(l< 0) then
+   if (l< 0) then
        goto 50
-   else if(l == 0) then 
+   else if (l == 0) then 
        goto 37
    else 
        goto 36
@@ -2650,9 +2650,9 @@ go to 35
 40 l = (n+1)/2
 cw(l) = cf*work(l)
 45 l = l-1
-   if(l< 0) then
+   if (l< 0) then
        goto 50
-   else if(l == 0) then 
+   else if (l == 0) then 
        goto 47
    else 
        goto 46
@@ -2670,17 +2670,17 @@ subroutine dvtt(m, n, theta, cv, vh)
 dimension cv(1)
 real cv, vh, theta, cth, sth, cdt, sdt, chh
 vh = 0.
-if(n==0) return
+if (n==0) return
 cth = cos(theta)
 sth = sin(theta)
 cdt = cth*cth-sth*sth
 sdt = 2.*sth*cth
 mmod = mod(m, 2)
 nmod = mod(n, 2)
-if(nmod /= 0) go to 1
+if (nmod /= 0) go to 1
 cth = cdt
 sth = sdt
-if(mmod /= 0) go to 2
+if (mmod /= 0) go to 2
 !
 !     n even  m even
 !
@@ -2703,7 +2703,7 @@ sth = sdt*cth+cdt*sth
 cth = chh
 15 continue
 return
-1 if(mmod /= 0) go to 3
+1 if (mmod /= 0) go to 3
 !
 !     n odd m even
 !
@@ -2734,15 +2734,15 @@ subroutine dwtt(m, n, theta, cw, wh)
 dimension cw(1)
 real theta, cw, wh, cth, sth, cdt, sdt, chh
 wh = 0.
-if(n<=0 .or. m<=0) return
+if (n<=0 .or. m<=0) return
 cth = cos(theta)
 sth = sin(theta)
 cdt = cth*cth-sth*sth
 sdt = 2.*sth*cth
 mmod=mod(m, 2)
 nmod=mod(n, 2)
-if(nmod /= 0) go to 1
-if(mmod /= 0) go to 2
+if (nmod /= 0) go to 1
+if (mmod /= 0) go to 2
 !
 !     n even  m even
 !
@@ -2767,7 +2767,7 @@ cth = chh
 return
 1 cth = cdt
 sth = sdt
-if(mmod /= 0) go to 3
+if (mmod /= 0) go to 3
 !
 !     n odd m even
 !
@@ -2784,7 +2784,7 @@ return
 !
 3 ncw = (n+1)/2
 wh = 0.
-if(ncw<2) return
+if (ncw<2) return
 do 25 k=2, ncw
 wh = wh+cw(k)*sth
 chh = cdt*cth-sdt*sth
@@ -2867,7 +2867,7 @@ subroutine wbgit1 (nlat, nlon, imid, theta, wb, abc, cwb, work)
 dimension wb(imid, nlat, 2), abc(1)
 real cwb(1), theta(1), wbh, work(1)
 mdo = min(3, nlat, (nlon+1)/2)
-if(mdo < 2) return
+if (mdo < 2) return
 do mp1=2, mdo
 m = mp1-1
 do np1=mp1, nlat

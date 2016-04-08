@@ -7,8 +7,6 @@ module type_GaussianGrid
     use type_SphericalGrid, only: &
         SphericalGrid
 
-    !!! gaqd
-
     ! Explicit typing only
     implicit none
 

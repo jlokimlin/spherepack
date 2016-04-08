@@ -202,9 +202,9 @@ subroutine lfin1(init, theta, l, m, nm, id, p3, phz, ph1, p1, p2, cp)
 5   mp1 = m+1
     fm = real(m)
     tm = fm+fm
-    if(m-1< 0) then
+    if (m-1< 0) then
         goto 25
-    else if(m-1 == 0) then 
+    else if (m-1 == 0) then 
         goto 30
     else 
         goto 35

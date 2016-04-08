@@ -56,53 +56,59 @@ module type_Sphere
         !----------------------------------------------------------------------
         ! Class methods
         !----------------------------------------------------------------------
-        procedure,                              public :: create_sphere
-        procedure,                              public :: destroy => destroy_sphere
-        procedure,                              public :: destroy_sphere
-        procedure,                              public :: get_index
-        procedure,                              public :: get_coefficient
+        procedure, public  :: create_sphere
+        procedure, public  :: destroy => destroy_sphere
+        procedure, public  :: destroy_sphere
+        procedure, public  :: get_index
+        procedure, public  :: get_coefficient
+        procedure, public  :: invert_helmholtz
+        procedure, public  :: get_gradient
+        procedure, public  :: invert_gradient
+        procedure, public  :: get_vorticity
+        procedure, public  :: invert_vorticity
+        procedure, private :: get_divergence_from_vector_field
+        procedure, private :: get_divergence_from_spherical_angles
+        procedure, public  :: invert_divergence
+        procedure, public  :: get_rotation_operator => compute_angular_momentum
+        procedure, private :: get_scalar_symmetries
+        procedure, private :: get_vector_symmetries
+        procedure, public  :: perform_complex_analysis
+        procedure, public  :: perform_complex_synthesis
+        procedure, private :: perform_vector_analysis_from_vector_field
+        procedure, public  :: synthesize_from_complex_spectral_coefficients
+        procedure, public  :: analyze_into_complex_spectral_coefficients
+        procedure, public  :: get_vorticity_and_divergence_coefficients_from_velocities
+        procedure, public  :: get_velocities_from_vorticity_and_divergence_coefficients
         procedure, private :: get_scalar_laplacian
         procedure, private :: compute_vector_laplacian_coefficients
         procedure, private :: get_vector_laplacian_from_spherical_angles
         procedure, private :: get_vector_laplacian_from_vector_field
-        generic,   public  :: get_laplacian => &
+        procedure, private :: invert_scalar_laplacian
+        procedure, private :: invert_vector_laplacian
+        procedure (scalar_analysis),  deferred, public :: &
+            perform_scalar_analysis
+        procedure (scalar_synthesis), deferred, public :: &
+            perform_scalar_synthesis
+        procedure (vector_analysis),  deferred, public :: &
+            vector_analysis_from_spherical_components
+        procedure (vector_synthesis), deferred, public :: &
+            perform_vector_synthesis
+        generic, public :: perform_vector_analysis => &
+            perform_vector_analysis_from_vector_field
+        generic, public :: invert_laplacian => &
+            invert_scalar_laplacian, &
+            invert_vector_laplacian
+        generic, public :: get_divergence => &
+            get_divergence_from_vector_field, &
+            get_divergence_from_spherical_angles
+        generic, public :: get_laplacian => &
             get_scalar_laplacian, &
             get_vector_laplacian_from_spherical_angles, &
             get_vector_laplacian_from_vector_field
-        procedure, private :: invert_scalar_laplacian
-        procedure, private :: invert_vector_laplacian
-        generic,   public :: invert_laplacian => &
-            invert_scalar_laplacian, &
-            invert_vector_laplacian
-        procedure,                              public :: invert_helmholtz
-        procedure,                              public :: get_gradient
-        procedure,                              public :: invert_gradient
-        procedure,                              public :: get_vorticity
-        procedure,                              public :: invert_vorticity
-        procedure, private :: get_divergence_from_vector_field
-        procedure, private :: get_divergence_from_spherical_angles
-        generic,   public :: get_divergence => &
-            get_divergence_from_vector_field, &
-            get_divergence_from_spherical_angles
-        procedure,                              public :: invert_divergence
-        procedure,                              public :: get_rotation_operator => compute_angular_momentum
-        procedure,                              private :: get_scalar_symmetries
-        procedure,                              private :: get_vector_symmetries
-        procedure,                              public :: perform_complex_analysis
-        procedure,                              public :: perform_complex_synthesis
-        procedure (scalar_analysis),  deferred, public :: perform_scalar_analysis
-        procedure (scalar_synthesis), deferred, public :: perform_scalar_synthesis
-        procedure,                              private :: perform_vector_analysis_from_vector_field
-        procedure (vector_analysis),  deferred, public :: vector_analysis_from_spherical_components
-        generic, public :: perform_vector_analysis => &
-            perform_vector_analysis_from_vector_field
-        procedure (vector_synthesis), deferred, public :: perform_vector_synthesis
-        procedure,                              public :: synthesize_from_complex_spectral_coefficients
-        procedure,                              public :: analyze_into_complex_spectral_coefficients
-        procedure,                              public :: get_vorticity_and_divergence_coefficients_from_velocities
-        procedure,                              public :: get_velocities_from_vorticity_and_divergence_coefficients
         !----------------------------------------------------------------------
     end type Sphere
+
+
 
     abstract interface
         subroutine scalar_analysis(this, scalar_function)
@@ -137,8 +143,8 @@ module type_Sphere
             ! Dictionary: calling arguments
             !----------------------------------------------------------------------
             class (Sphere), intent (in out) :: this
-            real (wp),      intent (in)    :: polar_component(:,:)
-            real (wp),      intent (in)    :: azimuthal_component(:,:)
+            real (wp),      intent (in)     :: polar_component(:,:)
+            real (wp),      intent (in)     :: azimuthal_component(:,:)
             !----------------------------------------------------------------------
         end subroutine vector_analysis
     end interface
@@ -150,14 +156,16 @@ module type_Sphere
             ! Dictionary: calling arguments
             !----------------------------------------------------------------------
             class (Sphere), intent (in out) :: this
-            real (wp),      intent (out)   :: polar_component(:,:)
-            real (wp),      intent (out)   :: azimuthal_component(:,:)
+            real (wp),      intent (out)    :: polar_component(:,:)
+            real (wp),      intent (out)    :: azimuthal_component(:,:)
             !----------------------------------------------------------------------
         end subroutine vector_synthesis
     end interface
 
 
+
 contains
+
 
 
     subroutine create_sphere( this, nlat, nlon, ntrunc, isym, itype, isynt, rsphere )
@@ -181,20 +189,28 @@ contains
         ! Ensure that object is usable
         call this%destroy_sphere()
 
-        ! Set constants
+        !
+        !==> Set constants
+        !
         this%NUMBER_OF_LATITUDES = nlat
         this%NUMBER_OF_LONGITUDES = nlon
         this%TRIANGULAR_TRUNCATION_LIMIT = ntrunc
         this%NUMBER_OF_SYNTHESES = isynt
         this%RADIUS_OF_SPHERE = rsphere
 
-        ! Set scalar symmetries
+        !
+        !==> Set scalar symmetries
+        !
         call this%get_scalar_symmetries( isym )
 
-        ! Set vector symmetries
+        !
+        !==> Set vector symmetries
+        !
         call this%get_vector_symmetries( itype )
 
-        ! Allocate memory
+        !
+        !==> Allocate memory
+        !
         associate( nm_dim => (ntrunc+1)*(ntrunc+2)/2 )
             allocate( this%INDEX_ORDER_M(nm_dim) )
             allocate( this%INDEX_DEGREE_N(nm_dim) )
@@ -202,8 +218,9 @@ contains
             allocate( this%inverse_laplacian_coefficients(nm_dim) )
             allocate( this%complex_spectral_coefficients(nm_dim) )
             allocate( this%vorticity_and_divergence_coefficients(nlat) )
-
-            ! Fill arrays
+            !
+            !==> Fill arrays
+            !
             associate( &
                 ntrunc => this%TRIANGULAR_TRUNCATION_LIMIT, &
                 indxm => this%INDEX_ORDER_M, &
@@ -226,7 +243,9 @@ contains
             end associate
         end associate
 
-        ! Initialize derived data types
+        !
+        !==> Initialize derived data types
+        !
         associate( &
             grid => this%grid, &
             workspace => this%workspace, &
@@ -237,7 +256,9 @@ contains
             call unit_vectors%create( grid, trig_func )
         end associate
 
-        ! Set initialization flag
+        !
+        !==> Set initialization flag
+        !
         this%initialized = .true.
         
     end subroutine create_sphere
@@ -252,29 +273,57 @@ contains
         !----------------------------------------------------------------------
 
         ! Check flag
-        if ( this%initialized .eqv. .false. ) return
+        if (this%initialized .eqv. .false.) then
+            return
+        end if
 
-         ! Release memory
-        if (allocated(this%INDEX_ORDER_M)) deallocate(this%INDEX_ORDER_M)
-        if (allocated(this%INDEX_DEGREE_N)) deallocate(this%INDEX_DEGREE_N)
-        if (allocated(this%laplacian_coefficients )) &
+        !
+        !==> Release memory
+        !
+        if (allocated(this%INDEX_ORDER_M)) then
+            deallocate(this%INDEX_ORDER_M)
+        end if
+
+        if (allocated(this%INDEX_DEGREE_N)) then
+            deallocate(this%INDEX_DEGREE_N)
+        end if
+
+        if (allocated(this%laplacian_coefficients )) then
             deallocate(this%laplacian_coefficients)
-        if (allocated(this%inverse_laplacian_coefficients)) &
+        end if
+
+        if (allocated(this%inverse_laplacian_coefficients)) then
             deallocate(this%inverse_laplacian_coefficients)
-        if (allocated(this%complex_spectral_coefficients)) &
+        end if
+
+        if (allocated(this%complex_spectral_coefficients)) then
             deallocate(this%complex_spectral_coefficients)
-        if (allocated(this%vorticity_and_divergence_coefficients)) &
+        end if
+
+        if (allocated(this%vorticity_and_divergence_coefficients)) then
             deallocate(this%vorticity_and_divergence_coefficients)
+        end if
 
-        ! Release memory from polymorphic class variables
-        if (allocated(this%grid)) deallocate(this%grid)
-        if (allocated(this%workspace)) deallocate( this%workspace )
+        !
+        !==> Release memory from polymorphic class variables
+        !
+        if (allocated(this%grid)) then
+            deallocate(this%grid)
+        end if
 
-        ! Release memory from derived data types
+        if (allocated(this%workspace)) then
+            deallocate( this%workspace )
+        end if
+
+        !
+        !==>  Release memory from derived data types
+        !
         call this%trigonometric_functions%destroy()
         call this%unit_vectors%destroy()
 
-        ! Reset constants
+        !
+        !==> Reset constants
+        !
         this%NUMBER_OF_LONGITUDES = 0
         this%NUMBER_OF_LATITUDES = 0
         this%TRIANGULAR_TRUNCATION_LIMIT = 0
@@ -282,7 +331,9 @@ contains
         this%VECTOR_SYMMETRIES = 0
         this%NUMBER_OF_SYNTHESES = 0
 
-        ! Reset initialization flag
+        !
+        !==> Reset initialization flag
+        !
         this%initialized = .false.
 
     end subroutine destroy_sphere
@@ -330,10 +381,14 @@ contains
                 //' in PERFORM_COMPLEX_ANALYSIS'
         end if
 
-        ! compute the (real) spherical harmonic coefficients
+        !
+        !==>  compute the (real) spherical harmonic coefficients
+        !
         call this%perform_scalar_analysis( scalar_function )
 
-        ! Set complex spherical harmonic coefficients
+        !
+        !==> Set complex spherical harmonic coefficients
+        !
         associate( &
             ntrunc => this%TRIANGULAR_TRUNCATION_LIMIT, & ! set the triangular truncation limit
             a => this%workspace%real_harmonic_coefficients, &
@@ -372,7 +427,9 @@ contains
                 //' in PERFORM_COMPLEX_SYNTHESIS'
         end if
 
-        ! Convert complex spherical harmonic coefficients to real version
+        !
+        !==> Convert complex spherical harmonic coefficients to real version
+        !
         associate( &
             ntrunc => this%TRIANGULAR_TRUNCATION_LIMIT, & ! set the triangular truncation limit
             a => this%workspace%real_harmonic_coefficients, &
@@ -397,7 +454,9 @@ contains
             end do
         end associate
 
-        ! synthesise the scalar function from the (real) harmonic coefficients
+        !
+        !==> synthesise the scalar function from the (real) harmonic coefficients
+        !
         call this%perform_scalar_synthesis( scalar_function )
 
     end subroutine perform_complex_synthesis
@@ -1459,12 +1518,12 @@ contains
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
         class (Sphere), intent (in out) :: this
-        real (wp),      intent (in)    :: scalar_function(:,:)
-        real (wp),      intent (out)   :: angular_momentum(:,:,:)
+        real (wp),      intent (in)     :: scalar_function(:,:)
+        real (wp),      intent (out)    :: angular_momentum(:,:,:)
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
-        integer (ip)          :: k, l   !! Counters
+        integer (ip)           :: k, l   !! Counters
         real (wp), allocatable :: polar_gradient_component(:,:)
         real (wp), allocatable :: azimuthal_gradient_component(:,:)
         !----------------------------------------------------------------------
@@ -1612,7 +1671,7 @@ contains
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
         class (Sphere), intent (in out) :: this
-        integer (ip),   intent (in)    :: isym
+        integer (ip),   intent (in)     :: isym
         !----------------------------------------------------------------------
 
         select case (isym)
@@ -1636,7 +1695,7 @@ contains
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
         class (Sphere), intent (in out) :: this
-        integer (ip),   intent (in)    :: itype
+        integer (ip),   intent (in)     :: itype
         !----------------------------------------------------------------------
 
         select case (itype)

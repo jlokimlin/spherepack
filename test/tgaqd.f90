@@ -59,7 +59,7 @@ program testint
     call gsqd(nlat,theta,wts,work,lwork,ierror)
     tdoub = etime(t1)
     tdoub = t1(1)-hold
-    if(ierror /= 0) write(6,4) ierror
+    if (ierror /= 0) write(6,4) ierror
 4   format(' ierror=',i5)
     write(*,739) tdoub
 739 format(' tdoub ',1pe15.6)
@@ -72,7 +72,7 @@ program testint
     call gaqd(nlat,dtheta,dwts,dw,ldw,ierror)
     tdoub = etime(t1)
     tdoub = t1(1)-hold
-    if(ierror /= 0) write(6,30) ierror
+    if (ierror /= 0) write(6,30) ierror
 30  format(' ierror=',i5)
     write(*,31) tdoub
 31  format(' tdoub gaqd',1pe15.6)
@@ -99,14 +99,14 @@ program testint
     end do
     write(*,638) sumw
 638 format('  sumw ',1pd39.30)
-    !      if(0.eq.0) go to 671
+    !      if (0.eq.0) go to 671
     hold = etime(t2)
     hold = t2(1)
     lwork = nlat+2
     call sgaqd(nlat,stheta,swts,swork,lwork,ierror)
     tsing = etime(t2)
     tsing = t2(1)-hold
-    if(ierror /= 0) write(6,5) ierror
+    if (ierror /= 0) write(6,5) ierror
 5   format(' iserror=',i5)
     sums = 0.
     do i=1,nlat
@@ -123,11 +123,11 @@ program testint
         dmax = max(dmax,abs(diff(i)))
         wmax = max(wmax,abs(swts(i)))
         rerr = abs(diff(i)/swts(i))
-        if(rerr>rmax) then
+        if (rerr>rmax) then
             rmax = rerr
             irm = i
         end if
-        !      if(i.lt.121) write(*,27) wts(i),swts(i),rerr
+        !      if (i.lt.121) write(*,27) wts(i),swts(i),rerr
 27      format(' wts ',1pd15.6,' swts ',e15.6,' rpter ',e15.6)
 6   continue
     !      write(*,7) (diff(i),i=nlat-25,nlat)
@@ -144,7 +144,7 @@ program testint
         dmax = max(dmax,abs(diff(i)))
         pmax = max(pmax,abs(stheta(i)))
         rerr = abs(diff(i)/stheta(i))
-        if(rerr>rmax) then
+        if (rerr>rmax) then
             rmax = rerr
             irm = i
         end if
@@ -265,7 +265,7 @@ program testint
         pis2 = 2.0*atan(1.0)
         pi = pis2+pis2
         theta(1) = pis2
-        if(nlat==1) go to 30
+        if (nlat==1) go to 30
         ns2 = nlat/2
         nhalf = (nlat+1)/2
         !
@@ -284,7 +284,7 @@ program testint
         dtheta = pis2/nhalf
         dthalf = dtheta/2.0
         cmax = .2d0*dtheta
-        if(mod(nlat,2)/=0) then
+        if (mod(nlat,2)/=0) then
             theta(nhalf) = pis2
             zero = pis2-dtheta
             nix = nhalf-1
@@ -302,17 +302,17 @@ program testint
         call dlft (0,nlat,zero,cp,dpb)
         dcor = pb/dpb
         sgnd = 1.0
-        if(dcor /= 0.0) sgnd = dcor/abs(dcor)
+        if (dcor /= 0.0) sgnd = dcor/abs(dcor)
         !      write(*,2) nix,zero,theta(nix),dcor,cmax,sgnd
 2       format(i7,1p5d15.6)
         dcor = sgnd*min(abs(dcor),cmax)
         zero = zero-dcor
-        if(abs(zero-zlast)>eps*abs(zero)) go to 10
+        if (abs(zero-zlast)>eps*abs(zero)) go to 10
         theta(nix) = zero
         nix = nix-1
-        if(nix==0) go to 30
-        if(nix==nhalf-1)  zero = 3.0*zero-pi
-        if(nix<nhalf-1)  zero = zero+zero-theta(nix+2)
+        if (nix==0) go to 30
+        if (nix==nhalf-1)  zero = 3.0*zero-pi
+        if (nix<nhalf-1)  zero = zero+zero-theta(nix+2)
         go to 9
 30      return
     end subroutine gsqd1
@@ -352,23 +352,23 @@ program testint
         !
         cp(1) = 0.
         ma = iabs(m)
-        if(ma > n) return
-        if(n-1< 0) then
+        if (ma > n) return
+        if (n-1< 0) then
             goto 2
-        else if(n-1 == 0) then 
+        else if (n-1 == 0) then 
             goto 3
         else 
             goto 5
         end if
 2       cp(1) = sqrt(2.d0)
         return
-3       if(ma /= 0) go to 4
+3       if (ma /= 0) go to 4
         cp(1) = sqrt(1.5d0)
         return
 4       cp(1) = sqrt(.75d0)
-        if(m == -1) cp(1) = -cp(1)
+        if (m == -1) cp(1) = -cp(1)
         return
-5       if(mod(n+ma,2) /= 0) go to 10
+5       if (mod(n+ma,2) /= 0) go to 10
         nmms2 = (n-ma)/2
         fnum = n+ma+1
         fnmh = n-ma+1
@@ -384,10 +384,10 @@ program testint
 15      t1 = 1.d0/sc20
         nex = 20
         fden = 2.d0
-        if(nmms2 < 1) go to 20
+        if (nmms2 < 1) go to 20
         do 18 i=1,nmms2
             t1 = fnum*t1/fden
-            if(t1 > sc20) then
+            if (t1 > sc20) then
                 t1 = t1/sc40
                 nex = nex+40
             end if
@@ -395,9 +395,9 @@ program testint
             fden = fden+2.
 18      continue
 20      t1 = t1/2.d0**(n-1-nex)
-        if(mod(ma/2,2) /= 0) t1 = -t1
+        if (mod(ma/2,2) /= 0) t1 = -t1
         t2 = 1.
-        if(ma == 0) go to 26
+        if (ma == 0) go to 26
         do 25 i=1,ma
             t2 = fnmh*t2/(fnmh+pm1)
             fnmh = fnmh+2.
@@ -406,17 +406,17 @@ program testint
         fnnp1 = n*(n+1)
         fnmsq = fnnp1-2.d0*ma*ma
         l = (n+1)/2
-        if(mod(n,2) == 0 .and. mod(ma,2) == 0) l = l+1
+        if (mod(n,2) == 0 .and. mod(ma,2) == 0) l = l+1
         cp(l) = cp2
-        if(m >= 0) go to 29
-        if(mod(ma,2) /= 0) cp(l) = -cp(l)
-29      if(l <= 1) return
+        if (m >= 0) go to 29
+        if (mod(ma,2) /= 0) cp(l) = -cp(l)
+29      if (l <= 1) return
         fk = n
         a1 = (fk-2.)*(fk-1.)-fnnp1
         b1 = 2.*(fk*fk-fnmsq)
         cp(l-1) = b1*cp(l)/a1
 30      l = l-1
-        if(l <= 1) return
+        if (l <= 1) return
         fk = fk-2.
         a1 = (fk-2.)*(fk-1.)-fnnp1
         b1 = -2.*(fk*fk-fnmsq)
@@ -430,16 +430,16 @@ program testint
         sdt = sin(theta+theta)
         nmod=mod(n,2)
         mmod=mod(m,2)
-        if(nmod< 0) then
+        if (nmod< 0) then
             goto 1
-        else if(nmod == 0) then 
+        else if (nmod == 0) then 
             goto 1
         else 
             goto 2
         end if
-1       if(mmod< 0) then
+1       if (mmod< 0) then
             goto 3
-        else if(mmod == 0) then 
+        else if (mmod == 0) then 
             goto 3
         else 
             goto 4
@@ -449,7 +449,7 @@ program testint
         !
 3       kdo=n/2
         pb = .5*cp(1)
-        if(n == 0) return
+        if (n == 0) return
         cth = cdt
         sth = sdt
         do 170 k=1,kdo
@@ -475,9 +475,9 @@ program testint
             cth = chh
 180     continue
         return
-2       if(mmod< 0) then
+2       if (mmod< 0) then
             goto 13
-        else if(mmod == 0) then 
+        else if (mmod == 0) then 
             goto 13
         else 
             goto 14
@@ -523,16 +523,16 @@ program testint
         sdt = sin(theta+theta)
         nmod=mod(n,2)
         mmod=mod(abs(m),2)
-        if(nmod< 0) then
+        if (nmod< 0) then
             goto 1
-        else if(nmod == 0) then 
+        else if (nmod == 0) then 
             goto 1
         else 
             goto 2
         end if
-1       if(mmod< 0) then
+1       if (mmod< 0) then
             goto 3
-        else if(mmod == 0) then 
+        else if (mmod == 0) then 
             goto 3
         else 
             goto 4
@@ -542,7 +542,7 @@ program testint
         !
 3       kdo=n/2
         pb = 0.d0
-        if(n == 0) return
+        if (n == 0) return
         cth = cdt
         sth = sdt
         do 170 k=1,kdo
@@ -568,9 +568,9 @@ program testint
             cth = chh
 180     continue
         return
-2       if(mmod< 0) then
+2       if (mmod< 0) then
             goto 13
-        else if(mmod == 0) then 
+        else if (mmod == 0) then 
             goto 13
         else 
             goto 14
@@ -618,13 +618,13 @@ program testint
         cn = 2.0
         write(*,9) cn
 9       format(' check1 on dble cn ',1pd20.11)
-        if(n>0) then
+        if (n>0) then
             ic = 0
             fi = 0.0
             do i=1,n
                 fi = fi+2.0
                 cn = (1.0-1.0/fi**2)*cn
-                if(abs(cn)> 5.0.and.ic==0) then
+                if (abs(cn)> 5.0.and.ic==0) then
                     ic = 1
                     write(*,7) i,cn
 7                   format('  i ',i7,' check3 on cn',1pd15.6)
@@ -652,7 +652,7 @@ program testint
         t4 = t4-2.0
         coef = (t1*t2)/(t3*t4)*coef
         cp(j) = coef*cn
-        if(j>1) go to 10
+        if (j>1) go to 10
         !      end do
         return
     end subroutine dlfcz
@@ -737,7 +737,7 @@ program testint
         !
         !     estimate first point next to theta = pi/2
         !
-        if(mnlat/=0) then
+        if (mnlat/=0) then
             zprev = pis2
             zero = pis2-dtheta
             nix = nhalf-1
@@ -755,10 +755,10 @@ program testint
         call slpdp (nlat,zero,cz,theta(ns2+1),wts(ns2+1),pb,dpb)
         dcor = pb/dpb
         sgnd = 1.0
-        if(dcor /= 0.0) sgnd = dcor/abs(dcor)
+        if (dcor /= 0.0) sgnd = dcor/abs(dcor)
         dcor = sgnd*min(abs(dcor),cmax)
         zero = zero-dcor
-        if(abs(zero-zlast)>eps*abs(zero)) go to 10
+        if (abs(zero-zlast)>eps*abs(zero)) go to 10
         theta(nix) = zero
         zhold = zero
         !      wts(nix) = (nlat+nlat+1)/(dpb*dpb)
@@ -767,15 +767,15 @@ program testint
         !
         wts(nix) = (nlat+nlat+1)/(dpb+pb*cos(zlast)/sin(zlast))**2
         nix = nix-1
-        if(nix==0) go to 30
-        if(nix==nhalf-1)  zero = 3.0*zero-pi
-        if(nix<nhalf-1)  zero = zero+zero-zprev
+        if (nix==0) go to 30
+        if (nix==nhalf-1)  zero = 3.0*zero-pi
+        if (nix<nhalf-1)  zero = zero+zero-zprev
         zprev = zhold
         go to 9
         !
         !     extend points and weights via symmetries
         !
-30      if(mnlat/=0) then
+30      if (mnlat/=0) then
             theta(nhalf) = pis2
             call slpdp (nlat,pis2,cz,theta(ns2+1),wts(ns2+1),pb,dpb)
             wts(nhalf) = (nlat+nlat+1)/(dpb*dpb)
@@ -809,7 +809,7 @@ program testint
         t2 = n+1.0
         t3 = 0.
         t4 = n+n+1.0
-        if(mod(n,2)==0) then
+        if (mod(n,2)==0) then
             cp(ncp) = 1.0
             do j = ncp,2,-1
                 t1 = t1+2.0
@@ -853,14 +853,14 @@ program testint
         fn = real(n)
         cdt = cos(theta+theta)
         sdt = sin(theta+theta)
-        if(mod(n,2) ==0) then
+        if (mod(n,2) ==0) then
             !
             !     n even
             !
             kdo = n/2
             pb = .5*cz
             dpb = 0.0
-            if(n > 0) then
+            if (n > 0) then
                 cth = cdt
                 sth = sdt
                 do 170 k=1,kdo

@@ -231,28 +231,28 @@ subroutine vrtes(nlat, nlon, isym, nt, vort, ivrt, jvrt, cr, ci, mdc, ndc, &
     !     check input parameters
     !
     ierror = 1
-    if(nlat < 3) return
+    if (nlat < 3) return
     ierror = 2
-    if(nlon < 4) return
+    if (nlon < 4) return
     ierror = 3
     if (isym<0 .or. isym>2) return
     ierror = 4
-    if(nt < 0) return
+    if (nt < 0) return
     ierror = 5
     imid = (nlat+1)/2
-    if((isym==0 .and. ivrt<nlat) .or. &
+    if ((isym==0 .and. ivrt<nlat) .or. &
         (isym>0 .and. ivrt<imid)) return
     ierror = 6
-    if(jvrt < nlon) return
+    if (jvrt < nlon) return
     ierror = 7
-    if(mdc < min(nlat, (nlon+1)/2)) return
+    if (mdc < min(nlat, (nlon+1)/2)) return
     mmax = min(nlat, (nlon+2)/2)
     ierror = 8
-    if(ndc < nlat) return
+    if (ndc < nlat) return
     ierror = 9
     imid = (nlat+1)/2
     lpimn = (imid*mmax*(nlat+nlat-mmax+1))/2
-    if(lshses < lpimn+nlon+15) return
+    if (lshses < lpimn+nlon+15) return
     ierror = 10
     !
     !     verify unsaved work space (add to what shses requires, file f3)
@@ -263,9 +263,9 @@ subroutine vrtes(nlat, nlon, isym, nt, vort, ivrt, jvrt, cr, ci, mdc, ndc, &
     mab = min(nlat, nlon/2+1)
     mn = mab*nlat*nt
     ls = nlat
-    if(isym > 0) ls = imid
+    if (isym > 0) ls = imid
     nln = nt*ls*nlon
-    if(lwork< nln+ls*nlon+2*mn+nlat) return
+    if (lwork< nln+ls*nlon+2*mn+nlat) return
     ierror = 0
     !
     !     set work space pointers

@@ -76,22 +76,22 @@ program tshpg
             idimg = idp
             jdimg = kdp
             call shagci(nlat,nlon,wshagc,lwsha,work,lwrk,ierror)
-            if(ierror /= 0) write(6,70) ierror
+            if (ierror /= 0) write(6,70) ierror
 70          format('   ierror0' ,i5)
             !
             lwshs = lwsha
             call shsgci(nlat,nlon,wshsgc,lwshs,work,lwrk,ierror)
-            if(ierror /= 0) write(6,71) ierror
+            if (ierror /= 0) write(6,71) ierror
 71          format('   ierror1' ,i5)
             !
             !     initiate faster filter
             !
             call shpgi(nlat,nlon,isym,mtrunc,wshp,lwshp,iwshp,liwshp, &
                 work,lwrk,ierror)
-            if(ierror/=0) write(*,429) ierror
+            if (ierror/=0) write(*,429) ierror
 429         format(' ierror2 =',i5,' at 429')
             !
-            if(iprint /= 0) write (6,5) mode,nlat,nlon
+            if (iprint /= 0) write (6,5) mode,nlat,nlon
 5           format(' mode =' ,i5,'  nlat =',i5,'  nlon =',i5)
             !
             !     initialize with pseudo random field
@@ -107,10 +107,10 @@ program tshpg
             thold = t1(1)
             call shagc(nlat,nlon,mode,nt,g,idimg,jdimg,ga,gb,idimg,idimg, &
                 wshagc,lwsha,wrk2,lwork,ierror)
-            if(ierror /= 0) write(6,72) ierror
+            if (ierror /= 0) write(6,72) ierror
 72          format('   ierror2' ,i5)
             !
-            if(mtrunc<nlat-1) then
+            if (mtrunc<nlat-1) then
                 do np1=mtrunc+2,nlat
                     do mp1=1,np1
                         ga(mp1,np1,1) = 0.
@@ -122,7 +122,7 @@ program tshpg
                 wshsgc,lwshs,wrk2,lwork,ierror)
             tusl = etime(t1)
             tusl = t1(1)-thold
-            if(ierror /= 0) write(6,73) ierror
+            if (ierror /= 0) write(6,73) ierror
 73          format('   ierror3' ,i5)
             !
             thold = etime(t1)
@@ -131,12 +131,12 @@ program tshpg
                 wshp,lwshp,iwshp,liwshp,wrk1,lwrk1,ierror)
             thold = etime(t1)
             toe = t1(1)-toe
-            if(ierror/=0) write(*,428) ierror
+            if (ierror/=0) write(*,428) ierror
 428         format(' ierror =',i5,' at 428')
-            if(iprint>0)write(*,431)
+            if (iprint>0)write(*,431)
 431         format(/' approx and exact solution'/)
             do j=1,nlon
-                if(iprint>0)write(*,437) j,(sy(i,j),gh(i,j,1),i=1,nlat)
+                if (iprint>0)write(*,437) j,(sy(i,j),gh(i,j,1),i=1,nlat)
 437             format(' j=',i5,1p4e15.6/(8x,1p4e15.6))
             end do
             dmax1 = 0.

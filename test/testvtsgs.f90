@@ -67,16 +67,16 @@ program tvtsgs
     !     initialize spherepack routines
     !
     call shigs(nlat,nlon,wshi,lwshi,work,lwork,dwork,ldwork,ierror)
-    if(ierror /= 0) write(6,55) ierror
+    if (ierror /= 0) write(6,55) ierror
 55  format('testvtsgs:  error' i4 ' in shigs')
     call vhagsi(nlat,nlon,wvha,lwvha,dwork,ldwork,ierror)
-    if(ierror /= 0) write(6,57) ierror
+    if (ierror /= 0) write(6,57) ierror
 57  format('testvtsgs:  error' i4 ' in vhagsi')
     call vhsgsi(nlat,nlon,wvhs,lwvhs,dwork,ldwork,ierror)
-    if(ierror /= 0) write(6,58) ierror
+    if (ierror /= 0) write(6,58) ierror
 58  format(' testvtsgs: error' i4 ' in vhsgsi')
     call vtsgsi(nlat,nlon,wvts,lwvts,work,lwork,dwork,ldwork,ierror)
-    if(ierror /= 0) write(6,59) ierror
+    if (ierror /= 0) write(6,59) ierror
 59  format(' testvtsgs: error' i4 ' in vtsgsi')
     !
     !     compute gauss points and weights
@@ -143,7 +143,7 @@ program tvtsgs
     !
     call vhsgs(nlat,nlon,0,1,v,w,idp,jdp,br,bi, &
         cr,ci,mdab,ndab,wvhs,lwvhs,work,lwork,ierror)
-    if(ierror /= 0) write(6,79) ierror
+    if (ierror /= 0) write(6,79) ierror
 79  format(' testvtsgs: error' i4 ' in vhsgs at point 1')
     !
     do j=1,nlon
@@ -167,7 +167,7 @@ program tvtsgs
     !
     call shags(nlat,nlon,0,1,x,idp,jdp,a(1,1,1),b(1,1,1), &
         mdab,ndab,wshi,lwshi,work,lwork,ierror)
-    if(ierror /= 0) write(6,16) ierror
+    if (ierror /= 0) write(6,16) ierror
 16  format(' testvtsgs: error' i4 ' in shags at point 2')
     !
     !     write harmonic coefficients for x
@@ -185,7 +185,7 @@ program tvtsgs
     !
     call shags(nlat,nlon,0,1,y,idp,jdp,a(1,1,2),b(1,1,2), &
         mdab,ndab,wshi,lwshi,work,lwork,ierror)
-    if(ierror /= 0) write(6,17) ierror
+    if (ierror /= 0) write(6,17) ierror
 17  format(' testvtsgs: error' i4 ' in shags at point 3')
     !
     !     write harmonic coefficients for y
@@ -202,7 +202,7 @@ program tvtsgs
     !
     call shags(nlat,nlon,0,1,z,idp,jdp,a(1,1,3),b(1,1,3), &
         mdab,ndab,wshi,lwshi,work,lwork,ierror)
-    if(ierror /= 0) write(6,18) ierror
+    if (ierror /= 0) write(6,18) ierror
 18  format(' testvtsgs: error' i4 ' in shags at point 4')
     !
     !     write harmonic coefficients for z
@@ -237,7 +237,7 @@ program tvtsgs
     !
     call shsgs(nlat,nlon,0,9,c,idp,jdp,da,db,idp,idp, &
         wshi,lwshi,work,lwork,ierror)
-    if(ierror /= 0) write(6,19) ierror
+    if (ierror /= 0) write(6,19) ierror
 19  format(' testvtsgs: error' i4 ' in shsgs at point 5')
     !
     !     convert to jacobian to spherical coordinates
@@ -281,7 +281,7 @@ program tvtsgs
     !
     call vtsgs(nlat,nlon,0,1,vt,wt,idp,jdp,br,bi,cr,ci, &
         mdab,ndab,wvts,lwvts,work,lwork,ierror)
-    if(ierror /= 0) write(6,4) ierror
+    if (ierror /= 0) write(6,4) ierror
 4   format(' testvtsgs: error' i4 ' in vtsgs during initialization')
     dmax1 = 0.
     dmax2 = 0.

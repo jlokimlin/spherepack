@@ -276,36 +276,36 @@ subroutine idvtes(nlat, nlon, isym, nt, v, w, idvw, jdvw, ad, bd, av, bv, &
     !     check input parameters
     !
     ierror = 1
-    if(nlat < 3) return
+    if (nlat < 3) return
     ierror = 2
-    if(nlon < 4) return
+    if (nlon < 4) return
     ierror = 3
-    if(isym<0 .or. isym>2) return
+    if (isym<0 .or. isym>2) return
     ierror = 4
-    if(nt < 0) return
+    if (nt < 0) return
     ierror = 5
     imid = (nlat+1)/2
-    if((isym==0 .and. idvw<nlat) .or. &
+    if ((isym==0 .and. idvw<nlat) .or. &
         (isym/=0 .and. idvw<imid)) return
     ierror = 6
-    if(jdvw < nlon) return
+    if (jdvw < nlon) return
     ierror = 7
     mmax = min(nlat, (nlon+1)/2)
-    if(mdab < min(nlat, (nlon+2)/2)) return
+    if (mdab < min(nlat, (nlon+2)/2)) return
     ierror = 8
-    if(ndab < nlat) return
+    if (ndab < nlat) return
     ierror = 9
     idz = (mmax*(nlat+nlat-mmax+1))/2
     lzimn = idz*imid
-    if(lvhses < lzimn+lzimn+nlon+15) return
+    if (lvhses < lzimn+lzimn+nlon+15) return
     ierror = 10
     !
     !     verify unsaved work space length
     !
     mn = mmax*nlat*nt
-    if(isym/=0  .and. lwork < &
+    if (isym/=0  .and. lwork < &
         nlat*(2*nt*nlon+max(6*imid, nlon))+4*mn+nlat) return
-    if(isym==0  .and. lwork < &
+    if (isym==0  .and. lwork < &
         imid*(2*nt*nlon+max(6*nlat, nlon))+4*mn+nlat) return
     ierror = 0
     !
@@ -341,8 +341,8 @@ subroutine idvtes1(nlat, nlon, isym, nt, v, w, idvw, jdvw, br, bi, &
     !     preset coefficient multiplyers in vector
     !
     do n=2, nlat
-        fn = real(n-1)
-        sqnn(n) = sqrt(fn*(fn + 1.0))
+        fn = real(n - 1)
+        sqnn(n) = sqrt(fn * (fn + 1.0))
     end do
     !
     !     compute multiple vector fields coefficients

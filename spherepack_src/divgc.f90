@@ -232,24 +232,24 @@ subroutine divgc(nlat, nlon, isym, nt, dv, idv, jdv, br, bi, mdb, ndb, &
     !     check input parameters
     !
     ierror = 1
-    if(nlat < 3) return
+    if (nlat < 3) return
     ierror = 2
-    if(nlon < 4) return
+    if (nlon < 4) return
     ierror = 3
     if (isym<0 .or. isym>2) return
     ierror = 4
-    if(nt < 0) return
+    if (nt < 0) return
     ierror = 5
     imid = (nlat+1)/2
-    if((isym==0 .and. idv<nlat) .or. &
+    if ((isym==0 .and. idv<nlat) .or. &
         (isym>0 .and. idv<imid)) return
     ierror = 6
-    if(jdv < nlon) return
+    if (jdv < nlon) return
     ierror = 7
-    if(mdb < min(nlat, (nlon+1)/2)) return
+    if (mdb < min(nlat, (nlon+1)/2)) return
     mmax = min(nlat, (nlon+2)/2)
     ierror = 8
-    if(ndb < nlat) return
+    if (ndb < nlat) return
     ierror = 9
     imid = (nlat+1)/2
     lpimn = (imid*mmax*(nlat+nlat-mmax+1))/2
@@ -262,14 +262,14 @@ subroutine divgc(nlat, nlon, isym, nt, dv, idv, jdv, br, bi, mdb, ndb, &
     !     verify unsaved work space (add to what shsgc requires)
     !
     ls = nlat
-    if(isym > 0) ls = imid
+    if (isym > 0) ls = imid
     nln = nt*ls*nlon
     !
     !     set first dimension for a, b (as requried by shsgc)
     !
     mab = min(nlat, nlon/2+1)
     mn = mab*nlat*nt
-    !     if(lwork.lt. nln+ls*nlon+2*mn+nlat) return
+    !     if (lwork.lt. nln+ls*nlon+2*mn+nlat) return
     l1 = min(nlat, (nlon+2)/2)
     l2 = (nlat+1)/2
     if (isym == 0) then
@@ -305,8 +305,8 @@ subroutine divgc1(nlat, nlon, isym, nt, dv, idv, jdv, br, bi, mdb, ndb, &
     !     set coefficient multiplyers
     !
     do  n=2, nlat
-        fn = real(n-1)
-        sqnn(n) = sqrt(fn*(fn + 1.0))
+        fn = real(n - 1)
+        sqnn(n) = sqrt(fn * (fn + 1.0))
     end do
     !
     !     compute divergence scalar coefficients for each vector field

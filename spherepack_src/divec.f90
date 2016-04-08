@@ -221,58 +221,136 @@
 !           = 8  error in the specification of ndb
 !           = 9  error in the specification of lshsec
 !           = 10 error in the specification of lwork
-! **********************************************************************
-!                                                                              
+!
 subroutine divec(nlat, nlon, isym, nt, dv, idv, jdv, br, bi, mdb, ndb, &
     wshsec, lshsec, work, lwork, ierror)
+    implicit none
+    !----------------------------------------------------------------------
+    ! Dictionary: calling arguments
+    !----------------------------------------------------------------------
+    integer, intent (in)     :: nlat
+    integer, intent (in)     :: nlon
+    integer, intent (in)     :: isym
+    integer, intent (in)     :: nt
+    real,    intent (in out) :: dv(idv, jdv, nt)
+    integer, intent (in)     :: idv
+    integer, intent (in)     :: jdv
+    real,    intent (in out) :: br(mdb, ndb, nt)
+    real,    intent (in out) :: bi(mdb, ndb, nt)
+    integer, intent (in)     :: mdb
+    integer, intent (in)     :: ndb
+    real,    intent (in out) :: wshsec(lshsec)
+    integer, intent (in)     :: lshsec
+    real,    intent (in out) :: work(lwork)
+    integer, intent (in)     :: lwork
+    integer, intent (out)    :: ierror
+    !----------------------------------------------------------------------
+    ! Dictionary: local variables
+    !----------------------------------------------------------------------
+    integer :: l1, l2, ia, ib, mn, is, ls, mab, nln
+    integer ::  iwk, lwk, lzz1, labc, imid
+    integer :: mmax, lwmin, lwkmin
+    !----------------------------------------------------------------------
 
-    dimension dv(idv, jdv, nt), br(mdb, ndb, nt), bi(mdb, ndb, nt)
-    dimension wshsec(lshsec), work(lwork)
     !
-    !     check input parameters
+    !==> check validity of input parameters
     !
-    ierror = 1
-    if(nlat < 3) return
-    ierror = 2
-    if(nlon < 4) return
-    ierror = 3
-    if (isym<0 .or. isym>2) return
-    ierror = 4
-    if(nt < 0) return
-    ierror = 5
+
+    ! Initialize error flag
+    ierror = 0
+
+    ! Check case 1
+    if (nlat < 3) then
+        ierror = 1
+        return
+    end if
+
+    ! Check case 2
+    if (nlon < 4) then
+        ierror = 2
+        return
+    end if
+
+    ! Check case 3
+    if (isym < 0 .or. isym > 2) then
+        ierror = 3
+        return
+    end if
+
+    ! Check case 4
+    if (nt < 0) then
+        ierror = 4
+        return
+    end if
+
+    ! Check case 5
     imid = (nlat+1)/2
-    if((isym==0 .and. idv<nlat) .or. &
-        (isym>0 .and. idv<imid)) return
-    ierror = 6
-    if(jdv < nlon) return
-    ierror = 7
-    if(mdb < min(nlat, (nlon+1)/2)) return
+    if ( &
+        (isym == 0 .and. idv < nlat) &
+        .or. &
+        (isym > 0 .and. idv < imid) &
+        ) then
+        ierror = 5
+        return
+    end if
+
+    ! Check case 6
+    if (jdv < nlon) then
+        ierror = 6
+        return
+    end if
+
+    ! Check case 7
+    if (mdb < min(nlat, (nlon+1)/2)) then
+        ierror = 7
+        return
+    end if
+
+    !
+    !==> Check case 8
+    !
+
     mmax = min(nlat, (nlon+2)/2)
-    ierror = 8
-    if(ndb < nlat) return
-    ierror = 9
+
+    if (ndb < nlat) then
+        ierror = 8
+        return
+    end if
+
+
     !
-    !     verify saved work space (same as shsec)
+    !==> Check case 9:
+    !    verify saved work space (same as shsec)
     !
+
     imid = (nlat+1)/2
     lzz1 = 2*nlat*imid
     labc = 3*(max(mmax-2, 0)*(nlat+nlat-mmax-1))/2
     lwmin = lzz1+labc+nlon+15
 
-    if(lshsec < lwmin) return
+    if (lshsec < lwmin) then
+        ierror = 9
+        return
+    end if
+
     !
-    !     verify unsaved work space (add to what shec requires)
+    !==> Check case 10
+    !    verify unsaved work space (add to what shec requires)
     !
-    ierror = 10
+
     ls = nlat
-    if(isym > 0) ls = imid
+
+    if (isym > 0) then
+        ls = imid
+    end if
+
     nln = nt*ls*nlon
     !
     !     set first dimension for a, b (as requried by shsec)
     !
     mab = min(nlat, nlon/2+1)
     mn = mab*nlat*nt
-    !     if(lwork .lt. nln+max(ls*nlon, 3*nlat*imid)+2*mn+nlat) return
+    !     if (lwork .lt. nln+max(ls*nlon, 3*nlat*imid)+2*mn+nlat) return
     l1 = min(nlat, (nlon+2)/2)
     l2 = (nlat+1)/2
 
@@ -282,8 +360,11 @@ subroutine divec(nlat, nlon, isym, nt, dv, idv, jdv, br, bi, mdb, ndb, &
         lwkmin = l2*(nt*nlon+max(3*nlat, nlon)) + nlat*(2*nt*l1+1)
     end if
 
-    if (lwork < lwkmin) return
-    ierror = 0
+    if (lwork < lwkmin) then
+        ierror = 10
+        return
+    end if
+
     !
     !     set work space pointers
     !
@@ -310,8 +391,8 @@ subroutine divec1(nlat, nlon, isym, nt, dv, idv, jdv, br, bi, mdb, ndb, &
     !     set coefficient multiplyers
     !
     do n=2, nlat
-        fn = real(n-1)
-        sqnn(n) = sqrt(fn*(fn + 1.0))
+        fn = real(n - 1)
+        sqnn(n) = sqrt(fn * (fn + 1.0))
     end do
     !
     !     compute divergence scalar coefficients for each vector field

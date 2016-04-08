@@ -149,7 +149,7 @@ do 10 i=1, l
 pb(i) = 0.
 10 continue
 ma = abs(m)
-if(ma > n) return
+if (ma > n) return
 iw1 = l+l+12
 iw2 = iw1+3*(l+1)/2+15
 call lfp1(init, n, ma, l, cp, pb, w, w(iw1), w(iw2))
@@ -158,7 +158,7 @@ end subroutine lfp
 subroutine lfp1(init, n, m, l, cp, p, wsave1, wsave2, wsave3)
 dimension cp(*), p(*), wsave1(*), wsave2(*), wsave3(*)
 save lc, lq, ls
-if(init/=0) go to 41
+if (init/=0) go to 41
 lc=(l+1)/2
 ls=lc-2
 lq=lc-1
@@ -166,16 +166,16 @@ call sinti(ls, wsave1)
 call costi(lc, wsave2)
 call cosqi(lq, wsave3)
 return
-41 if(n< 0) then
+41 if (n< 0) then
     goto 10
-else if(n == 0) then 
+else if (n == 0) then 
     goto 10
 else 
     goto 40
 end if
-10 if(m< 0) then
+10 if (m< 0) then
     goto 20
-else if(m == 0) then 
+else if (m == 0) then 
     goto 20
 else 
     goto 40
@@ -192,16 +192,16 @@ pi = acos( -1.0 )
 dt = pi/lm1
 nmod = mod(n, 2)
 mmod = mod(m, 2)
-if(nmod< 0) then
+if (nmod< 0) then
     goto 50
-else if(nmod == 0) then 
+else if (nmod == 0) then 
     goto 50
 else 
     goto 120
 end if
-50 if(mmod< 0) then
+50 if (mmod< 0) then
     goto 60
-else if(mmod == 0) then 
+else if (mmod == 0) then 
     goto 60
 else 
     goto 90
@@ -230,9 +230,9 @@ p(lmi)=-p(i+1)
 p(l)=0.
 go to 190
 120 kdp=(n+1)/2
-    if(mmod< 0) then
+    if (mmod< 0) then
         goto 140
-    else if(mmod == 0) then 
+    else if (mmod == 0) then 
         goto 140
     else 
         goto 160

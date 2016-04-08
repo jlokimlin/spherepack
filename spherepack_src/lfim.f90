@@ -207,9 +207,9 @@ subroutine lfim1(init, theta, l, n, nm, id, p3, phz, ph1, p1, p2, cp)
 
     return
 5   if (n > 2) go to 60
-    if(n-1< 0) then
+    if (n-1< 0) then
         goto 25
-    else if(n-1 == 0) then 
+    else if (n-1 == 0) then 
         goto 30
     else 
         goto 35

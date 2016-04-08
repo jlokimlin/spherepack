@@ -304,51 +304,51 @@ subroutine shaec(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, &
 
     ierror = 1
 
-    if(nlat<3) then
+    if (nlat<3) then
         return
     end if
 
     ierror = 2
 
-    if(nlon<4) then
+    if (nlon<4) then
         return
     end if
 
     ierror = 3
 
-    if(isym<0 .or. isym>2) then
+    if (isym<0 .or. isym>2) then
         return
     end if
 
     ierror = 4
 
-    if(nt < 0) then
+    if (nt < 0) then
         return
     end if
 
     ierror = 5
 
-    if((isym==0 .and. idg<nlat) .or. &
+    if ((isym==0 .and. idg<nlat) .or. &
         (isym/=0 .and. idg<(nlat+1)/2)) then
         return
     end if
 
     ierror = 6
 
-    if(jdg < nlon) then
+    if (jdg < nlon) then
         return
     end if
 
     ierror = 7
     mmax = min(nlat, nlon/2+1)
 
-    if(mdab < mmax) then
+    if (mdab < mmax) then
         return
     end if
 
     ierror = 8
 
-    if(ndab < nlat) then
+    if (ndab < nlat) then
         return
     end if
 
@@ -357,27 +357,27 @@ subroutine shaec(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, &
     lzz1 = 2*nlat*imid
     labc = 3*((mmax-2)*(nlat+nlat-mmax-1))/2
 
-    if(lshaec < lzz1+labc+nlon+15) then
+    if (lshaec < lzz1+labc+nlon+15) then
         return
     end if
 
     ierror = 10
     ls = nlat
 
-    if(isym > 0) then
+    if (isym > 0) then
         ls = imid
     end if
 
     nln = nt*ls*nlon
 
-    if(lwork < nln+max(ls*nlon, 3*nlat*imid)) then
+    if (lwork < nln+max(ls*nlon, 3*nlat*imid)) then
         return
     end if
 
     ierror = 0
     ist = 0
 
-    if(isym == 0) then
+    if (isym == 0) then
         ist = imid
     end if
 
@@ -406,14 +406,14 @@ subroutine shaec1(nlat, isym, nt, g, idgs, jdgs, a, b, mdab, ndab, imid, &
     nlon = jdg
     mmax = min(nlat, nlon/2+1)
     mdo = mmax
-    if(mdo+mdo-1 > nlon) mdo = mmax-1
+    if (mdo+mdo-1 > nlon) mdo = mmax-1
     nlp1 = nlat+1
     tsn = 2./nlon
     fsn = 4./nlon
     modl = mod(nlat, 2)
     imm1 = imid
-    if(modl /= 0) imm1 = imid-1
-    if(isym /= 0) then
+    if (modl /= 0) imm1 = imid-1
+    if (isym /= 0) then
         go to 15
     end if
 
@@ -435,11 +435,11 @@ subroutine shaec1(nlat, isym, nt, g, idgs, jdgs, a, b, mdab, ndab, imid, &
         end do
     end do
 
-    if(isym == 1) then
+    if (isym == 1) then
         go to 27
     end if
 
-30  if(modl == 0) then
+30  if (modl == 0) then
         go to 27
     end if
 
@@ -451,7 +451,7 @@ subroutine shaec1(nlat, isym, nt, g, idgs, jdgs, a, b, mdab, ndab, imid, &
 
     27 do k=1, nt
         call hrfftf(ls, nlon, ge(1, 1, k), ls, whrfft, work)
-        if(mod(nlon, 2) /= 0) exit !go to 35
+        if (mod(nlon, 2) /= 0) exit !go to 35
         do i=1, ls
             ge(i, nlon, k) = .5*ge(i, nlon, k)
         end do
@@ -465,7 +465,7 @@ subroutine shaec1(nlat, isym, nt, g, idgs, jdgs, a, b, mdab, ndab, imid, &
             end do
         end do
     end do
-    if(isym == 1) then
+    if (isym == 1) then
         go to 145
     end if
 
@@ -481,7 +481,7 @@ subroutine shaec1(nlat, isym, nt, g, idgs, jdgs, a, b, mdab, ndab, imid, &
 
     ndo = nlat
 
-    if(mod(nlat, 2) == 0) then
+    if (mod(nlat, 2) == 0) then
         ndo = nlat-1
     end if
 
@@ -498,7 +498,7 @@ subroutine shaec1(nlat, isym, nt, g, idgs, jdgs, a, b, mdab, ndab, imid, &
         end do
     end do
 
-    if(mdo == mmax .or. mmax > ndo) then
+    if (mdo == mmax .or. mmax > ndo) then
         go to 135
     end if
 
@@ -512,7 +512,7 @@ subroutine shaec1(nlat, isym, nt, g, idgs, jdgs, a, b, mdab, ndab, imid, &
         end do
     end do
 
-135 if(isym == 2) then
+135 if (isym == 2) then
         return
     end if
 
@@ -528,7 +528,7 @@ subroutine shaec1(nlat, isym, nt, g, idgs, jdgs, a, b, mdab, ndab, imid, &
 
     ndo = nlat
 
-    if(mod(nlat, 2) /= 0) then
+    if (mod(nlat, 2) /= 0) then
         ndo = nlat-1
     end if
 
@@ -548,7 +548,7 @@ subroutine shaec1(nlat, isym, nt, g, idgs, jdgs, a, b, mdab, ndab, imid, &
 
     mp2 = mmax+1
 
-    if(mdo == mmax .or. mp2 > ndo) then
+    if (mdo == mmax .or. mp2 > ndo) then
         return
     end if
 
@@ -573,13 +573,13 @@ subroutine shaeci(nlat, nlon, wshaec, lshaec, dwork, ldwork, ierror)
 
     ierror = 1
 
-    if(nlat<3) then
+    if (nlat<3) then
         return
     end if
 
     ierror = 2
 
-    if(nlon<4) then
+    if (nlon<4) then
         return
     end if
 
@@ -589,13 +589,13 @@ subroutine shaeci(nlat, nlon, wshaec, lshaec, dwork, ldwork, ierror)
     lzz1 = 2*nlat*imid
     labc = 3*((mmax-2)*(nlat+nlat-mmax-1))/2
 
-    if(lshaec < lzz1+labc+nlon+15) then
+    if (lshaec < lzz1+labc+nlon+15) then
         return
     end if
 
     ierror = 4
 
-    if(ldwork < nlat+1) return
+    if (ldwork < nlat+1) return
     ierror = 0
 
     call zfinit (nlat, nlon, wshaec, dwork)

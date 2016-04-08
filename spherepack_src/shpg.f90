@@ -118,23 +118,23 @@ real work(*)
 dimension wshp(*), iwshp(*)
 !
 ierror = 1
-if(nlat<1) return
+if (nlat<1) return
 ierror = 2
-if(nlon<1) return
+if (nlon<1) return
 !      ierror = 3
-!      if(isym.lt.0 .or. isym.gt.2) return
+!      if (isym.lt.0 .or. isym.gt.2) return
 ierror = 4
 mmax = min(nlat-1, nlon/2)
-if(mtrunc<0 .or. mtrunc>mmax) return
+if (mtrunc<0 .or. mtrunc>mmax) return
 ierror = 5
 lw1 = 2*(nlat+1)**2
 log2n = log(real(nlon))/log(2.0)
-if(lwshp<lw1+nlon+log2n) return
+if (lwshp<lw1+nlon+log2n) return
 ierror = 6
-if(liwshp<4*(nlat+1)) return
+if (liwshp<4*(nlat+1)) return
 ierror = 7
 mlwk = 1.25*(nlat+1)**2+7*nlat+8
-if(lwork<mlwk) return
+if (lwork<mlwk) return
 ierror = 0
 !
 call hrffti(nlon, wshp(lw1+1))
@@ -196,7 +196,7 @@ toe = 0.
 !
 lwork = nlat+1
 call gaqdp(nlat, thet, gwts, work, lwork, ierr)
-if(ierr /= 0) write(*, 160) ierr
+if (ierr /= 0) write(*, 160) ierr
 160 format(' error in gaqd =', i5)
 do i=1, nto
 gwts(i) = gwts(i)+gwts(i)
@@ -224,7 +224,7 @@ nec = nte-nem
 !
 !     compute associated legendre functions
 !
-if(m<=1) then
+if (m<=1) then
 do 205 j=1, nem
 n = j+j+m-2
 call dlfkg(m, n, cp)
@@ -237,7 +237,7 @@ else
 !
 do 207 j=1, nem
 n = j+j+m-2
-if(m>1.and.n>mxtr) then
+if (m>1.and.n>mxtr) then
 do i=1, nte
 u(i, j+nec) = ped(i, j+nec, ip)
 end do
@@ -245,7 +245,7 @@ go to 207
 end if
 a1 = b(n-1)*a(n+m-3)/a(n+m-1)
 b1 = a(n-m+1)/a(n+m-1)
-if(n-m<=1) then
+if (n-m<=1) then
 do i=1, nte
 u(i, j+nec) = a1*ped(i, j+nec-1, ip) &
                    - b1*ped(i, j+nec, ip)    
@@ -264,7 +264,7 @@ ped(i, j+nec, ip) = u(i, j+nec)
 end do
 end do
 end if
-if(nec<=0) go to 200
+if (nec<=0) go to 200
 !
 !     generate orthogonal vector with 
 !     random numbers using Fortran90
@@ -287,7 +287,7 @@ z(i) = 0.0
 wx(i) = gwts(i)*xx(i)
 end do
 do 220 j=1, nte
-if(j==nec) go to 220
+if (j==nec) go to 220
 call gs(nte, wx, ped(1, j, ip), z)
 220 continue
 !  
@@ -296,7 +296,7 @@ xx(i) = xx(i)-z(i)
 end do
 call normal(nte, xx, idp, gwts)
 it = it+1
-if(it<=2) go to 201
+if (it<=2) go to 201
 do i=1, nte
 ped(i, nec, ip) = xx(i)
 end do
@@ -306,7 +306,7 @@ end do
 !         case of even functions
 !
 nmx = nlat-mxtr
-if(modn==1) then
+if (modn==1) then
 nshe(1) = nmx/2
 nshe(2) = (nmx-1)/2
 else
@@ -317,7 +317,7 @@ end if
 do 210 mp1=1, 2
 do j=1, nte
 js = j+nshe(mp1)
-if(js>nte) js = js-nte
+if (js>nte) js = js-nte
 do i=1, nte
 u(i, js) = ped(i, j, mp1)
 end do
@@ -341,7 +341,7 @@ do j=1, nte
 sum = ped(j, i, ip)*gwts(j)
 ze(j, i, ip) =  sum
 pe(i, j, ip) = ped(i, j, ip)
-if(abs(sum)>eps .and. lock==0) then
+if (abs(sum)>eps .and. lock==0) then
 lock = 1
 jzse(i, ip) = j
 end if
@@ -360,7 +360,7 @@ do k=1, nte
 sum1 = sum1+ze(k, i, ip)*pe(k, j, ip)
 end do
 zo(i, j, ip) = sum1
-if(i/=j) then
+if (i/=j) then
 dmax = max(dmax, abs(sum1))
 else
 dmax = max(dmax, abs(sum1-1.0))
@@ -382,21 +382,21 @@ noc = nto-nom
 !
 !     compute associated legendre functions
 !
-if(m<=1) then
+if (m<=1) then
 do 305 j=1, nom
 n = j+j+m-1
 call dlfkg(m, n, cp)
 do i=1, nte
 call dlftg (m, n, thet(i), cp, pod(i, j+noc, ip))
 end do
-if(modn>0) pod(nte, j+noc, ip) = 0.0
+if (modn>0) pod(nte, j+noc, ip) = 0.0
 305 continue
 !
 else
 !
 do 307 j=1, nom
 n = j+j+m-1
-if(m>1.and.n>mxtr) then
+if (m>1.and.n>mxtr) then
 do i=1, nte
 u(i, j+noc) = pod(i, j+noc, ip)
 end do
@@ -404,7 +404,7 @@ go to 304
 end if
 a1 = b(n-1)*a(n+m-3)/a(n+m-1)
 b1 = a(n-m+1)/a(n+m-1)
-if(n-m<=1) then
+if (n-m<=1) then
 do i=1, nte
 u(i, j+noc) = a1*pod(i, j+noc-1, ip) &
                    - b1*pod(i, j+noc, ip)    
@@ -416,7 +416,7 @@ u(i, j+noc) = a1*pod(i, j+noc-1, ip) &
    - b1*pod(i, j+noc, ip) + c1*u(i, j+noc-1)    
 end do
 end if
-304 if(modn==1) u(nte, j+noc) = 0.0
+304 if (modn==1) u(nte, j+noc) = 0.0
 307 continue
 do j=1, nom
 do i=1, nte
@@ -425,7 +425,7 @@ end do
 end do
 end if
 !
-if(noc<=0) go to 300
+if (noc<=0) go to 300
 !
 !     old code with nonstandard (s)rand
 !     commented out
@@ -438,14 +438,14 @@ if(noc<=0) go to 300
 !     intrinsic
 !
 call random_number(xx(1:nte))
-if(modn==1) xx(nte) = 0.0
+if (modn==1) xx(nte) = 0.0
 it = 0
 306 do i=1, nte
 z(i) = 0.
 wx(i) = gwts(i)*xx(i)
 end do
 do 330 j=1, nto
-if(j==noc) go to 330
+if (j==noc) go to 330
 call gs(nte, wx, pod(1, j, ip), z(1))
 330 continue
 !  
@@ -454,15 +454,15 @@ xx(i) = xx(i)-z(i)
 end do
 call normal(nte, xx, idp, gwts)
 it = it+1
-if(it<=2) go to 306
+if (it<=2) go to 306
 do i=1, nte
 pod(i, noc, ip) = xx(i)
 end do
-if(modn==1) pod(nte, noc, ip) = 0.0
+if (modn==1) pod(nte, noc, ip) = 0.0
 300 continue
 !
 nmx = nlat-mxtr
-if(modn==1) then
+if (modn==1) then
 nsho(1) = (nmx-1)/2
 nsho(2) = nmx/2
 else
@@ -473,7 +473,7 @@ end if
 do 310 mp1=1, 2
 do j=1, nto
 js = j+nsho(mp1)
-if(js>nto) js = js-nto
+if (js>nto) js = js-nto
 do i=1, nte
 u(i, js) = pod(i, j, mp1)
 end do
@@ -497,7 +497,7 @@ do j=1, nto
 sum = pod(j, i, ip)*gwts(j)
 zo(j, i, ip) = sum
 po(i, j, ip) = pod(i, j, ip)
-if(abs(sum)>eps .and. lock==0) then
+if (abs(sum)>eps .and. lock==0) then
 lock = 1
 jzso(i, ip) = j
 end if
@@ -516,7 +516,7 @@ do k=1, nto
 sum1 = sum1+zo(k, i, ip)*po(k, j, ip)
 end do
 zort(i, j, ip) = sum1
-if(i/=j) then
+if (i/=j) then
 dmax = max(dmax, abs(sum1))
 else
 dmax = max(dmax, abs(sum1-1.0))
@@ -634,23 +634,23 @@ subroutine shpg(nlat, nlon, isym, mtrunc, x, y, idxy, &
 dimension wshp(*), iwshp(*), work(*), x(idxy, nlon), y(idxy, nlon)
 !
 ierror = 1
-if(nlat<1) return
+if (nlat<1) return
 ierror = 2
-if(nlon<1) return
+if (nlon<1) return
 !      ierror = 3
-!      if(isym.lt.0 .or. isym.gt.2) return
+!      if (isym.lt.0 .or. isym.gt.2) return
 ierror = 4
 mmax = min(nlat-1, nlon/2)
-if(mtrunc<0 .or. mtrunc>mmax) return
+if (mtrunc<0 .or. mtrunc>mmax) return
 ierror = 5
 log2n = log(real(nlon))/log(2.0)
 lw1 = 2*(nlat+1)**2
-if(lwshp<lw1+nlon+log2n) return
+if (lwshp<lw1+nlon+log2n) return
 ierror = 6
-if(liwshp<4*(nlat+1)) return
+if (liwshp<4*(nlat+1)) return
 ierror = 7
 mwrk = max(nlat*nlon, 4*(nlat+1))
-if(lwork<mwrk) return
+if (lwork<mwrk) return
 ierror = 0
 !
 do j=1, nlon
@@ -702,7 +702,7 @@ nto = nlat-nte
 !
 mxtr = min(nlat-1, nlon/2, mtrunc)
 nmx = nlat-mxtr
-if(modn==1) then
+if (modn==1) then
 nshe(1) = nmx/2
 nshe(2) = (nmx-1)/2
 nsho(1) = (nmx-1)/2
@@ -717,15 +717,15 @@ end if
 ip = 2 
 do 100 mp1=1, mxtr+1
 ip = 3-ip
-if(mxtr==nlat-1.and.mp1==1) then
+if (mxtr==nlat-1.and.mp1==1) then
 do i=1, nlat
 sy(i, mp1) = sx(i, mp1)
 end do
-!      if(mp1.eq.2) then
+!      if (mp1.eq.2) then
 !      sy(1, 2) = 0.
 !      sy(nlat, 2) = 0.
 !      end if
-!      if(nlon.ge.3) then
+!      if (nlon.ge.3) then
 !      sy(1, 3) = 0.
 !      sy(nlat, 3) = 0.
 !      do i=2, nlat-1
@@ -749,29 +749,29 @@ do i=1, nte
 xe(i, 1) = .5*(sx(i, mpm)+sx(nlat+1-i, mpm))
 xo(i, 1) = .5*(sx(i, mpm)-sx(nlat+1-i, mpm))
 end do
-!      if(modn.eq.1) then
+!      if (modn.eq.1) then
 !      xe(nte, 1) = sx(nte, mpm)
 !      xo(nte, 1) = 0.
 !      end if
-if(mpm<nlon) then
+if (mpm<nlon) then
 do i=1, nte
 xe(i, 2) = .5*(sx(i, mpm+1)+sx(nlat+1-i, mpm+1))
 xo(i, 2) = .5*(sx(i, mpm+1)-sx(nlat+1-i, mpm+1))
 end do
-!      if(modn.eq.1) then
+!      if (modn.eq.1) then
 !      xe(nte, 2) = sx(nte, mpm+1)
 !      xo(nte, 2) = 0.
 !      end if
 end if
 lag = 0
-if(m==0.or.mpm==nlon) lag = 1
-if(3*nec<2*nem.or.nem==0) then
+if (m==0.or.mpm==nlon) lag = 1
+if (3*nec<2*nem.or.nem==0) then
 call tmxmx(lag, nte, nec, idp, pe(1, 1, ip), nte, idp, &
           ze(1, 1, ip), xe, ye, ipse(1, ip), jzse(1, ip))  
 do i=1, nte
 ye(i, 1) = xe(i, 1)-ye(i, 1)
 end do
-if(mpm<nlon.and.m/=0) then
+if (mpm<nlon.and.m/=0) then
 do i=1, nte
 ye(i, 2) = xe(i, 2)-ye(i, 2)
 end do
@@ -780,13 +780,13 @@ else
 call tmxmx(lag, nte, nem, idp, pe(1, nec+1, ip), nte, idp, &
 ze(1, nec+1, ip), xe, ye, ipse(nec+1, ip), jzse(nec+1, ip))
 end if
-if(3*noc<2*nom.or.nom==0) then
+if (3*noc<2*nom.or.nom==0) then
 call tmxmx(lag, nto, noc, idp, po(1, 1, ip), nto, idp, &
           zo(1, 1, ip), xo, yo, ipso(1, ip), jzso(1, ip))
 do i=1, nto
 yo(i, 1) = xo(i, 1)-yo(i, 1)
 end do
-if(mpm<nlon.and.m/=0) then
+if (mpm<nlon.and.m/=0) then
 do i=1, nto
 yo(i, 2) = xo(i, 2)-yo(i, 2)
 end do
@@ -799,13 +799,13 @@ do i=1, nto
 sy(i, mpm) = ye(i, 1)+yo(i, 1)
 sy(nlat+1-i, mpm) = ye(i, 1)-yo(i, 1)
 end do
-if(nte>nto) sy(nte, mpm) = ye(nte, 1)
-if(mpm<nlon.and.m/=0) then
+if (nte>nto) sy(nte, mpm) = ye(nte, 1)
+if (mpm<nlon.and.m/=0) then
 do i=1, nto
 sy(i, mpm+1) = ye(i, 2)+yo(i, 2)
 sy(nlat+1-i, mpm+1) = ye(i, 2)-yo(i, 2)
 end do 
-if(nte>nto) sy(nte, mpm+1) = ye(nte, 2)
+if (nte>nto) sy(nte, mpm+1) = ye(nte, 2)
 end if
 100 continue
 !
@@ -848,7 +848,7 @@ y(k, 1) = 0.
 y(k, 2) = 0.
 end do
 !
-if(lc<=0) return
+if (lc<=0) return
 do i=1, lc
 sum1 = 0.
 sum2 = 0.
@@ -871,7 +871,7 @@ y(k, 1) = 0.
 y(k, 2) = 0.
 end do
 !
-if(lc<=0) return
+if (lc<=0) return
 do i=1, lc
 sum1 = 0.
 sum2 = 0.
@@ -891,17 +891,17 @@ dimension a(ld, *), b(md, *), x(ld, 2), y(ld, 2), &
               is(*), js(*)
 !
 kmx = min(lr+1, ld)
-if(lag==1) then
+if (lag==1) then
 do k=1, kmx
 y(k, 1) = 0.
 end do
-!      if(lc.eq.0) then
+!      if (lc.eq.0) then
 !      do k=1, lr
 !      y(k, 1) = x(k, 1)
 !      end do
 !      return
 !      end if
-if(lc<=0) return
+if (lc<=0) return
 do i=1, lc
 sum1 = 0.
 do j=js(i), mc
@@ -917,7 +917,7 @@ do k=1, kmx
 y(k, 1) = 0.
 y(k, 2) = 0.
 end do
-if(lc<=0) return
+if (lc<=0) return
 !
 do i=1, lc
 sum1 = 0.
@@ -940,18 +940,18 @@ dimension a(idp, *), ijs(n)
 !
 !     irc = 0 for columns , or irc = 1 for rows
 !
-if(irc/=0) go to 30
+if (irc/=0) go to 30
 do 20 j=1, nrc
 do i=1, n
 ijs(j) = i
-if(abs(a(i, j)) > eps) go to 20
+if (abs(a(i, j)) > eps) go to 20
 end do
 20 continue
 return
 30 do 50 i=1, nrc
 do j=1, n
 ijs(i) = j
-if(abs(a(i, j)) > eps) go to 50
+if (abs(a(i, j)) > eps) go to 50
 end do
 50 continue
 return
@@ -987,7 +987,7 @@ do i=1, n
 sqs = sqs+q(i)*x(i)*x(i)
 end do
 !
-if(sqs /= 0) go to 4
+if (sqs /= 0) go to 4
 write(*, 3)
 3 format(' norm of z is zero in subroutine normal')
 return
@@ -1001,7 +1001,7 @@ subroutine coe(moe, n, x, dmax)
 real x(n), dmax
 nh = (n+1)/2
 dmax = 0.
-if(moe/=0) go to 1
+if (moe/=0) go to 1
 do i=1, nh
 dmax = max(dmax, abs(x(i)-x(n-i+1)))
 x(i) = .5*(x(i)+x(n-i+1))
@@ -1013,7 +1013,7 @@ dmax = max(dmax, abs(x(i)+x(n-i+1)))
 x(i) = .5*(x(i)-x(n-i+1))
 x(n-i+1) = -x(i)
 end do
-if(mod(n, 2)/=0) x(nh) = 0.
+if (mod(n, 2)/=0) x(nh) = 0.
 return
 end subroutine coe
 !     subroutine dlfkg(m, n, cp)
@@ -1083,23 +1083,23 @@ parameter (sc40=sc20*sc20)
 !
 cp(1) = 0.
 ma = abs(m)
-if(ma > n) return
-if(n-1< 0) then
+if (ma > n) return
+if (n-1< 0) then
     goto 2
-else if(n-1 == 0) then 
+else if (n-1 == 0) then 
     goto 3
 else 
     goto 5
 end if
 2 cp(1) = sqrt(2.d0)
 return
-3 if(ma /= 0) go to 4
+3 if (ma /= 0) go to 4
 cp(1) = sqrt(1.5d0)
 return
 4 cp(1) = sqrt(.75d0)
-if(m == -1) cp(1) = -cp(1)
+if (m == -1) cp(1) = -cp(1)
 return
-5 if(mod(n+ma, 2) /= 0) go to 10
+5 if (mod(n+ma, 2) /= 0) go to 10
 nmms2 = (n-ma)/2
 fnum = n+ma+1
 fnmh = n-ma+1
@@ -1112,10 +1112,10 @@ pm1 = -1.d0
 15 t1 = 1.d0/sc20
 nex = 20
 fden = 2.d0
-if(nmms2 < 1) go to 20
+if (nmms2 < 1) go to 20
 do 18 i=1, nmms2
 t1 = fnum*t1/fden
-if(t1 > sc20) then
+if (t1 > sc20) then
 t1 = t1/sc40
 nex = nex+40
 end if
@@ -1123,9 +1123,9 @@ fnum = fnum+2.
 fden = fden+2.
 18 continue
 20 t1 = t1/2.d0**(n-1-nex)
-if(mod(ma/2, 2) /= 0) t1 = -t1
+if (mod(ma/2, 2) /= 0) t1 = -t1
 t2 = 1. 
-if(ma == 0) go to 26
+if (ma == 0) go to 26
 do 25 i=1, ma
 t2 = fnmh*t2/(fnmh+pm1)
 fnmh = fnmh+2.
@@ -1134,17 +1134,17 @@ fnmh = fnmh+2.
 fnnp1 = n*(n+1)
 fnmsq = fnnp1-2.d0*ma*ma
 l = (n+1)/2
-if(mod(n, 2) == 0 .and. mod(ma, 2) == 0) l = l+1
+if (mod(n, 2) == 0 .and. mod(ma, 2) == 0) l = l+1
 cp(l) = cp2
-if(m >= 0) go to 29
-if(mod(ma, 2) /= 0) cp(l) = -cp(l)
-29 if(l <= 1) return
+if (m >= 0) go to 29
+if (mod(ma, 2) /= 0) cp(l) = -cp(l)
+29 if (l <= 1) return
 fk = n
 a1 = (fk-2.)*(fk-1.)-fnnp1
 b1 = 2.*(fk*fk-fnmsq)
 cp(l-1) = b1*cp(l)/a1
 30 l = l-1
-if(l <= 1) return
+if (l <= 1) return
 fk = fk-2.
 a1 = (fk-2.)*(fk-1.)-fnnp1
 b1 = -2.*(fk*fk-fnmsq)
@@ -1159,16 +1159,16 @@ cdt = cos(theta+theta)
 sdt = sin(theta+theta)
 nmod=mod(n, 2)
 mmod=mod(abs(m), 2)
-if(nmod< 0) then
+if (nmod< 0) then
     goto 1
-else if(nmod == 0) then 
+else if (nmod == 0) then 
     goto 1
 else 
     goto 2
 end if
-1 if(mmod< 0) then
+1 if (mmod< 0) then
     goto 3
-else if(mmod == 0) then 
+else if (mmod == 0) then 
     goto 3
 else 
     goto 4
@@ -1178,7 +1178,7 @@ end if
 !
 3 kdo=n/2
 pb = .5*cp(1)
-if(n == 0) return
+if (n == 0) return
 cth = cdt
 sth = sdt
 do 170 k=1, kdo
@@ -1204,9 +1204,9 @@ sth = sdt*cth+cdt*sth
 cth = chh
 180 continue
 return
-2 if(mmod< 0) then
+2 if (mmod< 0) then
     goto 13
-else if(mmod == 0) then 
+else if (mmod == 0) then 
     goto 13
 else 
     goto 14
@@ -1325,7 +1325,7 @@ cmax = .2d0*dtheta
 !
 !     estimate first point next to theta = pi/2
 !
-if(mnlat/=0) then
+if (mnlat/=0) then
 zero = pis2-dtheta
 zprev = pis2
 nix = nhalf-1
@@ -1342,10 +1342,10 @@ zlast = zero
 call tpdp1 (nlat, zero, cz, theta(ns2+1), wts(ns2+1), pb, dpb)
 dcor = pb/dpb
 sgnd = 1.0
-if(dcor /= 0.0) sgnd = dcor/abs(dcor)
+if (dcor /= 0.0) sgnd = dcor/abs(dcor)
 dcor = sgnd*min(abs(dcor), cmax)
 zero = zero-dcor
-if(abs(zero-zlast)>eps*abs(zero)) go to 10
+if (abs(zero-zlast)>eps*abs(zero)) go to 10
 theta(nix) = zero
 zhold = zero
 !      wts(nix) = (nlat+nlat+1)/(dpb*dpb)
@@ -1354,15 +1354,15 @@ zhold = zero
 !
 wts(nix) = (nlat+nlat+1)/(dpb+pb*cos(zlast)/sin(zlast))**2
 nix = nix-1
-if(nix==0) go to 30
-if(nix==nhalf-1)  zero = 3.0*zero-pi
-if(nix<nhalf-1)  zero = zero+zero-zprev
+if (nix==0) go to 30
+if (nix==nhalf-1)  zero = 3.0*zero-pi
+if (nix<nhalf-1)  zero = zero+zero-zprev
 zprev = zhold
 go to 9
 !
 !     extend points and weights via symmetries
 !
-30 if(mnlat/=0) then
+30 if (mnlat/=0) then
 theta(nhalf) = pis2
 call tpdp1 (nlat, pis2, cz, theta(ns2+1), wts(ns2+1), pb, dpb)
 wts(nhalf) = (nlat+nlat+1)/(dpb*dpb)
@@ -1397,7 +1397,7 @@ t1 = -1.0
 t2 = n+1.0
 t3 = 0.0
 t4 = n+n+1.0
-if(mod(n, 2)==0) then
+if (mod(n, 2)==0) then
 cp(ncp) = 1.0
 do j = ncp, 2, -1
 t1 = t1+2.0
@@ -1440,14 +1440,14 @@ real cp(n/2+1), dcp(n/2+1), cz, &
 fn = n
 cdt = cos(theta+theta)
 sdt = sin(theta+theta)
-if(mod(n, 2) ==0) then
+if (mod(n, 2) ==0) then
 !
 !     n even
 !
 kdo = n/2
 pb = .5d0*cz
 dpb = 0.0
-if(n > 0) then
+if (n > 0) then
 cth = cdt
 sth = sdt
 do 170 k=1, kdo

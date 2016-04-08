@@ -313,29 +313,29 @@ subroutine vlapgs(nlat, nlon, ityp, nt, vlap, wlap, idvw, jdvw, br, bi, &
     dimension cr(mdbc, ndbc, nt), ci(mdbc, ndbc, nt)
     dimension wvhsgs(lvhsgs), work(lwork)
     ierror = 1
-    if(nlat < 3) return
+    if (nlat < 3) return
     ierror = 2
-    if(nlon < 1) return
+    if (nlon < 1) return
     ierror = 3
-    if(ityp<0 .or. ityp>8) return
+    if (ityp<0 .or. ityp>8) return
     ierror = 4
-    if(nt < 0) return
+    if (nt < 0) return
     ierror = 5
     imid = (nlat+1)/2
-    if((ityp<=2 .and. idvw<nlat) .or. &
+    if ((ityp<=2 .and. idvw<nlat) .or. &
         (ityp>2 .and. idvw<imid)) return
     ierror = 6
-    if(jdvw < nlon) return
+    if (jdvw < nlon) return
     ierror = 7
     mmax = min(nlat, (nlon+1)/2)
-    if(mdbc < mmax) return
+    if (mdbc < mmax) return
     ierror = 8
-    if(ndbc < nlat) return
+    if (ndbc < nlat) return
     ierror = 9
     idz = (mmax*(nlat+nlat-mmax+1))/2
     lzimn = idz*imid
     lsavmin = lzimn+lzimn+nlon+15
-    if(lvhsgs < lsavmin) return
+    if (lvhsgs < lsavmin) return
     !
     !     verify unsaved work space length
     !
@@ -414,7 +414,7 @@ subroutine vlapgs1(nlat, nlon, ityp, nt, vlap, wlap, idvw, jdvw, brlap, &
     !     preset coefficient multiplyers
     !
     do n=2, nlat
-        fn = real(n-1)
+        fn = real(n - 1)
         fnn(n) = -fn*(fn + 1.0)
     end do
     !

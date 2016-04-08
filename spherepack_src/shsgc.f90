@@ -316,9 +316,9 @@ if (idg<lat) return
 ierror = 6
 if (jdg<nlon) return
 ierror = 7
-if(mdab < l) return
+if (mdab < l) return
 ierror = 8
-if(ndab < nlat) return
+if (ndab < nlat) return
 l1 = l
 l2 = late
 ierror = 9
@@ -327,10 +327,10 @@ if (lshsgc < nlat*(2*l2+3*l1-2)+3*l1*(1-l1)/2+nlon+15)return
 ierror = 10
 !     check temporary work space length
 if (mode==0) then
-if(lwork<nlat*(nlon*nt+max(3*l2, nlon)))return
+if (lwork<nlat*(nlon*nt+max(3*l2, nlon)))return
 else
 !     mode.ne.0
-if(lwork<l2*(nlon*nt+max(3*nlat, nlon))) return
+if (lwork<l2*(nlon*nt+max(3*nlat, nlon))) return
 end if
 ierror = 0
 !     starting address  fft values

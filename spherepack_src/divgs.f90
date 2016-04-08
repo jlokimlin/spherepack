@@ -232,24 +232,24 @@ subroutine divgs(nlat, nlon, isym, nt, divg, idiv, jdiv, br, bi, mdb, ndb, &
     !     check input parameters
     !
     ierror = 1
-    if(nlat < 3) return
+    if (nlat < 3) return
     ierror = 2
-    if(nlon < 4) return
+    if (nlon < 4) return
     ierror = 3
     if (isym<0 .or. isym>2) return
     ierror = 4
-    if(nt < 0) return
+    if (nt < 0) return
     ierror = 5
     imid = (nlat+1)/2
-    if((isym==0 .and. idiv<nlat) .or. &
+    if ((isym==0 .and. idiv<nlat) .or. &
         (isym>0 .and. idiv<imid)) return
     ierror = 6
-    if(jdiv < nlon) return
+    if (jdiv < nlon) return
     ierror = 7
-    if(mdb < min(nlat, (nlon+1)/2)) return
+    if (mdb < min(nlat, (nlon+1)/2)) return
     mmax = min(nlat, (nlon+2)/2)
     ierror = 8
-    if(ndb < nlat) return
+    if (ndb < nlat) return
     ierror = 9
     imid = (nlat+1)/2
     lpimn = (imid*mmax*(nlat+nlat-mmax+1))/2
@@ -257,20 +257,20 @@ subroutine divgs(nlat, nlon, isym, nt, divg, idiv, jdiv, br, bi, mdb, ndb, &
     l2 = (nlat+1)/2
     l1 = min((nlon+2)/2, nlat)
     lp=nlat*(3*(l1+l2)-2)+(l1-1)*(l2*(2*nlat-l1)-3*l1)/2+nlon+15
-    if(lshsgs<lp) return
+    if (lshsgs<lp) return
     ierror = 10
     !
     !     verify unsaved work space (add to what shses requires, file f3)
     !
     ls = nlat
-    if(isym > 0) ls = imid
+    if (isym > 0) ls = imid
     nln = nt*ls*nlon
     !
     !     set first dimension for a, b (as requried by shses)
     !
     mab = min(nlat, nlon/2+1)
     mn = mab*nlat*nt
-    if(lwork< nln+ls*nlon+2*mn+nlat) return
+    if (lwork< nln+ls*nlon+2*mn+nlat) return
     ierror = 0
     !
     !     set work space pointers
@@ -298,8 +298,8 @@ subroutine divgs1(nlat, nlon, isym, nt, divg, idiv, jdiv, br, bi, mdb, ndb, &
     !     set coefficient multiplyers
     !
     do  n=2, nlat
-        fn = real(n-1)
-        sqnn(n) = sqrt(fn*(fn + 1.0))
+        fn = real(n - 1)
+        sqnn(n) = sqrt(fn * (fn + 1.0))
     end do
     !
     !     compute divergence scalar coefficients for each vector field

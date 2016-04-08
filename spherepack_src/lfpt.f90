@@ -104,17 +104,17 @@ dimension       cp(1)
 !
 pb = 0.
 ma = abs(m)
-if(ma > n) return
-if(n< 0) then
+if (ma > n) return
+if (n< 0) then
     goto 10
-else if(n == 0) then 
+else if (n == 0) then 
     goto 10
 else 
     goto 30
 end if
-10 if(ma< 0) then
+10 if (ma< 0) then
     goto 20
-else if(ma == 0) then 
+else if (ma == 0) then 
     goto 20
 else 
     goto 30
@@ -124,16 +124,16 @@ go to 140
 30 np1 = n+1
 nmod = mod(n, 2)
 mmod = mod(ma, 2)
-if(nmod< 0) then
+if (nmod< 0) then
     goto 40
-else if(nmod == 0) then 
+else if (nmod == 0) then 
     goto 40
 else 
     goto 90
 end if
-40 if(mmod< 0) then
+40 if (mmod< 0) then
     goto 50
-else if(mmod == 0) then 
+else if (mmod == 0) then 
     goto 50
 else 
     goto 70
@@ -167,9 +167,9 @@ do  80 k=1, kdo
 pb= sum
 go to 140
 90 kdo = (n+1)/2
-   if(mmod< 0) then
+   if (mmod< 0) then
        goto 100
-   else if(mmod == 0) then 
+   else if (mmod == 0) then 
        goto 100
    else 
        goto 120

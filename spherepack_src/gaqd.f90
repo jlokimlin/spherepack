@@ -139,7 +139,7 @@ subroutine gaqd(nlat, theta, wts, w, lwork, ierror)
             !
             !     estimate first point next to theta = pi/2
             !
-            if(mnlat/=0) then
+            if (mnlat/=0) then
                 zero = HALF_PI-dtheta
                 zprev = HALF_PI
                 nix = nhalf-1
@@ -158,14 +158,14 @@ subroutine gaqd(nlat, theta, wts, w, lwork, ierror)
             dcor = pb/dpb
             sgnd = 1.0
 
-            if(dcor /= 0.0) then
+            if (dcor /= 0.0) then
                 sgnd = dcor/abs(dcor)
             end if
 
             dcor = sgnd*min(abs(dcor), cmax)
             zero = zero-dcor
 
-            if(abs(zero-zlast)>eps*abs(zero)) then
+            if (abs(zero-zlast)>eps*abs(zero)) then
                 go to 10
             end if
 
@@ -178,13 +178,13 @@ subroutine gaqd(nlat, theta, wts, w, lwork, ierror)
             wts(nix) = (nlat+nlat+1)/(dpb+pb*cos(zlast)/sin(zlast))**2
             nix = nix-1
 
-            if(nix==0) go to 30
+            if (nix==0) go to 30
 
-            if(nix==nhalf-1)  then
+            if (nix==nhalf-1)  then
                 zero = 3.0 * zero - PI
             end if
 
-            if(nix<nhalf-1)  zero = zero+zero-zprev
+            if (nix<nhalf-1)  zero = zero+zero-zprev
 
             zprev = zhold
 
@@ -192,7 +192,7 @@ subroutine gaqd(nlat, theta, wts, w, lwork, ierror)
             !
             !     extend points and weights via symmetries
             !
-30          if(mnlat/=0) then
+30          if (mnlat/=0) then
                 theta(nhalf) = HALF_PI
                 call tpdp (nlat, HALF_PI, cz, theta(ns2+1), wts(ns2+1), pb, dpb)
                 wts(nhalf) = (nlat+nlat+1)/(dpb*dpb)
@@ -247,7 +247,7 @@ subroutine cpdp(n, cz, cp, dcp)
         t2 = real(n+1)
         t3 = 0.0
         t4 = real(2*n + 1)
-        if(mod(n, 2) == 0) then
+        if (mod(n, 2) == 0) then
             cp(ncp) = 1.0
             do j = ncp, 2, -1
                 t1 = t1+2.0
@@ -310,14 +310,14 @@ subroutine tpdp(n, theta, cz, cp, dcp, pb, dpb)
         sdt => sin(2.0*theta) &
         )
 
-        if(mod(n, 2) == 0) then
+        if (mod(n, 2) == 0) then
             !
             !     n even
             !
             kdo = n/2
             pb = 0.5 * cz
             dpb = 0.0
-            if(n > 0) then
+            if (n > 0) then
                 cth = cdt
                 sth = sdt
                 do k=1, kdo

@@ -241,7 +241,7 @@ subroutine sfvpec(nlat, nlon, isym, nt, sf, vp, idv, jdv, br, bi, cr, ci, &
     !     check input parameters
     !
     ierror = 1
-    if(nlat < 3) return
+    if (nlat < 3) return
     ierror = 2
     if (nlon < 4) return
     ierror = 3
@@ -250,13 +250,13 @@ subroutine sfvpec(nlat, nlon, isym, nt, sf, vp, idv, jdv, br, bi, cr, ci, &
     if (nt < 0) return
     ierror = 5
     imid = (nlat+1)/2
-    if((isym==0 .and. idv<nlat) .or. &
+    if ((isym==0 .and. idv<nlat) .or. &
         (isym>0 .and. idv<imid)) return
     ierror = 6
-    if(jdv < nlon) return
+    if (jdv < nlon) return
     ierror = 7
     mmax = min(nlat, (nlon+2)/2)
-    if(mdb < min(nlat, (nlon+1)/2)) return
+    if (mdb < min(nlat, (nlon+1)/2)) return
     ierror = 8
     if (ndb < nlat) return
     ierror = 9
@@ -268,7 +268,7 @@ subroutine sfvpec(nlat, nlon, isym, nt, sf, vp, idv, jdv, br, bi, cr, ci, &
     labc = 3*(max(mmax-2, 0)*(nlat+nlat-mmax-1))/2
     lwmin = lzz1+labc+nlon+15
 
-    if(lshsec < lwmin) return
+    if (lshsec < lwmin) return
     !
     !     verify unsaved work space (add to what shec requires)
     !
@@ -281,7 +281,7 @@ subroutine sfvpec(nlat, nlon, isym, nt, sf, vp, idv, jdv, br, bi, cr, ci, &
     !
     mab = min(nlat, nlon/2+1)
     mn = mab*nlat*nt
-    if(lwork < nln+max(ls*nlon, 3*nlat*imid)+2*mn+nlat) return
+    if (lwork < nln+max(ls*nlon, 3*nlat*imid)+2*mn+nlat) return
     ierror = 0
     !
     !     set work space pointers

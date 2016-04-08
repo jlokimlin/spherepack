@@ -315,15 +315,15 @@ subroutine shsgs(nlat, nlon, mode, nt, g, idg, jdg, a, b, mdab, ndab, &
     ierror = 6
     if (jdg<nlon) return
     ierror = 7
-    if(mdab < l) return
+    if (mdab < l) return
     ierror = 8
-    if(ndab < nlat) return
+    if (ndab < nlat) return
     l1 = l
     l2 = late
     ierror = 9
     !     check permanent work space length
     lp=nlat*(3*(l1+l2)-2)+(l1-1)*(l2*(2*nlat-l1)-3*l1)/2+nlon+15
-    if(lshsgs<lp) return
+    if (lshsgs<lp) return
     !     check temporary work space length
     ierror = 10
     if (mode==0 .and. lwork<nlat*nlon*(nt+1)) return
@@ -563,7 +563,7 @@ subroutine shsgsi(nlat, nlon, wshsgs, lshsgs, work, lwork, dwork, ldwork, &
     !     check permanent work space length
     ierror = 3
     lp=nlat*(3*(l1+l2)-2)+(l1-1)*(l2*(2*nlat-l1)-3*l1)/2+nlon+15
-    if(lshsgs<lp) return
+    if (lshsgs<lp) return
     ierror = 4
     !     check temporary work space
     if (lwork<4*nlat*(nlat+2)+2) return

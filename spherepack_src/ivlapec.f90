@@ -312,24 +312,24 @@ subroutine ivlapec(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
     dimension cr(mdbc, ndbc, nt), ci(mdbc, ndbc, nt)
     dimension wvhsec(lvhsec), work(lwork)
     ierror = 1
-    if(nlat < 3) return
+    if (nlat < 3) return
     ierror = 2
-    if(nlon < 1) return
+    if (nlon < 1) return
     ierror = 3
-    if(ityp<0 .or. ityp>8) return
+    if (ityp<0 .or. ityp>8) return
     ierror = 4
-    if(nt < 0) return
+    if (nt < 0) return
     ierror = 5
     imid = (nlat+1)/2
-    if((ityp<=2 .and. idvw<nlat) .or. &
+    if ((ityp<=2 .and. idvw<nlat) .or. &
         (ityp>2 .and. idvw<imid)) return
     ierror = 6
-    if(jdvw < nlon) return
+    if (jdvw < nlon) return
     ierror = 7
     mmax = min(nlat, (nlon+1)/2)
-    if(mdbc < mmax) return
+    if (mdbc < mmax) return
     ierror = 8
-    if(ndbc < nlat) return
+    if (ndbc < nlat) return
     ierror = 9
     !
     !     set minimum and verify saved workspace length
@@ -340,13 +340,13 @@ subroutine ivlapec(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
     !     if (lvhsec .lt. lsavmin) return
     lzz1 = 2*nlat*imid
     labc = 3*(max(mmax-2, 0)*(nlat+nlat-mmax-1))/2
-    if(lvhsec < 2*(lzz1+labc)+nlon+15) return
+    if (lvhsec < 2*(lzz1+labc)+nlon+15) return
     !
     !     set minimum and verify unsaved work space length
     !
     ierror = 10
     mn = mmax*nlat*nt
-    if(ityp<3) then
+    if (ityp<3) then
         !     no symmetry
         if ( typ==0) then
                 !       br, bi, cr, ci nonzero
@@ -439,7 +439,7 @@ subroutine ivlapec1(nlat, nlon, ityp, nt, v, w, idvw, jdvw, brvw, &
     !     preset coefficient multiplyers
     !
     do n=2, nlat
-        fn = real(n-1)
+        fn = real(n - 1)
         fnn(n) = -1.0/(fn*(fn + 1.0))
     end do
     !

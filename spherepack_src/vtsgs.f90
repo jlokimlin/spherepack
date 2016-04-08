@@ -357,36 +357,36 @@ subroutine vtsgs(nlat, nlon, ityp, nt, vt, wt, idvw, jdvw, br, bi, cr, ci, &
         bi(mdab, ndab, 1), cr(mdab, ndab, 1), ci(mdab, ndab, 1), &
         work(1), wvts(1)
     ierror = 1
-    if(nlat < 3) return
+    if (nlat < 3) return
     ierror = 2
-    if(nlon < 1) return
+    if (nlon < 1) return
     ierror = 3
-    if(ityp<0 .or. ityp>8) return
+    if (ityp<0 .or. ityp>8) return
     ierror = 4
-    if(nt < 0) return
+    if (nt < 0) return
     ierror = 5
     imid = (nlat+1)/2
-    if((ityp<=2 .and. idvw<nlat) .or. &
+    if ((ityp<=2 .and. idvw<nlat) .or. &
         (ityp>2 .and. idvw<imid)) return
     ierror = 6
-    if(jdvw < nlon) return
+    if (jdvw < nlon) return
     ierror = 7
     mmax = min(nlat, (nlon+1)/2)
-    if(mdab < mmax) return
+    if (mdab < mmax) return
     ierror = 8
-    if(ndab < nlat) return
+    if (ndab < nlat) return
     ierror = 9
     idz = (mmax*(nlat+nlat-mmax+1))/2
     lzimn = idz*imid
-    if(lwvts < lzimn+lzimn+nlon+15) return
+    if (lwvts < lzimn+lzimn+nlon+15) return
     ierror = 10
     idv = nlat
-    if(ityp > 2) idv = imid
+    if (ityp > 2) idv = imid
     lnl = nt*idv*nlon
-    if(lwork < lnl+lnl+idv*nlon) return
+    if (lwork < lnl+lnl+idv*nlon) return
     ierror = 0
     ist = 0
-    if(ityp <= 2) ist = imid
+    if (ityp <= 2) ist = imid
     iw1 = ist+1
     iw2 = lnl+1
     iw3 = iw2+ist
@@ -414,7 +414,7 @@ subroutine vtsgs1(nlat, nlon, ityp, nt, imid, idvw, jdvw, vt, wt, mdab, &
     mlon = mod(nlon, 2)
     mmax = min(nlat, (nlon+1)/2)
     imm1 = imid
-    if(mlat /= 0) imm1 = imid-1
+    if (mlat /= 0) imm1 = imid-1
 
     do k=1, nt
         do j=1, nlon
@@ -427,8 +427,8 @@ subroutine vtsgs1(nlat, nlon, ityp, nt, imid, idvw, jdvw, vt, wt, mdab, &
 
     ndo1 = nlat
     ndo2 = nlat
-    if(mlat /= 0) ndo1 = nlat-1
-    if(mlat == 0) ndo2 = nlat-1
+    if (mlat /= 0) ndo1 = nlat-1
+    if (mlat == 0) ndo2 = nlat-1
 18  itypp = ityp+1
     go to (1, 100, 200, 300, 400, 500, 600, 700, 800), itypp
     !
@@ -455,12 +455,12 @@ subroutine vtsgs1(nlat, nlon, ityp, nt, imid, idvw, jdvw, vt, wt, mdab, &
     !
     !     case m = 1 through nlat-1
     !
-    if(mmax < 2) go to 950
+    if (mmax < 2) go to 950
     do mp1=2, mmax
         m = mp1-1
         mb = m*(nlat-1)-(m*(m-1))/2
         mp2 = mp1+1
-        if(mp1 > ndo1) go to 26
+        if (mp1 > ndo1) go to 26
         do k=1, nt
             do np1=mp1, ndo1, 2
                 mn = mb+np1
@@ -474,7 +474,7 @@ subroutine vtsgs1(nlat, nlon, ityp, nt, imid, idvw, jdvw, vt, wt, mdab, &
                     wte(i, 2*mp1-1, k) = wte(i, 2*mp1-1, k)-ci(mp1, np1, k)*vb(i, mn)
                     wto(i, 2*mp1-1, k) = wto(i, 2*mp1-1, k)+br(mp1, np1, k)*wb(i, mn)
                 end do
-                if(mlat == 0) exit !go to 24
+                if (mlat == 0) exit !go to 24
                 vte(imid, 2*mp1-2, k) = vte(imid, 2*mp1-2, k) &
                     +br(mp1, np1, k)*vb(imid, mn)
                 vte(imid, 2*mp1-1, k) = vte(imid, 2*mp1-1, k) &
@@ -485,7 +485,7 @@ subroutine vtsgs1(nlat, nlon, ityp, nt, imid, idvw, jdvw, vt, wt, mdab, &
                     -ci(mp1, np1, k)*vb(imid, mn)
             end do
         end do
-26      if(mp2 > ndo2) exit !go to 30
+26      if (mp2 > ndo2) exit !go to 30
         do k=1, nt
             do np1=mp2, ndo2, 2
                 mn = mb+np1
@@ -499,7 +499,7 @@ subroutine vtsgs1(nlat, nlon, ityp, nt, imid, idvw, jdvw, vt, wt, mdab, &
                     wto(i, 2*mp1-1, k) = wto(i, 2*mp1-1, k)-ci(mp1, np1, k)*vb(i, mn)
                     wte(i, 2*mp1-1, k) = wte(i, 2*mp1-1, k)+br(mp1, np1, k)*wb(i, mn)
                 end do
-                if(mlat == 0) exit !go to 28
+                if (mlat == 0) exit !go to 28
                 vte(imid, 2*mp1-2, k) = vte(imid, 2*mp1-2, k) &
                     -ci(mp1, np1, k)*wb(imid, mn)
                 vte(imid, 2*mp1-1, k) = vte(imid, 2*mp1-1, k) &
@@ -534,12 +534,12 @@ subroutine vtsgs1(nlat, nlon, ityp, nt, imid, idvw, jdvw, vt, wt, mdab, &
     !
     !     case m = 1 through nlat-1
     !
-    if(mmax < 2) go to 950
+    if (mmax < 2) go to 950
     do mp1=2, mmax
         m = mp1-1
         mb = m*(nlat-1)-(m*(m-1))/2
         mp2 = mp1+1
-        if(mp1 > ndo1) go to 126
+        if (mp1 > ndo1) go to 126
         do k=1, nt
             do np1=mp1, ndo1, 2
                 mn = mb+np1
@@ -549,14 +549,14 @@ subroutine vtsgs1(nlat, nlon, ityp, nt, imid, idvw, jdvw, vt, wt, mdab, &
                     wto(i, 2*mp1-2, k) = wto(i, 2*mp1-2, k)-bi(mp1, np1, k)*wb(i, mn)
                     wto(i, 2*mp1-1, k) = wto(i, 2*mp1-1, k)+br(mp1, np1, k)*wb(i, mn)
                 end do
-                if(mlat == 0) exit !go to 124
+                if (mlat == 0) exit !go to 124
                 vte(imid, 2*mp1-2, k) = vte(imid, 2*mp1-2, k) &
                     +br(mp1, np1, k)*vb(imid, mn)
                 vte(imid, 2*mp1-1, k) = vte(imid, 2*mp1-1, k) &
                     +bi(mp1, np1, k)*vb(imid, mn)
             end do
         end do
-126     if(mp2 > ndo2) exit ! go to 130
+126     if (mp2 > ndo2) exit ! go to 130
         do k=1, nt
             do np1=mp2, ndo2, 2
                 mn = mb+np1
@@ -566,7 +566,7 @@ subroutine vtsgs1(nlat, nlon, ityp, nt, imid, idvw, jdvw, vt, wt, mdab, &
                     wte(i, 2*mp1-2, k) = wte(i, 2*mp1-2, k)-bi(mp1, np1, k)*wb(i, mn)
                     wte(i, 2*mp1-1, k) = wte(i, 2*mp1-1, k)+br(mp1, np1, k)*wb(i, mn)
                 end do
-                if(mlat == 0) exit !go to 128
+                if (mlat == 0) exit !go to 128
                 wte(imid, 2*mp1-2, k) = wte(imid, 2*mp1-2, k) &
                     -bi(mp1, np1, k)*wb(imid, mn)
                 wte(imid, 2*mp1-1, k) = wte(imid, 2*mp1-1, k) &
@@ -597,12 +597,12 @@ subroutine vtsgs1(nlat, nlon, ityp, nt, imid, idvw, jdvw, vt, wt, mdab, &
     !
     !     case m = 1 through nlat-1
     !
-    if(mmax < 2) go to 950
+    if (mmax < 2) go to 950
     do mp1=2, mmax
         m = mp1-1
         mb = m*(nlat-1)-(m*(m-1))/2
         mp2 = mp1+1
-        if(mp1 > ndo1) go to 226
+        if (mp1 > ndo1) go to 226
         do k=1, nt
             do np1=mp1, ndo1, 2
                 mn = mb+np1
@@ -612,14 +612,14 @@ subroutine vtsgs1(nlat, nlon, ityp, nt, imid, idvw, jdvw, vt, wt, mdab, &
                     wte(i, 2*mp1-2, k) = wte(i, 2*mp1-2, k)-cr(mp1, np1, k)*vb(i, mn)
                     wte(i, 2*mp1-1, k) = wte(i, 2*mp1-1, k)-ci(mp1, np1, k)*vb(i, mn)
                 end do
-                if(mlat == 0) exit !go to 224
+                if (mlat == 0) exit !go to 224
                 wte(imid, 2*mp1-2, k) = wte(imid, 2*mp1-2, k) &
                     -cr(mp1, np1, k)*vb(imid, mn)
                 wte(imid, 2*mp1-1, k) = wte(imid, 2*mp1-1, k) &
                     -ci(mp1, np1, k)*vb(imid, mn)
             end do
         end do
-226     if(mp2 > ndo2) exit !go to 230
+226     if (mp2 > ndo2) exit !go to 230
         do k=1, nt
             do np1=mp2, ndo2, 2
                 mn = mb+np1
@@ -629,7 +629,7 @@ subroutine vtsgs1(nlat, nlon, ityp, nt, imid, idvw, jdvw, vt, wt, mdab, &
                     wto(i, 2*mp1-2, k) = wto(i, 2*mp1-2, k)-cr(mp1, np1, k)*vb(i, mn)
                     wto(i, 2*mp1-1, k) = wto(i, 2*mp1-1, k)-ci(mp1, np1, k)*vb(i, mn)
                 end do
-                if(mlat == 0) exit !go to 228
+                if (mlat == 0) exit !go to 228
                 vte(imid, 2*mp1-2, k) = vte(imid, 2*mp1-2, k) &
                     -ci(mp1, np1, k)*wb(imid, mn)
                 vte(imid, 2*mp1-1, k) = vte(imid, 2*mp1-1, k) &
@@ -660,12 +660,12 @@ subroutine vtsgs1(nlat, nlon, ityp, nt, imid, idvw, jdvw, vt, wt, mdab, &
     !
     !     case m = 1 through nlat-1
     !
-    if(mmax < 2) go to 950
+    if (mmax < 2) go to 950
     do mp1=2, mmax
         m = mp1-1
         mb = m*(nlat-1)-(m*(m-1))/2
         mp2 = mp1+1
-        if(mp1 > ndo1) go to 326
+        if (mp1 > ndo1) go to 326
         do k=1, nt
             do np1=mp1, ndo1, 2
                 mn = mb+np1
@@ -675,14 +675,14 @@ subroutine vtsgs1(nlat, nlon, ityp, nt, imid, idvw, jdvw, vt, wt, mdab, &
                     wte(i, 2*mp1-2, k) = wte(i, 2*mp1-2, k)-cr(mp1, np1, k)*vb(i, mn)
                     wte(i, 2*mp1-1, k) = wte(i, 2*mp1-1, k)-ci(mp1, np1, k)*vb(i, mn)
                 end do
-                if(mlat == 0) exit !go to 324
+                if (mlat == 0) exit !go to 324
                 wte(imid, 2*mp1-2, k) = wte(imid, 2*mp1-2, k) &
                     -cr(mp1, np1, k)*vb(imid, mn)
                 wte(imid, 2*mp1-1, k) = wte(imid, 2*mp1-1, k) &
                     -ci(mp1, np1, k)*vb(imid, mn)
             end do
         end do
-326     if(mp2 > ndo2) exit !go to 330
+326     if (mp2 > ndo2) exit !go to 330
         do k=1, nt
             do np1=mp2, ndo2, 2
                 mn = mb+np1
@@ -692,7 +692,7 @@ subroutine vtsgs1(nlat, nlon, ityp, nt, imid, idvw, jdvw, vt, wt, mdab, &
                     wte(i, 2*mp1-2, k) = wte(i, 2*mp1-2, k)-bi(mp1, np1, k)*wb(i, mn)
                     wte(i, 2*mp1-1, k) = wte(i, 2*mp1-1, k)+br(mp1, np1, k)*wb(i, mn)
                 end do
-                if(mlat == 0) exit !go to 328
+                if (mlat == 0) exit !go to 328
                 wte(imid, 2*mp1-2, k) = wte(imid, 2*mp1-2, k) &
                     -bi(mp1, np1, k)*wb(imid, mn)
                 wte(imid, 2*mp1-1, k) = wte(imid, 2*mp1-1, k) &
@@ -716,12 +716,12 @@ subroutine vtsgs1(nlat, nlon, ityp, nt, imid, idvw, jdvw, vt, wt, mdab, &
     !
     !     case m = 1 through nlat-1
     !
-    if(mmax < 2) go to 950
+    if (mmax < 2) go to 950
     do mp1=2, mmax
         m = mp1-1
         mb = m*(nlat-1)-(m*(m-1))/2
         mp2 = mp1+1
-        if(mp2 > ndo2) exit !go to 430
+        if (mp2 > ndo2) exit !go to 430
         do k=1, nt
             do np1=mp2, ndo2, 2
                 mn = mb+np1
@@ -731,7 +731,7 @@ subroutine vtsgs1(nlat, nlon, ityp, nt, imid, idvw, jdvw, vt, wt, mdab, &
                     wte(i, 2*mp1-2, k) = wte(i, 2*mp1-2, k)-bi(mp1, np1, k)*wb(i, mn)
                     wte(i, 2*mp1-1, k) = wte(i, 2*mp1-1, k)+br(mp1, np1, k)*wb(i, mn)
                 end do
-                if(mlat == 0) exit !go to 428
+                if (mlat == 0) exit !go to 428
                 wte(imid, 2*mp1-2, k) = wte(imid, 2*mp1-2, k) &
                     -bi(mp1, np1, k)*wb(imid, mn)
                 wte(imid, 2*mp1-1, k) = wte(imid, 2*mp1-1, k) &
@@ -755,12 +755,12 @@ subroutine vtsgs1(nlat, nlon, ityp, nt, imid, idvw, jdvw, vt, wt, mdab, &
     !
     !     case m = 1 through nlat-1
     !
-    if(mmax < 2) go to 950
+    if (mmax < 2) go to 950
     do mp1=2, mmax
         m = mp1-1
         mb = m*(nlat-1)-(m*(m-1))/2
         mp2 = mp1+1
-        if(mp1 > ndo1) exit !go to 530
+        if (mp1 > ndo1) exit !go to 530
         do k=1, nt
             do np1=mp1, ndo1, 2
                 mn = mb+np1
@@ -770,7 +770,7 @@ subroutine vtsgs1(nlat, nlon, ityp, nt, imid, idvw, jdvw, vt, wt, mdab, &
                     wte(i, 2*mp1-2, k) = wte(i, 2*mp1-2, k)-cr(mp1, np1, k)*vb(i, mn)
                     wte(i, 2*mp1-1, k) = wte(i, 2*mp1-1, k)-ci(mp1, np1, k)*vb(i, mn)
                 end do
-                if(mlat == 0) exit !go to 524
+                if (mlat == 0) exit !go to 524
                 wte(imid, 2*mp1-2, k) = wte(imid, 2*mp1-2, k) &
                     -cr(mp1, np1, k)*vb(imid, mn)
                 wte(imid, 2*mp1-1, k) = wte(imid, 2*mp1-1, k) &
@@ -801,12 +801,12 @@ subroutine vtsgs1(nlat, nlon, ityp, nt, imid, idvw, jdvw, vt, wt, mdab, &
     !
     !     case m = 1 through nlat-1
     !
-    if(mmax < 2) go to 950
+    if (mmax < 2) go to 950
     do mp1=2, mmax
         m = mp1-1
         mb = m*(nlat-1)-(m*(m-1))/2
         mp2 = mp1+1
-        if(mp1 > ndo1) go to 626
+        if (mp1 > ndo1) go to 626
         do k=1, nt
             do np1=mp1, ndo1, 2
                 mn = mb+np1
@@ -816,14 +816,14 @@ subroutine vtsgs1(nlat, nlon, ityp, nt, imid, idvw, jdvw, vt, wt, mdab, &
                     wto(i, 2*mp1-2, k) = wto(i, 2*mp1-2, k)-bi(mp1, np1, k)*wb(i, mn)
                     wto(i, 2*mp1-1, k) = wto(i, 2*mp1-1, k)+br(mp1, np1, k)*wb(i, mn)
                 end do
-                if(mlat == 0) exit !go to 624
+                if (mlat == 0) exit !go to 624
                 vte(imid, 2*mp1-2, k) = vte(imid, 2*mp1-2, k) &
                     +br(mp1, np1, k)*vb(imid, mn)
                 vte(imid, 2*mp1-1, k) = vte(imid, 2*mp1-1, k) &
                     +bi(mp1, np1, k)*vb(imid, mn)
             end do
         end do
-626     if(mp2 > ndo2) exit !go to 630
+626     if (mp2 > ndo2) exit !go to 630
         do k=1, nt
             do np1=mp2, ndo2, 2
                 mn = mb+np1
@@ -833,7 +833,7 @@ subroutine vtsgs1(nlat, nlon, ityp, nt, imid, idvw, jdvw, vt, wt, mdab, &
                     wto(i, 2*mp1-2, k) = wto(i, 2*mp1-2, k)-cr(mp1, np1, k)*vb(i, mn)
                     wto(i, 2*mp1-1, k) = wto(i, 2*mp1-1, k)-ci(mp1, np1, k)*vb(i, mn)
                 end do
-                if(mlat == 0) exit !go to 628
+                if (mlat == 0) exit !go to 628
                 vte(imid, 2*mp1-2, k) = vte(imid, 2*mp1-2, k) &
                     -ci(mp1, np1, k)*wb(imid, mn)
                 vte(imid, 2*mp1-1, k) = vte(imid, 2*mp1-1, k) &
@@ -857,12 +857,12 @@ subroutine vtsgs1(nlat, nlon, ityp, nt, imid, idvw, jdvw, vt, wt, mdab, &
     !
     !     case m = 1 through nlat-1
     !
-    if(mmax < 2) go to 950
+    if (mmax < 2) go to 950
     do mp1=2, mmax
         m = mp1-1
         mb = m*(nlat-1)-(m*(m-1))/2
         mp2 = mp1+1
-        if(mp1 > ndo1) exit !go to 730
+        if (mp1 > ndo1) exit !go to 730
         do k=1, nt
             do np1=mp1, ndo1, 2
                 mn = mb+np1
@@ -872,7 +872,7 @@ subroutine vtsgs1(nlat, nlon, ityp, nt, imid, idvw, jdvw, vt, wt, mdab, &
                     wto(i, 2*mp1-2, k) = wto(i, 2*mp1-2, k)-bi(mp1, np1, k)*wb(i, mn)
                     wto(i, 2*mp1-1, k) = wto(i, 2*mp1-1, k)+br(mp1, np1, k)*wb(i, mn)
                 end do
-                if(mlat == 0) exit !go to 724
+                if (mlat == 0) exit !go to 724
                 vte(imid, 2*mp1-2, k) = vte(imid, 2*mp1-2, k) &
                     +br(mp1, np1, k)*vb(imid, mn)
                 vte(imid, 2*mp1-1, k) = vte(imid, 2*mp1-1, k) &
@@ -896,12 +896,12 @@ subroutine vtsgs1(nlat, nlon, ityp, nt, imid, idvw, jdvw, vt, wt, mdab, &
     !
     !     case m = 1 through nlat-1
     !
-    if(mmax < 2) go to 950
+    if (mmax < 2) go to 950
     do mp1=2, mmax
         m = mp1-1
         mb = m*(nlat-1)-(m*(m-1))/2
         mp2 = mp1+1
-        if(mp2 > ndo2) exit !go to 830
+        if (mp2 > ndo2) exit !go to 830
         do k=1, nt
             do np1=mp2, ndo2, 2
                 mn = mb+np1
@@ -911,7 +911,7 @@ subroutine vtsgs1(nlat, nlon, ityp, nt, imid, idvw, jdvw, vt, wt, mdab, &
                     wto(i, 2*mp1-2, k) = wto(i, 2*mp1-2, k)-cr(mp1, np1, k)*vb(i, mn)
                     wto(i, 2*mp1-1, k) = wto(i, 2*mp1-1, k)-ci(mp1, np1, k)*vb(i, mn)
                 end do
-                if(mlat == 0) exit! go to 828
+                if (mlat == 0) exit! go to 828
                 vte(imid, 2*mp1-2, k) = vte(imid, 2*mp1-2, k) &
                     -ci(mp1, np1, k)*wb(imid, mn)
                 vte(imid, 2*mp1-1, k) = vte(imid, 2*mp1-1, k) &
@@ -923,7 +923,7 @@ subroutine vtsgs1(nlat, nlon, ityp, nt, imid, idvw, jdvw, vt, wt, mdab, &
         call hrfftb(idv, nlon, vte(1, 1, k), idv, wrfft, work)
         call hrfftb(idv, nlon, wte(1, 1, k), idv, wrfft, work)
     end do
-    if(ityp > 2) go to 12
+    if (ityp > 2) go to 12
     do k=1, nt
         do j=1, nlon
             do i=1, imm1
@@ -943,7 +943,7 @@ subroutine vtsgs1(nlat, nlon, ityp, nt, imid, idvw, jdvw, vt, wt, mdab, &
             end do
         end do
     end do
-13  if(mlat == 0) return
+13  if (mlat == 0) return
     do k=1, nt
         do j=1, nlon
             vt(imid, j, k) = 0.5 * vte(imid, j, k)
@@ -966,20 +966,20 @@ subroutine vtsgsi(nlat, nlon, wvts, lwvts, work, lwork, dwork, ldwork, &
     dimension wvts(lwvts), work(lwork)
     real dwork(ldwork)
     ierror = 1
-    if(nlat < 3) return
+    if (nlat < 3) return
     ierror = 2
-    if(nlon < 1) return
+    if (nlon < 1) return
     ierror = 3
     mmax = min(nlat, nlon/2+1)
     imid = (nlat+1)/2
     lzimn = (imid*mmax*(nlat+nlat-mmax+1))/2
-    if(lwvts < lzimn+lzimn+nlon+15) return
+    if (lwvts < lzimn+lzimn+nlon+15) return
     ierror = 4
     labc = 3*(max(mmax-2, 0)*(nlat+nlat-mmax-1))/2
     lvin = 3*nlat*imid
     lwvbin = 2*nlat*imid+labc
     ltheta = nlat+nlat
-    if(lwork < lvin+lwvbin+ltheta) return
+    if (lwork < lvin+lwvbin+ltheta) return
     ierror = 5
     if (ldwork < 3*nlat+2) return
     ierror = 0
@@ -989,7 +989,7 @@ subroutine vtsgsi(nlat, nlon, wvts, lwvts, work, lwork, dwork, ldwork, &
     jw2 = jw1+nlat
     call vetg1(nlat, nlon, imid, wvts, wvts(lzimn+1), work, work(iw1), &
         dwork, dwork(jw1), dwork(jw2), ierror)
-    if(ierror /= 0) return
+    if (ierror /= 0) return
     call hrffti(nlon, wvts(2*lzimn+1))
 
 end subroutine vtsgsi
@@ -1006,7 +1006,7 @@ subroutine vetg1(nlat, nlon, imid, vb, wb, vin, wvbin, &
 
     call gaqd(nlat, theta, wts, dwork, ldwork, ierr)
 
-    if(ierr == 0) go to 10
+    if (ierr == 0) go to 10
     ierror = 10+ierr
     return
 10  call vtgint (nlat, nlon, theta, wvbin, dwork)

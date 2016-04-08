@@ -243,24 +243,24 @@ subroutine gradec(nlat, nlon, isym, nt, v, w, idvw, jdvw, a, b, mdab, ndab, &
     !     check input parameters
     !
     ierror = 1
-    if(nlat < 3) return
+    if (nlat < 3) return
     ierror = 2
-    if(nlon < 4) return
+    if (nlon < 4) return
     ierror = 3
-    if(isym<0 .or. isym>2) return
+    if (isym<0 .or. isym>2) return
     ierror = 4
-    if(nt < 0) return
+    if (nt < 0) return
     ierror = 5
     imid = (nlat+1)/2
-    if((isym==0 .and. idvw<nlat) .or. &
+    if ((isym==0 .and. idvw<nlat) .or. &
         (isym/=0 .and. idvw<imid)) return
     ierror = 6
-    if(jdvw < nlon) return
+    if (jdvw < nlon) return
     ierror = 7
     mmax = min(nlat, (nlon+1)/2)
-    if(mdab < min(nlat, (nlon+2)/2)) return
+    if (mdab < min(nlat, (nlon+2)/2)) return
     ierror = 8
-    if(ndab < nlat) return
+    if (ndab < nlat) return
     ierror = 9
     !
     !     verify minimum saved work space length
@@ -270,7 +270,7 @@ subroutine gradec(nlat, nlon, isym, nt, v, w, idvw, jdvw, a, b, mdab, ndab, &
     l1 = min(nlat, (nlon+1)/2)
     l2 = (nlat+1)/2
     lwmin = 4*nlat*l2+3*max(l1-2, 0)*(nlat+nlat-l1-1)+nlon+15
-    if(lvhsec < lwmin) return
+    if (lvhsec < lwmin) return
     ierror = 10
     !
     !     verify minimum unsaved work space length
@@ -308,8 +308,8 @@ subroutine gradec1(nlat, nlon, isym, nt, v, w, idvw, jdvw, br, bi, mmax, &
     !     preset coefficient multiplyers in vector
     !
     do n=2, nlat
-        fn = real(n-1)
-        sqnn(n) = sqrt(fn*(fn + 1.0))
+        fn = real(n - 1)
+        sqnn(n) = sqrt(fn * (fn + 1.0))
     end do
     !
     !     compute multiple vector fields coefficients

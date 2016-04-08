@@ -160,13 +160,13 @@ program advec
     !     preset saved work spaces for gradgc and shagc and shsgc
     !
     call vhsgci(nlat,nlon,wvhsgc,lvhsgc,dwork,ldwork,ierror)
-    if(ierror /= 0) write(*,10) ierror
+    if (ierror /= 0) write(*,10) ierror
 10  format(' error in vsgci = ',i5)
     call shagci(nlat,nlon,wshagc,lshagc,dwork,ldwork,ierror)
-    if(ierror /= 0) write(*,20) ierror
+    if (ierror /= 0) write(*,20) ierror
 20  format(' error in shagci = ',i5)
     call shsgci(nlat,nlon,wshsgc,lshagc,dwork,ldwork,ierror)
-    if(ierror /= 0) write(*,21) ierror
+    if (ierror /= 0) write(*,21) ierror
 21  format(' error in shsgci = ',i5)
     !
     !     set vector velocities and cosine bell in geopotential
@@ -378,9 +378,9 @@ subroutine gpot(t,alpha,beta,omega,hzero,re,nlat,nlon,idim, &
             dist = sqrt((x1-xc)**2+(y1-yc)**2 &
                 +(z1-zc)**2)
             h(i,j) = 0.
-            if(dist >= re) go to 10
+            if (dist >= re) go to 10
             r = 2.*asin(dist/2.)
-            if(r >= re) go to 10
+            if (r >= re) go to 10
             h(i,j) = hzero*.5*(cos(r*pi/re)+1.)
 10      continue
 
@@ -389,7 +389,7 @@ subroutine gpot(t,alpha,beta,omega,hzero,re,nlat,nlon,idim, &
 
     function atanxy(x,y)
         atanxy = 0.
-        if(x==0. .and. y==0.) return
+        if (x==0. .and. y==0.) return
         atanxy = atan2(y,x)
 
     end function atanxy
@@ -397,10 +397,10 @@ subroutine gpot(t,alpha,beta,omega,hzero,re,nlat,nlon,idim, &
 
     subroutine ctos(x,y,z,r,theta,phi)
         r1 = x*x+y*y
-        if(r1 /= 0.) go to 10
+        if (r1 /= 0.) go to 10
         phi = 0.
         theta = 0.
-        if(z < 0.) theta = acos( -1.0 )
+        if (z < 0.) theta = acos( -1.0 )
         return
 10      r = sqrt(r1+z*z)
         r1 = sqrt(r1)

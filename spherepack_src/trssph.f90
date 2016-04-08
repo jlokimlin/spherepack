@@ -480,12 +480,33 @@
 subroutine trssph (intl, igrida, nlona, nlata, da, igridb, nlonb, nlatb, &
     db, wsave, lsave, lsvmin, work, lwork, lwkmin, dwork, ldwork, ier)
     implicit none
-    integer intl, igrida(2), nlona, nlata, igridb(2), nlonb, nlatb
-    integer lsave, lsvmin, lwork, lwkmin, ldwork, ier
-    real da(*), db(*), wsave(*), work(*)
-    real dwork(*)
-    integer ig, igrda, igrdb, la1, la2, lb1, lb2, lwa, lwb, iaa, iab, iba, ibb
-    integer lwk3, lwk4, lw, iw, jb, nt, isym, nlat
+    !----------------------------------------------------------------------
+    ! Dictionary: calling arguments
+    !----------------------------------------------------------------------
+    integer, intent (in)     :: intl
+    integer, intent (in)     :: igrida(2)
+    integer, intent (in)     :: nlona
+    integer, intent (in)     :: nlata
+    integer, intent (in)     :: igridb(2)
+    integer, intent (in)     :: nlonb
+    integer, intent (in)     :: nlatb
+    integer, intent (in)     :: lsave
+    integer, intent (in out) :: lsvmin
+    integer, intent (in)     :: lwork
+    integer, intent (in out) :: lwkmin
+    integer, intent (in)     :: ldwork
+    integer, intent (out)    :: ier
+    real,    intent (in out) :: da(*)
+    real,    intent (out)    :: db(*)
+    real,    intent (in out) :: wsave(*)
+    real,    intent (in out) :: work(*)
+    real,    intent (in out) :: dwork(*)
+    !----------------------------------------------------------------------
+    ! Dictionary: calling arguments
+    !----------------------------------------------------------------------
+    integer :: ig, igrda, igrdb, la1, la2, lb1, lb2, lwa, lwb, iaa, iab, iba, ibb
+    integer :: lwk3, lwk4, lw, iw, jb, nt, isym, nlat
+    !----------------------------------------------------------------------
     !
     !     include a save statement to ensure local variables in trssph, set during
     !     an intl=0 call, are preserved if trssph is recalled with intl=1
@@ -681,47 +702,78 @@ subroutine trssph (intl, igrida, nlona, nlata, da, igridb, nlonb, nlatb, &
     !     both da, db are currently latitude by longitude north to south arrays
     !     restore da and set db to agree with flags in igrida and igridb
     !
-    if (igrida(1) > 0) call convlat(nlata, nlona, da)
-    if (igridb(1) > 0) call convlat(nlatb, nlonb, db)
-    if (igrida(2) == 0) call trsplat(nlata, nlona, da, work)
-    if (igridb(2) == 0) call trsplat(nlatb, nlonb, db, work)
+    if (igrida(1) > 0) then
+        call convlat(nlata, nlona, da)
+    end if
+
+    if (igridb(1) > 0) then
+        call convlat(nlatb, nlonb, db)
+    end if
+
+    if (igrida(2) == 0) then
+        call trsplat(nlata, nlona, da, work)
+    end if
+
+    if (igridb(2) == 0) then
+        call trsplat(nlatb, nlonb, db, work)
+    end if
 
 end subroutine trssph
 
 
 
 subroutine trab(ma, na, aa, ba, mb, nb, ab, bb)
-    implicit none
-    integer ma, na, mb, nb, i, j, m, n
-    real aa(ma, na), ba(ma, na), ab(mb, nb), bb(mb, nb)
+    !
+    ! Purpose:
     !
     !     set coefficients for b grid from coefficients for a grid
     !
-    m = min(ma, mb)
-    n = min(na, nb)
+    implicit none
+    !----------------------------------------------------------------------
+    ! Dictionary: calling arguments
+    !----------------------------------------------------------------------
+    integer, intent (in)  :: ma
+    integer, intent (in)  :: na
+    integer, intent (in)  :: mb
+    integer, intent (in)  :: nb
+    real,    intent (in)  :: aa(ma, na)
+    real,    intent (in)  :: ba(ma, na)
+    real,    intent (out) :: ab(mb, nb)
+    real,    intent (out) :: bb(mb, nb)
+    !----------------------------------------------------------------------
+    ! Dictionary: calling arguments
+    !----------------------------------------------------------------------
+    integer :: i, j !! Counters
+    !----------------------------------------------------------------------
 
-    do j=1, n
-        do i=1, m
-            ab(i, j) = aa(i, j)
-            bb(i, j) = ba(i, j)
-        end do
-    end do
-    !
-    !     set coefs outside triangle to zero
-    !
-    do i=m+1, mb
-        do j=1, nb
-            ab(i, j) = 0.0
-            bb(i, j) = 0.0
-        end do
-    end do
+    associate( &
+        m => min(ma, mb), &
+        n => min(na, nb) &
+        )
 
-    do j=n+1, nb
-        do i=1, mb
-            ab(i, j) = 0.0
-            bb(i, j) = 0.0
+        do j=1, n
+            do i=1, m
+                ab(i, j) = aa(i, j)
+                bb(i, j) = ba(i, j)
+            end do
         end do
-    end do
+        !
+        !     set coefs outside triangle to zero
+        !
+        do i=m+1, mb
+            do j=1, nb
+                ab(i, j) = 0.0
+                bb(i, j) = 0.0
+            end do
+        end do
+
+        do j=n+1, nb
+            do i=1, mb
+                ab(i, j) = 0.0
+                bb(i, j) = 0.0
+            end do
+        end do
+    end associate
 
 end subroutine trab
 
@@ -733,21 +785,35 @@ subroutine trsplat(n, m, data, work)
     !     work must be at least n*m words long
     !
     implicit none
-    integer n, m, i, j, ij, ji
-    real data(*), work(*)
+    !----------------------------------------------------------------------
+    ! Dictionary: calling arguments
+    !----------------------------------------------------------------------
+    integer, intent (in)     :: n
+    integer, intent (in)     :: m
+    real,    intent (in out) :: data(*)
+    real,    intent (in out) :: work(*)
+    !----------------------------------------------------------------------
+    ! Dictionary: calling arguments
+    !----------------------------------------------------------------------
+    integer :: i, j !! Counters
+    !----------------------------------------------------------------------
 
     do j=1, m
         do i=1, n
-            ij = (j-1)*n+i
-            work(ij) = data(ij)
+            associate( ij => (j-1)*n+i )
+                work(ij) = data(ij)
+            end associate
         end do
     end do
 
     do i=1, n
         do j=1, m
-            ji = (i-1)*m+j
-            ij = (j-1)*n+i
-            data(ji) = work(ij)
+            associate( &
+                ji => (i-1)*m+j, &
+                ij => (j-1)*n+i &
+                )
+                data(ji) = work(ij)
+            end associate
         end do
     end do
 
@@ -757,19 +823,34 @@ end subroutine trsplat
 
 subroutine convlat(nlat, nlon, data)
     !
-    !     reverse order of latitude (colatitude) grids
+    ! Purpose:
+    !
+    ! Reverse order of latitude (colatitude) grids
     !
     implicit none
-    integer nlat, nlon, nlat2, i, ib, j
-    real data(nlat, nlon), temp
-    nlat2 = nlat/2
-    do i=1, nlat2
-        ib = nlat-i+1
-        do j=1, nlon
-            temp = data(i, j)
-            data(i, j) = data(ib, j)
-            data(ib, j) = temp
+    !----------------------------------------------------------------------
+    ! Dictionary: calling arguments
+    !----------------------------------------------------------------------
+    integer, intent (in)     :: nlat
+    integer, intent (in)     :: nlon
+    real,    intent (in out) :: data(nlat,nlon)
+    !----------------------------------------------------------------------
+    ! Dictionary: local variables
+    !----------------------------------------------------------------------
+    integer :: i, j !! Counters
+    real    :: temp
+    !----------------------------------------------------------------------
+
+    associate( half_nlat => nlat/2 )
+        do i=1, half_nlat
+            associate( ib => nlat-i+1 )
+                do j=1, nlon
+                    temp = data(i, j)
+                    data(i, j) = data(ib, j)
+                    data(ib, j) = temp
+                end do
+            end associate
         end do
-    end do
+    end associate
 
 end subroutine convlat

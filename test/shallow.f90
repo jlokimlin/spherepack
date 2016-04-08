@@ -188,19 +188,19 @@ program shallow
     !     initialize spherepack routines
     !
     call shaesi(nlat,nlon,wsha,lwsha,work,lwork,dwork,lwork,ierror)
-    if(ierror /= 0) write(*,55) ierror
+    if (ierror /= 0) write(*,55) ierror
 55  format(' error' i4 ' in shaesi')
     call shsesi(nlat,nlon,wshs,lwshs,work,lwork,dwork,ldwork,ierror)
-    if(ierror /= 0) write(*,56) ierror
+    if (ierror /= 0) write(*,56) ierror
 56  format(' error' i4 ' in shsesi')
     call vhaesi(nlat,nlon,wvha,lwvha,work,lwork,dwork,ldwork,ierror)
-    if(ierror /= 0) write(*,57) ierror
+    if (ierror /= 0) write(*,57) ierror
 57  format(' error' i4 ' in vhaesi')
     call vhsesi(nlat,nlon,wvhs,lwvhs,work,lwork,dwork,ldwork,ierror)
-    if(ierror /= 0) write(*,58) ierror
+    if (ierror /= 0) write(*,58) ierror
 58  format(' error' i4 ' in vhsesi')
     call vtsesi(nlat,nlon,wvts,lwvts,work,lwork,dwork,ldwork,ierror)
-    if(ierror /= 0) write(*,59) ierror
+    if (ierror /= 0) write(*,59) ierror
 59  format(' error' i4 ' in vtsesi')
     !
     !
@@ -312,7 +312,7 @@ program shallow
     !
 90  call vhaesgo(nlat,nlon,isym,nt,u,v,idp,jdp,br,bi,cr,ci, &
         mdab,ndab,wvha,lwvha,work,lwork,ierror)
-    if(ierror /= 0) write(*,91) ierror
+    if (ierror /= 0) write(*,91) ierror
 91  format(' error' i4 ' in vhaes')
     !
     !     truncate spectrum to eliminate aliasing of the
@@ -325,7 +325,7 @@ program shallow
     !
     call vhsesgo(nlat,nlon,isym,nt,u,v,idp,jdp,br,bi,cr,ci, &
         mdab,ndab,wvhs,lwvhs,work,lwork,ierror)
-    if(ierror /= 0) write(*,92) ierror
+    if (ierror /= 0) write(*,92) ierror
 92  format(' error' i4 ' in vhses')
     !
     !   begin step 2, section 3
@@ -334,7 +334,7 @@ program shallow
     !
     call shaes(nlat,nlon,isym,nt,p,idp,jdp,a,b,mdab,ndab, &
         wsha,lwsha,work,lwork,ierror)
-    if(ierror /= 0) write(*,93) ierror
+    if (ierror /= 0) write(*,93) ierror
 93  format(' error' i4 ' in shaes')
     !
     !     truncate spectrum to eliminate aliasing of the
@@ -346,7 +346,7 @@ program shallow
     !
     call shses(nlat,nlon,isym,nt,p,idp,jdp,a,b,mdab,ndab, &
         wshs,lwshs,work,lwork,ierror)
-    if(ierror /= 0) write(*,94) ierror
+    if (ierror /= 0) write(*,94) ierror
 94  format(' error' i4 ' in shses')
     !
     !
@@ -356,14 +356,14 @@ program shallow
     !
     call vrtes(nlat,nlon,isym,nt,vort,idp,jdp,cr,ci,mdab,ndab, &
         wshs,lwshs,work,lwork,ierror)
-    if(ierror /= 0) write(*,95) ierror
+    if (ierror /= 0) write(*,95) ierror
 95  format(' error' i4 ' in vrtes')
     !
     !     compute the divergence of the velocity (u,v)
     !
     call dives(nlat,nlon,isym,nt,divg,idp,jdp,br,bi,mdab,ndab, &
         wshs,lwshs,work,lwork,ierror)
-    if(ierror /= 0) write(*,96) ierror
+    if (ierror /= 0) write(*,96) ierror
 96  format(' error' i4 ' in dives')
     !
     !   begin step 4, section 3
@@ -373,7 +373,7 @@ program shallow
     !
     call vtsesgo(nlat,nlon,isym,nt,ut,vt,idp,jdp,br,bi,cr,ci, &
         mdab,ndab,wvts,lwvts,work,lwork,ierror)
-    if(ierror /= 0) write(*,97) ierror
+    if (ierror /= 0) write(*,97) ierror
 97  format(' error' i4 ' in vtsesgo')
     !
     !   begin step 5, section 3
@@ -382,7 +382,7 @@ program shallow
     !
     call gradesgo(nlat,nlon,isym,nt,gpdl,gpdt,idp,jdp,a,b,mdab,ndab, &
         wvhs,lwvhs,work,lwork,ierror)
-    if(ierror /= 0) write(*,98) ierror
+    if (ierror /= 0) write(*,98) ierror
 98  format(' error' i4 ' in grades')
     !
     !     compute the time derivatives of the velocity (u,v)
@@ -400,7 +400,7 @@ program shallow
         end do
     end do
     !
-    if(mod(ncycle,mprint) /= 0) go to 370
+    if (mod(ncycle,mprint) /= 0) go to 370
     htime = time/3600.
 
     write(*,390) ncycle,htime,dt,nlat,nlon,mmode,omega,pzero, &
@@ -445,7 +445,7 @@ program shallow
     !
     !     set values at time = -dt to values at time = 0.
     !
-370 if(ncycle > 0) go to 206
+370 if (ncycle > 0) go to 206
     do j=1,nlon
         do i=1,nlat
             uold(i,j) = u(i,j)
@@ -480,7 +480,7 @@ program shallow
 
     ncycle = ncycle+1
     time = time+dt
-    if(ncycle <= itmax) go to 90
+    if (ncycle <= itmax) go to 90
 
 end program shallow
 
@@ -519,14 +519,14 @@ function ui(amp,thetad)
     xe=3.e-1
     x =xe*(thetad-thetab)/(thetae-thetab)
     ui = 0.
-    if(x<=0. .or. x>=xe) return
+    if (x<=0. .or. x>=xe) return
     ui=amp*exp(-1./x-1./(xe-x)+4./xe)
 
 end function ui
 !
 function atanxy(x,y)
     atanxy = 0.
-    if(x==0. .and. y==0.) return
+    if (x==0. .and. y==0.) return
     atanxy = atan2(y,x)
 
 end function atanxy

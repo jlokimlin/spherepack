@@ -235,24 +235,24 @@ subroutine igradgs(nlat, nlon, isym, nt, sf, isf, jsf, br, bi, mdb, ndb, &
     !     check input parameters
     !
     ierror = 1
-    if(nlat < 3) return
+    if (nlat < 3) return
     ierror = 2
-    if(nlon < 4) return
+    if (nlon < 4) return
     ierror = 3
-    if(isym<0 .or. isym>2) return
+    if (isym<0 .or. isym>2) return
     ierror = 4
-    if(nt < 0) return
+    if (nt < 0) return
     ierror = 5
     imid = (nlat+1)/2
-    if((isym==0 .and. isf<nlat) .or. &
+    if ((isym==0 .and. isf<nlat) .or. &
         (isym/=0 .and. isf<imid)) return
     ierror = 6
-    if(jsf < nlon) return
+    if (jsf < nlon) return
     ierror = 7
     mmax = min(nlat, (nlon+2)/2)
-    if(mdb < min(nlat, (nlon+1)/2)) return
+    if (mdb < min(nlat, (nlon+1)/2)) return
     ierror = 8
-    if(ndb < nlat) return
+    if (ndb < nlat) return
     ierror = 9
     !
     !     verify saved work space length
@@ -260,13 +260,13 @@ subroutine igradgs(nlat, nlon, isym, nt, sf, isf, jsf, br, bi, mdb, ndb, &
     l2 = (nlat+mod(nlat, 2))/2
     l1 = min((nlon+2)/2, nlat)
     lp=nlat*(3*(l1+l2)-2)+(l1-1)*(l2*(2*nlat-l1)-3*l1)/2+nlon+15
-    if(lshsgs<lp) return
+    if (lshsgs<lp) return
     ierror = 10
     !
     !     set minimum and verify unsaved work space
     !
     ls = nlat
-    if(isym > 0) ls = imid
+    if (isym > 0) ls = imid
     nln = nt*ls*nlon
     !
     !     set first dimension for a, b (as requried by shses)
@@ -302,8 +302,8 @@ subroutine igrdgs1(nlat, nlon, isym, nt, sf, isf, jsf, a, b, mab, &
     !     preset coefficient multiplyers in vector
     !
     do n=2, nlat
-        fn = real(n-1)
-        sqnn(n) = 1.0/sqrt(fn*(fn + 1.0))
+        fn = real(n - 1)
+        sqnn(n) = 1.0/sqrt(fn * (fn + 1.0))
     end do
     !
     !     set upper limit for vector m subscript

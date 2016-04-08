@@ -232,24 +232,24 @@ dimension wvhsgs(lvhsgs), work(lwork)
 !     check input parameters
 !
 ierror = 1
-if(nlat < 3) return
+if (nlat < 3) return
 ierror = 2
-if(nlon < 4) return
+if (nlon < 4) return
 ierror = 3
-if(isym<0 .or. isym>2) return
+if (isym<0 .or. isym>2) return
 ierror = 4
-if(nt < 0) return
+if (nt < 0) return
 ierror = 5
 imid = (nlat+1)/2
-if((isym==0 .and. idvw<nlat) .or. &
+if ((isym==0 .and. idvw<nlat) .or. &
    (isym/=0 .and. idvw<imid)) return
 ierror = 6
-if(jdvw < nlon) return
+if (jdvw < nlon) return
 ierror = 7
 mmax = min(nlat, (nlon+1)/2)
-if(mdab < min(nlat, (nlon+2)/2)) return
+if (mdab < min(nlat, (nlon+2)/2)) return
 ierror = 8
-if(ndab < nlat) return
+if (ndab < nlat) return
 ierror = 9
 !
 !     verify minimum saved work space length
@@ -257,7 +257,7 @@ ierror = 9
 idz = (mmax*(nlat+nlat-mmax+1))/2
 lzimn = idz*imid
 lgdmin = lzimn+lzimn+nlon+15
-if(lvhsgs < lgdmin) return
+if (lvhsgs < lgdmin) return
 ierror = 10
 !
 !     verify minimum unsaved work space length
@@ -267,7 +267,7 @@ idv = nlat
 if (isym/=0) idv = imid
 lnl = nt*idv*nlon
 lwkmin =  lnl+lnl+idv*nlon+2*mn+nlat
-if(lwork < lwkmin) return
+if (lwork < lwkmin) return
 ierror = 0
 !
 !     set work space pointers
@@ -293,8 +293,8 @@ dimension wvhsgs(lvhsgs), wk(lwk)
 !     preset coefficient multiplyers in vector
 !
 do 1 n=2, nlat
-fn = real(n-1)
-sqnn(n) = sqrt(fn*(fn + 1.0))
+fn = real(n - 1)
+sqnn(n) = sqrt(fn * (fn + 1.0))
 1 continue
 !
 !     compute multiple vector fields coefficients

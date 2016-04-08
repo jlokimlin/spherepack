@@ -141,8 +141,8 @@ program testrssph
     !
     !     dimension and type data arrays and grid vectors and internal variables
     !
-    real :: datae(nnlate,nnlone)
-    real :: datag(nnlong,nnlatg)
+    real :: regular_data(nnlate,nnlone)
+    real :: gaussian_data(nnlong,nnlatg)
     real :: work(llwork)
     real :: wsave(llsave)
     real :: thetag(nnlatg)
@@ -151,10 +151,10 @@ program testrssph
     real :: dwts(nnlatg)
     integer :: igride(2)
     integer :: igridg(2)
-    integer :: nlatg
-    integer :: nlong
-    integer :: nlate
-    integer :: nlone
+    integer :: GAUSSIAN_NLATS
+    integer :: GAUSSIAN_NLONS
+    integer :: REGULAR_NLATS
+    integer :: REGULAR_NLONS
     integer :: lwork
     integer :: lsave
     integer :: ldwork
@@ -180,10 +180,10 @@ program testrssph
     !
     !     set grid sizes and dimensions from parameter statements
     !
-    nlatg = nnlatg
-    nlong = nnlong
-    nlate = nnlate
-    nlone = nnlone
+    GAUSSIAN_NLATS = nnlatg
+    GAUSSIAN_NLONS = nnlong
+    REGULAR_NLATS = nnlate
+    REGULAR_NLONS = nnlone
     lwork = llwork
     ldwork = lldwork
     lsave = llsave
@@ -191,18 +191,18 @@ program testrssph
     !     set equally spaced grid increments
     !
     pi = acos( -1.0 )
-    dlate = pi/(nlate-1)
-    dlone = (pi+pi)/nlone
-    dlong = (pi+pi)/nlong
+    dlate = pi/(REGULAR_NLATS-1)
+    dlone = (pi+pi)/REGULAR_NLONS
+    dlong = (pi+pi)/GAUSSIAN_NLONS
     !
     !     set given data in DATAE from f(x,y,z)= exp(x*y*z) restricted
     !     to nlate by nlone equally spaced grid on the sphere
     !
-    do  j=1,nlone
+    do  j=1,REGULAR_NLONS
         p = (j-1)*dlone
         cp = cos(p)
         sp = sin(p)
-        do i=1,nlate
+        do i=1,REGULAR_NLATS
             !
             !     set north to south oriented colatitude point
             !
@@ -210,7 +210,7 @@ program testrssph
             ct = cos(t)
             st = sin(t)
             xyz = (st*(st*ct*sp*cp))
-            datae(i,j) = exp(xyz)
+            regular_data(i,j) = exp(xyz)
         end do
     end do
     !
@@ -236,8 +236,8 @@ program testrssph
     !
     !     print trssph input parameters
     !
-    write(*,100) intl,igride(1),igride(2),nlone,nlate, &
-        igridg(1),igridg(2),nlong,nlatg,lsave,lwork,ldwork
+    write(*,100) intl,igride(1),igride(2),REGULAR_NLONS,REGULAR_NLATS, &
+        igridg(1),igridg(2),GAUSSIAN_NLONS,GAUSSIAN_NLATS,lsave,lwork,ldwork
 100 format(//' EQUALLY SPACED TO GAUSSIAN GRID TRANSFER ' , &
         /' trssph input arguments: ' , &
         /' intl = ',i2, &
@@ -249,8 +249,8 @@ program testrssph
     !
     !     transfer data from DATAE to DATAG
     !
-    call trssph(intl,igride,nlone,nlate,datae,igridg,nlong, &
-        nlatg,datag,wsave,lsave,lsvmin,work,lwork,lwkmin,dwork, &
+    call trssph(intl,igride,REGULAR_NLONS,REGULAR_NLATS,regular_data,igridg,GAUSSIAN_NLONS, &
+        GAUSSIAN_NLATS,gaussian_data,wsave,lsave,lsvmin,work,lwork,lwkmin,dwork, &
         ldwork,ier)
     !
     !     print output parameters
@@ -264,42 +264,42 @@ program testrssph
         !     and set in single precision vector thetag with south to north orientation
         !     for computing error in DATAG
         !
-        call gaqd(nlatg,dtheta,dwts,dwork,ldwork,ier)
-        do  i=1,nlatg
+        call gaqd(GAUSSIAN_NLATS,dtheta,dwts,dwork,ldwork,ier)
+        do  i=1,GAUSSIAN_NLATS
             thetag(i) = pi-dtheta(i)
         end do
         !
         !     compute the least squares error in DATAG
         !
         err2 = 0.0
-        do j=1,nlong
+        do j=1,GAUSSIAN_NLONS
             p = (j-1)*dlong
             cp = cos(p)
             sp = sin(p)
-            do i=1,nlatg
+            do i=1,GAUSSIAN_NLATS
                 t = thetag(i)
                 ct = cos(t)
                 st = sin(t)
                 xyz = (st*(st*ct*sp*cp))
-                dif = abs(DATAG(j,i)-exp(xyz))
+                dif = abs(gaussian_data(j,i)-exp(xyz))
                 err2 = err2+dif*dif
             end do
         end do
-        err2 = sqrt(err2/(nlong*nlatg))
+        err2 = sqrt(err2/size(gaussian_data))
         write (6,300) err2
 300     format(' least squares error = ',e10.3)
     end if
     !
     !     set DATAE to zero
     !
-    do j=1,nlone
-        do i=1,nlate
-            datae(i,j) = 0.0
+    do j=1,REGULAR_NLONS
+        do i=1,REGULAR_NLATS
+            regular_data(i,j) = 0.0
         end do
     end do
 
-    write(*,400) intl,igridg(1),igridg(2),nlong,nlatg,igride(1), &
-        igride(2),nlone,nlate,lsave,lwork,ldwork
+    write(*,400) intl,igridg(1),igridg(2),GAUSSIAN_NLONS,GAUSSIAN_NLATS,igride(1), &
+        igride(2),REGULAR_NLONS,REGULAR_NLATS,lsave,lwork,ldwork
 400 format(/' GAUSSIAN TO EQUALLY SPACED GRID TRANSFER ' , &
         /' trssph input arguments: ' , &
         /' intl = ',i2, &
@@ -311,8 +311,8 @@ program testrssph
     !
     !     transfer DATAG back to DATAE
     !
-    call trssph(intl,igridg,nlong,nlatg,datag,igride,nlone, &
-        nlate,datae,wsave,lsave,lsvmin,work,lwork,lwkmin,dwork, &
+    call trssph(intl,igridg,GAUSSIAN_NLONS,GAUSSIAN_NLATS,gaussian_data,igride,REGULAR_NLONS, &
+        REGULAR_NLATS,regular_data,wsave,lsave,lsvmin,work,lwork,lwkmin,dwork, &
         ldwork,ier)
     !
     !     print output parameters
@@ -323,20 +323,20 @@ program testrssph
         !     compute the least squares error in DATAE
         !
         err2 = 0.0
-        do j=1,nlone
+        do j=1,REGULAR_NLONS
             p = (j-1)*dlone
             cp = cos(p)
             sp = sin(p)
-            do i=1,nlate
+            do i=1,REGULAR_NLATS
                 t = (i-1)*dlate
                 ct = cos(t)
                 st = sin(t)
                 xyz = (st*(st*ct*sp*cp))
-                dif = abs(DATAE(i,j)-exp(xyz))
+                dif = abs(regular_data(i,j)-exp(xyz))
                 err2 = err2+dif*dif
             end do
         end do
-        err2 = sqrt(err2/(nlate*nlone))
+        err2 = sqrt(err2/size(regular_data))
         write (6,300) err2
     end if
 

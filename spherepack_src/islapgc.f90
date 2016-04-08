@@ -258,24 +258,24 @@ subroutine islapgc(nlat, nlon, isym, nt, xlmbda, sf, ids, jds, a, b, &
     !     check input parameters
     !
     ierror = 1
-    if(nlat < 3) return
+    if (nlat < 3) return
     ierror = 2
-    if(nlon < 4) return
+    if (nlon < 4) return
     ierror = 3
     if (isym<0 .or. isym>2) return
     ierror = 4
-    if(nt < 0) return
+    if (nt < 0) return
     ierror = 5
     imid = (nlat+1)/2
-    if((isym==0 .and. ids<nlat) .or. &
+    if ((isym==0 .and. ids<nlat) .or. &
         (isym>0 .and. ids<imid)) return
     ierror = 6
-    if(jds < nlon) return
+    if (jds < nlon) return
     ierror = 7
     mmax = min(nlat, nlon/2+1)
-    if(mdab < mmax) return
+    if (mdab < mmax) return
     ierror = 8
-    if(ndab < nlat) return
+    if (ndab < nlat) return
     ierror = 9
     !
     !     set and verify saved work space length
@@ -284,13 +284,13 @@ subroutine islapgc(nlat, nlon, isym, nt, xlmbda, sf, ids, jds, a, b, &
     l1 = min(nlat, (nlon+2)/2)
     l2 = (nlat+1)/2
     lwmin = nlat*(2*l2+3*l1-2)+3*l1*(1-l1)/2+nlon+15
-    if(lshsgc < lwmin) return
+    if (lshsgc < lwmin) return
     ierror = 10
     !
     !     set and verify unsaved work space length
     !
     ls = nlat
-    if(isym > 0) ls = imid
+    if (isym > 0) ls = imid
     nln = nt*ls*nlon
     mn = mmax*nlat*nt
     !     lwmin = nln+ls*nlon+2*mn+nlat
@@ -336,7 +336,7 @@ subroutine islpgc1(nlat, nlon, isym, nt, xlmbda, sf, ids, jds, a, b, &
     !     set multipliers and preset synthesis coefficients to zero
     !
     do n=1, nlat
-        fn = real(n-1)
+        fn = real(n - 1)
         fnn(n) = fn*(fn+1.0)
         do m=1, mmax
             do k=1, nt
