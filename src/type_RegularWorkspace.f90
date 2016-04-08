@@ -45,7 +45,7 @@ module type_RegularWorkspace
 contains
 
 
-    subroutine create_regular_workspace( this, nlat, nlon )
+    subroutine create_regular_workspace(this, nlat, nlon )
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
@@ -69,7 +69,7 @@ contains
 
 
 
-    subroutine destroy_regular_workspace( this )
+    subroutine destroy_regular_workspace(this)
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
@@ -77,7 +77,7 @@ contains
         !----------------------------------------------------------------------
 
         ! Check flag
-        if ( this%initialized .eqv. .false. ) return
+        if (this%initialized .eqv. .false.) return
 
         ! Release memory from parent type
         call this%destroy_workspace()
@@ -88,7 +88,7 @@ contains
     end subroutine destroy_regular_workspace
 
 
-    subroutine initialize_regular_scalar_analysis( this, nlat, nlon )
+    subroutine initialize_regular_scalar_analysis(this, nlat, nlon )
         !
         ! Purpose:
         !
@@ -118,13 +118,13 @@ contains
         lshaes = this%get_lshaes(nlat, nlon)
 
         ! Release memory ( if necessary )
-        if (allocated(this%legendre_workspace)) deallocate( this%legendre_workspace )
-        if (allocated(this%forward_scalar)) deallocate( this%forward_scalar )
+        if (allocated(this%legendre_workspace)) deallocate(this%legendre_workspace )
+        if (allocated(this%forward_scalar)) deallocate(this%forward_scalar )
 
         ! Allocate memory
-        allocate( this%legendre_workspace(lwork) )
+        allocate(this%legendre_workspace(lwork) )
         allocate( dwork(ldwork) )
-        allocate( this%forward_scalar(lshaes) )
+        allocate(this%forward_scalar(lshaes) )
 
         ! Compute workspace
         associate( &
@@ -163,7 +163,7 @@ contains
 
 
 
-    subroutine initialize_regular_scalar_synthesis( this, nlat, nlon )
+    subroutine initialize_regular_scalar_synthesis(this, nlat, nlon )
         !
         !  Purpose:
         !
@@ -193,12 +193,12 @@ contains
         lshses = this%get_lshses(nlat, nlon)
 
         ! Release memory ( if necessary )
-        if (allocated(this%legendre_workspace)) deallocate( this%legendre_workspace )
-        if (allocated(this%backward_scalar)) deallocate( this%backward_scalar )
+        if (allocated(this%legendre_workspace)) deallocate(this%legendre_workspace )
+        if (allocated(this%backward_scalar)) deallocate(this%backward_scalar )
 
         ! Allocate memory
-        allocate( this%legendre_workspace(lwork) )
-        allocate( this%backward_scalar(lshses) )
+        allocate(this%legendre_workspace(lwork) )
+        allocate(this%backward_scalar(lshses) )
         allocate( dwork(ldwork) )
 
         ! Compute workspace
@@ -238,7 +238,7 @@ contains
 
 
 
-    subroutine initialize_regular_scalar_transform( this, nlat, nlon )
+    subroutine initialize_regular_scalar_transform(this, nlat, nlon )
         !
         ! Purpose:
         !
@@ -260,14 +260,14 @@ contains
         call this%initialize_regular_scalar_synthesis(nlat, nlon)
 
         ! Allocate memory for the (real) scalar harmonic transform
-        allocate( this%real_harmonic_coefficients(nlat, nlat) )
-        allocate( this%imaginary_harmonic_coefficients(nlat, nlat) )
+        allocate(this%real_harmonic_coefficients(nlat, nlat) )
+        allocate(this%imaginary_harmonic_coefficients(nlat, nlat) )
 
     end subroutine initialize_regular_scalar_transform
 
 
 
-    subroutine initialize_regular_vector_analysis( this, nlat, nlon )
+    subroutine initialize_regular_vector_analysis(this, nlat, nlon )
         !
         !< Purpose:
         !
@@ -297,12 +297,12 @@ contains
         lvhaes = this%get_lvhaes(nlat, nlon)
 
         ! Release memory ( if necessary )
-        if (allocated(this%forward_vector)) deallocate( this%forward_vector )
+        if (allocated(this%forward_vector)) deallocate(this%forward_vector )
 
         ! Allocate memory
         allocate( work(lwork) )
         allocate( dwork(ldwork) )
-        allocate( this%forward_vector(lvhaes) )
+        allocate(this%forward_vector(lvhaes) )
 
         ! Compute workspace
         associate( &
@@ -345,7 +345,7 @@ contains
 
 
 
-    subroutine initialize_regular_vector_synthesis( this, nlat, nlon )
+    subroutine initialize_regular_vector_synthesis(this, nlat, nlon )
         !
         ! Purpose:
         !
@@ -376,12 +376,12 @@ contains
         lvhses = this%get_lvhses(nlat, nlon)
 
         ! Release memory ( if necessary )
-        if (allocated(this%backward_vector)) deallocate( this%backward_vector )
+        if (allocated(this%backward_vector)) deallocate(this%backward_vector )
 
         ! Allocate memory
         allocate( work(lwork) )
         allocate( dwork(ldwork) )
-        allocate( this%backward_vector(lvhses) )
+        allocate(this%backward_vector(lvhses) )
 
         ! Compute workspace
         associate( &
@@ -424,7 +424,7 @@ contains
 
 
 
-    subroutine initialize_regular_vector_transform( this, nlat, nlon )
+    subroutine initialize_regular_vector_transform(this, nlat, nlon )
         !
         ! Purpose:
         !
@@ -447,10 +447,10 @@ contains
         call this%initialize_regular_vector_synthesis(nlat, nlon)
 
         ! Allocate memory for the vector transform coefficients
-        allocate( this%real_polar_harmonic_coefficients(nlat, nlat) )
-        allocate( this%imaginary_polar_harmonic_coefficients(nlat, nlat) )
-        allocate( this%real_azimuthal_harmonic_coefficients(nlat, nlat) )
-        allocate( this%imaginary_azimuthal_harmonic_coefficients(nlat, nlat) )
+        allocate(this%real_polar_harmonic_coefficients(nlat, nlat) )
+        allocate(this%imaginary_polar_harmonic_coefficients(nlat, nlat) )
+        allocate(this%real_azimuthal_harmonic_coefficients(nlat, nlat) )
+        allocate(this%imaginary_azimuthal_harmonic_coefficients(nlat, nlat) )
 
     end subroutine initialize_regular_vector_transform
 
@@ -617,7 +617,7 @@ contains
     end function get_lwork_unsaved
 
 
-    subroutine finalize_regular_workspace( this )
+    subroutine finalize_regular_workspace(this)
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------

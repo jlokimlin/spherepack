@@ -14,13 +14,6 @@ module type_GaussianGrid
     private
     public :: GaussianGrid
 
-    !----------------------------------------------------------------------
-    ! Dictionary: global variables confined to the module
-    !----------------------------------------------------------------------
-    integer (ip) :: allocate_status !! To check allocation status
-    integer (ip) :: deallocate_status !! To check deallocation status
-    !----------------------------------------------------------------------
-
     ! Declare derived data type
     type, extends (SphericalGrid), public ::  GaussianGrid
         !----------------------------------------------------------------------
@@ -44,7 +37,7 @@ module type_GaussianGrid
 contains
 
 
-    subroutine create_gaussian_grid( this, nlat, nlon )
+    subroutine create_gaussian_grid(this, nlat, nlon )
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
@@ -56,17 +49,25 @@ contains
         ! Ensure that object is usable
         call this%destroy()
 
-        ! Set contants
+        !
+        !==> Set contants
+        !
         this%NUMBER_OF_LATITUDES = nlat
         this%NUMBER_OF_LONGITUDES = nlon
 
-        ! Set the gaussian grid type
-        allocate( this%grid_type, source='gaussian' )
+        !
+        !==> Set the gaussian grid type
+        !
+        allocate(this%grid_type, source='gaussian')
 
-        ! Set longitudinal grid: 0 <= phi <= 2*pi
+        !
+        !==> Set longitudinal grid: 0 <= phi <= 2*pi
+        !
         call this%get_equally_spaced_longitudes( nlon, this%longitudes )
 
-        ! Set latitudinal grid: 0 <= theta <= pi
+        !
+        !==> Set latitudinal grid: 0 <= theta <= pi
+        !
         call this%get_gaussian_weights_and_points( &
             nlat, this%latitudes, this%gaussian_weights )
 
@@ -76,7 +77,7 @@ contains
     end subroutine create_gaussian_grid
 
 
-    subroutine destroy_gaussian_grid( this )
+    subroutine destroy_gaussian_grid(this)
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
@@ -84,12 +85,20 @@ contains
         !----------------------------------------------------------------------
 
         ! Check initialization flag
-        if ( this%initialized .eqv. .false. ) return
+        if (this%initialized .eqv. .false.) then
+            return
+        end if
 
-        ! Release memory
-        if (allocated(this%gaussian_weights)) deallocate(this%gaussian_weights)
+        !
+        !==> Release memory
+        !
+        if (allocated(this%gaussian_weights)) then
+            deallocate(this%gaussian_weights)
+        end if
 
-        ! Release parent type
+        !
+        !==> Release parent type
+        !
         call this%destroy_grid()
 
         ! Reset flag
@@ -98,7 +107,7 @@ contains
     end subroutine destroy_gaussian_grid
 
 
-    subroutine get_gaussian_weights_and_points( this, nlat, theta, wts )
+    subroutine get_gaussian_weights_and_points(this, nlat, theta, wts )
         !
         !<Purpose:
         !
@@ -134,12 +143,21 @@ contains
                 //'invalid argument NLAT in GET_EQUALLY_SPACED_LATITUDES'
         end if
 
-        ! Release memory
-        if (allocated(theta)) deallocate( theta )
-        if (allocated(wts)) deallocate( wts )
+        !
+        !==> Release memory
+        !
+        if (allocated(theta)) then
+            deallocate( theta )
+        end if
+        if (allocated(wts)) then
+            deallocate( wts )
+        end if
 
-        ! Allocate memory
-        allocate( theta(nlat), wts(nlat) )
+        !
+        !==> Allocate memory
+        !
+        allocate( theta(nlat) )
+        allocate( wts(nlat) )
 
         ! Associate various quantities
         associate( &
@@ -147,11 +165,15 @@ contains
             lwork => dummy_integer, &
             ierror => error_flag &
             )
-            ! Compute gaussian weights and latitudes
+            !
+            !==> Compute gaussian weights and latitudes
+            !
             call gaqd( nlat, theta, wts, w, lwork, ierror )
         end associate
 
-        ! Address error flag
+        !
+        !==> Address error flag
+        !
         select case (error_flag)
             case(0)
                 return
@@ -161,13 +183,13 @@ contains
                     //'in GET_GAUSSIAN_WEIGHTS_AND_POINTS'
             case default
                 error stop 'TYPE (GaussianGrid): '&
-                    //'Undetermined error in GET_GAUSSIAN_WEIGHTS_AND_POINTS'
+                    //'undetermined error in GET_GAUSSIAN_WEIGHTS_AND_POINTS'
         end select
 
     end subroutine get_gaussian_weights_and_points
 
 
-    subroutine unformatted_print( this, header )
+    subroutine unformatted_print(this, header )
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
@@ -181,7 +203,7 @@ contains
         !----------------------------------------------------------------------
 
         ! Check if object is usable
-        if ( this%initialized .eqv. .false. ) then
+        if (this%initialized .eqv. .false.) then
             error stop 'TYPE(GaussianGrid): '&
                 //'uninitialized object in UNFORMATTED_PRINT'
         end if
@@ -202,7 +224,7 @@ contains
     end subroutine unformatted_print
 
 
-    subroutine finalize_gaussian_grid( this )
+    subroutine finalize_gaussian_grid(this)
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------

@@ -55,7 +55,7 @@ module type_RegularSphere
 contains
 
 
-    subroutine create_regular_sphere( this, nlat, nlon, ntrunc, isym, itype, isynt, rsphere )
+    subroutine create_regular_sphere(this, nlat, nlon, ntrunc, isym, itype, isynt, rsphere )
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
@@ -134,7 +134,7 @@ contains
 
 
 
-    subroutine destroy_regular_sphere( this )
+    subroutine destroy_regular_sphere(this)
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
@@ -142,7 +142,7 @@ contains
         !----------------------------------------------------------------------
 
         ! Check flag
-        if ( this%initialized .eqv. .false. ) return
+        if (this%initialized .eqv. .false.) return
 
         ! Release memory from parent type
         call this%destroy_sphere()
@@ -154,7 +154,7 @@ contains
 
 
 
-    subroutine regular_scalar_analysis( this, scalar_function )
+    subroutine regular_scalar_analysis(this, scalar_function )
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
@@ -167,7 +167,7 @@ contains
         !----------------------------------------------------------------------
 
         ! Check if object is usable
-        if ( this%initialized .eqv. .false. ) then
+        if (this%initialized .eqv. .false.) then
             error stop 'TYPE(RegularSphere): '&
                 //'uninitialized object in regular_SCALAR_ANALYSIS'
         end if
@@ -231,7 +231,7 @@ contains
     
 
 
-    subroutine regular_scalar_synthesis( this, scalar_function )
+    subroutine regular_scalar_synthesis(this, scalar_function )
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
@@ -244,7 +244,7 @@ contains
         !----------------------------------------------------------------------
 
         ! Check if object is usable
-        if ( this%initialized .eqv. .false. ) then
+        if (this%initialized .eqv. .false.) then
             error stop 'TYPE(RegularSphere): '&
                 //'uninitialized object in regular_SCALAR_SYNTHESIS'
         end if
@@ -309,7 +309,7 @@ contains
 
 
 
-    subroutine regular_vector_analysis( this, &
+    subroutine regular_vector_analysis(this, &
         polar_component, azimuthal_component )
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
@@ -324,7 +324,7 @@ contains
         !----------------------------------------------------------------------
 
         ! Check if object is usable
-        if ( this%initialized .eqv. .false. ) then
+        if (this%initialized .eqv. .false.) then
             error stop 'TYPE(RegularSphere): '&
                 //'uninitialized object in REGULAR_VECTOR_ANALYSIS'
         end if
@@ -419,7 +419,7 @@ contains
 
 
 
-    subroutine regular_vector_synthesis( this, polar_component, azimuthal_component )
+    subroutine regular_vector_synthesis(this, polar_component, azimuthal_component )
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
@@ -433,7 +433,7 @@ contains
         !----------------------------------------------------------------------
 
         ! Check if object is usable
-        if ( this%initialized .eqv. .false. ) then
+        if (this%initialized .eqv. .false.) then
             error stop 'TYPE(RegularSphere): '&
                 //'uninitialized object in regular_VECTOR_SYNTHESIS'
         end if
@@ -516,7 +516,7 @@ contains
     end subroutine regular_vector_synthesis
     
 
-    subroutine finalize_regular_sphere( this )
+    subroutine finalize_regular_sphere(this)
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------

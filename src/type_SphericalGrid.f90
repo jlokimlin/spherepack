@@ -45,14 +45,14 @@ module type_SphericalGrid
 contains
 
 
-    subroutine destroy_grid( this )
+    subroutine destroy_grid(this)
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
         class (SphericalGrid), intent (in out) :: this
         !----------------------------------------------------------------------
 
-        if ( this%initialized .eqv. .false. ) return
+        if (this%initialized .eqv. .false.) return
 
         ! Release memory
         if (allocated(this%grid_type)) deallocate(this%grid_type)
@@ -70,7 +70,7 @@ contains
     end subroutine destroy_grid
 
 
-    subroutine get_equally_spaced_longitudes( this, nlon, phi )
+    subroutine get_equally_spaced_longitudes(this, nlon, phi )
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
@@ -117,7 +117,7 @@ contains
     end subroutine get_equally_spaced_longitudes
 
 
-    subroutine print_to_unformatted_binary_files( this, header )
+    subroutine print_to_unformatted_binary_files(this, header )
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
@@ -131,7 +131,7 @@ contains
         !----------------------------------------------------------------------
 
         ! Check if object is usable
-        if ( this%initialized .eqv. .false. ) then
+        if (this%initialized .eqv. .false.) then
             error stop 'TYPE(Grid): '&
                 //'uninitialized object in PRINT_TO_UNFORMATTED_BINARY_FILES'
         end if

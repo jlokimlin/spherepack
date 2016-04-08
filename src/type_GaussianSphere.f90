@@ -57,7 +57,7 @@ module type_GaussianSphere
 contains
 
 
-    subroutine create_gaussian_sphere( this, nlat, nlon, ntrunc, isym, itype, isynt, rsphere )
+    subroutine create_gaussian_sphere(this, nlat, nlon, ntrunc, isym, itype, isynt, rsphere )
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
@@ -126,7 +126,7 @@ contains
     end subroutine create_gaussian_sphere
 
 
-    subroutine destroy_gaussian_sphere( this )
+    subroutine destroy_gaussian_sphere(this)
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
@@ -134,7 +134,7 @@ contains
         !----------------------------------------------------------------------
 
         ! Check flag
-        if ( this%initialized .eqv. .false. ) return
+        if (this%initialized .eqv. .false.) return
 
         ! Release memory from parent type
         call this%destroy_sphere()
@@ -145,7 +145,7 @@ contains
     end subroutine destroy_gaussian_sphere
 
 
-    subroutine gaussian_scalar_analysis( this, scalar_function )
+    subroutine gaussian_scalar_analysis(this, scalar_function )
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
@@ -158,7 +158,7 @@ contains
         !----------------------------------------------------------------------
 
         ! Check if object is usable
-        if ( this%initialized .eqv. .false. ) then
+        if (this%initialized .eqv. .false.) then
             error stop 'TYPE(GaussianSphere): '&
                 //'uninitialized object in GAUSSIAN_SCALAR_ANALYSIS'
         end if
@@ -225,7 +225,7 @@ contains
     
 
 
-    subroutine gaussian_scalar_synthesis( this, scalar_function )
+    subroutine gaussian_scalar_synthesis(this, scalar_function )
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
@@ -238,7 +238,7 @@ contains
         !----------------------------------------------------------------------
 
                 ! Check if object is usable
-        if ( this%initialized .eqv. .false. ) then
+        if (this%initialized .eqv. .false.) then
             error stop 'TYPE(GaussianSphere): '&
                 //'uninitialized object in GAUSSIAN_SCALAR_SYNTHESIS'
         end if
@@ -320,7 +320,7 @@ contains
         !----------------------------------------------------------------------
 
         ! Check if object is usable
-        if ( this%initialized .eqv. .false. ) then
+        if (this%initialized .eqv. .false.) then
             error stop 'TYPE(GaussianSphere): '&
                 //'uninitialized object in '&
                 //'GAUSSIAN_VECTOR_ANALYSIS'
@@ -415,7 +415,7 @@ contains
     end subroutine gaussian_vector_analysis
 
 
-    subroutine gaussian_vector_synthesis( this, polar_component, azimuthal_component )
+    subroutine gaussian_vector_synthesis(this, polar_component, azimuthal_component )
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
@@ -429,7 +429,7 @@ contains
         !----------------------------------------------------------------------
 
         ! Check if object is usable
-        if ( this%initialized .eqv. .false. ) then
+        if (this%initialized .eqv. .false.) then
             error stop 'TYPE(GaussianSphere): '&
                 //'uninitialized object in GAUSSIAN_VECTOR_SYNTHESIS'
         end if
@@ -513,7 +513,7 @@ contains
     
 
 
-    function compute_surface_integral( this, scalar_function ) result( return_value )
+    function compute_surface_integral(this, scalar_function ) result( return_value )
         !
         ! Purpose:
         !
@@ -543,7 +543,7 @@ contains
         !----------------------------------------------------------------------
 
         ! Check if object is usable
-        if ( this%initialized .eqv. .false. ) then
+        if (this%initialized .eqv. .false.) then
             error stop 'TYPE(GaussianSphere): '&
                 //'uninitialized object in GET_SURFACE_INTEGRAL'
         end if
@@ -583,7 +583,7 @@ contains
 
 
 
-    subroutine compute_first_moment( this, scalar_function, first_moment )
+    subroutine compute_first_moment(this, scalar_function, first_moment )
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
@@ -598,7 +598,7 @@ contains
         !----------------------------------------------------------------------
 
         ! Check if object is usable
-        if ( this%initialized .eqv. .false. ) then
+        if (this%initialized .eqv. .false.) then
             error stop 'TYPE(GaussianSphere): '&
                 //'uninitialized object in COMPUTE_FIRST_MOMENT'
         end if
@@ -644,7 +644,7 @@ contains
 
     
 
-    subroutine finalize_gaussian_sphere( this )
+    subroutine finalize_gaussian_sphere(this)
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------

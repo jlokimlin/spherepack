@@ -168,7 +168,7 @@ contains
 
 
 
-    subroutine create_sphere( this, nlat, nlon, ntrunc, isym, itype, isynt, rsphere )
+    subroutine create_sphere(this, nlat, nlon, ntrunc, isym, itype, isynt, rsphere )
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
@@ -212,12 +212,12 @@ contains
         !==> Allocate memory
         !
         associate( nm_dim => (ntrunc+1)*(ntrunc+2)/2 )
-            allocate( this%INDEX_ORDER_M(nm_dim) )
-            allocate( this%INDEX_DEGREE_N(nm_dim) )
-            allocate( this%laplacian_coefficients(nm_dim) )
-            allocate( this%inverse_laplacian_coefficients(nm_dim) )
-            allocate( this%complex_spectral_coefficients(nm_dim) )
-            allocate( this%vorticity_and_divergence_coefficients(nlat) )
+            allocate(this%INDEX_ORDER_M(nm_dim) )
+            allocate(this%INDEX_DEGREE_N(nm_dim) )
+            allocate(this%laplacian_coefficients(nm_dim) )
+            allocate(this%inverse_laplacian_coefficients(nm_dim) )
+            allocate(this%complex_spectral_coefficients(nm_dim) )
+            allocate(this%vorticity_and_divergence_coefficients(nlat) )
             !
             !==> Fill arrays
             !
@@ -265,7 +265,7 @@ contains
 
 
 
-    subroutine destroy_sphere( this )
+    subroutine destroy_sphere(this)
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
@@ -312,7 +312,7 @@ contains
         end if
 
         if (allocated(this%workspace)) then
-            deallocate( this%workspace )
+            deallocate(this%workspace )
         end if
 
         !
@@ -340,7 +340,7 @@ contains
 
 
 
-    subroutine perform_complex_analysis( this, scalar_function )
+    subroutine perform_complex_analysis(this, scalar_function )
         !
         ! Purpose:
         !
@@ -376,7 +376,7 @@ contains
         !----------------------------------------------------------------------
 
         ! Check if object is usable
-        if ( this%initialized .eqv. .false. ) then
+        if (this%initialized .eqv. .false.) then
             error stop 'TYPE(Sphere): uninitialized object'&
                 //' in PERFORM_COMPLEX_ANALYSIS'
         end if
@@ -405,7 +405,7 @@ contains
 
 
 
-    subroutine perform_complex_synthesis( this, scalar_function )
+    subroutine perform_complex_synthesis(this, scalar_function )
         !
         ! Purpose:
         ! Converts gridded input array to (complex) spherical harmonic coefficients
@@ -422,7 +422,7 @@ contains
         !----------------------------------------------------------------------
 
         ! Check if object is usable
-        if ( this%initialized .eqv. .false. ) then
+        if (this%initialized .eqv. .false.) then
             error stop 'TYPE(Sphere): uninitialized object'&
                 //' in PERFORM_COMPLEX_SYNTHESIS'
         end if
@@ -462,7 +462,7 @@ contains
     end subroutine perform_complex_synthesis
 
 
-    subroutine analyze_into_complex_spectral_coefficients( this, &
+    subroutine analyze_into_complex_spectral_coefficients(this, &
         scalar_function, spectral_coefficients )
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
@@ -473,7 +473,7 @@ contains
         !----------------------------------------------------------------------
 
         ! Check if object is usable
-        if ( this%initialized .eqv. .false. ) then
+        if (this%initialized .eqv. .false.) then
             error stop 'TYPE(Sphere): uninitialized object'&
                 //' in ANALYZE_INTO_COMPLEX_SPECTRAL_COEFFICIENTS'
         end if
@@ -487,7 +487,7 @@ contains
     end subroutine analyze_into_complex_spectral_coefficients
 
 
-    subroutine synthesize_from_complex_spectral_coefficients( this, &
+    subroutine synthesize_from_complex_spectral_coefficients(this, &
         spectral_coefficients, scalar_function )
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
@@ -502,7 +502,7 @@ contains
         !----------------------------------------------------------------------
 
         ! Check if object is usable
-        if ( this%initialized .eqv. .false. ) then
+        if (this%initialized .eqv. .false.) then
             error stop 'TYPE(Sphere): uninitialized object'&
                 //' in SYNTHESIZE_FROM_COMPLEX_SPECTRAL_COEFFICIENTS'
         end if
@@ -540,7 +540,7 @@ contains
 
 
 
-    subroutine perform_vector_analysis_from_vector_field( this, vector_field )
+    subroutine perform_vector_analysis_from_vector_field(this, vector_field )
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
@@ -555,7 +555,7 @@ contains
         !----------------------------------------------------------------------
 
         ! Check if object is usable
-        if ( this%initialized .eqv. .false. ) then
+        if (this%initialized .eqv. .false.) then
             error stop 'TYPE(Sphere): '&
                 //'uninitialized object in PERFORM_VECTOR_ANALYSIS'
         end if
@@ -589,7 +589,7 @@ contains
 
 
 
-    subroutine get_scalar_laplacian( this, scalar_function, scalar_laplacian )
+    subroutine get_scalar_laplacian(this, scalar_function, scalar_laplacian )
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
@@ -599,7 +599,7 @@ contains
         !----------------------------------------------------------------------
 
         ! Check if object is usable
-        if ( this%initialized .eqv. .false. ) then
+        if (this%initialized .eqv. .false.) then
             error stop 'TYPE(Sphere): uninitialized object'&
                 //' in GET_SCALAR_LAPLACIAN'
         end if
@@ -622,7 +622,7 @@ contains
 
 
 
-    subroutine invert_scalar_laplacian( this, source, solution)
+    subroutine invert_scalar_laplacian(this, source, solution)
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
@@ -632,7 +632,7 @@ contains
         !----------------------------------------------------------------------
 
         ! Check if object is usable
-        if ( this%initialized .eqv. .false. ) then
+        if (this%initialized .eqv. .false.) then
             error stop 'TYPE(Sphere): uninitialized object'&
                 //' in INVERT_SCALAR_LAPLACIAN'
         end if
@@ -655,7 +655,7 @@ contains
 
 
 
-    subroutine compute_vector_laplacian_coefficients( this )
+    subroutine compute_vector_laplacian_coefficients(this)
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
@@ -667,7 +667,7 @@ contains
         !----------------------------------------------------------------------
 
         ! Check if object is usable
-        if ( this%initialized .eqv. .false. ) then
+        if (this%initialized .eqv. .false.) then
             error stop 'TYPE(Sphere): uninitialized object'&
                 //' in COMPUTE_VECTOR_LAPLACIAN_COEFFICIENTS'
         end if
@@ -720,7 +720,7 @@ contains
 
 
 
-    subroutine get_vector_laplacian_from_spherical_angles( this, &
+    subroutine get_vector_laplacian_from_spherical_angles(this, &
         polar_component, azimuthal_component, polar_laplacian, azimuthal_laplacian )
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
@@ -733,7 +733,7 @@ contains
         !----------------------------------------------------------------------
 
         ! Check if object is usable
-        if ( this%initialized .eqv. .false. ) then
+        if (this%initialized .eqv. .false.) then
             error stop 'TYPE(Sphere): uninitialized object'&
                 //' in GET_VECTOR_LAPLACIAN_FROM_SPHERICAL_ANGLES'
         end if
@@ -761,7 +761,7 @@ contains
     end subroutine get_vector_laplacian_from_spherical_angles
 
 
-    subroutine get_vector_laplacian_from_vector_field( this, &
+    subroutine get_vector_laplacian_from_vector_field(this, &
         vector_field, polar_laplacian, azimuthal_laplacian )
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
@@ -773,7 +773,7 @@ contains
         !----------------------------------------------------------------------
 
         ! Check if object is usable
-        if ( this%initialized .eqv. .false. ) then
+        if (this%initialized .eqv. .false.) then
             error stop 'TYPE(Sphere): uninitialized object'&
                 //' in GET_VECTOR_LAPLACIAN_FROM_VECTOR_FIELD'
         end if
@@ -793,7 +793,7 @@ contains
     end subroutine get_vector_laplacian_from_vector_field
 
 
-    subroutine invert_vector_laplacian( this, &
+    subroutine invert_vector_laplacian(this, &
         polar_source, azimuthal_source, polar_solution, azimuthal_solution)
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
@@ -810,7 +810,7 @@ contains
         !----------------------------------------------------------------------
 
         ! Check if object is usable
-        if ( this%initialized .eqv. .false. ) then
+        if (this%initialized .eqv. .false.) then
             error stop 'TYPE(Sphere): uninitialized object'&
                 //' in INVERT_VECTOR_LAPLACIAN'
         end if
@@ -877,7 +877,7 @@ contains
     end subroutine invert_vector_laplacian
 
 
-    subroutine invert_helmholtz( this, helmholtz_constant, source, solution )
+    subroutine invert_helmholtz(this, helmholtz_constant, source, solution )
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
@@ -893,7 +893,7 @@ contains
         !----------------------------------------------------------------------
 
         ! Check if object is usable
-        if ( this%initialized .eqv. .false. ) then
+        if (this%initialized .eqv. .false.) then
             error stop 'TYPE(Sphere): uninitialized object'&
                 //' in INVERT_HELMHOLTZ'
         end if
@@ -938,7 +938,7 @@ contains
 
 
 
-    subroutine get_gradient( this, scalar_function, &
+    subroutine get_gradient(this, scalar_function, &
         polar_gradient_component, azimuthal_gradient_component )
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
@@ -954,7 +954,7 @@ contains
         !----------------------------------------------------------------------
 
         ! Check if object is usable
-        if ( this%initialized .eqv. .false. ) then
+        if (this%initialized .eqv. .false.) then
             error stop 'TYPE(Sphere): uninitialized object'&
                 //' in GET_GRADIENT'
         end if
@@ -994,7 +994,7 @@ contains
     end subroutine get_gradient
 
 
-    subroutine invert_gradient( this, source, solution )
+    subroutine invert_gradient(this, source, solution )
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
@@ -1008,7 +1008,7 @@ contains
         !----------------------------------------------------------------------
 
         ! Check if object is usable
-        if ( this%initialized .eqv. .false. ) then
+        if (this%initialized .eqv. .false.) then
             error stop 'TYPE(Sphere): uninitialized object'&
                 //' in INVERT_GRADIENT'
         end if
@@ -1045,7 +1045,7 @@ contains
     end subroutine invert_gradient
 
 
-    subroutine get_vorticity( this, vector_field, vorticity )
+    subroutine get_vorticity(this, vector_field, vorticity )
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
@@ -1059,7 +1059,7 @@ contains
         !----------------------------------------------------------------------
 
         ! Check if object is usable
-        if ( this%initialized .eqv. .false. ) then
+        if (this%initialized .eqv. .false.) then
             error stop 'TYPE(Sphere): uninitialized object'&
                 //' in GET_VORTICITY'
         end if
@@ -1097,7 +1097,7 @@ contains
     end subroutine get_vorticity
 
 
-    subroutine invert_vorticity( this, source, solution )
+    subroutine invert_vorticity(this, source, solution )
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
@@ -1111,7 +1111,7 @@ contains
         !----------------------------------------------------------------------
 
         ! Check if object is usable
-        if ( this%initialized .eqv. .false. ) then
+        if (this%initialized .eqv. .false.) then
             error stop 'TYPE(Sphere): uninitialized object'&
                 //' in INVERT_VORTICITY'
         end if
@@ -1170,7 +1170,7 @@ contains
         !----------------------------------------------------------------------
 
         ! Check if object is usable
-        if ( this%initialized .eqv. .false. ) then
+        if (this%initialized .eqv. .false.) then
             error stop 'TYPE(Sphere): uninitialized object'&
                 //' in GET_DIVERGENCE_FROM_COEFFICIENTS'
         end if
@@ -1206,7 +1206,7 @@ contains
 
 
 
-    subroutine get_divergence_from_vector_field( this, vector_field, divergence )
+    subroutine get_divergence_from_vector_field(this, vector_field, divergence )
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
@@ -1220,7 +1220,7 @@ contains
         !----------------------------------------------------------------------
 
         ! Check if object is usable
-        if ( this%initialized .eqv. .false. ) then
+        if (this%initialized .eqv. .false.) then
             error stop 'TYPE(Sphere): uninitialized object'&
                 //' in GET_DIVERGENCE_FROM_VECTOR_FIELD'
         end if
@@ -1234,7 +1234,7 @@ contains
     end subroutine get_divergence_from_vector_field
 
 
-    subroutine get_divergence_from_spherical_angles( this, &
+    subroutine get_divergence_from_spherical_angles(this, &
         polar_component, azimuthal_component, divergence )
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
@@ -1250,7 +1250,7 @@ contains
         !----------------------------------------------------------------------
 
         ! Check if object is usable
-        if ( this%initialized .eqv. .false. ) then
+        if (this%initialized .eqv. .false.) then
             error stop 'TYPE(Sphere): uninitialized object'&
                 //' in GET_DIVERGENCE_FROM_SPHERICAL_ANGLES'
         end if
@@ -1288,7 +1288,7 @@ contains
         !----------------------------------------------------------------------
 
         ! Check if object is usable
-        if ( this%initialized .eqv. .false. ) then
+        if (this%initialized .eqv. .false.) then
             error stop 'TYPE(Sphere): uninitialized object'&
                 //' in INVERT_DIVERGENCE'
         end if
@@ -1360,7 +1360,7 @@ contains
         !----------------------------------------------------------------------
 
         ! Check if object is usable
-        if ( this%initialized .eqv. .false. ) then
+        if (this%initialized .eqv. .false.) then
             error stop 'TYPE(Sphere): uninitialized object'&
                 //' in GET_VORTICITY_AND_DIVERGENCE_COEFFICIENTS_FROM_VELOCITIES'
         end if
@@ -1371,7 +1371,7 @@ contains
 
         ! Associate various quantities
         associate( &
-            nm_dim => size( this%complex_spectral_coefficients ), &
+            nm_dim => size(this%complex_spectral_coefficients ), &
             nlat => this%NUMBER_OF_LATITUDES, &
             ntrunc => this%TRIANGULAR_TRUNCATION_LIMIT, &
             rsphere => this%RADIUS_OF_SPHERE, &
@@ -1429,7 +1429,7 @@ contains
         !----------------------------------------------------------------------
 
         ! Check if object is usable
-        if ( this%initialized .eqv. .false. ) then
+        if (this%initialized .eqv. .false.) then
             error stop 'TYPE(Sphere): uninitialized object'&
                 //' in GET_VELOCITIES_FROM_VORTICITY_AND_DIVERGENCE_COEFFICIENTS'
         end if
@@ -1529,7 +1529,7 @@ contains
         !----------------------------------------------------------------------
 
         ! Check if object is usable
-        if ( this%initialized .eqv. .false. ) then
+        if (this%initialized .eqv. .false.) then
             error stop 'TYPE(Sphere): uninitialized object'&
                 //' in COMPUTE_ANGULAR_MOMENTUM'
         end if
@@ -1580,7 +1580,7 @@ contains
     
 
 
-    function get_index( this, n, m ) result( return_value )
+    function get_index(this, n, m ) result( return_value )
         !
         !< Purpose:
         ! The spectral data is assumed to be in a complex array of dimension
@@ -1638,7 +1638,7 @@ contains
     end function get_index
 
 
-    function get_coefficient( this, n, m ) result ( return_value )
+    function get_coefficient(this, n, m ) result ( return_value )
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
@@ -1666,7 +1666,7 @@ contains
     end function get_coefficient
 
 
-    subroutine get_scalar_symmetries( this, isym )
+    subroutine get_scalar_symmetries(this, isym )
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
@@ -1690,7 +1690,7 @@ contains
     end subroutine get_scalar_symmetries
     
 
-    subroutine get_vector_symmetries( this, itype )
+    subroutine get_vector_symmetries(this, itype )
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------

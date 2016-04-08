@@ -49,7 +49,7 @@ module type_SphericalUnitVectors
 contains
 
 
-    subroutine create_spherical_unit_vectors( this, grid_type, trig_functions )
+    subroutine create_spherical_unit_vectors(this, grid_type, trig_functions )
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
@@ -67,7 +67,7 @@ contains
         call this%destroy()
 
         ! Check if polymorphic argument is usable
-        if ( grid_type%initialized .eqv. .false. ) then
+        if ( grid_type%initialized .eqv. .false.) then
             error stop 'TYPE(SphericalUnitVectors): '&
                 //'initialized polymorphic argument CLASS(Grid)'
         end if
@@ -82,15 +82,15 @@ contains
             this%NUMBER_OF_LONGITUDES = nlon
 
             ! Allocate memory
-            allocate( this%radial(nlat, nlon) )
-            allocate( this%polar(nlat, nlon) )
-            allocate( this%azimuthal(nlat, nlon) )
+            allocate(this%radial(nlat, nlon) )
+            allocate(this%polar(nlat, nlon) )
+            allocate(this%azimuthal(nlat, nlon) )
 
             ! Address optional argument
             if (present(trig_functions)) then
 
                 ! Check if polymorphic argument is usable
-                if ( trig_functions%initialized .eqv. .false. ) then
+                if ( trig_functions%initialized .eqv. .false.) then
                     error stop 'TYPE(SphericalUnitVectors): '&
                         //'initialized polymorphic argument CLASS(Grid)'
                 else
@@ -158,7 +158,7 @@ contains
     
 
 
-    subroutine destroy_spherical_unit_vectors( this )
+    subroutine destroy_spherical_unit_vectors(this)
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
@@ -166,12 +166,12 @@ contains
         !----------------------------------------------------------------------
 
         ! Check flag
-        if ( this%initialized .eqv. .false. ) return
+        if (this%initialized .eqv. .false.) return
 
         ! Release memory
-        if ( allocated( this%radial ) ) deallocate ( this%radial )
+        if ( allocated(this%radial ) ) deallocate (this%radial )
         if (allocated(this%polar)) deallocate(  this%polar )
-        if (allocated(this%azimuthal)) deallocate( this%azimuthal )
+        if (allocated(this%azimuthal)) deallocate(this%azimuthal )
 
         ! Reset constants
         this%NUMBER_OF_LONGITUDES = 0
@@ -184,7 +184,7 @@ contains
 
 
 
-    subroutine get_spherical_angle_components( this, &
+    subroutine get_spherical_angle_components(this, &
         vector_function, polar_component, azimuthal_component )
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
@@ -201,7 +201,7 @@ contains
         !----------------------------------------------------------------------
 
         ! Check if object is usable
-        if ( this%initialized .eqv. .false. ) then
+        if (this%initialized .eqv. .false.) then
             error stop 'TYPE(SphericalUnitVectors): '&
                 //'uninitialized object in GET_SPHERICAL_ANGLE_COMPONENTS'
         end if
@@ -230,7 +230,7 @@ contains
 
     end subroutine get_spherical_angle_components
 
-    subroutine get_vector_function( this, &
+    subroutine get_vector_function(this, &
         radial_component, polar_component, azimuthal_component, vector_function )
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
@@ -248,7 +248,7 @@ contains
         !----------------------------------------------------------------------
 
         ! Check if object is usable
-        if ( this%initialized .eqv. .false. ) then
+        if (this%initialized .eqv. .false.) then
             error stop 'TYPE(SphericalUnitVectors): '&
                 //'uninitialized object in GET_VECTOR_FUNCTION'
         end if
@@ -278,7 +278,7 @@ contains
 
 
 
-    subroutine finalize_spherical_unit_vectors( this )
+    subroutine finalize_spherical_unit_vectors(this)
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------

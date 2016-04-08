@@ -43,14 +43,14 @@ module type_Workspace
 contains
 
 
-    subroutine destroy_workspace( this )
+    subroutine destroy_workspace(this)
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
         class (Workspace), intent (in out) :: this
         !----------------------------------------------------------------------
 
-        if ( this%initialized .eqv. .false. ) return
+        if (this%initialized .eqv. .false.) return
 
         ! Release memory
         if (allocated(this%legendre_workspace)) deallocate(this%legendre_workspace)

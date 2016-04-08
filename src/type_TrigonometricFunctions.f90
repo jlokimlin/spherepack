@@ -41,7 +41,7 @@ module type_TrigonometricFunctions
 contains
 
 
-    subroutine create_trigonometric_functions( this, grid_type )
+    subroutine create_trigonometric_functions(this, grid_type )
         !
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
@@ -54,7 +54,7 @@ contains
         call this%destroy()
 
         ! Check if polymorphic argument is usable
-        if ( grid_type%initialized .eqv. .false. ) then
+        if ( grid_type%initialized .eqv. .false.) then
             error stop 'TYPE(TrigonometricFunctions): '&
                 //'initialized polymorphic argument CLASS(Grid)'
         end if
@@ -69,10 +69,10 @@ contains
             this%NUMBER_OF_LATITUDES = nlat
             this%NUMBER_OF_LONGITUDES = nlon
 
-            allocate( this%sint(nlat) )
-            allocate( this%cost(nlat) )
-            allocate( this%sinp(nlon) )
-            allocate( this%cosp(nlon) )
+            allocate(this%sint(nlat) )
+            allocate(this%cost(nlat) )
+            allocate(this%sinp(nlon) )
+            allocate(this%cosp(nlon) )
         end associate
 
         ! compute trigonometric functions
@@ -98,7 +98,7 @@ contains
 
 
 
-    subroutine destroy_trigonometric_functions( this )
+    subroutine destroy_trigonometric_functions(this)
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
@@ -106,7 +106,7 @@ contains
         !----------------------------------------------------------------------
 
         ! Check flag
-        if ( this%initialized .eqv. .false. ) return
+        if (this%initialized .eqv. .false.) return
 
         ! Release memory
         if (allocated(this%sint)) deallocate(this%sint)
@@ -125,7 +125,7 @@ contains
 
 
 
-    subroutine finalize_trigonometric_functions( this )
+    subroutine finalize_trigonometric_functions(this)
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------

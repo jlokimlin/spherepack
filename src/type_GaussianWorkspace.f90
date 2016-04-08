@@ -44,7 +44,7 @@ module type_GaussianWorkspace
 contains
 
 
-    subroutine create_gaussian_workspace( this, nlat, nlon )
+    subroutine create_gaussian_workspace(this, nlat, nlon )
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
@@ -67,7 +67,7 @@ contains
 
     end subroutine create_gaussian_workspace
 
-    subroutine destroy_gaussian_workspace( this )
+    subroutine destroy_gaussian_workspace(this)
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
@@ -75,7 +75,7 @@ contains
         !----------------------------------------------------------------------
 
         ! Check flag
-        if ( this%initialized .eqv. .false.) return
+        if (this%initialized .eqv. .false.) return
 
         ! Release memory from parent type
         call this%destroy_workspace()
@@ -86,7 +86,7 @@ contains
     end subroutine destroy_gaussian_workspace
 
 
-    subroutine initialize_gaussian_scalar_analysis( this, nlat, nlon )
+    subroutine initialize_gaussian_scalar_analysis(this, nlat, nlon )
         !
         ! Purpose:
         !
@@ -112,16 +112,16 @@ contains
 
         ! Compute dimensions of various workspace arrays
         lwork = max(this%get_lwork(nlat, nlon), 5*(nlat**2)*nlon )
-        ldwork = max( this%get_ldwork(nlat), 4*(nlat**2) )
+        ldwork = max(this%get_ldwork(nlat), 4*(nlat**2) )
         lshags = this%get_lshags(nlat, nlon)
 
         ! Release memory ( if necessary )
-        if (allocated(this%legendre_workspace)) deallocate( this%legendre_workspace )
-        if (allocated(this%forward_scalar)) deallocate( this%forward_scalar )
+        if (allocated(this%legendre_workspace)) deallocate(this%legendre_workspace )
+        if (allocated(this%forward_scalar)) deallocate(this%forward_scalar )
 
         ! Allocate memory
-        allocate( this%legendre_workspace(lwork) )
-        allocate( this%forward_scalar(lshags) )
+        allocate(this%legendre_workspace(lwork) )
+        allocate(this%forward_scalar(lshags) )
         allocate( dwork(lwork) )
 
         ! Compute workspace arrays
@@ -168,7 +168,7 @@ contains
 
 
 
-    subroutine initialize_gaussian_scalar_synthesis( this, nlat, nlon )
+    subroutine initialize_gaussian_scalar_synthesis(this, nlat, nlon )
         !
         ! Purpose:
         !
@@ -194,17 +194,17 @@ contains
 
         ! Compute dimensions of various workspace arrays
         lwork = max(this%get_lwork(nlat, nlon), 5*(nlat**2)*nlon )
-        ldwork = max( this%get_ldwork(nlat), 4*(nlat**2) )
+        ldwork = max(this%get_ldwork(nlat), 4*(nlat**2) )
         lshsgs = this%get_lshsgs(nlat, nlon)
 
         ! Release memory ( if necessary )
-        if (allocated(this%legendre_workspace)) deallocate( this%legendre_workspace )
-        if (allocated(this%backward_scalar)) deallocate( this%backward_scalar )
+        if (allocated(this%legendre_workspace)) deallocate(this%legendre_workspace )
+        if (allocated(this%backward_scalar)) deallocate(this%backward_scalar )
 
         ! Allocate memory
-        allocate( this%legendre_workspace(lwork) )
+        allocate(this%legendre_workspace(lwork) )
         allocate( dwork(ldwork) )
-        allocate( this%backward_scalar(lshsgs) )
+        allocate(this%backward_scalar(lshsgs) )
 
         ! Compute workspace
         associate( &
@@ -245,7 +245,7 @@ contains
     end subroutine initialize_gaussian_scalar_synthesis
 
 
-    subroutine initialize_gaussian_scalar_transform( this, nlat, nlon )
+    subroutine initialize_gaussian_scalar_transform(this, nlat, nlon )
         !
         ! Purpose:
         !
@@ -267,13 +267,13 @@ contains
         call this%initialize_gaussian_scalar_synthesis(nlat, nlon)
 
         ! Allocate memory
-        allocate( this%real_harmonic_coefficients(nlat, nlat) )
-        allocate( this%imaginary_harmonic_coefficients(nlat, nlat) )
+        allocate(this%real_harmonic_coefficients(nlat, nlat) )
+        allocate(this%imaginary_harmonic_coefficients(nlat, nlat) )
 
     end subroutine initialize_gaussian_scalar_transform
 
 
-    subroutine initialize_gaussian_vector_analysis( this, nlat, nlon )
+    subroutine initialize_gaussian_vector_analysis(this, nlat, nlon )
         !
         ! Purpose:
         !
@@ -302,11 +302,11 @@ contains
         lvhags = this%get_lvhags(nlat, nlon)
 
         ! Release memory ( if necessary )
-        if (allocated(this%forward_vector)) deallocate( this%forward_vector )
+        if (allocated(this%forward_vector)) deallocate(this%forward_vector )
 
         ! Allocate memory
         allocate( dwork(ldwork) )
-        allocate( this%forward_vector(lvhags) )
+        allocate(this%forward_vector(lvhags) )
 
         ! Compute workspace
         associate( &
@@ -343,7 +343,7 @@ contains
     end subroutine initialize_gaussian_vector_analysis
 
 
-    subroutine initialize_gaussian_vector_synthesis( this, nlat, nlon )
+    subroutine initialize_gaussian_vector_synthesis(this, nlat, nlon )
         !
         !< Purpose:
         !
@@ -372,11 +372,11 @@ contains
         lvhsgs = max(this%get_lvhsgs(nlat, nlon), 5*(nlat**2)*nlon)
 
         ! Release memory ( if necessary )
-        if (allocated(this%backward_vector)) deallocate( this%backward_vector )
+        if (allocated(this%backward_vector)) deallocate(this%backward_vector )
 
          ! Allocate memory
         allocate( dwork(ldwork) )
-        allocate( this%backward_vector(lvhsgs) )
+        allocate(this%backward_vector(lvhsgs) )
 
         ! Compute workspace
         associate( &
@@ -414,7 +414,7 @@ contains
     end subroutine initialize_gaussian_vector_synthesis
 
 
-    subroutine initialize_gaussian_vector_transform( this, nlat, nlon )
+    subroutine initialize_gaussian_vector_transform(this, nlat, nlon )
         !
         ! Purpose:
         !
@@ -436,10 +436,10 @@ contains
         call this%initialize_gaussian_vector_synthesis(nlat, nlon)
 
         ! Allocate memory
-        allocate( this%real_polar_harmonic_coefficients(nlat, nlat) )
-        allocate( this%imaginary_polar_harmonic_coefficients(nlat, nlat) )
-        allocate( this%real_azimuthal_harmonic_coefficients(nlat, nlat) )
-        allocate( this%imaginary_azimuthal_harmonic_coefficients(nlat, nlat) )
+        allocate(this%real_polar_harmonic_coefficients(nlat, nlat) )
+        allocate(this%imaginary_polar_harmonic_coefficients(nlat, nlat) )
+        allocate(this%real_azimuthal_harmonic_coefficients(nlat, nlat) )
+        allocate(this%imaginary_azimuthal_harmonic_coefficients(nlat, nlat) )
 
     end subroutine initialize_gaussian_vector_transform
 
@@ -557,7 +557,7 @@ contains
     end function get_lvhsgs
 
 
-    subroutine finalize_gaussian_workspace( this )
+    subroutine finalize_gaussian_workspace(this)
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
