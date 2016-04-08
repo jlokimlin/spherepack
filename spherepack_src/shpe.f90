@@ -1791,57 +1791,100 @@ do 50 i = mp1, n, 4
   dy(i + 2) = dy(i + 2) + da*dx(i + 2)
   dy(i + 3) = dy(i + 3) + da*dx(i + 3)
 50 continue
-return
+
 end subroutine daxpy
-real function ddot(n, dx, incx, dy, incy)
-!
-!     forms the dot product of two vectors.
-!     uses unrolled loops for increments equal to one.
-!     jack dongarra, linpack, 3/11/78.
-!     modified 12/3/93, array(1) declarations changed to array(*)
-!
-real dx(*), dy(*), dtemp
-integer i, incx, incy, ix, iy, m, mp1, n
-!
-ddot = 0.0
-dtemp = 0.0
-if (n<=0)return
-if (incx==1.and.incy==1)go to 20
-!
-!        code for unequal increments or equal increments
-!          not equal to 1
-!
-ix = 1
-iy = 1
-if (incx<0)ix = (-n+1)*incx + 1
-if (incy<0)iy = (-n+1)*incy + 1
-do 10 i = 1, n
-  dtemp = dtemp + dx(ix)*dy(iy)
-  ix = ix + incx
-  iy = iy + incy
-10 continue
-ddot = dtemp
-return
-!
-!        code for both increments equal to 1
-!
-!
-!        clean-up loop
-!
-20 m = mod(n, 5)
-if ( m == 0 ) go to 40
-do 30 i = 1, m
-  dtemp = dtemp + dx(i)*dy(i)
-30 continue
-if ( n < 5 ) go to 60
-40 mp1 = m + 1
-do 50 i = mp1, n, 5
-  dtemp = dtemp + dx(i)*dy(i) + dx(i + 1)*dy(i + 1) + &
-   dx(i + 2)*dy(i + 2) + dx(i + 3)*dy(i + 3) + dx(i + 4)*dy(i + 4)
-50 continue
-60 ddot = dtemp
-return
-end function ddot
+
+    pure function ddot(n, dx, incx, dy, incy) result (return_value)
+        implicit none
+        !
+        !     forms the dot product of two vectors.
+        !     uses unrolled loops for increments equal to one.
+        !     jack dongarra, linpack, 3/11/78.
+        !     modified 12/3/93, array(1) declarations changed to array(*)
+        !
+        !----------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !----------------------------------------------------------------------
+        integer, intent (in) :: n
+        real,    intent (in) :: dx(*)
+        integer, intent (in) :: incx
+        real,    intent (in) :: dy(*)
+        integer, intent (in) :: incy
+        real                 :: return_value
+        !----------------------------------------------------------------------
+        ! Dictionary: local variables
+        !----------------------------------------------------------------------
+        real    :: dtemp
+        integer :: i, ix, iy, m, mp1
+        !----------------------------------------------------------------------
+
+        ! Initialize
+        return_value = 0.0
+        dtemp = 0.0
+
+        if (n <= 0) then
+            return
+        end if
+
+        if (incx == 1 .and. incy == 1) then
+            go to 20
+        end if
+        !
+        !        code for unequal increments or equal increments
+        !          not equal to 1
+        !
+        ix = 1
+        iy = 1
+        if (incx < 0) then
+            ix = (-n+1)*incx + 1
+        end if
+
+        if (incy < 0) then
+            iy = (-n+1)*incy + 1
+        end if
+
+        do i = 1, n
+            dtemp = dtemp + dx(ix)*dy(iy)
+            ix = ix + incx
+            iy = iy + incy
+        end do
+
+        return_value = dtemp
+        return
+        !
+        !        code for both increments equal to 1
+        !
+        !
+        !        clean-up loop
+        !
+20      m = mod(n, 5)
+        if (m == 0) then
+            go to 40
+        end if
+
+        do i = 1, m
+            dtemp = dtemp + dx(i)*dy(i)
+        end do
+
+        if ( n < 5 ) then
+            go to 60
+        end if
+
+
+40      mp1 = m + 1
+        do i = mp1, n, 5
+            dtemp = dtemp &
+                + dx(i)*dy(i) &
+                + dx(i + 1)*dy(i + 1) &
+                + dx(i + 2)*dy(i + 2) &
+                + dx(i + 3)*dy(i + 3)&
+                + dx(i + 4)*dy(i + 4)
+        end do
+60      return_value = dtemp
+
+    end function ddot
+
+
 real function DNRM2 ( n, x, incx )
 !     .. Scalar Arguments ..
 integer                           incx, n

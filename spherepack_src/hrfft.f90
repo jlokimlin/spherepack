@@ -865,12 +865,24 @@ subroutine hradfg (mp, ido, ip, l1, idl1, cc, c1, c2, mdimcc, &
 142         continue
 143     continue
 144 continue         
-    return
+
 end subroutine hradfg              
-function pimach()                   
-    pimach=3.14159265358979
-    return
-end function pimach              
+
+
+
+pure function pimach() result (return_value)
+    !----------------------------------------------------------------------
+    ! Dictionary: calling arguments
+    !----------------------------------------------------------------------
+    real :: return_value
+    !----------------------------------------------------------------------
+
+    return_value = acos(-1.0) !3.14159265358979
+
+end function pimach
+
+
+
 subroutine hrfftb(m, n, r, mdimr, whrfft, work)
     !
     !     a multiple fft package for spherepack
@@ -882,7 +894,10 @@ subroutine hrfftb(m, n, r, mdimr, whrfft, work)
     call hrftb1 (m, n, r, mdimr, work, whrfft, whrfft(n+1))
     !     tfft = tfft+second(dum)-tstart
     return
-end subroutine hrfftb              
+end subroutine hrfftb
+
+
+
 subroutine hrftb1 (m, n, c, mdimc, ch, wa, fac)
     !
     !     a multiple fft package for spherepack
