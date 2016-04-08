@@ -871,13 +871,18 @@ end subroutine hradfg
 
 
 pure function pimach() result (return_value)
+
+    use, intrinsic :: iso_fortran_env, only: &
+        wp => REAL64
+
+    implicit none
     !----------------------------------------------------------------------
     ! Dictionary: calling arguments
     !----------------------------------------------------------------------
     real :: return_value
     !----------------------------------------------------------------------
 
-    return_value = acos(-1.0) !3.14159265358979
+    return_value = acos(-1.0_wp)
 
 end function pimach
 

@@ -39,7 +39,6 @@ module type_RegularGrid
 contains
 
 
-
     subroutine create_regular_grid(this, nlat, nlon )
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments

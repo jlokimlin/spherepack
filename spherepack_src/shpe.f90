@@ -1794,6 +1794,7 @@ do 50 i = mp1, n, 4
 
 end subroutine daxpy
 
+
     pure function ddot(n, dx, incx, dy, incy) result (return_value)
         implicit none
         !
@@ -1885,66 +1886,75 @@ end subroutine daxpy
     end function ddot
 
 
-real function DNRM2 ( n, x, incx )
-!     .. Scalar Arguments ..
-integer                           incx, n
-!     .. Array Arguments ..
-real                  x( * )
-!     ..
-!
-!  DNRM2 returns the euclidean norm of a vector via the function
-!  name, so that
-!
-!     DNRM2 := sqrt( x'*x )
-!
-!
-!
-!  -- This version written on 25-October-1982.
-!     Modified on 14-October-1993 to inline the call to DLASSQ.
-!     Sven Hammarling, Nag Ltd.
-!
-!
-!     .. Parameters ..
-real      one         , zero
-parameter           ( one = 1.0D+0, zero = 0.0D+0 )
-!     .. Local Scalars ..
-integer               ix
-real      absxi, norm, scale, ssq
-!     .. Intrinsic Functions ..
-intrinsic             ABS, SQRT
-!     ..
-!     .. Executable Statements ..
-if ( n<1 .or. incx<1 )then
-   norm  = zero
-else if ( n==1 )then
-   norm  = ABS( X( 1 ) )
-else
-   scale = zero
-   ssq   = one
-!        The following loop is equivalent to this call to the LAPACK
-!        auxiliary routine:
-!        CALL DLASSQ( N, X, INCX, SCALE, SSQ )
-!
-   do 10, ix = 1, 1 + ( n - 1 )*incx, incx
-      if ( X( ix )/=zero )then
-         absxi = ABS( X( ix ) )
-         if ( scale<absxi )then
-            ssq   = one   + ssq*( scale/absxi )**2
-            scale = absxi
-         else
-            ssq   = ssq   +     ( absxi/scale )**2
-         end if
-      end if
-10    continue
-   norm  = scale * SQRT( ssq )
-end if
-!
-DNRM2 = norm
-return
-!
-!     End of DNRM2.
-!
-end function DNRM2
+    pure function dnrm2( n, x, incx ) result (return_value)
+        implicit none
+        !
+        ! Purpose:
+        !
+        !  dnrm2 returns the euclidean norm of a vector via the function
+        !  name, so that
+        !
+        !     dnrm2 := sqrt( x'*x )
+        !
+        !
+        !
+        !  -- This version written on 25-October-1982.
+        !     Modified on 14-October-1993 to inline the call to DLASSQ.
+        !     Sven Hammarling, Nag Ltd.
+        !
+        !----------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !----------------------------------------------------------------------
+        integer, intent (in) :: n
+        real,    intent (in) :: x(*)
+        integer, intent (in) :: incx
+        real                 :: return_value
+        !----------------------------------------------------------------------
+        ! Dictionary: local variables
+        !----------------------------------------------------------------------
+        integer         :: ix
+        real            :: absxi, norm, scale_rename, ssq
+        real, parameter :: ZERO = nearest(1.0,1.0)-nearest(1.0,-1.0)
+        real, parameter :: ONE = 1.0
+        !----------------------------------------------------------------------
+
+        !
+        !==> Executable Statements
+        !
+        if (n < 1 .or. incx < 1 ) then
+            norm = ZERO
+        else if (n == 1) then
+            norm = abs(x(1))
+        else
+            scale_rename = ZERO
+            ssq = ONE
+            !        The following loop is equivalent to this call to the LAPACK
+            !        auxiliary routine:
+            !        call dlassq( n, x, incx, scale, ssq )
+            !
+            do ix = 1, 1 + (n - 1) * incx, incx
+                if ( x(ix) /= ZERO ) then
+                    absxi = abs(x(ix))
+                    if ( scale_rename < absxi ) then
+                        ssq = ONE + ssq * (scale_rename/absxi)**2
+                        scale_rename = absxi
+                    else
+                        ssq = ssq + (absxi/scale_rename)**2
+                    end if
+                end if
+            end do
+            norm  = scale_rename * sqrt( ssq )
+        end if
+
+        !
+        !==> Return norm
+        !
+        return_value = norm
+
+    end function dnrm2
+
+
+
 subroutine  drot (n, dx, incx, dy, incy, c, s)
 !
 !     applies a plane rotation.

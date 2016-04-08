@@ -1481,39 +1481,50 @@ cth = chh
 end if
 return
 end subroutine tpdp1
-real function dzepp (x)
-real  x
-!
-!     estimate unit roundoff in quantities of size x.
-!
-real a, b, c, eps
-!
-!     this program should function properly on all systems
-!     satisfying the following two assumptions, 
-!        1.  the base used in representing floating point
-!            numbers is not a power of three.
-!        2.  the quantity  a  in statement 10 is represented to 
-!            the accuracy used in floating point variables
-!            that are stored in memory.
-!     the statement number 10 and the go to 10 are intended to
-!     force optimizing compilers to generate code satisfying 
-!     assumption 2.
-!     under these assumptions, it should be true that, 
-!            a  is not exactly equal to four-thirds, 
-!            b  has a zero for its last bit or digit, 
-!            c  is not exactly equal to one, 
-!            eps  measures the separation of 1.0 from
-!                 the next larger floating point number.
-!     the developers of eispack would appreciate being informed
-!     about any systems where these assumptions do not hold.
-!
-!     this version dated 4/6/83.
-!
-a = 4.0/3.0
-10 b = a - 1.0
-c = b + b + b
-eps = abs(c-1.0)
-if (eps == 0.0) go to 10
-dzepp = eps*abs(x)
-return
-end function dzepp
+
+    pure function dzepp(x) result (return_value)
+        implicit none
+        !----------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !----------------------------------------------------------------------
+        real, intent (in) ::  x
+        real              :: return_value
+        !----------------------------------------------------------------------
+        !
+        ! Purpose: estimate unit roundoff in quantities of size x.
+        !
+        ! real :: a, b, c, eps
+        !
+        ! a = 4.0/3.0
+        ! 10 b = a - 1.0
+        ! c = b + b + b
+        ! eps = abs(c-1.0)
+        ! if (eps == 0.0) go to 10
+        ! dzepp = eps*abs(x)
+        !
+        !     this program should function properly on all systems
+        !     satisfying the following two assumptions,
+        !        1.  the base used in representing floating point
+        !            numbers is not a power of three.
+        !        2.  the quantity  a  in statement 10 is represented to
+        !            the accuracy used in floating point variables
+        !            that are stored in memory.
+        !     the statement number 10 and the go to 10 are intended to
+        !     force optimizing compilers to generate code satisfying
+        !     assumption 2.
+        !     under these assumptions, it should be true that,
+        !            a  is not exactly equal to four-thirds,
+        !            b  has a zero for its last bit or digit,
+        !            c  is not exactly equal to one,
+        !            eps  measures the separation of 1.0 from
+        !                 the next larger floating point number.
+        !     the developers of eispack would appreciate being informed
+        !     about any systems where these assumptions do not hold.
+        !
+        !     this version dated 4/6/83
+        !     04/08/16 - replaced with the intrinsic EPSILON
+        !
+
+        return_value = epsilon(x)
+
+    end function dzepp
