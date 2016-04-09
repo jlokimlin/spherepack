@@ -66,7 +66,7 @@
 !
 !            lambda(j) = (j-1)*2*pi/nlon
 !
-!     on the sphere (pi=acos( -1.0 )).
+!     on the sphere (pi=acos(-1.0)).
 !
 !
 !     input parameters

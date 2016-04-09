@@ -58,7 +58,7 @@ subroutine ihgeod(m, idp, jdp, x, y, z)
     !                total number of triangles is 20*(m-1)**2
     !                total number of edges is 30*(m-1)**2
     !
-    pi = acos( -1.0 )
+    pi = acos(-1.0)
     dphi = .4*pi
     beta = cos(dphi)
     theta1 = acos(beta/(1.-beta))
@@ -154,7 +154,7 @@ subroutine ctos(x, y, z, r, theta, phi)
     if (r1 /= 0.) go to 10
     phi = 0.
     theta = 0.
-    if (z < 0.) theta = acos( -1.0 )
+    if (z < 0.) theta = acos(-1.0)
     return
 10  r = sqrt(r1+z*z)
     r1 = sqrt(r1)

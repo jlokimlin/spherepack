@@ -166,7 +166,7 @@ program shallow
     lwvts = 141647
     lwork = 40000
     ldwork = lldwork
-    pi = acos( -1.0 )
+    pi = acos(-1.0)
     hpi = pi/2.
     dtr = pi/180.
     aa = 6.37122e6
@@ -513,7 +513,7 @@ function ui(amp,thetad)
     !     computes the initial unrotated longitudinal velocity
     !     see section 3.3.
     !
-    pi=acos( -1.0 )
+    pi=acos(-1.0)
     thetab=-pi/6.
     thetae= pi/2.
     xe=3.e-1
@@ -536,7 +536,7 @@ subroutine sine(n,x,w)
     !     computes the sine transform
     !
     dimension x(n),w(n)
-    arg = acos( -1.0 )/(n+1)
+    arg = acos(-1.0)/(n+1)
     do  j=1,n
         w(j) = 0.
         do  i=1,n

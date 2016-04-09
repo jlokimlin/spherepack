@@ -919,7 +919,7 @@ call gaqd(nlat, dthet, dwts, dpbar, lwk, ierror)
 !
 !     compute m=n=0 legendre polynomials for all theta(i)
 !
-ssqr2 = 1./sqrt(2.d0)
+ssqr2 = 1./sqrt(2.0)
 do 90 i=1, imid
 dpbar(i, 1, 1) = ssqr2
 vb(i, 1) = 0.
@@ -1000,7 +1000,7 @@ vb(i, ix) = (abel*dpbar(i, m, np)-bbel*dpbar(i, m+2, np))*dwts(i)
 131 continue
 ix = indx(0, n, nlat)
 do 220 i=1, imid
-wb(i, ix) = 0.d0
+wb(i, ix) = 0.0
 220 continue
 !
 !     compute wb for m=1, n

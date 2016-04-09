@@ -117,7 +117,7 @@ program testvshifte
     lsave = llsave
     nlat2 = nnlat2
     lwork = llwork
-    pi = acos( -1.0 )
+    pi = acos(-1.0)
     dlat = pi/nlat
     dlon = (pi+pi)/nlon
     dlat2 = 0.5*dlat

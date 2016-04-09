@@ -634,7 +634,7 @@ do 107 n=2, nlat
 mlim = min(n, l)
 do 107 m=2, mlim
 imn = indx(m, n)
-if (n>=l) imn = imndx(m, n)
+if (n >= l) imn = imndx(m, n)
 abel(imn)=sqrt(real((2*n+1)*(m+n-2)*(m+n-3))/ &
                real(((2*n-3)*(m+n-1)*(m+n))))
 bbel(imn)=sqrt(real((2*n+1)*(n-m-1)*(n-m))/ &

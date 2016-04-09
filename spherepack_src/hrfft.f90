@@ -256,7 +256,7 @@ subroutine hrfti1 (n, wa, fac)
 107 if (nl /= 1) go to 104            
     fac(1) = n
     fac(2) = nf
-    tpi = 8.d0*atan(1.d0)
+    tpi = 8.0*atan(1.0)
     argh = tpi/n
     is = 0
     nfm1 = nf-1

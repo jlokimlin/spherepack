@@ -224,15 +224,15 @@ program testint
         !
         if (nlat==1) then
             theta(1) = acos(0.0)
-            wts(1) = 2.d0
+            wts(1) = 2.0
             return
         end if
         if (nlat==2) then
             x = sqrt(1.0/3.0)
             theta(1) = acos(x)
             theta(2) = acos(-x)
-            wts(1) = 1.d0
-            wts(2) = 1.d0
+            wts(1) = 1.0
+            wts(2) = 1.0
             return
         end if
         !
@@ -346,7 +346,7 @@ program testint
         real cp,fnum,fden,fnmh,a1,b1,c1,cp2,fnnp1,fnmsq,fk, &
             t1,t2,pm1,sc10,sc20,sc40
         dimension       cp(n/2+1)
-        parameter (sc10=1024.d0)
+        parameter (sc10=1024.0)
         parameter (sc20=sc10*sc10)
         parameter (sc40=sc20*sc20)
         !
@@ -360,7 +360,7 @@ program testint
         else 
             goto 5
         end if
-2       cp(1) = sqrt(2.d0)
+2       cp(1) = sqrt(2.0)
         return
 3       if (ma /= 0) go to 4
         cp(1) = sqrt(1.5d0)
@@ -372,18 +372,18 @@ program testint
         nmms2 = (n-ma)/2
         fnum = n+ma+1
         fnmh = n-ma+1
-        pm1 = 1.d0
+        pm1 = 1.0
         go to 15
 10      nmms2 = (n-ma-1)/2
         fnum = n+ma+2
         fnmh = n-ma+2
-        pm1 = -1.d0
+        pm1 = -1.0
         !      t1 = 1.
-        !      t1 = 2.d0**(n-1)
-        !      t1 = 1.d0/t1
-15      t1 = 1.d0/sc20
+        !      t1 = 2.0**(n-1)
+        !      t1 = 1.0/t1
+15      t1 = 1.0/sc20
         nex = 20
-        fden = 2.d0
+        fden = 2.0
         if (nmms2 < 1) go to 20
         do 18 i=1,nmms2
             t1 = fnum*t1/fden
@@ -394,7 +394,7 @@ program testint
             fnum = fnum+2.
             fden = fden+2.
 18      continue
-20      t1 = t1/2.d0**(n-1-nex)
+20      t1 = t1/2.0**(n-1-nex)
         if (mod(ma/2,2) /= 0) t1 = -t1
         t2 = 1.
         if (ma == 0) go to 26
@@ -404,7 +404,7 @@ program testint
 25      continue
 26      cp2 = t1*sqrt((n+.5d0)*t2)
         fnnp1 = n*(n+1)
-        fnmsq = fnnp1-2.d0*ma*ma
+        fnmsq = fnnp1-2.0*ma*ma
         l = (n+1)/2
         if (mod(n,2) == 0 .and. mod(ma,2) == 0) l = l+1
         cp(l) = cp2
@@ -541,13 +541,13 @@ program testint
         !     n even, m even
         !
 3       kdo=n/2
-        pb = 0.d0
+        pb = 0.0
         if (n == 0) return
         cth = cdt
         sth = sdt
         do 170 k=1,kdo
             !     pb = pb+cp(k+1)*cos(2*k*theta)
-            pb = pb-2.d0*k*cp(k+1)*sth
+            pb = pb-2.0*k*cp(k+1)*sth
             chh = cdt*cth-sdt*sth
             sth = sdt*cth+cdt*sth
             cth = chh
@@ -562,7 +562,7 @@ program testint
         sth = sdt
         do 180 k=1,kdo
             !     pb = pb+cp(k)*sin(2*k*theta)
-            pb = pb+2.d0*k*cp(k)*cth
+            pb = pb+2.0*k*cp(k)*cth
             chh = cdt*cth-sdt*sth
             sth = sdt*cth+cdt*sth
             cth = chh
@@ -584,7 +584,7 @@ program testint
         sth = sin(theta)
         do 190 k=1,kdo
             !     pb = pb+cp(k)*cos((2*k-1)*theta)
-            pb = pb-(2.d0*k-1)*cp(k)*sth
+            pb = pb-(2.0*k-1)*cp(k)*sth
             chh = cdt*cth-sdt*sth
             sth = sdt*cth+cdt*sth
             cth = chh
@@ -599,7 +599,7 @@ program testint
         sth = sin(theta)
         do 200 k=1,kdo
             !     pb = pb+cp(k)*sin((2*k-1)*theta)
-            pb = pb+(2.d0*k-1)*cp(k)*cth
+            pb = pb+(2.0*k-1)*cp(k)*cth
             chh = cdt*cth-sdt*sth
             sth = sdt*cth+cdt*sth
             cth = chh

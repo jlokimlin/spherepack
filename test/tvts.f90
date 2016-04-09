@@ -76,7 +76,7 @@ program tvts
     !
     !     set equally spaced colatitude and longitude increments
     !
-    pi = acos( -1.0 )
+    pi = acos(-1.0)
     dphi = (pi+pi)/nlon
     dlat = pi/(nlat-1)
     !

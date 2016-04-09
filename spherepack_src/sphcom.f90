@@ -43,7 +43,7 @@ subroutine dnlfk (m, n, cp)
 real cp, fnum, fden, fnmh, a1, b1, c1, cp2, fnnp1, fnmsq, fk, &
        t1, t2, pm1, sc10, sc20, sc40
 dimension       cp(1)
-parameter (sc10=1024.d0)
+parameter (sc10=1024.0)
 parameter (sc20=sc10*sc10)
 parameter (sc40=sc20*sc20)
 !
@@ -57,7 +57,7 @@ else if (n-1 == 0) then
 else 
     goto 5
 end if
-2 cp(1) = sqrt(2.d0)
+2 cp(1) = sqrt(2.0)
 return
 3 if (ma /= 0) go to 4
 cp(1) = sqrt(1.5d0)
@@ -69,18 +69,18 @@ return
 nmms2 = (n-ma)/2
 fnum = n+ma+1
 fnmh = n-ma+1
-pm1 = 1.d0
+pm1 = 1.0
 go to 15
 10 nmms2 = (n-ma-1)/2
 fnum = n+ma+2
 fnmh = n-ma+2
-pm1 = -1.d0
+pm1 = -1.0
 !      t1 = 1.
-!      t1 = 2.d0**(n-1)
-!      t1 = 1.d0/t1
-15 t1 = 1.d0/sc20
+!      t1 = 2.0**(n-1)
+!      t1 = 1.0/t1
+15 t1 = 1.0/sc20
 nex = 20
-fden = 2.d0
+fden = 2.0
 if (nmms2 < 1) go to 20
 do 18 i=1, nmms2
 t1 = fnum*t1/fden
@@ -91,7 +91,7 @@ end if
 fnum = fnum+2.
 fden = fden+2.
 18 continue
-20 t1 = t1/2.d0**(n-1-nex)
+20 t1 = t1/2.0**(n-1-nex)
 if (mod(ma/2, 2) /= 0) t1 = -t1
 t2 = 1.
 if (ma == 0) go to 26
@@ -101,7 +101,7 @@ fnmh = fnmh+2.
 end do
 26 cp2 = t1*sqrt((n+.5d0)*t2)
 fnnp1 = n*(n+1)
-fnmsq = fnnp1-2.d0*ma*ma
+fnmsq = fnnp1-2.0*ma*ma
 l = (n+1)/2
 if (mod(n, 2) == 0 .and. mod(ma, 2) == 0) l = l+1
 cp(l) = cp2
@@ -248,13 +248,13 @@ end if
 !     n even, m even
 !
 3 kdo=n/2
-pb = 0.d0
+pb = 0.0
 if (n == 0) return
 cth = cdt
 sth = sdt
 do 170 k=1, kdo
 !     pb = pb+cp(k+1)*cos(2*k*theta)
-pb = pb-2.d0*k*cp(k+1)*sth
+pb = pb-2.0*k*cp(k+1)*sth
 chh = cdt*cth-sdt*sth
 sth = sdt*cth+cdt*sth
 cth = chh
@@ -269,7 +269,7 @@ cth = cdt
 sth = sdt
 do 180 k=1, kdo
 !     pb = pb+cp(k)*sin(2*k*theta)
-pb = pb+2.d0*k*cp(k)*cth
+pb = pb+2.0*k*cp(k)*cth
 chh = cdt*cth-sdt*sth
 sth = sdt*cth+cdt*sth
 cth = chh
@@ -291,7 +291,7 @@ cth = cos(theta)
 sth = sin(theta)
 do 190 k=1, kdo
 !     pb = pb+cp(k)*cos((2*k-1)*theta)
-pb = pb-(2.d0*k-1)*cp(k)*sth
+pb = pb-(2.0*k-1)*cp(k)*sth
 chh = cdt*cth-sdt*sth
 sth = sdt*cth+cdt*sth
 cth = chh
@@ -306,7 +306,7 @@ cth = cos(theta)
 sth = sin(theta)
 do 200 k=1, kdo
 !     pb = pb+cp(k)*sin((2*k-1)*theta)
-pb = pb+(2.d0*k-1)*cp(k)*cth
+pb = pb+(2.0*k-1)*cp(k)*cth
 chh = cdt*cth-sdt*sth
 sth = sdt*cth+cdt*sth
 cth = chh
@@ -372,7 +372,7 @@ if (m>1) then
 do 100 np1=ms, nlat, ninc
 n = np1-1
 imn = indx(m, n)
-if (n>=l) imn = imndx(m, n)
+if (n >= l) imn = imndx(m, n)
 do 100 i=1, late
 pmn(np1, i, km0) = abel(imn)*pmn(n-1, i, km2) &
             +bbel(imn)*pmn(n-1, i, km0) &
@@ -526,7 +526,7 @@ subroutine zfini1 (nlat, nlon, imid, z, abc, cz, work)
 !
 dimension z(imid, nlat, 2), abc(1)
 real pi, dt, th, zh, cz(*), work(*)
-pi = acos( -1.0 )
+pi = acos(-1.0)
 dt = pi/(nlat-1)
 do mp1=1, 2
 m = mp1-1
@@ -559,7 +559,7 @@ dimension  cz(1), work(1)
 !
 real sum, sc1, t1, t2, work, cz
 lc = (nlat+1)/2
-sc1 = 2.d0/real(nlat-1)
+sc1 = 2.0/real(nlat-1)
 call dnlfk(m, n, work)
 nmod = mod(n, 2)
 mmod = mod(m, 2)
@@ -583,12 +583,12 @@ end if
 3 kdo = n/2+1
 do 5 idx=1, lc
 i = idx+idx-2
-sum = work(1)/(1.d0-i*i)
+sum = work(1)/(1.0-i*i)
 if (kdo<2) go to 29
 do 6 kp1=2, kdo
 k = kp1-1
-t1 = 1.d0-(k+k+i)**2
-t2 = 1.d0-(k+k-i)**2
+t1 = 1.0-(k+k+i)**2
+t2 = 1.0-(k+k-i)**2
 8 sum = sum+work(kp1)*(t1+t2)/(t1*t2)
 6 continue
 29 cz(idx) = sc1*sum
@@ -602,8 +602,8 @@ do 9 idx=1, lc
 i = idx+idx-2
 sum = 0.
 do 101 k=1, kdo
-t1 = 1.d0-(k+k+i)**2
-t2 = 1.d0-(k+k-i)**2
+t1 = 1.0-(k+k+i)**2
+t2 = 1.0-(k+k-i)**2
 12 sum=sum+work(k)*(t1-t2)/(t1*t2)
 101 continue
 cz(idx) = sc1*sum
@@ -624,8 +624,8 @@ do 15 idx=1, lc
 i = idx+idx-1
 sum = 0.
 do 16 k=1, kdo
-t1 = 1.d0-(k+k-1+i)**2
-t2 = 1.d0-(k+k-1-i)**2
+t1 = 1.0-(k+k-1+i)**2
+t2 = 1.0-(k+k-1-i)**2
 18 sum=sum+work(k)*(t1+t2)/(t1*t2)
 16 continue
 cz(idx)=sc1*sum
@@ -639,8 +639,8 @@ do 19 idx=1, lc
 i = idx+idx-3
 sum=0.
 do 20 k=1, kdo
-t1 = 1.d0-(k+k-1+i)**2
-t2 = 1.d0-(k+k-1-i)**2
+t1 = 1.0-(k+k-1+i)**2
+t2 = 1.0-(k+k-1-i)**2
 22 sum=sum+work(k)*(t1-t2)/(t1*t2)
 20 continue
 cz(idx)=sc1*sum
@@ -917,7 +917,7 @@ end subroutine alinit
 subroutine alini1 (nlat, nlon, imid, p, abc, cp)
 dimension p(imid, nlat, 2), abc(1), cp(1)
 real pi, dt, th, cp, ph
-pi = acos( -1.0 )
+pi = acos(-1.0)
 dt = pi/(nlat-1)
 do 160 mp1=1, 2
 m = mp1-1
@@ -1054,7 +1054,7 @@ subroutine zvini1 (nlat, nlon, imid, zv, abc, czv, work)
 !
 dimension zv(imid, nlat, 2), abc(1)
 real dt, czv(1), zvh, th, work(1)
-real, parameter :: pi = acos( -1.0 )
+real, parameter :: pi = acos(-1.0)
 dt = pi/(nlat-1)
 mdo = min(2, nlat, (nlon+1)/2)
 do mp1=1, mdo
@@ -1101,7 +1101,7 @@ subroutine zwini1 (nlat, nlon, imid, zw, abc, czw, work)
 !
 dimension zw(imid, nlat, 2), abc(1)
 real  dt, czw(1), zwh, th, work(1)
-real, parameter :: pi = acos( -1.0 )
+real, parameter :: pi = acos(-1.0)
 dt = pi/(nlat-1)
 mdo = min(3, nlat, (nlon+1)/2)
 
@@ -1303,7 +1303,7 @@ subroutine vbini1 (nlat, nlon, imid, vb, abc, cvb, work)
 !
 dimension vb(imid, nlat, 2), abc(1)
 real dt, cvb(1), th, vbh, work(1)
-real, parameter :: pi = acos( -1.0 )
+real, parameter :: pi = acos(-1.0)
 dt = pi/(nlat-1)
 mdo = min(2, nlat, (nlon+1)/2)
 do mp1=1, mdo
@@ -1349,7 +1349,7 @@ subroutine wbini1 (nlat, nlon, imid, wb, abc, cwb, work)
 !
 dimension wb(imid, nlat, 2), abc(1)
 real dt, cwb(1), wbh, th, work(1)
-real, parameter :: pi = acos( -1.0 )
+real, parameter :: pi = acos(-1.0)
 
 dt = pi/(nlat-1)
 mdo = min(3, nlat, (nlon+1)/2)
@@ -1549,7 +1549,7 @@ dimension czv(1), work(1)
 real czv, sc1, sum, work, t1, t2
 if (n <= 0) return
 lc = (nlat+1)/2
-sc1 = 2.d0/real(nlat-1)
+sc1 = 2.0/real(nlat-1)
 call dvbk(m, n, work, czv)
 nmod = mod(n, 2)
 mmod = mod(m, 2)
@@ -1563,8 +1563,8 @@ do 9 id=1, lc
 i = id+id-2
 sum = 0.
 do 10 k=1, kdo
-t1 = 1.d0-(k+k+i)**2
-t2 = 1.d0-(k+k-i)**2
+t1 = 1.0-(k+k+i)**2
+t2 = 1.0-(k+k-i)**2
 sum = sum+work(k)*(t1-t2)/(t1*t2)
 10 continue
 czv(id) = sc1*sum
@@ -1578,8 +1578,8 @@ do 5 id=1, lc
 i = id+id-2
 sum = 0.
 do 6 k=1, kdo
-t1 = 1.d0-(k+k+i)**2
-t2 = 1.d0-(k+k-i)**2
+t1 = 1.0-(k+k+i)**2
+t2 = 1.0-(k+k-i)**2
 sum = sum+work(k)*(t1+t2)/(t1*t2)
 6 continue
 czv(id) = sc1*sum
@@ -1594,8 +1594,8 @@ do 19 id=1, lc
 i = id+id-3
 sum = 0.
 do 20 k=1, kdo
-t1 = 1.d0-(k+k-1+i)**2
-t2 = 1.d0-(k+k-1-i)**2
+t1 = 1.0-(k+k-1+i)**2
+t2 = 1.0-(k+k-1-i)**2
 sum = sum+work(k)*(t1-t2)/(t1*t2)
 20 continue
 czv(id) = sc1*sum
@@ -1609,8 +1609,8 @@ do 15 id=1, lc
 i = id+id-1
 sum = 0.
 do 16 k=1, kdo
-t1 = 1.d0-(k+k-1+i)**2
-t2 = 1.d0-(k+k-1-i)**2
+t1 = 1.0-(k+k-1+i)**2
+t2 = 1.0-(k+k-1-i)**2
 sum = sum+work(k)*(t1+t2)/(t1*t2)
 16 continue
 czv(id) = sc1*sum
@@ -1776,7 +1776,7 @@ dimension czw(1), work(1)
 real czw, work, sc1, sum, t1, t2
 if (n <= 0) return
 lc = (nlat+1)/2
-sc1 = 2.d0/real(nlat-1)
+sc1 = 2.0/real(nlat-1)
 call dwbk(m, n, work, czw)
 nmod = mod(n, 2)
 mmod = mod(m, 2)
@@ -1790,8 +1790,8 @@ do 19 id=1, lc
 i = id+id-3
 sum = 0.
 do 20 k=1, kdo
-t1 = 1.d0-(k+k-1+i)**2
-t2 = 1.d0-(k+k-1-i)**2
+t1 = 1.0-(k+k-1+i)**2
+t2 = 1.0-(k+k-1-i)**2
 sum = sum+work(k)*(t1-t2)/(t1*t2)
 20 continue
 czw(id) = sc1*sum
@@ -1805,8 +1805,8 @@ do 15 id=1, lc
 i = id+id-1
 sum = 0.
 do 16 k=1, kdo
-t1 = 1.d0-(k+k-1+i)**2
-t2 = 1.d0-(k+k-1-i)**2
+t1 = 1.0-(k+k-1+i)**2
+t2 = 1.0-(k+k-1-i)**2
 sum = sum+work(k)*(t1+t2)/(t1*t2)
 16 continue
 czw(id) = sc1*sum
@@ -1821,8 +1821,8 @@ do 9 id=1, lc
 i = id+id-2
 sum = 0.
 do 10 k=1, kdo
-t1 = 1.d0-(k+k+i)**2
-t2 = 1.d0-(k+k-i)**2
+t1 = 1.0-(k+k+i)**2
+t2 = 1.0-(k+k-i)**2
 sum = sum+work(k)*(t1-t2)/(t1*t2)
 10 continue
 czw(id) = sc1*sum
@@ -1834,12 +1834,12 @@ return
 3 kdo = (n+1)/2
 do 5 id=1, lc
 i = id+id-2
-sum = work(1)/(1.d0-i*i)
+sum = work(1)/(1.0-i*i)
 if (kdo < 2) go to 29
 do 6 kp1=2, kdo
 k = kp1-1
-t1 = 1.d0-(k+k+i)**2
-t2 = 1.d0-(k+k-i)**2
+t1 = 1.0-(k+k+i)**2
+t2 = 1.0-(k+k-i)**2
 sum = sum+work(kp1)*(t1+t2)/(t1*t2)
 6 continue
 29 czw(id) = sc1*sum
@@ -2375,7 +2375,7 @@ subroutine vtini1 (nlat, nlon, imid, vb, abc, cvb, work)
 !
 dimension vb(imid, nlat, 2), abc(1), cvb(1)
 real dt, cvb, th, vbh, work(*)
-real, parameter :: pi = acos( -1.0 )
+real, parameter :: pi = acos(-1.0)
 dt = pi/(nlat-1)
 mdo = min(2, nlat, (nlon+1)/2)
 do mp1=1, mdo
@@ -2420,7 +2420,7 @@ subroutine wtini1 (nlat, nlon, imid, wb, abc, cwb, work)
 !
 dimension wb(imid, nlat, 2), abc(1)
 real dt, cwb(*), wbh, th, work(*)
-real, parameter :: pi = acos( -1.0 )
+real, parameter :: pi = acos(-1.0)
 dt = pi/(nlat-1)
 mdo = min(3, nlat, (nlon+1)/2)
 if (mdo < 2) return

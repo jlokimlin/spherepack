@@ -99,106 +99,138 @@
 ! timing                 time per call to routine lfpt is dependent on
 !                        the input parameter n.
 !
-subroutine lfpt (n, m, theta, cp, pb)
-dimension       cp(1)
-!
-pb = 0.
-ma = abs(m)
-if (ma > n) return
-if (n< 0) then
-    goto 10
-else if (n == 0) then 
-    goto 10
-else 
-    goto 30
-end if
-10 if (ma< 0) then
-    goto 20
-else if (ma == 0) then 
-    goto 20
-else 
-    goto 30
-end if
-20 pb= sqrt(.5)
-go to 140
-30 np1 = n+1
-nmod = mod(n, 2)
-mmod = mod(ma, 2)
-if (nmod< 0) then
-    goto 40
-else if (nmod == 0) then 
-    goto 40
-else 
-    goto 90
-end if
-40 if (mmod< 0) then
-    goto 50
-else if (mmod == 0) then 
-    goto 50
-else 
-    goto 70
-end if
-50 kdo = n/2+1
-cdt = cos(2.0*theta)
-sdt = sin(2.0*theta)
-ct = 1.
-st = 0.
-sum = .5*cp(1)
-do  60 kp1=2, kdo
-   cth = cdt*ct-sdt*st
-   st = sdt*ct+cdt*st
-   ct = cth
-   sum = sum+cp(kp1)*ct
-60 continue
-pb= sum
-go to 140
-70 kdo = n/2
-cdt = cos(2.0*theta)
-sdt = sin(2.0*theta)
-ct = 1.
-st = 0.
-sum = 0.
-do  80 k=1, kdo
-   cth = cdt*ct-sdt*st
-   st = sdt*ct+cdt*st
-   ct = cth
-   sum = sum+cp(k)*st
-80 continue
-pb= sum
-go to 140
-90 kdo = (n+1)/2
-   if (mmod< 0) then
-       goto 100
-   else if (mmod == 0) then 
-       goto 100
-   else 
-       goto 120
-   end if
+pure subroutine lfpt(n, m, theta, cp, pb)
+    implicit none
+    !----------------------------------------------------------------------
+    ! Dictionary: calling arguments
+    !----------------------------------------------------------------------
+    integer, intent (in)  :: n
+    integer, intent (in)  :: m
+    real,    intent (in)  :: theta
+    real,    intent (in)  :: cp(1)
+    real,    intent (out) :: pb
+    !----------------------------------------------------------------------
+    ! Dictionary: local variables
+    !----------------------------------------------------------------------
+    integer :: ma, nmod, mmod, np1, k, kdo, kp1
+    real    :: cdt, sdt, ct, st, cth, summation
+    !----------------------------------------------------------------------
+
+    pb = 0.0
+    ma = abs(m)
+
+    if (ma > n) then
+        return
+    end if
+
+    if (n< 0) then
+        go to 10
+    else if (n == 0) then
+        go to 10
+    else
+        go to 30
+    end if
+
+10  if (ma < 0) then
+        go to 20
+    else if (ma == 0) then
+        go to 20
+    else
+        go to 30
+    end if
+
+20  pb= sqrt(0.5)
+
+    go to 140
+
+30  np1 = n+1
+    nmod = mod(n, 2)
+    mmod = mod(ma, 2)
+
+    if (nmod < 0) then
+        go to 40
+    else if (nmod == 0) then
+        go to 40
+    else
+        go to 90
+    end if
+
+40  if (mmod < 0) then
+        go to 50
+    else if (mmod == 0) then
+        go to 50
+    else
+        go to 70
+    end if
+
+50  kdo = n/2+1
+    cdt = cos(2.0*theta)
+    sdt = sin(2.0*theta)
+    ct = 1.0
+    st = 0.0
+    summation = 0.5*cp(1)
+    do kp1=2, kdo
+        cth = cdt*ct-sdt*st
+        st = sdt*ct+cdt*st
+        ct = cth
+        summation = summation+cp(kp1)*ct
+    end do
+    pb= summation
+    go to 140
+
+70  kdo = n/2
+    cdt = cos(2.0*theta)
+    sdt = sin(2.0*theta)
+    ct = 1.
+    st = 0.
+    summation = 0.
+    do k=1, kdo
+        cth = cdt*ct-sdt*st
+        st = sdt*ct+cdt*st
+        ct = cth
+        summation = summation+cp(k)*st
+    end do
+
+    pb= summation
+    go to 140
+
+90  kdo = (n+1)/2
+    if (mmod< 0) then
+        go to 100
+    else if (mmod == 0) then
+        go to 100
+    else
+        go to 120
+    end if
+
 100 cdt = cos(2.0*theta)
-sdt = sin(2.0*theta)
-ct = cos(theta)
-st = -sin(theta)
-sum = 0.
-do 110 k=1, kdo
-   cth = cdt*ct-sdt*st
-   st = sdt*ct+cdt*st
-   ct = cth
-   sum = sum+cp(k)*ct
-110 continue
-pb= sum
-go to 140
+    sdt = sin(2.0*theta)
+    ct = cos(theta)
+    st = -sin(theta)
+    summation = 0.
+    do k=1, kdo
+        cth = cdt*ct-sdt*st
+        st = sdt*ct+cdt*st
+        ct = cth
+        summation = summation+cp(k)*ct
+    end do
+    pb= summation
+    go to 140
+
 120 cdt = cos(2.0*theta)
-sdt = sin(2.0*theta)
-ct = cos(theta)
-st = -sin(theta)
-sum = 0.
-do 130 k=1, kdo
-   cth = cdt*ct-sdt*st
-   st = sdt*ct+cdt*st
-   ct = cth
-   sum = sum+cp(k)*st
-130 continue
-pb= sum
+    sdt = sin(2.0*theta)
+    ct = cos(theta)
+    st = -sin(theta)
+    summation = 0.
+    do k=1, kdo
+        cth = cdt*ct-sdt*st
+        st = sdt*ct+cdt*st
+        ct = cth
+        summation = summation+cp(k)*st
+    end do
+    pb= summation
+
 140 return
+
 end subroutine lfpt
 

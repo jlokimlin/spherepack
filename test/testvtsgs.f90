@@ -58,7 +58,7 @@ program tvtsgs
     lwork = 165765
     ldwork = 25741
     !
-    pi = acos( -1.0 )
+    pi = acos(-1.0)
     hpi = pi/2.
     dtr = pi/180.
     isym = 0

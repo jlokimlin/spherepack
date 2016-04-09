@@ -95,7 +95,7 @@ subroutine gaqd(nlat, theta, wts, w, lwork, ierror)
     !----------------------------------------------------------------------
     integer         :: i, idx, it, mnlat, nix
     integer         :: nhalf, ns2
-    real, parameter :: PI = acos( -1.0 )
+    real, parameter :: PI = acos(-1.0)
     real, parameter :: HALF_PI = PI/2
     real            :: x, dtheta, dthalf, cmax
     real            :: zprev, zlast, zero

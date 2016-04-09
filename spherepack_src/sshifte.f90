@@ -48,7 +48,7 @@
 !     (which includes poles).  the transfer can go from goff to greg or from
 !     greg to goff (see ioff).  the grids which underly goff and greg are
 !     described below.  the north and south poles are at latitude 0.5*pi and
-!     -0.5*pi radians respectively where pi = acos( -1.0 ).
+!     -0.5*pi radians respectively where pi = acos(-1.0).
 !
 ! *** grid descriptions
 !
@@ -498,7 +498,7 @@ subroutine sshifti(ioff, nlon, nlat, lsav, wsav, ier)
     ier = 4
     if (lsav < 2*(2*nlat+nlon+16)) return
     ier = 0
-    pi = acos( -1.0 )
+    pi = acos(-1.0)
     !
     !     set lat, long increments
     !

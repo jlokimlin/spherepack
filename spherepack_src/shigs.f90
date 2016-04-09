@@ -306,7 +306,7 @@ subroutine shigsp1(nlat, nlon, l, late, wts, p0n, p1n, abel, bbel, cbel, &
         mlim = min(n, l)
         do m=2, mlim
             imn = indx(m, n)
-            if (n>=l) imn = imndx(m, n)
+            if (n >= l) imn = imndx(m, n)
             abel(imn)=sqrt(real((2*n+1)*(m+n-2)*(m+n-3))/ &
                 real(((2*n-3)*(m+n-1)*(m+n))))
             bbel(imn)=sqrt(real((2*n+1)*(n-m-1)*(n-m))/ &

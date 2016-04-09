@@ -316,41 +316,41 @@ subroutine slapes1(nlat, nlon, isym, nt, slap, ids, jds, a, b, mdab, ndab, &
     !
     !     set coefficient multiplyers
     !
-    do 1 n=2, nlat
+    do n=2, nlat
         fn = real(n - 1)
         fnn(n) = fn*(fn + 1.0)
-1   continue
+    end do
     !
     !     compute scalar laplacian coefficients for each vector field
     !
-    do 2 k=1, nt
-        do 3 n=1, nlat
-            do 4 m=1, mmax
+    do k=1, nt
+        do n=1, nlat
+            do m=1, mmax
                 alap(m, n, k) = 0.0
                 blap(m, n, k) = 0.0
-4           continue
-3       continue
+            end do
+        end do
         !
         !     compute m=0 coefficients
         !
-        do 5 n=2, nlat
+        do n=2, nlat
             alap(1, n, k) = -fnn(n)*a(1, n, k)
             blap(1, n, k) = -fnn(n)*b(1, n, k)
-5       continue
+        end do
         !
         !     compute m>0 coefficients
         !
-        do 6 m=2, mmax
-            do 7 n=m, nlat
+        do m=2, mmax
+            do n=m, nlat
                 alap(m, n, k) = -fnn(n)*a(m, n, k)
                 blap(m, n, k) = -fnn(n)*b(m, n, k)
-7           continue
-6       continue
-2   continue
+            end do
+        end do
+    end do
     !
     !     synthesize alap, blap into slap
     !
     call shses(nlat, nlon, isym, nt, slap, ids, jds, alap, blap, &
         mmax, nlat, wsave, lsave, wk, lwk, ierror)
-    return
+
 end subroutine slapes1

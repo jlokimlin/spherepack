@@ -210,7 +210,7 @@ itype(ntri) = 3
 !     1             x3(l2), y3(l2), z3(l2), l2=1, ntri)
 ! 23   format(9f10.7)
 !
-pi = acos( -1.0 )
+pi = acos(-1.0)
 dtr = pi/180.
 xeye=eyer*sin(dtr*eyelat)
 yeye=xeye*sin(dtr*eyelon)
@@ -225,7 +225,7 @@ r1 = x*x+y*y
 if (r1 /= 0.) go to 10
 phi = 0.
 theta = 0.
-if (z < 0.) theta = acos( -1.0 )
+if (z < 0.) theta = acos(-1.0)
 return
 10 r = sqrt(r1+z*z)
 r1 = sqrt(r1) 
@@ -301,7 +301,7 @@ real le2
 !     compute projections of 3-d points
 !
 le2 = .6931471805599453094172321d0
-l2e = 1.d0/le2
+l2e = 1.0/le2
 fntri = ntri
 irmax = .5*l2e*log(fntri)
 irmax = min(irmax, 10)

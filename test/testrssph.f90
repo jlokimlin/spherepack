@@ -190,7 +190,7 @@ program testrssph
     !
     !     set equally spaced grid increments
     !
-    pi = acos( -1.0 )
+    pi = acos(-1.0)
     dlate = pi/(REGULAR_NLATS-1)
     dlone = (pi+pi)/REGULAR_NLONS
     dlong = (pi+pi)/GAUSSIAN_NLONS

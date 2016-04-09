@@ -1160,7 +1160,7 @@ subroutine vhgsi1(nlat, imid, vb, wb, dthet, dwts, dpbar, work)
         !
 131     ix = indx(0, n, nlat)
         do i=1, imid
-            wb(i, ix) = 0.d0
+            wb(i, ix) = 0.0
         end do
         !
         !     compute wb for m=1, n

@@ -184,7 +184,7 @@ program testrvsph
     !
     !     set equally spaced grid increments
     !
-    pi = acos( -1.0 )
+    pi = acos(-1.0)
     dlate = pi/(nlate-1)
     dlone = (pi+pi)/nlone
     dlong = (pi+pi)/nlong
