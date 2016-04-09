@@ -257,7 +257,7 @@ subroutine divgs(nlat, nlon, isym, nt, divg, idiv, jdiv, br, bi, mdb, ndb, &
     l2 = (nlat+1)/2
     l1 = min((nlon+2)/2, nlat)
     lp=nlat*(3*(l1+l2)-2)+(l1-1)*(l2*(2*nlat-l1)-3*l1)/2+nlon+15
-    if (lshsgs<lp) return
+    if (lshsgs < lp) return
     ierror = 10
     !
     !     verify unsaved work space (add to what shses requires, file f3)

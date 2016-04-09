@@ -88,7 +88,7 @@ program tshpg
             !
             call shpgi(nlat,nlon,isym,mtrunc,wshp,lwshp,iwshp,liwshp, &
                 work,lwrk,ierror)
-            if (ierror/=0) write(*,429) ierror
+            if (ierror /= 0) write(*,429) ierror
 429         format(' ierror2 =',i5,' at 429')
             !
             if (iprint /= 0) write (6,5) mode,nlat,nlon
@@ -131,7 +131,7 @@ program tshpg
                 wshp,lwshp,iwshp,liwshp,wrk1,lwrk1,ierror)
             thold = etime(t1)
             toe = t1(1)-toe
-            if (ierror/=0) write(*,428) ierror
+            if (ierror /= 0) write(*,428) ierror
 428         format(' ierror =',i5,' at 428')
             if (iprint>0)write(*,431)
 431         format(/' approx and exact solution'/)

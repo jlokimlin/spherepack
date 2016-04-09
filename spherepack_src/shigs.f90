@@ -160,7 +160,7 @@ subroutine shigs(nlat, nlon, wshigs, lshigs, work, lwork, dwork, &
     ierror = 0
     !     set preliminary quantites needed to compute and store legendre polys
     call shigsp(nlat, nlon, wshigs, lshigs, dwork, ldwork, ierror)
-    if (ierror/=0) return
+    if (ierror /= 0) return
     !     set legendre poly pointer in wshigs
     ipmnf = nlat+2*nlat*late+3*(l*(l-1)/2+(nlat-l)*(l-1))+nlon+16
     call shigss1(nlat, l, late, wshigs, work, wshigs(ipmnf))
@@ -231,7 +231,7 @@ subroutine shigsp(nlat, nlon, wshigs, lshigs, dwork, ldwork, ierror)
         wshigs(i4), wshigs(i5), wshigs(i6), wshigs(i7), dwork(idth), &
         dwork(idwts), dwork(iw), ierror)
 
-    if (ierror/=0) then
+    if (ierror /= 0) then
         ierror = 5
     end if
 

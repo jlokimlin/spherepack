@@ -157,7 +157,7 @@ subroutine shigc(nlat, nlon, wshigc, lshigc, dwork, ldwork, ierror)
     call shigc1(nlat, nlon, l, late, wshigc(i1), wshigc(i2), wshigc(i3), &
         wshigc(i4), wshigc(i5), wshigc(i6), wshigc(i7), dwork(idth), &
         dwork(idwts), dwork(iw), ierror)
-    if (ierror/=0) ierror = 5
+    if (ierror /= 0) ierror = 5
 
 end subroutine shigc
 

@@ -609,7 +609,7 @@ subroutine vhaesgo(nlat,nlon,ityp,nt,u,v,iduv,jduv, &
         end do
     end do
 
-    if (ierror/=0) return
+    if (ierror /= 0) return
 
 end subroutine vhaesgo
 
@@ -624,7 +624,7 @@ subroutine vhsesgo(nlat,nlon,ityp,nt,u,v,iduv,jduv, &
     !
     call vhses(nlat,nlon,ityp,nt,v,u,iduv,jduv, &
         br,bi,cr,ci,mdab,ndab,wsav,lwsav,work,lwork,ierror)
-    if (ierror/=0) return
+    if (ierror /= 0) return
     do k=1,nt
         do j=1,nlon
             do i=1,nlat

@@ -301,20 +301,20 @@ if (nlat < 3) return
 ierror = 2
 if (nlon < 4) return
 ierror = 3
-if (mode<0 .or.mode>2) return
+if (mode < 0 .or. mode > 2) return
 ierror = 4
-if (nt<1) return
+if (nt < 1) return
 !     set limit for m iin a(m, n), b(m, n) computation
 l = min((nlon+2)/2, nlat)
 !     set gaussian point nearest equator pointer
 late = (nlat+mod(nlat, 2))/2
 !     set number of grid points for analysis/synthesis
 lat = nlat
-if (mode/=0) lat = late
+if (mode /= 0) lat = late
 ierror = 5
-if (idg<lat) return
+if (idg < lat) return
 ierror = 6
-if (jdg<nlon) return
+if (jdg < nlon) return
 ierror = 7
 if (mdab < l) return
 ierror = 8
@@ -326,7 +326,7 @@ ierror = 9
 if (lshsgc < nlat*(2*l2+3*l1-2)+3*l1*(1-l1)/2+nlon+15)return
 ierror = 10
 !     check temporary work space length
-if (mode==0) then
+if (mode == 0) then
 if (lwork <nlat*(nlon*nt+max(3*l2, nlon)))return
 else
 !     mode.ne.0
@@ -356,7 +356,7 @@ do 100 j=1, nlon
 do 100 i=1, lat
 g(i, j, k) = 0.0
 100 continue
-if (mode==0) then
+if (mode == 0) then
 !     set first column in g
 m = 0
 !     compute pmn for all i and n=m, ..., l-1
@@ -452,7 +452,7 @@ else
 !     set first column in g
 m = 0
 meo = 1
-if (mode==1) meo = 2
+if (mode == 1) meo = 2
 ms = m+meo
 !     compute pmn for all i and n=m, ..., l-1
 call legin(mode, l, nlat, m, w, pmn, km)
@@ -479,7 +479,7 @@ if (nlon==l+l-2) then
 m = l-1
 call legin(mode, l, nlat, m, w, pmn, km)
 ns = l
-if (mode==1) ns = l+1
+if (mode == 1) ns = l+1
 do 116 k=1, nt
 do 116 i=1, late
 do 116 np1=ns, nlat, 2
@@ -537,7 +537,7 @@ iw = idwts+nlat
 call shsgci1(nlat, nlon, l, late, wshsgc(i1), wshsgc(i2), wshsgc(i3), &
 wshsgc(i4), wshsgc(i5), wshsgc(i6), wshsgc(i7), dwork(idth), &
 dwork(idwts), dwork(iw), ierror)
-if (ierror/=0) ierror = 5
+if (ierror /= 0) ierror = 5
 return
 end subroutine shsgci
 subroutine shsgci1(nlat, nlon, l, late, wts, p0n, p1n, abel, bbel, cbel, &

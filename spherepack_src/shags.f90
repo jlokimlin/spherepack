@@ -710,7 +710,7 @@ subroutine shags1(nlat, nlon, l, lat, mode, gs, idg, jdg, nt, a, b, mdab, &
             !
             !==> set starting n for mode odd
             !
-            if (mode==1) then
+            if (mode == 1) then
                 ns = l+1
             end if
             do k=1, nt
@@ -823,7 +823,7 @@ subroutine shagsi(nlat, nlon, wshags, lshags, work, lwork, dwork, ldwork, &
     call shagsp(nlat, nlon, wshags, lshags, dwork, ldwork, ierror)
 
     ! Check error flag
-    if (ierror/=0) then
+    if (ierror /= 0) then
         return
     end if
 

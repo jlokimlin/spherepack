@@ -257,7 +257,7 @@ subroutine sfvpgs(nlat, nlon, isym, nt, sf, vp, idv, jdv, br, bi, cr, ci, &
     l2 = (nlat+mod(nlat, 2))/2
     l1 = min((nlon+2)/2, nlat)
     lp=nlat*(3*(l1+l2)-2)+(l1-1)*(l2*(2*nlat-l1)-3*l1)/2+nlon+15
-    if (lshsgs<lp) return
+    if (lshsgs < lp) return
     !
     !     verify unsaved work space
     !

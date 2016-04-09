@@ -268,7 +268,7 @@ subroutine slapgs(nlat, nlon, isym, nt, slap, ids, jds, a, b, mdab, ndab, &
     l2 = (nlat+mod(nlat, 2))/2
     l1 = min((nlon+2)/2, nlat)
     lp=nlat*(3*(l1+l2)-2)+(l1-1)*(l2*(2*nlat-l1)-3*l1)/2+nlon+15
-    if (lshsgs<lp) return
+    if (lshsgs < lp) return
     ierror = 10
     !
     !     set and verify unsaved work space length

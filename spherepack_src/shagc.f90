@@ -320,7 +320,7 @@ if (nlon < 4) return
 ierror = 3
 if (isym < 0 .or.isym > 2) return
 ierror = 4
-if (nt<1) return
+if (nt < 1) return
 !     set upper limit on m for spherical harmonic basis
 l = min((nlon+2)/2, nlat)
 !     set gaussian point nearest equator pointer
@@ -329,9 +329,9 @@ late = (nlat+mod(nlat, 2))/2
 lat = nlat
 if (isym /= 0) lat = late
 ierror = 5
-if (idg<lat) return
+if (idg < lat) return
 ierror = 6
-if (jdg<nlon) return
+if (jdg < nlon) return
 ierror = 7
 if (mdab < l) return
 ierror = 8
@@ -402,7 +402,7 @@ b(mp1, np1, k) = 0.0
 !     set m+1 limit on b(m+1) calculation
 lm1 = l
 if (nlon == l+l-2) lm1 = l-1
-if (mode==0) then
+if (mode == 0) then
 !     for full sphere (mode=0) and even/odd reduction:
 !     overwrite g(i) with (g(i)+g(nlat-i+1))*wts(i)
 !     overwrite g(nlat-i+1) with (g(i)-g(nlat-i+1))*wts(i)
@@ -490,7 +490,7 @@ if (nl2<late) g(late, j, k) = wts(late)*g(late, j, k)
 m = 0
 call legin(mode, l, nlat, m, w, pmn, km)
 ms = 1
-if (mode==1) ms = 2
+if (mode == 1) ms = 2
 do 117 k=1, nt
 do 117 i=1, late
 do 117 np1=ms, nlat, 2
@@ -500,7 +500,7 @@ a(1, np1, k) = a(1, np1, k)+g(i, 1, k)*pmn(np1, i, km)
 do 118 mp1=2, lm1
 m = mp1-1
 ms = mp1
-if (mode==1) ms = mp1+1
+if (mode == 1) ms = mp1+1
 !     compute pmn for all i and n=m, ..., nlat-1
 call legin(mode, l, nlat, m, w, pmn, km)
 do 119 k=1, nt
@@ -515,7 +515,7 @@ if (nlon==l+l-2) then
 m = l-1
 call legin(mode, l, nlat, m, w, pmn, km)
 ns = l
-if (mode==1) ns = l+1
+if (mode == 1) ns = l+1
 do 120 k=1, nt
 do 120 i=1, late
 do 120 np1=ns, nlat, 2
@@ -563,7 +563,7 @@ iw = idwts+nlat
 call shagci1(nlat, nlon, l, late, wshagc(i1), wshagc(i2), wshagc(i3), &
 wshagc(i4), wshagc(i5), wshagc(i6), wshagc(i7), dwork(idth), &
 dwork(idwts), dwork(iw), ierror)
-if (ierror/=0) ierror = 5
+if (ierror /= 0) ierror = 5
 return
 end subroutine shagci
 subroutine shagci1(nlat, nlon, l, late, wts, p0n, p1n, abel, bbel, cbel, &

@@ -291,48 +291,141 @@
 !
 subroutine shsgs(nlat, nlon, mode, nt, g, idg, jdg, a, b, mdab, ndab, &
     wshsgs, lshsgs, work, lwork, ierror)
-    dimension g(idg, jdg, 1), a(mdab, ndab, 1), b(mdab, ndab, 1), &
-        wshsgs(lshsgs), work(lwork)
 
-    !     check input parameters
-    ierror = 1
-    if (nlat < 3) return
-    ierror = 2
-    if (nlon < 4) return
-    ierror = 3
-    if (mode<0 .or.mode>2) return
-    ierror = 4
-    if (nt<1) return
-    !     set limit on m subscript
+    use, intrinsic :: iso_fortran_env, only: &
+        wp => REAL64, &
+        ip => INT32
+
+    implicit none
+    !----------------------------------------------------------------------
+    ! Dictionary: calling arguments
+    !----------------------------------------------------------------------
+    integer (ip), intent (in)      :: nlat
+    integer (ip), intent (in)      :: nlon
+    integer (ip), intent (in)      :: mode
+    integer (ip), intent (in)      :: nt
+    real (wp),    intent (out)     :: g(idg, jdg, 1)
+    integer (ip), intent (in)      :: idg
+    integer (ip), intent (in)      :: jdg
+    real (wp),    intent (in)      :: a(mdab, ndab, 1)
+    real (wp),    intent (in)      :: b(mdab, ndab, 1)
+    integer (ip), intent (in)      :: mdab
+    integer (ip), intent (in)      :: ndab
+    real (wp),    intent (in out)  :: wshsgs(lshsgs)
+    integer (ip), intent (in)      :: lshsgs
+    real (wp),    intent (in out)  :: work(lwork)
+    integer (ip), intent (in)      :: lwork
+    integer (ip), intent (out)     :: ierror
+    !----------------------------------------------------------------------
+    ! Dictionary: calling arguments
+    !----------------------------------------------------------------------
+    integer (ip) :: l, l1, l2, lp, iw, lat, late, ifft, ipmn
+    !----------------------------------------------------------------------
+
+    !
+    !==> Check validity of input arguments
+    !
+
+    ! Initialize error flag
+    ierror = 0
+
+    ! Check case 1
+    if (nlat < 3) then
+        ierror = 1
+        return
+    end if
+
+    ! Check case 2
+    if (nlon < 4) then
+        ierror = 2
+        return
+    end if
+
+    ! Check case 3
+    if (mode < 0 .or. mode > 2) then
+        ierror = 3
+        return
+    end if
+
+    ! Check case 4
+    if (nt < 1) then
+        ierror = 4
+        return
+    end if
+
+    !
+    !==> set limit on m subscript
+    !
     l = min((nlon+2)/2, nlat)
-    !     set gaussian point nearest equator pointer
+
+    !
+    !==> set gaussian point nearest equator pointer
+    !
     late = (nlat+mod(nlat, 2))/2
-    !     set number of grid points for analysis/synthesis
+
+    !
+    !==> set number of grid points for analysis/synthesis
+    !
     lat = nlat
-    if (mode/=0) lat = late
-    ierror = 5
-    if (idg<lat) return
-    ierror = 6
-    if (jdg<nlon) return
-    ierror = 7
-    if (mdab < l) return
-    ierror = 8
-    if (ndab < nlat) return
+
+    if (mode /= 0) then
+        lat = late
+    end if
+
+    ! Check case 5
+    if (idg < lat) then
+        ierror = 5
+        return
+    end if
+
+    ! Check case 6
+    if (jdg < nlon) then
+        ierror = 6
+        return
+    end if
+
+    ! Check case 7
+    if (mdab < l) then
+        ierror = 7
+        return
+    end if
+
+    ! Check case 8
+    if (ndab < nlat) then
+        ierror = 8
+        return
+    end if
+
     l1 = l
     l2 = late
-    ierror = 9
-    !     check permanent work space length
     lp=nlat*(3*(l1+l2)-2)+(l1-1)*(l2*(2*nlat-l1)-3*l1)/2+nlon+15
-    if (lshsgs<lp) return
-    !     check temporary work space length
-    ierror = 10
-    if (mode==0 .and. lwork <nlat*nlon*(nt+1)) return
-    if (mode/=0 .and. lwork <l2*nlon*(nt+1)) return
-    ierror = 0
-    !     starting address for fft values and legendre polys in wshsgs
+
+
+    ! Check case 9: permanent work space length
+    if (lshsgs < lp) then
+        ierror = 9
+        return
+    end if
+
+    ! Check case 10: temporary work space length
+    if ( &
+        (mode == 0 .and. lwork < nlat*nlon*(nt+1)) &
+        .or. &
+        (mode /= 0 .and. lwork < l2*nlon*(nt+1)) &
+        ) then
+        ierror = 10
+        return
+    end if
+
+    !
+    !==> Starting address for fft values and legendre polys in wshsgs
+    !
     ifft = nlat+2*nlat*late+3*(l*(l-1)/2+(nlat-l)*(l-1))+1
     ipmn = ifft+nlon+15
-    !     set pointer for internal storage of g
+
+    !
+    !==> set pointer for internal storage of g
+    !
     iw = lat*nlon*nt+1
 
     call shsgs1(nlat, nlon, l, lat, mode, g, idg, jdg, nt, a, b, mdab, ndab, &
@@ -344,36 +437,75 @@ end subroutine shsgs
 
 subroutine shsgs1(nlat, nlon, l, lat, mode, gs, idg, jdg, nt, a, b, mdab, &
     ndab, wfft, pmn, late, g, work)
-    dimension gs(idg, jdg, nt), a(mdab, ndab, nt), b(mdab, ndab, nt)
-    dimension wfft(1), pmn(late, 1), g(lat, nlon, nt), work(1)
+    !
+    ! Purpose:
+    !
+    ! Reconstruct fourier coefficients in g on gaussian grid
+    ! using coefficients in a, b
+    !
+    use, intrinsic :: iso_fortran_env, only: &
+        wp => REAL64, &
+        ip => INT32
 
-    !     reconstruct fourier coefficients in g on gaussian grid
-    !     using coefficients in a, b
+    implicit none
+    !----------------------------------------------------------------------
+    ! Dictionary: calling arguments
+    !----------------------------------------------------------------------
+    integer (ip), intent (in)     :: nlat
+    integer (ip), intent (in)     :: nlon
+    integer (ip), intent (in)     :: l
+    integer (ip), intent (in)     :: lat
+    integer (ip), intent (in)     :: mode
+    real (wp),    intent (in out) :: gs(idg, jdg, nt)
+    integer (ip), intent (in)     :: idg
+    integer (ip), intent (in)     :: jdg
+    integer (ip), intent (in)     :: nt
+    real (wp),    intent (in)     :: a(mdab, ndab, nt)
+    real (wp),    intent (in)     :: b(mdab, ndab, nt)
+    integer (ip), intent (in)     :: mdab
+    integer (ip), intent (in)     :: ndab
+    real (wp),    intent (in out) :: wfft(1)
+    real (wp),    intent (in out) :: pmn(late, 1)
+    integer (ip), intent (in)     :: late
+    real (wp),    intent (out)    :: g(lat, nlon, nt)
+    real (wp),    intent (in out) :: work(1)
+    !----------------------------------------------------------------------
+    ! Dictionary: calling arguments
+    !----------------------------------------------------------------------
+    integer (ip) :: i, j, k, m
+    integer (ip) :: mn, is, ms, ns, lm1, nl2, lp1, mp1, np1, mp2, meo, mml1
+    real (wp) ::  t1, t2, t3, t4
+    !----------------------------------------------------------------------
 
-    !     initialize to zero
-    do k=1, nt
-        do j=1, nlon
-            do i=1, lat
-                g(i, j, k) = 0.0
-            end do
-        end do
-    end do
+    !
+    !==> initialize to zero
+    !
+    g = 0.0_wp
 
     lm1 = l
-    if (nlon == l+l-2) lm1 = l-1
-    if (mode==0) then
-        !     set first column in g
+    if (nlon == l+l-2) then
+        lm1 = l-1
+    end if
+
+    if (mode == 0) then
+        !
+        !==> set first column in g
+        !
         m = 0
         mml1 = m*(2*nlat-m-1)/2
         do k=1, nt
-            !     n even
+            !
+            !==>  n even
+            !
             do np1=1, nlat, 2
                 mn = mml1+np1
                 do i=1, late
                     g(i, 1, k) = g(i, 1, k)+a(1, np1, k)*pmn(i, mn)
                 end do
             end do
-            !     n odd
+            !
+            !==> n odd
+            !
             nl2 = nlat/2
             do np1=2, nlat, 2
                 mn = mml1+np1
@@ -384,7 +516,9 @@ subroutine shsgs1(nlat, nlon, l, lat, mode, gs, idg, jdg, nt, a, b, mdab, &
             end do
         end do
 
-        !     restore m=0 coefficients from odd/even
+        !
+        !==> restore m=0 coefficients from odd/even
+        !
         do k=1, nt
             do i=1, nl2
                 is = nlat-i+1
@@ -395,14 +529,18 @@ subroutine shsgs1(nlat, nlon, l, lat, mode, gs, idg, jdg, nt, a, b, mdab, &
             end do
         end do
 
-        !     sweep interior columns of g
+        !
+        !==> sweep interior columns of g
+        !
         do mp1=2, lm1
             m = mp1-1
             mml1 = m*(2*nlat-m-1)/2
             mp2 = m+2
             do k=1, nt
-                !     for n-m even store (g(i, p, k)+g(nlat-i+1, p, k))/2 in g(i, p, k) p=2*m, 2*m+1
-                !     for i=1, ..., late
+                !
+                !==> for n-m even store (g(i, p, k)+g(nlat-i+1, p, k))/2 in g(i, p, k) p=2*m, 2*m+1
+                !    for i=1, ..., late
+                !
                 do np1=mp1, nlat, 2
                     mn = mml1+np1
                     do i=1, late
@@ -410,9 +548,10 @@ subroutine shsgs1(nlat, nlon, l, lat, mode, gs, idg, jdg, nt, a, b, mdab, &
                         g(i, 2*m+1, k) = g(i, 2*m+1, k)+b(mp1, np1, k)*pmn(i, mn)
                     end do
                 end do
-
-                !     for n-m odd store g(i, p, k)-g(nlat-i+1, p, k) in g(nlat-i+1, p, k)
-                !     for i=1, ..., nlat/2 (p=2*m, p=2*m+1)
+                !
+                !==> for n-m odd store g(i, p, k)-g(nlat-i+1, p, k) in g(nlat-i+1, p, k)
+                !    for i=1, ..., nlat/2 (p=2*m, p=2*m+1)
+                !
                 do np1=mp2, nlat, 2
                     mn = mml1+np1
                     do i=1, nl2
@@ -422,7 +561,9 @@ subroutine shsgs1(nlat, nlon, l, lat, mode, gs, idg, jdg, nt, a, b, mdab, &
                     end do
                 end do
 
-                !     now set fourier coefficients using even-odd reduction above
+                !
+                !==> now set fourier coefficients using even-odd reduction above
+                !
                 do i=1, nl2
                     is = nlat-i+1
                     t1 = g(i, 2*m, k)
@@ -437,26 +578,32 @@ subroutine shsgs1(nlat, nlon, l, lat, mode, gs, idg, jdg, nt, a, b, mdab, &
             end do
         end do
 
-        !     set last column (using a only) if necessary
+        !
+        !==> set last column (using a only) if necessary
+        !
         if (nlon== l+l-2) then
             m = l-1
             mml1 = m*(2*nlat-m-1)/2
             do k=1, nt
-                !     n-m even
+                !
+                !==> (n - m) even
+                !
                 do np1=l, nlat, 2
                     mn = mml1+np1
                     do i=1, late
-                        g(i, nlon, k) = g(i, nlon, k)+2.0*a(l, np1, k)*pmn(i, mn)
+                        g(i, nlon, k) = g(i, nlon, k)+2.0_wp *a(l, np1, k)*pmn(i, mn)
                     end do
                 end do
 
                 lp1 = l+1
-                !     n-m odd
+                !
+                !==> (n - m) odd
+                !
                 do np1=lp1, nlat, 2
                     mn = mml1+np1
                     do i=1, nl2
                         is = nlat-i+1
-                        g(is, nlon, k) = g(is, nlon, k)+2.0*a(l, np1, k)*pmn(i, mn)
+                        g(is, nlon, k) = g(is, nlon, k)+2.0_wp *a(l, np1, k)*pmn(i, mn)
                     end do
                 end do
 
@@ -475,7 +622,7 @@ subroutine shsgs1(nlat, nlon, l, lat, mode, gs, idg, jdg, nt, a, b, mdab, &
         m = 0
         mml1 = m*(2*nlat-m-1)/2
         meo = 1
-        if (mode==1) meo = 2
+        if (mode == 1) meo = 2
         ms = m+meo
         do k=1, nt
             do np1=ms, nlat, 2
@@ -504,16 +651,20 @@ subroutine shsgs1(nlat, nlon, l, lat, mode, gs, idg, jdg, nt, a, b, mdab, &
         end do
 
         if (nlon==l+l-2) then
-            !     set last column
+            !
+            !==> set last column
+            !
             m = l-1
             mml1 = m*(2*nlat-m-1)/2
             ns = l
-            if (mode==1) ns = l+1
+            if (mode == 1) then
+                ns = l+1
+            end if
             do k=1, nt
                 do np1=ns, nlat, 2
                     mn = mml1+np1
                     do i=1, late
-                        g(i, nlon, k) = g(i, nlon, k)+2.0*a(l, np1, k)*pmn(i, mn)
+                        g(i, nlon, k) = g(i, nlon, k)+2.0_wp *a(l, np1, k)*pmn(i, mn)
                     end do
                 end do
             end do
@@ -521,15 +672,19 @@ subroutine shsgs1(nlat, nlon, l, lat, mode, gs, idg, jdg, nt, a, b, mdab, &
     end if
 
 
-    !     do inverse fourier transform
+    !
+    !==> Perform inverse fourier transform
+    !
     do k=1, nt
         call hrfftb(lat, nlon, g(1, 1, k), lat, wfft, work)
     end do
-    !     scale output in gs
+    !
+    !==> scale output in gs
+    !
     do k=1, nt
         do j=1, nlon
             do i=1, lat
-                gs(i, j, k) = 0.5*g(i, j, k)
+                gs(i, j, k) = 0.5_wp *g(i, j, k)
             end do
         end do
     end do
@@ -538,43 +693,104 @@ end subroutine shsgs1
 
 
 
-subroutine shsgsi(nlat, nlon, wshsgs, lshsgs, work, lwork, dwork, ldwork, &
-    ierror)
+subroutine shsgsi(nlat, nlon, wshsgs, lshsgs, work, lwork, dwork, ldwork, ierror)
     !
-    !     this subroutine must be called before calling shags or shsgs with
-    !     fixed nlat, nlon. it precomputes the gaussian weights, points
-    !     and all necessary legendre polys and stores them in wshsgs.
-    !     these quantities must be preserved when calling shsgs
-    !     repeatedly with fixed nlat, nlon.
+    ! Remark:
     !
-    dimension wshsgs(lshsgs), work(lwork)
-    real dwork(ldwork)
+    ! This subroutine must be called before calling shags or shsgs with
+    ! fixed nlat, nlon. it precomputes the gaussian weights, points
+    ! and all necessary legendre polys and stores them in wshsgs.
+    ! these quantities must be preserved when calling shsgs
+    ! repeatedly with fixed nlat, nlon.
+    !
+    use, intrinsic :: iso_fortran_env, only: &
+        wp => REAL64, &
+        ip => INT32
 
-    ierror = 1
-    if (nlat < 3) return
-    ierror = 2
-    if (nlon < 4) return
-    !     set triangular truncation limit for spherical harmonic basis
+    implicit none
+    !----------------------------------------------------------------------
+    ! Dictionary: calling arguments
+    !----------------------------------------------------------------------
+    integer (ip), intent (in)     :: nlat
+    integer (ip), intent (in)     :: nlon
+    real (wp),    intent (in out) :: wshsgs(lshsgs)
+    integer (ip), intent (in)     :: lshsgs
+    real (wp),    intent (in out) :: work(lwork)
+    integer (ip), intent (in)     :: lwork
+    real (wp),    intent (in out) :: dwork(ldwork)
+    integer (ip), intent (in)     :: ldwork
+    integer (ip), intent (out)    :: ierror
+    !----------------------------------------------------------------------
+    ! Dictionary: calling arguments
+    !----------------------------------------------------------------------
+    integer (ip) :: l, l1, l2, lp, ldw, late, ipmnf
+    !----------------------------------------------------------------------
+
+    !
+    !==> Check validity of input arguments
+    !
+
+    ! Initialize error flag
+    ierror = 0
+
+    ! Check case 1
+    if (nlat < 3) then
+        ierror = 1
+        return
+    end if
+
+    ! Check case 2
+    if (nlon < 4) then
+        ierror = 2
+        return
+    end if
+
+    !
+    !==> set triangular truncation limit for spherical harmonic basis
+    !
     l = min((nlon+2)/2, nlat)
-    !     set equator or nearest point (if excluded) pointer
+
+    !
+    !==> set equator or nearest point (if excluded) pointer
+    !
     late = (nlat+1)/2
     l1 = l
     l2 = late
-    !     check permanent work space length
-    ierror = 3
     lp=nlat*(3*(l1+l2)-2)+(l1-1)*(l2*(2*nlat-l1)-3*l1)/2+nlon+15
-    if (lshsgs<lp) return
-    ierror = 4
-    !     check temporary work space
-    if (lwork <4*nlat*(nlat+2)+2) return
-    ierror = 5
-    if (ldwork < nlat*(nlat+4)) return
-    ierror = 0
-    !     set preliminary quantites needed to compute and store legendre polys
+
+    ! Check case 3: permanent work space length
+    if (lshsgs < lp) then
+        ierror = 3
+        return
+    end if
+
+
+    ! Check case 4: temporary work space
+    if (lwork <4*nlat*(nlat+2)+2) then
+        ierror = 4
+        return
+    end if
+
+    ! Check case 5
+    if (ldwork < nlat*(nlat+4)) then
+        ierror = 5
+        return
+    end if
+
+    !
+    !==> set preliminary quantites needed to compute and store legendre polys
+    !
     ldw = nlat*(nlat+4)
     call shsgsp(nlat, nlon, wshsgs, lshsgs, dwork, ldwork, ierror)
-    if (ierror/=0) return
-    !     set legendre poly pointer in wshsgs
+
+    ! Check error flag
+    if (ierror /= 0) then
+        return
+    end if
+
+    !
+    !==>  set legendre poly pointer in wshsgs
+    !
     ipmnf = nlat+2*nlat*late+3*(l*(l-1)/2+(nlat-l)*(l-1))+nlon+16
 
     call shsgss1(nlat, l, late, wshsgs, work, wshsgs(ipmnf))
@@ -584,25 +800,48 @@ end subroutine shsgsi
 
 
 subroutine shsgss1(nlat, l, late, w, pmn, pmnf)
-    dimension w(1), pmn(nlat, late, 3), pmnf(late, 1)
+    !
+    ! Purpose:
+    !
+    ! Compute and store legendre polys for i=1, ..., late, m=0, ..., l-1
+    ! and n=m, ..., l-1
+    !
+    use, intrinsic :: iso_fortran_env, only: &
+        wp => REAL64, &
+        ip => INT32
 
-    !     compute and store legendre polys for i=1, ..., late, m=0, ..., l-1
-    !     and n=m, ..., l-1
-    do i=1, nlat
-        do j=1, late
-            do k=1, 3
-                pmn(i, j, k) = 0.0
-            end do
-        end do
-    end do
+    implicit none
+    !----------------------------------------------------------------------
+    ! Dictionary: calling arguments
+    !----------------------------------------------------------------------
+    integer (ip), intent (in)     :: nlat
+    integer (ip), intent (in)     :: l
+    integer (ip), intent (in)     :: late
+    real (wp),    intent (in out) :: w(1)
+    real (wp),    intent (out)    :: pmn(nlat, late, 3)
+    real (wp),    intent (in out) :: pmnf(late, 1)
+    !----------------------------------------------------------------------
+    ! Dictionary: local variables
+    !----------------------------------------------------------------------
+    integer (ip) :: i, j, k, m, km, mn, mp1, np1, mml1, mode
+    !----------------------------------------------------------------------
+
+    !
+    !==> Initialize
+    !
+    pmn = 0.0_wp
 
     do mp1=1, l
         m = mp1-1
         mml1 = m*(2*nlat-m-1)/2
-        !     compute pmn for n=m, ..., nlat-1 and i=1, ..., (l+1)/2
+        !
+        !==> compute pmn for n=m, ..., nlat-1 and i=1, ..., (l+1)/2
+        !
         mode = 0
         call legin(mode, l, nlat, m, w, pmn, km)
-        !     store above in pmnf
+        !
+        !==> store above in pmnf
+        !
         do np1=mp1, nlat
             mn = mml1+np1
             do i=1, late
@@ -610,32 +849,82 @@ subroutine shsgss1(nlat, l, late, w, pmn, pmnf)
             end do
         end do
     end do
+
 end subroutine shsgss1
 
 
 
 subroutine shsgsp(nlat, nlon, wshsgs, lshsgs, dwork, ldwork, ierror)
-    dimension wshsgs(lshsgs)
-    real dwork(ldwork)
 
-    ierror = 1
-    if (nlat < 3) return
-    ierror = 2
-    if (nlon < 4) return
-    !     set triangular truncation limit for spherical harmonic basis
+    use, intrinsic :: iso_fortran_env, only: &
+        wp => REAL64, &
+        ip => INT32
+
+    implicit none
+    !----------------------------------------------------------------------
+    ! Dictionary: calling arguments
+    !----------------------------------------------------------------------
+    integer (ip), intent (in)     :: nlat
+    integer (ip), intent (in)     :: nlon
+    real (wp),    intent (in out) :: wshsgs(lshsgs)
+    integer (ip), intent (in)     :: lshsgs
+    real (wp),    intent (in out) :: dwork(ldwork)
+    integer (ip), intent (in)     :: ldwork
+    integer (ip), intent (out)    :: ierror
+    !----------------------------------------------------------------------
+    ! Dictionary: local variables
+    !----------------------------------------------------------------------
+    integer (ip) :: l, i1, i2, i3, l1, l2, i4, i5, i6, i7
+    integer (ip) :: iw, late, idth, idwts
+    !----------------------------------------------------------------------
+
+    !
+    !==> Check validity of input arguments
+    !
+
+    ! Initialize error flag
+    ierror = 0
+
+    ! Check case 1
+    if (nlat < 3) then
+        ierror = 1
+        return
+    end if
+
+    ! Check case 2
+    if (nlon < 4) then
+        ierror = 2
+        return
+    end if
+
+    !
+    !==> set triangular truncation limit for spherical harmonic basis
+    !
     l = min((nlon+2)/2, nlat)
-    !     set equator or nearest point (if excluded) pointer
+
+    !
+    !==> set equator or nearest point (if excluded) pointer
+    !
     late = (nlat+mod(nlat, 2))/2
     l1 = l
     l2 = late
-    ierror = 3
-    !     check permanent work space length
-    if (lshsgs < nlat*(2*l2+3*l1-2)+3*l1*(1-l1)/2+nlon+15)return
-    ierror = 4
-    !     if (lwork.lt.4*nlat*(nlat+2)+2) return
-    if (ldwork < nlat*(nlat+4)) return
-    ierror = 0
-    !     set pointers
+
+    ! Check case 3: permanent work space length
+    if (lshsgs < nlat*(2*l2+3*l1-2)+3*l1*(1-l1)/2+nlon+15) then
+        ierror = 3
+        return
+    end if
+
+    ! Check case 4
+    if (ldwork < nlat*(nlat+4)) then
+        ierror = 4
+        return
+    end if
+
+
+    !
+    !==> set pointers
+    !
     i1 = 1
     i2 = i1+nlat
     i3 = i2+nlat*late
@@ -643,17 +932,21 @@ subroutine shsgsp(nlat, nlon, wshsgs, lshsgs, dwork, ldwork, ierror)
     i5 = i4+l*(l-1)/2 +(nlat-l)*(l-1)
     i6 = i5+l*(l-1)/2 +(nlat-l)*(l-1)
     i7 = i6+l*(l-1)/2 +(nlat-l)*(l-1)
-    !     set indices in temp work for real gaussian wts and pts
+
+    !
+    !==> set indices in temp work for real gaussian wts and pts
     idth = 1
-    !     idwts = idth+2*nlat
-    !     iw = idwts+2*nlat
     idwts = idth+nlat
     iw = idwts+nlat
 
     call shsgsp1(nlat, nlon, l, late, wshsgs(i1), wshsgs(i2), wshsgs(i3), &
         wshsgs(i4), wshsgs(i5), wshsgs(i6), wshsgs(i7), dwork(idth), &
         dwork(idwts), dwork(iw), ierror)
-    if (ierror/=0) ierror = 6
+
+    ! Check error flag
+    if (ierror /= 0) then
+        ierror = 6
+    end if
 
 end subroutine shsgsp
 
@@ -661,43 +954,82 @@ end subroutine shsgsp
 
 subroutine shsgsp1(nlat, nlon, l, late, wts, p0n, p1n, abel, bbel, cbel, &
     wfft, dtheta, dwts, work, ier)
-    dimension wts(nlat), p0n(nlat, late), p1n(nlat, late), abel(1), bbel(1), &
-        cbel(1), wfft(1), dtheta(nlat), dwts(nlat)
-    real pb, dtheta, dwts, work(*)
 
-    indx(m, n) = (n-1)*(n-2)/2+m-1
-    imndx(m, n) = l*(l-1)/2+(n-l-1)*(l-1)+m-1
-    call hrffti(nlon, wfft)
+    use, intrinsic :: iso_fortran_env, only: &
+        wp => REAL64, &
+        ip => INT32
+
+    implicit none
+    !----------------------------------------------------------------------
+    ! Dictionary: calling arguments
+    !----------------------------------------------------------------------
+    integer (ip), intent (in)     :: nlat
+    integer (ip), intent (in)     :: nlon
+    integer (ip), intent (in)     :: l
+    integer (ip), intent (in)     :: late
+    real (wp),    intent (in out) :: wts(nlat)
+    real (wp),    intent (out)    :: p0n(nlat, late)
+    real (wp),    intent (out)    :: p1n(nlat, late)
+    real (wp),    intent (out)    :: abel(1)
+    real (wp),    intent (out)    :: bbel(1)
+    real (wp),    intent (out)    :: cbel(1)
+    real (wp),    intent (in out) :: wfft(1)
+    real (wp),    intent (out)    :: dtheta(nlat)
+    real (wp),    intent (out)    :: dwts(nlat)
+    real (wp),    intent (in out) :: work(*)
+    integer (ip), intent (out)    :: ier
+    !----------------------------------------------------------------------
+    ! Dictionary: calling arguments
+    !----------------------------------------------------------------------
+    integer (ip) :: i, m, n, lw, np1, imn, mlim
+    real (wp)    :: pb
+    !----------------------------------------------------------------------
+
     !
-    !     compute real gaussian points and weights
+    !==> Initialize FFT
+    !
+    call hrffti(nlon, wfft)
+
+    !
+    !==> compute real gaussian points and weights
     !
     lw = nlat*(nlat+2)
     call gaqd(nlat, dtheta, dwts, work, lw, ier)
-    if (ier/=0) return
 
-    !     store gaussian weights single precision to save computation
-    !     in inner loops in analysis
-    do i=1, nlat
-        wts(i) = dwts(i)
-    end do
+    ! Check error flag
+    if (ier/=0) then
+        return
+    end if
 
-    !     initialize p0n, p1n using real dnlfk, dnlft
-    do np1=1, nlat
-        do i=1, late
-            p0n(np1, i) = 0.0
-            p1n(np1, i) = 0.0
-        end do
-    end do
-    !     compute m=n=0 legendre polynomials for all theta(i)
+    !
+    !==> store gaussian weights single precision to save computation
+    !    in inner loops in analysis
+    !
+    wts = dwts
+
+
+    !
+    !==> initialize p0n, p1n using real dnlfk, dnlft
+    !
+    p0n = 0.0_wp
+    p1n = 0.0_wp
+
+    !
+    !==> compute m=n=0 legendre polynomials for all theta(i)
+    !
     np1 = 1
     n = 0
     m = 0
     call dnlfk(m, n, work)
+
     do i=1, late
         call dnlft(m, n, dtheta(i), work, pb)
         p0n(1, i) = pb
     end do
-    !     compute p0n, p1n for all theta(i) when n.gt.0
+
+    !
+    !==> compute p0n, p1n for all theta(i) when n.gt.0
+    !
     do np1=2, nlat
         n = np1-1
         m = 0
@@ -706,7 +1038,9 @@ subroutine shsgsp1(nlat, nlon, l, late, wts, p0n, p1n, abel, bbel, cbel, &
             call dnlft(m, n, dtheta(i), work, pb)
             p0n(np1, i) = pb
         end do
-        !     compute m=1 legendre polynomials for all n and theta(i)
+        !
+        !==> compute m=1 legendre polynomials for all n and theta(i)
+        !
         m = 1
         call dnlfk(m, n, work)
         do i=1, late
@@ -716,13 +1050,16 @@ subroutine shsgsp1(nlat, nlon, l, late, wts, p0n, p1n, abel, bbel, cbel, &
     end do
 
     !
-    !     compute and store swarztrauber recursion coefficients
-    !     for 2.le.m.le.n and 2.le.n.le.nlat in abel, bbel, cbel
+    !==> compute and store swarztrauber recursion coefficients
+    !    for 2<=m<=n and 2<=n<=nlat in abel, bbel, cbel
+    !
     do n=2, nlat
         mlim = min(n, l)
         do m=2, mlim
-            imn = indx(m, n)
-            if (n >= l) imn = imndx(m, n)
+            imn = (n-1)*(n-2)/2+m-1
+            if (n >= l) then
+                imn = l*(l-1)/2+(n-l-1)*(l-1)+m-1
+            end if
             abel(imn)=sqrt(real((2*n+1)*(m+n-2)*(m+n-3))/ &
                 real(((2*n-3)*(m+n-1)*(m+n))))
             bbel(imn)=sqrt(real((2*n+1)*(n-m-1)*(n-m))/ &

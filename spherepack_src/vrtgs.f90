@@ -250,7 +250,7 @@ subroutine vrtgs(nlat, nlon, isym, nt, vort, ivrt, jvrt, cr, ci, mdc, ndc, &
     l2 = (nlat+mod(nlat, 2))/2
     l1 = min((nlon+2)/2, nlat)
     lp=nlat*(3*(l1+l2)-2)+(l1-1)*(l2*(2*nlat-l1)-3*l1)/2+nlon+15
-    if (lshsgs<lp) return
+    if (lshsgs < lp) return
     ierror = 10
     !
     !     verify unsaved work space (add to what shses requires, file f3)
