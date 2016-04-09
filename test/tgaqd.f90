@@ -283,7 +283,7 @@ program testint
         !
         dtheta = pis2/nhalf
         dthalf = dtheta/2.0
-        cmax = .2d0*dtheta
+        cmax = .2*dtheta
         if (mod(nlat,2)/=0) then
             theta(nhalf) = pis2
             zero = pis2-dtheta
@@ -363,9 +363,9 @@ program testint
 2       cp(1) = sqrt(2.0)
         return
 3       if (ma /= 0) go to 4
-        cp(1) = sqrt(1.5d0)
+        cp(1) = sqrt(1.5)
         return
-4       cp(1) = sqrt(.75d0)
+4       cp(1) = sqrt(.75)
         if (m == -1) cp(1) = -cp(1)
         return
 5       if (mod(n+ma,2) /= 0) go to 10
@@ -402,7 +402,7 @@ program testint
             t2 = fnmh*t2/(fnmh+pm1)
             fnmh = fnmh+2.
 25      continue
-26      cp2 = t1*sqrt((n+.5d0)*t2)
+26      cp2 = t1*sqrt((n+.5)*t2)
         fnnp1 = n*(n+1)
         fnmsq = fnnp1-2.0*ma*ma
         l = (n+1)/2

@@ -33,7 +33,7 @@
 !
 !     contains documentation and code for subroutine visgeo
 !
-subroutine VISGEO (m, idp, jdp, x, y, z, h, eyer, eyelat, eyelon, &
+subroutine visgeo (m, idp, jdp, x, y, z, h, eyer, eyelat, eyelon, &
                           work, lwork, iwork, liwork, ierror)
 !
 !     subroutine visgeo will display a function on the sphere
@@ -160,8 +160,8 @@ work(i1), work(i2), work(i3), work(i4), work(i5), work(i6), &
 work(i7), work(i8), work(i9), IWORK(1), work(i11), &
 work(i12), work(i13), work(i14), IWORK(lt+1))
 return
-end subroutine VISGEO
-subroutine VISGEO1(m, idp, jdp, h, eyer, eyelat, eyelon, &
+end subroutine visgeo
+subroutine visgeo1(m, idp, jdp, h, eyer, eyelat, eyelon, &
     xi, yi, zi, x1, y1, z1, x2, y2, z2, x3, y3, z3, itype, work, x, y, z, iwork)
 dimension h(idp, jdp, 5), xi(idp, jdp, 5), yi(idp, jdp, 5), zi(idp, jdp, 5), &
 x1(*), y1(*), z1(*), x2(*), y2(*), z2(*), x3(*), y3(*), z3(*), itype(*), &
@@ -211,15 +211,15 @@ itype(ntri) = 3
 ! 23   format(9f10.7)
 !
 pi = acos(-1.0)
-dtr = pi/180.
+dtr = pi/180
 xeye=eyer*sin(dtr*eyelat)
 yeye=xeye*sin(dtr*eyelon)
 xeye=xeye*cos(dtr*eyelon)
 zeye=eyer*cos(dtr*eyelat)
-call VSURF(xeye, yeye, zeye, ntri, x1, y1, z1, x2, y2, z2, &
+call vsurf(xeye, yeye, zeye, ntri, x1, y1, z1, x2, y2, z2, &
                  x3, y3, z3, itype, work, iwork)
 return
-end subroutine VISGEO1
+end subroutine visgeo1
 subroutine ctos(x, y, z, r, theta, phi)
 r1 = x*x+y*y
 if (r1 /= 0.) go to 10
@@ -240,7 +240,7 @@ y = r*st*sin(phi)
 z = r*cos(theta)
 return
 end subroutine stoc
-subroutine VSURF(xeye, yeye, zeye, ntri, x1, y1, z1, x2, y2, z2, &
+subroutine vsurf(xeye, yeye, zeye, ntri, x1, y1, z1, x2, y2, z2, &
                  x3, y3, z3, itype, work, iwork)
 !
 !    subroutine vsurf is like subroutine hidel except the triangles
@@ -281,7 +281,7 @@ call vsurf1(xeye, yeye, zeye, ntri, x1, y1, z1, x2, y2, z2, x3, y3, z3, &
  work(12*ntri+1), work(13*ntri+1), iwork, IWORK(ntri+1), &
  IWORK(2*ntri+1), IWORK(4*ntri+1))
 return
-end subroutine VSURF
+end subroutine vsurf
 subroutine vsurf1(xeye, yeye, zeye, ntri, x1, y1, z1, x2, y2, z2, x3, y3, z3, &
  itype, px1, py1, px2, py2, px3, py3, vx1, vy1, vx2, vy2, vx3, vy3, tl, tr, kh, &
  next, istart, ifinal)
@@ -300,7 +300,7 @@ real le2
 !
 !     compute projections of 3-d points
 !
-le2 = .6931471805599453094172321d0
+le2 = .6931471805599453094172321
 l2e = 1.0/le2
 fntri = ntri
 irmax = .5*l2e*log(fntri)

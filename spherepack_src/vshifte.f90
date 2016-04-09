@@ -377,33 +377,33 @@ subroutine vhftoff(nlon, nlat, uoff, ureg, wsav, nr, &
         !       shift the n2=(nlon+1)/2 rlat vectors one half latitude grid
         !
         call vhifth(n2, nlat2, rlatu, wsav, wrk)
-            !
-            !       set ureg, vreg shifted in latitude
-            !
-            do j=1, n2
-        js = n2+j
-        ureg(j, 1) =   rlatu(j, 1)
-        ureg(js, 1) = -rlatu(j, 1)
-        do i=2, nlatp1
-            ureg(j, i) =  rlatu(j, i)
-            ureg(js, i) =-rlatu(j, nlat2-i+2)
+        !
+        !       set ureg, vreg shifted in latitude
+        !
+        do j=1, n2
+            js = n2+j
+            ureg(j, 1) =   rlatu(j, 1)
+            ureg(js, 1) = -rlatu(j, 1)
+            do i=2, nlatp1
+                ureg(j, i) =  rlatu(j, i)
+                ureg(js, i) =-rlatu(j, nlat2-i+2)
+            end do
+        end do
+    end if
+    !
+    !     execute full circle longitude shift
+    !
+    do j=1, nlon
+        do i=1, nlatp1
+            rlonu(i, j) = ureg(j, i)
         end do
     end do
-end if
-!
-!     execute full circle longitude shift
-!
-do j=1, nlon
-    do i=1, nlatp1
-        rlonu(i, j) = ureg(j, i)
+    call vhifth(nlatp1, nlon, rlonu, wsav(isav), wrk)
+    do j=1, nlon
+        do i=1, nlatp1
+            ureg(j, i) = rlonu(i, j)
+        end do
     end do
-end do
-call vhifth(nlatp1, nlon, rlonu, wsav(isav), wrk)
-do j=1, nlon
-    do i=1, nlatp1
-        ureg(j, i) = rlonu(i, j)
-    end do
-end do
 end subroutine vhftoff
 subroutine vhftreg(nlon, nlat, uoff, ureg, wsav, nr, nlat2, &
     nlatp1, rlatu, rlonu, rlou, wrk)
@@ -433,82 +433,82 @@ subroutine vhftreg(nlon, nlat, uoff, ureg, wsav, nr, nlat2, &
         !       half shift in longitude in rlon
         !
         call vhifth(nlatp1, nlon, rlonu, wsav(isav), wrk)
-                !
-                !       set full 2*nlat circles in rlat using shifted values in rlon
-                !
-            do j=1, n2
-        js = j+n2-1
-        rlatu(j, 1) = ureg(j, 1)
-        do i=2, nlat
-            rlatu(j, i) = ureg(j, i)
-            rlatu(j, nlat+i) =-rlonu(nlat+2-i, js)
+            !
+            !       set full 2*nlat circles in rlat using shifted values in rlon
+            !
+        do j=1, n2
+            js = j+n2-1
+            rlatu(j, 1) = ureg(j, 1)
+            do i=2, nlat
+                rlatu(j, i) = ureg(j, i)
+                rlatu(j, nlat+i) =-rlonu(nlat+2-i, js)
+            end do
+            rlatu(j, nlat+1) = ureg(j, nlat+1)
         end do
-        rlatu(j, nlat+1) = ureg(j, nlat+1)
-    end do
-    do j=n2+1, nlon
-        js = j-n2
-        rlatu(j, 1) = ureg(j, 1)
-        do i=2, nlat
-            rlatu(j, i) = ureg(j, i)
-            rlatu(j, nlat+i) =-rlonu(nlat+2-i, js)
+        do j=n2+1, nlon
+            js = j-n2
+            rlatu(j, 1) = ureg(j, 1)
+            do i=2, nlat
+                rlatu(j, i) = ureg(j, i)
+                rlatu(j, nlat+i) =-rlonu(nlat+2-i, js)
+            end do
+            rlatu(j, nlat+1) = ureg(j, nlat+1)
         end do
-        rlatu(j, nlat+1) = ureg(j, nlat+1)
-    end do
-    !
-    !       shift the nlon rlat vectors one halflatitude grid
-    !
-    call vhifth(nlon, nlat2, rlatu, wsav, wrk)
+        !
+        !       shift the nlon rlat vectors one halflatitude grid
+        !
+        call vhifth(nlon, nlat2, rlatu, wsav, wrk)
         !
         !       set values in uoff
         !
         do j=1, nlon
-    do i=1, nlat
-        uoff(j, i) = rlatu(j, i)
-    end do
-end do
-else
-    !
-    !     even number of longitudes (no initial longitude shift necessary)
-    !     set full 2*nlat circles (over poles) for each longitude pair (j, js)
-    !
-do j=1, n2
-    js = n2+j
-    rlatu(j, 1) = ureg(j, 1)
-    do i=2, nlat
-        rlatu(j, i) = ureg(j, i)
-        rlatu(j, nlat+i) =-ureg(js, nlat+2-i)
-    end do
-    rlatu(j, nlat+1) = ureg(j, nlat+1)
-end do
-!
-!       shift the n2=(nlon+1)/2 rlat vectors one half latitude grid
-!
-call vhifth(n2, nlat2, rlatu, wsav, wrk)
+            do i=1, nlat
+                uoff(j, i) = rlatu(j, i)
+            end do
+        end do
+    else
+            !
+            !     even number of longitudes (no initial longitude shift necessary)
+            !     set full 2*nlat circles (over poles) for each longitude pair (j, js)
+            !
+        do j=1, n2
+            js = n2+j
+            rlatu(j, 1) = ureg(j, 1)
+            do i=2, nlat
+                rlatu(j, i) = ureg(j, i)
+                rlatu(j, nlat+i) =-ureg(js, nlat+2-i)
+            end do
+            rlatu(j, nlat+1) = ureg(j, nlat+1)
+        end do
         !
-        !       set values in uoff
+        !       shift the n2=(nlon+1)/2 rlat vectors one half latitude grid
         !
-    do j=1, n2
-js = n2+j
-do i=1, nlat
-    uoff(j, i) =  rlatu(j, i)
-    uoff(js, i) =-rlatu(j, nlat2+1-i)
-end do
-end do
-end if
-!
-!     execute full circle longitude shift for all latitude circles
-!
-do j=1, nlon
-    do i=1, nlat
-        rlou(i, j) = uoff(j, i)
+        call vhifth(n2, nlat2, rlatu, wsav, wrk)
+            !
+            !       set values in uoff
+            !
+        do j=1, n2
+            js = n2+j
+            do i=1, nlat
+                uoff(j, i) =  rlatu(j, i)
+                uoff(js, i) =-rlatu(j, nlat2+1-i)
+            end do
+        end do
+    end if
+    !
+    !     execute full circle longitude shift for all latitude circles
+    !
+    do j=1, nlon
+        do i=1, nlat
+            rlou(i, j) = uoff(j, i)
+        end do
     end do
-end do
-call vhifth(nlat, nlon, rlou, wsav(isav), wrk)
-do j=1, nlon
-    do i=1, nlat
-        uoff(j, i) = rlou(i, j)
+    call vhifth(nlat, nlon, rlou, wsav(isav), wrk)
+    do j=1, nlon
+        do i=1, nlat
+            uoff(j, i) = rlou(i, j)
+        end do
     end do
-end do
 end subroutine vhftreg
 
 subroutine vshifti(ioff, nlon, nlat, lsav, wsav, ier)
@@ -565,24 +565,26 @@ subroutine vhifth(m, n, r, wsav, work)
     !     compute fourier coefficients for r on shifted grid
     !
     call hrfftf(m, n, r, m, wsav(n+2), work)
+
     do l=1, m
         do k=2, n2
             r2km2 = r(l, k+k-2)
             r2km1 = r(l, k+k-1)
-            r(l, k+k-2)   =  r2km2*wsav(n2+k) - r2km1*wsav(k)
-            r(l, k+k-1)   =  r2km2*wsav(k)    + r2km1*wsav(n2+k)
+            r(l, k+k-2) = r2km2*wsav(n2+k) - r2km1*wsav(k)
+            r(l, k+k-1) = r2km2*wsav(k) + r2km1*wsav(n2+k)
         end do
     end do
     !
     !     shift r with fourier synthesis and normalization
     !
     call hrfftb(m, n, r, m, wsav(n+2), work)
+
     do l=1, m
         do k=1, n
             r(l, k) = r(l, k)/n
         end do
     end do
-    return
+
 end subroutine vhifth
 
 subroutine vhifthi(n, dp, wsav)
@@ -590,13 +592,17 @@ subroutine vhifthi(n, dp, wsav)
     !     initialize wsav for subroutine vhifth
     !
     implicit none
-    integer n, n2, k
+    integer n, k
     real wsav(*), dp
-    n2 = (n+1)/2
-    do k=2, n2
-        wsav(k)    =  sin((k-1)*dp)
-        wsav(k+n2) =  cos((k-1)*dp)
-    end do
+
+
+    associate( n2 => (n+1)/2 )
+        do k=2, n2
+            wsav(k) = sin((k-1)*dp)
+            wsav(k+n2) = cos((k-1)*dp)
+        end do
+    end associate
+
     call hrffti(n, wsav(n+2))
-    return
+
 end subroutine vhifthi

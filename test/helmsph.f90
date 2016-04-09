@@ -118,7 +118,7 @@ contains
             call sphere_type%create(nlat=NLATS, nlon=NLONS)
 
             ! Allocate known error from previous platform
-            allocate( error_previous_platform, source='     discretization error = 3.552714e-15' )
+            allocate( error_previous_platform, source='     discretization error = 2.664535e-15' )
             !
             !==> For regular sphere
             !
@@ -128,7 +128,7 @@ contains
             call sphere_type%create(nlat=NLATS, nlon=NLONS)
 
             ! Allocate known error from previous platform
-            allocate( error_previous_platform, source='     discretization error = 2.331468e-15' )
+            allocate( error_previous_platform, source='     discretization error = 1.332268e-15' )
         end select
 
         !

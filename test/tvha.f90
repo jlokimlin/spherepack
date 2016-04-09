@@ -116,8 +116,8 @@ contains
             call sphere_type%create(nlat=NLATS, nlon=NLONS)
 
             ! Allocate known error from previous platform
-            allocate( previous_polar_error, source='     polar error     = 9.047386e-14' )
-            allocate( previous_azimuthal_error, source='     azimuthal error = 1.507082e-13' )
+            allocate( previous_polar_error, source='     polar error     = 2.690555e-14' )
+            allocate( previous_azimuthal_error, source='     azimuthal error = 2.824306e-14' )
             !
             !==> For regular sphere
             !
@@ -127,8 +127,8 @@ contains
             call sphere_type%create(nlat=NLATS, nlon=NLONS)
 
             ! Allocate known error from previous platform
-            allocate( previous_polar_error, source='     polar error     = 8.579997e-14' )
-            allocate( previous_azimuthal_error, source='     azimuthal error = 1.461516e-13' )
+            allocate( previous_polar_error, source='     polar error     = 2.426757e-14' )
+            allocate( previous_azimuthal_error, source='     azimuthal error = 3.070124e-14' )
         end select
 
         !

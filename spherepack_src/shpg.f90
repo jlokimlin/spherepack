@@ -1094,9 +1094,9 @@ end if
 2 cp(1) = sqrt(2.0)
 return
 3 if (ma /= 0) go to 4
-cp(1) = sqrt(1.5d0)
+cp(1) = sqrt(1.5)
 return
-4 cp(1) = sqrt(.75d0)
+4 cp(1) = sqrt(.75)
 if (m == -1) cp(1) = -cp(1)
 return
 5 if (mod(n+ma, 2) /= 0) go to 10
@@ -1130,7 +1130,7 @@ do 25 i=1, ma
 t2 = fnmh*t2/(fnmh+pm1)
 fnmh = fnmh+2.
 25 continue
-26 cp2 = t1*sqrt((n+.5d0)*t2)
+26 cp2 = t1*sqrt((n+.5)*t2)
 fnnp1 = n*(n+1)
 fnmsq = fnnp1-2.0*ma*ma
 l = (n+1)/2
@@ -1321,7 +1321,7 @@ call cpdp1 (nlat, cz, theta(ns2+1), wts(ns2+1))
 !
 dtheta = pis2/nhalf
 dthalf = dtheta/2.0
-cmax = .2d0*dtheta
+cmax = .2*dtheta
 !
 !     estimate first point next to theta = pi/2
 !
@@ -1445,7 +1445,7 @@ if (mod(n, 2) ==0) then
 !     n even
 !
 kdo = n/2
-pb = .5d0*cz
+pb = .5*cz
 dpb = 0.0
 if (n > 0) then
 cth = cdt

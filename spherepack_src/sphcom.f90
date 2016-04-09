@@ -60,9 +60,9 @@ end if
 2 cp(1) = sqrt(2.0)
 return
 3 if (ma /= 0) go to 4
-cp(1) = sqrt(1.5d0)
+cp(1) = sqrt(1.5)
 return
-4 cp(1) = sqrt(.75d0)
+4 cp(1) = sqrt(.75)
 if (m == -1) cp(1) = -cp(1)
 return
 5 if (mod(n+ma, 2) /= 0) go to 10
@@ -99,7 +99,7 @@ do i=1, ma
 t2 = fnmh*t2/(fnmh+pm1)
 fnmh = fnmh+2.
 end do
-26 cp2 = t1*sqrt((n+.5d0)*t2)
+26 cp2 = t1*sqrt((n+.5)*t2)
 fnnp1 = n*(n+1)
 fnmsq = fnnp1-2.0*ma*ma
 l = (n+1)/2
@@ -583,7 +583,7 @@ end if
 3 kdo = n/2+1
 do 5 idx=1, lc
 i = idx+idx-2
-sum = work(1)/(1.0-i*i)
+sum = work(1)/(1.0-real(i**2))
 if (kdo<2) go to 29
 do 6 kp1=2, kdo
 k = kp1-1
@@ -602,8 +602,8 @@ do 9 idx=1, lc
 i = idx+idx-2
 sum = 0.
 do 101 k=1, kdo
-t1 = 1.0-(k+k+i)**2
-t2 = 1.0-(k+k-i)**2
+t1 = 1.0-real(2*k+i)**2
+t2 = 1.0-real(2*k-i)**2
 12 sum=sum+work(k)*(t1-t2)/(t1*t2)
 101 continue
 cz(idx) = sc1*sum
@@ -1549,7 +1549,7 @@ dimension czv(1), work(1)
 real czv, sc1, sum, work, t1, t2
 if (n <= 0) return
 lc = (nlat+1)/2
-sc1 = 2.0/real(nlat-1)
+sc1 = 2.0/(nlat-1)
 call dvbk(m, n, work, czv)
 nmod = mod(n, 2)
 mmod = mod(m, 2)
@@ -1776,7 +1776,7 @@ dimension czw(1), work(1)
 real czw, work, sc1, sum, t1, t2
 if (n <= 0) return
 lc = (nlat+1)/2
-sc1 = 2.0/real(nlat-1)
+sc1 = 2.0/(nlat-1)
 call dwbk(m, n, work, czw)
 nmod = mod(n, 2)
 mmod = mod(m, 2)

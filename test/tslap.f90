@@ -100,8 +100,8 @@ contains
             call sphere_type%create(nlat=NLATS, nlon=NLONS)
 
             ! Allocate known error from previous platform
-            allocate( laplacian_error, source='     discretization error = 1.682230e-13' )
-            allocate( inversion_error, source='     discretization error = 9.988022e-16' )
+            allocate( laplacian_error, source='     discretization error = 5.333566e-14' )
+            allocate( inversion_error, source='     discretization error = 2.164177e-16' )
             !
             !==> For regular sphere
             !
@@ -111,8 +111,8 @@ contains
             call sphere_type%create(nlat=NLATS, nlon=NLONS)
 
             ! Allocate known error from previous platform
-            allocate( laplacian_error, source='     discretization error = 1.450713e-13' )
-            allocate( inversion_error, source='     discretization error = 9.666880e-16' )
+            allocate( laplacian_error, source='     discretization error = 3.783623e-14' )
+            allocate( inversion_error, source='     discretization error = 3.372189e-16' )
         end select
 
         !
