@@ -505,7 +505,7 @@ subroutine hradf3 (mp, ido, l1, cc, mdimcc, ch, mdimch, wa1, wa2)
     !
     dimension   ch(mdimch, ido, 3, l1)  , cc(mdimcc, ido, l1, 3)     , &
         wa1(ido)     , wa2(ido)
-    arg=2.*pimach()/3.
+    arg=2.*acos(-1.0)/3.
     taur=cos(arg)
     taui=sin(arg)
     do 101 k=1, l1
@@ -563,7 +563,7 @@ subroutine hradf5 (mp, ido, l1, cc, mdimcc, ch, mdimch, &
     !
     dimension  cc(mdimcc, ido, l1, 5)    , ch(mdimch, ido, 5, l1)     , &
         wa1(ido)     , wa2(ido)     , wa3(ido)     , wa4(ido)           !
-    arg=2.*pimach()/5.
+    arg=2.*acos(-1.0)/5.
     tr11=cos(arg)
     ti11=sin(arg)
     tr12=cos(2.*arg)
@@ -683,7 +683,7 @@ subroutine hradfg (mp, ido, ip, l1, idl1, cc, c1, c2, mdimcc, &
     dimension     ch(mdimch, ido, l1, ip)   , cc(mdimcc, ido, ip, l1)  , &
         c1(mdimcc, ido, l1, ip)    , c2(mdimcc, idl1, ip), &
         ch2(mdimch, idl1, ip)           , wa(ido)
-    tpi=2.*pimach()
+    tpi=2.*acos(-1.0)
     arg = tpi/real(ip)
     dcp = cos(arg)
     dsp = sin(arg)
@@ -884,24 +884,6 @@ end subroutine hradfg
 
 
 
-pure function pimach() result (return_value)
-
-    use, intrinsic :: iso_fortran_env, only: &
-        wp => REAL64
-
-    implicit none
-    !----------------------------------------------------------------------
-    ! Dictionary: calling arguments
-    !----------------------------------------------------------------------
-    real :: return_value
-    !----------------------------------------------------------------------
-
-    return_value = acos(-1.0_wp)
-
-end function pimach
-
-
-
 subroutine hrfftb(m, n, r, mdimr, whrfft, work)
     !
     !     a multiple fft package for spherepack
@@ -991,7 +973,7 @@ subroutine hrftb1 (m, n, c, mdimc, ch, wa, fac)
         dimension    ch(mdimch, ido, l1, ip)    , cc(mdimcc, ido, ip, l1) , &
             c1(mdimcc, ido, l1, ip)     , c2(mdimcc, idl1, ip), &
             ch2(mdimch, idl1, ip)       , wa(ido)
-        tpi=2.*pimach()
+        tpi=2.*acos(-1.0)
         arg = tpi/real(ip)
         dcp = cos(arg)
         dsp = sin(arg)
@@ -1311,7 +1293,7 @@ subroutine hradb3 (mp, ido, l1, cc, mdimcc, ch, mdimch, wa1, wa2)
     !
     dimension  cc(mdimcc, ido, 3, l1)    , ch(mdimch, ido, l1, 3), &
         wa1(ido)   , wa2(ido)
-    arg=2.*pimach()/3.
+    arg=2.*acos(-1.0)/3.
     taur=cos(arg)
     taui=sin(arg)
     do 101 k=1, l1
@@ -1370,7 +1352,7 @@ subroutine hradb5 (mp, ido, l1, cc, mdimcc, ch, mdimch, &
     !
     dimension  cc(mdimcc, ido, 5, l1)    , ch(mdimch, ido, l1, 5), &
         wa1(ido)     , wa2(ido)     , wa3(ido)     , wa4(ido)         !
-    arg=2.*pimach()/5.
+    arg=2.*acos(-1.0)/5.
     tr11=cos(arg)
     ti11=sin(arg)
     tr12=cos(2.*arg)
