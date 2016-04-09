@@ -43,8 +43,6 @@
 !
 !
 subroutine gaqd(nlat, theta, wts, w, lwork, ierror)
-    implicit none
-    !  . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
     !
     !     gauss points and weights are computed using the fourier-newton
     !     described in "on computing the points and weights for 
@@ -79,67 +77,79 @@ subroutine gaqd(nlat, theta, wts, w, lwork, ierror)
     !             containing the gaussian weights.
     !
     !     ierror = 0 no errors
-    !            = 1 if nlat.le.0
+    !            = 1 if nlat <= 0
     !
+    use, intrinsic :: iso_fortran_env, only: &
+        wp => REAL64, &
+        ip => INT32
+
+    implicit none
     !----------------------------------------------------------------------
     ! Dictionary: calling arguments
     !----------------------------------------------------------------------
-    integer, intent (in)  :: nlat
-    real,    intent (out) :: theta(nlat)
-    real,    intent (out) :: wts(nlat)
-    real,    intent (in)  :: w
-    integer, intent (in)  :: lwork
-    integer, intent (out) :: ierror
+    integer (ip), intent (in)  :: nlat
+    real (wp),    intent (out) :: theta(nlat)
+    real (wp),    intent (out) :: wts(nlat)
+    real (wp),    intent (in)  :: w
+    integer (ip), intent (in)  :: lwork
+    integer (ip), intent (out) :: ierror
     !----------------------------------------------------------------------
     ! Dictionary: local variables
     !----------------------------------------------------------------------
-    integer         :: i, idx, it, mnlat, nix
-    integer         :: nhalf, ns2
-    real, parameter :: PI = acos(-1.0)
-    real, parameter :: HALF_PI = PI/2
-    real            :: x, dtheta, dthalf, cmax
-    real            :: zprev, zlast, zero
-    real            :: zhold, pb, dpb, dcor, summation, cz
-    real            :: eps, sgnd
+    integer (ip)         :: i, idx, it, mnlat, nix
+    integer (ip)         :: nhalf, ns2
+    real (wp), parameter :: PI = acos(-1.0_wp)
+    real (wp), parameter :: HALF_PI = PI/2
+    real (wp)            :: dtheta, dthalf, cmax
+    real (wp)            :: zprev, zlast, zero
+    real (wp)            :: zhold, pb, dpb, dcor, cz
+    real (wp)            :: eps, sgnd
     !----------------------------------------------------------------------
 
-    !     check work space length
     !
-    ierror = 1
-    if (nlat <= 0) return
+    ! Initialize error flag
     ierror = 0
+
+    ! Check case 1: work space length
+    if (nlat <= 0) then
+        ierror = 1
+        return
+    end if
+
+
     !
-    !     compute weights and points analytically when nlat=1, 2
+    !==> compute weights and points analytically when nlat=1, 2
     !
     select case (nlat)
         case(1)
-            theta(1) = acos(0.0)
-            wts(1) = 2.0
+            theta(1) = acos(0.0_wp)
+            wts(1) = 2.0_wp
             return
         case(2)
-            x = sqrt(1.0/3.0)
-            theta(1) = acos(x)
-            theta(2) = acos(-x)
-            wts(1) = 1.0
-            wts(2) = 1.0
+            associate( x => sqrt(1.0_wp/3.0_wp) )
+                theta(1) = acos(x)
+                theta(2) = acos(-x)
+            end associate
+            wts(1) = 1.0_wp
+            wts(2) = 1.0_wp
             return
         case default
-            eps = sqrt(epsilon(1.0))
-            eps = eps*sqrt(eps)
+            eps = sqrt(epsilon(1.0_wp))
+            eps = eps * sqrt(eps)
             mnlat = mod(nlat, 2)
             ns2 = nlat/2
             nhalf = (nlat+1)/2
             idx = ns2+2
-            !
-            call cpdp (nlat, cz, theta(ns2+1), wts(ns2+1))
-            !
+
+            call cpdp(nlat, cz, theta(ns2+1), wts(ns2+1))
+
             dtheta = HALF_PI/nhalf
             dthalf = dtheta/2
-            cmax = 0.2*dtheta
+            cmax = 0.2_wp * dtheta
             !
-            !     estimate first point next to theta = pi/2
+            !==> Estimate first point next to theta = pi/2
             !
-            if (mnlat/=0) then
+            if (mnlat /= 0) then
                 zero = HALF_PI-dtheta
                 zprev = HALF_PI
                 nix = nhalf-1
@@ -154,45 +164,49 @@ subroutine gaqd(nlat, theta, wts, w, lwork, ierror)
             !
             !     newton iterations
             !
-            call tpdp (nlat, zero, cz, theta(ns2+1), wts(ns2+1), pb, dpb)
+            call tpdp(nlat, zero, cz, theta(ns2+1), wts(ns2+1), pb, dpb)
             dcor = pb/dpb
-            sgnd = 1.0
+            sgnd = 1.0_wp
 
-            if (dcor /= 0.0) then
+            if (dcor /= 0.0_wp) then
                 sgnd = dcor/abs(dcor)
             end if
 
-            dcor = sgnd*min(abs(dcor), cmax)
+            dcor = sgnd * min(abs(dcor), cmax)
             zero = zero-dcor
 
-            if (abs(zero-zlast)>eps*abs(zero)) then
+            if (abs(zero-zlast) > eps*abs(zero)) then
                 go to 10
             end if
 
             theta(nix) = zero
             zhold = zero
-            !      wts(nix) = (nlat+nlat+1)/(dpb*dpb)
+            !    wts(nix) = (nlat+nlat+1)/(dpb*dpb)
             !
-            !     yakimiw's formula permits using old pb and dpb
+            ! ==> yakimiw's formula permits using old pb and dpb
             !
-            wts(nix) = (nlat+nlat+1)/(dpb+pb*cos(zlast)/sin(zlast))**2
+            wts(nix) = (2*nlat+1)/(dpb+pb*cos(zlast)/sin(zlast))**2
             nix = nix-1
 
-            if (nix==0) go to 30
-
-            if (nix==nhalf-1)  then
-                zero = 3.0 * zero - PI
+            if (nix==0) then
+                go to 30
             end if
 
-            if (nix<nhalf-1)  zero = zero+zero-zprev
+            if (nix == nhalf-1)  then
+                zero = 3.0_wp * zero - PI
+            end if
+
+            if (nix < nhalf-1)  then
+                zero = 2.0_wp * zero-zprev
+            end if
 
             zprev = zhold
 
             go to 9
             !
-            !     extend points and weights via symmetries
+            !==> Extend points and weights via symmetries
             !
-30          if (mnlat/=0) then
+30          if (mnlat /= 0) then
                 theta(nhalf) = HALF_PI
                 call tpdp (nlat, HALF_PI, cz, theta(ns2+1), wts(ns2+1), pb, dpb)
                 wts(nhalf) = (nlat+nlat+1)/(dpb*dpb)
@@ -203,38 +217,41 @@ subroutine gaqd(nlat, theta, wts, w, lwork, ierror)
                 theta(nlat-i+1) = PI-theta(i)
             end do
 
-            summation = 0.0
-
-            do i=1, nlat
-                summation = summation+wts(i)
-            end do
-
-            do i=1, nlat
-                wts(i) = 2.0*wts(i)/summation
-            end do
+            !
+            !==> Set weights
+            !
+            associate( summation => sum(wts) )
+                wts = 2.0_wp * wts/summation
+            end associate
     end select
 
 end subroutine gaqd
 
 
-subroutine cpdp(n, cz, cp, dcp)
+pure subroutine cpdp(n, cz, cp, dcp)
+    !
+    ! Purpose:
+    !
+    ! Computes the fourier coefficients of the legendre
+    ! polynomial p_n^0 and its derivative.
+    ! n is the degree and n/2 or (n+1)/2
+    ! coefficients are returned in cp depending on whether
+    ! n is even or odd. The same number of coefficients
+    ! are returned in dcp. For n even the constant
+    ! coefficient is returned in cz.
+    !
+    use, intrinsic :: iso_fortran_env, only: &
+        wp => REAL64, &
+        ip => INT32
+
     implicit none
-    !
-    !     computes the fourier coefficients of the legendre
-    !     polynomial p_n^0 and its derivative.
-    !     n is the degree and n/2 or (n+1)/2
-    !     coefficients are returned in cp depending on whether
-    !     n is even or odd. The same number of coefficients
-    !     are returned in dcp. For n even the constant
-    !     coefficient is returned in cz.
-    !
     !----------------------------------------------------------------------
     ! Dictionary: calling arguments
     !----------------------------------------------------------------------
-    integer, intent (in)     :: n
-    real,    intent (in out) :: cz
-    real,    intent (in out) :: cp(n/2+1)
-    real,    intent (in out) :: dcp(n/2+1)
+    integer (ip), intent (in)  :: n
+    real (wp),    intent (out) :: cz
+    real (wp),    intent (out) :: cp(n/2+1)
+    real (wp),    intent (out) :: dcp(n/2+1)
     !----------------------------------------------------------------------
     ! Dictionary: local variables
     !----------------------------------------------------------------------
@@ -243,38 +260,40 @@ subroutine cpdp(n, cz, cp, dcp)
     !----------------------------------------------------------------------
 
     associate( ncp => (n+1)/2 )
-        t1 = -1.0
-        t2 = real(n+1)
-        t3 = 0.0
-        t4 = real(2*n + 1)
+
+        t1 = -1.0_wp
+        t2 = real(n + 1, kind=wp)
+        t3 = 0.0_wp
+        t4 = real(2*n + 1, kind=wp)
+
         if (mod(n, 2) == 0) then
-            cp(ncp) = 1.0
+            cp(ncp) = 1.0_wp
             do j = ncp, 2, -1
-                t1 = t1+2.0
-                t2 = t2-1.0
-                t3 = t3+1.0
-                t4 = t4-2.0
+                t1 = t1+2.0_wp
+                t2 = t2-1.0_wp
+                t3 = t3+1.0_wp
+                t4 = t4-2.0_wp
                 cp(j-1) = (t1*t2)/(t3*t4)*cp(j)
             end do
-            t1 = t1+2.0
-            t2 = t2-1.0
-            t3 = t3+1.0
-            t4 = t4-2.0
+            t1 = t1+2.0_wp
+            t2 = t2-1.0_wp
+            t3 = t3+1.0_wp
+            t4 = t4-2.0_wp
             cz = (t1*t2)/(t3*t4)*cp(1)
             do j=1, ncp
-                dcp(j) = real(2*j)*cp(j)
+                dcp(j) = real(2*j, kind=wp)*cp(j)
             end do
         else
-            cp(ncp) = 1.0
+            cp(ncp) = 1.0_wp
             do j = ncp-1, 1, -1
-                t1 = t1+2.0
-                t2 = t2-1.0
-                t3 = t3+1.0
-                t4 = t4-2.0
+                t1 = t1+2.0_wp
+                t2 = t2-1.0_wp
+                t3 = t3+1.0_wp
+                t4 = t4-2.0_wp
                 cp(j) = (t1*t2)/(t3*t4)*cp(j+1)
             end do
             do j=1, ncp
-                dcp(j) = real(2*j-1)*cp(j)
+                dcp(j) = real(2*j-1, kind=wp)*cp(j)
             end do
         end if
     end associate
@@ -282,41 +301,47 @@ subroutine cpdp(n, cz, cp, dcp)
 end subroutine cpdp
 
 
-subroutine tpdp(n, theta, cz, cp, dcp, pb, dpb)
+pure subroutine tpdp(n, theta, cz, cp, dcp, pb, dpb)
+    !
+    ! Purpose:
+    !
+    ! Computes pn(theta) and its derivative dpb(theta) with
+    ! respect to theta
+    !
+    use, intrinsic :: iso_fortran_env, only: &
+        wp => REAL64, &
+        ip => INT32
+
     implicit none
-    !
-    !     computes pn(theta) and its derivative dpb(theta) with
-    !     respect to theta
-    !
     !----------------------------------------------------------------------
     ! Dictionary: calling arguments
     !----------------------------------------------------------------------
-    integer, intent (in)     :: n
-    real,    intent (in)     :: theta
-    real,    intent (in )    :: cz
-    real,    intent (in)     :: cp(n/2+1)
-    real,    intent (in)     :: dcp(n/2+1)
-    real,    intent (in out) :: pb
-    real,    intent (in out) :: dpb
+    integer (ip), intent (in)  :: n
+    real (wp),    intent (in)  :: theta
+    real (wp),    intent (in)  :: cz
+    real (wp),    intent (in)  :: cp(n/2+1)
+    real (wp),    intent (in)  :: dcp(n/2+1)
+    real (wp),    intent (out) :: pb
+    real (wp),    intent (out) :: dpb
     !----------------------------------------------------------------------
     ! Dictionary: calling arguments
     !----------------------------------------------------------------------
-    integer :: k, kdo
-    real    :: chh, cth, sth
+    integer (ip) :: k, kdo
+    real (wp)    :: chh, cth, sth
     !----------------------------------------------------------------------
 
     associate( &
-        cdt => cos(2.0*theta), &
-        sdt => sin(2.0*theta) &
+        cdt => cos(2.0_wp * theta), &
+        sdt => sin(2.0_wp * theta) &
         )
 
         if (mod(n, 2) == 0) then
             !
-            !     n even
+            !==> n even
             !
             kdo = n/2
-            pb = 0.5 * cz
-            dpb = 0.0
+            pb = 0.5_wp * cz
+            dpb = 0.0_wp
             if (n > 0) then
                 cth = cdt
                 sth = sdt
@@ -332,11 +357,11 @@ subroutine tpdp(n, theta, cz, cp, dcp, pb, dpb)
             end if
         else
             !
-            !     n odd
+            !==> n odd
             !
-            kdo = (n+1)/2
-            pb = 0.0
-            dpb = 0.0
+            kdo = (n + 1)/2
+            pb = 0.0_wp
+            dpb = 0.0_wp
             cth = cos(theta)
             sth = sin(theta)
             do k=1, kdo
