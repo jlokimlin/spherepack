@@ -827,27 +827,65 @@ end subroutine shagss1
 
 
 subroutine shagsp(nlat, nlon, wshags, lshags, dwork, ldwork, ierror)
-    dimension wshags(lshags)
-    real dwork(ldwork)
+    implicit none
+    !----------------------------------------------------------------------
+    ! Dictionary: calling arguments
+    !----------------------------------------------------------------------
+    integer, intent (in)     :: nlat
+    integer, intent (in)     :: nlon
+    real,    intent (in out) :: wshags(lshags)
+    integer, intent (in)     :: lshags
+    real,    intent (in out) :: dwork(ldwork)
+    integer, intent (in)     :: ldwork
+    integer, intent (out)    :: ierror
+    !----------------------------------------------------------------------
+    ! Dictionary: local variables
+    !----------------------------------------------------------------------
+    integer :: l, i1, i2, i3, l1, l2, i4, i5, i6, i7
+    integer :: iw, late, idth, idwts
+    !----------------------------------------------------------------------
 
-    ierror = 1
-    if (nlat<3) return
-    ierror = 2
-    if (nlon<4) return
+
+    !
+    !==> Check validity of input arguments
+    !
+
+    ! Initialize error flag
+    ierror = 0
+
+    ! Check case 1
+    if (nlat<3) then
+        ierror = 1
+        return
+    end if
+
+    ! Check case 2
+    if (nlon < 4) then
+        ierror = 2
+        return
+    end if
     !     set triangular truncation limit for spherical harmonic basis
     l = min((nlon+2)/2, nlat)
     !     set equator or nearest point (if excluded) pointer
     late = (nlat+mod(nlat, 2))/2
     l1 = l
     l2 = late
-    ierror = 3
-    !     check permanent work space length
-    if (lshags < nlat*(2*l2+3*l1-2)+3*l1*(1-l1)/2+nlon+15)return
-    ierror = 4
-    !     if (lwork.lt.4*nlat*(nlat+2)+2) return
-    if (ldwork<nlat*(nlat+4))return
-    ierror = 0
-    !     set pointers
+
+    ! Check case 3: permanent work space length
+    if (lshags < nlat*(2*l2+3*l1-2)+3*l1*(1-l1)/2+nlon+15) then
+        ierror = 3
+        return
+    end if
+
+    ! Check case 4
+    if (ldwork < nlat*(nlat+4)) then
+        ierror = 4
+        return
+    end if
+
+    !
+    !==> set pointers
+    !
     i1 = 1
     i2 = i1+nlat
     i3 = i2+nlat*late
@@ -855,16 +893,22 @@ subroutine shagsp(nlat, nlon, wshags, lshags, dwork, ldwork, ierror)
     i5 = i4+l*(l-1)/2 +(nlat-l)*(l-1)
     i6 = i5+l*(l-1)/2 +(nlat-l)*(l-1)
     i7 = i6+l*(l-1)/2 +(nlat-l)*(l-1)
-    !     set indices in temp work for real gaussian wts and pts
+
+    !
+    !==> set indices in temp work for real gaussian wts and pts
+    !
     idth = 1
-    !     idwts = idth+2*nlat
-    !     iw = idwts+2*nlat
-    idwts = idth+nlat
-    iw = idwts+nlat
+    idwts = idth + nlat
+    iw = idwts + nlat
+
+
     call shagsp1(nlat, nlon, l, late, wshags(i1), wshags(i2), wshags(i3), &
         wshags(i4), wshags(i5), wshags(i6), wshags(i7), dwork(idth), &
         dwork(idwts), dwork(iw), ierror)
-    if (ierror/=0) ierror = 6
+
+    if (ierror /= 0) then
+        ierror = 6
+    end if
 
 end subroutine shagsp
 
