@@ -297,9 +297,9 @@ dimension g(idg, jdg, 1), a(mdab, ndab, 1), b(mdab, ndab, 1), &
           wshsgc(lshsgc), work(lwork)
 !     check input parameters
 ierror = 1
-if (nlat<3) return
+if (nlat < 3) return
 ierror = 2
-if (nlon<4) return
+if (nlon < 4) return
 ierror = 3
 if (mode<0 .or.mode>2) return
 ierror = 4
@@ -327,10 +327,10 @@ if (lshsgc < nlat*(2*l2+3*l1-2)+3*l1*(1-l1)/2+nlon+15)return
 ierror = 10
 !     check temporary work space length
 if (mode==0) then
-if (lwork<nlat*(nlon*nt+max(3*l2, nlon)))return
+if (lwork <nlat*(nlon*nt+max(3*l2, nlon)))return
 else
 !     mode.ne.0
-if (lwork<l2*(nlon*nt+max(3*nlat, nlon))) return
+if (lwork <l2*(nlon*nt+max(3*nlat, nlon))) return
 end if
 ierror = 0
 !     starting address  fft values
@@ -507,9 +507,9 @@ subroutine shsgci(nlat, nlon, wshsgc, lshsgc, dwork, ldwork, ierror)
 dimension wshsgc(lshsgc)
 real dwork(ldwork)
 ierror = 1
-if (nlat<3) return
+if (nlat < 3) return
 ierror = 2
-if (nlon<4) return
+if (nlon < 4) return
 !     set triangular truncation limit for spherical harmonic basis
 l = min((nlon+2)/2, nlat)
 !     set equator or nearest point (if excluded) pointer

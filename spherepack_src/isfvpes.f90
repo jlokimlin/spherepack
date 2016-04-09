@@ -252,12 +252,12 @@ subroutine isfvpes(nlat, nlon, isym, nt, v, w, idv, jdv, as, bs, av, bv, &
     ierror = 2
     if (nlon < 4) return
     ierror = 3
-    if (isym<0 .or. isym>2) return
+    if (isym < 0 .or. isym > 2) return
     ierror = 4
     if (nt < 0) return
     ierror = 5
     l2 = (nlat+1)/2
-    if ((isym==0 .and. idv<nlat) .or. &
+    if ((isym == 0 .and. idv<nlat) .or. &
         (isym>0 .and. idv<l2)) return
     ierror = 6
     if (jdv < nlon) return
@@ -270,7 +270,7 @@ subroutine isfvpes(nlat, nlon, isym, nt, v, w, idv, jdv, as, bs, av, bv, &
     l1 = min(nlat, (nlon+2)/2)
     if (lvhses < l1*l2*(nlat+nlat-l1+1)+nlon+15) return
     ierror = 10
-    if (isym==0) then
+    if (isym == 0) then
         if (lwork < nlat*((2*nt+1)*nlon+4*l1*nt+1)) return
     else
         if (lwork < (2*nt+1)*nlon+nlat*(4*l1*nt+1)) return

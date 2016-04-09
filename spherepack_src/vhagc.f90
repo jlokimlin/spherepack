@@ -348,8 +348,8 @@ lzz1 = 2*nlat*imid
 labc = 3*(max(mmax-2, 0)*(nlat+nlat-mmax-1))/2
 if (lvhagc < 2*(lzz1+labc)+nlon+imid+15) return
 ierror = 10
-if (ityp<=2 .and. lwork<nlat*(4*nlon*nt+6*imid)) return
-if (ityp>2 .and. lwork<imid*(4*nlon*nt+6*nlat)) return
+if (ityp<=2 .and. lwork <nlat*(4*nlon*nt+6*imid)) return
+if (ityp>2 .and. lwork <imid*(4*nlon*nt+6*nlat)) return
 ierror = 0
 idv = nlat
 if (ityp > 2) idv = imid

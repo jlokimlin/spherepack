@@ -314,11 +314,11 @@ dimension g(idg, jdg, 1), a(mdab, ndab, 1), b(mdab, ndab, 1), &
           wshagc(lshagc), work(lwork)
 !     check input parameters
 ierror = 1
-if (nlat<3) return
+if (nlat < 3) return
 ierror = 2
-if (nlon<4) return
+if (nlon < 4) return
 ierror = 3
-if (isym<0 .or.isym>2) return
+if (isym < 0 .or.isym > 2) return
 ierror = 4
 if (nt<1) return
 !     set upper limit on m for spherical harmonic basis
@@ -327,7 +327,7 @@ l = min((nlon+2)/2, nlat)
 late = (nlat+mod(nlat, 2))/2
 !     set number of grid points for analysis/synthesis
 lat = nlat
-if (isym/=0) lat = late
+if (isym /= 0) lat = late
 ierror = 5
 if (idg<lat) return
 ierror = 6
@@ -343,11 +343,11 @@ ierror = 9
 if (lshagc < nlat*(2*l2+3*l1-2)+3*l1*(1-l1)/2+nlon+15)return
 ierror = 10
 !     check temporary work space length
-if (isym==0) then
-if (lwork<nlat*(nlon*nt+max(3*l2, nlon))) return
+if (isym == 0) then
+if (lwork <nlat*(nlon*nt+max(3*l2, nlon))) return
 else
 !     isym.ne.0
-if (lwork<l2*(nlon*nt+max(3*nlat, nlon))) return
+if (lwork <l2*(nlon*nt+max(3*nlat, nlon))) return
 end if
 ierror = 0
 !     starting address for gaussian wts in shigc and fft values
@@ -533,9 +533,9 @@ subroutine shagci(nlat, nlon, wshagc, lshagc, dwork, ldwork, ierror)
 dimension wshagc(lshagc)
 real dwork(ldwork)
 ierror = 1
-if (nlat<3) return
+if (nlat < 3) return
 ierror = 2
-if (nlon<4) return
+if (nlon < 4) return
 !     set triangular truncation limit for spherical harmonic basis
 l = min((nlon+2)/2, nlat)
 !     set equator or nearest point (if excluded) pointer

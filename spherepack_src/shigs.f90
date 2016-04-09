@@ -138,9 +138,9 @@ subroutine shigs(nlat, nlon, wshigs, lshigs, work, lwork, dwork, &
     dimension wshigs(lshigs), work(lwork)
     real dwork(ldwork)
     ierror = 1
-    if (nlat<3) return
+    if (nlat < 3) return
     ierror = 2
-    if (nlon<4) return
+    if (nlon < 4) return
     !     set triangular truncation limit for spherical harmonic basis
     l = min((nlon+2)/2, nlat)
     !     set equator or nearest point (if excluded) pointer
@@ -153,7 +153,7 @@ subroutine shigs(nlat, nlon, wshigs, lshigs, work, lwork, dwork, &
     if (lshigs<lp) return
     ierror = 4
     !     check temporary work space
-    if (lwork<4*nlat*(nlat+2)+2) return
+    if (lwork <4*nlat*(nlat+2)+2) return
     !     check temp real space
     ierror = 5
     if (ldwork < nlat*(nlat+4)) return
@@ -197,9 +197,9 @@ subroutine shigsp(nlat, nlon, wshigs, lshigs, dwork, ldwork, ierror)
     dimension wshigs(lshigs)
     real dwork(ldwork)
     ierror = 1
-    if (nlat<3) return
+    if (nlat < 3) return
     ierror = 2
-    if (nlon<4) return
+    if (nlon < 4) return
     !     set triangular truncation limit for spherical harmonic basis
     l = min((nlon+2)/2, nlat)
     !     set equator or nearest point (if excluded) pointer

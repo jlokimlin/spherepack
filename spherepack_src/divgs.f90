@@ -236,12 +236,12 @@ subroutine divgs(nlat, nlon, isym, nt, divg, idiv, jdiv, br, bi, mdb, ndb, &
     ierror = 2
     if (nlon < 4) return
     ierror = 3
-    if (isym<0 .or. isym>2) return
+    if (isym < 0 .or. isym > 2) return
     ierror = 4
     if (nt < 0) return
     ierror = 5
     imid = (nlat+1)/2
-    if ((isym==0 .and. idiv<nlat) .or. &
+    if ((isym == 0 .and. idiv<nlat) .or. &
         (isym>0 .and. idiv<imid)) return
     ierror = 6
     if (jdiv < nlon) return
@@ -270,7 +270,7 @@ subroutine divgs(nlat, nlon, isym, nt, divg, idiv, jdiv, br, bi, mdb, ndb, &
     !
     mab = min(nlat, nlon/2+1)
     mn = mab*nlat*nt
-    if (lwork< nln+ls*nlon+2*mn+nlat) return
+    if (lwork < nln+ls*nlon+2*mn+nlat) return
     ierror = 0
     !
     !     set work space pointers

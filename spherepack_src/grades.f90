@@ -243,13 +243,13 @@ subroutine grades(nlat, nlon, isym, nt, v, w, idvw, jdvw, a, b, mdab, ndab, &
     ierror = 2
     if (nlon < 4) return
     ierror = 3
-    if (isym<0 .or. isym>2) return
+    if (isym < 0 .or. isym > 2) return
     ierror = 4
     if (nt < 0) return
     ierror = 5
     imid = (nlat+1)/2
-    if ((isym==0 .and. idvw<nlat) .or. &
-        (isym/=0 .and. idvw<imid)) return
+    if ((isym == 0 .and. idvw<nlat) .or. &
+        (isym /= 0 .and. idvw<imid)) return
     ierror = 6
     if (jdvw < nlon) return
     ierror = 7
@@ -271,7 +271,7 @@ subroutine grades(nlat, nlon, isym, nt, v, w, idvw, jdvw, a, b, mdab, ndab, &
     !
     mn = mmax*nlat*nt
     idv = nlat
-    if (isym/=0) idv = imid
+    if (isym /= 0) idv = imid
     lnl = nt*idv*nlon
     lwkmin =  lnl+lnl+idv*nlon+2*mn+nlat
     if (lwork < lwkmin) return

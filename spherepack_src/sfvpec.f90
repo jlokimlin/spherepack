@@ -245,12 +245,12 @@ subroutine sfvpec(nlat, nlon, isym, nt, sf, vp, idv, jdv, br, bi, cr, ci, &
     ierror = 2
     if (nlon < 4) return
     ierror = 3
-    if (isym<0 .or. isym>2) return
+    if (isym < 0 .or. isym > 2) return
     ierror = 4
     if (nt < 0) return
     ierror = 5
     imid = (nlat+1)/2
-    if ((isym==0 .and. idv<nlat) .or. &
+    if ((isym == 0 .and. idv<nlat) .or. &
         (isym>0 .and. idv<imid)) return
     ierror = 6
     if (jdv < nlon) return

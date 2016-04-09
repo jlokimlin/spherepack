@@ -118,9 +118,9 @@ real work(*)
 dimension wshp(*), iwshp(*)
 !
 ierror = 1
-if (nlat<3) return
+if (nlat < 3) return
 ierror = 2
-if (nlon<4) return
+if (nlon < 4) return
 !      ierror = 3
 !      if (isym.lt.0 .or. isym.gt.2) return
 ierror = 4
@@ -134,7 +134,7 @@ ierror = 6
 if (liwshp<4*(nlat+1)) return
 ierror = 7
 mlwk = 1.25*(nlat+1)**2+7*nlat+8
-if (lwork<mlwk) return
+if (lwork <mlwk) return
 ierror = 0
 !
 call hrffti(nlon, wshp(lw1+1))
@@ -693,9 +693,9 @@ subroutine shpe(nlat, nlon, isym, mtrunc, x, y, idxy, &
 dimension wshp(*), iwshp(*), work(*), x(idxy, nlon), y(idxy, nlon)
 !
 ierror = 1
-if (nlat<3) return
+if (nlat < 3) return
 ierror = 2
-if (nlon<4) return
+if (nlon < 4) return
 !      ierror = 3
 !      if (isym.lt.0 .or. isym.gt.2) return
 ierror = 4
@@ -709,7 +709,7 @@ ierror = 6
 if (liwshp<4*(nlat+1)) return
 ierror = 7
 mwrk = max(nlat*nlon, 4*(nlat+1))
-if (lwork<mwrk) return
+if (lwork <mwrk) return
 ierror = 0
 !
 do j=1, nlon

@@ -124,9 +124,9 @@ subroutine shigc(nlat, nlon, wshigc, lshigc, dwork, ldwork, ierror)
     dimension wshigc(lshigc)
     real dwork(ldwork)
     ierror = 1
-    if (nlat<3) return
+    if (nlat < 3) return
     ierror = 2
-    if (nlon<4) return
+    if (nlon < 4) return
     !     set triangular truncation limit for spherical harmonic basis
     l = min((nlon+2)/2, nlat)
     !     set equator or nearest point (if excluded) pointer

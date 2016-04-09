@@ -224,7 +224,7 @@ subroutine sshifte(ioff, nlon, nlat, goff, greg, wsav, lsav, &
     ier = 1
     if (ioff*(ioff-1)/=0) return
     ier = 2
-    if (nlon<4) return
+    if (nlon < 4) return
     ier = 3
     if (nlat < 3) return
     ier = 4

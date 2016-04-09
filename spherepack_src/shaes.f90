@@ -316,31 +316,35 @@
 !
 subroutine shaes(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, &
     wshaes, lshaes, work, lwork, ierror)
-    implicit none
     ! External routines: shaes1
+    use, intrinsic :: iso_fortran_env, only: &
+        wp => REAL64, &
+        ip => INT32
+
+    implicit none
     !----------------------------------------------------------------------
     ! Dictionary: calling arguments
     !----------------------------------------------------------------------
-    integer, intent (in)     :: nlat
-    integer, intent (in)     :: nlon
-    integer, intent (in)     :: isym
-    integer, intent (in)     :: nt
-    real,    intent (in)     :: g(idg, jdg, 1)
-    integer, intent (in)     :: idg
-    integer, intent (in)     :: jdg
-    real,    intent (out)    :: a(mdab, ndab, 1)
-    real,    intent (out)    :: b(mdab, ndab, 1)
-    integer, intent (in)     :: mdab
-    integer, intent (in)     :: ndab
-    real,    intent (in out) :: wshaes(1)
-    integer, intent (in)     :: lshaes
-    real,    intent (in out) :: work(1)
-    integer, intent (in)     :: lwork
-    integer, intent (out)    :: ierror
+    integer (ip), intent (in)     :: nlat
+    integer (ip), intent (in)     :: nlon
+    integer (ip), intent (in)     :: isym
+    integer (ip), intent (in)     :: nt
+    real (wp),    intent (in)     :: g(idg, jdg, 1)
+    integer (ip), intent (in)     :: idg
+    integer (ip), intent (in)     :: jdg
+    real (wp),    intent (out)    :: a(mdab, ndab, 1)
+    real (wp),    intent (out)    :: b(mdab, ndab, 1)
+    integer (ip), intent (in)     :: mdab
+    integer (ip), intent (in)     :: ndab
+    real (wp),    intent (in out) :: wshaes(1)
+    integer (ip), intent (in)     :: lshaes
+    real (wp),    intent (in out) :: work(1)
+    integer (ip), intent (in)     :: lwork
+    integer (ip), intent (out)    :: ierror
     !----------------------------------------------------------------------
     ! Dictionary: calling arguments
     !----------------------------------------------------------------------
-    integer :: ist, mmax, imid, idz, lzimn, ls, nln
+    integer (ip) :: ist, mmax, imid, idz, lzimn, ls, nln
     !----------------------------------------------------------------------
 
     !
@@ -444,35 +448,39 @@ end subroutine shaes
 
 subroutine shaes1(nlat, isym, nt, g, idgs, jdgs, a, b, mdab, ndab, &
     z, idz, idg, jdg, ge, go, work, whrfft)
-    implicit none
     ! External routines: hrfftf
+    use, intrinsic :: iso_fortran_env, only: &
+        wp => REAL64, &
+        ip => INT32
+
+    implicit none
     !----------------------------------------------------------------------
     ! Dictionary: calling arguments
     !----------------------------------------------------------------------
-    integer, intent (in)     :: nlat
-    integer, intent (in)     :: isym
-    integer, intent (in)     :: nt
-    real,    intent (in)     :: g(idgs, jdgs, 1)
-    integer, intent (in)     :: idgs
-    integer, intent (in)     :: jdgs
-    real,    intent (in out) :: a(mdab, ndab, 1)
-    real,    intent (in out) :: b(mdab, ndab, 1)
-    integer, intent (in)     :: mdab
-    integer, intent (in)     :: ndab
-    real,    intent (in out) :: z(idz, 1)
-    integer, intent (in)     :: idz
-    integer, intent (in)     :: idg
-    integer, intent (in)     :: jdg
-    real,    intent (in out) :: ge(idg, jdg, 1)
-    real,    intent (in out) :: go(idg, jdg, 1)
-    real,    intent (in out) :: work(1)
-    real,    intent (in out) :: whrfft(1)
+    integer (ip), intent (in)     :: nlat
+    integer (ip), intent (in)     :: isym
+    integer (ip), intent (in)     :: nt
+    real (wp),    intent (in)     :: g(idgs, jdgs, 1)
+    integer (ip), intent (in)     :: idgs
+    integer (ip), intent (in)     :: jdgs
+    real (wp),    intent (in out) :: a(mdab, ndab, 1)
+    real (wp),    intent (in out) :: b(mdab, ndab, 1)
+    integer (ip), intent (in)     :: mdab
+    integer (ip), intent (in)     :: ndab
+    real (wp),    intent (in out) :: z(idz, 1)
+    integer (ip), intent (in)     :: idz
+    integer (ip), intent (in)     :: idg
+    integer (ip), intent (in)     :: jdg
+    real (wp),    intent (in out) :: ge(idg, jdg, 1)
+    real (wp),    intent (in out) :: go(idg, jdg, 1)
+    real (wp),    intent (in out) :: work(1)
+    real (wp),    intent (in out) :: whrfft(1)
     !----------------------------------------------------------------------
     ! Dictionary: local variables
     !----------------------------------------------------------------------
-    integer :: i, j, k, m, mb, ls, mp1, np1, mp2, mdo, ndo
-    real    :: fsn, tsn
-    integer :: imm1, nlp1, imid, modl, mmax, nlon
+    integer (ip) :: i, j, k, m, mb, ls, mp1, np1, mp2, mdo, ndo
+    integer (ip) :: imm1, nlp1, imid, modl, mmax, nlon
+    real (wp)    :: fsn, tsn
     !----------------------------------------------------------------------
 
 
@@ -486,8 +494,8 @@ subroutine shaes1(nlat, isym, nt, g, idgs, jdgs, a, b, mdab, ndab, &
     end if
 
     nlp1 = nlat+1
-    tsn = 2.0/nlon
-    fsn = 4.0/nlon
+    tsn = 2.0_wp/nlon
+    fsn = 4.0_wp/nlon
     imid = (nlat+1)/2
     modl = mod(nlat, 2)
     imm1 = imid
@@ -533,17 +541,19 @@ subroutine shaes1(nlat, isym, nt, g, idgs, jdgs, a, b, mdab, ndab, &
 
     27 do k=1, nt
         call hrfftf(ls, nlon, ge(1, 1, k), ls, whrfft, work)
-        if (mod(nlon, 2) /= 0) exit
+        if (mod(nlon, 2) /= 0) then
+            exit
+        end if
         do i=1, ls
-            ge(i, nlon, k) = 0.5*ge(i, nlon, k)
+            ge(i, nlon, k) = 0.5_wp * ge(i, nlon, k)
         end do
     end do
 
     do k=1, nt
         do mp1=1, mmax
             do np1=mp1, nlat
-                a(mp1, np1, k) = 0.0
-                b(mp1, np1, k) = 0.0
+                a(mp1, np1, k) = 0.0_wp
+                b(mp1, np1, k) = 0.0_wp
             end do
         end do
     end do
@@ -647,20 +657,24 @@ end subroutine shaes1
 
 subroutine shaesi(nlat, nlon, wshaes, lshaes, work, lwork, dwork, &
     ldwork, ierror)
-    implicit none
     ! External routines: sea1, hrffti
+    use, intrinsic :: iso_fortran_env, only: &
+        wp => REAL64, &
+        ip => INT32
+
+    implicit none
     !----------------------------------------------------------------------
     ! Dictionary: calling arguments
     !----------------------------------------------------------------------
-    integer, intent (in)     :: nlat
-    integer, intent (in)     :: nlon
-    real,    intent (in out) :: wshaes(*)
-    integer, intent (in)     :: lshaes
-    real,    intent (in)     :: work(*)
-    integer, intent (in)     :: lwork
-    real,    intent (in out) :: dwork(*)
-    integer, intent (in)     :: ldwork
-    integer, intent (out)    :: ierror
+    integer (ip), intent (in)     :: nlat
+    integer (ip), intent (in)     :: nlon
+    real (wp),    intent (in out) :: wshaes(*)
+    integer (ip), intent (in)     :: lshaes
+    real (wp),    intent (in)     :: work(*)
+    integer (ip), intent (in)     :: lwork
+    real (wp),    intent (in out) :: dwork(*)
+    integer (ip), intent (in)     :: ldwork
+    integer (ip), intent (out)    :: ierror
     !----------------------------------------------------------------------
 
     !
@@ -677,13 +691,13 @@ subroutine shaesi(nlat, nlon, wshaes, lshaes, work, lwork, dwork, &
     ierror = 0
 
     ! Check case 1
-    if (nlat<3) then
+    if (nlat < 3) then
         ierror = 1
         return
     end if
 
     ! Check case 2
-    if (nlon<4) then
+    if (nlon < 4) then
         ierror = 2
         return
     end if

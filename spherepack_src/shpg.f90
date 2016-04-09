@@ -134,7 +134,7 @@ ierror = 6
 if (liwshp<4*(nlat+1)) return
 ierror = 7
 mlwk = 1.25*(nlat+1)**2+7*nlat+8
-if (lwork<mlwk) return
+if (lwork <mlwk) return
 ierror = 0
 !
 call hrffti(nlon, wshp(lw1+1))
@@ -650,7 +650,7 @@ ierror = 6
 if (liwshp<4*(nlat+1)) return
 ierror = 7
 mwrk = max(nlat*nlon, 4*(nlat+1))
-if (lwork<mwrk) return
+if (lwork <mwrk) return
 ierror = 0
 !
 do j=1, nlon

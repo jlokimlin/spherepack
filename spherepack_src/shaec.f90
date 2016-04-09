@@ -304,19 +304,19 @@ subroutine shaec(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, &
 
     ierror = 1
 
-    if (nlat<3) then
+    if (nlat < 3) then
         return
     end if
 
     ierror = 2
 
-    if (nlon<4) then
+    if (nlon < 4) then
         return
     end if
 
     ierror = 3
 
-    if (isym<0 .or. isym>2) then
+    if (isym < 0 .or. isym > 2) then
         return
     end if
 
@@ -328,8 +328,8 @@ subroutine shaec(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, &
 
     ierror = 5
 
-    if ((isym==0 .and. idg<nlat) .or. &
-        (isym/=0 .and. idg<(nlat+1)/2)) then
+    if ((isym == 0 .and. idg < nlat) .or. &
+        (isym /= 0 .and. idg < (nlat+1)/2)) then
         return
     end if
 
@@ -573,13 +573,13 @@ subroutine shaeci(nlat, nlon, wshaec, lshaec, dwork, ldwork, ierror)
 
     ierror = 1
 
-    if (nlat<3) then
+    if (nlat < 3) then
         return
     end if
 
     ierror = 2
 
-    if (nlon<4) then
+    if (nlon < 4) then
         return
     end if
 

@@ -279,16 +279,16 @@ subroutine shsec(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, &
 dimension g(idg, jdg, 1), a(mdab, ndab, 1), b(mdab, ndab, 1), wshsec(1), &
           work(1)
 ierror = 1
-if (nlat<3) return
+if (nlat < 3) return
 ierror = 2
-if (nlon<4) return
+if (nlon < 4) return
 ierror = 3
-if (isym<0 .or. isym>2) return
+if (isym < 0 .or. isym > 2) return
 ierror = 4
 if (nt < 0) return
 ierror = 5
-if ((isym==0 .and. idg<nlat) .or. &
-   (isym/=0 .and. idg<(nlat+1)/2)) return
+if ((isym == 0 .and. idg < nlat) .or. &
+   (isym /= 0 .and. idg < (nlat+1)/2)) return
 ierror = 6
 if (jdg < nlon) return
 ierror = 7
@@ -479,9 +479,9 @@ subroutine shseci(nlat, nlon, wshsec, lshsec, dwork, ldwork, ierror)
 dimension wshsec(*)
 real dwork(ldwork)
 ierror = 1
-if (nlat<3) return
+if (nlat < 3) return
 ierror = 2
-if (nlon<4) return
+if (nlon < 4) return
 ierror = 3
 imid = (nlat+1)/2
 mmax = min(nlat, nlon/2+1)

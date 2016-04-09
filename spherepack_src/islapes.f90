@@ -261,12 +261,12 @@ subroutine islapes(nlat, nlon, isym, nt, xlmbda, sf, ids, jds, a, b, &
     ierror = 2
     if (nlon < 4) return
     ierror = 3
-    if (isym<0 .or. isym>2) return
+    if (isym < 0 .or. isym > 2) return
     ierror = 4
     if (nt < 0) return
     ierror = 5
     imid = (nlat+1)/2
-    if ((isym==0 .and. ids<nlat) .or. &
+    if ((isym == 0 .and. ids<nlat) .or. &
         (isym>0 .and. ids<imid)) return
     ierror = 6
     if (jds < nlon) return
@@ -294,7 +294,7 @@ subroutine islapes(nlat, nlon, isym, nt, xlmbda, sf, ids, jds, a, b, &
     !     if (lwork .lt. lwkmin) return
     l2 = (nlat+1)/2
     l1 = min(nlat, nlon/2+1)
-    if (isym==0) then
+    if (isym == 0) then
         lwkmin = (nt+1)*nlat*nlon + nlat*(2*nt*l1+1)
     else
         lwkmin = (nt+1)*l2*nlon + nlat*(2*nt*l1+1)

@@ -306,7 +306,6 @@
 !
 subroutine shags(nlat, nlon, mode, nt, g, idg, jdg, a, b, mdab, ndab, &
     wshags, lshags, work, lwork, ierror)
-    implicit none
     ! External routines: shags1
     !
     ! Purpose:
@@ -316,29 +315,34 @@ subroutine shags(nlat, nlon, mode, nt, g, idg, jdg, a, b, mdab, ndab, &
     ! in array(s) a, b. the necessary legendre polynomials are fully
     ! stored in this version.
     !
+    use, intrinsic :: iso_fortran_env, only: &
+        wp => REAL64, &
+        ip => INT32
+
+    implicit none
     !----------------------------------------------------------------------
     ! Dictionary: calling arguments
     !----------------------------------------------------------------------
-    integer, intent (in)     :: nlat
-    integer, intent (in)     :: nlon
-    integer, intent (in)     :: mode
-    integer, intent (in)     :: nt
-    real,    intent (in)     :: g(idg, jdg, 1)
-    integer, intent (in)     :: idg
-    integer, intent (in)     :: jdg
-    real,    intent (out)    :: a(mdab, ndab, 1)
-    real,    intent (out)    :: b(mdab, ndab, 1)
-    integer, intent (in)     :: mdab
-    integer, intent (in)     :: ndab
-    real,    intent (in out) :: wshags(lshags)
-    integer, intent (in)     :: lshags
-    real,    intent (in out) :: work(lwork)
-    integer, intent (in)     :: lwork
-    integer, intent (out)    :: ierror
+    integer (ip), intent (in)     :: nlat
+    integer (ip), intent (in)     :: nlon
+    integer (ip), intent (in)     :: mode
+    integer (ip), intent (in)     :: nt
+    real (wp),    intent (in)     :: g(idg, jdg, 1)
+    integer (ip), intent (in)     :: idg
+    integer (ip), intent (in)     :: jdg
+    real (wp),    intent (out)    :: a(mdab, ndab, 1)
+    real (wp),    intent (out)    :: b(mdab, ndab, 1)
+    integer (ip), intent (in)     :: mdab
+    integer (ip), intent (in)     :: ndab
+    real (wp),    intent (in out) :: wshags(lshags)
+    integer (ip), intent (in)     :: lshags
+    real (wp),    intent (in out) :: work(lwork)
+    integer (ip), intent (in)     :: lwork
+    integer (ip), intent (out)    :: ierror
     !----------------------------------------------------------------------
     ! Dictionary: local variables
     !----------------------------------------------------------------------
-    integer :: l, l1, l2, lp, iw, lat, late, ifft, ipmn, iwts
+    integer (ip) :: l, l1, l2, lp, iw, lat, late, ifft, ipmn, iwts
     !----------------------------------------------------------------------
 
     !
@@ -349,7 +353,7 @@ subroutine shags(nlat, nlon, mode, nt, g, idg, jdg, a, b, mdab, ndab, &
     ierror = 0
 
     ! Check case 1
-    if (nlat<3) then
+    if (nlat < 3) then
         ierror = 1
         return
     end if
@@ -457,30 +461,34 @@ end subroutine shags
 
 subroutine shags1(nlat, nlon, l, lat, mode, gs, idg, jdg, nt, a, b, mdab, &
     ndab, wts, wfft, pmn, late, g, work)
-    implicit none
     !external :: hrfftf
+    use, intrinsic :: iso_fortran_env, only: &
+        wp => REAL64, &
+        ip => INT32
+
+    implicit none
     !----------------------------------------------------------------------
     ! Dictionary: calling arguments
     !----------------------------------------------------------------------
-    integer, intent (in)     :: nlat
-    integer, intent (in)     :: nlon
-    integer, intent (in)     :: l
-    integer, intent (in)     :: lat
-    integer, intent (in)     :: mode
-    real,    intent (in)     :: gs(idg, jdg, nt)
-    integer, intent (in)     :: idg
-    integer, intent (in)     :: jdg
-    integer, intent (in)     :: nt
-    real,    intent (in out) :: a(mdab, ndab, nt)
-    real,    intent (in out) :: b(mdab, ndab, nt)
-    integer, intent (in)     :: mdab
-    integer, intent (in)     :: ndab
-    integer, intent (in)     :: late
-    real,    intent (in out) :: g(lat, nlon, nt)
-    real,    intent (in out) :: wfft(1)
-    real,    intent (in out) :: pmn(late, 1)
-    real,    intent (in out) :: wts(nlat)
-    real,    intent (in out) :: work(1)
+    integer (ip), intent (in)     :: nlat
+    integer (ip), intent (in)     :: nlon
+    integer (ip), intent (in)     :: l
+    integer (ip), intent (in)     :: lat
+    integer (ip), intent (in)     :: mode
+    real (wp),    intent (in)     :: gs(idg, jdg, nt)
+    integer (ip), intent (in)     :: idg
+    integer (ip), intent (in)     :: jdg
+    integer (ip), intent (in)     :: nt
+    real (wp),    intent (in out) :: a(mdab, ndab, nt)
+    real (wp),    intent (in out) :: b(mdab, ndab, nt)
+    integer (ip), intent (in)     :: mdab
+    integer (ip), intent (in)     :: ndab
+    integer (ip), intent (in)     :: late
+    real (wp),    intent (in out) :: g(lat, nlon, nt)
+    real (wp),    intent (in out) :: wfft(1)
+    real (wp),    intent (in out) :: pmn(late, 1)
+    real (wp),    intent (in out) :: wts(nlat)
+    real (wp),    intent (in out) :: work(1)
     !----------------------------------------------------------------------
     ! Dictionary: calling arguments
     !----------------------------------------------------------------------
@@ -489,20 +497,26 @@ subroutine shags1(nlat, nlon, l, lat, mode, gs, idg, jdg, nt, a, b, mdab, &
     real    :: t1, t2, sfn
     !----------------------------------------------------------------------
 
-    !     set gs array internally in shags1
+    !
+    !==> set gs array internally in shags1
+    !
     do j=1, nlon
         do i=1, lat
             g(i, j, :) = gs(i, j, :)
         end do
     end do
 
-    !     do fourier transform
+    !
+    !==> do fourier transform
+    !
     do k=1, nt
         call hrfftf(lat, nlon, g(1, 1, k), lat, wfft, work)
     end do
 
-    !     scale result
-    sfn = 2.0/nlon
+    !
+    !==> scale result
+    !
+    sfn = 2.0_wp/nlon
     g = sfn * g
 
     !     compute using gaussian quadrature
@@ -518,10 +532,12 @@ subroutine shags1(nlat, nlon, l, lat, mode, gs, idg, jdg, nt, a, b, mdab, &
     !     g(i, 1), g(i, 2), g(i, 3), g(i, 4), g(i, 5), ..., g(i, 2l-4), g(i, 2l-3), g(i, 2l-2)
     !     whenever 2*l-2 = nlon exactly
     !     initialize coefficients to zero
-    a = 0.0
-    b = 0.0
+    a = 0.0_wp
+    b = 0.0_wp
 
-    !     set mp1 limit on b(mp1) calculation
+    !
+    !==> set mp1 limit on b(mp1) calculation
+    !
     lm1 = l
     if (nlon == l+l-2) then
         lm1 = l-1
@@ -541,13 +557,17 @@ subroutine shags1(nlat, nlon, l, lat, mode, gs, idg, jdg, nt, a, b, mdab, &
                     g(i, j, k) = wts(i)*(t1+t2)
                     g(is, j, k) = wts(i)*(t1-t2)
                 end do
-                !     adjust equator if necessary(nlat odd)
+                !
+                !==> adjust equator if necessary(nlat odd)
+                !
                 if (mod(nlat, 2) /= 0) then
                     g(late, j, k) = wts(late)*g(late, j, k)
                 end if
             end do
         end do
-        !     set m = 0 coefficients first
+        !
+        !==> set m = 0 coefficients first
+        !
         mp1 = 1
         m = 0
         mml1 = m*(2*nlat-m-1)/2
@@ -555,16 +575,22 @@ subroutine shags1(nlat, nlon, l, lat, mode, gs, idg, jdg, nt, a, b, mdab, &
             do i=1, late
                 is = nlat-i+1
                 do np1=1, nlat, 2
-                    !     n even
+                    !
+                    !==> n even
+                    !
                     a(1, np1, k) = a(1, np1, k)+g(i, 1, k)*pmn(i, mml1+np1)
                 end do
                 do np1=2, nlat, 2
-                    !     n odd
+                    !
+                    !==> n odd
+                    !
                     a(1, np1, k) = a(1, np1, k)+g(is, 1, k)*pmn(i, mml1+np1)
                 end do
             end do
         end do
-        !     compute m.ge.1  coefficients next
+        !
+        !==> compute m >= 1  coefficients next
+        !
         do mp1=2, lm1
             m = mp1-1
             mml1 = m*(2*nlat-m-1)/2
@@ -572,12 +598,16 @@ subroutine shags1(nlat, nlon, l, lat, mode, gs, idg, jdg, nt, a, b, mdab, &
             do k=1, nt
                 do i=1, late
                     is = nlat-i+1
-                    !     n-m even
+                    !
+                    !==> (n - m) even
+                    !
                     do np1=mp1, nlat, 2
                         a(mp1, np1, k) = a(mp1, np1, k)+g(i, 2*m, k)*pmn(i, mml1+np1)
                         b(mp1, np1, k) = b(mp1, np1, k)+g(i, 2*m+1, k)*pmn(i, mml1+np1)
                     end do
-                    !     n-m odd
+                    !
+                    !==> (n - m) odd
+                    !
                     do np1=mp2, nlat, 2
                         a(mp1, np1, k) = a(mp1, np1, k)+g(is, 2*m, k)*pmn(i, mml1+np1)
                         b(mp1, np1, k) = b(mp1, np1, k)+g(is, 2*m+1, k)*pmn(i, mml1+np1)
@@ -587,7 +617,9 @@ subroutine shags1(nlat, nlon, l, lat, mode, gs, idg, jdg, nt, a, b, mdab, &
         end do
 
         if (nlon == l+l-2) then
-            !     compute m=l-1, n=l-1, l, ..., nlat-1 coefficients
+            !
+            !==> compute m=l-1, n=l-1, l, ..., nlat-1 coefficients
+            !
             m = l-1
             mml1 = m*(2*nlat-m-1)/2
             do k=1, nt
@@ -595,33 +627,41 @@ subroutine shags1(nlat, nlon, l, lat, mode, gs, idg, jdg, nt, a, b, mdab, &
                     is = nlat-i+1
                     do np1=l, nlat, 2
                         mn = mml1+np1
-                        a(l, np1, k) = a(l, np1, k)+0.5*g(i, nlon, k)*pmn(i, mn)
+                        a(l, np1, k) = a(l, np1, k) + 0.5_wp * g(i, nlon, k) * pmn(i, mn)
                     end do
-                    !     n-m  odd
+                    !
+                    !==> (n - m)  odd
+                    !
                     lp1 = l+1
                     do np1=lp1, nlat, 2
                         mn = mml1+np1
-                        a(l, np1, k) = a(l, np1, k)+0.5*g(is, nlon, k)*pmn(i, mn)
+                        a(l, np1, k) = a(l, np1, k) + 0.5_wp * g(is, nlon, k) * pmn(i, mn)
                     end do
                 end do
             end do
         end if
     else
-        !     half sphere
-        !     overwrite g(i) with wts(i)*(g(i)+g(i)) for i=1, ..., nlate/2
+        !
+        !==> half sphere
+        !    overwrite g(i) with wts(i)*(g(i)+g(i)) for i=1, ..., nlate/2
+        !
         nl2 = nlat/2
         do  k=1, nt
             do j=1, nlon
                 do i=1, nl2
                     g(i, j, k) = wts(i)*(g(i, j, k)+g(i, j, k))
                 end do
-                !     adjust equator separately if a grid point
+                !
+                !==> adjust equator separately if a grid point
+                !
                 if (nl2 < late) then
                     g(late, j, k) = wts(late) * g(late, j, k)
                 end if
             end do
         end do
-        !     set m = 0 coefficients first
+        !
+        !==> set m = 0 coefficients first
+        !
         mp1 = 1
         m = 0
         mml1 = m*(2*nlat-m-1)/2
@@ -637,7 +677,9 @@ subroutine shags1(nlat, nlon, l, lat, mode, gs, idg, jdg, nt, a, b, mdab, &
                 end do
             end do
         end do
-        !     compute m.ge.1  coefficients next
+        !
+        !==> compute m >= 1  coefficients next
+        !
         do mp1=2, lm1
             m = mp1-1
             mml1 = m*(2*nlat-m-1)/2
@@ -656,12 +698,18 @@ subroutine shags1(nlat, nlon, l, lat, mode, gs, idg, jdg, nt, a, b, mdab, &
         end do
 
         if (nlon == l+l-2) then
-            !     compute n=m=l-1 coefficients last
+            !
+            !==> compute n=m=l-1 coefficients last
+            !
             m = l-1
             mml1 = m*(2*nlat-m-1)/2
-            !     set starting n for mode even
+            !
+            !==> set starting n for mode even
+            !
             ns = l
-            !     set starting n for mode odd
+            !
+            !==> set starting n for mode odd
+            !
             if (mode==1) then
                 ns = l+1
             end if
@@ -669,7 +717,7 @@ subroutine shags1(nlat, nlon, l, lat, mode, gs, idg, jdg, nt, a, b, mdab, &
                 do i=1, late
                     do np1=ns, nlat, 2
                         mn = mml1+np1
-                        a(l, np1, k) = a(l, np1, k)+0.5*g(i, nlon, k)*pmn(i, mn)
+                        a(l, np1, k) = a(l, np1, k) + 0.5_wp * g(i, nlon, k) * pmn(i, mn)
                     end do
                 end do
             end do
@@ -682,7 +730,8 @@ end subroutine shags1
 
 subroutine shagsi(nlat, nlon, wshags, lshags, work, lwork, dwork, ldwork, &
     ierror)
-    implicit none
+    !
+    !     Remark:
     !
     !     this subroutine must be called before calling shags or shsgs with
     !     fixed nlat, nlon. it precomputes the gaussian weights, points
@@ -693,22 +742,27 @@ subroutine shagsi(nlat, nlon, wshags, lshags, work, lwork, dwork, ldwork, &
     !     not checked.  undetectable errors will result if dwork is
     !     smaller than nlat*(nlat+4).
     !
+    use, intrinsic :: iso_fortran_env, only: &
+        wp => REAL64, &
+        ip => INT32
+
+    implicit none
     !----------------------------------------------------------------------
     ! Dictionary: calling arguments
     !----------------------------------------------------------------------
-    integer, intent (in)     :: nlat
-    integer, intent (in)     :: nlon
-    real,    intent (in out) :: wshags(lshags)
-    integer, intent (in)     :: lshags
-    real,    intent (in out) :: work(lwork)
-    integer, intent (in)     :: lwork
-    real,    intent (in out) :: dwork(ldwork)
-    integer, intent (in)     :: ldwork
-    integer, intent (out)    :: ierror
+    integer (ip), intent (in)     :: nlat
+    integer (ip), intent (in)     :: nlon
+    real (wp),    intent (in out) :: wshags(lshags)
+    integer (ip), intent (in)     :: lshags
+    real (wp),    intent (in out) :: work(lwork)
+    integer (ip), intent (in)     :: lwork
+    real (wp),    intent (in out) :: dwork(ldwork)
+    integer (ip), intent (in)     :: ldwork
+    integer (ip), intent (out)    :: ierror
      !----------------------------------------------------------------------
      ! Dictionary: local variables
      !----------------------------------------------------------------------
-    integer :: l, l1, l2, late, lp, ldw, ipmnf
+    integer (ip) :: l, l1, l2, late, lp, ldw, ipmnf
     !----------------------------------------------------------------------
 
     !
@@ -785,33 +839,43 @@ end subroutine shagsi
 
 
 subroutine shagss1(nlat, l, late, w, pmn, pmnf)
-    implicit none
     ! External subroutines  :: legin
+    use, intrinsic :: iso_fortran_env, only: &
+        wp => REAL64, &
+        ip => INT32
+
+    implicit none
     !----------------------------------------------------------------------
     ! Dictionary: calling arguments
     !----------------------------------------------------------------------
-    integer, intent (in)     :: nlat
-    integer, intent (in)     :: l
-    integer, intent (in)     :: late
-    real,    intent (in out) :: w(1)
-    real,    intent (in out) :: pmn(nlat, late, 3)
-    real,    intent (in out) :: pmnf(late, 1)
+    integer (ip), intent (in)     :: nlat
+    integer (ip), intent (in)     :: l
+    integer (ip), intent (in)     :: late
+    real (wp),    intent (in out) :: w(1)
+    real (wp),    intent (in out) :: pmn(nlat, late, 3)
+    real (wp),    intent (in out) :: pmnf(late, 1)
     !----------------------------------------------------------------------
     ! Dictionary: calling arguments
     !----------------------------------------------------------------------
-    integer :: mp1, m, mode, i, np1, km
+    integer (ip) :: mp1, m, mode, i, np1, km
     !----------------------------------------------------------------------
 
-    !     compute and store legendre polys for i=1, ..., late, m=0, ..., l-1
-    pmn = 0.0
+    !
+    !==> Compute and store legendre polys for i=1, ..., late, m=0, ..., l-1
+    !
+    pmn = 0.0_wp
 
     do mp1=1, l
         m = mp1-1
         associate( mml1 => m*(2*nlat-m-1)/2 )
-            !     compute pmn for n=m, ..., nlat-1 and i=1, ..., (l+1)/2
+            !
+            !==> Compute pmn for n=m, ..., nlat-1 and i=1, ..., (l+1)/2
+            !
             mode = 0
             call legin(mode, l, nlat, m, w, pmn, km)
-            !     store above in pmnf
+            !
+            !==> Store above in pmnf
+            !
             do np1=mp1, nlat
                 associate( mn => mml1+np1 )
                     do i=1, late
@@ -827,22 +891,26 @@ end subroutine shagss1
 
 
 subroutine shagsp(nlat, nlon, wshags, lshags, dwork, ldwork, ierror)
+    use, intrinsic :: iso_fortran_env, only: &
+        wp => REAL64, &
+        ip => INT32
+
     implicit none
     !----------------------------------------------------------------------
     ! Dictionary: calling arguments
     !----------------------------------------------------------------------
-    integer, intent (in)     :: nlat
-    integer, intent (in)     :: nlon
-    real,    intent (in out) :: wshags(lshags)
-    integer, intent (in)     :: lshags
-    real,    intent (in out) :: dwork(ldwork)
-    integer, intent (in)     :: ldwork
-    integer, intent (out)    :: ierror
+    integer (ip), intent (in)     :: nlat
+    integer (ip), intent (in)     :: nlon
+    real (wp),    intent (in out) :: wshags(lshags)
+    integer (ip), intent (in)     :: lshags
+    real (wp),    intent (in out) :: dwork(ldwork)
+    integer (ip), intent (in)     :: ldwork
+    integer (ip), intent (out)    :: ierror
     !----------------------------------------------------------------------
     ! Dictionary: local variables
     !----------------------------------------------------------------------
-    integer :: l, i1, i2, i3, l1, l2, i4, i5, i6, i7
-    integer :: iw, late, idth, idwts
+    integer (ip) :: l, i1, i2, i3, l1, l2, i4, i5, i6, i7
+    integer (ip) :: iw, late, idth, idwts
     !----------------------------------------------------------------------
 
 
@@ -854,7 +922,7 @@ subroutine shagsp(nlat, nlon, wshags, lshags, dwork, ldwork, ierror)
     ierror = 0
 
     ! Check case 1
-    if (nlat<3) then
+    if (nlat < 3) then
         ierror = 1
         return
     end if
@@ -906,6 +974,7 @@ subroutine shagsp(nlat, nlon, wshags, lshags, dwork, ldwork, ierror)
         wshags(i4), wshags(i5), wshags(i6), wshags(i7), dwork(idth), &
         dwork(idwts), dwork(iw), ierror)
 
+    ! Check case 6
     if (ierror /= 0) then
         ierror = 6
     end if
@@ -916,27 +985,30 @@ end subroutine shagsp
 
 subroutine shagsp1(nlat, nlon, l, late, wts, p0n, p1n, abel, bbel, cbel, &
     wfft, dtheta, dwts, work, ier)
-    implicit none
     ! External subroutines  :: hrffti, gaqd, dnlfk
-    ! External functions    :: indx, imndx
+    use, intrinsic :: iso_fortran_env, only: &
+        wp => REAL64, &
+        ip => INT32
+
+    implicit none
     !----------------------------------------------------------------------
     ! Dictionary: calling arguments
     !----------------------------------------------------------------------
-    integer, intent (in)     :: nlat
-    integer, intent (in)     :: nlon
-    integer, intent (in)     :: l
-    integer, intent (in)     :: late
-    real,    intent (in out) :: wts(nlat)
-    real,    intent (in out) :: p0n(nlat, late)
-    real,    intent (in out) :: p1n(nlat, late)
-    real,    intent (in out) :: abel(1)
-    real,    intent (in out) :: bbel(1)
-    real,    intent (in out) :: cbel(1)
-    real,    intent (in out) :: wfft(1)
-    real,    intent (in out) :: dtheta(nlat)
-    real,    intent (in out) :: dwts(nlat)
-    real,    intent (in out) :: work(*)
-    integer, intent (out)    :: ier
+    integer (ip), intent (in)     :: nlat
+    integer (ip), intent (in)     :: nlon
+    integer (ip), intent (in)     :: l
+    integer (ip), intent (in)     :: late
+    real (wp),    intent (in out) :: wts(nlat)
+    real (wp),    intent (in out) :: p0n(nlat, late)
+    real (wp),    intent (in out) :: p1n(nlat, late)
+    real (wp),    intent (in out) :: abel(1)
+    real (wp),    intent (in out) :: bbel(1)
+    real (wp),    intent (in out) :: cbel(1)
+    real (wp),    intent (in out) :: wfft(1)
+    real (wp),    intent (in out) :: dtheta(nlat)
+    real (wp),    intent (in out) :: dwts(nlat)
+    real (wp),    intent (in out) :: work(*)
+    integer (ip), intent (out)    :: ier
     !----------------------------------------------------------------------
     ! Dictionary: local variables
     !----------------------------------------------------------------------
@@ -947,13 +1019,14 @@ subroutine shagsp1(nlat, nlon, l, late, wts, p0n, p1n, abel, bbel, cbel, &
 
     call hrffti(nlon, wfft)
 
-    !     compute real gaussian points and weights
-    !     lw = 4*nlat*(nlat+2)
+    !
+    !==> Compute real gaussian points and weights
+    !    lw = 4*nlat*(nlat+2)
     lw = nlat*(nlat+2)
 
     call gaqd(nlat, dtheta, dwts, work, lw, ier)
 
-    if (ier/=0) then
+    if (ier /= 0) then
         return
     end if
 
@@ -961,11 +1034,15 @@ subroutine shagsp1(nlat, nlon, l, late, wts, p0n, p1n, abel, bbel, cbel, &
     !     in inner loops in analysis
     wts = dwts
 
-    !     initialize p0n, p1n using real dnlfk, dnlft
-    p0n = 0.0
-    p1n = 0.0
+    !
+    !==> initialize p0n, p1n using real dnlfk, dnlft
+    !
+    p0n = 0.0_wp
+    p1n = 0.0_wp
 
-    !     compute m=n=0 legendre polynomials for all theta(i)
+    !
+    !==> compute m=n=0 legendre polynomials for all theta(i)
+    !
     np1 = 1
     n = 0
     m = 0
@@ -974,7 +1051,9 @@ subroutine shagsp1(nlat, nlon, l, late, wts, p0n, p1n, abel, bbel, cbel, &
         call dnlft(m, n, dtheta(i), work, pb)
         p0n(1, i) = pb
     end do
-    !     compute p0n, p1n for all theta(i) when n.gt.0
+    !
+    !==> Compute p0n, p1n for all theta(i) when n.gt.0
+    !
     do np1=2, nlat
         n = np1-1
         m = 0
@@ -983,7 +1062,9 @@ subroutine shagsp1(nlat, nlon, l, late, wts, p0n, p1n, abel, bbel, cbel, &
             call dnlft(m, n, dtheta(i), work, pb)
             p0n(np1, i) = pb
         end do
-        !     compute m=1 legendre polynomials for all n and theta(i)
+        !
+        !==> compute m=1 legendre polynomials for all n and theta(i)
+        !
         m = 1
         call dnlfk(m, n, work)
         do i=1, late
@@ -992,8 +1073,9 @@ subroutine shagsp1(nlat, nlon, l, late, wts, p0n, p1n, abel, bbel, cbel, &
         end do
     end do
     !
-    !     compute and store swarztrauber recursion coefficients
-    !     for 2 <= m <= n and 2 <= n <= nlat in abel, bbel, cbel
+    !==> Compute and store swarztrauber recursion coefficients
+    !    for 2 <= m <= n and 2 <= n <= nlat in abel, bbel, cbel
+    !
     do n=2, nlat
         mlim = min(n, l)
         do  m=2, mlim

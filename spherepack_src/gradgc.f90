@@ -240,13 +240,13 @@ subroutine gradgc(nlat, nlon, isym, nt, v, w, idvw, jdvw, a, b, mdab, ndab, &
     ierror = 2
     if (nlon < 4) return
     ierror = 3
-    if (isym<0 .or. isym>2) return
+    if (isym < 0 .or. isym > 2) return
     ierror = 4
     if (nt < 0) return
     ierror = 5
     imid = (nlat+1)/2
-    if ((isym==0 .and. idvw<nlat) .or. &
-        (isym/=0 .and. idvw<imid)) return
+    if ((isym == 0 .and. idvw<nlat) .or. &
+        (isym /= 0 .and. idvw<imid)) return
     ierror = 6
     if (jdvw < nlon) return
     ierror = 7
@@ -334,7 +334,7 @@ subroutine gradgc1(nlat, nlon, isym, nt, v, w, idvw, jdvw, br, bi, mmax, &
     !
     !     set ityp for irrotational vector synthesis to compute gradient
     !
-    if (isym==0) then
+    if (isym == 0) then
         ityp = 1
     else if (isym==1) then
         ityp = 4

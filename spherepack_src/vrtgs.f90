@@ -230,12 +230,12 @@ subroutine vrtgs(nlat, nlon, isym, nt, vort, ivrt, jvrt, cr, ci, mdc, ndc, &
     ierror = 2
     if (nlon < 4) return
     ierror = 3
-    if (isym<0 .or. isym>2) return
+    if (isym < 0 .or. isym > 2) return
     ierror = 4
     if (nt < 0) return
     ierror = 5
     imid = (nlat+1)/2
-    if ((isym==0 .and. ivrt<nlat) .or. &
+    if ((isym == 0 .and. ivrt<nlat) .or. &
         (isym>0 .and. ivrt<imid)) return
     ierror = 6
     if (jvrt < nlon) return
@@ -263,7 +263,7 @@ subroutine vrtgs(nlat, nlon, isym, nt, vort, ivrt, jvrt, cr, ci, mdc, ndc, &
     ls = nlat
     if (isym > 0) ls = imid
     nln = nt*ls*nlon
-    if (lwork< nln+ls*nlon+2*mn+nlat) return
+    if (lwork < nln+ls*nlon+2*mn+nlat) return
     ierror = 0
     !
     !     set work space pointers

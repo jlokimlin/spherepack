@@ -248,12 +248,12 @@ subroutine slapgc(nlat, nlon, isym, nt, slap, ids, jds, a, b, mdab, ndab, &
     ierror = 2
     if (nlon < 4) return
     ierror = 3
-    if (isym<0 .or. isym>2) return
+    if (isym < 0 .or. isym > 2) return
     ierror = 4
     if (nt < 0) return
     ierror = 5
     imid = (nlat+1)/2
-    if ((isym==0 .and. ids<nlat) .or. &
+    if ((isym == 0 .and. ids<nlat) .or. &
         (isym>0 .and. ids<imid)) return
     ierror = 6
     if (jds < nlon) return

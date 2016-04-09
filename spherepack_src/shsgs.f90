@@ -296,9 +296,9 @@ subroutine shsgs(nlat, nlon, mode, nt, g, idg, jdg, a, b, mdab, ndab, &
 
     !     check input parameters
     ierror = 1
-    if (nlat<3) return
+    if (nlat < 3) return
     ierror = 2
-    if (nlon<4) return
+    if (nlon < 4) return
     ierror = 3
     if (mode<0 .or.mode>2) return
     ierror = 4
@@ -326,8 +326,8 @@ subroutine shsgs(nlat, nlon, mode, nt, g, idg, jdg, a, b, mdab, ndab, &
     if (lshsgs<lp) return
     !     check temporary work space length
     ierror = 10
-    if (mode==0 .and. lwork<nlat*nlon*(nt+1)) return
-    if (mode/=0 .and. lwork<l2*nlon*(nt+1)) return
+    if (mode==0 .and. lwork <nlat*nlon*(nt+1)) return
+    if (mode/=0 .and. lwork <l2*nlon*(nt+1)) return
     ierror = 0
     !     starting address for fft values and legendre polys in wshsgs
     ifft = nlat+2*nlat*late+3*(l*(l-1)/2+(nlat-l)*(l-1))+1
@@ -551,9 +551,9 @@ subroutine shsgsi(nlat, nlon, wshsgs, lshsgs, work, lwork, dwork, ldwork, &
     real dwork(ldwork)
 
     ierror = 1
-    if (nlat<3) return
+    if (nlat < 3) return
     ierror = 2
-    if (nlon<4) return
+    if (nlon < 4) return
     !     set triangular truncation limit for spherical harmonic basis
     l = min((nlon+2)/2, nlat)
     !     set equator or nearest point (if excluded) pointer
@@ -566,7 +566,7 @@ subroutine shsgsi(nlat, nlon, wshsgs, lshsgs, work, lwork, dwork, ldwork, &
     if (lshsgs<lp) return
     ierror = 4
     !     check temporary work space
-    if (lwork<4*nlat*(nlat+2)+2) return
+    if (lwork <4*nlat*(nlat+2)+2) return
     ierror = 5
     if (ldwork < nlat*(nlat+4)) return
     ierror = 0
@@ -619,9 +619,9 @@ subroutine shsgsp(nlat, nlon, wshsgs, lshsgs, dwork, ldwork, ierror)
     real dwork(ldwork)
 
     ierror = 1
-    if (nlat<3) return
+    if (nlat < 3) return
     ierror = 2
-    if (nlon<4) return
+    if (nlon < 4) return
     !     set triangular truncation limit for spherical harmonic basis
     l = min((nlon+2)/2, nlat)
     !     set equator or nearest point (if excluded) pointer

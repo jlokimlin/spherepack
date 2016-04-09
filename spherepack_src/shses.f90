@@ -293,38 +293,124 @@
 !
 subroutine shses(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, &
     wshses, lshses, work, lwork, ierror)
-    dimension g(idg, jdg, 1), a(mdab, ndab, 1), b(mdab, ndab, 1), wshses(1), &
-        work(1)
-    ierror = 1
-    if (nlat<3) return
-    ierror = 2
-    if (nlon<4) return
-    ierror = 3
-    if (isym<0 .or. isym>2) return
-    ierror = 4
-    if (nt < 0) return
-    ierror = 5
-    if ((isym==0 .and. idg<nlat) .or. &
-        (isym/=0 .and. idg<(nlat+1)/2)) return
-    ierror = 6
-    if (jdg < nlon) return
-    ierror = 7
+
+    use, intrinsic :: iso_fortran_env, only: &
+        wp => REAL64, &
+        ip => INT32
+
+    implicit none
+    !----------------------------------------------------------------------
+    ! Dictionary: calling arguments
+    !----------------------------------------------------------------------
+    integer (ip), intent (in)     :: nlat
+    integer (ip), intent (in)     :: nlon
+    integer (ip), intent (in)     :: isym
+    integer (ip), intent (in)     :: nt
+    real (wp),    intent (out)    :: g(idg, jdg, 1)
+    integer (ip), intent (in)     :: idg
+    integer (ip), intent (in)     :: jdg
+    real (wp),    intent (in)     :: a(mdab, ndab, 1)
+    real (wp),    intent (in)     :: b(mdab, ndab, 1)
+    integer (ip), intent (in)     :: mdab
+    integer (ip), intent (in)     :: ndab
+    real (wp),    intent (in out) :: wshses(1)
+    integer (ip), intent (in)     :: lshses
+    real (wp),    intent (in out) :: work(1)
+    integer (ip), intent (in)     :: lwork
+    integer (ip), intent (out)    :: ierror
+    !----------------------------------------------------------------------
+    ! Dictionary: local variables
+    !----------------------------------------------------------------------
+    integer (ip) :: ls, nln, ist, imid, mmax, lpimn
+    !----------------------------------------------------------------------
+
+    !
+    !==> Check validity of input arguments
+    !
+
+    ! Initialize error flag
+    ierror = 0
+
+    ! Check case 1
+    if (nlat < 3) then
+        ierror = 1
+        return
+    end if
+
+    ! Check case 2
+    if (nlon < 4) then
+        ierror = 2
+        return
+    end if
+
+    ! Check case 3
+    if (isym < 0 .or. isym > 2) then
+        ierror = 3
+        return
+    end if
+
+    ! Check case 4
+    if (nt < 0) then
+        ierror = 4
+        return
+    end if
+
+    ! Check case 5
+    if ( &
+        (isym == 0 .and. idg < nlat) &
+        .or. &
+        (isym /= 0 .and. idg < (nlat+1)/2) &
+        ) then
+        ierror = 5
+        return
+    end if
+
+    ! Check case 6
+    if (jdg < nlon) then
+        ierror = 6
+        return
+    end if
+
+
     mmax = min(nlat, nlon/2+1)
-    if (mdab < mmax) return
-    ierror = 8
-    if (ndab < nlat) return
-    ierror = 9
+
+    ! Check case 7
+    if (mdab < mmax)  then
+        ierror = 7
+        return
+    end if
+
+    ! Check case 8
+    if (ndab < nlat) then
+        ierror = 8
+        return
+    end if
+
     imid = (nlat+1)/2
     lpimn = (imid*mmax*(nlat+nlat-mmax+1))/2
-    if (lshses < lpimn+nlon+15) return
-    ierror = 10
-    ls = nlat
-    if (isym > 0) ls = imid
-    nln = nt*ls*nlon
-    if (lwork< nln+ls*nlon) return
-    ierror = 0
-    ist = 0
 
+    ! Check case 9
+    if (lshses < lpimn+nlon+15) then
+        ierror = 9
+        return
+    end if
+
+
+    ls = nlat
+
+    if (isym > 0) then
+        ls = imid
+    end if
+
+    nln = nt*ls*nlon
+
+    ! Check case 10
+    if (lwork < nln+ls*nlon) then
+        ierror = 10
+        return
+    end if
+
+    ist = 0
     if (isym == 0) then
         ist = imid
     end if
@@ -337,8 +423,41 @@ end subroutine shses
 
 subroutine shses1(nlat, isym, nt, g, idgs, jdgs, a, b, mdab, ndab, p, imid, &
     idg, jdg, ge, go, work, whrfft)
-    dimension g(idgs, jdgs, 1), a(mdab, ndab, 1), b(mdab, ndab, 1), p(imid, 1), &
-        ge(idg, jdg, 1), go(idg, jdg, 1), work(1), whrfft(1)
+
+    ! External subroutines: hrfftb
+
+    use, intrinsic :: iso_fortran_env, only: &
+        wp => REAL64, &
+        ip => INT32
+
+    implicit none
+    !----------------------------------------------------------------------
+    ! Dictionary: calling arguments
+    !----------------------------------------------------------------------
+    integer (ip), intent (in)     :: nlat
+    integer (ip), intent (in)     :: isym
+    integer (ip), intent (in)     :: nt
+    real (wp),    intent (in out) :: g(idgs, jdgs, 1)
+    integer (ip), intent (in)     :: idgs
+    integer (ip), intent (in)     :: jdgs
+    real (wp),    intent (in)     :: a(mdab, ndab, 1)
+    real (wp),    intent (in)     :: b(mdab, ndab, 1)
+    integer (ip), intent (in)     :: mdab
+    integer (ip), intent (in)     :: ndab
+    real (wp),    intent (in out) :: p(imid, 1)
+    integer (ip), intent (in)     :: imid
+    integer (ip), intent (in)     :: idg
+    integer (ip), intent (in)     :: jdg
+    real (wp),    intent (in out) :: ge(idg, jdg, 1)
+    real (wp),    intent (in out) :: go(idg, jdg, 1)
+    real (wp),    intent (in out) :: work(1)
+    real (wp),    intent (in out) :: whrfft(1)
+    !----------------------------------------------------------------------
+    ! Dictionary: local  variables
+    !----------------------------------------------------------------------
+    integer (ip) ::  i, j, k, m, mb, mn, ls, mp1, np1, mp2
+    integer (ip) ::  mdo, ndo, imm1, nlp1, modl, mmax, nlo, nlon
+    !----------------------------------------------------------------------
 
     ls = idg
     nlon = jdg
@@ -360,7 +479,7 @@ subroutine shses1(nlat, isym, nt, g, idgs, jdgs, a, b, mdab, ndab, p, imid, &
     do k=1, nt
         do j=1, nlon
             do i=1, ls
-                ge(i, j, k) = 0.0
+                ge(i, j, k) = 0.0_wp
             end do
         end do
     end do
@@ -466,7 +585,7 @@ subroutine shses1(nlat, isym, nt, g, idgs, jdgs, a, b, mdab, ndab, p, imid, &
             go to 157
         end if
         do i=1, ls
-            ge(i, nlon, k) = 2.0 * ge(i, nlon, k)
+            ge(i, nlon, k) = 2.0_wp * ge(i, nlon, k)
         end do
 157     call hrfftb(ls, nlon, ge(1, 1, k), ls, whrfft, work)
     end do
@@ -478,13 +597,13 @@ subroutine shses1(nlat, isym, nt, g, idgs, jdgs, a, b, mdab, ndab, p, imid, &
     do k=1, nt
         do j=1, nlon
             do i=1, imm1
-                g(i, j, k) = 0.5 * (ge(i, j, k)+go(i, j, k))
-                g(nlp1-i, j, k) = 0.5 * (ge(i, j, k)-go(i, j, k))
+                g(i, j, k) = 0.5_wp * (ge(i, j, k)+go(i, j, k))
+                g(nlp1-i, j, k) = 0.5_wp * (ge(i, j, k)-go(i, j, k))
             end do
             if (modl == 0) then
                 exit
             end if
-            g(imid, j, k) = 0.5 * ge(imid, j, k)
+            g(imid, j, k) = 0.5_wp * ge(imid, j, k)
         end do
     end do
 
@@ -493,7 +612,7 @@ subroutine shses1(nlat, isym, nt, g, idgs, jdgs, a, b, mdab, ndab, p, imid, &
     180 do k=1, nt
         do i=1, imid
             do j=1, nlon
-                g(i, j, k) = 0.5 * ge(i, j, k)
+                g(i, j, k) = 0.5_wp * ge(i, j, k)
             end do
         end do
     end do
@@ -504,27 +623,77 @@ end subroutine shses1
 
 subroutine shsesi(nlat, nlon, wshses, lshses, work, lwork, dwork, &
     ldwork, ierror)
-    dimension wshses(*), work(*)
-    real dwork(*)
+    ! External subroutines :: ses1, hrffti
+    use, intrinsic :: iso_fortran_env, only: &
+        wp => REAL64, &
+        ip => INT32
 
-    ierror = 1
-    if (nlat<3) return
-    ierror = 2
-    if (nlon<4) return
-    ierror = 3
+    implicit none
+    !----------------------------------------------------------------------
+    ! Dictionary: calling arguments
+    !----------------------------------------------------------------------
+    integer (ip), intent (in)     :: nlat
+    integer (ip), intent (in)     :: nlon
+    real (wp),    intent (in out) :: wshses(*)
+    integer (ip), intent (in)     :: lshses
+    real (wp),    intent (in out) :: work(*)
+    integer (ip), intent (in)     :: lwork
+    real (wp),    intent (in out) :: dwork(*)
+    integer (wp), intent (in)     :: ldwork
+    integer (ip), intent (out)    :: ierror
+    !----------------------------------------------------------------------
+    ! Dictionary: local variables
+    !----------------------------------------------------------------------
+    integer (ip) :: mmax, imid, lpimn, labc, iw1
+    !----------------------------------------------------------------------
+
+    !
+    !==> Check validity of input arguments
+    !
+
+    ! Initialize error flag
+    ierror = 0
+
+    ! Check case 1
+    if (nlat < 3) then
+        ierror = 1
+        return
+    end if
+
+    ! Check case 2
+    if (nlon < 4) then
+        ierror = 2
+        return
+    end if
+
     mmax = min(nlat, nlon/2+1)
     imid = (nlat+1)/2
     lpimn = (imid*mmax*(nlat+nlat-mmax+1))/2
-    if (lshses < lpimn+nlon+15) return
-    ierror = 4
+
+    ! Check case 3
+    if (lshses < lpimn+nlon+15) then
+        ierror = 3
+        return
+    end if
+
     labc = 3*((mmax-2)*(nlat+nlat-mmax-1))/2
-    if (lwork < 5*nlat*imid + labc) return
-    ierror = 5
-    if (ldwork < nlat+1) return
-    ierror = 0
+
+    ! Check case 4
+    if (lwork < 5*nlat*imid + labc) then
+        ierror = 4
+        return
+    end if
+
+    ! Check case 5
+    if (ldwork < nlat+1) then
+        ierror = 5
+        return
+    end if
+
     iw1 = 3*nlat*imid+1
 
     call ses1(nlat, nlon, imid, wshses, work, work(iw1), dwork)
+
     call hrffti(nlon, wshses(lpimn+1))
 
 end subroutine shsesi

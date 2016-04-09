@@ -239,13 +239,13 @@ subroutine igradgs(nlat, nlon, isym, nt, sf, isf, jsf, br, bi, mdb, ndb, &
     ierror = 2
     if (nlon < 4) return
     ierror = 3
-    if (isym<0 .or. isym>2) return
+    if (isym < 0 .or. isym > 2) return
     ierror = 4
     if (nt < 0) return
     ierror = 5
     imid = (nlat+1)/2
-    if ((isym==0 .and. isf<nlat) .or. &
-        (isym/=0 .and. isf<imid)) return
+    if ((isym == 0 .and. isf<nlat) .or. &
+        (isym /= 0 .and. isf<imid)) return
     ierror = 6
     if (jsf < nlon) return
     ierror = 7

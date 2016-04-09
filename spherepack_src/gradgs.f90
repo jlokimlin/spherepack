@@ -236,13 +236,13 @@ if (nlat < 3) return
 ierror = 2
 if (nlon < 4) return
 ierror = 3
-if (isym<0 .or. isym>2) return
+if (isym < 0 .or. isym > 2) return
 ierror = 4
 if (nt < 0) return
 ierror = 5
 imid = (nlat+1)/2
-if ((isym==0 .and. idvw<nlat) .or. &
-   (isym/=0 .and. idvw<imid)) return
+if ((isym == 0 .and. idvw<nlat) .or. &
+   (isym /= 0 .and. idvw<imid)) return
 ierror = 6
 if (jdvw < nlon) return
 ierror = 7
@@ -264,7 +264,7 @@ ierror = 10
 !
 mn = mmax*nlat*nt
 idv = nlat
-if (isym/=0) idv = imid
+if (isym /= 0) idv = imid
 lnl = nt*idv*nlon
 lwkmin =  lnl+lnl+idv*nlon+2*mn+nlat
 if (lwork < lwkmin) return
@@ -329,7 +329,7 @@ bi(m, n, k) = sqnn(n)*b(m, n, k)
 !
 !     set ityp for irrotational vector synthesis to compute gradient
 !
-if (isym==0) then
+if (isym == 0) then
 ityp = 1
 else if (isym==1) then
 ityp = 4

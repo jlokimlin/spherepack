@@ -276,13 +276,13 @@ subroutine idvtgs(nlat, nlon, isym, nt, v, w, idvw, jdvw, ad, bd, av, bv, &
     ierror = 2
     if (nlon < 4) return
     ierror = 3
-    if (isym<0 .or. isym>2) return
+    if (isym < 0 .or. isym > 2) return
     ierror = 4
     if (nt < 0) return
     ierror = 5
     imid = (nlat+1)/2
-    if ((isym==0 .and. idvw<nlat) .or. &
-        (isym/=0 .and. idvw<imid)) return
+    if ((isym == 0 .and. idvw<nlat) .or. &
+        (isym /= 0 .and. idvw<imid)) return
     ierror = 6
     if (jdvw < nlon) return
     ierror = 7
@@ -299,9 +299,9 @@ subroutine idvtgs(nlat, nlon, isym, nt, v, w, idvw, jdvw, ad, bd, av, bv, &
     !     verify unsaved work space length
     !
     mn = mmax*nlat*nt
-    if (isym/=0  .and. lwork < &
+    if (isym /= 0  .and. lwork < &
         (2*nt+1)*imid*nlon+4*mn+nlat) return
-    if (isym==0  .and. lwork < &
+    if (isym == 0  .and. lwork < &
         (2*nt+1)*nlat*nlon+4*mn+nlat) return
     ierror = 0
     !
