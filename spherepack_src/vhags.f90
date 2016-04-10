@@ -1272,51 +1272,42 @@ subroutine vhgai1(nlat, imid, vb, wb, dthet, dwts, dpbar, work)
             vb(i, ix) = -dpbar(i, 2, np)*dwts(i)
             vb(i, iy) = dpbar(i, n, np)/sqrt(dble(real(2*(n+1))))*dwts(i)
         end do
-        !
-        if (n==1) then
-            go to 131
-        end if
 
-        dcf = sqrt(dble(real(4*n*(n+1))))
-        do m=1, n-1
-            ix = indx(m, n, nlat)
-            abel = sqrt(dble(real((n+m)*(n-m+1))))/dcf
-            bbel = sqrt(dble(real((n-m)*(n+m+1))))/dcf
-            do i=1, imid
-                vb(i, ix) = (abel*dpbar(i, m, np)-bbel*dpbar(i, m+2, np))*dwts(i)
+        if (n==1) then
+            !
+            !==> compute the vector harmonic w(theta) = m*pbar/cos(theta)
+            !
+            !     set wb=0 for m=0
+            !
+            ix = indx(0, n, nlat)
+            wb(1:imid, ix) = 0.0
+        else
+            dcf = sqrt(dble(real(4*n*(n+1))))
+            do m=1, n-1
+                ix = indx(m, n, nlat)
+                abel = sqrt(dble(real((n+m)*(n-m+1))))/dcf
+                bbel = sqrt(dble(real((n-m)*(n+m+1))))/dcf
+                do i=1, imid
+                    vb(i, ix) = (abel*dpbar(i, m, np)-bbel*dpbar(i, m+2, np))*dwts(i)
+                end do
             end do
-        end do
+        end if
         !
-        !     compute the vector harmonic w(theta) = m*pbar/cos(theta)
+        !==> compute wb for m=1, n
         !
-        !     set wb=0 for m=0
-        !
-131     ix = indx(0, n, nlat)
-        do i=1, imid
-            wb(i, ix) = 0.0
-        end do
-        !
-        !     compute wb for m=1, n
-        !
-        dcf = sqrt(dble(real(n+n+1))/dble(real(4*n*(n+1)*(n+n-1))))
+        dcf = sqrt(real(n+n+1)/real(4*n*(n+1)*(n+n-1)))
         do m=1, n
             ix = indx(m, n, nlat)
-            abel = dcf*sqrt(dble(real((n+m)*(n+m-1))))
-            bbel = dcf*sqrt(dble(real((n-m)*(n-m-1))))
+            abel = dcf*sqrt(real((n+m)*(n+m-1)))
+            bbel = dcf*sqrt(real((n-m)*(n-m-1)))
 
             if (m >= n-1) then
-                go to 231
+                wb(1:imid, ix) = abel * dpbar(1:imid, m, nz) * dwts(1:imid)
+            else
+                wb(1:imid, ix) = &
+                    (abel*dpbar(1:imid, m, nz) + bbel*dpbar(1:imid, m+2, nz))&
+                    * dwts(1:imid)
             end if
-
-            do i=1, imid
-                wb(i, ix) = (abel*dpbar(i, m, nz) + bbel*dpbar(i, m+2, nz))*dwts(i)
-            end do
-
-            cycle!exit
-
-            231 do i=1, imid
-                wb(i, ix) = abel*dpbar(i, m, nz)*dwts(i)
-            end do
         end do
     end do
 
