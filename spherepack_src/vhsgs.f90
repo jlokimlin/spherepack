@@ -1169,24 +1169,21 @@ subroutine vhsgs1(nlat, nlon, ityp, nt, imid, idvw, jdvw, v, w, mdab, &
         call hrfftb(idv, nlon, we(1, 1, k), idv, wrfft, work)
     end do
 
-    if (ityp > 2) then
-        go to 12
+    if (ityp <= 2) then
+        do k=1, nt
+            do j=1, nlon
+                do i=1, imm1
+                    v(i, j, k) = .5*(ve(i, j, k)+vo(i, j, k))
+                    w(i, j, k) = .5*(we(i, j, k)+wo(i, j, k))
+                    v(nlp1-i, j, k) = .5*(ve(i, j, k)-vo(i, j, k))
+                    w(nlp1-i, j, k) = .5*(we(i, j, k)-wo(i, j, k))
+                end do
+            end do
+        end do
+        go to 13
     end if
 
     do k=1, nt
-        do j=1, nlon
-            do i=1, imm1
-                v(i, j, k) = .5*(ve(i, j, k)+vo(i, j, k))
-                w(i, j, k) = .5*(we(i, j, k)+wo(i, j, k))
-                v(nlp1-i, j, k) = .5*(ve(i, j, k)-vo(i, j, k))
-                w(nlp1-i, j, k) = .5*(we(i, j, k)-wo(i, j, k))
-            end do
-        end do
-    end do
-
-    go to 13
-
-    12 do k=1, nt
         do j=1, nlon
             do i=1, imm1
                 v(i, j, k) = .5*ve(i, j, k)
@@ -1279,11 +1276,9 @@ subroutine vhgsi1(nlat, imid, vb, wb, dthet, dwts, dpbar, work)
     !     compute m=n=0 legendre polynomials for all theta(i)
     !
     ssqr2 = 1.0/sqrt(2.0)
-    do i=1, imid
-        dpbar(i, 1, 1) = ssqr2
-        vb(i, 1) = 0.0
-        wb(i, 1) = 0.0
-    end do
+    dpbar(1:imid, 1, 1) = ssqr2
+    vb(1:imid, 1) = 0.0
+    wb(1:imid, 1) = 0.0
     !
     !     main loop for remaining vb, and wb
     !
@@ -1292,34 +1287,32 @@ subroutine vhgsi1(nlat, imid, vb, wb, dthet, dwts, dpbar, work)
         nz = mod(n-1, 3)+1
         np = mod(n, 3)+1
         !
-        !     compute dpbar for m=0
+        !==> compute dpbar for m=0
         !
         call dnlfk(0, n, work)
         mn = indx(0, n, nlat)
         do i=1, imid
             call dnlft(0, n, dthet(i), work, dpbar(i, 1, np))
-        !      pbar(i, mn) = dpbar(i, 1, np)
         end do
         !
-        !     compute dpbar for m=1
+        !==> compute dpbar for m=1
         !
         call dnlfk(1, n, work)
         mn = indx(1, n, nlat)
         do i=1, imid
             call dnlft(1, n, dthet(i), work, dpbar(i, 2, np))
-        !      pbar(i, mn) = dpbar(i, 2, np)
         end do
         !
-        !     compute and store dpbar for m=2, n
+        !==> compute and store dpbar for m=2, n
         !
         if (n >= 2) then
             do m=2, n
-                abel = sqrt(dble(real((2*n+1)*(m+n-2)*(m+n-3)))/ &
-                    dble(real((2*n-3)*(m+n-1)*(m+n))))
-                bbel = sqrt(dble(real((2*n+1)*(n-m-1)*(n-m)))/ &
-                    dble(real((2*n-3)*(m+n-1)*(m+n))))
-                cbel = sqrt(dble(real((n-m+1)*(n-m+2)))/ &
-                    dble(real((m+n-1)*(m+n))))
+                abel = sqrt(real((2*n+1)*(m+n-2)*(m+n-3))/ &
+                    real((2*n-3)*(m+n-1)*(m+n)))
+                bbel = sqrt(real((2*n+1)*(n-m-1)*(n-m))/ &
+                    real((2*n-3)*(m+n-1)*(m+n)))
+                cbel = sqrt(real((n-m+1)*(n-m+2))/ &
+                    real((m+n-1)*(m+n)))
                 id = indx(m, n, nlat)
                 if (m >= n-1) then
                     dpbar(1:imid, m+1, np) = &
