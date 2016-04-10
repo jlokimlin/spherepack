@@ -1249,19 +1249,15 @@ subroutine vhgai1(nlat, imid, vb, wb, dthet, dwts, dpbar, work)
             id = indx(m, n, nlat)
 
             if (m >= n-1) then
-                go to 102
+                do i=1, imid
+                    dpbar(i, m+1, np) = abel*dpbar(i, m-1, nm)-cbel*dpbar(i, m-1, np)
+                end do
+            else
+                do i=1, imid
+                    dpbar(i, m+1, np) = abel*dpbar(i, m-1, nm)+bbel*dpbar(i, m+1, nm) &
+                        -cbel*dpbar(i, m-1, np)
+                end do
             end if
-
-            do i=1, imid
-                dpbar(i, m+1, np) = abel*dpbar(i, m-1, nm)+bbel*dpbar(i, m+1, nm) &
-                    -cbel*dpbar(i, m-1, np)
-            end do
-
-            cycle!exit
-
-            102 do i=1, imid
-                dpbar(i, m+1, np) = abel*dpbar(i, m-1, nm)-cbel*dpbar(i, m-1, np)
-            end do
         end do
         !
         !     compute the derivative of the functions
@@ -1300,7 +1296,6 @@ subroutine vhgai1(nlat, imid, vb, wb, dthet, dwts, dpbar, work)
             ix = indx(m, n, nlat)
             abel = dcf*sqrt(real((n+m)*(n+m-1)))
             bbel = dcf*sqrt(real((n-m)*(n-m-1)))
-
             if (m >= n-1) then
                 wb(1:imid, ix) = abel * dpbar(1:imid, m, nz) * dwts(1:imid)
             else
