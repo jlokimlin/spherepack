@@ -671,23 +671,17 @@ subroutine shsgs1(nlat, nlon, l, lat, mode, gs, idg, jdg, nt, a, b, mdab, &
         end if
     end if
 
-
     !
     !==> Perform inverse fourier transform
     !
     do k=1, nt
         call hrfftb(lat, nlon, g(1, 1, k), lat, wfft, work)
     end do
+
     !
     !==> scale output in gs
     !
-    do k=1, nt
-        do j=1, nlon
-            do i=1, lat
-                gs(i, j, k) = 0.5_wp *g(i, j, k)
-            end do
-        end do
-    end do
+    gs(1:lat, 1:nlon, :) = 0.5_wp *g(1:lat, 1:nlon, :)
 
 end subroutine shsgs1
 

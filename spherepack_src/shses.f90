@@ -395,11 +395,10 @@ subroutine shses(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, &
         return
     end if
 
-
-    ls = nlat
-
     if (isym > 0) then
         ls = imid
+    else
+        ls = nlat
     end if
 
     nln = nt*ls*nlon
@@ -410,9 +409,10 @@ subroutine shses(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, &
         return
     end if
 
-    ist = 0
     if (isym == 0) then
         ist = imid
+    else
+        ist = 0
     end if
 
     call shses1(nlat, isym, nt, g, idg, jdg, a, b, mdab, ndab, wshses, imid, &
@@ -462,18 +462,20 @@ subroutine shses1(nlat, isym, nt, g, idgs, jdgs, a, b, mdab, ndab, p, imid, &
     ls = idg
     nlon = jdg
     mmax = min(nlat, nlon/2+1)
-    mdo = mmax
 
-    if (mdo+mdo-1 > nlon) then
+    if (2*mmax-1 > nlon) then
         mdo = mmax-1
+    else
+        mdo = mmax
     end if
 
     nlp1 = nlat+1
     modl = mod(nlat, 2)
-    imm1 = imid
 
     if (modl /= 0) then
         imm1 = imid-1
+    else
+        imm1 = imid
     end if
 
     ! Initialize
@@ -543,8 +545,10 @@ subroutine shses1(nlat, isym, nt, g, idgs, jdgs, a, b, mdab, ndab, p, imid, &
                     mn = mb+np1
                     do k=1, nt
                         do i=1, imm1
-                            go(i, 2*mp1-2, k) = go(i, 2*mp1-2, k)+a(mp1, np1, k)*p(i, mn)
-                            go(i, 2*mp1-1, k) = go(i, 2*mp1-1, k)+b(mp1, np1, k)*p(i, mn)
+                            go(i, 2*mp1-2, k) = &
+                                go(i, 2*mp1-2, k) + a(mp1, np1, k) * p(i, mn)
+                            go(i, 2*mp1-1, k) = &
+                                go(i, 2*mp1-1, k) + b(mp1, np1, k) * p(i, mn)
                         end do
                     end do
                 end do
@@ -558,7 +562,8 @@ subroutine shses1(nlat, isym, nt, g, idgs, jdgs, a, b, mdab, ndab, p, imid, &
                     mn = mb+np1
                     do k=1, nt
                         go(1:imm1, 2*mmax-2, k) = &
-                            go(1:imm1, 2*mmax-2, k)+a(mmax, np1, k)*p(1:imm1, mn)
+                            go(1:imm1, 2*mmax-2, k) + &
+                            a(mmax, np1, k) * p(1:imm1, mn)
                     end do
                 end do
             end if
