@@ -1165,21 +1165,17 @@ subroutine vhgsi1(nlat, imid, vb, wb, dthet, dwts, dpbar, work)
         !
         !     compute wb for m=1, n
         !
-        dcf = sqrt(dble(real(n+n+1))/dble(real(4*n*(n+1)*(n+n-1))))
+        dcf = sqrt(real(n+n+1)/real(4*n*(n+1)*(n+n-1)))
         do m=1, n
             ix = indx(m, n, nlat)
-            abel = dcf*sqrt(dble(real((n+m)*(n+m-1))))
-            bbel = dcf*sqrt(dble(real((n-m)*(n-m-1))))
-            if (m>=n-1) go to 231
-
-            do i=1, imid
-                wb(i, ix) = abel*dpbar(i, m, nz) + bbel*dpbar(i, m+2, nz)
-            end do
-
-            cycle
-            231 do i=1, imid
-                wb(i, ix) = abel*dpbar(i, m, nz)
-            end do
+            abel = dcf*sqrt(real((n+m)*(n+m-1)))
+            bbel = dcf*sqrt(real((n-m)*(n-m-1)))
+            if (m>=n-1) then
+                wb(1:imid, ix) = abel*dpbar(1:imid, m, nz)
+            else
+                wb(1:imid, ix) = &
+                abel*dpbar(1:imid, m, nz) + bbel*dpbar(1:imid, m+2, nz)
+            end if
         end do
     end do
 

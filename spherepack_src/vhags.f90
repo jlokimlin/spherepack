@@ -1179,11 +1179,9 @@ subroutine vhagsi(nlat, nlon, wvhags, lvhags, dwork, ldwork, ierror)
     iw2 = iw1+nlat
     iw3 = iw2+nlat
     iw4 = iw3+3*imid*nlat
-    !     iw2 = iw1+nlat+nlat
-    !     iw3 = iw2+nlat+nlat
-    !     iw4 = iw3+6*imid*nlat
     call vhgai1(nlat, imid, wvhags(jw1), wvhags(jw2), &
         dwork(iw1), dwork(iw2), dwork(iw3), dwork(iw4))
+
     call hrffti(nlon, wvhags(jw3))
 
 end subroutine vhagsi
@@ -1203,20 +1201,18 @@ subroutine vhgai1(nlat, imid, vb, wb, dthet, dwts, dpbar, work)
     !     compute m=n=0 legendre polynomials for all theta(i)
     !
     ssqr2 = 1.0/sqrt(2.0)
-    do i=1, imid
-        dpbar(i, 1, 1) = ssqr2
-        vb(i, 1) = 0.0
-        wb(i, 1) = 0.0
-    end do
+    dpbar(1:imid, 1, 1) = ssqr2
+    vb(1:imid, 1) = 0.0
+    wb(1:imid, 1) = 0.0
     !
-    !     main loop for remaining vb, and wb
+    !==> main loop for remaining vb, and wb
     !
     do n=1, nlat-1
         nm = mod(n-2, 3)+1
         nz = mod(n-1, 3)+1
         np = mod(n, 3)+1
         !
-        !     compute dpbar for m=0
+        !==> compute dpbar for m=0
         !
         call dnlfk(0, n, work)
         mn = indx(0, n, nlat)
@@ -1224,7 +1220,7 @@ subroutine vhgai1(nlat, imid, vb, wb, dthet, dwts, dpbar, work)
             call dnlft(0, n, dthet(i), work, dpbar(i, 1, np))
         end do
         !
-        !     compute dpbar for m=1
+        !==> compute dpbar for m=1
         !
         call dnlfk(1, n, work)
         mn = indx(1, n, nlat)
@@ -1232,42 +1228,37 @@ subroutine vhgai1(nlat, imid, vb, wb, dthet, dwts, dpbar, work)
             call dnlft(1, n, dthet(i), work, dpbar(i, 2, np))
         !      pbar(i, mn) = dpbar(i, 2, np)
         end do
+
         !
-        !     compute and store dpbar for m=2, n
+        !==> compute and store dpbar for m=2, n
         !
-        if (n < 2) then
-            go to 108
+        if (n >= 2) then
+            do m=2, n
+                abel = sqrt(real((2*n+1)*(m+n-2)*(m+n-3))/ &
+                    real((2*n-3)*(m+n-1)*(m+n)))
+                bbel = sqrt(real((2*n+1)*(n-m-1)*(n-m))/ &
+                    real((2*n-3)*(m+n-1)*(m+n)))
+                cbel = sqrt(real((n-m+1)*(n-m+2))/ &
+                    real((m+n-1)*(m+n)))
+                id = indx(m, n, nlat)
+
+                if (m >= n-1) then
+                    dpbar(1:imid, m+1, np) = &
+                        abel*dpbar(1:imid, m-1, nm)-cbel*dpbar(1:imid, m-1, np)
+                else
+                    dpbar(1:imid, m+1, np) = &
+                        abel*dpbar(1:imid, m-1, nm)+bbel*dpbar(1:imid, m+1, nm) &
+                        -cbel*dpbar(1:imid, m-1, np)
+                end if
+            end do
         end if
-
-        do m=2, n
-            abel = sqrt(real((2*n+1)*(m+n-2)*(m+n-3))/ &
-                real((2*n-3)*(m+n-1)*(m+n)))
-            bbel = sqrt(real((2*n+1)*(n-m-1)*(n-m))/ &
-                real((2*n-3)*(m+n-1)*(m+n)))
-            cbel = sqrt(real((n-m+1)*(n-m+2))/ &
-                real((m+n-1)*(m+n)))
-            id = indx(m, n, nlat)
-
-            if (m >= n-1) then
-                do i=1, imid
-                    dpbar(i, m+1, np) = abel*dpbar(i, m-1, nm)-cbel*dpbar(i, m-1, np)
-                end do
-            else
-                do i=1, imid
-                    dpbar(i, m+1, np) = abel*dpbar(i, m-1, nm)+bbel*dpbar(i, m+1, nm) &
-                        -cbel*dpbar(i, m-1, np)
-                end do
-            end if
-        end do
         !
         !     compute the derivative of the functions
         !
-108     ix = indx(0, n, nlat)
+        ix = indx(0, n, nlat)
         iy = indx(n, n, nlat)
-        do i=1, imid
-            vb(i, ix) = -dpbar(i, 2, np)*dwts(i)
-            vb(i, iy) = dpbar(i, n, np)/sqrt(real(2*(n+1)))*dwts(i)
-        end do
+        vb(1:imid, ix) = -dpbar(1:imid, 2, np)*dwts(1:imid)
+        vb(1:imid, iy) = dpbar(1:imid, n, np)/sqrt(real(2*(n+1)))*dwts(1:imid)
 
         if (n==1) then
             !
