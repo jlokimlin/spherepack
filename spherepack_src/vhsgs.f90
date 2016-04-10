@@ -1312,58 +1312,52 @@ subroutine vhgsi1(nlat, imid, vb, wb, dthet, dwts, dpbar, work)
         !
         !     compute and store dpbar for m=2, n
         !
-        if (n<2) go to 108
-        do m=2, n
-            abel = sqrt(dble(real((2*n+1)*(m+n-2)*(m+n-3)))/ &
-                dble(real((2*n-3)*(m+n-1)*(m+n))))
-            bbel = sqrt(dble(real((2*n+1)*(n-m-1)*(n-m)))/ &
-                dble(real((2*n-3)*(m+n-1)*(m+n))))
-            cbel = sqrt(dble(real((n-m+1)*(n-m+2)))/ &
-                dble(real((m+n-1)*(m+n))))
-            id = indx(m, n, nlat)
-            if (m>=n-1) go to 102
-            do i=1, imid
-                dpbar(i, m+1, np) = abel*dpbar(i, m-1, nm)+bbel*dpbar(i, m+1, nm) &
-                    -cbel*dpbar(i, m-1, np)
-            !      pbar(i, id) = dpbar(i, m+1, np)
+        if (n >= 2) then
+            do m=2, n
+                abel = sqrt(dble(real((2*n+1)*(m+n-2)*(m+n-3)))/ &
+                    dble(real((2*n-3)*(m+n-1)*(m+n))))
+                bbel = sqrt(dble(real((2*n+1)*(n-m-1)*(n-m)))/ &
+                    dble(real((2*n-3)*(m+n-1)*(m+n))))
+                cbel = sqrt(dble(real((n-m+1)*(n-m+2)))/ &
+                    dble(real((m+n-1)*(m+n))))
+                id = indx(m, n, nlat)
+                if (m >= n-1) then
+                    dpbar(1:imid, m+1, np) = &
+                        abel*dpbar(1:imid, m-1, nm)-cbel*dpbar(1:imid, m-1, np)
+                else
+                    dpbar(1:imid, m+1, np) = &
+                        abel*dpbar(1:imid, m-1, nm)+bbel*dpbar(1:imid, m+1, nm) &
+                        -cbel*dpbar(1:imid, m-1, np)
+                end if
             end do
-            exit!go to 107
-            102 do i=1, imid
-                dpbar(i, m+1, np) = abel*dpbar(i, m-1, nm)-cbel*dpbar(i, m-1, np)
-            !      pbar(i, id) = dpbar(i, m+1, np)
-            end do
-        end do
+        end if
         !
-        !     compute the derivative of the functions
+        !==> compute the derivative of the functions
         !
-108     ix = indx(0, n, nlat)
+        ix = indx(0, n, nlat)
         iy = indx(n, n, nlat)
-        do i=1, imid
-            vb(i, ix) = -dpbar(i, 2, np)
-            vb(i, iy) = dpbar(i, n, np)/sqrt(dble(real(2*(n+1))))
-        end do
-        !
-        if (n==1) go to 131
-        dcf = sqrt(dble(real(4*n*(n+1))))
-        do m=1, n-1
-            ix = indx(m, n, nlat)
-            abel = sqrt(dble(real((n+m)*(n-m+1))))/dcf
-            bbel = sqrt(dble(real((n-m)*(n+m+1))))/dcf
-            do i=1, imid
-                vb(i, ix) = abel*dpbar(i, m, np)-bbel*dpbar(i, m+2, np)
+        vb(1:imid, ix) = -dpbar(1:imid, 2, np)
+        vb(1:imid, iy) = dpbar(1:imid, n, np)/sqrt(real(2*(n+1)))
+
+        if (n /= 1) then
+            dcf = sqrt(real(4*n*(n+1)))
+            do m=1, n-1
+                ix = indx(m, n, nlat)
+                abel = sqrt(real((n+m)*(n-m+1)))/dcf
+                bbel = sqrt(real((n-m)*(n+m+1)))/dcf
+                vb(1:imid, ix) = &
+                    abel*dpbar(1:imid, m, np)-bbel*dpbar(1:imid, m+2, np)
             end do
-        end do
+        end if
         !
-        !     compute the vector harmonic w(theta) = m*pbar/cos(theta)
+        !==> compute the vector harmonic w(theta) = m*pbar/cos(theta)
         !
         !     set wb=0 for m=0
         !
-131     ix = indx(0, n, nlat)
-        do i=1, imid
-            wb(i, ix) = 0.0
-        end do
+        ix = indx(0, n, nlat)
+        wb(1:imid, ix) = 0.0
         !
-        !     compute wb for m=1, n
+        !==> compute wb for m=1, n
         !
         dcf = sqrt(real(n+n+1)/real(4*n*(n+1)*(n+n-1)))
         do m=1, n
