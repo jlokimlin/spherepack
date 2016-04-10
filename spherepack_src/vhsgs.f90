@@ -425,49 +425,144 @@
 !
 subroutine vhsgs(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
     mdab, ndab, wvhsgs, lvhsgs, work, lwork, ierror)
-    dimension v(idvw, jdvw, 1), w(idvw, jdvw, 1), br(mdab, ndab, 1), &
-        bi(mdab, ndab, 1), cr(mdab, ndab, 1), ci(mdab, ndab, 1), &
-        work(1), wvhsgs(1)
-    ierror = 1
-    if (nlat < 3) return
-    ierror = 2
-    if (nlon < 1) return
-    ierror = 3
-    if (ityp<0 .or. ityp>8) return
-    ierror = 4
-    if (nt < 0) return
-    ierror = 5
+
+    use, intrinsic :: iso_fortran_env, only: &
+        wp => REAL64, &
+        ip => INT32
+
+    implicit none
+    !----------------------------------------------------------------------
+    ! Dictionary: calling arguments
+    !----------------------------------------------------------------------
+    integer (ip), intent (in)      :: nlat
+    integer (ip), intent (in)      :: nlon
+    integer (ip), intent (in)      :: ityp
+    integer (ip), intent (in)      :: nt
+    real (wp),    intent (out)     :: v(idvw, jdvw, 1)
+    real (wp),    intent (out)     :: w(idvw, jdvw, 1)
+    integer (ip), intent (in)      :: idvw
+    integer (ip), intent (in)      :: jdvw
+    real (wp),    intent (in)      :: br(mdab, ndab, 1)
+    real (wp),    intent (in)      :: bi(mdab, ndab, 1)
+    real (wp),    intent (in)      :: cr(mdab, ndab, 1)
+    real (wp),    intent (in)      :: ci(mdab, ndab, 1)
+    integer (ip), intent (in)      :: mdab
+    integer (ip), intent (in)      :: ndab
+    real (wp),    intent (in out)  :: wvhsgs(1)
+    integer (ip), intent (in)      :: lvhsgs
+    real (wp),    intent (in out)  :: work(1)
+    integer (ip), intent (in)      :: lwork
+    integer (ip), intent (out)     :: ierror
+    !----------------------------------------------------------------------
+    ! Dictionary: calling arguments
+    !----------------------------------------------------------------------
+    integer (ip) :: iw1, jw1, jw2, jw3, iw2, iw3, iw4
+    integer (ip) :: idv, lnl, idz, lmn, ist, imid
+    integer (ip) :: mmax, lzimn
+    !----------------------------------------------------------------------
+
+    !
+    !==> Check validity of input arguments
+    !
+
+    ! Initialize error flag
+    ierror = 0
+
+    ! Check case 1
+    if (nlat < 3) then
+        ierror = 1
+        return
+    end if
+
+    ! Check case 2
+    if (nlon < 1) then
+        ierror = 2
+        return
+    end if
+
+    ! Check case 3
+    if (ityp < 0 .or. ityp > 8) then
+        ierror = 3
+        return
+    end if
+
+    ! Check case 4
+    if (nt < 0) then
+        ierror = 4
+        return
+    end if
+
     imid = (nlat+1)/2
-    if ((ityp<=2 .and. idvw<nlat) .or. &
-        (ityp>2 .and. idvw<imid)) return
-    ierror = 6
-    if (jdvw < nlon) return
-    ierror = 7
+
+    ! Check case 5
+    if ( &
+        (ityp <= 2 .and. idvw < nlat) &
+        .or. &
+        (ityp > 2 .and. idvw < imid) &
+        ) then
+        ierror = 5
+        return
+    end if
+
+    ! Check case 6
+    if (jdvw < nlon) then
+        ierror = 6
+        return
+    end if
+
     mmax = min(nlat, (nlon+1)/2)
-    if (mdab < mmax) return
-    ierror = 8
-    if (ndab < nlat) return
-    ierror = 9
+
+    ! Check case 7
+    if (mdab < mmax) then
+        ierror = 7
+        return
+    end if
+
+    ! Check case 8
+    if (ndab < nlat) then
+        ierror = 8
+        return
+    end if
+
     idz = (mmax*(nlat+nlat-mmax+1))/2
     lzimn = idz*imid
-    if (lvhsgs < lzimn+lzimn+nlon+15) return
-    ierror = 10
+
+    ! Check case 9
+    if (lvhsgs < lzimn+lzimn+nlon+15) then
+        ierror = 9
+        return
+    end if
+
+
     idv = nlat
-    if (ityp > 2) idv = imid
+
+    if (ityp > 2) then
+        idv = imid
+    end if
+
     lnl = nt*idv*nlon
-    if (lwork < lnl+lnl+idv*nlon) return
-    ierror = 0
+
+    ! Check case 10
+    if (lwork < lnl+lnl+idv*nlon) then
+        ierror = 10
+        return
+    end if
+
     ist = 0
-    if (ityp <= 2) ist = imid
+
+    if (ityp <= 2) then
+        ist = imid
+    end if
+
     !
-    !     set wvhsgs pointers
+    !==> set wvhsgs pointers
     !
     lmn = nlat*(nlat+1)/2
     jw1 = 1
     jw2 = jw1+imid*lmn
     jw3 = jw2+imid*lmn
     !
-    !     set work pointers
+    !==> set work pointers
     !
     iw1 = ist+1
     iw2 = lnl+1
@@ -484,28 +579,62 @@ end subroutine vhsgs
 
 subroutine vhsgs1(nlat, nlon, ityp, nt, imid, idvw, jdvw, v, w, mdab, &
     ndab, br, bi, cr, ci, idv, ve, vo, we, wo, work, idz, vb, wb, wrfft)
-    dimension v(idvw, jdvw, 1), w(idvw, jdvw, 1), br(mdab, ndab, 1), &
-        bi(mdab, ndab, 1), cr(mdab, ndab, 1), ci(mdab, ndab, 1), &
-        ve(idv, nlon, 1), vo(idv, nlon, 1), we(idv, nlon, 1), &
-        wo(idv, nlon, 1), work(1), wrfft(1), &
-        vb(imid, 1), wb(imid, 1)
+
+    use, intrinsic :: iso_fortran_env, only: &
+        wp => REAL64, &
+        ip => INT32
+
+    implicit none
+    !----------------------------------------------------------------------
+    ! Dictionary: calling arguments
+    !----------------------------------------------------------------------
+    integer (ip), intent (in)      :: nlat
+    integer (ip), intent (in)      :: nlon
+    integer (ip), intent (in)      :: ityp
+    integer (ip), intent (in)      :: nt
+    integer (ip), intent (in)      :: imid
+    integer (ip), intent (in)      :: idvw
+    integer (ip), intent (in)      :: jdvw
+    real (wp),    intent (out)     :: v(idvw, jdvw, 1)
+    real (wp),    intent (out)     :: w(idvw, jdvw, 1)
+    integer (ip), intent (in)      :: mdab
+    integer (ip), intent (in)      :: ndab
+    real (wp),    intent (in)      :: br(mdab, ndab, 1)
+    real (wp),    intent (in)      :: bi(mdab, ndab, 1)
+    real (wp),    intent (in)      :: cr(mdab, ndab, 1)
+    real (wp),    intent (in)      :: ci(mdab, ndab, 1)
+    integer (ip), intent (in)      :: idv
+    real (wp),    intent (in out)  :: ve(idv, nlon, 1)
+    real (wp),    intent (in out)  :: vo(idv, nlon, 1)
+    real (wp),    intent (in out)  :: we(idv, nlon, 1)
+    real (wp),    intent (in out)  :: wo(idv, nlon, 1)
+    real (wp),    intent (in out)  :: work(1)
+    integer (ip), intent (in)      :: idz
+    real (wp),    intent (in out)  :: wrfft(1)
+    real (wp),    intent (in out)  :: vb(imid, 1)
+    real (wp),    intent (in out)  :: wb(imid, 1)
+    !----------------------------------------------------------------------
+    ! Dictionary: calling arguments
+    !----------------------------------------------------------------------
+    integer (ip) :: i, j, k, m, mn, mb, mp1, np1, mp2
+    integer (ip) :: ndo1, ndo2, imm1, nlp1, mlat, mmax, mlon
+    real (wp)    :: fsn, tsn
+    !----------------------------------------------------------------------
+
     nlp1 = nlat+1
     mlat = mod(nlat, 2)
     mlon = mod(nlon, 2)
     mmax = min(nlat, (nlon+1)/2)
     imm1 = imid
+
     if (mlat /= 0) then
         imm1 = imid-1
     end if
 
-    do k=1, nt
-        do j=1, nlon
-            do i=1, idv
-                ve(i, j, k) = 0.0
-                we(i, j, k) = 0.0
-            end do
-        end do
-    end do
+    !
+    !==> Initialize
+    ve = 0.0_wp
+    we = 0.0_wp
 
     ndo1 = nlat
     ndo2 = nlat
@@ -551,7 +680,6 @@ subroutine vhsgs1(nlat, nlon, ityp, nt, imid, idvw, jdvw, v, w, mdab, &
 
             do mp1=2, mmax
                 m = mp1-1
-                !     mb = m*(nlat-1)-(m*(m-1))/2
                 mb = m*nlat-(m*(m+1))/2
                 mp2 = mp1+1
 
@@ -607,7 +735,7 @@ subroutine vhsgs1(nlat, nlon, ityp, nt, imid, idvw, jdvw, v, w, mdab, &
                         end do
 
                         if (mlat == 0) then
-                            exit !go to 28
+                            exit
                         end if
 
                         ve(imid, 2*mp1-2, k) = ve(imid, 2*mp1-2, k) &
@@ -651,7 +779,6 @@ subroutine vhsgs1(nlat, nlon, ityp, nt, imid, idvw, jdvw, v, w, mdab, &
 
             do mp1=2, mmax
                 m = mp1-1
-                !     mb = m*(nlat-1)-(m*(m-1))/2
                 mb = m*nlat-(m*(m+1))/2
                 mp2 = mp1+1
 
@@ -735,7 +862,6 @@ subroutine vhsgs1(nlat, nlon, ityp, nt, imid, idvw, jdvw, v, w, mdab, &
 
             do mp1=2, mmax
                 m = mp1-1
-                !     mb = m*(nlat-1)-(m*(m-1))/2
                 mb = m*nlat-(m*(m+1))/2
                 mp2 = mp1+1
 
@@ -779,7 +905,7 @@ subroutine vhsgs1(nlat, nlon, ityp, nt, imid, idvw, jdvw, v, w, mdab, &
                         end do
 
                         if (mlat == 0) then
-                            exit !go to 228
+                            exit
                         end if
 
                         we(imid, 2*mp1-2, k) = we(imid, 2*mp1-2, k) &
@@ -819,7 +945,6 @@ subroutine vhsgs1(nlat, nlon, ityp, nt, imid, idvw, jdvw, v, w, mdab, &
 
             do mp1=2, mmax
                 m = mp1-1
-                !     mb = m*(nlat-1)-(m*(m-1))/2
                 mb = m*nlat-(m*(m+1))/2
                 mp2 = mp1+1
 
@@ -863,7 +988,7 @@ subroutine vhsgs1(nlat, nlon, ityp, nt, imid, idvw, jdvw, v, w, mdab, &
                         end do
 
                         if (mlat == 0) then
-                            exit !go to 328
+                            exit
                         end if
 
                         ve(imid, 2*mp1-2, k) = ve(imid, 2*mp1-2, k) &
@@ -895,12 +1020,11 @@ subroutine vhsgs1(nlat, nlon, ityp, nt, imid, idvw, jdvw, v, w, mdab, &
 
             do mp1=2, mmax
                 m = mp1-1
-                !     mb = m*(nlat-1)-(m*(m-1))/2
                 mb = m*nlat-(m*(m+1))/2
                 mp2 = mp1+1
 
                 if (mp2 > ndo2) then
-                    exit !go to 430
+                    exit
                 end if
 
                 do k=1, nt
@@ -946,7 +1070,6 @@ subroutine vhsgs1(nlat, nlon, ityp, nt, imid, idvw, jdvw, v, w, mdab, &
 
             do mp1=2, mmax
                 m = mp1-1
-                !     mb = m*(nlat-1)-(m*(m-1))/2
                 mb = m*nlat-(m*(m+1))/2
                 mp2 = mp1+1
 
@@ -1005,7 +1128,6 @@ subroutine vhsgs1(nlat, nlon, ityp, nt, imid, idvw, jdvw, v, w, mdab, &
 
             do mp1=2, mmax
                 m = mp1-1
-                !     mb = m*(nlat-1)-(m*(m-1))/2
                 mb = m*nlat-(m*(m+1))/2
                 mp2 = mp1+1
 
@@ -1024,7 +1146,7 @@ subroutine vhsgs1(nlat, nlon, ityp, nt, imid, idvw, jdvw, v, w, mdab, &
                         end do
 
                         if (mlat == 0) then
-                            exit!go to 624
+                            exit
                         end if
 
                         we(imid, 2*mp1-2, k) = we(imid, 2*mp1-2, k) &
@@ -1082,7 +1204,6 @@ subroutine vhsgs1(nlat, nlon, ityp, nt, imid, idvw, jdvw, v, w, mdab, &
 
             do mp1=2, mmax
                 m = mp1-1
-                !     mb = m*(nlat-1)-(m*(m-1))/2
                 mb = m*nlat-(m*(m+1))/2
                 mp2 = mp1+1
 
@@ -1133,7 +1254,6 @@ subroutine vhsgs1(nlat, nlon, ityp, nt, imid, idvw, jdvw, v, w, mdab, &
 
             do mp1=2, mmax
                 m = mp1-1
-                !     mb = m*(nlat-1)-(m*(m-1))/2
                 mb = m*nlat-(m*(m+1))/2
                 mp2 = mp1+1
 
@@ -1173,10 +1293,10 @@ subroutine vhsgs1(nlat, nlon, ityp, nt, imid, idvw, jdvw, v, w, mdab, &
         do k=1, nt
             do j=1, nlon
                 do i=1, imm1
-                    v(i, j, k) = .5*(ve(i, j, k)+vo(i, j, k))
-                    w(i, j, k) = .5*(we(i, j, k)+wo(i, j, k))
-                    v(nlp1-i, j, k) = .5*(ve(i, j, k)-vo(i, j, k))
-                    w(nlp1-i, j, k) = .5*(we(i, j, k)-wo(i, j, k))
+                    v(i, j, k) = 0.5_wp * (ve(i, j, k)+vo(i, j, k))
+                    w(i, j, k) = 0.5_wp * (we(i, j, k)+wo(i, j, k))
+                    v(nlp1-i, j, k) = 0.5_wp * (ve(i, j, k)-vo(i, j, k))
+                    w(nlp1-i, j, k) = 0.5_wp * (we(i, j, k)-wo(i, j, k))
                 end do
             end do
         end do
@@ -1186,8 +1306,8 @@ subroutine vhsgs1(nlat, nlon, ityp, nt, imid, idvw, jdvw, v, w, mdab, &
     do k=1, nt
         do j=1, nlon
             do i=1, imm1
-                v(i, j, k) = .5*ve(i, j, k)
-                w(i, j, k) = .5*we(i, j, k)
+                v(i, j, k) = 0.5_wp * ve(i, j, k)
+                w(i, j, k) = 0.5_wp * we(i, j, k)
             end do
         end do
     end do
@@ -1198,8 +1318,8 @@ subroutine vhsgs1(nlat, nlon, ityp, nt, imid, idvw, jdvw, v, w, mdab, &
 
     do k=1, nt
         do j=1, nlon
-            v(imid, j, k) = .5*ve(imid, j, k)
-            w(imid, j, k) = .5*we(imid, j, k)
+            v(imid, j, k) = 0.5_wp * ve(imid, j, k)
+            w(imid, j, k) = 0.5_wp * we(imid, j, k)
         end do
     end do
 
@@ -1208,6 +1328,8 @@ end subroutine vhsgs1
 
 
 subroutine vhsgsi(nlat, nlon, wvhsgs, lvhsgs, dwork, ldwork, ierror)
+    !
+    !     Purpose:
     !
     !     subroutine vhsfsi computes the gaussian points theta, gauss
     !     weights wts, and the components vb and wb of the vector
@@ -1223,37 +1345,82 @@ subroutine vhsgsi(nlat, nlon, wvhsgs, lvhsgs, dwork, ldwork, ierror)
     !     locations which is determined by the size of dthet,
     !     dwts, dwork, and dpbar in vhsgs1
     !
-    dimension wvhsgs(*)
-    real dwork(*)
-    ierror = 1
-    if (nlat < 3) return
-    ierror = 2
-    if (nlon < 1) return
-    ierror = 3
+
+    ! EXTERNAL SUBROUTINES:: hrffti
+
+    use, intrinsic :: iso_fortran_env, only: &
+        wp => REAL64, &
+        ip => INT32
+
+    implicit none
+    !----------------------------------------------------------------------
+    ! Dictionary: calling arguments
+    !----------------------------------------------------------------------
+    integer (ip), intent (in)     :: nlat
+    integer (ip), intent (in)     :: nlon
+    real (wp),    intent (in out) :: wvhsgs(lvhsgs) !wvhsgs(*)
+    integer (ip), intent (in)     :: lvhsgs
+    real (wp),    intent (in out) :: dwork(ldwork) !dwork(*)
+    integer (ip), intent (in)     :: ldwork
+    integer (ip), intent (out)    :: ierror
+    !----------------------------------------------------------------------
+    ! Dictionary: calling arguments
+    !----------------------------------------------------------------------
+    integer (ip) :: iw1, jw1, jw2, jw3
+    integer (ip) :: iw2, iw3, iw4, lmn, imid
+    !----------------------------------------------------------------------
+
+    !
+    !==> Check the validity of input arguments
+    !
+
+    ! Initialize error flag
+    ierror = 0
+
+    ! Check case 1
+    if (nlat < 3) then
+        ierror = 1
+        return
+    end if
+
+    ! Check case 2
+    if (nlon < 1) then
+        ierror = 2
+        return
+    end if
+
     imid = (nlat+1)/2
     lmn = (nlat*(nlat+1))/2
-    if (lvhsgs < 2*(imid*lmn)+nlon+15) return
-    ierror = 4
-    if (ldwork < (nlat*3*(nlat+3)+2)/2) return
-    ierror = 0
+
+    ! Check case 3
+    if (lvhsgs < 2*(imid*lmn)+nlon+15) then
+        ierror = 3
+        return
+    end if
+
+    ! Check case 4
+    if (ldwork < (nlat*3*(nlat+3)+2)/2) then
+        ierror = 4
+        return
+    end if
+
     !
-    !     set saved work space pointers
+    !==> set saved work space pointers
     !
     jw1 = 1
     jw2 = jw1+imid*lmn
     jw3 = jw2+imid*lmn
     !
-    !     set unsaved work space pointers
+    !==> set unsaved work space pointers
     !
     iw1 = 1
     iw2 = iw1+nlat
     iw3 = iw2+nlat
     iw4 = iw3+3*imid*nlat
-    !     iw2 = iw1+nlat+nlat
-    !     iw3 = iw2+nlat+nlat
-    !     iw4 = iw3+6*imid*nlat
+
     call vhgsi1(nlat, imid, wvhsgs(jw1), wvhsgs(jw2), &
         dwork(iw1), dwork(iw2), dwork(iw3), dwork(iw4))
+
     call hrffti(nlon, wvhsgs(jw3))
 
 end subroutine vhsgsi
@@ -1261,24 +1428,49 @@ end subroutine vhsgsi
 
 
 subroutine vhgsi1(nlat, imid, vb, wb, dthet, dwts, dpbar, work)
-    dimension vb(imid, *), wb(imid, *)
-    real abel, bbel, cbel, ssqr2, dcf
-    real dthet(*), dwts(*), dpbar(imid, nlat, 3), work(*)
+
+    ! EXTERNAL SUBROUTINES :: gaqd, dnlfk
+    ! EXTERNAL FUNCTIONS :: indx
+
+    use, intrinsic :: iso_fortran_env, only: &
+        wp => REAL64, &
+        ip => INT32
+
+    implicit none
+    !----------------------------------------------------------------------
+    ! Dictionary: calling arguments
+    !----------------------------------------------------------------------
+    integer (ip), intent (in)     :: nlat
+    integer (ip), intent (in)     :: imid
+    real (wp),    intent (in out) :: vb(imid, *)
+    real (wp),    intent (in out) :: wb(imid, *)
+    real (wp),    intent (in out) :: dthet(*)
+    real (wp),    intent (in out) :: dwts(*)
+    real (wp),    intent (in out) :: dpbar(imid, nlat, 3)
+    real (wp),    intent (in out) :: work(*)
+    !----------------------------------------------------------------------
+    ! Dictionary: local variables
+    !----------------------------------------------------------------------
+    integer (ip)         :: i, m, n, id, nm, mn, np, ix, iy, nz
+    integer (ip)         :: lwk, ierror
+    real (wp), parameter :: ONE_OVER_SQRT2 = 1.0_wp/sqrt(2.0_wp)
+    real (wp)            :: abel, bbel, cbel, dcf
+    !----------------------------------------------------------------------
+
     !
-    !     compute gauss points and weights
-    !     use dpbar (length 3*nnlat*(nnlat+1)) as work space for gaqd
+    !==> Compute gauss points and weights
+    !    Use dpbar (length 3*nnlat*(nnlat+1)) as work space for gaqd
     !
     lwk = nlat*(nlat+2)
     call gaqd(nlat, dthet, dwts, dpbar, lwk, ierror)
+
     !
-    !     compute associated legendre functions
+    !==> Compute associated legendre functions
+    !    Set m=n=0 legendre polynomials for all theta(i)
     !
-    !     compute m=n=0 legendre polynomials for all theta(i)
-    !
-    ssqr2 = 1.0/sqrt(2.0)
-    dpbar(1:imid, 1, 1) = ssqr2
-    vb(1:imid, 1) = 0.0
-    wb(1:imid, 1) = 0.0
+    dpbar(:, 1, 1) = ONE_OVER_SQRT2
+    vb(:, 1) = 0.0_wp
+    wb(:, 1) = 0.0_wp
     !
     !     main loop for remaining vb, and wb
     !
@@ -1307,20 +1499,25 @@ subroutine vhgsi1(nlat, imid, vb, wb, dthet, dwts, dpbar, work)
         !
         if (n >= 2) then
             do m=2, n
-                abel = sqrt(real((2*n+1)*(m+n-2)*(m+n-3))/ &
-                    real((2*n-3)*(m+n-1)*(m+n)))
-                bbel = sqrt(real((2*n+1)*(n-m-1)*(n-m))/ &
-                    real((2*n-3)*(m+n-1)*(m+n)))
-                cbel = sqrt(real((n-m+1)*(n-m+2))/ &
-                    real((m+n-1)*(m+n)))
+
+                abel = sqrt(real((2*n+1)*(m+n-2)*(m+n-3), kind=wp)/ &
+                    real((2*n-3)*(m+n-1)*(m+n), kind=wp))
+
+                bbel = sqrt(real((2*n+1)*(n-m-1)*(n-m), kind=wp)/ &
+                    real((2*n-3)*(m+n-1)*(m+n), kind=wp))
+
+                cbel = sqrt(real((n-m+1)*(n-m+2),kind=wp)/ &
+                    real((m+n-1)*(m+n),kind=wp))
+
                 id = indx(m, n, nlat)
+
                 if (m >= n-1) then
-                    dpbar(1:imid, m+1, np) = &
-                        abel*dpbar(1:imid, m-1, nm)-cbel*dpbar(1:imid, m-1, np)
+                    dpbar(:, m+1, np) = abel*dpbar(:, m-1, nm)-cbel*dpbar(:, m-1, np)
                 else
                     dpbar(1:imid, m+1, np) = &
-                        abel*dpbar(1:imid, m-1, nm)+bbel*dpbar(1:imid, m+1, nm) &
-                        -cbel*dpbar(1:imid, m-1, np)
+                        abel * dpbar(:, m-1, nm) &
+                        + bbel * dpbar(:, m+1, nm) &
+                        -cbel * dpbar(:, m-1, np)
                 end if
             end do
         end if
@@ -1329,17 +1526,16 @@ subroutine vhgsi1(nlat, imid, vb, wb, dthet, dwts, dpbar, work)
         !
         ix = indx(0, n, nlat)
         iy = indx(n, n, nlat)
-        vb(1:imid, ix) = -dpbar(1:imid, 2, np)
-        vb(1:imid, iy) = dpbar(1:imid, n, np)/sqrt(real(2*(n+1)))
+        vb(:, ix) = -dpbar(:, 2, np)
+        vb(:, iy) = dpbar(:, n, np)/sqrt(real(2*(n+1)))
 
         if (n /= 1) then
-            dcf = sqrt(real(4*n*(n+1)))
+            dcf = sqrt(real(4*n*(n+1), kind=wp))
             do m=1, n-1
                 ix = indx(m, n, nlat)
-                abel = sqrt(real((n+m)*(n-m+1)))/dcf
-                bbel = sqrt(real((n-m)*(n+m+1)))/dcf
-                vb(1:imid, ix) = &
-                    abel*dpbar(1:imid, m, np)-bbel*dpbar(1:imid, m+2, np)
+                abel = sqrt(real((n+m)*(n-m+1), kind=wp))/dcf
+                bbel = sqrt(real((n-m)*(n+m+1),kind=wp))/dcf
+                vb(:, ix) = abel * dpbar(:, m, np) - bbel * dpbar(:, m+2, np)
             end do
         end if
         !
@@ -1348,22 +1544,40 @@ subroutine vhgsi1(nlat, imid, vb, wb, dthet, dwts, dpbar, work)
         !     set wb=0 for m=0
         !
         ix = indx(0, n, nlat)
-        wb(1:imid, ix) = 0.0
+        wb(:, ix) = 0.0_wp
         !
         !==> compute wb for m=1, n
         !
-        dcf = sqrt(real(n+n+1)/real(4*n*(n+1)*(n+n-1)))
+        dcf = sqrt(real(n+n+1)/real(4*n*(n+1)*(n+n-1), kind=wp))
         do m=1, n
             ix = indx(m, n, nlat)
-            abel = dcf*sqrt(real((n+m)*(n+m-1)))
-            bbel = dcf*sqrt(real((n-m)*(n-m-1)))
+            abel = dcf*sqrt(real((n+m)*(n+m-1), kind=wp))
+            bbel = dcf*sqrt(real((n-m)*(n-m-1), kind=wp))
             if (m >= n-1) then
-                wb(1:imid, ix) = abel*dpbar(1:imid, m, nz)
+                wb(:, ix) = abel*dpbar(:, m, nz)
             else
-                wb(1:imid, ix) = &
-                    abel*dpbar(1:imid, m, nz) + bbel*dpbar(1:imid, m+2, nz)
+                wb(:, ix) = &
+                    abel * dpbar(:, m, nz) &
+                    + bbel * dpbar(:, m+2, nz)
             end if
         end do
     end do
+
+contains
+
+    pure function indx(m, n, nlat) result (return_value)
+        implicit none
+        !----------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !----------------------------------------------------------------------
+        integer, intent (in) :: m
+        integer, intent (in) :: n
+        integer, intent (in) :: nlat
+        integer              :: return_value
+        !----------------------------------------------------------------------
+
+        return_value = m*nlat-(m*(m+1))/2+n+1
+
+    end function indx
 
 end subroutine vhgsi1
