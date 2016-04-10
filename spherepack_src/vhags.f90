@@ -1240,12 +1240,12 @@ subroutine vhgai1(nlat, imid, vb, wb, dthet, dwts, dpbar, work)
         end if
 
         do m=2, n
-            abel = sqrt(dble(real((2*n+1)*(m+n-2)*(m+n-3)))/ &
-                dble(real((2*n-3)*(m+n-1)*(m+n))))
-            bbel = sqrt(dble(real((2*n+1)*(n-m-1)*(n-m)))/ &
-                dble(real((2*n-3)*(m+n-1)*(m+n))))
-            cbel = sqrt(dble(real((n-m+1)*(n-m+2)))/ &
-                dble(real((m+n-1)*(m+n))))
+            abel = sqrt(real((2*n+1)*(m+n-2)*(m+n-3))/ &
+                real((2*n-3)*(m+n-1)*(m+n)))
+            bbel = sqrt(real((2*n+1)*(n-m-1)*(n-m))/ &
+                real((2*n-3)*(m+n-1)*(m+n)))
+            cbel = sqrt(real((n-m+1)*(n-m+2))/ &
+                real((m+n-1)*(m+n)))
             id = indx(m, n, nlat)
 
             if (m >= n-1) then
@@ -1266,7 +1266,7 @@ subroutine vhgai1(nlat, imid, vb, wb, dthet, dwts, dpbar, work)
         iy = indx(n, n, nlat)
         do i=1, imid
             vb(i, ix) = -dpbar(i, 2, np)*dwts(i)
-            vb(i, iy) = dpbar(i, n, np)/sqrt(dble(real(2*(n+1))))*dwts(i)
+            vb(i, iy) = dpbar(i, n, np)/sqrt(real(2*(n+1)))*dwts(i)
         end do
 
         if (n==1) then
@@ -1278,14 +1278,14 @@ subroutine vhgai1(nlat, imid, vb, wb, dthet, dwts, dpbar, work)
             ix = indx(0, n, nlat)
             wb(1:imid, ix) = 0.0
         else
-            dcf = sqrt(dble(real(4*n*(n+1))))
+            dcf = sqrt(real(4*n*(n+1)))
             do m=1, n-1
                 ix = indx(m, n, nlat)
-                abel = sqrt(dble(real((n+m)*(n-m+1))))/dcf
-                bbel = sqrt(dble(real((n-m)*(n+m+1))))/dcf
-                do i=1, imid
-                    vb(i, ix) = (abel*dpbar(i, m, np)-bbel*dpbar(i, m+2, np))*dwts(i)
-                end do
+                abel = sqrt(real((n+m)*(n-m+1)))/dcf
+                bbel = sqrt(real((n-m)*(n+m+1)))/dcf
+                vb(1:imid, ix) = &
+                    (abel*dpbar(1:imid, m, np)-bbel*dpbar(1:imid, m+2, np))&
+                    * dwts(1:imid)
             end do
         end if
         !
