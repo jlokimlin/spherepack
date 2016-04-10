@@ -228,9 +228,27 @@
 !
 !
 subroutine geo2maths(ig, nlon, nlat, sg, sm, work)
+
+    use, intrinsic :: iso_fortran_env, only: &
+        wp => REAL64, &
+        ip => INT32
+
     implicit none
-    integer ig, nlon, nlat, i, j, ij
-    real sg(nlon, nlat), sm(nlat, nlon), work(*)
+    !----------------------------------------------------------------------
+    ! Dictionary: calling arguments
+    !----------------------------------------------------------------------
+    integer (ip), intent (in)     :: ig
+    integer (ip), intent (in)     :: nlon
+    integer (ip), intent (in)     :: nlat
+    real (wp),    intent (in)     :: sg(nlon, nlat)
+    real (wp),    intent (out)    :: sm(nlat, nlon)
+    real (wp),    intent (in out) :: work(*)
+    !----------------------------------------------------------------------
+    ! Dictionary: calling arguments
+    !----------------------------------------------------------------------
+    integer (ip) :: i, j, ij ! counters
+    !----------------------------------------------------------------------
+
     !
     !     transpose sg into sm and reverse colatitude subscript order
     !     if necessary
@@ -241,7 +259,8 @@ subroutine geo2maths(ig, nlon, nlat, sg, sm, work)
             work(ij) = sg(j, i)
         end do
     end do
-    if (ig==0) then
+
+    if (ig == 0) then
         do i=1, nlat
             do j=1, nlon
                 ij = (j-1)*nlat+i
@@ -262,9 +281,27 @@ end subroutine geo2maths
 
 
 subroutine math2geos(ig, nlat, nlon, sm, sg, work)
+
+    use, intrinsic :: iso_fortran_env, only: &
+        wp => REAL64, &
+        ip => INT32
+
     implicit none
-    integer ig, nlon, nlat, i, j, ij
-    real sm(nlat, nlon), sg(nlon, nlat), work(*)
+    !----------------------------------------------------------------------
+    ! Dictionary: calling arguments
+    !----------------------------------------------------------------------
+    integer (ip), intent (in)     :: ig
+    integer (ip), intent (in)     :: nlon
+    integer (ip), intent (in)     :: nlat
+    real (wp),    intent (in)     :: sm(nlon, nlat)
+    real (wp),    intent (out)    :: sg(nlat, nlon)
+    real (wp),    intent (in out) :: work(*)
+    !----------------------------------------------------------------------
+    ! Dictionary: calling arguments
+    !----------------------------------------------------------------------
+    integer (ip) :: i, j, ij ! counters
+    !----------------------------------------------------------------------
+
     !
     !     transpose sm into sg and reverse colatitude subscript order
     !     if necessary
@@ -275,7 +312,7 @@ subroutine math2geos(ig, nlat, nlon, sm, sg, work)
             work(ij) = sm(i, j)
         end do
     end do
-    if (ig==0) then
+    if (ig == 0) then
         do i=1, nlat
             do j=1, nlon
                 ij = (j-1)*nlat+i
@@ -296,14 +333,33 @@ end subroutine math2geos
 
 
 subroutine geo2mathv(ig, nlon, nlat, ug, vg, vm, wm, work)
+
+    use, intrinsic :: iso_fortran_env, only: &
+        wp => REAL64, &
+        ip => INT32
+
     implicit none
-    integer ig, nlon, nlat, i, j, ij
-    real ug(nlon, nlat), vg(nlon, nlat), work(*)
-    real vm(nlat, nlon), wm(nlat, nlon)
+    !----------------------------------------------------------------------
+    ! Dictionary: calling arguments
+    !----------------------------------------------------------------------
+    integer (ip), intent (in)     :: ig
+    integer (ip), intent (in)     :: nlon
+    integer (ip), intent (in)     :: nlat
+    real (wp),    intent (in)     :: ug(nlon, nlat)
+    real (wp),    intent (in)     :: vg(nlon, nlat)
+    real (wp),    intent (out)    :: vm(nlat, nlon)
+    real (wp),    intent (out)    :: wm(nlat, nlon)
+    real (wp),    intent (in out) :: work(*)
+    !----------------------------------------------------------------------
+    ! Dictionary: calling arguments
+    !----------------------------------------------------------------------
+    integer (ip) :: i, j, ij ! counters
+    !----------------------------------------------------------------------
+
     !
     !     convert vg to vm, ug to wm
     !
-    if (ig==0) then
+    if (ig == 0) then
         do i=1, nlat
             do j=1, nlon
                 ij = (j-1)*nlat+i
@@ -360,14 +416,33 @@ end subroutine geo2mathv
 
 
 subroutine math2geov(ig, nlat, nlon, vm, wm, ug, vg, work)
+
+    use, intrinsic :: iso_fortran_env, only: &
+        wp => REAL64, &
+        ip => INT32
+
     implicit none
-    integer ig, nlon, nlat, i, j, ij
-    real vm(nlat, nlon), wm(nlat, nlon), work(*)
-    real ug(nlon, nlat), vg(nlon, nlat)
+    !----------------------------------------------------------------------
+    ! Dictionary: calling arguments
+    !----------------------------------------------------------------------
+    integer (ip), intent (in)     :: ig
+    integer (ip), intent (in)     :: nlon
+    integer (ip), intent (in)     :: nlat
+    real (wp),    intent (in)     :: vm(nlat, nlon)
+    real (wp),    intent (in)     :: wm(nlat, nlon)
+    real (wp),    intent (out)    :: ug(nlon, nlat)
+    real (wp),    intent (out)    :: vg(nlon, nlat)
+    real (wp),    intent (in out) :: work(*)
+    !----------------------------------------------------------------------
+    ! Dictionary: calling arguments
+    !----------------------------------------------------------------------
+    integer (ip) :: i, j, ij ! counters
+    !----------------------------------------------------------------------
+
     !
     !     convert vm to vg, wm to ug
     !
-    if (ig==0) then
+    if (ig == 0) then
         do i=1, nlat
             do j=1, nlon
                 ij = (j-1)*nlat+i

@@ -444,8 +444,6 @@ end associate
 
 end subroutine zfin
 
-
-
 subroutine zfin1 (isym, nlat, m, z, imid, i3, zz, z1, a, b, c)
 dimension       z(imid, nlat, 3), zz(imid, 1), z1(imid, 1), &
                 a(1), b(1), c(1)
@@ -455,13 +453,13 @@ i1 = i2
 i2 = i3
 i3 = ihold
 if (m-1< 0) then
-    goto 25
-else if (m-1 == 0) then 
+    goto 2225
+else if (m-1 == 0) then
     goto 30
-else 
+else
     goto 35
 end if
-25 i1 = 1
+2225 i1 = 1
 i2 = 2
 i3 = 3
 do 45 np1=1, nlat
@@ -998,14 +996,16 @@ dimension z(idz, *), zin(imid, nlat, 3), wzfin(*)
 real dwork(*)
 call zfinit(nlat, nlon, wzfin, dwork)
 mmax = min(nlat, nlon/2+1)
-do 33 mp1=1, mmax
+do mp1=1, mmax
 m = mp1-1
 call zfin (0, nlat, nlon, m, zin, i3, wzfin)
-do 33 np1=mp1, nlat
+do np1=mp1, nlat
 mn = m*(nlat-1)-(m*(m-1))/2+np1
-do 33 i=1, imid
+do i=1, imid
 z(mn, i) = zin(i, np1, i3)
-33 continue
+end do
+end do
+end do
 
 end subroutine sea1
 
@@ -2020,18 +2020,18 @@ if (modm /= 0) go to 80
 !
 !     n odd m even
 !
-do 75 l=1, ncv
+do l=1, ncv
 fk = fk+2.
 cv(l) = -fk*work(l)/srnp1
-75 continue
+end do
 return
 !
 !     n odd m odd
 !
-80 do 85 l=1, ncv
+80 do l=1, ncv
 fk = fk+2.
 cv(l) = fk*work(l)/srnp1
-85 continue
+end do
 
 end subroutine dvbk
 
@@ -2113,46 +2113,47 @@ if (mmod /= 0) go to 2
 !     n even  m even
 !
 ncv = n/2
-do 10 k=1, ncv
+do k=1, ncv
 vh = vh+cv(k)*sth
 chh = cdt*cth-sdt*sth
 sth = sdt*cth+cdt*sth
 cth = chh
-10 continue
+end do
 return
 !
 !     n even  m odd
 !
 2 ncv = n/2
-do 15 k=1, ncv
+do k=1, ncv
 vh = vh+cv(k)*cth
 chh = cdt*cth-sdt*sth
 sth = sdt*cth+cdt*sth
 cth = chh
-15 continue
+end do
+
 return
 1 if (mmod /= 0) go to 3
 !
 !     n odd m even
 !
 ncv = (n+1)/2
-do 20 k=1, ncv
+do k=1, ncv
 vh = vh+cv(k)*sth
 chh = cdt*cth-sdt*sth
 sth = sdt*cth+cdt*sth
 cth = chh
-20 continue
+end do
 return
 !
 ! case m odd and n odd
 !
 3 ncv = (n+1)/2
-do 25 k=1, ncv
+do k=1, ncv
 vh = vh+cv(k)*cth
 chh = cdt*cth-sdt*sth
 sth = sdt*cth+cdt*sth
 cth = chh
-25 continue
+end do
 
 end subroutine dvbt
 
