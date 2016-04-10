@@ -476,146 +476,122 @@ subroutine shses1(nlat, isym, nt, g, idgs, jdgs, a, b, mdab, ndab, p, imid, &
         imm1 = imid-1
     end if
 
-    do k=1, nt
-        do j=1, nlon
-            do i=1, ls
-                ge(i, j, k) = 0.0_wp
+    ! Initialize
+    ge = 0.0_wp
+
+    if (isym /= 1) then
+        do k = 1,nt
+            do np1=1, nlat, 2
+                ge(1:imid, 1, k) = &
+                    ge(1:imid, 1, k) + &
+                    a(1, np1, k) * p(1:imid, np1)
             end do
         end do
-    end do
 
-    if (isym == 1) then
-        go to 125
-    end if
-
-    do k=1, nt
-        do np1=1, nlat, 2
-            do i=1, imid
-                ge(i, 1, k)=ge(i, 1, k)+a(1, np1, k)*p(i, np1)
-            end do
-        end do
-    end do
-
-    ndo = nlat
-    if (mod(nlat, 2) == 0) then
-        ndo = nlat-1
-    end if
-
-    do mp1=2, mdo
-        m = mp1-1
-        mb = m*(nlat-1)-(m*(m-1))/2
-        do np1=mp1, ndo, 2
-            mn = mb+np1
-            do k=1, nt
-                do i=1, imid
-                    ge(i, 2*mp1-2, k) = ge(i, 2*mp1-2, k)+a(mp1, np1, k)*p(i, mn)
-                    ge(i, 2*mp1-1, k) = ge(i, 2*mp1-1, k)+b(mp1, np1, k)*p(i, mn)
-                end do
-            end do
-        end do
-    end do
-
-    if (mdo == mmax .or. mmax > ndo) then
-        go to 122
-    end if
-
-    mb = mdo*(nlat-1)-(mdo*(mdo-1))/2
-
-    do np1=mmax, ndo, 2
-        mn = mb+np1
-        do k=1, nt
-            do i=1, imid
-                ge(i, 2*mmax-2, k) = ge(i, 2*mmax-2, k)+a(mmax, np1, k)*p(i, mn)
-            end do
-        end do
-    end do
-
-122 if (isym == 2) then
-        go to 155
-    end if
-
-    125 do k=1, nt
-        do np1=2, nlat, 2
-            do i=1, imm1
-                go(i, 1, k)=go(i, 1, k)+a(1, np1, k)*p(i, np1)
-            end do
-        end do
-    end do
-
-    ndo = nlat
-
-    if (mod(nlat, 2) /= 0) then
-        ndo = nlat-1
-    end if
-
-    do mp1=2, mdo
-        mp2 = mp1+1
-        m = mp1-1
-        mb = m*(nlat-1)-(m*(m-1))/2
-        do np1=mp2, ndo, 2
-            mn = mb+np1
-            do k=1, nt
-                do i=1, imm1
-                    go(i, 2*mp1-2, k) = go(i, 2*mp1-2, k)+a(mp1, np1, k)*p(i, mn)
-                    go(i, 2*mp1-1, k) = go(i, 2*mp1-1, k)+b(mp1, np1, k)*p(i, mn)
-                end do
-            end do
-        end do
-    end do
-
-    mp2 = mmax+1
-
-    if (mdo == mmax .or. mp2 > ndo) then
-        go to 155
-    end if
-
-    mb = mdo*(nlat-1)-(mdo*(mdo-1))/2
-
-    do np1=mp2, ndo, 2
-        mn = mb+np1
-        do k=1, nt
-            do i=1, imm1
-                go(i, 2*mmax-2, k) = go(i, 2*mmax-2, k)+a(mmax, np1, k)*p(i, mn)
-            end do
-        end do
-    end do
-
-    155 do k=1, nt
-        if (mod(nlon, 2) /= 0) then
-            go to 157
+        if (mod(nlat, 2) == 0) then
+            ndo = nlat-1
+        else
+            ndo = nlat
         end if
-        do i=1, ls
-            ge(i, nlon, k) = 2.0_wp * ge(i, nlon, k)
-        end do
-157     call hrfftb(ls, nlon, ge(1, 1, k), ls, whrfft, work)
-    end do
 
-    if (isym /= 0) then
-        go to 180
+        do mp1=2, mdo
+            m = mp1-1
+            mb = m*(nlat-1)-(m*(m-1))/2
+            do np1=mp1, ndo, 2
+                mn = mb+np1
+                do k=1, nt
+                    ge(1:imid, 2*mp1-2, k) = &
+                        ge(1:imid, 2*mp1-2, k)+a(mp1, np1, k)*p(1:imid, mn)
+                    ge(1:imid, 2*mp1-1, k) = &
+                        ge(1:imid, 2*mp1-1, k)+b(mp1, np1, k)*p(1:imid, mn)
+                end do
+            end do
+        end do
+
+        if ( .not.(mdo == mmax .or. mmax > ndo) ) then
+            if (isym == 2) then
+                mb = mdo*(nlat-1)-(mdo*(mdo-1))/2
+                do k = 1, nt
+                    do np1=mmax, ndo, 2
+                        mn = mb+np1
+                        ge(1:imid, 2*mmax-2, k) = &
+                            ge(1:imid, 2*mmax-2, k) &
+                            + a(mmax, np1, k) * p(1:imid, mn)
+                    end do
+                end do
+            end if
+
+            do k = 1, nt
+                do np1=2, nlat, 2
+                    go(1:imm1, 1, k)= &
+                        go(1:imm1, 1, k) &
+                        + a(1, np1, k)*p(1:imm1, np1)
+                end do
+            end do
+
+            if (mod(nlat, 2) /= 0) then
+                ndo = nlat-1
+            else
+                ndo = nlat
+            end if
+
+            do mp1=2, mdo
+                mp2 = mp1+1
+                m = mp1-1
+                mb = m*(nlat-1)-(m*(m-1))/2
+                do np1=mp2, ndo, 2
+                    mn = mb+np1
+                    do k=1, nt
+                        do i=1, imm1
+                            go(i, 2*mp1-2, k) = go(i, 2*mp1-2, k)+a(mp1, np1, k)*p(i, mn)
+                            go(i, 2*mp1-1, k) = go(i, 2*mp1-1, k)+b(mp1, np1, k)*p(i, mn)
+                        end do
+                    end do
+                end do
+            end do
+
+            mp2 = mmax+1
+
+            if (.not.(mdo == mmax .or. mp2 > ndo) ) then
+                mb = mdo*(nlat-1)-(mdo*(mdo-1))/2
+                do np1=mp2, ndo, 2
+                    mn = mb+np1
+                    do k=1, nt
+                        go(1:imm1, 2*mmax-2, k) = &
+                            go(1:imm1, 2*mmax-2, k)+a(mmax, np1, k)*p(1:imm1, mn)
+                    end do
+                end do
+            end if
+        end if
     end if
 
     do k=1, nt
-        do j=1, nlon
-            do i=1, imm1
-                g(i, j, k) = 0.5_wp * (ge(i, j, k)+go(i, j, k))
-                g(nlp1-i, j, k) = 0.5_wp * (ge(i, j, k)-go(i, j, k))
-            end do
-            if (modl == 0) then
-                exit
-            end if
-            g(imid, j, k) = 0.5_wp * ge(imid, j, k)
-        end do
+        if (mod(nlon, 2) == 0) then
+            ge(1:ls, nlon, k) = 2.0_wp * ge(1:ls, nlon, k)
+        end if
+        call hrfftb(ls, nlon, ge(1, 1, k), ls, whrfft, work)
     end do
 
-    return
-
-    180 do k=1, nt
-        do i=1, imid
+    if (isym == 0) then
+        do k=1, nt
             do j=1, nlon
-                g(i, j, k) = 0.5_wp * ge(i, j, k)
+                do i=1, imm1
+                    g(i, j, k) = 0.5_wp * (ge(i, j, k)+go(i, j, k))
+                    g(nlp1-i, j, k) = 0.5_wp * (ge(i, j, k)-go(i, j, k))
+                end do
+                if (modl == 0) then
+                    exit
+                end if
+                g(imid, j, k) = 0.5_wp * ge(imid, j, k)
             end do
         end do
-    end do
+    else
+        do k=1, nt
+            do j=1, nlon
+                g(1:imid, j, k) = 0.5_wp * ge(1:imid, j, k)
+            end do
+        end do
+    end if
 
 end subroutine shses1
 

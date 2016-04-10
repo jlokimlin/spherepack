@@ -756,7 +756,7 @@ subroutine shsgsi(nlat, nlon, wshsgs, lshsgs, work, lwork, dwork, ldwork, ierror
     late = (nlat+1)/2
     l1 = l
     l2 = late
-    lp=nlat*(3*(l1+l2)-2)+(l1-1)*(l2*(2*nlat-l1)-3*l1)/2+nlon+15
+    lp = nlat*(3*(l1+l2)-2)+(l1-1)*(l2*(2*nlat-l1)-3*l1)/2+nlon+15
 
     ! Check case 3: permanent work space length
     if (lshsgs < lp) then
@@ -766,7 +766,7 @@ subroutine shsgsi(nlat, nlon, wshsgs, lshsgs, work, lwork, dwork, ldwork, ierror
 
 
     ! Check case 4: temporary work space
-    if (lwork <4*nlat*(nlat+2)+2) then
+    if (lwork < 4*nlat*(nlat+2)+2) then
         ierror = 4
         return
     end if
@@ -823,7 +823,7 @@ subroutine shsgss1(nlat, l, late, w, pmn, pmnf)
     !----------------------------------------------------------------------
     ! Dictionary: local variables
     !----------------------------------------------------------------------
-    integer (ip) :: i, j, k, m, km, mn, mp1, np1, mml1, mode
+    integer (ip) :: m, km, mn, mp1, np1, mml1, mode
     !----------------------------------------------------------------------
 
     !
@@ -844,9 +844,7 @@ subroutine shsgss1(nlat, l, late, w, pmn, pmnf)
         !
         do np1=mp1, nlat
             mn = mml1+np1
-            do i=1, late
-                pmnf(i, mn) = pmn(np1, i, km)
-            end do
+            pmnf(:, mn) = pmn(np1,:, km)
         end do
     end do
 
@@ -981,7 +979,7 @@ subroutine shsgsp1(nlat, nlon, l, late, wts, p0n, p1n, abel, bbel, cbel, &
     !----------------------------------------------------------------------
     ! Dictionary: calling arguments
     !----------------------------------------------------------------------
-    integer (ip) :: i, m, n, lw, np1, imn, mlim
+    integer (ip) :: i, m, n, lw, np1, imn
     real (wp)    :: pb
     !----------------------------------------------------------------------
 
@@ -1054,19 +1052,20 @@ subroutine shsgsp1(nlat, nlon, l, late, wts, p0n, p1n, abel, bbel, cbel, &
     !    for 2<=m<=n and 2<=n<=nlat in abel, bbel, cbel
     !
     do n=2, nlat
-        mlim = min(n, l)
-        do m=2, mlim
-            imn = (n-1)*(n-2)/2+m-1
-            if (n >= l) then
-                imn = l*(l-1)/2+(n-l-1)*(l-1)+m-1
-            end if
-            abel(imn)=sqrt(real((2*n+1)*(m+n-2)*(m+n-3))/ &
-                real(((2*n-3)*(m+n-1)*(m+n))))
-            bbel(imn)=sqrt(real((2*n+1)*(n-m-1)*(n-m))/ &
-                real(((2*n-3)*(m+n-1)*(m+n))))
-            cbel(imn)=sqrt(real((n-m+1)*(n-m+2))/ &
-                real(((n+m-1)*(n+m))))
-        end do
+        associate( mlim => min(n, l) )
+            do m=2, mlim
+                imn = (n-1)*(n-2)/2+m-1
+                if (n >= l) then
+                    imn = l*(l-1)/2+(n-l-1)*(l-1)+m-1
+                end if
+                abel(imn) = sqrt(real((2*n+1)*(m+n-2)*(m+n-3), kind=wp)/ &
+                    real(((2*n-3)*(m+n-1)*(m+n)), kind=wp))
+                bbel(imn) = sqrt(real((2*n+1)*(n-m-1)*(n-m), kind=wp)/ &
+                    real((2*n-3)*(m+n-1)*(m+n),kind=wp))
+                cbel(imn) = sqrt(real((n-m+1)*(n-m+2), kind=wp)/ &
+                    real((n+m-1)*(n+m), kind=wp))
+            end do
+        end associate
     end do
 
 end subroutine shsgsp1

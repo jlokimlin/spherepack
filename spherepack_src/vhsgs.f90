@@ -448,9 +448,9 @@ subroutine vhsgs(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
     real (wp),    intent (in)      :: ci(mdab, ndab, 1)
     integer (ip), intent (in)      :: mdab
     integer (ip), intent (in)      :: ndab
-    real (wp),    intent (in out)  :: wvhsgs(1)
+    real (wp),    intent (in out)  :: wvhsgs(lvhsgs)
     integer (ip), intent (in)      :: lvhsgs
-    real (wp),    intent (in out)  :: work(1)
+    real (wp),    intent (in out)  :: work(lwork)
     integer (ip), intent (in)      :: lwork
     integer (ip), intent (out)     :: ierror
     !----------------------------------------------------------------------
@@ -1358,9 +1358,9 @@ subroutine vhsgsi(nlat, nlon, wvhsgs, lvhsgs, dwork, ldwork, ierror)
     !----------------------------------------------------------------------
     integer (ip), intent (in)     :: nlat
     integer (ip), intent (in)     :: nlon
-    real (wp),    intent (in out) :: wvhsgs(lvhsgs) !wvhsgs(*)
+    real (wp),    intent (in out) :: wvhsgs(lvhsgs)
     integer (ip), intent (in)     :: lvhsgs
-    real (wp),    intent (in out) :: dwork(ldwork) !dwork(*)
+    real (wp),    intent (in out) :: dwork(ldwork)
     integer (ip), intent (in)     :: ldwork
     integer (ip), intent (out)    :: ierror
     !----------------------------------------------------------------------
@@ -1430,7 +1430,6 @@ end subroutine vhsgsi
 subroutine vhgsi1(nlat, imid, vb, wb, dthet, dwts, dpbar, work)
 
     ! EXTERNAL SUBROUTINES :: gaqd, dnlfk
-    ! EXTERNAL FUNCTIONS :: indx
 
     use, intrinsic :: iso_fortran_env, only: &
         wp => REAL64, &
