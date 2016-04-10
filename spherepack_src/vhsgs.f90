@@ -1176,7 +1176,7 @@ subroutine vhgsi1(nlat, imid, vb, wb, dthet, dwts, dpbar, work)
                 wb(i, ix) = abel*dpbar(i, m, nz) + bbel*dpbar(i, m+2, nz)
             end do
 
-            exit
+            cycle
             231 do i=1, imid
                 wb(i, ix) = abel*dpbar(i, m, nz)
             end do

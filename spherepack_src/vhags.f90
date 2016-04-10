@@ -40,16 +40,16 @@
 !
 !     sphcom.f, hrfft.f, gaqd.f
 !
-!     subroutine vhags(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, 
+!     subroutine vhags(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci,
 !    +                 mdab, ndab, wvhags, lvhags, work, lwork, ierror)
 !
 !     subroutine vhags performs the vector spherical harmonic analysis
 !     on the vector field (v, w) and stores the result in the arrays
-!     br, bi, cr, and ci. v(i, j) and w(i, j) are the colatitudinal 
+!     br, bi, cr, and ci. v(i, j) and w(i, j) are the colatitudinal
 !     (measured from the north pole) and east longitudinal components
 !     respectively, located at the gaussian colatitude point theta(i)
 !     and longitude phi(j) = (j-1)*2*pi/nlon. the spectral
-!     representation of (v, w) is given at output parameters v, w in 
+!     representation of (v, w) is given at output parameters v, w in
 !     subroutine vhses.  
 !
 !     input parameters
@@ -75,27 +75,27 @@
 !
 !     ityp   = 0  no symmetries exist about the equator. the analysis
 !                 is performed on the entire sphere.  i.e. on the
-!                 arrays v(i, j), w(i, j) for i=1, ..., nlat and 
-!                 j=1, ..., nlon.   
+!                 arrays v(i, j), w(i, j) for i=1, ..., nlat and
+!                 j=1, ..., nlon.
 !
 !            = 1  no symmetries exist about the equator. the analysis
 !                 is performed on the entire sphere.  i.e. on the
-!                 arrays v(i, j), w(i, j) for i=1, ..., nlat and 
-!                 j=1, ..., nlon. the curl of (v, w) is zero. that is, 
+!                 arrays v(i, j), w(i, j) for i=1, ..., nlat and
+!                 j=1, ..., nlon. the curl of (v, w) is zero. that is,
 !                 (d/dtheta (sin(theta) w) - dv/dphi)/sin(theta) = 0. 
 !                 the coefficients cr and ci are zero.
 !
 !            = 2  no symmetries exist about the equator. the analysis
 !                 is performed on the entire sphere.  i.e. on the
-!                 arrays v(i, j), w(i, j) for i=1, ..., nlat and 
-!                 j=1, ..., nlon. the divergence of (v, w) is zero. i.e., 
+!                 arrays v(i, j), w(i, j) for i=1, ..., nlat and
+!                 j=1, ..., nlon. the divergence of (v, w) is zero. i.e.,
 !                 (d/dtheta (sin(theta) v) + dw/dphi)/sin(theta) = 0. 
 !                 the coefficients br and bi are zero.
 !
 !            = 3  v is symmetric and w is antisymmetric about the 
 !                 equator. the analysis is performed on the northern
 !                 hemisphere only.  i.e., if nlat is odd the analysis
-!                 is performed on the arrays v(i, j), w(i, j) for 
+!                 is performed on the arrays v(i, j), w(i, j) for
 !                 i=1, ..., (nlat+1)/2 and j=1, ..., nlon. if nlat is
 !                 even the analysis is performed on the the arrays
 !                 v(i, j), w(i, j) for i=1, ..., nlat/2 and j=1, ..., nlon.
@@ -103,29 +103,29 @@
 !            = 4  v is symmetric and w is antisymmetric about the 
 !                 equator. the analysis is performed on the northern
 !                 hemisphere only.  i.e., if nlat is odd the analysis
-!                 is performed on the arrays v(i, j), w(i, j) for 
+!                 is performed on the arrays v(i, j), w(i, j) for
 !                 i=1, ..., (nlat+1)/2 and j=1, ..., nlon. if nlat is
 !                 even the analysis is performed on the the arrays
 !                 v(i, j), w(i, j) for i=1, ..., nlat/2 and j=1, ..., nlon.
-!                 the curl of (v, w) is zero. that is, 
+!                 the curl of (v, w) is zero. that is,
 !                 (d/dtheta (sin(theta) w) - dv/dphi)/sin(theta) = 0. 
 !                 the coefficients cr and ci are zero.
 !
 !            = 5  v is symmetric and w is antisymmetric about the 
 !                 equator. the analysis is performed on the northern
 !                 hemisphere only.  i.e., if nlat is odd the analysis
-!                 is performed on the arrays v(i, j), w(i, j) for 
+!                 is performed on the arrays v(i, j), w(i, j) for
 !                 i=1, ..., (nlat+1)/2 and j=1, ..., nlon. if nlat is
 !                 even the analysis is performed on the the arrays
 !                 v(i, j), w(i, j) for i=1, ..., nlat/2 and j=1, ..., nlon.
-!                 the divergence of (v, w) is zero. i.e., 
+!                 the divergence of (v, w) is zero. i.e.,
 !                 (d/dtheta (sin(theta) v) + dw/dphi)/sin(theta) = 0. 
 !                 the coefficients br and bi are zero.
 !
 !            = 6  v is antisymmetric and w is symmetric about the 
 !                 equator. the analysis is performed on the northern
 !                 hemisphere only.  i.e., if nlat is odd the analysis
-!                 is performed on the arrays v(i, j), w(i, j) for 
+!                 is performed on the arrays v(i, j), w(i, j) for
 !                 i=1, ..., (nlat+1)/2 and j=1, ..., nlon. if nlat is
 !                 even the analysis is performed on the the arrays
 !                 v(i, j), w(i, j) for i=1, ..., nlat/2 and j=1, ..., nlon.
@@ -133,27 +133,27 @@
 !            = 7  v is antisymmetric and w is symmetric about the 
 !                 equator. the analysis is performed on the northern
 !                 hemisphere only.  i.e., if nlat is odd the analysis
-!                 is performed on the arrays v(i, j), w(i, j) for 
+!                 is performed on the arrays v(i, j), w(i, j) for
 !                 i=1, ..., (nlat+1)/2 and j=1, ..., nlon. if nlat is
 !                 even the analysis is performed on the the arrays
 !                 v(i, j), w(i, j) for i=1, ..., nlat/2 and j=1, ..., nlon.
-!                 the curl of (v, w) is zero. that is, 
+!                 the curl of (v, w) is zero. that is,
 !                 (d/dtheta (sin(theta) w) - dv/dphi)/sin(theta) = 0. 
 !                 the coefficients cr and ci are zero.
 !
 !            = 8  v is antisymmetric and w is symmetric about the 
 !                 equator. the analysis is performed on the northern
 !                 hemisphere only.  i.e., if nlat is odd the analysis
-!                 is performed on the arrays v(i, j), w(i, j) for 
+!                 is performed on the arrays v(i, j), w(i, j) for
 !                 i=1, ..., (nlat+1)/2 and j=1, ..., nlon. if nlat is
 !                 even the analysis is performed on the the arrays
 !                 v(i, j), w(i, j) for i=1, ..., nlat/2 and j=1, ..., nlon.
-!                 the divergence of (v, w) is zero. i.e., 
+!                 the divergence of (v, w) is zero. i.e.,
 !                 (d/dtheta (sin(theta) v) + dw/dphi)/sin(theta) = 0. 
 !                 the coefficients br and bi are zero.
 !
 !
-!     nt     the number of analyses.  in the program that calls vhags, 
+!     nt     the number of analyses.  in the program that calls vhags,
 !            the arrays v, w, br, bi, cr, and ci can be three dimensional
 !            in which case multiple analyses will be performed.
 !            the third index is the analysis index which assumes the 
@@ -245,12 +245,12 @@
 !
 !     br, bi  two or three dimensional arrays (see input parameter nt)
 !     cr, ci  that contain the vector spherical harmonic coefficients
-!            in the spectral representation of v(i, j) and w(i, j) given 
-!            in the discription of subroutine vhses. br(mp1, np1), 
-!            bi(mp1, np1), cr(mp1, np1), and ci(mp1, np1) are computed 
+!            in the spectral representation of v(i, j) and w(i, j) given
+!            in the discription of subroutine vhses. br(mp1, np1),
+!            bi(mp1, np1), cr(mp1, np1), and ci(mp1, np1) are computed
 !            for mp1=1, ..., mmax and np1=mp1, ..., nlat except for np1=nlat
-!            and odd mp1. mmax=min(nlat, nlon/2) if nlon is even or 
-!            mmax=min(nlat, (nlon+1)/2) if nlon is odd. 
+!            and odd mp1. mmax=min(nlat, nlon/2) if nlon is even or
+!            mmax=min(nlat, (nlon+1)/2) if nlon is odd.
 !      
 !     ierror = 0  no errors
 !            = 1  error in the specification of nlat
@@ -381,8 +381,10 @@ subroutine vhags(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
     call vhags1(nlat, nlon, ityp, nt, imid, idvw, jdvw, v, w, mdab, ndab, &
         br, bi, cr, ci, idv, work, work(iw1), work(iw2), work(iw3), &
         work(iw4), idz, wvhags(jw1), wvhags(jw2), wvhags(jw3))
-    return
+
 end subroutine vhags
+
+
 
 subroutine vhags1(nlat, nlon, ityp, nt, imid, idvw, jdvw, v, w, mdab, &
     ndab, br, bi, cr, ci, idv, ve, vo, we, wo, work, idz, vb, wb, wrfft)
@@ -392,12 +394,13 @@ subroutine vhags1(nlat, nlon, ityp, nt, imid, idvw, jdvw, v, w, mdab, &
         wo(idv, nlon, 1), work(1), &
         vb(imid, 1), wb(imid, 1), wrfft(1)
     nlp1 = nlat+1
-    tsn = 2./nlon
-    fsn = 4./nlon
+    tsn = 2.0/nlon
+    fsn = 4.0/nlon
     mlat = mod(nlat, 2)
     mlon = mod(nlon, 2)
     mmax = min(nlat, (nlon+1)/2)
     imm1 = imid
+
     if (mlat /= 0) then
         imm1 = imid-1
     end if
@@ -1193,31 +1196,27 @@ subroutine vhgai1(nlat, imid, vb, wb, dthet, dwts, dpbar, work)
     !     lwk = 4*nlat*(nlat+2)
     lwk = nlat*(nlat+2)
 
-    !
-    !==> Compute gaussian grid
-    !
     call gaqd(nlat, dthet, dwts, dpbar, lwk, ierror)
     !
-    ! ==> compute associated legendre functions
+    !     compute associated legendre functions
     !
-
-    !
-    !==> compute m=n=0 legendre polynomials for all theta(i)
+    !     compute m=n=0 legendre polynomials for all theta(i)
     !
     ssqr2 = 1.0/sqrt(2.0)
-    dpbar(1:imid, 1, 1) = ssqr2
-    vb(1:imid, 1) = 0.0
-    wb(1:imid, 1) = 0.0
-
+    do i=1, imid
+        dpbar(i, 1, 1) = ssqr2
+        vb(i, 1) = 0.0
+        wb(i, 1) = 0.0
+    end do
     !
-    !==> main loop for remaining vb, and wb
+    !     main loop for remaining vb, and wb
     !
     do n=1, nlat-1
         nm = mod(n-2, 3)+1
         nz = mod(n-1, 3)+1
         np = mod(n, 3)+1
         !
-        !==> compute dpbar for m=0
+        !     compute dpbar for m=0
         !
         call dnlfk(0, n, work)
         mn = indx(0, n, nlat)
@@ -1225,7 +1224,7 @@ subroutine vhgai1(nlat, imid, vb, wb, dthet, dwts, dpbar, work)
             call dnlft(0, n, dthet(i), work, dpbar(i, 1, np))
         end do
         !
-        !==> compute dpbar for m=1
+        !     compute dpbar for m=1
         !
         call dnlfk(1, n, work)
         mn = indx(1, n, nlat)
@@ -1234,74 +1233,90 @@ subroutine vhgai1(nlat, imid, vb, wb, dthet, dwts, dpbar, work)
         !      pbar(i, mn) = dpbar(i, 2, np)
         end do
         !
-        !==> compute and store dpbar for m=2, n
+        !     compute and store dpbar for m=2, n
         !
         if (n < 2) then
-            !
-            !==>  compute the derivative of the functions
-            !
-            ix = indx(0, n, nlat)
-            iy = indx(n, n, nlat)
+            go to 108
+        end if
+
+        do m=2, n
+            abel = sqrt(dble(real((2*n+1)*(m+n-2)*(m+n-3)))/ &
+                dble(real((2*n-3)*(m+n-1)*(m+n))))
+            bbel = sqrt(dble(real((2*n+1)*(n-m-1)*(n-m)))/ &
+                dble(real((2*n-3)*(m+n-1)*(m+n))))
+            cbel = sqrt(dble(real((n-m+1)*(n-m+2)))/ &
+                dble(real((m+n-1)*(m+n))))
+            id = indx(m, n, nlat)
+
+            if (m >= n-1) then
+                go to 102
+            end if
+
             do i=1, imid
-                vb(i, ix) = -dpbar(i, 2, np)*dwts(i)
-                vb(i, iy) = dpbar(i, n, np)/sqrt(real(2*(n+1)))*dwts(i)
+                dpbar(i, m+1, np) = abel*dpbar(i, m-1, nm)+bbel*dpbar(i, m+1, nm) &
+                    -cbel*dpbar(i, m-1, np)
             end do
-        else
-            do m=2, n
-                abel = sqrt(dble(real((2*n+1)*(m+n-2)*(m+n-3)))/ &
-                    dble(real((2*n-3)*(m+n-1)*(m+n))))
-                bbel = sqrt(dble(real((2*n+1)*(n-m-1)*(n-m)))/ &
-                    dble(real((2*n-3)*(m+n-1)*(m+n))))
-                cbel = sqrt(dble(real((n-m+1)*(n-m+2)))/ &
-                    dble(real((m+n-1)*(m+n))))
-                id = indx(m, n, nlat)
 
-                if (m >= n-1) then
-                    do i=1, imid
-                        dpbar(i, m+1, np) = abel*dpbar(i, m-1, nm)-cbel*dpbar(i, m-1, np)
-                    end do
-                else
-                    do i=1, imid
-                        dpbar(i, m+1, np) = abel*dpbar(i, m-1, nm)+bbel*dpbar(i, m+1, nm) &
-                            -cbel*dpbar(i, m-1, np)
-                    end do
-                end if
+            cycle!exit
+
+            102 do i=1, imid
+                dpbar(i, m+1, np) = abel*dpbar(i, m-1, nm)-cbel*dpbar(i, m-1, np)
             end do
+        end do
+        !
+        !     compute the derivative of the functions
+        !
+108     ix = indx(0, n, nlat)
+        iy = indx(n, n, nlat)
+        do i=1, imid
+            vb(i, ix) = -dpbar(i, 2, np)*dwts(i)
+            vb(i, iy) = dpbar(i, n, np)/sqrt(dble(real(2*(n+1))))*dwts(i)
+        end do
+        !
+        if (n==1) then
+            go to 131
         end if
 
-        if (n == 1) then
-            !
-            !==> compute the vector harmonic w(theta) = m*pbar/cos(theta)
-            !
-            !    set wb=0 for m=0
-            !
-            ix = indx(0, n, nlat)
-            wb(1:imid, ix) = 0.0
-        else
-            dcf = sqrt(real(4*n*(n+1)))
-            do m=1, n-1
-                ix = indx(m, n, nlat)
-                abel = sqrt(real((n+m)*(n-m+1)))/dcf
-                bbel = sqrt(real((n-m)*(n+m+1)))/dcf
-                vb(1:imid, ix) = &
-                    (abel*dpbar(1:imid, m, np) - bbel*dpbar(1:imid, m+2, np))*dwts(1:imid)
+        dcf = sqrt(dble(real(4*n*(n+1))))
+        do m=1, n-1
+            ix = indx(m, n, nlat)
+            abel = sqrt(dble(real((n+m)*(n-m+1))))/dcf
+            bbel = sqrt(dble(real((n-m)*(n+m+1))))/dcf
+            do i=1, imid
+                vb(i, ix) = (abel*dpbar(i, m, np)-bbel*dpbar(i, m+2, np))*dwts(i)
             end do
-        end if
+        end do
+        !
+        !     compute the vector harmonic w(theta) = m*pbar/cos(theta)
+        !
+        !     set wb=0 for m=0
+        !
+131     ix = indx(0, n, nlat)
+        do i=1, imid
+            wb(i, ix) = 0.0
+        end do
         !
         !     compute wb for m=1, n
         !
-        dcf = sqrt(real(n+n+1)/real(4*n*(n+1)*(n+n-1)))
+        dcf = sqrt(dble(real(n+n+1))/dble(real(4*n*(n+1)*(n+n-1))))
         do m=1, n
             ix = indx(m, n, nlat)
-            abel = dcf*sqrt(real((n+m)*(n+m-1)))
-            bbel = dcf*sqrt(real((n-m)*(n-m-1)))
+            abel = dcf*sqrt(dble(real((n+m)*(n+m-1))))
+            bbel = dcf*sqrt(dble(real((n-m)*(n-m-1))))
+
             if (m >= n-1) then
-                wb(1:imid, ix) = abel*dpbar(1:imid, m, nz)*dwts(1:imid)
-            else
-                wb(1:imid, ix) = &
-                    (abel*dpbar(1:imid, m, nz) + bbel*dpbar(1:imid, m+2, nz)) &
-                    * dwts(1:imid)
+                go to 231
             end if
+
+            do i=1, imid
+                wb(i, ix) = (abel*dpbar(i, m, nz) + bbel*dpbar(i, m+2, nz))*dwts(i)
+            end do
+
+            cycle!exit
+
+            231 do i=1, imid
+                wb(i, ix) = abel*dpbar(i, m, nz)*dwts(i)
+            end do
         end do
     end do
 
