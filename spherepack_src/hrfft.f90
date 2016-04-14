@@ -518,7 +518,7 @@ end subroutine hrftf1
 
 
 
-subroutine hradf4 (mp, ido, l1, cc, mdimcc, ch, mdimch, wa1, wa2, wa3)
+subroutine hradf4(mp, ido, l1, cc, mdimcc, ch, mdimch, wa1, wa2, wa3)
     !
     ! Purpose:
     !
@@ -566,9 +566,7 @@ subroutine hradf4 (mp, ido, l1, cc, mdimcc, ch, mdimch, wa1, wa2, wa3)
 
     if (ido-2 < 0) then
         return
-    end if
-
-    if (ido-2 /= 0) then
+    else if (ido-2 /= 0) then
         idp2 = ido+2
         do k=1, l1
             do i=3, ido, 2
@@ -658,107 +656,182 @@ end subroutine hradf4
 
 subroutine hradf2 (mp, ido, l1, cc, mdimcc, ch, mdimch, wa1)
     !
-    !     a multiple fft package for spherepack
+    ! Purpose:
     !
-    dimension   ch(mdimch, ido, 2, l1)  , cc(mdimcc, ido, l1, 2)     , &
-        wa1(ido)
-    do 101 k=1, l1
-        do 1001 m=1, mp
+    ! A multiple fft package for spherepack
+    !
+    use, intrinsic :: iso_fortran_env, only: &
+        wp => REAL64, &
+        ip => INT32
+
+    implicit none
+    !----------------------------------------------------------------------
+    ! Dictionary: calling arguments
+    !----------------------------------------------------------------------
+    integer (ip), intent (in)     :: mp
+    integer (ip), intent (in)     :: ido
+    integer (ip), intent (in)     :: l1
+    real (wp),    intent (in out) :: ch(mdimch, ido, 2, l1)
+    integer (ip), intent (in)     :: mdimch
+    real (wp),    intent (in out) :: cc(mdimcc, ido, l1, 2)
+    integer (ip), intent (in)     :: mdimcc
+    real (wp),    intent (in out) :: wa1(ido)
+    !----------------------------------------------------------------------
+    ! Dictionary: local variables
+    !----------------------------------------------------------------------
+    integer (ip) :: i, k, m, ic, idp2
+    !----------------------------------------------------------------------
+
+    do k=1, l1
+        do m=1, mp
             ch(m, 1, 1, k) = cc(m, 1, k, 1)+cc(m, 1, k, 2)
             ch(m, ido, 2, k) = cc(m, 1, k, 1)-cc(m, 1, k, 2)
-1001    continue      
-101 continue         
-    if (ido-2< 0) then
-        goto 107
-    else if (ido-2 == 0) then 
-        goto 105
-    else 
-        goto 102
+        end do
+    end do
+
+
+    if (ido-2 < 0) then
+        return
+    else if (ido-2 /= 0) then
+        idp2 = ido+2
+        do k=1, l1
+            do i=3, ido, 2
+                ic = idp2-i
+                do m=1, mp
+
+                    ch(m, i, 1, k) = &
+                        cc(m, i, k, 1)+(wa1(i-2)*cc(m, i, k, 2)- &
+                        wa1(i-1)*cc(m, i-1, k, 2))
+
+                    ch(m, ic, 2, k) = &
+                        (wa1(i-2)*cc(m, i, k, 2)-wa1(i-1)* &
+                        cc(m, i-1, k, 2))-cc(m, i, k, 1)
+
+                    ch(m, i-1, 1, k) = &
+                        cc(m, i-1, k, 1)+(wa1(i-2)*cc(m, i-1, k, 2)+ &          !
+                        wa1(i-1)*cc(m, i, k, 2))
+
+                    ch(m, ic-1, 2, k) = &
+                        cc(m, i-1, k, 1)-(wa1(i-2)*cc(m, i-1, k, 2)+ &         !
+                        wa1(i-1)*cc(m, i, k, 2))
+                end do
+            end do
+        end do
+        if (mod(ido, 2) == 1) then
+            return
+        end if
     end if
-102 idp2 = ido+2     
-    do 104 k=1, l1
-        do 103 i=3, ido, 2
-            ic = idp2-i
-            do 1003 m=1, mp
-                ch(m, i, 1, k) = cc(m, i, k, 1)+(wa1(i-2)*cc(m, i, k, 2)- &
-                    wa1(i-1)*cc(m, i-1, k, 2))
-                ch(m, ic, 2, k) = (wa1(i-2)*cc(m, i, k, 2)-wa1(i-1)* &
-                    cc(m, i-1, k, 2))-cc(m, i, k, 1)
-                ch(m, i-1, 1, k) = cc(m, i-1, k, 1)+(wa1(i-2)*cc(m, i-1, k, 2)+ &          !
-                    wa1(i-1)*cc(m, i, k, 2))
-                ch(m, ic-1, 2, k) = cc(m, i-1, k, 1)-(wa1(i-2)*cc(m, i-1, k, 2)+ &         !
-                    wa1(i-1)*cc(m, i, k, 2))
-1003        continue
-103     continue
-104 continue         
-    if (mod(ido, 2) == 1) return
-    105 do 106 k=1, l1
-        do 1006 m=1, mp
+
+    do k=1, l1
+        do m=1, mp
             ch(m, 1, 2, k) = -cc(m, ido, k, 2)
             ch(m, ido, 1, k) = cc(m, ido, k, 1)
-1006    continue      
-106 continue         
-107 return
+        end do
+    end do
 
 end subroutine hradf2
 
 
 
-subroutine hradf3 (mp, ido, l1, cc, mdimcc, ch, mdimch, wa1, wa2)
+subroutine hradf3(mp, ido, l1, cc, mdimcc, ch, mdimch, wa1, wa2)
     !
-    !     a multiple fft package for spherepack
+    ! Purpose:
     !
-    dimension   ch(mdimch, ido, 3, l1)  , cc(mdimcc, ido, l1, 3)     , &
-        wa1(ido)     , wa2(ido)
-    arg=2.0*acos(-1.0)/3.
-    taur=cos(arg)
-    taui=sin(arg)
-    do 101 k=1, l1
-        do 1001 m=1, mp
-            ch(m, 1, 1, k) = cc(m, 1, k, 1)+(cc(m, 1, k, 2)+cc(m, 1, k, 3))
-            ch(m, 1, 3, k) = taui*(cc(m, 1, k, 3)-cc(m, 1, k, 2))
-            ch(m, ido, 2, k) = cc(m, 1, k, 1)+taur* &
+    ! A multiple fft package for spherepack
+    !
+    use, intrinsic :: iso_fortran_env, only: &
+        wp => REAL64, &
+        ip => INT32
+
+    implicit none
+    !----------------------------------------------------------------------
+    ! Dictionary: calling arguments
+    !----------------------------------------------------------------------
+    integer (ip), intent (in)     :: mp
+    integer (ip), intent (in)     :: ido
+    integer (ip), intent (in)     :: l1
+    real (wp),    intent (in out) :: ch(mdimch, ido, 3, l1)
+    integer (ip), intent (in)     :: mdimch
+    real (wp),    intent (in out) :: cc(mdimcc, ido, l1, 3)
+    integer (ip), intent (in)     :: mdimcc
+    real (wp),    intent (in out) :: wa1(ido)
+    real (wp),    intent (in out) :: wa2(ido)
+    !----------------------------------------------------------------------
+    ! Dictionary: local variables
+    !----------------------------------------------------------------------
+    integer (ip)         :: i, k, m, ic, idp2
+    real (wp), parameter :: ARG=2.0_wp * acos(-1.0_wp)/3
+    real (wp), parameter :: TAUR=cos(ARG)
+    real (wp), parameter :: TAUI=sin(ARG)
+    !----------------------------------------------------------------------
+
+    do k=1, l1
+        do m=1, mp
+
+            ch(m, 1, 1, k) = &
+                cc(m, 1, k, 1)+(cc(m, 1, k, 2)+cc(m, 1, k, 3))
+
+            ch(m, 1, 3, k) = &
+                TAUI*(cc(m, 1, k, 3)-cc(m, 1, k, 2))
+
+            ch(m, ido, 2, k) = &
+                cc(m, 1, k, 1)+TAUR* &
                 (cc(m, 1, k, 2)+cc(m, 1, k, 3))
-1001    continue      
-101 continue         
-    if (ido == 1) return
+        end do
+    end do
+
+    if (ido == 1) then
+        return
+    end if
+
     idp2 = ido+2
-    do 103 k=1, l1
-        do 102 i=3, ido, 2
+    do k=1, l1
+        do i=3, ido, 2
             ic = idp2-i
-            do 1002 m=1, mp
-                ch(m, i-1, 1, k) = cc(m, i-1, k, 1)+((wa1(i-2)*cc(m, i-1, k, 2)+ &         !
+            do m=1, mp
+
+                ch(m, i-1, 1, k) = &
+                    cc(m, i-1, k, 1)+((wa1(i-2)*cc(m, i-1, k, 2)+ &         !
                     wa1(i-1)*cc(m, i, k, 2))+(wa2(i-2)*cc(m, i-1, k, 3)+wa2(i-1)* &        !
                     cc(m, i, k, 3)))
-                ch(m, i, 1, k) = cc(m, i, k, 1)+((wa1(i-2)*cc(m, i, k, 2)-wa1(i-1)* &      !
+
+                ch(m, i, 1, k) = &
+                    cc(m, i, k, 1)+((wa1(i-2)*cc(m, i, k, 2)-wa1(i-1)* &      !
                     cc(m, i-1, k, 2))+(wa2(i-2)*cc(m, i, k, 3)-wa2(i-1)* &
                     cc(m, i-1, k, 3)))
-                ch(m, i-1, 3, k) = (cc(m, i-1, k, 1)+taur*((wa1(i-2)* &
+
+                ch(m, i-1, 3, k) = &
+                    (cc(m, i-1, k, 1)+TAUR*((wa1(i-2)* &
                     cc(m, i-1, k, 2)+wa1(i-1)*cc(m, i, k, 2))+(wa2(i-2)* &
-                    cc(m, i-1, k, 3)+wa2(i-1)*cc(m, i, k, 3))))+(taui*((wa1(i-2)* &        !
+                    cc(m, i-1, k, 3)+wa2(i-1)*cc(m, i, k, 3))))+(TAUI*((wa1(i-2)* &        !
                     cc(m, i, k, 2)-wa1(i-1)*cc(m, i-1, k, 2))-(wa2(i-2)* &
                     cc(m, i, k, 3)-wa2(i-1)*cc(m, i-1, k, 3))))
-                ch(m, ic-1, 2, k) = (cc(m, i-1, k, 1)+taur*((wa1(i-2)* &
+
+                ch(m, ic-1, 2, k) = &
+                    (cc(m, i-1, k, 1)+TAUR*((wa1(i-2)* &
                     cc(m, i-1, k, 2)+wa1(i-1)*cc(m, i, k, 2))+(wa2(i-2)* &
-                    cc(m, i-1, k, 3)+wa2(i-1)*cc(m, i, k, 3))))-(taui*((wa1(i-2)* &        !
+                    cc(m, i-1, k, 3)+wa2(i-1)*cc(m, i, k, 3))))-(TAUI*((wa1(i-2)* &
                     cc(m, i, k, 2)-wa1(i-1)*cc(m, i-1, k, 2))-(wa2(i-2)* &
                     cc(m, i, k, 3)-wa2(i-1)*cc(m, i-1, k, 3))))
-                ch(m, i, 3, k) = (cc(m, i, k, 1)+taur*((wa1(i-2)*cc(m, i, k, 2)- &         !
-                    wa1(i-1)*cc(m, i-1, k, 2))+(wa2(i-2)*cc(m, i, k, 3)-wa2(i-1)* &        !
-                    cc(m, i-1, k, 3))))+(taui*((wa2(i-2)*cc(m, i-1, k, 3)+wa2(i-1)* &      !
+
+                ch(m, i, 3, k) = &
+                    (cc(m, i, k, 1)+TAUR*((wa1(i-2)*cc(m, i, k, 2)- &
+                    wa1(i-1)*cc(m, i-1, k, 2))+(wa2(i-2)*cc(m, i, k, 3)-wa2(i-1)* &
+                    cc(m, i-1, k, 3))))+(TAUI*((wa2(i-2)*cc(m, i-1, k, 3)+wa2(i-1)* &
                     cc(m, i, k, 3))-(wa1(i-2)*cc(m, i-1, k, 2)+wa1(i-1)* &
                     cc(m, i, k, 2))))
-                ch(m, ic, 2, k) = (taui*((wa2(i-2)*cc(m, i-1, k, 3)+wa2(i-1)* &         !
+
+                ch(m, ic, 2, k) = &
+                    (TAUI*((wa2(i-2)*cc(m, i-1, k, 3)+wa2(i-1)* &
                     cc(m, i, k, 3))-(wa1(i-2)*cc(m, i-1, k, 2)+wa1(i-1)* &
-                    cc(m, i, k, 2))))-(cc(m, i, k, 1)+taur*((wa1(i-2)*cc(m, i, k, 2)- &       !
-                    wa1(i-1)*cc(m, i-1, k, 2))+(wa2(i-2)*cc(m, i, k, 3)-wa2(i-1)* &        !
+                    cc(m, i, k, 2))))-(cc(m, i, k, 1)+TAUR*((wa1(i-2)*cc(m, i, k, 2)- &
+                    wa1(i-1)*cc(m, i-1, k, 2))+(wa2(i-2)*cc(m, i, k, 3)-wa2(i-1)* &
                     cc(m, i-1, k, 3))))
-1002        continue
-102     continue
-103 continue         
+            end do
+        end do
+    end do
 
 end subroutine hradf3
-
 
 
 subroutine hradf5 (mp, ido, l1, cc, mdimcc, ch, mdimch, &
