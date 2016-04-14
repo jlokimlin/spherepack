@@ -834,124 +834,187 @@ subroutine hradf3(mp, ido, l1, cc, mdimcc, ch, mdimch, wa1, wa2)
 end subroutine hradf3
 
 
-subroutine hradf5 (mp, ido, l1, cc, mdimcc, ch, mdimch, &
+
+
+subroutine hradf5(mp, ido, l1, cc, mdimcc, ch, mdimch, &
     wa1, wa2, wa3, wa4)
     !
-    !     a multiple fft package for spherepack
+    ! Purpose:
     !
-    dimension  cc(mdimcc, ido, l1, 5)    , ch(mdimch, ido, 5, l1)     , &
-        wa1(ido)     , wa2(ido)     , wa3(ido)     , wa4(ido)           !
-    arg=2.0*acos(-1.0)/5.
-    tr11=cos(arg)
-    ti11=sin(arg)
-    tr12=cos(2.0*arg)
-    ti12=sin(2.0*arg)
-    do 101 k=1, l1
-        do 1001 m=1, mp
-            ch(m, 1, 1, k) = cc(m, 1, k, 1)+(cc(m, 1, k, 5)+cc(m, 1, k, 2))+ &               !
+    ! A multiple fft package for spherepack
+    !
+    use, intrinsic :: iso_fortran_env, only: &
+        wp => REAL64, &
+        ip => INT32
+
+    implicit none
+    !----------------------------------------------------------------------
+    ! Dictionary: calling arguments
+    !----------------------------------------------------------------------
+    integer (ip), intent (in)     :: mp
+    integer (ip), intent (in)     :: ido
+    integer (ip), intent (in)     :: l1
+    real (wp),    intent (in out) :: ch(mdimch, ido, 5, l1)
+    integer (ip), intent (in)     :: mdimch
+    real (wp),    intent (in out) :: cc(mdimcc, ido, l1, 5)
+    integer (ip), intent (in)     :: mdimcc
+    real (wp),    intent (in out) :: wa1(ido)
+    real (wp),    intent (in out) :: wa2(ido)
+    real (wp),    intent (in out) :: wa3(ido)
+    real (wp),    intent (in out) :: wa4(ido)
+    !----------------------------------------------------------------------
+    ! Dictionary: local variables
+    !----------------------------------------------------------------------
+    integer (ip)         :: i, k, m, ic, idp2
+    real (wp), parameter :: ARG = 2.0_wp * acos(-1.0_wp)/5
+    real (wp), parameter :: TR11=cos(ARG)
+    real (wp), parameter :: TI11=sin(ARG)
+    real (wp), parameter :: TR12=cos(2.0*ARG)
+    real (wp), parameter :: TI12=sin(2.0*ARG)
+    !----------------------------------------------------------------------
+
+    do k=1, l1
+        do m=1, mp
+
+            ch(m, 1, 1, k) = &
+                cc(m, 1, k, 1)+(cc(m, 1, k, 5)+cc(m, 1, k, 2))+ &
                 (cc(m, 1, k, 4)+cc(m, 1, k, 3))
-            ch(m, ido, 2, k) = cc(m, 1, k, 1)+tr11*(cc(m, 1, k, 5)+cc(m, 1, k, 2))+ &        !
-                tr12*(cc(m, 1, k, 4)+cc(m, 1, k, 3))
-            ch(m, 1, 3, k) = ti11*(cc(m, 1, k, 5)-cc(m, 1, k, 2))+ti12* &
+
+            ch(m, ido, 2, k) = &
+                cc(m, 1, k, 1)+TR11*(cc(m, 1, k, 5)+cc(m, 1, k, 2))+ &
+                TR12*(cc(m, 1, k, 4)+cc(m, 1, k, 3))
+
+            ch(m, 1, 3, k) = &
+                TI11*(cc(m, 1, k, 5)-cc(m, 1, k, 2))+TI12* &
                 (cc(m, 1, k, 4)-cc(m, 1, k, 3))
-            ch(m, ido, 4, k) = cc(m, 1, k, 1)+tr12*(cc(m, 1, k, 5)+cc(m, 1, k, 2))+ &        !
-                tr11*(cc(m, 1, k, 4)+cc(m, 1, k, 3))
-            ch(m, 1, 5, k) = ti12*(cc(m, 1, k, 5)-cc(m, 1, k, 2))-ti11* &
+
+            ch(m, ido, 4, k) = &
+                cc(m, 1, k, 1)+TR12*(cc(m, 1, k, 5)+cc(m, 1, k, 2))+ &        !
+                TR11*(cc(m, 1, k, 4)+cc(m, 1, k, 3))
+
+            ch(m, 1, 5, k) = &
+                TI12*(cc(m, 1, k, 5)-cc(m, 1, k, 2))-TI11* &
                 (cc(m, 1, k, 4)-cc(m, 1, k, 3))
-1001    continue      
-101 continue         
-    if (ido == 1) return
+        end do
+    end do
+
+    if (ido == 1) then
+        return
+    end if
+
     idp2 = ido+2
-    do 103 k=1, l1
-        do 102 i=3, ido, 2
+    do k=1, l1
+        do i=3, ido, 2
             ic = idp2-i
-            do 1002 m=1, mp
-                ch(m, i-1, 1, k) = cc(m, i-1, k, 1)+((wa1(i-2)*cc(m, i-1, k, 2)+ &         !
+            do m=1, mp
+
+                ch(m, i-1, 1, k) = &
+                    cc(m, i-1, k, 1)+((wa1(i-2)*cc(m, i-1, k, 2)+ &         !
                     wa1(i-1)*cc(m, i, k, 2))+(wa4(i-2)*cc(m, i-1, k, 5)+wa4(i-1)* &        !
                     cc(m, i, k, 5)))+((wa2(i-2)*cc(m, i-1, k, 3)+wa2(i-1)* &               !
                     cc(m, i, k, 3))+(wa3(i-2)*cc(m, i-1, k, 4)+wa3(i-1)*cc(m, i, k, 4)))      !
-                ch(m, i, 1, k) = cc(m, i, k, 1)+((wa1(i-2)*cc(m, i, k, 2)-wa1(i-1)* &      !
+
+                ch(m, i, 1, k) = &
+                    cc(m, i, k, 1)+((wa1(i-2)*cc(m, i, k, 2)-wa1(i-1)* &      !
                     cc(m, i-1, k, 2))+(wa4(i-2)*cc(m, i, k, 5)-wa4(i-1)* &
                     cc(m, i-1, k, 5)))+((wa2(i-2)*cc(m, i, k, 3)-wa2(i-1)* &               !
                     cc(m, i-1, k, 3))+(wa3(i-2)*cc(m, i, k, 4)-wa3(i-1)* &
                     cc(m, i-1, k, 4)))
-                ch(m, i-1, 3, k) = cc(m, i-1, k, 1)+tr11* &
+
+                ch(m, i-1, 3, k) = &
+                    cc(m, i-1, k, 1)+TR11* &
                     ( wa1(i-2)*cc(m, i-1, k, 2)+wa1(i-1)*cc(m, i, k, 2) &
-                    +wa4(i-2)*cc(m, i-1, k, 5)+wa4(i-1)*cc(m, i, k, 5))+tr12* &            !
+                    +wa4(i-2)*cc(m, i-1, k, 5)+wa4(i-1)*cc(m, i, k, 5))+TR12* &            !
                     ( wa2(i-2)*cc(m, i-1, k, 3)+wa2(i-1)*cc(m, i, k, 3) &
-                    +wa3(i-2)*cc(m, i-1, k, 4)+wa3(i-1)*cc(m, i, k, 4))+ti11* &            !
+                    +wa3(i-2)*cc(m, i-1, k, 4)+wa3(i-1)*cc(m, i, k, 4))+TI11* &            !
                     ( wa1(i-2)*cc(m, i, k, 2)-wa1(i-1)*cc(m, i-1, k, 2) &
-                    -(wa4(i-2)*cc(m, i, k, 5)-wa4(i-1)*cc(m, i-1, k, 5)))+ti12* &          !
+                    -(wa4(i-2)*cc(m, i, k, 5)-wa4(i-1)*cc(m, i-1, k, 5)))+TI12* &          !
                     ( wa2(i-2)*cc(m, i, k, 3)-wa2(i-1)*cc(m, i-1, k, 3) &
                     -(wa3(i-2)*cc(m, i, k, 4)-wa3(i-1)*cc(m, i-1, k, 4)))
-                ch(m, ic-1, 2, k) = cc(m, i-1, k, 1)+tr11* &
+
+                ch(m, ic-1, 2, k) = &
+                    cc(m, i-1, k, 1)+TR11* &
                     ( wa1(i-2)*cc(m, i-1, k, 2)+wa1(i-1)*cc(m, i, k, 2) &
-                    +wa4(i-2)*cc(m, i-1, k, 5)+wa4(i-1)*cc(m, i, k, 5))+tr12* &            !
+                    +wa4(i-2)*cc(m, i-1, k, 5)+wa4(i-1)*cc(m, i, k, 5))+TR12* &            !
                     ( wa2(i-2)*cc(m, i-1, k, 3)+wa2(i-1)*cc(m, i, k, 3) &
-                    +wa3(i-2)*cc(m, i-1, k, 4)+wa3(i-1)*cc(m, i, k, 4))-(ti11* &            !
+                    +wa3(i-2)*cc(m, i-1, k, 4)+wa3(i-1)*cc(m, i, k, 4))-(TI11* &            !
                     ( wa1(i-2)*cc(m, i, k, 2)-wa1(i-1)*cc(m, i-1, k, 2) &
-                    -(wa4(i-2)*cc(m, i, k, 5)-wa4(i-1)*cc(m, i-1, k, 5)))+ti12* &          !
+                    -(wa4(i-2)*cc(m, i, k, 5)-wa4(i-1)*cc(m, i-1, k, 5)))+TI12* &          !
                     ( wa2(i-2)*cc(m, i, k, 3)-wa2(i-1)*cc(m, i-1, k, 3) &
                     -(wa3(i-2)*cc(m, i, k, 4)-wa3(i-1)*cc(m, i-1, k, 4))))                 !
-                ch(m, i, 3, k) = (cc(m, i, k, 1)+tr11*((wa1(i-2)*cc(m, i, k, 2)- &         !
+
+                ch(m, i, 3, k) = &
+                    (cc(m, i, k, 1)+TR11*((wa1(i-2)*cc(m, i, k, 2)- &         !
                     wa1(i-1)*cc(m, i-1, k, 2))+(wa4(i-2)*cc(m, i, k, 5)-wa4(i-1)* &        !
-                    cc(m, i-1, k, 5)))+tr12*((wa2(i-2)*cc(m, i, k, 3)-wa2(i-1)* &          !
+                    cc(m, i-1, k, 5)))+TR12*((wa2(i-2)*cc(m, i, k, 3)-wa2(i-1)* &          !
                     cc(m, i-1, k, 3))+(wa3(i-2)*cc(m, i, k, 4)-wa3(i-1)* &
-                    cc(m, i-1, k, 4))))+(ti11*((wa4(i-2)*cc(m, i-1, k, 5)+ &               !
+                    cc(m, i-1, k, 4))))+(TI11*((wa4(i-2)*cc(m, i-1, k, 5)+ &               !
                     wa4(i-1)*cc(m, i, k, 5))-(wa1(i-2)*cc(m, i-1, k, 2)+wa1(i-1)* &        !
-                    cc(m, i, k, 2)))+ti12*((wa3(i-2)*cc(m, i-1, k, 4)+wa3(i-1)* &          !
+                    cc(m, i, k, 2)))+TI12*((wa3(i-2)*cc(m, i-1, k, 4)+wa3(i-1)* &          !
                     cc(m, i, k, 4))-(wa2(i-2)*cc(m, i-1, k, 3)+wa2(i-1)* &
                     cc(m, i, k, 3))))
-                ch(m, ic, 2, k) = (ti11*((wa4(i-2)*cc(m, i-1, k, 5)+wa4(i-1)* &         !
+
+                ch(m, ic, 2, k) = &
+                    (TI11*((wa4(i-2)*cc(m, i-1, k, 5)+wa4(i-1)* &         !
                     cc(m, i, k, 5))-(wa1(i-2)*cc(m, i-1, k, 2)+wa1(i-1)* &
-                    cc(m, i, k, 2)))+ti12*((wa3(i-2)*cc(m, i-1, k, 4)+wa3(i-1)* &          !
+                    cc(m, i, k, 2)))+TI12*((wa3(i-2)*cc(m, i-1, k, 4)+wa3(i-1)* &          !
                     cc(m, i, k, 4))-(wa2(i-2)*cc(m, i-1, k, 3)+wa2(i-1)* &
-                    cc(m, i, k, 3))))-(cc(m, i, k, 1)+tr11*((wa1(i-2)*cc(m, i, k, 2)- &       !
+                    cc(m, i, k, 3))))-(cc(m, i, k, 1)+TR11*((wa1(i-2)*cc(m, i, k, 2)- &       !
                     wa1(i-1)*cc(m, i-1, k, 2))+(wa4(i-2)*cc(m, i, k, 5)-wa4(i-1)* &        !
-                    cc(m, i-1, k, 5)))+tr12*((wa2(i-2)*cc(m, i, k, 3)-wa2(i-1)* &          !
+                    cc(m, i-1, k, 5)))+TR12*((wa2(i-2)*cc(m, i, k, 3)-wa2(i-1)* &          !
                     cc(m, i-1, k, 3))+(wa3(i-2)*cc(m, i, k, 4)-wa3(i-1)* &
                     cc(m, i-1, k, 4))))
-                ch(m, i-1, 5, k) = (cc(m, i-1, k, 1)+tr12*((wa1(i-2)* &
+
+                ch(m, i-1, 5, k) = &
+                    (cc(m, i-1, k, 1)+TR12*((wa1(i-2)* &
                     cc(m, i-1, k, 2)+wa1(i-1)*cc(m, i, k, 2))+(wa4(i-2)* &
-                    cc(m, i-1, k, 5)+wa4(i-1)*cc(m, i, k, 5)))+tr11*((wa2(i-2)* &          !
+                    cc(m, i-1, k, 5)+wa4(i-1)*cc(m, i, k, 5)))+TR11*((wa2(i-2)* &          !
                     cc(m, i-1, k, 3)+wa2(i-1)*cc(m, i, k, 3))+(wa3(i-2)* &
-                    cc(m, i-1, k, 4)+wa3(i-1)*cc(m, i, k, 4))))+(ti12*((wa1(i-2)* &        !
+                    cc(m, i-1, k, 4)+wa3(i-1)*cc(m, i, k, 4))))+(TI12*((wa1(i-2)* &        !
                     cc(m, i, k, 2)-wa1(i-1)*cc(m, i-1, k, 2))-(wa4(i-2)*cc(m, i, k, 5)- &     !
-                    wa4(i-1)*cc(m, i-1, k, 5)))-ti11*((wa2(i-2)*cc(m, i, k, 3)- &          !
+                    wa4(i-1)*cc(m, i-1, k, 5)))-TI11*((wa2(i-2)*cc(m, i, k, 3)- &          !
                     wa2(i-1)*cc(m, i-1, k, 3))-(wa3(i-2)*cc(m, i, k, 4)-wa3(i-1)* &        !
                     cc(m, i-1, k, 4))))
-                ch(m, ic-1, 4, k) = (cc(m, i-1, k, 1)+tr12*((wa1(i-2)* &
+
+                ch(m, ic-1, 4, k) = &
+                    (cc(m, i-1, k, 1)+TR12*((wa1(i-2)* &
                     cc(m, i-1, k, 2)+wa1(i-1)*cc(m, i, k, 2))+(wa4(i-2)* &
-                    cc(m, i-1, k, 5)+wa4(i-1)*cc(m, i, k, 5)))+tr11*((wa2(i-2)* &          !
+                    cc(m, i-1, k, 5)+wa4(i-1)*cc(m, i, k, 5)))+TR11*((wa2(i-2)* &          !
                     cc(m, i-1, k, 3)+wa2(i-1)*cc(m, i, k, 3))+(wa3(i-2)* &
-                    cc(m, i-1, k, 4)+wa3(i-1)*cc(m, i, k, 4))))-(ti12*((wa1(i-2)* &        !
+                    cc(m, i-1, k, 4)+wa3(i-1)*cc(m, i, k, 4))))-(TI12*((wa1(i-2)* &        !
                     cc(m, i, k, 2)-wa1(i-1)*cc(m, i-1, k, 2))-(wa4(i-2)*cc(m, i, k, 5)- &     !
-                    wa4(i-1)*cc(m, i-1, k, 5)))-ti11*((wa2(i-2)*cc(m, i, k, 3)- &          !
+                    wa4(i-1)*cc(m, i-1, k, 5)))-TI11*((wa2(i-2)*cc(m, i, k, 3)- &          !
                     wa2(i-1)*cc(m, i-1, k, 3))-(wa3(i-2)*cc(m, i, k, 4)-wa3(i-1)* &        !
                     cc(m, i-1, k, 4))))
-                ch(m, i, 5, k) = (cc(m, i, k, 1)+tr12*((wa1(i-2)*cc(m, i, k, 2)- &         !
+
+                ch(m, i, 5, k) = &
+                    (cc(m, i, k, 1)+TR12*((wa1(i-2)*cc(m, i, k, 2)- &         !
                     wa1(i-1)*cc(m, i-1, k, 2))+(wa4(i-2)*cc(m, i, k, 5)-wa4(i-1)* &        !
-                    cc(m, i-1, k, 5)))+tr11*((wa2(i-2)*cc(m, i, k, 3)-wa2(i-1)* &          !
+                    cc(m, i-1, k, 5)))+TR11*((wa2(i-2)*cc(m, i, k, 3)-wa2(i-1)* &          !
                     cc(m, i-1, k, 3))+(wa3(i-2)*cc(m, i, k, 4)-wa3(i-1)* &
-                    cc(m, i-1, k, 4))))+(ti12*((wa4(i-2)*cc(m, i-1, k, 5)+ &               !
+                    cc(m, i-1, k, 4))))+(TI12*((wa4(i-2)*cc(m, i-1, k, 5)+ &               !
                     wa4(i-1)*cc(m, i, k, 5))-(wa1(i-2)*cc(m, i-1, k, 2)+wa1(i-1)* &        !
-                    cc(m, i, k, 2)))-ti11*((wa3(i-2)*cc(m, i-1, k, 4)+wa3(i-1)* &          !
+                    cc(m, i, k, 2)))-TI11*((wa3(i-2)*cc(m, i-1, k, 4)+wa3(i-1)* &          !
                     cc(m, i, k, 4))-(wa2(i-2)*cc(m, i-1, k, 3)+wa2(i-1)* &
                     cc(m, i, k, 3))))
-                ch(m, ic, 4, k) = (ti12*((wa4(i-2)*cc(m, i-1, k, 5)+wa4(i-1)* &         !
+
+                ch(m, ic, 4, k) = &
+                    (TI12*((wa4(i-2)*cc(m, i-1, k, 5)+wa4(i-1)* &         !
                     cc(m, i, k, 5))-(wa1(i-2)*cc(m, i-1, k, 2)+wa1(i-1)* &
-                    cc(m, i, k, 2)))-ti11*((wa3(i-2)*cc(m, i-1, k, 4)+wa3(i-1)* &          !
+                    cc(m, i, k, 2)))-TI11*((wa3(i-2)*cc(m, i-1, k, 4)+wa3(i-1)* &          !
                     cc(m, i, k, 4))-(wa2(i-2)*cc(m, i-1, k, 3)+wa2(i-1)* &
-                    cc(m, i, k, 3))))-(cc(m, i, k, 1)+tr12*((wa1(i-2)*cc(m, i, k, 2)- &       !
+                    cc(m, i, k, 3))))-(cc(m, i, k, 1)+TR12*((wa1(i-2)*cc(m, i, k, 2)- &       !
                     wa1(i-1)*cc(m, i-1, k, 2))+(wa4(i-2)*cc(m, i, k, 5)-wa4(i-1)* &        !
-                    cc(m, i-1, k, 5)))+tr11*((wa2(i-2)*cc(m, i, k, 3)-wa2(i-1)* &          !
+                    cc(m, i-1, k, 5)))+TR11*((wa2(i-2)*cc(m, i, k, 3)-wa2(i-1)* &          !
                     cc(m, i-1, k, 3))+(wa3(i-2)*cc(m, i, k, 4)-wa3(i-1)* &
                     cc(m, i-1, k, 4))))
-1002        continue
-102     continue
-103 continue         
+            end do
+        end do
+    end do
 
 end subroutine hradf5
+
+
 
 subroutine hradfg (mp, ido, ip, l1, idl1, cc, c1, c2, mdimcc, &
     ch, ch2, mdimch, wa)
