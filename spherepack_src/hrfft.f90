@@ -624,7 +624,7 @@ subroutine hradf4(mp, ido, l1, cc, mdimcc, ch, mdimch, wa1, wa2, wa3)
             end do
         end do
 
-        if (mod(ido, 2) == 1) then
+        if(mod(ido, 2) == 1) then
             return
         end if
     end if
@@ -654,7 +654,7 @@ end subroutine hradf4
 
 
 
-subroutine hradf2 (mp, ido, l1, cc, mdimcc, ch, mdimch, wa1)
+subroutine hradf2(mp, ido, l1, cc, mdimcc, ch, mdimch, wa1)
     !
     ! Purpose:
     !
@@ -717,7 +717,7 @@ subroutine hradf2 (mp, ido, l1, cc, mdimcc, ch, mdimch, wa1)
                 end do
             end do
         end do
-        if (mod(ido, 2) == 1) then
+        if(mod(ido, 2) == 1) then
             return
         end if
     end if
@@ -1016,506 +1016,690 @@ end subroutine hradf5
 
 
 
-subroutine hradfg (mp, ido, ip, l1, idl1, cc, c1, c2, mdimcc, &
+subroutine hradfg(mp, ido, ip_rename, l1, idl1, cc, c1, c2, mdimcc, &
     ch, ch2, mdimch, wa)
     !
-    !     a multiple fft package for spherepack
+    ! Purpose:
     !
-    dimension     ch(mdimch, ido, l1, ip)   , cc(mdimcc, ido, ip, l1)  , &
-        c1(mdimcc, ido, l1, ip)    , c2(mdimcc, idl1, ip), &
-        ch2(mdimch, idl1, ip)           , wa(ido)
-    tpi=2.0*acos(-1.0)
-    arg = tpi/real(ip)
-    dcp = cos(arg)
-    dsp = sin(arg)
-    ipph = (ip+1)/2
-    ipp2 = ip+2
-    idp2 = ido+2
-    nbd = (ido-1)/2
-    if (ido == 1) go to 119
-    do 101 ik=1, idl1
-        do 1001 m=1, mp
-            ch2(m, ik, 1) = c2(m, ik, 1)
-1001    continue      
-101 continue         
-    do 103 j=2, ip
-        do 102 k=1, l1
-            do 1002 m=1, mp
-                ch(m, 1, k, j) = c1(m, 1, k, j)
-1002        continue
-102     continue
-103 continue         
-    if (nbd > l1) go to 107
-    is = -ido
-    do 106 j=2, ip
-        is = is+ido
-        idij = is
-        do 105 i=3, ido, 2
-            idij = idij+2
-            do 104 k=1, l1
-                do 1004 m=1, mp
-                    ch(m, i-1, k, j) = wa(idij-1)*c1(m, i-1, k, j)+wa(idij) &            !
-                        *c1(m, i, k, j)
-                    ch(m, i, k, j) = wa(idij-1)*c1(m, i, k, j)-wa(idij) &
-                        *c1(m, i-1, k, j)
-1004            continue
-104         continue
-105     continue
-106 continue         
-    go to 111
-107 is = -ido        
-    do 110 j=2, ip
-        is = is+ido
-        do 109 k=1, l1
-            idij = is
-            do 108 i=3, ido, 2
-                idij = idij+2
-                do 1008 m=1, mp
-                    ch(m, i-1, k, j) = wa(idij-1)*c1(m, i-1, k, j)+wa(idij) &            !
-                        *c1(m, i, k, j)
-                    ch(m, i, k, j) = wa(idij-1)*c1(m, i, k, j)-wa(idij) &
-                        *c1(m, i-1, k, j)
-1008            continue
-108         continue
-109     continue
-110 continue         
-111 if (nbd < l1) go to 115          
-    do 114 j=2, ipph
-        jc = ipp2-j
-        do 113 k=1, l1
-            do 112 i=3, ido, 2
-                do 1012 m=1, mp
-                    c1(m, i-1, k, j) = ch(m, i-1, k, j)+ch(m, i-1, k, jc)
-                    c1(m, i-1, k, jc) = ch(m, i, k, j)-ch(m, i, k, jc)
-                    c1(m, i, k, j) = ch(m, i, k, j)+ch(m, i, k, jc)
-                    c1(m, i, k, jc) = ch(m, i-1, k, jc)-ch(m, i-1, k, j)
-1012            continue
-112         continue
-113     continue
-114 continue         
-    go to 121
-    115 do 118 j=2, ipph
-        jc = ipp2-j
-        do 117 i=3, ido, 2
-            do 116 k=1, l1
-                do 1016 m=1, mp
-                    c1(m, i-1, k, j) = ch(m, i-1, k, j)+ch(m, i-1, k, jc)
-                    c1(m, i-1, k, jc) = ch(m, i, k, j)-ch(m, i, k, jc)
-                    c1(m, i, k, j) = ch(m, i, k, j)+ch(m, i, k, jc)
-                    c1(m, i, k, jc) = ch(m, i-1, k, jc)-ch(m, i-1, k, j)
-1016            continue
-116         continue
-117     continue
-118 continue         
-    go to 121
-    119 do 120 ik=1, idl1
-        do 1020 m=1, mp
-            c2(m, ik, 1) = ch2(m, ik, 1)
-1020    continue      
-120 continue         
-    121 do 123 j=2, ipph
-        jc = ipp2-j
-        do 122 k=1, l1
-            do 1022 m=1, mp
-                c1(m, 1, k, j) = ch(m, 1, k, j)+ch(m, 1, k, jc)
-                c1(m, 1, k, jc) = ch(m, 1, k, jc)-ch(m, 1, k, j)
-1022        continue
-122     continue
-123 continue         
+    ! A multiple fft package for spherepack
     !
-    ar1 = 1.
-    ai1 = 0.
-    do 127 l=2, ipph
-        lc = ipp2-l
-        ar1h = dcp*ar1-dsp*ai1
-        ai1 = dcp*ai1+dsp*ar1
-        ar1 = ar1h
-        do 124 ik=1, idl1
-            do 1024 m=1, mp
-                ch2(m, ik, l) = c2(m, ik, 1)+ar1*c2(m, ik, 2)
-                ch2(m, ik, lc) = ai1*c2(m, ik, ip)
-1024        continue
-124     continue
-        dc2 = ar1
-        ds2 = ai1
-        ar2 = ar1
-        ai2 = ai1
-        do 126 j=3, ipph
-            jc = ipp2-j
-            ar2h = dc2*ar2-ds2*ai2
-            ai2 = dc2*ai2+ds2*ar2
-            ar2 = ar2h
-            do 125 ik=1, idl1
-                do 1025 m=1, mp
-                    ch2(m, ik, l) = ch2(m, ik, l)+ar2*c2(m, ik, j)
-                    ch2(m, ik, lc) = ch2(m, ik, lc)+ai2*c2(m, ik, jc)
-1025            continue
-125         continue
-126     continue
-127 continue         
-    do 129 j=2, ipph
-        do 128 ik=1, idl1
-            do 1028 m=1, mp
-                ch2(m, ik, 1) = ch2(m, ik, 1)+c2(m, ik, j)
-1028        continue
-128     continue
-129 continue         
-    !
-    if (ido < l1) go to 132
-    do 131 k=1, l1
-        do 130 i=1, ido
-            do 1030 m=1, mp
-                cc(m, i, 1, k) = ch(m, i, k, 1)
-1030        continue
-130     continue
-131 continue         
-    go to 135
-    132 do 134 i=1, ido
-        do 133 k=1, l1
-            do 1033 m=1, mp
-                cc(m, i, 1, k) = ch(m, i, k, 1)
-1033        continue
-133     continue
-134 continue         
-    135 do 137 j=2, ipph
-        jc = ipp2-j
-        j2 = j+j
-        do 136 k=1, l1
-            do 1036 m=1, mp
-                cc(m, ido, j2-2, k) = ch(m, 1, k, j)
-                cc(m, 1, j2-1, k) = ch(m, 1, k, jc)
-1036        continue
-136     continue
-137 continue         
-    if (ido == 1) return
-    if (nbd < l1) go to 141
-    do 140 j=2, ipph
-        jc = ipp2-j
-        j2 = j+j
-        do 139 k=1, l1
-            do 138 i=3, ido, 2
-                ic = idp2-i
-                do 1038 m=1, mp
-                    cc(m, i-1, j2-1, k) = ch(m, i-1, k, j)+ch(m, i-1, k, jc)                !
-                    cc(m, ic-1, j2-2, k) = ch(m, i-1, k, j)-ch(m, i-1, k, jc)               !
-                    cc(m, i, j2-1, k) = ch(m, i, k, j)+ch(m, i, k, jc)
-                    cc(m, ic, j2-2, k) = ch(m, i, k, jc)-ch(m, i, k, j)
-1038            continue
-138         continue
-139     continue
-140 continue         
-    return
-    141 do 144 j=2, ipph
-        jc = ipp2-j
-        j2 = j+j
-        do 143 i=3, ido, 2
-            ic = idp2-i
-            do 142 k=1, l1
-                do 1042 m=1, mp
-                    cc(m, i-1, j2-1, k) = ch(m, i-1, k, j)+ch(m, i-1, k, jc)                !
-                    cc(m, ic-1, j2-2, k) = ch(m, i-1, k, j)-ch(m, i-1, k, jc)               !
-                    cc(m, i, j2-1, k) = ch(m, i, k, j)+ch(m, i, k, jc)
-                    cc(m, ic, j2-2, k) = ch(m, i, k, jc)-ch(m, i, k, j)
-1042            continue
-142         continue
-143     continue
-144 continue         
+    use, intrinsic :: iso_fortran_env, only: &
+        wp => REAL64, &
+        ip => INT32
 
-end subroutine hradfg              
+    implicit none
+    !----------------------------------------------------------------------
+    ! Dictionary: calling arguments
+    !----------------------------------------------------------------------
+    integer (ip), intent (in)     :: mp
+    integer (ip), intent (in)     :: ido
+    integer (ip), intent (in)     :: ip_rename
+    integer (ip), intent (in)     :: l1
+    integer (ip), intent (in)     :: idl1
+    real (wp),    intent (in out) :: cc(mdimcc, ido, ip_rename, l1)
+    real (wp),    intent (in out) :: c1(mdimcc, ido, l1, ip_rename)
+    real (wp),    intent (in out) :: c2(mdimcc, idl1, ip_rename)
+    integer (ip), intent (in)     :: mdimcc
+    real (wp),    intent (in out) :: ch(mdimch, ido, l1, ip_rename)
+    real (wp),    intent (in out) :: ch2(mdimch, idl1, ip_rename)
+    integer (ip), intent (in)     :: mdimch
+    real (wp),    intent (in out) :: wa(ido)
+    !----------------------------------------------------------------------
+    ! Dictionary: calling arguments
+    !----------------------------------------------------------------------
+    integer (ip)         :: i, j, k, l, m, j2, ic, jc, lc, ik, is, idij
+    real (wp), parameter :: TWO_PI = 2.0_wp * acos(-1.0_wp)
+    real (wp)            :: dc2, ai1, ai2, ar1, ar2, ds2
+    real (wp)            :: ar1h, ar2h
+    !----------------------------------------------------------------------
+
+    associate( &
+        ipph => (ip_rename+1)/2, &
+        ipp2 => ip_rename+2, &
+        idp2 => ido+2, &
+        nbd => (ido-1)/2, &
+        arg => TWO_PI/ip_rename &
+        )
+        associate( &
+            dcp => cos(arg), &
+            dsp => sin(arg) &
+            )
+
+            if (ido /= 1) then
+                do ik=1, idl1
+                    do m=1, mp
+                        ch2(m, ik, 1) = c2(m, ik, 1)
+                    end do
+                end do
+                do j=2, ip_rename
+                    do k=1, l1
+                        do m=1, mp
+                            ch(m, 1, k, j) = c1(m, 1, k, j)
+                        end do
+                    end do
+                end do
+                if (nbd <= l1) then
+                    is = -ido
+                    do j=2, ip_rename
+                        is = is+ido
+                        idij = is
+                        do i=3, ido, 2
+                            idij = idij+2
+                            do k=1, l1
+                                do m=1, mp
+                                    ch(m, i-1, k, j) = wa(idij-1)*c1(m, i-1, k, j)+wa(idij) &            !
+                                        *c1(m, i, k, j)
+                                    ch(m, i, k, j) = wa(idij-1)*c1(m, i, k, j)-wa(idij) &
+                                        *c1(m, i-1, k, j)
+                                end do
+                            end do
+                        end do
+                    end do
+                else
+                    is = -ido
+                    do j=2, ip_rename
+                        is = is+ido
+                        do k=1, l1
+                            idij = is
+                            do i=3, ido, 2
+                                idij = idij+2
+                                do m=1, mp
+                                    ch(m, i-1, k, j) = wa(idij-1)*c1(m, i-1, k, j)+wa(idij) &            !
+                                        *c1(m, i, k, j)
+                                    ch(m, i, k, j) = wa(idij-1)*c1(m, i, k, j)-wa(idij) &
+                                        *c1(m, i-1, k, j)
+                                end do
+                            end do
+                        end do
+                    end do
+                end if
+                if (nbd >= l1) then
+                    do j=2, ipph
+                        jc = ipp2-j
+                        do k=1, l1
+                            do i=3, ido, 2
+                                do m=1, mp
+                                    c1(m, i-1, k, j) = ch(m, i-1, k, j)+ch(m, i-1, k, jc)
+                                    c1(m, i-1, k, jc) = ch(m, i, k, j)-ch(m, i, k, jc)
+                                    c1(m, i, k, j) = ch(m, i, k, j)+ch(m, i, k, jc)
+                                    c1(m, i, k, jc) = ch(m, i-1, k, jc)-ch(m, i-1, k, j)
+                                end do
+                            end do
+                        end do
+                    end do
+                else
+                    do j=2, ipph
+                        jc = ipp2-j
+                        do i=3, ido, 2
+                            do k=1, l1
+                                do m=1, mp
+                                    c1(m, i-1, k, j) = ch(m, i-1, k, j)+ch(m, i-1, k, jc)
+                                    c1(m, i-1, k, jc) = ch(m, i, k, j)-ch(m, i, k, jc)
+                                    c1(m, i, k, j) = ch(m, i, k, j)+ch(m, i, k, jc)
+                                    c1(m, i, k, jc) = ch(m, i-1, k, jc)-ch(m, i-1, k, j)
+                                end do
+                            end do
+                        end do
+                    end do
+                end if
+            else
+                do ik=1, idl1
+                    do m=1, mp
+                        c2(m, ik, 1) = ch2(m, ik, 1)
+                    end do
+                end do
+            end if
+
+            do j=2, ipph
+                jc = ipp2-j
+                do k=1, l1
+                    do m=1, mp
+                        c1(m, 1, k, j) = ch(m, 1, k, j)+ch(m, 1, k, jc)
+                        c1(m, 1, k, jc) = ch(m, 1, k, jc)-ch(m, 1, k, j)
+                    end do
+                end do
+            end do
+
+            ar1 = 1.0_wp
+            ai1 = 0.0_wp
+            do l=2, ipph
+                lc = ipp2-l
+                ar1h = dcp*ar1-dsp*ai1
+                ai1 = dcp*ai1+dsp*ar1
+                ar1 = ar1h
+                do ik=1, idl1
+                    do m=1, mp
+                        ch2(m, ik, l) = c2(m, ik, 1)+ar1*c2(m, ik, 2)
+                        ch2(m, ik, lc) = ai1*c2(m, ik, ip_rename)
+                    end do
+                end do
+                dc2 = ar1
+                ds2 = ai1
+                ar2 = ar1
+                ai2 = ai1
+                do j=3, ipph
+                    jc = ipp2-j
+                    ar2h = dc2*ar2-ds2*ai2
+                    ai2 = dc2*ai2+ds2*ar2
+                    ar2 = ar2h
+                    do ik=1, idl1
+                        do m=1, mp
+                            ch2(m, ik, l) = ch2(m, ik, l)+ar2*c2(m, ik, j)
+                            ch2(m, ik, lc) = ch2(m, ik, lc)+ai2*c2(m, ik, jc)
+                        end do
+                    end do
+                end do
+            end do
+
+            do j=2, ipph
+                do ik=1, idl1
+                    do m=1, mp
+                        ch2(m, ik, 1) = ch2(m, ik, 1)+c2(m, ik, j)
+                    end do
+                end do
+            end do
+
+            if (ido >= l1) then
+                do k=1, l1
+                    do i=1, ido
+                        do m=1, mp
+                            cc(m, i, 1, k) = ch(m, i, k, 1)
+                        end do
+                    end do
+                end do
+            else
+                do i=1, ido
+                    do k=1, l1
+                        do m=1, mp
+                            cc(m, i, 1, k) = ch(m, i, k, 1)
+                        end do
+                    end do
+                end do
+            end if
+
+            do j=2, ipph
+                jc = ipp2-j
+                j2 = j+j
+                do k=1, l1
+                    do m=1, mp
+                        cc(m, ido, j2-2, k) = ch(m, 1, k, j)
+                        cc(m, 1, j2-1, k) = ch(m, 1, k, jc)
+                    end do
+                end do
+            end do
+
+            if (ido == 1) then
+                return
+            end if
+
+            if (nbd >= l1) then
+                do j=2, ipph
+                    jc = ipp2-j
+                    j2 = j+j
+                    do k=1, l1
+                        do i=3, ido, 2
+                            ic = idp2-i
+                            do m=1, mp
+                                cc(m, i-1, j2-1, k) = ch(m, i-1, k, j)+ch(m, i-1, k, jc)                !
+                                cc(m, ic-1, j2-2, k) = ch(m, i-1, k, j)-ch(m, i-1, k, jc)               !
+                                cc(m, i, j2-1, k) = ch(m, i, k, j)+ch(m, i, k, jc)
+                                cc(m, ic, j2-2, k) = ch(m, i, k, jc)-ch(m, i, k, j)
+                            end do
+                        end do
+                    end do
+                end do
+            else
+                do j=2, ipph
+                    jc = ipp2-j
+                    j2 = j+j
+                    do i=3, ido, 2
+                        ic = idp2-i
+                        do k=1, l1
+                            do m=1, mp
+                                cc(m, i-1, j2-1, k) = ch(m, i-1, k, j)+ch(m, i-1, k, jc)                !
+                                cc(m, ic-1, j2-2, k) = ch(m, i-1, k, j)-ch(m, i-1, k, jc)               !
+                                cc(m, i, j2-1, k) = ch(m, i, k, j)+ch(m, i, k, jc)
+                                cc(m, ic, j2-2, k) = ch(m, i, k, jc)-ch(m, i, k, j)
+                            end do
+                        end do
+                    end do
+                end do
+            end if
+        end associate
+    end associate
+
+end subroutine hradfg
 
 
 
 subroutine hrfftb(m, n, r, mdimr, whrfft, work)
-    !
-    !     a multiple fft package for spherepack
-    !
-    dimension     r(mdimr, n)  , work(1)    , whrfft(n+15)
+
+    use, intrinsic :: iso_fortran_env, only: &
+        wp => REAL64, &
+        ip => INT32
+
+    implicit none
+    !----------------------------------------------------------------------
+    ! Dictionary: calling arguments
+    !----------------------------------------------------------------------
+    integer (ip), intent (in)     :: m
+    integer (ip), intent (in)     :: n
+    real (wp),    intent (in out) :: r(mdimr, n)
+    integer (ip), intent (in)     :: mdimr
+    real (wp),    intent (in out) :: whrfft(n+15)
+    real (wp),    intent (in out) :: work(1)
+    !----------------------------------------------------------------------
+    ! Dictionary: local variables
+    !----------------------------------------------------------------------
+    real (wp) :: tfft
     common /hrf/ tfft
-    if (n == 1) return
-    !     tstart = second(dum)
-    call hrftb1 (m, n, r, mdimr, work, whrfft, whrfft(n+1))
-    !     tfft = tfft+second(dum)-tstart
+    !----------------------------------------------------------------------
+
+    if (n == 1) then
+        return
+    end if
+
+    call hrftb1(m, n, r, mdimr, work, whrfft, whrfft(n+1))
 
 end subroutine hrfftb
 
 
 
-subroutine hrftb1 (m, n, c, mdimc, ch, wa, fac)
-    !
-    !     a multiple fft package for spherepack
-    !
-    dimension       ch(m, n), c(mdimc, n), wa(n) , fac(15)
-    nf = fac(2)
+subroutine hrftb1(m, n, c, mdimc, ch, wa, fac)
+
+    use, intrinsic :: iso_fortran_env, only: &
+        wp => REAL64, &
+        ip => INT32
+
+    implicit none
+    !----------------------------------------------------------------------
+    ! Dictionary: calling arguments
+    !----------------------------------------------------------------------
+    integer (ip), intent (in)     :: m
+    integer (ip), intent (in)     :: n
+    real (wp),    intent (in out) :: c(mdimc, n)
+    integer (ip), intent (in)     :: mdimc
+    real (wp),    intent (in out) :: ch(m, n)
+    real (wp),    intent (in out) :: wa(n)
+    real (wp),    intent (in out) :: fac(15)
+    !----------------------------------------------------------------------
+    ! Dictionary: calling arguments
+    !----------------------------------------------------------------------
+    integer (ip) :: i, j, k1, l1, l2, na
+    integer (ip) :: nf, ip_rename, iw, ix2, ix3, ix4, ido, idl1
+    !----------------------------------------------------------------------
+
+    nf = int(fac(2), kind=ip)
     na = 0
     l1 = 1
     iw = 1
-    do 116 k1=1, nf
-        ip = fac(k1+2)
-        l2 = ip*l1
+    do k1=1, nf
+        ip_rename = int(fac(k1+2), kind=ip)
+        l2 = ip_rename*l1
         ido = n/l2
         idl1 = ido*l1
-        if (ip /= 4) go to 103
+
+        if (ip_rename /= 4) then
+            go to 103
+        end if
+
         ix2 = iw+ido
         ix3 = ix2+ido
-        if (na /= 0) go to 101
-        call  hradb4 (m, ido, l1, c, mdimc, ch, m, wa(iw), wa(ix2), wa(ix3))
+
+        if (na /= 0) then
+            go to 101
+        end if
+
+        call  hradb4(m, ido, l1, c, mdimc, ch, m, wa(iw), wa(ix2), wa(ix3))
         go to 102
-101     call hradb4 (m, ido, l1, ch, m, c, mdimc, wa(iw), wa(ix2), wa(ix3))
+101     call hradb4(m, ido, l1, ch, m, c, mdimc, wa(iw), wa(ix2), wa(ix3))
 102     na = 1-na
         go to 115
-103     if (ip /= 2) go to 106
-        if (na /= 0) go to 104
-        call  hradb2 (m, ido, l1, c, mdimc, ch, m, wa(iw))
+
+103     if (ip_rename /= 2) then
+            go to 106
+        end if
+
+        if (na /= 0) then
+            go to 104
+        end if
+
+        call  hradb2(m, ido, l1, c, mdimc, ch, m, wa(iw))
         go to 105
-104     call hradb2 (m, ido, l1, ch, m, c, mdimc, wa(iw))
+104     call hradb2(m, ido, l1, ch, m, c, mdimc, wa(iw))
 105     na = 1-na
         go to 115
-106     if (ip /= 3) go to 109
+
+106     if (ip_rename /= 3) then
+            go to 109
+        end if
+
         ix2 = iw+ido
-        if (na /= 0) go to 107
-        call  hradb3 (m, ido, l1, c, mdimc, ch, m, wa(iw), wa(ix2))
+        if (na /= 0) then
+            go to 107
+        end if
+
+        call  hradb3(m, ido, l1, c, mdimc, ch, m, wa(iw), wa(ix2))
         go to 108
-107     call hradb3 (m, ido, l1, ch, m, c, mdimc, wa(iw), wa(ix2))
+107     call hradb3(m, ido, l1, ch, m, c, mdimc, wa(iw), wa(ix2))
 108     na = 1-na
         go to 115
-109     if (ip /= 5) go to 112
+109     if (ip_rename /= 5) then
+            go to 112
+        end if
+
         ix2 = iw+ido
         ix3 = ix2+ido
         ix4 = ix3+ido
-        if (na /= 0) go to 110
-        call hradb5 (m, ido, l1, c, mdimc, ch, m, wa(iw), wa(ix2), wa(ix3), wa(ix4))
+
+        if (na /= 0) then
+            go to 110
+        end if
+
+        call hradb5(m, ido, l1, c, mdimc, ch, m, wa(iw), wa(ix2), wa(ix3), wa(ix4))
         go to 111
-110     call hradb5 (m, ido, l1, ch, m, c, mdimc, wa(iw), wa(ix2), wa(ix3), wa(ix4))
+110     call hradb5(m, ido, l1, ch, m, c, mdimc, wa(iw), wa(ix2), wa(ix3), wa(ix4))
 111     na = 1-na
         go to 115
-112     if (na /= 0) go to 113
-        call  hradbg (m, ido, ip, l1, idl1, c, c, c, mdimc, ch, ch, m, wa(iw))
+
+112     if (na /= 0) then
+            go to 113
+        end if
+
+        call  hradbg(m, ido, ip_rename, l1, idl1, c, c, c, mdimc, ch, ch, m, wa(iw))
         go to 114
-113     call hradbg (m, ido, ip, l1, idl1, ch, ch, ch, m, c, c, mdimc, wa(iw))
-114     if (ido == 1) na = 1-na
+113     call hradbg(m, ido, ip_rename, l1, idl1, ch, ch, ch, m, c, c, mdimc, wa(iw))
+114     if (ido == 1) then
+            na = 1-na
+        end if
+
 115     l1 = l2
-        iw = iw+(ip-1)*ido
-116 continue         
-    if (na == 0) return
-    do 117 j=1, n
-        do 117 i=1, m
-            c(i, j) = ch(i, j)
-117     continue
+        iw = iw+(ip_rename-1)*ido
+    end do
 
-    end subroutine hrftb1
+    if (na == 0) then
+        return
+    end if
+
+    c(1:m, 1:n) = ch
+
+end subroutine hrftb1
 
 
 
-    subroutine hradbg (mp, ido, ip, l1, idl1, cc, c1, c2, mdimcc, &
-        ch, ch2, mdimch, wa)
-        !
-        !     a multiple fft package for spherepack
-        !
-        dimension    ch(mdimch, ido, l1, ip)    , cc(mdimcc, ido, ip, l1) , &
-            c1(mdimcc, ido, l1, ip)     , c2(mdimcc, idl1, ip), &
-            ch2(mdimch, idl1, ip)       , wa(ido)
-        tpi=2.0*acos(-1.0)
-        arg = tpi/real(ip)
-        dcp = cos(arg)
-        dsp = sin(arg)
-        idp2 = ido+2
-        nbd = (ido-1)/2
-        ipp2 = ip+2
-        ipph = (ip+1)/2
-        if (ido < l1) go to 103
-        do 102 k=1, l1
-            do 101 i=1, ido
-                do 1001 m=1, mp
-                    ch(m, i, k, 1) = cc(m, i, 1, k)
-1001            continue
-101         continue
-102     continue
-        go to 106
-        103 do 105 i=1, ido
-            do 104 k=1, l1
-                do 1004 m=1, mp
-                    ch(m, i, k, 1) = cc(m, i, 1, k)
-1004            continue
-104         continue
-105     continue
-        106 do 108 j=2, ipph
-            jc = ipp2-j
-            j2 = j+j
-            do 107 k=1, l1
-                do 1007 m=1, mp
-                    ch(m, 1, k, j) = cc(m, ido, j2-2, k)+cc(m, ido, j2-2, k)
-                    ch(m, 1, k, jc) = cc(m, 1, j2-1, k)+cc(m, 1, j2-1, k)
-1007            continue
-107         continue
-108     continue
-        if (ido == 1) go to 116
-        if (nbd < l1) go to 112
-        do 111 j=2, ipph
-            jc = ipp2-j
-            do 110 k=1, l1
-                do 109 i=3, ido, 2
-                    ic = idp2-i
-                    do 1009 m=1, mp
-                        ch(m, i-1, k, j) = cc(m, i-1, 2*j-1, k)+cc(m, ic-1, 2*j-2, k)           !
-                        ch(m, i-1, k, jc) = cc(m, i-1, 2*j-1, k)-cc(m, ic-1, 2*j-2, k)          !
-                        ch(m, i, k, j) = cc(m, i, 2*j-1, k)-cc(m, ic, 2*j-2, k)                 !
-                        ch(m, i, k, jc) = cc(m, i, 2*j-1, k)+cc(m, ic, 2*j-2, k)                !
-1009                continue
-109             continue
-110         continue
-111     continue
+subroutine hradbg(mp, ido, ip_rename, l1, idl1, cc, c1, c2, mdimcc, &
+    ch, ch2, mdimch, wa)
+
+    use, intrinsic :: iso_fortran_env, only: &
+        wp => REAL64, &
+        ip => INT32
+
+    implicit none
+    !----------------------------------------------------------------------
+    ! Dictionary: calling arguments
+    !----------------------------------------------------------------------
+    integer (ip), intent (in)     :: mp
+    integer (ip), intent (in)     :: ido
+    integer (ip), intent (in)     :: ip_rename
+    integer (ip), intent (in)     :: l1
+    integer (ip), intent (in)     :: idl1
+    real (wp),    intent (in out) :: cc(mdimcc, ido, ip_rename, l1)
+    real (wp),    intent (in out) :: c1(mdimcc, ido, l1, ip_rename)
+    real (wp),    intent (in out) :: c2(mdimcc, idl1, ip_rename)
+    integer (ip), intent (in)     :: mdimcc
+    real (wp),    intent (in out) :: ch(mdimch, ido, l1, ip_rename)
+    real (wp),    intent (in out) :: ch2(mdimch, idl1, ip_rename)
+    integer (ip), intent (in)     :: mdimch
+    real (wp),    intent (in out) :: wa(ido)
+    !----------------------------------------------------------------------
+    ! Dictionary: calling arguments
+    !----------------------------------------------------------------------
+    integer (ip)         :: i, j, k, l, m, j2, ic, jc, lc, ik, is, nbd
+    integer (ip)         :: idp2, ipp2, idij, ipph
+    real (wp), parameter :: TWO_PI = 2.0_wp * acos(-1.0_wp)
+    real (wp)            :: dc2, ai1, ai2, ar1, ar2, ds2
+    real (wp)            :: dcp, arg, dsp, ar1h, ar2h
+    !----------------------------------------------------------------------
+
+    arg = TWO_PI/ip_rename
+    dcp = cos(arg)
+    dsp = sin(arg)
+    idp2 = ido+2
+    nbd = (ido-1)/2
+    ipp2 = ip_rename+2
+    ipph = (ip_rename+1)/2
+
+    if (ido < l1) then
+        go to 103
+    end if
+
+    do k=1, l1
+        do i=1, ido
+            do m=1, mp
+                ch(m, i, k, 1) = cc(m, i, 1, k)
+            end do
+        end do
+    end do
+    go to 106
+    103 do i=1, ido
+        do k=1, l1
+            do m=1, mp
+                ch(m, i, k, 1) = cc(m, i, 1, k)
+            end do
+        end do
+    end do
+    106 do j=2, ipph
+        jc = ipp2-j
+        j2 = j+j
+        do k=1, l1
+            do m=1, mp
+                ch(m, 1, k, j) = cc(m, ido, j2-2, k)+cc(m, ido, j2-2, k)
+                ch(m, 1, k, jc) = cc(m, 1, j2-1, k)+cc(m, 1, j2-1, k)
+            end do
+        end do
+    end do
+
+    if (ido == 1) then
         go to 116
-        112 do 115 j=2, ipph
-            jc = ipp2-j
-            do 114 i=3, ido, 2
+    end if
+
+    if (nbd < l1) then
+        go to 112
+    end if
+
+    do j=2, ipph
+        jc = ipp2-j
+        do k=1, l1
+            do i=3, ido, 2
                 ic = idp2-i
-                do 113 k=1, l1
-                    do 1013 m=1, mp
-                        ch(m, i-1, k, j) = cc(m, i-1, 2*j-1, k)+cc(m, ic-1, 2*j-2, k)           !
-                        ch(m, i-1, k, jc) = cc(m, i-1, 2*j-1, k)-cc(m, ic-1, 2*j-2, k)          !
-                        ch(m, i, k, j) = cc(m, i, 2*j-1, k)-cc(m, ic, 2*j-2, k)                 !
-                        ch(m, i, k, jc) = cc(m, i, 2*j-1, k)+cc(m, ic, 2*j-2, k)                !
-1013                continue
-113             continue
-114         continue
-115     continue
-116     ar1 = 1.
-        ai1 = 0.
-        do 120 l=2, ipph
-            lc = ipp2-l
-            ar1h = dcp*ar1-dsp*ai1
-            ai1 = dcp*ai1+dsp*ar1
-            ar1 = ar1h
-            do 117 ik=1, idl1
-                do 1017 m=1, mp
-                    c2(m, ik, l) = ch2(m, ik, 1)+ar1*ch2(m, ik, 2)
-                    c2(m, ik, lc) = ai1*ch2(m, ik, ip)
-1017            continue
-117         continue
-            dc2 = ar1
-            ds2 = ai1
-            ar2 = ar1
-            ai2 = ai1
-            do 119 j=3, ipph
+                do m=1, mp
+                    ch(m, i-1, k, j) = cc(m, i-1, 2*j-1, k)+cc(m, ic-1, 2*j-2, k)
+                    ch(m, i-1, k, jc) = cc(m, i-1, 2*j-1, k)-cc(m, ic-1, 2*j-2, k)
+                    ch(m, i, k, j) = cc(m, i, 2*j-1, k)-cc(m, ic, 2*j-2, k)
+                    ch(m, i, k, jc) = cc(m, i, 2*j-1, k)+cc(m, ic, 2*j-2, k)
+                end do
+            end do
+        end do
+    end do
+    go to 116
+    112 do j=2, ipph
+        jc = ipp2-j
+        do i=3, ido, 2
+            ic = idp2-i
+            do k=1, l1
+                do m=1, mp
+                    ch(m, i-1, k, j) = cc(m, i-1, 2*j-1, k)+cc(m, ic-1, 2*j-2, k)
+                    ch(m, i-1, k, jc) = cc(m, i-1, 2*j-1, k)-cc(m, ic-1, 2*j-2, k)
+                    ch(m, i, k, j) = cc(m, i, 2*j-1, k)-cc(m, ic, 2*j-2, k)
+                    ch(m, i, k, jc) = cc(m, i, 2*j-1, k)+cc(m, ic, 2*j-2, k)
+                end do
+            end do
+        end do
+    end do
+116 ar1 = 1.0_wp
+    ai1 = 0.0_wp
+    do l=2, ipph
+        lc = ipp2-l
+        ar1h = dcp*ar1-dsp*ai1
+        ai1 = dcp*ai1+dsp*ar1
+        ar1 = ar1h
+        do ik=1, idl1
+            do m=1, mp
+                c2(m, ik, l) = ch2(m, ik, 1)+ar1*ch2(m, ik, 2)
+                c2(m, ik, lc) = ai1*ch2(m, ik, ip_rename)
+            end do
+        end do
+        dc2 = ar1
+        ds2 = ai1
+        ar2 = ar1
+        ai2 = ai1
+        do j=3, ipph
+            jc = ipp2-j
+            ar2h = dc2*ar2-ds2*ai2
+            ai2 = dc2*ai2+ds2*ar2
+            ar2 = ar2h
+            do ik=1, idl1
+                do m=1, mp
+                    c2(m, ik, l) = c2(m, ik, l)+ar2*ch2(m, ik, j)
+                    c2(m, ik, lc) = c2(m, ik, lc)+ai2*ch2(m, ik, jc)
+                end do
+            end do
+        end do
+    end do
+    do j=2, ipph
+        do ik=1, idl1
+            do m=1, mp
+                ch2(m, ik, 1) = ch2(m, ik, 1)+ch2(m, ik, j)
+            end do
+        end do
+    end do
+    do j=2, ipph
+        jc = ipp2-j
+        do k=1, l1
+            do m=1, mp
+                ch(m, 1, k, j) = c1(m, 1, k, j)-c1(m, 1, k, jc)
+                ch(m, 1, k, jc) = c1(m, 1, k, j)+c1(m, 1, k, jc)
+            end do
+        end do
+    end do
+
+    if (ido /= 1) then
+        if (nbd >= l1) then
+            do j=2, ipph
                 jc = ipp2-j
-                ar2h = dc2*ar2-ds2*ai2
-                ai2 = dc2*ai2+ds2*ar2
-                ar2 = ar2h
-                do 118 ik=1, idl1
-                    do 1018 m=1, mp
-                        c2(m, ik, l) = c2(m, ik, l)+ar2*ch2(m, ik, j)
-                        c2(m, ik, lc) = c2(m, ik, lc)+ai2*ch2(m, ik, jc)
-1018                continue
-118             continue
-119         continue
-120     continue
-        do 122 j=2, ipph
-            do 121 ik=1, idl1
-                do 1021 m=1, mp
-                    ch2(m, ik, 1) = ch2(m, ik, 1)+ch2(m, ik, j)
-1021            continue
-121         continue
-122     continue
-        do 124 j=2, ipph
-            jc = ipp2-j
-            do 123 k=1, l1
-                do 1023 m=1, mp
-                    ch(m, 1, k, j) = c1(m, 1, k, j)-c1(m, 1, k, jc)
-                    ch(m, 1, k, jc) = c1(m, 1, k, j)+c1(m, 1, k, jc)
-1023            continue
-123         continue
-124     continue
-        if (ido == 1) go to 132
-        if (nbd < l1) go to 128
-        do 127 j=2, ipph
-            jc = ipp2-j
-            do 126 k=1, l1
-                do 125 i=3, ido, 2
-                    do 1025 m=1, mp
-                        ch(m, i-1, k, j) = c1(m, i-1, k, j)-c1(m, i, k, jc)
-                        ch(m, i-1, k, jc) = c1(m, i-1, k, j)+c1(m, i, k, jc)
-                        ch(m, i, k, j) = c1(m, i, k, j)+c1(m, i-1, k, jc)
-                        ch(m, i, k, jc) = c1(m, i, k, j)-c1(m, i-1, k, jc)
-1025                continue
-125             continue
-126         continue
-127     continue
-        go to 132
-        128 do 131 j=2, ipph
-            jc = ipp2-j
-            do 130 i=3, ido, 2
-                do 129 k=1, l1
-                    do 1029 m=1, mp
-                        ch(m, i-1, k, j) = c1(m, i-1, k, j)-c1(m, i, k, jc)
-                        ch(m, i-1, k, jc) = c1(m, i-1, k, j)+c1(m, i, k, jc)
-                        ch(m, i, k, j) = c1(m, i, k, j)+c1(m, i-1, k, jc)
-                        ch(m, i, k, jc) = c1(m, i, k, j)-c1(m, i-1, k, jc)
-1029                continue
-129             continue
-130         continue
-131     continue
-132 continue         
-    if (ido == 1) return
-    do 133 ik=1, idl1
-        do 1033 m=1, mp
+                do k=1, l1
+                    do i=3, ido, 2
+                        do m=1, mp
+                            ch(m, i-1, k, j) = c1(m, i-1, k, j)-c1(m, i, k, jc)
+                            ch(m, i-1, k, jc) = c1(m, i-1, k, j)+c1(m, i, k, jc)
+                            ch(m, i, k, j) = c1(m, i, k, j)+c1(m, i-1, k, jc)
+                            ch(m, i, k, jc) = c1(m, i, k, j)-c1(m, i-1, k, jc)
+                        end do
+                    end do
+                end do
+            end do
+        else
+            do j=2, ipph
+                jc = ipp2-j
+                do i=3, ido, 2
+                    do k=1, l1
+                        do m=1, mp
+                            ch(m, i-1, k, j) = c1(m, i-1, k, j)-c1(m, i, k, jc)
+                            ch(m, i-1, k, jc) = c1(m, i-1, k, j)+c1(m, i, k, jc)
+                            ch(m, i, k, j) = c1(m, i, k, j)+c1(m, i-1, k, jc)
+                            ch(m, i, k, jc) = c1(m, i, k, j)-c1(m, i-1, k, jc)
+                        end do
+                    end do
+                end do
+            end do
+        end if
+    end if
+
+    if (ido == 1) then
+        return
+    end if
+
+    do ik=1, idl1
+        do m=1, mp
             c2(m, ik, 1) = ch2(m, ik, 1)
-1033    continue      
-133 continue         
-    do 135 j=2, ip
-        do 134 k=1, l1
-            do 1034 m=1, mp
+        end do
+    end do
+    do j=2, ip_rename
+        do k=1, l1
+            do m=1, mp
                 c1(m, 1, k, j) = ch(m, 1, k, j)
-1034        continue
-134     continue
-135 continue         
-    if (nbd > l1) go to 139
-    is = -ido
-    do 138 j=2, ip
-        is = is+ido
-        idij = is
-        do 137 i=3, ido, 2
-            idij = idij+2
-            do 136 k=1, l1
-                do 1036 m=1, mp
-                    c1(m, i-1, k, j) = wa(idij-1)*ch(m, i-1, k, j)-wa(idij)* &           !
-                        ch(m, i, k, j)
-                    c1(m, i, k, j) = wa(idij-1)*ch(m, i, k, j)+wa(idij)* &               !
-                        ch(m, i-1, k, j)
-1036            continue
-136         continue
-137     continue
-138 continue         
-    go to 143
-139 is = -ido        
-    do 142 j=2, ip
-        is = is+ido
-        do 141 k=1, l1
+            end do
+        end do
+    end do
+    if (nbd <= l1) then
+        is = -ido
+        do j=2, ip_rename
+            is = is+ido
             idij = is
-            do 140 i=3, ido, 2
+            do i=3, ido, 2
                 idij = idij+2
-                do 1040 m=1, mp
-                    c1(m, i-1, k, j) = wa(idij-1)*ch(m, i-1, k, j)-wa(idij)* &           !
-                        ch(m, i, k, j)
-                    c1(m, i, k, j) = wa(idij-1)*ch(m, i, k, j)+wa(idij)* &               !
-                        ch(m, i-1, k, j)
-1040            continue
-140         continue
-141     continue
-142 continue         
-143 return           
+                do k=1, l1
+                    do m=1, mp
+                        c1(m, i-1, k, j) = wa(idij-1)*ch(m, i-1, k, j)-wa(idij)* &           !
+                            ch(m, i, k, j)
+                        c1(m, i, k, j) = wa(idij-1)*ch(m, i, k, j)+wa(idij)* &               !
+                            ch(m, i-1, k, j)
+                    end do
+                end do
+            end do
+        end do
+    else
+        is = -ido
+        do j=2, ip_rename
+            is = is+ido
+            do k=1, l1
+                idij = is
+                do i=3, ido, 2
+                    idij = idij+2
+                    do m=1, mp
+                        c1(m, i-1, k, j) = wa(idij-1)*ch(m, i-1, k, j)-wa(idij)* &           !
+                            ch(m, i, k, j)
+                        c1(m, i, k, j) = wa(idij-1)*ch(m, i, k, j)+wa(idij)* &               !
+                            ch(m, i-1, k, j)
+                    end do
+                end do
+            end do
+        end do
+    end if
+
 end subroutine hradbg
 
 
 
-subroutine hradb4 (mp, ido, l1, cc, mdimcc, ch, mdimch, wa1, wa2, wa3)
-    !
-    !     a multiple fft package for spherepack
-    !
-    dimension  cc(mdimcc, ido, 4, l1)  , ch(mdimch, ido, l1, 4)    , &
-        wa1(ido)  , wa2(ido)  , wa3(ido)
-    sqrt2=sqrt(2.)
-    do 101 k=1, l1
-        do 1001 m=1, mp
+subroutine hradb4(mp, ido, l1, cc, mdimcc, ch, mdimch, wa1, wa2, wa3)
+
+    use, intrinsic :: iso_fortran_env, only: &
+        wp => REAL64, &
+        ip => INT32
+
+    implicit none
+    !----------------------------------------------------------------------
+    ! Dictionary: calling arguments
+    !----------------------------------------------------------------------
+    integer (ip), intent (in)     :: mp
+    integer (ip), intent (in)     :: ido
+    integer (ip), intent (in)     :: l1
+    real (wp),    intent (in out) :: cc(mdimcc, ido, 4, l1)
+    integer (ip), intent (in)     :: mdimcc
+    real (wp),    intent (in out) :: ch(mdimch, ido, l1, 4)
+    integer (ip), intent (in)     :: mdimch
+    real (wp),    intent (in out) :: wa1(ido)
+    real (wp),    intent (in out) :: wa2(ido)
+    real (wp),    intent (in out) :: wa3(ido)
+    !----------------------------------------------------------------------
+    ! Dictionary: calling arguments
+    !----------------------------------------------------------------------
+    integer (ip)         :: i, k, m, ic, idp2
+    real (wp), parameter :: SQRT2 = sqrt(2.0_wp)
+    !----------------------------------------------------------------------
+
+    do k=1, l1
+        do m=1, mp
             ch(m, 1, k, 3) = (cc(m, 1, 1, k)+cc(m, ido, 4, k)) &
                 -(cc(m, ido, 2, k)+cc(m, ido, 2, k))
             ch(m, 1, k, 1) = (cc(m, 1, 1, k)+cc(m, ido, 4, k)) &
@@ -1524,276 +1708,425 @@ subroutine hradb4 (mp, ido, l1, cc, mdimcc, ch, mdimch, wa1, wa2, wa3)
                 +(cc(m, 1, 3, k)+cc(m, 1, 3, k))
             ch(m, 1, k, 2) = (cc(m, 1, 1, k)-cc(m, ido, 4, k)) &
                 -(cc(m, 1, 3, k)+cc(m, 1, 3, k))
-1001    continue
-101 continue         
-    if (ido-2< 0) then
-        goto 107
-    else if (ido-2 == 0) then 
-        goto 105
-    else 
-        goto 102
+        end do
+    end do
+
+    if (ido-2 < 0) then
+        return
+    else if (ido-2 /= 0) then
+        idp2 = ido+2
+        do k=1, l1
+            do i=3, ido, 2
+                ic = idp2-i
+                do m=1, mp
+                    ch(m, i-1, k, 1) = &
+                        (cc(m, i-1, 1, k)+cc(m, ic-1, 4, k)) &
+                        +(cc(m, i-1, 3, k)+cc(m, ic-1, 2, k))
+
+                    ch(m, i, k, 1) = &
+                        (cc(m, i, 1, k)-cc(m, ic, 4, k)) &
+                        +(cc(m, i, 3, k)-cc(m, ic, 2, k))
+
+                    ch(m, i-1, k, 2) = &
+                        wa1(i-2)*((cc(m, i-1, 1, k)-cc(m, ic-1, 4, k)) &          !
+                        -(cc(m, i, 3, k)+cc(m, ic, 2, k)))-wa1(i-1) &
+                        *((cc(m, i, 1, k)+cc(m, ic, 4, k))+(cc(m, i-1, 3, k)-cc(m, ic-1, 2, k)))      !
+
+                    ch(m, i, k, 2)= &
+                        wa1(i-2)*((cc(m, i, 1, k)+cc(m, ic, 4, k)) &
+                        +(cc(m, i-1, 3, k)-cc(m, ic-1, 2, k)))+wa1(i-1) &
+                        *((cc(m, i-1, 1, k)-cc(m, ic-1, 4, k))-(cc(m, i, 3, k)+cc(m, ic, 2, k)))      !
+
+                    ch(m, i-1, k, 3) = &
+                        wa2(i-2)*((cc(m, i-1, 1, k)+cc(m, ic-1, 4, k)) &          !
+                        -(cc(m, i-1, 3, k)+cc(m, ic-1, 2, k)))-wa2(i-1) &
+                        *((cc(m, i, 1, k)-cc(m, ic, 4, k))-(cc(m, i, 3, k)-cc(m, ic, 2, k)))          !
+
+                    ch(m, i, k, 3) = &
+                        wa2(i-2)*((cc(m, i, 1, k)-cc(m, ic, 4, k)) &
+                        -(cc(m, i, 3, k)-cc(m, ic, 2, k)))+wa2(i-1) &
+                        *((cc(m, i-1, 1, k)+cc(m, ic-1, 4, k))-(cc(m, i-1, 3, k) &
+                        +cc(m, ic-1, 2, k)))
+
+                    ch(m, i-1, k, 4) = &
+                        wa3(i-2)*((cc(m, i-1, 1, k)-cc(m, ic-1, 4, k)) &          !
+                        +(cc(m, i, 3, k)+cc(m, ic, 2, k)))-wa3(i-1) &
+                        *((cc(m, i, 1, k)+cc(m, ic, 4, k))-(cc(m, i-1, 3, k)-cc(m, ic-1, 2, k)))       !
+
+                    ch(m, i, k, 4) = &
+                        wa3(i-2)*((cc(m, i, 1, k)+cc(m, ic, 4, k)) &
+                        -(cc(m, i-1, 3, k)-cc(m, ic-1, 2, k)))+wa3(i-1) &
+                        *((cc(m, i-1, 1, k)-cc(m, ic-1, 4, k))+(cc(m, i, 3, k)+cc(m, ic, 2, k)))      !
+                end do
+            end do
+        end do
+
+        if(mod(ido, 2) == 1) then
+            return
+        end if
     end if
-102 idp2 = ido+2     
-    do 104 k=1, l1
-        do 103 i=3, ido, 2
-            ic = idp2-i
-            do 1002 m=1, mp
-                ch(m, i-1, k, 1) = (cc(m, i-1, 1, k)+cc(m, ic-1, 4, k)) &
-                    +(cc(m, i-1, 3, k)+cc(m, ic-1, 2, k))
-                ch(m, i, k, 1) = (cc(m, i, 1, k)-cc(m, ic, 4, k)) &
-                    +(cc(m, i, 3, k)-cc(m, ic, 2, k))
-                ch(m, i-1, k, 2)=wa1(i-2)*((cc(m, i-1, 1, k)-cc(m, ic-1, 4, k)) &          !
-                    -(cc(m, i, 3, k)+cc(m, ic, 2, k)))-wa1(i-1) &
-                    *((cc(m, i, 1, k)+cc(m, ic, 4, k))+(cc(m, i-1, 3, k)-cc(m, ic-1, 2, k)))      !
-                ch(m, i, k, 2)=wa1(i-2)*((cc(m, i, 1, k)+cc(m, ic, 4, k)) &
-                    +(cc(m, i-1, 3, k)-cc(m, ic-1, 2, k)))+wa1(i-1) &
-                    *((cc(m, i-1, 1, k)-cc(m, ic-1, 4, k))-(cc(m, i, 3, k)+cc(m, ic, 2, k)))      !
-                ch(m, i-1, k, 3)=wa2(i-2)*((cc(m, i-1, 1, k)+cc(m, ic-1, 4, k)) &          !
-                    -(cc(m, i-1, 3, k)+cc(m, ic-1, 2, k)))-wa2(i-1) &
-                    *((cc(m, i, 1, k)-cc(m, ic, 4, k))-(cc(m, i, 3, k)-cc(m, ic, 2, k)))          !
-                ch(m, i, k, 3)=wa2(i-2)*((cc(m, i, 1, k)-cc(m, ic, 4, k)) &
-                    -(cc(m, i, 3, k)-cc(m, ic, 2, k)))+wa2(i-1) &
-                    *((cc(m, i-1, 1, k)+cc(m, ic-1, 4, k))-(cc(m, i-1, 3, k) &
-                    +cc(m, ic-1, 2, k)))
-                ch(m, i-1, k, 4)=wa3(i-2)*((cc(m, i-1, 1, k)-cc(m, ic-1, 4, k)) &          !
-                    +(cc(m, i, 3, k)+cc(m, ic, 2, k)))-wa3(i-1) &
-                    *((cc(m, i, 1, k)+cc(m, ic, 4, k))-(cc(m, i-1, 3, k)-cc(m, ic-1, 2, k)))       !
-                ch(m, i, k, 4)=wa3(i-2)*((cc(m, i, 1, k)+cc(m, ic, 4, k)) &
-                    -(cc(m, i-1, 3, k)-cc(m, ic-1, 2, k)))+wa3(i-1) &
-                    *((cc(m, i-1, 1, k)-cc(m, ic-1, 4, k))+(cc(m, i, 3, k)+cc(m, ic, 2, k)))      !
-1002        continue
-103     continue
-104 continue         
-    if (mod(ido, 2) == 1) return
-105 continue         
-    do 106 k=1, l1
-        do 1003 m=1, mp
-            ch(m, ido, k, 1) = (cc(m, ido, 1, k)+cc(m, ido, 3, k)) &
+
+    do k=1, l1
+        do m=1, mp
+            ch(m, ido, k, 1) = &
+                (cc(m, ido, 1, k)+cc(m, ido, 3, k)) &
                 +(cc(m, ido, 1, k)+cc(m, ido, 3, k))
-            ch(m, ido, k, 2) = sqrt2*((cc(m, ido, 1, k)-cc(m, ido, 3, k)) &               !
+
+            ch(m, ido, k, 2) = &
+                SQRT2*((cc(m, ido, 1, k)-cc(m, ido, 3, k)) &               !
                 -(cc(m, 1, 2, k)+cc(m, 1, 4, k)))
-            ch(m, ido, k, 3) = (cc(m, 1, 4, k)-cc(m, 1, 2, k)) &
+
+            ch(m, ido, k, 3) = &
+                (cc(m, 1, 4, k)-cc(m, 1, 2, k)) &
                 +(cc(m, 1, 4, k)-cc(m, 1, 2, k))
-            ch(m, ido, k, 4) = -sqrt2*((cc(m, ido, 1, k)-cc(m, ido, 3, k)) &              !
+
+            ch(m, ido, k, 4) = &
+                -SQRT2*((cc(m, ido, 1, k)-cc(m, ido, 3, k)) &              !
                 +(cc(m, 1, 2, k)+cc(m, 1, 4, k)))
-1003    continue
-106 continue         
-107 return           
+        end do
+    end do
+
 end subroutine hradb4
 
 
 
-subroutine hradb2 (mp, ido, l1, cc, mdimcc, ch, mdimch, wa1)
-    !
-    !     a multiple fft package for spherepack
-    !
-    dimension  cc(mdimcc, ido, 2, l1)    , ch(mdimch, ido, l1, 2), &
-        wa1(ido)
-    do 101 k=1, l1
-        do 1001 m=1, mp
+subroutine hradb2(mp, ido, l1, cc, mdimcc, ch, mdimch, wa1)
+
+    use, intrinsic :: iso_fortran_env, only: &
+        wp => REAL64, &
+        ip => INT32
+
+    implicit none
+    !----------------------------------------------------------------------
+    ! Dictionary: calling arguments
+    !----------------------------------------------------------------------
+    integer (ip), intent (in)     :: mp
+    integer (ip), intent (in)     :: ido
+    integer (ip), intent (in)     :: l1
+    real (wp),    intent (in out) :: cc(mdimcc, ido, 2, l1)
+    integer (ip), intent (in)     :: mdimcc
+    real (wp),    intent (in out) :: ch(mdimch, ido, l1, 2)
+    integer (ip), intent (in)     :: mdimch
+    real (wp),    intent (in out) :: wa1(ido)
+    !----------------------------------------------------------------------
+    ! Dictionary: calling arguments
+    !----------------------------------------------------------------------
+    integer (ip) :: i, k, m, ic, idp2
+    !----------------------------------------------------------------------
+
+    do k=1, l1
+        do m=1, mp
             ch(m, 1, k, 1) = cc(m, 1, 1, k)+cc(m, ido, 2, k)
             ch(m, 1, k, 2) = cc(m, 1, 1, k)-cc(m, ido, 2, k)
-1001    continue
-101 continue         
-    if (ido-2< 0) then
-        goto 107
-    else if (ido-2 == 0) then 
-        goto 105
-    else 
-        goto 102
+        end do
+    end do
+
+    if (ido-2 < 0) then
+        return
+    else if (ido-2 /= 0) then
+        idp2 = ido+2
+        do k=1, l1
+            do i=3, ido, 2
+                ic = idp2-i
+                do m=1, mp
+                    ch(m, i-1, k, 1) = &
+                        cc(m, i-1, 1, k)+cc(m, ic-1, 2, k)
+
+                    ch(m, i, k, 1) = &
+                        cc(m, i, 1, k)-cc(m, ic, 2, k)
+
+                    ch(m, i-1, k, 2) = &
+                        wa1(i-2)*(cc(m, i-1, 1, k)-cc(m, ic-1, 2, k)) &         !
+                        -wa1(i-1)*(cc(m, i, 1, k)+cc(m, ic, 2, k))
+
+                    ch(m, i, k, 2) = &
+                        wa1(i-2)*(cc(m, i, 1, k)+cc(m, ic, 2, k))+wa1(i-1) &      !
+                        *(cc(m, i-1, 1, k)-cc(m, ic-1, 2, k))
+                end do
+            end do
+        end do
+        if(mod(ido, 2) == 1) then
+            return
+        end if
     end if
-102 idp2 = ido+2     
-    do 104 k=1, l1
-        do 103 i=3, ido, 2
-            ic = idp2-i
-            do 1002 m=1, mp
-                ch(m, i-1, k, 1) = cc(m, i-1, 1, k)+cc(m, ic-1, 2, k)
-                ch(m, i, k, 1) = cc(m, i, 1, k)-cc(m, ic, 2, k)
-                ch(m, i-1, k, 2) = wa1(i-2)*(cc(m, i-1, 1, k)-cc(m, ic-1, 2, k)) &         !
-                    -wa1(i-1)*(cc(m, i, 1, k)+cc(m, ic, 2, k))
-                ch(m, i, k, 2) = wa1(i-2)*(cc(m, i, 1, k)+cc(m, ic, 2, k))+wa1(i-1) &      !
-                    *(cc(m, i-1, 1, k)-cc(m, ic-1, 2, k))
-1002        continue
-103     continue
-104 continue         
-    if (mod(ido, 2) == 1) return
-    105 do 106 k=1, l1
-        do 1003 m=1, mp
+
+    do k=1, l1
+        do m=1, mp
             ch(m, ido, k, 1) = cc(m, ido, 1, k)+cc(m, ido, 1, k)
             ch(m, ido, k, 2) = -(cc(m, 1, 2, k)+cc(m, 1, 2, k))
-1003    continue
-106 continue         
-107 return           
+        end do
+    end do
+
 end subroutine hradb2
 
 
 
-subroutine hradb3 (mp, ido, l1, cc, mdimcc, ch, mdimch, wa1, wa2)
-    !
-    !     a multiple fft package for spherepack
-    !
-    dimension  cc(mdimcc, ido, 3, l1)    , ch(mdimch, ido, l1, 3), &
-        wa1(ido)   , wa2(ido)
-    arg=2.0*acos(-1.0)/3.
-    taur=cos(arg)
-    taui=sin(arg)
-    do 101 k=1, l1
-        do 1001 m=1, mp
-            ch(m, 1, k, 1) = cc(m, 1, 1, k)+2.0*cc(m, ido, 2, k)
-            ch(m, 1, k, 2) = cc(m, 1, 1, k)+(2.0*taur)*cc(m, ido, 2, k) &
-                -(2.0*taui)*cc(m, 1, 3, k)
-            ch(m, 1, k, 3) = cc(m, 1, 1, k)+(2.0*taur)*cc(m, ido, 2, k) &
-                +2.0*taui*cc(m, 1, 3, k)
-1001    continue
-101 continue         
-    if (ido == 1) return
+subroutine hradb3(mp, ido, l1, cc, mdimcc, ch, mdimch, wa1, wa2)
+
+    use, intrinsic :: iso_fortran_env, only: &
+        wp => REAL64, &
+        ip => INT32
+
+    implicit none
+    !----------------------------------------------------------------------
+    ! Dictionary: calling arguments
+    !----------------------------------------------------------------------
+    integer (ip), intent (in)     :: mp
+    integer (ip), intent (in)     :: ido
+    integer (ip), intent (in)     :: l1
+    real (wp),    intent (in out) :: cc(mdimcc, ido, 3, l1)
+    integer (ip), intent (in)     :: mdimcc
+    real (wp),    intent (in out) :: ch(mdimch, ido, l1, 3)
+    integer (ip), intent (in)     :: mdimch
+    real (wp),    intent (in out) :: wa1(ido)
+    real (wp),    intent (in out) :: wa2(ido)
+    !----------------------------------------------------------------------
+    ! Dictionary: calling arguments
+    !----------------------------------------------------------------------
+    integer (ip)         :: i, k, m, ic, idp2
+    real (wp), parameter :: ARG = 2.0_wp * acos(-1.0_wp)/3
+    real (wp), parameter :: TAUR = cos(ARG)
+    real (wp), parameter :: TAUI = sin(ARG)
+    !----------------------------------------------------------------------
+
+
+    do k=1, l1
+        do m=1, mp
+            ch(m, 1, k, 1) = &
+                cc(m, 1, 1, k)+2.0_wp * cc(m, ido, 2, k)
+
+            ch(m, 1, k, 2) = &
+                cc(m, 1, 1, k)+(2.0_wp * TAUR)*cc(m, ido, 2, k) &
+                -(2.0_wp *TAUI)*cc(m, 1, 3, k)
+
+            ch(m, 1, k, 3) = &
+                cc(m, 1, 1, k)+(2.0_wp * TAUR)*cc(m, ido, 2, k) &
+                +2.0_wp *TAUI*cc(m, 1, 3, k)
+        end do
+    end do
+
+    if (ido == 1) then
+        return
+    end if
+
     idp2 = ido+2
-    do 103 k=1, l1
-        do 102 i=3, ido, 2
+    do k=1, l1
+        do i=3, ido, 2
             ic = idp2-i
-            do 1002 m=1, mp
-                ch(m, i-1, k, 1) = cc(m, i-1, 1, k)+(cc(m, i-1, 3, k)+cc(m, ic-1, 2, k))      !
-                ch(m, i, k, 1) = cc(m, i, 1, k)+(cc(m, i, 3, k)-cc(m, ic, 2, k))              !
-                ch(m, i-1, k, 2) = wa1(i-2)* &
-                    ((cc(m, i-1, 1, k)+taur*(cc(m, i-1, 3, k)+cc(m, ic-1, 2, k)))- &
-                    (taui*(cc(m, i, 3, k)+cc(m, ic, 2, k)))) &
+            do m=1, mp
+
+                ch(m, i-1, k, 1) = &
+                    cc(m, i-1, 1, k)+(cc(m, i-1, 3, k)+cc(m, ic-1, 2, k))      !
+
+                ch(m, i, k, 1) = &
+                    cc(m, i, 1, k)+(cc(m, i, 3, k)-cc(m, ic, 2, k))              !
+
+                ch(m, i-1, k, 2) = &
+                    wa1(i-2)* &
+                    ((cc(m, i-1, 1, k)+TAUR*(cc(m, i-1, 3, k)+cc(m, ic-1, 2, k)))- &
+                    (TAUI*(cc(m, i, 3, k)+cc(m, ic, 2, k)))) &
                     -wa1(i-1)* &
-                    ((cc(m, i, 1, k)+taur*(cc(m, i, 3, k)-cc(m, ic, 2, k)))+ &
-                    (taui*(cc(m, i-1, 3, k)-cc(m, ic-1, 2, k))))
-                ch(m, i, k, 2) = wa1(i-2)* &
-                    ((cc(m, i, 1, k)+taur*(cc(m, i, 3, k)-cc(m, ic, 2, k)))+ &
-                    (taui*(cc(m, i-1, 3, k)-cc(m, ic-1, 2, k)))) &
+                    ((cc(m, i, 1, k)+TAUR*(cc(m, i, 3, k)-cc(m, ic, 2, k)))+ &
+                    (TAUI*(cc(m, i-1, 3, k)-cc(m, ic-1, 2, k))))
+
+                ch(m, i, k, 2) = &
+                    wa1(i-2)* &
+                    ((cc(m, i, 1, k)+TAUR*(cc(m, i, 3, k)-cc(m, ic, 2, k)))+ &
+                    (TAUI*(cc(m, i-1, 3, k)-cc(m, ic-1, 2, k)))) &
                     +wa1(i-1)* &
-                    ((cc(m, i-1, 1, k)+taur*(cc(m, i-1, 3, k)+cc(m, ic-1, 2, k)))- &
-                    (taui*(cc(m, i, 3, k)+cc(m, ic, 2, k))))
-                ch(m, i-1, k, 3) = wa2(i-2)* &
-                    ((cc(m, i-1, 1, k)+taur*(cc(m, i-1, 3, k)+cc(m, ic-1, 2, k)))+ &
-                    (taui*(cc(m, i, 3, k)+cc(m, ic, 2, k)))) &
+                    ((cc(m, i-1, 1, k)+TAUR*(cc(m, i-1, 3, k)+cc(m, ic-1, 2, k)))- &
+                    (TAUI*(cc(m, i, 3, k)+cc(m, ic, 2, k))))
+
+                ch(m, i-1, k, 3) = &
+                    wa2(i-2)* &
+                    ((cc(m, i-1, 1, k)+TAUR*(cc(m, i-1, 3, k)+cc(m, ic-1, 2, k)))+ &
+                    (TAUI*(cc(m, i, 3, k)+cc(m, ic, 2, k)))) &
                     -wa2(i-1)* &
-                    ((cc(m, i, 1, k)+taur*(cc(m, i, 3, k)-cc(m, ic, 2, k)))- &
-                    (taui*(cc(m, i-1, 3, k)-cc(m, ic-1, 2, k))))
-                ch(m, i, k, 3) = wa2(i-2)* &
-                    ((cc(m, i, 1, k)+taur*(cc(m, i, 3, k)-cc(m, ic, 2, k)))- &
-                    (taui*(cc(m, i-1, 3, k)-cc(m, ic-1, 2, k)))) &
+                    ((cc(m, i, 1, k)+TAUR*(cc(m, i, 3, k)-cc(m, ic, 2, k)))- &
+                    (TAUI*(cc(m, i-1, 3, k)-cc(m, ic-1, 2, k))))
+
+                ch(m, i, k, 3) = &
+                    wa2(i-2)* &
+                    ((cc(m, i, 1, k)+TAUR*(cc(m, i, 3, k)-cc(m, ic, 2, k)))- &
+                    (TAUI*(cc(m, i-1, 3, k)-cc(m, ic-1, 2, k)))) &
                     +wa2(i-1)* &
-                    ((cc(m, i-1, 1, k)+taur*(cc(m, i-1, 3, k)+cc(m, ic-1, 2, k)))+ &
-                    (taui*(cc(m, i, 3, k)+cc(m, ic, 2, k))))
-1002        continue
-102     continue
-103 continue         
+                    ((cc(m, i-1, 1, k)+TAUR*(cc(m, i-1, 3, k)+cc(m, ic-1, 2, k)))+ &
+                    (TAUI*(cc(m, i, 3, k)+cc(m, ic, 2, k))))
+            end do
+        end do
+    end do
 
 end subroutine hradb3
 
 
 
-subroutine hradb5 (mp, ido, l1, cc, mdimcc, ch, mdimch, &
+subroutine hradb5(mp, ido, l1, cc, mdimcc, ch, mdimch, &
     wa1, wa2, wa3, wa4)
     !
-    !     a multiple fft package for spherepack
+    ! Purpose:
     !
-    dimension  cc(mdimcc, ido, 5, l1)    , ch(mdimch, ido, l1, 5), &
-        wa1(ido)     , wa2(ido)     , wa3(ido)     , wa4(ido)         !
-    arg=2.0*acos(-1.0)/5.
-    tr11=cos(arg)
-    ti11=sin(arg)
-    tr12=cos(2.0*arg)
-    ti12=sin(2.0*arg)
-    do 101 k=1, l1
-        do 1001 m=1, mp
-            ch(m, 1, k, 1) = cc(m, 1, 1, k)+2.0*cc(m, ido, 2, k)+2.0*cc(m, ido, 4, k)          !
-            ch(m, 1, k, 2) = (cc(m, 1, 1, k)+tr11*2.0*cc(m, ido, 2, k) &
-                +tr12*2.0*cc(m, ido, 4, k))-(ti11*2.0*cc(m, 1, 3, k) &
-                +ti12*2.0*cc(m, 1, 5, k))
-            ch(m, 1, k, 3) = (cc(m, 1, 1, k)+tr12*2.0*cc(m, ido, 2, k) &
-                +tr11*2.0*cc(m, ido, 4, k))-(ti12*2.0*cc(m, 1, 3, k) &
-                -ti11*2.0*cc(m, 1, 5, k))
-            ch(m, 1, k, 4) = (cc(m, 1, 1, k)+tr12*2.0*cc(m, ido, 2, k) &
-                +tr11*2.0*cc(m, ido, 4, k))+(ti12*2.0*cc(m, 1, 3, k) &
-                -ti11*2.0*cc(m, 1, 5, k))
-            ch(m, 1, k, 5) = (cc(m, 1, 1, k)+tr11*2.0*cc(m, ido, 2, k) &
-                +tr12*2.0*cc(m, ido, 4, k))+(ti11*2.0*cc(m, 1, 3, k) &
-                +ti12*2.0*cc(m, 1, 5, k))
-1001    continue
-101 continue         
-    if (ido == 1) return
+    ! A multiple fft package for spherepack
+    !
+    use, intrinsic :: iso_fortran_env, only: &
+        wp => REAL64, &
+        ip => INT32
+
+    implicit none
+    !----------------------------------------------------------------------
+    ! Dictionary: calling arguments
+    !----------------------------------------------------------------------
+    integer (ip), intent (in)     :: mp
+    integer (ip), intent (in)     :: ido
+    integer (ip), intent (in)     :: l1
+    real (wp),    intent (in out) :: ch(mdimch, ido, l1, 5)
+    integer (ip), intent (in)     :: mdimch
+    real (wp),    intent (in out) :: cc(mdimcc, ido, 5, l1)
+    integer (ip), intent (in)     :: mdimcc
+    real (wp),    intent (in out) :: wa1(ido)
+    real (wp),    intent (in out) :: wa2(ido)
+    real (wp),    intent (in out) :: wa3(ido)
+    real (wp),    intent (in out) :: wa4(ido)
+    !----------------------------------------------------------------------
+    ! Dictionary: local variables
+    !----------------------------------------------------------------------
+    integer (ip)         :: i, k, m, ic, idp2
+    real (wp), parameter :: ARG = 2.0_wp * acos(-1.0_wp)/5
+    real (wp), parameter :: TR11=cos(ARG)
+    real (wp), parameter :: TI11=sin(ARG)
+    real (wp), parameter :: TR12=cos(2.0_wp *ARG)
+    real (wp), parameter :: TI12=sin(2.0_wp *ARG)
+    !----------------------------------------------------------------------
+
+    do k=1, l1
+        do m=1, mp
+            ch(m, 1, k, 1) = &
+                cc(m, 1, 1, k)+2.0_wp *cc(m, ido, 2, k)+2.0_wp *cc(m, ido, 4, k)          !
+
+            ch(m, 1, k, 2) = &
+                (cc(m, 1, 1, k)+TR11*2.0_wp *cc(m, ido, 2, k) &
+                +TR12*2.0_wp *cc(m, ido, 4, k))-(TI11*2.0_wp *cc(m, 1, 3, k) &
+                +TI12*2.0_wp *cc(m, 1, 5, k))
+
+            ch(m, 1, k, 3) = &
+                (cc(m, 1, 1, k)+TR12*2.0_wp *cc(m, ido, 2, k) &
+                +TR11*2.0_wp *cc(m, ido, 4, k))-(TI12*2.0_wp *cc(m, 1, 3, k) &
+                -TI11*2.0_wp *cc(m, 1, 5, k))
+
+            ch(m, 1, k, 4) = &
+                (cc(m, 1, 1, k)+TR12*2.0_wp *cc(m, ido, 2, k) &
+                +TR11*2.0_wp *cc(m, ido, 4, k))+(TI12*2.0_wp *cc(m, 1, 3, k) &
+                -TI11*2.0_wp *cc(m, 1, 5, k))
+
+            ch(m, 1, k, 5) = &
+                (cc(m, 1, 1, k)+TR11*2.0_wp *cc(m, ido, 2, k) &
+                +TR12*2.0_wp *cc(m, ido, 4, k))+(TI11*2.0_wp *cc(m, 1, 3, k) &
+                +TI12*2.0_wp *cc(m, 1, 5, k))
+        end do
+    end do
+
+    if (ido == 1) then
+        return
+    end if
+
     idp2 = ido+2
-    do 103 k=1, l1
-        do 102 i=3, ido, 2
+    do k=1, l1
+        do i=3, ido, 2
             ic = idp2-i
-            do 1002 m=1, mp
-                ch(m, i-1, k, 1) = cc(m, i-1, 1, k)+(cc(m, i-1, 3, k)+cc(m, ic-1, 2, k)) &    !
+            do m=1, mp
+
+                ch(m, i-1, k, 1) = &
+                    cc(m, i-1, 1, k)+(cc(m, i-1, 3, k)+cc(m, ic-1, 2, k)) &    !
                     +(cc(m, i-1, 5, k)+cc(m, ic-1, 4, k))
-                ch(m, i, k, 1) = cc(m, i, 1, k)+(cc(m, i, 3, k)-cc(m, ic, 2, k)) &            !
+
+                ch(m, i, k, 1) = &
+                    cc(m, i, 1, k)+(cc(m, i, 3, k)-cc(m, ic, 2, k)) &            !
                     +(cc(m, i, 5, k)-cc(m, ic, 4, k))
-                ch(m, i-1, k, 2) = wa1(i-2)*((cc(m, i-1, 1, k)+tr11* &
-                    (cc(m, i-1, 3, k)+cc(m, ic-1, 2, k))+tr12 &
-                    *(cc(m, i-1, 5, k)+cc(m, ic-1, 4, k)))-(ti11*(cc(m, i, 3, k) &             !
-                    +cc(m, ic, 2, k))+ti12*(cc(m, i, 5, k)+cc(m, ic, 4, k)))) &
-                    -wa1(i-1)*((cc(m, i, 1, k)+tr11*(cc(m, i, 3, k)-cc(m, ic, 2, k)) &         !
-                    +tr12*(cc(m, i, 5, k)-cc(m, ic, 4, k)))+(ti11*(cc(m, i-1, 3, k) &          !
-                    -cc(m, ic-1, 2, k))+ti12*(cc(m, i-1, 5, k)-cc(m, ic-1, 4, k))))            !
-                ch(m, i, k, 2) = wa1(i-2)*((cc(m, i, 1, k)+tr11*(cc(m, i, 3, k) &          !
-                    -cc(m, ic, 2, k))+tr12*(cc(m, i, 5, k)-cc(m, ic, 4, k))) &
-                    +(ti11*(cc(m, i-1, 3, k)-cc(m, ic-1, 2, k))+ti12 &
+
+                ch(m, i-1, k, 2) = &
+                    wa1(i-2)*((cc(m, i-1, 1, k)+TR11* &
+                    (cc(m, i-1, 3, k)+cc(m, ic-1, 2, k))+TR12 &
+                    *(cc(m, i-1, 5, k)+cc(m, ic-1, 4, k)))-(TI11*(cc(m, i, 3, k) &             !
+                    +cc(m, ic, 2, k))+TI12*(cc(m, i, 5, k)+cc(m, ic, 4, k)))) &
+                    -wa1(i-1)*((cc(m, i, 1, k)+TR11*(cc(m, i, 3, k)-cc(m, ic, 2, k)) &         !
+                    +TR12*(cc(m, i, 5, k)-cc(m, ic, 4, k)))+(TI11*(cc(m, i-1, 3, k) &          !
+                    -cc(m, ic-1, 2, k))+TI12*(cc(m, i-1, 5, k)-cc(m, ic-1, 4, k))))            !
+
+                ch(m, i, k, 2) = &
+                    wa1(i-2)*((cc(m, i, 1, k)+TR11*(cc(m, i, 3, k) &          !
+                    -cc(m, ic, 2, k))+TR12*(cc(m, i, 5, k)-cc(m, ic, 4, k))) &
+                    +(TI11*(cc(m, i-1, 3, k)-cc(m, ic-1, 2, k))+TI12 &
                     *(cc(m, i-1, 5, k)-cc(m, ic-1, 4, k))))+wa1(i-1) &
-                    *((cc(m, i-1, 1, k)+tr11*(cc(m, i-1, 3, k) &
-                    +cc(m, ic-1, 2, k))+tr12*(cc(m, i-1, 5, k)+cc(m, ic-1, 4, k))) &           !
-                    -(ti11*(cc(m, i, 3, k)+cc(m, ic, 2, k))+ti12 &
+                    *((cc(m, i-1, 1, k)+TR11*(cc(m, i-1, 3, k) &
+                    +cc(m, ic-1, 2, k))+TR12*(cc(m, i-1, 5, k)+cc(m, ic-1, 4, k))) &           !
+                    -(TI11*(cc(m, i, 3, k)+cc(m, ic, 2, k))+TI12 &
                     *(cc(m, i, 5, k)+cc(m, ic, 4, k))))
-                ch(m, i-1, k, 3) = wa2(i-2) &
-                    *((cc(m, i-1, 1, k)+tr12*(cc(m, i-1, 3, k)+cc(m, ic-1, 2, k)) &            !
-                    +tr11*(cc(m, i-1, 5, k)+cc(m, ic-1, 4, k)))-(ti12*(cc(m, i, 3, k) &        !
-                    +cc(m, ic, 2, k))-ti11*(cc(m, i, 5, k)+cc(m, ic, 4, k)))) &
+
+                ch(m, i-1, k, 3) = &
+                    wa2(i-2) &
+                    *((cc(m, i-1, 1, k)+TR12*(cc(m, i-1, 3, k)+cc(m, ic-1, 2, k)) &            !
+                    +TR11*(cc(m, i-1, 5, k)+cc(m, ic-1, 4, k)))-(TI12*(cc(m, i, 3, k) &        !
+                    +cc(m, ic, 2, k))-TI11*(cc(m, i, 5, k)+cc(m, ic, 4, k)))) &
                     -wa2(i-1) &
-                    *((cc(m, i, 1, k)+tr12*(cc(m, i, 3, k)- &
-                    cc(m, ic, 2, k))+tr11*(cc(m, i, 5, k)-cc(m, ic, 4, k))) &
-                    +(ti12*(cc(m, i-1, 3, k)-cc(m, ic-1, 2, k))-ti11 &
+                    *((cc(m, i, 1, k)+TR12*(cc(m, i, 3, k)- &
+                    cc(m, ic, 2, k))+TR11*(cc(m, i, 5, k)-cc(m, ic, 4, k))) &
+                    +(TI12*(cc(m, i-1, 3, k)-cc(m, ic-1, 2, k))-TI11 &
                     *(cc(m, i-1, 5, k)-cc(m, ic-1, 4, k))))
-                ch(m, i, k, 3) = wa2(i-2) &
-                    *((cc(m, i, 1, k)+tr12*(cc(m, i, 3, k)- &
-                    cc(m, ic, 2, k))+tr11*(cc(m, i, 5, k)-cc(m, ic, 4, k))) &
-                    +(ti12*(cc(m, i-1, 3, k)-cc(m, ic-1, 2, k))-ti11 &
+
+                ch(m, i, k, 3) = &
+                    wa2(i-2) &
+                    *((cc(m, i, 1, k)+TR12*(cc(m, i, 3, k)- &
+                    cc(m, ic, 2, k))+TR11*(cc(m, i, 5, k)-cc(m, ic, 4, k))) &
+                    +(TI12*(cc(m, i-1, 3, k)-cc(m, ic-1, 2, k))-TI11 &
                     *(cc(m, i-1, 5, k)-cc(m, ic-1, 4, k)))) &
                     +wa2(i-1) &
-                    *((cc(m, i-1, 1, k)+tr12*(cc(m, i-1, 3, k)+cc(m, ic-1, 2, k)) &            !
-                    +tr11*(cc(m, i-1, 5, k)+cc(m, ic-1, 4, k)))-(ti12*(cc(m, i, 3, k) &        !
-                    +cc(m, ic, 2, k))-ti11*(cc(m, i, 5, k)+cc(m, ic, 4, k))))
-                ch(m, i-1, k, 4) = wa3(i-2) &
-                    *((cc(m, i-1, 1, k)+tr12*(cc(m, i-1, 3, k)+cc(m, ic-1, 2, k)) &            !
-                    +tr11*(cc(m, i-1, 5, k)+cc(m, ic-1, 4, k)))+(ti12*(cc(m, i, 3, k) &        !
-                    +cc(m, ic, 2, k))-ti11*(cc(m, i, 5, k)+cc(m, ic, 4, k)))) &
+                    *((cc(m, i-1, 1, k)+TR12*(cc(m, i-1, 3, k)+cc(m, ic-1, 2, k)) &            !
+                    +TR11*(cc(m, i-1, 5, k)+cc(m, ic-1, 4, k)))-(TI12*(cc(m, i, 3, k) &        !
+                    +cc(m, ic, 2, k))-TI11*(cc(m, i, 5, k)+cc(m, ic, 4, k))))
+
+                ch(m, i-1, k, 4) = &
+                    wa3(i-2) &
+                    *((cc(m, i-1, 1, k)+TR12*(cc(m, i-1, 3, k)+cc(m, ic-1, 2, k)) &            !
+                    +TR11*(cc(m, i-1, 5, k)+cc(m, ic-1, 4, k)))+(TI12*(cc(m, i, 3, k) &        !
+                    +cc(m, ic, 2, k))-TI11*(cc(m, i, 5, k)+cc(m, ic, 4, k)))) &
                     -wa3(i-1) &
-                    *((cc(m, i, 1, k)+tr12*(cc(m, i, 3, k)- &
-                    cc(m, ic, 2, k))+tr11*(cc(m, i, 5, k)-cc(m, ic, 4, k))) &
-                    -(ti12*(cc(m, i-1, 3, k)-cc(m, ic-1, 2, k))-ti11 &
+                    *((cc(m, i, 1, k)+TR12*(cc(m, i, 3, k)- &
+                    cc(m, ic, 2, k))+TR11*(cc(m, i, 5, k)-cc(m, ic, 4, k))) &
+                    -(TI12*(cc(m, i-1, 3, k)-cc(m, ic-1, 2, k))-TI11 &
                     *(cc(m, i-1, 5, k)-cc(m, ic-1, 4, k))))
-                ch(m, i, k, 4) = wa3(i-2) &
-                    *((cc(m, i, 1, k)+tr12*(cc(m, i, 3, k)- &
-                    cc(m, ic, 2, k))+tr11*(cc(m, i, 5, k)-cc(m, ic, 4, k))) &
-                    -(ti12*(cc(m, i-1, 3, k)-cc(m, ic-1, 2, k))-ti11 &
+
+                ch(m, i, k, 4) = &
+                    wa3(i-2) &
+                    *((cc(m, i, 1, k)+TR12*(cc(m, i, 3, k)- &
+                    cc(m, ic, 2, k))+TR11*(cc(m, i, 5, k)-cc(m, ic, 4, k))) &
+                    -(TI12*(cc(m, i-1, 3, k)-cc(m, ic-1, 2, k))-TI11 &
                     *(cc(m, i-1, 5, k)-cc(m, ic-1, 4, k)))) &
                     +wa3(i-1) &
-                    *((cc(m, i-1, 1, k)+tr12*(cc(m, i-1, 3, k)+cc(m, ic-1, 2, k)) &            !
-                    +tr11*(cc(m, i-1, 5, k)+cc(m, ic-1, 4, k)))+(ti12*(cc(m, i, 3, k) &        !
-                    +cc(m, ic, 2, k))-ti11*(cc(m, i, 5, k)+cc(m, ic, 4, k))))
-                ch(m, i-1, k, 5) = wa4(i-2) &
-                    *((cc(m, i-1, 1, k)+tr11*(cc(m, i-1, 3, k)+cc(m, ic-1, 2, k)) &            !
-                    +tr12*(cc(m, i-1, 5, k)+cc(m, ic-1, 4, k)))+(ti11*(cc(m, i, 3, k) &        !
-                    +cc(m, ic, 2, k))+ti12*(cc(m, i, 5, k)+cc(m, ic, 4, k)))) &
+                    *((cc(m, i-1, 1, k)+TR12*(cc(m, i-1, 3, k)+cc(m, ic-1, 2, k)) &            !
+                    +TR11*(cc(m, i-1, 5, k)+cc(m, ic-1, 4, k)))+(TI12*(cc(m, i, 3, k) &        !
+                    +cc(m, ic, 2, k))-TI11*(cc(m, i, 5, k)+cc(m, ic, 4, k))))
+
+                ch(m, i-1, k, 5) = &
+                    wa4(i-2) &
+                    *((cc(m, i-1, 1, k)+TR11*(cc(m, i-1, 3, k)+cc(m, ic-1, 2, k)) &            !
+                    +TR12*(cc(m, i-1, 5, k)+cc(m, ic-1, 4, k)))+(TI11*(cc(m, i, 3, k) &        !
+                    +cc(m, ic, 2, k))+TI12*(cc(m, i, 5, k)+cc(m, ic, 4, k)))) &
                     -wa4(i-1) &
-                    *((cc(m, i, 1, k)+tr11*(cc(m, i, 3, k)-cc(m, ic, 2, k)) &
-                    +tr12*(cc(m, i, 5, k)-cc(m, ic, 4, k)))-(ti11*(cc(m, i-1, 3, k) &          !
-                    -cc(m, ic-1, 2, k))+ti12*(cc(m, i-1, 5, k)-cc(m, ic-1, 4, k))))            !
-                ch(m, i, k, 5) = wa4(i-2) &
-                    *((cc(m, i, 1, k)+tr11*(cc(m, i, 3, k)-cc(m, ic, 2, k)) &
-                    +tr12*(cc(m, i, 5, k)-cc(m, ic, 4, k)))-(ti11*(cc(m, i-1, 3, k) &          !
-                    -cc(m, ic-1, 2, k))+ti12*(cc(m, i-1, 5, k)-cc(m, ic-1, 4, k)))) &          !
+                    *((cc(m, i, 1, k)+TR11*(cc(m, i, 3, k)-cc(m, ic, 2, k)) &
+                    +TR12*(cc(m, i, 5, k)-cc(m, ic, 4, k)))-(TI11*(cc(m, i-1, 3, k) &          !
+                    -cc(m, ic-1, 2, k))+TI12*(cc(m, i-1, 5, k)-cc(m, ic-1, 4, k))))            !
+
+                ch(m, i, k, 5) = &
+                    wa4(i-2) &
+                    *((cc(m, i, 1, k)+TR11*(cc(m, i, 3, k)-cc(m, ic, 2, k)) &
+                    +TR12*(cc(m, i, 5, k)-cc(m, ic, 4, k)))-(TI11*(cc(m, i-1, 3, k) &          !
+                    -cc(m, ic-1, 2, k))+TI12*(cc(m, i-1, 5, k)-cc(m, ic-1, 4, k)))) &          !
                     +wa4(i-1) &
-                    *((cc(m, i-1, 1, k)+tr11*(cc(m, i-1, 3, k)+cc(m, ic-1, 2, k)) &            !
-                    +tr12*(cc(m, i-1, 5, k)+cc(m, ic-1, 4, k)))+(ti11*(cc(m, i, 3, k) &        !
-                    +cc(m, ic, 2, k))+ti12*(cc(m, i, 5, k)+cc(m, ic, 4, k))))
-1002        continue
-102     continue
-103 continue         
-    return
-end subroutine hradb5              
+                    *((cc(m, i-1, 1, k)+TR11*(cc(m, i-1, 3, k)+cc(m, ic-1, 2, k)) &            !
+                    +TR12*(cc(m, i-1, 5, k)+cc(m, ic-1, 4, k)))+(TI11*(cc(m, i, 3, k) &        !
+                    +cc(m, ic, 2, k))+TI12*(cc(m, i, 5, k)+cc(m, ic, 4, k))))
+            end do
+        end do
+    end do
+
+end subroutine hradb5
+
