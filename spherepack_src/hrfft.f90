@@ -214,13 +214,6 @@ subroutine hrffti(n, wsave)
     integer (ip), intent (in)     :: n
     real (wp),    intent (in out) :: wsave(n+15)
     !----------------------------------------------------------------------
-    ! Dictionary: local variables
-    !----------------------------------------------------------------------
-    real (wp) :: tfft
-    common /hrf/ tfft
-    !----------------------------------------------------------------------
-
-    tfft = 0.0_wp
 
     if (n == 1) then
         return                                                    !
@@ -365,11 +358,6 @@ subroutine hrfftf(m, n, r, mdimr, whrfft, work)
     integer (ip), intent (in)     :: mdimr
     real (wp),    intent (in out) :: work(1)
     real (wp),    intent (in out) :: whrfft(n+15)
-    !----------------------------------------------------------------------
-    ! Dictionary: local variables
-    !----------------------------------------------------------------------
-    real (wp) :: tfft
-    common /hrf/ tfft
     !----------------------------------------------------------------------
 
     if (n == 1) then
@@ -1288,11 +1276,6 @@ subroutine hrfftb(m, n, r, mdimr, whrfft, work)
     integer (ip), intent (in)     :: mdimr
     real (wp),    intent (in out) :: whrfft(n+15)
     real (wp),    intent (in out) :: work(1)
-    !----------------------------------------------------------------------
-    ! Dictionary: local variables
-    !----------------------------------------------------------------------
-    real (wp) :: tfft
-    common /hrf/ tfft
     !----------------------------------------------------------------------
 
     if (n == 1) then

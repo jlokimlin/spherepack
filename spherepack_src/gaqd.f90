@@ -371,4 +371,3 @@ pure subroutine tpdp(n, theta, cz, cp, dcp, pb, dpb)
     end associate
 
 end subroutine tpdp
-

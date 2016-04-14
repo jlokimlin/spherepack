@@ -64,10 +64,11 @@ module type_Sphere
         procedure, public  :: invert_helmholtz
         procedure, public  :: get_gradient
         procedure, public  :: invert_gradient
-        procedure, public  :: get_vorticity
+        procedure, private :: get_vorticity_from_spherical_components
+        procedure, private :: get_vorticity_from_vector_field
         procedure, public  :: invert_vorticity
         procedure, private :: get_divergence_from_vector_field
-        procedure, private :: get_divergence_from_spherical_angles
+        procedure, private :: get_divergence_from_spherical_components
         procedure, public  :: invert_divergence
         procedure, public  :: get_rotation_operator => compute_angular_momentum
         procedure, private :: get_scalar_symmetries
@@ -81,7 +82,7 @@ module type_Sphere
         procedure, public  :: get_velocities_from_vorticity_and_divergence_coefficients
         procedure, private :: get_scalar_laplacian
         procedure, private :: compute_vector_laplacian_coefficients
-        procedure, private :: get_vector_laplacian_from_spherical_angles
+        procedure, private :: get_vector_laplacian_from_spherical_components
         procedure, private :: get_vector_laplacian_from_vector_field
         procedure, private :: invert_scalar_laplacian
         procedure, private :: invert_vector_laplacian
@@ -100,11 +101,14 @@ module type_Sphere
             invert_vector_laplacian
         generic, public :: get_divergence => &
             get_divergence_from_vector_field, &
-            get_divergence_from_spherical_angles
+            get_divergence_from_spherical_components
         generic, public :: get_laplacian => &
             get_scalar_laplacian, &
-            get_vector_laplacian_from_spherical_angles, &
+            get_vector_laplacian_from_spherical_components, &
             get_vector_laplacian_from_vector_field
+        generic, public :: get_vorticity => &
+            get_vorticity_from_spherical_components, &
+            get_vorticity_from_vector_field
         !----------------------------------------------------------------------
     end type Sphere
 
@@ -578,7 +582,7 @@ contains
             ! Get spherical components
             call this%unit_vectors%get_spherical_angle_components( F, v, w )
             ! Perform vector analysis
-            call this%vector_analysis_from_spherical_components( v, w )
+            call this%vector_analysis_from_spherical_components(v, w)
         end associate
 
         ! Release memory
@@ -720,7 +724,7 @@ contains
 
 
 
-    subroutine get_vector_laplacian_from_spherical_angles(this, &
+    subroutine get_vector_laplacian_from_spherical_components(this, &
         polar_component, azimuthal_component, polar_laplacian, azimuthal_laplacian )
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
@@ -735,7 +739,7 @@ contains
         ! Check if object is usable
         if (this%initialized .eqv. .false.) then
             error stop 'TYPE(Sphere): uninitialized object'&
-                //' in GET_VECTOR_LAPLACIAN_FROM_SPHERICAL_ANGLES'
+                //' in GET_VECTOR_LAPLACIAN_FROM_SPHERICAL_COMPONENTS'
         end if
 
         ! Set vector spherical harmonic coefficients
@@ -743,7 +747,7 @@ contains
             v => polar_component, &
             w => azimuthal_component &
             )
-            call this%vector_analysis_from_spherical_components( v, w )
+            call this%vector_analysis_from_spherical_components(v, w)
         end associate
 
         ! Compute vector laplacian coefficients
@@ -758,7 +762,7 @@ contains
             call this%perform_vector_synthesis( vlap, wlap )
         end associate
 
-    end subroutine get_vector_laplacian_from_spherical_angles
+    end subroutine get_vector_laplacian_from_spherical_components
 
 
     subroutine get_vector_laplacian_from_vector_field(this, &
@@ -870,7 +874,7 @@ contains
             !
             !==> synthesize coefficients inot vector field (v,w)
             !
-            call this%perform_vector_synthesis( v, w )
+            call this%perform_vector_synthesis(v, w)
         end associate
 
 
@@ -988,7 +992,7 @@ contains
             cr = 0.0_wp
             ci = 0.0_wp
             ! Compute vector harmonic synthesis
-            call this%perform_vector_synthesis( v, w )
+            call this%perform_vector_synthesis(v, w)
         end associate
 
     end subroutine get_gradient
@@ -1045,13 +1049,16 @@ contains
     end subroutine invert_gradient
 
 
-    subroutine get_vorticity(this, vector_field, vorticity )
+
+    subroutine get_vorticity_from_spherical_components(this, &
+        polar_component, azimuthal_component, vorticity )
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
         class (Sphere), intent (in out) :: this
-        real (wp),      intent (in)    :: vector_field(:,:,:)
-        real (wp),      intent (out)   :: vorticity(:,:)
+        real (wp),      intent (in)     :: polar_component(:,:)
+        real (wp),      intent (in)     :: azimuthal_component(:,:)
+        real (wp),      intent (out)    :: vorticity(:,:)
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
@@ -1061,11 +1068,17 @@ contains
         ! Check if object is usable
         if (this%initialized .eqv. .false.) then
             error stop 'TYPE(Sphere): uninitialized object'&
-                //' in GET_VORTICITY'
+                //' in GET_VORTICITY_FROM_SPHERICAL_ANGLES'
         end if
 
-        ! Calculate the (real) vector harmonic coefficients
-        call this%perform_vector_analysis( vector_field )
+        ! Perform vector analysis from spherical components
+        associate( &
+            v => polar_component, &
+            w => azimuthal_component &
+            )
+            ! Perform vector analysis
+            call this%vector_analysis_from_spherical_components(v, w)
+        end associate
 
         ! compute gradient
         associate( &
@@ -1094,20 +1107,83 @@ contains
         end associate
 
 
-    end subroutine get_vorticity
+    end subroutine get_vorticity_from_spherical_components
 
 
-    subroutine invert_vorticity(this, source, solution )
+
+    subroutine get_vorticity_from_vector_field(this, vector_field, vorticity )
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
         class (Sphere), intent (in out) :: this
-        real (wp),      intent (in)    :: source(:,:,:)
-        real (wp),      intent (out)   :: solution(:,:)
+        real (wp),      intent (in)     :: vector_field(:,:,:)
+        real (wp),      intent (out)    :: vorticity(:,:)
+        !----------------------------------------------------------------------
+        ! Dictionary: local variables
+        !----------------------------------------------------------------------
+        real (wp), allocatable :: polar_component(:,:)
+        real (wp), allocatable :: azimuthal_component(:,:)
+        !----------------------------------------------------------------------
+
+        ! Check if object is usable
+        if (this%initialized .eqv. .false.) then
+            error stop 'TYPE(Sphere): '&
+                //'uninitialized object in GET_VORTICITY_FROM_VECTOR_FIELD'
+        end if
+
+        !
+        !==> Allocate memory
+        !
+        associate( &
+            nlat => this%NUMBER_OF_LATITUDES, &
+            nlon => this%NUMBER_OF_LONGITUDES &
+            )
+            allocate( polar_component(nlat, nlon) )
+            allocate( azimuthal_component(nlat, nlon) )
+        end associate
+
+        !
+        !==> Compute vorticity
+        !
+        associate( &
+            F => vector_field, &
+            v => polar_component, &
+            w => azimuthal_component, &
+            vort => vorticity &
+            )
+            !
+            !==> Get spherical components
+            !
+            call this%unit_vectors%get_spherical_angle_components( F, v, w )
+            !
+            !==> Get vorticity from spherical components
+            !
+            call this%get_vorticity_from_spherical_components( v, w, vort )
+        end associate
+
+        !
+        !==> Release memory
+        !
+        deallocate( polar_component )
+        deallocate( azimuthal_component )
+
+    end subroutine get_vorticity_from_vector_field
+
+
+
+    subroutine invert_vorticity(this, source, polar_solution, azimuthal_solution)
+        !----------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !----------------------------------------------------------------------
+        class (Sphere), intent (in out) :: this
+        real (wp),      intent (in)     :: source(:,:)
+        real (wp),      intent (out)    :: polar_solution(:,:)
+        real (wp),      intent (out)    :: azimuthal_solution(:,:)
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
         integer (ip) :: n, m !! Counters
+        integer (ip) :: ityp_temp
         !----------------------------------------------------------------------
 
         ! Check if object is usable
@@ -1117,45 +1193,72 @@ contains
         end if
 
         ! compute the (real) spherical harmonic coefficients
-        call this%perform_vector_analysis( source )
+        call this%perform_scalar_analysis(source)
 
-        ! Invert gradient
+        !
+        !==> Invert vorticity
+        !
         associate( &
             nlat => this%NUMBER_OF_LATITUDES, &
-            ntrunc => this%TRIANGULAR_TRUNCATION_LIMIT, &
-            f => solution, &
+            v => polar_solution, &
+            w => azimuthal_solution, &
             sqnn => this%vorticity_and_divergence_coefficients, &
             a => this%workspace%real_harmonic_coefficients, &
             b => this%workspace%imaginary_harmonic_coefficients, &
             cr => this%workspace%real_azimuthal_harmonic_coefficients, &
-            ci => this%workspace%imaginary_azimuthal_harmonic_coefficients &
+            ci => this%workspace%imaginary_azimuthal_harmonic_coefficients, &
+            isym => this%SCALAR_SYMMETRIES, &
+            ityp => this%VECTOR_SYMMETRIES &
             )
-            ! Initialize azimuthal coefficients
-            cr = 0.0_wp
-            ci = 0.0_wp
+            associate( mmax => size(cr, dim=1) )
+                !
+                !==> Initialize coefficients
+                !
+                cr = 0.0_wp
+                ci = 0.0_wp
 
-            ! Compute m = 0 coefficients
-            do n = 1, nlat
-                ! Set real coefficients
-                cr(1, n) = a(1, n)/sqnn(n)
-                ! Set imaginary coeffients
-                ci(1, n) = b(1, n)/sqnn(n)
-            end do
-
-            ! Compute m >0 coefficients
-            do m=2, ntrunc+1
-                do n=m, ntrunc+1
+                ! Compute m = 0 coefficients
+                do n = 2, nlat
                     ! Set real coefficients
-                    cr(m, n) = a(m, n)/sqnn(n)
-                    ! Set imaginary coefficients
-                    ci(m, n) = b(m, n)/sqnn(n)
+                    cr(1, n) = a(1, n)/sqnn(n)
+                    ! Set imaginary coeffients
+                    ci(1, n) = b(1, n)/sqnn(n)
                 end do
-            end do
-            ! Compute scalar synthesis
-            call this%perform_scalar_synthesis( f )
+
+                ! Compute m >0 coefficients
+                do m=2, mmax
+                    do n=m, nlat
+                        ! Set real coefficients
+                        cr(m, n) = a(m, n)/sqnn(n)
+                        ! Set imaginary coefficients
+                        ci(m, n) = b(m, n)/sqnn(n)
+                    end do
+                end do
+
+                ! Save old vector symmetry
+                ityp_temp = ityp
+
+                ! Set symmetries for synthesis
+                select case (isym)
+                    case (0)
+                        ityp = 2
+                    case (1)
+                        ityp = 5
+                    case(2)
+                        ityp = 8
+                end select
+
+                ! Compute scalar synthesis
+                call this%perform_vector_synthesis(v, w)
+
+                ! Reset old vector symmetry
+                ityp = ityp_temp
+            end associate
         end associate
 
     end subroutine invert_vorticity
+
+
 
     subroutine get_divergence_from_coefficients(this, divergence)
         !----------------------------------------------------------------------
@@ -1234,7 +1337,7 @@ contains
     end subroutine get_divergence_from_vector_field
 
 
-    subroutine get_divergence_from_spherical_angles(this, &
+    subroutine get_divergence_from_spherical_components(this, &
         polar_component, azimuthal_component, divergence )
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
@@ -1252,7 +1355,7 @@ contains
         ! Check if object is usable
         if (this%initialized .eqv. .false.) then
             error stop 'TYPE(Sphere): uninitialized object'&
-                //' in GET_DIVERGENCE_FROM_SPHERICAL_ANGLES'
+                //' in GET_DIVERGENCE_FROM_SPHERICAL_COMPONENTS'
         end if
 
         ! Calculate the (real) vector harmonic coefficients
@@ -1260,13 +1363,13 @@ contains
             v => polar_component, &
             w => azimuthal_component &
             )
-            call this%vector_analysis_from_spherical_components( v, w )
+            call this%vector_analysis_from_spherical_components(v, w)
         end associate
 
         ! compute divergence
         call get_divergence_from_coefficients(this, divergence)
 
-    end subroutine get_divergence_from_spherical_angles
+    end subroutine get_divergence_from_spherical_components
 
 
 
@@ -1503,7 +1606,7 @@ contains
             end do
 
             ! Compute vector harmonic sysnthesis to get components
-            call this%perform_vector_synthesis( v, w )
+            call this%perform_vector_synthesis(v, w)
         end associate
 
         ! Release memory
@@ -1580,7 +1683,7 @@ contains
     
 
 
-    function get_index(this, n, m ) result( return_value )
+    function get_index(this, n, m) result (return_value)
         !
         !< Purpose:
         ! The spectral data is assumed to be in a complex array of dimension
@@ -1638,7 +1741,7 @@ contains
     end function get_index
 
 
-    function get_coefficient(this, n, m ) result ( return_value )
+    function get_coefficient(this, n, m ) result (return_value)
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------

@@ -40,7 +40,7 @@
 !
 !     sphcom.f, hrfft.f, gaqd.f
 !
-!     subroutine vhsgs(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, 
+!     subroutine vhsgs(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci,
 !    +                 mdab, ndab, wvhsgs, lvhsgs, work, lwork, ierror)
 !                                                                              
 !   
@@ -76,27 +76,27 @@
 !
 !     ityp   = 0  no symmetries exist about the equator. the synthesis
 !                 is performed on the entire sphere.  i.e. on the
-!                 arrays v(i, j), w(i, j) for i=1, ..., nlat and 
-!                 j=1, ..., nlon.   
+!                 arrays v(i, j), w(i, j) for i=1, ..., nlat and
+!                 j=1, ..., nlon.
 !
 !            = 1  no symmetries exist about the equator. the synthesis
 !                 is performed on the entire sphere.  i.e. on the
-!                 arrays v(i, j), w(i, j) for i=1, ..., nlat and 
-!                 j=1, ..., nlon. the curl of (v, w) is zero. that is, 
+!                 arrays v(i, j), w(i, j) for i=1, ..., nlat and
+!                 j=1, ..., nlon. the curl of (v, w) is zero. that is,
 !                 (d/dtheta (sin(theta) w) - dv/dphi)/sin(theta) = 0. 
 !                 the coefficients cr and ci are zero.
 !
 !            = 2  no symmetries exist about the equator. the synthesis
 !                 is performed on the entire sphere.  i.e. on the
-!                 arrays v(i, j), w(i, j) for i=1, ..., nlat and 
-!                 j=1, ..., nlon. the divergence of (v, w) is zero. i.e., 
+!                 arrays v(i, j), w(i, j) for i=1, ..., nlat and
+!                 j=1, ..., nlon. the divergence of (v, w) is zero. i.e.,
 !                 (d/dtheta (sin(theta) v) + dw/dphi)/sin(theta) = 0. 
 !                 the coefficients br and bi are zero.
 !
 !            = 3  v is symmetric and w is antisymmetric about the 
 !                 equator. the synthesis is performed on the northern
 !                 hemisphere only.  i.e., if nlat is odd the synthesis
-!                 is performed on the arrays v(i, j), w(i, j) for 
+!                 is performed on the arrays v(i, j), w(i, j) for
 !                 i=1, ..., (nlat+1)/2 and j=1, ..., nlon. if nlat is
 !                 even the synthesis is performed on the the arrays
 !                 v(i, j), w(i, j) for i=1, ..., nlat/2 and j=1, ..., nlon.
@@ -104,29 +104,29 @@
 !            = 4  v is symmetric and w is antisymmetric about the 
 !                 equator. the synthesis is performed on the northern
 !                 hemisphere only.  i.e., if nlat is odd the synthesis
-!                 is performed on the arrays v(i, j), w(i, j) for 
+!                 is performed on the arrays v(i, j), w(i, j) for
 !                 i=1, ..., (nlat+1)/2 and j=1, ..., nlon. if nlat is
 !                 even the synthesis is performed on the the arrays
 !                 v(i, j), w(i, j) for i=1, ..., nlat/2 and j=1, ..., nlon.
-!                 the curl of (v, w) is zero. that is, 
+!                 the curl of (v, w) is zero. that is,
 !                 (d/dtheta (sin(theta) w) - dv/dphi)/sin(theta) = 0. 
 !                 the coefficients cr and ci are zero.
 !
 !            = 5  v is symmetric and w is antisymmetric about the 
 !                 equator. the synthesis is performed on the northern
 !                 hemisphere only.  i.e., if nlat is odd the synthesis
-!                 is performed on the arrays v(i, j), w(i, j) for 
+!                 is performed on the arrays v(i, j), w(i, j) for
 !                 i=1, ..., (nlat+1)/2 and j=1, ..., nlon. if nlat is
 !                 even the synthesis is performed on the the arrays
 !                 v(i, j), w(i, j) for i=1, ..., nlat/2 and j=1, ..., nlon.
-!                 the divergence of (v, w) is zero. i.e., 
+!                 the divergence of (v, w) is zero. i.e.,
 !                 (d/dtheta (sin(theta) v) + dw/dphi)/sin(theta) = 0. 
 !                 the coefficients br and bi are zero.
 !
 !            = 6  v is antisymmetric and w is symmetric about the 
 !                 equator. the synthesis is performed on the northern
 !                 hemisphere only.  i.e., if nlat is odd the synthesis
-!                 is performed on the arrays v(i, j), w(i, j) for 
+!                 is performed on the arrays v(i, j), w(i, j) for
 !                 i=1, ..., (nlat+1)/2 and j=1, ..., nlon. if nlat is
 !                 even the synthesis is performed on the the arrays
 !                 v(i, j), w(i, j) for i=1, ..., nlat/2 and j=1, ..., nlon.
@@ -134,27 +134,27 @@
 !            = 7  v is antisymmetric and w is symmetric about the 
 !                 equator. the synthesis is performed on the northern
 !                 hemisphere only.  i.e., if nlat is odd the synthesis
-!                 is performed on the arrays v(i, j), w(i, j) for 
+!                 is performed on the arrays v(i, j), w(i, j) for
 !                 i=1, ..., (nlat+1)/2 and j=1, ..., nlon. if nlat is
 !                 even the synthesis is performed on the the arrays
 !                 v(i, j), w(i, j) for i=1, ..., nlat/2 and j=1, ..., nlon.
-!                 the curl of (v, w) is zero. that is, 
+!                 the curl of (v, w) is zero. that is,
 !                 (d/dtheta (sin(theta) w) - dv/dphi)/sin(theta) = 0. 
 !                 the coefficients cr and ci are zero.
 !
 !            = 8  v is antisymmetric and w is symmetric about the 
 !                 equator. the synthesis is performed on the northern
 !                 hemisphere only.  i.e., if nlat is odd the synthesis
-!                 is performed on the arrays v(i, j), w(i, j) for 
+!                 is performed on the arrays v(i, j), w(i, j) for
 !                 i=1, ..., (nlat+1)/2 and j=1, ..., nlon. if nlat is
 !                 even the synthesis is performed on the the arrays
 !                 v(i, j), w(i, j) for i=1, ..., nlat/2 and j=1, ..., nlon.
-!                 the divergence of (v, w) is zero. i.e., 
+!                 the divergence of (v, w) is zero. i.e.,
 !                 (d/dtheta (sin(theta) v) + dw/dphi)/sin(theta) = 0. 
 !                 the coefficients br and bi are zero.
 !
 !
-!     nt     the number of syntheses.  in the program that calls vhsgs, 
+!     nt     the number of syntheses.  in the program that calls vhsgs,
 !            the arrays v, w, br, bi, cr, and ci can be three dimensional
 !            in which case multiple syntheses will be performed.
 !            the third index is the synthesis index which assumes the 
