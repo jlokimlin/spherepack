@@ -32,14 +32,13 @@
 !
 !
 !     This version of gaqd implements the method presented in:
-!     P. N. swarztrauber, Computing the points and weights for 
-!     Gauss-Legendre quadrature, SIAM J. Sci. Comput., 
+!     P. N. swarztrauber, Computing the points and weights for
+!     Gauss-Legendre quadrature, SIAM J. Sci. Comput.,
 !     24(2002) pp. 945-954.
-!     
+!
 !     The w and lwork arrays are dummy and included only to
 !     permit a simple pluggable exchange with the
 !     old gaqd in previous versions of SPHEREPACK
-!
 !
 !
 subroutine gaqd(nlat, theta, wts, w, lwork, ierror)
@@ -208,7 +207,7 @@ subroutine gaqd(nlat, theta, wts, w, lwork, ierror)
             if (mnlat /= 0) then
                 theta(nhalf) = HALF_PI
                 call tpdp (nlat, HALF_PI, cz, theta(ns2+1), wts(ns2+1), pb, dpb)
-                wts(nhalf) = (nlat+nlat+1)/(dpb*dpb)
+                wts(nhalf) = (2*nlat+1)/(dpb*dpb)
             end if
 
             do i=1, ns2
@@ -219,9 +218,7 @@ subroutine gaqd(nlat, theta, wts, w, lwork, ierror)
             !
             !==> Set weights
             !
-            associate( summation => sum(wts) )
-                wts = 2.0_wp * wts/summation
-            end associate
+            wts = 2.0_wp * wts/sum(wts)
     end select
 
 end subroutine gaqd

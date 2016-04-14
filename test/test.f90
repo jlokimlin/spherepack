@@ -39,7 +39,7 @@ contains
         call test_vector_analysis_and_synthesis( regular_sphere )
         call regular_sphere%destroy()
 
-        ! Instantiate object
+        ! Allocate memory
         call gaussian_sphere%create( nlat, nlon )
 
         write( stdout, '(A)' ) 'SPHEREPACK WRAPPER VALIDATION testS'
@@ -47,15 +47,15 @@ contains
         write( stdout, '(A, I3, A, I3)' ) 'nlat = ', nlat, ' nlon = ', nlon
 
         !        ! test all the subroutines
-        !        call test_scalar_analysis_and_synthesis( gaussian_sphere )
-        !        call test_vector_analysis_and_synthesis( gaussian_sphere )
-        !        call test_compute_surface_integral( gaussian_sphere )
-        !        call test_invert_helmholtz( gaussian_sphere )
-        !        call test_get_gradient( gaussian_sphere )
-        !        call test_get_vorticity( gaussian_sphere )
-        !        call test_get_rotation_operator( gaussian_sphere )
+        call test_scalar_analysis_and_synthesis( gaussian_sphere )
+        call test_vector_analysis_and_synthesis( gaussian_sphere )
+        call test_compute_surface_integral( gaussian_sphere )
+        call test_invert_helmholtz( gaussian_sphere )
+        call test_get_gradient( gaussian_sphere )
+        call test_get_vorticity( gaussian_sphere )
+        call test_get_rotation_operator( gaussian_sphere )
 
-        ! disembody object
+        ! Release memory
         call gaussian_sphere%destroy()
 
     end subroutine test_all

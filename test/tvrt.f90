@@ -102,6 +102,7 @@ program tvrt
     end do
     call name("gaqd")
     call iout(ier," ier")
+    print *, thetag
     call vecout(thetag,"thtg",nlat)
     !
     !     test all vorticity subroutines
