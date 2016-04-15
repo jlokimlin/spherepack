@@ -831,40 +831,31 @@ subroutine lfpt(n, m, theta, cp, pb)
         return
     end if
 
-    if (n < 0) then
-        go to 10
-    else if (n == 0) then
+    if (n <= 0) then
         go to 10
     else 
         go to 30
     end if
 
-10  if (ma < 0) then
-        go to 20
-    else if (ma == 0) then
-        go to 20
+10  if (ma <= 0) then
+        pb= sqrt(0.5)
+        return
     else 
         go to 30
     end if
 
-20  pb= sqrt(0.5)
-    go to 140
 
 30  np1 = n+1
     nmod = mod(n, 2)
     mmod = mod(ma, 2)
 
-    if (nmod < 0) then
-        go to 40
-    else if (nmod == 0) then
+    if (nmod <= 0) then
         go to 40
     else 
         go to 90
     end if
 
-40  if (mmod < 0) then
-        go to 50
-    else if (mmod == 0) then
+40  if (mmod <= 0) then
         go to 50
     else 
         go to 70
@@ -904,44 +895,33 @@ subroutine lfpt(n, m, theta, cp, pb)
 
 90  kdo = (n+1)/2
 
-    if (mmod < 0) then
-        go to 100
-    else if (mmod == 0) then
-        go to 100
-    else 
-        go to 120
+    if (mmod <= 0) then
+        cdt = cos(2.0*theta)
+        sdt = sin(2.0*theta)
+        ct = cos(theta)
+        st = -sin(theta)
+        summation = 0.0
+        do k=1, kdo
+            cth = cdt*ct-sdt*st
+            st = sdt*ct+cdt*st
+            ct = cth
+            summation = summation+cp(k)*ct
+        end do
+        pb= summation
+    else
+        cdt = cos(2.0*theta)
+        sdt = sin(2.0*theta)
+        ct = cos(theta)
+        st = -sin(theta)
+        summation = 0.0
+        do k=1, kdo
+            cth = cdt*ct-sdt*st
+            st = sdt*ct+cdt*st
+            ct = cth
+            summation = summation+cp(k)*st
+        end do
+        pb= summation
     end if
-
-100 cdt = cos(2.0*theta)
-    sdt = sin(2.0*theta)
-    ct = cos(theta)
-    st = -sin(theta)
-    summation = 0.0
-
-    do k=1, kdo
-        cth = cdt*ct-sdt*st
-        st = sdt*ct+cdt*st
-        ct = cth
-        summation = summation+cp(k)*ct
-    end do
-
-    pb= summation
-    go to 140
-
-120 cdt = cos(2.0*theta)
-    sdt = sin(2.0*theta)
-    ct = cos(theta)
-    st = -sin(theta)
-    summation = 0.0
-
-    do k=1, kdo
-        cth = cdt*ct-sdt*st
-        st = sdt*ct+cdt*st
-        ct = cth
-        summation = summation+cp(k)*st
-    end do
-
-    pb= summation
 
 140 return
 

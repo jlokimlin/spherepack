@@ -206,7 +206,7 @@ subroutine gaqd(nlat, theta, wts, w, lwork, ierror)
             !
             if (mnlat /= 0) then
                 theta(nhalf) = HALF_PI
-                call tpdp (nlat, HALF_PI, cz, theta(ns2+1), wts(ns2+1), pb, dpb)
+                call tpdp(nlat, HALF_PI, cz, theta(ns2+1), wts(ns2+1), pb, dpb)
                 wts(nhalf) = (2*nlat+1)/(dpb*dpb)
             end if
 

@@ -217,8 +217,8 @@
 !           = 8  error in the specification of ndb
 !           = 9  error in the specification of lvhsgs
 !           = 10 error in the specification of lwork
-! **********************************************************************
-!                                                                              
+!
+!
 subroutine isfvpgs(nlat, nlon, isym, nt, v, w, idv, jdv, as, bs, av, bv, &
     mdb, ndb, wvhsgs, lvhsgs, work, lwork, ierror)
     implicit none
@@ -230,45 +230,94 @@ subroutine isfvpgs(nlat, nlon, isym, nt, v, w, idv, jdv, as, bs, av, bv, &
     integer l1, l2, mn, is, lwk, iwk, lwmin
     integer ibr, ibi, icr, ici
     !
-    !     check input parameters
+    !==> Check validity of input parameters
     !
-    ierror = 1
-    if (nlat < 3) return
-    ierror = 2
-    if (nlon < 4) return
-    ierror = 3
-    if (isym < 0 .or. isym > 2) return
-    ierror = 4
-    if (nt < 0) return
-    ierror = 5
-    l2 = (nlat+1)/2
-    if ((isym == 0 .and. idv<nlat) .or. &
-        (isym>0 .and. idv<l2)) return
-    ierror = 6
-    if (jdv < nlon) return
-    ierror = 7
-    l1 = min(nlat, (nlon+1)/2)
-    if (mdb < min(nlat, (nlon+2)/2)) return
-    ierror = 8
-    if (ndb < nlat) return
-    ierror = 9
-    lwmin = l1*l2*(nlat+nlat-l1+1)+nlon+15+2*nlat
-    if (lvhsgs < lwmin) return
-    ierror = 10
-    ierror = 10
-    if (isym == 0) then
-        lwmin = nlat*((2*nt+1)*nlon+4*l1*nt+1)
-    else
-        lwmin = (2*nt+1)*l2*nlon + nlat*(4*l1*nt+1)
+
+    ! Initialize error flag
+    ierror = 0
+
+    ! Check case 1
+    if (nlat < 3) then
+        ierror = 1
+        return
     end if
-    if (lwork < lwmin) return
+
+    ! Check case 2
+    if (nlon < 4) then
+        ierror = 2
+        return
+    end if
+
+    ! Check case 3
+    if (isym < 0 .or. isym > 2) then
+        ierror = 3
+        return
+    end if
+
+    ! Check case 4
+    if (nt < 0) then
+        ierror = 4
+        return
+    end if
+
+    l2 = (nlat+1)/2
+
+    ! Check case 5
+    if ( &
+        (isym == 0 .and. idv < nlat) &
+        .or. &
+        (isym > 0 .and. idv < l2) &
+        ) then
+        ierror = 5
+        return
+    end if
+
+    ! Check case 6
+    if (jdv < nlon) then
+        ierror = 6
+        return
+    end if
+
+    l1 = min(nlat, (nlon+1)/2)
+
+    ! Check case 7
+    if (mdb < min(nlat, (nlon+2)/2)) then
+        ierror = 7
+        return
+    end if
+
+    ! Check case 8
+    if (ndb < nlat) then
+        ierror = 8
+        return
+    end if
+
+    lwmin = l1*l2*(nlat+nlat-l1+1)+nlon+15+2*nlat
+
+    ! Check case 9
+    if (lvhsgs < lwmin) then
+        ierror = 9
+        return
+    end if
+
+    select case (isym)
+        case (0)
+            lwmin = nlat*((2*nt+1)*nlon+4*l1*nt+1)
+        case default
+            lwmin = (2*nt+1)*l2*nlon + nlat*(4*l1*nt+1)
+    end select
+
+    ! Check case 10
+    if (lwork < lwmin) then
+        ierror = 10
+        return
+    end if
     !
-    !     set first dimension for br, bi, cr, ci (as requried by vhsgs)
+    !==> set first dimension for br, bi, cr, ci (as requried by vhsgs)
     !
     mn = l1*nlat*nt
-    ierror = 0
     !
-    !     set work space pointers
+    !==> set work space pointers
     !
     ibr = 1
     ibi = ibr+mn
@@ -277,11 +326,14 @@ subroutine isfvpgs(nlat, nlon, isym, nt, v, w, idv, jdv, as, bs, av, bv, &
     is = ici+mn
     iwk = is+nlat
     lwk = lwork-4*mn-nlat
+
     call isfvpgs1(nlat, nlon, isym, nt, v, w, idv, jdv, as, bs, av, bv, mdb, &
         ndb, work(ibr), work(ibi), work(icr), work(ici), l1, work(is), &
         wvhsgs, lvhsgs, work(iwk), lwk, ierror)
-    return
+
 end subroutine isfvpgs
+
+
 
 subroutine isfvpgs1(nlat, nlon, isym, nt, v, w, idv, jdv, as, bs, av, bv, &
     mdb, ndb, br, bi, cr, ci, mab, fnn, wvhsgs, lvhsgs, wk, lwk, ierror)
@@ -295,14 +347,14 @@ subroutine isfvpgs1(nlat, nlon, isym, nt, v, w, idv, jdv, as, bs, av, bv, &
     real wvhsgs(lvhsgs), wk(lwk), fnn(nlat)
     integer n, m, mmax, k, ityp
     !
-    !     set coefficient multiplyers
+    !==> set coefficient multiplyers
     !
     do n=2, nlat
         fnn(n) = -sqrt(real(n*(n-1)))
     end do
     mmax = min(nlat, (nlon+1)/2)
     !
-    !     compute (v, w) coefficients from as, bs, av, bv
+    !==> compute (v, w) coefficients from as, bs, av, bv
     !
     do k=1, nt
         do n=1, nlat
@@ -313,18 +365,19 @@ subroutine isfvpgs1(nlat, nlon, isym, nt, v, w, idv, jdv, as, bs, av, bv, &
                 ci(m, n, k) = 0.0
             end do
         end do
-            !
-            !     compute m=0 coefficients
-            !
+        !
+        !==> compute m = 0 coefficients
+        !
         do n=2, nlat
             br(1, n, k) = -fnn(n)*av(1, n, k)
             bi(1, n, k) = -fnn(n)*bv(1, n, k)
             cr(1, n, k) =  fnn(n)*as(1, n, k)
             ci(1, n, k) =  fnn(n)*bs(1, n, k)
         end do
-            !
-            !     compute m>0 coefficients using vector spherepack value for mmax
-            !
+        !
+        !==> compute m > 0 coefficients
+        !    using vector spherepack value for mmax
+        !
         do m=2, mmax
             do n=m, nlat
                 br(m, n, k) = -fnn(n)*av(m, n, k)
@@ -335,15 +388,15 @@ subroutine isfvpgs1(nlat, nlon, isym, nt, v, w, idv, jdv, as, bs, av, bv, &
         end do
     end do
     !
-    !     synthesize br, bi, cr, ci into (v, w)
+    !==> synthesize br, bi, cr, ci into (v, w)
     !
     select case (isym)
-    	case (0)
-    		ityp = 0
-    	case (1)
-    		ityp = 3
-    	case (2)
-    		ityp = 6
+        case (0)
+            ityp = 0
+        case (1)
+            ityp = 3
+        case (2)
+            ityp = 6
     end select
 
     call vhsgs(nlat, nlon, ityp, nt, v, w, idv, jdv, br, bi, cr, ci, &
