@@ -63,7 +63,7 @@ module type_Sphere
         procedure, public  :: get_coefficient
         procedure, public  :: invert_helmholtz
         procedure, public  :: get_gradient
-        procedure, public  :: invert_gradient
+        procedure, private :: invert_gradient_from_spherical_components
         procedure, private :: get_vorticity_from_spherical_components
         procedure, private :: get_vorticity_from_vector_field
         procedure, public  :: invert_vorticity
@@ -109,6 +109,8 @@ module type_Sphere
         generic, public :: get_vorticity => &
             get_vorticity_from_spherical_components, &
             get_vorticity_from_vector_field
+        generic, public :: invert_gradient => &
+            invert_gradient_from_spherical_components
         !----------------------------------------------------------------------
     end type Sphere
 
@@ -948,9 +950,9 @@ contains
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
         class (Sphere), intent (in out) :: this
-        real (wp),      intent (in)    :: scalar_function(:,:)
-        real (wp),      intent (out)   :: polar_gradient_component(:,:)
-        real (wp),      intent (out)   :: azimuthal_gradient_component(:,:)
+        real (wp),      intent (in)     :: scalar_function(:,:)
+        real (wp),      intent (out)    :: polar_gradient_component(:,:)
+        real (wp),      intent (out)    :: azimuthal_gradient_component(:,:)
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
@@ -998,13 +1000,15 @@ contains
     end subroutine get_gradient
 
 
-    subroutine invert_gradient(this, source, solution )
+    subroutine invert_gradient_from_spherical_components(this, &
+        polar_source, azimuthal_source, solution )
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
         class (Sphere), intent (in out) :: this
-        real (wp),      intent (in)    :: source(:,:,:)
-        real (wp),      intent (out)   :: solution(:,:)
+        real (wp),      intent (in)     :: polar_source(:,:)
+        real (wp),      intent (in)     :: azimuthal_source(:,:)
+        real (wp),      intent (out)    :: solution(:,:)
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
@@ -1014,15 +1018,21 @@ contains
         ! Check if object is usable
         if (this%initialized .eqv. .false.) then
             error stop 'TYPE(Sphere): uninitialized object'&
-                //' in INVERT_GRADIENT'
+                //' in INVERT_GRADIENT_FROM_SPHERICAL_COMPONENTS'
         end if
 
-        ! compute the (real) spherical harmonic coefficients
-        call this%perform_vector_analysis( source )
+        ! Set vector spherical harmonic coefficients
+        associate( &
+            v => polar_source, &
+            w => azimuthal_source &
+            )
+            call this%vector_analysis_from_spherical_components(v, w)
+        end associate
 
         ! Invert gradient
         associate( &
-            ntrunc => this%TRIANGULAR_TRUNCATION_LIMIT, &
+            nlat => this%NUMBER_OF_LATITUDES, &
+            nlon => this%NUMBER_OF_LONGITUDES, &
             f => solution, &
             sqnn => this%vorticity_and_divergence_coefficients, &
             a => this%workspace%real_harmonic_coefficients, &
@@ -1034,19 +1044,32 @@ contains
             a = 0.0_wp
             b = 0.0_wp
 
-            do m=1, ntrunc+1
-                do n=m, ntrunc+1
-                    ! Set real coefficients
-                    a(m, n) = sqnn(n) * br(m, n)
-                    ! Set imaginary coefficients
-                    b(m, n) = sqnn(n) * bi(m, n)
-                end do
+            !
+            !==> compute m=0 coefficients
+            !
+            do n=2, nlat
+                a(1, n) = br(1, n)/sqnn(n)
+                b(1, n) = bi(1, n)/sqnn(n)
             end do
+            !
+            !==> set upper limit for vector m subscript
+            !
+            associate( mmax => min(nlat, (nlon+1)/2) )
+                !
+                !==> compute m > 0 coefficients
+                !
+                do m=2, mmax
+                    do n=m, nlat
+                        a(m, n) = br(m, n)/sqnn(n)
+                        b(m, n) = bi(m, n)/sqnn(n)
+                    end do
+                end do
+            end associate
             ! Compute scalar synthesis
             call this%perform_scalar_synthesis( f )
         end associate
 
-    end subroutine invert_gradient
+    end subroutine invert_gradient_from_spherical_components
 
 
 
@@ -1082,7 +1105,8 @@ contains
 
         ! compute gradient
         associate( &
-            ntrunc => this%TRIANGULAR_TRUNCATION_LIMIT, &
+            nlat => this%NUMBER_OF_LATITUDES, &
+            nlon => this%NUMBER_OF_LONGITUDES, &
             vort => vorticity, &
             sqnn => this%vorticity_and_divergence_coefficients, &
             a => this%workspace%real_harmonic_coefficients, &
@@ -1090,20 +1114,29 @@ contains
             cr => this%workspace%real_azimuthal_harmonic_coefficients, &
             ci => this%workspace%imaginary_azimuthal_harmonic_coefficients &
             )
-            ! Initialize (real) coefficients
+            !
+            !==> Initialize (real) coefficients
+            !
             a = 0.0_wp
             b = 0.0_wp
-
-            do m=1, ntrunc+1
-                do n=m, ntrunc+1
-                    ! Set real coefficients
-                    a(m, n) = sqnn(n) * cr(m, n)
-                    ! Set imaginary coefficients
-                    b(m, n) = sqnn(n) * ci(m, n)
+            !
+            !==> set upper limit for vector m subscript
+            !
+            associate( mmax => min(nlat, (nlon+1)/2) )
+                !
+                !==> compute m > 0 coefficients
+                !
+                do m=1, mmax
+                    do n=m, nlat
+                        a(m, n) = sqnn(n) * cr(m, n)
+                        b(m, n) = sqnn(n) * ci(m, n)
+                    end do
                 end do
-            end do
-            ! Compute vector harmonic synthesis
-            call this%perform_scalar_synthesis( vort )
+            end associate
+            !
+            !==> Compute vector harmonic synthesis
+            !
+            call this%perform_scalar_synthesis(vort)
         end associate
 
 

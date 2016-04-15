@@ -87,7 +87,7 @@ contains
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
-        integer (ip), parameter        :: NLONS = 24
+        integer (ip), parameter        :: NLONS = 36
         integer (ip), parameter        :: NLATS = NLONS/2 + 1
         integer (ip), parameter        :: NSYNTHS = 3
         integer (ip)                   :: i, j, k !! Counters
@@ -181,18 +181,6 @@ contains
             end do
         end associate
 
-        !
-        !==> Compute vorticity
-        !
-        do k=1, NSYNTHS
-            associate( &
-                ve => original_polar_component(:,:,k), &
-                we => original_azimuthal_component(:,:,k), &
-                vt => approximate_vorticity(:,:,k) &
-                )
-                call sphere_type%get_vorticity(ve, we, vt)
-            end associate
-        end do
 
         !
         !==> Compute vorticity error
@@ -246,7 +234,7 @@ contains
             w => azimuthal_component &
             )
             err2v = maxval( abs(v-ve) ) !norm2(v - ve)/size(v)
-            err2w = maxval( abs(v-ve) ) !norm2(w - we)/size(w)
+            err2w = maxval( abs(w-we) ) !norm2(w - we)/size(w)
         end associate
 
         !
