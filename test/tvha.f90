@@ -99,7 +99,6 @@ contains
         real (wp)                      :: azimuthal_component(NLATS,NLONS,NSYNTHS)
         real (wp)                      :: synthesized_polar(NLATS,NLONS,NSYNTHS)
         real (wp)                      :: synthesized_azimuthal(NLATS,NLONS,NSYNTHS)
-        real (wp)                      :: polar_error, azimuthal_error
         character (len=:), allocatable :: previous_polar_error, previous_azimuthal_error
         !----------------------------------------------------------------------
 
@@ -116,8 +115,8 @@ contains
             call sphere_type%create(nlat=NLATS, nlon=NLONS)
 
             ! Allocate known error from previous platform
-            allocate( previous_polar_error, source='     polar error     = 2.690555e-14' )
-            allocate( previous_azimuthal_error, source='     azimuthal error = 2.824306e-14' )
+            allocate( previous_polar_error, source='     polar error     = 5.107026e-15' )
+            allocate( previous_azimuthal_error, source='     azimuthal error = 9.769963e-15' )
             !
             !==> For regular sphere
             !
@@ -127,8 +126,8 @@ contains
             call sphere_type%create(nlat=NLATS, nlon=NLONS)
 
             ! Allocate known error from previous platform
-            allocate( previous_polar_error, source='     polar error     = 2.426757e-14' )
-            allocate( previous_azimuthal_error, source='     azimuthal error = 3.070124e-14' )
+            allocate( previous_polar_error, source='     polar error     = 5.329071e-15' )
+            allocate( previous_azimuthal_error, source='     azimuthal error = 7.771561e-15' )
         end select
 
         !
@@ -212,35 +211,34 @@ contains
         !==> Compute discretization error
         !
         associate( &
-            err2v => polar_error, &
-            err2w => azimuthal_error, &
             ve => polar_component, &
             we => azimuthal_component, &
             v => synthesized_polar, &
             w => synthesized_azimuthal &
             )
-            err2v = norm2(v - ve)
-            err2w = norm2(w - we)
+            associate( &
+                err2v => maxval(abs(v - ve)), &
+                err2w => maxval(abs(w - we)) &
+                )
+                !
+                !==> Print earlier output from platform with 64-bit floating point
+                !    arithmetic followed by the output from this computer
+                !
+                write( stdout, '(A)') ''
+                write( stdout, '(A)') '     tvha *** TEST RUN *** '
+                write( stdout, '(A)') ''
+                write( stdout, '(A)') '     grid type = '//sphere_type%grid%grid_type
+                write( stdout, '(A)') '     Testing vector analysis and synthesis'
+                write( stdout, '(2(A,I2))') '     nlat = ', NLATS,' nlon = ', NLONS
+                write( stdout, '(A)') '     Previous 64 bit floating point arithmetic result '
+                write( stdout, '(A)') previous_polar_error
+                write( stdout, '(A)') previous_azimuthal_error
+                write( stdout, '(A)') '     The output from your computer is: '
+                write( stdout, '(A,1pe15.6)') '     polar error     = ', err2v
+                write( stdout, '(A,1pe15.6)') '     azimuthal error = ', err2w
+                write( stdout, '(A)' ) ''
+            end associate
         end associate
-
-        !
-        !==> Print earlier output from platform with 64-bit floating point
-        !    arithmetic followed by the output from this computer
-        !
-        write( stdout, '(A)') ''
-        write( stdout, '(A)') '     tvha *** TEST RUN *** '
-        write( stdout, '(A)') ''
-        write( stdout, '(A)') '     grid type = '//sphere_type%grid%grid_type
-        write( stdout, '(A)') '     Testing vector analysis and synthesis'
-        write( stdout, '(2(A,I2))') '     nlat = ', NLATS,' nlon = ', NLONS
-        write( stdout, '(A)') '     Previous 64 bit floating point arithmetic result '
-        write( stdout, '(A)') previous_polar_error
-        write( stdout, '(A)') previous_azimuthal_error
-        write( stdout, '(A)') '     The output from your computer is: '
-        write( stdout, '(A,1pe15.6)') '     polar error     = ', polar_error
-        write( stdout, '(A,1pe15.6)') '     azimuthal error = ', azimuthal_error
-        write( stdout, '(A)' ) ''
-
         !
         !==> Release memory
         !

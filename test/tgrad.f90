@@ -95,7 +95,6 @@ contains
         real (wp)                      :: approximate_polar_gradient_component(NLATS,NLONS,NSYNTHS)
         real (wp)                      :: approximate_azimuthal_gradient_component(NLATS,NLONS,NSYNTHS)
         real (wp)                      :: approximate_scalar_function(NLATS,NLONS,NSYNTHS)
-        real (wp)                      :: gradient_error, polar_error, azimuthal_error
         character (len=:), allocatable :: previous_gradient_inversion_error
         character (len=:), allocatable :: previous_polar_gradient_error
         character (len=:), allocatable :: previous_azimuthal_gradient_error
@@ -221,32 +220,33 @@ contains
         !==> compare this v,w with original
         !
         associate( &
-            err2v => polar_error, &
-            err2w => azimuthal_error, &
             ve => original_polar_gradient_component, &
             we => original_azimuthal_gradient_component, &
             v => approximate_polar_gradient_component, &
             w => approximate_azimuthal_gradient_component &
             )
-            err2v = maxval( abs(v-ve) ) !norm2(v - ve)/size(v)
-            err2w = maxval( abs(w-we) ) !norm2(w - we)/size(w)
-            !
-            !==> Print earlier output from platform with 64-bit floating point
-            !    arithmetic followed by the output from this computer
-            !
-            write( stdout, '(A)') ''
-            write( stdout, '(A)') '     tgrad *** TEST RUN *** '
-            write( stdout, '(A)') ''
-            write( stdout, '(A)') '     grid type = '//sphere_type%grid%grid_type
-            write( stdout, '(A)') '     Testing gradient'
-            write( stdout, '(2(A,I2))') '     nlat = ', NLATS,' nlon = ', NLONS
-            write( stdout, '(A)') '     Previous 64 bit floating point arithmetic result '
-            write( stdout, '(A)') previous_polar_gradient_error
-            write( stdout, '(A)') previous_azimuthal_gradient_error
-            write( stdout, '(A)') '     The output from your computer is: '
-            write( stdout, '(A,1pe15.6)') '     polar gradient error     = ', err2v
-            write( stdout, '(A,1pe15.6)') '     azimuthal gradient error = ', err2w
-            write( stdout, '(A)' ) ''
+            associate( &
+                err2v => maxval(abs(v-ve)), &
+                err2w => maxval(abs(w-we)) &
+                )
+                !
+                !==> Print earlier output from platform with 64-bit floating point
+                !    arithmetic followed by the output from this computer
+                !
+                write( stdout, '(A)') ''
+                write( stdout, '(A)') '     tgrad *** TEST RUN *** '
+                write( stdout, '(A)') ''
+                write( stdout, '(A)') '     grid type = '//sphere_type%grid%grid_type
+                write( stdout, '(A)') '     Testing gradient'
+                write( stdout, '(2(A,I2))') '     nlat = ', NLATS,' nlon = ', NLONS
+                write( stdout, '(A)') '     Previous 64 bit floating point arithmetic result '
+                write( stdout, '(A)') previous_polar_gradient_error
+                write( stdout, '(A)') previous_azimuthal_gradient_error
+                write( stdout, '(A)') '     The output from your computer is: '
+                write( stdout, '(A,1pe15.6)') '     polar gradient error     = ', err2v
+                write( stdout, '(A,1pe15.6)') '     azimuthal gradient error = ', err2w
+                write( stdout, '(A)' ) ''
+            end associate
         end associate
 
         !
@@ -261,33 +261,30 @@ contains
                 call sphere_type%invert_gradient(ve, we, sf)
             end associate
         end do
-
-
         !
         !==> Compute gradient inversion error
         !
         associate( &
-            err2 => gradient_error, &
             sf => approximate_scalar_function, &
             sfe => original_scalar_function &
             )
-            err2 = maxval(abs(sf-sfe)) !norm2(sf - sfe)/size(sf)
-
-            !
-            !==> Print earlier output from platform with 64-bit floating point
-            !    arithmetic followed by the output from this computer
-            !
-            write( stdout, '(A)') ''
-            write( stdout, '(A)') '     tgrad *** TEST RUN *** '
-            write( stdout, '(A)') ''
-            write( stdout, '(A)') '     grid type = '//sphere_type%grid%grid_type
-            write( stdout, '(A)') '     Testing gradient inversion'
-            write( stdout, '(2(A,I2))') '     nlat = ', NLATS,' nlon = ', NLONS
-            write( stdout, '(A)') '     Previous 64 bit floating point arithmetic result '
-            write( stdout, '(A)') previous_gradient_inversion_error
-            write( stdout, '(A)') '     The output from your computer is: '
-            write( stdout, '(A,1pe15.6)') '     gradient inversion error     = ', err2
-            write( stdout, '(A)' ) ''
+            associate( err2 => maxval(abs(sf-sfe)) )
+                !
+                !==> Print earlier output from platform with 64-bit floating point
+                !    arithmetic followed by the output from this computer
+                !
+                write( stdout, '(A)') ''
+                write( stdout, '(A)') '     tgrad *** TEST RUN *** '
+                write( stdout, '(A)') ''
+                write( stdout, '(A)') '     grid type = '//sphere_type%grid%grid_type
+                write( stdout, '(A)') '     Testing gradient inversion'
+                write( stdout, '(2(A,I2))') '     nlat = ', NLATS,' nlon = ', NLONS
+                write( stdout, '(A)') '     Previous 64 bit floating point arithmetic result '
+                write( stdout, '(A)') previous_gradient_inversion_error
+                write( stdout, '(A)') '     The output from your computer is: '
+                write( stdout, '(A,1pe15.6)') '     gradient inversion error     = ', err2
+                write( stdout, '(A)' ) ''
+            end associate
         end associate
         !
         !==> Release memory

@@ -75,8 +75,7 @@ contains
         integer (ip), parameter        :: NSYNTHS = 3
         integer (ip)                   :: i, j, k !! Counters
         real (wp)                      :: original_scalar_function(NLATS,NLONS,NSYNTHS)
-        real (wp)                      :: synthesized_function(NLATS,NLONS,NSYNTHS)
-        real (wp)                      :: discretization_error
+        real (wp)                      :: approximate_scalar_function(NLATS,NLONS,NSYNTHS)
         character (len=:), allocatable :: error_previous_platform
         !----------------------------------------------------------------------
 
@@ -93,7 +92,7 @@ contains
             call sphere_type%create(nlat=NLATS, nlon=NLONS)
 
             ! Allocate known error from previous platform
-            allocate( error_previous_platform, source='     discretization error = 6.517790e-13' )
+            allocate( error_previous_platform, source='     discretization error = 3.375078e-14' )
             !
             !==> For regular sphere
             !
@@ -103,7 +102,7 @@ contains
             call sphere_type%create(nlat=NLATS, nlon=NLONS)
 
             ! Allocate known error from previous platform
-            allocate( error_previous_platform, source='     discretization error = 5.415693e-13' )
+            allocate( error_previous_platform, source='     discretization error = 2.664535e-14' )
         end select
 
         !
@@ -140,44 +139,41 @@ contains
         do k = 1, NSYNTHS
             associate( &
                 se => original_scalar_function(:,:,k), &
-                s => synthesized_function(:,:,k) &
+                s => approximate_scalar_function(:,:,k) &
                 )
 
                 ! Analyse function into (real) coefficients
-                call sphere_type%perform_scalar_analysis(se)
+                call sphere_type%perform_complex_analysis(se)
 
                 ! Synthesize function from (real) coefficients
-                call sphere_type%perform_scalar_synthesis(s)
+                call sphere_type%perform_complex_synthesis(s)
             end associate
         end do
-
         !
         !==> Compute discretization error
         !
         associate( &
-            err2 => discretization_error, &
             se => original_scalar_function, &
-            s => synthesized_function &
+            s => approximate_scalar_function &
             )
-            err2 = norm2(s - se)
+            associate( err2 => maxval(abs(s - se)) )
+                !
+                !==> Print earlier output from platform with 64-bit floating point
+                !    arithmetic followed by the output from this computer
+                !
+                write( stdout, '(A)') ''
+                write( stdout, '(A)') '     tsha *** TEST RUN *** '
+                write( stdout, '(A)') ''
+                write( stdout, '(A)') '     grid type = '//sphere_type%grid%grid_type
+                write( stdout, '(A)') '     Testing scalar analysis and synthesis'
+                write( stdout, '(2(A,I2))') '     nlat = ', NLATS,' nlon = ', NLONS
+                write( stdout, '(A)') '     Previous 64 bit floating point arithmetic result '
+                write( stdout, '(A)') error_previous_platform
+                write( stdout, '(A)') '     The output from your computer is: '
+                write( stdout, '(A,1pe15.6)') '     discretization error = ', err2
+                write( stdout, '(A)' ) ''
+            end associate
         end associate
-
-        !
-        !==> Print earlier output from platform with 64-bit floating point
-        !    arithmetic followed by the output from this computer
-        !
-        write( stdout, '(A)') ''
-        write( stdout, '(A)') '     tsha *** TEST RUN *** '
-        write( stdout, '(A)') ''
-        write( stdout, '(A)') '     grid type = '//sphere_type%grid%grid_type
-        write( stdout, '(A)') '     Testing scalar analysis and synthesis'
-        write( stdout, '(2(A,I2))') '     nlat = ', NLATS,' nlon = ', NLONS
-        write( stdout, '(A)') '     Previous 64 bit floating point arithmetic result '
-        write( stdout, '(A)') error_previous_platform
-        write( stdout, '(A)') '     The output from your computer is: '
-        write( stdout, '(A,1pe15.6)') '     discretization error = ', discretization_error
-        write( stdout, '(A)' ) ''
-
         !
         !==> Release memory
         !

@@ -80,10 +80,10 @@ contains
         integer (ip), parameter        :: NLONS = 22
         integer (ip), parameter        :: NSYNTHS = 3
         integer (ip)                   :: i, j, k !! Counters
-        real (wp)                      :: scalar_function(NLATS,NLONS,NSYNTHS)
-        real (wp)                      :: approximate_laplacian(NLATS,NLONS,NSYNTHS)
+        real (wp)                      :: original_scalar_function(NLATS,NLONS,NSYNTHS)
         real (wp)                      :: exact_laplacian(NLATS,NLONS,NSYNTHS)
-        real (wp)                      :: discretization_error, se
+        real (wp)                      :: approximate_scalar_function(NLATS,NLONS,NSYNTHS)
+        real (wp)                      :: approximate_laplacian(NLATS,NLONS,NSYNTHS)
         character (len=:), allocatable :: laplacian_error, inversion_error
         !----------------------------------------------------------------------
 
@@ -100,8 +100,8 @@ contains
             call sphere_type%create(nlat=NLATS, nlon=NLONS)
 
             ! Allocate known error from previous platform
-            allocate( laplacian_error, source='     discretization error = 5.333566e-14' )
-            allocate( inversion_error, source='     discretization error = 2.164177e-16' )
+            allocate( laplacian_error, source='     discretization error = 1.953993e-13' )
+            allocate( inversion_error, source='     discretization error = 6.661338e-16' )
             !
             !==> For regular sphere
             !
@@ -111,8 +111,8 @@ contains
             call sphere_type%create(nlat=NLATS, nlon=NLONS)
 
             ! Allocate known error from previous platform
-            allocate( laplacian_error, source='     discretization error = 3.783623e-14' )
-            allocate( inversion_error, source='     discretization error = 3.372189e-16' )
+            allocate( laplacian_error, source='     discretization error = 1.003642e-13' )
+            allocate( inversion_error, source='     discretization error = 8.881784e-16' )
         end select
 
         !
@@ -121,7 +121,7 @@ contains
         !    restricted to the sphere
         !
         associate( &
-            s => scalar_function, &
+            se => original_scalar_function, &
             sclpe => exact_laplacian, &
             radial => sphere_type%unit_vectors%radial &
             )
@@ -135,13 +135,13 @@ contains
                             )
                             select case (k)
                                 case(1)
-                                    s(i,j,k) = x + y
+                                    se(i,j,k) = x + y
                                     sclpe(i,j,k) = -2.0_wp * (x + y)
                                 case(2)
-                                    s(i,j,k) = x + z
+                                    se(i,j,k) = x + z
                                     sclpe(i,j,k) = -2.0_wp * (x + z)
                                 case(3)
-                                    s(i,j,k) = y + z
+                                    se(i,j,k) = y + z
                                     sclpe(i,j,k) = -2.0_wp * (y + z)
                             end select
                         end associate
@@ -155,116 +155,81 @@ contains
         !
         do k = 1, NSYNTHS
             associate( &
-                s => scalar_function(:,:,k), &
+                se => original_scalar_function(:,:,k), &
                 sclp => approximate_laplacian(:,:,k) &
                 )
-                call sphere_type%get_laplacian(s, sclp)
+                call sphere_type%get_laplacian(se, sclp)
             end associate
         end do
 
         !
         !==> Compute discretization error in sclp
         !
-        discretization_error = 0.0_wp
         associate( &
-        err2 => discretization_error, &
             sclp => approximate_laplacian, &
             sclpe => exact_laplacian &
             )
-            do k = 1, NSYNTHS
-                do j = 1, NLONS
-                    do i = 1, NLATS
-                        err2 = err2 + (sclpe(i,j,k)-sclp(i,j,k))**2
-                    end do
-                end do
-            end do
-            err2 = sqrt(err2/size(sclp))
+            associate( err2 => maxval(abs(sclp - sclpe)) )
+                !
+                !==> Print earlier output from platform with 64-bit floating point
+                !    arithmetic followed by the output from this computer
+                !
+                write( stdout, '(A)') ''
+                write( stdout, '(A)') '     tslap *** TEST RUN *** '
+                write( stdout, '(A)') ''
+                write( stdout, '(A)') '     grid type = '//sphere_type%grid%grid_type
+                write( stdout, '(A)') '     scalar laplacian approximation'
+                write( stdout, '(2(A,I2))') '     nlat = ', NLATS,' nlon = ', NLONS
+                write( stdout, '(A)') '     Previous 64 bit floating point arithmetic result '
+                write( stdout, '(A)') laplacian_error
+                write( stdout, '(A)') '     The output from your computer is: '
+                write( stdout, '(A,1pe15.6)') '     discretization error = ', err2
+                write( stdout, '(A)' ) ''
+            end associate
         end associate
-
-
-        !
-        !==> Print earlier output from platform with 64-bit floating point
-        !    arithmetic followed by the output from this computer
-        !
-        write( stdout, '(A)') ''
-        write( stdout, '(A)') '     tslap *** TEST RUN *** '
-        write( stdout, '(A)') ''
-        write( stdout, '(A)') '     grid type = '//sphere_type%grid%grid_type
-        write( stdout, '(A)') '     scalar laplacian approximation'
-        write( stdout, '(2(A,I2))') '     nlat = ', NLATS,' nlon = ', NLONS
-        write( stdout, '(A)') '     Previous 64 bit floating point arithmetic result '
-        write( stdout, '(A)') laplacian_error
-        write( stdout, '(A)') '     The output from your computer is: '
-        write( stdout, '(A,1pe15.6)') '     discretization error = ', discretization_error
-        write( stdout, '(A)' ) ''
-
         !
         !==> invert scalar laplacian
         !
         do k = 1, NSYNTHS
             associate( &
                 sclpe => exact_laplacian(:,:,k), &
-                s => scalar_function(:,:,k) &
+                s => approximate_scalar_function(:,:,k) &
                 )
                 call sphere_type%invert_laplacian(sclpe, s)
             end associate
         end do
 
         !
-        !==> Compare s with original
+        !==> Compare s with se
         !
-        discretization_error = 0.0_wp
         associate( &
-            err2 => discretization_error, &
-            s => scalar_function, &
-            radial => sphere_type%unit_vectors%radial &
+            s => approximate_scalar_function, &
+            se => original_scalar_function &
             )
-            do k=1,NSYNTHS
-                do j=1,NLONS
-                    do i=1,NLATS
-                        associate( &
-                            x => radial(i,j)%x, &
-                            y => radial(i,j)%y, &
-                            z => radial(i,j)%z &
-                            )
-                            select case (k)
-                                case (1)
-                                    se = x + y
-                                case (2)
-                                    se = x + z
-                                case (3)
-                                    se = y + z
-                            end select
-                            err2 = err2+(s(i,j,k) - se)**2
-                        end associate
-                    end do
-                end do
-            end do
-            err2 = sqrt(err2/size(s))
+            associate( err2 => maxval(abs(s - se)) )
+                !
+                !==> Print earlier output from platform with 64-bit floating point
+                !    arithmetic followed by the output from this computer
+                !
+                write( stdout, '(A)') ''
+                write( stdout, '(A)') '     tslap *** TEST RUN *** '
+                write( stdout, '(A)') ''
+                write( stdout, '(A)') '     grid type = '//sphere_type%grid%grid_type
+                write( stdout, '(A)') '     scalar laplacian inversion'
+                write( stdout, '(2(A,I2))') '     nlat = ', NLATS,' nlon = ', NLONS
+                write( stdout, '(A)') '     Previous 64 bit floating point arithmetic result '
+                write( stdout, '(A)') inversion_error
+                write( stdout, '(A)') '     The output from your computer is: '
+                write( stdout, '(A,1pe15.6)') '     discretization error = ', err2
+                write( stdout, '(A)' ) ''
+            end associate
         end associate
-
-        !
-        !==> Print earlier output from platform with 64-bit floating point
-        !    arithmetic followed by the output from this computer
-        !
-        write( stdout, '(A)') ''
-        write( stdout, '(A)') '     tslap *** TEST RUN *** '
-        write( stdout, '(A)') ''
-        write( stdout, '(A)') '     grid type = '//sphere_type%grid%grid_type
-        write( stdout, '(A)') '     scalar laplacian inversion'
-        write( stdout, '(2(A,I2))') '     nlat = ', NLATS,' nlon = ', NLONS
-        write( stdout, '(A)') '     Previous 64 bit floating point arithmetic result '
-        write( stdout, '(A)') inversion_error
-        write( stdout, '(A)') '     The output from your computer is: '
-        write( stdout, '(A,1pe15.6)') '     discretization error = ', discretization_error
-        write( stdout, '(A)' ) ''
-
         !
         !==> Release memory
         !
-        call sphere_type%destroy()
         deallocate( laplacian_error )
         deallocate( inversion_error )
+        call sphere_type%destroy()
 
     end subroutine test_scalar_laplacian_routines
 

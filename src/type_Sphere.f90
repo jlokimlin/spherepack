@@ -78,8 +78,9 @@ module type_Sphere
         procedure, private :: perform_vector_analysis_from_vector_field
         procedure, public  :: synthesize_from_complex_spectral_coefficients
         procedure, public  :: analyze_into_complex_spectral_coefficients
-        procedure, public  :: get_vorticity_and_divergence_coefficients_from_velocities
-        procedure, public  :: get_velocities_from_vorticity_and_divergence_coefficients
+        procedure, public  :: get_vorticity_and_divergence_from_velocities
+        procedure, private :: get_velocities_from_vorticity_and_divergence_coefficients
+        procedure, public  :: get_velocities_from_vorticity_and_divergence
         procedure, private :: get_scalar_laplacian
         procedure, private :: compute_vector_laplacian_coefficients
         procedure, private :: get_vector_laplacian_from_spherical_components
@@ -584,7 +585,7 @@ contains
             w => azimuthal_component &
             )
             ! Get spherical components
-            call this%unit_vectors%get_spherical_angle_components( F, v, w )
+            call this%unit_vectors%get_spherical_angle_components(F, v, w)
             ! Perform vector analysis
             call this%vector_analysis_from_spherical_components(v, w)
         end associate
@@ -1108,29 +1109,25 @@ contains
         ! Check if object is usable
         if (this%initialized .eqv. .false.) then
             error stop 'TYPE(Sphere): uninitialized object'&
-                //' in GET_VORTICITY_FROM_SPHERICAL_ANGLES'
+                //' in GET_VORTICITY_FROM_SPHERICAL_COMPONENTS'
         end if
 
-        ! Perform vector analysis from spherical components
         associate( &
             v => polar_component, &
-            w => azimuthal_component &
-            )
-            ! Perform vector analysis
-            call this%vector_analysis_from_spherical_components(v, w)
-        end associate
-
-        ! compute gradient
-        associate( &
+            w => azimuthal_component, &
             nlat => this%NUMBER_OF_LATITUDES, &
             nlon => this%NUMBER_OF_LONGITUDES, &
-            vort => vorticity, &
+            vt => vorticity, &
             sqnn => this%vorticity_and_divergence_coefficients, &
             a => this%workspace%real_harmonic_coefficients, &
             b => this%workspace%imaginary_harmonic_coefficients, &
             cr => this%workspace%real_azimuthal_harmonic_coefficients, &
             ci => this%workspace%imaginary_azimuthal_harmonic_coefficients &
             )
+            !
+            !==> Perform vector analysis
+            !
+            call this%vector_analysis_from_spherical_components(v, w)
             !
             !==> Initialize (real) coefficients
             !
@@ -1153,7 +1150,7 @@ contains
             !
             !==> Compute vector harmonic synthesis
             !
-            call this%perform_scalar_synthesis(vort)
+            call this%perform_scalar_synthesis(vt)
         end associate
 
 
@@ -1204,11 +1201,11 @@ contains
             !
             !==> Get spherical components
             !
-            call this%unit_vectors%get_spherical_angle_components( F, v, w )
+            call this%unit_vectors%get_spherical_angle_components(F, v, w)
             !
             !==> Get vorticity from spherical components
             !
-            call this%get_vorticity_from_spherical_components( v, w, vort )
+            call this%get_vorticity_from_spherical_components(v, w, vort)
         end associate
 
         !
@@ -1320,82 +1317,64 @@ contains
     end subroutine invert_vorticity
 
 
-
-    subroutine get_divergence_from_coefficients(this, divergence)
+    subroutine get_divergence_from_vector_field(this, vector_field, divergence)
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
         class (Sphere), intent (in out) :: this
-        real (wp),      intent (out)   :: divergence (:,:)
+        real (wp),      intent (in)     :: vector_field (:,:,:)
+        real (wp),      intent (out)    :: divergence (:,:)
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
-        integer (ip) :: n, m !! Counters
+        real (wp), allocatable :: polar_component(:,:)
+        real (wp), allocatable :: azimuthal_component(:,:)
         !----------------------------------------------------------------------
 
         ! Check if object is usable
         if (this%initialized .eqv. .false.) then
-            error stop 'TYPE(Sphere): uninitialized object'&
-                //' in GET_DIVERGENCE_FROM_COEFFICIENTS'
+            error stop 'TYPE(Sphere): '&
+                //'uninitialized object in GET_DIVERGENCE_FROM_VECTOR_FIELD'
         end if
 
-        ! compute gradient
+        !
+        !==> Allocate memory
+        !
         associate( &
             nlat => this%NUMBER_OF_LATITUDES, &
-            ntrunc => this%TRIANGULAR_TRUNCATION_LIMIT, &
-            div => divergence, &
-            sqnn => this%vorticity_and_divergence_coefficients, &
-            a => this%workspace%real_harmonic_coefficients, &
-            b => this%workspace%imaginary_harmonic_coefficients, &
-            br => this%workspace%real_polar_harmonic_coefficients, &
-            bi => this%workspace%imaginary_polar_harmonic_coefficients &
+            nlon => this%NUMBER_OF_LONGITUDES &
             )
-            ! Initialize (real) coefficients
-            a = 0.0_wp
-            b = 0.0_wp
-
-            do m=1, ntrunc+1
-                do n=m, ntrunc+1
-                    ! Set real coefficients
-                    a(m, n) = -sqnn(n) * br(m, n)
-                    ! Set imaginary coefficients
-                    b(m, n) = -sqnn(n) * bi(m, n)
-                end do
-            end do
-            ! Compute vector harmonic synthesis
-            call this%perform_scalar_synthesis( div )
+            allocate( polar_component(nlat, nlon) )
+            allocate( azimuthal_component(nlat, nlon) )
         end associate
 
-    end subroutine get_divergence_from_coefficients
+        !
+        !==> Compute vorticity
+        !
+        associate( &
+            F => vector_field, &
+            v => polar_component, &
+            w => azimuthal_component, &
+            dv => divergence &
+            )
+            !
+            !==> Get spherical components
+            !
+            call this%unit_vectors%get_spherical_angle_components(F, v, w)
+            !
+            !==> Get vorticity from spherical components
+            !
+            call this%get_divergence_from_spherical_components(v, w, dv)
+        end associate
 
-
-
-    subroutine get_divergence_from_vector_field(this, vector_field, divergence )
-        !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
-        !----------------------------------------------------------------------
-        class (Sphere), intent (in out) :: this
-        real (wp),      intent (in)    :: vector_field (:,:,:)
-        real (wp),      intent (out)   :: divergence (:,:)
-        !----------------------------------------------------------------------
-        ! Dictionary: local variables
-        !----------------------------------------------------------------------
-        integer (ip) :: n, m !! Counters
-        !----------------------------------------------------------------------
-
-        ! Check if object is usable
-        if (this%initialized .eqv. .false.) then
-            error stop 'TYPE(Sphere): uninitialized object'&
-                //' in GET_DIVERGENCE_FROM_VECTOR_FIELD'
-        end if
-
-        ! Calculate the (real) vector harmonic coefficients
-        call this%perform_vector_analysis( vector_field )
-
-        ! compute divergence
-        call get_divergence_from_coefficients(this, divergence)
+        !
+        !==> Release memory
+        !
+        deallocate( polar_component )
+        deallocate( azimuthal_component )
 
     end subroutine get_divergence_from_vector_field
+
 
 
     subroutine get_divergence_from_spherical_components(this, &
@@ -1418,18 +1397,46 @@ contains
             error stop 'TYPE(Sphere): uninitialized object'&
                 //' in GET_DIVERGENCE_FROM_SPHERICAL_COMPONENTS'
         end if
-
-        ! Calculate the (real) vector harmonic coefficients
         associate( &
             v => polar_component, &
-            w => azimuthal_component &
+            w => azimuthal_component, &
+            nlat => this%NUMBER_OF_LATITUDES, &
+            nlon => this%NUMBER_OF_LONGITUDES, &
+            dv => divergence, &
+            sqnn => this%vorticity_and_divergence_coefficients, &
+            a => this%workspace%real_harmonic_coefficients, &
+            b => this%workspace%imaginary_harmonic_coefficients, &
+            br => this%workspace%real_polar_harmonic_coefficients, &
+            bi => this%workspace%imaginary_polar_harmonic_coefficients &
             )
+            !
+            !==> Perform vector analysis
+            !
             call this%vector_analysis_from_spherical_components(v, w)
+            !
+            !==> Initialize (real) coefficients
+            !
+            a = 0.0_wp
+            b = 0.0_wp
+            !
+            !==> set upper limit for vector m subscript
+            !
+            associate( mmax => min(nlat, (nlon+1)/2) )
+                !
+                !==> compute m > 0 coefficients
+                !
+                do m=1, mmax
+                    do n=m, nlat
+                        a(m, n) = -sqnn(n) * br(m, n)
+                        b(m, n) = -sqnn(n) * bi(m, n)
+                    end do
+                end do
+            end associate
+            !
+            !==> Compute vector harmonic synthesis
+            !
+            call this%perform_scalar_synthesis(dv)
         end associate
-
-        ! compute divergence
-        call get_divergence_from_coefficients(this, divergence)
-
     end subroutine get_divergence_from_spherical_components
 
 
@@ -1507,72 +1514,42 @@ contains
     end subroutine invert_divergence
 
 
-    subroutine get_vorticity_and_divergence_coefficients_from_velocities(this, &
-        polar_component, azimuthal_component, vort_spec, div_spec)
+    subroutine get_vorticity_and_divergence_from_velocities(this, &
+        polar_component, azimuthal_component, vorticity, divergence)
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
         class (Sphere),         intent (in out) :: this
-        real (wp),              intent (in)    :: polar_component(:,:)
-        real (wp),              intent (in)    :: azimuthal_component(:,:)
-        complex (wp),           intent (out)   :: vort_spec(:)
-        complex (wp),           intent (out)   :: div_spec(:)
-        !----------------------------------------------------------------------
-        ! Dictionary: local variables
-        !----------------------------------------------------------------------
-        integer (ip) :: n, m  !! Counters
+        real (wp),              intent (in)     :: polar_component(:,:)
+        real (wp),              intent (in)     :: azimuthal_component(:,:)
+        real (wp),              intent (out)    :: vorticity(:,:)
+        real (wp),              intent (out)    :: divergence(:,:)
         !----------------------------------------------------------------------
 
         ! Check if object is usable
         if (this%initialized .eqv. .false.) then
             error stop 'TYPE(Sphere): uninitialized object'&
-                //' in GET_VORTICITY_AND_DIVERGENCE_COEFFICIENTS_FROM_VELOCITIES'
+                //' in GET_VORTICITY_AND_DIVERGENCE_FROM_VELOCITIES'
         end if
 
-        ! Perform vector analysis
-        call this%vector_analysis_from_spherical_components( &
-            polar_component, azimuthal_component )
-
-        ! Associate various quantities
         associate( &
-            nm_dim => size(this%complex_spectral_coefficients ), &
-            nlat => this%NUMBER_OF_LATITUDES, &
-            ntrunc => this%TRIANGULAR_TRUNCATION_LIMIT, &
-            rsphere => this%RADIUS_OF_SPHERE, &
-            sqnn => this%vorticity_and_divergence_coefficients, &
-            a => this%workspace%real_harmonic_coefficients, &
-            b => this%workspace%imaginary_harmonic_coefficients, &
-            br => this%workspace%real_polar_harmonic_coefficients, &
-            bi => this%workspace%imaginary_polar_harmonic_coefficients, &
-            cr => this%workspace%real_azimuthal_harmonic_coefficients, &
-            ci => this%workspace%imaginary_azimuthal_harmonic_coefficients &
+            v => polar_component, &
+            w => azimuthal_component, &
+            vt => vorticity, &
+            dv => divergence &
             )
-            ! Initialize real scalar coefficients
-            a = 0.0_wp
-            b = 0.0_wp
-            ! Set auxiliary coefficients for divergence
-            do n = 1, nlat
-                a(:, n) = -sqnn(n) * br(:, n)
-                b(:, n) = -sqnn(n) * bi(:, n)
-            end do
-            ! Set divergence coefficients
-            div_spec = 0.5_wp * cmplx( &
-                [((a(m, n), n=m, ntrunc+1), m=1, ntrunc+1)], &
-                [((b(m, n), n=m, ntrunc+1), m=1, ntrunc+1)], &
-                kind=wp )
-            ! Set auxiliary coefficients for vorticity
-            do n=1, nlat
-                a(:, n) = sqnn(n) * cr(:, n)
-                b(:, n) = sqnn(n) * ci(:, n)
-            end do
-            ! Set vorticity coefficients
-            vort_spec = 0.5_wp * cmplx( &
-                [((a(m, n), n=m, ntrunc+1), m=1, ntrunc+1)], &
-                [((b(m, n), n=m, ntrunc+1), m=1, ntrunc+1)], &
-                kind=wp )
+            !
+            !==> Compute vorticity
+            !
+            call this%get_vorticity(v, w, vt)
+            !
+            !==> Compute divergence
+            !
+            call this%get_divergence(v, w, dv)
         end associate
 
-    end subroutine get_vorticity_and_divergence_coefficients_from_velocities
+
+    end subroutine get_vorticity_and_divergence_from_velocities
 
 
     subroutine get_velocities_from_vorticity_and_divergence_coefficients(this, &
@@ -1588,7 +1565,7 @@ contains
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
-        integer (ip)           :: nm, n, m, i  !! Counters
+        integer (ip)           :: nm, n, m, i !! Counters
         real (wp), allocatable :: isqnn(:)
         !----------------------------------------------------------------------
 
@@ -1612,7 +1589,9 @@ contains
             cr => this%workspace%real_azimuthal_harmonic_coefficients, &
             ci => this%workspace%imaginary_azimuthal_harmonic_coefficients &
             )
-            ! Allocate memory
+            !
+            !==> Allocate memory
+            !
             allocate( isqnn(size(sqnn)) )
 
             isqnn(1) = 0.0_wp
@@ -1620,11 +1599,16 @@ contains
                 isqnn(n) = 1.0_wp/sqnn(n)
             end do
 
-            ! Initialize (real) coefficients
+            !
+            !==> Initialize (real) scalar coefficients
+            !
             a = 0.0_wp
             b = 0.0_wp
 
-            ! Set (real) coefficients
+            !
+            !==> Set (real) auxiliary coefficients
+            !    from complex divergence harmonic coefficients
+            !
             do m=1, ntrunc+1
                 do n=m, ntrunc+1
                     nm = sum([(i, i=ntrunc+1, ntrunc-m+3, -1)])+n-m+1
@@ -1633,21 +1617,30 @@ contains
                 end do
             end do
 
-            ! Initialize polar coefficients
+            !
+            !==> Initialize polar vector coefficients
+            !
             br = 0.0_wp
             bi = 0.0_wp
 
-            ! Set polar coefficients
+            !
+            !==> Set polar vector coefficients
+            !
             do n=1, nlat
                 br(:, n) = isqnn(n)*a(:, n)
                 bi(:, n) = isqnn(n)*b(:, n)
             end do
 
-            ! Re-initialize (real) coefficients
+            !
+            !==> Re-initialize (real) scalar coefficients
+            !
             a = 0.0_wp
             b = 0.0_wp
 
-            ! Set azimuthal coefficients
+            !
+            !==> Set (real) auxiliary coefficients
+            !    from complex vorticity harmonic coefficients
+            !
             do m=1, ntrunc+1
                 do n=m, ntrunc+1
                     nm = sum([(i, i=ntrunc+1, ntrunc-m+3, -1)])+n-m+1
@@ -1656,24 +1649,88 @@ contains
                 end do
             end do
 
-            ! Initialize azimuthal coefficients
+            !
+            !==> Initialize azimuthal vector coefficients
+            !
             cr = 0.0_wp
             ci = 0.0_wp
 
-            ! Set azimuthal coefficients
+            !
+            !==> Set azimuthal vector coefficients
+            !
             do n=1, nlat
                 cr(:, n) = isqnn(n)*a(:, n)
                 ci(:, n) = isqnn(n)*b(:, n)
             end do
 
-            ! Compute vector harmonic sysnthesis to get components
+            !
+            !==> Compute vector harmonic sysnthesis to get components
+            !
             call this%perform_vector_synthesis(v, w)
         end associate
 
-        ! Release memory
+        !
+        !==> Release memory
+        !
         deallocate( isqnn )
 
     end subroutine get_velocities_from_vorticity_and_divergence_coefficients
+
+
+
+    subroutine get_velocities_from_vorticity_and_divergence(this, &
+        vorticity, divergence, polar_component, azimuthal_component)
+        !----------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !----------------------------------------------------------------------
+        class (Sphere), intent (in out) :: this
+        real (wp),      intent (in)     :: vorticity(:,:)
+        real (wp),      intent (in)     :: divergence(:,:)
+        real (wp),      intent (out)    :: polar_component(:,:)
+        real (wp),      intent (out)    :: azimuthal_component(:,:)
+        !----------------------------------------------------------------------
+        ! Dictionary: local variables
+        !----------------------------------------------------------------------
+        complex (wp), allocatable  :: vorticity_coefficients(:)
+        complex (wp), allocatable  :: divergence_coefficients(:)
+        !----------------------------------------------------------------------
+
+        ! Check if object is usable
+        if (this%initialized .eqv. .false.) then
+            error stop 'TYPE(Sphere): uninitialized object'&
+                //' in GET_VELOCITIES_FROM_VORTICITY_AND_DIVERGENCE'
+        end if
+
+        !
+        !==> Allocate memory
+        !
+        associate( nm_dim => size(this%complex_spectral_coefficients) )
+            allocate( vorticity_coefficients(nm_dim) )
+            allocate( divergence_coefficients(nm_dim) )
+        end associate
+
+        associate( &
+            v => polar_component, &
+            w => azimuthal_component, &
+            vt_spec => vorticity_coefficients, &
+            dv_spec => divergence_coefficients, &
+            vt => vorticity, &
+            dv => divergence &
+            )
+            !
+            !==> Compute complex spectral coefficients
+            !
+            call this%analyze_into_complex_spectral_coefficients(vt, vt_spec)
+            call this%analyze_into_complex_spectral_coefficients(dv, dv_spec)
+            !
+            !==> Compute velocities
+            !
+            call this%get_velocities_from_vorticity_and_divergence_coefficients( &
+                vt_spec, dv_spec, v, w)
+        end associate
+
+
+    end subroutine get_velocities_from_vorticity_and_divergence
 
 
 

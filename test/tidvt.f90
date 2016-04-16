@@ -50,446 +50,269 @@
 !     (5) invert dv,vt with idvt(ec,es,gc,gs) and compare with vector field from (1)
 !
 program tidvt
-    !
-    !     set dimensions with parameter statements
-    !
-    parameter(nnlat= 25,nnlon= 16, nnt = 3)
-    parameter(mmdab = (nnlon+2)/2, mmdb = (nnlon+1)/2)
-    parameter (lleng= 5*nnlat*nnlat*nnlon,llsav=15*nnlat*nnlat*nnlon)
-    dimension work(lleng),wsave(llsav)
-    parameter (lldwork = 4*nnlat*nnlat )
-    real dwork(lldwork)
-    dimension br(mmdb,nnlat,nnt),bi(mmdb,nnlat,nnt)
-    dimension cr(mmdb,nnlat,nnt),ci(mmdb,nnlat,nnt)
-    dimension ad(mmdab,nnlat,nnt),bd(mmdab,nnlat,nnt)
-    dimension av(mmdab,nnlat,nnt),bv(mmdab,nnlat,nnt)
-    dimension dv(nnlat,nnlon,nnt),vt(nnlat,nnlon,nnt)
-    dimension dvsav(nnlat,nnlon,nnt),vtsav(nnlat,nnlon,nnt)
-    dimension thetag(nnlat),dtheta(nnlat),dwts(nnlat)
-    dimension v(nnlat,nnlon,nnt),w(nnlat,nnlon,nnt)
-    dimension vsav(nnlat,nnlon,nnt),wsav(nnlat,nnlon,nnt)
-    dimension ptrbd(nnt),ptrbv(nnt)
-    real dtheta, dwts
-    !
-    !     set dimension variables
-    !
-    nlat = nnlat
-    nlon = nnlon
-    mdab = mmdab
-    mdb = mmdb
-    nmax = max(nlat,nlon)
+    use, intrinsic :: iso_fortran_env, only: &
+        ip => INT32, &
+        wp => REAL64, &
+        stdout => OUTPUT_UNIT
 
-    lwork = lleng
-    lsave = llsav
-    nt = nnt
-    call iout(nlat,"nlat")
-    call iout(nlon,"nlon")
-    call iout(nt,"  nt")
-    isym = 0
-    ityp = 0
-    !
-    !     set equally spaced colatitude and longitude increments
-    !
-    pi = acos(-1.0)
-    dphi = (pi+pi)/nlon
-    dlat = pi/(nlat-1)
-    !
-    !     compute nlat gaussian points in thetag
-    !
-    ldwork = lldwork
-    call gaqd(nlat,dtheta,dwts,dwork,ldwork,ier)
-    do  i=1,nlat
-        thetag(i) = dtheta(i)
-    end do
+    use modern_spherepack_library, only: &
+        Sphere, &
+        Regularsphere, &
+        GaussianSphere
 
-    call name("gaqd")
-    call iout(ier," ier")
-    call vecout(thetag,"thtg",nlat)
-    !
-    !     test all divergence and inverse divergence subroutines
-    !
-    do icase=1,4
+    ! Explicit typing only
+    implicit none
+
+    !----------------------------------------------------------------------
+    ! Dictionary
+    !----------------------------------------------------------------------
+    type (GaussianSphere) :: gaussian_sphere
+    type (RegularSphere)  :: regular_sphere
+    !----------------------------------------------------------------------
+
+    call test_divergence_vorticity_routines(gaussian_sphere)
+    call test_divergence_vorticity_routines(regular_sphere)
+
+
+contains
+
+    subroutine test_divergence_vorticity_routines(sphere_type )
+        !----------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !----------------------------------------------------------------------
+        class (Sphere), intent (in out) :: sphere_type
+        !----------------------------------------------------------------------
+        ! Dictionary: local variables
+        !----------------------------------------------------------------------
+        integer (ip), parameter        :: NLONS = 16
+        integer (ip), parameter        :: NLATS = 25
+        integer (ip), parameter        :: NSYNTHS = 3
+        integer (ip)                   :: i, j, k !! Counters
+        real (wp)                      :: exact_polar_component(NLATS, NLONS, NSYNTHS)
+        real (wp)                      :: exact_azimuthal_component(NLATS, NLONS, NSYNTHS)
+        real (wp)                      :: exact_vorticity(NLATS, NLONS, NSYNTHS)
+        real (wp)                      :: exact_divergence(NLATS, NLONS, NSYNTHS)
+        real (wp)                      :: approximate_polar_component(NLATS, NLONS, NSYNTHS)
+        real (wp)                      :: approximate_azimuthal_component(NLATS, NLONS, NSYNTHS)
+        real (wp)                      :: approximate_vorticity(NLATS, NLONS, NSYNTHS)
+        real (wp)                      :: approximate_divergence(NLATS, NLONS, NSYNTHS)
+        character (len=:), allocatable :: previous_vorticity_error, previous_divergence_error
+        character (len=:), allocatable :: previous_polar_inversion_error
+        character (len=:), allocatable :: previous_azimuthal_inversion_error
+        !----------------------------------------------------------------------
+
         !
-        !     icase=1 corresponds to "ec"
-        !     icase=2 corresponds to "es"
-        !     icase=3 corresponds to "gc"
-        !     icase=4 corresponds to "gs"
-
-        call name("****")
-        call name("****")
-        call iout(icase,"icas")
+        !==> Set up workspace arrays
         !
-        !     set vector field v,w
-        !
-        do k=1,nt
-            do j=1,nlon
-                phi = (j-1)*dphi
-                sinp = sin(phi)
-                cosp = cos(phi)
-                do i=1,nlat
-                    theta = (i-1)*dlat
-                    if (icase>2) theta=thetag(i)
-                    cost = cos(theta)
-                    sint = sin(theta)
-                    x = sint*cosp
-                    y = sint*sinp
-                    z = cost
-                    if (k ==1) then
-                        !              sf = x
-                        !              sv = y
-                        !
-                        !          v = -1/sint*dstdp + dsvdt
-                        !
-                        !          w =  1/sint*dsvdp + dstdt
-                        !
-                        !          dv = 1/sint*[d(sint*v)/dt + dwdp]  = dvdt + ct/st*v + 1/st*dwdp
-                        !
-                        !          vt = 1/sint*[-dv/dp + d(sint*w)/dt) = dwdt + ct/st*w - 1/st*dvdp
+        select type (sphere_type)
+            !
+            !==> For gaussian sphere
+            !
+            class is (GaussianSphere)
 
-                        v(i,j,k) = sinp + cost*sinp
-                        w(i,j,k) = cosp + cost*cosp
-                        dv(i,j,k) = -2.0*sint*sinp
-                        vt(i,j,k) = -2.0*sint*cosp
-                    else if (k==2) then
-                        !              sf = y
-                        !              sv = z
-                        v(i,j,k) = -cosp-sint
-                        w(i,j,k) = cost*sinp
-                        vt(i,j,k) = -2.*sint*sinp
-                        dv(i,j,k) = -2.*cost
-                    else if (k==3) then
-                        !              st = x
-                        !              sv = z
-                        v(i,j,k) = sinp - sint
-                        w(i,j,k) = cost*cosp
-                        vt(i,j,k) = -2.*sint*cosp
-                        dv(i,j,k) = -2.*cost
-                    end if
-                    !
-                    !      save derived vector field,vorticity,divergence for latter comparison
-                    !
-                    vtsav(i,j,k) = vt(i,j,k)
-                    dvsav(i,j,k) = dv(i,j,k)
-                    vsav(i,j,k) = v(i,j,k)
-                    wsav(i,j,k) = w(i,j,k)
+            !
+            !==> Initialize gaussian sphere object
+            !
+            call sphere_type%create(nlat=NLATS, nlon=NLONS)
+
+            ! Allocate known error from previous platform
+            allocate( previous_vorticity_error, source='     vorticity error     = 5.417888e-14' )
+            allocate( previous_divergence_error, source='     divergence error    = 7.144285e-14' )
+            allocate( previous_polar_inversion_error, source='     polar inversion error     = 1.332268e-15' )
+            allocate( previous_azimuthal_inversion_error, source='     azimuthal inversion error = 1.332268e-15' )
+            !
+            !==> For regular sphere
+            !
+            class is (RegularSphere)
+
+            !
+            !==> Initialize regular sphere object
+            !
+            call sphere_type%create(nlat=NLATS, nlon=NLONS)
+
+            ! Allocate known error from previous platform
+            allocate( previous_vorticity_error, source='     vorticity error     = 3.019807e-14' )
+            allocate( previous_divergence_error, source='     divergence error    = 4.141132e-14' )
+            allocate( previous_polar_inversion_error, source='     polar inversion error     = 1.554312e-15' )
+            allocate( previous_azimuthal_inversion_error, source='     azimuthal inversion error = 1.110223e-15' )
+        end select
+
+        !
+        !==> set scalar stream and velocity potential fields as polys in x,y,z
+        !    and then set v,w from st,sv scalar fields
+        !
+        associate( &
+            ve => exact_polar_component, &
+            we => exact_azimuthal_component, &
+            vte => exact_vorticity, &
+            dve => exact_divergence, &
+            radial => sphere_type%unit_vectors%radial, &
+            theta => sphere_type%unit_vectors%polar, &
+            phi => sphere_type%unit_vectors%azimuthal &
+            )
+            do k=1, NSYNTHS
+                do j=1, NLONS
+                    do i=1, NLATS
+                        associate( &
+                            x => radial(i,j)%x, & !sint*cosp
+                            y => radial(i,j)%y, & !sint*sinp
+                            z => radial(i,j)%z, & !cost
+                            dxdt => theta(i,j)%x, &! cost*cosp
+                            dxdp => -radial(i,j)%y, & !-sint*sinp
+                            dydt => theta(i,j)%y, &! cost*sinp
+                            dydp => radial(i,j)%x, & ! sint*cosp
+                            dzdt => theta(i,j)%z, & ! -sint
+                            dzdp => phi(i,j)%z,& ! 0.0
+                            cosp => phi(i,j)%y, &
+                            sinp => -phi(i,j)%x &
+                            )
+                            select case (k)
+                                case (1)
+                                    !
+                                    !   sf = x
+                                    !   sv = y
+                                    !
+                                    !   v = -1/sint*dstdp + dsvdt
+                                    !
+                                    !   w =  1/sint*dsvdp + dstdt
+                                    !
+                                    !   dv = 1/sint*[d(sint*v)/dt + dwdp]  = dvdt + ct/st*v + 1/st*dwdp
+                                    !
+                                    !   vt = 1/sint*[-dv/dp + d(sint*w)/dt) = dwdt + ct/st*w - 1/st*dvdp
+                                    !
+                                    ve(i,j,k) = sinp + dydt ! sinp + cost*sinp
+                                    we(i,j,k) = cosp + dxdt !cosp + cost*cosp
+                                    dve(i,j,k) = -2.0_wp * y !-2.0*sint*sinp
+                                    vte(i,j,k) = -2.0_wp * x ! -2.0*sint*cosp
+                                case (2)
+                                    !
+                                    !   sf = y
+                                    !   sv = z
+                                    !
+                                    ve(i,j,k) = -cosp + dzdt !-cosp-sint
+                                    we(i,j,k) = dydt ! cost*sinp
+                                    vte(i,j,k) = -2.0_wp * y ! -2.*sint*sinp
+                                    dve(i,j,k) = -2.0_wp * z !-2.*cost
+                                case (3)
+                                    !
+                                    !   st = x
+                                    !   sv = z
+                                    !
+                                    ve(i,j,k) = sinp + dzdt ! sinp - sint
+                                    we(i,j,k) = dxdt ! cost*cosp
+                                    vte(i,j,k) = -2.0_wp * x !-2.*sint*cosp
+                                    dve(i,j,k) = -2.0_wp * z !-2.*cost
+                            end select
+                        end associate
+                    end do
                 end do
             end do
+        end associate
+
+        !
+        !==> Compute vt and dv from (ve,we)
+        !
+        do k=1, NSYNTHS
+            associate( &
+                ve => exact_polar_component(:,:,k), &
+                we => exact_azimuthal_component(:,:,k), &
+                vt => approximate_vorticity(:,:,k), &
+                dv => approximate_divergence(:,:,k) &
+                )
+                !
+                !==> Compute vorticity and divergence
+                !
+                call sphere_type%get_vorticity_and_divergence_from_velocities(ve, we, vt, dv)
+            end associate
         end do
 
-        if (icase==1) then
-
-            call name("**ec")
-            !
-            !     analyze vector field
-            !
-            call vhaeci(nlat,nlon,wsave,lsave,work,lwork,dwork,ierror)
-            call name("vhai")
-            call iout(ierror,"ierr")
-
-            call vhaec(nlat,nlon,isym,nt,v,w,nlat,nlon,br,bi,cr,ci,mdb, &
-                nlat,wsave,lsave,work,lwork,ierror)
-            call name("vha ")
-            call iout(ierror,"ierr")
-            !
-            !     compute divergence,vorticity of (v,w) in dv,vt
-            !
-
-            call shseci(nlat,nlon,wsave,lsave,dwork,ldwork,ierror)
-            call name("shsi")
-            call iout(ierror,"ierr")
-
-            call divec(nlat,nlon,isym,nt,dv,nlat,nlon,br,bi,mdb,nlat, &
-                wsave,lsave,work,lwork,ierror)
-            call name("div ")
-            call iout(ierror,"ierr")
-
-            call vrtec(nlat,nlon,isym,nt,vt,nlat,nlon,cr,ci,mdb,nlat, &
-                wsave,lsave,work,lwork,ierror)
-            call name("vrt ")
-            call iout(ierror,"ierr")
-
-
-        else if (icase==2) then
-
-            call name("**es")
-            !
-            !     analyze vector field
-            !
-            call vhaesi(nlat,nlon,wsave,lsave,work,lwork,dwork,ldwork,ierror)
-            call name("vhai")
-            call iout(ierror,"ierr")
-            call vhaes(nlat,nlon,isym,nt,v,w,nlat,nlon,br,bi,cr,ci,mdb, &
-                nlat,wsave,lsave,work,lwork,ierror)
-            call name("vha ")
-            call iout(ierror,"ierr")
-
-            call shsesi(nlat,nlon,wsave,lsave,work,lwork,dwork,ldwork,ierror)
-            call name("shsi")
-            call iout(ierror,"ierr")
-
-            call dives(nlat,nlon,isym,nt,dv,nlat,nlon,br,bi,mdb,nlat, &
-                wsave,lsave,work,lwork,ierror)
-            call name("div ")
-            call iout(ierror,"ierr")
-            call vrtes(nlat,nlon,isym,nt,vt,nlat,nlon,cr,ci,mdb,nlat, &
-                wsave,lsave,work,lwork,ierror)
-            call name("vrt ")
-            call iout(ierror,"ierr")
-
-        else if (icase == 3) then
-
-            call name("**gc")
-            !
-            !     analyze vector field
-            !
-            call vhagci(nlat,nlon,wsave,lsave,dwork,ldwork,ierror)
-            call name("vhai")
-            call iout(ierror,"ierr")
-            call vhagc(nlat,nlon,isym,nt,v,w,nlat,nlon,br,bi,cr,ci,mdb, &
-                nlat,wsave,lsave,work,lwork,ierror)
-            call name("vha ")
-            call iout(ierror,"ierr")
-
-            call shsgci(nlat,nlon,wsave,lsave,dwork,ldwork,ierror)
-            call name("shsi")
-            call iout(ierror,"ierr")
-
-            call divgc(nlat,nlon,isym,nt,dv,nlat,nlon,br,bi,mdb,nlat, &
-                wsave,lsave,work,lwork,ierror)
-            call name("div ")
-            call iout(ierror,"ierr")
-            call vrtgc(nlat,nlon,isym,nt,vt,nlat,nlon,cr,ci,mdb,nlat, &
-                wsave,lsave,work,lwork,ierror)
-            call name("vrt ")
-            call iout(ierror,"ierr")
-
-        else if (icase == 4) then
-
-            call name("**gs")
-            !
-            !     analyze vector field
-            !
-            call vhagsi(nlat,nlon,wsave,lsave,work,lwork,dwork,ldwork,ierror)
-            call name("vhai")
-            call iout(ierror,"ierr")
-            call vhags(nlat,nlon,isym,nt,v,w,nlat,nlon,br,bi,cr,ci,mdb, &
-                nlat,wsave,lsave,work,lwork,ierror)
-            call name("vha ")
-            call iout(ierror,"ierr")
-
-            call shsgsi(nlat,nlon,wsave,lsave,work,lwork,dwork,ldwork,ierror)
-            call name("shsi")
-            call iout(ierror,"ierr")
-
-            call divgs(nlat,nlon,isym,nt,dv,nlat,nlon,br,bi,mdb,nlat, &
-                wsave,lsave,work,lwork,ierror)
-            call name("div ")
-            call iout(ierror,"ierr")
-            call vrtgs(nlat,nlon,isym,nt,vt,nlat,nlon,cr,ci,mdb,nlat, &
-                wsave,lsave,work,lwork,ierror)
-            call name("vrt ")
-            call iout(ierror,"ierr")
-
-        end if
         !
-        !     compute "error" in dv,vt
+        !==> Compute "error" in dv,vt
         !
-        err2d = 0.0
-        err2v = 0.0
-        do k=1,nt
-            do j=1,nlon
-                do i=1,nlat
-                    err2d = err2d + (dv(i,j,k)-dvsav(i,j,k))**2
-                    err2v = err2v + (vt(i,j,k)-vtsav(i,j,k))**2
-                end do
-            end do
+        associate( &
+            vt => approximate_vorticity, &
+            dv => approximate_divergence, &
+            vte => exact_vorticity,  &
+            dve => exact_divergence &
+            )
+            associate( &
+                err2vt => maxval(abs(vt-vte)), &
+                err2dv => maxval(abs(dv-dve)) &
+                )
+                !
+                !==> Print earlier output from platform with 64-bit floating point
+                !    arithmetic followed by the output from this computer
+                !
+                write( stdout, '(A)') ''
+                write( stdout, '(A)') '     tidvt *** TEST RUN *** '
+                write( stdout, '(A)') ''
+                write( stdout, '(A)') '     grid type = '//sphere_type%grid%grid_type
+                write( stdout, '(A)') '     Testing vorticity'
+                write( stdout, '(2(A,I2))') '     nlat = ', NLATS,' nlon = ', NLONS
+                write( stdout, '(A)') '     Previous 64 bit floating point arithmetic result '
+                write( stdout, '(A)') previous_vorticity_error
+                write( stdout, '(A)') previous_divergence_error
+                write( stdout, '(A)') '     The output from your computer is: '
+                write( stdout, '(A,1pe15.6)') '     vorticity error     = ', err2vt
+                write( stdout, '(A,1pe15.6)') '     divergence error     = ', err2dv
+                write( stdout, '(A)' ) ''
+            end associate
+        end associate
+
+        !
+        !==> Now compute (v,w) inverting vte, dve
+        !
+        do k=1, NSYNTHS
+            associate( &
+                v => approximate_polar_component(:,:,k), &
+                w => approximate_azimuthal_component(:,:,k), &
+                vte => exact_vorticity(:,:,k), &
+                dve => exact_divergence(:,:,k) &
+                )
+                call sphere_type%get_velocities_from_vorticity_and_divergence(vte, dve, v, w)
+            end associate
         end do
         !
-        !     set and print least squares error in dv
+        !==> compare this v,w with original
         !
-        err2d = sqrt(err2d/(nt*nlat*nlon))
-        call vout(err2d,"errd")
-        err2v = sqrt(err2v/(nt*nlat*nlon))
-        call vout(err2v,"errv")
+        associate( &
+            ve => exact_polar_component, &
+            we => exact_azimuthal_component, &
+            v => approximate_polar_component, &
+            w => approximate_azimuthal_component &
+            )
+            associate( &
+                err2v => maxval(abs(v-ve)), &
+                err2w => maxval(abs(w-we)) &
+                )
+                !
+                !==> Print earlier output from platform with 64-bit floating point
+                !    arithmetic followed by the output from this computer
+                !
+                write( stdout, '(A)') ''
+                write( stdout, '(A)') '     tidvt *** TEST RUN *** '
+                write( stdout, '(A)') ''
+                write( stdout, '(A)') '     grid type = '//sphere_type%grid%grid_type
+                write( stdout, '(A)') '     Testing vorticity inversion'
+                write( stdout, '(2(A,I2))') '     nlat = ', NLATS,' nlon = ', NLONS
+                write( stdout, '(A)') '     Previous 64 bit floating point arithmetic result '
+                write( stdout, '(A)') previous_polar_inversion_error
+                write( stdout, '(A)') previous_azimuthal_inversion_error
+                write( stdout, '(A)') '     The output from your computer is: '
+                write( stdout, '(A,1pe15.6)') '     polar inversion error     = ', err2v
+                write( stdout, '(A,1pe15.6)') '     azimuthal inversion error = ', err2w
+                write( stdout, '(A)' ) ''
+            end associate
+        end associate
         !
-        !     now recompute (v,w) inverting dv,vt using idvt(ec,es,gc,gs)
+        !==> Release memory
         !
-        do kk=1,nt
-            do j=1,nlon
-                do i=1,nlat
-                    v(i,j,kk) = 0.0
-                    w(i,j,kk) = 0.0
-                end do
-            end do
-        end do
+        deallocate( previous_vorticity_error )
+        deallocate( previous_divergence_error )
+        deallocate( previous_polar_inversion_error )
+        deallocate( previous_azimuthal_inversion_error )
+        call sphere_type%destroy()
 
+    end subroutine test_divergence_vorticity_routines
 
-        if (icase==1) then
-
-            call name("**ec")
-
-
-            call shaeci(nlat,nlon,wsave,lsave,dwork,ldwork,ierror)
-            call name("shai")
-            call iout(ierror,"ierr")
-
-            call shaec(nlat,nlon,isym,nt,dv,nlat,nlon,ad,bd, &
-                mdab,nlat,wsave,lsave,work,lwork,ierror)
-            call shaec(nlat,nlon,isym,nt,vt,nlat,nlon,av,bv, &
-                mdab,nlat,wsave,lsave,work,lwork,ierror)
-            call name("sha ")
-            call iout(ierror,"ierr")
-            call iout(lsave,"lsav")
-            call iout(lwork,"lwrk")
-
-            call vhseci(nlat,nlon,wsave,lsave,dwork,ldwork,ierror)
-            call name("idvi")
-            call iout(ierror,"ierr")
-
-            call idvtec(nlat,nlon,isym,nt,v,w,nlat,nlon,ad,bd,av,bv, &
-                mdab,nlat,wsave,lsave,work,lwork,ptrbd,ptrbv,ierror)
-            call name("idvt")
-            call iout(ierror,"ierr")
-            call vecout(prtbd,"prtd",nt)
-            call vecout(prtbv,"prtv",nt)
-
-        else if (icase==2) then
-
-            call name("**es")
-
-            call shaesi(nlat,nlon,wsave,lsave,work,lwork,dwork,ldwork,ierror)
-            call name("shai")
-            call iout(ierror,"ierr")
-
-            call shaes(nlat,nlon,isym,nt,dv,nlat,nlon,ad,bd, &
-                mdab,nlat,wsave,lsave,work,lwork,ierror)
-            call shaes(nlat,nlon,isym,nt,vt,nlat,nlon,av,bv, &
-                mdab,nlat,wsave,lsave,work,lwork,ierror)
-
-            call name("sha ")
-            call iout(ierror,"ierr")
-            call iout(lsave,"lsav")
-            call iout(lwork,"lwrk")
-
-            call vhsesi(nlat,nlon,wsave,lsave,work,lwork,dwork,ldwork,ierror)
-            call name("idvi")
-            call iout(ierror,"ierr")
-
-            call idvtes(nlat,nlon,isym,nt,v,w,nlat,nlon,ad,bd,av,bv, &
-                mdab,nlat,wsave,lsave,work,lwork,ptrbd,ptrbv,ierror)
-            call name("idvt")
-            call iout(ierror,"ierr")
-            call vecout(prtbd,"prtd",nt)
-            call vecout(prtbv,"prtv",nt)
-
-        else if (icase==3) then
-
-            call name("**gc")
-
-            call shagci(nlat,nlon,wsave,lsave,dwork,ldwork,ierror)
-            call name("shai")
-            call iout(ierror,"ierr")
-
-            call shagc(nlat,nlon,isym,nt,dv,nlat,nlon,ad,bd, &
-                mdab,nlat,wsave,lsave,work,lwork,ierror)
-            call shagc(nlat,nlon,isym,nt,vt,nlat,nlon,av,bv, &
-                mdab,nlat,wsave,lsave,work,lwork,ierror)
-
-            call name("sha ")
-            call iout(ierror,"ierr")
-            call iout(lsave,"lsav")
-            call iout(lwork,"lwrk")
-
-            call vhsgci(nlat,nlon,wsave,lsave,dwork,ldwork,ierror)
-            call name("idvi")
-            call iout(ierror,"ierr")
-
-            call idvtgc(nlat,nlon,isym,nt,v,w,nlat,nlon,ad,bd,av,bv, &
-                mdab,nlat,wsave,lsave,work,lwork,ptrbd,ptrbv,ierror)
-            call name("idvt")
-            call iout(ierror,"ierr")
-            call vecout(prtbd,"prtd",nt)
-            call vecout(prtbv,"prtv",nt)
-
-        else if (icase==4) then
-
-            call name("**gs")
-
-            call shagsi(nlat,nlon,wsave,lsave,work,lwork,dwork,ldwork,ierror)
-            call name("shai")
-            call iout(ierror,"ierr")
-
-            call shags(nlat,nlon,isym,nt,dv,nlat,nlon,ad,bd, &
-                mdab,nlat,wsave,lsave,work,lwork,ierror)
-            call shags(nlat,nlon,isym,nt,vt,nlat,nlon,av,bv, &
-                mdab,nlat,wsave,lsave,work,lwork,ierror)
-
-            call name("sha ")
-            call iout(ierror,"ierr")
-            call iout(lsave,"lsav")
-            call iout(lwork,"lwrk")
-
-            call vhsgsi(nlat,nlon,wsave,lsave,work,lwork,dwork,ldwork,ierror)
-            call name("idvi")
-            call iout(ierror,"ierr")
-
-            call idvtgs(nlat,nlon,isym,nt,v,w,nlat,nlon,ad,bd,av,bv, &
-                mdab,nlat,wsave,lsave,work,lwork,ptrbd,ptrbv,ierror)
-            call name("idvt")
-            call iout(ierror,"ierr")
-            call vecout(prtbd,"prtd",nt)
-            call vecout(prtbv,"prtv",nt)
-
-        end if
-
-        !
-        !     compare this v,w with original derived from sf,sv
-        !
-        err2v = 0.0
-        err2w = 0.0
-        do k=1,nt
-            do j=1,nlon
-                do i=1,nlat
-                    err2v = err2v + (v(i,j,k)-vsav(i,j,k))**2
-                    err2w = err2w + (w(i,j,k)-wsav(i,j,k))**2
-                end do
-            end do
-        end do
-        err2v = sqrt(err2v/(nlat*nlon*nt))
-        err2w = sqrt(err2w/(nlat*nlon*nt))
-        call vout(err2v,"errv")
-        call vout(err2w,"errw")
-    !
-    !     end of icase loop
-    !
-    end do
 end program tidvt
-!
-subroutine iout(ivar,nam)
-    real nam
-    write(6,10) nam , ivar
-10  format(1h a4, 3h = ,i8)
-    return
-end subroutine iout
-!
-subroutine vout(var,nam)
-    real nam
-    write(6,10) nam , var
-10  format(1h a4,3h = ,e12.5)
-    return
-end subroutine vout
-!
-subroutine name(nam)
-    real nam
-    write(6,100) nam
-100 format(1h a8)
-    return
-end subroutine name
-!
-subroutine vecout(vec,nam,len)
-    dimension vec(len)
-    real nam
-    write(6,109) nam, (vec(l),l=1,len)
-109 format(1h a4,/(1h 8e11.4))
-    return
-end subroutine vecout

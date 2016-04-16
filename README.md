@@ -5,9 +5,6 @@ This Fortran project is a object-oriented programming (OOP) modernization of NCA
 
 The arduous initialization procedures for analysis and synthesis are now confined to the polymorphic class variable **Sphere**. The OOP approach hides the various workspace arrays from the user.
 
-This project is still a work in progress and mainly works with gaussian grids; regular (equally-spaced) grids are only partially supported.
- 
-
 -----------------------------------------------------------------------------
 
 ## What is spherepack?
@@ -41,10 +38,10 @@ Test programs are provided for solving these equations. Each program serves two 
     !.... generate some data
     
     ! Compute laplacian on sphere
-    call sphere_dat%get_laplacian( scalar_function, laplacian )
+    call sphere_dat%get_laplacian(scalar_function, laplacian)
     
     ! Invert laplacian on sphere
-    call sphere_dat%invert_laplacian( laplacian, solution )
+    call sphere_dat%invert_laplacian(laplacian, solution)
     
     ! Release memory
     call sphere_dat%destroy()

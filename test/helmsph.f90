@@ -98,10 +98,10 @@ contains
         integer (ip), parameter        :: NLONS = 36
         integer (ip), parameter        :: NLATS = NLONS/2 + 1
         integer (ip)                   :: i, j !! Counters
+        real (wp)                      :: exact_solution(NLATS, NLONS)
         real (wp)                      :: approximate_solution(NLATS, NLONS)
         real (wp)                      :: source_term(NLATS, NLONS)
         real (wp), parameter           :: HELMHOLTZ_CONSTANT = 1.0_wp
-        real (wp)                      :: discretization_error
         character (len=:), allocatable :: error_previous_platform
         !----------------------------------------------------------------------
 
@@ -118,7 +118,7 @@ contains
             call sphere_type%create(nlat=NLATS, nlon=NLONS)
 
             ! Allocate known error from previous platform
-            allocate( error_previous_platform, source='     discretization error = 2.664535e-15' )
+            allocate( error_previous_platform, source='     discretization error = 2.325553e-14' )
             !
             !==> For regular sphere
             !
@@ -128,7 +128,7 @@ contains
             call sphere_type%create(nlat=NLATS, nlon=NLONS)
 
             ! Allocate known error from previous platform
-            allocate( error_previous_platform, source='     discretization error = 1.332268e-15' )
+            allocate( error_previous_platform, source='     discretization error = 1.202313e-14' )
         end select
 
         !
@@ -136,6 +136,7 @@ contains
         !    applied to ue = (1.+x*y)*exp(z)
         !
         associate( &
+            ue => exact_solution, &
             rhs => source_term, &
             radial => sphere_type%unit_vectors%radial &
             )
@@ -146,6 +147,7 @@ contains
                         y => radial(i,j)%y, &
                         z => radial(i,j)%z &
                         )
+                        ue(i,j) = (1.0_wp + x * y) * exp(z)
                         rhs(i,j) = -(x*y*(z*z+6.0_wp*(z+1.0_wp))+z*(z+2.0_wp))*exp(z)
                     end associate
                 end do
@@ -164,48 +166,30 @@ contains
         end associate
 
         !
-        !==> Compute and print maximum error
+        !==> Compare ue with u
         !
         associate( &
-            err_max => discretization_error, &
             u => approximate_solution, &
-            radial => sphere_type%unit_vectors%radial &
+            ue => exact_solution &
             )
-            ! Initialize error
-            err_max = 0.0_wp
-            do j=1,NLONS
-                do i=1,NLATS
-                    associate( &
-                        ! Associate radial components
-                        x => radial(i,j)%x, &
-                        y => radial(i,j)%y, &
-                        z => radial(i,j)%z &
-                        )
-                        ! Set exact solution
-                        associate( ue => (1.0_wp + x * y) * exp(z) )
-                            err_max = max(err_max,abs(u(i,j)-ue))
-                        end associate
-                    end associate
-                end do
-            end do
+            associate( err2 => norm2(u-ue) )
+                !
+                !==> Print earlier output from platform with 64-bit floating point
+                !    arithmetic followed by the output from this computer
+                !
+                write( stdout, '(A)') ''
+                write( stdout, '(A)') '     helmsph *** TEST RUN *** '
+                write( stdout, '(A)') ''
+                write( stdout, '(A)') '     grid type = '//sphere_type%grid%grid_type
+                write( stdout, '(A)') '     Helmholtz approximation on a ten degree grid'
+                write( stdout, '(2(A,I2))') '     nlat = ', NLATS,' nlon = ', NLONS
+                write( stdout, '(A)') '     Previous 64 bit floating point arithmetic result '
+                write( stdout, '(A)') error_previous_platform
+                write( stdout, '(A)') '     The output from your computer is: '
+                write( stdout, '(A,1pe15.6)') '     discretization error = ', err2
+                write( stdout, '(A)' ) ''
+            end associate
         end associate
-
-        !
-        !==> Print earlier output from platform with 64-bit floating point
-        !    arithmetic followed by the output from this computer
-        !
-        write( stdout, '(A)') ''
-        write( stdout, '(A)') '     helmsph *** TEST RUN *** '
-        write( stdout, '(A)') ''
-        write( stdout, '(A)') '     grid type = '//sphere_type%grid%grid_type
-        write( stdout, '(A)') '     Helmholtz approximation on a ten degree grid'
-        write( stdout, '(2(A,I2))') '     nlat = ', NLATS,' nlon = ', NLONS
-        write( stdout, '(A)') '     Previous 64 bit floating point arithmetic result '
-        write( stdout, '(A)') error_previous_platform
-        write( stdout, '(A)') '     The output from your computer is: '
-        write( stdout, '(A,1pe15.6)') '     discretization error = ', discretization_error
-        write( stdout, '(A)' ) ''
-
         !
         !==> Release memory
         !

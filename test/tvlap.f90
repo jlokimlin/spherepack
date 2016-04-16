@@ -99,7 +99,6 @@ contains
         real (wp)                      :: azimuthal_component(NLATS,NLONS)
         real (wp)                      :: approximate_polar_laplacian(NLATS,NLONS)
         real (wp)                      :: approximate_azimuthal_laplacian(NLATS,NLONS)
-        real (wp)                      :: polar_error, azimuthal_error
         character (len=:), allocatable :: previous_polar_laplacian_error
         character (len=:), allocatable :: previous_polar_inversion_error
         character (len=:), allocatable :: previous_azimuthal_laplacian_error
@@ -119,10 +118,10 @@ contains
             call sphere_type%create(nlat=NLATS, nlon=NLONS)
 
             ! Allocate known error from previous platform
-            allocate( previous_polar_laplacian_error, source='     polar laplacian error     = 1.166998e-11' )
-            allocate( previous_azimuthal_laplacian_error, source='     azimuthal laplacian error = 6.585862e-12' )
-            allocate( previous_polar_inversion_error, source='     polar inversion error     = 8.037451e-15' )
-            allocate( previous_azimuthal_inversion_error, source='     azimuthal inversion error = 6.727343e-15' )
+            allocate( previous_polar_laplacian_error, source='     polar laplacian error     = 1.760814e-12' )
+            allocate( previous_azimuthal_laplacian_error, source='     azimuthal laplacian error = 8.715251e-13' )
+            allocate( previous_polar_inversion_error, source='     polar inversion error     = 6.661338e-16' )
+            allocate( previous_azimuthal_inversion_error, source='     azimuthal inversion error = 7.216450e-16' )
             !
             !==> For regular sphere
             !
@@ -132,10 +131,10 @@ contains
             call sphere_type%create(nlat=NLATS, nlon=NLONS)
 
             ! Allocate known error from previous platform
-            allocate( previous_polar_laplacian_error, source='     polar laplacian error     = 2.959434e-12' )
-            allocate( previous_azimuthal_laplacian_error, source='     azimuthal laplacian error = 3.198244e-12' )
-            allocate( previous_polar_inversion_error, source='     polar inversion error     = 6.314779e-15' )
-            allocate( previous_azimuthal_inversion_error, source='     azimuthal inversion error = 3.401176e-15' )
+            allocate( previous_polar_laplacian_error, source='     polar laplacian error     = 3.113065e-13' )
+            allocate( previous_azimuthal_laplacian_error, source='     azimuthal laplacian error = 4.702905e-13' )
+            allocate( previous_polar_inversion_error, source='     polar inversion error     = 5.551115e-16' )
+            allocate( previous_azimuthal_inversion_error, source='     azimuthal inversion error = 5.551115e-16' )
         end select
 
         !
@@ -180,42 +179,42 @@ contains
             vlap => approximate_polar_laplacian, &
             wlap => approximate_azimuthal_laplacian &
             )
-            call sphere_type%get_laplacian( ve, we, vlap, wlap )
+            call sphere_type%get_laplacian(ve, we, vlap, wlap)
         end associate
 
         !
         !==> Compute laplacian error
         !
         associate( &
-            err2v => polar_error, &
-            err2w => azimuthal_error, &
             velap => exact_polar_laplacian, &
             welap => exact_azimuthal_laplacian, &
             vlap => approximate_polar_laplacian, &
             wlap => approximate_azimuthal_laplacian &
             )
-            err2v = norm2(vlap - velap)
-            err2w = norm2(wlap - welap)
+            associate( &
+                err2v => maxval(abs(vlap - velap)), &
+                err2w => maxval(abs(wlap - welap)) &
+                )
+
+                !
+                !==> Print earlier output from platform with 64-bit floating point
+                !    arithmetic followed by the output from this computer
+                !
+                write( stdout, '(A)') ''
+                write( stdout, '(A)') '     tvlap *** TEST RUN *** '
+                write( stdout, '(A)') ''
+                write( stdout, '(A)') '     grid type = '//sphere_type%grid%grid_type
+                write( stdout, '(A)') '     Testing vector laplacian'
+                write( stdout, '(2(A,I2))') '     nlat = ', NLATS,' nlon = ', NLONS
+                write( stdout, '(A)') '     Previous 64 bit floating point arithmetic result '
+                write( stdout, '(A)') previous_polar_laplacian_error
+                write( stdout, '(A)') previous_azimuthal_laplacian_error
+                write( stdout, '(A)') '     The output from your computer is: '
+                write( stdout, '(A,1pe15.6)') '     polar laplacian error     = ', err2v
+                write( stdout, '(A,1pe15.6)') '     azimuthal laplacian error = ', err2w
+                write( stdout, '(A)' ) ''
+            end associate
         end associate
-
-        !
-        !==> Print earlier output from platform with 64-bit floating point
-        !    arithmetic followed by the output from this computer
-        !
-        write( stdout, '(A)') ''
-        write( stdout, '(A)') '     tvlap *** TEST RUN *** '
-        write( stdout, '(A)') ''
-        write( stdout, '(A)') '     grid type = '//sphere_type%grid%grid_type
-        write( stdout, '(A)') '     Testing vector laplacian'
-        write( stdout, '(2(A,I2))') '     nlat = ', NLATS,' nlon = ', NLONS
-        write( stdout, '(A)') '     Previous 64 bit floating point arithmetic result '
-        write( stdout, '(A)') previous_polar_laplacian_error
-        write( stdout, '(A)') previous_azimuthal_laplacian_error
-        write( stdout, '(A)') '     The output from your computer is: '
-        write( stdout, '(A,1pe15.6)') '     polar laplacian error     = ', polar_error
-        write( stdout, '(A,1pe15.6)') '     azimuthal laplacian error = ', azimuthal_error
-        write( stdout, '(A)' ) ''
-
         !
         !==> Now recompute (v,w) inverting (velap,welap)
         !
@@ -232,35 +231,34 @@ contains
         !==> compare this v,w with original
         !
         associate( &
-            err2v => polar_error, &
-            err2w => azimuthal_error, &
             ve => original_polar_component, &
             we => original_azimuthal_component, &
             v => polar_component, &
             w => azimuthal_component &
             )
-            err2v = norm2(v - ve)
-            err2w = norm2(w - we)
+            associate( &
+                err2v => maxval(abs(v - ve)), &
+                err2w => maxval(abs(w - we)) &
+                )
+                !
+                !==> Print earlier output from platform with 64-bit floating point
+                !    arithmetic followed by the output from this computer
+                !
+                write( stdout, '(A)') ''
+                write( stdout, '(A)') '     tvlap *** TEST RUN *** '
+                write( stdout, '(A)') ''
+                write( stdout, '(A)') '     grid type = '//sphere_type%grid%grid_type
+                write( stdout, '(A)') '     Testing vector laplacian inversion'
+                write( stdout, '(2(A,I2))') '     nlat = ', NLATS,' nlon = ', NLONS
+                write( stdout, '(A)') '     Previous 64 bit floating point arithmetic result '
+                write( stdout, '(A)') previous_polar_inversion_error
+                write( stdout, '(A)') previous_azimuthal_inversion_error
+                write( stdout, '(A)') '     The output from your computer is: '
+                write( stdout, '(A,1pe15.6)') '     polar inversion error     = ', err2v
+                write( stdout, '(A,1pe15.6)') '     azimuthal inversion error = ', err2w
+                write( stdout, '(A)' ) ''
+            end associate
         end associate
-
-        !
-        !==> Print earlier output from platform with 64-bit floating point
-        !    arithmetic followed by the output from this computer
-        !
-        write( stdout, '(A)') ''
-        write( stdout, '(A)') '     tvlap *** TEST RUN *** '
-        write( stdout, '(A)') ''
-        write( stdout, '(A)') '     grid type = '//sphere_type%grid%grid_type
-        write( stdout, '(A)') '     Testing vector laplacian inversion'
-        write( stdout, '(2(A,I2))') '     nlat = ', NLATS,' nlon = ', NLONS
-        write( stdout, '(A)') '     Previous 64 bit floating point arithmetic result '
-        write( stdout, '(A)') previous_polar_inversion_error
-        write( stdout, '(A)') previous_azimuthal_inversion_error
-        write( stdout, '(A)') '     The output from your computer is: '
-        write( stdout, '(A,1pe15.6)') '     polar inversion error     = ', polar_error
-        write( stdout, '(A,1pe15.6)') '     azimuthal inversion error = ', azimuthal_error
-        write( stdout, '(A)' ) ''
-
         !
         !==> Release memory
         deallocate( previous_polar_laplacian_error )

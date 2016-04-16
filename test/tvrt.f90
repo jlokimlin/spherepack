@@ -97,7 +97,6 @@ contains
         real (wp)                      :: approximate_polar_component(NLATS, NLONS, NSYNTHS)
         real (wp)                      :: approximate_azimuthal_component(NLATS, NLONS, NSYNTHS)
         real (wp)                      :: approximate_vorticity(NLATS, NLONS, NSYNTHS)
-        real (wp)                      :: vorticity_error, polar_inversion_error, azimuthal_inversion_error
         character (len=:), allocatable :: previous_vorticity_error
         character (len=:), allocatable :: previous_polar_inversion_error
         character (len=:), allocatable :: previous_azimuthal_inversion_error
@@ -197,34 +196,31 @@ contains
                 call sphere_type%get_vorticity(ve, we, vt)
             end associate
         end do
-
         !
         !==> Compute vorticity error
         !
         associate( &
-            err2 => vorticity_error, &
             vt => approximate_vorticity, &
             vte => exact_vorticity &
             )
-            err2 = maxval(abs(vt-vte)) !norm2(vt - vte)/size(vt)
+            associate( err2 => maxval(abs(vt-vte)) )
+                !
+                !==> Print earlier output from platform with 64-bit floating point
+                !    arithmetic followed by the output from this computer
+                !
+                write( stdout, '(A)') ''
+                write( stdout, '(A)') '     tvrt *** TEST RUN *** '
+                write( stdout, '(A)') ''
+                write( stdout, '(A)') '     grid type = '//sphere_type%grid%grid_type
+                write( stdout, '(A)') '     Testing vorticity'
+                write( stdout, '(2(A,I2))') '     nlat = ', NLATS,' nlon = ', NLONS
+                write( stdout, '(A)') '     Previous 64 bit floating point arithmetic result '
+                write( stdout, '(A)') previous_vorticity_error
+                write( stdout, '(A)') '     The output from your computer is: '
+                write( stdout, '(A,1pe15.6)') '     vorticity error     = ', err2
+                write( stdout, '(A)' ) ''
+            end associate
         end associate
-
-        !
-        !==> Print earlier output from platform with 64-bit floating point
-        !    arithmetic followed by the output from this computer
-        !
-        write( stdout, '(A)') ''
-        write( stdout, '(A)') '     tvrt *** TEST RUN *** '
-        write( stdout, '(A)') ''
-        write( stdout, '(A)') '     grid type = '//sphere_type%grid%grid_type
-        write( stdout, '(A)') '     Testing vorticity'
-        write( stdout, '(2(A,I2))') '     nlat = ', NLATS,' nlon = ', NLONS
-        write( stdout, '(A)') '     Previous 64 bit floating point arithmetic result '
-        write( stdout, '(A)') previous_vorticity_error
-        write( stdout, '(A)') '     The output from your computer is: '
-        write( stdout, '(A,1pe15.6)') '     vorticity error     = ', vorticity_error
-        write( stdout, '(A)' ) ''
-
         !
         !==> Now recompute (v,w) inverting vte
         !
@@ -270,35 +266,34 @@ contains
         !==> compare this v,w with original
         !
         associate( &
-            err2v => polar_inversion_error, &
-            err2w => azimuthal_inversion_error, &
             ve => exact_polar_component, &
             we => exact_azimuthal_component, &
             v => approximate_polar_component, &
             w => approximate_azimuthal_component &
             )
-            err2v = maxval( abs(v-ve) ) !norm2(v - ve)/size(v)
-            err2w = maxval( abs(w-we) ) !norm2(w - we)/size(w)
+            associate( &
+                err2v => maxval(abs(v-ve)), &
+                err2w => maxval(abs(w-we)) &
+                )
+                !
+                !==> Print earlier output from platform with 64-bit floating point
+                !    arithmetic followed by the output from this computer
+                !
+                write( stdout, '(A)') ''
+                write( stdout, '(A)') '     tvrt *** TEST RUN *** '
+                write( stdout, '(A)') ''
+                write( stdout, '(A)') '     grid type = '//sphere_type%grid%grid_type
+                write( stdout, '(A)') '     Testing vorticity inversion'
+                write( stdout, '(2(A,I2))') '     nlat = ', NLATS,' nlon = ', NLONS
+                write( stdout, '(A)') '     Previous 64 bit floating point arithmetic result '
+                write( stdout, '(A)') previous_polar_inversion_error
+                write( stdout, '(A)') previous_azimuthal_inversion_error
+                write( stdout, '(A)') '     The output from your computer is: '
+                write( stdout, '(A,1pe15.6)') '     polar inversion error     = ', err2v
+                write( stdout, '(A,1pe15.6)') '     azimuthal inversion error = ', err2w
+                write( stdout, '(A)' ) ''
+            end associate
         end associate
-
-        !
-        !==> Print earlier output from platform with 64-bit floating point
-        !    arithmetic followed by the output from this computer
-        !
-        write( stdout, '(A)') ''
-        write( stdout, '(A)') '     tvrt *** TEST RUN *** '
-        write( stdout, '(A)') ''
-        write( stdout, '(A)') '     grid type = '//sphere_type%grid%grid_type
-        write( stdout, '(A)') '     Testing vorticity inversion'
-        write( stdout, '(2(A,I2))') '     nlat = ', NLATS,' nlon = ', NLONS
-        write( stdout, '(A)') '     Previous 64 bit floating point arithmetic result '
-        write( stdout, '(A)') previous_polar_inversion_error
-        write( stdout, '(A)') previous_azimuthal_inversion_error
-        write( stdout, '(A)') '     The output from your computer is: '
-        write( stdout, '(A,1pe15.6)') '     polar inversion error     = ', polar_inversion_error
-        write( stdout, '(A,1pe15.6)') '     azimuthal inversion error = ', azimuthal_inversion_error
-        write( stdout, '(A)' ) ''
-
         !
         !==> Release memory
         !
