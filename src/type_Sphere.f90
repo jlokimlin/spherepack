@@ -33,12 +33,12 @@ module type_Sphere
         !----------------------------------------------------------------------
         ! Class variables
         !----------------------------------------------------------------------
-        logical,                            public :: initialized = .false. !! Instantiation status
-        integer (ip),                       public :: NUMBER_OF_LONGITUDES = 0   !! number of longitudinal points
-        integer (ip),                       public :: NUMBER_OF_LATITUDES = 0   !! number of latitudinal points
-        integer (ip),                       public :: TRIANGULAR_TRUNCATION_LIMIT = 0 !! triangular truncation limit
-        integer (ip),                       public :: SCALAR_SYMMETRIES = 0 !! symmetries about the equator for scalar calculations
-        integer (ip),                       public :: VECTOR_SYMMETRIES = 0 !! symmetries about the equator for vector calculations
+        logical,                            public :: initialized = .false.
+        integer (ip),                       public :: NUMBER_OF_LONGITUDES = 0
+        integer (ip),                       public :: NUMBER_OF_LATITUDES = 0
+        integer (ip),                       public :: TRIANGULAR_TRUNCATION_LIMIT = 0
+        integer (ip),                       public :: SCALAR_SYMMETRIES = 0
+        integer (ip),                       public :: VECTOR_SYMMETRIES = 0
         integer (ip),                       public :: NUMBER_OF_SYNTHESES = 0
         integer (ip),          allocatable, public :: INDEX_ORDER_M(:)
         integer (ip),          allocatable, public :: INDEX_DEGREE_N(:)
@@ -62,11 +62,11 @@ module type_Sphere
         procedure, public  :: get_index
         procedure, public  :: get_coefficient
         procedure, public  :: invert_helmholtz
+        procedure, public  :: invert_vorticity
         procedure, public  :: get_gradient
         procedure, private :: invert_gradient_from_spherical_components
         procedure, private :: get_vorticity_from_spherical_components
         procedure, private :: get_vorticity_from_vector_field
-        procedure, public  :: invert_vorticity
         procedure, private :: get_divergence_from_vector_field
         procedure, private :: get_divergence_from_spherical_components
         procedure, public  :: invert_divergence
@@ -115,7 +115,6 @@ module type_Sphere
     end type Sphere
 
 
-
     abstract interface
         subroutine scalar_analysis(this, scalar_function)
             import :: Sphere, wp
@@ -126,10 +125,7 @@ module type_Sphere
             real (wp),      intent (in)    :: scalar_function(:,:)
             !----------------------------------------------------------------------
         end subroutine scalar_analysis
-    end interface
 
-
-    abstract interface
         subroutine scalar_synthesis(this, scalar_function)
             import :: Sphere, wp
             !----------------------------------------------------------------------
@@ -139,9 +135,7 @@ module type_Sphere
             real (wp),      intent (out)   :: scalar_function(:,:)
             !----------------------------------------------------------------------
         end subroutine scalar_synthesis
-    end interface
 
-    abstract interface
         subroutine vector_analysis(this, &
             polar_component, azimuthal_component)
             import :: Sphere, wp
@@ -153,9 +147,7 @@ module type_Sphere
             real (wp),      intent (in)     :: azimuthal_component(:,:)
             !----------------------------------------------------------------------
         end subroutine vector_analysis
-    end interface
 
-    abstract interface
         subroutine vector_synthesis(this, polar_component, azimuthal_component)
             import :: Sphere, wp
             !----------------------------------------------------------------------
@@ -174,18 +166,18 @@ contains
 
 
 
-    subroutine create_sphere(this, nlat, nlon, ntrunc, isym, itype, isynt, rsphere )
+    subroutine create_sphere(this, nlat, nlon, ntrunc, isym, itype, isynt, rsphere)
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
         class (Sphere), intent (in out) :: this
-        integer (ip),   intent (in)    :: nlat
-        integer (ip),   intent (in)    :: nlon
-        integer (ip),   intent (in)    :: ntrunc
-        integer (ip),   intent (in)    :: isym  !! Either 0, 1, or 2
-        integer (ip),   intent (in)    :: itype !! Either 0, 1, 2, 3, ..., 8
-        integer (ip),   intent (in)    :: isynt
-        real (wp),      intent (in)    :: rsphere
+        integer (ip),   intent (in)     :: nlat
+        integer (ip),   intent (in)     :: nlon
+        integer (ip),   intent (in)     :: ntrunc
+        integer (ip),   intent (in)     :: isym  !! Either 0, 1, or 2
+        integer (ip),   intent (in)     :: itype !! Either 0, 1, 2, 3, ..., 8
+        integer (ip),   intent (in)     :: isynt
+        real (wp),      intent (in)     :: rsphere
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
         !--------------------------------------------------------------------------------
@@ -207,12 +199,12 @@ contains
         !
         !==> Set scalar symmetries
         !
-        call this%get_scalar_symmetries( isym )
+        call this%get_scalar_symmetries(isym)
 
         !
         !==> Set vector symmetries
         !
-        call this%get_vector_symmetries( itype )
+        call this%get_vector_symmetries(itype)
 
         !
         !==> Allocate memory
@@ -235,20 +227,29 @@ contains
                 ilap => this%inverse_laplacian_coefficients, &
                 sqnn => this%vorticity_and_divergence_coefficients &
                 )
-                ! Set indices of order m
+                !
+                !==> Precompute indices of order m
+                !
                 indxm = [ ((m, n=m, ntrunc), m=0, ntrunc) ]
-                ! Set indices of degree n
+                !
+                !==> Precompute indices of degree n
+                !
                 indxn = [ ((n, n=m, ntrunc), m=0, ntrunc) ]
-                ! Set laplacian coefficients
+                !
+                !==> Precompute laplacian coefficients
+                !
                 lap = -real(indxn, kind=wp) * real(indxn + 1, kind=wp)/(rsphere**2)
-                ! Set inverse laplacian coefficients
+                !
+                !==> Precompute inverse laplacian coefficients
+                !
                 ilap(1) = 0.0_wp
                 ilap(2:nm_dim) = 1.0_wp/lap(2:nm_dim)
-                ! Set vorticity and divergence coefficients
+                !
+                !==> Precompute vorticity and divergence coefficients
+                !
                 sqnn = [ (sqrt(real((n - 1) * n, kind=wp)/rsphere), n=1, nlat) ]
             end associate
         end associate
-
         !
         !==> Initialize derived data types
         !
@@ -258,8 +259,8 @@ contains
             trig_func => this%trigonometric_functions, &
             unit_vectors => this%unit_vectors &
             )
-            call trig_func%create( grid )
-            call unit_vectors%create( grid, trig_func )
+            call trig_func%create(grid)
+            call unit_vectors%create(grid, trig_func)
         end associate
 
         !
@@ -390,13 +391,14 @@ contains
         !
         !==>  compute the (real) spherical harmonic coefficients
         !
-        call this%perform_scalar_analysis( scalar_function )
-
+        associate( f => scalar_function )
+            call this%perform_scalar_analysis(f)
+        end associate
         !
         !==> Set complex spherical harmonic coefficients
         !
         associate( &
-            ntrunc => this%TRIANGULAR_TRUNCATION_LIMIT, & ! set the triangular truncation limit
+            ntrunc => this%TRIANGULAR_TRUNCATION_LIMIT, &
             a => this%workspace%real_harmonic_coefficients, &
             b => this%workspace%imaginary_harmonic_coefficients, &
             psi => this%complex_spectral_coefficients &
@@ -437,7 +439,7 @@ contains
         !==> Convert complex spherical harmonic coefficients to real version
         !
         associate( &
-            ntrunc => this%TRIANGULAR_TRUNCATION_LIMIT, & ! set the triangular truncation limit
+            ntrunc => this%TRIANGULAR_TRUNCATION_LIMIT, &
             a => this%workspace%real_harmonic_coefficients, &
             b => this%workspace%imaginary_harmonic_coefficients, &
             psi => this%complex_spectral_coefficients &
@@ -463,9 +465,10 @@ contains
         !
         !==> synthesise the scalar function from the (real) harmonic coefficients
         !
-        call this%perform_scalar_synthesis( scalar_function )
+        call this%perform_scalar_synthesis(scalar_function)
 
     end subroutine perform_complex_synthesis
+
 
 
     subroutine analyze_into_complex_spectral_coefficients(this, &
@@ -485,7 +488,7 @@ contains
         end if
 
         ! analyze the scalar function into (complex) harmonic coefficients
-        call this%perform_complex_analysis( scalar_function )
+        call this%perform_complex_analysis(scalar_function)
 
         ! copy coefficients
         spectral_coefficients = this%complex_spectral_coefficients
@@ -536,11 +539,10 @@ contains
                     end associate
                 end do
             end do
-
         end associate
 
         ! synthesise the scalar function from the (real) harmonic coefficients
-        call this%perform_scalar_synthesis( scalar_function )
+        call this%perform_scalar_synthesis(scalar_function)
 
     end subroutine synthesize_from_complex_spectral_coefficients
 
@@ -555,7 +557,7 @@ contains
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
-        integer (ip)          :: error_flag
+        integer (ip)           :: error_flag
         real (wp), allocatable :: polar_component(:,:)
         real (wp), allocatable :: azimuthal_component(:,:)
         !----------------------------------------------------------------------
@@ -600,8 +602,8 @@ contains
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
         class (Sphere), intent (in out) :: this
-        real (wp),      intent (in)    :: scalar_function(:,:)
-        real (wp),      intent (out)   :: scalar_laplacian(:,:)
+        real (wp),      intent (in)     :: scalar_function(:,:)
+        real (wp),      intent (out)    :: scalar_laplacian(:,:)
         !----------------------------------------------------------------------
 
         ! Check if object is usable
@@ -611,7 +613,7 @@ contains
         end if
 
         ! Set (real) scalar spherica harmonic coefficients
-        call this%perform_complex_analysis( scalar_function )
+        call this%perform_complex_analysis(scalar_function)
 
         ! Associate various quantities
         associate( &
@@ -622,7 +624,7 @@ contains
         end associate
 
         ! Synthesize complex coefficients into gridded array
-        call this%perform_complex_synthesis( scalar_laplacian )
+        call this%perform_complex_synthesis(scalar_laplacian)
 
     end subroutine get_scalar_laplacian
 
@@ -888,14 +890,14 @@ contains
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
         class (Sphere), target, intent (in out) :: this
-        real (wp),              intent (in)    :: helmholtz_constant
-        real (wp),              intent (in)    :: source(:,:)
-        real (wp),              intent (out)   :: solution(:,:)
+        real (wp),              intent (in)     :: helmholtz_constant
+        real (wp),              intent (in)     :: source(:,:)
+        real (wp),              intent (out)    :: solution(:,:)
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
         real (wp), parameter :: ZERO=nearest(1.0_wp, 1.0_wp)-nearest(1.0_wp, -1.0_wp)
-        real (wp), pointer  :: iptr(:) => null()
+        real (wp), pointer   :: iptr(:) => null()
         !----------------------------------------------------------------------
 
         ! Check if object is usable
@@ -904,8 +906,10 @@ contains
                 //' in INVERT_HELMHOLTZ'
         end if
 
-        ! Set (real) scalar spherica harmonic coefficients
-        call this%perform_complex_analysis( source )
+        !
+        !==> Set (real) scalar spherica harmonic coefficients
+        !
+        call this%perform_complex_analysis(source)
 
         ! Associate various quantities
         associate( &
@@ -915,8 +919,11 @@ contains
             lap => this%laplacian_coefficients, &
             xlmbda => helmholtz_constant &
             )
+            !
+            !==> Associate local pointer
+            !
             if ( xlmbda == ZERO ) then
-                ! Associate pointer
+                ! Assign pointer
                 iptr => ilap
             else
                 ! Allocate memory
@@ -924,13 +931,19 @@ contains
                 iptr = 1.0_wp/(lap - xlmbda)
             end if
 
-            ! Set coefficients
+            !
+            !==> Set coefficients
+            !
             psi = iptr * psi
 
-            ! Synthesize complex coefficients into gridded array
-            call this%perform_complex_synthesis( solution )
+            !
+            !==> Synthesize complex coefficients into gridded array
+            !
+            call this%perform_complex_synthesis(solution)
 
-            ! Garbage collection
+            !
+            !==> Garbage collection
+            !
             if ( xlmbda == ZERO ) then
                 ! Nullify pointer
                 nullify( iptr )
@@ -966,7 +979,7 @@ contains
         end if
 
         ! compute the (real) spherical harmonic coefficients
-        call this%perform_scalar_analysis( scalar_function )
+        call this%perform_scalar_analysis(scalar_function)
 
         ! compute gradient
         associate( &
@@ -1040,7 +1053,9 @@ contains
             br => this%workspace%real_polar_harmonic_coefficients, &
             bi => this%workspace%imaginary_polar_harmonic_coefficients &
             )
-            ! Initialize (real) coefficients
+            !
+            !==> Initialize (real) coefficients
+            !
             a = 0.0_wp
             b = 0.0_wp
 
@@ -1065,7 +1080,9 @@ contains
                     end do
                 end do
             end associate
-            ! Compute scalar synthesis
+            !
+            !==> Perform scalar synthesis
+            !
             call this%perform_scalar_synthesis( f )
         end associate
 
@@ -1216,7 +1233,7 @@ contains
         ! Dictionary: local variables
         !----------------------------------------------------------------------
         integer (ip) :: n, m !! Counters
-        integer (ip) :: ityp_temp
+        integer (ip) :: ityp_temp_save
         !----------------------------------------------------------------------
 
         ! Check if object is usable
@@ -1225,7 +1242,9 @@ contains
                 //' in INVERT_VORTICITY'
         end if
 
-        ! compute the (real) spherical harmonic coefficients
+        !
+        !==> compute the (real) spherical harmonic coefficients
+        !
         call this%perform_scalar_analysis(source)
 
         !
@@ -1233,6 +1252,7 @@ contains
         !
         associate( &
             nlat => this%NUMBER_OF_LATITUDES, &
+            nlon => this%NUMBER_OF_LONGITUDES, &
             v => polar_solution, &
             w => azimuthal_solution, &
             sqnn => this%vorticity_and_divergence_coefficients, &
@@ -1243,35 +1263,39 @@ contains
             isym => this%SCALAR_SYMMETRIES, &
             ityp => this%VECTOR_SYMMETRIES &
             )
-            associate( mmax => size(cr, dim=1) )
+            associate( mmax => min(nlat, (nlon+1)/2) )
                 !
                 !==> Initialize coefficients
                 !
                 cr = 0.0_wp
                 ci = 0.0_wp
 
-                ! Compute m = 0 coefficients
+                !
+                !==>  Compute m = 0 coefficients
+                !
                 do n = 2, nlat
-                    ! Set real coefficients
                     cr(1, n) = a(1, n)/sqnn(n)
-                    ! Set imaginary coeffients
                     ci(1, n) = b(1, n)/sqnn(n)
                 end do
 
-                ! Compute m >0 coefficients
+                !
+                !==> Compute m > 0 coefficients
+                !
                 do m=2, mmax
                     do n=m, nlat
-                        ! Set real coefficients
                         cr(m, n) = a(m, n)/sqnn(n)
-                        ! Set imaginary coefficients
                         ci(m, n) = b(m, n)/sqnn(n)
                     end do
                 end do
 
-                ! Save old vector symmetry
-                ityp_temp = ityp
+                !
+                !==> Save old vector symmetry
+                !
+                ityp_temp_save = ityp
 
-                ! Set symmetries for synthesis
+                !
+                !==> Set symmetries for synthesis
+                !
                 select case (isym)
                     case (0)
                         ityp = 2
@@ -1281,11 +1305,15 @@ contains
                         ityp = 8
                 end select
 
-                ! Compute scalar synthesis
+                !
+                !==> Compute scalar synthesis
+                !
                 call this%perform_vector_synthesis(v, w)
 
-                ! Reset old vector symmetry
-                ityp = ityp_temp
+                !
+                !==> Reset old vector symmetry
+                !
+                ityp = ityp_temp_save
             end associate
         end associate
 
@@ -1376,9 +1404,9 @@ contains
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
         class (Sphere), intent (in out) :: this
-        real (wp),      intent (in)    :: polar_component(:,:)
-        real (wp),      intent (in)    :: azimuthal_component(:,:)
-        real (wp),      intent (out)   :: divergence (:,:)
+        real (wp),      intent (in)     :: polar_component(:,:)
+        real (wp),      intent (in)     :: azimuthal_component(:,:)
+        real (wp),      intent (out)    :: divergence (:,:)
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
@@ -1553,14 +1581,14 @@ contains
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
         class (Sphere), intent (in out) :: this
-        complex (wp),   intent (in)    :: vort_spec(:)
-        complex (wp),   intent (in)    :: div_spec(:)
-        real (wp),      intent (out)   :: polar_component(:,:)
-        real (wp),      intent (out)   :: azimuthal_component(:,:)
+        complex (wp),   intent (in)     :: vort_spec(:)
+        complex (wp),   intent (in)     :: div_spec(:)
+        real (wp),      intent (out)    :: polar_component(:,:)
+        real (wp),      intent (out)    :: azimuthal_component(:,:)
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
-        integer (ip)          :: nm, n, m, i  !! Counters
+        integer (ip)           :: nm, n, m, i  !! Counters
         real (wp), allocatable :: isqnn(:)
         !----------------------------------------------------------------------
 
@@ -1685,7 +1713,7 @@ contains
             grad_theta => polar_gradient_component, &
             grad_phi => azimuthal_gradient_component &
             )
-            call this%get_gradient( f, grad_theta, grad_phi )
+            call this%get_gradient(f, grad_theta, grad_phi)
         end associate
 
         ! Calculate the rotation operator applied to a scalar function
@@ -1698,7 +1726,7 @@ contains
                 do k = 1, nlat
                     associate( &
                         theta => this%unit_vectors%polar(k, l), &
-                        phi => this%unit_vectors%azimuthal( k, l), &
+                        phi => this%unit_vectors%azimuthal(k, l), &
                         grad_theta => polar_gradient_component(k, l), &
                         grad_phi => azimuthal_gradient_component(k, l) &
                         )
@@ -1708,7 +1736,9 @@ contains
             end do
         end associate
 
-        ! Release memory
+        !
+        !==> Release memory
+        !
         deallocate( polar_gradient_component )
         deallocate( azimuthal_gradient_component)
 
@@ -1779,9 +1809,9 @@ contains
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
         class (Sphere), intent (in out) :: this
-        integer (ip),   intent (in)    :: n
-        integer (ip),   intent (in)    :: m
-        complex (wp)                   :: return_value
+        integer (ip),   intent (in)     :: n
+        integer (ip),   intent (in)     :: m
+        complex (wp)                    :: return_value
         !----------------------------------------------------------------------
 
         associate( &
@@ -1802,7 +1832,7 @@ contains
     end function get_coefficient
 
 
-    subroutine get_scalar_symmetries(this, isym )
+    subroutine get_scalar_symmetries(this, isym)
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
@@ -1818,7 +1848,7 @@ contains
             case (0)
                 this%SCALAR_SYMMETRIES = isym
             case default
-                error stop 'TYPE (Sphere) in get_SCALAR_SYMMETRIES'&
+                error stop 'TYPE (Sphere) in GET_SCALAR_SYMMETRIES'&
                     //'Optional argument isym must be either '&
                     //' 0, 1, or 2 (default isym = 0)'
         end select
@@ -1826,7 +1856,7 @@ contains
     end subroutine get_scalar_symmetries
     
 
-    subroutine get_vector_symmetries(this, itype )
+    subroutine get_vector_symmetries(this, itype)
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------

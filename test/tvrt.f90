@@ -87,17 +87,17 @@ contains
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
-        integer (ip), parameter        :: NLONS = 36
-        integer (ip), parameter        :: NLATS = NLONS/2 + 1
+        integer (ip), parameter        :: NLONS = 14
+        integer (ip), parameter        :: NLATS = 24
         integer (ip), parameter        :: NSYNTHS = 3
         integer (ip)                   :: i, j, k !! Counters
-        real (wp)                      :: original_polar_component(NLATS,NLONS,NSYNTHS)
-        real (wp)                      :: original_azimuthal_component(NLATS,NLONS,NSYNTHS)
-        real (wp)                      :: exact_vorticity(NLATS,NLONS,NSYNTHS)
-        real (wp)                      :: polar_component(NLATS,NLONS,NSYNTHS)
-        real (wp)                      :: azimuthal_component(NLATS,NLONS,NSYNTHS)
-        real (wp)                      :: approximate_vorticity(NLATS,NLONS,NSYNTHS)
-        real (wp)                      :: vorticity_error, polar_error, azimuthal_error
+        real (wp)                      :: exact_polar_component(NLATS, NLONS, NSYNTHS)
+        real (wp)                      :: exact_azimuthal_component(NLATS, NLONS, NSYNTHS)
+        real (wp)                      :: exact_vorticity(NLATS, NLONS, NSYNTHS)
+        real (wp)                      :: approximate_polar_component(NLATS, NLONS, NSYNTHS)
+        real (wp)                      :: approximate_azimuthal_component(NLATS, NLONS, NSYNTHS)
+        real (wp)                      :: approximate_vorticity(NLATS, NLONS, NSYNTHS)
+        real (wp)                      :: vorticity_error, polar_inversion_error, azimuthal_inversion_error
         character (len=:), allocatable :: previous_vorticity_error
         character (len=:), allocatable :: previous_polar_inversion_error
         character (len=:), allocatable :: previous_azimuthal_inversion_error
@@ -112,25 +112,29 @@ contains
             !
             class is (GaussianSphere)
 
-            !  Initialize gaussian sphere object
+            !
+            !==> Initialize gaussian sphere object
+            !
             call sphere_type%create(nlat=NLATS, nlon=NLONS)
 
             ! Allocate known error from previous platform
-            allocate( previous_vorticity_error, source='     vorticity error     = 1.166998e-11' )
-            allocate( previous_polar_inversion_error, source='     polar inversion error     = 8.037451e-15' )
-            allocate( previous_azimuthal_inversion_error, source='     azimuthal inversion error = 6.727343e-15' )
+            allocate( previous_vorticity_error, source='     vorticity error     = 8.246182e-14' )
+            allocate( previous_polar_inversion_error, source='     polar inversion error     = 1.998401e-15' )
+            allocate( previous_azimuthal_inversion_error, source='     azimuthal inversion error = 4.107825e-15' )
             !
             !==> For regular sphere
             !
             class is (RegularSphere)
 
-            ! Initialize regular sphere
+            !
+            !==> Initialize regular sphere object
+            !
             call sphere_type%create(nlat=NLATS, nlon=NLONS)
 
             ! Allocate known error from previous platform
-            allocate( previous_vorticity_error, source='     vorticity error     = 2.959434e-12' )
-            allocate( previous_polar_inversion_error, source='     polar inversion error     = 6.314779e-15' )
-            allocate( previous_azimuthal_inversion_error, source='     azimuthal inversion error = 3.401176e-15' )
+            allocate( previous_vorticity_error, source='     vorticity error     = 2.420286e-14' )
+            allocate( previous_polar_inversion_error, source='     polar inversion error     = 1.110223e-15' )
+            allocate( previous_azimuthal_inversion_error, source='     azimuthal inversion error = 1.887379e-15' )
         end select
 
         !
@@ -138,8 +142,8 @@ contains
         !    and then set v,w from st,sv scalar fields
         !
         associate( &
-            ve => original_polar_component, &
-            we => original_azimuthal_component, &
+            ve => exact_polar_component, &
+            we => exact_azimuthal_component, &
             vte => exact_vorticity, &
             radial => sphere_type%unit_vectors%radial, &
             theta => sphere_type%unit_vectors%polar, &
@@ -181,6 +185,18 @@ contains
             end do
         end associate
 
+        !
+        !==> Compute vt from (ve,we)
+        !
+        do k=1, NSYNTHS
+            associate( &
+                ve => exact_polar_component(:,:,k), &
+                we => exact_azimuthal_component(:,:,k), &
+                vt => approximate_vorticity(:,:,k) &
+                )
+                call sphere_type%get_vorticity(ve, we, vt)
+            end associate
+        end do
 
         !
         !==> Compute vorticity error
@@ -214,8 +230,8 @@ contains
         !
         do k=1, NSYNTHS
             associate( &
-                v => polar_component(:,:,k), &
-                w => azimuthal_component(:,:,k), &
+                v => approximate_polar_component(:,:,k), &
+                w => approximate_azimuthal_component(:,:,k), &
                 vte => exact_vorticity(:,:,k) &
                 )
                 call sphere_type%invert_vorticity(vte, v, w)
@@ -223,15 +239,43 @@ contains
         end do
 
         !
+        !==> compute vector field (ve,we) using br,bi,cr,ci from (ve,we) with
+        !    br = bi = 0.0
+        !
+        do k = 1, NSYNTHS
+            associate( &
+                ve => exact_polar_component(:,:,k), &
+                we => exact_azimuthal_component(:,:,k) &
+                )
+                !
+                !==> Get polar coefficients (br, bi) and azimuthal coefficients (cr, ci) from (ve, we)
+                !
+                call sphere_type%vector_analysis_from_spherical_components(ve, we)
+                !
+                !==> Set polar coefficients to zero
+                !
+                associate( &
+                    br => sphere_type%workspace%real_polar_harmonic_coefficients, &
+                    bi => sphere_type%workspace%imaginary_polar_harmonic_coefficients &
+                    )
+                    br = 0.0_wp; bi = 0.0_wp
+                end associate
+                !
+                !==> Synthesize azimuthal coefficients (cr, ci) into (ve, we)
+                !
+                call sphere_type%perform_vector_synthesis(ve, we)
+            end associate
+        end do
+        !
         !==> compare this v,w with original
         !
         associate( &
-            err2v => polar_error, &
-            err2w => azimuthal_error, &
-            ve => original_polar_component, &
-            we => original_azimuthal_component, &
-            v => polar_component, &
-            w => azimuthal_component &
+            err2v => polar_inversion_error, &
+            err2w => azimuthal_inversion_error, &
+            ve => exact_polar_component, &
+            we => exact_azimuthal_component, &
+            v => approximate_polar_component, &
+            w => approximate_azimuthal_component &
             )
             err2v = maxval( abs(v-ve) ) !norm2(v - ve)/size(v)
             err2w = maxval( abs(w-we) ) !norm2(w - we)/size(w)
@@ -251,12 +295,13 @@ contains
         write( stdout, '(A)') previous_polar_inversion_error
         write( stdout, '(A)') previous_azimuthal_inversion_error
         write( stdout, '(A)') '     The output from your computer is: '
-        write( stdout, '(A,1pe15.6)') '     polar inversion error     = ', polar_error
-        write( stdout, '(A,1pe15.6)') '     azimuthal inversion error = ', azimuthal_error
+        write( stdout, '(A,1pe15.6)') '     polar inversion error     = ', polar_inversion_error
+        write( stdout, '(A,1pe15.6)') '     azimuthal inversion error = ', azimuthal_inversion_error
         write( stdout, '(A)' ) ''
 
         !
         !==> Release memory
+        !
         deallocate( previous_vorticity_error )
         deallocate( previous_polar_inversion_error )
         deallocate( previous_azimuthal_inversion_error )

@@ -41,6 +41,7 @@
 !     old gaqd in previous versions of SPHEREPACK
 !
 !
+!
 subroutine gaqd(nlat, theta, wts, w, lwork, ierror)
     !
     !     gauss points and weights are computed using the fourier-newton
@@ -99,7 +100,6 @@ subroutine gaqd(nlat, theta, wts, w, lwork, ierror)
     integer (ip)         :: nhalf, ns2
     real (wp), parameter :: PI = acos(-1.0_wp)
     real (wp), parameter :: HALF_PI = PI/2
-    real (wp), parameter :: WP_ZERO = nearest(1.0_wp,1.0_wp)-nearest(1.0_wp,-1.0_wp)
     real (wp)            :: dtheta, dthalf, cmax
     real (wp)            :: zprev, zlast, zero
     real (wp)            :: zhold, pb, dpb, dcor, cz
@@ -115,6 +115,7 @@ subroutine gaqd(nlat, theta, wts, w, lwork, ierror)
         ierror = 1
         return
     end if
+
 
     !
     !==> compute weights and points analytically when nlat=1, 2
@@ -157,57 +158,58 @@ subroutine gaqd(nlat, theta, wts, w, lwork, ierror)
                 nix = nhalf
             end if
 
-            do while (nix /= 0)
-                it = 0
-                do while (abs(zero-zlast) > eps*abs(zero) .or. it == 0 )
-                    !
-                    !==> Increment iterator
-                    !
-                    it = it+1
-                    zlast = zero
-                    !
-                    !==> newton iterations
-                    !
-                    call tpdp(nlat, zero, cz, theta(ns2+1), wts(ns2+1), pb, dpb)
-                    dcor = pb/dpb
-                    sgnd = 1.0_wp
+9           it = 0
+10          it = it+1
+            zlast = zero
+            !
+            !     newton iterations
+            !
+            call tpdp(nlat, zero, cz, theta(ns2+1), wts(ns2+1), pb, dpb)
+            dcor = pb/dpb
+            sgnd = 1.0_wp
 
-                    if ( dcor /= WP_ZERO ) then
-                        sgnd = dcor/abs(dcor)
-                    end if
+            if (dcor /= 0.0_wp) then
+                sgnd = dcor/abs(dcor)
+            end if
 
-                    dcor = sgnd * min(abs(dcor), cmax)
-                    zero = zero-dcor
+            dcor = sgnd * min(abs(dcor), cmax)
+            zero = zero-dcor
 
-                end do
+            if (abs(zero-zlast) > eps*abs(zero)) then
+                go to 10
+            end if
 
-                theta(nix) = zero
-                zhold = zero
-                !    wts(nix) = (nlat+nlat+1)/(dpb*dpb)
-                !
-                ! ==> yakimiw's formula permits using old pb and dpb
-                !
-                wts(nix) = (2*nlat+1)/(dpb+pb*cos(zlast)/sin(zlast))**2
-                nix = nix-1
+            theta(nix) = zero
+            zhold = zero
+            !    wts(nix) = (nlat+nlat+1)/(dpb*dpb)
+            !
+            ! ==> yakimiw's formula permits using old pb and dpb
+            !
+            wts(nix) = (2*nlat+1)/(dpb+pb*cos(zlast)/sin(zlast))**2
+            nix = nix-1
 
-                if (nix == nhalf-1)  then
-                    zero = 3.0_wp * zero - PI
-                end if
+            if (nix==0) then
+                go to 30
+            end if
 
-                if (nix < nhalf-1)  then
-                    zero = 2.0_wp * zero-zprev
-                end if
+            if (nix == nhalf-1)  then
+                zero = 3.0_wp * zero - PI
+            end if
 
-                zprev = zhold
+            if (nix < nhalf-1)  then
+                zero = 2.0_wp * zero-zprev
+            end if
 
-            end do
+            zprev = zhold
+
+            go to 9
             !
             !==> Extend points and weights via symmetries
             !
-            if (mnlat /= 0) then
+30          if (mnlat /= 0) then
                 theta(nhalf) = HALF_PI
-                call tpdp(nlat, HALF_PI, cz, theta(ns2+1), wts(ns2+1), pb, dpb)
-                wts(nhalf) = (2*nlat+1)/(dpb*dpb)
+                call tpdp (nlat, HALF_PI, cz, theta(ns2+1), wts(ns2+1), pb, dpb)
+                wts(nhalf) = (nlat+nlat+1)/(dpb*dpb)
             end if
 
             do i=1, ns2

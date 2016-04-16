@@ -70,11 +70,11 @@ contains
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
-        integer (ip) :: ntrunc_op
-        integer (ip) :: isym_op
-        integer (ip) :: ityp_op
-        integer (ip) :: isynt_op
-        real (wp)    :: rsphere_op
+        integer (ip) :: default_ntrunc
+        integer (ip) :: default_isym
+        integer (ip) :: default_ityp
+        integer (ip) :: default_isynt
+        real (wp)    :: default_rsphere
         !----------------------------------------------------------------------
 
         ! Ensure that object is usable
@@ -105,27 +105,44 @@ contains
         end associate
 
         !
-        !==> Initialize parent type
+        !==> Address optional arguments
         !
+        if (present(ntrunc)) then
+            default_ntrunc = ntrunc
+        else
+            default_ntrunc = nlat - 1
+        end if
 
-        ! Initialize optional arguments
-        ntrunc_op = nlat - 1
-        isym_op = 0
-        ityp_op = 0
-        isynt_op = 1
-        rsphere_op = 1.0_wp
+        if (present(isym)) then
+            default_isym = isym
+        else
+            default_isym = 0
+        end if
 
-        ! Address optional arguments
-        if (present(ntrunc)) ntrunc_op = ntrunc
-        if (present(isym)) isym_op = isym
-        if (present(itype)) ityp_op = itype
-        if (present(isynt)) isynt_op = isynt
-        if (present(rsphere)) rsphere_op = rsphere
+        if (present(itype)) then
+            default_ityp = itype
+        else
+            default_ityp = 0
+        end if
 
-        ! Create parent type
+        if (present(isynt)) then
+            default_isynt = isynt
+        else
+            default_isynt = 1
+        end if
+
+        if (present(rsphere)) then
+            default_rsphere = rsphere
+        else
+            default_rsphere = 1.0_wp
+        end if
+
+        !
+        !==> Create parent type
+        !
         call this%create_sphere( &
-            nlat=nlat, nlon=nlon, ntrunc=ntrunc_op, &
-            isym=isym_op, itype=ityp_op, isynt=isynt_op, rsphere=rsphere_op )
+            nlat=nlat, nlon=nlon, ntrunc=default_ntrunc, &
+            isym=default_isym, itype=default_ityp, isynt=default_isynt, rsphere=default_rsphere )
 
         ! Set flag
         this%initialized = .true.
@@ -142,7 +159,9 @@ contains
         !----------------------------------------------------------------------
 
         ! Check flag
-        if (this%initialized .eqv. .false.) return
+        if (this%initialized .eqv. .false.) then
+            return
+        end if
 
         ! Release memory from parent type
         call this%destroy_sphere()
@@ -154,7 +173,7 @@ contains
 
 
 
-    subroutine regular_scalar_analysis(this, scalar_function )
+    subroutine regular_scalar_analysis(this, scalar_function)
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
@@ -172,12 +191,14 @@ contains
                 //'uninitialized object in regular_SCALAR_ANALYSIS'
         end if
 
+        !
+        !==> Perform regular (real) spherical harmonic analysis
+        !
         select type (this)
             class is (RegularSphere)
             associate( workspace => this%workspace )
                 select type (workspace)
                     class is (RegularWorkspace)
-                    ! perform the (real) spherical harmonic analysis
                     associate( &
                         nlat => this%NUMBER_OF_LATITUDES, &
                         nlon => this%NUMBER_OF_LONGITUDES, &
@@ -203,7 +224,9 @@ contains
             end associate
         end select
 
-        ! Address the error flag
+        !
+        !==> Address the error flag
+        !
         select case (error_flag)
             case(0)
                 return
@@ -249,13 +272,14 @@ contains
                 //'uninitialized object in regular_SCALAR_SYNTHESIS'
         end if
 
-        ! Perform (real) spherical harmonic synthesis
+        !
+        !==> Perform (real) spherical harmonic synthesis
+        !
         select type (this)
             class is (RegularSphere)
             associate( workspace => this%workspace )
                 select type (workspace)
                     class is (RegularWorkspace)
-                    ! Associate various quantities
                     associate( &
                         nlat => this%NUMBER_OF_LATITUDES, &
                         nlon => this%NUMBER_OF_LONGITUDES, &
@@ -281,7 +305,9 @@ contains
             end associate
         end select
 
-        ! Address the error flag
+        !
+        !==> Address the error flag
+        !
         select case (error_flag)
             case(0)
                 return
@@ -329,7 +355,9 @@ contains
                 //'uninitialized object in REGULAR_VECTOR_ANALYSIS'
         end if
 
-        ! Perform vector analysis
+        !
+        !==> Perform (real) vector spherical harmonic analysis
+        !
         select type (this)
             class is (RegularSphere)
             associate( workspace => this%workspace )
@@ -363,7 +391,9 @@ contains
             end associate
         end select
 
-        ! Address error flag
+        !
+        !==> Address error flag
+        !
         select case (error_flag)
             case(0)
                 return
@@ -438,7 +468,9 @@ contains
                 //'uninitialized object in regular_VECTOR_SYNTHESIS'
         end if
 
-        ! Perform vector analysis
+        !
+        !==> Perform (real) vector spherical harmonic analysis
+        !
         select type (this)
             class is (RegularSphere)
             associate( workspace => this%workspace )
@@ -472,7 +504,9 @@ contains
             end associate
         end select
 
-        ! Address error flag
+        !
+        !==> Address error flag
+        !
         select case (error_flag)
             case(0)
                 return
@@ -514,7 +548,8 @@ contains
         end select
 
     end subroutine regular_vector_synthesis
-    
+
+
 
     subroutine finalize_regular_sphere(this)
         !----------------------------------------------------------------------

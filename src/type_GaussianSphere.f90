@@ -237,18 +237,20 @@ contains
         integer (ip):: error_flag
         !----------------------------------------------------------------------
 
-                ! Check if object is usable
+        ! Check if object is usable
         if (this%initialized .eqv. .false.) then
             error stop 'TYPE(GaussianSphere): '&
                 //'uninitialized object in GAUSSIAN_SCALAR_SYNTHESIS'
         end if
 
+        !
+        !==> Perform gaussian scalar synthesis
+        !
         select type (this)
             class is (GaussianSphere)
             associate( workspace => this%workspace )
                 select type (workspace)
                     class is (GaussianWorkspace)
-                    ! perform (real) spherical harmonic synthesis
                     associate( &
                         nlat => this%NUMBER_OF_LATITUDES, &
                         nlon => this%NUMBER_OF_LONGITUDES, &
@@ -274,7 +276,9 @@ contains
             end associate
         end select
 
-        ! Address error flag
+        !
+        !==> Address error flag
+        !
         select case (error_flag)
             case(0)
                 return
@@ -306,7 +310,7 @@ contains
 
 
 
-    subroutine gaussian_vector_analysis(this, polar_component, azimuthal_component )
+    subroutine gaussian_vector_analysis(this, polar_component, azimuthal_component)
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
@@ -316,7 +320,7 @@ contains
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
-        integer (ip)           :: error_flag
+        integer (ip) :: error_flag
         !----------------------------------------------------------------------
 
         ! Check if object is usable
@@ -326,7 +330,9 @@ contains
                 //'GAUSSIAN_VECTOR_ANALYSIS'
         end if
 
-        ! Perform vector analysis
+        !
+        !==> Perform gaussian vector analysis
+        !
         select type (this)
             class is (GaussianSphere)
             associate( workspace => this%workspace )
@@ -360,7 +366,9 @@ contains
             end associate
         end select
 
-        ! Address error flag
+        !
+        !==> Address error flag
+        !
         select case (error_flag)
             case(0)
                 return
@@ -434,7 +442,9 @@ contains
                 //'uninitialized object in GAUSSIAN_VECTOR_SYNTHESIS'
         end if
 
-        ! Perform vector analysis
+        !
+        !==> Perform gaussian vector analysis
+        !
         select type (this)
             class is (GaussianSphere)
             associate( workspace => this%workspace )
@@ -468,7 +478,9 @@ contains
             end associate
         end select
 
-        ! Address error flag
+        !
+        !==> Address error flag
+        !
         select case (error_flag)
             case(0)
                 return
@@ -513,7 +525,7 @@ contains
     
 
 
-    function compute_surface_integral(this, scalar_function ) result( return_value )
+    function compute_surface_integral(this, scalar_function) result (return_value)
         !
         ! Purpose:
         !
@@ -548,12 +560,16 @@ contains
                 //'uninitialized object in GET_SURFACE_INTEGRAL'
         end if
 
-        ! Allocate memory
+        !
+        !==> Allocate memory
+        !
         associate( nlat => this%NUMBER_OF_LATITUDES )
             allocate(summation(nlat))
         end associate
 
-        ! compute the integrant
+        !
+        !==> compute the integrant
+        !
         associate( grid => this%grid )
             select type(grid)
                 class is (GaussianGrid)
@@ -563,21 +579,28 @@ contains
                     wts => grid%gaussian_weights, &
                     f => scalar_function &
                     )
-                    ! Apply trapezoidal rule
+                    !
+                    !==> Apply trapezoidal rule
+                    !
                     do k = 1, nlat
                         summation(k) = sum(f(k, :)) * dphi
                     end do
-                    ! Apply gaussian quadrature
-                    summation = summation * wts
+                    !
+                    !==> Apply gaussian quadrature
+                    !summation = summation * wts
                 end associate
             end select
         end associate
 
-        ! Set integral \int_{S^2} f( theta, phi ) dS
-        return_value = sum( summation )
+        !
+        !==> Set integral \int_{S^2} f( theta, phi ) dS
+        !
+        return_value = sum(summation)
 
-        ! Release memory
-        deallocate( summation )
+        !
+        !==> Release memory
+        !
+        deallocate(summation)
 
     end function compute_surface_integral
 
