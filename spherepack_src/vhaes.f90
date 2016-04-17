@@ -391,9 +391,16 @@ subroutine vhaes1(nlat, nlon, ityp, nt, imid, idvw, jdvw, v, w, mdab, &
     mmax = min(nlat, (nlon+1)/2)
     imm1 = imid
 
-    if (mlat /= 0) then
-        imm1 = imid-1
-    end if
+    select case (mlat)
+        case (0)
+            imm1 = imid
+            ndo1 = nlat
+            ndo2 = nlat-1
+        case default
+            imm1 = imid-1
+            ndo1 = nlat-1
+            ndo2 = nlat
+    end select
 
     if (ityp > 2) then
         go to 3
@@ -439,46 +446,37 @@ subroutine vhaes1(nlat, nlon, ityp, nt, imid, idvw, jdvw, v, w, mdab, &
         call hrfftf(idv, nlon, we(1, 1, k), idv, wrfft, work)
     end do
 
-    ndo1 = nlat
-    ndo2 = nlat
+    !
+    !==> Set polar coefficients to zero
+    !
+    select case (ityp)
+        case (0,1,3,4,6,7)
+            do k=1, nt
+                do mp1=1, mmax
+                    do np1=mp1, nlat
+                        br(mp1, np1, k) = 0.0
+                        bi(mp1, np1, k) = 0.0
+                    end do
+                end do
+            end do
+    end select
 
-    if (mlat /= 0) then
-        ndo1 = nlat-1
-    end if
-
-    if (mlat == 0) then
-        ndo2 = nlat-1
-    end if
+    !
+    !==> Set azimuthal coefficients to zero
+    !
+    select case (ityp)
+        case (0,2,3,5,6,8)
+            do k=1, nt
+                do mp1=1, mmax
+                    do np1=mp1, nlat
+                        cr(mp1, np1, k) = 0.0
+                        ci(mp1, np1, k) = 0.0
+                    end do
+                end do
+            end do
+    end select
 
     select case (ityp)
-        case (2,5,8)
-            go to 11
-    end select
-
-    do k=1, nt
-        do mp1=1, mmax
-            do np1=mp1, nlat
-                br(mp1, np1, k) = 0.0
-                bi(mp1, np1, k) = 0.0
-            end do
-        end do
-    end do
-
-11  select case (ityp)
-        case (1,4,7)
-            go to 13
-    end select
-
-    do k=1, nt
-        do mp1=1, mmax
-            do np1=mp1, nlat
-                cr(mp1, np1, k) = 0.0
-                ci(mp1, np1, k) = 0.0
-            end do
-        end do
-    end do
-
-13  select case (ityp)
         case (0)
             !
             !==> case ityp=0,  no symmetries
@@ -1160,8 +1158,10 @@ subroutine vhaesi(nlat, nlon, wvhaes, lvhaes, work, lwork, dwork, &
     ierror = 0
     iw1 = 3*nlat*imid+1
     idz = (mmax*(nlat+nlat-mmax+1))/2
+
     call vea1(nlat, nlon, imid, wvhaes, wvhaes(lzimn+1), idz, &
         work, work(iw1), dwork)
+
     call hrffti(nlon, wvhaes(2*lzimn+1))
 
 end subroutine vhaesi
@@ -1172,32 +1172,29 @@ subroutine vea1(nlat, nlon, imid, zv, zw, idz, zin, wzvin, dwork)
     dimension zv(idz, 1), zw(idz, 1), zin(imid, nlat, 3), wzvin(1)
     real dwork(*)
 
-    mmax = min(nlat, (nlon+1)/2)
+    associate( mmax => min(nlat, (nlon+1)/2) )
 
-    call zvinit (nlat, nlon, wzvin, dwork)
+        call zvinit(nlat, nlon, wzvin, dwork)
 
-    do mp1=1, mmax
-        m = mp1-1
-        call zvin(0, nlat, nlon, m, zin, i3, wzvin)
-        do np1=mp1, nlat
-            mn = m*(nlat-1)-(m*(m-1))/2+np1
-            do i=1, imid
-                zv(mn, i) = zin(i, np1, i3)
+        do mp1=1, mmax
+            m = mp1-1
+            call zvin(0, nlat, nlon, m, zin, i3, wzvin)
+            do np1=mp1, nlat
+                mn = m*(nlat-1)-(m*(m-1))/2+np1
+                zv(mn,1:imid) = zin(1:imid,np1,i3)
             end do
         end do
-    end do
 
-    call zwinit (nlat, nlon, wzvin, dwork)
+        call zwinit(nlat, nlon, wzvin, dwork)
 
-    do mp1=1, mmax
-        m = mp1-1
-        call zwin(0, nlat, nlon, m, zin, i3, wzvin)
-        do np1=mp1, nlat
-            mn = m*(nlat-1)-(m*(m-1))/2+np1
-            do i=1, imid
-                zw(mn, i) = zin(i, np1, i3)
+        do mp1=1, mmax
+            m = mp1-1
+            call zwin(0, nlat, nlon, m, zin, i3, wzvin)
+            do np1=mp1, nlat
+                mn = m*(nlat-1)-(m*(m-1))/2+np1
+                zw(mn,1:imid) = zin(1:imid,np1,i3)
             end do
         end do
-    end do
+    end associate
 
 end subroutine vea1

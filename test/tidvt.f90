@@ -254,7 +254,7 @@ contains
                 write( stdout, '(A)') previous_divergence_error
                 write( stdout, '(A)') '     The output from your computer is: '
                 write( stdout, '(A,1pe15.6)') '     vorticity error     = ', err2vt
-                write( stdout, '(A,1pe15.6)') '     divergence error     = ', err2dv
+                write( stdout, '(A,1pe15.6)') '     divergence error    = ', err2dv
                 write( stdout, '(A)' ) ''
             end associate
         end associate

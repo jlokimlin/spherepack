@@ -478,7 +478,9 @@ subroutine vtsgs1(nlat, nlon, ityp, nt, imid, idvw, jdvw, vt, wt, mdab, &
                     mb = m*(nlat-1)-(m*(m-1))/2
                     mp2 = mp1+1
                     if (mp1 > ndo1) then
-                        go to 26
+                        if (mp2 > ndo2) then
+                            exit
+                        end if
                     end if
                     do k=1, nt
                         do np1=mp1, ndo1, 2
@@ -506,9 +508,7 @@ subroutine vtsgs1(nlat, nlon, ityp, nt, imid, idvw, jdvw, vt, wt, mdab, &
                                 -ci(mp1, np1, k)*vb(imid, mn)
                         end do
                     end do
-26                  if (mp2 > ndo2) then
-                        exit
-                    end if
+
                     do k=1, nt
                         do np1=mp2, ndo2, 2
                             mn = mb+np1
@@ -568,7 +568,9 @@ subroutine vtsgs1(nlat, nlon, ityp, nt, imid, idvw, jdvw, vt, wt, mdab, &
                     mb = m*(nlat-1)-(m*(m-1))/2
                     mp2 = mp1+1
                     if (mp1 > ndo1) then
-                        go to 126
+                        if (mp2 > ndo2) then
+                            exit
+                        end if
                     end if
                     do k=1, nt
                         do np1=mp1, ndo1, 2
@@ -588,9 +590,7 @@ subroutine vtsgs1(nlat, nlon, ityp, nt, imid, idvw, jdvw, vt, wt, mdab, &
                                 +bi(mp1, np1, k)*vb(imid, mn)
                         end do
                     end do
-126                 if (mp2 > ndo2) then
-                        exit
-                    end if
+
                     do k=1, nt
                         do np1=mp2, ndo2, 2
                             mn = mb+np1
@@ -644,7 +644,9 @@ subroutine vtsgs1(nlat, nlon, ityp, nt, imid, idvw, jdvw, vt, wt, mdab, &
                     mb = m*(nlat-1)-(m*(m-1))/2
                     mp2 = mp1+1
                     if (mp1 > ndo1) then
-                        go to 226
+                        if (mp2 > ndo2) then
+                            exit
+                        end if
                     end if
                     do k=1, nt
                         do np1=mp1, ndo1, 2
@@ -664,9 +666,7 @@ subroutine vtsgs1(nlat, nlon, ityp, nt, imid, idvw, jdvw, vt, wt, mdab, &
                                 -ci(mp1, np1, k)*vb(imid, mn)
                         end do
                     end do
-226                 if (mp2 > ndo2) then
-                        exit
-                    end if
+
                     do k=1, nt
                         do np1=mp2, ndo2, 2
                             mn = mb+np1
@@ -719,17 +719,15 @@ subroutine vtsgs1(nlat, nlon, ityp, nt, imid, idvw, jdvw, vt, wt, mdab, &
                     mb = m*(nlat-1)-(m*(m-1))/2
                     mp2 = mp1+1
                     if (mp1 > ndo1) then
-                        go to 326
+                        if (mp2 > ndo2) then
+                            exit
+                        end if
                     end if
                     wte(imid, 2*mp1-2, k) = wte(imid, 2*mp1-2, k) &
                         -cr(mp1, np1, k)*vb(imid, mn)
                     wte(imid, 2*mp1-1, k) = wte(imid, 2*mp1-1, k) &
                         -ci(mp1, np1, k)*vb(imid, mn)
                 end do
-
-326             if (mp2 > ndo2) then
-                    exit
-                end if
 
                 do k=1, nt
                     do np1=mp2, ndo2, 2
@@ -874,7 +872,9 @@ subroutine vtsgs1(nlat, nlon, ityp, nt, imid, idvw, jdvw, vt, wt, mdab, &
                     mp2 = mp1+1
 
                     if (mp1 > ndo1) then
-                        go to 626
+                        if (mp2 > ndo2) then
+                            exit
+                        end if
                     end if
 
                     do k=1, nt
@@ -895,10 +895,6 @@ subroutine vtsgs1(nlat, nlon, ityp, nt, imid, idvw, jdvw, vt, wt, mdab, &
                                 +bi(mp1, np1, k)*vb(imid, mn)
                         end do
                     end do
-
-626                 if (mp2 > ndo2) then
-                        exit
-                    end if
 
                     do k=1, nt
                         do np1=mp2, ndo2, 2
@@ -1079,9 +1075,14 @@ subroutine vtsgsi(nlat, nlon, wvts, lwvts, work, lwork, dwork, ldwork, &
     iw2 = iw1+lwvbin
     jw1 = nlat+1
     jw2 = jw1+nlat
+
     call vetg1(nlat, nlon, imid, wvts, wvts(lzimn+1), work, work(iw1), &
         dwork, dwork(jw1), dwork(jw2), ierror)
-    if (ierror /= 0) return
+
+    if (ierror /= 0) then
+        return
+    end if
+
     call hrffti(nlon, wvts(2*lzimn+1))
 
 end subroutine vtsgsi
@@ -1093,37 +1094,38 @@ subroutine vetg1(nlat, nlon, imid, vb, wb, vin, wvbin, &
     dimension vb(imid, *), wb(imid, *), vin(imid, nlat, 3), wvbin(*)
     real dwork(*), theta(*), wts(*)
 
-    mmax = min(nlat, nlon/2+1)
-    ldwork = 1
+    associate( &
+        mmax => min(nlat, nlon/2+1), &
+        ldwork => 1 &
+        )
 
-    call gaqd(nlat, theta, wts, dwork, ldwork, ierr)
+        call gaqd(nlat, theta, wts, dwork, ldwork, ierr)
 
-    if (ierr == 0) go to 10
-    ierror = 10+ierr
-    return
-10  call vtgint (nlat, nlon, theta, wvbin, dwork)
-    do mp1=1, mmax
-        m = mp1-1
-        call vbin (0, nlat, nlon, m, vin, i3, wvbin)
-        do np1=mp1, nlat
-            mn = m*(nlat-1)-(m*(m-1))/2+np1
-            do i=1, imid
-                vb(i, mn) = vin(i, np1, i3)
+        if (ierr /= 0) then
+            ierror = 10+ierr
+            return
+        end if
+
+        call vtgint(nlat, nlon, theta, wvbin, dwork)
+        do mp1=1, mmax
+            m = mp1-1
+            call vbin(0, nlat, nlon, m, vin, i3, wvbin)
+            do np1=mp1, nlat
+                mn = m*(nlat-1)-(m*(m-1))/2+np1
+                vb(1:imid, mn) = vin(1:imid, np1, i3)
             end do
         end do
-    end do
 
-    call wtgint (nlat, nlon, theta, wvbin, dwork)
+        call wtgint(nlat, nlon, theta, wvbin, dwork)
 
-    do mp1=1, mmax
-        m = mp1-1
-        call wbin (0, nlat, nlon, m, vin, i3, wvbin)
-        do np1=mp1, nlat
-            mn = m*(nlat-1)-(m*(m-1))/2+np1
-            do i=1, imid
-                wb(i, mn) = vin(i, np1, i3)
+        do mp1=1, mmax
+            m = mp1-1
+            call wbin (0, nlat, nlon, m, vin, i3, wvbin)
+            do np1=mp1, nlat
+                mn = m*(nlat-1)-(m*(m-1))/2+np1
+                wb(1:imid, mn) = vin(1:imid, np1, i3)
             end do
         end do
-    end do
+    end associate
 
 end subroutine vetg1

@@ -399,11 +399,17 @@ subroutine vhags1(nlat, nlon, ityp, nt, imid, idvw, jdvw, v, w, mdab, &
     mlat = mod(nlat, 2)
     mlon = mod(nlon, 2)
     mmax = min(nlat, (nlon+1)/2)
-    imm1 = imid
 
-    if (mlat /= 0) then
-        imm1 = imid-1
-    end if
+    select case (mlat)
+        case (0)
+            imm1 = imid
+            ndo1 = nlat
+            ndo2 = nlat-1
+        case default
+            imm1 = imid-1
+            ndo1 = nlat-1
+            ndo2 = nlat
+    end select
 
     if (ityp > 2) then
         go to 3
@@ -449,46 +455,37 @@ subroutine vhags1(nlat, nlon, ityp, nt, imid, idvw, jdvw, v, w, mdab, &
         call hrfftf(idv, nlon, we(1, 1, k), idv, wrfft, work)
     end do
 
-    ndo1 = nlat
-    ndo2 = nlat
+    !
+    !==> Set polar coefficients to zero
+    !
+    select case (ityp)
+        case (0,1,3,4,6,7)
+            do k=1, nt
+                do mp1=1, mmax
+                    do np1=mp1, nlat
+                        br(mp1, np1, k) = 0.0
+                        bi(mp1, np1, k) = 0.0
+                    end do
+                end do
+            end do
+    end select
 
-    if (mlat /= 0) then
-        ndo1 = nlat-1
-    end if
-
-    if (mlat == 0) then
-        ndo2 = nlat-1
-    end if
+    !
+    !==> Set azimuthal coefficients to zero
+    !
+    select case (ityp)
+        case (0,2,3,5,6,8)
+            do k=1, nt
+                do mp1=1, mmax
+                    do np1=mp1, nlat
+                        cr(mp1, np1, k) = 0.0
+                        ci(mp1, np1, k) = 0.0
+                    end do
+                end do
+            end do
+    end select
 
     select case (ityp)
-        case (2,5,8)
-            go to 11
-    end select
-
-    do k=1, nt
-        do mp1=1, mmax
-            do np1=mp1, nlat
-                br(mp1, np1, k) = 0.0
-                bi(mp1, np1, k) = 0.0
-            end do
-        end do
-    end do
-
-11  select case (ityp)
-        case (1,4,7)
-            go to 13
-    end select
-
-    do k=1, nt
-        do mp1=1, mmax
-            do np1=mp1, nlat
-                cr(mp1, np1, k) = 0.0
-                ci(mp1, np1, k) = 0.0
-            end do
-        end do
-    end do
-
-13  select case (ityp)
         case (0)
             !
             !==> case ityp=0 ,  no symmetries
