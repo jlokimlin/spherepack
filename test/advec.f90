@@ -83,228 +83,233 @@
 !     ar(m,n),br(m,n)    spectral coefficients of phi
 !
 program advec
+
+    use, intrinsic :: iso_fortran_env, only: &
+        ip => INT32, &
+        wp => REAL64, &
+        stdout => OUTPUT_UNIT
+
+    use modern_spherepack_library, only: &
+        GaussianSphere
+
+    ! Explicit typing only
     implicit none
-    !
-    !     set grid size with parameter statements
-    !
-    integer nlat,nlon,lwork,ldwork,lvhsgc,lshagc
 
-    !     parameter (nnlat=12,nnlon=23,ddt=1200.)
-    integer, parameter :: nnlat=23
-    integer, parameter :: nnlon=45
-    real, parameter :: ddt=600.0
-    !     parameter (nnlat=45,nnlon=90,ddt=300.)
-    !
-    !     set saved and unsaved work space lengths in terms of nnlat,nnlon
-    !     (see documentation for shagc,vhsgc,vhsgci,gradgc for estimates)
-    !
-    integer, parameter :: nn15=nnlon+15
-    integer, parameter :: llwork=4*nnlat*nnlon+2*nnlat*(nnlat+1)
-    integer, parameter :: lldwork = 2*nnlat*(nnlat+1)+1
-    integer, parameter :: llvhsgc = 7*nnlat*nnlat+nnlon+15
-    integer, parameter :: llshagc = 5*nnlat*nnlat + nnlon+15
-    !
-    !     dimension arrays
-    !
-    real u(nnlat,nnlon),v(nnlat,nnlon)
-    real phi_old(nnlat,nnlon),phi_new(nnlat,nnlon),phi(nnlat,nnlon)
-    real exact_phi(nnlat,nnlon)
-    real dpdt(nnlat,nnlon)
-    real gdphl(nnlat,nnlon),gdpht(nnlat,nnlon), work(llwork)
-    real dwork(lldwork)
-    real wshagc(llshagc),wvhsgc(llvhsgc),wshsgc(llshagc)
-    real ar(nnlat,nnlat),br(nnlat,nnlat)
-    real thetag(nnlat),colat(nnlat)
-    real dtheta(nnlat),dwts(nnlat)
-    !
-    !     set constants
-    !
-    real, parameter :: pi = acos(-1.0)
-    real, parameter :: omega = (2.0*pi)/(12.0*24.0*3600.0)
-    real, parameter :: p0 = 1000.0
-    real, parameter :: re = 1.0/3
-    real, parameter :: hzero = 1000.0
-    real, parameter :: alphad = 60.0
-    real, parameter :: alpha = pi*alphad/180
-    real, parameter :: beta = pi/6
-    !
-    !     set one array and no equatorial symmetry
-    !
-    integer, parameter :: nt = 1
-    integer, parameter :: isym = 0
-    !
-    !     set time step depending on resolution
-    !
-    real, parameter :: dt = ddt
-    real, parameter :: tdt = dt+dt
+    !----------------------------------------------------------------------
+    ! Dictionary: global variables
+    !----------------------------------------------------------------------
+    real (wp),    parameter :: PI = acos(-1.0_wp)
+    real (wp),    parameter :: DEGREES_TO_RADIANS = PI/180
+    integer (ip), parameter :: TIME_TO_CIRCUMVENT_THE_EARTH = 12*24*3600
+    !----------------------------------------------------------------------
 
-    integer :: i, j, k, ierror, ier, error
-    integer :: mprint, ncycle, ntime
-    real :: errm, err2
-    real :: p2, pmax, time, htime
-    real :: xlm, sl, cl, st, ct, cthclh, cthslh, xlhat, clh, slh, cth, uhat, sth
 
-       !
-    !     set work space length arguments
-    !
-    lwork = llwork
-    ldwork = lldwork
-    lshagc = llshagc
-    lvhsgc = llvhsgc
-     !
-     !     set grid size arguments
-     !
-    nlat = nnlat
-    nlon = nnlon
-    !
-    !     compute nlat latitudinal gaussian points in thetag  with
-    !     north to south orientation using gaqd from SPHEREPACK
-    !
-    call gaqd(nlat,dtheta,dwts,dwork,ldwork,ier)
+    type, extends (GaussianSphere) :: Solver
+        !----------------------------------------------------------------------
+        ! Class variables
+        !----------------------------------------------------------------------
+        real (wp) :: TIME_STEP = 6.0e+2_wp
+        real (wp) :: ROTATION_RATE_OF_EARTH = 2.0_wp * PI/TIME_TO_CIRCUMVENT_THE_EARTH
+        real (wp) :: LATITUDE_OF_COSINE_BELL = PI/6
+        real (wp) :: RADIUS_OF_EARTH_IN_METERS = 1.0_wp/3
+        real (wp) :: TILT_ANGLE_IN_DEGREES = 60.0_wp
+        real (wp) :: TILT_ANGLE = 60.0_wp * DEGREES_TO_RADIANS
+        real (wp) :: MAXIMUM_VALUE_OF_COSINE_BELL = 1.0e+3_wp
+        !----------------------------------------------------------------------
+    end type Solver
 
-    thetag = 0.5*pi- dtheta
-    colat = dtheta
-    !
-    !     preset saved work spaces for gradgc and shagc and shsgc
-    !
-    call vhsgci(nlat,nlon,wvhsgc,lvhsgc,dwork,ldwork,ierror)
-    if (ierror /= 0) write(*,10) ierror
-10  format(' error in vsgci = ',i5)
-    call shagci(nlat,nlon,wshagc,lshagc,dwork,ldwork,ierror)
-    if (ierror /= 0) write(*,20) ierror
-20  format(' error in shagci = ',i5)
-    call shsgci(nlat,nlon,wshsgc,lshagc,dwork,ldwork,ierror)
-    if (ierror /= 0) write(*,21) ierror
-21  format(' error in shsgci = ',i5)
-    !
-    !==> set vector velocities and cosine bell in geopotential
-    !
-    associate( &
-        ca => cos(alpha), &
-        sa => sin(alpha), &
-        dlon => (pi+pi)/nlon &
-        )
-        do j=1,nlon
-            xlm = (j-1)*dlon
-            sl = sin(xlm)
-            cl = cos(xlm)
-            do i=1,nlat
-                st = cos(colat(i))
-                ct = sin(colat(i))
-                sth = ca*st+sa*ct*cl
-                cthclh = ca*ct*cl-sa*st
-                cthslh = ct*sl
-                xlhat = atanxy(cthclh,cthslh)
-                clh = cos(xlhat)
-                slh = sin(xlhat)
-                cth = clh*cthclh+slh*cthslh
-                uhat = omega*cth
-                u(i,j) = (ca*sl*slh+cl*clh)*uhat
-                v(i,j) = (ca*st*cl*slh-st*sl*clh+sa*ct*slh)*uhat
-            end do
-        end do
-    end associate
-    !
-    !==> compute geopotential at t=-dt in phi_old and at t=0.0 in phi
-    !    to start up leapfrog scheme
-    !
-    call gpot(-dt, alpha, beta, omega, hzero, re, nlat, nlon, nlat, colat, phi_old)
-    call gpot(0.0, alpha, beta, omega, hzero, re, nlat, nlon, nlat, colat, phi)
-    !
-    !==> smooth geopotential at t=-dt and t=0. by synthesizing after analysis
-    !
-    call shagc(nlat,nlon,isym,nt,phi_old,nlat,nlon,ar,br,nlat, &
-        nlat,wshagc,lshagc,work,lwork,ierror)
-    if ( ierror /=0) write(*,26) ierror
-    call shsgc(nlat,nlon,isym,nt,phi_old,nlat,nlon,ar,br,nlat, &
-        nlat,wshsgc,lshagc,work,lwork,ierror)
-    if ( ierror /=0) write(*,28) ierror
-    call shagc(nlat,nlon,isym,nt,phi,nlat,nlon,ar,br,nlat, &
-        nlat,wshagc,lshagc,work,lwork,ierror)
-    if ( ierror /=0) write(*,26) ierror
-    call shsgc(nlat,nlon,isym,nt,phi,nlat,nlon,ar,br,nlat, &
-        nlat,wshsgc,lshagc,work,lwork,ierror)
-    if ( ierror /=0) write(*,28) ierror
-28  format(' ierror in shsgc = ',i5)
-    !
-    !==> compute l2 and max norms of geopotential at t=0.
-    !
-    p2 = norm2(phi)
-    pmax = maxval(abs(phi))
-    !
-    !==> set number of time steps for 12 days
-    !    (time to circumvent the earth)
-    !
-    ntime = int((12.0*24.0*3600.0)/dt+0.5)
-    mprint = ntime/12
-    time = 0.0
-    ncycle = 0
 
-    time_loop: do k=1,ntime+1
-        !
-        !       compute harmonic coefficients for phi at current time
-        !
-        call shagc(nlat,nlon,isym,nt,phi,nlat,nlon,ar,br,nlat, &
-            nlat,wshagc,lshagc,work,lwork,ierror)
-        if ( error /=0) write(*,26) ierror
-26      format(' ierror in shagc = ',i5)
-        !
-        !       compute gradient of phi at current time
-        !
-        call gradgc(nlat,nlon,isym,nt,gdpht,gdphl,nlat,nlon,ar,br, &
-            nlat,nlat,wvhsgc,lvhsgc,work,lwork,ierror)
-        if ( error /=0) write(*,27) ierror
-27      format(' ierror in gradgc = ',i5)
-        !
-        !==> compute the time derivative of phi, note that the sign
-        !    of the last term is positive because the gradient is
-        !    computed with respect to colatitude rather than latitude.
-        !
-        dpdt = -u*gdphl + v*gdpht
 
-        if (mod(ncycle,mprint) == 0) then
-            !
-            !==> write variables
-            !
-            call gpot(time,alpha,beta,omega,hzero,re,nlat,nlon,nlat, &
-                colat,exact_phi)
+    call advecting_cosine_bell()
 
-            errm = maxval(abs(exact_phi-phi))/pmax
-            err2 = norm2(exact_phi-phi)/p2
-            htime = time/3600.0
-
-            write(*,390) ncycle,htime,dt,nlat,nlon,omega,hzero, &
-                alphad,errm,err2
-390         format(//' advecting cosine bell, test case 2',/ &
-                ,' exit number              ',i10 &
-                ,' model time in  hours      ',f10.2/ &
-                ,' time step in seconds      ',f10.0 &
-                ,' number of latitudes       ',i10/ &
-                ,' number of longitudes      ',i10 &
-                ,' rotation rate        ',1pe15.6/ &
-                ,' mean height          ',1pe15.6 &
-                ,' tilt angle                ',0pf10.2/ &
-                ,' max geopot. error    ',1pe15.6 &
-                ,' RMS geopot. error    ',1pe15.6)
-
-        end if
-
-        time = time + dt
-        ncycle = ncycle+1
-        !
-        !==> update phi_old,phi for next time step
-        !
-        phi_new = phi_old + tdt*dpdt
-        phi_old = phi
-        phi = phi_new
-        !
-        !==> end of time loop
-        !
-    end do time_loop
 
 contains
 
-    subroutine gpot(t,alpha,beta,omega,hzero,re,nlat,nlon,idim, colat,h)
+
+
+    subroutine advecting_cosine_bell()
+        !----------------------------------------------------------------------
+        ! Dictionary: local variables
+        !----------------------------------------------------------------------
+        type (Solver)                 :: solver_dat
+        integer (ip), parameter       :: NLONS = 45
+        integer (ip), parameter       :: NLATS = 23
+        integer (ip)                  :: i, j, n !! Counters
+        integer (ip)                  :: mprint, ncycle, ntime
+        real (wp)                     :: u(NLATS,NLONS),v(NLATS,NLONS)
+        real (wp)                     :: phi_old(NLATS,NLONS),phi_new(NLATS,NLONS)
+        real (wp)                     :: phi(NLATS,NLONS)
+        real (wp)                     :: exact_phi(NLATS,NLONS)
+        real (wp)                     :: dpdt(NLATS,NLONS)
+        real (wp)                     :: gdphl(NLATS,NLONS),gdpht(NLATS,NLONS)
+        real (wp)                     :: p0_l2, p0_max, time, htime
+        real (wp)                     :: xlhat, uhat, cth
+        character (len=*), parameter  :: write_format = &
+            '( A,i10 ,A,f10.2/ ,A,f10.0 ,A,i10/ ,A,i10 '&
+            //',A,1pe15.6/,A,1pe15.6 ,A,0pf10.2/ A,1pe15.6 ,A,1pe15.6)'
+        !----------------------------------------------------------------------
+
+        !
+        !==> Set up workspace arrays
+        !
+        call solver_dat%create(nlat=NLATS, nlon=NLONS)
+
+        !
+        !==> set vector velocities and cosine bell in geopotential
+        !
+        associate( &
+            colat => solver_dat%grid%latitudes, &
+            omega => solver_dat%ROTATION_RATE_OF_EARTH, &
+            alpha => solver_dat%TILT_ANGLE &
+            )
+            associate( &
+                cosa => cos(alpha), &
+                sina => sin(alpha) &
+                )
+                do j=1,NLONS
+                    associate( xlm => solver_dat%grid%longitudes(j) )
+                        associate( &
+                            sinp => sin(xlm), &
+                            cosp => cos(xlm) &
+                            )
+                            do i=1,NLATS
+                                associate( &
+                                    cost => cos(colat(i)), &
+                                    sint => sin(colat(i)) &
+                                    )
+                                    associate( &
+                                        sth => cosa*cost+sina*sint*cosp, &
+                                        cthclh => cosa*sint*cosp-sina*cost, &
+                                        cthslh => sint*sinp &
+                                        )
+                                        xlhat = atanxy(cthclh,cthslh)
+                                        associate( &
+                                            cosl => cos(xlhat), &
+                                            sinl => sin(xlhat) &
+                                            )
+                                            cth = cosl*cthclh+sinl*cthslh
+                                            uhat = omega*cth
+                                            u(i,j) = (cosa*sinp*sinl+cosp*cosl)*uhat
+                                            v(i,j) = &
+                                                (cosa*cost*cosp*sinl &
+                                                -cost*sinp*cosl+sina*sint*sinl)*uhat
+                                        end associate
+                                    end associate
+                                end associate
+                            end do
+                        end associate
+                    end associate
+                end do
+            end associate
+        end associate
+        !
+        !==> compute geopotential at t=-dt in phi_old and at t=0.0 in phi
+        !    to start up leapfrog scheme
+        !
+        associate( dt => solver_dat%TIME_STEP )
+            call get_geopotential(solver_dat, -dt, phi_old)
+            call get_geopotential(solver_dat, 0.0_wp, phi)
+        end associate
+        !
+        !==> smooth geopotential at t=-dt and t=0. by synthesizing after analysis
+        !
+        call solver_dat%perform_scalar_analysis(phi_old)
+        call solver_dat%perform_scalar_synthesis(phi_old)
+        call solver_dat%perform_scalar_analysis(phi)
+        call solver_dat%perform_scalar_synthesis(phi)
+        !
+        !==> compute l2 and max norms of geopotential at t=0.
+        !
+        p0_l2 = norm2(phi)
+        p0_max = maxval(abs(phi))
+        !
+        !==> set number of time steps for 12 days
+        !    (time to circumvent the earth)
+        !
+        associate( dt => solver_dat%TIME_STEP )
+            ntime = int(real(TIME_TO_CIRCUMVENT_THE_EARTH, kind=wp)/dt + 0.5_wp, kind=ip)
+            mprint = ntime/12
+            time = 0.0_wp
+            ncycle = 0
+        end associate
+        !
+        !==> Start time loop
+        !
+        time_loop: do n=1, ntime + 1
+            !
+            !==> Compute gradient of phi at current time
+            !
+            call solver_dat%get_gradient(phi, gdpht, gdphl)
+            !
+            !==> Compute the time derivative of phi, note that the sign
+            !    of the last term is positive because the gradient is
+            !    computed with respect to colatitude rather than latitude.
+            !
+            dpdt = -u * gdphl + v * gdpht
+            !
+            !==> write variables to standard output
+            !
+            if (mod(ncycle, mprint) == 0) then
+                !
+                !==> Compute exact solution
+                !
+                call get_geopotential(solver_dat, time, exact_phi)
+                !
+                !==> Compute errors
+                !
+                associate( &
+                    htime => time/3600, &
+                    dt => solver_dat%TIME_STEP, &
+                    nlats => solver_dat%NUMBER_OF_LATITUDES, &
+                    nlons => solver_dat%NUMBER_OF_LONGITUDES, &
+                    omega => solver_dat%ROTATION_RATE_OF_EARTH, &
+                    hzero => solver_dat%MAXIMUM_VALUE_OF_COSINE_BELL, &
+                    alphad => solver_dat%TILT_ANGLE_IN_DEGREES, &
+                    errm => maxval(abs(exact_phi-phi))/p0_max, &
+                    err2 => norm2(exact_phi-phi)/p0_l2 &
+                    )
+                    write( stdout, '(A)') ''
+                    write( stdout, '(A)' ) ' advecting cosine bell, test case 2'
+                    write( stdout, fmt = write_format ) &
+                        ' exit number              ', ncycle, &
+                        '  model time in  hours      ', htime, &
+                        ' time step in seconds      ', dt, &
+                        ' number of latitudes       ', nlats, &
+                        ' number of longitudes      ', nlons, &
+                        ' rotation rate        ', omega, &
+                        ' mean height          ', hzero, &
+                        ' tilt angle                ', alphad, &
+                        ' max geopot. error    ', errm, &
+                        ' RMS geopot. error    ', err2
+                end associate
+            end if
+
+            !
+            !==> Update various quantities
+            !
+            associate( dt => solver_dat%TIME_STEP )
+                !
+                !==> increment
+                !
+                time = time + dt
+                ncycle = ncycle + 1
+                !
+                !==> update phi_old,phi for next time step
+                !
+                phi_new = phi_old + 2.0_wp * dt * dpdt
+                phi_old = phi
+                phi = phi_new
+            end associate
+            !
+            !==> end of time loop
+            !
+        end do time_loop
+
+    end subroutine advecting_cosine_bell
+
+
+
+    subroutine get_geopotential(this, t, geopot)
         !
         !     computes advecting cosine bell on a tilted grid a time t.
         !
@@ -333,97 +338,112 @@ contains
         !
         ! output parameter
         !
-        !     h      an nlat by nlon array containing the geopotential
+        !     geopot     an nlat by nlon array containing the geopotential
         !
         !             on a tilted grid
         !
-        implicit none
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
-        real,    intent (in) :: t
-        real,    intent (in) :: alpha
-        real,    intent (in) :: beta
-        real,    intent (in) :: omega
-        real,    intent (in) :: hzero
-        real,    intent (in) :: re
-        integer, intent (in) :: nlat
-        integer, intent (in) :: nlon
-        integer, intent (in) :: idim
-        real,    intent (in) :: colat(nlat)
-        real,    intent (out) ::  h(idim,nlon)
+        class (Solver), intent (in out) :: this
+        real (wp),    intent (in)       :: t
+        real (wp),    intent (out)      :: geopot(:,:)
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
-        integer :: i, j
-        real, parameter :: pi = acos(-1.0)
-        real, parameter :: tpi = 2.0*pi
-        real :: xc, yc, zc, x1, y1, z1
-        real :: lambda, theta, st, ct, sth ,cthclh
-        real :: cthslh,lhat,clh,slh,cth ,that, r
+        integer (ip) :: i, j
+        real (wp)    :: xc, yc, zc, x1, y1, z1
+        real (wp)    :: lambda, theta, cost, sint, sth ,cthclh
+        real (wp)    :: cthslh,lhat,cosl,sinl,cth ,that, r
         !----------------------------------------------------------------------
 
-        associate( lambdc => omega*t )
-            call stoc(1.0, beta, lambdc, xc, yc, zc)
-        end associate
-
-
         associate( &
-            ca => cos(alpha), &
-            sa => sin(alpha), &
-            dlon => tpi/nlon &
+            nlat => this%NUMBER_OF_LATITUDES, &
+            nlon => this%NUMBER_OF_LONGITUDES, &
+            omega => this%ROTATION_RATE_OF_EARTH, &
+            beta => this%LATITUDE_OF_COSINE_BELL, &
+            re => this%RADIUS_OF_EARTH_IN_METERS, &
+            alpha => this%TILT_ANGLE, &
+            hzero => this%MAXIMUM_VALUE_OF_COSINE_BELL,&
+            colat => this%grid%latitudes &
             )
-            do j=1,nlon
-                lambda = (j-1)*dlon
-                associate( &
-                    cl => cos(lambda), &
-                    sl => sin(lambda) &
-                    )
-                    do i=1,nlat
-                        theta = colat(i)
-                        st = cos(theta)
-                        ct = sin(theta)
-                        sth = ca*st+sa*ct*cl
-                        cthclh = ca*ct*cl-sa*st
-                        cthslh = ct*sl
-                        lhat = atanxy(cthclh,cthslh)
-                        clh = cos(lhat)
-                        slh = sin(lhat)
-                        cth = clh*cthclh+slh*cthslh
-                        that = atanxy(sth,cth)
-                        call stoc(1.0, that, lhat, x1, y1, z1)
-                        associate( dist => norm2([x1-xc, y1-yc, z1-zc]) )
-                            h(i,j) = 0.0
-                            if (dist >= re) then
+
+            associate( lambdc => omega*t )
+                call get_scaled_radial_unit_vector(1.0, beta, lambdc, xc, yc, zc)
+            end associate
+
+
+            associate( &
+                cosa => cos(alpha), &
+                sina => sin(alpha) &
+                )
+                do j=1,nlon
+                    lambda = this%grid%longitudes(j)
+                    associate( &
+                        cosp => cos(lambda), &
+                        sinp => sin(lambda) &
+                        )
+                        do i=1,nlat
+                            theta = colat(i)
+                            cost = cos(theta)
+                            sint = sin(theta)
+                            sth = cosa*cost+sina*sint*cosp
+                            cthclh = cosa*sint*cosp-sina*cost
+                            cthslh = sint*sinp
+                            lhat = atanxy(cthclh,cthslh)
+                            cosl = cos(lhat)
+                            sinl = sin(lhat)
+                            cth = cosl*cthclh+sinl*cthslh
+                            that = atanxy(sth,cth)
+                            !
+                            !== Compute scaled radial unit vector
+                            !
+                            call get_scaled_radial_unit_vector(1.0_wp, that, lhat, x1, y1, z1)
+                            !
+                            !==> compute distance
+                            !
+                            associate( dist => norm2([x1-xc, y1-yc, z1-zc]) )
+                                !
+                                !==> Initialize geopotential
+                                !
+                                geopot(i,j) = 0.0_wp
+                                if (dist >= re) then
+                                    cycle
+                                end if
+                                r = 2.0_wp * asin(dist/2)
+                            end associate
+                            if (r >= re) then
                                 cycle
                             end if
-                            r = 2.0*asin(dist/2)
-                        end associate
-                        if (r >= re) then
-                            cycle
-                        end if
-                        h(i,j) = hzero*0.5*(cos(r*pi/re)+1.)
-                    end do
-                end associate
-            end do
+                            !
+                            !==> Set geopotential
+                            geopot(i,j) = hzero * (cos(r*PI/re)+1.0_wp)/2
+                        end do
+                    end associate
+                end do
+            end associate
         end associate
 
-    end subroutine gpot
+    end subroutine get_geopotential
+
 
 
     pure function atanxy(x,y) result (return_value)
-        implicit none
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
-        real, intent (in) :: x
-        real, intent (in) :: y
+        real (wp), intent (in) :: x
+        real (wp), intent (in) :: y
         real              :: return_value
-        !----------------------------------------------------------------------
+        !--------------------------------------------------------------------------------
+        ! Dictionary: local variables
+        !--------------------------------------------------------------------------------
+        real (wp), parameter :: ZERO = nearest(1.0_wp, 1.0_wp)-nearest(1.0_wp, -1.0_wp)
+        !--------------------------------------------------------------------------------
 
-        return_value = 0.0
+        return_value = 0.0_wp
 
-        if (x == 0.0 .and. y == 0.0) then
+        if (x == ZERO .and. y == ZERO) then
             return
         end if
 
@@ -432,56 +452,23 @@ contains
     end function atanxy
 
 
-    pure subroutine ctos(x,y,z,r,theta,phi)
-        implicit none
+
+    pure subroutine get_scaled_radial_unit_vector(radius, theta, phi, x, y, z)
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
-        real, intent (in) :: x, y, z
-        real, intent (out) :: theta, r, phi
-        !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
-        !----------------------------------------------------------------------
-        real :: r1
+        real (wp), intent (in) :: radius
+        real (wp), intent (in) :: theta
+        real (wp), intent (in) :: phi
+        real (wp), intent (out) :: x, y, z
         !----------------------------------------------------------------------
 
-        r1 = norm2([x, y])
+        x = radius * sin(theta) * cos(phi)
+        y = radius * sin(theta) * sin(phi)
+        z = radius * cos(theta)
 
-        if (r1 == 0.0) then
-            phi = 0.
-            theta = 0.
-            if (z < 0.) then
-                theta = acos(-1.0)
-            end if
-        else
-            r = sqrt(r1+z**2)
-            r1 = sqrt(r1)
-            phi = atan2(y,x)
-            theta = atan2(r1,z)
-        end if
-
-    end subroutine ctos
+    end subroutine get_scaled_radial_unit_vector
 
 
-    pure subroutine stoc(r, theta, phi, x, y, z)
-        implicit none
-        !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
-        !----------------------------------------------------------------------
-        real, intent (in) :: r
-        real, intent (in) :: theta
-        real, intent (in) :: phi
-        real, intent (out) :: x, y, z
-        !----------------------------------------------------------------------
-
-        associate( st => sin(theta) )
-            x = r*st*cos(phi)
-            y = r*st*sin(phi)
-            z = r*cos(theta)
-        end associate
-
-    end subroutine stoc
 
 end program advec
-
-
