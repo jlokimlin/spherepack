@@ -153,7 +153,6 @@ contains
         !==> Set up workspace arrays
         !
         call solver_dat%create(nlat=NLATS, nlon=NLONS)
-
         !
         !==> set vector velocities and cosine bell in geopotential
         !

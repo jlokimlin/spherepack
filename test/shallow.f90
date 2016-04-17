@@ -290,13 +290,9 @@ program shallow
     !
     !     initialize first time step
     !
-    do j=1,nlon
-        do i=1,nlat
-            u(i,j) = uxact(i,j)
-            v(i,j) = vxact(i,j)
-            p(i,j) = pxact(i,j)
-        end do
-    end do
+    u = uxact
+    v = vxact
+    p = pxact
     !
     isym = 0
     nt = 1
@@ -310,177 +306,172 @@ program shallow
     !
     !     analyze the velocity components (u,v)
     !
-90  call vhaesgo(nlat,nlon,isym,nt,u,v,idp,jdp,br,bi,cr,ci, &
-        mdab,ndab,wvha,lwvha,work,lwork,ierror)
-    if (ierror /= 0) write(*,91) ierror
-91  format(' error' i4 ' in vhaes')
-    !
-    !     truncate spectrum to eliminate aliasing of the
-    !     product terms in the shallow-water equations
-    !
-    call trunc(nlat,mmode,mdab,br,bi)
-    call trunc(nlat,mmode,mdab,cr,ci)
-    !
-    !     resynthesize the velocity components
-    !
-    call vhsesgo(nlat,nlon,isym,nt,u,v,idp,jdp,br,bi,cr,ci, &
-        mdab,ndab,wvhs,lwvhs,work,lwork,ierror)
-    if (ierror /= 0) write(*,92) ierror
-92  format(' error' i4 ' in vhses')
-    !
-    !   begin step 2, section 3
-    !
-    !     analyze geopotential p
-    !
-    call shaes(nlat,nlon,isym,nt,p,idp,jdp,a,b,mdab,ndab, &
-        wsha,lwsha,work,lwork,ierror)
-    if (ierror /= 0) write(*,93) ierror
-93  format(' error' i4 ' in shaes')
-    !
-    !     truncate spectrum to eliminate aliasing of the
-    !     product terms in the shallow-water equations
-    !
-    call trunc(nlat,mmode,mdab,a,b)
-    !
-    !     resynthesize the geopotential p
-    !
-    call shses(nlat,nlon,isym,nt,p,idp,jdp,a,b,mdab,ndab, &
-        wshs,lwshs,work,lwork,ierror)
-    if (ierror /= 0) write(*,94) ierror
-94  format(' error' i4 ' in shses')
-    !
-    !
-    !   begin step 3, section 3
-    !
-    !     compute the vorticity of the velocity (u,v)
-    !
-    call vrtes(nlat,nlon,isym,nt,vort,idp,jdp,cr,ci,mdab,ndab, &
-        wshs,lwshs,work,lwork,ierror)
-    if (ierror /= 0) write(*,95) ierror
-95  format(' error' i4 ' in vrtes')
-    !
-    !     compute the divergence of the velocity (u,v)
-    !
-    call dives(nlat,nlon,isym,nt,divg,idp,jdp,br,bi,mdab,ndab, &
-        wshs,lwshs,work,lwork,ierror)
-    if (ierror /= 0) write(*,96) ierror
-96  format(' error' i4 ' in dives')
-    !
-    !   begin step 4, section 3
-    !
-    !     compute the derivative of the velocity (u,v) with
-    !     respect to colatitude theta.
-    !
-    call vtsesgo(nlat,nlon,isym,nt,ut,vt,idp,jdp,br,bi,cr,ci, &
-        mdab,ndab,wvts,lwvts,work,lwork,ierror)
-    if (ierror /= 0) write(*,97) ierror
-97  format(' error' i4 ' in vtsesgo')
-    !
-    !   begin step 5, section 3
-    !
-    !     compute the gradient of the geopotential p
-    !
-    call gradesgo(nlat,nlon,isym,nt,gpdl,gpdt,idp,jdp,a,b,mdab,ndab, &
-        wvhs,lwvhs,work,lwork,ierror)
-    if (ierror /= 0) write(*,98) ierror
-98  format(' error' i4 ' in grades')
-    !
-    !     compute the time derivatives of the velocity (u,v)
-    !     and the geopotential p using the shallow-water
-    !     equations (2.8), (2.9), and (2.10), section 3.
-    !
-    do j=1,nlon
-        do i=1,nlat
-            dudt(i,j) = (u(i,j)*(vt(i,j)-divg(i,j))-v(i,j)*ut(i,j) &
-                -gpdl(i,j))/aa+f(i,j)*v(i,j)
-            dvdt(i,j) = -(u(i,j)*(vort(i,j)+ut(i,j))+v(i,j)*vt(i,j) &
-                +gpdt(i,j))/aa-f(i,j)*u(i,j)
-            dpdt(i,j) = -((p(i,j)+pzero)*divg(i,j)+v(i,j)*gpdt(i,j) &
-                +u(i,j)*gpdl(i,j))/aa
-        end do
-    end do
-    !
-    if (mod(ncycle,mprint) /= 0) go to 370
-    htime = time/3600.
+    time_loop: do while (ncycle <= itmax)
 
-    write(*,390) ncycle,htime,dt,nlat,nlon,mmode,omega,pzero, &
-        uzero,alphad
-390 format(//' steady nonlinear rotated flow, test case 3'/ &
-        ' exit number              ' i10 &
-        ' model time in  hours      ' f10.2/ &
-        ' time step in seconds      ' f10.0 &
-        ' number of latitudes       ' i10/ &
-        ' number of longitudes      ' i10 &
-        ' max wave number           ' i10/ &
-        ' rotation rate        ' 1pe15.6 &
-        ' mean height          ' 1pe15.6/ &
-        ' maximum velocity     ' 1pe15.6 &
-        ' tilt angle                ' f10.2)
-    dvgm = 0.
-    dvmax = 0.
-    dpmax = 0.
-    evmax = 0.0
-    epmax = 0.0
-    do j=1,nlon
-        do i=1,nlat
-            dvgm = amax1(dvgm,abs(divg(i,j)))
-            dvmax = dvmax+(u(i,j)-uxact(i,j))**2+(v(i,j)-vxact(i,j))**2
-            dpmax = dpmax+(p(i,j)-pxact(i,j))**2
-            evmax = amax1(evmax,abs(v(i,j)-vxact(i,j)),abs(u(i,j)-uxact(i,j)))
-            epmax = amax1(epmax,abs(p(i,j)-pxact(i,j)))
-        end do
-    end do
+        call vhaesgo(nlat,nlon,isym,nt,u,v,idp,jdp,br,bi,cr,ci, &
+            mdab,ndab,wvha,lwvha,work,lwork,ierror)
+        if (ierror /= 0) write(*,91) ierror
+91      format(' error' i4 ' in vhaes')
+        !
+        !     truncate spectrum to eliminate aliasing of the
+        !     product terms in the shallow-water equations
+        !
+        call trunc(nlat,mmode,mdab,br,bi)
+        call trunc(nlat,mmode,mdab,cr,ci)
+        !
+        !     resynthesize the velocity components
+        !
+        call vhsesgo(nlat,nlon,isym,nt,u,v,idp,jdp,br,bi,cr,ci, &
+            mdab,ndab,wvhs,lwvhs,work,lwork,ierror)
+        if (ierror /= 0) write(*,92) ierror
+92      format(' error' i4 ' in vhses')
+        !
+        !   begin step 2, section 3
+        !
+        !     analyze geopotential p
+        !
+        call shaes(nlat,nlon,isym,nt,p,idp,jdp,a,b,mdab,ndab, &
+            wsha,lwsha,work,lwork,ierror)
+        if (ierror /= 0) write(*,93) ierror
+93      format(' error' i4 ' in shaes')
+        !
+        !     truncate spectrum to eliminate aliasing of the
+        !     product terms in the shallow-water equations
+        !
+        call trunc(nlat,mmode,mdab,a,b)
+        !
+        !     resynthesize the geopotential p
+        !
+        call shses(nlat,nlon,isym,nt,p,idp,jdp,a,b,mdab,ndab, &
+            wshs,lwshs,work,lwork,ierror)
+        if (ierror /= 0) write(*,94) ierror
+94      format(' error' i4 ' in shses')
+        !
+        !
+        !   begin step 3, section 3
+        !
+        !     compute the vorticity of the velocity (u,v)
+        !
+        call vrtes(nlat,nlon,isym,nt,vort,idp,jdp,cr,ci,mdab,ndab, &
+            wshs,lwshs,work,lwork,ierror)
+        if (ierror /= 0) write(*,95) ierror
+95      format(' error' i4 ' in vrtes')
+        !
+        !     compute the divergence of the velocity (u,v)
+        !
+        call dives(nlat,nlon,isym,nt,divg,idp,jdp,br,bi,mdab,ndab, &
+            wshs,lwshs,work,lwork,ierror)
+        if (ierror /= 0) write(*,96) ierror
+96      format(' error' i4 ' in dives')
+        !
+        !   begin step 4, section 3
+        !
+        !     compute the derivative of the velocity (u,v) with
+        !     respect to colatitude theta.
+        !
+        call vtsesgo(nlat,nlon,isym,nt,ut,vt,idp,jdp,br,bi,cr,ci, &
+            mdab,ndab,wvts,lwvts,work,lwork,ierror)
+        if (ierror /= 0) write(*,97) ierror
+97      format(' error' i4 ' in vtsesgo')
+        !
+        !   begin step 5, section 3
+        !
+        !     compute the gradient of the geopotential p
+        !
+        call gradesgo(nlat,nlon,isym,nt,gpdl,gpdt,idp,jdp,a,b,mdab,ndab, &
+            wvhs,lwvhs,work,lwork,ierror)
+        if (ierror /= 0) write(*,98) ierror
+98      format(' error' i4 ' in grades')
+        !
+        !==>  compute the time derivatives of the velocity (u,v)
+        !     and the geopotential p using the shallow-water
+        !     equations (2.8), (2.9), and (2.10), section 3.
+        !
+        dudt = (u*(vt - divg) - v*ut - gpdl)/aa + f*v
 
-    dvmax = sqrt(dvmax/v2max)
-    dpmax = sqrt(dpmax/p2max)
-    evmax = evmax/vmax
-    epmax = epmax/pmax
+        dvdt = -(u*(vort + ut) + v*vt +gpdt)/aa - f*u
 
-    write(*,391) evmax,epmax,dvmax,dpmax,dvgm
-391 format(' max error in velocity' 1pe15.6 &
-        ' max error in geopot. ' 1pe15.6/ &
-        ' l2 error in velocity ' 1pe15.6 &
-        ' l2 error in geopot.  ' 1pe15.6/ &
-        ' maximum divergence   ' 1pe15.6)
-    !
-    !     set values at time = -dt to values at time = 0.
-    !
-370 if (ncycle > 0) go to 206
-    do j=1,nlon
-        do i=1,nlat
-            uold(i,j) = u(i,j)
-            vold(i,j) = v(i,j)
-            pold(i,j) = p(i,j)
-        end do
-    end do
-    !
-    !     compute values at next time level using leap frog
-    !     time differencing
-    !
-    206 do j=1,nlon
-        do  i=1,nlat
-            unew(i,j) = uold(i,j)+tdt*dudt(i,j)
-            vnew(i,j) = vold(i,j)+tdt*dvdt(i,j)
-            pnew(i,j) = pold(i,j)+tdt*dpdt(i,j)
-        end do
-    end do
-    !
-    !     update values to next time level
-    !
-    do j=1,nlon
-        do i=1,nlat
-            uold(i,j) = u(i,j)
-            vold(i,j) = v(i,j)
-            pold(i,j) = p(i,j)
-            u(i,j) = unew(i,j)
-            v(i,j) = vnew(i,j)
-            p(i,j) = pnew(i,j)
-        end do
-    end do
+        dpdt = -( (p + pzero)*divg + v*gpdt + u*gpdl )/aa
+        !
+        !==> Print results to standard output
+        !
+        if (mod(ncycle,mprint) == 0) then
 
-    ncycle = ncycle+1
-    time = time+dt
-    if (ncycle <= itmax) go to 90
+            htime = time/3600.
+
+            write(*,390) ncycle,htime,dt,nlat,nlon,mmode,omega,pzero, &
+                uzero,alphad
+390         format(//' steady nonlinear rotated flow, test case 3'/ &
+                ' exit number              ' i10 &
+                ' model time in  hours      ' f10.2/ &
+                ' time step in seconds      ' f10.0 &
+                ' number of latitudes       ' i10/ &
+                ' number of longitudes      ' i10 &
+                ' max wave number           ' i10/ &
+                ' rotation rate        ' 1pe15.6 &
+                ' mean height          ' 1pe15.6/ &
+                ' maximum velocity     ' 1pe15.6 &
+                ' tilt angle                ' f10.2)
+            dvgm = 0.
+            dvmax = 0.
+            dpmax = 0.
+            evmax = 0.0
+            epmax = 0.0
+            do j=1,nlon
+                do i=1,nlat
+                    dvgm = amax1(dvgm,abs(divg(i,j)))
+                    dvmax = dvmax+(u(i,j)-uxact(i,j))**2+(v(i,j)-vxact(i,j))**2
+                    dpmax = dpmax+(p(i,j)-pxact(i,j))**2
+                    evmax = amax1(evmax,abs(v(i,j)-vxact(i,j)),abs(u(i,j)-uxact(i,j)))
+                    epmax = amax1(epmax,abs(p(i,j)-pxact(i,j)))
+                end do
+            end do
+
+            dvmax = sqrt(dvmax/v2max)
+            dpmax = sqrt(dpmax/p2max)
+            evmax = evmax/vmax
+            epmax = epmax/pmax
+
+            write(*,391) evmax,epmax,dvmax,dpmax,dvgm
+391         format(' max error in velocity' 1pe15.6 &
+                ' max error in geopot. ' 1pe15.6/ &
+                ' l2 error in velocity ' 1pe15.6 &
+                ' l2 error in geopot.  ' 1pe15.6/ &
+                ' maximum divergence   ' 1pe15.6)
+        end if
+        !
+        !     set values at time = -dt to values at time = 0.
+        !
+        if (ncycle == 0) then
+            uold = u
+            vold = v
+            pold = p
+        end if
+        !
+        !     compute values at next time level using leap frog
+        !     time differencing
+        !
+        unew = uold + tdt*dudt
+        vnew = vold + tdt*dvdt
+        pnew = pold + tdt*dpdt
+        !
+        !==> update values to next time level
+        !
+        uold = u
+        vold = v
+        pold = p
+        u = unew
+        v = vnew
+        p = pnew
+        !
+        !==> Increment
+        !
+        ncycle = ncycle+1
+        time = time+dt
+        !
+        !==> end of time loop
+        !
+    end do time_loop
 
 end program shallow
 
