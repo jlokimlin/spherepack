@@ -409,547 +409,639 @@ subroutine vtsgs1(nlat, nlon, ityp, nt, imid, idvw, jdvw, vt, wt, mdab, &
         wto(idv, nlon, 1), work(1), wrfft(1), &
         vb(imid, 1), wb(imid, 1)
 
+    integer :: i, j, k, hack_counter !! Counters
+
     nlp1 = nlat+1
     mlat = mod(nlat, 2)
     mlon = mod(nlon, 2)
     mmax = min(nlat, (nlon+1)/2)
-    imm1 = imid
-    if (mlat /= 0) imm1 = imid-1
+
+    if (mlat /= 0) then
+        imm1 = imid-1
+        ndo1 = nlat-1
+        ndo2 = nlat-1
+    else
+        imm1 = imid
+        ndo1 = nlat
+        ndo2 = nlat
+    end if
+
+    !
+    !==> Initialize
+    !
+    vte = 0.0
+    wte = 0.0
+
+    !
+    !==> Remark:
+    !
+    !    Fortran 2008:
+    !    The EXIT statement provides one way of terminating
+    !    a loop, or completing execution of another construct.
+    !    Unfortunately, many compilers don't support this feature yet.
+    !    We exit a DO loop labeled "dumb_hack" to avoid the dreaded GO TO
+    !
+    dumb_hack: do hack_counter=1,1
+        select case (ityp)
+            case (0)
+                !
+                !==> case ityp=0   no symmetries
+                !
+                !     case m = 0
+                !
+                do k=1, nt
+                    do np1=2, ndo2, 2
+                        do i=1, imm1
+                            vto(i, 1, k)=vto(i, 1, k)+br(1, np1, k)*vb(i, np1)
+                            wto(i, 1, k)=wto(i, 1, k)-cr(1, np1, k)*vb(i, np1)
+                        end do
+                    end do
+                end do
+
+                do k=1, nt
+                    do np1=3, ndo1, 2
+                        do i=1, imid
+                            vte(i, 1, k)=vte(i, 1, k)+br(1, np1, k)*vb(i, np1)
+                            wte(i, 1, k)=wte(i, 1, k)-cr(1, np1, k)*vb(i, np1)
+                        end do
+                    end do
+                end do
+                !
+                !     case m = 1 through nlat-1
+                !
+                if (mmax < 2) then
+                    exit dumb_hack
+                end if
+
+                do mp1=2, mmax
+                    m = mp1-1
+                    mb = m*(nlat-1)-(m*(m-1))/2
+                    mp2 = mp1+1
+                    if (mp1 > ndo1) then
+                        go to 26
+                    end if
+                    do k=1, nt
+                        do np1=mp1, ndo1, 2
+                            mn = mb+np1
+                            do i=1, imm1
+                                vte(i, 2*mp1-2, k) = vte(i, 2*mp1-2, k)+br(mp1, np1, k)*vb(i, mn)
+                                vto(i, 2*mp1-2, k) = vto(i, 2*mp1-2, k)-ci(mp1, np1, k)*wb(i, mn)
+                                vte(i, 2*mp1-1, k) = vte(i, 2*mp1-1, k)+bi(mp1, np1, k)*vb(i, mn)
+                                vto(i, 2*mp1-1, k) = vto(i, 2*mp1-1, k)+cr(mp1, np1, k)*wb(i, mn)
+                                wte(i, 2*mp1-2, k) = wte(i, 2*mp1-2, k)-cr(mp1, np1, k)*vb(i, mn)
+                                wto(i, 2*mp1-2, k) = wto(i, 2*mp1-2, k)-bi(mp1, np1, k)*wb(i, mn)
+                                wte(i, 2*mp1-1, k) = wte(i, 2*mp1-1, k)-ci(mp1, np1, k)*vb(i, mn)
+                                wto(i, 2*mp1-1, k) = wto(i, 2*mp1-1, k)+br(mp1, np1, k)*wb(i, mn)
+                            end do
+                            if (mlat == 0) then
+                                exit
+                            end if
+                            vte(imid, 2*mp1-2, k) = vte(imid, 2*mp1-2, k) &
+                                +br(mp1, np1, k)*vb(imid, mn)
+                            vte(imid, 2*mp1-1, k) = vte(imid, 2*mp1-1, k) &
+                                +bi(mp1, np1, k)*vb(imid, mn)
+                            wte(imid, 2*mp1-2, k) = wte(imid, 2*mp1-2, k) &
+                                -cr(mp1, np1, k)*vb(imid, mn)
+                            wte(imid, 2*mp1-1, k) = wte(imid, 2*mp1-1, k) &
+                                -ci(mp1, np1, k)*vb(imid, mn)
+                        end do
+                    end do
+26                  if (mp2 > ndo2) then
+                        exit
+                    end if
+                    do k=1, nt
+                        do np1=mp2, ndo2, 2
+                            mn = mb+np1
+                            do i=1, imm1
+                                vto(i, 2*mp1-2, k) = vto(i, 2*mp1-2, k)+br(mp1, np1, k)*vb(i, mn)
+                                vte(i, 2*mp1-2, k) = vte(i, 2*mp1-2, k)-ci(mp1, np1, k)*wb(i, mn)
+                                vto(i, 2*mp1-1, k) = vto(i, 2*mp1-1, k)+bi(mp1, np1, k)*vb(i, mn)
+                                vte(i, 2*mp1-1, k) = vte(i, 2*mp1-1, k)+cr(mp1, np1, k)*wb(i, mn)
+                                wto(i, 2*mp1-2, k) = wto(i, 2*mp1-2, k)-cr(mp1, np1, k)*vb(i, mn)
+                                wte(i, 2*mp1-2, k) = wte(i, 2*mp1-2, k)-bi(mp1, np1, k)*wb(i, mn)
+                                wto(i, 2*mp1-1, k) = wto(i, 2*mp1-1, k)-ci(mp1, np1, k)*vb(i, mn)
+                                wte(i, 2*mp1-1, k) = wte(i, 2*mp1-1, k)+br(mp1, np1, k)*wb(i, mn)
+                            end do
+                            if (mlat == 0) then
+                                exit
+                            end if
+                            vte(imid, 2*mp1-2, k) = vte(imid, 2*mp1-2, k) &
+                                -ci(mp1, np1, k)*wb(imid, mn)
+                            vte(imid, 2*mp1-1, k) = vte(imid, 2*mp1-1, k) &
+                                +cr(mp1, np1, k)*wb(imid, mn)
+                            wte(imid, 2*mp1-2, k) = wte(imid, 2*mp1-2, k) &
+                                -bi(mp1, np1, k)*wb(imid, mn)
+                            wte(imid, 2*mp1-1, k) = wte(imid, 2*mp1-1, k) &
+                                +br(mp1, np1, k)*wb(imid, mn)
+                        end do
+                    end do
+                end do
+            case (1)
+                !
+                !==> case ityp=1   no symmetries,  cr and ci equal zero
+                !
+                !     case m = 0
+                !
+                do k=1, nt
+                    do np1=2, ndo2, 2
+                        do i=1, imm1
+                            vto(i, 1, k)=vto(i, 1, k)+br(1, np1, k)*vb(i, np1)
+                        end do
+                    end do
+                end do
+                do k=1, nt
+                    do np1=3, ndo1, 2
+                        do i=1, imid
+                            vte(i, 1, k)=vte(i, 1, k)+br(1, np1, k)*vb(i, np1)
+                        end do
+                    end do
+                end do
+                !
+                !     case m = 1 through nlat-1
+                !
+                if (mmax < 2) then
+                    exit dumb_hack
+                end if
+
+                do mp1=2, mmax
+                    m = mp1-1
+                    mb = m*(nlat-1)-(m*(m-1))/2
+                    mp2 = mp1+1
+                    if (mp1 > ndo1) then
+                        go to 126
+                    end if
+                    do k=1, nt
+                        do np1=mp1, ndo1, 2
+                            mn = mb+np1
+                            do i=1, imm1
+                                vte(i, 2*mp1-2, k) = vte(i, 2*mp1-2, k)+br(mp1, np1, k)*vb(i, mn)
+                                vte(i, 2*mp1-1, k) = vte(i, 2*mp1-1, k)+bi(mp1, np1, k)*vb(i, mn)
+                                wto(i, 2*mp1-2, k) = wto(i, 2*mp1-2, k)-bi(mp1, np1, k)*wb(i, mn)
+                                wto(i, 2*mp1-1, k) = wto(i, 2*mp1-1, k)+br(mp1, np1, k)*wb(i, mn)
+                            end do
+                            if (mlat == 0) then
+                                exit
+                            end if
+                            vte(imid, 2*mp1-2, k) = vte(imid, 2*mp1-2, k) &
+                                +br(mp1, np1, k)*vb(imid, mn)
+                            vte(imid, 2*mp1-1, k) = vte(imid, 2*mp1-1, k) &
+                                +bi(mp1, np1, k)*vb(imid, mn)
+                        end do
+                    end do
+126                 if (mp2 > ndo2) then
+                        exit
+                    end if
+                    do k=1, nt
+                        do np1=mp2, ndo2, 2
+                            mn = mb+np1
+                            do i=1, imm1
+                                vto(i, 2*mp1-2, k) = vto(i, 2*mp1-2, k)+br(mp1, np1, k)*vb(i, mn)
+                                vto(i, 2*mp1-1, k) = vto(i, 2*mp1-1, k)+bi(mp1, np1, k)*vb(i, mn)
+                                wte(i, 2*mp1-2, k) = wte(i, 2*mp1-2, k)-bi(mp1, np1, k)*wb(i, mn)
+                                wte(i, 2*mp1-1, k) = wte(i, 2*mp1-1, k)+br(mp1, np1, k)*wb(i, mn)
+                            end do
+                            if (mlat == 0) then
+                                exit
+                            end if
+
+                            wte(imid, 2*mp1-2, k) = wte(imid, 2*mp1-2, k) &
+                                -bi(mp1, np1, k)*wb(imid, mn)
+                            wte(imid, 2*mp1-1, k) = wte(imid, 2*mp1-1, k) &
+                                +br(mp1, np1, k)*wb(imid, mn)
+                        end do
+                    end do
+                end do
+            case (2)
+                !
+                !==> case ityp=2   no symmetries,  br and bi are equal to zero
+                !
+                !     case m = 0
+                !
+                do k=1, nt
+                    do np1=2, ndo2, 2
+                        do i=1, imm1
+                            wto(i, 1, k)=wto(i, 1, k)-cr(1, np1, k)*vb(i, np1)
+                        end do
+                    end do
+                end do
+
+                do k=1, nt
+                    do np1=3, ndo1, 2
+                        do i=1, imid
+                            wte(i, 1, k)=wte(i, 1, k)-cr(1, np1, k)*vb(i, np1)
+                        end do
+                    end do
+                end do
+                !
+                !     case m = 1 through nlat-1
+                !
+                if (mmax < 2) then
+                    exit dumb_hack
+                end if
+
+                do mp1=2, mmax
+                    m = mp1-1
+                    mb = m*(nlat-1)-(m*(m-1))/2
+                    mp2 = mp1+1
+                    if (mp1 > ndo1) then
+                        go to 226
+                    end if
+                    do k=1, nt
+                        do np1=mp1, ndo1, 2
+                            mn = mb+np1
+                            do i=1, imm1
+                                vto(i, 2*mp1-2, k) = vto(i, 2*mp1-2, k)-ci(mp1, np1, k)*wb(i, mn)
+                                vto(i, 2*mp1-1, k) = vto(i, 2*mp1-1, k)+cr(mp1, np1, k)*wb(i, mn)
+                                wte(i, 2*mp1-2, k) = wte(i, 2*mp1-2, k)-cr(mp1, np1, k)*vb(i, mn)
+                                wte(i, 2*mp1-1, k) = wte(i, 2*mp1-1, k)-ci(mp1, np1, k)*vb(i, mn)
+                            end do
+                            if (mlat == 0) then
+                                exit
+                            end if
+                            wte(imid, 2*mp1-2, k) = wte(imid, 2*mp1-2, k) &
+                                -cr(mp1, np1, k)*vb(imid, mn)
+                            wte(imid, 2*mp1-1, k) = wte(imid, 2*mp1-1, k) &
+                                -ci(mp1, np1, k)*vb(imid, mn)
+                        end do
+                    end do
+226                 if (mp2 > ndo2) then
+                        exit
+                    end if
+                    do k=1, nt
+                        do np1=mp2, ndo2, 2
+                            mn = mb+np1
+                            do i=1, imm1
+                                vte(i, 2*mp1-2, k) = vte(i, 2*mp1-2, k)-ci(mp1, np1, k)*wb(i, mn)
+                                vte(i, 2*mp1-1, k) = vte(i, 2*mp1-1, k)+cr(mp1, np1, k)*wb(i, mn)
+                                wto(i, 2*mp1-2, k) = wto(i, 2*mp1-2, k)-cr(mp1, np1, k)*vb(i, mn)
+                                wto(i, 2*mp1-1, k) = wto(i, 2*mp1-1, k)-ci(mp1, np1, k)*vb(i, mn)
+                            end do
+                            if (mlat == 0) then
+                                exit
+                            end if
+                            vte(imid, 2*mp1-2, k) = vte(imid, 2*mp1-2, k) &
+                                -ci(mp1, np1, k)*wb(imid, mn)
+                            vte(imid, 2*mp1-1, k) = vte(imid, 2*mp1-1, k) &
+                                +cr(mp1, np1, k)*wb(imid, mn)
+                        end do
+                    end do
+                end do
+            case (3)
+                !
+                !==> case ityp=3   v odd,  w even
+                !
+                !     case m = 0
+                !
+                do k=1, nt
+                    do np1=2, ndo2, 2
+                        do i=1, imm1
+                            vto(i, 1, k)=vto(i, 1, k)+br(1, np1, k)*vb(i, np1)
+                        end do
+                    end do
+                end do
+
+                do k=1, nt
+                    do np1=3, ndo1, 2
+                        do i=1, imid
+                            wte(i, 1, k)=wte(i, 1, k)-cr(1, np1, k)*vb(i, np1)
+                        end do
+                    end do
+                end do
+                !
+                !     case m = 1 through nlat-1
+                !
+                if (mmax < 2) then
+                    exit dumb_hack
+                end if
+
+                do mp1=2, mmax
+                    m = mp1-1
+                    mb = m*(nlat-1)-(m*(m-1))/2
+                    mp2 = mp1+1
+                    if (mp1 > ndo1) then
+                        go to 326
+                    end if
+                    wte(imid, 2*mp1-2, k) = wte(imid, 2*mp1-2, k) &
+                        -cr(mp1, np1, k)*vb(imid, mn)
+                    wte(imid, 2*mp1-1, k) = wte(imid, 2*mp1-1, k) &
+                        -ci(mp1, np1, k)*vb(imid, mn)
+                end do
+
+326             if (mp2 > ndo2) then
+                    exit
+                end if
+
+                do k=1, nt
+                    do np1=mp2, ndo2, 2
+                        mn = mb+np1
+                        do i=1, imm1
+                            vto(i, 2*mp1-2, k) = vto(i, 2*mp1-2, k)+br(mp1, np1, k)*vb(i, mn)
+                            vto(i, 2*mp1-1, k) = vto(i, 2*mp1-1, k)+bi(mp1, np1, k)*vb(i, mn)
+                            wte(i, 2*mp1-2, k) = wte(i, 2*mp1-2, k)-bi(mp1, np1, k)*wb(i, mn)
+                            wte(i, 2*mp1-1, k) = wte(i, 2*mp1-1, k)+br(mp1, np1, k)*wb(i, mn)
+                        end do
+                        if (mlat == 0) then
+                            exit
+                        end if
+                        wte(imid, 2*mp1-2, k) = wte(imid, 2*mp1-2, k) &
+                            -bi(mp1, np1, k)*wb(imid, mn)
+                        wte(imid, 2*mp1-1, k) = wte(imid, 2*mp1-1, k) &
+                            +br(mp1, np1, k)*wb(imid, mn)
+                    end do
+                end do
+            case (4)
+                !
+                !==> case ityp=4   v odd,  w even, and both cr and ci equal zero
+                !
+                !     case m = 0
+                !
+                do k=1, nt
+                    do np1=2, ndo2, 2
+                        do i=1, imm1
+                            vto(i, 1, k)=vto(i, 1, k)+br(1, np1, k)*vb(i, np1)
+                        end do
+                    end do
+                end do
+                !
+                !     case m = 1 through nlat-1
+                !
+                if (mmax < 2) then
+                    exit dumb_hack
+                end if
+
+                do mp1=2, mmax
+                    m = mp1-1
+                    mb = m*(nlat-1)-(m*(m-1))/2
+                    mp2 = mp1+1
+                    if (mp2 > ndo2) then
+                        exit
+                    end if
+                    do k=1, nt
+                        do np1=mp2, ndo2, 2
+                            mn = mb+np1
+                            do i=1, imm1
+                                vto(i, 2*mp1-2, k) = vto(i, 2*mp1-2, k)+br(mp1, np1, k)*vb(i, mn)
+                                vto(i, 2*mp1-1, k) = vto(i, 2*mp1-1, k)+bi(mp1, np1, k)*vb(i, mn)
+                                wte(i, 2*mp1-2, k) = wte(i, 2*mp1-2, k)-bi(mp1, np1, k)*wb(i, mn)
+                                wte(i, 2*mp1-1, k) = wte(i, 2*mp1-1, k)+br(mp1, np1, k)*wb(i, mn)
+                            end do
+                            if (mlat == 0) then
+                                exit
+                            end if
+                            wte(imid, 2*mp1-2, k) = wte(imid, 2*mp1-2, k) &
+                                -bi(mp1, np1, k)*wb(imid, mn)
+                            wte(imid, 2*mp1-1, k) = wte(imid, 2*mp1-1, k) &
+                                +br(mp1, np1, k)*wb(imid, mn)
+                        end do
+                    end do
+                end do
+            case (5)
+                !
+                !==> case ityp=5   v odd,  w even,     br and bi equal zero
+                !
+                !     case m = 0
+                !
+                do k=1, nt
+                    do np1=3, ndo1, 2
+                        do i=1, imid
+                            wte(i, 1, k)=wte(i, 1, k)-cr(1, np1, k)*vb(i, np1)
+                        end do
+                    end do
+                end do
+                !
+                !     case m = 1 through nlat-1
+                !
+                if (mmax < 2) then
+                    exit dumb_hack
+                end if
+
+                do mp1=2, mmax
+                    m = mp1-1
+                    mb = m*(nlat-1)-(m*(m-1))/2
+                    mp2 = mp1+1
+                    if (mp1 > ndo1) then
+                        exit
+                    end if
+                    do k=1, nt
+                        do np1=mp1, ndo1, 2
+                            mn = mb+np1
+                            do i=1, imm1
+                                vto(i, 2*mp1-2, k) = vto(i, 2*mp1-2, k)-ci(mp1, np1, k)*wb(i, mn)
+                                vto(i, 2*mp1-1, k) = vto(i, 2*mp1-1, k)+cr(mp1, np1, k)*wb(i, mn)
+                                wte(i, 2*mp1-2, k) = wte(i, 2*mp1-2, k)-cr(mp1, np1, k)*vb(i, mn)
+                                wte(i, 2*mp1-1, k) = wte(i, 2*mp1-1, k)-ci(mp1, np1, k)*vb(i, mn)
+                            end do
+                            if (mlat == 0) then
+                                exit
+                            end if
+                            wte(imid, 2*mp1-2, k) = wte(imid, 2*mp1-2, k) &
+                                -cr(mp1, np1, k)*vb(imid, mn)
+                            wte(imid, 2*mp1-1, k) = wte(imid, 2*mp1-1, k) &
+                                -ci(mp1, np1, k)*vb(imid, mn)
+                        end do
+                    end do
+                end do
+            case (6)
+                !
+                !==> case ityp=6   v even  ,  w odd
+                !
+                !     case m = 0
+                !
+                do k=1, nt
+                    do np1=2, ndo2, 2
+                        do i=1, imm1
+                            wto(i, 1, k)=wto(i, 1, k)-cr(1, np1, k)*vb(i, np1)
+                        end do
+                    end do
+                end do
+                do k=1, nt
+                    do np1=3, ndo1, 2
+                        do i=1, imid
+                            vte(i, 1, k)=vte(i, 1, k)+br(1, np1, k)*vb(i, np1)
+                        end do
+                    end do
+                end do
+                !
+                !     case m = 1 through nlat-1
+                !
+                if (mmax < 2) then
+                    exit dumb_hack
+                end if
+
+                do mp1=2, mmax
+                    m = mp1-1
+                    mb = m*(nlat-1)-(m*(m-1))/2
+                    mp2 = mp1+1
+
+                    if (mp1 > ndo1) then
+                        go to 626
+                    end if
+
+                    do k=1, nt
+                        do np1=mp1, ndo1, 2
+                            mn = mb+np1
+                            do i=1, imm1
+                                vte(i, 2*mp1-2, k) = vte(i, 2*mp1-2, k)+br(mp1, np1, k)*vb(i, mn)
+                                vte(i, 2*mp1-1, k) = vte(i, 2*mp1-1, k)+bi(mp1, np1, k)*vb(i, mn)
+                                wto(i, 2*mp1-2, k) = wto(i, 2*mp1-2, k)-bi(mp1, np1, k)*wb(i, mn)
+                                wto(i, 2*mp1-1, k) = wto(i, 2*mp1-1, k)+br(mp1, np1, k)*wb(i, mn)
+                            end do
+                            if (mlat == 0) then
+                                exit
+                            end if
+                            vte(imid, 2*mp1-2, k) = vte(imid, 2*mp1-2, k) &
+                                +br(mp1, np1, k)*vb(imid, mn)
+                            vte(imid, 2*mp1-1, k) = vte(imid, 2*mp1-1, k) &
+                                +bi(mp1, np1, k)*vb(imid, mn)
+                        end do
+                    end do
+
+626                 if (mp2 > ndo2) then
+                        exit
+                    end if
+
+                    do k=1, nt
+                        do np1=mp2, ndo2, 2
+                            mn = mb+np1
+                            do i=1, imm1
+                                vte(i, 2*mp1-2, k) = vte(i, 2*mp1-2, k)-ci(mp1, np1, k)*wb(i, mn)
+                                vte(i, 2*mp1-1, k) = vte(i, 2*mp1-1, k)+cr(mp1, np1, k)*wb(i, mn)
+                                wto(i, 2*mp1-2, k) = wto(i, 2*mp1-2, k)-cr(mp1, np1, k)*vb(i, mn)
+                                wto(i, 2*mp1-1, k) = wto(i, 2*mp1-1, k)-ci(mp1, np1, k)*vb(i, mn)
+                            end do
+                            if (mlat == 0) then
+                                exit
+                            end if
+                            vte(imid, 2*mp1-2, k) = vte(imid, 2*mp1-2, k) &
+                                -ci(mp1, np1, k)*wb(imid, mn)
+                            vte(imid, 2*mp1-1, k) = vte(imid, 2*mp1-1, k) &
+                                +cr(mp1, np1, k)*wb(imid, mn)
+                        end do
+                    end do
+                end do
+            case (7)
+                !
+                !==> case ityp=7   v even, w odd   cr and ci equal zero
+                !
+                !     case m = 0
+                !
+                do k=1, nt
+                    do np1=3, ndo1, 2
+                        do i=1, imid
+                            vte(i, 1, k)=vte(i, 1, k)+br(1, np1, k)*vb(i, np1)
+                        end do
+                    end do
+                end do
+                !
+                !     case m = 1 through nlat-1
+                !
+                if (mmax < 2) then
+                    exit dumb_hack
+                end if
+
+                do mp1=2, mmax
+                    m = mp1-1
+                    mb = m*(nlat-1)-(m*(m-1))/2
+                    mp2 = mp1+1
+
+                    if (mp1 > ndo1) then
+                        exit
+                    end if
+
+                    do k=1, nt
+                        do np1=mp1, ndo1, 2
+                            mn = mb+np1
+                            do i=1, imm1
+                                vte(i, 2*mp1-2, k) = vte(i, 2*mp1-2, k)+br(mp1, np1, k)*vb(i, mn)
+                                vte(i, 2*mp1-1, k) = vte(i, 2*mp1-1, k)+bi(mp1, np1, k)*vb(i, mn)
+                                wto(i, 2*mp1-2, k) = wto(i, 2*mp1-2, k)-bi(mp1, np1, k)*wb(i, mn)
+                                wto(i, 2*mp1-1, k) = wto(i, 2*mp1-1, k)+br(mp1, np1, k)*wb(i, mn)
+                            end do
+                            if (mlat == 0) then
+                                exit
+                            end if
+                            vte(imid, 2*mp1-2, k) = vte(imid, 2*mp1-2, k) &
+                                +br(mp1, np1, k)*vb(imid, mn)
+                            vte(imid, 2*mp1-1, k) = vte(imid, 2*mp1-1, k) &
+                                +bi(mp1, np1, k)*vb(imid, mn)
+                        end do
+                    end do
+                end do
+            case (8)
+                !
+                !==> case ityp=8   v even,  w odd,   br and bi equal zero
+                !
+                !     case m = 0
+                !
+                do k=1, nt
+                    do np1=2, ndo2, 2
+                        do i=1, imm1
+                            wto(i, 1, k)=wto(i, 1, k)-cr(1, np1, k)*vb(i, np1)
+                        end do
+                    end do
+                end do
+                !
+                !     case m = 1 through nlat-1
+                !
+                if (mmax < 2) then
+                    exit dumb_hack
+                end if
+
+                do mp1=2, mmax
+                    m = mp1-1
+                    mb = m*(nlat-1)-(m*(m-1))/2
+                    mp2 = mp1+1
+                    if (mp2 > ndo2) then
+                        exit
+                    end if
+                    do k=1, nt
+                        do np1=mp2, ndo2, 2
+                            mn = mb+np1
+                            do i=1, imm1
+                                vte(i, 2*mp1-2, k) = vte(i, 2*mp1-2, k)-ci(mp1, np1, k)*wb(i, mn)
+                                vte(i, 2*mp1-1, k) = vte(i, 2*mp1-1, k)+cr(mp1, np1, k)*wb(i, mn)
+                                wto(i, 2*mp1-2, k) = wto(i, 2*mp1-2, k)-cr(mp1, np1, k)*vb(i, mn)
+                                wto(i, 2*mp1-1, k) = wto(i, 2*mp1-1, k)-ci(mp1, np1, k)*vb(i, mn)
+                            end do
+                            if (mlat == 0) then
+                                exit
+                            end if
+                            vte(imid, 2*mp1-2, k) = vte(imid, 2*mp1-2, k) &
+                                -ci(mp1, np1, k)*wb(imid, mn)
+                            vte(imid, 2*mp1-1, k) = vte(imid, 2*mp1-1, k) &
+                                +cr(mp1, np1, k)*wb(imid, mn)
+                        end do
+                    end do
+                end do
+        end select
+    end do dumb_hack
+
 
     do k=1, nt
-        do j=1, nlon
-            do i=1, idv
-                vte(i, j, k) = 0.
-                wte(i, j, k) = 0.
-            end do
-        end do
-    end do
-
-    ndo1 = nlat
-    ndo2 = nlat
-    if (mlat /= 0) ndo1 = nlat-1
-    if (mlat == 0) ndo2 = nlat-1
-18  itypp = ityp+1
-    go to (1, 100, 200, 300, 400, 500, 600, 700, 800), itypp
-    !
-    !     case ityp=0   no symmetries
-    !
-    !     case m = 0
-    !
-    1 do k=1, nt
-        do np1=2, ndo2, 2
-            do i=1, imm1
-                vto(i, 1, k)=vto(i, 1, k)+br(1, np1, k)*vb(i, np1)
-                wto(i, 1, k)=wto(i, 1, k)-cr(1, np1, k)*vb(i, np1)
-            end do
-        end do
-    end do
-    do k=1, nt
-        do np1=3, ndo1, 2
-            do i=1, imid
-                vte(i, 1, k)=vte(i, 1, k)+br(1, np1, k)*vb(i, np1)
-                wte(i, 1, k)=wte(i, 1, k)-cr(1, np1, k)*vb(i, np1)
-            end do
-        end do
-    end do
-    !
-    !     case m = 1 through nlat-1
-    !
-    if (mmax < 2) go to 950
-    do mp1=2, mmax
-        m = mp1-1
-        mb = m*(nlat-1)-(m*(m-1))/2
-        mp2 = mp1+1
-        if (mp1 > ndo1) go to 26
-        do k=1, nt
-            do np1=mp1, ndo1, 2
-                mn = mb+np1
-                do i=1, imm1
-                    vte(i, 2*mp1-2, k) = vte(i, 2*mp1-2, k)+br(mp1, np1, k)*vb(i, mn)
-                    vto(i, 2*mp1-2, k) = vto(i, 2*mp1-2, k)-ci(mp1, np1, k)*wb(i, mn)
-                    vte(i, 2*mp1-1, k) = vte(i, 2*mp1-1, k)+bi(mp1, np1, k)*vb(i, mn)
-                    vto(i, 2*mp1-1, k) = vto(i, 2*mp1-1, k)+cr(mp1, np1, k)*wb(i, mn)
-                    wte(i, 2*mp1-2, k) = wte(i, 2*mp1-2, k)-cr(mp1, np1, k)*vb(i, mn)
-                    wto(i, 2*mp1-2, k) = wto(i, 2*mp1-2, k)-bi(mp1, np1, k)*wb(i, mn)
-                    wte(i, 2*mp1-1, k) = wte(i, 2*mp1-1, k)-ci(mp1, np1, k)*vb(i, mn)
-                    wto(i, 2*mp1-1, k) = wto(i, 2*mp1-1, k)+br(mp1, np1, k)*wb(i, mn)
-                end do
-                if (mlat == 0) exit !go to 24
-                vte(imid, 2*mp1-2, k) = vte(imid, 2*mp1-2, k) &
-                    +br(mp1, np1, k)*vb(imid, mn)
-                vte(imid, 2*mp1-1, k) = vte(imid, 2*mp1-1, k) &
-                    +bi(mp1, np1, k)*vb(imid, mn)
-                wte(imid, 2*mp1-2, k) = wte(imid, 2*mp1-2, k) &
-                    -cr(mp1, np1, k)*vb(imid, mn)
-                wte(imid, 2*mp1-1, k) = wte(imid, 2*mp1-1, k) &
-                    -ci(mp1, np1, k)*vb(imid, mn)
-            end do
-        end do
-26      if (mp2 > ndo2) exit !go to 30
-        do k=1, nt
-            do np1=mp2, ndo2, 2
-                mn = mb+np1
-                do i=1, imm1
-                    vto(i, 2*mp1-2, k) = vto(i, 2*mp1-2, k)+br(mp1, np1, k)*vb(i, mn)
-                    vte(i, 2*mp1-2, k) = vte(i, 2*mp1-2, k)-ci(mp1, np1, k)*wb(i, mn)
-                    vto(i, 2*mp1-1, k) = vto(i, 2*mp1-1, k)+bi(mp1, np1, k)*vb(i, mn)
-                    vte(i, 2*mp1-1, k) = vte(i, 2*mp1-1, k)+cr(mp1, np1, k)*wb(i, mn)
-                    wto(i, 2*mp1-2, k) = wto(i, 2*mp1-2, k)-cr(mp1, np1, k)*vb(i, mn)
-                    wte(i, 2*mp1-2, k) = wte(i, 2*mp1-2, k)-bi(mp1, np1, k)*wb(i, mn)
-                    wto(i, 2*mp1-1, k) = wto(i, 2*mp1-1, k)-ci(mp1, np1, k)*vb(i, mn)
-                    wte(i, 2*mp1-1, k) = wte(i, 2*mp1-1, k)+br(mp1, np1, k)*wb(i, mn)
-                end do
-                if (mlat == 0) exit !go to 28
-                vte(imid, 2*mp1-2, k) = vte(imid, 2*mp1-2, k) &
-                    -ci(mp1, np1, k)*wb(imid, mn)
-                vte(imid, 2*mp1-1, k) = vte(imid, 2*mp1-1, k) &
-                    +cr(mp1, np1, k)*wb(imid, mn)
-                wte(imid, 2*mp1-2, k) = wte(imid, 2*mp1-2, k) &
-                    -bi(mp1, np1, k)*wb(imid, mn)
-                wte(imid, 2*mp1-1, k) = wte(imid, 2*mp1-1, k) &
-                    +br(mp1, np1, k)*wb(imid, mn)
-            end do
-        end do
-    end do
-    go to 950
-    !
-    !     case ityp=1   no symmetries,  cr and ci equal zero
-    !
-    !     case m = 0
-    !
-    100 do k=1, nt
-        do np1=2, ndo2, 2
-            do i=1, imm1
-                vto(i, 1, k)=vto(i, 1, k)+br(1, np1, k)*vb(i, np1)
-            end do
-        end do
-    end do
-    do k=1, nt
-        do np1=3, ndo1, 2
-            do i=1, imid
-                vte(i, 1, k)=vte(i, 1, k)+br(1, np1, k)*vb(i, np1)
-            end do
-        end do
-    end do
-    !
-    !     case m = 1 through nlat-1
-    !
-    if (mmax < 2) go to 950
-    do mp1=2, mmax
-        m = mp1-1
-        mb = m*(nlat-1)-(m*(m-1))/2
-        mp2 = mp1+1
-        if (mp1 > ndo1) go to 126
-        do k=1, nt
-            do np1=mp1, ndo1, 2
-                mn = mb+np1
-                do i=1, imm1
-                    vte(i, 2*mp1-2, k) = vte(i, 2*mp1-2, k)+br(mp1, np1, k)*vb(i, mn)
-                    vte(i, 2*mp1-1, k) = vte(i, 2*mp1-1, k)+bi(mp1, np1, k)*vb(i, mn)
-                    wto(i, 2*mp1-2, k) = wto(i, 2*mp1-2, k)-bi(mp1, np1, k)*wb(i, mn)
-                    wto(i, 2*mp1-1, k) = wto(i, 2*mp1-1, k)+br(mp1, np1, k)*wb(i, mn)
-                end do
-                if (mlat == 0) exit !go to 124
-                vte(imid, 2*mp1-2, k) = vte(imid, 2*mp1-2, k) &
-                    +br(mp1, np1, k)*vb(imid, mn)
-                vte(imid, 2*mp1-1, k) = vte(imid, 2*mp1-1, k) &
-                    +bi(mp1, np1, k)*vb(imid, mn)
-            end do
-        end do
-126     if (mp2 > ndo2) exit ! go to 130
-        do k=1, nt
-            do np1=mp2, ndo2, 2
-                mn = mb+np1
-                do i=1, imm1
-                    vto(i, 2*mp1-2, k) = vto(i, 2*mp1-2, k)+br(mp1, np1, k)*vb(i, mn)
-                    vto(i, 2*mp1-1, k) = vto(i, 2*mp1-1, k)+bi(mp1, np1, k)*vb(i, mn)
-                    wte(i, 2*mp1-2, k) = wte(i, 2*mp1-2, k)-bi(mp1, np1, k)*wb(i, mn)
-                    wte(i, 2*mp1-1, k) = wte(i, 2*mp1-1, k)+br(mp1, np1, k)*wb(i, mn)
-                end do
-                if (mlat == 0) exit !go to 128
-                wte(imid, 2*mp1-2, k) = wte(imid, 2*mp1-2, k) &
-                    -bi(mp1, np1, k)*wb(imid, mn)
-                wte(imid, 2*mp1-1, k) = wte(imid, 2*mp1-1, k) &
-                    +br(mp1, np1, k)*wb(imid, mn)
-            end do
-        end do
-    end do
-    go to 950
-    !
-    !     case ityp=2   no symmetries,  br and bi are equal to zero
-    !
-    !     case m = 0
-    !
-    200 do k=1, nt
-        do np1=2, ndo2, 2
-            do i=1, imm1
-                wto(i, 1, k)=wto(i, 1, k)-cr(1, np1, k)*vb(i, np1)
-            end do
-        end do
-    end do
-    do k=1, nt
-        do np1=3, ndo1, 2
-            do i=1, imid
-                wte(i, 1, k)=wte(i, 1, k)-cr(1, np1, k)*vb(i, np1)
-            end do
-        end do
-    end do
-    !
-    !     case m = 1 through nlat-1
-    !
-    if (mmax < 2) go to 950
-    do mp1=2, mmax
-        m = mp1-1
-        mb = m*(nlat-1)-(m*(m-1))/2
-        mp2 = mp1+1
-        if (mp1 > ndo1) go to 226
-        do k=1, nt
-            do np1=mp1, ndo1, 2
-                mn = mb+np1
-                do i=1, imm1
-                    vto(i, 2*mp1-2, k) = vto(i, 2*mp1-2, k)-ci(mp1, np1, k)*wb(i, mn)
-                    vto(i, 2*mp1-1, k) = vto(i, 2*mp1-1, k)+cr(mp1, np1, k)*wb(i, mn)
-                    wte(i, 2*mp1-2, k) = wte(i, 2*mp1-2, k)-cr(mp1, np1, k)*vb(i, mn)
-                    wte(i, 2*mp1-1, k) = wte(i, 2*mp1-1, k)-ci(mp1, np1, k)*vb(i, mn)
-                end do
-                if (mlat == 0) exit !go to 224
-                wte(imid, 2*mp1-2, k) = wte(imid, 2*mp1-2, k) &
-                    -cr(mp1, np1, k)*vb(imid, mn)
-                wte(imid, 2*mp1-1, k) = wte(imid, 2*mp1-1, k) &
-                    -ci(mp1, np1, k)*vb(imid, mn)
-            end do
-        end do
-226     if (mp2 > ndo2) exit !go to 230
-        do k=1, nt
-            do np1=mp2, ndo2, 2
-                mn = mb+np1
-                do i=1, imm1
-                    vte(i, 2*mp1-2, k) = vte(i, 2*mp1-2, k)-ci(mp1, np1, k)*wb(i, mn)
-                    vte(i, 2*mp1-1, k) = vte(i, 2*mp1-1, k)+cr(mp1, np1, k)*wb(i, mn)
-                    wto(i, 2*mp1-2, k) = wto(i, 2*mp1-2, k)-cr(mp1, np1, k)*vb(i, mn)
-                    wto(i, 2*mp1-1, k) = wto(i, 2*mp1-1, k)-ci(mp1, np1, k)*vb(i, mn)
-                end do
-                if (mlat == 0) exit !go to 228
-                vte(imid, 2*mp1-2, k) = vte(imid, 2*mp1-2, k) &
-                    -ci(mp1, np1, k)*wb(imid, mn)
-                vte(imid, 2*mp1-1, k) = vte(imid, 2*mp1-1, k) &
-                    +cr(mp1, np1, k)*wb(imid, mn)
-            end do
-        end do
-    end do
-    go to 950
-    !
-    !     case ityp=3   v odd,  w even
-    !
-    !     case m = 0
-    !
-    300 do k=1, nt
-        do np1=2, ndo2, 2
-            do i=1, imm1
-                vto(i, 1, k)=vto(i, 1, k)+br(1, np1, k)*vb(i, np1)
-            end do
-        end do
-    end do
-    do k=1, nt
-        do np1=3, ndo1, 2
-            do i=1, imid
-                wte(i, 1, k)=wte(i, 1, k)-cr(1, np1, k)*vb(i, np1)
-            end do
-        end do
-    end do
-    !
-    !     case m = 1 through nlat-1
-    !
-    if (mmax < 2) go to 950
-    do mp1=2, mmax
-        m = mp1-1
-        mb = m*(nlat-1)-(m*(m-1))/2
-        mp2 = mp1+1
-        if (mp1 > ndo1) go to 326
-        do k=1, nt
-            do np1=mp1, ndo1, 2
-                mn = mb+np1
-                do i=1, imm1
-                    vto(i, 2*mp1-2, k) = vto(i, 2*mp1-2, k)-ci(mp1, np1, k)*wb(i, mn)
-                    vto(i, 2*mp1-1, k) = vto(i, 2*mp1-1, k)+cr(mp1, np1, k)*wb(i, mn)
-                    wte(i, 2*mp1-2, k) = wte(i, 2*mp1-2, k)-cr(mp1, np1, k)*vb(i, mn)
-                    wte(i, 2*mp1-1, k) = wte(i, 2*mp1-1, k)-ci(mp1, np1, k)*vb(i, mn)
-                end do
-                if (mlat == 0) exit !go to 324
-                wte(imid, 2*mp1-2, k) = wte(imid, 2*mp1-2, k) &
-                    -cr(mp1, np1, k)*vb(imid, mn)
-                wte(imid, 2*mp1-1, k) = wte(imid, 2*mp1-1, k) &
-                    -ci(mp1, np1, k)*vb(imid, mn)
-            end do
-        end do
-326     if (mp2 > ndo2) exit !go to 330
-        do k=1, nt
-            do np1=mp2, ndo2, 2
-                mn = mb+np1
-                do i=1, imm1
-                    vto(i, 2*mp1-2, k) = vto(i, 2*mp1-2, k)+br(mp1, np1, k)*vb(i, mn)
-                    vto(i, 2*mp1-1, k) = vto(i, 2*mp1-1, k)+bi(mp1, np1, k)*vb(i, mn)
-                    wte(i, 2*mp1-2, k) = wte(i, 2*mp1-2, k)-bi(mp1, np1, k)*wb(i, mn)
-                    wte(i, 2*mp1-1, k) = wte(i, 2*mp1-1, k)+br(mp1, np1, k)*wb(i, mn)
-                end do
-                if (mlat == 0) exit !go to 328
-                wte(imid, 2*mp1-2, k) = wte(imid, 2*mp1-2, k) &
-                    -bi(mp1, np1, k)*wb(imid, mn)
-                wte(imid, 2*mp1-1, k) = wte(imid, 2*mp1-1, k) &
-                    +br(mp1, np1, k)*wb(imid, mn)
-            end do
-        end do
-    end do
-    go to 950
-    !
-    !     case ityp=4   v odd,  w even, and both cr and ci equal zero
-    !
-    !     case m = 0
-    !
-    400 do k=1, nt
-        do np1=2, ndo2, 2
-            do i=1, imm1
-                vto(i, 1, k)=vto(i, 1, k)+br(1, np1, k)*vb(i, np1)
-            end do
-        end do
-    end do
-    !
-    !     case m = 1 through nlat-1
-    !
-    if (mmax < 2) go to 950
-    do mp1=2, mmax
-        m = mp1-1
-        mb = m*(nlat-1)-(m*(m-1))/2
-        mp2 = mp1+1
-        if (mp2 > ndo2) exit !go to 430
-        do k=1, nt
-            do np1=mp2, ndo2, 2
-                mn = mb+np1
-                do i=1, imm1
-                    vto(i, 2*mp1-2, k) = vto(i, 2*mp1-2, k)+br(mp1, np1, k)*vb(i, mn)
-                    vto(i, 2*mp1-1, k) = vto(i, 2*mp1-1, k)+bi(mp1, np1, k)*vb(i, mn)
-                    wte(i, 2*mp1-2, k) = wte(i, 2*mp1-2, k)-bi(mp1, np1, k)*wb(i, mn)
-                    wte(i, 2*mp1-1, k) = wte(i, 2*mp1-1, k)+br(mp1, np1, k)*wb(i, mn)
-                end do
-                if (mlat == 0) exit !go to 428
-                wte(imid, 2*mp1-2, k) = wte(imid, 2*mp1-2, k) &
-                    -bi(mp1, np1, k)*wb(imid, mn)
-                wte(imid, 2*mp1-1, k) = wte(imid, 2*mp1-1, k) &
-                    +br(mp1, np1, k)*wb(imid, mn)
-            end do
-        end do
-    end do
-    go to 950
-    !
-    !     case ityp=5   v odd,  w even,     br and bi equal zero
-    !
-    !     case m = 0
-    !
-    500 do k=1, nt
-        do np1=3, ndo1, 2
-            do i=1, imid
-                wte(i, 1, k)=wte(i, 1, k)-cr(1, np1, k)*vb(i, np1)
-            end do
-        end do
-    end do
-    !
-    !     case m = 1 through nlat-1
-    !
-    if (mmax < 2) go to 950
-    do mp1=2, mmax
-        m = mp1-1
-        mb = m*(nlat-1)-(m*(m-1))/2
-        mp2 = mp1+1
-        if (mp1 > ndo1) exit !go to 530
-        do k=1, nt
-            do np1=mp1, ndo1, 2
-                mn = mb+np1
-                do i=1, imm1
-                    vto(i, 2*mp1-2, k) = vto(i, 2*mp1-2, k)-ci(mp1, np1, k)*wb(i, mn)
-                    vto(i, 2*mp1-1, k) = vto(i, 2*mp1-1, k)+cr(mp1, np1, k)*wb(i, mn)
-                    wte(i, 2*mp1-2, k) = wte(i, 2*mp1-2, k)-cr(mp1, np1, k)*vb(i, mn)
-                    wte(i, 2*mp1-1, k) = wte(i, 2*mp1-1, k)-ci(mp1, np1, k)*vb(i, mn)
-                end do
-                if (mlat == 0) exit !go to 524
-                wte(imid, 2*mp1-2, k) = wte(imid, 2*mp1-2, k) &
-                    -cr(mp1, np1, k)*vb(imid, mn)
-                wte(imid, 2*mp1-1, k) = wte(imid, 2*mp1-1, k) &
-                    -ci(mp1, np1, k)*vb(imid, mn)
-            end do
-        end do
-    end do
-    go to 950
-    !
-    !     case ityp=6   v even  ,  w odd
-    !
-    !     case m = 0
-    !
-    600 do k=1, nt
-        do np1=2, ndo2, 2
-            do i=1, imm1
-                wto(i, 1, k)=wto(i, 1, k)-cr(1, np1, k)*vb(i, np1)
-            end do
-        end do
-    end do
-    do k=1, nt
-        do np1=3, ndo1, 2
-            do i=1, imid
-                vte(i, 1, k)=vte(i, 1, k)+br(1, np1, k)*vb(i, np1)
-            end do
-        end do
-    end do
-    !
-    !     case m = 1 through nlat-1
-    !
-    if (mmax < 2) go to 950
-    do mp1=2, mmax
-        m = mp1-1
-        mb = m*(nlat-1)-(m*(m-1))/2
-        mp2 = mp1+1
-        if (mp1 > ndo1) go to 626
-        do k=1, nt
-            do np1=mp1, ndo1, 2
-                mn = mb+np1
-                do i=1, imm1
-                    vte(i, 2*mp1-2, k) = vte(i, 2*mp1-2, k)+br(mp1, np1, k)*vb(i, mn)
-                    vte(i, 2*mp1-1, k) = vte(i, 2*mp1-1, k)+bi(mp1, np1, k)*vb(i, mn)
-                    wto(i, 2*mp1-2, k) = wto(i, 2*mp1-2, k)-bi(mp1, np1, k)*wb(i, mn)
-                    wto(i, 2*mp1-1, k) = wto(i, 2*mp1-1, k)+br(mp1, np1, k)*wb(i, mn)
-                end do
-                if (mlat == 0) exit !go to 624
-                vte(imid, 2*mp1-2, k) = vte(imid, 2*mp1-2, k) &
-                    +br(mp1, np1, k)*vb(imid, mn)
-                vte(imid, 2*mp1-1, k) = vte(imid, 2*mp1-1, k) &
-                    +bi(mp1, np1, k)*vb(imid, mn)
-            end do
-        end do
-626     if (mp2 > ndo2) exit !go to 630
-        do k=1, nt
-            do np1=mp2, ndo2, 2
-                mn = mb+np1
-                do i=1, imm1
-                    vte(i, 2*mp1-2, k) = vte(i, 2*mp1-2, k)-ci(mp1, np1, k)*wb(i, mn)
-                    vte(i, 2*mp1-1, k) = vte(i, 2*mp1-1, k)+cr(mp1, np1, k)*wb(i, mn)
-                    wto(i, 2*mp1-2, k) = wto(i, 2*mp1-2, k)-cr(mp1, np1, k)*vb(i, mn)
-                    wto(i, 2*mp1-1, k) = wto(i, 2*mp1-1, k)-ci(mp1, np1, k)*vb(i, mn)
-                end do
-                if (mlat == 0) exit !go to 628
-                vte(imid, 2*mp1-2, k) = vte(imid, 2*mp1-2, k) &
-                    -ci(mp1, np1, k)*wb(imid, mn)
-                vte(imid, 2*mp1-1, k) = vte(imid, 2*mp1-1, k) &
-                    +cr(mp1, np1, k)*wb(imid, mn)
-            end do
-        end do
-    end do
-    go to 950
-    !
-    !     case ityp=7   v even, w odd   cr and ci equal zero
-    !
-    !     case m = 0
-    !
-    700 do k=1, nt
-        do np1=3, ndo1, 2
-            do i=1, imid
-                vte(i, 1, k)=vte(i, 1, k)+br(1, np1, k)*vb(i, np1)
-            end do
-        end do
-    end do
-    !
-    !     case m = 1 through nlat-1
-    !
-    if (mmax < 2) go to 950
-    do mp1=2, mmax
-        m = mp1-1
-        mb = m*(nlat-1)-(m*(m-1))/2
-        mp2 = mp1+1
-        if (mp1 > ndo1) exit !go to 730
-        do k=1, nt
-            do np1=mp1, ndo1, 2
-                mn = mb+np1
-                do i=1, imm1
-                    vte(i, 2*mp1-2, k) = vte(i, 2*mp1-2, k)+br(mp1, np1, k)*vb(i, mn)
-                    vte(i, 2*mp1-1, k) = vte(i, 2*mp1-1, k)+bi(mp1, np1, k)*vb(i, mn)
-                    wto(i, 2*mp1-2, k) = wto(i, 2*mp1-2, k)-bi(mp1, np1, k)*wb(i, mn)
-                    wto(i, 2*mp1-1, k) = wto(i, 2*mp1-1, k)+br(mp1, np1, k)*wb(i, mn)
-                end do
-                if (mlat == 0) exit !go to 724
-                vte(imid, 2*mp1-2, k) = vte(imid, 2*mp1-2, k) &
-                    +br(mp1, np1, k)*vb(imid, mn)
-                vte(imid, 2*mp1-1, k) = vte(imid, 2*mp1-1, k) &
-                    +bi(mp1, np1, k)*vb(imid, mn)
-            end do
-        end do
-    end do
-    go to 950
-    !
-    !     case ityp=8   v even,  w odd,   br and bi equal zero
-    !
-    !     case m = 0
-    !
-    800 do k=1, nt
-        do np1=2, ndo2, 2
-            do i=1, imm1
-                wto(i, 1, k)=wto(i, 1, k)-cr(1, np1, k)*vb(i, np1)
-            end do
-        end do
-    end do
-    !
-    !     case m = 1 through nlat-1
-    !
-    if (mmax < 2) go to 950
-    do mp1=2, mmax
-        m = mp1-1
-        mb = m*(nlat-1)-(m*(m-1))/2
-        mp2 = mp1+1
-        if (mp2 > ndo2) exit !go to 830
-        do k=1, nt
-            do np1=mp2, ndo2, 2
-                mn = mb+np1
-                do i=1, imm1
-                    vte(i, 2*mp1-2, k) = vte(i, 2*mp1-2, k)-ci(mp1, np1, k)*wb(i, mn)
-                    vte(i, 2*mp1-1, k) = vte(i, 2*mp1-1, k)+cr(mp1, np1, k)*wb(i, mn)
-                    wto(i, 2*mp1-2, k) = wto(i, 2*mp1-2, k)-cr(mp1, np1, k)*vb(i, mn)
-                    wto(i, 2*mp1-1, k) = wto(i, 2*mp1-1, k)-ci(mp1, np1, k)*vb(i, mn)
-                end do
-                if (mlat == 0) exit! go to 828
-                vte(imid, 2*mp1-2, k) = vte(imid, 2*mp1-2, k) &
-                    -ci(mp1, np1, k)*wb(imid, mn)
-                vte(imid, 2*mp1-1, k) = vte(imid, 2*mp1-1, k) &
-                    +cr(mp1, np1, k)*wb(imid, mn)
-            end do
-        end do
-    end do
-    950 do k=1, nt
         call hrfftb(idv, nlon, vte(1, 1, k), idv, wrfft, work)
         call hrfftb(idv, nlon, wte(1, 1, k), idv, wrfft, work)
     end do
-    if (ityp > 2) go to 12
-    do k=1, nt
-        do j=1, nlon
+
+    select case (ityp)
+        case (0,1,2)
             do i=1, imm1
-                vt(i, j, k) = .5*(vte(i, j, k)+vto(i, j, k))
-                wt(i, j, k) = .5*(wte(i, j, k)+wto(i, j, k))
-                vt(nlp1-i, j, k) = .5*(vte(i, j, k)-vto(i, j, k))
-                wt(nlp1-i, j, k) = .5*(wte(i, j, k)-wto(i, j, k))
+                vt(i,:,:) = 0.5*( vte(i,:,:)+vto(i,:,:) )
+                wt(i,:,:) = 0.5*( wte(i,:,:)+wto(i,:,:) )
+                vt(nlp1-i,:,:) = 0.5*( vte(i,:,:)-vto(i, :,:) )
+                wt(nlp1-i,:,:) = 0.5*( wte(i,:,:)-wto(i,:,:) )
             end do
-        end do
-    end do
-    go to 13
-    12 do k=1, nt
-        do j=1, nlon
-            do i=1, imm1
-                vt(i, j, k) = 0.5 * vte(i, j, k)
-                wt(i, j, k) = 0.5 * wte(i, j, k)
-            end do
-        end do
-    end do
-13  if (mlat == 0) return
-    do k=1, nt
-        do j=1, nlon
-            vt(imid, j, k) = 0.5 * vte(imid, j, k)
-            wt(imid, j, k) = 0.5 * wte(imid, j, k)
-        end do
-    end do
+        case default
+            vt(1:imm1,:,:) = 0.5 * vte(1:imm1,:,:)
+            wt(1:imm1,:,:) = 0.5 * wte(1:imm1,:,:)
+    end select
+
+    select case (mlat)
+        case (0)
+            return
+        case default
+            vt(imid,:,:) = 0.5 * vte(imid,:,:)
+            wt(imid,:,:) = 0.5 * wte(imid,:,:)
+    end select
 
 end subroutine vtsgs1
 

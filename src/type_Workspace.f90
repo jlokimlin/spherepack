@@ -22,6 +22,7 @@ module type_Workspace
         real (wp), allocatable, public :: forward_vector(:)
         real (wp), allocatable, public :: backward_scalar(:)
         real (wp), allocatable, public :: backward_vector(:)
+        real (wp), allocatable, public :: colatitude_workspace(:)
         real (wp), allocatable, public :: real_harmonic_coefficients(:, :)
         real (wp), allocatable, public :: imaginary_harmonic_coefficients(:, :)
         real (wp), allocatable, public :: real_polar_harmonic_coefficients(:, :)
@@ -50,20 +51,61 @@ contains
         class (Workspace), intent (in out) :: this
         !----------------------------------------------------------------------
 
-        if (this%initialized .eqv. .false.) return
+        ! Check flag
+        if (this%initialized .eqv. .false.) then
+            return
+        end if
 
-        ! Release memory
-        if (allocated(this%legendre_workspace)) deallocate(this%legendre_workspace)
-        if (allocated(this%forward_scalar)) deallocate(this%forward_scalar)
-        if (allocated(this%forward_vector)) deallocate(this%forward_vector)
-        if (allocated(this%backward_scalar)) deallocate(this%backward_scalar)
-        if (allocated(this%backward_vector)) deallocate(this%backward_vector)
-        if (allocated(this%real_harmonic_coefficients)) deallocate(this%real_harmonic_coefficients)
-        if (allocated(this%imaginary_harmonic_coefficients)) deallocate(this%imaginary_harmonic_coefficients)
-        if (allocated(this%real_polar_harmonic_coefficients)) deallocate(this%real_polar_harmonic_coefficients)
-        if (allocated(this%imaginary_polar_harmonic_coefficients)) deallocate(this%imaginary_polar_harmonic_coefficients)
-        if (allocated(this%real_azimuthal_harmonic_coefficients)) deallocate(this%real_azimuthal_harmonic_coefficients)
-        if (allocated(this%imaginary_azimuthal_harmonic_coefficients)) deallocate(this%imaginary_azimuthal_harmonic_coefficients)
+        !
+        !==> Release memory
+        !
+        if (allocated(this%legendre_workspace)) then
+            deallocate(this%legendre_workspace)
+        end if
+
+        if (allocated(this%forward_scalar)) then
+            deallocate(this%forward_scalar)
+        end if
+
+        if (allocated(this%forward_vector)) then
+            deallocate(this%forward_vector)
+        end if
+
+        if (allocated(this%backward_scalar)) then
+            deallocate(this%backward_scalar)
+        end if
+
+        if (allocated(this%backward_vector)) then
+            deallocate(this%backward_vector)
+        end if
+
+        if (allocated(this%colatitude_workspace)) then
+            deallocate(this%colatitude_workspace)
+        end if
+
+        if (allocated(this%real_harmonic_coefficients)) then
+            deallocate(this%real_harmonic_coefficients)
+        end if
+
+        if (allocated(this%imaginary_harmonic_coefficients)) then
+            deallocate(this%imaginary_harmonic_coefficients)
+        end if
+
+        if (allocated(this%real_polar_harmonic_coefficients)) then
+            deallocate(this%real_polar_harmonic_coefficients)
+        end if
+
+        if (allocated(this%imaginary_polar_harmonic_coefficients)) then
+            deallocate(this%imaginary_polar_harmonic_coefficients)
+        end if
+
+        if (allocated(this%real_azimuthal_harmonic_coefficients)) then
+            deallocate(this%real_azimuthal_harmonic_coefficients)
+        end if
+
+        if (allocated(this%imaginary_azimuthal_harmonic_coefficients)) then
+            deallocate(this%imaginary_azimuthal_harmonic_coefficients)
+        end if
 
         ! Reset flag
         this%initialized = .false.
@@ -71,7 +113,7 @@ contains
     end subroutine destroy_workspace
 
 
-    pure function get_lwork( nlat, nlon ) result ( return_value )
+    pure function get_lwork(nlat, nlon) result (return_value)
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
@@ -85,7 +127,7 @@ contains
     end function get_lwork
 
 
-    pure function get_ldwork( nlat ) result ( return_value )
+    pure function get_ldwork(nlat) result (return_value)
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
