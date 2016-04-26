@@ -61,21 +61,29 @@ Test programs are provided for solving these equations. Each program serves two 
 ## To build the project
 
 Type the following command line arguments
-```
-git clone https://github.com/jlokimlin/modern_spherepack.git
 
-cd modern_spherepack; make all
+```bash
+
+	git clone https://github.com/jlokimlin/modern_spherepack.git
+	
+	cd modern_spherepack; make all
 ```
 
 -----------------------------------------------------------------------------
 
+## Contributing
+
+This project is still a work in progress and anyone is free to contribute. 
+
+-----------------------------------------------------------------------------
 
 ## TODO
+* Enclose **assignment**(=) and **operator**(\*) inside **type**(ThreeDimensionalVector)
 * Replace old-style **do** loops
-* Replace all instances of **go to** statements with **if-then-else**, **exit**, **cycle** and **select case**
-* Introduce parameterized kinds to remove the compiler flags **-fdefault-real-8 -fdefault-double-8**
+* Replace all occurences of **go to** with **if-then-else**, **exit**, **cycle** and **select case**
+* Universal instances of parameterized kinds *INT32* and *REAL64* to remove the compiler flags **-fdefault-real-8 -fdefault-double-8**
 * Encapsulate all functions and subroutines inside modules.
-* Improve documentation
+* Improve documentation and build tools. 
 
 -----------------------------------------------------------------------------
 
