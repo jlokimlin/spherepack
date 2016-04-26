@@ -103,7 +103,7 @@ program advec
     integer (ip), parameter :: TIME_TO_CIRCUMVENT_THE_EARTH = 12*24*3600
     !----------------------------------------------------------------------
 
-
+    ! Declare derived data type
     type, extends (GaussianSphere) :: Solver
         !----------------------------------------------------------------------
         ! Class variables
@@ -121,6 +121,7 @@ program advec
 
 
     call advecting_cosine_bell()
+
 
 
 contains
@@ -345,8 +346,8 @@ contains
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
         class (Solver), intent (in out) :: this
-        real (wp),    intent (in)       :: t
-        real (wp),    intent (out)      :: geopot(:,:)
+        real (wp),      intent (in)     :: t
+        real (wp),      intent (out)    :: geopot(:,:)
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
@@ -368,7 +369,7 @@ contains
             )
 
             associate( lambdc => omega*t )
-                call get_scaled_radial_unit_vector(1.0, beta, lambdc, xc, yc, zc)
+                call sph2cart(1.0, beta, lambdc, xc, yc, zc)
             end associate
 
 
@@ -397,7 +398,7 @@ contains
                             !
                             !== Compute scaled radial unit vector
                             !
-                            call get_scaled_radial_unit_vector(1.0_wp, that, lhat, x1, y1, z1)
+                            call sph2cart(1.0_wp, that, lhat, x1, y1, z1)
                             !
                             !==> compute distance
                             !
@@ -433,7 +434,7 @@ contains
         !----------------------------------------------------------------------
         real (wp), intent (in) :: x
         real (wp), intent (in) :: y
-        real              :: return_value
+        real                   :: return_value
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
         !--------------------------------------------------------------------------------
@@ -452,13 +453,13 @@ contains
 
 
 
-    pure subroutine get_scaled_radial_unit_vector(radius, theta, phi, x, y, z)
+    pure subroutine sph2cart(radius, theta, phi, x, y, z)
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
-        real (wp), intent (in) :: radius
-        real (wp), intent (in) :: theta
-        real (wp), intent (in) :: phi
+        real (wp), intent (in)  :: radius
+        real (wp), intent (in)  :: theta
+        real (wp), intent (in)  :: phi
         real (wp), intent (out) :: x, y, z
         !----------------------------------------------------------------------
 
@@ -466,7 +467,7 @@ contains
         y = radius * sin(theta) * sin(phi)
         z = radius * cos(theta)
 
-    end subroutine get_scaled_radial_unit_vector
+    end subroutine sph2cart
 
 
 

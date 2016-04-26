@@ -36,185 +36,234 @@
 !     in spherepack.  it includes undocumented subroutines
 !     called by some or all of main programs
 !
-subroutine dnlfk (m, n, cp)
-!
-!     cp requires n/2+1 real locations
-!
-real cp, fnum, fden, fnmh, a1, b1, c1, cp2, fnnp1, fnmsq, fk, &
-       t1, t2, pm1, sc10, sc20, sc40
-dimension       cp(1)
-parameter (sc10=1024.0)
-parameter (sc20=sc10*sc10)
-parameter (sc40=sc20*sc20)
-!
-cp(1) = 0.
-ma = abs(m)
-if (ma > n) return
-if (n-1< 0) then
-    goto 2
-else if (n-1 == 0) then 
-    goto 3
-else 
-    goto 5
-end if
-2 cp(1) = sqrt(2.0)
-return
-3 if (ma /= 0) go to 4
-cp(1) = sqrt(1.5)
-return
-4 cp(1) = sqrt(.75)
-if (m == -1) cp(1) = -cp(1)
-return
-5 if (mod(n+ma, 2) /= 0) go to 10
-nmms2 = (n-ma)/2
-fnum = n+ma+1
-fnmh = n-ma+1
-pm1 = 1.0
-go to 15
-10 nmms2 = (n-ma-1)/2
-fnum = n+ma+2
-fnmh = n-ma+2
-pm1 = -1.0
-!      t1 = 1.
-!      t1 = 2.0**(n-1)
-!      t1 = 1.0/t1
-15 t1 = 1.0/sc20
-nex = 20
-fden = 2.0
-if (nmms2 < 1) go to 20
-do 18 i=1, nmms2
-t1 = fnum*t1/fden
-if (t1 > sc20) then
-t1 = t1/sc40
-nex = nex+40
-end if
-fnum = fnum+2.
-fden = fden+2.
-18 continue
-20 t1 = t1/2.0**(n-1-nex)
-if (mod(ma/2, 2) /= 0) t1 = -t1
-t2 = 1.
-if (ma == 0) go to 26
-do i=1, ma
-t2 = fnmh*t2/(fnmh+pm1)
-fnmh = fnmh+2.
-end do
-26 cp2 = t1*sqrt((n+.5)*t2)
-fnnp1 = n*(n+1)
-fnmsq = fnnp1-2.0*ma*ma
-l = (n+1)/2
-if (mod(n, 2) == 0 .and. mod(ma, 2) == 0) l = l+1
-cp(l) = cp2
-if (m >= 0) go to 29
-if (mod(ma, 2) /= 0) cp(l) = -cp(l)
-29 if (l <= 1) return
-fk = n
-a1 = (fk-2.)*(fk-1.)-fnnp1
-b1 = 2.*(fk*fk-fnmsq)
-cp(l-1) = b1*cp(l)/a1
-30 l = l-1
-if (l <= 1) return
-fk = fk-2.
-a1 = (fk-2.)*(fk-1.)-fnnp1
-b1 = -2.*(fk*fk-fnmsq)
-c1 = (fk+1.)*(fk+2.)-fnnp1
-cp(l-1) = -(b1*cp(l)+c1*cp(l+1))/a1
-go to 30
+pure subroutine dnlfk(m, n, cp)
+    !
+    !     cp requires n/2+1 real locations
+    !
+    use, intrinsic :: iso_fortran_env, only: &
+        wp => REAL64, &
+        ip => INT32
+
+    implicit none
+    !----------------------------------------------------------------------
+    ! Dictionary: calling arguments
+    !----------------------------------------------------------------------
+    integer (ip), intent (in)  :: m
+    integer (ip), intent (in)  :: n
+    real (wp),    intent (out) :: cp(1)
+    !----------------------------------------------------------------------
+    ! Dictionary: local variables
+    !----------------------------------------------------------------------
+    integer (ip)         :: i, l, ma, nex,  nmms2
+    real (wp)            :: a1, b1, c1, t1, t2
+    real (wp)            :: fk, cp2, pm1
+    real (wp)            :: fden, fnmh, fnum, fnnp1, fnmsq
+    real (wp), parameter :: SC10=1024.0_wp
+    real (wp), parameter :: SC20=SC10**2
+    real (wp), parameter :: SC40=SC20**2
+    !----------------------------------------------------------------------
+
+    ma = abs(m)
+
+    if (ma > n) then
+        cp(1) = 0.0_wp
+        return
+    end if
+
+    if (n < 1) then
+        cp(1) = sqrt(2.0_wp)
+    else if (n == 1) then
+        if (ma /= 0) then
+            cp(1) = sqrt(0.75_wp)
+            if (m == -1) then
+                cp(1) = -cp(1)
+            end if
+        else
+            cp(1) = sqrt(1.5_wp)
+        end if
+    else
+        if (mod(n+ma, 2) /= 0) then
+            nmms2 = (n-ma-1)/2
+            fnum = real(n+ma+2, kind=wp)
+            fnmh = real(n-ma+2, kind=wp)
+            pm1 = -1.0_wp
+        else
+            nmms2 = (n-ma)/2
+            fnum = real(n+ma+1, kind=wp)
+            fnmh = real(n-ma+1, kind=wp)
+            pm1 = 1.0_wp
+        end if
+
+        t1 = 1.0_wp/SC20
+        nex = 20
+        fden = 2.0_wp
+        if (.not.(nmms2 < 1)) then
+            do i=1, nmms2
+                t1 = fnum*t1/fden
+                if (t1 > SC20) then
+                    t1 = t1/SC40
+                    nex = nex+40
+                end if
+                fnum = fnum+2.0_wp
+                fden = fden+2.0_wp
+            end do
+        end if
+
+        t1 = t1/2.0**(n-1-nex)
+
+        if (mod(ma/2, 2) /= 0) then
+            t1 = -t1
+        end if
+
+        t2 = 1.0_wp
+
+        if (.not.(ma == 0)) then
+            do i=1, ma
+                t2 = fnmh*t2/(fnmh+pm1)
+                fnmh = fnmh+2.0_wp
+            end do
+        end if
+
+        cp2 = t1*sqrt((real(n, kind=wp)+0.5_wp)*t2)
+        fnnp1 = real(n*(n+1), kind=wp)
+        fnmsq = fnnp1 - 2.0_wp * real(ma**2, kind=wp)
+        l = (n+1)/2
+
+        if (mod(n, 2) == 0 .and. mod(ma, 2) == 0) then
+            l = l+1
+        end if
+
+        cp(l) = cp2
+
+        if (.not.(m >= 0)) then
+            if (mod(ma, 2) /= 0) then
+                cp(l) = -cp(l)
+            end if
+        end if
+
+        if (l <= 1) then
+            return
+        end if
+
+        fk = real(n, kind=wp)
+        a1 = (fk-2.0_wp)*(fk-1.0_wp)-fnnp1
+        b1 = 2.0_wp*(fk*fk-fnmsq)
+        cp(l-1) = b1*cp(l)/a1
+
+        l = l - 1
+
+        do while (.not.(l <= 1))
+            fk = fk-2.0_wp
+            a1 = (fk-2.0_wp)*(fk-1.0_wp)-fnnp1
+            b1 = -2.0_wp*(fk*fk-fnmsq)
+            c1 = (fk+1.0_wp)*(fk+2.0_wp)-fnnp1
+            cp(l-1) = -(b1*cp(l)+c1*cp(l+1))/a1
+            l=l-1
+        end do
+    end if
 
 end subroutine dnlfk
 
 
 
-subroutine dnlft (m, n, theta, cp, pb)
-real cp(*), pb, theta, cdt, sdt, cth, sth, chh
+pure subroutine dnlft(m, n, theta, cp, pb)
 
-cdt = cos(2.0*theta)
-sdt = sin(2.0*theta)
+    use, intrinsic :: iso_fortran_env, only: &
+        wp => REAL64, &
+        ip => INT32
 
-nmod=mod(n, 2)
-mmod=mod(m, 2)
+    implicit none
+    !----------------------------------------------------------------------
+    ! Dictionary: calling arguments
+    !----------------------------------------------------------------------
+    integer (ip), intent (in)  :: m
+    integer (ip), intent (in)  :: n
+    real (wp),    intent (in)  :: theta
+    real (wp),    intent (out) :: cp(*)
+    real (wp),    intent (out) :: pb
+    !----------------------------------------------------------------------
+    ! Dictionary: local variables
+    !----------------------------------------------------------------------
+    integer (ip) ::  k, kdo, mmod, nmod
+    real (wp)    :: chh, cdt, cth, sdt, sth
+    !----------------------------------------------------------------------
 
-if (nmod< 0) then
-    goto 1
-else if (nmod == 0) then 
-    goto 1
-else 
-    goto 2
-end if
-1 if (mmod< 0) then
-    goto 3
-else if (mmod == 0) then 
-    goto 3
-else 
-    goto 4
-end if
-!
-!     n even, m even
-!
-3 kdo=n/2
-pb = .5*cp(1)
-if (n == 0) return
-cth = cdt
-sth = sdt
-do 170 k=1, kdo
-!     pb = pb+cp(k+1)*cos(2*k*theta)
-pb = pb+cp(k+1)*cth
-chh = cdt*cth-sdt*sth
-sth = sdt*cth+cdt*sth
-cth = chh
-170 continue
-return
-!
-!     n even, m odd
-!
-4 kdo = n/2
-pb = 0.
-cth = cdt
-sth = sdt
-do 180 k=1, kdo
-!     pb = pb+cp(k)*sin(2*k*theta)
-pb = pb+cp(k)*sth
-chh = cdt*cth-sdt*sth
-sth = sdt*cth+cdt*sth
-cth = chh
-180 continue
-return
-2 if (mmod< 0) then
-    goto 13
-else if (mmod == 0) then 
-    goto 13
-else 
-    goto 14
-end if
-!
-!     n odd, m even
-!
-13 kdo = (n+1)/2
-pb = 0.
-cth = cos(theta)
-sth = sin(theta)
-do 190 k=1, kdo
-!     pb = pb+cp(k)*cos((2*k-1)*theta)
-pb = pb+cp(k)*cth
-chh = cdt*cth-sdt*sth
-sth = sdt*cth+cdt*sth
-cth = chh
-190 continue
-return
-!
-!     n odd, m odd
-!
-14 kdo = (n+1)/2
-pb = 0.
-cth = cos(theta)
-sth = sin(theta)
-do 200 k=1, kdo
-!     pb = pb+cp(k)*sin((2*k-1)*theta)
-pb = pb+cp(k)*sth
-chh = cdt*cth-sdt*sth
-sth = sdt*cth+cdt*sth
-cth = chh
-200 continue
+    cdt = cos(2.0_wp * theta)
+    sdt = sin(2.0_wp * theta)
+
+    nmod = mod(n, 2)
+    mmod = mod(m, 2)
+
+    if (nmod <= 0) then
+        if (mmod <= 0) then
+            !
+            !==>  n even, m even
+            !
+            kdo = n/2
+            pb = 0.5_wp * cp(1)
+
+            if (n == 0) then
+                return
+            end if
+
+            cth = cdt
+            sth = sdt
+
+            do k=1, kdo
+                pb = pb+cp(k+1)*cth
+                chh = cdt*cth-sdt*sth
+                sth = sdt*cth+cdt*sth
+                cth = chh
+            end do
+        else
+            !
+            !==> n even, m odd
+            !
+            kdo = n/2
+            pb = 0.0_wp
+            cth = cdt
+            sth = sdt
+
+            do k=1, kdo
+                pb = pb+cp(k)*sth
+                chh = cdt*cth-sdt*sth
+                sth = sdt*cth+cdt*sth
+                cth = chh
+            end do
+        end if
+    else
+        if (mmod <= 0) then
+            !
+            !==> n odd, m even
+            !
+            kdo = (n+1)/2
+            pb = 0.0_wp
+            cth = cos(theta)
+            sth = sin(theta)
+
+            do k=1, kdo
+                pb = pb+cp(k)*cth
+                chh = cdt*cth-sdt*sth
+                sth = sdt*cth+cdt*sth
+                cth = chh
+            end do
+        else
+            !
+            !==>  n odd, m odd
+            !
+            kdo = (n+1)/2
+            pb = 0.0_wp
+            cth = cos(theta)
+            sth = sin(theta)
+
+            do k=1, kdo
+                pb = pb+cp(k)*sth
+                chh = cdt*cth-sdt*sth
+                sth = sdt*cth+cdt*sth
+                cth = chh
+            end do
+        end if
+    end if
 
 end subroutine dnlft
 
@@ -232,16 +281,16 @@ nmod=mod(n, 2)
 mmod=mod(abs(m), 2)
 if (nmod< 0) then
     goto 1
-else if (nmod == 0) then 
+else if (nmod == 0) then
     goto 1
-else 
+else
     goto 2
 end if
 1 if (mmod< 0) then
     goto 3
-else if (mmod == 0) then 
+else if (mmod == 0) then
     goto 3
-else 
+else
     goto 4
 end if
 !
@@ -277,9 +326,9 @@ cth = chh
 return
 2 if (mmod< 0) then
     goto 13
-else if (mmod == 0) then 
+else if (mmod == 0) then
     goto 13
-else 
+else
     goto 14
 end if
 !
@@ -406,41 +455,41 @@ end subroutine legin1
 
 
 subroutine zfin (isym, nlat, nlon, m, z, i3, wzfin)
-implicit none
-!----------------------------------------------------------------------
-! Dictionary: calling arguments
-!----------------------------------------------------------------------
-integer, intent (in)     :: isym
-integer, intent (in)     :: nlat
-integer, intent (in)     :: nlon
-integer, intent (in)     :: m
-real,    intent (inout)  :: z(1)
-integer, intent (in)     :: i3
-real,    intent (in out) :: wzfin(1)
-!----------------------------------------------------------------------
+    implicit none
+    !----------------------------------------------------------------------
+    ! Dictionary: calling arguments
+    !----------------------------------------------------------------------
+    integer, intent (in)     :: isym
+    integer, intent (in)     :: nlat
+    integer, intent (in)     :: nlon
+    integer, intent (in)     :: m
+    real,    intent (inout)  :: z(1)
+    integer, intent (in)     :: i3
+    real,    intent (in out) :: wzfin(1)
+    !----------------------------------------------------------------------
 
-associate( imid => (nlat+1)/2 )
-associate( mmax => min(nlat, nlon/2+1) )
-associate( lim => nlat*imid )
-associate( labc => ((mmax-2)*(nlat+nlat-mmax-1))/2 )
-associate( iw1 => lim+1 )
-associate( iw2 => iw1+lim )
-associate( iw3 => iw2+labc )
-associate( iw4 => iw3+labc )
-!
-!     the length of wzfin is 2*lim+3*labc
-!
-call zfin1(isym, nlat, m, z, imid, i3, &
-wzfin, wzfin(iw1), wzfin(iw2), &
-wzfin(iw3), wzfin(iw4))
-end associate
-end associate
-end associate
-end associate
-end associate
-end associate
-end associate
-end associate
+    associate( imid => (nlat+1)/2 )
+        associate( mmax => min(nlat, nlon/2+1) )
+            associate( lim => nlat*imid )
+                associate( labc => ((mmax-2)*(nlat+nlat-mmax-1))/2 )
+                    associate( iw1 => lim+1 )
+                        associate( iw2 => iw1+lim )
+                            associate( iw3 => iw2+labc )
+                                associate( iw4 => iw3+labc )
+                                    !
+                                    !     the length of wzfin is 2*lim+3*labc
+                                    !
+                                    call zfin1(isym, nlat, m, z, imid, i3, &
+                                        wzfin, wzfin(iw1), wzfin(iw2), &
+                                        wzfin(iw3), wzfin(iw4))
+                                end associate
+                            end associate
+                        end associate
+                    end associate
+                end associate
+            end associate
+        end associate
+    end associate
 
 end subroutine zfin
 
@@ -563,16 +612,16 @@ nmod = mod(n, 2)
 mmod = mod(m, 2)
 if (nmod< 0) then
     goto 1
-else if (nmod == 0) then 
+else if (nmod == 0) then
     goto 1
-else 
+else
     goto 2
 end if
 1 if (mmod< 0) then
     goto 3
-else if (mmod == 0) then 
+else if (mmod == 0) then
     goto 3
-else 
+else
     goto 4
 end if
 !
@@ -609,9 +658,9 @@ cz(idx) = sc1*sum
 return
 2 if (mmod< 0) then
     goto 13
-else if (mmod == 0) then 
+else if (mmod == 0) then
     goto 13
-else 
+else
     goto 14
 end if
 !
@@ -659,9 +708,9 @@ mmod = mod(m, 2)
 nmod = mod(n, 2)
 if (lmod< 0) then
     goto 20
-else if (lmod == 0) then 
+else if (lmod == 0) then
     goto 20
-else 
+else
     goto 10
 end if
 10 lc = (nlat+1)/2
@@ -669,16 +718,16 @@ lq = lc-1
 ls = lc-2
 if (nmod< 0) then
     goto 1
-else if (nmod == 0) then 
+else if (nmod == 0) then
     goto 1
-else 
+else
     goto 2
 end if
 1 if (mmod< 0) then
     goto 3
-else if (mmod == 0) then 
+else if (mmod == 0) then
     goto 3
-else 
+else
     goto 4
 end if
 !
@@ -713,9 +762,9 @@ return
 !
 2 if (mmod< 0) then
     goto 5
-else if (mmod == 0) then 
+else if (mmod == 0) then
     goto 5
-else 
+else
     goto 6
 end if
 5 cth = cos(th)
@@ -745,16 +794,16 @@ return
 lq = lc-1
 if (nmod< 0) then
     goto 30
-else if (nmod == 0) then 
+else if (nmod == 0) then
     goto 30
-else 
+else
     goto 80
 end if
 30 if (mmod< 0) then
     goto 40
-else if (mmod == 0) then 
+else if (mmod == 0) then
     goto 40
-else 
+else
     goto 60
 end if
 !
@@ -789,9 +838,9 @@ return
 !
 80 if (mmod< 0) then
     goto 90
-else if (mmod == 0) then 
+else if (mmod == 0) then
     goto 90
-else 
+else
     goto 110
 end if
 90 zh = .5*cz(lc)*cos((nlat-1)*th)
@@ -823,20 +872,20 @@ end subroutine dnzft
 
 
 subroutine alin (isym, nlat, nlon, m, p, i3, walin)
-dimension       p(1)        , walin(1)
-imid = (nlat+1)/2
-lim = nlat*imid
-mmax = min(nlat, nlon/2+1)
-labc = ((mmax-2)*(nlat+nlat-mmax-1))/2
-iw1 = lim+1
-iw2 = iw1+lim
-iw3 = iw2+labc
-iw4 = iw3+labc
-!
-!     the length of walin is ((5*l-7)*l+6)/2
-!
-call alin1 (isym, nlat, m, p, imid, i3, walin, walin(iw1), walin(iw2), &
-            walin(iw3), walin(iw4))
+    dimension       p(1)        , walin(1)
+    imid = (nlat+1)/2
+    lim = nlat*imid
+    mmax = min(nlat, nlon/2+1)
+    labc = ((mmax-2)*(nlat+nlat-mmax-1))/2
+    iw1 = lim+1
+    iw2 = iw1+lim
+    iw3 = iw2+labc
+    iw4 = iw3+labc
+    !
+    !     the length of walin is ((5*l-7)*l+6)/2
+    !
+    call alin1 (isym, nlat, m, p, imid, i3, walin, walin(iw1), walin(iw2), &
+        walin(iw3), walin(iw4))
 
 end subroutine alin
 
@@ -852,9 +901,9 @@ i2 = i3
 i3 = ihold
 if (m-1< 0) then
     goto 25
-else if (m-1 == 0) then 
+else if (m-1 == 0) then
     goto 30
-else 
+else
     goto 35
 end if
 25 i1 = 1
@@ -1157,9 +1206,9 @@ i2 = i3
 i3 = ihold
 if (m-1< 0) then
     goto 25
-else if (m-1 == 0) then 
+else if (m-1 == 0) then
     goto 30
-else 
+else
     goto 35
 end if
 25 i1 = 1
@@ -1233,9 +1282,9 @@ i2 = i3
 i3 = ihold
 if (m-2< 0) then
     goto 25
-else if (m-2 == 0) then 
+else if (m-2 == 0) then
     goto 30
-else 
+else
     goto 35
 end if
 25 i1 = 1
@@ -1403,9 +1452,9 @@ i2 = i3
 i3 = ihold
 if (m-1< 0) then
     goto 25
-else if (m-1 == 0) then 
+else if (m-1 == 0) then
     goto 30
-else 
+else
     goto 35
 end if
 25 i1 = 1
@@ -1479,9 +1528,9 @@ i2 = i3
 i3 = ihold
 if (m-2< 0) then
     goto 25
-else if (m-2 == 0) then 
+else if (m-2 == 0) then
     goto 30
-else 
+else
     goto 35
 end if
 25 i1 = 1
@@ -2619,9 +2668,9 @@ go to 10
 25 l = l-1
    if (l< 0) then
        goto 50
-   else if (l == 0) then 
+   else if (l == 0) then
        goto 27
-   else 
+   else
        goto 26
    end if
 26 cw(l) = cw(l+1)+cf*work(l)
@@ -2637,9 +2686,9 @@ cw(l) = -cf*work(l+1)
 35 l = l-1
    if (l< 0) then
        goto 50
-   else if (l == 0) then 
+   else if (l == 0) then
        goto 37
-   else 
+   else
        goto 36
    end if
 36 cw(l) = cw(l+1)-cf*work(l+1)
@@ -2653,9 +2702,9 @@ cw(l) = cf*work(l)
 45 l = l-1
    if (l< 0) then
        goto 50
-   else if (l == 0) then 
+   else if (l == 0) then
        goto 47
-   else 
+   else
        goto 46
    end if
 46 cw(l) = cw(l+1)+cf*work(l)
