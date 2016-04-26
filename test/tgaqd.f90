@@ -44,13 +44,17 @@
 !                         April 2002
 !
 program testint
+
+    use, intrinsic :: iso_fortran_env, only: &
+        sp => REAL32
+
     parameter (nlat=63)
     real theta(nlat),wts(nlat),work(nlat+2), &
         dtheta(nlat),dwts(nlat),dw(nlat+1)
     real dwmx,tmax,dwmax,dtmax
     dimension stheta(nlat),swts(nlat),swork(nlat+1)
     dimension diff(nlat)
-    real*4 t1(2),t2(2)
+    real (sp) :: t1(2),t2(2)
     real sumw
     !
     lwork = nlat+1

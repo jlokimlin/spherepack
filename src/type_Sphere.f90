@@ -87,6 +87,7 @@ module type_Sphere
         procedure, private :: get_vector_laplacian_from_vector_field
         procedure, private :: invert_scalar_laplacian
         procedure, private :: invert_vector_laplacian
+        !procedure, nopass, public  :: get_legendre_function
         procedure (scalar_analysis),  deferred, public :: &
             perform_scalar_analysis
         procedure (scalar_synthesis), deferred, public :: &
@@ -1887,6 +1888,50 @@ contains
         end associate
 
     end function get_coefficient
+
+
+
+!    subroutine get_legendre_function(lat, ntrunc, legfunc)
+!        !----------------------------------------------------------------------
+!        ! Dictionary: calling arguments
+!        !----------------------------------------------------------------------
+!        real (wp),              intent (in)     :: lat
+!        integer (ip),           intent (in)     :: ntrunc
+!        real (wp), allocatable, intent (out)    :: legfunc(:)
+!        !----------------------------------------------------------------------
+!        ! Dictionary: calling arguments
+!        !----------------------------------------------------------------------
+!        real (wp), parameter   :: PI = acos(-1.0_wp)
+!        real (wp), allocatable :: cp(:)
+!        integer (wp)           :: i, n, m, nm !! Counters
+!        !----------------------------------------------------------------------
+!
+!        !
+!        !==> Allocate memory
+!        !
+!        allocate( legfunc((ntrunc+1)*(ntrunc+2)/2) )
+!        allocate( cp((ntrunc/2)+1) )
+!
+!        !
+!        !==> Compute normalized associate Legendre function at theta
+!        !
+!        associate( theta => PI/2 - (PI/180)*lat )
+!            do m=1,ntrunc+1
+!                do n=m,ntrunc+1
+!                    nm = sum([(i, i=ntrunc+1, ntrunc-m+3, -1)])+n-m+1
+!                    call alfk(n-1, m-1, cp)
+!                    call lfpt(n-1, m-1, theta, cp, legfunc(nm))
+!                end do
+!            end do
+!        end associate
+!
+!        !
+!        !==> Release memory
+!        !
+!        deallocate( cp )
+!
+!    end subroutine get_legendre_function
+
 
 
     subroutine get_scalar_symmetries(this, isym)

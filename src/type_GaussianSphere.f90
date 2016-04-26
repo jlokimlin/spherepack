@@ -188,7 +188,7 @@ contains
                         ierror => error_flag &
                         )
                         call shags( nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, &
-                            wshags, lshags, work, lwork, ierror )
+                            wshags, lshags, work, lwork, ierror)
                     end associate
                 end select
             end associate

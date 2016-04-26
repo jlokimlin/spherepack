@@ -215,11 +215,12 @@ subroutine hrffti(n, wsave)
     real (wp),    intent (in out) :: wsave(n+15)
     !----------------------------------------------------------------------
 
-    if (n == 1) then
-        return                                                    !
-    end if
-
-    call hrfti1(n, wsave(1), wsave(n+1))
+    select case (n)
+        case (1)
+            return
+        case default
+            call hrfti1(n, wsave(1), wsave(n+1))
+    end select
                                                                  !
 end subroutine hrffti
 
@@ -360,11 +361,12 @@ subroutine hrfftf(m, n, r, mdimr, whrfft, work)
     real (wp),    intent (in out) :: whrfft(n+15)
     !----------------------------------------------------------------------
 
-    if (n == 1) then
-        return
-    end if
-
-    call hrftf1(m, n, r, mdimr, work, whrfft, whrfft(n+1))
+    select case (n)
+        case (1)
+            return
+        case default
+            call hrftf1(m, n, r, mdimr, work, whrfft, whrfft(n+1))
+    end select
 
 end subroutine hrfftf
 
@@ -1278,11 +1280,12 @@ subroutine hrfftb(m, n, r, mdimr, whrfft, work)
     real (wp),    intent (in out) :: work(1)
     !----------------------------------------------------------------------
 
-    if (n == 1) then
-        return
-    end if
-
-    call hrftb1(m, n, r, mdimr, work, whrfft, whrfft(n+1))
+    select case (n)
+        case (1)
+            return
+        case default
+            call hrftb1(m, n, r, mdimr, work, whrfft, whrfft(n+1))
+    end select
 
 end subroutine hrfftb
 

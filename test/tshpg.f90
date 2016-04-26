@@ -46,6 +46,10 @@
 !                     April 2002
 !
 program tshpg
+
+    use, intrinsic :: iso_fortran_env, only: &
+        sp => REAL32
+
     parameter (idp=8)
     parameter (kdp=idp+idp-2)
     parameter (lwshp=2*(idp+1)**2+kdp+20, &
@@ -61,7 +65,7 @@ program tshpg
     dimension g(idp,kdp,2),ga(idp,idp,2),gb(idp,idp,2), &
         gh(idp,kdp,2), &
         wrk2(lwork),wshagc(lwsha),wshsgc(lwsha)
-    real*4 t1(2)
+    real (sp) :: t1(2)
     !
     iprint = 0
     nt = 1
@@ -103,8 +107,8 @@ program tshpg
                 end do
             end do
             !
-            thold = etime(t1)
-            thold = t1(1)
+            call cpu_time(thold)
+            
             call shagc(nlat,nlon,mode,nt,g,idimg,jdimg,ga,gb,idimg,idimg, &
                 wshagc,lwsha,wrk2,lwork,ierror)
             if (ierror /= 0) write(6,72) ierror
@@ -120,16 +124,16 @@ program tshpg
             end if
             call shsgc(nlat,nlon,mode,nt,gh,idimg,jdimg,ga,gb,idimg,idimg, &
                 wshsgc,lwshs,wrk2,lwork,ierror)
-            tusl = etime(t1)
-            tusl = t1(1)-thold
+            call cpu_time(tusl)
+            tusl = tusl-thold
             if (ierror /= 0) write(6,73) ierror
 73          format('   ierror3' ,i5)
             !
-            thold = etime(t1)
+            call cpu_time(thold)
             toe = t1(1)
             call shpg(nlat,nlon,isym,mtrunc,sx,sy,idp, &
                 wshp,lwshp,iwshp,liwshp,wrk1,lwrk1,ierror)
-            thold = etime(t1)
+            call cpu_time(thold)
             toe = t1(1)-toe
             if (ierror /= 0) write(*,428) ierror
 428         format(' ierror =',i5,' at 428')

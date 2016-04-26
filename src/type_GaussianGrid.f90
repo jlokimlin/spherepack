@@ -27,7 +27,7 @@ module type_GaussianGrid
         !----------------------------------------------------------------------
         procedure, public  :: create => create_gaussian_grid
         procedure, public  :: destroy => destroy_gaussian_grid
-        procedure, public  :: get_gaussian_weights_and_points
+        procedure, public  :: get_latitudes_and_gaussian_weights
         procedure, public  :: unformatted_print
         final              :: finalize_gaussian_grid
         !----------------------------------------------------------------------
@@ -37,7 +37,7 @@ module type_GaussianGrid
 contains
 
 
-    subroutine create_gaussian_grid(this, nlat, nlon )
+    subroutine create_gaussian_grid(this, nlat, nlon)
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
@@ -68,7 +68,7 @@ contains
         !
         !==> Set latitudinal grid: 0 <= theta <= pi
         !
-        call this%get_gaussian_weights_and_points( &
+        call this%get_latitudes_and_gaussian_weights( &
             nlat, this%latitudes, this%gaussian_weights )
 
         ! Set initialization flag
@@ -107,7 +107,7 @@ contains
     end subroutine destroy_gaussian_grid
 
 
-    subroutine get_gaussian_weights_and_points(this, nlat, theta, wts )
+    subroutine get_latitudes_and_gaussian_weights(this, nlat, theta, wts)
         !
         !<Purpose:
         !
@@ -144,16 +144,6 @@ contains
         end if
 
         !
-        !==> Release memory
-        !
-        if (allocated(theta)) then
-            deallocate( theta )
-        end if
-        if (allocated(wts)) then
-            deallocate( wts )
-        end if
-
-        !
         !==> Allocate memory
         !
         allocate( theta(nlat) )
@@ -168,7 +158,7 @@ contains
             !
             !==> Compute gaussian weights and latitudes
             !
-            call gaqd( nlat, theta, wts, w, lwork, ierror )
+            call gaqd(nlat, theta, wts, w, lwork, ierror)
         end associate
 
         !
@@ -180,13 +170,13 @@ contains
             case(1)
                 error stop 'TYPE (GaussianGrid): '&
                     //'fails to satisfy nlat >= 0 '&
-                    //'in GET_GAUSSIAN_WEIGHTS_AND_POINTS'
+                    //'in GET_LATITUDES_AND_GAUSSIAN_WEIGHTS'
             case default
                 error stop 'TYPE (GaussianGrid): '&
-                    //'undetermined error in GET_GAUSSIAN_WEIGHTS_AND_POINTS'
+                    //'undetermined error in GET_LATITUDES_AND_GAUSSIAN_WEIGHTS'
         end select
 
-    end subroutine get_gaussian_weights_and_points
+    end subroutine get_latitudes_and_gaussian_weights
 
 
     subroutine unformatted_print(this, header )

@@ -134,7 +134,7 @@ contains
         type (Solver)                 :: solver_dat
         integer (ip), parameter       :: NLONS = 45
         integer (ip), parameter       :: NLATS = 23
-        integer (ip)                  :: i, j, n !! Counters
+        integer (ip)                  :: i, j !! Counters
         integer (ip)                  :: mprint, ncycle, ntime
         real (wp)                     :: u(NLATS,NLONS),v(NLATS,NLONS)
         real (wp)                     :: phi_old(NLATS,NLONS),phi_new(NLATS,NLONS)
@@ -234,7 +234,7 @@ contains
         !
         !==> Start time loop
         !
-        time_loop: do n=1, ntime + 1
+        time_loop: do while (ncycle <= ntime)
             !
             !==> Compute gradient of phi at current time
             !

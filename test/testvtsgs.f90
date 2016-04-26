@@ -66,7 +66,7 @@ program tvtsgs
     !
     !     initialize spherepack routines
     !
-    call shigs(nlat,nlon,wshi,lwshi,work,lwork,dwork,ldwork,ierror)
+    call shagsi(nlat,nlon,wshi,lwshi,work,lwork,dwork,ldwork,ierror)
     if (ierror /= 0) write(6,55) ierror
 55  format('testvtsgs:  error' i4 ' in shigs')
     call vhagsi(nlat,nlon,wvha,lwvha,dwork,ldwork,ierror)
@@ -85,14 +85,10 @@ program tvtsgs
     !
     !     zero vector harmonic coefficients
     !
-    do np1=1,nlat
-        do mp1=1,np1
-            br(mp1,np1) = 0.
-            bi(mp1,np1) = 0.
-            cr(mp1,np1) = 0.
-            ci(mp1,np1) = 0.
-        end do
-    end do
+    br = 0.0
+    bi = 0.0
+    cr = 0.0
+    ci = 0.0
     !
     !     initialize arrays with random numbers
     !     old style non-portable commented out
@@ -111,8 +107,8 @@ program tvtsgs
     !     (new style using standard Fortran90
     !     intrinsics
     !
-    call RANDOM_SEED()
-    !
+    call random_seed()
+
     call random_number(tmp)
     do np1=1,nlat-1
         do mp1=1,np1
@@ -146,11 +142,8 @@ program tvtsgs
     if (ierror /= 0) write(6,79) ierror
 79  format(' testvtsgs: error' i4 ' in vhsgs at point 1')
     !
-    do j=1,nlon
-        do i=1,nlat
-            u(i,j) = 0.
-        end do
-    end do
+    !==> Initialize
+    u = 0.0
     !
     !     convert to cartesian coordinates
     !
