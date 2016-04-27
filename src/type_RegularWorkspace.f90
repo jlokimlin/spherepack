@@ -45,7 +45,7 @@ module type_RegularWorkspace
 contains
 
 
-    subroutine create_regular_workspace(this, nlat, nlon )
+    subroutine create_regular_workspace(this, nlat, nlon)
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
@@ -77,7 +77,9 @@ contains
         !----------------------------------------------------------------------
 
         ! Check flag
-        if (this%initialized .eqv. .false.) return
+        if (this%initialized .eqv. .false.) then
+            return
+        end if
 
         ! Release memory from parent type
         call this%destroy_workspace()
@@ -88,7 +90,8 @@ contains
     end subroutine destroy_regular_workspace
 
 
-    subroutine initialize_regular_scalar_analysis(this, nlat, nlon )
+
+    subroutine initialize_regular_scalar_analysis(this, nlat, nlon)
         !
         ! Purpose:
         !
@@ -118,13 +121,18 @@ contains
         lshaes = this%get_lshaes(nlat, nlon)
 
         ! Release memory ( if necessary )
-        if (allocated(this%legendre_workspace)) deallocate(this%legendre_workspace )
-        if (allocated(this%forward_scalar)) deallocate(this%forward_scalar )
+        if (allocated(this%legendre_workspace)) then
+            deallocate( this%legendre_workspace )
+        end if
+
+        if (allocated(this%forward_scalar)) then
+            deallocate( this%forward_scalar )
+        end if
 
         ! Allocate memory
-        allocate(this%legendre_workspace(lwork) )
+        allocate( this%legendre_workspace(lwork) )
         allocate( dwork(ldwork) )
-        allocate(this%forward_scalar(lshaes) )
+        allocate( this%forward_scalar(lshaes) )
 
         ! Compute workspace
         associate( &
@@ -143,19 +151,24 @@ contains
             case(0)
                 return
             case(1)
-                error stop 'TYPE (RegularWorkspace) in INITIALIZE_REGULAR_SCALAR_ANALYSIS '&
-                    //'Error in the specification of NUMBER_OF_LATITUDES'
+                error stop 'Object of class (RegularWorkspace): '&
+                    //'in initialize_regular_scalar_analysis '&
+                    //'error in the specification of NUMBER_OF_LATITUDES'
             case(2)
-                error stop 'TYPE (RegularWorkspace) in INITIALIZE_REGULAR_SCALAR_ANALYSIS '&
-                    //'Error in the specification of NUMBER_OF_LONGITUDES'
+                error stop 'Object of class (RegularWorkspace): '&
+                    //'in initialize_regular_scalar_analysis '&
+                    //'error in the specification of NUMBER_OF_LONGITUDES'
             case(3)
-                error stop 'TYPE (RegularWorkspace) in INITIALIZE_REGULAR_SCALAR_ANALYSIS '&
-                    //'Error in the specification of extent for FORWARD_SCALAR'
+                error stop 'Object of class (RegularWorkspace): '&
+                    //'in initialize_regular_scalar_analysis '&
+                    //'error in the specification of extent for forward_scalar'
             case(4)
-                error stop 'TYPE (RegularWorkspace) in INITIALIZE_REGULAR_SCALAR_ANALYSIS '&
-                    //'Error in the specification of extent for LEGENDRE_WORKSPACE'
+                error stop 'Object of class (RegularWorkspace): '&
+                    //'in initialize_regular_scalar_analysis '&
+                    //'error in the specification of extent for legendre_workspace'
             case default
-                error stop 'TYPE (RegularWorkspace) in INITIALIZE_REGULAR_SCALAR_ANALYSIS '&
+                error stop 'Object of class (RegularWorkspace): '&
+                    //'in initialize_regular_scalar_analysis '&
                     //'Undetermined error flag'
         end select
 
@@ -163,7 +176,7 @@ contains
 
 
 
-    subroutine initialize_regular_scalar_synthesis(this, nlat, nlon )
+    subroutine initialize_regular_scalar_synthesis(this, nlat, nlon)
         !
         !  Purpose:
         !
@@ -193,12 +206,17 @@ contains
         lshses = this%get_lshses(nlat, nlon)
 
         ! Release memory ( if necessary )
-        if (allocated(this%legendre_workspace)) deallocate(this%legendre_workspace )
-        if (allocated(this%backward_scalar)) deallocate(this%backward_scalar )
+        if (allocated(this%legendre_workspace)) then
+            deallocate( this%legendre_workspace )
+        end if
+
+        if (allocated(this%backward_scalar)) then
+            deallocate( this%backward_scalar )
+        end if
 
         ! Allocate memory
-        allocate(this%legendre_workspace(lwork) )
-        allocate(this%backward_scalar(lshses) )
+        allocate( this%legendre_workspace(lwork) )
+        allocate( this%backward_scalar(lshses) )
         allocate( dwork(ldwork) )
 
         ! Compute workspace
@@ -218,19 +236,24 @@ contains
             case(0)
                 return
             case(1)
-                error stop 'TYPE (RegularWorkspace) in INITIALIZE_REGULAR_SCALAR_SYNTHESIS '&
-                    //'Error in the specification of NUMBER_OF_LATITUDES'
+                error stop 'Object of class (RegularWorkspace): '&
+                    //'in initialize_regular_scalar_synthesis '&
+                    //'error in the specification of NUMBER_OF_LATITUDES'
             case(2)
-                error stop 'TYPE (RegularWorkspace) in INITIALIZE_REGULAR_SCALAR_SYNTHESIS '&
-                    //'Error in the specification of NUMBER_OF_LONGITUDES'
+                error stop 'Object of class (RegularWorkspace): '&
+                    //'in initialize_regular_scalar_synthesis '&
+                    //'error in the specification of NUMBER_OF_LONGITUDES'
             case(3)
-                error stop 'TYPE (RegularWorkspace) in INITIALIZE_REGULAR_SCALAR_SYNTHESIS '&
-                    //'Error in the specification of extent for FORWARD_SCALAR'
+                error stop 'Object of class (RegularWorkspace): '&
+                    //'in initialize_regular_scalar_synthesis '&
+                    //'error in the specification of extent for forward_scalar'
             case(4)
-                error stop 'TYPE (RegularWorkspace) in INITIALIZE_REGULAR_SCALAR_SYNTHESIS '&
-                    //'Error in the specification of extent for LEGENDRE_WORKSPACE'
+                error stop 'Object of class (RegularWorkspace): '&
+                    //'in initialize_regular_scalar_synthesis '&
+                    //'error in the specification of extent for legendre_workspace'
             case default
-                error stop 'TYPE (RegularWorkspace) in INITIALIZE_REGULAR_SCALAR_SYNTHESIS '&
+                error stop 'Object of class (RegularWorkspace): '&
+                    //'in initialize_regular_scalar_synthesis '&
                     //'Undetermined error flag'
         end select
 
@@ -238,7 +261,7 @@ contains
 
 
 
-    subroutine initialize_regular_scalar_transform(this, nlat, nlon )
+    subroutine initialize_regular_scalar_transform(this, nlat, nlon)
         !
         ! Purpose:
         !
@@ -260,14 +283,14 @@ contains
         call this%initialize_regular_scalar_synthesis(nlat, nlon)
 
         ! Allocate memory for the (real) scalar harmonic transform
-        allocate(this%real_harmonic_coefficients(nlat, nlat) )
-        allocate(this%imaginary_harmonic_coefficients(nlat, nlat) )
+        allocate( this%real_harmonic_coefficients(nlat, nlat) )
+        allocate( this%imaginary_harmonic_coefficients(nlat, nlat) )
 
     end subroutine initialize_regular_scalar_transform
 
 
 
-    subroutine initialize_regular_vector_analysis(this, nlat, nlon )
+    subroutine initialize_regular_vector_analysis(this, nlat, nlon)
         !
         !< Purpose:
         !
@@ -297,12 +320,14 @@ contains
         lvhaes = this%get_lvhaes(nlat, nlon)
 
         ! Release memory ( if necessary )
-        if (allocated(this%forward_vector)) deallocate(this%forward_vector )
+        if (allocated(this%forward_vector)) then
+            deallocate( this%forward_vector )
+        end if
 
         ! Allocate memory
         allocate( work(lwork) )
         allocate( dwork(ldwork) )
-        allocate(this%forward_vector(lvhaes) )
+        allocate( this%forward_vector(lvhaes) )
 
         ! Compute workspace
         associate( &
@@ -321,22 +346,28 @@ contains
             case(0)
                 return
             case(1)
-                error stop 'TYPE (RegularWorkspace) in INITIALIZE_REGULAR_VECTOR_ANALYSIS'&
-                    //'Error in the specification of NUMBER_OF_LATITUDES'
+                error stop 'Object of class (RegularWorkspace): '&
+                    //'in initialize_regular_vector_analysis'&
+                    //'error in the specification of NUMBER_OF_LATITUDES'
             case(2)
-                error stop 'TYPE (RegularWorkspace) in INITIALIZE_REGULAR_VECTOR_ANALYSIS'&
-                    //' Error in the specification of NUMBER_OF_LONGITUDES'
+                error stop 'Object of class (RegularWorkspace): '&
+                    //'in initialize_regular_vector_analysis'&
+                    //'error in the specification of NUMBER_OF_LONGITUDES'
             case(3)
-                error stop 'TYPE (RegularWorkspace) in INITIALIZE_REGULAR_VECTOR_ANALYSIS'&
-                    //' Error in the specification of extent for FORWARD_VECTOR'
+                error stop 'Object of class (RegularWorkspace): '&
+                    //'in initialize_regular_vector_analysis'&
+                    //'error in the specification of extent for forward_vector'
             case(4)
-                error stop 'TYPE (RegularWorkspace) in INITIALIZE_REGULAR_VECTOR_ANALYSIS'&
-                    //' Error in the specification of extent for unsaved WORK'
+                error stop 'Object of class (RegularWorkspace): '&
+                    //'in initialize_regular_vector_analysis'&
+                    //'error in the specification of extent for unsaved work'
             case(5)
-                error stop 'TYPE (RegularWorkspace) in INITIALIZE_REGULAR_VECTOR_ANALYSIS'&
-                    //' Error in the specification of extent for unsaved DWORK'
+                error stop 'Object of class (RegularWorkspace): '&
+                    //'in initialize_regular_vector_analysis'&
+                    //'error in the specification of extent for unsaved dwork'
             case default
-                error stop 'TYPE (RegularWorkspace) in INITIALIZE_REGULAR_VECTOR_ANALYSIS'&
+                error stop 'Object of class (RegularWorkspace): '&
+                    //'in initialize_regular_vector_analysis'&
                     //' Undetermined error flag'
         end select
 
@@ -345,7 +376,7 @@ contains
 
 
 
-    subroutine initialize_regular_vector_synthesis(this, nlat, nlon )
+    subroutine initialize_regular_vector_synthesis(this, nlat, nlon)
         !
         ! Purpose:
         !
@@ -376,12 +407,14 @@ contains
         lvhses = this%get_lvhses(nlat, nlon)
 
         ! Release memory ( if necessary )
-        if (allocated(this%backward_vector)) deallocate(this%backward_vector )
+        if (allocated(this%backward_vector)) then
+            deallocate( this%backward_vector )
+        end if
 
         ! Allocate memory
         allocate( work(lwork) )
         allocate( dwork(ldwork) )
-        allocate(this%backward_vector(lvhses) )
+        allocate( this%backward_vector(lvhses) )
 
         ! Compute workspace
         associate( &
@@ -400,22 +433,28 @@ contains
             case(0)
                 return
             case(1)
-                error stop 'TYPE (RegularWorkspace) in INITIALIZE_REGULAR_VECTOR_SYNTHESIS'&
-                    //'Error in the specification of NUMBER_OF_LATITUDES'
+                error stop 'Object of class (RegularWorkspace): '&
+                    //'in initialize_regular_vector_synthesis '&
+                    //'error in the specification of NUMBER_OF_LATITUDES'
             case(2)
-                error stop 'TYPE (RegularWorkspace) in INITIALIZE_REGULAR_VECTOR_SYNTHESIS'&
-                    //' Error in the specification of NUMBER_OF_LONGITUDES'
+                error stop 'Object of class (RegularWorkspace): '&
+                    //'in initialize_regular_vector_synthesis '&
+                    //'error in the specification of NUMBER_OF_LONGITUDES'
             case(3)
-                error stop 'TYPE (RegularWorkspace) in INITIALIZE_REGULAR_VECTOR_SYNTHESIS'&
-                    //' Error in the specification of extent for BACKWARD_VECTOR'
+                error stop 'Object of class (RegularWorkspace): '&
+                    //'in initialize_regular_vector_synthesis '&
+                    //'error in the specification of extent for backward_vector'
             case(4)
-                error stop 'TYPE (RegularWorkspace) in INITIALIZE_REGULAR_VECTOR_SYNTHESIS'&
-                    //' Error in the specification of extent for unsaved WORK'
+                error stop 'Object of class (RegularWorkspace): '&
+                    //'in initialize_regular_vector_synthesis'&
+                    //'error in the specification of extent for unsaved work'
             case(5)
-                error stop 'TYPE (RegularWorkspace) in INITIALIZE_REGULAR_VECTOR_SYNTHESIS'&
-                    //' Error in the specification of extent for unsaved DWORK'
+                error stop 'Object of class (RegularWorkspace): '&
+                    //'in initialize_regular_vector_synthesis '&
+                    //'error in the specification of extent for unsaved dwork'
             case default
-                error stop 'TYPE (RegularWorkspace) in INITIALIZE_REGULAR_VECTOR_SYNTHESIS'&
+                error stop 'Object of class (RegularWorkspace): '&
+                    //'in initialize_regular_vector_synthesis'&
                     //' Undetermined error flag'
         end select
 
@@ -424,7 +463,7 @@ contains
 
 
 
-    subroutine initialize_regular_vector_transform(this, nlat, nlon )
+    subroutine initialize_regular_vector_transform(this, nlat, nlon)
         !
         ! Purpose:
         !
@@ -447,12 +486,13 @@ contains
         call this%initialize_regular_vector_synthesis(nlat, nlon)
 
         ! Allocate memory for the vector transform coefficients
-        allocate(this%real_polar_harmonic_coefficients(nlat, nlat) )
-        allocate(this%imaginary_polar_harmonic_coefficients(nlat, nlat) )
-        allocate(this%real_azimuthal_harmonic_coefficients(nlat, nlat) )
-        allocate(this%imaginary_azimuthal_harmonic_coefficients(nlat, nlat) )
+        allocate( this%real_polar_harmonic_coefficients(nlat, nlat) )
+        allocate( this%imaginary_polar_harmonic_coefficients(nlat, nlat) )
+        allocate( this%real_azimuthal_harmonic_coefficients(nlat, nlat) )
+        allocate( this%imaginary_azimuthal_harmonic_coefficients(nlat, nlat) )
 
     end subroutine initialize_regular_vector_transform
+
 
 
     pure function get_lshaes(nlat, nlon) result ( return_value )
@@ -617,6 +657,7 @@ contains
     end function get_lwork_unsaved
 
 
+
     subroutine finalize_regular_workspace(this)
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
@@ -627,6 +668,7 @@ contains
         call this%destroy_workspace()
 
     end subroutine finalize_regular_workspace
+
 
 
 end module type_RegularWorkspace

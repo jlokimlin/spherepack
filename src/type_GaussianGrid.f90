@@ -63,13 +63,13 @@ contains
         !
         !==> Set longitudinal grid: 0 <= phi <= 2*pi
         !
-        call this%get_equally_spaced_longitudes( nlon, this%longitudes )
+        call this%get_equally_spaced_longitudes(nlon, this%longitudes)
 
         !
         !==> Set latitudinal grid: 0 <= theta <= pi
         !
         call this%get_latitudes_and_gaussian_weights( &
-            nlat, this%latitudes, this%gaussian_weights )
+            nlat, this%latitudes, this%gaussian_weights)
 
         ! Set initialization flag
         this%initialized = .true.
@@ -139,8 +139,9 @@ contains
 
         ! Check input argument
         if ( nlat <= 0 ) then
-            error stop 'TYPE (Grid): '&
-                //'invalid argument NLAT in GET_EQUALLY_SPACED_LATITUDES'
+            error stop 'Object of class (GaussianGrid): '&
+                //'invalid argument NLAT <= 0 '&
+                //'in get_equally_spaced_latitudes'
         end if
 
         !
@@ -168,18 +169,19 @@ contains
             case(0)
                 return
             case(1)
-                error stop 'TYPE (GaussianGrid): '&
+                error stop 'Object of class (GaussianGrid): '&
                     //'fails to satisfy nlat >= 0 '&
-                    //'in GET_LATITUDES_AND_GAUSSIAN_WEIGHTS'
+                    //'in get_latitudes_and_gaussian_weights'
             case default
-                error stop 'TYPE (GaussianGrid): '&
-                    //'undetermined error in GET_LATITUDES_AND_GAUSSIAN_WEIGHTS'
+                error stop 'Object of class (GaussianGrid): '&
+                    //'undetermined error in '&
+                    //'get_latitudes_and_gaussian_weights'
         end select
 
     end subroutine get_latitudes_and_gaussian_weights
 
 
-    subroutine unformatted_print(this, header )
+    subroutine unformatted_print(this, header)
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
@@ -189,13 +191,12 @@ contains
         ! Dictionary: local variables
         !----------------------------------------------------------------------
         integer (ip)  :: file_unit
-        integer (ip)  :: record_length
         !----------------------------------------------------------------------
 
         ! Check if object is usable
         if (this%initialized .eqv. .false.) then
-            error stop 'TYPE(GaussianGrid): '&
-                //'uninitialized object in UNFORMATTED_PRINT'
+            error stop 'Uninitialized object of class (GaussianGrid): '&
+                //'in unformatted_print'
         end if
 
         ! Write latitudes and longitudes
@@ -203,12 +204,13 @@ contains
 
         ! Write gaussian weights
         associate( wts => this%gaussian_weights )
-            inquire( iolength=record_length ) wts
+
             open( newunit=file_unit, file=header//'gaussian_weights.dat', &
                 status='replace', form='unformatted', &
-                access='direct', recl=record_length )
-            write( file_unit, rec=1 ) wts
+                action='write', access='stream' )
+            write( file_unit ) wts
             close( file_unit )
+
         end associate
 
     end subroutine unformatted_print

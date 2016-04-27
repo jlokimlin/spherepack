@@ -143,118 +143,153 @@
 !                        the input parameters l and n.
 !
 subroutine lfp (init, n, m, l, cp, pb, w)
-dimension       cp(1)       , pb(1)    , w(1)
-!
-do 10 i=1, l
-pb(i) = 0.
-10 continue
-ma = abs(m)
-if (ma > n) return
-iw1 = l+l+12
-iw2 = iw1+3*(l+1)/2+15
-call lfp1(init, n, ma, l, cp, pb, w, w(iw1), w(iw2))
-return
+
+    use, intrinsic :: iso_fortran_env, only: &
+        wp => REAL64, &
+        ip => INT32
+
+    real (wp) :: cp(1), pb(1), w(1)
+
+
+    pb(1:l) = 0.0_wp
+
+    ma = abs(m)
+
+    if (ma > n) then
+        return
+    end if
+
+    iw1 = l+l+12
+    iw2 = iw1+3*(l+1)/2+15
+
+    call lfp1(init, n, ma, l, cp, pb, w, w(iw1), w(iw2))
+
 end subroutine lfp
+
 subroutine lfp1(init, n, m, l, cp, p, wsave1, wsave2, wsave3)
-dimension cp(*), p(*), wsave1(*), wsave2(*), wsave3(*)
-save lc, lq, ls
-if (init/=0) go to 41
-lc=(l+1)/2
-ls=lc-2
-lq=lc-1
-call sinti(ls, wsave1)
-call costi(lc, wsave2)
-call cosqi(lq, wsave3)
-return
-41 if (n< 0) then
-    goto 10
-else if (n == 0) then 
-    goto 10
-else 
-    goto 40
-end if
-10 if (m< 0) then
-    goto 20
-else if (m == 0) then 
-    goto 20
-else 
-    goto 40
-end if
-20 ssqrt2 = 1./sqrt(2.)
-do  30 i=1, l
-   p(i) = ssqrt2
-30 continue
-return
-40 ls2 = (l+1)/2
-lm1 = l-1
-np1 = n+1
-pi = acos(-1.0)
-dt = pi/lm1
-nmod = mod(n, 2)
-mmod = mod(m, 2)
-if (nmod< 0) then
-    goto 50
-else if (nmod == 0) then 
-    goto 50
-else 
-    goto 120
-end if
-50 if (mmod< 0) then
-    goto 60
-else if (mmod == 0) then 
-    goto 60
-else 
-    goto 90
-end if
-60 kdp = n/2+1
-do 70 i=1, kdp
-p(i)=.5*cp(i)
-70 continue
-p(lc)=p(lc)+p(lc)
-call cost(lc, p, wsave2)
-do 80 i=1, lc
-lmi=l-i
-p(lmi+1)=p(i)
-80 continue
-go to 190
-90 kdp=n/2
-do 100 i=1, kdp
-p(i+1)=.5*cp(i)
-100 continue
-p(ls+2)=0.
-call sint(ls, p(2), wsave1)
-do 110 i=1, ls
-lmi=l-i
-p(lmi)=-p(i+1)
-110 continue
-p(l)=0.
-go to 190
+
+    use, intrinsic :: iso_fortran_env, only: &
+        wp => REAL64, &
+        ip => INT32
+
+    real (wp)          :: cp(*), p(*)
+    real (wp)          :: wsave1(*), wsave2(*), wsave3(*)
+    integer (ip), save :: lc, lq, ls
+
+    if (.not.(init/=0)) then
+
+        lc=(l+1)/2
+        ls=lc-2
+        lq=lc-1
+
+        call sinti(ls, wsave1)
+        call costi(lc, wsave2)
+        call cosqi(lq, wsave3)
+        return
+    end if
+
+    if (n <= 0) then
+        goto 10
+    else
+        goto 40
+    end if
+
+10  if (m <= 0) then
+        goto 20
+    else
+        goto 40
+    end if
+
+20  ssqrt2 = 1.0_wp/sqrt(2.0_wp)
+
+    do i=1, l
+        p(i) = ssqrt2
+    end do
+
+    return
+
+40  ls2 = (l+1)/2
+    lm1 = l-1
+    np1 = n+1
+    pi = acos(-1.0_wp)
+    dt = pi/lm1
+    nmod = mod(n, 2)
+    mmod = mod(m, 2)
+
+    if (nmod <= 0) then
+        goto 50
+    else
+        goto 120
+    end if
+
+50  if (mmod <= 0) then
+        goto 60
+    else
+        goto 90
+    end if
+60  kdp = n/2+1
+    do i=1, kdp
+        p(i)=0.5_wp*cp(i)
+    end do
+
+    p(lc)=p(lc)+p(lc)
+
+    call cost(lc, p, wsave2)
+
+    do i=1, lc
+        lmi=l-i
+        p(lmi+1)=p(i)
+    end do
+    return
+
+90  kdp=n/2
+    do i=1, kdp
+        p(i+1)=0.5_wp*cp(i)
+    end do
+
+    p(ls+2)=0.0_wp
+
+    call sint(ls, p(2), wsave1)
+    do i=1, ls
+        lmi=l-i
+        p(lmi)=-p(i+1)
+    end do
+    p(l)=0.0_wp
+    return
+
 120 kdp=(n+1)/2
-    if (mmod< 0) then
-        goto 140
-    else if (mmod == 0) then 
+
+    if (mmod <= 0) then
         goto 140
     else 
         goto 160
     end if
-140 do 130 i=1, kdp
-p(i)=.25*cp(i)
-130 continue
-call cosqb(lq, p, wsave3)
-do 150 i=1, lq
-lmi=l-i
-p(lmi+1)=-p(i)
-150 continue
-go to 190
-160 do 180 i=1, kdp
-p(i+1)=.25*cp(i)
-180 continue
-call sinqb(lq, p(2), wsave3)
-do 170 i=1, lq
-lmi=l-i
-p(lmi)=p(i+1)
-170 continue
-p(l)=0.
-190 return
+
+    140 do i=1, kdp
+        p(i)=0.25_wp*cp(i)
+    end do
+
+    call cosqb(lq, p, wsave3)
+
+    do i=1, lq
+        lmi=l-i
+        p(lmi+1)=-p(i)
+    end do
+
+    return
+
+    160 do i=1, kdp
+        p(i+1)=0.25_wp*cp(i)
+    end do
+
+    call sinqb(lq, p(2), wsave3)
+
+    do i=1, lq
+        lmi=l-i
+        p(lmi)=p(i+1)
+    end do
+
+    p(l)=0.0_wp
+
 end subroutine lfp1
 

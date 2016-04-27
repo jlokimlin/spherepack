@@ -138,8 +138,7 @@ module type_Sphere
             !----------------------------------------------------------------------
         end subroutine scalar_synthesis
 
-        subroutine vector_analysis(this, &
-            polar_component, azimuthal_component)
+        subroutine vector_analysis(this, polar_component, azimuthal_component)
             import :: Sphere, wp
             !----------------------------------------------------------------------
             ! Dictionary: calling arguments
@@ -163,9 +162,7 @@ module type_Sphere
     end interface
 
 
-
 contains
-
 
 
     subroutine create_sphere(this, nlat, nlon, ntrunc, isym, itype, isynt, rsphere)
@@ -363,7 +360,7 @@ contains
         ! Coefficients are ordered so that first (nm=1) is m=0, n=0, second is m=0, n=1, 
         ! nm=mtrunc is m=0, n=mtrunc, nm=mtrunc+1 is m=1, n=1, etc.
         !
-        ! In modern Fortran syntax, values of m (degree) and n (order) as a function
+        ! In Fortran syntax, values of m (degree) and n (order) as a function
         ! of the index nm are:
         !
         ! integer (ip), dimension ((mtrunc+1)*(mtrunc+2)/2) :: indxm, indxn
@@ -386,8 +383,8 @@ contains
 
         ! Check if object is usable
         if (this%initialized .eqv. .false.) then
-            error stop 'TYPE(Sphere): uninitialized object'&
-                //' in PERFORM_COMPLEX_ANALYSIS'
+            error stop 'Uninitialized object of class (Sphere): '&
+                //' in perform_complex_analysis'
         end if
 
         !
@@ -433,8 +430,8 @@ contains
 
         ! Check if object is usable
         if (this%initialized .eqv. .false.) then
-            error stop 'TYPE(Sphere): uninitialized object'&
-                //' in PERFORM_COMPLEX_SYNTHESIS'
+            error stop 'Uninitialized object of class (Sphere): '&
+                //' in perform_complex_synthesis'
         end if
 
         !
@@ -485,8 +482,8 @@ contains
 
         ! Check if object is usable
         if (this%initialized .eqv. .false.) then
-            error stop 'TYPE(Sphere): uninitialized object'&
-                //' in ANALYZE_INTO_COMPLEX_SPECTRAL_COEFFICIENTS'
+            error stop 'Uninitialized object of class (Sphere): '&
+                //' in analyze_into_complex_spectral_coefficients'
         end if
 
         ! analyze the scalar function into (complex) harmonic coefficients
@@ -514,8 +511,8 @@ contains
 
         ! Check if object is usable
         if (this%initialized .eqv. .false.) then
-            error stop 'TYPE(Sphere): uninitialized object'&
-                //' in SYNTHESIZE_FROM_COMPLEX_SPECTRAL_COEFFICIENTS'
+            error stop 'Uninitialized object of class (Sphere): '&
+                //' in synthesize_from_complex_spectral_coefficients'
         end if
 
         ! Convert complex coefficients to real version
@@ -566,8 +563,8 @@ contains
 
         ! Check if object is usable
         if (this%initialized .eqv. .false.) then
-            error stop 'TYPE(Sphere): '&
-                //'uninitialized object in PERFORM_VECTOR_ANALYSIS'
+            error stop 'Uninitialized object of class (Sphere): '&
+                //'in perform_vector_analysis'
         end if
 
         ! Allocate memory
@@ -610,8 +607,8 @@ contains
 
         ! Check if object is usable
         if (this%initialized .eqv. .false.) then
-            error stop 'TYPE(Sphere): uninitialized object'&
-                //' in GET_SCALAR_LAPLACIAN'
+            error stop 'Uninitialized object of class (Sphere): '&
+                //' in get_scalar_laplacian'
         end if
 
         ! Set (real) scalar spherica harmonic coefficients
@@ -643,8 +640,8 @@ contains
 
         ! Check if object is usable
         if (this%initialized .eqv. .false.) then
-            error stop 'TYPE(Sphere): uninitialized object'&
-                //' in INVERT_SCALAR_LAPLACIAN'
+            error stop 'Uninitialized object of class (Sphere): '&
+                //' in invert_scalar_laplacian'
         end if
 
         ! Set (real) scalar spherica harmonic coefficients
@@ -678,8 +675,8 @@ contains
 
         ! Check if object is usable
         if (this%initialized .eqv. .false.) then
-            error stop 'TYPE(Sphere): uninitialized object'&
-                //' in COMPUTE_VECTOR_LAPLACIAN_COEFFICIENTS'
+            error stop 'Uninitialized object of class (Sphere): '&
+                //' in compute_vector_laplacian_coefficients'
         end if
 
         ! compute vector laplacian
@@ -744,8 +741,8 @@ contains
 
         ! Check if object is usable
         if (this%initialized .eqv. .false.) then
-            error stop 'TYPE(Sphere): uninitialized object'&
-                //' in GET_VECTOR_LAPLACIAN_FROM_SPHERICAL_COMPONENTS'
+            error stop 'Uninitialized object of class (Sphere): '&
+                //' in get_vector_laplacian_from_spherical_components'
         end if
 
         ! Set vector spherical harmonic coefficients
@@ -784,8 +781,8 @@ contains
 
         ! Check if object is usable
         if (this%initialized .eqv. .false.) then
-            error stop 'TYPE(Sphere): uninitialized object'&
-                //' in GET_VECTOR_LAPLACIAN_FROM_VECTOR_FIELD'
+            error stop 'Uninitialized object of class (Sphere): '&
+                //' in get_vector_laplacian_from_vector_field'
         end if
 
         ! Compute vector laplacian coefficients
@@ -821,8 +818,8 @@ contains
 
         ! Check if object is usable
         if (this%initialized .eqv. .false.) then
-            error stop 'TYPE(Sphere): uninitialized object'&
-                //' in INVERT_VECTOR_LAPLACIAN'
+            error stop 'Uninitialized object of class (Sphere): '&
+                //' in invert_vector_laplacian'
         end if
 
         ! Set vector spherical harmonic coefficients
@@ -904,8 +901,8 @@ contains
 
         ! Check if object is usable
         if (this%initialized .eqv. .false.) then
-            error stop 'TYPE(Sphere): uninitialized object'&
-                //' in INVERT_HELMHOLTZ'
+            error stop 'Uninitialized object of class (Sphere): '&
+                //' in invert_helmholtz'
         end if
 
         !
@@ -960,7 +957,7 @@ contains
 
 
     subroutine get_gradient(this, scalar_function, &
-        polar_gradient_component, azimuthal_gradient_component )
+        polar_gradient_component, azimuthal_gradient_component)
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
@@ -976,8 +973,8 @@ contains
 
         ! Check if object is usable
         if (this%initialized .eqv. .false.) then
-            error stop 'TYPE(Sphere): uninitialized object'&
-                //' in GET_GRADIENT'
+            error stop 'Uninitialized object of class (Sphere): '&
+                //' in get_gradient'
         end if
 
         ! compute the (real) spherical harmonic coefficients
@@ -1032,8 +1029,8 @@ contains
 
         ! Check if object is usable
         if (this%initialized .eqv. .false.) then
-            error stop 'TYPE(Sphere): uninitialized object'&
-                //' in INVERT_GRADIENT_FROM_SPHERICAL_COMPONENTS'
+            error stop 'Uninitialized object of class (Sphere): '&
+                //' in invert_gradient_from_spherical_components'
         end if
 
         ! Set vector spherical harmonic coefficients
@@ -1085,7 +1082,7 @@ contains
             !
             !==> Perform scalar synthesis
             !
-            call this%perform_scalar_synthesis( f )
+            call this%perform_scalar_synthesis(f)
         end associate
 
     end subroutine invert_gradient_from_spherical_components
@@ -1093,7 +1090,7 @@ contains
 
 
     subroutine get_vorticity_from_spherical_components(this, &
-        polar_component, azimuthal_component, vorticity )
+        polar_component, azimuthal_component, vorticity)
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
@@ -1109,8 +1106,8 @@ contains
 
         ! Check if object is usable
         if (this%initialized .eqv. .false.) then
-            error stop 'TYPE(Sphere): uninitialized object'&
-                //' in GET_VORTICITY_FROM_SPHERICAL_COMPONENTS'
+            error stop 'Uninitialized object of class (Sphere): '&
+                //' in get_vorticity_from_spherical_components'
         end if
 
         associate( &
@@ -1159,7 +1156,7 @@ contains
 
 
 
-    subroutine get_vorticity_from_vector_field(this, vector_field, vorticity )
+    subroutine get_vorticity_from_vector_field(this, vector_field, vorticity)
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
@@ -1175,8 +1172,8 @@ contains
 
         ! Check if object is usable
         if (this%initialized .eqv. .false.) then
-            error stop 'TYPE(Sphere): '&
-                //'uninitialized object in GET_VORTICITY_FROM_VECTOR_FIELD'
+            error stop 'Uninitialized object of class (Sphere): '&
+                //'in get_vorticity_from_vector_field'
         end if
 
         !
@@ -1236,8 +1233,8 @@ contains
 
         ! Check if object is usable
         if (this%initialized .eqv. .false.) then
-            error stop 'TYPE(Sphere): uninitialized object'&
-                //' in INVERT_VORTICITY'
+            error stop 'Uninitialized object of class (Sphere): '&
+                //' in invert_vorticity'
         end if
 
         !
@@ -1318,6 +1315,7 @@ contains
     end subroutine invert_vorticity
 
 
+
     subroutine get_divergence_from_vector_field(this, vector_field, divergence)
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
@@ -1334,8 +1332,8 @@ contains
 
         ! Check if object is usable
         if (this%initialized .eqv. .false.) then
-            error stop 'TYPE(Sphere): '&
-                //'uninitialized object in GET_DIVERGENCE_FROM_VECTOR_FIELD'
+            error stop 'Uninitialized object of class (Sphere): '&
+                //'in get_divergence_from_vector_field'
         end if
 
         !
@@ -1395,9 +1393,10 @@ contains
 
         ! Check if object is usable
         if (this%initialized .eqv. .false.) then
-            error stop 'TYPE(Sphere): uninitialized object'&
-                //' in GET_DIVERGENCE_FROM_SPHERICAL_COMPONENTS'
+            error stop 'Uninitialized object of class (Sphere): '&
+                //' in get_divergence_from_spherical_components'
         end if
+
         associate( &
             v => polar_component, &
             w => azimuthal_component, &
@@ -1450,9 +1449,9 @@ contains
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
         class (Sphere), intent (in out) :: this
-        real (wp),      intent (in)    :: source(:,:)
-        real (wp),      intent (out)   :: polar_solution(:,:)
-        real (wp),      intent (out)   :: azimuthal_solution(:,:)
+        real (wp),      intent (in)     :: source(:,:)
+        real (wp),      intent (out)    :: polar_solution(:,:)
+        real (wp),      intent (out)    :: azimuthal_solution(:,:)
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
@@ -1461,13 +1460,15 @@ contains
 
         ! Check if object is usable
         if (this%initialized .eqv. .false.) then
-            error stop 'TYPE(Sphere): uninitialized object'&
-                //' in INVERT_DIVERGENCE'
+            error stop 'Uninitialized object of class (Sphere): '&
+                //' in invert_divergence'
         end if
 
         ! Calculate the (real) scalar harmonic coefficients
         associate( div => source )
+
             call this%perform_scalar_analysis( div )
+
         end associate
 
         ! Invert gradient
@@ -1529,8 +1530,8 @@ contains
 
         ! Check if object is usable
         if (this%initialized .eqv. .false.) then
-            error stop 'TYPE(Sphere): uninitialized object'&
-                //' in GET_VORTICITY_AND_DIVERGENCE_FROM_VELOCITIES'
+            error stop 'Uninitialized object of class (Sphere): '&
+                //' in get_vorticity_and_divergence_from_velocities'
         end if
 
         associate( &
@@ -1572,8 +1573,8 @@ contains
 
         ! Check if object is usable
         if (this%initialized .eqv. .false.) then
-            error stop 'TYPE(Sphere): uninitialized object'&
-                //' in GET_VELOCITIES_FROM_VORTICITY_AND_DIVERGENCE_COEFFICIENTS'
+            error stop 'Uninitialized object of class (Sphere): '&
+                //' in get_velocities_from_vorticity_and_divergence_coefficients'
         end if
 
         ! Associate various quantities
@@ -1698,8 +1699,8 @@ contains
 
         ! Check if object is usable
         if (this%initialized .eqv. .false.) then
-            error stop 'TYPE(Sphere): uninitialized object'&
-                //' in GET_VELOCITIES_FROM_VORTICITY_AND_DIVERGENCE'
+            error stop 'Uninitialized object of class (Sphere): '&
+                //' in get_velocities_from_vorticity_and_divergence'
         end if
 
         !
@@ -1752,8 +1753,8 @@ contains
 
         ! Check if object is usable
         if (this%initialized .eqv. .false.) then
-            error stop 'TYPE(Sphere): uninitialized object'&
-                //' in COMPUTE_ANGULAR_MOMENTUM'
+            error stop 'Uninitialized object of class (Sphere): '&
+                //' in compute_angular_momentum'
         end if
 
         ! Allocate memory
@@ -1891,46 +1892,46 @@ contains
 
 
 
-!    subroutine get_legendre_function(lat, ntrunc, legfunc)
-!        !----------------------------------------------------------------------
-!        ! Dictionary: calling arguments
-!        !----------------------------------------------------------------------
-!        real (wp),              intent (in)     :: lat
-!        integer (ip),           intent (in)     :: ntrunc
-!        real (wp), allocatable, intent (out)    :: legfunc(:)
-!        !----------------------------------------------------------------------
-!        ! Dictionary: calling arguments
-!        !----------------------------------------------------------------------
-!        real (wp), parameter   :: PI = acos(-1.0_wp)
-!        real (wp), allocatable :: cp(:)
-!        integer (wp)           :: i, n, m, nm !! Counters
-!        !----------------------------------------------------------------------
-!
-!        !
-!        !==> Allocate memory
-!        !
-!        allocate( legfunc((ntrunc+1)*(ntrunc+2)/2) )
-!        allocate( cp((ntrunc/2)+1) )
-!
-!        !
-!        !==> Compute normalized associate Legendre function at theta
-!        !
-!        associate( theta => PI/2 - (PI/180)*lat )
-!            do m=1,ntrunc+1
-!                do n=m,ntrunc+1
-!                    nm = sum([(i, i=ntrunc+1, ntrunc-m+3, -1)])+n-m+1
-!                    call alfk(n-1, m-1, cp)
-!                    call lfpt(n-1, m-1, theta, cp, legfunc(nm))
-!                end do
-!            end do
-!        end associate
-!
-!        !
-!        !==> Release memory
-!        !
-!        deallocate( cp )
-!
-!    end subroutine get_legendre_function
+    !    subroutine get_legendre_function(lat, ntrunc, legfunc)
+    !        !----------------------------------------------------------------------
+    !        ! Dictionary: calling arguments
+    !        !----------------------------------------------------------------------
+    !        real (wp),              intent (in)     :: lat
+    !        integer (ip),           intent (in)     :: ntrunc
+    !        real (wp), allocatable, intent (out)    :: legfunc(:)
+    !        !----------------------------------------------------------------------
+    !        ! Dictionary: calling arguments
+    !        !----------------------------------------------------------------------
+    !        real (wp), parameter   :: PI = acos(-1.0_wp)
+    !        real (wp), allocatable :: cp(:)
+    !        integer (wp)           :: i, n, m, nm !! Counters
+    !        !----------------------------------------------------------------------
+    !
+    !        !
+    !        !==> Allocate memory
+    !        !
+    !        allocate( legfunc((ntrunc+1)*(ntrunc+2)/2) )
+    !        allocate( cp((ntrunc/2)+1) )
+    !
+    !        !
+    !        !==> Compute normalized associate Legendre function at theta
+    !        !
+    !        associate( theta => PI/2 - (PI/180)*lat )
+    !            do m=1,ntrunc+1
+    !                do n=m,ntrunc+1
+    !                    nm = sum([(i, i=ntrunc+1, ntrunc-m+3, -1)])+n-m+1
+    !                    call alfk(n-1, m-1, cp)
+    !                    call lfpt(n-1, m-1, theta, cp, legfunc(nm))
+    !                end do
+    !            end do
+    !        end associate
+    !
+    !        !
+    !        !==> Release memory
+    !        !
+    !        deallocate( cp )
+    !
+    !    end subroutine get_legendre_function
 
 
 
@@ -1943,20 +1944,17 @@ contains
         !----------------------------------------------------------------------
 
         select case (isym)
-            case (2)
-                this%SCALAR_SYMMETRIES = isym
-            case (1)
-                this%SCALAR_SYMMETRIES = isym
-            case (0)
+            case (0:2)
                 this%SCALAR_SYMMETRIES = isym
             case default
-                error stop 'TYPE (Sphere) in GET_SCALAR_SYMMETRIES'&
+                error stop 'Object of class (Sphere) in get_scalar_symmetries: '&
                     //'Optional argument isym must be either '&
-                    //' 0, 1, or 2 (default isym = 0)'
+                    //'0, 1, or 2 (default isym = 0)'
         end select
 
     end subroutine get_scalar_symmetries
     
+
 
     subroutine get_vector_symmetries(this, itype)
         !----------------------------------------------------------------------
@@ -1967,28 +1965,12 @@ contains
         !----------------------------------------------------------------------
 
         select case (itype)
-            case (8)
-                this%VECTOR_SYMMETRIES = itype
-            case (7)
-                this%VECTOR_SYMMETRIES = itype
-            case (6)
-                this%VECTOR_SYMMETRIES = itype
-            case (5)
-                this%VECTOR_SYMMETRIES = itype
-            case (4)
-                this%VECTOR_SYMMETRIES = itype
-            case (3)
-                this%VECTOR_SYMMETRIES = itype
-            case (2)
-                this%VECTOR_SYMMETRIES = itype
-            case (1)
-                this%VECTOR_SYMMETRIES = itype
-            case (0)
+            case (0:8)
                 this%VECTOR_SYMMETRIES = itype
             case default
-                error stop 'TYPE (Sphere) in GET_VECTOR_SYMMETRIES'&
+                error stop 'Object of class (Sphere) in get_vector_symmetries: '&
                     //'Optional argument itype must be either '&
-                    //' 0, 1, 2, ..., 8 (default itype = 0)'
+                    //'0, 1, 2, ..., 8 (default itype = 0)'
         end select
 
     end subroutine get_vector_symmetries

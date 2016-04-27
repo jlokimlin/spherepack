@@ -44,7 +44,7 @@ module type_GaussianWorkspace
 contains
 
 
-    subroutine create_gaussian_workspace(this, nlat, nlon )
+    subroutine create_gaussian_workspace(this, nlat, nlon)
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
@@ -75,7 +75,9 @@ contains
         !----------------------------------------------------------------------
 
         ! Check flag
-        if (this%initialized .eqv. .false.) return
+        if (this%initialized .eqv. .false.) then
+            return
+        end if
 
         ! Release memory from parent type
         call this%destroy_workspace()
@@ -86,7 +88,7 @@ contains
     end subroutine destroy_gaussian_workspace
 
 
-    subroutine initialize_gaussian_scalar_analysis(this, nlat, nlon )
+    subroutine initialize_gaussian_scalar_analysis(this, nlat, nlon)
         !
         ! Purpose:
         !
@@ -111,17 +113,24 @@ contains
         !----------------------------------------------------------------------
 
         ! Compute dimensions of various workspace arrays
-        lwork = max(this%get_lwork(nlat, nlon), 5*(nlat**2)*nlon )
+        lwork = max(this%get_lwork(nlat, nlon), 5*(nlat**2)*nlon)
         ldwork = max(this%get_ldwork(nlat), 4*(nlat**2) )
         lshags = this%get_lshags(nlat, nlon)
 
         ! Release memory ( if necessary )
-        if (allocated(this%legendre_workspace)) deallocate(this%legendre_workspace )
-        if (allocated(this%forward_scalar)) deallocate(this%forward_scalar )
+        if (allocated(this%legendre_workspace)) then
+            deallocate(this%legendre_workspace )
+        end if
 
-        ! Allocate memory
-        allocate(this%legendre_workspace(lwork) )
-        allocate(this%forward_scalar(lshags) )
+        if (allocated(this%forward_scalar)) then
+            deallocate(this%forward_scalar )
+        end if
+
+        !
+        !==> Allocate memory
+        !
+        allocate( this%legendre_workspace(lwork) )
+        allocate( this%forward_scalar(lshags) )
         allocate( dwork(lwork) )
 
         ! Compute workspace arrays
@@ -130,7 +139,7 @@ contains
             work => this%legendre_workspace, &
             ierror => error_flag &
             )
-            call shagsi( nlat, nlon, wshags, lshags, work, lwork, dwork, ldwork, ierror )
+            call shagsi( nlat, nlon, wshags, lshags, work, lwork, dwork, ldwork, ierror)
         end associate
 
         ! Release memory
@@ -142,25 +151,33 @@ contains
             case(0)
                 return
             case(1)
-                error stop 'TYPE (GaussianWorkspace) in INITIALIZE_GAUSSIAN_SCALAR_ANALYSIS '&
-                    //'Error in the specification of NUMBER_OF_LATITUDES'
+                error stop 'Object of class (GaussianWorkspace) '&
+                    //'in initialize_gaussian_scalar_analysis '&
+                    //'error in the specification of NUMBER_OF_LATITUDES'
             case(2)
-                error stop 'TYPE (GaussianWorkspace) in INITIALIZE_GAUSSIAN_SCALAR_ANALYSIS '&
-                    //'Error in the specification of NUMBER_OF_LONGITUDES'
+                error stop 'Object of class (GaussianWorkspace) '&
+                    //'in initialize_gaussian_scalar_analysis '&
+                    //'error in the specification of NUMBER_OF_LONGITUDES'
             case(3)
-                error stop 'TYPE (GaussianWorkspace) in INITIALIZE_GAUSSIAN_SCALAR_ANALYSIS '&
-                    //'Error in the specification of extent for FORWARD_SCALAR'
+                error stop 'Object of class (GaussianWorkspace) '&
+                    //'in initialize_gaussian_scalar_analysis '&
+                    //'error in the specification of extent for FORWARD_SCALAR'
             case(4)
-                error stop 'TYPE (GaussianWorkspace) in INITIALIZE_GAUSSIAN_SCALAR_ANALYSIS '&
-                    //'Error in the specification of extent for LEGENDRE_WORKSPACE'
+                error stop 'Object of class (GaussianWorkspace) '&
+                    //'in initialize_gaussian_scalar_analysis '&
+                    //'error in the specification of extent for legendre_workspace'
             case(5)
-                error stop 'TYPE (GaussianWorkspace) in INITIALIZE_GAUSSIAN_SCALAR_ANALYSIS '&
-                    //'Error in the specification of extent for DWORK'
+                error stop 'Object of class (GaussianWorkspace) '&
+                    //'in initialize_gaussian_scalar_analysis '&
+                    //'error in the specification of extent for dwork'
             case(6)
-                error stop 'TYPE (GaussianWorkspace) in INITIALIZE_GAUSSIAN_SCALAR_ANALYSIS '&
-                    //'Error in call to GAQD to compute gaussian points: failure in eigenvalue routine)'
+                error stop 'Object of class (GaussianWorkspace) '&
+                    //'in initialize_gaussian_scalar_analysis '&
+                    //'error in call to gaqd to compute gaussian points '&
+                    //'due to failure in eigenvalue routine'
             case default
-                error stop 'TYPE (GaussianWorkspace) in INITIALIZE_GAUSSIAN_SCALAR_ANALYSIS '&
+                error stop 'Object of class (GaussianWorkspace) '&
+                    //'in initialize_gaussian_scalar_analysis '&
                     //'Undetermined error flag'
         end select
 
@@ -168,7 +185,7 @@ contains
 
 
 
-    subroutine initialize_gaussian_scalar_synthesis(this, nlat, nlon )
+    subroutine initialize_gaussian_scalar_synthesis(this, nlat, nlon)
         !
         ! Purpose:
         !
@@ -193,18 +210,25 @@ contains
         !----------------------------------------------------------------------
 
         ! Compute dimensions of various workspace arrays
-        lwork = max(this%get_lwork(nlat, nlon), 5*(nlat**2)*nlon )
+        lwork = max(this%get_lwork(nlat, nlon), 5*(nlat**2)*nlon)
         ldwork = max(this%get_ldwork(nlat), 4*(nlat**2) )
         lshsgs = this%get_lshsgs(nlat, nlon)
 
         ! Release memory ( if necessary )
-        if (allocated(this%legendre_workspace)) deallocate(this%legendre_workspace )
-        if (allocated(this%backward_scalar)) deallocate(this%backward_scalar )
+        if (allocated(this%legendre_workspace)) then
+            deallocate(this%legendre_workspace )
+        end if
 
-        ! Allocate memory
-        allocate(this%legendre_workspace(lwork) )
+        if (allocated(this%backward_scalar)) then
+            deallocate(this%backward_scalar )
+        end if
+
+        !
+        !==> Allocate memory
+        !
+        allocate( this%legendre_workspace(lwork) )
         allocate( dwork(ldwork) )
-        allocate(this%backward_scalar(lshsgs) )
+        allocate( this%backward_scalar(lshsgs) )
 
         ! Compute workspace
         associate( &
@@ -220,32 +244,39 @@ contains
             case(0)
                 return
             case(1)
-                error stop 'TYPE (GaussianWorkspace) in INITIALIZE_GAUSSIAN_SCALAR_SYNTHESIS '&
-                    //'Error in the specification of NUMBER_OF_LATITUDES'
+                error stop 'Object of class (GaussianWorkspace) '&
+                    //'in initialize_gaussian_scalar_synthesis '&
+                    //'error in the specification of NUMBER_OF_LATITUDES'
             case(2)
-                error stop 'TYPE (GaussianWorkspace) in INITIALIZE_GAUSSIAN_SCALAR_SYNTHESIS '&
-                    //'Error in the specification of NUMBER_OF_LONGITUDES'
+                error stop 'Object of class (GaussianWorkspace) '&
+                    //'in initialize_gaussian_scalar_synthesis '&
+                    //'error in the specification of NUMBER_OF_LONGITUDES'
             case(3)
-                error stop 'TYPE (GaussianWorkspace) in INITIALIZE_GAUSSIAN_SCALAR_SYNTHESIS '&
-                    //'Error in the specification of extent for BACKWARD_SCALAR'
+                error stop 'Object of class (GaussianWorkspace) '&
+                    //'in initialize_gaussian_scalar_synthesis '&
+                    //'error in the specification of extent for backward_scalar'
             case(4)
-                error stop 'TYPE (GaussianWorkspace) in INITIALIZE_GAUSSIAN_SCALAR_SYNTHESIS '&
-                    //'Error in the specification of extent for LEGENDRE_WORKSPACE'
+                error stop 'Object of class (GaussianWorkspace) '&
+                    //'in initialize_gaussian_scalar_synthesis '&
+                    //'error in the specification of extent for legendre_workspace'
             case(5)
-                error stop 'TYPE (GaussianWorkspace) in INITIALIZE_GAUSSIAN_SCALAR_SYNTHESIS '&
-                    //'Error in the specification of extent for DWORK'
+                error stop 'Object of class (GaussianWorkspace) '&
+                    //'in initialize_gaussian_scalar_synthesis '&
+                    //'error in the specification of extent for dwork'
             case(6)
-                error stop 'TYPE (GaussianWorkspace) in INITIALIZE_GAUSSIAN_SCALAR_SYNTHESIS '&
-                    //'Error in call to GAQD: due to failure in eigenvalue routine'
+                error stop 'Object of class (GaussianWorkspace) '&
+                    //'in initialize_gaussian_scalar_synthesis '&
+                    //'error in call to gaqd due to failure in eigenvalue routine'
             case default
-                error stop 'TYPE (GaussianWorkspace) in INITIALIZE_GAUSSIAN_SCALAR_SYNTHESIS '&
+                error stop 'Object of class (GaussianWorkspace) '&
+                    //'in initialize_gaussian_scalar_synthesis '&
                     //'Undetermined error flag'
         end select
 
     end subroutine initialize_gaussian_scalar_synthesis
 
 
-    subroutine initialize_gaussian_scalar_transform(this, nlat, nlon )
+    subroutine initialize_gaussian_scalar_transform(this, nlat, nlon)
         !
         ! Purpose:
         !
@@ -266,14 +297,16 @@ contains
         ! Set up scalar synthesis
         call this%initialize_gaussian_scalar_synthesis(nlat, nlon)
 
-        ! Allocate memory
-        allocate(this%real_harmonic_coefficients(nlat, nlat) )
-        allocate(this%imaginary_harmonic_coefficients(nlat, nlat) )
+        !
+        !==> Allocate memory
+        !
+        allocate( this%real_harmonic_coefficients(nlat, nlat) )
+        allocate( this%imaginary_harmonic_coefficients(nlat, nlat) )
 
     end subroutine initialize_gaussian_scalar_transform
 
 
-    subroutine initialize_gaussian_vector_analysis(this, nlat, nlon )
+    subroutine initialize_gaussian_vector_analysis(this, nlat, nlon)
         !
         ! Purpose:
         !
@@ -302,7 +335,9 @@ contains
         lvhags = this%get_lvhags(nlat, nlon)
 
         ! Release memory ( if necessary )
-        if (allocated(this%forward_vector)) deallocate(this%forward_vector )
+        if (allocated(this%forward_vector)) then
+            deallocate( this%forward_vector )
+        end if
 
         ! Allocate memory
         allocate( dwork(ldwork) )
@@ -324,26 +359,32 @@ contains
             case(0)
                 return
             case(1)
-                error stop 'TYPE (GaussianWorkspace) in INITIALIZE_GAUSSIAN_VECTOR_ANALYSIS'&
-                    //'Error in the specification of NUMBER_OF_LATITUDES'
+                error stop 'Object of class (GaussianWorkspace) '&
+                    //'in initialize_gaussian_vector_analysis'&
+                    //'error in the specification of NUMBER_OF_LATITUDES'
             case(2)
-                error stop 'TYPE (GaussianWorkspace) in INITIALIZE_GAUSSIAN_VECTOR_ANALYSIS'&
-                    //'Error in the specification of NUMBER_OF_LONGITUDES'
+                error stop 'Object of class (GaussianWorkspace) '&
+                    //'in initialize_gaussian_vector_analysis'&
+                    //'error in the specification of NUMBER_OF_LONGITUDES'
             case(3)
-                error stop 'TYPE (GaussianWorkspace) in INITIALIZE_GAUSSIAN_VECTOR_ANALYSIS'&
-                    //'Error in the specification of extent for FORWARD_VECTOR'
+                error stop 'Object of class (GaussianWorkspace) '&
+                    //'in initialize_gaussian_vector_analysis'&
+                    //'error in the specification of extent for FORWARD_VECTOR'
             case(4)
-                error stop 'TYPE (GaussianWorkspace) in INITIALIZE_GAUSSIAN_VECTOR_ANALYSIS'&
-                    //'Error in the specification of extent for DWORK'
+                error stop 'Object of class (GaussianWorkspace) '&
+                    //'in initialize_gaussian_vector_analysis'&
+                    //'error in the specification of extent for dwork'
             case default
-                error stop 'TYPE (GaussianWorkspace) in INITIALIZE_GAUSSIAN_VECTOR_ANALYSIS'&
+                error stop 'Object of class (GaussianWorkspace) '&
+                    //'in initialize_gaussian_vector_analysis'&
                     //'Undetermined error flag'
         end select
 
     end subroutine initialize_gaussian_vector_analysis
 
 
-    subroutine initialize_gaussian_vector_synthesis(this, nlat, nlon )
+
+    subroutine initialize_gaussian_vector_synthesis(this, nlat, nlon)
         !
         !< Purpose:
         !
@@ -372,11 +413,15 @@ contains
         lvhsgs = max(this%get_lvhsgs(nlat, nlon), 5*(nlat**2)*nlon)
 
         ! Release memory ( if necessary )
-        if (allocated(this%backward_vector)) deallocate(this%backward_vector )
+        if (allocated(this%backward_vector)) then
+            deallocate( this%backward_vector )
+        end if
 
-         ! Allocate memory
+        !
+        !==> Allocate memory
+        !
         allocate( dwork(ldwork) )
-        allocate(this%backward_vector(lvhsgs) )
+        allocate( this%backward_vector(lvhsgs) )
 
         ! Compute workspace
         associate( &
@@ -394,19 +439,24 @@ contains
             case(0)
                 return
             case(1)
-                error stop 'TYPE (GaussianWorkspace) in INITIALIZE_VECTOR_SYNTHESIS '&
-                    //'Error in the specification of NUMBER_OF_LATITUDES'
+                error stop 'Object of class (GaussianWorkspace) '&
+                    //'in initialize_gaussian_vector_synthesis '&
+                    //'error in the specification of NUMBER_OF_LATITUDES'
             case(2)
-                error stop 'TYPE (GaussianWorkspace) in INITIALIZE_VECTOR_SYNTHESIS '&
-                    //'Error in the specification of NUMBER_OF_LONGITUDES'
+                error stop 'Object of class (GaussianWorkspace) '&
+                    //'in initialize_gaussian_vector_synthesis '&
+                    //'error in the specification of NUMBER_OF_LONGITUDES'
             case(3)
-                error stop 'TYPE (GaussianWorkspace) in INITIALIZE_VECTOR_SYNTHESIS '&
-                    //'Error in the specification of extent for BACKWARD_VECTOR'
+                error stop 'Object of class (GaussianWorkspace) '&
+                    //'in initialize_gaussian_vector_synthesis '&
+                    //'error in the specification of extent for backward_vector'
             case(4)
-                error stop 'TYPE (GaussianWorkspace) in INITIALIZE_VECTOR_SYNTHESIS '&
-                    //'Error in the specification of extent for DWORK'
+                error stop 'Object of class (GaussianWorkspace) '&
+                    //'in initialize_gaussian_vector_synthesis '&
+                    //'error in the specification of extent for dwork'
             case default
-                error stop 'TYPE (GaussianWorkspace) in INITIALIZE_VECTOR_SYNTHESIS '&
+                error stop 'Object of class (GaussianWorkspace) '&
+                    //'in initialize_gaussian_vector_synthesis '&
                     //'Undetermined error flag'
         end select
 
@@ -414,7 +464,8 @@ contains
     end subroutine initialize_gaussian_vector_synthesis
 
 
-    subroutine initialize_gaussian_vector_transform(this, nlat, nlon )
+
+    subroutine initialize_gaussian_vector_transform(this, nlat, nlon)
         !
         ! Purpose:
         !
@@ -435,16 +486,19 @@ contains
         ! Set up vector analysis
         call this%initialize_gaussian_vector_synthesis(nlat, nlon)
 
-        ! Allocate memory
-        allocate(this%real_polar_harmonic_coefficients(nlat, nlat) )
-        allocate(this%imaginary_polar_harmonic_coefficients(nlat, nlat) )
-        allocate(this%real_azimuthal_harmonic_coefficients(nlat, nlat) )
-        allocate(this%imaginary_azimuthal_harmonic_coefficients(nlat, nlat) )
+        !
+        !==> Allocate memory
+        !
+        allocate( this%real_polar_harmonic_coefficients(nlat, nlat) )
+        allocate( this%imaginary_polar_harmonic_coefficients(nlat, nlat) )
+        allocate( this%real_azimuthal_harmonic_coefficients(nlat, nlat) )
+        allocate( this%imaginary_azimuthal_harmonic_coefficients(nlat, nlat) )
 
     end subroutine initialize_gaussian_vector_transform
 
 
-    pure function get_lshags(nlat, nlon) result ( return_value )
+
+    pure function get_lshags(nlat, nlon) result (return_value)
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
@@ -478,7 +532,8 @@ contains
     end function get_lshags
 
 
-    pure function get_lshsgs(nlat, nlon) result ( return_value )
+
+    pure function get_lshsgs(nlat, nlon) result (return_value)
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
@@ -512,7 +567,8 @@ contains
     end function get_lshsgs
 
 
-    pure function get_lvhags(nlat, nlon) result ( return_value )
+
+    pure function get_lvhags(nlat, nlon) result (return_value)
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
@@ -526,7 +582,8 @@ contains
     end function get_lvhags
 
 
-    pure function get_lvhsgs(nlat, nlon) result ( return_value )
+
+    pure function get_lvhsgs(nlat, nlon) result (return_value)
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
@@ -557,6 +614,7 @@ contains
     end function get_lvhsgs
 
 
+
     subroutine finalize_gaussian_workspace(this)
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
@@ -567,5 +625,7 @@ contains
         call this%destroy()
 
     end subroutine finalize_gaussian_workspace
+
+
 
 end module type_GaussianWorkspace

@@ -19,7 +19,7 @@ module type_SphericalGrid
     !----------------------------------------------------------------------
 
     ! Declare derived data type
-    type, abstract, public ::  SphericalGrid
+    type, abstract, public :: SphericalGrid
         !----------------------------------------------------------------------
         ! Class variables
         !----------------------------------------------------------------------
@@ -52,12 +52,25 @@ contains
         class (SphericalGrid), intent (in out) :: this
         !----------------------------------------------------------------------
 
-        if (this%initialized .eqv. .false.) return
+        ! Check flag
+        if (this%initialized .eqv. .false.) then
+            return
+        end if
 
-        ! Release memory
-        if (allocated(this%grid_type)) deallocate(this%grid_type)
-        if (allocated(this%longitudes)) deallocate(this%longitudes)
-        if (allocated(this%latitudes)) deallocate(this%latitudes)
+        !
+        !==> Release memory
+        !
+        if (allocated(this%grid_type)) then
+            deallocate( this%grid_type )
+        end if
+
+        if (allocated(this%longitudes)) then
+            deallocate( this%longitudes )
+        end if
+
+        if (allocated(this%latitudes)) then
+            deallocate( this%latitudes )
+        end if
 
         ! Reset constants
         this%NUMBER_OF_LONGITUDES = 0
@@ -70,45 +83,48 @@ contains
     end subroutine destroy_grid
 
 
-    subroutine get_equally_spaced_longitudes(this, nlon, phi )
+    subroutine get_equally_spaced_longitudes(this, nlon, phi)
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
-        class (SphericalGrid),           intent (in out) :: this
+        class (SphericalGrid),  intent (in out) :: this
         integer (ip),           intent (in)     :: nlon !! number of longitudinal points
         real (wp), allocatable, intent (out)    :: phi(:)  !! longitudes: 0 <= phi <= 2*pi
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
         integer (ip)         :: l !! counter
-        real (wp), parameter :: TWO_PI = 2.0_wp * acos( -1.0_wp )
+        real (wp), parameter :: TWO_PI = 2.0_wp * acos(-1.0_wp)
         !----------------------------------------------------------------------
 
+        !
+        !==> Check validity of calling argument
+        !
         if ( nlon <= 0 ) then
-            error stop 'TYPE (Grid): '&
-                //'invalid argument NLON in GET_EQUALLY_SPACED_LONGITUDES'
+            error stop 'Object of class (SphericalGrid): '&
+                //'invalid calling argument nlon <= 0 '&
+                //'in get_equally_spaced_longitudes'
         end if
 
-        ! Release memory
-        if (allocated(phi)) deallocate( phi, stat=deallocate_status )
-        ! Check allocation status
-        if ( deallocate_status /= 0 ) then
-            error stop 'TYPE (Grid): '&
-                //'Deallocating PHI failed in GET_EQUALLY_SPACED_LONGITUDES'
-        end if
-
-        ! Allocate memory
+        !
+        !==> Allocate memory
+        !
         allocate( phi(nlon), stat=allocate_status )
+
         ! Check allocation status
         if ( allocate_status /= 0 ) then
-            error stop 'TYPE (Grid): '&
-                //'Allocating PHI failed in GET_EQUALLY_SPACED_LONGITUDES'
+            error stop 'Object of class (SphericalGrid): '&
+                //'Allocating phi failed in get_equally_spaced_longitudes'
         end if
 
         associate( dphi => this%LONGITUDINAL_MESH )
-            ! Set equally spaced (uniform) mesh size
+            !
+            !==> Set equally spaced (uniform) mesh size
+            !
             dphi= TWO_PI / nlon
-            ! Compute  equally spaced (uniform) longitudinal grid
+            !
+            !==> Compute  equally spaced (uniform) longitudinal grid
+            !
             do l = 1, nlon
                 phi(l) = real(l - 1, kind=wp) * dphi
             end do
@@ -117,43 +133,49 @@ contains
     end subroutine get_equally_spaced_longitudes
 
 
-    subroutine print_to_unformatted_binary_files(this, header )
+    subroutine print_to_unformatted_binary_files(this, header)
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
-        class (SphericalGrid),       intent (in out) :: this
-        character (len=*),  intent (in)     :: header
+        class (SphericalGrid), intent (in out) :: this
+        character (len=*),     intent (in)     :: header
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
         integer (ip)  :: file_unit
-        integer (ip)  :: record_length
         !----------------------------------------------------------------------
 
         ! Check if object is usable
         if (this%initialized .eqv. .false.) then
-            error stop 'TYPE(Grid): '&
-                //'uninitialized object in PRINT_TO_UNFORMATTED_BINARY_FILES'
+            error stop 'Uninitialized object of class (SphericalGrid): '&
+                //'in print_to_unformatted_binary_files'
         end if
 
         ! Write latitudes
         associate( theta => this%latitudes )
-            inquire( iolength=record_length ) theta
-            open( newunit=file_unit, file=header//this%grid_type//'_latitudes.dat', status='replace', &
-                form='unformatted', access='direct', recl=record_length )
-            write( file_unit, rec=1 ) theta
+
+            open( newunit=file_unit, &
+                file=header//this%grid_type//'_latitudes.dat', &
+                status='replace', action='write', &
+                form='unformatted', access='stream' )
+            write( file_unit ) theta
             close( file_unit )
+
         end associate
 
         ! Write longitudes
         associate( phi => this%longitudes )
-            inquire( iolength=record_length ) phi
-            open( newunit=file_unit, file=header//this%grid_type//'_longitudes.dat', status='replace', &
-                form='unformatted', access='direct', recl=record_length )
-            write( file_unit, rec=1 ) phi
+
+            open( newunit=file_unit, &
+                file=header//this%grid_type//'_longitudes.dat', &
+                status='replace', action='write', &
+                form='unformatted', access='stream' )
+            write( file_unit ) phi
             close( file_unit )
+
         end associate
 
     end subroutine print_to_unformatted_binary_files
+
 
 end module type_SphericalGrid

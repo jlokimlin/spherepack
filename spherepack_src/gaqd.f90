@@ -106,7 +106,6 @@ subroutine gaqd(nlat, theta, wts, w, lwork, ierror)
     real (wp)            :: eps, sgnd
     !----------------------------------------------------------------------
 
-    !
     ! Initialize error flag
     ierror = 0
 
@@ -116,24 +115,27 @@ subroutine gaqd(nlat, theta, wts, w, lwork, ierror)
         return
     end if
 
-
     !
     !==> compute weights and points analytically when nlat=1, 2
     !
     select case (nlat)
         case(1)
+
             theta(1) = acos(0.0_wp)
             wts(1) = 2.0_wp
-            return
+
         case(2)
+
             associate( x => sqrt(1.0_wp/3.0_wp) )
                 theta(1) = acos(x)
                 theta(2) = acos(-x)
             end associate
+
             wts(1) = 1.0_wp
             wts(2) = 1.0_wp
-            return
+
         case default
+
             eps = sqrt(epsilon(1.0_wp))
             eps = eps * sqrt(eps)
             mnlat = mod(nlat, 2)
@@ -188,28 +190,33 @@ subroutine gaqd(nlat, theta, wts, w, lwork, ierror)
             wts(nix) = (2*nlat+1)/(dpb+pb*cos(zlast)/sin(zlast))**2
             nix = nix-1
 
-            if (nix==0) then
-                go to 30
+            if (.not.(nix==0)) then
+
+                if (nix == nhalf-1)  then
+                    zero = 3.0_wp * zero - PI
+                end if
+
+                if (nix < nhalf-1)  then
+                    zero = 2.0_wp * zero-zprev
+                end if
+
+                zprev = zhold
+
+                go to 9
+
             end if
 
-            if (nix == nhalf-1)  then
-                zero = 3.0_wp * zero - PI
-            end if
-
-            if (nix < nhalf-1)  then
-                zero = 2.0_wp * zero-zprev
-            end if
-
-            zprev = zhold
-
-            go to 9
             !
             !==> Extend points and weights via symmetries
             !
-30          if (mnlat /= 0) then
+            if (mnlat /= 0) then
+
                 theta(nhalf) = HALF_PI
-                call tpdp (nlat, HALF_PI, cz, theta(ns2+1), wts(ns2+1), pb, dpb)
-                wts(nhalf) = (nlat+nlat+1)/(dpb*dpb)
+
+                call tpdp(nlat, HALF_PI, cz, theta(ns2+1), wts(ns2+1), pb, dpb)
+
+                wts(nhalf) = (2*nlat+1)/(dpb**2)
+
             end if
 
             do i=1, ns2
@@ -253,8 +260,8 @@ pure subroutine cpdp(n, cz, cp, dcp)
     !----------------------------------------------------------------------
     ! Dictionary: local variables
     !----------------------------------------------------------------------
-    integer :: j !! Counter
-    real    :: t1, t2, t3, t4
+    integer (ip) :: j !! Counter
+    real (wp)    :: t1, t2, t3, t4
     !----------------------------------------------------------------------
 
     associate( ncp => (n+1)/2 )
@@ -344,9 +351,7 @@ pure subroutine tpdp(n, theta, cz, cp, dcp, pb, dpb)
                 cth = cdt
                 sth = sdt
                 do k=1, kdo
-                    !      pb = pb+cp(k)*cos(2*k*theta)
                     pb = pb+cp(k)*cth
-                    !      dpb = dpb-(k+k)*cp(k)*sin(2*k*theta)
                     dpb = dpb-dcp(k)*sth
                     chh = cdt*cth-sdt*sth
                     sth = sdt*cth+cdt*sth

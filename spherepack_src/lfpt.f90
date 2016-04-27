@@ -100,137 +100,112 @@
 !                        the input parameter n.
 !
 pure subroutine lfpt(n, m, theta, cp, pb)
+
+    use, intrinsic :: iso_fortran_env, only: &
+        wp => REAL64, &
+        ip => INT32
+
     implicit none
     !----------------------------------------------------------------------
     ! Dictionary: calling arguments
     !----------------------------------------------------------------------
-    integer, intent (in)  :: n
-    integer, intent (in)  :: m
-    real,    intent (in)  :: theta
-    real,    intent (in)  :: cp(1)
-    real,    intent (out) :: pb
+    integer (ip), intent (in)  :: n
+    integer (ip), intent (in)  :: m
+    real (wp),    intent (in)  :: theta
+    real (wp),    intent (in)  :: cp(1)
+    real (wp),    intent (out) :: pb
     !----------------------------------------------------------------------
     ! Dictionary: local variables
     !----------------------------------------------------------------------
-    integer :: ma, nmod, mmod, np1, k, kdo, kp1
-    real    :: cdt, sdt, ct, st, cth, summation
+    integer (ip) :: ma, nmod, mmod, np1, k, kdo, kp1
+    real (ip)    :: cdt, sdt, ct, st, cth, summation
     !----------------------------------------------------------------------
 
-    pb = 0.0
+    pb = 0.0_wp
     ma = abs(m)
 
     if (ma > n) then
         return
     end if
 
-    if (n< 0) then
-        go to 10
-    else if (n == 0) then
+    if (n <= 0) then
         go to 10
     else
         go to 30
     end if
 
-10  if (ma < 0) then
-        go to 20
-    else if (ma == 0) then
-        go to 20
+10  if (ma <= 0) then
+        pb= sqrt(0.5_wp)
+        return
     else
-        go to 30
+30      np1 = n+1
+        nmod = mod(n, 2)
+        mmod = mod(ma, 2)
+
+        if (nmod <= 0) then
+            if (mmod <= 0) then
+                kdo = n/2+1
+                cdt = cos(2.0_wp*theta)
+                sdt = sin(2.0_wp*theta)
+                ct = 1.0_wp
+                st = 0.0_wp
+                summation = 0.5_wp * cp(1)
+                do kp1=2, kdo
+                    cth = cdt*ct-sdt*st
+                    st = sdt*ct+cdt*st
+                    ct = cth
+                    summation = summation+cp(kp1)*ct
+                end do
+                pb= summation
+                return
+            else
+                kdo = n/2
+                cdt = cos(2.0*theta)
+                sdt = sin(2.0_wp*theta)
+                ct = 1.0_wp
+                st = 0.0_wp
+                summation = 0.0_wp
+                do k=1, kdo
+                    cth = cdt*ct-sdt*st
+                    st = sdt*ct+cdt*st
+                    ct = cth
+                    summation = summation+cp(k)*st
+                end do
+
+                pb= summation
+                return
+            end if
+        else
+            kdo = (n+1)/2
+            if (mmod <= 0) then
+                cdt = cos(2.0*theta)
+                sdt = sin(2.0*theta)
+                ct = cos(theta)
+                st = -sin(theta)
+                summation = 0.0_wp
+                do k=1, kdo
+                    cth = cdt*ct-sdt*st
+                    st = sdt*ct+cdt*st
+                    ct = cth
+                    summation = summation+cp(k)*ct
+                end do
+                pb= summation
+            else
+                cdt = cos(2.0*theta)
+                sdt = sin(2.0*theta)
+                ct = cos(theta)
+                st = -sin(theta)
+                summation = 0.0_wp
+                do k=1, kdo
+                    cth = cdt*ct-sdt*st
+                    st = sdt*ct+cdt*st
+                    ct = cth
+                    summation = summation+cp(k)*st
+                end do
+                pb= summation
+            end if
+        end if
     end if
-
-20  pb= sqrt(0.5)
-
-    go to 140
-
-30  np1 = n+1
-    nmod = mod(n, 2)
-    mmod = mod(ma, 2)
-
-    if (nmod < 0) then
-        go to 40
-    else if (nmod == 0) then
-        go to 40
-    else
-        go to 90
-    end if
-
-40  if (mmod < 0) then
-        go to 50
-    else if (mmod == 0) then
-        go to 50
-    else
-        go to 70
-    end if
-
-50  kdo = n/2+1
-    cdt = cos(2.0*theta)
-    sdt = sin(2.0*theta)
-    ct = 1.0
-    st = 0.0
-    summation = 0.5*cp(1)
-    do kp1=2, kdo
-        cth = cdt*ct-sdt*st
-        st = sdt*ct+cdt*st
-        ct = cth
-        summation = summation+cp(kp1)*ct
-    end do
-    pb= summation
-    go to 140
-
-70  kdo = n/2
-    cdt = cos(2.0*theta)
-    sdt = sin(2.0*theta)
-    ct = 1.
-    st = 0.
-    summation = 0.
-    do k=1, kdo
-        cth = cdt*ct-sdt*st
-        st = sdt*ct+cdt*st
-        ct = cth
-        summation = summation+cp(k)*st
-    end do
-
-    pb= summation
-    go to 140
-
-90  kdo = (n+1)/2
-    if (mmod< 0) then
-        go to 100
-    else if (mmod == 0) then
-        go to 100
-    else
-        go to 120
-    end if
-
-100 cdt = cos(2.0*theta)
-    sdt = sin(2.0*theta)
-    ct = cos(theta)
-    st = -sin(theta)
-    summation = 0.
-    do k=1, kdo
-        cth = cdt*ct-sdt*st
-        st = sdt*ct+cdt*st
-        ct = cth
-        summation = summation+cp(k)*ct
-    end do
-    pb= summation
-    go to 140
-
-120 cdt = cos(2.0*theta)
-    sdt = sin(2.0*theta)
-    ct = cos(theta)
-    st = -sin(theta)
-    summation = 0.
-    do k=1, kdo
-        cth = cdt*ct-sdt*st
-        st = sdt*ct+cdt*st
-        ct = cth
-        summation = summation+cp(k)*st
-    end do
-    pb= summation
-
-140 return
 
 end subroutine lfpt
 
