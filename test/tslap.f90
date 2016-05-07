@@ -47,7 +47,7 @@ program tslap
         wp => REAL64, &
         stdout => OUTPUT_UNIT
 
-    use modern_spherepack_library, only: &
+    use spherepack_library, only: &
         Sphere, &
         Regularsphere, &
         GaussianSphere

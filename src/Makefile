@@ -4,7 +4,7 @@ include ../make.inc
 MODULE_PATH = $(LIB_DIRECTORY)
 
 LINKS = \
--L$(LIB_DIRECTORY) -lspherepack \
+-L$(LIB_DIRECTORY) -lold_spherepack \
 -I$(MODULE_PATH)
 
 EXECUTABLE = ./build_lib.exe
@@ -94,16 +94,16 @@ type_RegularSphere.f90
 	$(FC) $(FFLAGS) -c type_RegularSphere.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(LIB_DIRECTORY)
 
-modern_spherepack_library.o: \
+spherepack_library.o: \
 type_ThreeDimensionalVector.o \
 type_GaussianSphere.o \
 type_RegularSphere.o \
-modern_spherepack_library.f90
-	$(FC) $(FFLAGS) -c modern_spherepack_library.f90 $(LINKS)\
+spherepack_library.f90
+	$(FC) $(FFLAGS) -c spherepack_library.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(LIB_DIRECTORY)
 
 main.o: \
-modern_spherepack_library.o \
+spherepack_library.o \
 main.f90
 	$(FC) $(FFLAGS) -c main.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@

@@ -1,4 +1,4 @@
-module modern_spherepack_library
+module spherepack_library
     
     use type_ThreeDimensionalVector, only: &
         ThreeDimensionalVector, &
@@ -36,4 +36,4 @@ module modern_spherepack_library
     public :: RegularGrid
     public :: RegularSphere
 
-end module modern_spherepack_library
+end module spherepack_library

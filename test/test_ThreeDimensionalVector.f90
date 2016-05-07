@@ -3,7 +3,7 @@ program test_ThreeDimensionalVector
     use, intrinsic :: iso_fortran_env, only: &
         stdout => OUTPUT_UNIT
 
-    use modern_spherepack_library, only: &
+    use spherepack_library, only: &
         Vector => ThreeDimensionalVector
 
     ! Explicit typing only

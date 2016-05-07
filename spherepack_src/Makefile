@@ -1,7 +1,7 @@
 
 include ../make.inc
 
-LIB_SPHEREPACK=../lib/libspherepack.a
+LIB_SPHEREPACK=../lib/libold_spherepack.a
 
 ENFORCE_64_BIT_PRECISION = \
 -fdefault-real-8 \

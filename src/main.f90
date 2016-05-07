@@ -1,6 +1,6 @@
 program main
 
-    use modern_spherepack_library, only: &
+    use spherepack_library, only: &
         ThreeDimensionalVector, &
         ThreeDimensionalVectorPointer, &
         assignment(=), &

@@ -1,9 +1,8 @@
-# **modern\_spherepack**
+# **spherepack - A modern Fortran (2008+) library of spherical harmonic transforms**
 
-This Fortran project is a object-oriented programming (OOP) modernization of NCAR's SPHEREPACK library. The original work, written in FORTRAN 77, was heavily refactored to incorporate features of modern Fortran (2008+). 
+An object-oriented programming (OOP) modernization of NCAR's SPHEREPACK3.2. 
 
-
-The arduous initialization procedures for analysis and synthesis are now confined to the polymorphic class variable **Sphere**. The OOP approach hides the various workspace arrays from the user.
+The original work, written in FORTRAN 77, was heavily refactored to incorporate features of modern Fortran (2008+). The arduous initialization procedures for analysis and synthesis are now confined to the polymorphic class variable **Sphere**. The OOP approach hides the various workspace arrays from the user.
 
 -----------------------------------------------------------------------------
 
@@ -21,7 +20,7 @@ Test programs are provided for solving these equations. Each program serves two 
 
 ```fortran
 
-    use modern_spherepack_library, only: &
+    use spherepack_library, only: &
         GaussianSphere
 
     ! Explicit typing only
@@ -64,9 +63,9 @@ Type the following command line arguments
 
 ```bash
 
-	git clone https://github.com/jlokimlin/modern_spherepack.git
+	git clone https://github.com/jlokimlin/spherepack.git
 	
-	cd modern_spherepack; make all
+	cd spherepack; make all
 ```
 
 -----------------------------------------------------------------------------

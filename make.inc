@@ -3,7 +3,7 @@ MAKE = /usr/bin/make
 
 AR = /usr/bin/ar
 
-LIB_NAME = modern_spherepack
+LIB_NAME = spherepack
 
 LIB = ../lib/lib$(LIB_NAME).a
 
