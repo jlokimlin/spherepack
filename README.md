@@ -1,4 +1,4 @@
-# **spherepack4.1 - A modern Fortran (2008+) library of spherical harmonic transforms**
+# **modern\_spherepack - A modern Fortran (2008+) library of spherical harmonic transforms**
 
 An object-oriented modernization of NCAR's SPHEREPACK3.2. 
 
@@ -69,9 +69,9 @@ Type the following command line arguments
 
 ```bash
 
-	git clone https://github.com/jlokimlin/spherepack.git
+	git clone https://github.com/jlokimlin/modern_spherepack.git
 	
-	cd spherepack; make all
+	cd modern_spherepack; make all
 ```
 
 -----------------------------------------------------------------------------

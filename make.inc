@@ -3,7 +3,7 @@ MAKE = /usr/bin/make
 
 AR = /usr/bin/ar
 
-LIB_NAME = spherepack
+LIB_NAME = modern_spherepack
 
 LIB = ../lib/lib$(LIB_NAME).a
 
@@ -18,11 +18,13 @@ OBJ_DIRECTORY = ../objs
 
 LIB_DIRECTORY = ../lib
 
+MOD_DIRECTORY = $(LIB_DIRECTORY)
+
 OBJS = $(addprefix $(OBJ_DIRECTORY)/, $(OBJ))
 
 FC = gfortran
 
-FFLAGS = \
+FCFLAGS = \
 -O3 \
 $(LANGUAGE_OPTIONS)
 $(ERROR_WARNING_OPTIONS) \

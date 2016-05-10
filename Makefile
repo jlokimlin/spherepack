@@ -9,7 +9,7 @@ libspherepack:
 	( cd ./spherepack_src; $(MAKE) clean; $(MAKE) )
 
 lib: 
-	( cd ./src; $(MAKE) all )
+	( cd ./src; $(MAKE) )
 
 testlib:
 	( cd ./test; $(MAKE) clean; $(MAKE) run )
