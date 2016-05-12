@@ -52,7 +52,30 @@ module type_RegularSphere
     end type RegularSphere
 
 
+    ! Declare constructor
+    interface RegularSphere
+        module procedure regular_sphere_constructor
+    end interface
+
+
+
 contains
+
+
+
+    function regular_sphere_constructor(nlat, nlon) result (return_value)
+        !----------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !----------------------------------------------------------------------
+        integer (ip),         intent (in) :: nlat !! number of latitudinal points 0 <= theta <= pi
+        integer (ip),         intent (in) :: nlon !! number of longitudinal points 0 <= phi <= 2*pi
+        type (RegularSphere)              :: return_value
+        !----------------------------------------------------------------------
+
+        call return_value%create(nlat, nlon)
+
+    end function regular_sphere_constructor
+
 
 
     subroutine create_regular_sphere(this, nlat, nlon, ntrunc, isym, itype, isynt, rsphere )
@@ -70,79 +93,60 @@ contains
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
-        integer (ip) :: default_ntrunc
-        integer (ip) :: default_isym
-        integer (ip) :: default_ityp
-        integer (ip) :: default_isynt
-        real (wp)    :: default_rsphere
+        integer (ip) :: ntrunc_op
+        integer (ip) :: isym_op
+        integer (ip) :: ityp_op
+        integer (ip) :: isynt_op
+        real (wp)    :: rsphere_op
         !----------------------------------------------------------------------
 
         ! Ensure that object is usable
         call this%destroy()
 
-        ! Allocate polymorphic components
-        allocate( RegularGrid :: this%grid )
-        allocate( RegularWorkspace :: this%workspace )
-
         !
-        !==> Initialize polymorphic types
+        !==> Allocate polymorphic components
         !
-
-        ! Initialize Regular grid
-        associate( grid => this%grid )
-            select type (grid)
-                class is (RegularGrid)
-                call grid%create( nlat, nlon )
-            end select
-        end associate
-
-        ! Initialize Regular workspace
-        associate( workspace => this%workspace )
-            select type (workspace)
-                class is (RegularWorkspace)
-                call workspace%create( nlat, nlon )
-            end select
-        end associate
+        allocate( this%grid, source=RegularGrid(nlat, nlon) )
+        allocate( this%workspace, source=RegularWorkspace(nlat,nlon) )
 
         !
         !==> Address optional arguments
         !
         if (present(ntrunc)) then
-            default_ntrunc = ntrunc
+            ntrunc_op = ntrunc
         else
-            default_ntrunc = nlat - 1
+            ntrunc_op = nlat - 1
         end if
 
         if (present(isym)) then
-            default_isym = isym
+            isym_op = isym
         else
-            default_isym = 0
+            isym_op = 0
         end if
 
         if (present(itype)) then
-            default_ityp = itype
+            ityp_op = itype
         else
-            default_ityp = 0
+            ityp_op = 0
         end if
 
         if (present(isynt)) then
-            default_isynt = isynt
+            isynt_op = isynt
         else
-            default_isynt = 1
+            isynt_op = 1
         end if
 
         if (present(rsphere)) then
-            default_rsphere = rsphere
+            rsphere_op = rsphere
         else
-            default_rsphere = 1.0_wp
+            rsphere_op = 1.0_wp
         end if
 
         !
         !==> Create parent type
         !
-        call this%create_sphere( &
-            nlat=nlat, nlon=nlon, ntrunc=default_ntrunc, &
-            isym=default_isym, itype=default_ityp, isynt=default_isynt, rsphere=default_rsphere )
+        call this%create_sphere(nlat, nlon, &
+            ntrunc_op, isym_op, ityp_op, isynt_op, rsphere_op)
 
         ! Set flag
         this%initialized = .true.

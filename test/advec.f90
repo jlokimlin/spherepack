@@ -103,6 +103,7 @@ program advec
     integer (ip), parameter :: TIME_TO_CIRCUMVENT_THE_EARTH = 12*24*3600
     !----------------------------------------------------------------------
 
+
     ! Declare derived data type
     type, extends (GaussianSphere) :: Solver
         !----------------------------------------------------------------------

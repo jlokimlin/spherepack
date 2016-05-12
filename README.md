@@ -35,7 +35,7 @@ Test programs are provided for solving these equations. Each program serves two 
     real (wp), allocatable :: solution(:,:)
     
     ! Initialize object
-    call sphere_dat%create(nlat=19, nlon=36)
+    sphere_dat = GaussianSphere(nlat=19, nlon=36)
     
     !.... generate some data
     

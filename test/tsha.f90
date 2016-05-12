@@ -52,15 +52,31 @@ program tsha
     !----------------------------------------------------------------------
     ! Dictionary
     !----------------------------------------------------------------------
-    type (GaussianSphere) :: gaussian_sphere
-    type (RegularSphere)  :: regular_sphere
+    class (Sphere), allocatable :: sphere_dat
     !----------------------------------------------------------------------
 
-    call test_analysis_and_synthesis_routines( gaussian_sphere )
-    call test_analysis_and_synthesis_routines( regular_sphere )
+    !
+    !==> Test gaussian case
+    !
+    allocate( GaussianSphere :: sphere_dat )
+
+    call test_analysis_and_synthesis_routines(sphere_dat)
+
+    deallocate( sphere_dat )
+
+    !
+    !==> Test regular case
+    !
+    allocate( RegularSphere :: sphere_dat )
+
+    call test_analysis_and_synthesis_routines(sphere_dat)
+
+    deallocate( sphere_dat )
 
 
 contains
+
+
 
     subroutine test_analysis_and_synthesis_routines( sphere_type )
         !----------------------------------------------------------------------
@@ -83,23 +99,18 @@ contains
         !==> Set up workspace arrays
         !
         select type (sphere_type)
-            !
-            !==> For gaussian sphere
-            !
-            class is (GaussianSphere)
+            type is (GaussianSphere)
 
             !  Initialize gaussian sphere object
-            call sphere_type%create(nlat=NLATS, nlon=NLONS)
+            sphere_type = GaussianSphere(NLATS, NLONS)
 
             ! Allocate known error from previous platform
             allocate( error_previous_platform, source='     discretization error = 3.375078e-14' )
-            !
-            !==> For regular sphere
-            !
-            class is (RegularSphere)
+
+            type is (RegularSphere)
 
             ! Initialize regular sphere
-            call sphere_type%create(nlat=NLATS, nlon=NLONS)
+            sphere_type = RegularSphere(NLATS, NLONS)
 
             ! Allocate known error from previous platform
             allocate( error_previous_platform, source='     discretization error = 2.664535e-14' )

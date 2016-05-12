@@ -106,13 +106,14 @@ subroutine gaqd(nlat, theta, wts, w, lwork, ierror)
     real (wp)            :: eps, sgnd
     !----------------------------------------------------------------------
 
-    ! Initialize error flag
-    ierror = 0
-
-    ! Check case 1: work space length
+    !
+    !==> Check validity of input arguments
+    !
     if (nlat <= 0) then
         ierror = 1
         return
+    else
+        ierror = 0
     end if
 
     !
@@ -120,19 +121,17 @@ subroutine gaqd(nlat, theta, wts, w, lwork, ierror)
     !
     select case (nlat)
         case(1)
-
             theta(1) = acos(0.0_wp)
             wts(1) = 2.0_wp
-
         case(2)
-
             associate( x => sqrt(1.0_wp/3.0_wp) )
+
                 theta(1) = acos(x)
                 theta(2) = acos(-x)
+
             end associate
 
-            wts(1) = 1.0_wp
-            wts(2) = 1.0_wp
+            wts(1:2) = 1.0_wp
 
         case default
 
@@ -160,52 +159,65 @@ subroutine gaqd(nlat, theta, wts, w, lwork, ierror)
                 nix = nhalf
             end if
 
-9           it = 0
-10          it = it+1
-            zlast = zero
-            !
-            !     newton iterations
-            !
-            call tpdp(nlat, zero, cz, theta(ns2+1), wts(ns2+1), pb, dpb)
-            dcor = pb/dpb
-            sgnd = 1.0_wp
+            outer_loop: do
+                it = 0
+                inner_loop: do
+                    it = it+1
+                    zlast = zero
+                    !
+                    !==> Newton iterations
+                    !
+                    call tpdp(nlat, zero, cz, theta(ns2+1), wts(ns2+1), pb, dpb)
 
-            if (dcor /= 0.0_wp) then
-                sgnd = dcor/abs(dcor)
-            end if
+                    dcor = pb/dpb
+                    sgnd = 1.0_wp
 
-            dcor = sgnd * min(abs(dcor), cmax)
-            zero = zero-dcor
+                    if (dcor /= 0.0_wp) then
+                        sgnd = dcor/abs(dcor)
+                    end if
 
-            if (abs(zero-zlast) > eps*abs(zero)) then
-                go to 10
-            end if
+                    dcor = sgnd * min(abs(dcor), cmax)
+                    zero = zero-dcor
 
-            theta(nix) = zero
-            zhold = zero
-            !    wts(nix) = (nlat+nlat+1)/(dpb*dpb)
-            !
-            ! ==> yakimiw's formula permits using old pb and dpb
-            !
-            wts(nix) = (2*nlat+1)/(dpb+pb*cos(zlast)/sin(zlast))**2
-            nix = nix-1
 
-            if (.not.(nix==0)) then
+                    if (abs(zero-zlast) - eps*abs(zero) > 0.0_wp) then
+                        !
+                        !==> Repeat iteration
+                        !
+                        cycle inner_loop
+                    end if
 
-                if (nix == nhalf-1)  then
-                    zero = 3.0_wp * zero - PI
-                end if
+                    theta(nix) = zero
+                    zhold = zero
+                    !    wts(nix) = (nlat+nlat+1)/(dpb*dpb)
+                    !
+                    ! ==> yakimiw's formula permits using old pb and dpb
+                    !
+                    wts(nix) = (2*nlat+1)/(dpb+pb*cos(zlast)/sin(zlast))**2
+                    nix = nix-1
 
-                if (nix < nhalf-1)  then
-                    zero = 2.0_wp * zero-zprev
-                end if
+                    if (nix /= 0) then
 
-                zprev = zhold
+                        if (nix == nhalf-1)  then
+                            zero = 3.0_wp * zero - PI
+                        end if
 
-                go to 9
+                        if (nix < nhalf-1)  then
+                            zero = 2.0_wp * zero-zprev
+                        end if
 
-            end if
+                        zprev = zhold
 
+                        !
+                        !==> Re-initialize loop
+                        !
+                        cycle outer_loop
+
+                    end if
+                    exit inner_loop
+                end do inner_loop
+                exit outer_loop
+            end do outer_loop
             !
             !==> Extend points and weights via symmetries
             !
@@ -215,7 +227,7 @@ subroutine gaqd(nlat, theta, wts, w, lwork, ierror)
 
                 call tpdp(nlat, HALF_PI, cz, theta(ns2+1), wts(ns2+1), pb, dpb)
 
-                wts(nhalf) = (2*nlat+1)/(dpb**2)
+                wts(nhalf) = real(2*nlat+1, kind=wp)/(dpb**2)
 
             end if
 

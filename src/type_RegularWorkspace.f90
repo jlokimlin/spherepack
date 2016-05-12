@@ -15,6 +15,7 @@ module type_RegularWorkspace
     public :: RegularWorkspace
 
 
+
     ! Declare derived data type
     type, extends (Workspace), public :: RegularWorkspace
         !----------------------------------------------------------------------
@@ -37,12 +38,73 @@ module type_RegularWorkspace
         procedure, nopass, private :: get_lvhaes
         procedure, nopass, private :: get_lvhses
         procedure, nopass, private :: get_lwork_unsaved
+        generic,           public  :: assignment (=) => copy_regular_workspace
+        procedure,         private :: copy_regular_workspace
         final                      :: finalize_regular_workspace
         !----------------------------------------------------------------------
     end type RegularWorkspace
 
 
+
+    ! Declare constructor
+    interface RegularWorkspace
+        module procedure regular_workspace_constructor
+    end interface
+
+
+
 contains
+
+
+
+    function regular_workspace_constructor(nlat, nlon) result (return_value)
+        !----------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !----------------------------------------------------------------------
+        integer (ip),         intent (in) :: nlat !! number of latitudinal points 0 <= theta <= pi
+        integer (ip),         intent (in) :: nlon !! number of longitudinal points 0 <= phi <= 2*pi
+        type (RegularWorkspace)           :: return_value
+        !----------------------------------------------------------------------
+
+        call return_value%create(nlat, nlon)
+
+    end function regular_workspace_constructor
+
+
+
+    subroutine copy_regular_workspace(this, object_to_be_copied)
+        !--------------------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !--------------------------------------------------------------------------------
+        class (RegularWorkspace), intent (out) :: this
+        class (RegularWorkspace), intent (in)  :: object_to_be_copied
+        !--------------------------------------------------------------------------------
+
+        ! Check if object is usable
+        if (object_to_be_copied%initialized .eqv. .false.) then
+            error stop 'Uninitialized object of class (RegularWorkspace): '&
+                //'in assignment (=) '
+        end if
+
+        !
+        !==> Make copies
+        !
+        this%initialized = object_to_be_copied%initialized
+        this%legendre_workspace = object_to_be_copied%legendre_workspace
+        this%forward_scalar = object_to_be_copied%forward_scalar
+        this%forward_vector = object_to_be_copied%forward_vector
+        this%backward_scalar = object_to_be_copied%backward_scalar
+        this%backward_vector = object_to_be_copied%backward_vector
+        this%real_harmonic_coefficients = object_to_be_copied%real_harmonic_coefficients
+        this%imaginary_harmonic_coefficients = object_to_be_copied%imaginary_harmonic_coefficients
+        this%real_polar_harmonic_coefficients = object_to_be_copied%real_polar_harmonic_coefficients
+        this%imaginary_polar_harmonic_coefficients = object_to_be_copied%imaginary_polar_harmonic_coefficients
+        this%real_azimuthal_harmonic_coefficients = object_to_be_copied%real_azimuthal_harmonic_coefficients
+        this%imaginary_azimuthal_harmonic_coefficients = object_to_be_copied%imaginary_azimuthal_harmonic_coefficients
+
+
+    end subroutine copy_regular_workspace
+
 
 
     subroutine create_regular_workspace(this, nlat, nlon)

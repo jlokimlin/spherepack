@@ -11,12 +11,7 @@ module type_SphericalGrid
     private
     public :: SphericalGrid
 
-    !----------------------------------------------------------------------
-    ! Dictionary: global variables confined to the module
-    !----------------------------------------------------------------------
-    integer (ip) :: allocate_status !! To check allocation status
-    integer (ip) :: deallocate_status !! To check deallocation status
-    !----------------------------------------------------------------------
+
 
     ! Declare derived data type
     type, abstract, public :: SphericalGrid
@@ -42,7 +37,9 @@ module type_SphericalGrid
     end type SphericalGrid
 
 
+
 contains
+
 
 
     subroutine destroy_grid(this)
@@ -83,6 +80,7 @@ contains
     end subroutine destroy_grid
 
 
+
     subroutine get_equally_spaced_longitudes(this, nlon, phi)
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
@@ -93,14 +91,14 @@ contains
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
-        integer (ip)         :: l !! counter
+        integer (ip)         :: i !! counter
         real (wp), parameter :: TWO_PI = 2.0_wp * acos(-1.0_wp)
         !----------------------------------------------------------------------
 
         !
         !==> Check validity of calling argument
         !
-        if ( nlon <= 0 ) then
+        if (nlon <= 0) then
             error stop 'Object of class (SphericalGrid): '&
                 //'invalid calling argument nlon <= 0 '&
                 //'in get_equally_spaced_longitudes'
@@ -109,28 +107,23 @@ contains
         !
         !==> Allocate memory
         !
-        allocate( phi(nlon), stat=allocate_status )
+        allocate( phi(nlon) )
 
-        ! Check allocation status
-        if ( allocate_status /= 0 ) then
-            error stop 'Object of class (SphericalGrid): '&
-                //'Allocating phi failed in get_equally_spaced_longitudes'
-        end if
-
+        !
+        !==> Compute equally space (uniform) longitudinal grid
+        !
         associate( dphi => this%LONGITUDINAL_MESH )
-            !
-            !==> Set equally spaced (uniform) mesh size
-            !
+
+            ! Set equally spaced (uniform) mesh size
             dphi= TWO_PI / nlon
-            !
-            !==> Compute  equally spaced (uniform) longitudinal grid
-            !
-            do l = 1, nlon
-                phi(l) = real(l - 1, kind=wp) * dphi
-            end do
+
+            ! Compute grid
+            phi = [ (real(i - 1, kind=wp) * dphi, i=1, nlon) ]
+
         end associate
 
     end subroutine get_equally_spaced_longitudes
+
 
 
     subroutine print_to_unformatted_binary_files(this, header)

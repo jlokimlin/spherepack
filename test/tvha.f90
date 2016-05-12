@@ -73,17 +73,35 @@ program tvha
     !----------------------------------------------------------------------
     ! Dictionary
     !----------------------------------------------------------------------
-    type (GaussianSphere) :: gaussian_sphere
-    type (RegularSphere)  :: regular_sphere
+    class (Sphere), allocatable :: sphere_dat
     !----------------------------------------------------------------------
 
-    call test_vector_analysis_and_synthesis_routines( gaussian_sphere )
-    call test_vector_analysis_and_synthesis_routines( regular_sphere )
+    !
+    !==> Test gaussian case
+    !
+    allocate( GaussianSphere :: sphere_dat )
+
+    call test_vector_analysis_and_synthesis_routines(sphere_dat)
+
+    deallocate( sphere_dat )
+
+    !
+    !==> Test regular case
+    !
+    allocate( RegularSphere :: sphere_dat )
+
+    call test_vector_analysis_and_synthesis_routines(sphere_dat)
+
+    deallocate( sphere_dat )
+
 
 
 contains
 
-    subroutine test_vector_analysis_and_synthesis_routines( sphere_type )
+
+
+
+    subroutine test_vector_analysis_and_synthesis_routines(sphere_type)
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
@@ -106,24 +124,19 @@ contains
         !==> Set up workspace arrays
         !
         select type (sphere_type)
-            !
-            !==> For gaussian sphere
-            !
-            class is (GaussianSphere)
+            type is (GaussianSphere)
 
             !  Initialize gaussian sphere object
-            call sphere_type%create(nlat=NLATS, nlon=NLONS)
+            sphere_type = GaussianSphere(NLATS, NLONS)
 
             ! Allocate known error from previous platform
             allocate( previous_polar_error, source='     polar error     = 5.107026e-15' )
             allocate( previous_azimuthal_error, source='     azimuthal error = 9.769963e-15' )
-            !
-            !==> For regular sphere
-            !
-            class is (RegularSphere)
+
+            type is (RegularSphere)
 
             ! Initialize regular sphere
-            call sphere_type%create(nlat=NLATS, nlon=NLONS)
+            sphere_type = RegularSphere(NLATS, NLONS)
 
             ! Allocate known error from previous platform
             allocate( previous_polar_error, source='     polar error     = 5.329071e-15' )

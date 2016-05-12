@@ -9,7 +9,7 @@ libspherepack:
 	( cd ./spherepack_src; $(MAKE) clean; $(MAKE) )
 
 lib: 
-	( cd ./src; $(MAKE) )
+	( cd ./src; $(MAKE) all )
 
 testlib:
 	( cd ./test; $(MAKE) clean; $(MAKE) run )
@@ -19,6 +19,6 @@ install:
 	cp -r ../$(LIB_NAME) $(BIN_PATH)
 
 clean: 
-	( cd ./src; $(MAKE) clean; cd ../test; $(MAKE) clean )
+	( cd ./spherepack_src; $(MAKE) clean; cd ./src; $(MAKE) clean; cd ../test; $(MAKE) clean )
 
 .PHONY: all lipspherepack lib testlib install

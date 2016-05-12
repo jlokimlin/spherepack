@@ -3,10 +3,6 @@ MAKE = /usr/bin/make
 
 AR = /usr/bin/ar
 
-LIB_NAME = modern_spherepack
-
-LIB = ../lib/lib$(LIB_NAME).a
-
 #EXTERNAL_LIBRARY_PATH = /usr/local/lib
 EXTERNAL_LIBRARY_PATH = /usr/local/lib64
 
@@ -17,6 +13,10 @@ OBJ := $(patsubst %.f90, %.o, $(wildcard *.f90))
 OBJ_DIRECTORY = ../objs
 
 LIB_DIRECTORY = ../lib
+
+LIB_NAME = modern_spherepack
+
+LIB = $(LIB_DIRECTORY)/lib$(LIB_NAME).a
 
 MOD_DIRECTORY = $(LIB_DIRECTORY)
 

@@ -8,7 +8,7 @@ module type_SphericalUnitVectors
         SphericalGrid
 
     use type_TrigonometricFunctions, only: &
-        TrigFunctions => TrigonometricFunctions
+        TrigonometricFunctions
 
     use type_ThreeDimensionalVector, only: &
         Vector => ThreeDimensionalVector, &
@@ -21,6 +21,8 @@ module type_SphericalUnitVectors
     ! Everything is private unless stated otherwise
     private
     public :: SphericalUnitVectors
+
+
 
     ! Declare derived data type
     type, public :: SphericalUnitVectors
@@ -46,110 +48,116 @@ module type_SphericalUnitVectors
     end type SphericalUnitVectors
 
 
+
+    ! Declare constructor
+    interface SphericalUnitVectors
+        module procedure spherical_unit_vectors_constructor
+    end interface
+
+
+
 contains
 
 
-    subroutine create_spherical_unit_vectors(this, grid_type, trig_functions )
+
+    function spherical_unit_vectors_constructor(grid) result (return_value)
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
-        class (SphericalUnitVectors),            intent (in out) :: this
-        class (SphericalGrid),                   intent (in out) :: grid_type
-        class (TrigFunctions), optional, target, intent (in out) :: trig_functions
+        class (SphericalGrid), intent (in out) :: grid
+        type (SphericalUnitVectors)            :: return_value
+        !----------------------------------------------------------------------
+
+        call return_value%create(grid)
+
+    end function spherical_unit_vectors_constructor
+
+
+
+    subroutine create_spherical_unit_vectors(this, grid)
+        !----------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !----------------------------------------------------------------------
+        class (SphericalUnitVectors),  intent (in out) :: this
+        class (SphericalGrid),         intent (in out) :: grid
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
         integer (ip)                  :: k,  l !! Counters
-        type (TrigFunctions), pointer :: ptr => null()
+        type (TrigonometricFunctions) :: trig_func
         !----------------------------------------------------------------------
 
         ! Check if object is usable
         call this%destroy()
 
         ! Check if polymorphic argument is usable
-        if ( grid_type%initialized .eqv. .false.) then
-            error stop 'TYPE(SphericalUnitVectors): '&
-                //'initialized polymorphic argument CLASS(Grid)'
+        if ( grid%initialized .eqv. .false.) then
+            error stop 'Object of class (SphericalUnitVectors): '&
+                //'uninitialized polymorphic argument of class (SphericalGrid) '&
+                //'in create_spherical_unit_vectors'
         end if
 
-        ! Associate array extends
+
         associate( &
-            nlat => grid_type%NUMBER_OF_LATITUDES, &
-            nlon => grid_type%NUMBER_OF_LONGITUDES &
+            nlat => grid%NUMBER_OF_LATITUDES, &
+            nlon => grid%NUMBER_OF_LONGITUDES &
             )
 
+            ! Set constants
             this%NUMBER_OF_LATITUDES = nlat
             this%NUMBER_OF_LONGITUDES = nlon
 
-            ! Allocate memory
+            !
+            !==> Allocate memory
+            !
             allocate(this%radial(nlat, nlon) )
             allocate(this%polar(nlat, nlon) )
             allocate(this%azimuthal(nlat, nlon) )
 
-            ! Address optional argument
-            if (present(trig_functions)) then
-
-                ! Check if polymorphic argument is usable
-                if ( trig_functions%initialized .eqv. .false.) then
-                    error stop 'TYPE(SphericalUnitVectors): '&
-                        //'initialized polymorphic argument CLASS(Grid)'
-                else
-                    ! Assign pointer
-                    ptr => trig_functions
-                end if
-            else
-                ! Compute trigonometric functions from scratch
-                allocate( TrigFunctions :: ptr )
-                call ptr%create( grid_type )
-            end if
+            ! Compute required trigonometric functions
+            trig_func = TrigonometricFunctions(grid)
 
             ! Compute spherical unit vectors
             associate( &
                 r => this%radial, &
                 theta => this%polar, &
                 phi => this%azimuthal, &
-                sint => ptr%sint, &
-                cost => ptr%cost, &
-                sinp => ptr%sinp, &
-                cosp => ptr%cosp &
+                sint => trig_func%sint, &
+                cost => trig_func%cost, &
+                sinp => trig_func%sinp, &
+                cosp => trig_func%cosp &
                 )
+
                 do l = 1, nlon
                     do k = 1, nlat
 
                         ! set radial unit vector
                         r(k, l) = &
-                            Vector( &
-                            x = sint(k) * cosp(l), &
-                            y = sint(k) * sinp(l), &
-                            z = cost(k) &
+                            Vector(&
+                            sint(k) * cosp(l), &
+                            sint(k) * sinp(l), &
+                            cost(k) &
                             )
 
                         ! set polar unit vector
                         theta(k, l) = &
                             Vector( &
-                            x = cost(k) * cosp(l), &
-                            y = cost(k) * sinp(l), &
-                            z = -sint(k) &
+                            cost(k) * cosp(l), &
+                            cost(k) * sinp(l), &
+                            -sint(k) &
                             )
 
                         ! set azimuthal unit vector
                         phi(k, l) = &
                             Vector( &
-                            x = -sinp(l), &
-                            y =  cosp(l), &
-                            z =  0.0_wp &
+                            -sinp(l), &
+                            cosp(l), &
+                            0.0_wp &
                             )
                     end do
                 end do
             end associate
         end associate
-
-        ! Garbage collection
-        if (present(trig_functions)) then
-            nullify( ptr )
-        else
-            deallocate( ptr )
-        end if
 
         ! Set flag
         this%initialized = .true.
@@ -169,9 +177,9 @@ contains
         if (this%initialized .eqv. .false.) return
 
         ! Release memory
-        if ( allocated(this%radial ) ) deallocate (this%radial )
+        if (allocated(this%radial)) deallocate( this%radial )
         if (allocated(this%polar)) deallocate(  this%polar )
-        if (allocated(this%azimuthal)) deallocate(this%azimuthal )
+        if (allocated(this%azimuthal)) deallocate( this%azimuthal )
 
         ! Reset constants
         this%NUMBER_OF_LONGITUDES = 0
@@ -202,8 +210,8 @@ contains
 
         ! Check if object is usable
         if (this%initialized .eqv. .false.) then
-            error stop 'TYPE(SphericalUnitVectors): '&
-                //'uninitialized object in GET_SPHERICAL_ANGLE_COMPONENTS'
+            error stop 'Object of class (SphericalUnitVectors): '&
+                //'uninitialized object in get_spherical_angle_components'
         end if
 
         ! Calculate the spherical angle components
@@ -230,8 +238,11 @@ contains
 
     end subroutine get_spherical_angle_components
 
+
+
+
     subroutine get_vector_function(this, &
-        radial_component, polar_component, azimuthal_component, vector_function )
+        radial_component, polar_component, azimuthal_component, vector_function)
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
@@ -244,7 +255,6 @@ contains
         ! Dictionary: local variables
         !----------------------------------------------------------------------
         integer (ip)  :: k, l !! Counters
-        type (Vector) :: vector_field !! To cast array to vector
         !----------------------------------------------------------------------
 
         ! Check if object is usable
@@ -253,7 +263,7 @@ contains
                 //'uninitialized object in GET_VECTOR_FUNCTION'
         end if
 
-        ! Calculate the spherical angle components
+
         associate( &
             nlat => this%NUMBER_OF_LATITUDES, &
             nlon => this%NUMBER_OF_LONGITUDES &
@@ -265,10 +275,14 @@ contains
                         theta => this%polar(k, l), &
                         phi => this%azimuthal(k, l) &
                         )
+                        !
+                        !==> Calculate the spherical angle components
+                        !
                         vector_function(:, k, l ) = &
                             r * radial_component(k, l) &
                             + theta * polar_component(k, l) &
                             + phi * azimuthal_component(k,l)
+
                     end associate
                 end do
             end do
@@ -288,6 +302,7 @@ contains
         call this%destroy()
 
     end subroutine finalize_spherical_unit_vectors
+
 
 
 end module type_SphericalUnitVectors

@@ -15,6 +15,7 @@ module type_GaussianWorkspace
     public :: GaussianWorkspace
 
 
+
     ! Declare derived data type
     type, extends (Workspace), public :: GaussianWorkspace
         !----------------------------------------------------------------------
@@ -36,12 +37,73 @@ module type_GaussianWorkspace
         procedure, nopass, private :: get_lshsgs
         procedure, nopass, private :: get_lvhags
         procedure, nopass, private :: get_lvhsgs
+        generic,           public  :: assignment (=) => copy_gaussian_workspace
+        procedure,         private :: copy_gaussian_workspace
         final                      :: finalize_gaussian_workspace
         !----------------------------------------------------------------------
     end type GaussianWorkspace
 
 
+
+    ! Declare constructor
+    interface GaussianWorkspace
+        module procedure gaussian_workspace_constructor
+    end interface
+
+
+
 contains
+
+
+
+    function gaussian_workspace_constructor(nlat, nlon) result (return_value)
+        !----------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !----------------------------------------------------------------------
+        integer (ip),         intent (in) :: nlat !! number of latitudinal points 0 <= theta <= pi
+        integer (ip),         intent (in) :: nlon !! number of longitudinal points 0 <= phi <= 2*pi
+        type (GaussianWorkspace)          :: return_value
+        !----------------------------------------------------------------------
+
+        call return_value%create(nlat, nlon)
+
+    end function gaussian_workspace_constructor
+
+
+
+    subroutine copy_gaussian_workspace(this, object_to_be_copied)
+        !--------------------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !--------------------------------------------------------------------------------
+        class (GaussianWorkspace), intent (out) :: this
+        class (GaussianWorkspace), intent (in)  :: object_to_be_copied
+        !--------------------------------------------------------------------------------
+
+        ! Check if object is usable
+        if (object_to_be_copied%initialized .eqv. .false.) then
+            error stop 'Uninitialized object of class (GaussianWorkspace): '&
+                //'in assignment (=) '
+        end if
+
+        !
+        !==> Make copies
+        !
+        this%initialized = object_to_be_copied%initialized
+        this%legendre_workspace = object_to_be_copied%legendre_workspace
+        this%forward_scalar = object_to_be_copied%forward_scalar
+        this%forward_vector = object_to_be_copied%forward_vector
+        this%backward_scalar = object_to_be_copied%backward_scalar
+        this%backward_vector = object_to_be_copied%backward_vector
+        this%real_harmonic_coefficients = object_to_be_copied%real_harmonic_coefficients
+        this%imaginary_harmonic_coefficients = object_to_be_copied%imaginary_harmonic_coefficients
+        this%real_polar_harmonic_coefficients = object_to_be_copied%real_polar_harmonic_coefficients
+        this%imaginary_polar_harmonic_coefficients = object_to_be_copied%imaginary_polar_harmonic_coefficients
+        this%real_azimuthal_harmonic_coefficients = object_to_be_copied%real_azimuthal_harmonic_coefficients
+        this%imaginary_azimuthal_harmonic_coefficients = object_to_be_copied%imaginary_azimuthal_harmonic_coefficients
+
+
+    end subroutine copy_gaussian_workspace
+
 
 
     subroutine create_gaussian_workspace(this, nlat, nlon)
@@ -67,6 +129,8 @@ contains
 
     end subroutine create_gaussian_workspace
 
+
+
     subroutine destroy_gaussian_workspace(this)
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
@@ -86,6 +150,7 @@ contains
         this%initialized = .true.
 
     end subroutine destroy_gaussian_workspace
+
 
 
     subroutine initialize_gaussian_scalar_analysis(this, nlat, nlon)
@@ -139,7 +204,9 @@ contains
             work => this%legendre_workspace, &
             ierror => error_flag &
             )
+
             call shagsi( nlat, nlon, wshags, lshags, work, lwork, dwork, ldwork, ierror)
+
         end associate
 
         ! Release memory
@@ -276,6 +343,7 @@ contains
     end subroutine initialize_gaussian_scalar_synthesis
 
 
+
     subroutine initialize_gaussian_scalar_transform(this, nlat, nlon)
         !
         ! Purpose:
@@ -304,6 +372,7 @@ contains
         allocate( this%imaginary_harmonic_coefficients(nlat, nlat) )
 
     end subroutine initialize_gaussian_scalar_transform
+
 
 
     subroutine initialize_gaussian_vector_analysis(this, nlat, nlon)
@@ -348,7 +417,9 @@ contains
             wvhags => this%forward_vector, &
             ierror => error_flag &
             )
+
             call vhagsi( nlat, nlon, wvhags, lvhags, dwork, ldwork, ierror )
+
         end associate
 
         ! Release memory

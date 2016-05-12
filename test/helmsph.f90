@@ -76,18 +76,23 @@ program helmsph
     !----------------------------------------------------------------------
     ! Dictionary
     !----------------------------------------------------------------------
-    type (GaussianSphere) :: gaussian_sphere
-    type (RegularSphere)  :: regular_sphere
+    class (Sphere), pointer :: sphere_dat
     !----------------------------------------------------------------------
 
-    call test_helmholtz_inversion( gaussian_sphere )
-    call test_helmholtz_inversion( regular_sphere )
+    ! Cast to gaussian case
+    allocate( GaussianSphere :: sphere_dat )
+    call test_helmholtz_inversion(sphere_dat)
+    deallocate( sphere_dat )
 
+    ! Cast to regular case
+    allocate( RegularSphere :: sphere_dat )
+    call test_helmholtz_inversion(sphere_dat)
+    deallocate( sphere_dat )
 
 contains
 
 
-    subroutine test_helmholtz_inversion( sphere_type )
+    subroutine test_helmholtz_inversion(sphere_type)
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
@@ -109,23 +114,18 @@ contains
         !==> Set up workspace arrays
         !
         select type (sphere_type)
-            !
-            !==> For gaussian sphere
-            !
-            class is (GaussianSphere)
+            type is (GaussianSphere)
 
             !  Initialize gaussian sphere object
-            call sphere_type%create(nlat=NLATS, nlon=NLONS)
+            sphere_type = GaussianSphere(NLATS,NLONS)
 
             ! Allocate known error from previous platform
             allocate( error_previous_platform, source='     discretization error = 2.325553e-14' )
-            !
-            !==> For regular sphere
-            !
-            class is (RegularSphere)
+
+            type is (RegularSphere)
 
             ! Initialize regular sphere
-            call sphere_type%create(nlat=NLATS, nlon=NLONS)
+            sphere_type = RegularSphere(NLATS, NLONS)
 
             ! Allocate known error from previous platform
             allocate( error_previous_platform, source='     discretization error = 1.202313e-14' )
@@ -154,15 +154,17 @@ contains
             end do
         end associate
 
-        !
-        !==> Solve Helmholtz equation on the sphere
-        !
+
         associate( &
             xlmbda => HELMHOLTZ_CONSTANT, &
             rhs => source_term, &
             u => approximate_solution &
             )
+            !
+            !==> Solve Helmholtz equation on the sphere
+            !
             call sphere_type%invert_helmholtz( xlmbda, rhs, u)
+
         end associate
 
         !

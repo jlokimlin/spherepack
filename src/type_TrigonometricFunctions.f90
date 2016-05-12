@@ -38,16 +38,38 @@ module type_TrigonometricFunctions
     end type TrigonometricFunctions
 
 
+    ! Declare constructor
+    interface TrigonometricFunctions
+        module procedure trigonometric_functions_constructor
+    end interface
+
+
+
 contains
 
 
-    subroutine create_trigonometric_functions(this, grid_type )
+
+    function trigonometric_functions_constructor(grid) result (return_value)
+        !----------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !----------------------------------------------------------------------
+        class (SphericalGrid), intent (in out) :: grid
+        type (TrigonometricFunctions)          :: return_value
+        !----------------------------------------------------------------------
+
+        call return_value%create(grid)
+
+    end function trigonometric_functions_constructor
+
+
+
+    subroutine create_trigonometric_functions(this, grid_type)
         !
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
         class (TrigonometricFunctions), intent (in out) :: this
-        class (SphericalGrid),                   intent (in)     :: grid_type
+        class (SphericalGrid),          intent (in)     :: grid_type
         !----------------------------------------------------------------------
 
         ! Ensure that object is usable
@@ -55,8 +77,9 @@ contains
 
         ! Check if polymorphic argument is usable
         if ( grid_type%initialized .eqv. .false.) then
-            error stop 'TYPE(TrigonometricFunctions): '&
-                //'initialized polymorphic argument CLASS(Grid)'
+            error stop 'Object of class (TrigonometricFunctions): '&
+                //'initialized polymorphic argument of class (SphericalGrid) '&
+                //'in create_trigonometric_functions'
         end if
 
         ! Allocate memory
@@ -89,6 +112,7 @@ contains
             cost = cos(theta)
             sinp = sin(phi)
             cosp = cos(phi)
+
         end associate
 
         ! Set flag

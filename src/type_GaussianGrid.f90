@@ -14,6 +14,8 @@ module type_GaussianGrid
     private
     public :: GaussianGrid
 
+
+
     ! Declare derived data type
     type, extends (SphericalGrid), public ::  GaussianGrid
         !----------------------------------------------------------------------
@@ -29,12 +31,68 @@ module type_GaussianGrid
         procedure, public  :: destroy => destroy_gaussian_grid
         procedure, public  :: get_latitudes_and_gaussian_weights
         procedure, public  :: unformatted_print
+        generic,   public  :: assignment (=) => copy_gaussian_grid
+        procedure, private :: copy_gaussian_grid
         final              :: finalize_gaussian_grid
         !----------------------------------------------------------------------
     end type GaussianGrid
 
 
+
+    ! Declare constructor
+    interface GaussianGrid
+        module procedure gaussian_grid_constructor
+    end interface
+
+
+
 contains
+
+
+
+    function gaussian_grid_constructor(nlat, nlon) result (return_value)
+        !----------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !----------------------------------------------------------------------
+        integer (ip),         intent (in)     :: nlat !! number of latitudinal points 0 <= theta <= pi
+        integer (ip),         intent (in)     :: nlon !! number of longitudinal points 0 <= phi <= 2*pi
+        type (GaussianGrid)                   :: return_value
+        !----------------------------------------------------------------------
+
+        call return_value%create(nlat, nlon)
+
+    end function gaussian_grid_constructor
+
+
+
+    subroutine copy_gaussian_grid(this, object_to_be_copied)
+        !--------------------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !--------------------------------------------------------------------------------
+        class (GaussianGrid), intent (out) :: this
+        class (GaussianGrid), intent (in)  :: object_to_be_copied
+        !--------------------------------------------------------------------------------
+
+        ! Check if object is usable
+        if (object_to_be_copied%initialized .eqv. .false.) then
+            error stop 'Uninitialized object of class (GaussianGrid): '&
+                //'in assignment (=) '
+        end if
+
+        !
+        !==> Make copies
+        !
+        this%initialized = object_to_be_copied%initialized
+        this%NUMBER_OF_LONGITUDES = object_to_be_copied%NUMBER_OF_LONGITUDES
+        this%NUMBER_OF_LATITUDES = object_to_be_copied%NUMBER_OF_LATITUDES
+        this%LONGITUDINAL_MESH = object_to_be_copied%LONGITUDINAL_MESH
+        this%latitudes = object_to_be_copied%latitudes
+        this%longitudes = object_to_be_copied%longitudes
+        this%gaussian_weights = object_to_be_copied%gaussian_weights
+        this%grid_type = object_to_be_copied%grid_type
+
+    end subroutine copy_gaussian_grid
+
 
 
     subroutine create_gaussian_grid(this, nlat, nlon)
@@ -42,8 +100,8 @@ contains
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
         class (GaussianGrid), intent (in out) :: this
-        integer (ip),         intent (in)     :: nlat         !! number of latitudinal points
-        integer (ip),         intent (in)     :: nlon         !! number of longitudinal points
+        integer (ip),         intent (in)     :: nlat !! number of latitudinal points 0 <= theta <= pi
+        integer (ip),         intent (in)     :: nlon !! number of longitudinal points 0 <= phi <= 2*pi
         !----------------------------------------------------------------------
 
         ! Ensure that object is usable
@@ -77,6 +135,7 @@ contains
     end subroutine create_gaussian_grid
 
 
+
     subroutine destroy_gaussian_grid(this)
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
@@ -107,6 +166,7 @@ contains
     end subroutine destroy_gaussian_grid
 
 
+
     subroutine get_latitudes_and_gaussian_weights(this, nlat, theta, wts)
         !
         !<Purpose:
@@ -126,7 +186,7 @@ contains
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
         class (GaussianGrid),   intent (in out) :: this
-        integer (ip),           intent (in)     :: nlat  !! number of latitudinal points
+        integer (ip),           intent (in)     :: nlat     !! number of latitudinal points
         real (wp), allocatable, intent (out)    :: theta(:) !! latitudinal points: 0 <= theta <= pi
         real (wp), allocatable, intent (out)    :: wts(:)   !! gaussian weights
         !----------------------------------------------------------------------
@@ -140,7 +200,7 @@ contains
         ! Check input argument
         if ( nlat <= 0 ) then
             error stop 'Object of class (GaussianGrid): '&
-                //'invalid argument NLAT <= 0 '&
+                //'invalid argument nlat <= 0 '&
                 //'in get_equally_spaced_latitudes'
         end if
 
@@ -160,6 +220,7 @@ contains
             !==> Compute gaussian weights and latitudes
             !
             call gaqd(nlat, theta, wts, w, lwork, ierror)
+
         end associate
 
         !
@@ -216,6 +277,7 @@ contains
     end subroutine unformatted_print
 
 
+
     subroutine finalize_gaussian_grid(this)
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
@@ -226,6 +288,7 @@ contains
         call this%destroy()
 
     end subroutine finalize_gaussian_grid
+
 
 
 end module type_GaussianGrid

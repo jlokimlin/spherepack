@@ -14,7 +14,7 @@ ENFORCE_64_BIT_PRECISION = \
 -fdefault-real-8 \
 -fdefault-double-8
 
-FC = gfortran
+F90 = gfortran
 
 FCFLAGS = -O3 $(ENFORCE_64_BIT_PRECISION)
 
@@ -24,7 +24,7 @@ $(EXES): $(SRC)
 
 %.exe : %.f90
 	rm -f $@
-	$(FC) $(FCFLAGS) $< -o $@ $(LINKS)
+	$(F90) $(FCFLAGS) $< -o $@ $(LINKS)
 	./$@
 
 clean:

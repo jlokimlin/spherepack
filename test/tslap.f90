@@ -58,17 +58,34 @@ program tslap
     !----------------------------------------------------------------------
     ! Dictionary
     !----------------------------------------------------------------------
-    type (GaussianSphere) :: gaussian_sphere
-    type (RegularSphere)  :: regular_sphere
+    class (Sphere), allocatable :: sphere_dat
     !----------------------------------------------------------------------
 
-    call test_scalar_laplacian_routines( gaussian_sphere )
-    call test_scalar_laplacian_routines( regular_sphere )
+    !
+    !==> Test gaussian case
+    !
+    allocate( GaussianSphere :: sphere_dat )
+
+    call test_scalar_laplacian_routines(sphere_dat)
+
+    deallocate( sphere_dat )
+
+    !
+    !==> Test regular case
+    !
+    allocate( RegularSphere :: sphere_dat )
+
+    call test_scalar_laplacian_routines(sphere_dat)
+
+    deallocate( sphere_dat )
+
 
 
 contains
 
-    subroutine test_scalar_laplacian_routines( sphere_type )
+
+
+    subroutine test_scalar_laplacian_routines(sphere_type)
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
@@ -91,24 +108,19 @@ contains
         !==> Set up workspace arrays
         !
         select type (sphere_type)
-            !
-            !==> For gaussian sphere
-            !
-            class is (GaussianSphere)
+            type is (GaussianSphere)
 
             !  Initialize gaussian sphere object
-            call sphere_type%create(nlat=NLATS, nlon=NLONS)
+            sphere_type = GaussianSphere(NLATS, NLONS)
 
             ! Allocate known error from previous platform
             allocate( laplacian_error, source='     discretization error = 1.953993e-13' )
             allocate( inversion_error, source='     discretization error = 6.661338e-16' )
-            !
-            !==> For regular sphere
-            !
-            class is (RegularSphere)
+
+            type is (RegularSphere)
 
             ! Initialize regular sphere
-            call sphere_type%create(nlat=NLATS, nlon=NLONS)
+            sphere_type = RegularSphere(NLATS, NLONS)
 
             ! Allocate known error from previous platform
             allocate( laplacian_error, source='     discretization error = 1.003642e-13' )

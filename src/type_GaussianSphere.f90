@@ -54,10 +54,33 @@ module type_GaussianSphere
     end type GaussianSphere
 
 
+    ! Declare constructor
+    interface GaussianSphere
+        module procedure gaussian_sphere_constructor
+    end interface
+
+
+
 contains
 
 
-    subroutine create_gaussian_sphere(this, nlat, nlon, ntrunc, isym, itype, isynt, rsphere )
+
+    function gaussian_sphere_constructor(nlat, nlon) result (return_value)
+        !----------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !----------------------------------------------------------------------
+        integer (ip),         intent (in) :: nlat !! number of latitudinal points 0 <= theta <= pi
+        integer (ip),         intent (in) :: nlon !! number of longitudinal points 0 <= phi <= 2*pi
+        type (GaussianSphere)             :: return_value
+        !----------------------------------------------------------------------
+
+        call return_value%create(nlat, nlon)
+
+    end function gaussian_sphere_constructor
+
+
+
+    subroutine create_gaussian_sphere(this, nlat, nlon, ntrunc, isym, itype, isynt, rsphere)
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
@@ -75,52 +98,59 @@ contains
         integer (ip) :: ntrunc_op
         integer (ip) :: isym_op
         integer (ip) :: ityp_op
-        integer (ip) :: isynth_op
+        integer (ip) :: isynt_op
         real (wp)    :: rsphere_op
         !----------------------------------------------------------------------
 
         ! Ensure that object is usable
         call this%destroy()
 
-        ! Allocate polymorphic components
-        allocate( GaussianGrid :: this%grid )
-        allocate( GaussianWorkspace :: this%workspace )
+        !
+        !==> Allocate polymorphic components
+        !
+        allocate( this%grid, source=GaussianGrid(nlat,nlon) )
+        allocate( this%workspace, source=GaussianWorkspace(nlat, nlon) )
 
-        ! Initialize polymorphic types
-        associate( &
-            grid => this%grid, &
-            workspace => this%workspace &
-            )
-            ! Initialize gaussian grid
-            select type (grid)
-                class is (GaussianGrid)
-                call grid%create( nlat, nlon )
-            end select
-            ! Initialize gaussian workspace
-            select type (workspace)
-                class is (GaussianWorkspace)
-                call workspace%create( nlat, nlon )
-            end select
-        end associate
+        !
+        !==> Address optional arguments
+        !
+        if (present(ntrunc)) then
+            ntrunc_op = ntrunc
+        else
+            ntrunc_op = nlat - 1
+        end if
 
-        ! Initialize constants
-        ntrunc_op = nlat - 1
-        isym_op = 0
-        ityp_op = 0
-        isynth_op = 1
-        rsphere_op = 1.0_wp
+        if (present(isym)) then
+            isym_op = isym
+        else
+            isym_op = 0
+        end if
 
-        ! Address optional arguments
-        if (present(ntrunc)) ntrunc_op = ntrunc
-        if (present(isym)) isym_op = isym
-        if (present(itype)) ityp_op = itype
-        if (present(isynt)) isynth_op = isynt
-        if (present(rsphere)) rsphere_op = rsphere
+        if (present(itype)) then
+            ityp_op = itype
+        else
+            ityp_op = 0
+        end if
 
-        ! Create parent type
-        call this%create_sphere( nlat, nlon, ntrunc_op, isym_op, ityp_op, isynth_op, rsphere_op )
+        if (present(isynt)) then
+            isynt_op = isynt
+        else
+            isynt_op = 1
+        end if
 
-        ! Set initialization flag
+        if (present(rsphere)) then
+            rsphere_op = rsphere
+        else
+            rsphere_op = 1.0_wp
+        end if
+
+        !
+        !==> Create parent type
+        !
+        call this%create_sphere(nlat, nlon, &
+            ntrunc_op, isym_op, ityp_op, isynt_op, rsphere_op)
+
+        ! Set flag
         this%initialized = .true.
         
     end subroutine create_gaussian_sphere
@@ -159,8 +189,8 @@ contains
 
         ! Check if object is usable
         if (this%initialized .eqv. .false.) then
-            error stop 'TYPE(GaussianSphere): '&
-                //'uninitialized object in GAUSSIAN_SCALAR_ANALYSIS'
+            error stop 'Uninitialized object of class(GaussianSphere): '&
+                //'in GAUSSIAN_SCALAR_ANALYSIS'
         end if
 
         select type (this)
@@ -199,25 +229,25 @@ contains
             case(0)
                 return
             case(1)
-                error stop 'TYPE(GaussianSphere) in GAUSSIAN_SCALAR_ANALYSIS'&
+                error stop 'Uninitialized object of class(GaussianSphere) in GAUSSIAN_SCALAR_ANALYSIS'&
                     //'Error in the specification of NUMBER_OF_LATITUDES'
             case(2)
-                error stop 'TYPE(GaussianSphere) in GAUSSIAN_SCALAR_ANALYSIS'&
+                error stop 'Uninitialized object of class(GaussianSphere) in GAUSSIAN_SCALAR_ANALYSIS'&
                     //'Error in the specification of NUMBER_OF_LONGITUDES'
             case(3)
-                error stop 'TYPE(GaussianSphere) in GAUSSIAN_SCALAR_ANALYSIS'&
+                error stop 'Uninitialized object of class(GaussianSphere) in GAUSSIAN_SCALAR_ANALYSIS'&
                     //'Invalid extent for SCALAR_FORWARD'
             case(4)
-                error stop 'TYPE(GaussianSphere) in GAUSSIAN_SCALAR_ANALYSIS'&
+                error stop 'Uninitialized object of class(GaussianSphere) in GAUSSIAN_SCALAR_ANALYSIS'&
                     //'Invalid extent for LEGENDRE_WORKSPACE'
             case(5)
-                error stop 'TYPE(GaussianSphere) in GAUSSIAN_SCALAR_ANALYSIS'&
+                error stop 'Uninitialized object of class(GaussianSphere) in GAUSSIAN_SCALAR_ANALYSIS'&
                     //'Invalid extent for DWORK'
             case(6)
-                error stop 'TYPE(GaussianSphere) in GAUSSIAN_SCALAR_ANALYSIS'&
+                error stop 'Uninitialized object of class(GaussianSphere) in GAUSSIAN_SCALAR_ANALYSIS'&
                     //'Failure in GAQD due to failure in eigenvalue routine'
             case default
-                error stop 'TYPE(GaussianSphere) in GAUSSIAN_SCALAR_ANALYSIS'&
+                error stop 'Uninitialized object of class(GaussianSphere) in GAUSSIAN_SCALAR_ANALYSIS'&
                     //'Undetermined error flag'
         end select
 
@@ -239,8 +269,8 @@ contains
 
         ! Check if object is usable
         if (this%initialized .eqv. .false.) then
-            error stop 'TYPE(GaussianSphere): '&
-                //'uninitialized object in GAUSSIAN_SCALAR_SYNTHESIS'
+            error stop 'Uninitialized object of class(GaussianSphere): '&
+                //'in gaussian_scalar_synthesis'
         end if
 
         !
@@ -283,25 +313,25 @@ contains
             case(0)
                 return
             case(1)
-                error stop 'TYPE(GaussianSphere) in GAUSSIAN_SCALAR_SYNTHESIS'&
+                error stop 'Uninitialized object of class(GaussianSphere) in GAUSSIAN_SCALAR_SYNTHESIS'&
                     //'Error in the specification of NUMBER_OF_LATITUDES'
             case(2)
-                error stop 'TYPE(GaussianSphere) in GAUSSIAN_SCALAR_SYNTHESIS'&
+                error stop 'Uninitialized object of class(GaussianSphere) in GAUSSIAN_SCALAR_SYNTHESIS'&
                     //'Error in the specification of NUMBER_OF_LONGITUDES'
             case(3)
-                error stop 'TYPE(GaussianSphere) in GAUSSIAN_SCALAR_SYNTHESIS'&
+                error stop 'Uninitialized object of class(GaussianSphere) in GAUSSIAN_SCALAR_SYNTHESIS'&
                     //'Invalid extent for SCALAR_BACKWARD'
             case(4)
-                error stop 'TYPE(GaussianSphere) in GAUSSIAN_SCALAR_SYNTHESIS'&
+                error stop 'Uninitialized object of class(GaussianSphere) in GAUSSIAN_SCALAR_SYNTHESIS'&
                     //'Invalid extent for LEGENDRE_WORKSPACE'
             case(5)
-                error stop 'TYPE(GaussianSphere) in GAUSSIAN_SCALAR_SYNTHESIS'&
+                error stop 'Uninitialized object of class(GaussianSphere) in GAUSSIAN_SCALAR_SYNTHESIS'&
                     //'Invalid extent for DWORK'
             case(6)
-                error stop 'TYPE(GaussianSphere) in GAUSSIAN_SCALAR_SYNTHESIS'&
+                error stop 'Uninitialized object of class(GaussianSphere) in GAUSSIAN_SCALAR_SYNTHESIS'&
                     //'Failure in GAQD due to failure in eigenvalue routine'
             case default
-                error stop 'TYPE(GaussianSphere) in GAUSSIAN_SCALAR_SYNTHESIS'&
+                error stop 'Uninitialized object of class(GaussianSphere) in GAUSSIAN_SCALAR_SYNTHESIS'&
                     //'Undetermined error flag'
         end select
 
@@ -325,9 +355,8 @@ contains
 
         ! Check if object is usable
         if (this%initialized .eqv. .false.) then
-            error stop 'TYPE(GaussianSphere): '&
-                //'uninitialized object in '&
-                //'GAUSSIAN_VECTOR_ANALYSIS'
+            error stop 'Uninitialized object of class(GaussianSphere): '&
+                //'in gaussian_vector_analysis'
         end if
 
         !
@@ -359,8 +388,10 @@ contains
                         lwork => size(workspace%legendre_workspace ), &
                         ierror => error_flag &
                         )
+
                         call vhags( nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
                             mdab, ndab, wvhags, lvhags, work, lwork, ierror )
+
                     end associate
                 end select
             end associate
@@ -373,49 +404,49 @@ contains
             case(0)
                 return
             case(1)
-                error stop 'TYPE(GaussianSphere) in '&
+                error stop 'Uninitialized object of class(GaussianSphere) in '&
                     //'GAUSSIAN_VECTOR_ANALYSIS'&
                     //'Error in the specification of NUMBER_OF_LATITUDES'
             case(2)
-                error stop 'TYPE(GaussianSphere) in '&
+                error stop 'Uninitialized object of class(GaussianSphere) in '&
                     //'GAUSSIAN_VECTOR_ANALYSIS'&
                     //'Error in the specification of NUMBER_OF_LONGITUDES'
             case(3)
-                error stop 'TYPE(GaussianSphere) in '&
+                error stop 'Uninitialized object of class(GaussianSphere) in '&
                     //'GAUSSIAN_VECTOR_ANALYSIS'&
                     //'Error in the specification of VECTOR_SYMMETRIES'
             case(4)
-                error stop 'TYPE(GaussianSphere) in '&
+                error stop 'Uninitialized object of class(GaussianSphere) in '&
                     //'GAUSSIAN_VECTOR_ANALYSIS'&
                     //'Error in the specification of NUMBER_OF_synthESES'
             case(5)
-                error stop 'TYPE(GaussianSphere) in '&
+                error stop 'Uninitialized object of class(GaussianSphere) in '&
                     //'GAUSSIAN_VECTOR_ANALYSIS'&
                     //'Invalid DIM=1 extent for '&
                     //'POLAR_COMPONENT (THETA) or AZIMUTHAL_COMPONENT (PHI)'
             case(6)
-                error stop 'TYPE(GaussianSphere) in '&
+                error stop 'Uninitialized object of class(GaussianSphere) in '&
                     //'GAUSSIAN_VECTOR_ANALYSIS'&
                     //'Invalid DIM=2 extent '&
                     //'POLAR_COMPONENT (THETA) or AZIMUTHAL_COMPONENT (PHI)'
             case(7)
-                error stop 'TYPE(GaussianSphere) in '&
+                error stop 'Uninitialized object of class(GaussianSphere) in '&
                     //'GAUSSIAN_VECTOR_ANALYSIS'&
                     //'Invalid DIM=1 extent for BR or CR'
             case(8)
-                error stop 'TYPE(GaussianSphere) in '&
+                error stop 'Uninitialized object of class(GaussianSphere) in '&
                     //'GAUSSIAN_VECTOR_ANALYSIS'&
                     //'Invalid DIM=1 extent for BI or CI'
             case(9)
-                error stop 'TYPE(GaussianSphere) in '&
+                error stop 'Uninitialized object of class(GaussianSphere) in '&
                     //'GAUSSIAN_VECTOR_ANALYSIS'&
                     //'Invalid extent for FORWARD_VECTOR'
             case(10)
-                error stop 'TYPE(GaussianSphere) in '&
+                error stop 'Uninitialized object of class(GaussianSphere) in '&
                     //'GAUSSIAN_VECTOR_ANALYSIS'&
                     //'Invalid extent for LEGENDRE_WORKSPACE'
             case default
-                error stop 'TYPE(GaussianSphere) in '&
+                error stop 'Uninitialized object of class(GaussianSphere) in '&
                     //'GAUSSIAN_VECTOR_ANALYSIS'&
                     //'Undetermined error flag'
         end select
@@ -438,8 +469,8 @@ contains
 
         ! Check if object is usable
         if (this%initialized .eqv. .false.) then
-            error stop 'TYPE(GaussianSphere): '&
-                //'uninitialized object in GAUSSIAN_VECTOR_SYNTHESIS'
+            error stop 'Uninitialized object of class(GaussianSphere): '&
+                //'in gaussian_vector_synthesis'
         end if
 
         !
@@ -485,39 +516,39 @@ contains
             case(0)
                 return
             case(1)
-                error stop 'TYPE(GaussianSphere) in GAUSSIAN_VECTOR_SYNTHESIS'&
+                error stop 'Uninitialized object of class(GaussianSphere) in GAUSSIAN_VECTOR_SYNTHESIS'&
                     //'Error in the specification of NUMBER_OF_LATITUDES'
             case(2)
-                error stop 'TYPE(GaussianSphere) in GAUSSIAN_VECTOR_SYNTHESIS'&
+                error stop 'Uninitialized object of class(GaussianSphere) in GAUSSIAN_VECTOR_SYNTHESIS'&
                     //'Error in the specification of NUMBER_OF_LONGITUDES'
             case(3)
-                error stop 'TYPE(GaussianSphere) in GAUSSIAN_VECTOR_SYNTHESIS'&
+                error stop 'Uninitialized object of class(GaussianSphere) in GAUSSIAN_VECTOR_SYNTHESIS'&
                     //'Error in the specification of VECTOR_SYMMETRIES'
             case(4)
-                error stop 'TYPE(GaussianSphere) in GAUSSIAN_VECTOR_SYNTHESIS'&
+                error stop 'Uninitialized object of class(GaussianSphere) in GAUSSIAN_VECTOR_SYNTHESIS'&
                     //'Error in the specification of NUMBER_OF_synthESES'
             case(5)
-                error stop 'TYPE(GaussianSphere) in GAUSSIAN_VECTOR_SYNTHESIS'&
+                error stop 'Uninitialized object of class(GaussianSphere) in GAUSSIAN_VECTOR_SYNTHESIS'&
                     //'Invalid DIM=1 extent for '&
                     //'POLAR_COMPONENT (THETA) or AZIMUTHAL_COMPONENT (PHI)'
             case(6)
-                error stop 'TYPE(GaussianSphere) in GAUSSIAN_VECTOR_SYNTHESIS'&
+                error stop 'Uninitialized object of class(GaussianSphere) in GAUSSIAN_VECTOR_SYNTHESIS'&
                     //'Invalid DIM=2 extent '&
                     //'POLAR_COMPONENT (THETA) or AZIMUTHAL_COMPONENT (PHI)'
             case(7)
-                error stop 'TYPE(GaussianSphere) in GAUSSIAN_VECTOR_SYNTHESIS'&
+                error stop 'Uninitialized object of class(GaussianSphere) in GAUSSIAN_VECTOR_SYNTHESIS'&
                     //'Invalid DIM=1 extent for BR or CR'
             case(8)
-                error stop 'TYPE(GaussianSphere) in GAUSSIAN_VECTOR_SYNTHESIS'&
+                error stop 'Uninitialized object of class(GaussianSphere) in GAUSSIAN_VECTOR_SYNTHESIS'&
                     //'Invalid DIM=1 extent for BI or CI'
             case(9)
-                error stop 'TYPE(GaussianSphere) in GAUSSIAN_VECTOR_SYNTHESIS'&
+                error stop 'Uninitialized object of class(GaussianSphere) in GAUSSIAN_VECTOR_SYNTHESIS'&
                     //'Invalid extent for BACKWARD_VECTOR'
             case(10)
-                error stop 'TYPE(GaussianSphere) in GAUSSIAN_VECTOR_SYNTHESIS'&
+                error stop 'Uninitialized object of class(GaussianSphere) in GAUSSIAN_VECTOR_SYNTHESIS'&
                     //'Invalid extent for LEGENDRE_WORKSPACE'
             case default
-                error stop 'TYPE(GaussianSphere) in GAUSSIAN_VECTOR_SYNTHESIS'&
+                error stop 'Uninitialized object of class(GaussianSphere) in GAUSSIAN_VECTOR_SYNTHESIS'&
                     //'Undetermined error flag'
         end select
 
@@ -556,15 +587,17 @@ contains
 
         ! Check if object is usable
         if (this%initialized .eqv. .false.) then
-            error stop 'TYPE(GaussianSphere): '&
-                //'uninitialized object in GET_SURFACE_INTEGRAL'
+            error stop 'Uninitialized object of class(GaussianSphere): '&
+                //'in get_surface_integral'
         end if
 
         !
         !==> Allocate memory
         !
         associate( nlat => this%NUMBER_OF_LATITUDES )
+
             allocate(summation(nlat))
+
         end associate
 
         !
@@ -587,7 +620,8 @@ contains
                     end do
                     !
                     !==> Apply gaussian quadrature
-                    !summation = summation * wts
+                    !
+                    summation = summation * wts
                 end associate
             end select
         end associate
@@ -622,8 +656,8 @@ contains
 
         ! Check if object is usable
         if (this%initialized .eqv. .false.) then
-            error stop 'TYPE(GaussianSphere): '&
-                //'uninitialized object in COMPUTE_FIRST_MOMENT'
+            error stop 'Uninitialized object of class(GaussianSphere): '&
+                //'in compute_first_moment'
         end if
 
         ! Allocate  memory

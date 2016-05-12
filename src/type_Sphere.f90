@@ -28,6 +28,8 @@ module type_Sphere
     private
     public :: Sphere
 
+
+
     ! Declare derived data type
     type, abstract, public :: Sphere
         !----------------------------------------------------------------------
@@ -117,6 +119,8 @@ module type_Sphere
     end type Sphere
 
 
+
+
     abstract interface
         subroutine scalar_analysis(this, scalar_function)
             import :: Sphere, wp
@@ -124,7 +128,7 @@ module type_Sphere
             ! Dictionary: calling arguments
             !----------------------------------------------------------------------
             class (Sphere), intent (in out) :: this
-            real (wp),      intent (in)    :: scalar_function(:,:)
+            real (wp),      intent (in)     :: scalar_function(:,:)
             !----------------------------------------------------------------------
         end subroutine scalar_analysis
 
@@ -162,7 +166,11 @@ module type_Sphere
     end interface
 
 
+
+
 contains
+
+
 
 
     subroutine create_sphere(this, nlat, nlon, ntrunc, isym, itype, isynt, rsphere)
@@ -247,6 +255,7 @@ contains
                 !==> Precompute vorticity and divergence coefficients
                 !
                 sqnn = [ (sqrt(real((n - 1) * n, kind=wp)/rsphere), n=1, nlat) ]
+
             end associate
         end associate
         !
@@ -254,12 +263,14 @@ contains
         !
         associate( &
             grid => this%grid, &
-            workspace => this%workspace, &
             trig_func => this%trigonometric_functions, &
             unit_vectors => this%unit_vectors &
             )
-            call trig_func%create(grid)
-            call unit_vectors%create(grid, trig_func)
+
+            trig_func = TrigonometricFunctions(grid)
+
+            unit_vectors = SphericalUnitVectors(grid)
+
         end associate
 
         !
@@ -391,8 +402,11 @@ contains
         !==>  compute the (real) spherical harmonic coefficients
         !
         associate( f => scalar_function )
+
             call this%perform_scalar_analysis(f)
+
         end associate
+
         !
         !==> Set complex spherical harmonic coefficients
         !
@@ -402,10 +416,12 @@ contains
             b => this%workspace%imaginary_harmonic_coefficients, &
             psi => this%complex_spectral_coefficients &
             )
+
             psi = 0.5_wp * cmplx( &
                 [((a(m+1, n+1), n=m, ntrunc), m=0, ntrunc)], &
                 [((b(m+1, n+1), n=m, ntrunc), m=0, ntrunc)], &
                 kind=wp )
+
         end associate
 
     end subroutine perform_complex_analysis

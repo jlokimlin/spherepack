@@ -69,15 +69,32 @@ program tvrt
     !----------------------------------------------------------------------
     ! Dictionary
     !----------------------------------------------------------------------
-    type (GaussianSphere) :: gaussian_sphere
-    type (RegularSphere)  :: regular_sphere
+    class (Sphere), allocatable :: sphere_dat
     !----------------------------------------------------------------------
 
-    call test_vorticity_routines(gaussian_sphere)
-    call test_vorticity_routines(regular_sphere)
+    !
+    !==> Test gaussian case
+    !
+    allocate( GaussianSphere :: sphere_dat )
+
+    call test_vorticity_routines(sphere_dat)
+
+    deallocate( sphere_dat )
+
+    !
+    !==> Test regular case
+    !
+    allocate( RegularSphere :: sphere_dat )
+
+    call test_vorticity_routines(sphere_dat)
+
+    deallocate( sphere_dat )
+
 
 
 contains
+
+
 
     subroutine test_vorticity_routines(sphere_type )
         !----------------------------------------------------------------------
@@ -106,32 +123,23 @@ contains
         !==> Set up workspace arrays
         !
         select type (sphere_type)
-            !
-            !==> For gaussian sphere
-            !
-            class is (GaussianSphere)
+            type is (GaussianSphere)
 
-            !
-            !==> Initialize gaussian sphere object
-            !
-            call sphere_type%create(nlat=NLATS, nlon=NLONS)
+            ! Initialize gaussian sphere object
+            sphere_type = GaussianSphere(NLATS, NLONS)
 
             ! Allocate known error from previous platform
-            allocate( previous_vorticity_error, source='     vorticity error     = 8.246182e-14' )
+            allocate( previous_vorticity_error, source='     vorticity error     = 8.257284e-14' )
             allocate( previous_polar_inversion_error, source='     polar inversion error     = 1.998401e-15' )
             allocate( previous_azimuthal_inversion_error, source='     azimuthal inversion error = 4.107825e-15' )
-            !
-            !==> For regular sphere
-            !
-            class is (RegularSphere)
 
-            !
-            !==> Initialize regular sphere object
-            !
-            call sphere_type%create(nlat=NLATS, nlon=NLONS)
+            type is (RegularSphere)
+
+            ! Initialize regular sphere object
+            sphere_type = RegularSphere(NLATS, NLONS)
 
             ! Allocate known error from previous platform
-            allocate( previous_vorticity_error, source='     vorticity error     = 2.420286e-14' )
+            allocate( previous_vorticity_error, source='     vorticity error     = 2.375877e-14' )
             allocate( previous_polar_inversion_error, source='     polar inversion error     = 1.110223e-15' )
             allocate( previous_azimuthal_inversion_error, source='     azimuthal inversion error = 1.887379e-15' )
         end select

@@ -70,12 +70,26 @@ program tvlap
     !----------------------------------------------------------------------
     ! Dictionary
     !----------------------------------------------------------------------
-    type (GaussianSphere) :: gaussian_sphere
-    type (RegularSphere)  :: regular_sphere
+    class (Sphere), allocatable :: sphere_dat
     !----------------------------------------------------------------------
 
-    call test_vector_laplacian_routines( gaussian_sphere )
-    call test_vector_laplacian_routines( regular_sphere )
+    !
+    !==> Test gaussian case
+    !
+    allocate( GaussianSphere :: sphere_dat )
+
+    call test_vector_laplacian_routines(sphere_dat)
+
+    deallocate( sphere_dat )
+
+    !
+    !==> Test regular case
+    !
+    allocate( RegularSphere :: sphere_dat )
+
+    call test_vector_laplacian_routines(sphere_dat)
+
+    deallocate( sphere_dat )
 
 
 contains
@@ -109,26 +123,21 @@ contains
         !==> Set up workspace arrays
         !
         select type (sphere_type)
-            !
-            !==> For gaussian sphere
-            !
-            class is (GaussianSphere)
+            type is (GaussianSphere)
 
             !  Initialize gaussian sphere object
-            call sphere_type%create(nlat=NLATS, nlon=NLONS)
+            sphere_type = GaussianSphere(NLATS,NLONS)
 
             ! Allocate known error from previous platform
             allocate( previous_polar_laplacian_error, source='     polar laplacian error     = 1.760814e-12' )
             allocate( previous_azimuthal_laplacian_error, source='     azimuthal laplacian error = 8.715251e-13' )
             allocate( previous_polar_inversion_error, source='     polar inversion error     = 6.661338e-16' )
             allocate( previous_azimuthal_inversion_error, source='     azimuthal inversion error = 7.216450e-16' )
-            !
-            !==> For regular sphere
-            !
-            class is (RegularSphere)
+
+            type is (RegularSphere)
 
             ! Initialize regular sphere
-            call sphere_type%create(nlat=NLATS, nlon=NLONS)
+            sphere_type = RegularSphere(NLATS, NLONS)
 
             ! Allocate known error from previous platform
             allocate( previous_polar_laplacian_error, source='     polar laplacian error     = 3.113065e-13' )
@@ -170,16 +179,18 @@ contains
             end do
         end associate
 
-        !
-        !==> Compute vector laplacian
-        !
+
         associate( &
             ve => original_polar_component, &
             we => original_azimuthal_component, &
             vlap => approximate_polar_laplacian, &
             wlap => approximate_azimuthal_laplacian &
             )
+            !
+            !==> Compute vector laplacian
+            !
             call sphere_type%get_laplacian(ve, we, vlap, wlap)
+
         end associate
 
         !
