@@ -654,9 +654,14 @@ subroutine shaes1(nlat, isym, nt, g, idgs, jdgs, a, b, mdab, ndab, &
 end subroutine shaes1
 
 
-
 subroutine shaesi(nlat, nlon, wshaes, lshaes, work, lwork, dwork, &
     ldwork, ierror)
+    !
+    ! Remarks:
+    !
+    ! size(wshaes) = (l*(l+1)*imid)/2+nlon+15
+    ! size(work) = 5*l*imid + 3*((l-3)*l+2)/2
+    !
     ! External routines: sea1, hrffti
     use, intrinsic :: iso_fortran_env, only: &
         wp => REAL64, &
@@ -676,69 +681,86 @@ subroutine shaesi(nlat, nlon, wshaes, lshaes, work, lwork, dwork, &
     integer (ip), intent (in)     :: ldwork
     integer (ip), intent (out)    :: ierror
     !----------------------------------------------------------------------
+    ! Dictionary: local variables
+    !----------------------------------------------------------------------
+    integer (ip) :: mmax, imid, labc, lzimn
+    integer (ip) :: workspace_indices(3)
+    !----------------------------------------------------------------------
 
-    !
-    !==> Remarks:
-    !    length of wshaes is (l*(l+1)*imid)/2+nlon+15
-    !    length of work is 5*l*imid + 3*((l-3)*l+2)/2
-    !
-
+    mmax = min(nlat, nlon/2+1)
+    imid = (nlat+1)/2
+    labc = 3*((mmax-2)*(2*nlat-mmax-1))/2
+    lzimn = (imid*mmax*(2*nlat-mmax+1))/2
     !
     !==> Check validity of input values
     !
-
-    ! Initialize error flag
-    ierror = 0
-
-    ! Check case 1
     if (nlat < 3) then
         ierror = 1
         return
-    end if
-
-    ! Check case 2
-    if (nlon < 4) then
+    else if (nlon < 4) then
         ierror = 2
         return
+    else if (lshaes < lzimn+nlon+15) then
+        ierror = 3
+        return
+    else if (lwork < 5*nlat*imid + labc) then
+        ierror = 4
+        return
+    else if (ldwork < nlat+1) then
+        ierror = 5
+        return
+    else
+        ierror = 0
     end if
 
+    !
+    !==> Set workspace indices
+    !
+    workspace_indices = get_workspace_indices(nlat, nlon, mmax, imid, lzimn)
+    !
+    !==> Compute workspace
+    !
     associate( &
-        mmax => min(nlat, nlon/2+1), &
-        imid => (nlat+1)/2 &
+        idz => workspace_indices(1), &
+        iw1 => workspace_indices(2), &
+        iw2 => workspace_indices(3) &
         )
-        associate( lzimn => (imid*mmax*(nlat+nlat-mmax+1))/2 )
 
-            ! Check case 3
-            if (lshaes < lzimn+nlon+15) then
-                ierror = 3
-                return
-            end if
+        call sea1(nlat, nlon, imid, wshaes, idz, work, work(iw1), dwork)
+        call hrffti(nlon, wshaes(iw2))
 
-            ! Check case 4
-            associate( labc => 3*((mmax-2)*(nlat+nlat-mmax-1))/2 )
-                if (lwork < 5*nlat*imid + labc) then
-                    ierror = 4
-                    return
-                end if
-            end associate
-
-            ! Check case 5
-            if (ldwork < nlat+1) then
-                ierror = 5
-                return
-            end if
-
-            !
-            !==> Compute workspace
-            !
-            associate( &
-                iw1 => 3*nlat*imid+1, &
-                idz => (mmax*(nlat+nlat-mmax+1))/2 &
-                )
-                call sea1(nlat, nlon, imid, wshaes, idz, work, work(iw1), dwork)
-                call hrffti(nlon, wshaes(lzimn+1))
-            end associate
-        end associate
     end associate
+
+
+contains
+
+
+    pure function get_workspace_indices(nlat, nlon, mmax, imid, lzimn) &
+        result (return_value)
+        !----------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !----------------------------------------------------------------------
+        integer (ip), intent (in) :: nlat
+        integer (ip), intent (in) :: nlon
+        integer (ip), intent (in) :: mmax
+        integer (ip), intent (in) :: imid
+        integer (ip), intent (in) :: lzimn
+        integer (ip)              :: return_value(3)
+        !----------------------------------------------------------------------
+
+
+        associate( &
+            idz => return_value(1), &
+            iw1 => return_value(2), &
+            iw2 => return_value(3) &
+            )
+
+            idz = (mmax*(2*nlat-mmax+1))/2
+            iw1 = 3*nlat*imid+1
+            iw2 = lzimn + 1
+
+        end associate
+
+    end function get_workspace_indices
 
 end subroutine shaesi
