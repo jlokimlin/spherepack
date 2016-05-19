@@ -349,96 +349,70 @@ subroutine shaes(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, &
 
     !
     !==> Set constants
+    !
     mmax = min(nlat, nlon/2+1)
     imid = (nlat+1)/2
     idz = (mmax*(nlat+nlat-mmax+1))/2
     lzimn = idz*imid
-    ls = nlat
 
-    if (isym > 0) then
-        ls = imid
-    end if
+    !
+    !==> Set calling argument for analysis
+    !
+    select case (isym)
+        case (0)
+            ls = nlat
+            ist = imid
+        case default
+            ls = imid
+            ist = 0
+    end select
 
     nln = nt*ls*nlon
 
     !
     !==> Check validity of input arguments
     !
-
-    ! Initialize error flag
-    ierror = 0
-
-    ! Check case 1
     if (nlat < 3) then
         ierror = 1
         return
-    end if
-
-    ! Check case 2
-    if (nlon < 4) then
+    else if (nlon < 4) then
         ierror = 2
         return
-    end if
-
-    ! Check case 3
-    if (isym < 0 .or. isym > 2) then
+    else if (isym < 0 .or. isym > 2) then
         ierror = 3
         return
-    end if
-
-    ! Check case 4
-    if (nt < 0) then
+    else if (nt < 0) then
         ierror = 4
         return
-    end if
-
-    ! Check case 5
-    if ((isym == 0 .and. idg < nlat) .or. &
-        (isym /= 0 .and. idg < (nlat+1)/2)) then
+    else if ( &
+        (isym == 0 .and. idg < nlat) &
+        .or. &
+        (isym /= 0 .and. idg < (nlat+1)/2) &
+        ) then
         ierror = 5
         return
-    end if
-
-    ! Check case 6
-    if (jdg < nlon) then
+    else if (jdg < nlon) then
         ierror = 6
         return
-    end if
-
-
-    ! Check case 7
-    if (mdab < mmax) then
+    else if (mdab < mmax) then
         ierror = 7
         return
-    end if
-
-    ! Check case 8
-    if (ndab < nlat) then
+    else if (ndab < nlat) then
         ierror = 8
         return
-    end if
-
-    ! Check case 9
-    if (lshaes < lzimn+nlon+15) then
+    else if(lshaes < lzimn+nlon+15) then
         ierror = 9
         return
-    end if
-
-    ! Check case 10
-    if (lwork < nln+ls*nlon) then
+    else if (lwork < nln+ls*nlon) then
         ierror = 10
         return
+    else
+        ierror = 0
     end if
 
-    ! Set calling argument for analsyis
-    select case (isym)
-        case (0)
-            ist = imid
-        case default
-            ist = 0
-    end select
-
-
+    !
+    !==> Perform analysis
+    !
     call shaes1(nlat, isym, nt, g, idg, jdg, a, b, mdab, ndab, wshaes, idz, &
         ls, nlon, work, work(ist+1), work(nln+1), wshaes(lzimn+1))
 
@@ -487,10 +461,11 @@ subroutine shaes1(nlat, isym, nt, g, idgs, jdgs, a, b, mdab, ndab, &
     ls = idg
     nlon = jdg
     mmax = min(nlat, nlon/2+1)
-    mdo = mmax
 
-    if (mdo+mdo-1 > nlon) then
+    if (2*mmax-1 > nlon) then
         mdo = mmax-1
+    else
+        mdo = mmax
     end if
 
     nlp1 = nlat+1
@@ -498,56 +473,49 @@ subroutine shaes1(nlat, isym, nt, g, idgs, jdgs, a, b, mdab, ndab, &
     fsn = 4.0_wp/nlon
     imid = (nlat+1)/2
     modl = mod(nlat, 2)
-    imm1 = imid
 
     if (modl /= 0) then
         imm1 = imid-1
+    else
+        imm1 = imid
     end if
 
-    if (isym /= 0) then
-        go to 15
-    end if
+    if_block: block
 
-    do k=1, nt
-        do i=1, imm1
-            do j=1, nlon
-                ge(i, j, k) = tsn*(g(i, j, k)+g(nlp1-i, j, k))
-                go(i, j, k) = tsn*(g(i, j, k)-g(nlp1-i, j, k))
+        if (isym == 0) then
+            do k=1, nt
+                do i=1, imm1
+                    ge(i,1:nlon,k) = tsn*(g(i,1:nlon,k)+g(nlp1-i,1:nlon,k))
+                    go(i,1:nlon,k) = tsn*(g(i,1:nlon,k)-g(nlp1-i,1:nlon,k))
+                end do
             end do
-        end do
-    end do
-    go to 30
-    15 do k=1, nt
-        do i=1, imm1
-            do j=1, nlon
-                ge(i, j, k) = fsn*g(i, j, k)
+        else
+            do k=1, nt
+                ge(1:imm1,1:nlon,k) = fsn*g(1:imm1,1:nlon,k)
             end do
-        end do
-    end do
 
-    if (isym == 1) then
-        go to 27
-    end if
-
-30  if (modl == 0) then
-        go to 27
-    end if
-
-    do k=1, nt
-        do j=1, nlon
-            ge(imid, j, k) = tsn*g(imid, j, k)
-        end do
-    end do
-
-    27 do k=1, nt
-        call hrfftf(ls, nlon, ge(1, 1, k), ls, whrfft, work)
-        if (mod(nlon, 2) /= 0) then
-            exit
+            if (isym == 1) then
+                exit if_block
+            end if
         end if
-        do i=1, ls
-            ge(i, nlon, k) = 0.5_wp * ge(i, nlon, k)
-        end do
-    end do
+
+        if (modl /= 0) then
+            do k=1, nt
+                ge(imid, 1:nlon, k) = tsn*g(imid,1:nlon, k)
+            end do
+        end if
+
+    end block if_block
+
+    fft_loop: do k=1, nt
+
+        call hrfftf(ls, nlon, ge(1, 1, k), ls, whrfft, work)
+
+        if (mod(nlon, 2) /= 0) exit fft_loop
+
+        ge(1:ls, nlon, k) = 0.5_wp * ge(1:ls, nlon, k)
+
+    end do fft_loop
 
     do k=1, nt
         do mp1=1, mmax
@@ -558,56 +526,55 @@ subroutine shaes1(nlat, isym, nt, g, idgs, jdgs, a, b, mdab, ndab, &
         end do
     end do
 
-    if (isym == 1) then
-        go to 145
-    end if
+    if (isym /= 1) then
 
-    do k=1, nt
-        do i=1, imid
-            do np1=1, nlat, 2
-                a(1, np1, k) = a(1, np1, k)+z(np1, i)*ge(i, 1, k)
-            end do
-        end do
-    end do
-
-    ndo = nlat
-
-    if (mod(nlat, 2) == 0) then
-        ndo = nlat-1
-    end if
-
-    do mp1=2, mdo
-        m = mp1-1
-        mb = m*(nlat-1)-(m*(m-1))/2
         do k=1, nt
             do i=1, imid
-                do np1=mp1, ndo, 2
-                    a(mp1, np1, k) = a(mp1, np1, k)+z(np1+mb, i)*ge(i, 2*mp1-2, k)
-                    b(mp1, np1, k) = b(mp1, np1, k)+z(np1+mb, i)*ge(i, 2*mp1-1, k)
+                do np1=1, nlat, 2
+                    a(1, np1, k) = a(1, np1, k)+z(np1, i)*ge(i, 1, k)
                 end do
             end do
         end do
-    end do
 
-    if (mdo == mmax .or. mmax > ndo) then
-        go to 135
-    end if
 
-    mb = mdo*(nlat-1)-(mdo*(mdo-1))/2
+        if (mod(nlat, 2) == 0) then
+            ndo = nlat-1
+        else
+            ndo = nlat
+        end if
 
-    do k=1, nt
-        do i=1, imid
-            do np1=mmax, ndo, 2
-                a(mmax, np1, k) = a(mmax, np1, k)+z(np1+mb, i)*ge(i, 2*mmax-2, k)
+        do mp1=2, mdo
+            m = mp1-1
+            mb = m*(nlat-1)-(m*(m-1))/2
+            do k=1, nt
+                do i=1, imid
+                    do np1=mp1, ndo, 2
+                        a(mp1, np1, k) = a(mp1, np1, k)+z(np1+mb, i)*ge(i, 2*mp1-2, k)
+                        b(mp1, np1, k) = b(mp1, np1, k)+z(np1+mb, i)*ge(i, 2*mp1-1, k)
+                    end do
+                end do
             end do
         end do
-    end do
 
-135 if (isym == 2) then
-        return
+        if (mdo /= mmax .and. mmax <= ndo) then
+
+            mb = mdo*(nlat-1)-(mdo*(mdo-1))/2
+
+            do k=1, nt
+                do i=1, imid
+                    do np1=mmax, ndo, 2
+                        a(mmax, np1, k) = a(mmax, np1, k)+z(np1+mb, i)*ge(i, 2*mmax-2, k)
+                    end do
+                end do
+            end do
+
+        end if
+
+        if (isym == 2) return
+
     end if
 
-    145 do k=1, nt
+    do k=1, nt
         do i=1, imm1
             do np1=2, nlat, 2
                 a(1, np1, k) = a(1, np1, k)+z(np1, i)*go(i, 1, k)
@@ -615,10 +582,10 @@ subroutine shaes1(nlat, isym, nt, g, idgs, jdgs, a, b, mdab, ndab, &
         end do
     end do
 
-    ndo = nlat
-
     if (mod(nlat, 2) /= 0) then
         ndo = nlat-1
+    else
+        ndo = nlat
     end if
 
     do mp1=2, mdo
@@ -637,9 +604,7 @@ subroutine shaes1(nlat, isym, nt, g, idgs, jdgs, a, b, mdab, ndab, &
 
     mp2 = mmax+1
 
-    if (mdo == mmax .or. mp2 > ndo) then
-        return
-    end if
+    if (mdo == mmax .or. mp2 > ndo)  return
 
     mb = mdo*(nlat-1)-(mdo*(mdo-1))/2
 
