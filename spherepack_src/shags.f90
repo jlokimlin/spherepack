@@ -895,77 +895,102 @@ contains
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
-        integer (ip) :: l, i1, i2, i3, l1, l2, i4, i5, i6, i7
-        integer (ip) :: iw, late, idth, idwts
+        integer (ip) :: ntrunc, l1, l2, late
+        integer (ip) :: workspace_indices(10)
         !----------------------------------------------------------------------
 
+        !
+        !==> Compute constants
+        !
+
+        ! Set triangular truncation limit for spherical harmonic basis
+        ntrunc = min((nlon+2)/2, nlat)
+
+        ! Set equator or nearest point (if excluded) pointer
+        late = (nlat+mod(nlat, 2))/2
+        l1 = ntrunc
+        l2 = late
 
         !
         !==> Check validity of input arguments
         !
-
-        ! Initialize error flag
-        ierror = 0
-
-        ! Check case 1
         if (nlat < 3) then
             ierror = 1
             return
-        end if
-
-        ! Check case 2
-        if (nlon < 4) then
+        else if (nlon < 4) then
             ierror = 2
             return
-        end if
-        !     set triangular truncation limit for spherical harmonic basis
-        l = min((nlon+2)/2, nlat)
-        !     set equator or nearest point (if excluded) pointer
-        late = (nlat+mod(nlat, 2))/2
-        l1 = l
-        l2 = late
-
-        ! Check case 3: permanent work space length
-        if (lshags < nlat*(2*l2+3*l1-2)+3*l1*(1-l1)/2+nlon+15) then
+        else if (lshags < nlat*(2*l2+3*l1-2)+3*l1*(1-l1)/2+nlon+15) then
             ierror = 3
             return
-        end if
-
-        ! Check case 4
-        if (ldwork < nlat*(nlat+4)) then
+        else if (ldwork < nlat*(nlat+4)) then
             ierror = 4
             return
+        else
+            ierror = 0
         end if
 
         !
-        !==> set pointers
+        !==> Compute workspace index pointers
         !
-        i1 = 1
-        i2 = i1+nlat
-        i3 = i2+nlat*late
-        i4 = i3+nlat*late
-        i5 = i4+l*(l-1)/2 +(nlat-l)*(l-1)
-        i6 = i5+l*(l-1)/2 +(nlat-l)*(l-1)
-        i7 = i6+l*(l-1)/2 +(nlat-l)*(l-1)
+        workspace_indices = get_workspace_indices(nlat, late, ntrunc)
 
-        !
-        !==> set indices in temp work for real gaussian wts and pts
-        !
-        idth = 1
-        idwts = idth + nlat
-        iw = idwts + nlat
+        associate( &
+            i1 => workspace_indices(1), &
+            i2 => workspace_indices(2), &
+            i3 => workspace_indices(3), &
+            i4 => workspace_indices(4), &
+            i5 => workspace_indices(5), &
+            i6 => workspace_indices(6), &
+            i7 => workspace_indices(7), &
+            idth => workspace_indices(8), &
+            idwts => workspace_indices(9), &
+            iw => workspace_indices(10) &
+            )
 
+            call shagsp1(nlat, nlon, ntrunc, late, wshags(i1), wshags(i2), wshags(i3), &
+                wshags(i4), wshags(i5), wshags(i6), wshags(i7), dwork(idth), &
+                dwork(idwts), dwork(iw), ierror)
 
-        call shagsp1(nlat, nlon, l, late, wshags(i1), wshags(i2), wshags(i3), &
-            wshags(i4), wshags(i5), wshags(i6), wshags(i7), dwork(idth), &
-            dwork(idwts), dwork(iw), ierror)
+        end associate
 
-        ! Check case 6
+        ! Check error of lower routine call
         if (ierror /= 0) then
             ierror = 6
+            return
         end if
 
     end subroutine shagsp
+
+
+
+    pure function get_workspace_indices(nlat, late, l) result (return_value)
+        !----------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !----------------------------------------------------------------------
+        integer (ip), intent (in)  :: nlat
+        integer (ip), intent (in)  :: late
+        integer (ip), intent (in)  :: l
+        integer (ip)               :: return_value(10)
+        !----------------------------------------------------------------------
+
+        associate( i => return_value )
+            i(1) = 1
+            i(2) = i(1)+nlat
+            i(3) = i(2)+nlat*late
+            i(4) = i(3)+nlat*late
+            i(5) = i(4)+l*(l-1)/2 +(nlat-l)*(l-1)
+            i(6) = i(5)+l*(l-1)/2 +(nlat-l)*(l-1)
+            i(7) = i(6)+l*(l-1)/2 +(nlat-l)*(l-1)
+            !
+            !==> set indices in temp work for real gaussian wts and pts
+            !
+            i(8) = 1
+            i(9) = nlat + 1
+            i(10) = 2*nlat + 1
+        end associate
+
+    end function get_workspace_indices
 
 
 
@@ -1061,9 +1086,10 @@ contains
         do n=2, nlat
             mlim = min(n, l)
             do  m=2, mlim
-                imn = (n-1)*(n-2)/2+m-1
                 if (n >= l) then
                     imn = l*(l-1)/2+(n-l-1)*(l-1)+m-1
+                else
+                    imn = (n-1)*(n-2)/2+m-1
                 end if
                 abel(imn)=sqrt(real((2*n+1)*(m+n-2)*(m+n-3))/ &
                     real(((2*n-3)*(m+n-1)*(m+n))))
