@@ -9,7 +9,7 @@
 !     *                                                               *
 !     *                      SPHEREPACK version 3.2                   *
 !     *                                                               *
-!     *       A Package of Fortran77 Subroutines and Programs         *
+!     *       A Package of Fortran Subroutines and Programs           *
 !     *                                                               *
 !     *              for Modeling Geophysical Processes               *
 !     *                                                               *
@@ -30,10 +30,10 @@
 !     * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !
 !
-! ... file hrfft.f
+! ... file hrfft.f90
 !
-!     this file contains a multiple fft package for spherepack. it
-!     includes code and documentation for performing fast fourier
+!     This file contains a multiple fft package for spherepack. It
+!     includes code and documentation for performing fast Fourier
 !     transforms (see subroutines hrffti, hrfftf and hrfftb)
 !
 ! **********************************************************************
