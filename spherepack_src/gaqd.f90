@@ -96,11 +96,12 @@ subroutine gaqd(nlat, theta, wts, w, lwork, ierror)
     !----------------------------------------------------------------------
     ! Dictionary: local variables
     !----------------------------------------------------------------------
-    integer (ip)         :: i, idx, it, mnlat, nix
-    integer (ip)         :: nhalf, ns2
+    integer (ip)         :: i, idx, it, nix
+    integer (ip)         :: nhalf, half_nlat
     real (wp), parameter :: PI = acos(-1.0_wp)
     real (wp), parameter :: HALF_PI = PI/2
-    real (wp)            :: dtheta, dthalf, cmax
+    real (wp), parameter :: ONE_OVER_SQRT3 = 1.0_wp/sqrt(3.0_wp)
+    real (wp)            :: dt, half_dt, cmax
     real (wp)            :: zprev, zlast, zero
     real (wp)            :: zhold, pb, dpb, dcor, cz
     real (wp)            :: eps, sgnd
@@ -121,75 +122,70 @@ subroutine gaqd(nlat, theta, wts, w, lwork, ierror)
     !
     select case (nlat)
         case(1)
-            theta(1) = acos(0.0_wp)
-            wts(1) = 2.0_wp
+            theta = HALF_PI
+            wts = 2.0_wp
         case(2)
-            associate( x => sqrt(1.0_wp/3.0_wp) )
-
-                theta(1) = acos(x)
-                theta(2) = acos(-x)
-
-            end associate
-
-            wts(1:2) = 1.0_wp
-
+            theta(1) = acos(ONE_OVER_SQRT3)
+            theta(2) = acos(-ONE_OVER_SQRT3)
+            wts = 1.0_wp
         case default
 
             eps = sqrt(epsilon(1.0_wp))
             eps = eps * sqrt(eps)
-            mnlat = mod(nlat, 2)
-            ns2 = nlat/2
+            half_nlat = nlat/2
             nhalf = (nlat+1)/2
-            idx = ns2+2
+            idx = half_nlat+2
 
-            call cpdp(nlat, cz, theta(ns2+1), wts(ns2+1))
+            call cpdp(nlat, cz, theta(half_nlat+1), wts(half_nlat+1))
 
-            dtheta = HALF_PI/nhalf
-            dthalf = dtheta/2
-            cmax = 0.2_wp * dtheta
+            dt = HALF_PI/nhalf
+            half_dt = dt/2
+            cmax = 0.2_wp * dt
             !
             !==> Estimate first point next to theta = pi/2
             !
-            if (mnlat /= 0) then
-                zero = HALF_PI-dtheta
-                zprev = HALF_PI
-                nix = nhalf-1
-            else
-                zero = HALF_PI-dthalf
-                nix = nhalf
-            end if
+            select case (mod(nlat,2))
+                case (0)
+                    !
+                    !==> nlat even
+                    !
+                    zero = HALF_PI-half_dt
+                    nix = nhalf
+                case default
+                    !
+                    !==> nlat odd
+                    !
+                    zero = HALF_PI-dt
+                    zprev = HALF_PI
+                    nix = nhalf-1
+            end select
 
-            outer_loop: do
+
+            start_iteration: do
                 it = 0
-                inner_loop: do
+                newton_iteration: do
                     it = it+1
                     zlast = zero
                     !
                     !==> Newton iterations
                     !
-                    call tpdp(nlat, zero, cz, theta(ns2+1), wts(ns2+1), pb, dpb)
+                    call tpdp(nlat, zero, cz, theta(half_nlat+1), wts(half_nlat+1), pb, dpb)
 
                     dcor = pb/dpb
                     sgnd = 1.0_wp
 
-                    if (dcor /= 0.0_wp) then
-                        sgnd = dcor/abs(dcor)
-                    end if
+                    if (dcor /= 0.0_wp) sgnd = dcor/abs(dcor)
 
                     dcor = sgnd * min(abs(dcor), cmax)
                     zero = zero-dcor
 
-
-                    if (abs(zero-zlast) - eps*abs(zero) > 0.0_wp) then
-                        !
-                        !==> Repeat iteration
-                        !
-                        cycle inner_loop
-                    end if
+                    !
+                    !==> Repeat iteration
+                    !
+                    if (abs(zero-zlast) - eps*abs(zero) > 0.0_wp) cycle newton_iteration
 
                     theta(nix) = zero
                     zhold = zero
-                    !    wts(nix) = (nlat+nlat+1)/(dpb*dpb)
                     !
                     ! ==> yakimiw's formula permits using old pb and dpb
                     !
@@ -200,9 +196,7 @@ subroutine gaqd(nlat, theta, wts, w, lwork, ierror)
 
                         if (nix == nhalf-1)  then
                             zero = 3.0_wp * zero - PI
-                        end if
-
-                        if (nix < nhalf-1)  then
+                        else if (nix < nhalf-1)  then
                             zero = 2.0_wp * zero-zprev
                         end if
 
@@ -211,27 +205,27 @@ subroutine gaqd(nlat, theta, wts, w, lwork, ierror)
                         !
                         !==> Re-initialize loop
                         !
-                        cycle outer_loop
+                        cycle start_iteration
 
                     end if
-                    exit inner_loop
-                end do inner_loop
-                exit outer_loop
-            end do outer_loop
+                    exit newton_iteration
+                end do newton_iteration
+                exit start_iteration
+            end do start_iteration
             !
             !==> Extend points and weights via symmetries
             !
-            if (mnlat /= 0) then
+            if (mod(nlat,2) /= 0) then
 
                 theta(nhalf) = HALF_PI
 
-                call tpdp(nlat, HALF_PI, cz, theta(ns2+1), wts(ns2+1), pb, dpb)
+                call tpdp(nlat, HALF_PI, cz, theta(half_nlat+1), wts(half_nlat+1), pb, dpb)
 
                 wts(nhalf) = real(2*nlat+1, kind=wp)/(dpb**2)
 
             end if
 
-            do i=1, ns2
+            do i=1, half_nlat
                 wts(nlat-i+1) = wts(i)
                 theta(nlat-i+1) = PI-theta(i)
             end do
@@ -272,19 +266,23 @@ pure subroutine cpdp(n, cz, cp, dcp)
     !----------------------------------------------------------------------
     ! Dictionary: local variables
     !----------------------------------------------------------------------
-    integer (ip) :: j !! Counter
+    integer (ip) :: j, ncp !! Counter
     real (wp)    :: t1, t2, t3, t4
     !----------------------------------------------------------------------
 
-    associate( ncp => (n+1)/2 )
+    ncp = (n+1)/2
+    t1 = -1.0_wp
+    t2 = real(n + 1, kind=wp)
+    t3 = 0.0_wp
+    t4 = real(2*n + 1, kind=wp)
 
-        t1 = -1.0_wp
-        t2 = real(n + 1, kind=wp)
-        t3 = 0.0_wp
-        t4 = real(2*n + 1, kind=wp)
-
-        if (mod(n, 2) == 0) then
+    select case (mod(n,2))
+        case (0)
+            !
+            !==> n even
+            !
             cp(ncp) = 1.0_wp
+
             do j = ncp, 2, -1
                 t1 = t1+2.0_wp
                 t2 = t2-1.0_wp
@@ -292,15 +290,21 @@ pure subroutine cpdp(n, cz, cp, dcp)
                 t4 = t4-2.0_wp
                 cp(j-1) = (t1*t2)/(t3*t4)*cp(j)
             end do
+
             t1 = t1+2.0_wp
             t2 = t2-1.0_wp
             t3 = t3+1.0_wp
             t4 = t4-2.0_wp
             cz = (t1*t2)/(t3*t4)*cp(1)
+
             do j=1, ncp
                 dcp(j) = real(2*j, kind=wp)*cp(j)
             end do
-        else
+
+        case default
+            !
+            !==> odd
+            !
             cp(ncp) = 1.0_wp
             do j = ncp-1, 1, -1
                 t1 = t1+2.0_wp
@@ -309,11 +313,12 @@ pure subroutine cpdp(n, cz, cp, dcp)
                 t4 = t4-2.0_wp
                 cp(j) = (t1*t2)/(t3*t4)*cp(j+1)
             end do
+
             do j=1, ncp
                 dcp(j) = real(2*j-1, kind=wp)*cp(j)
             end do
-        end if
-    end associate
+
+    end select
 
 end subroutine cpdp
 
@@ -344,15 +349,14 @@ pure subroutine tpdp(n, theta, cz, cp, dcp, pb, dpb)
     ! Dictionary: calling arguments
     !----------------------------------------------------------------------
     integer (ip) :: k, kdo
-    real (wp)    :: chh, cth, sth
+    real (wp)    :: cost, sint, cos2t, sin2t, temp
     !----------------------------------------------------------------------
 
-    associate( &
-        cdt => cos(2.0_wp * theta), &
-        sdt => sin(2.0_wp * theta) &
-        )
+    cos2t = cos(2.0_wp * theta)
+    sin2t = sin(2.0_wp * theta)
 
-        if (mod(n, 2) == 0) then
+    select case (mod(n,2))
+        case (0)
             !
             !==> n even
             !
@@ -360,33 +364,32 @@ pure subroutine tpdp(n, theta, cz, cp, dcp, pb, dpb)
             pb = 0.5_wp * cz
             dpb = 0.0_wp
             if (n > 0) then
-                cth = cdt
-                sth = sdt
+                cost = cos2t
+                sint = sin2t
                 do k=1, kdo
-                    pb = pb+cp(k)*cth
-                    dpb = dpb-dcp(k)*sth
-                    chh = cdt*cth-sdt*sth
-                    sth = sdt*cth+cdt*sth
-                    cth = chh
+                    pb = pb+cp(k)*cost
+                    dpb = dpb-dcp(k)*sint
+                    temp = cos2t*cost-sin2t*sint
+                    sint = sin2t*cost+cos2t*sint
+                    cost = temp
                 end do
             end if
-        else
+        case default
             !
             !==> n odd
             !
             kdo = (n + 1)/2
             pb = 0.0_wp
             dpb = 0.0_wp
-            cth = cos(theta)
-            sth = sin(theta)
+            cost = cos(theta)
+            sint = sin(theta)
             do k=1, kdo
-                pb = pb+cp(k)*cth
-                dpb = dpb-dcp(k)*sth
-                chh = cdt*cth-sdt*sth
-                sth = sdt*cth+cdt*sth
-                cth = chh
+                pb = pb+cp(k)*cost
+                dpb = dpb-dcp(k)*sint
+                temp = cos2t*cost-sin2t*sint
+                sint = sin2t*cost+cos2t*sint
+                cost = temp
             end do
-        end if
-    end associate
+    end select
 
 end subroutine tpdp

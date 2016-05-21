@@ -8,7 +8,7 @@ ENFORCE_64_BIT_PRECISION = \
 -fdefault-double-8
 
 F90 = gfortran 
-FFLAG = -O3 $(ENFORCE_64_BIT_PRECISION)
+FFLAG =  -O3 $(ENFORCE_64_BIT_PRECISION)
 
 $(LIB_OLD_SPHEREPACK) : $(OBJS)
 	$(AR) -rv $@ $?

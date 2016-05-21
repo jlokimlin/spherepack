@@ -181,83 +181,73 @@ subroutine lfin1(init, theta, l, m, nm, id, p3, phz, ph1, p1, p2, cp)
     !----------------------------------------------------------------------
     nmp1 = nm+1
 
-    if (init /= 0) go to 5
+    select case (init)
+        case (0)
+
+            phz(:, 1) = ONE_OVER_SQRT2
+
+            do np1=2, nmp1
+                nh = np1-1
+                call alfk(nh, 0, cp)
+                do i=1, l
+                    call lfpt(nh, 0, theta(i), cp, phz(i, np1))
+                end do
+                call alfk(nh, 1, cp)
+                do i=1, l
+                    call lfpt(nh, 1, theta(i), cp, ph1(i, np1))
+                end do
+            end do
+
+        case default
+            mp1 = m+1
+            fm = real(m)
+            tm = fm+fm
+
+            if (m < 1) then
+
+                p3(:,1:nmp1) = phz(:,1:nmp1)
+                p1(:, 1:nmp1) = phz(:,1:nmp1)
+
+            else if (m == 1) then
+
+                p3(:, 2:nmp1) = ph1(:,2:nmp1)
+                p2(:,2:nmp1) = ph1(:,2:nmp1)
+
+            else
+                temp = tm*(tm-1.0)
+                cc = sqrt((tm+1.0)*(tm-2.0)/temp)
+                ee = sqrt(2.0/temp)
+                p3(:, m+1) = cc*p1(:, m-1)-ee*p1(:, m+1)
+
+                if (m == nm) return
 
 
-    phz(:, 1) = ONE_OVER_SQRT2
+                temp = tm*(tm+1.0)
+                cc = sqrt((tm+3.0)*(tm-2.0)/temp)
+                ee = sqrt(6.0/temp)
+                p3(:, m+2) = cc*p1(:, m)-ee*p1(:, m+2)
+                mp3 = m+3
 
-    do np1=2, nmp1
-        nh = np1-1
-        call alfk(nh, 0, cp)
-        do i=1, l
-            call lfpt(nh, 0, theta(i), cp, phz(i, np1))
-        end do
-        call alfk(nh, 1, cp)
-        do i=1, l
-            call lfpt(nh, 1, theta(i), cp, ph1(i, np1))
-        end do
-    end do
-    return
+                if (nmp1 >= mp3) then
+                    do np1=mp3, nmp1
+                        n = np1-1
+                        fn = real(n)
+                        tn = fn+fn
+                        cn = (tn+1.0)/(tn-3.0)
+                        fnpm = fn+fm
+                        fnmm = fn-fm
+                        temp = fnpm*(fnpm-1.0)
+                        cc = sqrt(cn*(fnpm-3.0)*(fnpm-2.0)/temp)
+                        dd = sqrt(cn*fnmm*(fnmm-1.0)/temp)
+                        ee = sqrt((fnmm+1.0)*(fnmm+2.0)/temp)
+                        p3(:, np1) = cc*p1(:, np1-2)+dd*p3(:, np1-2)-ee*p1(:, np1)
+                    end do
+                end if
 
-5   mp1 = m+1
-    fm = real(m)
-    tm = fm+fm
-    if (m-1< 0) then
-        goto 25
-    else if (m-1 == 0) then 
-        goto 30
-    else 
-        goto 35
-    end if
+                p1(:,m:nmp1) = p2(:,m:nmp1)
+                p2(:,m:nmp1) = p3(:,m:nmp1)
 
-    25 do np1=1, nmp1
-        p3(:, np1) = phz(:, np1)
-        p1(:, np1) = phz(:, np1)
-    end do
-    return
-
-    30 do np1=2, nmp1
-        p3(:, np1) = ph1(:, np1)
-        p2(:, np1) = ph1(:, np1)
-    end do
-    return
-
-35  temp = tm*(tm-1.0)
-    cc = sqrt((tm+1.0)*(tm-2.0)/temp)
-    ee = sqrt(2.0/temp)
-    p3(:, m+1) = cc*p1(:, m-1)-ee*p1(:, m+1)
-
-    if (m == nm) then
-        return
-    end if
-
-    temp = tm*(tm+1.0)
-    cc = sqrt((tm+3.0)*(tm-2.0)/temp)
-    ee = sqrt(6.0/temp)
-    p3(:, m+2) = cc*p1(:, m)-ee*p1(:, m+2)
-    mp3 = m+3
-
-    if (nmp1 < mp3) then
-        go to 80
-    end if
-
-    do np1=mp3, nmp1
-        n = np1-1
-        fn = real(n)
-        tn = fn+fn
-        cn = (tn+1.0)/(tn-3.0)
-        fnpm = fn+fm
-        fnmm = fn-fm
-        temp = fnpm*(fnpm-1.0)
-        cc = sqrt(cn*(fnpm-3.0)*(fnpm-2.0)/temp)
-        dd = sqrt(cn*fnmm*(fnmm-1.0)/temp)
-        ee = sqrt((fnmm+1.0)*(fnmm+2.0)/temp)
-        p3(:, np1) = cc*p1(:, np1-2)+dd*p3(:, np1-2)-ee*p1(:, np1)
-    end do
-
-    80 do np1=m, nmp1
-        p1(:, np1) = p2(:, np1)
-        p2(:, np1) = p3(:, np1)
-    end do
+            end if
+    end select
 
 end subroutine lfin1

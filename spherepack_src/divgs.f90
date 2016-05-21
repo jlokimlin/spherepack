@@ -226,52 +226,104 @@
 subroutine divgs(nlat, nlon, isym, nt, divg, idiv, jdiv, br, bi, mdb, ndb, &
     wshsgs, lshsgs, work, lwork, ierror)
 
-    dimension divg(idiv, jdiv, nt), br(mdb, ndb, nt), bi(mdb, ndb, nt)
-    dimension wshsgs(lshsgs), work(lwork)
+    use, intrinsic :: iso_fortran_env, only: &
+        wp => REAL64, &
+        ip => INT32
+
+    implicit none
+    !----------------------------------------------------------------------
+    ! Dictionary: calling arguments
+    !----------------------------------------------------------------------
+    integer (ip), intent (in)     :: nlat
+    integer (ip), intent (in)     :: nlon
+    integer (ip), intent (in)     :: isym
+    integer (ip), intent (in)     :: nt
+    real (wp),    intent (in out) :: divg(idiv, jdiv, nt)
+    integer (ip), intent (in)     :: idiv
+    integer (ip), intent (in)     :: jdiv
+    real (wp),    intent (in out) :: br(mdb, ndb, nt)
+    real (wp),    intent (in out) :: bi(mdb, ndb, nt)
+    integer (ip), intent (in)     :: mdb
+    integer (ip), intent (in)     :: ndb
+    real (wp),    intent (in out) :: wshsgs(lshsgs)
+    integer (ip), intent (in)     :: lshsgs
+    real (wp),    intent (in out) :: work(lwork)
+    integer (ip), intent (in)     :: lwork
+    integer (ip), intent (out)    :: ierror
+    !----------------------------------------------------------------------
+    ! Dictionary: calling arguments
+    !----------------------------------------------------------------------
+    integer (ip) :: l1, l2, ia, ib, mn, lp
+    integer (ip) :: is, ls, mab, nln
+    integer (ip) :: iwk, lwk, imid, mmax, lpimn
+    !------------------------------------------------------------------------
+
     !
-    !     check input parameters
+    !==> Compute constants
     !
-    ierror = 1
-    if (nlat < 3) return
-    ierror = 2
-    if (nlon < 4) return
-    ierror = 3
-    if (isym < 0 .or. isym > 2) return
-    ierror = 4
-    if (nt < 0) return
-    ierror = 5
     imid = (nlat+1)/2
-    if ((isym == 0 .and. idiv<nlat) .or. &
-        (isym>0 .and. idiv<imid)) return
-    ierror = 6
-    if (jdiv < nlon) return
-    ierror = 7
-    if (mdb < min(nlat, (nlon+1)/2)) return
     mmax = min(nlat, (nlon+2)/2)
-    ierror = 8
-    if (ndb < nlat) return
-    ierror = 9
-    imid = (nlat+1)/2
-    lpimn = (imid*mmax*(nlat+nlat-mmax+1))/2
-    !     check permanent work space length
+    lpimn = (imid*mmax*(2*nlat-mmax+1))/2
     l2 = (nlat+1)/2
     l1 = min((nlon+2)/2, nlat)
     lp=nlat*(3*(l1+l2)-2)+(l1-1)*(l2*(2*nlat-l1)-3*l1)/2+nlon+15
-    if (lshsgs < lp) return
-    ierror = 10
     !
-    !     verify unsaved work space (add to what shses requires, file f3)
+    !==> verify unsaved work space (add to what shses requires, file f3)
     !
-    ls = nlat
-    if (isym > 0) ls = imid
+    select case (isym)
+        case (0)
+            ls = nlat
+        case default
+            ls = imid
+    end select
+
     nln = nt*ls*nlon
     !
-    !     set first dimension for a, b (as requried by shses)
+    !==> set first dimension for a, b (as requried by shses)
     !
     mab = min(nlat, nlon/2+1)
     mn = mab*nlat*nt
-    if (lwork < nln+ls*nlon+2*mn+nlat) return
-    ierror = 0
+
+    !
+    !==> Check validity of input parameters
+    !
+    if (nlat < 3) then
+        ierror = 1
+        return
+    else if (nlon < 4) then
+        ierror = 2
+        return
+    else if (isym < 0 .or. isym > 2) then
+        ierror = 3
+        return
+    else if (nt < 0) then
+        ierror = 4
+        return
+    else if (&
+        (isym == 0 .and. idiv < nlat) &
+        .or. &
+        (isym > 0 .and. idiv < imid) &
+        ) then
+        ierror = 5
+        return
+    else if (jdiv < nlon) then
+        ierror = 6
+        return
+    else if (mdb < min(nlat, (nlon+1)/2)) then
+        ierror = 7
+        return
+    else if (ndb < nlat) then
+        ierror = 8
+        return
+    else if (lshsgs < lp) then
+        ierror = 9
+        return
+    else if (lwork < nln+ls*nlon+2*mn+nlat) then
+        ierror = 10
+        return
+    else
+        ierror = 0
+    end if
     !
     !     set work space pointers
     !
