@@ -215,12 +215,9 @@ subroutine hrffti(n, wsave)
     real (wp),    intent (in out) :: wsave(n+15)
     !----------------------------------------------------------------------
 
-    select case (n)
-        case (1)
-            return
-        case default
-            call hrfti1(n, wsave(1), wsave(n+1))
-    end select
+    if (n /= 1) then
+        call hrfti1(n, wsave(1), wsave(n+1))
+    end if
                                                                  !
 end subroutine hrffti
 
@@ -240,100 +237,96 @@ subroutine hrfti1(n, wa, fac)
     !----------------------------------------------------------------------
     ! Dictionary: calling arguments
     !----------------------------------------------------------------------
-    integer (ip), intent (in)     :: n
-    real (wp),    intent (in out) :: wa(n)
-    real (wp),    intent (in out) :: fac(15)
-    !----------------------------------------------------------------------
-    ! Dictionary: calling arguments
-    !----------------------------------------------------------------------
-    integer (ip), parameter :: ntryh(4) = [4, 2, 3, 5]
-    integer (ip)            :: i, j, k1, l1, l2, ib
-    integer (ip)            :: ld, ii, nf, ip_rename, nl, is, nq, nr
+    integer (ip), intent (in)  :: n
+    real (wp),    intent (out) :: wa(n)
+    real (wp),    intent (out) :: fac(15)
+    !--------------------------------------------------------------
+    ! Dictionary: local variables
+    !--------------------------------------------------------------
+    integer (ip)            :: i, ib, ido, ii, iip, ipm, is
+    integer (ip)            :: j, k1, l1, l2, ld
+    integer (ip)            :: nf, nfm1, nl, nq, nr, ntry
+    integer (ip), parameter :: ntryh(*)=[ 4, 2, 3, 5]
     real (wp),    parameter :: TWO_PI = 2.0_wp * acos(-1.0_wp)
-    integer (ip)            :: fi, ido, ipm, nfm1, ntry
-    real (wp)               :: arg, argh, argld
-    !----------------------------------------------------------------------
-                     !
-    nl = n                                                                  !
+    real (wp)               :: arg,  argh, argld, fi
+    !--------------------------------------------------------------
+
+    ntry = 0
+    nl = n
     nf = 0
     j = 0
-101 j = j+1
 
-    if (j-4 <= 0) then
-        goto 102
-    else
-        goto 103
-    end if
+    factorize_loop: do
+        ! Increment j
+        j = j+1
 
-102 ntry = ntryh(j)
-    go to 104
-103 ntry = ntry+2
-104 nq = nl/ntry
-    nr = nl-ntry*nq
+        ! Choose ntry
+        if (j <= 4) then
+            ntry = ntryh(j)
+        else
+            ntry = ntry+2
+        end if
 
-    if (nr < 0) then
-        goto 101
-    else if (nr == 0) then
-        goto 105
-    else
-        goto 101
-    end if
+        inner_loop: do
+            nq = nl/ntry
+            nr = nl-ntry*nq
+            if (nr < 0) then
+                cycle factorize_loop
+            else if (nr == 0) then
+                nf = nf+1
+                fac(nf+2) = ntry
+                nl = nq
 
-105 nf = nf+1
-    fac(nf+2) = real(ntry, kind=wp)
-    nl = nq
+                if (ntry == 2 .and. nf /= 1) then
+                    do i=2,nf
+                        ib = nf-i+2
+                        fac(ib+2) = fac(ib+1)
+                    end do
+                    fac(3) = 2
+                end if
 
-    if (ntry /= 2) then
-        go to 107
-    end if
+                if (nl /= 1) then
+                    cycle inner_loop
+                end if
+            else
+                cycle factorize_loop
+            end if
+            exit inner_loop
+        end do inner_loop
+        exit factorize_loop
+    end do factorize_loop
 
-    if (nf == 1) then
-        go to 107
-    end if
-
-    do i=2, nf
-        ib = nf-i+2
-        fac(ib+2) = fac(ib+1)
-    end do
-    fac(3) = 2.0_wp
-
-107 if (nl /= 1) then
-        go to 104
-    end if
-
-    fac(1) = real(n, kind=wp)
-    fac(2) = real(nf, kind=wp)
+    fac(1) = n
+    fac(2) = nf
     argh = TWO_PI/n
     is = 0
     nfm1 = nf-1
     l1 = 1
 
-    if (nfm1 == 0) then
-        return
-    end if
-
-    do k1=1, nfm1
-        ip_rename = int(fac(k1+2), kind=ip)
-        ld = 0
-        l2 = l1*ip_rename
-        ido = n/l2
-        ipm = ip_rename-1
-        do j=1, ipm
-            ld = ld+l1
-            i = is
-            argld = real(ld, kind=wp)*argh
-            fi = 0.0_wp
-            do ii=3, ido, 2
-                i = i + 2
-                fi = fi + 1.0_wp
-                arg = fi * argld
-                wa(i-1) = cos(arg)
-                wa(i) = sin(arg)
+    if (nfm1 /= 0) then
+        do k1=1,nfm1
+            iip = int(fac(k1+2), kind=ip)
+            ld = 0
+            l2 = l1*iip
+            ido = n/l2
+            ipm = iip-1
+            do j=1,ipm
+                ld = ld+l1
+                i = is
+                argld = real(ld, kind=wp) * argh
+                fi = 0.0_wp
+                do ii=3,ido,2
+                    i = i+2
+                    fi = fi + 1.0_wp
+                    arg = fi*argld
+                    wa(i-1) = cos(arg)
+                    wa(i) = sin(arg)
+                end do
+                is = is+ido
             end do
-            is = is+ido
+            l1 = l2
         end do
-        l1 = l2
-    end do
+    end if
 
 end subroutine hrfti1
 
