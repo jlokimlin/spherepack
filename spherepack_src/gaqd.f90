@@ -101,7 +101,7 @@ subroutine gaqd(nlat, theta, wts, w, lwork, ierror)
     real (wp), parameter :: PI = acos(-1.0_wp)
     real (wp), parameter :: HALF_PI = PI/2
     real (wp), parameter :: ONE_OVER_SQRT3 = 1.0_wp/sqrt(3.0_wp)
-    real (wp)            :: dt, half_dt, cmax
+    real (wp)            :: dt, half_dt
     real (wp)            :: zprev, zlast, zero
     real (wp)            :: zhold, pb, dpb, dcor, cz
     real (wp)            :: eps, sgnd
@@ -140,7 +140,6 @@ subroutine gaqd(nlat, theta, wts, w, lwork, ierror)
 
             dt = HALF_PI/nhalf
             half_dt = dt/2
-            cmax = 0.2_wp * dt
             !
             !==> Estimate first point next to theta = pi/2
             !
@@ -176,7 +175,7 @@ subroutine gaqd(nlat, theta, wts, w, lwork, ierror)
 
                     if (dcor /= 0.0_wp) sgnd = dcor/abs(dcor)
 
-                    dcor = sgnd * min(abs(dcor), cmax)
+                    dcor = sgnd * min(abs(dcor), 0.2_wp * dt)
                     zero = zero-dcor
 
                     !
@@ -236,136 +235,144 @@ subroutine gaqd(nlat, theta, wts, w, lwork, ierror)
             wts = 2.0_wp * wts/sum(wts)
     end select
 
-end subroutine gaqd
+
+contains
 
 
-pure subroutine cpdp(n, cz, cp, dcp)
-    !
-    ! Purpose:
-    !
-    ! Computes the fourier coefficients of the legendre
-    ! polynomial p_n^0 and its derivative.
-    ! n is the degree and n/2 or (n+1)/2
-    ! coefficients are returned in cp depending on whether
-    ! n is even or odd. The same number of coefficients
-    ! are returned in dcp. For n even the constant
-    ! coefficient is returned in cz.
-    !
-    use, intrinsic :: iso_fortran_env, only: &
-        wp => REAL64, &
-        ip => INT32
+    pure subroutine cpdp(n, cz, cp, dcp)
+        !
+        ! Purpose:
+        !
+        ! Computes the fourier coefficients of the legendre
+        ! polynomial p_n^0 and its derivative.
+        ! n is the degree and n/2 or (n+1)/2
+        ! coefficients are returned in cp depending on whether
+        ! n is even or odd. The same number of coefficients
+        ! are returned in dcp. For n even the constant
+        ! coefficient is returned in cz.
+        !
+        !----------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !----------------------------------------------------------------------
+        integer (ip), intent (in)  :: n
+        real (wp),    intent (out) :: cz
+        real (wp),    intent (out) :: cp(n/2+1)
+        real (wp),    intent (out) :: dcp(n/2+1)
+        !----------------------------------------------------------------------
+        ! Dictionary: local variables
+        !----------------------------------------------------------------------
+        integer (ip) :: j, ncp !! Counter
+        real (wp)    :: t1, t2, t3, t4
+        !----------------------------------------------------------------------
 
-    implicit none
-    !----------------------------------------------------------------------
-    ! Dictionary: calling arguments
-    !----------------------------------------------------------------------
-    integer (ip), intent (in)  :: n
-    real (wp),    intent (out) :: cz
-    real (wp),    intent (out) :: cp(n/2+1)
-    real (wp),    intent (out) :: dcp(n/2+1)
-    !----------------------------------------------------------------------
-    ! Dictionary: local variables
-    !----------------------------------------------------------------------
-    integer (ip) :: j, ncp !! Counter
-    real (wp)    :: t1, t2, t3, t4
-    !----------------------------------------------------------------------
+        ncp = (n+1)/2
+        t1 = -1.0_wp
+        t2 = real(n + 1, kind=wp)
+        t3 = 0.0_wp
+        t4 = real(2*n + 1, kind=wp)
 
-    ncp = (n+1)/2
-    t1 = -1.0_wp
-    t2 = real(n + 1, kind=wp)
-    t3 = 0.0_wp
-    t4 = real(2*n + 1, kind=wp)
+        select case (mod(n,2))
+            case (0)
+                !
+                !==> n even
+                !
+                cp(ncp) = 1.0_wp
 
-    select case (mod(n,2))
-        case (0)
-            !
-            !==> n even
-            !
-            cp(ncp) = 1.0_wp
+                do j = ncp, 2, -1
+                    t1 = t1+2.0_wp
+                    t2 = t2-1.0_wp
+                    t3 = t3+1.0_wp
+                    t4 = t4-2.0_wp
+                    cp(j-1) = (t1*t2)/(t3*t4)*cp(j)
+                end do
 
-            do j = ncp, 2, -1
                 t1 = t1+2.0_wp
                 t2 = t2-1.0_wp
                 t3 = t3+1.0_wp
                 t4 = t4-2.0_wp
-                cp(j-1) = (t1*t2)/(t3*t4)*cp(j)
-            end do
+                cz = (t1*t2)/(t3*t4)*cp(1)
 
-            t1 = t1+2.0_wp
-            t2 = t2-1.0_wp
-            t3 = t3+1.0_wp
-            t4 = t4-2.0_wp
-            cz = (t1*t2)/(t3*t4)*cp(1)
+                do j=1, ncp
+                    dcp(j) = real(2*j, kind=wp)*cp(j)
+                end do
 
-            do j=1, ncp
-                dcp(j) = real(2*j, kind=wp)*cp(j)
-            end do
+            case default
+                !
+                !==> odd
+                !
+                cp(ncp) = 1.0_wp
+                do j = ncp-1, 1, -1
+                    t1 = t1+2.0_wp
+                    t2 = t2-1.0_wp
+                    t3 = t3+1.0_wp
+                    t4 = t4-2.0_wp
+                    cp(j) = (t1*t2)/(t3*t4)*cp(j+1)
+                end do
 
-        case default
-            !
-            !==> odd
-            !
-            cp(ncp) = 1.0_wp
-            do j = ncp-1, 1, -1
-                t1 = t1+2.0_wp
-                t2 = t2-1.0_wp
-                t3 = t3+1.0_wp
-                t4 = t4-2.0_wp
-                cp(j) = (t1*t2)/(t3*t4)*cp(j+1)
-            end do
+                do j=1, ncp
+                    dcp(j) = real(2*j-1, kind=wp)*cp(j)
+                end do
 
-            do j=1, ncp
-                dcp(j) = real(2*j-1, kind=wp)*cp(j)
-            end do
+        end select
 
-    end select
-
-end subroutine cpdp
+    end subroutine cpdp
 
 
-pure subroutine tpdp(n, theta, cz, cp, dcp, pb, dpb)
-    !
-    ! Purpose:
-    !
-    ! Computes pn(theta) and its derivative dpb(theta) with
-    ! respect to theta
-    !
-    use, intrinsic :: iso_fortran_env, only: &
-        wp => REAL64, &
-        ip => INT32
+    pure subroutine tpdp(n, theta, cz, cp, dcp, pb, dpb)
+        !
+        ! Purpose:
+        !
+        ! Computes pn(theta) and its derivative dpb(theta) with
+        ! respect to theta
+        !
+        !----------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !----------------------------------------------------------------------
+        integer (ip), intent (in)  :: n
+        real (wp),    intent (in)  :: theta
+        real (wp),    intent (in)  :: cz
+        real (wp),    intent (in)  :: cp(n/2+1)
+        real (wp),    intent (in)  :: dcp(n/2+1)
+        real (wp),    intent (out) :: pb
+        real (wp),    intent (out) :: dpb
+        !----------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !----------------------------------------------------------------------
+        integer (ip) :: k, kdo
+        real (wp)    :: cost, sint, cos2t, sin2t, temp
+        !----------------------------------------------------------------------
 
-    implicit none
-    !----------------------------------------------------------------------
-    ! Dictionary: calling arguments
-    !----------------------------------------------------------------------
-    integer (ip), intent (in)  :: n
-    real (wp),    intent (in)  :: theta
-    real (wp),    intent (in)  :: cz
-    real (wp),    intent (in)  :: cp(n/2+1)
-    real (wp),    intent (in)  :: dcp(n/2+1)
-    real (wp),    intent (out) :: pb
-    real (wp),    intent (out) :: dpb
-    !----------------------------------------------------------------------
-    ! Dictionary: calling arguments
-    !----------------------------------------------------------------------
-    integer (ip) :: k, kdo
-    real (wp)    :: cost, sint, cos2t, sin2t, temp
-    !----------------------------------------------------------------------
+        cos2t = cos(2.0_wp * theta)
+        sin2t = sin(2.0_wp * theta)
 
-    cos2t = cos(2.0_wp * theta)
-    sin2t = sin(2.0_wp * theta)
-
-    select case (mod(n,2))
-        case (0)
-            !
-            !==> n even
-            !
-            kdo = n/2
-            pb = 0.5_wp * cz
-            dpb = 0.0_wp
-            if (n > 0) then
-                cost = cos2t
-                sint = sin2t
+        select case (mod(n,2))
+            case (0)
+                !
+                !==> n even
+                !
+                kdo = n/2
+                pb = 0.5_wp * cz
+                dpb = 0.0_wp
+                if (n > 0) then
+                    cost = cos2t
+                    sint = sin2t
+                    do k=1, kdo
+                        pb = pb+cp(k)*cost
+                        dpb = dpb-dcp(k)*sint
+                        temp = cos2t*cost-sin2t*sint
+                        sint = sin2t*cost+cos2t*sint
+                        cost = temp
+                    end do
+                end if
+            case default
+                !
+                !==> n odd
+                !
+                kdo = (n + 1)/2
+                pb = 0.0_wp
+                dpb = 0.0_wp
+                cost = cos(theta)
+                sint = sin(theta)
                 do k=1, kdo
                     pb = pb+cp(k)*cost
                     dpb = dpb-dcp(k)*sint
@@ -373,23 +380,8 @@ pure subroutine tpdp(n, theta, cz, cp, dcp, pb, dpb)
                     sint = sin2t*cost+cos2t*sint
                     cost = temp
                 end do
-            end if
-        case default
-            !
-            !==> n odd
-            !
-            kdo = (n + 1)/2
-            pb = 0.0_wp
-            dpb = 0.0_wp
-            cost = cos(theta)
-            sint = sin(theta)
-            do k=1, kdo
-                pb = pb+cp(k)*cost
-                dpb = dpb-dcp(k)*sint
-                temp = cos2t*cost-sin2t*sint
-                sint = sin2t*cost+cos2t*sint
-                cost = temp
-            end do
-    end select
+        end select
 
-end subroutine tpdp
+    end subroutine tpdp
+
+end subroutine gaqd
