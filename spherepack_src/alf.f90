@@ -8,7 +8,7 @@
 !     *                                                               *
 !     *                      SPHEREPACK version 3.2                   *
 !     *                                                               *
-!     *       A Package of Fortran77 Subroutines and Programs         *
+!     *       A Package of Fortran Subroutines and Programs           *
 !     *                                                               *
 !     *              for Modeling Geophysical Processes               *
 !     *                                                               *
@@ -114,145 +114,132 @@
 !                        places was obtained for n=10 and to 13
 !                        places for n=100.
 !
-subroutine alfk (n, m, cp)
+pure subroutine alfk (n, m, cp)
+
+    use, intrinsic :: iso_fortran_env, only: &
+        ip => INT32, &
+        wp => REAL64
+
     implicit none
     !----------------------------------------------------------------------
     ! Dictionary: calling arguments
     !----------------------------------------------------------------------
-    integer, intent (in)    :: n
-    integer, intent (in)    :: m
-    real,    intent (out)   :: cp(n/2+1)
+    integer (ip), intent (in)   :: n
+    integer (ip), intent (in)   :: m
+    real (wp),    intent (out)  :: cp(n/2+1)
     !----------------------------------------------------------------------
     ! Dictionary: local variables
     !----------------------------------------------------------------------
-    integer         :: i, l, ma, nex, nmms2
-    real, parameter :: sc10 = 1024.0
-    real, parameter :: sc20 = sc10**2
-    real, parameter :: sc40 = sc20**2
-    real            :: a1, b1, c1, t1, t2
-    real            :: fk, cp2, pm1
-    real            :: fden, fnmh, fnum, fnnp1, fnmsq
+    integer (ip)         :: i, l, ma, nex, nmms2
+    real (wp), parameter :: sc10 = 1024.0
+    real (wp), parameter :: sc20 = sc10**2
+    real (wp), parameter :: sc40 = sc20**2
+    real (wp)            :: a1, b1, c1, t1, t2
+    real (wp)            :: fk, cp2, pm1
+    real (wp)            :: fden, fnmh, fnum, fnnp1, fnmsq
     !----------------------------------------------------------------------
 
-    cp(1) = 0.0
+    cp(1) = 0.0_wp
     ma = abs(m)
 
-    if (ma > n) then
-        return
-    end if
+    if (ma > n) return
 
-    if (n-1 < 0) then
-        go to 2
-    else if (n-1 == 0) then
-        go to 3
-    else 
-        go to 5
-    end if
-
-2   cp(1) = sqrt(2.0)
-    return
-
-3   if (ma /= 0) then
-        go to 4
-    end if
-
-    cp(1) = sqrt(1.5)
-    return
-
-4   cp(1) = sqrt(0.75)
-
-    if (m == -1) then
-        cp(1) = -cp(1)
-    end if
-
-    return
-
-5   if (mod(n+ma, 2) /= 0) then
-        go to 10
-    end if
-
-    nmms2 = (n-ma)/2
-    fnum = n+ma+1
-    fnmh = n-ma+1
-    pm1 = 1.0
-    go to 15
-
-10  nmms2 = (n-ma-1)/2
-    fnum = n+ma+2
-    fnmh = n-ma+2
-    pm1 = -1.0
-
-15  t1 = 1.0/sc20
-    nex = 20
-    fden = 2.0
-    if (nmms2 < 1) then
-        go to 20
-    end if
-
-    do  i=1, nmms2
-        t1 = fnum*t1/fden
-        if (t1 > sc20) then
-            t1 = t1/sc40
-            nex = nex+40
+    if (n < 1) then
+        !
+        !==> n less than 1
+        !
+        cp(1) = sqrt(2.0_wp)
+    else if (n == 1) then
+        !
+        !==> n equals 1
+        !
+        if (ma == 0) then
+            cp(1) = sqrt(1.5_wp)
+        else
+            cp(1) = sqrt(0.75_wp)
+            select case (m)
+                case (-1)
+                    cp(1) = -cp(1)
+            end select
         end if
-        fnum = fnum+2.0
-        fden = fden+2.0
-    end do
+    else
+        !
+        !==> n greater than 1
+        !
+        select case (mod(n+ma,2))
+            case (0)
+                nmms2 = (n-ma)/2
+                fnum = n+ma+1
+                fnmh = n-ma+1
+                pm1 = 1.0
+            case default
+                nmms2 = (n-ma-1)/2
+                fnum = n+ma+2
+                fnmh = n-ma+2
+                pm1 = -1.0
+        end select
 
-20  t1 = t1/2.0**(n-1-nex)
+        t1 = 1.0_wp/sc20
+        nex = 20
+        fden = 2.0_wp
 
-    if (mod(ma/2, 2) /= 0) then
-        t1 = -t1
+        if (nmms2 >= 1) then
+            do  i=1, nmms2
+                t1 = fnum*t1/fden
+                if (t1 > sc20) then
+                    t1 = t1/sc40
+                    nex = nex+40
+                end if
+                fnum = fnum+2.0_wp
+                fden = fden+2.0_wp
+            end do
+        end if
+
+        t1 = t1/2.0_wp**(n-1-nex)
+
+        if (mod(ma/2, 2) /= 0) t1 = -t1
+
+        t2 = 1.0_wp
+
+        if (ma /= 0) then
+            do  i=1, ma
+                t2 = fnmh*t2/(fnmh+pm1)
+                fnmh = fnmh+2.0_wp
+            end do
+        end if
+
+        cp2 = t1*sqrt((real(n, kind=wp)+0.5_wp)*t2)
+        fnnp1 = real(n*(n+1), kind=wp)
+        fnmsq = fnnp1-2.0_wp*(ma**2)
+        l = (n+1)/2
+
+        if (mod(n,2) == 0 .and. mod(ma,2) == 0) l = l+1
+
+        cp(l) = cp2
+
+        if ((m < 0) .and. (mod(ma, 2) /= 0)) cp(l) = -cp(l)
+
+        if (l <= 1) return
+
+        fk = n
+        a1 = (fk-2.0_wp)*(fk-1.0_wp)-fnnp1
+        b1 = 2.0_wp*(fk**2-fnmsq)
+        cp(l-1) = b1*cp(l)/a1
+
+        do
+            l = l-1
+
+            if (l <= 1) return
+
+            fk = fk-2.0
+            a1 = (fk-2.0)*(fk-1.0)-fnnp1
+            b1 = -2.0*(fk*fk-fnmsq)
+            c1 = (fk+1.0)*(fk+2.0)-fnnp1
+            cp(l-1) = -(b1*cp(l)+c1*cp(l+1))/a1
+            cycle
+        end do
+
     end if
-
-    t2 = 1.0
-    if (ma == 0) then
-        go to 26
-    end if
-
-    do  i=1, ma
-        t2 = fnmh*t2/(fnmh+pm1)
-        fnmh = fnmh+2.
-    end do
-
-26  cp2 = t1*sqrt((real(n)+0.5)*t2)
-    fnnp1 = real(n*(n+1))
-    fnmsq = fnnp1-2.0*(ma**2)
-    l = (n+1)/2
-
-    if (mod(n, 2) == 0 .and. mod(ma, 2) == 0) then
-        l = l+1
-    end if
-
-    cp(l) = cp2
-
-    if (m >= 0) then
-        go to 29
-    end if
-
-    if (mod(ma, 2) /= 0) cp(l) = -cp(l)
-
-29  if (l <= 1) then
-        return
-    end if
-
-    fk = n
-    a1 = (fk-2.0)*(fk-1.0)-fnnp1
-    b1 = 2.0*(fk*fk-fnmsq)
-    cp(l-1) = b1*cp(l)/a1
-
-30  l = l-1
-
-    if (l <= 1) then
-        return
-    end if
-
-    fk = fk-2.0
-    a1 = (fk-2.0)*(fk-1.0)-fnnp1
-    b1 = -2.0*(fk*fk-fnmsq)
-    c1 = (fk+1.0)*(fk+2.0)-fnnp1
-    cp(l-1) = -(b1*cp(l)+c1*cp(l+1))/a1
-    go to 30
 
 end subroutine alfk
 
@@ -349,160 +336,179 @@ end subroutine alfk
 !                        notes by paul n. swarztrauber)
 !
 subroutine lfim(init, theta, l, n, nm, pb, id, wlfim)
+
+    use, intrinsic :: iso_fortran_env, only: &
+        ip => INT32, &
+        wp => REAL64
+
     implicit none
     !----------------------------------------------------------------------
     ! Dictionary: calling arguments
     !----------------------------------------------------------------------
-    integer, intent (in)     :: init
-    real,    intent (in)     :: theta(*)
-    integer, intent (in)     :: l
-    integer, intent (in)     :: n
-    integer, intent (in)     :: nm
-    real,    intent (in out) :: pb(1)
-    integer, intent (in)     :: id
-    real,    intent (in out) :: wlfim(1)
+    integer (ip), intent (in)     :: init
+    real (wp),    intent (in)     :: theta(*)
+    integer (ip), intent (in)     :: l
+    integer (ip), intent (in)     :: n
+    integer (ip), intent (in)     :: nm
+    real (wp),    intent (in out) :: pb(1)
+    integer (ip), intent (in)     :: id
+    real (wp),    intent (in out) :: wlfim(1)
+    !----------------------------------------------------------------------
+    ! Dictionary: local variables
+    !----------------------------------------------------------------------
+    integer (ip) :: workspace_indices(3)
     !----------------------------------------------------------------------
 
     !
-    !     total length of wlfim is 4*l*(nm+1)
+    !==>  total length of wlfim is 4*l*(nm+1)
     !
-    associate(lnx => l*(nm+1) )
-        associate( iw1=> lnx+1)
-            associate( iw2 => iw1+lnx)
-                associate( iw3 => iw2+lnx)
-                    call lfim1(init, theta, l, n, nm, id, pb, wlfim, wlfim(iw1), &
-                        wlfim(iw2), wlfim(iw3), wlfim(iw2))
-                end associate
-            end associate
-        end associate
+    workspace_indices = get_workspace_indices(l, nm)
+
+
+    associate( &
+        iw1 => workspace_indices(1), &
+        iw2 => workspace_indices(2), &
+        iw3 => workspace_indices(3) &
+        )
+
+        call lfim1(init, theta, l, n, nm, id, pb, wlfim, wlfim(iw1), &
+            wlfim(iw2), wlfim(iw3), wlfim(iw2))
+
     end associate
+
+contains
+
+    pure function get_workspace_indices(l, nm) result (return_value)
+        !----------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !----------------------------------------------------------------------
+        integer (ip), intent (in) :: l
+        integer (ip), intent (in) :: nm
+        integer (ip)              :: return_value(3)
+        !----------------------------------------------------------------------
+        ! Dictionary: local variables
+        !----------------------------------------------------------------------
+        integer (ip) :: lnx
+        !----------------------------------------------------------------------
+
+        associate( i => return_value )
+
+            lnx = l*(nm + 1)
+            i(1) = lnx + 1
+            i(2) = 2*lnx + 1
+            i(3) = 3*lnx + 1
+
+        end associate
+
+    end function get_workspace_indices
 
 end subroutine lfim
 
 
 subroutine lfim1(init, theta, l, n, nm, id, p3, phz, ph1, p1, p2, cp)
+
+    use, intrinsic :: iso_fortran_env, only: &
+        ip => INT32, &
+        wp => REAL64
+
     implicit none
     !----------------------------------------------------------------------
     ! Dictionary: calling arguments
     !----------------------------------------------------------------------
-    integer, intent (in)     :: init
-    real,    intent (in)     :: theta(*)
-    integer, intent (in)     :: l
-    integer, intent (in)     :: n
-    integer, intent (in)     :: nm
-    integer, intent (in)     :: id
-    real,    intent (in out) :: p3(id,*)
-    real,    intent (in out) :: phz(l,*)
-    real,    intent (in out) :: ph1(l,*)
-    real,    intent (in out) :: p1(l,*)
-    real,    intent (in out) :: p2(l,*)
-    real,    intent (in out) :: cp(*)
+    integer (ip), intent (in)     :: init
+    real (wp),    intent (in)     :: theta(*)
+    integer (ip), intent (in)     :: l
+    integer (ip), intent (in)     :: n
+    integer (ip), intent (in)     :: nm
+    integer (ip), intent (in)     :: id
+    real (wp),    intent (in out) :: p3(id,*)
+    real (wp),    intent (in out) :: phz(l,*)
+    real (wp),    intent (in out) :: ph1(l,*)
+    real (wp),    intent (in out) :: p1(l,*)
+    real (wp),    intent (in out) :: p2(l,*)
+    real (wp),    intent (in out) :: cp(*)
     !----------------------------------------------------------------------
     ! Dictionary: local variables
     !----------------------------------------------------------------------
-    integer         :: i, m, nm1, nh, mp1, np1, mp3, nmp1
-    real            :: cc, dd, ee, cn, fm, fn, fnmm, fnpm
-    real            :: tm, tn, temp
-    real, parameter :: SQRT2 = sqrt(2.0)
-    real, parameter :: SQRT5 = sqrt(5.0)
-    real, parameter :: SQRT6 = sqrt(6.0)
-    real, parameter :: ONE_OVER_SQRT2 = 1.0/SQRT2
-    real, parameter :: ONE_OVER_SQRT6 = 1.0/SQRT6
-    real, parameter :: SQRT5_OVER_SQRT6 = SQRT5/SQRT6
+    integer (ip)         :: i, m, nm1, nh, mp1, np1, nmp1
+    real (wp)            :: cc, dd, ee, cn, fm, fn, fnmm, fnpm
+    real (wp)            :: tn, temp
+    real (wp), parameter :: SQRT2 = sqrt(2.0)
+    real (wp), parameter :: SQRT5 = sqrt(5.0)
+    real (wp), parameter :: SQRT6 = sqrt(6.0)
+    real (wp), parameter :: ONE_OVER_SQRT2 = 1.0/SQRT2
+    real (wp), parameter :: ONE_OVER_SQRT6 = 1.0/SQRT6
+    real (wp), parameter :: SQRT5_OVER_SQRT6 = SQRT5/SQRT6
     !----------------------------------------------------------------------
-
     nmp1 = nm+1
 
-    if (init /= 0) then
-        go to 5
-    end if
+    select case (init)
+        case (0)
+            phz(:, 1) = ONE_OVER_SQRT2
+            do np1=2, nmp1
+                nh = np1-1
+                call alfk(nh, 0, cp)
+                do i=1, l
+                    call lfpt(nh, 0, theta(i), cp, phz(i, np1))
+                end do
+                call alfk(nh, 1, cp)
+                do  i=1, l
+                    call lfpt(nh, 1, theta(i), cp, ph1(i, np1))
+                end do
+            end do
+        case default
+            if (n <= 2) then
+                if (n < 1) then
+                    p3(:, 1) = phz(:, 1)
+                else if (n == 1) then
+                    p3(:, 1) = phz(:, 2)
+                    p3(:, 2) = ph1(:, 2)
+                else
+                    p3(:, 1) = phz(:, 3)
+                    p3(:, 2) = ph1(:, 3)
+                    p3(:, 3) = SQRT5_OVER_SQRT6 * phz(:, 1) - ONE_OVER_SQRT6 * p3(:, 1)
+                    p1(:, 1) = phz(:, 2)
+                    p1(:, 2) = ph1(:, 2)
+                    p2(:, 1) = phz(:, 3)
+                    p2(:, 2) = ph1(:, 3)
+                    p2(:, 3) = p3(:, 3)
+                end if
+            else
+                nm1 = n-1
+                np1 = n+1
+                fn = real(n, kind=wp)
+                tn = 2.0_wp*fn
+                cn = (tn+1.0_wp)/(tn-3.0_wp)
+                p3(:, 1) = phz(:, np1)
+                p3(:, 2) = ph1(:, np1)
 
-    phz(:, 1) = ONE_OVER_SQRT2
-
-    do np1=2, nmp1
-        nh = np1-1
-        call alfk(nh, 0, cp)
-        do i=1, l
-            call lfpt(nh, 0, theta(i), cp, phz(i, np1))
-        end do
-        call alfk(nh, 1, cp)
-        do  i=1, l
-            call lfpt(nh, 1, theta(i), cp, ph1(i, np1))
-        end do
-    end do
-
-
-    return
-5   if (n > 2) then
-        go to 60
-    end if
-
-    if (n-1< 0) then
-        go to 25
-    else if (n-1 == 0) then
-        go to 30
-    else 
-        go to 35
-    end if
-
-25  p3(:, 1) = phz(:, 1)
-    return
-
-30  p3(:, 1) = phz(:, 2)
-    p3(:, 2) = ph1(:, 2)
-    return
-
-35  p3(:, 1) = phz(:, 3)
-    p3(:, 2) = ph1(:, 3)
-    p3(:, 3) = SQRT5_OVER_SQRT6 * phz(:, 1) - ONE_OVER_SQRT6 * p3(:, 1)
-    p1(:, 1) = phz(:, 2)
-    p1(:, 2) = ph1(:, 2)
-    p2(:, 1) = phz(:, 3)
-    p2(:, 2) = ph1(:, 3)
-    p2(:, 3) = p3(:, 3)
-    return
-60  nm1 = n-1
-    np1 = n+1
-    fn = real(n)
-    tn = fn+fn
-    cn = (tn+1.0)/(tn-3.0)
-    p3(:, 1) = phz(:, np1)
-    p3(:, 2) = ph1(:, np1)
-
-    if (nm1 < 3) then
-        go to 71
-    end if
-
-    do mp1=3, nm1
-        m = mp1-1
-        fm = real(m)
-        fnpm = fn+fm
-        fnmm = fn-fm
-        temp = fnpm*(fnpm-1.0)
-        cc = sqrt(cn*(fnpm-3.0)*(fnpm-2.0)/temp)
-        dd = sqrt(cn*fnmm*(fnmm-1.0)/temp)
-        ee = sqrt((fnmm+1.0)*(fnmm+2.0)/temp)
-        p3(:, mp1) = cc*p1(i, mp1-2)+dd*p1(:, mp1)-ee*p3(:, mp1-2)
-    end do
-
-71  fnpm = fn+fn-1.
-    temp = fnpm*(fnpm-1.0)
-    cc = sqrt(cn*(fnpm-3.0)*(fnpm-2.0)/temp)
-    ee = sqrt(6.0/temp)
-
-    p3(:, n) = cc*p1(:, n-2)-ee*p3(:, n-2)
-
-    fnpm = fn+fn
-    temp = fnpm*(fnpm-1.0)
-    cc = sqrt(cn*(fnpm-3.0)*(fnpm-2.0)/temp)
-    ee = sqrt(2.0/temp)
-    p3(:, n+1) = cc*p1(:, n-1)-ee*p3(:, n-1)
-
-
-    do mp1=1, np1
-        p1(:, mp1) = p2(:, mp1)
-        p2(:, mp1) = p3(:, mp1)
-    end do
+                if (nm1 >= 3) then
+                    do mp1=3, nm1
+                        m = mp1-1
+                        fm = real(m, kind=wp)
+                        fnpm = fn+fm
+                        fnmm = fn-fm
+                        temp = fnpm*(fnpm-1.0_wp)
+                        cc = sqrt(cn*(fnpm-3.0_wp)*(fnpm-2.0_wp)/temp)
+                        dd = sqrt(cn*fnmm*(fnmm-1.0_wp)/temp)
+                        ee = sqrt((fnmm+1.0_wp)*(fnmm+2.0_wp)/temp)
+                        p3(:, mp1) = cc*p1(i, mp1-2)+dd*p1(:, mp1)-ee*p3(:, mp1-2)
+                    end do
+                end if
+                fnpm = 2.0_wp*fn-1.0_wp
+                temp = fnpm*(fnpm-1.0_wp)
+                cc = sqrt(cn*(fnpm-3.0_wp)*(fnpm-2.0_wp)/temp)
+                ee = sqrt(6.0_wp/temp)
+                p3(:, n) = cc*p1(:, n-2)-ee*p3(:, n-2)
+                fnpm = 2.0_wp*fn
+                temp = fnpm*(fnpm-1.0_wp)
+                cc = sqrt(cn*(fnpm-3.0_wp)*(fnpm-2.0_wp)/temp)
+                ee = sqrt(2.0_wp/temp)
+                p3(:, n+1) = cc*p1(:, n-1)-ee*p3(:, n-1)
+                p1(:,1:np1) = p2(:,1:np1)
+                p2(:,:np1) = p3(:,1:np1)
+            end if
+    end select
 
 end subroutine lfim1
 ! subroutine lfin (init, theta, l, m, nm, pb, id, wlfin)
@@ -597,144 +603,173 @@ end subroutine lfim1
 !                        notes by paul n. swarztrauber)
 !
 subroutine lfin(init, theta, l, m, nm, pb, id, wlfin)
+
+    use, intrinsic :: iso_fortran_env, only: &
+        ip => INT32, &
+        wp => REAL64
+
     implicit none
     !----------------------------------------------------------------------
     ! Dictionary: calling arguments
     !----------------------------------------------------------------------
-    integer, intent (in)     :: init
-    real,    intent (in)     :: theta(*)
-    integer, intent (in)     :: l
-    integer, intent (in)     :: m
-    integer, intent (in)     :: nm
-    real,    intent (in out) :: pb(1)
-    integer, intent (in)     ::  id
-    real,    intent (in out) :: wlfin(1)
+    integer (ip), intent (in)     :: init
+    real (wp),    intent (in)     :: theta(*)
+    integer (ip), intent (in)     :: l
+    integer (ip), intent (in)     :: m
+    integer (ip), intent (in)     :: nm
+    real (wp),    intent (in out) :: pb(1)
+    integer (ip), intent (in)     ::  id
+    real (wp),    intent (in out) :: wlfin(1)
+    !----------------------------------------------------------------------
+    ! Dictionary: local variables
+    !----------------------------------------------------------------------
+    integer (ip) :: workspace_indices(3)
     !----------------------------------------------------------------------
 
-    !     total length of wlfin is 4*l*(nm+1)
     !
-    associate( lnx => l*(nm+1) )
-        associate( iw1 => lnx+1 )
-            associate( iw2 => iw1+lnx )
-                associate( iw3 => iw2+lnx )
-                    call lfin1(init, theta, l, m, nm, id, pb, wlfin, wlfin(iw1), &
-                        wlfin(iw2), wlfin(iw3), wlfin(iw2))
-                end associate
-            end associate
-        end associate
+    !==> total length of wlfin is 4*l*(nm+1)
+    !
+    workspace_indices = get_workspace_indices(l, nm)
+
+
+    associate( &
+        iw1=> workspace_indices(1), &
+        iw2 => workspace_indices(2), &
+        iw3 => workspace_indices(3) &
+        )
+
+        call lfin1(init, theta, l, m, nm, id, pb, wlfin, &
+            wlfin(iw1), wlfin(iw2), wlfin(iw3), wlfin(iw2))
+
     end associate
+
+contains
+
+    pure function get_workspace_indices(l, nm) result (return_value)
+        !----------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !----------------------------------------------------------------------
+        integer (ip), intent (in) :: l
+        integer (ip), intent (in) :: nm
+        integer (ip)              :: return_value(3)
+        !----------------------------------------------------------------------
+        ! Dictionary: local variables
+        !----------------------------------------------------------------------
+        integer (ip) :: lnx
+        !----------------------------------------------------------------------
+
+        associate( i => return_value )
+
+            lnx = l*(nm + 1)
+            i(1) = lnx + 1
+            i(2) = 2*lnx + 1
+            i(3) = 3*lnx + 1
+
+        end associate
+
+    end function get_workspace_indices
 
 end subroutine lfin
 
 
 subroutine lfin1(init, theta, l, m, nm, id, p3, phz, ph1, p1, p2, cp)
+
+    use, intrinsic :: iso_fortran_env, only: &
+        ip => INT32, &
+        wp => REAL64
+
     implicit none
     !----------------------------------------------------------------------
     ! Dictionary: calling arguments
     !----------------------------------------------------------------------
-    integer, intent (in) :: init
-    real,    intent (in) :: theta(*)!theta(1)
-    integer, intent (in) :: l
-    integer, intent (in) :: m
-    integer, intent (in) :: nm
-    integer, intent (in) :: id
-    real,    intent (in out) :: p3(id, 1)
-    real,    intent (in out) :: phz(l,1)
-    real,    intent (in out) :: ph1(l,1)
-    real,    intent (in out) :: p1(l,1)
-    real,    intent (in out) :: p2(l,1)
-    real,    intent (in out) :: cp(1)
+    integer (ip), intent (in)     :: init
+    real (wp),    intent (in)     :: theta(*)!theta(1)
+    integer (ip), intent (in)     :: l
+    integer (ip), intent (in)     :: m
+    integer (ip), intent (in)     :: nm
+    integer (ip), intent (in)     :: id
+    real (wp),    intent (in out) :: p3(id, 1)
+    real (wp),    intent (in out) :: phz(l,1)
+    real (wp),    intent (in out) :: ph1(l,1)
+    real (wp),    intent (in out) :: p1(l,1)
+    real (wp),    intent (in out) :: p2(l,1)
+    real (wp),    intent (in out) :: cp(1)
     !----------------------------------------------------------------------
     ! Dictionary: local variables
     !----------------------------------------------------------------------
-    integer         :: i, n, nh, mp1, np1, mp3, nmp1
-    real            :: cc, dd, ee, cn, fm, fn, fnmm, fnpm
-    real            :: tm, tn, temp
-    real, parameter :: SQRT2 = sqrt(2.0)
-    real, parameter :: ONE_OVER_SQRT2 = 1.0/sqrt2
+    integer (ip)         :: i, n, nh, mp1, np1, mp3, nmp1
+    real (wp)            :: cc, dd, ee, cn, fm, fn, fnmm, fnpm
+    real (wp)            :: tm, tn, temp
+    real (wp), parameter :: SQRT2 = sqrt(2.0_wp)
+    real (wp), parameter :: ONE_OVER_SQRT2 = 1.0_wp/sqrt2
     !----------------------------------------------------------------------
+
     nmp1 = nm+1
 
-    if (init /= 0) then
-        go to 5
-    end if
+    select case (init)
+        case (0)
 
-    phz(:, 1) = ONE_OVER_SQRT2
+            phz(:,1) = ONE_OVER_SQRT2
 
-    do np1=2, nmp1
-        nh = np1-1
-        call alfk(nh, 0, cp)
-        do i=1, l
-            call lfpt(nh, 0, theta(i), cp, phz(i, np1))
-        end do
-        call alfk(nh, 1, cp)
-        do i=1, l
-            call lfpt(nh, 1, theta(i), cp, ph1(i, np1))
-        end do
-    end do
-    return
+            do np1=2, nmp1
+                nh = np1-1
+                call alfk(nh, 0, cp)
+                do i=1, l
+                    call lfpt(nh, 0, theta(i), cp, phz(i, np1))
+                end do
+                call alfk(nh, 1, cp)
+                do i=1, l
+                    call lfpt(nh, 1, theta(i), cp, ph1(i, np1))
+                end do
+            end do
 
-5   mp1 = m+1
-    fm = real(m)
-    tm = fm+fm
+        case default
 
-    if (m-1 < 0) then
-        go to 25
-    else if (m-1 == 0) then
-        go to 30
-    else 
-        go to 35
-    end if
+            mp1 = m+1
+            fm = real(m, kind=wp)
+            tm = fm+fm
 
-    25 do np1=1, nmp1
-        p3(:, np1) = phz(:, np1)
-        p1(:, np1) = phz(:, np1)
-    end do
-    return
+            if (m < 1) then
+                p3(:,1:nmp1) = phz(:,1:nmp1)
+                p1(:,1:nmp1) = phz(:,1:nmp1)
+            else if (m == 1) then
+                p3(:,2:nmp1) = ph1(:,2:nmp1)
+                p2(:,2:nmp1) = ph1(:,2:nmp1)
+            else
+                temp = tm*(tm-1.0_wp)
+                cc = sqrt((tm+1.0_wp)*(tm-2.0_wp)/temp)
+                ee = sqrt(2.0_wp/temp)
+                p3(:, m+1) = cc*p1(:, m-1)-ee*p1(:, m+1)
 
-    30 do np1=2, nmp1
-        p3(:, np1) = ph1(:, np1)
-        p2(:, np1) = ph1(:, np1)
-    end do
-    return
+                if (m == nm) return
 
-35  temp = tm*(tm-1.0)
-    cc = sqrt((tm+1.0)*(tm-2.0)/temp)
-    ee = sqrt(2.0/temp)
-    p3(:, m+1) = cc*p1(:, m-1)-ee*p1(:, m+1)
+                temp = tm*(tm+1.0_wp)
+                cc = sqrt((tm+3.0_wp)*(tm-2.0_wp)/temp)
+                ee = sqrt(6.0_wp/temp)
+                p3(:, m+2) = cc*p1(:, m)-ee*p1(:, m+2)
+                mp3 = m+3
 
-    if (m == nm) then
-        return
-    end if
+                if (nmp1 >= mp3) then
+                    do np1=mp3, nmp1
+                        n = np1-1
+                        fn = real(n, kind=wp)
+                        tn = 2.0_wp*fn
+                        cn = (tn+1.0_wp)/(tn-3.0_wp)
+                        fnpm = fn+fm
+                        fnmm = fn-fm
+                        temp = fnpm*(fnpm-1.0_wp)
+                        cc = sqrt(cn*(fnpm-3.0_wp)*(fnpm-2.0_wp)/temp)
+                        dd = sqrt(cn*fnmm*(fnmm-1.0_wp)/temp)
+                        ee = sqrt((fnmm+1.0_wp)*(fnmm+2.0_wp)/temp)
+                        p3(:, np1) = cc*p1(:, np1-2)+dd*p3(:, np1-2)-ee*p1(:, np1)
+                    end do
+                end if
 
-    temp = tm*(tm+1.0)
-    cc = sqrt((tm+3.0)*(tm-2.0)/temp)
-    ee = sqrt(6.0/temp)
-    p3(:, m+2) = cc*p1(:, m)-ee*p1(:, m+2)
-    mp3 = m+3
+                p1(:,m:nmp1) = p2(:,m:nmp1)
+                p2(:,m:nmp1) = p3(:,m:nmp1)
 
-    if (nmp1 < mp3) then
-        go to 80
-    end if
-
-    do np1=mp3, nmp1
-        n = np1-1
-        fn = real(n)
-        tn = fn+fn
-        cn = (tn+1.0)/(tn-3.0)
-        fnpm = fn+fm
-        fnmm = fn-fm
-        temp = fnpm*(fnpm-1.0)
-        cc = sqrt(cn*(fnpm-3.0)*(fnpm-2.0)/temp)
-        dd = sqrt(cn*fnmm*(fnmm-1.0)/temp)
-        ee = sqrt((fnmm+1.0)*(fnmm+2.0)/temp)
-        p3(:, np1) = cc*p1(:, np1-2)+dd*p3(:, np1-2)-ee*p1(:, np1)
-    end do
-
-    80 do np1=m, nmp1
-        p1(:, np1) = p2(:, np1)
-        p2(:, np1) = p3(:, np1)
-    end do
+            end if
+    end select
 
 end subroutine lfin1
 
@@ -807,122 +842,102 @@ end subroutine lfin1
 ! timing                 time per call to routine lfpt is dependent on
 !                        the input parameter n.
 !
-subroutine lfpt(n, m, theta, cp, pb)
+pure subroutine lfpt(n, m, theta, cp, pb)
+
+    use, intrinsic :: iso_fortran_env, only: &
+        ip => INT32, &
+        wp => REAL64
+
     implicit none
     !----------------------------------------------------------------------
     ! Dictionary: calling arguments
     !----------------------------------------------------------------------
-    integer, intent (in)     :: n
-    integer, intent (in)     :: m
-    real,    intent (in)     :: theta
-    real,    intent (in out) :: cp(1)
-    real,    intent (in out) :: pb
+    integer (ip), intent (in)  :: n
+    integer (ip), intent (in)  :: m
+    real (wp),    intent (in)  :: theta
+    real (wp),    intent (in)  :: cp(1)
+    real (wp),    intent (out) :: pb
     !----------------------------------------------------------------------
     ! Dictionary: calling arguments
     !----------------------------------------------------------------------
-    integer :: i,  k, ma, mmod, nmod, kp1, np1, kdo
-    real    :: ct, st, cdt, cth, sdt, summation
+    integer (ip) :: k, ma, kp1, np1, kdo
+    real (wp)    :: cost, sint, cos2t, temp, sin2t, summation
     !----------------------------------------------------------------------
 
-    pb = 0.0
+    pb = 0.0_wp
     ma = abs(m)
 
-    if (ma > n) then
+    if (ma > n) return
+
+    if ((n <= 0) .and. (ma <= 0)) then
+        pb= sqrt(0.5_wp)
         return
     end if
 
-    if (n <= 0) then
-        go to 10
-    else 
-        go to 30
-    end if
+    np1 = n+1
 
-10  if (ma <= 0) then
-        pb= sqrt(0.5)
-        return
-    else 
-        go to 30
-    end if
+    if (mod(n, 2) <= 0) then
+        if (mod(ma, 2) <= 0) then
 
+            kdo = n/2+1
+            cos2t = cos(2.0_wp*theta)
+            sin2t = sin(2.0_wp*theta)
+            cost = 1.0_wp
+            sint = 0.0_wp
+            summation = 0.5_wp*cp(1)
 
-30  np1 = n+1
-    nmod = mod(n, 2)
-    mmod = mod(ma, 2)
+            do kp1=2, kdo
+                temp = cos2t*cost-sin2t*sint
+                sint = sin2t*cost+cos2t*sint
+                cost = temp
+                summation = summation+cp(kp1)*cost
+            end do
 
-    if (nmod <= 0) then
-        go to 40
-    else 
-        go to 90
-    end if
-
-40  if (mmod <= 0) then
-        go to 50
-    else 
-        go to 70
-    end if
-
-50  kdo = n/2+1
-    cdt = cos(2.0*theta)
-    sdt = sin(2.0*theta)
-    ct = 1.0
-    st = 0.0
-    summation = 0.5*cp(1)
-
-    do kp1=2, kdo
-        cth = cdt*ct-sdt*st
-        st = sdt*ct+cdt*st
-        ct = cth
-        summation = summation+cp(kp1)*ct
-    end do
-
-    pb= summation
-    go to 140
-
-70  kdo = n/2
-    cdt = cos(2.0*theta)
-    sdt = sin(2.0*theta)
-    ct = 1.
-    st = 0.
-    summation = 0.0
-    do  k=1, kdo
-        cth = cdt*ct-sdt*st
-        st = sdt*ct+cdt*st
-        ct = cth
-        summation = summation+cp(k)*st
-    end do
-    pb= summation
-    go to 140
-
-90  kdo = (n+1)/2
-
-    if (mmod <= 0) then
-        cdt = cos(2.0*theta)
-        sdt = sin(2.0*theta)
-        ct = cos(theta)
-        st = -sin(theta)
-        summation = 0.0
-        do k=1, kdo
-            cth = cdt*ct-sdt*st
-            st = sdt*ct+cdt*st
-            ct = cth
-            summation = summation+cp(k)*ct
-        end do
-        pb= summation
+            pb = summation
+        else
+            kdo = n/2
+            cos2t = cos(2.0_wp*theta)
+            sin2t = sin(2.0_wp*theta)
+            cost = 1.0_wp
+            sint = 0.0_wp
+            summation = 0.0_wp
+            do  k=1, kdo
+                temp = cos2t*cost-sin2t*sint
+                sint = sin2t*cost+cos2t*sint
+                cost = temp
+                summation = summation+cp(k)*sint
+            end do
+            pb= summation
+        end if
     else
-        cdt = cos(2.0*theta)
-        sdt = sin(2.0*theta)
-        ct = cos(theta)
-        st = -sin(theta)
-        summation = 0.0
-        do k=1, kdo
-            cth = cdt*ct-sdt*st
-            st = sdt*ct+cdt*st
-            ct = cth
-            summation = summation+cp(k)*st
-        end do
-        pb= summation
+        kdo = (n+1)/2
+        if (mod(ma, 2) <= 0) then
+            cos2t = cos(2.0_wp*theta)
+            sin2t = sin(2.0_wp*theta)
+            cost = cos(theta)
+            sint = -sin(theta)
+            summation = 0.0_wp
+            do k=1, kdo
+                temp = cos2t*cost-sin2t*sint
+                sint = sin2t*cost+cos2t*sint
+                cost = temp
+                summation = summation+cp(k)*cost
+            end do
+            pb= summation
+        else
+            cos2t = cos(2.0_wp*theta)
+            sin2t = sin(2.0_wp*theta)
+            cost = cos(theta)
+            sint = -sin(theta)
+            summation = 0.0_wp
+            do k=1, kdo
+                temp = cos2t*cost-sin2t*sint
+                sint = sin2t*cost+cos2t*sint
+                cost = temp
+                summation = summation+cp(k)*sint
+            end do
+            pb = summation
+        end if
     end if
-
-140 return
 
 end subroutine lfpt

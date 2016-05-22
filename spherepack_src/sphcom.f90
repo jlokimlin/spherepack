@@ -9,7 +9,7 @@
 !     *                                                               *
 !     *                      SPHEREPACK version 3.2                   *
 !     *                                                               *
-!     *       A Package of Fortran77 Subroutines and Programs         *
+!     *       A Package of Fortran Subroutines and Programs           *
 !     *                                                               *
 !     *              for Modeling Geophysical Processes               *
 !     *                                                               *
@@ -30,7 +30,7 @@
 !     * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !
 !
-! ... file sphcom.f
+! ... file sphcom.f90
 !
 !     this file must be loaded with all main program files
 !     in spherepack.  it includes undocumented subroutines
@@ -97,7 +97,8 @@ pure subroutine dnlfk(m, n, cp)
         t1 = 1.0_wp/SC20
         nex = 20
         fden = 2.0_wp
-        if (.not.(nmms2 < 1)) then
+
+        if (nmms2 >= 1) then
             do i=1, nmms2
                 t1 = fnum*t1/fden
                 if (t1 > SC20) then
@@ -111,13 +112,11 @@ pure subroutine dnlfk(m, n, cp)
 
         t1 = t1/2.0**(n-1-nex)
 
-        if (mod(ma/2, 2) /= 0) then
-            t1 = -t1
-        end if
+        if (mod(ma/2, 2) /= 0) t1 = -t1
 
         t2 = 1.0_wp
 
-        if (.not.(ma == 0)) then
+        if (ma /= 0) then
             do i=1, ma
                 t2 = fnmh*t2/(fnmh+pm1)
                 fnmh = fnmh+2.0_wp
@@ -129,21 +128,15 @@ pure subroutine dnlfk(m, n, cp)
         fnmsq = fnnp1 - 2.0_wp * real(ma**2, kind=wp)
         l = (n+1)/2
 
-        if (mod(n, 2) == 0 .and. mod(ma, 2) == 0) then
-            l = l+1
-        end if
+        if (mod(n, 2) == 0 .and. mod(ma, 2) == 0) l = l+1
 
         cp(l) = cp2
 
-        if (.not.(m >= 0)) then
-            if (mod(ma, 2) /= 0) then
-                cp(l) = -cp(l)
-            end if
+        if (m < 0) then
+            if (mod(ma, 2) /= 0) cp(l) = -cp(l)
         end if
 
-        if (l <= 1) then
-            return
-        end if
+        if (l <= 1) return
 
         fk = real(n, kind=wp)
         a1 = (fk-2.0_wp)*(fk-1.0_wp)-fnnp1
@@ -152,7 +145,7 @@ pure subroutine dnlfk(m, n, cp)
 
         l = l - 1
 
-        do while (.not.(l <= 1))
+        do while (l > 1)
             fk = fk-2.0_wp
             a1 = (fk-2.0_wp)*(fk-1.0_wp)-fnnp1
             b1 = -2.0_wp*(fk*fk-fnmsq)
@@ -184,36 +177,31 @@ pure subroutine dnlft(m, n, theta, cp, pb)
     !----------------------------------------------------------------------
     ! Dictionary: local variables
     !----------------------------------------------------------------------
-    integer (ip) ::  k, kdo, mmod, nmod
-    real (wp)    :: chh, cdt, cth, sdt, sth
+    integer (ip) ::  k, kdo
+    real (wp)    :: temp, cos2t, cost, sin2t, sint
     !----------------------------------------------------------------------
 
-    cdt = cos(2.0_wp * theta)
-    sdt = sin(2.0_wp * theta)
+    cos2t = cos(2.0_wp * theta)
+    sin2t = sin(2.0_wp * theta)
 
-    nmod = mod(n, 2)
-    mmod = mod(m, 2)
-
-    if (nmod <= 0) then
-        if (mmod <= 0) then
+    if (mod(n, 2) <= 0) then
+        if (mod(m, 2) <= 0) then
             !
             !==>  n even, m even
             !
             kdo = n/2
             pb = 0.5_wp * cp(1)
 
-            if (n == 0) then
-                return
-            end if
+            if (n == 0) return
 
-            cth = cdt
-            sth = sdt
+            cost = cos2t
+            sint = sin2t
 
             do k=1, kdo
-                pb = pb+cp(k+1)*cth
-                chh = cdt*cth-sdt*sth
-                sth = sdt*cth+cdt*sth
-                cth = chh
+                pb = pb+cp(k+1)*cost
+                temp = cos2t*cost-sin2t*sint
+                sint = sin2t*cost+cos2t*sint
+                cost = temp
             end do
         else
             !
@@ -221,31 +209,31 @@ pure subroutine dnlft(m, n, theta, cp, pb)
             !
             kdo = n/2
             pb = 0.0_wp
-            cth = cdt
-            sth = sdt
+            cost = cos2t
+            sint = sin2t
 
             do k=1, kdo
-                pb = pb+cp(k)*sth
-                chh = cdt*cth-sdt*sth
-                sth = sdt*cth+cdt*sth
-                cth = chh
+                pb = pb+cp(k)*sint
+                temp = cos2t*cost-sin2t*sint
+                sint = sin2t*cost+cos2t*sint
+                cost = temp
             end do
         end if
     else
-        if (mmod <= 0) then
+        if (mod(m, 2) <= 0) then
             !
             !==> n odd, m even
             !
             kdo = (n+1)/2
             pb = 0.0_wp
-            cth = cos(theta)
-            sth = sin(theta)
+            cost = cos(theta)
+            sint = sin(theta)
 
             do k=1, kdo
-                pb = pb+cp(k)*cth
-                chh = cdt*cth-sdt*sth
-                sth = sdt*cth+cdt*sth
-                cth = chh
+                pb = pb+cp(k)*cost
+                temp = cos2t*cost-sin2t*sint
+                sint = sin2t*cost+cos2t*sint
+                cost = temp
             end do
         else
             !
@@ -253,14 +241,14 @@ pure subroutine dnlft(m, n, theta, cp, pb)
             !
             kdo = (n+1)/2
             pb = 0.0_wp
-            cth = cos(theta)
-            sth = sin(theta)
+            cost = cos(theta)
+            sint = sin(theta)
 
             do k=1, kdo
-                pb = pb+cp(k)*sth
-                chh = cdt*cth-sdt*sth
-                sth = sdt*cth+cdt*sth
-                cth = chh
+                pb = pb+cp(k)*sint
+                temp = cos2t*cost-sin2t*sint
+                sint = sin2t*cost+cos2t*sint
+                cost = temp
             end do
         end if
     end if
