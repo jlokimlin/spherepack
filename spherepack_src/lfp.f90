@@ -9,7 +9,7 @@
 !     *                                                               *
 !     *                      SPHEREPACK version 3.2                   *
 !     *                                                               *
-!     *       A Package of Fortran77 Subroutines and Programs         *
+!     *       A Package of Fortran Subroutines and Programs           *
 !     *                                                               *
 !     *              for Modeling Geophysical Processes               *
 !     *                                                               *
@@ -37,7 +37,7 @@
 ! arguments
 !
 ! purpose                routine lfp uses coefficients computed by
-!                        routine alfk to calculate the single precision
+!                        routine alfk to calculate the 64-bit double precision
 !                        normalized associated legendre function pbar(n, 
 !                        m, theta) at colatitudes theta=(i-1)*pi/(l-1), 
 !                        i=1, ..., l. subroutine lfp evaluates pbar
@@ -92,28 +92,28 @@
 !                          l must be an odd integer.
 !
 !                        cp
-!                          single precision array of length (n/2)+1
+!                          64-bit double precision array of length (n/2)+1
 !                          containing coefficients computed by routine
 !                          alfk
 !
 !                        w
-!                          a single precision work array with at
+!                          a 64-bit double precision work array with at
 !                          least 5*l+41 locations
 !
 ! on output              pb
-!                          single precision array of length l containing
+!                          64-bit double precision array of length l containing
 !                          pbar(n, m, theta), theta=(i-1)*pi/(l-1) for i=1
 !                          , ..., l.
 !
 !                        w
-!                          a single precision array containing values
+!                          a 64-bit double precision array containing values
 !                          which must not be destroyed if the next call
 !                          will have the same value of input parameter n
 !
 ! special conditions     calls to routine lfp must be preceded by an
 !                        appropriate call to routine alfk.
 !
-! precision              single
+! precision              64-bit double precision
 !
 ! algorithm              the trigonometric series formula used by
 !                        routine lfp to calculate pbar(n, m, theta) for
@@ -148,148 +148,137 @@ subroutine lfp (init, n, m, l, cp, pb, w)
         wp => REAL64, &
         ip => INT32
 
-    real (wp) :: cp(1), pb(1), w(1)
-
+    implicit none
+    !----------------------------------------------------------------------
+    ! Dictionary: calling arguments
+    !----------------------------------------------------------------------
+    integer (ip), intent (in)  :: init
+    integer (ip), intent (in)  :: n
+    integer (ip), intent (in)  :: m
+    integer (ip), intent (in)  :: l
+    real (wp)                  :: cp(1)
+    real (wp)                  :: pb(1)
+    real (wp)                  :: w(1)
+    !----------------------------------------------------------------------
+    ! Dictionary: calling arguments
+    !----------------------------------------------------------------------
+    integer (ip) :: ma, iw1, iw2
+    !----------------------------------------------------------------------
 
     pb(1:l) = 0.0_wp
 
     ma = abs(m)
 
-    if (ma > n) then
-        return
-    end if
+    if (ma > n) return
 
-    iw1 = l+l+12
+    iw1 = 2*l+12
     iw2 = iw1+3*(l+1)/2+15
 
     call lfp1(init, n, ma, l, cp, pb, w, w(iw1), w(iw2))
 
+contains
+
+    subroutine lfp1(init, n, m, l, cp, p, wsave1, wsave2, wsave3)
+        !----------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !----------------------------------------------------------------------
+        integer (ip), intent (in) :: init
+        integer (ip), intent (in) :: n
+        integer (ip), intent (in) :: m
+        integer (ip), intent (in) :: l
+        real (wp)                 :: cp(*)
+        real (wp)                 :: p(*)
+        real (wp)                 :: wsave1(*)
+        real (wp)                 :: wsave2(*)
+        real (wp)                 :: wsave3(*)
+        !----------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !----------------------------------------------------------------------
+        integer (ip), save   :: lc, lq, ls
+        integer (ip)         :: i
+        integer (ip)         :: lm1, np1, ls2, kdp, lmi
+        real (wp)            :: dt
+        real (wp), parameter :: PI = acos(-1.0_wp)
+        real (wp), parameter :: ONE_OVER_SQRT2 = 1.0_wp/sqrt(2.0_wp)
+        !----------------------------------------------------------------------
+
+        select case (init)
+            case (0)
+
+                lc=(l+1)/2
+                ls=lc-2
+                lq=lc-1
+                call sinti(ls, wsave1)
+                call costi(lc, wsave2)
+                call cosqi(lq, wsave3)
+
+            case default
+
+                if ((n <= 0) .and. (m <= 0)) then
+                    p(1:l) = ONE_OVER_SQRT2
+                else
+                    ls2 = (l+1)/2
+                    lm1 = l-1
+                    np1 = n+1
+
+                    dt = PI/lm1
+
+                    if (mod(n, 2) <= 0) then
+                        if (mod(m, 2) <= 0) then
+                            kdp = n/2+1
+                            p(1:kdp)=0.5_wp*cp(1:kdp)
+                            p(lc)= 2.0_wp*p(lc)
+
+                            call cost(lc, p, wsave2)
+
+                            do i=1, lc
+                                lmi=l-i
+                                p(lmi+1)=p(i)
+                            end do
+                        else
+                            kdp=n/2
+                            p(2:kdp+1)=0.5_wp*cp(1:kdp)
+                            p(ls+2)=0.0_wp
+
+                            call sint(ls, p(2), wsave1)
+
+                            do i=1, ls
+                                lmi=l-i
+                                p(lmi)=-p(i+1)
+                            end do
+
+                            p(l)=0.0_wp
+                        end if
+                    else
+                        kdp=(n+1)/2
+
+                        if (mod(m, 2) <= 0) then
+
+                            p(1:kdp)=0.25_wp*cp(1:kdp)
+
+                            call cosqb(lq, p, wsave3)
+
+                            do i=1, lq
+                                lmi=l-i
+                                p(lmi+1)=-p(i)
+                            end do
+
+                        else
+                            p(2:kdp+1)=0.25_wp*cp(1:kdp)
+
+                            call sinqb(lq, p(2), wsave3)
+
+                            do i=1, lq
+                                lmi=l-i
+                                p(lmi)=p(i+1)
+                            end do
+
+                            p(l)=0.0_wp
+                        end if
+                    end if
+                end if
+        end select
+
+    end subroutine lfp1
+
 end subroutine lfp
-
-subroutine lfp1(init, n, m, l, cp, p, wsave1, wsave2, wsave3)
-
-    use, intrinsic :: iso_fortran_env, only: &
-        wp => REAL64, &
-        ip => INT32
-
-    real (wp)          :: cp(*), p(*)
-    real (wp)          :: wsave1(*), wsave2(*), wsave3(*)
-    integer (ip), save :: lc, lq, ls
-
-    if (.not.(init/=0)) then
-
-        lc=(l+1)/2
-        ls=lc-2
-        lq=lc-1
-
-        call sinti(ls, wsave1)
-        call costi(lc, wsave2)
-        call cosqi(lq, wsave3)
-        return
-    end if
-
-    if (n <= 0) then
-        goto 10
-    else
-        goto 40
-    end if
-
-10  if (m <= 0) then
-        goto 20
-    else
-        goto 40
-    end if
-
-20  ssqrt2 = 1.0_wp/sqrt(2.0_wp)
-
-    do i=1, l
-        p(i) = ssqrt2
-    end do
-
-    return
-
-40  ls2 = (l+1)/2
-    lm1 = l-1
-    np1 = n+1
-    pi = acos(-1.0_wp)
-    dt = pi/lm1
-    nmod = mod(n, 2)
-    mmod = mod(m, 2)
-
-    if (nmod <= 0) then
-        goto 50
-    else
-        goto 120
-    end if
-
-50  if (mmod <= 0) then
-        goto 60
-    else
-        goto 90
-    end if
-60  kdp = n/2+1
-    do i=1, kdp
-        p(i)=0.5_wp*cp(i)
-    end do
-
-    p(lc)=p(lc)+p(lc)
-
-    call cost(lc, p, wsave2)
-
-    do i=1, lc
-        lmi=l-i
-        p(lmi+1)=p(i)
-    end do
-    return
-
-90  kdp=n/2
-    do i=1, kdp
-        p(i+1)=0.5_wp*cp(i)
-    end do
-
-    p(ls+2)=0.0_wp
-
-    call sint(ls, p(2), wsave1)
-    do i=1, ls
-        lmi=l-i
-        p(lmi)=-p(i+1)
-    end do
-    p(l)=0.0_wp
-    return
-
-120 kdp=(n+1)/2
-
-    if (mmod <= 0) then
-        goto 140
-    else 
-        goto 160
-    end if
-
-    140 do i=1, kdp
-        p(i)=0.25_wp*cp(i)
-    end do
-
-    call cosqb(lq, p, wsave3)
-
-    do i=1, lq
-        lmi=l-i
-        p(lmi+1)=-p(i)
-    end do
-
-    return
-
-    160 do i=1, kdp
-        p(i+1)=0.25_wp*cp(i)
-    end do
-
-    call sinqb(lq, p(2), wsave3)
-
-    do i=1, lq
-        lmi=l-i
-        p(lmi)=p(i+1)
-    end do
-
-    p(l)=0.0_wp
-
-end subroutine lfp1
-

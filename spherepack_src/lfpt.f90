@@ -117,8 +117,8 @@ pure subroutine lfpt(n, m, theta, cp, pb)
     !----------------------------------------------------------------------
     ! Dictionary: local variables
     !----------------------------------------------------------------------
-    integer (ip) :: ma, nmod, mmod, np1, k, kdo, kp1
-    real (ip)    :: cdt, sdt, ct, st, cth, summation
+    integer (ip) :: ma, np1, k, kdo, kp1
+    real (ip)    :: cos2t, sin2t, cost, sint, temp, summation
     !----------------------------------------------------------------------
 
     pb = 0.0_wp
@@ -126,75 +126,75 @@ pure subroutine lfpt(n, m, theta, cp, pb)
 
     if (ma <= n) then
         if (n <= 0) then
-            if (ma <= 0) then
-                pb= sqrt(0.5_wp)
-            end if
+            if (ma <= 0) pb= sqrt(0.5_wp)
         else
             np1 = n+1
-            nmod = mod(n, 2)
-            mmod = mod(ma, 2)
-
-            if (nmod <= 0) then
-                if (mmod <= 0) then
+            if (mod(n, 2) <= 0) then
+                if (mod(ma, 2) <= 0) then
                     kdo = n/2+1
-                    cdt = cos(2.0_wp*theta)
-                    sdt = sin(2.0_wp*theta)
-                    ct = 1.0_wp
-                    st = 0.0_wp
+                    cos2t = cos(2.0_wp*theta)
+                    sin2t = sin(2.0_wp*theta)
+                    cost = 1.0_wp
+                    sint = 0.0_wp
                     summation = 0.5_wp * cp(1)
+
                     do kp1=2, kdo
-                        cth = cdt*ct-sdt*st
-                        st = sdt*ct+cdt*st
-                        ct = cth
-                        summation = summation+cp(kp1)*ct
+                        temp = cos2t*cost-sin2t*sint
+                        sint = sin2t*cost+cos2t*sint
+                        cost = temp
+                        summation = summation+cp(kp1)*cost
                     end do
-                    pb= summation
-                    return
+
+                    pb = summation
                 else
                     kdo = n/2
-                    cdt = cos(2.0*theta)
-                    sdt = sin(2.0_wp*theta)
-                    ct = 1.0_wp
-                    st = 0.0_wp
+                    cos2t = cos(2.0_wp*theta)
+                    sin2t = sin(2.0_wp*theta)
+                    cost = 1.0_wp
+                    sint = 0.0_wp
                     summation = 0.0_wp
+
                     do k=1, kdo
-                        cth = cdt*ct-sdt*st
-                        st = sdt*ct+cdt*st
-                        ct = cth
-                        summation = summation+cp(k)*st
+                        temp = cos2t*cost-sin2t*sint
+                        sint = sin2t*cost+cos2t*sint
+                        cost = temp
+                        summation = summation+cp(k)*sint
                     end do
 
-                    pb= summation
-                    return
+                    pb = summation
                 end if
             else
                 kdo = (n+1)/2
-                if (mmod <= 0) then
-                    cdt = cos(2.0*theta)
-                    sdt = sin(2.0*theta)
-                    ct = cos(theta)
-                    st = -sin(theta)
+                if (mod(ma, 2) <= 0) then
+                    cos2t = cos(2.0*theta)
+                    sin2t = sin(2.0*theta)
+                    cost = cos(theta)
+                    sint = -sin(theta)
                     summation = 0.0_wp
+
                     do k=1, kdo
-                        cth = cdt*ct-sdt*st
-                        st = sdt*ct+cdt*st
-                        ct = cth
-                        summation = summation+cp(k)*ct
+                        temp = cos2t*cost-sin2t*sint
+                        sint = sin2t*cost+cos2t*sint
+                        cost = temp
+                        summation = summation+cp(k)*cost
                     end do
+
                     pb= summation
                 else
-                    cdt = cos(2.0*theta)
-                    sdt = sin(2.0*theta)
-                    ct = cos(theta)
-                    st = -sin(theta)
+                    cos2t = cos(2.0*theta)
+                    sin2t = sin(2.0*theta)
+                    cost = cos(theta)
+                    sint = -sin(theta)
                     summation = 0.0_wp
+
                     do k=1, kdo
-                        cth = cdt*ct-sdt*st
-                        st = sdt*ct+cdt*st
-                        ct = cth
-                        summation = summation+cp(k)*st
+                        temp = cos2t*cost-sin2t*sint
+                        sint = sin2t*cost+cos2t*sint
+                        cost = temp
+                        summation = summation+cp(k)*sint
                     end do
-                    pb= summation
+
+                    pb = summation
                 end if
             end if
         end if
