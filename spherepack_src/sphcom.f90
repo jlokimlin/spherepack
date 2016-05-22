@@ -1027,79 +1027,149 @@ end subroutine dnzft
 
 
 
-subroutine alin (isym, nlat, nlon, m, p, i3, walin)
-    dimension       p(1)        , walin(1)
+subroutine alin(isym, nlat, nlon, m, p, i3, walin)
+
+    use, intrinsic :: iso_fortran_env, only: &
+        wp => REAL64, &
+        ip => INT32
+
+    implicit none
+    !----------------------------------------------------------------------
+    ! Dictionary: calling arguments
+    !----------------------------------------------------------------------
+    integer (ip), intent (in)     :: isym
+    integer (ip), intent (in)     :: nlat
+    integer (ip), intent (in)     :: nlon
+    integer (ip), intent (in)     :: m
+    real (wp),    intent (in out) :: p(*)
+    integer (ip), intent (in out) :: i3
+    real (wp),    intent (in out) :: walin(*)
+    !----------------------------------------------------------------------
+    ! Dictionary: local variables
+    !----------------------------------------------------------------------
+    integer (ip) :: imid
+    integer (ip) :: workspace_indices(4)
+    !----------------------------------------------------------------------
+
     imid = (nlat+1)/2
-    lim = nlat*imid
-    mmax = min(nlat, nlon/2+1)
-    labc = ((mmax-2)*(nlat+nlat-mmax-1))/2
-    iw1 = lim+1
-    iw2 = iw1+lim
-    iw3 = iw2+labc
-    iw4 = iw3+labc
-    !
-    !     the length of walin is ((5*l-7)*l+6)/2
-    !
-    call alin1 (isym, nlat, m, p, imid, i3, walin, walin(iw1), walin(iw2), &
-        walin(iw3), walin(iw4))
+
+    workspace_indices = get_workspace_indices(nlat, nlon, imid)
+
+    associate( &
+        iw1 => workspace_indices(1), &
+        iw2 => workspace_indices(2), &
+        iw3 => workspace_indices(3), &
+        iw4 => workspace_indices(4) &
+        )
+        !
+        !     the length of walin is ((5*l-7)*l+6)/2
+        !
+        call alin1(isym, nlat, m, p, imid, i3, walin, walin(iw1), walin(iw2), &
+            walin(iw3), walin(iw4))
+
+    end associate
+
+contains
+
+
+    subroutine alin1(isym, nlat, m, p, imid, i3, pz, p1, a, b, c)
+        !----------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !----------------------------------------------------------------------
+        integer (ip), intent (in)     :: isym
+        integer (ip), intent (in)     :: nlat
+        integer (ip), intent (in)     :: m
+        real (wp),    intent (in out) :: p(imid,nlat,3)
+        integer (ip), intent (in)     :: imid
+        integer (ip), intent (in out) :: i3
+        real (wp),    intent (in out) :: pz(imid,*)
+        real (wp),    intent (in out) :: p1(imid,*)
+        real (wp),    intent (in out) :: a(*)
+        real (wp),    intent (in out) :: b(*)
+        real (wp),    intent (in out) :: c(*)
+        !----------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !----------------------------------------------------------------------
+        integer (ip)       :: ns, np1, nstp, itemp, nstrt
+        integer (ip), save :: i1, i2
+        !----------------------------------------------------------------------
+
+        itemp = i1
+        i1 = i2
+        i2 = i3
+        i3 = itemp
+
+        if (m < 1) then
+            i1 = 1
+            i2 = 2
+            i3 = 3
+            p(:,:, i3) = pz(:,1:nlat)
+        else if (m == 1) then
+            p(:,2:nlat, i3) = p1(:,2:nlat)
+        else
+            ns = ((m-2)*(nlat+nlat-m-1))/2+1
+
+            if (isym /= 1) then
+                p(:, m+1, i3) = a(ns)*p(:, m-1, i1)-c(ns)*p(:, m+1, i1)
+            end if
+
+            if (m == nlat-1) return
+
+            if (isym /= 2) then
+                ns = ns+1
+                p(:, m+2, i3) = a(ns)*p(:, m, i1)-c(ns)*p(:, m+2, i1)
+            end if
+
+            nstrt = m+3
+
+            if (isym == 1) nstrt = m+4
+
+            if (nstrt > nlat) return
+
+            nstp = 2
+
+            if (isym == 0) nstp = 1
+
+            do np1=nstrt, nlat, nstp
+                ns = ns+nstp
+                p(:,np1,i3) = &
+                    a(ns)*p(:,np1-2,i1)+b(ns)*p(:,np1-2,i3)-c(ns)*p(:,np1,i1)
+            end do
+        end if
+
+    end subroutine alin1
+
+    pure function get_workspace_indices(nlat, nlon, imid) &
+        result (return_value)
+        !----------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !----------------------------------------------------------------------
+        integer (ip), intent (in) :: nlat
+        integer (ip), intent (in) :: nlon
+        integer (ip), intent (in) :: imid
+        integer (ip)              :: return_value(4)
+        !----------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !----------------------------------------------------------------------
+        integer (ip) :: lim, mmax, labc
+        !----------------------------------------------------------------------
+
+        associate( i => return_value )
+
+            lim = nlat*imid
+            mmax = min(nlat, nlon/2+1)
+            labc = ((mmax-2)*(2*nlat-mmax-1))/2
+            i(1) = lim+1
+            i(2) = i(1)+lim
+            i(3) = i(2)+labc
+            i(4) = i(3)+labc
+
+        end associate
+
+    end function get_workspace_indices
 
 end subroutine alin
 
-
-
-subroutine alin1(isym, nlat, m, p, imid, i3, pz, p1, a, b, c)
-dimension       p(imid, nlat, 3), pz(imid, 1), p1(imid, 1), &
-                a(1), b(1), c(1)
-save i1, i2
-ihold = i1
-i1 = i2
-i2 = i3
-i3 = ihold
-if (m-1< 0) then
-    goto 25
-else if (m-1 == 0) then
-    goto 30
-else
-    goto 35
-end if
-25 i1 = 1
-i2 = 2
-i3 = 3
-do 45 np1=1, nlat
-do 45 i=1, imid
-p(i, np1, i3) = pz(i, np1)
-45 continue
-return
-30 do 50 np1=2, nlat
-do 50 i=1, imid
-p(i, np1, i3) = p1(i, np1)
-50 continue
-return
-35 ns = ((m-2)*(nlat+nlat-m-1))/2+1
-if (isym == 1) go to 36
-do 85 i=1, imid
-p(i, m+1, i3) = a(ns)*p(i, m-1, i1)-c(ns)*p(i, m+1, i1)
-85 continue
-36 if (m == nlat-1) return
-if (isym == 2) go to 71
-ns = ns+1
-do 70 i=1, imid
-p(i, m+2, i3) = a(ns)*p(i, m, i1)-c(ns)*p(i, m+2, i1)
-70 continue
-71 nstrt = m+3
-if (isym == 1) nstrt = m+4
-if (nstrt > nlat) go to 80
-nstp = 2
-if (isym == 0) nstp = 1
-do 75 np1=nstrt, nlat, nstp
-ns = ns+nstp
-do 75 i=1, imid
-p(i, np1, i3) = a(ns)*p(i, np1-2, i1)+b(ns)*p(i, np1-2, i3) &
-                              -c(ns)*p(i, np1, i1)
-75 continue
-80 return
-
-end subroutine alin1
 
 
 subroutine alinit (nlat, nlon, walin, dwork)
