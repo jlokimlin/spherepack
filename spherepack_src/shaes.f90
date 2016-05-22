@@ -9,7 +9,7 @@
 !     *                                                               *
 !     *                      SPHEREPACK version 3.2                   *
 !     *                                                               *
-!     *       A Package of Fortran77 Subroutines and Programs         *
+!     *       A Package of Fortran Subroutines and Programs           *
 !     *                                                               *
 !     *              for Modeling Geophysical Processes               *
 !     *                                                               *
@@ -494,9 +494,8 @@ subroutine shaes1(nlat, isym, nt, g, idgs, jdgs, a, b, mdab, ndab, &
                 ge(1:imm1,1:nlon,k) = fsn*g(1:imm1,1:nlon,k)
             end do
 
-            if (isym == 1) then
-                exit if_block
-            end if
+            if (isym == 1) exit if_block
+
         end if
 
         if (modl /= 0) then

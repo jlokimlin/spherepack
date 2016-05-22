@@ -256,100 +256,84 @@ pure subroutine dnlft(m, n, theta, cp, pb)
 end subroutine dnlft
 
 
+    subroutine dnlftd (m, n, theta, cp, pb)
+        !
+        !     computes the derivative of pmn(theta) with respect to theta
+        !
+        dimension cp(1)
+        real cp, pb, theta, cdt, sdt, cth, sth, chh
+        cdt = cos(2.0*theta)
+        sdt = sin(2.0*theta)
+        nmod=mod(n, 2)
+        mmod=mod(abs(m), 2)
+        if (nmod <= 0) then
+            if (mmod <= 0) then
+                !
+                !==> n even, m even
+                !
+                kdo=n/2
+                pb = 0.0
+                if (n == 0) return
+                cth = cdt
+                sth = sdt
+                do k=1, kdo
+                    !     pb = pb+cp(k+1)*cos(2*k*theta)
+                    pb = pb-2.0*k*cp(k+1)*sth
+                    chh = cdt*cth-sdt*sth
+                    sth = sdt*cth+cdt*sth
+                    cth = chh
+                end do
+            else
+                !
+                !==> n even, m odd
+                !
+                kdo = n/2
+                pb = 0.
+                cth = cdt
+                sth = sdt
+                do k=1, kdo
+                    !     pb = pb+cp(k)*sin(2*k*theta)
+                    pb = pb+2.0*k*cp(k)*cth
+                    chh = cdt*cth-sdt*sth
+                    sth = sdt*cth+cdt*sth
+                    cth = chh
+                end do
+            end if
+        else
+            if (mmod <= 0) then
+                !
+                !==> n odd, m even
+                !
+                kdo = (n+1)/2
+                pb = 0.
+                cth = cos(theta)
+                sth = sin(theta)
+                do k=1, kdo
+                    !     pb = pb+cp(k)*cos((2*k-1)*theta)
+                    pb = pb-(2.0*k-1)*cp(k)*sth
+                    chh = cdt*cth-sdt*sth
+                    sth = sdt*cth+cdt*sth
+                    cth = chh
+                end do
+            else
+                !
+                !==> n odd, m odd
+                !
+                kdo = (n+1)/2
+                pb = 0.
+                cth = cos(theta)
+                sth = sin(theta)
+                do k=1, kdo
+                    !     pb = pb+cp(k)*sin((2*k-1)*theta)
+                    pb = pb+(2.0*k-1)*cp(k)*cth
+                    chh = cdt*cth-sdt*sth
+                    sth = sdt*cth+cdt*sth
+                    cth = chh
+                end do
+            end if
+        end if
 
-subroutine dnlftd (m, n, theta, cp, pb)
-!
-!     computes the derivative of pmn(theta) with respect to theta
-!
-dimension cp(1)
-real cp, pb, theta, cdt, sdt, cth, sth, chh
-cdt = cos(2.0*theta)
-sdt = sin(2.0*theta)
-nmod=mod(n, 2)
-mmod=mod(abs(m), 2)
-if (nmod< 0) then
-    goto 1
-else if (nmod == 0) then
-    goto 1
-else
-    goto 2
-end if
-1 if (mmod< 0) then
-    goto 3
-else if (mmod == 0) then
-    goto 3
-else
-    goto 4
-end if
-!
-!     n even, m even
-!
-3 kdo=n/2
-pb = 0.0
-if (n == 0) return
-cth = cdt
-sth = sdt
-do 170 k=1, kdo
-!     pb = pb+cp(k+1)*cos(2*k*theta)
-pb = pb-2.0*k*cp(k+1)*sth
-chh = cdt*cth-sdt*sth
-sth = sdt*cth+cdt*sth
-cth = chh
-170 continue
-return
-!
-!     n even, m odd
-!
-4 kdo = n/2
-pb = 0.
-cth = cdt
-sth = sdt
-do 180 k=1, kdo
-!     pb = pb+cp(k)*sin(2*k*theta)
-pb = pb+2.0*k*cp(k)*cth
-chh = cdt*cth-sdt*sth
-sth = sdt*cth+cdt*sth
-cth = chh
-180 continue
-return
-2 if (mmod< 0) then
-    goto 13
-else if (mmod == 0) then
-    goto 13
-else
-    goto 14
-end if
-!
-!     n odd, m even
-!
-13 kdo = (n+1)/2
-pb = 0.
-cth = cos(theta)
-sth = sin(theta)
-do 190 k=1, kdo
-!     pb = pb+cp(k)*cos((2*k-1)*theta)
-pb = pb-(2.0*k-1)*cp(k)*sth
-chh = cdt*cth-sdt*sth
-sth = sdt*cth+cdt*sth
-cth = chh
-190 continue
-return
-!
-!     n odd, m odd
-!
-14 kdo = (n+1)/2
-pb = 0.
-cth = cos(theta)
-sth = sin(theta)
-do 200 k=1, kdo
-!     pb = pb+cp(k)*sin((2*k-1)*theta)
-pb = pb+(2.0*k-1)*cp(k)*cth
-chh = cdt*cth-sdt*sth
-sth = sdt*cth+cdt*sth
-cth = chh
-200 continue
-
-end subroutine dnlftd
+    end subroutine dnlftd
 
 
 

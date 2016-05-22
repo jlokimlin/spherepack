@@ -9,7 +9,7 @@
 !     *                                                               *
 !     *                      SPHEREPACK version 3.2                   *
 !     *                                                               *
-!     *       A Package of Fortran77 Subroutines and Programs         *
+!     *       A Package of Fortran Subroutines and Programs           *
 !     *                                                               *
 !     *              for Modeling Geophysical Processes               *
 !     *                                                               *
@@ -29,20 +29,19 @@
 !     *                                                               *
 !     * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !
-!
-!
-!     This version of gaqd implements the method presented in:
-!     P. N. swarztrauber, Computing the points and weights for
-!     Gauss-Legendre quadrature, SIAM J. Sci. Comput.,
-!     24(2002) pp. 945-954.
-!
-!     The w and lwork arrays are dummy and included only to
-!     permit a simple pluggable exchange with the
-!     old gaqd in previous versions of SPHEREPACK
-!
-!
-!
+
 subroutine gaqd(nlat, theta, wts, w, lwork, ierror)
+    !
+    !
+    !     This version of gaqd implements the method presented in:
+    !     P. N. swarztrauber, Computing the points and weights for
+    !     Gauss-Legendre quadrature, SIAM J. Sci. Comput.,
+    !     24(2002) pp. 945-954.
+    !
+    !     The w and lwork arrays are dummy and included only to
+    !     permit a simple pluggable exchange with the
+    !     old gaqd in previous versions of SPHEREPACK
+    !
     !
     !     gauss points and weights are computed using the fourier-newton
     !     described in "on computing the points and weights for 
