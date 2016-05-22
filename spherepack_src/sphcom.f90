@@ -1088,7 +1088,7 @@ contains
         real (wp),    intent (in out) :: b(*)
         real (wp),    intent (in out) :: c(*)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dictionary: local variables
         !----------------------------------------------------------------------
         integer (ip)       :: ns, np1, nstp, itemp, nstrt
         integer (ip), save :: i1, i2
@@ -1149,7 +1149,7 @@ contains
         integer (ip), intent (in) :: imid
         integer (ip)              :: return_value(4)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dictionary: local variables arguments
         !----------------------------------------------------------------------
         integer (ip) :: lim, mmax, labc
         !----------------------------------------------------------------------
@@ -1172,133 +1172,253 @@ end subroutine alin
 
 
 
-subroutine alinit (nlat, nlon, walin, dwork)
-dimension       walin(*)
-real dwork(*)
-imid = (nlat+1)/2
-iw1 = 2*nlat*imid+1
-!
-!     the length of walin is 3*((l-3)*l+2)/2 + 2*l*imid
-!     the length of work is nlat+1
-!
-call alini1 (nlat, nlon, imid, walin, walin(iw1), dwork)
+subroutine alinit(nlat, nlon, walin, dwork)
+
+    use, intrinsic :: iso_fortran_env, only: &
+        wp => REAL64, &
+        ip => INT32
+
+    implicit none
+    !----------------------------------------------------------------------
+    ! Dictionary: calling arguments
+    !----------------------------------------------------------------------
+    integer (ip), intent (in)     :: nlat
+    integer (ip), intent (in)     :: nlon
+    real (wp),    intent (in out) :: walin(*)
+    real (wp),    intent (in out) :: dwork(*)
+    !----------------------------------------------------------------------
+    ! Dictionary: calling arguments
+    !----------------------------------------------------------------------
+    integer (ip) :: imid, iw1
+    !----------------------------------------------------------------------
+
+    imid = (nlat+1)/2
+    iw1 = 2*nlat*imid+1
+    !
+    !     the length of walin is 3*((l-3)*l+2)/2 + 2*l*imid
+    !     the length of work is nlat+1
+    !
+    call alini1(nlat, nlon, imid, walin, walin(iw1), dwork)
+
+contains
+
+    subroutine alini1 (nlat, nlon, imid, p, abc, cp)
+        !----------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !----------------------------------------------------------------------
+        integer (ip), intent (in)     :: nlat
+        integer (ip), intent (in)     :: nlon
+        integer (ip), intent (in)     :: imid
+        real (wp),    intent (in out) :: p(imid, nlat,2)
+        real (wp),    intent (in out) :: abc(*)
+        real (wp),    intent (in out) :: cp(*)
+        !----------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !----------------------------------------------------------------------
+        integer (ip)         :: i, m, n, mp1, np1
+        real (wp)            :: dt, ph, th
+        real (wp), parameter :: PI = acos(-1.0_wp)
+        !----------------------------------------------------------------------
+
+        dt = PI/(nlat-1)
+
+        do mp1=1, 2
+            m = mp1-1
+            do np1=mp1, nlat
+                n = np1-1
+                call dnlfk(m, n, cp)
+                do i=1, imid
+                    th = real(i-1, kind=wp)*dt
+                    call dnlft(m, n, th, cp, ph)
+                    p(i, np1, mp1) = ph
+                end do
+            end do
+        end do
+
+        call rabcp(nlat, nlon, abc)
+
+    end subroutine alini1
 
 end subroutine alinit
 
 
-
-subroutine alini1 (nlat, nlon, imid, p, abc, cp)
-dimension p(imid, nlat, 2), abc(1), cp(1)
-real pi, dt, th, cp, ph
-pi = acos(-1.0)
-dt = pi/(nlat-1)
-do 160 mp1=1, 2
-m = mp1-1
-do 160 np1=mp1, nlat
-n = np1-1
-call dnlfk (m, n, cp)
-do 160 i=1, imid
-th = (i-1)*dt
-call dnlft (m, n, th, cp, ph)
-p(i, np1, mp1) = ph
-160 continue
-call rabcp(nlat, nlon, abc)
-
-end subroutine alini1
-
-
-
 subroutine rabcp(nlat, nlon, abc)
-!
-!     subroutine rabcp computes the coefficients in the recurrence
-!     relation for the associated legendre fuctions. array abc
-!     must have 3*((mmax-2)*(nlat+nlat-mmax-1))/2 locations.
-!
-dimension abc(1)
-mmax = min(nlat, nlon/2+1)
-labc = ((mmax-2)*(nlat+nlat-mmax-1))/2
-iw1 = labc+1
-iw2 = iw1+labc
-call rabcp1(nlat, nlon, abc, abc(iw1), abc(iw2))
+    !
+    ! Purpose:
+    !
+    ! Computes the coefficients in the recurrence
+    ! relation for the associated legendre functions.0_wp array abc
+    ! must have 3*((mmax-2)*(nlat+nlat-mmax-1))/2 locations.0_wp
+    !
+    use, intrinsic :: iso_fortran_env, only: &
+        wp => REAL64, &
+        ip => INT32
 
+    implicit none
+    !----------------------------------------------------------------------
+    ! Dictionary: calling arguments
+    !----------------------------------------------------------------------
+    integer (ip), intent (in)     :: nlat
+    integer (ip), intent (in)     :: nlon
+    real (wp),    intent (in out) :: abc(*)
+    !----------------------------------------------------------------------
+    ! Dictionary: calling arguments
+    !----------------------------------------------------------------------
+    integer (ip) :: mmax, labc, iw1, iw2
+    !----------------------------------------------------------------------
+
+    ! Compute workspace indices
+    mmax = min(nlat, nlon/2+1)
+    labc = ((mmax-2)*(nlat+nlat-mmax-1))/2
+    iw1 = labc+1
+    iw2 = iw1+labc
+
+    call rabcp1(nlat, nlon, abc, abc(iw1), abc(iw2))
+
+contains
+
+    subroutine rabcp1(nlat, nlon, a, b, c)
+        !
+        ! Purpose:
+        !
+        ! Coefficients a, b, and c for computing pbar(m, n, theta) are
+        ! stored in location ((m-2)*(nlat+nlat-m-1))/2+n+1
+        !
+        !----------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !----------------------------------------------------------------------
+        integer (ip), intent (in)     :: nlat
+        integer (ip), intent (in)     :: nlon
+        real (wp),    intent (in out) :: a(*)
+        real (wp),    intent (in out) :: b(*)
+        real (wp),    intent (in out) :: c(*)
+        !----------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !----------------------------------------------------------------------
+        integer (ip) :: m, n, ns, mp1, np1, mp3, mmax
+        real (wp)    :: cn, fm, fn
+        real (wp)    :: tm, tn, fnmm, fnpm, temp
+        !----------------------------------------------------------------------
+
+        mmax = min(nlat, nlon/2+1)
+
+        outer_loop: do mp1=3, mmax
+
+            m = mp1-1
+            ns = ((m-2)*(nlat+nlat-m-1))/2+1
+            fm = real(m, kind=wp)
+            tm = 2.0_wp * fm
+            temp = tm*(tm-1.0_wp)
+            a(ns) = sqrt((tm+1.0_wp)*(tm-2.0_wp)/temp)
+            c(ns) = sqrt(2.0_wp/temp)
+
+            if (m == nlat-1) cycle outer_loop
+
+            ns = ns+1
+            temp = tm*(tm+1.0_wp)
+            a(ns) = sqrt((tm+3.0_wp)*(tm-2.0_wp)/temp)
+            c(ns) = sqrt(6.0_wp/temp)
+            mp3 = m+3
+
+            if (mp3 > nlat) cycle outer_loop
+
+            do np1=mp3, nlat
+                n = np1-1
+                ns = ns+1
+                fn = real(n, kind=wp)
+                tn = 2.0_wp * fn
+                cn = (tn+1.0_wp)/(tn-3.0_wp)
+                fnpm = fn+fm
+                fnmm = fn-fm
+                temp = fnpm*(fnpm-1.0_wp)
+                a(ns) = sqrt(cn*(fnpm-3.0_wp)*(fnpm-2.0_wp)/temp)
+                b(ns) = sqrt(cn*fnmm*(fnmm-1.0_wp)/temp)
+                c(ns) = sqrt((fnmm+1.0_wp)*(fnmm+2.0_wp)/temp)
+            end do
+        end do outer_loop
+
+    end subroutine rabcp1
 end subroutine rabcp
 
 
-
-subroutine rabcp1(nlat, nlon, a, b, c)
-!
-!     coefficients a, b, and c for computing pbar(m, n, theta) are
-!     stored in location ((m-2)*(nlat+nlat-m-1))/2+n+1
-!
-dimension a(1), b(1), c(1)
-mmax = min(nlat, nlon/2+1)
-do 215 mp1=3, mmax
-m = mp1-1
-ns = ((m-2)*(nlat+nlat-m-1))/2+1
-fm = real(m)
-tm = fm+fm
-temp = tm*(tm-1.)
-a(ns) = sqrt((tm+1.)*(tm-2.)/temp)
-c(ns) = sqrt(2./temp)
-if (m == nlat-1) go to 215
-ns = ns+1
-temp = tm*(tm+1.)
-a(ns) = sqrt((tm+3.)*(tm-2.)/temp)
-c(ns) = sqrt(6./temp)
-mp3 = m+3
-if (mp3 > nlat) go to 215
-do 210 np1=mp3, nlat
-n = np1-1
-ns = ns+1
-fn = real(n)
-tn = fn+fn
-cn = (tn+1.)/(tn-3.)
-fnpm = fn+fm
-fnmm = fn-fm
-temp = fnpm*(fnpm-1.)
-a(ns) = sqrt(cn*(fnpm-3.)*(fnpm-2.)/temp)
-b(ns) = sqrt(cn*fnmm*(fnmm-1.)/temp)
-c(ns) = sqrt((fnmm+1.)*(fnmm+2.)/temp)
-210 continue
-215 continue
-
-end subroutine rabcp1
-
-
-
 subroutine sea1(nlat, nlon, imid, z, idz, zin, wzfin, dwork)
-dimension z(idz, *), zin(imid, nlat, 3), wzfin(*)
-real dwork(*)
-call zfinit(nlat, nlon, wzfin, dwork)
-mmax = min(nlat, nlon/2+1)
-do mp1=1, mmax
-m = mp1-1
-call zfin (0, nlat, nlon, m, zin, i3, wzfin)
-do np1=mp1, nlat
-mn = m*(nlat-1)-(m*(m-1))/2+np1
-do i=1, imid
-z(mn, i) = zin(i, np1, i3)
-end do
-end do
-end do
+
+    use, intrinsic :: iso_fortran_env, only: &
+        wp => REAL64, &
+        ip => INT32
+
+    implicit none
+    !----------------------------------------------------------------------
+    ! Dictionary: calling arguments
+    !----------------------------------------------------------------------
+    integer (ip), intent (in)     :: nlat
+    integer (ip), intent (in)     :: nlon
+    integer (ip), intent (in)     :: imid
+    real (wp),    intent (in out) :: z(idz, *)
+    integer (ip), intent (in)     :: idz
+    real (wp),    intent (in out) :: zin(imid, nlat,3)
+    real (wp),    intent (in out) :: wzfin(*)
+    real (wp),    intent (in out) :: dwork(*)
+    !----------------------------------------------------------------------
+    ! Dictionary: calling arguments
+    !----------------------------------------------------------------------
+    integer (ip) :: i, m, i3, mn, mp1, np1, mmax
+    !----------------------------------------------------------------------
+
+    call zfinit(nlat, nlon, wzfin, dwork)
+
+    mmax = min(nlat, nlon/2+1)
+
+    do mp1=1, mmax
+        m = mp1-1
+
+        call zfin(0, nlat, nlon, m, zin, i3, wzfin)
+
+        do np1=mp1, nlat
+            mn = m*(nlat-1)-(m*(m-1))/2+np1
+            z(mn,1:imid) = zin(:,np1, i3)
+        end do
+    end do
 
 end subroutine sea1
 
 
 
 subroutine ses1(nlat, nlon, imid, p, pin, walin, dwork)
-dimension p(imid, *), pin(imid, nlat, 3), walin(*)
-real dwork(*)
-call alinit (nlat, nlon, walin, dwork)
-mmax = min(nlat, nlon/2+1)
-do 10 mp1=1, mmax
-m = mp1-1
-call alin(0, nlat, nlon, m, pin, i3, walin)
-do 10 np1=mp1, nlat
-mn = m*(nlat-1)-(m*(m-1))/2+np1
-do 10 i=1, imid
-p(i, mn) = pin(i, np1, i3)
-10 continue
+
+    use, intrinsic :: iso_fortran_env, only: &
+        wp => REAL64, &
+        ip => INT32
+
+    implicit none
+    !----------------------------------------------------------------------
+    ! Dictionary: calling arguments
+    !----------------------------------------------------------------------
+    integer (ip), intent (in)     :: nlat
+    integer (ip), intent (in)     :: nlon
+    integer (ip), intent (in)     :: imid
+    real (wp),    intent (in out) :: p(imid,*)
+    real (wp),    intent (in out) :: pin(imid,nlat,3)
+    real (wp),    intent (in out) :: walin(*)
+    real (wp),    intent (in out) :: dwork(*)
+    !----------------------------------------------------------------------
+    ! Dictionary: calling arguments
+    !----------------------------------------------------------------------
+    integer (ip) :: m, i3, mn, mp1, np1, mmax
+    !----------------------------------------------------------------------
+
+    call alinit(nlat, nlon, walin, dwork)
+
+    mmax = min(nlat, nlon/2+1)
+
+    do mp1=1, mmax
+        m = mp1-1
+        call alin(0, nlat, nlon, m, pin, i3, walin)
+        do np1=mp1, nlat
+            mn = m*(nlat-1)-(m*(m-1))/2+np1
+            p(:, mn) = pin(:, np1, i3)
+        end do
+    end do
 
 end subroutine ses1
 
