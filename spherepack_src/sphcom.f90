@@ -894,176 +894,134 @@ end subroutine dnzfk
 
 
 
-
 subroutine dnzft(nlat, m, n, th, cz, zh)
-dimension cz(1)
-real cz, zh, th, cdt, sdt, cth, sth, chh
-zh = 0.
-cdt = cos(th+th)
-sdt = sin(th+th)
-lmod = mod(nlat, 2)
-mmod = mod(m, 2)
-nmod = mod(n, 2)
-if (lmod< 0) then
-    goto 20
-else if (lmod == 0) then
-    goto 20
-else
-    goto 10
-end if
-10 lc = (nlat+1)/2
-lq = lc-1
-ls = lc-2
-if (nmod< 0) then
-    goto 1
-else if (nmod == 0) then
-    goto 1
-else
-    goto 2
-end if
-1 if (mmod< 0) then
-    goto 3
-else if (mmod == 0) then
-    goto 3
-else
-    goto 4
-end if
-!
-!     nlat odd n even m even
-!
-3 zh = .5*(cz(1)+cz(lc)*cos(2*lq*th))
-cth = cdt
-sth = sdt
-do 201 k=2, lq
-!     zh = zh+cz(k)*cos(2*(k-1)*th)
-zh = zh+cz(k)*cth
-chh = cdt*cth-sdt*sth
-sth = sdt*cth+cdt*sth
-cth = chh
-201 continue
-return
-!
-!     nlat odd n even m odd
-!
-4 cth = cdt
-sth = sdt
-do 202 k=1, ls
-!     zh = zh+cz(k+1)*sin(2*k*th)
-zh = zh+cz(k+1)*sth
-chh = cdt*cth-sdt*sth
-sth = sdt*cth+cdt*sth
-cth = chh
-202 continue
-return
-!
-!     nlat odd n odd, m even
-!
-2 if (mmod< 0) then
-    goto 5
-else if (mmod == 0) then
-    goto 5
-else
-    goto 6
-end if
-5 cth = cos(th)
-sth = sin(th)
-do 203 k=1, lq
-!     zh = zh+cz(k)*cos((2*k-1)*th)
-zh = zh+cz(k)*cth
-chh = cdt*cth-sdt*sth
-sth = sdt*cth+cdt*sth
-cth = chh
-203 continue
-return
-!
-!     nlat odd n odd m odd
-!
-6 cth = cos(th)
-sth = sin(th)
-do 204 k=1, lq
-!     zh = zh+cz(k+1)*sin((2*k-1)*th)
-zh = zh+cz(k+1)*sth
-chh = cdt*cth-sdt*sth
-sth = sdt*cth+cdt*sth
-cth = chh
-204 continue
-return
-20 lc = nlat/2
-lq = lc-1
-if (nmod< 0) then
-    goto 30
-else if (nmod == 0) then
-    goto 30
-else
-    goto 80
-end if
-30 if (mmod< 0) then
-    goto 40
-else if (mmod == 0) then
-    goto 40
-else
-    goto 60
-end if
-!
-!     nlat even n even m even
-!
-40 zh = .5*cz(1)
-cth = cdt
-sth = sdt
-do 50 k=2, lc
-!     zh = zh+cz(k)*cos(2*(k-1)*th)
-zh = zh+cz(k)*cth
-chh = cdt*cth-sdt*sth
-sth = sdt*cth+cdt*sth
-cth = chh
-50 continue
-return
-!
-!     nlat even n even m odd
-!
-60 cth = cdt
-sth = sdt
-do 70 k=1, lq
-!     zh = zh+cz(k+1)*sin(2*k*th)
-zh = zh+cz(k+1)*sth
-chh = cdt*cth-sdt*sth
-sth = sdt*cth+cdt*sth
-cth = chh
-70 continue
-return
-!
-!     nlat even n odd m even
-!
-80 if (mmod< 0) then
-    goto 90
-else if (mmod == 0) then
-    goto 90
-else
-    goto 110
-end if
-90 zh = .5*cz(lc)*cos((nlat-1)*th)
-cth = cos(th)
-sth = sin(th)
-do 100 k=1, lq
-!     zh = zh+cz(k)*cos((2*k-1)*th)
-zh = zh+cz(k)*cth
-chh = cdt*cth-sdt*sth
-sth = sdt*cth+cdt*sth
-cth = chh
-100 continue
-return
-!
-!     nlat even n odd m odd
-!
-110 cth = cos(th)
-sth = sin(th)
-do 120 k=1, lq
-!     zh = zh+cz(k+1)*sin((2*k-1)*th)
-zh = zh+cz(k+1)*sth
-chh = cdt*cth-sdt*sth
-sth = sdt*cth+cdt*sth
-cth = chh
-120 continue
+
+    use, intrinsic :: iso_fortran_env, only: &
+        wp => REAL64, &
+        ip => INT32
+
+    implicit none
+    !----------------------------------------------------------------------
+    ! Dictionary: calling arguments
+    !----------------------------------------------------------------------
+    integer (ip), intent (in)   :: nlat
+    integer (ip), intent (in)   :: m
+    integer (ip), intent (in)   :: n
+    real (wp),    intent (in)   :: th
+    real (wp),    intent (in)   :: cz(*)
+    real (wp),    intent (out)  :: zh
+    !----------------------------------------------------------------------
+    ! Dictionary: local variables
+    !----------------------------------------------------------------------
+    integer (ip) :: i, k, lc, lq, ls
+    real (wp)    :: cos2t, sin2t, cost, sint, temp
+    !----------------------------------------------------------------------
+
+    zh = 0.0_wp
+    cos2t = cos(2.0_wp*th)
+    sin2t = sin(2.0_wp*th)
+
+    if (mod(nlat, 2) <= 0) then
+        lc = nlat/2
+        lq = lc-1
+        if (mod(n, 2) <= 0) then
+            if (mod(m, 2) <= 0) then
+                zh = 0.5_wp*cz(1)
+                cost = cos2t
+                sint = sin2t
+                do k=2, lc
+                    !     zh = zh+cz(k)*cos(2*(k-1)*th)
+                    zh = zh+cz(k)*cost
+                    temp = cos2t*cost-sin2t*sint
+                    sint = sin2t*cost+cos2t*sint
+                    cost = temp
+                end do
+            else
+                cost = cos2t
+                sint = sin2t
+                do k=1, lq
+                    !     zh = zh+cz(k+1)*sin(2*k*th)
+                    zh = zh+cz(k+1)*sint
+                    temp = cos2t*cost-sin2t*sint
+                    sint = sin2t*cost+cos2t*sint
+                    cost = temp
+                end do
+            end if
+        else
+            if (mod(m, 2) <= 0) then
+                zh = 0.5_wp*cz(lc)*cos((nlat-1)*th)
+                cost = cos(th)
+                sint = sin(th)
+                do k=1, lq
+                    !     zh = zh+cz(k)*cos((2*k-1)*th)
+                    zh = zh+cz(k)*cost
+                    temp = cos2t*cost-sin2t*sint
+                    sint = sin2t*cost+cos2t*sint
+                    cost = temp
+                end do
+            else
+                cost = cos(th)
+                sint = sin(th)
+                do k=1, lq
+                    !     zh = zh+cz(k+1)*sin((2*k-1)*th)
+                    zh = zh+cz(k+1)*sint
+                    temp = cos2t*cost-sin2t*sint
+                    sint = sin2t*cost+cos2t*sint
+                    cost = temp
+                end do
+            end if
+        end if
+    else
+        lc = (nlat+1)/2
+        lq = lc-1
+        ls = lc-2
+        if (mod(n, 2) <= 0) then
+            if (mod(m, 2) <= 0) then
+                zh = 0.5_wp*(cz(1)+cz(lc)*cos(2*lq*th))
+                cost = cos2t
+                sint = sin2t
+                do k=2, lq
+                    !     zh = zh+cz(k)*cos(2*(k-1)*th)
+                    zh = zh+cz(k)*cost
+                    temp = cos2t*cost-sin2t*sint
+                    sint = sin2t*cost+cos2t*sint
+                    cost = temp
+                end do
+            else
+                cost = cos2t
+                sint = sin2t
+                do k=1, ls
+                    !     zh = zh+cz(k+1)*sin(2*k*th)
+                    zh = zh+cz(k+1)*sint
+                    temp = cos2t*cost-sin2t*sint
+                    sint = sin2t*cost+cos2t*sint
+                    cost = temp
+                end do
+            end if
+        else
+            if (mod(m, 2) <= 0) then
+                cost = cos(th)
+                sint = sin(th)
+                do k=1, lq
+                    !     zh = zh+cz(k)*cos((2*k-1)*th)
+                    zh = zh+cz(k)*cost
+                    temp = cos2t*cost-sin2t*sint
+                    sint = sin2t*cost+cos2t*sint
+                    cost = temp
+                end do
+            else
+                cost = cos(th)
+                sint = sin(th)
+                do k=1, lq
+                    !     zh = zh+cz(k+1)*sin((2*k-1)*th)
+                    zh = zh+cz(k+1)*sint
+                    temp = cos2t*cost-sin2t*sint
+                    sint = sin2t*cost+cos2t*sint
+                    cost = temp
+                end do
+            end if
+        end if
+    end if
 
 end subroutine dnzft
 
