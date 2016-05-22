@@ -795,105 +795,103 @@ end subroutine zfinit
 
 
 subroutine dnzfk(nlat, m, n, cz, work)
-!
-!     dnzfk computes the coefficients in the trigonometric
-!     expansion of the z functions that are used in spherical
-!     harmonic analysis.
-!
-dimension  cz(1), work(1)
-!
-!     cz and work must both have nlat/2+1 locations
-!
-real sum, sc1, t1, t2, work, cz
-lc = (nlat+1)/2
-sc1 = 2.0/real(nlat-1)
-call dnlfk(m, n, work)
-nmod = mod(n, 2)
-mmod = mod(m, 2)
-if (nmod< 0) then
-    goto 1
-else if (nmod == 0) then
-    goto 1
-else
-    goto 2
-end if
-1 if (mmod< 0) then
-    goto 3
-else if (mmod == 0) then
-    goto 3
-else
-    goto 4
-end if
-!
-!     n even, m even
-!
-3 kdo = n/2+1
-do 5 idx=1, lc
-i = idx+idx-2
-sum = work(1)/(1.0-real(i**2))
-if (kdo<2) go to 29
-do 6 kp1=2, kdo
-k = kp1-1
-t1 = 1.0-(k+k+i)**2
-t2 = 1.0-(k+k-i)**2
-8 sum = sum+work(kp1)*(t1+t2)/(t1*t2)
-6 continue
-29 cz(idx) = sc1*sum
-5 continue
-return
-!
-!     n even, m odd
-!
-4 kdo = n/2
-do 9 idx=1, lc
-i = idx+idx-2
-sum = 0.
-do 101 k=1, kdo
-t1 = 1.0-real(2*k+i)**2
-t2 = 1.0-real(2*k-i)**2
-12 sum=sum+work(k)*(t1-t2)/(t1*t2)
-101 continue
-cz(idx) = sc1*sum
-9 continue
-return
-2 if (mmod< 0) then
-    goto 13
-else if (mmod == 0) then
-    goto 13
-else
-    goto 14
-end if
-!
-!     n odd, m even
-!
-13 kdo = (n+1)/2
-do 15 idx=1, lc
-i = idx+idx-1
-sum = 0.
-do 16 k=1, kdo
-t1 = 1.0-(k+k-1+i)**2
-t2 = 1.0-(k+k-1-i)**2
-18 sum=sum+work(k)*(t1+t2)/(t1*t2)
-16 continue
-cz(idx)=sc1*sum
-15 continue
-return
-!
-!     n odd, m odd
-!
-14 kdo = (n+1)/2
-do 19 idx=1, lc
-i = idx+idx-3
-sum=0.
-do 20 k=1, kdo
-t1 = 1.0-(k+k-1+i)**2
-t2 = 1.0-(k+k-1-i)**2
-22 sum=sum+work(k)*(t1-t2)/(t1*t2)
-20 continue
-cz(idx)=sc1*sum
-19 continue
+    !
+    ! Purpose:
+    !
+    !     Computes the coefficients in the trigonometric
+    !     expansion of the z functions that are used in spherical
+    !     harmonic analysis.
+    !
+    !
+    ! Remark:
+    !
+    !    cz and work must both have nlat/2+1 locations
+    !
+    use, intrinsic :: iso_fortran_env, only: &
+        wp => REAL64, &
+        ip => INT32
+
+    implicit none
+    !----------------------------------------------------------------------
+    ! Dictionary: calling arguments
+    !----------------------------------------------------------------------
+    integer (ip), intent (in)     :: nlat
+    integer (ip), intent (in)     :: m
+    integer (ip), intent (in)     :: n
+    real (wp),    intent (in out) :: cz(nlat/2 + 1)
+    real (wp),    intent (in out) :: work(nlat/2 + 1)
+    !----------------------------------------------------------------------
+    integer (ip) :: i, k, lc, kp1, kdo, idx
+    real (wp)    :: summation, sc1, t1, t2
+    !----------------------------------------------------------------------
+
+    lc = (nlat+1)/2
+    sc1 = 2.0_wp/(nlat-1)
+
+    call dnlfk(m, n, work)
+
+    if (mod(n,2) <= 0) then
+        if (mod(m,2) <= 0) then
+            kdo = n/2+1
+            do idx=1, lc
+                i = 2*idx-2
+                summation = work(1)/(1.0_wp-real(i**2, kind=wp))
+                if (kdo >= 2) then
+                    do kp1=2, kdo
+                        k = kp1-1
+                        t1 = 1.0_wp-real((2*k+i)**2, kind=wp)
+                        t2 = 1.0_wp-real((2*k-i)**2, kind=wp)
+                        summation = summation+work(kp1)*(t1+t2)/(t1*t2)
+                    end do
+                end if
+                cz(idx) = sc1*summation
+            end do
+        else
+            kdo = n/2
+            do idx=1, lc
+                i = 2*idx-2
+                summation = 0.0_wp
+                do k=1, kdo
+                    t1 = 1.0_wp-real((2*k+i)**2, kind=wp)
+                    t2 = 1.0_wp-real((2*k-i)**2, kind=wp)
+                    summation=summation+work(k)*(t1-t2)/(t1*t2)
+                end do
+                cz(idx) = sc1*summation
+            end do
+        end if
+    else
+        if (mod(m,2) <= 0) then
+            !
+            !==>  n odd, m even
+            !
+            kdo = (n+1)/2
+            do idx=1, lc
+                i = 2*idx-1
+                summation = 0.0_wp
+                do k=1, kdo
+                    t1 = 1.0_wp-real((2*k-1+i)**2, kind=wp)
+                    t2 = 1.0_wp-real((2*k-1-i)**2, kind=wp)
+                    summation=summation+work(k)*(t1+t2)/(t1*t2)
+                end do
+                cz(idx)=sc1*summation
+            end do
+        else
+            kdo = (n+1)/2
+            do idx=1, lc
+                i = 2*idx-3
+                summation=0.0_wp
+                do k=1, kdo
+                    t1 = 1.0_wp-real((2*k-1+i)**2, kind=wp)
+                    t2 = 1.0_wp-real((2*k-1-i)**2, kind=wp)
+                    summation=summation+work(k)*(t1-t2)/(t1*t2)
+                end do
+                cz(idx)=sc1*summation
+            end do
+        end if
+    end if
 
 end subroutine dnzfk
+
 
 
 
