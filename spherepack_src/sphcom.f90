@@ -158,6 +158,106 @@ pure subroutine dnlfk(m, n, cp)
 end subroutine dnlfk
 
 
+subroutine dnlftd (m, n, theta, cp, pb)
+    !
+    ! Purpose:
+    !
+    ! Computes the derivative of pmn(theta) with respect to theta
+    !
+    use, intrinsic :: iso_fortran_env, only: &
+        wp => REAL64, &
+        ip => INT32
+
+    implicit none
+    !----------------------------------------------------------------------
+    ! Dictionary: calling arguments
+    !----------------------------------------------------------------------
+    integer (ip), intent (in)  :: m
+    integer (ip), intent (in)  :: n
+    real (wp),    intent (in)  :: theta
+    real (wp),    intent (out) :: cp(*)
+    real (wp),    intent (out) :: pb
+    !----------------------------------------------------------------------
+    ! Dictionary: local variables
+    !----------------------------------------------------------------------
+    integer (ip) ::  k, kdo
+    real (wp)    :: cos2t, sin2t, cost, sint, temp
+    !----------------------------------------------------------------------
+
+    cos2t = cos(2.0_wp*theta)
+    sin2t = sin(2.0_wp*theta)
+
+    if (mod(n, 2) <= 0) then
+        if (mod(abs(m), 2) <= 0) then
+            !
+            !==> n even, m even
+            !
+            kdo=n/2
+            pb = 0.0_wp
+
+            if (n == 0) return
+
+            cost = cos2t
+            sint = sin2t
+            do k=1, kdo
+                !     pb = pb+cp(k+1)*cos(2*k*theta)
+                pb = pb-2.0_wp*real(k, kind=wp)*cp(k+1)*sint
+                temp = cos2t*cost-sin2t*sint
+                sint = sin2t*cost+cos2t*sint
+                cost = temp
+            end do
+        else
+            !
+            !==> n even, m odd
+            !
+            kdo = n/2
+            pb = 0.0_wp
+            cost = cos2t
+            sint = sin2t
+            do k=1, kdo
+                !     pb = pb+cp(k)*sin(2*k*theta)
+                pb = pb+2.0_wp*real(k, kind=wp)*cp(k)*cost
+                temp = cos2t*cost-sin2t*sint
+                sint = sin2t*cost+cos2t*sint
+                cost = temp
+            end do
+        end if
+    else
+        if (mod(abs(m), 2) <= 0) then
+            !
+            !==> n odd, m even
+            !
+            kdo = (n+1)/2
+            pb = 0.0_wp
+            cost = cos(theta)
+            sint = sin(theta)
+            do k=1, kdo
+                !     pb = pb+cp(k)*cos((2*k-1)*theta)
+                pb = pb-(2.0_wp*real(k-1, kind=wp))*cp(k)*sint
+                temp = cos2t*cost-sin2t*sint
+                sint = sin2t*cost+cos2t*sint
+                cost = temp
+            end do
+        else
+            !
+            !==> n odd, m odd
+            !
+            kdo = (n+1)/2
+            pb = 0.0_wp
+            cost = cos(theta)
+            sint = sin(theta)
+            do k=1, kdo
+                !     pb = pb+cp(k)*sin((2*k-1)*theta)
+                pb = pb+(2.0_wp*real(k-1, kind=wp))*cp(k)*cost
+                temp = cos2t*cost-sin2t*sint
+                sint = sin2t*cost+cos2t*sint
+                cost = temp
+            end do
+        end if
+    end if
+
+end subroutine dnlftd
+
 
 pure subroutine dnlft(m, n, theta, cp, pb)
 
@@ -256,314 +356,442 @@ pure subroutine dnlft(m, n, theta, cp, pb)
 end subroutine dnlft
 
 
-    subroutine dnlftd (m, n, theta, cp, pb)
-        !
-        !     computes the derivative of pmn(theta) with respect to theta
-        !
-        dimension cp(1)
-        real cp, pb, theta, cdt, sdt, cth, sth, chh
-        cdt = cos(2.0*theta)
-        sdt = sin(2.0*theta)
-        nmod=mod(n, 2)
-        mmod=mod(abs(m), 2)
-        if (nmod <= 0) then
-            if (mmod <= 0) then
-                !
-                !==> n even, m even
-                !
-                kdo=n/2
-                pb = 0.0
-                if (n == 0) return
-                cth = cdt
-                sth = sdt
-                do k=1, kdo
-                    !     pb = pb+cp(k+1)*cos(2*k*theta)
-                    pb = pb-2.0*k*cp(k+1)*sth
-                    chh = cdt*cth-sdt*sth
-                    sth = sdt*cth+cdt*sth
-                    cth = chh
-                end do
-            else
-                !
-                !==> n even, m odd
-                !
-                kdo = n/2
-                pb = 0.
-                cth = cdt
-                sth = sdt
-                do k=1, kdo
-                    !     pb = pb+cp(k)*sin(2*k*theta)
-                    pb = pb+2.0*k*cp(k)*cth
-                    chh = cdt*cth-sdt*sth
-                    sth = sdt*cth+cdt*sth
-                    cth = chh
-                end do
-            end if
-        else
-            if (mmod <= 0) then
-                !
-                !==> n odd, m even
-                !
-                kdo = (n+1)/2
-                pb = 0.
-                cth = cos(theta)
-                sth = sin(theta)
-                do k=1, kdo
-                    !     pb = pb+cp(k)*cos((2*k-1)*theta)
-                    pb = pb-(2.0*k-1)*cp(k)*sth
-                    chh = cdt*cth-sdt*sth
-                    sth = sdt*cth+cdt*sth
-                    cth = chh
-                end do
-            else
-                !
-                !==> n odd, m odd
-                !
-                kdo = (n+1)/2
-                pb = 0.
-                cth = cos(theta)
-                sth = sin(theta)
-                do k=1, kdo
-                    !     pb = pb+cp(k)*sin((2*k-1)*theta)
-                    pb = pb+(2.0*k-1)*cp(k)*cth
-                    chh = cdt*cth-sdt*sth
-                    sth = sdt*cth+cdt*sth
-                    cth = chh
-                end do
-            end if
-        end if
-
-    end subroutine dnlftd
-
-
-
 subroutine legin(mode, l, nlat, m, w, pmn, km)
-!     this subroutine computes legendre polynomials for n=m, ..., l-1
-!     and  i=1, ..., late (late=((nlat+mod(nlat, 2))/2)gaussian grid
-!     in pmn(n+1, i, km) using swarztrauber's recursion formula.
-!     the vector w contains quantities precomputed in shigc.
-!     legin must be called in the order m=0, 1, ..., l-1
-!     (e.g., if m=10 is sought it must be preceded by calls with
-!     m=0, 1, 2, ..., 9 in that order)
-dimension w(1), pmn(1)
-!     set size of pole to equator gaussian grid
-late = (nlat+mod(nlat, 2))/2
-!     partition w (set pointers for p0n, p1n, abel, bbel, cbel, pmn)
-i1 = 1+nlat
-i2 = i1+nlat*late
-i3 = i2+nlat*late
-i4 = i3+(2*nlat-l)*(l-1)/2
-i5 = i4+(2*nlat-l)*(l-1)/2
-call legin1(mode, l, nlat, late, m, w(i1), w(i2), w(i3), w(i4), &
-            w(i5), pmn, km)
+    !
+    ! Purpose:
+    !
+    ! Computes legendre polynomials for n=m, ..., l-1
+    ! and  i=1, ..., late (late=((nlat+mod(nlat, 2))/2)gaussian grid
+    ! in pmn(n+1, i, km) using swarztrauber's recursion formula.
+    ! the vector w contains quantities precomputed in shigc.
+    ! legin must be called in the order m=0, 1, ..., l-1
+    ! (e.g., if m=10 is sought it must be preceded by calls with
+    ! m=0, 1, 2, ..., 9 in that order)
+    !
+    use, intrinsic :: iso_fortran_env, only: &
+        wp => REAL64, &
+        ip => INT32
+
+    implicit none
+    !----------------------------------------------------------------------
+    ! Dictionary: calling arguments
+    !----------------------------------------------------------------------
+    integer (ip), intent (in)  :: mode
+    integer (ip), intent (in)  :: l
+    integer (ip), intent (in)  :: nlat
+    integer (ip), intent (in)  :: m
+    real (wp),    intent (out) :: w(*)
+    real (wp),    intent (out) :: pmn(*)
+    integer (ip), intent (out) :: km
+    !----------------------------------------------------------------------
+    ! Dictionary: local variables
+    !----------------------------------------------------------------------
+    integer (ip) :: late
+    integer (ip) :: workspace_indices(5)
+    !----------------------------------------------------------------------
+
+    !
+    !==> set size of pole to equator gaussian grid
+    !
+    late = (nlat+mod(nlat,2))/2
+
+    !
+    !==> partition w (set pointers for p0n, p1n, abel, bbel, cbel, pmn)
+    !
+    workspace_indices = get_workspace_indices(l, late, nlat)
+
+    associate( i => workspace_indices )
+
+        call legin1(mode, l, nlat, late, m, &
+            w(i(1)), w(i(2)), w(i(3)), w(i(4)), w(i(5)), pmn, km)
+
+    end associate
+
+contains
+
+
+    subroutine legin1(mode, l, nlat, late, m, p0n, p1n, abel, bbel, cbel, &
+        pmn, km)
+        !----------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !----------------------------------------------------------------------
+        integer (ip), intent (in)  :: mode
+        integer (ip), intent (in)  :: l
+        integer (ip), intent (in)  :: nlat
+        integer (ip), intent (in)  :: late
+        integer (ip), intent (in)  :: m
+        real (wp),    intent (out) :: p0n(nlat, late)
+        real (wp),    intent (out) :: p1n(nlat, late)
+        real (wp),    intent (out) :: abel(*)
+        real (wp),    intent (out) :: bbel(*)
+        real (wp),    intent (out) :: cbel(*)
+        real (wp),    intent (out) :: pmn(nlat, late, 3)
+        integer (ip), intent (out) :: km
+        !----------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !----------------------------------------------------------------------
+        integer (ip)       :: i, n, ms, np1, imn, kmt, ninc
+        integer (ip), save :: column_indices(0:2) = [1, 2, 3]
+        !----------------------------------------------------------------------
+
+        !     set do loop indices for full or half sphere
+        ms = m+1
+        ninc = 1
+        select case (mode)
+            case (1)
+                !     only compute pmn for n-m odd
+                ms = m+2
+                ninc = 2
+            case (2)
+                !     only compute pmn for n-m even
+                ms = m+1
+                ninc = 2
+        end select
+
+        associate( &
+            km0 => column_indices(0), &
+            km1 => column_indices(1), &
+            km2 => column_indices(2) &
+            )
+
+            if (m > 1) then
+                do np1=ms, nlat, ninc
+                    n = np1-1
+                    imn = indx(m, n)
+                    if (n >= l) imn = imndx(l, m, n)
+                    do i=1, late
+                        pmn(np1, i, km0) = abel(imn)*pmn(n-1, i, km2) &
+                            +bbel(imn)*pmn(n-1, i, km0) &
+                            -cbel(imn)*pmn(np1, i, km2)
+                    end do
+                end do
+            else if (m == 0) then
+                do np1=ms, nlat, ninc
+                    do i=1, late
+                        pmn(np1, i, km0) = p0n(np1, i)
+                    end do
+                end do
+            else if (m == 1) then
+                do np1=ms, nlat, ninc
+                    do i=1, late
+                        pmn(np1, i, km0) = p1n(np1, i)
+                    end do
+                end do
+            end if
+
+            !
+            !==>  Permute column indices
+            !     km0, km1, km2 store m, m-1, m-2 columns
+            kmt = km0
+            km0 = km2
+            km2 = km1
+            km1 = kmt
+        end associate
+
+        !     set current m index in output param km
+        km = kmt
+
+    end subroutine legin1
+
+    pure function get_workspace_indices(l, late, nlat) &
+        result (return_value)
+        !----------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !----------------------------------------------------------------------
+        integer (ip), intent (in) :: l
+        integer (ip), intent (in) :: late
+        integer (ip), intent (in) :: nlat
+        integer (ip)              :: return_value(5)
+        !----------------------------------------------------------------------
+
+        associate( i => return_value )
+
+            i(1) = 1+nlat
+            i(2) = i(1)+nlat*late
+            i(3) = i(2)+nlat*late
+            i(4) = i(3)+(2*nlat-l)*(l-1)/2
+            i(5) = i(4)+(2*nlat-l)*(l-1)/2
+
+        end associate
+
+    end function get_workspace_indices
+
+    pure function indx(m, n) result (return_value)
+        !
+        ! Purpose:
+        !
+        !     index function used in storing triangular
+        !     arrays for recursion coefficients (functions of (m, n))
+        !     for 2 <= m <= n-1 and 2 <= n <= l-1
+        !----------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !----------------------------------------------------------------------
+        integer (ip), intent (in) :: m
+        integer (ip), intent (in) :: n
+        integer (ip)              :: return_value
+        !----------------------------------------------------------------------
+
+
+        return_value = (n-1)*(n-2)/2+m-1
+
+
+    end function indx
+
+    pure function imndx(l, m, n) result (return_value)
+        !
+        ! Purpose:
+        !
+        !     index function used in storing triangular
+        !     arrays for recursion coefficients (functions of (m, n))
+        !     for l <= n <= nlat and 2 <= m <= l
+        !
+        !----------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !----------------------------------------------------------------------
+        integer (ip), intent (in) :: l
+        integer (ip), intent (in) :: m
+        integer (ip), intent (in) :: n
+        integer (ip)              :: return_value
+        !----------------------------------------------------------------------
+
+        return_value = l*(l-1)/2+(n-l-1)*(l-1)+m-1
+
+    end function imndx
 
 end subroutine legin
 
 
 
-subroutine legin1(mode, l, nlat, late, m, p0n, p1n, abel, bbel, cbel, &
-                  pmn, km)
-dimension p0n(nlat, late), p1n(nlat, late)
-dimension abel(1), bbel(1), cbel(1), pmn(nlat, late, 3)
-data km0, km1, km2/ 1, 2, 3/
-save km0, km1, km2
-!     define index function used in storing triangular
-!     arrays for recursion coefficients (functions of (m, n))
-!     for 2.le.m.le.n-1 and 2.le.n.le.l-1
-indx(m, n) = (n-1)*(n-2)/2+m-1
-!     for l.le.n.le.nlat and 2.le.m.le.l
-imndx(m, n) = l*(l-1)/2+(n-l-1)*(l-1)+m-1
-
-!     set do loop indices for full or half sphere
-ms = m+1
-ninc = 1
-select case (mode)
-	case (1)
-		!     only compute pmn for n-m odd
-		ms = m+2
-		ninc = 2
-	case (2)
-		!     only compute pmn for n-m even
-		ms = m+1
-		ninc = 2
-end select
-
-
-if (m>1) then
-do 100 np1=ms, nlat, ninc
-n = np1-1
-imn = indx(m, n)
-if (n >= l) imn = imndx(m, n)
-do 100 i=1, late
-pmn(np1, i, km0) = abel(imn)*pmn(n-1, i, km2) &
-            +bbel(imn)*pmn(n-1, i, km0) &
-            -cbel(imn)*pmn(np1, i, km2)
-100 continue
-
-else if (m==0) then
-do 101 np1=ms, nlat, ninc
-do 101 i=1, late
-pmn(np1, i, km0) = p0n(np1, i)
-101 continue
-
-else if (m==1) then
-do 102 np1=ms, nlat, ninc
-do 102 i=1, late
-pmn(np1, i, km0) = p1n(np1, i)
-102 continue
-end if
-
-!     permute column indices
-!     km0, km1, km2 store m, m-1, m-2 columns
-kmt = km0
-km0 = km2
-km2 = km1
-km1 = kmt
-!     set current m index in output param km
-km = kmt
-
-end subroutine legin1
-
-
-
 subroutine zfin (isym, nlat, nlon, m, z, i3, wzfin)
+
+    use, intrinsic :: iso_fortran_env, only: &
+        wp => REAL64, &
+        ip => INT32
+
     implicit none
     !----------------------------------------------------------------------
     ! Dictionary: calling arguments
     !----------------------------------------------------------------------
-    integer, intent (in)     :: isym
-    integer, intent (in)     :: nlat
-    integer, intent (in)     :: nlon
-    integer, intent (in)     :: m
-    real,    intent (inout)  :: z(1)
-    integer, intent (in)     :: i3
-    real,    intent (in out) :: wzfin(1)
+    integer (ip), intent (in)     :: isym
+    integer (ip), intent (in)     :: nlat
+    integer (ip), intent (in)     :: nlon
+    integer (ip), intent (in)     :: m
+    real (wp),    intent (in out) :: z(*)
+    integer (ip), intent (in out) :: i3
+    real (wp),    intent (in out) :: wzfin(*)
+    !----------------------------------------------------------------------
+    ! Dictionary: calling arguments
+    !----------------------------------------------------------------------
+    integer (ip) :: imid
+    integer (ip) :: workspace(4)
     !----------------------------------------------------------------------
 
-    associate( imid => (nlat+1)/2 )
-        associate( mmax => min(nlat, nlon/2+1) )
-            associate( lim => nlat*imid )
-                associate( labc => ((mmax-2)*(nlat+nlat-mmax-1))/2 )
-                    associate( iw1 => lim+1 )
-                        associate( iw2 => iw1+lim )
-                            associate( iw3 => iw2+labc )
-                                associate( iw4 => iw3+labc )
-                                    !
-                                    !     the length of wzfin is 2*lim+3*labc
-                                    !
-                                    call zfin1(isym, nlat, m, z, imid, i3, &
-                                        wzfin, wzfin(iw1), wzfin(iw2), &
-                                        wzfin(iw3), wzfin(iw4))
-                                end associate
-                            end associate
-                        end associate
-                    end associate
-                end associate
-            end associate
-        end associate
+    imid = (nlat+1)/2
+    !
+    !==> The length of wzfin is 2*lim+3*labc
+    !
+    workspace = get_workspace_indices(nlat, nlon, imid)
+
+    associate( &
+        iw1 => workspace(1), &
+        iw2 => workspace(2), &
+        iw3 => workspace(3), &
+        iw4 => workspace(4) &
+        )
+
+        call zfin1(isym, nlat, m, z, imid, i3, wzfin, &
+            wzfin(iw1), wzfin(iw2), wzfin(iw3), wzfin(iw4))
+
     end associate
+
+
+contains
+
+    subroutine zfin1 (isym, nlat, m, z, imid, i3, zz, z1, a, b, c)
+        !----------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !----------------------------------------------------------------------
+        integer (ip), intent (in)     :: isym
+        integer (ip), intent (in)     :: nlat
+        integer (ip), intent (in)     :: m
+        real (wp),    intent (in out) :: z(imid, nlat, 3)
+        integer (ip), intent (in)     :: imid
+        integer (ip), intent (in out) :: i3
+        real (wp),    intent (in out) :: zz(imid,*)
+        real (wp),    intent (in out) :: z1(imid,*)
+        real (wp),    intent (in out) :: a(*)
+        real (wp),    intent (in out) :: b(*)
+        real (wp),    intent (in out) :: c(*)
+        !----------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !----------------------------------------------------------------------
+        integer (ip), save :: i1, i2
+        integer (ip)       :: ns, np1, nstp, itemp, nstrt
+        !----------------------------------------------------------------------
+
+        itemp = i1
+        i1 = i2
+        i2 = i3
+        i3 = itemp
+
+        if (m < 1) then
+            i1 = 1
+            i2 = 2
+            i3 = 3
+            z(:,1:nlat, i3) = zz(:,1:nlat)
+        else if (m == 1) then
+            z(:,2:nlat, i3) = z1(:,2:nlat)
+        else
+            ns = ((m-2)*(nlat+nlat-m-1))/2+1
+
+            if (isym /= 1) then
+                z(:,m+1,i3) = a(ns)*z(:,m-1,i1)-c(ns)*z(:,m+1,i1)
+            end if
+
+            if (m == nlat-1) return
+
+            if (isym /= 2) then
+                ns = ns+1
+                z(:, m+2, i3) = a(ns)*z(:, m, i1) -c(ns)*z(:, m+2, i1)
+            end if
+
+            nstrt = m+3
+
+            if (isym == 1) nstrt = m+4
+
+            if (nstrt > nlat) return
+
+            nstp = 2
+
+            if (isym == 0) nstp = 1
+
+            do np1=nstrt, nlat, nstp
+                ns = ns+nstp
+                z(:,np1,i3) = &
+                    a(ns)*z(:,np1-2,i1)+b(ns)*z(:,np1-2,i3)-c(ns)*z(:,np1,i1)
+            end do
+        end if
+
+    end subroutine zfin1
+
+    pure function get_workspace_indices(nlat, nlon, imid) &
+        result (return_value)
+        !----------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !----------------------------------------------------------------------
+        integer (ip), intent (in) :: nlat
+        integer (ip), intent (in) :: nlon
+        integer (ip), intent (in) :: imid
+        integer (ip)              :: return_value(4)
+        !----------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !----------------------------------------------------------------------
+        integer (ip) :: mmax, lim, labc
+        !----------------------------------------------------------------------
+
+        associate( i => return_value )
+
+            mmax = min(nlat, nlon/2+1)
+            lim = nlat*imid
+            labc = ((mmax-2)*(nlat+nlat-mmax-1))/2
+            i(1) = lim+1
+            i(2) = i(1)+lim
+            i(3) = i(2)+labc
+            i(4) = i(3)+labc
+
+        end associate
+
+    end function get_workspace_indices
 
 end subroutine zfin
 
-subroutine zfin1 (isym, nlat, m, z, imid, i3, zz, z1, a, b, c)
-dimension       z(imid, nlat, 3), zz(imid, 1), z1(imid, 1), &
-                a(1), b(1), c(1)
-save i1, i2
-ihold = i1
-i1 = i2
-i2 = i3
-i3 = ihold
-if (m-1< 0) then
-    goto 2225
-else if (m-1 == 0) then
-    goto 30
-else
-    goto 35
-end if
-2225 i1 = 1
-i2 = 2
-i3 = 3
-do 45 np1=1, nlat
-do 45 i=1, imid
-z(i, np1, i3) = zz(i, np1)
-45 continue
-return
-30 do 50 np1=2, nlat
-do 50 i=1, imid
-z(i, np1, i3) = z1(i, np1)
-50 continue
-return
-35 ns = ((m-2)*(nlat+nlat-m-1))/2+1
-if (isym == 1) go to 36
-do 85 i=1, imid
-z(i, m+1, i3) = a(ns)*z(i, m-1, i1)-c(ns)*z(i, m+1, i1)
-85 continue
-36 if (m == nlat-1) return
-if (isym == 2) go to 71
-ns = ns+1
-do 70 i=1, imid
-z(i, m+2, i3) = a(ns)*z(i, m, i1)-c(ns)*z(i, m+2, i1)
-70 continue
-71 nstrt = m+3
-if (isym == 1) nstrt = m+4
-if (nstrt > nlat) go to 80
-nstp = 2
-if (isym == 0) nstp = 1
-do 75 np1=nstrt, nlat, nstp
-ns = ns+nstp
-do 75 i=1, imid
-z(i, np1, i3) = a(ns)*z(i, np1-2, i1)+b(ns)*z(i, np1-2, i3) &
-                              -c(ns)*z(i, np1, i1)
-75 continue
-80 return
 
-end subroutine zfin1
+subroutine zfinit(nlat, nlon, wzfin, dwork)
 
+    use, intrinsic :: iso_fortran_env, only: &
+        wp => REAL64, &
+        ip => INT32
 
+    implicit none
+    !----------------------------------------------------------------------
+    ! Dictionary: calling arguments
+    !----------------------------------------------------------------------
+    integer (ip), intent (in)     :: nlat
+    integer (ip), intent (in)     :: nlon
+    real (wp),    intent (in out) :: wzfin(*)
+    real (wp),    intent (in out) :: dwork(*)
+    !----------------------------------------------------------------------
+    ! Dictionary: local variables
+    !----------------------------------------------------------------------
+    integer (ip) :: imid
+    integer (ip) :: iw1, iw2
+    !----------------------------------------------------------------------
 
-subroutine zfinit (nlat, nlon, wzfin, dwork)
-dimension       wzfin(*)
-real dwork(*)
-imid = (nlat+1)/2
-iw1 = 2*nlat*imid+1
-!
-!     the length of wzfin is 3*((l-3)*l+2)/2 + 2*l*imid
-!     the length of dwork is nlat+2
-!
-call zfini1 (nlat, nlon, imid, wzfin, wzfin(iw1), dwork, &
-                                       dwork(nlat/2+1))
+    imid = (nlat+1)/2
+
+    !
+    ! Remarks:
+    !
+    !     the length of wzfin is 3*((l-3)*l+2)/2 + 2*l*imid
+    !     the length of dwork is nlat+2
+    !
+
+    ! Set workspace indices
+    iw1 = 2*nlat*imid+1
+    iw2 = nlat/2+1
+
+    call zfini1(nlat, nlon, imid, wzfin, wzfin(iw1), dwork, dwork(iw2))
+
+contains
+
+    subroutine zfini1(nlat, nlon, imid, z, abc, cz, work)
+        !
+        !     Remarks:
+        !
+        !     abc must have 3*((mmax-2)*(nlat+nlat-mmax-1))/2 locations
+        !     where mmax = min(nlat, nlon/2+1)
+        !     cz and work must each have nlat+1 locations
+        !
+        !----------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !----------------------------------------------------------------------
+        integer (ip), intent (in)     :: nlat
+        integer (ip), intent (in)     :: nlon
+        integer (ip), intent (in)     :: imid
+        real (wp),    intent (in out) :: z(imid, nlat, 2)
+        real (wp),    intent (in out) :: abc(*)
+        real (wp),    intent (in out) :: cz(*)
+        real (wp),    intent (in out) :: work(*)
+        !----------------------------------------------------------------------
+        ! Dictionary: local variables
+        !----------------------------------------------------------------------
+        integer (ip)         :: i, m, n, mp1, np1
+        real (wp)            :: dt, th, zh
+        real (wp), parameter :: PI = acos(-1.0_wp)
+        !----------------------------------------------------------------------
+
+        dt = PI/(nlat-1)
+
+        do mp1=1, 2
+            m = mp1-1
+            do np1=mp1, nlat
+                n = np1-1
+                call dnzfk(nlat, m, n, cz, work)
+                do i=1, imid
+                    th = real(i-1, kind=wp)*dt
+                    call dnzft(nlat, m, n, th, cz, zh)
+                    z(i, np1, mp1) = zh
+                end do
+                z(1, np1, mp1) = 0.5_wp*z(1, np1, mp1)
+            end do
+        end do
+
+        call rabcp(nlat, nlon, abc)
+
+    end subroutine zfini1
 
 end subroutine zfinit
 
-
-
-subroutine zfini1 (nlat, nlon, imid, z, abc, cz, work)
-!
-!     abc must have 3*((mmax-2)*(nlat+nlat-mmax-1))/2 locations
-!     where mmax = min(nlat, nlon/2+1)
-!     cz and work must each have nlat+1 locations
-!
-dimension z(imid, nlat, 2), abc(1)
-real pi, dt, th, zh, cz(*), work(*)
-pi = acos(-1.0)
-dt = pi/(nlat-1)
-do mp1=1, 2
-m = mp1-1
-do np1=mp1, nlat
-n = np1-1
-call dnzfk(nlat, m, n, cz, work)
-do i=1, imid
-th = (i-1)*dt
-call dnzft(nlat, m, n, th, cz, zh)
-z(i, np1, mp1) = zh
-end do
-z(1, np1, mp1) = .5*z(1, np1, mp1)
-end do
-end do
-
-call rabcp(nlat, nlon, abc)
-
-end subroutine zfini1
 
 
 subroutine dnzfk(nlat, m, n, cz, work)

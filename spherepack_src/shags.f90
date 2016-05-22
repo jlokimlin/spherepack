@@ -9,7 +9,7 @@
 !     *                                                               *
 !     *                      SPHEREPACK version 3.2                   *
 !     *                                                               *
-!     *       A Package of Fortran77 Subroutines and Programs         *
+!     *       A Package of Fortran Subroutines and Programs           *
 !     *                                                               *
 !     *              for Modeling Geophysical Processes               *
 !     *                                                               *
@@ -724,6 +724,8 @@ contains
 
 end subroutine shags
 
+
+
 subroutine shagsi(nlat, nlon, wshags, lshags, work, lwork, dwork, ldwork, &
     ierror)
     !
@@ -758,67 +760,53 @@ subroutine shagsi(nlat, nlon, wshags, lshags, work, lwork, dwork, ldwork, &
     !----------------------------------------------------------------------
     ! Dictionary: local variables
     !----------------------------------------------------------------------
-    integer (ip) :: l, l1, l2, late, lp, ldw, ipmnf
+    integer (ip) :: ntrunc, l1, l2, late, lp, ldw, ipmnf
     !----------------------------------------------------------------------
+
+    !
+    !==> Compute constants
+    !
+
+    ! set triangular truncation limit for spherical harmonic basis
+    ntrunc = min((nlon+2)/2, nlat)
+
+    ! set equator or nearest point (if excluded) pointer
+    late = (nlat+1)/2
+    l1 = ntrunc
+    l2 = late
+
+    ! Set permanent work space length
+    lp = nlat*(3*(l1+l2)-2)+(l1-1)*(l2*(2*nlat-l1)-3*l1)/2+nlon+15
+
+    ! Set preliminary quantites needed to compute and store legendre polys
+    ldw = nlat*(nlat+4)
 
     !
     !==> Check validity of input argument
     !
-    ! Initialize error flag
-    ierror = 0
-
-    ! Check case 1
     if (nlat < 3) then
         ierror = 1
         return
-    end if
-
-    ! Check case 2
-    if (nlon < 4) then
+    else if (nlon < 4) then
         ierror = 2
         return
-    end if
-
-
-    !
-    !==> set triangular truncation limit for spherical harmonic basis
-    !
-    l = min((nlon+2)/2, nlat)
-
-    !
-    !==> set equator or nearest point (if excluded) pointer
-    !
-    late = (nlat+1)/2
-    l1 = l
-    l2 = late
-
-    ! Check case 3: permanent work space length
-    lp = nlat*(3*(l1+l2)-2)+(l1-1)*(l2*(2*nlat-l1)-3*l1)/2+nlon+15
-    if (lshags < lp) then
+    else if (lshags < lp) then
         ierror = 3
         return
-    end if
-
-    ! Check case 4: temporary work space
-    if (lwork < 4*nlat*(nlat+2)+2) then
+    else if (lwork < 4*nlat*(nlat+2)+2) then
         ierror = 4
         return
-    end if
-
-    ! Check case 5: real temporary space
-    if (ldwork < nlat*(nlat+4)) then
+    else if (ldwork < nlat*(nlat+4)) then
         ierror = 5
         return
+    else
+        ierror = 0
     end if
 
-    !
-    !==> set preliminary quantites needed to compute and store legendre polys
-    !
-    ldw = nlat*(nlat+4)
-
+    ! Call lower routine
     call shagsp(nlat, nlon, wshags, lshags, dwork, ldwork, ierror)
 
-    ! Check error flag
+    ! Check error flag from lower routine
     if (ierror /= 0) then
         return
     end if
@@ -826,9 +814,9 @@ subroutine shagsi(nlat, nlon, wshags, lshags, work, lwork, dwork, ldwork, &
     !
     !==> set legendre poly pointer in wshags
     !
-    ipmnf = nlat+2*nlat*late+3*(l*(l-1)/2+(nlat-l)*(l-1))+nlon+16
+    ipmnf = nlat+2*nlat*late+3*(ntrunc*(ntrunc-1)/2+(nlat-ntrunc)*(ntrunc-1))+nlon+16
 
-    call shagss1(nlat, l, late, wshags, work, wshags(ipmnf))
+    call shagss1(nlat, ntrunc, late, wshags, work, wshags(ipmnf))
 
 
 contains
@@ -1091,12 +1079,12 @@ contains
                 else
                     imn = (n-1)*(n-2)/2+m-1
                 end if
-                abel(imn)=sqrt(real((2*n+1)*(m+n-2)*(m+n-3))/ &
-                    real(((2*n-3)*(m+n-1)*(m+n))))
-                bbel(imn)=sqrt(real((2*n+1)*(n-m-1)*(n-m))/ &
-                    real(((2*n-3)*(m+n-1)*(m+n))))
-                cbel(imn)=sqrt(real((n-m+1)*(n-m+2))/ &
-                    real(((n+m-1)*(n+m))))
+                abel(imn)=sqrt(real((2*n+1)*(m+n-2)*(m+n-3),kind=wp)/ &
+                    real((2*n-3)*(m+n-1)*(m+n), kind=wp))
+                bbel(imn)=sqrt(real((2*n+1)*(n-m-1)*(n-m), kind=wp)/ &
+                    real((2*n-3)*(m+n-1)*(m+n), kind=wp))
+                cbel(imn)=sqrt(real((n-m+1)*(n-m+2), kind=wp)/ &
+                    real((n+m-1)*(n+m), kind=wp))
             end do
         end do
 
