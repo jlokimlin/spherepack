@@ -3180,77 +3180,92 @@ end subroutine dvtk
 
 subroutine dwtk(m, n, cw, work)
     real cw(*), work(*), fn, cf, srnp1
-    cw(1) = 0.
+
+    cw(1) = 0.0
+
     if (n <= 0 .or. m <= 0) return
+
     fn = n
     srnp1 = sqrt(fn * (fn + 1.0))
-    cf = 2.*m/srnp1
-    modn = mod(n, 2)
-    modm = mod(m, 2)
+    cf = 2.0*real(m)/srnp1
+
     call dnlfk(m, n, work)
+
     if (m == 0) return
-    if (modn /= 0) goto 30
-    l = n/2
-    if (l == 0) return
-    if (modm /= 0) goto 20
-    !
-    !     n even m even
-    !
-    cw(l) = -cf*work(l+1)
-10  l = l-1
-    if (l <= 0) return
-    cw(l) = cw(l+1)-cf*work(l+1)
-    cw(l+1) = (l+l+1)*cw(l+1)
-    goto 10
-    !
-    !     n even m odd
-    !
-20  cw(l) = cf*work(l)
-25  l = l-1
-    if (l< 0) then
-        return
-    else if (l == 0) then
-        goto 27
-    else
-        goto 26
-    end if
-26  cw(l) = cw(l+1)+cf*work(l)
-27  cw(l+1) = -(l+l+1)*cw(l+1)
-    goto 25
-30  if (modm /= 0) goto 40
-    l = (n-1)/2
-    if (l == 0) return
-    !
-    !     n odd m even
-    !
-    cw(l) = -cf*work(l+1)
-35  l = l-1
-    if (l< 0) then
-        return
-    else if (l == 0) then
-        goto 37
-    else
-        goto 36
-    end if
-36  cw(l) = cw(l+1)-cf*work(l+1)
-37  cw(l+1) = (l+l+2)*cw(l+1)
-    goto 35
-    !
-    !     n odd m odd
-    !
-40  l = (n+1)/2
-    cw(l) = cf*work(l)
-45  l = l-1
-    if (l < 0) then
-        return
-    else if (l == 0) then
-        goto 47
-    else
-        goto 46
-    end if
-46  cw(l) = cw(l+1)+cf*work(l)
-47  cw(l+1) = -(l+l)*cw(l+1)
-    goto 45
+
+    select case (mod(n,2))
+        case (0) ! n even
+            l = n/2
+            if (l == 0) return
+            select case (mod(m,2))
+                case (0) ! m even
+                    !
+                    !     n even m even
+                    !
+                    cw(l) = -cf*work(l+1)
+                    do
+                        l = l-1
+                        if (l <= 0) exit
+                        cw(l) = cw(l+1)-cf*work(l+1)
+                        cw(l+1) = (2*l+1)*cw(l+1)
+                    end do
+                case (1) ! m odd
+                    !
+                    !==> n even m odd
+                    !
+                    cw(l) = cf*work(l)
+                    do
+                        l = l-1
+                        if (l < 0) then
+                            exit
+                        else if (l == 0) then
+                            cw(l+1) = -(2*l+1)*cw(l+1)
+                        else
+                            cw(l) = cw(l+1)+cf*work(l)
+                            cw(l+1) = -(2*l+1)*cw(l+1)
+                        end if
+                    end do
+            end select
+        case (1) ! n odd
+            select case (mod(m,2))
+                case (0) ! m even
+                    l = (n-1)/2
+                    if (l == 0) return
+                    !
+                    !==> n odd m even
+                    !
+                    cw(l) = -cf*work(l+1)
+                    do
+                        l = l-1
+                        if (l < 0) then
+                            exit
+                        else if (l == 0) then
+                            !cw(l) = cw(l+1)-cf*work(l+1)
+                            cw(l+1) = (2*l+2)*cw(l+1)
+                        else
+                            cw(l) = cw(l+1)-cf*work(l+1)
+                            cw(l+1) = (2*l+2)*cw(l+1)
+                        end if
+                    end do
+                case (1) ! m odd
+                    !
+                    !==> n odd m odd
+                    !
+                    l = (n+1)/2
+                    cw(l) = cf*work(l)
+                    do
+                        l = l-1
+                        if (l < 0) then
+                            exit
+                        else if (l == 0) then
+                            cw(l+1) = -(2*l)*cw(l+1)
+                        else
+                            cw(l) = cw(l+1)+cf*work(l)
+                            cw(l+1) = -(2*l)*cw(l+1)
+                        end if
+                    end do
+            end select
+    end select
 
 end subroutine dwtk
 
