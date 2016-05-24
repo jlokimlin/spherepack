@@ -2231,472 +2231,470 @@ end subroutine dzvt
 
 
 subroutine dzwk(nlat, m, n, czw, work)
-!
-!     subroutine dzwk computes the coefficients in the trigonometric
-!     expansion of the quadrature function zwbar(n, m, theta)
-!
-!     input parameters
-!
-!     nlat      the number of colatitudes including the poles.
-!
-!     n      the degree (subscript) of zwbar(n, m, theta)
-!
-!     m      the order (superscript) of zwbar(n, m, theta)
-!
-!     work   a work array with at least nlat/2+1 locations
-!
-!     output parameter
-!
-!     czw     the fourier coefficients of zwbar(n, m, theta).
-!
-dimension czw(1), work(1)
-real czw, work, sc1, sum, t1, t2
-if (n <= 0) return
-lc = (nlat+1)/2
-sc1 = 2.0/(nlat-1)
-call dwbk(m, n, work, czw)
-nmod = mod(n, 2)
-mmod = mod(m, 2)
-if (nmod /= 0) goto 1
-if (mmod /= 0) goto 2
-!
-!     n even, m even
-!
-kdo = n/2
-do 19 id=1, lc
-i = id+id-3
-sum = 0.
-do 20 k=1, kdo
-t1 = 1.0-(k+k-1+i)**2
-t2 = 1.0-(k+k-1-i)**2
-sum = sum+work(k)*(t1-t2)/(t1*t2)
-20 continue
-czw(id) = sc1*sum
-19 continue
-return
-!
-!     n even, m odd
-!
-2 kdo = n/2
-do 15 id=1, lc
-i = id+id-1
-sum = 0.
-do 16 k=1, kdo
-t1 = 1.0-(k+k-1+i)**2
-t2 = 1.0-(k+k-1-i)**2
-sum = sum+work(k)*(t1+t2)/(t1*t2)
-16 continue
-czw(id) = sc1*sum
-15 continue
-return
-1 if (mmod /= 0) goto 3
-!
-!     n odd, m even
-!
-kdo = (n-1)/2
-do 9 id=1, lc
-i = id+id-2
-sum = 0.
-do 10 k=1, kdo
-t1 = 1.0-(k+k+i)**2
-t2 = 1.0-(k+k-i)**2
-sum = sum+work(k)*(t1-t2)/(t1*t2)
-10 continue
-czw(id) = sc1*sum
-9 continue
-return
-!
-!     n odd, m odd
-!
-3 kdo = (n+1)/2
-do 5 id=1, lc
-i = id+id-2
-sum = work(1)/(1.0-i*i)
-if (kdo < 2) goto 29
-do 6 kp1=2, kdo
-k = kp1-1
-t1 = 1.0-(k+k+i)**2
-t2 = 1.0-(k+k-i)**2
-sum = sum+work(kp1)*(t1+t2)/(t1*t2)
-6 continue
-29 czw(id) = sc1*sum
-5 continue
+    !
+    !     subroutine dzwk computes the coefficients in the trigonometric
+    !     expansion of the quadrature function zwbar(n, m, theta)
+    !
+    !     input parameters
+    !
+    !     nlat      the number of colatitudes including the poles.
+    !
+    !     n      the degree (subscript) of zwbar(n, m, theta)
+    !
+    !     m      the order (superscript) of zwbar(n, m, theta)
+    !
+    !     work   a work array with at least nlat/2+1 locations
+    !
+    !     output parameter
+    !
+    !     czw     the fourier coefficients of zwbar(n, m, theta).
+    !
+    dimension czw(1), work(1)
+    real czw, work, sc1, summation, t1, t2
+    if (n <= 0) return
+    lc = (nlat+1)/2
+    sc1 = 2.0/(nlat-1)
+    call dwbk(m, n, work, czw)
+    nmod = mod(n, 2)
+    mmod = mod(m, 2)
+    if (nmod /= 0) goto 1
+    if (mmod /= 0) goto 2
+    !
+    !     n even, m even
+    !
+    kdo = n/2
+    do id=1, lc
+        i = id+id-3
+        summation = 0.
+        do k=1, kdo
+            t1 = 1.0-(k+k-1+i)**2
+            t2 = 1.0-(k+k-1-i)**2
+            summation = summation+work(k)*(t1-t2)/(t1*t2)
+        end do
+        czw(id) = sc1*summation
+    end do
+    return
+    !
+    !     n even, m odd
+    !
+2   kdo = n/2
+    do id=1, lc
+        i = id+id-1
+        summation = 0.
+        do k=1, kdo
+            t1 = 1.0-(k+k-1+i)**2
+            t2 = 1.0-(k+k-1-i)**2
+            summation = summation+work(k)*(t1+t2)/(t1*t2)
+        end do
+        czw(id) = sc1*summation
+    end do
+    return
+1   if (mmod /= 0) goto 3
+    !
+    !     n odd, m even
+    !
+    kdo = (n-1)/2
+    do id=1, lc
+        i = id+id-2
+        summation = 0.
+        do k=1, kdo
+            t1 = 1.0-(k+k+i)**2
+            t2 = 1.0-(k+k-i)**2
+            summation = summation+work(k)*(t1-t2)/(t1*t2)
+        end do
+        czw(id) = sc1*summation
+    end do
+    return
+    !
+    !     n odd, m odd
+    !
+3   kdo = (n+1)/2
+    do id=1, lc
+        i = id+id-2
+        summation = work(1)/(1.0-i*i)
+        if (kdo < 2) goto 29
+        do kp1=2, kdo
+            k = kp1-1
+            t1 = 1.0-(k+k+i)**2
+            t2 = 1.0-(k+k-i)**2
+            summation = summation+work(kp1)*(t1+t2)/(t1*t2)
+        end do
+29      czw(id) = sc1*summation
+    end do
 
 end subroutine dzwk
 
 
-
 subroutine dzwt(nlat, m, n, th, czw, zwh)
-!
-!     subroutine dzwt tabulates the function zwbar(n, m, theta)
-!     at theta = th in real
-!
-!     input parameters
-!
-!     nlat      the number of colatitudes including the poles.
-!            nlat must be an odd integer
-!
-!     n      the degree (subscript) of zwbar(n, m, theta)
-!
-!     m      the order (superscript) of zwbar(n, m, theta)
-!
-!     czw     the fourier coefficients of zwbar(n, m, theta)
-!             as computed by subroutine zwk.
-!
-!     output parameter
-!
-!     zwh     zwbar(m, n, theta) evaluated at theta = th
-!
-dimension czw(1)
-real czw, zwh, th, cth, sth, cdt, sdt, chh
-zwh = 0.
-if (n <= 0) return
-lc = (nlat+1)/2
-lq = lc-1
-ls = lc-2
-cth = cos(th)
-sth = sin(th)
-cdt = cth*cth-sth*sth
-sdt = 2.*sth*cth
-lmod = mod(nlat, 2)
-mmod = mod(m, 2)
-nmod = mod(n, 2)
-if (lmod == 0) goto 50
-if (nmod /= 0) goto 1
-if (mmod /= 0) goto 2
-!
-!     nlat odd  n even  m even
-!
-do 30 k=1, lq
-zwh = zwh+czw(k+1)*sth
-chh = cdt*cth-sdt*sth
-sth = sdt*cth+cdt*sth
-cth = chh
-30 continue
-return
-!
-!     nlat odd  n even  m odd
-!
-2 do 40 k=1, lq
-zwh = zwh+czw(k)*cth
-chh = cdt*cth-sdt*sth
-sth = sdt*cth+cdt*sth
-cth = chh
-40 continue
-return
-1 cth = cdt
-sth = sdt
-if (mmod /= 0) goto 3
-!
-!     nlat odd  n odd  m even
-!
-do 10 k=1, ls
-zwh = zwh+czw(k+1)*sth
-chh = cdt*cth-sdt*sth
-sth = sdt*cth+cdt*sth
-cth = chh
-10 continue
-return
-!
-!     nlat odd  n odd  m odd
-!
-3 zwh = .5*czw(1)
-do 20 k=2, lq
-zwh = zwh+czw(k)*cth
-chh = cdt*cth-sdt*sth
-sth = sdt*cth+cdt*sth
-cth = chh
-20 continue
-zwh = zwh+.5*czw(lc)*cos((nlat-1)*th)
-return
-50 if (nmod /= 0) goto 51
-if (mmod /= 0) goto 52
-!
-!     nlat even  n even  m even
-!
-do 55 k=1, lq
-zwh = zwh+czw(k+1)*sth
-chh = cdt*cth-sdt*sth
-sth = sdt*cth+cdt*sth
-cth = chh
-55 continue
-return
-!
-!     nlat even  n even  m odd
-!
-52 zwh = .5*czw(lc)*cos((nlat-1)*th)
-do 60 k=1, lq
-zwh = zwh+czw(k)*cth
-chh = cdt*cth-sdt*sth
-sth = sdt*cth+cdt*sth
-cth = chh
-60 continue
-return
-51 cth = cdt
-sth = sdt
-if (mmod /= 0) goto 53
-!
-!     nlat even  n odd  m even
-!
-do 65 k=1, lq
-zwh = zwh+czw(k+1)*sth
-chh = cdt*cth-sdt*sth
-sth = sdt*cth+cdt*sth
-cth = chh
-65 continue
-return
-!
-!     nlat even  n odd  m odd
-!
-53 zwh = .5*czw(1)
-do 70 k=2, lc
-zwh = zwh+czw(k)*cth
-chh = cdt*cth-sdt*sth
-sth = sdt*cth+cdt*sth
-cth = chh
-70 continue
+    !
+    !     subroutine dzwt tabulates the function zwbar(n, m, theta)
+    !     at theta = th in real
+    !
+    !     input parameters
+    !
+    !     nlat      the number of colatitudes including the poles.
+    !            nlat must be an odd integer
+    !
+    !     n      the degree (subscript) of zwbar(n, m, theta)
+    !
+    !     m      the order (superscript) of zwbar(n, m, theta)
+    !
+    !     czw     the fourier coefficients of zwbar(n, m, theta)
+    !             as computed by subroutine zwk.
+    !
+    !     output parameter
+    !
+    !     zwh     zwbar(m, n, theta) evaluated at theta = th
+    !
+    dimension czw(1)
+    real czw, zwh, th, cost, sint, cdt, sdt, chh
+    zwh = 0.
+    if (n <= 0) return
+    lc = (nlat+1)/2
+    lq = lc-1
+    ls = lc-2
+    cost = cos(th)
+    sint = sin(th)
+    cdt = cost**2-sint**2
+    sdt = 2.0*sint*cost
+    lmod = mod(nlat, 2)
+    mmod = mod(m, 2)
+    nmod = mod(n, 2)
+    if (lmod == 0) goto 50
+    if (nmod /= 0) goto 1
+    if (mmod /= 0) goto 2
+    !
+    !     nlat odd  n even  m even
+    !
+    do k=1, lq
+        zwh = zwh+czw(k+1)*sint
+        chh = cdt*cost-sdt*sint
+        sint = sdt*cost+cdt*sint
+        cost = chh
+    end do
+    return
+    !
+    !     nlat odd  n even  m odd
+    !
+    2 do k=1, lq
+        zwh = zwh+czw(k)*cost
+        chh = cdt*cost-sdt*sint
+        sint = sdt*cost+cdt*sint
+        cost = chh
+    end do
+    return
+1   cost = cdt
+    sint = sdt
+    if (mmod /= 0) goto 3
+    !
+    !     nlat odd  n odd  m even
+    !
+    do k=1, ls
+        zwh = zwh+czw(k+1)*sint
+        chh = cdt*cost-sdt*sint
+        sint = sdt*cost+cdt*sint
+        cost = chh
+    end do
+    return
+    !
+    !     nlat odd  n odd  m odd
+    !
+3   zwh = .5*czw(1)
+    do k=2, lq
+        zwh = zwh+czw(k)*cost
+        chh = cdt*cost-sdt*sint
+        sint = sdt*cost+cdt*sint
+        cost = chh
+    end do
+    zwh = zwh+.5*czw(lc)*cos((nlat-1)*th)
+    return
+50  if (nmod /= 0) goto 51
+    if (mmod /= 0) goto 52
+    !
+    !     nlat even  n even  m even
+    !
+    do k=1, lq
+        zwh = zwh+czw(k+1)*sint
+        chh = cdt*cost-sdt*sint
+        sint = sdt*cost+cdt*sint
+        cost = chh
+    end do
+    return
+    !
+    !     nlat even  n even  m odd
+    !
+52  zwh = .5*czw(lc)*cos((nlat-1)*th)
+    do k=1, lq
+        zwh = zwh+czw(k)*cost
+        chh = cdt*cost-sdt*sint
+        sint = sdt*cost+cdt*sint
+        cost = chh
+    end do
+    return
+51  cost = cdt
+    sint = sdt
+    if (mmod /= 0) goto 53
+    !
+    !     nlat even  n odd  m even
+    !
+    do k=1, lq
+        zwh = zwh+czw(k+1)*sint
+        chh = cdt*cost-sdt*sint
+        sint = sdt*cost+cdt*sint
+        cost = chh
+    end do
+    return
+    !
+    !     nlat even  n odd  m odd
+    !
+53  zwh = .5*czw(1)
+    do k=2, lc
+        zwh = zwh+czw(k)*cost
+        chh = cdt*cost-sdt*sint
+        sint = sdt*cost+cdt*sint
+        cost = chh
+    end do
 
 end subroutine dzwt
 
 
 
 subroutine dvbk(m, n, cv, work)
-real cv(1), work(1), fn, fk, cf
-cv(1) = 0.
-if (n <= 0) return
-fn = n
-srnp1 = sqrt(fn * (fn + 1.0))
-cf = 2.*m/srnp1
-modn = mod(n, 2)
-modm = mod(m, 2)
-call dnlfk(m, n, work)
-if (modn /= 0) goto 70
-ncv = n/2
-if (ncv == 0) return
-fk = 0.
-if (modm /= 0) goto 60
-!
-!     n even m even
-!
-do 55 l=1, ncv
-fk = fk+2.
-cv(l) = -fk*work(l+1)/srnp1
-55 continue
-return
-!
-!     n even m odd
-!
-60 do 65 l=1, ncv
-fk = fk+2.
-cv(l) = fk*work(l)/srnp1
-65 continue
-return
-70 ncv = (n+1)/2
-fk = -1.
-if (modm /= 0) goto 80
-!
-!     n odd m even
-!
-do l=1, ncv
-fk = fk+2.
-cv(l) = -fk*work(l)/srnp1
-end do
-return
-!
-!     n odd m odd
-!
-80 do l=1, ncv
-fk = fk+2.
-cv(l) = fk*work(l)/srnp1
-end do
+    real cv(1), work(1), fn, fk, cf
+    cv(1) = 0.0
+    if (n <= 0) return
+    fn = n
+    srnp1 = sqrt(fn * (fn + 1.0))
+    cf = 2.0*m/srnp1
+    modn = mod(n, 2)
+    modm = mod(m, 2)
+    call dnlfk(m, n, work)
+    if (modn /= 0) goto 70
+    ncv = n/2
+    if (ncv == 0) return
+    fk = 0.0
+    if (modm /= 0) goto 60
+    !
+    !     n even m even
+    !
+    do l=1, ncv
+        fk = fk+2.0
+        cv(l) = -fk*work(l+1)/srnp1
+    end do
+    return
+    !
+    !     n even m odd
+    !
+    60 do l=1, ncv
+        fk = fk+2.
+        cv(l) = fk*work(l)/srnp1
+    end do
+    return
+70  ncv = (n+1)/2
+    fk = -1.0
+    if (modm /= 0) goto 80
+    !
+    !     n odd m even
+    !
+    do l=1, ncv
+        fk = fk+2.0
+        cv(l) = -fk*work(l)/srnp1
+    end do
+    return
+    !
+    !     n odd m odd
+    !
+    80 do l=1, ncv
+        fk = fk+2.0
+        cv(l) = fk*work(l)/srnp1
+    end do
 
 end subroutine dvbk
 
 
 
 subroutine dwbk(m, n, cw, work)
-real cw(1), work(1), fn, cf, srnp1
-cw(1) = 0.
-if (n<=0 .or. m<=0) return
-fn = n
-srnp1 = sqrt(fn * (fn + 1.0))
-cf = 2.*m/srnp1
-modn = mod(n, 2)
-modm = mod(m, 2)
-call dnlfk(m, n, work)
-if (m == 0) goto 50
-if (modn /= 0) goto 30
-l = n/2
-if (l == 0) goto 50
-if (modm /= 0) goto 20
-!
-!     n even m even
-!
-cw(l) = -cf*work(l+1)
-10 l = l-1
-if (l <= 0) goto 50
-cw(l) = cw(l+1)-cf*work(l+1)
-goto 10
-!
-!     n even m odd
-!
-20 cw(l) = cf*work(l)
-25 l = l-1
-if (l <= 0) goto 50
-cw(l) = cw(l+1)+cf*work(l)
-goto 25
-30 if (modm /= 0) goto 40
-l = (n-1)/2
-if (l == 0) goto 50
-!
-!     n odd m even
-!
-cw(l) = -cf*work(l+1)
-35 l = l-1
-if (l <= 0) goto 50
-cw(l) = cw(l+1)-cf*work(l+1)
-goto 35
-!
-!     n odd m odd
-!
-40 l = (n+1)/2
-cw(l) = cf*work(l)
-45 l = l-1
-if (l <= 0) goto 50
-cw(l) = cw(l+1)+cf*work(l)
-goto 45
-50 return
+    real cw(1), work(1), fn, cf, srnp1
+    cw(1) = 0.
+    if (n <= 0 .or. m <= 0) return
+    fn = n
+    srnp1 = sqrt(fn * (fn + 1.0))
+    cf = 2.*m/srnp1
+    modn = mod(n, 2)
+    modm = mod(m, 2)
+    call dnlfk(m, n, work)
+    if (m == 0) return
+    if (modn /= 0) goto 30
+    l = n/2
+    if (l == 0) return
+    if (modm /= 0) goto 20
+    !
+    !     n even m even
+    !
+    cw(l) = -cf*work(l+1)
+10  l = l-1
+    if (l <= 0) return
+    cw(l) = cw(l+1)-cf*work(l+1)
+    goto 10
+    !
+    !     n even m odd
+    !
+20  cw(l) = cf*work(l)
+25  l = l-1
+    if (l <= 0) return
+    cw(l) = cw(l+1)+cf*work(l)
+    goto 25
+30  if (modm /= 0) goto 40
+    l = (n-1)/2
+    if (l == 0) return
+    !
+    !     n odd m even
+    !
+    cw(l) = -cf*work(l+1)
+35  l = l-1
+    if (l <= 0) return
+    cw(l) = cw(l+1)-cf*work(l+1)
+    goto 35
+    !
+    !     n odd m odd
+    !
+40  l = (n+1)/2
+    cw(l) = cf*work(l)
+45  l = l-1
+    if (l <= 0) return
+    cw(l) = cw(l+1)+cf*work(l)
+    goto 45
 
 end subroutine dwbk
 
 
 
 subroutine dvbt(m, n, theta, cv, vh)
-dimension cv(1)
-real cv, vh, theta, cth, sth, cdt, sdt, chh
-vh = 0.
-if (n==0) return
-cth = cos(theta)
-sth = sin(theta)
-cdt = cth*cth-sth*sth
-sdt = 2.*sth*cth
-mmod = mod(m, 2)
-nmod = mod(n, 2)
-if (nmod /= 0) goto 1
-cth = cdt
-sth = sdt
-if (mmod /= 0) goto 2
-!
-!     n even  m even
-!
-ncv = n/2
-do k=1, ncv
-vh = vh+cv(k)*sth
-chh = cdt*cth-sdt*sth
-sth = sdt*cth+cdt*sth
-cth = chh
-end do
-return
-!
-!     n even  m odd
-!
-2 ncv = n/2
-do k=1, ncv
-vh = vh+cv(k)*cth
-chh = cdt*cth-sdt*sth
-sth = sdt*cth+cdt*sth
-cth = chh
-end do
+    dimension cv(1)
+    real cv, vh, theta, cost, sint, cdt, sdt, chh
+    vh = 0.
+    if (n == 0) return
+    cost = cos(theta)
+    sint = sin(theta)
+    cdt = cost**2-sint**2
+    sdt = 2.0*sint*cost
+    mmod = mod(m, 2)
+    nmod = mod(n, 2)
+    if (nmod /= 0) goto 1
+    cost = cdt
+    sint = sdt
+    if (mmod /= 0) goto 2
+    !
+    !     n even  m even
+    !
+    ncv = n/2
+    do k=1, ncv
+        vh = vh+cv(k)*sint
+        chh = cdt*cost-sdt*sint
+        sint = sdt*cost+cdt*sint
+        cost = chh
+    end do
+    return
+    !
+    !     n even  m odd
+    !
+2   ncv = n/2
+    do k=1, ncv
+        vh = vh+cv(k)*cost
+        chh = cdt*cost-sdt*sint
+        sint = sdt*cost+cdt*sint
+        cost = chh
+    end do
 
-return
-1 if (mmod /= 0) goto 3
-!
-!     n odd m even
-!
-ncv = (n+1)/2
-do k=1, ncv
-vh = vh+cv(k)*sth
-chh = cdt*cth-sdt*sth
-sth = sdt*cth+cdt*sth
-cth = chh
-end do
-return
-!
-! case m odd and n odd
-!
-3 ncv = (n+1)/2
-do k=1, ncv
-vh = vh+cv(k)*cth
-chh = cdt*cth-sdt*sth
-sth = sdt*cth+cdt*sth
-cth = chh
-end do
+    return
+1   if (mmod /= 0) goto 3
+    !
+    !     n odd m even
+    !
+    ncv = (n+1)/2
+    do k=1, ncv
+        vh = vh+cv(k)*sint
+        chh = cdt*cost-sdt*sint
+        sint = sdt*cost+cdt*sint
+        cost = chh
+    end do
+    return
+    !
+    ! case m odd and n odd
+    !
+3   ncv = (n+1)/2
+    do k=1, ncv
+        vh = vh+cv(k)*cost
+        chh = cdt*cost-sdt*sint
+        sint = sdt*cost+cdt*sint
+        cost = chh
+    end do
 
 end subroutine dvbt
 
 
 
 subroutine dwbt(m, n, theta, cw, wh)
-dimension cw(1)
-real theta, cw, wh, cth, sth, cdt, sdt, chh
-wh = 0.
-if (n<=0 .or. m<=0) return
-cth = cos(theta)
-sth = sin(theta)
-cdt = cth*cth-sth*sth
-sdt = 2.*sth*cth
-mmod=mod(m, 2)
-nmod=mod(n, 2)
-if (nmod /= 0) goto 1
-if (mmod /= 0) goto 2
-!
-!     n even  m even
-!
-ncw = n/2
-do 10 k=1, ncw
-wh = wh+cw(k)*sth
-chh = cdt*cth-sdt*sth
-sth = sdt*cth+cdt*sth
-cth = chh
-10 continue
-return
-!
-!     n even  m odd
-!
-2 ncw = n/2
-do 8 k=1, ncw
-wh = wh+cw(k)*cth
-chh = cdt*cth-sdt*sth
-sth = sdt*cth+cdt*sth
-cth = chh
-8 continue
-return
-1 cth = cdt
-sth = sdt
-if (mmod /= 0) goto 3
-!
-!     n odd m even
-!
-ncw = (n-1)/2
-do 20 k=1, ncw
-wh = wh+cw(k)*sth
-chh = cdt*cth-sdt*sth
-sth = sdt*cth+cdt*sth
-cth = chh
-20 continue
-return
-!
-! case m odd and n odd
-!
-3 ncw = (n+1)/2
-wh = .5*cw(1)
-if (ncw<2) return
-do 25 k=2, ncw
-wh = wh+cw(k)*cth
-chh = cdt*cth-sdt*sth
-sth = sdt*cth+cdt*sth
-cth = chh
-25 continue
+    dimension cw(1)
+    real theta, cw, wh, cth, sth, cdt, sdt, chh
+    wh = 0.
+    if (n <= 0 .or. m <= 0) return
+    cth = cos(theta)
+    sth = sin(theta)
+    cdt = cth*cth-sth*sth
+    sdt = 2.*sth*cth
+    mmod=mod(m, 2)
+    nmod=mod(n, 2)
+    if (nmod /= 0) goto 1
+    if (mmod /= 0) goto 2
+    !
+    !     n even  m even
+    !
+    ncw = n/2
+    do k=1, ncw
+        wh = wh+cw(k)*sth
+        chh = cdt*cth-sdt*sth
+        sth = sdt*cth+cdt*sth
+        cth = chh
+    end do
+    return
+    !
+    !     n even  m odd
+    !
+2   ncw = n/2
+    do k=1, ncw
+        wh = wh+cw(k)*cth
+        chh = cdt*cth-sdt*sth
+        sth = sdt*cth+cdt*sth
+        cth = chh
+    end do
+    return
+1   cth = cdt
+    sth = sdt
+    if (mmod /= 0) goto 3
+    !
+    !     n odd m even
+    !
+    ncw = (n-1)/2
+    do k=1, ncw
+        wh = wh+cw(k)*sth
+        chh = cdt*cth-sdt*sth
+        sth = sdt*cth+cdt*sth
+        cth = chh
+    end do
+    return
+    !
+    ! case m odd and n odd
+    !
+3   ncw = (n+1)/2
+    wh = .5*cw(1)
+    if (ncw<2) return
+    do k=2, ncw
+        wh = wh+cw(k)*cth
+        chh = cdt*cth-sdt*sth
+        sth = sdt*cth+cdt*sth
+        cth = chh
+    end do
 
 end subroutine dwbt
 
@@ -2720,47 +2718,51 @@ end subroutine rabcv
 
 
 subroutine rabcv1(nlat, nlon, a, b, c)
-!
-!     coefficients a, b, and c for computing vbar(m, n, theta) are
-!     stored in location ((m-2)*(nlat+nlat-m-1))/2+n+1
-!
-dimension a(1), b(1), c(1)
-mmax = min(nlat, (nlon+1)/2)
-if (mmax < 3) return
-do 215 mp1=3, mmax
-m = mp1-1
-ns = ((m-2)*(nlat+nlat-m-1))/2+1
-fm = real(m)
-tm = fm+fm
-temp = tm*(tm-1.)
-tpn = (fm-2.)*(fm-1.)/(fm*(fm+1.))
-a(ns) = sqrt(tpn*(tm+1.)*(tm-2.)/temp)
-c(ns) = sqrt(2./temp)
-if (m == nlat-1) goto 215
-ns = ns+1
-temp = tm*(tm+1.)
-tpn = (fm-1.)*fm/((fm+1.)*(fm+2.))
-a(ns) = sqrt(tpn*(tm+3.)*(tm-2.)/temp)
-c(ns) = sqrt(6./temp)
-mp3 = m+3
-if (mp3 > nlat) goto 215
-do 210 np1=mp3, nlat
-n = np1-1
-ns = ns+1
-fn = real(n)
-tn = fn+fn
-cn = (tn+1.)/(tn-3.)
-tpn = (fn-2.)*(fn-1.)/(fn*(fn + 1.0))
-fnpm = fn+fm
-fnmm = fn-fm
-temp = fnpm*(fnpm-1.)
-a(ns) = sqrt(tpn*cn*(fnpm-3.)*(fnpm-2.)/temp)
-b(ns) = sqrt(tpn*cn*fnmm*(fnmm-1.)/temp)
-c(ns) = sqrt((fnmm+1.)*(fnmm+2.)/temp)
-210 continue
-215 continue
+    !
+    !     coefficients a, b, and c for computing vbar(m, n, theta) are
+    !     stored in location ((m-2)*(nlat+nlat-m-1))/2+n+1
+    !
+    dimension a(1), b(1), c(1)
+
+    mmax = min(nlat, (nlon+1)/2)
+
+    if (mmax < 3) return
+
+    outer_loop: do mp1=3, mmax
+        m = mp1-1
+        ns = ((m-2)*(2*nlat-m-1))/2+1
+        fm = real(m)
+        tm = fm+fm
+        temp = tm*(tm-1.0)
+        tpn = (fm-2.0)*(fm-1.0)/(fm*(fm+1.0))
+        a(ns) = sqrt(tpn*(tm+1.0)*(tm-2.0)/temp)
+        c(ns) = sqrt(2.0/temp)
+        if (m == nlat-1) cycle outer_loop
+        ns = ns+1
+        temp = tm*(tm+1.0)
+        tpn = (fm-1.0)*fm/((fm+1.0)*(fm+2.0))
+        a(ns) = sqrt(tpn*(tm+3.0)*(tm-2.0)/temp)
+        c(ns) = sqrt(6.0/temp)
+        mp3 = m+3
+        if (mp3 > nlat) cycle outer_loop
+        do np1=mp3, nlat
+            n = np1-1
+            ns = ns+1
+            fn = real(n)
+            tn = 2.0*fn
+            cn = (tn+1.0)/(tn-3.0)
+            tpn = (fn-2.0)*(fn-1.0)/(fn*(fn + 1.0))
+            fnpm = fn+fm
+            fnmm = fn-fm
+            temp = fnpm*(fnpm-1.0)
+            a(ns) = sqrt(tpn*cn*(fnpm-3.0)*(fnpm-2.0)/temp)
+            b(ns) = sqrt(tpn*cn*fnmm*(fnmm-1.0)/temp)
+            c(ns) = sqrt((fnmm+1.0)*(fnmm+2.0)/temp)
+        end do
+    end do outer_loop
 
 end subroutine rabcv1
+
 
 
 
@@ -2782,48 +2784,51 @@ end subroutine rabcw
 
 
 subroutine rabcw1(nlat, nlon, a, b, c)
-!
-!     coefficients a, b, and c for computing wbar(m, n, theta) are
-!     stored in location ((m-2)*(nlat+nlat-m-1))/2+n+1
-!
-dimension a(1), b(1), c(1)
-mmax = min(nlat, (nlon+1)/2)
-if (mmax < 4) return
-do 215 mp1=4, mmax
-m = mp1-1
-ns = ((m-2)*(nlat+nlat-m-1))/2+1
-fm = real(m)
-tm = fm+fm
-temp = tm*(tm-1.)
-tpn = (fm-2.)*(fm-1.)/(fm*(fm+1.))
-tph = fm/(fm-2.)
-a(ns) = tph*sqrt(tpn*(tm+1.)*(tm-2.)/temp)
-c(ns) = tph*sqrt(2./temp)
-if (m == nlat-1) goto 215
-ns = ns+1
-temp = tm*(tm+1.)
-tpn = (fm-1.)*fm/((fm+1.)*(fm+2.))
-tph = fm/(fm-2.)
-a(ns) = tph*sqrt(tpn*(tm+3.)*(tm-2.)/temp)
-c(ns) = tph*sqrt(6./temp)
-mp3 = m+3
-if (mp3 > nlat) goto 215
-do 210 np1=mp3, nlat
-n = np1-1
-ns = ns+1
-fn = real(n)
-tn = fn+fn
-cn = (tn+1.)/(tn-3.)
-fnpm = fn+fm
-fnmm = fn-fm
-temp = fnpm*(fnpm-1.)
-tpn = (fn-2.)*(fn-1.)/(fn*(fn + 1.0))
-tph = fm/(fm-2.)
-a(ns) = tph*sqrt(tpn*cn*(fnpm-3.)*(fnpm-2.)/temp)
-b(ns) = sqrt(tpn*cn*fnmm*(fnmm-1.)/temp)
-c(ns) = tph*sqrt((fnmm+1.)*(fnmm+2.)/temp)
-210 continue
-215 continue
+    !
+    !     coefficients a, b, and c for computing wbar(m, n, theta) are
+    !     stored in location ((m-2)*(nlat+nlat-m-1))/2+n+1
+    !
+    dimension a(1), b(1), c(1)
+
+    mmax = min(nlat, (nlon+1)/2)
+
+    if (mmax < 4) return
+
+    outer_loop: do mp1=4, mmax
+        m = mp1-1
+        ns = ((m-2)*(nlat+nlat-m-1))/2+1
+        fm = real(m)
+        tm = 2.0*fm
+        temp = tm*(tm-1.0)
+        tpn = (fm-2.0)*(fm-1.0)/(fm*(fm+1.0))
+        tph = fm/(fm-2.0)
+        a(ns) = tph*sqrt(tpn*(tm+1.0)*(tm-2.0)/temp)
+        c(ns) = tph*sqrt(2.0/temp)
+        if (m == nlat-1) cycle outer_loop
+        ns = ns+1
+        temp = tm*(tm+1.0)
+        tpn = (fm-1.0)*fm/((fm+1.0)*(fm+2.0))
+        tph = fm/(fm-2.0)
+        a(ns) = tph*sqrt(tpn*(tm+3.0)*(tm-2.0)/temp)
+        c(ns) = tph*sqrt(6.0/temp)
+        mp3 = m+3
+        if (mp3 > nlat) cycle outer_loop
+        do np1=mp3, nlat
+            n = np1-1
+            ns = ns+1
+            fn = real(n)
+            tn = 2.0*fn
+            cn = (tn+1.0)/(tn-3.0)
+            fnpm = fn+fm
+            fnmm = fn-fm
+            temp = fnpm*(fnpm-1.0)
+            tpn = (fn-2.0)*(fn-1.0)/(fn*(fn + 1.0))
+            tph = fm/(fm-2.0)
+            a(ns) = tph*sqrt(tpn*cn*(fnpm-3.0)*(fnpm-2.0)/temp)
+            b(ns) = sqrt(tpn*cn*fnmm*(fnmm-1.0)/temp)
+            c(ns) = tph*sqrt((fnmm+1.0)*(fnmm+2.0)/temp)
+        end do
+    end do outer_loop
 
 end subroutine rabcw1
 
@@ -2834,43 +2839,44 @@ dimension       wvbin(*)
 real dwork(*)
 imid = (nlat+1)/2
 iw1 = 2*nlat*imid+1
+iw2 = nlat/2+2
 !
 !     the length of wvbin is 2*nlat*imid+3*((nlat-3)*nlat+2)/2
 !     the length of dwork is nlat+2
 !
-call vtini1 (nlat, nlon, imid, wvbin, wvbin(iw1), dwork, &
-                                       dwork(nlat/2+2))
+call vtini1 (nlat, nlon, imid, wvbin, wvbin(iw1), dwork, dwork(iw2))
 
 end subroutine vtinit
 
 
 
 subroutine vtini1 (nlat, nlon, imid, vb, abc, cvb, work)
-!
-!     abc must have 3*(max(mmax-2, 0)*(nlat+nlat-mmax-1))/2
-!     locations where mmax = min(nlat, (nlon+1)/2)
-!     cvb and work must each have nlat/2+1 locations
-!
-dimension vb(imid, nlat, 2), abc(1), cvb(1)
-real dt, cvb, th, vbh, work(*)
-real, parameter :: pi = acos(-1.0)
-dt = pi/(nlat-1)
-mdo = min(2, nlat, (nlon+1)/2)
-do mp1=1, mdo
-m = mp1-1
-do np1=mp1, nlat
-n = np1-1
-call dvtk(m, n, cvb, work)
-do i=1, imid
-th = (i-1)*dt
-call dvtt(m, n, th, cvb, vbh)
-vb(i, np1, mp1) = vbh
-end do
-end do
-end do
-call rabcv(nlat, nlon, abc)
+    !
+    !     abc must have 3*(max(mmax-2, 0)*(nlat+nlat-mmax-1))/2
+    !     locations where mmax = min(nlat, (nlon+1)/2)
+    !     cvb and work must each have nlat/2+1 locations
+    !
+    dimension vb(imid, nlat, 2), abc(1), cvb(1)
+    real dt, cvb, th, vbh, work(*)
+    real, parameter :: PI = acos(-1.0)
+    dt = PI/(nlat-1)
+    mdo = min(2, nlat, (nlon+1)/2)
+    do mp1=1, mdo
+        m = mp1-1
+        do np1=mp1, nlat
+            n = np1-1
+            call dvtk(m, n, cvb, work)
+            do i=1, imid
+                th = real(i-1)*dt
+                call dvtt(m, n, th, cvb, vbh)
+                vb(i, np1, mp1) = vbh
+            end do
+        end do
+    end do
+    call rabcv(nlat, nlon, abc)
 
 end subroutine vtini1
+
 
 
 
@@ -2879,43 +2885,43 @@ dimension       wwbin(1)
 real dwork(*)
 imid = (nlat+1)/2
 iw1 = 2*nlat*imid+1
+iw2 = nlat/2+2
 !
 !     the length of wwbin is 2*nlat*imid+3*((nlat-3)*nlat+2)/2
 !     the length of dwork is nlat+2
 !
-call wtini1 (nlat, nlon, imid, wwbin, wwbin(iw1), dwork, &
-                                       dwork(nlat/2+2))
+call wtini1 (nlat, nlon, imid, wwbin, wwbin(iw1), dwork, dwork(iw2))
 
 end subroutine wtinit
 
 
 
-subroutine wtini1 (nlat, nlon, imid, wb, abc, cwb, work)
-!
-!     abc must have 3*(max(mmax-2, 0)*(nlat+nlat-mmax-1))/2
-!     locations where mmax = min(nlat, (nlon+1)/2)
-!     cwb and work must each have nlat/2+1 locations
-!
-dimension wb(imid, nlat, 2), abc(1)
-real dt, cwb(*), wbh, th, work(*)
-real, parameter :: pi = acos(-1.0)
-dt = pi/(nlat-1)
-mdo = min(3, nlat, (nlon+1)/2)
-if (mdo < 2) return
-do mp1=2, mdo
-m = mp1-1
-do np1=mp1, nlat
-n = np1-1
-call dwtk(m, n, cwb, work)
-do i=1, imid
-th = (i-1)*dt
-call dwtt(m, n, th, cwb, wbh)
-wb(i, np1, m) = wbh
-end do
-end do
-end do
+subroutine wtini1(nlat, nlon, imid, wb, abc, cwb, work)
+    !
+    !     abc must have 3*(max(mmax-2, 0)*(nlat+nlat-mmax-1))/2
+    !     locations where mmax = min(nlat, (nlon+1)/2)
+    !     cwb and work must each have nlat/2+1 locations
+    !
+    dimension wb(imid, nlat, 2), abc(1)
+    real dt, cwb(*), wbh, th, work(*)
+    real, parameter :: PI = acos(-1.0)
+    dt = PI/(nlat-1)
+    mdo = min(3, nlat, (nlon+1)/2)
+    if (mdo < 2) return
+    do mp1=2, mdo
+        m = mp1-1
+        do np1=mp1, nlat
+            n = np1-1
+            call dwtk(m, n, cwb, work)
+            do i=1, imid
+                th = real(i-1)*dt
+                call dwtt(m, n, th, cwb, wbh)
+                wb(i, np1, m) = wbh
+            end do
+        end do
+    end do
 
-call rabcw(nlat, nlon, abc)
+    call rabcw(nlat, nlon, abc)
 
 end subroutine wtini1
 
@@ -2926,14 +2932,14 @@ dimension       wvbin(*)
 real theta(*), work(*)
 imid = (nlat+1)/2
 iw1 = 2*nlat*imid+1
+iw2 = nlat/2+2
 !
 !     theta is a real array with (nlat+1)/2 locations
 !     nlat is the maximum value of n+1
 !     the length of wvbin is 2*nlat*imid+3*((nlat-3)*nlat+2)/2
 !     the length of work is nlat+2
 !
-call vtgit1 (nlat, nlon, imid, theta, wvbin, wvbin(iw1), &
-                        work, work(nlat/2+2))
+call vtgit1 (nlat, nlon, imid, theta, wvbin, wvbin(iw1), work, work(iw2))
 
 end subroutine vtgint
 
@@ -3012,133 +3018,132 @@ end subroutine wtgit1
 
 
 subroutine dvtk(m, n, cv, work)
-real cv(*), work(*), fn, fk, cf, srnp1
-cv(1) = 0.
-if (n <= 0) return
-fn = n
-srnp1 = sqrt(fn * (fn + 1.0))
-cf = 2.*m/srnp1
-modn = mod(n, 2)
-modm = mod(m, 2)
-call dnlfk(m, n, work)
-if (modn /= 0) goto 70
-ncv = n/2
-if (ncv == 0) return
-fk = 0.
-if (modm /= 0) goto 60
-!
-!     n even m even
-!
-do 55 l=1, ncv
-fk = fk+2.
-cv(l) = -fk*fk*work(l+1)/srnp1
-55 continue
-return
-!
-!     n even m odd
-!
-60 do 65 l=1, ncv
-fk = fk+2.
-cv(l) = -fk*fk*work(l)/srnp1
-65 continue
-return
-70 ncv = (n+1)/2
-fk = -1.
-if (modm /= 0) goto 80
-!
-!     n odd m even
-!
-do 75 l=1, ncv
-fk = fk+2.
-cv(l) = -fk*fk*work(l)/srnp1
-75 continue
-return
-!
-!     n odd m odd
-!
-80 do 85 l=1, ncv
-fk = fk+2.
-cv(l) = -fk*fk*work(l)/srnp1
-85 continue
+    real cv(*), work(*), fn, fk, cf, srnp1
+    cv(1) = 0.0
+    if (n <= 0) return
+    fn = n
+    srnp1 = sqrt(fn * (fn + 1.0))
+    cf = 2.0*m/srnp1
+    modn = mod(n, 2)
+    modm = mod(m, 2)
+    call dnlfk(m, n, work)
+    if (modn /= 0) goto 70
+    ncv = n/2
+    if (ncv == 0) return
+    fk = 0.0
+    if (modm /= 0) goto 60
+    !
+    !     n even m even
+    !
+    do l=1, ncv
+        fk = fk+2.0
+        cv(l) = -fk*fk*work(l+1)/srnp1
+    end do
+    return
+    !
+    !     n even m odd
+    !
+    60 do l=1, ncv
+        fk = fk+2.0
+        cv(l) = -fk*fk*work(l)/srnp1
+    end do
+    return
+70  ncv = (n+1)/2
+    fk = -1.0
+    if (modm /= 0) goto 80
+    !
+    !     n odd m even
+    !
+    do l=1, ncv
+        fk = fk+2.0
+        cv(l) = -fk*fk*work(l)/srnp1
+    end do
+    return
+    !
+    !     n odd m odd
+    !
+    80 do l=1, ncv
+        fk = fk+2.0
+        cv(l) = -fk*fk*work(l)/srnp1
+    end do
 
 end subroutine dvtk
 
 
 
 subroutine dwtk(m, n, cw, work)
-real cw(*), work(*), fn, cf, srnp1
-cw(1) = 0.
-if (n<=0 .or. m<=0) return
-fn = n
-srnp1 = sqrt(fn * (fn + 1.0))
-cf = 2.*m/srnp1
-modn = mod(n, 2)
-modm = mod(m, 2)
-call dnlfk(m, n, work)
-if (m == 0) goto 50
-if (modn /= 0) goto 30
-l = n/2
-if (l == 0) goto 50
-if (modm /= 0) goto 20
-!
-!     n even m even
-!
-cw(l) = -cf*work(l+1)
-10 l = l-1
-if (l <= 0) goto 50
-cw(l) = cw(l+1)-cf*work(l+1)
-cw(l+1) = (l+l+1)*cw(l+1)
-goto 10
-!
-!     n even m odd
-!
-20 cw(l) = cf*work(l)
-25 l = l-1
-   if (l< 0) then
-       goto 50
-   else if (l == 0) then
-       goto 27
-   else
-       goto 26
-   end if
-26 cw(l) = cw(l+1)+cf*work(l)
-27 cw(l+1) = -(l+l+1)*cw(l+1)
-goto 25
-30 if (modm /= 0) goto 40
-l = (n-1)/2
-if (l == 0) goto 50
-!
-!     n odd m even
-!
-cw(l) = -cf*work(l+1)
-35 l = l-1
-   if (l< 0) then
-       goto 50
-   else if (l == 0) then
-       goto 37
-   else
-       goto 36
-   end if
-36 cw(l) = cw(l+1)-cf*work(l+1)
-37 cw(l+1) = (l+l+2)*cw(l+1)
-goto 35
-!
-!     n odd m odd
-!
-40 l = (n+1)/2
-cw(l) = cf*work(l)
-45 l = l-1
-   if (l< 0) then
-       goto 50
-   else if (l == 0) then
-       goto 47
-   else
-       goto 46
-   end if
-46 cw(l) = cw(l+1)+cf*work(l)
-47 cw(l+1) = -(l+l)*cw(l+1)
-goto 45
-50 return
+    real cw(*), work(*), fn, cf, srnp1
+    cw(1) = 0.
+    if (n <= 0 .or. m <= 0) return
+    fn = n
+    srnp1 = sqrt(fn * (fn + 1.0))
+    cf = 2.*m/srnp1
+    modn = mod(n, 2)
+    modm = mod(m, 2)
+    call dnlfk(m, n, work)
+    if (m == 0) return
+    if (modn /= 0) goto 30
+    l = n/2
+    if (l == 0) return
+    if (modm /= 0) goto 20
+    !
+    !     n even m even
+    !
+    cw(l) = -cf*work(l+1)
+10  l = l-1
+    if (l <= 0) return
+    cw(l) = cw(l+1)-cf*work(l+1)
+    cw(l+1) = (l+l+1)*cw(l+1)
+    goto 10
+    !
+    !     n even m odd
+    !
+20  cw(l) = cf*work(l)
+25  l = l-1
+    if (l< 0) then
+        return
+    else if (l == 0) then
+        goto 27
+    else
+        goto 26
+    end if
+26  cw(l) = cw(l+1)+cf*work(l)
+27  cw(l+1) = -(l+l+1)*cw(l+1)
+    goto 25
+30  if (modm /= 0) goto 40
+    l = (n-1)/2
+    if (l == 0) return
+    !
+    !     n odd m even
+    !
+    cw(l) = -cf*work(l+1)
+35  l = l-1
+    if (l< 0) then
+        return
+    else if (l == 0) then
+        goto 37
+    else
+        goto 36
+    end if
+36  cw(l) = cw(l+1)-cf*work(l+1)
+37  cw(l+1) = (l+l+2)*cw(l+1)
+    goto 35
+    !
+    !     n odd m odd
+    !
+40  l = (n+1)/2
+    cw(l) = cf*work(l)
+45  l = l-1
+    if (l < 0) then
+        return
+    else if (l == 0) then
+        goto 47
+    else
+        goto 46
+    end if
+46  cw(l) = cw(l+1)+cf*work(l)
+47  cw(l+1) = -(l+l)*cw(l+1)
+    goto 45
 
 end subroutine dwtk
 
@@ -3212,7 +3217,7 @@ subroutine dwtt(m, n, theta, cw, wh)
 dimension cw(1)
 real theta, cw, wh, cth, sth, cdt, sdt, chh
 wh = 0.
-if (n<=0 .or. m<=0) return
+if (n <= 0 .or. m <= 0) return
 cth = cos(theta)
 sth = sin(theta)
 cdt = cth*cth-sth*sth
