@@ -1584,7 +1584,7 @@ end subroutine zwinit
 
 
 
-subroutine zvin (ityp, nlat, nlon, m, zv, i3, wzvin)
+subroutine zvin(ityp, nlat, nlon, m, zv, i3, wzvin)
     dimension       zv(1)        , wzvin(1)
     imid = (nlat+1)/2
     lim = nlat*imid
@@ -1613,56 +1613,62 @@ subroutine zvin1(ityp, nlat, m, zv, imid, i3, zvz, zv1, a, b, c)
     i2 = i3
     i3 = ihold
     if (m < 1) then
-        goto 25
+        i1 = 1
+        i2 = 2
+        i3 = 3
+        do np1=1, nlat
+            do i=1, imid
+                zv(i, np1, i3) = zvz(i, np1)
+            end do
+        end do
     else if (m == 1) then
-        goto 30
+        do np1=2, nlat
+            do i=1, imid
+                zv(i, np1, i3) = zv1(i, np1)
+            end do
+        end do
     else
-        goto 35
+        ns = ((m-2)*(nlat+nlat-m-1))/2+1
+
+        if (ityp /= 1) then
+            do i=1, imid
+                zv(i, m+1, i3) = a(ns)*zv(i, m-1, i1)-c(ns)*zv(i, m+1, i1)
+            end do
+        end if
+
+        if (m == nlat-1) return
+
+        if (ityp /= 2) then
+            ns = ns+1
+            do i=1, imid
+                zv(i, m+2, i3) = a(ns)*zv(i, m, i1)-c(ns)*zv(i, m+2, i1)
+            end do
+        end if
+
+        nstrt = m+3
+
+        if (ityp == 1) nstrt = m+4
+
+        if (nstrt > nlat) return
+
+        nstp = 2
+
+        if (ityp == 0) nstp = 1
+
+        do np1=nstrt, nlat, nstp
+            ns = ns+nstp
+            do i=1, imid
+                zv(i, np1, i3) = a(ns)*zv(i, np1-2, i1)+b(ns)*zv(i, np1-2, i3) &
+                    -c(ns)*zv(i, np1, i1)
+            end do
+        end do
     end if
-25  i1 = 1
-    i2 = 2
-    i3 = 3
-    do np1=1, nlat
-        do i=1, imid
-            zv(i, np1, i3) = zvz(i, np1)
-        end do
-    end do
-    return
-    30 do np1=2, nlat
-        do i=1, imid
-            zv(i, np1, i3) = zv1(i, np1)
-        end do
-    end do
-    return
-35  ns = ((m-2)*(nlat+nlat-m-1))/2+1
-    if (ityp == 1) goto 36
-    do i=1, imid
-        zv(i, m+1, i3) = a(ns)*zv(i, m-1, i1)-c(ns)*zv(i, m+1, i1)
-    end do
-36  if (m == nlat-1) return
-    if (ityp == 2) goto 71
-    ns = ns+1
-    do i=1, imid
-        zv(i, m+2, i3) = a(ns)*zv(i, m, i1)-c(ns)*zv(i, m+2, i1)
-    end do
-71  nstrt = m+3
-    if (ityp == 1) nstrt = m+4
-    if (nstrt > nlat) return
-    nstp = 2
-    if (ityp == 0) nstp = 1
-    do np1=nstrt, nlat, nstp
-        ns = ns+nstp
-        do i=1, imid
-            zv(i, np1, i3) = a(ns)*zv(i, np1-2, i1)+b(ns)*zv(i, np1-2, i3) &
-                -c(ns)*zv(i, np1, i1)
-        end do
-    end do
 
 end subroutine zvin1
 
 
 
-subroutine zwin (ityp, nlat, nlon, m, zw, i3, wzwin)
+subroutine zwin(ityp, nlat, nlon, m, zw, i3, wzwin)
     dimension       zw(1)        , wzwin(1)
     imid = (nlat+1)/2
     lim = nlat*imid
@@ -1691,51 +1697,56 @@ subroutine zwin1(ityp, nlat, m, zw, imid, i3, zw1, zw2, a, b, c)
     i2 = i3
     i3 = ihold
     if (m < 2) then
-        goto 25
+        i1 = 1
+        i2 = 2
+        i3 = 3
+        do np1=2, nlat
+            do i=1, imid
+                zw(i, np1, i3) = zw1(i, np1)
+            end do
+        end do
     else if (m == 2) then
-        goto 30
+        do np1=3, nlat
+            do i=1, imid
+                zw(i, np1, i3) = zw2(i, np1)
+            end do
+        end do
     else
-        goto 35
+        ns = ((m-2)*(2*nlat-m-1))/2+1
+
+        if (ityp /= 1) then
+            do i=1, imid
+                zw(i, m+1, i3) = a(ns)*zw(i, m-1, i1)-c(ns)*zw(i, m+1, i1)
+            end do
+        end if
+
+        if (m == nlat-1) return
+
+        if (ityp /= 2) then
+            ns = ns+1
+            do i=1, imid
+                zw(i, m+2, i3) = a(ns)*zw(i, m, i1)-c(ns)*zw(i, m+2, i1)
+            end do
+        end if
+
+        nstrt = m+3
+
+        if (ityp == 1) nstrt = m+4
+
+        if (nstrt > nlat) return
+
+        nstp = 2
+
+        if (ityp == 0) nstp = 1
+
+        do np1=nstrt, nlat, nstp
+            ns = ns+nstp
+            do i=1, imid
+                zw(i, np1, i3) = a(ns)*zw(i, np1-2, i1)+b(ns)*zw(i, np1-2, i3) &
+                    -c(ns)*zw(i, np1, i1)
+            end do
+        end do
     end if
-25  i1 = 1
-    i2 = 2
-    i3 = 3
-    do np1=2, nlat
-        do i=1, imid
-            zw(i, np1, i3) = zw1(i, np1)
-        end do
-    end do
-    return
-    30 do np1=3, nlat
-        do i=1, imid
-            zw(i, np1, i3) = zw2(i, np1)
-        end do
-    end do
-    return
-35  ns = ((m-2)*(nlat+nlat-m-1))/2+1
-    if (ityp == 1) goto 36
-    do i=1, imid
-        zw(i, m+1, i3) = a(ns)*zw(i, m-1, i1)-c(ns)*zw(i, m+1, i1)
-    end do
-36  if (m == nlat-1) return
-    if (ityp == 2) goto 71
-    ns = ns+1
-    do i=1, imid
-        zw(i, m+2, i3) = a(ns)*zw(i, m, i1)-c(ns)*zw(i, m+2, i1)
-    end do
-71  nstrt = m+3
-    if (ityp == 1) nstrt = m+4
-    if (nstrt > nlat) goto 80
-    nstp = 2
-    if (ityp == 0) nstp = 1
-    do np1=nstrt, nlat, nstp
-        ns = ns+nstp
-        do i=1, imid
-            zw(i, np1, i3) = a(ns)*zw(i, np1-2, i1)+b(ns)*zw(i, np1-2, i3) &
-                -c(ns)*zw(i, np1, i1)
-        end do
-    end do
-80  return
 
 end subroutine zwin1
 
@@ -1834,7 +1845,7 @@ subroutine wbini1(nlat, nlon, imid, wb, abc, cwb, work)
 end subroutine wbini1
 
 
-subroutine vbin (ityp, nlat, nlon, m, vb, i3, wvbin)
+subroutine vbin(ityp, nlat, nlon, m, vb, i3, wvbin)
     dimension       vb(1)        , wvbin(1)
     imid = (nlat+1)/2
     lim = nlat*imid
@@ -1863,57 +1874,62 @@ subroutine vbin1(ityp, nlat, m, vb, imid, i3, vbz, vb1, a, b, c)
     i2 = i3
     i3 = ihold
     if (m < 1) then
-        goto 25
+        i1 = 1
+        i2 = 2
+        i3 = 3
+        do np1=1, nlat
+            do i=1, imid
+                vb(i, np1, i3) = vbz(i, np1)
+            end do
+        end do
     else if (m == 1) then
-        goto 30
+        do np1=2, nlat
+            do i=1, imid
+                vb(i, np1, i3) = vb1(i, np1)
+            end do
+        end do
     else
-        goto 35
+        ns = ((m-2)*(nlat+nlat-m-1))/2+1
+
+        if (ityp /= 1) then
+            do i=1, imid
+                vb(i, m+1, i3) = a(ns)*vb(i, m-1, i1)-c(ns)*vb(i, m+1, i1)
+            end do
+        end if
+
+        if (m == nlat-1) return
+
+        if (ityp /= 2) then
+            ns = ns+1
+            do i=1, imid
+                vb(i, m+2, i3) = a(ns)*vb(i, m, i1)-c(ns)*vb(i, m+2, i1)
+            end do
+        end if
+
+        nstrt = m+3
+
+        if (ityp == 1) nstrt = m+4
+
+        if (nstrt > nlat) return
+
+        nstp = 2
+
+        if (ityp == 0) nstp = 1
+
+        do np1=nstrt, nlat, nstp
+            ns = ns+nstp
+            do i=1, imid
+                vb(i, np1, i3) = a(ns)*vb(i, np1-2, i1)+b(ns)*vb(i, np1-2, i3) &
+                    -c(ns)*vb(i, np1, i1)
+            end do
+        end do
     end if
-25  i1 = 1
-    i2 = 2
-    i3 = 3
-    do np1=1, nlat
-        do i=1, imid
-            vb(i, np1, i3) = vbz(i, np1)
-        end do
-    end do
-    return
-    30 do np1=2, nlat
-        do i=1, imid
-            vb(i, np1, i3) = vb1(i, np1)
-        end do
-    end do
-    return
-35  ns = ((m-2)*(nlat+nlat-m-1))/2+1
-    if (ityp == 1) goto 36
-    do i=1, imid
-        vb(i, m+1, i3) = a(ns)*vb(i, m-1, i1)-c(ns)*vb(i, m+1, i1)
-    end do
-36  if (m == nlat-1) return
-    if (ityp == 2) goto 71
-    ns = ns+1
-    do i=1, imid
-        vb(i, m+2, i3) = a(ns)*vb(i, m, i1)-c(ns)*vb(i, m+2, i1)
-    end do
-71  nstrt = m+3
-    if (ityp == 1) nstrt = m+4
-    if (nstrt > nlat) goto 80
-    nstp = 2
-    if (ityp == 0) nstp = 1
-    do np1=nstrt, nlat, nstp
-        ns = ns+nstp
-        do i=1, imid
-            vb(i, np1, i3) = a(ns)*vb(i, np1-2, i1)+b(ns)*vb(i, np1-2, i3) &
-                -c(ns)*vb(i, np1, i1)
-        end do
-    end do
-80  return
 
 end subroutine vbin1
 
 
 
-subroutine wbin (ityp, nlat, nlon, m, wb, i3, wwbin)
+subroutine wbin(ityp, nlat, nlon, m, wb, i3, wwbin)
     dimension       wb(1)        , wwbin(1)
     imid = (nlat+1)/2
     lim = nlat*imid
@@ -1932,6 +1948,7 @@ subroutine wbin (ityp, nlat, nlon, m, wb, i3, wwbin)
 end subroutine wbin
 
 
+
 subroutine wbin1(ityp, nlat, m, wb, imid, i3, wb1, wb2, a, b, c)
     dimension wb(imid, nlat, 3), wb1(imid, 1), wb2(imid, 1), &
         a(1), b(1), c(1)
@@ -1941,55 +1958,57 @@ subroutine wbin1(ityp, nlat, m, wb, imid, i3, wb1, wb2, a, b, c)
     i2 = i3
     i3 = ihold
     if (m < 2) then
-        goto 25
+        i1 = 1
+        i2 = 2
+        i3 = 3
+        do np1=2, nlat
+            do i=1, imid
+                wb(i, np1, i3) = wb1(i, np1)
+            end do
+        end do
     else if (m == 2) then
-        goto 30
+        do np1=3, nlat
+            do i=1, imid
+                wb(i, np1, i3) = wb2(i, np1)
+            end do
+        end do
     else
-        goto 35
+        ns = ((m-2)*(nlat+nlat-m-1))/2+1
+
+        if (ityp /= 1) then
+            do i=1, imid
+                wb(i, m+1, i3) = a(ns)*wb(i, m-1, i1)-c(ns)*wb(i, m+1, i1)
+            end do
+        end if
+
+        if (m == nlat-1) return
+
+        if (ityp /= 2) then
+            ns = ns+1
+            do i=1, imid
+                wb(i, m+2, i3) = a(ns)*wb(i, m, i1)-c(ns)*wb(i, m+2, i1)
+            end do
+        end if
+
+        nstrt = m+3
+
+        if (ityp == 1) nstrt = m+4
+
+        if (nstrt > nlat) return
+
+        nstp = 2
+        if (ityp == 0) nstp = 1
+        do np1=nstrt, nlat, nstp
+            ns = ns+nstp
+            do i=1, imid
+                wb(i, np1, i3) = a(ns)*wb(i, np1-2, i1)+b(ns)*wb(i, np1-2, i3) &
+                    -c(ns)*wb(i, np1, i1)
+            end do
+        end do
     end if
-25  i1 = 1
-    i2 = 2
-    i3 = 3
-    do np1=2, nlat
-        do i=1, imid
-            wb(i, np1, i3) = wb1(i, np1)
-        end do
-    end do
-    return
-    30 do np1=3, nlat
-        do i=1, imid
-            wb(i, np1, i3) = wb2(i, np1)
-        end do
-    end do
-    return
-35  ns = ((m-2)*(nlat+nlat-m-1))/2+1
-    if (ityp == 1) goto 36
-    do i=1, imid
-        wb(i, m+1, i3) = a(ns)*wb(i, m-1, i1)-c(ns)*wb(i, m+1, i1)
-    end do
-36  if (m == nlat-1) return
-    if (ityp == 2) goto 71
-    ns = ns+1
-    do i=1, imid
-        wb(i, m+2, i3) = a(ns)*wb(i, m, i1)-c(ns)*wb(i, m+2, i1)
-    end do
-71  nstrt = m+3
-    if (ityp == 1) nstrt = m+4
-    if (nstrt > nlat) goto 80
-    nstp = 2
-    if (ityp == 0) nstp = 1
-    do np1=nstrt, nlat, nstp
-        ns = ns+nstp
-        do i=1, imid
-            wb(i, np1, i3) = a(ns)*wb(i, np1-2, i1)+b(ns)*wb(i, np1-2, i3) &
-                -c(ns)*wb(i, np1, i1)
-        end do
-    end do
-80  return
 
 
 end subroutine wbin1
-
 
 
 subroutine dzvk(nlat, m, n, czv, work)
@@ -2021,74 +2040,77 @@ subroutine dzvk(nlat, m, n, czv, work)
 
     call dvbk(m, n, work, czv)
 
-    nmod = mod(n, 2)
-    mmod = mod(m, 2)
-
-    if (nmod /= 0) goto 1
-    if (mmod /= 0) goto 2
-    !
-    !     n even, m even
-    !
-    kdo = n/2
-    do id=1, lc
-        i = id+id-2
-        summation = 0.0
-        do k=1, kdo
-            t1 = 1.0-(k+k+i)**2
-            t2 = 1.0-(k+k-i)**2
-            summation = summation+work(k)*(t1-t2)/(t1*t2)
-        end do
-        czv(id) = sc1*summation
-    end do
-    return
-    !
-    !     n even, m odd
-    !
-2   kdo = n/2
-    do id=1, lc
-        i = 2*id-2
-        summation = 0.0
-        do k=1, kdo
-            t1 = 1.0-(k+k+i)**2
-            t2 = 1.0-(k+k-i)**2
-            summation = summation+work(k)*(t1+t2)/(t1*t2)
-        end do
-        czv(id) = sc1*summation
-    end do
-    return
-1   if (mmod /= 0) goto 3
-    !
-    !     n odd, m even
-    !
-    kdo = (n+1)/2
-    do id=1, lc
-        i = 2*id-3
-        summation = 0.0
-        do k=1, kdo
-            t1 = 1.0-(k+k-1+i)**2
-            t2 = 1.0-(k+k-1-i)**2
-            summation = summation+work(k)*(t1-t2)/(t1*t2)
-        end do
-        czv(id) = sc1*summation
-    end do
-    return
-    !
-    !     n odd, m odd
-    !
-3   kdo = (n+1)/2
-    do id=1, lc
-        i = 2*id-1
-        summation = 0.0
-        do k=1, kdo
-            t1 = 1.0-(k+k-1+i)**2
-            t2 = 1.0-(k+k-1-i)**2
-            summation = summation+work(k)*(t1+t2)/(t1*t2)
-        end do
-        czv(id) = sc1*summation
-    end do
+    select case (mod(n, 2))
+        case (0)
+            select case (mod(m, 2))
+                case (0)
+                    !
+                    !==> n even, m even
+                    !
+                    kdo = n/2
+                    do id=1, lc
+                        i = id+id-2
+                        summation = 0.0
+                        do k=1, kdo
+                            t1 = 1.0-(k+k+i)**2
+                            t2 = 1.0-(k+k-i)**2
+                            summation = summation+work(k)*(t1-t2)/(t1*t2)
+                        end do
+                        czv(id) = sc1*summation
+                    end do
+                case (1)
+                    !
+                    !==> n even, m odd
+                    !
+                    kdo = n/2
+                    do id=1, lc
+                        i = 2*id-2
+                        summation = 0.0
+                        do k=1, kdo
+                            t1 = 1.0-(k+k+i)**2
+                            t2 = 1.0-(k+k-i)**2
+                            summation = summation+work(k)*(t1+t2)/(t1*t2)
+                        end do
+                        czv(id) = sc1*summation
+                    end do
+                    return
+            end select
+        case default
+            select case (mod(m, 2))
+                case (0)
+                    !
+                    !==> n odd, m even
+                    !
+                    kdo = (n+1)/2
+                    do id=1, lc
+                        i = 2*id-3
+                        summation = 0.0
+                        do k=1, kdo
+                            t1 = 1.0-(k+k-1+i)**2
+                            t2 = 1.0-(k+k-1-i)**2
+                            summation = summation+work(k)*(t1-t2)/(t1*t2)
+                        end do
+                        czv(id) = sc1*summation
+                    end do
+                case (1)
+                    !
+                    !==> n odd, m odd
+                    !
+                    kdo = (n+1)/2
+                    do id=1, lc
+                        i = 2*id-1
+                        summation = 0.0
+                        do k=1, kdo
+                            t1 = 1.0-(k+k-1+i)**2
+                            t2 = 1.0-(k+k-1-i)**2
+                            summation = summation+work(k)*(t1+t2)/(t1*t2)
+                        end do
+                        czv(id) = sc1*summation
+                    end do
+            end select
+    end select
 
 end subroutine dzvk
-
 
 
 
@@ -2113,7 +2135,7 @@ subroutine dzvt(nlat, m, n, th, czv, zvh)
     !     zvh     zvbar(m, n, theta) evaluated at theta = th
     !
     dimension czv(1)
-    real th, czv, zvh, cost, sint, cdt, sdt, chh
+    real th, czv, zvh, cost, sint, cdt, sdt, temp
 
     zvh = 0.0
 
@@ -2126,107 +2148,113 @@ subroutine dzvt(nlat, m, n, th, czv, zvh)
     sint = sin(th)
     cdt = cost**2-sint**2
     sdt = 2.0*sint*cost
-    lmod = mod(nlat, 2)
-    mmod = mod(m, 2)
-    nmod = mod(n, 2)
 
-    if (lmod == 0) goto 50
-    if (nmod /= 0) goto 1
+    select case (mod(nlat, 2))
+        case(0) ! nlat even
+            select case (mod(n, 2))
+                case (0) ! n even
+                    cost = cdt
+                    sint = sdt
+                    select case (mod(m, 2))
+                        case (0) ! m even
+                            !
+                            !==> nlat even n even  m even
+                            !
+                            do k=1, lq
+                                zvh = zvh+czv(k+1)*sint
+                                temp = cdt*cost-sdt*sint
+                                sint = sdt*cost+cdt*sint
+                                cost = temp
+                            end do
+                        case (1) ! m odd
+                            !
+                            !==> nlat even n even m odd
+                            !
+                            zvh = 0.5*czv(1)
+                            do k=2, lc
+                                zvh = zvh+czv(k)*cost
+                                temp = cdt*cost-sdt*sint
+                                sint = sdt*cost+cdt*sint
+                                cost = temp
+                            end do
+                    end select
+                case (1) ! n odd
+                    select case (mod(m, 2))
+                        case (0) ! m even
+                            !
+                            !==> nlat even n odd  m even
+                            !
+                            do k=1, lq
+                                zvh = zvh+czv(k+1)*sint
+                                temp = cdt*cost-sdt*sint
+                                sint = sdt*cost+cdt*sint
+                                cost = temp
+                            end do
+                        case (1) ! m odd
+                            !
+                            !==> nlat even  n odd  m odd
+                            !
+                            zvh = 0.5*czv(lc)*cos(real(nlat-1)*th)
 
-    cost = cdt
-    sint = sdt
-
-    if (mmod /= 0) goto 2
-    !
-    !     nlat odd  n even  m even
-    !
-    do k=1, ls
-        zvh = zvh+czv(k+1)*sint
-        chh = cdt*cost-sdt*sint
-        sint = sdt*cost+cdt*sint
-        cost = chh
-    end do
-    return
-    !
-    !     nlat odd  n even  m odd
-    !
-2   zvh = .5*czv(1)
-    do k=2, lq
-        zvh = zvh+czv(k)*cost
-        chh = cdt*cost-sdt*sint
-        sint = sdt*cost+cdt*sint
-        cost = chh
-    end do
-    zvh = zvh+.5*czv(lc)*cos((nlat-1)*th)
-    return
-1   if (mmod /= 0) goto 3
-    !
-    !     nlat odd  n odd  m even
-    !
-    do k=1, lq
-        zvh = zvh+czv(k+1)*sint
-        chh = cdt*cost-sdt*sint
-        sint = sdt*cost+cdt*sint
-        cost = chh
-    end do
-    return
-    !
-    !     nlat odd  n odd  m odd
-    !
-    3 do k=1, lq
-        zvh = zvh+czv(k)*cost
-        chh = cdt*cost-sdt*sint
-        sint = sdt*cost+cdt*sint
-        cost = chh
-    end do
-    return
-50  if (nmod /= 0) goto 51
-    cost = cdt
-    sint = sdt
-    if (mmod /= 0) goto 52
-    !
-    !     nlat even  n even  m even
-    !
-    do k=1, lq
-        zvh = zvh+czv(k+1)*sint
-        chh = cdt*cost-sdt*sint
-        sint = sdt*cost+cdt*sint
-        cost = chh
-    end do
-    return
-    !
-    !     nlat even  n even  m odd
-    !
-52  zvh = .5*czv(1)
-    do k=2, lc
-        zvh = zvh+czv(k)*cost
-        chh = cdt*cost-sdt*sint
-        sint = sdt*cost+cdt*sint
-        cost = chh
-    end do
-    return
-51  if (mmod /= 0) goto 53
-    !
-    !     nlat even  n odd  m even
-    !
-    do k=1, lq
-        zvh = zvh+czv(k+1)*sint
-        chh = cdt*cost-sdt*sint
-        sint = sdt*cost+cdt*sint
-        cost = chh
-    end do
-    return
-    !
-    !     nlat even  n odd  m odd
-    !
-53  zvh = 0.5*czv(lc)*cos((nlat-1)*th)
-
-    do k=1, lq
-        zvh = zvh+czv(k)*cost
-        chh = cdt*cost-sdt*sint
-        sint = sdt*cost+cdt*sint
-        cost = chh
-    end do
+                            do k=1, lq
+                                zvh = zvh+czv(k)*cost
+                                temp = cdt*cost-sdt*sint
+                                sint = sdt*cost+cdt*sint
+                                cost = temp
+                            end do
+                    end select
+            end select
+        case (1) ! nlat odd
+            select case (mod(n, 2))
+                case (0) ! n even
+                    cost = cdt
+                    sint = sdt
+                    select case (mod(m, 2))
+                        case (0) ! m even
+                            !
+                            !==> nlat odd  n even  m even
+                            !
+                            do k=1, ls
+                                zvh = zvh+czv(k+1)*sint
+                                temp = cdt*cost-sdt*sint
+                                sint = sdt*cost+cdt*sint
+                                cost = temp
+                            end do
+                        case (1) ! m odd
+                            zvh = 0.5*czv(1)
+                            do k=2, lq
+                                zvh = zvh+czv(k)*cost
+                                temp = cdt*cost-sdt*sint
+                                sint = sdt*cost+cdt*sint
+                                cost = temp
+                            end do
+                            zvh = zvh+0.5*czv(lc)*cos((nlat-1)*th)
+                    end select
+                case (1) ! n odd
+                    select case (mod(m, 2))
+                        case (0) ! m even
+                            !
+                            !==> nlat odd n odd m even
+                            !
+                            do k=1, lq
+                                zvh = zvh+czv(k+1)*sint
+                                temp = cdt*cost-sdt*sint
+                                sint = sdt*cost+cdt*sint
+                                cost = temp
+                            end do
+                        case (1) ! m odd
+                            !
+                            !==> nlat odd n odd m odd
+                            !
+                            do k=1, lq
+                                zvh = zvh+czv(k)*cost
+                                temp = cdt*cost-sdt*sint
+                                sint = sdt*cost+cdt*sint
+                                cost = temp
+                            end do
+                    end select
+            end select
+    end select
 
 end subroutine dzvt
 
@@ -2238,7 +2266,7 @@ subroutine dzwk(nlat, m, n, czw, work)
     !
     !     input parameters
     !
-    !     nlat      the number of colatitudes including the poles.
+    !     nlat      the number of colatitudes including the poles.0
     !
     !     n      the degree (subscript) of zwbar(n, m, theta)
     !
@@ -2248,80 +2276,91 @@ subroutine dzwk(nlat, m, n, czw, work)
     !
     !     output parameter
     !
-    !     czw     the fourier coefficients of zwbar(n, m, theta).
+    !     czw     the fourier coefficients of zwbar(n, m, theta).0
     !
     dimension czw(1), work(1)
     real czw, work, sc1, summation, t1, t2
+
     if (n <= 0) return
+
     lc = (nlat+1)/2
     sc1 = 2.0/(nlat-1)
+
     call dwbk(m, n, work, czw)
-    nmod = mod(n, 2)
-    mmod = mod(m, 2)
-    if (nmod /= 0) goto 1
-    if (mmod /= 0) goto 2
-    !
-    !     n even, m even
-    !
-    kdo = n/2
-    do id=1, lc
-        i = id+id-3
-        summation = 0.
-        do k=1, kdo
-            t1 = 1.0-(k+k-1+i)**2
-            t2 = 1.0-(k+k-1-i)**2
-            summation = summation+work(k)*(t1-t2)/(t1*t2)
-        end do
-        czw(id) = sc1*summation
-    end do
-    return
-    !
-    !     n even, m odd
-    !
-2   kdo = n/2
-    do id=1, lc
-        i = id+id-1
-        summation = 0.
-        do k=1, kdo
-            t1 = 1.0-(k+k-1+i)**2
-            t2 = 1.0-(k+k-1-i)**2
-            summation = summation+work(k)*(t1+t2)/(t1*t2)
-        end do
-        czw(id) = sc1*summation
-    end do
-    return
-1   if (mmod /= 0) goto 3
-    !
-    !     n odd, m even
-    !
-    kdo = (n-1)/2
-    do id=1, lc
-        i = id+id-2
-        summation = 0.
-        do k=1, kdo
-            t1 = 1.0-(k+k+i)**2
-            t2 = 1.0-(k+k-i)**2
-            summation = summation+work(k)*(t1-t2)/(t1*t2)
-        end do
-        czw(id) = sc1*summation
-    end do
-    return
-    !
-    !     n odd, m odd
-    !
-3   kdo = (n+1)/2
-    do id=1, lc
-        i = id+id-2
-        summation = work(1)/(1.0-i*i)
-        if (kdo < 2) goto 29
-        do kp1=2, kdo
-            k = kp1-1
-            t1 = 1.0-(k+k+i)**2
-            t2 = 1.0-(k+k-i)**2
-            summation = summation+work(kp1)*(t1+t2)/(t1*t2)
-        end do
-29      czw(id) = sc1*summation
-    end do
+
+    select case (mod(n,2))
+        case (0) ! n even
+            select case (mod(m,2))
+                case (0) ! m even
+                    !
+                    !==> n even, m even
+                    !
+                    kdo = n/2
+                    do id=1, lc
+                        i = 2*id-3
+                        summation = 0.0
+                        do k=1, kdo
+                            t1 = 1.0-(k+k-1+i)**2
+                            t2 = 1.0-(k+k-1-i)**2
+                            summation = summation+work(k)*(t1-t2)/(t1*t2)
+                        end do
+                        czw(id) = sc1*summation
+                    end do
+                case (1) ! m odd
+                    !
+                    !==> n even, m odd
+                    !
+                    kdo = n/2
+                    do id=1, lc
+                        i = 2*id-1
+                        summation = 0.0
+                        do k=1, kdo
+                            t1 = 1.0-(k+k-1+i)**2
+                            t2 = 1.0-(k+k-1-i)**2
+                            summation = summation+work(k)*(t1+t2)/(t1*t2)
+                        end do
+                        czw(id) = sc1*summation
+                    end do
+            end select
+        case (1) ! n odd
+            select case (mod(m,2))
+                case (0) ! m even
+                    !
+                    !==> n odd, m even
+                    !
+                    kdo = (n-1)/2
+                    do id=1, lc
+                        i = 2*id-2
+                        summation = 0.0
+                        do k=1, kdo
+                            t1 = 1.0-(k+k+i)**2
+                            t2 = 1.0-(k+k-i)**2
+                            summation = summation+work(k)*(t1-t2)/(t1*t2)
+                        end do
+                        czw(id) = sc1*summation
+                    end do
+                case (1) ! m odd
+                    !
+                    !==> n odd, m odd
+                    !
+                    kdo = (n+1)/2
+                    do id=1, lc
+                        i = 2*id-2
+                        summation = work(1)/(1.0-i**2)
+
+                        if (kdo >= 2) then
+                            do kp1=2, kdo
+                                k = kp1-1
+                                t1 = 1.0-(2*k+i)**2
+                                t2 = 1.0-(2*k-i)**2
+                                summation = summation+work(kp1)*(t1+t2)/(t1*t2)
+                            end do
+                        end if
+
+                        czw(id) = sc1*summation
+                    end do
+            end select
+    end select
 
 end subroutine dzwk
 
@@ -2348,9 +2387,12 @@ subroutine dzwt(nlat, m, n, th, czw, zwh)
     !     zwh     zwbar(m, n, theta) evaluated at theta = th
     !
     dimension czw(1)
-    real czw, zwh, th, cost, sint, cdt, sdt, chh
-    zwh = 0.
+    real czw, zwh, th, cost, sint, cdt, sdt, temp
+
+    zwh = 0.0
+
     if (n <= 0) return
+
     lc = (nlat+1)/2
     lq = lc-1
     ls = lc-2
@@ -2358,103 +2400,115 @@ subroutine dzwt(nlat, m, n, th, czw, zwh)
     sint = sin(th)
     cdt = cost**2-sint**2
     sdt = 2.0*sint*cost
-    lmod = mod(nlat, 2)
-    mmod = mod(m, 2)
-    nmod = mod(n, 2)
-    if (lmod == 0) goto 50
-    if (nmod /= 0) goto 1
-    if (mmod /= 0) goto 2
-    !
-    !     nlat odd  n even  m even
-    !
-    do k=1, lq
-        zwh = zwh+czw(k+1)*sint
-        chh = cdt*cost-sdt*sint
-        sint = sdt*cost+cdt*sint
-        cost = chh
-    end do
-    return
-    !
-    !     nlat odd  n even  m odd
-    !
-    2 do k=1, lq
-        zwh = zwh+czw(k)*cost
-        chh = cdt*cost-sdt*sint
-        sint = sdt*cost+cdt*sint
-        cost = chh
-    end do
-    return
-1   cost = cdt
-    sint = sdt
-    if (mmod /= 0) goto 3
-    !
-    !     nlat odd  n odd  m even
-    !
-    do k=1, ls
-        zwh = zwh+czw(k+1)*sint
-        chh = cdt*cost-sdt*sint
-        sint = sdt*cost+cdt*sint
-        cost = chh
-    end do
-    return
-    !
-    !     nlat odd  n odd  m odd
-    !
-3   zwh = .5*czw(1)
-    do k=2, lq
-        zwh = zwh+czw(k)*cost
-        chh = cdt*cost-sdt*sint
-        sint = sdt*cost+cdt*sint
-        cost = chh
-    end do
-    zwh = zwh+.5*czw(lc)*cos((nlat-1)*th)
-    return
-50  if (nmod /= 0) goto 51
-    if (mmod /= 0) goto 52
-    !
-    !     nlat even  n even  m even
-    !
-    do k=1, lq
-        zwh = zwh+czw(k+1)*sint
-        chh = cdt*cost-sdt*sint
-        sint = sdt*cost+cdt*sint
-        cost = chh
-    end do
-    return
-    !
-    !     nlat even  n even  m odd
-    !
-52  zwh = .5*czw(lc)*cos((nlat-1)*th)
-    do k=1, lq
-        zwh = zwh+czw(k)*cost
-        chh = cdt*cost-sdt*sint
-        sint = sdt*cost+cdt*sint
-        cost = chh
-    end do
-    return
-51  cost = cdt
-    sint = sdt
-    if (mmod /= 0) goto 53
-    !
-    !     nlat even  n odd  m even
-    !
-    do k=1, lq
-        zwh = zwh+czw(k+1)*sint
-        chh = cdt*cost-sdt*sint
-        sint = sdt*cost+cdt*sint
-        cost = chh
-    end do
-    return
-    !
-    !     nlat even  n odd  m odd
-    !
-53  zwh = .5*czw(1)
-    do k=2, lc
-        zwh = zwh+czw(k)*cost
-        chh = cdt*cost-sdt*sint
-        sint = sdt*cost+cdt*sint
-        cost = chh
-    end do
+
+    select case (mod(nlat,2))
+        case (0) ! nlat even
+            select case (mod(n,2))
+                case (0) ! n even
+                    select case (mod(m,2))
+                        case (0) ! m even
+                            !
+                            !==> nlat even  n even  m even
+                            !
+                            do k=1, lq
+                                zwh = zwh+czw(k+1)*sint
+                                temp = cdt*cost-sdt*sint
+                                sint = sdt*cost+cdt*sint
+                                cost = temp
+                            end do
+                        case (1) ! m odd
+                               !
+                               !     nlat even  n even  m odd
+                               !
+                            zwh = 0.5*czw(lc)*cos(real(nlat-1)*th)
+                            do k=1, lq
+                                zwh = zwh+czw(k)*cost
+                                temp = cdt*cost-sdt*sint
+                                sint = sdt*cost+cdt*sint
+                                cost = temp
+                            end do
+                    end select
+                case (1) ! n odd
+                    cost = cdt
+                    sint = sdt
+                    select case (mod(m,2))
+                        case (0) ! m even
+                            !
+                            !==> nlat even  n odd  m even
+                            !
+                            do k=1, lq
+                                zwh = zwh+czw(k+1)*sint
+                                temp = cdt*cost-sdt*sint
+                                sint = sdt*cost+cdt*sint
+                                cost = temp
+                            end do
+                        case (1) ! m odd
+                               !
+                               !==> nlat even  n odd  m odd
+                               !
+                            zwh = 0.5*czw(1)
+                            do k=2, lc
+                                zwh = zwh+czw(k)*cost
+                                temp = cdt*cost-sdt*sint
+                                sint = sdt*cost+cdt*sint
+                                cost = temp
+                            end do
+                    end select
+            end select
+        case (1) ! nlat odd
+            select case (mod(n,2))
+                case (0) ! n even
+                    select case (mod(m,2))
+                        case (0) ! m even
+                            !
+                            !==> nlat odd  n even  m even
+                            !
+                            do k=1, lq
+                                zwh = zwh+czw(k+1)*sint
+                                temp = cdt*cost-sdt*sint
+                                sint = sdt*cost+cdt*sint
+                                cost = temp
+                            end do
+                        case (1) ! m odd
+                            !
+                            !==> nlat odd  n even  m odd
+                            !
+                            do k=1, lq
+                                zwh = zwh+czw(k)*cost
+                                temp = cdt*cost-sdt*sint
+                                sint = sdt*cost+cdt*sint
+                                cost = temp
+                            end do
+                    end select
+                case (1) ! n odd
+                    cost = cdt
+                    sint = sdt
+                    select case (mod(m,2))
+                        case (0) ! m even
+                            !
+                            !==> nlat odd  n odd  m even
+                            !
+                            do k=1, ls
+                                zwh = zwh+czw(k+1)*sint
+                                temp = cdt*cost-sdt*sint
+                                sint = sdt*cost+cdt*sint
+                                cost = temp
+                            end do
+                        case (1) ! m odd
+                             !
+                             !==> nlat odd  n odd  m odd
+                             !
+                            zwh = 0.5*czw(1)
+                            do k=2, lq
+                                zwh = zwh+czw(k)*cost
+                                temp = cdt*cost-sdt*sint
+                                sint = sdt*cost+cdt*sint
+                                cost = temp
+                            end do
+                            zwh = zwh+0.5*czw(lc)*cos(real(nlat-1)*th)
+                    end select
+            end select
+    end select
 
 end subroutine dzwt
 
