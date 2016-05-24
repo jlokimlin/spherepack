@@ -1424,51 +1424,83 @@ end subroutine ses1
 
 
 
-subroutine zvinit (nlat, nlon, wzvin, dwork)
-dimension       wzvin(1)
-real dwork(*)
-imid = (nlat+1)/2
-iw1 = 2*nlat*imid+1
-!
-!     the length of wzvin is
-!         2*nlat*imid +3*(max(mmax-2, 0)*(nlat+nlat-mmax-1))/2
-!     the length of dwork is nlat+2
-!
-call zvini1 (nlat, nlon, imid, wzvin, wzvin(iw1), dwork, &
-                                    dwork(nlat/2+2))
+subroutine zvinit(nlat, nlon, wzvin, dwork)
 
+    use, intrinsic :: iso_fortran_env, only: &
+        wp => REAL64, &
+        ip => INT32
+
+    implicit none
+    !----------------------------------------------------------------------
+    ! Dictionary: calling arguments
+    !----------------------------------------------------------------------
+    integer (ip), intent (in)     :: nlat
+    integer (ip), intent (in)     :: nlon
+    real (wp),    intent (in out) :: wzvin(*)
+    real (wp),    intent (in out) :: dwork(*)
+    !----------------------------------------------------------------------
+    ! Dictionary: calling arguments
+    !----------------------------------------------------------------------
+    integer (ip) :: imid, iw1, iw2
+    !----------------------------------------------------------------------
+
+    imid = (nlat+1)/2
+    iw1 = 2*nlat*imid+1
+    iw2 = nlat/2+2
+    !
+    !     the length of wzvin is
+    !         2*nlat*imid +3*(max(mmax-2, 0)*(nlat+nlat-mmax-1))/2
+    !     the length of dwork is nlat+2
+    !
+    call zvini1(nlat, nlon, imid, wzvin, wzvin(iw1), dwork, dwork(iw2))
+
+contains
+
+    subroutine zvini1(nlat, nlon, imid, zv, abc, czv, work)
+        !
+        !     abc must have 3*(max(mmax-2, 0)*(nlat+nlat-mmax-1))/2
+        !     locations where mmax = min(nlat, (nlon+1)/2)
+        !     czv and work must each have nlat/2+1  locations
+        !
+        !----------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !----------------------------------------------------------------------
+        integer (ip), intent (in)     :: nlat
+        integer (ip), intent (in)     :: nlon
+        integer (ip), intent (in)     :: imid
+        real (wp),    intent (in out) :: zv(imid,nlat,2)
+        real (wp),    intent (in out) :: abc(*)
+        real (wp),    intent (in out) :: czv(*)
+        real (wp),    intent (in out) :: work(*)
+        !----------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !----------------------------------------------------------------------
+        integer (ip)         :: i,m, mdo, mp1, n, np1
+        real (wp)            :: dt, th, zvh
+        real (wp), parameter :: PI = acos(-1.0_wp)
+        !----------------------------------------------------------------------
+
+        dt = PI/(nlat-1)
+        mdo = min(2, nlat, (nlon+1)/2)
+        do mp1=1, mdo
+            m = mp1-1
+            do np1=mp1, nlat
+                n = np1-1
+                call dzvk(nlat, m, n, czv, work)
+                do i=1, imid
+                    th = real(i-1, kind=wp)*dt
+                    call dzvt(nlat, m, n, th, czv, zvh)
+                    zv(i, np1, mp1) = zvh
+                end do
+                zv(1, np1, mp1) = 0.5_wp*zv(1, np1, mp1)
+            end do
+        end do
+
+        call rabcv(nlat, nlon, abc)
+
+    end subroutine zvini1
 end subroutine zvinit
 
-
-
-subroutine zvini1 (nlat, nlon, imid, zv, abc, czv, work)
-!
-!     abc must have 3*(max(mmax-2, 0)*(nlat+nlat-mmax-1))/2
-!     locations where mmax = min(nlat, (nlon+1)/2)
-!     czv and work must each have nlat/2+1  locations
-!
-dimension zv(imid, nlat, 2), abc(1)
-real dt, czv(1), zvh, th, work(1)
-real, parameter :: pi = acos(-1.0)
-dt = pi/(nlat-1)
-mdo = min(2, nlat, (nlon+1)/2)
-do mp1=1, mdo
-m = mp1-1
-do np1=mp1, nlat
-n = np1-1
-call dzvk(nlat, m, n, czv, work)
-do i=1, imid
-th = (i-1)*dt
-call dzvt(nlat, m, n, th, czv, zvh)
-zv(i, np1, mp1) = zvh
-end do
-zv(1, np1, mp1) = .5*zv(1, np1, mp1)
-end do
-end do
-
-call rabcv(nlat, nlon, abc)
-
-end subroutine zvini1
 
 
 
