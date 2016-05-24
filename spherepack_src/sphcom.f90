@@ -1612,9 +1612,9 @@ ihold = i1
 i1 = i2
 i2 = i3
 i3 = ihold
-if (m-1< 0) then
+if (m < 1) then
     goto 25
-else if (m-1 == 0) then
+else if (m == 1) then
     goto 30
 else
     goto 35
@@ -1633,19 +1633,19 @@ zv(i, np1, i3) = zv1(i, np1)
 50 continue
 return
 35 ns = ((m-2)*(nlat+nlat-m-1))/2+1
-if (ityp == 1) go to 36
+if (ityp == 1) goto 36
 do 85 i=1, imid
 zv(i, m+1, i3) = a(ns)*zv(i, m-1, i1)-c(ns)*zv(i, m+1, i1)
 85 continue
 36 if (m == nlat-1) return
-if (ityp == 2) go to 71
+if (ityp == 2) goto 71
 ns = ns+1
 do 70 i=1, imid
 zv(i, m+2, i3) = a(ns)*zv(i, m, i1)-c(ns)*zv(i, m+2, i1)
 70 continue
 71 nstrt = m+3
 if (ityp == 1) nstrt = m+4
-if (nstrt > nlat) go to 80
+if (nstrt > nlat) goto 80
 nstp = 2
 if (ityp == 0) nstp = 1
 do 75 np1=nstrt, nlat, nstp
@@ -1681,56 +1681,59 @@ end subroutine zwin
 
 
 subroutine zwin1 (ityp, nlat, m, zw, imid, i3, zw1, zw2, a, b, c)
-dimension       zw(imid, nlat, 3), zw1(imid, 1), zw2(imid, 1), &
-                a(1), b(1), c(1)
-save i1, i2
-ihold = i1
-i1 = i2
-i2 = i3
-i3 = ihold
-if (m-2< 0) then
-    goto 25
-else if (m-2 == 0) then
-    goto 30
-else
-    goto 35
-end if
-25 i1 = 1
-i2 = 2
-i3 = 3
-do 45 np1=2, nlat
-do 45 i=1, imid
-zw(i, np1, i3) = zw1(i, np1)
-45 continue
-return
-30 do 50 np1=3, nlat
-do 50 i=1, imid
-zw(i, np1, i3) = zw2(i, np1)
-50 continue
-return
-35 ns = ((m-2)*(nlat+nlat-m-1))/2+1
-if (ityp == 1) go to 36
-do 85 i=1, imid
-zw(i, m+1, i3) = a(ns)*zw(i, m-1, i1)-c(ns)*zw(i, m+1, i1)
-85 continue
-36 if (m == nlat-1) return
-if (ityp == 2) go to 71
-ns = ns+1
-do 70 i=1, imid
-zw(i, m+2, i3) = a(ns)*zw(i, m, i1)-c(ns)*zw(i, m+2, i1)
-70 continue
-71 nstrt = m+3
-if (ityp == 1) nstrt = m+4
-if (nstrt > nlat) go to 80
-nstp = 2
-if (ityp == 0) nstp = 1
-do 75 np1=nstrt, nlat, nstp
-ns = ns+nstp
-do 75 i=1, imid
-zw(i, np1, i3) = a(ns)*zw(i, np1-2, i1)+b(ns)*zw(i, np1-2, i3) &
-                              -c(ns)*zw(i, np1, i1)
-75 continue
-80 return
+    dimension       zw(imid, nlat, 3), zw1(imid, 1), zw2(imid, 1), &
+        a(1), b(1), c(1)
+    save i1, i2
+    ihold = i1
+    i1 = i2
+    i2 = i3
+    i3 = ihold
+    if (m < 2) then
+        goto 25
+    else if (m == 2) then
+        goto 30
+    else
+        goto 35
+    end if
+25  i1 = 1
+    i2 = 2
+    i3 = 3
+    do np1=2, nlat
+        do i=1, imid
+            zw(i, np1, i3) = zw1(i, np1)
+        end do
+    end do
+    return
+    30 do np1=3, nlat
+        do i=1, imid
+            zw(i, np1, i3) = zw2(i, np1)
+        end do
+    end do
+    return
+35  ns = ((m-2)*(nlat+nlat-m-1))/2+1
+    if (ityp == 1) goto 36
+    do i=1, imid
+        zw(i, m+1, i3) = a(ns)*zw(i, m-1, i1)-c(ns)*zw(i, m+1, i1)
+    end do
+36  if (m == nlat-1) return
+    if (ityp == 2) goto 71
+    ns = ns+1
+    do i=1, imid
+        zw(i, m+2, i3) = a(ns)*zw(i, m, i1)-c(ns)*zw(i, m+2, i1)
+    end do
+71  nstrt = m+3
+    if (ityp == 1) nstrt = m+4
+    if (nstrt > nlat) goto 80
+    nstp = 2
+    if (ityp == 0) nstp = 1
+    do np1=nstrt, nlat, nstp
+        ns = ns+nstp
+        do i=1, imid
+            zw(i, np1, i3) = a(ns)*zw(i, np1-2, i1)+b(ns)*zw(i, np1-2, i3) &
+                -c(ns)*zw(i, np1, i1)
+        end do
+    end do
+80  return
 
 end subroutine zwin1
 
@@ -1850,57 +1853,60 @@ end subroutine vbin
 
 
 
-subroutine vbin1 (ityp, nlat, m, vb, imid, i3, vbz, vb1, a, b, c)
-dimension       vb(imid, nlat, 3), vbz(imid, 1), vb1(imid, 1), &
-                a(1), b(1), c(1)
-save i1, i2
-ihold = i1
-i1 = i2
-i2 = i3
-i3 = ihold
-if (m-1< 0) then
-    goto 25
-else if (m-1 == 0) then
-    goto 30
-else
-    goto 35
-end if
-25 i1 = 1
-i2 = 2
-i3 = 3
-do 45 np1=1, nlat
-do 45 i=1, imid
-vb(i, np1, i3) = vbz(i, np1)
-45 continue
-return
-30 do 50 np1=2, nlat
-do 50 i=1, imid
-vb(i, np1, i3) = vb1(i, np1)
-50 continue
-return
-35 ns = ((m-2)*(nlat+nlat-m-1))/2+1
-if (ityp == 1) go to 36
-do 85 i=1, imid
-vb(i, m+1, i3) = a(ns)*vb(i, m-1, i1)-c(ns)*vb(i, m+1, i1)
-85 continue
-36 if (m == nlat-1) return
-if (ityp == 2) go to 71
-ns = ns+1
-do 70 i=1, imid
-vb(i, m+2, i3) = a(ns)*vb(i, m, i1)-c(ns)*vb(i, m+2, i1)
-70 continue
-71 nstrt = m+3
-if (ityp == 1) nstrt = m+4
-if (nstrt > nlat) go to 80
-nstp = 2
-if (ityp == 0) nstp = 1
-do 75 np1=nstrt, nlat, nstp
-ns = ns+nstp
-do 75 i=1, imid
-vb(i, np1, i3) = a(ns)*vb(i, np1-2, i1)+b(ns)*vb(i, np1-2, i3) &
-                              -c(ns)*vb(i, np1, i1)
-75 continue
-80 return
+subroutine vbin1(ityp, nlat, m, vb, imid, i3, vbz, vb1, a, b, c)
+    dimension       vb(imid, nlat, 3), vbz(imid, 1), vb1(imid, 1), &
+        a(1), b(1), c(1)
+    save i1, i2
+    ihold = i1
+    i1 = i2
+    i2 = i3
+    i3 = ihold
+    if (m < 1) then
+        goto 25
+    else if (m == 1) then
+        goto 30
+    else
+        goto 35
+    end if
+25  i1 = 1
+    i2 = 2
+    i3 = 3
+    do np1=1, nlat
+        do i=1, imid
+            vb(i, np1, i3) = vbz(i, np1)
+        end do
+    end do
+    return
+    30 do np1=2, nlat
+        do i=1, imid
+            vb(i, np1, i3) = vb1(i, np1)
+        end do
+    end do
+    return
+35  ns = ((m-2)*(nlat+nlat-m-1))/2+1
+    if (ityp == 1) goto 36
+    do i=1, imid
+        vb(i, m+1, i3) = a(ns)*vb(i, m-1, i1)-c(ns)*vb(i, m+1, i1)
+    end do
+36  if (m == nlat-1) return
+    if (ityp == 2) goto 71
+    ns = ns+1
+    do i=1, imid
+        vb(i, m+2, i3) = a(ns)*vb(i, m, i1)-c(ns)*vb(i, m+2, i1)
+    end do
+71  nstrt = m+3
+    if (ityp == 1) nstrt = m+4
+    if (nstrt > nlat) goto 80
+    nstp = 2
+    if (ityp == 0) nstp = 1
+    do np1=nstrt, nlat, nstp
+        ns = ns+nstp
+        do i=1, imid
+            vb(i, np1, i3) = a(ns)*vb(i, np1-2, i1)+b(ns)*vb(i, np1-2, i3) &
+                -c(ns)*vb(i, np1, i1)
+        end do
+    end do
+80  return
 
 end subroutine vbin1
 
@@ -1925,58 +1931,60 @@ call wbin1 (ityp, nlat, m, wb, imid, i3, wwbin, wwbin(iw1), wwbin(iw2), &
 end subroutine wbin
 
 
-
 subroutine wbin1 (ityp, nlat, m, wb, imid, i3, wb1, wb2, a, b, c)
-dimension       wb(imid, nlat, 3), wb1(imid, 1), wb2(imid, 1), &
-                a(1), b(1), c(1)
-save i1, i2
-ihold = i1
-i1 = i2
-i2 = i3
-i3 = ihold
-if (m-2< 0) then
-    goto 25
-else if (m-2 == 0) then
-    goto 30
-else
-    goto 35
-end if
-25 i1 = 1
-i2 = 2
-i3 = 3
-do 45 np1=2, nlat
-do 45 i=1, imid
-wb(i, np1, i3) = wb1(i, np1)
-45 continue
-return
-30 do 50 np1=3, nlat
-do 50 i=1, imid
-wb(i, np1, i3) = wb2(i, np1)
-50 continue
-return
-35 ns = ((m-2)*(nlat+nlat-m-1))/2+1
-if (ityp == 1) go to 36
-do 85 i=1, imid
-wb(i, m+1, i3) = a(ns)*wb(i, m-1, i1)-c(ns)*wb(i, m+1, i1)
-85 continue
-36 if (m == nlat-1) return
-if (ityp == 2) go to 71
-ns = ns+1
-do 70 i=1, imid
-wb(i, m+2, i3) = a(ns)*wb(i, m, i1)-c(ns)*wb(i, m+2, i1)
-70 continue
-71 nstrt = m+3
-if (ityp == 1) nstrt = m+4
-if (nstrt > nlat) go to 80
-nstp = 2
-if (ityp == 0) nstp = 1
-do 75 np1=nstrt, nlat, nstp
-ns = ns+nstp
-do 75 i=1, imid
-wb(i, np1, i3) = a(ns)*wb(i, np1-2, i1)+b(ns)*wb(i, np1-2, i3) &
-                              -c(ns)*wb(i, np1, i1)
-75 continue
-80 return
+    dimension       wb(imid, nlat, 3), wb1(imid, 1), wb2(imid, 1), &
+        a(1), b(1), c(1)
+    save i1, i2
+    ihold = i1
+    i1 = i2
+    i2 = i3
+    i3 = ihold
+    if (m < 2) then
+        goto 25
+    else if (m == 2) then
+        goto 30
+    else
+        goto 35
+    end if
+25  i1 = 1
+    i2 = 2
+    i3 = 3
+    do np1=2, nlat
+        do i=1, imid
+            wb(i, np1, i3) = wb1(i, np1)
+        end do
+    end do
+    return
+    30 do np1=3, nlat
+        do i=1, imid
+            wb(i, np1, i3) = wb2(i, np1)
+        end do
+    end do
+    return
+35  ns = ((m-2)*(nlat+nlat-m-1))/2+1
+    if (ityp == 1) goto 36
+    do i=1, imid
+        wb(i, m+1, i3) = a(ns)*wb(i, m-1, i1)-c(ns)*wb(i, m+1, i1)
+    end do
+36  if (m == nlat-1) return
+    if (ityp == 2) goto 71
+    ns = ns+1
+    do i=1, imid
+        wb(i, m+2, i3) = a(ns)*wb(i, m, i1)-c(ns)*wb(i, m+2, i1)
+    end do
+71  nstrt = m+3
+    if (ityp == 1) nstrt = m+4
+    if (nstrt > nlat) goto 80
+    nstp = 2
+    if (ityp == 0) nstp = 1
+    do np1=nstrt, nlat, nstp
+        ns = ns+nstp
+        do i=1, imid
+            wb(i, np1, i3) = a(ns)*wb(i, np1-2, i1)+b(ns)*wb(i, np1-2, i3) &
+                -c(ns)*wb(i, np1, i1)
+        end do
+    end do
+80  return
 
 
 end subroutine wbin1
@@ -1984,230 +1992,242 @@ end subroutine wbin1
 
 
 subroutine dzvk(nlat, m, n, czv, work)
-!
-!     subroutine dzvk computes the coefficients in the trigonometric
-!     expansion of the quadrature function zvbar(n, m, theta)
-!
-!     input parameters
-!
-!     nlat      the number of colatitudes including the poles.
-!
-!     n      the degree (subscript) of wbarv(n, m, theta)
-!
-!     m      the order (superscript) of wbarv(n, m, theta)
-!
-!     work   a work array with at least nlat/2+1 locations
-!
-!     output parameter
-!
-!     czv     the fourier coefficients of zvbar(n, m, theta).
-!
-dimension czv(1), work(1)
-real czv, sc1, sum, work, t1, t2
-if (n <= 0) return
-lc = (nlat+1)/2
-sc1 = 2.0/(nlat-1)
-call dvbk(m, n, work, czv)
-nmod = mod(n, 2)
-mmod = mod(m, 2)
-if (nmod /= 0) go to 1
-if (mmod /= 0) go to 2
-!
-!     n even, m even
-!
-kdo = n/2
-do 9 id=1, lc
-i = id+id-2
-sum = 0.
-do 10 k=1, kdo
-t1 = 1.0-(k+k+i)**2
-t2 = 1.0-(k+k-i)**2
-sum = sum+work(k)*(t1-t2)/(t1*t2)
-10 continue
-czv(id) = sc1*sum
-9 continue
-return
-!
-!     n even, m odd
-!
-2 kdo = n/2
-do 5 id=1, lc
-i = id+id-2
-sum = 0.
-do 6 k=1, kdo
-t1 = 1.0-(k+k+i)**2
-t2 = 1.0-(k+k-i)**2
-sum = sum+work(k)*(t1+t2)/(t1*t2)
-6 continue
-czv(id) = sc1*sum
-5 continue
-return
-1 if (mmod /= 0) go to 3
-!
-!     n odd, m even
-!
-kdo = (n+1)/2
-do 19 id=1, lc
-i = id+id-3
-sum = 0.
-do 20 k=1, kdo
-t1 = 1.0-(k+k-1+i)**2
-t2 = 1.0-(k+k-1-i)**2
-sum = sum+work(k)*(t1-t2)/(t1*t2)
-20 continue
-czv(id) = sc1*sum
-19 continue
-return
-!
-!     n odd, m odd
-!
-3 kdo = (n+1)/2
-do 15 id=1, lc
-i = id+id-1
-sum = 0.
-do 16 k=1, kdo
-t1 = 1.0-(k+k-1+i)**2
-t2 = 1.0-(k+k-1-i)**2
-sum = sum+work(k)*(t1+t2)/(t1*t2)
-16 continue
-czv(id) = sc1*sum
-15 continue
+    !
+    !     subroutine dzvk computes the coefficients in the trigonometric
+    !     expansion of the quadrature function zvbar(n, m, theta)
+    !
+    !     input parameters
+    !
+    !     nlat      the number of colatitudes including the poles.
+    !
+    !     n      the degree (subscript) of wbarv(n, m, theta)
+    !
+    !     m      the order (superscript) of wbarv(n, m, theta)
+    !
+    !     work   a work array with at least nlat/2+1 locations
+    !
+    !     output parameter
+    !
+    !     czv     the fourier coefficients of zvbar(n, m, theta).
+    !
+    dimension czv(1), work(1)
+    real czv, sc1, summation, work, t1, t2
+
+    if (n <= 0) return
+
+    lc = (nlat+1)/2
+    sc1 = 2.0/(nlat-1)
+
+    call dvbk(m, n, work, czv)
+
+    nmod = mod(n, 2)
+    mmod = mod(m, 2)
+
+    if (nmod /= 0) goto 1
+    if (mmod /= 0) goto 2
+    !
+    !     n even, m even
+    !
+    kdo = n/2
+    do id=1, lc
+        i = id+id-2
+        summation = 0.0
+        do k=1, kdo
+            t1 = 1.0-(k+k+i)**2
+            t2 = 1.0-(k+k-i)**2
+            summation = summation+work(k)*(t1-t2)/(t1*t2)
+        end do
+        czv(id) = sc1*summation
+    end do
+    return
+    !
+    !     n even, m odd
+    !
+2   kdo = n/2
+    do id=1, lc
+        i = 2*id-2
+        summation = 0.0
+        do k=1, kdo
+            t1 = 1.0-(k+k+i)**2
+            t2 = 1.0-(k+k-i)**2
+            summation = summation+work(k)*(t1+t2)/(t1*t2)
+        end do
+        czv(id) = sc1*summation
+    end do
+    return
+1   if (mmod /= 0) goto 3
+    !
+    !     n odd, m even
+    !
+    kdo = (n+1)/2
+    do id=1, lc
+        i = 2*id-3
+        summation = 0.0
+        do k=1, kdo
+            t1 = 1.0-(k+k-1+i)**2
+            t2 = 1.0-(k+k-1-i)**2
+            summation = summation+work(k)*(t1-t2)/(t1*t2)
+        end do
+        czv(id) = sc1*summation
+    end do
+    return
+    !
+    !     n odd, m odd
+    !
+3   kdo = (n+1)/2
+    do id=1, lc
+        i = 2*id-1
+        summation = 0.0
+        do k=1, kdo
+            t1 = 1.0-(k+k-1+i)**2
+            t2 = 1.0-(k+k-1-i)**2
+            summation = summation+work(k)*(t1+t2)/(t1*t2)
+        end do
+        czv(id) = sc1*summation
+    end do
 
 end subroutine dzvk
 
 
 
+
 subroutine dzvt(nlat, m, n, th, czv, zvh)
-!
-!     subroutine dzvt tabulates the function zvbar(n, m, theta)
-!     at theta = th in real
-!
-!     input parameters
-!
-!     nlat      the number of colatitudes including the poles.
-!
-!     n      the degree (subscript) of zvbar(n, m, theta)
-!
-!     m      the order (superscript) of zvbar(n, m, theta)
-!
-!     czv     the fourier coefficients of zvbar(n, m, theta)
-!             as computed by subroutine zwk.
-!
-!     output parameter
-!
-!     zvh     zvbar(m, n, theta) evaluated at theta = th
-!
-dimension czv(1)
-real th, czv, zvh, cth, sth, cdt, sdt, chh
-zvh = 0.
-if (n <= 0) return
-lc = (nlat+1)/2
-lq = lc-1
-ls = lc-2
-cth = cos(th)
-sth = sin(th)
-cdt = cth*cth-sth*sth
-sdt = 2.*sth*cth
-lmod = mod(nlat, 2)
-mmod = mod(m, 2)
-nmod = mod(n, 2)
-if (lmod == 0) go to 50
-if (nmod /= 0) go to 1
-cth = cdt
-sth = sdt
-if (mmod /= 0) go to 2
-!
-!     nlat odd  n even  m even
-!
-do 10 k=1, ls
-zvh = zvh+czv(k+1)*sth
-chh = cdt*cth-sdt*sth
-sth = sdt*cth+cdt*sth
-cth = chh
-10 continue
-return
-!
-!     nlat odd  n even  m odd
-!
-2 zvh = .5*czv(1)
-do 20 k=2, lq
-zvh = zvh+czv(k)*cth
-chh = cdt*cth-sdt*sth
-sth = sdt*cth+cdt*sth
-cth = chh
-20 continue
-zvh = zvh+.5*czv(lc)*cos((nlat-1)*th)
-return
-1 if (mmod /= 0) go to 3
-!
-!     nlat odd  n odd  m even
-!
-do 30 k=1, lq
-zvh = zvh+czv(k+1)*sth
-chh = cdt*cth-sdt*sth
-sth = sdt*cth+cdt*sth
-cth = chh
-30 continue
-return
-!
-!     nlat odd  n odd  m odd
-!
-3 do 40 k=1, lq
-zvh = zvh+czv(k)*cth
-chh = cdt*cth-sdt*sth
-sth = sdt*cth+cdt*sth
-cth = chh
-40 continue
-return
-50 if (nmod /= 0) go to 51
-cth = cdt
-sth = sdt
-if (mmod /= 0) go to 52
-!
-!     nlat even  n even  m even
-!
-do 55 k=1, lq
-zvh = zvh+czv(k+1)*sth
-chh = cdt*cth-sdt*sth
-sth = sdt*cth+cdt*sth
-cth = chh
-55 continue
-return
-!
-!     nlat even  n even  m odd
-!
-52 zvh = .5*czv(1)
-do 57 k=2, lc
-zvh = zvh+czv(k)*cth
-chh = cdt*cth-sdt*sth
-sth = sdt*cth+cdt*sth
-cth = chh
-57 continue
-return
-51 if (mmod /= 0) go to 53
-!
-!     nlat even  n odd  m even
-!
-do 58 k=1, lq
-zvh = zvh+czv(k+1)*sth
-chh = cdt*cth-sdt*sth
-sth = sdt*cth+cdt*sth
-cth = chh
-58 continue
-return
-!
-!     nlat even  n odd  m odd
-!
-53 zvh = .5*czv(lc)*cos((nlat-1)*th)
-do 60 k=1, lq
-zvh = zvh+czv(k)*cth
-chh = cdt*cth-sdt*sth
-sth = sdt*cth+cdt*sth
-cth = chh
-60 continue
+    !
+    !     subroutine dzvt tabulates the function zvbar(n, m, theta)
+    !     at theta = th in real
+    !
+    !     input parameters
+    !
+    !     nlat      the number of colatitudes including the poles.
+    !
+    !     n      the degree (subscript) of zvbar(n, m, theta)
+    !
+    !     m      the order (superscript) of zvbar(n, m, theta)
+    !
+    !     czv     the fourier coefficients of zvbar(n, m, theta)
+    !             as computed by subroutine zwk.
+    !
+    !     output parameter
+    !
+    !     zvh     zvbar(m, n, theta) evaluated at theta = th
+    !
+    dimension czv(1)
+    real th, czv, zvh, cost, sint, cdt, sdt, chh
+
+    zvh = 0.0
+
+    if (n <= 0) return
+
+    lc = (nlat+1)/2
+    lq = lc-1
+    ls = lc-2
+    cost = cos(th)
+    sint = sin(th)
+    cdt = cost**2-sint**2
+    sdt = 2.0*sint*cost
+    lmod = mod(nlat, 2)
+    mmod = mod(m, 2)
+    nmod = mod(n, 2)
+
+    if (lmod == 0) goto 50
+    if (nmod /= 0) goto 1
+
+    cost = cdt
+    sint = sdt
+
+    if (mmod /= 0) goto 2
+    !
+    !     nlat odd  n even  m even
+    !
+    do k=1, ls
+        zvh = zvh+czv(k+1)*sint
+        chh = cdt*cost-sdt*sint
+        sint = sdt*cost+cdt*sint
+        cost = chh
+    end do
+    return
+    !
+    !     nlat odd  n even  m odd
+    !
+2   zvh = .5*czv(1)
+    do k=2, lq
+        zvh = zvh+czv(k)*cost
+        chh = cdt*cost-sdt*sint
+        sint = sdt*cost+cdt*sint
+        cost = chh
+    end do
+    zvh = zvh+.5*czv(lc)*cos((nlat-1)*th)
+    return
+1   if (mmod /= 0) goto 3
+    !
+    !     nlat odd  n odd  m even
+    !
+    do k=1, lq
+        zvh = zvh+czv(k+1)*sint
+        chh = cdt*cost-sdt*sint
+        sint = sdt*cost+cdt*sint
+        cost = chh
+    end do
+    return
+    !
+    !     nlat odd  n odd  m odd
+    !
+    3 do k=1, lq
+        zvh = zvh+czv(k)*cost
+        chh = cdt*cost-sdt*sint
+        sint = sdt*cost+cdt*sint
+        cost = chh
+    end do
+    return
+50  if (nmod /= 0) goto 51
+    cost = cdt
+    sint = sdt
+    if (mmod /= 0) goto 52
+    !
+    !     nlat even  n even  m even
+    !
+    do k=1, lq
+        zvh = zvh+czv(k+1)*sint
+        chh = cdt*cost-sdt*sint
+        sint = sdt*cost+cdt*sint
+        cost = chh
+    end do
+    return
+    !
+    !     nlat even  n even  m odd
+    !
+52  zvh = .5*czv(1)
+    do k=2, lc
+        zvh = zvh+czv(k)*cost
+        chh = cdt*cost-sdt*sint
+        sint = sdt*cost+cdt*sint
+        cost = chh
+    end do
+    return
+51  if (mmod /= 0) goto 53
+    !
+    !     nlat even  n odd  m even
+    !
+    do k=1, lq
+        zvh = zvh+czv(k+1)*sint
+        chh = cdt*cost-sdt*sint
+        sint = sdt*cost+cdt*sint
+        cost = chh
+    end do
+    return
+    !
+    !     nlat even  n odd  m odd
+    !
+53  zvh = 0.5*czv(lc)*cos((nlat-1)*th)
+
+    do k=1, lq
+        zvh = zvh+czv(k)*cost
+        chh = cdt*cost-sdt*sint
+        sint = sdt*cost+cdt*sint
+        cost = chh
+    end do
 
 end subroutine dzvt
-
 
 
 subroutine dzwk(nlat, m, n, czw, work)
@@ -2237,8 +2257,8 @@ sc1 = 2.0/(nlat-1)
 call dwbk(m, n, work, czw)
 nmod = mod(n, 2)
 mmod = mod(m, 2)
-if (nmod /= 0) go to 1
-if (mmod /= 0) go to 2
+if (nmod /= 0) goto 1
+if (mmod /= 0) goto 2
 !
 !     n even, m even
 !
@@ -2269,7 +2289,7 @@ sum = sum+work(k)*(t1+t2)/(t1*t2)
 czw(id) = sc1*sum
 15 continue
 return
-1 if (mmod /= 0) go to 3
+1 if (mmod /= 0) goto 3
 !
 !     n odd, m even
 !
@@ -2292,7 +2312,7 @@ return
 do 5 id=1, lc
 i = id+id-2
 sum = work(1)/(1.0-i*i)
-if (kdo < 2) go to 29
+if (kdo < 2) goto 29
 do 6 kp1=2, kdo
 k = kp1-1
 t1 = 1.0-(k+k+i)**2
@@ -2341,9 +2361,9 @@ sdt = 2.*sth*cth
 lmod = mod(nlat, 2)
 mmod = mod(m, 2)
 nmod = mod(n, 2)
-if (lmod == 0) go to 50
-if (nmod /= 0) go to 1
-if (mmod /= 0) go to 2
+if (lmod == 0) goto 50
+if (nmod /= 0) goto 1
+if (mmod /= 0) goto 2
 !
 !     nlat odd  n even  m even
 !
@@ -2366,7 +2386,7 @@ cth = chh
 return
 1 cth = cdt
 sth = sdt
-if (mmod /= 0) go to 3
+if (mmod /= 0) goto 3
 !
 !     nlat odd  n odd  m even
 !
@@ -2389,8 +2409,8 @@ cth = chh
 20 continue
 zwh = zwh+.5*czw(lc)*cos((nlat-1)*th)
 return
-50 if (nmod /= 0) go to 51
-if (mmod /= 0) go to 52
+50 if (nmod /= 0) goto 51
+if (mmod /= 0) goto 52
 !
 !     nlat even  n even  m even
 !
@@ -2414,7 +2434,7 @@ cth = chh
 return
 51 cth = cdt
 sth = sdt
-if (mmod /= 0) go to 53
+if (mmod /= 0) goto 53
 !
 !     nlat even  n odd  m even
 !
@@ -2450,11 +2470,11 @@ cf = 2.*m/srnp1
 modn = mod(n, 2)
 modm = mod(m, 2)
 call dnlfk(m, n, work)
-if (modn /= 0) go to 70
+if (modn /= 0) goto 70
 ncv = n/2
 if (ncv == 0) return
 fk = 0.
-if (modm /= 0) go to 60
+if (modm /= 0) goto 60
 !
 !     n even m even
 !
@@ -2473,7 +2493,7 @@ cv(l) = fk*work(l)/srnp1
 return
 70 ncv = (n+1)/2
 fk = -1.
-if (modm /= 0) go to 80
+if (modm /= 0) goto 80
 !
 !     n odd m even
 !
@@ -2504,47 +2524,47 @@ cf = 2.*m/srnp1
 modn = mod(n, 2)
 modm = mod(m, 2)
 call dnlfk(m, n, work)
-if (m == 0) go to 50
-if (modn /= 0) go to 30
+if (m == 0) goto 50
+if (modn /= 0) goto 30
 l = n/2
-if (l == 0) go to 50
-if (modm /= 0) go to 20
+if (l == 0) goto 50
+if (modm /= 0) goto 20
 !
 !     n even m even
 !
 cw(l) = -cf*work(l+1)
 10 l = l-1
-if (l <= 0) go to 50
+if (l <= 0) goto 50
 cw(l) = cw(l+1)-cf*work(l+1)
-go to 10
+goto 10
 !
 !     n even m odd
 !
 20 cw(l) = cf*work(l)
 25 l = l-1
-if (l <= 0) go to 50
+if (l <= 0) goto 50
 cw(l) = cw(l+1)+cf*work(l)
-go to 25
-30 if (modm /= 0) go to 40
+goto 25
+30 if (modm /= 0) goto 40
 l = (n-1)/2
-if (l == 0) go to 50
+if (l == 0) goto 50
 !
 !     n odd m even
 !
 cw(l) = -cf*work(l+1)
 35 l = l-1
-if (l <= 0) go to 50
+if (l <= 0) goto 50
 cw(l) = cw(l+1)-cf*work(l+1)
-go to 35
+goto 35
 !
 !     n odd m odd
 !
 40 l = (n+1)/2
 cw(l) = cf*work(l)
 45 l = l-1
-if (l <= 0) go to 50
+if (l <= 0) goto 50
 cw(l) = cw(l+1)+cf*work(l)
-go to 45
+goto 45
 50 return
 
 end subroutine dwbk
@@ -2562,10 +2582,10 @@ cdt = cth*cth-sth*sth
 sdt = 2.*sth*cth
 mmod = mod(m, 2)
 nmod = mod(n, 2)
-if (nmod /= 0) go to 1
+if (nmod /= 0) goto 1
 cth = cdt
 sth = sdt
-if (mmod /= 0) go to 2
+if (mmod /= 0) goto 2
 !
 !     n even  m even
 !
@@ -2589,7 +2609,7 @@ cth = chh
 end do
 
 return
-1 if (mmod /= 0) go to 3
+1 if (mmod /= 0) goto 3
 !
 !     n odd m even
 !
@@ -2627,8 +2647,8 @@ cdt = cth*cth-sth*sth
 sdt = 2.*sth*cth
 mmod=mod(m, 2)
 nmod=mod(n, 2)
-if (nmod /= 0) go to 1
-if (mmod /= 0) go to 2
+if (nmod /= 0) goto 1
+if (mmod /= 0) goto 2
 !
 !     n even  m even
 !
@@ -2653,7 +2673,7 @@ cth = chh
 return
 1 cth = cdt
 sth = sdt
-if (mmod /= 0) go to 3
+if (mmod /= 0) goto 3
 !
 !     n odd m even
 !
@@ -2716,14 +2736,14 @@ temp = tm*(tm-1.)
 tpn = (fm-2.)*(fm-1.)/(fm*(fm+1.))
 a(ns) = sqrt(tpn*(tm+1.)*(tm-2.)/temp)
 c(ns) = sqrt(2./temp)
-if (m == nlat-1) go to 215
+if (m == nlat-1) goto 215
 ns = ns+1
 temp = tm*(tm+1.)
 tpn = (fm-1.)*fm/((fm+1.)*(fm+2.))
 a(ns) = sqrt(tpn*(tm+3.)*(tm-2.)/temp)
 c(ns) = sqrt(6./temp)
 mp3 = m+3
-if (mp3 > nlat) go to 215
+if (mp3 > nlat) goto 215
 do 210 np1=mp3, nlat
 n = np1-1
 ns = ns+1
@@ -2779,7 +2799,7 @@ tpn = (fm-2.)*(fm-1.)/(fm*(fm+1.))
 tph = fm/(fm-2.)
 a(ns) = tph*sqrt(tpn*(tm+1.)*(tm-2.)/temp)
 c(ns) = tph*sqrt(2./temp)
-if (m == nlat-1) go to 215
+if (m == nlat-1) goto 215
 ns = ns+1
 temp = tm*(tm+1.)
 tpn = (fm-1.)*fm/((fm+1.)*(fm+2.))
@@ -2787,7 +2807,7 @@ tph = fm/(fm-2.)
 a(ns) = tph*sqrt(tpn*(tm+3.)*(tm-2.)/temp)
 c(ns) = tph*sqrt(6./temp)
 mp3 = m+3
-if (mp3 > nlat) go to 215
+if (mp3 > nlat) goto 215
 do 210 np1=mp3, nlat
 n = np1-1
 ns = ns+1
@@ -3001,11 +3021,11 @@ cf = 2.*m/srnp1
 modn = mod(n, 2)
 modm = mod(m, 2)
 call dnlfk(m, n, work)
-if (modn /= 0) go to 70
+if (modn /= 0) goto 70
 ncv = n/2
 if (ncv == 0) return
 fk = 0.
-if (modm /= 0) go to 60
+if (modm /= 0) goto 60
 !
 !     n even m even
 !
@@ -3024,7 +3044,7 @@ cv(l) = -fk*fk*work(l)/srnp1
 return
 70 ncv = (n+1)/2
 fk = -1.
-if (modm /= 0) go to 80
+if (modm /= 0) goto 80
 !
 !     n odd m even
 !
@@ -3055,20 +3075,20 @@ cf = 2.*m/srnp1
 modn = mod(n, 2)
 modm = mod(m, 2)
 call dnlfk(m, n, work)
-if (m == 0) go to 50
-if (modn /= 0) go to 30
+if (m == 0) goto 50
+if (modn /= 0) goto 30
 l = n/2
-if (l == 0) go to 50
-if (modm /= 0) go to 20
+if (l == 0) goto 50
+if (modm /= 0) goto 20
 !
 !     n even m even
 !
 cw(l) = -cf*work(l+1)
 10 l = l-1
-if (l <= 0) go to 50
+if (l <= 0) goto 50
 cw(l) = cw(l+1)-cf*work(l+1)
 cw(l+1) = (l+l+1)*cw(l+1)
-go to 10
+goto 10
 !
 !     n even m odd
 !
@@ -3083,10 +3103,10 @@ go to 10
    end if
 26 cw(l) = cw(l+1)+cf*work(l)
 27 cw(l+1) = -(l+l+1)*cw(l+1)
-go to 25
-30 if (modm /= 0) go to 40
+goto 25
+30 if (modm /= 0) goto 40
 l = (n-1)/2
-if (l == 0) go to 50
+if (l == 0) goto 50
 !
 !     n odd m even
 !
@@ -3101,7 +3121,7 @@ cw(l) = -cf*work(l+1)
    end if
 36 cw(l) = cw(l+1)-cf*work(l+1)
 37 cw(l+1) = (l+l+2)*cw(l+1)
-go to 35
+goto 35
 !
 !     n odd m odd
 !
@@ -3117,7 +3137,7 @@ cw(l) = cf*work(l)
    end if
 46 cw(l) = cw(l+1)+cf*work(l)
 47 cw(l+1) = -(l+l)*cw(l+1)
-go to 45
+goto 45
 50 return
 
 end subroutine dwtk
@@ -3135,10 +3155,10 @@ cdt = cth*cth-sth*sth
 sdt = 2.*sth*cth
 mmod = mod(m, 2)
 nmod = mod(n, 2)
-if (nmod /= 0) go to 1
+if (nmod /= 0) goto 1
 cth = cdt
 sth = sdt
-if (mmod /= 0) go to 2
+if (mmod /= 0) goto 2
 !
 !     n even  m even
 !
@@ -3161,7 +3181,7 @@ sth = sdt*cth+cdt*sth
 cth = chh
 15 continue
 return
-1 if (mmod /= 0) go to 3
+1 if (mmod /= 0) goto 3
 !
 !     n odd m even
 !
@@ -3199,8 +3219,8 @@ cdt = cth*cth-sth*sth
 sdt = 2.*sth*cth
 mmod=mod(m, 2)
 nmod=mod(n, 2)
-if (nmod /= 0) go to 1
-if (mmod /= 0) go to 2
+if (nmod /= 0) goto 1
+if (mmod /= 0) goto 2
 !
 !     n even  m even
 !
@@ -3225,7 +3245,7 @@ cth = chh
 return
 1 cth = cdt
 sth = sdt
-if (mmod /= 0) go to 3
+if (mmod /= 0) goto 3
 !
 !     n odd m even
 !
