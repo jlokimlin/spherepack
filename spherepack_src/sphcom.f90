@@ -2723,65 +2723,76 @@ end subroutine dvbt
 
 subroutine dwbt(m, n, theta, cw, wh)
     dimension cw(1)
-    real theta, cw, wh, cth, sth, cdt, sdt, chh
-    wh = 0.
+    real theta, cw, wh, cost, sint, cdt, sdt, temp
+
+    wh = 0.0
+
     if (n <= 0 .or. m <= 0) return
-    cth = cos(theta)
-    sth = sin(theta)
-    cdt = cth*cth-sth*sth
-    sdt = 2.*sth*cth
-    mmod=mod(m, 2)
-    nmod=mod(n, 2)
-    if (nmod /= 0) goto 1
-    if (mmod /= 0) goto 2
-    !
-    !     n even  m even
-    !
-    ncw = n/2
-    do k=1, ncw
-        wh = wh+cw(k)*sth
-        chh = cdt*cth-sdt*sth
-        sth = sdt*cth+cdt*sth
-        cth = chh
-    end do
-    return
-    !
-    !     n even  m odd
-    !
-2   ncw = n/2
-    do k=1, ncw
-        wh = wh+cw(k)*cth
-        chh = cdt*cth-sdt*sth
-        sth = sdt*cth+cdt*sth
-        cth = chh
-    end do
-    return
-1   cth = cdt
-    sth = sdt
-    if (mmod /= 0) goto 3
-    !
-    !     n odd m even
-    !
-    ncw = (n-1)/2
-    do k=1, ncw
-        wh = wh+cw(k)*sth
-        chh = cdt*cth-sdt*sth
-        sth = sdt*cth+cdt*sth
-        cth = chh
-    end do
-    return
-    !
-    ! case m odd and n odd
-    !
-3   ncw = (n+1)/2
-    wh = .5*cw(1)
-    if (ncw<2) return
-    do k=2, ncw
-        wh = wh+cw(k)*cth
-        chh = cdt*cth-sdt*sth
-        sth = sdt*cth+cdt*sth
-        cth = chh
-    end do
+
+    cost = cos(theta)
+    sint = sin(theta)
+    cdt = cost*cost-sint*sint
+    sdt = 2.0*sint*cost
+
+    select case (mod(n,2))
+        case (0) ! n even
+            select case (mod(m,2))
+                case (0) ! m even
+                    !
+                    !==> n even  m even
+                    !
+                    ncw = n/2
+                    do k=1, ncw
+                        wh = wh+cw(k)*sint
+                        temp = cdt*cost-sdt*sint
+                        sint = sdt*cost+cdt*sint
+                        cost = temp
+                    end do
+                case (1) ! m odd
+                     !
+                     !==> n even m odd
+                     !
+                    ncw = n/2
+                    do k=1, ncw
+                        wh = wh+cw(k)*cost
+                        temp = cdt*cost-sdt*sint
+                        sint = sdt*cost+cdt*sint
+                        cost = temp
+                    end do
+            end select
+        case (1) ! n odd
+            cost = cdt
+            sint = sdt
+            select case (mod(m,2))
+                case (0) ! m even
+                    !
+                    !==> n odd m even
+                    !
+                    ncw = (n-1)/2
+                    do k=1, ncw
+                        wh = wh+cw(k)*sint
+                        temp = cdt*cost-sdt*sint
+                        sint = sdt*cost+cdt*sint
+                        cost = temp
+                    end do
+                case (1) ! m odd
+                    !
+                    !==> n odd m odd
+                    !
+                    ncw = (n+1)/2
+                    wh = 0.5*cw(1)
+
+                    if (ncw < 2) return
+
+                    do k=2, ncw
+                        wh = wh+cw(k)*cost
+                        temp = cdt*cost-sdt*sint
+                        sint = sdt*cost+cdt*sint
+                        cost = temp
+                    end do
+
+            end select
+    end select
 
 end subroutine dwbt
 
@@ -3064,14 +3075,14 @@ subroutine wtgint(nlat, nlon, theta, wwbin, work)
     real theta(*), work(*)
     imid = (nlat+1)/2
     iw1 = 2*nlat*imid+1
+    iw2 = nlat/2+2
     !
     !     theta is a real array with (nlat+1)/2 locations
     !     nlat is the maximum value of n+1
     !     the length of wwbin is 2*nlat*imid+3*((nlat-3)*nlat+2)/2
     !     the length of work is nlat+2
     !
-    call wtgit1(nlat, nlon, imid, theta, wwbin, wwbin(iw1), &
-        work, work(nlat/2+2))
+    call wtgit1(nlat, nlon, imid, theta, wwbin, wwbin(iw1), work, work(iw2))
 
 end subroutine wtgint
 
@@ -3106,53 +3117,62 @@ end subroutine wtgit1
 
 subroutine dvtk(m, n, cv, work)
     real cv(*), work(*), fn, fk, cf, srnp1
+
     cv(1) = 0.0
+
     if (n <= 0) return
+
     fn = n
     srnp1 = sqrt(fn * (fn + 1.0))
-    cf = 2.0*m/srnp1
-    modn = mod(n, 2)
-    modm = mod(m, 2)
+    cf = 2.0*real(m)/srnp1
+
     call dnlfk(m, n, work)
-    if (modn /= 0) goto 70
-    ncv = n/2
-    if (ncv == 0) return
-    fk = 0.0
-    if (modm /= 0) goto 60
-    !
-    !     n even m even
-    !
-    do l=1, ncv
-        fk = fk+2.0
-        cv(l) = -fk*fk*work(l+1)/srnp1
-    end do
-    return
-    !
-    !     n even m odd
-    !
-    60 do l=1, ncv
-        fk = fk+2.0
-        cv(l) = -fk*fk*work(l)/srnp1
-    end do
-    return
-70  ncv = (n+1)/2
-    fk = -1.0
-    if (modm /= 0) goto 80
-    !
-    !     n odd m even
-    !
-    do l=1, ncv
-        fk = fk+2.0
-        cv(l) = -fk*fk*work(l)/srnp1
-    end do
-    return
-    !
-    !     n odd m odd
-    !
-    80 do l=1, ncv
-        fk = fk+2.0
-        cv(l) = -fk*fk*work(l)/srnp1
-    end do
+
+    select case (mod(n,2))
+        case (0) ! n even
+            ncv = n/2
+            if (ncv == 0) return
+            fk = 0.0
+            select case (mod(m,2))
+                case (0) ! m even
+                    !
+                    !==> n even m even
+                    !
+                    do l=1, ncv
+                        fk = fk+2.0
+                        cv(l) = -(fk**2)*work(l+1)/srnp1
+                    end do
+                case (1) ! m odd
+                    !
+                    !==> n even m odd
+                    !
+                    do l=1, ncv
+                        fk = fk+2.0
+                        cv(l) = -(fk**2)*work(l)/srnp1
+                    end do
+            end select
+        case (1) ! n odd
+            ncv = (n+1)/2
+            fk = -1.0
+            select case (mod(m,2))
+                case (0) ! m even
+                    !
+                    !==> n odd m even
+                    !
+                    do l=1, ncv
+                        fk = fk+2.0
+                        cv(l) = -(fk**2)*work(l)/srnp1
+                    end do
+                case (1) ! m odd
+                    !
+                    !==> n odd m odd
+                    !
+                    do l=1, ncv
+                        fk = fk+2.0
+                        cv(l) = -(fk**2)*work(l)/srnp1
+                    end do
+            end select
+    end select
 
 end subroutine dvtk
 
@@ -3238,63 +3258,71 @@ end subroutine dwtk
 
 subroutine dvtt(m, n, theta, cv, vh)
     dimension cv(1)
-    real cv, vh, theta, cth, sth, cdt, sdt, chh
+    real cv, vh, theta, cost, sint, cdt, sdt, temp
+
     vh = 0.0
+
     if (n == 0) return
-    cth = cos(theta)
-    sth = sin(theta)
-    cdt = cth*cth-sth*sth
-    sdt = 2.0*sth*cth
-    mmod = mod(m, 2)
-    nmod = mod(n, 2)
-    if (nmod /= 0) goto 1
-    cth = cdt
-    sth = sdt
-    if (mmod /= 0) goto 2
-    !
-    !     n even  m even
-    !
-    ncv = n/2
-    do k=1, ncv
-        vh = vh+cv(k)*cth
-        chh = cdt*cth-sdt*sth
-        sth = sdt*cth+cdt*sth
-        cth = chh
-    end do
-    return
-    !
-    !     n even  m odd
-    !
-2   ncv = n/2
-    do k=1, ncv
-        vh = vh+cv(k)*sth
-        chh = cdt*cth-sdt*sth
-        sth = sdt*cth+cdt*sth
-        cth = chh
-    end do
-    return
-1   if (mmod /= 0) goto 3
-    !
-    !     n odd m even
-    !
-    ncv = (n+1)/2
-    do k=1, ncv
-        vh = vh+cv(k)*cth
-        chh = cdt*cth-sdt*sth
-        sth = sdt*cth+cdt*sth
-        cth = chh
-    end do
-    return
-    !
-    ! case m odd and n odd
-    !
-3   ncv = (n+1)/2
-    do k=1, ncv
-        vh = vh+cv(k)*sth
-        chh = cdt*cth-sdt*sth
-        sth = sdt*cth+cdt*sth
-        cth = chh
-    end do
+
+    cost = cos(theta)
+    sint = sin(theta)
+    cdt = cost*cost-sint*sint
+    sdt = 2.0*sint*cost
+
+    select case (mod(n,2))
+        case (0) ! n even
+            cost = cdt
+            sint = sdt
+            select case (mod(m,2))
+                case (0) ! m even
+                    !
+                    !==> n even  m even
+                    !
+                    ncv = n/2
+                    do k=1, ncv
+                        vh = vh+cv(k)*cost
+                        temp = cdt*cost-sdt*sint
+                        sint = sdt*cost+cdt*sint
+                        cost = temp
+                    end do
+                case (1) ! m odd
+                     !
+                     !==> n even  m odd
+                     !
+                    ncv = n/2
+                    do k=1, ncv
+                        vh = vh+cv(k)*sint
+                        temp = cdt*cost-sdt*sint
+                        sint = sdt*cost+cdt*sint
+                        cost = temp
+                    end do
+            end select
+        case (1) ! n odd
+            select case (mod(m,2))
+                case (0) ! m even
+                    !
+                    !     n odd m even
+                    !
+                    ncv = (n+1)/2
+                    do k=1, ncv
+                        vh = vh+cv(k)*cost
+                        temp = cdt*cost-sdt*sint
+                        sint = sdt*cost+cdt*sint
+                        cost = temp
+                    end do
+                case (1) ! m odd
+                     !
+                     !==> n odd m odd
+                     !
+                    ncv = (n+1)/2
+                    do k=1, ncv
+                        vh = vh+cv(k)*sint
+                        temp = cdt*cost-sdt*sint
+                        sint = sdt*cost+cdt*sint
+                        cost = temp
+                    end do
+            end select
+    end select
 
 end subroutine dvtt
 
@@ -3311,58 +3339,65 @@ subroutine dwtt(m, n, theta, cw, wh)
     sint = sin(theta)
     cdt = cost**2-sint**2
     sdt = 2.0*sint*cost
-    mmod=mod(m, 2)
-    nmod=mod(n, 2)
-    if (nmod /= 0) goto 1
-    if (mmod /= 0) goto 2
-    !
-    !     n even  m even
-    !
-    ncw = n/2
-    do k=1, ncw
-        wh = wh+cw(k)*cost
-        temp = cdt*cost-sdt*sint
-        sint = sdt*cost+cdt*sint
-        cost = temp
-    end do
-    return
-    !
-    !     n even  m odd
-    !
-2   ncw = n/2
-    do k=1, ncw
-        wh = wh+cw(k)*sint
-        temp = cdt*cost-sdt*sint
-        sint = sdt*cost+cdt*sint
-        cost = temp
-    end do
-    return
-1   cost = cdt
-    sint = sdt
-    if (mmod /= 0) goto 3
-    !
-    !     n odd m even
-    !
-    ncw = (n-1)/2
-    do k=1, ncw
-        wh = wh+cw(k)*cost
-        temp = cdt*cost-sdt*sint
-        sint = sdt*cost+cdt*sint
-        cost = temp
-    end do
-    return
-    !
-    ! case m odd and n odd
-    !
-3   ncw = (n+1)/2
-    wh = 0.0
-    if (ncw < 2) return
-    do k=2, ncw
-        wh = wh+cw(k)*sint
-        temp = cdt*cost-sdt*sint
-        sint = sdt*cost+cdt*sint
-        cost = temp
-    end do
+
+    select case (mod(n,2))
+        case (0) ! n even
+            select case (mod(m,2))
+                case (0) ! m even
+                    !
+                    !==> n even m even
+                    !
+                    ncw = n/2
+                    do k=1, ncw
+                        wh = wh+cw(k)*cost
+                        temp = cdt*cost-sdt*sint
+                        sint = sdt*cost+cdt*sint
+                        cost = temp
+                    end do
+                case (1) ! m odd
+                      !
+                      !==> n even m odd
+                      !
+                    ncw = n/2
+                    do k=1, ncw
+                        wh = wh+cw(k)*sint
+                        temp = cdt*cost-sdt*sint
+                        sint = sdt*cost+cdt*sint
+                        cost = temp
+                    end do
+            end select
+        case (1) ! n odd
+            cost = cdt
+            sint = sdt
+            select case (mod(m,2))
+                case (0) ! m even
+                    !
+                    !==> n odd m even
+                    !
+                    ncw = (n-1)/2
+                    do k=1, ncw
+                        wh = wh+cw(k)*cost
+                        temp = cdt*cost-sdt*sint
+                        sint = sdt*cost+cdt*sint
+                        cost = temp
+                    end do
+                case (1) ! m odd
+                      !
+                      !==> n odd m odd
+                      !
+                    ncw = (n+1)/2
+                    wh = 0.0
+
+                    if (ncw < 2) return
+
+                    do k=2, ncw
+                        wh = wh+cw(k)*sint
+                        temp = cdt*cost-sdt*sint
+                        sint = sdt*cost+cdt*sint
+                        cost = temp
+                    end do
+            end select
+    end select
 
 end subroutine dwtt
 
@@ -3374,14 +3409,14 @@ subroutine vbgint (nlat, nlon, theta, wvbin, work)
     real theta(*), work(*)
     imid = (nlat+1)/2
     iw1 = 2*nlat*imid+1
+    iw2 = nlat/2+2
     !
     !     theta is a real array with (nlat+1)/2 locations
     !     nlat is the maximum value of n+1
     !     the length of wvbin is 2*nlat*imid+3*((nlat-3)*nlat+2)/2
     !     the length of work is nlat+2
     !
-    call vbgit1(nlat, nlon, imid, theta, wvbin, wvbin(iw1), &
-        work, work(nlat/2+2))
+    call vbgit1(nlat, nlon, imid, theta, wvbin, wvbin(iw1), work, work(iw2))
 
 end subroutine vbgint
 
@@ -3419,14 +3454,14 @@ subroutine wbgint(nlat, nlon, theta, wwbin, work)
     real work(*), theta(*)
     imid = (nlat+1)/2
     iw1 = 2*nlat*imid+1
+    iw2 = nlat/2+2
     !
     !     theta is a real array with (nlat+1)/2 locations
     !     nlat is the maximum value of n+1
     !     the length of wwbin is 2*nlat*imid+3*((nlat-3)*nlat+2)/2
     !     the length of work is nlat+2
     !
-    call wbgit1(nlat, nlon, imid, theta, wwbin, wwbin(iw1), &
-        work, work(nlat/2+2))
+    call wbgit1(nlat, nlon, imid, theta, wwbin, wwbin(iw1), work, work(iw2))
 
 end subroutine wbgint
 
