@@ -2516,109 +2516,134 @@ end subroutine dzwt
 
 subroutine dvbk(m, n, cv, work)
     real cv(1), work(1), fn, fk, cf
+
     cv(1) = 0.0
+
     if (n <= 0) return
+
     fn = n
     srnp1 = sqrt(fn * (fn + 1.0))
-    cf = 2.0*m/srnp1
-    modn = mod(n, 2)
-    modm = mod(m, 2)
+    cf = 2.0*real(m)/srnp1
+
     call dnlfk(m, n, work)
-    if (modn /= 0) goto 70
-    ncv = n/2
-    if (ncv == 0) return
-    fk = 0.0
-    if (modm /= 0) goto 60
-    !
-    !     n even m even
-    !
-    do l=1, ncv
-        fk = fk+2.0
-        cv(l) = -fk*work(l+1)/srnp1
-    end do
-    return
-    !
-    !     n even m odd
-    !
-    60 do l=1, ncv
-        fk = fk+2.
-        cv(l) = fk*work(l)/srnp1
-    end do
-    return
-70  ncv = (n+1)/2
-    fk = -1.0
-    if (modm /= 0) goto 80
-    !
-    !     n odd m even
-    !
-    do l=1, ncv
-        fk = fk+2.0
-        cv(l) = -fk*work(l)/srnp1
-    end do
-    return
-    !
-    !     n odd m odd
-    !
-    80 do l=1, ncv
-        fk = fk+2.0
-        cv(l) = fk*work(l)/srnp1
-    end do
+
+    select case (mod(n,2))
+        case (0) ! n even
+            ncv = n/2
+            if (ncv == 0) return
+            fk = 0.0
+            select case (mod(m,2))
+                case (0) ! m even
+                    !
+                    !==> n even m even
+                    !
+                    do l=1, ncv
+                        fk = fk+2.0
+                        cv(l) = -fk*work(l+1)/srnp1
+                    end do
+                case (1) ! m odd
+                    !
+                    !==> n even m odd
+                    !
+                    do l=1, ncv
+                        fk = fk+2.0
+                        cv(l) = fk*work(l)/srnp1
+                    end do
+            end select
+        case (1) ! n odd
+            ncv = (n+1)/2
+            fk = -1.0
+            select case (mod(m,2))
+                case (0) ! m even
+                    !
+                    !     n odd m even
+                    !
+                    do l=1, ncv
+                        fk = fk+2.0
+                        cv(l) = -fk*work(l)/srnp1
+                    end do
+                case (1) ! m odd
+                    !
+                    !==>     n odd m odd
+                    !
+                    do l=1, ncv
+                        fk = fk+2.0
+                        cv(l) = fk*work(l)/srnp1
+                    end do
+            end select
+    end select
 
 end subroutine dvbk
 
 
-
 subroutine dwbk(m, n, cw, work)
     real cw(1), work(1), fn, cf, srnp1
-    cw(1) = 0.
+
+    cw(1) = 0.0
+
     if (n <= 0 .or. m <= 0) return
+
     fn = n
     srnp1 = sqrt(fn * (fn + 1.0))
-    cf = 2.*m/srnp1
-    modn = mod(n, 2)
-    modm = mod(m, 2)
+    cf = 2.0*real(m)/srnp1
+
     call dnlfk(m, n, work)
+
     if (m == 0) return
-    if (modn /= 0) goto 30
-    l = n/2
-    if (l == 0) return
-    if (modm /= 0) goto 20
-    !
-    !     n even m even
-    !
-    cw(l) = -cf*work(l+1)
-10  l = l-1
-    if (l <= 0) return
-    cw(l) = cw(l+1)-cf*work(l+1)
-    goto 10
-    !
-    !     n even m odd
-    !
-20  cw(l) = cf*work(l)
-25  l = l-1
-    if (l <= 0) return
-    cw(l) = cw(l+1)+cf*work(l)
-    goto 25
-30  if (modm /= 0) goto 40
-    l = (n-1)/2
-    if (l == 0) return
-    !
-    !     n odd m even
-    !
-    cw(l) = -cf*work(l+1)
-35  l = l-1
-    if (l <= 0) return
-    cw(l) = cw(l+1)-cf*work(l+1)
-    goto 35
-    !
-    !     n odd m odd
-    !
-40  l = (n+1)/2
-    cw(l) = cf*work(l)
-45  l = l-1
-    if (l <= 0) return
-    cw(l) = cw(l+1)+cf*work(l)
-    goto 45
+
+    select case (mod(n,2))
+        case (0) ! n even
+            l = n/2
+            if (l == 0) return
+            select case (mod(m,2))
+                case (0) ! m even
+                    !
+                    !==> n even m even
+                    !
+                    cw(l) = -cf*work(l+1)
+                    do
+                        l = l-1
+                        if (l <= 0) exit
+                        cw(l) = cw(l+1)-cf*work(l+1)
+                    end do
+                case (1) ! m odd
+                         !
+                         !     n even m odd
+                         !
+                    cw(l) = cf*work(l)
+                    do
+                        l = l-1
+                        if (l <= 0) exit
+                        cw(l) = cw(l+1)+cf*work(l)
+                    end do
+            end select
+        case (1) ! n odd
+            select case (mod(m,2))
+                case (0) ! m even
+                    l = (n-1)/2
+                    if (l == 0) return
+                    !
+                    !==> n odd m even
+                    !
+                    cw(l) = -cf*work(l+1)
+                    do
+                        l = l-1
+                        if (l <= 0) exit
+                        cw(l) = cw(l+1)-cf*work(l+1)
+                    end do
+                case (1) ! m odd
+                    !
+                    !==> n odd m odd
+                    !
+                    l = (n+1)/2
+                    cw(l) = cf*work(l)
+                    do
+                        l = l-1
+                        if (l <= 0) exit
+                        cw(l) = cw(l+1)+cf*work(l)
+                    end do
+            end select
+    end select
 
 end subroutine dwbk
 
@@ -2626,64 +2651,71 @@ end subroutine dwbk
 
 subroutine dvbt(m, n, theta, cv, vh)
     dimension cv(1)
-    real cv, vh, theta, cost, sint, cdt, sdt, chh
-    vh = 0.
+    real cv, vh, theta, cost, sint, cdt, sdt, temp
+
+    vh = 0.0
+
     if (n == 0) return
+
     cost = cos(theta)
     sint = sin(theta)
     cdt = cost**2-sint**2
     sdt = 2.0*sint*cost
-    mmod = mod(m, 2)
-    nmod = mod(n, 2)
-    if (nmod /= 0) goto 1
-    cost = cdt
-    sint = sdt
-    if (mmod /= 0) goto 2
-    !
-    !     n even  m even
-    !
-    ncv = n/2
-    do k=1, ncv
-        vh = vh+cv(k)*sint
-        chh = cdt*cost-sdt*sint
-        sint = sdt*cost+cdt*sint
-        cost = chh
-    end do
-    return
-    !
-    !     n even  m odd
-    !
-2   ncv = n/2
-    do k=1, ncv
-        vh = vh+cv(k)*cost
-        chh = cdt*cost-sdt*sint
-        sint = sdt*cost+cdt*sint
-        cost = chh
-    end do
 
-    return
-1   if (mmod /= 0) goto 3
-    !
-    !     n odd m even
-    !
-    ncv = (n+1)/2
-    do k=1, ncv
-        vh = vh+cv(k)*sint
-        chh = cdt*cost-sdt*sint
-        sint = sdt*cost+cdt*sint
-        cost = chh
-    end do
-    return
-    !
-    ! case m odd and n odd
-    !
-3   ncv = (n+1)/2
-    do k=1, ncv
-        vh = vh+cv(k)*cost
-        chh = cdt*cost-sdt*sint
-        sint = sdt*cost+cdt*sint
-        cost = chh
-    end do
+    select case (mod(n,2))
+        case (0) ! n even
+            cost = cdt
+            sint = sdt
+            select case (mod(m,2))
+                case (0) ! m even
+                    !
+                    !==> n even m even
+                    !
+                    ncv = n/2
+                    do k=1, ncv
+                        vh = vh+cv(k)*sint
+                        temp = cdt*cost-sdt*sint
+                        sint = sdt*cost+cdt*sint
+                        cost = temp
+                    end do
+                case (1) ! m odd
+                   !
+                   !==> n even  m odd
+                   !
+                    ncv = n/2
+                    do k=1, ncv
+                        vh = vh+cv(k)*cost
+                        temp = cdt*cost-sdt*sint
+                        sint = sdt*cost+cdt*sint
+                        cost = temp
+                    end do
+            end select
+        case (1) ! n odd
+            select case (mod(m,2))
+                case (0) ! m even
+                    !
+                    !==> n odd m even
+                    !
+                    ncv = (n+1)/2
+                    do k=1, ncv
+                        vh = vh+cv(k)*sint
+                        temp = cdt*cost-sdt*sint
+                        sint = sdt*cost+cdt*sint
+                        cost = temp
+                    end do
+                case (1) ! m odd
+                    !
+                    !==> n odd m odd
+                    !
+                    ncv = (n+1)/2
+                    do k=1, ncv
+                        vh = vh+cv(k)*cost
+                        temp = cdt*cost-sdt*sint
+                        sint = sdt*cost+cdt*sint
+                        cost = temp
+                    end do
+            end select
+    end select
 
 end subroutine dvbt
 
