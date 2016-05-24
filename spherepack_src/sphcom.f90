@@ -32,8 +32,8 @@
 !
 ! ... file sphcom.f90
 !
-!     this file must be loaded with all main program files
-!     in spherepack.  it includes undocumented subroutines
+!     This file must be loaded with all main program files
+!     in spherepack. It includes undocumented subroutines
 !     called by some or all of main programs
 !
 pure subroutine dnlfk(m, n, cp)
@@ -50,7 +50,7 @@ pure subroutine dnlfk(m, n, cp)
     !----------------------------------------------------------------------
     integer (ip), intent (in)  :: m
     integer (ip), intent (in)  :: n
-    real (wp),    intent (out) :: cp(1)
+    real (wp),    intent (out) :: cp(n/2+1)
     !----------------------------------------------------------------------
     ! Dictionary: local variables
     !----------------------------------------------------------------------
@@ -562,7 +562,7 @@ end subroutine legin
 
 
 
-subroutine zfin (isym, nlat, nlon, m, z, i3, wzfin)
+subroutine zfin(isym, nlat, nlon, m, z, i3, wzfin)
 
     use, intrinsic :: iso_fortran_env, only: &
         wp => REAL64, &
@@ -607,7 +607,7 @@ subroutine zfin (isym, nlat, nlon, m, z, i3, wzfin)
 
 contains
 
-    subroutine zfin1 (isym, nlat, m, z, imid, i3, zz, z1, a, b, c)
+    subroutine zfin1(isym, nlat, m, z, imid, i3, zz, z1, a, b, c)
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
@@ -1202,7 +1202,7 @@ subroutine alinit(nlat, nlon, walin, dwork)
 
 contains
 
-    subroutine alini1 (nlat, nlon, imid, p, abc, cp)
+    subroutine alini1(nlat, nlon, imid, p, abc, cp)
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
@@ -1585,20 +1585,20 @@ end subroutine zwinit
 
 
 subroutine zvin (ityp, nlat, nlon, m, zv, i3, wzvin)
-dimension       zv(1)        , wzvin(1)
-imid = (nlat+1)/2
-lim = nlat*imid
-mmax = min(nlat, (nlon+1)/2)
-labc = (max(mmax-2, 0)*(nlat+nlat-mmax-1))/2
-iw1 = lim+1
-iw2 = iw1+lim
-iw3 = iw2+labc
-iw4 = iw3+labc
-!
-!     the length of wzvin is 2*lim+3*labc
-!
-call zvin1 (ityp, nlat, m, zv, imid, i3, wzvin, wzvin(iw1), wzvin(iw2), &
-            wzvin(iw3), wzvin(iw4))
+    dimension       zv(1)        , wzvin(1)
+    imid = (nlat+1)/2
+    lim = nlat*imid
+    mmax = min(nlat, (nlon+1)/2)
+    labc = (max(mmax-2, 0)*(nlat+nlat-mmax-1))/2
+    iw1 = lim+1
+    iw2 = iw1+lim
+    iw3 = iw2+labc
+    iw4 = iw3+labc
+    !
+    !     the length of wzvin is 2*lim+3*labc
+    !
+    call zvin1(ityp, nlat, m, zv, imid, i3, wzvin, wzvin(iw1), wzvin(iw2), &
+        wzvin(iw3), wzvin(iw4))
 
 end subroutine zvin
 
@@ -1663,26 +1663,26 @@ end subroutine zvin1
 
 
 subroutine zwin (ityp, nlat, nlon, m, zw, i3, wzwin)
-dimension       zw(1)        , wzwin(1)
-imid = (nlat+1)/2
-lim = nlat*imid
-mmax = min(nlat, (nlon+1)/2)
-labc = (max(mmax-2, 0)*(nlat+nlat-mmax-1))/2
-iw1 = lim+1
-iw2 = iw1+lim
-iw3 = iw2+labc
-iw4 = iw3+labc
-!
-!     the length of wzwin is 2*lim+3*labc
-!
-call zwin1 (ityp, nlat, m, zw, imid, i3, wzwin, wzwin(iw1), wzwin(iw2), &
-            wzwin(iw3), wzwin(iw4))
+    dimension       zw(1)        , wzwin(1)
+    imid = (nlat+1)/2
+    lim = nlat*imid
+    mmax = min(nlat, (nlon+1)/2)
+    labc = (max(mmax-2, 0)*(nlat+nlat-mmax-1))/2
+    iw1 = lim+1
+    iw2 = iw1+lim
+    iw3 = iw2+labc
+    iw4 = iw3+labc
+    !
+    !     the length of wzwin is 2*lim+3*labc
+    !
+    call zwin1(ityp, nlat, m, zw, imid, i3, wzwin, wzwin(iw1), wzwin(iw2), &
+        wzwin(iw3), wzwin(iw4))
 
 end subroutine zwin
 
 
 
-subroutine zwin1 (ityp, nlat, m, zw, imid, i3, zw1, zw2, a, b, c)
+subroutine zwin1(ityp, nlat, m, zw, imid, i3, zw1, zw2, a, b, c)
     dimension       zw(imid, nlat, 3), zw1(imid, 1), zw2(imid, 1), &
         a(1), b(1), c(1)
     save i1, i2
@@ -1742,114 +1742,113 @@ end subroutine zwin1
 
 
 subroutine vbinit (nlat, nlon, wvbin, dwork)
-dimension wvbin(1)
-real dwork(*)
-imid = (nlat+1)/2
-iw1 = 2*nlat*imid+1
-!
-!     the length of wvbin is 2*nlat*imid+3*((nlat-3)*nlat+2)/2
-!     the length of dwork is nlat+2
-!
-call vbini1 (nlat, nlon, imid, wvbin, wvbin(iw1), dwork, &
-                                       dwork(nlat/2+2))
+    dimension wvbin(1)
+    real dwork(*)
+    imid = (nlat+1)/2
+    iw1 = 2*nlat*imid+1
+    !
+    !     the length of wvbin is 2*nlat*imid+3*((nlat-3)*nlat+2)/2
+    !     the length of dwork is nlat+2
+    !
+    call vbini1(nlat, nlon, imid, wvbin, wvbin(iw1), dwork, &
+        dwork(nlat/2+2))
 
 end subroutine vbinit
 
 
 
-subroutine vbini1 (nlat, nlon, imid, vb, abc, cvb, work)
-!
-!     abc must have 3*(max(mmax-2, 0)*(nlat+nlat-mmax-1))/2
-!     locations where mmax = min(nlat, (nlon+1)/2)
-!     cvb and work must each have nlat+1 locations
-!
-dimension vb(imid, nlat, 2), abc(1)
-real dt, cvb(1), th, vbh, work(1)
-real, parameter :: pi = acos(-1.0)
-dt = pi/(nlat-1)
-mdo = min(2, nlat, (nlon+1)/2)
-do mp1=1, mdo
-m = mp1-1
-do np1=mp1, nlat
-n = np1-1
-call dvbk(m, n, cvb, work)
-do  i=1, imid
-th = (i-1)*dt
-call dvbt(m, n, th, cvb, vbh)
-vb(i, np1, mp1) = vbh
-end do
-end do
-end do
+subroutine vbini1(nlat, nlon, imid, vb, abc, cvb, work)
+    !
+    !     abc must have 3*(max(mmax-2, 0)*(nlat+nlat-mmax-1))/2
+    !     locations where mmax = min(nlat, (nlon+1)/2)
+    !     cvb and work must each have nlat+1 locations
+    !
+    dimension vb(imid, nlat, 2), abc(1)
+    real dt, cvb(1), th, vbh, work(1)
+    real, parameter :: pi = acos(-1.0)
+    dt = pi/(nlat-1)
+    mdo = min(2, nlat, (nlon+1)/2)
+    do mp1=1, mdo
+        m = mp1-1
+        do np1=mp1, nlat
+            n = np1-1
+            call dvbk(m, n, cvb, work)
+            do  i=1, imid
+                th = (i-1)*dt
+                call dvbt(m, n, th, cvb, vbh)
+                vb(i, np1, mp1) = vbh
+            end do
+        end do
+    end do
 
-call rabcv(nlat, nlon, abc)
+    call rabcv(nlat, nlon, abc)
 
 end subroutine vbini1
 
 
 
 subroutine wbinit (nlat, nlon, wwbin, dwork)
-dimension       wwbin(1)
-real dwork(*)
-imid = (nlat+1)/2
-iw1 = 2*nlat*imid+1
-!
-!     the length of wwbin is 2*nlat*imid+3*((nlat-3)*nlat+2)/2
-!     the length of dwork is nlat+2
-!
-call wbini1 (nlat, nlon, imid, wwbin, wwbin(iw1), dwork, &
-                                        dwork(nlat/2+2))
+    dimension       wwbin(1)
+    real dwork(*)
+    imid = (nlat+1)/2
+    iw1 = 2*nlat*imid+1
+    !
+    !     the length of wwbin is 2*nlat*imid+3*((nlat-3)*nlat+2)/2
+    !     the length of dwork is nlat+2
+    !
+    call wbini1(nlat, nlon, imid, wwbin, wwbin(iw1), dwork, &
+        dwork(nlat/2+2))
 
 end subroutine wbinit
 
 
 
-subroutine wbini1 (nlat, nlon, imid, wb, abc, cwb, work)
-!
-!     abc must have 3*(max(mmax-2, 0)*(nlat+nlat-mmax-1))/2
-!     locations where mmax = min(nlat, (nlon+1)/2)
-!     cwb and work must each have nlat/2+1 locations
-!
-dimension wb(imid, nlat, 2), abc(1)
-real dt, cwb(1), wbh, th, work(1)
-real, parameter :: pi = acos(-1.0)
+subroutine wbini1(nlat, nlon, imid, wb, abc, cwb, work)
+    !
+    !     abc must have 3*(max(mmax-2, 0)*(nlat+nlat-mmax-1))/2
+    !     locations where mmax = min(nlat, (nlon+1)/2)
+    !     cwb and work must each have nlat/2+1 locations
+    !
+    dimension wb(imid, nlat, 2), abc(1)
+    real dt, cwb(1), wbh, th, work(1)
+    real, parameter :: pi = acos(-1.0)
 
-dt = pi/(nlat-1)
-mdo = min(3, nlat, (nlon+1)/2)
-if (mdo < 2) return
-do mp1=2, mdo
-m = mp1-1
-do np1=mp1, nlat
-n = np1-1
-call dwbk(m, n, cwb, work)
-do i=1, imid
-th = (i-1)*dt
-call dwbt(m, n, th, cwb, wbh)
-wb(i, np1, m) = wbh
-end do
-end do
-end do
+    dt = pi/(nlat-1)
+    mdo = min(3, nlat, (nlon+1)/2)
+    if (mdo < 2) return
+    do mp1=2, mdo
+        m = mp1-1
+        do np1=mp1, nlat
+            n = np1-1
+            call dwbk(m, n, cwb, work)
+            do i=1, imid
+                th = (i-1)*dt
+                call dwbt(m, n, th, cwb, wbh)
+                wb(i, np1, m) = wbh
+            end do
+        end do
+    end do
 
-call rabcw(nlat, nlon, abc)
+    call rabcw(nlat, nlon, abc)
 
 end subroutine wbini1
 
 
-
 subroutine vbin (ityp, nlat, nlon, m, vb, i3, wvbin)
-dimension       vb(1)        , wvbin(1)
-imid = (nlat+1)/2
-lim = nlat*imid
-mmax = min(nlat, (nlon+1)/2)
-labc = (max(mmax-2, 0)*(nlat+nlat-mmax-1))/2
-iw1 = lim+1
-iw2 = iw1+lim
-iw3 = iw2+labc
-iw4 = iw3+labc
-!
-!     the length of wvbin is 2*lim+3*labc
-!
-call vbin1 (ityp, nlat, m, vb, imid, i3, wvbin, wvbin(iw1), wvbin(iw2), &
-            wvbin(iw3), wvbin(iw4))
+    dimension       vb(1)        , wvbin(1)
+    imid = (nlat+1)/2
+    lim = nlat*imid
+    mmax = min(nlat, (nlon+1)/2)
+    labc = (max(mmax-2, 0)*(nlat+nlat-mmax-1))/2
+    iw1 = lim+1
+    iw2 = iw1+lim
+    iw3 = iw2+labc
+    iw4 = iw3+labc
+    !
+    !     the length of wvbin is 2*lim+3*labc
+    !
+    call vbin1(ityp, nlat, m, vb, imid, i3, wvbin, wvbin(iw1), wvbin(iw2), &
+        wvbin(iw3), wvbin(iw4))
 
 end subroutine vbin
 
@@ -1915,26 +1914,26 @@ end subroutine vbin1
 
 
 subroutine wbin (ityp, nlat, nlon, m, wb, i3, wwbin)
-dimension       wb(1)        , wwbin(1)
-imid = (nlat+1)/2
-lim = nlat*imid
-mmax = min(nlat, (nlon+1)/2)
-labc = (max(mmax-2, 0)*(nlat+nlat-mmax-1))/2
-iw1 = lim+1
-iw2 = iw1+lim
-iw3 = iw2+labc
-iw4 = iw3+labc
-!
-!     the length of wwbin is 2*lim+3*labc
-!
-call wbin1 (ityp, nlat, m, wb, imid, i3, wwbin, wwbin(iw1), wwbin(iw2), &
-            wwbin(iw3), wwbin(iw4))
+    dimension       wb(1)        , wwbin(1)
+    imid = (nlat+1)/2
+    lim = nlat*imid
+    mmax = min(nlat, (nlon+1)/2)
+    labc = (max(mmax-2, 0)*(nlat+nlat-mmax-1))/2
+    iw1 = lim+1
+    iw2 = iw1+lim
+    iw3 = iw2+labc
+    iw4 = iw3+labc
+    !
+    !     the length of wwbin is 2*lim+3*labc
+    !
+    call wbin1(ityp, nlat, m, wb, imid, i3, wwbin, wwbin(iw1), wwbin(iw2), &
+        wwbin(iw3), wwbin(iw4))
 
 end subroutine wbin
 
 
-subroutine wbin1 (ityp, nlat, m, wb, imid, i3, wb1, wb2, a, b, c)
-    dimension       wb(imid, nlat, 3), wb1(imid, 1), wb2(imid, 1), &
+subroutine wbin1(ityp, nlat, m, wb, imid, i3, wb1, wb2, a, b, c)
+    dimension wb(imid, nlat, 3), wb1(imid, 1), wb2(imid, 1), &
         a(1), b(1), c(1)
     save i1, i2
     ihold = i1
@@ -2703,17 +2702,17 @@ end subroutine dwbt
 
 
 subroutine rabcv(nlat, nlon, abc)
-!
-!     subroutine rabcp computes the coefficients in the recurrence
-!     relation for the functions vbar(m, n, theta). array abc
-!     must have 3*(max(mmax-2, 0)*(nlat+nlat-mmax-1))/2 locations.
-!
-dimension abc(1)
-mmax = min(nlat, (nlon+1)/2)
-labc = (max(mmax-2, 0)*(nlat+nlat-mmax-1))/2
-iw1 = labc+1
-iw2 = iw1+labc
-call rabcv1(nlat, nlon, abc, abc(iw1), abc(iw2))
+    !
+    !     subroutine rabcp computes the coefficients in the recurrence
+    !     relation for the functions vbar(m, n, theta). array abc
+    !     must have 3*(max(mmax-2, 0)*(nlat+nlat-mmax-1))/2 locations.
+    !
+    dimension abc(1)
+    mmax = min(nlat, (nlon+1)/2)
+    labc = (max(mmax-2, 0)*(nlat+nlat-mmax-1))/2
+    iw1 = labc+1
+    iw2 = iw1+labc
+    call rabcv1(nlat, nlon, abc, abc(iw1), abc(iw2))
 
 end subroutine rabcv
 
@@ -2769,17 +2768,17 @@ end subroutine rabcv1
 
 
 subroutine rabcw(nlat, nlon, abc)
-!
-!     subroutine rabcw computes the coefficients in the recurrence
-!     relation for the functions wbar(m, n, theta). array abc
-!     must have 3*(max(mmax-2, 0)*(nlat+nlat-mmax-1))/2 locations.
-!
-dimension abc(1)
-mmax = min(nlat, (nlon+1)/2)
-labc = (max(mmax-2, 0)*(nlat+nlat-mmax-1))/2
-iw1 = labc+1
-iw2 = iw1+labc
-call rabcw1(nlat, nlon, abc, abc(iw1), abc(iw2))
+    !
+    !     subroutine rabcw computes the coefficients in the recurrence
+    !     relation for the functions wbar(m, n, theta). array abc
+    !     must have 3*(max(mmax-2, 0)*(nlat+nlat-mmax-1))/2 locations.
+    !
+    dimension abc(1)
+    mmax = min(nlat, (nlon+1)/2)
+    labc = (max(mmax-2, 0)*(nlat+nlat-mmax-1))/2
+    iw1 = labc+1
+    iw2 = iw1+labc
+    call rabcw1(nlat, nlon, abc, abc(iw1), abc(iw2))
 
 end subroutine rabcw
 
@@ -2837,22 +2836,22 @@ end subroutine rabcw1
 
 
 subroutine vtinit (nlat, nlon, wvbin, dwork)
-dimension       wvbin(*)
-real dwork(*)
-imid = (nlat+1)/2
-iw1 = 2*nlat*imid+1
-iw2 = nlat/2+2
-!
-!     the length of wvbin is 2*nlat*imid+3*((nlat-3)*nlat+2)/2
-!     the length of dwork is nlat+2
-!
-call vtini1 (nlat, nlon, imid, wvbin, wvbin(iw1), dwork, dwork(iw2))
+    dimension       wvbin(*)
+    real dwork(*)
+    imid = (nlat+1)/2
+    iw1 = 2*nlat*imid+1
+    iw2 = nlat/2+2
+    !
+    !     the length of wvbin is 2*nlat*imid+3*((nlat-3)*nlat+2)/2
+    !     the length of dwork is nlat+2
+    !
+    call vtini1(nlat, nlon, imid, wvbin, wvbin(iw1), dwork, dwork(iw2))
 
 end subroutine vtinit
 
 
 
-subroutine vtini1 (nlat, nlon, imid, vb, abc, cvb, work)
+subroutine vtini1(nlat, nlon, imid, vb, abc, cvb, work)
     !
     !     abc must have 3*(max(mmax-2, 0)*(nlat+nlat-mmax-1))/2
     !     locations where mmax = min(nlat, (nlon+1)/2)
@@ -2882,17 +2881,17 @@ end subroutine vtini1
 
 
 
-subroutine wtinit (nlat, nlon, wwbin, dwork)
-dimension       wwbin(1)
-real dwork(*)
-imid = (nlat+1)/2
-iw1 = 2*nlat*imid+1
-iw2 = nlat/2+2
-!
-!     the length of wwbin is 2*nlat*imid+3*((nlat-3)*nlat+2)/2
-!     the length of dwork is nlat+2
-!
-call wtini1 (nlat, nlon, imid, wwbin, wwbin(iw1), dwork, dwork(iw2))
+subroutine wtinit(nlat, nlon, wwbin, dwork)
+    dimension wwbin(1)
+    real dwork(*)
+    imid = (nlat+1)/2
+    iw1 = 2*nlat*imid+1
+    iw2 = nlat/2+2
+    !
+    !     the length of wwbin is 2*nlat*imid+3*((nlat-3)*nlat+2)/2
+    !     the length of dwork is nlat+2
+    !
+    call wtini1(nlat, nlon, imid, wwbin, wwbin(iw1), dwork, dwork(iw2))
 
 end subroutine wtinit
 
@@ -2930,90 +2929,90 @@ end subroutine wtini1
 
 
 subroutine vtgint (nlat, nlon, theta, wvbin, work)
-dimension       wvbin(*)
-real theta(*), work(*)
-imid = (nlat+1)/2
-iw1 = 2*nlat*imid+1
-iw2 = nlat/2+2
-!
-!     theta is a real array with (nlat+1)/2 locations
-!     nlat is the maximum value of n+1
-!     the length of wvbin is 2*nlat*imid+3*((nlat-3)*nlat+2)/2
-!     the length of work is nlat+2
-!
-call vtgit1 (nlat, nlon, imid, theta, wvbin, wvbin(iw1), work, work(iw2))
+    dimension       wvbin(*)
+    real theta(*), work(*)
+    imid = (nlat+1)/2
+    iw1 = 2*nlat*imid+1
+    iw2 = nlat/2+2
+    !
+    !     theta is a real array with (nlat+1)/2 locations
+    !     nlat is the maximum value of n+1
+    !     the length of wvbin is 2*nlat*imid+3*((nlat-3)*nlat+2)/2
+    !     the length of work is nlat+2
+    !
+    call vtgit1(nlat, nlon, imid, theta, wvbin, wvbin(iw1), work, work(iw2))
 
 end subroutine vtgint
 
 
 
-subroutine vtgit1 (nlat, nlon, imid, theta, vb, abc, cvb, work)
-!
-!     abc must have 3*(max(mmax-2, 0)*(nlat+nlat-mmax-1))/2
-!     locations where mmax = min(nlat, (nlon+1)/2)
-!     cvb and work must each have nlat/2+1   locations
-!
-dimension vb(imid, nlat, 2), abc(*)
-real theta(*), cvb(*), work(*), vbh
-mdo = min(2, nlat, (nlon+1)/2)
-do mp1=1, mdo
-m = mp1-1
-do np1=mp1, nlat
-n = np1-1
-call dvtk(m, n, cvb, work)
-do i=1, imid
-call dvtt(m, n, theta(i), cvb, vbh)
-vb(i, np1, mp1) = vbh
-end do
-end do
-end do
+subroutine vtgit1(nlat, nlon, imid, theta, vb, abc, cvb, work)
+    !
+    !     abc must have 3*(max(mmax-2, 0)*(nlat+nlat-mmax-1))/2
+    !     locations where mmax = min(nlat, (nlon+1)/2)
+    !     cvb and work must each have nlat/2+1   locations
+    !
+    dimension vb(imid, nlat, 2), abc(*)
+    real theta(*), cvb(*), work(*), vbh
+    mdo = min(2, nlat, (nlon+1)/2)
+    do mp1=1, mdo
+        m = mp1-1
+        do np1=mp1, nlat
+            n = np1-1
+            call dvtk(m, n, cvb, work)
+            do i=1, imid
+                call dvtt(m, n, theta(i), cvb, vbh)
+                vb(i, np1, mp1) = vbh
+            end do
+        end do
+    end do
 
-call rabcv(nlat, nlon, abc)
+    call rabcv(nlat, nlon, abc)
 
 end subroutine vtgit1
 
 
 
-subroutine wtgint (nlat, nlon, theta, wwbin, work)
-dimension       wwbin(*)
-real theta(*), work(*)
-imid = (nlat+1)/2
-iw1 = 2*nlat*imid+1
-!
-!     theta is a real array with (nlat+1)/2 locations
-!     nlat is the maximum value of n+1
-!     the length of wwbin is 2*nlat*imid+3*((nlat-3)*nlat+2)/2
-!     the length of work is nlat+2
-!
-call wtgit1 (nlat, nlon, imid, theta, wwbin, wwbin(iw1), &
-                        work, work(nlat/2+2))
+subroutine wtgint(nlat, nlon, theta, wwbin, work)
+    dimension wwbin(*)
+    real theta(*), work(*)
+    imid = (nlat+1)/2
+    iw1 = 2*nlat*imid+1
+    !
+    !     theta is a real array with (nlat+1)/2 locations
+    !     nlat is the maximum value of n+1
+    !     the length of wwbin is 2*nlat*imid+3*((nlat-3)*nlat+2)/2
+    !     the length of work is nlat+2
+    !
+    call wtgit1(nlat, nlon, imid, theta, wwbin, wwbin(iw1), &
+        work, work(nlat/2+2))
 
 end subroutine wtgint
 
 
 
-subroutine wtgit1 (nlat, nlon, imid, theta, wb, abc, cwb, work)
-!
-!     abc must have 3*((nlat-3)*nlat+2)/2 locations
-!     cwb and work must each have nlat/2+1 locations
-!
-dimension wb(imid, nlat, 2), abc(1)
-real theta(*), cwb(*), work(*), wbh
-mdo = min(3, nlat, (nlon+1)/2)
-if (mdo < 2) return
-do mp1=2, mdo
-m = mp1-1
-do np1=mp1, nlat
-n = np1-1
-call dwtk(m, n, cwb, work)
-do i=1, imid
-call dwtt(m, n, theta(i), cwb, wbh)
-wb(i, np1, m) = wbh
-end do
-end do
-end do
+subroutine wtgit1(nlat, nlon, imid, theta, wb, abc, cwb, work)
+    !
+    !     abc must have 3*((nlat-3)*nlat+2)/2 locations
+    !     cwb and work must each have nlat/2+1 locations
+    !
+    dimension wb(imid, nlat, 2), abc(1)
+    real theta(*), cwb(*), work(*), wbh
+    mdo = min(3, nlat, (nlon+1)/2)
+    if (mdo < 2) return
+    do mp1=2, mdo
+        m = mp1-1
+        do np1=mp1, nlat
+            n = np1-1
+            call dwtk(m, n, cwb, work)
+            do i=1, imid
+                call dwtt(m, n, theta(i), cwb, wbh)
+                wb(i, np1, m) = wbh
+            end do
+        end do
+    end do
 
-call rabcw(nlat, nlon, abc)
+    call rabcw(nlat, nlon, abc)
 
 end subroutine wtgit1
 
@@ -3285,89 +3284,89 @@ end subroutine dwtt
 
 
 subroutine vbgint (nlat, nlon, theta, wvbin, work)
-dimension       wvbin(1)
-real theta(*), work(*)
-imid = (nlat+1)/2
-iw1 = 2*nlat*imid+1
-!
-!     theta is a real array with (nlat+1)/2 locations
-!     nlat is the maximum value of n+1
-!     the length of wvbin is 2*nlat*imid+3*((nlat-3)*nlat+2)/2
-!     the length of work is nlat+2
-!
-call vbgit1 (nlat, nlon, imid, theta, wvbin, wvbin(iw1), &
-                        work, work(nlat/2+2))
+    dimension       wvbin(1)
+    real theta(*), work(*)
+    imid = (nlat+1)/2
+    iw1 = 2*nlat*imid+1
+    !
+    !     theta is a real array with (nlat+1)/2 locations
+    !     nlat is the maximum value of n+1
+    !     the length of wvbin is 2*nlat*imid+3*((nlat-3)*nlat+2)/2
+    !     the length of work is nlat+2
+    !
+    call vbgit1(nlat, nlon, imid, theta, wvbin, wvbin(iw1), &
+        work, work(nlat/2+2))
 
 end subroutine vbgint
 
 
 
-subroutine vbgit1 (nlat, nlon, imid, theta, vb, abc, cvb, work)
-!
-!     abc must have 3*(max(mmax-2, 0)*(nlat+nlat-mmax-1))/2
-!     locations where mmax = min(nlat, (nlon+1)/2)
-!     cvb and work must each have nlat/2+1 locations
-!
-dimension vb(imid, nlat, 2), abc(1)
-real cvb(1), theta(1), vbh, work(1)
-mdo = min(2, nlat, (nlon+1)/2)
-do mp1=1, mdo
-m = mp1-1
-do np1=mp1, nlat
-n = np1-1
-call dvbk(m, n, cvb, work)
-do i=1, imid
-call dvbt(m, n, theta(i), cvb, vbh)
-vb(i, np1, mp1) = vbh
-end do
-end do
-end do
+subroutine vbgit1(nlat, nlon, imid, theta, vb, abc, cvb, work)
+    !
+    !     abc must have 3*(max(mmax-2, 0)*(nlat+nlat-mmax-1))/2
+    !     locations where mmax = min(nlat, (nlon+1)/2)
+    !     cvb and work must each have nlat/2+1 locations
+    !
+    dimension vb(imid, nlat, 2), abc(1)
+    real cvb(1), theta(1), vbh, work(1)
+    mdo = min(2, nlat, (nlon+1)/2)
+    do mp1=1, mdo
+        m = mp1-1
+        do np1=mp1, nlat
+            n = np1-1
+            call dvbk(m, n, cvb, work)
+            do i=1, imid
+                call dvbt(m, n, theta(i), cvb, vbh)
+                vb(i, np1, mp1) = vbh
+            end do
+        end do
+    end do
 
-call rabcv(nlat, nlon, abc)
+    call rabcv(nlat, nlon, abc)
 
 end subroutine vbgit1
 
 
 
-subroutine wbgint (nlat, nlon, theta, wwbin, work)
-dimension       wwbin(1)
-real work(*), theta(*)
-imid = (nlat+1)/2
-iw1 = 2*nlat*imid+1
-!
-!     theta is a real array with (nlat+1)/2 locations
-!     nlat is the maximum value of n+1
-!     the length of wwbin is 2*nlat*imid+3*((nlat-3)*nlat+2)/2
-!     the length of work is nlat+2
-!
-call wbgit1 (nlat, nlon, imid, theta, wwbin, wwbin(iw1), &
-                        work, work(nlat/2+2))
+subroutine wbgint(nlat, nlon, theta, wwbin, work)
+    dimension wwbin(1)
+    real work(*), theta(*)
+    imid = (nlat+1)/2
+    iw1 = 2*nlat*imid+1
+    !
+    !     theta is a real array with (nlat+1)/2 locations
+    !     nlat is the maximum value of n+1
+    !     the length of wwbin is 2*nlat*imid+3*((nlat-3)*nlat+2)/2
+    !     the length of work is nlat+2
+    !
+    call wbgit1(nlat, nlon, imid, theta, wwbin, wwbin(iw1), &
+        work, work(nlat/2+2))
 
 end subroutine wbgint
 
 
 
-subroutine wbgit1 (nlat, nlon, imid, theta, wb, abc, cwb, work)
-!
-!     abc must have 3*((nlat-3)*nlat+2)/2 locations
-!     cwb and work must each have nlat/2+1 locations
-!
-dimension wb(imid, nlat, 2), abc(1)
-real cwb(1), theta(1), wbh, work(1)
-mdo = min(3, nlat, (nlon+1)/2)
-if (mdo < 2) return
-do mp1=2, mdo
-m = mp1-1
-do np1=mp1, nlat
-n = np1-1
-call dwbk(m, n, cwb, work)
-do i=1, imid
-call dwbt(m, n, theta(i), cwb, wbh)
-wb(i, np1, m) = wbh
-end do
-end do
-end do
+subroutine wbgit1(nlat, nlon, imid, theta, wb, abc, cwb, work)
+    !
+    !     abc must have 3*((nlat-3)*nlat+2)/2 locations
+    !     cwb and work must each have nlat/2+1 locations
+    !
+    dimension wb(imid, nlat, 2), abc(1)
+    real cwb(1), theta(1), wbh, work(1)
+    mdo = min(3, nlat, (nlon+1)/2)
+    if (mdo < 2) return
+    do mp1=2, mdo
+        m = mp1-1
+        do np1=mp1, nlat
+            n = np1-1
+            call dwbk(m, n, cwb, work)
+            do i=1, imid
+                call dwbt(m, n, theta(i), cwb, wbh)
+                wb(i, np1, m) = wbh
+            end do
+        end do
+    end do
 
-call rabcw(nlat, nlon, abc)
+    call rabcw(nlat, nlon, abc)
 
 end subroutine wbgit1
