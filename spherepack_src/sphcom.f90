@@ -3150,132 +3150,135 @@ end subroutine dwtk
 
 
 subroutine dvtt(m, n, theta, cv, vh)
-dimension cv(1)
-real cv, vh, theta, cth, sth, cdt, sdt, chh
-vh = 0.
-if (n==0) return
-cth = cos(theta)
-sth = sin(theta)
-cdt = cth*cth-sth*sth
-sdt = 2.*sth*cth
-mmod = mod(m, 2)
-nmod = mod(n, 2)
-if (nmod /= 0) goto 1
-cth = cdt
-sth = sdt
-if (mmod /= 0) goto 2
-!
-!     n even  m even
-!
-ncv = n/2
-do 10 k=1, ncv
-vh = vh+cv(k)*cth
-chh = cdt*cth-sdt*sth
-sth = sdt*cth+cdt*sth
-cth = chh
-10 continue
-return
-!
-!     n even  m odd
-!
-2 ncv = n/2
-do 15 k=1, ncv
-vh = vh+cv(k)*sth
-chh = cdt*cth-sdt*sth
-sth = sdt*cth+cdt*sth
-cth = chh
-15 continue
-return
-1 if (mmod /= 0) goto 3
-!
-!     n odd m even
-!
-ncv = (n+1)/2
-do 20 k=1, ncv
-vh = vh+cv(k)*cth
-chh = cdt*cth-sdt*sth
-sth = sdt*cth+cdt*sth
-cth = chh
-20 continue
-return
-!
-! case m odd and n odd
-!
-3 ncv = (n+1)/2
-do 25 k=1, ncv
-vh = vh+cv(k)*sth
-chh = cdt*cth-sdt*sth
-sth = sdt*cth+cdt*sth
-cth = chh
-25 continue
+    dimension cv(1)
+    real cv, vh, theta, cth, sth, cdt, sdt, chh
+    vh = 0.0
+    if (n == 0) return
+    cth = cos(theta)
+    sth = sin(theta)
+    cdt = cth*cth-sth*sth
+    sdt = 2.0*sth*cth
+    mmod = mod(m, 2)
+    nmod = mod(n, 2)
+    if (nmod /= 0) goto 1
+    cth = cdt
+    sth = sdt
+    if (mmod /= 0) goto 2
+    !
+    !     n even  m even
+    !
+    ncv = n/2
+    do k=1, ncv
+        vh = vh+cv(k)*cth
+        chh = cdt*cth-sdt*sth
+        sth = sdt*cth+cdt*sth
+        cth = chh
+    end do
+    return
+    !
+    !     n even  m odd
+    !
+2   ncv = n/2
+    do k=1, ncv
+        vh = vh+cv(k)*sth
+        chh = cdt*cth-sdt*sth
+        sth = sdt*cth+cdt*sth
+        cth = chh
+    end do
+    return
+1   if (mmod /= 0) goto 3
+    !
+    !     n odd m even
+    !
+    ncv = (n+1)/2
+    do k=1, ncv
+        vh = vh+cv(k)*cth
+        chh = cdt*cth-sdt*sth
+        sth = sdt*cth+cdt*sth
+        cth = chh
+    end do
+    return
+    !
+    ! case m odd and n odd
+    !
+3   ncv = (n+1)/2
+    do k=1, ncv
+        vh = vh+cv(k)*sth
+        chh = cdt*cth-sdt*sth
+        sth = sdt*cth+cdt*sth
+        cth = chh
+    end do
 
 end subroutine dvtt
 
 
-
 subroutine dwtt(m, n, theta, cw, wh)
-dimension cw(1)
-real theta, cw, wh, cth, sth, cdt, sdt, chh
-wh = 0.
-if (n <= 0 .or. m <= 0) return
-cth = cos(theta)
-sth = sin(theta)
-cdt = cth*cth-sth*sth
-sdt = 2.*sth*cth
-mmod=mod(m, 2)
-nmod=mod(n, 2)
-if (nmod /= 0) goto 1
-if (mmod /= 0) goto 2
-!
-!     n even  m even
-!
-ncw = n/2
-do 10 k=1, ncw
-wh = wh+cw(k)*cth
-chh = cdt*cth-sdt*sth
-sth = sdt*cth+cdt*sth
-cth = chh
-10 continue
-return
-!
-!     n even  m odd
-!
-2 ncw = n/2
-do 8 k=1, ncw
-wh = wh+cw(k)*sth
-chh = cdt*cth-sdt*sth
-sth = sdt*cth+cdt*sth
-cth = chh
-8 continue
-return
-1 cth = cdt
-sth = sdt
-if (mmod /= 0) goto 3
-!
-!     n odd m even
-!
-ncw = (n-1)/2
-do 20 k=1, ncw
-wh = wh+cw(k)*cth
-chh = cdt*cth-sdt*sth
-sth = sdt*cth+cdt*sth
-cth = chh
-20 continue
-return
-!
-! case m odd and n odd
-!
-3 ncw = (n+1)/2
-wh = 0.
-if (ncw<2) return
-do 25 k=2, ncw
-wh = wh+cw(k)*sth
-chh = cdt*cth-sdt*sth
-sth = sdt*cth+cdt*sth
-cth = chh
-25 continue
+    dimension cw(1)
+    real theta, cw, wh, cost, sint, cdt, sdt, temp
+
+    wh = 0.0
+
+    if (n <= 0 .or. m <= 0) return
+
+    cost = cos(theta)
+    sint = sin(theta)
+    cdt = cost**2-sint**2
+    sdt = 2.0*sint*cost
+    mmod=mod(m, 2)
+    nmod=mod(n, 2)
+    if (nmod /= 0) goto 1
+    if (mmod /= 0) goto 2
+    !
+    !     n even  m even
+    !
+    ncw = n/2
+    do k=1, ncw
+        wh = wh+cw(k)*cost
+        temp = cdt*cost-sdt*sint
+        sint = sdt*cost+cdt*sint
+        cost = temp
+    end do
+    return
+    !
+    !     n even  m odd
+    !
+2   ncw = n/2
+    do k=1, ncw
+        wh = wh+cw(k)*sint
+        temp = cdt*cost-sdt*sint
+        sint = sdt*cost+cdt*sint
+        cost = temp
+    end do
+    return
+1   cost = cdt
+    sint = sdt
+    if (mmod /= 0) goto 3
+    !
+    !     n odd m even
+    !
+    ncw = (n-1)/2
+    do k=1, ncw
+        wh = wh+cw(k)*cost
+        temp = cdt*cost-sdt*sint
+        sint = sdt*cost+cdt*sint
+        cost = temp
+    end do
+    return
+    !
+    ! case m odd and n odd
+    !
+3   ncw = (n+1)/2
+    wh = 0.0
+    if (ncw < 2) return
+    do k=2, ncw
+        wh = wh+cw(k)*sint
+        temp = cdt*cost-sdt*sint
+        sint = sdt*cost+cdt*sint
+        cost = temp
+    end do
 
 end subroutine dwtt
+
 
 
 
