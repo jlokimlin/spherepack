@@ -1503,54 +1503,84 @@ end subroutine zvinit
 
 
 
+subroutine zwinit(nlat, nlon, wzwin, dwork)
 
-subroutine zwinit (nlat, nlon, wzwin, dwork)
-dimension       wzwin(1)
-real dwork(*)
-imid = (nlat+1)/2
-iw1 = 2*nlat*imid+1
-!
-!     the length of wzvin is 2*nlat*imid+3*((nlat-3)*nlat+2)/2
-!     the length of dwork is nlat+2
-!
-call zwini1 (nlat, nlon, imid, wzwin, wzwin(iw1), dwork, &
-                                        dwork(nlat/2+2))
+    use, intrinsic :: iso_fortran_env, only: &
+        wp => REAL64, &
+        ip => INT32
 
+    implicit none
+    !----------------------------------------------------------------------
+    ! Dictionary: calling arguments
+    !----------------------------------------------------------------------
+    integer (ip), intent (in)     :: nlat
+    integer (ip), intent (in)     :: nlon
+    real (wp),    intent (in out) :: wzwin(*)
+    real (wp),    intent (in out) :: dwork(*)
+    !----------------------------------------------------------------------
+    ! Dictionary: calling arguments
+    !----------------------------------------------------------------------
+    integer (ip) :: imid, iw1, iw2
+    !----------------------------------------------------------------------
+
+    imid = (nlat+1)/2
+    iw1 = 2*nlat*imid+1
+    iw2 = nlat/2+2
+    !
+    !     the length of wzvin is 2*nlat*imid+3*((nlat-3)*nlat+2)/2
+    !     the length of dwork is nlat+2
+    !
+    call zwini1(nlat, nlon, imid, wzwin, wzwin(iw1), dwork, dwork(iw2))
+
+contains
+
+    subroutine zwini1(nlat, nlon, imid, zw, abc, czw, work)
+        !
+        !     abc must have 3*(max(mmax-2, 0)*(nlat+nlat-mmax-1))/2
+        !     locations where mmax = min(nlat, (nlon+1)/2)
+        !     czw and work must each have nlat+1 locations
+        !
+        !----------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !----------------------------------------------------------------------
+        integer (ip), intent (in)     :: nlat
+        integer (ip), intent (in)     :: nlon
+        integer (ip), intent (in)     :: imid
+        real (wp),    intent (in out) :: zw(imid,nlat,2)
+        real (wp),    intent (in out) :: abc(*)
+        real (wp),    intent (in out) :: czw(*)
+        real (wp),    intent (in out) :: work(*)
+        !----------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !----------------------------------------------------------------------
+        integer (ip)         :: i, m, mdo, mp1, n, np1
+        real (wp)            :: dt, th, zwh
+        real (wp), parameter :: pi = acos(-1.0_wp)
+        !----------------------------------------------------------------------
+
+        dt = pi/(nlat-1)
+        mdo = min(3, nlat, (nlon+1)/2)
+
+        if (mdo < 2) return
+
+        do mp1=2, mdo
+            m = mp1-1
+            do np1=mp1, nlat
+                n = np1-1
+                call dzwk(nlat, m, n, czw, work)
+                do i=1, imid
+                    th = real(i-1, kind=wp)*dt
+                    call dzwt(nlat, m, n, th, czw, zwh)
+                    zw(i, np1, m) = zwh
+                end do
+                zw(1, np1, m) = 0.5_wp*zw(1, np1, m)
+            end do
+        end do
+
+        call rabcw(nlat, nlon, abc)
+
+    end subroutine zwini1
 end subroutine zwinit
-
-
-
-subroutine zwini1 (nlat, nlon, imid, zw, abc, czw, work)
-!
-!     abc must have 3*(max(mmax-2, 0)*(nlat+nlat-mmax-1))/2
-!     locations where mmax = min(nlat, (nlon+1)/2)
-!     czw and work must each have nlat+1 locations
-!
-dimension zw(imid, nlat, 2), abc(1)
-real  dt, czw(1), zwh, th, work(1)
-real, parameter :: pi = acos(-1.0)
-dt = pi/(nlat-1)
-mdo = min(3, nlat, (nlon+1)/2)
-
-if (mdo < 2) return
-
-do mp1=2, mdo
-m = mp1-1
-do np1=mp1, nlat
-n = np1-1
-call dzwk(nlat, m, n, czw, work)
-do i=1, imid
-th = (i-1)*dt
-call dzwt(nlat, m, n, th, czw, zwh)
-zw(i, np1, m) = zwh
-end do
-zw(1, np1, m) = .5*zw(1, np1, m)
-end do
-end do
-
-call rabcw(nlat, nlon, abc)
-
-end subroutine zwini1
 
 
 
