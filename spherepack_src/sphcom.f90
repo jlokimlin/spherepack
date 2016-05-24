@@ -1604,57 +1604,59 @@ end subroutine zvin
 
 
 
-subroutine zvin1 (ityp, nlat, m, zv, imid, i3, zvz, zv1, a, b, c)
-dimension       zv(imid, nlat, 3), zvz(imid, 1), zv1(imid, 1), &
-                a(1), b(1), c(1)
-save i1, i2
-ihold = i1
-i1 = i2
-i2 = i3
-i3 = ihold
-if (m < 1) then
-    goto 25
-else if (m == 1) then
-    goto 30
-else
-    goto 35
-end if
-25 i1 = 1
-i2 = 2
-i3 = 3
-do 45 np1=1, nlat
-do 45 i=1, imid
-zv(i, np1, i3) = zvz(i, np1)
-45 continue
-return
-30 do 50 np1=2, nlat
-do 50 i=1, imid
-zv(i, np1, i3) = zv1(i, np1)
-50 continue
-return
-35 ns = ((m-2)*(nlat+nlat-m-1))/2+1
-if (ityp == 1) goto 36
-do 85 i=1, imid
-zv(i, m+1, i3) = a(ns)*zv(i, m-1, i1)-c(ns)*zv(i, m+1, i1)
-85 continue
-36 if (m == nlat-1) return
-if (ityp == 2) goto 71
-ns = ns+1
-do 70 i=1, imid
-zv(i, m+2, i3) = a(ns)*zv(i, m, i1)-c(ns)*zv(i, m+2, i1)
-70 continue
-71 nstrt = m+3
-if (ityp == 1) nstrt = m+4
-if (nstrt > nlat) goto 80
-nstp = 2
-if (ityp == 0) nstp = 1
-do 75 np1=nstrt, nlat, nstp
-ns = ns+nstp
-do 75 i=1, imid
-zv(i, np1, i3) = a(ns)*zv(i, np1-2, i1)+b(ns)*zv(i, np1-2, i3) &
-                              -c(ns)*zv(i, np1, i1)
-75 continue
-80 return
+subroutine zvin1(ityp, nlat, m, zv, imid, i3, zvz, zv1, a, b, c)
+    dimension zv(imid, nlat, 3), zvz(imid, 1), zv1(imid, 1), &
+        a(1), b(1), c(1)
+    save i1, i2
+    ihold = i1
+    i1 = i2
+    i2 = i3
+    i3 = ihold
+    if (m < 1) then
+        goto 25
+    else if (m == 1) then
+        goto 30
+    else
+        goto 35
+    end if
+25  i1 = 1
+    i2 = 2
+    i3 = 3
+    do np1=1, nlat
+        do i=1, imid
+            zv(i, np1, i3) = zvz(i, np1)
+        end do
+    end do
+    return
+    30 do np1=2, nlat
+        do i=1, imid
+            zv(i, np1, i3) = zv1(i, np1)
+        end do
+    end do
+    return
+35  ns = ((m-2)*(nlat+nlat-m-1))/2+1
+    if (ityp == 1) goto 36
+    do i=1, imid
+        zv(i, m+1, i3) = a(ns)*zv(i, m-1, i1)-c(ns)*zv(i, m+1, i1)
+    end do
+36  if (m == nlat-1) return
+    if (ityp == 2) goto 71
+    ns = ns+1
+    do i=1, imid
+        zv(i, m+2, i3) = a(ns)*zv(i, m, i1)-c(ns)*zv(i, m+2, i1)
+    end do
+71  nstrt = m+3
+    if (ityp == 1) nstrt = m+4
+    if (nstrt > nlat) return
+    nstp = 2
+    if (ityp == 0) nstp = 1
+    do np1=nstrt, nlat, nstp
+        ns = ns+nstp
+        do i=1, imid
+            zv(i, np1, i3) = a(ns)*zv(i, np1-2, i1)+b(ns)*zv(i, np1-2, i3) &
+                -c(ns)*zv(i, np1, i1)
+        end do
+    end do
 
 end subroutine zvin1
 
