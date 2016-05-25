@@ -250,6 +250,37 @@
 !
 subroutine slapec(nlat, nlon, isym, nt, slap, ids, jds, a, b, mdab, ndab, &
                   wshsec, lshsec, work, lwork, ierror)
+implicit none
+real :: a
+real :: b
+integer :: ia
+integer :: ib
+integer :: ids
+integer :: ierror
+integer :: ifn
+integer :: imid
+integer :: isym
+integer :: iwk
+integer :: jds
+integer :: l1
+integer :: l2
+integer :: ls
+integer :: lshsec
+integer :: lwk
+integer :: lwkmin
+integer :: lwmin
+integer :: lwork
+integer :: mdab
+integer :: mmax
+integer :: mn
+integer :: ndab
+integer :: nlat
+integer :: nln
+integer :: nlon
+integer :: nt
+real :: slap
+real :: work
+real :: wshsec
 dimension slap(ids, jds, nt), a(mdab, ndab, nt), b(mdab, ndab, nt)
 dimension wshsec(lshsec), work(lwork)
 !
@@ -320,6 +351,31 @@ end subroutine slapec
 
 subroutine slapec1(nlat, nlon, isym, nt, slap, ids, jds, a, b, mdab, ndab, &
                   alap, blap, mmax, fnn, wshsec, lshsec, wk, lwk, ierror)
+implicit none
+real :: a
+real :: alap
+real :: b
+real :: blap
+real :: fn
+real :: fnn
+integer :: ids
+integer :: ierror
+integer :: isym
+integer :: jds
+integer :: k
+integer :: lshsec
+integer :: lwk
+integer :: m
+integer :: mdab
+integer :: mmax
+integer :: n
+integer :: ndab
+integer :: nlat
+integer :: nlon
+integer :: nt
+real :: slap
+real :: wk
+real :: wshsec
 dimension slap(ids, jds, nt), a(mdab, ndab, nt), b(mdab, ndab, nt)
 dimension alap(mmax, nlat, nt), blap(mmax, nlat, nt), fnn(nlat)
 dimension wshsec(lshsec), wk(lwk)

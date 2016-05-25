@@ -486,6 +486,8 @@ subroutine shftreg(nlon, nlat, goff, greg, wsav, nr, nlat2, nlatp1, &
 end subroutine shftreg
 
 subroutine sshifti(ioff, nlon, nlat, lsav, wsav, ier)
+    implicit none
+    integer :: lsav
     integer ioff, nlat, nlon, nlat2, isav, ier
     real wsav(lsav)
     real pi, dlat, dlon, dp

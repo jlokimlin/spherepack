@@ -9,7 +9,7 @@
 !     *                                                               *
 !     *                      SPHEREPACK version 3.2                   *
 !     *                                                               *
-!     *       A Package of Fortran77 Subroutines and Programs         *
+!     *       A Package of Fortran Subroutines and Programs           *
 !     *                                                               *
 !     *              for Modeling Geophysical Processes               *
 !     *                                                               *
@@ -232,6 +232,38 @@
 !   
 subroutine grades(nlat, nlon, isym, nt, v, w, idvw, jdvw, a, b, mdab, ndab, &
     wvhses, lvhses, work, lwork, ierror)
+    implicit none
+    real :: a
+    real :: b
+    integer :: ibi
+    integer :: ibr
+    integer :: idv
+    integer :: idvw
+    integer :: idz
+    integer :: ierror
+    integer :: imid
+    integer :: is
+    integer :: isym
+    integer :: iwk
+    integer :: jdvw
+    integer :: lgdmin
+    integer :: liwk
+    integer :: lnl
+    integer :: lvhses
+    integer :: lwkmin
+    integer :: lwork
+    integer :: lzimn
+    integer :: mdab
+    integer :: mmax
+    integer :: mn
+    integer :: ndab
+    integer :: nlat
+    integer :: nlon
+    integer :: nt
+    real :: v
+    real :: w
+    real :: work
+    real :: wvhses
     dimension v(idvw, jdvw, nt), w(idvw, jdvw, nt)
     dimension a(mdab, ndab, nt), b(mdab, ndab, nt)
     dimension wvhses(lvhses), work(lwork)
@@ -284,6 +316,7 @@ subroutine grades(nlat, nlon, isym, nt, v, w, idvw, jdvw, a, b, mdab, ndab, &
     is = ibi + mn
     iwk = is + nlat
     liwk = lwork-2*mn-nlat
+
     call grades1(nlat, nlon, isym, nt, v, w, idvw, jdvw, work(ibr), work(ibi), &
         mmax, work(is), mdab, ndab, a, b, wvhses, lvhses, work(iwk), liwk, &
         ierror)
@@ -293,6 +326,35 @@ end subroutine grades
 
 subroutine grades1(nlat, nlon, isym, nt, v, w, idvw, jdvw, br, bi, mmax, &
     sqnn, mdab, ndab, a, b, wvhses, lvhses, wk, lwk, ierror)
+    implicit none
+    real :: a
+    real :: b
+    real :: bi
+    real :: br
+    real :: ci
+    real :: cr
+    real :: fn
+    integer :: idvw
+    integer :: ierror
+    integer :: isym
+    integer :: ityp
+    integer :: jdvw
+    integer :: k
+    integer :: lvhses
+    integer :: lwk
+    integer :: m
+    integer :: mdab
+    integer :: mmax
+    integer :: n
+    integer :: ndab
+    integer :: nlat
+    integer :: nlon
+    integer :: nt
+    real :: sqnn
+    real :: v
+    real :: w
+    real :: wk
+    real :: wvhses
     dimension v(idvw, jdvw, nt), w(idvw, jdvw, nt)
     dimension br(mmax, nlat, nt), bi(mmax, nlat, nt), sqnn(nlat)
     dimension a(mdab, ndab, nt), b(mdab, ndab, nt)

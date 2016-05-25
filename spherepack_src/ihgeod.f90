@@ -31,6 +31,53 @@
 !
 !
 subroutine ihgeod(m, idp, jdp, x, y, z)
+    implicit none
+    real :: beta
+    real :: dphi
+    real :: dxi
+    real :: dxj
+    real :: dyi
+    real :: dyj
+    real :: dzi
+    real :: dzj
+    real :: hdphi
+    integer :: i
+    integer :: idp
+    integer :: j
+    integer :: jdp
+    integer :: k
+    integer :: m
+    real :: phi
+    real :: pi
+    real :: rad
+    real :: tdphi
+    real :: theta
+    real :: theta1
+    real :: theta2
+    real :: x
+    real :: x1
+    real :: x2
+    real :: x3
+    real :: x4
+    real :: x5
+    real :: x6
+    real :: xs
+    real :: y
+    real :: y1
+    real :: y2
+    real :: y3
+    real :: y4
+    real :: y5
+    real :: y6
+    real :: ys
+    real :: z
+    real :: z1
+    real :: z2
+    real :: z3
+    real :: z4
+    real :: z5
+    real :: z6
+    real :: zs
     dimension x(idp, jdp, 5), y(idp, jdp, 5), z(idp, jdp, 5)
     !
     !     m         is the number of points on the edge of a
@@ -67,9 +114,9 @@ subroutine ihgeod(m, idp, jdp, x, y, z)
     tdphi = 3.*hdphi
     do k=1, 5
         phi = (k-1)*dphi
-        call stoc(1., theta2, phi, x1, y1, z1)
-        call stoc(1., pi, phi+hdphi, x2, y2, z2)
-        call stoc(1., theta2, phi+dphi, x3, y3, z3)
+        call sph2cart(1., theta2, phi, x1, y1, z1)
+        call sph2cart(1., pi, phi+hdphi, x2, y2, z2)
+        call sph2cart(1., theta2, phi+dphi, x3, y3, z3)
         dxi = (x2-x1)/(m-1)
         dyi = (y2-y1)/(m-1)
         dzi = (z2-z1)/(m-1)
@@ -86,7 +133,7 @@ subroutine ihgeod(m, idp, jdp, x, y, z)
                 z(j, i, k) = zs + (j-1)*dzj
             end do
         end do
-        call stoc(1., theta1, phi+hdphi, x4, y4, z4)
+        call sph2cart(1., theta1, phi+hdphi, x4, y4, z4)
         dxi = (x3-x4)/(m-1)
         dyi = (y3-y4)/(m-1)
         dzi = (z3-z4)/(m-1)
@@ -103,7 +150,7 @@ subroutine ihgeod(m, idp, jdp, x, y, z)
                 z(j, i, k) = zs + (i-1)*dzi
             end do
         end do
-        call stoc(1., theta1, phi+tdphi, x5, y5, z5)
+        call sph2cart(1., theta1, phi+tdphi, x5, y5, z5)
         dxj = (x5-x3)/(m-1)
         dyj = (y5-y3)/(m-1)
         dzj = (z5-z3)/(m-1)
@@ -117,7 +164,7 @@ subroutine ihgeod(m, idp, jdp, x, y, z)
                 z(j+m-1, i, k) = zs + (j-1)*dzj
             end do
         end do
-        call stoc(1., 0., phi+dphi, x6, y6, z6)
+        call sph2cart(1., 0., phi+dphi, x6, y6, z6)
         dxi = (x5-x6)/(m-1)
         dyi = (y5-y6)/(m-1)
         dzi = (z5-z6)/(m-1)
@@ -139,8 +186,8 @@ subroutine ihgeod(m, idp, jdp, x, y, z)
     do k=1, 5
         do j=1, m+m-1
             do i=1, m
-                call ctos(x(j, i, k), y(j, i, k), z(j, i, k), rad, theta, phi)
-                call stoc(1., theta, phi, x(j, i, k), y(j, i, k), z(j, i, k))
+                call cart2sph(x(j, i, k), y(j, i, k), z(j, i, k), rad, theta, phi)
+                call sph2cart(1., theta, phi, x(j, i, k), y(j, i, k), z(j, i, k))
             end do
         end do
     end do
@@ -149,7 +196,15 @@ end subroutine ihgeod
 
 
 
-subroutine ctos(x, y, z, r, theta, phi)
+subroutine cart2sph(x, y, z, r, theta, phi)
+    implicit none
+    real :: phi
+    real :: r
+    real :: r1
+    real :: theta
+    real :: x
+    real :: y
+    real :: z
     r1 = x*x+y*y
     if (r1 /= 0.) go to 10
     phi = 0.
@@ -161,13 +216,21 @@ subroutine ctos(x, y, z, r, theta, phi)
     phi = atan2(y, x)
     theta = atan2(r1, z)
 
-end subroutine ctos
+end subroutine cart2sph
 
 
-subroutine stoc(r, theta, phi, x, y, z)
+subroutine sph2cart(r, theta, phi, x, y, z)
+    implicit none
+    real :: phi
+    real :: r
+    real :: st
+    real :: theta
+    real :: x
+    real :: y
+    real :: z
     st = sin(theta)
     x = r*st*cos(phi)
     y = r*st*sin(phi)
     z = r*cos(theta)
 
-end subroutine stoc
+end subroutine sph2cart

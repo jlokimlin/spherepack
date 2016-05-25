@@ -433,6 +433,39 @@
 ! *****************************************
 subroutine vhses(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
                  mdab, ndab, wvhses, lvhses, work, lwork, ierror)
+implicit none
+real :: bi
+real :: br
+real :: ci
+real :: cr
+integer :: idv
+integer :: idvw
+integer :: idz
+integer :: ierror
+integer :: imid
+integer :: ist
+integer :: ityp
+integer :: iw1
+integer :: iw2
+integer :: iw3
+integer :: iw4
+integer :: jdvw
+integer :: jw1
+integer :: jw2
+integer :: lnl
+integer :: lvhses
+integer :: lwork
+integer :: lzimn
+integer :: mdab
+integer :: mmax
+integer :: ndab
+integer :: nlat
+integer :: nlon
+integer :: nt
+real :: v
+real :: w
+real :: work
+real :: wvhses
 dimension v(idvw, jdvw, 1), w(idvw, jdvw, 1), br(mdab, ndab, 1), &
           bi(mdab, ndab, 1), cr(mdab, ndab, 1), ci(mdab, ndab, 1), &
           work(1), wvhses(1)
@@ -481,6 +514,49 @@ end subroutine vhses
 
 subroutine vhses1(nlat, nlon, ityp, nt, imid, idvw, jdvw, v, w, mdab, &
    ndab, br, bi, cr, ci, idv, ve, vo, we, wo, work, idz, vb, wb, wrfft)
+implicit none
+real :: bi
+real :: br
+real :: ci
+real :: cr
+integer :: i
+integer :: idv
+integer :: idvw
+integer :: idz
+integer :: imid
+integer :: imm1
+integer :: ityp
+integer :: itypp
+integer :: j
+integer :: jdvw
+integer :: k
+integer :: m
+integer :: mb
+integer :: mdab
+integer :: mlat
+integer :: mlon
+integer :: mmax
+integer :: mn
+integer :: mp1
+integer :: mp2
+integer :: ndab
+integer :: ndo1
+integer :: ndo2
+integer :: nlat
+integer :: nlon
+integer :: nlp1
+integer :: np1
+integer :: nt
+real :: v
+real :: vb
+real :: ve
+real :: vo
+real :: w
+real :: wb
+real :: we
+real :: wo
+real :: work
+real :: wrfft
 dimension v(idvw, jdvw, 1), w(idvw, jdvw, 1), br(mdab, ndab, 1), &
           bi(mdab, ndab, 1), cr(mdab, ndab, 1), ci(mdab, ndab, 1), &
           ve(idv, nlon, 1), vo(idv, nlon, 1), we(idv, nlon, 1), &
@@ -996,6 +1072,21 @@ end subroutine vhses1
 
 subroutine vhsesi(nlat, nlon, wvhses, lvhses, work, lwork, dwork, &
                   ldwork, ierror)
+implicit none
+integer :: idz
+integer :: ierror
+integer :: imid
+integer :: iw1
+integer :: labc
+integer :: ldwork
+integer :: lvhses
+integer :: lwork
+integer :: lzimn
+integer :: mmax
+integer :: nlat
+integer :: nlon
+real :: work
+real :: wvhses
 dimension wvhses(lvhses), work(lwork)
 real dwork(ldwork)
 ierror = 1
@@ -1021,6 +1112,22 @@ call hrffti(nlon, wvhses(2*lzimn+1))
 return
 end subroutine vhsesi
 subroutine ves1(nlat, nlon, imid, vb, wb, idz, vin, wzvin, dwork)
+implicit none
+integer :: i
+integer :: i3
+integer :: idz
+integer :: imid
+integer :: m
+integer :: mmax
+integer :: mn
+integer :: mp1
+integer :: nlat
+integer :: nlon
+integer :: np1
+real :: vb
+real :: vin
+real :: wb
+real :: wzvin
 dimension vb(imid, *), wb(imid, *), vin(imid, nlat, 3), wzvin(*)
 real dwork(*)
 mmax = min(nlat, (nlon+1)/2)

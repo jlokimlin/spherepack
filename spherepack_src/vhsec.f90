@@ -9,7 +9,7 @@
 !     *                                                               *
 !     *                      SPHEREPACK version 3.2                   *
 !     *                                                               *
-!     *       A Package of Fortran77 Subroutines and Programs         *
+!     *       A Package of Fortran Subroutines and Programs           *
 !     *                                                               *
 !     *              for Modeling Geophysical Processes               *
 !     *                                                               *
@@ -549,7 +549,7 @@ ve(imid, 2*mp1-2, k) = ve(imid, 2*mp1-2, k) &
 ve(imid, 2*mp1-1, k) = ve(imid, 2*mp1-1, k) &
                      +cr(mp1, np1, k)*wb(imid, np1, iw)
 we(imid, 2*mp1-2, k) = we(imid, 2*mp1-2, k) &
-                     -bi(mp1, np1, k)*wb(imid, np1, iw) 
+                     -bi(mp1, np1, k)*wb(imid, np1, iw)
 we(imid, 2*mp1-1, k) = we(imid, 2*mp1-1, k) &
                      +br(mp1, np1, k)*wb(imid, np1, iw)
 24 continue
@@ -569,7 +569,7 @@ wo(i, 2*mp1-1, k) = wo(i, 2*mp1-1, k)+br(mp1, np1, k)*wb(i, np1, iw)
 27 continue
 if (mlat == 0) go to 28
 ve(imid, 2*mp1-2, k) = ve(imid, 2*mp1-2, k) &
-                     +br(mp1, np1, k)*vb(imid, np1, iv) 
+                     +br(mp1, np1, k)*vb(imid, np1, iv)
 ve(imid, 2*mp1-1, k) = ve(imid, 2*mp1-1, k) &
                      +bi(mp1, np1, k)*vb(imid, np1, iv)
 we(imid, 2*mp1-2, k) = we(imid, 2*mp1-2, k) &
@@ -617,7 +617,7 @@ we(i, 2*mp1-1, k) = we(i, 2*mp1-1, k)+br(mp1, np1, k)*wb(i, np1, iw)
 123 continue
 if (mlat == 0) go to 124
 we(imid, 2*mp1-2, k) = we(imid, 2*mp1-2, k) &
-                     -bi(mp1, np1, k)*wb(imid, np1, iw) 
+                     -bi(mp1, np1, k)*wb(imid, np1, iw)
 we(imid, 2*mp1-1, k) = we(imid, 2*mp1-1, k) &
                      +br(mp1, np1, k)*wb(imid, np1, iw)
 124 continue
@@ -633,7 +633,7 @@ wo(i, 2*mp1-1, k) = wo(i, 2*mp1-1, k)+br(mp1, np1, k)*wb(i, np1, iw)
 127 continue
 if (mlat == 0) go to 128
 ve(imid, 2*mp1-2, k) = ve(imid, 2*mp1-2, k) &
-                     +br(mp1, np1, k)*vb(imid, np1, iv) 
+                     +br(mp1, np1, k)*vb(imid, np1, iv)
 ve(imid, 2*mp1-1, k) = ve(imid, 2*mp1-1, k) &
                      +bi(mp1, np1, k)*vb(imid, np1, iv)
 128 continue
@@ -701,7 +701,7 @@ we(imid, 2*mp1-1, k) = we(imid, 2*mp1-1, k) &
 230 continue
 go to 950
 !
-!     case ityp=3   v even,  w odd 
+!     case ityp=3   v even,  w odd
 !
 300 call vbin(0, nlat, nlon, 0, vb, iv, wvbin)
 !
@@ -753,7 +753,7 @@ wo(i, 2*mp1-1, k) = wo(i, 2*mp1-1, k)+br(mp1, np1, k)*wb(i, np1, iw)
 327 continue
 if (mlat == 0) go to 328
 ve(imid, 2*mp1-2, k) = ve(imid, 2*mp1-2, k) &
-                     +br(mp1, np1, k)*vb(imid, np1, iv) 
+                     +br(mp1, np1, k)*vb(imid, np1, iv)
 ve(imid, 2*mp1-1, k) = ve(imid, 2*mp1-1, k) &
                      +bi(mp1, np1, k)*vb(imid, np1, iv)
 328 continue
@@ -761,7 +761,7 @@ ve(imid, 2*mp1-1, k) = ve(imid, 2*mp1-1, k) &
 330 continue
 go to 950
 !
-!     case ityp=4   v even,  w odd, and both cr and ci equal zero 
+!     case ityp=4   v even,  w odd, and both cr and ci equal zero
 !
 400 call vbin(1, nlat, nlon, 0, vb, iv, wvbin)
 !
@@ -792,7 +792,7 @@ wo(i, 2*mp1-1, k) = wo(i, 2*mp1-1, k)+br(mp1, np1, k)*wb(i, np1, iw)
 427 continue
 if (mlat == 0) go to 428
 ve(imid, 2*mp1-2, k) = ve(imid, 2*mp1-2, k) &
-                     +br(mp1, np1, k)*vb(imid, np1, iv) 
+                     +br(mp1, np1, k)*vb(imid, np1, iv)
 ve(imid, 2*mp1-1, k) = ve(imid, 2*mp1-1, k) &
                      +bi(mp1, np1, k)*vb(imid, np1, iv)
 428 continue
@@ -800,7 +800,7 @@ ve(imid, 2*mp1-1, k) = ve(imid, 2*mp1-1, k) &
 430 continue
 go to 950
 !
-!     case ityp=5   v even,  w odd,     br and bi equal zero 
+!     case ityp=5   v even,  w odd,     br and bi equal zero
 !
 500 call vbin(2, nlat, nlon, 0, vb, iv, wvbin)
 !
@@ -875,7 +875,7 @@ we(i, 2*mp1-1, k) = we(i, 2*mp1-1, k)+br(mp1, np1, k)*wb(i, np1, iw)
 623 continue
 if (mlat == 0) go to 624
 we(imid, 2*mp1-2, k) = we(imid, 2*mp1-2, k) &
-                     -bi(mp1, np1, k)*wb(imid, np1, iw) 
+                     -bi(mp1, np1, k)*wb(imid, np1, iw)
 we(imid, 2*mp1-1, k) = we(imid, 2*mp1-1, k) &
                      +br(mp1, np1, k)*wb(imid, np1, iw)
 624 continue
@@ -930,7 +930,7 @@ we(i, 2*mp1-1, k) = we(i, 2*mp1-1, k)+br(mp1, np1, k)*wb(i, np1, iw)
 723 continue
 if (mlat == 0) go to 724
 we(imid, 2*mp1-2, k) = we(imid, 2*mp1-2, k) &
-                     -bi(mp1, np1, k)*wb(imid, np1, iw) 
+                     -bi(mp1, np1, k)*wb(imid, np1, iw)
 we(imid, 2*mp1-1, k) = we(imid, 2*mp1-1, k) &
                      +br(mp1, np1, k)*wb(imid, np1, iw)
 724 continue

@@ -330,6 +330,41 @@
 !
 subroutine vhags(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
     mdab, ndab, wvhags, lvhags, work, lwork, ierror)
+    implicit none
+    real :: bi
+    real :: br
+    real :: ci
+    real :: cr
+    integer :: idv
+    integer :: idvw
+    integer :: idz
+    integer :: ierror
+    integer :: imid
+    integer :: ist
+    integer :: ityp
+    integer :: iw1
+    integer :: iw2
+    integer :: iw3
+    integer :: iw4
+    integer :: jdvw
+    integer :: jw1
+    integer :: jw2
+    integer :: jw3
+    integer :: lmn
+    integer :: lnl
+    integer :: lvhags
+    integer :: lwork
+    integer :: lzimn
+    integer :: mdab
+    integer :: mmax
+    integer :: ndab
+    integer :: nlat
+    integer :: nlon
+    integer :: nt
+    real :: v
+    real :: w
+    real :: work
+    real :: wvhags
     dimension v(idvw, jdvw, 1), w(idvw, jdvw, 1), br(mdab, ndab, 1), &
         bi(mdab, ndab, 1), cr(mdab, ndab, 1), ci(mdab, ndab, 1), &
         work(1), wvhags(1)
@@ -388,6 +423,49 @@ end subroutine vhags
 
 subroutine vhags1(nlat, nlon, ityp, nt, imid, idvw, jdvw, v, w, mdab, &
     ndab, br, bi, cr, ci, idv, ve, vo, we, wo, work, idz, vb, wb, wrfft)
+    implicit none
+    real :: bi
+    real :: br
+    real :: ci
+    real :: cr
+    real :: fsn
+    integer :: i
+    integer :: idv
+    integer :: idvw
+    integer :: idz
+    integer :: imid
+    integer :: imm1
+    integer :: ityp
+    integer :: j
+    integer :: jdvw
+    integer :: k
+    integer :: m
+    integer :: mb
+    integer :: mdab
+    integer :: mlat
+    integer :: mlon
+    integer :: mmax
+    integer :: mp1
+    integer :: mp2
+    integer :: ndab
+    integer :: ndo1
+    integer :: ndo2
+    integer :: nlat
+    integer :: nlon
+    integer :: nlp1
+    integer :: np1
+    integer :: nt
+    real :: tsn
+    real :: v
+    real :: vb
+    real :: ve
+    real :: vo
+    real :: w
+    real :: wb
+    real :: we
+    real :: wo
+    real :: work
+    real :: wrfft
     dimension v(idvw, jdvw, 1), w(idvw, jdvw, 1), br(mdab, ndab, 1), &
         bi(mdab, ndab, 1), cr(mdab, ndab, 1), ci(mdab, ndab, 1), &
         ve(idv, nlon, 1), vo(idv, nlon, 1), we(idv, nlon, 1), &
@@ -1146,6 +1224,22 @@ end subroutine vhags1
 
 
 subroutine vhagsi(nlat, nlon, wvhags, lvhags, dwork, ldwork, ierror)
+    implicit none
+    integer :: ierror
+    integer :: imid
+    integer :: iw1
+    integer :: iw2
+    integer :: iw3
+    integer :: iw4
+    integer :: jw1
+    integer :: jw2
+    integer :: jw3
+    integer :: ldwork
+    integer :: lmn
+    integer :: lvhags
+    integer :: nlat
+    integer :: nlon
+    real :: wvhags
     dimension wvhags(lvhags)
     real dwork(ldwork)
     ierror = 1
@@ -1175,6 +1269,22 @@ subroutine vhagsi(nlat, nlon, wvhags, lvhags, dwork, ldwork, ierror)
 end subroutine vhagsi
 
 subroutine vhgai1(nlat, imid, vb, wb, dthet, dwts, dpbar, work)
+    integer :: i
+    integer :: id
+    integer :: ierror
+    integer :: imid
+    integer :: ix
+    integer :: iy
+    integer :: lwk
+    integer :: m
+    integer :: mn
+    integer :: n
+    integer :: nlat
+    integer :: nm
+    integer :: np
+    integer :: nz
+    real :: vb
+    real :: wb
     dimension vb(imid, *), wb(imid, *)
     real abel, bbel, cbel, ssqr2, dcf
     real dpbar(imid, nlat, 3), dthet(*), dwts(*), work(*)

@@ -265,6 +265,40 @@
 !   
 subroutine idvtgc(nlat, nlon, isym, nt, v, w, idvw, jdvw, ad, bd, av, bv, &
     mdab, ndab, wvhsgc, lvhsgc, work, lwork, pertbd, pertbv, ierror)
+    implicit none
+    real :: ad
+    real :: av
+    real :: bd
+    real :: bv
+    integer :: ibi
+    integer :: ibr
+    integer :: ici
+    integer :: icr
+    integer :: idvw
+    integer :: ierror
+    integer :: imid
+    integer :: is
+    integer :: isym
+    integer :: iwk
+    integer :: jdvw
+    integer :: labc
+    integer :: liwk
+    integer :: lvhsgc
+    integer :: lwork
+    integer :: lzz1
+    integer :: mdab
+    integer :: mmax
+    integer :: mn
+    integer :: ndab
+    integer :: nlat
+    integer :: nlon
+    integer :: nt
+    real :: pertbd
+    real :: pertbv
+    real :: v
+    real :: w
+    real :: work
+    real :: wvhsgc
     dimension w(idvw, jdvw, nt), v(idvw, jdvw, nt), pertbd(nt), pertbv(nt)
     dimension ad(mdab, ndab, nt), bd(mdab, ndab, nt)
     dimension av(mdab, ndab, nt), bv(mdab, ndab, nt)
@@ -327,6 +361,39 @@ end subroutine idvtgc
 subroutine idvtgc1(nlat, nlon, isym, nt, v, w, idvw, jdvw, br, bi, &
     cr, ci, mmax, sqnn, mdab, ndab, ad, bd, av, bv, wvhsgc, lvhsgc, wk, lwk, &
     pertbd, pertbv, ierror)
+    implicit none
+    real :: ad
+    real :: av
+    real :: bd
+    real :: bi
+    real :: br
+    real :: bv
+    real :: ci
+    real :: cr
+    real :: fn
+    integer :: idvw
+    integer :: ierror
+    integer :: isym
+    integer :: ityp
+    integer :: jdvw
+    integer :: k
+    integer :: lvhsgc
+    integer :: lwk
+    integer :: m
+    integer :: mdab
+    integer :: mmax
+    integer :: n
+    integer :: ndab
+    integer :: nlat
+    integer :: nlon
+    integer :: nt
+    real :: pertbd
+    real :: pertbv
+    real :: sqnn
+    real :: v
+    real :: w
+    real :: wk
+    real :: wvhsgc
     dimension w(idvw, jdvw, nt), v(idvw, jdvw, nt)
     dimension br(mmax, nlat, nt), bi(mmax, nlat, nt), sqnn(nlat)
     dimension cr(mmax, nlat, nt), ci(mmax, nlat, nt)

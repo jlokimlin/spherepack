@@ -35,6 +35,41 @@
 !
 subroutine visgeo (m, idp, jdp, x, y, z, h, eyer, eyelat, eyelon, &
                           work, lwork, iwork, liwork, ierror)
+implicit none
+real :: eyelat
+real :: eyelon
+real :: eyer
+real :: h
+integer :: i
+integer :: i1
+integer :: i10
+integer :: i11
+integer :: i12
+integer :: i13
+integer :: i14
+integer :: i2
+integer :: i3
+integer :: i4
+integer :: i5
+integer :: i6
+integer :: i7
+integer :: i8
+integer :: i9
+integer :: idp
+integer :: ierror
+integer :: j
+integer :: jdp
+integer :: k
+integer :: lg
+integer :: liwork
+integer :: lt
+integer :: lwork
+integer :: m
+integer :: mmsq
+real :: work
+real :: x
+real :: y
+real :: z
 !
 !     subroutine visgeo will display a function on the sphere
 !     as a solid. ie. as a "lumpy" sphere. visgeo calls subroutine
@@ -163,6 +198,43 @@ return
 end subroutine visgeo
 subroutine visgeo1(m, idp, jdp, h, eyer, eyelat, eyelon, &
     xi, yi, zi, x1, y1, z1, x2, y2, z2, x3, y3, z3, itype, work, x, y, z, iwork)
+implicit none
+real :: dtr
+real :: elambda
+real :: eyelat
+real :: eyelon
+real :: eyer
+real :: h
+integer :: i
+integer :: idp
+integer :: itype
+integer :: j
+integer :: jdp
+integer :: k
+integer :: m
+integer :: ntri
+real :: pi
+real :: rad
+real :: theta
+real :: work
+real :: x
+real :: x1
+real :: x2
+real :: x3
+real :: xeye
+real :: xi
+real :: y
+real :: y1
+real :: y2
+real :: y3
+real :: yeye
+real :: yi
+real :: z
+real :: z1
+real :: z2
+real :: z3
+real :: zeye
+real :: zi
 dimension h(idp, jdp, 5), xi(idp, jdp, 5), yi(idp, jdp, 5), zi(idp, jdp, 5), &
 x1(*), y1(*), z1(*), x2(*), y2(*), z2(*), x3(*), y3(*), z3(*), itype(*), &
 work(*), x(m+m-1, m, 5), y(m+m-1, m, 5), z(m+m-1, m, 5)
@@ -174,8 +246,8 @@ integer iwork(*)
 do 10 k=1, 5
 do 10 j=1, m
 do 10 i=1, m+m-1
-call ctos(xi(i, j, k), yi(i, j, k), zi(i, j, k), rad, theta, elambda)
-call stoc(h(i, j, k), theta, elambda, x(i, j, k), y(i, j, k), z(i, j, k))
+call cart2sph(xi(i, j, k), yi(i, j, k), zi(i, j, k), rad, theta, elambda)
+call sph2cart(h(i, j, k), theta, elambda, x(i, j, k), y(i, j, k), z(i, j, k))
 10 continue  
 ntri = 0
 do 20 k=1, 5
@@ -220,7 +292,15 @@ call vsurf(xeye, yeye, zeye, ntri, x1, y1, z1, x2, y2, z2, &
                  x3, y3, z3, itype, work, iwork)
 return
 end subroutine visgeo1
-subroutine ctos(x, y, z, r, theta, phi)
+subroutine cart2sph(x, y, z, r, theta, phi)
+implicit none
+real :: phi
+real :: r
+real :: r1
+real :: theta
+real :: x
+real :: y
+real :: z
 r1 = x*x+y*y
 if (r1 /= 0.) go to 10
 phi = 0.
@@ -232,16 +312,40 @@ r1 = sqrt(r1)
 phi = atan2(y, x)
 theta = atan2(r1, z)
 return
-end subroutine ctos
-subroutine stoc(r, theta, phi, x, y, z)
+end subroutine cart2sph
+subroutine sph2cart(r, theta, phi, x, y, z)
+implicit none
+real :: phi
+real :: r
+real :: st
+real :: theta
+real :: x
+real :: y
+real :: z
 st = sin(theta)
 x = r*st*cos(phi)
 y = r*st*sin(phi)
 z = r*cos(theta)
 return
-end subroutine stoc
+end subroutine sph2cart
 subroutine vsurf(xeye, yeye, zeye, ntri, x1, y1, z1, x2, y2, z2, &
                  x3, y3, z3, itype, work, iwork)
+implicit none
+integer :: itype
+integer :: ntri
+real :: work
+real :: x1
+real :: x2
+real :: x3
+real :: xeye
+real :: y1
+real :: y2
+real :: y3
+real :: yeye
+real :: z1
+real :: z2
+real :: z3
+real :: zeye
 !
 !    subroutine vsurf is like subroutine hidel except the triangles
 !    are categorized. vsurf is also like solid except triangles rather
@@ -285,6 +389,183 @@ end subroutine vsurf
 subroutine vsurf1(xeye, yeye, zeye, ntri, x1, y1, z1, x2, y2, z2, x3, y3, z3, &
  itype, px1, py1, px2, py2, px3, py3, vx1, vy1, vx2, vy2, vx3, vy3, tl, tr, kh, &
  next, istart, ifinal)
+implicit none
+real :: a
+real :: apl
+real :: b
+real :: bpl
+real :: c
+real :: c14
+real :: c17
+real :: c25
+real :: c27
+real :: c36
+real :: c37
+real :: cpl
+real :: cprod
+real :: d
+real :: den
+real :: dmx
+real :: dmy
+real :: dpl
+real :: dum1
+real :: dum2
+real :: dxt
+real :: fntri
+real :: hdx
+real :: hdy
+real :: hgr
+real :: hr
+integer :: i
+integer :: i1f
+integer :: i1s
+integer :: i2
+integer :: i2m
+integer :: icv
+integer :: id
+integer :: id1
+integer :: id2
+integer :: id3
+integer :: if
+integer :: ifinal
+integer :: ifx
+integer :: ijd
+integer :: il
+integer :: ip2
+integer :: ir
+integer :: ir1
+integer :: ir2
+integer :: ird
+integer :: irdp
+integer :: irmax
+integer :: irmp1
+integer :: irp1
+integer :: isd
+integer :: isize
+integer :: ist
+integer :: istart
+integer :: isx
+integer :: isxm
+integer :: ith
+integer :: ityp
+integer :: itype
+integer :: ixf
+integer :: ixh
+integer :: ixs
+integer :: j1
+integer :: j1f
+integer :: j1s
+integer :: j2
+integer :: j2m
+integer :: jd
+integer :: jf
+integer :: k
+integer :: k1
+integer :: k2
+integer :: kb
+integer :: kcv
+integer :: kd
+integer :: kdf
+integer :: kds
+integer :: kh
+integer :: ks
+integer :: l
+integer :: last
+integer :: ldo
+integer :: lf
+integer :: ls
+integer :: ltp
+integer :: maxs
+integer :: nct
+integer :: ncv
+integer :: next
+integer :: ns
+integer :: nseg
+integer :: nsegp
+integer :: ntri
+real :: pmax
+real :: pmin
+real :: px1
+real :: px1h
+real :: px2
+real :: px3
+real :: px4
+real :: px5
+real :: py1
+real :: py1h
+real :: py2
+real :: py3
+real :: py4
+real :: py5
+real :: thold
+real :: til
+real :: tim
+real :: tir
+real :: tl
+real :: tl1
+real :: tl2
+real :: tlh
+real :: tmax
+real :: tmin
+real :: tr
+real :: trh
+real :: vx1
+real :: vx1t
+real :: vx2
+real :: vx2t
+real :: vx3
+real :: vx3t
+real :: vy1
+real :: vy1t
+real :: vy2
+real :: vy2t
+real :: vy3
+real :: vy3t
+real :: vz1t
+real :: vz2t
+real :: vz3t
+real :: x
+real :: x1
+real :: x1hold
+real :: x2
+real :: x3
+real :: x4
+real :: x5
+real :: x54
+real :: xa
+real :: xb
+real :: xeye
+real :: xmax
+real :: xmid
+real :: xmin
+real :: xpl
+real :: xpr
+real :: y
+real :: y1
+real :: y1hold
+real :: y2
+real :: y3
+real :: y4
+real :: y5
+real :: y54
+real :: ya
+real :: yb
+real :: yeye
+real :: ymax
+real :: ymid
+real :: ymin
+real :: ypl
+real :: ypr
+real :: z
+real :: z1
+real :: z1hold
+real :: z2
+real :: z3
+real :: z4
+real :: z5
+real :: zeye
+real :: zpl
+real :: zpr
 !
 dimension x1(ntri), y1(ntri), z1(ntri), x2(ntri), y2(ntri), z2(ntri), &
           x3(ntri), y3(ntri), z3(ntri), itype(ntri), &
@@ -774,6 +1055,32 @@ call line(xa, ya, xb, yb)
 call frame
 end subroutine vsurf1
 subroutine prjct(init, xeye, yeye, zeye, x, y, z, px, py)
+implicit none
+real :: cx1
+real :: cx2
+real :: cx3
+real :: cy1
+real :: cy2
+real :: cy3
+real :: cz2
+real :: cz3
+real :: d1
+real :: d2
+integer :: init
+real :: px
+real :: py
+real :: rads1
+real :: rads2
+real :: ratio
+real :: x
+real :: x1
+real :: xeye
+real :: y
+real :: y1
+real :: yeye
+real :: z
+real :: z1
+real :: zeye
 !
 !     subroutine prjct projects the point x, y, z onto a plane through
 !     the origin that is perpendicular to a line between the origin
@@ -816,6 +1123,15 @@ py = ratio*y1
 return
 end subroutine prjct
 subroutine box(isd, istart, next, l, list)
+implicit none
+integer :: id
+integer :: idx
+integer :: isd
+integer :: istart
+integer :: jd
+integer :: l
+integer :: list
+integer :: next
 dimension istart(isd, isd), next(1), list(1)
 do 30 jd=1, isd
 do 10 id=1, isd

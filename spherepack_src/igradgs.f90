@@ -228,6 +228,38 @@
 !   
 subroutine igradgs(nlat, nlon, isym, nt, sf, isf, jsf, br, bi, mdb, ndb, &
     wshsgs, lshsgs, work, lwork, ierror)
+    implicit none
+    real :: bi
+    real :: br
+    integer :: ia
+    integer :: ib
+    integer :: ierror
+    integer :: imid
+    integer :: is
+    integer :: isf
+    integer :: isym
+    integer :: iwk
+    integer :: jsf
+    integer :: l1
+    integer :: l2
+    integer :: liwk
+    integer :: lp
+    integer :: ls
+    integer :: lshsgs
+    integer :: lwkmin
+    integer :: lwork
+    integer :: mab
+    integer :: mdb
+    integer :: mmax
+    integer :: mn
+    integer :: ndb
+    integer :: nlat
+    integer :: nln
+    integer :: nlon
+    integer :: nt
+    real :: sf
+    real :: work
+    real :: wshsgs
     dimension sf(isf, jsf, nt)
     dimension br(mdb, ndb, nt), bi(mdb, ndb, nt)
     dimension wshsgs(lshsgs), work(lwork)
@@ -294,6 +326,32 @@ end subroutine igradgs
 
 subroutine igrdgs1(nlat, nlon, isym, nt, sf, isf, jsf, a, b, mab, &
     sqnn, mdb, ndb, br, bi, wsav, lsav, wk, lwk, ierror)
+    implicit none
+    real :: a
+    real :: b
+    real :: bi
+    real :: br
+    real :: fn
+    integer :: ierror
+    integer :: isf
+    integer :: isym
+    integer :: jsf
+    integer :: k
+    integer :: lsav
+    integer :: lwk
+    integer :: m
+    integer :: mab
+    integer :: mdb
+    integer :: mmax
+    integer :: n
+    integer :: ndb
+    integer :: nlat
+    integer :: nlon
+    integer :: nt
+    real :: sf
+    real :: sqnn
+    real :: wk
+    real :: wsav
     dimension sf(isf, jsf, nt)
     dimension br(mdb, ndb, nt), bi(mdb, ndb, nt), sqnn(nlat)
     dimension a(mab, nlat, nt), b(mab, nlat, nt)

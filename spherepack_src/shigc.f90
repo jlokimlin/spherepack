@@ -117,6 +117,27 @@
 !
 ! ****************************************************************
 subroutine shigc(nlat, nlon, wshigc, lshigc, dwork, ldwork, ierror)
+    implicit none
+    integer :: i1
+    integer :: i2
+    integer :: i3
+    integer :: i4
+    integer :: i5
+    integer :: i6
+    integer :: i7
+    integer :: idth
+    integer :: idwts
+    integer :: ierror
+    integer :: iw
+    integer :: l
+    integer :: l1
+    integer :: l2
+    integer :: late
+    integer :: ldwork
+    integer :: lshigc
+    integer :: nlat
+    integer :: nlon
+    real :: wshigc
     !     this subroutine must be called before calling shsgc/shagc with
     !     fixed nlat, nlon. it precomputes quantites such as the gaussian
     !     points and weights, m=0, m=1 legendre polynomials, recursion
@@ -164,6 +185,28 @@ end subroutine shigc
 
 subroutine shigc1(nlat, nlon, l, late, wts, p0n, p1n, abel, bbel, cbel, &
     wfft, dtheta, dwts, work, ier)
+    implicit none
+    real :: abel
+    real :: bbel
+    real :: cbel
+    integer :: i
+    integer :: ier
+    integer :: imn
+    integer :: imndx
+    integer :: indx
+    integer :: l
+    integer :: late
+    integer :: lw
+    integer :: m
+    integer :: mlim
+    integer :: n
+    integer :: nlat
+    integer :: nlon
+    integer :: np1
+    real :: p0n
+    real :: p1n
+    real :: wfft
+    real :: wts
     dimension wts(nlat), p0n(nlat, late), p1n(nlat, late), abel(1), bbel(1), &
         cbel(1), wfft(1), dtheta(nlat), dwts(nlat)
     real pb, dtheta, dwts, work(*)

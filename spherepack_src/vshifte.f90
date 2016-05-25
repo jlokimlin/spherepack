@@ -512,6 +512,8 @@ subroutine vhftreg(nlon, nlat, uoff, ureg, wsav, nr, nlat2, &
 end subroutine vhftreg
 
 subroutine vshifti(ioff, nlon, nlat, lsav, wsav, ier)
+    implicit none
+    integer :: lsav
     !
     !     initialize wsav for vshifte
     !

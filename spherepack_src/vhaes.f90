@@ -326,6 +326,39 @@
 !
 subroutine vhaes(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
     mdab, ndab, wvhaes, lvhaes, work, lwork, ierror)
+    implicit none
+    real :: bi
+    real :: br
+    real :: ci
+    real :: cr
+    integer :: idv
+    integer :: idvw
+    integer :: idz
+    integer :: ierror
+    integer :: imid
+    integer :: ist
+    integer :: ityp
+    integer :: iw1
+    integer :: iw2
+    integer :: iw3
+    integer :: iw4
+    integer :: jdvw
+    integer :: jw1
+    integer :: jw2
+    integer :: lnl
+    integer :: lvhaes
+    integer :: lwork
+    integer :: lzimn
+    integer :: mdab
+    integer :: mmax
+    integer :: ndab
+    integer :: nlat
+    integer :: nlon
+    integer :: nt
+    real :: v
+    real :: w
+    real :: work
+    real :: wvhaes
     dimension v(idvw, jdvw, 1), w(idvw, jdvw, 1), br(mdab, ndab, 1), &
         bi(mdab, ndab, 1), cr(mdab, ndab, 1), ci(mdab, ndab, 1), &
         work(1), wvhaes(1)
@@ -377,6 +410,49 @@ end subroutine vhaes
 
 subroutine vhaes1(nlat, nlon, ityp, nt, imid, idvw, jdvw, v, w, mdab, &
     ndab, br, bi, cr, ci, idv, ve, vo, we, wo, work, idz, zv, zw, wrfft)
+    implicit none
+    real :: bi
+    real :: br
+    real :: ci
+    real :: cr
+    real :: fsn
+    integer :: i
+    integer :: idv
+    integer :: idvw
+    integer :: idz
+    integer :: imid
+    integer :: imm1
+    integer :: ityp
+    integer :: j
+    integer :: jdvw
+    integer :: k
+    integer :: m
+    integer :: mb
+    integer :: mdab
+    integer :: mlat
+    integer :: mlon
+    integer :: mmax
+    integer :: mp1
+    integer :: mp2
+    integer :: ndab
+    integer :: ndo1
+    integer :: ndo2
+    integer :: nlat
+    integer :: nlon
+    integer :: nlp1
+    integer :: np1
+    integer :: nt
+    real :: tsn
+    real :: v
+    real :: ve
+    real :: vo
+    real :: w
+    real :: we
+    real :: wo
+    real :: work
+    real :: wrfft
+    real :: zv
+    real :: zw
     dimension v(idvw, jdvw, 1), w(idvw, jdvw, 1), br(mdab, ndab, 1), &
         bi(mdab, ndab, 1), cr(mdab, ndab, 1), ci(mdab, ndab, 1), &
         ve(idv, nlon, 1), vo(idv, nlon, 1), we(idv, nlon, 1), &
@@ -1136,6 +1212,21 @@ end subroutine vhaes1
 
 subroutine vhaesi(nlat, nlon, wvhaes, lvhaes, work, lwork, dwork, &
     ldwork, ierror)
+    implicit none
+    integer :: idz
+    integer :: ierror
+    integer :: imid
+    integer :: iw1
+    integer :: labc
+    integer :: ldwork
+    integer :: lvhaes
+    integer :: lwork
+    integer :: lzimn
+    integer :: mmax
+    integer :: nlat
+    integer :: nlon
+    real :: work
+    real :: wvhaes
     !
     !     dwork must be of length at least 2*(nlat+1)
     !
@@ -1169,6 +1260,20 @@ end subroutine vhaesi
 
 
 subroutine vea1(nlat, nlon, imid, zv, zw, idz, zin, wzvin, dwork)
+    implicit none
+    integer :: i3
+    integer :: idz
+    integer :: imid
+    integer :: m
+    integer :: mn
+    integer :: mp1
+    integer :: nlat
+    integer :: nlon
+    integer :: np1
+    real :: wzvin
+    real :: zin
+    real :: zv
+    real :: zw
     dimension zv(idz, 1), zw(idz, 1), zin(imid, nlat, 3), wzvin(1)
     real dwork(*)
 

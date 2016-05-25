@@ -305,6 +305,31 @@
 ! ****************************************************************
 subroutine shagc(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, &
                     wshagc, lshagc, work, lwork, ierror)
+implicit none
+real :: a
+real :: b
+real :: g
+integer :: idg
+integer :: ierror
+integer :: ifft
+integer :: ipmn
+integer :: isym
+integer :: iwts
+integer :: jdg
+integer :: l
+integer :: l1
+integer :: l2
+integer :: lat
+integer :: late
+integer :: lshagc
+integer :: lwork
+integer :: mdab
+integer :: ndab
+integer :: nlat
+integer :: nlon
+integer :: nt
+real :: work
+real :: wshagc
 !     subroutine shagc performs the spherical harmonic analysis on
 !     a gaussian grid on the array(s) in g and returns the coefficients
 !     in array(s) a, b. the necessary legendre polynomials are computed
@@ -361,6 +386,43 @@ return
 end subroutine shagc
 subroutine shagc1(nlat, nlon, l, lat, mode, gs, idg, jdg, nt, a, b, mdab, &
                   ndab, w, wts, wfft, late, pmn, g)
+implicit none
+real :: a
+real :: b
+real :: g
+real :: gs
+integer :: i
+integer :: idg
+integer :: is
+integer :: j
+integer :: jdg
+integer :: k
+integer :: km
+integer :: l
+integer :: lat
+integer :: late
+integer :: lm1
+integer :: lp1
+integer :: m
+integer :: mdab
+integer :: mode
+integer :: mp1
+integer :: mp2
+integer :: ms
+integer :: ndab
+integer :: nl2
+integer :: nlat
+integer :: nlon
+integer :: np1
+integer :: ns
+integer :: nt
+real :: pmn
+real :: sfn
+real :: t1
+real :: t2
+real :: w
+real :: wfft
+real :: wts
 dimension gs(idg, jdg, nt), a(mdab, ndab, nt), &
           b(mdab, ndab, nt), g(lat, nlon, nt)
 dimension w(1), wts(nlat), wfft(1), pmn(nlat, late, 3)
@@ -526,6 +588,27 @@ end if
 return
 end subroutine shagc1
 subroutine shagci(nlat, nlon, wshagc, lshagc, dwork, ldwork, ierror)
+implicit none
+integer :: i1
+integer :: i2
+integer :: i3
+integer :: i4
+integer :: i5
+integer :: i6
+integer :: i7
+integer :: idth
+integer :: idwts
+integer :: ierror
+integer :: iw
+integer :: l
+integer :: l1
+integer :: l2
+integer :: late
+integer :: ldwork
+integer :: lshagc
+integer :: nlat
+integer :: nlon
+real :: wshagc
 !     this subroutine must be called before calling shagc with
 !     fixed nlat, nlon. it precomputes quantites such as the gaussian
 !     points and weights, m=0, m=1 legendre polynomials, recursion
@@ -568,6 +651,28 @@ return
 end subroutine shagci
 subroutine shagci1(nlat, nlon, l, late, wts, p0n, p1n, abel, bbel, cbel, &
                   wfft, dtheta, dwts, work, ier)
+implicit none
+real :: abel
+real :: bbel
+real :: cbel
+integer :: i
+integer :: ier
+integer :: imn
+integer :: imndx
+integer :: indx
+integer :: l
+integer :: late
+integer :: lw
+integer :: m
+integer :: mlim
+integer :: n
+integer :: nlat
+integer :: nlon
+integer :: np1
+real :: p0n
+real :: p1n
+real :: wfft
+real :: wts
 dimension wts(nlat), p0n(nlat, late), p1n(nlat, late), abel(1), bbel(1), &
  cbel(1), wfft(1)
 real pb, dtheta(nlat), dwts(nlat), work(*)

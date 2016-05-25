@@ -384,6 +384,32 @@ end subroutine divec
 
 subroutine divec1(nlat, nlon, isym, nt, dv, idv, jdv, br, bi, mdb, ndb, &
     a, b, mab, sqnn, wshsec, lshsec, wk, lwk, ierror)
+    implicit none
+    real :: a
+    real :: b
+    real :: bi
+    real :: br
+    real :: dv
+    real :: fn
+    integer :: idv
+    integer :: ierror
+    integer :: isym
+    integer :: jdv
+    integer :: k
+    integer :: lshsec
+    integer :: lwk
+    integer :: m
+    integer :: mab
+    integer :: mdb
+    integer :: mmax
+    integer :: n
+    integer :: ndb
+    integer :: nlat
+    integer :: nlon
+    integer :: nt
+    real :: sqnn
+    real :: wk
+    real :: wshsec
     dimension dv(idv, jdv, nt), br(mdb, ndb, nt), bi(mdb, ndb, nt)
     dimension a(mab, nlat, nt), b(mab, nlat, nt), sqnn(nlat)
     dimension wshsec(lshsec), wk(lwk)

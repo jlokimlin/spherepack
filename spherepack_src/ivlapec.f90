@@ -307,6 +307,42 @@
 !
 subroutine ivlapec(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
     mdbc, ndbc, wvhsec, lvhsec, work, lwork, ierror)
+    implicit none
+    real :: bi
+    real :: br
+    real :: ci
+    real :: cr
+    integer :: ibi
+    integer :: ibr
+    integer :: ici
+    integer :: icr
+    integer :: idvw
+    integer :: idz
+    integer :: ierror
+    integer :: ifn
+    integer :: imid
+    integer :: ityp
+    integer :: iwk
+    integer :: jdvw
+    integer :: labc
+    integer :: liwk
+    integer :: lvhsec
+    integer :: lwkmin
+    integer :: lwork
+    integer :: lzimn
+    integer :: lzz1
+    integer :: mdbc
+    integer :: mmax
+    integer :: mn
+    integer :: ndbc
+    integer :: nlat
+    integer :: nlon
+    integer :: nt
+    real :: typ
+    real :: v
+    real :: w
+    real :: work
+    real :: wvhsec
     dimension v(idvw, jdvw, nt), w(idvw, jdvw, nt)
     dimension br(mdbc, ndbc, nt), bi(mdbc, ndbc, nt)
     dimension cr(mdbc, ndbc, nt), ci(mdbc, ndbc, nt)
@@ -429,6 +465,36 @@ end subroutine ivlapec
 subroutine ivlapec1(nlat, nlon, ityp, nt, v, w, idvw, jdvw, brvw, &
     bivw, crvw, civw, mmax, fnn, mdbc, ndbc, br, bi, cr, ci, wsave, lwsav, &
     wk, lwk, ierror)
+    implicit none
+    real :: bi
+    real :: bivw
+    real :: br
+    real :: brvw
+    real :: ci
+    real :: civw
+    real :: cr
+    real :: crvw
+    real :: fn
+    real :: fnn
+    integer :: idvw
+    integer :: ierror
+    integer :: ityp
+    integer :: jdvw
+    integer :: k
+    integer :: lwk
+    integer :: lwsav
+    integer :: m
+    integer :: mdbc
+    integer :: mmax
+    integer :: n
+    integer :: ndbc
+    integer :: nlat
+    integer :: nlon
+    integer :: nt
+    real :: v
+    real :: w
+    real :: wk
+    real :: wsave
     dimension v(idvw, jdvw, nt), w(idvw, jdvw, nt)
     dimension fnn(nlat), brvw(mmax, nlat, nt), bivw(mmax, nlat, nt)
     dimension crvw(mmax, nlat, nt), civw(mmax, nlat, nt)

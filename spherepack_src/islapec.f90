@@ -261,6 +261,40 @@
 
 subroutine islapec(nlat, nlon, isym, nt, xlmbda, sf, ids, jds, a, b, &
     mdab, ndab, wshsec, lshsec, work, lwork, pertrb, ierror)
+    implicit none
+    real :: a
+    real :: b
+    integer :: ia
+    integer :: ib
+    integer :: ids
+    integer :: ierror
+    integer :: ifn
+    integer :: imid
+    integer :: isym
+    integer :: iwk
+    integer :: jds
+    integer :: k
+    integer :: l1
+    integer :: l2
+    integer :: ls
+    integer :: lshsec
+    integer :: lwk
+    integer :: lwkmin
+    integer :: lwmin
+    integer :: lwork
+    integer :: mdab
+    integer :: mmax
+    integer :: mn
+    integer :: ndab
+    integer :: nlat
+    integer :: nln
+    integer :: nlon
+    integer :: nt
+    real :: pertrb
+    real :: sf
+    real :: work
+    real :: wshsec
+    real :: xlmbda
     dimension sf(ids, jds, nt), a(mdab, ndab, nt), b(mdab, ndab, nt)
     dimension wshsec(lshsec), work(lwork), pertrb(nt), xlmbda(nt)
     !
@@ -337,6 +371,33 @@ end subroutine islapec
 
 subroutine islpec1(nlat, nlon, isym, nt, xlmbda, sf, ids, jds, a, b, &
     mdab, ndab, as, bs, mmax, fnn, wshsec, lshsec, wk, lwk, pertrb, ierror)
+    implicit none
+    real :: a
+    real :: as
+    real :: b
+    real :: bs
+    real :: fn
+    real :: fnn
+    integer :: ids
+    integer :: ierror
+    integer :: isym
+    integer :: jds
+    integer :: k
+    integer :: lshsec
+    integer :: lwk
+    integer :: m
+    integer :: mdab
+    integer :: mmax
+    integer :: n
+    integer :: ndab
+    integer :: nlat
+    integer :: nlon
+    integer :: nt
+    real :: pertrb
+    real :: sf
+    real :: wk
+    real :: wshsec
+    real :: xlmbda
     dimension sf(ids, jds, nt), a(mdab, ndab, nt), b(mdab, ndab, nt)
     dimension as(mmax, nlat, nt), bs(mmax, nlat, nt), fnn(nlat)
     dimension wshsec(lshsec), wk(lwk), pertrb(nt), xlmbda(nt)

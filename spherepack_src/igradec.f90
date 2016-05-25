@@ -236,6 +236,38 @@
 !   
 subroutine igradec(nlat, nlon, isym, nt, sf, isf, jsf, br, bi, mdb, ndb, &
     wshsec, lshsec, work, lwork, ierror)
+    implicit none
+    real :: bi
+    real :: br
+    integer :: ia
+    integer :: ib
+    integer :: ierror
+    integer :: imid
+    integer :: is
+    integer :: isf
+    integer :: isym
+    integer :: iwk
+    integer :: jsf
+    integer :: l1
+    integer :: l2
+    integer :: liwk
+    integer :: lpimn
+    integer :: ls
+    integer :: lshsec
+    integer :: lwkmin
+    integer :: lwork
+    integer :: mab
+    integer :: mdb
+    integer :: mmax
+    integer :: mn
+    integer :: ndb
+    integer :: nlat
+    integer :: nln
+    integer :: nlon
+    integer :: nt
+    real :: sf
+    real :: work
+    real :: wshsec
     dimension sf(isf, jsf, nt)
     dimension br(mdb, ndb, nt), bi(mdb, ndb, nt)
     dimension wshsec(lshsec), work(lwork)
@@ -309,6 +341,32 @@ end subroutine igradec
 
 subroutine igrdec1(nlat, nlon, isym, nt, sf, isf, jsf, a, b, mab, &
     sqnn, mdb, ndb, br, bi, wshsec, lshsec, wk, lwk, ierror)
+    implicit none
+    real :: a
+    real :: b
+    real :: bi
+    real :: br
+    real :: fn
+    integer :: ierror
+    integer :: isf
+    integer :: isym
+    integer :: jsf
+    integer :: k
+    integer :: lshsec
+    integer :: lwk
+    integer :: m
+    integer :: mab
+    integer :: mdb
+    integer :: mmax
+    integer :: n
+    integer :: ndb
+    integer :: nlat
+    integer :: nlon
+    integer :: nt
+    real :: sf
+    real :: sqnn
+    real :: wk
+    real :: wshsec
     dimension sf(isf, jsf, nt)
     dimension br(mdb, ndb, nt), bi(mdb, ndb, nt), sqnn(nlat)
     dimension a(mab, nlat, nt), b(mab, nlat, nt)

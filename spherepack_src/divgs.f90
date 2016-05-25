@@ -343,6 +343,32 @@ end subroutine divgs
 
 subroutine divgs1(nlat, nlon, isym, nt, divg, idiv, jdiv, br, bi, mdb, ndb, &
     a, b, mab, sqnn, wshsgs, lshsgs, wk, lwk, ierror)
+    implicit none
+    real :: a
+    real :: b
+    real :: bi
+    real :: br
+    real :: divg
+    real :: fn
+    integer :: idiv
+    integer :: ierror
+    integer :: isym
+    integer :: jdiv
+    integer :: k
+    integer :: lshsgs
+    integer :: lwk
+    integer :: m
+    integer :: mab
+    integer :: mdb
+    integer :: mmax
+    integer :: n
+    integer :: ndb
+    integer :: nlat
+    integer :: nlon
+    integer :: nt
+    real :: sqnn
+    real :: wk
+    real :: wshsgs
     dimension divg(idiv, jdiv, nt), br(mdb, ndb, nt), bi(mdb, ndb, nt)
     dimension a(mab, nlat, nt), b(mab, nlat, nt), sqnn(nlat)
     dimension wshsgs(lshsgs), wk(lwk)

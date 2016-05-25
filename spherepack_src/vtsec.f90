@@ -336,6 +336,41 @@
 !                                                                              
 subroutine vtsec(nlat, nlon, ityp, nt, vt, wt, idvw, jdvw, br, bi, cr, ci, &
            mdab, ndab, wvts, lwvts, work, lwork, ierror)
+implicit none
+real :: bi
+real :: br
+real :: ci
+real :: cr
+integer :: idv
+integer :: idvw
+integer :: ierror
+integer :: imid
+integer :: ist
+integer :: ityp
+integer :: iw1
+integer :: iw2
+integer :: iw3
+integer :: iw4
+integer :: iw5
+integer :: jdvw
+integer :: jw1
+integer :: jw2
+integer :: labc
+integer :: lnl
+integer :: lwork
+integer :: lwvts
+integer :: lwzvin
+integer :: lzz1
+integer :: mdab
+integer :: mmax
+integer :: ndab
+integer :: nlat
+integer :: nlon
+integer :: nt
+real :: vt
+real :: work
+real :: wt
+real :: wvts
 !
 dimension vt(idvw, jdvw, 1), wt(idvw, jdvw, 1), br(mdab, ndab, 1), &
           bi(mdab, ndab, 1), cr(mdab, ndab, 1), ci(mdab, ndab, 1), &
@@ -391,6 +426,49 @@ return
 end subroutine vtsec
 subroutine vtsec1(nlat, nlon, ityp, nt, imid, idvw, jdvw, vt, wt, mdab, &
    ndab, br, bi, cr, ci, idv, vte, vto, wte, wto, vb, wb, wvbin, wwbin, wrfft)
+implicit none
+real :: bi
+real :: br
+real :: ci
+real :: cr
+integer :: i
+integer :: idv
+integer :: idvw
+integer :: imid
+integer :: imm1
+integer :: ityp
+integer :: itypp
+integer :: iv
+integer :: iw
+integer :: j
+integer :: jdvw
+integer :: k
+integer :: m
+integer :: mdab
+integer :: mlat
+integer :: mlon
+integer :: mmax
+integer :: mp1
+integer :: mp2
+integer :: ndab
+integer :: ndo1
+integer :: ndo2
+integer :: nlat
+integer :: nlon
+integer :: nlp1
+integer :: np1
+integer :: nt
+real :: vb
+real :: vt
+real :: vte
+real :: vto
+real :: wb
+real :: wrfft
+real :: wt
+real :: wte
+real :: wto
+real :: wvbin
+real :: wwbin
 dimension vt(idvw, jdvw, 1), wt(idvw, jdvw, 1), br(mdab, ndab, 1), &
           bi(mdab, ndab, 1), cr(mdab, ndab, 1), ci(mdab, ndab, 1), &
           vte(idv, nlon, 1), vto(idv, nlon, 1), wte(idv, nlon, 1), &
@@ -916,6 +994,20 @@ wt(imid, j, k) = .5*wte(imid, j, k)
 return
 end subroutine vtsec1
 subroutine vtseci(nlat, nlon, wvts, lwvts, dwork, ldwork, ierror)
+implicit none
+integer :: ierror
+integer :: imid
+integer :: iw1
+integer :: iw2
+integer :: labc
+integer :: ldwork
+integer :: lwvbin
+integer :: lwvts
+integer :: lzz1
+integer :: mmax
+integer :: nlat
+integer :: nlon
+real :: wvts
 !
 dimension wvts(lwvts)
 real dwork(ldwork)

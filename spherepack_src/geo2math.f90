@@ -9,7 +9,7 @@
 !     *                                                               *
 !     *                      SPHEREPACK version 3.2                   *
 !     *                                                               *
-!     *       A Package of Fortran77 Subroutines and Programs         *
+!     *       A Package of Fortran Subroutines and Programs           *
 !     *                                                               *
 !     *              for Modeling Geophysical Processes               *
 !     *                                                               *
@@ -312,6 +312,7 @@ subroutine math2geos(ig, nlat, nlon, sm, sg, work)
             work(ij) = sm(i, j)
         end do
     end do
+
     if (ig == 0) then
         do i=1, nlat
             do j=1, nlon

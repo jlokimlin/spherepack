@@ -31,6 +31,65 @@
 !
 !
 program tvtsgs
+
+    use, intrinsic :: iso_fortran_env, only: &
+        stdout => OUTPUT_UNIT
+
+    implicit none
+    real :: a
+    real :: b
+    real :: bi
+    real :: br
+    real :: c
+    real :: ci
+    real :: cr
+    real :: da
+    real :: db
+    real :: dmax1
+    real :: dmax2
+    real :: dphi
+    real :: dtr
+    real :: hpi
+    integer :: i
+    integer :: idp
+    integer :: ierror
+    integer :: iq
+    integer :: isym
+    integer :: j
+    integer :: jdp
+    integer :: jq
+    integer :: k
+    integer :: ldwork
+    integer :: lwork
+    integer :: lwshi
+    integer :: lwvha
+    integer :: lwvhs
+    integer :: lwvts
+    integer :: mdab
+    integer :: mp1
+    integer :: ndab
+    integer :: nlat
+    integer :: nlon
+    integer :: np1
+    integer :: nt
+    real :: phi
+    real :: pi
+    real :: s
+    real :: theta
+    real :: tmp
+    real :: u
+    real :: v
+    real :: vt
+    real :: w
+    real :: work
+    real :: wshi
+    real :: wt
+    real :: wvha
+    real :: wvhs
+    real :: wvts
+    real :: x
+    real :: y
+    real :: z
     !
     !     this program checks vtsgs for computing the colatitudinal
     !     derivatives of the velocity ....
@@ -60,23 +119,23 @@ program tvtsgs
     !
     pi = acos(-1.0)
     hpi = pi/2.
-    dtr = pi/180.
+    dtr = pi/180
     isym = 0
     nt = 1
     !
     !     initialize spherepack routines
     !
     call shagsi(nlat,nlon,wshi,lwshi,work,lwork,dwork,ldwork,ierror)
-    if (ierror /= 0) write(6,55) ierror
+    if (ierror /= 0) write( stdout, 55) ierror
 55  format('testvtsgs:  error' i4 ' in shigs')
     call vhagsi(nlat,nlon,wvha,lwvha,dwork,ldwork,ierror)
-    if (ierror /= 0) write(6,57) ierror
+    if (ierror /= 0) write( stdout, 57) ierror
 57  format('testvtsgs:  error' i4 ' in vhagsi')
     call vhsgsi(nlat,nlon,wvhs,lwvhs,dwork,ldwork,ierror)
-    if (ierror /= 0) write(6,58) ierror
+    if (ierror /= 0) write( stdout, 58) ierror
 58  format(' testvtsgs: error' i4 ' in vhsgsi')
     call vtsgsi(nlat,nlon,wvts,lwvts,work,lwork,dwork,ldwork,ierror)
-    if (ierror /= 0) write(6,59) ierror
+    if (ierror /= 0) write( stdout, 59) ierror
 59  format(' testvtsgs: error' i4 ' in vtsgsi')
     !
     !     compute gauss points and weights
@@ -139,7 +198,7 @@ program tvtsgs
     !
     call vhsgs(nlat,nlon,0,1,v,w,idp,jdp,br,bi, &
         cr,ci,mdab,ndab,wvhs,lwvhs,work,lwork,ierror)
-    if (ierror /= 0) write(6,79) ierror
+    if (ierror /= 0) write( stdout, 79) ierror
 79  format(' testvtsgs: error' i4 ' in vhsgs at point 1')
     !
     !==> Initialize
@@ -152,7 +211,7 @@ program tvtsgs
         phi = (j-1)*dphi
         do i=1,nlat
             theta = dthet(i)
-            call stoc(theta,phi,u(i,j),v(i,j),w(i,j),x(i,j),y(i,j),z(i,j))
+            call sph2cart(theta,phi,u(i,j),v(i,j),w(i,j),x(i,j),y(i,j),z(i,j))
         end do
     end do
     !
@@ -160,16 +219,16 @@ program tvtsgs
     !
     call shags(nlat,nlon,0,1,x,idp,jdp,a(1,1,1),b(1,1,1), &
         mdab,ndab,wshi,lwshi,work,lwork,ierror)
-    if (ierror /= 0) write(6,16) ierror
+    if (ierror /= 0) write( stdout, 16) ierror
 16  format(' testvtsgs: error' i4 ' in shags at point 2')
     !
     !     write harmonic coefficients for x
     !
-    !      write(6,20)
+    !      write( stdout, 20)
     ! 20   format(//'  harmonic coefficients for x'//)
     !      do mp1=1,nlat
     !      do np1=mp1,nlat
-    !      write(6,5) mp1,np1,a(mp1,np1,1),b(mp1,np1,1)
+    !      write( stdout, 5) mp1,np1,a(mp1,np1,1),b(mp1,np1,1)
     ! 5    format(2i5,1p2e15.6)
     !      end do
     !      end do
@@ -178,16 +237,16 @@ program tvtsgs
     !
     call shags(nlat,nlon,0,1,y,idp,jdp,a(1,1,2),b(1,1,2), &
         mdab,ndab,wshi,lwshi,work,lwork,ierror)
-    if (ierror /= 0) write(6,17) ierror
+    if (ierror /= 0) write( stdout, 17) ierror
 17  format(' testvtsgs: error' i4 ' in shags at point 3')
     !
     !     write harmonic coefficients for y
     !
-    !      write(6,21)
+    !      write( stdout, 21)
     ! 21   format(//'  harmonic coefficients for y'//)
     !      do mp1=1,nlat
     !      do np1=mp1,nlat
-    !      write(6,5) mp1,np1,a(mp1,np1,2),b(mp1,np1,2)
+    !      write( stdout, 5) mp1,np1,a(mp1,np1,2),b(mp1,np1,2)
     !      end do
     !      end do
     !
@@ -195,16 +254,16 @@ program tvtsgs
     !
     call shags(nlat,nlon,0,1,z,idp,jdp,a(1,1,3),b(1,1,3), &
         mdab,ndab,wshi,lwshi,work,lwork,ierror)
-    if (ierror /= 0) write(6,18) ierror
+    if (ierror /= 0) write( stdout, 18) ierror
 18  format(' testvtsgs: error' i4 ' in shags at point 4')
     !
     !     write harmonic coefficients for z
     !
-    !      write(6,22)
+    !      write( stdout, 22)
     ! 22   format(//'  harmonic coefficients for z'//)
     !      do mp1=1,nlat
     !      do np1=mp1,nlat
-    !      write(6,5) mp1,np1,a(mp1,np1,3),b(mp1,np1,3)
+    !      write( stdout, 5) mp1,np1,a(mp1,np1,3),b(mp1,np1,3)
     !      end do
     !      end do
     !
@@ -230,7 +289,7 @@ program tvtsgs
     !
     call shsgs(nlat,nlon,0,9,c,idp,jdp,da,db,idp,idp, &
         wshi,lwshi,work,lwork,ierror)
-    if (ierror /= 0) write(6,19) ierror
+    if (ierror /= 0) write( stdout, 19) ierror
 19  format(' testvtsgs: error' i4 ' in shsgs at point 5')
     !
     !     convert to jacobian to spherical coordinates
@@ -241,7 +300,7 @@ program tvtsgs
             phi = (j-1)*dphi
             do i=1,nlat
                 theta = dthet(i)
-                call ctos(theta,phi,c(i,j,1,k),c(i,j,2,k),c(i,j,3,k), &
+                call cart2sph(theta,phi,c(i,j,1,k),c(i,j,2,k),c(i,j,3,k), &
                     s(i,j,1,k),s(i,j,2,k),s(i,j,3,k))
             end do
         end do
@@ -254,7 +313,7 @@ program tvtsgs
             phi = (j-1)*dphi
             do i=1,nlat
                 theta = dthet(i)
-                call ctos(theta,phi,s(i,j,k,1),s(i,j,k,2),s(i,j,k,3), &
+                call cart2sph(theta,phi,s(i,j,k,1),s(i,j,k,2),s(i,j,k,3), &
                     c(i,j,k,1),c(i,j,k,2),c(i,j,k,3))
             end do
         end do
@@ -274,7 +333,7 @@ program tvtsgs
     !
     call vtsgs(nlat,nlon,0,1,vt,wt,idp,jdp,br,bi,cr,ci, &
         mdab,ndab,wvts,lwvts,work,lwork,ierror)
-    if (ierror /= 0) write(6,4) ierror
+    if (ierror /= 0) write( stdout, 4) ierror
 4   format(' testvtsgs: error' i4 ' in vtsgs during initialization')
     dmax1 = 0.
     dmax2 = 0.
@@ -284,13 +343,28 @@ program tvtsgs
             dmax2 = max(dmax2,abs(s(i,j,3,2)-wt(i,j)))
         end do
     end do
-    write(6,2) dmax1,dmax2
+    write( stdout, 2) dmax1,dmax2
 2   format(' testvtsgs: error in vt '1pe15.6' error in wt '1pe15.6)
 end program tvtsgs
 
 
 
-subroutine ctos(theta,phi,x,y,z,u,v,w)
+subroutine cart2sph(theta,phi,x,y,z,u,v,w)
+    implicit none
+    real :: cp
+    real :: ct
+    real :: phi
+    real :: sp
+    real :: st
+    real :: temp1
+    real :: temp2
+    real :: theta
+    real :: u
+    real :: v
+    real :: w
+    real :: x
+    real :: y
+    real :: z
     !
     !     this program computes the components of a vector
     !     field in spherical coordinates u, v, and w, from
@@ -306,11 +380,26 @@ subroutine ctos(theta,phi,x,y,z,u,v,w)
     v = ct*temp1-st*z
     w = temp2
 
-end subroutine ctos
+end subroutine cart2sph
 
 
 
-subroutine stoc(theta,phi,u,v,w,x,y,z)
+subroutine sph2cart(theta,phi,u,v,w,x,y,z)
+    implicit none
+    real :: cp
+    real :: ct
+    real :: phi
+    real :: sp
+    real :: st
+    real :: temp1
+    real :: temp2
+    real :: theta
+    real :: u
+    real :: v
+    real :: w
+    real :: x
+    real :: y
+    real :: z
     !
     !     this program computes the components of a vector
     !     field in cartesian coordinates x, y, and z, from
@@ -326,11 +415,27 @@ subroutine stoc(theta,phi,u,v,w,x,y,z)
     y = sp*temp1+cp*w
     z = temp2
 
-end subroutine stoc
+end subroutine sph2cart
 
 
 
 subroutine dbdx(l,mdim,a,b,dxa,dxb)
+    implicit none
+    real :: a
+    real :: a1
+    real :: a2
+    real :: b
+    real :: cn
+    real :: dxa
+    real :: dxb
+    real :: fm
+    real :: fn
+    integer :: l
+    integer :: lm1
+    integer :: mdim
+    integer :: mp1
+    integer :: n
+    integer :: np1
     !
     !     subroutine to compute the coefficients in the spherical
     !     harmonic representation of the derivative with respect to x
@@ -373,6 +478,22 @@ end subroutine dbdx
 
 
 subroutine dbdy(l,mdim,a,b,dya,dyb)
+    implicit none
+    real :: a
+    real :: a1
+    real :: a2
+    real :: b
+    real :: cn
+    real :: dya
+    real :: dyb
+    real :: fm
+    real :: fn
+    integer :: l
+    integer :: lm1
+    integer :: mdim
+    integer :: mp1
+    integer :: n
+    integer :: np1
     !
     !     subroutine to compute the coefficients in the spherical
     !     harmonic representation of the derivative with respect to y
@@ -416,6 +537,21 @@ end subroutine dbdy
 
 
 subroutine dbdz(l,mdim,a,b,dza,dzb)
+    implicit none
+    real :: a
+    real :: a1
+    real :: b
+    real :: cn
+    real :: dza
+    real :: dzb
+    real :: fm
+    real :: fn
+    integer :: l
+    integer :: lm1
+    integer :: mdim
+    integer :: mp1
+    integer :: n
+    integer :: np1
     !
     !     subroutine to compute the coefficients in the spherical
     !     harmonic representation of the derivative with respect to z

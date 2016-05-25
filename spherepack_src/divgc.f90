@@ -225,6 +225,38 @@
 !   
 subroutine divgc(nlat, nlon, isym, nt, dv, idv, jdv, br, bi, mdb, ndb, &
     wshsgc, lshsgc, work, lwork, ierror)
+    implicit none
+    real :: bi
+    real :: br
+    real :: dv
+    integer :: ia
+    integer :: ib
+    integer :: idv
+    integer :: ierror
+    integer :: imid
+    integer :: is
+    integer :: isym
+    integer :: iwk
+    integer :: jdv
+    integer :: l1
+    integer :: l2
+    integer :: lpimn
+    integer :: ls
+    integer :: lshsgc
+    integer :: lwk
+    integer :: lwkmin
+    integer :: lwork
+    integer :: mab
+    integer :: mdb
+    integer :: mmax
+    integer :: mn
+    integer :: ndb
+    integer :: nlat
+    integer :: nln
+    integer :: nlon
+    integer :: nt
+    real :: work
+    real :: wshsgc
 
     dimension dv(idv, jdv, nt), br(mdb, ndb, nt), bi(mdb, ndb, nt)
     dimension wshsgc(lshsgc), work(lwork)
@@ -298,6 +330,32 @@ end subroutine divgc
 
 subroutine divgc1(nlat, nlon, isym, nt, dv, idv, jdv, br, bi, mdb, ndb, &
     a, b, mab, sqnn, wshsgc, lshsgc, wk, lwk, ierror)
+    implicit none
+    real :: a
+    real :: b
+    real :: bi
+    real :: br
+    real :: dv
+    real :: fn
+    integer :: idv
+    integer :: ierror
+    integer :: isym
+    integer :: jdv
+    integer :: k
+    integer :: lshsgc
+    integer :: lwk
+    integer :: m
+    integer :: mab
+    integer :: mdb
+    integer :: mmax
+    integer :: n
+    integer :: ndb
+    integer :: nlat
+    integer :: nlon
+    integer :: nt
+    real :: sqnn
+    real :: wk
+    real :: wshsgc
     dimension dv(idv, jdv, nt), br(mdb, ndb, nt), bi(mdb, ndb, nt)
     dimension a(mab, nlat, nt), b(mab, nlat, nt), sqnn(nlat)
     dimension wshsgc(lshsgc), wk(lwk)

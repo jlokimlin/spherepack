@@ -420,6 +420,44 @@
 !
 subroutine vhsgc(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
                  mdab, ndab, wvhsgc, lvhsgc, work, lwork, ierror)
+implicit none
+real :: bi
+real :: br
+real :: ci
+real :: cr
+integer :: idv
+integer :: idvw
+integer :: ierror
+integer :: imid
+integer :: ist
+integer :: ityp
+integer :: iw1
+integer :: iw2
+integer :: iw3
+integer :: iw4
+integer :: iw5
+integer :: jdvw
+integer :: jw1
+integer :: jw2
+integer :: l1
+integer :: l2
+integer :: labc
+integer :: lnl
+integer :: lvhsgc
+integer :: lwmin
+integer :: lwork
+integer :: lwzvin
+integer :: lzz1
+integer :: mdab
+integer :: mmax
+integer :: ndab
+integer :: nlat
+integer :: nlon
+integer :: nt
+real :: v
+real :: w
+real :: work
+real :: wvhsgc
 dimension v(idvw, jdvw, 1), w(idvw, jdvw, 1), br(mdab, ndab, 1), &
           bi(mdab, ndab, 1), cr(mdab, ndab, 1), ci(mdab, ndab, 1), &
           work(1), wvhsgc(1)
@@ -483,6 +521,49 @@ return
 end subroutine vhsgc
 subroutine vhsgc1(nlat, nlon, ityp, nt, imid, idvw, jdvw, v, w, mdab, &
    ndab, br, bi, cr, ci, idv, ve, vo, we, wo, vb, wb, wvbin, wwbin, wrfft)
+implicit none
+real :: bi
+real :: br
+real :: ci
+real :: cr
+integer :: i
+integer :: idv
+integer :: idvw
+integer :: imid
+integer :: imm1
+integer :: ityp
+integer :: itypp
+integer :: iv
+integer :: iw
+integer :: j
+integer :: jdvw
+integer :: k
+integer :: m
+integer :: mdab
+integer :: mlat
+integer :: mlon
+integer :: mmax
+integer :: mp1
+integer :: mp2
+integer :: ndab
+integer :: ndo1
+integer :: ndo2
+integer :: nlat
+integer :: nlon
+integer :: nlp1
+integer :: np1
+integer :: nt
+real :: v
+real :: vb
+real :: ve
+real :: vo
+real :: w
+real :: wb
+real :: we
+real :: wo
+real :: wrfft
+real :: wvbin
+real :: wwbin
 dimension v(idvw, jdvw, 1), w(idvw, jdvw, 1), br(mdab, ndab, 1), &
           bi(mdab, ndab, 1), cr(mdab, ndab, 1), ci(mdab, ndab, 1), &
           ve(idv, nlon, 1), vo(idv, nlon, 1), we(idv, nlon, 1), &
@@ -1008,6 +1089,24 @@ w(imid, j, k) = .5*we(imid, j, k)
 return
 end subroutine vhsgc1
 subroutine vhsgci(nlat, nlon, wvhsgc, lvhsgc, dwork, ldwork, ierror)
+implicit none
+integer :: ierror
+integer :: imid
+integer :: iw1
+integer :: iw2
+integer :: iwrk
+integer :: jw1
+integer :: jw2
+integer :: jw3
+integer :: labc
+integer :: ldwork
+integer :: lvhsgc
+integer :: lwvbin
+integer :: lzz1
+integer :: mmax
+integer :: nlat
+integer :: nlon
+real :: wvhsgc
 dimension wvhsgc(lvhsgc)
 real dwork(ldwork)
 ierror = 1

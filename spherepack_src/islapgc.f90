@@ -252,6 +252,39 @@
 !
 subroutine islapgc(nlat, nlon, isym, nt, xlmbda, sf, ids, jds, a, b, &
     mdab, ndab, wshsgc, lshsgc, work, lwork, pertrb, ierror)
+    implicit none
+    real :: a
+    real :: b
+    integer :: ia
+    integer :: ib
+    integer :: ids
+    integer :: ierror
+    integer :: ifn
+    integer :: imid
+    integer :: isym
+    integer :: iwk
+    integer :: jds
+    integer :: k
+    integer :: l1
+    integer :: l2
+    integer :: ls
+    integer :: lshsgc
+    integer :: lwk
+    integer :: lwmin
+    integer :: lwork
+    integer :: mdab
+    integer :: mmax
+    integer :: mn
+    integer :: ndab
+    integer :: nlat
+    integer :: nln
+    integer :: nlon
+    integer :: nt
+    real :: pertrb
+    real :: sf
+    real :: work
+    real :: wshsgc
+    real :: xlmbda
     dimension sf(ids, jds, nt), a(mdab, ndab, nt), b(mdab, ndab, nt)
     dimension wshsgc(lshsgc), work(lwork), xlmbda(nt), pertrb(nt)
     !
@@ -329,6 +362,33 @@ end subroutine islapgc
 
 subroutine islpgc1(nlat, nlon, isym, nt, xlmbda, sf, ids, jds, a, b, &
     mdab, ndab, as, bs, mmax, fnn, wsav, lsav, wk, lwk, pertrb, ierror)
+    implicit none
+    real :: a
+    real :: as
+    real :: b
+    real :: bs
+    real :: fn
+    real :: fnn
+    integer :: ids
+    integer :: ierror
+    integer :: isym
+    integer :: jds
+    integer :: k
+    integer :: lsav
+    integer :: lwk
+    integer :: m
+    integer :: mdab
+    integer :: mmax
+    integer :: n
+    integer :: ndab
+    integer :: nlat
+    integer :: nlon
+    integer :: nt
+    real :: pertrb
+    real :: sf
+    real :: wk
+    real :: wsav
+    real :: xlmbda
     dimension sf(ids, jds, nt), a(mdab, ndab, nt), b(mdab, ndab, nt)
     dimension as(mmax, nlat, nt), bs(mmax, nlat, nt), fnn(nlat)
     dimension wsav(lsav), wk(lwk), xlmbda(nt), pertrb(nt)

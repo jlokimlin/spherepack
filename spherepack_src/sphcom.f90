@@ -1585,6 +1585,22 @@ end subroutine zwinit
 
 
 subroutine zvin(ityp, nlat, nlon, m, zv, i3, wzvin)
+    implicit none
+    integer :: i3
+    integer :: imid
+    integer :: ityp
+    integer :: iw1
+    integer :: iw2
+    integer :: iw3
+    integer :: iw4
+    integer :: labc
+    integer :: lim
+    integer :: m
+    integer :: mmax
+    integer :: nlat
+    integer :: nlon
+    real :: wzvin
+    real :: zv
     dimension       zv(1)        , wzvin(1)
     imid = (nlat+1)/2
     lim = nlat*imid
@@ -1605,6 +1621,26 @@ end subroutine zvin
 
 
 subroutine zvin1(ityp, nlat, m, zv, imid, i3, zvz, zv1, a, b, c)
+    implicit none
+    real :: a
+    real :: b
+    real :: c
+    integer :: i
+    integer :: i1
+    integer :: i2
+    integer :: i3
+    integer :: ihold
+    integer :: imid
+    integer :: ityp
+    integer :: m
+    integer :: nlat
+    integer :: np1
+    integer :: ns
+    integer :: nstp
+    integer :: nstrt
+    real :: zv
+    real :: zv1
+    real :: zvz
     dimension zv(imid, nlat, 3), zvz(imid, 1), zv1(imid, 1), &
         a(1), b(1), c(1)
     save i1, i2
@@ -1669,6 +1705,22 @@ end subroutine zvin1
 
 
 subroutine zwin(ityp, nlat, nlon, m, zw, i3, wzwin)
+    implicit none
+    integer :: i3
+    integer :: imid
+    integer :: ityp
+    integer :: iw1
+    integer :: iw2
+    integer :: iw3
+    integer :: iw4
+    integer :: labc
+    integer :: lim
+    integer :: m
+    integer :: mmax
+    integer :: nlat
+    integer :: nlon
+    real :: wzwin
+    real :: zw
     dimension       zw(1)        , wzwin(1)
     imid = (nlat+1)/2
     lim = nlat*imid
@@ -1689,6 +1741,26 @@ end subroutine zwin
 
 
 subroutine zwin1(ityp, nlat, m, zw, imid, i3, zw1, zw2, a, b, c)
+    implicit none
+    real :: a
+    real :: b
+    real :: c
+    integer :: i
+    integer :: i1
+    integer :: i2
+    integer :: i3
+    integer :: ihold
+    integer :: imid
+    integer :: ityp
+    integer :: m
+    integer :: nlat
+    integer :: np1
+    integer :: ns
+    integer :: nstp
+    integer :: nstrt
+    real :: zw
+    real :: zw1
+    real :: zw2
     dimension       zw(imid, nlat, 3), zw1(imid, 1), zw2(imid, 1), &
         a(1), b(1), c(1)
     save i1, i2
@@ -1753,6 +1825,12 @@ end subroutine zwin1
 
 
 subroutine vbinit (nlat, nlon, wvbin, dwork)
+    implicit none
+    integer :: imid
+    integer :: iw1
+    integer :: nlat
+    integer :: nlon
+    real :: wvbin
     dimension wvbin(1)
     real dwork(*)
     imid = (nlat+1)/2
@@ -1769,6 +1847,18 @@ end subroutine vbinit
 
 
 subroutine vbini1(nlat, nlon, imid, vb, abc, cvb, work)
+    implicit none
+    real :: abc
+    integer :: i
+    integer :: imid
+    integer :: m
+    integer :: mdo
+    integer :: mp1
+    integer :: n
+    integer :: nlat
+    integer :: nlon
+    integer :: np1
+    real :: vb
     !
     !     abc must have 3*(max(mmax-2, 0)*(nlat+nlat-mmax-1))/2
     !     locations where mmax = min(nlat, (nlon+1)/2)
@@ -1799,6 +1889,12 @@ end subroutine vbini1
 
 
 subroutine wbinit (nlat, nlon, wwbin, dwork)
+    implicit none
+    integer :: imid
+    integer :: iw1
+    integer :: nlat
+    integer :: nlon
+    real :: wwbin
     dimension       wwbin(1)
     real dwork(*)
     imid = (nlat+1)/2
@@ -1815,6 +1911,18 @@ end subroutine wbinit
 
 
 subroutine wbini1(nlat, nlon, imid, wb, abc, cwb, work)
+    implicit none
+    real :: abc
+    integer :: i
+    integer :: imid
+    integer :: m
+    integer :: mdo
+    integer :: mp1
+    integer :: n
+    integer :: nlat
+    integer :: nlon
+    integer :: np1
+    real :: wb
     !
     !     abc must have 3*(max(mmax-2, 0)*(nlat+nlat-mmax-1))/2
     !     locations where mmax = min(nlat, (nlon+1)/2)
@@ -1846,6 +1954,22 @@ end subroutine wbini1
 
 
 subroutine vbin(ityp, nlat, nlon, m, vb, i3, wvbin)
+    implicit none
+    integer :: i3
+    integer :: imid
+    integer :: ityp
+    integer :: iw1
+    integer :: iw2
+    integer :: iw3
+    integer :: iw4
+    integer :: labc
+    integer :: lim
+    integer :: m
+    integer :: mmax
+    integer :: nlat
+    integer :: nlon
+    real :: vb
+    real :: wvbin
     dimension       vb(1)        , wvbin(1)
     imid = (nlat+1)/2
     lim = nlat*imid
@@ -1866,6 +1990,26 @@ end subroutine vbin
 
 
 subroutine vbin1(ityp, nlat, m, vb, imid, i3, vbz, vb1, a, b, c)
+    implicit none
+    real :: a
+    real :: b
+    real :: c
+    integer :: i
+    integer :: i1
+    integer :: i2
+    integer :: i3
+    integer :: ihold
+    integer :: imid
+    integer :: ityp
+    integer :: m
+    integer :: nlat
+    integer :: np1
+    integer :: ns
+    integer :: nstp
+    integer :: nstrt
+    real :: vb
+    real :: vb1
+    real :: vbz
     dimension       vb(imid, nlat, 3), vbz(imid, 1), vb1(imid, 1), &
         a(1), b(1), c(1)
     save i1, i2
@@ -1930,6 +2074,22 @@ end subroutine vbin1
 
 
 subroutine wbin(ityp, nlat, nlon, m, wb, i3, wwbin)
+    implicit none
+    integer :: i3
+    integer :: imid
+    integer :: ityp
+    integer :: iw1
+    integer :: iw2
+    integer :: iw3
+    integer :: iw4
+    integer :: labc
+    integer :: lim
+    integer :: m
+    integer :: mmax
+    integer :: nlat
+    integer :: nlon
+    real :: wb
+    real :: wwbin
     dimension       wb(1)        , wwbin(1)
     imid = (nlat+1)/2
     lim = nlat*imid
@@ -1950,6 +2110,26 @@ end subroutine wbin
 
 
 subroutine wbin1(ityp, nlat, m, wb, imid, i3, wb1, wb2, a, b, c)
+    implicit none
+    real :: a
+    real :: b
+    real :: c
+    integer :: i
+    integer :: i1
+    integer :: i2
+    integer :: i3
+    integer :: ihold
+    integer :: imid
+    integer :: ityp
+    integer :: m
+    integer :: nlat
+    integer :: np1
+    integer :: ns
+    integer :: nstp
+    integer :: nstrt
+    real :: wb
+    real :: wb1
+    real :: wb2
     dimension wb(imid, nlat, 3), wb1(imid, 1), wb2(imid, 1), &
         a(1), b(1), c(1)
     save i1, i2
@@ -2012,6 +2192,15 @@ end subroutine wbin1
 
 
 subroutine dzvk(nlat, m, n, czv, work)
+    implicit none
+    integer :: i
+    integer :: id
+    integer :: k
+    integer :: kdo
+    integer :: lc
+    integer :: m
+    integer :: n
+    integer :: nlat
     !
     !     subroutine dzvk computes the coefficients in the trigonometric
     !     expansion of the quadrature function zvbar(n, m, theta)
@@ -2115,6 +2304,14 @@ end subroutine dzvk
 
 
 subroutine dzvt(nlat, m, n, th, czv, zvh)
+    implicit none
+    integer :: k
+    integer :: lc
+    integer :: lq
+    integer :: ls
+    integer :: m
+    integer :: n
+    integer :: nlat
     !
     !     subroutine dzvt tabulates the function zvbar(n, m, theta)
     !     at theta = th in real
@@ -2260,6 +2457,16 @@ end subroutine dzvt
 
 
 subroutine dzwk(nlat, m, n, czw, work)
+    implicit none
+    integer :: i
+    integer :: id
+    integer :: k
+    integer :: kdo
+    integer :: kp1
+    integer :: lc
+    integer :: m
+    integer :: n
+    integer :: nlat
     !
     !     subroutine dzwk computes the coefficients in the trigonometric
     !     expansion of the quadrature function zwbar(n, m, theta)
@@ -2366,6 +2573,14 @@ end subroutine dzwk
 
 
 subroutine dzwt(nlat, m, n, th, czw, zwh)
+    implicit none
+    integer :: k
+    integer :: lc
+    integer :: lq
+    integer :: ls
+    integer :: m
+    integer :: n
+    integer :: nlat
     !
     !     subroutine dzwt tabulates the function zwbar(n, m, theta)
     !     at theta = th in real
@@ -2515,6 +2730,12 @@ end subroutine dzwt
 
 
 subroutine dvbk(m, n, cv, work)
+    implicit none
+    integer :: l
+    integer :: m
+    integer :: n
+    integer :: ncv
+    real :: srnp1
     real cv(1), work(1), fn, fk, cf
 
     cv(1) = 0.0
@@ -2577,6 +2798,10 @@ end subroutine dvbk
 
 
 subroutine dwbk(m, n, cw, work)
+    implicit none
+    integer :: l
+    integer :: m
+    integer :: n
     real cw(1), work(1), fn, cf, srnp1
 
     cw(1) = 0.0
@@ -2650,6 +2875,11 @@ end subroutine dwbk
 
 
 subroutine dvbt(m, n, theta, cv, vh)
+    implicit none
+    integer :: k
+    integer :: m
+    integer :: n
+    integer :: ncv
     dimension cv(1)
     real cv, vh, theta, cost, sint, cdt, sdt, temp
 
@@ -2722,6 +2952,11 @@ end subroutine dvbt
 
 
 subroutine dwbt(m, n, theta, cw, wh)
+    implicit none
+    integer :: k
+    integer :: m
+    integer :: n
+    integer :: ncw
     dimension cw(1)
     real theta, cw, wh, cost, sint, cdt, sdt, temp
 
@@ -2799,6 +3034,14 @@ end subroutine dwbt
 
 
 subroutine rabcv(nlat, nlon, abc)
+    implicit none
+    real :: abc
+    integer :: iw1
+    integer :: iw2
+    integer :: labc
+    integer :: mmax
+    integer :: nlat
+    integer :: nlon
     !
     !     subroutine rabcp computes the coefficients in the recurrence
     !     relation for the functions vbar(m, n, theta). array abc
@@ -2816,6 +3059,28 @@ end subroutine rabcv
 
 
 subroutine rabcv1(nlat, nlon, a, b, c)
+    implicit none
+    real :: a
+    real :: b
+    real :: c
+    real :: cn
+    real :: fm
+    real :: fn
+    real :: fnmm
+    real :: fnpm
+    integer :: m
+    integer :: mmax
+    integer :: mp1
+    integer :: mp3
+    integer :: n
+    integer :: nlat
+    integer :: nlon
+    integer :: np1
+    integer :: ns
+    real :: temp
+    real :: tm
+    real :: tn
+    real :: tpn
     !
     !     coefficients a, b, and c for computing vbar(m, n, theta) are
     !     stored in location ((m-2)*(nlat+nlat-m-1))/2+n+1
@@ -2865,6 +3130,14 @@ end subroutine rabcv1
 
 
 subroutine rabcw(nlat, nlon, abc)
+    implicit none
+    real :: abc
+    integer :: iw1
+    integer :: iw2
+    integer :: labc
+    integer :: mmax
+    integer :: nlat
+    integer :: nlon
     !
     !     subroutine rabcw computes the coefficients in the recurrence
     !     relation for the functions wbar(m, n, theta). array abc
@@ -2882,6 +3155,29 @@ end subroutine rabcw
 
 
 subroutine rabcw1(nlat, nlon, a, b, c)
+    implicit none
+    real :: a
+    real :: b
+    real :: c
+    real :: cn
+    real :: fm
+    real :: fn
+    real :: fnmm
+    real :: fnpm
+    integer :: m
+    integer :: mmax
+    integer :: mp1
+    integer :: mp3
+    integer :: n
+    integer :: nlat
+    integer :: nlon
+    integer :: np1
+    integer :: ns
+    real :: temp
+    real :: tm
+    real :: tn
+    real :: tph
+    real :: tpn
     !
     !     coefficients a, b, and c for computing wbar(m, n, theta) are
     !     stored in location ((m-2)*(nlat+nlat-m-1))/2+n+1
@@ -2933,6 +3229,13 @@ end subroutine rabcw1
 
 
 subroutine vtinit (nlat, nlon, wvbin, dwork)
+    implicit none
+    integer :: imid
+    integer :: iw1
+    integer :: iw2
+    integer :: nlat
+    integer :: nlon
+    real :: wvbin
     dimension       wvbin(*)
     real dwork(*)
     imid = (nlat+1)/2
@@ -2949,6 +3252,18 @@ end subroutine vtinit
 
 
 subroutine vtini1(nlat, nlon, imid, vb, abc, cvb, work)
+    implicit none
+    real :: abc
+    integer :: i
+    integer :: imid
+    integer :: m
+    integer :: mdo
+    integer :: mp1
+    integer :: n
+    integer :: nlat
+    integer :: nlon
+    integer :: np1
+    real :: vb
     !
     !     abc must have 3*(max(mmax-2, 0)*(nlat+nlat-mmax-1))/2
     !     locations where mmax = min(nlat, (nlon+1)/2)
@@ -2979,6 +3294,13 @@ end subroutine vtini1
 
 
 subroutine wtinit(nlat, nlon, wwbin, dwork)
+    implicit none
+    integer :: imid
+    integer :: iw1
+    integer :: iw2
+    integer :: nlat
+    integer :: nlon
+    real :: wwbin
     dimension wwbin(1)
     real dwork(*)
     imid = (nlat+1)/2
@@ -2995,6 +3317,18 @@ end subroutine wtinit
 
 
 subroutine wtini1(nlat, nlon, imid, wb, abc, cwb, work)
+    implicit none
+    real :: abc
+    integer :: i
+    integer :: imid
+    integer :: m
+    integer :: mdo
+    integer :: mp1
+    integer :: n
+    integer :: nlat
+    integer :: nlon
+    integer :: np1
+    real :: wb
     !
     !     abc must have 3*(max(mmax-2, 0)*(nlat+nlat-mmax-1))/2
     !     locations where mmax = min(nlat, (nlon+1)/2)
@@ -3026,6 +3360,13 @@ end subroutine wtini1
 
 
 subroutine vtgint (nlat, nlon, theta, wvbin, work)
+    implicit none
+    integer :: imid
+    integer :: iw1
+    integer :: iw2
+    integer :: nlat
+    integer :: nlon
+    real :: wvbin
     dimension       wvbin(*)
     real theta(*), work(*)
     imid = (nlat+1)/2
@@ -3044,6 +3385,18 @@ end subroutine vtgint
 
 
 subroutine vtgit1(nlat, nlon, imid, theta, vb, abc, cvb, work)
+    implicit none
+    real :: abc
+    integer :: i
+    integer :: imid
+    integer :: m
+    integer :: mdo
+    integer :: mp1
+    integer :: n
+    integer :: nlat
+    integer :: nlon
+    integer :: np1
+    real :: vb
     !
     !     abc must have 3*(max(mmax-2, 0)*(nlat+nlat-mmax-1))/2
     !     locations where mmax = min(nlat, (nlon+1)/2)
@@ -3071,6 +3424,13 @@ end subroutine vtgit1
 
 
 subroutine wtgint(nlat, nlon, theta, wwbin, work)
+    implicit none
+    integer :: imid
+    integer :: iw1
+    integer :: iw2
+    integer :: nlat
+    integer :: nlon
+    real :: wwbin
     dimension wwbin(*)
     real theta(*), work(*)
     imid = (nlat+1)/2
@@ -3089,6 +3449,18 @@ end subroutine wtgint
 
 
 subroutine wtgit1(nlat, nlon, imid, theta, wb, abc, cwb, work)
+    implicit none
+    real :: abc
+    integer :: i
+    integer :: imid
+    integer :: m
+    integer :: mdo
+    integer :: mp1
+    integer :: n
+    integer :: nlat
+    integer :: nlon
+    integer :: np1
+    real :: wb
     !
     !     abc must have 3*((nlat-3)*nlat+2)/2 locations
     !     cwb and work must each have nlat/2+1 locations
@@ -3116,6 +3488,11 @@ end subroutine wtgit1
 
 
 subroutine dvtk(m, n, cv, work)
+    implicit none
+    integer :: l
+    integer :: m
+    integer :: n
+    integer :: ncv
     real cv(*), work(*), fn, fk, cf, srnp1
 
     cv(1) = 0.0
@@ -3179,6 +3556,10 @@ end subroutine dvtk
 
 
 subroutine dwtk(m, n, cw, work)
+    implicit none
+    integer :: l
+    integer :: m
+    integer :: n
     real cw(*), work(*), fn, cf, srnp1
 
     cw(1) = 0.0
@@ -3272,6 +3653,11 @@ end subroutine dwtk
 
 
 subroutine dvtt(m, n, theta, cv, vh)
+    implicit none
+    integer :: k
+    integer :: m
+    integer :: n
+    integer :: ncv
     dimension cv(1)
     real cv, vh, theta, cost, sint, cdt, sdt, temp
 
@@ -3343,6 +3729,11 @@ end subroutine dvtt
 
 
 subroutine dwtt(m, n, theta, cw, wh)
+    implicit none
+    integer :: k
+    integer :: m
+    integer :: n
+    integer :: ncw
     dimension cw(1)
     real theta, cw, wh, cost, sint, cdt, sdt, temp
 
@@ -3420,6 +3811,13 @@ end subroutine dwtt
 
 
 subroutine vbgint (nlat, nlon, theta, wvbin, work)
+    implicit none
+    integer :: imid
+    integer :: iw1
+    integer :: iw2
+    integer :: nlat
+    integer :: nlon
+    real :: wvbin
     dimension       wvbin(1)
     real theta(*), work(*)
     imid = (nlat+1)/2
@@ -3438,6 +3836,18 @@ end subroutine vbgint
 
 
 subroutine vbgit1(nlat, nlon, imid, theta, vb, abc, cvb, work)
+    implicit none
+    real :: abc
+    integer :: i
+    integer :: imid
+    integer :: m
+    integer :: mdo
+    integer :: mp1
+    integer :: n
+    integer :: nlat
+    integer :: nlon
+    integer :: np1
+    real :: vb
     !
     !     abc must have 3*(max(mmax-2, 0)*(nlat+nlat-mmax-1))/2
     !     locations where mmax = min(nlat, (nlon+1)/2)
@@ -3465,6 +3875,13 @@ end subroutine vbgit1
 
 
 subroutine wbgint(nlat, nlon, theta, wwbin, work)
+    implicit none
+    integer :: imid
+    integer :: iw1
+    integer :: iw2
+    integer :: nlat
+    integer :: nlon
+    real :: wwbin
     dimension wwbin(1)
     real work(*), theta(*)
     imid = (nlat+1)/2
@@ -3483,6 +3900,18 @@ end subroutine wbgint
 
 
 subroutine wbgit1(nlat, nlon, imid, theta, wb, abc, cwb, work)
+    implicit none
+    real :: abc
+    integer :: i
+    integer :: imid
+    integer :: m
+    integer :: mdo
+    integer :: mp1
+    integer :: n
+    integer :: nlat
+    integer :: nlon
+    integer :: np1
+    real :: wb
     !
     !     abc must have 3*((nlat-3)*nlat+2)/2 locations
     !     cwb and work must each have nlat/2+1 locations

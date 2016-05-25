@@ -236,6 +236,37 @@
 !
 subroutine slapgs(nlat, nlon, isym, nt, slap, ids, jds, a, b, mdab, ndab, &
     wshsgs, lshsgs, work, lwork, ierror)
+    implicit none
+    real :: a
+    real :: b
+    integer :: ia
+    integer :: ib
+    integer :: ids
+    integer :: ierror
+    integer :: ifn
+    integer :: imid
+    integer :: isym
+    integer :: iwk
+    integer :: jds
+    integer :: l1
+    integer :: l2
+    integer :: lp
+    integer :: ls
+    integer :: lshsgs
+    integer :: lwk
+    integer :: lwkmin
+    integer :: lwork
+    integer :: mdab
+    integer :: mmax
+    integer :: mn
+    integer :: ndab
+    integer :: nlat
+    integer :: nln
+    integer :: nlon
+    integer :: nt
+    real :: slap
+    real :: work
+    real :: wshsgs
     dimension slap(ids, jds, nt), a(mdab, ndab, nt), b(mdab, ndab, nt)
     dimension wshsgs(lshsgs), work(lwork)
     !
@@ -306,6 +337,31 @@ end subroutine slapgs
 
 subroutine slapgs1(nlat, nlon, isym, nt, slap, ids, jds, a, b, mdab, ndab, &
     alap, blap, mmax, fnn, wsave, lsave, wk, lwk, ierror)
+    implicit none
+    real :: a
+    real :: alap
+    real :: b
+    real :: blap
+    real :: fn
+    real :: fnn
+    integer :: ids
+    integer :: ierror
+    integer :: isym
+    integer :: jds
+    integer :: k
+    integer :: lsave
+    integer :: lwk
+    integer :: m
+    integer :: mdab
+    integer :: mmax
+    integer :: n
+    integer :: ndab
+    integer :: nlat
+    integer :: nlon
+    integer :: nt
+    real :: slap
+    real :: wk
+    real :: wsave
     dimension slap(ids, jds, nt), a(mdab, ndab, nt), b(mdab, ndab, nt)
     dimension alap(mmax, nlat, nt), blap(mmax, nlat, nt), fnn(nlat)
     dimension wsave(lsave), wk(lwk)

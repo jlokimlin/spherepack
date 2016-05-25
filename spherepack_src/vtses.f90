@@ -346,6 +346,39 @@
 !
 subroutine vtses(nlat, nlon, ityp, nt, vt, wt, idvw, jdvw, br, bi, cr, ci, &
     mdab, ndab, wvts, lwvts, work, lwork, ierror)
+    implicit none
+    real :: bi
+    real :: br
+    real :: ci
+    real :: cr
+    integer :: idv
+    integer :: idvw
+    integer :: idz
+    integer :: ierror
+    integer :: imid
+    integer :: ist
+    integer :: ityp
+    integer :: iw1
+    integer :: iw2
+    integer :: iw3
+    integer :: iw4
+    integer :: jdvw
+    integer :: jw1
+    integer :: jw2
+    integer :: lnl
+    integer :: lwork
+    integer :: lwvts
+    integer :: lzimn
+    integer :: mdab
+    integer :: mmax
+    integer :: ndab
+    integer :: nlat
+    integer :: nlon
+    integer :: nt
+    real :: vt
+    real :: work
+    real :: wt
+    real :: wvts
     !
     dimension vt(idvw, jdvw, 1), wt(idvw, jdvw, 1), br(mdab, ndab, 1), &
         bi(mdab, ndab, 1), cr(mdab, ndab, 1), ci(mdab, ndab, 1), &
@@ -399,6 +432,45 @@ end subroutine vtses
 
 subroutine vtses1(nlat, nlon, ityp, nt, imid, idvw, jdvw, vt, wt, mdab, &
     ndab, br, bi, cr, ci, idv, vte, vto, wte, wto, work, idz, vb, wb, wrfft)
+    implicit none
+    real :: bi
+    real :: br
+    real :: ci
+    real :: cr
+    integer :: idv
+    integer :: idvw
+    integer :: idz
+    integer :: imid
+    integer :: imm1
+    integer :: ityp
+    integer :: jdvw
+    integer :: m
+    integer :: mb
+    integer :: mdab
+    integer :: mlat
+    integer :: mlon
+    integer :: mmax
+    integer :: mn
+    integer :: mp1
+    integer :: mp2
+    integer :: ndab
+    integer :: ndo1
+    integer :: ndo2
+    integer :: nlat
+    integer :: nlon
+    integer :: nlp1
+    integer :: np1
+    integer :: nt
+    real :: vb
+    real :: vt
+    real :: vte
+    real :: vto
+    real :: wb
+    real :: work
+    real :: wrfft
+    real :: wt
+    real :: wte
+    real :: wto
     dimension vt(idvw, jdvw, 1), wt(idvw, jdvw, 1), br(mdab, ndab, 1), &
         bi(mdab, ndab, 1), cr(mdab, ndab, 1), ci(mdab, ndab, 1), &
         vte(idv, nlon, 1), vto(idv, nlon, 1), wte(idv, nlon, 1), &
@@ -1068,6 +1140,21 @@ end subroutine vtses1
 
 subroutine vtsesi(nlat, nlon, wvts, lwvts, work, lwork, dwork, ldwork, &
     ierror)
+    implicit none
+    integer :: idz
+    integer :: ierror
+    integer :: imid
+    integer :: iw1
+    integer :: labc
+    integer :: ldwork
+    integer :: lwork
+    integer :: lwvts
+    integer :: lzimn
+    integer :: mmax
+    integer :: nlat
+    integer :: nlon
+    real :: work
+    real :: wvts
     !
     dimension wvts(lwvts), work(lwork)
     real dwork(ldwork)
@@ -1098,6 +1185,20 @@ end subroutine vtsesi
 
 
 subroutine vet1(nlat, nlon, imid, vb, wb, idz, vin, wzvin, dwork)
+    implicit none
+    integer :: i3
+    integer :: idz
+    integer :: imid
+    integer :: m
+    integer :: mn
+    integer :: mp1
+    integer :: nlat
+    integer :: nlon
+    integer :: np1
+    real :: vb
+    real :: vin
+    real :: wb
+    real :: wzvin
     dimension vb(imid, *), wb(imid, *), vin(imid, nlat, 3), wzvin(*)
     real dwork(*)
 

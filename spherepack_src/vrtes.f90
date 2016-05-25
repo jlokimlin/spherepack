@@ -224,6 +224,35 @@
 !   
 subroutine vrtes(nlat, nlon, isym, nt, vort, ivrt, jvrt, cr, ci, mdc, ndc, &
     wshses, lshses, work, lwork, ierror)
+    implicit none
+    real :: ci
+    real :: cr
+    integer :: ia
+    integer :: ib
+    integer :: ierror
+    integer :: imid
+    integer :: is
+    integer :: isym
+    integer :: ivrt
+    integer :: iwk
+    integer :: jvrt
+    integer :: lpimn
+    integer :: ls
+    integer :: lshses
+    integer :: lwk
+    integer :: lwork
+    integer :: mab
+    integer :: mdc
+    integer :: mmax
+    integer :: mn
+    integer :: ndc
+    integer :: nlat
+    integer :: nln
+    integer :: nlon
+    integer :: nt
+    real :: vort
+    real :: work
+    real :: wshses
 
     dimension vort(ivrt, jvrt, nt), cr(mdc, ndc, nt), ci(mdc, ndc, nt)
     dimension wshses(lshses), work(lwork)
@@ -286,6 +315,32 @@ end subroutine vrtes
 
 subroutine vrtes1(nlat, nlon, isym, nt, vort, ivrt, jvrt, cr, ci, mdc, ndc, &
     a, b, mab, sqnn, wsav, lwsav, wk, lwk, ierror)
+    implicit none
+    real :: a
+    real :: b
+    real :: ci
+    real :: cr
+    real :: fn
+    integer :: ierror
+    integer :: isym
+    integer :: ivrt
+    integer :: jvrt
+    integer :: k
+    integer :: lwk
+    integer :: lwsav
+    integer :: m
+    integer :: mab
+    integer :: mdc
+    integer :: mmax
+    integer :: n
+    integer :: ndc
+    integer :: nlat
+    integer :: nlon
+    integer :: nt
+    real :: sqnn
+    real :: vort
+    real :: wk
+    real :: wsav
     dimension vort(ivrt, jvrt, nt), cr(mdc, ndc, nt), ci(mdc, ndc, nt)
     dimension a(mab, nlat, nt), b(mab, nlat, nt), sqnn(nlat)
     dimension wsav(lwsav), wk(lwk)

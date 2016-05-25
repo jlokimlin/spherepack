@@ -227,6 +227,35 @@
 !   
 subroutine dives(nlat, nlon, isym, nt, dv, idv, jdv, br, bi, mdb, ndb, &
     wshses, lshses, work, lwork, ierror)
+    implicit none
+    real :: bi
+    real :: br
+    real :: dv
+    integer :: ia
+    integer :: ib
+    integer :: idv
+    integer :: ierror
+    integer :: imid
+    integer :: is
+    integer :: isym
+    integer :: iwk
+    integer :: jdv
+    integer :: lpimn
+    integer :: ls
+    integer :: lshses
+    integer :: lwk
+    integer :: lwork
+    integer :: mab
+    integer :: mdb
+    integer :: mmax
+    integer :: mn
+    integer :: ndb
+    integer :: nlat
+    integer :: nln
+    integer :: nlon
+    integer :: nt
+    real :: work
+    real :: wshses
 
     dimension dv(idv, jdv, nt), br(mdb, ndb, nt), bi(mdb, ndb, nt)
     dimension wshses(lshses), work(lwork)
@@ -292,6 +321,32 @@ end subroutine dives
 
 subroutine dives1(nlat, nlon, isym, nt, dv, idv, jdv, br, bi, mdb, ndb, &
     a, b, mab, sqnn, wshses, lshses, wk, lwk, ierror)
+    implicit none
+    real :: a
+    real :: b
+    real :: bi
+    real :: br
+    real :: dv
+    real :: fn
+    integer :: idv
+    integer :: ierror
+    integer :: isym
+    integer :: jdv
+    integer :: k
+    integer :: lshses
+    integer :: lwk
+    integer :: m
+    integer :: mab
+    integer :: mdb
+    integer :: mmax
+    integer :: n
+    integer :: ndb
+    integer :: nlat
+    integer :: nlon
+    integer :: nt
+    real :: sqnn
+    real :: wk
+    real :: wshses
     dimension dv(idv, jdv, nt), br(mdb, ndb, nt), bi(mdb, ndb, nt)
     dimension a(mab, nlat, nt), b(mab, nlat, nt), sqnn(nlat)
     dimension wshses(lshses), wk(lwk)

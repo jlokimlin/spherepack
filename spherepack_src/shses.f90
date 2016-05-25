@@ -294,6 +294,29 @@
 ! ****************************************************************
 subroutine shses(nlat,nlon,isym,nt,g,idg,jdg,a,b,mdab,ndab, &
                     wshses,lshses,work,lwork,ierror)
+implicit none
+real :: a
+real :: b
+real :: g
+integer :: idg
+integer :: ierror
+integer :: imid
+integer :: ist
+integer :: isym
+integer :: jdg
+integer :: lpimn
+integer :: ls
+integer :: lshses
+integer :: lwork
+integer :: mdab
+integer :: mmax
+integer :: ndab
+integer :: nlat
+integer :: nln
+integer :: nlon
+integer :: nt
+real :: work
+real :: wshses
 dimension g(idg,jdg,1),a(mdab,ndab,1),b(mdab,ndab,1),wshses(1), &
           work(1)
 ierror = 1
@@ -332,6 +355,42 @@ return
 end subroutine shses
 subroutine shses1(nlat,isym,nt,g,idgs,jdgs,a,b,mdab,ndab,p,imid, &
                   idg,jdg,ge,go,work,whrfft)
+implicit none
+real :: a
+real :: b
+real :: g
+real :: ge
+real :: go
+integer :: i
+integer :: idg
+integer :: idgs
+integer :: imid
+integer :: imm1
+integer :: isym
+integer :: j
+integer :: jdg
+integer :: jdgs
+integer :: k
+integer :: ls
+integer :: m
+integer :: mb
+integer :: mdab
+integer :: mdo
+integer :: mmax
+integer :: mn
+integer :: modl
+integer :: mp1
+integer :: mp2
+integer :: ndab
+integer :: ndo
+integer :: nlat
+integer :: nlon
+integer :: nlp1
+integer :: np1
+integer :: nt
+real :: p
+real :: whrfft
+real :: work
 dimension g(idgs,jdgs,1),a(mdab,ndab,1),b(mdab,ndab,1),p(imid,1), &
           ge(idg,jdg,1),go(idg,jdg,1),work(1),whrfft(1)
 ls = idg
@@ -432,6 +491,20 @@ end subroutine shses1
 
 subroutine shsesi(nlat,nlon,wshses,lshses,work,lwork,dwork, &
                   ldwork,ierror)
+implicit none
+integer :: ierror
+integer :: imid
+integer :: iw1
+integer :: labc
+integer :: ldwork
+integer :: lpimn
+integer :: lshses
+integer :: lwork
+integer :: mmax
+integer :: nlat
+integer :: nlon
+real :: work
+real :: wshses
 dimension wshses(*),work(*)
 real dwork(*)
 ierror = 1

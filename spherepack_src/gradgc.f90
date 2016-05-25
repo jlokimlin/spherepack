@@ -9,7 +9,7 @@
 !     *                                                               *
 !     *                      SPHEREPACK version 3.2                   *
 !     *                                                               *
-!     *       A Package of Fortran77 Subroutines and Programs         *
+!     *       A Package of Fortran Subroutines and Programs           *
 !     *                                                               *
 !     *              for Modeling Geophysical Processes               *
 !     *                                                               *
@@ -229,6 +229,36 @@
 !   
 subroutine gradgc(nlat, nlon, isym, nt, v, w, idvw, jdvw, a, b, mdab, ndab, &
     wvhsgc, lvhsgc, work, lwork, ierror)
+    implicit none
+    real :: a
+    real :: b
+    integer :: ibi
+    integer :: ibr
+    integer :: idvw
+    integer :: ierror
+    integer :: imid
+    integer :: is
+    integer :: isym
+    integer :: iwk
+    integer :: jdvw
+    integer :: l1
+    integer :: l2
+    integer :: liwk
+    integer :: lvhsgc
+    integer :: lwkmin
+    integer :: lwmin
+    integer :: lwork
+    integer :: mdab
+    integer :: mmax
+    integer :: mn
+    integer :: ndab
+    integer :: nlat
+    integer :: nlon
+    integer :: nt
+    real :: v
+    real :: w
+    real :: work
+    real :: wvhsgc
     dimension v(idvw, jdvw, nt), w(idvw, jdvw, nt)
     dimension a(mdab, ndab, nt), b(mdab, ndab, nt)
     dimension wvhsgc(lvhsgc), work(lwork)
@@ -286,10 +316,40 @@ subroutine gradgc(nlat, nlon, isym, nt, v, w, idvw, jdvw, a, b, mdab, ndab, &
     call gradgc1(nlat, nlon, isym, nt, v, w, idvw, jdvw, work(ibr), work(ibi), &
         mmax, work(is), mdab, ndab, a, b, wvhsgc, lvhsgc, work(iwk), liwk, &
         ierror)
-    return
+
 end subroutine gradgc
+
 subroutine gradgc1(nlat, nlon, isym, nt, v, w, idvw, jdvw, br, bi, mmax, &
     sqnn, mdab, ndab, a, b, wvhsgc, lvhsgc, wk, lwk, ierror)
+    implicit none
+    real :: a
+    real :: b
+    real :: bi
+    real :: br
+    real :: ci
+    real :: cr
+    real :: fn
+    integer :: idvw
+    integer :: ierror
+    integer :: isym
+    integer :: ityp
+    integer :: jdvw
+    integer :: k
+    integer :: lvhsgc
+    integer :: lwk
+    integer :: m
+    integer :: mdab
+    integer :: mmax
+    integer :: n
+    integer :: ndab
+    integer :: nlat
+    integer :: nlon
+    integer :: nt
+    real :: sqnn
+    real :: v
+    real :: w
+    real :: wk
+    real :: wvhsgc
     dimension v(idvw, jdvw, nt), w(idvw, jdvw, nt)
     dimension br(mmax, nlat, nt), bi(mmax, nlat, nt), sqnn(nlat)
     dimension a(mdab, ndab, nt), b(mdab, ndab, nt)
@@ -297,54 +357,55 @@ subroutine gradgc1(nlat, nlon, isym, nt, v, w, idvw, jdvw, br, bi, mmax, &
     !
     !     preset coefficient multiplyers in vector
     !
-    do 1 n=2, nlat
+    do n=2, nlat
         fn = real(n - 1)
         sqnn(n) = sqrt(fn * (fn + 1.0))
-1   continue
+    end do
     !
     !     compute multiple vector fields coefficients
     !
-    do 2 k=1, nt
+    do k=1, nt
         !
         !     preset br, bi to 0.0
         !
-        do 3 n=1, nlat
-            do 4 m=1, mmax
+        do n=1, nlat
+            do m=1, mmax
                 br(m, n, k) = 0.0
                 bi(m, n, k) = 0.0
-4           continue
-3       continue
+            end do
+        end do
         !
         !     compute m=0 coefficients
         !
-        do 5 n=2, nlat
+        do n=2, nlat
             br(1, n, k) = sqnn(n)*a(1, n, k)
             bi(1, n, k) = sqnn(n)*b(1, n, k)
-5       continue
+        end do
         !
         !     compute m>0 coefficients
         !
-        do 6 m=2, mmax
-            do 7 n=m, nlat
+        do m=2, mmax
+            do n=m, nlat
                 br(m, n, k) = sqnn(n)*a(m, n, k)
                 bi(m, n, k) = sqnn(n)*b(m, n, k)
-7           continue
-6       continue
-2   continue
+            end do
+        end do
+    end do
     !
     !     set ityp for irrotational vector synthesis to compute gradient
     !
-    if (isym == 0) then
-        ityp = 1
-    else if (isym==1) then
-        ityp = 4
-    else if (isym==2) then
-        ityp = 7
-    end if
+    select case (isym)
+        case (0)
+            ityp = 1
+        case (1)
+            ityp = 4
+        case (2)
+            ityp = 7
+    end select
     !
     !     vector sythesize br, bi into (v, w) (cr, ci are dummy variables)
     !
     call vhsgc(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
         mmax, nlat, wvhsgc, lvhsgc, wk, lwk, ierror)
-    return
+
 end subroutine gradgc1

@@ -128,6 +128,21 @@
 !
 subroutine shigs(nlat, nlon, wshigs, lshigs, work, lwork, dwork, &
     ldwork, ierror)
+    implicit none
+    integer :: ierror
+    integer :: ipmnf
+    integer :: l
+    integer :: l1
+    integer :: l2
+    integer :: late
+    integer :: ldwork
+    integer :: lp
+    integer :: lshigs
+    integer :: lwork
+    integer :: nlat
+    integer :: nlon
+    real :: work
+    real :: wshigs
     !
     !     this subroutine must be called before calling shags or shsgs with
     !     fixed nlat, nlon. it precomputes the gaussian weights, points
@@ -168,6 +183,21 @@ subroutine shigs(nlat, nlon, wshigs, lshigs, work, lwork, dwork, &
 end subroutine shigs
 
 subroutine shigss1(nlat, l, late, w, pmn, pmnf)
+    implicit none
+    integer :: i
+    integer :: km
+    integer :: l
+    integer :: late
+    integer :: m
+    integer :: mml1
+    integer :: mn
+    integer :: mode
+    integer :: mp1
+    integer :: nlat
+    integer :: np1
+    real :: pmn
+    real :: pmnf
+    real :: w
     dimension w(1), pmn(nlat, late, 3), pmnf(late, 1)
     !     compute and store legendre polys for i=1, ..., late, m=0, ..., l-1
     !     and n=m, ..., l-1
@@ -194,6 +224,27 @@ end subroutine shigss1
 
 
 subroutine shigsp(nlat, nlon, wshigs, lshigs, dwork, ldwork, ierror)
+    implicit none
+    integer :: i1
+    integer :: i2
+    integer :: i3
+    integer :: i4
+    integer :: i5
+    integer :: i6
+    integer :: i7
+    integer :: idth
+    integer :: idwts
+    integer :: ierror
+    integer :: iw
+    integer :: l
+    integer :: l1
+    integer :: l2
+    integer :: late
+    integer :: ldwork
+    integer :: lshigs
+    integer :: nlat
+    integer :: nlon
+    real :: wshigs
     dimension wshigs(lshigs)
     real dwork(ldwork)
     ierror = 1
@@ -241,6 +292,29 @@ end subroutine shigsp
 
 subroutine shigsp1(nlat, nlon, l, late, wts, p0n, p1n, abel, bbel, cbel, &
     wfft, dtheta, dwts, work, ier)
+    implicit none
+    real :: abel
+    real :: bbel
+    real :: cbel
+    real :: dwts
+    integer :: i
+    integer :: ier
+    integer :: imn
+    integer :: imndx
+    integer :: indx
+    integer :: l
+    integer :: late
+    integer :: lw
+    integer :: m
+    integer :: mlim
+    integer :: n
+    integer :: nlat
+    integer :: nlon
+    integer :: np1
+    real :: p0n
+    real :: p1n
+    real :: wfft
+    real :: wts
     dimension wts(nlat), p0n(nlat, late), p1n(nlat, late), abel(1), bbel(1), &
         cbel(1), wfft(1), dtheta(nlat), dwts(nlat)
     real pb, dtheta, work(*)

@@ -321,6 +321,42 @@
 !
 subroutine vhagc(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
            mdab, ndab, wvhagc, lvhagc, work, lwork, ierror)
+implicit none
+real :: bi
+real :: br
+real :: ci
+real :: cr
+integer :: idv
+integer :: idvw
+integer :: ierror
+integer :: imid
+integer :: ist
+integer :: ityp
+integer :: iw1
+integer :: iw2
+integer :: iw3
+integer :: iw4
+integer :: iw5
+integer :: jdvw
+integer :: jw1
+integer :: jw2
+integer :: jw3
+integer :: labc
+integer :: lnl
+integer :: lvhagc
+integer :: lwork
+integer :: lwzvin
+integer :: lzz1
+integer :: mdab
+integer :: mmax
+integer :: ndab
+integer :: nlat
+integer :: nlon
+integer :: nt
+real :: v
+real :: w
+real :: work
+real :: wvhagc
 dimension v(idvw, jdvw, 1), w(idvw, jdvw, 1), br(mdab, ndab, 1), &
           bi(mdab, ndab, 1), cr(mdab, ndab, 1), ci(mdab, ndab, 1), &
           work(1), wvhagc(1)
@@ -372,6 +408,62 @@ return
 end subroutine vhagc
 subroutine vhagc1(nlat, nlon, ityp, nt, imid, idvw, jdvw, v, w, mdab, &
 ndab, br, bi, cr, ci, idv, ve, vo, we, wo, vb, wb, wts, wvbin, wwbin, wrfft)
+implicit none
+real :: bi
+real :: br
+real :: ci
+real :: cr
+real :: fsn
+integer :: i
+integer :: idv
+integer :: idvw
+integer :: imid
+integer :: imm1
+integer :: ityp
+integer :: itypp
+integer :: iv
+integer :: iw
+integer :: j
+integer :: jdvw
+integer :: k
+integer :: m
+integer :: mdab
+integer :: mlat
+integer :: mlon
+integer :: mmax
+integer :: mp1
+integer :: mp2
+integer :: ndab
+integer :: ndo1
+integer :: ndo2
+integer :: nlat
+integer :: nlon
+integer :: nlp1
+integer :: np1
+integer :: nt
+real :: tsn
+real :: tv
+real :: tve1
+real :: tve2
+real :: tvo1
+real :: tvo2
+real :: tw
+real :: twe1
+real :: twe2
+real :: two1
+real :: two2
+real :: v
+real :: vb
+real :: ve
+real :: vo
+real :: w
+real :: wb
+real :: we
+real :: wo
+real :: wrfft
+real :: wts
+real :: wvbin
+real :: wwbin
 dimension v(idvw, jdvw, 1), w(idvw, jdvw, 1), br(mdab, ndab, 1), &
           bi(mdab, ndab, 1), cr(mdab, ndab, 1), ci(mdab, ndab, 1), &
           ve(idv, nlon, 1), vo(idv, nlon, 1), we(idv, nlon, 1), &
@@ -1000,6 +1092,26 @@ ci(mp1, np1, k) = ci(mp1, np1, k)-vb(i, np1, iv)*we(i, 2*mp1-1, k)*wts(i)
 return
 end subroutine vhagc1
 subroutine vhagci(nlat, nlon, wvhagc, lvhagc, dwork, ldwork, ierror)
+implicit none
+integer :: ierror
+integer :: imid
+integer :: iw1
+integer :: iw2
+integer :: iw3
+integer :: iwrk
+integer :: jw1
+integer :: jw2
+integer :: jw3
+integer :: labc
+integer :: ldwork
+integer :: lvhagc
+integer :: lwk
+integer :: lwvbin
+integer :: lzz1
+integer :: mmax
+integer :: nlat
+integer :: nlon
+real :: wvhagc
 dimension wvhagc(1)
 real dwork(*)
 ierror = 1
@@ -1049,6 +1161,10 @@ call hrffti(nlon, wvhagc(iw3))
 return
 end subroutine vhagci
 subroutine setwts(imid, dwts, wts)
+implicit none
+integer :: i
+integer :: imid
+real :: wts
 !
 !     set first imid =(nlat+1)/2 of real weights in dwts
 !     as single precision in wts

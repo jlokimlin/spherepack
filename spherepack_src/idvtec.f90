@@ -9,7 +9,7 @@
 !     *                                                               *
 !     *                      SPHEREPACK version 3.2                   *
 !     *                                                               *
-!     *       A Package of Fortran77 Subroutines and Programs         *
+!     *       A Package of Fortran Subroutines and Programs           *
 !     *                                                               *
 !     *              for Modeling Geophysical Processes               *
 !     *                                                               *
@@ -31,14 +31,14 @@
 !
 !
 !
-! ... file idvtec.f
+! ... file idvtec.f90
 !
 !     this file includes documentation and code for
 !     subroutine idvtec         i
 !
-! ... files which must be loaded with idvtec.f
+! ... files which must be loaded with idvtec.f90
 !
-!     sphcom.f, hrfft.f, vhsec.f, shaec.f
+!     sphcom.f90, hrfft.f90, vhsec.f90, shaec.f90
 !
 !
 !     subroutine idvtec(nlat, nlon, isym, nt, v, w, idvw, jdvw, ad, bd, av, bv, 
@@ -274,6 +274,40 @@
 !   
 subroutine idvtec(nlat, nlon, isym, nt, v, w, idvw, jdvw, ad, bd, av, bv, &
     mdab, ndab, wvhsec, lvhsec, work, lwork, pertbd, pertbv, ierror)
+    implicit none
+    real :: ad
+    real :: av
+    real :: bd
+    real :: bv
+    integer :: ibi
+    integer :: ibr
+    integer :: ici
+    integer :: icr
+    integer :: idvw
+    integer :: ierror
+    integer :: imid
+    integer :: is
+    integer :: isym
+    integer :: iwk
+    integer :: jdvw
+    integer :: labc
+    integer :: liwk
+    integer :: lvhsec
+    integer :: lwork
+    integer :: lzz1
+    integer :: mdab
+    integer :: mmax
+    integer :: mn
+    integer :: ndab
+    integer :: nlat
+    integer :: nlon
+    integer :: nt
+    real :: pertbd
+    real :: pertbv
+    real :: v
+    real :: w
+    real :: work
+    real :: wvhsec
     dimension w(idvw, jdvw, nt), v(idvw, jdvw, nt), pertbd(nt), pertbv(nt)
     dimension ad(mdab, ndab, nt), bd(mdab, ndab, nt)
     dimension av(mdab, ndab, nt), bv(mdab, ndab, nt)
@@ -336,6 +370,39 @@ end subroutine idvtec
 subroutine idvtec1(nlat, nlon, isym, nt, v, w, idvw, jdvw, br, bi, &
     cr, ci, mmax, sqnn, mdab, ndab, ad, bd, av, bv, wvhsec, lvhsec, wk, lwk, &
     pertbd, pertbv, ierror)
+    implicit none
+    real :: ad
+    real :: av
+    real :: bd
+    real :: bi
+    real :: br
+    real :: bv
+    real :: ci
+    real :: cr
+    real :: fn
+    integer :: idvw
+    integer :: ierror
+    integer :: isym
+    integer :: ityp
+    integer :: jdvw
+    integer :: k
+    integer :: lvhsec
+    integer :: lwk
+    integer :: m
+    integer :: mdab
+    integer :: mmax
+    integer :: n
+    integer :: ndab
+    integer :: nlat
+    integer :: nlon
+    integer :: nt
+    real :: pertbd
+    real :: pertbv
+    real :: sqnn
+    real :: v
+    real :: w
+    real :: wk
+    real :: wvhsec
     dimension w(idvw, jdvw, nt), v(idvw, jdvw, nt)
     dimension br(mmax, nlat, nt), bi(mmax, nlat, nt), sqnn(nlat)
     dimension cr(mmax, nlat, nt), ci(mmax, nlat, nt)

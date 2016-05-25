@@ -276,6 +276,31 @@
 ! ****************************************************************
 subroutine shsec(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, &
                     wshsec, lshsec, work, lwork, ierror)
+implicit none
+real :: a
+real :: b
+real :: g
+integer :: idg
+integer :: ierror
+integer :: imid
+integer :: ist
+integer :: isym
+integer :: iw1
+integer :: jdg
+integer :: labc
+integer :: ls
+integer :: lshsec
+integer :: lwork
+integer :: lzz1
+integer :: mdab
+integer :: mmax
+integer :: ndab
+integer :: nlat
+integer :: nln
+integer :: nlon
+integer :: nt
+real :: work
+real :: wshsec
 dimension g(idg, jdg, 1), a(mdab, ndab, 1), b(mdab, ndab, 1), wshsec(1), &
           work(1)
 ierror = 1
@@ -316,6 +341,42 @@ return
 end subroutine shsec
 subroutine shsec1(nlat, isym, nt, g, idgs, jdgs, a, b, mdab, ndab, imid, &
                 idg, jdg, ge, go, work, pb, walin, whrfft)
+implicit none
+real :: a
+real :: b
+real :: g
+real :: ge
+real :: go
+integer :: i
+integer :: i3
+integer :: idg
+integer :: idgs
+integer :: imid
+integer :: imm1
+integer :: isym
+integer :: j
+integer :: jdg
+integer :: jdgs
+integer :: k
+integer :: ls
+integer :: m
+integer :: mdab
+integer :: mdo
+integer :: mmax
+integer :: modl
+integer :: mp1
+integer :: mp2
+integer :: ndab
+integer :: ndo
+integer :: nlat
+integer :: nlon
+integer :: nlp1
+integer :: np1
+integer :: nt
+real :: pb
+real :: walin
+real :: whrfft
+real :: work
 !
 !     whrfft must have at least nlon+15 locations
 !     walin must have 3*l*imid + 3*((l-3)*l+2)/2 locations
@@ -476,6 +537,18 @@ end subroutine shsec1
 !
 ! ****************************************************************
 subroutine shseci(nlat, nlon, wshsec, lshsec, dwork, ldwork, ierror)
+implicit none
+integer :: ierror
+integer :: imid
+integer :: iw1
+integer :: labc
+integer :: ldwork
+integer :: lshsec
+integer :: lzz1
+integer :: mmax
+integer :: nlat
+integer :: nlon
+real :: wshsec
 dimension wshsec(*)
 real dwork(ldwork)
 ierror = 1

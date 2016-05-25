@@ -319,6 +319,41 @@
 ! **********************************************************************
 subroutine vhaec(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
            mdab, ndab, wvhaec, lvhaec, work, lwork, ierror)
+implicit none
+real :: bi
+real :: br
+real :: ci
+real :: cr
+integer :: idv
+integer :: idvw
+integer :: ierror
+integer :: imid
+integer :: ist
+integer :: ityp
+integer :: iw1
+integer :: iw2
+integer :: iw3
+integer :: iw4
+integer :: iw5
+integer :: jdvw
+integer :: jw1
+integer :: jw2
+integer :: labc
+integer :: lnl
+integer :: lvhaec
+integer :: lwork
+integer :: lwzvin
+integer :: lzz1
+integer :: mdab
+integer :: mmax
+integer :: ndab
+integer :: nlat
+integer :: nlon
+integer :: nt
+real :: v
+real :: w
+real :: work
+real :: wvhaec
 dimension v(idvw, jdvw, 1), w(idvw, jdvw, 1), br(mdab, ndab, 1), &
           bi(mdab, ndab, 1), cr(mdab, ndab, 1), ci(mdab, ndab, 1), &
           work(1), wvhaec(1)
@@ -371,6 +406,51 @@ return
 end subroutine vhaec
 subroutine vhaec1(nlat, nlon, ityp, nt, imid, idvw, jdvw, v, w, mdab, &
    ndab, br, bi, cr, ci, idv, ve, vo, we, wo, zv, zw, wzvin, wzwin, wrfft)
+implicit none
+real :: bi
+real :: br
+real :: ci
+real :: cr
+real :: fsn
+integer :: i
+integer :: idv
+integer :: idvw
+integer :: imid
+integer :: imm1
+integer :: ityp
+integer :: itypp
+integer :: iv
+integer :: iw
+integer :: j
+integer :: jdvw
+integer :: k
+integer :: m
+integer :: mdab
+integer :: mlat
+integer :: mlon
+integer :: mmax
+integer :: mp1
+integer :: mp2
+integer :: ndab
+integer :: ndo1
+integer :: ndo2
+integer :: nlat
+integer :: nlon
+integer :: nlp1
+integer :: np1
+integer :: nt
+real :: tsn
+real :: v
+real :: ve
+real :: vo
+real :: w
+real :: we
+real :: wo
+real :: wrfft
+real :: wzvin
+real :: wzwin
+real :: zv
+real :: zw
 dimension v(idvw, jdvw, 1), w(idvw, jdvw, 1), br(mdab, ndab, 1), &
           bi(mdab, ndab, 1), cr(mdab, ndab, 1), ci(mdab, ndab, 1), &
           ve(idv, nlon, 1), vo(idv, nlon, 1), we(idv, nlon, 1), &
@@ -890,6 +970,20 @@ ci(mp1, np1, k) = ci(mp1, np1, k)-zv(imid, np1, iv)*we(imid, 2*mp1-1, k)
 return
 end subroutine vhaec1
 subroutine vhaeci(nlat, nlon, wvhaec, lvhaec, dwork, ldwork, ierror)
+implicit none
+integer :: ierror
+integer :: imid
+integer :: iw1
+integer :: iw2
+integer :: labc
+integer :: ldwork
+integer :: lvhaec
+integer :: lwzvin
+integer :: lzz1
+integer :: mmax
+integer :: nlat
+integer :: nlon
+real :: wvhaec
 dimension wvhaec(lvhaec)
 real dwork(ldwork)
 ierror = 1

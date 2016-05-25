@@ -43,6 +43,110 @@
 !
 
 program shallow
+    real :: a
+    real :: aa
+    real :: alpha
+    real :: alphad
+    real :: b
+    real :: bi
+    real :: br
+    real :: ca
+    real :: cfn
+    real :: ci
+    real :: cl
+    real :: clh
+    real :: cr
+    real :: ct
+    real :: cth
+    real :: cthclh
+    real :: cthslh
+    real :: ctime
+    real :: divg
+    real :: dlam
+    real :: dlath
+    real :: dpdt
+    real :: dpmax
+    real :: dt
+    real :: dtheta
+    real :: dtr
+    real :: dudt
+    real :: dvdt
+    real :: dvgm
+    real :: dvmax
+    real :: epmax
+    real :: evmax
+    real :: f
+    real :: fzero
+    real :: gpdl
+    real :: gpdt
+    real :: hpi
+    real :: htime
+    integer :: i
+    integer :: idp
+    integer :: ierror
+    integer :: isym
+    integer :: itmax
+    integer :: j
+    integer :: jdp
+    integer :: ldwork
+    integer :: lldwork
+    integer :: lwork
+    integer :: lwsha
+    integer :: lwshs
+    integer :: lwvha
+    integer :: lwvhs
+    integer :: lwvts
+    integer :: mdab
+    integer :: mmode
+    integer :: mprint
+    integer :: ncycle
+    integer :: ndab
+    integer :: nl
+    integer :: nlat
+    integer :: nlm1
+    integer :: nlm2
+    integer :: nlon
+    integer :: nt
+    real :: omega
+    real :: p
+    real :: p2max
+    real :: phlt
+    real :: pi
+    real :: pmax
+    real :: pnew
+    real :: pold
+    real :: pxact
+    real :: pzero
+    real :: sa
+    real :: sl
+    real :: slh
+    real :: st
+    real :: sth
+    real :: tdt
+    real :: that
+    real :: theta
+    real :: time
+    real :: u
+    real :: uhat
+    real :: unew
+    real :: uold
+    real :: ut
+    real :: uxact
+    real :: uzero
+    real :: v
+    real :: v2max
+    real :: vmax
+    real :: vnew
+    real :: vold
+    real :: vort
+    real :: vt
+    real :: vxact
+    real :: work
+    real :: wsha
+    real :: wshs
+    real :: wvha
+    real :: wvhs
+    real :: wvts
     !
     !     the nonlinear shallow-water equations on the sphere are
     !     solved using a spectral method based on the spherical
@@ -477,6 +581,29 @@ end program shallow
 
 subroutine vtsesgo(nlat,nlon,ityp,nt,ut,vt,idvw,jdvw,br,bi,cr,ci, &
     mdab,ndab,wvts,lwvts,work,lwork,ierror)
+
+    real :: bi
+    real :: br
+    real :: ci
+    real :: cr
+    integer :: i
+    integer :: idvw
+    integer :: ierror
+    integer :: ityp
+    integer :: j
+    integer :: jdvw
+    integer :: k
+    integer :: lwork
+    integer :: lwvts
+    integer :: mdab
+    integer :: ndab
+    integer :: nlat
+    integer :: nlon
+    integer :: nt
+    real :: ut
+    real :: vt
+    real :: work
+    real :: wvts
     !
     !     vtsesgo computes the latitudinal derivatives of the
     !     velocity components using subroutine vtses which
@@ -500,6 +627,14 @@ end subroutine vtsesgo
 
 !
 function ui(amp,thetad)
+
+    real :: amp
+    real :: pi
+    real :: thetab
+    real :: thetad
+    real :: thetae
+    real :: x
+    real :: xe
     !
     !     computes the initial unrotated longitudinal velocity
     !     see section 3.3.
@@ -516,6 +651,9 @@ function ui(amp,thetad)
 end function ui
 !
 function atanxy(x,y)
+
+    real :: x
+    real :: y
     atanxy = 0.
     if (x==0. .and. y==0.) return
     atanxy = atan2(y,x)
@@ -523,6 +661,13 @@ function atanxy(x,y)
 end function atanxy
 
 subroutine sine(n,x,w)
+
+    real :: arg
+    integer :: i
+    integer :: j
+    integer :: n
+    real :: w
+    real :: x
     !
     !     computes the sine transform
     !
@@ -542,6 +687,11 @@ subroutine sine(n,x,w)
 end subroutine sine
 !
 function cosine(theta,n,cf)
+
+    real :: cf
+    integer :: i
+    integer :: n
+    real :: theta
     !
     !     computes the cosine transform
     !
@@ -554,6 +704,15 @@ function cosine(theta,n,cf)
 end function cosine
 !
 subroutine trunc(nm,ms,id,a,b)
+
+    real :: a
+    real :: b
+    integer :: id
+    integer :: m
+    integer :: mp
+    integer :: ms
+    integer :: n
+    integer :: nm
     !
     !     truncates spectral coefficients so that aliasing
     !     does not occur when computing the spectral representations
@@ -572,6 +731,29 @@ end subroutine trunc
 
 subroutine vhaesgo(nlat,nlon,ityp,nt,u,v,iduv,jduv, &
     br,bi,cr,ci,mdab,ndab,wsav,lwsav,work,lwork,ierror)
+
+    real :: bi
+    real :: br
+    real :: ci
+    real :: cr
+    integer :: i
+    integer :: iduv
+    integer :: ierror
+    integer :: ityp
+    integer :: j
+    integer :: jduv
+    integer :: k
+    integer :: lwork
+    integer :: lwsav
+    integer :: mdab
+    integer :: ndab
+    integer :: nlat
+    integer :: nlon
+    integer :: nt
+    real :: u
+    real :: v
+    real :: work
+    real :: wsav
     dimension u(iduv,jduv,*),v(iduv,jduv,*),br(mdab,ndab,*), &
         bi(mdab,ndab,*),cr(mdab,ndab,*),ci(mdab,ndab,*), &
         work(1),wsav(1)
@@ -606,6 +788,29 @@ end subroutine vhaesgo
 
 subroutine vhsesgo(nlat,nlon,ityp,nt,u,v,iduv,jduv, &
     br,bi,cr,ci,mdab,ndab,wsav,lwsav,work,lwork,ierror)
+
+    real :: bi
+    real :: br
+    real :: ci
+    real :: cr
+    integer :: i
+    integer :: iduv
+    integer :: ierror
+    integer :: ityp
+    integer :: j
+    integer :: jduv
+    integer :: k
+    integer :: lwork
+    integer :: lwsav
+    integer :: mdab
+    integer :: ndab
+    integer :: nlat
+    integer :: nlon
+    integer :: nt
+    real :: u
+    real :: v
+    real :: work
+    real :: wsav
     dimension u(iduv,jduv,*),v(iduv,jduv,*),br(mdab,ndab,*), &
         bi(mdab,ndab,*),cr(mdab,ndab,*),ci(mdab,ndab,*), &
         work(1),wsav(1)
@@ -628,6 +833,27 @@ end subroutine vhsesgo
 
 subroutine gradesgo(nlat,nlon,isym,nt,u,v,iduv,jduv,a,b, &
     mdab,ndab,wsav,lwsav,work,lwork,ierror)
+
+    real :: a
+    real :: b
+    integer :: i
+    integer :: iduv
+    integer :: ierror
+    integer :: isym
+    integer :: j
+    integer :: jduv
+    integer :: k
+    integer :: lwork
+    integer :: lwsav
+    integer :: mdab
+    integer :: ndab
+    integer :: nlat
+    integer :: nlon
+    integer :: nt
+    real :: u
+    real :: v
+    real :: work
+    real :: wsav
     dimension u(iduv,jduv,nt),v(iduv,jduv,nt)
     dimension a(mdab,ndab,nt),b(mdab,ndab,nt)
     dimension wsav(lwsav),work(lwork)

@@ -114,6 +114,45 @@
 !
 subroutine shpei(nlat, nlon, isym, mtrunc, wshp, lwshp, iwshp, &
  liwshp, work, lwork, ierror)
+implicit none
+integer :: ierror
+integer :: isym
+integer :: iw1
+integer :: iw2
+integer :: iw3
+integer :: iw4
+integer :: iwshp
+integer :: jw1
+integer :: jw2
+integer :: jw3
+integer :: jw4
+integer :: kw1
+integer :: kw10
+integer :: kw11
+integer :: kw12
+integer :: kw13
+integer :: kw2
+integer :: kw3
+integer :: kw4
+integer :: kw5
+integer :: kw6
+integer :: kw7
+integer :: kw8
+integer :: kw9
+integer :: liwshp
+integer :: log2n
+integer :: lw1
+integer :: lwork
+integer :: lwshp
+integer :: mlwk
+integer :: mmax
+integer :: mtrunc
+integer :: nlat
+integer :: nloc1
+integer :: nloc2
+integer :: nlon
+integer :: nte
+real :: wshp
 real work(*)
 dimension wshp(*), iwshp(*)
 !
@@ -175,6 +214,47 @@ end subroutine shpei
 subroutine shpei1(nlat, nlon, isym, mtrunc, idp, ierror, &
   pe, po, ze, zo, ipse, jzse, ipso, jzso, &
   cp, work, wx, s, e, thet, xx, z, a, b, we, ped, wo, pod, u)
+implicit none
+real :: dfn
+integer :: i
+integer :: idp
+integer :: ierror
+integer :: info
+integer :: ip
+integer :: ipse
+integer :: ipso
+integer :: isym
+integer :: it
+integer :: j
+integer :: js
+integer :: jzse
+integer :: jzso
+integer :: k
+integer :: lock
+integer :: m
+integer :: modn
+integer :: mp1
+integer :: mrank
+integer :: ms2
+integer :: mtrunc
+integer :: mxtr
+integer :: n
+integer :: nem
+integer :: nlat
+integer :: nlon
+integer :: nom
+integer :: nrank
+integer :: ns2
+integer :: nshe
+integer :: nsho
+integer :: nte
+integer :: nto
+real :: pe
+real :: po
+real :: toe
+real :: tusl
+real :: ze
+real :: zo
 !
 real sum, eps, pi, dthet, v(1,1), a1, b1, c1
 parameter (eps=epsilon(1.0))
@@ -689,6 +769,39 @@ end subroutine shpei1
 !
 subroutine shpe(nlat, nlon, isym, mtrunc, x, y, idxy, &
         wshp, lwshp, iwshp, liwshp, work, lwork, ierror)
+implicit none
+integer :: i
+integer :: idxy
+integer :: ierror
+integer :: isym
+integer :: iw1
+integer :: iw2
+integer :: iw3
+integer :: iw4
+integer :: iwshp
+integer :: j
+integer :: jw1
+integer :: jw2
+integer :: jw3
+integer :: jw4
+integer :: liwshp
+integer :: log2n
+integer :: lw1
+integer :: lwork
+integer :: lwshp
+integer :: mmax
+integer :: mtrunc
+integer :: mwrk
+integer :: nlat
+integer :: nloc1
+integer :: nloc2
+integer :: nlon
+integer :: nte
+real :: sn
+real :: work
+real :: wshp
+real :: x
+real :: y
 !
 dimension wshp(*), iwshp(*), work(*), x(idxy, nlon), y(idxy, nlon)
 !
@@ -748,6 +861,49 @@ return
 end subroutine shpe
 subroutine shpe1(nlat, nlon, isym, mtrunc, sx, sy, idxy, ierror, &
  idp, pe, po, ze, zo, ipse, jzse, ipso, jzso, xe, xo, ye, yo)
+implicit none
+integer :: i
+integer :: idp
+integer :: idxy
+integer :: ierror
+integer :: ip
+integer :: ipse
+integer :: ipso
+integer :: isym
+integer :: j
+integer :: js
+integer :: jzse
+integer :: jzso
+integer :: m
+integer :: modn
+integer :: mp1
+integer :: mpm
+integer :: mrank
+integer :: ms2
+integer :: mtrunc
+integer :: mxtr
+integer :: nec
+integer :: nem
+integer :: nlat
+integer :: nlon
+integer :: noc
+integer :: nom
+integer :: nrank
+integer :: ns2
+integer :: nshe
+integer :: nsho
+integer :: nte
+integer :: nto
+real :: pe
+real :: po
+real :: sx
+real :: sy
+real :: xe
+real :: xo
+real :: ye
+real :: yo
+real :: ze
+real :: zo
 !
 dimension sx(idxy, nlon), sy(idxy, nlon), nshe(2), nsho(2), &
   pe(idp, idp, 2), po(idp, idp, 2), ze(idp, idp, 2), zo(idp, idp, 2), &
@@ -862,6 +1018,16 @@ end do
 return
 end subroutine shpe1
 subroutine mxm(lr, lc, ld, a, mc, md, b, nd, c)
+implicit none
+integer :: i
+integer :: j
+integer :: k
+integer :: lc
+integer :: ld
+integer :: lr
+integer :: mc
+integer :: md
+integer :: nd
 real a(ld, *), b(md, *), c(nd, *)
 do i=1, lr
 do j=1, mc
@@ -874,6 +1040,19 @@ end do
 return
 end subroutine mxm
 subroutine smxm(lr, lc, ld, a, mc, md, b, nd, c)
+implicit none
+real :: a
+real :: b
+real :: c
+integer :: i
+integer :: j
+integer :: k
+integer :: lc
+integer :: ld
+integer :: lr
+integer :: mc
+integer :: md
+integer :: nd
 dimension a(ld, *), b(md, *), c(nd, *)
 do i=1, lr
 do j=1, mc
@@ -886,6 +1065,21 @@ end do
 return
 end subroutine smxm
 subroutine mxmx(lr, lc, ld, a, mc, md, b, x, y)
+implicit none
+real :: a
+real :: b
+integer :: i
+integer :: j
+integer :: k
+integer :: lc
+integer :: ld
+integer :: lr
+integer :: mc
+integer :: md
+real :: sum1
+real :: sum2
+real :: x
+real :: y
 dimension a(ld, *), b(md, *), x(ld, 2), y(ld, 2)
 do k=1, lr
 y(k, 1) = 0.
@@ -908,6 +1102,15 @@ end do
 return
 end subroutine mxmx
 subroutine dmxmx(lr, lc, ld, a, mc, md, b, x, y)
+implicit none
+integer :: i
+integer :: j
+integer :: k
+integer :: lc
+integer :: ld
+integer :: lr
+integer :: mc
+integer :: md
 real a(ld, *), b(md, *), x(ld, 2), y(ld, 2), &
                  sum1, sum2
 do k=1, lr
@@ -931,6 +1134,24 @@ end do
 return
 end subroutine dmxmx
 subroutine tmxmx(lr, lc, ld, a, mc, md, b, x, y, is, js)
+implicit none
+real :: a
+real :: b
+integer :: i
+integer :: is
+integer :: j
+integer :: js
+integer :: k
+integer :: kmx
+integer :: lc
+integer :: ld
+integer :: lr
+integer :: mc
+integer :: md
+real :: sum1
+real :: sum2
+real :: x
+real :: y
 dimension a(ld, *), b(md, *), x(ld, 2), y(ld, 2), &
               is(*), js(*)
 !
@@ -956,6 +1177,14 @@ end do
 return
 end subroutine tmxmx
 subroutine trunc(irc, n, idp, a, nrc, ijs)
+implicit none
+integer :: i
+integer :: idp
+integer :: ijs
+integer :: irc
+integer :: j
+integer :: n
+integer :: nrc
 real a, eps
 parameter (eps=epsilon(1.0))
 dimension a(idp, *), ijs(n)
@@ -979,6 +1208,9 @@ end do
 return
 end subroutine trunc
 subroutine gs(n, x, y, z)
+implicit none
+integer :: i
+integer :: n
 dimension x(n), y(n), z(n)
 real x, y, z, sum
 !
@@ -994,6 +1226,11 @@ end do
 return
 end subroutine gs
 subroutine normal(n, x, id, q)
+implicit none
+integer :: i
+integer :: id
+integer :: j
+integer :: n
 dimension x(n), q(id, n)
 real x, q, sum, sqs
 !
@@ -1015,6 +1252,11 @@ end do
 return
 end subroutine normal
 subroutine coe(moe, n, x, dmax)
+implicit none
+integer :: i
+integer :: moe
+integer :: n
+integer :: nh
 real x(n), dmax
 nh = (n+1)/2
 dmax = 0.
@@ -1090,6 +1332,14 @@ end subroutine coe
 !
 ! ****************************************************************
 subroutine dlfkp (m, n, cp)
+implicit none
+integer :: i
+integer :: l
+integer :: m
+integer :: ma
+integer :: n
+integer :: nex
+integer :: nmms2
 !
 real cp, fnum, fden, fnmh, a1, b1, c1, cp2, fnnp1, fnmsq, fk, &
        t1, t2, pm1, sc10, sc20, sc40
@@ -1173,6 +1423,13 @@ cp(l-1) = -(b1*cp(l)+c1*cp(l+1))/a1
 go to 30
 end subroutine dlfkp
 subroutine dlftp (m, n, theta, cp, pb)
+implicit none
+integer :: k
+integer :: kdo
+integer :: m
+integer :: mmod
+integer :: n
+integer :: nmod
 dimension cp(1)
 real cp, pb, theta, cdt, sdt, cth, sth, chh
 cdt = cos(2.0*theta)
@@ -1264,6 +1521,7 @@ return
 end subroutine dlftp
 !
 subroutine dsvdc(x, ldx, n, p, s, e, u, ldu, v, ldv, work, job, info)
+implicit none
 integer ldx, n, p, ldu, ldv, job, info
 real x(ldx, 1), s(1), e(1), u(ldu, 1), v(ldv, 1), work(1)
 !
@@ -1746,6 +2004,7 @@ go to 360
 return
 end subroutine dsvdc
 subroutine daxpy(n, da, dx, incx, dy, incy)
+implicit none
 !
 !     constant times a vector plus a vector.
 !     uses unrolled loops for increments equal to one.
@@ -1956,6 +2215,7 @@ end subroutine daxpy
 
 
 subroutine  drot (n, dx, incx, dy, incy, c, s)
+implicit none
 !
 !     applies a plane rotation.
 !     jack dongarra, linpack, 3/11/78.
@@ -1993,6 +2253,7 @@ return
 return
 end subroutine  drot
 subroutine drotg(da, db, c, s)
+implicit none
 !
 !     construct givens plane rotation.
 !     jack dongarra, linpack, 3/11/78.
@@ -2020,6 +2281,7 @@ db = z
 return
 end subroutine drotg
 subroutine  dscal(n, da, dx, incx)
+implicit none
 !
 !     scales a vector by a constant.
 !     uses unrolled loops for increment equal to one.
@@ -2063,6 +2325,7 @@ do 50 i = mp1, n, 5
 return
 end subroutine  dscal
 subroutine  dswap (n, dx, incx, dy, incy)
+implicit none
 !
 !     interchanges two vectors.
 !     uses unrolled loops for increments equal one.

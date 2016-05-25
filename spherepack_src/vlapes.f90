@@ -315,6 +315,42 @@
 !
 subroutine vlapes(nlat, nlon, ityp, nt, vlap, wlap, idvw, jdvw, br, bi, &
     cr, ci, mdbc, ndbc, wvhses, lvhses, work, lwork, ierror)
+    implicit none
+    real :: bi
+    real :: br
+    real :: ci
+    real :: cr
+    integer :: ibi
+    integer :: ibr
+    integer :: ici
+    integer :: icr
+    integer :: idvw
+    integer :: idz
+    integer :: ierror
+    integer :: ifn
+    integer :: imid
+    integer :: ityp
+    integer :: iwk
+    integer :: jdvw
+    integer :: l1
+    integer :: l2
+    integer :: liwk
+    integer :: lsavmin
+    integer :: lvhses
+    integer :: lwkmin
+    integer :: lwork
+    integer :: lzimn
+    integer :: mdbc
+    integer :: mmax
+    integer :: mn
+    integer :: ndbc
+    integer :: nlat
+    integer :: nlon
+    integer :: nt
+    real :: vlap
+    real :: wlap
+    real :: work
+    real :: wvhses
     dimension vlap(idvw, jdvw, nt), wlap(idvw, jdvw, nt)
     dimension br(mdbc, ndbc, nt), bi(mdbc, ndbc, nt)
     dimension cr(mdbc, ndbc, nt), ci(mdbc, ndbc, nt)
@@ -387,6 +423,36 @@ end subroutine vlapes
 subroutine vlapes1(nlat, nlon, ityp, nt, vlap, wlap, idvw, jdvw, brlap, &
     bilap, crlap, cilap, mmax, fnn, mdb, ndb, br, bi, cr, ci, wsave, lsave, &
     wk, lwk, ierror)
+    implicit none
+    real :: bi
+    real :: bilap
+    real :: br
+    real :: brlap
+    real :: ci
+    real :: cilap
+    real :: cr
+    real :: crlap
+    real :: fn
+    real :: fnn
+    integer :: idvw
+    integer :: ierror
+    integer :: ityp
+    integer :: jdvw
+    integer :: k
+    integer :: lsave
+    integer :: lwk
+    integer :: m
+    integer :: mdb
+    integer :: mmax
+    integer :: n
+    integer :: ndb
+    integer :: nlat
+    integer :: nlon
+    integer :: nt
+    real :: vlap
+    real :: wk
+    real :: wlap
+    real :: wsave
     dimension vlap(idvw, jdvw, nt), wlap(idvw, jdvw, nt)
     dimension fnn(nlat), brlap(mmax, nlat, nt), bilap(mmax, nlat, nt)
     dimension crlap(mmax, nlat, nt), cilap(mmax, nlat, nt)

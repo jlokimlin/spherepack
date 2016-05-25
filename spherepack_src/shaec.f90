@@ -299,6 +299,31 @@
 !
 subroutine shaec(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, &
     wshaec, lshaec, work, lwork, ierror)
+    implicit none
+    real :: a
+    real :: b
+    real :: g
+    integer :: idg
+    integer :: ierror
+    integer :: imid
+    integer :: ist
+    integer :: isym
+    integer :: iw1
+    integer :: jdg
+    integer :: labc
+    integer :: ls
+    integer :: lshaec
+    integer :: lwork
+    integer :: lzz1
+    integer :: mdab
+    integer :: mmax
+    integer :: ndab
+    integer :: nlat
+    integer :: nln
+    integer :: nlon
+    integer :: nt
+    real :: work
+    real :: wshaec
     dimension g(idg, jdg, *), a(mdab, ndab, *), b(mdab, ndab, *), wshaec(*), &
         work(*)
 
@@ -392,6 +417,44 @@ end subroutine shaec
 
 subroutine shaec1(nlat, isym, nt, g, idgs, jdgs, a, b, mdab, ndab, imid, &
     idg, jdg, ge, go, work, zb, wzfin, whrfft)
+    implicit none
+    real :: a
+    real :: b
+    real :: fsn
+    real :: g
+    real :: ge
+    real :: go
+    integer :: i
+    integer :: i3
+    integer :: idg
+    integer :: idgs
+    integer :: imid
+    integer :: imm1
+    integer :: isym
+    integer :: j
+    integer :: jdg
+    integer :: jdgs
+    integer :: k
+    integer :: ls
+    integer :: m
+    integer :: mdab
+    integer :: mdo
+    integer :: mmax
+    integer :: modl
+    integer :: mp1
+    integer :: mp2
+    integer :: ndab
+    integer :: ndo
+    integer :: nlat
+    integer :: nlon
+    integer :: nlp1
+    integer :: np1
+    integer :: nt
+    real :: tsn
+    real :: whrfft
+    real :: work
+    real :: wzfin
+    real :: zb
     !
     !     whrfft must have at least nlon+15 locations
     !     wzfin must have 2*l*(nlat+1)/2 + ((l-3)*l+2)/2 locations
@@ -568,6 +631,18 @@ end subroutine shaec1
 
 
 subroutine shaeci(nlat, nlon, wshaec, lshaec, dwork, ldwork, ierror)
+    implicit none
+    integer :: ierror
+    integer :: imid
+    integer :: iw1
+    integer :: labc
+    integer :: ldwork
+    integer :: lshaec
+    integer :: lzz1
+    integer :: mmax
+    integer :: nlat
+    integer :: nlon
+    real :: wshaec
     dimension wshaec(lshaec)
     real dwork(ldwork)
 

@@ -236,6 +236,38 @@
 !   
 subroutine gradec(nlat, nlon, isym, nt, v, w, idvw, jdvw, a, b, mdab, ndab, &
     wvhsec, lvhsec, work, lwork, ierror)
+    implicit none
+    real :: a
+    real :: b
+    integer :: ibi
+    integer :: ibr
+    integer :: idvw
+    integer :: idz
+    integer :: ierror
+    integer :: imid
+    integer :: is
+    integer :: isym
+    integer :: iwk
+    integer :: jdvw
+    integer :: l1
+    integer :: l2
+    integer :: liwk
+    integer :: lvhsec
+    integer :: lwkmin
+    integer :: lwmin
+    integer :: lwork
+    integer :: lzimn
+    integer :: mdab
+    integer :: mmax
+    integer :: mn
+    integer :: ndab
+    integer :: nlat
+    integer :: nlon
+    integer :: nt
+    real :: v
+    real :: w
+    real :: work
+    real :: wvhsec
     dimension v(idvw, jdvw, nt), w(idvw, jdvw, nt)
     dimension a(mdab, ndab, nt), b(mdab, ndab, nt)
     dimension wvhsec(lvhsec), work(lwork)
@@ -300,6 +332,35 @@ end subroutine gradec
 
 subroutine gradec1(nlat, nlon, isym, nt, v, w, idvw, jdvw, br, bi, mmax, &
     sqnn, mdab, ndab, a, b, wvhsec, lvhsec, wk, lwk, ierror)
+    implicit none
+    real :: a
+    real :: b
+    real :: bi
+    real :: br
+    real :: ci
+    real :: cr
+    real :: fn
+    integer :: idvw
+    integer :: ierror
+    integer :: isym
+    integer :: ityp
+    integer :: jdvw
+    integer :: k
+    integer :: lvhsec
+    integer :: lwk
+    integer :: m
+    integer :: mdab
+    integer :: mmax
+    integer :: n
+    integer :: ndab
+    integer :: nlat
+    integer :: nlon
+    integer :: nt
+    real :: sqnn
+    real :: v
+    real :: w
+    real :: wk
+    real :: wvhsec
     dimension v(idvw, jdvw, nt), w(idvw, jdvw, nt)
     dimension br(mmax, nlat, nt), bi(mmax, nlat, nt), sqnn(nlat)
     dimension a(mdab, ndab, nt), b(mdab, ndab, nt)

@@ -9,7 +9,7 @@
 !     *                                                               *
 !     *                      SPHEREPACK version 3.2                   *
 !     *                                                               *
-!     *       A Package of Fortran77 Subroutines and Programs         *
+!     *       A Package of Fortran Subroutines and Programs           *
 !     *                                                               *
 !     *              for Modeling Geophysical Processes               *
 !     *                                                               *
@@ -30,17 +30,17 @@
 !     * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !
 !
-! ... file gradgs.f
+! ... file gradgs.f90
 !
 !     this file includes documentation and code for
-!     subroutine gradgs         i
+!     subroutine gradgs
 !
-! ... files which must be loaded with gradgec.f
+! ... files which must be loaded with gradgec.f90
 !
-!     sphcom.f, hrfft.f, shags.f, vhsgs.f
+!     sphcom.f90, hrfft.f90, shags.f90, vhsgs.f90
 !
 !     subroutine gradgs(nlat, nlon, isym, nt, v, w, idvw, jdvw, a, b, mdab, ndab, 
-!    +                  wvhsgs, lvhsgs, work, lwork, ierror)
+!                      wvhsgs, lvhsgs, work, lwork, ierror)
 !
 !     given the scalar spherical harmonic coefficients a and b, precomputed
 !     by subroutine shags for a scalar field sf, subroutine gradgs computes
@@ -224,122 +224,184 @@
 !                                                                              
 !   
 subroutine gradgs(nlat, nlon, isym, nt, v, w, idvw, jdvw, a, b, mdab, ndab, &
-wvhsgs, lvhsgs, work, lwork, ierror)
-dimension v(idvw, jdvw, nt), w(idvw, jdvw, nt)
-dimension a(mdab, ndab, nt), b(mdab, ndab, nt)
-dimension wvhsgs(lvhsgs), work(lwork)
-!
-!     check input parameters
-!
-ierror = 1
-if (nlat < 3) return
-ierror = 2
-if (nlon < 4) return
-ierror = 3
-if (isym < 0 .or. isym > 2) return
-ierror = 4
-if (nt < 0) return
-ierror = 5
-imid = (nlat+1)/2
-if ((isym == 0 .and. idvw<nlat) .or. &
-   (isym /= 0 .and. idvw<imid)) return
-ierror = 6
-if (jdvw < nlon) return
-ierror = 7
-mmax = min(nlat, (nlon+1)/2)
-if (mdab < min(nlat, (nlon+2)/2)) return
-ierror = 8
-if (ndab < nlat) return
-ierror = 9
-!
-!     verify minimum saved work space length
-!
-idz = (mmax*(nlat+nlat-mmax+1))/2
-lzimn = idz*imid
-lgdmin = lzimn+lzimn+nlon+15
-if (lvhsgs < lgdmin) return
-ierror = 10
-!
-!     verify minimum unsaved work space length
-!
-mn = mmax*nlat*nt
-idv = nlat
-if (isym /= 0) idv = imid
-lnl = nt*idv*nlon
-lwkmin =  lnl+lnl+idv*nlon+2*mn+nlat
-if (lwork < lwkmin) return
-ierror = 0
-!
-!     set work space pointers
-!
-ibr = 1
-ibi = ibr + mn
-is = ibi + mn
-iwk = is + nlat
-liwk = lwork-2*mn-nlat
-call gradgs1(nlat, nlon, isym, nt, v, w, idvw, jdvw, work(ibr), work(ibi), &
-mmax, work(is), mdab, ndab, a, b, wvhsgs, lvhsgs, work(iwk), liwk, &
-ierror)
-return
+    wvhsgs, lvhsgs, work, lwork, ierror)
+    implicit none
+    real :: a
+    real :: b
+    integer :: ibi
+    integer :: ibr
+    integer :: idv
+    integer :: idvw
+    integer :: idz
+    integer :: ierror
+    integer :: imid
+    integer :: is
+    integer :: isym
+    integer :: iwk
+    integer :: jdvw
+    integer :: lgdmin
+    integer :: liwk
+    integer :: lnl
+    integer :: lvhsgs
+    integer :: lwkmin
+    integer :: lwork
+    integer :: lzimn
+    integer :: mdab
+    integer :: mmax
+    integer :: mn
+    integer :: ndab
+    integer :: nlat
+    integer :: nlon
+    integer :: nt
+    real :: v
+    real :: w
+    real :: work
+    real :: wvhsgs
+    dimension v(idvw, jdvw, nt), w(idvw, jdvw, nt)
+    dimension a(mdab, ndab, nt), b(mdab, ndab, nt)
+    dimension wvhsgs(lvhsgs), work(lwork)
+    !
+    !     check input parameters
+    !
+    ierror = 1
+    if (nlat < 3) return
+    ierror = 2
+    if (nlon < 4) return
+    ierror = 3
+    if (isym < 0 .or. isym > 2) return
+    ierror = 4
+    if (nt < 0) return
+    ierror = 5
+    imid = (nlat+1)/2
+    if ((isym == 0 .and. idvw<nlat) .or. &
+        (isym /= 0 .and. idvw<imid)) return
+    ierror = 6
+    if (jdvw < nlon) return
+    ierror = 7
+    mmax = min(nlat, (nlon+1)/2)
+    if (mdab < min(nlat, (nlon+2)/2)) return
+    ierror = 8
+    if (ndab < nlat) return
+    ierror = 9
+    !
+    !     verify minimum saved work space length
+    !
+    idz = (mmax*(nlat+nlat-mmax+1))/2
+    lzimn = idz*imid
+    lgdmin = lzimn+lzimn+nlon+15
+    if (lvhsgs < lgdmin) return
+    ierror = 10
+    !
+    !     verify minimum unsaved work space length
+    !
+    mn = mmax*nlat*nt
+    idv = nlat
+    if (isym /= 0) idv = imid
+    lnl = nt*idv*nlon
+    lwkmin =  lnl+lnl+idv*nlon+2*mn+nlat
+    if (lwork < lwkmin) return
+    ierror = 0
+    !
+    !     set work space pointers
+    !
+    ibr = 1
+    ibi = ibr + mn
+    is = ibi + mn
+    iwk = is + nlat
+    liwk = lwork-2*mn-nlat
+    call gradgs1(nlat, nlon, isym, nt, v, w, idvw, jdvw, work(ibr), work(ibi), &
+        mmax, work(is), mdab, ndab, a, b, wvhsgs, lvhsgs, work(iwk), liwk, &
+        ierror)
+
 end subroutine gradgs
 
 subroutine gradgs1(nlat, nlon, isym, nt, v, w, idvw, jdvw, br, bi, mmax, &
-sqnn, mdab, ndab, a, b, wvhsgs, lvhsgs, wk, lwk, ierror)
-dimension v(idvw, jdvw, nt), w(idvw, jdvw, nt)
-dimension br(mmax, nlat, nt), bi(mmax, nlat, nt), sqnn(nlat)
-dimension a(mdab, ndab, nt), b(mdab, ndab, nt)
-dimension wvhsgs(lvhsgs), wk(lwk)
-!
-!     preset coefficient multiplyers in vector
-!
-do 1 n=2, nlat
-fn = real(n - 1)
-sqnn(n) = sqrt(fn * (fn + 1.0))
-1 continue
-!
-!     compute multiple vector fields coefficients
-!
-do 2 k=1, nt
-!
-!     preset br, bi to 0.0
-!
-do 3 n=1, nlat
-do 4 m=1, mmax
-br(m, n, k) = 0.0
-bi(m, n, k) = 0.0
-4 continue
-3 continue
-!
-!     compute m=0 coefficients
-!
-do 5 n=2, nlat
-br(1, n, k) = sqnn(n)*a(1, n, k)
-bi(1, n, k) = sqnn(n)*b(1, n, k)
-5 continue
-!
-!     compute m>0 coefficients
-!
-do 6 m=2, mmax
-do 7 n=m, nlat
-br(m, n, k) = sqnn(n)*a(m, n, k)
-bi(m, n, k) = sqnn(n)*b(m, n, k)
-7 continue
-6 continue
-2 continue
-!
-!     set ityp for irrotational vector synthesis to compute gradient
-!
-if (isym == 0) then
-ityp = 1
-else if (isym==1) then
-ityp = 4
-else if (isym==2) then
-ityp = 7
-end if
-!
-!     vector sythesize br, bi into (v, w) (cr, ci are dummy variables)
-!
-call vhsgs(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
-           mmax, nlat, wvhsgs, lvhsgs, wk, lwk, ierror)
-return
+    sqnn, mdab, ndab, a, b, wvhsgs, lvhsgs, wk, lwk, ierror)
+    implicit none
+    real :: a
+    real :: b
+    real :: bi
+    real :: br
+    real :: ci
+    real :: cr
+    real :: fn
+    integer :: idvw
+    integer :: ierror
+    integer :: isym
+    integer :: ityp
+    integer :: jdvw
+    integer :: k
+    integer :: lvhsgs
+    integer :: lwk
+    integer :: m
+    integer :: mdab
+    integer :: mmax
+    integer :: n
+    integer :: ndab
+    integer :: nlat
+    integer :: nlon
+    integer :: nt
+    real :: sqnn
+    real :: v
+    real :: w
+    real :: wk
+    real :: wvhsgs
+    dimension v(idvw, jdvw, nt), w(idvw, jdvw, nt)
+    dimension br(mmax, nlat, nt), bi(mmax, nlat, nt), sqnn(nlat)
+    dimension a(mdab, ndab, nt), b(mdab, ndab, nt)
+    dimension wvhsgs(lvhsgs), wk(lwk)
+    !
+    !     preset coefficient multiplyers in vector
+    !
+    do n=2, nlat
+        fn = real(n - 1)
+        sqnn(n) = sqrt(fn * (fn + 1.0))
+    end do
+    !
+    !     compute multiple vector fields coefficients
+    !
+    do k=1, nt
+        !
+        !     preset br, bi to 0.0
+        !
+        do n=1, nlat
+            do m=1, mmax
+                br(m, n, k) = 0.0
+                bi(m, n, k) = 0.0
+            end do
+        end do
+        !
+        !     compute m=0 coefficients
+        !
+        do n=2, nlat
+            br(1, n, k) = sqnn(n)*a(1, n, k)
+            bi(1, n, k) = sqnn(n)*b(1, n, k)
+        end do
+        !
+        !     compute m>0 coefficients
+        !
+        do m=2, mmax
+            do n=m, nlat
+                br(m, n, k) = sqnn(n)*a(m, n, k)
+                bi(m, n, k) = sqnn(n)*b(m, n, k)
+            end do
+        end do
+    end do
+    !
+    !     set ityp for irrotational vector synthesis to compute gradient
+    !
+    select case (isym)
+        case (0)
+            ityp = 1
+        case (1)
+            ityp = 4
+        case (2)
+            ityp = 7
+    end select
+    !
+    !     vector sythesize br, bi into (v, w) (cr, ci are dummy variables)
+    !
+    call vhsgs(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
+        mmax, nlat, wvhsgs, lvhsgs, wk, lwk, ierror)
+
 end subroutine gradgs1
