@@ -9,7 +9,7 @@
 !     *                                                               *
 !     *                      SPHEREPACK version 3.2                   *
 !     *                                                               *
-!     *       A Package of Fortran77 Subroutines and Programs         *
+!     *       A Package of Fortran Subroutines and Programs           *
 !     *                                                               *
 !     *              for Modeling Geophysical Processes               *
 !     *                                                               *
@@ -280,7 +280,7 @@ subroutine isfvpgc(nlat, nlon, isym, nt, v, w, idv, jdv, as, bs, av, bv, &
     call isfvpgc1(nlat, nlon, isym, nt, v, w, idv, jdv, as, bs, av, bv, mdb, &
         ndb, work(ibr), work(ibi), work(icr), work(ici), l1, work(is), &
         wvhsgc, lvhsgc, work(iwk), lwk, ierror)
-    return
+
 end subroutine isfvpgc
 
 subroutine isfvpgc1(nlat, nlon, isym, nt, v, w, idv, jdv, as, bs, av, bv, &
@@ -344,7 +344,8 @@ subroutine isfvpgc1(nlat, nlon, isym, nt, v, w, idv, jdv, as, bs, av, bv, &
     else if (isym ==2) then
         ityp = 6
     end if
+
     call vhsgc(nlat, nlon, ityp, nt, v, w, idv, jdv, br, bi, cr, ci, &
         mab, nlat, wvhsgc, lvhsgc, wk, lwk, ierror)
-    return
+
 end subroutine isfvpgc1

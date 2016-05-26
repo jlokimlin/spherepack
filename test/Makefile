@@ -18,6 +18,8 @@ F90 = gfortran
 
 FCFLAGS = -O3 $(ENFORCE_64_BIT_PRECISION)
 
+all : clean run
+
 run: $(EXES)
 
 $(EXES): $(SRC)
@@ -28,4 +30,4 @@ $(EXES): $(SRC)
 	./$@
 
 clean:
-	rm -f $(OBJS) $(EXES)
+	rm -f $(OBJS) $(EXES) ./*.mod

@@ -101,10 +101,10 @@ program shallow
     integer :: mprint
     integer :: ncycle
     integer :: ndab
-    integer :: nl
+    integer, parameter :: nl = 91
+    integer, parameter :: nlm1 = nl-1
+    integer, parameter :: nlm2 = nl-2
     integer :: nlat
-    integer :: nlm1
-    integer :: nlm2
     integer :: nlon
     integer :: nt
     real :: omega
@@ -252,7 +252,7 @@ program shallow
         dpdt(idp,jdp),gpdt(idp,jdp),gpdl(idp,jdp), &
         a(mdab,ndab),b(mdab,ndab),br(mdab,ndab), &
         bi(mdab,ndab),cr(mdab,ndab),ci(mdab,ndab), &
-        phlt(361)
+        phlt(nlm2)
     !
     !   the following work arrays are initialized and subsequently
     !   used repeatedly by spherepack routines.
@@ -311,9 +311,7 @@ program shallow
     !     compute the derivative of the unrotated geopotential
     !             p as a function of latitude
     !
-    nl = 91
-    nlm1 = nl-1
-    nlm2 = nl-2
+
     cfn = 1./nlm1
     dlath = pi/nlm1
     do i=1,nlm2
