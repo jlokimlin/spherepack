@@ -431,261 +431,256 @@ subroutine shsgs(nlat, nlon, mode, nt, g, idg, jdg, a, b, mdab, ndab, &
     call shsgs1(nlat, nlon, l, lat, mode, g, idg, jdg, nt, a, b, mdab, ndab, &
         wshsgs(ifft), wshsgs(ipmn), late, work, work(iw))
 
-end subroutine shsgs
+contains
 
-
-
-subroutine shsgs1(nlat, nlon, l, lat, mode, gs, idg, jdg, nt, a, b, mdab, &
-    ndab, wfft, pmn, late, g, work)
-    !
-    ! Purpose:
-    !
-    ! Reconstruct fourier coefficients in g on gaussian grid
-    ! using coefficients in a, b
-    !
-    use, intrinsic :: iso_fortran_env, only: &
-        wp => REAL64, &
-        ip => INT32
-
-    implicit none
-    !----------------------------------------------------------------------
-    ! Dictionary: calling arguments
-    !----------------------------------------------------------------------
-    integer (ip), intent (in)     :: nlat
-    integer (ip), intent (in)     :: nlon
-    integer (ip), intent (in)     :: l
-    integer (ip), intent (in)     :: lat
-    integer (ip), intent (in)     :: mode
-    real (wp),    intent (in out) :: gs(idg, jdg, nt)
-    integer (ip), intent (in)     :: idg
-    integer (ip), intent (in)     :: jdg
-    integer (ip), intent (in)     :: nt
-    real (wp),    intent (in)     :: a(mdab, ndab, nt)
-    real (wp),    intent (in)     :: b(mdab, ndab, nt)
-    integer (ip), intent (in)     :: mdab
-    integer (ip), intent (in)     :: ndab
-    real (wp),    intent (in out) :: wfft(1)
-    real (wp),    intent (in out) :: pmn(late, 1)
-    integer (ip), intent (in)     :: late
-    real (wp),    intent (out)    :: g(lat, nlon, nt)
-    real (wp),    intent (in out) :: work(1)
-    !----------------------------------------------------------------------
-    ! Dictionary: calling arguments
-    !----------------------------------------------------------------------
-    integer (ip) :: i, j, k, m
-    integer (ip) :: mn, is, ms, ns, lm1, nl2, lp1, mp1, np1, mp2, meo, mml1
-    real (wp) ::  t1, t2, t3, t4
-    !----------------------------------------------------------------------
-
-    !
-    !==> initialize to zero
-    !
-    g = 0.0_wp
-
-    lm1 = l
-    if (nlon == l+l-2) then
-        lm1 = l-1
-    end if
-
-    if (mode == 0) then
+    subroutine shsgs1(nlat, nlon, l, lat, mode, gs, idg, jdg, nt, a, b, mdab, &
+        ndab, wfft, pmn, late, g, work)
         !
-        !==> set first column in g
+        ! Purpose:
         !
-        m = 0
-        mml1 = m*(2*nlat-m-1)/2
-        do k=1, nt
-            !
-            !==>  n even
-            !
-            do np1=1, nlat, 2
-                mn = mml1+np1
-                do i=1, late
-                    g(i, 1, k) = g(i, 1, k)+a(1, np1, k)*pmn(i, mn)
-                end do
-            end do
-            !
-            !==> n odd
-            !
-            nl2 = nlat/2
-            do np1=2, nlat, 2
-                mn = mml1+np1
-                do i=1, nl2
-                    is = nlat-i+1
-                    g(is, 1, k) = g(is, 1, k)+a(1, np1, k)*pmn(i, mn)
-                end do
-            end do
-        end do
+        ! Reconstruct fourier coefficients in g on gaussian grid
+        ! using coefficients in a, b
+        !
+        !----------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !----------------------------------------------------------------------
+        integer (ip), intent (in)     :: nlat
+        integer (ip), intent (in)     :: nlon
+        integer (ip), intent (in)     :: l
+        integer (ip), intent (in)     :: lat
+        integer (ip), intent (in)     :: mode
+        real (wp),    intent (in out) :: gs(idg, jdg, nt)
+        integer (ip), intent (in)     :: idg
+        integer (ip), intent (in)     :: jdg
+        integer (ip), intent (in)     :: nt
+        real (wp),    intent (in)     :: a(mdab, ndab, nt)
+        real (wp),    intent (in)     :: b(mdab, ndab, nt)
+        integer (ip), intent (in)     :: mdab
+        integer (ip), intent (in)     :: ndab
+        real (wp),    intent (in out) :: wfft(*)
+        real (wp),    intent (in out) :: pmn(late,*)
+        integer (ip), intent (in)     :: late
+        real (wp),    intent (out)    :: g(lat, nlon, nt)
+        real (wp),    intent (in out) :: work(1)
+        !----------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !----------------------------------------------------------------------
+        integer (ip) :: i, j, k, m
+        integer (ip) :: mn, is, ms, ns, lm1, nl2, lp1, mp1, np1, mp2, meo, mml1
+        real (wp)    ::  t1, t2, t3, t4
+        !----------------------------------------------------------------------
 
         !
-        !==> restore m=0 coefficients from odd/even
+        !==> initialize to zero
         !
-        do k=1, nt
-            do i=1, nl2
-                is = nlat-i+1
-                t1 = g(i, 1, k)
-                t3 = g(is, 1, k)
-                g(i, 1, k) = t1+t3
-                g(is, 1, k) = t1-t3
-            end do
-        end do
+        g = 0.0_wp
 
-        !
-        !==> sweep interior columns of g
-        !
-        do mp1=2, lm1
-            m = mp1-1
-            mml1 = m*(2*nlat-m-1)/2
-            mp2 = m+2
-            do k=1, nt
-                !
-                !==> for n-m even store (g(i, p, k)+g(nlat-i+1, p, k))/2 in g(i, p, k) p=2*m, 2*m+1
-                !    for i=1, ..., late
-                !
-                do np1=mp1, nlat, 2
-                    mn = mml1+np1
-                    do i=1, late
-                        g(i, 2*m, k) = g(i, 2*m, k)+a(mp1, np1, k)*pmn(i, mn)
-                        g(i, 2*m+1, k) = g(i, 2*m+1, k)+b(mp1, np1, k)*pmn(i, mn)
-                    end do
-                end do
-                !
-                !==> for n-m odd store g(i, p, k)-g(nlat-i+1, p, k) in g(nlat-i+1, p, k)
-                !    for i=1, ..., nlat/2 (p=2*m, p=2*m+1)
-                !
-                do np1=mp2, nlat, 2
-                    mn = mml1+np1
-                    do i=1, nl2
-                        is = nlat-i+1
-                        g(is, 2*m, k) = g(is, 2*m, k)+a(mp1, np1, k)*pmn(i, mn)
-                        g(is, 2*m+1, k) = g(is, 2*m+1, k)+b(mp1, np1, k)*pmn(i, mn)
-                    end do
-                end do
-
-                !
-                !==> now set fourier coefficients using even-odd reduction above
-                !
-                do i=1, nl2
-                    is = nlat-i+1
-                    t1 = g(i, 2*m, k)
-                    t2 = g(i, 2*m+1, k)
-                    t3 = g(is, 2*m, k)
-                    t4 = g(is, 2*m+1, k)
-                    g(i, 2*m, k) = t1+t3
-                    g(i, 2*m+1, k) = t2+t4
-                    g(is, 2*m, k) = t1-t3
-                    g(is, 2*m+1, k) = t2-t4
-                end do
-            end do
-        end do
-
-        !
-        !==> set last column (using a only) if necessary
-        !
-        if (nlon== l+l-2) then
-            m = l-1
-            mml1 = m*(2*nlat-m-1)/2
-            do k=1, nt
-                !
-                !==> (n - m) even
-                !
-                do np1=l, nlat, 2
-                    mn = mml1+np1
-                    do i=1, late
-                        g(i, nlon, k) = g(i, nlon, k)+2.0_wp *a(l, np1, k)*pmn(i, mn)
-                    end do
-                end do
-
-                lp1 = l+1
-                !
-                !==> (n - m) odd
-                !
-                do np1=lp1, nlat, 2
-                    mn = mml1+np1
-                    do i=1, nl2
-                        is = nlat-i+1
-                        g(is, nlon, k) = g(is, nlon, k)+2.0_wp *a(l, np1, k)*pmn(i, mn)
-                    end do
-                end do
-
-                do i=1, nl2
-                    is = nlat-i+1
-                    t1 = g(i, nlon, k)
-                    t3 = g(is, nlon, k)
-                    g(i, nlon, k)= t1+t3
-                    g(is, nlon, k)= t1-t3
-                end do
-            end do
+        if (nlon == 2*l-2) then
+            lm1 = l-1
+        else
+            lm1 = l
         end if
-    else
-        !     half sphere (mode.ne.0)
-        !     set first column in g
-        m = 0
-        mml1 = m*(2*nlat-m-1)/2
-        meo = 1
-        if (mode == 1) meo = 2
-        ms = m+meo
-        do k=1, nt
-            do np1=ms, nlat, 2
-                mn = mml1+np1
-                do i=1, late
-                    g(i, 1, k) = g(i, 1, k)+a(1, np1, k)*pmn(i, mn)
+
+        if (mode == 0) then
+            !
+            !==> set first column in g
+            !
+            m = 0
+            mml1 = m*(2*nlat-m-1)/2
+            do k=1, nt
+                !
+                !==>  n even
+                !
+                do np1=1, nlat, 2
+                    mn = mml1+np1
+                    do i=1, late
+                        g(i, 1, k) = g(i, 1, k)+a(1, np1, k)*pmn(i, mn)
+                    end do
+                end do
+                !
+                !==> n odd
+                !
+                nl2 = nlat/2
+                do np1=2, nlat, 2
+                    mn = mml1+np1
+                    do i=1, nl2
+                        is = nlat-i+1
+                        g(is, 1, k) = g(is, 1, k)+a(1, np1, k)*pmn(i, mn)
+                    end do
                 end do
             end do
-        end do
 
-        !     sweep interior columns of g
+            !
+            !==> restore m=0 coefficients from odd/even
+            !
+            do k=1, nt
+                do i=1, nl2
+                    is = nlat-i+1
+                    t1 = g(i, 1, k)
+                    t3 = g(is, 1, k)
+                    g(i, 1, k) = t1+t3
+                    g(is, 1, k) = t1-t3
+                end do
+            end do
 
-        do mp1=2, lm1
-            m = mp1-1
+            !
+            !==> sweep interior columns of g
+            !
+            do mp1=2, lm1
+                m = mp1-1
+                mml1 = m*(2*nlat-m-1)/2
+                mp2 = m+2
+                do k=1, nt
+                    !
+                    !==> for n-m even store (g(i, p, k)+g(nlat-i+1, p, k))/2 in g(i, p, k) p=2*m, 2*m+1
+                    !    for i=1, ..., late
+                    !
+                    do np1=mp1, nlat, 2
+                        mn = mml1+np1
+                        do i=1, late
+                            g(i, 2*m, k) = g(i, 2*m, k)+a(mp1, np1, k)*pmn(i, mn)
+                            g(i, 2*m+1, k) = g(i, 2*m+1, k)+b(mp1, np1, k)*pmn(i, mn)
+                        end do
+                    end do
+                    !
+                    !==> for n-m odd store g(i, p, k)-g(nlat-i+1, p, k) in g(nlat-i+1, p, k)
+                    !    for i=1, ..., nlat/2 (p=2*m, p=2*m+1)
+                    !
+                    do np1=mp2, nlat, 2
+                        mn = mml1+np1
+                        do i=1, nl2
+                            is = nlat-i+1
+                            g(is, 2*m, k) = g(is, 2*m, k)+a(mp1, np1, k)*pmn(i, mn)
+                            g(is, 2*m+1, k) = g(is, 2*m+1, k)+b(mp1, np1, k)*pmn(i, mn)
+                        end do
+                    end do
+
+                    !
+                    !==> now set fourier coefficients using even-odd reduction above
+                    !
+                    do i=1, nl2
+                        is = nlat-i+1
+                        t1 = g(i, 2*m, k)
+                        t2 = g(i, 2*m+1, k)
+                        t3 = g(is, 2*m, k)
+                        t4 = g(is, 2*m+1, k)
+                        g(i, 2*m, k) = t1+t3
+                        g(i, 2*m+1, k) = t2+t4
+                        g(is, 2*m, k) = t1-t3
+                        g(is, 2*m+1, k) = t2-t4
+                    end do
+                end do
+            end do
+
+            !
+            !==> set last column (using a only) if necessary
+            !
+            if (nlon== l+l-2) then
+                m = l-1
+                mml1 = m*(2*nlat-m-1)/2
+                do k=1, nt
+                    !
+                    !==> (n - m) even
+                    !
+                    do np1=l, nlat, 2
+                        mn = mml1+np1
+                        do i=1, late
+                            g(i, nlon, k) = g(i, nlon, k)+2.0_wp *a(l, np1, k)*pmn(i, mn)
+                        end do
+                    end do
+
+                    lp1 = l+1
+                    !
+                    !==> (n - m) odd
+                    !
+                    do np1=lp1, nlat, 2
+                        mn = mml1+np1
+                        do i=1, nl2
+                            is = nlat-i+1
+                            g(is, nlon, k) = g(is, nlon, k)+2.0_wp *a(l, np1, k)*pmn(i, mn)
+                        end do
+                    end do
+
+                    do i=1, nl2
+                        is = nlat-i+1
+                        t1 = g(i, nlon, k)
+                        t3 = g(is, nlon, k)
+                        g(i, nlon, k)= t1+t3
+                        g(is, nlon, k)= t1-t3
+                    end do
+                end do
+            end if
+        else
+            !     half sphere (mode.ne.0)
+            !     set first column in g
+            m = 0
             mml1 = m*(2*nlat-m-1)/2
+            meo = 1
+            if (mode == 1) meo = 2
             ms = m+meo
             do k=1, nt
                 do np1=ms, nlat, 2
                     mn = mml1+np1
                     do i=1, late
-                        g(i, 2*m, k) = g(i, 2*m, k)+a(mp1, np1, k)*pmn(i, mn)
-                        g(i, 2*m+1, k) = g(i, 2*m+1, k)+b(mp1, np1, k)*pmn(i, mn)
+                        g(i, 1, k) = g(i, 1, k)+a(1, np1, k)*pmn(i, mn)
                     end do
                 end do
             end do
+
+            !     sweep interior columns of g
+
+            do mp1=2, lm1
+                m = mp1-1
+                mml1 = m*(2*nlat-m-1)/2
+                ms = m+meo
+                do k=1, nt
+                    do np1=ms, nlat, 2
+                        mn = mml1+np1
+                        do i=1, late
+                            g(i, 2*m, k) = g(i, 2*m, k)+a(mp1, np1, k)*pmn(i, mn)
+                            g(i, 2*m+1, k) = g(i, 2*m+1, k)+b(mp1, np1, k)*pmn(i, mn)
+                        end do
+                    end do
+                end do
+            end do
+
+            if (nlon == 2*l-2) then
+                !
+                !==> set last column
+                !
+                m = l-1
+                mml1 = m*(2*nlat-m-1)/2
+                if (mode == 1) then
+                    ns = l+1
+                else
+                    ns = l
+                end if
+                do k=1, nt
+                    do np1=ns, nlat, 2
+                        mn = mml1+np1
+                        do i=1, late
+                            g(i, nlon, k) = g(i, nlon, k)+2.0_wp *a(l, np1, k)*pmn(i, mn)
+                        end do
+                    end do
+                end do
+            end if
+        end if
+
+        !
+        !==> Perform inverse fourier transform
+        !
+        do k=1, nt
+            call hrfftb(lat, nlon, g(1, 1, k), lat, wfft, work)
         end do
 
-        if (nlon==l+l-2) then
-            !
-            !==> set last column
-            !
-            m = l-1
-            mml1 = m*(2*nlat-m-1)/2
-            ns = l
-            if (mode == 1) then
-                ns = l+1
-            end if
-            do k=1, nt
-                do np1=ns, nlat, 2
-                    mn = mml1+np1
-                    do i=1, late
-                        g(i, nlon, k) = g(i, nlon, k)+2.0_wp *a(l, np1, k)*pmn(i, mn)
-                    end do
-                end do
-            end do
-        end if
-    end if
+        !
+        !==> scale output in gs
+        !
+        gs(1:lat, 1:nlon, :) = 0.5_wp *g(1:lat, 1:nlon, :)
 
-    !
-    !==> Perform inverse fourier transform
-    !
-    do k=1, nt
-        call hrfftb(lat, nlon, g(1, 1, k), lat, wfft, work)
-    end do
+    end subroutine shsgs1
 
-    !
-    !==> scale output in gs
-    !
-    gs(1:lat, 1:nlon, :) = 0.5_wp *g(1:lat, 1:nlon, :)
-
-end subroutine shsgs1
-
-
+end subroutine shsgs
 
 subroutine shsgsi(nlat, nlon, wshsgs, lshsgs, work, lwork, dwork, ldwork, ierror)
     !
@@ -789,268 +784,248 @@ subroutine shsgsi(nlat, nlon, wshsgs, lshsgs, work, lwork, dwork, ldwork, ierror
 
     call shsgss1(nlat, l, late, wshsgs, work, wshsgs(ipmnf))
 
-end subroutine shsgsi
+contains
 
-
-
-subroutine shsgss1(nlat, l, late, w, pmn, pmnf)
-    !
-    ! Purpose:
-    !
-    ! Compute and store legendre polys for i=1, ..., late, m=0, ..., l-1
-    ! and n=m, ..., l-1
-    !
-    use, intrinsic :: iso_fortran_env, only: &
-        wp => REAL64, &
-        ip => INT32
-
-    implicit none
-    !----------------------------------------------------------------------
-    ! Dictionary: calling arguments
-    !----------------------------------------------------------------------
-    integer (ip), intent (in)     :: nlat
-    integer (ip), intent (in)     :: l
-    integer (ip), intent (in)     :: late
-    real (wp),    intent (in out) :: w(1)
-    real (wp),    intent (out)    :: pmn(nlat, late, 3)
-    real (wp),    intent (in out) :: pmnf(late, 1)
-    !----------------------------------------------------------------------
-    ! Dictionary: local variables
-    !----------------------------------------------------------------------
-    integer (ip) :: m, km, mn, mp1, np1, mml1, mode
-    !----------------------------------------------------------------------
-
-    !
-    !==> Initialize
-    !
-    pmn = 0.0_wp
-
-    do mp1=1, l
-        m = mp1-1
-        mml1 = m*(2*nlat-m-1)/2
+    subroutine shsgss1(nlat, l, late, w, pmn, pmnf)
         !
-        !==> compute pmn for n=m, ..., nlat-1 and i=1, ..., (l+1)/2
+        ! Purpose:
         !
-        mode = 0
-        call legin(mode, l, nlat, m, w, pmn, km)
+        ! Compute and store legendre polys for i=1, ..., late, m=0, ..., l-1
+        ! and n=m, ..., l-1
         !
-        !==> store above in pmnf
+        !----------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !----------------------------------------------------------------------
+        integer (ip), intent (in)     :: nlat
+        integer (ip), intent (in)     :: l
+        integer (ip), intent (in)     :: late
+        real (wp),    intent (in out) :: w(1)
+        real (wp),    intent (out)    :: pmn(nlat, late, 3)
+        real (wp),    intent (in out) :: pmnf(late,*)
+        !----------------------------------------------------------------------
+        ! Dictionary: local variables
+        !----------------------------------------------------------------------
+        integer (ip) :: m, km, mn, mp1, np1, mml1, mode
+        !----------------------------------------------------------------------
+
         !
-        do np1=mp1, nlat
-            mn = mml1+np1
-            pmnf(:, mn) = pmn(np1,:, km)
+        !==> Initialize
+        !
+        pmn = 0.0_wp
+
+        do mp1=1, l
+            m = mp1-1
+            mml1 = m*(2*nlat-m-1)/2
+            !
+            !==> compute pmn for n=m, ..., nlat-1 and i=1, ..., (l+1)/2
+            !
+            mode = 0
+            call legin(mode, l, nlat, m, w, pmn, km)
+            !
+            !==> store above in pmnf
+            !
+            do np1=mp1, nlat
+                mn = mml1+np1
+                pmnf(:, mn) = pmn(np1,:, km)
+            end do
         end do
-    end do
 
-end subroutine shsgss1
-
-
-
-subroutine shsgsp(nlat, nlon, wshsgs, lshsgs, dwork, ldwork, ierror)
-
-    use, intrinsic :: iso_fortran_env, only: &
-        wp => REAL64, &
-        ip => INT32
-
-    implicit none
-    !----------------------------------------------------------------------
-    ! Dictionary: calling arguments
-    !----------------------------------------------------------------------
-    integer (ip), intent (in)     :: nlat
-    integer (ip), intent (in)     :: nlon
-    real (wp),    intent (in out) :: wshsgs(lshsgs)
-    integer (ip), intent (in)     :: lshsgs
-    real (wp),    intent (in out) :: dwork(ldwork)
-    integer (ip), intent (in)     :: ldwork
-    integer (ip), intent (out)    :: ierror
-    !----------------------------------------------------------------------
-    ! Dictionary: local variables
-    !----------------------------------------------------------------------
-    integer (ip) :: l, i1, i2, i3, l1, l2, i4, i5, i6, i7
-    integer (ip) :: iw, late, idth, idwts
-    !----------------------------------------------------------------------
-
-    !
-    !==> Check validity of input arguments
-    !
-
-    ! Initialize error flag
-    ierror = 0
-
-    ! Check case 1
-    if (nlat < 3) then
-        ierror = 1
-        return
-    end if
-
-    ! Check case 2
-    if (nlon < 4) then
-        ierror = 2
-        return
-    end if
-
-    !
-    !==> set triangular truncation limit for spherical harmonic basis
-    !
-    l = min((nlon+2)/2, nlat)
-
-    !
-    !==> set equator or nearest point (if excluded) pointer
-    !
-    late = (nlat+mod(nlat, 2))/2
-    l1 = l
-    l2 = late
-
-    ! Check case 3: permanent work space length
-    if (lshsgs < nlat*(2*l2+3*l1-2)+3*l1*(1-l1)/2+nlon+15) then
-        ierror = 3
-        return
-    end if
-
-    ! Check case 4
-    if (ldwork < nlat*(nlat+4)) then
-        ierror = 4
-        return
-    end if
-
-
-    !
-    !==> set pointers
-    !
-    i1 = 1
-    i2 = i1+nlat
-    i3 = i2+nlat*late
-    i4 = i3+nlat*late
-    i5 = i4+l*(l-1)/2 +(nlat-l)*(l-1)
-    i6 = i5+l*(l-1)/2 +(nlat-l)*(l-1)
-    i7 = i6+l*(l-1)/2 +(nlat-l)*(l-1)
-
-    !
-    !==> set indices in temp work for real gaussian wts and pts
-    idth = 1
-    idwts = idth+nlat
-    iw = idwts+nlat
-
-    call shsgsp1(nlat, nlon, l, late, wshsgs(i1), wshsgs(i2), wshsgs(i3), &
-        wshsgs(i4), wshsgs(i5), wshsgs(i6), wshsgs(i7), dwork(idth), &
-        dwork(idwts), dwork(iw), ierror)
-
-    ! Check error flag
-    if (ierror /= 0) then
-        ierror = 6
-    end if
-
-end subroutine shsgsp
+    end subroutine shsgss1
 
 
 
-subroutine shsgsp1(nlat, nlon, l, late, wts, p0n, p1n, abel, bbel, cbel, &
-    wfft, dtheta, dwts, work, ier)
+    subroutine shsgsp(nlat, nlon, wshsgs, lshsgs, dwork, ldwork, ierror)
+        !----------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !----------------------------------------------------------------------
+        integer (ip), intent (in)     :: nlat
+        integer (ip), intent (in)     :: nlon
+        real (wp),    intent (in out) :: wshsgs(lshsgs)
+        integer (ip), intent (in)     :: lshsgs
+        real (wp),    intent (in out) :: dwork(ldwork)
+        integer (ip), intent (in)     :: ldwork
+        integer (ip), intent (out)    :: ierror
+        !----------------------------------------------------------------------
+        ! Dictionary: local variables
+        !----------------------------------------------------------------------
+        integer (ip) :: l, i1, i2, i3, l1, l2, i4, i5, i6, i7
+        integer (ip) :: iw, late, idth, idwts
+        !----------------------------------------------------------------------
 
-    use, intrinsic :: iso_fortran_env, only: &
-        wp => REAL64, &
-        ip => INT32
+        !
+        !==> Check validity of input arguments
+        !
 
-    implicit none
-    !----------------------------------------------------------------------
-    ! Dictionary: calling arguments
-    !----------------------------------------------------------------------
-    integer (ip), intent (in)     :: nlat
-    integer (ip), intent (in)     :: nlon
-    integer (ip), intent (in)     :: l
-    integer (ip), intent (in)     :: late
-    real (wp),    intent (in out) :: wts(nlat)
-    real (wp),    intent (out)    :: p0n(nlat, late)
-    real (wp),    intent (out)    :: p1n(nlat, late)
-    real (wp),    intent (out)    :: abel(1)
-    real (wp),    intent (out)    :: bbel(1)
-    real (wp),    intent (out)    :: cbel(1)
-    real (wp),    intent (in out) :: wfft(1)
-    real (wp),    intent (out)    :: dtheta(nlat)
-    real (wp),    intent (out)    :: dwts(nlat)
-    real (wp),    intent (in out) :: work(*)
-    integer (ip), intent (out)    :: ier
-    !----------------------------------------------------------------------
-    ! Dictionary: calling arguments
-    !----------------------------------------------------------------------
-    integer (ip) :: i, m, n, lw, np1, imn
-    real (wp)    :: pb
-    !----------------------------------------------------------------------
+        ! Initialize error flag
+        ierror = 0
 
-    !
-    !==> Initialize FFT
-    !
-    call hrffti(nlon, wfft)
+        ! Check case 1
+        if (nlat < 3) then
+            ierror = 1
+            return
+        end if
 
-    !
-    !==> compute real gaussian points and weights
-    !
-    lw = nlat*(nlat+2)
-    call gaqd(nlat, dtheta, dwts, work, lw, ier)
+        ! Check case 2
+        if (nlon < 4) then
+            ierror = 2
+            return
+        end if
 
-    ! Check error flag
-    if (ier/=0) then
-        return
-    end if
+        !
+        !==> set triangular truncation limit for spherical harmonic basis
+        !
+        l = min((nlon+2)/2, nlat)
 
-    !
-    !==> store gaussian weights single precision to save computation
-    !    in inner loops in analysis
-    !
-    wts = dwts
+        !
+        !==> set equator or nearest point (if excluded) pointer
+        !
+        late = (nlat+mod(nlat, 2))/2
+        l1 = l
+        l2 = late
+
+        ! Check case 3: permanent work space length
+        if (lshsgs < nlat*(2*l2+3*l1-2)+3*l1*(1-l1)/2+nlon+15) then
+            ierror = 3
+            return
+        end if
+
+        ! Check case 4
+        if (ldwork < nlat*(nlat+4)) then
+            ierror = 4
+            return
+        end if
 
 
-    !
-    !==> initialize p0n, p1n using real dnlfk, dnlft
-    !
-    p0n = 0.0_wp
-    p1n = 0.0_wp
+        !
+        !==> set pointers
+        !
+        i1 = 1
+        i2 = i1+nlat
+        i3 = i2+nlat*late
+        i4 = i3+nlat*late
+        i5 = i4+l*(l-1)/2 +(nlat-l)*(l-1)
+        i6 = i5+l*(l-1)/2 +(nlat-l)*(l-1)
+        i7 = i6+l*(l-1)/2 +(nlat-l)*(l-1)
 
-    !
-    !==> compute m=n=0 legendre polynomials for all theta(i)
-    !
-    np1 = 1
-    n = 0
-    m = 0
-    call dnlfk(m, n, work)
+        !
+        !==> set indices in temp work for real gaussian wts and pts
+        idth = 1
+        idwts = idth+nlat
+        iw = idwts+nlat
 
-    do i=1, late
-        call dnlft(m, n, dtheta(i), work, pb)
-        p0n(1, i) = pb
-    end do
+        call shsgsp1(nlat, nlon, l, late, wshsgs(i1), wshsgs(i2), wshsgs(i3), &
+            wshsgs(i4), wshsgs(i5), wshsgs(i6), wshsgs(i7), dwork(idth), &
+            dwork(idwts), dwork(iw), ierror)
 
-    !
-    !==> compute p0n, p1n for all theta(i) when n.gt.0
-    !
-    do np1=2, nlat
-        n = np1-1
+        ! Check error flag
+        if (ierror /= 0) then
+            ierror = 6
+        end if
+
+    end subroutine shsgsp
+
+
+
+    subroutine shsgsp1(nlat, nlon, l, late, wts, p0n, p1n, abel, bbel, cbel, &
+        wfft, dtheta, dwts, work, ier)
+        !----------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !----------------------------------------------------------------------
+        integer (ip), intent (in)     :: nlat
+        integer (ip), intent (in)     :: nlon
+        integer (ip), intent (in)     :: l
+        integer (ip), intent (in)     :: late
+        real (wp),    intent (in out) :: wts(nlat)
+        real (wp),    intent (out)    :: p0n(nlat, late)
+        real (wp),    intent (out)    :: p1n(nlat, late)
+        real (wp),    intent (out)    :: abel(*)
+        real (wp),    intent (out)    :: bbel(*)
+        real (wp),    intent (out)    :: cbel(*)
+        real (wp),    intent (in out) :: wfft(*)
+        real (wp),    intent (out)    :: dtheta(nlat)
+        real (wp),    intent (out)    :: dwts(nlat)
+        real (wp),    intent (in out) :: work(*)
+        integer (ip), intent (out)    :: ier
+        !----------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !----------------------------------------------------------------------
+        integer (ip) :: i, m, n, lw, np1, imn, mlim
+        real (wp)    :: pb
+        !----------------------------------------------------------------------
+
+        !
+        !==> Initialize FFT
+        !
+        call hrffti(nlon, wfft)
+
+        !
+        !==> compute real gaussian points and weights
+        !
+        lw = nlat*(nlat+2)
+        call gaqd(nlat, dtheta, dwts, work, lw, ier)
+
+        ! Check error flag
+        if (ier /= 0) return
+
+        !
+        !==> store gaussian weights single precision to save computation
+        !    in inner loops in analysis
+        !
+        wts = dwts
+
+
+        !
+        !==> initialize p0n, p1n using real dnlfk, dnlft
+        !
+        p0n = 0.0_wp
+        p1n = 0.0_wp
+
+        !
+        !==> compute m=n=0 legendre polynomials for all theta(i)
+        !
+        np1 = 1
+        n = 0
         m = 0
         call dnlfk(m, n, work)
-        do i=1, late
-            call dnlft(m, n, dtheta(i), work, pb)
-            p0n(np1, i) = pb
-        end do
-        !
-        !==> compute m=1 legendre polynomials for all n and theta(i)
-        !
-        m = 1
-        call dnlfk(m, n, work)
-        do i=1, late
-            call dnlft(m, n, dtheta(i), work, pb)
-            p1n(np1, i) = pb
-        end do
-    end do
 
-    !
-    !==> compute and store swarztrauber recursion coefficients
-    !    for 2<=m<=n and 2<=n<=nlat in abel, bbel, cbel
-    !
-    do n=2, nlat
-        associate( mlim => min(n, l) )
+        do i=1, late
+            call dnlft(m, n, dtheta(i), work, pb)
+            p0n(1, i) = pb
+        end do
+
+        !
+        !==> compute p0n, p1n for all theta(i) when n.gt.0
+        !
+        do np1=2, nlat
+            n = np1-1
+            m = 0
+            call dnlfk(m, n, work)
+            do i=1, late
+                call dnlft(m, n, dtheta(i), work, pb)
+                p0n(np1, i) = pb
+            end do
+            !
+            !==> compute m=1 legendre polynomials for all n and theta(i)
+            !
+            m = 1
+            call dnlfk(m, n, work)
+            do i=1, late
+                call dnlft(m, n, dtheta(i), work, pb)
+                p1n(np1, i) = pb
+            end do
+        end do
+
+        !
+        !==> compute and store swarztrauber recursion coefficients
+        !    for 2<=m<=n and 2<=n<=nlat in abel, bbel, cbel
+        !
+        do n=2, nlat
+            mlim = min(n, l)
             do m=2, mlim
-                imn = (n-1)*(n-2)/2+m-1
                 if (n >= l) then
                     imn = l*(l-1)/2+(n-l-1)*(l-1)+m-1
+                else
+                    imn = (n-1)*(n-2)/2+m-1
                 end if
                 abel(imn) = sqrt(real((2*n+1)*(m+n-2)*(m+n-3), kind=wp)/ &
                     real(((2*n-3)*(m+n-1)*(m+n)), kind=wp))
@@ -1059,7 +1034,8 @@ subroutine shsgsp1(nlat, nlon, l, late, wts, p0n, p1n, abel, bbel, cbel, &
                 cbel(imn) = sqrt(real((n-m+1)*(n-m+2), kind=wp)/ &
                     real((n+m-1)*(n+m), kind=wp))
             end do
-        end associate
-    end do
+        end do
 
-end subroutine shsgsp1
+    end subroutine shsgsp1
+
+end subroutine shsgsi

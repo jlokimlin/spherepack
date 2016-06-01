@@ -306,7 +306,6 @@
 !
 subroutine shags(nlat, nlon, mode, nt, g, idg, jdg, a, b, mdab, ndab, &
     wshags, lshags, work, lwork, ierror)
-    ! External routines: shags1
     !
     ! Purpose:
     !
@@ -327,11 +326,11 @@ subroutine shags(nlat, nlon, mode, nt, g, idg, jdg, a, b, mdab, ndab, &
     integer (ip), intent (in)     :: nlon
     integer (ip), intent (in)     :: mode
     integer (ip), intent (in)     :: nt
-    real (wp),    intent (in)     :: g(idg, jdg, 1)
+    real (wp),    intent (in)     :: g(idg, jdg, *)
     integer (ip), intent (in)     :: idg
     integer (ip), intent (in)     :: jdg
-    real (wp),    intent (out)    :: a(mdab, ndab, 1)
-    real (wp),    intent (out)    :: b(mdab, ndab, 1)
+    real (wp),    intent (out)    :: a(mdab, ndab, *)
+    real (wp),    intent (out)    :: b(mdab, ndab, *)
     integer (ip), intent (in)     :: mdab
     integer (ip), intent (in)     :: ndab
     real (wp),    intent (in out) :: wshags(lshags)
@@ -487,9 +486,9 @@ contains
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
-        integer :: i, j, k, m, mml1
-        integer :: mn, is, ms, ns, lm1, nl2, lp1, mp1, np1, mp2
-        real    :: t1, t2, sfn
+        integer (ip) :: i, j, k, m, mml1
+        integer (ip) :: mn, is, ms, ns, lm1, nl2, lp1, mp1, np1, mp2
+        real (wp)    :: t1, t2, sfn
         !----------------------------------------------------------------------
 
         !
@@ -644,9 +643,8 @@ contains
                     !
                     !==> adjust equator separately if a grid point
                     !
-                    if (nl2 < late) then
-                        g(late, j, k) = wts(late) * g(late, j, k)
-                    end if
+                    if (nl2 < late) g(late, j, k) = wts(late) * g(late, j, k)
+
                 end do
             end do
             !
@@ -692,7 +690,7 @@ contains
                 end do
             end do
 
-            if (nlon == l+l-2) then
+            if (nlon == 2*l-2) then
                 !
                 !==> compute n=m=l-1 coefficients last
                 !
@@ -995,10 +993,10 @@ contains
         real (wp),    intent (in out) :: wts(nlat)
         real (wp),    intent (in out) :: p0n(nlat, late)
         real (wp),    intent (in out) :: p1n(nlat, late)
-        real (wp),    intent (in out) :: abel(1)
-        real (wp),    intent (in out) :: bbel(1)
-        real (wp),    intent (in out) :: cbel(1)
-        real (wp),    intent (in out) :: wfft(1)
+        real (wp),    intent (in out) :: abel(*)
+        real (wp),    intent (in out) :: bbel(*)
+        real (wp),    intent (in out) :: cbel(*)
+        real (wp),    intent (in out) :: wfft(*)
         real (wp),    intent (in out) :: dtheta(nlat)
         real (wp),    intent (in out) :: dwts(nlat)
         real (wp),    intent (in out) :: work(*)
@@ -1006,9 +1004,9 @@ contains
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
-        integer :: i, m, n
-        integer :: lw, np1, imn, mlim
-        real    :: pb
+        integer (ip) :: i, m, n
+        integer (ip) :: lw, np1, imn, mlim
+        real (wp)    :: pb
         !----------------------------------------------------------------------
 
         call hrffti(nlon, wfft)
@@ -1020,9 +1018,7 @@ contains
 
         call gaqd(nlat, dtheta, dwts, work, lw, ier)
 
-        if (ier /= 0) then
-            return
-        end if
+        if (ier /= 0) return
 
         !     store gaussian weights single precision to save computation
         !     in inner loops in analysis
