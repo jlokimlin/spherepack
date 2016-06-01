@@ -326,144 +326,187 @@
 !
 subroutine vhaes(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
     mdab, ndab, wvhaes, lvhaes, work, lwork, ierror)
-    implicit none
-    real :: bi
-    real :: br
-    real :: ci
-    real :: cr
-    integer :: idv
-    integer :: idvw
-    integer :: idz
-    integer :: ierror
-    integer :: imid
-    integer :: ist
-    integer :: ityp
-    integer :: iw1
-    integer :: iw2
-    integer :: iw3
-    integer :: iw4
-    integer :: jdvw
-    integer :: jw1
-    integer :: jw2
-    integer :: lnl
-    integer :: lvhaes
-    integer :: lwork
-    integer :: lzimn
-    integer :: mdab
-    integer :: mmax
-    integer :: ndab
-    integer :: nlat
-    integer :: nlon
-    integer :: nt
-    real :: v
-    real :: w
-    real :: work
-    real :: wvhaes
-    dimension v(idvw, jdvw, 1), w(idvw, jdvw, 1), br(mdab, ndab, 1), &
-        bi(mdab, ndab, 1), cr(mdab, ndab, 1), ci(mdab, ndab, 1), &
-        work(1), wvhaes(1)
-    ierror = 1
-    if (nlat < 3) return
-    ierror = 2
-    if (nlon < 1) return
-    ierror = 3
-    if (ityp<0 .or. ityp>8) return
-    ierror = 4
-    if (nt < 0) return
-    ierror = 5
-    imid = (nlat+1)/2
-    if ((ityp<=2 .and. idvw<nlat) .or. &
-        (ityp>2 .and. idvw<imid)) return
-    ierror = 6
-    if (jdvw < nlon) return
-    ierror = 7
-    mmax = min(nlat, (nlon+1)/2)
-    if (mdab < mmax) return
-    ierror = 8
-    if (ndab < nlat) return
-    ierror = 9
-    idz = (mmax*(nlat+nlat-mmax+1))/2
-    lzimn = idz*imid
-    if (lvhaes < lzimn+lzimn+nlon+15) return
-    ierror = 10
-    idv = nlat
-    if (ityp > 2) idv = imid
-    lnl = nt*idv*nlon
-    if (lwork < lnl+lnl+idv*nlon) return
-    ierror = 0
-    ist = 0
-    if (ityp <= 2) ist = imid
-    iw1 = ist+1
-    iw2 = lnl+1
-    iw3 = iw2+ist
-    iw4 = iw2+lnl
-    jw1 = lzimn+1
-    jw2 = jw1+lzimn
 
-    call vhaes1(nlat, nlon, ityp, nt, imid, idvw, jdvw, v, w, mdab, ndab, &
-        br, bi, cr, ci, idv, work, work(iw1), work(iw2), work(iw3), &
-        work(iw4), idz, wvhaes, wvhaes(jw1), wvhaes(jw2))
+    use, intrinsic :: iso_fortran_env, only: &
+        wp => REAL64, &
+        ip => INT32
+
+    implicit none
+    !----------------------------------------------------------------------
+    ! Dictionary: calling arguments
+    !----------------------------------------------------------------------
+    integer (ip), intent (in)  :: nlat
+    integer (ip), intent (in)  :: nlon
+    integer (ip), intent (in)  :: ityp
+    integer (ip), intent (in)  :: nt
+    real (wp),    intent (in)  :: v(idvw, jdvw,*)
+    real (wp),    intent (in)  :: w(idvw, jdvw,*)
+    integer (ip), intent (in)  :: idvw
+    integer (ip), intent (in)  :: jdvw
+    real (wp),    intent (out) :: br(mdab, ndab,*)
+    real (wp),    intent (out) :: bi(mdab, ndab,*)
+    real (wp),    intent (out) :: cr(mdab, ndab,*)
+    real (wp),    intent (out) :: ci(mdab, ndab,*)
+    integer (ip), intent (in)  :: mdab
+    integer (ip), intent (in)  :: ndab
+    real (wp),    intent (in)  :: wvhaes(lvhaes)
+    integer (ip), intent (in)  :: lvhaes
+    real (wp),    intent (out) :: work(lwork)
+    integer (ip), intent (in)  :: lwork
+    integer (ip), intent (out) :: ierror
+    !----------------------------------------------------------------------
+    ! Dictionary: local variables
+    !----------------------------------------------------------------------
+    integer (ip) :: idv, imid, idz, ist, lnl, lzimn, mmax
+    integer (ip) :: workspace_indices(6)
+    !----------------------------------------------------------------------
+
+    imid = (nlat+1)/2
+    mmax = min(nlat, (nlon+1)/2)
+    idz = (mmax*(2*nlat-mmax+1))/2
+    lzimn = idz*imid
+
+    if (ityp > 2) then
+        idv = imid
+    else
+        idv = nlat
+    end if
+
+    lnl = nt*idv*nlon
+
+    !
+    !==> Check validity of input arguments
+    !
+    if (nlat < 3) then
+        ierror = 1
+        return
+    else if (nlon < 1) then
+        ierror = 2
+        return
+    else if (ityp < 0 .or. ityp > 8) then
+        ierror = 3
+        return
+    else if (nt < 0) then
+        ierror = 4
+        return
+    else if ((ityp <= 2 .and. idvw < nlat) .or. (ityp > 2 .and. idvw < imid)) then
+        ierror = 5
+        return
+    else if (jdvw < nlon) then
+        ierror = 6
+        return
+    else if (mdab < mmax) then
+        ierror = 7
+        return
+    else if (ndab < nlat) then
+        ierror = 8
+        return
+    else if (lvhaes < 2*lzimn+nlon+15) then
+        ierror = 9
+        return
+    else if (lwork < 2*lnl+idv*nlon) then
+        ierror = 10
+        return
+    else
+        ierror = 0
+    end if
+
+    if (ityp <= 2) then
+        ist = imid
+    else
+        ist = 0
+    end if
+
+    !
+    !==> Set workspace indices
+    !
+    workspace_indices = get_workspace_indices(ist, lnl, lzimn)
+
+    associate( &
+        iw1 => workspace_indices(1), &
+        iw2 => workspace_indices(2), &
+        iw3 => workspace_indices(3), &
+        iw4 => workspace_indices(4), &
+        jw1 => workspace_indices(5), &
+        jw2 => workspace_indices(6) &
+        )
+
+        call vhaes1(nlat, nlon, ityp, nt, imid, idvw, jdvw, v, w, mdab, ndab, &
+            br, bi, cr, ci, idv, work, work(iw1), work(iw2), work(iw3), &
+            work(iw4), idz, wvhaes, wvhaes(jw1), wvhaes(jw2))
+
+    end associate
 
 contains
 
+    pure function get_workspace_indices(ist, lnl, lzimn) result (return_value)
+        !----------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !----------------------------------------------------------------------
+        integer (ip), intent (in)  :: ist
+        integer (ip), intent (in)  :: lnl
+        integer (ip), intent (in)  :: lzimn
+        integer (ip)               :: return_value(6)
+        !----------------------------------------------------------------------
+
+        associate( i => return_value )
+
+            i(1) = ist+1
+            i(2) = lnl+1
+            i(3) = i(2)+ist
+            i(4) = i(2)+lnl
+            i(5) = lzimn+1
+            i(6) = i(5)+lzimn
+
+        end associate
+
+    end function get_workspace_indices
+
+
     subroutine vhaes1(nlat, nlon, ityp, nt, imid, idvw, jdvw, v, w, mdab, &
         ndab, br, bi, cr, ci, idv, ve, vo, we, wo, work, idz, zv, zw, wrfft)
-        implicit none
-        real :: bi
-        real :: br
-        real :: ci
-        real :: cr
-        real :: fsn
-        integer :: i
-        integer :: idv
-        integer :: idvw
-        integer :: idz
-        integer :: imid
-        integer :: imm1
-        integer :: ityp
-        integer :: j
-        integer :: jdvw
-        integer :: k
-        integer :: m
-        integer :: mb
-        integer :: mdab
-        integer :: mlat
-        integer :: mlon
-        integer :: mmax
-        integer :: mp1
-        integer :: mp2
-        integer :: ndab
-        integer :: ndo1
-        integer :: ndo2
-        integer :: nlat
-        integer :: nlon
-        integer :: nlp1
-        integer :: np1
-        integer :: nt
-        real :: tsn
-        real :: v
-        real :: ve
-        real :: vo
-        real :: w
-        real :: we
-        real :: wo
-        real :: work
-        real :: wrfft
-        real :: zv
-        real :: zw
-        dimension v(idvw, jdvw, 1), w(idvw, jdvw, 1), br(mdab, ndab, 1), &
-            bi(mdab, ndab, 1), cr(mdab, ndab, 1), ci(mdab, ndab, 1), &
-            ve(idv, nlon, 1), vo(idv, nlon, 1), we(idv, nlon, 1), &
-            wo(idv, nlon, 1), work(1), wrfft(1), &
-            zv(idz, 1), zw(idz, 1)
+        !----------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !----------------------------------------------------------------------
+        integer (ip), intent (in)  :: nlat
+        integer (ip), intent (in)  :: nlon
+        integer (ip), intent (in)  :: ityp
+        integer (ip), intent (in)  :: nt
+        integer (ip), intent (in)  :: imid
+        integer (ip), intent (in)  :: idvw
+        integer (ip), intent (in)  :: jdvw
+        real (wp),    intent (in)  :: v(idvw, jdvw,*)
+        real (wp),    intent (in)  :: w(idvw, jdvw,*)
+        integer (ip), intent (in)  :: mdab
+        integer (ip), intent (in)  :: ndab
+        real (wp),    intent (out) :: br(mdab, ndab,*)
+        real (wp),    intent (out) :: bi(mdab, ndab,*)
+        real (wp),    intent (out) :: cr(mdab, ndab,*)
+        real (wp),    intent (out) :: ci(mdab, ndab,*)
+        integer (ip), intent (in)  :: idv
+        real (wp),    intent (out) :: ve(idv, nlon, *)
+        real (wp),    intent (out) :: vo(idv, nlon, *)
+        real (wp),    intent (out) :: we(idv, nlon, *)
+        real (wp),    intent (out) :: wo(idv, nlon, *)
+        real (wp),    intent (out) :: work(*)
+        integer (ip), intent (in)  :: idz
+        real (wp),    intent (in)  :: zv(idz, *)
+        real (wp),    intent (in)  :: zw(idz, *)
+        real (wp),    intent (in)  :: wrfft(*)
+        !----------------------------------------------------------------------
+        ! Dictionary: local variables
+        !----------------------------------------------------------------------
+        integer (ip) :: i,imm1, j, k, m, mb, mlat, mlon
+        integer (ip) :: mmax, mp1, mp2, ndo1, ndo2,  nlp1, np1
+        real (wp)    :: fsn, tsn
+        !----------------------------------------------------------------------
 
         nlp1 = nlat+1
-        tsn = 2.0/nlon
-        fsn = 4.0/nlon
+        tsn = 2.0_wp/nlon
+        fsn = 4.0_wp/nlon
         mlat = mod(nlat, 2)
         mlon = mod(nlon, 2)
         mmax = min(nlat, (nlon+1)/2)
-        imm1 = imid
 
         select case (mlat)
             case (0)
@@ -476,36 +519,31 @@ contains
                 ndo2 = nlat
         end select
 
-        if (ityp <= 2) then
-            do k=1, nt
-                do i=1, imm1
-                    do j=1, nlon
-                        ve(i, j, k) = tsn*(v(i, j, k)+v(nlp1-i, j, k))
-                        vo(i, j, k) = tsn*(v(i, j, k)-v(nlp1-i, j, k))
-                        we(i, j, k) = tsn*(w(i, j, k)+w(nlp1-i, j, k))
-                        wo(i, j, k) = tsn*(w(i, j, k)-w(nlp1-i, j, k))
+        select case (ityp)
+            case (:2)
+                do k=1, nt
+                    do i=1, imm1
+                        ve(i, :, k) = tsn*(v(i, 1:nlon, k)+v(nlp1-i, 1:nlon, k))
+                        vo(i, :, k) = tsn*(v(i, 1:nlon, k)-v(nlp1-i, 1:nlon, k))
+                        we(i, :, k) = tsn*(w(i, 1:nlon, k)+w(nlp1-i, 1:nlon, k))
+                        wo(i, :, k) = tsn*(w(i, 1:nlon, k)-w(nlp1-i, 1:nlon, k))
                     end do
                 end do
-            end do
-        else
-            do k=1, nt
-                do i=1, imm1
-                    do j=1, nlon
-                        ve(i, j, k) = fsn*v(i, j, k)
-                        vo(i, j, k) = fsn*v(i, j, k)
-                        we(i, j, k) = fsn*w(i, j, k)
-                        wo(i, j, k) = fsn*w(i, j, k)
+            case default
+                do k=1, nt
+                    do i=1, imm1
+                        ve(i,:,k) = fsn*v(i,1:nlon,k)
+                        vo(i,:,k) = fsn*v(i,1:nlon,k)
+                        we(i,:,k) = fsn*w(i,1:nlon,k)
+                        wo(i,:,k) = fsn*w(i,1:nlon,k)
                     end do
                 end do
-            end do
-        end if
+        end select
 
         if (mlat /= 0) then
             do k=1, nt
-                do j=1, nlon
-                    ve(imid, j, k) = tsn*v(imid, j, k)
-                    we(imid, j, k) = tsn*w(imid, j, k)
-                end do
+                ve(imid,:, k) = tsn*v(imid,1:nlon, k)
+                we(imid,:, k) = tsn*w(imid,1:nlon, k)
             end do
         end if
 
@@ -518,11 +556,11 @@ contains
         !==> Set polar coefficients to zero
         !
         select case (ityp)
-            case (0,1,3,4,6,7)
+            case (0:1,3:4,6:7)
                 do k=1, nt
                     do mp1=1, mmax
-                        br(mp1, mp1: nlat, k) = 0.0
-                        bi(mp1, mp1: nlat, k) = 0.0
+                        br(mp1, mp1: nlat, k) = 0.0_wp
+                        bi(mp1, mp1: nlat, k) = 0.0_wp
                     end do
                 end do
         end select
@@ -534,12 +572,15 @@ contains
             case (0,2:3,5:6,8)
                 do k=1, nt
                     do mp1=1, mmax
-                        cr(mp1, mp1: nlat, k) = 0.0
-                        ci(mp1, mp1: nlat, k) = 0.0
+                        cr(mp1, mp1: nlat, k) = 0.0_wp
+                        ci(mp1, mp1: nlat, k) = 0.0_wp
                     end do
                 end do
         end select
 
+        !
+        !==> Compute coefficients br, bi, cr, ci
+        !
         select case (ityp)
             case (0)
                 !
