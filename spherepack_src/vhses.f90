@@ -299,7 +299,7 @@
 !
 !     h(i, j) = the sum from n=1 to n=nlat-1 of the real part of
 !
-!         .5*(b(0, n)*bbar(0, n, theta(i))+c(0, n)*cbar(0, n, theta(i)))
+!         0.5_wp*(b(0, n)*bbar(0, n, theta(i))+c(0, n)*cbar(0, n, theta(i)))
 !
 !     plus the sum from m=1 to m=mmax-1 of the sum from n=m to 
 !     n=nlat-1 of the real part of
@@ -315,7 +315,7 @@
 !
 !     v(i, j) = the sum from n=1 to n=nlat-1 of
 !
-!               .5*br(1, n+1)*vbar(0, n, theta(i))
+!               0.5_wp*br(1, n+1)*vbar(0, n, theta(i))
 !
 !     plus the sum from m=1 to m=mmax-1 of the sum from n=m to 
 !     n=nlat-1 of the real part of
@@ -329,7 +329,7 @@
 !
 !     w(i, j) = the sum from n=1 to n=nlat-1 of
 !
-!              -.5*cr(1, n+1)*vbar(0, n, theta(i))
+!              -0.5_wp*cr(1, n+1)*vbar(0, n, theta(i))
 !
 !     plus the sum from m=1 to m=mmax-1 of the sum from n=m to
 !     n=nlat-1 of the real part of
@@ -432,42 +432,41 @@
 !
 subroutine vhses(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
     mdab, ndab, wvhses, lvhses, work, lwork, ierror)
+
+    use, intrinsic :: iso_fortran_env, only: &
+        wp => REAL64, &
+        ip => INT32
+
     implicit none
-    real :: bi
-    real :: br
-    real :: ci
-    real :: cr
-    integer :: idv
-    integer :: idvw
-    integer :: idz
-    integer :: ierror
-    integer :: imid
-    integer :: ist
-    integer :: ityp
-    integer :: iw1
-    integer :: iw2
-    integer :: iw3
-    integer :: iw4
-    integer :: jdvw
-    integer :: jw1
-    integer :: jw2
-    integer :: lnl
-    integer :: lvhses
-    integer :: lwork
-    integer :: lzimn
-    integer :: mdab
-    integer :: mmax
-    integer :: ndab
-    integer :: nlat
-    integer :: nlon
-    integer :: nt
-    real :: v
-    real :: w
-    real :: work
-    real :: wvhses
-    dimension v(idvw, jdvw, 1), w(idvw, jdvw, 1), br(mdab, ndab, 1), &
-        bi(mdab, ndab, 1), cr(mdab, ndab, 1), ci(mdab, ndab, 1), &
-        work(1), wvhses(1)
+    !----------------------------------------------------------------------
+    ! Dictionary: calling arguments
+    !----------------------------------------------------------------------
+    integer (ip), intent (in)  :: nlat
+    integer (ip), intent (in)  :: nlon
+    integer (ip), intent (in)  :: ityp
+    integer (ip), intent (in)  :: nt
+    real (wp),    intent (out) :: v(idvw, jdvw,*)
+    real (wp),    intent (out) :: w(idvw, jdvw,*)
+    integer (ip), intent (in)  :: idvw
+    integer (ip), intent (in)  :: jdvw
+    real (wp),    intent (in)  :: br(mdab, ndab,*)
+    real (wp),    intent (in)  :: bi(mdab, ndab,*)
+    real (wp),    intent (in)  :: cr(mdab, ndab,*)
+    real (wp),    intent (in)  :: ci(mdab, ndab,*)
+    integer (ip), intent (in)  :: mdab
+    integer (ip), intent (in)  :: ndab
+    real (wp),    intent (in)  :: wvhses(lvhses)
+    integer (ip), intent (in)  :: lvhses
+    real (wp),    intent (out) :: work(lwork)
+    integer (ip), intent (in)  :: lwork
+    integer (ip), intent (out) :: ierror
+    !----------------------------------------------------------------------
+    ! Dictionary: local variables
+    !----------------------------------------------------------------------
+    integer (ip) :: idv, idz, imid, ist
+    integer (ip) :: iw1, iw2, iw3, iw4
+    integer (ip) :: jw1, jw2, lnl, lzimn, mmax
+    !----------------------------------------------------------------------
 
     imid = (nlat+1)/2
     mmax = min(nlat, (nlon+1)/2)
@@ -540,54 +539,40 @@ contains
 
     subroutine vhses1(nlat, nlon, ityp, nt, imid, idvw, jdvw, v, w, mdab, &
         ndab, br, bi, cr, ci, idv, ve, vo, we, wo, work, idz, vb, wb, wrfft)
-        implicit none
-        real :: bi
-        real :: br
-        real :: ci
-        real :: cr
-        integer :: i
-        integer :: idv
-        integer :: idvw
-        integer :: idz
-        integer :: imid
-        integer :: imm1
-        integer :: ityp
-
-        integer :: j
-        integer :: jdvw
-        integer :: k
-        integer :: m
-        integer :: mb
-        integer :: mdab
-        integer :: mlat
-        integer :: mlon
-        integer :: mmax
-        integer :: mn
-        integer :: mp1
-        integer :: mp2
-        integer :: ndab
-        integer :: ndo1
-        integer :: ndo2
-        integer :: nlat
-        integer :: nlon
-        integer :: nlp1
-        integer :: np1
-        integer :: nt
-        real :: v
-        real :: vb
-        real :: ve
-        real :: vo
-        real :: w
-        real :: wb
-        real :: we
-        real :: wo
-        real :: work
-        real :: wrfft
-        dimension v(idvw, jdvw, 1), w(idvw, jdvw, 1), br(mdab, ndab, 1), &
-            bi(mdab, ndab, 1), cr(mdab, ndab, 1), ci(mdab, ndab, 1), &
-            ve(idv, nlon, 1), vo(idv, nlon, 1), we(idv, nlon, 1), &
-            wo(idv, nlon, 1), work(1), wrfft(1), &
-            vb(imid, 1), wb(imid, 1)
+        !----------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !----------------------------------------------------------------------
+        integer (ip), intent (in)  :: nlat
+        integer (ip), intent (in)  :: nlon
+        integer (ip), intent (in)  :: ityp
+        integer (ip), intent (in)  :: nt
+        integer (ip), intent (in)  :: imid
+        integer (ip), intent (in)  :: idvw
+        integer (ip), intent (in)  :: jdvw
+        real (wp),    intent (out) :: v(idvw, jdvw,*)
+        real (wp),    intent (out) :: w(idvw, jdvw,*)
+        integer (ip), intent (in)  :: mdab
+        integer (ip), intent (in)  :: ndab
+        real (wp),    intent (in)  :: br(mdab, ndab,* )
+        real (wp),    intent (in)  :: bi(mdab, ndab, *)
+        real (wp),    intent (in)  :: cr(mdab, ndab, *)
+        real (wp),    intent (in)  :: ci(mdab, ndab, *)
+        integer (ip), intent (in)  :: idv
+        real (wp),    intent (out)  :: ve(idv, nlon, *)
+        real (wp),    intent (out)  :: vo(idv, nlon, *)
+        real (wp),    intent (out)  :: we(idv, nlon, *)
+        real (wp),    intent (out)  :: wo(idv, nlon, *)
+        real (wp),    intent (out)  :: work(*)
+        integer (ip), intent (in)  :: idz
+        real (wp),    intent (in)  :: vb(imid, *)
+        real (wp),    intent (in)  :: wb(imid, *)
+        real (wp),    intent (in)  :: wrfft(*)
+        !----------------------------------------------------------------------
+        ! Dictionary: local variables
+        !----------------------------------------------------------------------
+        integer (ip) :: i, imm1, j, k, m, mb, mlat, mlon, mmax, mn
+        integer (ip) :: mp1, mp2, ndo1, ndo2, nlp1, np1
+        !----------------------------------------------------------------------
 
         nlp1 = nlat+1
         mlat = mod(nlat, 2)
@@ -601,12 +586,8 @@ contains
         end if
 
         do k=1, nt
-            do j=1, nlon
-                do i=1, idv
-                    ve(i, j, k) = 0.
-                    we(i, j, k) = 0.
-                end do
-            end do
+            ve(:,:, k) = 0.0_wp
+            we(:,:, k) = 0.0_wp
         end do
 
         if (mlat /= 0) then
@@ -1173,30 +1154,26 @@ contains
             do k=1, nt
                 do j=1, nlon
                     do i=1, imm1
-                        v(i, j, k) = .5*(ve(i, j, k)+vo(i, j, k))
-                        w(i, j, k) = .5*(we(i, j, k)+wo(i, j, k))
-                        v(nlp1-i, j, k) = .5*(ve(i, j, k)-vo(i, j, k))
-                        w(nlp1-i, j, k) = .5*(we(i, j, k)-wo(i, j, k))
+                        v(i, j, k) = 0.5_wp*(ve(i, j, k)+vo(i, j, k))
+                        w(i, j, k) = 0.5_wp*(we(i, j, k)+wo(i, j, k))
+                        v(nlp1-i, j, k) = 0.5_wp*(ve(i, j, k)-vo(i, j, k))
+                        w(nlp1-i, j, k) = 0.5_wp*(we(i, j, k)-wo(i, j, k))
                     end do
                 end do
             end do
         else
             do k=1, nt
                 do j=1, nlon
-                    do i=1, imm1
-                        v(i, j, k) = .5*ve(i, j, k)
-                        w(i, j, k) = .5*we(i, j, k)
-                    end do
+                    v(1: imm1, j, k) = 0.5_wp*ve(1: imm1, j, k)
+                    w(1: imm1, j, k) = 0.5_wp*we(1: imm1, j, k)
                 end do
             end do
         end if
 
         if (mlat /= 0) then
             do k=1, nt
-                do j=1, nlon
-                    v(imid, j, k) = .5*ve(imid, j, k)
-                    w(imid, j, k) = .5*we(imid, j, k)
-                end do
+                v(imid, 1: nlon, k) = 0.5_wp*ve(imid, 1: nlon, k)
+                w(imid, 1: nlon, k) = 0.5_wp*we(imid, 1: nlon, k)
             end do
         end if
 
@@ -1204,42 +1181,66 @@ contains
 
 end subroutine vhses
 
+
+
 subroutine vhsesi(nlat, nlon, wvhses, lvhses, work, lwork, dwork, &
     ldwork, ierror)
+
+    use, intrinsic :: iso_fortran_env, only: &
+        wp => REAL64, &
+        ip => INT32
+
     implicit none
-    integer :: idz
-    integer :: ierror
-    integer :: imid
-    integer :: iw1
-    integer :: labc
-    integer :: ldwork
-    integer :: lvhses
-    integer :: lwork
-    integer :: lzimn
-    integer :: mmax
-    integer :: nlat
-    integer :: nlon
-    real :: work
-    real :: wvhses
-    dimension wvhses(lvhses), work(lwork)
-    real dwork(ldwork)
-    ierror = 1
-    if (nlat < 3) return
-    ierror = 2
-    if (nlon < 1) return
-    ierror = 3
+    !----------------------------------------------------------------------
+    ! Dictionary: calling arguments
+    !----------------------------------------------------------------------
+    integer (ip), intent (in)  :: nlat
+    integer (ip), intent (in)  :: nlon
+    real (wp),    intent (out) :: wvhses(lvhses)
+    integer (ip), intent (in)  :: lvhses
+    real (wp),    intent (out) :: work(lwork)
+    integer (ip), intent (in)  :: lwork
+    real (wp),    intent (out) :: dwork(ldwork)
+    integer (ip), intent (in)  :: ldwork
+    integer (ip), intent (out) :: ierror
+    !----------------------------------------------------------------------
+    ! Dictionary: local variables
+    !----------------------------------------------------------------------
+    integer (ip) :: idz, imid, iw1, labc, lzimn, mmax
+    !----------------------------------------------------------------------
+
     mmax = min(nlat, (nlon+1)/2)
     imid = (nlat+1)/2
-    lzimn = (imid*mmax*(nlat+nlat-mmax+1))/2
-    if (lvhses < lzimn+lzimn+nlon+15) return
-    ierror = 4
-    labc = 3*(max(mmax-2, 0)*(nlat+nlat-mmax-1))/2
-    if (lwork < 5*nlat*imid+labc) return
-    ierror = 5
-    if (ldwork < 2*(nlat+1)) return
-    ierror = 0
+    lzimn = (imid*mmax*(2*nlat-mmax+1))/2
+    labc = 3*(max(mmax-2, 0)*(2*nlat-mmax-1))/2
+
+    !
+    !==> Check validity of input arguments
+    !
+    if (nlat < 3) then
+        ierror = 1
+        return
+    else if (nlon < 1) then
+        ierror = 2
+        return
+    else if (lvhses < 2*lzimn+nlon+15) then
+        ierror = 3
+        return
+    else if (lwork < 5*nlat*imid+labc) then
+        ierror = 4
+        return
+    else if (ldwork < 2*(nlat+1)) then
+        ierror = 5
+        return
+    else
+        ierror = 0
+    end if
+
+    !
+    !==> Set workspace indices
+    !
     iw1 = 3*nlat*imid+1
-    idz = (mmax*(nlat+nlat-mmax+1))/2
+    idz = (mmax*(2*nlat-mmax+1))/2
 
     call ves1(nlat, nlon, imid, wvhses, wvhses(lzimn+1), idz, work, work(iw1), dwork)
     call hrffti(nlon, wvhses(2*lzimn+1))
@@ -1247,24 +1248,23 @@ subroutine vhsesi(nlat, nlon, wvhses, lvhses, work, lwork, dwork, &
 contains
 
     subroutine ves1(nlat, nlon, imid, vb, wb, idz, vin, wzvin, dwork)
-        implicit none
-        integer :: i
-        integer :: i3
-        integer :: idz
-        integer :: imid
-        integer :: m
-        integer :: mmax
-        integer :: mn
-        integer :: mp1
-        integer :: nlat
-        integer :: nlon
-        integer :: np1
-        real :: vb
-        real :: vin
-        real :: wb
-        real :: wzvin
-        dimension vb(imid, *), wb(imid, *), vin(imid, nlat, 3), wzvin(*)
-        real dwork(*)
+        !----------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !----------------------------------------------------------------------
+        integer (ip), intent (in)  :: nlat
+        integer (ip), intent (in)  :: nlon
+        integer (ip), intent (in)  :: imid
+        real (wp),    intent (out) :: vb(imid, *)
+        real (wp),    intent (out) :: wb(imid, *)
+        integer (ip), intent (in)  :: idz
+        real (wp),    intent (out) :: vin(imid, nlat, 3)
+        real (wp),    intent (out) :: wzvin(*)
+        real (wp),    intent (out) :: dwork(*)
+        !----------------------------------------------------------------------
+        ! Dictionary: local variables
+        !----------------------------------------------------------------------
+        integer (ip) :: i3, m, mmax, mn, mp1, np1
+        !----------------------------------------------------------------------
 
         mmax = min(nlat, (nlon+1)/2)
 
@@ -1272,12 +1272,10 @@ contains
 
         do mp1=1, mmax
             m = mp1-1
-            call vbin (0, nlat, nlon, m, vin, i3, wzvin)
+            call vbin(0, nlat, nlon, m, vin, i3, wzvin)
             do np1=mp1, nlat
                 mn = m*(nlat-1)-(m*(m-1))/2+np1
-                do i=1, imid
-                    vb(i, mn) = vin(i, np1, i3)
-                end do
+                vb(1: imid, mn) = vin(1: imid, np1, i3)
             end do
         end do
 
@@ -1285,12 +1283,10 @@ contains
 
         do mp1=1, mmax
             m = mp1-1
-            call wbin (0, nlat, nlon, m, vin, i3, wzvin)
+            call wbin(0, nlat, nlon, m, vin, i3, wzvin)
             do np1=mp1, nlat
                 mn = m*(nlat-1)-(m*(m-1))/2+np1
-                do i=1, imid
-                    wb(i, mn) = vin(i, np1, i3)
-                end do
+                wb(1: imid, mn) = vin(1: imid, np1, i3)
             end do
         end do
 
