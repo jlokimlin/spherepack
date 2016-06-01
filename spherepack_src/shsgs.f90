@@ -9,7 +9,7 @@
 !     *                                                               *
 !     *                      SPHEREPACK version 3.2                   *
 !     *                                                               *
-!     *       A Package of Fortran77 Subroutines and Programs         *
+!     *       A Package of Fortran Subroutines and Programs           *
 !     *                                                               *
 !     *              for Modeling Geophysical Processes               *
 !     *                                                               *
@@ -650,11 +650,13 @@ contains
                 !
                 m = l-1
                 mml1 = m*(2*nlat-m-1)/2
+
                 if (mode == 1) then
                     ns = l+1
                 else
                     ns = l
                 end if
+
                 do k=1, nt
                     do np1=ns, nlat, 2
                         mn = mml1+np1

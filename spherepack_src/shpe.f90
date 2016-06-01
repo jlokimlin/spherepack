@@ -9,7 +9,7 @@
 !     *                                                               *
 !     *                      SPHEREPACK version 3.2                   *
 !     *                                                               *
-!     *       A Package of Fortran77 Subroutines and Programs         *
+!     *       A Package of Fortran Subroutines and Programs           *
 !     *                                                               *
 !     *              for Modeling Geophysical Processes               *
 !     *                                                               *
@@ -290,7 +290,7 @@ m = mp1-1
 mrank = nlat-m-m
 nem = (mrank+1)/2
 do j=1, nem
-n = j+j+m-2
+n = 2*j+m-2
 call dlfkp(m, n, cp)
 do i=1, nte
 call dlftp (m, n, thet(i), cp, ped(i, j, mp1))
@@ -348,7 +348,7 @@ nem = (mrank+1)/2
 !
 if (m<=1) then
 do 205 j=1, nem
-n = j+j+m-2
+n = 2*j+m-2
 call dlfkp(m, n, cp)
 do i=1, nte
 call dlftp (m, n, thet(i), cp, ped(i, j+ms2, ip))
@@ -359,7 +359,7 @@ end do
 else
 !
 do 207 j=1, nem
-n = j+j+m-2
+n = 2*j+m-2
 if (m>1.and.n>mxtr) then
 do i=1, nte
 u(i, j+ms2) = ped(i, j+ms2, ip)
@@ -483,7 +483,7 @@ mrank = nlat-m-m
 nem = (mrank+1)/2
 nom = mrank-nem
 do j=1, nom
-n = j+j+m-1
+n = 2*j+m-1
 call dlfkp(m, n, cp)
 do i=1, nte
 call dlftp (m, n, thet(i), cp, pod(i, j, mp1))
@@ -536,7 +536,7 @@ nom = mrank-nem
 !
 if (m<=1) then
 do 305 j=1, nom
-n = j+j+m-1
+n = 2*j+m-1
 call dlfkp(m, n, cp)
 do i=1, nte
 call dlftp (m, n, thet(i), cp, pod(i, j+ms2, ip))
@@ -548,7 +548,7 @@ if (m>0) pod(1, j+ms2, ip) = 0.0
 else
 !
 do 307 j=1, nom
-n = j+j+m-1
+n = 2*j+m-1
 if (m>1.and.n>mxtr) then
 do i=1, nte
 u(i, j+ms2) = pod(i, j+ms2, ip)

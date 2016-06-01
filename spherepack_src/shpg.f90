@@ -9,7 +9,7 @@
 !     *                                                               *
 !     *                      SPHEREPACK version 3.2                   *
 !     *                                                               *
-!     *       A Package of Fortran77 Subroutines and Programs         *
+!     *       A Package of Fortran Subroutines and Programs           *
 !     *                                                               *
 !     *              for Modeling Geophysical Processes               *
 !     *                                                               *
@@ -310,7 +310,7 @@ nec = nte-nem
 !
 if (m<=1) then
 do 205 j=1, nem
-n = j+j+m-2
+n = 2*j+m-2
 call dlfkg(m, n, cp)
 do i=1, nte
 call dlftg (m, n, thet(i), cp, ped(i, j+nec, ip))
@@ -320,7 +320,7 @@ end do
 else
 !
 do 207 j=1, nem
-n = j+j+m-2
+n = 2*j+m-2
 if (m>1.and.n>mxtr) then
 do i=1, nte
 u(i, j+nec) = ped(i, j+nec, ip)
@@ -468,7 +468,7 @@ noc = nto-nom
 !
 if (m<=1) then
 do 305 j=1, nom
-n = j+j+m-1
+n = 2*j+m-1
 call dlfkg(m, n, cp)
 do i=1, nte
 call dlftg (m, n, thet(i), cp, pod(i, j+noc, ip))
@@ -479,7 +479,7 @@ if (modn>0) pod(nte, j+noc, ip) = 0.0
 else
 !
 do 307 j=1, nom
-n = j+j+m-1
+n = 2*j+m-1
 if (m>1.and.n>mxtr) then
 do i=1, nte
 u(i, j+noc) = pod(i, j+noc, ip)

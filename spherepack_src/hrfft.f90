@@ -1071,7 +1071,7 @@ contains
 
                 do j=2, ipph
                     jc = ipp2-j
-                    j2 = j+j
+                    j2 = 2*j
                     do k=1, l1
                         do m=1, mp
                             cc(m, ido, j2-2, k) = ch(m, 1, k, j)
@@ -1087,7 +1087,7 @@ contains
                 if (nbd >= l1) then
                     do j=2, ipph
                         jc = ipp2-j
-                        j2 = j+j
+                        j2 = 2*j
                         do k=1, l1
                             do i=3, ido, 2
                                 ic = idp2-i
@@ -1103,7 +1103,7 @@ contains
                 else
                     do j=2, ipph
                         jc = ipp2-j
-                        j2 = j+j
+                        j2 = 2*j
                         do i=3, ido, 2
                             ic = idp2-i
                             do k=1, l1
@@ -1686,7 +1686,7 @@ contains
 
         do j=2, ipph
             jc = ipp2-j
-            j2 = j+j
+            j2 = 2*j
             ch(1:mp, 1, :, j) = cc(1:mp, ido, j2-2, :)+cc(1:mp, ido, j2-2, :)
             ch(1:mp, 1, :, jc) = cc(1:mp, 1, j2-1, :)+cc(1:mp, 1, j2-1, :)
         end do
@@ -1742,30 +1742,20 @@ contains
                 ai2 = dc2*ai2+ds2*ar2
                 ar2 = ar2h
                 do ik=1, idl1
-                    do m=1, mp
-                        c2(m, ik, l) = c2(m, ik, l)+ar2*ch2(m, ik, j)
-                        c2(m, ik, lc) = c2(m, ik, lc)+ai2*ch2(m, ik, jc)
-                    end do
+                    c2(1: mp, ik, l) = c2(1: mp, ik, l)+ar2*ch2(1: mp, ik, j)
+                    c2(1: mp, ik, lc) = c2(1: mp, ik, lc)+ai2*ch2(1: mp, ik, jc)
                 end do
             end do
         end do
 
         do j=2, ipph
-            do ik=1, idl1
-                do m=1, mp
-                    ch2(m, ik, 1) = ch2(m, ik, 1)+ch2(m, ik, j)
-                end do
-            end do
+            ch2(1: mp, 1: idl1, 1) = ch2(1: mp, 1: idl1, 1)+ch2(1: mp, 1: idl1, j)
         end do
 
         do j=2, ipph
             jc = ipp2-j
-            do k=1, l1
-                do m=1, mp
-                    ch(m, 1, k, j) = c1(m, 1, k, j)-c1(m, 1, k, jc)
-                    ch(m, 1, k, jc) = c1(m, 1, k, j)+c1(m, 1, k, jc)
-                end do
-            end do
+            ch(1: mp, 1, 1: l1, j) = c1(1: mp, 1, 1: l1, j)-c1(1: mp, 1, 1: l1, jc)
+            ch(1: mp, 1, 1: l1, jc) = c1(1: mp, 1, 1: l1, j)+c1(1: mp, 1, 1: l1, jc)
         end do
 
         if (ido /= 1) then
@@ -1802,15 +1792,8 @@ contains
 
         if (ido == 1) return
 
-        do ik=1, idl1
-            c2(1:mp, ik, 1) = ch2(1:mp, ik, 1)
-        end do
-
-        do j=2, iip
-            do k=1, l1
-                c1(1:mp, 1, k, j) = ch(1:mp, 1, k, j)
-            end do
-        end do
+        c2(1:mp, 1: idl1, 1) = ch2(1:mp, 1: idl1, 1)
+        c1(1:mp, 1, 1: l1, 2: iip) = ch(1:mp, 1, 1: l1, 2: iip)
 
         if (nbd <= l1) then
             is = -ido
