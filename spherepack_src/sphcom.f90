@@ -1824,134 +1824,171 @@ end subroutine zwin1
 
 
 
-subroutine vbinit (nlat, nlon, wvbin, dwork)
+subroutine vbinit(nlat, nlon, wvbin, dwork)
+
+    use, intrinsic :: iso_fortran_env, only: &
+        wp => REAL64, &
+        ip => INT32
+
     implicit none
-    integer :: imid
-    integer :: iw1
-    integer :: nlat
-    integer :: nlon
-    real :: wvbin
-    dimension wvbin(1)
-    real dwork(*)
+    !
+    ! Remark:
+    !
+    ! The length of wvbin is 2*nlat*imid+3*((nlat-3)*nlat+2)/2
+    ! The length of dwork is nlat+2
+    !
+    !----------------------------------------------------------------------
+    ! Dictionary: calling arguments
+    !----------------------------------------------------------------------
+    integer (ip), intent (in)  :: nlat
+    integer (ip), intent (in)  :: nlon
+    real (wp),    intent (out) :: wvbin(2*nlat*((nlat+1)/2)+3*((nlat-3)*nlat+2)/2)
+    real (wp),    intent (out) :: dwork(nlat+2)
+    !----------------------------------------------------------------------
+    ! Dictionary: local variables
+    !----------------------------------------------------------------------
+    integer (ip) :: imid, iw1, iw2
+    !----------------------------------------------------------------------
+
     imid = (nlat+1)/2
     iw1 = 2*nlat*imid+1
-    !
-    !     the length of wvbin is 2*nlat*imid+3*((nlat-3)*nlat+2)/2
-    !     the length of dwork is nlat+2
-    !
-    call vbini1(nlat, nlon, imid, wvbin, wvbin(iw1), dwork, &
-        dwork(nlat/2+2))
+    iw2 = nlat/2 + 2
+
+    call vbini1(nlat, nlon, imid, wvbin, wvbin(iw1), dwork, dwork(iw2))
+
+contains
+
+    subroutine vbini1(nlat, nlon, imid, vb, abc, cvb, work)
+        !
+        ! Remarks:
+        !
+        !     abc must have 3*(max(mmax-2, 0)*(2*nlat-mmax-1))/2
+        !     locations where mmax = min(nlat, (nlon+1)/2)
+        !     cvb and work must each have nlat+1 locations
+        !
+        !----------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !----------------------------------------------------------------------
+        integer (ip), intent (in)  :: nlat
+        integer (ip), intent (in)  :: nlon
+        integer (ip), intent (in)  :: imid
+        real (wp),    intent (out) :: vb(imid, nlat, 2)
+        real (wp),    intent (out) :: abc(*)
+        real (wp),    intent (out) :: cvb(nlat+1)
+        real (wp),    intent (out) :: work(nlat+1)
+        !----------------------------------------------------------------------
+        ! Dictionary: local variables
+        !----------------------------------------------------------------------
+        integer (ip)    :: i, m, mdo, mp1, n, np1
+        real (wp)       :: dth, theta, vbh
+        real, parameter :: pi = acos(-1.0_wp)
+        !----------------------------------------------------------------------
+
+        dth = pi/(nlat-1)
+        mdo = min(2, nlat, (nlon+1)/2)
+        do mp1=1, mdo
+            m = mp1-1
+            do np1=mp1, nlat
+                n = np1-1
+                call dvbk(m, n, cvb, work)
+                do  i=1, imid
+                    theta = real(i-1, kind=wp)*dth
+                    call dvbt(m, n, theta, cvb, vbh)
+                    vb(i, np1, mp1) = vbh
+                end do
+            end do
+        end do
+
+        call rabcv(nlat, nlon, abc)
+
+    end subroutine vbini1
 
 end subroutine vbinit
 
 
-
-subroutine vbini1(nlat, nlon, imid, vb, abc, cvb, work)
-    implicit none
-    real :: abc
-    integer :: i
-    integer :: imid
-    integer :: m
-    integer :: mdo
-    integer :: mp1
-    integer :: n
-    integer :: nlat
-    integer :: nlon
-    integer :: np1
-    real :: vb
-    !
-    !     abc must have 3*(max(mmax-2, 0)*(nlat+nlat-mmax-1))/2
-    !     locations where mmax = min(nlat, (nlon+1)/2)
-    !     cvb and work must each have nlat+1 locations
-    !
-    dimension vb(imid, nlat, 2), abc(1)
-    real dt, cvb(1), th, vbh, work(1)
-    real, parameter :: pi = acos(-1.0)
-    dt = pi/(nlat-1)
-    mdo = min(2, nlat, (nlon+1)/2)
-    do mp1=1, mdo
-        m = mp1-1
-        do np1=mp1, nlat
-            n = np1-1
-            call dvbk(m, n, cvb, work)
-            do  i=1, imid
-                th = (i-1)*dt
-                call dvbt(m, n, th, cvb, vbh)
-                vb(i, np1, mp1) = vbh
-            end do
-        end do
-    end do
-
-    call rabcv(nlat, nlon, abc)
-
-end subroutine vbini1
-
-
-
 subroutine wbinit (nlat, nlon, wwbin, dwork)
+
+    use, intrinsic :: iso_fortran_env, only: &
+        wp => REAL64, &
+        ip => INT32
+
     implicit none
-    integer :: imid
-    integer :: iw1
-    integer :: nlat
-    integer :: nlon
-    real :: wwbin
-    dimension       wwbin(1)
-    real dwork(*)
+    !
+    ! Remark:
+    !
+    ! The length of wwbin is 2*nlat*imid+3*((nlat-3)*nlat+2)/2
+    ! The length of dwork is nlat+2
+    !
+    !----------------------------------------------------------------------
+    ! Dictionary: calling arguments
+    !----------------------------------------------------------------------
+    integer (ip), intent (in)  :: nlat
+    integer (ip), intent (in)  :: nlon
+    real (wp),    intent (out) :: wwbin(2*nlat*((nlat+1)/2)+3*((nlat-3)*nlat+2)/2)
+    real (wp),    intent (out) :: dwork(nlat+2)
+    !----------------------------------------------------------------------
+    ! Dictionary: local variables
+    !----------------------------------------------------------------------
+    integer (ip) :: imid, iw1, iw2
+    !----------------------------------------------------------------------
+
     imid = (nlat+1)/2
     iw1 = 2*nlat*imid+1
-    !
-    !     the length of wwbin is 2*nlat*imid+3*((nlat-3)*nlat+2)/2
-    !     the length of dwork is nlat+2
-    !
-    call wbini1(nlat, nlon, imid, wwbin, wwbin(iw1), dwork, &
-        dwork(nlat/2+2))
+    iw2 = nlat/2 + 2
+
+    call wbini1(nlat, nlon, imid, wwbin, wwbin(iw1), dwork, dwork(iw2))
+
+contains
+
+    subroutine wbini1(nlat, nlon, imid, wb, abc, cwb, work)
+        !
+        ! Remarks:
+        !
+        ! abc must have 3*(max(mmax-2, 0)*(nlat+nlat-mmax-1))/2
+        ! locations where mmax = min(nlat, (nlon+1)/2)
+        ! cwb and work must each have nlat/2+1 locations
+        !
+        !----------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !----------------------------------------------------------------------
+        integer (ip), intent (in)  :: nlat
+        integer (ip), intent (in)  :: nlon
+        integer (ip), intent (in)  :: imid
+        real (wp),    intent (out) :: wb(imid, nlat, 2)
+        real (wp),    intent (out) :: abc(*)
+        real (wp),    intent (out) :: cwb(nlat/2+1)
+        real (wp),    intent (out) :: work(nlat/2+1)
+        !----------------------------------------------------------------------
+        ! Dictionary: local variables
+        !----------------------------------------------------------------------
+        integer (ip)         :: i, m, mdo, mp1, n, np1
+        real (wp)            :: dth, wbh, theta
+        real (wp), parameter :: pi = acos(-1.0_wp)
+        !----------------------------------------------------------------------
+
+        dth = pi/(nlat-1)
+        mdo = min(3, nlat, (nlon+1)/2)
+
+        if (mdo >= 2) then
+            do mp1=2, mdo
+                m = mp1-1
+                do np1=mp1, nlat
+                    n = np1-1
+                    call dwbk(m, n, cwb, work)
+                    do i=1, imid
+                        theta = real(i-1, kind=wp)*dth
+                        call dwbt(m, n, theta, cwb, wbh)
+                        wb(i, np1, m) = wbh
+                    end do
+                end do
+            end do
+
+            call rabcw(nlat, nlon, abc)
+        end if
+
+    end subroutine wbini1
 
 end subroutine wbinit
-
-
-
-subroutine wbini1(nlat, nlon, imid, wb, abc, cwb, work)
-    implicit none
-    real :: abc
-    integer :: i
-    integer :: imid
-    integer :: m
-    integer :: mdo
-    integer :: mp1
-    integer :: n
-    integer :: nlat
-    integer :: nlon
-    integer :: np1
-    real :: wb
-    !
-    !     abc must have 3*(max(mmax-2, 0)*(nlat+nlat-mmax-1))/2
-    !     locations where mmax = min(nlat, (nlon+1)/2)
-    !     cwb and work must each have nlat/2+1 locations
-    !
-    dimension wb(imid, nlat, 2), abc(1)
-    real dt, cwb(1), wbh, th, work(1)
-    real, parameter :: pi = acos(-1.0)
-
-    dt = pi/(nlat-1)
-    mdo = min(3, nlat, (nlon+1)/2)
-    if (mdo < 2) return
-    do mp1=2, mdo
-        m = mp1-1
-        do np1=mp1, nlat
-            n = np1-1
-            call dwbk(m, n, cwb, work)
-            do i=1, imid
-                th = (i-1)*dt
-                call dwbt(m, n, th, cwb, wbh)
-                wb(i, np1, m) = wbh
-            end do
-        end do
-    end do
-
-    call rabcw(nlat, nlon, abc)
-
-end subroutine wbini1
-
 
 subroutine vbin(ityp, nlat, nlon, m, vb, i3, wvbin)
     implicit none
@@ -2909,9 +2946,9 @@ subroutine dvbt(m, n, theta, cv, vh)
                         cost = temp
                     end do
                 case (1) ! m odd
-                   !
-                   !==> n even  m odd
-                   !
+                    !
+                    !==> n even  m odd
+                    !
                     ncv = n/2
                     do k=1, ncv
                         vh = vh+cv(k)*cost

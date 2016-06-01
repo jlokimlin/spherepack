@@ -463,9 +463,8 @@ subroutine vhses(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
     !----------------------------------------------------------------------
     ! Dictionary: local variables
     !----------------------------------------------------------------------
-    integer (ip) :: idv, idz, imid, ist
-    integer (ip) :: iw1, iw2, iw3, iw4
-    integer (ip) :: jw1, jw2, lnl, lzimn, mmax
+    integer (ip) :: idv, idz, imid, ist, lnl, lzimn, mmax
+    integer (ip) :: workspace_indices(6)
     !----------------------------------------------------------------------
 
     imid = (nlat+1)/2
@@ -473,19 +472,16 @@ subroutine vhses(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
     idz = (mmax*(2*nlat-mmax+1))/2
     lzimn = idz*imid
 
-    if (ityp > 2) then
-        idv = imid
-    else
-        idv = nlat
-    end if
+    select case (ityp)
+        case (:2)
+            idv = nlat
+            ist = imid
+        case default
+            idv = imid
+            ist = 0
+    end select
 
     lnl = nt*idv*nlon
-
-    if (ityp <= 2) then
-        ist = imid
-    else
-        ist = 0
-    end if
 
     !
     !==> Check validity of input arguments
@@ -524,18 +520,52 @@ subroutine vhses(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
         ierror = 0
     end if
 
-    iw1 = ist+1
-    iw2 = lnl+1
-    iw3 = iw2+ist
-    iw4 = iw2+lnl
-    jw1 = lzimn+1
-    jw2 = jw1+lzimn
+    !
+    !==> Set workspace indices
+    !
+    workspace_indices = get_workspace_indices(ist, lnl, lzimn)
 
-    call vhses1(nlat, nlon, ityp, nt, imid, idvw, jdvw, v, w, mdab, ndab, &
-        br, bi, cr, ci, idv, work, work(iw1), work(iw2), work(iw3), &
-        work(iw4), idz, wvhses, wvhses(jw1), wvhses(jw2))
+    associate( &
+        iw1 => workspace_indices(1), &
+        iw2 => workspace_indices(2), &
+        iw3 => workspace_indices(3), &
+        iw4 => workspace_indices(4), &
+        jw1 => workspace_indices(5), &
+        jw2 => workspace_indices(6) &
+        )
+
+        call vhses1(nlat, nlon, ityp, nt, imid, idvw, jdvw, v, w, mdab, ndab, &
+            br, bi, cr, ci, idv, work, work(iw1), work(iw2), work(iw3), &
+            work(iw4), idz, wvhses, wvhses(jw1), wvhses(jw2))
+
+    end associate
+
 
 contains
+
+
+    pure function get_workspace_indices(ist, lnl, lzimn) result (return_value)
+        !----------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !----------------------------------------------------------------------
+        integer (ip), intent (in)  :: ist
+        integer (ip), intent (in)  :: lnl
+        integer (ip), intent (in)  :: lzimn
+        integer (ip)               :: return_value(6)
+        !----------------------------------------------------------------------
+
+        associate( i => return_value )
+
+            i(1) = ist+1
+            i(2) = lnl+1
+            i(3) = i(2)+ist
+            i(4) = i(2)+lnl
+            i(5) = lzimn+1
+            i(6) = i(5)+lzimn
+
+        end associate
+
+    end function get_workspace_indices
 
     subroutine vhses1(nlat, nlon, ityp, nt, imid, idvw, jdvw, v, w, mdab, &
         ndab, br, bi, cr, ci, idv, ve, vo, we, wo, work, idz, vb, wb, wrfft)
@@ -579,28 +609,21 @@ contains
         mlon = mod(nlon, 2)
         mmax = min(nlat, (nlon+1)/2)
 
-        if (mlat /= 0) then
-            imm1 = imid-1
-        else
-            imm1 = imid
-        end if
+        select case (mlat)
+            case (0)
+                imm1 = imid
+                ndo1 = nlat
+                ndo2 = nlat-1
+            case default
+                imm1 = imid-1
+                ndo1 = nlat-1
+                ndo2 = nlat
+        end select
 
         do k=1, nt
             ve(:,:, k) = 0.0_wp
             we(:,:, k) = 0.0_wp
         end do
-
-        if (mlat /= 0) then
-            ndo1 = nlat-1
-        else
-            ndo1 = nlat
-        end if
-
-        if (mlat == 0) then
-            ndo2 = nlat-1
-        else
-            ndo2 = nlat
-        end if
 
         case_block: block
             select case (ityp)
@@ -1206,7 +1229,8 @@ subroutine vhsesi(nlat, nlon, wvhses, lvhses, work, lwork, dwork, &
     !----------------------------------------------------------------------
     ! Dictionary: local variables
     !----------------------------------------------------------------------
-    integer (ip) :: idz, imid, iw1, labc, lzimn, mmax
+    integer (ip) :: imid, labc, lzimn, mmax
+    integer (ip) :: workspace_indices(4)
     !----------------------------------------------------------------------
 
     mmax = min(nlat, (nlon+1)/2)
@@ -1239,13 +1263,46 @@ subroutine vhsesi(nlat, nlon, wvhses, lvhses, work, lwork, dwork, &
     !
     !==> Set workspace indices
     !
-    iw1 = 3*nlat*imid+1
-    idz = (mmax*(2*nlat-mmax+1))/2
+    workspace_indices = get_workspace_indices(nlat, imid, mmax, lzimn)
 
-    call ves1(nlat, nlon, imid, wvhses, wvhses(lzimn+1), idz, work, work(iw1), dwork)
-    call hrffti(nlon, wvhses(2*lzimn+1))
+    associate( &
+        iw1 => workspace_indices(1), &
+        idz => workspace_indices(2), &
+        jw1 => workspace_indices(3), &
+        jw2 => workspace_indices(4) &
+        )
+
+        call ves1(nlat, nlon, imid, wvhses, wvhses(jw1), idz, work, work(iw1), dwork)
+
+        call hrffti(nlon, wvhses(jw2))
+
+    end associate
 
 contains
+
+
+    pure function get_workspace_indices(nlat, imid, mmax, lzimn) result (return_value)
+        !----------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !----------------------------------------------------------------------
+        integer (ip), intent (in)  :: nlat
+        integer (ip), intent (in)  :: imid
+        integer (ip), intent (in)  :: mmax
+        integer (ip), intent (in)  :: lzimn
+        integer (ip)               :: return_value(4)
+        !----------------------------------------------------------------------
+
+        associate( i => return_value )
+
+            i(1) = 3*nlat*imid+1
+            i(2) = (mmax*(2*nlat-mmax+1))/2
+            i(3) = lzimn+1
+            i(4) = 2*lzimn+1
+
+        end associate
+
+    end function get_workspace_indices
+
 
     subroutine ves1(nlat, nlon, imid, vb, wb, idz, vin, wzvin, dwork)
         !----------------------------------------------------------------------
