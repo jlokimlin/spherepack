@@ -918,33 +918,19 @@ contains
                 )
 
                 if (ido /= 1) then
-                    do ik=1, idl1
-                        do m=1, mp
-                            ch2(m, ik, 1) = c2(m, ik, 1)
-                        end do
-                    end do
-                    do j=2, iip
-                        do k=1, l1
-                            do m=1, mp
-                                ch(m, 1, k, j) = c1(m, 1, k, j)
-                            end do
-                        end do
-                    end do
+                    ch2(1: mp, 1: idl1, 1) = c2(1: mp, 1: idl1, 1)
+                    ch(1: mp, 1, 1: l1, 2: iip) = c1(1: mp, 1, 1: l1, 2: iip)
+
                     if (nbd <= l1) then
                         is = -ido
                         do j=2, iip
                             is = is+ido
                             idij = is
                             do i=3, ido, 2
-                                idij = idij+2
-                                do k=1, l1
-                                    do m=1, mp
-                                        ch(m, i-1, k, j) = wa(idij-1)*c1(m, i-1, k, j)+wa(idij) &            !
-                                            *c1(m, i, k, j)
-                                        ch(m, i, k, j) = wa(idij-1)*c1(m, i, k, j)-wa(idij) &
-                                            *c1(m, i-1, k, j)
-                                    end do
-                                end do
+                                ch(1: mp, i-1, 1: l1, j) = wa(idij+1)*c1(1: mp, i-1, 1: l1, j)+wa(idij+2) &            !
+                                    *c1(1: mp, i, 1: l1, j)
+                                ch(1: mp, i, 1: l1, j) = wa(idij+1)*c1(1: mp, i, 1: l1, j)-wa(idij+2) &
+                                    *c1(1: mp, i-1, 1: l1, j)
                             end do
                         end do
                     else
@@ -955,12 +941,10 @@ contains
                                 idij = is
                                 do i=3, ido, 2
                                     idij = idij+2
-                                    do m=1, mp
-                                        ch(m, i-1, k, j) = wa(idij-1)*c1(m, i-1, k, j)+wa(idij) &            !
-                                            *c1(m, i, k, j)
-                                        ch(m, i, k, j) = wa(idij-1)*c1(m, i, k, j)-wa(idij) &
-                                            *c1(m, i-1, k, j)
-                                    end do
+                                    ch(1: mp, i-1, k, j) = wa(idij-1)*c1(1: mp, i-1, k, j)+wa(idij) &            !
+                                        *c1(1: mp, i, k, j)
+                                    ch(1: mp, i, k, j) = wa(idij-1)*c1(1: mp, i, k, j)-wa(idij) &
+                                        *c1(1: mp, i-1, k, j)
                                 end do
                             end do
                         end do
@@ -970,12 +954,10 @@ contains
                             jc = ipp2-j
                             do k=1, l1
                                 do i=3, ido, 2
-                                    do m=1, mp
-                                        c1(m, i-1, k, j) = ch(m, i-1, k, j)+ch(m, i-1, k, jc)
-                                        c1(m, i-1, k, jc) = ch(m, i, k, j)-ch(m, i, k, jc)
-                                        c1(m, i, k, j) = ch(m, i, k, j)+ch(m, i, k, jc)
-                                        c1(m, i, k, jc) = ch(m, i-1, k, jc)-ch(m, i-1, k, j)
-                                    end do
+                                    c1(1: mp, i-1, k, j) = ch(1: mp, i-1, k, j)+ch(1: mp, i-1, k, jc)
+                                    c1(1: mp, i-1, k, jc) = ch(1: mp, i, k, j)-ch(1: mp, i, k, jc)
+                                    c1(1: mp, i, k, j) = ch(1: mp, i, k, j)+ch(1: mp, i, k, jc)
+                                    c1(1: mp, i, k, jc) = ch(1: mp, i-1, k, jc)-ch(1: mp, i-1, k, j)
                                 end do
                             end do
                         end do
@@ -983,33 +965,21 @@ contains
                         do j=2, ipph
                             jc = ipp2-j
                             do i=3, ido, 2
-                                do k=1, l1
-                                    do m=1, mp
-                                        c1(m, i-1, k, j) = ch(m, i-1, k, j)+ch(m, i-1, k, jc)
-                                        c1(m, i-1, k, jc) = ch(m, i, k, j)-ch(m, i, k, jc)
-                                        c1(m, i, k, j) = ch(m, i, k, j)+ch(m, i, k, jc)
-                                        c1(m, i, k, jc) = ch(m, i-1, k, jc)-ch(m, i-1, k, j)
-                                    end do
-                                end do
+                                c1(1: mp, i-1, 1: l1, j) = ch(1: mp, i-1, 1: l1, j)+ch(1: mp, i-1, 1: l1, jc)
+                                c1(1: mp, i-1, 1: l1, jc) = ch(1: mp, i, 1: l1, j)-ch(1: mp, i, 1: l1, jc)
+                                c1(1: mp, i, 1: l1, j) = ch(1: mp, i, 1: l1, j)+ch(1: mp, i, 1: l1, jc)
+                                c1(1: mp, i, 1: l1, jc) = ch(1: mp, i-1, 1: l1, jc)-ch(1: mp, i-1, 1: l1, j)
                             end do
                         end do
                     end if
                 else
-                    do ik=1, idl1
-                        do m=1, mp
-                            c2(m, ik, 1) = ch2(m, ik, 1)
-                        end do
-                    end do
+                    c2(1: mp, 1: idl1, 1) = ch2(1: mp, 1: idl1, 1)
                 end if
 
                 do j=2, ipph
                     jc = ipp2-j
-                    do k=1, l1
-                        do m=1, mp
-                            c1(m, 1, k, j) = ch(m, 1, k, j)+ch(m, 1, k, jc)
-                            c1(m, 1, k, jc) = ch(m, 1, k, jc)-ch(m, 1, k, j)
-                        end do
-                    end do
+                    c1(1: mp, 1, 1: l1, j) = ch(1: mp, 1, 1: l1, j)+ch(1: mp, 1, 1: l1, jc)
+                    c1(1: mp, 1, 1: l1, jc) = ch(1: mp, 1, 1: l1, jc)-ch(1: mp, 1, 1: l1, j)
                 end do
 
                 ar1 = 1.0_wp
@@ -1019,12 +989,8 @@ contains
                     ar1h = dcp*ar1-dsp*ai1
                     ai1 = dcp*ai1+dsp*ar1
                     ar1 = ar1h
-                    do ik=1, idl1
-                        do m=1, mp
-                            ch2(m, ik, l) = c2(m, ik, 1)+ar1*c2(m, ik, 2)
-                            ch2(m, ik, lc) = ai1*c2(m, ik, iip)
-                        end do
-                    end do
+                    ch2(1: mp, 1: idl1, l) = c2(1: mp, 1: idl1, 1)+ar1*c2(1: mp, 1: idl1, 2)
+                    ch2(1: mp, 1: idl1, lc) = ai1*c2(1: mp, 1: idl1, iip)
                     dc2 = ar1
                     ds2 = ai1
                     ar2 = ar1
@@ -1034,50 +1000,28 @@ contains
                         ar2h = dc2*ar2-ds2*ai2
                         ai2 = dc2*ai2+ds2*ar2
                         ar2 = ar2h
-                        do ik=1, idl1
-                            do m=1, mp
-                                ch2(m, ik, l) = ch2(m, ik, l)+ar2*c2(m, ik, j)
-                                ch2(m, ik, lc) = ch2(m, ik, lc)+ai2*c2(m, ik, jc)
-                            end do
-                        end do
+                        ch2(1: mp, 1: idl1, l) = ch2(1: mp, 1: idl1, l)+ar2*c2(1: mp, 1: idl1, j)
+                        ch2(1: mp, 1: idl1, lc) = ch2(1: mp, 1: idl1, lc)+ai2*c2(1: mp, 1: idl1, jc)
                     end do
                 end do
 
                 do j=2, ipph
                     do ik=1, idl1
-                        do m=1, mp
-                            ch2(m, ik, 1) = ch2(m, ik, 1)+c2(m, ik, j)
-                        end do
+                        ch2(1: mp, ik, 1) = ch2(1: mp, ik, 1)+c2(1: mp, ik, j)
                     end do
                 end do
 
                 if (ido >= l1) then
-                    do k=1, l1
-                        do i=1, ido
-                            do m=1, mp
-                                cc(m, i, 1, k) = ch(m, i, k, 1)
-                            end do
-                        end do
-                    end do
+                    cc(1: mp, 1: ido, 1, 1: l1) = ch(1: mp, 1: ido, 1: l1, 1)
                 else
-                    do i=1, ido
-                        do k=1, l1
-                            do m=1, mp
-                                cc(m, i, 1, k) = ch(m, i, k, 1)
-                            end do
-                        end do
-                    end do
+                    cc(1: mp, 1: ido, 1, 1: l1) = ch(1: mp, 1: ido, 1: l1, 1)
                 end if
 
                 do j=2, ipph
                     jc = ipp2-j
                     j2 = 2*j
-                    do k=1, l1
-                        do m=1, mp
-                            cc(m, ido, j2-2, k) = ch(m, 1, k, j)
-                            cc(m, 1, j2-1, k) = ch(m, 1, k, jc)
-                        end do
-                    end do
+                    cc(1: mp, ido, j2-2, 1: l1) = ch(1: mp, 1, 1: l1, j)
+                    cc(1: mp, 1, j2-1, 1: l1) = ch(1: mp, 1, 1: l1, jc)
                 end do
 
                 if (ido == 1) then
@@ -1091,12 +1035,10 @@ contains
                         do k=1, l1
                             do i=3, ido, 2
                                 ic = idp2-i
-                                do m=1, mp
-                                    cc(m, i-1, j2-1, k) = ch(m, i-1, k, j)+ch(m, i-1, k, jc)                !
-                                    cc(m, ic-1, j2-2, k) = ch(m, i-1, k, j)-ch(m, i-1, k, jc)               !
-                                    cc(m, i, j2-1, k) = ch(m, i, k, j)+ch(m, i, k, jc)
-                                    cc(m, ic, j2-2, k) = ch(m, i, k, jc)-ch(m, i, k, j)
-                                end do
+                                cc(1: mp, i-1, j2-1, k) = ch(1: mp, i-1, k, j)+ch(1: mp, i-1, k, jc)                !
+                                cc(1: mp, ic-1, j2-2, k) = ch(1: mp, i-1, k, j)-ch(1: mp, i-1, k, jc)               !
+                                cc(1: mp, i, j2-1, k) = ch(1: mp, i, k, j)+ch(1: mp, i, k, jc)
+                                cc(1: mp, ic, j2-2, k) = ch(1: mp, i, k, jc)-ch(1: mp, i, k, j)
                             end do
                         end do
                     end do
@@ -1106,14 +1048,10 @@ contains
                         j2 = 2*j
                         do i=3, ido, 2
                             ic = idp2-i
-                            do k=1, l1
-                                do m=1, mp
-                                    cc(m, i-1, j2-1, k) = ch(m, i-1, k, j)+ch(m, i-1, k, jc)                !
-                                    cc(m, ic-1, j2-2, k) = ch(m, i-1, k, j)-ch(m, i-1, k, jc)               !
-                                    cc(m, i, j2-1, k) = ch(m, i, k, j)+ch(m, i, k, jc)
-                                    cc(m, ic, j2-2, k) = ch(m, i, k, jc)-ch(m, i, k, j)
-                                end do
-                            end do
+                            cc(1: mp, i-1, j2-1, 1: l1) = ch(1: mp, i-1, 1: l1, j)+ch(1: mp, i-1, 1: l1, jc)                !
+                            cc(1: mp, ic-1, j2-2, 1: l1) = ch(1: mp, i-1, 1: l1, j)-ch(1: mp, i-1, 1: l1, jc)               !
+                            cc(1: mp, i, j2-1, 1: l1) = ch(1: mp, i, 1: l1, j)+ch(1: mp, i, 1: l1, jc)
+                            cc(1: mp, ic, j2-2, 1: l1) = ch(1: mp, i, 1: l1, jc)-ch(1: mp, i, 1: l1, j)
                         end do
                     end do
                 end if
@@ -1258,21 +1196,19 @@ contains
             do k=1, l1
                 do i=3, ido, 2
                     ic = idp2-i
-                    do m=1, mp
-                        ch(m, i-1, k, 1) = &
-                            cc(m, i-1, 1, k)+cc(m, ic-1, 2, k)
+                    ch(1: mp, i-1, k, 1) = &
+                        cc(1: mp, i-1, 1, k)+cc(1: mp, ic-1, 2, k)
 
-                        ch(m, i, k, 1) = &
-                            cc(m, i, 1, k)-cc(m, ic, 2, k)
+                    ch(1: mp, i, k, 1) = &
+                        cc(1: mp, i, 1, k)-cc(1: mp, ic, 2, k)
 
-                        ch(m, i-1, k, 2) = &
-                            wa1(i-2)*(cc(m, i-1, 1, k)-cc(m, ic-1, 2, k)) &         !
-                            -wa1(i-1)*(cc(m, i, 1, k)+cc(m, ic, 2, k))
+                    ch(1: mp, i-1, k, 2) = &
+                        wa1(i-2)*(cc(1: mp, i-1, 1, k)-cc(1: mp, ic-1, 2, k)) &         !
+                        -wa1(i-1)*(cc(1: mp, i, 1, k)+cc(1: mp, ic, 2, k))
 
-                        ch(m, i, k, 2) = &
-                            wa1(i-2)*(cc(m, i, 1, k)+cc(m, ic, 2, k))+wa1(i-1) &      !
-                            *(cc(m, i-1, 1, k)-cc(m, ic-1, 2, k))
-                    end do
+                    ch(1: mp, i, k, 2) = &
+                        wa1(i-2)*(cc(1: mp, i, 1, k)+cc(1: mp, ic, 2, k))+wa1(i-1) &      !
+                        *(cc(1: mp, i-1, 1, k)-cc(1: mp, ic-1, 2, k))
                 end do
             end do
 
@@ -1308,21 +1244,16 @@ contains
         real (wp), parameter :: TAUI = sin(ARG)
         !----------------------------------------------------------------------
 
+        ch(1: mp, 1, 1: l1, 1) = &
+            cc(1: mp, 1, 1, 1: l1)+2.0_wp * cc(1: mp, ido, 2, 1: l1)
 
-        do k=1, l1
-            do m=1, mp
-                ch(m, 1, k, 1) = &
-                    cc(m, 1, 1, k)+2.0_wp * cc(m, ido, 2, k)
+        ch(1: mp, 1, 1: l1, 2) = &
+            cc(1: mp, 1, 1, 1: l1)+(2.0_wp * TAUR)*cc(1: mp, ido, 2, 1: l1) &
+            -(2.0_wp *TAUI)*cc(1: mp, 1, 3, 1: l1)
 
-                ch(m, 1, k, 2) = &
-                    cc(m, 1, 1, k)+(2.0_wp * TAUR)*cc(m, ido, 2, k) &
-                    -(2.0_wp *TAUI)*cc(m, 1, 3, k)
-
-                ch(m, 1, k, 3) = &
-                    cc(m, 1, 1, k)+(2.0_wp * TAUR)*cc(m, ido, 2, k) &
-                    +2.0_wp *TAUI*cc(m, 1, 3, k)
-            end do
-        end do
+        ch(1: mp, 1, 1: l1, 3) = &
+            cc(1: mp, 1, 1, 1: l1)+(2.0_wp * TAUR)*cc(1: mp, ido, 2, 1: l1) &
+            +2.0_wp *TAUI*cc(1: mp, 1, 3, 1: l1)
 
         if (ido == 1) return
 
@@ -1330,46 +1261,43 @@ contains
         do k=1, l1
             do i=3, ido, 2
                 ic = idp2-i
-                do m=1, mp
+                ch(1: mp, i-1, k, 1) = &
+                    cc(1: mp, i-1, 1, k)+(cc(1: mp, i-1, 3, k)+cc(1: mp, ic-1, 2, k))      !
 
-                    ch(m, i-1, k, 1) = &
-                        cc(m, i-1, 1, k)+(cc(m, i-1, 3, k)+cc(m, ic-1, 2, k))      !
+                ch(1: mp, i, k, 1) = &
+                    cc(1: mp, i, 1, k)+(cc(1: mp, i, 3, k)-cc(1: mp, ic, 2, k))              !
 
-                    ch(m, i, k, 1) = &
-                        cc(m, i, 1, k)+(cc(m, i, 3, k)-cc(m, ic, 2, k))              !
+                ch(1: mp, i-1, k, 2) = &
+                    wa1(i-2)* &
+                    ((cc(1: mp, i-1, 1, k)+TAUR*(cc(1: mp, i-1, 3, k)+cc(1: mp, ic-1, 2, k)))- &
+                    (TAUI*(cc(1: mp, i, 3, k)+cc(1: mp, ic, 2, k)))) &
+                    -wa1(i-1)* &
+                    ((cc(1: mp, i, 1, k)+TAUR*(cc(1: mp, i, 3, k)-cc(1: mp, ic, 2, k)))+ &
+                    (TAUI*(cc(1: mp, i-1, 3, k)-cc(1: mp, ic-1, 2, k))))
 
-                    ch(m, i-1, k, 2) = &
-                        wa1(i-2)* &
-                        ((cc(m, i-1, 1, k)+TAUR*(cc(m, i-1, 3, k)+cc(m, ic-1, 2, k)))- &
-                        (TAUI*(cc(m, i, 3, k)+cc(m, ic, 2, k)))) &
-                        -wa1(i-1)* &
-                        ((cc(m, i, 1, k)+TAUR*(cc(m, i, 3, k)-cc(m, ic, 2, k)))+ &
-                        (TAUI*(cc(m, i-1, 3, k)-cc(m, ic-1, 2, k))))
+                ch(1: mp, i, k, 2) = &
+                    wa1(i-2)* &
+                    ((cc(1: mp, i, 1, k)+TAUR*(cc(1: mp, i, 3, k)-cc(1: mp, ic, 2, k)))+ &
+                    (TAUI*(cc(1: mp, i-1, 3, k)-cc(1: mp, ic-1, 2, k)))) &
+                    +wa1(i-1)* &
+                    ((cc(1: mp, i-1, 1, k)+TAUR*(cc(1: mp, i-1, 3, k)+cc(1: mp, ic-1, 2, k)))- &
+                    (TAUI*(cc(1: mp, i, 3, k)+cc(1: mp, ic, 2, k))))
 
-                    ch(m, i, k, 2) = &
-                        wa1(i-2)* &
-                        ((cc(m, i, 1, k)+TAUR*(cc(m, i, 3, k)-cc(m, ic, 2, k)))+ &
-                        (TAUI*(cc(m, i-1, 3, k)-cc(m, ic-1, 2, k)))) &
-                        +wa1(i-1)* &
-                        ((cc(m, i-1, 1, k)+TAUR*(cc(m, i-1, 3, k)+cc(m, ic-1, 2, k)))- &
-                        (TAUI*(cc(m, i, 3, k)+cc(m, ic, 2, k))))
+                ch(1: mp, i-1, k, 3) = &
+                    wa2(i-2)* &
+                    ((cc(1: mp, i-1, 1, k)+TAUR*(cc(1: mp, i-1, 3, k)+cc(1: mp, ic-1, 2, k)))+ &
+                    (TAUI*(cc(1: mp, i, 3, k)+cc(1: mp, ic, 2, k)))) &
+                    -wa2(i-1)* &
+                    ((cc(1: mp, i, 1, k)+TAUR*(cc(1: mp, i, 3, k)-cc(1: mp, ic, 2, k)))- &
+                    (TAUI*(cc(1: mp, i-1, 3, k)-cc(1: mp, ic-1, 2, k))))
 
-                    ch(m, i-1, k, 3) = &
-                        wa2(i-2)* &
-                        ((cc(m, i-1, 1, k)+TAUR*(cc(m, i-1, 3, k)+cc(m, ic-1, 2, k)))+ &
-                        (TAUI*(cc(m, i, 3, k)+cc(m, ic, 2, k)))) &
-                        -wa2(i-1)* &
-                        ((cc(m, i, 1, k)+TAUR*(cc(m, i, 3, k)-cc(m, ic, 2, k)))- &
-                        (TAUI*(cc(m, i-1, 3, k)-cc(m, ic-1, 2, k))))
-
-                    ch(m, i, k, 3) = &
-                        wa2(i-2)* &
-                        ((cc(m, i, 1, k)+TAUR*(cc(m, i, 3, k)-cc(m, ic, 2, k)))- &
-                        (TAUI*(cc(m, i-1, 3, k)-cc(m, ic-1, 2, k)))) &
-                        +wa2(i-1)* &
-                        ((cc(m, i-1, 1, k)+TAUR*(cc(m, i-1, 3, k)+cc(m, ic-1, 2, k)))+ &
-                        (TAUI*(cc(m, i, 3, k)+cc(m, ic, 2, k))))
-                end do
+                ch(1: mp, i, k, 3) = &
+                    wa2(i-2)* &
+                    ((cc(1: mp, i, 1, k)+TAUR*(cc(1: mp, i, 3, k)-cc(1: mp, ic, 2, k)))- &
+                    (TAUI*(cc(1: mp, i-1, 3, k)-cc(1: mp, ic-1, 2, k)))) &
+                    +wa2(i-1)* &
+                    ((cc(1: mp, i-1, 1, k)+TAUR*(cc(1: mp, i-1, 3, k)+cc(1: mp, ic-1, 2, k)))+ &
+                    (TAUI*(cc(1: mp, i, 3, k)+cc(1: mp, ic, 2, k))))
             end do
         end do
 
@@ -1397,18 +1325,14 @@ contains
         real (wp), parameter :: SQRT2 = sqrt(2.0_wp)
         !----------------------------------------------------------------------
 
-        do k=1, l1
-            do m=1, mp
-                ch(m, 1, k, 3) = (cc(m, 1, 1, k)+cc(m, ido, 4, k)) &
-                    -(cc(m, ido, 2, k)+cc(m, ido, 2, k))
-                ch(m, 1, k, 1) = (cc(m, 1, 1, k)+cc(m, ido, 4, k)) &
-                    +(cc(m, ido, 2, k)+cc(m, ido, 2, k))
-                ch(m, 1, k, 4) = (cc(m, 1, 1, k)-cc(m, ido, 4, k)) &
-                    +(cc(m, 1, 3, k)+cc(m, 1, 3, k))
-                ch(m, 1, k, 2) = (cc(m, 1, 1, k)-cc(m, ido, 4, k)) &
-                    -(cc(m, 1, 3, k)+cc(m, 1, 3, k))
-            end do
-        end do
+        ch(1: mp, 1, 1: l1, 3) = (cc(1: mp, 1, 1, 1: l1)+cc(1: mp, ido, 4, 1: l1)) &
+            -(cc(1: mp, ido, 2, 1: l1)+cc(1: mp, ido, 2, 1: l1))
+        ch(1: mp, 1, 1: l1, 1) = (cc(1: mp, 1, 1, 1: l1)+cc(1: mp, ido, 4, 1: l1)) &
+            +(cc(1: mp, ido, 2, 1: l1)+cc(1: mp, ido, 2, 1: l1))
+        ch(1: mp, 1, 1: l1, 4) = (cc(1: mp, 1, 1, 1: l1)-cc(1: mp, ido, 4, 1: l1)) &
+            +(cc(1: mp, 1, 3, 1: l1)+cc(1: mp, 1, 3, 1: l1))
+        ch(1: mp, 1, 1: l1, 2) = (cc(1: mp, 1, 1, 1: l1)-cc(1: mp, ido, 4, 1: l1)) &
+            -(cc(1: mp, 1, 3, 1: l1)+cc(1: mp, 1, 3, 1: l1))
 
         if (ido < 2) then
             return
@@ -1417,46 +1341,44 @@ contains
             do k=1, l1
                 do i=3, ido, 2
                     ic = idp2-i
-                    do m=1, mp
-                        ch(m, i-1, k, 1) = &
-                            (cc(m, i-1, 1, k)+cc(m, ic-1, 4, k)) &
-                            +(cc(m, i-1, 3, k)+cc(m, ic-1, 2, k))
+                    ch(1: mp, i-1, k, 1) = &
+                        (cc(1: mp, i-1, 1, k)+cc(1: mp, ic-1, 4, k)) &
+                        +(cc(1: mp, i-1, 3, k)+cc(1: mp, ic-1, 2, k))
 
-                        ch(m, i, k, 1) = &
-                            (cc(m, i, 1, k)-cc(m, ic, 4, k)) &
-                            +(cc(m, i, 3, k)-cc(m, ic, 2, k))
+                    ch(1: mp, i, k, 1) = &
+                        (cc(1: mp, i, 1, k)-cc(1: mp, ic, 4, k)) &
+                        +(cc(1: mp, i, 3, k)-cc(1: mp, ic, 2, k))
 
-                        ch(m, i-1, k, 2) = &
-                            wa1(i-2)*((cc(m, i-1, 1, k)-cc(m, ic-1, 4, k)) &          !
-                            -(cc(m, i, 3, k)+cc(m, ic, 2, k)))-wa1(i-1) &
-                            *((cc(m, i, 1, k)+cc(m, ic, 4, k))+(cc(m, i-1, 3, k)-cc(m, ic-1, 2, k)))      !
+                    ch(1: mp, i-1, k, 2) = &
+                        wa1(i-2)*((cc(1: mp, i-1, 1, k)-cc(1: mp, ic-1, 4, k)) &          !
+                        -(cc(1: mp, i, 3, k)+cc(1: mp, ic, 2, k)))-wa1(i-1) &
+                        *((cc(1: mp, i, 1, k)+cc(1: mp, ic, 4, k))+(cc(1: mp, i-1, 3, k)-cc(1: mp, ic-1, 2, k)))      !
 
-                        ch(m, i, k, 2)= &
-                            wa1(i-2)*((cc(m, i, 1, k)+cc(m, ic, 4, k)) &
-                            +(cc(m, i-1, 3, k)-cc(m, ic-1, 2, k)))+wa1(i-1) &
-                            *((cc(m, i-1, 1, k)-cc(m, ic-1, 4, k))-(cc(m, i, 3, k)+cc(m, ic, 2, k)))      !
+                    ch(1: mp, i, k, 2)= &
+                        wa1(i-2)*((cc(1: mp, i, 1, k)+cc(1: mp, ic, 4, k)) &
+                        +(cc(1: mp, i-1, 3, k)-cc(1: mp, ic-1, 2, k)))+wa1(i-1) &
+                        *((cc(1: mp, i-1, 1, k)-cc(1: mp, ic-1, 4, k))-(cc(1: mp, i, 3, k)+cc(1: mp, ic, 2, k)))      !
 
-                        ch(m, i-1, k, 3) = &
-                            wa2(i-2)*((cc(m, i-1, 1, k)+cc(m, ic-1, 4, k)) &          !
-                            -(cc(m, i-1, 3, k)+cc(m, ic-1, 2, k)))-wa2(i-1) &
-                            *((cc(m, i, 1, k)-cc(m, ic, 4, k))-(cc(m, i, 3, k)-cc(m, ic, 2, k)))          !
+                    ch(1: mp, i-1, k, 3) = &
+                        wa2(i-2)*((cc(1: mp, i-1, 1, k)+cc(1: mp, ic-1, 4, k)) &          !
+                        -(cc(1: mp, i-1, 3, k)+cc(1: mp, ic-1, 2, k)))-wa2(i-1) &
+                        *((cc(1: mp, i, 1, k)-cc(1: mp, ic, 4, k))-(cc(1: mp, i, 3, k)-cc(1: mp, ic, 2, k)))          !
 
-                        ch(m, i, k, 3) = &
-                            wa2(i-2)*((cc(m, i, 1, k)-cc(m, ic, 4, k)) &
-                            -(cc(m, i, 3, k)-cc(m, ic, 2, k)))+wa2(i-1) &
-                            *((cc(m, i-1, 1, k)+cc(m, ic-1, 4, k))-(cc(m, i-1, 3, k) &
-                            +cc(m, ic-1, 2, k)))
+                    ch(1: mp, i, k, 3) = &
+                        wa2(i-2)*((cc(1: mp, i, 1, k)-cc(1: mp, ic, 4, k)) &
+                        -(cc(1: mp, i, 3, k)-cc(1: mp, ic, 2, k)))+wa2(i-1) &
+                        *((cc(1: mp, i-1, 1, k)+cc(1: mp, ic-1, 4, k))-(cc(1: mp, i-1, 3, k) &
+                        +cc(1: mp, ic-1, 2, k)))
 
-                        ch(m, i-1, k, 4) = &
-                            wa3(i-2)*((cc(m, i-1, 1, k)-cc(m, ic-1, 4, k)) &          !
-                            +(cc(m, i, 3, k)+cc(m, ic, 2, k)))-wa3(i-1) &
-                            *((cc(m, i, 1, k)+cc(m, ic, 4, k))-(cc(m, i-1, 3, k)-cc(m, ic-1, 2, k)))       !
+                    ch(1: mp, i-1, k, 4) = &
+                        wa3(i-2)*((cc(1: mp, i-1, 1, k)-cc(1: mp, ic-1, 4, k)) &          !
+                        +(cc(1: mp, i, 3, k)+cc(1: mp, ic, 2, k)))-wa3(i-1) &
+                        *((cc(1: mp, i, 1, k)+cc(1: mp, ic, 4, k))-(cc(1: mp, i-1, 3, k)-cc(1: mp, ic-1, 2, k)))       !
 
-                        ch(m, i, k, 4) = &
-                            wa3(i-2)*((cc(m, i, 1, k)+cc(m, ic, 4, k)) &
-                            -(cc(m, i-1, 3, k)-cc(m, ic-1, 2, k)))+wa3(i-1) &
-                            *((cc(m, i-1, 1, k)-cc(m, ic-1, 4, k))+(cc(m, i, 3, k)+cc(m, ic, 2, k)))      !
-                    end do
+                    ch(1: mp, i, k, 4) = &
+                        wa3(i-2)*((cc(1: mp, i, 1, k)+cc(1: mp, ic, 4, k)) &
+                        -(cc(1: mp, i-1, 3, k)-cc(1: mp, ic-1, 2, k)))+wa3(i-1) &
+                        *((cc(1: mp, i-1, 1, k)-cc(1: mp, ic-1, 4, k))+(cc(1: mp, i, 3, k)+cc(1: mp, ic, 2, k)))      !
                 end do
             end do
 
@@ -1464,25 +1386,21 @@ contains
 
         end if
 
-        do k=1, l1
-            do m=1, mp
-                ch(m, ido, k, 1) = &
-                    (cc(m, ido, 1, k)+cc(m, ido, 3, k)) &
-                    +(cc(m, ido, 1, k)+cc(m, ido, 3, k))
+        ch(1: mp, ido, 1: l1, 1) = &
+            (cc(1: mp, ido, 1, 1: l1)+cc(1: mp, ido, 3, 1: l1)) &
+            +(cc(1: mp, ido, 1, 1: l1)+cc(1: mp, ido, 3, 1: l1))
 
-                ch(m, ido, k, 2) = &
-                    SQRT2*((cc(m, ido, 1, k)-cc(m, ido, 3, k)) &               !
-                    -(cc(m, 1, 2, k)+cc(m, 1, 4, k)))
+        ch(1: mp, ido, 1: l1, 2) = &
+            SQRT2*((cc(1: mp, ido, 1, 1: l1)-cc(1: mp, ido, 3, 1: l1)) &
+            -(cc(1: mp, 1, 2, 1: l1)+cc(1: mp, 1, 4, 1: l1)))
 
-                ch(m, ido, k, 3) = &
-                    (cc(m, 1, 4, k)-cc(m, 1, 2, k)) &
-                    +(cc(m, 1, 4, k)-cc(m, 1, 2, k))
+        ch(1: mp, ido, 1: l1, 3) = &
+            (cc(1: mp, 1, 4, 1: l1)-cc(1: mp, 1, 2, 1: l1)) &
+            +(cc(1: mp, 1, 4, 1: l1)-cc(1: mp, 1, 2, 1: l1))
 
-                ch(m, ido, k, 4) = &
-                    -SQRT2*((cc(m, ido, 1, k)-cc(m, ido, 3, k)) &              !
-                    +(cc(m, 1, 2, k)+cc(m, 1, 4, k)))
-            end do
-        end do
+        ch(1: mp, ido, 1: l1, 4) = &
+            -SQRT2*((cc(1: mp, ido, 1, 1: l1)-cc(1: mp, ido, 3, 1: l1)) &
+            +(cc(1: mp, 1, 2, 1: l1)+cc(1: mp, 1, 4, 1: l1)))
 
     end subroutine hradb4
 
@@ -1515,30 +1433,28 @@ contains
         !----------------------------------------------------------------------
 
         do k=1, l1
-            do m=1, mp
-                ch(m, 1, k, 1) = &
-                    cc(m, 1, 1, k)+2.0_wp *cc(m, ido, 2, k)+2.0_wp *cc(m, ido, 4, k)          !
+            ch(1: mp, 1, k, 1) = &
+                cc(1: mp, 1, 1, k)+2.0_wp *cc(1: mp, ido, 2, k)+2.0_wp *cc(1: mp, ido, 4, k)          !
 
-                ch(m, 1, k, 2) = &
-                    (cc(m, 1, 1, k)+TR11*2.0_wp *cc(m, ido, 2, k) &
-                    +TR12*2.0_wp *cc(m, ido, 4, k))-(TI11*2.0_wp *cc(m, 1, 3, k) &
-                    +TI12*2.0_wp *cc(m, 1, 5, k))
+            ch(1: mp, 1, k, 2) = &
+                (cc(1: mp, 1, 1, k)+TR11*2.0_wp *cc(1: mp, ido, 2, k) &
+                +TR12*2.0_wp *cc(1: mp, ido, 4, k))-(TI11*2.0_wp *cc(1: mp, 1, 3, k) &
+                +TI12*2.0_wp *cc(1: mp, 1, 5, k))
 
-                ch(m, 1, k, 3) = &
-                    (cc(m, 1, 1, k)+TR12*2.0_wp *cc(m, ido, 2, k) &
-                    +TR11*2.0_wp *cc(m, ido, 4, k))-(TI12*2.0_wp *cc(m, 1, 3, k) &
-                    -TI11*2.0_wp *cc(m, 1, 5, k))
+            ch(1: mp, 1, k, 3) = &
+                (cc(1: mp, 1, 1, k)+TR12*2.0_wp *cc(1: mp, ido, 2, k) &
+                +TR11*2.0_wp *cc(1: mp, ido, 4, k))-(TI12*2.0_wp *cc(1: mp, 1, 3, k) &
+                -TI11*2.0_wp *cc(1: mp, 1, 5, k))
 
-                ch(m, 1, k, 4) = &
-                    (cc(m, 1, 1, k)+TR12*2.0_wp *cc(m, ido, 2, k) &
-                    +TR11*2.0_wp *cc(m, ido, 4, k))+(TI12*2.0_wp *cc(m, 1, 3, k) &
-                    -TI11*2.0_wp *cc(m, 1, 5, k))
+            ch(1: mp, 1, k, 4) = &
+                (cc(1: mp, 1, 1, k)+TR12*2.0_wp *cc(1: mp, ido, 2, k) &
+                +TR11*2.0_wp *cc(1: mp, ido, 4, k))+(TI12*2.0_wp *cc(1: mp, 1, 3, k) &
+                -TI11*2.0_wp *cc(1: mp, 1, 5, k))
 
-                ch(m, 1, k, 5) = &
-                    (cc(m, 1, 1, k)+TR11*2.0_wp *cc(m, ido, 2, k) &
-                    +TR12*2.0_wp *cc(m, ido, 4, k))+(TI11*2.0_wp *cc(m, 1, 3, k) &
-                    +TI12*2.0_wp *cc(m, 1, 5, k))
-            end do
+            ch(1: mp, 1, k, 5) = &
+                (cc(1: mp, 1, 1, k)+TR11*2.0_wp *cc(1: mp, ido, 2, k) &
+                +TR12*2.0_wp *cc(1: mp, ido, 4, k))+(TI11*2.0_wp *cc(1: mp, 1, 3, k) &
+                +TI12*2.0_wp *cc(1: mp, 1, 5, k))
         end do
 
         if (ido == 1) return
@@ -1547,99 +1463,96 @@ contains
         do k=1, l1
             do i=3, ido, 2
                 ic = idp2-i
-                do m=1, mp
+                ch(1: mp, i-1, k, 1) = &
+                    cc(1: mp, i-1, 1, k)+(cc(1: mp, i-1, 3, k)+cc(1: mp, ic-1, 2, k)) &    !
+                    +(cc(1: mp, i-1, 5, k)+cc(1: mp, ic-1, 4, k))
 
-                    ch(m, i-1, k, 1) = &
-                        cc(m, i-1, 1, k)+(cc(m, i-1, 3, k)+cc(m, ic-1, 2, k)) &    !
-                        +(cc(m, i-1, 5, k)+cc(m, ic-1, 4, k))
+                ch(1: mp, i, k, 1) = &
+                    cc(1: mp, i, 1, k)+(cc(1: mp, i, 3, k)-cc(1: mp, ic, 2, k)) &            !
+                    +(cc(1: mp, i, 5, k)-cc(1: mp, ic, 4, k))
 
-                    ch(m, i, k, 1) = &
-                        cc(m, i, 1, k)+(cc(m, i, 3, k)-cc(m, ic, 2, k)) &            !
-                        +(cc(m, i, 5, k)-cc(m, ic, 4, k))
+                ch(1: mp, i-1, k, 2) = &
+                    wa1(i-2)*((cc(1: mp, i-1, 1, k)+TR11* &
+                    (cc(1: mp, i-1, 3, k)+cc(1: mp, ic-1, 2, k))+TR12 &
+                    *(cc(1: mp, i-1, 5, k)+cc(1: mp, ic-1, 4, k)))-(TI11*(cc(1: mp, i, 3, k) &             !
+                    +cc(1: mp, ic, 2, k))+TI12*(cc(1: mp, i, 5, k)+cc(1: mp, ic, 4, k)))) &
+                    -wa1(i-1)*((cc(1: mp, i, 1, k)+TR11*(cc(1: mp, i, 3, k)-cc(1: mp, ic, 2, k)) &         !
+                    +TR12*(cc(1: mp, i, 5, k)-cc(1: mp, ic, 4, k)))+(TI11*(cc(1: mp, i-1, 3, k) &          !
+                    -cc(1: mp, ic-1, 2, k))+TI12*(cc(1: mp, i-1, 5, k)-cc(1: mp, ic-1, 4, k))))            !
 
-                    ch(m, i-1, k, 2) = &
-                        wa1(i-2)*((cc(m, i-1, 1, k)+TR11* &
-                        (cc(m, i-1, 3, k)+cc(m, ic-1, 2, k))+TR12 &
-                        *(cc(m, i-1, 5, k)+cc(m, ic-1, 4, k)))-(TI11*(cc(m, i, 3, k) &             !
-                        +cc(m, ic, 2, k))+TI12*(cc(m, i, 5, k)+cc(m, ic, 4, k)))) &
-                        -wa1(i-1)*((cc(m, i, 1, k)+TR11*(cc(m, i, 3, k)-cc(m, ic, 2, k)) &         !
-                        +TR12*(cc(m, i, 5, k)-cc(m, ic, 4, k)))+(TI11*(cc(m, i-1, 3, k) &          !
-                        -cc(m, ic-1, 2, k))+TI12*(cc(m, i-1, 5, k)-cc(m, ic-1, 4, k))))            !
+                ch(1: mp, i, k, 2) = &
+                    wa1(i-2)*((cc(1: mp, i, 1, k)+TR11*(cc(1: mp, i, 3, k) &          !
+                    -cc(1: mp, ic, 2, k))+TR12*(cc(1: mp, i, 5, k)-cc(1: mp, ic, 4, k))) &
+                    +(TI11*(cc(1: mp, i-1, 3, k)-cc(1: mp, ic-1, 2, k))+TI12 &
+                    *(cc(1: mp, i-1, 5, k)-cc(1: mp, ic-1, 4, k))))+wa1(i-1) &
+                    *((cc(1: mp, i-1, 1, k)+TR11*(cc(1: mp, i-1, 3, k) &
+                    +cc(1: mp, ic-1, 2, k))+TR12*(cc(1: mp, i-1, 5, k)+cc(1: mp, ic-1, 4, k))) &           !
+                    -(TI11*(cc(1: mp, i, 3, k)+cc(1: mp, ic, 2, k))+TI12 &
+                    *(cc(1: mp, i, 5, k)+cc(1: mp, ic, 4, k))))
 
-                    ch(m, i, k, 2) = &
-                        wa1(i-2)*((cc(m, i, 1, k)+TR11*(cc(m, i, 3, k) &          !
-                        -cc(m, ic, 2, k))+TR12*(cc(m, i, 5, k)-cc(m, ic, 4, k))) &
-                        +(TI11*(cc(m, i-1, 3, k)-cc(m, ic-1, 2, k))+TI12 &
-                        *(cc(m, i-1, 5, k)-cc(m, ic-1, 4, k))))+wa1(i-1) &
-                        *((cc(m, i-1, 1, k)+TR11*(cc(m, i-1, 3, k) &
-                        +cc(m, ic-1, 2, k))+TR12*(cc(m, i-1, 5, k)+cc(m, ic-1, 4, k))) &           !
-                        -(TI11*(cc(m, i, 3, k)+cc(m, ic, 2, k))+TI12 &
-                        *(cc(m, i, 5, k)+cc(m, ic, 4, k))))
+                ch(1: mp, i-1, k, 3) = &
+                    wa2(i-2) &
+                    *((cc(1: mp, i-1, 1, k)+TR12*(cc(1: mp, i-1, 3, k)+cc(1: mp, ic-1, 2, k)) &            !
+                    +TR11*(cc(1: mp, i-1, 5, k)+cc(1: mp, ic-1, 4, k)))-(TI12*(cc(1: mp, i, 3, k) &        !
+                    +cc(1: mp, ic, 2, k))-TI11*(cc(1: mp, i, 5, k)+cc(1: mp, ic, 4, k)))) &
+                    -wa2(i-1) &
+                    *((cc(1: mp, i, 1, k)+TR12*(cc(1: mp, i, 3, k)- &
+                    cc(1: mp, ic, 2, k))+TR11*(cc(1: mp, i, 5, k)-cc(1: mp, ic, 4, k))) &
+                    +(TI12*(cc(1: mp, i-1, 3, k)-cc(1: mp, ic-1, 2, k))-TI11 &
+                    *(cc(1: mp, i-1, 5, k)-cc(1: mp, ic-1, 4, k))))
 
-                    ch(m, i-1, k, 3) = &
-                        wa2(i-2) &
-                        *((cc(m, i-1, 1, k)+TR12*(cc(m, i-1, 3, k)+cc(m, ic-1, 2, k)) &            !
-                        +TR11*(cc(m, i-1, 5, k)+cc(m, ic-1, 4, k)))-(TI12*(cc(m, i, 3, k) &        !
-                        +cc(m, ic, 2, k))-TI11*(cc(m, i, 5, k)+cc(m, ic, 4, k)))) &
-                        -wa2(i-1) &
-                        *((cc(m, i, 1, k)+TR12*(cc(m, i, 3, k)- &
-                        cc(m, ic, 2, k))+TR11*(cc(m, i, 5, k)-cc(m, ic, 4, k))) &
-                        +(TI12*(cc(m, i-1, 3, k)-cc(m, ic-1, 2, k))-TI11 &
-                        *(cc(m, i-1, 5, k)-cc(m, ic-1, 4, k))))
+                ch(1: mp, i, k, 3) = &
+                    wa2(i-2) &
+                    *((cc(1: mp, i, 1, k)+TR12*(cc(1: mp, i, 3, k)- &
+                    cc(1: mp, ic, 2, k))+TR11*(cc(1: mp, i, 5, k)-cc(1: mp, ic, 4, k))) &
+                    +(TI12*(cc(1: mp, i-1, 3, k)-cc(1: mp, ic-1, 2, k))-TI11 &
+                    *(cc(1: mp, i-1, 5, k)-cc(1: mp, ic-1, 4, k)))) &
+                    +wa2(i-1) &
+                    *((cc(1: mp, i-1, 1, k)+TR12*(cc(1: mp, i-1, 3, k)+cc(1: mp, ic-1, 2, k)) &            !
+                    +TR11*(cc(1: mp, i-1, 5, k)+cc(1: mp, ic-1, 4, k)))-(TI12*(cc(1: mp, i, 3, k) &        !
+                    +cc(1: mp, ic, 2, k))-TI11*(cc(1: mp, i, 5, k)+cc(1: mp, ic, 4, k))))
 
-                    ch(m, i, k, 3) = &
-                        wa2(i-2) &
-                        *((cc(m, i, 1, k)+TR12*(cc(m, i, 3, k)- &
-                        cc(m, ic, 2, k))+TR11*(cc(m, i, 5, k)-cc(m, ic, 4, k))) &
-                        +(TI12*(cc(m, i-1, 3, k)-cc(m, ic-1, 2, k))-TI11 &
-                        *(cc(m, i-1, 5, k)-cc(m, ic-1, 4, k)))) &
-                        +wa2(i-1) &
-                        *((cc(m, i-1, 1, k)+TR12*(cc(m, i-1, 3, k)+cc(m, ic-1, 2, k)) &            !
-                        +TR11*(cc(m, i-1, 5, k)+cc(m, ic-1, 4, k)))-(TI12*(cc(m, i, 3, k) &        !
-                        +cc(m, ic, 2, k))-TI11*(cc(m, i, 5, k)+cc(m, ic, 4, k))))
+                ch(1: mp, i-1, k, 4) = &
+                    wa3(i-2) &
+                    *((cc(1: mp, i-1, 1, k)+TR12*(cc(1: mp, i-1, 3, k)+cc(1: mp, ic-1, 2, k)) &            !
+                    +TR11*(cc(1: mp, i-1, 5, k)+cc(1: mp, ic-1, 4, k)))+(TI12*(cc(1: mp, i, 3, k) &        !
+                    +cc(1: mp, ic, 2, k))-TI11*(cc(1: mp, i, 5, k)+cc(1: mp, ic, 4, k)))) &
+                    -wa3(i-1) &
+                    *((cc(1: mp, i, 1, k)+TR12*(cc(1: mp, i, 3, k)- &
+                    cc(1: mp, ic, 2, k))+TR11*(cc(1: mp, i, 5, k)-cc(1: mp, ic, 4, k))) &
+                    -(TI12*(cc(1: mp, i-1, 3, k)-cc(1: mp, ic-1, 2, k))-TI11 &
+                    *(cc(1: mp, i-1, 5, k)-cc(1: mp, ic-1, 4, k))))
 
-                    ch(m, i-1, k, 4) = &
-                        wa3(i-2) &
-                        *((cc(m, i-1, 1, k)+TR12*(cc(m, i-1, 3, k)+cc(m, ic-1, 2, k)) &            !
-                        +TR11*(cc(m, i-1, 5, k)+cc(m, ic-1, 4, k)))+(TI12*(cc(m, i, 3, k) &        !
-                        +cc(m, ic, 2, k))-TI11*(cc(m, i, 5, k)+cc(m, ic, 4, k)))) &
-                        -wa3(i-1) &
-                        *((cc(m, i, 1, k)+TR12*(cc(m, i, 3, k)- &
-                        cc(m, ic, 2, k))+TR11*(cc(m, i, 5, k)-cc(m, ic, 4, k))) &
-                        -(TI12*(cc(m, i-1, 3, k)-cc(m, ic-1, 2, k))-TI11 &
-                        *(cc(m, i-1, 5, k)-cc(m, ic-1, 4, k))))
+                ch(1: mp, i, k, 4) = &
+                    wa3(i-2) &
+                    *((cc(1: mp, i, 1, k)+TR12*(cc(1: mp, i, 3, k)- &
+                    cc(1: mp, ic, 2, k))+TR11*(cc(1: mp, i, 5, k)-cc(1: mp, ic, 4, k))) &
+                    -(TI12*(cc(1: mp, i-1, 3, k)-cc(1: mp, ic-1, 2, k))-TI11 &
+                    *(cc(1: mp, i-1, 5, k)-cc(1: mp, ic-1, 4, k)))) &
+                    +wa3(i-1) &
+                    *((cc(1: mp, i-1, 1, k)+TR12*(cc(1: mp, i-1, 3, k)+cc(1: mp, ic-1, 2, k)) &            !
+                    +TR11*(cc(1: mp, i-1, 5, k)+cc(1: mp, ic-1, 4, k)))+(TI12*(cc(1: mp, i, 3, k) &        !
+                    +cc(1: mp, ic, 2, k))-TI11*(cc(1: mp, i, 5, k)+cc(1: mp, ic, 4, k))))
 
-                    ch(m, i, k, 4) = &
-                        wa3(i-2) &
-                        *((cc(m, i, 1, k)+TR12*(cc(m, i, 3, k)- &
-                        cc(m, ic, 2, k))+TR11*(cc(m, i, 5, k)-cc(m, ic, 4, k))) &
-                        -(TI12*(cc(m, i-1, 3, k)-cc(m, ic-1, 2, k))-TI11 &
-                        *(cc(m, i-1, 5, k)-cc(m, ic-1, 4, k)))) &
-                        +wa3(i-1) &
-                        *((cc(m, i-1, 1, k)+TR12*(cc(m, i-1, 3, k)+cc(m, ic-1, 2, k)) &            !
-                        +TR11*(cc(m, i-1, 5, k)+cc(m, ic-1, 4, k)))+(TI12*(cc(m, i, 3, k) &        !
-                        +cc(m, ic, 2, k))-TI11*(cc(m, i, 5, k)+cc(m, ic, 4, k))))
+                ch(1: mp, i-1, k, 5) = &
+                    wa4(i-2) &
+                    *((cc(1: mp, i-1, 1, k)+TR11*(cc(1: mp, i-1, 3, k)+cc(1: mp, ic-1, 2, k)) &            !
+                    +TR12*(cc(1: mp, i-1, 5, k)+cc(1: mp, ic-1, 4, k)))+(TI11*(cc(1: mp, i, 3, k) &        !
+                    +cc(1: mp, ic, 2, k))+TI12*(cc(1: mp, i, 5, k)+cc(1: mp, ic, 4, k)))) &
+                    -wa4(i-1) &
+                    *((cc(1: mp, i, 1, k)+TR11*(cc(1: mp, i, 3, k)-cc(1: mp, ic, 2, k)) &
+                    +TR12*(cc(1: mp, i, 5, k)-cc(1: mp, ic, 4, k)))-(TI11*(cc(1: mp, i-1, 3, k) &          !
+                    -cc(1: mp, ic-1, 2, k))+TI12*(cc(1: mp, i-1, 5, k)-cc(1: mp, ic-1, 4, k))))            !
 
-                    ch(m, i-1, k, 5) = &
-                        wa4(i-2) &
-                        *((cc(m, i-1, 1, k)+TR11*(cc(m, i-1, 3, k)+cc(m, ic-1, 2, k)) &            !
-                        +TR12*(cc(m, i-1, 5, k)+cc(m, ic-1, 4, k)))+(TI11*(cc(m, i, 3, k) &        !
-                        +cc(m, ic, 2, k))+TI12*(cc(m, i, 5, k)+cc(m, ic, 4, k)))) &
-                        -wa4(i-1) &
-                        *((cc(m, i, 1, k)+TR11*(cc(m, i, 3, k)-cc(m, ic, 2, k)) &
-                        +TR12*(cc(m, i, 5, k)-cc(m, ic, 4, k)))-(TI11*(cc(m, i-1, 3, k) &          !
-                        -cc(m, ic-1, 2, k))+TI12*(cc(m, i-1, 5, k)-cc(m, ic-1, 4, k))))            !
-
-                    ch(m, i, k, 5) = &
-                        wa4(i-2) &
-                        *((cc(m, i, 1, k)+TR11*(cc(m, i, 3, k)-cc(m, ic, 2, k)) &
-                        +TR12*(cc(m, i, 5, k)-cc(m, ic, 4, k)))-(TI11*(cc(m, i-1, 3, k) &          !
-                        -cc(m, ic-1, 2, k))+TI12*(cc(m, i-1, 5, k)-cc(m, ic-1, 4, k)))) &          !
-                        +wa4(i-1) &
-                        *((cc(m, i-1, 1, k)+TR11*(cc(m, i-1, 3, k)+cc(m, ic-1, 2, k)) &            !
-                        +TR12*(cc(m, i-1, 5, k)+cc(m, ic-1, 4, k)))+(TI11*(cc(m, i, 3, k) &        !
-                        +cc(m, ic, 2, k))+TI12*(cc(m, i, 5, k)+cc(m, ic, 4, k))))
-                end do
+                ch(1: mp, i, k, 5) = &
+                    wa4(i-2) &
+                    *((cc(1: mp, i, 1, k)+TR11*(cc(1: mp, i, 3, k)-cc(1: mp, ic, 2, k)) &
+                    +TR12*(cc(1: mp, i, 5, k)-cc(1: mp, ic, 4, k)))-(TI11*(cc(1: mp, i-1, 3, k) &          !
+                    -cc(1: mp, ic-1, 2, k))+TI12*(cc(1: mp, i-1, 5, k)-cc(1: mp, ic-1, 4, k)))) &          !
+                    +wa4(i-1) &
+                    *((cc(1: mp, i-1, 1, k)+TR11*(cc(1: mp, i-1, 3, k)+cc(1: mp, ic-1, 2, k)) &            !
+                    +TR12*(cc(1: mp, i-1, 5, k)+cc(1: mp, ic-1, 4, k)))+(TI11*(cc(1: mp, i, 3, k) &        !
+                    +cc(1: mp, ic, 2, k))+TI12*(cc(1: mp, i, 5, k)+cc(1: mp, ic, 4, k))))
             end do
         end do
 
@@ -1726,12 +1639,8 @@ contains
             ar1h = dcp*ar1-dsp*ai1
             ai1 = dcp*ai1+dsp*ar1
             ar1 = ar1h
-            do ik=1, idl1
-                do m=1, mp
-                    c2(m, ik, l) = ch2(m, ik, 1)+ar1*ch2(m, ik, 2)
-                    c2(m, ik, lc) = ai1*ch2(m, ik, iip)
-                end do
-            end do
+            c2(1: mp, 1: idl1, l) = ch2(1: mp, 1: idl1, 1)+ar1*ch2(1: mp, 1: idl1, 2)
+            c2(1: mp, 1: idl1, lc) = ai1*ch2(1: mp, 1: idl1, iip)
             dc2 = ar1
             ds2 = ai1
             ar2 = ar1
@@ -1741,10 +1650,8 @@ contains
                 ar2h = dc2*ar2-ds2*ai2
                 ai2 = dc2*ai2+ds2*ar2
                 ar2 = ar2h
-                do ik=1, idl1
-                    c2(1: mp, ik, l) = c2(1: mp, ik, l)+ar2*ch2(1: mp, ik, j)
-                    c2(1: mp, ik, lc) = c2(1: mp, ik, lc)+ai2*ch2(1: mp, ik, jc)
-                end do
+                c2(1: mp, 1: idl1, l) = c2(1: mp, 1: idl1, l)+ar2*ch2(1: mp, 1: idl1, j)
+                c2(1: mp, 1: idl1, lc) = c2(1: mp, 1: idl1, lc)+ai2*ch2(1: mp, 1: idl1, jc)
             end do
         end do
 
@@ -1764,12 +1671,10 @@ contains
                     jc = ipp2-j
                     do k=1, l1
                         do i=3, ido, 2
-                            do m=1, mp
-                                ch(m, i-1, k, j) = c1(m, i-1, k, j)-c1(m, i, k, jc)
-                                ch(m, i-1, k, jc) = c1(m, i-1, k, j)+c1(m, i, k, jc)
-                                ch(m, i, k, j) = c1(m, i, k, j)+c1(m, i-1, k, jc)
-                                ch(m, i, k, jc) = c1(m, i, k, j)-c1(m, i-1, k, jc)
-                            end do
+                            ch(1: mp, i-1, k, j) = c1(1: mp, i-1, k, j)-c1(1: mp, i, k, jc)
+                            ch(1: mp, i-1, k, jc) = c1(1: mp, i-1, k, j)+c1(1: mp, i, k, jc)
+                            ch(1: mp, i, k, j) = c1(1: mp, i, k, j)+c1(1: mp, i-1, k, jc)
+                            ch(1: mp, i, k, jc) = c1(1: mp, i, k, j)-c1(1: mp, i-1, k, jc)
                         end do
                     end do
                 end do
@@ -1777,14 +1682,10 @@ contains
                 do j=2, ipph
                     jc = ipp2-j
                     do i=3, ido, 2
-                        do k=1, l1
-                            do m=1, mp
-                                ch(m, i-1, k, j) = c1(m, i-1, k, j)-c1(m, i, k, jc)
-                                ch(m, i-1, k, jc) = c1(m, i-1, k, j)+c1(m, i, k, jc)
-                                ch(m, i, k, j) = c1(m, i, k, j)+c1(m, i-1, k, jc)
-                                ch(m, i, k, jc) = c1(m, i, k, j)-c1(m, i-1, k, jc)
-                            end do
-                        end do
+                        ch(1: mp, i-1, 1: l1, j) = c1(1: mp, i-1, 1: l1, j)-c1(1: mp, i, 1: l1, jc)
+                        ch(1: mp, i-1, 1: l1, jc) = c1(1: mp, i-1, 1: l1, j)+c1(1: mp, i, 1: l1, jc)
+                        ch(1: mp, i, 1: l1, j) = c1(1: mp, i, 1: l1, j)+c1(1: mp, i-1, 1: l1, jc)
+                        ch(1: mp, i, 1: l1, jc) = c1(1: mp, i, 1: l1, j)-c1(1: mp, i-1, 1: l1, jc)
                     end do
                 end do
             end if
@@ -1803,12 +1704,10 @@ contains
                 do i=3, ido, 2
                     idij = idij+2
                     do k=1, l1
-                        do m=1, mp
-                            c1(m, i-1, k, j) = wa(idij-1)*ch(m, i-1, k, j)-wa(idij)* &           !
-                                ch(m, i, k, j)
-                            c1(m, i, k, j) = wa(idij-1)*ch(m, i, k, j)+wa(idij)* &               !
-                                ch(m, i-1, k, j)
-                        end do
+                        c1(1: mp, i-1, k, j) = wa(idij-1)*ch(1: mp, i-1, k, j)-wa(idij)* &           !
+                            ch(1: mp, i, k, j)
+                        c1(1: mp, i, k, j) = wa(idij-1)*ch(1: mp, i, k, j)+wa(idij)* &               !
+                            ch(1: mp, i-1, k, j)
                     end do
                 end do
             end do
@@ -1820,12 +1719,10 @@ contains
                     idij = is
                     do i=3, ido, 2
                         idij = idij+2
-                        do m=1, mp
-                            c1(m, i-1, k, j) = wa(idij-1)*ch(m, i-1, k, j)-wa(idij)* &           !
-                                ch(m, i, k, j)
-                            c1(m, i, k, j) = wa(idij-1)*ch(m, i, k, j)+wa(idij)* &               !
-                                ch(m, i-1, k, j)
-                        end do
+                        c1(1: mp, i-1, k, j) = wa(idij-1)*ch(1: mp, i-1, k, j)-wa(idij)* &           !
+                            ch(1: mp, i, k, j)
+                        c1(1: mp, i, k, j) = wa(idij-1)*ch(1: mp, i, k, j)+wa(idij)* &               !
+                            ch(1: mp, i-1, k, j)
                     end do
                 end do
             end do
