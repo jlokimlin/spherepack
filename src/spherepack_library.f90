@@ -36,4 +36,6 @@ module spherepack_library
     public :: RegularGrid
     public :: RegularSphere
 
+contains
+
 end module spherepack_library
