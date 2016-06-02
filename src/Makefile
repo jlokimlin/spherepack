@@ -330,6 +330,54 @@ ivrtgs.f90
 	$(FC) $(FCFLAGS) -c ivrtgs.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 
+vlapec.o: \
+vhsec.o \
+vlapec.f90
+	$(FC) $(FCFLAGS) -c vlapec.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
+
+vlapes.o: \
+vhses.o \
+vlapes.f90
+	$(FC) $(FCFLAGS) -c vlapes.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
+
+vlapgc.o: \
+vhsgc.o \
+vlapgc.f90
+	$(FC) $(FCFLAGS) -c vlapgc.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
+
+vlapgs.o: \
+vhsgs.o \
+vlapgs.f90
+	$(FC) $(FCFLAGS) -c vlapgs.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
+
+ivlapec.o: \
+vhsec.o \
+ivlapec.f90
+	$(FC) $(FCFLAGS) -c ivlapec.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
+
+ivlapes.o: \
+vhses.o \
+ivlapes.f90
+	$(FC) $(FCFLAGS) -c ivlapes.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
+
+ivlapgc.o: \
+vhsgc.o \
+ivlapgc.f90
+	$(FC) $(FCFLAGS) -c ivlapgc.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
+
+ivlapgs.o: \
+vhsgs.o \
+ivlapgs.f90
+	$(FC) $(FCFLAGS) -c ivlapgs.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
+
 type_SphericalGrid.o: \
 type_SphericalGrid.f90
 	$(FC) $(FCFLAGS) -c type_SphericalGrid.f90 $(LINKS)\
