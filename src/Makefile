@@ -157,6 +157,30 @@ vhsgs.f90
 	$(FC) $(FCFLAGS) -c vhsgs.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 
+gradec.o: \
+vhsec.o \
+gradec.f90
+	$(FC) $(FCFLAGS) -c gradec.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
+
+grades.o: \
+vhses.o \
+grades.f90
+	$(FC) $(FCFLAGS) -c grades.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
+
+gradgc.o: \
+vhsgc.o \
+gradgc.f90
+	$(FC) $(FCFLAGS) -c gradgc.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
+
+gradgs.o: \
+vhsgs.o \
+gradgs.f90
+	$(FC) $(FCFLAGS) -c gradgs.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
+
 divec.o: \
 shsec.o \
 divec.f90
