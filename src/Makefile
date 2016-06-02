@@ -186,6 +186,30 @@ gradgs.f90
 	$(FC) $(FCFLAGS) -c gradgs.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 
+igradec.o: \
+shsec.o \
+igradec.f90
+	$(FC) $(FCFLAGS) -c igradec.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
+
+igrades.o: \
+shses.o \
+igrades.f90
+	$(FC) $(FCFLAGS) -c igrades.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
+
+igradgc.o: \
+shsgc.o \
+igradgc.f90
+	$(FC) $(FCFLAGS) -c igradgc.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
+
+igradgs.o: \
+shsgs.o \
+igradgs.f90
+	$(FC) $(FCFLAGS) -c igradgs.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
+
 divec.o: \
 shsec.o \
 divec.f90
