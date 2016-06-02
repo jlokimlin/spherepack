@@ -94,11 +94,25 @@ shsgs.f90
 	$(FC) $(FCFLAGS) -c shsgs.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 
+vhaec.o: \
+type_HFFTpack.o \
+type_SpherepackAux.o\
+vhaec.f90
+	$(FC) $(FCFLAGS) -c vhaec.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
+
 vhaes.o: \
 type_HFFTpack.o \
 type_SpherepackAux.o\
 vhaes.f90
 	$(FC) $(FCFLAGS) -c vhaes.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
+
+vhagc.o: \
+type_HFFTpack.o \
+type_SpherepackAux.o\
+vhagc.f90
+	$(FC) $(FCFLAGS) -c vhagc.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 
 vhags.o: \
@@ -108,12 +122,11 @@ vhags.f90
 	$(FC) $(FCFLAGS) -c vhags.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 
-vhsgs.o: \
+vhsec.o: \
 type_HFFTpack.o \
 type_SpherepackAux.o\
-gaqd.o \
-vhsgs.f90
-	$(FC) $(FCFLAGS) -c vhsgs.f90 $(LINKS)\
+vhsec.f90
+	$(FC) $(FCFLAGS) -c vhsec.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 
 vhses.o: \
@@ -121,6 +134,22 @@ type_HFFTpack.o \
 type_SpherepackAux.o\
 vhses.f90
 	$(FC) $(FCFLAGS) -c vhses.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
+
+vhsgc.o: \
+type_HFFTpack.o \
+type_SpherepackAux.o\
+gaqd.o \
+vhsgc.f90
+	$(FC) $(FCFLAGS) -c vhsgc.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
+
+vhsgs.o: \
+type_HFFTpack.o \
+type_SpherepackAux.o\
+gaqd.o \
+vhsgs.f90
+	$(FC) $(FCFLAGS) -c vhsgs.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 
 divec.o: \
