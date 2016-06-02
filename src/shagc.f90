@@ -38,7 +38,7 @@
 !
 ! ... files which must be loaded with shagc.f
 !
-!     sphcom.f, hrfft.f, gaqd.f
+!     type_SpherepackAux.f, type_HFFTpack.f, gaqd.f
 !
 !
 !     subroutine shagc(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, 
@@ -302,450 +302,513 @@
 !                 (due to failure in eigenvalue routine)
 !
 !
-! ****************************************************************
-subroutine shagc(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, &
-                    wshagc, lshagc, work, lwork, ierror)
-implicit none
-real :: a
-real :: b
-real :: g
-integer :: idg
-integer :: ierror
-integer :: ifft
-integer :: ipmn
-integer :: isym
-integer :: iwts
-integer :: jdg
-integer :: l
-integer :: l1
-integer :: l2
-integer :: lat
-integer :: late
-integer :: lshagc
-integer :: lwork
-integer :: mdab
-integer :: ndab
-integer :: nlat
-integer :: nlon
-integer :: nt
-real :: work
-real :: wshagc
-!     subroutine shagc performs the spherical harmonic analysis on
-!     a gaussian grid on the array(s) in g and returns the coefficients
-!     in array(s) a, b. the necessary legendre polynomials are computed
-!     as needed in this version.
-!
-dimension g(idg, jdg, 1), a(mdab, ndab, 1), b(mdab, ndab, 1), &
-          wshagc(lshagc), work(lwork)
-!     check input parameters
-ierror = 1
-if (nlat < 3) return
-ierror = 2
-if (nlon < 4) return
-ierror = 3
-if (isym < 0 .or.isym > 2) return
-ierror = 4
-if (nt < 1) return
-!     set upper limit on m for spherical harmonic basis
-l = min((nlon+2)/2, nlat)
-!     set gaussian point nearest equator pointer
-late = (nlat+mod(nlat, 2))/2
-!     set number of grid points for analysis/synthesis
-lat = nlat
-if (isym /= 0) lat = late
-ierror = 5
-if (idg < lat) return
-ierror = 6
-if (jdg < nlon) return
-ierror = 7
-if (mdab < l) return
-ierror = 8
-if (ndab < nlat) return
-l1 = l
-l2 = late
-ierror = 9
-!     check permanent work space length
-if (lshagc < nlat*(2*l2+3*l1-2)+3*l1*(1-l1)/2+nlon+15)return
-ierror = 10
-!     check temporary work space length
-if (isym == 0) then
-if (lwork <nlat*(nlon*nt+max(3*l2, nlon))) return
-else
-!     isym.ne.0
-if (lwork <l2*(nlon*nt+max(3*nlat, nlon))) return
-end if
-ierror = 0
-!     starting address for gaussian wts in shigc and fft values
-iwts = 1
-ifft = nlat+2*nlat*late+3*(l*(l-1)/2+(nlat-l)*(l-1))+1
-!     set pointers for internal storage of g and legendre polys
-ipmn = lat*nlon*nt+1
-call shagc1(nlat, nlon, l, lat, isym, g, idg, jdg, nt, a, b, mdab, ndab, &
-wshagc, wshagc(iwts), wshagc(ifft), late, work(ipmn), work)
-return
-end subroutine shagc
-subroutine shagc1(nlat, nlon, l, lat, mode, gs, idg, jdg, nt, a, b, mdab, &
-                  ndab, w, wts, wfft, late, pmn, g)
-implicit none
-real :: a
-real :: b
-real :: g
-real :: gs
-integer :: i
-integer :: idg
-integer :: is
-integer :: j
-integer :: jdg
-integer :: k
-integer :: km
-integer :: l
-integer :: lat
-integer :: late
-integer :: lm1
-integer :: lp1
-integer :: m
-integer :: mdab
-integer :: mode
-integer :: mp1
-integer :: mp2
-integer :: ms
-integer :: ndab
-integer :: nl2
-integer :: nlat
-integer :: nlon
-integer :: np1
-integer :: ns
-integer :: nt
-real :: pmn
-real :: sfn
-real :: t1
-real :: t2
-real :: w
-real :: wfft
-real :: wts
-dimension gs(idg, jdg, nt), a(mdab, ndab, nt), &
-          b(mdab, ndab, nt), g(lat, nlon, nt)
-dimension w(1), wts(nlat), wfft(1), pmn(nlat, late, 3)
-!     set gs array internally in shagc1
-do 100 k=1, nt
-do 100 j=1, nlon
-do 100 i=1, lat
-g(i, j, k) = gs(i, j, k)
-100 continue
-!     do fourier transform
-do 101 k=1, nt
-call hrfftf(lat, nlon, g(1, 1, k), lat, wfft, pmn)
-101 continue
-!     scale result
-sfn = 2.0/real(nlon)
-do 102 k=1, nt
-do 102 j=1, nlon
-do 102 i=1, lat
-g(i, j, k) = sfn*g(i, j, k)
-102 continue
-!     compute using gaussian quadrature
-!     a(n, m) = s (ga(theta, m)*pnm(theta)*sin(theta)*dtheta)
-!     b(n, m) = s (gb(theta, m)*pnm(theta)*sin(theta)*dtheta)
-!     here ga, gb are the cos(phi), sin(phi) coefficients of
-!     the fourier expansion of g(theta, phi) in phi.  as a result
-!     of the above fourier transform they are stored in array
-!     g as follows:
-!     for each theta(i) and k= l-1
-!     ga(0), ga(1), gb(1), ga(2), gb(2), ..., ga(k-1), gb(k-1), ga(k)
-!     correspond to (in the case nlon=l+l-2)
-!     g(i, 1), g(i, 2), g(i, 3), g(i, 4), g(i, 5), ..., g(i, 2l-4), g(i, 2l-3), g(i, 2l-
-!     initialize coefficients to zero
-do 103 k=1, nt
-do 103 np1=1, nlat
-do 103 mp1=1, l
-a(mp1, np1, k) = 0.0
-b(mp1, np1, k) = 0.0
-103 continue
-!     set m+1 limit on b(m+1) calculation
-lm1 = l
-if (nlon == l+l-2) lm1 = l-1
-if (mode == 0) then
-!     for full sphere (mode=0) and even/odd reduction:
-!     overwrite g(i) with (g(i)+g(nlat-i+1))*wts(i)
-!     overwrite g(nlat-i+1) with (g(i)-g(nlat-i+1))*wts(i)
-nl2 = nlat/2
-do 104 k=1, nt
-do 104 j=1, nlon
-do 105 i=1, nl2
-is = nlat-i+1
-t1 = g(i, j, k)
-t2 = g(is, j, k)
-g(i, j, k) = wts(i)*(t1+t2)
-g(is, j, k) = wts(i)*(t1-t2)
-105 continue
-!     adjust equator if necessary(nlat odd)
-if (mod(nlat, 2)/=0) g(late, j, k) = wts(late)*g(late, j, k)
-104 continue
-!     set m = 0 coefficients first
-m = 0
-call legin(mode, l, nlat, m, w, pmn, km)
-do 106 k=1, nt
-do 106 i=1, late
-is = nlat-i+1
-do 107 np1=1, nlat, 2
-!     n even
-a(1, np1, k) = a(1, np1, k)+g(i, 1, k)*pmn(np1, i, km)
-107 continue
-do 108 np1=2, nlat, 2
-!     n odd
-a(1, np1, k) = a(1, np1, k)+g(is, 1, k)*pmn(np1, i, km)
-108 continue
-106 continue
-!     compute coefficients for which b(m, n) is available
-do 109 mp1=2, lm1
-m = mp1-1
-mp2 = m+2
-!     compute pmn for all i and n=m, ..., l-1
-call legin(mode, l, nlat, m, w, pmn, km)
-do 110 k=1, nt
-do 111 i=1, late
-is = nlat-i+1
-!     n-m even
-do 112 np1=mp1, nlat, 2
-a(mp1, np1, k) = a(mp1, np1, k)+g(i, 2*m, k)*pmn(np1, i, km)
-b(mp1, np1, k) = b(mp1, np1, k)+g(i, 2*m+1, k)*pmn(np1, i, km)
-112 continue
-!     n-m odd
-do 113 np1=mp2, nlat, 2
-a(mp1, np1, k) = a(mp1, np1, k)+g(is, 2*m, k)*pmn(np1, i, km)
-b(mp1, np1, k) = b(mp1, np1, k)+g(is, 2*m+1, k)*pmn(np1, i, km)
-113 continue
-111 continue
-110 continue
-109 continue
-if (nlon == l+l-2) then
-!     compute a(l, np1) coefficients only
-m = l-1
-call legin(mode, l, nlat, m, w, pmn, km)
-do 114 k=1, nt
-do 114 i=1, late
-is = nlat-i+1
-!     n-m even
-do 124 np1=l, nlat, 2
-a(l, np1, k) = a(l, np1, k)+0.5*g(i, nlon, k)*pmn(np1, i, km)
-124 continue
-lp1 = l+1
-!     n-m odd
-do 125 np1=lp1, nlat, 2
-a(l, np1, k) = a(l, np1, k)+0.5*g(is, nlon, k)*pmn(np1, i, km)
-125 continue
-114 continue
-end if
-else
-!     half sphere
-!     overwrite g(i) with wts(i)*(g(i)+g(i)) for i=1, ..., nlate/2
-nl2 = nlat/2
-do 116  k=1, nt
-do 116 j=1, nlon
-do 115 i=1, nl2
-g(i, j, k) = wts(i)*(g(i, j, k)+g(i, j, k))
-115 continue
-!     adjust equator separately if a grid point
-if (nl2<late) g(late, j, k) = wts(late)*g(late, j, k)
-116 continue
-!     set m = 0 coefficients first
-m = 0
-call legin(mode, l, nlat, m, w, pmn, km)
-ms = 1
-if (mode == 1) ms = 2
-do 117 k=1, nt
-do 117 i=1, late
-do 117 np1=ms, nlat, 2
-a(1, np1, k) = a(1, np1, k)+g(i, 1, k)*pmn(np1, i, km)
-117 continue
-!     compute coefficients for which b(m, n) is available
-do 118 mp1=2, lm1
-m = mp1-1
-ms = mp1
-if (mode == 1) ms = mp1+1
-!     compute pmn for all i and n=m, ..., nlat-1
-call legin(mode, l, nlat, m, w, pmn, km)
-do 119 k=1, nt
-do 119 i=1, late
-do 119 np1=ms, nlat, 2
-a(mp1, np1, k) = a(mp1, np1, k)+g(i, 2*m, k)*pmn(np1, i, km)
-b(mp1, np1, k) = b(mp1, np1, k)+g(i, 2*m+1, k)*pmn(np1, i, km)
-119 continue
-118 continue
-if (nlon==l+l-2) then
-!     compute coefficient a(l, np1) only
-m = l-1
-call legin(mode, l, nlat, m, w, pmn, km)
-ns = l
-if (mode == 1) ns = l+1
-do 120 k=1, nt
-do 120 i=1, late
-do 120 np1=ns, nlat, 2
-a(l, np1, k) = a(l, np1, k)+0.5*g(i, nlon, k)*pmn(np1, i, km)
-120 continue
-end if
-end if
-return
-end subroutine shagc1
-subroutine shagci(nlat, nlon, wshagc, lshagc, dwork, ldwork, ierror)
-implicit none
-integer :: i1
-integer :: i2
-integer :: i3
-integer :: i4
-integer :: i5
-integer :: i6
-integer :: i7
-integer :: idth
-integer :: idwts
-integer :: ierror
-integer :: iw
-integer :: l
-integer :: l1
-integer :: l2
-integer :: late
-integer :: ldwork
-integer :: lshagc
-integer :: nlat
-integer :: nlon
-real :: wshagc
-!     this subroutine must be called before calling shagc with
-!     fixed nlat, nlon. it precomputes quantites such as the gaussian
-!     points and weights, m=0, m=1 legendre polynomials, recursion
-!     recursion coefficients.
-dimension wshagc(lshagc)
-real dwork(ldwork)
-ierror = 1
-if (nlat < 3) return
-ierror = 2
-if (nlon < 4) return
-!     set triangular truncation limit for spherical harmonic basis
-l = min((nlon+2)/2, nlat)
-!     set equator or nearest point (if excluded) pointer
-late = (nlat+mod(nlat, 2))/2
-l1 = l
-l2 = late
-ierror = 3
-!     check permanent work space length
-if (lshagc < nlat*(2*l2+3*l1-2)+3*l1*(1-l1)/2+nlon+15)return
-ierror = 4
-if (ldwork<nlat*(nlat+4))return
-ierror = 0
-!     set pointers
-i1 = 1
-i2 = i1+nlat
-i3 = i2+nlat*late
-i4 = i3+nlat*late
-i5 = i4+l*(l-1)/2 +(nlat-l)*(l-1)
-i6 = i5+l*(l-1)/2 +(nlat-l)*(l-1)
-i7 = i6+l*(l-1)/2 +(nlat-l)*(l-1)
-!     set indices in temp work for real gaussian wts and pts
-idth = 1
-idwts = idth+nlat
-iw = idwts+nlat
-call shagci1(nlat, nlon, l, late, wshagc(i1), wshagc(i2), wshagc(i3), &
-wshagc(i4), wshagc(i5), wshagc(i6), wshagc(i7), dwork(idth), &
-dwork(idwts), dwork(iw), ierror)
-if (ierror /= 0) ierror = 5
-return
-end subroutine shagci
-subroutine shagci1(nlat, nlon, l, late, wts, p0n, p1n, abel, bbel, cbel, &
-                  wfft, dtheta, dwts, work, ier)
-implicit none
-real :: abel
-real :: bbel
-real :: cbel
-integer :: i
-integer :: ier
-integer :: imn
-integer :: imndx
-integer :: indx
-integer :: l
-integer :: late
-integer :: lw
-integer :: m
-integer :: mlim
-integer :: n
-integer :: nlat
-integer :: nlon
-integer :: np1
-real :: p0n
-real :: p1n
-real :: wfft
-real :: wts
-dimension wts(nlat), p0n(nlat, late), p1n(nlat, late), abel(1), bbel(1), &
- cbel(1), wfft(1)
-real pb, dtheta(nlat), dwts(nlat), work(*)
-!     compute the nlat  gaussian points and weights, the
-!     m=0, 1 legendre polys for gaussian points and all n, 
-!     and the legendre recursion coefficients
-!     define index function used in storing
-!     arrays for recursion coefficients (functions of (m, n))
-!     the index function indx(m, n) is defined so that
-!     the pairs (m, n) map to [1, 2, ..., indx(l-1, l-1)] with no
-!     "holes" as m varies from 2 to n and n varies from 2 to l-1.
-!     (m=0, 1 are set from p0n, p1n for all n)
-!     define for 2.le.n.le.l-1
-indx(m, n) = (n-1)*(n-2)/2+m-1
-!     define index function for l.le.n.le.nlat
-imndx(m, n) = l*(l-1)/2+(n-l-1)*(l-1)+m-1
-!     preset quantites for fourier transform
-call hrffti(nlon, wfft)
-!     compute real gaussian points and weights
-!     lw = 4*nlat*(nlat+1)+2
-lw = nlat*(nlat+2)
-call gaqd(nlat, dtheta, dwts, work, lw, ier)
-if (ier/=0) return
-!     store gaussian weights single precision to save computation
-!     in inner loops in analysis
-do 100 i=1, nlat
-wts(i) = dwts(i)
-100 continue
-!     initialize p0n, p1n using real dnlfk, dnlft
-do 101 np1=1, nlat
-do 101 i=1, late
-p0n(np1, i) = 0.0
-p1n(np1, i) = 0.0
-101 continue
-!     compute m=n=0 legendre polynomials for all theta(i)
-np1 = 1
-n = 0
-m = 0
-call dnlfk(m, n, work)
-do 103 i=1, late
-call dnlft(m, n, dtheta(i), work, pb)
-p0n(1, i) = pb
-103 continue
-!     compute p0n, p1n for all theta(i) when n.gt.0
-do 104 np1=2, nlat
-n = np1-1
-m = 0
-call dnlfk(m, n, work)
-do 105 i=1, late
-call dnlft(m, n, dtheta(i), work, pb)
-p0n(np1, i) = pb
-105 continue
-!     compute m=1 legendre polynomials for all n and theta(i)
-m = 1
-call dnlfk(m, n, work)
-do 106 i=1, late
-call dnlft(m, n, dtheta(i), work, pb)
-p1n(np1, i) = pb
-106 continue
-104 continue
-!     compute and store swarztrauber recursion coefficients
-!     for 2.le.m.le.n and 2.le.n.le.nlat in abel, bbel, cbel
-do 107 n=2, nlat
-mlim = min(n, l)
-do 107 m=2, mlim
-imn = indx(m, n)
-if (n >= l) imn = imndx(m, n)
-abel(imn)=sqrt(real((2*n+1)*(m+n-2)*(m+n-3))/ &
-               real(((2*n-3)*(m+n-1)*(m+n))))
-bbel(imn)=sqrt(real((2*n+1)*(n-m-1)*(n-m))/ &
-               real(((2*n-3)*(m+n-1)*(m+n))))
-cbel(imn)=sqrt(real((n-m+1)*(n-m+2))/ &
-               real(((n+m-1)*(n+m))))
-107 continue
-return
-end subroutine shagci1
+module module_shagc
+
+    use, intrinsic :: iso_fortran_env, only: &
+        wp => REAL64, &
+        ip => INT32
+
+    use type_HFFTpack, only: &
+        HFFTpack
+
+    use type_SpherepackAux, only: &
+        SpherepackAux
+
+    use module_gaqd, only: &
+        gaqd
+
+    ! Explicit typing only
+    implicit none
+
+    ! Everything is private unless stated otherwise
+    public :: shagc
+    public :: shagci
+
+contains
+
+    subroutine shagc(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, &
+        wshagc, lshagc, work, lwork, ierror)
+
+        real :: a
+        real :: b
+        real :: g
+        integer :: idg
+        integer :: ierror
+        integer :: ifft
+        integer :: ipmn
+        integer :: isym
+        integer :: iwts
+        integer :: jdg
+        integer :: l
+        integer :: l1
+        integer :: l2
+        integer :: lat
+        integer :: late
+        integer :: lshagc
+        integer :: lwork
+        integer :: mdab
+        integer :: ndab
+        integer :: nlat
+        integer :: nlon
+        integer :: nt
+        real :: work
+        real :: wshagc
+        !     subroutine shagc performs the spherical harmonic analysis on
+        !     a gaussian grid on the array(s) in g and returns the coefficients
+        !     in array(s) a, b. the necessary legendre polynomials are computed
+        !     as needed in this version.
+        !
+        dimension g(idg, jdg, *), a(mdab, ndab, *), b(mdab, ndab,*), &
+            wshagc(lshagc), work(lwork)
+        !     check input parameters
+        ierror = 1
+        if (nlat < 3) return
+        ierror = 2
+        if (nlon < 4) return
+        ierror = 3
+        if (isym < 0 .or.isym > 2) return
+        ierror = 4
+        if (nt < 1) return
+        !     set upper limit on m for spherical harmonic basis
+        l = min((nlon+2)/2, nlat)
+        !     set gaussian point nearest equator pointer
+        late = (nlat+mod(nlat, 2))/2
+        !     set number of grid points for analysis/synthesis
+        lat = nlat
+        if (isym /= 0) lat = late
+        ierror = 5
+        if (idg < lat) return
+        ierror = 6
+        if (jdg < nlon) return
+        ierror = 7
+        if (mdab < l) return
+        ierror = 8
+        if (ndab < nlat) return
+        l1 = l
+        l2 = late
+        ierror = 9
+        !     check permanent work space length
+        if (lshagc < nlat*(2*l2+3*l1-2)+3*l1*(1-l1)/2+nlon+15)return
+        ierror = 10
+        !     check temporary work space length
+        if (isym == 0) then
+            if (lwork <nlat*(nlon*nt+max(3*l2, nlon))) return
+        else
+            !     isym.ne.0
+            if (lwork <l2*(nlon*nt+max(3*nlat, nlon))) return
+        end if
+        ierror = 0
+        !     starting address for gaussian wts in shigc and fft values
+        iwts = 1
+        ifft = nlat+2*nlat*late+3*(l*(l-1)/2+(nlat-l)*(l-1))+1
+        !     set pointers for internal storage of g and legendre polys
+        ipmn = lat*nlon*nt+1
+        call shagc1(nlat, nlon, l, lat, isym, g, idg, jdg, nt, a, b, mdab, ndab, &
+            wshagc, wshagc(iwts), wshagc(ifft), late, work(ipmn), work)
+
+    contains
+
+
+        subroutine shagc1(nlat, nlon, l, lat, mode, gs, idg, jdg, nt, a, b, mdab, &
+            ndab, w, wts, wfft, late, pmn, g)
+
+            real :: a
+            real :: b
+            real :: g
+            real :: gs
+            integer :: i
+            integer :: idg
+            integer :: is
+            integer :: j
+            integer :: jdg
+            integer :: k
+            integer :: km
+            integer :: l
+            integer :: lat
+            integer :: late
+            integer :: lm1
+            integer :: lp1
+            integer :: m
+            integer :: mdab
+            integer :: mode
+            integer :: mp1
+            integer :: mp2
+            integer :: ms
+            integer :: ndab
+            integer :: nl2
+            integer :: nlat
+            integer :: nlon
+            integer :: np1
+            integer :: ns
+            integer :: nt
+            real :: pmn
+            real :: sfn
+            real :: t1
+            real :: t2
+            real :: w
+            real :: wfft
+            real :: wts
+            dimension gs(idg, jdg, nt), a(mdab, ndab, nt), &
+                b(mdab, ndab, nt), g(lat, nlon, nt)
+            dimension w(*), wts(nlat), wfft(*), pmn(nlat, late, 3)
+
+            type (HFFTpack)      :: hfft
+            type (SpherepackAux) :: sphere_aux
+
+            !     set gs array internally in shagc1
+            do k=1, nt
+                do j=1, nlon
+                    do i=1, lat
+                        g(i, j, k) = gs(i, j, k)
+                    end do
+                end do
+            end do
+            !     do fourier transform
+            do k=1, nt
+                call hfft%forward(lat, nlon, g(1, 1, k), lat, wfft, pmn)
+            end do
+            !     scale result
+            sfn = 2.0/real(nlon)
+            do k=1, nt
+                do j=1, nlon
+                    do i=1, lat
+                        g(i, j, k) = sfn*g(i, j, k)
+                    end do
+                end do
+            end do
+            !     compute using gaussian quadrature
+            !     a(n, m) = s (ga(theta, m)*pnm(theta)*sin(theta)*dtheta)
+            !     b(n, m) = s (gb(theta, m)*pnm(theta)*sin(theta)*dtheta)
+            !     here ga, gb are the cos(phi), sin(phi) coefficients of
+            !     the fourier expansion of g(theta, phi) in phi.  as a result
+            !     of the above fourier transform they are stored in array
+            !     g as follows:
+            !     for each theta(i) and k= l-1
+            !     ga(0), ga(1), gb(1), ga(2), gb(2), ..., ga(k-1), gb(k-1), ga(k)
+            !     correspond to (in the case nlon=l+l-2)
+            !     g(i, 1), g(i, 2), g(i, 3), g(i, 4), g(i, 5), ..., g(i, 2l-4), g(i, 2l-3), g(i, 2l-
+            !     initialize coefficients to zero
+            do k=1, nt
+                do np1=1, nlat
+                    do mp1=1, l
+                        a(mp1, np1, k) = 0.0
+                        b(mp1, np1, k) = 0.0
+                    end do
+                end do
+            end do
+            !     set m+1 limit on b(m+1) calculation
+            lm1 = l
+            if (nlon == 2*l-2) lm1 = l-1
+            if (mode == 0) then
+                !     for full sphere (mode=0) and even/odd reduction:
+                !     overwrite g(i) with (g(i)+g(nlat-i+1))*wts(i)
+                !     overwrite g(nlat-i+1) with (g(i)-g(nlat-i+1))*wts(i)
+                nl2 = nlat/2
+                do k=1, nt
+                    do j=1, nlon
+                        do i=1, nl2
+                            is = nlat-i+1
+                            t1 = g(i, j, k)
+                            t2 = g(is, j, k)
+                            g(i, j, k) = wts(i)*(t1+t2)
+                            g(is, j, k) = wts(i)*(t1-t2)
+                        end do
+                        !     adjust equator if necessary(nlat odd)
+                        if (mod(nlat, 2)/=0) g(late, j, k) = wts(late)*g(late, j, k)
+                    end do
+                end do
+                !     set m = 0 coefficients first
+                m = 0
+                call sphere_aux%legin(mode, l, nlat, m, w, pmn, km)
+                do k=1, nt
+                    do i=1, late
+                        is = nlat-i+1
+                        do np1=1, nlat, 2
+                            !     n even
+                            a(1, np1, k) = a(1, np1, k)+g(i, 1, k)*pmn(np1, i, km)
+                        end do
+                        do np1=2, nlat, 2
+                            !     n odd
+                            a(1, np1, k) = a(1, np1, k)+g(is, 1, k)*pmn(np1, i, km)
+                        end do
+                    end do
+                end do
+                !     compute coefficients for which b(m, n) is available
+                do mp1=2, lm1
+                    m = mp1-1
+                    mp2 = m+2
+                    !     compute pmn for all i and n=m, ..., l-1
+                    call sphere_aux%legin(mode, l, nlat, m, w, pmn, km)
+                    do k=1, nt
+                        do i=1, late
+                            is = nlat-i+1
+                            !     n-m even
+                            do np1=mp1, nlat, 2
+                                a(mp1, np1, k) = a(mp1, np1, k)+g(i, 2*m, k)*pmn(np1, i, km)
+                                b(mp1, np1, k) = b(mp1, np1, k)+g(i, 2*m+1, k)*pmn(np1, i, km)
+                            end do
+                            !     n-m odd
+                            do np1=mp2, nlat, 2
+                                a(mp1, np1, k) = a(mp1, np1, k)+g(is, 2*m, k)*pmn(np1, i, km)
+                                b(mp1, np1, k) = b(mp1, np1, k)+g(is, 2*m+1, k)*pmn(np1, i, km)
+                            end do
+                        end do
+                    end do
+                end do
+                if (nlon == 2*l-2) then
+                    !     compute a(l, np1) coefficients only
+                    m = l-1
+                    call sphere_aux%legin(mode, l, nlat, m, w, pmn, km)
+                    do k=1, nt
+                        do i=1, late
+                            is = nlat-i+1
+                            !     n-m even
+                            do np1=l, nlat, 2
+                                a(l, np1, k) = a(l, np1, k)+0.5*g(i, nlon, k)*pmn(np1, i, km)
+                            end do
+                            lp1 = l+1
+                            !     n-m odd
+                            do np1=lp1, nlat, 2
+                                a(l, np1, k) = a(l, np1, k)+0.5*g(is, nlon, k)*pmn(np1, i, km)
+                            end do
+                        end do
+                    end do
+                end if
+            else
+                !     half sphere
+                !     overwrite g(i) with wts(i)*(g(i)+g(i)) for i=1, ..., nlate/2
+                nl2 = nlat/2
+                do  k=1, nt
+                    do j=1, nlon
+                        do i=1, nl2
+                            g(i, j, k) = wts(i)*(g(i, j, k)+g(i, j, k))
+                        end do
+                        !     adjust equator separately if a grid point
+                        if (nl2<late) g(late, j, k) = wts(late)*g(late, j, k)
+                    end do
+                end do
+                !     set m = 0 coefficients first
+                m = 0
+                call sphere_aux%legin(mode, l, nlat, m, w, pmn, km)
+                ms = 1
+                if (mode == 1) ms = 2
+                do k=1, nt
+                    do i=1, late
+                        do np1=ms, nlat, 2
+                            a(1, np1, k) = a(1, np1, k)+g(i, 1, k)*pmn(np1, i, km)
+                        end do
+                    end do
+                end do
+                !     compute coefficients for which b(m, n) is available
+                do mp1=2, lm1
+                    m = mp1-1
+                    ms = mp1
+                    if (mode == 1) ms = mp1+1
+                    !     compute pmn for all i and n=m, ..., nlat-1
+                    call sphere_aux%legin(mode, l, nlat, m, w, pmn, km)
+                    do  k=1, nt
+                        do  i=1, late
+                            do np1=ms, nlat, 2
+                                a(mp1, np1, k) = a(mp1, np1, k)+g(i, 2*m, k)*pmn(np1, i, km)
+                                b(mp1, np1, k) = b(mp1, np1, k)+g(i, 2*m+1, k)*pmn(np1, i, km)
+                            end do
+                        end do
+                    end do
+                end do
+                if (nlon==2*l-2) then
+                    !     compute coefficient a(l, np1) only
+                    m = l-1
+                    call sphere_aux%legin(mode, l, nlat, m, w, pmn, km)
+                    ns = l
+                    if (mode == 1) ns = l+1
+                    do k=1, nt
+                        do i=1, late
+                            do np1=ns, nlat, 2
+                                a(l, np1, k) = a(l, np1, k)+0.5*g(i, nlon, k)*pmn(np1, i, km)
+                            end do
+                        end do
+                    end do
+                end if
+            end if
+
+        end subroutine shagc1
+
+
+    end subroutine shagc
+
+    subroutine shagci(nlat, nlon, wshagc, lshagc, dwork, ldwork, ierror)
+        implicit none
+        integer :: i1
+        integer :: i2
+        integer :: i3
+        integer :: i4
+        integer :: i5
+        integer :: i6
+        integer :: i7
+        integer :: idth
+        integer :: idwts
+        integer :: ierror
+        integer :: iw
+        integer :: l
+        integer :: l1
+        integer :: l2
+        integer :: late
+        integer :: ldwork
+        integer :: lshagc
+        integer :: nlat
+        integer :: nlon
+        real :: wshagc
+        !     this subroutine must be called before calling shagc with
+        !     fixed nlat, nlon. it precomputes quantites such as the gaussian
+        !     points and weights, m=0, m=1 legendre polynomials, recursion
+        !     recursion coefficients.
+        dimension wshagc(lshagc)
+        real dwork(ldwork)
+        ierror = 1
+        if (nlat < 3) return
+        ierror = 2
+        if (nlon < 4) return
+        !     set triangular truncation limit for spherical harmonic basis
+        l = min((nlon+2)/2, nlat)
+        !     set equator or nearest point (if excluded) pointer
+        late = (nlat+mod(nlat, 2))/2
+        l1 = l
+        l2 = late
+        ierror = 3
+        !     check permanent work space length
+        if (lshagc < nlat*(2*l2+3*l1-2)+3*l1*(1-l1)/2+nlon+15)return
+        ierror = 4
+        if (ldwork<nlat*(nlat+4))return
+        ierror = 0
+        !     set pointers
+        i1 = 1
+        i2 = i1+nlat
+        i3 = i2+nlat*late
+        i4 = i3+nlat*late
+        i5 = i4+l*(l-1)/2 +(nlat-l)*(l-1)
+        i6 = i5+l*(l-1)/2 +(nlat-l)*(l-1)
+        i7 = i6+l*(l-1)/2 +(nlat-l)*(l-1)
+        !     set indices in temp work for real gaussian wts and pts
+        idth = 1
+        idwts = idth+nlat
+        iw = idwts+nlat
+        call shagci1(nlat, nlon, l, late, wshagc(i1), wshagc(i2), wshagc(i3), &
+            wshagc(i4), wshagc(i5), wshagc(i6), wshagc(i7), dwork(idth), &
+            dwork(idwts), dwork(iw), ierror)
+        if (ierror /= 0) ierror = 5
+
+    contains
+
+
+        subroutine shagci1(nlat, nlon, l, late, wts, p0n, p1n, abel, bbel, cbel, &
+            wfft, dtheta, dwts, work, ier)
+            real :: abel
+            real :: bbel
+            real :: cbel
+            integer :: i
+            integer :: ier
+            integer :: imn
+            integer :: imndx
+            integer :: indx
+            integer :: l
+            integer :: late
+            integer :: lw
+            integer :: m
+            integer :: mlim
+            integer :: n
+            integer :: nlat
+            integer :: nlon
+            integer :: np1
+            real :: p0n
+            real :: p1n
+            real :: wfft
+            real :: wts
+            dimension wts(nlat), p0n(nlat, late), p1n(nlat, late), abel(*), bbel(*), &
+                cbel(*), wfft(*)
+            real pb, dtheta(nlat), dwts(nlat), work(*)
+
+            type (HFFTpack)      :: hfft
+            type (SpherepackAux) :: sphere_aux
+
+            !     compute the nlat  gaussian points and weights, the
+            !     m=0, 1 legendre polys for gaussian points and all n,
+            !     and the legendre recursion coefficients
+            !     define index function used in storing
+            !     arrays for recursion coefficients (functions of (m, n))
+            !     the index function indx(m, n) is defined so that
+            !     the pairs (m, n) map to [1, 2, ..., indx(l-1, l-1)] with no
+            !     "holes" as m varies from 2 to n and n varies from 2 to l-1.
+            !     (m=0, 1 are set from p0n, p1n for all n)
+            !     define for 2.le.n.le.l-1
+            !indx(m, n) = imn = (n-1)*(n-2)/2+m-1
+            !     define index function for l.le.n.le.nlat
+            !imndx(m, n) = l*(l-1)/2+(n-l-1)*(l-1)+m-1
+            !     preset quantites for fourier transform
+            call hfft%initialize(nlon, wfft)
+            !     compute real gaussian points and weights
+            !     lw = 4*nlat*(nlat+1)+2
+            lw = nlat*(nlat+2)
+            call gaqd(nlat, dtheta, dwts, work(1), lw, ier)
+            if (ier/=0) return
+            !     store gaussian weights single precision to save computation
+            !     in inner loops in analysis
+            do i=1, nlat
+                wts(i) = dwts(i)
+            end do
+            !     initialize p0n, p1n using real dnlfk, dnlft
+            do np1=1, nlat
+                do i=1, late
+                    p0n(np1, i) = 0.0
+                    p1n(np1, i) = 0.0
+                end do
+            end do
+            !     compute m=n=0 legendre polynomials for all theta(i)
+            np1 = 1
+            n = 0
+            m = 0
+            call sphere_aux%dnlfk(m, n, work)
+            do i=1, late
+                call sphere_aux%dnlft(m, n, dtheta(i), work, pb)
+                p0n(1, i) = pb
+            end do
+            !     compute p0n, p1n for all theta(i) when n.gt.0
+            do np1=2, nlat
+                n = np1-1
+                m = 0
+                call sphere_aux%dnlfk(m, n, work)
+                do i=1, late
+                    call sphere_aux%dnlft(m, n, dtheta(i), work, pb)
+                    p0n(np1, i) = pb
+                end do
+                !     compute m=1 legendre polynomials for all n and theta(i)
+                m = 1
+                call sphere_aux%dnlfk(m, n, work)
+                do i=1, late
+                    call sphere_aux%dnlft(m, n, dtheta(i), work, pb)
+                    p1n(np1, i) = pb
+                end do
+            end do
+            !     compute and store swarztrauber recursion coefficients
+            !     for 2.le.m.le.n and 2.le.n.le.nlat in abel, bbel, cbel
+            do n=2, nlat
+                mlim = min(n, l)
+                do m=2, mlim
+                    if (n >= l) then
+                        imn = l*(l-1)/2+(n-l-1)*(l-1)+m-1
+                    else
+                        imn = (n-1)*(n-2)/2+m-1
+                    end if
+                    abel(imn)=sqrt(real((2*n+1)*(m+n-2)*(m+n-3))/ &
+                        real(((2*n-3)*(m+n-1)*(m+n))))
+                    bbel(imn)=sqrt(real((2*n+1)*(n-m-1)*(n-m))/ &
+                        real(((2*n-3)*(m+n-1)*(m+n))))
+                    cbel(imn)=sqrt(real((n-m+1)*(n-m+2))/ &
+                        real(((n+m-1)*(n+m))))
+                end do
+            end do
+
+        end subroutine shagci1
+
+    end subroutine shagci
+
+end module module_shagc

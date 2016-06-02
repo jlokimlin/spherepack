@@ -38,7 +38,7 @@
 !
 ! ... files which must be loaded with vhags.f
 !
-!     sphcom.f, hrfft.f, gaqd.f
+!     type_SpherepackAux.f, type_HFFTpack.f, gaqd.f
 !
 !     subroutine vhags(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci,
 !    +                 mdab, ndab, wvhags, lvhags, work, lwork, ierror)
@@ -328,1015 +328,1049 @@
 !            = 3  error in the specification of lvhags
 !            = 4  error in the specification of ldwork
 !
-subroutine vhags(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
-    mdab, ndab, wvhags, lvhags, work, lwork, ierror)
+module module_vhags
+
+    use, intrinsic :: iso_fortran_env, only: &
+        wp => REAL64, &
+        ip => INT32
+
+    use type_HFFTpack, only: &
+        HFFTpack
+
+    use type_SpherepackAux, only: &
+        SpherepackAux
+
+    use module_gaqd, only: &
+        gaqd
+
+    ! Explicit typing only
     implicit none
-    real :: bi
-    real :: br
-    real :: ci
-    real :: cr
-    integer :: idv
-    integer :: idvw
-    integer :: idz
-    integer :: ierror
-    integer :: imid
-    integer :: ist
-    integer :: ityp
-    integer :: iw1
-    integer :: iw2
-    integer :: iw3
-    integer :: iw4
-    integer :: jdvw
-    integer :: jw1
-    integer :: jw2
-    integer :: jw3
-    integer :: lmn
-    integer :: lnl
-    integer :: lvhags
-    integer :: lwork
-    integer :: lzimn
-    integer :: mdab
-    integer :: mmax
-    integer :: ndab
-    integer :: nlat
-    integer :: nlon
-    integer :: nt
-    real :: v
-    real :: w
-    real :: work
-    real :: wvhags
-    dimension v(idvw, jdvw, *), w(idvw, jdvw,*), br(mdab,ndab,*), &
-        bi(mdab, ndab,*), cr(mdab, ndab,*), ci(mdab, ndab,*), &
-        work(*), wvhags(*)
-    ierror = 1
-    if (nlat < 3) return
-    ierror = 2
-    if (nlon < 1) return
-    ierror = 3
-    if (ityp<0 .or. ityp>8) return
-    ierror = 4
-    if (nt < 0) return
-    ierror = 5
-    imid = (nlat+1)/2
-    if ((ityp<=2 .and. idvw<nlat) .or. &
-        (ityp>2 .and. idvw<imid)) return
-    ierror = 6
-    if (jdvw < nlon) return
-    ierror = 7
-    mmax = min(nlat, (nlon+1)/2)
-    if (mdab < mmax) return
-    ierror = 8
-    if (ndab < nlat) return
-    ierror = 9
-    idz = (mmax*(nlat+nlat-mmax+1))/2
-    lzimn = idz*imid
-    if (lvhags < lzimn+lzimn+nlon+15) return
-    ierror = 10
-    idv = nlat
-    if (ityp > 2) idv = imid
-    lnl = nt*idv*nlon
-    if (lwork < lnl+lnl+idv*nlon) return
-    ierror = 0
 
-    if (ityp <= 2) then
-        ist = imid
-    else
-        ist = 0
-    end if
-
-    !
-    !     set wvhags pointers
-    !
-    lmn = nlat*(nlat+1)/2
-    jw1 = 1
-    jw2 = jw1+imid*lmn
-    jw3 = jw2+imid*lmn
-    !
-    !     set work pointers
-    !
-    iw1 = ist+1
-    iw2 = lnl+1
-    iw3 = iw2+ist
-    iw4 = iw2+lnl
-    call vhags1(nlat, nlon, ityp, nt, imid, idvw, jdvw, v, w, mdab, ndab, &
-        br, bi, cr, ci, idv, work, work(iw1), work(iw2), work(iw3), &
-        work(iw4), idz, wvhags(jw1), wvhags(jw2), wvhags(jw3))
+    ! Everything is private unless stated otherwise
+    public :: vhags
+    public :: vhagsi
 
 contains
 
-    subroutine vhags1(nlat, nlon, ityp, nt, imid, idvw, jdvw, v, w, mdab, &
-        ndab, br, bi, cr, ci, idv, ve, vo, we, wo, work, idz, vb, wb, wrfft)
-        implicit none
+    subroutine vhags(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
+        mdab, ndab, wvhags, lvhags, work, lwork, ierror)
+
         real :: bi
         real :: br
         real :: ci
         real :: cr
-        real :: fsn
-        integer :: i
         integer :: idv
         integer :: idvw
         integer :: idz
-        integer :: imid
-        integer :: imm1
-        integer :: ityp
-        integer :: j
-        integer :: jdvw
-        integer :: k
-        integer :: m
-        integer :: mb
-        integer :: mdab
-        integer :: mlat
-        integer :: mlon
-        integer :: mmax
-        integer :: mp1
-        integer :: mp2
-        integer :: ndab
-        integer :: ndo1
-        integer :: ndo2
-        integer :: nlat
-        integer :: nlon
-        integer :: nlp1
-        integer :: np1
-        integer :: nt
-        real :: tsn
-        real :: v
-        real :: vb
-        real :: ve
-        real :: vo
-        real :: w
-        real :: wb
-        real :: we
-        real :: wo
-        real :: work
-        real :: wrfft
-        dimension v(idvw, jdvw, *), w(idvw, jdvw, *), br(mdab, ndab,*), &
-            bi(mdab, ndab, *), cr(mdab, ndab, *), ci(mdab, ndab, *), &
-            ve(idv, nlon, *), vo(idv, nlon, *), we(idv, nlon, *), &
-            wo(idv, nlon, *), work(*), &
-            vb(imid,*), wb(imid,*), wrfft(*)
-        nlp1 = nlat+1
-        tsn = 2.0/nlon
-        fsn = 4.0/nlon
-        mlat = mod(nlat, 2)
-        mlon = mod(nlon, 2)
-        mmax = min(nlat, (nlon+1)/2)
-
-        select case (mlat)
-            case (0)
-                imm1 = imid
-                ndo1 = nlat
-                ndo2 = nlat-1
-            case default
-                imm1 = imid-1
-                ndo1 = nlat-1
-                ndo2 = nlat
-        end select
-
-        if (ityp <= 2) then
-            do k=1, nt
-                do i=1, imm1
-                    do j=1, nlon
-                        ve(i, j, k) = tsn*(v(i, j, k)+v(nlp1-i, j, k))
-                        vo(i, j, k) = tsn*(v(i, j, k)-v(nlp1-i, j, k))
-                        we(i, j, k) = tsn*(w(i, j, k)+w(nlp1-i, j, k))
-                        wo(i, j, k) = tsn*(w(i, j, k)-w(nlp1-i, j, k))
-                    end do
-                end do
-            end do
-        else
-            do k=1, nt
-                do i=1, imm1
-                    do j=1, nlon
-                        ve(i, j, k) = fsn*v(i, j, k)
-                        vo(i, j, k) = fsn*v(i, j, k)
-                        we(i, j, k) = fsn*w(i, j, k)
-                        wo(i, j, k) = fsn*w(i, j, k)
-                    end do
-                end do
-            end do
-        end if
-
-        if (mlat /= 0) then
-            do k=1, nt
-                do j=1, nlon
-                    ve(imid, j, k) = tsn*v(imid, j, k)
-                    we(imid, j, k) = tsn*w(imid, j, k)
-                end do
-            end do
-        end if
-
-        do k=1, nt
-            call hrfftf(idv, nlon, ve(1, 1, k), idv, wrfft, work)
-            call hrfftf(idv, nlon, we(1, 1, k), idv, wrfft, work)
-        end do
-
-        !
-        !==> Set polar coefficients to zero
-        !
-        select case (ityp)
-            case (0:1,3:4,6:7)
-                do k=1, nt
-                    do mp1=1, mmax
-                        do np1=mp1, nlat
-                            br(mp1, np1, k) = 0.0
-                            bi(mp1, np1, k) = 0.0
-                        end do
-                    end do
-                end do
-        end select
-
-        !
-        !==> Set azimuthal coefficients to zero
-        !
-        select case (ityp)
-            case (0,2:3,5:6,8)
-                do k=1, nt
-                    do mp1=1, mmax
-                        do np1=mp1, nlat
-                            cr(mp1, np1, k) = 0.0
-                            ci(mp1, np1, k) = 0.0
-                        end do
-                    end do
-                end do
-        end select
-
-        select case (ityp)
-            case (0)
-                !
-                !==> case ityp=0 ,  no symmetries
-                !
-                !    case m=0
-                !
-                do k=1, nt
-                    do i=1, imid
-                        do np1=2, ndo2, 2
-                            br(1, np1, k) = br(1, np1, k)+vb(i, np1)*ve(i, 1, k)
-                            cr(1, np1, k) = cr(1, np1, k)-vb(i, np1)*we(i, 1, k)
-                        end do
-                    end do
-                end do
-
-                do k=1, nt
-                    do i=1, imm1
-                        do np1=3, ndo1, 2
-                            br(1, np1, k) = br(1, np1, k)+vb(i, np1)*vo(i, 1, k)
-                            cr(1, np1, k) = cr(1, np1, k)-vb(i, np1)*wo(i, 1, k)
-                        end do
-                    end do
-                end do
-                !
-                !==> case m = 1 through nlat-1
-                !
-                if (mmax < 2) then
-                    return
-                end if
-
-                do mp1=2, mmax
-                    m = mp1-1
-                    mb = m*nlat-(m*(m+1))/2
-                    mp2 = mp1+1
-
-                    if (mp1 <= ndo1) then
-
-                        do k=1, nt
-                            do i=1, imm1
-                                do np1=mp1, ndo1, 2
-                                    br(mp1, np1, k) = br(mp1, np1, k)+vb(i, np1+mb)*vo(i, 2*mp1-2, k) &
-                                        +wb(i, np1+mb)*we(i, 2*mp1-1, k)
-                                    bi(mp1, np1, k) = bi(mp1, np1, k)+vb(i, np1+mb)*vo(i, 2*mp1-1, k) &
-                                        -wb(i, np1+mb)*we(i, 2*mp1-2, k)
-                                    cr(mp1, np1, k) = cr(mp1, np1, k)-vb(i, np1+mb)*wo(i, 2*mp1-2, k) &
-                                        +wb(i, np1+mb)*ve(i, 2*mp1-1, k)
-                                    ci(mp1, np1, k) = ci(mp1, np1, k)-vb(i, np1+mb)*wo(i, 2*mp1-1, k) &
-                                        -wb(i, np1+mb)*ve(i, 2*mp1-2, k)
-                                end do
-                            end do
-                        end do
-
-                        if (mlat /= 0) then
-                            do k=1, nt
-                                do np1=mp1, ndo1, 2
-                                    br(mp1, np1, k) = br(mp1, np1, k)+wb(imid, np1+mb)*we(imid, 2*mp1-1, k)
-                                    bi(mp1, np1, k) = bi(mp1, np1, k)-wb(imid, np1+mb)*we(imid, 2*mp1-2, k)
-                                    cr(mp1, np1, k) = cr(mp1, np1, k)+wb(imid, np1+mb)*ve(imid, 2*mp1-1, k)
-                                    ci(mp1, np1, k) = ci(mp1, np1, k)-wb(imid, np1+mb)*ve(imid, 2*mp1-2, k)
-                                end do
-                            end do
-
-                        end if
-                    end if
-
-                    if (mp2 > ndo2) exit
-
-                    do k=1, nt
-                        do i=1, imm1
-                            do np1=mp2, ndo2, 2
-                                br(mp1, np1, k) = br(mp1, np1, k)+vb(i, np1+mb)*ve(i, 2*mp1-2, k) &
-                                    +wb(i, np1+mb)*wo(i, 2*mp1-1, k)
-                                bi(mp1, np1, k) = bi(mp1, np1, k)+vb(i, np1+mb)*ve(i, 2*mp1-1, k) &
-                                    -wb(i, np1+mb)*wo(i, 2*mp1-2, k)
-                                cr(mp1, np1, k) = cr(mp1, np1, k)-vb(i, np1+mb)*we(i, 2*mp1-2, k) &
-                                    +wb(i, np1+mb)*vo(i, 2*mp1-1, k)
-                                ci(mp1, np1, k) = ci(mp1, np1, k)-vb(i, np1+mb)*we(i, 2*mp1-1, k) &
-                                    -wb(i, np1+mb)*vo(i, 2*mp1-2, k)
-                            end do
-                        end do
-                    end do
-
-                    if (mlat == 0) exit
-
-                    do k=1, nt
-                        do np1=mp2, ndo2, 2
-                            br(mp1, np1, k) = br(mp1, np1, k)+vb(imid, np1+mb)*ve(imid, 2*mp1-2, k)
-                            bi(mp1, np1, k) = bi(mp1, np1, k)+vb(imid, np1+mb)*ve(imid, 2*mp1-1, k)
-                            cr(mp1, np1, k) = cr(mp1, np1, k)-vb(imid, np1+mb)*we(imid, 2*mp1-2, k)
-                            ci(mp1, np1, k) = ci(mp1, np1, k)-vb(imid, np1+mb)*we(imid, 2*mp1-1, k)
-                        end do
-                    end do
-                end do
-            case (1)
-                !
-                !==> case ityp=1 ,  no symmetries but cr and ci equal zero
-                !
-                !    case m=0
-                !
-                do k=1, nt
-                    do i=1, imid
-                        do np1=2, ndo2, 2
-                            br(1, np1, k) = br(1, np1, k)+vb(i, np1)*ve(i, 1, k)
-                        end do
-                    end do
-                end do
-
-                do k=1, nt
-                    do i=1, imm1
-                        do np1=3, ndo1, 2
-                            br(1, np1, k) = br(1, np1, k)+vb(i, np1)*vo(i, 1, k)
-                        end do
-                    end do
-                end do
-                !
-                !==> case m = 1 through nlat-1
-                !
-                if (mmax < 2) return
-
-                do mp1=2, mmax
-                    m = mp1-1
-                    mb = m*nlat-(m*(m+1))/2
-                    mp2 = mp1+1
-
-                    if (mp1 <= ndo1) then
-
-                        do k=1, nt
-                            do i=1, imm1
-                                do np1=mp1, ndo1, 2
-                                    br(mp1, np1, k) = br(mp1, np1, k)+vb(i, np1+mb)*vo(i, 2*mp1-2, k) &
-                                        +wb(i, np1+mb)*we(i, 2*mp1-1, k)
-                                    bi(mp1, np1, k) = bi(mp1, np1, k)+vb(i, np1+mb)*vo(i, 2*mp1-1, k) &
-                                        -wb(i, np1+mb)*we(i, 2*mp1-2, k)
-                                end do
-                            end do
-                        end do
-
-                        if (mlat /= 0) then
-                            do k=1, nt
-                                do np1=mp1, ndo1, 2
-                                    br(mp1, np1, k) = br(mp1, np1, k)+wb(imid, np1+mb)*we(imid, 2*mp1-1, k)
-                                    bi(mp1, np1, k) = bi(mp1, np1, k)-wb(imid, np1+mb)*we(imid, 2*mp1-2, k)
-                                end do
-                            end do
-                        end if
-                    end if
-
-                    if (mp2 > ndo2) exit
-
-                    do k=1, nt
-                        do i=1, imm1
-                            do np1=mp2, ndo2, 2
-                                br(mp1, np1, k) = br(mp1, np1, k)+vb(i, np1+mb)*ve(i, 2*mp1-2, k) &
-                                    +wb(i, np1+mb)*wo(i, 2*mp1-1, k)
-                                bi(mp1, np1, k) = bi(mp1, np1, k)+vb(i, np1+mb)*ve(i, 2*mp1-1, k) &
-                                    -wb(i, np1+mb)*wo(i, 2*mp1-2, k)
-                            end do
-                        end do
-                    end do
-
-                    if (mlat == 0) exit
-
-                    do k=1, nt
-                        do np1=mp2, ndo2, 2
-                            br(mp1, np1, k) = br(mp1, np1, k)+vb(imid, np1+mb)*ve(imid, 2*mp1-2, k)
-                            bi(mp1, np1, k) = bi(mp1, np1, k)+vb(imid, np1+mb)*ve(imid, 2*mp1-1, k)
-                        end do
-                    end do
-                end do
-            case (2)
-                !
-                !==> case ityp=2 ,  no symmetries but br and bi equal zero
-                !
-                !    case m=0
-                !
-                do k=1, nt
-                    do i=1, imid
-                        do np1=2, ndo2, 2
-                            cr(1, np1, k) = cr(1, np1, k)-vb(i, np1)*we(i, 1, k)
-                        end do
-                    end do
-                end do
-
-                do k=1, nt
-                    do i=1, imm1
-                        do np1=3, ndo1, 2
-                            cr(1, np1, k) = cr(1, np1, k)-vb(i, np1)*wo(i, 1, k)
-                        end do
-                    end do
-                end do
-                !
-                !==> case m = 1 through nlat-1
-                !
-                if (mmax < 2) return
-
-                do mp1=2, mmax
-                    m = mp1-1
-                    mb = m*nlat-(m*(m+1))/2
-                    mp2 = mp1+1
-
-                    if (mp1 <= ndo1) then
-
-                        do k=1, nt
-                            do i=1, imm1
-                                do np1=mp1, ndo1, 2
-                                    cr(mp1, np1, k) = cr(mp1, np1, k)-vb(i, np1+mb)*wo(i, 2*mp1-2, k) &
-                                        +wb(i, np1+mb)*ve(i, 2*mp1-1, k)
-                                    ci(mp1, np1, k) = ci(mp1, np1, k)-vb(i, np1+mb)*wo(i, 2*mp1-1, k) &
-                                        -wb(i, np1+mb)*ve(i, 2*mp1-2, k)
-                                end do
-                            end do
-                        end do
-
-                        if (mlat /= 0) then
-                            do k=1, nt
-                                do np1=mp1, ndo1, 2
-                                    cr(mp1, np1, k) = cr(mp1, np1, k)+wb(imid, np1+mb)*ve(imid, 2*mp1-1, k)
-                                    ci(mp1, np1, k) = ci(mp1, np1, k)-wb(imid, np1+mb)*ve(imid, 2*mp1-2, k)
-                                end do
-                            end do
-                        end if
-                    end if
-
-                    if (mp2 > ndo2) exit
-
-                    do k=1, nt
-                        do i=1, imm1
-                            do np1=mp2, ndo2, 2
-                                cr(mp1, np1, k) = cr(mp1, np1, k)-vb(i, np1+mb)*we(i, 2*mp1-2, k) &
-                                    +wb(i, np1+mb)*vo(i, 2*mp1-1, k)
-                                ci(mp1, np1, k) = ci(mp1, np1, k)-vb(i, np1+mb)*we(i, 2*mp1-1, k) &
-                                    -wb(i, np1+mb)*vo(i, 2*mp1-2, k)
-                            end do
-                        end do
-                    end do
-
-                    if (mlat == 0) exit
-
-                    do k=1, nt
-                        do np1=mp2, ndo2, 2
-                            cr(mp1, np1, k) = cr(mp1, np1, k)-vb(imid, np1+mb)*we(imid, 2*mp1-2, k)
-                            ci(mp1, np1, k) = ci(mp1, np1, k)-vb(imid, np1+mb)*we(imid, 2*mp1-1, k)
-                        end do
-                    end do
-                end do
-            case (3)
-                !
-                !==> case ityp=3 ,  v even , w odd
-                !
-                !    case m=0
-                !
-                do k=1, nt
-                    do i=1, imid
-                        do np1=2, ndo2, 2
-                            br(1, np1, k) = br(1, np1, k)+vb(i, np1)*ve(i, 1, k)
-                        end do
-                    end do
-                end do
-
-                do k=1, nt
-                    do i=1, imm1
-                        do np1=3, ndo1, 2
-                            cr(1, np1, k) = cr(1, np1, k)-vb(i, np1)*wo(i, 1, k)
-                        end do
-                    end do
-                end do
-                !
-                !==> case m = 1 through nlat-1
-                !
-                if (mmax < 2) return
-
-                do mp1=2, mmax
-                    m = mp1-1
-                    mb = m*nlat-(m*(m+1))/2
-                    mp2 = mp1+1
-
-                    if (mp1 <= ndo1) then
-
-                        do k=1, nt
-                            do i=1, imm1
-                                do np1=mp1, ndo1, 2
-                                    cr(mp1, np1, k) = cr(mp1, np1, k)-vb(i, np1+mb)*wo(i, 2*mp1-2, k) &
-                                        +wb(i, np1+mb)*ve(i, 2*mp1-1, k)
-                                    ci(mp1, np1, k) = ci(mp1, np1, k)-vb(i, np1+mb)*wo(i, 2*mp1-1, k) &
-                                        -wb(i, np1+mb)*ve(i, 2*mp1-2, k)
-                                end do
-                            end do
-                        end do
-
-                        if (mlat /= 0) then
-
-                            do k=1, nt
-                                do np1=mp1, ndo1, 2
-                                    cr(mp1, np1, k) = cr(mp1, np1, k)+wb(imid, np1+mb)*ve(imid, 2*mp1-1, k)
-                                    ci(mp1, np1, k) = ci(mp1, np1, k)-wb(imid, np1+mb)*ve(imid, 2*mp1-2, k)
-                                end do
-                            end do
-                        end if
-                    end if
-
-                    if (mp2 > ndo2) exit
-
-                    do k=1, nt
-                        do i=1, imm1
-                            do np1=mp2, ndo2, 2
-                                br(mp1, np1, k) = br(mp1, np1, k)+vb(i, np1+mb)*ve(i, 2*mp1-2, k) &
-                                    +wb(i, np1+mb)*wo(i, 2*mp1-1, k)
-                                bi(mp1, np1, k) = bi(mp1, np1, k)+vb(i, np1+mb)*ve(i, 2*mp1-1, k) &
-                                    -wb(i, np1+mb)*wo(i, 2*mp1-2, k)
-                            end do
-                        end do
-                    end do
-
-                    if (mlat == 0) exit
-
-                    do k=1, nt
-                        do np1=mp2, ndo2, 2
-                            br(mp1, np1, k) = br(mp1, np1, k)+vb(imid, np1+mb)*ve(imid, 2*mp1-2, k)
-                            bi(mp1, np1, k) = bi(mp1, np1, k)+vb(imid, np1+mb)*ve(imid, 2*mp1-1, k)
-                        end do
-                    end do
-                end do
-            case (4)
-                !
-                !==> case ityp=4 ,  v even, w odd, and cr and ci equal 0.
-                !
-                !     case m=0
-                !
-                do k=1, nt
-                    do i=1, imid
-                        do np1=2, ndo2, 2
-                            br(1, np1, k) = br(1, np1, k)+vb(i, np1)*ve(i, 1, k)
-                        end do
-                    end do
-                end do
-                !
-                !==> case m = 1 through nlat-1
-                !
-                if (mmax < 2) return
-
-                do mp1=2, mmax
-                    m = mp1-1
-                    mb = m*nlat-(m*(m+1))/2
-                    mp2 = mp1+1
-
-                    if (mp2 > ndo2) exit
-
-                    do k=1, nt
-                        do i=1, imm1
-                            do np1=mp2, ndo2, 2
-                                br(mp1, np1, k) = br(mp1, np1, k)+vb(i, np1+mb)*ve(i, 2*mp1-2, k) &
-                                    +wb(i, np1+mb)*wo(i, 2*mp1-1, k)
-                                bi(mp1, np1, k) = bi(mp1, np1, k)+vb(i, np1+mb)*ve(i, 2*mp1-1, k) &
-                                    -wb(i, np1+mb)*wo(i, 2*mp1-2, k)
-                            end do
-                        end do
-                    end do
-
-                    if (mlat == 0) exit
-
-                    do k=1, nt
-                        do np1=mp2, ndo2, 2
-                            br(mp1, np1, k) = br(mp1, np1, k)+vb(imid, np1+mb)*ve(imid, 2*mp1-2, k)
-                            bi(mp1, np1, k) = bi(mp1, np1, k)+vb(imid, np1+mb)*ve(imid, 2*mp1-1, k)
-                        end do
-                    end do
-                end do
-            case (5)
-                !
-                !==> case ityp=5   v even, w odd, and br and bi equal zero
-                !
-                !     case m=0
-                !
-                do k=1, nt
-                    do i=1, imm1
-                        do np1=3, ndo1, 2
-                            cr(1, np1, k) = cr(1, np1, k)-vb(i, np1)*wo(i, 1, k)
-                        end do
-                    end do
-                end do
-                !
-                !==> case m = 1 through nlat-1
-                !
-                if (mmax < 2) return
-
-                do mp1=2, mmax
-                    m = mp1-1
-                    mb = m*nlat-(m*(m+1))/2
-                    mp2 = mp1+1
-
-                    if (mp1 > ndo1) exit
-
-                    do  k=1, nt
-                        do  i=1, imm1
-                            do  np1=mp1, ndo1, 2
-                                cr(mp1, np1, k) = cr(mp1, np1, k)-vb(i, np1+mb)*wo(i, 2*mp1-2, k) &
-                                    +wb(i, np1+mb)*ve(i, 2*mp1-1, k)
-                                ci(mp1, np1, k) = ci(mp1, np1, k)-vb(i, np1+mb)*wo(i, 2*mp1-1, k) &
-                                    -wb(i, np1+mb)*ve(i, 2*mp1-2, k)
-                            end do
-                        end do
-                    end do
-
-                    if (mlat == 0) exit
-
-                    do k=1, nt
-                        do np1=mp1, ndo1, 2
-                            cr(mp1, np1, k) = cr(mp1, np1, k)+wb(imid, np1+mb)*ve(imid, 2*mp1-1, k)
-                            ci(mp1, np1, k) = ci(mp1, np1, k)-wb(imid, np1+mb)*ve(imid, 2*mp1-2, k)
-                        end do
-                    end do
-                end do
-            case (6)
-                !
-                !==> case ityp=6 ,  v odd , w even
-                !
-                !     case m=0
-                !
-                do k=1, nt
-                    do i=1, imid
-                        do np1=2, ndo2, 2
-                            cr(1, np1, k) = cr(1, np1, k)-vb(i, np1)*we(i, 1, k)
-                        end do
-                    end do
-                end do
-
-                do k=1, nt
-                    do i=1, imm1
-                        do np1=3, ndo1, 2
-                            br(1, np1, k) = br(1, np1, k)+vb(i, np1)*vo(i, 1, k)
-                        end do
-                    end do
-                end do
-                !
-                !==> case m = 1 through nlat-1
-                !
-                if (mmax < 2) return
-
-                do mp1=2, mmax
-                    m = mp1-1
-                    mb = m*nlat-(m*(m+1))/2
-                    mp2 = mp1+1
-
-                    if (mp1 <= ndo1) then
-
-                        do k=1, nt
-                            do i=1, imm1
-                                do np1=mp1, ndo1, 2
-                                    br(mp1, np1, k) = br(mp1, np1, k)+vb(i, np1+mb)*vo(i, 2*mp1-2, k) &
-                                        +wb(i, np1+mb)*we(i, 2*mp1-1, k)
-                                    bi(mp1, np1, k) = bi(mp1, np1, k)+vb(i, np1+mb)*vo(i, 2*mp1-1, k) &
-                                        -wb(i, np1+mb)*we(i, 2*mp1-2, k)
-                                end do
-                            end do
-                        end do
-
-
-                        if (mlat /= 0) then
-                            do k=1, nt
-                                do np1=mp1, ndo1, 2
-                                    br(mp1, np1, k) = br(mp1, np1, k)+wb(imid, np1+mb)*we(imid, 2*mp1-1, k)
-                                    bi(mp1, np1, k) = bi(mp1, np1, k)-wb(imid, np1+mb)*we(imid, 2*mp1-2, k)
-                                end do
-                            end do
-                        end if
-
-                    end if
-
-                    if (mp2 > ndo2) exit
-
-                    do k=1, nt
-                        do i=1, imm1
-                            do np1=mp2, ndo2, 2
-                                cr(mp1, np1, k) = cr(mp1, np1, k)-vb(i, np1+mb)*we(i, 2*mp1-2, k) &
-                                    +wb(i, np1+mb)*vo(i, 2*mp1-1, k)
-                                ci(mp1, np1, k) = ci(mp1, np1, k)-vb(i, np1+mb)*we(i, 2*mp1-1, k) &
-                                    -wb(i, np1+mb)*vo(i, 2*mp1-2, k)
-                            end do
-                        end do
-                    end do
-
-                    if (mlat == 0) exit
-
-                    do k=1, nt
-                        do np1=mp2, ndo2, 2
-                            cr(mp1, np1, k) = cr(mp1, np1, k)-vb(imid, np1+mb)*we(imid, 2*mp1-2, k)
-                            ci(mp1, np1, k) = ci(mp1, np1, k)-vb(imid, np1+mb)*we(imid, 2*mp1-1, k)
-                        end do
-                    end do
-                end do
-            case (7)
-                !
-                !==> case ityp=7   v odd, w even, and cr and ci equal zero
-                !
-                !    case m=0
-                !
-                do k=1, nt
-                    do i=1, imm1
-                        do np1=3, ndo1, 2
-                            br(1, np1, k) = br(1, np1, k)+vb(i, np1)*vo(i, 1, k)
-                        end do
-                    end do
-                end do
-                !
-                !==> case m = 1 through nlat-1
-                !
-                if (mmax < 2) return
-
-                do mp1=2, mmax
-                    m = mp1-1
-                    mb = m*nlat-(m*(m+1))/2
-                    mp2 = mp1+1
-
-                    if (mp1 > ndo1) exit
-
-                    do k=1, nt
-                        do i=1, imm1
-                            do np1=mp1, ndo1, 2
-                                br(mp1, np1, k) = br(mp1, np1, k)+vb(i, np1+mb)*vo(i, 2*mp1-2, k) &
-                                    +wb(i, np1+mb)*we(i, 2*mp1-1, k)
-                                bi(mp1, np1, k) = bi(mp1, np1, k)+vb(i, np1+mb)*vo(i, 2*mp1-1, k) &
-                                    -wb(i, np1+mb)*we(i, 2*mp1-2, k)
-                            end do
-                        end do
-                    end do
-
-
-                    if (mlat == 0) exit
-
-                    do  k=1, nt
-                        do np1=mp1, ndo1, 2
-                            br(mp1, np1, k) = br(mp1, np1, k)+wb(imid, np1+mb)*we(imid, 2*mp1-1, k)
-                            bi(mp1, np1, k) = bi(mp1, np1, k)-wb(imid, np1+mb)*we(imid, 2*mp1-2, k)
-                        end do
-                    end do
-                end do
-            case (8)
-                !
-                !==> case ityp=8   v odd, w even, and both br and bi equal zero
-                !
-                !     case m=0
-                !
-                do k=1, nt
-                    do i=1, imid
-                        do np1=2, ndo2, 2
-                            cr(1, np1, k) = cr(1, np1, k)-vb(i, np1)*we(i, 1, k)
-                        end do
-                    end do
-                end do
-                !
-                !==> case m = 1 through nlat-1
-                !
-                if (mmax < 2) return
-
-                do mp1=2, mmax
-                    m = mp1-1
-                    mb = m*nlat-(m*(m+1))/2
-                    mp2 = mp1+1
-
-                    if (mp2 > ndo2) exit
-
-                    do k=1, nt
-                        do i=1, imm1
-                            do np1=mp2, ndo2, 2
-                                cr(mp1, np1, k) = cr(mp1, np1, k)-vb(i, np1+mb)*we(i, 2*mp1-2, k) &
-                                    +wb(i, np1+mb)*vo(i, 2*mp1-1, k)
-                                ci(mp1, np1, k) = ci(mp1, np1, k)-vb(i, np1+mb)*we(i, 2*mp1-1, k) &
-                                    -wb(i, np1+mb)*vo(i, 2*mp1-2, k)
-                            end do
-                        end do
-                    end do
-
-                    if (mlat == 0) exit
-
-                    do  k=1, nt
-                        do  np1=mp2, ndo2, 2
-                            cr(mp1, np1, k) = cr(mp1, np1, k)-vb(imid, np1+mb)*we(imid, 2*mp1-2, k)
-                            ci(mp1, np1, k) = ci(mp1, np1, k)-vb(imid, np1+mb)*we(imid, 2*mp1-1, k)
-                        end do
-                    end do
-                end do
-        end select
-
-    end subroutine vhags1
-
-end subroutine vhags
-
-subroutine vhagsi(nlat, nlon, wvhags, lvhags, dwork, ldwork, ierror)
-    implicit none
-    integer :: ierror
-    integer :: imid
-    integer :: iw1
-    integer :: iw2
-    integer :: iw3
-    integer :: iw4
-    integer :: jw1
-    integer :: jw2
-    integer :: jw3
-    integer :: ldwork
-    integer :: lmn
-    integer :: lvhags
-    integer :: nlat
-    integer :: nlon
-    real :: wvhags
-    dimension wvhags(lvhags)
-    real dwork(ldwork)
-    ierror = 1
-    if (nlat < 3) return
-    ierror = 2
-    if (nlon < 1) return
-    ierror = 3
-    imid = (nlat+1)/2
-    lmn = (nlat*(nlat+1))/2
-    if (lvhags < 2*(imid*lmn)+nlon+15) return
-    ierror = 4
-    !     if (ldwork.lt.nlat*(3*nlat+9)+2) return
-    if (ldwork<(nlat*(3*nlat+9)+2)/2) return
-    ierror = 0
-    jw1 = 1
-    jw2 = jw1+imid*lmn
-    jw3 = jw2+imid*lmn
-    iw1 = 1
-    iw2 = iw1+nlat
-    iw3 = iw2+nlat
-    iw4 = iw3+3*imid*nlat
-    call vhgai1(nlat, imid, wvhags(jw1), wvhags(jw2), &
-        dwork(iw1), dwork(iw2), dwork(iw3), dwork(iw4))
-
-    call hrffti(nlon, wvhags(jw3))
-
-contains
-
-    subroutine vhgai1(nlat, imid, vb, wb, dthet, dwts, dpbar, work)
-        integer :: i
-        integer :: id
         integer :: ierror
         integer :: imid
-        integer :: ix
-        integer :: iy
-        integer :: lwk
-        integer :: m
-        integer :: mn
-        integer :: n
+        integer :: ist
+        integer :: ityp
+        integer :: iw1
+        integer :: iw2
+        integer :: iw3
+        integer :: iw4
+        integer :: jdvw
+        integer :: jw1
+        integer :: jw2
+        integer :: jw3
+        integer :: lmn
+        integer :: lnl
+        integer :: lvhags
+        integer :: lwork
+        integer :: lzimn
+        integer :: mdab
+        integer :: mmax
+        integer :: ndab
         integer :: nlat
-        integer :: nm
-        integer :: np
-        integer :: nz
-        real :: vb
-        real :: wb
-        dimension vb(imid, *), wb(imid, *)
-        real abel, bbel, cbel, ssqr2, dcf
-        real dpbar(imid, nlat, 3), dthet(*), dwts(*), work(*)
+        integer :: nlon
+        integer :: nt
+        real :: v
+        real :: w
+        real :: work
+        real :: wvhags
+        dimension v(idvw, jdvw, *), w(idvw, jdvw,*), br(mdab,ndab,*), &
+            bi(mdab, ndab,*), cr(mdab, ndab,*), ci(mdab, ndab,*), &
+            work(*), wvhags(*)
+        ierror = 1
+        if (nlat < 3) return
+        ierror = 2
+        if (nlon < 1) return
+        ierror = 3
+        if (ityp<0 .or. ityp>8) return
+        ierror = 4
+        if (nt < 0) return
+        ierror = 5
+        imid = (nlat+1)/2
+        if ((ityp<=2 .and. idvw<nlat) .or. &
+            (ityp>2 .and. idvw<imid)) return
+        ierror = 6
+        if (jdvw < nlon) return
+        ierror = 7
+        mmax = min(nlat, (nlon+1)/2)
+        if (mdab < mmax) return
+        ierror = 8
+        if (ndab < nlat) return
+        ierror = 9
+        idz = (mmax*(nlat+nlat-mmax+1))/2
+        lzimn = idz*imid
+        if (lvhags < lzimn+lzimn+nlon+15) return
+        ierror = 10
+        idv = nlat
+        if (ityp > 2) idv = imid
+        lnl = nt*idv*nlon
+        if (lwork < lnl+lnl+idv*nlon) return
+        ierror = 0
 
-        !     lwk = 4*nlat*(nlat+2)
-        lwk = nlat*(nlat+2)
+        if (ityp <= 2) then
+            ist = imid
+        else
+            ist = 0
+        end if
 
-        call gaqd(nlat, dthet, dwts, dpbar, lwk, ierror)
         !
-        !     compute associated legendre functions
+        !     set wvhags pointers
         !
-        !     compute m=n=0 legendre polynomials for all theta(i)
+        lmn = nlat*(nlat+1)/2
+        jw1 = 1
+        jw2 = jw1+imid*lmn
+        jw3 = jw2+imid*lmn
         !
-        ssqr2 = 1.0/sqrt(2.0)
-        dpbar(1:imid, 1, 1) = ssqr2
-        vb(1:imid, 1) = 0.0
-        wb(1:imid, 1) = 0.0
+        !     set work pointers
         !
-        !==> main loop for remaining vb, and wb
-        !
-        do n=1, nlat-1
-            nm = mod(n-2, 3)+1
-            nz = mod(n-1, 3)+1
-            np = mod(n, 3)+1
-            !
-            !==> compute dpbar for m=0
-            !
-            call dnlfk(0, n, work)
-            mn = indx(0, n, nlat)
-            do i=1, imid
-                call dnlft(0, n, dthet(i), work, dpbar(i, 1, np))
-            end do
-            !
-            !==> compute dpbar for m=1
-            !
-            call dnlfk(1, n, work)
-            mn = indx(1, n, nlat)
-            do i=1, imid
-                call dnlft(1, n, dthet(i), work, dpbar(i, 2, np))
-            !      pbar(i, mn) = dpbar(i, 2, np)
-            end do
+        iw1 = ist+1
+        iw2 = lnl+1
+        iw3 = iw2+ist
+        iw4 = iw2+lnl
+        call vhags1(nlat, nlon, ityp, nt, imid, idvw, jdvw, v, w, mdab, ndab, &
+            br, bi, cr, ci, idv, work, work(iw1), work(iw2), work(iw3), &
+            work(iw4), idz, wvhags(jw1), wvhags(jw2), wvhags(jw3))
 
-            !
-            !==> compute and store dpbar for m=2, n
-            !
-            if (n >= 2) then
-                do m=2, n
-                    abel = sqrt(real((2*n+1)*(m+n-2)*(m+n-3))/ &
-                        real((2*n-3)*(m+n-1)*(m+n)))
-                    bbel = sqrt(real((2*n+1)*(n-m-1)*(n-m))/ &
-                        real((2*n-3)*(m+n-1)*(m+n)))
-                    cbel = sqrt(real((n-m+1)*(n-m+2))/ &
-                        real((m+n-1)*(m+n)))
-                    id = indx(m, n, nlat)
+    contains
 
-                    if (m >= n-1) then
-                        dpbar(1:imid, m+1, np) = &
-                            abel*dpbar(1:imid, m-1, nm)-cbel*dpbar(1:imid, m-1, np)
-                    else
-                        dpbar(1:imid, m+1, np) = &
-                            abel*dpbar(1:imid, m-1, nm)+bbel*dpbar(1:imid, m+1, nm) &
-                            -cbel*dpbar(1:imid, m-1, np)
-                    end if
+        subroutine vhags1(nlat, nlon, ityp, nt, imid, idvw, jdvw, v, w, mdab, &
+            ndab, br, bi, cr, ci, idv, ve, vo, we, wo, work, idz, vb, wb, wrfft)
+
+            real :: bi
+            real :: br
+            real :: ci
+            real :: cr
+            real :: fsn
+            integer :: i
+            integer :: idv
+            integer :: idvw
+            integer :: idz
+            integer :: imid
+            integer :: imm1
+            integer :: ityp
+            integer :: j
+            integer :: jdvw
+            integer :: k
+            integer :: m
+            integer :: mb
+            integer :: mdab
+            integer :: mlat
+            integer :: mlon
+            integer :: mmax
+            integer :: mp1
+            integer :: mp2
+            integer :: ndab
+            integer :: ndo1
+            integer :: ndo2
+            integer :: nlat
+            integer :: nlon
+            integer :: nlp1
+            integer :: np1
+            integer :: nt
+            real :: tsn
+            real :: v
+            real :: vb
+            real :: ve
+            real :: vo
+            real :: w
+            real :: wb
+            real :: we
+            real :: wo
+            real :: work
+            real :: wrfft
+            dimension v(idvw, jdvw, *), w(idvw, jdvw, *), br(mdab, ndab,*), &
+                bi(mdab, ndab, *), cr(mdab, ndab, *), ci(mdab, ndab, *), &
+                ve(idv, nlon, *), vo(idv, nlon, *), we(idv, nlon, *), &
+                wo(idv, nlon, *), work(*), &
+                vb(imid,*), wb(imid,*), wrfft(*)
+
+            type (HFFTpack)      :: hfft
+
+            nlp1 = nlat+1
+            tsn = 2.0/nlon
+            fsn = 4.0/nlon
+            mlat = mod(nlat, 2)
+            mlon = mod(nlon, 2)
+            mmax = min(nlat, (nlon+1)/2)
+
+            select case (mlat)
+                case (0)
+                    imm1 = imid
+                    ndo1 = nlat
+                    ndo2 = nlat-1
+                case default
+                    imm1 = imid-1
+                    ndo1 = nlat-1
+                    ndo2 = nlat
+            end select
+
+            if (ityp <= 2) then
+                do k=1, nt
+                    do i=1, imm1
+                        do j=1, nlon
+                            ve(i, j, k) = tsn*(v(i, j, k)+v(nlp1-i, j, k))
+                            vo(i, j, k) = tsn*(v(i, j, k)-v(nlp1-i, j, k))
+                            we(i, j, k) = tsn*(w(i, j, k)+w(nlp1-i, j, k))
+                            wo(i, j, k) = tsn*(w(i, j, k)-w(nlp1-i, j, k))
+                        end do
+                    end do
+                end do
+            else
+                do k=1, nt
+                    do i=1, imm1
+                        do j=1, nlon
+                            ve(i, j, k) = fsn*v(i, j, k)
+                            vo(i, j, k) = fsn*v(i, j, k)
+                            we(i, j, k) = fsn*w(i, j, k)
+                            wo(i, j, k) = fsn*w(i, j, k)
+                        end do
+                    end do
                 end do
             end if
-            !
-            !     compute the derivative of the functions
-            !
-            ix = indx(0, n, nlat)
-            iy = indx(n, n, nlat)
-            vb(1:imid, ix) = -dpbar(1:imid, 2, np)*dwts(1:imid)
-            vb(1:imid, iy) = dpbar(1:imid, n, np)/sqrt(real(2*(n+1)))*dwts(1:imid)
 
-            if (n==1) then
+            if (mlat /= 0) then
+                do k=1, nt
+                    do j=1, nlon
+                        ve(imid, j, k) = tsn*v(imid, j, k)
+                        we(imid, j, k) = tsn*w(imid, j, k)
+                    end do
+                end do
+            end if
+
+            do k=1, nt
+                call hfft%forward(idv, nlon, ve(1, 1, k), idv, wrfft, work)
+                call hfft%forward(idv, nlon, we(1, 1, k), idv, wrfft, work)
+            end do
+
+            !
+            !==> Set polar coefficients to zero
+            !
+            select case (ityp)
+                case (0:1,3:4,6:7)
+                    do k=1, nt
+                        do mp1=1, mmax
+                            do np1=mp1, nlat
+                                br(mp1, np1, k) = 0.0
+                                bi(mp1, np1, k) = 0.0
+                            end do
+                        end do
+                    end do
+            end select
+
+            !
+            !==> Set azimuthal coefficients to zero
+            !
+            select case (ityp)
+                case (0,2:3,5:6,8)
+                    do k=1, nt
+                        do mp1=1, mmax
+                            do np1=mp1, nlat
+                                cr(mp1, np1, k) = 0.0
+                                ci(mp1, np1, k) = 0.0
+                            end do
+                        end do
+                    end do
+            end select
+
+            select case (ityp)
+                case (0)
+                    !
+                    !==> case ityp=0 ,  no symmetries
+                    !
+                    !    case m=0
+                    !
+                    do k=1, nt
+                        do i=1, imid
+                            do np1=2, ndo2, 2
+                                br(1, np1, k) = br(1, np1, k)+vb(i, np1)*ve(i, 1, k)
+                                cr(1, np1, k) = cr(1, np1, k)-vb(i, np1)*we(i, 1, k)
+                            end do
+                        end do
+                    end do
+
+                    do k=1, nt
+                        do i=1, imm1
+                            do np1=3, ndo1, 2
+                                br(1, np1, k) = br(1, np1, k)+vb(i, np1)*vo(i, 1, k)
+                                cr(1, np1, k) = cr(1, np1, k)-vb(i, np1)*wo(i, 1, k)
+                            end do
+                        end do
+                    end do
+                    !
+                    !==> case m = 1 through nlat-1
+                    !
+                    if (mmax < 2) then
+                        return
+                    end if
+
+                    do mp1=2, mmax
+                        m = mp1-1
+                        mb = m*nlat-(m*(m+1))/2
+                        mp2 = mp1+1
+
+                        if (mp1 <= ndo1) then
+
+                            do k=1, nt
+                                do i=1, imm1
+                                    do np1=mp1, ndo1, 2
+                                        br(mp1, np1, k) = br(mp1, np1, k)+vb(i, np1+mb)*vo(i, 2*mp1-2, k) &
+                                            +wb(i, np1+mb)*we(i, 2*mp1-1, k)
+                                        bi(mp1, np1, k) = bi(mp1, np1, k)+vb(i, np1+mb)*vo(i, 2*mp1-1, k) &
+                                            -wb(i, np1+mb)*we(i, 2*mp1-2, k)
+                                        cr(mp1, np1, k) = cr(mp1, np1, k)-vb(i, np1+mb)*wo(i, 2*mp1-2, k) &
+                                            +wb(i, np1+mb)*ve(i, 2*mp1-1, k)
+                                        ci(mp1, np1, k) = ci(mp1, np1, k)-vb(i, np1+mb)*wo(i, 2*mp1-1, k) &
+                                            -wb(i, np1+mb)*ve(i, 2*mp1-2, k)
+                                    end do
+                                end do
+                            end do
+
+                            if (mlat /= 0) then
+                                do k=1, nt
+                                    do np1=mp1, ndo1, 2
+                                        br(mp1, np1, k) = br(mp1, np1, k)+wb(imid, np1+mb)*we(imid, 2*mp1-1, k)
+                                        bi(mp1, np1, k) = bi(mp1, np1, k)-wb(imid, np1+mb)*we(imid, 2*mp1-2, k)
+                                        cr(mp1, np1, k) = cr(mp1, np1, k)+wb(imid, np1+mb)*ve(imid, 2*mp1-1, k)
+                                        ci(mp1, np1, k) = ci(mp1, np1, k)-wb(imid, np1+mb)*ve(imid, 2*mp1-2, k)
+                                    end do
+                                end do
+
+                            end if
+                        end if
+
+                        if (mp2 > ndo2) exit
+
+                        do k=1, nt
+                            do i=1, imm1
+                                do np1=mp2, ndo2, 2
+                                    br(mp1, np1, k) = br(mp1, np1, k)+vb(i, np1+mb)*ve(i, 2*mp1-2, k) &
+                                        +wb(i, np1+mb)*wo(i, 2*mp1-1, k)
+                                    bi(mp1, np1, k) = bi(mp1, np1, k)+vb(i, np1+mb)*ve(i, 2*mp1-1, k) &
+                                        -wb(i, np1+mb)*wo(i, 2*mp1-2, k)
+                                    cr(mp1, np1, k) = cr(mp1, np1, k)-vb(i, np1+mb)*we(i, 2*mp1-2, k) &
+                                        +wb(i, np1+mb)*vo(i, 2*mp1-1, k)
+                                    ci(mp1, np1, k) = ci(mp1, np1, k)-vb(i, np1+mb)*we(i, 2*mp1-1, k) &
+                                        -wb(i, np1+mb)*vo(i, 2*mp1-2, k)
+                                end do
+                            end do
+                        end do
+
+                        if (mlat == 0) exit
+
+                        do k=1, nt
+                            do np1=mp2, ndo2, 2
+                                br(mp1, np1, k) = br(mp1, np1, k)+vb(imid, np1+mb)*ve(imid, 2*mp1-2, k)
+                                bi(mp1, np1, k) = bi(mp1, np1, k)+vb(imid, np1+mb)*ve(imid, 2*mp1-1, k)
+                                cr(mp1, np1, k) = cr(mp1, np1, k)-vb(imid, np1+mb)*we(imid, 2*mp1-2, k)
+                                ci(mp1, np1, k) = ci(mp1, np1, k)-vb(imid, np1+mb)*we(imid, 2*mp1-1, k)
+                            end do
+                        end do
+                    end do
+                case (1)
+                    !
+                    !==> case ityp=1 ,  no symmetries but cr and ci equal zero
+                    !
+                    !    case m=0
+                    !
+                    do k=1, nt
+                        do i=1, imid
+                            do np1=2, ndo2, 2
+                                br(1, np1, k) = br(1, np1, k)+vb(i, np1)*ve(i, 1, k)
+                            end do
+                        end do
+                    end do
+
+                    do k=1, nt
+                        do i=1, imm1
+                            do np1=3, ndo1, 2
+                                br(1, np1, k) = br(1, np1, k)+vb(i, np1)*vo(i, 1, k)
+                            end do
+                        end do
+                    end do
+                    !
+                    !==> case m = 1 through nlat-1
+                    !
+                    if (mmax < 2) return
+
+                    do mp1=2, mmax
+                        m = mp1-1
+                        mb = m*nlat-(m*(m+1))/2
+                        mp2 = mp1+1
+
+                        if (mp1 <= ndo1) then
+
+                            do k=1, nt
+                                do i=1, imm1
+                                    do np1=mp1, ndo1, 2
+                                        br(mp1, np1, k) = br(mp1, np1, k)+vb(i, np1+mb)*vo(i, 2*mp1-2, k) &
+                                            +wb(i, np1+mb)*we(i, 2*mp1-1, k)
+                                        bi(mp1, np1, k) = bi(mp1, np1, k)+vb(i, np1+mb)*vo(i, 2*mp1-1, k) &
+                                            -wb(i, np1+mb)*we(i, 2*mp1-2, k)
+                                    end do
+                                end do
+                            end do
+
+                            if (mlat /= 0) then
+                                do k=1, nt
+                                    do np1=mp1, ndo1, 2
+                                        br(mp1, np1, k) = br(mp1, np1, k)+wb(imid, np1+mb)*we(imid, 2*mp1-1, k)
+                                        bi(mp1, np1, k) = bi(mp1, np1, k)-wb(imid, np1+mb)*we(imid, 2*mp1-2, k)
+                                    end do
+                                end do
+                            end if
+                        end if
+
+                        if (mp2 > ndo2) exit
+
+                        do k=1, nt
+                            do i=1, imm1
+                                do np1=mp2, ndo2, 2
+                                    br(mp1, np1, k) = br(mp1, np1, k)+vb(i, np1+mb)*ve(i, 2*mp1-2, k) &
+                                        +wb(i, np1+mb)*wo(i, 2*mp1-1, k)
+                                    bi(mp1, np1, k) = bi(mp1, np1, k)+vb(i, np1+mb)*ve(i, 2*mp1-1, k) &
+                                        -wb(i, np1+mb)*wo(i, 2*mp1-2, k)
+                                end do
+                            end do
+                        end do
+
+                        if (mlat == 0) exit
+
+                        do k=1, nt
+                            do np1=mp2, ndo2, 2
+                                br(mp1, np1, k) = br(mp1, np1, k)+vb(imid, np1+mb)*ve(imid, 2*mp1-2, k)
+                                bi(mp1, np1, k) = bi(mp1, np1, k)+vb(imid, np1+mb)*ve(imid, 2*mp1-1, k)
+                            end do
+                        end do
+                    end do
+                case (2)
+                    !
+                    !==> case ityp=2 ,  no symmetries but br and bi equal zero
+                    !
+                    !    case m=0
+                    !
+                    do k=1, nt
+                        do i=1, imid
+                            do np1=2, ndo2, 2
+                                cr(1, np1, k) = cr(1, np1, k)-vb(i, np1)*we(i, 1, k)
+                            end do
+                        end do
+                    end do
+
+                    do k=1, nt
+                        do i=1, imm1
+                            do np1=3, ndo1, 2
+                                cr(1, np1, k) = cr(1, np1, k)-vb(i, np1)*wo(i, 1, k)
+                            end do
+                        end do
+                    end do
+                    !
+                    !==> case m = 1 through nlat-1
+                    !
+                    if (mmax < 2) return
+
+                    do mp1=2, mmax
+                        m = mp1-1
+                        mb = m*nlat-(m*(m+1))/2
+                        mp2 = mp1+1
+
+                        if (mp1 <= ndo1) then
+
+                            do k=1, nt
+                                do i=1, imm1
+                                    do np1=mp1, ndo1, 2
+                                        cr(mp1, np1, k) = cr(mp1, np1, k)-vb(i, np1+mb)*wo(i, 2*mp1-2, k) &
+                                            +wb(i, np1+mb)*ve(i, 2*mp1-1, k)
+                                        ci(mp1, np1, k) = ci(mp1, np1, k)-vb(i, np1+mb)*wo(i, 2*mp1-1, k) &
+                                            -wb(i, np1+mb)*ve(i, 2*mp1-2, k)
+                                    end do
+                                end do
+                            end do
+
+                            if (mlat /= 0) then
+                                do k=1, nt
+                                    do np1=mp1, ndo1, 2
+                                        cr(mp1, np1, k) = cr(mp1, np1, k)+wb(imid, np1+mb)*ve(imid, 2*mp1-1, k)
+                                        ci(mp1, np1, k) = ci(mp1, np1, k)-wb(imid, np1+mb)*ve(imid, 2*mp1-2, k)
+                                    end do
+                                end do
+                            end if
+                        end if
+
+                        if (mp2 > ndo2) exit
+
+                        do k=1, nt
+                            do i=1, imm1
+                                do np1=mp2, ndo2, 2
+                                    cr(mp1, np1, k) = cr(mp1, np1, k)-vb(i, np1+mb)*we(i, 2*mp1-2, k) &
+                                        +wb(i, np1+mb)*vo(i, 2*mp1-1, k)
+                                    ci(mp1, np1, k) = ci(mp1, np1, k)-vb(i, np1+mb)*we(i, 2*mp1-1, k) &
+                                        -wb(i, np1+mb)*vo(i, 2*mp1-2, k)
+                                end do
+                            end do
+                        end do
+
+                        if (mlat == 0) exit
+
+                        do k=1, nt
+                            do np1=mp2, ndo2, 2
+                                cr(mp1, np1, k) = cr(mp1, np1, k)-vb(imid, np1+mb)*we(imid, 2*mp1-2, k)
+                                ci(mp1, np1, k) = ci(mp1, np1, k)-vb(imid, np1+mb)*we(imid, 2*mp1-1, k)
+                            end do
+                        end do
+                    end do
+                case (3)
+                    !
+                    !==> case ityp=3 ,  v even , w odd
+                    !
+                    !    case m=0
+                    !
+                    do k=1, nt
+                        do i=1, imid
+                            do np1=2, ndo2, 2
+                                br(1, np1, k) = br(1, np1, k)+vb(i, np1)*ve(i, 1, k)
+                            end do
+                        end do
+                    end do
+
+                    do k=1, nt
+                        do i=1, imm1
+                            do np1=3, ndo1, 2
+                                cr(1, np1, k) = cr(1, np1, k)-vb(i, np1)*wo(i, 1, k)
+                            end do
+                        end do
+                    end do
+                    !
+                    !==> case m = 1 through nlat-1
+                    !
+                    if (mmax < 2) return
+
+                    do mp1=2, mmax
+                        m = mp1-1
+                        mb = m*nlat-(m*(m+1))/2
+                        mp2 = mp1+1
+
+                        if (mp1 <= ndo1) then
+
+                            do k=1, nt
+                                do i=1, imm1
+                                    do np1=mp1, ndo1, 2
+                                        cr(mp1, np1, k) = cr(mp1, np1, k)-vb(i, np1+mb)*wo(i, 2*mp1-2, k) &
+                                            +wb(i, np1+mb)*ve(i, 2*mp1-1, k)
+                                        ci(mp1, np1, k) = ci(mp1, np1, k)-vb(i, np1+mb)*wo(i, 2*mp1-1, k) &
+                                            -wb(i, np1+mb)*ve(i, 2*mp1-2, k)
+                                    end do
+                                end do
+                            end do
+
+                            if (mlat /= 0) then
+
+                                do k=1, nt
+                                    do np1=mp1, ndo1, 2
+                                        cr(mp1, np1, k) = cr(mp1, np1, k)+wb(imid, np1+mb)*ve(imid, 2*mp1-1, k)
+                                        ci(mp1, np1, k) = ci(mp1, np1, k)-wb(imid, np1+mb)*ve(imid, 2*mp1-2, k)
+                                    end do
+                                end do
+                            end if
+                        end if
+
+                        if (mp2 > ndo2) exit
+
+                        do k=1, nt
+                            do i=1, imm1
+                                do np1=mp2, ndo2, 2
+                                    br(mp1, np1, k) = br(mp1, np1, k)+vb(i, np1+mb)*ve(i, 2*mp1-2, k) &
+                                        +wb(i, np1+mb)*wo(i, 2*mp1-1, k)
+                                    bi(mp1, np1, k) = bi(mp1, np1, k)+vb(i, np1+mb)*ve(i, 2*mp1-1, k) &
+                                        -wb(i, np1+mb)*wo(i, 2*mp1-2, k)
+                                end do
+                            end do
+                        end do
+
+                        if (mlat == 0) exit
+
+                        do k=1, nt
+                            do np1=mp2, ndo2, 2
+                                br(mp1, np1, k) = br(mp1, np1, k)+vb(imid, np1+mb)*ve(imid, 2*mp1-2, k)
+                                bi(mp1, np1, k) = bi(mp1, np1, k)+vb(imid, np1+mb)*ve(imid, 2*mp1-1, k)
+                            end do
+                        end do
+                    end do
+                case (4)
+                    !
+                    !==> case ityp=4 ,  v even, w odd, and cr and ci equal 0.
+                    !
+                    !     case m=0
+                    !
+                    do k=1, nt
+                        do i=1, imid
+                            do np1=2, ndo2, 2
+                                br(1, np1, k) = br(1, np1, k)+vb(i, np1)*ve(i, 1, k)
+                            end do
+                        end do
+                    end do
+                    !
+                    !==> case m = 1 through nlat-1
+                    !
+                    if (mmax < 2) return
+
+                    do mp1=2, mmax
+                        m = mp1-1
+                        mb = m*nlat-(m*(m+1))/2
+                        mp2 = mp1+1
+
+                        if (mp2 > ndo2) exit
+
+                        do k=1, nt
+                            do i=1, imm1
+                                do np1=mp2, ndo2, 2
+                                    br(mp1, np1, k) = br(mp1, np1, k)+vb(i, np1+mb)*ve(i, 2*mp1-2, k) &
+                                        +wb(i, np1+mb)*wo(i, 2*mp1-1, k)
+                                    bi(mp1, np1, k) = bi(mp1, np1, k)+vb(i, np1+mb)*ve(i, 2*mp1-1, k) &
+                                        -wb(i, np1+mb)*wo(i, 2*mp1-2, k)
+                                end do
+                            end do
+                        end do
+
+                        if (mlat == 0) exit
+
+                        do k=1, nt
+                            do np1=mp2, ndo2, 2
+                                br(mp1, np1, k) = br(mp1, np1, k)+vb(imid, np1+mb)*ve(imid, 2*mp1-2, k)
+                                bi(mp1, np1, k) = bi(mp1, np1, k)+vb(imid, np1+mb)*ve(imid, 2*mp1-1, k)
+                            end do
+                        end do
+                    end do
+                case (5)
+                    !
+                    !==> case ityp=5   v even, w odd, and br and bi equal zero
+                    !
+                    !     case m=0
+                    !
+                    do k=1, nt
+                        do i=1, imm1
+                            do np1=3, ndo1, 2
+                                cr(1, np1, k) = cr(1, np1, k)-vb(i, np1)*wo(i, 1, k)
+                            end do
+                        end do
+                    end do
+                    !
+                    !==> case m = 1 through nlat-1
+                    !
+                    if (mmax < 2) return
+
+                    do mp1=2, mmax
+                        m = mp1-1
+                        mb = m*nlat-(m*(m+1))/2
+                        mp2 = mp1+1
+
+                        if (mp1 > ndo1) exit
+
+                        do  k=1, nt
+                            do  i=1, imm1
+                                do  np1=mp1, ndo1, 2
+                                    cr(mp1, np1, k) = cr(mp1, np1, k)-vb(i, np1+mb)*wo(i, 2*mp1-2, k) &
+                                        +wb(i, np1+mb)*ve(i, 2*mp1-1, k)
+                                    ci(mp1, np1, k) = ci(mp1, np1, k)-vb(i, np1+mb)*wo(i, 2*mp1-1, k) &
+                                        -wb(i, np1+mb)*ve(i, 2*mp1-2, k)
+                                end do
+                            end do
+                        end do
+
+                        if (mlat == 0) exit
+
+                        do k=1, nt
+                            do np1=mp1, ndo1, 2
+                                cr(mp1, np1, k) = cr(mp1, np1, k)+wb(imid, np1+mb)*ve(imid, 2*mp1-1, k)
+                                ci(mp1, np1, k) = ci(mp1, np1, k)-wb(imid, np1+mb)*ve(imid, 2*mp1-2, k)
+                            end do
+                        end do
+                    end do
+                case (6)
+                    !
+                    !==> case ityp=6 ,  v odd , w even
+                    !
+                    !     case m=0
+                    !
+                    do k=1, nt
+                        do i=1, imid
+                            do np1=2, ndo2, 2
+                                cr(1, np1, k) = cr(1, np1, k)-vb(i, np1)*we(i, 1, k)
+                            end do
+                        end do
+                    end do
+
+                    do k=1, nt
+                        do i=1, imm1
+                            do np1=3, ndo1, 2
+                                br(1, np1, k) = br(1, np1, k)+vb(i, np1)*vo(i, 1, k)
+                            end do
+                        end do
+                    end do
+                    !
+                    !==> case m = 1 through nlat-1
+                    !
+                    if (mmax < 2) return
+
+                    do mp1=2, mmax
+                        m = mp1-1
+                        mb = m*nlat-(m*(m+1))/2
+                        mp2 = mp1+1
+
+                        if (mp1 <= ndo1) then
+
+                            do k=1, nt
+                                do i=1, imm1
+                                    do np1=mp1, ndo1, 2
+                                        br(mp1, np1, k) = br(mp1, np1, k)+vb(i, np1+mb)*vo(i, 2*mp1-2, k) &
+                                            +wb(i, np1+mb)*we(i, 2*mp1-1, k)
+                                        bi(mp1, np1, k) = bi(mp1, np1, k)+vb(i, np1+mb)*vo(i, 2*mp1-1, k) &
+                                            -wb(i, np1+mb)*we(i, 2*mp1-2, k)
+                                    end do
+                                end do
+                            end do
+
+
+                            if (mlat /= 0) then
+                                do k=1, nt
+                                    do np1=mp1, ndo1, 2
+                                        br(mp1, np1, k) = br(mp1, np1, k)+wb(imid, np1+mb)*we(imid, 2*mp1-1, k)
+                                        bi(mp1, np1, k) = bi(mp1, np1, k)-wb(imid, np1+mb)*we(imid, 2*mp1-2, k)
+                                    end do
+                                end do
+                            end if
+
+                        end if
+
+                        if (mp2 > ndo2) exit
+
+                        do k=1, nt
+                            do i=1, imm1
+                                do np1=mp2, ndo2, 2
+                                    cr(mp1, np1, k) = cr(mp1, np1, k)-vb(i, np1+mb)*we(i, 2*mp1-2, k) &
+                                        +wb(i, np1+mb)*vo(i, 2*mp1-1, k)
+                                    ci(mp1, np1, k) = ci(mp1, np1, k)-vb(i, np1+mb)*we(i, 2*mp1-1, k) &
+                                        -wb(i, np1+mb)*vo(i, 2*mp1-2, k)
+                                end do
+                            end do
+                        end do
+
+                        if (mlat == 0) exit
+
+                        do k=1, nt
+                            do np1=mp2, ndo2, 2
+                                cr(mp1, np1, k) = cr(mp1, np1, k)-vb(imid, np1+mb)*we(imid, 2*mp1-2, k)
+                                ci(mp1, np1, k) = ci(mp1, np1, k)-vb(imid, np1+mb)*we(imid, 2*mp1-1, k)
+                            end do
+                        end do
+                    end do
+                case (7)
+                    !
+                    !==> case ityp=7   v odd, w even, and cr and ci equal zero
+                    !
+                    !    case m=0
+                    !
+                    do k=1, nt
+                        do i=1, imm1
+                            do np1=3, ndo1, 2
+                                br(1, np1, k) = br(1, np1, k)+vb(i, np1)*vo(i, 1, k)
+                            end do
+                        end do
+                    end do
+                    !
+                    !==> case m = 1 through nlat-1
+                    !
+                    if (mmax < 2) return
+
+                    do mp1=2, mmax
+                        m = mp1-1
+                        mb = m*nlat-(m*(m+1))/2
+                        mp2 = mp1+1
+
+                        if (mp1 > ndo1) exit
+
+                        do k=1, nt
+                            do i=1, imm1
+                                do np1=mp1, ndo1, 2
+                                    br(mp1, np1, k) = br(mp1, np1, k)+vb(i, np1+mb)*vo(i, 2*mp1-2, k) &
+                                        +wb(i, np1+mb)*we(i, 2*mp1-1, k)
+                                    bi(mp1, np1, k) = bi(mp1, np1, k)+vb(i, np1+mb)*vo(i, 2*mp1-1, k) &
+                                        -wb(i, np1+mb)*we(i, 2*mp1-2, k)
+                                end do
+                            end do
+                        end do
+
+
+                        if (mlat == 0) exit
+
+                        do  k=1, nt
+                            do np1=mp1, ndo1, 2
+                                br(mp1, np1, k) = br(mp1, np1, k)+wb(imid, np1+mb)*we(imid, 2*mp1-1, k)
+                                bi(mp1, np1, k) = bi(mp1, np1, k)-wb(imid, np1+mb)*we(imid, 2*mp1-2, k)
+                            end do
+                        end do
+                    end do
+                case (8)
+                    !
+                    !==> case ityp=8   v odd, w even, and both br and bi equal zero
+                    !
+                    !     case m=0
+                    !
+                    do k=1, nt
+                        do i=1, imid
+                            do np1=2, ndo2, 2
+                                cr(1, np1, k) = cr(1, np1, k)-vb(i, np1)*we(i, 1, k)
+                            end do
+                        end do
+                    end do
+                    !
+                    !==> case m = 1 through nlat-1
+                    !
+                    if (mmax < 2) return
+
+                    do mp1=2, mmax
+                        m = mp1-1
+                        mb = m*nlat-(m*(m+1))/2
+                        mp2 = mp1+1
+
+                        if (mp2 > ndo2) exit
+
+                        do k=1, nt
+                            do i=1, imm1
+                                do np1=mp2, ndo2, 2
+                                    cr(mp1, np1, k) = cr(mp1, np1, k)-vb(i, np1+mb)*we(i, 2*mp1-2, k) &
+                                        +wb(i, np1+mb)*vo(i, 2*mp1-1, k)
+                                    ci(mp1, np1, k) = ci(mp1, np1, k)-vb(i, np1+mb)*we(i, 2*mp1-1, k) &
+                                        -wb(i, np1+mb)*vo(i, 2*mp1-2, k)
+                                end do
+                            end do
+                        end do
+
+                        if (mlat == 0) exit
+
+                        do  k=1, nt
+                            do  np1=mp2, ndo2, 2
+                                cr(mp1, np1, k) = cr(mp1, np1, k)-vb(imid, np1+mb)*we(imid, 2*mp1-2, k)
+                                ci(mp1, np1, k) = ci(mp1, np1, k)-vb(imid, np1+mb)*we(imid, 2*mp1-1, k)
+                            end do
+                        end do
+                    end do
+            end select
+
+        end subroutine vhags1
+
+    end subroutine vhags
+
+    subroutine vhagsi(nlat, nlon, wvhags, lvhags, dwork, ldwork, ierror)
+
+        integer :: ierror
+        integer :: imid
+        integer :: iw1
+        integer :: iw2
+        integer :: iw3
+        integer :: iw4
+        integer :: jw1
+        integer :: jw2
+        integer :: jw3
+        integer :: ldwork
+        integer :: lmn
+        integer :: lvhags
+        integer :: nlat
+        integer :: nlon
+        real :: wvhags
+        dimension wvhags(lvhags)
+        real dwork(ldwork)
+
+        type (HFFTpack) :: hfft
+
+        ierror = 1
+        if (nlat < 3) return
+        ierror = 2
+        if (nlon < 1) return
+        ierror = 3
+        imid = (nlat+1)/2
+        lmn = (nlat*(nlat+1))/2
+        if (lvhags < 2*(imid*lmn)+nlon+15) return
+        ierror = 4
+        !     if (ldwork.lt.nlat*(3*nlat+9)+2) return
+        if (ldwork<(nlat*(3*nlat+9)+2)/2) return
+        ierror = 0
+        jw1 = 1
+        jw2 = jw1+imid*lmn
+        jw3 = jw2+imid*lmn
+        iw1 = 1
+        iw2 = iw1+nlat
+        iw3 = iw2+nlat
+        iw4 = iw3+3*imid*nlat
+        call vhgai1(nlat, imid, wvhags(jw1), wvhags(jw2), &
+            dwork(iw1), dwork(iw2), dwork(iw3), dwork(iw4))
+
+        call hfft%initialize(nlon, wvhags(jw3))
+
+    contains
+
+        subroutine vhgai1(nlat, imid, vb, wb, dthet, dwts, dpbar, work)
+            integer :: i
+            integer :: id
+            integer :: ierror
+            integer :: imid
+            integer :: ix
+            integer :: iy
+            integer :: lwk
+            integer :: m
+            integer :: mn
+            integer :: n
+            integer :: nlat
+            integer :: nm
+            integer :: np
+            integer :: nz
+            real :: vb
+            real :: wb
+            dimension vb(imid, *), wb(imid, *)
+            real abel, bbel, cbel, ssqr2, dcf
+            real dpbar(imid, nlat, 3), dthet(*), dwts(*), work(*)
+            real dummy_variable
+
+            type (SpherepackAux) :: sphere_aux
+
+            !     lwk = 4*nlat*(nlat+2)
+            lwk = nlat*(nlat+2)
+
+            call gaqd(nlat, dthet, dwts, dummy_variable, lwk, ierror)
+            !
+            !     compute associated legendre functions
+            !
+            !     compute m=n=0 legendre polynomials for all theta(i)
+            !
+            ssqr2 = 1.0/sqrt(2.0)
+            dpbar(1:imid, 1, 1) = ssqr2
+            vb(1:imid, 1) = 0.0
+            wb(1:imid, 1) = 0.0
+            !
+            !==> main loop for remaining vb, and wb
+            !
+            do n=1, nlat-1
+                nm = mod(n-2, 3)+1
+                nz = mod(n-1, 3)+1
+                np = mod(n, 3)+1
                 !
-                !==> compute the vector harmonic w(theta) = m*pbar/cos(theta)
+                !==> compute dpbar for m=0
                 !
-                !     set wb=0 for m=0
+                call sphere_aux%dnlfk(0, n, work)
+                mn = indx(0, n, nlat)
+                do i=1, imid
+                    call sphere_aux%dnlft(0, n, dthet(i), work, dpbar(i, 1, np))
+                end do
+                !
+                !==> compute dpbar for m=1
+                !
+                call sphere_aux%dnlfk(1, n, work)
+                mn = indx(1, n, nlat)
+                do i=1, imid
+                    call sphere_aux%dnlft(1, n, dthet(i), work, dpbar(i, 2, np))
+                !      pbar(i, mn) = dpbar(i, 2, np)
+                end do
+
+                !
+                !==> compute and store dpbar for m=2, n
+                !
+                if (n >= 2) then
+                    do m=2, n
+                        abel = sqrt(real((2*n+1)*(m+n-2)*(m+n-3))/ &
+                            real((2*n-3)*(m+n-1)*(m+n)))
+                        bbel = sqrt(real((2*n+1)*(n-m-1)*(n-m))/ &
+                            real((2*n-3)*(m+n-1)*(m+n)))
+                        cbel = sqrt(real((n-m+1)*(n-m+2))/ &
+                            real((m+n-1)*(m+n)))
+                        id = indx(m, n, nlat)
+
+                        if (m >= n-1) then
+                            dpbar(1:imid, m+1, np) = &
+                                abel*dpbar(1:imid, m-1, nm)-cbel*dpbar(1:imid, m-1, np)
+                        else
+                            dpbar(1:imid, m+1, np) = &
+                                abel*dpbar(1:imid, m-1, nm)+bbel*dpbar(1:imid, m+1, nm) &
+                                -cbel*dpbar(1:imid, m-1, np)
+                        end if
+                    end do
+                end if
+                !
+                !     compute the derivative of the functions
                 !
                 ix = indx(0, n, nlat)
-                wb(1:imid, ix) = 0.0
-            else
-                dcf = sqrt(real(4*n*(n+1)))
-                do m=1, n-1
-                    ix = indx(m, n, nlat)
-                    abel = sqrt(real((n+m)*(n-m+1)))/dcf
-                    bbel = sqrt(real((n-m)*(n+m+1)))/dcf
-                    vb(1:imid, ix) = &
-                        (abel*dpbar(1:imid, m, np)-bbel*dpbar(1:imid, m+2, np))&
-                        * dwts(1:imid)
-                end do
-            end if
-            !
-            !==> compute wb for m=1, n
-            !
-            dcf = sqrt(real(n+n+1)/real(4*n*(n+1)*(n+n-1)))
-            do m=1, n
-                ix = indx(m, n, nlat)
-                abel = dcf*sqrt(real((n+m)*(n+m-1)))
-                bbel = dcf*sqrt(real((n-m)*(n-m-1)))
-                if (m >= n-1) then
-                    wb(1:imid, ix) = abel * dpbar(1:imid, m, nz) * dwts(1:imid)
+                iy = indx(n, n, nlat)
+                vb(1:imid, ix) = -dpbar(1:imid, 2, np)*dwts(1:imid)
+                vb(1:imid, iy) = dpbar(1:imid, n, np)/sqrt(real(2*(n+1)))*dwts(1:imid)
+
+                if (n==1) then
+                    !
+                    !==> compute the vector harmonic w(theta) = m*pbar/cos(theta)
+                    !
+                    !     set wb=0 for m=0
+                    !
+                    ix = indx(0, n, nlat)
+                    wb(1:imid, ix) = 0.0
                 else
-                    wb(1:imid, ix) = &
-                        (abel*dpbar(1:imid, m, nz) + bbel*dpbar(1:imid, m+2, nz))&
-                        * dwts(1:imid)
+                    dcf = sqrt(real(4*n*(n+1)))
+                    do m=1, n-1
+                        ix = indx(m, n, nlat)
+                        abel = sqrt(real((n+m)*(n-m+1)))/dcf
+                        bbel = sqrt(real((n-m)*(n+m+1)))/dcf
+                        vb(1:imid, ix) = &
+                            (abel*dpbar(1:imid, m, np)-bbel*dpbar(1:imid, m+2, np))&
+                            * dwts(1:imid)
+                    end do
                 end if
+                !
+                !==> compute wb for m=1, n
+                !
+                dcf = sqrt(real(n+n+1)/real(4*n*(n+1)*(n+n-1)))
+                do m=1, n
+                    ix = indx(m, n, nlat)
+                    abel = dcf*sqrt(real((n+m)*(n+m-1)))
+                    bbel = dcf*sqrt(real((n-m)*(n-m-1)))
+                    if (m >= n-1) then
+                        wb(1:imid, ix) = abel * dpbar(1:imid, m, nz) * dwts(1:imid)
+                    else
+                        wb(1:imid, ix) = &
+                            (abel*dpbar(1:imid, m, nz) + bbel*dpbar(1:imid, m+2, nz))&
+                            * dwts(1:imid)
+                    end if
+                end do
             end do
-        end do
 
-    end subroutine vhgai1
-
+        end subroutine vhgai1
 
 
-    pure function indx(m, n, nlat) result (return_value)
-        implicit none
-        !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
-        !----------------------------------------------------------------------
-        integer, intent (in) :: m
-        integer, intent (in) :: n
-        integer, intent (in) :: nlat
-        integer              :: return_value
-        !----------------------------------------------------------------------
 
-        return_value = m*nlat-(m*(m+1))/2+n+1
+        pure function indx(m, n, nlat) result (return_value)
+            !----------------------------------------------------------------------
+            ! Dictionary: calling arguments
+            !----------------------------------------------------------------------
+            integer, intent (in) :: m
+            integer, intent (in) :: n
+            integer, intent (in) :: nlat
+            integer              :: return_value
+            !----------------------------------------------------------------------
 
-    end function indx
+            return_value = m*nlat-(m*(m+1))/2+n+1
 
-end subroutine vhagsi
+        end function indx
+
+    end subroutine vhagsi
+
+end module module_vhags

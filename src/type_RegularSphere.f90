@@ -24,6 +24,18 @@ module type_RegularSphere
         assignment(=), &
         operator(*)
     
+    use module_shaes, only: &
+        shaes
+
+    use module_shses, only: &
+        shses
+
+    use module_vhaes, only: &
+        vhaes
+
+    use module_vhses, only: &
+        vhses
+
     ! Explicit typing only
     implicit none
 

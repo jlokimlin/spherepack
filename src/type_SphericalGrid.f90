@@ -12,7 +12,6 @@ module type_SphericalGrid
     public :: SphericalGrid
 
 
-
     ! Declare derived data type
     type, abstract, public :: SphericalGrid
         !----------------------------------------------------------------------

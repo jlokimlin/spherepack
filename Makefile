@@ -1,14 +1,11 @@
 
 include make.inc
 
-all: libspherepack lib testlib
+all: lib testlib
 
-libspherepack:
+lib:
 	mkdir -p ./lib
 	mkdir -p ./objs
-	( cd ./spherepack_src; $(MAKE) clean; $(MAKE) )
-
-lib: 
 	( cd ./src; $(MAKE) all )
 
 testlib:
@@ -19,6 +16,6 @@ install:
 	cp -r ../$(LIB_NAME) $(BIN_PATH)
 
 clean: 
-	( cd ./spherepack_src; $(MAKE) clean; cd ./src; $(MAKE) clean; cd ../test; $(MAKE) clean )
+	(cd ./src; $(MAKE) clean; cd ../test; $(MAKE) clean )
 
-.PHONY: all lipspherepack lib testlib install
+.PHONY: all lib testlib install

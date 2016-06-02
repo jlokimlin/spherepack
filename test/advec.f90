@@ -25,7 +25,7 @@
 !
 ! ... required files
 !
-!     gradgc.f,shagc.f,shsgc.f,vhsgc.f,sphcom.f hrfft.f,gaqd.f
+!     gradgc.f,shagc.f,shsgc.f,vhsgc.f,type_SpherepackAux.f type_HFFTpack.f,gaqd.f
 !
 !
 ! definitions:

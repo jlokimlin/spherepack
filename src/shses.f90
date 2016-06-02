@@ -31,14 +31,14 @@
 !
 !
 !
-! ... file shses.f
+! ... file shses.f90
 !
 !     this file contains code and documentation for subroutines
 !     shses and shsesi
 !
-! ... files which must be loaded with shses.f
+! ... files which must be loaded with shses.f90
 !
-!     sphcom.f, hrfft.f
+!     type_SpherepackAux.f90, type_HFFTpack.f90
 !
 !     subroutine shses(nlat,nlon,isym,nt,g,idg,jdg,a,b,mdab,ndab,
 !    +                 wshses,lshses,work,lwork,ierror)
@@ -52,7 +52,7 @@
 !
 ! *** required files from spherepack2
 !
-!     sphcom.f, hrfft.f
+!     type_SpherepackAux.f90, type_HFFTpack.f90
 !
 !
 !     input parameters
@@ -291,322 +291,338 @@
 !            = 4  error in the specification of lwork
 !            = 5  error in the specification of ldwork
 !
-subroutine shses(nlat,nlon,isym,nt,g,idg,jdg,a,b,mdab,ndab, &
-    wshses,lshses,work,lwork,ierror)
+module module_shses
 
     use, intrinsic :: iso_fortran_env, only: &
         wp => REAL64, &
         ip => INT32
 
+    use type_HFFTpack, only: &
+        HFFTpack
+
+    use type_SpherepackAux, only: &
+        SpherepackAux
+
+    ! Explicit typing only
     implicit none
-    !----------------------------------------------------------------------
-    ! Dictionary: calling arguments
-    !----------------------------------------------------------------------
-    integer (ip), intent (in)     :: nlat
-    integer (ip), intent (in)     :: nlon
-    integer (ip), intent (in)     :: isym
-    integer (ip), intent (in)     :: nt
-    real (wp),    intent (out)    :: g(idg,jdg,*)
-    integer (ip), intent (in)     :: idg
-    integer (ip), intent (in)     :: jdg
-    real (wp),    intent (in out) :: a(mdab,ndab,*)
-    real (wp),    intent (in out) :: b(mdab,ndab,*)
-    integer (ip), intent (in)     :: mdab
-    integer (ip), intent (in)     :: ndab
-    real (wp),    intent (in out) :: wshses(lshses)
-    integer (ip), intent (in)     :: lshses
-    real (wp),    intent (in out) :: work(lwork)
-    integer (ip), intent (in)     :: lwork
-    integer (ip), intent (out)    :: ierror
-    !----------------------------------------------------------------------
-    ! Dictionary: local variables
-    !----------------------------------------------------------------------
-    integer (ip) :: imid, ist, lpimn, ls, mmax, nln
-    !----------------------------------------------------------------------
 
-    mmax = min(nlat,nlon/2+1)
-    imid = (nlat+1)/2
-    lpimn = (imid*mmax*(nlat+nlat-mmax+1))/2
-
-    if(isym > 0) then
-        ls = imid
-    else
-        ls = nlat
-    end if
-
-    nln = nt*ls*nlon
-
-    if (nlat < 3) then
-        ierror = 1
-        return
-    else if (nlon < 4) then
-        ierror = 2
-        return
-    else if (isym < 0 .or. isym > 2) then
-        ierror = 3
-        return
-    else if (nt < 0) then
-        ierror = 4
-        return
-    else if ((isym == 0 .and. idg < nlat) .or. (isym /= 0 .and. idg < (nlat+1)/2)) then
-        ierror = 5
-        return
-    else if (jdg < nlon) then
-        ierror = 6
-        return
-    else if (mdab < mmax) then
-        ierror = 7
-        return
-    else if (ndab < nlat) then
-        ierror = 8
-        return
-    else if (lshses < lpimn+nlon+15) then
-        ierror = 9
-        return
-    else if (lwork < nln+ls*nlon) then
-        ierror = 10
-        return
-    else
-        ierror = 0
-    end if
-
-    select case (isym)
-        case (0)
-            ist = imid
-        case default
-            ist = 0
-    end select
-
-    call shses1(nlat,isym,nt,g,idg,jdg,a,b,mdab,ndab,wshses,imid, &
-        ls,nlon,work,work(ist+1),work(nln+1),wshses(lpimn+1))
+    ! Everything is private unless stated otherwise
+    public :: shses
+    public :: shsesi
 
 contains
 
-    subroutine shses1(nlat,isym,nt,g,idgs,jdgs,a,b,mdab,ndab,p,imid, &
-        idg,jdg,ge,go,work,whrfft)
+    subroutine shses(nlat,nlon,isym,nt,g,idg,jdg,a,b,mdab,ndab, &
+        wshses,lshses,work,lwork,ierror)
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
         integer (ip), intent (in)     :: nlat
+        integer (ip), intent (in)     :: nlon
         integer (ip), intent (in)     :: isym
         integer (ip), intent (in)     :: nt
-        real (wp),    intent (in out) :: g(idgs,jdgs,*)
-        integer (ip), intent (in)     :: idgs
-        integer (ip), intent (in)     :: jdgs
-        real (wp),    intent (in)     :: a(mdab,ndab,*)
-        real (wp),    intent (in)     :: b(mdab,ndab,*)
-        integer (ip), intent (in)     :: mdab
-        integer (ip), intent (in)     :: ndab
-        real (wp),    intent (in)     :: p(imid,*)
+        real (wp),    intent (out)    :: g(idg,jdg,*)
         integer (ip), intent (in)     :: idg
         integer (ip), intent (in)     :: jdg
-        real (wp),    intent (in out) :: ge(idg,jdg,*)
-        real (wp),    intent (in out) :: go(idg,jdg,*)
-        real (wp),    intent (in out) :: work(*)
-        real (wp),    intent (in out) :: whrfft(*)
+        real (wp),    intent (in out) :: a(mdab,ndab,*)
+        real (wp),    intent (in out) :: b(mdab,ndab,*)
+        integer (ip), intent (in)     :: mdab
+        integer (ip), intent (in)     :: ndab
+        real (wp),    intent (in out) :: wshses(lshses)
+        integer (ip), intent (in)     :: lshses
+        real (wp),    intent (in out) :: work(lwork)
+        integer (ip), intent (in)     :: lwork
+        integer (ip), intent (out)    :: ierror
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
-        integer (ip) :: i, j, imid, imm1, k, ls
-        integer (ip) :: m, mb, mdo, mmax, mn, modl, nlon
-        integer (ip) :: mp1, mp2,  ndo, nlp1, np1
+        integer (ip) :: imid, ist, lpimn, ls, mmax, nln
         !----------------------------------------------------------------------
 
-        ls = idg
-        nlon = jdg
         mmax = min(nlat,nlon/2+1)
+        imid = (nlat+1)/2
+        lpimn = (imid*mmax*(nlat+nlat-mmax+1))/2
 
-        if (2*mmax-1 > nlon) then
-            mdo = mmax-1
+        if(isym > 0) then
+            ls = imid
         else
-            mdo = mmax
+            ls = nlat
         end if
 
-        nlp1 = nlat+1
-        modl = mod(nlat,2)
+        nln = nt*ls*nlon
 
-        if (modl /= 0) then
-            imm1 = imid-1
+        if (nlat < 3) then
+            ierror = 1
+            return
+        else if (nlon < 4) then
+            ierror = 2
+            return
+        else if (isym < 0 .or. isym > 2) then
+            ierror = 3
+            return
+        else if (nt < 0) then
+            ierror = 4
+            return
+        else if ((isym == 0 .and. idg < nlat) .or. (isym /= 0 .and. idg < (nlat+1)/2)) then
+            ierror = 5
+            return
+        else if (jdg < nlon) then
+            ierror = 6
+            return
+        else if (mdab < mmax) then
+            ierror = 7
+            return
+        else if (ndab < nlat) then
+            ierror = 8
+            return
+        else if (lshses < lpimn+nlon+15) then
+            ierror = 9
+            return
+        else if (lwork < nln+ls*nlon) then
+            ierror = 10
+            return
         else
-            imm1 = imid
+            ierror = 0
         end if
 
-        ge(1:ls,1:nlon,1:nt) = 0.0_wp
+        select case (isym)
+            case (0)
+                ist = imid
+            case default
+                ist = 0
+        end select
+
+        call shses1(nlat,isym,nt,g,idg,jdg,a,b,mdab,ndab,wshses,imid, &
+            ls,nlon,work,work(ist+1),work(nln+1),wshses(lpimn+1))
+
+    contains
+
+        subroutine shses1(nlat,isym,nt,g,idgs,jdgs,a,b,mdab,ndab,p,imid, &
+            idg,jdg,ge,go,work,whrfft)
+            !----------------------------------------------------------------------
+            ! Dictionary: calling arguments
+            !----------------------------------------------------------------------
+            integer (ip), intent (in)     :: nlat
+            integer (ip), intent (in)     :: isym
+            integer (ip), intent (in)     :: nt
+            real (wp),    intent (in out) :: g(idgs,jdgs,*)
+            integer (ip), intent (in)     :: idgs
+            integer (ip), intent (in)     :: jdgs
+            real (wp),    intent (in)     :: a(mdab,ndab,*)
+            real (wp),    intent (in)     :: b(mdab,ndab,*)
+            integer (ip), intent (in)     :: mdab
+            integer (ip), intent (in)     :: ndab
+            real (wp),    intent (in)     :: p(imid,*)
+            integer (ip), intent (in)     :: idg
+            integer (ip), intent (in)     :: jdg
+            real (wp),    intent (in out) :: ge(idg,jdg,*)
+            real (wp),    intent (in out) :: go(idg,jdg,*)
+            real (wp),    intent (in out) :: work(*)
+            real (wp),    intent (in out) :: whrfft(*)
+            !----------------------------------------------------------------------
+            ! Dictionary: local variables
+            !----------------------------------------------------------------------
+            integer (ip)    :: i, j, imid, imm1, k, ls
+            integer (ip)    :: m, mb, mdo, mmax, mn, modl, nlon
+            integer (ip)    :: mp1, mp2,  ndo, nlp1, np1
+            type (HFFTpack) :: hfft
+            !----------------------------------------------------------------------
+
+            ls = idg
+            nlon = jdg
+            mmax = min(nlat,nlon/2+1)
+
+            if (2*mmax-1 > nlon) then
+                mdo = mmax-1
+            else
+                mdo = mmax
+            end if
+
+            nlp1 = nlat+1
+            modl = mod(nlat,2)
+
+            if (modl /= 0) then
+                imm1 = imid-1
+            else
+                imm1 = imid
+            end if
+
+            ge(1:ls,1:nlon,1:nt) = 0.0_wp
 
 
-        if_block: block
+            if_block: block
 
-            if (isym /= 1) then
+                if (isym /= 1) then
+                    do k=1,nt
+                        do np1=1,nlat,2
+                            do i=1,imid
+                                ge(i,1,k)=ge(i,1,k)+a(1,np1,k)*p(i,np1)
+                            end do
+                        end do
+                    end do
+
+                    if (mod(nlat,2) == 0) then
+                        ndo = nlat-1
+                    else
+                        ndo = nlat
+                    end if
+
+                    do mp1=2,mdo
+                        m = mp1-1
+                        mb = m*(nlat-1)-(m*(m-1))/2
+                        do np1=mp1,ndo,2
+                            mn = mb+np1
+                            do k=1,nt
+                                do i=1,imid
+                                    ge(i,2*mp1-2,k) = ge(i,2*mp1-2,k)+a(mp1,np1,k)*p(i,mn)
+                                    ge(i,2*mp1-1,k) = ge(i,2*mp1-1,k)+b(mp1,np1,k)*p(i,mn)
+                                end do
+                            end do
+                        end do
+                    end do
+
+                    if (.not.(mdo == mmax .or. mmax > ndo)) then
+                        mb = mdo*(nlat-1)-(mdo*(mdo-1))/2
+                        do np1=mmax,ndo,2
+                            mn = mb+np1
+                            do k=1,nt
+                                do i=1,imid
+                                    ge(i,2*mmax-2,k) = ge(i,2*mmax-2,k)+a(mmax,np1,k)*p(i,mn)
+                                end do
+                            end do
+                        end do
+                    end if
+
+                    if(isym == 2) exit if_block
+
+                end if
+
                 do k=1,nt
-                    do np1=1,nlat,2
-                        do i=1,imid
-                            ge(i,1,k)=ge(i,1,k)+a(1,np1,k)*p(i,np1)
+                    do np1=2,nlat,2
+                        do i=1,imm1
+                            go(i,1,k)=go(i,1,k)+a(1,np1,k)*p(i,np1)
                         end do
                     end do
                 end do
 
-                if (mod(nlat,2) == 0) then
+                if(mod(nlat,2) /= 0) then
                     ndo = nlat-1
                 else
                     ndo = nlat
                 end if
 
                 do mp1=2,mdo
+                    mp2 = mp1+1
                     m = mp1-1
                     mb = m*(nlat-1)-(m*(m-1))/2
-                    do np1=mp1,ndo,2
+                    do np1=mp2,ndo,2
                         mn = mb+np1
                         do k=1,nt
-                            do i=1,imid
-                                ge(i,2*mp1-2,k) = ge(i,2*mp1-2,k)+a(mp1,np1,k)*p(i,mn)
-                                ge(i,2*mp1-1,k) = ge(i,2*mp1-1,k)+b(mp1,np1,k)*p(i,mn)
+                            do i=1,imm1
+                                go(i,2*mp1-2,k) = go(i,2*mp1-2,k)+a(mp1,np1,k)*p(i,mn)
+                                go(i,2*mp1-1,k) = go(i,2*mp1-1,k)+b(mp1,np1,k)*p(i,mn)
                             end do
                         end do
                     end do
                 end do
 
-                if (.not.(mdo == mmax .or. mmax > ndo)) then
+                mp2 = mmax+1
+
+                if (.not.(mdo == mmax .or. mp2 > ndo)) then
                     mb = mdo*(nlat-1)-(mdo*(mdo-1))/2
-                    do np1=mmax,ndo,2
+                    do np1=mp2,ndo,2
                         mn = mb+np1
                         do k=1,nt
-                            do i=1,imid
-                                ge(i,2*mmax-2,k) = ge(i,2*mmax-2,k)+a(mmax,np1,k)*p(i,mn)
+                            do i=1,imm1
+                                go(i,2*mmax-2,k) = go(i,2*mmax-2,k)+a(mmax,np1,k)*p(i,mn)
                             end do
                         end do
                     end do
                 end if
 
-                if(isym == 2) exit if_block
-
-            end if
+            end block if_block
 
             do k=1,nt
-                do np1=2,nlat,2
-                    do i=1,imm1
-                        go(i,1,k)=go(i,1,k)+a(1,np1,k)*p(i,np1)
-                    end do
-                end do
+                if(mod(nlon,2) == 0) ge(1:ls,nlon,k) = 2.0_wp*ge(1:ls,nlon,k)
+                call hfft%backward(ls,nlon,ge(1,1,k),ls,whrfft,work)
             end do
 
-            if(mod(nlat,2) /= 0) then
-                ndo = nlat-1
-            else
-                ndo = nlat
-            end if
-
-            do mp1=2,mdo
-                mp2 = mp1+1
-                m = mp1-1
-                mb = m*(nlat-1)-(m*(m-1))/2
-                do np1=mp2,ndo,2
-                    mn = mb+np1
+            select case (isym)
+                case (0)
                     do k=1,nt
-                        do i=1,imm1
-                            go(i,2*mp1-2,k) = go(i,2*mp1-2,k)+a(mp1,np1,k)*p(i,mn)
-                            go(i,2*mp1-1,k) = go(i,2*mp1-1,k)+b(mp1,np1,k)*p(i,mn)
+                        do j=1,nlon
+                            do i=1,imm1
+                                g(i,j,k) = 0.5_wp*(ge(i,j,k)+go(i,j,k))
+                                g(nlp1-i,j,k) = 0.5_wp*(ge(i,j,k)-go(i,j,k))
+                            end do
+
+                            if (modl /= 0) g(imid,j,k) = 0.5_wp*ge(imid,j,k)
+
                         end do
                     end do
-                end do
-            end do
-
-            mp2 = mmax+1
-
-            if (.not.(mdo == mmax .or. mp2 > ndo)) then
-                mb = mdo*(nlat-1)-(mdo*(mdo-1))/2
-                do np1=mp2,ndo,2
-                    mn = mb+np1
+                case default
                     do k=1,nt
-                        do i=1,imm1
-                            go(i,2*mmax-2,k) = go(i,2*mmax-2,k)+a(mmax,np1,k)*p(i,mn)
-                        end do
+                        g(1:imid,1:nlon,k) = 0.5_wp*ge(1:imid,1:nlon,k)
                     end do
-                end do
-            end if
+            end select
 
-        end block if_block
+        end subroutine shses1
 
-        do k=1,nt
-            if(mod(nlon,2) == 0) ge(1:ls,nlon,k) = 2.0_wp*ge(1:ls,nlon,k)
-            call hrfftb(ls,nlon,ge(1,1,k),ls,whrfft,work)
-        end do
-
-        select case (isym)
-            case (0)
-                do k=1,nt
-                    do j=1,nlon
-                        do i=1,imm1
-                            g(i,j,k) = 0.5_wp*(ge(i,j,k)+go(i,j,k))
-                            g(nlp1-i,j,k) = 0.5_wp*(ge(i,j,k)-go(i,j,k))
-                        end do
-
-                        if (modl /= 0) g(imid,j,k) = 0.5_wp*ge(imid,j,k)
-
-                    end do
-                end do
-            case default
-                do k=1,nt
-                    g(1:imid,1:nlon,k) = 0.5_wp*ge(1:imid,1:nlon,k)
-                end do
-        end select
-
-    end subroutine shses1
-
-end subroutine shses
-
-subroutine shsesi(nlat,nlon,wshses,lshses,work,lwork,dwork, &
-    ldwork,ierror)
-
-    use, intrinsic :: iso_fortran_env, only: &
-        wp => REAL64, &
-        ip => INT32
-
-    implicit none
-    !----------------------------------------------------------------------
-    ! Dictionary: calling arguments
-    !----------------------------------------------------------------------
-    integer (ip), intent (in)  :: nlat
-    integer (ip), intent (in)  :: nlon
-    real (wp),    intent (out) :: wshses(lshses)
-    integer (ip), intent (in)  :: lshses
-    real (wp),    intent (out) :: work(lwork)
-    integer (ip), intent (in)  :: lwork
-    real (wp),    intent (out) :: dwork(ldwork)
-    integer (ip), intent (in)  :: ldwork
-    integer (ip), intent (out) :: ierror
-    !----------------------------------------------------------------------
-    ! Dictionary: local variables
-    !----------------------------------------------------------------------
-    integer (ip) :: imid, iw1, labc, lpimn, mmax
-    !----------------------------------------------------------------------
-
-    mmax = min(nlat,nlon/2+1)
-    imid = (nlat+1)/2
-    lpimn = (imid*mmax*(2*nlat-mmax+1))/2
-    labc = 3*((mmax-2)*(2*nlat-mmax-1))/2
-    iw1 = 3*nlat*imid+1
+    end subroutine shses
 
 
-    if (nlat < 3) then
-        ierror = 1
-        return
-    else if (nlon < 4) then
-        ierror = 2
-        return
-    else if (lshses < lpimn+nlon+15) then
-        ierror = 3
-        return
-    else if (lwork < 5*nlat*imid + labc) then
-        ierror = 4
-        return
-    else if (ldwork < nlat+1) then
-        ierror = 5
-        return
-    else
-        ierror = 0
-    end if
+    subroutine shsesi(nlat,nlon,wshses,lshses,work,lwork,dwork, &
+        ldwork,ierror)
+        !----------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !----------------------------------------------------------------------
+        integer (ip), intent (in)  :: nlat
+        integer (ip), intent (in)  :: nlon
+        real (wp),    intent (out) :: wshses(lshses)
+        integer (ip), intent (in)  :: lshses
+        real (wp),    intent (out) :: work(lwork)
+        integer (ip), intent (in)  :: lwork
+        real (wp),    intent (out) :: dwork(ldwork)
+        integer (ip), intent (in)  :: ldwork
+        integer (ip), intent (out) :: ierror
+        !----------------------------------------------------------------------
+        ! Dictionary: local variables
+        !----------------------------------------------------------------------
+        integer (ip)         :: imid, iw1, labc, lpimn, mmax
+        type (HFFTpack)      :: hfft
+        type (SpherepackAux) :: sphere_aux
+        !----------------------------------------------------------------------
 
-    call ses1(nlat, nlon, imid, wshses, work, work(iw1), dwork)
-    call hrffti(nlon, wshses(lpimn+1))
+        mmax = min(nlat,nlon/2+1)
+        imid = (nlat+1)/2
+        lpimn = (imid*mmax*(2*nlat-mmax+1))/2
+        labc = 3*((mmax-2)*(2*nlat-mmax-1))/2
+        iw1 = 3*nlat*imid+1
 
-end subroutine shsesi
+
+        if (nlat < 3) then
+            ierror = 1
+            return
+        else if (nlon < 4) then
+            ierror = 2
+            return
+        else if (lshses < lpimn+nlon+15) then
+            ierror = 3
+            return
+        else if (lwork < 5*nlat*imid + labc) then
+            ierror = 4
+            return
+        else if (ldwork < nlat+1) then
+            ierror = 5
+            return
+        else
+            ierror = 0
+        end if
+
+        call sphere_aux%ses1(nlat, nlon, imid, wshses, work, work(iw1), dwork)
+
+        call hfft%initialize(nlon, wshses(lpimn+1))
+
+    end subroutine shsesi
+
+end module module_shses

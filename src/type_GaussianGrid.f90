@@ -7,6 +7,9 @@ module type_GaussianGrid
     use type_SphericalGrid, only: &
         SphericalGrid
 
+    use module_gaqd, only: &
+        gaqd
+
     ! Explicit typing only
     implicit none
 
@@ -15,13 +18,12 @@ module type_GaussianGrid
     public :: GaussianGrid
 
 
-
     ! Declare derived data type
     type, extends (SphericalGrid), public ::  GaussianGrid
         !----------------------------------------------------------------------
         ! Class variables
         !----------------------------------------------------------------------
-        real (wp), allocatable, public :: gaussian_weights(:) !! Used for integration, requires 'GAU' for allocation
+        real (wp), allocatable, public :: gaussian_weights(:)
         !----------------------------------------------------------------------
     contains
         !----------------------------------------------------------------------

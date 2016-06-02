@@ -38,7 +38,7 @@
 !
 ! ... files which must be loaded with vhsgs.f
 !
-!     sphcom.f, hrfft.f, gaqd.f
+!     type_SpherepackAux.f, type_HFFTpack.f, gaqd.f
 !
 !     subroutine vhsgs(nlat,nlon,ityp,nt,v,w,idvw,jdvw,br,bi,cr,ci,
 !    +                 mdab,ndab,wvhsgs,lvhsgs,work,lwork,ierror)
@@ -423,11 +423,71 @@
 !            = 3  error in the specification of lvhsgs
 !            = 4  error in the specification of lwork
 !
+module module_vhsgs
+
+    use, intrinsic :: iso_fortran_env, only: &
+        wp => REAL64, &
+        ip => INT32
+
+    use type_HFFTpack, only: &
+        HFFTpack
+
+    use type_SpherepackAux, only: &
+        SpherepackAux
+
+    use module_gaqd, only: &
+        gaqd
+
+    ! Explicit typing only
+    implicit none
+
+    ! Everything is private unless stated otherwise
+    public :: vhsgs
+    public :: vhsgsi
+
+contains
+
 subroutine vhsgs(nlat,nlon,ityp,nt,v,w,idvw,jdvw,br,bi,cr,ci, &
                  mdab,ndab,wvhsgs,lvhsgs,work,lwork,ierror)
-dimension v(idvw,jdvw,1),w(idvw,jdvw,1),br(mdab,ndab,1), &
-          bi(mdab,ndab,1),cr(mdab,ndab,1),ci(mdab,ndab,1), &
-          work(1),wvhsgs(1)
+
+real :: bi
+real :: br
+real :: ci
+real :: cr
+integer :: idv
+integer :: idvw
+integer :: idz
+integer :: ierror
+integer :: imid
+integer :: ist
+integer :: ityp
+integer :: iw1
+integer :: iw2
+integer :: iw3
+integer :: iw4
+integer :: jdvw
+integer :: jw1
+integer :: jw2
+integer :: jw3
+integer :: lmn
+integer :: lnl
+integer :: lvhsgs
+integer :: lwork
+integer :: lzimn
+integer :: mdab
+integer :: mmax
+integer :: ndab
+integer :: nlat
+integer :: nlon
+integer :: nt
+real :: v
+real :: w
+real :: work
+real :: wvhsgs
+dimension v(idvw,jdvw,*),w(idvw,jdvw,*),br(mdab,ndab,*), &
+          bi(mdab,ndab,*),cr(mdab,ndab,*),ci(mdab,ndab,*), &
+          work(*),wvhsgs(*)
+
 ierror = 1
 if(nlat < 3) return
 ierror = 2
@@ -477,16 +537,62 @@ iw4 = iw2+lnl
 call vhsgs1(nlat,nlon,ityp,nt,imid,idvw,jdvw,v,w,mdab,ndab, &
            br,bi,cr,ci,idv,work,work(iw1),work(iw2),work(iw3), &
           work(iw4),idz,wvhsgs(jw1),wvhsgs(jw2),wvhsgs(jw3))
-return
-end subroutine vhsgs
+
+contains
 
 subroutine vhsgs1(nlat,nlon,ityp,nt,imid,idvw,jdvw,v,w,mdab, &
    ndab,br,bi,cr,ci,idv,ve,vo,we,wo,work,idz,vb,wb,wrfft)
-dimension v(idvw,jdvw,1),w(idvw,jdvw,1),br(mdab,ndab,1), &
-          bi(mdab,ndab,1),cr(mdab,ndab,1),ci(mdab,ndab,1), &
-          ve(idv,nlon,1),vo(idv,nlon,1),we(idv,nlon,1), &
-          wo(idv,nlon,1),work(1),wrfft(1), &
-          vb(imid,1),wb(imid,1)
+
+real :: bi
+real :: br
+real :: ci
+real :: cr
+integer :: i
+integer :: idv
+integer :: idvw
+integer :: idz
+integer :: imid
+integer :: imm1
+integer :: ityp
+integer :: itypp
+integer :: j
+integer :: jdvw
+integer :: k
+integer :: m
+integer :: mb
+integer :: mdab
+integer :: mlat
+integer :: mlon
+integer :: mmax
+integer :: mn
+integer :: mp1
+integer :: mp2
+integer :: ndab
+integer :: ndo1
+integer :: ndo2
+integer :: nlat
+integer :: nlon
+integer :: nlp1
+integer :: np1
+integer :: nt
+real :: v
+real :: vb
+real :: ve
+real :: vo
+real :: w
+real :: wb
+real :: we
+real :: wo
+real :: work
+real :: wrfft
+dimension v(idvw,jdvw,*),w(idvw,jdvw,*),br(mdab,ndab,*), &
+          bi(mdab,ndab,*),cr(mdab,ndab,*),ci(mdab,ndab,*), &
+          ve(idv,nlon,*),vo(idv,nlon,*),we(idv,nlon,*), &
+          wo(idv,nlon,*),work(*),wrfft(*), &
+          vb(imid,*),wb(imid,*)
+
+type (HFFTpack) :: hfft
+
 nlp1 = nlat+1
 mlat = mod(nlat,2)
 mlon = mod(nlon,2)
@@ -978,8 +1084,8 @@ we(imid,2*mp1-1,k) = we(imid,2*mp1-1,k) &
 830 continue
 950 continue
 do 14 k=1,nt
-call hrfftb(idv,nlon,ve(1,1,k),idv,wrfft,work)
-call hrfftb(idv,nlon,we(1,1,k),idv,wrfft,work)
+call hfft%backward(idv,nlon,ve(1,1,k),idv,wrfft,work)
+call hfft%backward(idv,nlon,we(1,1,k),idv,wrfft,work)
 14 continue
 if(ityp > 2) go to 12
 do 60 k=1,nt
@@ -1003,8 +1109,11 @@ do 65 j=1,nlon
 v(imid,j,k) = .5*ve(imid,j,k)
 w(imid,j,k) = .5*we(imid,j,k)
 65 continue
-return
+
 end subroutine vhsgs1
+
+end subroutine vhsgs
+
 subroutine vhsgsi(nlat,nlon,wvhsgs,lvhsgs,dwork,ldwork,ierror)
 !
 !     subroutine vhsfsi computes the gaussian points theta, gauss
@@ -1021,8 +1130,27 @@ subroutine vhsgsi(nlat,nlon,wvhsgs,lvhsgs,dwork,ldwork,ierror)
 !     locations which is determined by the size of dthet,
 !     dwts, dwork, and dpbar in vhsgs1
 !
-dimension wvhsgs(*)
-real dwork(*)
+integer :: ierror
+integer :: imid
+integer :: iw1
+integer :: iw2
+integer :: iw3
+integer :: iw4
+integer :: jw1
+integer :: jw2
+integer :: jw3
+integer :: ldwork
+integer :: lmn
+integer :: lvhsgs
+integer :: nlat
+integer :: nlon
+real :: wvhsgs
+dimension wvhsgs(lvhsgs)
+real dwork(ldwork)
+
+
+type (HFFTpack) :: hfft
+
 ierror = 1
 if(nlat < 3) return
 ierror = 2
@@ -1052,25 +1180,49 @@ iw4 = iw3+3*imid*nlat
 !     iw4 = iw3+6*imid*nlat
 call vhgsi1(nlat,imid,wvhsgs(jw1),wvhsgs(jw2), &
 dwork(iw1),dwork(iw2),dwork(iw3),dwork(iw4))
-call hrffti(nlon,wvhsgs(jw3))
-return
-end subroutine vhsgsi
+
+call hfft%initialize(nlon,wvhsgs(jw3))
+
+contains
+
 subroutine vhgsi1(nlat,imid,vb,wb,dthet,dwts,dpbar,work)
+
+integer :: i
+integer :: id
+integer :: ierror
+integer :: imid
+integer :: ix
+integer :: iy
+integer :: lwk
+integer :: m
+integer :: mn
+integer :: n
+integer :: nlat
+integer :: nm
+integer :: np
+integer :: nz
+real :: vb
+real :: wb
 dimension vb(imid,*),wb(imid,*)
 real abel,bbel,cbel,ssqr2,dcf
 real dthet(*),dwts(*),dpbar(imid,nlat,3),work(*)
+real dummy_variable
+
+type (HFFTpack)      :: hfft
+type (SpherepackAux) :: sphere_aux
+
 !
 !     compute gauss points and weights
 !     use dpbar (length 3*nnlat*(nnlat+1)) as work space for gaqd
 !
 lwk = nlat*(nlat+2)
-call gaqd(nlat,dthet,dwts,dpbar,lwk,ierror)
+call gaqd(nlat,dthet,dwts,dummy_variable,lwk,ierror)
 !
 !     compute associated legendre functions
 !
 !     compute m=n=0 legendre polynomials for all theta(i)
 !
-ssqr2 = 1./sqrt(2.d0)
+ssqr2 = 1./sqrt(2.0)
 do 90 i=1,imid
 dpbar(i,1,1) = ssqr2
 vb(i,1) = 0.
@@ -1086,19 +1238,19 @@ np = mod(n,3)+1
 !
 !     compute dpbar for m=0
 !
-call dnlfk(0,n,work)
+call sphere_aux%dnlfk(0,n,work)
 mn = indx(0,n,nlat)
 do 105 i=1,imid
-call dnlft(0,n,dthet(i),work,dpbar(i,1,np))
+call sphere_aux%dnlft(0,n,dthet(i),work,dpbar(i,1,np))
 !      pbar(i,mn) = dpbar(i,1,np)
 105 continue
 !
 !     compute dpbar for m=1
 !
-call dnlfk(1,n,work)
+call sphere_aux%dnlfk(1,n,work)
 mn = indx(1,n,nlat)
 do 106 i=1,imid
-call dnlft(1,n,dthet(i),work,dpbar(i,2,np))
+call sphere_aux%dnlft(1,n,dthet(i),work,dpbar(i,2,np))
 !      pbar(i,mn) = dpbar(i,2,np)
 106 continue
 104 continue
@@ -1172,8 +1324,9 @@ wb(i,ix) = abel*dpbar(i,m,nz)
 228 continue
 230 continue
 100 continue
-return
+
 end subroutine vhgsi1
+
 
     pure function indx(m, n, nlat) result (return_value)
         implicit none
@@ -1189,3 +1342,9 @@ end subroutine vhgsi1
         return_value = m*nlat-(m*(m+1))/2+n+1
 
     end function indx
+
+
+
+end subroutine vhsgsi
+
+end module module_vhsgs

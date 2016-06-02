@@ -38,7 +38,7 @@
 !
 ! ... required spherepack files
 !
-!     islapec.f, shaec.f, shsec.f, sphcom.f, hrfft.f
+!     islapec.f, shaec.f, shsec.f, type_SpherepackAux.f, type_HFFTpack.f
 !
 ! ... description
 !

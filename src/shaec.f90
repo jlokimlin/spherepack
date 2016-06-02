@@ -37,7 +37,7 @@
 !
 ! ... files which must be loaded with shaec.f
 !
-!     sphcom.f, hrfft.f
+!     type_SpherepackAux.f, type_HFFTpack.f
 !
 !     subroutine shaec(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, 
 !    +                 wshaec, lshaec, work, lwork, ierror)
@@ -297,386 +297,412 @@
 !
 !
 !
-subroutine shaec(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, &
-    wshaec, lshaec, work, lwork, ierror)
+module module_shaec
+
+    use, intrinsic :: iso_fortran_env, only: &
+        wp => REAL64, &
+        ip => INT32
+
+    use type_HFFTpack, only: &
+        HFFTpack
+
+    use type_SpherepackAux, only: &
+        SpherepackAux
+
+    ! Explicit typing only
     implicit none
-    real :: a
-    real :: b
-    real :: g
-    integer :: idg
-    integer :: ierror
-    integer :: imid
-    integer :: ist
-    integer :: isym
-    integer :: iw1
-    integer :: jdg
-    integer :: labc
-    integer :: ls
-    integer :: lshaec
-    integer :: lwork
-    integer :: lzz1
-    integer :: mdab
-    integer :: mmax
-    integer :: ndab
-    integer :: nlat
-    integer :: nln
-    integer :: nlon
-    integer :: nt
-    real :: work
-    real :: wshaec
-    dimension g(idg, jdg, *), a(mdab, ndab, *), b(mdab, ndab, *), wshaec(*), &
-        work(*)
 
-    ierror = 1
+    ! Everything is private unless stated otherwise
+    public :: shaec
+    public :: shaeci
 
-    if (nlat < 3) then
-        return
-    end if
+contains
 
-    ierror = 2
+    subroutine shaec(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, &
+        wshaec, lshaec, work, lwork, ierror)
+        real (wp) :: a
+        real (wp) :: b
+        real (wp) :: g
+        integer (ip) :: idg
+        integer (ip) :: ierror
+        integer (ip) :: imid
+        integer (ip) :: ist
+        integer (ip) :: isym
+        integer (ip) :: iw1
+        integer (ip) :: jdg
+        integer (ip) :: labc
+        integer (ip) :: ls
+        integer (ip) :: lshaec
+        integer (ip) :: lwork
+        integer (ip) :: lzz1
+        integer (ip) :: mdab
+        integer (ip) :: mmax
+        integer (ip) :: ndab
+        integer (ip) :: nlat
+        integer (ip) :: nln
+        integer (ip) :: nlon
+        integer (ip) :: nt
+        real (wp) :: work
+        real (wp) :: wshaec
+        dimension g(idg, jdg, *), a(mdab, ndab, *), b(mdab, ndab, *), wshaec(*), &
+            work(*)
 
-    if (nlon < 4) then
-        return
-    end if
+        ierror = 1
 
-    ierror = 3
+        if (nlat < 3) then
+            return
+        end if
 
-    if (isym < 0 .or. isym > 2) then
-        return
-    end if
+        ierror = 2
 
-    ierror = 4
+        if (nlon < 4) then
+            return
+        end if
 
-    if (nt < 0) then
-        return
-    end if
+        ierror = 3
 
-    ierror = 5
+        if (isym < 0 .or. isym > 2) then
+            return
+        end if
 
-    if ((isym == 0 .and. idg < nlat) .or. &
-        (isym /= 0 .and. idg < (nlat+1)/2)) then
-        return
-    end if
+        ierror = 4
 
-    ierror = 6
+        if (nt < 0) then
+            return
+        end if
 
-    if (jdg < nlon) then
-        return
-    end if
+        ierror = 5
 
-    ierror = 7
-    mmax = min(nlat, nlon/2+1)
+        if ((isym == 0 .and. idg < nlat) .or. &
+            (isym /= 0 .and. idg < (nlat+1)/2)) then
+            return
+        end if
 
-    if (mdab < mmax) then
-        return
-    end if
+        ierror = 6
 
-    ierror = 8
+        if (jdg < nlon) then
+            return
+        end if
 
-    if (ndab < nlat) then
-        return
-    end if
+        ierror = 7
+        mmax = min(nlat, nlon/2+1)
 
-    ierror = 9
-    imid = (nlat+1)/2
-    lzz1 = 2*nlat*imid
-    labc = 3*((mmax-2)*(nlat+nlat-mmax-1))/2
+        if (mdab < mmax) then
+            return
+        end if
 
-    if (lshaec < lzz1+labc+nlon+15) then
-        return
-    end if
+        ierror = 8
 
-    ierror = 10
-    ls = nlat
+        if (ndab < nlat) then
+            return
+        end if
 
-    if (isym > 0) then
-        ls = imid
-    end if
+        ierror = 9
+        imid = (nlat+1)/2
+        lzz1 = 2*nlat*imid
+        labc = 3*((mmax-2)*(nlat+nlat-mmax-1))/2
 
-    nln = nt*ls*nlon
+        if (lshaec < lzz1+labc+nlon+15) then
+            return
+        end if
 
-    if (lwork < nln+max(ls*nlon, 3*nlat*imid)) then
-        return
-    end if
+        ierror = 10
+        ls = nlat
 
-    ierror = 0
-    ist = 0
+        if (isym > 0) then
+            ls = imid
+        end if
 
-    if (isym == 0) then
-        ist = imid
-    end if
+        nln = nt*ls*nlon
 
-    iw1 = lzz1+labc+1
+        if (lwork < nln+max(ls*nlon, 3*nlat*imid)) then
+            return
+        end if
 
-    call shaec1(nlat, isym, nt, g, idg, jdg, a, b, mdab, ndab, imid, ls, nlon, &
-        work, work(ist+1), work(nln+1), work(nln+1), wshaec, wshaec(iw1))
+        ierror = 0
+        ist = 0
 
-end subroutine shaec
+        if (isym == 0) then
+            ist = imid
+        end if
+
+        iw1 = lzz1+labc+1
+
+        call shaec1(nlat, isym, nt, g, idg, jdg, a, b, mdab, ndab, imid, ls, nlon, &
+            work, work(ist+1), work(nln+1), work(nln+1), wshaec, wshaec(iw1))
 
 
+    contains
 
-subroutine shaec1(nlat, isym, nt, g, idgs, jdgs, a, b, mdab, ndab, imid, &
-    idg, jdg, ge, go, work, zb, wzfin, whrfft)
-    implicit none
-    real :: a
-    real :: b
-    real :: fsn
-    real :: g
-    real :: ge
-    real :: go
-    integer :: i
-    integer :: i3
-    integer :: idg
-    integer :: idgs
-    integer :: imid
-    integer :: imm1
-    integer :: isym
-    integer :: j
-    integer :: jdg
-    integer :: jdgs
-    integer :: k
-    integer :: ls
-    integer :: m
-    integer :: mdab
-    integer :: mdo
-    integer :: mmax
-    integer :: modl
-    integer :: mp1
-    integer :: mp2
-    integer :: ndab
-    integer :: ndo
-    integer :: nlat
-    integer :: nlon
-    integer :: nlp1
-    integer :: np1
-    integer :: nt
-    real :: tsn
-    real :: whrfft
-    real :: work
-    real :: wzfin
-    real :: zb
-    !
-    !     whrfft must have at least nlon+15 locations
-    !     wzfin must have 2*l*(nlat+1)/2 + ((l-3)*l+2)/2 locations
-    !     zb must have 3*l*(nlat+1)/2 locations
-    !     work must have ls*nlon locations
-    !
-    dimension g(idgs, jdgs, 1), a(mdab, ndab, 1), b(mdab, ndab, 1), &
-        ge(idg, jdg, 1), go(idg, jdg, 1), zb(imid, nlat, 3), wzfin(1), &
-        whrfft(1), work(1)
 
-    ls = idg
-    nlon = jdg
-    mmax = min(nlat, nlon/2+1)
-    mdo = mmax
-    if (mdo+mdo-1 > nlon) mdo = mmax-1
-    nlp1 = nlat+1
-    tsn = 2./nlon
-    fsn = 4./nlon
-    modl = mod(nlat, 2)
-    imm1 = imid
-    if (modl /= 0) imm1 = imid-1
-    if (isym /= 0) then
-        go to 15
-    end if
+        subroutine shaec1(nlat, isym, nt, g, idgs, jdgs, a, b, mdab, ndab, imid, &
+            idg, jdg, ge, go, work, zb, wzfin, whrfft)
 
-    do k=1, nt
-        do i=1, imm1
-            do j=1, nlon
-                ge(i, j, k) = tsn*(g(i, j, k)+g(nlp1-i, j, k))
-                go(i, j, k) = tsn*(g(i, j, k)-g(nlp1-i, j, k))
-            end do
-        end do
-    end do
-    go to 30
+            real (wp) :: a
+            real (wp) :: b
+            real (wp) :: fsn
+            real (wp) :: g
+            real (wp) :: ge
+            real (wp) :: go
+            integer (ip) :: i
+            integer (ip) :: i3
+            integer (ip) :: idg
+            integer (ip) :: idgs
+            integer (ip) :: imid
+            integer (ip) :: imm1
+            integer (ip) :: isym
+            integer (ip) :: j
+            integer (ip) :: jdg
+            integer (ip) :: jdgs
+            integer (ip) :: k
+            integer (ip) :: ls
+            integer (ip) :: m
+            integer (ip) :: mdab
+            integer (ip) :: mdo
+            integer (ip) :: mmax
+            integer (ip) :: modl
+            integer (ip) :: mp1
+            integer (ip) :: mp2
+            integer (ip) :: ndab
+            integer (ip) :: ndo
+            integer (ip) :: nlat
+            integer (ip) :: nlon
+            integer (ip) :: nlp1
+            integer (ip) :: np1
+            integer (ip) :: nt
+            real (wp) :: tsn
+            real (wp) :: whrfft
+            real (wp) :: work
+            real (wp) :: wzfin
+            real (wp) :: zb
+            !
+            !     whrfft must have at least nlon+15 locations
+            !     wzfin must have 2*l*(nlat+1)/2 + ((l-3)*l+2)/2 locations
+            !     zb must have 3*l*(nlat+1)/2 locations
+            !     work must have ls*nlon locations
+            !
+            dimension g(idgs, jdgs, *), a(mdab, ndab, *), b(mdab, ndab, *), &
+                ge(idg, jdg, *), go(idg, jdg, *), zb(imid, nlat, 3), wzfin(*), &
+                whrfft(*), work(*)
 
-    15 do k=1, nt
-        do i=1, imm1
-            do j=1, nlon
-                ge(i, j, k) = fsn*g(i, j, k)
-            end do
-        end do
-    end do
+            type (HFFTpack)      :: hfft
+            type (SpherepackAux) :: sphere_aux
 
-    if (isym == 1) then
-        go to 27
-    end if
+            ls = idg
+            nlon = jdg
+            mmax = min(nlat, nlon/2+1)
+            mdo = mmax
+            if (mdo+mdo-1 > nlon) mdo = mmax-1
+            nlp1 = nlat+1
+            tsn = 2./nlon
+            fsn = 4./nlon
+            modl = mod(nlat, 2)
+            imm1 = imid
+            if (modl /= 0) imm1 = imid-1
+            if (isym /= 0) then
+                go to 15
+            end if
 
-30  if (modl == 0) then
-        go to 27
-    end if
-
-    do k=1, nt
-        do j=1, nlon
-            ge(imid, j, k) = tsn*g(imid, j, k)
-        end do
-    end do
-
-    27 do k=1, nt
-        call hrfftf(ls, nlon, ge(1, 1, k), ls, whrfft, work)
-        if (mod(nlon, 2) /= 0) exit !go to 35
-        do i=1, ls
-            ge(i, nlon, k) = .5*ge(i, nlon, k)
-        end do
-    end do
-
-    do k=1, nt
-        do mp1=1, mmax
-            do np1=mp1, nlat
-                a(mp1, np1, k) = 0.
-                b(mp1, np1, k) = 0.
-            end do
-        end do
-    end do
-    if (isym == 1) then
-        go to 145
-    end if
-
-    call zfin(2, nlat, nlon, 0, zb, i3, wzfin)
-
-    do k=1, nt
-        do i=1, imid
-            do np1=1, nlat, 2
-                a(1, np1, k) = a(1, np1, k)+zb(i, np1, i3)*ge(i, 1, k)
-            end do
-        end do
-    end do
-
-    ndo = nlat
-
-    if (mod(nlat, 2) == 0) then
-        ndo = nlat-1
-    end if
-
-    do mp1=2, mdo
-        m = mp1-1
-        call zfin (2, nlat, nlon, m, zb, i3, wzfin)
-        do k=1, nt
-            do i=1, imid
-                do np1=mp1, ndo, 2
-                    a(mp1, np1, k) = a(mp1, np1, k)+zb(i, np1, i3)*ge(i, 2*mp1-2, k)
-                    b(mp1, np1, k) = b(mp1, np1, k)+zb(i, np1, i3)*ge(i, 2*mp1-1, k)
+            do k=1, nt
+                do i=1, imm1
+                    do j=1, nlon
+                        ge(i, j, k) = tsn*(g(i, j, k)+g(nlp1-i, j, k))
+                        go(i, j, k) = tsn*(g(i, j, k)-g(nlp1-i, j, k))
+                    end do
                 end do
             end do
-        end do
-    end do
+            go to 30
 
-    if (mdo == mmax .or. mmax > ndo) then
-        go to 135
-    end if
-
-    call zfin(2, nlat, nlon, mdo, zb, i3, wzfin)
-
-    do k=1, nt
-        do i=1, imid
-            do np1=mmax, ndo, 2
-                a(mmax, np1, k) = a(mmax, np1, k)+zb(i, np1, i3)*ge(i, 2*mmax-2, k)
-            end do
-        end do
-    end do
-
-135 if (isym == 2) then
-        return
-    end if
-
-145 call zfin (1, nlat, nlon, 0, zb, i3, wzfin)
-
-    do k=1, nt
-        do i=1, imm1
-            do np1=2, nlat, 2
-                a(1, np1, k) = a(1, np1, k)+zb(i, np1, i3)*go(i, 1, k)
-            end do
-        end do
-    end do
-
-    ndo = nlat
-
-    if (mod(nlat, 2) /= 0) then
-        ndo = nlat-1
-    end if
-
-    do mp1=2, mdo
-        m = mp1-1
-        mp2 = mp1+1
-        call zfin (1, nlat, nlon, m, zb, i3, wzfin)
-        do k=1, nt
-            do i=1, imm1
-                do np1=mp2, ndo, 2
-                    a(mp1, np1, k) = a(mp1, np1, k)+zb(i, np1, i3)*go(i, 2*mp1-2, k)
-                    b(mp1, np1, k) = b(mp1, np1, k)+zb(i, np1, i3)*go(i, 2*mp1-1, k)
+            15 do k=1, nt
+                do i=1, imm1
+                    do j=1, nlon
+                        ge(i, j, k) = fsn*g(i, j, k)
+                    end do
                 end do
             end do
-        end do
-    end do
 
-    mp2 = mmax+1
+            if (isym == 1) then
+                go to 27
+            end if
 
-    if (mdo == mmax .or. mp2 > ndo) then
-        return
-    end if
+30          if (modl == 0) then
+                go to 27
+            end if
 
-    call zfin(1, nlat, nlon, mdo, zb, i3, wzfin)
-
-    do k=1, nt
-        do i=1, imm1
-            do np1=mp2, ndo, 2
-                a(mmax, np1, k) = a(mmax, np1, k)+zb(i, np1, i3)*go(i, 2*mmax-2, k)
+            do k=1, nt
+                do j=1, nlon
+                    ge(imid, j, k) = tsn*g(imid, j, k)
+                end do
             end do
-        end do
-    end do
 
-end subroutine shaec1
+            27 do k=1, nt
+                call hfft%forward(ls, nlon, ge(1, 1, k), ls, whrfft, work)
+                if (mod(nlon, 2) /= 0) exit !go to 35
+                do i=1, ls
+                    ge(i, nlon, k) = .5*ge(i, nlon, k)
+                end do
+            end do
+
+            do k=1, nt
+                do mp1=1, mmax
+                    do np1=mp1, nlat
+                        a(mp1, np1, k) = 0.
+                        b(mp1, np1, k) = 0.
+                    end do
+                end do
+            end do
+            if (isym == 1) then
+                go to 145
+            end if
+
+            call sphere_aux%zfin(2, nlat, nlon, 0, zb, i3, wzfin)
+
+            do k=1, nt
+                do i=1, imid
+                    do np1=1, nlat, 2
+                        a(1, np1, k) = a(1, np1, k)+zb(i, np1, i3)*ge(i, 1, k)
+                    end do
+                end do
+            end do
+
+            ndo = nlat
+
+            if (mod(nlat, 2) == 0) then
+                ndo = nlat-1
+            end if
+
+            do mp1=2, mdo
+                m = mp1-1
+                call sphere_aux%zfin(2, nlat, nlon, m, zb, i3, wzfin)
+                do k=1, nt
+                    do i=1, imid
+                        do np1=mp1, ndo, 2
+                            a(mp1, np1, k) = a(mp1, np1, k)+zb(i, np1, i3)*ge(i, 2*mp1-2, k)
+                            b(mp1, np1, k) = b(mp1, np1, k)+zb(i, np1, i3)*ge(i, 2*mp1-1, k)
+                        end do
+                    end do
+                end do
+            end do
+
+            if (mdo == mmax .or. mmax > ndo) then
+                go to 135
+            end if
+
+            call sphere_aux%zfin(2, nlat, nlon, mdo, zb, i3, wzfin)
+
+            do k=1, nt
+                do i=1, imid
+                    do np1=mmax, ndo, 2
+                        a(mmax, np1, k) = a(mmax, np1, k)+zb(i, np1, i3)*ge(i, 2*mmax-2, k)
+                    end do
+                end do
+            end do
+
+135         if (isym == 2) then
+                return
+            end if
+
+145         call sphere_aux%zfin(1, nlat, nlon, 0, zb, i3, wzfin)
+
+            do k=1, nt
+                do i=1, imm1
+                    do np1=2, nlat, 2
+                        a(1, np1, k) = a(1, np1, k)+zb(i, np1, i3)*go(i, 1, k)
+                    end do
+                end do
+            end do
+
+            ndo = nlat
+
+            if (mod(nlat, 2) /= 0) then
+                ndo = nlat-1
+            end if
+
+            do mp1=2, mdo
+                m = mp1-1
+                mp2 = mp1+1
+                call sphere_aux%zfin(1, nlat, nlon, m, zb, i3, wzfin)
+                do k=1, nt
+                    do i=1, imm1
+                        do np1=mp2, ndo, 2
+                            a(mp1, np1, k) = a(mp1, np1, k)+zb(i, np1, i3)*go(i, 2*mp1-2, k)
+                            b(mp1, np1, k) = b(mp1, np1, k)+zb(i, np1, i3)*go(i, 2*mp1-1, k)
+                        end do
+                    end do
+                end do
+            end do
+
+            mp2 = mmax+1
+
+            if (mdo == mmax .or. mp2 > ndo) then
+                return
+            end if
+
+            call sphere_aux%zfin(1, nlat, nlon, mdo, zb, i3, wzfin)
+
+            do k=1, nt
+                do i=1, imm1
+                    do np1=mp2, ndo, 2
+                        a(mmax, np1, k) = a(mmax, np1, k)+zb(i, np1, i3)*go(i, 2*mmax-2, k)
+                    end do
+                end do
+            end do
+
+        end subroutine shaec1
+
+    end subroutine shaec
 
 
+    subroutine shaeci(nlat, nlon, wshaec, lshaec, dwork, ldwork, ierror)
 
+        integer (ip) :: ierror
+        integer (ip) :: imid
+        integer (ip) :: iw1
+        integer (ip) :: labc
+        integer (ip) :: ldwork
+        integer (ip) :: lshaec
+        integer (ip) :: lzz1
+        integer (ip) :: mmax
+        integer (ip) :: nlat
+        integer (ip) :: nlon
+        real (wp) :: wshaec(lshaec)
+        real (wp) :: dwork(ldwork)
 
-subroutine shaeci(nlat, nlon, wshaec, lshaec, dwork, ldwork, ierror)
-    implicit none
-    integer :: ierror
-    integer :: imid
-    integer :: iw1
-    integer :: labc
-    integer :: ldwork
-    integer :: lshaec
-    integer :: lzz1
-    integer :: mmax
-    integer :: nlat
-    integer :: nlon
-    real :: wshaec
-    dimension wshaec(lshaec)
-    real dwork(ldwork)
+        type (HFFTpack)      :: hfft
+        type (SpherepackAux) :: sphere_aux
 
-    ierror = 1
+        ierror = 1
 
-    if (nlat < 3) then
-        return
-    end if
+        if (nlat < 3) then
+            return
+        end if
 
-    ierror = 2
+        ierror = 2
 
-    if (nlon < 4) then
-        return
-    end if
+        if (nlon < 4) then
+            return
+        end if
 
-    ierror = 3
-    imid = (nlat+1)/2
-    mmax = min(nlat, nlon/2+1)
-    lzz1 = 2*nlat*imid
-    labc = 3*((mmax-2)*(nlat+nlat-mmax-1))/2
+        ierror = 3
+        imid = (nlat+1)/2
+        mmax = min(nlat, nlon/2+1)
+        lzz1 = 2*nlat*imid
+        labc = 3*((mmax-2)*(nlat+nlat-mmax-1))/2
 
-    if (lshaec < lzz1+labc+nlon+15) then
-        return
-    end if
+        if (lshaec < lzz1+labc+nlon+15) then
+            return
+        end if
+        ierror = 4
 
-    ierror = 4
+        if (ldwork < nlat+1) return
+        ierror = 0
 
-    if (ldwork < nlat+1) return
-    ierror = 0
+        call sphere_aux%zfinit(nlat, nlon, wshaec, dwork)
 
-    call zfinit (nlat, nlon, wshaec, dwork)
+        iw1 = lzz1+labc+1
 
-    iw1 = lzz1+labc+1
+        call hfft%initialize(nlon, wshaec(iw1))
 
-    call hrffti(nlon, wshaec(iw1))
+    end subroutine shaeci
 
-end subroutine shaeci
+end module module_shaec

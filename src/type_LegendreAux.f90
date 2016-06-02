@@ -45,6 +45,9 @@ module type_LegendreAux
         ip => INT32, &
         wp => REAL64
 
+    use type_FFTpack, only: &
+        FFTpack
+
     ! Explicit typing only
     implicit none
 
@@ -961,6 +964,7 @@ contains
             real (wp)            :: dt
             real (wp), parameter :: PI = acos(-1.0_wp)
             real (wp), parameter :: ONE_OVER_SQRT2 = 1.0_wp/sqrt(2.0_wp)
+            type (FFTpack)       :: fft
             !----------------------------------------------------------------------
 
             select case (init)
@@ -969,9 +973,9 @@ contains
                     lc=(l+1)/2
                     ls=lc-2
                     lq=lc-1
-                    call sinti(ls, wsave1)
-                    call costi(lc, wsave2)
-                    call cosqi(lq, wsave3)
+                    call fft%sinti(ls, wsave1)
+                    call fft%costi(lc, wsave2)
+                    call fft%cosqi(lq, wsave3)
 
                 case default
 
@@ -990,7 +994,7 @@ contains
                                 p(1:kdp)=0.5_wp*cp(1:kdp)
                                 p(lc)= 2.0_wp*p(lc)
 
-                                call cost(lc, p, wsave2)
+                                call fft%cost(lc, p, wsave2)
 
                                 do i=1, lc
                                     lmi=l-i
@@ -1001,7 +1005,7 @@ contains
                                 p(2:kdp+1)=0.5_wp*cp(1:kdp)
                                 p(ls+2)=0.0_wp
 
-                                call sint(ls, p(2), wsave1)
+                                call fft%sint(ls, p(2), wsave1)
 
                                 do i=1, ls
                                     lmi=l-i
@@ -1017,7 +1021,7 @@ contains
 
                                 p(1:kdp)=0.25_wp*cp(1:kdp)
 
-                                call cosqb(lq, p, wsave3)
+                                call fft%cosqb(lq, p, wsave3)
 
                                 do i=1, lq
                                     lmi=l-i
@@ -1027,7 +1031,7 @@ contains
                             else
                                 p(2:kdp+1)=0.25_wp*cp(1:kdp)
 
-                                call sinqb(lq, p(2), wsave3)
+                                call fft%sinqb(lq, p(2), wsave3)
 
                                 do i=1, lq
                                     lmi=l-i

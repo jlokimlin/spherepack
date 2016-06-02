@@ -22,13 +22,16 @@ MOD_DIRECTORY = $(LIB_DIRECTORY)
 
 OBJS = $(addprefix $(OBJ_DIRECTORY)/, $(OBJ))
 
+
 FC = gfortran
 
 FCFLAGS = \
--O3 \
+$(ENFORCE_64_BIT_PRECISION) \
 $(LANGUAGE_OPTIONS)
-$(ERROR_WARNING_OPTIONS) \
-$(CODE_GENERATION_OPTIONS)
+
+ENFORCE_64_BIT_PRECISION = \
+-fdefault-real-8 \
+-fdefault-double-8
 
 LANGUAGE_OPTIONS = \
 -fimplicit-none

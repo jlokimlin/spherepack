@@ -29,213 +29,222 @@
 !     *                                                               *
 !     * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !
+!
+!
+!     This version of gaqd implements the method presented in:
+!     P. N. swarztrauber, Computing the points and weights for
+!     Gauss-Legendre quadrature, SIAM J. Sci. Comput.,
+!     24(2002) pp. 945-954.
+!
+!     The w and lwork arrays are dummy and included only to
+!     permit a simple pluggable exchange with the
+!     old gaqd in previous versions of SPHEREPACK
+!
+!
+!     gauss points and weights are computed using the fourier-newton
+!     described in "on computing the points and weights for 
+!     gauss-legendre quadrature", paul n. swarztrauber, siam journal 
+!     on scientific computing that has been accepted for publication.
+!     This routine is faster and more accurate than older program
+!     with the same name.
+!
+!     subroutine gaqd computes the nlat gaussian colatitudes and weights
+!     in real. the colatitudes are in radians and lie in the
+!     in the interval (0, pi).
+!
+!     input parameters
+!
+!     nlat    the number of gaussian colatitudes in the interval (0, pi)
+!             (between the two poles).  nlat must be greater than zero.
+!
+!     w       unused real variable that permits a simple
+!             exchange with the old routine with the same name
+!             in spherepack.
+!
+!     lwork   unused variable that permits a simple exchange with the
+!             old routine with the same name in spherepack.
+!
+!     output parameters
+!
+!     theta   a real array with length nlat
+!             containing the gaussian colatitudes in
+!             increasing radians on the interval (0, pi).
+!
+!     wts     a real array with lenght nlat
+!             containing the gaussian weights.
+!
+!     ierror = 0 no errors
+!            = 1 if nlat <= 0
+!
+module module_gaqd
 
-subroutine gaqd(nlat, theta, wts, w, lwork, ierror)
-    !
-    !
-    !     This version of gaqd implements the method presented in:
-    !     P. N. swarztrauber, Computing the points and weights for
-    !     Gauss-Legendre quadrature, SIAM J. Sci. Comput.,
-    !     24(2002) pp. 945-954.
-    !
-    !     The w and lwork arrays are dummy and included only to
-    !     permit a simple pluggable exchange with the
-    !     old gaqd in previous versions of SPHEREPACK
-    !
-    !
-    !     gauss points and weights are computed using the fourier-newton
-    !     described in "on computing the points and weights for 
-    !     gauss-legendre quadrature", paul n. swarztrauber, siam journal 
-    !     on scientific computing that has been accepted for publication.
-    !     This routine is faster and more accurate than older program
-    !     with the same name.
-    !
-    !     subroutine gaqd computes the nlat gaussian colatitudes and weights
-    !     in real. the colatitudes are in radians and lie in the
-    !     in the interval (0, pi).
-    !
-    !     input parameters
-    !
-    !     nlat    the number of gaussian colatitudes in the interval (0, pi)
-    !             (between the two poles).  nlat must be greater than zero.
-    !
-    !     w       unused real variable that permits a simple
-    !             exchange with the old routine with the same name
-    !             in spherepack.
-    !
-    !     lwork   unused variable that permits a simple exchange with the
-    !             old routine with the same name in spherepack.
-    !
-    !     output parameters
-    !
-    !     theta   a real array with length nlat
-    !             containing the gaussian colatitudes in
-    !             increasing radians on the interval (0, pi).
-    !
-    !     wts     a real array with lenght nlat
-    !             containing the gaussian weights.
-    !
-    !     ierror = 0 no errors
-    !            = 1 if nlat <= 0
-    !
     use, intrinsic :: iso_fortran_env, only: &
         wp => REAL64, &
         ip => INT32
 
+    ! Explicit typing only
     implicit none
-    !----------------------------------------------------------------------
-    ! Dictionary: calling arguments
-    !----------------------------------------------------------------------
-    integer (ip), intent (in)  :: nlat
-    real (wp),    intent (out) :: theta(nlat)
-    real (wp),    intent (out) :: wts(nlat)
-    real (wp),    intent (in)  :: w
-    integer (ip), intent (in)  :: lwork
-    integer (ip), intent (out) :: ierror
-    !----------------------------------------------------------------------
-    ! Dictionary: local variables
-    !----------------------------------------------------------------------
-    integer (ip)         :: i, idx, it, nix
-    integer (ip)         :: nhalf, half_nlat
-    real (wp), parameter :: PI = acos(-1.0_wp)
-    real (wp), parameter :: HALF_PI = PI/2
-    real (wp), parameter :: ONE_OVER_SQRT3 = 1.0_wp/sqrt(3.0_wp)
-    real (wp)            :: dt, half_dt
-    real (wp)            :: zprev, zlast, zero
-    real (wp)            :: zhold, pb, dpb, dcor, cz
-    real (wp)            :: eps, sgnd
-    !----------------------------------------------------------------------
 
-    !
-    !==> Check validity of input arguments
-    !
-    if (nlat <= 0) then
-        ierror = 1
-        return
-    else
-        ierror = 0
-    end if
-
-    !
-    !==> compute weights and points analytically when nlat=1, 2
-    !
-    select case (nlat)
-        case(1)
-            theta = HALF_PI
-            wts = 2.0_wp
-        case(2)
-            theta(1) = acos(ONE_OVER_SQRT3)
-            theta(2) = acos(-ONE_OVER_SQRT3)
-            wts = 1.0_wp
-        case default
-
-            eps = sqrt(epsilon(1.0_wp))
-            eps = eps * sqrt(eps)
-            half_nlat = nlat/2
-            nhalf = (nlat+1)/2
-            idx = half_nlat+2
-
-            call cpdp(nlat, cz, theta(half_nlat+1), wts(half_nlat+1))
-
-            dt = HALF_PI/nhalf
-            half_dt = dt/2
-            !
-            !==> Estimate first point next to theta = pi/2
-            !
-            select case (mod(nlat,2))
-                case (0)
-                    !
-                    !==> nlat even
-                    !
-                    zero = HALF_PI-half_dt
-                    nix = nhalf
-                case default
-                    !
-                    !==> nlat odd
-                    !
-                    zero = HALF_PI-dt
-                    zprev = HALF_PI
-                    nix = nhalf-1
-            end select
-
-
-            start_iteration: do
-                it = 0
-                newton_iteration: do
-                    it = it+1
-                    zlast = zero
-                    !
-                    !==> Newton iterations
-                    !
-                    call tpdp(nlat, zero, cz, theta(half_nlat+1), wts(half_nlat+1), pb, dpb)
-
-                    dcor = pb/dpb
-                    sgnd = 1.0_wp
-
-                    if (dcor /= 0.0_wp) sgnd = dcor/abs(dcor)
-
-                    dcor = sgnd * min(abs(dcor), 0.2_wp * dt)
-                    zero = zero-dcor
-
-                    !
-                    !==> Repeat iteration
-                    !
-                    if (abs(zero-zlast) - eps*abs(zero) > 0.0_wp) cycle newton_iteration
-
-                    theta(nix) = zero
-                    zhold = zero
-                    !
-                    ! ==> yakimiw's formula permits using old pb and dpb
-                    !
-                    wts(nix) = (2*nlat+1)/(dpb+pb*cos(zlast)/sin(zlast))**2
-                    nix = nix-1
-
-                    if (nix /= 0) then
-
-                        if (nix == nhalf-1)  then
-                            zero = 3.0_wp * zero - PI
-                        else if (nix < nhalf-1)  then
-                            zero = 2.0_wp * zero-zprev
-                        end if
-
-                        zprev = zhold
-
-                        !
-                        !==> Re-initialize loop
-                        !
-                        cycle start_iteration
-
-                    end if
-                    exit newton_iteration
-                end do newton_iteration
-                exit start_iteration
-            end do start_iteration
-            !
-            !==> Extend points and weights via symmetries
-            !
-            if (mod(nlat,2) /= 0) then
-
-                theta(nhalf) = HALF_PI
-
-                call tpdp(nlat, HALF_PI, cz, theta(half_nlat+1), wts(half_nlat+1), pb, dpb)
-
-                wts(nhalf) = real(2*nlat+1, kind=wp)/(dpb**2)
-
-            end if
-
-            do i=1, half_nlat
-                wts(nlat-i+1) = wts(i)
-                theta(nlat-i+1) = PI-theta(i)
-            end do
-
-            !
-            !==> Set weights
-            !
-            wts = 2.0_wp * wts/sum(wts)
-    end select
-
+    ! Everything is private unless stated otherwise
+    private
+    public :: gaqd
 
 contains
+
+    subroutine gaqd(nlat, theta, wts, w, lwork, ierror)
+        !----------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !----------------------------------------------------------------------
+        integer (ip), intent (in)  :: nlat
+        real (wp),    intent (out) :: theta(nlat)
+        real (wp),    intent (out) :: wts(nlat)
+        real (wp),    intent (in)  :: w
+        integer (ip), intent (in)  :: lwork
+        integer (ip), intent (out) :: ierror
+        !----------------------------------------------------------------------
+        ! Dictionary: local variables
+        !----------------------------------------------------------------------
+        integer (ip)         :: i, idx, it, nix
+        integer (ip)         :: nhalf, half_nlat
+        real (wp), parameter :: PI = acos(-1.0_wp)
+        real (wp), parameter :: HALF_PI = PI/2
+        real (wp), parameter :: ONE_OVER_SQRT3 = 1.0_wp/sqrt(3.0_wp)
+        real (wp)            :: dt, half_dt
+        real (wp)            :: zprev, zlast, zero
+        real (wp)            :: zhold, pb, dpb, dcor, cz
+        real (wp)            :: eps, sgnd
+        !----------------------------------------------------------------------
+
+        !
+        !==> Check validity of input arguments
+        !
+        if (nlat <= 0) then
+            ierror = 1
+            return
+        else
+            ierror = 0
+        end if
+
+        !
+        !==> compute weights and points analytically when nlat=1, 2
+        !
+        select case (nlat)
+            case(1)
+                theta = HALF_PI
+                wts = 2.0_wp
+            case(2)
+                theta(1) = acos(ONE_OVER_SQRT3)
+                theta(2) = acos(-ONE_OVER_SQRT3)
+                wts = 1.0_wp
+            case default
+
+                eps = sqrt(epsilon(1.0_wp))
+                eps = eps * sqrt(eps)
+                half_nlat = nlat/2
+                nhalf = (nlat+1)/2
+                idx = half_nlat+2
+
+                call cpdp(nlat, cz, theta(half_nlat+1), wts(half_nlat+1))
+
+                dt = HALF_PI/nhalf
+                half_dt = dt/2
+                !
+                !==> Estimate first point next to theta = pi/2
+                !
+                select case (mod(nlat,2))
+                    case (0)
+                        !
+                        !==> nlat even
+                        !
+                        zero = HALF_PI-half_dt
+                        nix = nhalf
+                    case default
+                        !
+                        !==> nlat odd
+                        !
+                        zero = HALF_PI-dt
+                        zprev = HALF_PI
+                        nix = nhalf-1
+                end select
+
+
+                start_iteration: do
+                    it = 0
+                    newton_iteration: do
+                        it = it+1
+                        zlast = zero
+                        !
+                        !==> Newton iterations
+                        !
+                        call tpdp(nlat, zero, cz, theta(half_nlat+1), wts(half_nlat+1), pb, dpb)
+
+                        dcor = pb/dpb
+                        sgnd = 1.0_wp
+
+                        if (dcor /= 0.0_wp) sgnd = dcor/abs(dcor)
+
+                        dcor = sgnd * min(abs(dcor), 0.2_wp * dt)
+                        zero = zero-dcor
+
+                        !
+                        !==> Repeat iteration
+                        !
+                        if (abs(zero-zlast) - eps*abs(zero) > 0.0_wp) cycle newton_iteration
+
+                        theta(nix) = zero
+                        zhold = zero
+                        !
+                        ! ==> yakimiw's formula permits using old pb and dpb
+                        !
+                        wts(nix) = (2*nlat+1)/(dpb+pb*cos(zlast)/sin(zlast))**2
+                        nix = nix-1
+
+                        if (nix /= 0) then
+
+                            if (nix == nhalf-1)  then
+                                zero = 3.0_wp * zero - PI
+                            else if (nix < nhalf-1)  then
+                                zero = 2.0_wp * zero-zprev
+                            end if
+
+                            zprev = zhold
+
+                            !
+                            !==> Re-initialize loop
+                            !
+                            cycle start_iteration
+
+                        end if
+                        exit newton_iteration
+                    end do newton_iteration
+                    exit start_iteration
+                end do start_iteration
+                !
+                !==> Extend points and weights via symmetries
+                !
+                if (mod(nlat,2) /= 0) then
+
+                    theta(nhalf) = HALF_PI
+
+                    call tpdp(nlat, HALF_PI, cz, theta(half_nlat+1), wts(half_nlat+1), pb, dpb)
+
+                    wts(nhalf) = real(2*nlat+1, kind=wp)/(dpb**2)
+
+                end if
+
+                do i=1, half_nlat
+                    wts(nlat-i+1) = wts(i)
+                    theta(nlat-i+1) = PI-theta(i)
+                end do
+
+                !
+                !==> Set weights
+                !
+                wts = 2.0_wp * wts/sum(wts)
+        end select
+
+
+    end subroutine gaqd
 
 
     pure subroutine cpdp(n, cz, cp, dcp)
@@ -383,4 +392,4 @@ contains
 
     end subroutine tpdp
 
-end subroutine gaqd
+end module module_gaqd

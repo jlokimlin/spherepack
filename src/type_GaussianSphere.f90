@@ -24,6 +24,18 @@ module type_GaussianSphere
         assignment(=), &
         operator(*)
     
+    use module_shags, only: &
+        shags
+
+    use module_shsgs, only: &
+        shsgs
+
+    use module_vhags, only: &
+        vhags
+
+    use module_vhsgs, only: &
+        vhsgs
+
     ! Explicit typing only
     implicit none
 
@@ -217,7 +229,7 @@ contains
                         lwork => size(workspace%legendre_workspace), &
                         ierror => error_flag &
                         )
-                        call shags( nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, &
+                        call shags(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, &
                             wshags, lshags, work, lwork, ierror)
                     end associate
                 end select
@@ -389,8 +401,8 @@ contains
                         ierror => error_flag &
                         )
 
-                        call vhags( nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
-                            mdab, ndab, wvhags, lvhags, work, lwork, ierror )
+                        call vhags(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
+                            mdab, ndab, wvhags, lvhags, work, lwork, ierror)
 
                     end associate
                 end select
@@ -502,8 +514,8 @@ contains
                         lwork => size(workspace%legendre_workspace ), &
                         ierror => error_flag &
                         )
-                        call vhsgs( nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
-                            mdab, ndab, wvhsgs, lvhsgs, work, lwork, ierror )
+                        call vhsgs(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
+                            mdab, ndab, wvhsgs, lvhsgs, work, lwork, ierror)
                     end associate
                 end select
             end associate

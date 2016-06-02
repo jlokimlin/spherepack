@@ -7,6 +7,18 @@ module type_GaussianWorkspace
     use type_Workspace, only: &
         Workspace
 
+    use module_shags, only: &
+        shagsi
+
+    use module_shsgs, only: &
+        shsgsi
+
+    use module_vhags, only: &
+        vhagsi
+
+    use module_vhsgs, only: &
+        vhsgsi
+
     ! Explicit typing only
     implicit none
 
@@ -499,7 +511,7 @@ contains
             wvhsgs => this%backward_vector, &
             ierror => error_flag &
             )
-            call vhsgsi( nlat, nlon, wvhsgs, lvhsgs, dwork, ldwork, ierror )
+            call vhsgsi(nlat, nlon, wvhsgs, lvhsgs, dwork, ldwork, ierror)
         end associate
 
         ! Release memory

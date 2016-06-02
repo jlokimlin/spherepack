@@ -7,13 +7,24 @@ module type_RegularWorkspace
     use type_Workspace, only: &
         Workspace
 
+    use module_shaes, only: &
+        shaesi
+
+    use module_shses, only: &
+        shsesi
+
+    use module_vhaes, only: &
+        vhaesi
+
+    use module_vhses, only: &
+        vhsesi
+
     ! Explicit typing only
     implicit none
 
     ! Everything is private unless stated otherwise
     private
     public :: RegularWorkspace
-
 
 
     ! Declare derived data type
