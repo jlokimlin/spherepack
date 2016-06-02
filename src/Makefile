@@ -205,6 +205,30 @@ divgs.f90
 	$(FC) $(FCFLAGS) -c divgs.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 
+idivec.o: \
+vhsec.o \
+idivec.f90
+	$(FC) $(FCFLAGS) -c idivec.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
+
+idives.o: \
+vhses.o \
+idives.f90
+	$(FC) $(FCFLAGS) -c idives.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
+
+idivgc.o: \
+vhsgc.o \
+idivgc.f90
+	$(FC) $(FCFLAGS) -c idivgc.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
+
+idivgs.o: \
+vhsgs.o \
+idivgs.f90
+	$(FC) $(FCFLAGS) -c idivgs.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
+
 type_SphericalGrid.o: \
 type_SphericalGrid.f90
 	$(FC) $(FCFLAGS) -c type_SphericalGrid.f90 $(LINKS)\

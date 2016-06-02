@@ -246,34 +246,34 @@ contains
     subroutine dives(nlat, nlon, isym, nt, dv, idv, jdv, br, bi, mdb, ndb, &
         wshses, lshses, work, lwork, ierror)
         implicit none
-        real :: bi
-        real :: br
-        real :: dv
-        integer :: ia
-        integer :: ib
-        integer :: idv
-        integer :: ierror
-        integer :: imid
-        integer :: is
-        integer :: isym
-        integer :: iwk
-        integer :: jdv
-        integer :: lpimn
-        integer :: ls
-        integer :: lshses
-        integer :: lwk
-        integer :: lwork
-        integer :: mab
-        integer :: mdb
-        integer :: mmax
-        integer :: mn
-        integer :: ndb
-        integer :: nlat
-        integer :: nln
-        integer :: nlon
-        integer :: nt
-        real :: work
-        real :: wshses
+        real (wp) :: bi
+        real (wp) :: br
+        real (wp) :: dv
+        integer (ip) :: ia
+        integer (ip) :: ib
+        integer (ip) :: idv
+        integer (ip) :: ierror
+        integer (ip) :: imid
+        integer (ip) :: is
+        integer (ip) :: isym
+        integer (ip) :: iwk
+        integer (ip) :: jdv
+        integer (ip) :: lpimn
+        integer (ip) :: ls
+        integer (ip) :: lshses
+        integer (ip) :: lwk
+        integer (ip) :: lwork
+        integer (ip) :: mab
+        integer (ip) :: mdb
+        integer (ip) :: mmax
+        integer (ip) :: mn
+        integer (ip) :: ndb
+        integer (ip) :: nlat
+        integer (ip) :: nln
+        integer (ip) :: nlon
+        integer (ip) :: nt
+        real (wp) :: work
+        real (wp) :: wshses
 
         dimension dv(idv, jdv, nt), br(mdb, ndb, nt), bi(mdb, ndb, nt)
         dimension wshses(lshses), work(lwork)
@@ -339,37 +339,36 @@ contains
         subroutine dives1(nlat, nlon, isym, nt, dv, idv, jdv, br, bi, mdb, ndb, &
             a, b, mab, sqnn, wshses, lshses, wk, lwk, ierror)
             implicit none
-            real :: a
-            real :: b
-            real :: bi
-            real :: br
-            real :: dv
-            real :: fn
-            integer :: idv
-            integer :: ierror
-            integer :: isym
-            integer :: jdv
-            integer :: k
-            integer :: lshses
-            integer :: lwk
-            integer :: m
-            integer :: mab
-            integer :: mdb
-            integer :: mmax
-            integer :: n
-            integer :: ndb
-            integer :: nlat
-            integer :: nlon
-            integer :: nt
-            real :: sqnn
-            real :: wk
-            real :: wshses
+            real (wp) :: a
+            real (wp) :: b
+            real (wp) :: bi
+            real (wp) :: br
+            real (wp) :: dv
+            real (wp) :: fn
+            integer (ip) :: idv
+            integer (ip) :: ierror
+            integer (ip) :: isym
+            integer (ip) :: jdv
+            integer (ip) :: k
+            integer (ip) :: lshses
+            integer (ip) :: lwk
+            integer (ip) :: m
+            integer (ip) :: mab
+            integer (ip) :: mdb
+            integer (ip) :: mmax
+            integer (ip) :: n
+            integer (ip) :: ndb
+            integer (ip) :: nlat
+            integer (ip) :: nlon
+            integer (ip) :: nt
+            real (wp) :: sqnn
+            real (wp) :: wk
+            real (wp) :: wshses
             dimension dv(idv, jdv, nt), br(mdb, ndb, nt), bi(mdb, ndb, nt)
             dimension a(mab, nlat, nt), b(mab, nlat, nt), sqnn(nlat)
             dimension wshses(lshses), wk(lwk)
             !
             !     set coefficient multiplyers
-            !
             do n=2, nlat
                 fn = real(n - 1, kind=wp)
                 sqnn(n) = sqrt(fn * (fn + 1.0_wp))
