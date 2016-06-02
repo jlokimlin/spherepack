@@ -33,12 +33,19 @@ gaqd.f90
 	$(FC) $(FCFLAGS) -c gaqd.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 
-shags.o: \
+shaec.o: \
 type_HFFTpack.o \
 type_SpherepackAux.o\
 gaqd.o\
-shags.f90
-	$(FC) $(FCFLAGS) -c shags.f90 $(LINKS)\
+shaec.f90
+	$(FC) $(FCFLAGS) -c shaec.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
+
+shaes.o: \
+type_HFFTpack.o \
+type_SpherepackAux.o\
+shaes.f90
+	$(FC) $(FCFLAGS) -c shaes.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 
 shagc.o: \
@@ -49,12 +56,19 @@ shagc.f90
 	$(FC) $(FCFLAGS) -c shagc.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 
-shsgs.o: \
+shags.o: \
 type_HFFTpack.o \
 type_SpherepackAux.o\
 gaqd.o\
-shsgs.f90
-	$(FC) $(FCFLAGS) -c shsgs.f90 $(LINKS)\
+shags.f90
+	$(FC) $(FCFLAGS) -c shags.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
+
+shsec.o: \
+type_HFFTpack.o \
+type_SpherepackAux.o\
+shsec.f90
+	$(FC) $(FCFLAGS) -c shsec.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 
 shses.o: \
@@ -64,19 +78,20 @@ shses.f90
 	$(FC) $(FCFLAGS) -c shses.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 
-shaes.o: \
-type_HFFTpack.o \
-type_SpherepackAux.o\
-shaes.f90
-	$(FC) $(FCFLAGS) -c shaes.f90 $(LINKS)\
-	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
-
-shaec.o: \
+shsgc.o: \
 type_HFFTpack.o \
 type_SpherepackAux.o\
 gaqd.o\
-shaec.f90
-	$(FC) $(FCFLAGS) -c shaec.f90 $(LINKS)\
+shsgc.f90
+	$(FC) $(FCFLAGS) -c shsgc.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
+
+shsgs.o: \
+type_HFFTpack.o \
+type_SpherepackAux.o\
+gaqd.o\
+shsgs.f90
+	$(FC) $(FCFLAGS) -c shsgs.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 
 vhaes.o: \
@@ -106,6 +121,30 @@ type_HFFTpack.o \
 type_SpherepackAux.o\
 vhses.f90
 	$(FC) $(FCFLAGS) -c vhses.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
+
+divec.o: \
+shsec.o \
+divec.f90
+	$(FC) $(FCFLAGS) -c divec.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
+
+dives.o: \
+shses.o \
+dives.f90
+	$(FC) $(FCFLAGS) -c dives.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
+
+divgc.o: \
+shsgc.o \
+divgc.f90
+	$(FC) $(FCFLAGS) -c divgc.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
+
+divgs.o: \
+shsgs.o \
+divgs.f90
+	$(FC) $(FCFLAGS) -c divgs.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 
 type_SphericalGrid.o: \
