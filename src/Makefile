@@ -253,6 +253,30 @@ slapgs.f90
 	$(FC) $(FCFLAGS) -c slapgs.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 
+islapec.o: \
+shsec.o \
+islapec.f90
+	$(FC) $(FCFLAGS) -c islapec.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
+
+islapes.o: \
+shses.o \
+islapes.f90
+	$(FC) $(FCFLAGS) -c islapes.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
+
+islapgc.o: \
+shsgc.o \
+islapgc.f90
+	$(FC) $(FCFLAGS) -c islapgc.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
+
+islapgs.o: \
+shsgs.o \
+islapgs.f90
+	$(FC) $(FCFLAGS) -c islapgs.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
+
 type_SphericalGrid.o: \
 type_SphericalGrid.f90
 	$(FC) $(FCFLAGS) -c type_SphericalGrid.f90 $(LINKS)\
