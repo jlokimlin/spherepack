@@ -277,6 +277,54 @@ islapgs.f90
 	$(FC) $(FCFLAGS) -c islapgs.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 
+vrtec.o: \
+shsec.o \
+vrtec.f90
+	$(FC) $(FCFLAGS) -c vrtec.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
+
+vrtes.o: \
+shses.o \
+vrtes.f90
+	$(FC) $(FCFLAGS) -c vrtes.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
+
+vrtgc.o: \
+shsgc.o \
+vrtgc.f90
+	$(FC) $(FCFLAGS) -c vrtgc.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
+
+vrtgs.o: \
+shsgs.o \
+vrtgs.f90
+	$(FC) $(FCFLAGS) -c vrtgs.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
+
+ivrtec.o: \
+vhsec.o \
+ivrtec.f90
+	$(FC) $(FCFLAGS) -c ivrtec.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
+
+ivrtes.o: \
+vhses.o \
+ivrtes.f90
+	$(FC) $(FCFLAGS) -c ivrtes.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
+
+ivrtgc.o: \
+vhsgc.o \
+ivrtgc.f90
+	$(FC) $(FCFLAGS) -c ivrtgc.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
+
+ivrtgs.o: \
+vhsgs.o \
+ivrtgs.f90
+	$(FC) $(FCFLAGS) -c ivrtgs.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
+
 type_SphericalGrid.o: \
 type_SphericalGrid.f90
 	$(FC) $(FCFLAGS) -c type_SphericalGrid.f90 $(LINKS)\
