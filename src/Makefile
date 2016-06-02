@@ -229,6 +229,30 @@ idivgs.f90
 	$(FC) $(FCFLAGS) -c idivgs.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 
+slapec.o: \
+shsec.o \
+slapec.f90
+	$(FC) $(FCFLAGS) -c slapec.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
+
+slapes.o: \
+shses.o \
+slapes.f90
+	$(FC) $(FCFLAGS) -c slapes.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
+
+slapgc.o: \
+shsgc.o \
+slapgc.f90
+	$(FC) $(FCFLAGS) -c slapgc.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
+
+slapgs.o: \
+shsgs.o \
+slapgs.f90
+	$(FC) $(FCFLAGS) -c slapgs.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
+
 type_SphericalGrid.o: \
 type_SphericalGrid.f90
 	$(FC) $(FCFLAGS) -c type_SphericalGrid.f90 $(LINKS)\
