@@ -12,6 +12,11 @@ geo2math.f90
 	$(FC) $(FCFLAGS) -c geo2math.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 
+ihgeod.o: \
+ihgeod.f90
+	$(FC) $(FCFLAGS) -c ihgeod.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
+
 type_FFTpack.o: \
 type_FFTpack.f90
 	$(FC) $(FCFLAGS) -c type_FFTpack.f90 $(LINKS)\
