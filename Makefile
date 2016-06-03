@@ -1,15 +1,18 @@
 
 include make.inc
 
-all: lib testlib
+all: lib libtest libexamples
 
 lib:
 	mkdir -p ./lib
 	mkdir -p ./objs
 	( cd ./src; $(MAKE) all )
 
-testlib:
+libtest:
 	( cd ./test; $(MAKE) clean; $(MAKE) run )
+
+libexamples:
+	( cd ./examples; $(MAKE) clean; $(MAKE) run )
 
 install:
 	cp ./lib/lib$(LIB_NAME).a $(EXTERNAL_LIBRARY_PATH)
@@ -18,4 +21,4 @@ install:
 clean: 
 	(cd ./src; $(MAKE) clean; cd ../test; $(MAKE) clean )
 
-.PHONY: all lib testlib install
+.PHONY: all lib libtest libexamples install
