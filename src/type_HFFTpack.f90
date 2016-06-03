@@ -533,8 +533,9 @@ contains
             ! Dictionary: local variables
             !----------------------------------------------------------------------
             integer (ip)         :: i, k, m, ic, idp2
-            real (wp), parameter :: ARG=2.0_wp * acos(-1.0_wp)/3
-            real (wp), parameter :: TAUR=cos(ARG)
+            real (wp), parameter :: TWO_PI = 2.0_wp * acos(-1.0_wp)
+            real (wp), parameter :: ARG=TWO_PI/3
+            real (wp), parameter :: TAUR=cos(ARG)! -0.5_wp
             real (wp), parameter :: TAUI=sin(ARG)
             !----------------------------------------------------------------------
 
@@ -749,11 +750,12 @@ contains
             ! Dictionary: local variables
             !----------------------------------------------------------------------
             integer (ip)         :: i, k, m, ic, idp2
-            real (wp), parameter :: ARG = 2.0_wp * acos(-1.0_wp)/5
+            real (wp), parameter :: TWO_PI = 2.0_wp * acos(-1.0_wp)
+            real (wp), parameter :: ARG = TWO_PI/5
             real (wp), parameter :: TR11=cos(ARG)
             real (wp), parameter :: TI11=sin(ARG)
-            real (wp), parameter :: TR12=cos(2.0*ARG)
-            real (wp), parameter :: TI12=sin(2.0*ARG)
+            real (wp), parameter :: TR12=cos(2.0_wp*ARG)
+            real (wp), parameter :: TI12=sin(2.0_wp*ARG)
             !----------------------------------------------------------------------
 
             do k=1, l1
@@ -1252,7 +1254,8 @@ contains
             ! Dictionary: calling arguments
             !----------------------------------------------------------------------
             integer (ip)         :: i, k, m, ic, idp2
-            real (wp), parameter :: ARG = 2.0_wp * acos(-1.0_wp)/3
+            real (wp), parameter :: TWO_PI = 2.0_wp * acos(-1.0_wp)
+            real (wp), parameter :: ARG = TWO_PI/3
             real (wp), parameter :: TAUR = cos(ARG)
             real (wp), parameter :: TAUI = sin(ARG)
             !----------------------------------------------------------------------
@@ -1438,7 +1441,8 @@ contains
             ! Dictionary: local variables
             !----------------------------------------------------------------------
             integer (ip)         :: i, k, m, ic, idp2
-            real (wp), parameter :: ARG = 2.0_wp * acos(-1.0_wp)/5
+            real (wp), parameter :: TWO_PI = 2.0_wp * acos(-1.0_wp)
+            real (wp), parameter :: ARG = TWO_PI/5
             real (wp), parameter :: TR11=cos(ARG)
             real (wp), parameter :: TI11=sin(ARG)
             real (wp), parameter :: TR12=cos(2.0_wp *ARG)

@@ -1655,7 +1655,7 @@ contains
 
                 j = j + 1
 
-                if (j - 4 <= 0) then
+                if (j <= 4) then
                     ntry = ntryh(j)
                 else
                     ntry = ntry + 2
@@ -2755,7 +2755,7 @@ contains
 
                 j = j + 1
 
-                if (j - 4 <= 0) then
+                if (j <= 4) then
                     ntry = ntryh(j)
                 else
                     ntry = ntry + 2

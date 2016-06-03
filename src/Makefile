@@ -290,6 +290,30 @@ idivgs.f90
 	$(FC) $(FCFLAGS) -c idivgs.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 
+idvtec.o: \
+vhsec.o \
+idvtec.f90
+	$(FC) $(FCFLAGS) -c idvtec.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
+
+idvtes.o: \
+vhses.o \
+idvtes.f90
+	$(FC) $(FCFLAGS) -c idvtes.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
+
+idvtgc.o: \
+vhsgc.o \
+idvtgc.f90
+	$(FC) $(FCFLAGS) -c idvtgc.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
+
+idvtgs.o: \
+vhsgs.o \
+idvtgs.f90
+	$(FC) $(FCFLAGS) -c idvtgs.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
+
 slapec.o: \
 shsec.o \
 slapec.f90
