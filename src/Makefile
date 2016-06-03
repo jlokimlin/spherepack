@@ -362,6 +362,54 @@ islapgs.f90
 	$(FC) $(FCFLAGS) -c islapgs.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 
+sfvpec.o: \
+shsec.o \
+sfvpec.f90
+	$(FC) $(FCFLAGS) -c sfvpec.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
+
+sfvpes.o: \
+shses.o \
+sfvpes.f90
+	$(FC) $(FCFLAGS) -c sfvpes.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
+
+sfvpgc.o: \
+shsgc.o \
+sfvpgc.f90
+	$(FC) $(FCFLAGS) -c sfvpgc.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
+
+sfvpgs.o: \
+shsgs.o \
+sfvpgs.f90
+	$(FC) $(FCFLAGS) -c sfvpgs.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
+
+isfvpec.o: \
+vhsec.o \
+isfvpec.f90
+	$(FC) $(FCFLAGS) -c isfvpec.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
+
+isfvpes.o: \
+vhses.o \
+isfvpes.f90
+	$(FC) $(FCFLAGS) -c isfvpes.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
+
+isfvpgc.o: \
+vhsgc.o \
+isfvpgc.f90
+	$(FC) $(FCFLAGS) -c isfvpgc.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
+
+isfvpgs.o: \
+vhsgs.o \
+isfvpgs.f90
+	$(FC) $(FCFLAGS) -c isfvpgs.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
+
 vrtec.o: \
 shsec.o \
 vrtec.f90
