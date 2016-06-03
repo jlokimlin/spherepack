@@ -355,40 +355,40 @@ contains
     subroutine vhags(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
         mdab, ndab, wvhags, lvhags, work, lwork, ierror)
 
-        real :: bi
-        real :: br
-        real :: ci
-        real :: cr
-        integer :: idv
-        integer :: idvw
-        integer :: idz
-        integer :: ierror
-        integer :: imid
-        integer :: ist
-        integer :: ityp
-        integer :: iw1
-        integer :: iw2
-        integer :: iw3
-        integer :: iw4
-        integer :: jdvw
-        integer :: jw1
-        integer :: jw2
-        integer :: jw3
-        integer :: lmn
-        integer :: lnl
-        integer :: lvhags
-        integer :: lwork
-        integer :: lzimn
-        integer :: mdab
-        integer :: mmax
-        integer :: ndab
-        integer :: nlat
-        integer :: nlon
-        integer :: nt
-        real :: v
-        real :: w
-        real :: work
-        real :: wvhags
+        real (wp) :: bi
+        real (wp) :: br
+        real (wp) :: ci
+        real (wp) :: cr
+        integer (ip) :: idv
+        integer (ip) :: idvw
+        integer (ip) :: idz
+        integer (ip) :: ierror
+        integer (ip) :: imid
+        integer (ip) :: ist
+        integer (ip) :: ityp
+        integer (ip) :: iw1
+        integer (ip) :: iw2
+        integer (ip) :: iw3
+        integer (ip) :: iw4
+        integer (ip) :: jdvw
+        integer (ip) :: jw1
+        integer (ip) :: jw2
+        integer (ip) :: jw3
+        integer (ip) :: lmn
+        integer (ip) :: lnl
+        integer (ip) :: lvhags
+        integer (ip) :: lwork
+        integer (ip) :: lzimn
+        integer (ip) :: mdab
+        integer (ip) :: mmax
+        integer (ip) :: ndab
+        integer (ip) :: nlat
+        integer (ip) :: nlon
+        integer (ip) :: nt
+        real (wp) :: v
+        real (wp) :: w
+        real (wp) :: work
+        real (wp) :: wvhags
         dimension v(idvw, jdvw, *), w(idvw, jdvw,*), br(mdab,ndab,*), &
             bi(mdab, ndab,*), cr(mdab, ndab,*), ci(mdab, ndab,*), &
             work(*), wvhags(*)
@@ -451,48 +451,48 @@ contains
         subroutine vhags1(nlat, nlon, ityp, nt, imid, idvw, jdvw, v, w, mdab, &
             ndab, br, bi, cr, ci, idv, ve, vo, we, wo, work, idz, vb, wb, wrfft)
 
-            real :: bi
-            real :: br
-            real :: ci
-            real :: cr
-            real :: fsn
-            integer :: i
-            integer :: idv
-            integer :: idvw
-            integer :: idz
-            integer :: imid
-            integer :: imm1
-            integer :: ityp
-            integer :: j
-            integer :: jdvw
-            integer :: k
-            integer :: m
-            integer :: mb
-            integer :: mdab
-            integer :: mlat
-            integer :: mlon
-            integer :: mmax
-            integer :: mp1
-            integer :: mp2
-            integer :: ndab
-            integer :: ndo1
-            integer :: ndo2
-            integer :: nlat
-            integer :: nlon
-            integer :: nlp1
-            integer :: np1
-            integer :: nt
-            real :: tsn
-            real :: v
-            real :: vb
-            real :: ve
-            real :: vo
-            real :: w
-            real :: wb
-            real :: we
-            real :: wo
-            real :: work
-            real :: wrfft
+            real (wp) :: bi
+            real (wp) :: br
+            real (wp) :: ci
+            real (wp) :: cr
+            real (wp) :: fsn
+            integer (ip) :: i
+            integer (ip) :: idv
+            integer (ip) :: idvw
+            integer (ip) :: idz
+            integer (ip) :: imid
+            integer (ip) :: imm1
+            integer (ip) :: ityp
+            integer (ip) :: j
+            integer (ip) :: jdvw
+            integer (ip) :: k
+            integer (ip) :: m
+            integer (ip) :: mb
+            integer (ip) :: mdab
+            integer (ip) :: mlat
+            integer (ip) :: mlon
+            integer (ip) :: mmax
+            integer (ip) :: mp1
+            integer (ip) :: mp2
+            integer (ip) :: ndab
+            integer (ip) :: ndo1
+            integer (ip) :: ndo2
+            integer (ip) :: nlat
+            integer (ip) :: nlon
+            integer (ip) :: nlp1
+            integer (ip) :: np1
+            integer (ip) :: nt
+            real (wp) :: tsn
+            real (wp) :: v
+            real (wp) :: vb
+            real (wp) :: ve
+            real (wp) :: vo
+            real (wp) :: w
+            real (wp) :: wb
+            real (wp) :: we
+            real (wp) :: wo
+            real (wp) :: work
+            real (wp) :: wrfft
             dimension v(idvw, jdvw, *), w(idvw, jdvw, *), br(mdab, ndab,*), &
                 bi(mdab, ndab, *), cr(mdab, ndab, *), ci(mdab, ndab, *), &
                 ve(idv, nlon, *), vo(idv, nlon, *), we(idv, nlon, *), &
@@ -1177,21 +1177,21 @@ contains
 
     subroutine vhagsi(nlat, nlon, wvhags, lvhags, dwork, ldwork, ierror)
 
-        integer :: ierror
-        integer :: imid
-        integer :: iw1
-        integer :: iw2
-        integer :: iw3
-        integer :: iw4
-        integer :: jw1
-        integer :: jw2
-        integer :: jw3
-        integer :: ldwork
-        integer :: lmn
-        integer :: lvhags
-        integer :: nlat
-        integer :: nlon
-        real :: wvhags
+        integer (ip) :: ierror
+        integer (ip) :: imid
+        integer (ip) :: iw1
+        integer (ip) :: iw2
+        integer (ip) :: iw3
+        integer (ip) :: iw4
+        integer (ip) :: jw1
+        integer (ip) :: jw2
+        integer (ip) :: jw3
+        integer (ip) :: ldwork
+        integer (ip) :: lmn
+        integer (ip) :: lvhags
+        integer (ip) :: nlat
+        integer (ip) :: nlon
+        real (wp) :: wvhags
         dimension wvhags(lvhags)
         real dwork(ldwork)
 
@@ -1224,26 +1224,27 @@ contains
     contains
 
         subroutine vhgai1(nlat, imid, vb, wb, dthet, dwts, dpbar, work)
-            integer :: i
-            integer :: id
-            integer :: ierror
-            integer :: imid
-            integer :: ix
-            integer :: iy
-            integer :: lwk
-            integer :: m
-            integer :: mn
-            integer :: n
-            integer :: nlat
-            integer :: nm
-            integer :: np
-            integer :: nz
-            real :: vb
-            real :: wb
+            integer (ip) :: i
+            integer (ip) :: id
+            integer (ip) :: ierror
+            integer (ip) :: imid
+            integer (ip) :: ix
+            integer (ip) :: iy
+            integer (ip) :: lwk
+            integer (ip) :: m
+            integer (ip) :: mn
+            integer (ip) :: n
+            integer (ip) :: nlat
+            integer (ip) :: nm
+            integer (ip) :: np
+            integer (ip) :: nz
+            real (wp) :: vb
+            real (wp) :: wb
             dimension vb(imid, *), wb(imid, *)
-            real abel, bbel, cbel, ssqr2, dcf
-            real dpbar(imid, nlat, 3), dthet(*), dwts(*), work(*)
-            real dummy_variable
+            real (wp), parameter :: PI = acos(-1.0_wp)
+            real (wp) :: abel, bbel, cbel, dcf
+            real (wp) :: dpbar(imid, nlat, 3), dthet(*), dwts(*), work(*)
+            real (wp) :: dummy_variable
 
             type (SpherepackAux) :: sphere_aux
 
@@ -1256,8 +1257,7 @@ contains
             !
             !     compute m=n=0 legendre polynomials for all theta(i)
             !
-            ssqr2 = 1.0/sqrt(2.0)
-            dpbar(1:imid, 1, 1) = ssqr2
+            dpbar(1:imid, 1, 1) = cos(PI/4)
             vb(1:imid, 1) = 0.0
             wb(1:imid, 1) = 0.0
             !

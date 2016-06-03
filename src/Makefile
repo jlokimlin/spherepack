@@ -121,6 +121,7 @@ vhaes.f90
 vhagc.o: \
 type_HFFTpack.o \
 type_SpherepackAux.o\
+gaqd.o\
 vhagc.f90
 	$(FC) $(FCFLAGS) -c vhagc.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
@@ -128,6 +129,7 @@ vhagc.f90
 vhags.o: \
 type_HFFTpack.o \
 type_SpherepackAux.o\
+gaqd.o\
 vhags.f90
 	$(FC) $(FCFLAGS) -c vhags.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
@@ -160,6 +162,36 @@ type_SpherepackAux.o\
 gaqd.o \
 vhsgs.f90
 	$(FC) $(FCFLAGS) -c vhsgs.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
+
+vtsec.o: \
+type_HFFTpack.o \
+type_SpherepackAux.o\
+vtsec.f90
+	$(FC) $(FCFLAGS) -c vtsec.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
+
+vtses.o: \
+type_HFFTpack.o \
+type_SpherepackAux.o\
+vtses.f90
+	$(FC) $(FCFLAGS) -c vtses.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
+
+vtsgc.o: \
+type_HFFTpack.o \
+type_SpherepackAux.o\
+gaqd.o \
+vtsgc.f90
+	$(FC) $(FCFLAGS) -c vtsgc.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
+
+vtsgs.o: \
+type_HFFTpack.o \
+type_SpherepackAux.o\
+gaqd.o \
+vtsgs.f90
+	$(FC) $(FCFLAGS) -c vtsgs.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 
 gradec.o: \
