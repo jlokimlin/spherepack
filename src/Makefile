@@ -206,6 +206,39 @@ vtsgs.f90
 	$(FC) $(FCFLAGS) -c vtsgs.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 
+
+sshifte.o: \
+type_HFFTpack.o \
+sshifte.f90
+	$(FC) $(FCFLAGS) -c sshifte.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
+
+vshifte.o: \
+type_HFFTpack.o \
+vshifte.f90
+	$(FC) $(FCFLAGS) -c vshifte.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
+
+trssph.o: \
+type_HFFTpack.o \
+shaec.o \
+shsec.o \
+shagc.o \
+shsgc.o \
+trssph.f90
+	$(FC) $(FCFLAGS) -c trssph.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
+
+trvsph.o: \
+type_HFFTpack.o \
+vhaec.o \
+vhsec.o \
+vhagc.o \
+vhsgc.o \
+trvsph.f90
+	$(FC) $(FCFLAGS) -c trvsph.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
+
 gradec.o: \
 vhsec.o \
 gradec.f90
@@ -678,6 +711,9 @@ slapec.o \
 slapes.o \
 slapgc.o \
 slapgs.o \
+sshifte.o \
+trssph.o \
+trvsph.o \
 vhaec.o \
 vhaes.o \
 vhagc.o \
@@ -694,6 +730,7 @@ vrtec.o \
 vrtes.o \
 vrtgc.o \
 vrtgs.o \
+vshifte.o \
 vtsec.o \
 vtses.o \
 vtsgc.o \

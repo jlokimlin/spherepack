@@ -171,14 +171,14 @@ module spherepack_library
     use module_slapgs, only: &
         slapgs
 
-    !    use module_sshifte, only: &
-    !        sshifte
-    !
-    !    use module_trssph, only: &
-    !        trssph
-    !
-    !    use module_trvsph, only: &
-    !        trvsph
+    use module_sshifte, only: &
+        sshifte, sshifti
+
+    use module_trssph, only: &
+        trssph
+
+    use module_trvsph, only: &
+        trvsph
 
     use module_vhaec, only: &
         vhaec, vhaeci
@@ -237,8 +237,8 @@ module spherepack_library
     use module_vrtgs, only: &
         vrtgs
 
-    !    use module_vshifte, only: &
-    !        vshifte
+    use module_vshifte, only: &
+        vshifte, vshifti
 
     use module_vtsec, only: &
         vtsec, vtseci
@@ -325,9 +325,8 @@ module spherepack_library
     public :: shsec, shses, shsgc, shsgs
     public :: shseci, shsesi, shsgci, shsgsi
     public :: slapec, slapes, slapgc, slapgs
-    !    public :: sshifte
-    !    public :: trssph
-    !    public :: trvsph
+    public :: sshifte, sshifti
+    public :: trssph, trvsph
     public :: vhaec, vhaes, vhagc, vhags
     public :: vhaeci, vhaesi, vhagci, vhagsi
     public :: vhsec, vhses, vhsgc, vhsgs
@@ -337,7 +336,7 @@ module spherepack_library
     !    public :: visgeo
     public :: vlapec, vlapes, vlapgc, vlapgs
     public :: vrtec, vrtes, vrtgc, vrtgs
-    !    public :: vshifte
+    public :: vshifte, vshifti
     public :: vtsec, vtses, vtsgc, vtsgs
     public :: vtseci, vtsesi, vtsgci, vtsgsi
     public :: alfk, lfp, lfpt, lfim, lfin
