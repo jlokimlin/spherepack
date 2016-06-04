@@ -33,7 +33,7 @@
 !
 !     file type_LegendreAux.f90 contains the derived data type LegendreAux
 !
-!     with type-bound proceduressubroutines
+!     with type-bound procedures
 !
 !     alfk, lfim, lfin, lfp, lfpt
 !

@@ -38,6 +38,18 @@ type_LegendreAux.f90
 	$(FC) $(FCFLAGS) -c type_LegendreAux.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 
+shpg.o: \
+type_HFFTpack.o \
+shpg.f90
+	$(FC) $(FCFLAGS) -c shpg.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
+
+shpe.o: \
+type_HFFTpack.o \
+shpe.f90
+	$(FC) $(FCFLAGS) -c shpe.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
+
 gaqd.o: \
 gaqd.f90
 	$(FC) $(FCFLAGS) -c gaqd.f90 $(LINKS)\
