@@ -213,6 +213,7 @@ module type_HFFTpack
     ! Everything is private unless stated otherwise
     private
     public :: HFFTpack
+    public :: hrffti, hrfftf, hrfftb
 
     ! Declare derived data type
     type, public :: HFFTpack

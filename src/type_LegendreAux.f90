@@ -54,6 +54,7 @@ module type_LegendreAux
     ! Everything is private unless stated otherwise
     private
     public :: LegendreAux
+    public :: alfk, lfp, lfpt, lfim, lfin
 
 
     ! Declare derived data type
