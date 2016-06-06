@@ -107,8 +107,8 @@ contains
         integer (ip)         :: i, idx, it, nix
         integer (ip)         :: nhalf, half_nlat
         real (wp), parameter :: PI = acos(-1.0_wp)
-        real (wp), parameter :: HALF_PI = PI/2
-        real (wp), parameter :: ONE_OVER_SQRT3 = 1.0_wp/sqrt(3.0_wp)
+        real (wp), parameter :: HALF_PI = acos(0.0_wp)
+        real (wp), parameter :: SQRT3 = sqrt(3.0_wp)
         real (wp)            :: dt, half_dt
         real (wp)            :: zprev, zlast, zero
         real (wp)            :: zhold, pb, dpb, dcor, cz
@@ -133,8 +133,8 @@ contains
                 theta = HALF_PI
                 wts = 2.0_wp
             case(2)
-                theta(1) = acos(ONE_OVER_SQRT3)
-                theta(2) = acos(-ONE_OVER_SQRT3)
+                theta(1) = acos(SQRT3/3)
+                theta(2) = acos(-SQRT3/3)
                 wts = 1.0_wp
             case default
 
@@ -236,7 +236,6 @@ contains
                     wts(nlat-i+1) = wts(i)
                     theta(nlat-i+1) = PI-theta(i)
                 end do
-
                 !
                 !==> Set weights
                 !

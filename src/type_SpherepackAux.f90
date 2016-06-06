@@ -432,11 +432,6 @@ contains
         ! (e.g., if m=10 is sought it must be preceded by calls with
         ! m=0, 1, 2, ..., 9 in that order)
         !
-
-
-
-
-
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
@@ -470,6 +465,7 @@ contains
                 w(i(1)), w(i(2)), w(i(3)), w(i(4)), w(i(5)), pmn, km)
 
         end associate
+
 
     contains
 
@@ -627,12 +623,6 @@ contains
 
 
     subroutine zfin(isym, nlat, nlon, m, z, i3, wzfin)
-
-
-
-
-
-
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
@@ -757,7 +747,7 @@ contains
 
                 mmax = min(nlat, nlon/2+1)
                 lim = nlat*imid
-                labc = ((mmax-2)*(nlat+nlat-mmax-1))/2
+                labc = ((mmax-2)*(2*nlat-mmax-1))/2
                 i(1) = lim+1
                 i(2) = i(1)+lim
                 i(3) = i(2)+labc
@@ -812,7 +802,7 @@ contains
             !
             !     Remarks:
             !
-            !     abc must have 3*((mmax-2)*(nlat+nlat-mmax-1))/2 locations
+            !     abc must have 3*((mmax-2)*(2*nlat-mmax-1))/2 locations
             !     where mmax = min(nlat, nlon/2+1)
             !     cz and work must each have nlat+1 locations
             !
@@ -1312,7 +1302,7 @@ contains
         !
         ! Computes the coefficients in the recurrence
         ! relation for the associated legendre functions.0_wp array abc
-        ! must have 3*((mmax-2)*(nlat+nlat-mmax-1))/2 locations.0_wp
+        ! must have 3*((mmax-2)*(2*nlat-mmax-1))/2 locations.0_wp
         !
 
 
@@ -1333,7 +1323,7 @@ contains
 
         ! Compute workspace indices
         mmax = min(nlat, nlon/2+1)
-        labc = ((mmax-2)*(nlat+nlat-mmax-1))/2
+        labc = ((mmax-2)*(2*nlat-mmax-1))/2
         iw1 = labc+1
         iw2 = iw1+labc
 
@@ -1513,7 +1503,7 @@ contains
         iw2 = nlat/2+2
         !
         !     the length of wzvin is
-        !         2*nlat*imid +3*(max(mmax-2, 0)*(nlat+nlat-mmax-1))/2
+        !         2*nlat*imid +3*(max(mmax-2, 0)*(2*nlat-mmax-1))/2
         !     the length of dwork is nlat+2
         !
         call zvini1(nlat, nlon, imid, wzvin, wzvin(iw1), dwork, dwork(iw2))
@@ -1522,7 +1512,7 @@ contains
 
         subroutine zvini1(nlat, nlon, imid, zv, abc, czv, work)
             !
-            !     abc must have 3*(max(mmax-2, 0)*(nlat+nlat-mmax-1))/2
+            !     abc must have 3*(max(mmax-2, 0)*(2*nlat-mmax-1))/2
             !     locations where mmax = min(nlat, (nlon+1)/2)
             !     czv and work must each have nlat/2+1  locations
             !
@@ -1568,19 +1558,19 @@ contains
 
 
     subroutine zwinit(nlat, nlon, wzwin, dwork)
-
-
-
-
-
-
+        !
+        ! Purpose:
+        !
+        ! The length of wzvin is 2*nlat*imid+3*((nlat-3)*nlat+2)/2
+        ! The length of dwork is nlat+2
+        !
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
         integer (ip), intent (in)     :: nlat
         integer (ip), intent (in)     :: nlon
-        real (wp),    intent (in out) :: wzwin(*)
-        real (wp),    intent (in out) :: dwork(*)
+        real (wp),    intent (in out) :: wzwin(2*nlat*((nlat+1)/2)+3*((nlat-3)*nlat+2)/2)
+        real (wp),    intent (in out) :: dwork(nlat+2)
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
@@ -1590,17 +1580,14 @@ contains
         imid = (nlat+1)/2
         iw1 = 2*nlat*imid+1
         iw2 = nlat/2+2
-        !
-        !     the length of wzvin is 2*nlat*imid+3*((nlat-3)*nlat+2)/2
-        !     the length of dwork is nlat+2
-        !
+
         call zwini1(nlat, nlon, imid, wzwin, wzwin(iw1), dwork, dwork(iw2))
 
     contains
 
         subroutine zwini1(nlat, nlon, imid, zw, abc, czw, work)
             !
-            !     abc must have 3*(max(mmax-2, 0)*(nlat+nlat-mmax-1))/2
+            !     abc must have 3*(max(mmax-2, 0)*(2*nlat-mmax-1))/2
             !     locations where mmax = min(nlat, (nlon+1)/2)
             !     czw and work must each have nlat+1 locations
             !
@@ -1644,6 +1631,7 @@ contains
             call rabcw(nlat, nlon, abc)
 
         end subroutine zwini1
+
     end subroutine zwinit
 
 
@@ -1663,13 +1651,13 @@ contains
         integer :: mmax
         integer :: nlat
         integer :: nlon
-        real :: wzvin
-        real :: zv
-        dimension       zv(1)        , wzvin(1)
+        real :: wzvin(*)
+        real :: zv(*)
+
         imid = (nlat+1)/2
         lim = nlat*imid
         mmax = min(nlat, (nlon+1)/2)
-        labc = (max(mmax-2, 0)*(nlat+nlat-mmax-1))/2
+        labc = (max(mmax-2, 0)*(2*nlat-mmax-1))/2
         iw1 = lim+1
         iw2 = iw1+lim
         iw3 = iw2+labc
@@ -1783,11 +1771,12 @@ contains
         integer :: nlon
         real :: wzwin
         real :: zw
-        dimension       zw(1)        , wzwin(1)
+        dimension  zw(1), wzwin(1)
+
         imid = (nlat+1)/2
         lim = nlat*imid
         mmax = min(nlat, (nlon+1)/2)
-        labc = (max(mmax-2, 0)*(nlat+nlat-mmax-1))/2
+        labc = (max(mmax-2, 0)*(2*nlat-mmax-1))/2
         iw1 = lim+1
         iw2 = iw1+lim
         iw3 = iw2+labc
@@ -1991,7 +1980,7 @@ contains
             !
             ! Remarks:
             !
-            ! abc must have 3*(max(mmax-2, 0)*(nlat+nlat-mmax-1))/2
+            ! abc must have 3*(max(mmax-2, 0)*(2*nlat-mmax-1))/2
             ! locations where mmax = min(nlat, (nlon+1)/2)
             ! cwb and work must each have nlat/2+1 locations
             !
@@ -2058,7 +2047,7 @@ contains
         imid = (nlat+1)/2
         lim = nlat*imid
         mmax = min(nlat, (nlon+1)/2)
-        labc = (max(mmax-2, 0)*(nlat+nlat-mmax-1))/2
+        labc = (max(mmax-2, 0)*(2*nlat-mmax-1))/2
         iw1 = lim+1
         iw2 = iw1+lim
         iw3 = iw2+labc
@@ -2177,7 +2166,7 @@ contains
         imid = (nlat+1)/2
         lim = nlat*imid
         mmax = min(nlat, (nlon+1)/2)
-        labc = (max(mmax-2, 0)*(nlat+nlat-mmax-1))/2
+        labc = (max(mmax-2, 0)*(2*nlat-mmax-1))/2
         iw1 = lim+1
         iw2 = iw1+lim
         iw3 = iw2+labc
@@ -3125,11 +3114,11 @@ contains
         !
         !     subroutine rabcp computes the coefficients in the recurrence
         !     relation for the functions vbar(m, n, theta). array abc
-        !     must have 3*(max(mmax-2, 0)*(nlat+nlat-mmax-1))/2 locations.
+        !     must have 3*(max(mmax-2, 0)*(2*nlat-mmax-1))/2 locations.
         !
         dimension abc(1)
         mmax = min(nlat, (nlon+1)/2)
-        labc = (max(mmax-2, 0)*(nlat+nlat-mmax-1))/2
+        labc = (max(mmax-2, 0)*(2*nlat-mmax-1))/2
         iw1 = labc+1
         iw2 = iw1+labc
         call rabcv1(nlat, nlon, abc, abc(iw1), abc(iw2))
@@ -3219,11 +3208,11 @@ contains
         !
         !     subroutine rabcw computes the coefficients in the recurrence
         !     relation for the functions wbar(m, n, theta). array abc
-        !     must have 3*(max(mmax-2, 0)*(nlat+nlat-mmax-1))/2 locations.
+        !     must have 3*(max(mmax-2, 0)*(2*nlat-mmax-1))/2 locations.
         !
         dimension abc(1)
         mmax = min(nlat, (nlon+1)/2)
-        labc = (max(mmax-2, 0)*(nlat+nlat-mmax-1))/2
+        labc = (max(mmax-2, 0)*(2*nlat-mmax-1))/2
         iw1 = labc+1
         iw2 = iw1+labc
         call rabcw1(nlat, nlon, abc, abc(iw1), abc(iw2))
@@ -3339,7 +3328,7 @@ contains
             integer :: np1
             real :: vb
             !
-            !     abc must have 3*(max(mmax-2, 0)*(nlat+nlat-mmax-1))/2
+            !     abc must have 3*(max(mmax-2, 0)*(2*nlat-mmax-1))/2
             !     locations where mmax = min(nlat, (nlon+1)/2)
             !     cvb and work must each have nlat/2+1 locations
             !
@@ -3402,7 +3391,7 @@ contains
             integer :: np1
             real :: wb
             !
-            !     abc must have 3*(max(mmax-2, 0)*(nlat+nlat-mmax-1))/2
+            !     abc must have 3*(max(mmax-2, 0)*(2*nlat-mmax-1))/2
             !     locations where mmax = min(nlat, (nlon+1)/2)
             !     cwb and work must each have nlat/2+1 locations
             !
@@ -3468,7 +3457,7 @@ contains
             integer :: np1
             real :: vb
             !
-            !     abc must have 3*(max(mmax-2, 0)*(nlat+nlat-mmax-1))/2
+            !     abc must have 3*(max(mmax-2, 0)*(2*nlat-mmax-1))/2
             !     locations where mmax = min(nlat, (nlon+1)/2)
             !     cvb and work must each have nlat/2+1   locations
             !
@@ -3916,7 +3905,7 @@ contains
             integer :: np1
             real :: vb
             !
-            !     abc must have 3*(max(mmax-2, 0)*(nlat+nlat-mmax-1))/2
+            !     abc must have 3*(max(mmax-2, 0)*(2*nlat-mmax-1))/2
             !     locations where mmax = min(nlat, (nlon+1)/2)
             !     cvb and work must each have nlat/2+1 locations
             !
@@ -3949,9 +3938,9 @@ contains
         integer :: iw2
         integer :: nlat
         integer :: nlon
-        real :: wwbin
-        dimension wwbin(1)
-        real work(*), theta(*)
+        real :: wwbin(2*nlat*((nlat+1)/2)+3*((nlat-3)*nlat+2)/2)
+        real :: work(nlat+2), theta((nlat+1)/2)
+
         imid = (nlat+1)/2
         iw1 = 2*nlat*imid+1
         iw2 = nlat/2+2
@@ -3967,7 +3956,7 @@ contains
 
         subroutine wbgit1(nlat, nlon, imid, theta, wb, abc, cwb, work)
 
-            real :: abc
+            real :: abc(3*((nlat-3)*nlat+2)/2)
             integer :: i
             integer :: imid
             integer :: m
@@ -3977,13 +3966,12 @@ contains
             integer :: nlat
             integer :: nlon
             integer :: np1
-            real :: wb
+            real :: wb(imid, nlat, 2)
+            real :: cwb(nlat/2+1), theta(*), wbh, work(nlat/2+1)
             !
             !     abc must have 3*((nlat-3)*nlat+2)/2 locations
             !     cwb and work must each have nlat/2+1 locations
             !
-            dimension wb(imid, nlat, 2), abc(1)
-            real cwb(1), theta(1), wbh, work(1)
             mdo = min(3, nlat, (nlon+1)/2)
             if (mdo < 2) return
             do mp1=2, mdo

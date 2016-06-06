@@ -322,11 +322,11 @@ contains
         integer (ip), intent (in)      :: nlon
         integer (ip), intent (in)      :: mode
         integer (ip), intent (in)      :: nt
-        real (wp),    intent (out)     :: g(idg, jdg, *)
+        real (wp),    intent (out)     :: g(idg, jdg, nt)
         integer (ip), intent (in)      :: idg
         integer (ip), intent (in)      :: jdg
-        real (wp),    intent (in)      :: a(mdab, ndab, *)
-        real (wp),    intent (in)      :: b(mdab, ndab, *)
+        real (wp),    intent (in)      :: a(mdab, ndab, nt)
+        real (wp),    intent (in)      :: b(mdab, ndab, nt)
         integer (ip), intent (in)      :: mdab
         integer (ip), intent (in)      :: ndab
         real (wp),    intent (in out)  :: wshsgs(lshsgs)
@@ -340,110 +340,69 @@ contains
         integer (ip) :: l, l1, l2, lp, iw, lat, late, ifft, ipmn
         !----------------------------------------------------------------------
 
-        !
-        !==> Check validity of input arguments
-        !
-
-        ! Initialize error flag
-        ierror = 0
-
-        ! Check case 1
-        if (nlat < 3) then
-            ierror = 1
-            return
-        end if
-
-        ! Check case 2
-        if (nlon < 4) then
-            ierror = 2
-            return
-        end if
-
-        ! Check case 3
-        if (mode < 0 .or. mode > 2) then
-            ierror = 3
-            return
-        end if
-
-        ! Check case 4
-        if (nt < 1) then
-            ierror = 4
-            return
-        end if
-
-        !
-        !==> set limit on m subscript
-        !
+        ! Set limit on m subscript
         l = min((nlon+2)/2, nlat)
 
-        !
-        !==> set gaussian point nearest equator pointer
-        !
+        ! Set gaussian point nearest equator pointer
         late = (nlat+mod(nlat, 2))/2
 
-        !
-        !==> set number of grid points for analysis/synthesis
-        !
-        lat = nlat
-
+        ! Set number of grid points for analysis/synthesis
         if (mode /= 0) then
             lat = late
-        end if
-
-        ! Check case 5
-        if (idg < lat) then
-            ierror = 5
-            return
-        end if
-
-        ! Check case 6
-        if (jdg < nlon) then
-            ierror = 6
-            return
-        end if
-
-        ! Check case 7
-        if (mdab < l) then
-            ierror = 7
-            return
-        end if
-
-        ! Check case 8
-        if (ndab < nlat) then
-            ierror = 8
-            return
+        else
+            lat = nlat
         end if
 
         l1 = l
         l2 = late
         lp=nlat*(3*(l1+l2)-2)+(l1-1)*(l2*(2*nlat-l1)-3*l1)/2+nlon+15
 
-
-        ! Check case 9: permanent work space length
-        if (lshsgs < lp) then
+        !
+        !==> Check validity of input arguments
+        !
+        if (nlat < 3) then
+            ierror = 1
+            return
+        else if (nlon < 4) then
+            ierror = 2
+            return
+        else if (mode < 0 .or. mode > 2) then
+            ierror = 3
+            return
+        else if (nt < 1) then
+            ierror = 4
+            return
+        else if (idg < lat) then
+            ierror = 5
+            return
+        else if (jdg < nlon) then
+            ierror = 6
+            return
+        else if (mdab < l) then
+            ierror = 7
+            return
+        else if (ndab < nlat) then
+            ierror = 8
+            return
+        else if (lshsgs < lp) then
             ierror = 9
             return
-        end if
-
-        ! Check case 10: temporary work space length
-        if ( &
+        else if ( &
             (mode == 0 .and. lwork < nlat*nlon*(nt+1)) &
             .or. &
             (mode /= 0 .and. lwork < l2*nlon*(nt+1)) &
             ) then
             ierror = 10
             return
+        else
+            ierror = 0
         end if
 
-        !
-        !==> Starting address for fft values and legendre polys in wshsgs
-        !
+        ! Starting address for fft values and legendre polys in wshsgs
         ifft = nlat+2*nlat*late+3*(l*(l-1)/2+(nlat-l)*(l-1))+1
         ipmn = ifft+nlon+15
 
-        !
-        !==> set pointer for internal storage of g
-        !
+        ! set pointer for internal storage of g
         iw = lat*nlon*nt+1
 
         call shsgs1(nlat, nlon, l, lat, mode, g, idg, jdg, nt, a, b, mdab, ndab, &

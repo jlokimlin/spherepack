@@ -321,11 +321,11 @@ contains
         integer (ip), intent (in)     :: nlon
         integer (ip), intent (in)     :: isym
         integer (ip), intent (in)     :: nt
-        real (wp),    intent (out)    :: g(idg,jdg,*)
+        real (wp),    intent (out)    :: g(idg,jdg,nt)
         integer (ip), intent (in)     :: idg
         integer (ip), intent (in)     :: jdg
-        real (wp),    intent (in out) :: a(mdab,ndab,*)
-        real (wp),    intent (in out) :: b(mdab,ndab,*)
+        real (wp),    intent (in out) :: a(mdab,ndab,nt)
+        real (wp),    intent (in out) :: b(mdab,ndab,nt)
         integer (ip), intent (in)     :: mdab
         integer (ip), intent (in)     :: ndab
         real (wp),    intent (in out) :: wshses(lshses)
@@ -349,6 +349,13 @@ contains
             ls = nlat
         end if
 
+        select case (isym)
+            case (0)
+                ist = imid
+            case default
+                ist = 0
+        end select
+
         nln = nt*ls*nlon
 
         if (nlat < 3) then
@@ -363,7 +370,11 @@ contains
         else if (nt < 0) then
             ierror = 4
             return
-        else if ((isym == 0 .and. idg < nlat) .or. (isym /= 0 .and. idg < (nlat+1)/2)) then
+        else if (&
+            (isym == 0 .and. idg < nlat) &
+            .or. &
+            (isym /= 0 .and. idg < (nlat+1)/2)&
+            ) then
             ierror = 5
             return
         else if (jdg < nlon) then
@@ -385,15 +396,16 @@ contains
             ierror = 0
         end if
 
-        select case (isym)
-            case (0)
-                ist = imid
-            case default
-                ist = 0
-        end select
+        associate( &
+            iw1 => ist+1, &
+            iw2 => nln+1, &
+            iw3 => lpimn+1 &
+            )
 
-        call shses1(nlat,isym,nt,g,idg,jdg,a,b,mdab,ndab,wshses,imid, &
-            ls,nlon,work,work(ist+1),work(nln+1),wshses(lpimn+1))
+            call shses1(nlat,isym,nt,g,idg,jdg,a,b,mdab,ndab,wshses,imid, &
+                ls,nlon,work,work(iw1),work(iw2),wshses(iw3))
+
+        end associate
 
     contains
 
@@ -405,11 +417,11 @@ contains
             integer (ip), intent (in)     :: nlat
             integer (ip), intent (in)     :: isym
             integer (ip), intent (in)     :: nt
-            real (wp),    intent (in out) :: g(idgs,jdgs,*)
+            real (wp),    intent (in out) :: g(idgs, jdgs, nt)
             integer (ip), intent (in)     :: idgs
             integer (ip), intent (in)     :: jdgs
-            real (wp),    intent (in)     :: a(mdab,ndab,*)
-            real (wp),    intent (in)     :: b(mdab,ndab,*)
+            real (wp),    intent (in)     :: a(mdab, ndab, nt)
+            real (wp),    intent (in)     :: b(mdab, ndab, nt)
             integer (ip), intent (in)     :: mdab
             integer (ip), intent (in)     :: ndab
             real (wp),    intent (in)     :: p(imid,*)
@@ -449,7 +461,6 @@ contains
 
             ge(1:ls,1:nlon,1:nt) = 0.0_wp
 
-
             if_block: block
 
                 if (isym /= 1) then
@@ -461,11 +472,12 @@ contains
                         end do
                     end do
 
-                    if (mod(nlat,2) == 0) then
-                        ndo = nlat-1
-                    else
-                        ndo = nlat
-                    end if
+                    select case (mod(nlat,2))
+                        case (0)
+                            ndo = nlat-1
+                        case default
+                            ndo = nlat
+                    end select
 
                     do mp1=2,mdo
                         m = mp1-1
@@ -588,7 +600,7 @@ contains
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
-        integer (ip)         :: imid, iw1, labc, lpimn, mmax
+        integer (ip)         :: imid, labc, lpimn, mmax
         type (HFFTpack)      :: hfft
         type (SpherepackAux) :: sphere_aux
         !----------------------------------------------------------------------
@@ -597,9 +609,10 @@ contains
         imid = (nlat+1)/2
         lpimn = (imid*mmax*(2*nlat-mmax+1))/2
         labc = 3*((mmax-2)*(2*nlat-mmax-1))/2
-        iw1 = 3*nlat*imid+1
 
-
+        !
+        !==> Check validity of input arguments
+        !
         if (nlat < 3) then
             ierror = 1
             return
@@ -619,10 +632,18 @@ contains
             ierror = 0
         end if
 
-        call sphere_aux%ses1(nlat, nlon, imid, wshses, work, work(iw1), dwork)
 
-        call hfft%initialize(nlon, wshses(lpimn+1))
+        associate( &
+            iw1 => 3*nlat*imid+1, &
+            iw2 => lpimn+1 &
+            )
+
+            call sphere_aux%ses1(nlat, nlon, imid, wshses, work, work(iw1), dwork)
+            call hfft%initialize(nlon, wshses(iw2))
+
+        end associate
 
     end subroutine shsesi
+
 
 end module module_shses

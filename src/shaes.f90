@@ -344,11 +344,11 @@ contains
         integer (ip), intent (in)     :: nlon
         integer (ip), intent (in)     :: isym
         integer (ip), intent (in)     :: nt
-        real (wp),    intent (in)     :: g(idg, jdg, *)
+        real (wp),    intent (in)     :: g(idg, jdg, nt)
         integer (ip), intent (in)     :: idg
         integer (ip), intent (in)     :: jdg
-        real (wp),    intent (out)    :: a(mdab, ndab, *)
-        real (wp),    intent (out)    :: b(mdab, ndab, *)
+        real (wp),    intent (out)    :: a(mdab, ndab, nt)
+        real (wp),    intent (out)    :: b(mdab, ndab, nt)
         integer (ip), intent (in)     :: mdab
         integer (ip), intent (in)     :: ndab
         real (wp),    intent (in out) :: wshaes(lshaes)
@@ -425,11 +425,18 @@ contains
             ierror = 0
         end if
 
-        !
-        !==> Perform analysis
-        !
-        call shaes1(nlat, isym, nt, g, idg, jdg, a, b, mdab, ndab, wshaes, idz, &
-            ls, nlon, work, work(ist+1), work(nln+1), wshaes(lzimn+1))
+        associate( &
+            iw1 => ist+1, &
+            iw2 => nln+1, &
+            iw3 => lzimn+1 &
+            )
+            !
+            !==> Perform analysis
+            !
+            call shaes1(nlat, isym, nt, g, idg, jdg, a, b, mdab, ndab, wshaes, idz, &
+                ls, nlon, work, work(iw1), work(iw2), wshaes(iw3))
+
+        end associate
 
     contains
 
@@ -441,11 +448,11 @@ contains
             integer (ip), intent (in)     :: nlat
             integer (ip), intent (in)     :: isym
             integer (ip), intent (in)     :: nt
-            real (wp),    intent (in)     :: g(idgs, jdgs, *)
+            real (wp),    intent (in)     :: g(idgs, jdgs, nt)
             integer (ip), intent (in)     :: idgs
             integer (ip), intent (in)     :: jdgs
-            real (wp),    intent (in out) :: a(mdab, ndab, *)
-            real (wp),    intent (in out) :: b(mdab, ndab, *)
+            real (wp),    intent (in out) :: a(mdab, ndab, nt)
+            real (wp),    intent (in out) :: b(mdab, ndab, nt)
             integer (ip), intent (in)     :: mdab
             integer (ip), intent (in)     :: ndab
             real (wp),    intent (in out) :: z(idz, *)
@@ -645,11 +652,11 @@ contains
         !----------------------------------------------------------------------
         integer (ip), intent (in)     :: nlat
         integer (ip), intent (in)     :: nlon
-        real (wp),    intent (out)    :: wshaes(*)
+        real (wp),    intent (out)    :: wshaes(lshaes)
         integer (ip), intent (in)     :: lshaes
-        real (wp),    intent (out)    :: work(*)
+        real (wp),    intent (out)    :: work(lwork)
         integer (ip), intent (in)     :: lwork
-        real (wp),    intent (out)    :: dwork(*)
+        real (wp),    intent (out)    :: dwork(ldwork)
         integer (ip), intent (in)     :: ldwork
         integer (ip), intent (out)    :: ierror
         !----------------------------------------------------------------------

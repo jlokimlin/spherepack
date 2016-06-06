@@ -354,14 +354,14 @@ contains
         integer (ip), intent (in)  :: nlon
         integer (ip), intent (in)  :: ityp
         integer (ip), intent (in)  :: nt
-        real (wp),    intent (in)  :: v(idvw, jdvw,*)
-        real (wp),    intent (in)  :: w(idvw, jdvw,*)
+        real (wp),    intent (in)  :: v(idvw, jdvw, nt)
+        real (wp),    intent (in)  :: w(idvw, jdvw, nt)
         integer (ip), intent (in)  :: idvw
         integer (ip), intent (in)  :: jdvw
-        real (wp),    intent (out) :: br(mdab, ndab,*)
-        real (wp),    intent (out) :: bi(mdab, ndab,*)
-        real (wp),    intent (out) :: cr(mdab, ndab,*)
-        real (wp),    intent (out) :: ci(mdab, ndab,*)
+        real (wp),    intent (out) :: br(mdab, ndab, nt)
+        real (wp),    intent (out) :: bi(mdab, ndab, nt)
+        real (wp),    intent (out) :: cr(mdab, ndab, nt)
+        real (wp),    intent (out) :: ci(mdab, ndab, nt)
         integer (ip), intent (in)  :: mdab
         integer (ip), intent (in)  :: ndab
         real (wp),    intent (in)  :: wvhaes(lvhaes)
@@ -383,8 +383,10 @@ contains
 
         if (ityp > 2) then
             idv = imid
+            ist = 0
         else
             idv = nlat
+            ist = imid
         end if
 
         lnl = nt*idv*nlon
@@ -424,12 +426,6 @@ contains
             return
         else
             ierror = 0
-        end if
-
-        if (ityp <= 2) then
-            ist = imid
-        else
-            ist = 0
         end if
 
         !
@@ -494,15 +490,15 @@ contains
             real (wp),    intent (in)  :: w(idvw, jdvw,*)
             integer (ip), intent (in)  :: mdab
             integer (ip), intent (in)  :: ndab
-            real (wp),    intent (out) :: br(mdab, ndab,*)
-            real (wp),    intent (out) :: bi(mdab, ndab,*)
-            real (wp),    intent (out) :: cr(mdab, ndab,*)
-            real (wp),    intent (out) :: ci(mdab, ndab,*)
+            real (wp),    intent (out) :: br(mdab, ndab, nt)
+            real (wp),    intent (out) :: bi(mdab, ndab, nt)
+            real (wp),    intent (out) :: cr(mdab, ndab, nt)
+            real (wp),    intent (out) :: ci(mdab, ndab, nt)
             integer (ip), intent (in)  :: idv
-            real (wp),    intent (out) :: ve(idv, nlon, *)
-            real (wp),    intent (out) :: vo(idv, nlon, *)
-            real (wp),    intent (out) :: we(idv, nlon, *)
-            real (wp),    intent (out) :: wo(idv, nlon, *)
+            real (wp),    intent (out) :: ve(idv, nlon, nt)
+            real (wp),    intent (out) :: vo(idv, nlon, nt)
+            real (wp),    intent (out) :: we(idv, nlon, nt)
+            real (wp),    intent (out) :: wo(idv, nlon, nt)
             real (wp),    intent (out) :: work(*)
             integer (ip), intent (in)  :: idz
             real (wp),    intent (in)  :: zv(idz, *)
@@ -1198,9 +1194,9 @@ contains
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
-        integer (ip)         :: imid, labc, lzimn, mmax
-        integer (ip)         :: workspace_indices(4)
-        type (HFFTpack)      :: hfft
+        integer (ip)    :: imid, labc, lzimn, mmax
+        integer (ip)    :: workspace_indices(4)
+        type (HFFTpack) :: hfft
         !----------------------------------------------------------------------
 
         mmax = min(nlat, (nlon+1)/2)
