@@ -8,7 +8,7 @@
 !  .                      all rights reserved                    .
 !  .                                                             .
 !  .                                                             .
-!  .                          SPHEREPACK                         .
+!  .                          spherepack                         .
 !  .                                                             .
 !  . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 !
@@ -17,15 +17,15 @@
 ! ... file advec.f90
 !
 !     program advec solves the time-dependent linear advection 
-!     equation for geopotential phi using the SPHEREPACK software
+!     equation for geopotential phi using the spherepack software
 !
-!          d(phi)/dt = -(u,v) DOT gradient(phi)
+!          d(phi)/dt = -(u,v) .dot. gradient(phi)
 !
-!                    = -(u*gdphl + v*gdpht)
+!                    = -(u*grad_phi_lon + v*grad_phi_lat)
 !
 ! ... required files
 !
-!     gradgc.f,shagc.f,shsgc.f,vhsgc.f,type_SpherepackAux.f type_HFFTpack.f,gaqd.f
+!     gradgc.f90,shagc.f90,shsgc.f90,vhsgc.f90,type_SpherepackAux.f90 type_HFFTpack.f90,gaqd.f90
 !
 !
 ! definitions:
@@ -53,29 +53,30 @@
 !   to 2pi minus 2pi/nlon.
 !
 !
-!     thetag(i)    vector of gaussian points on the full sphere which
-!                  have north to south orientation as i=1,...,nlat
+!     thetag(i)           vector of gaussian points on the full sphere which
+!                         have north to south orientation as i=1,...,nlat
 !
-!     u(i,j)       east longitudinal velocity component
-!     v(i,j)       latitudinal velocity component
+!     u(i,j)               east longitudinal velocity component
 !
-!     phi(i,j)     the geopotential at t = time
+!     v(i,j)               latitudinal velocity component
 !
-!     phi_new(i,j)   the geopotential at t=time+dt
+!     phi(i,j)             the geopotential at t = time
 !
-!     phi_old(i,j)   the geopotential at t=time-dt
+!     phi_new(i,j)         the geopotential at t=time+dt
 !
-!     gdphl(i,j)   the longitudinal derivative component of
-!                  the gradient of phi
+!     phi_old(i,j)         the geopotential at t=time-dt
 !
-!                       gdphl = 1/(cos(theta))*d(phi)/dlambda
-
+!     grad_phi_lon(i,j)    the longitudinal derivative component of
+!                          the gradient of phi
 !
-!     gdpht(i,j)   the latitudinal derivative component of
-!                  the gradient of phi
+!                          grad_phi_lon = 1/(cos(theta))*d(phi)/dlambda
 !
-!                       gdpht = d(phi)/dtheta
-
+!
+!     grad_phi_lat(i,j)   the latitudinal derivative component of
+!                         the gradient of phi
+!
+!                         grad_phi_lat = d(phi)/dtheta
+!
 !
 !   the following two dimensional arrays are nonzero in the triangle
 !   n=1,...,nlat and m less than or equal to n.
@@ -104,7 +105,7 @@ module type_AdvectionSolver
     !----------------------------------------------------------------------
 
     ! Declare derived data type
-    type, extends (GaussianSphere) :: AdvectionSolver
+    type, public, extends (GaussianSphere) :: AdvectionSolver
         !----------------------------------------------------------------------
         ! Class variables
         !----------------------------------------------------------------------
@@ -120,12 +121,15 @@ module type_AdvectionSolver
         !----------------------------------------------------------------------
         ! Class methods
         !----------------------------------------------------------------------
-        procedure         :: get_geopotential
+        procedure, public :: get_geopotential
+        procedure, public :: get_vector_velocities
         procedure, nopass :: atanxy
         !----------------------------------------------------------------------
     end type AdvectionSolver
 
+
 contains
+
 
     subroutine get_geopotential(this, t, geopot)
         !
@@ -248,6 +252,60 @@ contains
     end subroutine get_geopotential
 
 
+    subroutine get_vector_velocities(this, u, v)
+        !----------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !----------------------------------------------------------------------
+        class (AdvectionSolver), intent (in out) :: this
+        real (wp),               intent (out)    :: u(:,:)
+        real (wp),               intent (out)    :: v(:,:)
+        !----------------------------------------------------------------------
+        ! Dictionary: local variables
+        !----------------------------------------------------------------------
+        integer (ip) :: i, j
+        real (wp)    :: sinp, cosp, sint, cost, sinl, cosl
+        real (wp)    :: cth, xlhat, uhat
+        !----------------------------------------------------------------------
+
+        associate( &
+            nlats => this%NUMBER_OF_LATITUDES, &
+            nlons => this%NUMBER_OF_LONGITUDES, &
+            colat => this%grid%latitudes, &
+            omega => this%ROTATION_RATE_OF_EARTH, &
+            alpha => this%TILT_ANGLE &
+            )
+
+            do j=1,nlons
+                associate( xlm => this%grid%longitudes(j) )
+                    sinp = sin(xlm)
+                    cosp = cos(xlm)
+                    do i=1,nlats
+                        cost = cos(colat(i))
+                        sint = sin(colat(i))
+                        associate( &
+                            sth => cos(alpha)*cost+sin(alpha)*sint*cosp, &
+                            cthclh => cos(alpha)*sint*cosp-sin(alpha)*cost, &
+                            cthslh => sint*sinp &
+                            )
+
+                            xlhat = this%atanxy(cthclh,cthslh)
+                            cosl = cos(xlhat)
+                            sinl = sin(xlhat)
+                            cth = cosl*cthclh+sinl*cthslh
+                            uhat = omega*cth
+                            u(i,j) = (cos(alpha)*sinp*sinl+cosp*cosl)*uhat
+                            v(i,j) = (cos(alpha)*cost*cosp*sinl &
+                                -cost*sinp*cosl+sin(alpha)*sint*sinl)*uhat
+
+                        end associate
+                    end do
+                end associate
+            end do
+        end associate
+
+    end subroutine get_vector_velocities
+
+
     pure function atanxy(x,y) result (return_value)
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
@@ -266,21 +324,22 @@ contains
     end function atanxy
 
 
-    pure subroutine sph2cart(radius, theta, phi, x, y, z)
+    pure subroutine sph2cart(r, theta, phi, x, y, z)
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
-        real (wp), intent (in)  :: radius
+        real (wp), intent (in)  :: r
         real (wp), intent (in)  :: theta
         real (wp), intent (in)  :: phi
         real (wp), intent (out) :: x, y, z
         !----------------------------------------------------------------------
 
-        x = radius * sin(theta) * cos(phi)
-        y = radius * sin(theta) * sin(phi)
-        z = radius * cos(theta)
+        x = r * sin(theta) * cos(phi)
+        y = r * sin(theta) * sin(phi)
+        z = r * cos(theta)
 
     end subroutine sph2cart
+
 
 end module type_AdvectionSolver
 
@@ -299,7 +358,7 @@ program advec
     !----------------------------------------------------------------------
     ! Dictionary: local variables
     !----------------------------------------------------------------------
-    type (AdvectionSolver)        :: solver_dat
+    type (AdvectionSolver)        :: solver
     integer (ip), parameter       :: NLONS = 45
     integer (ip), parameter       :: NLATS = 23
     integer (ip)                  :: i, j !! Counters
@@ -308,99 +367,67 @@ program advec
     real (wp)                     :: phi_old(NLATS,NLONS),phi_new(NLATS,NLONS)
     real (wp)                     :: phi(NLATS,NLONS)
     real (wp)                     :: exact_phi(NLATS,NLONS)
-    real (wp)                     :: dpdt(NLATS,NLONS)
-    real (wp)                     :: gdphl(NLATS,NLONS),gdpht(NLATS,NLONS)
+    real (wp)                     :: grad_phi(NLATS,NLONS)
+    real (wp)                     :: grad_phi_lon(NLATS,NLONS),grad_phi_lat(NLATS,NLONS)
     real (wp)                     :: p0_l2, p0_max, time, htime
-    real (wp)                     :: xlhat, uhat, cth
     character (len=*), parameter  :: write_format = &
-        '( A,i10 ,A,f10.2/ ,A,f10.0 ,A,i10/ ,A,i10 '&
-        //',A,1pe15.6/,A,1pe15.6 ,A,0pf10.2/ A,1pe15.6 ,A,1pe15.6)'
+        '( a,i10 ,a,f10.2/ ,a,f10.0 ,a,i10/ ,a,i10 '&
+        //',a,1pe15.6/,a,1pe15.6 ,a,0pf10.2/ a,1pe15.6 ,a,1pe15.6)'
     !----------------------------------------------------------------------
 
+    write( stdout, '(/A)') '     advec *** TEST RUN *** '
+
     !
-    !==> Set up workspace arrays
+    !==> Allocate memory
     !
-    call solver_dat%create(nlat=NLATS, nlon=NLONS)
+    call solver%create(nlat=NLATS, nlon=NLONS)
+
     !
     !==> set vector velocities and cosine bell in geopotential
     !
-    associate( &
-        colat => solver_dat%grid%latitudes, &
-        omega => solver_dat%ROTATION_RATE_OF_EARTH, &
-        alpha => solver_dat%TILT_ANGLE &
-        )
-        associate( &
-            cosa => cos(alpha), &
-            sina => sin(alpha) &
-            )
-            do j=1,NLONS
-                associate( xlm => solver_dat%grid%longitudes(j) )
-                    associate( &
-                        sinp => sin(xlm), &
-                        cosp => cos(xlm) &
-                        )
-                        do i=1,NLATS
-                            associate( &
-                                cost => cos(colat(i)), &
-                                sint => sin(colat(i)) &
-                                )
-                                associate( &
-                                    sth => cosa*cost+sina*sint*cosp, &
-                                    cthclh => cosa*sint*cosp-sina*cost, &
-                                    cthslh => sint*sinp &
-                                    )
-                                    xlhat = atanxy(cthclh,cthslh)
-                                    associate( &
-                                        cosl => cos(xlhat), &
-                                        sinl => sin(xlhat) &
-                                        )
-                                        cth = cosl*cthclh+sinl*cthslh
-                                        uhat = omega*cth
-                                        u(i,j) = (cosa*sinp*sinl+cosp*cosl)*uhat
-                                        v(i,j) = &
-                                            (cosa*cost*cosp*sinl &
-                                            -cost*sinp*cosl+sina*sint*sinl)*uhat
-                                    end associate
-                                end associate
-                            end associate
-                        end do
-                    end associate
-                end associate
-            end do
-        end associate
-    end associate
-    !
-    !==> Compute geopotential at t=-dt in phi_old and at t=0.0 in phi
-    !    to start up leapfrog scheme
-    !
-    associate( dt => solver_dat%TIME_STEP )
+    call solver%get_vector_velocities(u, v)
 
-        call solver_dat%get_geopotential(-dt, phi_old)
-        call solver_dat%get_geopotential(0.0_wp, phi)
+
+
+    associate( dt => solver%TIME_STEP )
+        !
+        !==> Compute geopotential at t=-dt in phi_old and at t=0.0 in phi
+        !    to start up leapfrog scheme
+        !
+        call solver%get_geopotential(-dt, phi_old)
+        call solver%get_geopotential(0.0_wp, phi)
 
     end associate
+
+
     !
     !==> smooth geopotential at t=-dt and t=0. by synthesizing after analysis
     !
-    call solver_dat%perform_scalar_analysis(phi_old)
-    call solver_dat%perform_scalar_synthesis(phi_old)
-    call solver_dat%perform_scalar_analysis(phi)
-    call solver_dat%perform_scalar_synthesis(phi)
+    call solver%perform_scalar_analysis(phi_old)
+    call solver%perform_scalar_synthesis(phi_old)
+    call solver%perform_scalar_analysis(phi)
+    call solver%perform_scalar_synthesis(phi)
+
+
     !
     !==> compute l2 and max norms of geopotential at t=0.
     !
     p0_l2 = norm2(phi)
     p0_max = maxval(abs(phi))
-    !
-    !==> set number of time steps for 12 days
-    !    (time to circumvent the earth)
-    !
-    associate( dt => solver_dat%TIME_STEP )
+
+
+    associate( dt => solver%TIME_STEP )
+        !
+        !==> set number of time steps for 12 days (time to circumvent the earth)
+        !
         ntime = int(real(TIME_TO_CIRCUMVENT_THE_EARTH, kind=wp)/dt + 0.5_wp, kind=ip)
         mprint = ntime/12
         time = 0.0_wp
         ncycle = 0
+
     end associate
+
+
     !
     !==> Start time loop
     !
@@ -408,13 +435,13 @@ program advec
         !
         !==> Compute gradient of phi at current time
         !
-        call solver_dat%get_gradient(phi, gdpht, gdphl)
+        call solver%get_gradient(phi, grad_phi_lat, grad_phi_lon)
         !
         !==> Compute the time derivative of phi, note that the sign
         !    of the last term is positive because the gradient is
         !    computed with respect to colatitude rather than latitude.
         !
-        dpdt = -u * gdphl + v * gdpht
+        grad_phi = -u * grad_phi_lon + v * grad_phi_lat
         !
         !==> write variables to standard output
         !
@@ -422,42 +449,41 @@ program advec
             !
             !==> Compute exact solution
             !
-            call solver_dat%get_geopotential(time, exact_phi)
+            call solver%get_geopotential(time, exact_phi)
             !
             !==> Compute errors
             !
             associate( &
                 htime => time/3600, &
-                dt => solver_dat%TIME_STEP, &
-                nlats => solver_dat%NUMBER_OF_LATITUDES, &
-                nlons => solver_dat%NUMBER_OF_LONGITUDES, &
-                omega => solver_dat%ROTATION_RATE_OF_EARTH, &
-                hzero => solver_dat%MAXIMUM_VALUE_OF_COSINE_BELL, &
-                alphad => solver_dat%TILT_ANGLE_IN_DEGREES, &
+                dt => solver%TIME_STEP, &
+                nlats => solver%NUMBER_OF_LATITUDES, &
+                nlons => solver%NUMBER_OF_LONGITUDES, &
+                omega => solver%ROTATION_RATE_OF_EARTH, &
+                hzero => solver%MAXIMUM_VALUE_OF_COSINE_BELL, &
+                alphad => solver%TILT_ANGLE_IN_DEGREES, &
                 errm => maxval(abs(exact_phi-phi))/p0_max, &
                 err2 => norm2(exact_phi-phi)/p0_l2 &
                 )
 
-                write( stdout, '(A)') ''
-                write( stdout, '(A)' ) ' advecting cosine bell, test case 2'
+                write( stdout, '(/A)' ) ' advecting cosine bell, test case 2'
                 write( stdout, fmt = write_format ) &
-                    ' exit number              ', ncycle, &
+                    ' exit number              '  , ncycle, &
                     '  model time in  hours      ', htime, &
-                    ' time step in seconds      ', dt, &
-                    ' number of latitudes       ', nlats, &
-                    ' number of longitudes      ', nlons, &
-                    ' rotation rate        ', omega, &
-                    ' mean height          ', hzero, &
-                    ' tilt angle                ', alphad, &
-                    ' max geopot. error    ', errm, &
-                    ' RMS geopot. error    ', err2
+                    ' time step in seconds      ' , dt, &
+                    ' number of latitudes       ' , nlats, &
+                    ' number of longitudes      ' , nlons, &
+                    ' rotation rate        '      , omega, &
+                    ' mean height          '      , hzero, &
+                    ' tilt angle                ' , alphad, &
+                    ' max geopot. error    '      , errm, &
+                    ' RMS geopot. error    '      , err2
             end associate
         end if
 
         !
         !==> Update various quantities
         !
-        associate( dt => solver_dat%TIME_STEP )
+        associate( dt => solver%TIME_STEP )
             !
             !==> increment
             !
@@ -466,13 +492,19 @@ program advec
             !
             !==> update phi_old,phi for next time step
             !
-            phi_new = phi_old + 2.0_wp * dt * dpdt
+            phi_new = phi_old + 2.0_wp * dt * grad_phi
             phi_old = phi
             phi = phi_new
+
         end associate
         !
         !==> end of time loop
         !
     end do time_loop
+
+    !
+    !==> Release memory
+    !
+    call solver%destroy()
 
 end program advec

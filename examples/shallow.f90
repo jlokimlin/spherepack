@@ -162,7 +162,7 @@ module type_ShallowWaterSolver
         !----------------------------------------------------------------------
         procedure         :: spec_to_grid
         procedure         :: grid_to_spec
-        procedure         :: getvrtdivspec
+        procedure         :: get_vrtdivspec
         procedure         :: get_uv
         procedure, nopass :: atanxy
         procedure, nopass :: get_initial_velocity
@@ -394,7 +394,7 @@ contains
 
 
 
-    subroutine getvrtdivspec(this, ugrid, vgrid, vrtspec, divspec)
+    subroutine get_vrtdivspec(this, ugrid, vgrid, vrtspec, divspec)
         !
         ! Purpose:
         !
@@ -501,7 +501,7 @@ contains
         deallocate( w )
         deallocate( sqnn )
 
-    end subroutine getvrtdivspec
+    end subroutine get_vrtdivspec
 
 
     subroutine get_uv(this, vrtspec, divspec, ugrid, vgrid)
@@ -667,6 +667,8 @@ program shallow
     character (len=:), allocatable    :: write_fmt
     !--------------------------------------------------------------------------------
 
+    write( stdout, '(/A)') '     shallow *** TEST RUN *** '
+
     !
     !==> Initialize constants
     !
@@ -789,7 +791,7 @@ program shallow
     !
     !==> Compute spectral coeffs of initial vrt, div, p
     !
-    call solver%getvrtdivspec(ug, vg, vrtnm, divnm)
+    call solver%get_vrtdivspec(ug, vg, vrtnm, divnm)
     call solver%grid_to_spec(pg, pnm)
 
     !
@@ -824,8 +826,7 @@ program shallow
             p = pg
             htime = time/3600.0_wp
 
-            write( stdout, '(A)' ) ''
-            write( stdout, '(A)' ) ' steady nonlinear rotated flow:'
+            write( stdout, '(/A)' ) ' steady nonlinear rotated flow:'
             write( stdout, fmt=write_fmt ) &
                 ' cycle number              ', ncycle, &
                 ' model time in  hours      ', htime, &
@@ -874,13 +875,13 @@ program shallow
         scrg1 = ug * (vrtg + f)
         scrg2 = vg * (vrtg + f)
 
-        call solver%getvrtdivspec(scrg1, scrg2, ddivdtnm(:,new), dvrtdtnm(:,new))
+        call solver%get_vrtdivspec(scrg1, scrg2, ddivdtnm(:,new), dvrtdtnm(:,new))
 
         dvrtdtnm(:,new) = -dvrtdtnm(:,new)
         scrg1 = ug*(pg+pzero)
         scrg2 = vg*(pg+pzero)
 
-        call solver%getvrtdivspec(scrg1, scrg2, scrnm, dpdtnm(:,new))
+        call solver%get_vrtdivspec(scrg1, scrg2, scrnm, dpdtnm(:,new))
 
         dpdtnm(:,new) = -dpdtnm(:,new)
         scrg1 = pg + 0.5_wp * (ug**2+vg**2)

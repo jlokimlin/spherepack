@@ -53,7 +53,7 @@
 !     be the cartesian coordinates corresponding to theta and phi.
 !     on the unit sphere.  The exact solution
 !
-!        ue(theta,phi) = (1.+x*y)*exp(z)
+!        ue(theta,phi) = (1.0 + x*y)*exp(z)
 !
 !     is used to set the right hand side and compute error.
 !
@@ -179,8 +179,7 @@ contains
                 !==> Print earlier output from platform with 64-bit floating point
                 !    arithmetic followed by the output from this computer
                 !
-                write( stdout, '(A)') ''
-                write( stdout, '(A)') '     helmsph *** TEST RUN *** '
+                write( stdout, '(/A)') '     helmsph *** TEST RUN *** '
                 write( stdout, '(A)') ''
                 write( stdout, '(A)') '     grid type = '//sphere_type%grid%grid_type
                 write( stdout, '(A)') '     Helmholtz approximation on a ten degree grid'
@@ -188,8 +187,8 @@ contains
                 write( stdout, '(A)') '     Previous 64 bit floating point arithmetic result '
                 write( stdout, '(A)') error_previous_platform
                 write( stdout, '(A)') '     The output from your computer is: '
-                write( stdout, '(A,1pe15.6)') '     discretization error = ', err2
-                write( stdout, '(A)' ) ''
+                write( stdout, '(A,1pe15.6/)') '     discretization error = ', err2
+
             end associate
         end associate
         !
