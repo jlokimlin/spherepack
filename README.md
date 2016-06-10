@@ -4,7 +4,7 @@ An object-oriented modernization of NCAR's SPHEREPACK3.2.
 
 * The original work, written in fixed-from FORTRAN 77, was heavily refactored to incorporate features of free-form modern Fortran (2008+). 
 * Dynamic memory allocation procedures for analysis and synthesis are now hidden from the end user.
-* **type**(Sphere) allows one to write generic code for both regular (uniform spacing) and Gaussian grids.
+* **class**(Sphere) allows one to write generic code for both regular (uniform spacing) and Gaussian grids.
 
 -----------------------------------------------------------------------------
 
