@@ -308,10 +308,137 @@ module module_shsgs
     implicit none
 
     ! Everything is private unless stated otherwise
+    private
     public :: shsgs
     public :: shsgsi
+    public :: ShsgsAux
+
+    ! Declare derived data type
+    type, public :: ShsgsAux
+        !-----------------------------------------
+        ! Class variables
+        !-----------------------------------------
+    contains
+        !-----------------------------------------
+        ! Class methods
+        !-----------------------------------------
+        procedure, nopass :: shsgs
+        procedure, nopass :: shsgsi
+        procedure, nopass :: get_lshsgs
+        procedure, nopass :: get_lwork
+        procedure, nopass :: get_ldwork
+        procedure, nopass :: get_legendre_workspace_size
+        !-----------------------------------------
+    end type ShsgsAux
+
 
 contains
+
+
+    pure function get_lshsgs(nlat, nlon) result (return_value)
+        !----------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !----------------------------------------------------------------------
+        integer (ip), intent (in)  :: nlat
+        integer (ip), intent (in)  :: nlon
+        integer (ip)               :: return_value
+        !----------------------------------------------------------------------
+        ! Dictionary: local variables
+        !----------------------------------------------------------------------
+        integer (ip)         :: l1, l2
+        type (SpherepackAux) :: sphere_aux
+        !----------------------------------------------------------------------
+
+        call sphere_aux%compute_parity(nlat, nlon, l1, l2)
+
+        return_value = nlat*(3*(l1+l2)-2)+(l1-1)*(l2*(2*nlat-l1)-3*l1)/2+nlon+15
+
+
+    end function get_lshsgs
+
+
+
+    pure function get_lwork(nlat) result (return_value)
+        !----------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !----------------------------------------------------------------------
+        integer (ip), intent (in) :: nlat
+        integer (ip)              :: return_value
+        !----------------------------------------------------------------------
+
+        return_value = 4*nlat*(nlat+2)+2
+
+    end function get_lwork
+
+
+
+    pure function get_ldwork(nlat) result (return_value)
+        !----------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !----------------------------------------------------------------------
+        integer (ip), intent (in)  :: nlat
+        integer (ip)               :: return_value
+        !----------------------------------------------------------------------
+
+        return_value = nlat*(nlat+4)
+
+    end function get_ldwork
+
+
+
+
+    pure function get_legendre_workspace_size(nlat, nlon, nt, isym) result (return_value)
+        !----------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !----------------------------------------------------------------------
+        integer (ip),           intent (in) :: nlat
+        integer (ip),           intent (in) :: nlon
+        integer (ip), optional, intent (in) :: nt
+        integer (ip), optional, intent (in) :: isym
+        integer (ip)                        :: return_value
+        !----------------------------------------------------------------------
+        ! Dictionary: local variables
+        !----------------------------------------------------------------------
+        integer (ip) :: nt_op, isym_op, l2
+        !----------------------------------------------------------------------
+
+        !
+        !==> Address optional arguments
+        !
+        if (present(nt)) then
+            nt_op = nt
+        else
+            nt_op = 1
+        end if
+
+        if (present(isym)) then
+            isym_op = isym
+        else
+            isym_op = 0
+        end if
+
+        !
+        !==> Compute workspace size
+        !
+        select case (isym)
+            case (0)
+                ! Set workspace size
+                return_value = nlat*nlon*(nt_op+1)
+            case default
+                ! Compute parity
+                select case (mod(nlat, 2))
+                    case (0)
+                        l2 = nlat/2
+                    case default
+                        l2 = (nlat + 1)/2
+                end select
+                ! Set workspace size
+                return_value = l2*nlon*(nt_op+1)
+        end select
+
+    end function get_legendre_workspace_size
+
+
 
     subroutine shsgs(nlat, nlon, mode, nt, g, idg, jdg, a, b, mdab, ndab, &
         wshsgs, lshsgs, work, lwork, ierror)

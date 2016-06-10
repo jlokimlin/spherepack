@@ -446,10 +446,143 @@ module module_vhses
     implicit none
 
     ! Everything is private unless stated otherwise
+    private
     public :: vhses
     public :: vhsesi
+    public :: VhsesAux
+
+
+    ! Declare derived data type
+    type, public :: VhsesAux
+        !-----------------------------------------
+        ! Class variables
+        !-----------------------------------------
+    contains
+        !-----------------------------------------
+        ! Class methods
+        !-----------------------------------------
+        procedure, nopass :: vhses
+        procedure, nopass :: vhsesi
+        procedure, nopass :: get_lvhses
+        procedure, nopass :: get_lwork
+        procedure, nopass :: get_ldwork
+        procedure, nopass :: get_legendre_workspace_size
+        !-----------------------------------------
+    end type VhsesAux
+
 
 contains
+
+
+    pure function get_lvhses(nlat, nlon) result (return_value)
+        !----------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !----------------------------------------------------------------------
+        integer (ip), intent (in)  :: nlat
+        integer (ip), intent (in)  :: nlon
+        integer (ip)               :: return_value
+        !----------------------------------------------------------------------
+        ! Dictionary: local variables
+        !----------------------------------------------------------------------
+        integer (ip)         :: l1, l2
+        type (SpherepackAux) :: sphere_aux
+        !----------------------------------------------------------------------
+
+        call sphere_aux%compute_parity(nlat, nlon, l1, l2)
+
+        return_value = l1*l2*(2*nlat-l1+1)+nlon+15
+
+    end function get_lvhses
+
+
+
+    pure function get_lwork(nlat, nlon) result (return_value)
+        !----------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !----------------------------------------------------------------------
+        integer (ip), intent (in)  :: nlat
+        integer (ip), intent (in)  :: nlon
+        integer (ip)               :: return_value
+        !----------------------------------------------------------------------
+        ! Dictionary: local variables
+        !----------------------------------------------------------------------
+        integer (ip)         :: l1, l2
+        type (SpherepackAux) :: sphere_aux
+        !----------------------------------------------------------------------
+
+        call sphere_aux%compute_parity(nlat, nlon, l1, l2)
+
+        return_value = 3*(max(l1-2, 0)*(2*nlat-l1-1))/2+5*l2*nlat
+
+    end function get_lwork
+
+
+
+    pure function get_ldwork(nlat) result (return_value)
+        !----------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !----------------------------------------------------------------------
+        integer (ip), intent (in)  :: nlat
+        integer (ip)               :: return_value
+        !----------------------------------------------------------------------
+
+        return_value = 2*(nlat+1)
+
+    end function get_ldwork
+
+
+
+    pure function get_legendre_workspace_size(nlat, nlon, nt, ityp) result (return_value)
+        !----------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !----------------------------------------------------------------------
+        integer (ip),           intent (in) :: nlat
+        integer (ip),           intent (in) :: nlon
+        integer (ip), optional, intent (in) :: nt
+        integer (ip), optional, intent (in) :: ityp
+        integer (ip)                        :: return_value
+        !----------------------------------------------------------------------
+        ! Dictionary: local variables
+        !----------------------------------------------------------------------
+        integer (ip) :: nt_op, ityp_op, l2
+        !----------------------------------------------------------------------
+
+        !
+        !==> Address optional arguments
+        !
+        if (present(nt)) then
+            nt_op = nt
+        else
+            nt_op = 1
+        end if
+
+        if (present(ityp)) then
+            ityp_op = ityp
+        else
+            ityp_op = 0
+        end if
+
+        !
+        !==> Compute workspace size
+        !
+        if (ityp_op <= 2) then
+            ! Set workspace size
+            return_value = (2*nt_op+1)*nlat*nlon
+        else
+            ! Compute parity
+            select case (mod(nlat, 2))
+                case (0)
+                    l2 = nlat/2
+                case default
+                    l2 = (nlat + 1)/2
+            end select
+            ! Set workspace size
+            return_value = (2*nt_op+1)*l2*nlon
+        end if
+
+    end function get_legendre_workspace_size
+
+
 
     subroutine vhses(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
         mdab, ndab, wvhses, lvhses, work, lwork, ierror)
@@ -460,14 +593,14 @@ contains
         integer (ip), intent (in)  :: nlon
         integer (ip), intent (in)  :: ityp
         integer (ip), intent (in)  :: nt
-        real (wp),    intent (out) :: v(idvw, jdvw,*)
-        real (wp),    intent (out) :: w(idvw, jdvw,*)
+        real (wp),    intent (out) :: v(idvw, jdvw, nt)
+        real (wp),    intent (out) :: w(idvw, jdvw, nt)
         integer (ip), intent (in)  :: idvw
         integer (ip), intent (in)  :: jdvw
-        real (wp),    intent (in)  :: br(mdab, ndab,*)
-        real (wp),    intent (in)  :: bi(mdab, ndab,*)
-        real (wp),    intent (in)  :: cr(mdab, ndab,*)
-        real (wp),    intent (in)  :: ci(mdab, ndab,*)
+        real (wp),    intent (in)  :: br(mdab, ndab, nt)
+        real (wp),    intent (in)  :: bi(mdab, ndab, nt)
+        real (wp),    intent (in)  :: cr(mdab, ndab, nt)
+        real (wp),    intent (in)  :: ci(mdab, ndab, nt)
         integer (ip), intent (in)  :: mdab
         integer (ip), intent (in)  :: ndab
         real (wp),    intent (in)  :: wvhses(lvhses)
@@ -594,19 +727,19 @@ contains
             integer (ip), intent (in)  :: imid
             integer (ip), intent (in)  :: idvw
             integer (ip), intent (in)  :: jdvw
-            real (wp),    intent (out) :: v(idvw, jdvw,*)
-            real (wp),    intent (out) :: w(idvw, jdvw,*)
+            real (wp),    intent (out) :: v(idvw, jdvw, nt)
+            real (wp),    intent (out) :: w(idvw, jdvw, nt)
             integer (ip), intent (in)  :: mdab
             integer (ip), intent (in)  :: ndab
-            real (wp),    intent (in)  :: br(mdab, ndab,* )
-            real (wp),    intent (in)  :: bi(mdab, ndab, *)
-            real (wp),    intent (in)  :: cr(mdab, ndab, *)
-            real (wp),    intent (in)  :: ci(mdab, ndab, *)
+            real (wp),    intent (in)  :: br(mdab, ndab, nt)
+            real (wp),    intent (in)  :: bi(mdab, ndab, nt)
+            real (wp),    intent (in)  :: cr(mdab, ndab, nt)
+            real (wp),    intent (in)  :: ci(mdab, ndab, nt)
             integer (ip), intent (in)  :: idv
-            real (wp),    intent (out)  :: ve(idv, nlon, *)
-            real (wp),    intent (out)  :: vo(idv, nlon, *)
-            real (wp),    intent (out)  :: we(idv, nlon, *)
-            real (wp),    intent (out)  :: wo(idv, nlon, *)
+            real (wp),    intent (out)  :: ve(idv, nlon, nt)
+            real (wp),    intent (out)  :: vo(idv, nlon, nt)
+            real (wp),    intent (out)  :: we(idv, nlon, nt)
+            real (wp),    intent (out)  :: wo(idv, nlon, nt)
             real (wp),    intent (out)  :: work(*)
             integer (ip), intent (in)  :: idz
             real (wp),    intent (in)  :: vb(imid, *)

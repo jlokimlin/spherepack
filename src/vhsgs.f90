@@ -31,14 +31,14 @@
 !
 !
 !
-! ... file vhsgs.f
+! ... file vhsgs.f90
 !
 !     this file contains code and documentation for subroutines
 !     vhsgs and vhsgsi
 !
-! ... files which must be loaded with vhsgs.f
+! ... files which must be loaded with vhsgs.f90
 !
-!     type_SpherepackAux.f, type_HFFTpack.f, gaqd.f
+!     type_SpherepackAux.f90, type_HFFTpack.f90, gaqd.f90
 !
 !     subroutine vhsgs(nlat,nlon,ityp,nt,v,w,idvw,jdvw,br,bi,cr,ci,
 !    +                 mdab,ndab,wvhsgs,lvhsgs,work,lwork,ierror)
@@ -444,8 +444,117 @@ module module_vhsgs
     ! Everything is private unless stated otherwise
     public :: vhsgs
     public :: vhsgsi
+    public :: VhsgsAux
+
+    ! Declare derived data type
+    type, public :: VhsgsAux
+        !-----------------------------------------
+        ! Class variables
+        !-----------------------------------------
+    contains
+        !-----------------------------------------
+        ! Class methods
+        !-----------------------------------------
+        procedure, nopass :: vhsgs
+        procedure, nopass :: vhsgsi
+        procedure, nopass :: get_lvhsgs
+        procedure, nopass :: get_ldwork
+        procedure, nopass :: get_legendre_workspace_size
+        !-----------------------------------------
+    end type VhsgsAux
+
 
 contains
+
+
+    pure function get_lvhsgs(nlat, nlon) result (return_value)
+        !----------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !----------------------------------------------------------------------
+        integer (ip), intent (in)  :: nlat
+        integer (ip), intent (in)  :: nlon
+        integer (ip)               :: return_value
+        !----------------------------------------------------------------------
+        ! Dictionary: local variables
+        !----------------------------------------------------------------------
+        integer (ip)         :: l1, l2
+        type (SpherepackAux) :: sphere_aux
+        !----------------------------------------------------------------------
+
+        call sphere_aux%compute_parity(nlat, nlon, l1, l2)
+
+        return_value = max(l1*l2*(2*nlat-l1+1)+nlon+15+2*nlat, 5*(nlat**2)*nlon)
+
+    end function get_lvhsgs
+
+
+
+    pure function get_ldwork(nlat) result (return_value)
+        !----------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !----------------------------------------------------------------------
+        integer (ip), intent (in)  :: nlat
+        integer (ip)               :: return_value
+        !----------------------------------------------------------------------
+
+        return_value = (3*nlat*(nlat+3)+2)/2
+
+    end function get_ldwork
+
+
+
+
+    pure function get_legendre_workspace_size(nlat, nlon, nt, ityp) result (return_value)
+        !----------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !----------------------------------------------------------------------
+        integer (ip),           intent (in) :: nlat
+        integer (ip),           intent (in) :: nlon
+        integer (ip), optional, intent (in) :: ityp
+        integer (ip), optional, intent (in) :: nt
+        integer (ip)                        :: return_value
+        !----------------------------------------------------------------------
+        ! Dictionary: local variables
+        !----------------------------------------------------------------------
+        integer (ip) :: nt_op, ityp_op, l2
+        !----------------------------------------------------------------------
+
+        !
+        !==> Address optional arguments
+        !
+        if (present(nt)) then
+            nt_op = nt
+        else
+            nt_op = 1
+        end if
+
+        if (present(ityp)) then
+            ityp_op = ityp
+        else
+            ityp_op = 1
+        end if
+
+        !
+        !==> Compute workspace size
+        !
+        if (ityp <= 2) then
+            ! Set workspace size
+            return_value = (2*nt_op+1)*nlat*nlon
+        else
+            ! Compute parity
+            select case (mod(nlat, 2))
+                case (0)
+                    l2 = nlat/2
+                case default
+                    l2 = (nlat + 1)/2
+            end select
+            ! Set workspace size
+            return_value = (2*nt+1)*l2*nlon
+        end if
+
+    end function get_legendre_workspace_size
+
+
 
     subroutine vhsgs(nlat,nlon,ityp,nt,v,w,idvw,jdvw,br,bi,cr,ci, &
         mdab,ndab,wvhsgs,lvhsgs,work,lwork,ierror)

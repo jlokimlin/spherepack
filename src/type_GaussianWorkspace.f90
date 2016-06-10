@@ -8,16 +8,16 @@ module type_GaussianWorkspace
         Workspace
 
     use module_shags, only: &
-        shagsi
+        ShagsAux
 
     use module_shsgs, only: &
-        shsgsi
+        ShsgsAux
 
     use module_vhags, only: &
-        vhagsi
+        VhagsAux
 
     use module_vhsgs, only: &
-        vhsgsi
+        VhsgsAux
 
     ! Explicit typing only
     implicit none
@@ -45,10 +45,6 @@ module type_GaussianWorkspace
         procedure,         private :: initialize_gaussian_vector_analysis
         procedure,         private :: initialize_gaussian_vector_synthesis
         procedure,         private :: initialize_gaussian_vector_transform
-        procedure, nopass, private :: get_lshags
-        procedure, nopass, private :: get_lshsgs
-        procedure, nopass, private :: get_lvhags
-        procedure, nopass, private :: get_lvhsgs
         generic,           public  :: assignment (=) => copy_gaussian_workspace
         procedure,         private :: copy_gaussian_workspace
         final                      :: finalize_gaussian_workspace
@@ -130,11 +126,9 @@ contains
         ! Ensure that object is usable
         call this%destroy()
 
-        ! Set up scalar transform
         call this%initialize_gaussian_scalar_transform(nlat, nlon)
-
-        ! Set up vector transform
         call this%initialize_gaussian_vector_transform(nlat, nlon)
+        call get_legendre_workspace(nlat, nlon, this%legendre_workspace)
 
         ! Set flag
         this%initialized = .true.
@@ -151,9 +145,7 @@ contains
         !----------------------------------------------------------------------
 
         ! Check flag
-        if (this%initialized .eqv. .false.) then
-            return
-        end if
+        if (this%initialized .eqv. .false.) return
 
         ! Release memory from parent type
         call this%destroy_workspace()
@@ -166,15 +158,6 @@ contains
 
 
     subroutine initialize_gaussian_scalar_analysis(this, nlat, nlon)
-        !
-        ! Purpose:
-        !
-        !  Set the various workspace arrays to perform the
-        !  (real) scalar harmonic analysis on a gaussian grid
-        !
-        !  Reference:
-        !  https://www2.cisl.ucar.edu/spherepack/documentation#shags.html
-        !
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
@@ -186,43 +169,37 @@ contains
         !----------------------------------------------------------------------
         integer (ip)           :: error_flag
         integer (ip)           :: lwork, ldwork, lshags
-        real (wp), allocatable :: dwork(:)
+        real (wp), allocatable :: work(:), dwork(:)
+        type (ShagsAux)        :: aux
         !----------------------------------------------------------------------
 
         ! Compute dimensions of various workspace arrays
-        lwork = max(this%get_lwork(nlat, nlon), 5*(nlat**2)*nlon)
-        ldwork = max(this%get_ldwork(nlat), 4*(nlat**2) )
-        lshags = this%get_lshags(nlat, nlon)
-
-        ! Release memory ( if necessary )
-        if (allocated(this%legendre_workspace)) then
-            deallocate(this%legendre_workspace )
-        end if
-
-        if (allocated(this%forward_scalar)) then
-            deallocate(this%forward_scalar )
-        end if
+        lwork = get_lwork(nlat)
+        ldwork = get_ldwork(nlat)
+        lshags = aux%get_lshags(nlat, nlon)
 
         !
         !==> Allocate memory
         !
-        allocate( this%legendre_workspace(lwork) )
-        allocate( this%forward_scalar(lshags) )
-        allocate( dwork(lwork) )
+        if (allocated(this%forward_scalar)) deallocate(this%forward_scalar )
 
-        ! Compute workspace arrays
+        !
+        !==> Allocate memory
+        !
+        allocate( this%forward_scalar(lshags) )
+        allocate( work(lwork) )
+        allocate( dwork(ldwork) )
+
         associate( &
             wshags => this%forward_scalar, &
-            work => this%legendre_workspace, &
             ierror => error_flag &
             )
-
-            call shagsi( nlat, nlon, wshags, lshags, work, lwork, dwork, ldwork, ierror)
+            !
+            !==> Initialize workspace array for analysis
+            !
+            call aux%shagsi(nlat, nlon, wshags, lshags, work, lwork, dwork, ldwork, ierror)
 
         end associate
-
-        ! Release memory
-        deallocate( dwork )
 
 
         ! Address error flag
@@ -240,7 +217,7 @@ contains
             case(3)
                 error stop 'Object of class (GaussianWorkspace) '&
                     //'in initialize_gaussian_scalar_analysis '&
-                    //'error in the specification of extent for FORWARD_SCALAR'
+                    //'error in the specification of extent for forward_scalar'
             case(4)
                 error stop 'Object of class (GaussianWorkspace) '&
                     //'in initialize_gaussian_scalar_analysis '&
@@ -260,20 +237,18 @@ contains
                     //'Undetermined error flag'
         end select
 
+
+        !
+        !==> Release memory
+        !
+        deallocate( work )
+        deallocate( dwork )
+
     end subroutine initialize_gaussian_scalar_analysis
 
 
 
     subroutine initialize_gaussian_scalar_synthesis(this, nlat, nlon)
-        !
-        ! Purpose:
-        !
-        !  Set the various workspace arrays to perform the
-        !  (real) scalar harmonic synthesis on a gaussian grid
-        !
-        !  Reference:
-        !  https://www2.cisl.ucar.edu/spherepack/documentation#shags.html
-        !
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
@@ -285,37 +260,34 @@ contains
         !----------------------------------------------------------------------
         integer (ip)           :: error_flag
         integer (ip)           :: lwork, ldwork, lshsgs
-        real (wp), allocatable :: dwork(:)
+        real (wp), allocatable :: work(:), dwork(:)
+        type (ShsgsAux)        :: aux
         !----------------------------------------------------------------------
 
         ! Compute dimensions of various workspace arrays
-        lwork = max(this%get_lwork(nlat, nlon), 5*(nlat**2)*nlon)
-        ldwork = max(this%get_ldwork(nlat), 4*(nlat**2) )
-        lshsgs = this%get_lshsgs(nlat, nlon)
-
-        ! Release memory ( if necessary )
-        if (allocated(this%legendre_workspace)) then
-            deallocate(this%legendre_workspace )
-        end if
-
-        if (allocated(this%backward_scalar)) then
-            deallocate(this%backward_scalar )
-        end if
+        lwork = get_lwork(nlat)
+        ldwork = get_ldwork(nlat)
+        lshsgs = aux%get_lshsgs(nlat, nlon)
 
         !
         !==> Allocate memory
         !
-        allocate( this%legendre_workspace(lwork) )
+        if (allocated(this%backward_scalar)) deallocate(this%backward_scalar )
+
+        allocate( work(lwork) )
         allocate( dwork(ldwork) )
         allocate( this%backward_scalar(lshsgs) )
 
-        ! Compute workspace
+
         associate( &
             wshsgs => this%backward_scalar, &
-            work => this%legendre_workspace, &
             ierror => error_flag &
             )
-            call shsgsi(nlat, nlon, wshsgs, lshsgs, work, lwork, dwork, ldwork, ierror)
+            !
+            !==> Initialize workspace array for synthesis
+            !
+            call aux%shsgsi(nlat, nlon, wshsgs, lshsgs, work, lwork, dwork, ldwork, ierror)
+
         end associate
 
         ! Address error flag
@@ -351,6 +323,12 @@ contains
                     //'in initialize_gaussian_scalar_synthesis '&
                     //'Undetermined error flag'
         end select
+
+        !
+        !==> Release memory
+        !
+        deallocate( work )
+        deallocate( dwork )
 
     end subroutine initialize_gaussian_scalar_synthesis
 
@@ -388,15 +366,6 @@ contains
 
 
     subroutine initialize_gaussian_vector_analysis(this, nlat, nlon)
-        !
-        ! Purpose:
-        !
-        !  Set the various workspace arrays to perform the
-        !  (real) scalar harmonic analysis on a gaussian grid
-        !
-        !  Reference:
-        !  https://www2.cisl.ucar.edu/spherepack/documentation#vhags.html
-        !
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
@@ -409,33 +378,34 @@ contains
         integer (ip)           :: error_flag
         integer (ip)           :: ldwork, lvhags
         real (wp), allocatable :: dwork(:)
+        type (VhagsAux)        :: aux
         !----------------------------------------------------------------------
 
         ! Compute dimensions of various workspace arrays
-        ldwork = this%get_ldwork(nlat)
-        lvhags = this%get_lvhags(nlat, nlon)
+        ldwork = get_ldwork(nlat)
+        lvhags = aux%get_lvhags(nlat, nlon)
 
-        ! Release memory ( if necessary )
-        if (allocated(this%forward_vector)) then
-            deallocate( this%forward_vector )
-        end if
+        !
+        !==> Allocate memory
+        !
+        if (allocated(this%forward_vector)) deallocate( this%forward_vector )
 
-        ! Allocate memory
         allocate( dwork(ldwork) )
         allocate(this%forward_vector(lvhags) )
 
-        ! Compute workspace
+
         associate( &
             wvhags => this%forward_vector, &
             ierror => error_flag &
             )
 
-            call vhagsi( nlat, nlon, wvhags, lvhags, dwork, ldwork, ierror )
+            !
+            !==> Initialize workspace arrays for vector analysis
+            !
+            call aux%vhagsi(nlat, nlon, wvhags, lvhags, dwork, ldwork, ierror)
 
         end associate
 
-        ! Release memory
-        deallocate( dwork )
 
         ! Address error flag
         select case (error_flag)
@@ -452,7 +422,7 @@ contains
             case(3)
                 error stop 'Object of class (GaussianWorkspace) '&
                     //'in initialize_gaussian_vector_analysis'&
-                    //'error in the specification of extent for FORWARD_VECTOR'
+                    //'error in the specification of extent for forward_vector'
             case(4)
                 error stop 'Object of class (GaussianWorkspace) '&
                     //'in initialize_gaussian_vector_analysis'&
@@ -463,20 +433,16 @@ contains
                     //'Undetermined error flag'
         end select
 
+        !
+        !==> Release memory
+        !
+        deallocate( dwork )
+
     end subroutine initialize_gaussian_vector_analysis
 
 
 
     subroutine initialize_gaussian_vector_synthesis(this, nlat, nlon)
-        !
-        !< Purpose:
-        !
-        !  Set the various workspace arrays to perform the
-        !  (real) scalar harmonic analysis on a gaussian grid
-        !
-        !  Reference:
-        !  https://www2.cisl.ucar.edu/spherepack/documentation#vhsgsi.html
-        !
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
@@ -489,33 +455,32 @@ contains
         integer (ip)           :: error_flag
         integer (ip)           :: ldwork, lvhsgs
         real (wp), allocatable :: dwork(:)
+        type (VhsgsAux)        :: aux
         !----------------------------------------------------------------------
 
         ! Compute dimensions of various workspace arrays
-        ldwork = max(this%get_ldwork(nlat), 12*nlat*nlon, 4*(nlat**2))
-        lvhsgs = max(this%get_lvhsgs(nlat, nlon), 5*(nlat**2)*nlon)
-
-        ! Release memory ( if necessary )
-        if (allocated(this%backward_vector)) then
-            deallocate( this%backward_vector )
-        end if
+        ldwork = get_ldwork(nlat)
+        lvhsgs = aux%get_lvhsgs(nlat, nlon)
 
         !
         !==> Allocate memory
         !
+        if (allocated(this%backward_vector)) deallocate( this%backward_vector )
+
         allocate( dwork(ldwork) )
         allocate( this%backward_vector(lvhsgs) )
 
-        ! Compute workspace
+
         associate( &
             wvhsgs => this%backward_vector, &
             ierror => error_flag &
             )
-            call vhsgsi(nlat, nlon, wvhsgs, lvhsgs, dwork, ldwork, ierror)
-        end associate
+            !
+            !==> Initialize workspace arrays for vector synthesis
+            !
+            call aux%vhsgsi(nlat, nlon, wvhsgs, lvhsgs, dwork, ldwork, ierror)
 
-        ! Release memory
-        deallocate( dwork )
+        end associate
 
         ! Address error flag
         select case (error_flag)
@@ -543,6 +508,10 @@ contains
                     //'Undetermined error flag'
         end select
 
+        !
+        !==> Release memory
+        !
+        deallocate( dwork )
 
     end subroutine initialize_gaussian_vector_synthesis
 
@@ -581,120 +550,103 @@ contains
 
 
 
-    pure function get_lshags(nlat, nlon) result (return_value)
+    pure function get_lwork(nlat) result (return_value)
+        !----------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !----------------------------------------------------------------------
+        integer (ip), intent (in) :: nlat
+        integer (ip)              :: return_value
+        !----------------------------------------------------------------------
+        type (ShagsAux) :: shags_aux
+        type (ShsgsAux) :: shsgs_aux
+        integer (ip)    :: lwork(2)
+        !----------------------------------------------------------------------
+
+        lwork(1) = shags_aux%get_lwork(nlat)
+        lwork(2) = shsgs_aux%get_lwork(nlat)
+
+        return_value = maxval(lwork)
+
+    end function get_lwork
+
+
+
+    pure function get_ldwork(nlat) result (return_value)
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
         integer (ip), intent (in)  :: nlat
-        integer (ip), intent (in)  :: nlon
         integer (ip)               :: return_value
         !----------------------------------------------------------------------
-        ! Dictionary: local variables
+        type (ShagsAux) :: shags_aux
+        type (ShsgsAux) :: shsgs_aux
+        type (VhagsAux) :: vhags_aux
+        type (VhsgsAux) :: vhsgs_aux
+        integer (ip)    :: ldwork(4)
         !----------------------------------------------------------------------
-        integer (ip)::  l1, l2
-        !----------------------------------------------------------------------
 
-        ! Compute parity
-        if ( mod(nlon, 2) == 0 ) then
-            l1 = min( nlat, (nlon + 2)/2 )
-        else
-            l1 = min( nlat, (nlon + 1)/2 )
-        end if
+        ldwork(1) = shags_aux%get_ldwork(nlat)
+        ldwork(2) = shsgs_aux%get_ldwork(nlat)
+        ldwork(3) = vhags_aux%get_ldwork(nlat)
+        ldwork(4) = vhsgs_aux%get_ldwork(nlat)
 
-        if ( mod(nlat, 2) == 0 ) then
-            l2 = nlat/2
-        else
-            l2 = (nlat + 1)/2
-        end if
+        return_value = maxval(ldwork)
 
-        return_value = &
-            nlat * (3 * (l1 + l2) - 2) &
-            +(l1 - 1) * (l2 * (2 * nlat - l1) - 3 * l1)/2 &
-            + nlon + 15
-
-    end function get_lshags
+    end function get_ldwork
 
 
-
-    pure function get_lshsgs(nlat, nlon) result (return_value)
+    pure subroutine get_legendre_workspace(nlat, nlon, workspace, nt, ityp, isym)
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
-        integer (ip), intent (in) :: nlat
-        integer (ip), intent (in) :: nlon
-        integer (ip)              :: return_value
+        integer (ip),           intent (in)  :: nlat
+        integer (ip),           intent (in)  :: nlon
+        real (wp), allocatable, intent (out) :: workspace(:)
+        integer (ip), optional, intent (in)  :: nt
+        integer (ip), optional, intent (in)  :: ityp
+        integer (ip), optional, intent (in)  :: isym
         !----------------------------------------------------------------------
-        ! Dictionary: local variables
-        !----------------------------------------------------------------------
-        integer (ip) :: l1,  l2
+        type (ShagsAux) :: shags_aux
+        type (ShsgsAux) :: shsgs_aux
+        type (VhagsAux) :: vhags_aux
+        type (VhsgsAux) :: vhsgs_aux
+        integer (ip)    :: work_size(4)
+        integer (ip)    :: lwork, nt_op, ityp_op, isym_op
         !----------------------------------------------------------------------
 
-        ! Compute parity
-        if ( mod(nlon, 2) == 0 ) then
-            l1 = min( nlat, (nlon + 2)/2 )
+        !
+        !==> Address optional arguments
+        !
+        if (present(nt)) then
+            nt_op = nt
         else
-            l1 = min( nlat, (nlon + 1)/2 )
+            nt_op = 1
         end if
 
-        if ( mod(nlat, 2) == 0 ) then
-            l2 = nlat/2
+        if (present(isym)) then
+            isym_op = isym
         else
-            l2 = (nlat + 1)/2
+            isym_op = 0
         end if
 
-        return_value = &
-            nlat * (3 * (l1 + l2) - 2) &
-            +(l1 - 1) * (l2 * (2 * nlat - l1) - 3 * l1)/2 &
-            + nlon + 15
-
-    end function get_lshsgs
-
-
-
-    pure function get_lvhags(nlat, nlon) result (return_value)
-        !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
-        !----------------------------------------------------------------------
-        integer (ip), intent (in) :: nlat
-        integer (ip), intent (in) :: nlon
-        integer (ip)              :: return_value
-        !----------------------------------------------------------------------
-
-        return_value = ((nlat+1) **2) * nlat / 2  + nlon+15
-
-    end function get_lvhags
-
-
-
-    pure function get_lvhsgs(nlat, nlon) result (return_value)
-        !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
-        !----------------------------------------------------------------------
-        integer (ip), intent (in) :: nlat
-        integer (ip), intent (in) :: nlon
-        integer (ip)              :: return_value
-        !----------------------------------------------------------------------
-        ! Dictionary: local variables
-        !----------------------------------------------------------------------
-        integer (ip) :: l1, l2
-        !----------------------------------------------------------------------
-
-        ! Compute parity
-        if ( mod(nlon, 2) == 0 ) then
-            l1 = min( nlat, nlon/2 )
+        if (present(ityp)) then
+            ityp_op = ityp
         else
-            l1 = min( nlat, (nlon + 1)/2 )
+            ityp_op = 0
         end if
 
-        if ( mod(nlat, 2) == 0 ) then
-            l2 = nlat/2
-        else
-            l2 = (nlat + 1)/2
-        end if
+        work_size(1) = shags_aux%get_legendre_workspace_size(nlat, nlon, nt_op, isym_op)
+        work_size(2) = shsgs_aux%get_legendre_workspace_size(nlat, nlon, nt_op, isym_op)
+        work_size(3) = vhags_aux%get_legendre_workspace_size(nlat, nlon, nt_op, ityp_op)
+        work_size(4) = vhsgs_aux%get_legendre_workspace_size(nlat, nlon, nt_op, ityp_op)
 
-        return_value = l1 * l2 * (2*nlat - l1 + 1)  + nlon + 15 + nlat**2
+        lwork = maxval(work_size)
+        !
+        !==> Allocate memory
+        !
+        allocate( workspace(lwork) )
 
-    end function get_lvhsgs
+    end subroutine get_legendre_workspace
 
 
 

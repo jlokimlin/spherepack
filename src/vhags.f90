@@ -31,14 +31,14 @@
 !
 !
 !
-! ... file vhags.f
+! ... file vhags.f90
 !
 !     this file contains code and documentation for subroutines
 !     vhags and vhagsi
 !
-! ... files which must be loaded with vhags.f
+! ... files which must be loaded with vhags.f90
 !
-!     type_SpherepackAux.f, type_HFFTpack.f, gaqd.f
+!     type_SpherepackAux.f90, type_HFFTpack.f90, gaqd.f90
 !
 !     subroutine vhags(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci,
 !    +                 mdab, ndab, wvhags, lvhags, work, lwork, ierror)
@@ -265,7 +265,7 @@
 !            = 10 error in the specification of lwork
 !
 !
-!     subroutine vhagsi(nlat, nlon, wvhags, lvhags, work, lwork, ierror)
+!     subroutine vhagsi(nlat, nlon, wvhags, lvhags, dwork, ldwork, ierror)
 !
 !     subroutine vhagsi initializes the array wvhags which can then be
 !     used repeatedly by subroutine vhags until nlat or nlon is changed.
@@ -291,17 +291,7 @@
 !            is a product of small prime numbers.
 !
 !     lvhags the dimension of the array wvhags as it appears in the
-!            program that calls vhagsi.  define
-!
-!               l1 = min(nlat, nlon/2) if nlon is even or
-!               l1 = min(nlat, (nlon+1)/2) if nlon is odd
-!
-!            and
-!
-!               l2 = nlat/2        if nlat is even or
-!               l2 = (nlat+1)/2    if nlat is odd
-!
-!            then lvhags must be at least
+!            program that calls vhagsi. lvhags must be at least
 !
 !               3*nlat*(nlat+1)+2  (required by vhagsi)
 !
@@ -347,10 +337,124 @@ module module_vhags
     implicit none
 
     ! Everything is private unless stated otherwise
+    private
     public :: vhags
     public :: vhagsi
+    public :: VhagsAux
+
+    ! Declare derived data type
+    type, public :: VhagsAux
+        !-----------------------------------------
+        ! Class variables
+        !-----------------------------------------
+    contains
+        !-----------------------------------------
+        ! Class methods
+        !-----------------------------------------
+        procedure, nopass :: vhags
+        procedure, nopass :: vhagsi
+        procedure, nopass :: get_lvhags
+        procedure, nopass :: get_ldwork
+        procedure, nopass :: get_legendre_workspace_size
+        !-----------------------------------------
+    end type VhagsAux
+
 
 contains
+
+
+    pure function get_lvhags(nlat, nlon) result (return_value)
+        !----------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !----------------------------------------------------------------------
+        integer (ip), intent (in)  :: nlat
+        integer (ip), intent (in)  :: nlon
+        integer (ip)               :: return_value
+        !----------------------------------------------------------------------
+        ! Dictionary: local variables
+        !----------------------------------------------------------------------
+        integer (ip)         :: l1, l2
+        type (SpherepackAux) :: sphere_aux
+        !----------------------------------------------------------------------
+
+        call sphere_aux%compute_parity(nlat, nlon, l1, l2)
+
+        return_value = ((nlat+1)**2)*nlat/2+nlon+15
+        !return_value = max(3*nlat*(nlat+1)+2, l1*l2*(2*nlat-l1+1)+nlon+15+2*nlat)
+
+    end function get_lvhags
+
+
+
+
+    pure function get_ldwork(nlat) result (return_value)
+        !----------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !----------------------------------------------------------------------
+        integer (ip), intent (in)  :: nlat
+        integer (ip)               :: return_value
+        !----------------------------------------------------------------------
+
+        return_value = (3*nlat*(nlat+3)+2)/2
+
+    end function get_ldwork
+
+
+
+
+    pure function get_legendre_workspace_size(nlat, nlon, nt, ityp) result (return_value)
+        !----------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !----------------------------------------------------------------------
+        integer (ip),           intent (in) :: nlat
+        integer (ip),           intent (in) :: nlon
+        integer (ip), optional, intent (in) :: nt
+        integer (ip), optional, intent (in) :: ityp
+        integer (ip)                        :: return_value
+        !----------------------------------------------------------------------
+        ! Dictionary: local variables
+        !----------------------------------------------------------------------
+        integer (ip) :: nt_op, ityp_op, l2
+        !----------------------------------------------------------------------
+
+        !
+        !==> Address optional arguments
+        !
+        if (present(nt)) then
+            nt_op = nt
+        else
+            nt_op = 1
+        end if
+
+        if (present(ityp)) then
+            ityp_op = ityp
+        else
+            ityp_op = 0
+        end if
+
+        !
+        !==> Compute workspace size
+        !
+        if (ityp <= 2) then
+            ! Set workspace size
+            return_value = max(3*nlat*(nlat+1)+2, (2*nt_op+1)*nlat*nlon)
+        else
+            ! Compute parity
+            select case (mod(nlat, 2))
+                case (0)
+                    l2 = nlat/2
+                case default
+                    l2 = (nlat + 1)/2
+            end select
+            ! Set workspace size
+            return_value = max(3*nlat*(nlat+1)+2, (2*nt_op+1)*l2*nlon)
+        end if
+
+
+    end function get_legendre_workspace_size
+
+
+
 
     subroutine vhags(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
         mdab, ndab, wvhags, lvhags, work, lwork, ierror)

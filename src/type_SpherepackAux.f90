@@ -59,6 +59,7 @@ module type_SpherepackAux
         !----------------------------------------------------------------------
         procedure, nopass :: alin
         procedure, nopass :: alinit
+        procedure, nopass :: compute_parity
         procedure, nopass :: dnlfk
         procedure, nopass :: dnlft
         procedure, nopass :: dnlftd
@@ -103,6 +104,35 @@ module type_SpherepackAux
 
 
 contains
+
+
+    pure subroutine compute_parity(nlat, nlon, l1, l2)
+        !----------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !----------------------------------------------------------------------
+        integer (ip), intent (in)  :: nlat
+        integer (ip), intent (in)  :: nlon
+        integer (ip), intent (out) :: l1
+        integer (ip), intent (out) :: l2
+        !----------------------------------------------------------------------
+
+        ! Compute parity in nlon
+        select case (mod(nlon, 2))
+            case (0)
+                l1 = min(nlat, (nlon+2)/2)
+            case default
+                l1 = min(nlat, (nlon+1)/2)
+        end select
+
+        ! Compute parity in nlat
+        select case (mod(nlat, 2))
+            case (0)
+                l2 = nlat/2
+            case default
+                l2 = (nlat + 1)/2
+        end select
+
+    end subroutine compute_parity
 
 
     pure subroutine dnlfk(m, n, cp)

@@ -17,7 +17,7 @@ module type_Workspace
         ! Class variables
         !----------------------------------------------------------------------
         logical,                public :: initialized = .false.
-        real (wp), allocatable, public :: legendre_workspace(:) ! work
+        real (wp), allocatable, public :: legendre_workspace(:)
         real (wp), allocatable, public :: forward_scalar(:)
         real (wp), allocatable, public :: forward_vector(:)
         real (wp), allocatable, public :: backward_scalar(:)
@@ -33,10 +33,8 @@ module type_Workspace
         !----------------------------------------------------------------------
         ! Class methods
         !----------------------------------------------------------------------
-        procedure, nopass, public  :: get_lwork
-        procedure, nopass, public  :: get_ldwork
-        procedure,         public  :: destroy_workspace
-        procedure,         public  :: copy_workspace
+        procedure, public :: destroy_workspace
+        procedure, public :: copy_workspace
         !----------------------------------------------------------------------
     end type Workspace
 
@@ -87,9 +85,7 @@ contains
         !----------------------------------------------------------------------
 
         ! Check flag
-        if (this%initialized .eqv. .false.) then
-            return
-        end if
+        if (this%initialized .eqv. .false.) return
 
         !
         !==> Release memory
@@ -143,31 +139,5 @@ contains
 
     end subroutine destroy_workspace
 
-
-    pure function get_lwork(nlat, nlon) result (return_value)
-        !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
-        !----------------------------------------------------------------------
-        integer (ip), intent (in) :: nlat
-        integer (ip), intent (in) :: nlon
-        integer (ip)              :: return_value
-        !----------------------------------------------------------------------
-
-        return_value = (4 * nlon + 2) * nlat
-
-    end function get_lwork
-
-
-    pure function get_ldwork(nlat) result (return_value)
-        !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
-        !----------------------------------------------------------------------
-        integer (ip), intent (in) :: nlat
-        integer (ip)              :: return_value
-        !----------------------------------------------------------------------
-
-        return_value = (3 * nlat * (nlat + 3) + 2)/2
-
-    end function get_ldwork
 
 end module type_Workspace

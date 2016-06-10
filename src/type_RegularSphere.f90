@@ -16,9 +16,6 @@ module type_RegularSphere
     use type_SphericalUnitVectors, only: &
         SphericalUnitVectors
 
-    use type_TrigonometricFunctions, only: &
-        TrigonometricFunctions
-
     use type_ThreeDimensionalVector, only: &
         Vector => ThreeDimensionalVector, &
         assignment(=), &
@@ -203,8 +200,8 @@ contains
 
         ! Check if object is usable
         if (this%initialized .eqv. .false.) then
-            error stop 'TYPE(RegularSphere): '&
-                //'uninitialized object in regular_SCALAR_ANALYSIS'
+            error stop 'Uninitialized object of class (RegularSphere): '&
+                //' in regular_scalar_analysis'
         end if
 
         !
@@ -247,22 +244,22 @@ contains
             case(0)
                 return
             case(1)
-                error stop 'TYPE(RegularSphere) in regular_SCALAR_ANALYSIS'&
+                error stop 'type (RegularSphere) in regular_scalar_analysis'&
                     // 'Error in the specification of NUMBER_OF_LATITUDES'
             case(2)
-                error stop 'TYPE(RegularSphere) in regular_SCALAR_ANALYSIS'&
+                error stop 'type (RegularSphere) in regular_scalar_analysis'&
                     //'Error in the specification of NUMBER_OF_LONGITUDES'
             case(3)
-                error stop 'TYPE(RegularSphere) in regular_SCALAR_ANALYSIS'&
+                error stop 'type (RegularSphere) in regular_scalar_analysis'&
                     //'Invalid extent for SCALAR_FORWARD'
             case(4)
-                error stop 'TYPE(RegularSphere) in regular_SCALAR_ANALYSIS'&
-                    //'Invalid extent for LEGENDRE_WORKSPACE'
+                error stop 'type (RegularSphere) in regular_scalar_analysis'&
+                    //'Invalid extent for legendre_workspace'
             case(5)
-                error stop 'TYPE(RegularSphere) in regular_SCALAR_ANALYSIS'&
+                error stop 'type (RegularSphere) in regular_scalar_analysis'&
                     //'Invalid extent for DWORK'
             case default
-                error stop 'TYPE(RegularSphere) in regular_SCALAR_ANALYSIS'&
+                error stop 'type (RegularSphere) in regular_scalar_analysis'&
                     // 'Undetermined error flag'
         end select
 
@@ -284,8 +281,8 @@ contains
 
         ! Check if object is usable
         if (this%initialized .eqv. .false.) then
-            error stop 'TYPE(RegularSphere): '&
-                //'uninitialized object in regular_SCALAR_SYNTHESIS'
+            error stop 'Uninitialized object of class (RegularSphere): '&
+                //' in regular_scalar_synthesis'
         end if
 
         !
@@ -328,22 +325,22 @@ contains
             case(0)
                 return
             case(1)
-                error stop 'TYPE(RegularSphere) in regular_SCALAR_SYNTHESIS'&
+                error stop 'type (RegularSphere) in regular_scalar_synthesis'&
                     // 'Error in the specification of NUMBER_OF_LATITUDES'
             case(2)
-                error stop 'TYPE(RegularSphere) in regular_SCALAR_SYNTHESIS'&
+                error stop 'type (RegularSphere) in regular_scalar_synthesis'&
                     //'Error in the specification of NUMBER_OF_LONGITUDES'
             case(3)
-                error stop 'TYPE(RegularSphere) in regular_SCALAR_SYNTHESIS'&
+                error stop 'type (RegularSphere) in regular_scalar_synthesis'&
                     //'Invalid extent for SCALAR_FORWARD'
             case(4)
-                error stop 'TYPE(RegularSphere) in regular_SCALAR_SYNTHESIS'&
-                    //'Invalid extent for LEGENDRE_WORKSPACE'
+                error stop 'type (RegularSphere) in regular_scalar_synthesis'&
+                    //'Invalid extent for legendre_workspace'
             case(5)
-                error stop 'TYPE(RegularSphere) in regular_SCALAR_SYNTHESIS'&
+                error stop 'type (RegularSphere) in regular_scalar_synthesis'&
                     //'Invalid extent for DWORK'
             case default
-                error stop 'TYPE(RegularSphere) in regular_SCALAR_SYNTHESIS'&
+                error stop 'type (RegularSphere) in regular_scalar_synthesis'&
                     // 'Undetermined error flag'
         end select
 
@@ -367,8 +364,8 @@ contains
 
         ! Check if object is usable
         if (this%initialized .eqv. .false.) then
-            error stop 'TYPE(RegularSphere): '&
-                //'uninitialized object in REGULAR_VECTOR_ANALYSIS'
+            error stop 'Uninitialized object of class (RegularSphere): '&
+                //' in regular_vector_analysis'
         end if
 
         !
@@ -414,50 +411,50 @@ contains
             case(0)
                 return
             case(1)
-                error stop 'TYPE(RegularSphere) in '&
-                    //'REGULAR_VECTOR_ANALYSIS'&
+                error stop 'type (RegularSphere) in '&
+                    //'regular_vector_analysis'&
                     //'Error in the specification of NUMBER_OF_LATITUDES'
             case(2)
-                error stop 'TYPE(RegularSphere) in '&
-                    //'REGULAR_VECTOR_ANALYSIS'&
+                error stop 'type (RegularSphere) in '&
+                    //'regular_vector_analysis'&
                     //'Error in the specification of NUMBER_OF_LONGITUDES'
             case(3)
-                error stop 'TYPE(RegularSphere) in '&
-                    //'REGULAR_VECTOR_ANALYSIS'&
+                error stop 'type (RegularSphere) in '&
+                    //'regular_vector_analysis'&
                     //'Error in the specification of VECTOR_SYMMETRIES'
             case(4)
-                error stop 'TYPE(RegularSphere) in '&
-                    //'REGULAR_VECTOR_ANALYSIS'&
+                error stop 'type (RegularSphere) in '&
+                    //'regular_vector_analysis'&
                     //'Error in the specification of NUMBER_OF_SYNTHESES'
             case(5)
-                error stop 'TYPE(RegularSphere) in '&
-                    //'REGULAR_VECTOR_ANALYSIS'&
+                error stop 'type (RegularSphere) in '&
+                    //'regular_vector_analysis'&
                     //'Invalid DIM=1 extent for '&
                     //'POLAR_COMPONENT (THETA) or AZIMUTHAL_COMPONENT (PHI)'
             case(6)
-                error stop 'TYPE(RegularSphere) in '&
-                    //'REGULAR_VECTOR_ANALYSIS'&
+                error stop 'type (RegularSphere) in '&
+                    //'regular_vector_analysis'&
                     //'Invalid DIM=2 extent '&
                     //'POLAR_COMPONENT (THETA) or AZIMUTHAL_COMPONENT (PHI)'
             case(7)
-                error stop 'TYPE(RegularSphere) in '&
-                    //'REGULAR_VECTOR_ANALYSIS'&
+                error stop 'type (RegularSphere) in '&
+                    //'regular_vector_analysis'&
                     //'Invalid DIM=1 extent for BR or CR'
             case(8)
-                error stop 'TYPE(RegularSphere) in '&
-                    //'REGULAR_VECTOR_ANALYSIS'&
+                error stop 'type (RegularSphere) in '&
+                    //'regular_vector_analysis'&
                     //'Invalid DIM=1 extent for BI or CI'
             case(9)
-                error stop 'TYPE(RegularSphere) in '&
-                    //'REGULAR_VECTOR_ANALYSIS'&
+                error stop 'type (RegularSphere) in '&
+                    //'regular_vector_analysis'&
                     //'Invalid extent for FORWARD_VECTOR'
             case(10)
-                error stop 'TYPE(RegularSphere) in '&
-                    //'REGULAR_VECTOR_ANALYSIS'&
-                    //'Invalid extent for LEGENDRE_WORKSPACE'
+                error stop 'type (RegularSphere) in '&
+                    //'regular_vector_analysis'&
+                    //'Invalid extent for legendre_workspace'
             case default
-                error stop 'TYPE(RegularSphere) in '&
-                    //'REGULAR_VECTOR_ANALYSIS'&
+                error stop 'type (RegularSphere) in '&
+                    //'regular_vector_analysis'&
                     //'Undetermined error flag'
         end select
 
@@ -480,8 +477,8 @@ contains
 
         ! Check if object is usable
         if (this%initialized .eqv. .false.) then
-            error stop 'TYPE(RegularSphere): '&
-                //'uninitialized object in regular_VECTOR_SYNTHESIS'
+            error stop 'Uninitialized object of class (RegularSphere): '&
+                //' in regular_vector_synthesis'
         end if
 
         !
@@ -527,39 +524,39 @@ contains
             case(0)
                 return
             case(1)
-                error stop 'TYPE(RegularSphere) in REGULAR_VECTOR_SYNTHESIS'&
+                error stop 'type (RegularSphere) in regular_vector_synthesis'&
                     //'Error in the specification of NUMBER_OF_LATITUDES'
             case(2)
-                error stop 'TYPE(RegularSphere) in REGULAR_VECTOR_SYNTHESIS'&
+                error stop 'type (RegularSphere) in regular_vector_synthesis'&
                     //'Error in the specification of NUMBER_OF_LONGITUDES'
             case(3)
-                error stop 'TYPE(RegularSphere) in REGULAR_VECTOR_SYNTHESIS'&
+                error stop 'type (RegularSphere) in regular_vector_synthesis'&
                     //'Error in the specification of VECTOR_SYMMETRIES'
             case(4)
-                error stop 'TYPE(RegularSphere) in REGULAR_VECTOR_SYNTHESIS'&
+                error stop 'type (RegularSphere) in regular_vector_synthesis'&
                     //'Error in the specification of NUMBER_OF_synthESES'
             case(5)
-                error stop 'TYPE(RegularSphere) in REGULAR_VECTOR_SYNTHESIS'&
+                error stop 'type (RegularSphere) in regular_vector_synthesis'&
                     //'Invalid DIM=1 extent for '&
                     //'POLAR_COMPONENT (THETA) or AZIMUTHAL_COMPONENT (PHI)'
             case(6)
-                error stop 'TYPE(RegularSphere) in REGULAR_VECTOR_SYNTHESIS'&
+                error stop 'type (RegularSphere) in regular_vector_synthesis'&
                     //'Invalid DIM=2 extent '&
                     //'POLAR_COMPONENT (THETA) or AZIMUTHAL_COMPONENT (PHI)'
             case(7)
-                error stop 'TYPE(RegularSphere) in REGULAR_VECTOR_SYNTHESIS'&
+                error stop 'type (RegularSphere) in regular_vector_synthesis'&
                     //'Invalid DIM=1 extent for BR or CR'
             case(8)
-                error stop 'TYPE(RegularSphere) in REGULAR_VECTOR_SYNTHESIS'&
+                error stop 'type (RegularSphere) in regular_vector_synthesis'&
                     //'Invalid DIM=1 extent for BI or CI'
             case(9)
-                error stop 'TYPE(RegularSphere) in REGULAR_VECTOR_SYNTHESIS'&
-                    //'Invalid extent for BACKWARD_VECTOR'
+                error stop 'type (RegularSphere) in regular_vector_synthesis'&
+                    //'Invalid extent for backward_vector'
             case(10)
-                error stop 'TYPE(RegularSphere) in REGULAR_VECTOR_SYNTHESIS'&
-                    //'Invalid extent for LEGENDRE_WORKSPACE'
+                error stop 'type (RegularSphere) in regular_vector_synthesis'&
+                    //'Invalid extent for legendre_workspace'
             case default
-                error stop 'TYPE(RegularSphere) in REGULAR_VECTOR_SYNTHESIS'&
+                error stop 'type (RegularSphere) in regular_vector_synthesis'&
                     //'Undetermined error flag'
         end select
 

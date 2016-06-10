@@ -309,8 +309,139 @@ module module_shses
     ! Everything is private unless stated otherwise
     public :: shses
     public :: shsesi
+    public :: ShsesAux
+
+    ! Declare derived data type
+    type, public :: ShsesAux
+        !-----------------------------------------
+        ! Class variables
+        !-----------------------------------------
+    contains
+        !-----------------------------------------
+        ! Class methods
+        !-----------------------------------------
+        procedure, nopass :: shses
+        procedure, nopass :: shsesi
+        procedure, nopass :: get_lshses
+        procedure, nopass :: get_lwork
+        procedure, nopass :: get_ldwork
+        procedure, nopass :: get_legendre_workspace_size
+        !-----------------------------------------
+    end type ShsesAux
+
 
 contains
+
+
+    pure function get_lshses(nlat, nlon) result (return_value)
+        !----------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !----------------------------------------------------------------------
+        integer (ip), intent (in)  :: nlat
+        integer (ip), intent (in)  :: nlon
+        integer (ip)               :: return_value
+        !----------------------------------------------------------------------
+        ! Dictionary: local variables
+        !----------------------------------------------------------------------
+        integer (ip)         :: l1, l2
+        type (SpherepackAux) :: sphere_aux
+        !----------------------------------------------------------------------
+
+        call sphere_aux%compute_parity(nlat, nlon, l1, l2)
+
+        return_value = (l1*l2*(2*nlat-l1+1))/2+nlon+15
+
+    end function get_lshses
+
+
+
+    pure function get_lwork(nlat, nlon) result (return_value)
+        !----------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !----------------------------------------------------------------------
+        integer (ip), intent (in)  :: nlat
+        integer (ip), intent (in)  :: nlon
+        integer (ip)               :: return_value
+        !----------------------------------------------------------------------
+        ! Dictionary: local variables
+        !----------------------------------------------------------------------
+        integer (ip)         :: l1, l2
+        type (SpherepackAux) :: sphere_aux
+        !----------------------------------------------------------------------
+
+        call sphere_aux%compute_parity(nlat, nlon, l1, l2)
+
+        return_value = 5*nlat*l2+3*((l1-2)*(2*nlat-l1-1))/2
+
+    end function get_lwork
+
+
+
+    pure function get_ldwork(nlat) result (return_value)
+        !----------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !----------------------------------------------------------------------
+        integer (ip), intent (in)  :: nlat
+        integer (ip)               :: return_value
+        !----------------------------------------------------------------------
+
+        return_value = nlat + 1
+
+    end function get_ldwork
+
+
+
+
+    pure function get_legendre_workspace_size(nlat, nlon, nt, ityp) result (return_value)
+        !----------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !----------------------------------------------------------------------
+        integer (ip),           intent (in) :: nlat
+        integer (ip),           intent (in) :: nlon
+        integer (ip), optional, intent (in) :: nt
+        integer (ip), optional, intent (in) :: ityp
+        integer (ip)                        :: return_value
+        !----------------------------------------------------------------------
+        ! Dictionary: local variables
+        !----------------------------------------------------------------------
+        integer (ip) :: nt_op, ityp_op, l2
+        !----------------------------------------------------------------------
+
+        !
+        !==> Address optional arguments
+        !
+        if (present(nt)) then
+            nt_op = nt
+        else
+            nt_op = 1
+        end if
+
+        if (present(ityp)) then
+            ityp_op = ityp
+        else
+            ityp_op = 0
+        end if
+
+        !
+        !==> Compute workspace size
+        !
+        if (ityp_op <= 2) then
+            ! Set workspace size
+            return_value = (2*nt_op+1)*nlat*nlon
+        else
+            ! Compute parity
+            select case (mod(nlat, 2))
+                case (0)
+                    l2 = nlat/2
+                case default
+                    l2 = (nlat + 1)/2
+            end select
+            ! Set workspace size
+            return_value = (2*nt_op+1)*l2*nlon
+        end if
+
+    end function get_legendre_workspace_size
+
 
     subroutine shses(nlat,nlon,isym,nt,g,idg,jdg,a,b,mdab,ndab, &
         wshses,lshses,work,lwork,ierror)
@@ -343,7 +474,7 @@ contains
         imid = (nlat+1)/2
         lpimn = (imid*mmax*(nlat+nlat-mmax+1))/2
 
-        if(isym > 0) then
+        if (isym > 0) then
             ls = imid
         else
             ls = nlat

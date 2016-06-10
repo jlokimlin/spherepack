@@ -8,16 +8,16 @@ module type_RegularWorkspace
         Workspace
 
     use module_shaes, only: &
-        shaesi
+        ShaesAux
 
     use module_shses, only: &
-        shsesi
+        ShsesAux
 
     use module_vhaes, only: &
-        vhaesi
+        VhaesAux
 
     use module_vhses, only: &
-        vhsesi
+        VhsesAux
 
     ! Explicit typing only
     implicit none
@@ -36,22 +36,17 @@ module type_RegularWorkspace
         !----------------------------------------------------------------------
         ! Class methods
         !----------------------------------------------------------------------
-        procedure,         public  :: create => create_regular_workspace
-        procedure,         public  :: destroy => destroy_regular_workspace
-        procedure,         private :: initialize_regular_scalar_analysis
-        procedure,         private :: initialize_regular_scalar_synthesis
-        procedure,         private :: initialize_regular_scalar_transform
-        procedure,         private :: initialize_regular_vector_analysis
-        procedure,         private :: initialize_regular_vector_synthesis
-        procedure,         private :: initialize_regular_vector_transform
-        procedure, nopass, private :: get_lshaes
-        procedure, nopass, private :: get_lshses
-        procedure, nopass, private :: get_lvhaes
-        procedure, nopass, private :: get_lvhses
-        procedure, nopass, private :: get_lwork_unsaved
-        generic,           public  :: assignment (=) => copy_regular_workspace
-        procedure,         private :: copy_regular_workspace
-        final                      :: finalize_regular_workspace
+        procedure, public  :: create => create_regular_workspace
+        procedure, public  :: destroy => destroy_regular_workspace
+        procedure, private :: initialize_regular_scalar_analysis
+        procedure, private :: initialize_regular_scalar_synthesis
+        procedure, private :: initialize_regular_scalar_transform
+        procedure, private :: initialize_regular_vector_analysis
+        procedure, private :: initialize_regular_vector_synthesis
+        procedure, private :: initialize_regular_vector_transform
+        generic,   public  :: assignment (=) => copy_regular_workspace
+        procedure, private :: copy_regular_workspace
+        final              :: finalize_regular_workspace
         !----------------------------------------------------------------------
     end type RegularWorkspace
 
@@ -72,9 +67,9 @@ contains
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
-        integer (ip),         intent (in) :: nlat !! number of latitudinal points 0 <= theta <= pi
-        integer (ip),         intent (in) :: nlon !! number of longitudinal points 0 <= phi <= 2*pi
-        type (RegularWorkspace)           :: return_value
+        integer (ip), intent (in) :: nlat !! number of latitudinal points 0 <= theta <= pi
+        integer (ip), intent (in) :: nlon !! number of longitudinal points 0 <= phi <= 2*pi
+        type (RegularWorkspace)   :: return_value
         !----------------------------------------------------------------------
 
         call return_value%create(nlat, nlon)
@@ -132,8 +127,8 @@ contains
 
         ! Set up transforms for regular grids
         call this%initialize_regular_scalar_transform(nlat, nlon)
-
         call this%initialize_regular_vector_transform(nlat, nlon)
+        call get_legendre_workspace(nlat, nlon, this%legendre_workspace)
 
         ! Set flag
         this%initialized = .true.
@@ -150,9 +145,7 @@ contains
         !----------------------------------------------------------------------
 
         ! Check flag
-        if (this%initialized .eqv. .false.) then
-            return
-        end if
+        if (this%initialized .eqv. .false.) return
 
         ! Release memory from parent type
         call this%destroy_workspace()
@@ -185,41 +178,40 @@ contains
         !----------------------------------------------------------------------
         integer (ip)           :: error_flag
         integer (ip)           :: lwork, ldwork, lshaes
-        real (wp), allocatable :: dwork(:)
+        real (wp), allocatable :: dwork(:), work(:)
+        type (ShaesAux)        :: aux
         !----------------------------------------------------------------------
 
-        ! Compute dimensions of various workspace arrays
-        lwork = max(this%get_lwork(nlat, nlon), 5*(nlat**2)*nlon)
-        ldwork = max(this%get_ldwork(nlat), 12*nlat*nlon, 4*(nlat**2))
-        lshaes = this%get_lshaes(nlat, nlon)
+        !
+        !==> Compute dimensions of various workspace arrays
+        !
+        lwork = get_lwork(nlat, nlon)
+        ldwork = get_ldwork(nlat)
+        lshaes = aux%get_lshaes(nlat, nlon)
 
-        ! Release memory ( if necessary )
-        if (allocated(this%legendre_workspace)) then
-            deallocate( this%legendre_workspace )
-        end if
-
-        if (allocated(this%forward_scalar)) then
-            deallocate( this%forward_scalar )
-        end if
-
-        ! Allocate memory
-        allocate( this%legendre_workspace(lwork) )
+        !
+        !==>  Allocate memory
+        !
+        if (allocated(this%forward_scalar)) deallocate( this%forward_scalar )
+        allocate( work(lwork) )
         allocate( dwork(ldwork) )
         allocate( this%forward_scalar(lshaes) )
 
-        ! Compute workspace
+
         associate( &
             wshaes => this%forward_scalar, &
-            work => this%legendre_workspace, &
             ierror => error_flag &
             )
-            call shaesi(nlat, nlon, wshaes, lshaes, work, lwork, dwork, ldwork, ierror)
+            !
+            !==> Initialize workspace for scalar synthesis
+            !
+            call aux%shaesi(nlat, nlon, wshaes, lshaes, work, lwork, dwork, ldwork, ierror)
+
         end associate
 
-        ! Release memory
-        deallocate( dwork )
-
-         !  Address error flag
+        !
+        !==>  Address error flag
+        !
         select case (error_flag)
             case(0)
                 return
@@ -245,20 +237,17 @@ contains
                     //'Undetermined error flag'
         end select
 
+        !
+        !==> Release memory
+        !
+        deallocate( work )
+        deallocate( dwork )
+
     end subroutine initialize_regular_scalar_analysis
 
 
 
     subroutine initialize_regular_scalar_synthesis(this, nlat, nlon)
-        !
-        !  Purpose:
-        !
-        !  Set the various workspace arrays to perform the
-        !  (real) scalar harmonic analysis on a regular (equally-spaced) grid.
-        !
-        !  Reference:
-        !  https://www2.cisl.ucar.edu/spherepack/documentation#shsesi.html
-        !
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
@@ -270,39 +259,35 @@ contains
         !----------------------------------------------------------------------
         integer (ip)           :: error_flag
         integer (ip)           :: lwork, ldwork, lshses
-        real (wp), allocatable :: dwork(:)
+        real (wp), allocatable :: dwork(:), work(:)
+        type (ShsesAux)        :: aux
         !----------------------------------------------------------------------
 
         ! Set up various workspace dimensions
-        lwork = max(this%get_lwork(nlat, nlon), 5*(nlat**2)*nlon)
-        ldwork = max(this%get_ldwork(nlat), 12*nlat*nlon, 4*(nlat**2))
-        lshses = this%get_lshses(nlat, nlon)
+        lwork = get_lwork(nlat, nlon)
+        ldwork = get_ldwork(nlat)
+        lshses = aux%get_lshses(nlat, nlon)
 
-        ! Release memory ( if necessary )
-        if (allocated(this%legendre_workspace)) then
-            deallocate( this%legendre_workspace )
-        end if
-
-        if (allocated(this%backward_scalar)) then
-            deallocate( this%backward_scalar )
-        end if
-
-        ! Allocate memory
-        allocate( this%legendre_workspace(lwork) )
+        !
+        !==> Allocate memory
+        !
+        if (allocated(this%backward_scalar)) deallocate( this%backward_scalar )
         allocate( this%backward_scalar(lshses) )
+        allocate( work(lwork) )
         allocate( dwork(ldwork) )
 
-        ! Compute workspace
+
         associate( &
             wshses => this%backward_scalar, &
-            work => this%legendre_workspace, &
             ierror => error_flag &
             )
-            call shsesi(nlat, nlon, wshses, lshses, work, lwork, dwork, ldwork, ierror)
+            !
+            !==> Initialize workspace for scalar synthesis
+            !
+            call aux%shsesi(nlat, nlon, wshses, lshses, work, lwork, dwork, ldwork, ierror)
+
         end associate
 
-        ! Release memory
-        deallocate( dwork )
 
         !  Address error flag
         select case (error_flag)
@@ -329,6 +314,12 @@ contains
                     //'in initialize_regular_scalar_synthesis '&
                     //'Undetermined error flag'
         end select
+
+        !
+        !==> Release memory
+        !
+        deallocate( work )
+        deallocate( dwork )
 
     end subroutine initialize_regular_scalar_synthesis
 
@@ -364,15 +355,6 @@ contains
 
 
     subroutine initialize_regular_vector_analysis(this, nlat, nlon)
-        !
-        !< Purpose:
-        !
-        ! Sets the various workspace arrays required for
-        ! (real) vector harmonic analysis on a regular (equally-spaced) grid
-        !
-        ! Reference:
-        ! https://www2.cisl.ucar.edu/spherepack/documentation#vhaesi.html
-        !
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
@@ -385,34 +367,33 @@ contains
         integer (ip)           :: error_flag
         integer (ip)           :: lwork, ldwork, lvhaes
         real (wp), allocatable :: work(:), dwork(:)
+        type (VhaesAux)        :: aux
         !----------------------------------------------------------------------
 
         ! Compute various workspace dimensions
-        lwork = this%get_lwork_unsaved(nlat, nlon)
-        ldwork = this%get_ldwork(nlat)
-        lvhaes = this%get_lvhaes(nlat, nlon)
+        lwork = get_lwork(nlat, nlon)
+        ldwork = get_ldwork(nlat)
+        lvhaes = aux%get_lvhaes(nlat, nlon)
 
-        ! Release memory ( if necessary )
-        if (allocated(this%forward_vector)) then
-            deallocate( this%forward_vector )
-        end if
-
-        ! Allocate memory
+        !
+        !==> Allocate memory
+        !
+        if (allocated(this%forward_vector)) deallocate( this%forward_vector )
         allocate( work(lwork) )
         allocate( dwork(ldwork) )
         allocate( this%forward_vector(lvhaes) )
 
-        ! Compute workspace
+
         associate( &
             wvhaes => this%forward_vector, &
             ierror => error_flag &
             )
-            call vhaesi(nlat, nlon, wvhaes, lvhaes, work, lwork, dwork, ldwork, ierror)
-        end associate
+            !
+            !==> Initialize workspace for analysis
+            !
+            call aux%vhaesi(nlat, nlon, wvhaes, lvhaes, work, lwork, dwork, ldwork, ierror)
 
-        ! Release memory
-        deallocate( work )
-        deallocate( dwork )
+        end associate
 
         ! Address the error flag
         select case (error_flag)
@@ -444,6 +425,11 @@ contains
                     //' Undetermined error flag'
         end select
 
+        !
+        !==> Release memory
+        !
+        deallocate( work )
+        deallocate( dwork )
 
     end subroutine initialize_regular_vector_analysis
 
@@ -472,34 +458,33 @@ contains
         integer (ip)           :: error_flag
         integer (ip)           :: lwork, ldwork, lvhses
         real (wp), allocatable :: work(:), dwork(:)
+        type (VhsesAux)        :: aux
         !----------------------------------------------------------------------
 
         ! Compute various workspace dimensions
-        lwork = this%get_lwork_unsaved(nlat, nlon)
-        ldwork = this%get_ldwork(nlat)
-        lvhses = this%get_lvhses(nlat, nlon)
+        lwork = get_lwork(nlat, nlon)
+        ldwork = get_ldwork(nlat)
+        lvhses = aux%get_lvhses(nlat, nlon)
 
-        ! Release memory ( if necessary )
-        if (allocated(this%backward_vector)) then
-            deallocate( this%backward_vector )
-        end if
-
-        ! Allocate memory
+        !
+        !==> Allocate memory
+        !
+        if (allocated(this%backward_vector)) deallocate( this%backward_vector )
         allocate( work(lwork) )
         allocate( dwork(ldwork) )
         allocate( this%backward_vector(lvhses) )
 
-        ! Compute workspace
         associate( &
             wvhses => this%backward_vector, &
             ierror => error_flag &
             )
-            call vhsesi(nlat, nlon, wvhses, lvhses, work, lwork, dwork, ldwork, ierror)
-        end associate
 
-        ! Release memory
-        deallocate( work )
-        deallocate( dwork )
+            !
+            !==> Initialize workspace for vector synthesis
+            !
+            call aux%vhsesi(nlat, nlon, wvhses, lvhses, work, lwork, dwork, ldwork, ierror)
+
+        end associate
 
         ! Address the error flag
         select case (error_flag)
@@ -531,6 +516,11 @@ contains
                     //' Undetermined error flag'
         end select
 
+        !
+        !==> Release memory
+        !
+        deallocate( work )
+        deallocate( dwork )
 
     end subroutine initialize_regular_vector_synthesis
 
@@ -568,7 +558,7 @@ contains
 
 
 
-    pure function get_lshaes(nlat, nlon) result ( return_value )
+    pure function get_lwork(nlat, nlon) result (return_value)
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
@@ -576,158 +566,92 @@ contains
         integer (ip), intent (in)  :: nlon
         integer (ip)               :: return_value
         !----------------------------------------------------------------------
-        ! Dictionary: local variables
-        !----------------------------------------------------------------------
-        integer (ip) :: l1,  l2
-        !----------------------------------------------------------------------
-
-        ! Compute parity
-        if (mod(nlon, 2) == 0) then
-            l1 = min(nlat, (nlon+2)/2)
-        else
-            l1 = min(nlat, (nlon+1)/2)
-        end if
-
-        if (mod(nlat, 2) == 0) then
-            l2 = nlat/2
-        else
-            l2 = (nlat + 1)/2
-        end if
-
-        return_value = ( l1 * l2 * (2*nlat-l1+1) )/2 + nlon+15
-
-    end function get_lshaes
-
-
-
-    pure function get_lshses(nlat, nlon) result (return_value)
-        !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
-        !----------------------------------------------------------------------
-        integer (ip), intent (in) :: nlat
-        integer (ip), intent (in) :: nlon
-        integer (ip)              :: return_value
-        !----------------------------------------------------------------------
-        ! Dictionary: local variables
-        !----------------------------------------------------------------------
-        integer (ip) :: l1, l2
+        type (ShaesAux) :: shaes_aux
+        type (ShsesAux) :: shses_aux
+        type (VhaesAux) :: vhaes_aux
+        type (VhsesAux) :: vhses_aux
+        integer (ip)    :: lwork(4)
         !----------------------------------------------------------------------
 
-        ! Compute parity
-        if (mod(nlon, 2) == 0) then
-            l1 = min(nlat, (nlon+2)/2)
-        else
-            l1 = min(nlat, (nlon+1)/2)
-        end if
+        lwork(1) = shaes_aux%get_lwork(nlat, nlon)
+        lwork(2) = shses_aux%get_lwork(nlat, nlon)
+        lwork(3) = vhaes_aux%get_lwork(nlat, nlon)
+        lwork(4) = vhses_aux%get_lwork(nlat, nlon)
 
-        if (mod(nlat, 2) == 0) then
-            l2 = nlat/2
-        else
-            l2 = (nlat + 1)/2
-        end if
+        return_value = maxval(lwork)
 
-        return_value = get_lshaes(nlat, nlon)
+    end function get_lwork
 
 
-    end function get_lshses
-
-
-    pure function get_lvhaes(nlat, nlon) result (return_value)
+    pure function get_ldwork(nlat) result (return_value)
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
         integer (ip), intent (in)  :: nlat
-        integer (ip), intent (in)  :: nlon
         integer (ip)               :: return_value
         !----------------------------------------------------------------------
-        integer (ip) :: l1, l2
+        type (ShaesAux) :: shaes_aux
+        type (ShsesAux) :: shses_aux
+        type (VhaesAux) :: vhaes_aux
+        type (VhsesAux) :: vhses_aux
+        integer (ip)    :: ldwork(4)
         !----------------------------------------------------------------------
 
-        ! Compute parity
-        if (mod(nlon, 2) == 0) then
-            l1 = min(nlat, (nlon+2)/2)
-        else
-            l1 = min(nlat, (nlon+1)/2)
-        end if
+        ldwork(1) = shaes_aux%get_ldwork(nlat)
+        ldwork(2) = shses_aux%get_ldwork(nlat)
+        ldwork(3) = vhaes_aux%get_ldwork(nlat)
+        ldwork(4) = vhses_aux%get_ldwork(nlat)
 
-        if (mod(nlat, 2) == 0) then
-            l2 = nlat/2
-        else
-            l2 = (nlat + 1)/2
-        end if
+        return_value = maxval(ldwork)
 
-        return_value = l1 * l2 * (2*nlat-l1+1) + nlon+15
-
-    end function get_lvhaes
+    end function get_ldwork
 
 
-
-    pure function get_lvhses(nlat, nlon) result (return_value)
+    pure subroutine get_legendre_workspace(nlat, nlon, workspace, nt, ityp)
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
-        integer (ip), intent (in)  :: nlat
-        integer (ip), intent (in)  :: nlon
-        integer (ip)               :: return_value
+        integer (ip),           intent (in)  :: nlat
+        integer (ip),           intent (in)  :: nlon
+        real (wp), allocatable, intent (out) :: workspace(:)
+        integer (ip), optional, intent (in)  :: nt
+        integer (ip), optional, intent (in)  :: ityp
         !----------------------------------------------------------------------
-        ! Dictionary: local variables
-        !----------------------------------------------------------------------
-        integer (ip) :: l1, l2
+        type (ShaesAux) :: shaes_aux
+        type (ShsesAux) :: shses_aux
+        type (VhaesAux) :: vhaes_aux
+        type (VhsesAux) :: vhses_aux
+        integer (ip)    :: work_size(4)
+        integer (ip)    :: lwork, nt_op, ityp_op
         !----------------------------------------------------------------------
 
-        ! Compute parity
-        if (mod(nlon, 2) == 0) then
-            l1 = min(nlat, nlon/2 )
+        !
+        !==> Address optional arguments
+        !
+        if (present(nt)) then
+            nt_op = nt
         else
-            l1 = min(nlat, (nlon+1)/2)
+            nt_op = 1
         end if
 
-        if (mod(nlat, 2) == 0) then
-            l2 = nlat/2
+        if (present(ityp)) then
+            ityp_op = ityp
         else
-            l2 = (nlat + 1)/2
+            ityp_op = 0
         end if
 
-        return_value = l1 * l2 * (2*nlat-l1+1) + nlon+15
+        work_size(1) = shaes_aux%get_legendre_workspace_size(nlat, nlon, nt_op, ityp_op)
+        work_size(2) = shses_aux%get_legendre_workspace_size(nlat, nlon, nt_op, ityp_op)
+        work_size(3) = vhaes_aux%get_legendre_workspace_size(nlat, nlon, nt_op, ityp_op)
+        work_size(4) = vhses_aux%get_legendre_workspace_size(nlat, nlon, nt_op, ityp_op)
 
-    end function get_lvhses
+        lwork = maxval(work_size)
+        !
+        !==> Allocate memory
+        !
+        allocate( workspace(lwork) )
 
-
-
-    pure function get_lwork_unsaved(nlat, nlon) result (return_value)
-        !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
-        !----------------------------------------------------------------------
-        integer (ip), intent (in)  :: nlat
-        integer (ip), intent (in)  :: nlon
-        integer (ip)               :: return_value
-        !----------------------------------------------------------------------
-        ! Dictionary: local variables
-        !----------------------------------------------------------------------
-        integer (ip) :: l1, l2
-        !----------------------------------------------------------------------
-
-        ! Compute parity
-        if (mod(nlon, 2) == 0) then
-            l1 = min(nlat, nlon/2 )
-        else
-            l1 = min(nlat, (nlon+1)/2)
-        end if
-
-        if (mod(nlat, 2) == 0) then
-            l2 = nlat/2
-        else
-            l2 = (nlat + 1)/2
-        end if
-
-        associate( &
-            a => 3 * (max(l1-2, 0) * (nlat+nlat-l1-1))/2 + 5*l2*nlat, &
-            b => 5 * nlat * l2 + 3 * ( (l1-2)*(nlat+nlat-l1-1) )/2 &
-            )
-            return_value = max(a, b)
-        end associate
-
-    end function get_lwork_unsaved
+    end subroutine get_legendre_workspace
 
 
 
