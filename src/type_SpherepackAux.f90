@@ -1663,12 +1663,10 @@ contains
 
         subroutine zvin1(ityp, nlat, m, zv, imid, i3, zvz, zv1, a, b, c)
 
-            real (wp) :: a
-            real (wp) :: b
-            real (wp) :: c
+            real (wp) :: a(*)
+            real (wp) :: b(*)
+            real (wp) :: c(*)
             integer (ip) :: i
-            integer (ip) :: i1
-            integer (ip) :: i2
             integer (ip) :: i3
             integer (ip) :: ihold
             integer (ip) :: imid
@@ -1679,12 +1677,11 @@ contains
             integer (ip) :: ns
             integer (ip) :: nstp
             integer (ip) :: nstrt
-            real (wp) :: zv
-            real (wp) :: zv1
-            real (wp) :: zvz
-            dimension zv(imid, nlat, 3), zvz(imid, 1), zv1(imid, 1), &
-                a(1), b(1), c(1)
-            save i1, i2
+            real (wp) :: zv(imid, nlat, 3)
+            real (wp) :: zvz(imid, *)
+            real (wp) :: zv1(imid, *)
+            integer (ip), save :: i1, i2
+
             ihold = i1
             i1 = i2
             i2 = i3
@@ -1760,9 +1757,8 @@ contains
         integer (ip) :: mmax
         integer (ip) :: nlat
         integer (ip) :: nlon
-        real (wp) :: wzwin
-        real (wp) :: zw
-        dimension  zw(1), wzwin(1)
+        real (wp) :: wzwin(*)
+        real (wp) :: zw(*)
 
         imid = (nlat+1)/2
         lim = nlat*imid
@@ -1782,12 +1778,10 @@ contains
 
         subroutine zwin1(ityp, nlat, m, zw, imid, i3, zw1, zw2, a, b, c)
 
-            real (wp) :: a
-            real (wp) :: b
-            real (wp) :: c
+            real (wp) :: a(*)
+            real (wp) :: b(*)
+            real (wp) :: c(*)
             integer (ip) :: i
-            integer (ip) :: i1
-            integer (ip) :: i2
             integer (ip) :: i3
             integer (ip) :: ihold
             integer (ip) :: imid
@@ -1798,12 +1792,11 @@ contains
             integer (ip) :: ns
             integer (ip) :: nstp
             integer (ip) :: nstrt
-            real (wp) :: zw
-            real (wp) :: zw1
-            real (wp) :: zw2
-            dimension       zw(imid, nlat, 3), zw1(imid, 1), zw2(imid, 1), &
-                a(1), b(1), c(1)
-            save i1, i2
+            real (wp) :: zw(imid, nlat, 3)
+            real (wp) :: zw1(imid,*)
+            real (wp) :: zw2(imid,*)
+            integer (ip), save :: i1, i2
+
             ihold = i1
             i1 = i2
             i2 = i3
@@ -2032,9 +2025,10 @@ contains
         integer (ip) :: mmax
         integer (ip) :: nlat
         integer (ip) :: nlon
-        real (wp) :: vb
-        real (wp) :: wvbin
-        dimension       vb(1)        , wvbin(1)
+        real (wp) :: vb(*)
+        real (wp) :: wvbin(*)
+
+
         imid = (nlat+1)/2
         lim = nlat*imid
         mmax = min(nlat, (nlon+1)/2)
@@ -2053,12 +2047,10 @@ contains
 
         subroutine vbin1(ityp, nlat, m, vb, imid, i3, vbz, vb1, a, b, c)
 
-            real (wp) :: a
-            real (wp) :: b
-            real (wp) :: c
+            real (wp) :: a(*)
+            real (wp) :: b(*)
+            real (wp) :: c(*)
             integer (ip) :: i
-            integer (ip) :: i1
-            integer (ip) :: i2
             integer (ip) :: i3
             integer (ip) :: ihold
             integer (ip) :: imid
@@ -2069,12 +2061,12 @@ contains
             integer (ip) :: ns
             integer (ip) :: nstp
             integer (ip) :: nstrt
-            real (wp) :: vb
-            real (wp) :: vb1
-            real (wp) :: vbz
-            dimension       vb(imid, nlat, 3), vbz(imid, 1), vb1(imid, 1), &
-                a(1), b(1), c(1)
-            save i1, i2
+            real (wp) :: vb(imid, nlat, 3)
+            real (wp) :: vbz(imid,*)
+            real (wp) :: vb1(imid,*)
+            integer (ip), save :: i1, i2
+
+
             ihold = i1
             i1 = i2
             i2 = i3
@@ -2151,9 +2143,10 @@ contains
         integer (ip) :: mmax
         integer (ip) :: nlat
         integer (ip) :: nlon
-        real (wp) :: wb
-        real (wp) :: wwbin
-        dimension       wb(1)        , wwbin(1)
+        real (wp) :: wb(*)
+        real (wp) :: wwbin(*)
+
+
         imid = (nlat+1)/2
         lim = nlat*imid
         mmax = min(nlat, (nlon+1)/2)
@@ -2172,12 +2165,10 @@ contains
 
         subroutine wbin1(ityp, nlat, m, wb, imid, i3, wb1, wb2, a, b, c)
 
-            real (wp) :: a
-            real (wp) :: b
-            real (wp) :: c
+            real (wp) :: a(*)
+            real (wp) :: b(*)
+            real (wp) :: c(*)
             integer (ip) :: i
-            integer (ip) :: i1
-            integer (ip) :: i2
             integer (ip) :: i3
             integer (ip) :: ihold
             integer (ip) :: imid
@@ -2188,12 +2179,11 @@ contains
             integer (ip) :: ns
             integer (ip) :: nstp
             integer (ip) :: nstrt
-            real (wp) :: wb
-            real (wp) :: wb1
-            real (wp) :: wb2
-            dimension wb(imid, nlat, 3), wb1(imid, 1), wb2(imid, 1), &
-                a(1), b(1), c(1)
-            save i1, i2
+            real (wp) :: wb(imid, nlat, 3)
+            real (wp) :: wb1(imid, *)
+            real (wp) ::  wb2(imid, *)
+            integer (ip), save :: i1, i2
+
             ihold = i1
             i1 = i2
             i2 = i3
@@ -2253,6 +2243,8 @@ contains
 
     end subroutine wbin
 
+
+
     subroutine dzvk(nlat, m, n, czv, work)
 
         integer (ip) :: i
@@ -2263,6 +2255,9 @@ contains
         integer (ip) :: m
         integer (ip) :: n
         integer (ip) :: nlat
+        real (wp) :: work(nlat/2 + 1)
+        real (wp) :: czv(*)
+        real (wp) :: sc1, summation, t1, t2
         !
         !     subroutine dzvk computes the coefficients in the trigonometric
         !     expansion of the quadrature function zvbar(n, m, theta)
@@ -2281,8 +2276,6 @@ contains
         !
         !     czv     the fourier coefficients of zvbar(n, m, theta).
         !
-        dimension czv(1), work(1)
-        real czv, sc1, summation, work, t1, t2
 
         if (n <= 0) return
 
@@ -2374,6 +2367,8 @@ contains
         integer (ip) :: m
         integer (ip) :: n
         integer (ip) :: nlat
+        real (wp) :: czv(*)
+        real (wp) :: th, zvh, cost, sint, cdt, sdt, temp
         !
         !     subroutine dzvt tabulates the function zvbar(n, m, theta)
         !     at theta = th in real
@@ -2393,8 +2388,6 @@ contains
         !
         !     zvh     zvbar(m, n, theta) evaluated at theta = th
         !
-        dimension czv(1)
-        real th, czv, zvh, cost, sint, cdt, sdt, temp
 
         zvh = 0.0
 
@@ -2529,6 +2522,10 @@ contains
         integer (ip) :: m
         integer (ip) :: n
         integer (ip) :: nlat
+        real (wp) :: czw(*)
+        real (wp) :: work(nlat/2+1)
+        real (wp) :: sc1, summation, t1, t2
+
         !
         !     subroutine dzwk computes the coefficients in the trigonometric
         !     expansion of the quadrature function zwbar(n, m, theta)
@@ -2547,8 +2544,6 @@ contains
         !
         !     czw     the fourier coefficients of zwbar(n, m, theta).0
         !
-        dimension czw(1), work(1)
-        real czw, work, sc1, summation, t1, t2
 
         if (n <= 0) return
 
@@ -2643,6 +2638,8 @@ contains
         integer (ip) :: m
         integer (ip) :: n
         integer (ip) :: nlat
+        real (wp) :: czw(*)
+        real (wp) :: zwh, th, cost, sint, cdt, sdt, temp
         !
         !     subroutine dzwt tabulates the function zwbar(n, m, theta)
         !     at theta = th in real
@@ -2663,8 +2660,6 @@ contains
         !
         !     zwh     zwbar(m, n, theta) evaluated at theta = th
         !
-        dimension czw(1)
-        real czw, zwh, th, cost, sint, cdt, sdt, temp
 
         zwh = 0.0
 
@@ -2950,14 +2945,22 @@ contains
 
 
     subroutine dvbt(m, n, theta, cv, vh)
-        integer (ip) :: k
-        integer (ip) :: m
-        integer (ip) :: n
-        integer (ip) :: ncv
-        dimension cv(1)
-        real cv, vh, theta, cost, sint, cdt, sdt, temp
+        !----------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !----------------------------------------------------------------------
+        integer (ip), intent (in)  :: m
+        integer (ip), intent (in)  :: n
+        real (wp),    intent (in)  :: theta
+        real (wp),    intent (out) :: cv(*)
+        real (wp),    intent (out) :: vh
+        !----------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !----------------------------------------------------------------------
+        integer (ip) :: k, ncv
+        real (wp)    :: cost, sint, cdt, sdt, temp
+        !----------------------------------------------------------------------
 
-        vh = 0.0
+        vh = 0.0_wp
 
         if (n == 0) return
 
@@ -3031,8 +3034,8 @@ contains
         integer (ip) :: m
         integer (ip) :: n
         integer (ip) :: ncw
-        dimension cw(1)
-        real theta, cw, wh, cost, sint, cdt, sdt, temp
+        real (wp) :: cw(*)
+        real (wp) :: theta, wh, cost, sint, cdt, sdt, temp
 
         wh = 0.0
 
@@ -3109,7 +3112,7 @@ contains
 
     subroutine rabcv(nlat, nlon, abc)
 
-        real (wp) :: abc
+        real (wp) :: abc(*)
         integer (ip) :: iw1
         integer (ip) :: iw2
         integer (ip) :: labc
@@ -3121,20 +3124,20 @@ contains
         !     relation for the functions vbar(m, n, theta). array abc
         !     must have 3*(max(mmax-2, 0)*(2*nlat-mmax-1))/2 locations.
         !
-        dimension abc(1)
         mmax = min(nlat, (nlon+1)/2)
         labc = (max(mmax-2, 0)*(2*nlat-mmax-1))/2
         iw1 = labc+1
         iw2 = iw1+labc
+
         call rabcv1(nlat, nlon, abc, abc(iw1), abc(iw2))
 
     contains
 
         subroutine rabcv1(nlat, nlon, a, b, c)
 
-            real (wp) :: a
-            real (wp) :: b
-            real (wp) :: c
+            real (wp) :: a(*)
+            real (wp) :: b(*)
+            real (wp) :: c(*)
             real (wp) :: cn
             real (wp) :: fm
             real (wp) :: fn
@@ -3157,7 +3160,6 @@ contains
             !     coefficients a, b, and c for computing vbar(m, n, theta) are
             !     stored in location ((m-2)*(nlat+nlat-m-1))/2+n+1
             !
-            dimension a(1), b(1), c(1)
 
             mmax = min(nlat, (nlon+1)/2)
 
@@ -3166,7 +3168,7 @@ contains
             outer_loop: do mp1=3, mmax
                 m = mp1-1
                 ns = ((m-2)*(2*nlat-m-1))/2+1
-                fm = real(m)
+                fm = real(m, kind=wp)
                 tm = fm+fm
                 temp = tm*(tm-1.0)
                 tpn = (fm-2.0)*(fm-1.0)/(fm*(fm+1.0))
@@ -3203,7 +3205,7 @@ contains
 
     subroutine rabcw(nlat, nlon, abc)
 
-        real (wp) :: abc
+        real (wp) :: abc(*)
         integer (ip) :: iw1
         integer (ip) :: iw2
         integer (ip) :: labc
@@ -3215,7 +3217,6 @@ contains
         !     relation for the functions wbar(m, n, theta). array abc
         !     must have 3*(max(mmax-2, 0)*(2*nlat-mmax-1))/2 locations.
         !
-        dimension abc(1)
         mmax = min(nlat, (nlon+1)/2)
         labc = (max(mmax-2, 0)*(2*nlat-mmax-1))/2
         iw1 = labc+1
@@ -3226,9 +3227,9 @@ contains
 
         subroutine rabcw1(nlat, nlon, a, b, c)
 
-            real (wp) :: a
-            real (wp) :: b
-            real (wp) :: c
+            real (wp) :: a(*)
+            real (wp) :: b(*)
+            real (wp) :: c(*)
             real (wp) :: cn
             real (wp) :: fm
             real (wp) :: fn
@@ -3252,7 +3253,6 @@ contains
             !     coefficients a, b, and c for computing wbar(m, n, theta) are
             !     stored in location ((m-2)*(nlat+nlat-m-1))/2+n+1
             !
-            dimension a(1), b(1), c(1)
 
             mmax = min(nlat, (nlon+1)/2)
 
@@ -3261,7 +3261,7 @@ contains
             outer_loop: do mp1=4, mmax
                 m = mp1-1
                 ns = ((m-2)*(nlat+nlat-m-1))/2+1
-                fm = real(m)
+                fm = real(m, kind=wp)
                 tm = 2.0*fm
                 temp = tm*(tm-1.0)
                 tpn = (fm-2.0)*(fm-1.0)/(fm*(fm+1.0))
@@ -3305,9 +3305,8 @@ contains
         integer (ip) :: iw2
         integer (ip) :: nlat
         integer (ip) :: nlon
-        real (wp) :: wvbin
-        dimension       wvbin(*)
-        real dwork(*)
+        real (wp) :: wvbin(*)
+        real (wp) :: dwork(*)
         imid = (nlat+1)/2
         iw1 = 2*nlat*imid+1
         iw2 = nlat/2+2
@@ -3320,8 +3319,12 @@ contains
     contains
 
         subroutine vtini1(nlat, nlon, imid, vb, abc, cvb, work)
-
-            real (wp) :: abc
+            !
+            !     abc must have 3*(max(mmax-2, 0)*(2*nlat-mmax-1))/2
+            !     locations where mmax = min(nlat, (nlon+1)/2)
+            !     cvb and work must each have nlat/2+1 locations
+            !
+            real (wp) :: abc(*)
             integer (ip) :: i
             integer (ip) :: imid
             integer (ip) :: m
@@ -3331,15 +3334,11 @@ contains
             integer (ip) :: nlat
             integer (ip) :: nlon
             integer (ip) :: np1
-            real (wp) :: vb
-            !
-            !     abc must have 3*(max(mmax-2, 0)*(2*nlat-mmax-1))/2
-            !     locations where mmax = min(nlat, (nlon+1)/2)
-            !     cvb and work must each have nlat/2+1 locations
-            !
-            dimension vb(imid, nlat, 2), abc(1), cvb(1)
-            real dt, cvb, th, vbh, work(*)
-            real, parameter :: PI = acos(-1.0)
+            real (wp) :: vb(imid, nlat, 2)
+            real (wp) :: dt, cvb(*), th, vbh, work(*)
+            real (wp), parameter :: PI = acos(-1.0_wp)
+
+
             dt = PI/(nlat-1)
             mdo = min(2, nlat, (nlon+1)/2)
             do mp1=1, mdo
@@ -3368,9 +3367,9 @@ contains
         integer (ip) :: iw2
         integer (ip) :: nlat
         integer (ip) :: nlon
-        real (wp) :: wwbin
-        dimension wwbin(1)
-        real dwork(*)
+        real (wp) :: wwbin(*)
+        real (wp) :: dwork(nlat+2)
+
         imid = (nlat+1)/2
         iw1 = 2*nlat*imid+1
         iw2 = nlat/2+2
@@ -3384,7 +3383,7 @@ contains
 
         subroutine wtini1(nlat, nlon, imid, wb, abc, cwb, work)
 
-            real (wp) :: abc
+            real (wp) :: abc(*)
             integer (ip) :: i
             integer (ip) :: imid
             integer (ip) :: m
@@ -3394,15 +3393,15 @@ contains
             integer (ip) :: nlat
             integer (ip) :: nlon
             integer (ip) :: np1
-            real (wp) :: wb
+            real (wp) :: wb(imid, nlat, 2)
+            real (wp) :: dt, cwb(*), wbh, th, work(*)
+            real (wp), parameter :: PI = acos(-1.0_wp)
             !
             !     abc must have 3*(max(mmax-2, 0)*(2*nlat-mmax-1))/2
             !     locations where mmax = min(nlat, (nlon+1)/2)
             !     cwb and work must each have nlat/2+1 locations
             !
-            dimension wb(imid, nlat, 2), abc(1)
-            real dt, cwb(*), wbh, th, work(*)
-            real, parameter :: PI = acos(-1.0)
+
             dt = PI/(nlat-1)
             mdo = min(3, nlat, (nlon+1)/2)
             if (mdo < 2) return
@@ -3432,9 +3431,10 @@ contains
         integer (ip) :: iw2
         integer (ip) :: nlat
         integer (ip) :: nlon
-        real (wp) :: wvbin
-        dimension       wvbin(*)
-        real theta(*), work(*)
+        real (wp) :: wvbin(*)
+        real (wp) :: theta(*), work(*)
+
+
         imid = (nlat+1)/2
         iw1 = 2*nlat*imid+1
         iw2 = nlat/2+2
@@ -3450,7 +3450,7 @@ contains
 
         subroutine vtgit1(nlat, nlon, imid, theta, vb, abc, cvb, work)
 
-            real (wp) :: abc
+            real (wp) :: abc(*)
             integer (ip) :: i
             integer (ip) :: imid
             integer (ip) :: m
@@ -3460,14 +3460,14 @@ contains
             integer (ip) :: nlat
             integer (ip) :: nlon
             integer (ip) :: np1
-            real (wp) :: vb
+            real (wp) :: vb(imid, nlat, 2)
+            real (wp) :: theta(*), cvb(nlat/2+1), work(nlat/2+1), vbh
             !
             !     abc must have 3*(max(mmax-2, 0)*(2*nlat-mmax-1))/2
             !     locations where mmax = min(nlat, (nlon+1)/2)
             !     cvb and work must each have nlat/2+1   locations
             !
-            dimension vb(imid, nlat, 2), abc(*)
-            real theta(*), cvb(*), work(*), vbh
+
             mdo = min(2, nlat, (nlon+1)/2)
             do mp1=1, mdo
                 m = mp1-1
@@ -3494,9 +3494,11 @@ contains
         integer (ip) :: iw2
         integer (ip) :: nlat
         integer (ip) :: nlon
-        real (wp) :: wwbin
-        dimension wwbin(*)
-        real theta(*), work(*)
+        real (wp) :: wwbin(*)
+        real (wp) :: theta((nlat+1)/2)
+        real (wp) :: work(nlat+2)
+
+
         imid = (nlat+1)/2
         iw1 = 2*nlat*imid+1
         iw2 = nlat/2+2
@@ -3512,7 +3514,7 @@ contains
 
         subroutine wtgit1(nlat, nlon, imid, theta, wb, abc, cwb, work)
 
-            real (wp) :: abc
+            real (wp) :: abc(*)
             integer (ip) :: i
             integer (ip) :: imid
             integer (ip) :: m
@@ -3522,13 +3524,15 @@ contains
             integer (ip) :: nlat
             integer (ip) :: nlon
             integer (ip) :: np1
-            real (wp) :: wb
+            real (wp) :: wb(imid, nlat, 2)
+            real (wp) :: theta(*)
+            real (wp) :: cwb(nlat/2+1)
+            real (wp) :: work(nlat/2+1), wbh
             !
             !     abc must have 3*((nlat-3)*nlat+2)/2 locations
             !     cwb and work must each have nlat/2+1 locations
             !
-            dimension wb(imid, nlat, 2), abc(1)
-            real theta(*), cwb(*), work(*), wbh
+
             mdo = min(3, nlat, (nlon+1)/2)
             if (mdo < 2) return
             do mp1=2, mdo
@@ -3549,21 +3553,30 @@ contains
 
     end subroutine wtgint
 
+
+
     subroutine dvtk(m, n, cv, work)
+        !----------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !----------------------------------------------------------------------
+        integer (ip), intent (in)  :: m
+        integer (ip), intent (in)  :: n
+        real (wp),    intent (out) :: cv(*)
+        real (wp),    intent (out) :: work(*)
+        !----------------------------------------------------------------------
+        ! Dictionary: local variables
+        !----------------------------------------------------------------------
+        integer (ip) :: l, ncv
+        real (wp)    :: fn, fk, cf, srnp1
+        !----------------------------------------------------------------------
 
-        integer (ip) :: l
-        integer (ip) :: m
-        integer (ip) :: n
-        integer (ip) :: ncv
-        real cv(*), work(*), fn, fk, cf, srnp1
-
-        cv(1) = 0.0
+        cv(1) = 0.0_wp
 
         if (n <= 0) return
 
         fn = n
-        srnp1 = sqrt(fn * (fn + 1.0))
-        cf = 2.0*real(m)/srnp1
+        srnp1 = sqrt(fn * (fn + 1.0_wp))
+        cf = 2.0_wp * real(m, kind=wp)/srnp1
 
         call dnlfk(m, n, work)
 
@@ -3629,8 +3642,8 @@ contains
         if (n <= 0 .or. m <= 0) return
 
         fn = n
-        srnp1 = sqrt(fn * (fn + 1.0))
-        cf = 2.0*real(m)/srnp1
+        srnp1 = sqrt(fn * (fn + 1.0_wp))
+        cf = 2.0_wp * real(m, kind=wp)/srnp1
 
         call dnlfk(m, n, work)
 
@@ -3715,22 +3728,29 @@ contains
 
 
     subroutine dvtt(m, n, theta, cv, vh)
+        !----------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !----------------------------------------------------------------------
+        integer (ip), intent (in)  :: m
+        integer (ip), intent (in)  :: n
+        real (wp),    intent (in)  :: theta
+        real (wp),    intent (out) :: cv(*)
+        real (wp),    intent (out) :: vh
+        !----------------------------------------------------------------------
+        ! Dictionary: local variables
+        !----------------------------------------------------------------------
+        integer (ip) :: k, ncv
+        real (wp)    :: cost, sint, cdt, sdt, temp
+        !----------------------------------------------------------------------
 
-        integer (ip) :: k
-        integer (ip) :: m
-        integer (ip) :: n
-        integer (ip) :: ncv
-        dimension cv(1)
-        real cv, vh, theta, cost, sint, cdt, sdt, temp
-
-        vh = 0.0
+        vh = 0.0_wp
 
         if (n == 0) return
 
         cost = cos(theta)
         sint = sin(theta)
-        cdt = cost*cost-sint*sint
-        sdt = 2.0*sint*cost
+        cdt = cost**2-sint**2
+        sdt = 2.0_wp*sint*cost
 
         select case (mod(n,2))
             case (0) ! n even
@@ -3796,8 +3816,8 @@ contains
         integer (ip) :: m
         integer (ip) :: n
         integer (ip) :: ncw
-        dimension cw(1)
-        real theta, cw, wh, cost, sint, cdt, sdt, temp
+        real (wp) :: cw(*)
+        real (wp) :: theta, wh, cost, sint, cdt, sdt, temp
 
         wh = 0.0
 
@@ -3879,9 +3899,10 @@ contains
         integer (ip) :: iw2
         integer (ip) :: nlat
         integer (ip) :: nlon
-        real (wp) :: wvbin
-        dimension       wvbin(1)
-        real theta(*), work(*)
+        real (wp) :: wvbin(*)
+        real (wp) :: theta((nlat+1)/2)
+        real (wp) :: work(nlat+2)
+
         imid = (nlat+1)/2
         iw1 = 2*nlat*imid+1
         iw2 = nlat/2+2
@@ -3898,7 +3919,7 @@ contains
 
         subroutine vbgit1(nlat, nlon, imid, theta, vb, abc, cvb, work)
 
-            real (wp) :: abc
+            real (wp) :: abc(*)
             integer (ip) :: i
             integer (ip) :: imid
             integer (ip) :: m
@@ -3908,14 +3929,16 @@ contains
             integer (ip) :: nlat
             integer (ip) :: nlon
             integer (ip) :: np1
-            real (wp) :: vb
+            real (wp) :: vb(imid, nlat, 2)
+            real (wp) :: cvb(nlat/2+1)
+            real (wp) :: theta(*), vbh
+            real (wp) :: work(nlat/2+1)
             !
             !     abc must have 3*(max(mmax-2, 0)*(2*nlat-mmax-1))/2
             !     locations where mmax = min(nlat, (nlon+1)/2)
             !     cvb and work must each have nlat/2+1 locations
             !
-            dimension vb(imid, nlat, 2), abc(1)
-            real cvb(1), theta(1), vbh, work(1)
+
             mdo = min(2, nlat, (nlon+1)/2)
             do mp1=1, mdo
                 m = mp1-1
