@@ -25,16 +25,16 @@ module type_GaussianSphere
         operator(*)
     
     use module_shags, only: &
-        shags
+        ShagsAux
 
     use module_shsgs, only: &
-        shsgs
+        ShsgsAux
 
     use module_vhags, only: &
-        vhags
+        VhagsAux
 
     use module_vhsgs, only: &
-        vhsgs
+        VhsgsAux
 
     ! Explicit typing only
     implicit none
@@ -81,9 +81,9 @@ contains
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
-        integer (ip),         intent (in) :: nlat !! number of latitudinal points 0 <= theta <= pi
-        integer (ip),         intent (in) :: nlon !! number of longitudinal points 0 <= phi <= 2*pi
-        type (GaussianSphere)             :: return_value
+        integer (ip), intent (in) :: nlat !! number of latitudinal points 0 <= theta <= pi
+        integer (ip), intent (in) :: nlon !! number of longitudinal points 0 <= phi <= 2*pi
+        type (GaussianSphere)     :: return_value
         !----------------------------------------------------------------------
 
         call return_value%create(nlat, nlon)
@@ -92,7 +92,7 @@ contains
 
 
 
-    subroutine create_gaussian_sphere(this, nlat, nlon, ntrunc, isym, itype, isynt, rsphere)
+    subroutine create_gaussian_sphere(this, nlat, nlon, ntrunc, isym, itype, nt, rsphere)
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
@@ -102,7 +102,7 @@ contains
         integer (ip),           intent (in), optional  :: ntrunc
         integer (ip),           intent (in), optional  :: isym      !! Either 0, 1, or 2
         integer (ip),           intent (in), optional  :: itype     !! Either 0, 1, 2, 3, ..., 8
-        integer (ip),           intent (in), optional  :: isynt
+        integer (ip),           intent (in), optional  :: nt
         real (wp),              intent (in), optional  :: rsphere
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
@@ -110,7 +110,7 @@ contains
         integer (ip) :: ntrunc_op
         integer (ip) :: isym_op
         integer (ip) :: ityp_op
-        integer (ip) :: isynt_op
+        integer (ip) :: nt_op
         real (wp)    :: rsphere_op
         !----------------------------------------------------------------------
 
@@ -144,10 +144,10 @@ contains
             ityp_op = 0
         end if
 
-        if (present(isynt)) then
-            isynt_op = isynt
+        if (present(nt)) then
+            nt_op = nt
         else
-            isynt_op = 1
+            nt_op = 1
         end if
 
         if (present(rsphere)) then
@@ -159,8 +159,7 @@ contains
         !
         !==> Create parent type
         !
-        call this%create_sphere(nlat, nlon, &
-            ntrunc_op, isym_op, ityp_op, isynt_op, rsphere_op)
+        call this%create_sphere(nlat, nlon, ntrunc_op, isym_op, ityp_op, nt_op, rsphere_op)
 
         ! Set flag
         this%initialized = .true.
@@ -176,7 +175,7 @@ contains
         !----------------------------------------------------------------------
 
         ! Check flag
-        if (this%initialized .eqv. .false.) return
+        if (.not.this%initialized) return
 
         ! Release memory from parent type
         call this%destroy_sphere()
@@ -187,30 +186,32 @@ contains
     end subroutine destroy_gaussian_sphere
 
 
-    subroutine gaussian_scalar_analysis(this, scalar_function )
+
+    subroutine gaussian_scalar_analysis(this, scalar_function)
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
         class (GaussianSphere), intent (in out) :: this
-        real (wp),              intent (in)     :: scalar_function(:, :)
+        real (wp),              intent (in)     :: scalar_function(:,:)
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
-        integer (ip):: error_flag
+        integer (ip)    :: error_flag
+        type (ShagsAux) :: aux
         !----------------------------------------------------------------------
 
         ! Check if object is usable
-        if (this%initialized .eqv. .false.) then
+        if (.not.this%initialized) then
             error stop 'Uninitialized object of class(GaussianSphere): '&
-                //'in GAUSSIAN_SCALAR_ANALYSIS'
+                //'in gaussian_scalar_analysis'
         end if
+
 
         select type (this)
             class is (GaussianSphere)
             associate( workspace => this%workspace )
                 select type (workspace)
                     class is (GaussianWorkspace)
-                    ! perform the (real) spherical harmonic analysis
                     associate( &
                         nlat => this%NUMBER_OF_LATITUDES, &
                         nlon => this%NUMBER_OF_LONGITUDES, &
@@ -229,8 +230,12 @@ contains
                         lwork => size(workspace%legendre_workspace), &
                         ierror => error_flag &
                         )
-                        call shags(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, &
+                        !
+                        !==> perform the (real) spherical harmonic scalar analysis
+                        !
+                        call aux%shags(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, &
                             wshags, lshags, work, lwork, ierror)
+
                     end associate
                 end select
             end associate
@@ -238,56 +243,54 @@ contains
 
         ! Address error flag
         select case (error_flag)
-            case(0)
+            case (0)
                 return
-            case(1)
-                error stop 'Uninitialized object of class(GaussianSphere) in GAUSSIAN_SCALAR_ANALYSIS'&
-                    //'Error in the specification of NUMBER_OF_LATITUDES'
-            case(2)
-                error stop 'Uninitialized object of class(GaussianSphere) in GAUSSIAN_SCALAR_ANALYSIS'&
-                    //'Error in the specification of NUMBER_OF_LONGITUDES'
-            case(3)
-                error stop 'Uninitialized object of class(GaussianSphere) in GAUSSIAN_SCALAR_ANALYSIS'&
-                    //'Invalid extent for SCALAR_FORWARD'
-            case(4)
-                error stop 'Uninitialized object of class(GaussianSphere) in GAUSSIAN_SCALAR_ANALYSIS'&
-                    //'Invalid extent for LEGENDRE_WORKSPACE'
-            case(5)
-                error stop 'Uninitialized object of class(GaussianSphere) in GAUSSIAN_SCALAR_ANALYSIS'&
-                    //'Invalid extent for DWORK'
-            case(6)
-                error stop 'Uninitialized object of class(GaussianSphere) in GAUSSIAN_SCALAR_ANALYSIS'&
-                    //'Failure in GAQD due to failure in eigenvalue routine'
+            case (1)
+                error stop 'Object of class(GaussianSphere) in gaussian_scalar_analysis'&
+                    //'invalid specification of NUMBER_OF_LATITUDES'
+            case (2)
+                error stop 'Object of class(GaussianSphere) in gaussian_scalar_analysis'&
+                    //'invalid specification of NUMBER_OF_LONGITUDES'
+            case (3)
+                error stop 'Object of class(GaussianSphere) in gaussian_scalar_analysis'&
+                    //'invalid specification for scalar_forward'
+            case (4)
+                error stop 'Object of class(GaussianSphere) in gaussian_scalar_analysis'&
+                    //'invalid specification for legendre_workspace'
+            case (5)
+                error stop 'Object of class(GaussianSphere) in gaussian_scalar_analysis'&
+                    //'invalid specification for dwork'
+            case (6)
+                error stop 'Object of class(GaussianSphere) in gaussian_scalar_analysis'&
+                    //' failure in gaqd due to failure in eigenvalue routine'
             case default
-                error stop 'Uninitialized object of class(GaussianSphere) in GAUSSIAN_SCALAR_ANALYSIS'&
-                    //'Undetermined error flag'
+                error stop 'Object of class(GaussianSphere) in gaussian_scalar_analysis'&
+                    //' undetermined error'
         end select
 
     end subroutine gaussian_scalar_analysis
     
 
 
-    subroutine gaussian_scalar_synthesis(this, scalar_function )
+    subroutine gaussian_scalar_synthesis(this, scalar_function)
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
         class (GaussianSphere), intent (in out) :: this
-        real (wp),              intent (out)    :: scalar_function(:, :)
+        real (wp),              intent (out)    :: scalar_function(:,:)
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
-        integer (ip):: error_flag
+        integer (ip)    :: error_flag
+        type (ShsgsAux) :: aux
         !----------------------------------------------------------------------
 
         ! Check if object is usable
-        if (this%initialized .eqv. .false.) then
+        if (.not.this%initialized) then
             error stop 'Uninitialized object of class(GaussianSphere): '&
                 //'in gaussian_scalar_synthesis'
         end if
 
-        !
-        !==> Perform gaussian scalar synthesis
-        !
         select type (this)
             class is (GaussianSphere)
             associate( workspace => this%workspace )
@@ -306,13 +309,17 @@ contains
                         mdab => size(workspace%real_harmonic_coefficients, dim=1), &
                         ndab => size(workspace%real_harmonic_coefficients, dim=2), &
                         wshsgs => workspace%backward_scalar, &
-                        lshsgs => size(workspace%backward_scalar ), &
+                        lshsgs => size(workspace%backward_scalar), &
                         work => workspace%legendre_workspace, &
-                        lwork => size(workspace%legendre_workspace ), &
+                        lwork => size(workspace%legendre_workspace), &
                         ierror => error_flag &
                         )
-                        call shsgs(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, &
+                        !
+                        !==> Perform gaussian scalar synthesis
+                        !
+                        call aux%shsgs(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, &
                             wshsgs, lshsgs, work, lwork, ierror)
+
                     end associate
                 end select
             end associate
@@ -322,28 +329,28 @@ contains
         !==> Address error flag
         !
         select case (error_flag)
-            case(0)
+            case (0)
                 return
-            case(1)
-                error stop 'Uninitialized object of class(GaussianSphere) in GAUSSIAN_SCALAR_SYNTHESIS'&
-                    //'Error in the specification of NUMBER_OF_LATITUDES'
-            case(2)
-                error stop 'Uninitialized object of class(GaussianSphere) in GAUSSIAN_SCALAR_SYNTHESIS'&
-                    //'Error in the specification of NUMBER_OF_LONGITUDES'
-            case(3)
-                error stop 'Uninitialized object of class(GaussianSphere) in GAUSSIAN_SCALAR_SYNTHESIS'&
-                    //'Invalid extent for SCALAR_BACKWARD'
-            case(4)
-                error stop 'Uninitialized object of class(GaussianSphere) in GAUSSIAN_SCALAR_SYNTHESIS'&
-                    //'Invalid extent for LEGENDRE_WORKSPACE'
-            case(5)
-                error stop 'Uninitialized object of class(GaussianSphere) in GAUSSIAN_SCALAR_SYNTHESIS'&
-                    //'Invalid extent for DWORK'
-            case(6)
-                error stop 'Uninitialized object of class(GaussianSphere) in GAUSSIAN_SCALAR_SYNTHESIS'&
-                    //'Failure in GAQD due to failure in eigenvalue routine'
+            case (1)
+                error stop 'Object of class(GaussianSphere) in gaussian_scalar_synthesis'&
+                    //'invalid specification of NUMBER_OF_LATITUDES'
+            case (2)
+                error stop 'Object of class(GaussianSphere) in gaussian_scalar_synthesis'&
+                    //'invalid specification of NUMBER_OF_LONGITUDES'
+            case (3)
+                error stop 'Object of class(GaussianSphere) in gaussian_scalar_synthesis'&
+                    //'invalid specification for scalar_backward'
+            case (4)
+                error stop 'Object of class(GaussianSphere) in gaussian_scalar_synthesis'&
+                    //'invalid specification for legendre_workspace'
+            case (5)
+                error stop 'Object of class(GaussianSphere) in gaussian_scalar_synthesis'&
+                    //'invalid specification for dwork'
+            case (6)
+                error stop 'Object of class(GaussianSphere) in gaussian_scalar_synthesis'&
+                    //'Failure in gaqd due to failure in eigenvalue routine'
             case default
-                error stop 'Uninitialized object of class(GaussianSphere) in GAUSSIAN_SCALAR_SYNTHESIS'&
+                error stop 'Object of class(GaussianSphere) in gaussian_scalar_synthesis'&
                     //'Undetermined error flag'
         end select
 
@@ -357,23 +364,21 @@ contains
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
         class (GaussianSphere), intent (in out) :: this
-        real (wp),              intent (in)     :: polar_component(:, :)
-        real (wp),              intent (in)     :: azimuthal_component(:, :)
+        real (wp),              intent (in)     :: polar_component(:,:)
+        real (wp),              intent (in)     :: azimuthal_component(:,:)
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
-        integer (ip) :: error_flag
+        integer (ip)    :: error_flag
+        type (VhagsAux) :: aux
         !----------------------------------------------------------------------
 
         ! Check if object is usable
-        if (this%initialized .eqv. .false.) then
+        if (.not.this%initialized) then
             error stop 'Uninitialized object of class(GaussianSphere): '&
                 //'in gaussian_vector_analysis'
         end if
 
-        !
-        !==> Perform gaussian vector analysis
-        !
         select type (this)
             class is (GaussianSphere)
             associate( workspace => this%workspace )
@@ -386,22 +391,25 @@ contains
                         nt => this%NUMBER_OF_SYNTHESES, &
                         v => polar_component, &
                         w => azimuthal_component, &
-                        idvw => size(polar_component, dim=1 ), &
-                        jdvw => size(polar_component, dim=2 ), &
+                        idvw => size(polar_component, dim=1), &
+                        jdvw => size(polar_component, dim=2), &
                         br => workspace%real_polar_harmonic_coefficients, &
                         bi => workspace%imaginary_polar_harmonic_coefficients, &
                         cr => workspace%real_azimuthal_harmonic_coefficients, &
                         ci => workspace%imaginary_azimuthal_harmonic_coefficients, &
-                        mdab => size(workspace%real_polar_harmonic_coefficients, dim=1 ), &
-                        ndab => size(workspace%real_polar_harmonic_coefficients, dim=2 ), &
+                        mdab => size(workspace%real_polar_harmonic_coefficients, dim=1), &
+                        ndab => size(workspace%real_polar_harmonic_coefficients, dim=2), &
                         wvhags => workspace%forward_vector, &
-                        lvhags => size(workspace%forward_vector ), &
+                        lvhags => size(workspace%forward_vector), &
                         work => workspace%legendre_workspace, &
-                        lwork => size(workspace%legendre_workspace ), &
+                        lwork => size(workspace%legendre_workspace), &
                         ierror => error_flag &
                         )
 
-                        call vhags(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
+                        !
+                        !==> Perform gaussian vector analysis
+                        !
+                        call aux%vhags(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
                             mdab, ndab, wvhags, lvhags, work, lwork, ierror)
 
                     end associate
@@ -413,81 +421,80 @@ contains
         !==> Address error flag
         !
         select case (error_flag)
-            case(0)
+            case (0)
                 return
-            case(1)
-                error stop 'Uninitialized object of class(GaussianSphere) in '&
-                    //'GAUSSIAN_VECTOR_ANALYSIS'&
-                    //'Error in the specification of NUMBER_OF_LATITUDES'
-            case(2)
-                error stop 'Uninitialized object of class(GaussianSphere) in '&
-                    //'GAUSSIAN_VECTOR_ANALYSIS'&
-                    //'Error in the specification of NUMBER_OF_LONGITUDES'
-            case(3)
-                error stop 'Uninitialized object of class(GaussianSphere) in '&
-                    //'GAUSSIAN_VECTOR_ANALYSIS'&
-                    //'Error in the specification of VECTOR_SYMMETRIES'
-            case(4)
-                error stop 'Uninitialized object of class(GaussianSphere) in '&
-                    //'GAUSSIAN_VECTOR_ANALYSIS'&
-                    //'Error in the specification of NUMBER_OF_synthESES'
-            case(5)
-                error stop 'Uninitialized object of class(GaussianSphere) in '&
-                    //'GAUSSIAN_VECTOR_ANALYSIS'&
-                    //'Invalid DIM=1 extent for '&
-                    //'POLAR_COMPONENT (THETA) or AZIMUTHAL_COMPONENT (PHI)'
-            case(6)
-                error stop 'Uninitialized object of class(GaussianSphere) in '&
-                    //'GAUSSIAN_VECTOR_ANALYSIS'&
-                    //'Invalid DIM=2 extent '&
-                    //'POLAR_COMPONENT (THETA) or AZIMUTHAL_COMPONENT (PHI)'
-            case(7)
-                error stop 'Uninitialized object of class(GaussianSphere) in '&
-                    //'GAUSSIAN_VECTOR_ANALYSIS'&
-                    //'Invalid DIM=1 extent for BR or CR'
-            case(8)
-                error stop 'Uninitialized object of class(GaussianSphere) in '&
-                    //'GAUSSIAN_VECTOR_ANALYSIS'&
-                    //'Invalid DIM=1 extent for BI or CI'
-            case(9)
-                error stop 'Uninitialized object of class(GaussianSphere) in '&
-                    //'GAUSSIAN_VECTOR_ANALYSIS'&
-                    //'Invalid extent for FORWARD_VECTOR'
-            case(10)
-                error stop 'Uninitialized object of class(GaussianSphere) in '&
-                    //'GAUSSIAN_VECTOR_ANALYSIS'&
-                    //'Invalid extent for LEGENDRE_WORKSPACE'
+            case (1)
+                error stop 'Object of class(GaussianSphere) in '&
+                    //'gaussian_vector_analysis'&
+                    //'invalid specification of NUMBER_OF_LATITUDES'
+            case (2)
+                error stop 'Object of class(GaussianSphere) in '&
+                    //'gaussian_vector_analysis'&
+                    //'invalid specification of NUMBER_OF_LONGITUDES'
+            case (3)
+                error stop 'Object of class(GaussianSphere) in '&
+                    //'gaussian_vector_analysis'&
+                    //'invalid specification of VECTOR_SYMMETRIES'
+            case (4)
+                error stop 'Object of class(GaussianSphere) in '&
+                    //'gaussian_vector_analysis'&
+                    //'invalid specification of NUMBER_OF_SYNTHESES'
+            case (5)
+                error stop 'Object of class(GaussianSphere) in '&
+                    //'gaussian_vector_analysis'&
+                    //'invalid dim=1 extent for '&
+                    //'polar_component (theta) or azimuthal_component (phi)'
+            case (6)
+                error stop 'Object of class(GaussianSphere) in '&
+                    //'gaussian_vector_analysis'&
+                    //'invalid dim=2 extent '&
+                    //'polar_component (theta) or azimuthal_component (phi)'
+            case (7)
+                error stop 'Object of class(GaussianSphere) in '&
+                    //'gaussian_vector_analysis'&
+                    //'invalid dim=1 extent for br or cr'
+            case (8)
+                error stop 'Object of class(GaussianSphere) in '&
+                    //'gaussian_vector_analysis'&
+                    //'invalid dim=1 extent for bi or ci'
+            case (9)
+                error stop 'Object of class(GaussianSphere) in '&
+                    //'gaussian_vector_analysis'&
+                    //'invalid specification for forward_vector'
+            case (10)
+                error stop 'Object of class(GaussianSphere) in '&
+                    //'gaussian_vector_analysis'&
+                    //'invalid specification for legendre_workspace'
             case default
-                error stop 'Uninitialized object of class(GaussianSphere) in '&
-                    //'GAUSSIAN_VECTOR_ANALYSIS'&
+                error stop 'Object of class(GaussianSphere) in '&
+                    //'gaussian_vector_analysis'&
                     //'Undetermined error flag'
         end select
 
     end subroutine gaussian_vector_analysis
 
 
-    subroutine gaussian_vector_synthesis(this, polar_component, azimuthal_component )
+
+    subroutine gaussian_vector_synthesis(this, polar_component, azimuthal_component)
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
         class (GaussianSphere), intent (in out) :: this
-        real (wp),              intent (out)    :: polar_component(:, :)
-        real (wp),              intent (out)    :: azimuthal_component(:, :)
+        real (wp),              intent (out)    :: polar_component(:,:)
+        real (wp),              intent (out)    :: azimuthal_component(:,:)
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
-        integer (ip):: error_flag
+        integer (ip)    :: error_flag
+        type (VhsgsAux) :: aux
         !----------------------------------------------------------------------
 
         ! Check if object is usable
-        if (this%initialized .eqv. .false.) then
+        if (.not.this%initialized) then
             error stop 'Uninitialized object of class(GaussianSphere): '&
                 //'in gaussian_vector_synthesis'
         end if
 
-        !
-        !==> Perform gaussian vector analysis
-        !
         select type (this)
             class is (GaussianSphere)
             associate( workspace => this%workspace )
@@ -500,22 +507,26 @@ contains
                         nt => this%NUMBER_OF_SYNTHESES, &
                         v => polar_component, &
                         w => azimuthal_component, &
-                        idvw => size(polar_component, dim=1 ),  &
-                        jdvw => size(polar_component, dim=2 ),  &
+                        idvw => size(polar_component, dim=1),  &
+                        jdvw => size(polar_component, dim=2),  &
                         br => workspace%real_polar_harmonic_coefficients, &
                         bi => workspace%imaginary_polar_harmonic_coefficients, &
                         cr => workspace%real_azimuthal_harmonic_coefficients, &
                         ci => workspace%imaginary_azimuthal_harmonic_coefficients, &
-                        mdab => size(workspace%real_polar_harmonic_coefficients, dim=1 ), &
-                        ndab => size(workspace%real_polar_harmonic_coefficients, dim=2 ), &
+                        mdab => size(workspace%real_polar_harmonic_coefficients, dim=1), &
+                        ndab => size(workspace%real_polar_harmonic_coefficients, dim=2), &
                         wvhsgs => workspace%backward_vector, &
-                        lvhsgs => size(workspace%backward_vector ), &
+                        lvhsgs => size(workspace%backward_vector), &
                         work => workspace%legendre_workspace, &
-                        lwork => size(workspace%legendre_workspace ), &
+                        lwork => size(workspace%legendre_workspace), &
                         ierror => error_flag &
                         )
-                        call vhsgs(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
-                            mdab, ndab, wvhsgs, lvhsgs, work, lwork, ierror)
+                        !
+                        !==> Perform gaussian vector synthesis
+                        !
+                        call aux%vhsgs(nlat, nlon, ityp, nt, v, w, idvw, jdvw, &
+                            br, bi, cr, ci, mdab, ndab, wvhsgs, lvhsgs, work, lwork, ierror)
+
                     end associate
                 end select
             end associate
@@ -525,42 +536,42 @@ contains
         !==> Address error flag
         !
         select case (error_flag)
-            case(0)
+            case (0)
                 return
-            case(1)
-                error stop 'Uninitialized object of class(GaussianSphere) in GAUSSIAN_VECTOR_SYNTHESIS'&
-                    //'Error in the specification of NUMBER_OF_LATITUDES'
-            case(2)
-                error stop 'Uninitialized object of class(GaussianSphere) in GAUSSIAN_VECTOR_SYNTHESIS'&
-                    //'Error in the specification of NUMBER_OF_LONGITUDES'
-            case(3)
-                error stop 'Uninitialized object of class(GaussianSphere) in GAUSSIAN_VECTOR_SYNTHESIS'&
-                    //'Error in the specification of VECTOR_SYMMETRIES'
-            case(4)
-                error stop 'Uninitialized object of class(GaussianSphere) in GAUSSIAN_VECTOR_SYNTHESIS'&
-                    //'Error in the specification of NUMBER_OF_synthESES'
-            case(5)
-                error stop 'Uninitialized object of class(GaussianSphere) in GAUSSIAN_VECTOR_SYNTHESIS'&
-                    //'Invalid DIM=1 extent for '&
-                    //'POLAR_COMPONENT (THETA) or AZIMUTHAL_COMPONENT (PHI)'
-            case(6)
-                error stop 'Uninitialized object of class(GaussianSphere) in GAUSSIAN_VECTOR_SYNTHESIS'&
-                    //'Invalid DIM=2 extent '&
-                    //'POLAR_COMPONENT (THETA) or AZIMUTHAL_COMPONENT (PHI)'
-            case(7)
-                error stop 'Uninitialized object of class(GaussianSphere) in GAUSSIAN_VECTOR_SYNTHESIS'&
-                    //'Invalid DIM=1 extent for BR or CR'
-            case(8)
-                error stop 'Uninitialized object of class(GaussianSphere) in GAUSSIAN_VECTOR_SYNTHESIS'&
-                    //'Invalid DIM=1 extent for BI or CI'
-            case(9)
-                error stop 'Uninitialized object of class(GaussianSphere) in GAUSSIAN_VECTOR_SYNTHESIS'&
-                    //'Invalid extent for BACKWARD_VECTOR'
-            case(10)
-                error stop 'Uninitialized object of class(GaussianSphere) in GAUSSIAN_VECTOR_SYNTHESIS'&
-                    //'Invalid extent for LEGENDRE_WORKSPACE'
+            case (1)
+                error stop 'Object of class(GaussianSphere) in gaussian_vector_synthesis'&
+                    //'invalid specification of NUMBER_OF_LATITUDES'
+            case (2)
+                error stop 'Object of class(GaussianSphere) in gaussian_vector_synthesis'&
+                    //'invalid specification of NUMBER_OF_LONGITUDES'
+            case (3)
+                error stop 'Object of class(GaussianSphere) in gaussian_vector_synthesis'&
+                    //'invalid specification of VECTOR_SYMMETRIES'
+            case (4)
+                error stop 'Object of class(GaussianSphere) in gaussian_vector_synthesis'&
+                    //'invalid specification of NUMBER_OF_SYNTHESES'
+            case (5)
+                error stop 'Object of class(GaussianSphere) in gaussian_vector_synthesis'&
+                    //'invalid dim=1 extent for '&
+                    //'polar_component (theta) or azimuthal_component (phi)'
+            case (6)
+                error stop 'Object of class(GaussianSphere) in gaussian_vector_synthesis'&
+                    //'invalid dim=2 extent '&
+                    //'polar_component (theta) or azimuthal_component (phi)'
+            case (7)
+                error stop 'Object of class(GaussianSphere) in gaussian_vector_synthesis'&
+                    //'invalid dim=1 extent for br or cr'
+            case (8)
+                error stop 'Object of class(GaussianSphere) in gaussian_vector_synthesis'&
+                    //'invalid dim=1 extent for bi or ci'
+            case (9)
+                error stop 'Object of class(GaussianSphere) in gaussian_vector_synthesis'&
+                    //'invalid specification for backward_vector'
+            case (10)
+                error stop 'Object of class(GaussianSphere) in gaussian_vector_synthesis'&
+                    //'invalid specification for legendre_workspace'
             case default
-                error stop 'Uninitialized object of class(GaussianSphere) in GAUSSIAN_VECTOR_SYNTHESIS'&
+                error stop 'Object of class(GaussianSphere) in gaussian_vector_synthesis'&
                     //'Undetermined error flag'
         end select
 
@@ -588,7 +599,7 @@ contains
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
         class (GaussianSphere), intent (in out) :: this
-        real (wp),              intent (in)     :: scalar_function(:, :)
+        real (wp),              intent (in)     :: scalar_function(:,:)
         real (wp)                               :: return_value
         !----------------------------------------------------------------------
         ! Dictionary: local variables
@@ -598,7 +609,7 @@ contains
         !----------------------------------------------------------------------
 
         ! Check if object is usable
-        if (this%initialized .eqv. .false.) then
+        if (.not.this%initialized) then
             error stop 'Uninitialized object of class(GaussianSphere): '&
                 //'in get_surface_integral'
         end if
@@ -652,58 +663,69 @@ contains
 
 
 
-    subroutine compute_first_moment(this, scalar_function, first_moment )
+    subroutine compute_first_moment(this, scalar_function, first_moment)
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
         class (GaussianSphere),  intent (in out) :: this
-        real (wp),               intent (in)     :: scalar_function(:, :)
+        real (wp),               intent (in)     :: scalar_function(:,:)
         class (Vector),          intent (out)    :: first_moment
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
         integer (ip)           :: k, l !! Counters
-        real (wp), allocatable :: integrant(:, :, :)
+        real (wp), allocatable :: integrant(:,:,:)
         !----------------------------------------------------------------------
 
         ! Check if object is usable
-        if (this%initialized .eqv. .false.) then
+        if (.not.this%initialized) then
             error stop 'Uninitialized object of class(GaussianSphere): '&
                 //'in compute_first_moment'
         end if
 
-        ! Allocate  memory
+
         associate( &
             nlat => this%NUMBER_OF_LATITUDES, &
             nlon => this%NUMBER_OF_LONGITUDES &
             )
+            !
+            !==> Allocate memory
+            !
             allocate( integrant(nlat, nlon, 3) )
 
-            ! compute integrant
+
             do l = 1, nlon
                 do k = 1, nlat
                     associate( &
-                        u => this%unit_vectors%radial( k, l ), &
+                        u => this%unit_vectors%radial(k, l), &
                         f => scalar_function(k, l) &
                         )
+                        !
+                        !==> Compute integrant
+                        !
                         integrant(k, l, 1) = u%x * f
                         integrant(k, l, 2) = u%y * f
                         integrant(k, l, 3) = u%z * f
+
                     end associate
                 end do
             end do
         end associate
 
-        ! compute first moment
+
         associate( &
-            M  => first_moment, &
-            f1 => integrant(:, :, 1), &
-            f2 => integrant(:, :, 2), &
-            f3 => integrant(:, :, 3) &
+            m => first_moment, &
+            f1 => integrant(:,:,1), &
+            f2 => integrant(:,:,2), &
+            f3 => integrant(:,:,3) &
             )
-            m%x = this%compute_surface_integral( f1 )
-            m%y = this%compute_surface_integral( f2 )
-            m%z = this%compute_surface_integral( f3 )
+            !
+            !==> Compute first moment
+            !
+            m%x = this%compute_surface_integral(f1)
+            m%y = this%compute_surface_integral(f2)
+            m%z = this%compute_surface_integral(f3)
+
         end associate
 
         ! Release memory

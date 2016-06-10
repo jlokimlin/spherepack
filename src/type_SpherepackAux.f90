@@ -226,15 +226,13 @@ contains
 
             cp(l) = cp2
 
-            if (m < 0) then
-                if (mod(ma, 2) /= 0) cp(l) = -cp(l)
-            end if
+            if ((m < 0) .and. (mod(ma, 2) /= 0)) cp(l) = -cp(l)
 
             if (l <= 1) return
 
             fk = real(n, kind=wp)
             a1 = (fk-2.0_wp)*(fk-1.0_wp)-fnnp1
-            b1 = 2.0_wp*(fk*fk-fnmsq)
+            b1 = 2.0_wp*(fk**2-fnmsq)
             cp(l-1) = b1*cp(l)/a1
 
             l = l - 1
@@ -242,7 +240,7 @@ contains
             do while (l > 1)
                 fk = fk-2.0_wp
                 a1 = (fk-2.0_wp)*(fk-1.0_wp)-fnnp1
-                b1 = -2.0_wp*(fk*fk-fnmsq)
+                b1 = -2.0_wp*(fk**2-fnmsq)
                 c1 = (fk+1.0_wp)*(fk+2.0_wp)-fnnp1
                 cp(l-1) = -(b1*cp(l)+c1*cp(l+1))/a1
                 l=l-1
@@ -572,6 +570,7 @@ contains
 
         end subroutine legin1
 
+
         pure function get_workspace_indices(l, late, nlat) &
             result (return_value)
             !----------------------------------------------------------------------
@@ -594,6 +593,7 @@ contains
             end associate
 
         end function get_workspace_indices
+
 
         pure function indx(m, n) result (return_value)
             !
@@ -1610,22 +1610,23 @@ contains
 
 
     subroutine zvin(ityp, nlat, nlon, m, zv, i3, wzvin)
-
-        integer (ip) :: i3
+        !----------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !----------------------------------------------------------------------
+        integer (ip), intent (in)  :: ityp
+        integer (ip), intent (in)  :: nlat
+        integer (ip), intent (in)  :: nlon
+        integer (ip), intent (in)  :: m
+        real (wp),    intent (out) :: zv(*)
+        integer (ip), intent (out) :: i3
+        real (wp),    intent (in)  :: wzvin(*)
+        !----------------------------------------------------------------------
+        ! Dictionary: local variables
+        !----------------------------------------------------------------------
         integer (ip) :: imid
-        integer (ip) :: ityp
-        integer (ip) :: iw1
-        integer (ip) :: iw2
-        integer (ip) :: iw3
-        integer (ip) :: iw4
-        integer (ip) :: labc
-        integer (ip) :: lim
-        integer (ip) :: m
-        integer (ip) :: mmax
-        integer (ip) :: nlat
-        integer (ip) :: nlon
-        real (wp) :: wzvin(*)
-        real (wp) :: zv(*)
+        integer (ip) :: iw1, iw2, iw3, iw4
+        integer (ip) :: labc, lim, mmax
+        !----------------------------------------------------------------------
 
         imid = (nlat+1)/2
         lim = nlat*imid
@@ -1644,25 +1645,27 @@ contains
     contains
 
         subroutine zvin1(ityp, nlat, m, zv, imid, i3, zvz, zv1, a, b, c)
-
+            !----------------------------------------------------------------------
+            ! Dictionary: calling arguments
+            !----------------------------------------------------------------------
+            integer (ip), intent (in) :: ityp
+            integer (ip), intent (in) :: nlat
+            integer (ip), intent (in) :: m
+            real (wp)    :: zv(imid, nlat, 3)
+            integer (ip), intent (in) :: imid
+            integer (ip), intent (in out) :: i3
+            real (wp) :: zvz(imid, *)
+            real (wp) :: zv1(imid, *)
             real (wp) :: a(*)
             real (wp) :: b(*)
             real (wp) :: c(*)
-            integer (ip) :: i
-            integer (ip) :: i3
-            integer (ip) :: ihold
-            integer (ip) :: imid
-            integer (ip) :: ityp
-            integer (ip) :: m
-            integer (ip) :: nlat
-            integer (ip) :: np1
-            integer (ip) :: ns
-            integer (ip) :: nstp
-            integer (ip) :: nstrt
-            real (wp) :: zv(imid, nlat, 3)
-            real (wp) :: zvz(imid, *)
-            real (wp) :: zv1(imid, *)
+            !----------------------------------------------------------------------
+            ! Dictionary: local variables
+            !----------------------------------------------------------------------
+            integer (ip)       :: i, ihold
+            integer (ip)       :: np1, ns, nstp, nstrt
             integer (ip), save :: i1, i2
+            !----------------------------------------------------------------------
 
             ihold = i1
             i1 = i2
@@ -1726,21 +1729,22 @@ contains
 
 
     subroutine zwin(ityp, nlat, nlon, m, zw, i3, wzwin)
-        integer (ip) :: i3
-        integer (ip) :: imid
-        integer (ip) :: ityp
-        integer (ip) :: iw1
-        integer (ip) :: iw2
-        integer (ip) :: iw3
-        integer (ip) :: iw4
-        integer (ip) :: labc
-        integer (ip) :: lim
-        integer (ip) :: m
-        integer (ip) :: mmax
-        integer (ip) :: nlat
-        integer (ip) :: nlon
-        real (wp) :: wzwin(*)
-        real (wp) :: zw(*)
+        !----------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !----------------------------------------------------------------------
+        integer (ip), intent (in)     :: ityp
+        integer (ip), intent (in)     :: nlat
+        integer (ip), intent (in)     :: nlon
+        integer (ip), intent (in)     :: m
+        real (wp),    intent (out)    :: zw(*)
+        integer (ip), intent (in out) :: i3
+        real (wp),    intent (in)     :: wzwin(*)
+        !----------------------------------------------------------------------
+        ! Dictionary: local variables
+        !----------------------------------------------------------------------
+        integer (ip) :: imid, iw1, iw2, iw3, iw4
+        integer (ip) :: labc, lim, mmax
+        !----------------------------------------------------------------------
 
         imid = (nlat+1)/2
         lim = nlat*imid
@@ -1759,17 +1763,23 @@ contains
     contains
 
         subroutine zwin1(ityp, nlat, m, zw, imid, i3, zw1, zw2, a, b, c)
-
+            !----------------------------------------------------------------------
+            ! Dictionary: calling arguments
+            !----------------------------------------------------------------------
             real (wp) :: a(*)
             real (wp) :: b(*)
             real (wp) :: c(*)
+            !----------------------------------------------------------------------
+            ! Dictionary: local variables
+            !----------------------------------------------------------------------
+
             integer (ip) :: i
             integer (ip) :: i3
             integer (ip) :: ihold
             integer (ip) :: imid
-            integer (ip) :: ityp
+            integer (ip), intent (in) :: ityp
             integer (ip) :: m
-            integer (ip) :: nlat
+            integer (ip), intent (in) :: nlat
             integer (ip) :: np1
             integer (ip) :: ns
             integer (ip) :: nstp
@@ -1996,7 +2006,7 @@ contains
 
         integer (ip) :: i3
         integer (ip) :: imid
-        integer (ip) :: ityp
+        integer (ip), intent (in) :: ityp
         integer (ip) :: iw1
         integer (ip) :: iw2
         integer (ip) :: iw3
@@ -2005,8 +2015,8 @@ contains
         integer (ip) :: lim
         integer (ip) :: m
         integer (ip) :: mmax
-        integer (ip) :: nlat
-        integer (ip) :: nlon
+        integer (ip), intent (in) :: nlat
+        integer (ip), intent (in) :: nlon
         real (wp) :: vb(*)
         real (wp) :: wvbin(*)
 
@@ -2036,9 +2046,9 @@ contains
             integer (ip) :: i3
             integer (ip) :: ihold
             integer (ip) :: imid
-            integer (ip) :: ityp
+            integer (ip), intent (in) :: ityp
             integer (ip) :: m
-            integer (ip) :: nlat
+            integer (ip), intent (in) :: nlat
             integer (ip) :: np1
             integer (ip) :: ns
             integer (ip) :: nstp
@@ -2114,7 +2124,7 @@ contains
 
         integer (ip) :: i3
         integer (ip) :: imid
-        integer (ip) :: ityp
+        integer (ip), intent (in) :: ityp
         integer (ip) :: iw1
         integer (ip) :: iw2
         integer (ip) :: iw3
@@ -2123,8 +2133,8 @@ contains
         integer (ip) :: lim
         integer (ip) :: m
         integer (ip) :: mmax
-        integer (ip) :: nlat
-        integer (ip) :: nlon
+        integer (ip), intent (in) :: nlat
+        integer (ip), intent (in) :: nlon
         real (wp) :: wb(*)
         real (wp) :: wwbin(*)
 
@@ -2154,9 +2164,9 @@ contains
             integer (ip) :: i3
             integer (ip) :: ihold
             integer (ip) :: imid
-            integer (ip) :: ityp
+            integer (ip), intent (in) :: ityp
             integer (ip) :: m
-            integer (ip) :: nlat
+            integer (ip), intent (in) :: nlat
             integer (ip) :: np1
             integer (ip) :: ns
             integer (ip) :: nstp
@@ -2236,7 +2246,7 @@ contains
         integer (ip) :: lc
         integer (ip) :: m
         integer (ip) :: n
-        integer (ip) :: nlat
+        integer (ip), intent (in) :: nlat
         real (wp) :: work(nlat/2 + 1)
         real (wp) :: czv(*)
         real (wp) :: sc1, summation, t1, t2
@@ -2348,7 +2358,7 @@ contains
         integer (ip) :: ls
         integer (ip) :: m
         integer (ip) :: n
-        integer (ip) :: nlat
+        integer (ip), intent (in) :: nlat
         real (wp) :: czv(*)
         real (wp) :: th, zvh, cost, sint, cdt, sdt, temp
         !
@@ -2503,7 +2513,7 @@ contains
         integer (ip) :: lc
         integer (ip) :: m
         integer (ip) :: n
-        integer (ip) :: nlat
+        integer (ip), intent (in) :: nlat
         real (wp) :: czw(*)
         real (wp) :: work(nlat/2+1)
         real (wp) :: sc1, summation, t1, t2
@@ -2619,7 +2629,7 @@ contains
         integer (ip) :: ls
         integer (ip) :: m
         integer (ip) :: n
-        integer (ip) :: nlat
+        integer (ip), intent (in) :: nlat
         real (wp) :: czw(*)
         real (wp) :: zwh, th, cost, sint, cdt, sdt, temp
         !
@@ -3099,8 +3109,8 @@ contains
         integer (ip) :: iw2
         integer (ip) :: labc
         integer (ip) :: mmax
-        integer (ip) :: nlat
-        integer (ip) :: nlon
+        integer (ip), intent (in) :: nlat
+        integer (ip), intent (in) :: nlon
         !
         !     subroutine rabcp computes the coefficients in the recurrence
         !     relation for the functions vbar(m, n, theta). array abc
@@ -3130,8 +3140,8 @@ contains
             integer (ip) :: mp1
             integer (ip) :: mp3
             integer (ip) :: n
-            integer (ip) :: nlat
-            integer (ip) :: nlon
+            integer (ip), intent (in) :: nlat
+            integer (ip), intent (in) :: nlon
             integer (ip) :: np1
             integer (ip) :: ns
             real (wp) :: temp
@@ -3192,8 +3202,8 @@ contains
         integer (ip) :: iw2
         integer (ip) :: labc
         integer (ip) :: mmax
-        integer (ip) :: nlat
-        integer (ip) :: nlon
+        integer (ip), intent (in) :: nlat
+        integer (ip), intent (in) :: nlon
         !
         !     subroutine rabcw computes the coefficients in the recurrence
         !     relation for the functions wbar(m, n, theta). array abc
@@ -3222,8 +3232,8 @@ contains
             integer (ip) :: mp1
             integer (ip) :: mp3
             integer (ip) :: n
-            integer (ip) :: nlat
-            integer (ip) :: nlon
+            integer (ip), intent (in) :: nlat
+            integer (ip), intent (in) :: nlon
             integer (ip) :: np1
             integer (ip) :: ns
             real (wp) :: temp
@@ -3285,8 +3295,8 @@ contains
         integer (ip) :: imid
         integer (ip) :: iw1
         integer (ip) :: iw2
-        integer (ip) :: nlat
-        integer (ip) :: nlon
+        integer (ip), intent (in) :: nlat
+        integer (ip), intent (in) :: nlon
         real (wp) :: wvbin(*)
         real (wp) :: dwork(nlat+2)
 
@@ -3315,8 +3325,8 @@ contains
             integer (ip) :: mdo
             integer (ip) :: mp1
             integer (ip) :: n
-            integer (ip) :: nlat
-            integer (ip) :: nlon
+            integer (ip), intent (in) :: nlat
+            integer (ip), intent (in) :: nlon
             integer (ip) :: np1
             real (wp) :: vb(imid, nlat, 2)
             real (wp) :: dt
@@ -3352,8 +3362,8 @@ contains
         integer (ip) :: imid
         integer (ip) :: iw1
         integer (ip) :: iw2
-        integer (ip) :: nlat
-        integer (ip) :: nlon
+        integer (ip), intent (in) :: nlat
+        integer (ip), intent (in) :: nlon
         real (wp) :: wwbin(*)
         real (wp) :: dwork(nlat+2)
 
@@ -3377,8 +3387,8 @@ contains
             integer (ip) :: mdo
             integer (ip) :: mp1
             integer (ip) :: n
-            integer (ip) :: nlat
-            integer (ip) :: nlon
+            integer (ip), intent (in) :: nlat
+            integer (ip), intent (in) :: nlon
             integer (ip) :: np1
             real (wp) :: wb(imid, nlat, 2)
             real (wp) :: dt
@@ -3418,8 +3428,8 @@ contains
         integer (ip) :: imid
         integer (ip) :: iw1
         integer (ip) :: iw2
-        integer (ip) :: nlat
-        integer (ip) :: nlon
+        integer (ip), intent (in) :: nlat
+        integer (ip), intent (in) :: nlon
         real (wp) :: wvbin(*)
         real (wp) :: theta((nlat+1)/2)
         real (wp) :: work(nlat+2)
@@ -3447,8 +3457,8 @@ contains
             integer (ip) :: mdo
             integer (ip) :: mp1
             integer (ip) :: n
-            integer (ip) :: nlat
-            integer (ip) :: nlon
+            integer (ip), intent (in) :: nlat
+            integer (ip), intent (in) :: nlon
             integer (ip) :: np1
             real (wp) :: vb(imid, nlat, 2)
             real (wp) :: theta(*), cvb(nlat/2+1), work(nlat/2+1), vbh
@@ -3482,8 +3492,8 @@ contains
         integer (ip) :: imid
         integer (ip) :: iw1
         integer (ip) :: iw2
-        integer (ip) :: nlat
-        integer (ip) :: nlon
+        integer (ip), intent (in) :: nlat
+        integer (ip), intent (in) :: nlon
         real (wp) :: wwbin(*)
         real (wp) :: theta((nlat+1)/2)
         real (wp) :: work(nlat+2)
@@ -3511,8 +3521,8 @@ contains
             integer (ip) :: mdo
             integer (ip) :: mp1
             integer (ip) :: n
-            integer (ip) :: nlat
-            integer (ip) :: nlon
+            integer (ip), intent (in) :: nlat
+            integer (ip), intent (in) :: nlon
             integer (ip) :: np1
             real (wp) :: wb(imid, nlat, 2)
             real (wp) :: theta(*)
@@ -3887,8 +3897,8 @@ contains
         integer (ip) :: imid
         integer (ip) :: iw1
         integer (ip) :: iw2
-        integer (ip) :: nlat
-        integer (ip) :: nlon
+        integer (ip), intent (in) :: nlat
+        integer (ip), intent (in) :: nlon
         real (wp) :: wvbin(*)
         real (wp) :: theta((nlat+1)/2)
         real (wp) :: work(nlat+2)
@@ -3916,8 +3926,8 @@ contains
             integer (ip) :: mdo
             integer (ip) :: mp1
             integer (ip) :: n
-            integer (ip) :: nlat
-            integer (ip) :: nlon
+            integer (ip), intent (in) :: nlat
+            integer (ip), intent (in) :: nlon
             integer (ip) :: np1
             real (wp) :: vb(imid, nlat, 2)
             real (wp) :: cvb(nlat/2+1)
@@ -3950,14 +3960,19 @@ contains
 
 
     subroutine wbgint(nlat, nlon, theta, wwbin, work)
-
-        integer (ip) :: imid
-        integer (ip) :: iw1
-        integer (ip) :: iw2
-        integer (ip) :: nlat
-        integer (ip) :: nlon
-        real (wp) :: wwbin(2*nlat*((nlat+1)/2)+3*((nlat-3)*nlat+2)/2)
-        real (wp) :: work(nlat+2), theta((nlat+1)/2)
+        !----------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !----------------------------------------------------------------------
+        integer (ip), intent (in) :: nlat
+        integer (ip), intent (in) :: nlon
+        real (wp),    intent (in) :: theta((nlat+1)/2)
+        real (wp)                 :: wwbin(2*nlat*((nlat+1)/2)+3*((nlat-3)*nlat+2)/2)
+        real (wp)                 :: work(nlat+2)
+        !----------------------------------------------------------------------
+        ! Dictionary: local variables
+        !----------------------------------------------------------------------
+        integer (ip) :: imid, iw1, iw2
+        !----------------------------------------------------------------------
 
         imid = (nlat+1)/2
         iw1 = 2*nlat*imid+1
@@ -3973,19 +3988,24 @@ contains
     contains
 
         subroutine wbgit1(nlat, nlon, imid, theta, wb, abc, cwb, work)
+            !----------------------------------------------------------------------
+            ! Dictionary: calling arguments
+            !----------------------------------------------------------------------
+            integer (ip), intent (in) :: nlat
+            integer (ip), intent (in) :: nlon
+            integer (ip), intent (in) :: imid
+            real (wp),    intent (in) :: theta(*)
+            real (wp)                 :: wb(imid, nlat, 2)
+            real (wp)                 :: abc(3*((nlat-3)*nlat+2)/2)
+            real (wp)                 :: cwb(nlat/2+1)
+            real (wp)                 :: work(nlat/2+1)
+            !----------------------------------------------------------------------
+            ! Dictionary: local variables
+            !----------------------------------------------------------------------
+            integer (ip) :: i, m, mdo, mp1, n, np1
+            real (wp)    :: wbh
+            !----------------------------------------------------------------------
 
-            real (wp) :: abc(3*((nlat-3)*nlat+2)/2)
-            integer (ip) :: i
-            integer (ip) :: imid
-            integer (ip) :: m
-            integer (ip) :: mdo
-            integer (ip) :: mp1
-            integer (ip) :: n
-            integer (ip) :: nlat
-            integer (ip) :: nlon
-            integer (ip) :: np1
-            real (wp) :: wb(imid, nlat, 2)
-            real (wp) :: cwb(nlat/2+1), theta(*), wbh, work(nlat/2+1)
             !
             !     abc must have 3*((nlat-3)*nlat+2)/2 locations
             !     cwb and work must each have nlat/2+1 locations

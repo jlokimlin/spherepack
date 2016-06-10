@@ -145,7 +145,7 @@ contains
         !----------------------------------------------------------------------
 
         ! Check flag
-        if (this%initialized .eqv. .false.) return
+        if (.not.this%initialized) return
 
         ! Release memory from parent type
         call this%destroy_workspace()
@@ -436,16 +436,6 @@ contains
 
 
     subroutine initialize_regular_vector_synthesis(this, nlat, nlon)
-        !
-        ! Purpose:
-        !
-        ! Sets the various workspace arrays required for
-        ! (real) vector harmonic analysis on a regular (equally-spaced) grid
-        !
-        ! Reference:
-        ! https://www2.cisl.ucar.edu/spherepack/documentation#vhsesi.html
-        !
-        !
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
@@ -566,6 +556,8 @@ contains
         integer (ip), intent (in)  :: nlon
         integer (ip)               :: return_value
         !----------------------------------------------------------------------
+        ! Dictionary: local variables
+        !----------------------------------------------------------------------
         type (ShaesAux) :: shaes_aux
         type (ShsesAux) :: shses_aux
         type (VhaesAux) :: vhaes_aux
@@ -589,6 +581,8 @@ contains
         !----------------------------------------------------------------------
         integer (ip), intent (in)  :: nlat
         integer (ip)               :: return_value
+        !----------------------------------------------------------------------
+        ! Dictionary: local variables
         !----------------------------------------------------------------------
         type (ShaesAux) :: shaes_aux
         type (ShsesAux) :: shses_aux
@@ -616,6 +610,8 @@ contains
         real (wp), allocatable, intent (out) :: workspace(:)
         integer (ip), optional, intent (in)  :: nt
         integer (ip), optional, intent (in)  :: ityp
+        !----------------------------------------------------------------------
+        ! Dictionary: local variables
         !----------------------------------------------------------------------
         type (ShaesAux) :: shaes_aux
         type (ShsesAux) :: shses_aux

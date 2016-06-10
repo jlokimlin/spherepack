@@ -32,9 +32,9 @@ module type_SphericalUnitVectors
         logical,                    public :: initialized = .false.
         integer (ip),               public :: NUMBER_OF_LONGITUDES = 0
         integer (ip),               public :: NUMBER_OF_LATITUDES = 0
-        type (Vector), allocatable, public :: radial(:, :)
-        type (Vector), allocatable, public :: polar(:, :)
-        type (Vector), allocatable, public :: azimuthal(:, :)
+        type (Vector), allocatable, public :: radial(:,:)
+        type (Vector), allocatable, public :: polar(:,:)
+        type (Vector), allocatable, public :: azimuthal(:,:)
         !----------------------------------------------------------------------
     contains
         !----------------------------------------------------------------------
@@ -174,7 +174,7 @@ contains
         !----------------------------------------------------------------------
 
         ! Check flag
-        if (this%initialized .eqv. .false.) return
+        if (.not.this%initialized) return
 
         ! Release memory
         if (allocated(this%radial)) deallocate( this%radial )
@@ -198,9 +198,9 @@ contains
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
         class (SphericalUnitVectors), intent (in out) :: this
-        real (wp),                    intent (in)     :: vector_function(:, :, :)
-        real (wp),                    intent (out)    :: polar_component(:, :)
-        real (wp),                    intent (out)    :: azimuthal_component(:, :)
+        real (wp),                    intent (in)     :: vector_function(:,:,:)
+        real (wp),                    intent (out)    :: polar_component(:,:)
+        real (wp),                    intent (out)    :: azimuthal_component(:,:)
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
@@ -209,7 +209,7 @@ contains
         !----------------------------------------------------------------------
 
         ! Check if object is usable
-        if (this%initialized .eqv. .false.) then
+        if (.not.this%initialized) then
             error stop 'Object of class (SphericalUnitVectors): '&
                 //'uninitialized object in get_spherical_angle_components'
         end if
@@ -228,9 +228,9 @@ contains
                         phi => this%azimuthal(k, l) &
                         )
                         ! set the theta component
-                        polar_component( k, l ) = theta.dot.vector_field
+                        polar_component(k, l) = theta.dot.vector_field
                         ! set the azimuthal_component
-                        azimuthal_component( k, l ) = phi.dot.vector_field
+                        azimuthal_component(k, l) = phi.dot.vector_field
                     end associate
                 end do
             end do
@@ -248,9 +248,9 @@ contains
         !----------------------------------------------------------------------
         class (SphericalUnitVectors), intent (in out) :: this
         real (wp),                    intent (in)     :: radial_component(:,:)
-        real (wp),                    intent (in)     :: polar_component(:, :)
-        real (wp),                    intent (in)     :: azimuthal_component(:, :)
-        real (wp),                    intent (out)    :: vector_function(:, :, :)
+        real (wp),                    intent (in)     :: polar_component(:,:)
+        real (wp),                    intent (in)     :: azimuthal_component(:,:)
+        real (wp),                    intent (out)    :: vector_function(:,:,:)
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
@@ -258,7 +258,7 @@ contains
         !----------------------------------------------------------------------
 
         ! Check if object is usable
-        if (this%initialized .eqv. .false.) then
+        if (.not.this%initialized) then
             error stop 'TYPE(SphericalUnitVectors): '&
                 //'uninitialized object in GET_VECTOR_FUNCTION'
         end if

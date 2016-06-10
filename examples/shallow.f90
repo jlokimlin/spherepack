@@ -515,8 +515,8 @@ contains
         class (ShallowWaterSolver), intent (in out) :: this
         complex (wp),               intent (in)     :: vrtspec(:)
         complex (wp),               intent (in)     :: divspec(:)
-        real (wp),                  intent (out)    :: ugrid(:, :)
-        real (wp),                  intent (out)    :: vgrid(:, :)
+        real (wp),                  intent (out)    :: ugrid(:,:)
+        real (wp),                  intent (out)    :: vgrid(:,:)
 
         real (wp)              :: fn
         real (wp), allocatable :: v(:,:), w(:,:), isqnn(:)

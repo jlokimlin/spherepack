@@ -130,7 +130,7 @@ contains
         !----------------------------------------------------------------------
 
         ! Check flag
-        if (this%initialized .eqv. .false.) return
+        if (.not.this%initialized) return
 
         ! Release memory
         if (allocated(this%sint)) deallocate(this%sint)

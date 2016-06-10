@@ -89,7 +89,6 @@ module type_Sphere
         procedure, private :: get_vector_laplacian_from_vector_field
         procedure, private :: invert_scalar_laplacian
         procedure, private :: invert_vector_laplacian
-        !procedure, nopass, public  :: get_legendre_function
         procedure (scalar_analysis),  deferred, public :: &
             perform_scalar_analysis
         procedure (scalar_synthesis), deferred, public :: &
@@ -173,7 +172,7 @@ contains
 
 
 
-    subroutine create_sphere(this, nlat, nlon, ntrunc, isym, itype, isynt, rsphere)
+    subroutine create_sphere(this, nlat, nlon, ntrunc, isym, itype, nt, rsphere)
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
@@ -183,7 +182,7 @@ contains
         integer (ip),   intent (in)     :: ntrunc
         integer (ip),   intent (in)     :: isym  !! Either 0, 1, or 2
         integer (ip),   intent (in)     :: itype !! Either 0, 1, 2, 3, ..., 8
-        integer (ip),   intent (in)     :: isynt
+        integer (ip),   intent (in)     :: nt
         real (wp),      intent (in)     :: rsphere
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
@@ -200,7 +199,7 @@ contains
         this%NUMBER_OF_LATITUDES = nlat
         this%NUMBER_OF_LONGITUDES = nlon
         this%TRIANGULAR_TRUNCATION_LIMIT = ntrunc
-        this%NUMBER_OF_SYNTHESES = isynt
+        this%NUMBER_OF_SYNTHESES = nt
         this%RADIUS_OF_SPHERE = rsphere
 
         !
@@ -290,7 +289,7 @@ contains
         !----------------------------------------------------------------------
 
         ! Check flag
-        if (this%initialized .eqv. .false.) then
+        if (.not.this%initialized) then
             return
         end if
 
@@ -393,7 +392,7 @@ contains
         !----------------------------------------------------------------------
 
         ! Check if object is usable
-        if (this%initialized .eqv. .false.) then
+        if (.not.this%initialized) then
             error stop 'Uninitialized object of class (Sphere): '&
                 //' in perform_complex_analysis'
         end if
@@ -445,7 +444,7 @@ contains
         !----------------------------------------------------------------------
 
         ! Check if object is usable
-        if (this%initialized .eqv. .false.) then
+        if (.not.this%initialized) then
             error stop 'Uninitialized object of class (Sphere): '&
                 //' in perform_complex_synthesis'
         end if
@@ -497,7 +496,7 @@ contains
         !----------------------------------------------------------------------
 
         ! Check if object is usable
-        if (this%initialized .eqv. .false.) then
+        if (.not.this%initialized) then
             error stop 'Uninitialized object of class (Sphere): '&
                 //' in analyze_into_complex_spectral_coefficients'
         end if
@@ -526,7 +525,7 @@ contains
         !----------------------------------------------------------------------
 
         ! Check if object is usable
-        if (this%initialized .eqv. .false.) then
+        if (.not.this%initialized) then
             error stop 'Uninitialized object of class (Sphere): '&
                 //' in synthesize_from_complex_spectral_coefficients'
         end if
@@ -578,7 +577,7 @@ contains
         !----------------------------------------------------------------------
 
         ! Check if object is usable
-        if (this%initialized .eqv. .false.) then
+        if (.not.this%initialized) then
             error stop 'Uninitialized object of class (Sphere): '&
                 //'in perform_vector_analysis'
         end if
@@ -622,7 +621,7 @@ contains
         !----------------------------------------------------------------------
 
         ! Check if object is usable
-        if (this%initialized .eqv. .false.) then
+        if (.not.this%initialized) then
             error stop 'Uninitialized object of class (Sphere): '&
                 //' in get_scalar_laplacian'
         end if
@@ -655,7 +654,7 @@ contains
         !----------------------------------------------------------------------
 
         ! Check if object is usable
-        if (this%initialized .eqv. .false.) then
+        if (.not.this%initialized) then
             error stop 'Uninitialized object of class (Sphere): '&
                 //' in invert_scalar_laplacian'
         end if
@@ -690,7 +689,7 @@ contains
         !----------------------------------------------------------------------
 
         ! Check if object is usable
-        if (this%initialized .eqv. .false.) then
+        if (.not.this%initialized) then
             error stop 'Uninitialized object of class (Sphere): '&
                 //' in compute_vector_laplacian_coefficients'
         end if
@@ -756,7 +755,7 @@ contains
         !----------------------------------------------------------------------
 
         ! Check if object is usable
-        if (this%initialized .eqv. .false.) then
+        if (.not.this%initialized) then
             error stop 'Uninitialized object of class (Sphere): '&
                 //' in get_vector_laplacian_from_spherical_components'
         end if
@@ -796,7 +795,7 @@ contains
         !----------------------------------------------------------------------
 
         ! Check if object is usable
-        if (this%initialized .eqv. .false.) then
+        if (.not.this%initialized) then
             error stop 'Uninitialized object of class (Sphere): '&
                 //' in get_vector_laplacian_from_vector_field'
         end if
@@ -833,7 +832,7 @@ contains
         !----------------------------------------------------------------------
 
         ! Check if object is usable
-        if (this%initialized .eqv. .false.) then
+        if (.not.this%initialized) then
             error stop 'Uninitialized object of class (Sphere): '&
                 //' in invert_vector_laplacian'
         end if
@@ -916,7 +915,7 @@ contains
         !----------------------------------------------------------------------
 
         ! Check if object is usable
-        if (this%initialized .eqv. .false.) then
+        if (.not.this%initialized) then
             error stop 'Uninitialized object of class (Sphere): '&
                 //' in invert_helmholtz'
         end if
@@ -988,7 +987,7 @@ contains
         !----------------------------------------------------------------------
 
         ! Check if object is usable
-        if (this%initialized .eqv. .false.) then
+        if (.not.this%initialized) then
             error stop 'Uninitialized object of class (Sphere): '&
                 //' in get_gradient'
         end if
@@ -1044,7 +1043,7 @@ contains
         !----------------------------------------------------------------------
 
         ! Check if object is usable
-        if (this%initialized .eqv. .false.) then
+        if (.not.this%initialized) then
             error stop 'Uninitialized object of class (Sphere): '&
                 //' in invert_gradient_from_spherical_components'
         end if
@@ -1121,7 +1120,7 @@ contains
         !----------------------------------------------------------------------
 
         ! Check if object is usable
-        if (this%initialized .eqv. .false.) then
+        if (.not.this%initialized) then
             error stop 'Uninitialized object of class (Sphere): '&
                 //' in get_vorticity_from_spherical_components'
         end if
@@ -1187,7 +1186,7 @@ contains
         !----------------------------------------------------------------------
 
         ! Check if object is usable
-        if (this%initialized .eqv. .false.) then
+        if (.not.this%initialized) then
             error stop 'Uninitialized object of class (Sphere): '&
                 //'in get_vorticity_from_vector_field'
         end if
@@ -1248,7 +1247,7 @@ contains
         !----------------------------------------------------------------------
 
         ! Check if object is usable
-        if (this%initialized .eqv. .false.) then
+        if (.not.this%initialized) then
             error stop 'Uninitialized object of class (Sphere): '&
                 //' in invert_vorticity'
         end if
@@ -1347,7 +1346,7 @@ contains
         !----------------------------------------------------------------------
 
         ! Check if object is usable
-        if (this%initialized .eqv. .false.) then
+        if (.not.this%initialized) then
             error stop 'Uninitialized object of class (Sphere): '&
                 //'in get_divergence_from_vector_field'
         end if
@@ -1408,7 +1407,7 @@ contains
         !----------------------------------------------------------------------
 
         ! Check if object is usable
-        if (this%initialized .eqv. .false.) then
+        if (.not.this%initialized) then
             error stop 'Uninitialized object of class (Sphere): '&
                 //' in get_divergence_from_spherical_components'
         end if
@@ -1475,7 +1474,7 @@ contains
         !----------------------------------------------------------------------
 
         ! Check if object is usable
-        if (this%initialized .eqv. .false.) then
+        if (.not.this%initialized) then
             error stop 'Uninitialized object of class (Sphere): '&
                 //' in invert_divergence'
         end if
@@ -1545,7 +1544,7 @@ contains
         !----------------------------------------------------------------------
 
         ! Check if object is usable
-        if (this%initialized .eqv. .false.) then
+        if (.not.this%initialized) then
             error stop 'Uninitialized object of class (Sphere): '&
                 //' in get_vorticity_and_divergence_from_velocities'
         end if
@@ -1588,7 +1587,7 @@ contains
         !----------------------------------------------------------------------
 
         ! Check if object is usable
-        if (this%initialized .eqv. .false.) then
+        if (.not.this%initialized) then
             error stop 'Uninitialized object of class (Sphere): '&
                 //' in get_velocities_from_vorticity_and_divergence_coefficients'
         end if
@@ -1714,7 +1713,7 @@ contains
         !----------------------------------------------------------------------
 
         ! Check if object is usable
-        if (this%initialized .eqv. .false.) then
+        if (.not.this%initialized) then
             error stop 'Uninitialized object of class (Sphere): '&
                 //' in get_velocities_from_vorticity_and_divergence'
         end if
@@ -1768,7 +1767,7 @@ contains
         !----------------------------------------------------------------------
 
         ! Check if object is usable
-        if (this%initialized .eqv. .false.) then
+        if (.not.this%initialized) then
             error stop 'Uninitialized object of class (Sphere): '&
                 //' in compute_angular_momentum'
         end if
@@ -1872,14 +1871,14 @@ contains
 
         associate( ntrunc => this%TRIANGULAR_TRUNCATION_LIMIT )
             if ( m <= n .and. max(n, m) <= ntrunc ) then
-                return_value = sum ([ (i, i=ntrunc+1, ntrunc-m+2, -1) ]) + n-m+1
+                return_value = sum ([(i, i=ntrunc+1, ntrunc-m+2, -1)]) + n-m+1
             end if
         end associate
 
     end function get_index
 
 
-    function get_coefficient(this, n, m ) result (return_value)
+    function get_coefficient(this, n, m) result (return_value)
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
@@ -1905,50 +1904,6 @@ contains
         end associate
 
     end function get_coefficient
-
-
-
-    !    subroutine get_legendre_function(lat, ntrunc, legfunc)
-    !        !----------------------------------------------------------------------
-    !        ! Dictionary: calling arguments
-    !        !----------------------------------------------------------------------
-    !        real (wp),              intent (in)     :: lat
-    !        integer (ip),           intent (in)     :: ntrunc
-    !        real (wp), allocatable, intent (out)    :: legfunc(:)
-    !        !----------------------------------------------------------------------
-    !        ! Dictionary: calling arguments
-    !        !----------------------------------------------------------------------
-    !        real (wp), parameter   :: PI = acos(-1.0_wp)
-    !        real (wp), allocatable :: cp(:)
-    !        integer (wp)           :: i, n, m, nm !! Counters
-    !        !----------------------------------------------------------------------
-    !
-    !        !
-    !        !==> Allocate memory
-    !        !
-    !        allocate( legfunc((ntrunc+1)*(ntrunc+2)/2) )
-    !        allocate( cp((ntrunc/2)+1) )
-    !
-    !        !
-    !        !==> Compute normalized associate Legendre function at theta
-    !        !
-    !        associate( theta => PI/2 - (PI/180)*lat )
-    !            do m=1,ntrunc+1
-    !                do n=m,ntrunc+1
-    !                    nm = sum([(i, i=ntrunc+1, ntrunc-m+3, -1)])+n-m+1
-    !                    call alfk(n-1, m-1, cp)
-    !                    call lfpt(n-1, m-1, theta, cp, legfunc(nm))
-    !                end do
-    !            end do
-    !        end associate
-    !
-    !        !
-    !        !==> Release memory
-    !        !
-    !        deallocate( cp )
-    !
-    !    end subroutine get_legendre_function
-
 
 
     subroutine get_scalar_symmetries(this, isym)

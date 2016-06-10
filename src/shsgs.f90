@@ -900,7 +900,7 @@ contains
             integer (ip), intent (in)     :: nlat
             integer (ip), intent (in)     :: l
             integer (ip), intent (in)     :: late
-            real (wp),    intent (in out) :: w(1)
+            real (wp),    intent (in out) :: w(*)
             real (wp),    intent (out)    :: pmn(nlat, late, 3)
             real (wp),    intent (in out) :: pmnf(late,*)
             !----------------------------------------------------------------------

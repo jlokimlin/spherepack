@@ -319,8 +319,9 @@ contains
             !     set coefficient multiplyers
             !
             do n=2, nlat
-                fnn(n) = 1.0/sqrt(real(n*(n-1)))
+                fnn(n) = 1.0_wp/sqrt(real(n*(n-1), kind=wp))
             end do
+
             mmax = min(nlat, (nlon+1)/2)
             !
             !     compute st scalar coefficients from cr, ci

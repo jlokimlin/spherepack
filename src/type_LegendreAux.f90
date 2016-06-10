@@ -54,7 +54,7 @@ module type_LegendreAux
     ! Everything is private unless stated otherwise
     private
     public :: LegendreAux
-    public :: alfk, lfp, lfpt, lfim, lfin
+    public :: alfk, lfp, lfpt, lfim, lfin, get_legendre_function
 
 
     ! Declare derived data type
@@ -71,11 +71,59 @@ module type_LegendreAux
         procedure, nopass :: lfin
         procedure, nopass :: lfp
         procedure, nopass :: lfpt
+        procedure, nopass :: get_legendre_function
         !-------------------------------------------------------
     end type LegendreAux
 
 
 contains
+
+    subroutine get_legendre_function(lat, ntrunc, legfunc)
+        !----------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !----------------------------------------------------------------------
+        real (wp),              intent (in)  :: lat
+        integer (ip),           intent (in)  :: ntrunc
+        real (wp), allocatable, intent (out) :: legfunc(:)
+        !----------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !----------------------------------------------------------------------
+        real (wp)              :: theta
+        real (wp), parameter   :: PI = acos(-1.0_wp)
+        real (wp), allocatable :: cp(:)
+        integer (ip)           :: i, n, m, nm, nmstrt !! Counters
+        !----------------------------------------------------------------------
+
+        !
+        !==> Allocate memory
+        !
+        allocate( legfunc((ntrunc+1)*(ntrunc+2)/2) )
+        allocate( cp((ntrunc/2)+1) )
+
+
+        theta = PI/2 - (PI/180)*lat
+        nmstrt = 0
+
+        do m=1,ntrunc+1
+            do n=m,ntrunc+1
+                nm = nmstrt + n - m + 1
+                !
+                !==> Compute normalized associate Legendre function at theta
+                !
+                call alfk(n-1, m-1, cp)
+                call lfpt(n-1, m-1, theta, cp, legfunc(nm))
+
+            end do
+            nmstrt = nmstrt + ntrunc - m + 2
+        end do
+
+        !
+        !==> Release memory
+        !
+        deallocate( cp )
+
+    end subroutine get_legendre_function
+
 
 
     subroutine alfk(n, m, cp)

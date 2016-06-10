@@ -22,16 +22,16 @@ module type_RegularSphere
         operator(*)
     
     use module_shaes, only: &
-        shaes
+        ShaesAux
 
     use module_shses, only: &
-        shses
+        ShsesAux
 
     use module_vhaes, only: &
-        vhaes
+        VhaesAux
 
     use module_vhses, only: &
-        vhses
+        VhsesAux
 
     ! Explicit typing only
     implicit none
@@ -76,9 +76,9 @@ contains
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
-        integer (ip),         intent (in) :: nlat !! number of latitudinal points 0 <= theta <= pi
-        integer (ip),         intent (in) :: nlon !! number of longitudinal points 0 <= phi <= 2*pi
-        type (RegularSphere)              :: return_value
+        integer (ip), intent (in) :: nlat !! number of latitudinal points 0 <= theta <= pi
+        integer (ip), intent (in) :: nlon !! number of longitudinal points 0 <= phi <= 2*pi
+        type (RegularSphere)      :: return_value
         !----------------------------------------------------------------------
 
         call return_value%create(nlat, nlon)
@@ -87,7 +87,7 @@ contains
 
 
 
-    subroutine create_regular_sphere(this, nlat, nlon, ntrunc, isym, itype, isynt, rsphere )
+    subroutine create_regular_sphere(this, nlat, nlon, ntrunc, isym, itype, nt, rsphere )
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
@@ -95,17 +95,17 @@ contains
         integer (ip),          intent (in)            :: nlat
         integer (ip),          intent (in)            :: nlon
         integer (ip),          intent (in), optional  :: ntrunc
-        integer (ip),          intent (in), optional  :: isym      !! Either 0, 1, or 2
-        integer (ip),          intent (in), optional  :: itype     !! Either 0, 1, 2, 3, ..., 8
-        integer (ip),          intent (in), optional  :: isynt
-        real (wp),             intent (in), optional  :: rsphere
+        integer (ip),          intent (in), optional  :: isym  !! Either 0, 1, or 2
+        integer (ip),          intent (in), optional  :: itype !! Either 0, 1, 2, 3, ..., 8
+        integer (ip),          intent (in), optional  :: nt !!
+        real (wp),             intent (in), optional  :: rsphere !!
         !--------------------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
         integer (ip) :: ntrunc_op
         integer (ip) :: isym_op
         integer (ip) :: ityp_op
-        integer (ip) :: isynt_op
+        integer (ip) :: nt_op
         real (wp)    :: rsphere_op
         !----------------------------------------------------------------------
 
@@ -120,31 +120,37 @@ contains
 
         !
         !==> Address optional arguments
-        !
+
+
+        ! Set truncation number
         if (present(ntrunc)) then
             ntrunc_op = ntrunc
         else
             ntrunc_op = nlat - 1
         end if
 
+        ! Set scalar symmetries
         if (present(isym)) then
             isym_op = isym
         else
             isym_op = 0
         end if
 
+        ! Set vector symmetries
         if (present(itype)) then
             ityp_op = itype
         else
             ityp_op = 0
         end if
 
-        if (present(isynt)) then
-            isynt_op = isynt
+        ! Set number of syntheses
+        if (present(nt)) then
+            nt_op = nt
         else
-            isynt_op = 1
+            nt_op = 1
         end if
 
+        ! Set radius of sphere
         if (present(rsphere)) then
             rsphere_op = rsphere
         else
@@ -154,8 +160,7 @@ contains
         !
         !==> Create parent type
         !
-        call this%create_sphere(nlat, nlon, &
-            ntrunc_op, isym_op, ityp_op, isynt_op, rsphere_op)
+        call this%create_sphere(nlat, nlon, ntrunc_op, isym_op, ityp_op, nt_op, rsphere_op)
 
         ! Set flag
         this%initialized = .true.
@@ -172,9 +177,7 @@ contains
         !----------------------------------------------------------------------
 
         ! Check flag
-        if (this%initialized .eqv. .false.) then
-            return
-        end if
+        if (.not.this%initialized) return
 
         ! Release memory from parent type
         call this%destroy_sphere()
@@ -191,22 +194,20 @@ contains
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
         class (RegularSphere), intent (in out) :: this
-        real (wp),             intent (in)     :: scalar_function(:, :)
+        real (wp),             intent (in)     :: scalar_function(:,:)
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
-        integer (ip):: error_flag
+        integer (ip)    :: error_flag
+        type (ShaesAux) :: aux
         !----------------------------------------------------------------------
 
         ! Check if object is usable
-        if (this%initialized .eqv. .false.) then
+        if (.not.this%initialized) then
             error stop 'Uninitialized object of class (RegularSphere): '&
                 //' in regular_scalar_analysis'
         end if
 
-        !
-        !==> Perform regular (real) spherical harmonic analysis
-        !
         select type (this)
             class is (RegularSphere)
             associate( workspace => this%workspace )
@@ -230,8 +231,12 @@ contains
                         lwork => size(workspace%legendre_workspace), &
                         ierror => error_flag &
                         )
-                        call shaes( nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, &
-                            wshaes, lshaes, work, lwork, ierror )
+                        !
+                        !==> Perform regular (real) spherical harmonic analysis
+                        !
+                        call aux%shaes(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, &
+                            wshaes, lshaes, work, lwork, ierror)
+
                     end associate
                 end select
             end associate
@@ -241,23 +246,23 @@ contains
         !==> Address the error flag
         !
         select case (error_flag)
-            case(0)
+            case (0)
                 return
-            case(1)
+            case (1)
                 error stop 'type (RegularSphere) in regular_scalar_analysis'&
-                    // 'Error in the specification of NUMBER_OF_LATITUDES'
-            case(2)
+                    // ' invalid specification of NUMBER_OF_LATITUDES'
+            case (2)
                 error stop 'type (RegularSphere) in regular_scalar_analysis'&
-                    //'Error in the specification of NUMBER_OF_LONGITUDES'
-            case(3)
+                    //' invalid specification of NUMBER_OF_LONGITUDES'
+            case (3)
                 error stop 'type (RegularSphere) in regular_scalar_analysis'&
-                    //'Invalid extent for SCALAR_FORWARD'
-            case(4)
+                    //' invalid extent for scalar_forward'
+            case (4)
                 error stop 'type (RegularSphere) in regular_scalar_analysis'&
-                    //'Invalid extent for legendre_workspace'
-            case(5)
+                    //' invalid extent for legendre_workspace'
+            case (5)
                 error stop 'type (RegularSphere) in regular_scalar_analysis'&
-                    //'Invalid extent for DWORK'
+                    //' invalid extent for dwork'
             case default
                 error stop 'type (RegularSphere) in regular_scalar_analysis'&
                     // 'Undetermined error flag'
@@ -272,22 +277,21 @@ contains
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
         class (RegularSphere), intent (in out) :: this
-        real (wp),             intent (out)    :: scalar_function(:, :)
+        real (wp),             intent (out)    :: scalar_function(:,:)
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
-        integer (ip):: error_flag
+        integer (ip)    :: error_flag
+        type (ShsesAux) :: aux
         !----------------------------------------------------------------------
 
         ! Check if object is usable
-        if (this%initialized .eqv. .false.) then
+        if (.not.this%initialized) then
             error stop 'Uninitialized object of class (RegularSphere): '&
                 //' in regular_scalar_synthesis'
         end if
 
-        !
-        !==> Perform (real) spherical harmonic synthesis
-        !
+
         select type (this)
             class is (RegularSphere)
             associate( workspace => this%workspace )
@@ -306,13 +310,17 @@ contains
                         mdab => size(workspace%real_harmonic_coefficients, dim=1), &
                         ndab => size(workspace%real_harmonic_coefficients, dim=2), &
                         wshses => workspace%backward_scalar, &
-                        lshses => size(workspace%backward_scalar ), &
+                        lshses => size(workspace%backward_scalar), &
                         work => workspace%legendre_workspace, &
-                        lwork => size(workspace%legendre_workspace ), &
+                        lwork => size(workspace%legendre_workspace), &
                         ierror => error_flag &
                         )
-                        call shses(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, &
+                        !
+                        !==> Perform (real) spherical harmonic scalar synthesis
+                        !
+                        call aux%shses(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, &
                             wshses, lshses, work, lwork, ierror)
+
                     end associate
                 end select
             end associate
@@ -322,25 +330,25 @@ contains
         !==> Address the error flag
         !
         select case (error_flag)
-            case(0)
+            case (0)
                 return
-            case(1)
-                error stop 'type (RegularSphere) in regular_scalar_synthesis'&
-                    // 'Error in the specification of NUMBER_OF_LATITUDES'
-            case(2)
-                error stop 'type (RegularSphere) in regular_scalar_synthesis'&
-                    //'Error in the specification of NUMBER_OF_LONGITUDES'
-            case(3)
-                error stop 'type (RegularSphere) in regular_scalar_synthesis'&
-                    //'Invalid extent for SCALAR_FORWARD'
-            case(4)
-                error stop 'type (RegularSphere) in regular_scalar_synthesis'&
-                    //'Invalid extent for legendre_workspace'
-            case(5)
-                error stop 'type (RegularSphere) in regular_scalar_synthesis'&
-                    //'Invalid extent for DWORK'
+            case (1)
+                error stop 'type (RegularSphere) in regular_scalar_synthesis '&
+                    // ' invalid specification of NUMBER_OF_LATITUDES'
+            case (2)
+                error stop 'type (RegularSphere) in regular_scalar_synthesis '&
+                    //' invalid specification of NUMBER_OF_LONGITUDES'
+            case (3)
+                error stop 'type (RegularSphere) in regular_scalar_synthesis '&
+                    //' invalid extent for scalar_forward'
+            case (4)
+                error stop 'type (RegularSphere) in regular_scalar_synthesis '&
+                    //' invalid extent for legendre_workspace'
+            case (5)
+                error stop 'type (RegularSphere) in regular_scalar_synthesis '&
+                    //' invalid extent for dwork'
             case default
-                error stop 'type (RegularSphere) in regular_scalar_synthesis'&
+                error stop 'type (RegularSphere) in regular_scalar_synthesis '&
                     // 'Undetermined error flag'
         end select
 
@@ -348,29 +356,26 @@ contains
 
 
 
-    subroutine regular_vector_analysis(this, &
-        polar_component, azimuthal_component )
+    subroutine regular_vector_analysis(this, polar_component, azimuthal_component)
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
         class (RegularSphere), intent (in out) :: this
-        real (wp),             intent (in)     :: polar_component(:, :)
-        real (wp),             intent (in)     :: azimuthal_component(:, :)
+        real (wp),             intent (in)     :: polar_component(:,:)
+        real (wp),             intent (in)     :: azimuthal_component(:,:)
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
-        integer (ip) :: error_flag
+        integer (ip)    :: error_flag
+        type (VhaesAux) :: aux
         !----------------------------------------------------------------------
 
         ! Check if object is usable
-        if (this%initialized .eqv. .false.) then
+        if (.not.this%initialized) then
             error stop 'Uninitialized object of class (RegularSphere): '&
                 //' in regular_vector_analysis'
         end if
 
-        !
-        !==> Perform (real) vector spherical harmonic analysis
-        !
         select type (this)
             class is (RegularSphere)
             associate( workspace => this%workspace )
@@ -383,22 +388,26 @@ contains
                         nt => this%NUMBER_OF_SYNTHESES, &
                         v => polar_component, &
                         w => azimuthal_component, &
-                        idvw => size(polar_component, dim=1 ), &
-                        jdvw => size(polar_component, dim=2 ), &
+                        idvw => size(polar_component, dim=1), &
+                        jdvw => size(polar_component, dim=2), &
                         br => workspace%real_polar_harmonic_coefficients, &
                         bi => workspace%imaginary_polar_harmonic_coefficients, &
                         cr => workspace%real_azimuthal_harmonic_coefficients, &
                         ci => workspace%imaginary_azimuthal_harmonic_coefficients, &
-                        mdab => size(workspace%real_polar_harmonic_coefficients, dim=1 ), &
-                        ndab => size(workspace%real_polar_harmonic_coefficients, dim=2 ), &
+                        mdab => size(workspace%real_polar_harmonic_coefficients, dim=1), &
+                        ndab => size(workspace%real_polar_harmonic_coefficients, dim=2), &
                         wvhaes => workspace%forward_vector, &
-                        lvhaes => size(workspace%forward_vector ), &
+                        lvhaes => size(workspace%forward_vector), &
                         work => workspace%legendre_workspace, &
-                        lwork => size(workspace%legendre_workspace ), &
+                        lwork => size(workspace%legendre_workspace), &
                         ierror => error_flag &
                         )
-                        call vhaes(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
-                            mdab, ndab, wvhaes, lvhaes, work, lwork, ierror )
+                        !
+                        !==> Perform (real) vector spherical harmonic analysis
+                        !
+                        call aux%vhaes(nlat, nlon, ityp, nt, v, w, idvw, jdvw, &
+                            br, bi, cr, ci, mdab, ndab, wvhaes, lvhaes, work, lwork, ierror)
+
                     end associate
                 end select
             end associate
@@ -408,82 +417,69 @@ contains
         !==> Address error flag
         !
         select case (error_flag)
-            case(0)
+            case (0)
                 return
-            case(1)
-                error stop 'type (RegularSphere) in '&
-                    //'regular_vector_analysis'&
-                    //'Error in the specification of NUMBER_OF_LATITUDES'
-            case(2)
-                error stop 'type (RegularSphere) in '&
-                    //'regular_vector_analysis'&
-                    //'Error in the specification of NUMBER_OF_LONGITUDES'
-            case(3)
-                error stop 'type (RegularSphere) in '&
-                    //'regular_vector_analysis'&
-                    //'Error in the specification of VECTOR_SYMMETRIES'
-            case(4)
-                error stop 'type (RegularSphere) in '&
-                    //'regular_vector_analysis'&
-                    //'Error in the specification of NUMBER_OF_SYNTHESES'
-            case(5)
-                error stop 'type (RegularSphere) in '&
-                    //'regular_vector_analysis'&
-                    //'Invalid DIM=1 extent for '&
-                    //'POLAR_COMPONENT (THETA) or AZIMUTHAL_COMPONENT (PHI)'
-            case(6)
-                error stop 'type (RegularSphere) in '&
-                    //'regular_vector_analysis'&
-                    //'Invalid DIM=2 extent '&
-                    //'POLAR_COMPONENT (THETA) or AZIMUTHAL_COMPONENT (PHI)'
-            case(7)
-                error stop 'type (RegularSphere) in '&
-                    //'regular_vector_analysis'&
-                    //'Invalid DIM=1 extent for BR or CR'
-            case(8)
-                error stop 'type (RegularSphere) in '&
-                    //'regular_vector_analysis'&
-                    //'Invalid DIM=1 extent for BI or CI'
-            case(9)
-                error stop 'type (RegularSphere) in '&
-                    //'regular_vector_analysis'&
-                    //'Invalid extent for FORWARD_VECTOR'
-            case(10)
-                error stop 'type (RegularSphere) in '&
-                    //'regular_vector_analysis'&
-                    //'Invalid extent for legendre_workspace'
+            case (1)
+                error stop 'type (RegularSphere) in regular_vector_analysis'&
+                    //' invalid specification of NUMBER_OF_LATITUDES'
+            case (2)
+                error stop 'type (RegularSphere) in regular_vector_analysis'&
+                    //' invalid specification of NUMBER_OF_LONGITUDES'
+            case (3)
+                error stop 'type (RegularSphere) in regular_vector_analysis'&
+                    //' invalid specification of VECTOR_SYMMETRIES'
+            case (4)
+                error stop 'type (RegularSphere) in regular_vector_analysis'&
+                    //' invalid specification of NUMBER_OF_SYNTHESES'
+            case (5)
+                error stop 'type (RegularSphere) in regular_vector_analysis'&
+                    //' invalid dim=1 extent for '&
+                    //' polar_component (theta) or azimuthal_component (phi)'
+            case (6)
+                error stop 'type (RegularSphere) in regular_vector_analysis'&
+                    //' invalid dim=2 extent '&
+                    //'polar_component (theta) or azimuthal_component (phi)'
+            case (7)
+                error stop 'type (RegularSphere) in regular_vector_analysis'&
+                    //' invalid dim=1 extent for br or cr'
+            case (8)
+                error stop 'type (RegularSphere) in regular_vector_analysis'&
+                    //' invalid dim=1 extent for bi or ci'
+            case (9)
+                error stop 'type (RegularSphere) in regular_vector_analysis'&
+                    //' invalid extent for forward_vector'
+            case (10)
+                error stop 'type (RegularSphere) in regular_vector_analysis'&
+                    //' invalid extent for legendre_workspace'
             case default
-                error stop 'type (RegularSphere) in '&
-                    //'regular_vector_analysis'&
-                    //'Undetermined error flag'
+                error stop 'type (RegularSphere) in regular_vector_analysis'&
+                    //' undetermined error'
         end select
 
     end subroutine regular_vector_analysis
 
 
 
-    subroutine regular_vector_synthesis(this, polar_component, azimuthal_component )
+    subroutine regular_vector_synthesis(this, polar_component, azimuthal_component)
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
         class (RegularSphere), intent (in out) :: this
-        real (wp),             intent (out)    :: polar_component(:, :)
-        real (wp),             intent (out)    :: azimuthal_component(:, :)
+        real (wp),             intent (out)    :: polar_component(:,:)
+        real (wp),             intent (out)    :: azimuthal_component(:,:)
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
-        integer (ip):: error_flag
+        integer (ip)    :: error_flag
+        type (VhsesAux) :: aux
         !----------------------------------------------------------------------
 
         ! Check if object is usable
-        if (this%initialized .eqv. .false.) then
+        if (.not.this%initialized) then
             error stop 'Uninitialized object of class (RegularSphere): '&
                 //' in regular_vector_synthesis'
         end if
 
-        !
-        !==> Perform (real) vector spherical harmonic analysis
-        !
         select type (this)
             class is (RegularSphere)
             associate( workspace => this%workspace )
@@ -496,22 +492,26 @@ contains
                         nt => this%NUMBER_OF_SYNTHESES, &
                         v => polar_component, &
                         w => azimuthal_component, &
-                        idvw => size(polar_component, dim=1 ),  &
-                        jdvw => size(polar_component, dim=2 ),  &
+                        idvw => size(polar_component, dim=1),  &
+                        jdvw => size(polar_component, dim=2),  &
                         br => workspace%real_polar_harmonic_coefficients, &
                         bi => workspace%imaginary_polar_harmonic_coefficients, &
                         cr => workspace%real_azimuthal_harmonic_coefficients, &
                         ci => workspace%imaginary_azimuthal_harmonic_coefficients, &
-                        mdab => size(workspace%real_polar_harmonic_coefficients, dim=1 ), &
-                        ndab => size(workspace%real_polar_harmonic_coefficients, dim=2 ), &
+                        mdab => size(workspace%real_polar_harmonic_coefficients, dim=1), &
+                        ndab => size(workspace%real_polar_harmonic_coefficients, dim=2), &
                         wvhses => workspace%backward_vector, &
                         lvhses => size(workspace%backward_vector ), &
                         work => workspace%legendre_workspace, &
                         lwork => size(workspace%legendre_workspace ), &
                         ierror => error_flag &
                         )
-                        call vhses(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
-                            mdab, ndab, wvhses, lvhses, work, lwork, ierror )
+                        !
+                        !==> Perform (real) vector spherical harmonic analysis
+                        !
+                        call aux%vhses(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
+                            mdab, ndab, wvhses, lvhses, work, lwork, ierror)
+
                     end associate
                 end select
             end associate
@@ -521,43 +521,43 @@ contains
         !==> Address error flag
         !
         select case (error_flag)
-            case(0)
+            case (0)
                 return
-            case(1)
+            case (1)
                 error stop 'type (RegularSphere) in regular_vector_synthesis'&
-                    //'Error in the specification of NUMBER_OF_LATITUDES'
-            case(2)
+                    //' invalid specification of NUMBER_OF_LATITUDES'
+            case (2)
                 error stop 'type (RegularSphere) in regular_vector_synthesis'&
-                    //'Error in the specification of NUMBER_OF_LONGITUDES'
-            case(3)
+                    //' invalid specification of NUMBER_OF_LONGITUDES'
+            case (3)
                 error stop 'type (RegularSphere) in regular_vector_synthesis'&
-                    //'Error in the specification of VECTOR_SYMMETRIES'
-            case(4)
+                    //' invalid specification of VECTOR_SYMMETRIES'
+            case (4)
                 error stop 'type (RegularSphere) in regular_vector_synthesis'&
-                    //'Error in the specification of NUMBER_OF_synthESES'
-            case(5)
+                    //' invalid specification of NUMBER_OF_SYNTHESES'
+            case (5)
                 error stop 'type (RegularSphere) in regular_vector_synthesis'&
-                    //'Invalid DIM=1 extent for '&
-                    //'POLAR_COMPONENT (THETA) or AZIMUTHAL_COMPONENT (PHI)'
-            case(6)
+                    //' invalid dim=1 extent for '&
+                    //' polar_component (theta) or azimuthal_component (phi)'
+            case (6)
                 error stop 'type (RegularSphere) in regular_vector_synthesis'&
-                    //'Invalid DIM=2 extent '&
-                    //'POLAR_COMPONENT (THETA) or AZIMUTHAL_COMPONENT (PHI)'
-            case(7)
+                    //' invalid dim=2 extent '&
+                    //' polar_component (theta) or azimuthal_component (phi)'
+            case (7)
                 error stop 'type (RegularSphere) in regular_vector_synthesis'&
-                    //'Invalid DIM=1 extent for BR or CR'
-            case(8)
+                    //' invalid dim=1 extent for br or cr'
+            case (8)
+                error stop 'type (regularsphere) in regular_vector_synthesis'&
+                    //' invalid dim=1 extent for bi or ci'
+            case (9)
                 error stop 'type (RegularSphere) in regular_vector_synthesis'&
-                    //'Invalid DIM=1 extent for BI or CI'
-            case(9)
+                    //' invalid extent for backward_vector'
+            case (10)
                 error stop 'type (RegularSphere) in regular_vector_synthesis'&
-                    //'Invalid extent for backward_vector'
-            case(10)
-                error stop 'type (RegularSphere) in regular_vector_synthesis'&
-                    //'Invalid extent for legendre_workspace'
+                    //' invalid extent for legendre_workspace'
             case default
                 error stop 'type (RegularSphere) in regular_vector_synthesis'&
-                    //'Undetermined error flag'
+                    //' undetermined error'
         end select
 
     end subroutine regular_vector_synthesis

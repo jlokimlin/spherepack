@@ -49,7 +49,7 @@ contains
         !----------------------------------------------------------------------
 
         ! Check flag
-        if (this%initialized .eqv. .false.) then
+        if (.not.this%initialized) then
             return
         end if
 
@@ -138,7 +138,7 @@ contains
         !----------------------------------------------------------------------
 
         ! Check if object is usable
-        if (this%initialized .eqv. .false.) then
+        if (.not.this%initialized) then
             error stop 'Uninitialized object of class (SphericalGrid): '&
                 //'in print_to_unformatted_binary_files'
         end if

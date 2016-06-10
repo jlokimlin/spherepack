@@ -1209,7 +1209,7 @@ contains
             theta, wts, dwork, ierror)
 
             integer (ip) :: i3
-            integer (ip) :: ierr
+            integer (ip) :: local_error_flag
             integer (ip) :: ierror
             integer (ip) :: imid
             integer (ip) :: m
@@ -1231,10 +1231,10 @@ contains
             type (SpherepackAux) :: sphere_aux
 
 
-            call gaqd(nlat, theta, wts, dummy_real, dummy_int, ierr)
+            call gaqd(nlat, theta, wts, dummy_real, dummy_int, local_error_flag)
 
-            if (ierr /= 0) then
-                ierror = 10+ierr
+            if (local_error_flag /= 0) then
+                ierror = 10+local_error_flag
                 return
             end if
 

@@ -101,35 +101,26 @@ contains
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
-        class (GaussianGrid), intent (in out) :: this
-        integer (ip),         intent (in)     :: nlat !! number of latitudinal points 0 <= theta <= pi
-        integer (ip),         intent (in)     :: nlon !! number of longitudinal points 0 <= phi <= 2*pi
+        class (GaussianGrid), target, intent (in out) :: this
+        integer (ip),                 intent (in)     :: nlat !! number of latitudinal points 0 <= theta <= pi
+        integer (ip),                 intent (in)     :: nlon !! number of longitudinal points 0 <= phi <= 2*pi
         !----------------------------------------------------------------------
 
         ! Ensure that object is usable
         call this%destroy()
 
-        !
-        !==> Set contants
-        !
+        ! Set contants
         this%NUMBER_OF_LATITUDES = nlat
         this%NUMBER_OF_LONGITUDES = nlon
 
-        !
-        !==> Set the gaussian grid type
-        !
-        allocate(this%grid_type, source='gaussian')
+        ! Set the gaussian grid type
+        allocate( this%grid_type, source='gaussian' )
 
-        !
-        !==> Set longitudinal grid: 0 <= phi <= 2*pi
-        !
+        ! Set longitudinal grid: 0 <= phi <= 2*pi
         call this%get_equally_spaced_longitudes(nlon, this%longitudes)
 
-        !
-        !==> Set latitudinal grid: 0 <= theta <= pi
-        !
-        call this%get_latitudes_and_gaussian_weights( &
-            nlat, this%latitudes, this%gaussian_weights)
+        ! Set latitudinal grid: 0 <= theta <= pi
+        call this%get_latitudes_and_gaussian_weights(nlat, this%latitudes, this%gaussian_weights)
 
         ! Set initialization flag
         this%initialized = .true.
@@ -146,20 +137,13 @@ contains
         !----------------------------------------------------------------------
 
         ! Check initialization flag
-        if (this%initialized .eqv. .false.) then
-            return
-        end if
+        if (.not.this%initialized) return
 
         !
         !==> Release memory
         !
-        if (allocated(this%gaussian_weights)) then
-            deallocate(this%gaussian_weights)
-        end if
+        if (allocated(this%gaussian_weights)) deallocate(this%gaussian_weights)
 
-        !
-        !==> Release parent type
-        !
         call this%destroy_grid()
 
         ! Reset flag
@@ -232,7 +216,7 @@ contains
             case(0)
                 return
             case(1)
-                error stop 'Object of class (GaussianGrid): '&
+                error stop 'Object of class (GaussianGrid) '&
                     //'fails to satisfy nlat >= 0 '&
                     //'in get_latitudes_and_gaussian_weights'
             case default
@@ -257,7 +241,7 @@ contains
         !----------------------------------------------------------------------
 
         ! Check if object is usable
-        if (this%initialized .eqv. .false.) then
+        if (.not.this%initialized) then
             error stop 'Uninitialized object of class (GaussianGrid): '&
                 //'in unformatted_print'
         end if

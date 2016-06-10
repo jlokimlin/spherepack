@@ -145,7 +145,7 @@ contains
         !----------------------------------------------------------------------
 
         ! Check flag
-        if (this%initialized .eqv. .false.) return
+        if (.not.this%initialized) return
 
         ! Release memory from parent type
         call this%destroy_workspace()
