@@ -4,8 +4,7 @@ An object-oriented modernization of NCAR's SPHEREPACK3.2.
 
 * The original work, written in fixed-from FORTRAN 77, was heavily refactored to incorporate features of free-form modern Fortran (2008+). 
 * Dynamic memory allocation procedures for analysis and synthesis are now hidden from the end user.
-* The abstract class **type**(Sphere) allows one to write generic code for both regular (uniform spacing) and Gaussian grids.
-
+* **type**(Sphere) allows one to write generic code for both regular (uniform spacing) and Gaussian grids.
 
 -----------------------------------------------------------------------------
 
@@ -23,33 +22,37 @@ Test programs are provided for solving these equations. Each program serves two 
 
 ```fortran
 
+	
+    use, intrinsic :: iso_fortran_env, only: &
+        wp => REAL64
+        	
     use spherepack_library, only: &
         GaussianSphere
 
     ! Explicit typing only
     implicit none
     
-    type (GaussianSphere)  :: sphere_dat
+    type (GaussianSphere)  :: foo
     real (wp), allocatable :: scalar_function(:,:)
     real (wp), allocatable :: laplacian(:,:)
     real (wp), allocatable :: solution(:,:)
     
     ! Initialize object
-    sphere_dat = GaussianSphere(nlat=19, nlon=36)
+    foo = GaussianSphere(nlat=19, nlon=36)
     
     !.... generate some data
     
     ! Compute complex spectral coefficients
-    call sphere_dat%perform_complex_analysis(scalar_function)
+    call foo%perform_complex_analysis(scalar_function)
     
     ! Compute laplacian on sphere
-    call sphere_dat%get_laplacian(scalar_function, laplacian)
+    call foo%get_laplacian(scalar_function, laplacian)
     
     ! Invert laplacian on sphere
-    call sphere_dat%invert_laplacian(laplacian, solution)
+    call foo%invert_laplacian(laplacian, solution)
     
     ! Release memory
-    call sphere_dat%destroy()
+    call foo%destroy()
 
 ```
 
