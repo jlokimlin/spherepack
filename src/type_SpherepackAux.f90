@@ -792,7 +792,7 @@ contains
         integer (ip), intent (in)     :: nlat
         integer (ip), intent (in)     :: nlon
         real (wp),    intent (in out) :: wzfin(*)
-        real (wp),    intent (in out) :: dwork(*)
+        real (wp),    intent (in out) :: dwork(nlat+2)
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
@@ -833,8 +833,8 @@ contains
             integer (ip), intent (in)     :: imid
             real (wp),    intent (in out) :: z(imid, nlat, 2)
             real (wp),    intent (in out) :: abc(*)
-            real (wp),    intent (in out) :: cz(*)
-            real (wp),    intent (in out) :: work(*)
+            real (wp),    intent (in out) :: cz(nlat+1)
+            real (wp),    intent (in out) :: work(nlat+1)
             !----------------------------------------------------------------------
             ! Dictionary: local variables
             !----------------------------------------------------------------------
@@ -1235,7 +1235,7 @@ contains
         integer (ip), intent (in)     :: nlat
         integer (ip), intent (in)     :: nlon
         real (wp),    intent (in out) :: walin(*)
-        real (wp),    intent (in out) :: dwork(*)
+        real (wp),    intent (in out) :: dwork(nlat+1)
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
@@ -1387,12 +1387,6 @@ contains
 
 
     subroutine sea1(nlat, nlon, imid, z, idz, zin, wzfin, dwork)
-
-
-
-
-
-
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
@@ -1430,12 +1424,6 @@ contains
 
 
     subroutine ses1(nlat, nlon, imid, p, pin, walin, dwork)
-
-
-
-
-
-
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
@@ -1470,19 +1458,13 @@ contains
 
 
     subroutine zvinit(nlat, nlon, wzvin, dwork)
-
-
-
-
-
-
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
         integer (ip), intent (in)     :: nlat
         integer (ip), intent (in)     :: nlon
         real (wp),    intent (in out) :: wzvin(*)
-        real (wp),    intent (in out) :: dwork(*)
+        real (wp),    intent (in out) :: dwork(nlat+2)
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
@@ -1515,8 +1497,8 @@ contains
             integer (ip), intent (in)     :: imid
             real (wp),    intent (in out) :: zv(imid,nlat,2)
             real (wp),    intent (in out) :: abc(*)
-            real (wp),    intent (in out) :: czv(*)
-            real (wp),    intent (in out) :: work(*)
+            real (wp),    intent (in out) :: czv(nlat/2+1)
+            real (wp),    intent (in out) :: work(nlat/2+1)
             !----------------------------------------------------------------------
             ! Dictionary: calling arguments
             !----------------------------------------------------------------------
@@ -1590,8 +1572,8 @@ contains
             integer (ip), intent (in)     :: imid
             real (wp),    intent (in out) :: zw(imid,nlat,2)
             real (wp),    intent (in out) :: abc(*)
-            real (wp),    intent (in out) :: czw(*)
-            real (wp),    intent (in out) :: work(*)
+            real (wp),    intent (in out) :: czw(nlat+1)
+            real (wp),    intent (in out) :: work(nlat+1)
             !----------------------------------------------------------------------
             ! Dictionary: calling arguments
             !----------------------------------------------------------------------
@@ -3306,7 +3288,9 @@ contains
         integer (ip) :: nlat
         integer (ip) :: nlon
         real (wp) :: wvbin(*)
-        real (wp) :: dwork(*)
+        real (wp) :: dwork(nlat+2)
+
+
         imid = (nlat+1)/2
         iw1 = 2*nlat*imid+1
         iw2 = nlat/2+2
@@ -3335,7 +3319,10 @@ contains
             integer (ip) :: nlon
             integer (ip) :: np1
             real (wp) :: vb(imid, nlat, 2)
-            real (wp) :: dt, cvb(*), th, vbh, work(*)
+            real (wp) :: dt
+            real (wp) :: cvb(nlat/2+1)
+            real (wp) :: th, vbh
+            real (wp) :: work(nlat/2+1)
             real (wp), parameter :: PI = acos(-1.0_wp)
 
 
@@ -3394,7 +3381,9 @@ contains
             integer (ip) :: nlon
             integer (ip) :: np1
             real (wp) :: wb(imid, nlat, 2)
-            real (wp) :: dt, cwb(*), wbh, th, work(*)
+            real (wp) :: dt
+            real (wp) :: cwb(nlat/2+1), wbh, th
+            real (wp) :: work(nlat/2+1)
             real (wp), parameter :: PI = acos(-1.0_wp)
             !
             !     abc must have 3*(max(mmax-2, 0)*(2*nlat-mmax-1))/2
@@ -3432,7 +3421,8 @@ contains
         integer (ip) :: nlat
         integer (ip) :: nlon
         real (wp) :: wvbin(*)
-        real (wp) :: theta(*), work(*)
+        real (wp) :: theta((nlat+1)/2)
+        real (wp) :: work(nlat+2)
 
 
         imid = (nlat+1)/2
