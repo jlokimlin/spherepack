@@ -1311,30 +1311,24 @@ contains
                 do k=1,nt
                     do j=1,nlon
                         do i=1,imm1
-                            v(i,j,k) = 0.5*(ve(i,j,k)+vo(i,j,k))
-                            w(i,j,k) = 0.5*(we(i,j,k)+wo(i,j,k))
-                            v(nlp1-i,j,k) = 0.5*(ve(i,j,k)-vo(i,j,k))
-                            w(nlp1-i,j,k) = 0.5*(we(i,j,k)-wo(i,j,k))
+                            v(i,j,k) = 0.5_wp * (ve(i,j,k)+vo(i,j,k))
+                            w(i,j,k) = 0.5_wp * (we(i,j,k)+wo(i,j,k))
+                            v(nlp1-i,j,k) = 0.5_wp * (ve(i,j,k)-vo(i,j,k))
+                            w(nlp1-i,j,k) = 0.5_wp * (we(i,j,k)-wo(i,j,k))
                         end do
                     end do
                 end do
             else
                 do k=1,nt
-                    do j=1,nlon
-                        do i=1,imm1
-                            v(i,j,k) = 0.5*ve(i,j,k)
-                            w(i,j,k) = 0.5*we(i,j,k)
-                        end do
-                    end do
+                    v(1:imm1,1:nlon,k) = 0.5_wp * ve(1:imm1,1:nlon,k)
+                    w(1:imm1,1:nlon,k) = 0.5_wp * we(1:imm1,1:nlon,k)
                 end do
             end if
 
             if (mlat /= 0) then
                 do k=1,nt
-                    do j=1,nlon
-                        v(imid,j,k) = 0.5*ve(imid,j,k)
-                        w(imid,j,k) = 0.5*we(imid,j,k)
-                    end do
+                    v(imid,1:nlon,k) = 0.5_wp * ve(imid,1:nlon,k)
+                    w(imid,1:nlon,k) = 0.5_wp * we(imid,1:nlon,k)
                 end do
             end if
 

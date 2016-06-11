@@ -458,99 +458,153 @@ contains
 
     subroutine vhags(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
         mdab, ndab, wvhags, lvhags, work, lwork, ierror)
+        !----------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !----------------------------------------------------------------------
+        integer (ip), intent (in)  :: nlat
+        integer (ip), intent (in)  :: nlon
+        integer (ip), intent (in)  :: ityp
+        integer (ip), intent (in)  :: nt
+        real (wp),    intent (in)  :: v(idvw, jdvw, nt)
+        real (wp),    intent (in)  :: w(idvw, jdvw, nt)
+        integer (ip), intent (in)  :: idvw
+        integer (ip), intent (in)  :: jdvw
+        real (wp),    intent (out) :: br(mdab,ndab,nt)
+        real (wp),    intent (out) :: bi(mdab, ndab,nt)
+        real (wp),    intent (out) :: cr(mdab,ndab,nt)
+        real (wp),    intent (out) :: ci(mdab, ndab,nt)
+        integer (ip), intent (in)  :: mdab
+        integer (ip), intent (in)  :: ndab
+        real (wp),    intent (in)  :: wvhags(lvhags)
+        integer (ip), intent (in)  :: lvhags
+        real (wp),    intent (out) :: work(lwork)
+        integer (ip), intent (in)  :: lwork
+        integer (ip), intent (out) :: ierror
+        !----------------------------------------------------------------------
+        ! Dictionary: local variables
+        !----------------------------------------------------------------------
+        integer (ip) :: idv, idz, imid, ist
+        integer (ip) :: lnl, lzimn, mmax
+        integer (ip) :: workspace_indices(7)
+        !----------------------------------------------------------------------
 
-        real (wp) :: bi
-        real (wp) :: br
-        real (wp) :: ci
-        real (wp) :: cr
-        integer (ip) :: idv
-        integer (ip) :: idvw
-        integer (ip) :: idz
-        integer (ip) :: ierror
-        integer (ip) :: imid
-        integer (ip) :: ist
-        integer (ip) :: ityp
-        integer (ip) :: iw1
-        integer (ip) :: iw2
-        integer (ip) :: iw3
-        integer (ip) :: iw4
-        integer (ip) :: jdvw
-        integer (ip) :: jw1
-        integer (ip) :: jw2
-        integer (ip) :: jw3
-        integer (ip) :: lmn
-        integer (ip) :: lnl
-        integer (ip) :: lvhags
-        integer (ip) :: lwork
-        integer (ip) :: lzimn
-        integer (ip) :: mdab
-        integer (ip) :: mmax
-        integer (ip) :: ndab
-        integer (ip) :: nlat
-        integer (ip) :: nlon
-        integer (ip) :: nt
-        real (wp) :: v
-        real (wp) :: w
-        real (wp) :: work
-        real (wp) :: wvhags
-        dimension v(idvw, jdvw, *), w(idvw, jdvw,*), br(mdab,ndab,*), &
-            bi(mdab, ndab,*), cr(mdab, ndab,*), ci(mdab, ndab,*), &
-            work(*), wvhags(*)
-        ierror = 1
-        if (nlat < 3) return
-        ierror = 2
-        if (nlon < 1) return
-        ierror = 3
-        if (ityp<0 .or. ityp>8) return
-        ierror = 4
-        if (nt < 0) return
-        ierror = 5
-        imid = (nlat+1)/2
-        if ((ityp<=2 .and. idvw<nlat) .or. &
-            (ityp>2 .and. idvw<imid)) return
-        ierror = 6
-        if (jdvw < nlon) return
-        ierror = 7
         mmax = min(nlat, (nlon+1)/2)
-        if (mdab < mmax) return
-        ierror = 8
-        if (ndab < nlat) return
-        ierror = 9
-        idz = (mmax*(nlat+nlat-mmax+1))/2
+        idz = (mmax*(2*nlat-mmax+1))/2
+        imid = (nlat+1)/2
         lzimn = idz*imid
-        if (lvhags < lzimn+lzimn+nlon+15) return
-        ierror = 10
-        idv = nlat
-        if (ityp > 2) idv = imid
-        lnl = nt*idv*nlon
-        if (lwork < lnl+lnl+idv*nlon) return
-        ierror = 0
 
         if (ityp <= 2) then
             ist = imid
+            idv = nlat
         else
             ist = 0
+            idv = imid
+        end if
+
+        lnl = nt*idv*nlon
+
+        !
+        !==> Check validity of input arguments
+        !
+        if (nlat < 3) then
+            ierror = 1
+            return
+        else if (nlon < 1) then
+            ierror = 2
+            return
+        else if (ityp<0 .or. ityp>8) then
+            ierror = 3
+            return
+        else if (nt < 0) then
+            ierror = 4
+            return
+        else if ( &
+            (ityp <= 2 .and. idvw < nlat) &
+            .or. &
+            (ityp > 2 .and. idvw < imid) &
+            ) then
+            ierror = 5
+            return
+        else if (jdvw < nlon) then
+            ierror = 6
+            return
+        else if (mdab < mmax) then
+            ierror = 7
+            return
+        else if (ndab < nlat) then
+            ierror = 8
+            return
+        else if (lvhags < 2*lzimn+nlon+15) then
+            ierror = 9
+            return
+        else if (lwork < 2*lnl+idv*nlon) then
+            ierror = 10
+            return
+        else
+            ierror = 0
         end if
 
         !
-        !     set wvhags pointers
+        !==> Compute workspace pointers
         !
-        lmn = nlat*(nlat+1)/2
-        jw1 = 1
-        jw2 = jw1+imid*lmn
-        jw3 = jw2+imid*lmn
-        !
-        !     set work pointers
-        !
-        iw1 = ist+1
-        iw2 = lnl+1
-        iw3 = iw2+ist
-        iw4 = iw2+lnl
-        call vhags1(nlat, nlon, ityp, nt, imid, idvw, jdvw, v, w, mdab, ndab, &
-            br, bi, cr, ci, idv, work, work(iw1), work(iw2), work(iw3), &
-            work(iw4), idz, wvhags(jw1), wvhags(jw2), wvhags(jw3))
+        workspace_indices = get_workspace_indices(nlat, imid, ist, lnl)
+
+        associate( &
+            jw1 => workspace_indices(1), &
+            jw2 => workspace_indices(2), &
+            jw3 => workspace_indices(3), &
+            iw1 => workspace_indices(4), &
+            iw2 => workspace_indices(5), &
+            iw3 => workspace_indices(6), &
+            iw4 => workspace_indices(7) &
+            )
+
+            call vhags1(nlat, nlon, ityp, nt, imid, idvw, jdvw, v, w, mdab, ndab, &
+                br, bi, cr, ci, idv, work, work(iw1), work(iw2), work(iw3), &
+                work(iw4), idz, wvhags(jw1), wvhags(jw2), wvhags(jw3))
+
+        end associate
+
 
     contains
+
+
+        pure function get_workspace_indices(nlat, imid, ist, lnl) result (return_value)
+            !----------------------------------------------------------------------
+            ! Dictionary: calling arguments
+            !----------------------------------------------------------------------
+            integer (ip), intent (in)  :: nlat
+            integer (ip), intent (in)  :: imid
+            integer (ip), intent (in)  :: ist
+            integer (ip), intent (in)  :: lnl
+            integer (ip)               :: return_value(7)
+            !----------------------------------------------------------------------
+            ! Dictionary: local variables
+            !----------------------------------------------------------------------
+            integer (ip) :: lmn
+            !----------------------------------------------------------------------
+
+            associate( i => return_value )
+                !
+                !==> set wvhags pointers
+                !
+                lmn = nlat*(nlat+1)/2
+                i(1) = 1
+                i(2) = i(1)+imid*lmn
+                i(3) = i(2)+imid*lmn
+                !
+                !==> set work pointers
+                !
+                i(4) = ist+1
+                i(5) = lnl+1
+                i(6) = i(5)+ist
+                i(7) = i(5)+lnl
+
+            end associate
+
+        end function get_workspace_indices
+
+
 
         subroutine vhags1(nlat, nlon, ityp, nt, imid, idvw, jdvw, v, w, mdab, &
             ndab, br, bi, cr, ci, idv, ve, vo, we, wo, work, idz, vb, wb, wrfft)
@@ -718,9 +772,7 @@ contains
                     !
                     !==> case m = 1 through nlat-1
                     !
-                    if (mmax < 2) then
-                        return
-                    end if
+                    if (mmax < 2) return
 
                     do mp1=2, mmax
                         m = mp1-1
@@ -1279,6 +1331,8 @@ contains
 
     end subroutine vhags
 
+
+
     subroutine vhagsi(nlat, nlon, wvhags, lvhags, dwork, ldwork, ierror)
 
         integer (ip) :: ierror
@@ -1310,7 +1364,6 @@ contains
         lmn = (nlat*(nlat+1))/2
         if (lvhags < 2*(imid*lmn)+nlon+15) return
         ierror = 4
-        !     if (ldwork.lt.nlat*(3*nlat+9)+2) return
         if (ldwork<(nlat*(3*nlat+9)+2)/2) return
         ierror = 0
         jw1 = 1
@@ -1362,8 +1415,8 @@ contains
             !     compute m=n=0 legendre polynomials for all theta(i)
             !
             dpbar(1:imid, 1, 1) = cos(PI/4)
-            vb(1:imid, 1) = 0.0
-            wb(1:imid, 1) = 0.0
+            vb(1:imid, 1) = 0.0_wp
+            wb(1:imid, 1) = 0.0_wp
             !
             !==> main loop for remaining vb, and wb
             !
@@ -1418,7 +1471,7 @@ contains
                 ix = indx(0, n, nlat)
                 iy = indx(n, n, nlat)
                 vb(1:imid, ix) = -dpbar(1:imid, 2, np)*dwts(1:imid)
-                vb(1:imid, iy) = dpbar(1:imid, n, np)/sqrt(real(2*(n+1)))*dwts(1:imid)
+                vb(1:imid, iy) = dpbar(1:imid, n, np)/sqrt(real(2*(n+1), kind=wp))*dwts(1:imid)
 
                 if (n==1) then
                     !
@@ -1427,13 +1480,13 @@ contains
                     !     set wb=0 for m=0
                     !
                     ix = indx(0, n, nlat)
-                    wb(1:imid, ix) = 0.0
+                    wb(1:imid, ix) = 0.0_wp
                 else
-                    dcf = sqrt(real(4*n*(n+1)))
+                    dcf = sqrt(real(4*n*(n+1), kind=wp))
                     do m=1, n-1
                         ix = indx(m, n, nlat)
-                        abel = sqrt(real((n+m)*(n-m+1)))/dcf
-                        bbel = sqrt(real((n-m)*(n+m+1)))/dcf
+                        abel = sqrt(real((n+m)*(n-m+1), kind=wp))/dcf
+                        bbel = sqrt(real((n-m)*(n+m+1), kind=wp))/dcf
                         vb(1:imid, ix) = &
                             (abel*dpbar(1:imid, m, np)-bbel*dpbar(1:imid, m+2, np))&
                             * dwts(1:imid)
@@ -1442,11 +1495,11 @@ contains
                 !
                 !==> compute wb for m=1, n
                 !
-                dcf = sqrt(real(n+n+1)/real(4*n*(n+1)*(n+n-1)))
+                dcf = sqrt(real(2*n+1, kind=wp)/real(4*n*(n+1)*(n+n-1), kind=wp))
                 do m=1, n
                     ix = indx(m, n, nlat)
-                    abel = dcf*sqrt(real((n+m)*(n+m-1)))
-                    bbel = dcf*sqrt(real((n-m)*(n-m-1)))
+                    abel = dcf*sqrt(real((n+m)*(n+m-1), kind=wp))
+                    bbel = dcf*sqrt(real((n-m)*(n-m-1), kind=wp))
                     if (m >= n-1) then
                         wb(1:imid, ix) = abel * dpbar(1:imid, m, nz) * dwts(1:imid)
                     else
