@@ -780,12 +780,6 @@ contains
 
 
     subroutine zfinit(nlat, nlon, wzfin, dwork)
-
-
-
-
-
-
         !----------------------------------------------------------------------
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
@@ -1165,9 +1159,7 @@ contains
             else
                 ns = ((m-2)*(nlat+nlat-m-1))/2+1
 
-                if (isym /= 1) then
-                    p(:, m+1, i3) = a(ns)*p(:, m-1, i1)-c(ns)*p(:, m+1, i1)
-                end if
+                if (isym /= 1) p(:, m+1, i3) = a(ns)*p(:, m-1, i1)-c(ns)*p(:, m+1, i1)
 
                 if (m == nlat-1) return
 
@@ -1648,17 +1640,17 @@ contains
             !----------------------------------------------------------------------
             ! Dictionary: calling arguments
             !----------------------------------------------------------------------
-            integer (ip), intent (in) :: ityp
-            integer (ip), intent (in) :: nlat
-            integer (ip), intent (in) :: m
-            real (wp)    :: zv(imid, nlat, 3)
-            integer (ip), intent (in) :: imid
+            integer (ip), intent (in)     :: ityp
+            integer (ip), intent (in)     :: nlat
+            integer (ip), intent (in)     :: m
+            real (wp),    intent (out)    :: zv(imid, nlat, 3)
+            integer (ip), intent (in)     :: imid
             integer (ip), intent (in out) :: i3
-            real (wp) :: zvz(imid, *)
-            real (wp) :: zv1(imid, *)
-            real (wp) :: a(*)
-            real (wp) :: b(*)
-            real (wp) :: c(*)
+            real (wp),    intent (in)     :: zvz(imid, *)
+            real (wp),    intent (in)     :: zv1(imid, *)
+            real (wp),    intent (in)     :: a(*)
+            real (wp),    intent (in)     :: b(*)
+            real (wp),    intent (in)     :: c(*)
             !----------------------------------------------------------------------
             ! Dictionary: local variables
             !----------------------------------------------------------------------
@@ -1766,28 +1758,24 @@ contains
             !----------------------------------------------------------------------
             ! Dictionary: calling arguments
             !----------------------------------------------------------------------
-            real (wp) :: a(*)
-            real (wp) :: b(*)
-            real (wp) :: c(*)
+            integer (ip), intent (in)     :: ityp
+            integer (ip), intent (in)     :: nlat
+            integer (ip), intent (in)     :: m
+            real (wp),    intent (out)    :: zw(imid, nlat, 3)
+            integer (ip), intent (in)     :: imid
+            integer (ip), intent (in out) :: i3
+            real (wp),    intent (in)     :: zw1(imid,*)
+            real (wp),    intent (in)     :: zw2(imid,*)
+            real (wp),    intent (in)     :: a(*)
+            real (wp),    intent (in)     :: b(*)
+            real (wp),    intent (in)     :: c(*)
             !----------------------------------------------------------------------
             ! Dictionary: local variables
             !----------------------------------------------------------------------
-
-            integer (ip) :: i
-            integer (ip) :: i3
-            integer (ip) :: ihold
-            integer (ip) :: imid
-            integer (ip), intent (in) :: ityp
-            integer (ip) :: m
-            integer (ip), intent (in) :: nlat
-            integer (ip) :: np1
-            integer (ip) :: ns
-            integer (ip) :: nstp
-            integer (ip) :: nstrt
-            real (wp) :: zw(imid, nlat, 3)
-            real (wp) :: zw1(imid,*)
-            real (wp) :: zw2(imid,*)
+            integer (ip)       :: i, ihold
+            integer (ip)       :: np1, ns, nstp, nstrt
             integer (ip), save :: i1, i2
+            !----------------------------------------------------------------------
 
             ihold = i1
             i1 = i2
@@ -2002,24 +1990,26 @@ contains
 
     end subroutine wbinit
 
+
+
     subroutine vbin(ityp, nlat, nlon, m, vb, i3, wvbin)
-
-        integer (ip) :: i3
+        !----------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !----------------------------------------------------------------------
+        integer (ip), intent (in)     :: ityp
+        integer (ip), intent (in)     :: nlat
+        integer (ip), intent (in)     :: nlon
+        integer (ip), intent (in)     :: m
+        real (wp),    intent (out)    :: vb(*)
+        integer (ip), intent (in out) :: i3
+        real (wp),    intent (in)     :: wvbin(*)
+        !----------------------------------------------------------------------
+        ! Dictionary: local variables
+        !----------------------------------------------------------------------
         integer (ip) :: imid
-        integer (ip), intent (in) :: ityp
-        integer (ip) :: iw1
-        integer (ip) :: iw2
-        integer (ip) :: iw3
-        integer (ip) :: iw4
-        integer (ip) :: labc
-        integer (ip) :: lim
-        integer (ip) :: m
-        integer (ip) :: mmax
-        integer (ip), intent (in) :: nlat
-        integer (ip), intent (in) :: nlon
-        real (wp) :: vb(*)
-        real (wp) :: wvbin(*)
-
+        integer (ip) :: iw1, iw2, iw3, iw4
+        integer (ip) :: labc, lim, mmax
+        !----------------------------------------------------------------------
 
         imid = (nlat+1)/2
         lim = nlat*imid
@@ -2038,26 +2028,27 @@ contains
     contains
 
         subroutine vbin1(ityp, nlat, m, vb, imid, i3, vbz, vb1, a, b, c)
-
-            real (wp) :: a(*)
-            real (wp) :: b(*)
-            real (wp) :: c(*)
-            integer (ip) :: i
-            integer (ip) :: i3
-            integer (ip) :: ihold
-            integer (ip) :: imid
-            integer (ip), intent (in) :: ityp
-            integer (ip) :: m
-            integer (ip), intent (in) :: nlat
-            integer (ip) :: np1
-            integer (ip) :: ns
-            integer (ip) :: nstp
-            integer (ip) :: nstrt
-            real (wp) :: vb(imid, nlat, 3)
-            real (wp) :: vbz(imid,*)
-            real (wp) :: vb1(imid,*)
+            !----------------------------------------------------------------------
+            ! Dictionary: calling arguments
+            !----------------------------------------------------------------------
+            integer (ip), intent (in)     :: ityp
+            integer (ip), intent (in)     :: nlat
+            integer (ip), intent (in)     :: m
+            real (wp),    intent (out)    :: vb(imid, nlat, 3)
+            integer (ip), intent (in)     :: imid
+            integer (ip), intent (in out) :: i3
+            real (wp),    intent (in)     :: vbz(imid,*)
+            real (wp),    intent (in)     :: vb1(imid,*)
+            real (wp),    intent (in)     :: a(*)
+            real (wp),    intent (in)     :: b(*)
+            real (wp),    intent (in)     :: c(*)
+            !----------------------------------------------------------------------
+            ! Dictionary: local variables
+            !----------------------------------------------------------------------
+            integer (ip)       :: i, ihold
+            integer (ip)       :: np1, ns, nstp, nstrt
             integer (ip), save :: i1, i2
-
+            !----------------------------------------------------------------------
 
             ihold = i1
             i1 = i2
