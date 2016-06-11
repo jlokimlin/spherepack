@@ -129,9 +129,9 @@ contains
             sphere_type = GaussianSphere(NLATS,NLONS)
 
             ! Allocate known error from previous platform
-            allocate( previous_polar_laplacian_error, source='     polar laplacian error     = 1.760814e-12' )
-            allocate( previous_azimuthal_laplacian_error, source='     azimuthal laplacian error = 8.715251e-13' )
-            allocate( previous_polar_inversion_error, source='     polar inversion error     = 6.661338e-16' )
+            allocate( previous_polar_laplacian_error, source='     polar laplacian error     = 1.761258e-12' )
+            allocate( previous_azimuthal_laplacian_error, source='     azimuthal laplacian error = 8.710810e-13' )
+            allocate( previous_polar_inversion_error, source='     polar inversion error     = 5.551115e-16' )
             allocate( previous_azimuthal_inversion_error, source='     azimuthal inversion error = 7.216450e-16' )
 
             type is (RegularSphere)

@@ -512,7 +512,7 @@ contains
         else if (nlon < 1) then
             ierror = 2
             return
-        else if (ityp<0 .or. ityp>8) then
+        else if (ityp < 0 .or. ityp > 8) then
             ierror = 3
             return
         else if (nt < 0) then
@@ -1334,89 +1334,135 @@ contains
 
 
     subroutine vhagsi(nlat, nlon, wvhags, lvhags, dwork, ldwork, ierror)
-
-        integer (ip) :: ierror
-        integer (ip) :: imid
-        integer (ip) :: iw1
-        integer (ip) :: iw2
-        integer (ip) :: iw3
-        integer (ip) :: iw4
-        integer (ip) :: jw1
-        integer (ip) :: jw2
-        integer (ip) :: jw3
-        integer (ip) :: ldwork
-        integer (ip) :: lmn
-        integer (ip) :: lvhags
-        integer (ip) :: nlat
-        integer (ip) :: nlon
-        real (wp) :: wvhags
-        dimension wvhags(lvhags)
-        real dwork(ldwork)
-
+        !----------------------------------------------------------------------
+        ! Dictionary: calling arguments
+        !----------------------------------------------------------------------
+        integer (ip), intent (in)  :: nlat
+        integer (ip), intent (in)  :: nlon
+        real (wp),    intent (out) :: wvhags(lvhags)
+        integer (ip), intent (in)  :: lvhags
+        real (wp),    intent (out) :: dwork(ldwork)
+        integer (ip), intent (in)  :: ldwork
+        integer (ip), intent (out) :: ierror
+        !----------------------------------------------------------------------
+        ! Dictionary: local variables
+        !----------------------------------------------------------------------
+        integer (ip)    :: imid, lmn
+        integer (ip)    :: workspace_indices(7)
         type (HFFTpack) :: hfft
+        !----------------------------------------------------------------------
 
-        ierror = 1
-        if (nlat < 3) return
-        ierror = 2
-        if (nlon < 1) return
-        ierror = 3
         imid = (nlat+1)/2
         lmn = (nlat*(nlat+1))/2
-        if (lvhags < 2*(imid*lmn)+nlon+15) return
-        ierror = 4
-        if (ldwork<(nlat*(3*nlat+9)+2)/2) return
-        ierror = 0
-        jw1 = 1
-        jw2 = jw1+imid*lmn
-        jw3 = jw2+imid*lmn
-        iw1 = 1
-        iw2 = iw1+nlat
-        iw3 = iw2+nlat
-        iw4 = iw3+3*imid*nlat
-        call vhgai1(nlat, imid, wvhags(jw1), wvhags(jw2), &
-            dwork(iw1), dwork(iw2), dwork(iw3), dwork(iw4))
 
-        call hfft%initialize(nlon, wvhags(jw3))
+        !
+        !==> Check validity of input arguments
+        !
+        if (nlat < 3) then
+            ierror = 1
+            return
+        else if (nlon < 1) then
+            ierror = 2
+            return
+        else if (lvhags < 2*(imid*lmn)+nlon+15) then
+            ierror = 3
+            return
+        else if (ldwork < (nlat*(3*nlat+9)+2)/2) then
+            ierror = 4
+            return
+        else
+            ierror = 0
+        end if
+
+        !
+        !==> Compute workspace indices
+        !
+        workspace_indices = get_workspace_indices(nlat, imid, lmn)
+
+        associate( &
+            jw1 => workspace_indices(1), &
+            jw2 => workspace_indices(2), &
+            jw3 => workspace_indices(3), &
+            iw1 => workspace_indices(4), &
+            iw2 => workspace_indices(5), &
+            iw3 => workspace_indices(6), &
+            iw4 => workspace_indices(7) &
+            )
+
+            call vhgai1(nlat, imid, wvhags(jw1), wvhags(jw2), &
+                dwork(iw1), dwork(iw2), dwork(iw3), dwork(iw4))
+
+            call hfft%initialize(nlon, wvhags(jw3))
+
+        end associate
 
     contains
 
+        pure function get_workspace_indices(nlat, imid, lmn) result (return_value)
+            !----------------------------------------------------------------------
+            ! Dictionary: calling arguments
+            !----------------------------------------------------------------------
+            integer (ip), intent (in)  :: nlat
+            integer (ip), intent (in)  :: imid
+            integer (ip), intent (in)  :: lmn
+            integer (ip)               :: return_value(7)
+            !----------------------------------------------------------------------
+
+            associate( i => return_value )
+                !
+                !==> set pointers
+                !
+                i(1) = 1
+                i(2) = i(1)+imid*lmn
+                i(3) = i(2)+imid*lmn
+                i(4) = 1
+                i(5) = i(4)+nlat
+                i(6) = i(5)+nlat
+                i(7) = i(6)+3*imid*nlat
+
+            end associate
+
+        end function get_workspace_indices
+
+
         subroutine vhgai1(nlat, imid, vb, wb, dthet, dwts, dpbar, work)
-            integer (ip) :: i
-            integer (ip) :: id
-            integer (ip) :: ierror
-            integer (ip) :: imid
-            integer (ip) :: ix
-            integer (ip) :: iy
-            integer (ip) :: lwk
-            integer (ip) :: m
-            integer (ip) :: mn
-            integer (ip) :: n
-            integer (ip) :: nlat
-            integer (ip) :: nm
-            integer (ip) :: np
-            integer (ip) :: nz
-            real (wp) :: vb
-            real (wp) :: wb
-            dimension vb(imid, *), wb(imid, *)
+            !----------------------------------------------------------------------
+            ! Dictionary: calling arguments
+            !----------------------------------------------------------------------
+            integer (ip), intent (in)  :: nlat
+            integer (ip), intent (in)  :: imid
+            real (wp),    intent (out) :: vb(imid, *)
+            real (wp),    intent (out) :: wb(imid, *)
+            real (wp),    intent (out) :: dthet(nlat)
+            real (wp),    intent (out) :: dwts(nlat)
+            real (wp),    intent (out) :: dpbar(imid, nlat, 3)
+            real (wp),    intent (out) :: work(*)
+            !----------------------------------------------------------------------
+            ! Dictionary: calling arguments
+            !----------------------------------------------------------------------
+            integer (ip)         :: i, local_error_flag, id, ix, iy
+            integer (ip)         :: m, mn, n, nm, np, nz
             real (wp), parameter :: PI = acos(-1.0_wp)
-            real (wp) :: abel, bbel, cbel, dcf
-            real (wp) :: dpbar(imid, nlat, 3), dthet(*), dwts(*), work(*)
-            real (wp) :: dummy_variable
-
+            real (wp)            :: abel, bbel, cbel, dcf
+            integer (ip)         :: dummy_integer
+            real (wp)            :: dummy_real
             type (SpherepackAux) :: sphere_aux
+            !----------------------------------------------------------------------
 
-            !     lwk = 4*nlat*(nlat+2)
-            lwk = nlat*(nlat+2)
+            !
+            !==> Compute gaussian grid
+            !
+            call gaqd(nlat, dthet, dwts, dummy_real, dummy_integer, local_error_flag)
 
-            call gaqd(nlat, dthet, dwts, dummy_variable, lwk, ierror)
             !
-            !     compute associated legendre functions
+            !==> Compute associated legendre functions
             !
-            !     compute m=n=0 legendre polynomials for all theta(i)
+            !    Set m=n=0 legendre polynomials for all theta(i)
             !
-            dpbar(1:imid, 1, 1) = cos(PI/4)
-            vb(1:imid, 1) = 0.0_wp
-            wb(1:imid, 1) = 0.0_wp
+            dpbar(:,1,1) = cos(PI/4)
+            vb(:,1) = 0.0_wp
+            wb(:,1) = 0.0_wp
+
             !
             !==> main loop for remaining vb, and wb
             !
@@ -1436,10 +1482,11 @@ contains
                 !==> compute dpbar for m=1
                 !
                 call sphere_aux%dnlfk(1, n, work)
+
                 mn = indx(1, n, nlat)
+
                 do i=1, imid
                     call sphere_aux%dnlft(1, n, dthet(i), work, dpbar(i, 2, np))
-                !      pbar(i, mn) = dpbar(i, 2, np)
                 end do
 
                 !

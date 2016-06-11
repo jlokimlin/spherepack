@@ -131,7 +131,7 @@ contains
 
             ! Allocate known error from previous platform
             allocate( previous_polar_error, source='     polar error     = 5.107026e-15' )
-            allocate( previous_azimuthal_error, source='     azimuthal error = 9.769963e-15' )
+            allocate( previous_azimuthal_error, source='     azimuthal error = 9.325873e-15' )
 
             type is (RegularSphere)
 

@@ -129,8 +129,8 @@ contains
             sphere_type = GaussianSphere(NLATS, NLONS)
 
             ! Allocate known error from previous platform
-            allocate( previous_vorticity_error, source='     vorticity error     = 8.257284e-14' )
-            allocate( previous_polar_inversion_error, source='     polar inversion error     = 1.998401e-15' )
+            allocate( previous_vorticity_error, source='     vorticity error     = 8.246182e-14' )
+            allocate( previous_polar_inversion_error, source='     polar inversion error     = 2.331468e-15' )
             allocate( previous_azimuthal_inversion_error, source='     azimuthal inversion error = 4.107825e-15' )
 
             type is (RegularSphere)

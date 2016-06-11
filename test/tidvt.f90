@@ -116,10 +116,10 @@ contains
             call sphere_type%create(nlat=NLATS, nlon=NLONS)
 
             ! Allocate known error from previous platform
-            allocate( previous_vorticity_error, source='     vorticity error     = 5.417888e-14' )
-            allocate( previous_divergence_error, source='     divergence error    = 7.144285e-14' )
-            allocate( previous_polar_inversion_error, source='     polar inversion error     = 1.332268e-15' )
-            allocate( previous_azimuthal_inversion_error, source='     azimuthal inversion error = 1.332268e-15' )
+            allocate( previous_vorticity_error, source='     vorticity error     = 5.351275e-14' )
+            allocate( previous_divergence_error, source='     divergence error    = 7.149836e-14' )
+            allocate( previous_polar_inversion_error, source='     polar inversion error     = 1.776357e-15' )
+            allocate( previous_azimuthal_inversion_error, source='     azimuthal inversion error = 1.776357e-15' )
             !
             !==> For regular sphere
             !
