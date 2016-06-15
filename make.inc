@@ -8,20 +8,19 @@ EXTERNAL_LIBRARY_PATH = /usr/local/lib64
 
 BIN_PATH = /usr/local/bin
 
-OBJ := $(patsubst %.f90, %.o, $(wildcard *.f90))
-
 OBJ_DIRECTORY = ../objs
 
 LIB_DIRECTORY = ../lib
+
+MOD_DIRECTORY = $(LIB_DIRECTORY)
 
 LIB_NAME = modern_spherepack
 
 LIB = $(LIB_DIRECTORY)/lib$(LIB_NAME).a
 
-MOD_DIRECTORY = $(LIB_DIRECTORY)
+OBJ := $(patsubst %.f90, %.o, $(wildcard *.f90))
 
 OBJS = $(addprefix $(OBJ_DIRECTORY)/, $(OBJ))
-
 
 FC = gfortran
 

@@ -6,20 +6,23 @@ LINKS = \
 -I$(MOD_DIRECTORY) \
 -I$(OBJ_DIRECTORY)
 
-SRC=$(subst .o,.f90, $(OBJ))
+advec:
+	$(FC) $(FCFLAGS) -o advec.exe type_AdvectionSolver.f90 advec.f90 $(LINKS)
+	./advec.exe	
 
-EXES=$(subst .o,.exe, $(OBJ))
+helmsph:
+	$(FC) $(FCFLAGS) -o helmsph.exe helmsph.f90 $(LINKS)
+	./helmsph.exe	
 
-all : clean run
+shallow:
+	$(FC) $(FCFLAGS) -o shallow.exe type_ShallowWaterSolver.f90 shallow.f90 $(LINKS)
+	./shallow.exe	
 
-run: $(EXES)
+run: 
+	$(MAKE) clean
+	$(MAKE) examples
 
-$(EXES): $(SRC)
-
-%.exe : %.f90
-	rm -f $@
-	$(FC) $(FCFLAGS) $< -o $@ $(LINKS)
-	./$@
+examples: advec helmsph shallow
 
 clean:
-	rm -f $(OBJS) $(EXES) ./*.mod
+	rm -f $(OBJS) *.exe *.mod
