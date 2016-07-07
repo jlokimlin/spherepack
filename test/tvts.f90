@@ -47,8 +47,17 @@
 !
 program tvts
 
-    use spherepack_library
+    use, intrinsic :: iso_fortran_env, only: &
+        stdout => OUTPUT_UNIT
 
+    use spherepack_library, only: &
+        wp, & ! working precision
+        PI, &
+        gaqd, vhaeci, vhaec, vtseci, vtsec, vhaesi, &
+        vhaes, vtsesi, vtses, vhagci, vhagc, vtsgci, vtsgc, &
+        vhagsi, vhags, vtsgsi, vtsgs
+
+    ! Explicit typing only
     implicit none
 
     real :: bi
@@ -88,7 +97,6 @@ program tvts
     integer :: nnt
     integer :: nt
     real :: phi
-    real :: pi
     real :: sinp
     real :: sint
     real :: theta
@@ -121,9 +129,8 @@ program tvts
     real dtheta, dwts
     real dummy_variable
 
-    write( *, '(A)') ''
-    write( *, '(A)') '     tvts *** TEST RUN *** '
-    write( *, '(A)') ''
+    write( stdout, '(/a/)') '     tvts *** TEST RUN *** '
+
     !
     !     set dimension variables
     !
@@ -139,7 +146,6 @@ program tvts
     !
     !     set equally spaced colatitude and longitude increments
     !
-    pi = acos(-1.0)
     dphi = (pi+pi)/nlon
     dlat = pi/(nlat-1)
     !
@@ -176,8 +182,8 @@ program tvts
                 sinp = sin(phi)
                 cosp = cos(phi)
                 do i=1,nlat
-                    theta = (i-1)*dlat
-                    if (icase==3 .or. icase==4) theta = thetag(i)
+                    theta = real(i - 1, kind=wp)*dlat
+                    if (icase ==3 .or. icase==4) theta = thetag(i)
                     cost = cos(theta)
                     sint = sin(theta)
                        !
@@ -329,41 +335,52 @@ program tvts
     !     end of icase loop
     !
     end do
+
+
+contains
+
+
+    subroutine iout(ivar,nam)
+        implicit none
+        integer :: ivar
+        character(len=*) nam
+        write( stdout, 10) nam , ivar
+10      format(1h a4, 3h = ,i8)
+        return
+    end subroutine iout
+
+
+
+    subroutine vout(var,nam)
+        implicit none
+        real :: var
+        character(len=*) nam
+        write( stdout, 10) nam , var
+10      format(1h a4,3h = ,e12.5)
+        return
+    end subroutine vout
+
+
+    subroutine name(nam)
+        implicit none
+        character(len=*) nam
+        write( stdout, 100) nam
+100     format(1h a8)
+        return
+    end subroutine name
+
+
+
+    subroutine vecout(vec,nam,vec_size)
+        implicit none
+        integer :: l
+        integer :: vec_size
+        real :: vec
+        dimension vec(vec_size)
+        character(len=*) nam
+        write( stdout, 109) nam, (vec(l),l=1,vec_size)
+109     format(1h a4,/(1h 8e11.4))
+        return
+    end subroutine vecout
+
 end program tvts
-subroutine iout(ivar,nam)
-    implicit none
-    integer :: ivar
-    character(len=*) nam
-    write(6,10) nam , ivar
-10  format(1h a4, 3h = ,i8)
-    return
-end subroutine iout
-!
-subroutine vout(var,nam)
-    implicit none
-    real :: var
-    character(len=*) nam
-    write(6,10) nam , var
-10  format(1h a4,3h = ,e12.5)
-    return
-end subroutine vout
-!
-subroutine name(nam)
-    implicit none
-    character(len=*) nam
-    write(6,100) nam
-100 format(1h a8)
-    return
-end subroutine name
-!
-subroutine vecout(vec,nam,vec_size)
-    implicit none
-    integer :: l
-    integer :: vec_size
-    real :: vec
-    dimension vec(vec_size)
-    character(len=*) nam
-    write(6,109) nam, (vec(l),l=1,vec_size)
-109 format(1h a4,/(1h 8e11.4))
-    return
-end subroutine vecout

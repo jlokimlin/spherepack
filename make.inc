@@ -22,10 +22,9 @@ OBJ := $(patsubst %.f90, %.o, $(wildcard *.f90))
 
 OBJS = $(addprefix $(OBJ_DIRECTORY)/, $(OBJ))
 
-FC = gfortran
+FC = gfortran-6
 
 FCFLAGS = \
--O3 \
 $(ENFORCE_64_BIT_PRECISION) \
 $(LANGUAGE_OPTIONS)
 
@@ -39,5 +38,3 @@ LANGUAGE_OPTIONS = \
 ERROR_WARNING_OPTIONS = \
 -Wall
 
-CODE_GENERATION_OPTIONS = \
--fcheck=all

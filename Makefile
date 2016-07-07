@@ -1,17 +1,17 @@
 
 include make.inc
 
-all: lib libtest libexamples
+all: lib test examples
 
 lib:
 	mkdir -p ./lib
 	mkdir -p ./objs
 	( cd ./src; $(MAKE) all )
 
-libtest:
+test:
 	( cd ./test; $(MAKE) clean; $(MAKE) run )
 
-libexamples:
+examples:
 	( cd ./examples; $(MAKE) clean; $(MAKE) run )
 
 install:
@@ -21,4 +21,4 @@ install:
 clean: 
 	(cd ./src; $(MAKE) clean; cd ../test; $(MAKE) clean )
 
-.PHONY: all lib libtest libexamples install
+.PHONY: all lib test examples install

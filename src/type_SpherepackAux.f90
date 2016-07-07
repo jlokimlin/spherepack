@@ -38,9 +38,10 @@
 !
 module type_SpherepackAux
 
-    use, intrinsic :: iso_fortran_env, only: &
-        ip => INT32, &
-        wp => REAL64
+    use spherepack_precision, only: &
+        wp, & ! working precision
+        ip, & ! integer precision
+        PI
 
     ! Explicit typing only
     implicit none
@@ -747,6 +748,8 @@ contains
 
         end subroutine zfin1
 
+
+
         pure function get_workspace_indices(nlat, nlon, imid) &
             result (return_value)
             !----------------------------------------------------------------------
@@ -834,7 +837,6 @@ contains
             !----------------------------------------------------------------------
             integer (ip)         :: i, m, n, mp1, np1
             real (wp)            :: dt, th, zh
-            real (wp), parameter :: PI = acos(-1.0_wp)
             !----------------------------------------------------------------------
 
             dt = PI/(nlat-1)
@@ -1259,7 +1261,6 @@ contains
             !----------------------------------------------------------------------
             integer (ip)         :: i, m, n, mp1, np1
             real (wp)            :: dt, ph, th
-            real (wp), parameter :: PI = acos(-1.0_wp)
             !----------------------------------------------------------------------
 
             dt = PI/(nlat-1)
@@ -1496,7 +1497,6 @@ contains
             !----------------------------------------------------------------------
             integer (ip)         :: i,m, mdo, mp1, n, np1
             real (wp)            :: dt, th, zvh
-            real (wp), parameter :: PI = acos(-1.0_wp)
             !----------------------------------------------------------------------
 
             dt = PI/(nlat-1)
@@ -1571,7 +1571,6 @@ contains
             !----------------------------------------------------------------------
             integer (ip)         :: i, m, mdo, mp1, n, np1
             real (wp)            :: dt, th, zwh
-            real (wp), parameter :: pi = acos(-1.0_wp)
             !----------------------------------------------------------------------
 
             dt = pi/(nlat-1)
@@ -1887,7 +1886,6 @@ contains
             !----------------------------------------------------------------------
             integer (ip)    :: i, m, mdo, mp1, n, np1
             real (wp)       :: dth, theta, vbh
-            real, parameter :: pi = acos(-1.0_wp)
             !----------------------------------------------------------------------
 
             dth = pi/(nlat-1)
@@ -1963,7 +1961,6 @@ contains
             !----------------------------------------------------------------------
             integer (ip)         :: i, m, mdo, mp1, n, np1
             real (wp)            :: dth, wbh, theta
-            real (wp), parameter :: pi = acos(-1.0_wp)
             !----------------------------------------------------------------------
 
             dth = pi/(nlat-1)
@@ -3324,7 +3321,6 @@ contains
             real (wp) :: cvb(nlat/2+1)
             real (wp) :: th, vbh
             real (wp) :: work(nlat/2+1)
-            real (wp), parameter :: PI = acos(-1.0_wp)
 
 
             dt = PI/(nlat-1)
@@ -3385,7 +3381,6 @@ contains
             real (wp) :: dt
             real (wp) :: cwb(nlat/2+1), wbh, th
             real (wp) :: work(nlat/2+1)
-            real (wp), parameter :: PI = acos(-1.0_wp)
             !
             !     abc must have 3*(max(mmax-2, 0)*(2*nlat-mmax-1))/2
             !     locations where mmax = min(nlat, (nlon+1)/2)

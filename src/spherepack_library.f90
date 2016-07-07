@@ -1,5 +1,11 @@
 module spherepack_library
 
+    use spherepack_precision, only: &
+        wp, & ! working precision
+        ip, & ! integer precision
+        PI, &
+        TWO_PI
+
     use module_divec, only: &
         divec
 
@@ -290,6 +296,9 @@ module spherepack_library
     ! Everything is private unless stated otherwise
     private
 
+    ! Constants
+    public :: wp, ip
+    public :: PI, TWO_PI
     ! Classes
     public :: FFTpack
     public :: HFFTpack

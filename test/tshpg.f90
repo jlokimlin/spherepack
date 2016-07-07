@@ -50,7 +50,52 @@ program tshpg
     use, intrinsic :: iso_fortran_env, only: &
         sp => REAL32
 
-    use spherepack_library
+    use spherepack_library, only: &
+        shagci, shsgci, shpgi, shagc, shsgc, shpg
+
+    ! Explicit typing only
+    implicit none
+
+    real :: dmax1
+    real :: g
+    real :: ga
+    real :: gb
+    real :: gh
+    integer :: i
+    integer :: idimg
+    integer :: idp
+    integer :: ierror
+    integer :: iprint
+    integer :: isym
+    integer :: iwshp
+    integer :: j
+    integer :: jdimg
+    integer :: kdp
+    integer :: liwshp
+    integer :: lwork
+    integer :: lwrk
+    integer :: lwrk1
+    integer :: lwsha
+    integer :: lwshp
+    integer :: lwshs
+    integer :: mode
+    integer :: mp1
+    integer :: mtr
+    integer :: mtrunc
+    integer :: nlat
+    integer :: nlon
+    integer :: np1
+    integer :: nt
+    real :: sx
+    real :: sy
+    real :: thold
+    real :: toe
+    real :: tusl
+    real :: wrk1
+    real :: wrk2
+    real :: wshagc
+    real :: wshp
+    real :: wshsgc
 
     parameter (idp=8)
     parameter (kdp=idp+idp-2)
@@ -69,9 +114,9 @@ program tshpg
         wrk2(lwork),wshagc(lwsha),wshsgc(lwsha)
     real (sp) :: t1(2)
 
-    write( *, '(A)') ''
-    write( *, '(A)') '     tshpg *** TEST RUN *** '
-    write( *, '(A)') ''
+    write( *, '(a)') ''
+    write( *, '(a)') '     tshpg *** TEST RUN *** '
+    write( *, '(a)') ''
 
     !
     iprint = 0

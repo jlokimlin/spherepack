@@ -41,9 +41,10 @@
 !
 module type_LegendreAux
 
-    use, intrinsic :: iso_fortran_env, only: &
-        ip => INT32, &
-        wp => REAL64
+    use spherepack_precision, only: &
+        wp, & ! working precision
+        ip, & ! integer precision
+        PI
 
     use type_FFTpack, only: &
         FFTpack
@@ -89,7 +90,6 @@ contains
         ! Dictionary: calling arguments
         !----------------------------------------------------------------------
         real (wp)              :: theta
-        real (wp), parameter   :: PI = acos(-1.0_wp)
         real (wp), allocatable :: cp(:)
         integer (ip)           :: i, n, m, nm, nmstrt !! Counters
         !----------------------------------------------------------------------
@@ -1011,7 +1011,6 @@ contains
             integer (ip)         :: i
             integer (ip)         :: lm1, np1, ls2, kdp, lmi
             real (wp)            :: dt
-            real (wp), parameter :: PI = acos(-1.0_wp)
             real (wp), parameter :: ONE_OVER_SQRT2 = 1.0_wp/sqrt(2.0_wp)
             type (FFTpack)       :: fft
             !----------------------------------------------------------------------

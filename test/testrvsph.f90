@@ -171,14 +171,14 @@ program testrvsph
     real dtheta(nnlatg),dwts(nnlatg),dwork(lldwork)
     integer igride(2),igridg(2),ive,ivg
     integer nlatg,nlong,nlate,nlone,lwork,lsave,ldwork
-    real pi,dlate,dlone,dlong,t,p,cosp,sinp,cost,sint,x,y,z
+    real dlate,dlone,dlong,t,p,cosp,sinp,cost,sint,x,y,z
     real erru2,errv2,ex,ey,ez,emz,uee,vee
     integer i,j,ib,intl,ier,lsvmin,lwkmin
     real dummy_variable
 
-    write( *, '(A)') ''
-    write( *, '(A)') '     testrvsph *** TEST RUN *** '
-    write( *, '(A)') ''
+    write( *, '(a)') ''
+    write( *, '(a)') '     testrvsph *** TEST RUN *** '
+    write( *, '(a)') ''
     !
     !     set grid sizes and dimensions from parameter statements
     !
@@ -192,7 +192,6 @@ program testrvsph
     !
     !     set equally spaced grid increments
     !
-    pi = acos(-1.0)
     dlate = pi/(nlate-1)
     dlone = (pi+pi)/nlone
     dlong = (pi+pi)/nlong

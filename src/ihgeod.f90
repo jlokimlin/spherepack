@@ -32,9 +32,10 @@
 !
 module module_ihgeod
 
-    use, intrinsic :: iso_fortran_env, only: &
-        wp => REAL64, &
-        ip => INT32
+    use spherepack_precision, only: &
+        wp, & ! working precision
+        ip, & ! integer precision
+        PI
 
     ! Explicit typing only
     implicit none
@@ -99,7 +100,6 @@ contains
         integer (ip) :: j
         integer (ip) :: k
         real (wp) :: phi
-        real (wp) :: pi
         real (wp) :: rad
         real (wp) :: tdphi
         real (wp) :: theta
@@ -128,7 +128,6 @@ contains
         real (wp) :: zs
         !-------------------------------------------------------------
 
-        pi = acos(-1.0_wp)
         dphi = 0.4_wp*pi
         beta = cos(dphi)
         theta1 = acos(beta/(1.0_wp-beta))
@@ -246,7 +245,7 @@ contains
             phi = 0.0_wp
             theta = 0.0_wp
 
-            if (z < 0.0_wp) theta = acos(-1.0_wp)
+            if (z < 0.0_wp) theta = PI
 
         else
             r = sqrt(radial+z**2)

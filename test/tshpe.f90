@@ -51,6 +51,51 @@ program tshpe
 
     use spherepack_library
 
+    implicit none
+
+    real :: dmax1
+    real :: g
+    real :: ga
+    real :: gb
+    real :: gh
+    real :: gw
+    integer :: i
+    integer :: idimg
+    integer :: idp
+    integer :: ierror
+    integer :: iprint
+    integer :: isym
+    integer :: iwshp
+    integer :: j
+    integer :: jdimg
+    integer :: k
+    integer :: kdp
+    integer :: liwshp
+    integer :: lwork
+    integer :: lwrk
+    integer :: lwrk1
+    integer :: lwsha
+    integer :: lwshp
+    integer :: lwshs
+    integer :: mode
+    integer :: mp1
+    integer :: mtr
+    integer :: mtrunc
+    integer :: nlat
+    integer :: nlon
+    integer :: np1
+    integer :: nt
+    real :: sx
+    real :: sy
+    real :: thold
+    real :: toe
+    real :: tusl
+    real :: wrk1
+    real :: wrk2
+    real :: wshaec
+    real :: wshp
+    real :: wshsec
+
     parameter (idp=32)
     parameter (kdp=idp+idp-2)
     parameter (lwshp=2*(idp+1)**2+kdp+20, &
@@ -66,9 +111,9 @@ program tshpe
         wrk2(lwork),wshaec(lwsha),wshsec(lwsha)
     real (sp) :: t1(2)
 
-    write( *, '(A)') ''
-    write( *, '(A)') '     tshpe *** TEST RUN *** '
-    write( *, '(A)') ''
+    write( *, '(a)') ''
+    write( *, '(a)') '     tshpe *** TEST RUN *** '
+    write( *, '(a)') ''
     !
     iprint = 0
     nt = 1

@@ -55,11 +55,11 @@
 program tvlap
 
     use, intrinsic :: iso_fortran_env, only: &
-        ip => INT32, &
-        wp => REAL64, &
         stdout => OUTPUT_UNIT
 
     use spherepack_library, only: &
+        wp, & ! working precision
+        ip, & ! integer precision
         Sphere, &
         Regularsphere, &
         GaussianSphere
@@ -211,19 +211,16 @@ contains
                 !==> Print earlier output from platform with 64-bit floating point
                 !    arithmetic followed by the output from this computer
                 !
-                write( stdout, '(A)') ''
-                write( stdout, '(A)') '     tvlap *** TEST RUN *** '
-                write( stdout, '(A)') ''
-                write( stdout, '(A)') '     grid type = '//sphere_type%grid%grid_type
-                write( stdout, '(A)') '     Testing vector laplacian'
+                write( stdout, '(/a/)') '     tvlap *** TEST RUN *** '
+                write( stdout, '(a)') '     grid type = '//sphere_type%grid%grid_type
+                write( stdout, '(a)') '     Testing vector laplacian'
                 write( stdout, '(2(A,I2))') '     nlat = ', NLATS,' nlon = ', NLONS
-                write( stdout, '(A)') '     Previous 64 bit floating point arithmetic result '
-                write( stdout, '(A)') previous_polar_laplacian_error
-                write( stdout, '(A)') previous_azimuthal_laplacian_error
-                write( stdout, '(A)') '     The output from your computer is: '
-                write( stdout, '(A,1pe15.6)') '     polar laplacian error     = ', err2v
-                write( stdout, '(A,1pe15.6)') '     azimuthal laplacian error = ', err2w
-                write( stdout, '(A)' ) ''
+                write( stdout, '(a)') '     Previous 64 bit floating point arithmetic result '
+                write( stdout, '(a)') previous_polar_laplacian_error
+                write( stdout, '(a)') previous_azimuthal_laplacian_error
+                write( stdout, '(a)') '     The output from your computer is: '
+                write( stdout, '(a,1pe15.6)') '     polar laplacian error     = ', err2v
+                write( stdout, '(a,1pe15.6/)') '     azimuthal laplacian error = ', err2w
             end associate
         end associate
         !
@@ -255,19 +252,16 @@ contains
                 !==> Print earlier output from platform with 64-bit floating point
                 !    arithmetic followed by the output from this computer
                 !
-                write( stdout, '(A)') ''
-                write( stdout, '(A)') '     tvlap *** TEST RUN *** '
-                write( stdout, '(A)') ''
-                write( stdout, '(A)') '     grid type = '//sphere_type%grid%grid_type
-                write( stdout, '(A)') '     Testing vector laplacian inversion'
+                write( stdout, '(/a/)') '     tvlap *** TEST RUN *** '
+                write( stdout, '(a)') '     grid type = '//sphere_type%grid%grid_type
+                write( stdout, '(a)') '     Testing vector laplacian inversion'
                 write( stdout, '(2(A,I2))') '     nlat = ', NLATS,' nlon = ', NLONS
-                write( stdout, '(A)') '     Previous 64 bit floating point arithmetic result '
-                write( stdout, '(A)') previous_polar_inversion_error
-                write( stdout, '(A)') previous_azimuthal_inversion_error
-                write( stdout, '(A)') '     The output from your computer is: '
-                write( stdout, '(A,1pe15.6)') '     polar inversion error     = ', err2v
-                write( stdout, '(A,1pe15.6)') '     azimuthal inversion error = ', err2w
-                write( stdout, '(A)' ) ''
+                write( stdout, '(a)') '     Previous 64 bit floating point arithmetic result '
+                write( stdout, '(a)') previous_polar_inversion_error
+                write( stdout, '(a)') previous_azimuthal_inversion_error
+                write( stdout, '(a)') '     The output from your computer is: '
+                write( stdout, '(a,1pe15.6)') '     polar inversion error     = ', err2v
+                write( stdout, '(a,1pe15.6/)') '     azimuthal inversion error = ', err2w
             end associate
         end associate
         !

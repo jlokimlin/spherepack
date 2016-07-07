@@ -321,9 +321,9 @@
 !
 module module_vhagc
 
-    use, intrinsic :: iso_fortran_env, only: &
-        wp => REAL64, &
-        ip => INT32
+    use spherepack_precision, only: &
+        wp, & ! working precision
+        ip ! integer precision
 
     use type_HFFTpack, only: &
         HFFTpack
@@ -506,7 +506,7 @@ mlon = mod(nlon, 2)
 mmax = min(nlat, (nlon+1)/2)
 imm1 = imid
 if (mlat /= 0) imm1 = imid-1
-if (ityp > 2) go to 3  
+if (ityp > 2) goto 3  
 do 5 k=1, nt 
 do 5 i=1, imm1
 do 5 j=1, nlon
@@ -515,7 +515,7 @@ vo(i, j, k) = tsn*(v(i, j, k)-v(nlp1-i, j, k))
 we(i, j, k) = tsn*(w(i, j, k)+w(nlp1-i, j, k))
 wo(i, j, k) = tsn*(w(i, j, k)-w(nlp1-i, j, k))
 5 continue
-go to 2
+goto 2
 3 do 8 k=1, nt
 do 8 i=1, imm1 
 do 8 j=1, nlon
@@ -524,7 +524,7 @@ vo(i, j, k) = fsn*v(i, j, k)
 we(i, j, k) = fsn*w(i, j, k)
 wo(i, j, k) = fsn*w(i, j, k)
 8 continue
-2 if (mlat == 0) go to 7
+2 if (mlat == 0) goto 7
 do 6 k=1, nt 
 do 6 j=1, nlon
 ve(imid, j, k) = tsn*v(imid, j, k)
@@ -538,14 +538,14 @@ ndo1 = nlat
 ndo2 = nlat
 if (mlat /= 0) ndo1 = nlat-1
 if (mlat == 0) ndo2 = nlat-1
-if (ityp==2 .or. ityp==5 .or. ityp==8) go to 11 
+if (ityp==2 .or. ityp==5 .or. ityp==8) goto 11 
 do 10 k=1, nt
 do 10 mp1=1, mmax
 do 10 np1=mp1, nlat
 br(mp1, np1, k)=0.
 bi(mp1, np1, k)=0.
 10 continue
-11 if (ityp==1 .or. ityp==4 .or. ityp==7) go to 13 
+11 if (ityp==1 .or. ityp==4 .or. ityp==7) goto 13 
 do 12 k=1, nt
 do 12 mp1=1, mmax
 do 12 np1=mp1, nlat
@@ -553,7 +553,7 @@ cr(mp1, np1, k)=0.
 ci(mp1, np1, k)=0.
 12 continue
 13 itypp = ityp+1
-go to (1, 100, 200, 300, 400, 500, 600, 700, 800), itypp
+goto (1, 100, 200, 300, 400, 500, 600, 700, 800), itypp
 !
 !     case ityp=0 ,  no symmetries
 !
@@ -590,7 +590,7 @@ m = mp1-1
 mp2 = mp1+1
 call sphere_aux%vbin(0, nlat, nlon, m, vb, iv, wvbin)
 call sphere_aux%wbin(0, nlat, nlon, m, wb, iw, wwbin)
-if (mp1 > ndo1) go to 17
+if (mp1 > ndo1) goto 17
 do 23 k=1, nt
 do 1023 i=1, imm1
 !
@@ -617,7 +617,7 @@ ci(mp1, np1, k) = ci(mp1, np1, k)-vb(i, np1, iv)*two1 &
 1023 continue
 23 continue
 
-if (mlat == 0) go to 17
+if (mlat == 0) goto 17
 i = imid
 do 24 k=1, nt
 do 1024 np1=mp1, ndo1, 2
@@ -627,7 +627,7 @@ cr(mp1, np1, k)=cr(mp1, np1, k)+wb(i, np1, iw)*ve(i, 2*mp1-1, k)*wts(i)
 ci(mp1, np1, k)=ci(mp1, np1, k)-wb(i, np1, iw)*ve(i, 2*mp1-2, k)*wts(i)
 1024 continue
 24 continue
-17 if (mp2 > ndo2) go to 20
+17 if (mp2 > ndo2) goto 20
 do 21 k=1, nt
 do 1021 i=1, imm1
 tvo1 = vo(i, 2*mp1-1, k)*wts(i)
@@ -651,7 +651,7 @@ ci(mp1, np1, k) = ci(mp1, np1, k)-vb(i, np1, iv)*twe1 &
 1021 continue
 21 continue
 
-if (mlat == 0) go to 20
+if (mlat == 0) goto 20
 i = imid
 do 22 k=1, nt
 do 1022 np1=mp2, ndo2, 2
@@ -691,7 +691,7 @@ m = mp1-1
 mp2 = mp1+1
 call sphere_aux%vbin(0, nlat, nlon, m, vb, iv, wvbin)
 call sphere_aux%wbin(0, nlat, nlon, m, wb, iw, wwbin)
-if (mp1 > ndo1) go to 117
+if (mp1 > ndo1) goto 117
 do 123 k=1, nt
 do 123 i=1, imm1
 tvo1 = vo(i, 2*mp1-1, k)*wts(i)
@@ -704,14 +704,14 @@ br(mp1, np1, k) = br(mp1, np1, k)+vb(i, np1, iv)*tvo2 &
 bi(mp1, np1, k) = bi(mp1, np1, k)+vb(i, np1, iv)*tvo1 &
                              -wb(i, np1, iw)*twe2
 123 continue
-if (mlat == 0) go to 117
+if (mlat == 0) goto 117
 i = imid
 do 124 k=1, nt
 do 124 np1=mp1, ndo1, 2
 br(mp1, np1, k) = br(mp1, np1, k)+wb(i, np1, iw)*we(i, 2*mp1-1, k)*wts(i)
 bi(mp1, np1, k) = bi(mp1, np1, k)-wb(i, np1, iw)*we(i, 2*mp1-2, k)*wts(i)
 124 continue
-117 if (mp2 > ndo2) go to 120
+117 if (mp2 > ndo2) goto 120
 do 121 k=1, nt
 do 121 i=1, imm1
 tve1 = ve(i, 2*mp1-1, k)*wts(i)
@@ -724,7 +724,7 @@ br(mp1, np1, k) = br(mp1, np1, k)+vb(i, np1, iv)*tve2 &
 bi(mp1, np1, k) = bi(mp1, np1, k)+vb(i, np1, iv)*tve1 &
                              -wb(i, np1, iw)*two2
 121 continue
-if (mlat == 0) go to 120
+if (mlat == 0) goto 120
 i = imid
 do 122 k=1, nt
 do 122 np1=mp2, ndo2, 2
@@ -761,7 +761,7 @@ m = mp1-1
 mp2 = mp1+1
 call sphere_aux%vbin(0, nlat, nlon, m, vb, iv, wvbin)
 call sphere_aux%wbin(0, nlat, nlon, m, wb, iw, wwbin)
-if (mp1 > ndo1) go to 217
+if (mp1 > ndo1) goto 217
 do 223 k=1, nt
 do 223 i=1, imm1
 tve1 = ve(i, 2*mp1-1, k)*wts(i)
@@ -774,14 +774,14 @@ cr(mp1, np1, k) = cr(mp1, np1, k)-vb(i, np1, iv)*two2 &
 ci(mp1, np1, k) = ci(mp1, np1, k)-vb(i, np1, iv)*two1 &
                              -wb(i, np1, iw)*tve2
 223 continue
-if (mlat == 0) go to 217
+if (mlat == 0) goto 217
 i = imid
 do 224 k=1, nt
 do 224 np1=mp1, ndo1, 2
 cr(mp1, np1, k) = cr(mp1, np1, k)+wb(i, np1, iw)*ve(i, 2*mp1-1, k)*wts(i)
 ci(mp1, np1, k) = ci(mp1, np1, k)-wb(i, np1, iw)*ve(i, 2*mp1-2, k)*wts(i)
 224 continue
-217 if (mp2 > ndo2) go to 220
+217 if (mp2 > ndo2) goto 220
 do 221 k=1, nt
 do 221 i=1, imm1
 twe1 = we(i, 2*mp1-1, k)*wts(i)
@@ -794,7 +794,7 @@ cr(mp1, np1, k) = cr(mp1, np1, k)-vb(i, np1, iv)*twe2 &
 ci(mp1, np1, k) = ci(mp1, np1, k)-vb(i, np1, iv)*twe1 &
                              -wb(i, np1, iw)*tvo2
 221 continue
-if (mlat == 0) go to 220
+if (mlat == 0) goto 220
 i = imid
 do 222 k=1, nt
 do 222 np1=mp2, ndo2, 2
@@ -831,7 +831,7 @@ m = mp1-1
 mp2 = mp1+1
 call sphere_aux%vbin(0, nlat, nlon, m, vb, iv, wvbin)
 call sphere_aux%wbin(0, nlat, nlon, m, wb, iw, wwbin)
-if (mp1 > ndo1) go to 317
+if (mp1 > ndo1) goto 317
 do 323 k=1, nt
 do 323 i=1, imm1
 two1 = wo(i, 2*mp1-1, k)*wts(i)
@@ -844,14 +844,14 @@ cr(mp1, np1, k) = cr(mp1, np1, k)-vb(i, np1, iv)*two2 &
 ci(mp1, np1, k) = ci(mp1, np1, k)-vb(i, np1, iv)*two1 &
                              -wb(i, np1, iw)*tve2
 323 continue
-if (mlat == 0) go to 317
+if (mlat == 0) goto 317
 i = imid
 do 324 k=1, nt
 do 324 np1=mp1, ndo1, 2
 cr(mp1, np1, k) = cr(mp1, np1, k)+wb(i, np1, iw)*ve(i, 2*mp1-1, k)*wts(i)
 ci(mp1, np1, k) = ci(mp1, np1, k)-wb(i, np1, iw)*ve(i, 2*mp1-2, k)*wts(i)
 324 continue
-317 if (mp2 > ndo2) go to 320
+317 if (mp2 > ndo2) goto 320
 do 321 k=1, nt
 do 321 i=1, imm1
 two1 = wo(i, 2*mp1-1, k)*wts(i)
@@ -864,7 +864,7 @@ br(mp1, np1, k) = br(mp1, np1, k)+vb(i, np1, iv)*tve2 &
 bi(mp1, np1, k) = bi(mp1, np1, k)+vb(i, np1, iv)*tve1 &
                              -wb(i, np1, iw)*two2
 321 continue
-if (mlat == 0) go to 320
+if (mlat == 0) goto 320
 i = imid
 do 322 k=1, nt
 do 322 np1=mp2, ndo2, 2
@@ -895,7 +895,7 @@ m = mp1-1
 mp2 = mp1+1
 call sphere_aux%vbin(1, nlat, nlon, m, vb, iv, wvbin)
 call sphere_aux%wbin(1, nlat, nlon, m, wb, iw, wwbin)
-if (mp2 > ndo2) go to 420
+if (mp2 > ndo2) goto 420
 do 421 k=1, nt
 do 421 i=1, imm1
 two1 = wo(i, 2*mp1-1, k)*wts(i)
@@ -908,7 +908,7 @@ br(mp1, np1, k) = br(mp1, np1, k)+vb(i, np1, iv)*tve2 &
 bi(mp1, np1, k) = bi(mp1, np1, k)+vb(i, np1, iv)*tve1 &
                              -wb(i, np1, iw)*two2
 421 continue
-if (mlat == 0) go to 420
+if (mlat == 0) goto 420
 i = imid
 do 422 k=1, nt
 do 422 np1=mp2, ndo2, 2
@@ -939,7 +939,7 @@ m = mp1-1
 mp2 = mp1+1
 call sphere_aux%vbin(2, nlat, nlon, m, vb, iv, wvbin)
 call sphere_aux%wbin(2, nlat, nlon, m, wb, iw, wwbin)
-if (mp1 > ndo1) go to 520
+if (mp1 > ndo1) goto 520
 do 523 k=1, nt
 do 523 i=1, imm1
 two1 = wo(i, 2*mp1-1, k)*wts(i)
@@ -952,7 +952,7 @@ cr(mp1, np1, k) = cr(mp1, np1, k)-vb(i, np1, iv)*two2 &
 ci(mp1, np1, k) = ci(mp1, np1, k)-vb(i, np1, iv)*two1 &
                              -wb(i, np1, iw)*tve2
 523 continue
-if (mlat == 0) go to 520
+if (mlat == 0) goto 520
 i = imid
 do 524 k=1, nt
 do 524 np1=mp1, ndo1, 2
@@ -989,7 +989,7 @@ m = mp1-1
 mp2 = mp1+1
 call sphere_aux%vbin(0, nlat, nlon, m, vb, iv, wvbin)
 call sphere_aux%wbin(0, nlat, nlon, m, wb, iw, wwbin)
-if (mp1 > ndo1) go to 617
+if (mp1 > ndo1) goto 617
 do 623 k=1, nt
 do 623 i=1, imm1
 twe1 = we(i, 2*mp1-1, k)*wts(i)
@@ -1002,14 +1002,14 @@ br(mp1, np1, k) = br(mp1, np1, k)+vb(i, np1, iv)*tvo2 &
 bi(mp1, np1, k) = bi(mp1, np1, k)+vb(i, np1, iv)*tvo1 &
                              -wb(i, np1, iw)*twe2
 623 continue
-if (mlat == 0) go to 617
+if (mlat == 0) goto 617
 i = imid
 do 624 k=1, nt
 do 624 np1=mp1, ndo1, 2
 br(mp1, np1, k) = br(mp1, np1, k)+wb(i, np1, iw)*we(i, 2*mp1-1, k)*wts(i)
 bi(mp1, np1, k) = bi(mp1, np1, k)-wb(i, np1, iw)*we(i, 2*mp1-2, k)*wts(i)
 624 continue
-617 if (mp2 > ndo2) go to 620
+617 if (mp2 > ndo2) goto 620
 do 621 k=1, nt
 do 621 i=1, imm1
 twe1 = we(i, 2*mp1-1, k)*wts(i)
@@ -1022,7 +1022,7 @@ cr(mp1, np1, k) = cr(mp1, np1, k)-vb(i, np1, iv)*twe2 &
 ci(mp1, np1, k) = ci(mp1, np1, k)-vb(i, np1, iv)*twe1 &
                              -wb(i, np1, iw)*tvo2
 621 continue
-if (mlat == 0) go to 620
+if (mlat == 0) goto 620
 i = imid
 do 622 k=1, nt
 do 622 np1=mp2, ndo2, 2
@@ -1053,7 +1053,7 @@ m = mp1-1
 mp2 = mp1+1
 call sphere_aux%vbin(2, nlat, nlon, m, vb, iv, wvbin)
 call sphere_aux%wbin(2, nlat, nlon, m, wb, iw, wwbin)
-if (mp1 > ndo1) go to 720
+if (mp1 > ndo1) goto 720
 do 723 k=1, nt
 do 723 i=1, imm1
 twe1 = we(i, 2*mp1-1, k)*wts(i)
@@ -1066,7 +1066,7 @@ br(mp1, np1, k) = br(mp1, np1, k)+vb(i, np1, iv)*tvo2 &
 bi(mp1, np1, k) = bi(mp1, np1, k)+vb(i, np1, iv)*tvo1 &
                              -wb(i, np1, iw)*twe2
 723 continue
-if (mlat == 0) go to 720
+if (mlat == 0) goto 720
 i = imid
 do 724 k=1, nt
 do 724 np1=mp1, ndo1, 2
@@ -1097,7 +1097,7 @@ m = mp1-1
 mp2 = mp1+1
 call sphere_aux%vbin(1, nlat, nlon, m, vb, iv, wvbin)
 call sphere_aux%wbin(1, nlat, nlon, m, wb, iw, wwbin)
-if (mp2 > ndo2) go to 820
+if (mp2 > ndo2) goto 820
 do 821 k=1, nt
 do 821 i=1, imm1
 twe1 = we(i, 2*mp1-1, k)*wts(i)
@@ -1110,7 +1110,7 @@ cr(mp1, np1, k) = cr(mp1, np1, k)-vb(i, np1, iv)*twe2 &
 ci(mp1, np1, k) = ci(mp1, np1, k)-vb(i, np1, iv)*twe1 &
                              -wb(i, np1, iw)*tvo2
 821 continue
-if (mlat == 0) go to 820
+if (mlat == 0) goto 820
 i = imid
 do 822 k=1, nt
 do 822 np1=mp2, ndo2, 2

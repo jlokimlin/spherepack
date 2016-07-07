@@ -1,8 +1,8 @@
 module type_Workspace
 
-    use, intrinsic :: iso_fortran_env, only: &
-        wp => REAL64, &
-        ip => INT32
+    use spherepack_precision, only: &
+        wp, & ! working precision
+        ip ! integer precision
 
     ! Explicit typing only
     implicit none
@@ -52,7 +52,7 @@ contains
         !--------------------------------------------------------------------------------
 
         ! Check if object is usable
-        if (object_to_be_copied%initialized .eqv. .false.) then
+        if (.not.object_to_be_copied%initialized) then
             error stop 'Uninitialized object of class (Workspace): '&
                 //'in assignment (=) '
         end if

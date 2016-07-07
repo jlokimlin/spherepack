@@ -107,15 +107,15 @@ program testvshifte
     !     unsaved work space for nnlon odd
     !     parameter (llwork = nnlon*(5*nnlat+1))
     integer ioff,nlon,nlat,nlat2,j,i,lsave,lwork,ier
-    real pi,dlat,dlon,dlat2,dlon2,lat,long,x,y,z,ex,ey,ez,emz
+    real dlat,dlon,dlat2,dlon2,lat,long,x,y,z,ex,ey,ez,emz
     real err2u,err2v,ue,ve,sint,sinp,cost,cosp
     real uoff(nnlon,nnlat),voff(nnlon,nnlat)
     real ureg(nnlon,nnlatp1),vreg(nnlon,nnlatp1)
     real wsave(llsave),work(llwork)
 
-    write( *, '(A)') ''
-    write( *, '(A)') '     testvshifte *** TEST RUN *** '
-    write( *, '(A)') ''
+    write( *, '(a)') ''
+    write( *, '(a)') '     testvshifte *** TEST RUN *** '
+    write( *, '(a)') ''
 
     !
     !     set resolution, work space lengths, and grid increments
@@ -125,7 +125,6 @@ program testvshifte
     lsave = llsave
     nlat2 = nnlat2
     lwork = llwork
-    pi = acos(-1.0)
     dlat = pi/nlat
     dlon = (pi+pi)/nlon
     dlat2 = 0.5*dlat

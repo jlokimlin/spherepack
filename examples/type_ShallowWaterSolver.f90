@@ -1,15 +1,13 @@
 module type_ShallowWaterSolver
 
-    use, intrinsic :: iso_fortran_env, only: &
-        ip => INT32, &
-        wp => REAL64
-
     use spherepack_library, only: &
+        wp, & ! working precision
+        ip, & ! integer precision
+        PI, &
         Regularsphere
 
     ! Explicit typing only
     implicit none
-
 
     ! Declare derived data type
     type, extends (RegularSphere) :: ShallowWaterSolver
@@ -50,7 +48,6 @@ contains
         !------------------------------------------------------
         ! Dictionary: local variables
         !------------------------------------------------------
-        real (wp), parameter :: PI = acos(-1.0_wp)
         real (wp)            :: thetab, thetae, xe, x
         !------------------------------------------------------
 
@@ -105,7 +102,6 @@ contains
         !--------------------------------------------------------------
         integer (ip)           :: i, j
         real (wp)              :: arg
-        real (wp), parameter   :: PI = acos(-1.0_wp)
         real (wp), allocatable :: w(:)
         !--------------------------------------------------------------
 

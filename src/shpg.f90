@@ -114,9 +114,10 @@
 !
 module module_shpg
 
-    use, intrinsic :: iso_fortran_env, only: &
-        wp => REAL64, &
-        ip => INT32
+    use spherepack_precision, only: &
+        wp, & ! working precision
+        ip, & ! integer precision
+        PI
 
     use type_HFFTpack, only: &
     HFFTpack
@@ -181,13 +182,13 @@ if (nlat<1) return
 ierror = 2
 if (nlon<1) return
 !      ierror = 3
-!      if (isym.lt.0 .or. isym.gt.2) return
+!      if (isym.lt.0_wp .or. isym.gt.2) return
 ierror = 4
 mmax = min(nlat-1, nlon/2)
 if (mtrunc<0 .or. mtrunc>mmax) return
 ierror = 5
 lw1 = 2*(nlat+1)**2
-log2n = log(real(nlon))/log(2.0)
+log2n = log(real(nlon))/log(2.0_wp)
 if (lwshp<lw1+nlon+log2n) return
 ierror = 6
 if (liwshp<4*(nlat+1)) return
@@ -279,7 +280,7 @@ real :: zo
 real :: zort
 !
 real summation, eps, a1, b1, c1, work
-parameter (eps=epsilon(1.0))
+parameter (eps=epsilon(1.0_wp))
 real cp(idp), wx(idp), &
   thet(nlat), gwts(nlat), xx(idp), z(idp), a(4*idp), &
   b(2*idp), ped(idp, idp, 2), pod(idp, idp, 2), u(idp, idp)
@@ -311,11 +312,11 @@ end do
 !
 do n=1, nlat+nlat-2
 dfn = n
-a(n) = sqrt(dfn*(dfn+1.0))
+a(n) = sqrt(dfn*(dfn+1.0_wp))
 end do
 do n=1, nlat-1
 dfn = n
-b(n) = sqrt((dfn+dfn+3.0)/(dfn+dfn-1.0))
+b(n) = sqrt((dfn+dfn+3.0_wp)/(dfn+dfn-1.0_wp))
 end do
 !
 mxtr = min(nlat-1, nlon/2, mtrunc)
@@ -346,7 +347,7 @@ if (m>1.and.n>mxtr) then
 do i=1, nte
 u(i, j+nec) = ped(i, j+nec, ip)
 end do
-go to 207
+goto 207
 end if
 a1 = b(n-1)*a(n+m-3)/a(n+m-1)
 b1 = a(n-m+1)/a(n+m-1)
@@ -369,7 +370,7 @@ ped(i, j+nec, ip) = u(i, j+nec)
 end do
 end do
 end if
-if (nec<=0) go to 200
+if (nec<=0) goto 200
 !
 !     generate orthogonal vector with 
 !     random numbers using Fortran90
@@ -388,11 +389,11 @@ call random_number(xx(1:nte))
 !
 it = 0
 201 do i=1, nte
-z(i) = 0.0
+z(i) = 0.0_wp
 wx(i) = gwts(i)*xx(i)
 end do
 do 220 j=1, nte
-if (j==nec) go to 220
+if (j==nec) goto 220
 call gs(nte, wx, ped(1, j, ip), z)
 220 continue
 !  
@@ -401,7 +402,7 @@ xx(i) = xx(i)-z(i)
 end do
 call normal(nte, xx, idp, gwts)
 it = it+1
-if (it<=2) go to 201
+if (it<=2) goto 201
 do i=1, nte
 ped(i, nec, ip) = xx(i)
 end do
@@ -468,7 +469,7 @@ zo(i, j, ip) = sum1
 if (i/=j) then
 dmax = max(dmax, abs(sum1))
 else
-dmax = max(dmax, abs(sum1-1.0))
+dmax = max(dmax, abs(sum1-1.0_wp))
 end if
 end do
 end do
@@ -494,7 +495,7 @@ call dlfkg(m, n, cp)
 do i=1, nte
 call dlftg (m, n, thet(i), cp, pod(i, j+noc, ip))
 end do
-if (modn>0) pod(nte, j+noc, ip) = 0.0
+if (modn>0) pod(nte, j+noc, ip) = 0.0_wp
 305 continue
 !
 else
@@ -505,7 +506,7 @@ if (m>1.and.n>mxtr) then
 do i=1, nte
 u(i, j+noc) = pod(i, j+noc, ip)
 end do
-go to 304
+goto 304
 end if
 a1 = b(n-1)*a(n+m-3)/a(n+m-1)
 b1 = a(n-m+1)/a(n+m-1)
@@ -521,7 +522,7 @@ u(i, j+noc) = a1*pod(i, j+noc-1, ip) &
    - b1*pod(i, j+noc, ip) + c1*u(i, j+noc-1)    
 end do
 end if
-304 if (modn==1) u(nte, j+noc) = 0.0
+304 if (modn==1) u(nte, j+noc) = 0.0_wp
 307 continue
 do j=1, nom
 do i=1, nte
@@ -530,7 +531,7 @@ end do
 end do
 end if
 !
-if (noc<=0) go to 300
+if (noc<=0) goto 300
 !
 !     old code with nonstandard (s)rand
 !     commented out
@@ -543,14 +544,14 @@ if (noc<=0) go to 300
 !     intrinsic
 !
 call random_number(xx(1:nte))
-if (modn==1) xx(nte) = 0.0
+if (modn==1) xx(nte) = 0.0_wp
 it = 0
 306 do i=1, nte
 z(i) = 0.
 wx(i) = gwts(i)*xx(i)
 end do
 do 330 j=1, nto
-if (j==noc) go to 330
+if (j==noc) goto 330
 call gs(nte, wx, pod(1, j, ip), z(1))
 330 continue
 !  
@@ -559,11 +560,11 @@ xx(i) = xx(i)-z(i)
 end do
 call normal(nte, xx, idp, gwts)
 it = it+1
-if (it<=2) go to 306
+if (it<=2) goto 306
 do i=1, nte
 pod(i, noc, ip) = xx(i)
 end do
-if (modn==1) pod(nte, noc, ip) = 0.0
+if (modn==1) pod(nte, noc, ip) = 0.0_wp
 300 continue
 !
 nmx = nlat-mxtr
@@ -624,7 +625,7 @@ zort(i, j, ip) = sum1
 if (i/=j) then
 dmax = max(dmax, abs(sum1))
 else
-dmax = max(dmax, abs(sum1-1.0))
+dmax = max(dmax, abs(sum1-1.0_wp))
 end if
 end do
 end do
@@ -778,12 +779,12 @@ if (nlat<1) return
 ierror = 2
 if (nlon<1) return
 !      ierror = 3
-!      if (isym.lt.0 .or. isym.gt.2) return
+!      if (isym.lt.0_wp .or. isym.gt.2) return
 ierror = 4
 mmax = min(nlat-1, nlon/2)
 if (mtrunc<0 .or. mtrunc>mmax) return
 ierror = 5
-log2n = log(real(nlon))/log(2.0)
+log2n = log(real(nlon))/log(2.0_wp)
 lw1 = 2*(nlat+1)**2
 if (lwshp<lw1+nlon+log2n) return
 ierror = 6
@@ -819,7 +820,7 @@ call shpg1(nlat, nlon, isym, mtrunc, y, y, idxy, ierror, &
 !
 call hfft%backward(nlat, nlon, y, idxy, wshp(lw1+1), work)
 !
-sn = 1.0/nlon
+sn = 1.0_wp/nlon
 do j=1, nlon
  do i=1, nlat
   y(i, j) = sn*y(i, j)
@@ -915,7 +916,7 @@ end do
 !      sy(i, 3) = sx(i, 3)
 !      end do
 !      end if
-go to 100
+goto 100
 end if
 m = mp1-1
 mpm = max(1, m+m)
@@ -1144,7 +1145,7 @@ if (lag==1) then
 do k=1, kmx
 y(k, 1) = 0.
 end do
-!      if (lc.eq.0) then
+!      if (lc.eq.0_wp) then
 !      do k=1, lr
 !      y(k, 1) = x(k, 1)
 !      end do
@@ -1192,23 +1193,23 @@ integer :: j
 integer :: n
 integer :: nrc
 real a, eps
-parameter (eps=epsilon(1.0))
+parameter (eps=epsilon(1.0_wp))
 dimension a(idp, *), ijs(n)
 !
 !     irc = 0 for columns , or irc = 1 for rows
 !
-if (irc/=0) go to 30
+if (irc/=0) goto 30
 do 20 j=1, nrc
 do i=1, n
 ijs(j) = i
-if (abs(a(i, j)) > eps) go to 20
+if (abs(a(i, j)) > eps) goto 20
 end do
 20 continue
 return
 30 do 50 i=1, nrc
 do j=1, n
 ijs(i) = j
-if (abs(a(i, j)) > eps) go to 50
+if (abs(a(i, j)) > eps) goto 50
 end do
 50 continue
 return
@@ -1251,7 +1252,7 @@ do i=1, n
 sqs = sqs+q(i)*x(i)*x(i)
 end do
 !
-if (sqs /= 0) go to 4
+if (sqs /= 0) goto 4
 write(*, 3)
 3 format(' norm of z is zero in subroutine normal')
 return
@@ -1270,7 +1271,7 @@ integer :: nh
 real x(n), dmax
 nh = (n+1)/2
 dmax = 0.
-if (moe/=0) go to 1
+if (moe/=0) goto 1
 do i=1, nh
 dmax = max(dmax, abs(x(i)-x(n-i+1)))
 x(i) = .5*(x(i)+x(n-i+1))
@@ -1354,7 +1355,7 @@ integer :: nmms2
 real cp, fnum, fden, fnmh, a1, b1, c1, cp2, fnnp1, fnmsq, fk, &
        t1, t2, pm1, sc10, sc20, sc40
 dimension       cp(1)
-parameter (sc10=1024.0)
+parameter (sc10=1024.0_wp)
 parameter (sc20=sc10*sc10)
 parameter (sc40=sc20*sc20)
 !
@@ -1368,28 +1369,28 @@ else if (n-1 == 0) then
 else 
     goto 5
 end if
-2 cp(1) = sqrt(2.0)
+2 cp(1) = sqrt(2.0_wp)
 return
-3 if (ma /= 0) go to 4
+3 if (ma /= 0) goto 4
 cp(1) = sqrt(1.5)
 return
 4 cp(1) = sqrt(.75)
 if (m == -1) cp(1) = -cp(1)
 return
-5 if (mod(n+ma, 2) /= 0) go to 10
+5 if (mod(n+ma, 2) /= 0) goto 10
 nmms2 = (n-ma)/2
 fnum = n+ma+1
 fnmh = n-ma+1
-pm1 = 1.0
-go to 15
+pm1 = 1.0_wp
+goto 15
 10 nmms2 = (n-ma-1)/2
 fnum = n+ma+2
 fnmh = n-ma+2
-pm1 = -1.0
-15 t1 = 1.0/sc20
+pm1 = -1.0_wp
+15 t1 = 1.0_wp/sc20
 nex = 20
-fden = 2.0
-if (nmms2 < 1) go to 20
+fden = 2.0_wp
+if (nmms2 < 1) goto 20
 do 18 i=1, nmms2
 t1 = fnum*t1/fden
 if (t1 > sc20) then
@@ -1399,21 +1400,21 @@ end if
 fnum = fnum+2.
 fden = fden+2.
 18 continue
-20 t1 = t1/2.0**(n-1-nex)
+20 t1 = t1/2.0_wp**(n-1-nex)
 if (mod(ma/2, 2) /= 0) t1 = -t1
 t2 = 1. 
-if (ma == 0) go to 26
+if (ma == 0) goto 26
 do 25 i=1, ma
 t2 = fnmh*t2/(fnmh+pm1)
 fnmh = fnmh+2.
 25 continue
 26 cp2 = t1*sqrt((n+.5)*t2)
 fnnp1 = n*(n+1)
-fnmsq = fnnp1-2.0*ma*ma
+fnmsq = fnnp1-2.0_wp*ma*ma
 l = (n+1)/2
 if (mod(n, 2) == 0 .and. mod(ma, 2) == 0) l = l+1
 cp(l) = cp2
-if (m >= 0) go to 29
+if (m >= 0) goto 29
 if (mod(ma, 2) /= 0) cp(l) = -cp(l)
 29 if (l <= 1) return
 fk = n
@@ -1427,7 +1428,7 @@ a1 = (fk-2.)*(fk-1.)-fnnp1
 b1 = -2.*(fk*fk-fnmsq)
 c1 = (fk+1.)*(fk+2.)-fnnp1
 cp(l-1) = -(b1*cp(l)+c1*cp(l+1))/a1
-go to 30
+goto 30
 end subroutine dlfkg
 subroutine dlftg (m, n, theta, cp, pb)
 
@@ -1439,8 +1440,8 @@ integer :: n
 integer :: nmod
 dimension cp(1)
 real cp, pb, theta, cdt, sdt, cth, sth, chh
-cdt = cos(2.0*theta)
-sdt = sin(2.0*theta)
+cdt = cos(2.0_wp*theta)
+sdt = sin(2.0_wp*theta)
 nmod=mod(n, 2)
 mmod=mod(abs(m), 2)
 if (nmod< 0) then
@@ -1576,12 +1577,12 @@ real :: sgnd
 !             containing the gaussian weights.
 !
 !     ierror = 0 no errors
-!            = 1 if nlat.le.0
+!            = 1 if nlat.le.0_wp
 !
 !  *****************************************************************
 !
 real theta(nlat), wts(nlat), &
- x, pi, pis2, dtheta, dthalf, cmax, zprev, zlast, zero, &
+ x, HALF_PI, dtheta, dthalf, cmax, zprev, zlast, zero, &
  zhold, pb, dpb, dcor, summation, w, cz
 !
 !     check work space length
@@ -1593,22 +1594,21 @@ ierror = 0
 !     compute weights and points analytically when nlat=1, 2
 !
 if (nlat==1) then
-theta(1) = acos(0.0)
-wts(1) = 2.0
+theta(1) = PI/2
+wts(1) = 2.0_wp
 return
 end if
 if (nlat==2) then
-x = sqrt(1.0/3.0)
+x = sqrt(1.0_wp/3.0_wp)
 theta(1) = acos(x)
 theta(2) = acos(-x)
-wts(1) = 1.0
-wts(2) = 1.0
+wts(1) = 1.0_wp
+wts(2) = 1.0_wp
 return
 end if
-eps = sqrt(epsilon(1.0))
+eps = sqrt(epsilon(1.0_wp))
 eps = eps*sqrt(eps)
-pis2 = 2.0*atan(1.0)
-pi = pis2+pis2 
+HALF_PI = pi/2
 mnlat = mod(nlat, 2)
 ns2 = nlat/2
 nhalf = (nlat+1)/2
@@ -1616,18 +1616,18 @@ idx = ns2+2
 !
 call cpdp1 (nlat, cz, theta(ns2+1), wts(ns2+1))
 !
-dtheta = pis2/nhalf
-dthalf = dtheta/2.0
+dtheta = HALF_PI/nhalf
+dthalf = dtheta/2.0_wp
 cmax = .2*dtheta
 !
 !     estimate first point next to theta = pi/2
 !
 if (mnlat/=0) then
-zero = pis2-dtheta
-zprev = pis2
+zero = HALF_PI-dtheta
+zprev = HALF_PI
 nix = nhalf-1
 else
-zero = pis2-dthalf
+zero = HALF_PI-dthalf
 nix = nhalf
 end if
 9 it = 0
@@ -1638,11 +1638,11 @@ zlast = zero
 !
 call tpdp1 (nlat, zero, cz, theta(ns2+1), wts(ns2+1), pb, dpb)
 dcor = pb/dpb
-sgnd = 1.0
-if (dcor /= 0.0) sgnd = dcor/abs(dcor)
+sgnd = 1.0_wp
+if (dcor /= 0.0_wp) sgnd = dcor/abs(dcor)
 dcor = sgnd*min(abs(dcor), cmax)
 zero = zero-dcor
-if (abs(zero-zlast)>eps*abs(zero)) go to 10
+if (abs(zero-zlast)>eps*abs(zero)) goto 10
 theta(nix) = zero
 zhold = zero
 !      wts(nix) = (nlat+nlat+1)/(dpb*dpb)
@@ -1651,29 +1651,29 @@ zhold = zero
 !
 wts(nix) = (nlat+nlat+1)/(dpb+pb*cos(zlast)/sin(zlast))**2
 nix = nix-1
-if (nix==0) go to 30
-if (nix==nhalf-1)  zero = 3.0*zero-pi
+if (nix==0) goto 30
+if (nix==nhalf-1)  zero = 3.0_wp*zero-pi
 if (nix<nhalf-1)  zero = zero+zero-zprev
 zprev = zhold
-go to 9
+goto 9
 !
 !     extend points and weights via symmetries
 !
 30 if (mnlat/=0) then
-theta(nhalf) = pis2
-call tpdp1 (nlat, pis2, cz, theta(ns2+1), wts(ns2+1), pb, dpb)
+theta(nhalf) = HALF_PI
+call tpdp1 (nlat, HALF_PI, cz, theta(ns2+1), wts(ns2+1), pb, dpb)
 wts(nhalf) = (nlat+nlat+1)/(dpb*dpb)
 end if
 do i=1, ns2
 wts(nlat-i+1) = wts(i)
 theta(nlat-i+1) = pi-theta(i)
 end do
-summation = 0.0
+summation = 0.0_wp
 do i=1, nlat
 summation = summation+wts(i)
 end do
 do i=1, nlat
-wts(i) = 2.0*wts(i)/summation
+wts(i) = 2.0_wp*wts(i)/summation
 end do
 return
 end subroutine gaqdp
@@ -1694,34 +1694,34 @@ integer :: ncp
 real cp(n/2+1), dcp(n/2+1), &
  t1, t2, t3, t4, cz
 ncp = (n+1)/2
-t1 = -1.0
-t2 = n+1.0
-t3 = 0.0
-t4 = n+n+1.0
+t1 = -1.0_wp
+t2 = n+1.0_wp
+t3 = 0.0_wp
+t4 = n+n+1.0_wp
 if (mod(n, 2)==0) then
-cp(ncp) = 1.0
+cp(ncp) = 1.0_wp
 do j = ncp, 2, -1
-t1 = t1+2.0
-t2 = t2-1.0
-t3 = t3+1.0
-t4 = t4-2.0
+t1 = t1+2.0_wp
+t2 = t2-1.0_wp
+t3 = t3+1.0_wp
+t4 = t4-2.0_wp
 cp(j-1) = (t1*t2)/(t3*t4)*cp(j)
 end do
-t1 = t1+2.0
-t2 = t2-1.0
-t3 = t3+1.0
-t4 = t4-2.0
+t1 = t1+2.0_wp
+t2 = t2-1.0_wp
+t3 = t3+1.0_wp
+t4 = t4-2.0_wp
 cz = (t1*t2)/(t3*t4)*cp(1)
 do j=1, ncp
 dcp(j) = (j+j)*cp(j)
 end do
 else
-cp(ncp) = 1.0
+cp(ncp) = 1.0_wp
 do j = ncp-1, 1, -1
-t1 = t1+2.0
-t2 = t2-1.0
-t3 = t3+1.0
-t4 = t4-2.0
+t1 = t1+2.0_wp
+t2 = t2-1.0_wp
+t3 = t3+1.0_wp
+t4 = t4-2.0_wp
 cp(j) = (t1*t2)/(t3*t4)*cp(j+1)
 end do
 do j=1, ncp
@@ -1743,15 +1743,15 @@ real cp(n/2+1), dcp(n/2+1), cz, &
   pb, dpb, fn, theta, cdt, sdt, cth, sth, chh
 !
 fn = n
-cdt = cos(2.0*theta)
-sdt = sin(2.0*theta)
+cdt = cos(2.0_wp*theta)
+sdt = sin(2.0_wp*theta)
 if (mod(n, 2) ==0) then
 !
 !     n even
 !
 kdo = n/2
 pb = .5*cz
-dpb = 0.0
+dpb = 0.0_wp
 if (n > 0) then
 cth = cdt
 sth = sdt
@@ -1770,8 +1770,8 @@ else
 !     n odd
 !
 kdo = (n+1)/2
-pb = 0.0
-dpb = 0.0
+pb = 0.0_wp
+dpb = 0.0_wp
 cth = cos(theta)
 sth = sin(theta)
 do 190 k=1, kdo

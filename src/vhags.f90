@@ -320,9 +320,10 @@
 !
 module module_vhags
 
-    use, intrinsic :: iso_fortran_env, only: &
-        wp => REAL64, &
-        ip => INT32
+    use spherepack_precision, only: &
+        wp, & ! working precision
+        ip, & ! integer precision
+        PI
 
     use type_HFFTpack, only: &
         HFFTpack
@@ -660,8 +661,8 @@ contains
             type (HFFTpack)      :: hfft
 
             nlp1 = nlat+1
-            tsn = 2.0/nlon
-            fsn = 4.0/nlon
+            tsn = 2.0_wp/nlon
+            fsn = 4.0_wp/nlon
             mlat = mod(nlat, 2)
             mlon = mod(nlon, 2)
             mmax = min(nlat, (nlon+1)/2)
@@ -723,8 +724,8 @@ contains
                     do k=1, nt
                         do mp1=1, mmax
                             do np1=mp1, nlat
-                                br(mp1, np1, k) = 0.0
-                                bi(mp1, np1, k) = 0.0
+                                br(mp1, np1, k) = 0.0_wp
+                                bi(mp1, np1, k) = 0.0_wp
                             end do
                         end do
                     end do
@@ -738,8 +739,8 @@ contains
                     do k=1, nt
                         do mp1=1, mmax
                             do np1=mp1, nlat
-                                cr(mp1, np1, k) = 0.0
-                                ci(mp1, np1, k) = 0.0
+                                cr(mp1, np1, k) = 0.0_wp
+                                ci(mp1, np1, k) = 0.0_wp
                             end do
                         end do
                     end do
@@ -1442,7 +1443,6 @@ contains
             !----------------------------------------------------------------------
             integer (ip)         :: i, local_error_flag, id, ix, iy
             integer (ip)         :: m, mn, n, nm, np, nz
-            real (wp), parameter :: PI = acos(-1.0_wp)
             real (wp)            :: abel, bbel, cbel, dcf
             integer (ip)         :: dummy_integer
             real (wp)            :: dummy_real

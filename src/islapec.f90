@@ -259,9 +259,9 @@
 !
 module module_islapec
 
-    use, intrinsic :: iso_fortran_env, only: &
-        wp => REAL64, &
-        ip => INT32
+    use spherepack_precision, only: &
+        wp, & ! working precision
+        ip ! integer precision
 
     use module_shsec, only: &
         shsec

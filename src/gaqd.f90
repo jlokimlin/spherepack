@@ -78,9 +78,10 @@
 !
 module module_gaqd
 
-    use, intrinsic :: iso_fortran_env, only: &
-        wp => REAL64, &
-        ip => INT32
+    use spherepack_precision, only: &
+        wp, & ! working precision
+        ip, & ! integer precision
+        PI
 
     ! Explicit typing only
     implicit none
@@ -106,8 +107,7 @@ contains
         !----------------------------------------------------------------------
         integer (ip)         :: i, idx, it, nix
         integer (ip)         :: nhalf, half_nlat
-        real (wp), parameter :: PI = acos(-1.0_wp)
-        real (wp), parameter :: HALF_PI = acos(0.0_wp)
+        real (wp), parameter :: HALF_PI = PI/2
         real (wp), parameter :: SQRT3 = sqrt(3.0_wp)
         real (wp)            :: dt, half_dt
         real (wp)            :: zprev, zlast, zero

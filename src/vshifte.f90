@@ -50,7 +50,7 @@
 !     grid" in (ureg, vreg) (which includes poles).  the transfer can go from
 !     (uoff, voff) to (ureg, vreg) or vice versa (see ioff).  the grids which
 !     underly the vector fields are described below.  the north and south
-!     pole are at 0.5*pi and-0.5*pi radians respectively (pi=acos(-1.0)).
+!     pole are at 0.5*pi and-0.5*pi radians respectively.
 !     uoff and ureg are the east longitudinal vector data components.  voff
 !     and vreg are the latitudinal vector data components.
 !
@@ -249,9 +249,10 @@
 !
 module module_vshifte
 
-    use, intrinsic :: iso_fortran_env, only: &
-        wp => REAL64, &
-        ip => INT32
+    use spherepack_precision, only: &
+        wp, & ! working precision
+        ip, & ! integer precision
+        PI
 
     use type_HFFTpack, only: &
         HFFTpack
@@ -538,7 +539,7 @@ contains
         !
         integer ioff, nlat, nlon, nlat2, isav, ier
         real wsav(lsav)
-        real pi, dlat, dlon, dp
+        real dlat, dlon, dp
         ier = 1
         if (ioff*(ioff-1)/=0) return
         ier = 2
@@ -548,7 +549,6 @@ contains
         ier = 4
         if (lsav < 2*(2*nlat+nlon+16)) return
         ier = 0
-        pi = acos(-1.0)
         !
         !     set lat, long increments
         !

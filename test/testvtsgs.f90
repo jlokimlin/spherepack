@@ -35,7 +35,9 @@ program tvtsgs
     use, intrinsic :: iso_fortran_env, only: &
         stdout => OUTPUT_UNIT
 
-    use spherepack_library
+    use spherepack_library, only: &
+        pi, shagsi, vhagsi, vhsgsi, vtsgsi, &
+        gaqd, vhsgs, shags, shsgs, vtsgs
 
     implicit none
     real :: a
@@ -75,7 +77,6 @@ program tvtsgs
     integer :: np1
     integer :: nt
     real :: phi
-    real :: pi
     real :: s
     real :: theta
     real :: tmp
@@ -113,241 +114,241 @@ program tvtsgs
         wvts(1098771),work(165765)
     real dthet,dwts,dwork(25741)
     !
-    write( *, '(A)') ''
-    write( *, '(A)') '     testvtsgs *** TEST RUN *** '
-    write( *, '(A)') ''
+    write( *, '(a)') ''
+    write( *, '(a)') '     testvtsgs *** TEST RUN *** '
+    write( *, '(a)') ''
 
-    lwshi = 608411
-    lwvha = 1098771
-    lwvhs = 1098771
-    lwvts = 1098771
-    lwork = 165765
-    ldwork = 25741
-    !
-    pi = acos(-1.0)
-    hpi = pi/2.
-    dtr = pi/180
-    isym = 0
-    nt = 1
-    !
-    !     initialize spherepack routines
-    !
-    call shagsi(nlat,nlon,wshi,lwshi,work,lwork,dwork,ldwork,ierror)
-    if (ierror /= 0) write( stdout, 55) ierror
-55  format('testvtsgs:  error' i4 ' in shigs')
-    call vhagsi(nlat,nlon,wvha,lwvha,dwork,ldwork,ierror)
-    if (ierror /= 0) write( stdout, 57) ierror
-57  format('testvtsgs:  error' i4 ' in vhagsi')
-    call vhsgsi(nlat,nlon,wvhs,lwvhs,dwork,ldwork,ierror)
-    if (ierror /= 0) write( stdout, 58) ierror
-58  format(' testvtsgs: error' i4 ' in vhsgsi')
-    call vtsgsi(nlat,nlon,wvts,lwvts,work,lwork,dwork,ldwork,ierror)
-    if (ierror /= 0) write( stdout, 59) ierror
-59  format(' testvtsgs: error' i4 ' in vtsgsi')
-    !
-    !     compute gauss points and weights
-    !
-    call gaqd(nlat,dthet,dwts,dummy_variable,lwork,ierror)
-    !
-    !     zero vector harmonic coefficients
-    !
-    br = 0.0
-    bi = 0.0
-    cr = 0.0
-    ci = 0.0
-    !
-    !     initialize arrays with random numbers
-    !     old style non-portable commented out
-    !
-    !     call srand(227)
-    !     do np1=1,nlat-1
-    !     do mp1=1,np1
-    !     br(mp1,np1) = rand()
-    !     bi(mp1,np1) = rand()
-    !     cr(mp1,np1) = rand()
-    !     ci(mp1,np1) = rand()
-    !     end do
-    !     end do
-    !
-    !     set vector harmonic coefficients
-    !     (new style using standard Fortran90
-    !     intrinsics
-    !
-    call random_seed()
+!    lwshi = 608411
+!    lwvha = 1098771
+!    lwvhs = 1098771
+!    lwvts = 1098771
+!    lwork = 165765
+!    ldwork = 25741
+!    !
+!    hpi = pi/2.
+!    dtr = pi/180
+!    isym = 0
+!    nt = 1
+!    !
+!    !     initialize spherepack routines
+!    !
+!    call shagsi(nlat,nlon,wshi,lwshi,work,lwork,dwork,ldwork,ierror)
+!    if (ierror /= 0) write( stdout, 55) ierror
+!55  format('testvtsgs:  error' i4 ' in shigs')
+!    call vhagsi(nlat,nlon,wvha,lwvha,dwork,ldwork,ierror)
+!    if (ierror /= 0) write( stdout, 57) ierror
+!57  format('testvtsgs:  error' i4 ' in vhagsi')
+!    call vhsgsi(nlat,nlon,wvhs,lwvhs,dwork,ldwork,ierror)
+!    if (ierror /= 0) write( stdout, 58) ierror
+!58  format(' testvtsgs: error' i4 ' in vhsgsi')
+!    call vtsgsi(nlat,nlon,wvts,lwvts,work,lwork,dwork,ldwork,ierror)
+!    if (ierror /= 0) write( stdout, 59) ierror
+!59  format(' testvtsgs: error' i4 ' in vtsgsi')
+!    !
+!    !     compute gauss points and weights
+!    !
+!    call gaqd(nlat,dthet,dwts,dummy_variable,lwork,ierror)
+!    !
+!    !     zero vector harmonic coefficients
+!    !
+!    br = 0.0
+!    bi = 0.0
+!    cr = 0.0
+!    ci = 0.0
+!    !
+!    !     initialize arrays with random numbers
+!    !     old style non-portable commented out
+!    !
+!    !     call srand(227)
+!    !     do np1=1,nlat-1
+!    !     do mp1=1,np1
+!    !     br(mp1,np1) = rand()
+!    !     bi(mp1,np1) = rand()
+!    !     cr(mp1,np1) = rand()
+!    !     ci(mp1,np1) = rand()
+!    !     end do
+!    !     end do
+!    !
+!    !     set vector harmonic coefficients
+!    !     (new style using standard Fortran90
+!    !     intrinsics
+!    !
+!    call random_seed()
+!
+!    call random_number(tmp)
+!    do np1=1,nlat-1
+!        do mp1=1,np1
+!            br(mp1,np1) = tmp(mp1,np1)
+!        end do
+!    end do
+!    !
+!    call random_number(tmp)
+!    do np1=1,nlat-1
+!        do mp1=1,np1
+!            bi(mp1,np1) = tmp(mp1,np1)
+!        end do
+!    end do
+!    !
+!    call random_number(tmp)
+!    do np1=1,nlat-1
+!        do mp1=1,np1
+!            cr(mp1,np1) = tmp(mp1,np1)
+!        end do
+!    end do
+!    !
+!    call random_number(tmp)
+!    do np1=1,nlat-1
+!        do mp1=1,np1
+!            ci(mp1,np1) = tmp(mp1,np1)
+!        end do
+!    end do
+!    !
+!    call vhsgs(nlat,nlon,0,1,v,w,idp,jdp,br,bi, &
+!        cr,ci,mdab,ndab,wvhs,lwvhs,work,lwork,ierror)
+!    if (ierror /= 0) write( stdout, 79) ierror
+!79  format(' testvtsgs: error' i4 ' in vhsgs at point 1')
+!    !
+!    !==> Initialize
+!    u = 0.0
+!    !
+!    !     convert to cartesian coordinates
+!    !
+!    dphi = 2.*pi/nlon
+!    do j=1,nlon
+!        phi = (j-1)*dphi
+!        do i=1,nlat
+!            theta = dthet(i)
+!            call sph2cart(theta,phi,u(i,j),v(i,j),w(i,j),x(i,j),y(i,j),z(i,j))
+!        end do
+!    end do
+!    !
+!    !     compute harmonic components of x component
+!    !
+!    call shags(nlat,nlon,0,1,x,idp,jdp,a(1,1,1),b(1,1,1), &
+!        mdab,ndab,wshi,lwshi,work,lwork,ierror)
+!    if (ierror /= 0) write( stdout, 16) ierror
+!16  format(' testvtsgs: error' i4 ' in shags at point 2')
+!    !
+!    !     write harmonic coefficients for x
+!    !
+!    !      write( stdout, 20)
+!    ! 20   format(//'  harmonic coefficients for x'//)
+!    !      do mp1=1,nlat
+!    !      do np1=mp1,nlat
+!    !      write( stdout, 5) mp1,np1,a(mp1,np1,1),b(mp1,np1,1)
+!    ! 5    format(2i5,1p2e15.6)
+!    !      end do
+!    !      end do
+!    !
+!    !     compute harmonic components of y component
+!    !
+!    call shags(nlat,nlon,0,1,y,idp,jdp,a(1,1,2),b(1,1,2), &
+!        mdab,ndab,wshi,lwshi,work,lwork,ierror)
+!    if (ierror /= 0) write( stdout, 17) ierror
+!17  format(' testvtsgs: error' i4 ' in shags at point 3')
+!    !
+!    !     write harmonic coefficients for y
+!    !
+!    !      write( stdout, 21)
+!    ! 21   format(//'  harmonic coefficients for y'//)
+!    !      do mp1=1,nlat
+!    !      do np1=mp1,nlat
+!    !      write( stdout, 5) mp1,np1,a(mp1,np1,2),b(mp1,np1,2)
+!    !      end do
+!    !      end do
+!    !
+!    !     compute harmonic components of z component
+!    !
+!    call shags(nlat,nlon,0,1,z,idp,jdp,a(1,1,3),b(1,1,3), &
+!        mdab,ndab,wshi,lwshi,work,lwork,ierror)
+!    if (ierror /= 0) write( stdout, 18) ierror
+!18  format(' testvtsgs: error' i4 ' in shags at point 4')
+!    !
+!    !     write harmonic coefficients for z
+!    !
+!    !      write( stdout, 22)
+!    ! 22   format(//'  harmonic coefficients for z'//)
+!    !      do mp1=1,nlat
+!    !      do np1=mp1,nlat
+!    !      write( stdout, 5) mp1,np1,a(mp1,np1,3),b(mp1,np1,3)
+!    !      end do
+!    !      end do
+!    !
+!    !     compute partials of x, y, and z wrt z
+!    !
+!    call dbdz(nlat,nlat,a(1,1,1),b(1,1,1),da(1,1,1,3),db(1,1,1,3))
+!    call dbdz(nlat,nlat,a(1,1,2),b(1,1,2),da(1,1,2,3),db(1,1,2,3))
+!    call dbdz(nlat,nlat,a(1,1,3),b(1,1,3),da(1,1,3,3),db(1,1,3,3))
+!    !
+!    !     compute partials of x, y, and z wrt y
+!    !
+!    call dbdy(nlat,nlat,a(1,1,1),b(1,1,1),da(1,1,1,2),db(1,1,1,2))
+!    call dbdy(nlat,nlat,a(1,1,2),b(1,1,2),da(1,1,2,2),db(1,1,2,2))
+!    call dbdy(nlat,nlat,a(1,1,3),b(1,1,3),da(1,1,3,2),db(1,1,3,2))
+!    !
+!    !     compute partials of x, y, and z wrt x
+!    !
+!    call dbdx(nlat,nlat,a(1,1,1),b(1,1,1),da(1,1,1,1),db(1,1,1,1))
+!    call dbdx(nlat,nlat,a(1,1,2),b(1,1,2),da(1,1,2,1),db(1,1,2,1))
+!    call dbdx(nlat,nlat,a(1,1,3),b(1,1,3),da(1,1,3,1),db(1,1,3,1))
+!    !
+!    !     transform cartesian jacobian to physical space
+!    !
+!    call shsgs(nlat,nlon,0,9,c,idp,jdp,da,db,idp,idp, &
+!        wshi,lwshi,work,lwork,ierror)
+!    if (ierror /= 0) write( stdout, 19) ierror
+!19  format(' testvtsgs: error' i4 ' in shsgs at point 5')
+!    !
+!    !     convert to jacobian to spherical coordinates
+!    !        (multiply cartesian jacobian by q)
+!    !
+!    do k=1,3
+!        do j=1,nlon
+!            phi = (j-1)*dphi
+!            do i=1,nlat
+!                theta = dthet(i)
+!                call cart2sph(theta,phi,c(i,j,1,k),c(i,j,2,k),c(i,j,3,k), &
+!                    s(i,j,1,k),s(i,j,2,k),s(i,j,3,k))
+!            end do
+!        end do
+!    end do
+!    !
+!    !     form s = (q sq**T)**T
+!    !
+!    do k=1,3
+!        do j=1,nlon
+!            phi = (j-1)*dphi
+!            do i=1,nlat
+!                theta = dthet(i)
+!                call cart2sph(theta,phi,s(i,j,k,1),s(i,j,k,2),s(i,j,k,3), &
+!                    c(i,j,k,1),c(i,j,k,2),c(i,j,k,3))
+!            end do
+!        end do
+!    end do
+!
+!    do j=1,nlon
+!        do i=1,nlat
+!            do iq=1,3
+!                do jq=1,3
+!                    s(i,j,iq,jq) = c(i,j,iq,jq)
+!                end do
+!            end do
+!        end do
+!    end do
+!    !
+!    !     check derivative program
+!    !
+!    call vtsgs(nlat,nlon,0,1,vt,wt,idp,jdp,br,bi,cr,ci, &
+!        mdab,ndab,wvts,lwvts,work,lwork,ierror)
+!    if (ierror /= 0) write( stdout, 4) ierror
+!4   format(' testvtsgs: error' i4 ' in vtsgs during initialization')
+!
+!    dmax1 = maxval(abs(s(:,:,2,2)-vt))
+!    dmax2 = maxval(abs(s(:,:,3,2)-wt))
+!
+!    write( stdout, 2) dmax1,dmax2
+!2   format(' testvtsgs: error in vt '1pe15.6' error in wt '1pe15.6)
 
-    call random_number(tmp)
-    do np1=1,nlat-1
-        do mp1=1,np1
-            br(mp1,np1) = tmp(mp1,np1)
-        end do
-    end do
-    !
-    call random_number(tmp)
-    do np1=1,nlat-1
-        do mp1=1,np1
-            bi(mp1,np1) = tmp(mp1,np1)
-        end do
-    end do
-    !
-    call random_number(tmp)
-    do np1=1,nlat-1
-        do mp1=1,np1
-            cr(mp1,np1) = tmp(mp1,np1)
-        end do
-    end do
-    !
-    call random_number(tmp)
-    do np1=1,nlat-1
-        do mp1=1,np1
-            ci(mp1,np1) = tmp(mp1,np1)
-        end do
-    end do
-    !
-    call vhsgs(nlat,nlon,0,1,v,w,idp,jdp,br,bi, &
-        cr,ci,mdab,ndab,wvhs,lwvhs,work,lwork,ierror)
-    if (ierror /= 0) write( stdout, 79) ierror
-79  format(' testvtsgs: error' i4 ' in vhsgs at point 1')
-    !
-    !==> Initialize
-    u = 0.0
-    !
-    !     convert to cartesian coordinates
-    !
-    dphi = 2.*pi/nlon
-    do j=1,nlon
-        phi = (j-1)*dphi
-        do i=1,nlat
-            theta = dthet(i)
-            call sph2cart(theta,phi,u(i,j),v(i,j),w(i,j),x(i,j),y(i,j),z(i,j))
-        end do
-    end do
-    !
-    !     compute harmonic components of x component
-    !
-    call shags(nlat,nlon,0,1,x,idp,jdp,a(1,1,1),b(1,1,1), &
-        mdab,ndab,wshi,lwshi,work,lwork,ierror)
-    if (ierror /= 0) write( stdout, 16) ierror
-16  format(' testvtsgs: error' i4 ' in shags at point 2')
-    !
-    !     write harmonic coefficients for x
-    !
-    !      write( stdout, 20)
-    ! 20   format(//'  harmonic coefficients for x'//)
-    !      do mp1=1,nlat
-    !      do np1=mp1,nlat
-    !      write( stdout, 5) mp1,np1,a(mp1,np1,1),b(mp1,np1,1)
-    ! 5    format(2i5,1p2e15.6)
-    !      end do
-    !      end do
-    !
-    !     compute harmonic components of y component
-    !
-    call shags(nlat,nlon,0,1,y,idp,jdp,a(1,1,2),b(1,1,2), &
-        mdab,ndab,wshi,lwshi,work,lwork,ierror)
-    if (ierror /= 0) write( stdout, 17) ierror
-17  format(' testvtsgs: error' i4 ' in shags at point 3')
-    !
-    !     write harmonic coefficients for y
-    !
-    !      write( stdout, 21)
-    ! 21   format(//'  harmonic coefficients for y'//)
-    !      do mp1=1,nlat
-    !      do np1=mp1,nlat
-    !      write( stdout, 5) mp1,np1,a(mp1,np1,2),b(mp1,np1,2)
-    !      end do
-    !      end do
-    !
-    !     compute harmonic components of z component
-    !
-    call shags(nlat,nlon,0,1,z,idp,jdp,a(1,1,3),b(1,1,3), &
-        mdab,ndab,wshi,lwshi,work,lwork,ierror)
-    if (ierror /= 0) write( stdout, 18) ierror
-18  format(' testvtsgs: error' i4 ' in shags at point 4')
-    !
-    !     write harmonic coefficients for z
-    !
-    !      write( stdout, 22)
-    ! 22   format(//'  harmonic coefficients for z'//)
-    !      do mp1=1,nlat
-    !      do np1=mp1,nlat
-    !      write( stdout, 5) mp1,np1,a(mp1,np1,3),b(mp1,np1,3)
-    !      end do
-    !      end do
-    !
-    !     compute partials of x, y, and z wrt z
-    !
-    call dbdz(nlat,nlat,a(1,1,1),b(1,1,1),da(1,1,1,3),db(1,1,1,3))
-    call dbdz(nlat,nlat,a(1,1,2),b(1,1,2),da(1,1,2,3),db(1,1,2,3))
-    call dbdz(nlat,nlat,a(1,1,3),b(1,1,3),da(1,1,3,3),db(1,1,3,3))
-    !
-    !     compute partials of x, y, and z wrt y
-    !
-    call dbdy(nlat,nlat,a(1,1,1),b(1,1,1),da(1,1,1,2),db(1,1,1,2))
-    call dbdy(nlat,nlat,a(1,1,2),b(1,1,2),da(1,1,2,2),db(1,1,2,2))
-    call dbdy(nlat,nlat,a(1,1,3),b(1,1,3),da(1,1,3,2),db(1,1,3,2))
-    !
-    !     compute partials of x, y, and z wrt x
-    !
-    call dbdx(nlat,nlat,a(1,1,1),b(1,1,1),da(1,1,1,1),db(1,1,1,1))
-    call dbdx(nlat,nlat,a(1,1,2),b(1,1,2),da(1,1,2,1),db(1,1,2,1))
-    call dbdx(nlat,nlat,a(1,1,3),b(1,1,3),da(1,1,3,1),db(1,1,3,1))
-    !
-    !     transform cartesian jacobian to physical space
-    !
-    call shsgs(nlat,nlon,0,9,c,idp,jdp,da,db,idp,idp, &
-        wshi,lwshi,work,lwork,ierror)
-    if (ierror /= 0) write( stdout, 19) ierror
-19  format(' testvtsgs: error' i4 ' in shsgs at point 5')
-    !
-    !     convert to jacobian to spherical coordinates
-    !        (multiply cartesian jacobian by q)
-    !
-    do k=1,3
-        do j=1,nlon
-            phi = (j-1)*dphi
-            do i=1,nlat
-                theta = dthet(i)
-                call cart2sph(theta,phi,c(i,j,1,k),c(i,j,2,k),c(i,j,3,k), &
-                    s(i,j,1,k),s(i,j,2,k),s(i,j,3,k))
-            end do
-        end do
-    end do
-    !
-    !     form s = (q sq**T)**T
-    !
-    do k=1,3
-        do j=1,nlon
-            phi = (j-1)*dphi
-            do i=1,nlat
-                theta = dthet(i)
-                call cart2sph(theta,phi,s(i,j,k,1),s(i,j,k,2),s(i,j,k,3), &
-                    c(i,j,k,1),c(i,j,k,2),c(i,j,k,3))
-            end do
-        end do
-    end do
-
-    do j=1,nlon
-        do i=1,nlat
-            do iq=1,3
-                do jq=1,3
-                    s(i,j,iq,jq) = c(i,j,iq,jq)
-                end do
-            end do
-        end do
-    end do
-    !
-    !     check derivative program
-    !
-    call vtsgs(nlat,nlon,0,1,vt,wt,idp,jdp,br,bi,cr,ci, &
-        mdab,ndab,wvts,lwvts,work,lwork,ierror)
-    if (ierror /= 0) write( stdout, 4) ierror
-4   format(' testvtsgs: error' i4 ' in vtsgs during initialization')
-
-    dmax1 = maxval(abs(s(:,:,2,2)-vt))
-    dmax2 = maxval(abs(s(:,:,3,2)-wt))
-
-    write( stdout, 2) dmax1,dmax2
-2   format(' testvtsgs: error in vt '1pe15.6' error in wt '1pe15.6)
 end program tvtsgs
 
 
@@ -568,7 +569,7 @@ subroutine dbdz(l,mdim,a,b,dza,dzb)
     !     b and dzb, i.e. the arrays a and b can be overwritten by
     !     dza and dzb respectively.
     !
-    dimension a(mdim,1),b(mdim,1),dza(mdim,1),dzb(mdim,1)
+    dimension a(mdim,*),b(mdim,*),dza(mdim,*),dzb(mdim,*)
     lm1 = l-1
     do np1=1,lm1
         n = np1-1
@@ -588,5 +589,4 @@ subroutine dbdz(l,mdim,a,b,dza,dzb)
     end do
 
 end subroutine dbdz
-
 

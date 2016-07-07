@@ -2,6 +2,6 @@ program main
 
     use spherepack_library
 
-    print '(A)', 'Successful build!'
+    print '(a)', 'Successful build!'
 
 end program main

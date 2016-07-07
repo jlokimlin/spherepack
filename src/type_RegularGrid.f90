@@ -1,8 +1,9 @@
 module type_RegularGrid
 
-    use, intrinsic :: iso_fortran_env, only: &
-        wp => REAL64, &
-        ip => INT32
+    use spherepack_precision, only: &
+        wp, & ! working precision
+        ip, & ! integer precision
+        PI
 
     use type_SphericalGrid, only: &
         SphericalGrid
@@ -168,8 +169,7 @@ contains
         !----------------------------------------------------------------------
         ! Dictionary: local variables
         !----------------------------------------------------------------------
-        integer (ip)         :: k !! counter
-        real (wp), parameter :: PI = acos(-1.0_wp)
+        integer (ip) :: k !! counter
         !----------------------------------------------------------------------
 
         !

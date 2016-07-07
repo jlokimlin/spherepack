@@ -67,7 +67,7 @@
 !
 !            lambda(j) = (j-1)*2*pi/nlon
 !
-!     on the sphere (pi=acos(-1.0)).
+!     on the sphere.
 !
 !
 !     input parameters
@@ -236,9 +236,9 @@
 !
 module module_isfvpec
 
-    use, intrinsic :: iso_fortran_env, only: &
-        wp => REAL64, &
-        ip => INT32
+    use spherepack_precision, only: &
+        wp, & ! working precision
+        ip ! integer precision
 
     use module_vhsec, only: &
         vhsec

@@ -237,19 +237,19 @@ contains
                 !==> Print earlier output from platform with 64-bit floating point
                 !    arithmetic followed by the output from this computer
                 !
-                write( stdout, '(A)') ''
-                write( stdout, '(A)') '     tvha *** TEST RUN *** '
-                write( stdout, '(A)') ''
-                write( stdout, '(A)') '     grid type = '//sphere_type%grid%grid_type
-                write( stdout, '(A)') '     Testing vector analysis and synthesis'
+                write( stdout, '(a)') ''
+                write( stdout, '(a)') '     tvha *** TEST RUN *** '
+                write( stdout, '(a)') ''
+                write( stdout, '(a)') '     grid type = '//sphere_type%grid%grid_type
+                write( stdout, '(a)') '     Testing vector analysis and synthesis'
                 write( stdout, '(2(A,I2))') '     nlat = ', NLATS,' nlon = ', NLONS
-                write( stdout, '(A)') '     Previous 64 bit floating point arithmetic result '
-                write( stdout, '(A)') previous_polar_error
-                write( stdout, '(A)') previous_azimuthal_error
-                write( stdout, '(A)') '     The output from your computer is: '
-                write( stdout, '(A,1pe15.6)') '     polar error     = ', err2v
-                write( stdout, '(A,1pe15.6)') '     azimuthal error = ', err2w
-                write( stdout, '(A)' ) ''
+                write( stdout, '(a)') '     Previous 64 bit floating point arithmetic result '
+                write( stdout, '(a)') previous_polar_error
+                write( stdout, '(a)') previous_azimuthal_error
+                write( stdout, '(a)') '     The output from your computer is: '
+                write( stdout, '(a,1pe15.6)') '     polar error     = ', err2v
+                write( stdout, '(a,1pe15.6)') '     azimuthal error = ', err2w
+                write( stdout, '(a)' ) ''
             end associate
         end associate
         !

@@ -425,9 +425,10 @@
 !
 module module_vhsgs
 
-    use, intrinsic :: iso_fortran_env, only: &
-        wp => REAL64, &
-        ip => INT32
+    use spherepack_precision, only: &
+        wp, & ! working precision
+        ip, & ! integer precision
+        PI
 
     use type_HFFTpack, only: &
         HFFTpack
@@ -1431,7 +1432,6 @@ contains
             integer (ip)         :: i, id, ierror, ix, iy
             integer (ip)         :: lwk, m, mn, n, nm, np, nz
             real (wp)            :: abel, bbel, cbel, dcf, dummy_variable
-            real (wp), parameter :: PI = acos(-1.0_wp)
             type (SpherepackAux) :: sphere_aux
             !----------------------------------------------------------------------
 

@@ -6,15 +6,19 @@ module type_AdvectionSolver
         stdout => OUTPUT_UNIT
 
     use spherepack_library, only: &
-        GaussianSphere
+        GaussianSphere, &
+        PI
 
     ! Explicit typing only
     implicit none
 
+    private
+    public :: DEGREES_TO_RADIANS
+    public :: TIME_TO_CIRCUMVENT_THE_EARTH
+
     !----------------------------------------------------------------------
     ! Dictionary: global variables
     !----------------------------------------------------------------------
-    real (wp),    parameter :: PI = acos(-1.0_wp)
     real (wp),    parameter :: DEGREES_TO_RADIANS = PI/180
     integer (ip), parameter :: TIME_TO_CIRCUMVENT_THE_EARTH = 12*24*3600
     !----------------------------------------------------------------------

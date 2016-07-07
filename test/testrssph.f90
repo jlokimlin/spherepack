@@ -119,8 +119,14 @@
 !
 program testrssph
 
-    use spherepack_library
+    use, intrinsic :: iso_fortran_env, only: &
+        stdout => OUTPUT_UNIT
 
+    use spherepack_library, only: &
+        wp, & ! working precision
+        PI, TWO_PI, trssph, gaqd
+
+    ! Explicit typing only
     implicit none
     !
     !     set grid sizes with parameter statements
@@ -161,7 +167,6 @@ program testrssph
     integer :: lwork
     integer :: lsave
     integer :: ldwork
-    real :: pi
     real :: dlate
     real :: dlone
     real :: dlong
@@ -184,9 +189,7 @@ program testrssph
     !
     !     set grid sizes and dimensions from parameter statements
     !
-    write( *, '(A)') ''
-    write( *, '(A)') '     testrssph *** TEST RUN *** '
-    write( *, '(A)') ''
+    write( stdout, '(/a/)') '     testrssph *** TEST RUN *** '
 
     GAUSSIAN_NLATS = nnlatg
     GAUSSIAN_NLONS = nnlong
@@ -198,23 +201,22 @@ program testrssph
     !
     !     set equally spaced grid increments
     !
-    pi = acos(-1.0)
     dlate = pi/(REGULAR_NLATS-1)
-    dlone = (pi+pi)/REGULAR_NLONS
-    dlong = (pi+pi)/GAUSSIAN_NLONS
+    dlone = (TWO_PI)/REGULAR_NLONS
+    dlong = (TWO_PI)/GAUSSIAN_NLONS
     !
     !     set given data in DATAE from f(x,y,z)= exp(x*y*z) restricted
     !     to nlate by nlone equally spaced grid on the sphere
     !
     do  j=1,REGULAR_NLONS
-        p = (j-1)*dlone
+        p = real(j - 1, kind=wp)*dlone
         cp = cos(p)
         sp = sin(p)
         do i=1,REGULAR_NLATS
             !
             !     set north to south oriented colatitude point
             !
-            t = (i-1)*dlate
+            t = real(i - 1, kind=wp)*dlate
             ct = cos(t)
             st = sin(t)
             xyz = (st*(st*ct*sp*cp))
@@ -244,7 +246,7 @@ program testrssph
     !
     !     print trssph input parameters
     !
-    write(*,100) intl,igride(1),igride(2),REGULAR_NLONS,REGULAR_NLATS, &
+    write( stdout, 100) intl,igride(1),igride(2),REGULAR_NLONS,REGULAR_NLATS, &
         igridg(1),igridg(2),GAUSSIAN_NLONS,GAUSSIAN_NLATS,lsave,lwork,ldwork
 100 format(//' EQUALLY SPACED TO GAUSSIAN GRID TRANSFER ' , &
         /' trssph input arguments: ' , &
@@ -263,7 +265,7 @@ program testrssph
     !
     !     print output parameters
     !
-    write (*,200) ier, lsvmin, lwkmin
+    write( stdout, 200) ier, lsvmin, lwkmin
 200 format(//' trssph output: ' &
         / ' ier = ', i2,2x, 'lsvmin = ',i7, 2x,'lwkmin = ',i7)
     if (ier == 0) then
@@ -274,14 +276,14 @@ program testrssph
         !
         call gaqd(GAUSSIAN_NLATS,dtheta,dwts,dummy_variable,ldwork,ier)
         do  i=1,GAUSSIAN_NLATS
-            thetag(i) = pi-dtheta(i)
+            thetag(i) = PI-dtheta(i)
         end do
         !
         !     compute the least squares error in DATAG
         !
-        err2 = 0.0
+        err2 = 0.0_wp
         do j=1,GAUSSIAN_NLONS
-            p = (j-1)*dlong
+            p = real(j-1, kind=wp)*dlong
             cp = cos(p)
             sp = sin(p)
             do i=1,GAUSSIAN_NLATS
@@ -294,7 +296,7 @@ program testrssph
             end do
         end do
         err2 = sqrt(err2/size(gaussian_data))
-        write (6,300) err2
+        write( stdout, 300) err2
 300     format(' least squares error = ',e10.3)
     end if
     !
@@ -302,11 +304,11 @@ program testrssph
     !
     do j=1,REGULAR_NLONS
         do i=1,REGULAR_NLATS
-            regular_data(i,j) = 0.0
+            regular_data(i,j) = 0.0_wp
         end do
     end do
 
-    write(*,400) intl,igridg(1),igridg(2),GAUSSIAN_NLONS,GAUSSIAN_NLATS,igride(1), &
+    write( stdout, 400) intl,igridg(1),igridg(2),GAUSSIAN_NLONS,GAUSSIAN_NLATS,igride(1), &
         igride(2),REGULAR_NLONS,REGULAR_NLATS,lsave,lwork,ldwork
 400 format(/' GAUSSIAN TO EQUALLY SPACED GRID TRANSFER ' , &
         /' trssph input arguments: ' , &
@@ -325,18 +327,18 @@ program testrssph
     !
     !     print output parameters
     !
-    write (*,200) ier, lsvmin, lwkmin
+    write( stdout, 200) ier, lsvmin, lwkmin
     if (ier == 0) then
         !
         !     compute the least squares error in DATAE
         !
-        err2 = 0.0
+        err2 = 0.0_wp
         do j=1,REGULAR_NLONS
-            p = (j-1)*dlone
+            p = real(j-1, kind=wp)*dlone
             cp = cos(p)
             sp = sin(p)
             do i=1,REGULAR_NLATS
-                t = (i-1)*dlate
+                t = real(i-1, kind=wp)*dlate
                 ct = cos(t)
                 st = sin(t)
                 xyz = (st*(st*ct*sp*cp))
@@ -345,7 +347,7 @@ program testrssph
             end do
         end do
         err2 = sqrt(err2/size(regular_data))
-        write (6,300) err2
+        write( stdout,300) err2
     end if
 
 end program testrssph

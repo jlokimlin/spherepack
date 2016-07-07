@@ -48,7 +48,7 @@
 !     (which includes poles).  the transfer can go from goff to greg or from
 !     greg to goff (see ioff).  the grids which underly goff and greg are
 !     described below.  the north and south poles are at latitude 0.5*pi and
-!     -0.5*pi radians respectively where pi = acos(-1.0).
+!     -0.5*pi radians respectively.
 !
 ! *** grid descriptions
 !
@@ -215,9 +215,10 @@
 !
 module module_sshifte
 
-    use, intrinsic :: iso_fortran_env, only: &
-        wp => REAL64, &
-        ip => INT32
+    use spherepack_precision, only: &
+        wp, & ! working precision
+        ip, & ! integer precision
+        PI
 
     use type_HFFTpack, only: &
         HFFTpack
@@ -511,12 +512,14 @@ contains
 
     end subroutine shftreg
 
+
+
     subroutine sshifti(ioff, nlon, nlat, lsav, wsav, ier)
 
         integer :: lsav
         integer ioff, nlat, nlon, nlat2, isav, ier
         real wsav(lsav)
-        real pi, dlat, dlon, dp
+        real dlat, dlon, dp
         ier = 1
         if (ioff*(ioff-1)/=0) return
         ier = 2
@@ -526,7 +529,6 @@ contains
         ier = 4
         if (lsav < 2*(2*nlat+nlon+16)) return
         ier = 0
-        pi = acos(-1.0)
         !
         !     set lat, long increments
         !

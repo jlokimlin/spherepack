@@ -114,9 +114,10 @@
 !
 module module_shpe
 
-    use, intrinsic :: iso_fortran_env, only: &
-        wp => REAL64, &
-        ip => INT32
+    use spherepack_precision, only: &
+        wp, & ! working precision
+        ip, & ! integer precision
+        PI
 
     use type_HFFTpack, only: &
     HFFTpack
@@ -276,7 +277,7 @@ real :: tusl
 real :: ze
 real :: zo
 !
-real summation, eps, pi, dthet, v(1,1), a1, b1, c1
+real summation, eps, dthet, v(1,1), a1, b1, c1
 parameter (eps=epsilon(1.0))
 real cp(idp), work(idp), wx(idp), s(idp+1), &
   e(idp), thet(idp), xx(idp), z(idp), u(idp, idp), &
@@ -297,7 +298,6 @@ toe = 0.
 !
 !     compute grid distribution
 !
-pi = acos(-1.0)
 dthet = pi/(nlat-1)
 do i=1, nte
 thet(i) = (i-1)*dthet
@@ -384,7 +384,7 @@ if (m>1.and.n>mxtr) then
 do i=1, nte
 u(i, j+ms2) = ped(i, j+ms2, ip)
 end do
-go to 207
+goto 207
 end if
 a1 = b(n-1)*a(n+m-3)/a(n+m-1)
 b1 = a(n-m+1)/a(n+m-1)
@@ -408,7 +408,7 @@ end do
 end do
 end if
 !
-if (ms2<=0.or.ms2>=nte) go to 200
+if (ms2<=0.or.ms2>=nte) goto 200
 !
 ! initialize array with random numbers using 
 ! Fortran90 intrinsics RANDOM_{SEED, NUMBER}
@@ -431,7 +431,7 @@ wx(i) = wx(i)+we(i, j, ip)*xx(j)
 end do
 end do
 do 220 j=1, nte
-if (j==ms2) go to 220
+if (j==ms2) goto 220
 call gs(nte, wx, ped(1, j, ip), z)
 220 continue
 !  
@@ -440,7 +440,7 @@ xx(i) = xx(i)-z(i)
 end do
 call normal(nte, xx, idp, we(1, 1, ip))
 it = it+1
-if (it<=2) go to 201
+if (it<=2) goto 201
 do i=1, nte
 ped(i, ms2, ip) = xx(i)
 end do
@@ -573,7 +573,7 @@ if (m>1.and.n>mxtr) then
 do i=1, nte
 u(i, j+ms2) = pod(i, j+ms2, ip)
 end do
-go to 304
+goto 304
 end if
 a1 = b(n-1)*a(n+m-3)/a(n+m-1)
 b1 = a(n-m+1)/a(n+m-1)
@@ -598,7 +598,7 @@ end do
 end do
 end if
 !
-if (ms2<=0.or.ms2>=nto) go to 300
+if (ms2<=0.or.ms2>=nto) goto 300
 !
 ! initialize array with random numbers using 
 ! Fortran90 intrinsics RANDOM_{SEED, NUMBER}
@@ -621,7 +621,7 @@ wx(i) = wx(i)+wo(i, j, ip)*xx(j)
 end do
 end do
 do 330 j=1, nto
-if (j==ms2) go to 330
+if (j==ms2) goto 330
 call gs(nte, wx, pod(1, j, ip), z(1))
 330 continue
 !  
@@ -630,7 +630,7 @@ xx(i) = xx(i)-z(i)
 end do
 call normal(nte, xx, idp, wo(1, 1, ip))
 it = it+1
-if (it<=2) go to 306
+if (it<=2) goto 306
 do i=1, nte
 pod(i, ms2, ip) = xx(i)
 end do
@@ -966,7 +966,7 @@ do i=2, nlat-1
 sy(i, 3) = sx(i, 3)
 end do
 end if
-go to 100
+goto 100
 end if
 m = mp1-1
 mpm = max(1, m+m)
@@ -1212,18 +1212,18 @@ dimension a(idp, *), ijs(n)
 !
 !     irc = 0 for columns , or irc = 1 for rows
 !
-if (irc/=0) go to 30
+if (irc/=0) goto 30
 do 20 j=1, nrc
 do i=1, n
 ijs(j) = i
-if (abs(a(i, j)) > eps) go to 20
+if (abs(a(i, j)) > eps) goto 20
 end do
 20 continue
 return
 30 do 50 i=1, nrc
 do j=1, n
 ijs(i) = j
-if (abs(a(i, j)) > eps) go to 50
+if (abs(a(i, j)) > eps) goto 50
 end do
 50 continue
 return
@@ -1281,7 +1281,7 @@ integer :: nh
 real x(n), dmax
 nh = (n+1)/2
 dmax = 0.
-if (moe/=0) go to 1
+if (moe/=0) goto 1
 do i=1, nh
 dmax = max(dmax, abs(x(i)-x(n-i+1)))
 x(i) = .5*(x(i)+x(n-i+1))
@@ -1381,18 +1381,18 @@ else
 end if
 2 cp(1) = sqrt(2.0)
 return
-3 if (ma /= 0) go to 4
+3 if (ma /= 0) goto 4
 cp(1) = sqrt(1.5)
 return
 4 cp(1) = sqrt(.75)
 if (m == -1) cp(1) = -cp(1)
 return
-5 if (mod(n+ma, 2) /= 0) go to 10
+5 if (mod(n+ma, 2) /= 0) goto 10
 nmms2 = (n-ma)/2
 fnum = n+ma+1
 fnmh = n-ma+1
 pm1 = 1.0
-go to 15
+goto 15
 10 nmms2 = (n-ma-1)/2
 fnum = n+ma+2
 fnmh = n-ma+2
@@ -1403,7 +1403,7 @@ pm1 = -1.0
 15 t1 = 1.0/sc20
 nex = 20
 fden = 2.0
-if (nmms2 < 1) go to 20
+if (nmms2 < 1) goto 20
 do 18 i=1, nmms2
 t1 = fnum*t1/fden
 if (t1 > sc20) then
@@ -1416,7 +1416,7 @@ fden = fden+2.
 20 t1 = t1/2.0**(n-1-nex)
 if (mod(ma/2, 2) /= 0) t1 = -t1
 t2 = 1. 
-if (ma == 0) go to 26
+if (ma == 0) goto 26
 do 25 i=1, ma
 t2 = fnmh*t2/(fnmh+pm1)
 fnmh = fnmh+2.
@@ -1427,7 +1427,7 @@ fnmsq = fnnp1-2.0*ma*ma
 l = (n+1)/2
 if (mod(n, 2) == 0 .and. mod(ma, 2) == 0) l = l+1
 cp(l) = cp2
-if (m >= 0) go to 29
+if (m >= 0) goto 29
 if (mod(ma, 2) /= 0) cp(l) = -cp(l)
 29 if (l <= 1) return
 fk = n
@@ -1441,7 +1441,7 @@ a1 = (fk-2.)*(fk-1.)-fnnp1
 b1 = -2.*(fk*fk-fnmsq)
 c1 = (fk+1.)*(fk+2.)-fnnp1
 cp(l-1) = -(b1*cp(l)+c1*cp(l+1))/a1
-go to 30
+goto 30
 end subroutine dlfkp
 subroutine dlftp (m, n, theta, cp, pb)
 
@@ -1674,26 +1674,26 @@ info = 0
 nct = min(n-1, p)
 nrt = max(0, min(p-2, n))
 lu = max(nct, nrt)
-if (lu < 1) go to 170
+if (lu < 1) goto 170
 do 160 l = 1, lu
    lp1 = l + 1
-   if (l > nct) go to 20
+   if (l > nct) goto 20
 !
 !           compute the transformation for the l-th column and
 !           place the l-th diagonal in s(l).
 !
       s(l) = dnrm2(n-l+1, x(l, l), 1)
-      if (s(l) == 0.0) go to 10
+      if (s(l) == 0.0) goto 10
          if (x(l, l) /= 0.0) s(l) = dsign(s(l), x(l, l))
          call dscal(n-l+1, 1.0/s(l), x(l, l), 1)
          x(l, l) = 1.0 + x(l, l)
 10       continue
       s(l) = -s(l)
 20    continue
-   if (p < lp1) go to 50
+   if (p < lp1) goto 50
    do 40 j = lp1, p
-      if (l > nct) go to 30
-      if (s(l) == 0.0) go to 30
+      if (l > nct) goto 30
+      if (s(l) == 0.0) goto 30
 !
 !              apply the transformation.
 !
@@ -1707,7 +1707,7 @@ do 160 l = 1, lu
       e(j) = x(l, j)
 40    continue
 50    continue
-   if (.not.wantu .or. l > nct) go to 70
+   if (.not.wantu .or. l > nct) goto 70
 !
 !           place the transformation in u for subsequent back
 !           multiplication.
@@ -1716,19 +1716,19 @@ do 160 l = 1, lu
          u(i, l) = x(i, l)
 60       continue
 70    continue
-   if (l > nrt) go to 150
+   if (l > nrt) goto 150
 !
 !           compute the l-th row transformation and place the
 !           l-th super-diagonal in e(l).
 !
       e(l) = dnrm2(p-l, e(lp1), 1)
-      if (e(l) == 0.0) go to 80
+      if (e(l) == 0.0) goto 80
          if (e(lp1) /= 0.0) e(l) = dsign(e(l), e(lp1))
          call dscal(p-l, 1.0/e(l), e(lp1), 1)
          e(lp1) = 1.0 + e(lp1)
 80       continue
       e(l) = -e(l)
-      if (lp1 > n .or. e(l) == 0.0) go to 120
+      if (lp1 > n .or. e(l) == 0.0) goto 120
 !
 !              apply the transformation.
 !
@@ -1742,7 +1742,7 @@ do 160 l = 1, lu
             call daxpy(n-l, -e(j)/e(lp1), work(lp1), 1, x(lp1, j), 1)
 110          continue
 120       continue
-      if (.not.wantv) go to 140
+      if (.not.wantv) goto 140
 !
 !              place the transformation in v for subsequent
 !              back multiplication.
@@ -1767,8 +1767,8 @@ e(m) = 0.0
 !
 !     if required, generate u.
 !
-if (.not.wantu) go to 300
-   if (ncu < nctp1) go to 200
+if (.not.wantu) goto 300
+   if (ncu < nctp1) goto 200
    do 190 j = nctp1, ncu
       do 180 i = 1, n
          u(i, j) = 0.0
@@ -1776,12 +1776,12 @@ if (.not.wantu) go to 300
       u(j, j) = 1.0
 190    continue
 200    continue
-   if (nct < 1) go to 290
+   if (nct < 1) goto 290
    do 280 ll = 1, nct
       l = nct - ll + 1
-      if (s(l) == 0.0) go to 250
+      if (s(l) == 0.0) goto 250
          lp1 = l + 1
-         if (ncu < lp1) go to 220
+         if (ncu < lp1) goto 220
          do 210 j = lp1, ncu
             t = -ddot(n-l+1, u(l, l), 1, u(l, j), 1)/u(l, l)
             call daxpy(n-l+1, t, u(l, l), 1, u(l, j), 1)
@@ -1790,12 +1790,12 @@ if (.not.wantu) go to 300
          call dscal(n-l+1, -1.0, u(l, l), 1)
          u(l, l) = 1.0 + u(l, l)
          lm1 = l - 1
-         if (lm1 < 1) go to 240
+         if (lm1 < 1) goto 240
          do 230 i = 1, lm1
             u(i, l) = 0.0
 230          continue
 240          continue
-      go to 270
+      goto 270
 250       continue
          do 260 i = 1, n
             u(i, l) = 0.0
@@ -1808,12 +1808,12 @@ if (.not.wantu) go to 300
 !
 !     if it is required, generate v.
 !
-if (.not.wantv) go to 350
+if (.not.wantv) goto 350
    do 340 ll = 1, p
       l = p - ll + 1
       lp1 = l + 1
-      if (l > nrt) go to 320
-      if (e(l) == 0.0) go to 320
+      if (l > nrt) goto 320
+      if (e(l) == 0.0) goto 320
          do 310 j = lp1, p
             t = -ddot(p-l, v(lp1, l), 1, v(lp1, j), 1)/v(lp1, l)
             call daxpy(p-l, t, v(lp1, l), 1, v(lp1, j), 1)
@@ -1835,15 +1835,15 @@ iter = 0
 !        quit if all the singular values have been found.
 !
 !     ...exit
-   if (m == 0) go to 620
+   if (m == 0) goto 620
 !
 !        if too many iterations have been performed, set
 !        flag and return.
 !
-   if (iter < maxit) go to 370
+   if (iter < maxit) goto 370
       info = m
 !     ......exit
-      go to 620
+      goto 620
 370    continue
 !
 !        this section of the program inspects for
@@ -1859,44 +1859,44 @@ iter = 0
    do 390 ll = 1, m
       l = m - ll
 !        ...exit
-      if (l == 0) go to 400
+      if (l == 0) goto 400
       test = abs(s(l)) + abs(s(l+1))
       ztest = test + abs(e(l))
-      if (ztest /= test) go to 380
+      if (ztest /= test) goto 380
          e(l) = 0.0
 !        ......exit
-         go to 400
+         goto 400
 380       continue
 390    continue
 400    continue
-   if (l /= m - 1) go to 410
+   if (l /= m - 1) goto 410
       kase = 4
-   go to 480
+   goto 480
 410    continue
       lp1 = l + 1
       mp1 = m + 1
       do 430 lls = lp1, mp1
          ls = m - lls + lp1
 !           ...exit
-         if (ls == l) go to 440
+         if (ls == l) goto 440
          test = 0.0
          if (ls /= m) test = test + abs(e(ls))
          if (ls /= l + 1) test = test + abs(e(ls-1))
          ztest = test + abs(s(ls))
-         if (ztest /= test) go to 420
+         if (ztest /= test) goto 420
             s(ls) = 0.0
 !           ......exit
-            go to 440
+            goto 440
 420          continue
 430       continue
 440       continue
-      if (ls /= l) go to 450
+      if (ls /= l) goto 450
          kase = 3
-      go to 470
+      goto 470
 450       continue
-      if (ls /= m) go to 460
+      if (ls /= m) goto 460
          kase = 1
-      go to 470
+      goto 470
 460       continue
          kase = 2
          l = ls
@@ -1906,7 +1906,7 @@ iter = 0
 !
 !        perform the task indicated by kase.
 !
-   go to (490, 520, 540, 570), kase
+   goto (490, 520, 540, 570), kase
 !
 !        deflate negligible s(m).
 !
@@ -1919,13 +1919,13 @@ iter = 0
          t1 = s(k)
          call drotg(t1, f, cs, sn)
          s(k) = t1
-         if (k == l) go to 500
+         if (k == l) goto 500
             f = -sn*e(k-1)
             e(k-1) = cs*e(k-1)
 500          continue
          if (wantv) call drot(p, v(1, k), 1, v(1, m), 1, cs, sn)
 510       continue
-   go to 610
+   goto 610
 !
 !        split at negligible s(l).
 !
@@ -1940,7 +1940,7 @@ iter = 0
          e(k) = cs*e(k)
          if (wantu) call drot(n, u(1, k), 1, u(1, l-1), 1, cs, sn)
 530       continue
-   go to 610
+   goto 610
 !
 !        perform one qr step.
 !
@@ -1958,7 +1958,7 @@ iter = 0
       b = ((smm1 + sm)*(smm1 - sm) + emm1**2)/2.0
       c = (sm*emm1)**2
       shift = 0.0
-      if (b == 0.0 .and. c == 0.0) go to 550
+      if (b == 0.0 .and. c == 0.0) goto 550
          shift = sqrt(b**2+c)
          if (b < 0.0) shift = -shift
          shift = c/(b + shift)
@@ -1988,7 +1988,7 @@ iter = 0
 560       continue
       e(m-1) = f
       iter = iter + 1
-   go to 610
+   goto 610
 !
 !        convergence.
 !
@@ -1996,16 +1996,16 @@ iter = 0
 !
 !           make the singular value  positive.
 !
-      if (s(l) >= 0.0) go to 580
+      if (s(l) >= 0.0) goto 580
          s(l) = -s(l)
          if (wantv) call dscal(p, -1.0, v(1, l), 1)
 580       continue
 !
 !           order the singular value.
 !
-590       if (l == mm) go to 600
+590       if (l == mm) goto 600
 !           ...exit
-         if (s(l) >= s(l+1)) go to 600
+         if (s(l) >= s(l+1)) goto 600
          t = s(l)
          s(l) = s(l+1)
          s(l+1) = t
@@ -2014,12 +2014,12 @@ iter = 0
          if (wantu .and. l < n) &
             call dswap(n, u(1, l), 1, u(1, l+1), 1)
          l = l + 1
-      go to 590
+      goto 590
 600       continue
       iter = 0
       m = m - 1
 610    continue
-go to 360
+goto 360
 620 continue
 return
 end subroutine dsvdc
@@ -2036,7 +2036,7 @@ integer i, incx, incy, ix, iy, m, mp1, n
 !
 if (n<=0)return
 if (da == 0.0) return
-if (incx==1.and.incy==1)go to 20
+if (incx==1.and.incy==1)goto 20
 !
 !        code for unequal increments or equal increments
 !          not equal to 1
@@ -2058,7 +2058,7 @@ return
 !        clean-up loop
 !
 20 m = mod(n, 4)
-if ( m == 0 ) go to 40
+if ( m == 0 ) goto 40
 do 30 i = 1, m
   dy(i) = dy(i) + da*dx(i)
 30 continue
@@ -2107,7 +2107,7 @@ end subroutine daxpy
         end if
 
         if (incx == 1 .and. incy == 1) then
-            go to 20
+            goto 20
         end if
         !
         !        code for unequal increments or equal increments
@@ -2139,7 +2139,7 @@ end subroutine daxpy
         !
 20      m = mod(n, 5)
         if (m == 0) then
-            go to 40
+            goto 40
         end if
 
         do i = 1, m
@@ -2147,7 +2147,7 @@ end subroutine daxpy
         end do
 
         if ( n < 5 ) then
-            go to 60
+            goto 60
         end if
 
 
@@ -2245,7 +2245,7 @@ real dx(*), dy(*), dtemp, c, s
 integer i, incx, incy, ix, iy, n
 !
 if (n<=0)return
-if (incx==1.and.incy==1)go to 20
+if (incx==1.and.incy==1)goto 20
 !
 !       code for unequal increments or equal increments not equal
 !         to 1
@@ -2283,12 +2283,12 @@ real da, db, c, s, roe, scale, r, z
 roe = db
 if ( abs(da) > abs(db) ) roe = da
 scale = abs(da) + abs(db)
-if ( scale /= 0.0 ) go to 10
+if ( scale /= 0.0 ) goto 10
    c = 1.0
    s = 0.0
    r = 0.0
    z = 0.0
-   go to 20
+   goto 20
 10 r = scale*sqrt((da/scale)**2 + (db/scale)**2)
 r = dsign(1.0, roe)*r
 c = da/r
@@ -2313,7 +2313,7 @@ real da, dx(*)
 integer i, incx, m, mp1, n, nincx
 !
 if ( n<=0 .or. incx<=0 )return
-if (incx==1)go to 20
+if (incx==1)goto 20
 !
 !        code for increment not equal to 1
 !
@@ -2329,7 +2329,7 @@ return
 !        clean-up loop
 !
 20 m = mod(n, 5)
-if ( m == 0 ) go to 40
+if ( m == 0 ) goto 40
 do 30 i = 1, m
   dx(i) = da*dx(i)
 30 continue
@@ -2356,7 +2356,7 @@ real dx(*), dy(*), dtemp
 integer i, incx, incy, ix, iy, m, mp1, n
 !
 if (n<=0)return
-if (incx==1.and.incy==1)go to 20
+if (incx==1.and.incy==1)goto 20
 !
 !       code for unequal increments or equal increments not equal
 !         to 1
@@ -2380,7 +2380,7 @@ return
 !       clean-up loop
 !
 20 m = mod(n, 3)
-if ( m == 0 ) go to 40
+if ( m == 0 ) goto 40
 do 30 i = 1, m
   dtemp = dx(i)
   dx(i) = dy(i)

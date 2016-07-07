@@ -136,9 +136,12 @@
 !
 program shallow
 
+    use spherepack_precision, only: &
+        wp, & ! working precision
+        ip, & ! integer precision
+        PI
+
     use, intrinsic :: iso_fortran_env, only: &
-        ip => INT32, &
-        wp => REAL64, &
         stdout => OUTPUT_UNIT
 
     use type_ShallowWaterSolver
@@ -161,7 +164,7 @@ program shallow
     real (wp), dimension(nlon, nlat)  :: uxact, vxact, pxact, u, v, p, f
     real (wp), dimension(nlon, nlat)  :: ug, vg, pg, vrtg, divg, scrg1, scrg2
     real (wp)                         :: phlt(nlm2)
-    real (wp)                         :: theta_mesh, lambda, lhat, uhat, aa, uzero, pzero, pi, half_pi, radian_unit, omega, alphad
+    real (wp)                         :: theta_mesh, lambda, lhat, uhat, aa, uzero, pzero, HALF_PI, radian_unit, omega, alphad
     real (wp)                         :: alpha, fzero, dt, cfn, dlath, theta, sth
     real (wp)                         :: cth, cosa, sina, lambda_mesh, st, ct, cthclh, cthslh
     real (wp)                         :: clh, time, that, sl, slh, evmax, epmax, dvmax, dpmax, htime, dvgm, cl
@@ -177,9 +180,8 @@ program shallow
     !
     !==> Initialize constants
     !
-    pi = acos(-1.0_wp)
-    half_pi = pi/2
-    radian_unit = pi/180.0_wp
+    HALF_PI = PI/2
+    radian_unit = PI/180.0_wp
     aa = 6.37122e+6_wp
     omega = 7.292e-5_wp
     fzero = 2.0_wp * omega
@@ -205,12 +207,12 @@ program shallow
     !    p as a function of latitude
     !
     cfn = 1.0_wp / nlm1
-    dlath = pi / nlm1
+    dlath = PI / nlm1
     do i=1, nlm2
         theta = i*dlath
         sth = sin(theta)
         cth = cos(theta)
-        uhat = solver%get_initial_velocity(uzero, half_pi-theta)
+        uhat = solver%get_initial_velocity(uzero, HALF_PI-theta)
         phlt(i) = cfn*cth*uhat*(uhat/sth+aa*fzero)
     end do
     !
@@ -237,8 +239,8 @@ program shallow
     !
     cosa = cos(alpha)
     sina = sin(alpha)
-    lambda_mesh = (2.0_wp*pi)/nlon
-    theta_mesh = pi/(nlat-1)
+    lambda_mesh = (2.0_wp*PI)/nlon
+    theta_mesh = PI/(nlat-1)
 
     do j=1, nlon
         lambda = real(j - 1, kind=wp) * lambda_mesh
@@ -262,7 +264,7 @@ program shallow
             slh = sin(lhat)
             cth = clh*cthclh+slh*cthslh
             that = solver%atanxy(sth, cth)
-            uhat = solver%get_initial_velocity(uzero, half_pi-that)
+            uhat = solver%get_initial_velocity(uzero, HALF_PI-that)
             pxact(j, i) = solver%cosine_transform(that, nlm2, phlt)
             uxact(j, i) = uhat*(cosa*sl*slh+cl*clh)
             vxact(j, i) = uhat*(cosa*cl*slh*st-clh*sl*st+sina*slh*ct)

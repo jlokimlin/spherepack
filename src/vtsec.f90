@@ -336,9 +336,9 @@
 !
 module module_vtsec
 
-    use, intrinsic :: iso_fortran_env, only: &
-        wp => REAL64, &
-        ip => INT32
+    use spherepack_precision, only: &
+        wp, & ! working precision
+        ip ! integer precision
 
     use type_HFFTpack, only: &
         HFFTpack
@@ -522,23 +522,23 @@ contains
 
             select case (ityp)
                 case (0)
-                    go to 1
+                    goto 1
                 case (1)
-                    go to 100
+                    goto 100
                 case (2)
-                    go to 200
+                    goto 200
                 case (3)
-                    go to 300
+                    goto 300
                 case (4)
-                    go to 400
+                    goto 400
                 case (5)
-                    go to 500
+                    goto 500
                 case (6)
-                    go to 600
+                    goto 600
                 case (7)
-                    go to 700
+                    goto 700
                 case (8)
-                    go to 800
+                    goto 800
             end select
             !
             !     case ityp=0   no symmetries
@@ -568,13 +568,13 @@ contains
             !
             !     case m = 1 through nlat-1
             !
-            if (mmax < 2) go to 950
+            if (mmax < 2) goto 950
             do mp1=2, mmax
                 m = mp1-1
                 mp2 = mp1+1
                 call sphere_aux%vbin(0, nlat, nlon, m, vb, iv, wvbin)
                 call sphere_aux%wbin(0, nlat, nlon, m, wb, iw, wwbin)
-                if (mp1 > ndo1) go to 26
+                if (mp1 > ndo1) goto 26
                 do k=1, nt
                     do np1=mp1, ndo1, 2
                         do i=1, imm1
@@ -588,7 +588,7 @@ contains
                             wto(i, 2*mp1-1, k) = wto(i, 2*mp1-1, k)+br(mp1, np1, k)*wb(i, np1, iw)
 23                      continue
                         end do
-                        if (mlat == 0) go to 24
+                        if (mlat == 0) goto 24
                         vte(imid, 2*mp1-2, k) = vte(imid, 2*mp1-2, k) &
                             +br(mp1, np1, k)*vb(imid, np1, iv)
                         vte(imid, 2*mp1-1, k) = vte(imid, 2*mp1-1, k) &
@@ -601,7 +601,7 @@ contains
                     end do
 25              continue
                 end do
-26              if (mp2 > ndo2) go to 30
+26              if (mp2 > ndo2) goto 30
                 do k=1, nt
                     do np1=mp2, ndo2, 2
                         do i=1, imm1
@@ -615,7 +615,7 @@ contains
                             wte(i, 2*mp1-1, k) = wte(i, 2*mp1-1, k)+br(mp1, np1, k)*wb(i, np1, iw)
 27                      continue
                         end do
-                        if (mlat == 0) go to 28
+                        if (mlat == 0) goto 28
                         vte(imid, 2*mp1-2, k) = vte(imid, 2*mp1-2, k) &
                             -ci(mp1, np1, k)*wb(imid, np1, iw)
                         vte(imid, 2*mp1-1, k) = vte(imid, 2*mp1-1, k) &
@@ -630,7 +630,7 @@ contains
                 end do
 30          continue
             end do
-            go to 950
+            goto 950
             !
             !     case ityp=1   no symmetries,  cr and ci equal zero
             !
@@ -657,13 +657,13 @@ contains
             !
             !     case m = 1 through nlat-1
             !
-            if (mmax < 2) go to 950
+            if (mmax < 2) goto 950
             do mp1=2, mmax
                 m = mp1-1
                 mp2 = mp1+1
                 call sphere_aux%vbin(0, nlat, nlon, m, vb, iv, wvbin)
                 call sphere_aux%wbin(0, nlat, nlon, m, wb, iw, wwbin)
-                if (mp1 > ndo1) go to 126
+                if (mp1 > ndo1) goto 126
                 do k=1, nt
                     do np1=mp1, ndo1, 2
                         do i=1, imm1
@@ -673,7 +673,7 @@ contains
                             wto(i, 2*mp1-1, k) = wto(i, 2*mp1-1, k)+br(mp1, np1, k)*wb(i, np1, iw)
 123                     continue
                         end do
-                        if (mlat == 0) go to 124
+                        if (mlat == 0) goto 124
                         vte(imid, 2*mp1-2, k) = vte(imid, 2*mp1-2, k) &
                             +br(mp1, np1, k)*vb(imid, np1, iv)
                         vte(imid, 2*mp1-1, k) = vte(imid, 2*mp1-1, k) &
@@ -682,7 +682,7 @@ contains
                     end do
 125             continue
                 end do
-126             if (mp2 > ndo2) go to 130
+126             if (mp2 > ndo2) goto 130
                 do k=1, nt
                     do np1=mp2, ndo2, 2
                         do i=1, imm1
@@ -692,7 +692,7 @@ contains
                             wte(i, 2*mp1-1, k) = wte(i, 2*mp1-1, k)+br(mp1, np1, k)*wb(i, np1, iw)
 127                     continue
                         end do
-                        if (mlat == 0) go to 128
+                        if (mlat == 0) goto 128
                         wte(imid, 2*mp1-2, k) = wte(imid, 2*mp1-2, k) &
                             -bi(mp1, np1, k)*wb(imid, np1, iw)
                         wte(imid, 2*mp1-1, k) = wte(imid, 2*mp1-1, k) &
@@ -703,7 +703,7 @@ contains
                 end do
 130         continue
             end do
-            go to 950
+            goto 950
             !
             !     case ityp=2   no symmetries,  br and bi are equal to zero
             !
@@ -730,13 +730,13 @@ contains
             !
             !     case m = 1 through nlat-1
             !
-            if (mmax < 2) go to 950
+            if (mmax < 2) goto 950
             do mp1=2, mmax
                 m = mp1-1
                 mp2 = mp1+1
                 call sphere_aux%vbin(0, nlat, nlon, m, vb, iv, wvbin)
                 call sphere_aux%wbin(0, nlat, nlon, m, wb, iw, wwbin)
-                if (mp1 > ndo1) go to 226
+                if (mp1 > ndo1) goto 226
                 do k=1, nt
                     do np1=mp1, ndo1, 2
                         do i=1, imm1
@@ -746,7 +746,7 @@ contains
                             wte(i, 2*mp1-1, k) = wte(i, 2*mp1-1, k)-ci(mp1, np1, k)*vb(i, np1, iv)
 223                     continue
                         end do
-                        if (mlat == 0) go to 224
+                        if (mlat == 0) goto 224
                         wte(imid, 2*mp1-2, k) = wte(imid, 2*mp1-2, k) &
                             -cr(mp1, np1, k)*vb(imid, np1, iv)
                         wte(imid, 2*mp1-1, k) = wte(imid, 2*mp1-1, k) &
@@ -755,7 +755,7 @@ contains
                     end do
 225             continue
                 end do
-226             if (mp2 > ndo2) go to 230
+226             if (mp2 > ndo2) goto 230
                 do k=1, nt
                     do np1=mp2, ndo2, 2
                         do i=1, imm1
@@ -765,7 +765,7 @@ contains
                             wto(i, 2*mp1-1, k) = wto(i, 2*mp1-1, k)-ci(mp1, np1, k)*vb(i, np1, iv)
 227                     continue
                         end do
-                        if (mlat == 0) go to 228
+                        if (mlat == 0) goto 228
                         vte(imid, 2*mp1-2, k) = vte(imid, 2*mp1-2, k) &
                             -ci(mp1, np1, k)*wb(imid, np1, iw)
                         vte(imid, 2*mp1-1, k) = vte(imid, 2*mp1-1, k) &
@@ -776,7 +776,7 @@ contains
                 end do
 230         continue
             end do
-            go to 950
+            goto 950
             !
             !     case ityp=3   v odd,  w even
             !
@@ -803,13 +803,13 @@ contains
             !
             !     case m = 1 through nlat-1
             !
-            if (mmax < 2) go to 950
+            if (mmax < 2) goto 950
             do mp1=2, mmax
                 m = mp1-1
                 mp2 = mp1+1
                 call sphere_aux%vbin(0, nlat, nlon, m, vb, iv, wvbin)
                 call sphere_aux%wbin(0, nlat, nlon, m, wb, iw, wwbin)
-                if (mp1 > ndo1) go to 326
+                if (mp1 > ndo1) goto 326
                 do k=1, nt
                     do np1=mp1, ndo1, 2
                         do i=1, imm1
@@ -819,7 +819,7 @@ contains
                             wte(i, 2*mp1-1, k) = wte(i, 2*mp1-1, k)-ci(mp1, np1, k)*vb(i, np1, iv)
 323                     continue
                         end do
-                        if (mlat == 0) go to 324
+                        if (mlat == 0) goto 324
                         wte(imid, 2*mp1-2, k) = wte(imid, 2*mp1-2, k) &
                             -cr(mp1, np1, k)*vb(imid, np1, iv)
                         wte(imid, 2*mp1-1, k) = wte(imid, 2*mp1-1, k) &
@@ -828,7 +828,7 @@ contains
                     end do
 325             continue
                 end do
-326             if (mp2 > ndo2) go to 330
+326             if (mp2 > ndo2) goto 330
                 do k=1, nt
                     do np1=mp2, ndo2, 2
                         do i=1, imm1
@@ -838,7 +838,7 @@ contains
                             wte(i, 2*mp1-1, k) = wte(i, 2*mp1-1, k)+br(mp1, np1, k)*wb(i, np1, iw)
 327                     continue
                         end do
-                        if (mlat == 0) go to 328
+                        if (mlat == 0) goto 328
                         wte(imid, 2*mp1-2, k) = wte(imid, 2*mp1-2, k) &
                             -bi(mp1, np1, k)*wb(imid, np1, iw)
                         wte(imid, 2*mp1-1, k) = wte(imid, 2*mp1-1, k) &
@@ -849,7 +849,7 @@ contains
                 end do
 330         continue
             end do
-            go to 950
+            goto 950
             !
             !     case ityp=4   v odd,  w even, and both cr and ci equal zero
             !
@@ -868,13 +868,13 @@ contains
             !
             !     case m = 1 through nlat-1
             !
-            if (mmax < 2) go to 950
+            if (mmax < 2) goto 950
             do mp1=2, mmax
                 m = mp1-1
                 mp2 = mp1+1
                 call sphere_aux%vbin(1, nlat, nlon, m, vb, iv, wvbin)
                 call sphere_aux%wbin(1, nlat, nlon, m, wb, iw, wwbin)
-                if (mp2 > ndo2) go to 430
+                if (mp2 > ndo2) goto 430
                 do k=1, nt
                     do np1=mp2, ndo2, 2
                         do i=1, imm1
@@ -884,7 +884,7 @@ contains
                             wte(i, 2*mp1-1, k) = wte(i, 2*mp1-1, k)+br(mp1, np1, k)*wb(i, np1, iw)
 427                     continue
                         end do
-                        if (mlat == 0) go to 428
+                        if (mlat == 0) goto 428
                         wte(imid, 2*mp1-2, k) = wte(imid, 2*mp1-2, k) &
                             -bi(mp1, np1, k)*wb(imid, np1, iw)
                         wte(imid, 2*mp1-1, k) = wte(imid, 2*mp1-1, k) &
@@ -895,7 +895,7 @@ contains
                 end do
 430         continue
             end do
-            go to 950
+            goto 950
             !
             !     case ityp=5   v odd,  w even,     br and bi equal zero
             !
@@ -914,13 +914,13 @@ contains
             !
             !     case m = 1 through nlat-1
             !
-            if (mmax < 2) go to 950
+            if (mmax < 2) goto 950
             do mp1=2, mmax
                 m = mp1-1
                 mp2 = mp1+1
                 call sphere_aux%vbin(2, nlat, nlon, m, vb, iv, wvbin)
                 call sphere_aux%wbin(2, nlat, nlon, m, wb, iw, wwbin)
-                if (mp1 > ndo1) go to 530
+                if (mp1 > ndo1) goto 530
                 do k=1, nt
                     do np1=mp1, ndo1, 2
                         do i=1, imm1
@@ -930,7 +930,7 @@ contains
                             wte(i, 2*mp1-1, k) = wte(i, 2*mp1-1, k)-ci(mp1, np1, k)*vb(i, np1, iv)
 523                     continue
                         end do
-                        if (mlat == 0) go to 524
+                        if (mlat == 0) goto 524
                         wte(imid, 2*mp1-2, k) = wte(imid, 2*mp1-2, k) &
                             -cr(mp1, np1, k)*vb(imid, np1, iv)
                         wte(imid, 2*mp1-1, k) = wte(imid, 2*mp1-1, k) &
@@ -941,7 +941,7 @@ contains
                 end do
 530         continue
             end do
-            go to 950
+            goto 950
             !
             !     case ityp=6   v even  ,  w odd
             !
@@ -968,13 +968,13 @@ contains
             !
             !     case m = 1 through nlat-1
             !
-            if (mmax < 2) go to 950
+            if (mmax < 2) goto 950
             do mp1=2, mmax
                 m = mp1-1
                 mp2 = mp1+1
                 call sphere_aux%vbin(0, nlat, nlon, m, vb, iv, wvbin)
                 call sphere_aux%wbin(0, nlat, nlon, m, wb, iw, wwbin)
-                if (mp1 > ndo1) go to 626
+                if (mp1 > ndo1) goto 626
                 do k=1, nt
                     do np1=mp1, ndo1, 2
                         do i=1, imm1
@@ -984,7 +984,7 @@ contains
                             wto(i, 2*mp1-1, k) = wto(i, 2*mp1-1, k)+br(mp1, np1, k)*wb(i, np1, iw)
 623                     continue
                         end do
-                        if (mlat == 0) go to 624
+                        if (mlat == 0) goto 624
                         vte(imid, 2*mp1-2, k) = vte(imid, 2*mp1-2, k) &
                             +br(mp1, np1, k)*vb(imid, np1, iv)
                         vte(imid, 2*mp1-1, k) = vte(imid, 2*mp1-1, k) &
@@ -993,7 +993,7 @@ contains
                     end do
 625             continue
                 end do
-626             if (mp2 > ndo2) go to 630
+626             if (mp2 > ndo2) goto 630
                 do k=1, nt
                     do np1=mp2, ndo2, 2
                         do i=1, imm1
@@ -1003,7 +1003,7 @@ contains
                             wto(i, 2*mp1-1, k) = wto(i, 2*mp1-1, k)-ci(mp1, np1, k)*vb(i, np1, iv)
 627                     continue
                         end do
-                        if (mlat == 0) go to 628
+                        if (mlat == 0) goto 628
                         vte(imid, 2*mp1-2, k) = vte(imid, 2*mp1-2, k) &
                             -ci(mp1, np1, k)*wb(imid, np1, iw)
                         vte(imid, 2*mp1-1, k) = vte(imid, 2*mp1-1, k) &
@@ -1014,7 +1014,7 @@ contains
                 end do
 630         continue
             end do
-            go to 950
+            goto 950
             !
             !     case ityp=7   v even, w odd   cr and ci equal zero
             !
@@ -1033,13 +1033,13 @@ contains
             !
             !     case m = 1 through nlat-1
             !
-            if (mmax < 2) go to 950
+            if (mmax < 2) goto 950
             do mp1=2, mmax
                 m = mp1-1
                 mp2 = mp1+1
                 call sphere_aux%vbin(2, nlat, nlon, m, vb, iv, wvbin)
                 call sphere_aux%wbin(2, nlat, nlon, m, wb, iw, wwbin)
-                if (mp1 > ndo1) go to 730
+                if (mp1 > ndo1) goto 730
                 do k=1, nt
                     do np1=mp1, ndo1, 2
                         do i=1, imm1
@@ -1049,7 +1049,7 @@ contains
                             wto(i, 2*mp1-1, k) = wto(i, 2*mp1-1, k)+br(mp1, np1, k)*wb(i, np1, iw)
 723                     continue
                         end do
-                        if (mlat == 0) go to 724
+                        if (mlat == 0) goto 724
                         vte(imid, 2*mp1-2, k) = vte(imid, 2*mp1-2, k) &
                             +br(mp1, np1, k)*vb(imid, np1, iv)
                         vte(imid, 2*mp1-1, k) = vte(imid, 2*mp1-1, k) &
@@ -1060,7 +1060,7 @@ contains
                 end do
 730         continue
             end do
-            go to 950
+            goto 950
             !
             !     case ityp=8   v even,  w odd   br and bi equal zero
             !
@@ -1079,13 +1079,13 @@ contains
             !
             !     case m = 1 through nlat-1
             !
-            if (mmax < 2) go to 950
+            if (mmax < 2) goto 950
             do mp1=2, mmax
                 m = mp1-1
                 mp2 = mp1+1
                 call sphere_aux%vbin(1, nlat, nlon, m, vb, iv, wvbin)
                 call sphere_aux%wbin(1, nlat, nlon, m, wb, iw, wwbin)
-                if (mp2 > ndo2) go to 830
+                if (mp2 > ndo2) goto 830
                 do k=1, nt
                     do np1=mp2, ndo2, 2
                         do i=1, imm1
@@ -1095,7 +1095,7 @@ contains
                             wto(i, 2*mp1-1, k) = wto(i, 2*mp1-1, k)-ci(mp1, np1, k)*vb(i, np1, iv)
 827                     continue
                         end do
-                        if (mlat == 0) go to 828
+                        if (mlat == 0) goto 828
                         vte(imid, 2*mp1-2, k) = vte(imid, 2*mp1-2, k) &
                             -ci(mp1, np1, k)*wb(imid, np1, iw)
                         vte(imid, 2*mp1-1, k) = vte(imid, 2*mp1-1, k) &
@@ -1111,7 +1111,7 @@ contains
                 call hfft%backward(idv, nlon, wte(1, 1, k), idv, wrfft, vb)
 14          continue
             end do
-            if (ityp > 2) go to 12
+            if (ityp > 2) goto 12
             do k=1, nt
                 do j=1, nlon
                     do i=1, imm1
@@ -1123,7 +1123,7 @@ contains
                     end do
                 end do
             end do
-            go to 13
+            goto 13
             12 do k=1, nt
                 do j=1, nlon
                     do i=1, imm1
