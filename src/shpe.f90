@@ -100,7 +100,7 @@
 !     iwshp  an integer array that must be saved for repeated
 !            use by subroutine shpe.        
 !
-!     work   a real work array that does 
+!     work   a real work array that does
 !            not have to be saved.
 !
 !     ierror = 0  no errors
@@ -182,10 +182,10 @@ if (nlat < 3) return
 ierror = 2
 if (nlon < 4) return
 !      ierror = 3
-!      if (isym.lt.0 .or. isym.gt.2) return
+!      if (isym.lt.0  .or.  isym.gt.2) return
 ierror = 4
 mmax = min(nlat-1, nlon/2)
-if (mtrunc<0 .or. mtrunc>mmax) return
+if (mtrunc<0  .or.  mtrunc>mmax) return
 ierror = 5
 lw1 = 2*(nlat+1)**2
 log2n = log(real(nlon))/log(2.0)
@@ -293,8 +293,8 @@ ns2 = nlat/2
 modn = nlat-ns2-ns2
 nte = (nlat+1)/2
 nto = nlat-nte
-tusl = 0.
-toe = 0.
+tusl = 0.0
+toe = 0.0
 !
 !     compute grid distribution
 !
@@ -333,7 +333,7 @@ end do
 end do
 do i=1, nem
 do j=1, nem
-summation = 0.
+summation = 0.0
 do k=1, nem
 summation = summation+s(k)*u(i, k)*u(j, k)
 end do
@@ -380,7 +380,7 @@ else
 !
 do 207 j=1, nem
 n = 2*j+m-2
-if (m>1.and.n>mxtr) then
+if (m>1 .and. n>mxtr) then
 do i=1, nte
 u(i, j+ms2) = ped(i, j+ms2, ip)
 end do
@@ -391,13 +391,13 @@ b1 = a(n-m+1)/a(n+m-1)
 if (n-m<=1) then
 do i=1, nte
 u(i, j+ms2) = a1*ped(i, j+ms2-1, ip) &
-                   - b1*ped(i, j+ms2, ip)    
+                   - b1*ped(i, j+ms2, ip)
 end do
 else
 c1 = b(n-1)*a(n-m-1)/a(n+m-1)
 do i=1, nte
 u(i, j+ms2) = a1*ped(i, j+ms2-1, ip) &
-   - b1*ped(i, j+ms2, ip) + c1*u(i, j+ms2-1)    
+   - b1*ped(i, j+ms2, ip) + c1*u(i, j+ms2-1)
 end do
 end if
 207 continue
@@ -408,7 +408,7 @@ end do
 end do
 end if
 !
-if (ms2<=0.or.ms2>=nte) goto 200
+if (ms2<=0. .or. ms2>=nte) goto 200
 !
 ! initialize array with random numbers using 
 ! Fortran90 intrinsics RANDOM_{SEED, NUMBER}
@@ -526,7 +526,7 @@ end do
 end do
 do i=1, nom
 do j=1, nom
-summation = 0.
+summation = 0.0
 do k=1, nom
 summation = summation+s(k)*u(i, k)*u(j, k)
 end do
@@ -569,7 +569,7 @@ else
 !
 do 307 j=1, nom
 n = 2*j+m-1
-if (m>1.and.n>mxtr) then
+if (m>1 .and. n>mxtr) then
 do i=1, nte
 u(i, j+ms2) = pod(i, j+ms2, ip)
 end do
@@ -580,13 +580,13 @@ b1 = a(n-m+1)/a(n+m-1)
 if (n-m<=1) then
 do i=1, nte
 u(i, j+ms2) = a1*pod(i, j+ms2-1, ip) &
-                   - b1*pod(i, j+ms2, ip)    
+                   - b1*pod(i, j+ms2, ip)
 end do
 else
 c1 = b(n-1)*a(n-m-1)/a(n+m-1)
 do i=1, nte
 u(i, j+ms2) = a1*pod(i, j+ms2-1, ip) &
-   - b1*pod(i, j+ms2, ip) + c1*u(i, j+ms2-1)    
+   - b1*pod(i, j+ms2, ip) + c1*u(i, j+ms2-1)
 end do
 end if
 304 if (modn==1) u(nte, j+ms2) = 0.0
@@ -598,7 +598,7 @@ end do
 end do
 end if
 !
-if (ms2<=0.or.ms2>=nto) goto 300
+if (ms2<=0. .or. ms2>=nto) goto 300
 !
 ! initialize array with random numbers using 
 ! Fortran90 intrinsics RANDOM_{SEED, NUMBER}
@@ -614,8 +614,8 @@ call random_number(xx(1:nte))
 if (modn==1) xx(nte) = 0.0
 it = 0
 306 do i=1, nte
-z(i) = 0.
-wx(i) = 0.
+z(i) = 0.0
+wx(i) = 0.0
 do j=1, nto
 wx(i) = wx(i)+wo(i, j, ip)*xx(j)
 end do
@@ -831,10 +831,10 @@ if (nlat < 3) return
 ierror = 2
 if (nlon < 4) return
 !      ierror = 3
-!      if (isym.lt.0 .or. isym.gt.2) return
+!      if (isym.lt.0  .or.  isym.gt.2) return
 ierror = 4
 mmax = min(nlat-1, nlon/2)
-if (mtrunc<0 .or. mtrunc>mmax) return
+if (mtrunc<0  .or.  mtrunc>mmax) return
 ierror = 5
 log2n = log(real(nlon))/log(2.0)
 lw1 = 2*(nlat+1)**2
@@ -880,6 +880,7 @@ do j=1, nlon
 end do
 return
 end subroutine shpe
+
 subroutine shpe1(nlat, nlon, isym, mtrunc, sx, sy, idxy, ierror, &
  idp, pe, po, ze, zo, ipse, jzse, ipso, jzso, xe, xo, ye, yo)
 
@@ -951,17 +952,17 @@ mxtr = min(nlat-1, nlon/2, mtrunc)
 ip = 2 
 do 100 mp1=1, mxtr+1
 ip = 3-ip
-if (mxtr==nlat-1.and.mp1<=2) then
+if (mxtr==nlat-1 .and. mp1<=2) then
 do i=1, nlat
 sy(i, mp1) = sx(i, mp1)
 end do
 if (mp1==2) then
-sy(1, 2) = 0.
-sy(nlat, 2) = 0.
+sy(1, 2) = 0.0
+sy(nlat, 2) = 0.0
 end if
 if (nlon>=3) then
-sy(1, 3) = 0.
-sy(nlat, 3) = 0.
+sy(1, 3) = 0.0
+sy(nlat, 3) = 0.0
 do i=2, nlat-1
 sy(i, 3) = sx(i, 3)
 end do
@@ -989,13 +990,13 @@ xe(i, 2) = .5*(sx(i, mpm+1)+sx(nlat+1-i, mpm+1))
 xo(i, 2) = .5*(sx(i, mpm+1)-sx(nlat+1-i, mpm+1))
 end do
 end if
-if (3*nec<2*nem.or.nem==0) then
+if (3*nec<2*nem .or. nem==0) then
 call tmxmx(nte, nec, idp, pe(1, 1, ip), nte, idp, &
           ze(1, 1, ip), xe, ye, ipse(1, ip), jzse(1, ip))  
 do i=1, nte
 ye(i, 1) = xe(i, 1)-ye(i, 1)
 end do
-if (mpm<nlon.and.m/=0) then
+if (mpm<nlon .and. m/=0) then
 do i=1, nte
 ye(i, 2) = xe(i, 2)-ye(i, 2)
 end do
@@ -1004,13 +1005,13 @@ else
 call tmxmx(nte, nem, idp, pe(1, nec+1, ip), nte, idp, &
 ze(1, nec+1, ip), xe, ye, ipse(nec+1, ip), jzse(nec+1, ip))
 end if
-if (3*noc<2*nom.or.nom==0) then
+if (3*noc<2*nom .or. nom==0) then
 call tmxmx(nto, noc, idp, po(1, 1, ip), nto, idp, &
           zo(1, 1, ip), xo, yo, ipso(1, ip), jzso(1, ip))
 do i=1, nte
 yo(i, 1) = xo(i, 1)-yo(i, 1)
 end do
-if (mpm<nlon.and.m/=0) then
+if (mpm<nlon .and. m/=0) then
 do i=1, nte
 yo(i, 2) = xo(i, 2)-yo(i, 2)
 end do
@@ -1023,7 +1024,7 @@ do i=1, nte
 sy(i, mpm) = ye(i, 1)+yo(i, 1)
 sy(nlat+1-i, mpm) = ye(i, 1)-yo(i, 1)
 end do
-if (mpm<nlon.and.m/=0) then
+if (mpm<nlon .and. m/=0) then
 do i=1, nte
 sy(i, mpm+1) = ye(i, 2)+yo(i, 2)
 sy(nlat+1-i, mpm+1) = ye(i, 2)-yo(i, 2)
@@ -1033,7 +1034,7 @@ end if
 js = mxtr+mxtr+2
 do j=js, nlon
 do i=1, nlat
-sy(i, j) = 0.
+sy(i, j) = 0.0
 end do
 end do
 return
@@ -1052,7 +1053,7 @@ integer :: nd
 real a(ld, *), b(md, *), c(nd, *)
 do i=1, lr
 do j=1, mc
-c(i, j) = 0.
+c(i, j) = 0.0
 do k=1, lc 
 c(i, j) = c(i, j)+a(i, k)*b(k, j)
 end do
@@ -1077,7 +1078,7 @@ integer :: nd
 dimension a(ld, *), b(md, *), c(nd, *)
 do i=1, lr
 do j=1, mc
-c(i, j) = 0.
+c(i, j) = 0.0
 do k=1, lc 
 c(i, j) = c(i, j)+a(i, k)*b(k, j)
 end do
@@ -1103,14 +1104,14 @@ real :: x
 real :: y
 dimension a(ld, *), b(md, *), x(ld, 2), y(ld, 2)
 do k=1, lr
-y(k, 1) = 0.
-y(k, 2) = 0.
+y(k, 1) = 0.0
+y(k, 2) = 0.0
 end do
 !
 if (lc<=0) return
 do i=1, lc
-sum1 = 0.
-sum2 = 0.
+sum1 = 0.0
+sum2 = 0.0
 do j=1, mc
 sum1 = sum1 + b(i, j)*x(j, 1)
 sum2 = sum2 + b(i, j)*x(j, 2)
@@ -1135,14 +1136,14 @@ integer :: md
 real a(ld, *), b(md, *), x(ld, 2), y(ld, 2), &
                  sum1, sum2
 do k=1, lr
-y(k, 1) = 0.
-y(k, 2) = 0.
+y(k, 1) = 0.0
+y(k, 2) = 0.0
 end do
 !
 if (lc<=0) return
 do i=1, lc
-sum1 = 0.
-sum2 = 0.
+sum1 = 0.0
+sum2 = 0.0
 do j=1, mc
 sum1 = sum1 + b(i, j)*x(j, 1)
 sum2 = sum2 + b(i, j)*x(j, 2)
@@ -1178,14 +1179,14 @@ dimension a(ld, *), b(md, *), x(ld, 2), y(ld, 2), &
 !
 kmx = min(lr+1, ld)
 do k=1, kmx
-y(k, 1) = 0.
-y(k, 2) = 0.
+y(k, 1) = 0.0
+y(k, 2) = 0.0
 end do
 if (lc<=0) return
 !
 do i=1, lc
-sum1 = 0.
-sum2 = 0.
+sum1 = 0.0
+sum2 = 0.0
 do j=js(i), mc
 sum1 = sum1 + b(j, i)*x(j, 1)
 sum2 = sum2 + b(j, i)*x(j, 2)
@@ -1237,7 +1238,7 @@ real x, y, z, summation
 !
 !     accumulate innerproducts of x with respect to y.
 !
-summation = 0.
+summation = 0.0
 do i=1, n
 summation = summation+x(i)*y(i)
 end do
@@ -1257,9 +1258,9 @@ real x, q, summation, sqs
 !
 !     normalize x
 !
-sqs = 0.
+sqs = 0.0
 do i=1, n
-summation = 0.
+summation = 0.0
 do j=1, n
 summation = summation+q(i, j)*x(j)
 end do
@@ -1280,7 +1281,7 @@ integer :: n
 integer :: nh
 real x(n), dmax
 nh = (n+1)/2
-dmax = 0.
+dmax = 0.0
 if (moe/=0) goto 1
 do i=1, nh
 dmax = max(dmax, abs(x(i)-x(n-i+1)))
@@ -1293,7 +1294,7 @@ dmax = max(dmax, abs(x(i)+x(n-i+1)))
 x(i) = .5*(x(i)-x(n-i+1))
 x(n-i+1) = -x(i)
 end do
-if (mod(n, 2)/=0) x(nh) = 0.
+if (mod(n, 2)/=0) x(nh) = 0.0
 return
 end subroutine coe
 !     subroutine dlfkp(m, n, cp)
@@ -1369,7 +1370,7 @@ parameter (sc10=1024.0)
 parameter (sc20=sc10*sc10)
 parameter (sc40=sc20*sc20)
 !
-cp(1) = 0.
+cp(1) = 0.0
 ma = abs(m)
 if (ma > n) return
 if (n-1< 0) then
@@ -1491,7 +1492,7 @@ return
 !     n even, m odd
 !
 4 kdo = n/2
-pb = 0.
+pb = 0.0
 cth = cdt
 sth = sdt
 do 180 k=1, kdo
@@ -1513,7 +1514,7 @@ end if
 !     n odd, m even
 !
 13 kdo = (n+1)/2
-pb = 0.
+pb = 0.0
 cth = cos(theta)
 sth = sin(theta)
 do 190 k=1, kdo
@@ -1528,7 +1529,7 @@ return
 !     n odd, m odd
 !
 14 kdo = (n+1)/2
-pb = 0.
+pb = 0.0
 cth = cos(theta)
 sth = sin(theta)
 do 200 k=1, kdo
@@ -1611,13 +1612,13 @@ real x(ldx, 1), s(1), e(1), u(ldu, 1), v(ldv, 1), work(1)
 !                                   joba.eq.1 then k.eq.n, if joba.ge.2
 !                                   then k.eq.min(n, p).
 !                   u contains the matrix of left singular vectors.
-!                   u is not referenced if joba.eq.0.  if n.le.p
+!                   u is not referenced if joba.eq.0.0  if n.le.p
 !                   or if joba.eq.2, then u may be identified with x
 !                   in the subroutine call.
 !
 !         v         real(ldv, p), where ldv.ge.p.
 !                   v contains the matrix of right singular vectors.
-!                   v is not referenced if job.eq.0.  if p.le.n, 
+!                   v is not referenced if job.eq.0.0  if p.le.n,
 !                   then v may be identified with x in the
 !                   subroutine call.
 !
@@ -1684,7 +1685,7 @@ do 160 l = 1, lu
 !
       s(l) = dnrm2(n-l+1, x(l, l), 1)
       if (s(l) == 0.0) goto 10
-         if (x(l, l) /= 0.0) s(l) = dsign(s(l), x(l, l))
+         if (x(l, l) /= 0.0) s(l) = sign(s(l), x(l, l))
          call dscal(n-l+1, 1.0/s(l), x(l, l), 1)
          x(l, l) = 1.0 + x(l, l)
 10       continue
@@ -1707,7 +1708,7 @@ do 160 l = 1, lu
       e(j) = x(l, j)
 40    continue
 50    continue
-   if (.not.wantu .or. l > nct) goto 70
+   if (.not.wantu  .or.  l > nct) goto 70
 !
 !           place the transformation in u for subsequent back
 !           multiplication.
@@ -1723,12 +1724,12 @@ do 160 l = 1, lu
 !
       e(l) = dnrm2(p-l, e(lp1), 1)
       if (e(l) == 0.0) goto 80
-         if (e(lp1) /= 0.0) e(l) = dsign(e(l), e(lp1))
+         if (e(lp1) /= 0.0) e(l) = sign(e(l), e(lp1))
          call dscal(p-l, 1.0/e(l), e(lp1), 1)
          e(lp1) = 1.0 + e(lp1)
 80       continue
       e(l) = -e(l)
-      if (lp1 > n .or. e(l) == 0.0) goto 120
+      if (lp1 > n  .or.  e(l) == 0.0) goto 120
 !
 !              apply the transformation.
 !
@@ -2034,9 +2035,9 @@ subroutine daxpy(n, da, dx, incx, dy, incy)
 real dx(*), dy(*), da
 integer i, incx, incy, ix, iy, m, mp1, n
 !
-if (n<=0)return
+if (n <= 0)return
 if (da == 0.0) return
-if (incx==1.and.incy==1)goto 20
+if (incx == 1 .and. incy == 1)goto 20
 !
 !        code for unequal increments or equal increments
 !          not equal to 1
@@ -2102,26 +2103,18 @@ end subroutine daxpy
         return_value = 0.0
         dtemp = 0.0
 
-        if (n <= 0) then
-            return
-        end if
+        if (n <= 0) return
 
-        if (incx == 1 .and. incy == 1) then
-            goto 20
-        end if
+        if (incx == 1 .and. incy == 1) goto 20
+
         !
         !        code for unequal increments or equal increments
         !          not equal to 1
         !
         ix = 1
         iy = 1
-        if (incx < 0) then
-            ix = (-n+1)*incx + 1
-        end if
-
-        if (incy < 0) then
-            iy = (-n+1)*incy + 1
-        end if
+        if (incx < 0) ix = (-n+1)*incx + 1
+        if (incy < 0) iy = (-n+1)*incy + 1
 
         do i = 1, n
             dtemp = dtemp + dx(ix)*dy(iy)
@@ -2165,7 +2158,7 @@ end subroutine daxpy
     end function ddot
 
 
-    pure function dnrm2( n, x, incx ) result (return_value)
+    pure function dnrm2(n, x, incx) result (return_value)
 
         !
         ! Purpose:
@@ -2193,14 +2186,14 @@ end subroutine daxpy
         !----------------------------------------------------------------------
         integer         :: ix
         real            :: absxi, norm, scale_rename, ssq
-        real, parameter :: ZERO = nearest(1.0,1.0)-nearest(1.0,-1.0)
+        real, parameter :: ZERO = 0.0
         real, parameter :: ONE = 1.0
         !----------------------------------------------------------------------
 
         !
         !==> Executable Statements
         !
-        if (n < 1 .or. incx < 1 ) then
+        if (n < 1  .or.  incx < 1 ) then
             norm = ZERO
         else if (n == 1) then
             norm = abs(x(1))
@@ -2244,8 +2237,8 @@ subroutine  drot (n, dx, incx, dy, incy, c, s)
 real dx(*), dy(*), dtemp, c, s
 integer i, incx, incy, ix, iy, n
 !
-if (n<=0)return
-if (incx==1.and.incy==1)goto 20
+if (n <= 0)return
+if (incx == 1 .and. incy == 1)goto 20
 !
 !       code for unequal increments or equal increments not equal
 !         to 1
@@ -2290,7 +2283,7 @@ if ( scale /= 0.0 ) goto 10
    z = 0.0
    goto 20
 10 r = scale*sqrt((da/scale)**2 + (db/scale)**2)
-r = dsign(1.0, roe)*r
+r = sign(1.0, roe)*r
 c = da/r
 s = db/r
 z = 1.0
@@ -2306,14 +2299,14 @@ subroutine  dscal(n, da, dx, incx)
 !     scales a vector by a constant.
 !     uses unrolled loops for increment equal to one.
 !     jack dongarra, linpack, 3/11/78.
-!     modified 3/93 to return if incx .le. 0.
+!     modified 3/93 to return if incx .le. 0.0
 !     modified 12/3/93, array(1) declarations changed to array(*)
 !
 real da, dx(*)
 integer i, incx, m, mp1, n, nincx
 !
-if ( n<=0 .or. incx<=0 )return
-if (incx==1)goto 20
+if ( n <= 0  .or.  incx <= 0 )return
+if (incx == 1)goto 20
 !
 !        code for increment not equal to 1
 !
@@ -2344,6 +2337,9 @@ do 50 i = mp1, n, 5
 50 continue
 return
 end subroutine  dscal
+
+
+
 subroutine  dswap (n, dx, incx, dy, incy)
 
 !
@@ -2355,8 +2351,8 @@ subroutine  dswap (n, dx, incx, dy, incy)
 real dx(*), dy(*), dtemp
 integer i, incx, incy, ix, iy, m, mp1, n
 !
-if (n<=0)return
-if (incx==1.and.incy==1)goto 20
+if (n <= 0)return
+if (incx == 1 .and. incy == 1)goto 20
 !
 !       code for unequal increments or equal increments not equal
 !         to 1
@@ -2399,7 +2395,7 @@ do 50 i = mp1, n, 3
   dx(i + 2) = dy(i + 2)
   dy(i + 2) = dtemp
 50 continue
-return
+
 end subroutine  dswap
 
 end module module_shpe

@@ -24,8 +24,7 @@ OBJS = $(addprefix $(OBJ_DIRECTORY)/, $(OBJ))
 
 FC = gfortran-6
 
-FCFLAGS = \
--O3 \
+FFLAGS = \
 $(ENFORCE_64_BIT_PRECISION) \
 $(LANGUAGE_OPTIONS)
 

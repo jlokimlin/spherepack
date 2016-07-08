@@ -3619,7 +3619,8 @@ contains
         integer (ip) :: l
         integer (ip) :: m
         integer (ip) :: n
-        real cw(*), work(*), fn, cf, srnp1
+        real (wp) :: cw(*), work(*)
+        real (wp) :: fn, cf, srnp1
 
         cw(1) = 0.0
 

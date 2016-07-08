@@ -7,15 +7,15 @@ LINKS = \
 -I$(OBJ_DIRECTORY)
 
 advec:
-	$(FC) $(FCFLAGS) -o advec.exe type_AdvectionSolver.f90 advec.f90 $(LINKS)
+	$(FC) $(FFLAGS) -o advec.exe type_AdvectionSolver.f90 advec.f90 $(LINKS)
 	./advec.exe	
 
 helmsph:
-	$(FC) $(FCFLAGS) -o helmsph.exe helmsph.f90 $(LINKS)
+	$(FC) $(FFLAGS) -o helmsph.exe helmsph.f90 $(LINKS)
 	./helmsph.exe	
 
 shallow:
-	$(FC) $(FCFLAGS) -o shallow.exe type_ShallowWaterSolver.f90 shallow.f90 $(LINKS)
+	$(FC) $(FFLAGS) -o shallow.exe type_ShallowWaterSolver.f90 shallow.f90 $(LINKS)
 	./shallow.exe	
 
 run: 
