@@ -65,9 +65,18 @@
 !
 program testsshifte
 
-    use spherepack_library
+    use, intrinsic :: iso_fortran_env, only: &
+        stdout => OUTPUT_UNIT
 
+    use spherepack_library, only: &
+        wp, & ! working precision
+        pi, &
+        TWO_PI, &
+        sshifti, sshifte
+
+    ! Explicit typing only
     implicit none
+
     integer nnlon,nnlat,nnlatp1,nnlat2,llsave,llwork
     parameter(nnlon=144,nnlat=72)
     parameter (nnlatp1 = nnlat+1, nnlat2 = nnlat+nnlat)
@@ -76,14 +85,13 @@ program testsshifte
     parameter (llwork = 2*(nnlat+1)*nnlon)
     !     for nnlon odd
     !     parameter (llwork = nnlon*(5*nnlat+1))
-    integer ioff,nlon,nlat,nlat2,j,i,lsave,lwork,ier
+    integer ioff,nlon,nlat,nlat2,j,i,lsave,lwork,error_flag
     real dlat,dlon,dlat2,dlon2,lat,long,x,y,z,gexact,err2
     real goff(nnlon,nnlat),greg(nnlon,nnlatp1)
     real wsave(llsave),work(llwork)
 
-    write( *, '(a)') ''
-    write( *, '(a)') '     testsshifte *** TEST RUN *** '
-    write( *, '(a)') ''
+    write( stdout, '(/a/)') '     testsshifte *** TEST RUN *** '
+
     !
     !     set resolution, work space lengths, and grid increments
     !
@@ -94,16 +102,16 @@ program testsshifte
     lwork = llwork
 
     dlat = pi/nlat
-    dlon = (pi+pi)/nlon
-    dlat2 = 0.5*dlat
-    dlon2 = 0.5*dlon
+    dlon = (TWO_PI)/nlon
+    dlat2 = 0.5_wp * dlat
+    dlon2 = 0.5_wp * dlon
     !
     !     set offset grid values in goff
     !
     do j=1,nlon
-        long = dlon2+(j-1)*dlon
+        long = dlon2+real(j-1, kind=wp)*dlon
         do i=1,nlat
-            lat = -0.5*pi + dlat2+(i-1)*dlat
+            lat = -0.5_wp * pi + dlat2+real(i-1, kind=wp)*dlat
             x = cos(lat)*cos(long)
             y = cos(lat)*sin(long)
             z = sin(lat)
@@ -114,31 +122,31 @@ program testsshifte
     !    initialize wsav for offset to regular shift
     !
     ioff = 0
-    call sshifti(ioff,nlon,nlat,lsave,wsave,ier)
+    call sshifti(ioff,nlon,nlat,lsave,wsave,error_flag)
     !
     !     write input arguments to sshifte
     !
-    write(*,100) ioff,nlon,nlat,lsave,lwork
+    write( stdout, 100) ioff,nlon,nlat,lsave,lwork
 100 format(' sshifte arguments', &
         /' ioff = ',i2, ' nlon = ',i3,' nlat = ',i3, &
         /' lsave = ',i5, ' lwork = ',i5)
     !
     !     shift offset to regular grid
     !
-    call sshifte(ioff,nlon,nlat,goff,greg,wsave,lsave,work,lwork,ier)
+    call sshifte(ioff,nlon,nlat,goff,greg,wsave,lsave,work,lwork,error_flag)
 
-    write(*,200) ier
+    write( stdout, 200) error_flag
 200 format(' ier = ',i2)
 
-    if (ier==0) then
+    if (error_flag==0) then
           !
           !     compute error in greg
           !
-        err2 = 0.0
+        err2 = 0.0_wp
         do j=1,nlon
-            long = (j-1)*dlon
+            long = real(j-1, kind=wp)*dlon
             do i=1,nlat+1
-                lat = -0.5*pi+(i-1)*dlat
+                lat = -0.5_wp * pi+real(i-1, kind=wp)*dlat
                 x = cos(lat)*cos(long)
                 y = cos(lat)*sin(long)
                 z = sin(lat)
@@ -147,33 +155,30 @@ program testsshifte
             end do
         end do
         err2 = sqrt(err2/(nlon*(nlat+1)))
-        write(*,300) err2
+        write( stdout, 300) err2
 300     format(' least squares error = ', e10.3)
     end if
     !    initialize wsav for regular to offset shift
     !
     ioff = 1
-    call sshifti(ioff,nlon,nlat,lsave,wsave,ier)
+    call sshifti(ioff,nlon,nlat,lsave,wsave,error_flag)
     !
     !     now transfer regular grid values in greg back to offset grid in goff
     !
-    do j=1,nlon
-        do i=1,nlat
-            goff(j,i) = 0.0
-        end do
-    end do
-    write(*,100) ioff,nlon,nlat,lsave,lwork
-    call sshifte(ioff,nlon,nlat,goff,greg,wsave,lsave,work,lwork,ier)
-    write(*,200) ier
-    if (ier == 0) then
+    goff = 0.0_wp
+
+    write( stdout, 100) ioff,nlon,nlat,lsave,lwork
+    call sshifte(ioff,nlon,nlat,goff,greg,wsave,lsave,work,lwork,error_flag)
+    write( stdout, 200) error_flag
+    if (error_flag == 0) then
         !
         !     compute error in goff by comparing with exp(x+y+z) on offset grid
         !
-        err2 = 0.0
+        err2 = 0.0_wp
         do j=1,nlon
-            long = dlon2+(j-1)*dlon
+            long = dlon2+real(j-1, kind=wp)*dlon
             do i=1,nlat
-                lat = -0.5*pi+dlat2+(i-1)*dlat
+                lat = -0.5_wp * pi + dlat2 + real(i-1, kind=wp) * dlat
                 x = cos(lat)*cos(long)
                 y = cos(lat)*sin(long)
                 z = sin(lat)
@@ -182,6 +187,7 @@ program testsshifte
             end do
         end do
         err2 = sqrt(err2/(nlon*(nlat+1)))
-        write(*,300) err2
+        write( stdout, 300) err2
     end if
+
 end program testsshifte

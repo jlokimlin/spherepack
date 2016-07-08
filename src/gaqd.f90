@@ -94,7 +94,7 @@ contains
 
     subroutine gaqd(nlat, theta, wts, w, lwork, ierror)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip), intent (in)  :: nlat
         real (wp),    intent (out) :: theta(nlat)
@@ -103,7 +103,7 @@ contains
         integer (ip), intent (in)  :: lwork
         integer (ip), intent (out) :: ierror
         !----------------------------------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !----------------------------------------------------------------------
         integer (ip)         :: i, idx, it, nix
         integer (ip)         :: nhalf, half_nlat
@@ -259,14 +259,14 @@ contains
         ! coefficient is returned in cz.
         !
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip), intent (in)  :: n
         real (wp),    intent (out) :: cz
         real (wp),    intent (out) :: cp(n/2+1)
         real (wp),    intent (out) :: dcp(n/2+1)
         !----------------------------------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !----------------------------------------------------------------------
         integer (ip) :: j, ncp !! Counter
         real (wp)    :: t1, t2, t3, t4
@@ -333,7 +333,7 @@ contains
         ! respect to theta
         !
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip), intent (in)  :: n
         real (wp),    intent (in)  :: theta
@@ -343,7 +343,7 @@ contains
         real (wp),    intent (out) :: pb
         real (wp),    intent (out) :: dpb
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip) :: k, kdo
         real (wp)    :: cost, sint, cos2t, sin2t, temp

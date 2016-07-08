@@ -27,7 +27,7 @@ module type_SphericalUnitVectors
     ! Declare derived data type
     type, public :: SphericalUnitVectors
         !----------------------------------------------------------------------
-        ! Class variables
+        ! Type components
         !----------------------------------------------------------------------
         logical,                    public :: initialized = .false.
         integer (ip),               public :: NUMBER_OF_LONGITUDES = 0
@@ -38,7 +38,7 @@ module type_SphericalUnitVectors
         !----------------------------------------------------------------------
     contains
         !----------------------------------------------------------------------
-        ! Class methods
+        ! Type-bound procedures
         !----------------------------------------------------------------------
         procedure, public :: create => create_spherical_unit_vectors
         procedure, public :: destroy => destroy_spherical_unit_vectors
@@ -62,7 +62,7 @@ contains
 
     function spherical_unit_vectors_constructor(grid) result (return_value)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         class (SphericalGrid), intent (in out) :: grid
         type (SphericalUnitVectors)            :: return_value
@@ -76,12 +76,12 @@ contains
 
     subroutine create_spherical_unit_vectors(this, grid)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         class (SphericalUnitVectors),  intent (in out) :: this
         class (SphericalGrid),         intent (in out) :: grid
         !----------------------------------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !----------------------------------------------------------------------
         integer (ip)                  :: k,  l !! Counters
         type (TrigonometricFunctions) :: trig_func
@@ -168,7 +168,7 @@ contains
 
     subroutine destroy_spherical_unit_vectors(this)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         class (SphericalUnitVectors), intent (in out) :: this
         !----------------------------------------------------------------------
@@ -195,14 +195,14 @@ contains
     subroutine get_spherical_angle_components(this, &
         vector_function, polar_component, azimuthal_component )
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         class (SphericalUnitVectors), intent (in out) :: this
         real (wp),                    intent (in)     :: vector_function(:,:,:)
         real (wp),                    intent (out)    :: polar_component(:,:)
         real (wp),                    intent (out)    :: azimuthal_component(:,:)
         !----------------------------------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !----------------------------------------------------------------------
         integer (ip)  :: k, l !! Counters
         type (Vector) :: vector_field !! To cast array to vector
@@ -244,7 +244,7 @@ contains
     subroutine get_vector_function(this, &
         radial_component, polar_component, azimuthal_component, vector_function)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         class (SphericalUnitVectors), intent (in out) :: this
         real (wp),                    intent (in)     :: radial_component(:,:)
@@ -252,7 +252,7 @@ contains
         real (wp),                    intent (in)     :: azimuthal_component(:,:)
         real (wp),                    intent (out)    :: vector_function(:,:,:)
         !----------------------------------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !----------------------------------------------------------------------
         integer (ip)  :: k, l !! Counters
         !----------------------------------------------------------------------
@@ -294,7 +294,7 @@ contains
 
     subroutine finalize_spherical_unit_vectors(this)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         type (SphericalUnitVectors), intent (in out)    :: this
         !----------------------------------------------------------------------

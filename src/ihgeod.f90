@@ -76,7 +76,7 @@ contains
         !                total number of edges is 30*(m-1)**2
         !
         !-------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !-------------------------------------------------------------
         integer (ip), intent (in)     :: m
         integer (ip), intent (in)     :: idp
@@ -85,7 +85,7 @@ contains
         real (wp),    intent (in out) :: y(idp, jdp, 5)
         real (wp),    intent (in out) :: z(idp, jdp, 5)
         !-------------------------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !-------------------------------------------------------------
         real (wp) :: beta
         real (wp) :: dphi
@@ -227,7 +227,7 @@ contains
 
     pure subroutine cart2sph(x, y, z, r, theta, phi)
         !-------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !-------------------------------------------------------------
         real (wp), intent (in)   :: x
         real (wp), intent (in)   :: y
@@ -259,7 +259,7 @@ contains
 
     pure subroutine sph2cart(r, theta, phi, x, y, z)
         !-------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !-------------------------------------------------------------
         real (wp), intent (in)  :: r
         real (wp), intent (in)  :: theta

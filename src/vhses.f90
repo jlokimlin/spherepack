@@ -455,11 +455,11 @@ module module_vhses
     ! Declare derived data type
     type, public :: VhsesAux
         !-----------------------------------------
-        ! Class variables
+        ! Type components
         !-----------------------------------------
     contains
         !-----------------------------------------
-        ! Class methods
+        ! Type-bound procedures
         !-----------------------------------------
         procedure, nopass :: vhses
         procedure, nopass :: vhsesi
@@ -476,13 +476,13 @@ contains
 
     pure function get_lvhses(nlat, nlon) result (return_value)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip), intent (in)  :: nlat
         integer (ip), intent (in)  :: nlon
         integer (ip)               :: return_value
         !----------------------------------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !----------------------------------------------------------------------
         integer (ip)         :: l1, l2
         type (SpherepackAux) :: sphere_aux
@@ -498,13 +498,13 @@ contains
 
     pure function get_lwork(nlat, nlon) result (return_value)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip), intent (in)  :: nlat
         integer (ip), intent (in)  :: nlon
         integer (ip)               :: return_value
         !----------------------------------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !----------------------------------------------------------------------
         integer (ip)         :: l1, l2
         type (SpherepackAux) :: sphere_aux
@@ -520,7 +520,7 @@ contains
 
     pure function get_ldwork(nlat) result (return_value)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip), intent (in)  :: nlat
         integer (ip)               :: return_value
@@ -534,7 +534,7 @@ contains
 
     pure function get_legendre_workspace_size(nlat, nlon, nt, ityp) result (return_value)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip),           intent (in) :: nlat
         integer (ip),           intent (in) :: nlon
@@ -542,7 +542,7 @@ contains
         integer (ip), optional, intent (in) :: ityp
         integer (ip)                        :: return_value
         !----------------------------------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !----------------------------------------------------------------------
         integer (ip) :: nt_op, ityp_op, l2
         !----------------------------------------------------------------------
@@ -587,7 +587,7 @@ contains
     subroutine vhses(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
         mdab, ndab, wvhses, lvhses, work, lwork, ierror)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip), intent (in)  :: nlat
         integer (ip), intent (in)  :: nlon
@@ -609,7 +609,7 @@ contains
         integer (ip), intent (in)  :: lwork
         integer (ip), intent (out) :: ierror
         !----------------------------------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !----------------------------------------------------------------------
         integer (ip) :: idv, idz, imid, ist, lnl, lzimn, mmax
         integer (ip) :: workspace_indices(6)
@@ -694,7 +694,7 @@ contains
 
         pure function get_workspace_indices(ist, lnl, lzimn) result (return_value)
             !----------------------------------------------------------------------
-            ! Dictionary: calling arguments
+            ! Dummy arguments
             !----------------------------------------------------------------------
             integer (ip), intent (in)  :: ist
             integer (ip), intent (in)  :: lnl
@@ -718,7 +718,7 @@ contains
         subroutine vhses1(nlat, nlon, ityp, nt, imid, idvw, jdvw, v, w, mdab, &
             ndab, br, bi, cr, ci, idv, ve, vo, we, wo, work, idz, vb, wb, wrfft)
             !----------------------------------------------------------------------
-            ! Dictionary: calling arguments
+            ! Dummy arguments
             !----------------------------------------------------------------------
             integer (ip), intent (in)  :: nlat
             integer (ip), intent (in)  :: nlon
@@ -746,7 +746,7 @@ contains
             real (wp),    intent (in)  :: wb(imid, *)
             real (wp),    intent (in)  :: wrfft(*)
             !----------------------------------------------------------------------
-            ! Dictionary: local variables
+            ! Local variables
             !----------------------------------------------------------------------
             integer (ip)    :: i, imm1, j, k, m, mb, mlat, mlon, mmax, mn
             integer (ip)    :: mp1, mp2, ndo1, ndo2, nlp1, np1
@@ -1358,7 +1358,7 @@ contains
     subroutine vhsesi(nlat, nlon, wvhses, lvhses, work, lwork, dwork, &
         ldwork, ierror)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip), intent (in)  :: nlat
         integer (ip), intent (in)  :: nlon
@@ -1370,7 +1370,7 @@ contains
         integer (ip), intent (in)  :: ldwork
         integer (ip), intent (out) :: ierror
         !----------------------------------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !----------------------------------------------------------------------
         integer (ip)    :: imid, labc, lzimn, mmax
         integer (ip)    :: workspace_indices(4)
@@ -1427,7 +1427,7 @@ contains
 
         pure function get_workspace_indices(nlat, imid, mmax, lzimn) result (return_value)
             !----------------------------------------------------------------------
-            ! Dictionary: calling arguments
+            ! Dummy arguments
             !----------------------------------------------------------------------
             integer (ip), intent (in)  :: nlat
             integer (ip), intent (in)  :: imid
@@ -1450,7 +1450,7 @@ contains
 
         subroutine ves1(nlat, nlon, imid, vb, wb, idz, vin, wzvin, dwork)
             !----------------------------------------------------------------------
-            ! Dictionary: calling arguments
+            ! Dummy arguments
             !----------------------------------------------------------------------
             integer (ip), intent (in)  :: nlat
             integer (ip), intent (in)  :: nlon
@@ -1462,7 +1462,7 @@ contains
             real (wp),    intent (out) :: wzvin(*)
             real (wp),    intent (out) :: dwork(*)
             !----------------------------------------------------------------------
-            ! Dictionary: local variables
+            ! Local variables
             !----------------------------------------------------------------------
             integer (ip)         :: i3, m, mmax, mn, mp1, np1
             type (SpherepackAux) :: sphere_aux

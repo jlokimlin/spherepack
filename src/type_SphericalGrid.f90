@@ -16,7 +16,7 @@ module type_SphericalGrid
     ! Declare derived data type
     type, abstract, public :: SphericalGrid
         !----------------------------------------------------------------------
-        ! Class variables
+        ! Type components
         !----------------------------------------------------------------------
         logical,                        public :: initialized = .false.
         integer (ip),                   public :: NUMBER_OF_LONGITUDES = 0  !! number of longitudinal points
@@ -28,7 +28,7 @@ module type_SphericalGrid
         !----------------------------------------------------------------------
     contains
         !----------------------------------------------------------------------
-        ! Class methods
+        ! Type-bound procedures
         !----------------------------------------------------------------------
         procedure, public :: destroy_grid
         procedure, public :: get_equally_spaced_longitudes
@@ -44,7 +44,7 @@ contains
 
     subroutine destroy_grid(this)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         class (SphericalGrid), intent (in out) :: this
         !----------------------------------------------------------------------
@@ -83,13 +83,13 @@ contains
 
     subroutine get_equally_spaced_longitudes(this, nlon, phi)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         class (SphericalGrid),  intent (in out) :: this
         integer (ip),           intent (in)     :: nlon !! number of longitudinal points
         real (wp), allocatable, intent (out)    :: phi(:)  !! longitudes: 0 <= phi <= 2*pi
         !----------------------------------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !----------------------------------------------------------------------
         integer (ip) :: i !! counter
         !----------------------------------------------------------------------
@@ -127,12 +127,12 @@ contains
 
     subroutine print_to_unformatted_binary_files(this, header)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         class (SphericalGrid), intent (in out) :: this
         character (len=*),     intent (in)     :: header
         !----------------------------------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !----------------------------------------------------------------------
         integer (ip)  :: file_unit
         !----------------------------------------------------------------------

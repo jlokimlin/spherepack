@@ -636,7 +636,7 @@ contains
 
     subroutine shaeci(nlat, nlon, wshaec, lshaec, dwork, ldwork, ierror)
         !--------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !--------------------------------------------------------------
         integer (ip), intent (in)  :: nlat
         integer (ip), intent (in)  :: nlon
@@ -646,7 +646,7 @@ contains
         integer (ip), intent (in)  :: ldwork
         integer (ip), intent (out) :: ierror
         !--------------------------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !--------------------------------------------------------------
         integer (ip)         :: imid, iw1, labc, lzz1, mmax
         type (HFFTpack)      :: hfft

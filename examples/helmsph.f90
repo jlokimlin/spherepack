@@ -94,11 +94,11 @@ contains
 
     subroutine test_helmholtz_inversion(sphere_type)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         class (Sphere), intent (in out) :: sphere_type
         !----------------------------------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !----------------------------------------------------------------------
         integer (ip), parameter        :: NLONS = 36
         integer (ip), parameter        :: NLATS = NLONS/2 + 1

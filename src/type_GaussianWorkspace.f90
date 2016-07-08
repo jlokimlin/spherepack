@@ -31,11 +31,11 @@ module type_GaussianWorkspace
     ! Declare derived data type
     type, extends (Workspace), public :: GaussianWorkspace
         !----------------------------------------------------------------------
-        ! Class variables
+        ! Type components
         !----------------------------------------------------------------------
     contains
         !----------------------------------------------------------------------
-        ! Class methods
+        ! Type-bound procedures
         !----------------------------------------------------------------------
         procedure,         public  :: create => create_gaussian_workspace
         procedure,         public  :: destroy => destroy_gaussian_workspace
@@ -66,7 +66,7 @@ contains
 
     function gaussian_workspace_constructor(nlat, nlon) result (return_value)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip),         intent (in) :: nlat !! number of latitudinal points 0 <= theta <= pi
         integer (ip),         intent (in) :: nlon !! number of longitudinal points 0 <= phi <= 2*pi
@@ -81,7 +81,7 @@ contains
 
     subroutine copy_gaussian_workspace(this, object_to_be_copied)
         !--------------------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !--------------------------------------------------------------------------------
         class (GaussianWorkspace), intent (out) :: this
         class (GaussianWorkspace), intent (in)  :: object_to_be_copied
@@ -116,7 +116,7 @@ contains
 
     subroutine create_gaussian_workspace(this, nlat, nlon)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         class (GaussianWorkspace), intent (in out) :: this
         integer (ip),              intent (in)     :: nlat
@@ -139,7 +139,7 @@ contains
 
     subroutine destroy_gaussian_workspace(this)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         class (GaussianWorkspace), intent (in out) :: this
         !----------------------------------------------------------------------
@@ -159,13 +159,13 @@ contains
 
     subroutine initialize_gaussian_scalar_analysis(this, nlat, nlon)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         class (GaussianWorkspace), intent (in out) :: this
         integer (ip),              intent (in)     :: nlat
         integer (ip),              intent (in)     :: nlon
         !----------------------------------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !----------------------------------------------------------------------
         integer (ip)           :: error_flag
         integer (ip)           :: lwork, ldwork, lshags
@@ -250,13 +250,13 @@ contains
 
     subroutine initialize_gaussian_scalar_synthesis(this, nlat, nlon)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         class (GaussianWorkspace), intent (in out) :: this
         integer (ip),              intent (in)     :: nlat
         integer (ip),              intent (in)     :: nlon
         !----------------------------------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !----------------------------------------------------------------------
         integer (ip)           :: error_flag
         integer (ip)           :: lwork, ldwork, lshsgs
@@ -342,7 +342,7 @@ contains
         !  (real) scalar harmonic transform on a gaussian grid
         !
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         class (GaussianWorkspace), intent (in out) :: this
         integer (ip),              intent (in)     :: nlat
@@ -367,13 +367,13 @@ contains
 
     subroutine initialize_gaussian_vector_analysis(this, nlat, nlon)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         class (GaussianWorkspace), intent (in out) :: this
         integer (ip),              intent (in)     :: nlat
         integer (ip),              intent (in)     :: nlon
         !----------------------------------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !----------------------------------------------------------------------
         integer (ip)           :: error_flag
         integer (ip)           :: ldwork, lvhags
@@ -444,13 +444,13 @@ contains
 
     subroutine initialize_gaussian_vector_synthesis(this, nlat, nlon)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         class (GaussianWorkspace), intent (in out) :: this
         integer (ip),              intent (in)     :: nlat
         integer (ip),              intent (in)     :: nlon
         !----------------------------------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !----------------------------------------------------------------------
         integer (ip)           :: error_flag
         integer (ip)           :: ldwork, lvhsgs
@@ -525,7 +525,7 @@ contains
         !  required for the (real) vector harmonic transform
         !
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         class (GaussianWorkspace), intent (in out) :: this
         integer (ip),              intent (in)     :: nlat
@@ -552,7 +552,7 @@ contains
 
     pure function get_lwork(nlat) result (return_value)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip), intent (in) :: nlat
         integer (ip)              :: return_value
@@ -573,7 +573,7 @@ contains
 
     pure function get_ldwork(nlat) result (return_value)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip), intent (in)  :: nlat
         integer (ip)               :: return_value
@@ -597,7 +597,7 @@ contains
 
     pure subroutine get_legendre_workspace(nlat, nlon, workspace, nt, ityp, isym)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip),           intent (in)  :: nlat
         integer (ip),           intent (in)  :: nlon
@@ -652,7 +652,7 @@ contains
 
     subroutine finalize_gaussian_workspace(this)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         type (GaussianWorkspace), intent (in out) :: this
         !----------------------------------------------------------------------

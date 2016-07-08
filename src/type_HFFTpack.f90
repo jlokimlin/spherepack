@@ -220,12 +220,9 @@ module type_HFFTpack
 
     ! Declare derived data type
     type, public :: HFFTpack
-        !-------------------------------------------------------
-        ! Class variables
-        !-------------------------------------------------------
     contains
         !-------------------------------------------------------
-        ! Class methods
+        ! Type-bound procedures
         !-------------------------------------------------------
         procedure, nopass :: initialize => hrffti
         procedure, nopass :: forward => hrfftf
@@ -241,15 +238,15 @@ contains
 
     subroutine hrffti(n, wsave)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip), intent (in)  :: n
         real (wp),    intent (out) :: wsave(n+15)
         !----------------------------------------------------------------------
 
-        if (n /= 1) then
-            call hrfti1(n, wsave(1), wsave(n+1))
-        end if
+        if (n == 1) return
+
+        call hrfti1(n, wsave(1), wsave(n+1))
 
     end subroutine hrffti
 
@@ -257,21 +254,22 @@ contains
 
     subroutine hrfti1(n, wa, fac)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip), intent (in)  :: n
         real (wp),    intent (out) :: wa(n)
         real (wp),    intent (out) :: fac(15)
         !--------------------------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !--------------------------------------------------------------
         integer (ip)            :: i, ib, ido, ii, iip, ipm, is
         integer (ip)            :: j, k1, l1, l2, ld
         integer (ip)            :: nf, nfm1, nl, nq, nr, ntry
-        integer (ip), parameter :: ntryh(*)=[ 4, 2, 3, 5]
+        integer (ip), parameter :: NTRYH(*) = [4, 2, 3, 5]
         real (wp)               :: arg,  argh, argld, fi
         !--------------------------------------------------------------
 
+        ! Initialize
         ntry = 0
         nl = n
         nf = 0
@@ -283,7 +281,7 @@ contains
 
             ! Choose ntry
             if (j <= 4) then
-                ntry = ntryh(j)
+                ntry = NTRYH(j)
             else
                 ntry = ntry+2
             end if
@@ -361,7 +359,7 @@ contains
         ! A multiple fft package for spherepack
         !
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip), intent (in)     :: m
         integer (ip), intent (in)     :: n
@@ -371,9 +369,9 @@ contains
         real (wp),    intent (out)    :: work(*)
          !----------------------------------------------------------------------
 
-        if (n /= 1) then
-            call hrftf1(m, n, r, mdimr, work, whrfft, whrfft(n+1))
-        end if
+        if (n == 1) return
+
+        call hrftf1(m, n, r, mdimr, work, whrfft, whrfft(n+1))
 
     end subroutine hrfftf
 
@@ -381,7 +379,7 @@ contains
 
     subroutine hrftf1(m, n, c, mdimc, ch, wa, fac)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip), intent (in)     :: m
         integer (ip), intent (in)     :: n
@@ -391,9 +389,9 @@ contains
         real (wp),    intent (in)     :: wa(n)
         real (wp),    intent (in)     :: fac(15)
         !----------------------------------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !----------------------------------------------------------------------
-        integer (ip) :: i, j, k1, l1, l2
+        integer (ip) :: k1, l1, l2
         integer (ip) :: na, kh, nf, iip
         integer (ip) :: iw, ix2, ix3, ix4, ido, idl1
         !----------------------------------------------------------------------
@@ -456,9 +454,7 @@ contains
             l2 = l1
         end do
 
-        if (na /= 1) then
-            c(1:m, 1:n) = ch
-        end if
+        if (na /= 1) c(1:m, 1:n) = ch
 
     end subroutine hrftf1
 
@@ -466,7 +462,7 @@ contains
 
     subroutine hradf2(mp, ido, l1, cc, mdimcc, ch, mdimch, wa1)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip), intent (in)     :: mp
         integer (ip), intent (in)     :: ido
@@ -477,13 +473,13 @@ contains
         integer (ip), intent (in)     :: mdimcc
         real (wp),    intent (in)     :: wa1(ido)
         !----------------------------------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !----------------------------------------------------------------------
         integer (ip) :: i, k, m, ic, idp2
         !----------------------------------------------------------------------
 
-        ch(1:mp, 1, 1,:) = cc(1:mp, 1, :, 1)+cc(1:mp, 1, :, 2)
-        ch(1:mp, ido, 2,:) = cc(1:mp, 1, :, 1)-cc(1:mp, 1, :, 2)
+        ch(1:mp, 1, 1,:) = cc(1:mp, 1,:, 1)+cc(1:mp, 1,:, 2)
+        ch(1:mp, ido, 2,:) = cc(1:mp, 1,:, 1)-cc(1:mp, 1,:, 2)
 
 
         if (ido < 2) then
@@ -518,8 +514,8 @@ contains
 
         end if
 
-        ch(1:mp, 1, 2, :) = -cc(1:mp, ido, :, 2)
-        ch(1:mp, ido, 1, :) = cc(1:mp, ido, :, 1)
+        ch(1:mp, 1, 2, :) = -cc(1:mp, ido,:, 2)
+        ch(1:mp, ido, 1, :) = cc(1:mp, ido,:, 1)
 
 
     end subroutine hradf2
@@ -527,7 +523,7 @@ contains
 
     subroutine hradf3(mp, ido, l1, cc, mdimcc, ch, mdimch, wa1, wa2)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip), intent (in)     :: mp
         integer (ip), intent (in)     :: ido
@@ -539,7 +535,7 @@ contains
         real (wp),    intent (in)     :: wa1(ido)
         real (wp),    intent (in)     :: wa2(ido)
         !----------------------------------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !----------------------------------------------------------------------
         integer (ip)         :: i, k, m, ic, idp2
         real (wp), parameter :: ARG=TWO_PI/3
@@ -616,7 +612,7 @@ contains
 
     subroutine hradf4(mp, ido, l1, cc, mdimcc, ch, mdimch, wa1, wa2, wa3)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip), intent (in)     :: mp
         integer (ip), intent (in)     :: ido
@@ -629,7 +625,7 @@ contains
         real (wp),    intent (in)     :: wa2(ido)
         real (wp),    intent (in)     :: wa3(ido)
         !----------------------------------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !----------------------------------------------------------------------
         integer (ip)         :: i, k, m, ic, idp2
         real (wp), parameter :: HALF_SQRT2 = sqrt(2.0_wp)/2
@@ -741,7 +737,7 @@ contains
     subroutine hradf5(mp, ido, l1, cc, mdimcc, ch, mdimch, &
         wa1, wa2, wa3, wa4)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip), intent (in)     :: mp
         integer (ip), intent (in)     :: ido
@@ -755,7 +751,7 @@ contains
         real (wp),    intent (in)     :: wa3(ido)
         real (wp),    intent (in)     :: wa4(ido)
         !----------------------------------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !----------------------------------------------------------------------
         integer (ip)         :: i, k, m, ic, idp2
         real (wp), parameter :: ARG = TWO_PI/5
@@ -909,7 +905,7 @@ contains
     subroutine hradfg(mp, ido, iip, l1, idl1, cc, c1, c2, mdimcc, &
         ch, ch2, mdimch, wa)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip), intent (in)     :: mp
         integer (ip), intent (in)     :: ido
@@ -925,9 +921,9 @@ contains
         integer (ip), intent (in)     :: mdimch
         real (wp),    intent (in)     :: wa(ido)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Local variables
         !----------------------------------------------------------------------
-        integer (ip) :: i, j, k, l, m, j2, ic, jc, lc, ik, is, idij
+        integer (ip) :: i, j, k, l, j2, ic, jc, lc, ik, is, idij
         real (wp)    :: dc2, ai1, ai2, ar1, ar2, ds2
         real (wp)    :: ar1h, ar2h
         !----------------------------------------------------------------------
@@ -1091,19 +1087,19 @@ contains
 
     subroutine hrfftb(m, n, r, mdimr, whrfft, work)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip), intent (in)     :: m
         integer (ip), intent (in)     :: n
         real (wp),    intent (in out) :: r(mdimr, n)
         integer (ip), intent (in)     :: mdimr
         real (wp),    intent (in)     :: whrfft(n+15)
-        real (wp),    intent (out)    :: work(1)
+        real (wp),    intent (out)    :: work(*)
         !----------------------------------------------------------------------
 
-        if (n /= 1) then
-            call hrftb1(m, n, r, mdimr, work, whrfft, whrfft(n+1))
-        end if
+        if (n == 1) return
+
+        call hrftb1(m, n, r, mdimr, work, whrfft, whrfft(n+1))
 
     end subroutine hrfftb
 
@@ -1111,7 +1107,7 @@ contains
 
     subroutine hrftb1(m, n, c, mdimc, ch, wa, fac)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip), intent (in)     :: m
         integer (ip), intent (in)     :: n
@@ -1121,9 +1117,9 @@ contains
         real (wp),    intent (in)     :: wa(n)
         real (wp),    intent (in)     :: fac(15)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
-        integer (ip) :: i, j, k1, l1, l2, na
+        integer (ip) :: k1, l1, l2, na
         integer (ip) :: nf, iip, iw, ix2, ix3, ix4, ido, idl1
         !----------------------------------------------------------------------
 
@@ -1191,7 +1187,7 @@ contains
 
     subroutine hradb2(mp, ido, l1, cc, mdimcc, ch, mdimch, wa1)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip), intent (in)     :: mp
         integer (ip), intent (in)     :: ido
@@ -1202,13 +1198,13 @@ contains
         integer (ip), intent (in)     :: mdimch
         real (wp),    intent (in)     :: wa1(ido)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
-        integer (ip) :: i, k, m, ic, idp2
+        integer (ip) :: i, k, ic, idp2
         !----------------------------------------------------------------------
 
-        ch(1:mp, 1, :, 1) = cc(1:mp, 1, 1, :)+cc(1:mp, ido, 2, :)
-        ch(1:mp, 1, :, 2) = cc(1:mp, 1, 1, :)-cc(1:mp, ido, 2, :)
+        ch(1:mp, 1,:, 1) = cc(1:mp, 1, 1, :)+cc(1:mp, ido, 2, :)
+        ch(1:mp, 1,:, 2) = cc(1:mp, 1, 1, :)-cc(1:mp, ido, 2, :)
 
         if (ido < 2) then
             return
@@ -1237,8 +1233,8 @@ contains
 
         end if
 
-        ch(1:mp, ido, :, 1) = cc(1:mp, ido, 1,:)+cc(1:mp, ido, 1,:)
-        ch(1:mp, ido, :, 2) = -(cc(1:mp, 1, 2,:)+cc(1:mp, 1, 2,:))
+        ch(1:mp, ido,:, 1) = cc(1:mp, ido, 1,:)+cc(1:mp, ido, 1,:)
+        ch(1:mp, ido,:, 2) = -(cc(1:mp, 1, 2,:)+cc(1:mp, 1, 2,:))
 
     end subroutine hradb2
 
@@ -1246,7 +1242,7 @@ contains
 
     subroutine hradb3(mp, ido, l1, cc, mdimcc, ch, mdimch, wa1, wa2)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip), intent (in)     :: mp
         integer (ip), intent (in)     :: ido
@@ -1258,9 +1254,9 @@ contains
         real (wp),    intent (in)     :: wa1(ido)
         real (wp),    intent (in)     :: wa2(ido)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
-        integer (ip)         :: i, k, m, ic, idp2
+        integer (ip)         :: i, k, ic, idp2
         real (wp), parameter :: ARG = TWO_PI/3
         real (wp), parameter :: TAUR = cos(ARG)
         real (wp), parameter :: TAUI = sin(ARG)
@@ -1329,7 +1325,7 @@ contains
 
     subroutine hradb4(mp, ido, l1, cc, mdimcc, ch, mdimch, wa1, wa2, wa3)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip), intent (in)     :: mp
         integer (ip), intent (in)     :: ido
@@ -1342,9 +1338,9 @@ contains
         real (wp),    intent (in)     :: wa2(ido)
         real (wp),    intent (in)     :: wa3(ido)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
-        integer (ip)         :: i, k, m, ic, idp2
+        integer (ip)         :: i, k, ic, idp2
         real (wp), parameter :: SQRT2 = sqrt(2.0_wp)
         !----------------------------------------------------------------------
 
@@ -1432,7 +1428,7 @@ contains
     subroutine hradb5(mp, ido, l1, cc, mdimcc, ch, mdimch, &
         wa1, wa2, wa3, wa4)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip), intent (in)     :: mp
         integer (ip), intent (in)     :: ido
@@ -1446,9 +1442,9 @@ contains
         real (wp),    intent (in)     :: wa3(ido)
         real (wp),    intent (in)     :: wa4(ido)
         !----------------------------------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !----------------------------------------------------------------------
-        integer (ip)         :: i, k, m, ic, idp2
+        integer (ip)         :: i, k, ic, idp2
         real (wp), parameter :: ARG = TWO_PI/5
         real (wp), parameter :: TR11=cos(ARG)
         real (wp), parameter :: TI11=sin(ARG)
@@ -1587,7 +1583,7 @@ contains
     subroutine hradbg(mp, ido, iip, l1, idl1, cc, c1, c2, mdimcc, &
         ch, ch2, mdimch, wa)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip), intent (in)     :: mp
         integer (ip), intent (in)     :: ido
@@ -1603,9 +1599,9 @@ contains
         integer (ip), intent (in)     :: mdimch
         real (wp),    intent (in)     :: wa(ido)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
-        integer (ip)         :: i, j, k, l, m, j2, ic, jc, lc, ik, is, nbd
+        integer (ip)         :: i, j, k, l, j2, ic, jc, lc, is, nbd
         integer (ip)         :: idp2, ipp2, idij, ipph
         real (wp)            :: dc2, ai1, ai2, ar1, ar2, ds2
         real (wp)            :: dcp, arg, dsp, ar1h, ar2h
@@ -1619,13 +1615,13 @@ contains
         ipp2 = iip+2
         ipph = (iip+1)/2
 
-        ch(1:mp, :, :, 1) = cc(1:mp, :, 1, :)
+        ch(1:mp,:, :, 1) = cc(1:mp,:, 1, :)
 
         do j=2, ipph
             jc = ipp2-j
             j2 = 2*j
-            ch(1:mp, 1, :, j) = cc(1:mp, ido, j2-2, :)+cc(1:mp, ido, j2-2, :)
-            ch(1:mp, 1, :, jc) = cc(1:mp, 1, j2-1, :)+cc(1:mp, 1, j2-1, :)
+            ch(1:mp, 1,:, j) = cc(1:mp, ido, j2-2, :)+cc(1:mp, ido, j2-2, :)
+            ch(1:mp, 1,:, jc) = cc(1:mp, 1, j2-1, :)+cc(1:mp, 1, j2-1, :)
         end do
 
         if (ido /= 1) then
@@ -1647,10 +1643,10 @@ contains
                     jc = ipp2-j
                     do i=3, ido, 2
                         ic = idp2-i
-                        ch(1:mp, i-1, :, j) = cc(1:mp, i-1, 2*j-1, :)+cc(1:mp, ic-1, 2*j-2, :)
-                        ch(1:mp, i-1, :, jc) = cc(1:mp, i-1, 2*j-1, :)-cc(1:mp, ic-1, 2*j-2, :)
-                        ch(1:mp, i, :, j) = cc(1:mp, i, 2*j-1, :)-cc(1:mp, ic, 2*j-2, :)
-                        ch(1:mp, i, :, jc) = cc(1:mp, i, 2*j-1, :)+cc(1:mp, ic, 2*j-2, :)
+                        ch(1:mp, i-1,:, j) = cc(1:mp, i-1, 2*j-1, :)+cc(1:mp, ic-1, 2*j-2, :)
+                        ch(1:mp, i-1,:, jc) = cc(1:mp, i-1, 2*j-1, :)-cc(1:mp, ic-1, 2*j-2, :)
+                        ch(1:mp, i,:, j) = cc(1:mp, i, 2*j-1, :)-cc(1:mp, ic, 2*j-2, :)
+                        ch(1:mp, i,:, jc) = cc(1:mp, i, 2*j-1, :)+cc(1:mp, ic, 2*j-2, :)
                     end do
                 end do
             end if

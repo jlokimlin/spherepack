@@ -30,7 +30,7 @@ contains
 
     pure function pimach(dum) result (return_value)
         !-----------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !-----------------------------------------------
         real (wp), optional, intent (in) :: dum
         real (wp)                        :: return_value

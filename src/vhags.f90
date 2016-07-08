@@ -346,11 +346,11 @@ module module_vhags
     ! Declare derived data type
     type, public :: VhagsAux
         !-----------------------------------------
-        ! Class variables
+        ! Type components
         !-----------------------------------------
     contains
         !-----------------------------------------
-        ! Class methods
+        ! Type-bound procedures
         !-----------------------------------------
         procedure, nopass :: vhags
         procedure, nopass :: vhagsi
@@ -366,13 +366,13 @@ contains
 
     pure function get_lvhags(nlat, nlon) result (return_value)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip), intent (in)  :: nlat
         integer (ip), intent (in)  :: nlon
         integer (ip)               :: return_value
         !----------------------------------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !----------------------------------------------------------------------
         integer (ip)         :: l1, l2
         type (SpherepackAux) :: sphere_aux
@@ -390,7 +390,7 @@ contains
 
     pure function get_ldwork(nlat) result (return_value)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip), intent (in)  :: nlat
         integer (ip)               :: return_value
@@ -405,7 +405,7 @@ contains
 
     pure function get_legendre_workspace_size(nlat, nlon, nt, ityp) result (return_value)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip),           intent (in) :: nlat
         integer (ip),           intent (in) :: nlon
@@ -413,7 +413,7 @@ contains
         integer (ip), optional, intent (in) :: ityp
         integer (ip)                        :: return_value
         !----------------------------------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !----------------------------------------------------------------------
         integer (ip) :: nt_op, ityp_op, l2
         !----------------------------------------------------------------------
@@ -460,7 +460,7 @@ contains
     subroutine vhags(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
         mdab, ndab, wvhags, lvhags, work, lwork, ierror)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip), intent (in)  :: nlat
         integer (ip), intent (in)  :: nlon
@@ -482,7 +482,7 @@ contains
         integer (ip), intent (in)  :: lwork
         integer (ip), intent (out) :: ierror
         !----------------------------------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !----------------------------------------------------------------------
         integer (ip) :: idv, idz, imid, ist
         integer (ip) :: lnl, lzimn, mmax
@@ -572,7 +572,7 @@ contains
 
         pure function get_workspace_indices(nlat, imid, ist, lnl) result (return_value)
             !----------------------------------------------------------------------
-            ! Dictionary: calling arguments
+            ! Dummy arguments
             !----------------------------------------------------------------------
             integer (ip), intent (in)  :: nlat
             integer (ip), intent (in)  :: imid
@@ -580,7 +580,7 @@ contains
             integer (ip), intent (in)  :: lnl
             integer (ip)               :: return_value(7)
             !----------------------------------------------------------------------
-            ! Dictionary: local variables
+            ! Local variables
             !----------------------------------------------------------------------
             integer (ip) :: lmn
             !----------------------------------------------------------------------
@@ -1336,7 +1336,7 @@ contains
 
     subroutine vhagsi(nlat, nlon, wvhags, lvhags, dwork, ldwork, ierror)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip), intent (in)  :: nlat
         integer (ip), intent (in)  :: nlon
@@ -1346,7 +1346,7 @@ contains
         integer (ip), intent (in)  :: ldwork
         integer (ip), intent (out) :: ierror
         !----------------------------------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !----------------------------------------------------------------------
         integer (ip)    :: imid, lmn
         integer (ip)    :: workspace_indices(7)
@@ -1401,7 +1401,7 @@ contains
 
         pure function get_workspace_indices(nlat, imid, lmn) result (return_value)
             !----------------------------------------------------------------------
-            ! Dictionary: calling arguments
+            ! Dummy arguments
             !----------------------------------------------------------------------
             integer (ip), intent (in)  :: nlat
             integer (ip), intent (in)  :: imid
@@ -1428,7 +1428,7 @@ contains
 
         subroutine vhgai1(nlat, imid, vb, wb, dthet, dwts, dpbar, work)
             !----------------------------------------------------------------------
-            ! Dictionary: calling arguments
+            ! Dummy arguments
             !----------------------------------------------------------------------
             integer (ip), intent (in)  :: nlat
             integer (ip), intent (in)  :: imid
@@ -1439,7 +1439,7 @@ contains
             real (wp),    intent (out) :: dpbar(imid, nlat, 3)
             real (wp),    intent (out) :: work(*)
             !----------------------------------------------------------------------
-            ! Dictionary: calling arguments
+            ! Dummy arguments
             !----------------------------------------------------------------------
             integer (ip)         :: i, local_error_flag, id, ix, iy
             integer (ip)         :: m, mn, n, nm, np, nz
@@ -1563,7 +1563,7 @@ contains
 
         pure function indx(m, n, nlat) result (return_value)
             !----------------------------------------------------------------------
-            ! Dictionary: calling arguments
+            ! Dummy arguments
             !----------------------------------------------------------------------
             integer, intent (in) :: m
             integer, intent (in) :: n

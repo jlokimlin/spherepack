@@ -17,7 +17,7 @@ module type_TrigonometricFunctions
     ! Declare derived data type
     type, public :: TrigonometricFunctions
         !----------------------------------------------------------------------
-        ! Class variables
+        ! Type components
         !----------------------------------------------------------------------
         logical,                public :: initialized = .false. !! Initialization flag
         integer (ip),           public :: NUMBER_OF_LONGITUDES = 0 !! number of longitudinal points in phi
@@ -29,7 +29,7 @@ module type_TrigonometricFunctions
         !----------------------------------------------------------------------
     contains
         !----------------------------------------------------------------------
-        ! Class methods
+        ! Type-bound procedures
         !----------------------------------------------------------------------
         procedure, public :: create => create_trigonometric_functions
         procedure, public :: destroy => destroy_trigonometric_functions
@@ -51,7 +51,7 @@ contains
 
     function trigonometric_functions_constructor(grid) result (return_value)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         class (SphericalGrid), intent (in out) :: grid
         type (TrigonometricFunctions)          :: return_value
@@ -66,7 +66,7 @@ contains
     subroutine create_trigonometric_functions(this, grid_type)
         !
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         class (TrigonometricFunctions), intent (in out) :: this
         class (SphericalGrid),          intent (in)     :: grid_type
@@ -124,7 +124,7 @@ contains
 
     subroutine destroy_trigonometric_functions(this)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         class (TrigonometricFunctions), intent (in out) :: this
         !----------------------------------------------------------------------
@@ -151,7 +151,7 @@ contains
 
     subroutine finalize_trigonometric_functions(this)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         type (TrigonometricFunctions), intent (in out)    :: this
         !----------------------------------------------------------------------

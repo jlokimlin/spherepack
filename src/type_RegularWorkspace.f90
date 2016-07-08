@@ -30,11 +30,11 @@ module type_RegularWorkspace
     ! Declare derived data type
     type, extends (Workspace), public :: RegularWorkspace
         !----------------------------------------------------------------------
-        ! Class variables
+        ! Type components
         !----------------------------------------------------------------------
     contains
         !----------------------------------------------------------------------
-        ! Class methods
+        ! Type-bound procedures
         !----------------------------------------------------------------------
         procedure, public  :: create => create_regular_workspace
         procedure, public  :: destroy => destroy_regular_workspace
@@ -65,7 +65,7 @@ contains
 
     function regular_workspace_constructor(nlat, nlon) result (return_value)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip), intent (in) :: nlat !! number of latitudinal points 0 <= theta <= pi
         integer (ip), intent (in) :: nlon !! number of longitudinal points 0 <= phi <= 2*pi
@@ -80,7 +80,7 @@ contains
 
     subroutine copy_regular_workspace(this, object_to_be_copied)
         !--------------------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !--------------------------------------------------------------------------------
         class (RegularWorkspace), intent (out) :: this
         class (RegularWorkspace), intent (in)  :: object_to_be_copied
@@ -115,7 +115,7 @@ contains
 
     subroutine create_regular_workspace(this, nlat, nlon)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         class (RegularWorkspace), intent (in out) :: this
         integer (ip),             intent (in)     :: nlat
@@ -139,7 +139,7 @@ contains
 
     subroutine destroy_regular_workspace(this)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         class (RegularWorkspace), intent (in out) :: this
         !----------------------------------------------------------------------
@@ -168,13 +168,13 @@ contains
         !  https://www2.cisl.ucar.edu/spherepack/documentation#shaesi.html
         !
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         class (RegularWorkspace), intent (in out) :: this
         integer (ip),             intent (in)     :: nlat
         integer (ip),             intent (in)     :: nlon
         !----------------------------------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !----------------------------------------------------------------------
         integer (ip)           :: error_flag
         integer (ip)           :: lwork, ldwork, lshaes
@@ -249,13 +249,13 @@ contains
 
     subroutine initialize_regular_scalar_synthesis(this, nlat, nlon)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         class (RegularWorkspace), intent (in out) :: this
         integer (ip),             intent (in)     :: nlat
         integer (ip),             intent (in)     :: nlon
         !----------------------------------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !----------------------------------------------------------------------
         integer (ip)           :: error_flag
         integer (ip)           :: lwork, ldwork, lshses
@@ -333,7 +333,7 @@ contains
         !  (real) scalar harmonic transform on a regular (equally-spaced) grid.
         !
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         class (RegularWorkspace), intent (in out) :: this
         integer (ip),             intent (in)     :: nlat
@@ -356,13 +356,13 @@ contains
 
     subroutine initialize_regular_vector_analysis(this, nlat, nlon)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         class (RegularWorkspace), intent (in out) :: this
         integer (ip),             intent (in)     :: nlat
         integer (ip),             intent (in)     :: nlon
         !----------------------------------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !----------------------------------------------------------------------
         integer (ip)           :: error_flag
         integer (ip)           :: lwork, ldwork, lvhaes
@@ -437,13 +437,13 @@ contains
 
     subroutine initialize_regular_vector_synthesis(this, nlat, nlon)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         class (RegularWorkspace), intent (in out) :: this
         integer (ip),             intent (in)     :: nlat
         integer (ip),             intent (in)     :: nlon
         !----------------------------------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !----------------------------------------------------------------------
         integer (ip)           :: error_flag
         integer (ip)           :: lwork, ldwork, lvhses
@@ -525,7 +525,7 @@ contains
         ! on a regular (equally-spaced) grid
         !
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         class (RegularWorkspace), intent (in out) :: this
         integer (ip),             intent (in)     :: nlat
@@ -550,13 +550,13 @@ contains
 
     pure function get_lwork(nlat, nlon) result (return_value)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip), intent (in)  :: nlat
         integer (ip), intent (in)  :: nlon
         integer (ip)               :: return_value
         !----------------------------------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !----------------------------------------------------------------------
         type (ShaesAux) :: shaes_aux
         type (ShsesAux) :: shses_aux
@@ -577,12 +577,12 @@ contains
 
     pure function get_ldwork(nlat) result (return_value)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip), intent (in)  :: nlat
         integer (ip)               :: return_value
         !----------------------------------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !----------------------------------------------------------------------
         type (ShaesAux) :: shaes_aux
         type (ShsesAux) :: shses_aux
@@ -603,7 +603,7 @@ contains
 
     pure subroutine get_legendre_workspace(nlat, nlon, workspace, nt, ityp)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip),           intent (in)  :: nlat
         integer (ip),           intent (in)  :: nlon
@@ -611,7 +611,7 @@ contains
         integer (ip), optional, intent (in)  :: nt
         integer (ip), optional, intent (in)  :: ityp
         !----------------------------------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !----------------------------------------------------------------------
         type (ShaesAux) :: shaes_aux
         type (ShsesAux) :: shses_aux
@@ -653,7 +653,7 @@ contains
 
     subroutine finalize_regular_workspace(this)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         type (RegularWorkspace), intent (in out) :: this
         !----------------------------------------------------------------------

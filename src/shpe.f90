@@ -2083,7 +2083,7 @@ end subroutine daxpy
         !     modified 12/3/93, array(1) declarations changed to array(*)
         !
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer, intent (in) :: n
         real,    intent (in) :: dx(*)
@@ -2092,7 +2092,7 @@ end subroutine daxpy
         integer, intent (in) :: incy
         real                 :: return_value
         !----------------------------------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !----------------------------------------------------------------------
         real    :: dtemp
         integer :: i, ix, iy, m, mp1
@@ -2182,14 +2182,14 @@ end subroutine daxpy
         !     Sven Hammarling, Nag Ltd.
         !
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer, intent (in) :: n
         real,    intent (in) :: x(*)
         integer, intent (in) :: incx
         real                 :: return_value
         !----------------------------------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !----------------------------------------------------------------------
         integer         :: ix
         real            :: absxi, norm, scale_rename, ssq

@@ -33,7 +33,7 @@ module type_Sphere
     ! Declare derived data type
     type, abstract, public :: Sphere
         !----------------------------------------------------------------------
-        ! Class variables
+        ! Type components
         !----------------------------------------------------------------------
         logical,                            public :: initialized = .false.
         integer (ip),                       public :: NUMBER_OF_LONGITUDES = 0
@@ -56,7 +56,7 @@ module type_Sphere
         !----------------------------------------------------------------------
     contains
         !----------------------------------------------------------------------
-        ! Class methods
+        ! Type-bound procedures
         !----------------------------------------------------------------------
         procedure, public  :: create_sphere
         procedure, public  :: destroy => destroy_sphere
@@ -124,7 +124,7 @@ module type_Sphere
         subroutine scalar_analysis(this, scalar_function)
             import :: Sphere, wp
             !----------------------------------------------------------------------
-            ! Dictionary: calling arguments
+            ! Dummy arguments
             !----------------------------------------------------------------------
             class (Sphere), intent (in out) :: this
             real (wp),      intent (in)     :: scalar_function(:,:)
@@ -134,7 +134,7 @@ module type_Sphere
         subroutine scalar_synthesis(this, scalar_function)
             import :: Sphere, wp
             !----------------------------------------------------------------------
-            ! Dictionary: calling arguments
+            ! Dummy arguments
             !----------------------------------------------------------------------
             class (Sphere), intent (in out) :: this
             real (wp),      intent (out)   :: scalar_function(:,:)
@@ -144,7 +144,7 @@ module type_Sphere
         subroutine vector_analysis(this, polar_component, azimuthal_component)
             import :: Sphere, wp
             !----------------------------------------------------------------------
-            ! Dictionary: calling arguments
+            ! Dummy arguments
             !----------------------------------------------------------------------
             class (Sphere), intent (in out) :: this
             real (wp),      intent (in)     :: polar_component(:,:)
@@ -155,7 +155,7 @@ module type_Sphere
         subroutine vector_synthesis(this, polar_component, azimuthal_component)
             import :: Sphere, wp
             !----------------------------------------------------------------------
-            ! Dictionary: calling arguments
+            ! Dummy arguments
             !----------------------------------------------------------------------
             class (Sphere), intent (in out) :: this
             real (wp),      intent (out)    :: polar_component(:,:)
@@ -174,7 +174,7 @@ contains
 
     subroutine create_sphere(this, nlat, nlon, ntrunc, isym, itype, nt, rsphere)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         class (Sphere), intent (in out) :: this
         integer (ip),   intent (in)     :: nlat
@@ -185,7 +185,7 @@ contains
         integer (ip),   intent (in)     :: nt
         real (wp),      intent (in)     :: rsphere
         !--------------------------------------------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !--------------------------------------------------------------------------------
         integer (ip) :: m, n !! Counters
         !--------------------------------------------------------------------------------
@@ -283,7 +283,7 @@ contains
 
     subroutine destroy_sphere(this)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         class (Sphere), intent (in out) :: this
         !----------------------------------------------------------------------
@@ -378,12 +378,12 @@ contains
         ! nm = sum([(i, i=mtrunc+1, mtrunc-m+2, -1)])+n-m+1
         !
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         class (Sphere), intent (in out) :: this
         real (wp),      intent (in)     :: scalar_function(:,:)
         !----------------------------------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !----------------------------------------------------------------------
         integer (ip) :: n, m !! Counters
         !----------------------------------------------------------------------
@@ -430,12 +430,12 @@ contains
         ! Converts gridded input array to (complex) spherical harmonic coefficients
         !
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         class (Sphere), intent (in out) :: this
         real (wp),      intent (out)    :: scalar_function(:,:)
         !----------------------------------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !----------------------------------------------------------------------
         integer (ip) :: n, m, i !! Counters
         !----------------------------------------------------------------------
@@ -485,7 +485,7 @@ contains
     subroutine analyze_into_complex_spectral_coefficients(this, &
         scalar_function, spectral_coefficients )
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         class (Sphere), intent (in out) :: this
         real (wp),      intent (in)     :: scalar_function(:,:)
@@ -510,13 +510,13 @@ contains
     subroutine synthesize_from_complex_spectral_coefficients(this, &
         spectral_coefficients, scalar_function )
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         class (Sphere), intent (in out) :: this
         complex (wp),   intent (in)     :: spectral_coefficients(:)
         real (wp),      intent (out)    :: scalar_function(:,:)
         !----------------------------------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !----------------------------------------------------------------------
         integer (ip) :: n, m, i !! Counters
         !----------------------------------------------------------------------
@@ -561,12 +561,12 @@ contains
 
     subroutine perform_vector_analysis_from_vector_field(this, vector_field )
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         class (Sphere), intent (in out) :: this
         real (wp),      intent (in)    :: vector_field(:,:,:)
         !----------------------------------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !----------------------------------------------------------------------
         integer (ip)           :: error_flag
         real (wp), allocatable :: polar_component(:,:)
@@ -610,7 +610,7 @@ contains
 
     subroutine get_scalar_laplacian(this, scalar_function, scalar_laplacian )
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         class (Sphere), intent (in out) :: this
         real (wp),      intent (in)     :: scalar_function(:,:)
@@ -643,7 +643,7 @@ contains
 
     subroutine invert_scalar_laplacian(this, source, solution)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         class (Sphere), intent (in out) :: this
         real (wp),      intent (in)    :: source(:,:)
@@ -676,11 +676,11 @@ contains
 
     subroutine compute_vector_laplacian_coefficients(this)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         class (Sphere), intent (in out) :: this
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip) :: n !! Counter
         !----------------------------------------------------------------------
@@ -742,7 +742,7 @@ contains
     subroutine get_vector_laplacian_from_spherical_components(this, &
         polar_component, azimuthal_component, polar_laplacian, azimuthal_laplacian )
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         class (Sphere), intent (in out) :: this
         real (wp),      intent (in)     :: polar_component(:,:)
@@ -783,7 +783,7 @@ contains
     subroutine get_vector_laplacian_from_vector_field(this, &
         vector_field, polar_laplacian, azimuthal_laplacian )
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         class (Sphere), intent (in out) :: this
         real (wp),      intent (in)     :: vector_field(:,:,:)
@@ -815,7 +815,7 @@ contains
     subroutine invert_vector_laplacian(this, &
         polar_source, azimuthal_source, polar_solution, azimuthal_solution)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         class (Sphere), intent (in out) :: this
         real (wp),      intent (in)     :: polar_source(:,:)
@@ -823,7 +823,7 @@ contains
         real (wp),      intent (out)    :: polar_solution(:,:)
         real (wp),      intent (out)    :: azimuthal_solution(:,:)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip) :: n !! Counter
         !----------------------------------------------------------------------
@@ -898,14 +898,14 @@ contains
 
     subroutine invert_helmholtz(this, helmholtz_constant, source, solution )
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         class (Sphere), target, intent (in out) :: this
         real (wp),              intent (in)     :: helmholtz_constant
         real (wp),              intent (in)     :: source(:,:)
         real (wp),              intent (out)    :: solution(:,:)
         !----------------------------------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !----------------------------------------------------------------------
         real (wp), parameter :: ZERO=nearest(1.0_wp, 1.0_wp)-nearest(1.0_wp, -1.0_wp)
         real (wp), pointer   :: iptr(:) => null()
@@ -971,14 +971,14 @@ contains
     subroutine get_gradient(this, scalar_function, &
         polar_gradient_component, azimuthal_gradient_component)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         class (Sphere), intent (in out) :: this
         real (wp),      intent (in)     :: scalar_function(:,:)
         real (wp),      intent (out)    :: polar_gradient_component(:,:)
         real (wp),      intent (out)    :: azimuthal_gradient_component(:,:)
         !----------------------------------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !----------------------------------------------------------------------
         integer (ip) :: n, m !! Counters
         !----------------------------------------------------------------------
@@ -1027,14 +1027,14 @@ contains
     subroutine invert_gradient_from_spherical_components(this, &
         polar_source, azimuthal_source, solution )
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         class (Sphere), intent (in out) :: this
         real (wp),      intent (in)     :: polar_source(:,:)
         real (wp),      intent (in)     :: azimuthal_source(:,:)
         real (wp),      intent (out)    :: solution(:,:)
         !----------------------------------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !----------------------------------------------------------------------
         integer (ip) :: n, m !! Counters
         !----------------------------------------------------------------------
@@ -1104,14 +1104,14 @@ contains
     subroutine get_vorticity_from_spherical_components(this, &
         polar_component, azimuthal_component, vorticity)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         class (Sphere), intent (in out) :: this
         real (wp),      intent (in)     :: polar_component(:,:)
         real (wp),      intent (in)     :: azimuthal_component(:,:)
         real (wp),      intent (out)    :: vorticity(:,:)
         !----------------------------------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !----------------------------------------------------------------------
         integer (ip) :: n, m !! Counters
         !----------------------------------------------------------------------
@@ -1170,13 +1170,13 @@ contains
 
     subroutine get_vorticity_from_vector_field(this, vector_field, vorticity)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         class (Sphere), intent (in out) :: this
         real (wp),      intent (in)     :: vector_field(:,:,:)
         real (wp),      intent (out)    :: vorticity(:,:)
         !----------------------------------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !----------------------------------------------------------------------
         real (wp), allocatable :: polar_component(:,:)
         real (wp), allocatable :: azimuthal_component(:,:)
@@ -1230,14 +1230,14 @@ contains
 
     subroutine invert_vorticity(this, source, polar_solution, azimuthal_solution)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         class (Sphere), intent (in out) :: this
         real (wp),      intent (in)     :: source(:,:)
         real (wp),      intent (out)    :: polar_solution(:,:)
         real (wp),      intent (out)    :: azimuthal_solution(:,:)
         !----------------------------------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !----------------------------------------------------------------------
         integer (ip) :: n, m !! Counters
         integer (ip) :: ityp_temp_save
@@ -1330,13 +1330,13 @@ contains
 
     subroutine get_divergence_from_vector_field(this, vector_field, divergence)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         class (Sphere), intent (in out) :: this
         real (wp),      intent (in)     :: vector_field (:,:,:)
         real (wp),      intent (out)    :: divergence (:,:)
         !----------------------------------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !----------------------------------------------------------------------
         real (wp), allocatable :: polar_component(:,:)
         real (wp), allocatable :: azimuthal_component(:,:)
@@ -1391,14 +1391,14 @@ contains
     subroutine get_divergence_from_spherical_components(this, &
         polar_component, azimuthal_component, divergence )
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         class (Sphere), intent (in out) :: this
         real (wp),      intent (in)     :: polar_component(:,:)
         real (wp),      intent (in)     :: azimuthal_component(:,:)
         real (wp),      intent (out)    :: divergence (:,:)
         !----------------------------------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !----------------------------------------------------------------------
         integer (ip) :: n, m !! Counters
         !----------------------------------------------------------------------
@@ -1455,17 +1455,17 @@ contains
 
     subroutine invert_divergence(this, source, polar_solution, azimuthal_solution )
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         class (Sphere), intent (in out) :: this
         real (wp),      intent (in)     :: source(:,:)
         real (wp),      intent (out)    :: polar_solution(:,:)
         real (wp),      intent (out)    :: azimuthal_solution(:,:)
         !----------------------------------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !----------------------------------------------------------------------
         integer (ip) :: n, m !! Counters
         !----------------------------------------------------------------------
@@ -1531,7 +1531,7 @@ contains
     subroutine get_vorticity_and_divergence_from_velocities(this, &
         polar_component, azimuthal_component, vorticity, divergence)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         class (Sphere),         intent (in out) :: this
         real (wp),              intent (in)     :: polar_component(:,:)
@@ -1569,7 +1569,7 @@ contains
     subroutine get_velocities_from_vorticity_and_divergence_coefficients(this, &
         vort_spec, div_spec, polar_component, azimuthal_component)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         class (Sphere), intent (in out) :: this
         complex (wp),   intent (in)     :: vort_spec(:)
@@ -1577,7 +1577,7 @@ contains
         real (wp),      intent (out)    :: polar_component(:,:)
         real (wp),      intent (out)    :: azimuthal_component(:,:)
         !----------------------------------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !----------------------------------------------------------------------
         integer (ip)           :: nm, n, m, i !! Counters
         real (wp), allocatable :: isqnn(:)
@@ -1695,7 +1695,7 @@ contains
     subroutine get_velocities_from_vorticity_and_divergence(this, &
         vorticity, divergence, polar_component, azimuthal_component)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         class (Sphere), intent (in out) :: this
         real (wp),      intent (in)     :: vorticity(:,:)
@@ -1703,7 +1703,7 @@ contains
         real (wp),      intent (out)    :: polar_component(:,:)
         real (wp),      intent (out)    :: azimuthal_component(:,:)
         !----------------------------------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !----------------------------------------------------------------------
         complex (wp), allocatable  :: vorticity_coefficients(:)
         complex (wp), allocatable  :: divergence_coefficients(:)
@@ -1750,13 +1750,13 @@ contains
 
     subroutine compute_angular_momentum(this, scalar_function, angular_momentum)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         class (Sphere), intent (in out) :: this
         real (wp),      intent (in)     :: scalar_function(:,:)
         real (wp),      intent (out)    :: angular_momentum(:,:,:)
         !----------------------------------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !----------------------------------------------------------------------
         integer (ip)           :: k, l   !! Counters
         real (wp), allocatable :: polar_gradient_component(:,:)
@@ -1851,14 +1851,14 @@ contains
         ! nm = sum([(i, i=MTRUNC+1, MTRUNC-m+2, -1)])+n-m+1
         !
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         class (Sphere), intent (in out) :: this
         integer (ip),   intent (in)     :: n
         integer (ip),   intent (in)     :: m
         integer (ip)                    :: return_value
         !----------------------------------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !----------------------------------------------------------------------
         integer (ip) :: i !! Counter
         !----------------------------------------------------------------------
@@ -1877,7 +1877,7 @@ contains
 
     function get_coefficient(this, n, m) result (return_value)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         class (Sphere), intent (in out) :: this
         integer (ip),   intent (in)     :: n
@@ -1905,7 +1905,7 @@ contains
 
     subroutine get_scalar_symmetries(this, isym)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         class (Sphere), intent (in out) :: this
         integer (ip),   intent (in)     :: isym
@@ -1926,7 +1926,7 @@ contains
 
     subroutine get_vector_symmetries(this, itype)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         class (Sphere), intent (in out) :: this
         integer (ip),   intent (in)     :: itype

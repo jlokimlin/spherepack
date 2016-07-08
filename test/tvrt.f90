@@ -98,11 +98,11 @@ contains
 
     subroutine test_vorticity_routines(sphere_type )
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         class (Sphere), intent (in out) :: sphere_type
         !----------------------------------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !----------------------------------------------------------------------
         integer (ip), parameter        :: NLONS = 14
         integer (ip), parameter        :: NLATS = 24

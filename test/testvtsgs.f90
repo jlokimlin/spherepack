@@ -113,10 +113,8 @@ program tvtsgs
     dimension wshi(608411),wvha(1098771),wvhs(1098771), &
         wvts(1098771),work(165765)
     real dthet,dwts,dwork(25741)
-    !
-    write( *, '(a)') ''
-    write( *, '(a)') '     testvtsgs *** TEST RUN *** '
-    write( *, '(a)') ''
+
+    write( *, '(/a/)') '     testvtsgs *** TEST RUN *** '
 
 !    lwshi = 608411
 !    lwvha = 1098771
@@ -349,244 +347,245 @@ program tvtsgs
 !    write( stdout, 2) dmax1,dmax2
 !2   format(' testvtsgs: error in vt '1pe15.6' error in wt '1pe15.6)
 
+contains
+
+
+
+    subroutine cart2sph(theta,phi,x,y,z,u,v,w)
+        implicit none
+        real :: cosp
+        real :: cost
+        real :: phi
+        real :: sinp
+        real :: sint
+        real :: temp1
+        real :: temp2
+        real :: theta
+        real :: u
+        real :: v
+        real :: w
+        real :: x
+        real :: y
+        real :: z
+        !
+        !     this program computes the components of a vector
+        !     field in spherical coordinates u, v, and w, from
+        !     its components x, y, and z in cartesian coordinates
+        !
+        sint = sin(theta)
+        cost = cos(theta)
+        sinp = sin(phi)
+        cosp = cos(phi)
+        temp1 = cosp*x+sinp*y
+        temp2 = cosp*y-sinp*x
+        u = sint*temp1+cost*z
+        v = cost*temp1-sint*z
+        w = temp2
+
+    end subroutine cart2sph
+
+
+
+    subroutine sph2cart(theta,phi,u,v,w,x,y,z)
+        implicit none
+        real :: cosp
+        real :: cost
+        real :: phi
+        real :: sinp
+        real :: sint
+        real :: temp1
+        real :: temp2
+        real :: theta
+        real :: u
+        real :: v
+        real :: w
+        real :: x
+        real :: y
+        real :: z
+        !
+        !     this program computes the components of a vector
+        !     field in cartesian coordinates x, y, and z, from
+        !     its components u, v, and w in spherical coordinates
+        !
+        sint = sin(theta)
+        cost = cos(theta)
+        sinp = sin(phi)
+        cosp = cos(phi)
+        temp1 = sint*u+cost*v
+        temp2 = cost*u-sint*v
+        x = cosp*temp1-sinp*w
+        y = sinp*temp1+cosp*w
+        z = temp2
+
+    end subroutine sph2cart
+
+
+
+    subroutine dbdx(l,mdim,a,b,dxa,dxb)
+        implicit none
+        real :: a
+        real :: a1
+        real :: a2
+        real :: b
+        real :: cn
+        real :: dxa
+        real :: dxb
+        real :: fm
+        real :: fn
+        integer :: l
+        integer :: lm1
+        integer :: mdim
+        integer :: mp1
+        integer :: n
+        integer :: np1
+        !
+        !     subroutine to compute the coefficients in the spherical
+        !     harmonic representation of the derivative with respect to x
+        !     of a scalar function. i.e. given the coefficients a and b
+        !     in the spectral representation of a function, then dbdx
+        !     computes the coefficients dxa and dxb in the spectral
+        !     representation of the derivative of the function
+        !     with respect to x.
+        !
+        !     the arrays a and dxa can be the same as well as the arrays
+        !     b and dxb, i.e. the arrays a and b can be overwritten by
+        !     dxa and dxb respectively.
+        !
+        !     dimension a(mdim,1),b(mdim,1),dxa(mdim,1),dxb(mdim,1)
+        dimension a(mdim,*),b(mdim,*),dxa(mdim,*),dxb(mdim,*)
+        dxa(1,1) = sqrt(6.)*a(2,2)
+        dxb(1,1) = 0.
+        lm1 = l-1
+        do np1=2,lm1
+            n = np1-1
+            fn = real(n)
+            cn = (fn+fn+3.)/(fn+fn+1.)
+            dxa(1,np1) = sqrt(cn*(fn+2.)*(fn + 1.0))*a(2,np1+1)
+            dxb(1,np1) = 0.
+            do mp1=2,np1
+                fm = real(mp1-1)
+                a1 = .5*sqrt(cn*(fn+fm+2.)*(fn+fm+1.))
+                a2 = .5*sqrt(cn*(fn-fm+2.)*(fn-fm+1.))
+                dxa(mp1,np1) = a1*a(mp1+1,np1+1)-a2*a(mp1-1,np1+1)
+                dxb(mp1,np1) = a1*b(mp1+1,np1+1)-a2*b(mp1-1,np1+1)
+            end do
+        end do
+        do mp1=1,l
+            dxa(mp1,l) = 0.
+            dxb(mp1,l) = 0.
+        end do
+
+    end subroutine dbdx
+
+
+
+    subroutine dbdy(l,mdim,a,b,dya,dyb)
+        implicit none
+        real :: a
+        real :: a1
+        real :: a2
+        real :: b
+        real :: cn
+        real :: dya
+        real :: dyb
+        real :: fm
+        real :: fn
+        integer :: l
+        integer :: lm1
+        integer :: mdim
+        integer :: mp1
+        integer :: n
+        integer :: np1
+        !
+        !     subroutine to compute the coefficients in the spherical
+        !     harmonic representation of the derivative with respect to y
+        !     of a scalar function. i.e. given the coefficients a and b
+        !     in the spectral representation of a function, then dbdy
+        !     computes the coefficients dya and dyb in the spectral
+        !     representation of the derivative of the function
+        !     with respect to y.
+        !
+        !     the arrays a and dya can be the same as well as the arrays
+        !     b and dyb, i.e. the arrays a and b can be overwritten by
+        !     dya and dyb respectively.
+        !
+        !     dimension a(mdim,1),b(mdim,1),dya(mdim,1),dyb(mdim,1)
+        dimension a(mdim,*),b(mdim,*),dya(mdim,*),dyb(mdim,*)
+        dya(1,1) = -sqrt(6.)*b(2,2)
+        dyb(1,1) = 0.
+        lm1 = l-1
+        do np1=2,lm1
+            n = np1-1
+            fn = real(n)
+            cn = (fn+fn+3.)/(fn+fn+1.)
+            dya(1,np1) = -sqrt(cn*(fn+2.)*(fn + 1.0))*b(2,np1+1)
+            dyb(1,np1) = 0.
+            do mp1=2,np1
+                fm = real(mp1-1)
+                a1 = .5*sqrt(cn*(fn+fm+2.)*(fn+fm+1.))
+                a2 = .5*sqrt(cn*(fn-fm+2.)*(fn-fm+1.))
+                dya(mp1,np1) = -a1*b(mp1+1,np1+1)-a2*b(mp1-1,np1+1)
+                dyb(mp1,np1) =  a1*a(mp1+1,np1+1)+a2*a(mp1-1,np1+1)
+            end do
+        end do
+
+        do mp1=1,l
+            dya(mp1,l) = 0.
+            dyb(mp1,l) = 0.
+        end do
+
+    end subroutine dbdy
+
+
+
+    subroutine dbdz(l,mdim,a,b,dza,dzb)
+        implicit none
+        real :: a
+        real :: a1
+        real :: b
+        real :: cn
+        real :: dza
+        real :: dzb
+        real :: fm
+        real :: fn
+        integer :: l
+        integer :: lm1
+        integer :: mdim
+        integer :: mp1
+        integer :: n
+        integer :: np1
+        !
+        !     subroutine to compute the coefficients in the spherical
+        !     harmonic representation of the derivative with respect to z
+        !     of a scalar function. i.e. given the coefficients a and b
+        !     in the spectral representation of a function, then dbdz
+        !     computes the coefficients dza and dzb in the spectral
+        !     representation of the derivative of the function
+        !     with respect to z.
+        !
+        !     the arrays a and dza can be the same as well as the arrays
+        !     b and dzb, i.e. the arrays a and b can be overwritten by
+        !     dza and dzb respectively.
+        !
+        dimension a(mdim,*),b(mdim,*),dza(mdim,*),dzb(mdim,*)
+        lm1 = l-1
+        do np1=1,lm1
+            n = np1-1
+            fn = real(n)
+            cn = (fn+fn+3.)/(fn+fn+1.)
+            do mp1=1,np1
+                fm = real(mp1-1)
+                a1 = sqrt(cn*(fn-fm+1.)*(fn+fm+1.))
+                dza(mp1,np1) = a1*a(mp1,np1+1)
+                dzb(mp1,np1) = a1*b(mp1,np1+1)
+            end do
+        end do
+
+        do mp1=1,l
+            dza(mp1,l) = 0.
+            dzb(mp1,l) = 0.
+        end do
+
+    end subroutine dbdz
+
 end program tvtsgs
-
-
-
-subroutine cart2sph(theta,phi,x,y,z,u,v,w)
-    implicit none
-    real :: cp
-    real :: ct
-    real :: phi
-    real :: sp
-    real :: st
-    real :: temp1
-    real :: temp2
-    real :: theta
-    real :: u
-    real :: v
-    real :: w
-    real :: x
-    real :: y
-    real :: z
-    !
-    !     this program computes the components of a vector
-    !     field in spherical coordinates u, v, and w, from
-    !     its components x, y, and z in cartesian coordinates
-    !
-    st = sin(theta)
-    ct = cos(theta)
-    sp = sin(phi)
-    cp = cos(phi)
-    temp1 = cp*x+sp*y
-    temp2 = cp*y-sp*x
-    u = st*temp1+ct*z
-    v = ct*temp1-st*z
-    w = temp2
-
-end subroutine cart2sph
-
-
-
-subroutine sph2cart(theta,phi,u,v,w,x,y,z)
-    implicit none
-    real :: cp
-    real :: ct
-    real :: phi
-    real :: sp
-    real :: st
-    real :: temp1
-    real :: temp2
-    real :: theta
-    real :: u
-    real :: v
-    real :: w
-    real :: x
-    real :: y
-    real :: z
-    !
-    !     this program computes the components of a vector
-    !     field in cartesian coordinates x, y, and z, from
-    !     its components u, v, and w in spherical coordinates
-    !
-    st = sin(theta)
-    ct = cos(theta)
-    sp = sin(phi)
-    cp = cos(phi)
-    temp1 = st*u+ct*v
-    temp2 = ct*u-st*v
-    x = cp*temp1-sp*w
-    y = sp*temp1+cp*w
-    z = temp2
-
-end subroutine sph2cart
-
-
-
-subroutine dbdx(l,mdim,a,b,dxa,dxb)
-    implicit none
-    real :: a
-    real :: a1
-    real :: a2
-    real :: b
-    real :: cn
-    real :: dxa
-    real :: dxb
-    real :: fm
-    real :: fn
-    integer :: l
-    integer :: lm1
-    integer :: mdim
-    integer :: mp1
-    integer :: n
-    integer :: np1
-    !
-    !     subroutine to compute the coefficients in the spherical
-    !     harmonic representation of the derivative with respect to x
-    !     of a scalar function. i.e. given the coefficients a and b
-    !     in the spectral representation of a function, then dbdx
-    !     computes the coefficients dxa and dxb in the spectral
-    !     representation of the derivative of the function
-    !     with respect to x.
-    !
-    !     the arrays a and dxa can be the same as well as the arrays
-    !     b and dxb, i.e. the arrays a and b can be overwritten by
-    !     dxa and dxb respectively.
-    !
-    !     dimension a(mdim,1),b(mdim,1),dxa(mdim,1),dxb(mdim,1)
-    dimension a(mdim,*),b(mdim,*),dxa(mdim,*),dxb(mdim,*)
-    dxa(1,1) = sqrt(6.)*a(2,2)
-    dxb(1,1) = 0.
-    lm1 = l-1
-    do np1=2,lm1
-        n = np1-1
-        fn = real(n)
-        cn = (fn+fn+3.)/(fn+fn+1.)
-        dxa(1,np1) = sqrt(cn*(fn+2.)*(fn + 1.0))*a(2,np1+1)
-        dxb(1,np1) = 0.
-        do mp1=2,np1
-            fm = real(mp1-1)
-            a1 = .5*sqrt(cn*(fn+fm+2.)*(fn+fm+1.))
-            a2 = .5*sqrt(cn*(fn-fm+2.)*(fn-fm+1.))
-            dxa(mp1,np1) = a1*a(mp1+1,np1+1)-a2*a(mp1-1,np1+1)
-            dxb(mp1,np1) = a1*b(mp1+1,np1+1)-a2*b(mp1-1,np1+1)
-        end do
-    end do
-    do mp1=1,l
-        dxa(mp1,l) = 0.
-        dxb(mp1,l) = 0.
-    end do
-
-end subroutine dbdx
-
-
-
-subroutine dbdy(l,mdim,a,b,dya,dyb)
-    implicit none
-    real :: a
-    real :: a1
-    real :: a2
-    real :: b
-    real :: cn
-    real :: dya
-    real :: dyb
-    real :: fm
-    real :: fn
-    integer :: l
-    integer :: lm1
-    integer :: mdim
-    integer :: mp1
-    integer :: n
-    integer :: np1
-    !
-    !     subroutine to compute the coefficients in the spherical
-    !     harmonic representation of the derivative with respect to y
-    !     of a scalar function. i.e. given the coefficients a and b
-    !     in the spectral representation of a function, then dbdy
-    !     computes the coefficients dya and dyb in the spectral
-    !     representation of the derivative of the function
-    !     with respect to y.
-    !
-    !     the arrays a and dya can be the same as well as the arrays
-    !     b and dyb, i.e. the arrays a and b can be overwritten by
-    !     dya and dyb respectively.
-    !
-    !     dimension a(mdim,1),b(mdim,1),dya(mdim,1),dyb(mdim,1)
-    dimension a(mdim,*),b(mdim,*),dya(mdim,*),dyb(mdim,*)
-    dya(1,1) = -sqrt(6.)*b(2,2)
-    dyb(1,1) = 0.
-    lm1 = l-1
-    do np1=2,lm1
-        n = np1-1
-        fn = real(n)
-        cn = (fn+fn+3.)/(fn+fn+1.)
-        dya(1,np1) = -sqrt(cn*(fn+2.)*(fn + 1.0))*b(2,np1+1)
-        dyb(1,np1) = 0.
-        do mp1=2,np1
-            fm = real(mp1-1)
-            a1 = .5*sqrt(cn*(fn+fm+2.)*(fn+fm+1.))
-            a2 = .5*sqrt(cn*(fn-fm+2.)*(fn-fm+1.))
-            dya(mp1,np1) = -a1*b(mp1+1,np1+1)-a2*b(mp1-1,np1+1)
-            dyb(mp1,np1) =  a1*a(mp1+1,np1+1)+a2*a(mp1-1,np1+1)
-        end do
-    end do
-
-    do mp1=1,l
-        dya(mp1,l) = 0.
-        dyb(mp1,l) = 0.
-    end do
-
-end subroutine dbdy
-
-
-
-subroutine dbdz(l,mdim,a,b,dza,dzb)
-    implicit none
-    real :: a
-    real :: a1
-    real :: b
-    real :: cn
-    real :: dza
-    real :: dzb
-    real :: fm
-    real :: fn
-    integer :: l
-    integer :: lm1
-    integer :: mdim
-    integer :: mp1
-    integer :: n
-    integer :: np1
-    !
-    !     subroutine to compute the coefficients in the spherical
-    !     harmonic representation of the derivative with respect to z
-    !     of a scalar function. i.e. given the coefficients a and b
-    !     in the spectral representation of a function, then dbdz
-    !     computes the coefficients dza and dzb in the spectral
-    !     representation of the derivative of the function
-    !     with respect to z.
-    !
-    !     the arrays a and dza can be the same as well as the arrays
-    !     b and dzb, i.e. the arrays a and b can be overwritten by
-    !     dza and dzb respectively.
-    !
-    dimension a(mdim,*),b(mdim,*),dza(mdim,*),dzb(mdim,*)
-    lm1 = l-1
-    do np1=1,lm1
-        n = np1-1
-        fn = real(n)
-        cn = (fn+fn+3.)/(fn+fn+1.)
-        do mp1=1,np1
-            fm = real(mp1-1)
-            a1 = sqrt(cn*(fn-fm+1.)*(fn+fm+1.))
-            dza(mp1,np1) = a1*a(mp1,np1+1)
-            dzb(mp1,np1) = a1*b(mp1,np1+1)
-        end do
-    end do
-
-    do mp1=1,l
-        dza(mp1,l) = 0.
-        dzb(mp1,l) = 0.
-    end do
-
-end subroutine dbdz
-

@@ -96,7 +96,7 @@ program advec
     implicit none
 
     !----------------------------------------------------------------------
-    ! Dictionary: local variables
+    ! Local variables
     !----------------------------------------------------------------------
     type (AdvectionSolver)        :: solver
     integer (ip), parameter       :: NLONS = 45

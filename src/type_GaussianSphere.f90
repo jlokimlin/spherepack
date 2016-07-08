@@ -47,11 +47,11 @@ module type_GaussianSphere
     ! Declare derived data type
     type, extends (Sphere), public :: GaussianSphere
         !----------------------------------------------------------------------
-        ! Class variables
+        ! Type components
         !----------------------------------------------------------------------
     contains
         !----------------------------------------------------------------------
-        ! Class methods
+        ! Type-bound procedures
         !----------------------------------------------------------------------
         procedure, public  :: create => create_gaussian_sphere
         procedure, public  :: destroy => destroy_gaussian_sphere
@@ -79,7 +79,7 @@ contains
 
     function gaussian_sphere_constructor(nlat, nlon) result (return_value)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip), intent (in) :: nlat !! number of latitudinal points 0 <= theta <= pi
         integer (ip), intent (in) :: nlon !! number of longitudinal points 0 <= phi <= 2*pi
@@ -94,7 +94,7 @@ contains
 
     subroutine create_gaussian_sphere(this, nlat, nlon, ntrunc, isym, itype, nt, rsphere)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         class (GaussianSphere), intent (in out)        :: this
         integer (ip),           intent (in)            :: nlat
@@ -105,7 +105,7 @@ contains
         integer (ip),           intent (in), optional  :: nt
         real (wp),              intent (in), optional  :: rsphere
         !--------------------------------------------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !----------------------------------------------------------------------
         integer (ip) :: ntrunc_op
         integer (ip) :: isym_op
@@ -169,7 +169,7 @@ contains
 
     subroutine destroy_gaussian_sphere(this)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         class (GaussianSphere), intent (in out) :: this
         !----------------------------------------------------------------------
@@ -189,12 +189,12 @@ contains
 
     subroutine gaussian_scalar_analysis(this, scalar_function)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         class (GaussianSphere), intent (in out) :: this
         real (wp),              intent (in)     :: scalar_function(:,:)
         !----------------------------------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !----------------------------------------------------------------------
         integer (ip)    :: error_flag
         type (ShagsAux) :: aux
@@ -274,12 +274,12 @@ contains
 
     subroutine gaussian_scalar_synthesis(this, scalar_function)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         class (GaussianSphere), intent (in out) :: this
         real (wp),              intent (out)    :: scalar_function(:,:)
         !----------------------------------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !----------------------------------------------------------------------
         integer (ip)    :: error_flag
         type (ShsgsAux) :: aux
@@ -361,13 +361,13 @@ contains
 
     subroutine gaussian_vector_analysis(this, polar_component, azimuthal_component)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         class (GaussianSphere), intent (in out) :: this
         real (wp),              intent (in)     :: polar_component(:,:)
         real (wp),              intent (in)     :: azimuthal_component(:,:)
         !----------------------------------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !----------------------------------------------------------------------
         integer (ip)    :: error_flag
         type (VhagsAux) :: aux
@@ -477,13 +477,13 @@ contains
 
     subroutine gaussian_vector_synthesis(this, polar_component, azimuthal_component)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         class (GaussianSphere), intent (in out) :: this
         real (wp),              intent (out)    :: polar_component(:,:)
         real (wp),              intent (out)    :: azimuthal_component(:,:)
         !----------------------------------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !----------------------------------------------------------------------
         integer (ip)    :: error_flag
         type (VhsgsAux) :: aux
@@ -596,13 +596,13 @@ contains
         !
         !
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         class (GaussianSphere), intent (in out) :: this
         real (wp),              intent (in)     :: scalar_function(:,:)
         real (wp)                               :: return_value
         !----------------------------------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !----------------------------------------------------------------------
         integer (ip)           :: k  !! counter
         real (wp), allocatable :: summation(:)
@@ -665,13 +665,13 @@ contains
 
     subroutine compute_first_moment(this, scalar_function, first_moment)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         class (GaussianSphere),  intent (in out) :: this
         real (wp),               intent (in)     :: scalar_function(:,:)
         class (Vector),          intent (out)    :: first_moment
         !----------------------------------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !----------------------------------------------------------------------
         integer (ip)           :: k, l !! Counters
         real (wp), allocatable :: integrant(:,:,:)
@@ -737,7 +737,7 @@ contains
 
     subroutine finalize_gaussian_sphere(this)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         type (GaussianSphere), intent (in out) :: this
         !----------------------------------------------------------------------

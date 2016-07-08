@@ -20,13 +20,13 @@ module type_RegularGrid
     ! Declare derived data type
     type, extends (SphericalGrid), public :: RegularGrid
         !----------------------------------------------------------------------
-        ! Class variables
+        ! Type components
         !----------------------------------------------------------------------
         real (wp), public :: LATITUDINAL_MESH = 0.0_wp
         !----------------------------------------------------------------------
     contains
         !----------------------------------------------------------------------
-        ! Class methods
+        ! Type-bound procedures
         !----------------------------------------------------------------------
         procedure, public  :: create => create_regular_grid
         procedure, public  :: destroy => destroy_regular_grid
@@ -51,7 +51,7 @@ contains
 
     function regular_grid_constructor(nlat, nlon) result (return_value)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip),         intent (in) :: nlat !! number of latitudinal points 0 <= theta <= pi
         integer (ip),         intent (in) :: nlon !! number of longitudinal points 0 <= phi <= 2*pi
@@ -66,7 +66,7 @@ contains
 
     subroutine copy_regular_grid(this, object_to_be_copied)
         !--------------------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !--------------------------------------------------------------------------------
         class (RegularGrid), intent (out) :: this
         class (RegularGrid), intent (in)  :: object_to_be_copied
@@ -96,7 +96,7 @@ contains
 
     subroutine create_regular_grid(this, nlat, nlon)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         class (RegularGrid), intent (in out) :: this
         integer (ip),         intent (in)    :: nlat !! number of latitudinal points 0 <= theta <= pi
@@ -136,7 +136,7 @@ contains
 
     subroutine destroy_regular_grid(this)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         class (RegularGrid), intent (in out) :: this
         !----------------------------------------------------------------------
@@ -161,13 +161,13 @@ contains
 
     subroutine get_equally_spaced_latitudes(this, nlat, theta)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         class (RegularGrid),    intent (in out) :: this
         integer (ip),           intent (in)     :: nlat  !! number of latitudinal points
         real (wp), allocatable, intent (out)    :: theta(:) !! latitudes: 0 <= theta <= pi
         !----------------------------------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !----------------------------------------------------------------------
         integer (ip) :: k !! counter
         !----------------------------------------------------------------------
@@ -205,7 +205,7 @@ contains
 
     subroutine unformatted_print(this, header)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         class (RegularGrid), intent (in out) :: this
         character (len=*),   intent (in)     :: header
@@ -226,7 +226,7 @@ contains
 
     subroutine finalize_regular_grid(this)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         type (RegularGrid), intent (in out) :: this
         !----------------------------------------------------------------------

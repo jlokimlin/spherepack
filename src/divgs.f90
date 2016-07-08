@@ -244,7 +244,7 @@ contains
     subroutine divgs(nlat, nlon, isym, nt, divg, idiv, jdiv, br, bi, mdb, ndb, &
         wshsgs, lshsgs, work, lwork, ierror)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip), intent (in)     :: nlat
         integer (ip), intent (in)     :: nlon
@@ -263,7 +263,7 @@ contains
         integer (ip), intent (in)     :: lwork
         integer (ip), intent (out)    :: ierror
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip) :: l1, l2, ia, ib, mn, lp
         integer (ip) :: is, ls, mab, nln

@@ -247,7 +247,7 @@ contains
 
     subroutine geo2maths(ig, nlon, nlat, sg, sm, work)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip), intent (in)     :: ig
         integer (ip), intent (in)     :: nlon
@@ -256,7 +256,7 @@ contains
         real (wp),    intent (out)    :: sm(nlat, nlon)
         real (wp),    intent (in out) :: work(*)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip) :: i, j, ij ! counters
         !----------------------------------------------------------------------
@@ -294,7 +294,7 @@ contains
 
     subroutine math2geos(ig, nlat, nlon, sm, sg, work)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip), intent (in)     :: ig
         integer (ip), intent (in)     :: nlon
@@ -303,7 +303,7 @@ contains
         real (wp),    intent (out)    :: sg(nlat, nlon)
         real (wp),    intent (in out) :: work(*)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip) :: i, j, ij ! counters
         !----------------------------------------------------------------------
@@ -341,7 +341,7 @@ contains
 
     subroutine geo2mathv(ig, nlon, nlat, ug, vg, vm, wm, work)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip), intent (in)     :: ig
         integer (ip), intent (in)     :: nlon
@@ -352,7 +352,7 @@ contains
         real (wp),    intent (out)    :: wm(nlat, nlon)
         real (wp),    intent (in out) :: work(*)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip) :: i, j, ij ! counters
         !----------------------------------------------------------------------
@@ -418,7 +418,7 @@ contains
 
     subroutine math2geov(ig, nlat, nlon, vm, wm, ug, vg, work)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip), intent (in)     :: ig
         integer (ip), intent (in)     :: nlon
@@ -429,7 +429,7 @@ contains
         real (wp),    intent (out)    :: vg(nlon, nlat)
         real (wp),    intent (in out) :: work(*)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip) :: i, j, ij ! counters
         !----------------------------------------------------------------------

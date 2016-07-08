@@ -61,11 +61,11 @@ module type_LegendreAux
     ! Declare derived data type
     type, public :: LegendreAux
         !-------------------------------------------------------
-        ! Class variables
+        ! Type components
         !-------------------------------------------------------
     contains
         !-------------------------------------------------------
-        ! Class methods
+        ! Type-bound procedures
         !-------------------------------------------------------
         procedure, nopass :: alfk
         procedure, nopass :: lfim
@@ -81,13 +81,13 @@ contains
 
     subroutine get_legendre_function(lat, ntrunc, legfunc)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         real (wp),              intent (in)  :: lat
         integer (ip),           intent (in)  :: ntrunc
         real (wp), allocatable, intent (out) :: legfunc(:)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         real (wp)              :: theta
         real (wp), allocatable :: cp(:)
@@ -209,13 +209,13 @@ contains
         !                        places for n=100.
         !
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip), intent (in)   :: n
         integer (ip), intent (in)   :: m
         real (wp),    intent (out)  :: cp(n/2+1)
         !----------------------------------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !----------------------------------------------------------------------
         integer (ip)         :: i, l, ma, nex, nmms2
         real (wp), parameter :: sc10 = 1024.0_wp
@@ -425,7 +425,7 @@ contains
         !                        notes by paul n. swarztrauber)
         !
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip), intent (in)  :: init
         real (wp),    intent (in)  :: theta(*)
@@ -436,7 +436,7 @@ contains
         integer (ip), intent (in)  :: id
         real (wp),    intent (out) :: wlfim(1)
         !----------------------------------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !----------------------------------------------------------------------
         integer (ip) :: workspace_indices(3)
         !----------------------------------------------------------------------
@@ -462,13 +462,13 @@ contains
 
         pure function get_workspace_indices(l, nm) result (return_value)
             !----------------------------------------------------------------------
-            ! Dictionary: calling arguments
+            ! Dummy arguments
             !----------------------------------------------------------------------
             integer (ip), intent (in) :: l
             integer (ip), intent (in) :: nm
             integer (ip)              :: return_value(3)
             !----------------------------------------------------------------------
-            ! Dictionary: local variables
+            ! Local variables
             !----------------------------------------------------------------------
             integer (ip) :: lnx
             !----------------------------------------------------------------------
@@ -487,7 +487,7 @@ contains
 
         subroutine lfim1(init, theta, l, n, nm, id, p3, phz, ph1, p1, p2, cp)
             !----------------------------------------------------------------------
-            ! Dictionary: calling arguments
+            ! Dummy arguments
             !----------------------------------------------------------------------
             integer (ip), intent (in)  :: init
             real (wp),    intent (in)  :: theta(*)
@@ -502,7 +502,7 @@ contains
             real (wp),    intent (out) :: p2(l,*)
             real (wp),    intent (out) :: cp(*)
             !----------------------------------------------------------------------
-            ! Dictionary: local variables
+            ! Local variables
             !----------------------------------------------------------------------
             integer (ip)         :: i, m, nm1, nh, mp1, np1, nmp1
             real (wp)            :: cc, dd, ee, cn, fm, fn, fnmm, fnpm
@@ -684,7 +684,7 @@ contains
         !                        notes by paul n. swarztrauber)
         !
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip), intent (in)  :: init
         real (wp),    intent (in)  :: theta(l)
@@ -695,7 +695,7 @@ contains
         integer (ip), intent (in)  :: id
         real (wp),    intent (out) :: wlfin(4*l*(nm+1))
         !----------------------------------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !----------------------------------------------------------------------
         integer (ip) :: workspace_indices(3)
         !----------------------------------------------------------------------
@@ -722,13 +722,13 @@ contains
 
         pure function get_workspace_indices(l, nm) result (return_value)
             !----------------------------------------------------------------------
-            ! Dictionary: calling arguments
+            ! Dummy arguments
             !----------------------------------------------------------------------
             integer (ip), intent (in) :: l
             integer (ip), intent (in) :: nm
             integer (ip)              :: return_value(3)
             !----------------------------------------------------------------------
-            ! Dictionary: local variables
+            ! Local variables
             !----------------------------------------------------------------------
             integer (ip) :: lnx
             !----------------------------------------------------------------------
@@ -746,7 +746,7 @@ contains
 
         subroutine lfin1(init, theta, l, m, nm, id, p3, phz, ph1, p1, p2, cp)
             !----------------------------------------------------------------------
-            ! Dictionary: calling arguments
+            ! Dummy arguments
             !----------------------------------------------------------------------
             integer (ip), intent (in)  :: init
             real (wp),    intent (in)  :: theta(l)
@@ -761,7 +761,7 @@ contains
             real (wp),    intent (out) :: p2(l,*)
             real (wp),    intent (out) :: cp(*)
             !----------------------------------------------------------------------
-            ! Dictionary: local variables
+            ! Local variables
             !----------------------------------------------------------------------
             integer         :: i, n, nh, mp1, np1, mp3, nmp1
             real            :: cc, dd, ee, cn, fm, fn, fnmm, fnpm
@@ -960,7 +960,7 @@ contains
         !                        the input parameters l and n.
         !
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip), intent (in)  :: init
         integer (ip), intent (in)  :: n
@@ -970,7 +970,7 @@ contains
         real (wp)                  :: pb(l)
         real (wp)                  :: w(5*l+41)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip) :: ma, iw1, iw2
         !----------------------------------------------------------------------
@@ -993,7 +993,7 @@ contains
 
         subroutine lfp1(init, n, m, l, cp, p, wsave1, wsave2, wsave3)
             !----------------------------------------------------------------------
-            ! Dictionary: calling arguments
+            ! Dummy arguments
             !----------------------------------------------------------------------
             integer (ip), intent (in) :: init
             integer (ip), intent (in) :: n
@@ -1005,7 +1005,7 @@ contains
             real (wp)                 :: wsave2(*)
             real (wp)                 :: wsave3(*)
             !----------------------------------------------------------------------
-            ! Dictionary: calling arguments
+            ! Dummy arguments
             !----------------------------------------------------------------------
             integer (ip), save   :: lc, lq, ls
             integer (ip)         :: i
@@ -1169,7 +1169,7 @@ contains
         !                        the input parameter n.
         !
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip), intent (in)  :: n
         integer (ip), intent (in)  :: m
@@ -1177,7 +1177,7 @@ contains
         real (wp),    intent (in)  :: cp(n/2+1)
         real (wp),    intent (out) :: pb
         !----------------------------------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !----------------------------------------------------------------------
         integer (ip) :: ma, np1, k, kdo, kp1
         real (ip)    :: cos2t, sin2t, cost, sint, temp, summation

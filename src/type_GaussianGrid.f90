@@ -21,13 +21,13 @@ module type_GaussianGrid
     ! Declare derived data type
     type, extends (SphericalGrid), public ::  GaussianGrid
         !----------------------------------------------------------------------
-        ! Class variables
+        ! Type components
         !----------------------------------------------------------------------
         real (wp), allocatable, public :: gaussian_weights(:)
         !----------------------------------------------------------------------
     contains
         !----------------------------------------------------------------------
-        ! Class methods
+        ! Type-bound procedures
         !----------------------------------------------------------------------
         procedure, public  :: create => create_gaussian_grid
         procedure, public  :: destroy => destroy_gaussian_grid
@@ -54,7 +54,7 @@ contains
 
     function gaussian_grid_constructor(nlat, nlon) result (return_value)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip),         intent (in)     :: nlat !! number of latitudinal points 0 <= theta <= pi
         integer (ip),         intent (in)     :: nlon !! number of longitudinal points 0 <= phi <= 2*pi
@@ -69,7 +69,7 @@ contains
 
     subroutine copy_gaussian_grid(this, object_to_be_copied)
         !--------------------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !--------------------------------------------------------------------------------
         class (GaussianGrid), intent (out) :: this
         class (GaussianGrid), intent (in)  :: object_to_be_copied
@@ -99,7 +99,7 @@ contains
 
     subroutine create_gaussian_grid(this, nlat, nlon)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         class (GaussianGrid), target, intent (in out) :: this
         integer (ip),                 intent (in)     :: nlat !! number of latitudinal points 0 <= theta <= pi
@@ -131,7 +131,7 @@ contains
 
     subroutine destroy_gaussian_grid(this)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         class (GaussianGrid), intent (in out) :: this
         !----------------------------------------------------------------------
@@ -169,14 +169,14 @@ contains
         ! [2]  http://www2.cisl.ucar.edu/resources/legacy/spherepack/documentation#gaqd.html
         !
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         class (GaussianGrid),   intent (in out) :: this
         integer (ip),           intent (in)     :: nlat     !! number of latitudinal points
         real (wp), allocatable, intent (out)    :: theta(:) !! latitudinal points: 0 <= theta <= pi
         real (wp), allocatable, intent (out)    :: wts(:)   !! gaussian weights
         !----------------------------------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !----------------------------------------------------------------------
         integer (ip)  :: error_flag
         integer (ip)  :: dummy_integer !! unused integer variable to maintain backwards compatibility
@@ -230,12 +230,12 @@ contains
 
     subroutine unformatted_print(this, header)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         class (GaussianGrid), intent (in out) :: this
         character (len=*),    intent (in)     :: header
         !----------------------------------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !----------------------------------------------------------------------
         integer (ip)  :: file_unit
         !----------------------------------------------------------------------
@@ -266,7 +266,7 @@ contains
 
     subroutine finalize_gaussian_grid(this)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         type (GaussianGrid), intent (in out) :: this
         !----------------------------------------------------------------------

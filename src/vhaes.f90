@@ -349,11 +349,11 @@ module module_vhaes
     ! Declare derived data type
     type, public :: VhaesAux
         !-----------------------------------------
-        ! Class variables
+        ! Type components
         !-----------------------------------------
     contains
         !-----------------------------------------
-        ! Class methods
+        ! Type-bound procedures
         !-----------------------------------------
         procedure, nopass :: vhaes
         procedure, nopass :: vhaesi
@@ -370,13 +370,13 @@ contains
 
     pure function get_lvhaes(nlat, nlon) result (return_value)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip), intent (in)  :: nlat
         integer (ip), intent (in)  :: nlon
         integer (ip)               :: return_value
         !----------------------------------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !----------------------------------------------------------------------
         integer (ip)         :: l1, l2
         type (SpherepackAux) :: sphere_aux
@@ -392,13 +392,13 @@ contains
 
     pure function get_lwork(nlat, nlon) result (return_value)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip), intent (in)  :: nlat
         integer (ip), intent (in)  :: nlon
         integer (ip)               :: return_value
         !----------------------------------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !----------------------------------------------------------------------
         integer (ip)         :: l1, l2
         type (SpherepackAux) :: sphere_aux
@@ -414,7 +414,7 @@ contains
 
     pure function get_ldwork(nlat) result (return_value)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip), intent (in)  :: nlat
         integer (ip)               :: return_value
@@ -428,7 +428,7 @@ contains
 
     pure function get_legendre_workspace_size(nlat, nlon, nt, ityp) result (return_value)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip),           intent (in) :: nlat
         integer (ip),           intent (in) :: nlon
@@ -436,7 +436,7 @@ contains
         integer (ip), optional, intent (in) :: ityp
         integer (ip)                        :: return_value
         !----------------------------------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !----------------------------------------------------------------------
         integer (ip) :: nt_op, ityp_op, l2
         !----------------------------------------------------------------------
@@ -480,7 +480,7 @@ contains
     subroutine vhaes(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
         mdab, ndab, wvhaes, lvhaes, work, lwork, ierror)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip), intent (in)  :: nlat
         integer (ip), intent (in)  :: nlon
@@ -502,7 +502,7 @@ contains
         integer (ip), intent (in)  :: lwork
         integer (ip), intent (out) :: ierror
         !----------------------------------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !----------------------------------------------------------------------
         integer (ip) :: idv, imid, idz, ist, lnl, lzimn, mmax
         integer (ip) :: workspace_indices(6)
@@ -584,7 +584,7 @@ contains
 
         pure function get_workspace_indices(ist, lnl, lzimn) result (return_value)
             !----------------------------------------------------------------------
-            ! Dictionary: calling arguments
+            ! Dummy arguments
             !----------------------------------------------------------------------
             integer (ip), intent (in)  :: ist
             integer (ip), intent (in)  :: lnl
@@ -609,7 +609,7 @@ contains
         subroutine vhaes1(nlat, nlon, ityp, nt, imid, idvw, jdvw, v, w, mdab, &
             ndab, br, bi, cr, ci, idv, ve, vo, we, wo, work, idz, zv, zw, wrfft)
             !----------------------------------------------------------------------
-            ! Dictionary: calling arguments
+            ! Dummy arguments
             !----------------------------------------------------------------------
             integer (ip), intent (in)  :: nlat
             integer (ip), intent (in)  :: nlon
@@ -637,7 +637,7 @@ contains
             real (wp),    intent (in)  :: zw(idz, *)
             real (wp),    intent (in)  :: wrfft(*)
             !----------------------------------------------------------------------
-            ! Dictionary: local variables
+            ! Local variables
             !----------------------------------------------------------------------
             integer (ip)    :: i,imm1, j, k, m, mb, mlat, mlon
             integer (ip)    :: mmax, mp1, mp2, ndo1, ndo2,  nlp1, np1
@@ -1312,7 +1312,7 @@ contains
         ! dwork must be of length at least 2*(nlat+1)
         !
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip), intent (in)  :: nlat
         integer (ip), intent (in)  :: nlon
@@ -1324,7 +1324,7 @@ contains
         integer (ip), intent (in)  :: ldwork
         integer (ip), intent (out) :: ierror
         !----------------------------------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !----------------------------------------------------------------------
         integer (ip)    :: imid, labc, lzimn, mmax
         integer (ip)    :: workspace_indices(4)
@@ -1380,7 +1380,7 @@ contains
 
         pure function get_workspace_indices(lzimn, nlat, imid, mmax) result (return_value)
             !----------------------------------------------------------------------
-            ! Dictionary: calling arguments
+            ! Dummy arguments
             !----------------------------------------------------------------------
             integer (ip), intent (in)  :: lzimn
             integer (ip), intent (in)  :: nlat
@@ -1403,7 +1403,7 @@ contains
 
         subroutine vea1(nlat, nlon, imid, zv, zw, idz, zin, wzvin, dwork)
             !----------------------------------------------------------------------
-            ! Dictionary: calling arguments
+            ! Dummy arguments
             !----------------------------------------------------------------------
             integer (ip), intent (in)  :: nlat
             integer (ip), intent (in)  :: nlon
@@ -1415,7 +1415,7 @@ contains
             real (wp),    intent (out) :: wzvin(*)
             real (wp),    intent (out) :: dwork(*)
             !----------------------------------------------------------------------
-            ! Dictionary: local variables
+            ! Local variables
             !----------------------------------------------------------------------
             integer (ip)         :: i3, m, mn, mp1, np1, mmax
             type (SpherepackAux) :: sphere_aux

@@ -87,11 +87,11 @@ contains
 
     subroutine test_scalar_laplacian_routines(sphere_type)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         class (Sphere), intent (in out) :: sphere_type
         !----------------------------------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !----------------------------------------------------------------------
         integer (ip), parameter        :: NLATS = 15
         integer (ip), parameter        :: NLONS = 22

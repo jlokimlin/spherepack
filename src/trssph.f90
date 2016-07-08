@@ -507,7 +507,7 @@ contains
         db, wsave, lsave, lsvmin, work, lwork, lwkmin, dwork, ldwork, ier)
 
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer, intent (in)     :: intl
         integer, intent (in)     :: igrida(2)
@@ -528,7 +528,7 @@ contains
         real,    intent (in out) :: work(*)
         real,    intent (in out) :: dwork(*)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer :: ig, igrda, igrdb, la1, la2, lb1, lb2, lwa, lwb, iaa, iab, iba, ibb
         integer :: lwk3, lwk4, lw, iw, jb, nt, isym, nlat
@@ -756,7 +756,7 @@ contains
         !
 
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer, intent (in)  :: ma
         integer, intent (in)  :: na
@@ -767,7 +767,7 @@ contains
         real,    intent (out) :: ab(mb, nb)
         real,    intent (out) :: bb(mb, nb)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer :: i, j, m, n !! Counters
         !----------------------------------------------------------------------
@@ -810,14 +810,14 @@ contains
         !
 
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer, intent (in)     :: n
         integer, intent (in)     :: m
         real,    intent (in out) :: data(*)
         real,    intent (in out) :: work(*)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer :: i, j, ij, ji !! Counters
         !----------------------------------------------------------------------
@@ -849,13 +849,13 @@ contains
         !
 
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer, intent (in)     :: nlat
         integer, intent (in)     :: nlon
         real,    intent (in out) :: data(nlat,nlon)
         !----------------------------------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !----------------------------------------------------------------------
         integer :: i, j, half_nlat, ib !! Counters
         real    :: temp

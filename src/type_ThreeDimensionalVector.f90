@@ -22,7 +22,7 @@ module type_ThreeDimensionalVector
     ! Declare derived data type
     type, public :: ThreeDimensionalVector
         !----------------------------------------------------------------------
-        ! Class variables
+        ! Type components
         !----------------------------------------------------------------------
         real (wp), public :: x = 0.0_wp
         real (wp), public :: y = 0.0_wp
@@ -30,7 +30,7 @@ module type_ThreeDimensionalVector
         !----------------------------------------------------------------------
     contains
         !----------------------------------------------------------------------
-        ! Class methods
+        ! Type-bound procedures
         !----------------------------------------------------------------------
         procedure,          private  :: add_vectors
         procedure,          private  :: subtract_vectors
@@ -80,13 +80,13 @@ module type_ThreeDimensionalVector
     ! To create array of pointers
     type, public :: ThreeDimensionalVectorPointer
         !----------------------------------------------------------------------
-        ! Class variables
+        ! Type components
         !----------------------------------------------------------------------
         type (ThreeDimensionalVector), pointer :: p => null()
         !----------------------------------------------------------------------
     contains
         !----------------------------------------------------------------------
-        ! Class methods
+        ! Type-bound procedures
         !----------------------------------------------------------------------
         final :: finalize_three_dimensional_vector_pointer
         !----------------------------------------------------------------------
@@ -99,7 +99,7 @@ contains
 
     subroutine assign_vector_from_int_array(this, array)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         class (ThreeDimensionalVector),  intent (out) :: this
         integer (ip),                    intent (in)  :: array(:)
@@ -118,7 +118,7 @@ contains
 
     subroutine assign_vector_from_float_array(this, array)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         class (ThreeDimensionalVector),  intent (out) :: this
         real (wp),                       intent (in)  :: array(:)
@@ -136,7 +136,7 @@ contains
 
     subroutine assign_array_from_vector( array, this )
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         real (wp),                      intent (out)  :: array(:)
         class (ThreeDimensionalVector), intent (in)   :: this
@@ -154,7 +154,7 @@ contains
 
     subroutine copy_vector(this, vector_to_be_copied )
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         class (ThreeDimensionalVector), intent (out) :: this
         class (ThreeDimensionalVector), intent (in)  :: vector_to_be_copied
@@ -169,7 +169,7 @@ contains
 
     function add_vectors(this, vec) result (return_value)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         type (ThreeDimensionalVector)               :: return_value
         class (ThreeDimensionalVector), intent (in) :: this
@@ -185,7 +185,7 @@ contains
 
     function subtract_vectors(this, vec) result (return_value)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         class (ThreeDimensionalVector), intent (in) :: this
         class (ThreeDimensionalVector), intent (in) :: vec
@@ -201,7 +201,7 @@ contains
 
     pure function multiply_vector_times_float(this, float) result (return_value)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         class (ThreeDimensionalVector), intent (in) :: this
         real (wp),                      intent (in) :: float
@@ -217,7 +217,7 @@ contains
 
     function multiply_real_times_vector(float, vec) result (return_value)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         real (wp),                      intent (in) :: float
         class (ThreeDimensionalVector), intent (in) :: vec
@@ -233,7 +233,7 @@ contains
 
     function multiply_vector_times_integer(this, int) result (return_value)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         class (ThreeDimensionalVector), intent (in)  :: this
         integer (ip),                   intent (in)  :: int
@@ -249,7 +249,7 @@ contains
 
     pure function multiply_integer_times_vector(int, vec) result (return_value)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         type (ThreeDimensionalVector)               :: return_value
         integer (ip),                   intent (in) :: int
@@ -265,7 +265,7 @@ contains
 
     pure function divide_vector_by_float(this, float) result (return_value)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         class (ThreeDimensionalVector), intent (in)  :: this
         real (wp),                      intent (in)  :: float
@@ -282,7 +282,7 @@ contains
 
     pure function divide_vector_by_integer(this, int) result (return_value)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         class (ThreeDimensionalVector), intent (in)  :: this
         integer (ip),                   intent (in)  :: int
@@ -299,7 +299,7 @@ contains
 
     function get_dot_product(this, vec) result (return_value)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         real (wp)                                   :: return_value
         class (ThreeDimensionalVector), intent (in) :: this
@@ -318,7 +318,7 @@ contains
 
     function get_cross_product(this, vec) result (return_value)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         class (ThreeDimensionalVector), intent (in) :: this
         class (ThreeDimensionalVector), intent (in) :: vec
@@ -334,7 +334,7 @@ contains
 
     function get_norm(this) result (return_value)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         class (ThreeDimensionalVector), intent (in out) :: this
         real (wp)                                       :: return_value
@@ -349,7 +349,7 @@ contains
 
     elemental subroutine finalize_three_dimensional_vector(this)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         type (ThreeDimensionalVector), intent (in out) :: this
         !----------------------------------------------------------------------
@@ -364,7 +364,7 @@ contains
 
     elemental subroutine finalize_three_dimensional_vector_pointer(this)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         type (ThreeDimensionalVectorPointer), intent (in out) :: this
         !----------------------------------------------------------------------

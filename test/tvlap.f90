@@ -96,11 +96,11 @@ contains
 
     subroutine test_vector_laplacian_routines( sphere_type )
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         class (Sphere), intent (in out) :: sphere_type
         !----------------------------------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !----------------------------------------------------------------------
         integer (ip), parameter        :: NLONS = 16
         integer (ip), parameter        :: NLATS = 29

@@ -52,11 +52,11 @@ module type_SpherepackAux
 
     type, public :: SpherepackAux
         !----------------------------------------------------------------------
-        ! Class variables
+        ! Type components
         !----------------------------------------------------------------------
     contains
         !----------------------------------------------------------------------
-        ! Class methods
+        ! Type-bound procedures
         !----------------------------------------------------------------------
         procedure, nopass :: alin
         procedure, nopass :: alinit
@@ -109,7 +109,7 @@ contains
 
     pure subroutine compute_parity(nlat, nlon, l1, l2)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip), intent (in)  :: nlat
         integer (ip), intent (in)  :: nlon
@@ -141,13 +141,13 @@ contains
         !     cp requires n/2+1 real locations
         !
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip), intent (in)  :: m
         integer (ip), intent (in)  :: n
         real (wp),    intent (out) :: cp(n/2+1)
         !----------------------------------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !----------------------------------------------------------------------
         integer (ip)         :: i, l, ma, nex,  nmms2
         real (wp)            :: a1, b1, c1, t1, t2
@@ -258,7 +258,7 @@ contains
         ! Computes the derivative of pmn(theta) with respect to theta
         !
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip), intent (in)  :: m
         integer (ip), intent (in)  :: n
@@ -266,7 +266,7 @@ contains
         real (wp),    intent (out) :: cp(*)
         real (wp),    intent (out) :: pb
         !----------------------------------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !----------------------------------------------------------------------
         integer (ip) ::  k, kdo
         real (wp)    :: cos2t, sin2t, cost, sint, temp
@@ -349,7 +349,7 @@ contains
 
     pure subroutine dnlft(m, n, theta, cp, pb)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip), intent (in)  :: m
         integer (ip), intent (in)  :: n
@@ -357,7 +357,7 @@ contains
         real (wp),    intent (out) :: cp(*)
         real (wp),    intent (out) :: pb
         !----------------------------------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !----------------------------------------------------------------------
         integer (ip) ::  k, kdo
         real (wp)    :: temp, cos2t, cost, sin2t, sint
@@ -451,7 +451,7 @@ contains
         ! m=0, 1, 2, ..., 9 in that order)
         !
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip), intent (in)  :: mode
         integer (ip), intent (in)  :: l
@@ -461,7 +461,7 @@ contains
         real (wp),    intent (out) :: pmn(*)
         integer (ip), intent (out) :: km
         !----------------------------------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !----------------------------------------------------------------------
         integer (ip) :: late
         integer (ip) :: workspace_indices(5)
@@ -491,7 +491,7 @@ contains
         subroutine legin1(mode, l, nlat, late, m, p0n, p1n, abel, bbel, cbel, &
             pmn, km)
             !----------------------------------------------------------------------
-            ! Dictionary: calling arguments
+            ! Dummy arguments
             !----------------------------------------------------------------------
             integer (ip), intent (in)  :: mode
             integer (ip), intent (in)  :: l
@@ -506,7 +506,7 @@ contains
             real (wp),    intent (out) :: pmn(nlat, late, 3)
             integer (ip), intent (out) :: km
             !----------------------------------------------------------------------
-            ! Dictionary: calling arguments
+            ! Dummy arguments
             !----------------------------------------------------------------------
             integer (ip)       :: i, n, ms, np1, imn, kmt, ninc
             integer (ip), save :: column_indices(0:2) = [1, 2, 3]
@@ -575,7 +575,7 @@ contains
         pure function get_workspace_indices(l, late, nlat) &
             result (return_value)
             !----------------------------------------------------------------------
-            ! Dictionary: calling arguments
+            ! Dummy arguments
             !----------------------------------------------------------------------
             integer (ip), intent (in) :: l
             integer (ip), intent (in) :: late
@@ -604,7 +604,7 @@ contains
             !     arrays for recursion coefficients (functions of (m, n))
             !     for 2 <= m <= n-1 and 2 <= n <= l-1
             !----------------------------------------------------------------------
-            ! Dictionary: calling arguments
+            ! Dummy arguments
             !----------------------------------------------------------------------
             integer (ip), intent (in) :: m
             integer (ip), intent (in) :: n
@@ -626,7 +626,7 @@ contains
             !     for l <= n <= nlat and 2 <= m <= l
             !
             !----------------------------------------------------------------------
-            ! Dictionary: calling arguments
+            ! Dummy arguments
             !----------------------------------------------------------------------
             integer (ip), intent (in) :: l
             integer (ip), intent (in) :: m
@@ -644,7 +644,7 @@ contains
 
     subroutine zfin(isym, nlat, nlon, m, z, i3, wzfin)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip), intent (in)     :: isym
         integer (ip), intent (in)     :: nlat
@@ -654,7 +654,7 @@ contains
         integer (ip), intent (in out) :: i3
         real (wp),    intent (in out) :: wzfin(*)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip) :: imid
         integer (ip) :: workspace(4)
@@ -683,7 +683,7 @@ contains
 
         subroutine zfin1(isym, nlat, m, z, imid, i3, zz, z1, a, b, c)
             !----------------------------------------------------------------------
-            ! Dictionary: calling arguments
+            ! Dummy arguments
             !----------------------------------------------------------------------
             integer (ip), intent (in)     :: isym
             integer (ip), intent (in)     :: nlat
@@ -697,7 +697,7 @@ contains
             real (wp),    intent (in out) :: b(*)
             real (wp),    intent (in out) :: c(*)
             !----------------------------------------------------------------------
-            ! Dictionary: calling arguments
+            ! Dummy arguments
             !----------------------------------------------------------------------
             integer (ip), save :: i1, i2
             integer (ip)       :: ns, np1, nstp, itemp, nstrt
@@ -753,14 +753,14 @@ contains
         pure function get_workspace_indices(nlat, nlon, imid) &
             result (return_value)
             !----------------------------------------------------------------------
-            ! Dictionary: calling arguments
+            ! Dummy arguments
             !----------------------------------------------------------------------
             integer (ip), intent (in) :: nlat
             integer (ip), intent (in) :: nlon
             integer (ip), intent (in) :: imid
             integer (ip)              :: return_value(4)
             !----------------------------------------------------------------------
-            ! Dictionary: calling arguments
+            ! Dummy arguments
             !----------------------------------------------------------------------
             integer (ip) :: mmax, lim, labc
             !----------------------------------------------------------------------
@@ -784,14 +784,14 @@ contains
 
     subroutine zfinit(nlat, nlon, wzfin, dwork)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip), intent (in)     :: nlat
         integer (ip), intent (in)     :: nlon
         real (wp),    intent (in out) :: wzfin(*)
         real (wp),    intent (in out) :: dwork(nlat+2)
         !----------------------------------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !----------------------------------------------------------------------
         integer (ip) :: imid
         integer (ip) :: iw1, iw2
@@ -823,7 +823,7 @@ contains
             !     cz and work must each have nlat+1 locations
             !
             !----------------------------------------------------------------------
-            ! Dictionary: calling arguments
+            ! Dummy arguments
             !----------------------------------------------------------------------
             integer (ip), intent (in)     :: nlat
             integer (ip), intent (in)     :: nlon
@@ -833,7 +833,7 @@ contains
             real (wp),    intent (in out) :: cz(nlat+1)
             real (wp),    intent (in out) :: work(nlat+1)
             !----------------------------------------------------------------------
-            ! Dictionary: local variables
+            ! Local variables
             !----------------------------------------------------------------------
             integer (ip)         :: i, m, n, mp1, np1
             real (wp)            :: dt, th, zh
@@ -877,7 +877,7 @@ contains
         !    cz and work must both have nlat/2+1 locations
         !
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip), intent (in)     :: nlat
         integer (ip), intent (in)     :: m
@@ -960,7 +960,7 @@ contains
 
     subroutine dnzft(nlat, m, n, th, cz, zh)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip), intent (in)   :: nlat
         integer (ip), intent (in)   :: m
@@ -969,7 +969,7 @@ contains
         real (wp),    intent (in)   :: cz(*)
         real (wp),    intent (out)  :: zh
         !----------------------------------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !----------------------------------------------------------------------
         integer (ip) :: i, k, lc, lq, ls
         real (wp)    :: cos2t, sin2t, cost, sint, temp
@@ -1087,7 +1087,7 @@ contains
 
     subroutine alin(isym, nlat, nlon, m, p, i3, walin)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip), intent (in)     :: isym
         integer (ip), intent (in)     :: nlat
@@ -1097,7 +1097,7 @@ contains
         integer (ip), intent (in out) :: i3
         real (wp),    intent (in out) :: walin(*)
         !----------------------------------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !----------------------------------------------------------------------
         integer (ip) :: imid
         integer (ip) :: workspace_indices(4)
@@ -1126,7 +1126,7 @@ contains
 
         subroutine alin1(isym, nlat, m, p, imid, i3, pz, p1, a, b, c)
             !----------------------------------------------------------------------
-            ! Dictionary: calling arguments
+            ! Dummy arguments
             !----------------------------------------------------------------------
             integer (ip), intent (in)     :: isym
             integer (ip), intent (in)     :: nlat
@@ -1140,7 +1140,7 @@ contains
             real (wp),    intent (in out) :: b(*)
             real (wp),    intent (in out) :: c(*)
             !----------------------------------------------------------------------
-            ! Dictionary: local variables
+            ! Local variables
             !----------------------------------------------------------------------
             integer (ip)       :: ns, np1, nstp, itemp, nstrt
             integer (ip), save :: i1, i2
@@ -1192,14 +1192,14 @@ contains
         pure function get_workspace_indices(nlat, nlon, imid) &
             result (return_value)
             !----------------------------------------------------------------------
-            ! Dictionary: calling arguments
+            ! Dummy arguments
             !----------------------------------------------------------------------
             integer (ip), intent (in) :: nlat
             integer (ip), intent (in) :: nlon
             integer (ip), intent (in) :: imid
             integer (ip)              :: return_value(4)
             !----------------------------------------------------------------------
-            ! Dictionary: local variables arguments
+            ! Local variables arguments
             !----------------------------------------------------------------------
             integer (ip) :: lim, mmax, labc
             !----------------------------------------------------------------------
@@ -1224,14 +1224,14 @@ contains
 
     subroutine alinit(nlat, nlon, walin, dwork)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip), intent (in)     :: nlat
         integer (ip), intent (in)     :: nlon
         real (wp),    intent (in out) :: walin(*)
         real (wp),    intent (in out) :: dwork(nlat+1)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip) :: imid, iw1
         !----------------------------------------------------------------------
@@ -1248,7 +1248,7 @@ contains
 
         subroutine alini1(nlat, nlon, imid, p, abc, cp)
             !----------------------------------------------------------------------
-            ! Dictionary: calling arguments
+            ! Dummy arguments
             !----------------------------------------------------------------------
             integer (ip), intent (in)     :: nlat
             integer (ip), intent (in)     :: nlon
@@ -1257,7 +1257,7 @@ contains
             real (wp),    intent (in out) :: abc(*)
             real (wp),    intent (in out) :: cp(*)
             !----------------------------------------------------------------------
-            ! Dictionary: calling arguments
+            ! Dummy arguments
             !----------------------------------------------------------------------
             integer (ip)         :: i, m, n, mp1, np1
             real (wp)            :: dt, ph, th
@@ -1294,13 +1294,13 @@ contains
         ! must have 3*((mmax-2)*(2*nlat-mmax-1))/2 locations.
         !
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip), intent (in)     :: nlat
         integer (ip), intent (in)     :: nlon
         real (wp),    intent (in out) :: abc(*)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip) :: mmax, labc, iw1, iw2
         !----------------------------------------------------------------------
@@ -1323,7 +1323,7 @@ contains
             ! stored in location ((m-2)*(nlat+nlat-m-1))/2+n+1
             !
             !----------------------------------------------------------------------
-            ! Dictionary: calling arguments
+            ! Dummy arguments
             !----------------------------------------------------------------------
             integer (ip), intent (in)     :: nlat
             integer (ip), intent (in)     :: nlon
@@ -1331,7 +1331,7 @@ contains
             real (wp),    intent (in out) :: b(*)
             real (wp),    intent (in out) :: c(*)
             !----------------------------------------------------------------------
-            ! Dictionary: calling arguments
+            ! Dummy arguments
             !----------------------------------------------------------------------
             integer (ip) :: m, n, ns, mp1, np1, mp3, mmax
             real (wp)    :: cn, fm, fn
@@ -1381,7 +1381,7 @@ contains
 
     subroutine sea1(nlat, nlon, imid, z, idz, zin, wzfin, dwork)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip), intent (in)     :: nlat
         integer (ip), intent (in)     :: nlon
@@ -1392,7 +1392,7 @@ contains
         real (wp),    intent (in out) :: wzfin(*)
         real (wp),    intent (in out) :: dwork(*)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip) :: i, m, i3, mn, mp1, np1, mmax
         !----------------------------------------------------------------------
@@ -1418,7 +1418,7 @@ contains
 
     subroutine ses1(nlat, nlon, imid, p, pin, walin, dwork)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip), intent (in)     :: nlat
         integer (ip), intent (in)     :: nlon
@@ -1428,7 +1428,7 @@ contains
         real (wp),    intent (in out) :: walin(*)
         real (wp),    intent (in out) :: dwork(*)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip) :: m, i3, mn, mp1, np1, mmax
         !----------------------------------------------------------------------
@@ -1452,14 +1452,14 @@ contains
 
     subroutine zvinit(nlat, nlon, wzvin, dwork)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip), intent (in)     :: nlat
         integer (ip), intent (in)     :: nlon
         real (wp),    intent (in out) :: wzvin(*)
         real (wp),    intent (in out) :: dwork(nlat+2)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip) :: imid, iw1, iw2
         !----------------------------------------------------------------------
@@ -1483,7 +1483,7 @@ contains
             !     czv and work must each have nlat/2+1  locations
             !
             !----------------------------------------------------------------------
-            ! Dictionary: calling arguments
+            ! Dummy arguments
             !----------------------------------------------------------------------
             integer (ip), intent (in)     :: nlat
             integer (ip), intent (in)     :: nlon
@@ -1493,7 +1493,7 @@ contains
             real (wp),    intent (in out) :: czv(nlat/2+1)
             real (wp),    intent (in out) :: work(nlat/2+1)
             !----------------------------------------------------------------------
-            ! Dictionary: calling arguments
+            ! Dummy arguments
             !----------------------------------------------------------------------
             integer (ip)         :: i,m, mdo, mp1, n, np1
             real (wp)            :: dt, th, zvh
@@ -1530,14 +1530,14 @@ contains
         ! The length of dwork is nlat+2
         !
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip), intent (in)     :: nlat
         integer (ip), intent (in)     :: nlon
         real (wp),    intent (in out) :: wzwin(2*nlat*((nlat+1)/2)+3*((nlat-3)*nlat+2)/2)
         real (wp),    intent (in out) :: dwork(nlat+2)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip) :: imid, iw1, iw2
         !----------------------------------------------------------------------
@@ -1557,7 +1557,7 @@ contains
             !     czw and work must each have nlat+1 locations
             !
             !----------------------------------------------------------------------
-            ! Dictionary: calling arguments
+            ! Dummy arguments
             !----------------------------------------------------------------------
             integer (ip), intent (in)     :: nlat
             integer (ip), intent (in)     :: nlon
@@ -1567,7 +1567,7 @@ contains
             real (wp),    intent (in out) :: czw(nlat+1)
             real (wp),    intent (in out) :: work(nlat+1)
             !----------------------------------------------------------------------
-            ! Dictionary: calling arguments
+            ! Dummy arguments
             !----------------------------------------------------------------------
             integer (ip)         :: i, m, mdo, mp1, n, np1
             real (wp)            :: dt, th, zwh
@@ -1602,7 +1602,7 @@ contains
 
     subroutine zvin(ityp, nlat, nlon, m, zv, i3, wzvin)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip), intent (in)  :: ityp
         integer (ip), intent (in)  :: nlat
@@ -1612,7 +1612,7 @@ contains
         integer (ip), intent (out) :: i3
         real (wp),    intent (in)  :: wzvin(*)
         !----------------------------------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !----------------------------------------------------------------------
         integer (ip) :: imid
         integer (ip) :: iw1, iw2, iw3, iw4
@@ -1637,7 +1637,7 @@ contains
 
         subroutine zvin1(ityp, nlat, m, zv, imid, i3, zvz, zv1, a, b, c)
             !----------------------------------------------------------------------
-            ! Dictionary: calling arguments
+            ! Dummy arguments
             !----------------------------------------------------------------------
             integer (ip), intent (in)     :: ityp
             integer (ip), intent (in)     :: nlat
@@ -1651,7 +1651,7 @@ contains
             real (wp),    intent (in)     :: b(*)
             real (wp),    intent (in)     :: c(*)
             !----------------------------------------------------------------------
-            ! Dictionary: local variables
+            ! Local variables
             !----------------------------------------------------------------------
             integer (ip)       :: i, ihold
             integer (ip)       :: np1, ns, nstp, nstrt
@@ -1721,7 +1721,7 @@ contains
 
     subroutine zwin(ityp, nlat, nlon, m, zw, i3, wzwin)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip), intent (in)     :: ityp
         integer (ip), intent (in)     :: nlat
@@ -1731,7 +1731,7 @@ contains
         integer (ip), intent (in out) :: i3
         real (wp),    intent (in)     :: wzwin(*)
         !----------------------------------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !----------------------------------------------------------------------
         integer (ip) :: imid, iw1, iw2, iw3, iw4
         integer (ip) :: labc, lim, mmax
@@ -1755,7 +1755,7 @@ contains
 
         subroutine zwin1(ityp, nlat, m, zw, imid, i3, zw1, zw2, a, b, c)
             !----------------------------------------------------------------------
-            ! Dictionary: calling arguments
+            ! Dummy arguments
             !----------------------------------------------------------------------
             integer (ip), intent (in)     :: ityp
             integer (ip), intent (in)     :: nlat
@@ -1769,7 +1769,7 @@ contains
             real (wp),    intent (in)     :: b(*)
             real (wp),    intent (in)     :: c(*)
             !----------------------------------------------------------------------
-            ! Dictionary: local variables
+            ! Local variables
             !----------------------------------------------------------------------
             integer (ip)       :: i, ihold
             integer (ip)       :: np1, ns, nstp, nstrt
@@ -1843,14 +1843,14 @@ contains
         ! The length of dwork is nlat+2
         !
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip), intent (in)  :: nlat
         integer (ip), intent (in)  :: nlon
         real (wp),    intent (out) :: wvbin(2*nlat*((nlat+1)/2)+3*((nlat-3)*nlat+2)/2)
         real (wp),    intent (out) :: dwork(nlat+2)
         !----------------------------------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !----------------------------------------------------------------------
         integer (ip) :: imid, iw1, iw2
         !----------------------------------------------------------------------
@@ -1872,7 +1872,7 @@ contains
             !     cvb and work must each have nlat+1 locations
             !
             !----------------------------------------------------------------------
-            ! Dictionary: calling arguments
+            ! Dummy arguments
             !----------------------------------------------------------------------
             integer (ip), intent (in)  :: nlat
             integer (ip), intent (in)  :: nlon
@@ -1882,7 +1882,7 @@ contains
             real (wp),    intent (out) :: cvb(nlat+1)
             real (wp),    intent (out) :: work(nlat+1)
             !----------------------------------------------------------------------
-            ! Dictionary: local variables
+            ! Local variables
             !----------------------------------------------------------------------
             integer (ip)    :: i, m, mdo, mp1, n, np1
             real (wp)       :: dth, theta, vbh
@@ -1918,14 +1918,14 @@ contains
         ! The length of dwork is nlat+2
         !
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip), intent (in)  :: nlat
         integer (ip), intent (in)  :: nlon
         real (wp),    intent (out) :: wwbin(2*nlat*((nlat+1)/2)+3*((nlat-3)*nlat+2)/2)
         real (wp),    intent (out) :: dwork(nlat+2)
         !----------------------------------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !----------------------------------------------------------------------
         integer (ip) :: imid, iw1, iw2
         !----------------------------------------------------------------------
@@ -1947,7 +1947,7 @@ contains
             ! cwb and work must each have nlat/2+1 locations
             !
             !----------------------------------------------------------------------
-            ! Dictionary: calling arguments
+            ! Dummy arguments
             !----------------------------------------------------------------------
             integer (ip), intent (in)  :: nlat
             integer (ip), intent (in)  :: nlon
@@ -1957,7 +1957,7 @@ contains
             real (wp),    intent (out) :: cwb(nlat/2+1)
             real (wp),    intent (out) :: work(nlat/2+1)
             !----------------------------------------------------------------------
-            ! Dictionary: local variables
+            ! Local variables
             !----------------------------------------------------------------------
             integer (ip)         :: i, m, mdo, mp1, n, np1
             real (wp)            :: dth, wbh, theta
@@ -1991,7 +1991,7 @@ contains
 
     subroutine vbin(ityp, nlat, nlon, m, vb, i3, wvbin)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip), intent (in)     :: ityp
         integer (ip), intent (in)     :: nlat
@@ -2001,7 +2001,7 @@ contains
         integer (ip), intent (in out) :: i3
         real (wp),    intent (in)     :: wvbin(*)
         !----------------------------------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !----------------------------------------------------------------------
         integer (ip) :: imid
         integer (ip) :: iw1, iw2, iw3, iw4
@@ -2026,7 +2026,7 @@ contains
 
         subroutine vbin1(ityp, nlat, m, vb, imid, i3, vbz, vb1, a, b, c)
             !----------------------------------------------------------------------
-            ! Dictionary: calling arguments
+            ! Dummy arguments
             !----------------------------------------------------------------------
             integer (ip), intent (in)     :: ityp
             integer (ip), intent (in)     :: nlat
@@ -2040,7 +2040,7 @@ contains
             real (wp),    intent (in)     :: b(*)
             real (wp),    intent (in)     :: c(*)
             !----------------------------------------------------------------------
-            ! Dictionary: local variables
+            ! Local variables
             !----------------------------------------------------------------------
             integer (ip)       :: i, ihold
             integer (ip)       :: np1, ns, nstp, nstrt
@@ -2768,14 +2768,14 @@ contains
 
     subroutine dvbk(m, n, cv, work)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip), intent (in)  :: m
         integer (ip), intent (in)  :: n
         real (wp),    intent (out) :: cv(*)
         real (wp),    intent (out) :: work(*)
         !----------------------------------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !----------------------------------------------------------------------
         integer (ip) :: l, ncv
         real (wp)    :: srnp1, fn, fk, cf
@@ -2842,14 +2842,14 @@ contains
 
     subroutine dwbk(m, n, cw, work)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip), intent (in)  :: m
         integer (ip), intent (in)  :: n
         real (wp),    intent (out) :: cw(*)
         real (wp),    intent (out) :: work(*)
         !----------------------------------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !----------------------------------------------------------------------
         integer (ip) :: l
         real (wp)    :: fn, cf, srnp1
@@ -2926,7 +2926,7 @@ contains
 
     subroutine dvbt(m, n, theta, cv, vh)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip), intent (in)  :: m
         integer (ip), intent (in)  :: n
@@ -2934,7 +2934,7 @@ contains
         real (wp),    intent (out) :: cv(*)
         real (wp),    intent (out) :: vh
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip) :: k, ncv
         real (wp)    :: cost, sint, cdt, sdt, temp
@@ -3543,14 +3543,14 @@ contains
 
     subroutine dvtk(m, n, cv, work)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip), intent (in)  :: m
         integer (ip), intent (in)  :: n
         real (wp),    intent (out) :: cv(*)
         real (wp),    intent (out) :: work(*)
         !----------------------------------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !----------------------------------------------------------------------
         integer (ip) :: l, ncv
         real (wp)    :: fn, fk, cf, srnp1
@@ -3715,7 +3715,7 @@ contains
 
     subroutine dvtt(m, n, theta, cv, vh)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip), intent (in)  :: m
         integer (ip), intent (in)  :: n
@@ -3723,7 +3723,7 @@ contains
         real (wp),    intent (out) :: cv(*)
         real (wp),    intent (out) :: vh
         !----------------------------------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !----------------------------------------------------------------------
         integer (ip) :: k, ncv
         real (wp)    :: cost, sint, cdt, sdt, temp
@@ -3947,7 +3947,7 @@ contains
 
     subroutine wbgint(nlat, nlon, theta, wwbin, work)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip), intent (in) :: nlat
         integer (ip), intent (in) :: nlon
@@ -3955,7 +3955,7 @@ contains
         real (wp)                 :: wwbin(2*nlat*((nlat+1)/2)+3*((nlat-3)*nlat+2)/2)
         real (wp)                 :: work(nlat+2)
         !----------------------------------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !----------------------------------------------------------------------
         integer (ip) :: imid, iw1, iw2
         !----------------------------------------------------------------------
@@ -3975,7 +3975,7 @@ contains
 
         subroutine wbgit1(nlat, nlon, imid, theta, wb, abc, cwb, work)
             !----------------------------------------------------------------------
-            ! Dictionary: calling arguments
+            ! Dummy arguments
             !----------------------------------------------------------------------
             integer (ip), intent (in) :: nlat
             integer (ip), intent (in) :: nlon
@@ -3986,7 +3986,7 @@ contains
             real (wp)                 :: cwb(nlat/2+1)
             real (wp)                 :: work(nlat/2+1)
             !----------------------------------------------------------------------
-            ! Dictionary: local variables
+            ! Local variables
             !----------------------------------------------------------------------
             integer (ip) :: i, m, mdo, mp1, n, np1
             real (wp)    :: wbh

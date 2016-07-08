@@ -316,11 +316,11 @@ module module_shsgs
     ! Declare derived data type
     type, public :: ShsgsAux
         !-----------------------------------------
-        ! Class variables
+        ! Type components
         !-----------------------------------------
     contains
         !-----------------------------------------
-        ! Class methods
+        ! Type-bound procedures
         !-----------------------------------------
         procedure, nopass :: shsgs
         procedure, nopass :: shsgsi
@@ -337,13 +337,13 @@ contains
 
     pure function get_lshsgs(nlat, nlon) result (return_value)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip), intent (in)  :: nlat
         integer (ip), intent (in)  :: nlon
         integer (ip)               :: return_value
         !----------------------------------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !----------------------------------------------------------------------
         integer (ip)         :: l1, l2
         type (SpherepackAux) :: sphere_aux
@@ -360,7 +360,7 @@ contains
 
     pure function get_lwork(nlat) result (return_value)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip), intent (in) :: nlat
         integer (ip)              :: return_value
@@ -374,7 +374,7 @@ contains
 
     pure function get_ldwork(nlat) result (return_value)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip), intent (in)  :: nlat
         integer (ip)               :: return_value
@@ -389,7 +389,7 @@ contains
 
     pure function get_legendre_workspace_size(nlat, nlon, nt, isym) result (return_value)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip),           intent (in) :: nlat
         integer (ip),           intent (in) :: nlon
@@ -397,7 +397,7 @@ contains
         integer (ip), optional, intent (in) :: isym
         integer (ip)                        :: return_value
         !----------------------------------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !----------------------------------------------------------------------
         integer (ip) :: nt_op, isym_op, l2
         !----------------------------------------------------------------------
@@ -443,7 +443,7 @@ contains
     subroutine shsgs(nlat, nlon, mode, nt, g, idg, jdg, a, b, mdab, ndab, &
         wshsgs, lshsgs, work, lwork, ierror)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip), intent (in)      :: nlat
         integer (ip), intent (in)      :: nlon
@@ -462,7 +462,7 @@ contains
         integer (ip), intent (in)      :: lwork
         integer (ip), intent (out)     :: ierror
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip) :: mtrunc, l1, l2, lp, iw, lat, late, ifft, ipmn
         !----------------------------------------------------------------------
@@ -548,7 +548,7 @@ contains
         ! using coefficients in a, b
         !
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip), intent (in)     :: nlat
         integer (ip), intent (in)     :: nlon
@@ -569,7 +569,7 @@ contains
         real (wp),    intent (out)    :: g(lat, nlon, nt)
         real (wp),    intent (in out) :: work(*)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip)    :: i, j, k, m, mn, is, ms, ns, lm1, nl2
         integer (ip)    :: lp1, mp1, np1, mp2, meo, mml1
@@ -802,7 +802,7 @@ contains
         ! repeatedly with fixed nlat, nlon.
         !
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip), intent (in)     :: nlat
         integer (ip), intent (in)     :: nlon
@@ -814,7 +814,7 @@ contains
         integer (ip), intent (in)     :: ldwork
         integer (ip), intent (out)    :: ierror
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip) :: ntrunc, l1, l2, lp, ldw, late, ipmnf
         !----------------------------------------------------------------------
@@ -878,7 +878,7 @@ contains
         ! and n=m, ..., l-1
         !
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip), intent (in)     :: nlat
         integer (ip), intent (in)     :: l
@@ -887,7 +887,7 @@ contains
         real (wp),    intent (out)    :: pmn(nlat, late, 3)
         real (wp),    intent (in out) :: pmnf(late,*)
         !----------------------------------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !----------------------------------------------------------------------
         integer (ip)         :: m, km, mn, mp1, np1, mml1, mode
         type (SpherepackAux) :: sphere_aux
@@ -921,7 +921,7 @@ contains
 
     subroutine shsgsp(nlat, nlon, wshsgs, lshsgs, dwork, ldwork, ierror)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip), intent (in)     :: nlat
         integer (ip), intent (in)     :: nlon
@@ -931,7 +931,7 @@ contains
         integer (ip), intent (in)     :: ldwork
         integer (ip), intent (out)    :: ierror
         !----------------------------------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !----------------------------------------------------------------------
         integer (ip) :: ntrunc, i1, i2, i3, l1, l2, i4, i5, i6, i7
         integer (ip) :: iw, late, idth, idwts
@@ -997,7 +997,7 @@ contains
     subroutine shsgsp1(nlat, nlon, l, late, wts, p0n, p1n, abel, bbel, cbel, &
         wfft, dtheta, dwts, work, ier)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip), intent (in)     :: nlat
         integer (ip), intent (in)     :: nlon
@@ -1015,7 +1015,7 @@ contains
         real (wp),    intent (in out) :: work(*)
         integer (ip), intent (out)    :: ier
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip)         :: i, m, n, lw, np1, imn, mlim
         real (wp)            :: pb, dummy_variable

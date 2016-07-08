@@ -880,7 +880,8 @@ module type_FFTpack
     use spherepack_precision, only: &
         wp, & ! Working precision
         ip, & ! Integer precision
-        PI
+        PI, &
+        TWO_PI
 
     ! Explicit typing only
     implicit None
@@ -892,14 +893,9 @@ module type_FFTpack
 
     ! Declare derived data type
     type, public :: FFTpack
-        !-------------------------------------------------------
-        ! Class variables
-        !-------------------------------------------------------
-        real (wp), allocatable :: workspace(:)
-        !-------------------------------------------------------
     contains
         !-------------------------------------------------------
-        ! Class methods
+        ! Type-bound procedures
         !-------------------------------------------------------
         procedure, nopass, public :: rffti
         procedure, nopass, public :: rfftf
@@ -923,11 +919,15 @@ module type_FFTpack
         !-------------------------------------------------------
     end type FFTpack
 
+
+
 contains
+
+
 
     subroutine ezfftf(n, r, azero, a, b, wsave)
         !-----------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !-----------------------------------------------
         integer (ip), intent (in)  :: n
         real (wp),    intent (out) :: azero
@@ -936,7 +936,7 @@ contains
         real (wp),    intent (out) :: b(*)
         real (wp)                  :: wsave(*)
         !-----------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !-----------------------------------------------
         integer (ip) :: ns2, ns2m
         real (wp) :: cf, cfm
@@ -974,7 +974,7 @@ contains
 
     subroutine ezfftb(n, r, azero, a, b, wsave)
         !-----------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !-----------------------------------------------
         integer (ip), intent (in) :: n
         real (wp), intent (in)    :: azero
@@ -983,7 +983,7 @@ contains
         real (wp), intent (in)    :: b(*)
         real (wp)                 :: wsave(*)
         !-----------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !-----------------------------------------------
         integer (ip) :: ns2
         !-----------------------------------------------
@@ -1012,7 +1012,7 @@ contains
 
     subroutine ezffti(n, wsave)
         !-----------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !-----------------------------------------------
         integer (ip) :: n
         real (wp) :: wsave(*)
@@ -1026,21 +1026,21 @@ contains
 
     subroutine ezfft1(n, wa, ifac)
         !-----------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !-----------------------------------------------
         integer (ip),  intent (in)     :: n
         real (wp),     intent (in out) :: ifac(*)
         real (wp),     intent (in out) :: wa(*)
         !-----------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !-----------------------------------------------
-        integer (ip), parameter :: ntryh(*) =[ 4, 2, 3, 5 ]
+        integer (ip), parameter :: NTRYH(*) = [4, 2, 3, 5]
         integer (ip) :: nl, nf, j, ntry, nq, nr, i, is, nfm1
         integer (ip) :: l1, k1, iip, l2, ido, iipm, ii
-        real (wp), parameter :: TWO_PI = 2.0_wp * PI
         real (wp) :: argh, arg1, ch1, sh1, dch1, dsh1, temp
         !-----------------------------------------------
 
+        ! Initialize
         ntry = 0
         nl = n
         nf = 0
@@ -1051,7 +1051,7 @@ contains
             j = j + 1
 
             if (j <= 4) then
-                ntry = ntryh(j)
+                ntry = NTRYH(j)
             else
                 ntry = ntry + 2
             end if
@@ -1124,12 +1124,12 @@ contains
 
     subroutine costi(n, wsave)
         !-----------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !-----------------------------------------------
         integer (ip), intent (in) :: n
         real (wp)                 :: wsave(*)
         !-----------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !-----------------------------------------------
         integer (ip)  :: nm1, np1, ns2, k, kc
         real (wp)     :: dt, fk
@@ -1150,6 +1150,7 @@ contains
             end do
 
             call rffti(nm1, wsave(n+1))
+
         end if
 
     end subroutine costi
@@ -1157,13 +1158,13 @@ contains
 
     subroutine cost(n, x, wsave)
         !-----------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !-----------------------------------------------
         integer (ip), intent (in) :: n
         real (wp) :: x(*)
         real (wp) :: wsave(*)
         !-----------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !-----------------------------------------------
         integer (ip) :: nm1, np1, ns2, k, kc, modn, i
         real (wp) :: x1h, x1p3, tx2, c1, t1, t2, xim2, xi
@@ -1225,12 +1226,12 @@ contains
 
     subroutine sinti(n, wsave)
         !-----------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !-----------------------------------------------
         integer (ip), intent (in) :: n
         real (wp)                 :: wsave(*)
         !-----------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !-----------------------------------------------
         integer (ip) :: ns2, np1, k
         real (wp)    :: dt
@@ -1253,13 +1254,13 @@ contains
 
     subroutine sint(n, x, wsave)
         !-----------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !-----------------------------------------------
         integer (ip) :: n
         real (wp) :: x(*)
         real (wp) :: wsave(*)
         !-----------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !-----------------------------------------------
         integer (ip) :: np1, iw1, iw2, iw3
         !-----------------------------------------------
@@ -1277,7 +1278,7 @@ contains
 
     subroutine sint1(n, war, was, xh, x, ifac)
         !-----------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !-----------------------------------------------
         integer (ip), intent (in)  :: n
         real (wp)              :: ifac(*)
@@ -1286,7 +1287,7 @@ contains
         real (wp)              :: xh(*)
         real (wp)              :: x(*)
         !-----------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !-----------------------------------------------
         integer (ip)         :: i, np1, ns2, k, kc, modn
         real (wp), parameter :: SQRT3 = sqrt(3.0_wp) ! 1.73205080756888
@@ -1347,19 +1348,19 @@ contains
 
     subroutine cosqi(n, wsave)
         !-----------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !-----------------------------------------------
         integer (ip) :: n
         real (wp) :: wsave(*)
         !-----------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !-----------------------------------------------
         integer (ip)         :: k !! Counter
-        real (wp), parameter :: half_pi = PI/2
+        real (wp), parameter :: HALF_PI = PI/2
         real (wp)            :: fk, dt
         !-----------------------------------------------
 
-        dt = half_pi/n
+        dt = HALF_PI/n
         fk = 0.0_wp
 
         do k = 1, n
@@ -1374,24 +1375,24 @@ contains
 
     subroutine cosqf(n, x, wsave)
         !-----------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !-----------------------------------------------
-        integer (ip) :: n
-        real (wp) :: x(*)
-        real (wp) :: wsave(*)
+        integer (ip), intent (in) :: n
+        real (wp)                 :: x(*)
+        real (wp)                 :: wsave(*)
         !-----------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !-----------------------------------------------
         real (wp), parameter :: SQRT2 = sqrt(2.0_wp) ! 1.4142135623731
-        real (wp)            :: tsqx
+        real (wp)            :: temp
         !-----------------------------------------------
 
 
         if (3 < n) then
             if (n > 2) call cosqf1(n, x, wsave, wsave(n+1))
-            tsqx = SQRT2*x(2)
-            x(2) = x(1) - tsqx
-            x(1) = x(1) + tsqx
+            temp = SQRT2*x(2)
+            x(2) = x(1) - temp
+            x(1) = x(1) + temp
         end if
 
     end subroutine cosqf
@@ -1400,17 +1401,17 @@ contains
 
     subroutine cosqf1(n, x, w, xh)
         !-----------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !-----------------------------------------------
-        integer (ip) :: n
-        real (wp) :: x(*)
-        real (wp), intent (in) :: w(*)
-        real (wp) :: xh(*)
+        integer (ip), intent (in) :: n
+        real (wp)                 :: x(*)
+        real (wp),    intent (in) :: w(*)
+        real (wp)                 :: xh(*)
         !-----------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !-----------------------------------------------
         integer (ip) :: ns2, np2, k, kc, modn, i
-        real (wp) :: xim1
+        real (wp)    :: temp
         !-----------------------------------------------
 
         ns2 =(n + 1)/2
@@ -1437,9 +1438,9 @@ contains
         call rfftf(n, x, xh)
 
         do i = 3, n, 2
-            xim1 = x(i-1) - x(i)
+            temp = x(i-1) - x(i)
             x(i) = x(i-1) + x(i)
-            x(i-1) = xim1
+            x(i-1) = temp
         end do
 
     end subroutine cosqf1
@@ -1449,25 +1450,25 @@ contains
 
     subroutine cosqb(n, x, wsave)
         !-----------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !-----------------------------------------------
         integer (ip) :: n
         real (wp) :: x(*)
         real (wp) :: wsave(*)
         !-----------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !-----------------------------------------------
         real (wp), parameter :: TWO_SQRT2 = 2.0_wp * sqrt(2.0_wp) ! 2.82842712474619
-        real (wp)            :: x1
+        real (wp)            :: temp
         !-----------------------------------------------
 
         if (3 > n) then
             if (n /= 2) then
                 x(1) = 4.0_wp * x(1)
             else
-                x1 = 4.0_wp * (x(1)+x(2))
+                temp = 4.0_wp * (x(1)+x(2))
                 x(2) = TWO_SQRT2*(x(1)-x(2))
-                x(1) = x1
+                x(1) = temp
             end if
         end if
 
@@ -1478,17 +1479,17 @@ contains
 
     subroutine cosqb1(n, x, w, xh)
         !-----------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !-----------------------------------------------
         integer (ip)               :: n
         real (wp)              :: x(*)
         real (wp), intent (in) :: w(*)
         real (wp)              :: xh(*)
         !-----------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !-----------------------------------------------
         integer (ip) :: ns2, np2, i, modn, k, kc
-        real (wp) :: xim1
+        real (wp)    :: xim1
         !-----------------------------------------------
 
         ns2 =(n + 1)/2
@@ -1532,7 +1533,7 @@ contains
 
     subroutine sinqi(n, wsave)
         !-----------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !-----------------------------------------------
         integer (ip) :: n
         real (wp) :: wsave(*)
@@ -1545,13 +1546,13 @@ contains
 
     subroutine sinqf(n, x, wsave)
         !-----------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !-----------------------------------------------
         integer (ip) :: n
         real (wp) :: x(*)
         real (wp) :: wsave(*)
         !-----------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !-----------------------------------------------
         integer (ip) :: ns2, k, kc
         real (wp) :: xhold
@@ -1579,13 +1580,13 @@ contains
 
     subroutine sinqb(n, x, wsave)
         !-----------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !-----------------------------------------------
         integer (ip) :: n
         real (wp) :: x(*)
         real (wp) :: wsave(*)
         !-----------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !-----------------------------------------------
         integer (ip) :: ns2, k, kc
         real (wp) :: xhold
@@ -1612,12 +1613,12 @@ contains
 
     subroutine cffti(n, wsave)
         !-----------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !-----------------------------------------------
         integer (ip) :: n
         real (wp) :: wsave(*)
         !-----------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !-----------------------------------------------
         integer (ip) :: iw1, iw2
         !-----------------------------------------------
@@ -1633,20 +1634,19 @@ contains
 
     subroutine cffti1(n, wa, ifac)
         !-----------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !-----------------------------------------------
         integer (ip), intent (in)      :: n
         real (wp), intent (in out) :: ifac(*)
         real (wp), intent (in out) :: wa(*)
         !-----------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !-----------------------------------------------
-        integer (ip), parameter  :: ntryh(*) = [3, 4, 2, 5]
+        integer (ip), parameter  :: NTRYH(*) = [3, 4, 2, 5]
         integer (ip)             :: nl, nf, j, ntry, nq, nr
         integer (ip)             :: i, l1, k1, iip, ld, l2, ido
         integer (ip)             :: idot, iipm, i1, ii
-        real (wp), parameter :: TWO_PI = 2.0_wp * PI
-        real (wp)            :: argh, fi, argld, arg
+        real (wp)                :: argh, fi, argld, arg
         !-----------------------------------------------
 
         ntry = 0
@@ -1659,7 +1659,7 @@ contains
             j = j + 1
 
             if (j - 4 <= 0) then
-                ntry = ntryh(j)
+                ntry = NTRYH(j)
             else
                 ntry = ntry + 2
             end if
@@ -1730,13 +1730,13 @@ contains
 
     subroutine cfftb(n, c, wsave)
         !-----------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !-----------------------------------------------
         integer (ip) :: n
         real (wp) :: c(*)
         real (wp) :: wsave(*)
         !-----------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !-----------------------------------------------
         integer (ip) :: iw1, iw2
         !-----------------------------------------------
@@ -1752,7 +1752,7 @@ contains
 
     subroutine cfftb1(n, c, ch, wa, ifac)
         !-----------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !-----------------------------------------------
         integer (ip), intent (in) :: n
         real (wp), intent (in) :: ifac(*)
@@ -1760,7 +1760,7 @@ contains
         real (wp) :: ch(*)
         real (wp) :: wa(*)
         !-----------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !-----------------------------------------------
         integer (ip) :: nf, na, l1, iw, k1, iip, l2, ido
         integer (ip) :: idot, idl1, ix2, ix3, ix4, nac, n2
@@ -1840,7 +1840,7 @@ contains
 
     pure subroutine passb2(ido, l1, cc, ch, wa1)
         !-----------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !-----------------------------------------------
         integer (ip), intent (in) :: ido
         integer (ip), intent (in) :: l1
@@ -1848,7 +1848,7 @@ contains
         real (wp), intent (out) :: ch(ido, l1, 2)
         real (wp), intent (in) :: wa1(1)
         !-----------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !-----------------------------------------------
         integer (ip) :: k, i
         real (wp) :: tr2, ti2
@@ -1877,20 +1877,21 @@ contains
 
     pure subroutine passb3(ido, l1, cc, ch, wa1, wa2)
         !-----------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !-----------------------------------------------
-        integer (ip), intent (in) :: ido
-        integer (ip), intent (in) :: l1
-        real (wp), intent (in) :: cc(ido, 3, l1)
-        real (wp), intent (out) :: ch(ido, l1, 3)
-        real (wp), intent (in) :: wa1(*)
-        real (wp), intent (in) :: wa2(*)
+        integer (ip), intent (in)  :: ido
+        integer (ip), intent (in)  :: l1
+        real (wp),    intent (in)  :: cc(ido, 3, l1)
+        real (wp),    intent (out) :: ch(ido, l1, 3)
+        real (wp),    intent (in)  :: wa1(*)
+        real (wp),    intent (in)  :: wa2(*)
         !-----------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !-----------------------------------------------
-        integer (ip)             :: k, i
+        integer (ip)         :: k, i
+        real (wp), parameter :: SQRT3 = sqrt(3.0_wp)
         real (wp), parameter :: taur = -0.5_wp
-        real (wp), parameter :: taui = sqrt(3.0_wp)/2 ! 0.866025403784439
+        real (wp), parameter :: taui = SQRT3/2 ! 0.866025403784439
         real (wp)            :: tr2, cr2, ti2, ci2, cr3, ci3, dr2, dr3, di2, di3
         !-----------------------------------------------
 
@@ -1936,9 +1937,10 @@ contains
     end subroutine passb3
 
 
+
     pure subroutine passb4(ido, l1, cc, ch, wa1, wa2, wa3)
         !-----------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !-----------------------------------------------
         integer (ip), intent (in) :: ido
         integer (ip), intent (in) :: l1
@@ -1948,7 +1950,7 @@ contains
         real (wp), intent (in) :: wa2(*)
         real (wp), intent (in) :: wa3(*)
         !-----------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !-----------------------------------------------
         integer (ip) :: k, i
         real (wp) :: ti1, ti2, tr4, ti3, tr1, tr2, ti4
@@ -2009,7 +2011,7 @@ contains
 
     pure subroutine passb5(ido, l1, cc, ch, wa1, wa2, wa3, wa4)
         !-----------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !-----------------------------------------------
         integer (ip), intent (in) :: ido
         integer (ip), intent (in) :: l1
@@ -2020,7 +2022,7 @@ contains
         real (wp), intent (in) :: wa3(*)
         real (wp), intent (in) :: wa4(*)
         !-----------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !-----------------------------------------------
         integer (ip) :: k, i
         real (wp), parameter :: sqrt_5 = sqrt( 5.0_wp)
@@ -2109,7 +2111,7 @@ contains
 
     subroutine passb(nac, ido, iip, l1, idl1, cc, c1, c2, ch, ch2, wa)
         !-----------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !-----------------------------------------------
         integer (ip), intent (out) :: nac
         integer (ip), intent (in) :: ido
@@ -2123,7 +2125,7 @@ contains
         real (wp), intent (in out) :: ch2(idl1, iip)
         real (wp), intent (in) :: wa(*)
         !-----------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !-----------------------------------------------
         integer (ip) :: idot, nt, iipp2, iipph, idp, j, jc, k
         integer (ip) :: i, idl, inc, l, lc, idlj, idij, idj
@@ -2224,13 +2226,13 @@ contains
 
     subroutine cfftf(n, c, wsave)
         !-----------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !-----------------------------------------------
         integer (ip), intent (in)      :: n
         real (wp),    intent (in out)  :: c(*)
         real (wp),    intent (in out)  :: wsave(*)
         !-----------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !-----------------------------------------------
         integer (ip) :: iw1, iw2
         !-----------------------------------------------
@@ -2247,7 +2249,7 @@ contains
 
     subroutine cfftf1(n, c, ch, wa, ifac)
         !-----------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !-----------------------------------------------
         integer (ip), intent (in)     :: n
         real (wp),    intent (in out) :: c(*)
@@ -2255,7 +2257,7 @@ contains
         real (wp),    intent (in)     :: wa(*)
         real (wp),    intent (in)     :: ifac(*)
         !-----------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !-----------------------------------------------
         integer (ip) :: nf, na, l1, iw, k1, iip, l2, ido
         integer (ip) :: idot, idl1, ix2, ix3, ix4, nac, n2
@@ -2329,7 +2331,7 @@ contains
 
     pure subroutine passf2(ido, l1, cc, ch, wa1)
         !-----------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !-----------------------------------------------
         integer (ip), intent (in) :: ido
         integer (ip), intent (in) :: l1
@@ -2337,7 +2339,7 @@ contains
         real (wp), intent (out) :: ch(ido, l1, 2)
         real (wp), intent (in) :: wa1(*)
         !-----------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !-----------------------------------------------
         integer (ip) :: k, i
         real (wp) :: tr2, ti2
@@ -2366,7 +2368,7 @@ contains
 
     pure subroutine passf3(ido, l1, cc, ch, wa1, wa2)
         !-----------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !-----------------------------------------------
         integer (ip), intent (in) :: ido
         integer (ip), intent (in) :: l1
@@ -2375,7 +2377,7 @@ contains
         real (wp), intent (in) :: wa1(*)
         real (wp), intent (in) :: wa2(*)
         !-----------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !-----------------------------------------------
         integer (ip) :: k, i
         real (wp), parameter :: taur = -0.5_wp
@@ -2427,7 +2429,7 @@ contains
 
     pure subroutine passf4(ido, l1, cc, ch, wa1, wa2, wa3)
         !-----------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !-----------------------------------------------
         integer (ip), intent (in) :: ido
         integer (ip), intent (in) :: l1
@@ -2437,7 +2439,7 @@ contains
         real (wp), intent (in) :: wa2(*)
         real (wp), intent (in) :: wa3(*)
         !-----------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !-----------------------------------------------
         integer (ip) :: k, i
         real (wp) :: ti1, ti2, tr4, ti3, tr1, tr2, ti4
@@ -2498,7 +2500,7 @@ contains
 
     pure subroutine passf5(ido, l1, cc, ch, wa1, wa2, wa3, wa4)
         !-----------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !-----------------------------------------------
         integer (ip), intent (in) :: ido
         integer (ip), intent (in) :: l1
@@ -2509,7 +2511,7 @@ contains
         real (wp), intent (in) :: wa3(*)
         real (wp), intent (in) :: wa4(*)
         !-----------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !-----------------------------------------------
         integer (ip) :: k, i
         real (wp) :: ti5, ti2, ti4, ti3, tr5, tr2, tr4
@@ -2598,7 +2600,7 @@ contains
 
     subroutine passf(nac, ido, iip, l1, idl1, cc, c1, c2, ch, ch2, wa)
         !-----------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !-----------------------------------------------
         integer (ip), intent (out)    :: nac
         integer (ip), intent (in)     :: ido
@@ -2612,7 +2614,7 @@ contains
         real (wp),    intent (in out) :: ch2(idl1, iip)
         real (wp),    intent (in)     :: wa(*)
         !-----------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !-----------------------------------------------
         integer (ip) :: idot, nt, iipp2, iipph, idp, j, jc
         integer (ip) :: k, i, idl, inc, l, lc
@@ -2718,7 +2720,7 @@ contains
 
     subroutine rffti(n, wsave)
         !-----------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !-----------------------------------------------
         integer (ip) :: n
         real (wp) :: wsave(*)
@@ -2734,18 +2736,17 @@ contains
 
     subroutine rffti1(n, wa, ifac)
         !-----------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !-----------------------------------------------
         integer (ip),  intent (in)     :: n
         real (wp), intent (in out) :: ifac(*)
         real (wp), intent (out)    :: wa(*)
         !-----------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !-----------------------------------------------
         integer, parameter :: ntryh(*) = [4, 2, 3, 5]
         integer (ip) :: nl, nf, j, ntry, nq, nr, i, is, nfm1, l1, k1, iip
         integer (ip) :: ld, l2, ido, iipm, ii
-        real (wp), parameter :: TWO_PI = 2.0_wp * PI
         real (wp) :: argh, argld, fi, arg
         !-----------------------------------------------
 
@@ -2828,7 +2829,7 @@ contains
 
     subroutine rfftb(n, r, wsave)
         !-----------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !-----------------------------------------------
         integer (ip) :: n
         real (wp) :: r(*)
@@ -2845,7 +2846,7 @@ contains
 
     subroutine rfftb1(n, c, ch, wa, ifac)
         !-----------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !-----------------------------------------------
         integer (ip),  intent (in) :: n
         real (wp), intent (in) :: ifac(*)
@@ -2853,7 +2854,7 @@ contains
         real (wp)              :: ch(*)
         real (wp)              :: wa(*)
         !-----------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !-----------------------------------------------
         integer (ip) :: nf, na, l1, iw, k1, iip
         integer (ip) :: l2, ido, idl1, ix2, ix3, ix4
@@ -2928,7 +2929,7 @@ contains
 
     pure subroutine radb2(ido, l1, cc, ch, wa1)
         !-----------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !-----------------------------------------------
         integer (ip), intent (in) :: ido
         integer (ip), intent (in) :: l1
@@ -2936,7 +2937,7 @@ contains
         real (wp), intent (out) :: ch(ido, l1, 2)
         real (wp), intent (in) :: wa1(*)
         !-----------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !-----------------------------------------------
         integer (ip) :: k, idp2, i, ic
         real (wp) :: tr2, ti2
@@ -2972,7 +2973,7 @@ contains
 
     pure subroutine radb3(ido, l1, cc, ch, wa1, wa2)
         !-----------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !-----------------------------------------------
         integer (ip), intent (in) :: ido
         integer (ip), intent (in) :: l1
@@ -2981,7 +2982,7 @@ contains
         real (wp), intent (in) :: wa1(*)
         real (wp), intent (in) :: wa2(*)
         !-----------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !-----------------------------------------------
         integer (ip) :: k, idp2, i, ic
         real (wp), parameter :: taur = -0.5_wp
@@ -3028,7 +3029,7 @@ contains
 
     pure subroutine radb4(ido, l1, cc, ch, wa1, wa2, wa3)
         !-----------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !-----------------------------------------------
         integer (ip), intent (in) :: ido
         integer (ip), intent (in) :: l1
@@ -3038,7 +3039,7 @@ contains
         real (wp), intent (in) :: wa2(*)
         real (wp), intent (in) :: wa3(*)
         !-----------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !-----------------------------------------------
         integer (ip)             :: k, idp2, i, ic
         real (wp), parameter :: sqrt2 = sqrt(2.0_wp) ! 1.414213562373095
@@ -3108,7 +3109,7 @@ contains
 
     pure subroutine radb5(ido, l1, cc, ch, wa1, wa2, wa3, wa4)
         !-----------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !-----------------------------------------------
         integer (ip), intent (in) :: ido
         integer (ip), intent (in) :: l1
@@ -3119,7 +3120,7 @@ contains
         real (wp), intent (in) :: wa3(*)
         real (wp), intent (in) :: wa4(*)
         !-----------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !-----------------------------------------------
         integer (ip) :: k, idp2, i, ic
         real (wp) :: ti5, ti4, tr2, tr3, cr2, cr3, ci5
@@ -3197,7 +3198,7 @@ contains
 
     subroutine radbg(ido, iip, l1, idl1, cc, c1, c2, ch, ch2, wa)
         !-----------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !-----------------------------------------------
         integer (ip), intent (in) :: ido
         integer (ip), intent (in) :: iip
@@ -3210,10 +3211,9 @@ contains
         real (wp), intent (in out) :: ch2(idl1, iip)
         real (wp), intent (in) :: wa(*)
         !-----------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !-----------------------------------------------
         integer:: idp2, nbd, iipp2, iipph, k, i, j, jc, j2, l, lc, is, idij
-        real (wp), parameter :: TWO_PI = 2.0_wp * PI
         real (wp) :: arg, dcp, dsp, ar1, ai1, ar1h, dc2, ds2, ar2, ai2, ar2h
         !-----------------------------------------------
 
@@ -3350,7 +3350,7 @@ contains
 
     subroutine rfftf(n, r, wsave)
         !-----------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !-----------------------------------------------
         integer (ip) :: n
         real (wp) :: r(*)
@@ -3366,7 +3366,7 @@ contains
 
     subroutine rfftf1(n, c, ch, wa, ifac)
         !-----------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !-----------------------------------------------
         integer (ip),  intent (in) :: n
         real (wp), intent (in) :: ifac(*)
@@ -3374,7 +3374,7 @@ contains
         real (wp)              :: ch(*)
         real (wp)              :: wa(*)
         !-----------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !-----------------------------------------------
         integer (ip) :: nf, na, l2, iw, k1, kh
         integer (ip) :: iip, l1, ido, idl1, ix2, ix3, ix4
@@ -3448,7 +3448,7 @@ contains
 
     pure subroutine radf2(ido, l1, cc, ch, wa1)
         !-----------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !-----------------------------------------------
         integer (ip), intent (in) :: ido
         integer (ip), intent (in) :: l1
@@ -3456,7 +3456,7 @@ contains
         real (wp), intent (out) :: ch(ido, 2, l1)
         real (wp), intent (in) :: wa1(*)
         !-----------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !-----------------------------------------------
         integer (ip) :: k, idp2, i, ic
         real (wp) :: tr2, ti2
@@ -3492,7 +3492,7 @@ contains
 
     pure subroutine radf3(ido, l1, cc, ch, wa1, wa2)
         !-----------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !-----------------------------------------------
         integer (ip), intent (in) :: ido
         integer (ip), intent (in) :: l1
@@ -3501,7 +3501,7 @@ contains
         real (wp), intent (in) :: wa1(*)
         real (wp), intent (in) :: wa2(*)
         !-----------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !-----------------------------------------------
         integer (ip)         :: k, idp2, i, ic
         real (wp), parameter :: taur = -0.5_wp
@@ -3546,7 +3546,7 @@ contains
 
     subroutine radf4(ido, l1, cc, ch, wa1, wa2, wa3)
         !-----------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !-----------------------------------------------
         integer (ip),  intent (in)  :: ido
         integer (ip),  intent (in)  :: l1
@@ -3556,7 +3556,7 @@ contains
         real (wp), intent (in)  :: wa2(*)
         real (wp), intent (in)  :: wa3(*)
         !-----------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !-----------------------------------------------
         integer (ip) :: k, idp2, i, ic
         real (wp) :: tr1, tr2, cr2, ci2, cr3, ci3
@@ -3623,7 +3623,7 @@ contains
 
     subroutine radf5(ido, l1, cc, ch, wa1, wa2, wa3, wa4)
         !-----------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !-----------------------------------------------
         integer (ip),  intent (in)  :: ido
         integer (ip),  intent (in)  :: l1
@@ -3634,7 +3634,7 @@ contains
         real (wp), intent (in)  :: wa3(*)
         real (wp), intent (in)  :: wa4(*)
         !-----------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !-----------------------------------------------
         integer (ip) :: k, idp2, i, ic
         real (wp) :: cr2, ci5, cr3, ci4, dr2, di2, dr3
@@ -3708,7 +3708,7 @@ contains
 
     subroutine radfg(ido, iip, l1, idl1, cc, c1, c2, ch, ch2, wa)
         !-----------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !-----------------------------------------------
         integer (ip), intent (in)      :: ido
         integer (ip), intent (in)      :: iip
@@ -3721,11 +3721,10 @@ contains
         real (wp), intent (in out) :: ch2(idl1, iip)
         real (wp), intent (in)     :: wa(*)
         !-----------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !-----------------------------------------------
         integer (ip)         :: iipph, iipp2, idp2, nbd, j
         integer (ip)         :: k, is, idij, i, jc, l, lc
-        real (wp), parameter :: TWO_PI = 2.0_wp * PI
         real (wp)            :: arg, dcp, dsp, ar1, ai1
         real (wp)            :: ar1h, dc2, ds2, ar2, ai2, ar2h
         !-----------------------------------------------

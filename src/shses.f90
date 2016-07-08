@@ -314,11 +314,11 @@ module module_shses
     ! Declare derived data type
     type, public :: ShsesAux
         !-----------------------------------------
-        ! Class variables
+        ! Type components
         !-----------------------------------------
     contains
         !-----------------------------------------
-        ! Class methods
+        ! Type-bound procedures
         !-----------------------------------------
         procedure, nopass :: shses
         procedure, nopass :: shsesi
@@ -335,13 +335,13 @@ contains
 
     pure function get_lshses(nlat, nlon) result (return_value)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip), intent (in)  :: nlat
         integer (ip), intent (in)  :: nlon
         integer (ip)               :: return_value
         !----------------------------------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !----------------------------------------------------------------------
         integer (ip)         :: l1, l2
         type (SpherepackAux) :: sphere_aux
@@ -357,13 +357,13 @@ contains
 
     pure function get_lwork(nlat, nlon) result (return_value)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip), intent (in)  :: nlat
         integer (ip), intent (in)  :: nlon
         integer (ip)               :: return_value
         !----------------------------------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !----------------------------------------------------------------------
         integer (ip)         :: l1, l2
         type (SpherepackAux) :: sphere_aux
@@ -379,7 +379,7 @@ contains
 
     pure function get_ldwork(nlat) result (return_value)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip), intent (in)  :: nlat
         integer (ip)               :: return_value
@@ -394,7 +394,7 @@ contains
 
     pure function get_legendre_workspace_size(nlat, nlon, nt, ityp) result (return_value)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip),           intent (in) :: nlat
         integer (ip),           intent (in) :: nlon
@@ -402,7 +402,7 @@ contains
         integer (ip), optional, intent (in) :: ityp
         integer (ip)                        :: return_value
         !----------------------------------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !----------------------------------------------------------------------
         integer (ip) :: nt_op, ityp_op, l2
         !----------------------------------------------------------------------
@@ -447,7 +447,7 @@ contains
     subroutine shses(nlat,nlon,isym,nt,g,idg,jdg,a,b,mdab,ndab, &
         wshses,lshses,work,lwork,ierror)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip), intent (in)     :: nlat
         integer (ip), intent (in)     :: nlon
@@ -466,7 +466,7 @@ contains
         integer (ip), intent (in)     :: lwork
         integer (ip), intent (out)    :: ierror
         !----------------------------------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !----------------------------------------------------------------------
         integer (ip) :: imid, ist, lpimn, ls, mmax, nln
         !----------------------------------------------------------------------
@@ -546,7 +546,7 @@ contains
     subroutine shses1(nlat,isym,nt,g,idgs,jdgs,a,b,mdab,ndab,p,imid, &
         idg,jdg,ge,go,work,whrfft)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip), intent (in)     :: nlat
         integer (ip), intent (in)     :: isym
@@ -566,7 +566,7 @@ contains
         real (wp),    intent (in out) :: work(*)
         real (wp),    intent (in out) :: whrfft(*)
         !----------------------------------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !----------------------------------------------------------------------
         integer (ip)    :: i, j, imid, imm1, k, ls
         integer (ip)    :: m, mb, mdo, mmax, mn, modl, nlon
@@ -721,7 +721,7 @@ contains
     subroutine shsesi(nlat,nlon,wshses,lshses,work,lwork,dwork, &
         ldwork,ierror)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip), intent (in)  :: nlat
         integer (ip), intent (in)  :: nlon
@@ -733,7 +733,7 @@ contains
         integer (ip), intent (in)  :: ldwork
         integer (ip), intent (out) :: ierror
         !----------------------------------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !----------------------------------------------------------------------
         integer (ip)         :: imid, labc, lpimn, mmax
         type (HFFTpack)      :: hfft

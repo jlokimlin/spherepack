@@ -88,9 +88,16 @@
 !
 program testvshifte
 
-    use spherepack_library
+    use, intrinsic :: iso_fortran_env, only: &
+        stdout => OUTPUT_UNIT
 
+    use spherepack_library, only: &
+        wp, & ! working precision
+        TWO_PI, pi, vshifti, vshifte
+
+    ! Explicit typing only
     implicit none
+
     integer nnlon,nnlat,nnlatp1,nnlat2,llsave,llwork
     !
     !     set equally spaced grid sizes in nnlat,nnlon
@@ -99,23 +106,21 @@ program testvshifte
     !
     !     set parameters which depend on nnlat,nnlon
     !
-    parameter(nnlatp1=nnlat+1,nnlat2=nnlat+nnlat)
+    parameter(nnlatp1=nnlat+1,nnlat2=2*nnlat)
     !     save work space
     parameter (llsave=2*(2*nnlat+nnlon)+32)
     !     unsaved work space for nnlon even
     parameter (llwork = 2*nnlon*(nnlat+1))
     !     unsaved work space for nnlon odd
     !     parameter (llwork = nnlon*(5*nnlat+1))
-    integer ioff,nlon,nlat,nlat2,j,i,lsave,lwork,ier
+    integer ioff,nlon,nlat,nlat2,j,i,lsave,lwork,ierror
     real dlat,dlon,dlat2,dlon2,lat,long,x,y,z,ex,ey,ez,emz
     real err2u,err2v,ue,ve,sint,sinp,cost,cosp
     real uoff(nnlon,nnlat),voff(nnlon,nnlat)
     real ureg(nnlon,nnlatp1),vreg(nnlon,nnlatp1)
     real wsave(llsave),work(llwork)
 
-    write( *, '(a)') ''
-    write( *, '(a)') '     testvshifte *** TEST RUN *** '
-    write( *, '(a)') ''
+    write( *, '(/a/)') '     testvshifte *** TEST RUN *** '
 
     !
     !     set resolution, work space lengths, and grid increments
@@ -126,7 +131,7 @@ program testvshifte
     nlat2 = nnlat2
     lwork = llwork
     dlat = pi/nlat
-    dlon = (pi+pi)/nlon
+    dlon = TWO_PI/nlon
     dlat2 = 0.5*dlat
     dlon2 = 0.5*dlon
     !
@@ -155,11 +160,11 @@ program testvshifte
     !    initialize wsav for offset to regular shift
     !
     ioff = 0
-    call vshifti(ioff,nlon,nlat,lsave,wsave,ier)
+    call vshifti(ioff,nlon,nlat,lsave,wsave,ierror)
     !
     !     write input arguments to vshifte
     !
-    write(*,100) ioff,nlon,nlat,lsave,lwork
+    write( stdout, 100) ioff,nlon,nlat,lsave,lwork
 100 format(' vshifte arguments', &
         /' ioff = ',i2, ' nlon = ',i3,' nlat = ',i3, &
         /' lsave = ',i5, ' lwork = ',i5)
@@ -167,21 +172,21 @@ program testvshifte
     !     shift offset to regular grid
     !
     call vshifte(ioff,nlon,nlat,uoff,voff,ureg,vreg, &
-        wsave,lsave,work,lwork,ier)
-    write(*,200) ier
-200 format(' ier = ',i2)
-    if (ier==0) then
+        wsave,lsave,work,lwork,ierror)
+    write( stdout, 200) ierror
+200 format(' ierror = ',i2)
+    if (ierror==0) then
         !
         !     compute error in ureg,vreg
         !
-        err2u = 0.0
-        err2v = 0.0
+        err2u = 0.0_wp
+        err2v = 0.0_wp
         do j=1,nlon
-            long = (j-1)*dlon
+            long = real(j-1, kind=wp)*dlon
             sinp = sin(long)
             cosp = cos(long)
             do i=1,nlat+1
-                lat = -0.5*pi+(i-1)*dlat
+                lat = -0.5_wp * pi+real(i-1, kind=wp)*dlat
                 sint = sin(lat)
                 cost = cos(lat)
                 x = cost*cosp
@@ -199,7 +204,7 @@ program testvshifte
         end do
         err2u = sqrt(err2u/(nlon*(nlat+1)))
         err2v = sqrt(err2v/(nlon*(nlat+1)))
-        write(*,300) err2u,err2v
+        write( stdout, 300) err2u,err2v
 300     format(' least squares error ', &
             /' err2u = ',e10.3, ' err2v = ',e10.3)
     end if
@@ -207,32 +212,31 @@ program testvshifte
     !    initialize wsav for regular to offset shift
     !
     ioff = 1
-    call vshifti(ioff,nlon,nlat,lsave,wsave,ier)
+    call vshifti(ioff,nlon,nlat,lsave,wsave,ierror)
     !
     !     transfer regular grid values in (ureg,vreg) to offset grid in (uoff,voff)
     !
     do j=1,nlon
         do i=1,nlat
-            uoff(j,i) = 0.0
-            voff(j,i) = 0.0
+            uoff(j,i) = 0.0_wp
+            voff(j,i) = 0.0_wp
         end do
     end do
-    write(*,100) ioff,nlon,nlat,lsave,lwork
+    write( stdout, 100) ioff,nlon,nlat,lsave,lwork
     call vshifte(ioff,nlon,nlat,uoff,voff,ureg,vreg, &
-        wsave,lsave,work,lwork,ier)
-    write(*,200) ier
-    if (ier == 0) then
+        wsave,lsave,work,lwork,ierror)
+    if (ierror == 0) then
         !
         !     compute error in uoff,voff
         !
-        err2u = 0.0
-        err2v = 0.0
+        err2u = 0.0_wp
+        err2v = 0.0_wp
         do j=1,nlon
             long = dlon2+(j-1)*dlon
             sinp = sin(long)
             cosp = cos(long)
             do i=1,nlat
-                lat = -0.5*pi+dlat2+(i-1)*dlat
+                lat = -0.5_wp*pi+dlat2+(i-1)*dlat
                 sint = sin(lat)
                 cost = cos(lat)
                 x = cost*cosp
@@ -250,6 +254,7 @@ program testvshifte
         end do
         err2u = sqrt(err2u/(nlon*(nlat+1)))
         err2v = sqrt(err2v/(nlon*(nlat+1)))
-        write(*,300) err2u,err2v
+        write( stdout, 300) err2u,err2v
     end if
+
 end program testvshifte

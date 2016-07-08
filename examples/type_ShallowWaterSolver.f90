@@ -12,11 +12,11 @@ module type_ShallowWaterSolver
     ! Declare derived data type
     type, extends (RegularSphere) :: ShallowWaterSolver
         !--------------------------------------------------------------
-        ! Class variables
+        ! Type components
         !--------------------------------------------------------------
     contains
         !--------------------------------------------------------------
-        ! Class methods
+        ! Type-bound procedures
         !--------------------------------------------------------------
         procedure         :: spec_to_grid
         procedure         :: grid_to_spec
@@ -40,13 +40,13 @@ contains
         !     see section 3.3
         !
         !------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !------------------------------------------------------
         real (wp), intent (in) :: amp
         real (wp), intent (in) :: thetad
         real (wp)              :: return_value
         !------------------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !------------------------------------------------------
         real (wp)            :: thetab, thetae, xe, x
         !------------------------------------------------------
@@ -69,7 +69,7 @@ contains
 
     pure function atanxy(x,y) result (return_value)
         !--------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !--------------------------------------------------------------
         real (wp), intent (in) :: x
         real (wp), intent (in) :: y
@@ -93,12 +93,12 @@ contains
         ! Computes the sine transform
         !
         !--------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !--------------------------------------------------------------
         integer (ip), intent (in)     :: n
         real (wp),    intent (in out) :: x(n)
         !--------------------------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !--------------------------------------------------------------
         integer (ip)           :: i, j
         real (wp)              :: arg
@@ -133,14 +133,14 @@ contains
         ! Returns the cosine transform
         !
         !--------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !--------------------------------------------------------------
         real (wp),    intent (in) :: theta
         integer (ip), intent (in) :: n
         real (wp),    intent (in) :: cf(n)
         real (wp)                 :: return_value
         !--------------------------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !--------------------------------------------------------------
         integer (ip) ::  i
         !--------------------------------------------------------------
@@ -163,13 +163,13 @@ contains
         ! gridded data array (datagrid).
         !
         !--------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !--------------------------------------------------------------
         class (ShallowWaterSolver), intent (in out) :: this
         real (wp),                  intent (in)     :: datagrid(:,:)
         complex (wp),               intent (out)    :: dataspec(:)
         !--------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !--------------------------------------------------------------
         integer (ip)           :: n, m
         real (wp), allocatable :: temp(:,:)
@@ -232,13 +232,13 @@ contains
         ! gridded data array (datagrid).
         !
         !--------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !--------------------------------------------------------------
         class (ShallowWaterSolver), intent (in out) :: this
         real (wp),                  intent (in out) :: datagrid(:,:)
         complex (wp),               intent (in)     :: dataspec(:)
         !--------------------------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !--------------------------------------------------------------
         integer (ip)           :: n, m, nm, i
         real (wp), allocatable :: temp(:,:)
@@ -308,7 +308,7 @@ contains
         ! (vrtspec, divspec) given input gridded winds (ugrid, vgrid).
         !
         !--------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !--------------------------------------------------------------
         class (ShallowWaterSolver), intent (in out) :: this
         real (wp),                  intent (in)     :: ugrid(:,:)
@@ -316,7 +316,7 @@ contains
         complex (wp),               intent (out)    :: vrtspec(:)
         complex (wp),               intent (out)    :: divspec(:)
         !--------------------------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !--------------------------------------------------------------
         real (wp)              :: fn
         real (wp), allocatable :: v(:,:), w(:,:), sqnn(:)
@@ -425,7 +425,7 @@ contains
         ! (vrtspec, divspec) compute gridded winds (ugrid, vgrid)
         !
         !--------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !--------------------------------------------------------------
         class (ShallowWaterSolver), intent (in out) :: this
         complex (wp),               intent (in)     :: vrtspec(:)
@@ -433,7 +433,7 @@ contains
         real (wp),                  intent (out)    :: ugrid(:,:)
         real (wp),                  intent (out)    :: vgrid(:,:)
         !--------------------------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !--------------------------------------------------------------
         real (wp)              :: fn
         real (wp), allocatable :: v(:,:), w(:,:), isqnn(:)

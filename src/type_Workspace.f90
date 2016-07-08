@@ -14,7 +14,7 @@ module type_Workspace
     ! Declare derived data type
     type, abstract, public :: Workspace
         !----------------------------------------------------------------------
-        ! Class variables
+        ! Type components
         !----------------------------------------------------------------------
         logical,                public :: initialized = .false.
         real (wp), allocatable, public :: legendre_workspace(:)
@@ -31,7 +31,7 @@ module type_Workspace
         !----------------------------------------------------------------------
     contains
         !----------------------------------------------------------------------
-        ! Class methods
+        ! Type-bound procedures
         !----------------------------------------------------------------------
         procedure, public :: destroy_workspace
         procedure, public :: copy_workspace
@@ -45,7 +45,7 @@ contains
 
     subroutine copy_workspace(this, object_to_be_copied)
         !--------------------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !--------------------------------------------------------------------------------
         class (Workspace), intent (out) :: this
         class (Workspace), intent (in)  :: object_to_be_copied
@@ -79,7 +79,7 @@ contains
 
     subroutine destroy_workspace(this)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         class (Workspace), intent (in out) :: this
         !----------------------------------------------------------------------

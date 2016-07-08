@@ -26,7 +26,7 @@ module type_AdvectionSolver
     ! Declare derived data type
     type, public, extends (GaussianSphere) :: AdvectionSolver
         !----------------------------------------------------------------------
-        ! Class variables
+        ! Type components
         !----------------------------------------------------------------------
         real (wp) :: TIME_STEP = 6.0e+2_wp
         real (wp) :: ROTATION_RATE_OF_EARTH = 2.0_wp * PI/TIME_TO_CIRCUMVENT_THE_EARTH
@@ -38,7 +38,7 @@ module type_AdvectionSolver
         !----------------------------------------------------------------------
     contains
         !----------------------------------------------------------------------
-        ! Class methods
+        ! Type-bound procedures
         !----------------------------------------------------------------------
         procedure, public :: get_geopotential
         procedure, public :: get_vector_velocities
@@ -84,13 +84,13 @@ contains
         !             on a tilted grid
         !
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         class (AdvectionSolver), intent (in out) :: this
         real (wp),               intent (in)     :: t
         real (wp),               intent (out)    :: geopot(:,:)
         !----------------------------------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !----------------------------------------------------------------------
         integer (ip) :: i, j
         real (wp)    :: xc, yc, zc, x1, y1, z1
@@ -173,13 +173,13 @@ contains
 
     subroutine get_vector_velocities(this, u, v)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         class (AdvectionSolver), intent (in out) :: this
         real (wp),               intent (out)    :: u(:,:)
         real (wp),               intent (out)    :: v(:,:)
         !----------------------------------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !----------------------------------------------------------------------
         integer (ip) :: i, j
         real (wp)    :: sinp, cosp, sint, cost, sinl, cosl
@@ -227,7 +227,7 @@ contains
 
     pure function atanxy(x,y) result (return_value)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         real (wp), intent (in) :: x
         real (wp), intent (in) :: y
@@ -245,7 +245,7 @@ contains
 
     pure subroutine sph2cart(r, theta, phi, x, y, z)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         real (wp), intent (in)  :: r
         real (wp), intent (in)  :: theta

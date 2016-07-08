@@ -44,11 +44,11 @@ module type_RegularSphere
     ! Declare derived data type
     type, extends (Sphere), public :: RegularSphere
         !----------------------------------------------------------------------
-        ! Class variables
+        ! Type components
         !----------------------------------------------------------------------
     contains
         !----------------------------------------------------------------------
-        ! Class methods
+        ! Type-bound procedures
         !----------------------------------------------------------------------
         procedure, public  :: create => create_regular_sphere
         procedure, public  :: destroy => destroy_regular_sphere
@@ -74,7 +74,7 @@ contains
 
     function regular_sphere_constructor(nlat, nlon) result (return_value)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip), intent (in) :: nlat !! number of latitudinal points 0 <= theta <= pi
         integer (ip), intent (in) :: nlon !! number of longitudinal points 0 <= phi <= 2*pi
@@ -89,7 +89,7 @@ contains
 
     subroutine create_regular_sphere(this, nlat, nlon, ntrunc, isym, itype, nt, rsphere )
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         class (RegularSphere), intent (in out)        :: this
         integer (ip),          intent (in)            :: nlat
@@ -100,7 +100,7 @@ contains
         integer (ip),          intent (in), optional  :: nt !!
         real (wp),             intent (in), optional  :: rsphere !!
         !--------------------------------------------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !----------------------------------------------------------------------
         integer (ip) :: ntrunc_op
         integer (ip) :: isym_op
@@ -171,7 +171,7 @@ contains
 
     subroutine destroy_regular_sphere(this)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         class (RegularSphere), intent (in out) :: this
         !----------------------------------------------------------------------
@@ -191,12 +191,12 @@ contains
 
     subroutine regular_scalar_analysis(this, scalar_function)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         class (RegularSphere), intent (in out) :: this
         real (wp),             intent (in)     :: scalar_function(:,:)
         !----------------------------------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !----------------------------------------------------------------------
         integer (ip)    :: error_flag
         type (ShaesAux) :: aux
@@ -274,12 +274,12 @@ contains
 
     subroutine regular_scalar_synthesis(this, scalar_function )
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         class (RegularSphere), intent (in out) :: this
         real (wp),             intent (out)    :: scalar_function(:,:)
         !----------------------------------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !----------------------------------------------------------------------
         integer (ip)    :: error_flag
         type (ShsesAux) :: aux
@@ -358,13 +358,13 @@ contains
 
     subroutine regular_vector_analysis(this, polar_component, azimuthal_component)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         class (RegularSphere), intent (in out) :: this
         real (wp),             intent (in)     :: polar_component(:,:)
         real (wp),             intent (in)     :: azimuthal_component(:,:)
         !----------------------------------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !----------------------------------------------------------------------
         integer (ip)    :: error_flag
         type (VhaesAux) :: aux
@@ -462,13 +462,13 @@ contains
 
     subroutine regular_vector_synthesis(this, polar_component, azimuthal_component)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         class (RegularSphere), intent (in out) :: this
         real (wp),             intent (out)    :: polar_component(:,:)
         real (wp),             intent (out)    :: azimuthal_component(:,:)
         !----------------------------------------------------------------------
-        ! Dictionary: local variables
+        ! Local variables
         !----------------------------------------------------------------------
         integer (ip)    :: error_flag
         type (VhsesAux) :: aux
@@ -566,7 +566,7 @@ contains
 
     subroutine finalize_regular_sphere(this)
         !----------------------------------------------------------------------
-        ! Dictionary: calling arguments
+        ! Dummy arguments
         !----------------------------------------------------------------------
         type (RegularSphere), intent (in out) :: this
         !----------------------------------------------------------------------
