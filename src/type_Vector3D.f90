@@ -85,7 +85,7 @@ module type_Vector3D
 
 
 
-    ! To create array of pointers
+    ! Declare derived data type to create array of pointers
     type, public :: Vector3DPointer
         !----------------------------------------------------------------------
         ! Type components
