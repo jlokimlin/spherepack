@@ -269,9 +269,9 @@ module spherepack_library
         LegendreAux, &
         alfk, lfp, lfpt, lfim, lfin
 
-    use type_ThreeDimensionalVector, only: &
-        ThreeDimensionalVector, &
-        ThreeDimensionalVectorPointer, &
+    use type_Vector3D, only: &
+        Vector3D, &
+        Vector3DPointer, &
         assignment(=), &
         operator(*)
     
@@ -308,8 +308,8 @@ module spherepack_library
     public :: RegularGrid
     public :: RegularSphere
     public :: Sphere
-    public :: ThreeDimensionalVector
-    public :: ThreeDimensionalVectorPointer
+    public :: Vector3D
+    public :: Vector3DPointer
     public :: assignment(=)
     public :: operator(*)
     ! Procedural methods

@@ -29,9 +29,6 @@ module type_RegularWorkspace
 
     ! Declare derived data type
     type, extends (Workspace), public :: RegularWorkspace
-        !----------------------------------------------------------------------
-        ! Type components
-        !----------------------------------------------------------------------
     contains
         !----------------------------------------------------------------------
         ! Type-bound procedures
@@ -44,9 +41,12 @@ module type_RegularWorkspace
         procedure, private :: initialize_regular_vector_analysis
         procedure, private :: initialize_regular_vector_synthesis
         procedure, private :: initialize_regular_vector_transform
-        generic,   public  :: assignment (=) => copy_regular_workspace
         procedure, private :: copy_regular_workspace
         final              :: finalize_regular_workspace
+        !----------------------------------------------------------------------
+        ! Generic type-bound procedures
+        !----------------------------------------------------------------------
+        generic, public :: assignment (=) => copy_regular_workspace
         !----------------------------------------------------------------------
     end type RegularWorkspace
 
@@ -87,7 +87,7 @@ contains
         !--------------------------------------------------------------------------------
 
         ! Check if object is usable
-        if (object_to_be_copied%initialized .eqv. .false.) then
+        if (.not.object_to_be_copied%initialized) then
             error stop 'Uninitialized object of class (RegularWorkspace): '&
                 //'in assignment (=) '
         end if
@@ -599,6 +599,7 @@ contains
         return_value = maxval(ldwork)
 
     end function get_ldwork
+
 
 
     pure subroutine get_legendre_workspace(nlat, nlon, workspace, nt, ityp)

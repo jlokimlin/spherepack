@@ -50,10 +50,8 @@ module type_SpherepackAux
     private
     public :: SpherepackAux
 
+    ! Declare derived data type
     type, public :: SpherepackAux
-        !----------------------------------------------------------------------
-        ! Type components
-        !----------------------------------------------------------------------
     contains
         !----------------------------------------------------------------------
         ! Type-bound procedures
@@ -251,7 +249,7 @@ contains
     end subroutine dnlfk
 
 
-    subroutine dnlftd (m, n, theta, cp, pb)
+    pure subroutine dnlftd(m, n, theta, cp, pb)
         !
         ! Purpose:
         !
@@ -438,7 +436,7 @@ contains
     end subroutine dnlft
 
 
-    subroutine legin(mode, l, nlat, m, w, pmn, km)
+   subroutine legin(mode, l, nlat, m, w, pmn, km)
         !
         ! Purpose:
         !

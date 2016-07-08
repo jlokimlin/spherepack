@@ -16,8 +16,8 @@ module type_RegularSphere
     use type_SphericalUnitVectors, only: &
         SphericalUnitVectors
 
-    use type_ThreeDimensionalVector, only: &
-        Vector => ThreeDimensionalVector, &
+    use type_Vector3D, only: &
+        Vector => Vector3D, &
         assignment(=), &
         operator(*)
     
@@ -43,9 +43,6 @@ module type_RegularSphere
 
     ! Declare derived data type
     type, extends (Sphere), public :: RegularSphere
-        !----------------------------------------------------------------------
-        ! Type components
-        !----------------------------------------------------------------------
     contains
         !----------------------------------------------------------------------
         ! Type-bound procedures
@@ -87,7 +84,7 @@ contains
 
 
 
-    subroutine create_regular_sphere(this, nlat, nlon, ntrunc, isym, itype, nt, rsphere )
+    subroutine create_regular_sphere(this, nlat, nlon, ntrunc, isym, itype, nt, rsphere)
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
@@ -120,7 +117,7 @@ contains
 
         !
         !==> Address optional arguments
-
+        !
 
         ! Set truncation number
         if (present(ntrunc)) then
@@ -574,6 +571,7 @@ contains
         call this%destroy()
 
     end subroutine finalize_regular_sphere
+
 
 
 end module type_RegularSphere

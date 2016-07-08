@@ -21,7 +21,7 @@ module type_SphericalGrid
         logical,                        public :: initialized = .false.
         integer (ip),                   public :: NUMBER_OF_LONGITUDES = 0  !! number of longitudinal points
         integer (ip),                   public :: NUMBER_OF_LATITUDES = 0 !! number of latitudinal points
-        real (wp),                      public :: LONGITUDINAL_MESH = 0.0_wp !! Only used in 'REG' grid
+        real (wp),                      public :: LONGITUDINAL_MESH = 0.0_wp !! Only used in RegularGrid
         real (wp),         allocatable, public :: latitudes(:)  !! 0 <= theta <= pi
         real (wp),         allocatable, public :: longitudes(:) !! 0 <= phi <= 2*p
         character (len=:), allocatable, public :: grid_type
@@ -50,24 +50,14 @@ contains
         !----------------------------------------------------------------------
 
         ! Check flag
-        if (.not.this%initialized) then
-            return
-        end if
+        if (.not.this%initialized) return
 
         !
         !==> Release memory
         !
-        if (allocated(this%grid_type)) then
-            deallocate( this%grid_type )
-        end if
-
-        if (allocated(this%longitudes)) then
-            deallocate( this%longitudes )
-        end if
-
-        if (allocated(this%latitudes)) then
-            deallocate( this%latitudes )
-        end if
+        if (allocated(this%grid_type)) deallocate( this%grid_type )
+        if (allocated(this%longitudes)) deallocate( this%longitudes )
+        if (allocated(this%latitudes)) deallocate( this%latitudes )
 
         ! Reset constants
         this%NUMBER_OF_LONGITUDES = 0
@@ -168,6 +158,7 @@ contains
         end associate
 
     end subroutine print_to_unformatted_binary_files
+
 
 
 end module type_SphericalGrid

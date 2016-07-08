@@ -19,8 +19,8 @@ module type_GaussianSphere
     use type_TrigonometricFunctions, only: &
         TrigonometricFunctions
 
-    use type_ThreeDimensionalVector, only: &
-        Vector => ThreeDimensionalVector, &
+    use type_Vector3D, only: &
+        Vector => Vector3D, &
         assignment(=), &
         operator(*)
     

@@ -73,7 +73,7 @@ contains
         !--------------------------------------------------------------------------------
 
         ! Check if object is usable
-        if (object_to_be_copied%initialized .eqv. .false.) then
+        if (.not.object_to_be_copied%initialized) then
             error stop 'Uninitialized object of class (RegularGrid): '&
                 //'in assignment (=) '
         end if
@@ -142,9 +142,7 @@ contains
         !----------------------------------------------------------------------
 
         ! Check initialization flag
-        if (.not.this%initialized) then
-            return
-        end if
+        if (.not.this%initialized) return
 
         ! Reset constant
         this%LATITUDINAL_MESH = 0.0_wp

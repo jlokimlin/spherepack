@@ -60,9 +60,6 @@ module type_LegendreAux
 
     ! Declare derived data type
     type, public :: LegendreAux
-        !-------------------------------------------------------
-        ! Type components
-        !-------------------------------------------------------
     contains
         !-------------------------------------------------------
         ! Type-bound procedures
@@ -87,7 +84,7 @@ contains
         integer (ip),           intent (in)  :: ntrunc
         real (wp), allocatable, intent (out) :: legfunc(:)
         !----------------------------------------------------------------------
-        ! Dummy arguments
+        ! Local variables
         !----------------------------------------------------------------------
         real (wp)              :: theta
         real (wp), allocatable :: cp(:)

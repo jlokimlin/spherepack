@@ -16,8 +16,8 @@ module type_Sphere
     use type_TrigonometricFunctions, only: &
         TrigonometricFunctions
 
-    use type_ThreeDimensionalVector, only: &
-        Vector => ThreeDimensionalVector, &
+    use type_Vector3D, only: &
+        Vector => Vector3D, &
         assignment(=), &
         operator(*)
     
@@ -89,29 +89,43 @@ module type_Sphere
         procedure, private :: get_vector_laplacian_from_vector_field
         procedure, private :: invert_scalar_laplacian
         procedure, private :: invert_vector_laplacian
+        !----------------------------------------------------------------------
+        ! Deferred type-bound procedures
+        !----------------------------------------------------------------------
         procedure (scalar_analysis),  deferred, public :: &
             perform_scalar_analysis
+
         procedure (scalar_synthesis), deferred, public :: &
             perform_scalar_synthesis
+
         procedure (vector_analysis),  deferred, public :: &
             vector_analysis_from_spherical_components
+
         procedure (vector_synthesis), deferred, public :: &
             perform_vector_synthesis
+        !----------------------------------------------------------------------
+        ! Generic type-bound procedures
+        !----------------------------------------------------------------------
         generic, public :: perform_vector_analysis => &
             perform_vector_analysis_from_vector_field
+
         generic, public :: invert_laplacian => &
             invert_scalar_laplacian, &
             invert_vector_laplacian
+
         generic, public :: get_divergence => &
             get_divergence_from_vector_field, &
             get_divergence_from_spherical_components
+
         generic, public :: get_laplacian => &
             get_scalar_laplacian, &
             get_vector_laplacian_from_spherical_components, &
             get_vector_laplacian_from_vector_field
+
         generic, public :: get_vorticity => &
             get_vorticity_from_spherical_components, &
             get_vorticity_from_vector_field
+
         generic, public :: invert_gradient => &
             invert_gradient_from_spherical_components
         !----------------------------------------------------------------------
@@ -166,9 +180,7 @@ module type_Sphere
 
 
 
-
 contains
-
 
 
 
@@ -290,6 +302,7 @@ contains
 
         ! Check flag
         if (.not.this%initialized) return
+
         !
         !==> Release memory
         !
@@ -320,14 +333,9 @@ contains
         !
         !==> Release memory from polymorphic class variables
         !
-        if (allocated(this%grid)) then
-            deallocate(this%grid)
-        end if
+        if (allocated(this%grid)) deallocate( this%grid )
 
-        if (allocated(this%workspace)) then
-            deallocate(this%workspace )
-        end if
-
+        if (allocated(this%workspace)) deallocate( this%workspace )
         !
         !==>  Release memory from derived data types
         !
@@ -353,7 +361,7 @@ contains
 
 
 
-    subroutine perform_complex_analysis(this, scalar_function )
+    subroutine perform_complex_analysis(this, scalar_function)
         !
         ! Purpose:
         !
@@ -505,6 +513,7 @@ contains
         spectral_coefficients = this%complex_spectral_coefficients
 
     end subroutine analyze_into_complex_spectral_coefficients
+
 
 
     subroutine synthesize_from_complex_spectral_coefficients(this, &
@@ -774,14 +783,14 @@ contains
             vlap => polar_laplacian, &
             wlap => azimuthal_laplacian &
             )
-            call this%perform_vector_synthesis( vlap, wlap )
+            call this%perform_vector_synthesis(vlap, wlap)
         end associate
 
     end subroutine get_vector_laplacian_from_spherical_components
 
 
     subroutine get_vector_laplacian_from_vector_field(this, &
-        vector_field, polar_laplacian, azimuthal_laplacian )
+        vector_field, polar_laplacian, azimuthal_laplacian)
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
@@ -1715,13 +1724,15 @@ contains
                 //' in get_velocities_from_vorticity_and_divergence'
         end if
 
-        !
-        !==> Allocate memory
-        !
         associate( nm_dim => size(this%complex_spectral_coefficients) )
+            !
+            !==> Allocate memory
+            !
             allocate( vorticity_coefficients(nm_dim) )
             allocate( divergence_coefficients(nm_dim) )
+
         end associate
+
 
         associate( &
             v => polar_component, &
@@ -1769,25 +1780,31 @@ contains
                 //' in compute_angular_momentum'
         end if
 
-        ! Allocate memory
         associate( &
             nlat => this%NUMBER_OF_LATITUDES, &
             nlon => this%NUMBER_OF_LONGITUDES &
             )
+            !
+            !==>  Allocate memory
+            !
             allocate( polar_gradient_component(nlat, nlon) )
             allocate( azimuthal_gradient_component(nlat, nlon) )
         end associate
 
-        ! Calculate the spherical surface gradient components
+
         associate( &
             f => scalar_function, &
             grad_theta => polar_gradient_component, &
             grad_phi => azimuthal_gradient_component &
             )
+            !
+            !==> Calculate the spherical surface gradient components
+            !
             call this%get_gradient(f, grad_theta, grad_phi)
+
         end associate
 
-        ! Calculate the rotation operator applied to a scalar function
+
         associate( &
             nlat => this%NUMBER_OF_LATITUDES, &
             nlon => this%NUMBER_OF_LONGITUDES, &
@@ -1801,7 +1818,11 @@ contains
                         grad_theta => polar_gradient_component(k, l), &
                         grad_phi => azimuthal_gradient_component(k, l) &
                         )
+                        !
+                        !==> Calculate the rotation operator applied to a scalar function
+                        !
                         R(:, k, l) = phi * grad_theta - theta * grad_phi
+
                     end associate
                 end do
             end do
@@ -1811,7 +1832,7 @@ contains
         !==> Release memory
         !
         deallocate( polar_gradient_component )
-        deallocate( azimuthal_gradient_component)
+        deallocate( azimuthal_gradient_component )
 
     end subroutine compute_angular_momentum
     
@@ -1867,9 +1888,11 @@ contains
         return_value = -1
 
         associate( ntrunc => this%TRIANGULAR_TRUNCATION_LIMIT )
+
             if ( m <= n .and. max(n, m) <= ntrunc ) then
                 return_value = sum ([(i, i=ntrunc+1, ntrunc-m+2, -1)]) + n-m+1
             end if
+
         end associate
 
     end function get_index
@@ -1885,19 +1908,27 @@ contains
         complex (wp)                    :: return_value
         !----------------------------------------------------------------------
 
+        ! Check if object is usable
+        if (.not.this%initialized) then
+            error stop 'Uninitialized object of class (Sphere): '&
+                //' in get_coefficient'
+        end if
+
         associate( &
             ntrunc => this%TRIANGULAR_TRUNCATION_LIMIT, &
             nm  => this%get_index(n, m), &
             nm_conjg => this%get_index(n, -m), &
             psi => this%complex_spectral_coefficients &
             )
-            if ( m < 0 .and. nm_conjg > 0 ) then
-                return_value = ( (-1.0_wp)**(-m) ) * conjg( psi(nm_conjg) )
-            else if ( nm > 0 ) then
+
+            if (m < 0 .and. nm_conjg > 0) then
+                return_value = ( (-1.0_wp)**(-m) ) * conjg(psi(nm_conjg))
+            else if (nm > 0) then
                 return_value = psi(nm)
             else
                 return_value = 0.0_wp
             end if
+
         end associate
 
     end function get_coefficient
