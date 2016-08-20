@@ -63,17 +63,17 @@ shpe.f90
 	$(FC) $(FFLAGS) -c shpe.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 
-gaqd.o: \
+gaussian_latitudes_and_weights_routines.o: \
 spherepack_precision.o \
-gaqd.f90
-	$(FC) $(FFLAGS) -c gaqd.f90 $(LINKS)\
+gaussian_latitudes_and_weights_routines.f90
+	$(FC) $(FFLAGS) -c gaussian_latitudes_and_weights_routines.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 
 scalar_analysis_routines.o: \
 spherepack_precision.o \
 type_HFFTpack.o \
 type_SpherepackAux.o\
-gaqd.o\
+gaussian_latitudes_and_weights_routines.o\
 scalar_analysis_routines.f90
 	$(FC) $(FFLAGS) -c scalar_analysis_routines.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
@@ -82,7 +82,7 @@ shaec.o: \
 spherepack_precision.o \
 type_HFFTpack.o \
 type_SpherepackAux.o\
-gaqd.o\
+gaussian_latitudes_and_weights_routines.o\
 shaec.f90
 	$(FC) $(FFLAGS) -c shaec.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
@@ -97,7 +97,7 @@ shagc.o: \
 spherepack_precision.o \
 type_HFFTpack.o \
 type_SpherepackAux.o\
-gaqd.o \
+gaussian_latitudes_and_weights_routines.o \
 shagc.f90
 	$(FC) $(FFLAGS) -c shagc.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
@@ -128,7 +128,7 @@ shsgc.o: \
 spherepack_precision.o \
 type_HFFTpack.o \
 type_SpherepackAux.o\
-gaqd.o\
+gaussian_latitudes_and_weights_routines.o\
 shsgc.f90
 	$(FC) $(FFLAGS) -c shsgc.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
@@ -137,7 +137,7 @@ shsgs.o: \
 spherepack_precision.o \
 type_HFFTpack.o \
 type_SpherepackAux.o\
-gaqd.o\
+gaussian_latitudes_and_weights_routines.o\
 shsgs.f90
 	$(FC) $(FFLAGS) -c shsgs.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
@@ -162,7 +162,7 @@ vhagc.o: \
 spherepack_precision.o \
 type_HFFTpack.o \
 type_SpherepackAux.o\
-gaqd.o\
+gaussian_latitudes_and_weights_routines.o\
 vhagc.f90
 	$(FC) $(FFLAGS) -c vhagc.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
@@ -171,7 +171,7 @@ vhags.o: \
 spherepack_precision.o \
 type_HFFTpack.o \
 type_SpherepackAux.o\
-gaqd.o\
+gaussian_latitudes_and_weights_routines.o\
 vhags.f90
 	$(FC) $(FFLAGS) -c vhags.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
@@ -196,7 +196,7 @@ vhsgc.o: \
 spherepack_precision.o \
 type_HFFTpack.o \
 type_SpherepackAux.o\
-gaqd.o \
+gaussian_latitudes_and_weights_routines.o \
 vhsgc.f90
 	$(FC) $(FFLAGS) -c vhsgc.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
@@ -205,7 +205,7 @@ vhsgs.o: \
 spherepack_precision.o \
 type_HFFTpack.o \
 type_SpherepackAux.o\
-gaqd.o \
+gaussian_latitudes_and_weights_routines.o \
 vhsgs.f90
 	$(FC) $(FFLAGS) -c vhsgs.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
@@ -230,7 +230,7 @@ vtsgc.o: \
 spherepack_precision.o \
 type_HFFTpack.o \
 type_SpherepackAux.o\
-gaqd.o \
+gaussian_latitudes_and_weights_routines.o \
 vtsgc.f90
 	$(FC) $(FFLAGS) -c vtsgc.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
@@ -239,7 +239,7 @@ vtsgs.o: \
 spherepack_precision.o \
 type_HFFTpack.o \
 type_SpherepackAux.o\
-gaqd.o \
+gaussian_latitudes_and_weights_routines.o \
 vtsgs.f90
 	$(FC) $(FFLAGS) -c vtsgs.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
@@ -661,7 +661,7 @@ type_RegularGrid.f90
 type_GaussianGrid.o: \
 spherepack_precision.o \
 type_SphericalGrid.o \
-gaqd.o \
+gaussian_latitudes_and_weights_routines.o \
 type_GaussianGrid.f90
 	$(FC) $(FFLAGS) -c type_GaussianGrid.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
@@ -765,7 +765,7 @@ divec.o \
 dives.o \
 divgc.o \
 divgs.o \
-gaqd.o \
+gaussian_latitudes_and_weights_routines.o \
 geo2math.o \
 gradec.o \
 grades.o \
