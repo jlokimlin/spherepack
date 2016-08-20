@@ -90,6 +90,16 @@ module module_gaqd
     private
     public :: gaqd
 
+    !------------------------------------------------------------------
+    ! Dictionary: Variables confined to the module
+    !------------------------------------------------------------------
+    real (wp), parameter :: ZERO = 0.0_wp
+    real (wp), parameter :: HALF = 0.5_wp
+    real (wp), parameter :: ONE = 1.0_wp
+    real (wp), parameter :: TWO = 2.0_wp
+    real (wp), parameter :: THREE = 3.0_wp
+    !------------------------------------------------------------------
+
 contains
 
     subroutine gaqd(nlat, theta, wts, w, lwork, ierror)
@@ -108,9 +118,9 @@ contains
         integer (ip)         :: i, idx, it, nix
         integer (ip)         :: nhalf, half_nlat
         real (wp), parameter :: HALF_PI = PI/2
-        real (wp), parameter :: SQRT3 = sqrt(3.0_wp)
+        real (wp), parameter :: SQRT3 = sqrt(THREE)
         real (wp)            :: dt, half_dt
-        real (wp)            :: zprev, zlast, zero
+        real (wp)            :: zprev, zlast, eff_zero
         real (wp)            :: zhold, pb, dpb, dcor, cz
         real (wp)            :: eps, sgnd
         !----------------------------------------------------------------------
@@ -131,20 +141,19 @@ contains
         select case (nlat)
             case(1)
                 theta = HALF_PI
-                wts = 2.0_wp
+                wts = TWO
             case(2)
                 theta(1) = acos(SQRT3/3)
                 theta(2) = acos(-SQRT3/3)
-                wts = 1.0_wp
+                wts = ONE
             case default
-
-                eps = sqrt(epsilon(1.0_wp))
+                eps = sqrt(epsilon(ONE))
                 eps = eps * sqrt(eps)
                 half_nlat = nlat/2
                 nhalf = (nlat+1)/2
                 idx = half_nlat+2
 
-                call cpdp(nlat, cz, theta(half_nlat+1), wts(half_nlat+1))
+                call compute_fourier_coefficients(nlat, cz, theta(half_nlat+1), wts(half_nlat+1))
 
                 dt = HALF_PI/nhalf
                 half_dt = dt/2
@@ -156,43 +165,42 @@ contains
                         !
                         !==> nlat even
                         !
-                        zero = HALF_PI-half_dt
+                        eff_zero = HALF_PI-half_dt
                         nix = nhalf
                     case default
                         !
                         !==> nlat odd
                         !
-                        zero = HALF_PI-dt
+                        eff_zero = HALF_PI-dt
                         zprev = HALF_PI
                         nix = nhalf-1
                 end select
-
 
                 start_iteration: do
                     it = 0
                     newton_iteration: do
                         it = it+1
-                        zlast = zero
+                        zlast = eff_zero
                         !
                         !==> Newton iterations
                         !
-                        call tpdp(nlat, zero, cz, theta(half_nlat+1), wts(half_nlat+1), pb, dpb)
+                        call compute_legendre_poly_and_deriv(nlat, eff_zero, cz, theta(half_nlat+1), wts(half_nlat+1), pb, dpb)
 
                         dcor = pb/dpb
-                        sgnd = 1.0_wp
+                        sgnd = ONE
 
-                        if (dcor /= 0.0_wp) sgnd = dcor/abs(dcor)
+                        if (dcor /= ZERO) sgnd = dcor/abs(dcor)
 
                         dcor = sgnd * min(abs(dcor), 0.2_wp * dt)
-                        zero = zero-dcor
+                        eff_zero = eff_zero-dcor
 
                         !
                         !==> Repeat iteration
                         !
-                        if (abs(zero-zlast) - eps*abs(zero) > 0.0_wp) cycle newton_iteration
+                        if (abs(eff_zero-zlast) - eps*abs(eff_zero) > ZERO) cycle newton_iteration
 
-                        theta(nix) = zero
-                        zhold = zero
+                        theta(nix) = eff_zero
+                        zhold = eff_zero
                         !
                         ! ==> yakimiw's formula permits using old pb and dpb
                         !
@@ -202,9 +210,9 @@ contains
                         if (nix /= 0) then
 
                             if (nix == nhalf-1)  then
-                                zero = 3.0_wp * zero - PI
+                                eff_zero = THREE * eff_zero - PI
                             else if (nix < nhalf-1)  then
-                                zero = 2.0_wp * zero-zprev
+                                eff_zero = TWO * eff_zero-zprev
                             end if
 
                             zprev = zhold
@@ -213,7 +221,6 @@ contains
                             !==> Re-initialize loop
                             !
                             cycle start_iteration
-
                         end if
                         exit newton_iteration
                     end do newton_iteration
@@ -226,7 +233,7 @@ contains
 
                     theta(nhalf) = HALF_PI
 
-                    call tpdp(nlat, HALF_PI, cz, theta(half_nlat+1), wts(half_nlat+1), pb, dpb)
+                    call compute_legendre_poly_and_deriv(nlat, HALF_PI, cz, theta(half_nlat+1), wts(half_nlat+1), pb, dpb)
 
                     wts(nhalf) = real(2*nlat+1, kind=wp)/(dpb**2)
 
@@ -239,14 +246,15 @@ contains
                 !
                 !==> Set weights
                 !
-                wts = 2.0_wp * wts/sum(wts)
+                wts = TWO * wts/sum(wts)
         end select
 
 
     end subroutine gaqd
 
 
-    pure subroutine cpdp(n, cz, cp, dcp)
+    pure subroutine compute_fourier_coefficients( &
+        n, cz, legendre_poly_coeff, legendre_deriv_coeff)
         !
         ! Purpose:
         !
@@ -263,69 +271,77 @@ contains
         !----------------------------------------------------------------------
         integer (ip), intent (in)  :: n
         real (wp),    intent (out) :: cz
-        real (wp),    intent (out) :: cp(n/2+1)
-        real (wp),    intent (out) :: dcp(n/2+1)
+        real (wp),    intent (out) :: legendre_poly_coeff(n/2+1)
+        real (wp),    intent (out) :: legendre_deriv_coeff(n/2+1)
         !----------------------------------------------------------------------
         ! Local variables
         !----------------------------------------------------------------------
-        integer (ip) :: j, ncp !! Counter
+        integer (ip) :: j
         real (wp)    :: t1, t2, t3, t4
         !----------------------------------------------------------------------
 
-        ncp = (n+1)/2
-        t1 = -1.0_wp
-        t2 = real(n + 1, kind=wp)
-        t3 = 0.0_wp
-        t4 = real(2*n + 1, kind=wp)
+        associate( &
+            ncp => (n+1)/2, &
+            cp => legendre_poly_coeff, &
+            dcp => legendre_deriv_coeff &
+            )
 
-        select case (mod(n,2))
-            case (0)
-                !
-                !==> n even
-                !
-                cp(ncp) = 1.0_wp
+            t1 = -ONE
+            t2 = real(n + 1, kind=wp)
+            t3 = ZERO
+            t4 = real(2*n + 1, kind=wp)
 
-                do j = ncp, 2, -1
-                    t1 = t1+2.0_wp
-                    t2 = t2-1.0_wp
-                    t3 = t3+1.0_wp
-                    t4 = t4-2.0_wp
-                    cp(j-1) = (t1*t2)/(t3*t4)*cp(j)
-                end do
+            select case (mod(n,2))
+                case (0)
+                    !
+                    !==> n even
+                    !
+                    cp(ncp) = ONE
 
-                t1 = t1+2.0_wp
-                t2 = t2-1.0_wp
-                t3 = t3+1.0_wp
-                t4 = t4-2.0_wp
-                cz = (t1*t2)/(t3*t4)*cp(1)
+                    do j = ncp, 2, -1
+                        t1 = t1+TWO
+                        t2 = t2-ONE
+                        t3 = t3+ONE
+                        t4 = t4-TWO
+                        cp(j-1) = (t1*t2)/(t3*t4)*cp(j)
+                    end do
 
-                do j=1, ncp
-                    dcp(j) = real(2*j, kind=wp)*cp(j)
-                end do
+                    t1 = t1+TWO
+                    t2 = t2-ONE
+                    t3 = t3+ONE
+                    t4 = t4-TWO
+                    cz = (t1*t2)/(t3*t4)*cp(1)
 
-            case default
-                !
-                !==> odd
-                !
-                cp(ncp) = 1.0_wp
-                do j = ncp-1, 1, -1
-                    t1 = t1+2.0_wp
-                    t2 = t2-1.0_wp
-                    t3 = t3+1.0_wp
-                    t4 = t4-2.0_wp
-                    cp(j) = (t1*t2)/(t3*t4)*cp(j+1)
-                end do
+                    do j=1, ncp
+                        dcp(j) = real(2*j, kind=wp)*cp(j)
+                    end do
 
-                do j=1, ncp
-                    dcp(j) = real(2*j-1, kind=wp)*cp(j)
-                end do
+                case default
+                    !
+                    !==> odd
+                    !
+                    cp(ncp) = ONE
+                    do j = ncp-1, 1, -1
+                        t1 = t1+TWO
+                        t2 = t2-ONE
+                        t3 = t3+ONE
+                        t4 = t4-TWO
+                        cp(j) = (t1*t2)/(t3*t4)*cp(j+1)
+                    end do
 
-        end select
+                    do j=1, ncp
+                        dcp(j) = real(2*j-1, kind=wp)*cp(j)
+                    end do
 
-    end subroutine cpdp
+            end select
+        end associate
+
+    end subroutine compute_fourier_coefficients
 
 
-    pure subroutine tpdp(n, theta, cz, cp, dcp, pb, dpb)
+    pure subroutine compute_legendre_poly_and_deriv( &
+        n, theta, cz, legendre_poly_coeff, legendre_deriv_coeff, &
+        legendre_poly, legendre_deriv)
         !
         ! Purpose:
         !
@@ -338,31 +354,54 @@ contains
         integer (ip), intent (in)  :: n
         real (wp),    intent (in)  :: theta
         real (wp),    intent (in)  :: cz
-        real (wp),    intent (in)  :: cp(n/2+1)
-        real (wp),    intent (in)  :: dcp(n/2+1)
-        real (wp),    intent (out) :: pb
-        real (wp),    intent (out) :: dpb
+        real (wp),    intent (in)  :: legendre_poly_coeff(n/2+1)
+        real (wp),    intent (in)  :: legendre_deriv_coeff(n/2+1)
+        real (wp),    intent (out) :: legendre_poly
+        real (wp),    intent (out) :: legendre_deriv
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
         integer (ip) :: k, kdo
-        real (wp)    :: cost, sint, cos2t, sin2t, temp
+        real (wp)    :: cost, sint, temp
         !----------------------------------------------------------------------
 
-        cos2t = cos(2.0_wp * theta)
-        sin2t = sin(2.0_wp * theta)
+        associate( &
+            cos2t => cos(TWO * theta), &
+            sin2t => sin(TWO * theta), &
+            cp => legendre_poly_coeff, &
+            dcp => legendre_deriv_coeff, &
+            pb => legendre_poly, &
+            dpb => legendre_deriv &
+            )
 
-        select case (mod(n,2))
-            case (0)
-                !
-                !==> n even
-                !
-                kdo = n/2
-                pb = 0.5_wp * cz
-                dpb = 0.0_wp
-                if (n > 0) then
-                    cost = cos2t
-                    sint = sin2t
+            select case (mod(n,2))
+                case (0)
+                    !
+                    !==> n even
+                    !
+                    kdo = n/2
+                    pb = HALF * cz
+                    dpb = ZERO
+                    if (n > 0) then
+                        cost = cos2t
+                        sint = sin2t
+                        do k=1, kdo
+                            pb = pb+cp(k)*cost
+                            dpb = dpb-dcp(k)*sint
+                            temp = cos2t*cost-sin2t*sint
+                            sint = sin2t*cost+cos2t*sint
+                            cost = temp
+                        end do
+                    end if
+                case default
+                    !
+                    !==> n odd
+                    !
+                    kdo = (n + 1)/2
+                    pb = ZERO
+                    dpb = ZERO
+                    cost = cos(theta)
+                    sint = sin(theta)
                     do k=1, kdo
                         pb = pb+cp(k)*cost
                         dpb = dpb-dcp(k)*sint
@@ -370,25 +409,9 @@ contains
                         sint = sin2t*cost+cos2t*sint
                         cost = temp
                     end do
-                end if
-            case default
-                !
-                !==> n odd
-                !
-                kdo = (n + 1)/2
-                pb = 0.0_wp
-                dpb = 0.0_wp
-                cost = cos(theta)
-                sint = sin(theta)
-                do k=1, kdo
-                    pb = pb+cp(k)*cost
-                    dpb = dpb-dcp(k)*sint
-                    temp = cos2t*cost-sin2t*sint
-                    sint = sin2t*cost+cos2t*sint
-                    cost = temp
-                end do
-        end select
+            end select
+        end associate
 
-    end subroutine tpdp
+    end subroutine compute_legendre_poly_and_deriv
 
 end module module_gaqd

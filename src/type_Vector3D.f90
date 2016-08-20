@@ -386,6 +386,7 @@ contains
         !----------------------------------------------------------------------
         type (Vector3DPointer), intent (in out) :: this
         !----------------------------------------------------------------------
+
         ! Check if pointer is associated
         if (associated(this%ptr)) nullify(this%ptr )
 

@@ -19,6 +19,6 @@ install:
 	cp -r ../$(LIB_NAME) $(BIN_PATH)
 
 clean: 
-	(cd ./src; $(MAKE) clean; cd ../test; $(MAKE) clean )
+	(cd ./src; $(MAKE) clean; cd ../test; $(MAKE) clean)
 
 .PHONY: all lib test examples install
