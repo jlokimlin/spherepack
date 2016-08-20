@@ -25,7 +25,7 @@
 !
 ! ... required files
 !
-!     gradgc.f90,shagc.f90,shsgc.f90,vhsgc.f90,type_SpherepackAux.f90 type_HFFTpack.f90,gaqd.f90
+!     gradgc.f90,shagc.f90,shsgc.f90,vhsgc.f90,type_SpherepackAux.f90 type_HFFTpack.f90,compute_gaussian_latitudes_and_weights.f90
 !
 !
 ! definitions:

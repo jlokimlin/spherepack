@@ -104,7 +104,7 @@
 !        colat(i) = (i-1)*dlat  (i=1, ..., nlat)
 !
 !     If the grid is Gaussian let thetag(i) be the north to south colatitude
-!     grid (as computed by the spherepack routine gaqd).  In this case
+!     grid (as computed by the spherepack routine compute_gaussian_latitudes_and_weights).  In this case
 !
 !        colat(i) = thetag(i) (i=1, ..., nlat)
 !

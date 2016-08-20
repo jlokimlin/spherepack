@@ -38,7 +38,7 @@
 !
 ! ... files which must be loaded with vhsgs.f90
 !
-!     type_SpherepackAux.f90, type_HFFTpack.f90, gaqd.f90
+!     type_SpherepackAux.f90, type_HFFTpack.f90, compute_gaussian_latitudes_and_weights.f90
 !
 !     subroutine vhsgs(nlat,nlon,ityp,nt,v,w,idvw,jdvw,br,bi,cr,ci,
 !    +                 mdab,ndab,wvhsgs,lvhsgs,work,lwork,ierror)
@@ -58,7 +58,7 @@
 !
 !     nlat   the number of points in the gaussian colatitude grid on the
 !            full sphere. these lie in the interval (0,pi) and are computed
-!            in radians in theta(1) <...< theta(nlat) by subroutine gaqd.
+!            in radians in theta(1) <...< theta(nlat) by subroutine compute_gaussian_latitudes_and_weights.
 !            if nlat is odd the equator will be included as the grid point
 !            theta((nlat+1)/2).  if nlat is even the equator will be
 !            excluded as a grid point and will lie half way between
@@ -368,7 +368,7 @@
 !
 !     nlat   the number of points in the gaussian colatitude grid on the
 !            full sphere. these lie in the interval (0,pi) and are computed
-!            in radians in theta(1) <...< theta(nlat) by subroutine gaqd.
+!            in radians in theta(1) <...< theta(nlat) by subroutine compute_gaussian_latitudes_and_weights.
 !            if nlat is odd the equator will be included as the grid point
 !            theta((nlat+1)/2).  if nlat is even the equator will be
 !            excluded as a grid point and will lie half way between
@@ -436,8 +436,8 @@ module module_vhsgs
     use type_SpherepackAux, only: &
         SpherepackAux
 
-    use module_gaqd, only: &
-        gaqd
+    use gaussian_latitudes_and_weights_routines, only: &
+        compute_gaussian_latitudes_and_weights
 
     ! Explicit typing only
     implicit none
@@ -1437,10 +1437,10 @@ contains
 
             !
             !==> Compute gauss points and weights
-            !    use dpbar (length 3*nnlat*(nnlat+1)) as work space for gaqd
+            !    use dpbar (length 3*nnlat*(nnlat+1)) as work space for compute_gaussian_latitudes_and_weights
             !
             lwk = nlat*(nlat+2)
-            call gaqd(nlat,dthet,dwts,dummy_variable,lwk,ierror)
+            call compute_gaussian_latitudes_and_weights(nlat,dthet,dwts,dummy_variable,lwk,ierror)
             !
             !==> Compute associated legendre functions
             !

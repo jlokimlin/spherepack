@@ -38,7 +38,7 @@
 !
 ! ... files which must be loaded with vtsgc.f
 !
-!     type_SpherepackAux.f, type_HFFTpack.f, vhagc.f, vhsgc.f, gaqd.f
+!     type_SpherepackAux.f, type_HFFTpack.f, vhagc.f, vhsgc.f, compute_gaussian_latitudes_and_weights.f
 !   
 !
 !     subroutine vtsgc(nlat, nlon, ityp, nt, vt, wt, idvw, jdvw, br, bi, cr, ci, 
@@ -60,7 +60,7 @@
 !
 !     nlat   the number of gaussian colatitudinal grid points theta(i)
 !            such that 0 < theta(1) <...< theta(nlat) < pi. they are
-!            computed by subroutine gaqd which is called by this
+!            computed by subroutine compute_gaussian_latitudes_and_weights which is called by this
 !            subroutine. if nlat is odd the equator is
 !            theta((nlat+1)/2). if nlat is even the equator lies
 !            half way between theta(nlat/2) and theta(nlat/2+1). nlat
@@ -285,7 +285,7 @@
 !
 !     nlat   the number of gaussian colatitudinal grid points theta(i)
 !            such that 0 < theta(1) <...< theta(nlat) < pi. they are
-!            computed by subroutine gaqd which is called by this
+!            computed by subroutine compute_gaussian_latitudes_and_weights which is called by this
 !            subroutine. if nlat is odd the equator is
 !            theta((nlat+1)/2). if nlat is even the equator lies
 !            half way between theta(nlat/2) and theta(nlat/2+1). nlat
@@ -355,8 +355,8 @@ module module_vtsgc
     use type_SpherepackAux, only: &
         SpherepackAux
 
-    use module_gaqd, only: &
-        gaqd
+    use gaussian_latitudes_and_weights_routines, only: &
+        compute_gaussian_latitudes_and_weights
 
     ! Explicit typing only
     implicit none
@@ -1199,9 +1199,9 @@ contains
         ierror = 4
         !     if (lwork .lt. 2*nlat*(nlat+2)) return
         if (ldwork < 3*nlat+2) return
-        !     call gaqd(nlat, work, work(2*nlat+1), work(4*nlat+1), lwork, ierr)
+        !     call compute_gaussian_latitudes_and_weights(nlat, work, work(2*nlat+1), work(4*nlat+1), lwork, ierr)
         ldwk = 1
-        call gaqd(nlat, dwork, dwork(nlat+1), dummy_variable, ldwk, ierr)
+        call compute_gaussian_latitudes_and_weights(nlat, dwork, dwork(nlat+1), dummy_variable, ldwk, ierr)
         ierror = 5
         if (ierr /= 0) return
         ierror = 0

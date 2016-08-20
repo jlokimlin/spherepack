@@ -38,7 +38,7 @@
 !
 ! ... files which must be loaded with vhags.f90
 !
-!     type_SpherepackAux.f90, type_HFFTpack.f90, gaqd.f90
+!     type_SpherepackAux.f90, type_HFFTpack.f90, compute_gaussian_latitudes_and_weights.f90
 !
 !     subroutine vhags(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci,
 !    +                 mdab, ndab, wvhags, lvhags, work, lwork, ierror)
@@ -56,7 +56,7 @@
 !
 !     nlat   the number of points in the gaussian colatitude grid on the
 !            full sphere. these lie in the interval (0, pi) and are computed
-!            in radians in theta(1) <...< theta(nlat) by subroutine gaqd.
+!            in radians in theta(1) <...< theta(nlat) by subroutine compute_gaussian_latitudes_and_weights.
 !            if nlat is odd the equator will be included as the grid point
 !            theta((nlat+1)/2).  if nlat is even the equator will be
 !            excluded as a grid point and will lie half way between
@@ -274,7 +274,7 @@
 !
 !     nlat   the number of points in the gaussian colatitude grid on the
 !            full sphere. these lie in the interval (0, pi) and are computed
-!            in radians in theta(1) <...< theta(nlat) by subroutine gaqd.
+!            in radians in theta(1) <...< theta(nlat) by subroutine compute_gaussian_latitudes_and_weights.
 !            if nlat is odd the equator will be included as the grid point
 !            theta((nlat+1)/2).  if nlat is even the equator will be
 !            excluded as a grid point and will lie half way between
@@ -331,8 +331,8 @@ module module_vhags
     use type_SpherepackAux, only: &
         SpherepackAux
 
-    use module_gaqd, only: &
-        gaqd
+    use gaussian_latitudes_and_weights_routines, only: &
+        compute_gaussian_latitudes_and_weights
 
     ! Explicit typing only
     implicit none
@@ -1452,7 +1452,7 @@ contains
             !
             !==> Compute gaussian grid
             !
-            call gaqd(nlat, dthet, dwts, dummy_real, dummy_integer, local_error_flag)
+            call compute_gaussian_latitudes_and_weights(nlat, dthet, dwts, dummy_real, dummy_integer, local_error_flag)
 
             !
             !==> Compute associated legendre functions

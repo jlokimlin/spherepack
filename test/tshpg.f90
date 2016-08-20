@@ -33,7 +33,7 @@
 !
 !
 !    a program testing subroutines shpgi and shpg in file shpg.f
-!    also requires files  shagc.f, shsgc.f, gaqd.f 
+!    also requires files  shagc.f, shsgc.f, compute_gaussian_latitudes_and_weights.f 
 !    type_SpherepackAux.f and type_HFFTpack.f 
 !
 !    shpg is the n**2 projection with complement, odd/even

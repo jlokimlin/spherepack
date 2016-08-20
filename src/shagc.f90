@@ -38,7 +38,7 @@
 !
 ! ... files which must be loaded with shagc.f
 !
-!     type_SpherepackAux.f, type_HFFTpack.f, gaqd.f
+!     type_SpherepackAux.f, type_HFFTpack.f, compute_gaussian_latitudes_and_weights.f
 !
 !
 !     subroutine shagc(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, 
@@ -56,7 +56,7 @@
 !
 !     nlat   the number of points in the gaussian colatitude grid on the
 !            full sphere. these lie in the interval (0, pi) and are compu
-!            in radians in theta(1), ..., theta(nlat) by subroutine gaqd.
+!            in radians in theta(1), ..., theta(nlat) by subroutine compute_gaussian_latitudes_and_weights.
 !            if nlat is odd the equator will be included as the grid poi
 !            theta((nlat+1)/2).  if nlat is even the equator will be
 !            excluded as a grid point and will lie half way between
@@ -198,7 +198,7 @@
 !
 !
 !     3. the gaussian points and weights on the sphere
-!        (computed by subroutine gaqd).
+!        (computed by subroutine compute_gaussian_latitudes_and_weights).
 !
 !        theta(1), ..., theta(nlat) (gaussian pts in radians)
 !        wts(1), ..., wts(nlat) (corresponding gaussian weights)
@@ -244,7 +244,7 @@
 !
 !     nlat   the number of points in the gaussian colatitude grid on the
 !            full sphere. these lie in the interval (0, pi) and are compu
-!            in radians in theta(1), ..., theta(nlat) by subroutine gaqd.
+!            in radians in theta(1), ..., theta(nlat) by subroutine compute_gaussian_latitudes_and_weights.
 !            if nlat is odd the equator will be included as the grid poi
 !            theta((nlat+1)/2).  if nlat is even the equator will be
 !            excluded as a grid point and will lie half way between
@@ -298,7 +298,7 @@
 !            = 2  error in the specification of nlon
 !            = 3  error in the specification of lshagc
 !            = 4  error in the specification of ldwork
-!            = 5  failure in gaqd to compute gaussian points
+!            = 5  failure in compute_gaussian_latitudes_and_weights to compute gaussian points
 !                 (due to failure in eigenvalue routine)
 !
 !
@@ -314,8 +314,8 @@ module module_shagc
     use type_SpherepackAux, only: &
         SpherepackAux
 
-    use module_gaqd, only: &
-        gaqd
+    use gaussian_latitudes_and_weights_routines, only: &
+        compute_gaussian_latitudes_and_weights
 
     ! Explicit typing only
     implicit none
@@ -748,7 +748,7 @@ contains
             !     compute real gaussian points and weights
             !     lw = 4*nlat*(nlat+1)+2
             lw = nlat*(nlat+2)
-            call gaqd(nlat, dtheta, dwts, work(1), lw, ier)
+            call compute_gaussian_latitudes_and_weights(nlat, dtheta, dwts, work(1), lw, ier)
             if (ier/=0) return
             !     store gaussian weights single precision to save computation
             !     in inner loops in analysis

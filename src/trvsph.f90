@@ -36,7 +36,7 @@
 !
 ! ... required files
 !
-!     type_SpherepackAux.f, type_HFFTpack.f, gaqd.f, vhaec.f, vhsec.f, vhagc.f, vhsgc.f
+!     type_SpherepackAux.f, type_HFFTpack.f, compute_gaussian_latitudes_and_weights.f, vhaec.f, vhsec.f, vhagc.f, vhsgc.f
 !
 !     subroutine trvsph (intl, igrida, nlona, nlata, iveca, ua, va, 
 !    +igridb, nlonb, nlatb, ivecb, ub, vb, wsave, lsave, lsvmin, work, 
@@ -109,7 +109,7 @@
 !     include the poles.  the gaussian grid points are uniquely determined by
 !     the size of the partition.  they can be computed in colatitude in
 !     (0, pi) (north to south) in real by the spherepack subroutine
-!     gaqd.  let nlat be nlata or nlatb if either the ua, va or ub, vb grid is
+!     compute_gaussian_latitudes_and_weights.  let nlat be nlata or nlatb if either the ua, va or ub, vb grid is
 !     gaussian.  let
 !
 !        north pole                             south pole

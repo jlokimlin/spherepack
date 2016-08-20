@@ -262,7 +262,7 @@ contains
                     //'invalid specification for dwork'
             case (6)
                 error stop 'Object of class(GaussianSphere) in gaussian_scalar_analysis'&
-                    //' failure in gaqd due to failure in eigenvalue routine'
+                    //' failure in compute_gaussian_latitudes_and_weights due to failure in eigenvalue routine'
             case default
                 error stop 'Object of class(GaussianSphere) in gaussian_scalar_analysis'&
                     //' undetermined error'
@@ -348,7 +348,7 @@ contains
                     //'invalid specification for dwork'
             case (6)
                 error stop 'Object of class(GaussianSphere) in gaussian_scalar_synthesis'&
-                    //'Failure in gaqd due to failure in eigenvalue routine'
+                    //'Failure in compute_gaussian_latitudes_and_weights due to failure in eigenvalue routine'
             case default
                 error stop 'Object of class(GaussianSphere) in gaussian_scalar_synthesis'&
                     //'Undetermined error flag'

@@ -31,10 +31,10 @@
 !
 !
 !
-!     this program tests subroutine gaqd for computing 
-!     the Gauss Legendre points and weights in file gaqd.f
+!     this program tests subroutine compute_gaussian_latitudes_and_weights for computing 
+!     the Gauss Legendre points and weights in file compute_gaussian_latitudes_and_weights.f
 !     It tests only the april 2002 version and not the
-!     older version in file gaqd.old.f
+!     older version in file compute_gaussian_latitudes_and_weights.old.f
 !     gauss points and weights are computed using newtons method
 !     with equally spaced points as first guess. Points are
 !     computed as theta_i where x_i = cos(theta_i)
@@ -43,14 +43,14 @@
 !     publication in the SIAM journal of scientific computing.
 !                         April 2002
 !
-program tgaqd
+program tcompute_gaussian_latitudes_and_weights
 
     use, intrinsic :: iso_fortran_env, only: &
         stdout => OUTPUT_UNIT, &
         sp => REAL32
 
     use spherepack_library, only: &
-        gaqd, pi
+        compute_gaussian_latitudes_and_weights, pi
 
     ! Explicit typing only
     implicit none
@@ -85,7 +85,7 @@ program tgaqd
     real sumw
     real dummy_variable
     !
-    write( *, '(/a/)') '     tgaqd *** TEST RUN *** '
+    write( *, '(/a/)') '     tcompute_gaussian_latitudes_and_weights *** TEST RUN *** '
 
     lwork = nlat+1
     hold = etime(t1)
@@ -103,13 +103,13 @@ program tgaqd
     ldw = nlat+2
     hold = etime(t1)
     hold = t1(1)
-    call gaqd(nlat,dtheta,dwts,dummy_variable,ldw,ierror)
+    call compute_gaussian_latitudes_and_weights(nlat,dtheta,dwts,dummy_variable,ldw,ierror)
     tdoub = etime(t1)
     tdoub = t1(1)-hold
     if (ierror /= 0) write( stdout,30) ierror
 30  format(' ierror=',i5)
     write( stdout, 31) tdoub
-31  format(' tdoub gaqd',1pe15.6)
+31  format(' tdoub compute_gaussian_latitudes_and_weights',1pe15.6)
     !
     dwmx = 0.0
     tmax = 0.0
@@ -137,7 +137,7 @@ program tgaqd
     hold = etime(t2)
     hold = t2(1)
     lwork = nlat+2
-    call sgaqd(nlat,stheta,swts,swork,lwork,ierror)
+    call scompute_gaussian_latitudes_and_weights(nlat,stheta,swts,swork,lwork,ierror)
     tsing = etime(t2)
     tsing = t2(1)-hold
     if (ierror /= 0) write( stdout, 5) ierror
@@ -203,7 +203,7 @@ program tgaqd
 
 contains
     !
-    !     subroutine gsqd is a single precision version of gaqd.
+    !     subroutine gsqd is a single precision version of compute_gaussian_latitudes_and_weights.
     !     gauss points and weights are computed using newtons method
     !     with equally spaced points as first guess. Points are
     !     computed as theta_i where x_i = cos(theta_i)
@@ -737,7 +737,7 @@ contains
         return
     end subroutine dlfcz
     !
-    subroutine sgaqd(nlat,theta,wts,w,lwork,ierror)
+    subroutine scompute_gaussian_latitudes_and_weights(nlat,theta,wts,w,lwork,ierror)
         implicit none
         real :: cmax
         real :: cz
@@ -779,7 +779,7 @@ contains
         !     This routine is faster and more accurate than older program
         !     with the same name.
         !
-        !     subroutine sgaqd computes the nlat gaussian colatitudes and
+        !     subroutine scompute_gaussian_latitudes_and_weights computes the nlat gaussian colatitudes and
         !     weights in single precision. the colatitudes are in radians
         !     and lie in the interval (0,pi).
         !
@@ -904,7 +904,7 @@ contains
             wts(i) = 2.0*wts(i)/summation
         end do
         return
-    end subroutine sgaqd
+    end subroutine scompute_gaussian_latitudes_and_weights
     subroutine lfcz(n,cz,cp,dcp)
         implicit none
         real :: cp
@@ -1034,4 +1034,4 @@ contains
         return
     end subroutine slpdp
 
-end program tgaqd
+end program tcompute_gaussian_latitudes_and_weights

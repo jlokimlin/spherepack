@@ -301,9 +301,9 @@ toe = 0.
 !     compute gauss grid distribution
 !
 lwork = nlat+1
-call gaqdp(nlat, thet, gwts, work, lwork, ierr)
+call compute_gaussian_latitudes_and_weightsp(nlat, thet, gwts, work, lwork, ierr)
 if (ierr /= 0) write(*, 160) ierr
-160 format(' error in gaqd =', i5)
+160 format(' error in compute_gaussian_latitudes_and_weights =', i5)
 do i=1, nto
 gwts(i) = gwts(i)+gwts(i)
 end do
@@ -1528,7 +1528,7 @@ cth = chh
 return
 end subroutine dlftg
 !
-subroutine gaqdp(nlat, theta, wts, w, lwork, ierror)
+subroutine compute_gaussian_latitudes_and_weightsp(nlat, theta, wts, w, lwork, ierror)
 
 real :: eps
 integer :: i
@@ -1552,7 +1552,7 @@ real :: sgnd
 !     This routine is faster and more accurate than older program 
 !     with the same name.
 !
-!     subroutine gaqdp computes the nlat gaussian colatitudes and weights
+!     subroutine compute_gaussian_latitudes_and_weightsp computes the nlat gaussian colatitudes and weights
 !     in real. the colatitudes are in radians and lie in the
 !     in the interval (0, pi).
 !
@@ -1676,7 +1676,7 @@ do i=1, nlat
 wts(i) = 2.0_wp*wts(i)/summation
 end do
 return
-end subroutine gaqdp
+end subroutine compute_gaussian_latitudes_and_weightsp
 subroutine cpdp1(n, cz, cp, dcp)
 
 integer :: j

@@ -38,7 +38,7 @@
 !
 ! ... files which must be loaded with isfvpgc.f
 !
-!     type_SpherepackAux.f, type_HFFTpack.f, vhsgc.f, shagc.f, gaqd.f
+!     type_SpherepackAux.f, type_HFFTpack.f, vhsgc.f, shagc.f, compute_gaussian_latitudes_and_weights.f
 !
 !
 !     subroutine isfvpgc(nlat, nlon, isym, nt, sf, vp, idv, jdv, as, bs, av, bv, 
@@ -58,14 +58,14 @@
 !
 !     required legendre functions are recomputed rather than stored as
 !     they are in subroutine isfvpgs.  v(i, j) and w(i, j) are given at
-!     the i(th) gaussian colatitude point (see gaqd) theta(i) and east
+!     the i(th) gaussian colatitude point (see compute_gaussian_latitudes_and_weights) theta(i) and east
 !     longitude lambda(j) = (j-1)*2.*pi/nlon on the sphere.
 !
 !     input parameters
 !
 !     nlat   the number of points in the gaussian colatitude grid on the
 !            full sphere. these lie in the interval (0, pi) and are computed
-!            in radians in theta(1) <...< theta(nlat) by subroutine gaqd.
+!            in radians in theta(1) <...< theta(nlat) by subroutine compute_gaussian_latitudes_and_weights.
 !            if nlat is odd the equator will be included as the grid point
 !            theta((nlat+1)/2).  if nlat is even the equator will be
 !            excluded as a grid point and will lie half way between

@@ -10,8 +10,8 @@ module scalar_analysis_routines
     use type_SpherepackAux, only: &
         SpherepackAux
 
-    use module_gaqd, only: &
-        gaqd
+    use gaussian_latitudes_and_weights_routines, only: &
+        compute_gaussian_latitudes_and_weights
 
     ! Explicit typing only
     implicit none
@@ -70,6 +70,7 @@ module scalar_analysis_routines
         !-----------------------------------------
     end type ShagsAux
 
+    ! Declare module subroutine interfaces
     interface
 
         module subroutine shaes(nlat, nlon, isym, nt, g, idg, jdg, a, b, &

@@ -38,7 +38,7 @@
 !
 ! ... files which must be loaded with vrtgc.f
 !
-!     type_SpherepackAux.f, type_HFFTpack.f, vhagc.f, shsgc.f, gaqd.f
+!     type_SpherepackAux.f, type_HFFTpack.f, vhagc.f, shsgc.f, compute_gaussian_latitudes_and_weights.f
 !
 !     subroutine vrtgc(nlat, nlon, isym, nt, vort, ivrt, jvrt, cr, ci, mdc, ndc, 
 !    +                 wshsgc, lshsgc, work, lwork, ierror)
@@ -62,7 +62,7 @@
 !
 !     nlat   the number of points in the gaussian colatitude grid on the
 !            full sphere. these lie in the interval (0, pi) and are computed
-!            in radians in theta(1) <...< theta(nlat) by subroutine gaqd.
+!            in radians in theta(1) <...< theta(nlat) by subroutine compute_gaussian_latitudes_and_weights.
 !            if nlat is odd the equator will be included as the grid point
 !            theta((nlat+1)/2).  if nlat is even the equator will be
 !            excluded as a grid point and will lie half way between

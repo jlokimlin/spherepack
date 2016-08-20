@@ -37,7 +37,7 @@ program tvtsgs
 
     use spherepack_library, only: &
         pi, shagsi, vhagsi, vhsgsi, vtsgsi, &
-        gaqd, vhsgs, shags, shsgs, vtsgs
+        compute_gaussian_latitudes_and_weights, vhsgs, shags, shsgs, vtsgs
 
     implicit none
     real :: a
@@ -145,7 +145,7 @@ program tvtsgs
 !    !
 !    !     compute gauss points and weights
 !    !
-!    call gaqd(nlat,dthet,dwts,dummy_variable,lwork,ierror)
+!    call compute_gaussian_latitudes_and_weights(nlat,dthet,dwts,dummy_variable,lwork,ierror)
 !    !
 !    !     zero vector harmonic coefficients
 !    !

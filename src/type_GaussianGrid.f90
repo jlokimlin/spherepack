@@ -7,8 +7,8 @@ module type_GaussianGrid
     use type_SphericalGrid, only: &
         SphericalGrid
 
-    use module_gaqd, only: &
-        gaqd
+    use gaussian_latitudes_and_weights_routines, only: &
+        compute_gaussian_latitudes_and_weights
 
     ! Explicit typing only
     implicit none
@@ -166,7 +166,7 @@ contains
         !     "On computing the points and weights for Gauss--Legendre quadrature."
         !     SIAM Journal on Scientific Computing 24.3 (2003): 945-954.
         !
-        ! [2]  http://www2.cisl.ucar.edu/resources/legacy/spherepack/documentation#gaqd.html
+        ! [2]  http://www2.cisl.ucar.edu/resources/legacy/spherepack/documentation#compute_gaussian_latitudes_and_weights.html
         !
         !----------------------------------------------------------------------
         ! Dummy arguments
@@ -205,7 +205,7 @@ contains
             !
             !==> Compute gaussian weights and latitudes
             !
-            call gaqd(nlat, theta, wts, w, lwork, ierror)
+            call compute_gaussian_latitudes_and_weights(nlat, theta, wts, w, lwork, ierror)
 
         end associate
 

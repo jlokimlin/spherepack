@@ -38,7 +38,7 @@
 !
 ! ... files which must be loaded with vhagc.f
 !
-!     type_SpherepackAux.f, type_HFFTpack.f, gaqd.f
+!     type_SpherepackAux.f, type_HFFTpack.f, compute_gaussian_latitudes_and_weights.f
 !
 !                                                                              
 !     subroutine vhagc(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, 
@@ -57,7 +57,7 @@
 !
 !     nlat   the number of points in the gaussian colatitude grid on the
 !            full sphere. these lie in the interval (0, pi) and are computed
-!            in radians in theta(1) <...< theta(nlat) by subroutine gaqd.
+!            in radians in theta(1) <...< theta(nlat) by subroutine compute_gaussian_latitudes_and_weights.
 !            if nlat is odd the equator will be included as the grid point
 !            theta((nlat+1)/2).  if nlat is even the equator will be
 !            excluded as a grid point and will lie half way between
@@ -263,7 +263,7 @@
 !
 !     nlat   the number of points in the gaussian colatitude grid on the
 !            full sphere. these lie in the interval (0, pi) and are computed
-!            in radians in theta(1) <...< theta(nlat) by subroutine gaqd.
+!            in radians in theta(1) <...< theta(nlat) by subroutine compute_gaussian_latitudes_and_weights.
 !            if nlat is odd the equator will be included as the grid point
 !            theta((nlat+1)/2).  if nlat is even the equator will be
 !            excluded as a grid point and will lie half way between
@@ -331,8 +331,8 @@ module module_vhagc
     use type_SpherepackAux, only: &
         SpherepackAux
 
-    use module_gaqd, only: &
-        gaqd
+    use gaussian_latitudes_and_weights_routines, only: &
+        compute_gaussian_latitudes_and_weights
 
     ! Explicit typing only
     implicit none
@@ -1175,7 +1175,7 @@ jw1 = 1
 !     jw3 = jw2+nlat+nlat
 jw2 = jw1+nlat
 jw3 = jw2+nlat
-call gaqd(nlat, dwork(jw1), dwork(jw2), dummy_variable, lwk, ierror)
+call compute_gaussian_latitudes_and_weights(nlat, dwork(jw1), dwork(jw2), dummy_variable, lwk, ierror)
 imid = (nlat+1)/2
 !
 !     set first imid words of real weights in dwork

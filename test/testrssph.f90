@@ -124,7 +124,7 @@ program testrssph
 
     use spherepack_library, only: &
         wp, & ! working precision
-        PI, TWO_PI, trssph, gaqd
+        PI, TWO_PI, trssph, compute_gaussian_latitudes_and_weights
 
     ! Explicit typing only
     implicit none
@@ -270,11 +270,11 @@ program testrssph
         / ' ier = ', i2,2x, 'lsvmin = ',i7, 2x,'lwkmin = ',i7)
     if (ier == 0) then
         !
-        !     compute nlatg gaussian colatitude points using spherepack routine "gaqd"
+        !     compute nlatg gaussian colatitude points using spherepack routine "compute_gaussian_latitudes_and_weights"
         !     and set in single precision vector thetag with south to north orientation
         !     for computing error in DATAG
         !
-        call gaqd(GAUSSIAN_NLATS,dtheta,dwts,dummy_variable,ldwork,ier)
+        call compute_gaussian_latitudes_and_weights(GAUSSIAN_NLATS,dtheta,dwts,dummy_variable,ldwork,ier)
         do  i=1,GAUSSIAN_NLATS
             thetag(i) = PI-dtheta(i)
         end do

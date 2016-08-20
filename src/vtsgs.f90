@@ -38,7 +38,7 @@
 !
 ! ... files which must be loaded with vtsgs.f
 !
-!     type_SpherepackAux.f, type_HFFTpack.f, vhags.f, vhsgs.f, gaqd.f
+!     type_SpherepackAux.f, type_HFFTpack.f, vhags.f, vhsgs.f, compute_gaussian_latitudes_and_weights.f
 !   
 !   
 !     subroutine vtsgs(nlat, nlon, ityp, nt, vt, wt, idvw, jdvw, br, bi, cr, ci, 
@@ -60,7 +60,7 @@
 !
 !     nlat   the number of gaussian colatitudinal grid points theta(i)
 !            such that 0 < theta(1) <...< theta(nlat) < pi. they are
-!            computed by subroutine gaqd which is called by this
+!            computed by subroutine compute_gaussian_latitudes_and_weights which is called by this
 !            subroutine. if nlat is odd the equator is
 !            theta((nlat+1)/2). if nlat is even the equator lies
 !            half way between theta(nlat/2) and theta(nlat/2+1). nlat
@@ -289,7 +289,7 @@
 !
 !     nlat   the number of gaussian colatitudinal grid points theta(i)
 !            such that 0 < theta(1) <...< theta(nlat) < pi. they are
-!            computed by subroutine gaqd which is called by this
+!            computed by subroutine compute_gaussian_latitudes_and_weights which is called by this
 !            subroutine. if nlat is odd the equator is
 !            theta((nlat+1)/2). if nlat is even the equator lies
 !            half way between theta(nlat/2) and theta(nlat/2+1). nlat
@@ -362,8 +362,8 @@ module module_vtsgs
     use type_SpherepackAux, only: &
         SpherepackAux
 
-    use module_gaqd, only: &
-        gaqd
+    use gaussian_latitudes_and_weights_routines, only: &
+        compute_gaussian_latitudes_and_weights
 
     ! Explicit typing only
     implicit none
@@ -1231,7 +1231,7 @@ contains
             type (SpherepackAux) :: sphere_aux
 
 
-            call gaqd(nlat, theta, wts, dummy_real, dummy_int, local_error_flag)
+            call compute_gaussian_latitudes_and_weights(nlat, theta, wts, dummy_real, dummy_int, local_error_flag)
 
             if (local_error_flag /= 0) then
                 ierror = 10+local_error_flag

@@ -38,7 +38,7 @@
 !
 ! ... files which must be loaded with shags.f90
 !
-!     type_SpherepackAux.f90, type_HFFTpack.f90, gaqd.f90
+!     type_SpherepackAux.f90, type_HFFTpack.f90, compute_gaussian_latitudes_and_weights.f90
 !
 !     subroutine shags(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, 
 !    1                    wshags, lshags, work, lwork, ierror)
@@ -55,7 +55,7 @@
 !
 !     nlat   the number of points in the gaussian colatitude grid on the
 !            full sphere. these lie in the interval (0, pi) and are compu
-!            in radians in theta(1), ..., theta(nlat) by subroutine gaqd.
+!            in radians in theta(1), ..., theta(nlat) by subroutine compute_gaussian_latitudes_and_weights.
 !            if nlat is odd the equator will be included as the grid poi
 !            theta((nlat+1)/2).  if nlat is even the equator will be
 !            excluded as a grid point and will lie half way between
@@ -193,7 +193,7 @@
 !
 !
 !     3. the gaussian points and weights on the sphere
-!        (computed by subroutine gaqd).
+!        (computed by subroutine compute_gaussian_latitudes_and_weights).
 !
 !        theta(1), ..., theta(nlat) (gaussian pts in radians)
 !        wts(1), ..., wts(nlat) (corresponding gaussian weights)
@@ -241,7 +241,7 @@
 !
 !     nlat   the number of points in the gaussian colatitude grid on the
 !            full sphere. these lie in the interval (0, pi) and are compu
-!            in radians in theta(1), ..., theta(nlat) by subroutine gaqd.
+!            in radians in theta(1), ..., theta(nlat) by subroutine compute_gaussian_latitudes_and_weights.
 !            if nlat is odd the equator will be included as the grid poi
 !            theta((nlat+1)/2).  if nlat is even the equator will be
 !            excluded as a grid point and will lie half way between
@@ -300,7 +300,7 @@
 !            = 3  error in the specification of lshags
 !            = 4  error in the specification of lwork
 !            = 5  error in the specification of ldwork
-!            = 6  failure in gaqd to compute gaussian points
+!            = 6  failure in compute_gaussian_latitudes_and_weights to compute gaussian points
 !                 (due to failure in eigenvalue routine)
 !
 !
@@ -968,7 +968,7 @@ contains
         !    lw = 4*nlat*(nlat+2)
         lw = nlat*(nlat+2)
 
-        call gaqd(nlat, dtheta, dwts, dummy_variable, lw, ier)
+        call compute_gaussian_latitudes_and_weights(nlat, dtheta, dwts, dummy_variable, lw, ier)
 
         if (ier /= 0) return
 

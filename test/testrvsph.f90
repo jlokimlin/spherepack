@@ -36,7 +36,7 @@
 !
 ! ... required files
 !
-!     trvsph.f, type_SpherepackAux.f, type_HFFTpack.f, gaqd.f, vhaec.f, vhsec.f, vhagc.f, vhsgc.f
+!     trvsph.f, type_SpherepackAux.f, type_HFFTpack.f, compute_gaussian_latitudes_and_weights.f, vhaec.f, vhsec.f, vhagc.f, vhsgc.f
 !
 ! ... description (see documentation in file trvsph.f)
 !
@@ -152,7 +152,7 @@ program testrvsph
         pi, &
         TWO_PI, &
         trvsph, &
-        gaqd
+        compute_gaussian_latitudes_and_weights
 
     ! Explicit typing only
     implicit none
@@ -282,7 +282,7 @@ program testrvsph
         !     compute nlatg gaussian colatitude points and
         !     set with south to north orientation in thetag
         !
-        call gaqd(nlatg,dtheta,dwts,dummy_variable,ldwork,error_flag)
+        call compute_gaussian_latitudes_and_weights(nlatg,dtheta,dwts,dummy_variable,ldwork,error_flag)
         do  i=1,nlatg
             ib = nlatg-i+1
             thetag(i) = dtheta(ib)

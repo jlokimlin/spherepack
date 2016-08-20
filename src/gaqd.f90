@@ -31,14 +31,15 @@
 !
 !
 !
-!     This version of gaqd implements the method presented in:
-!     P. N. swarztrauber, Computing the points and weights for
+!     This version of compute_gaussian_latitudes_and_weights implements
+!     the method presented in:
+!     P. N. Swarztrauber, Computing the points and weights for
 !     Gauss-Legendre quadrature, SIAM J. Sci. Comput.,
 !     24(2002) pp. 945-954.
 !
 !     The w and lwork arrays are dummy and included only to
 !     permit a simple pluggable exchange with the
-!     old gaqd in previous versions of SPHEREPACK
+!     old compute_gaussian_latitudes_and_weights in previous versions of SPHEREPACK
 !
 !
 !     gauss points and weights are computed using the fourier-newton
@@ -48,7 +49,7 @@
 !     This routine is faster and more accurate than older program
 !     with the same name.
 !
-!     subroutine gaqd computes the nlat gaussian colatitudes and weights
+!     subroutine compute_gaussian_latitudes_and_weights computes the nlat gaussian colatitudes and weights
 !     in real. the colatitudes are in radians and lie in the
 !     in the interval (0, pi).
 !
@@ -76,7 +77,7 @@
 !     ierror = 0 no errors
 !            = 1 if nlat <= 0
 !
-module module_gaqd
+module gaussian_latitudes_and_weights_routines
 
     use spherepack_precision, only: &
         wp, & ! working precision
@@ -88,7 +89,7 @@ module module_gaqd
 
     ! Everything is private unless stated otherwise
     private
-    public :: gaqd
+    public :: compute_gaussian_latitudes_and_weights
 
     !------------------------------------------------------------------
     ! Dictionary: Variables confined to the module
@@ -102,7 +103,7 @@ module module_gaqd
 
 contains
 
-    subroutine gaqd(nlat, theta, wts, w, lwork, ierror)
+    subroutine compute_gaussian_latitudes_and_weights(nlat, theta, wts, w, lwork, ierror)
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
@@ -250,7 +251,7 @@ contains
         end select
 
 
-    end subroutine gaqd
+    end subroutine compute_gaussian_latitudes_and_weights
 
 
     pure subroutine compute_fourier_coefficients( &
@@ -414,4 +415,4 @@ contains
 
     end subroutine compute_legendre_poly_and_deriv
 
-end module module_gaqd
+end module gaussian_latitudes_and_weights_routines

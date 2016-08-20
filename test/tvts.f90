@@ -53,7 +53,7 @@ program tvts
     use spherepack_library, only: &
         wp, & ! working precision
         PI, &
-        gaqd, vhaeci, vhaec, vtseci, vtsec, vhaesi, &
+        compute_gaussian_latitudes_and_weights, vhaeci, vhaec, vtseci, vtsec, vhaesi, &
         vhaes, vtsesi, vtses, vhagci, vhagc, vtsgci, vtsgc, &
         vhagsi, vhags, vtsgsi, vtsgs
 
@@ -152,11 +152,11 @@ program tvts
     !     compute nlat gaussian points in thetag
     !
     ldwork = lldwork
-    call gaqd(nlat,dtheta,dwts,dummy_variable,ldwork,ier)
+    call compute_gaussian_latitudes_and_weights(nlat,dtheta,dwts,dummy_variable,ldwork,ier)
     do  i=1,nlat
         thetag(i) = dtheta(i)
     end do
-    call name("gaqd")
+    call name("compute_gaussian_latitudes_and_weights")
     call iout(ier," ier")
     call vecout(thetag,"thtg",nlat)
     !

@@ -18,8 +18,8 @@ module spherepack_library
     use module_divgs, only: &
         divgs
 
-    use module_gaqd, only: &
-        gaqd
+    use gaussian_latitudes_and_weights_routines, only: &
+        compute_gaussian_latitudes_and_weights
 
     use module_geo2math, only: &
         geo2maths, math2geos, geo2mathv, math2geov
@@ -312,7 +312,7 @@ module spherepack_library
     public :: operator(*)
     ! Procedural methods
     public :: divec, dives, divgc, divgs
-    public :: gaqd
+    public :: compute_gaussian_latitudes_and_weights
     public :: geo2maths, math2geos, geo2mathv, math2geov
     public :: gradec, grades, gradgc, gradgs
     public :: hrffti, hrfftf, hrfftb

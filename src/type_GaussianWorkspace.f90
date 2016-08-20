@@ -229,7 +229,7 @@ contains
             case(6)
                 error stop 'Object of class (GaussianWorkspace) '&
                     //'in initialize_gaussian_scalar_analysis '&
-                    //'error in call to gaqd to compute gaussian points '&
+                    //'error in call to compute_gaussian_latitudes_and_weights to compute gaussian points '&
                     //'due to failure in eigenvalue routine'
             case default
                 error stop 'Object of class (GaussianWorkspace) '&
@@ -317,7 +317,7 @@ contains
             case(6)
                 error stop 'Object of class (GaussianWorkspace) '&
                     //'in initialize_gaussian_scalar_synthesis '&
-                    //'error in call to gaqd due to failure in eigenvalue routine'
+                    //'error in call to compute_gaussian_latitudes_and_weights due to failure in eigenvalue routine'
             case default
                 error stop 'Object of class (GaussianWorkspace) '&
                     //'in initialize_gaussian_scalar_synthesis '&
