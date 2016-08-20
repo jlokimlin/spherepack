@@ -320,9 +320,9 @@ contains
 
     subroutine shaec(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, &
         wshaec, lshaec, work, lwork, ierror)
-        real (wp) :: a
-        real (wp) :: b
-        real (wp) :: g
+        real (wp) :: a(mdab, ndab, *)
+        real (wp) :: b(mdab, ndab, *)
+        real (wp) :: g(idg, jdg, *)
         integer (ip) :: idg
         integer (ip) :: ierror
         integer (ip) :: imid
@@ -342,10 +342,9 @@ contains
         integer (ip) :: nln
         integer (ip) :: nlon
         integer (ip) :: nt
-        real (wp) :: work
-        real (wp) :: wshaec
-        dimension g(idg, jdg, *), a(mdab, ndab, *), b(mdab, ndab, *), wshaec(lshaec), &
-            work(lwork)
+        real (wp) :: work(lwork)
+        real (wp) :: wshaec(lshaec)
+
 
         mmax = min(nlat, nlon/2+1)
         imid = (nlat+1)/2
@@ -630,8 +629,6 @@ contains
         end do
 
     end subroutine shaec1
-
-
 
 
     subroutine shaeci(nlat, nlon, wshaec, lshaec, dwork, ldwork, ierror)

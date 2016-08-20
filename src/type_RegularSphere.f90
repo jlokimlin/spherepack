@@ -21,7 +21,7 @@ module type_RegularSphere
         assignment(=), &
         operator(*)
     
-    use module_shaes, only: &
+    use scalar_analysis_routines, only: &
         ShaesAux
 
     use module_shses, only: &

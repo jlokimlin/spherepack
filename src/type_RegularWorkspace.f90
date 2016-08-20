@@ -7,7 +7,7 @@ module type_RegularWorkspace
     use type_Workspace, only: &
         Workspace
 
-    use module_shaes, only: &
+    use scalar_analysis_routines, only: &
         ShaesAux
 
     use module_shses, only: &

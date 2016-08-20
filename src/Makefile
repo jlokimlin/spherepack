@@ -69,6 +69,15 @@ gaqd.f90
 	$(FC) $(FFLAGS) -c gaqd.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 
+scalar_analysis_routines.o: \
+spherepack_precision.o \
+type_HFFTpack.o \
+type_SpherepackAux.o\
+gaqd.o\
+scalar_analysis_routines.f90
+	$(FC) $(FFLAGS) -c scalar_analysis_routines.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
+
 shaec.o: \
 spherepack_precision.o \
 type_HFFTpack.o \
@@ -79,9 +88,7 @@ shaec.f90
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 
 shaes.o: \
-spherepack_precision.o \
-type_HFFTpack.o \
-type_SpherepackAux.o\
+scalar_analysis_routines.o \
 shaes.f90
 	$(FC) $(FFLAGS) -c shaes.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
@@ -96,10 +103,7 @@ shagc.f90
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 
 shags.o: \
-spherepack_precision.o \
-type_HFFTpack.o \
-type_SpherepackAux.o\
-gaqd.o\
+scalar_analysis_routines.o \
 shags.f90
 	$(FC) $(FFLAGS) -c shags.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
@@ -671,7 +675,7 @@ type_Workspace.f90
 type_RegularWorkspace.o: \
 spherepack_precision.o \
 type_Workspace.o\
-shaes.o \
+scalar_analysis_routines.o \
 shses.o \
 vhaes.o \
 vhses.o \
@@ -682,7 +686,7 @@ type_RegularWorkspace.f90
 type_GaussianWorkspace.o: \
 spherepack_precision.o \
 type_Workspace.o\
-shags.o \
+scalar_analysis_routines.o \
 shsgs.o \
 vhags.o \
 vhsgs.o \
@@ -731,7 +735,7 @@ type_Vector3D.o \
 type_GaussianGrid.o\
 type_GaussianWorkspace.o\
 type_SphericalUnitVectors.o \
-shags.o \
+scalar_analysis_routines.o \
 shsgs.o \
 vhags.o \
 vhsgs.o \
@@ -747,7 +751,7 @@ type_Vector3D.o \
 type_RegularGrid.o\
 type_RegularWorkspace.o\
 type_SphericalUnitVectors.o \
-shaes.o \
+scalar_analysis_routines.o \
 shses.o \
 vhaes.o \
 vhses.o \
@@ -801,9 +805,8 @@ sfvpes.o \
 sfvpgc.o \
 sfvpgs.o \
 shaec.o \
-shaes.o \
 shagc.o \
-shags.o \
+scalar_analysis_routines.o \
 shpe.o \
 shpg.o \
 shsec.o \

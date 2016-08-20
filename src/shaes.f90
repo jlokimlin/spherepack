@@ -314,161 +314,12 @@
 !
 !
 !
-module module_shaes
-
-    use spherepack_precision, only: &
-        wp, & ! working precision
-        ip ! integer precision
-
-    use type_HFFTpack, only: &
-        HFFTpack
-
-    use type_SpherepackAux, only: &
-        SpherepackAux
-
-    ! Explicit typing only
-    implicit none
-
-    ! Everything is private unless stated otherwise
-    private
-    public :: shaes
-    public :: shaesi
-    public :: ShaesAux
-
-    ! Declare derived data type
-    type, public :: ShaesAux
-        !-----------------------------------------
-        ! Type components
-        !-----------------------------------------
-    contains
-        !-----------------------------------------
-        ! Type-bound procedures
-        !-----------------------------------------
-        procedure, nopass :: shaes
-        procedure, nopass :: shaesi
-        procedure, nopass :: get_lshaes
-        procedure, nopass :: get_lwork
-        procedure, nopass :: get_ldwork
-        procedure, nopass :: get_legendre_workspace_size
-        !-----------------------------------------
-    end type ShaesAux
-
+submodule (scalar_analysis_routines) scalar_analysis_shaes
 
 contains
 
-
-    pure function get_lshaes(nlat, nlon) result (return_value)
-        !----------------------------------------------------------------------
-        ! Dummy arguments
-        !----------------------------------------------------------------------
-        integer (ip), intent (in)  :: nlat
-        integer (ip), intent (in)  :: nlon
-        integer (ip)               :: return_value
-        !----------------------------------------------------------------------
-        ! Local variables
-        !----------------------------------------------------------------------
-        integer (ip)         :: l1, l2
-        type (SpherepackAux) :: sphere_aux
-        !----------------------------------------------------------------------
-
-        call sphere_aux%compute_parity(nlat, nlon, l1, l2)
-
-        return_value = ( l1 * l2 * (2*nlat-l1+1) )/2 + nlon+15
-
-    end function get_lshaes
-
-
-
-    pure function get_lwork(nlat, nlon) result (return_value)
-        !----------------------------------------------------------------------
-        ! Dummy arguments
-        !----------------------------------------------------------------------
-        integer (ip), intent (in)  :: nlat
-        integer (ip), intent (in)  :: nlon
-        integer (ip)               :: return_value
-        !----------------------------------------------------------------------
-        ! Local variables
-        !----------------------------------------------------------------------
-        integer (ip)         :: l1, l2
-        type (SpherepackAux) :: sphere_aux
-        !----------------------------------------------------------------------
-
-        call sphere_aux%compute_parity(nlat, nlon, l1, l2)
-
-        return_value = 5*nlat*l2+3*((l1-2)*(2*nlat-l1-1))/2
-
-    end function get_lwork
-
-
-
-    pure function get_ldwork(nlat) result (return_value)
-        !----------------------------------------------------------------------
-        ! Dummy arguments
-        !----------------------------------------------------------------------
-        integer (ip), intent (in)  :: nlat
-        integer (ip)               :: return_value
-        !----------------------------------------------------------------------
-
-        return_value = nlat + 1
-
-    end function get_ldwork
-
-
-
-
-    pure function get_legendre_workspace_size(nlat, nlon, nt, ityp) result (return_value)
-        !----------------------------------------------------------------------
-        ! Dummy arguments
-        !----------------------------------------------------------------------
-        integer (ip),           intent (in) :: nlat
-        integer (ip),           intent (in) :: nlon
-        integer (ip), optional, intent (in) :: nt
-        integer (ip), optional, intent (in) :: ityp
-        integer (ip)                        :: return_value
-        !----------------------------------------------------------------------
-        ! Local variables
-        !----------------------------------------------------------------------
-        integer (ip) :: nt_op, ityp_op, l2
-        !----------------------------------------------------------------------
-
-        !
-        !==> Address optional arguments
-        !
-        if (present(nt)) then
-            nt_op = nt
-        else
-            nt_op = 1
-        end if
-
-        if (present(ityp)) then
-            ityp_op = ityp
-        else
-            ityp_op = 0
-        end if
-
-        !
-        !==> Compute workspace size
-        !
-        if (ityp_op <= 2) then
-            ! Set workspace size
-            return_value = (2*nt_op+1)*nlat*nlon
-        else
-            ! Compute parity
-            select case (mod(nlat, 2))
-                case (0)
-                    l2 = nlat/2
-                case default
-                    l2 = (nlat + 1)/2
-            end select
-            ! Set workspace size
-            return_value = (2*nt_op+1)*l2*nlon
-        end if
-
-    end function get_legendre_workspace_size
-
-
-    subroutine shaes(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, &
-        wshaes, lshaes, work, lwork, ierror)
+    module subroutine shaes(nlat, nlon, isym, nt, g, idg, jdg, a, b, &
+        mdab, ndab, wshaes, lshaes, work, lwork, ierror)
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
@@ -570,208 +421,10 @@ contains
 
         end associate
 
-    contains
-
-        subroutine shaes1(nlat, isym, nt, g, idgs, jdgs, a, b, mdab, ndab, &
-            z, idz, idg, jdg, ge, go, work, whrfft)
-            !----------------------------------------------------------------------
-            ! Dummy arguments
-            !----------------------------------------------------------------------
-            integer (ip), intent (in)     :: nlat
-            integer (ip), intent (in)     :: isym
-            integer (ip), intent (in)     :: nt
-            real (wp),    intent (in)     :: g(idgs, jdgs, nt)
-            integer (ip), intent (in)     :: idgs
-            integer (ip), intent (in)     :: jdgs
-            real (wp),    intent (in out) :: a(mdab, ndab, nt)
-            real (wp),    intent (in out) :: b(mdab, ndab, nt)
-            integer (ip), intent (in)     :: mdab
-            integer (ip), intent (in)     :: ndab
-            real (wp),    intent (in out) :: z(idz, *)
-            integer (ip), intent (in)     :: idz
-            integer (ip), intent (in)     :: idg
-            integer (ip), intent (in)     :: jdg
-            real (wp),    intent (in out) :: ge(idg, jdg, *)
-            real (wp),    intent (in out) :: go(idg, jdg, *)
-            real (wp),    intent (in out) :: work(*)
-            real (wp),    intent (in out) :: whrfft(*)
-            !----------------------------------------------------------------------
-            ! Local variables
-            !----------------------------------------------------------------------
-            integer (ip)    :: i, j, k, m, mb, ls, mp1, np1, mp2, mdo, ndo
-            integer (ip)    :: imm1, nlp1, imid, modl, mmax, nlon
-            real (wp)       :: fsn, tsn
-            type (HFFTpack) :: hfft
-            !----------------------------------------------------------------------
-
-
-            ls = idg
-            nlon = jdg
-            mmax = min(nlat, nlon/2+1)
-
-            if (2*mmax-1 > nlon) then
-                mdo = mmax-1
-            else
-                mdo = mmax
-            end if
-
-            nlp1 = nlat+1
-            tsn = 2.0_wp/nlon
-            fsn = 4.0_wp/nlon
-            imid = (nlat+1)/2
-            modl = mod(nlat, 2)
-
-            if (modl /= 0) then
-                imm1 = imid-1
-            else
-                imm1 = imid
-            end if
-
-            if_block: block
-
-                if (isym == 0) then
-                    do k=1, nt
-                        do i=1, imm1
-                            ge(i,1:nlon,k) = tsn*(g(i,1:nlon,k)+g(nlp1-i,1:nlon,k))
-                            go(i,1:nlon,k) = tsn*(g(i,1:nlon,k)-g(nlp1-i,1:nlon,k))
-                        end do
-                    end do
-                else
-                    do k=1, nt
-                        ge(1:imm1,1:nlon,k) = fsn*g(1:imm1,1:nlon,k)
-                    end do
-
-                    if (isym == 1) exit if_block
-
-                end if
-
-                if (modl /= 0) then
-                    do k=1, nt
-                        ge(imid, 1:nlon, k) = tsn*g(imid,1:nlon, k)
-                    end do
-                end if
-
-            end block if_block
-
-            !
-            !==> Fast Fourier Transform
-            !
-            fft_loop: do k=1, nt
-
-                call hfft%forward(ls, nlon, ge(1, 1, k), ls, whrfft, work)
-
-                if (mod(nlon, 2) /= 0) exit fft_loop
-
-                ge(1:ls, nlon, k) = 0.5_wp * ge(1:ls, nlon, k)
-
-            end do fft_loop
-
-            do k=1, nt
-                do mp1=1, mmax
-                    do np1=mp1, nlat
-                        a(mp1, np1, k) = 0.0_wp
-                        b(mp1, np1, k) = 0.0_wp
-                    end do
-                end do
-            end do
-
-            if (isym /= 1) then
-
-                do k=1, nt
-                    do i=1, imid
-                        do np1=1, nlat, 2
-                            a(1, np1, k) = a(1, np1, k)+z(np1, i)*ge(i, 1, k)
-                        end do
-                    end do
-                end do
-
-
-                if (mod(nlat, 2) == 0) then
-                    ndo = nlat-1
-                else
-                    ndo = nlat
-                end if
-
-                do mp1=2, mdo
-                    m = mp1-1
-                    mb = m*(nlat-1)-(m*(m-1))/2
-                    do k=1, nt
-                        do i=1, imid
-                            do np1=mp1, ndo, 2
-                                a(mp1, np1, k) = a(mp1, np1, k)+z(np1+mb, i)*ge(i, 2*mp1-2, k)
-                                b(mp1, np1, k) = b(mp1, np1, k)+z(np1+mb, i)*ge(i, 2*mp1-1, k)
-                            end do
-                        end do
-                    end do
-                end do
-
-                if (mdo /= mmax .and. mmax <= ndo) then
-
-                    mb = mdo*(nlat-1)-(mdo*(mdo-1))/2
-
-                    do k=1, nt
-                        do i=1, imid
-                            do np1=mmax, ndo, 2
-                                a(mmax, np1, k) = a(mmax, np1, k)+z(np1+mb, i)*ge(i, 2*mmax-2, k)
-                            end do
-                        end do
-                    end do
-
-                end if
-
-                if (isym == 2) return
-
-            end if
-
-            do k=1, nt
-                do i=1, imm1
-                    do np1=2, nlat, 2
-                        a(1, np1, k) = a(1, np1, k)+z(np1, i)*go(i, 1, k)
-                    end do
-                end do
-            end do
-
-            if (mod(nlat, 2) /= 0) then
-                ndo = nlat-1
-            else
-                ndo = nlat
-            end if
-
-            do mp1=2, mdo
-                m = mp1-1
-                mp2 = mp1+1
-                mb = m*(nlat-1)-(m*(m-1))/2
-                do k=1, nt
-                    do i=1, imm1
-                        do np1=mp2, ndo, 2
-                            a(mp1, np1, k) = a(mp1, np1, k)+z(np1+mb, i)*go(i, 2*mp1-2, k)
-                            b(mp1, np1, k) = b(mp1, np1, k)+z(np1+mb, i)*go(i, 2*mp1-1, k)
-                        end do
-                    end do
-                end do
-            end do
-
-            mp2 = mmax+1
-
-            if (mdo == mmax .or. mp2 > ndo)  return
-
-            mb = mdo*(nlat-1)-(mdo*(mdo-1))/2
-
-            do k=1, nt
-                do i=1, imm1
-                    do np1=mp2, ndo, 2
-                        a(mmax, np1, k) = a(mmax, np1, k)+z(np1+mb, i)*go(i, 2*mmax-2, k)
-                    end do
-                end do
-            end do
-
-        end subroutine shaes1
-
     end subroutine shaes
 
 
-
-    subroutine shaesi(nlat, nlon, wshaes, lshaes, work, lwork, dwork, &
+    module subroutine shaesi(nlat, nlon, wshaes, lshaes, work, lwork, dwork, &
         ldwork, ierror)
         !
         ! Remarks:
@@ -838,41 +491,228 @@ contains
             iw1 => workspace_indices(2), &
             iw2 => workspace_indices(3) &
             )
-
             call sphere_aux%sea1(nlat, nlon, imid, wshaes, idz, work, work(iw1), dwork)
-
             call hfft%initialize(nlon, wshaes(iw2))
-
         end associate
-
-
-    contains
-
-
-        pure function get_workspace_indices(nlat, nlon, mmax, imid, lzimn) &
-            result (return_value)
-            !----------------------------------------------------------------------
-            ! Dummy arguments
-            !----------------------------------------------------------------------
-            integer (ip), intent (in) :: nlat
-            integer (ip), intent (in) :: nlon
-            integer (ip), intent (in) :: mmax
-            integer (ip), intent (in) :: imid
-            integer (ip), intent (in) :: lzimn
-            integer (ip)              :: return_value(3)
-            !----------------------------------------------------------------------
-
-
-            associate( i => return_value )
-
-                i(1) = (mmax*(2*nlat-mmax+1))/2
-                i(2) = 3*nlat*imid+1
-                i(3) = lzimn + 1
-
-            end associate
-
-        end function get_workspace_indices
 
     end subroutine shaesi
 
-end module module_shaes
+
+    subroutine shaes1(nlat, isym, nt, g, idgs, jdgs, a, b, mdab, ndab, &
+        z, idz, idg, jdg, ge, go, work, whrfft)
+        !----------------------------------------------------------------------
+        ! Dummy arguments
+        !----------------------------------------------------------------------
+        integer (ip), intent (in)     :: nlat
+        integer (ip), intent (in)     :: isym
+        integer (ip), intent (in)     :: nt
+        real (wp),    intent (in)     :: g(idgs, jdgs, nt)
+        integer (ip), intent (in)     :: idgs
+        integer (ip), intent (in)     :: jdgs
+        real (wp),    intent (in out) :: a(mdab, ndab, nt)
+        real (wp),    intent (in out) :: b(mdab, ndab, nt)
+        integer (ip), intent (in)     :: mdab
+        integer (ip), intent (in)     :: ndab
+        real (wp),    intent (in out) :: z(idz, *)
+        integer (ip), intent (in)     :: idz
+        integer (ip), intent (in)     :: idg
+        integer (ip), intent (in)     :: jdg
+        real (wp),    intent (in out) :: ge(idg, jdg, *)
+        real (wp),    intent (in out) :: go(idg, jdg, *)
+        real (wp),    intent (in out) :: work(*)
+        real (wp),    intent (in out) :: whrfft(*)
+        !----------------------------------------------------------------------
+        ! Local variables
+        !----------------------------------------------------------------------
+        integer (ip)    :: i, j, k, m, mb, ls, mp1, np1, mp2, mdo, ndo
+        integer (ip)    :: imm1, nlp1, imid, modl, mmax, nlon
+        real (wp)       :: fsn, tsn
+        type (HFFTpack) :: hfft
+        !----------------------------------------------------------------------
+
+        ls = idg
+        nlon = jdg
+        mmax = min(nlat, nlon/2+1)
+
+        if (2*mmax-1 > nlon) then
+            mdo = mmax-1
+        else
+            mdo = mmax
+        end if
+
+        nlp1 = nlat+1
+        tsn = 2.0_wp/nlon
+        fsn = 4.0_wp/nlon
+        imid = (nlat+1)/2
+        modl = mod(nlat, 2)
+
+        if (modl /= 0) then
+            imm1 = imid-1
+        else
+            imm1 = imid
+        end if
+
+        if_block: block
+
+            if (isym == 0) then
+                do k=1, nt
+                    do i=1, imm1
+                        ge(i,1:nlon,k) = tsn*(g(i,1:nlon,k)+g(nlp1-i,1:nlon,k))
+                        go(i,1:nlon,k) = tsn*(g(i,1:nlon,k)-g(nlp1-i,1:nlon,k))
+                    end do
+                end do
+            else
+                do k=1, nt
+                    ge(1:imm1,1:nlon,k) = fsn*g(1:imm1,1:nlon,k)
+                end do
+
+                if (isym == 1) exit if_block
+
+            end if
+
+            if (modl /= 0) then
+                do k=1, nt
+                    ge(imid, 1:nlon, k) = tsn*g(imid,1:nlon, k)
+                end do
+            end if
+
+        end block if_block
+
+        !
+        !==> Fast Fourier Transform
+        !
+        fft_loop: do k=1, nt
+
+            call hfft%forward(ls, nlon, ge(1, 1, k), ls, whrfft, work)
+
+            if (mod(nlon, 2) /= 0) exit fft_loop
+
+            ge(1:ls, nlon, k) = 0.5_wp * ge(1:ls, nlon, k)
+
+        end do fft_loop
+
+        do k=1, nt
+            do mp1=1, mmax
+                do np1=mp1, nlat
+                    a(mp1, np1, k) = 0.0_wp
+                    b(mp1, np1, k) = 0.0_wp
+                end do
+            end do
+        end do
+
+        if (isym /= 1) then
+
+            do k=1, nt
+                do i=1, imid
+                    do np1=1, nlat, 2
+                        a(1, np1, k) = a(1, np1, k)+z(np1, i)*ge(i, 1, k)
+                    end do
+                end do
+            end do
+
+
+            if (mod(nlat, 2) == 0) then
+                ndo = nlat-1
+            else
+                ndo = nlat
+            end if
+
+            do mp1=2, mdo
+                m = mp1-1
+                mb = m*(nlat-1)-(m*(m-1))/2
+                do k=1, nt
+                    do i=1, imid
+                        do np1=mp1, ndo, 2
+                            a(mp1, np1, k) = a(mp1, np1, k)+z(np1+mb, i)*ge(i, 2*mp1-2, k)
+                            b(mp1, np1, k) = b(mp1, np1, k)+z(np1+mb, i)*ge(i, 2*mp1-1, k)
+                        end do
+                    end do
+                end do
+            end do
+
+            if (mdo /= mmax .and. mmax <= ndo) then
+
+                mb = mdo*(nlat-1)-(mdo*(mdo-1))/2
+
+                do k=1, nt
+                    do i=1, imid
+                        do np1=mmax, ndo, 2
+                            a(mmax, np1, k) = a(mmax, np1, k)+z(np1+mb, i)*ge(i, 2*mmax-2, k)
+                        end do
+                    end do
+                end do
+
+            end if
+
+            if (isym == 2) return
+
+        end if
+
+        do k=1, nt
+            do i=1, imm1
+                do np1=2, nlat, 2
+                    a(1, np1, k) = a(1, np1, k)+z(np1, i)*go(i, 1, k)
+                end do
+            end do
+        end do
+
+        if (mod(nlat, 2) /= 0) then
+            ndo = nlat-1
+        else
+            ndo = nlat
+        end if
+
+        do mp1=2, mdo
+            m = mp1-1
+            mp2 = mp1+1
+            mb = m*(nlat-1)-(m*(m-1))/2
+            do k=1, nt
+                do i=1, imm1
+                    do np1=mp2, ndo, 2
+                        a(mp1, np1, k) = a(mp1, np1, k)+z(np1+mb, i)*go(i, 2*mp1-2, k)
+                        b(mp1, np1, k) = b(mp1, np1, k)+z(np1+mb, i)*go(i, 2*mp1-1, k)
+                    end do
+                end do
+            end do
+        end do
+
+        mp2 = mmax+1
+
+        if (mdo == mmax .or. mp2 > ndo)  return
+
+        mb = mdo*(nlat-1)-(mdo*(mdo-1))/2
+
+        do k=1, nt
+            do i=1, imm1
+                do np1=mp2, ndo, 2
+                    a(mmax, np1, k) = a(mmax, np1, k)+z(np1+mb, i)*go(i, 2*mmax-2, k)
+                end do
+            end do
+        end do
+
+    end subroutine shaes1
+
+
+    pure function get_workspace_indices(nlat, nlon, mmax, imid, lzimn) &
+        result (return_value)
+        !----------------------------------------------------------------------
+        ! Dummy arguments
+        !----------------------------------------------------------------------
+        integer (ip), intent (in) :: nlat
+        integer (ip), intent (in) :: nlon
+        integer (ip), intent (in) :: mmax
+        integer (ip), intent (in) :: imid
+        integer (ip), intent (in) :: lzimn
+        integer (ip)              :: return_value(3)
+        !----------------------------------------------------------------------
+
+        associate( i => return_value )
+            i(1) = (mmax*(2*nlat-mmax+1))/2
+            i(2) = 3*nlat*imid+1
+            i(3) = lzimn + 1
+        end associate
+
+    end function get_workspace_indices
+
+
+end submodule scalar_analysis_shaes

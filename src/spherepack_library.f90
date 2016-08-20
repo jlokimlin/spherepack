@@ -138,14 +138,12 @@ module spherepack_library
     use module_shaec, only: &
         shaec, shaeci
 
-    use module_shaes, only: &
-        shaes, shaesi
+    use scalar_analysis_routines, only: &
+        shaes, shaesi, &
+        shags, shagsi
 
     use module_shagc, only: &
         shagc, shagci
-
-    use module_shags, only: &
-        shags, shagsi
 
     use module_shpe, only: &
         shpe, shpei

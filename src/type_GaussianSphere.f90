@@ -24,7 +24,7 @@ module type_GaussianSphere
         assignment(=), &
         operator(*)
     
-    use module_shags, only: &
+    use scalar_analysis_routines, only: &
         ShagsAux
 
     use module_shsgs, only: &
