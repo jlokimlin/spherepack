@@ -116,10 +116,17 @@ shsec.f90
 	$(FC) $(FFLAGS) -c shsec.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 
-shses.o: \
+scalar_synthesis_routines.o: \
 spherepack_precision.o \
 type_HFFTpack.o \
 type_SpherepackAux.o\
+gaussian_latitudes_and_weights_routines.o\
+scalar_synthesis_routines.f90
+	$(FC) $(FFLAGS) -c scalar_synthesis_routines.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
+
+shses.o: \
+scalar_synthesis_routines.o \
 shses.f90
 	$(FC) $(FFLAGS) -c shses.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
@@ -134,10 +141,7 @@ shsgc.f90
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 
 shsgs.o: \
-spherepack_precision.o \
-type_HFFTpack.o \
-type_SpherepackAux.o\
-gaussian_latitudes_and_weights_routines.o\
+scalar_synthesis_routines.o \
 shsgs.f90
 	$(FC) $(FFLAGS) -c shsgs.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
@@ -263,7 +267,7 @@ trssph.o: \
 spherepack_precision.o \
 type_HFFTpack.o \
 shaec.o \
-shsec.o \
+scalar_synthesis_routines.o \
 shagc.o \
 shsgc.o \
 trssph.f90
@@ -311,7 +315,7 @@ gradgs.f90
 
 igradec.o: \
 spherepack_precision.o \
-shsec.o \
+scalar_synthesis_routines.o \
 igradec.f90
 	$(FC) $(FFLAGS) -c igradec.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
@@ -332,7 +336,7 @@ igradgc.f90
 
 igradgs.o: \
 spherepack_precision.o \
-shsgs.o \
+scalar_synthesis_routines.o \
 igradgs.f90
 	$(FC) $(FFLAGS) -c igradgs.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
@@ -346,7 +350,7 @@ divec.f90
 
 dives.o: \
 spherepack_precision.o \
-shses.o \
+scalar_synthesis_routines.o \
 dives.f90
 	$(FC) $(FFLAGS) -c dives.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
@@ -360,7 +364,7 @@ divgc.f90
 
 divgs.o: \
 spherepack_precision.o \
-shsgs.o \
+scalar_synthesis_routines.o \
 divgs.f90
 	$(FC) $(FFLAGS) -c divgs.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
@@ -430,7 +434,7 @@ slapec.f90
 
 slapes.o: \
 spherepack_precision.o \
-shses.o \
+scalar_synthesis_routines.o \
 slapes.f90
 	$(FC) $(FFLAGS) -c slapes.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
@@ -444,14 +448,14 @@ slapgc.f90
 
 slapgs.o: \
 spherepack_precision.o \
-shsgs.o \
+scalar_synthesis_routines.o \
 slapgs.f90
 	$(FC) $(FFLAGS) -c slapgs.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 
 islapec.o: \
 spherepack_precision.o \
-shsec.o \
+scalar_synthesis_routines.o \
 islapec.f90
 	$(FC) $(FFLAGS) -c islapec.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
@@ -472,14 +476,14 @@ islapgc.f90
 
 islapgs.o: \
 spherepack_precision.o \
-shsgs.o \
+scalar_synthesis_routines.o \
 islapgs.f90
 	$(FC) $(FFLAGS) -c islapgs.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 
 sfvpec.o: \
 spherepack_precision.o \
-shsec.o \
+scalar_synthesis_routines.o \
 sfvpec.f90
 	$(FC) $(FFLAGS) -c sfvpec.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
@@ -500,7 +504,7 @@ sfvpgc.f90
 
 sfvpgs.o: \
 spherepack_precision.o \
-shsgs.o \
+scalar_synthesis_routines.o \
 sfvpgs.f90
 	$(FC) $(FFLAGS) -c sfvpgs.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
@@ -535,7 +539,7 @@ isfvpgs.f90
 
 vrtec.o: \
 spherepack_precision.o \
-shsec.o \
+scalar_synthesis_routines.o \
 vrtec.f90
 	$(FC) $(FFLAGS) -c vrtec.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
@@ -556,7 +560,7 @@ vrtgc.f90
 
 vrtgs.o: \
 spherepack_precision.o \
-shsgs.o \
+scalar_synthesis_routines.o \
 vrtgs.f90
 	$(FC) $(FFLAGS) -c vrtgs.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
@@ -687,7 +691,7 @@ type_GaussianWorkspace.o: \
 spherepack_precision.o \
 type_Workspace.o\
 scalar_analysis_routines.o \
-shsgs.o \
+scalar_synthesis_routines.o \
 vhags.o \
 vhsgs.o \
 type_GaussianWorkspace.f90
@@ -736,7 +740,7 @@ type_GaussianGrid.o\
 type_GaussianWorkspace.o\
 type_SphericalUnitVectors.o \
 scalar_analysis_routines.o \
-shsgs.o \
+scalar_synthesis_routines.o \
 vhags.o \
 vhsgs.o \
 type_GaussianSphere.f90
@@ -809,10 +813,9 @@ shagc.o \
 scalar_analysis_routines.o \
 shpe.o \
 shpg.o \
-shsec.o \
+scalar_synthesis_routines.o \
 shses.o \
 shsgc.o \
-shsgs.o \
 slapec.o \
 slapes.o \
 slapgc.o \

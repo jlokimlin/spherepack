@@ -154,13 +154,13 @@ module spherepack_library
     use module_shsec, only: &
         shsec, shseci
 
-    use module_shses, only: &
+    use scalar_synthesis_routines, only: &
         shses, shsesi
 
     use module_shsgc, only: &
         shsgc, shsgci
 
-    use module_shsgs, only: &
+    use scalar_synthesis_routines, only: &
         shsgs, shsgsi
 
     use module_slapec, only: &

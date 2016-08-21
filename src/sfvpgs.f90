@@ -222,7 +222,7 @@ module module_sfvpgs
         wp => REAL64, &
         ip => INT32
 
-    use module_shsgs, only: &
+    use scalar_synthesis_routines, only: &
         shsgs
 
     ! Explicit typing only

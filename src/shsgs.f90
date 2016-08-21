@@ -289,158 +289,11 @@
 !                 (due to failure in eigenvalue routine)
 !
 !
-module module_shsgs
-
-    use spherepack_precision, only: &
-        wp, & ! working precision
-        ip ! integer precision
-
-    use type_HFFTpack, only: &
-        HFFTpack
-
-    use type_SpherepackAux, only: &
-        SpherepackAux
-
-    use gaussian_latitudes_and_weights_routines, only: &
-        compute_gaussian_latitudes_and_weights
-
-    ! Explicit typing only
-    implicit none
-
-    ! Everything is private unless stated otherwise
-    private
-    public :: shsgs
-    public :: shsgsi
-    public :: ShsgsAux
-
-    ! Declare derived data type
-    type, public :: ShsgsAux
-        !-----------------------------------------
-        ! Type components
-        !-----------------------------------------
-    contains
-        !-----------------------------------------
-        ! Type-bound procedures
-        !-----------------------------------------
-        procedure, nopass :: shsgs
-        procedure, nopass :: shsgsi
-        procedure, nopass :: get_lshsgs
-        procedure, nopass :: get_lwork
-        procedure, nopass :: get_ldwork
-        procedure, nopass :: get_legendre_workspace_size
-        !-----------------------------------------
-    end type ShsgsAux
-
+submodule (scalar_synthesis_routines) scalar_synthesis_shsgs
 
 contains
 
-
-    pure function get_lshsgs(nlat, nlon) result (return_value)
-        !----------------------------------------------------------------------
-        ! Dummy arguments
-        !----------------------------------------------------------------------
-        integer (ip), intent (in)  :: nlat
-        integer (ip), intent (in)  :: nlon
-        integer (ip)               :: return_value
-        !----------------------------------------------------------------------
-        ! Local variables
-        !----------------------------------------------------------------------
-        integer (ip)         :: l1, l2
-        type (SpherepackAux) :: sphere_aux
-        !----------------------------------------------------------------------
-
-        call sphere_aux%compute_parity(nlat, nlon, l1, l2)
-
-        return_value = nlat*(3*(l1+l2)-2)+(l1-1)*(l2*(2*nlat-l1)-3*l1)/2+nlon+15
-
-
-    end function get_lshsgs
-
-
-
-    pure function get_lwork(nlat) result (return_value)
-        !----------------------------------------------------------------------
-        ! Dummy arguments
-        !----------------------------------------------------------------------
-        integer (ip), intent (in) :: nlat
-        integer (ip)              :: return_value
-        !----------------------------------------------------------------------
-
-        return_value = 4*nlat*(nlat+2)+2
-
-    end function get_lwork
-
-
-
-    pure function get_ldwork(nlat) result (return_value)
-        !----------------------------------------------------------------------
-        ! Dummy arguments
-        !----------------------------------------------------------------------
-        integer (ip), intent (in)  :: nlat
-        integer (ip)               :: return_value
-        !----------------------------------------------------------------------
-
-        return_value = nlat*(nlat+4)
-
-    end function get_ldwork
-
-
-
-
-    pure function get_legendre_workspace_size(nlat, nlon, nt, isym) result (return_value)
-        !----------------------------------------------------------------------
-        ! Dummy arguments
-        !----------------------------------------------------------------------
-        integer (ip),           intent (in) :: nlat
-        integer (ip),           intent (in) :: nlon
-        integer (ip), optional, intent (in) :: nt
-        integer (ip), optional, intent (in) :: isym
-        integer (ip)                        :: return_value
-        !----------------------------------------------------------------------
-        ! Local variables
-        !----------------------------------------------------------------------
-        integer (ip) :: nt_op, isym_op, l2
-        !----------------------------------------------------------------------
-
-        !
-        !==> Address optional arguments
-        !
-        if (present(nt)) then
-            nt_op = nt
-        else
-            nt_op = 1
-        end if
-
-        if (present(isym)) then
-            isym_op = isym
-        else
-            isym_op = 0
-        end if
-
-        !
-        !==> Compute workspace size
-        !
-        select case (isym)
-            case (0)
-                ! Set workspace size
-                return_value = nlat*nlon*(nt_op+1)
-            case default
-                ! Compute parity
-                select case (mod(nlat, 2))
-                    case (0)
-                        l2 = nlat/2
-                    case default
-                        l2 = (nlat + 1)/2
-                end select
-                ! Set workspace size
-                return_value = l2*nlon*(nt_op+1)
-        end select
-
-    end function get_legendre_workspace_size
-
-
-
-    subroutine shsgs(nlat, nlon, mode, nt, g, idg, jdg, a, b, mdab, ndab, &
+    module subroutine shsgs(nlat, nlon, mode, nt, g, idg, jdg, a, b, mdab, ndab, &
         wshsgs, lshsgs, work, lwork, ierror)
         !----------------------------------------------------------------------
         ! Dummy arguments
@@ -462,7 +315,7 @@ contains
         integer (ip), intent (in)      :: lwork
         integer (ip), intent (out)     :: ierror
         !----------------------------------------------------------------------
-        ! Dummy arguments
+        ! Local variables
         !----------------------------------------------------------------------
         integer (ip) :: mtrunc, l1, l2, lp, iw, lat, late, ifft, ipmn
         !----------------------------------------------------------------------
@@ -537,6 +390,83 @@ contains
 
     end subroutine shsgs
 
+
+    module subroutine shsgsi(nlat, nlon, wshsgs, lshsgs, work, lwork, dwork, ldwork, ierror)
+        !
+        ! Remark:
+        !
+        ! This subroutine must be called before calling shags or shsgs with
+        ! fixed nlat, nlon. it precomputes the gaussian weights, points
+        ! and all necessary legendre polys and stores them in wshsgs.
+        ! these quantities must be preserved when calling shsgs
+        ! repeatedly with fixed nlat, nlon.
+        !
+        !----------------------------------------------------------------------
+        ! Dummy arguments
+        !----------------------------------------------------------------------
+        integer (ip), intent (in)     :: nlat
+        integer (ip), intent (in)     :: nlon
+        real (wp),    intent (in out) :: wshsgs(lshsgs)
+        integer (ip), intent (in)     :: lshsgs
+        real (wp),    intent (in out) :: work(lwork)
+        integer (ip), intent (in)     :: lwork
+        real (wp),    intent (in out) :: dwork(ldwork)
+        integer (ip), intent (in)     :: ldwork
+        integer (ip), intent (out)    :: ierror
+        !----------------------------------------------------------------------
+        ! Local variables
+        !----------------------------------------------------------------------
+        integer (ip) :: ntrunc, l1, l2, lp, ldw, late, ipmnf
+        !----------------------------------------------------------------------
+
+        ! Set triangular truncation limit for spherical harmonic basis
+        ntrunc = min((nlon+2)/2, nlat)
+
+        ! Set equator or nearest point (if excluded) pointer
+        late = (nlat+1)/2
+        l1 = ntrunc
+        l2 = late
+        lp = nlat*(3*(l1+l2)-2)+(l1-1)*(l2*(2*nlat-l1)-3*l1)/2+nlon+15
+
+        !
+        !==> Check validity of input arguments
+        !
+        if (nlat < 3) then
+            ierror = 1
+            return
+        else if (nlon < 4) then
+            ierror = 2
+            return
+        else if (lshsgs < lp) then
+            ierror = 3
+            return
+        else if (lwork < 4*nlat*(nlat+2)+2) then
+            ierror = 4
+            return
+        else if (ldwork < nlat*(nlat+4)) then
+            ierror = 5
+            return
+        else
+            ierror = 0
+        end if
+
+        !
+        !==> set preliminary quantites needed to compute and store legendre polys
+        !
+        ldw = nlat*(nlat+4)
+        call shsgsp(nlat, nlon, wshsgs, lshsgs, dwork, ldwork, ierror)
+
+        ! Check error flag
+        if (ierror /= 0) return
+
+        !
+        !==>  set legendre poly pointer in wshsgs
+        !
+        ipmnf = nlat+2*nlat*late+3*(ntrunc*(ntrunc-1)/2+(nlat-ntrunc)*(ntrunc-1))+nlon+16
+
+        call shsgss1(nlat, ntrunc, late, wshsgs, work, wshsgs(ipmnf))
+
+    end subroutine shsgsi
 
 
     subroutine shsgs1(nlat, nlon, l, lat, mode, gs, idg, jdg, nt, a, b, mdab, &
@@ -790,86 +720,6 @@ contains
     end subroutine shsgs1
 
 
-
-    subroutine shsgsi(nlat, nlon, wshsgs, lshsgs, work, lwork, dwork, ldwork, ierror)
-        !
-        ! Remark:
-        !
-        ! This subroutine must be called before calling shags or shsgs with
-        ! fixed nlat, nlon. it precomputes the gaussian weights, points
-        ! and all necessary legendre polys and stores them in wshsgs.
-        ! these quantities must be preserved when calling shsgs
-        ! repeatedly with fixed nlat, nlon.
-        !
-        !----------------------------------------------------------------------
-        ! Dummy arguments
-        !----------------------------------------------------------------------
-        integer (ip), intent (in)     :: nlat
-        integer (ip), intent (in)     :: nlon
-        real (wp),    intent (in out) :: wshsgs(lshsgs)
-        integer (ip), intent (in)     :: lshsgs
-        real (wp),    intent (in out) :: work(lwork)
-        integer (ip), intent (in)     :: lwork
-        real (wp),    intent (in out) :: dwork(ldwork)
-        integer (ip), intent (in)     :: ldwork
-        integer (ip), intent (out)    :: ierror
-        !----------------------------------------------------------------------
-        ! Dummy arguments
-        !----------------------------------------------------------------------
-        integer (ip) :: ntrunc, l1, l2, lp, ldw, late, ipmnf
-        !----------------------------------------------------------------------
-
-        ! Set triangular truncation limit for spherical harmonic basis
-        ntrunc = min((nlon+2)/2, nlat)
-
-        ! Set equator or nearest point (if excluded) pointer
-        late = (nlat+1)/2
-        l1 = ntrunc
-        l2 = late
-        lp = nlat*(3*(l1+l2)-2)+(l1-1)*(l2*(2*nlat-l1)-3*l1)/2+nlon+15
-
-        !
-        !==> Check validity of input arguments
-        !
-        if (nlat < 3) then
-            ierror = 1
-            return
-        else if (nlon < 4) then
-            ierror = 2
-            return
-        else if (lshsgs < lp) then
-            ierror = 3
-            return
-        else if (lwork < 4*nlat*(nlat+2)+2) then
-            ierror = 4
-            return
-        else if (ldwork < nlat*(nlat+4)) then
-            ierror = 5
-            return
-        else
-            ierror = 0
-        end if
-
-        !
-        !==> set preliminary quantites needed to compute and store legendre polys
-        !
-        ldw = nlat*(nlat+4)
-        call shsgsp(nlat, nlon, wshsgs, lshsgs, dwork, ldwork, ierror)
-
-        ! Check error flag
-        if (ierror /= 0) return
-
-        !
-        !==>  set legendre poly pointer in wshsgs
-        !
-        ipmnf = nlat+2*nlat*late+3*(ntrunc*(ntrunc-1)/2+(nlat-ntrunc)*(ntrunc-1))+nlon+16
-
-        call shsgss1(nlat, ntrunc, late, wshsgs, work, wshsgs(ipmnf))
-
-    end subroutine shsgsi
-
-
-
     subroutine shsgss1(nlat, l, late, w, pmn, pmnf)
         !
         ! Purpose:
@@ -916,7 +766,6 @@ contains
         end do
 
     end subroutine shsgss1
-
 
 
     subroutine shsgsp(nlat, nlon, wshsgs, lshsgs, dwork, ldwork, ierror)
@@ -1109,5 +958,4 @@ contains
     end subroutine shsgsp1
 
 
-
-end module module_shsgs
+end submodule scalar_synthesis_shsgs

@@ -251,7 +251,7 @@ module module_slapes
         wp, & ! working precision
         ip ! integer precision
 
-    use module_shses, only: &
+    use scalar_synthesis_routines, only: &
         shses
 
     ! Explicit typing only

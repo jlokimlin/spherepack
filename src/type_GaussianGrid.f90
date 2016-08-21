@@ -56,9 +56,9 @@ contains
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        integer (ip),         intent (in)     :: nlat !! number of latitudinal points 0 <= theta <= pi
-        integer (ip),         intent (in)     :: nlon !! number of longitudinal points 0 <= phi <= 2*pi
-        type (GaussianGrid)                   :: return_value
+        integer (ip), intent (in) :: nlat !! number of latitudinal points 0 <= theta <= pi
+        integer (ip), intent (in) :: nlon !! number of longitudinal points 0 <= phi <= 2*pi
+        type (GaussianGrid)       :: return_value
         !----------------------------------------------------------------------
 
         call return_value%create(nlat, nlon)
@@ -184,7 +184,7 @@ contains
         !----------------------------------------------------------------------
 
         ! Check input argument
-        if ( nlat <= 0 ) then
+        if (nlat <= 0) then
             error stop 'Object of class (GaussianGrid): '&
                 //'invalid argument nlat <= 0 '&
                 //'in get_equally_spaced_latitudes'

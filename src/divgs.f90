@@ -229,7 +229,7 @@ module module_divgs
         wp, & ! working precision
         ip ! integer precision
 
-    use module_shsgs, only: &
+    use scalar_synthesis_routines, only: &
         shsgs
 
     ! Explicit typing only

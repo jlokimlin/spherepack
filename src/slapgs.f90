@@ -240,7 +240,7 @@ module module_slapgs
         wp, & ! working precision
         ip ! integer precision
 
-    use module_shsgs, only: &
+    use scalar_synthesis_routines, only: &
         shsgs
 
     ! Explicit typing only

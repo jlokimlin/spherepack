@@ -291,160 +291,11 @@
 !            = 4  error in the specification of lwork
 !            = 5  error in the specification of ldwork
 !
-module module_shses
-
-    use spherepack_precision, only: &
-        wp, & ! working precision
-        ip ! integer precision
-
-    use type_HFFTpack, only: &
-        HFFTpack
-
-    use type_SpherepackAux, only: &
-        SpherepackAux
-
-    ! Explicit typing only
-    implicit none
-
-    ! Everything is private unless stated otherwise
-    public :: shses
-    public :: shsesi
-    public :: ShsesAux
-
-    ! Declare derived data type
-    type, public :: ShsesAux
-        !-----------------------------------------
-        ! Type components
-        !-----------------------------------------
-    contains
-        !-----------------------------------------
-        ! Type-bound procedures
-        !-----------------------------------------
-        procedure, nopass :: shses
-        procedure, nopass :: shsesi
-        procedure, nopass :: get_lshses
-        procedure, nopass :: get_lwork
-        procedure, nopass :: get_ldwork
-        procedure, nopass :: get_legendre_workspace_size
-        !-----------------------------------------
-    end type ShsesAux
-
+submodule (scalar_synthesis_routines) scalar_synthesis_shses
 
 contains
 
-
-    pure function get_lshses(nlat, nlon) result (return_value)
-        !----------------------------------------------------------------------
-        ! Dummy arguments
-        !----------------------------------------------------------------------
-        integer (ip), intent (in)  :: nlat
-        integer (ip), intent (in)  :: nlon
-        integer (ip)               :: return_value
-        !----------------------------------------------------------------------
-        ! Local variables
-        !----------------------------------------------------------------------
-        integer (ip)         :: l1, l2
-        type (SpherepackAux) :: sphere_aux
-        !----------------------------------------------------------------------
-
-        call sphere_aux%compute_parity(nlat, nlon, l1, l2)
-
-        return_value = (l1*l2*(2*nlat-l1+1))/2+nlon+15
-
-    end function get_lshses
-
-
-
-    pure function get_lwork(nlat, nlon) result (return_value)
-        !----------------------------------------------------------------------
-        ! Dummy arguments
-        !----------------------------------------------------------------------
-        integer (ip), intent (in)  :: nlat
-        integer (ip), intent (in)  :: nlon
-        integer (ip)               :: return_value
-        !----------------------------------------------------------------------
-        ! Local variables
-        !----------------------------------------------------------------------
-        integer (ip)         :: l1, l2
-        type (SpherepackAux) :: sphere_aux
-        !----------------------------------------------------------------------
-
-        call sphere_aux%compute_parity(nlat, nlon, l1, l2)
-
-        return_value = 5*nlat*l2+3*((l1-2)*(2*nlat-l1-1))/2
-
-    end function get_lwork
-
-
-
-    pure function get_ldwork(nlat) result (return_value)
-        !----------------------------------------------------------------------
-        ! Dummy arguments
-        !----------------------------------------------------------------------
-        integer (ip), intent (in)  :: nlat
-        integer (ip)               :: return_value
-        !----------------------------------------------------------------------
-
-        return_value = nlat + 1
-
-    end function get_ldwork
-
-
-
-
-    pure function get_legendre_workspace_size(nlat, nlon, nt, ityp) result (return_value)
-        !----------------------------------------------------------------------
-        ! Dummy arguments
-        !----------------------------------------------------------------------
-        integer (ip),           intent (in) :: nlat
-        integer (ip),           intent (in) :: nlon
-        integer (ip), optional, intent (in) :: nt
-        integer (ip), optional, intent (in) :: ityp
-        integer (ip)                        :: return_value
-        !----------------------------------------------------------------------
-        ! Local variables
-        !----------------------------------------------------------------------
-        integer (ip) :: nt_op, ityp_op, l2
-        !----------------------------------------------------------------------
-
-        !
-        !==> Address optional arguments
-        !
-        if (present(nt)) then
-            nt_op = nt
-        else
-            nt_op = 1
-        end if
-
-        if (present(ityp)) then
-            ityp_op = ityp
-        else
-            ityp_op = 0
-        end if
-
-        !
-        !==> Compute workspace size
-        !
-        if (ityp_op <= 2) then
-            ! Set workspace size
-            return_value = (2*nt_op+1)*nlat*nlon
-        else
-            ! Compute parity
-            select case (mod(nlat, 2))
-                case (0)
-                    l2 = nlat/2
-                case default
-                    l2 = (nlat + 1)/2
-            end select
-            ! Set workspace size
-            return_value = (2*nt_op+1)*l2*nlon
-        end if
-
-    end function get_legendre_workspace_size
-
-
-
-    subroutine shses(nlat,nlon,isym,nt,g,idg,jdg,a,b,mdab,ndab, &
+    module subroutine shses(nlat,nlon,isym,nt,g,idg,jdg,a,b,mdab,ndab, &
         wshses,lshses,work,lwork,ierror)
         !----------------------------------------------------------------------
         ! Dummy arguments
@@ -533,14 +384,71 @@ contains
             iw2 => nln+1, &
             iw3 => lpimn+1 &
             )
-
             call shses1(nlat,isym,nt,g,idg,jdg,a,b,mdab,ndab,wshses,imid, &
                 ls,nlon,work,work(iw1),work(iw2),wshses(iw3))
-
         end associate
 
     end subroutine shses
 
+
+    module subroutine shsesi(nlat,nlon,wshses,lshses,work,lwork,dwork, &
+        ldwork,ierror)
+        !----------------------------------------------------------------------
+        ! Dummy arguments
+        !----------------------------------------------------------------------
+        integer (ip), intent (in)  :: nlat
+        integer (ip), intent (in)  :: nlon
+        real (wp),    intent (out) :: wshses(lshses)
+        integer (ip), intent (in)  :: lshses
+        real (wp),    intent (out) :: work(lwork)
+        integer (ip), intent (in)  :: lwork
+        real (wp),    intent (out) :: dwork(ldwork)
+        integer (ip), intent (in)  :: ldwork
+        integer (ip), intent (out) :: ierror
+        !----------------------------------------------------------------------
+        ! Local variables
+        !----------------------------------------------------------------------
+        integer (ip)         :: imid, labc, lpimn, mmax
+        type (HFFTpack)      :: hfft
+        type (SpherepackAux) :: sphere_aux
+        !----------------------------------------------------------------------
+
+        mmax = min(nlat,nlon/2+1)
+        imid = (nlat+1)/2
+        lpimn = (imid*mmax*(2*nlat-mmax+1))/2
+        labc = 3*((mmax-2)*(2*nlat-mmax-1))/2
+
+        !
+        !==> Check validity of input arguments
+        !
+        if (nlat < 3) then
+            ierror = 1
+            return
+        else if (nlon < 4) then
+            ierror = 2
+            return
+        else if (lshses < lpimn+nlon+15) then
+            ierror = 3
+            return
+        else if (lwork < 5*nlat*imid + labc) then
+            ierror = 4
+            return
+        else if (ldwork < nlat+1) then
+            ierror = 5
+            return
+        else
+            ierror = 0
+        end if
+
+        associate( &
+            iw1 => 3*nlat*imid+1, &
+            iw2 => lpimn+1 &
+            )
+            call sphere_aux%ses1(nlat, nlon, imid, wshses, work, work(iw1), dwork)
+            call hfft%initialize(nlon, wshses(iw2))
+        end associate
+
+    end subroutine shsesi
 
 
     subroutine shses1(nlat,isym,nt,g,idgs,jdgs,a,b,mdab,ndab,p,imid, &
@@ -716,69 +624,4 @@ contains
     end subroutine shses1
 
 
-
-
-    subroutine shsesi(nlat,nlon,wshses,lshses,work,lwork,dwork, &
-        ldwork,ierror)
-        !----------------------------------------------------------------------
-        ! Dummy arguments
-        !----------------------------------------------------------------------
-        integer (ip), intent (in)  :: nlat
-        integer (ip), intent (in)  :: nlon
-        real (wp),    intent (out) :: wshses(lshses)
-        integer (ip), intent (in)  :: lshses
-        real (wp),    intent (out) :: work(lwork)
-        integer (ip), intent (in)  :: lwork
-        real (wp),    intent (out) :: dwork(ldwork)
-        integer (ip), intent (in)  :: ldwork
-        integer (ip), intent (out) :: ierror
-        !----------------------------------------------------------------------
-        ! Local variables
-        !----------------------------------------------------------------------
-        integer (ip)         :: imid, labc, lpimn, mmax
-        type (HFFTpack)      :: hfft
-        type (SpherepackAux) :: sphere_aux
-        !----------------------------------------------------------------------
-
-        mmax = min(nlat,nlon/2+1)
-        imid = (nlat+1)/2
-        lpimn = (imid*mmax*(2*nlat-mmax+1))/2
-        labc = 3*((mmax-2)*(2*nlat-mmax-1))/2
-
-        !
-        !==> Check validity of input arguments
-        !
-        if (nlat < 3) then
-            ierror = 1
-            return
-        else if (nlon < 4) then
-            ierror = 2
-            return
-        else if (lshses < lpimn+nlon+15) then
-            ierror = 3
-            return
-        else if (lwork < 5*nlat*imid + labc) then
-            ierror = 4
-            return
-        else if (ldwork < nlat+1) then
-            ierror = 5
-            return
-        else
-            ierror = 0
-        end if
-
-
-        associate( &
-            iw1 => 3*nlat*imid+1, &
-            iw2 => lpimn+1 &
-            )
-
-            call sphere_aux%ses1(nlat, nlon, imid, wshses, work, work(iw1), dwork)
-            call hfft%initialize(nlon, wshses(iw2))
-
-        end associate
-
-    end subroutine shsesi
-
-
-end module module_shses
+end submodule scalar_synthesis_shses

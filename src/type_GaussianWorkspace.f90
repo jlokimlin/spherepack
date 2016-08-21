@@ -10,7 +10,7 @@ module type_GaussianWorkspace
     use scalar_analysis_routines, only: &
         ShagsAux
 
-    use module_shsgs, only: &
+    use scalar_synthesis_routines, only: &
         ShsgsAux
 
     use module_vhags, only: &

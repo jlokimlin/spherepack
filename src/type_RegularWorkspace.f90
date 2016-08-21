@@ -10,7 +10,7 @@ module type_RegularWorkspace
     use scalar_analysis_routines, only: &
         ShaesAux
 
-    use module_shses, only: &
+    use scalar_synthesis_routines, only: &
         ShsesAux
 
     use module_vhaes, only: &
@@ -50,18 +50,12 @@ module type_RegularWorkspace
         !----------------------------------------------------------------------
     end type RegularWorkspace
 
-
-
     ! Declare constructor
     interface RegularWorkspace
         module procedure regular_workspace_constructor
     end interface
 
-
-
 contains
-
-
 
     function regular_workspace_constructor(nlat, nlon) result (return_value)
         !----------------------------------------------------------------------
@@ -75,7 +69,6 @@ contains
         call return_value%create(nlat, nlon)
 
     end function regular_workspace_constructor
-
 
 
     subroutine copy_regular_workspace(this, object_to_be_copied)

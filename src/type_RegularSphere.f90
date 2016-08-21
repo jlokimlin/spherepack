@@ -24,7 +24,7 @@ module type_RegularSphere
     use scalar_analysis_routines, only: &
         ShaesAux
 
-    use module_shses, only: &
+    use scalar_synthesis_routines, only: &
         ShsesAux
 
     use module_vhaes, only: &
