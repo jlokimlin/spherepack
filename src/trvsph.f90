@@ -289,7 +289,7 @@
 !     igrida(2) = 0.  ua must be dimensioned nlata by nlona in the program
 !     calling trvsph if igrida(2) = 1.  if ua is not properly dimensioned
 !     and if the latitude (colatitude) values do not run south to north or
-!     north to south as flagged by igrida(1) (this cannot be checked!) then
+!     north to south as flagged by igrida(1) (self cannot be checked!) then
 !     incorrect results will be produced.
 !
 !
@@ -301,7 +301,7 @@
 !     dimensioned nlata by nlona in the program calling trvsph if
 !     igrida(2)=1.  if va is not properly dimensioned or if the latitude
 !     (colatitude) values do not run south to north or north to south
-!     as flagged by igrida(1) (this cannot be checked!) then incorrect
+!     as flagged by igrida(1) (self cannot be checked!) then incorrect
 !     results will be produced.
 !
 ! ... igridb
@@ -446,7 +446,7 @@
 !     igridb(2)=0.  ub must be dimensioned nlatb by nlonb in the program
 !     calling trvsph if igridb(2)=1.  if ub is not properly dimensioned
 !     and if the latitude (colatitude) values do not run south to north or
-!     north to south as flagged by igrdb(1) (this cannot be checked!) then
+!     north to south as flagged by igrdb(1) (self cannot be checked!) then
 !     incorrect results will be produced.
 !
 !
@@ -458,7 +458,7 @@
 !     igridb(2)=0.  vb must be dimensioned nlatb by nlonb in the program
 !     calling trvsph if igridb(2)=1.  if vb is not properly dimensioned
 !     and if the latitude (colatitude) values do not run south to north or
-!     north to south as flagged by igrdb(1) (this cannot be checked!) then
+!     north to south as flagged by igrdb(1) (self cannot be checked!) then
 !     incorrect results will be produced.
 !
 ! ... lsvmin

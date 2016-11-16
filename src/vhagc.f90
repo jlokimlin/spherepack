@@ -346,41 +346,41 @@ contains
 subroutine vhagc(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
            mdab, ndab, wvhagc, lvhagc, work, lwork, ierror)
 
-real (wp) :: bi
-real (wp) :: br
-real (wp) :: ci
-real (wp) :: cr
-integer (ip) :: idv
-integer (ip) :: idvw
-integer (ip) :: ierror
-integer (ip) :: imid
-integer (ip) :: ist
-integer (ip) :: ityp
-integer (ip) :: iw1
-integer (ip) :: iw2
-integer (ip) :: iw3
-integer (ip) :: iw4
-integer (ip) :: iw5
-integer (ip) :: jdvw
-integer (ip) :: jw1
-integer (ip) :: jw2
-integer (ip) :: jw3
-integer (ip) :: labc
-integer (ip) :: lnl
-integer (ip) :: lvhagc
-integer (ip) :: lwork
-integer (ip) :: lwzvin
-integer (ip) :: lzz1
-integer (ip) :: mdab
-integer (ip) :: mmax
-integer (ip) :: ndab
-integer (ip) :: nlat
-integer (ip) :: nlon
-integer (ip) :: nt
-real (wp) :: v
-real (wp) :: w
-real (wp) :: work(lwork)
-real (wp) :: wvhagc(lvhagc)
+real(wp) :: bi
+real(wp) :: br
+real(wp) :: ci
+real(wp) :: cr
+integer(ip) :: idv
+integer(ip) :: idvw
+integer(ip) :: ierror
+integer(ip) :: imid
+integer(ip) :: ist
+integer(ip) :: ityp
+integer(ip) :: iw1
+integer(ip) :: iw2
+integer(ip) :: iw3
+integer(ip) :: iw4
+integer(ip) :: iw5
+integer(ip) :: jdvw
+integer(ip) :: jw1
+integer(ip) :: jw2
+integer(ip) :: jw3
+integer(ip) :: labc
+integer(ip) :: lnl
+integer(ip) :: lvhagc
+integer(ip) :: lwork
+integer(ip) :: lwzvin
+integer(ip) :: lzz1
+integer(ip) :: mdab
+integer(ip) :: mmax
+integer(ip) :: ndab
+integer(ip) :: nlat
+integer(ip) :: nlon
+integer(ip) :: nt
+real(wp) :: v
+real(wp) :: w
+real(wp) :: work(lwork)
+real(wp) :: wvhagc(lvhagc)
 dimension v(idvw, jdvw, *), w(idvw, jdvw, *), br(mdab, ndab, *), &
           bi(mdab, ndab, *), cr(mdab, ndab, *), ci(mdab, ndab, *)
 
@@ -434,69 +434,69 @@ contains
 subroutine vhagc1(nlat, nlon, ityp, nt, imid, idvw, jdvw, v, w, mdab, &
 ndab, br, bi, cr, ci, idv, ve, vo, we, wo, vb, wb, wts, wvbin, wwbin, wrfft)
 
-real (wp) :: bi
-real (wp) :: br
-real (wp) :: ci
-real (wp) :: cr
-real (wp) :: fsn
-integer (ip) :: i
-integer (ip) :: idv
-integer (ip) :: idvw
-integer (ip) :: imid
-integer (ip) :: imm1
-integer (ip) :: ityp
-integer (ip) :: itypp
-integer (ip) :: iv
-integer (ip) :: iw
-integer (ip) :: j
-integer (ip) :: jdvw
-integer (ip) :: k
-integer (ip) :: m
-integer (ip) :: mdab
-integer (ip) :: mlat
-integer (ip) :: mlon
-integer (ip) :: mmax
-integer (ip) :: mp1
-integer (ip) :: mp2
-integer (ip) :: ndab
-integer (ip) :: ndo1
-integer (ip) :: ndo2
-integer (ip) :: nlat
-integer (ip) :: nlon
-integer (ip) :: nlp1
-integer (ip) :: np1
-integer (ip) :: nt
-real (wp) :: tsn
-real (wp) :: tv
-real (wp) :: tve1
-real (wp) :: tve2
-real (wp) :: tvo1
-real (wp) :: tvo2
-real (wp) :: tw
-real (wp) :: twe1
-real (wp) :: twe2
-real (wp) :: two1
-real (wp) :: two2
-real (wp) :: v
-real (wp) :: vb
-real (wp) :: ve
-real (wp) :: vo
-real (wp) :: w
-real (wp) :: wb
-real (wp) :: we
-real (wp) :: wo
-real (wp) :: wrfft
-real (wp) :: wts
-real (wp) :: wvbin
-real (wp) :: wwbin
+real(wp) :: bi
+real(wp) :: br
+real(wp) :: ci
+real(wp) :: cr
+real(wp) :: fsn
+integer(ip) :: i
+integer(ip) :: idv
+integer(ip) :: idvw
+integer(ip) :: imid
+integer(ip) :: imm1
+integer(ip) :: ityp
+integer(ip) :: itypp
+integer(ip) :: iv
+integer(ip) :: iw
+integer(ip) :: j
+integer(ip) :: jdvw
+integer(ip) :: k
+integer(ip) :: m
+integer(ip) :: mdab
+integer(ip) :: mlat
+integer(ip) :: mlon
+integer(ip) :: mmax
+integer(ip) :: mp1
+integer(ip) :: mp2
+integer(ip) :: ndab
+integer(ip) :: ndo1
+integer(ip) :: ndo2
+integer(ip) :: nlat
+integer(ip) :: nlon
+integer(ip) :: nlp1
+integer(ip) :: np1
+integer(ip) :: nt
+real(wp) :: tsn
+real(wp) :: tv
+real(wp) :: tve1
+real(wp) :: tve2
+real(wp) :: tvo1
+real(wp) :: tvo2
+real(wp) :: tw
+real(wp) :: twe1
+real(wp) :: twe2
+real(wp) :: two1
+real(wp) :: two2
+real(wp) :: v
+real(wp) :: vb
+real(wp) :: ve
+real(wp) :: vo
+real(wp) :: w
+real(wp) :: wb
+real(wp) :: we
+real(wp) :: wo
+real(wp) :: wrfft
+real(wp) :: wts
+real(wp) :: wvbin
+real(wp) :: wwbin
 dimension v(idvw, jdvw, *), w(idvw, jdvw, *), br(mdab, ndab, *), &
           bi(mdab, ndab, *), cr(mdab, ndab, *), ci(mdab, ndab, *), &
           ve(idv, nlon, *), vo(idv, nlon, *), we(idv, nlon, *), &
           wo(idv, nlon, *), wts(*), wvbin(*), wwbin(*), wrfft(*), &
           vb(imid, nlat, 3), wb(imid, nlat, 3)
 
-type (HFFTpack)      :: hfft
-type (SpherepackAux) :: sphere_aux
+type(HFFTpack)      :: hfft
+type(SpherepackAux) :: sphere_aux
 
 nlp1 = nlat+1
 tsn = 2.0_wp/nlon
@@ -1125,30 +1125,30 @@ end subroutine vhagc
 
 subroutine vhagci(nlat, nlon, wvhagc, lvhagc, dwork, ldwork, ierror)
 
-integer (ip) :: ierror
-integer (ip) :: imid
-integer (ip) :: iw1
-integer (ip) :: iw2
-integer (ip) :: iw3
-integer (ip) :: iwrk
-integer (ip) :: jw1
-integer (ip) :: jw2
-integer (ip) :: jw3
-integer (ip) :: labc
-integer (ip) :: ldwork
-integer (ip) :: lvhagc
-integer (ip) :: lwk
-integer (ip) :: lwvbin
-integer (ip) :: lzz1
-integer (ip) :: mmax
-integer (ip) :: nlat
-integer (ip) :: nlon
-real (wp) :: wvhagc(lvhagc)
-real (wp) :: dwork(ldwork)
-real (wp) :: dummy_variable
+integer(ip) :: ierror
+integer(ip) :: imid
+integer(ip) :: iw1
+integer(ip) :: iw2
+integer(ip) :: iw3
+integer(ip) :: iwrk
+integer(ip) :: jw1
+integer(ip) :: jw2
+integer(ip) :: jw3
+integer(ip) :: labc
+integer(ip) :: ldwork
+integer(ip) :: lvhagc
+integer(ip) :: lwk
+integer(ip) :: lwvbin
+integer(ip) :: lzz1
+integer(ip) :: mmax
+integer(ip) :: nlat
+integer(ip) :: nlon
+real(wp) :: wvhagc(lvhagc)
+real(wp) :: dwork(ldwork)
+real(wp) :: dummy_variable
 
-type (HFFTpack)      :: hfft
-type (SpherepackAux) :: sphere_aux
+type(HFFTpack)      :: hfft
+type(SpherepackAux) :: sphere_aux
 
 ierror = 1
 if (nlat < 3) return
@@ -1204,9 +1204,9 @@ end subroutine vhagci
 
 subroutine setwts(imid, dwts, wts)
 
-integer (ip), intent (in)  :: imid
-real (wp),    intent (in)  :: dwts(imid)
-real (wp),    intent (out) :: wts(imid)
+integer(ip), intent(in)  :: imid
+real(wp),    intent(in)  :: dwts(imid)
+real(wp),    intent(out) :: wts(imid)
 !
 !     set first imid =(nlat+1)/2 of real weights in dwts
 !     as single precision in wts

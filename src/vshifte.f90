@@ -583,7 +583,7 @@ contains
 
     subroutine vhifth(m, n, r, wsav, work)
 
-        type (HFFTpack) :: hfft
+        type(HFFTpack) :: hfft
         integer m, n, n2, k, l
         real r(m, n), wsav(*), work(*), r2km2, r2km1
         n2 = (n+1)/2
@@ -622,7 +622,7 @@ contains
 
 
 
-        type (HFFTpack) :: hfft
+        type(HFFTpack) :: hfft
         integer n, n2, k
         real wsav(*), dp
 

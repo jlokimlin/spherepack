@@ -372,14 +372,14 @@ contains
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        integer (ip), intent (in)  :: nlat
-        integer (ip), intent (in)  :: nlon
-        integer (ip)               :: return_value
+        integer(ip), intent(in)  :: nlat
+        integer(ip), intent(in)  :: nlon
+        integer(ip)               :: return_value
         !----------------------------------------------------------------------
         ! Local variables
         !----------------------------------------------------------------------
-        integer (ip)         :: l1, l2
-        type (SpherepackAux) :: sphere_aux
+        integer(ip)         :: l1, l2
+        type(SpherepackAux) :: sphere_aux
         !----------------------------------------------------------------------
 
         call sphere_aux%compute_parity(nlat, nlon, l1, l2)
@@ -394,14 +394,14 @@ contains
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        integer (ip), intent (in)  :: nlat
-        integer (ip), intent (in)  :: nlon
-        integer (ip)               :: return_value
+        integer(ip), intent(in)  :: nlat
+        integer(ip), intent(in)  :: nlon
+        integer(ip)               :: return_value
         !----------------------------------------------------------------------
         ! Local variables
         !----------------------------------------------------------------------
-        integer (ip)         :: l1, l2
-        type (SpherepackAux) :: sphere_aux
+        integer(ip)         :: l1, l2
+        type(SpherepackAux) :: sphere_aux
         !----------------------------------------------------------------------
 
         call sphere_aux%compute_parity(nlat, nlon, l1, l2)
@@ -416,8 +416,8 @@ contains
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        integer (ip), intent (in)  :: nlat
-        integer (ip)               :: return_value
+        integer(ip), intent(in)  :: nlat
+        integer(ip)               :: return_value
         !----------------------------------------------------------------------
 
         return_value = 2*(nlat+1)
@@ -430,15 +430,15 @@ contains
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        integer (ip),           intent (in) :: nlat
-        integer (ip),           intent (in) :: nlon
-        integer (ip), optional, intent (in) :: nt
-        integer (ip), optional, intent (in) :: ityp
-        integer (ip)                        :: return_value
+        integer(ip),           intent(in) :: nlat
+        integer(ip),           intent(in) :: nlon
+        integer(ip), optional, intent(in) :: nt
+        integer(ip), optional, intent(in) :: ityp
+        integer(ip)                        :: return_value
         !----------------------------------------------------------------------
         ! Local variables
         !----------------------------------------------------------------------
-        integer (ip) :: nt_op, ityp_op, l2
+        integer(ip) :: nt_op, ityp_op, l2
         !----------------------------------------------------------------------
 
         !
@@ -482,30 +482,30 @@ contains
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        integer (ip), intent (in)  :: nlat
-        integer (ip), intent (in)  :: nlon
-        integer (ip), intent (in)  :: ityp
-        integer (ip), intent (in)  :: nt
-        real (wp),    intent (in)  :: v(idvw, jdvw, nt)
-        real (wp),    intent (in)  :: w(idvw, jdvw, nt)
-        integer (ip), intent (in)  :: idvw
-        integer (ip), intent (in)  :: jdvw
-        real (wp),    intent (out) :: br(mdab, ndab, nt)
-        real (wp),    intent (out) :: bi(mdab, ndab, nt)
-        real (wp),    intent (out) :: cr(mdab, ndab, nt)
-        real (wp),    intent (out) :: ci(mdab, ndab, nt)
-        integer (ip), intent (in)  :: mdab
-        integer (ip), intent (in)  :: ndab
-        real (wp),    intent (in)  :: wvhaes(lvhaes)
-        integer (ip), intent (in)  :: lvhaes
-        real (wp),    intent (out) :: work(lwork)
-        integer (ip), intent (in)  :: lwork
-        integer (ip), intent (out) :: ierror
+        integer(ip), intent(in)  :: nlat
+        integer(ip), intent(in)  :: nlon
+        integer(ip), intent(in)  :: ityp
+        integer(ip), intent(in)  :: nt
+        real(wp),    intent(in)  :: v(idvw, jdvw, nt)
+        real(wp),    intent(in)  :: w(idvw, jdvw, nt)
+        integer(ip), intent(in)  :: idvw
+        integer(ip), intent(in)  :: jdvw
+        real(wp),    intent(out) :: br(mdab, ndab, nt)
+        real(wp),    intent(out) :: bi(mdab, ndab, nt)
+        real(wp),    intent(out) :: cr(mdab, ndab, nt)
+        real(wp),    intent(out) :: ci(mdab, ndab, nt)
+        integer(ip), intent(in)  :: mdab
+        integer(ip), intent(in)  :: ndab
+        real(wp),    intent(in)  :: wvhaes(lvhaes)
+        integer(ip), intent(in)  :: lvhaes
+        real(wp),    intent(out) :: work(lwork)
+        integer(ip), intent(in)  :: lwork
+        integer(ip), intent(out) :: ierror
         !----------------------------------------------------------------------
         ! Local variables
         !----------------------------------------------------------------------
-        integer (ip) :: idv, imid, idz, ist, lnl, lzimn, mmax
-        integer (ip) :: workspace_indices(6)
+        integer(ip) :: idv, imid, idz, ist, lnl, lzimn, mmax
+        integer(ip) :: workspace_indices(6)
         !----------------------------------------------------------------------
 
         imid = (nlat+1)/2
@@ -586,10 +586,10 @@ contains
             !----------------------------------------------------------------------
             ! Dummy arguments
             !----------------------------------------------------------------------
-            integer (ip), intent (in)  :: ist
-            integer (ip), intent (in)  :: lnl
-            integer (ip), intent (in)  :: lzimn
-            integer (ip)               :: return_value(6)
+            integer(ip), intent(in)  :: ist
+            integer(ip), intent(in)  :: lnl
+            integer(ip), intent(in)  :: lzimn
+            integer(ip)               :: return_value(6)
             !----------------------------------------------------------------------
 
             associate( i => return_value )
@@ -611,38 +611,38 @@ contains
             !----------------------------------------------------------------------
             ! Dummy arguments
             !----------------------------------------------------------------------
-            integer (ip), intent (in)  :: nlat
-            integer (ip), intent (in)  :: nlon
-            integer (ip), intent (in)  :: ityp
-            integer (ip), intent (in)  :: nt
-            integer (ip), intent (in)  :: imid
-            integer (ip), intent (in)  :: idvw
-            integer (ip), intent (in)  :: jdvw
-            real (wp),    intent (in)  :: v(idvw, jdvw,*)
-            real (wp),    intent (in)  :: w(idvw, jdvw,*)
-            integer (ip), intent (in)  :: mdab
-            integer (ip), intent (in)  :: ndab
-            real (wp),    intent (out) :: br(mdab, ndab, nt)
-            real (wp),    intent (out) :: bi(mdab, ndab, nt)
-            real (wp),    intent (out) :: cr(mdab, ndab, nt)
-            real (wp),    intent (out) :: ci(mdab, ndab, nt)
-            integer (ip), intent (in)  :: idv
-            real (wp),    intent (out) :: ve(idv, nlon, nt)
-            real (wp),    intent (out) :: vo(idv, nlon, nt)
-            real (wp),    intent (out) :: we(idv, nlon, nt)
-            real (wp),    intent (out) :: wo(idv, nlon, nt)
-            real (wp),    intent (out) :: work(*)
-            integer (ip), intent (in)  :: idz
-            real (wp),    intent (in)  :: zv(idz, *)
-            real (wp),    intent (in)  :: zw(idz, *)
-            real (wp),    intent (in)  :: wrfft(*)
+            integer(ip), intent(in)  :: nlat
+            integer(ip), intent(in)  :: nlon
+            integer(ip), intent(in)  :: ityp
+            integer(ip), intent(in)  :: nt
+            integer(ip), intent(in)  :: imid
+            integer(ip), intent(in)  :: idvw
+            integer(ip), intent(in)  :: jdvw
+            real(wp),    intent(in)  :: v(idvw, jdvw,*)
+            real(wp),    intent(in)  :: w(idvw, jdvw,*)
+            integer(ip), intent(in)  :: mdab
+            integer(ip), intent(in)  :: ndab
+            real(wp),    intent(out) :: br(mdab, ndab, nt)
+            real(wp),    intent(out) :: bi(mdab, ndab, nt)
+            real(wp),    intent(out) :: cr(mdab, ndab, nt)
+            real(wp),    intent(out) :: ci(mdab, ndab, nt)
+            integer(ip), intent(in)  :: idv
+            real(wp),    intent(out) :: ve(idv, nlon, nt)
+            real(wp),    intent(out) :: vo(idv, nlon, nt)
+            real(wp),    intent(out) :: we(idv, nlon, nt)
+            real(wp),    intent(out) :: wo(idv, nlon, nt)
+            real(wp),    intent(out) :: work(*)
+            integer(ip), intent(in)  :: idz
+            real(wp),    intent(in)  :: zv(idz, *)
+            real(wp),    intent(in)  :: zw(idz, *)
+            real(wp),    intent(in)  :: wrfft(*)
             !----------------------------------------------------------------------
             ! Local variables
             !----------------------------------------------------------------------
-            integer (ip)    :: i,imm1, j, k, m, mb, mlat, mlon
-            integer (ip)    :: mmax, mp1, mp2, ndo1, ndo2,  nlp1, np1
-            real (wp)       :: fsn, tsn
-            type (HFFTpack) :: hfft
+            integer(ip)    :: i,imm1, j, k, m, mb, mlat, mlon
+            integer(ip)    :: mmax, mp1, mp2, ndo1, ndo2,  nlp1, np1
+            real(wp)       :: fsn, tsn
+            type(HFFTpack) :: hfft
             !----------------------------------------------------------------------
 
             nlp1 = nlat+1
@@ -1314,21 +1314,21 @@ contains
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        integer (ip), intent (in)  :: nlat
-        integer (ip), intent (in)  :: nlon
-        real (wp),    intent (out) :: wvhaes(lvhaes)
-        integer (ip), intent (in)  :: lvhaes
-        real (wp),    intent (out) :: work(lwork)
-        integer (ip), intent (in)  :: lwork
-        real (wp),    intent (out) :: dwork(ldwork)
-        integer (ip), intent (in)  :: ldwork
-        integer (ip), intent (out) :: ierror
+        integer(ip), intent(in)  :: nlat
+        integer(ip), intent(in)  :: nlon
+        real(wp),    intent(out) :: wvhaes(lvhaes)
+        integer(ip), intent(in)  :: lvhaes
+        real(wp),    intent(out) :: work(lwork)
+        integer(ip), intent(in)  :: lwork
+        real(wp),    intent(out) :: dwork(ldwork)
+        integer(ip), intent(in)  :: ldwork
+        integer(ip), intent(out) :: ierror
         !----------------------------------------------------------------------
         ! Local variables
         !----------------------------------------------------------------------
-        integer (ip)    :: imid, labc, lzimn, mmax
-        integer (ip)    :: workspace_indices(4)
-        type (HFFTpack) :: hfft
+        integer(ip)    :: imid, labc, lzimn, mmax
+        integer(ip)    :: workspace_indices(4)
+        type(HFFTpack) :: hfft
         !----------------------------------------------------------------------
 
         mmax = min(nlat, (nlon+1)/2)
@@ -1382,11 +1382,11 @@ contains
             !----------------------------------------------------------------------
             ! Dummy arguments
             !----------------------------------------------------------------------
-            integer (ip), intent (in)  :: lzimn
-            integer (ip), intent (in)  :: nlat
-            integer (ip), intent (in)  :: imid
-            integer (ip), intent (in)  :: mmax
-            integer (ip)               :: return_value(4)
+            integer(ip), intent(in)  :: lzimn
+            integer(ip), intent(in)  :: nlat
+            integer(ip), intent(in)  :: imid
+            integer(ip), intent(in)  :: mmax
+            integer(ip)               :: return_value(4)
             !----------------------------------------------------------------------
 
             associate( i => return_value )
@@ -1405,20 +1405,20 @@ contains
             !----------------------------------------------------------------------
             ! Dummy arguments
             !----------------------------------------------------------------------
-            integer (ip), intent (in)  :: nlat
-            integer (ip), intent (in)  :: nlon
-            integer (ip), intent (in)  :: imid
-            real (wp),    intent (out) :: zv(idz,*)
-            real (wp),    intent (out) :: zw(idz,*)
-            integer (ip), intent (in)  :: idz
-            real (wp),    intent (out) :: zin(imid, nlat, 3)
-            real (wp),    intent (out) :: wzvin(*)
-            real (wp),    intent (out) :: dwork(*)
+            integer(ip), intent(in)  :: nlat
+            integer(ip), intent(in)  :: nlon
+            integer(ip), intent(in)  :: imid
+            real(wp),    intent(out) :: zv(idz,*)
+            real(wp),    intent(out) :: zw(idz,*)
+            integer(ip), intent(in)  :: idz
+            real(wp),    intent(out) :: zin(imid, nlat, 3)
+            real(wp),    intent(out) :: wzvin(*)
+            real(wp),    intent(out) :: dwork(*)
             !----------------------------------------------------------------------
             ! Local variables
             !----------------------------------------------------------------------
-            integer (ip)         :: i3, m, mn, mp1, np1, mmax
-            type (SpherepackAux) :: sphere_aux
+            integer(ip)         :: i3, m, mn, mp1, np1, mmax
+            type(SpherepackAux) :: sphere_aux
             !----------------------------------------------------------------------
 
             mmax = min(nlat, (nlon+1)/2)

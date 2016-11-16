@@ -43,7 +43,6 @@ module type_GaussianSphere
     private
     public :: GaussianSphere
 
-
     ! Declare derived data type
     type, extends (Sphere), public :: GaussianSphere
         !----------------------------------------------------------------------
@@ -65,63 +64,56 @@ module type_GaussianSphere
         !----------------------------------------------------------------------
     end type GaussianSphere
 
-
     ! Declare constructor
     interface GaussianSphere
         module procedure gaussian_sphere_constructor
     end interface
 
-
-
 contains
-
-
 
     function gaussian_sphere_constructor(nlat, nlon) result (return_value)
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        integer (ip), intent (in) :: nlat !! number of latitudinal points 0 <= theta <= pi
-        integer (ip), intent (in) :: nlon !! number of longitudinal points 0 <= phi <= 2*pi
-        type (GaussianSphere)     :: return_value
+        integer(ip), intent(in) :: nlat !! number of latitudinal points 0 <= theta <= pi
+        integer(ip), intent(in) :: nlon !! number of longitudinal points 0 <= phi <= 2*pi
+        type(GaussianSphere)     :: return_value
         !----------------------------------------------------------------------
 
         call return_value%create(nlat, nlon)
 
     end function gaussian_sphere_constructor
 
-
-
-    subroutine create_gaussian_sphere(this, nlat, nlon, ntrunc, isym, itype, nt, rsphere)
+    subroutine create_gaussian_sphere(self, nlat, nlon, ntrunc, isym, itype, nt, rsphere)
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        class (GaussianSphere), intent (in out)        :: this
-        integer (ip),           intent (in)            :: nlat
-        integer (ip),           intent (in)            :: nlon
-        integer (ip),           intent (in), optional  :: ntrunc
-        integer (ip),           intent (in), optional  :: isym      !! Either 0, 1, or 2
-        integer (ip),           intent (in), optional  :: itype     !! Either 0, 1, 2, 3, ..., 8
-        integer (ip),           intent (in), optional  :: nt
-        real (wp),              intent (in), optional  :: rsphere
+        class(GaussianSphere), intent(inout)         :: self
+        integer(ip),           intent(in)            :: nlat
+        integer(ip),           intent(in)            :: nlon
+        integer(ip),           intent(in), optional  :: ntrunc
+        integer(ip),           intent(in), optional  :: isym      !! Either 0, 1, or 2
+        integer(ip),           intent(in), optional  :: itype     !! Either 0, 1, 2, 3, ..., 8
+        integer(ip),           intent(in), optional  :: nt
+        real(wp),              intent(in), optional  :: rsphere
         !--------------------------------------------------------------------------------
         ! Local variables
         !----------------------------------------------------------------------
-        integer (ip) :: ntrunc_op
-        integer (ip) :: isym_op
-        integer (ip) :: ityp_op
-        integer (ip) :: nt_op
-        real (wp)    :: rsphere_op
+        integer(ip) :: ntrunc_op
+        integer(ip) :: isym_op
+        integer(ip) :: ityp_op
+        integer(ip) :: nt_op
+        real(wp)    :: rsphere_op
         !----------------------------------------------------------------------
 
         ! Ensure that object is usable
-        call this%destroy()
+        call self%destroy()
 
         !
         !==> Allocate polymorphic components
         !
-        allocate( this%grid, source=GaussianGrid(nlat,nlon) )
-        allocate( this%workspace, source=GaussianWorkspace(nlat, nlon) )
+        allocate( self%grid, source=GaussianGrid(nlat,nlon) )
+        allocate( self%workspace, source=GaussianWorkspace(nlat, nlon) )
 
         !
         !==> Address optional arguments
@@ -159,71 +151,67 @@ contains
         !
         !==> Create parent type
         !
-        call this%create_sphere(nlat, nlon, ntrunc_op, isym_op, ityp_op, nt_op, rsphere_op)
+        call self%create_sphere(nlat, nlon, ntrunc_op, isym_op, ityp_op, nt_op, rsphere_op)
 
         ! Set flag
-        this%initialized = .true.
+        self%initialized = .true.
         
     end subroutine create_gaussian_sphere
 
-
-    subroutine destroy_gaussian_sphere(this)
+    subroutine destroy_gaussian_sphere(self)
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        class (GaussianSphere), intent (in out) :: this
+        class(GaussianSphere), intent(inout)  :: self
         !----------------------------------------------------------------------
 
         ! Check flag
-        if (.not.this%initialized) return
+        if (.not.self%initialized) return
 
         ! Release memory from parent type
-        call this%destroy_sphere()
+        call self%destroy_sphere()
 
         ! Reset initialization flag
-        this%initialized = .false.
+        self%initialized = .false.
 
     end subroutine destroy_gaussian_sphere
 
-
-
-    subroutine gaussian_scalar_analysis(this, scalar_function)
+    subroutine gaussian_scalar_analysis(self, scalar_function)
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        class (GaussianSphere), intent (in out) :: this
-        real (wp),              intent (in)     :: scalar_function(:,:)
+        class(GaussianSphere), intent(inout)  :: self
+        real(wp),              intent(in)     :: scalar_function(:,:)
         !----------------------------------------------------------------------
         ! Local variables
         !----------------------------------------------------------------------
-        integer (ip)    :: error_flag
-        type (ShagsAux) :: aux
+        integer(ip)    :: error_flag
+        type(ShagsAux) :: aux
         !----------------------------------------------------------------------
 
         ! Check if object is usable
-        if (.not.this%initialized) then
+        if (.not.self%initialized) then
             error stop 'Uninitialized object of class(GaussianSphere): '&
                 //'in gaussian_scalar_analysis'
         end if
 
-
-        select type (this)
+        select type(self)
             class is (GaussianSphere)
-            associate( workspace => this%workspace )
-                select type (workspace)
+            associate( workspace => self%workspace )
+                select type(workspace)
                     class is (GaussianWorkspace)
                     associate( &
-                        nlat => this%NUMBER_OF_LATITUDES, &
-                        nlon => this%NUMBER_OF_LONGITUDES, &
-                        isym => this%SCALAR_SYMMETRIES, &
-                        nt => this%NUMBER_OF_SYNTHESES, &
+                        nlat => self%NUMBER_OF_LATITUDES, &
+                        nlon => self%NUMBER_OF_LONGITUDES, &
+                        isym => self%SCALAR_SYMMETRIES, &
+                        nt => self%NUMBER_OF_SYNTHESES, &
                         g => scalar_function, &
-                        idg => this%NUMBER_OF_LATITUDES, &
-                        jdg => this%NUMBER_OF_LONGITUDES, &
+                        idg => self%NUMBER_OF_LATITUDES, &
+                        jdg => self%NUMBER_OF_LONGITUDES, &
                         a => workspace%real_harmonic_coefficients, &
                         b => workspace%imaginary_harmonic_coefficients, &
-                        mdab => this%NUMBER_OF_LATITUDES, &
-                        ndab => this%NUMBER_OF_LATITUDES, &
+                        mdab => self%NUMBER_OF_LATITUDES, &
+                        ndab => self%NUMBER_OF_LATITUDES, &
                         wshags => workspace%forward_scalar, &
                         lshags => size(workspace%forward_scalar), &
                         work => workspace%legendre_workspace, &
@@ -270,37 +258,35 @@ contains
 
     end subroutine gaussian_scalar_analysis
     
-
-
-    subroutine gaussian_scalar_synthesis(this, scalar_function)
+    subroutine gaussian_scalar_synthesis(self, scalar_function)
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        class (GaussianSphere), intent (in out) :: this
-        real (wp),              intent (out)    :: scalar_function(:,:)
+        class(GaussianSphere), intent(inout)  :: self
+        real(wp),              intent(out)    :: scalar_function(:,:)
         !----------------------------------------------------------------------
         ! Local variables
         !----------------------------------------------------------------------
-        integer (ip)    :: error_flag
-        type (ShsgsAux) :: aux
+        integer(ip)    :: error_flag
+        type(ShsgsAux) :: aux
         !----------------------------------------------------------------------
 
         ! Check if object is usable
-        if (.not.this%initialized) then
+        if (.not.self%initialized) then
             error stop 'Uninitialized object of class(GaussianSphere): '&
                 //'in gaussian_scalar_synthesis'
         end if
 
-        select type (this)
+        select type(self)
             class is (GaussianSphere)
-            associate( workspace => this%workspace )
-                select type (workspace)
+            associate( workspace => self%workspace )
+                select type(workspace)
                     class is (GaussianWorkspace)
                     associate( &
-                        nlat => this%NUMBER_OF_LATITUDES, &
-                        nlon => this%NUMBER_OF_LONGITUDES, &
-                        isym => this%SCALAR_SYMMETRIES, &
-                        nt => this%NUMBER_OF_SYNTHESES, &
+                        nlat => self%NUMBER_OF_LATITUDES, &
+                        nlon => self%NUMBER_OF_LONGITUDES, &
+                        isym => self%SCALAR_SYMMETRIES, &
+                        nt => self%NUMBER_OF_SYNTHESES, &
                         g => scalar_function, &
                         idg => size(scalar_function, dim=1), &
                         jdg => size(scalar_function, dim=2), &
@@ -357,38 +343,36 @@ contains
 
     end subroutine gaussian_scalar_synthesis
 
-
-
-    subroutine gaussian_vector_analysis(this, polar_component, azimuthal_component)
+    subroutine gaussian_vector_analysis(self, polar_component, azimuthal_component)
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        class (GaussianSphere), intent (in out) :: this
-        real (wp),              intent (in)     :: polar_component(:,:)
-        real (wp),              intent (in)     :: azimuthal_component(:,:)
+        class(GaussianSphere), intent(inout)  :: self
+        real(wp),              intent(in)     :: polar_component(:,:)
+        real(wp),              intent(in)     :: azimuthal_component(:,:)
         !----------------------------------------------------------------------
         ! Local variables
         !----------------------------------------------------------------------
-        integer (ip)    :: error_flag
-        type (VhagsAux) :: aux
+        integer(ip)    :: error_flag
+        type(VhagsAux) :: aux
         !----------------------------------------------------------------------
 
         ! Check if object is usable
-        if (.not.this%initialized) then
+        if (.not.self%initialized) then
             error stop 'Uninitialized object of class(GaussianSphere): '&
                 //'in gaussian_vector_analysis'
         end if
 
-        select type (this)
+        select type(self)
             class is (GaussianSphere)
-            associate( workspace => this%workspace )
-                select type (workspace)
+            associate( workspace => self%workspace )
+                select type(workspace)
                     class is (GaussianWorkspace)
                     associate( &
-                        nlat => this%NUMBER_OF_LATITUDES, &
-                        nlon => this%NUMBER_OF_LONGITUDES, &
-                        ityp => this%VECTOR_SYMMETRIES, &
-                        nt => this%NUMBER_OF_SYNTHESES, &
+                        nlat => self%NUMBER_OF_LATITUDES, &
+                        nlon => self%NUMBER_OF_LONGITUDES, &
+                        ityp => self%VECTOR_SYMMETRIES, &
+                        nt => self%NUMBER_OF_SYNTHESES, &
                         v => polar_component, &
                         w => azimuthal_component, &
                         idvw => size(polar_component, dim=1), &
@@ -473,38 +457,36 @@ contains
 
     end subroutine gaussian_vector_analysis
 
-
-
-    subroutine gaussian_vector_synthesis(this, polar_component, azimuthal_component)
+    subroutine gaussian_vector_synthesis(self, polar_component, azimuthal_component)
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        class (GaussianSphere), intent (in out) :: this
-        real (wp),              intent (out)    :: polar_component(:,:)
-        real (wp),              intent (out)    :: azimuthal_component(:,:)
+        class(GaussianSphere), intent(inout)  :: self
+        real(wp),              intent(out)    :: polar_component(:,:)
+        real(wp),              intent(out)    :: azimuthal_component(:,:)
         !----------------------------------------------------------------------
         ! Local variables
         !----------------------------------------------------------------------
-        integer (ip)    :: error_flag
-        type (VhsgsAux) :: aux
+        integer(ip)    :: error_flag
+        type(VhsgsAux) :: aux
         !----------------------------------------------------------------------
 
         ! Check if object is usable
-        if (.not.this%initialized) then
+        if (.not.self%initialized) then
             error stop 'Uninitialized object of class(GaussianSphere): '&
                 //'in gaussian_vector_synthesis'
         end if
 
-        select type (this)
+        select type(self)
             class is (GaussianSphere)
-            associate( workspace => this%workspace )
-                select type (workspace)
+            associate( workspace => self%workspace )
+                select type(workspace)
                     class is (GaussianWorkspace)
                     associate( &
-                        nlat => this%NUMBER_OF_LATITUDES, &
-                        nlon => this%NUMBER_OF_LONGITUDES, &
-                        ityp => this%VECTOR_SYMMETRIES, &
-                        nt => this%NUMBER_OF_SYNTHESES, &
+                        nlat => self%NUMBER_OF_LATITUDES, &
+                        nlon => self%NUMBER_OF_LONGITUDES, &
+                        ityp => self%VECTOR_SYMMETRIES, &
+                        nt => self%NUMBER_OF_SYNTHESES, &
                         v => polar_component, &
                         w => azimuthal_component, &
                         idvw => size(polar_component, dim=1),  &
@@ -576,10 +558,8 @@ contains
         end select
 
     end subroutine gaussian_vector_synthesis
-    
 
-
-    function compute_surface_integral(this, scalar_function) result (return_value)
+    function compute_surface_integral(self, scalar_function) result (return_value)
         !
         ! Purpose:
         !
@@ -598,18 +578,18 @@ contains
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        class (GaussianSphere), intent (in out) :: this
-        real (wp),              intent (in)     :: scalar_function(:,:)
-        real (wp)                               :: return_value
+        class(GaussianSphere), intent(inout)  :: self
+        real(wp),              intent(in)     :: scalar_function(:,:)
+        real(wp)                               :: return_value
         !----------------------------------------------------------------------
         ! Local variables
         !----------------------------------------------------------------------
-        integer (ip)           :: k  !! counter
-        real (wp), allocatable :: summation(:)
+        integer(ip)           :: k  !! counter
+        real(wp), allocatable :: summation(:)
         !----------------------------------------------------------------------
 
         ! Check if object is usable
-        if (.not.this%initialized) then
+        if (.not.self%initialized) then
             error stop 'Uninitialized object of class(GaussianSphere): '&
                 //'in get_surface_integral'
         end if
@@ -617,7 +597,7 @@ contains
         !
         !==> Allocate memory
         !
-        associate( nlat => this%NUMBER_OF_LATITUDES )
+        associate( nlat => self%NUMBER_OF_LATITUDES )
 
             allocate(summation(nlat))
 
@@ -626,7 +606,7 @@ contains
         !
         !==> compute the integrant
         !
-        associate( grid => this%grid )
+        associate( grid => self%grid )
             select type(grid)
                 class is (GaussianGrid)
                 associate( &
@@ -661,32 +641,30 @@ contains
 
     end function compute_surface_integral
 
-
-
-    subroutine compute_first_moment(this, scalar_function, first_moment)
+    subroutine compute_first_moment(self, scalar_function, first_moment)
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        class (GaussianSphere),  intent (in out) :: this
-        real (wp),               intent (in)     :: scalar_function(:,:)
-        class (Vector),          intent (out)    :: first_moment
+        class(GaussianSphere),  intent(inout)  :: self
+        real(wp),               intent(in)     :: scalar_function(:,:)
+        class(Vector),          intent(out)    :: first_moment
         !----------------------------------------------------------------------
         ! Local variables
         !----------------------------------------------------------------------
-        integer (ip)           :: k, l !! Counters
-        real (wp), allocatable :: integrant(:,:,:)
+        integer(ip)           :: k, l !! Counters
+        real(wp), allocatable :: integrant(:,:,:)
         !----------------------------------------------------------------------
 
         ! Check if object is usable
-        if (.not.this%initialized) then
+        if (.not.self%initialized) then
             error stop 'Uninitialized object of class(GaussianSphere): '&
                 //'in compute_first_moment'
         end if
 
 
         associate( &
-            nlat => this%NUMBER_OF_LATITUDES, &
-            nlon => this%NUMBER_OF_LONGITUDES &
+            nlat => self%NUMBER_OF_LATITUDES, &
+            nlon => self%NUMBER_OF_LONGITUDES &
             )
             !
             !==> Allocate memory
@@ -697,7 +675,7 @@ contains
             do l = 1, nlon
                 do k = 1, nlat
                     associate( &
-                        u => this%unit_vectors%radial(k, l), &
+                        u => self%unit_vectors%radial(k, l), &
                         f => scalar_function(k, l) &
                         )
                         !
@@ -712,7 +690,6 @@ contains
             end do
         end associate
 
-
         associate( &
             m => first_moment, &
             f1 => integrant(:,:,1), &
@@ -722,9 +699,9 @@ contains
             !
             !==> Compute first moment
             !
-            m%x = this%compute_surface_integral(f1)
-            m%y = this%compute_surface_integral(f2)
-            m%z = this%compute_surface_integral(f3)
+            m%x = self%compute_surface_integral(f1)
+            m%y = self%compute_surface_integral(f2)
+            m%z = self%compute_surface_integral(f3)
 
         end associate
 
@@ -733,18 +710,15 @@ contains
 
     end subroutine compute_first_moment
 
-    
-
-    subroutine finalize_gaussian_sphere(this)
+    subroutine finalize_gaussian_sphere(self)
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        type (GaussianSphere), intent (in out) :: this
+        type(GaussianSphere), intent(inout)  :: self
         !----------------------------------------------------------------------
 
-        call this%destroy()
+        call self%destroy()
 
     end subroutine finalize_gaussian_sphere
-
 
 end module type_GaussianSphere

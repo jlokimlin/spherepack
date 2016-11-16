@@ -245,38 +245,38 @@ contains
     subroutine vrtec(nlat, nlon, isym, nt, vort, ivrt, jvrt, cr, ci, mdc, ndc, &
         wshsec, lshsec, work, lwork, ierror)
 
-        real (wp) :: ci
-        real (wp) :: cr
-        integer (ip) :: ia
-        integer (ip) :: ib
-        integer (ip) :: ierror
-        integer (ip) :: imid
-        integer (ip) :: is
-        integer (ip) :: isym
-        integer (ip) :: ivrt
-        integer (ip) :: iwk
-        integer (ip) :: jvrt
-        integer (ip) :: l1
-        integer (ip) :: l2
-        integer (ip) :: labc
-        integer (ip) :: ls
-        integer (ip) :: lshsec
-        integer (ip) :: lwk
-        integer (ip) :: lwkmin
-        integer (ip) :: lwork
-        integer (ip) :: lzz1
-        integer (ip) :: mab
-        integer (ip) :: mdc
-        integer (ip) :: mmax
-        integer (ip) :: mn
-        integer (ip) :: ndc
-        integer (ip) :: nlat
-        integer (ip) :: nln
-        integer (ip) :: nlon
-        integer (ip) :: nt
-        real (wp) :: vort
-        real (wp) :: work
-        real (wp) :: wshsec
+        real(wp) :: ci
+        real(wp) :: cr
+        integer(ip) :: ia
+        integer(ip) :: ib
+        integer(ip) :: ierror
+        integer(ip) :: imid
+        integer(ip) :: is
+        integer(ip) :: isym
+        integer(ip) :: ivrt
+        integer(ip) :: iwk
+        integer(ip) :: jvrt
+        integer(ip) :: l1
+        integer(ip) :: l2
+        integer(ip) :: labc
+        integer(ip) :: ls
+        integer(ip) :: lshsec
+        integer(ip) :: lwk
+        integer(ip) :: lwkmin
+        integer(ip) :: lwork
+        integer(ip) :: lzz1
+        integer(ip) :: mab
+        integer(ip) :: mdc
+        integer(ip) :: mmax
+        integer(ip) :: mn
+        integer(ip) :: ndc
+        integer(ip) :: nlat
+        integer(ip) :: nln
+        integer(ip) :: nlon
+        integer(ip) :: nt
+        real(wp) :: vort
+        real(wp) :: work
+        real(wp) :: wshsec
 
         dimension vort(ivrt, jvrt, nt), cr(mdc, ndc, nt), ci(mdc, ndc, nt)
         dimension wshsec(lshsec), work(lwork)
@@ -348,31 +348,31 @@ contains
         subroutine vrtec1(nlat, nlon, isym, nt, vort, ivrt, jvrt, cr, ci, mdc, ndc, &
             a, b, mab, sqnn, wshsec, lshsec, wk, lwk, ierror)
 
-            real (wp) :: a
-            real (wp) :: b
-            real (wp) :: ci
-            real (wp) :: cr
-            real (wp) :: fn
-            integer (ip) :: ierror
-            integer (ip) :: isym
-            integer (ip) :: ivrt
-            integer (ip) :: jvrt
-            integer (ip) :: k
-            integer (ip) :: lshsec
-            integer (ip) :: lwk
-            integer (ip) :: m
-            integer (ip) :: mab
-            integer (ip) :: mdc
-            integer (ip) :: mmax
-            integer (ip) :: n
-            integer (ip) :: ndc
-            integer (ip) :: nlat
-            integer (ip) :: nlon
-            integer (ip) :: nt
-            real (wp) :: sqnn
-            real (wp) :: vort
-            real (wp) :: wk
-            real (wp) :: wshsec
+            real(wp) :: a
+            real(wp) :: b
+            real(wp) :: ci
+            real(wp) :: cr
+            real(wp) :: fn
+            integer(ip) :: ierror
+            integer(ip) :: isym
+            integer(ip) :: ivrt
+            integer(ip) :: jvrt
+            integer(ip) :: k
+            integer(ip) :: lshsec
+            integer(ip) :: lwk
+            integer(ip) :: m
+            integer(ip) :: mab
+            integer(ip) :: mdc
+            integer(ip) :: mmax
+            integer(ip) :: n
+            integer(ip) :: ndc
+            integer(ip) :: nlat
+            integer(ip) :: nlon
+            integer(ip) :: nt
+            real(wp) :: sqnn
+            real(wp) :: vort
+            real(wp) :: wk
+            real(wp) :: wshsec
             dimension vort(ivrt, jvrt, nt), cr(mdc, ndc, nt), ci(mdc, ndc, nt)
             dimension a(mab, nlat, nt), b(mab, nlat, nt), sqnn(nlat)
             dimension wshsec(lshsec), wk(lwk)

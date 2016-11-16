@@ -278,39 +278,39 @@ contains
     subroutine islapec(nlat, nlon, isym, nt, xlmbda, sf, ids, jds, a, b, &
         mdab, ndab, wshsec, lshsec, work, lwork, pertrb, ierror)
 
-        real (wp) :: a
-        real (wp) :: b
-        integer (ip) :: ia
-        integer (ip) :: ib
-        integer (ip) :: ids
-        integer (ip) :: ierror
-        integer (ip) :: ifn
-        integer (ip) :: imid
-        integer (ip) :: isym
-        integer (ip) :: iwk
-        integer (ip) :: jds
-        integer (ip) :: k
-        integer (ip) :: l1
-        integer (ip) :: l2
-        integer (ip) :: ls
-        integer (ip) :: lshsec
-        integer (ip) :: lwk
-        integer (ip) :: lwkmin
-        integer (ip) :: lwmin
-        integer (ip) :: lwork
-        integer (ip) :: mdab
-        integer (ip) :: mmax
-        integer (ip) :: mn
-        integer (ip) :: ndab
-        integer (ip) :: nlat
-        integer (ip) :: nln
-        integer (ip) :: nlon
-        integer (ip) :: nt
-        real (wp) :: pertrb
-        real (wp) :: sf
-        real (wp) :: work
-        real (wp) :: wshsec
-        real (wp) :: xlmbda
+        real(wp) :: a
+        real(wp) :: b
+        integer(ip) :: ia
+        integer(ip) :: ib
+        integer(ip) :: ids
+        integer(ip) :: ierror
+        integer(ip) :: ifn
+        integer(ip) :: imid
+        integer(ip) :: isym
+        integer(ip) :: iwk
+        integer(ip) :: jds
+        integer(ip) :: k
+        integer(ip) :: l1
+        integer(ip) :: l2
+        integer(ip) :: ls
+        integer(ip) :: lshsec
+        integer(ip) :: lwk
+        integer(ip) :: lwkmin
+        integer(ip) :: lwmin
+        integer(ip) :: lwork
+        integer(ip) :: mdab
+        integer(ip) :: mmax
+        integer(ip) :: mn
+        integer(ip) :: ndab
+        integer(ip) :: nlat
+        integer(ip) :: nln
+        integer(ip) :: nlon
+        integer(ip) :: nt
+        real(wp) :: pertrb
+        real(wp) :: sf
+        real(wp) :: work
+        real(wp) :: wshsec
+        real(wp) :: xlmbda
         dimension sf(ids, jds, nt), a(mdab, ndab, nt), b(mdab, ndab, nt)
         dimension wshsec(lshsec), work(lwork), pertrb(nt), xlmbda(nt)
         !
@@ -388,32 +388,32 @@ contains
         subroutine islpec1(nlat, nlon, isym, nt, xlmbda, sf, ids, jds, a, b, &
             mdab, ndab, as, bs, mmax, fnn, wshsec, lshsec, wk, lwk, pertrb, ierror)
 
-            real (wp) :: a
-            real (wp) :: as
-            real (wp) :: b
-            real (wp) :: bs
-            real (wp) :: fn
-            real (wp) :: fnn
-            integer (ip) :: ids
-            integer (ip) :: ierror
-            integer (ip) :: isym
-            integer (ip) :: jds
-            integer (ip) :: k
-            integer (ip) :: lshsec
-            integer (ip) :: lwk
-            integer (ip) :: m
-            integer (ip) :: mdab
-            integer (ip) :: mmax
-            integer (ip) :: n
-            integer (ip) :: ndab
-            integer (ip) :: nlat
-            integer (ip) :: nlon
-            integer (ip) :: nt
-            real (wp) :: pertrb
-            real (wp) :: sf
-            real (wp) :: wk
-            real (wp) :: wshsec
-            real (wp) :: xlmbda
+            real(wp) :: a
+            real(wp) :: as
+            real(wp) :: b
+            real(wp) :: bs
+            real(wp) :: fn
+            real(wp) :: fnn
+            integer(ip) :: ids
+            integer(ip) :: ierror
+            integer(ip) :: isym
+            integer(ip) :: jds
+            integer(ip) :: k
+            integer(ip) :: lshsec
+            integer(ip) :: lwk
+            integer(ip) :: m
+            integer(ip) :: mdab
+            integer(ip) :: mmax
+            integer(ip) :: n
+            integer(ip) :: ndab
+            integer(ip) :: nlat
+            integer(ip) :: nlon
+            integer(ip) :: nt
+            real(wp) :: pertrb
+            real(wp) :: sf
+            real(wp) :: wk
+            real(wp) :: wshsec
+            real(wp) :: xlmbda
             dimension sf(ids, jds, nt), a(mdab, ndab, nt), b(mdab, ndab, nt)
             dimension as(mmax, nlat, nt), bs(mmax, nlat, nt), fnn(nlat)
             dimension wshsec(lshsec), wk(lwk), pertrb(nt), xlmbda(nt)

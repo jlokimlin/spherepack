@@ -241,13 +241,13 @@ contains
     subroutine isfvpgc(nlat, nlon, isym, nt, v, w, idv, jdv, as, bs, av, bv, &
         mdb, ndb, wvhsgc, lvhsgc, work, lwork, ierror)
 
-        integer (ip) :: nlat, nlon, isym, nt, idv, jdv, mdb, ndb, lvhsgc, lwork, ierror
-        real (wp) :: v(idv, jdv, nt), w(idv, jdv, nt)
-        real (wp) :: as(mdb, ndb, nt), bs(mdb, ndb, nt)
-        real (wp) :: av(mdb, ndb, nt), bv(mdb, ndb, nt)
-        real (wp) :: wvhsgc(lvhsgc), work(lwork)
-        integer (ip) :: l1, l2, mn, is, lwk, iwk, lwmin
-        integer (ip) :: ibr, ibi, icr, ici
+        integer(ip) :: nlat, nlon, isym, nt, idv, jdv, mdb, ndb, lvhsgc, lwork, ierror
+        real(wp) :: v(idv, jdv, nt), w(idv, jdv, nt)
+        real(wp) :: as(mdb, ndb, nt), bs(mdb, ndb, nt)
+        real(wp) :: av(mdb, ndb, nt), bv(mdb, ndb, nt)
+        real(wp) :: wvhsgc(lvhsgc), work(lwork)
+        integer(ip) :: l1, l2, mn, is, lwk, iwk, lwmin
+        integer(ip) :: ibr, ibi, icr, ici
         !
         !     check input parameters
         !
@@ -304,14 +304,14 @@ contains
         subroutine isfvpgc1(nlat, nlon, isym, nt, v, w, idv, jdv, as, bs, av, bv, &
             mdb, ndb, br, bi, cr, ci, mab, fnn, wvhsgc, lvhsgc, wk, lwk, ierror)
 
-            integer (ip) :: nlat, nlon, isym, nt, idv, jdv, mdb, ndb, mab, lvhsgc, lwk, ierror
-            real (wp) :: v(idv, jdv, nt), w(idv, jdv, nt)
-            real (wp) :: as(mdb, ndb, nt), bs(mdb, ndb, nt)
-            real (wp) :: av(mdb, ndb, nt), bv(mdb, ndb, nt)
-            real (wp) :: br(mab, nlat, nt), bi(mab, nlat, nt)
-            real (wp) :: cr(mab, nlat, nt), ci(mab, nlat, nt)
-            real (wp) :: wvhsgc(lvhsgc), wk(lwk), fnn(nlat)
-            integer (ip) :: n, m, mmax, k, ityp
+            integer(ip) :: nlat, nlon, isym, nt, idv, jdv, mdb, ndb, mab, lvhsgc, lwk, ierror
+            real(wp) :: v(idv, jdv, nt), w(idv, jdv, nt)
+            real(wp) :: as(mdb, ndb, nt), bs(mdb, ndb, nt)
+            real(wp) :: av(mdb, ndb, nt), bv(mdb, ndb, nt)
+            real(wp) :: br(mab, nlat, nt), bi(mab, nlat, nt)
+            real(wp) :: cr(mab, nlat, nt), ci(mab, nlat, nt)
+            real(wp) :: wvhsgc(lvhsgc), wk(lwk), fnn(nlat)
+            integer(ip) :: n, m, mmax, k, ityp
             !
             !     set coefficient multiplyers
             !

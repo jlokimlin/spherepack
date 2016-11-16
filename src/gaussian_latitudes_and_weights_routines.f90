@@ -94,11 +94,11 @@ module gaussian_latitudes_and_weights_routines
     !------------------------------------------------------------------
     ! Dictionary: Variables confined to the module
     !------------------------------------------------------------------
-    real (wp), parameter :: ZERO = 0.0_wp
-    real (wp), parameter :: HALF = 0.5_wp
-    real (wp), parameter :: ONE = 1.0_wp
-    real (wp), parameter :: TWO = 2.0_wp
-    real (wp), parameter :: THREE = 3.0_wp
+    real(wp), parameter :: ZERO = 0.0_wp
+    real(wp), parameter :: HALF = 0.5_wp
+    real(wp), parameter :: ONE = 1.0_wp
+    real(wp), parameter :: TWO = 2.0_wp
+    real(wp), parameter :: THREE = 3.0_wp
     !------------------------------------------------------------------
 
 contains
@@ -107,23 +107,23 @@ contains
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        integer (ip), intent (in)  :: nlat
-        real (wp),    intent (out) :: theta(nlat)
-        real (wp),    intent (out) :: wts(nlat)
-        real (wp),    intent (in)  :: w
-        integer (ip), intent (in)  :: lwork
-        integer (ip), intent (out) :: ierror
+        integer(ip), intent(in)  :: nlat
+        real(wp),    intent(out) :: theta(nlat)
+        real(wp),    intent(out) :: wts(nlat)
+        real(wp),    intent(in)  :: w
+        integer(ip), intent(in)  :: lwork
+        integer(ip), intent(out) :: ierror
         !----------------------------------------------------------------------
         ! Local variables
         !----------------------------------------------------------------------
-        integer (ip)         :: i, idx, it, nix
-        integer (ip)         :: nhalf, half_nlat
-        real (wp), parameter :: HALF_PI = PI/2
-        real (wp), parameter :: SQRT3 = sqrt(THREE)
-        real (wp)            :: dt, half_dt
-        real (wp)            :: zprev, zlast, eff_zero
-        real (wp)            :: zhold, pb, dpb, dcor, cz
-        real (wp)            :: eps, sgnd
+        integer(ip)         :: i, idx, it, nix
+        integer(ip)         :: nhalf, half_nlat
+        real(wp), parameter :: HALF_PI = PI/2
+        real(wp), parameter :: SQRT3 = sqrt(THREE)
+        real(wp)            :: dt, half_dt
+        real(wp)            :: zprev, zlast, eff_zero
+        real(wp)            :: zhold, pb, dpb, dcor, cz
+        real(wp)            :: eps, sgnd
         !----------------------------------------------------------------------
 
         !
@@ -270,15 +270,15 @@ contains
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        integer (ip), intent (in)  :: n
-        real (wp),    intent (out) :: cz
-        real (wp),    intent (out) :: legendre_poly_coeff(n/2+1)
-        real (wp),    intent (out) :: legendre_deriv_coeff(n/2+1)
+        integer(ip), intent(in)  :: n
+        real(wp),    intent(out) :: cz
+        real(wp),    intent(out) :: legendre_poly_coeff(n/2+1)
+        real(wp),    intent(out) :: legendre_deriv_coeff(n/2+1)
         !----------------------------------------------------------------------
         ! Local variables
         !----------------------------------------------------------------------
-        integer (ip) :: j
-        real (wp)    :: t1, t2, t3, t4
+        integer(ip) :: j
+        real(wp)    :: t1, t2, t3, t4
         !----------------------------------------------------------------------
 
         associate( &
@@ -352,18 +352,18 @@ contains
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        integer (ip), intent (in)  :: n
-        real (wp),    intent (in)  :: theta
-        real (wp),    intent (in)  :: cz
-        real (wp),    intent (in)  :: legendre_poly_coeff(n/2+1)
-        real (wp),    intent (in)  :: legendre_deriv_coeff(n/2+1)
-        real (wp),    intent (out) :: legendre_poly
-        real (wp),    intent (out) :: legendre_deriv
+        integer(ip), intent(in)  :: n
+        real(wp),    intent(in)  :: theta
+        real(wp),    intent(in)  :: cz
+        real(wp),    intent(in)  :: legendre_poly_coeff(n/2+1)
+        real(wp),    intent(in)  :: legendre_deriv_coeff(n/2+1)
+        real(wp),    intent(out) :: legendre_poly
+        real(wp),    intent(out) :: legendre_deriv
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        integer (ip) :: k, kdo
-        real (wp)    :: cost, sint, temp
+        integer(ip) :: k, kdo
+        real(wp)    :: cost, sint, temp
         !----------------------------------------------------------------------
 
         associate( &

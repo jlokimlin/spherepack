@@ -85,10 +85,12 @@
 !
 program advec
 
-    use, intrinsic :: iso_fortran_env, only: &
-        ip => INT32, &
-        wp => REAL64, &
+    use, intrinsic :: ISO_Fortran_env, only: &
         stdout => OUTPUT_UNIT
+
+    use spherepack_library, only: &
+        wp, & ! Working precision
+        ip    ! Integer precision
 
     use type_AdvectionSolver
 
@@ -98,19 +100,19 @@ program advec
     !----------------------------------------------------------------------
     ! Local variables
     !----------------------------------------------------------------------
-    type (AdvectionSolver)        :: solver
-    integer (ip), parameter       :: NLONS = 45
-    integer (ip), parameter       :: NLATS = 23
-    integer (ip)                  :: i, j !! Counters
-    integer (ip)                  :: mprint, ncycle, ntime
-    real (wp)                     :: u(NLATS,NLONS),v(NLATS,NLONS)
-    real (wp)                     :: phi_old(NLATS,NLONS),phi_new(NLATS,NLONS)
-    real (wp)                     :: phi(NLATS,NLONS)
-    real (wp)                     :: exact_phi(NLATS,NLONS)
-    real (wp)                     :: grad_phi(NLATS,NLONS)
-    real (wp)                     :: grad_phi_lon(NLATS,NLONS),grad_phi_lat(NLATS,NLONS)
-    real (wp)                     :: p0_l2, p0_max, time, htime
-    character (len=*), parameter  :: write_format = &
+    type(AdvectionSolver)        :: solver
+    integer(ip), parameter       :: NLONS = 45
+    integer(ip), parameter       :: NLATS = 23
+    integer(ip)                  :: i, j !! Counters
+    integer(ip)                  :: mprint, ncycle, ntime
+    real(wp)                     :: u(NLATS,NLONS),v(NLATS,NLONS)
+    real(wp)                     :: phi_old(NLATS,NLONS),phi_new(NLATS,NLONS)
+    real(wp)                     :: phi(NLATS,NLONS)
+    real(wp)                     :: exact_phi(NLATS,NLONS)
+    real(wp)                     :: grad_phi(NLATS,NLONS)
+    real(wp)                     :: grad_phi_lon(NLATS,NLONS),grad_phi_lat(NLATS,NLONS)
+    real(wp)                     :: p0_l2, p0_max, time, htime
+    character(len=*), parameter  :: WRITE_FMT = &
         '(a, i10, a, f10.2/, a, f10.0, a, i10/, a, i10, '&
         //'a, 1pe15.6/, a, 1pe15.6, a, 0pf10.2/a, 1pe15.6, a, 1pe15.6)'
     !----------------------------------------------------------------------
@@ -206,7 +208,7 @@ program advec
                 )
 
                 write( stdout, '(/a)' ) ' advecting cosine bell, test case 2'
-                write( stdout, fmt = write_format ) &
+                write( stdout, fmt = WRITE_FMT ) &
                     ' exit number              '  , ncycle, &
                     '  model time in  hours      ', htime, &
                     ' time step in seconds      ' , dt, &

@@ -47,7 +47,7 @@
 !
 program tshpg
 
-    use, intrinsic :: iso_fortran_env, only: &
+    use, intrinsic :: ISO_Fortran_env, only: &
         sp => REAL32
 
     use spherepack_library, only: &

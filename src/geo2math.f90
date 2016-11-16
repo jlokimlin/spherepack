@@ -249,16 +249,16 @@ contains
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        integer (ip), intent (in)     :: ig
-        integer (ip), intent (in)     :: nlon
-        integer (ip), intent (in)     :: nlat
-        real (wp),    intent (in)     :: sg(nlon, nlat)
-        real (wp),    intent (out)    :: sm(nlat, nlon)
-        real (wp),    intent (in out) :: work(*)
+        integer(ip), intent(in)     :: ig
+        integer(ip), intent(in)     :: nlon
+        integer(ip), intent(in)     :: nlat
+        real(wp),    intent(in)     :: sg(nlon, nlat)
+        real(wp),    intent(out)    :: sm(nlat, nlon)
+        real(wp),    intent(inout)  :: work(*)
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        integer (ip) :: i, j, ij ! counters
+        integer(ip) :: i, j, ij ! counters
         !----------------------------------------------------------------------
 
         !
@@ -296,16 +296,16 @@ contains
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        integer (ip), intent (in)     :: ig
-        integer (ip), intent (in)     :: nlon
-        integer (ip), intent (in)     :: nlat
-        real (wp),    intent (in)     :: sm(nlon, nlat)
-        real (wp),    intent (out)    :: sg(nlat, nlon)
-        real (wp),    intent (in out) :: work(*)
+        integer(ip), intent(in)     :: ig
+        integer(ip), intent(in)     :: nlon
+        integer(ip), intent(in)     :: nlat
+        real(wp),    intent(in)     :: sm(nlon, nlat)
+        real(wp),    intent(out)    :: sg(nlat, nlon)
+        real(wp),    intent(inout)  :: work(*)
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        integer (ip) :: i, j, ij ! counters
+        integer(ip) :: i, j, ij ! counters
         !----------------------------------------------------------------------
 
         !
@@ -343,18 +343,18 @@ contains
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        integer (ip), intent (in)     :: ig
-        integer (ip), intent (in)     :: nlon
-        integer (ip), intent (in)     :: nlat
-        real (wp),    intent (in)     :: ug(nlon, nlat)
-        real (wp),    intent (in)     :: vg(nlon, nlat)
-        real (wp),    intent (out)    :: vm(nlat, nlon)
-        real (wp),    intent (out)    :: wm(nlat, nlon)
-        real (wp),    intent (in out) :: work(*)
+        integer(ip), intent(in)     :: ig
+        integer(ip), intent(in)     :: nlon
+        integer(ip), intent(in)     :: nlat
+        real(wp),    intent(in)     :: ug(nlon, nlat)
+        real(wp),    intent(in)     :: vg(nlon, nlat)
+        real(wp),    intent(out)    :: vm(nlat, nlon)
+        real(wp),    intent(out)    :: wm(nlat, nlon)
+        real(wp),    intent(inout)  :: work(*)
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        integer (ip) :: i, j, ij ! counters
+        integer(ip) :: i, j, ij ! counters
         !----------------------------------------------------------------------
 
         !
@@ -420,18 +420,18 @@ contains
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        integer (ip), intent (in)     :: ig
-        integer (ip), intent (in)     :: nlon
-        integer (ip), intent (in)     :: nlat
-        real (wp),    intent (in)     :: vm(nlat, nlon)
-        real (wp),    intent (in)     :: wm(nlat, nlon)
-        real (wp),    intent (out)    :: ug(nlon, nlat)
-        real (wp),    intent (out)    :: vg(nlon, nlat)
-        real (wp),    intent (in out) :: work(*)
+        integer(ip), intent(in)     :: ig
+        integer(ip), intent(in)     :: nlon
+        integer(ip), intent(in)     :: nlat
+        real(wp),    intent(in)     :: vm(nlat, nlon)
+        real(wp),    intent(in)     :: wm(nlat, nlon)
+        real(wp),    intent(out)    :: ug(nlon, nlat)
+        real(wp),    intent(out)    :: vg(nlon, nlat)
+        real(wp),    intent(inout)  :: work(*)
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        integer (ip) :: i, j, ij ! counters
+        integer(ip) :: i, j, ij ! counters
         !----------------------------------------------------------------------
 
         !

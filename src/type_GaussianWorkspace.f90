@@ -68,9 +68,9 @@ contains
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        integer (ip),         intent (in) :: nlat !! number of latitudinal points 0 <= theta <= pi
-        integer (ip),         intent (in) :: nlon !! number of longitudinal points 0 <= phi <= 2*pi
-        type (GaussianWorkspace)          :: return_value
+        integer(ip),         intent(in) :: nlat !! number of latitudinal points 0 <= theta <= pi
+        integer(ip),         intent(in) :: nlon !! number of longitudinal points 0 <= phi <= 2*pi
+        type(GaussianWorkspace)          :: return_value
         !----------------------------------------------------------------------
 
         call return_value%create(nlat, nlon)
@@ -79,98 +79,98 @@ contains
 
 
 
-    subroutine copy_gaussian_workspace(this, object_to_be_copied)
+    subroutine copy_gaussian_workspace(self, object_to_be_copied)
         !--------------------------------------------------------------------------------
         ! Dummy arguments
         !--------------------------------------------------------------------------------
-        class (GaussianWorkspace), intent (out) :: this
-        class (GaussianWorkspace), intent (in)  :: object_to_be_copied
+        class(GaussianWorkspace), intent(out) :: self
+        class(GaussianWorkspace), intent(in)  :: object_to_be_copied
         !--------------------------------------------------------------------------------
 
         ! Check if object is usable
         if (object_to_be_copied%initialized .eqv. .false.) then
-            error stop 'Uninitialized object of class (GaussianWorkspace): '&
+            error stop 'Uninitialized object of class(GaussianWorkspace): '&
                 //'in assignment (=) '
         end if
 
         !
         !==> Make copies
         !
-        this%initialized = object_to_be_copied%initialized
-        this%legendre_workspace = object_to_be_copied%legendre_workspace
-        this%forward_scalar = object_to_be_copied%forward_scalar
-        this%forward_vector = object_to_be_copied%forward_vector
-        this%backward_scalar = object_to_be_copied%backward_scalar
-        this%backward_vector = object_to_be_copied%backward_vector
-        this%real_harmonic_coefficients = object_to_be_copied%real_harmonic_coefficients
-        this%imaginary_harmonic_coefficients = object_to_be_copied%imaginary_harmonic_coefficients
-        this%real_polar_harmonic_coefficients = object_to_be_copied%real_polar_harmonic_coefficients
-        this%imaginary_polar_harmonic_coefficients = object_to_be_copied%imaginary_polar_harmonic_coefficients
-        this%real_azimuthal_harmonic_coefficients = object_to_be_copied%real_azimuthal_harmonic_coefficients
-        this%imaginary_azimuthal_harmonic_coefficients = object_to_be_copied%imaginary_azimuthal_harmonic_coefficients
+        self%initialized = object_to_be_copied%initialized
+        self%legendre_workspace = object_to_be_copied%legendre_workspace
+        self%forward_scalar = object_to_be_copied%forward_scalar
+        self%forward_vector = object_to_be_copied%forward_vector
+        self%backward_scalar = object_to_be_copied%backward_scalar
+        self%backward_vector = object_to_be_copied%backward_vector
+        self%real_harmonic_coefficients = object_to_be_copied%real_harmonic_coefficients
+        self%imaginary_harmonic_coefficients = object_to_be_copied%imaginary_harmonic_coefficients
+        self%real_polar_harmonic_coefficients = object_to_be_copied%real_polar_harmonic_coefficients
+        self%imaginary_polar_harmonic_coefficients = object_to_be_copied%imaginary_polar_harmonic_coefficients
+        self%real_azimuthal_harmonic_coefficients = object_to_be_copied%real_azimuthal_harmonic_coefficients
+        self%imaginary_azimuthal_harmonic_coefficients = object_to_be_copied%imaginary_azimuthal_harmonic_coefficients
 
 
     end subroutine copy_gaussian_workspace
 
 
 
-    subroutine create_gaussian_workspace(this, nlat, nlon)
+    subroutine create_gaussian_workspace(self, nlat, nlon)
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        class (GaussianWorkspace), intent (in out) :: this
-        integer (ip),              intent (in)     :: nlat
-        integer (ip),              intent (in)     :: nlon
+        class(GaussianWorkspace), intent(inout)  :: self
+        integer(ip),              intent(in)     :: nlat
+        integer(ip),              intent(in)     :: nlon
         !----------------------------------------------------------------------
 
         ! Ensure that object is usable
-        call this%destroy()
+        call self%destroy()
 
-        call this%initialize_gaussian_scalar_transform(nlat, nlon)
-        call this%initialize_gaussian_vector_transform(nlat, nlon)
-        call get_legendre_workspace(nlat, nlon, this%legendre_workspace)
+        call self%initialize_gaussian_scalar_transform(nlat, nlon)
+        call self%initialize_gaussian_vector_transform(nlat, nlon)
+        call get_legendre_workspace(nlat, nlon, self%legendre_workspace)
 
         ! Set flag
-        this%initialized = .true.
+        self%initialized = .true.
 
     end subroutine create_gaussian_workspace
 
 
 
-    subroutine destroy_gaussian_workspace(this)
+    subroutine destroy_gaussian_workspace(self)
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        class (GaussianWorkspace), intent (in out) :: this
+        class(GaussianWorkspace), intent(inout)  :: self
         !----------------------------------------------------------------------
 
         ! Check flag
-        if (.not.this%initialized) return
+        if (.not.self%initialized) return
 
         ! Release memory from parent type
-        call this%destroy_workspace()
+        call self%destroy_workspace()
 
         ! Set flag
-        this%initialized = .true.
+        self%initialized = .true.
 
     end subroutine destroy_gaussian_workspace
 
 
 
-    subroutine initialize_gaussian_scalar_analysis(this, nlat, nlon)
+    subroutine initialize_gaussian_scalar_analysis(self, nlat, nlon)
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        class (GaussianWorkspace), intent (in out) :: this
-        integer (ip),              intent (in)     :: nlat
-        integer (ip),              intent (in)     :: nlon
+        class(GaussianWorkspace), intent(inout)  :: self
+        integer(ip),              intent(in)     :: nlat
+        integer(ip),              intent(in)     :: nlon
         !----------------------------------------------------------------------
         ! Local variables
         !----------------------------------------------------------------------
-        integer (ip)           :: error_flag
-        integer (ip)           :: lwork, ldwork, lshags
-        real (wp), allocatable :: work(:), dwork(:)
-        type (ShagsAux)        :: aux
+        integer(ip)           :: error_flag
+        integer(ip)           :: lwork, ldwork, lshags
+        real(wp), allocatable :: work(:), dwork(:)
+        type(ShagsAux)        :: aux
         !----------------------------------------------------------------------
 
         ! Compute dimensions of various workspace arrays
@@ -181,17 +181,17 @@ contains
         !
         !==> Allocate memory
         !
-        if (allocated(this%forward_scalar)) deallocate(this%forward_scalar )
+        if (allocated(self%forward_scalar)) deallocate(self%forward_scalar )
 
         !
         !==> Allocate memory
         !
-        allocate( this%forward_scalar(lshags) )
+        allocate( self%forward_scalar(lshags) )
         allocate( work(lwork) )
         allocate( dwork(ldwork) )
 
         associate( &
-            wshags => this%forward_scalar, &
+            wshags => self%forward_scalar, &
             ierror => error_flag &
             )
             !
@@ -207,32 +207,32 @@ contains
             case(0)
                 return
             case(1)
-                error stop 'Object of class (GaussianWorkspace) '&
+                error stop 'Object of class(GaussianWorkspace) '&
                     //'in initialize_gaussian_scalar_analysis '&
                     //'error in the specification of NUMBER_OF_LATITUDES'
             case(2)
-                error stop 'Object of class (GaussianWorkspace) '&
+                error stop 'Object of class(GaussianWorkspace) '&
                     //'in initialize_gaussian_scalar_analysis '&
                     //'error in the specification of NUMBER_OF_LONGITUDES'
             case(3)
-                error stop 'Object of class (GaussianWorkspace) '&
+                error stop 'Object of class(GaussianWorkspace) '&
                     //'in initialize_gaussian_scalar_analysis '&
                     //'error in the specification of extent for forward_scalar'
             case(4)
-                error stop 'Object of class (GaussianWorkspace) '&
+                error stop 'Object of class(GaussianWorkspace) '&
                     //'in initialize_gaussian_scalar_analysis '&
                     //'error in the specification of extent for legendre_workspace'
             case(5)
-                error stop 'Object of class (GaussianWorkspace) '&
+                error stop 'Object of class(GaussianWorkspace) '&
                     //'in initialize_gaussian_scalar_analysis '&
                     //'error in the specification of extent for dwork'
             case(6)
-                error stop 'Object of class (GaussianWorkspace) '&
+                error stop 'Object of class(GaussianWorkspace) '&
                     //'in initialize_gaussian_scalar_analysis '&
                     //'error in call to compute_gaussian_latitudes_and_weights to compute gaussian points '&
                     //'due to failure in eigenvalue routine'
             case default
-                error stop 'Object of class (GaussianWorkspace) '&
+                error stop 'Object of class(GaussianWorkspace) '&
                     //'in initialize_gaussian_scalar_analysis '&
                     //'Undetermined error flag'
         end select
@@ -248,20 +248,20 @@ contains
 
 
 
-    subroutine initialize_gaussian_scalar_synthesis(this, nlat, nlon)
+    subroutine initialize_gaussian_scalar_synthesis(self, nlat, nlon)
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        class (GaussianWorkspace), intent (in out) :: this
-        integer (ip),              intent (in)     :: nlat
-        integer (ip),              intent (in)     :: nlon
+        class(GaussianWorkspace), intent(inout)  :: self
+        integer(ip),              intent(in)     :: nlat
+        integer(ip),              intent(in)     :: nlon
         !----------------------------------------------------------------------
         ! Local variables
         !----------------------------------------------------------------------
-        integer (ip)           :: error_flag
-        integer (ip)           :: lwork, ldwork, lshsgs
-        real (wp), allocatable :: work(:), dwork(:)
-        type (ShsgsAux)        :: aux
+        integer(ip)           :: error_flag
+        integer(ip)           :: lwork, ldwork, lshsgs
+        real(wp), allocatable :: work(:), dwork(:)
+        type(ShsgsAux)        :: aux
         !----------------------------------------------------------------------
 
         ! Compute dimensions of various workspace arrays
@@ -272,15 +272,15 @@ contains
         !
         !==> Allocate memory
         !
-        if (allocated(this%backward_scalar)) deallocate(this%backward_scalar )
+        if (allocated(self%backward_scalar)) deallocate(self%backward_scalar )
 
         allocate( work(lwork) )
         allocate( dwork(ldwork) )
-        allocate( this%backward_scalar(lshsgs) )
+        allocate( self%backward_scalar(lshsgs) )
 
 
         associate( &
-            wshsgs => this%backward_scalar, &
+            wshsgs => self%backward_scalar, &
             ierror => error_flag &
             )
             !
@@ -295,31 +295,31 @@ contains
             case(0)
                 return
             case(1)
-                error stop 'Object of class (GaussianWorkspace) '&
+                error stop 'Object of class(GaussianWorkspace) '&
                     //'in initialize_gaussian_scalar_synthesis '&
                     //'error in the specification of NUMBER_OF_LATITUDES'
             case(2)
-                error stop 'Object of class (GaussianWorkspace) '&
+                error stop 'Object of class(GaussianWorkspace) '&
                     //'in initialize_gaussian_scalar_synthesis '&
                     //'error in the specification of NUMBER_OF_LONGITUDES'
             case(3)
-                error stop 'Object of class (GaussianWorkspace) '&
+                error stop 'Object of class(GaussianWorkspace) '&
                     //'in initialize_gaussian_scalar_synthesis '&
                     //'error in the specification of extent for backward_scalar'
             case(4)
-                error stop 'Object of class (GaussianWorkspace) '&
+                error stop 'Object of class(GaussianWorkspace) '&
                     //'in initialize_gaussian_scalar_synthesis '&
                     //'error in the specification of extent for legendre_workspace'
             case(5)
-                error stop 'Object of class (GaussianWorkspace) '&
+                error stop 'Object of class(GaussianWorkspace) '&
                     //'in initialize_gaussian_scalar_synthesis '&
                     //'error in the specification of extent for dwork'
             case(6)
-                error stop 'Object of class (GaussianWorkspace) '&
+                error stop 'Object of class(GaussianWorkspace) '&
                     //'in initialize_gaussian_scalar_synthesis '&
                     //'error in call to compute_gaussian_latitudes_and_weights due to failure in eigenvalue routine'
             case default
-                error stop 'Object of class (GaussianWorkspace) '&
+                error stop 'Object of class(GaussianWorkspace) '&
                     //'in initialize_gaussian_scalar_synthesis '&
                     //'Undetermined error flag'
         end select
@@ -334,7 +334,7 @@ contains
 
 
 
-    subroutine initialize_gaussian_scalar_transform(this, nlat, nlon)
+    subroutine initialize_gaussian_scalar_transform(self, nlat, nlon)
         !
         ! Purpose:
         !
@@ -344,41 +344,41 @@ contains
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        class (GaussianWorkspace), intent (in out) :: this
-        integer (ip),              intent (in)     :: nlat
-        integer (ip),              intent (in)     :: nlon
+        class(GaussianWorkspace), intent(inout)  :: self
+        integer(ip),              intent(in)     :: nlat
+        integer(ip),              intent(in)     :: nlon
         !----------------------------------------------------------------------
 
         ! Set up scalar analysis
-        call this%initialize_gaussian_scalar_analysis(nlat, nlon)
+        call self%initialize_gaussian_scalar_analysis(nlat, nlon)
 
         ! Set up scalar synthesis
-        call this%initialize_gaussian_scalar_synthesis(nlat, nlon)
+        call self%initialize_gaussian_scalar_synthesis(nlat, nlon)
 
         !
         !==> Allocate memory
         !
-        allocate( this%real_harmonic_coefficients(nlat, nlat) )
-        allocate( this%imaginary_harmonic_coefficients(nlat, nlat) )
+        allocate( self%real_harmonic_coefficients(nlat, nlat) )
+        allocate( self%imaginary_harmonic_coefficients(nlat, nlat) )
 
     end subroutine initialize_gaussian_scalar_transform
 
 
 
-    subroutine initialize_gaussian_vector_analysis(this, nlat, nlon)
+    subroutine initialize_gaussian_vector_analysis(self, nlat, nlon)
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        class (GaussianWorkspace), intent (in out) :: this
-        integer (ip),              intent (in)     :: nlat
-        integer (ip),              intent (in)     :: nlon
+        class(GaussianWorkspace), intent(inout)  :: self
+        integer(ip),              intent(in)     :: nlat
+        integer(ip),              intent(in)     :: nlon
         !----------------------------------------------------------------------
         ! Local variables
         !----------------------------------------------------------------------
-        integer (ip)           :: error_flag
-        integer (ip)           :: ldwork, lvhags
-        real (wp), allocatable :: dwork(:)
-        type (VhagsAux)        :: aux
+        integer(ip)           :: error_flag
+        integer(ip)           :: ldwork, lvhags
+        real(wp), allocatable :: dwork(:)
+        type(VhagsAux)        :: aux
         !----------------------------------------------------------------------
 
         ! Compute dimensions of various workspace arrays
@@ -388,14 +388,14 @@ contains
         !
         !==> Allocate memory
         !
-        if (allocated(this%forward_vector)) deallocate( this%forward_vector )
+        if (allocated(self%forward_vector)) deallocate( self%forward_vector )
 
         allocate( dwork(ldwork) )
-        allocate(this%forward_vector(lvhags) )
+        allocate(self%forward_vector(lvhags) )
 
 
         associate( &
-            wvhags => this%forward_vector, &
+            wvhags => self%forward_vector, &
             ierror => error_flag &
             )
 
@@ -412,23 +412,23 @@ contains
             case(0)
                 return
             case(1)
-                error stop 'Object of class (GaussianWorkspace) '&
+                error stop 'Object of class(GaussianWorkspace) '&
                     //'in initialize_gaussian_vector_analysis'&
                     //'error in the specification of NUMBER_OF_LATITUDES'
             case(2)
-                error stop 'Object of class (GaussianWorkspace) '&
+                error stop 'Object of class(GaussianWorkspace) '&
                     //'in initialize_gaussian_vector_analysis'&
                     //'error in the specification of NUMBER_OF_LONGITUDES'
             case(3)
-                error stop 'Object of class (GaussianWorkspace) '&
+                error stop 'Object of class(GaussianWorkspace) '&
                     //'in initialize_gaussian_vector_analysis'&
                     //'error in the specification of extent for forward_vector'
             case(4)
-                error stop 'Object of class (GaussianWorkspace) '&
+                error stop 'Object of class(GaussianWorkspace) '&
                     //'in initialize_gaussian_vector_analysis'&
                     //'error in the specification of extent for dwork'
             case default
-                error stop 'Object of class (GaussianWorkspace) '&
+                error stop 'Object of class(GaussianWorkspace) '&
                     //'in initialize_gaussian_vector_analysis'&
                     //'Undetermined error flag'
         end select
@@ -442,20 +442,20 @@ contains
 
 
 
-    subroutine initialize_gaussian_vector_synthesis(this, nlat, nlon)
+    subroutine initialize_gaussian_vector_synthesis(self, nlat, nlon)
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        class (GaussianWorkspace), intent (in out) :: this
-        integer (ip),              intent (in)     :: nlat
-        integer (ip),              intent (in)     :: nlon
+        class(GaussianWorkspace), intent(inout)  :: self
+        integer(ip),              intent(in)     :: nlat
+        integer(ip),              intent(in)     :: nlon
         !----------------------------------------------------------------------
         ! Local variables
         !----------------------------------------------------------------------
-        integer (ip)           :: error_flag
-        integer (ip)           :: ldwork, lvhsgs
-        real (wp), allocatable :: dwork(:)
-        type (VhsgsAux)        :: aux
+        integer(ip)           :: error_flag
+        integer(ip)           :: ldwork, lvhsgs
+        real(wp), allocatable :: dwork(:)
+        type(VhsgsAux)        :: aux
         !----------------------------------------------------------------------
 
         ! Compute dimensions of various workspace arrays
@@ -465,14 +465,14 @@ contains
         !
         !==> Allocate memory
         !
-        if (allocated(this%backward_vector)) deallocate( this%backward_vector )
+        if (allocated(self%backward_vector)) deallocate( self%backward_vector )
 
         allocate( dwork(ldwork) )
-        allocate( this%backward_vector(lvhsgs) )
+        allocate( self%backward_vector(lvhsgs) )
 
 
         associate( &
-            wvhsgs => this%backward_vector, &
+            wvhsgs => self%backward_vector, &
             ierror => error_flag &
             )
             !
@@ -487,23 +487,23 @@ contains
             case(0)
                 return
             case(1)
-                error stop 'Object of class (GaussianWorkspace) '&
+                error stop 'Object of class(GaussianWorkspace) '&
                     //'in initialize_gaussian_vector_synthesis '&
                     //'error in the specification of NUMBER_OF_LATITUDES'
             case(2)
-                error stop 'Object of class (GaussianWorkspace) '&
+                error stop 'Object of class(GaussianWorkspace) '&
                     //'in initialize_gaussian_vector_synthesis '&
                     //'error in the specification of NUMBER_OF_LONGITUDES'
             case(3)
-                error stop 'Object of class (GaussianWorkspace) '&
+                error stop 'Object of class(GaussianWorkspace) '&
                     //'in initialize_gaussian_vector_synthesis '&
                     //'error in the specification of extent for backward_vector'
             case(4)
-                error stop 'Object of class (GaussianWorkspace) '&
+                error stop 'Object of class(GaussianWorkspace) '&
                     //'in initialize_gaussian_vector_synthesis '&
                     //'error in the specification of extent for dwork'
             case default
-                error stop 'Object of class (GaussianWorkspace) '&
+                error stop 'Object of class(GaussianWorkspace) '&
                     //'in initialize_gaussian_vector_synthesis '&
                     //'Undetermined error flag'
         end select
@@ -517,7 +517,7 @@ contains
 
 
 
-    subroutine initialize_gaussian_vector_transform(this, nlat, nlon)
+    subroutine initialize_gaussian_vector_transform(self, nlat, nlon)
         !
         ! Purpose:
         !
@@ -527,24 +527,24 @@ contains
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        class (GaussianWorkspace), intent (in out) :: this
-        integer (ip),              intent (in)     :: nlat
-        integer (ip),              intent (in)     :: nlon
+        class(GaussianWorkspace), intent(inout)  :: self
+        integer(ip),              intent(in)     :: nlat
+        integer(ip),              intent(in)     :: nlon
         !----------------------------------------------------------------------
 
         ! Set up vector analysis
-        call this%initialize_gaussian_vector_analysis(nlat, nlon)
+        call self%initialize_gaussian_vector_analysis(nlat, nlon)
 
         ! Set up vector analysis
-        call this%initialize_gaussian_vector_synthesis(nlat, nlon)
+        call self%initialize_gaussian_vector_synthesis(nlat, nlon)
 
         !
         !==> Allocate memory
         !
-        allocate( this%real_polar_harmonic_coefficients(nlat, nlat) )
-        allocate( this%imaginary_polar_harmonic_coefficients(nlat, nlat) )
-        allocate( this%real_azimuthal_harmonic_coefficients(nlat, nlat) )
-        allocate( this%imaginary_azimuthal_harmonic_coefficients(nlat, nlat) )
+        allocate( self%real_polar_harmonic_coefficients(nlat, nlat) )
+        allocate( self%imaginary_polar_harmonic_coefficients(nlat, nlat) )
+        allocate( self%real_azimuthal_harmonic_coefficients(nlat, nlat) )
+        allocate( self%imaginary_azimuthal_harmonic_coefficients(nlat, nlat) )
 
     end subroutine initialize_gaussian_vector_transform
 
@@ -554,12 +554,12 @@ contains
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        integer (ip), intent (in) :: nlat
-        integer (ip)              :: return_value
+        integer(ip), intent(in) :: nlat
+        integer(ip)              :: return_value
         !----------------------------------------------------------------------
-        type (ShagsAux) :: shags_aux
-        type (ShsgsAux) :: shsgs_aux
-        integer (ip)    :: lwork(2)
+        type(ShagsAux) :: shags_aux
+        type(ShsgsAux) :: shsgs_aux
+        integer(ip)    :: lwork(2)
         !----------------------------------------------------------------------
 
         lwork(1) = shags_aux%get_lwork(nlat)
@@ -575,14 +575,14 @@ contains
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        integer (ip), intent (in)  :: nlat
-        integer (ip)               :: return_value
+        integer(ip), intent(in)  :: nlat
+        integer(ip)               :: return_value
         !----------------------------------------------------------------------
-        type (ShagsAux) :: shags_aux
-        type (ShsgsAux) :: shsgs_aux
-        type (VhagsAux) :: vhags_aux
-        type (VhsgsAux) :: vhsgs_aux
-        integer (ip)    :: ldwork(4)
+        type(ShagsAux) :: shags_aux
+        type(ShsgsAux) :: shsgs_aux
+        type(VhagsAux) :: vhags_aux
+        type(VhsgsAux) :: vhsgs_aux
+        integer(ip)    :: ldwork(4)
         !----------------------------------------------------------------------
 
         ldwork(1) = shags_aux%get_ldwork(nlat)
@@ -599,19 +599,19 @@ contains
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        integer (ip),           intent (in)  :: nlat
-        integer (ip),           intent (in)  :: nlon
-        real (wp), allocatable, intent (out) :: workspace(:)
-        integer (ip), optional, intent (in)  :: nt
-        integer (ip), optional, intent (in)  :: ityp
-        integer (ip), optional, intent (in)  :: isym
+        integer(ip),           intent(in)  :: nlat
+        integer(ip),           intent(in)  :: nlon
+        real(wp), allocatable, intent(out) :: workspace(:)
+        integer(ip), optional, intent(in)  :: nt
+        integer(ip), optional, intent(in)  :: ityp
+        integer(ip), optional, intent(in)  :: isym
         !----------------------------------------------------------------------
-        type (ShagsAux) :: shags_aux
-        type (ShsgsAux) :: shsgs_aux
-        type (VhagsAux) :: vhags_aux
-        type (VhsgsAux) :: vhsgs_aux
-        integer (ip)    :: work_size(4)
-        integer (ip)    :: lwork, nt_op, ityp_op, isym_op
+        type(ShagsAux) :: shags_aux
+        type(ShsgsAux) :: shsgs_aux
+        type(VhagsAux) :: vhags_aux
+        type(VhsgsAux) :: vhsgs_aux
+        integer(ip)    :: work_size(4)
+        integer(ip)    :: lwork, nt_op, ityp_op, isym_op
         !----------------------------------------------------------------------
 
         !
@@ -650,14 +650,14 @@ contains
 
 
 
-    subroutine finalize_gaussian_workspace(this)
+    subroutine finalize_gaussian_workspace(self)
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        type (GaussianWorkspace), intent (in out) :: this
+        type(GaussianWorkspace), intent(inout)  :: self
         !----------------------------------------------------------------------
 
-        call this%destroy()
+        call self%destroy()
 
     end subroutine finalize_gaussian_workspace
 

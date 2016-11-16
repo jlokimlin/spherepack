@@ -23,7 +23,7 @@ module type_GaussianGrid
         !----------------------------------------------------------------------
         ! Type components
         !----------------------------------------------------------------------
-        real (wp), allocatable, public :: gaussian_weights(:)
+        real(wp), allocatable, public :: gaussian_weights(:)
         !----------------------------------------------------------------------
     contains
         !----------------------------------------------------------------------
@@ -56,9 +56,9 @@ contains
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        integer (ip), intent (in) :: nlat !! number of latitudinal points 0 <= theta <= pi
-        integer (ip), intent (in) :: nlon !! number of longitudinal points 0 <= phi <= 2*pi
-        type (GaussianGrid)       :: return_value
+        integer(ip), intent(in) :: nlat !! number of latitudinal points 0 <= theta <= pi
+        integer(ip), intent(in) :: nlon !! number of longitudinal points 0 <= phi <= 2*pi
+        type(GaussianGrid)       :: return_value
         !----------------------------------------------------------------------
 
         call return_value%create(nlat, nlon)
@@ -67,93 +67,93 @@ contains
 
 
 
-    subroutine copy_gaussian_grid(this, object_to_be_copied)
+    subroutine copy_gaussian_grid(self, object_to_be_copied)
         !--------------------------------------------------------------------------------
         ! Dummy arguments
         !--------------------------------------------------------------------------------
-        class (GaussianGrid), intent (out) :: this
-        class (GaussianGrid), intent (in)  :: object_to_be_copied
+        class(GaussianGrid), intent(out) :: self
+        class(GaussianGrid), intent(in)  :: object_to_be_copied
         !--------------------------------------------------------------------------------
 
         ! Check if object is usable
         if (object_to_be_copied%initialized .eqv. .false.) then
-            error stop 'Uninitialized object of class (GaussianGrid): '&
+            error stop 'Uninitialized object of class(GaussianGrid): '&
                 //'in assignment (=) '
         end if
 
         !
         !==> Make copies
         !
-        this%initialized = object_to_be_copied%initialized
-        this%NUMBER_OF_LONGITUDES = object_to_be_copied%NUMBER_OF_LONGITUDES
-        this%NUMBER_OF_LATITUDES = object_to_be_copied%NUMBER_OF_LATITUDES
-        this%LONGITUDINAL_MESH = object_to_be_copied%LONGITUDINAL_MESH
-        this%latitudes = object_to_be_copied%latitudes
-        this%longitudes = object_to_be_copied%longitudes
-        this%gaussian_weights = object_to_be_copied%gaussian_weights
-        this%grid_type = object_to_be_copied%grid_type
+        self%initialized = object_to_be_copied%initialized
+        self%NUMBER_OF_LONGITUDES = object_to_be_copied%NUMBER_OF_LONGITUDES
+        self%NUMBER_OF_LATITUDES = object_to_be_copied%NUMBER_OF_LATITUDES
+        self%LONGITUDINAL_MESH = object_to_be_copied%LONGITUDINAL_MESH
+        self%latitudes = object_to_be_copied%latitudes
+        self%longitudes = object_to_be_copied%longitudes
+        self%gaussian_weights = object_to_be_copied%gaussian_weights
+        self%grid_type = object_to_be_copied%grid_type
 
     end subroutine copy_gaussian_grid
 
 
 
-    subroutine create_gaussian_grid(this, nlat, nlon)
+    subroutine create_gaussian_grid(self, nlat, nlon)
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        class (GaussianGrid), target, intent (in out) :: this
-        integer (ip),                 intent (in)     :: nlat !! number of latitudinal points 0 <= theta <= pi
-        integer (ip),                 intent (in)     :: nlon !! number of longitudinal points 0 <= phi <= 2*pi
+        class(GaussianGrid), target, intent(inout)  :: self
+        integer(ip),                 intent(in)     :: nlat !! number of latitudinal points 0 <= theta <= pi
+        integer(ip),                 intent(in)     :: nlon !! number of longitudinal points 0 <= phi <= 2*pi
         !----------------------------------------------------------------------
 
         ! Ensure that object is usable
-        call this%destroy()
+        call self%destroy()
 
         ! Set contants
-        this%NUMBER_OF_LATITUDES = nlat
-        this%NUMBER_OF_LONGITUDES = nlon
+        self%NUMBER_OF_LATITUDES = nlat
+        self%NUMBER_OF_LONGITUDES = nlon
 
         ! Set the gaussian grid type
-        allocate( this%grid_type, source='gaussian' )
+        allocate( self%grid_type, source='gaussian' )
 
         ! Set longitudinal grid: 0 <= phi <= 2*pi
-        call this%get_equally_spaced_longitudes(nlon, this%longitudes)
+        call self%get_equally_spaced_longitudes(nlon, self%longitudes)
 
         ! Set latitudinal grid: 0 <= theta <= pi
-        call this%get_latitudes_and_gaussian_weights(nlat, this%latitudes, this%gaussian_weights)
+        call self%get_latitudes_and_gaussian_weights(nlat, self%latitudes, self%gaussian_weights)
 
         ! Set initialization flag
-        this%initialized = .true.
+        self%initialized = .true.
 
     end subroutine create_gaussian_grid
 
 
 
-    subroutine destroy_gaussian_grid(this)
+    subroutine destroy_gaussian_grid(self)
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        class (GaussianGrid), intent (in out) :: this
+        class(GaussianGrid), intent(inout)  :: self
         !----------------------------------------------------------------------
 
         ! Check initialization flag
-        if (.not.this%initialized) return
+        if (.not.self%initialized) return
 
         !
         !==> Release memory
         !
-        if (allocated(this%gaussian_weights)) deallocate(this%gaussian_weights)
+        if (allocated(self%gaussian_weights)) deallocate(self%gaussian_weights)
 
-        call this%destroy_grid()
+        call self%destroy_grid()
 
         ! Reset flag
-        this%initialized = .false.
+        self%initialized = .false.
 
     end subroutine destroy_gaussian_grid
 
 
 
-    subroutine get_latitudes_and_gaussian_weights(this, nlat, theta, wts)
+    subroutine get_latitudes_and_gaussian_weights(self, nlat, theta, wts)
         !
         !<Purpose:
         !
@@ -171,21 +171,21 @@ contains
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        class (GaussianGrid),   intent (in out) :: this
-        integer (ip),           intent (in)     :: nlat     !! number of latitudinal points
-        real (wp), allocatable, intent (out)    :: theta(:) !! latitudinal points: 0 <= theta <= pi
-        real (wp), allocatable, intent (out)    :: wts(:)   !! gaussian weights
+        class(GaussianGrid),   intent(inout)  :: self
+        integer(ip),           intent(in)     :: nlat     !! number of latitudinal points
+        real(wp), allocatable, intent(out)    :: theta(:) !! latitudinal points: 0 <= theta <= pi
+        real(wp), allocatable, intent(out)    :: wts(:)   !! gaussian weights
         !----------------------------------------------------------------------
         ! Local variables
         !----------------------------------------------------------------------
-        integer (ip)  :: error_flag
-        integer (ip)  :: dummy_integer !! unused integer variable to maintain backwards compatibility
-        real (wp)     :: dummy_real    !! unused double precision variable to maintain backwards compatibility
+        integer(ip)  :: error_flag
+        integer(ip)  :: dummy_integer !! unused integer variable to maintain backwards compatibility
+        real(wp)     :: dummy_real    !! unused double precision variable to maintain backwards compatibility
         !----------------------------------------------------------------------
 
         ! Check input argument
         if (nlat <= 0) then
-            error stop 'Object of class (GaussianGrid): '&
+            error stop 'Object of class(GaussianGrid): '&
                 //'invalid argument nlat <= 0 '&
                 //'in get_equally_spaced_latitudes'
         end if
@@ -216,11 +216,11 @@ contains
             case(0)
                 return
             case(1)
-                error stop 'Object of class (GaussianGrid) '&
+                error stop 'Object of class(GaussianGrid) '&
                     //'fails to satisfy nlat >= 0 '&
                     //'in get_latitudes_and_gaussian_weights'
             case default
-                error stop 'Object of class (GaussianGrid): '&
+                error stop 'Object of class(GaussianGrid): '&
                     //'undetermined error in '&
                     //'get_latitudes_and_gaussian_weights'
         end select
@@ -228,29 +228,29 @@ contains
     end subroutine get_latitudes_and_gaussian_weights
 
 
-    subroutine unformatted_print(this, header)
+    subroutine unformatted_print(self, header)
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        class (GaussianGrid), intent (in out) :: this
-        character (len=*),    intent (in)     :: header
+        class(GaussianGrid), intent(inout)  :: self
+        character(len=*),    intent(in)     :: header
         !----------------------------------------------------------------------
         ! Local variables
         !----------------------------------------------------------------------
-        integer (ip)  :: file_unit
+        integer(ip)  :: file_unit
         !----------------------------------------------------------------------
 
         ! Check if object is usable
-        if (.not.this%initialized) then
-            error stop 'Uninitialized object of class (GaussianGrid): '&
+        if (.not.self%initialized) then
+            error stop 'Uninitialized object of class(GaussianGrid): '&
                 //'in unformatted_print'
         end if
 
         ! Write latitudes and longitudes
-        call this%print_to_unformatted_binary_files(header)
+        call self%print_to_unformatted_binary_files(header)
 
         ! Write gaussian weights
-        associate( wts => this%gaussian_weights )
+        associate( wts => self%gaussian_weights )
 
             open( newunit=file_unit, file=header//'gaussian_weights.dat', &
                 status='replace', form='unformatted', &
@@ -264,14 +264,14 @@ contains
 
 
 
-    subroutine finalize_gaussian_grid(this)
+    subroutine finalize_gaussian_grid(self)
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        type (GaussianGrid), intent (in out) :: this
+        type(GaussianGrid), intent(inout)  :: self
         !----------------------------------------------------------------------
 
-        call this%destroy()
+        call self%destroy()
 
     end subroutine finalize_gaussian_grid
 

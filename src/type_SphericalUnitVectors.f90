@@ -30,11 +30,11 @@ module type_SphericalUnitVectors
         ! Type components
         !----------------------------------------------------------------------
         logical,                    public :: initialized = .false.
-        integer (ip),               public :: NUMBER_OF_LONGITUDES = 0
-        integer (ip),               public :: NUMBER_OF_LATITUDES = 0
-        type (Vector), allocatable, public :: radial(:,:)
-        type (Vector), allocatable, public :: polar(:,:)
-        type (Vector), allocatable, public :: azimuthal(:,:)
+        integer(ip),               public :: NUMBER_OF_LONGITUDES = 0
+        integer(ip),               public :: NUMBER_OF_LATITUDES = 0
+        type(Vector), allocatable, public :: radial(:,:)
+        type(Vector), allocatable, public :: polar(:,:)
+        type(Vector), allocatable, public :: azimuthal(:,:)
         !----------------------------------------------------------------------
     contains
         !----------------------------------------------------------------------
@@ -64,8 +64,8 @@ contains
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        class (SphericalGrid), intent (in out) :: grid
-        type (SphericalUnitVectors)            :: return_value
+        class(SphericalGrid), intent(inout)  :: grid
+        type(SphericalUnitVectors)            :: return_value
         !----------------------------------------------------------------------
 
         call return_value%create(grid)
@@ -74,26 +74,26 @@ contains
 
 
 
-    subroutine create_spherical_unit_vectors(this, grid)
+    subroutine create_spherical_unit_vectors(self, grid)
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        class (SphericalUnitVectors),  intent (in out) :: this
-        class (SphericalGrid),         intent (in out) :: grid
+        class(SphericalUnitVectors),  intent(inout)  :: self
+        class(SphericalGrid),         intent(inout)  :: grid
         !----------------------------------------------------------------------
         ! Local variables
         !----------------------------------------------------------------------
-        integer (ip)                  :: k,  l !! Counters
-        type (TrigonometricFunctions) :: trig_func
+        integer(ip)                  :: k,  l !! Counters
+        type(TrigonometricFunctions) :: trig_func
         !----------------------------------------------------------------------
 
         ! Check if object is usable
-        call this%destroy()
+        call self%destroy()
 
         ! Check if polymorphic argument is usable
         if ( grid%initialized .eqv. .false.) then
-            error stop 'Object of class (SphericalUnitVectors): '&
-                //'uninitialized polymorphic argument of class (SphericalGrid) '&
+            error stop 'Object of class(SphericalUnitVectors): '&
+                //'uninitialized polymorphic argument of class(SphericalGrid) '&
                 //'in create_spherical_unit_vectors'
         end if
 
@@ -104,24 +104,24 @@ contains
             )
 
             ! Set constants
-            this%NUMBER_OF_LATITUDES = nlat
-            this%NUMBER_OF_LONGITUDES = nlon
+            self%NUMBER_OF_LATITUDES = nlat
+            self%NUMBER_OF_LONGITUDES = nlon
 
             !
             !==> Allocate memory
             !
-            allocate(this%radial(nlat, nlon) )
-            allocate(this%polar(nlat, nlon) )
-            allocate(this%azimuthal(nlat, nlon) )
+            allocate(self%radial(nlat, nlon) )
+            allocate(self%polar(nlat, nlon) )
+            allocate(self%azimuthal(nlat, nlon) )
 
             ! Compute required trigonometric functions
             trig_func = TrigonometricFunctions(grid)
 
             ! Compute spherical unit vectors
             associate( &
-                r => this%radial, &
-                theta => this%polar, &
-                phi => this%azimuthal, &
+                r => self%radial, &
+                theta => self%polar, &
+                phi => self%azimuthal, &
                 sint => trig_func%sint, &
                 cost => trig_func%cost, &
                 sinp => trig_func%sinp, &
@@ -160,72 +160,72 @@ contains
         end associate
 
         ! Set flag
-        this%initialized = .true.
+        self%initialized = .true.
 
     end subroutine create_spherical_unit_vectors
     
 
 
-    subroutine destroy_spherical_unit_vectors(this)
+    subroutine destroy_spherical_unit_vectors(self)
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        class (SphericalUnitVectors), intent (in out) :: this
+        class(SphericalUnitVectors), intent(inout)  :: self
         !----------------------------------------------------------------------
 
         ! Check flag
-        if (.not.this%initialized) return
+        if (.not.self%initialized) return
 
         ! Release memory
-        if (allocated(this%radial)) deallocate( this%radial )
-        if (allocated(this%polar)) deallocate(  this%polar )
-        if (allocated(this%azimuthal)) deallocate( this%azimuthal )
+        if (allocated(self%radial)) deallocate( self%radial )
+        if (allocated(self%polar)) deallocate(  self%polar )
+        if (allocated(self%azimuthal)) deallocate( self%azimuthal )
 
         ! Reset constants
-        this%NUMBER_OF_LONGITUDES = 0
-        this%NUMBER_OF_LATITUDES = 0
+        self%NUMBER_OF_LONGITUDES = 0
+        self%NUMBER_OF_LATITUDES = 0
 
         ! Reset flag
-        this%initialized = .false.
+        self%initialized = .false.
 
     end subroutine destroy_spherical_unit_vectors
 
 
 
-    subroutine get_spherical_angle_components(this, &
+    subroutine get_spherical_angle_components(self, &
         vector_function, polar_component, azimuthal_component )
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        class (SphericalUnitVectors), intent (in out) :: this
-        real (wp),                    intent (in)     :: vector_function(:,:,:)
-        real (wp),                    intent (out)    :: polar_component(:,:)
-        real (wp),                    intent (out)    :: azimuthal_component(:,:)
+        class(SphericalUnitVectors), intent(inout)  :: self
+        real(wp),                    intent(in)     :: vector_function(:,:,:)
+        real(wp),                    intent(out)    :: polar_component(:,:)
+        real(wp),                    intent(out)    :: azimuthal_component(:,:)
         !----------------------------------------------------------------------
         ! Local variables
         !----------------------------------------------------------------------
-        integer (ip)  :: k, l !! Counters
-        type (Vector) :: vector_field !! To cast array to vector
+        integer(ip)  :: k, l !! Counters
+        type(Vector) :: vector_field !! To cast array to vector
         !----------------------------------------------------------------------
 
         ! Check if object is usable
-        if (.not.this%initialized) then
-            error stop 'Object of class (SphericalUnitVectors): '&
+        if (.not.self%initialized) then
+            error stop 'Object of class(SphericalUnitVectors): '&
                 //'uninitialized object in get_spherical_angle_components'
         end if
 
         ! Calculate the spherical angle components
         associate( &
-            nlat => this%NUMBER_OF_LATITUDES, &
-            nlon => this%NUMBER_OF_LONGITUDES &
+            nlat => self%NUMBER_OF_LATITUDES, &
+            nlon => self%NUMBER_OF_LONGITUDES &
             )
             do l = 1, nlon
                 do k = 1, nlat
                     ! Cast array to vector
                     vector_field = vector_function(:, k, l)
                     associate( &
-                        theta => this%polar(k, l), &
-                        phi => this%azimuthal(k, l) &
+                        theta => self%polar(k, l), &
+                        phi => self%azimuthal(k, l) &
                         )
                         ! set the theta component
                         polar_component(k, l) = theta.dot.vector_field
@@ -241,39 +241,39 @@ contains
 
 
 
-    subroutine get_vector_function(this, &
+    subroutine get_vector_function(self, &
         radial_component, polar_component, azimuthal_component, vector_function)
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        class (SphericalUnitVectors), intent (in out) :: this
-        real (wp),                    intent (in)     :: radial_component(:,:)
-        real (wp),                    intent (in)     :: polar_component(:,:)
-        real (wp),                    intent (in)     :: azimuthal_component(:,:)
-        real (wp),                    intent (out)    :: vector_function(:,:,:)
+        class(SphericalUnitVectors), intent(inout)  :: self
+        real(wp),                    intent(in)     :: radial_component(:,:)
+        real(wp),                    intent(in)     :: polar_component(:,:)
+        real(wp),                    intent(in)     :: azimuthal_component(:,:)
+        real(wp),                    intent(out)    :: vector_function(:,:,:)
         !----------------------------------------------------------------------
         ! Local variables
         !----------------------------------------------------------------------
-        integer (ip)  :: k, l !! Counters
+        integer(ip)  :: k, l !! Counters
         !----------------------------------------------------------------------
 
         ! Check if object is usable
-        if (.not.this%initialized) then
+        if (.not.self%initialized) then
             error stop 'TYPE(SphericalUnitVectors): '&
                 //'uninitialized object in GET_VECTOR_FUNCTION'
         end if
 
 
         associate( &
-            nlat => this%NUMBER_OF_LATITUDES, &
-            nlon => this%NUMBER_OF_LONGITUDES &
+            nlat => self%NUMBER_OF_LATITUDES, &
+            nlon => self%NUMBER_OF_LONGITUDES &
             )
             do l = 1, nlon
                 do k = 1, nlat
                     associate( &
-                        r => this%radial(k,l), &
-                        theta => this%polar(k, l), &
-                        phi => this%azimuthal(k, l) &
+                        r => self%radial(k,l), &
+                        theta => self%polar(k, l), &
+                        phi => self%azimuthal(k, l) &
                         )
                         !
                         !==> Calculate the spherical angle components
@@ -292,14 +292,14 @@ contains
 
 
 
-    subroutine finalize_spherical_unit_vectors(this)
+    subroutine finalize_spherical_unit_vectors(self)
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        type (SphericalUnitVectors), intent (in out)    :: this
+        type(SphericalUnitVectors), intent(inout)     :: self
         !----------------------------------------------------------------------
 
-        call this%destroy()
+        call self%destroy()
 
     end subroutine finalize_spherical_unit_vectors
 

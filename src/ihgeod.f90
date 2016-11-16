@@ -78,54 +78,54 @@ contains
         !-------------------------------------------------------------
         ! Dummy arguments
         !-------------------------------------------------------------
-        integer (ip), intent (in)     :: m
-        integer (ip), intent (in)     :: idp
-        integer (ip), intent (in)     :: jdp
-        real (wp),    intent (in out) :: x(idp, jdp, 5)
-        real (wp),    intent (in out) :: y(idp, jdp, 5)
-        real (wp),    intent (in out) :: z(idp, jdp, 5)
+        integer(ip), intent(in)     :: m
+        integer(ip), intent(in)     :: idp
+        integer(ip), intent(in)     :: jdp
+        real(wp),    intent(inout)  :: x(idp, jdp, 5)
+        real(wp),    intent(inout)  :: y(idp, jdp, 5)
+        real(wp),    intent(inout)  :: z(idp, jdp, 5)
         !-------------------------------------------------------------
         ! Local variables
         !-------------------------------------------------------------
-        real (wp) :: beta
-        real (wp) :: dphi
-        real (wp) :: dxi
-        real (wp) :: dxj
-        real (wp) :: dyi
-        real (wp) :: dyj
-        real (wp) :: dzi
-        real (wp) :: dzj
-        real (wp) :: hdphi
-        integer (ip) :: i
-        integer (ip) :: j
-        integer (ip) :: k
-        real (wp) :: phi
-        real (wp) :: rad
-        real (wp) :: tdphi
-        real (wp) :: theta
-        real (wp) :: theta1
-        real (wp) :: theta2
-        real (wp) :: x1
-        real (wp) :: x2
-        real (wp) :: x3
-        real (wp) :: x4
-        real (wp) :: x5
-        real (wp) :: x6
-        real (wp) :: xs
-        real (wp) :: y1
-        real (wp) :: y2
-        real (wp) :: y3
-        real (wp) :: y4
-        real (wp) :: y5
-        real (wp) :: y6
-        real (wp) :: ys
-        real (wp) :: z1
-        real (wp) :: z2
-        real (wp) :: z3
-        real (wp) :: z4
-        real (wp) :: z5
-        real (wp) :: z6
-        real (wp) :: zs
+        real(wp) :: beta
+        real(wp) :: dphi
+        real(wp) :: dxi
+        real(wp) :: dxj
+        real(wp) :: dyi
+        real(wp) :: dyj
+        real(wp) :: dzi
+        real(wp) :: dzj
+        real(wp) :: hdphi
+        integer(ip) :: i
+        integer(ip) :: j
+        integer(ip) :: k
+        real(wp) :: phi
+        real(wp) :: rad
+        real(wp) :: tdphi
+        real(wp) :: theta
+        real(wp) :: theta1
+        real(wp) :: theta2
+        real(wp) :: x1
+        real(wp) :: x2
+        real(wp) :: x3
+        real(wp) :: x4
+        real(wp) :: x5
+        real(wp) :: x6
+        real(wp) :: xs
+        real(wp) :: y1
+        real(wp) :: y2
+        real(wp) :: y3
+        real(wp) :: y4
+        real(wp) :: y5
+        real(wp) :: y6
+        real(wp) :: ys
+        real(wp) :: z1
+        real(wp) :: z2
+        real(wp) :: z3
+        real(wp) :: z4
+        real(wp) :: z5
+        real(wp) :: z6
+        real(wp) :: zs
         !-------------------------------------------------------------
 
         dphi = 0.4_wp*pi
@@ -229,14 +229,14 @@ contains
         !-------------------------------------------------------------
         ! Dummy arguments
         !-------------------------------------------------------------
-        real (wp), intent (in)   :: x
-        real (wp), intent (in)   :: y
-        real (wp), intent (in)   :: z
-        real (wp), intent (out)  :: r
-        real (wp), intent (out)  :: theta
-        real (wp), intent (out)  :: phi
+        real(wp), intent(in)   :: x
+        real(wp), intent(in)   :: y
+        real(wp), intent(in)   :: z
+        real(wp), intent(out)  :: r
+        real(wp), intent(out)  :: theta
+        real(wp), intent(out)  :: phi
         !-------------------------------------------------------------
-        real (wp) :: radial
+        real(wp) :: radial
         !-------------------------------------------------------------
 
         radial = hypot(x,y)**2
@@ -261,12 +261,12 @@ contains
         !-------------------------------------------------------------
         ! Dummy arguments
         !-------------------------------------------------------------
-        real (wp), intent (in)  :: r
-        real (wp), intent (in)  :: theta
-        real (wp), intent (in)  :: phi
-        real (wp), intent (out) :: x
-        real (wp), intent (out) :: y
-        real (wp), intent (out) :: z
+        real(wp), intent(in)  :: r
+        real(wp), intent(in)  :: theta
+        real(wp), intent(in)  :: phi
+        real(wp), intent(out) :: x
+        real(wp), intent(out) :: y
+        real(wp), intent(out) :: z
         !-------------------------------------------------------------
 
         x = r*sin(theta)*cos(phi)

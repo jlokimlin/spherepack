@@ -51,7 +51,7 @@
 !
 program tgrad
 
-    use, intrinsic :: iso_fortran_env, only: &
+    use, intrinsic :: ISO_Fortran_env, only: &
         ip => INT32, &
         wp => REAL64, &
         stdout => OUTPUT_UNIT
@@ -67,7 +67,7 @@ program tgrad
     !----------------------------------------------------------------------
     ! Dictionary
     !----------------------------------------------------------------------
-    class (Sphere), allocatable :: sphere_dat
+    class(Sphere), allocatable :: sphere_dat
     !----------------------------------------------------------------------
 
     !
@@ -98,29 +98,29 @@ contains
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        class (Sphere), intent (in out) :: sphere_type
+        class(Sphere), intent(inout)  :: sphere_type
         !----------------------------------------------------------------------
         ! Local variables
         !----------------------------------------------------------------------
-        integer (ip), parameter        :: NLATS = 33
-        integer (ip), parameter        :: NLONS = 18
-        integer (ip), parameter        :: NSYNTHS = 4
-        integer (ip)                   :: i, j, k !! Counters
-        real (wp)                      :: original_polar_gradient_component(NLATS,NLONS,NSYNTHS)
-        real (wp)                      :: original_azimuthal_gradient_component(NLATS,NLONS,NSYNTHS)
-        real (wp)                      :: original_scalar_function(NLATS,NLONS,NSYNTHS)
-        real (wp)                      :: approximate_polar_gradient_component(NLATS,NLONS,NSYNTHS)
-        real (wp)                      :: approximate_azimuthal_gradient_component(NLATS,NLONS,NSYNTHS)
-        real (wp)                      :: approximate_scalar_function(NLATS,NLONS,NSYNTHS)
-        character (len=:), allocatable :: previous_gradient_inversion_error
-        character (len=:), allocatable :: previous_polar_gradient_error
-        character (len=:), allocatable :: previous_azimuthal_gradient_error
+        integer(ip), parameter        :: NLATS = 33
+        integer(ip), parameter        :: NLONS = 18
+        integer(ip), parameter        :: NSYNTHS = 4
+        integer(ip)                   :: i, j, k !! Counters
+        real(wp)                      :: original_polar_gradient_component(NLATS,NLONS,NSYNTHS)
+        real(wp)                      :: original_azimuthal_gradient_component(NLATS,NLONS,NSYNTHS)
+        real(wp)                      :: original_scalar_function(NLATS,NLONS,NSYNTHS)
+        real(wp)                      :: approximate_polar_gradient_component(NLATS,NLONS,NSYNTHS)
+        real(wp)                      :: approximate_azimuthal_gradient_component(NLATS,NLONS,NSYNTHS)
+        real(wp)                      :: approximate_scalar_function(NLATS,NLONS,NSYNTHS)
+        character(len=:), allocatable :: previous_gradient_inversion_error
+        character(len=:), allocatable :: previous_polar_gradient_error
+        character(len=:), allocatable :: previous_azimuthal_gradient_error
         !----------------------------------------------------------------------
 
         !
         !==> Set up workspace arrays
         !
-        select type (sphere_type)
+        select type(sphere_type)
             type is (GaussianSphere)
 
             !  Initialize gaussian sphere object

@@ -145,7 +145,7 @@
 ! **********************************************************************
 program testrvsph
 
-    use, intrinsic :: iso_fortran_env, only: &
+    use, intrinsic :: ISO_Fortran_env, only: &
         stdout => OUTPUT_UNIT
 
     use spherepack_library, only: &

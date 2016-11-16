@@ -296,30 +296,30 @@ contains
 
     subroutine shsec(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, &
         wshsec, lshsec, work, lwork, ierror)
-        real (wp) :: a(mdab, ndab, nt)
-        real (wp) :: b(mdab, ndab, nt)
-        real (wp) :: g(idg, jdg, nt)
-        integer (ip) :: idg
-        integer (ip) :: ierror
-        integer (ip) :: imid
-        integer (ip) :: ist
-        integer (ip) :: isym
-        integer (ip) :: iw1
-        integer (ip) :: jdg
-        integer (ip) :: labc
-        integer (ip) :: ls
-        integer (ip) :: lshsec
-        integer (ip) :: lwork
-        integer (ip) :: lzz1
-        integer (ip) :: mdab
-        integer (ip) :: mmax
-        integer (ip) :: ndab
-        integer (ip) :: nlat
-        integer (ip) :: nln
-        integer (ip) :: nlon
-        integer (ip) :: nt
-        real (wp) :: work(lwork)
-        real (wp) :: wshsec(lshsec)
+        real(wp) :: a(mdab, ndab, nt)
+        real(wp) :: b(mdab, ndab, nt)
+        real(wp) :: g(idg, jdg, nt)
+        integer(ip) :: idg
+        integer(ip) :: ierror
+        integer(ip) :: imid
+        integer(ip) :: ist
+        integer(ip) :: isym
+        integer(ip) :: iw1
+        integer(ip) :: jdg
+        integer(ip) :: labc
+        integer(ip) :: ls
+        integer(ip) :: lshsec
+        integer(ip) :: lwork
+        integer(ip) :: lzz1
+        integer(ip) :: mdab
+        integer(ip) :: mmax
+        integer(ip) :: ndab
+        integer(ip) :: nlat
+        integer(ip) :: nln
+        integer(ip) :: nlon
+        integer(ip) :: nt
+        real(wp) :: work(lwork)
+        real(wp) :: wshsec(lshsec)
 
         ierror = 1
         if (nlat < 3) return
@@ -362,45 +362,45 @@ contains
             idg, jdg, ge, go, work, pb, walin, whrfft)
 
 
-            real (wp) :: a
-            real (wp) :: b
-            real (wp) :: g
-            real (wp) :: ge
-            real (wp) :: go
-            integer (ip) :: i
-            integer (ip) :: i3
-            integer (ip) :: idg
-            integer (ip) :: idgs
-            integer (ip) :: imid
-            integer (ip) :: imm1
-            integer (ip) :: isym
-            integer (ip) :: j
-            integer (ip) :: jdg
-            integer (ip) :: jdgs
-            integer (ip) :: k
-            integer (ip) :: ls
-            integer (ip) :: m
-            integer (ip) :: mdab
-            integer (ip) :: mdo
-            integer (ip) :: mmax
-            integer (ip) :: modl
-            integer (ip) :: mp1
-            integer (ip) :: mp2
-            integer (ip) :: ndab
-            integer (ip) :: ndo
-            integer (ip) :: nlat
-            integer (ip) :: nlon
-            integer (ip) :: nlp1
-            integer (ip) :: np1
-            integer (ip) :: nt
-            real (wp) :: pb
-            real (wp) :: walin
-            real (wp) :: whrfft
-            real (wp) :: work
+            real(wp) :: a
+            real(wp) :: b
+            real(wp) :: g
+            real(wp) :: ge
+            real(wp) :: go
+            integer(ip) :: i
+            integer(ip) :: i3
+            integer(ip) :: idg
+            integer(ip) :: idgs
+            integer(ip) :: imid
+            integer(ip) :: imm1
+            integer(ip) :: isym
+            integer(ip) :: j
+            integer(ip) :: jdg
+            integer(ip) :: jdgs
+            integer(ip) :: k
+            integer(ip) :: ls
+            integer(ip) :: m
+            integer(ip) :: mdab
+            integer(ip) :: mdo
+            integer(ip) :: mmax
+            integer(ip) :: modl
+            integer(ip) :: mp1
+            integer(ip) :: mp2
+            integer(ip) :: ndab
+            integer(ip) :: ndo
+            integer(ip) :: nlat
+            integer(ip) :: nlon
+            integer(ip) :: nlp1
+            integer(ip) :: np1
+            integer(ip) :: nt
+            real(wp) :: pb
+            real(wp) :: walin
+            real(wp) :: whrfft
+            real(wp) :: work
 
 
-            type (HFFTpack)      :: hfft
-            type (SpherepackAux) :: sphere_aux
+            type(HFFTpack)      :: hfft
+            type(SpherepackAux) :: sphere_aux
             !
             !     whrfft must have at least nlon+15 locations
             !     walin must have 3*l*imid + 3*((l-3)*l+2)/2 locations
@@ -614,21 +614,21 @@ contains
     ! ****************************************************************
     subroutine shseci(nlat, nlon, wshsec, lshsec, dwork, ldwork, ierror)
 
-        integer (ip) :: ierror
-        integer (ip) :: imid
-        integer (ip) :: iw1
-        integer (ip) :: labc
-        integer (ip) :: ldwork
-        integer (ip) :: lshsec
-        integer (ip) :: lzz1
-        integer (ip) :: mmax
-        integer (ip) :: nlat
-        integer (ip) :: nlon
-        real (wp) :: wshsec(lshsec)
-        real (wp) :: dwork(ldwork)
+        integer(ip) :: ierror
+        integer(ip) :: imid
+        integer(ip) :: iw1
+        integer(ip) :: labc
+        integer(ip) :: ldwork
+        integer(ip) :: lshsec
+        integer(ip) :: lzz1
+        integer(ip) :: mmax
+        integer(ip) :: nlat
+        integer(ip) :: nlon
+        real(wp) :: wshsec(lshsec)
+        real(wp) :: dwork(ldwork)
 
-        type (HFFTpack)      :: hfft
-        type (SpherepackAux) :: sphere_aux
+        type(HFFTpack)      :: hfft
+        type(SpherepackAux) :: sphere_aux
 
         ierror = 1
         if (nlat < 3) return

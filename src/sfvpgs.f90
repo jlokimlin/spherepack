@@ -218,7 +218,7 @@
 !
 module module_sfvpgs
 
-    use, intrinsic :: iso_fortran_env, only: &
+    use, intrinsic :: ISO_Fortran_env, only: &
         wp => REAL64, &
         ip => INT32
 
@@ -237,13 +237,13 @@ contains
     subroutine sfvpgs(nlat, nlon, isym, nt, sf, vp, idv, jdv, br, bi, cr, ci, &
         mdb, ndb, wshsgs, lshsgs, work, lwork, ierror)
 
-        integer (ip) :: nlat, nlon, isym, nt, idv, jdv, mdb, ndb, lshsgs, lwork, ierror
-        real (wp) :: sf(idv, jdv, nt), vp(idv, jdv, nt)
-        real (wp) :: br(mdb, ndb, nt), bi(mdb, ndb, nt)
-        real (wp) :: cr(mdb, ndb, nt), ci(mdb, ndb, nt)
-        real (wp) :: wshsgs(lshsgs), work(lwork)
-        integer (ip) :: imid, ls, mab, mn, ia, ib, is, lwk, iwk
-        integer (ip) :: lat, late, l1, l2, lp
+        integer(ip) :: nlat, nlon, isym, nt, idv, jdv, mdb, ndb, lshsgs, lwork, ierror
+        real(wp) :: sf(idv, jdv, nt), vp(idv, jdv, nt)
+        real(wp) :: br(mdb, ndb, nt), bi(mdb, ndb, nt)
+        real(wp) :: cr(mdb, ndb, nt), ci(mdb, ndb, nt)
+        real(wp) :: wshsgs(lshsgs), work(lwork)
+        integer(ip) :: imid, ls, mab, mn, ia, ib, is, lwk, iwk
+        integer(ip) :: lat, late, l1, l2, lp
         !
         !     check input parameters
         !
@@ -309,12 +309,12 @@ contains
         subroutine stvpgs1(nlat, nlon, isym, nt, sf, vp, idv, jdv, br, bi, cr, ci, &
             mdb, ndb, a, b, mab, fnn, wshsgs, lshsgs, wk, lwk, ierror)
 
-            integer (ip) :: nlat, nlon, isym, nt, idv, jdv, mdb, ndb, mab, lshsgs, lwk, ierror
-            real (wp) :: sf(idv, jdv, nt), vp(idv, jdv, nt)
-            real (wp) :: br(mdb, ndb, nt), bi(mdb, ndb, nt), cr(mdb, ndb, nt), ci(mdb, ndb, nt)
-            real (wp) :: a(mab, nlat, nt), b(mab, nlat, nt)
-            real (wp) :: wshsgs(lshsgs), wk(lwk), fnn(nlat)
-            integer (ip) :: n, m, mmax, k
+            integer(ip) :: nlat, nlon, isym, nt, idv, jdv, mdb, ndb, mab, lshsgs, lwk, ierror
+            real(wp) :: sf(idv, jdv, nt), vp(idv, jdv, nt)
+            real(wp) :: br(mdb, ndb, nt), bi(mdb, ndb, nt), cr(mdb, ndb, nt), ci(mdb, ndb, nt)
+            real(wp) :: a(mab, nlat, nt), b(mab, nlat, nt)
+            real(wp) :: wshsgs(lshsgs), wk(lwk), fnn(nlat)
+            integer(ip) :: n, m, mmax, k
             !
             !     set coefficient multiplyers
             !

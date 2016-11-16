@@ -54,7 +54,7 @@
 !
 program tvlap
 
-    use, intrinsic :: iso_fortran_env, only: &
+    use, intrinsic :: ISO_Fortran_env, only: &
         stdout => OUTPUT_UNIT
 
     use spherepack_library, only: &
@@ -70,7 +70,7 @@ program tvlap
     !----------------------------------------------------------------------
     ! Dictionary
     !----------------------------------------------------------------------
-    class (Sphere), allocatable :: sphere_dat
+    class(Sphere), allocatable :: sphere_dat
     !----------------------------------------------------------------------
 
     !
@@ -98,31 +98,31 @@ contains
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        class (Sphere), intent (in out) :: sphere_type
+        class(Sphere), intent(inout)  :: sphere_type
         !----------------------------------------------------------------------
         ! Local variables
         !----------------------------------------------------------------------
-        integer (ip), parameter        :: NLONS = 16
-        integer (ip), parameter        :: NLATS = 29
-        integer (ip)                   :: i, j, k !! Counters
-        real (wp)                      :: original_polar_component(NLATS,NLONS)
-        real (wp)                      :: original_azimuthal_component(NLATS,NLONS)
-        real (wp)                      :: exact_polar_laplacian(NLATS,NLONS)
-        real (wp)                      :: exact_azimuthal_laplacian(NLATS,NLONS)
-        real (wp)                      :: polar_component(NLATS,NLONS)
-        real (wp)                      :: azimuthal_component(NLATS,NLONS)
-        real (wp)                      :: approximate_polar_laplacian(NLATS,NLONS)
-        real (wp)                      :: approximate_azimuthal_laplacian(NLATS,NLONS)
-        character (len=:), allocatable :: previous_polar_laplacian_error
-        character (len=:), allocatable :: previous_polar_inversion_error
-        character (len=:), allocatable :: previous_azimuthal_laplacian_error
-        character (len=:), allocatable :: previous_azimuthal_inversion_error
+        integer(ip), parameter        :: NLONS = 16
+        integer(ip), parameter        :: NLATS = 29
+        integer(ip)                   :: i, j, k !! Counters
+        real(wp)                      :: original_polar_component(NLATS,NLONS)
+        real(wp)                      :: original_azimuthal_component(NLATS,NLONS)
+        real(wp)                      :: exact_polar_laplacian(NLATS,NLONS)
+        real(wp)                      :: exact_azimuthal_laplacian(NLATS,NLONS)
+        real(wp)                      :: polar_component(NLATS,NLONS)
+        real(wp)                      :: azimuthal_component(NLATS,NLONS)
+        real(wp)                      :: approximate_polar_laplacian(NLATS,NLONS)
+        real(wp)                      :: approximate_azimuthal_laplacian(NLATS,NLONS)
+        character(len=:), allocatable :: previous_polar_laplacian_error
+        character(len=:), allocatable :: previous_polar_inversion_error
+        character(len=:), allocatable :: previous_azimuthal_laplacian_error
+        character(len=:), allocatable :: previous_azimuthal_inversion_error
         !----------------------------------------------------------------------
 
         !
         !==> Set up workspace arrays
         !
-        select type (sphere_type)
+        select type(sphere_type)
             type is (GaussianSphere)
 
             !  Initialize gaussian sphere object

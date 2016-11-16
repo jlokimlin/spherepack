@@ -445,43 +445,43 @@ contains
     subroutine vhsgc(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
         mdab, ndab, wvhsgc, lvhsgc, work, lwork, ierror)
 
-        real (wp) :: bi
-        real (wp) :: br
-        real (wp) :: ci
-        real (wp) :: cr
-        integer (ip) :: idv
-        integer (ip) :: idvw
-        integer (ip) :: ierror
-        integer (ip) :: imid
-        integer (ip) :: ist
-        integer (ip) :: ityp
-        integer (ip) :: iw1
-        integer (ip) :: iw2
-        integer (ip) :: iw3
-        integer (ip) :: iw4
-        integer (ip) :: iw5
-        integer (ip) :: jdvw
-        integer (ip) :: jw1
-        integer (ip) :: jw2
-        integer (ip) :: l1
-        integer (ip) :: l2
-        integer (ip) :: labc
-        integer (ip) :: lnl
-        integer (ip) :: lvhsgc
-        integer (ip) :: lwmin
-        integer (ip) :: lwork
-        integer (ip) :: lwzvin
-        integer (ip) :: lzz1
-        integer (ip) :: mdab
-        integer (ip) :: mmax
-        integer (ip) :: ndab
-        integer (ip) :: nlat
-        integer (ip) :: nlon
-        integer (ip) :: nt
-        real (wp) :: v
-        real (wp) :: w
-        real (wp) :: work
-        real (wp) :: wvhsgc
+        real(wp) :: bi
+        real(wp) :: br
+        real(wp) :: ci
+        real(wp) :: cr
+        integer(ip) :: idv
+        integer(ip) :: idvw
+        integer(ip) :: ierror
+        integer(ip) :: imid
+        integer(ip) :: ist
+        integer(ip) :: ityp
+        integer(ip) :: iw1
+        integer(ip) :: iw2
+        integer(ip) :: iw3
+        integer(ip) :: iw4
+        integer(ip) :: iw5
+        integer(ip) :: jdvw
+        integer(ip) :: jw1
+        integer(ip) :: jw2
+        integer(ip) :: l1
+        integer(ip) :: l2
+        integer(ip) :: labc
+        integer(ip) :: lnl
+        integer(ip) :: lvhsgc
+        integer(ip) :: lwmin
+        integer(ip) :: lwork
+        integer(ip) :: lwzvin
+        integer(ip) :: lzz1
+        integer(ip) :: mdab
+        integer(ip) :: mmax
+        integer(ip) :: ndab
+        integer(ip) :: nlat
+        integer(ip) :: nlon
+        integer(ip) :: nt
+        real(wp) :: v
+        real(wp) :: w
+        real(wp) :: work
+        real(wp) :: wvhsgc
         dimension v(idvw, jdvw, 1), w(idvw, jdvw, 1), br(mdab, ndab, 1), &
             bi(mdab, ndab, 1), cr(mdab, ndab, 1), ci(mdab, ndab, 1), &
             work(1), wvhsgc(1)
@@ -547,48 +547,48 @@ contains
         subroutine vhsgc1(nlat, nlon, ityp, nt, imid, idvw, jdvw, v, w, mdab, &
             ndab, br, bi, cr, ci, idv, ve, vo, we, wo, vb, wb, wvbin, wwbin, wrfft)
 
-            real (wp) :: bi
-            real (wp) :: br
-            real (wp) :: ci
-            real (wp) :: cr
-            integer (ip) :: i
-            integer (ip) :: idv
-            integer (ip) :: idvw
-            integer (ip) :: imid
-            integer (ip) :: imm1
-            integer (ip) :: ityp
-            integer (ip) :: itypp
-            integer (ip) :: iv
-            integer (ip) :: iw
-            integer (ip) :: j
-            integer (ip) :: jdvw
-            integer (ip) :: k
-            integer (ip) :: m
-            integer (ip) :: mdab
-            integer (ip) :: mlat
-            integer (ip) :: mlon
-            integer (ip) :: mmax
-            integer (ip) :: mp1
-            integer (ip) :: mp2
-            integer (ip) :: ndab
-            integer (ip) :: ndo1
-            integer (ip) :: ndo2
-            integer (ip) :: nlat
-            integer (ip) :: nlon
-            integer (ip) :: nlp1
-            integer (ip) :: np1
-            integer (ip) :: nt
-            real (wp) :: v
-            real (wp) :: vb
-            real (wp) :: ve
-            real (wp) :: vo
-            real (wp) :: w
-            real (wp) :: wb
-            real (wp) :: we
-            real (wp) :: wo
-            real (wp) :: wrfft
-            real (wp) :: wvbin
-            real (wp) :: wwbin
+            real(wp) :: bi
+            real(wp) :: br
+            real(wp) :: ci
+            real(wp) :: cr
+            integer(ip) :: i
+            integer(ip) :: idv
+            integer(ip) :: idvw
+            integer(ip) :: imid
+            integer(ip) :: imm1
+            integer(ip) :: ityp
+            integer(ip) :: itypp
+            integer(ip) :: iv
+            integer(ip) :: iw
+            integer(ip) :: j
+            integer(ip) :: jdvw
+            integer(ip) :: k
+            integer(ip) :: m
+            integer(ip) :: mdab
+            integer(ip) :: mlat
+            integer(ip) :: mlon
+            integer(ip) :: mmax
+            integer(ip) :: mp1
+            integer(ip) :: mp2
+            integer(ip) :: ndab
+            integer(ip) :: ndo1
+            integer(ip) :: ndo2
+            integer(ip) :: nlat
+            integer(ip) :: nlon
+            integer(ip) :: nlp1
+            integer(ip) :: np1
+            integer(ip) :: nt
+            real(wp) :: v
+            real(wp) :: vb
+            real(wp) :: ve
+            real(wp) :: vo
+            real(wp) :: w
+            real(wp) :: wb
+            real(wp) :: we
+            real(wp) :: wo
+            real(wp) :: wrfft
+            real(wp) :: wvbin
+            real(wp) :: wwbin
             dimension v(idvw, jdvw, *), w(idvw, jdvw, *), br(mdab, ndab, *), &
                 bi(mdab, ndab, *), cr(mdab, ndab, *), ci(mdab, ndab, *), &
                 ve(idv, nlon, *), vo(idv, nlon, *), we(idv, nlon, *), &
@@ -596,8 +596,8 @@ contains
                 vb(imid, nlat, 3), wb(imid, nlat, 3)
 
 
-            type (HFFTpack)      :: hfft
-            type (SpherepackAux) :: sphere_aux
+            type(HFFTpack)      :: hfft
+            type(SpherepackAux) :: sphere_aux
 
             nlp1 = nlat+1
             mlat = mod(nlat, 2)
@@ -1246,27 +1246,27 @@ contains
 
     subroutine vhsgci(nlat, nlon, wvhsgc, lvhsgc, dwork, ldwork, ierror)
 
-        integer (ip) :: ierror
-        integer (ip) :: imid
-        integer (ip) :: iw1
-        integer (ip) :: iw2
-        integer (ip) :: iwrk
-        integer (ip) :: jw1
-        integer (ip) :: jw2
-        integer (ip) :: jw3
-        integer (ip) :: labc
-        integer (ip) :: ldwork
-        integer (ip) :: lvhsgc
-        integer (ip) :: lwvbin
-        integer (ip) :: lzz1
-        integer (ip) :: mmax
-        integer (ip) :: nlat
-        integer (ip) :: nlon
-        real (wp)    :: wvhsgc(lvhsgc)
-        real (wp)    :: dwork(ldwork)
+        integer(ip) :: ierror
+        integer(ip) :: imid
+        integer(ip) :: iw1
+        integer(ip) :: iw2
+        integer(ip) :: iwrk
+        integer(ip) :: jw1
+        integer(ip) :: jw2
+        integer(ip) :: jw3
+        integer(ip) :: labc
+        integer(ip) :: ldwork
+        integer(ip) :: lvhsgc
+        integer(ip) :: lwvbin
+        integer(ip) :: lzz1
+        integer(ip) :: mmax
+        integer(ip) :: nlat
+        integer(ip) :: nlon
+        real(wp)    :: wvhsgc(lvhsgc)
+        real(wp)    :: dwork(ldwork)
 
-        type (HFFTpack)      :: hfft
-        type (SpherepackAux) :: sphere_aux
+        type(HFFTpack)      :: hfft
+        type(SpherepackAux) :: sphere_aux
 
         imid = (nlat+1)/2
         lzz1 = 2*nlat*imid

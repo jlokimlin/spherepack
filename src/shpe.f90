@@ -135,7 +135,7 @@ contains
 subroutine shpei(nlat, nlon, isym, mtrunc, wshp, lwshp, iwshp, &
  liwshp, work, lwork, ierror)
 
-    type (HFFTpack) :: hfft
+    type(HFFTpack) :: hfft
 integer :: ierror
 integer :: isym
 integer :: iw1
@@ -790,7 +790,7 @@ end subroutine shpei1
 subroutine shpe(nlat, nlon, isym, mtrunc, x, y, idxy, &
         wshp, lwshp, iwshp, liwshp, work, lwork, ierror)
 
-    type (HFFTpack) :: hfft
+    type(HFFTpack) :: hfft
 integer :: i
 integer :: idxy
 integer :: ierror
@@ -2086,11 +2086,11 @@ end subroutine daxpy
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        integer, intent (in) :: n
-        real,    intent (in) :: dx(*)
-        integer, intent (in) :: incx
-        real,    intent (in) :: dy(*)
-        integer, intent (in) :: incy
+        integer, intent(in) :: n
+        real,    intent(in) :: dx(*)
+        integer, intent(in) :: incx
+        real,    intent(in) :: dy(*)
+        integer, intent(in) :: incy
         real                 :: return_value
         !----------------------------------------------------------------------
         ! Local variables
@@ -2177,9 +2177,9 @@ end subroutine daxpy
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        integer, intent (in) :: n
-        real,    intent (in) :: x(*)
-        integer, intent (in) :: incx
+        integer, intent(in) :: n
+        real,    intent(in) :: x(*)
+        integer, intent(in) :: incx
         real                 :: return_value
         !----------------------------------------------------------------------
         ! Local variables

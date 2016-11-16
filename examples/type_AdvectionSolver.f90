@@ -1,6 +1,6 @@
 module type_AdvectionSolver
 
-    use, intrinsic :: iso_fortran_env, only: &
+    use, intrinsic :: ISO_Fortran_env, only: &
         ip => INT32, &
         wp => REAL64, &
         stdout => OUTPUT_UNIT
@@ -19,8 +19,8 @@ module type_AdvectionSolver
     !----------------------------------------------------------------------
     ! Dictionary: global variables
     !----------------------------------------------------------------------
-    real (wp),    parameter :: DEGREES_TO_RADIANS = PI/180
-    integer (ip), parameter :: TIME_TO_CIRCUMVENT_THE_EARTH = 12*24*3600
+    real(wp),    parameter :: DEGREES_TO_RADIANS = PI/180
+    integer(ip), parameter :: TIME_TO_CIRCUMVENT_THE_EARTH = 12*24*3600
     !----------------------------------------------------------------------
 
     ! Declare derived data type
@@ -28,13 +28,13 @@ module type_AdvectionSolver
         !----------------------------------------------------------------------
         ! Type components
         !----------------------------------------------------------------------
-        real (wp) :: TIME_STEP = 6.0e+2_wp
-        real (wp) :: ROTATION_RATE_OF_EARTH = 2.0_wp * PI/TIME_TO_CIRCUMVENT_THE_EARTH
-        real (wp) :: LATITUDE_OF_COSINE_BELL = PI/6
-        real (wp) :: RADIUS_OF_EARTH_IN_METERS = 1.0_wp/3
-        real (wp) :: TILT_ANGLE_IN_DEGREES = 60.0_wp
-        real (wp) :: TILT_ANGLE = 60.0_wp * DEGREES_TO_RADIANS
-        real (wp) :: MAXIMUM_VALUE_OF_COSINE_BELL = 1.0e+3_wp
+        real(wp) :: TIME_STEP = 6.0e+2_wp
+        real(wp) :: ROTATION_RATE_OF_EARTH = 2.0_wp * PI/TIME_TO_CIRCUMVENT_THE_EARTH
+        real(wp) :: LATITUDE_OF_COSINE_BELL = PI/6
+        real(wp) :: RADIUS_OF_EARTH_IN_METERS = 1.0_wp/3
+        real(wp) :: TILT_ANGLE_IN_DEGREES = 60.0_wp
+        real(wp) :: TILT_ANGLE = 60.0_wp * DEGREES_TO_RADIANS
+        real(wp) :: MAXIMUM_VALUE_OF_COSINE_BELL = 1.0e+3_wp
         !----------------------------------------------------------------------
     contains
         !----------------------------------------------------------------------
@@ -50,7 +50,7 @@ module type_AdvectionSolver
 contains
 
 
-    subroutine get_geopotential(this, t, geopot)
+    subroutine get_geopotential(self, t, geopot)
         !
         !     computes advecting cosine bell on a tilted grid a time t.
         !
@@ -86,27 +86,27 @@ contains
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        class (AdvectionSolver), intent (in out) :: this
-        real (wp),               intent (in)     :: t
-        real (wp),               intent (out)    :: geopot(:,:)
+        class(AdvectionSolver), intent(inout)  :: self
+        real(wp),               intent(in)     :: t
+        real(wp),               intent(out)    :: geopot(:,:)
         !----------------------------------------------------------------------
         ! Local variables
         !----------------------------------------------------------------------
-        integer (ip) :: i, j
-        real (wp)    :: xc, yc, zc, x1, y1, z1
-        real (wp)    :: lambda, theta, cost, sint, sth ,cthclh
-        real (wp)    :: cthslh,lhat,cosl,sinl,cth ,that, r
+        integer(ip) :: i, j
+        real(wp)    :: xc, yc, zc, x1, y1, z1
+        real(wp)    :: lambda, theta, cost, sint, sth ,cthclh
+        real(wp)    :: cthslh,lhat,cosl,sinl,cth ,that, r
         !----------------------------------------------------------------------
 
         associate( &
-            nlat => this%NUMBER_OF_LATITUDES, &
-            nlon => this%NUMBER_OF_LONGITUDES, &
-            omega => this%ROTATION_RATE_OF_EARTH, &
-            beta => this%LATITUDE_OF_COSINE_BELL, &
-            re => this%RADIUS_OF_EARTH_IN_METERS, &
-            alpha => this%TILT_ANGLE, &
-            hzero => this%MAXIMUM_VALUE_OF_COSINE_BELL,&
-            colat => this%grid%latitudes &
+            nlat => self%NUMBER_OF_LATITUDES, &
+            nlon => self%NUMBER_OF_LONGITUDES, &
+            omega => self%ROTATION_RATE_OF_EARTH, &
+            beta => self%LATITUDE_OF_COSINE_BELL, &
+            re => self%RADIUS_OF_EARTH_IN_METERS, &
+            alpha => self%TILT_ANGLE, &
+            hzero => self%MAXIMUM_VALUE_OF_COSINE_BELL,&
+            colat => self%grid%latitudes &
             )
 
             associate( lambdc => omega*t )
@@ -121,7 +121,7 @@ contains
                 sina => sin(alpha) &
                 )
                 do j=1,nlon
-                    lambda = this%grid%longitudes(j)
+                    lambda = self%grid%longitudes(j)
                     associate( &
                         cosp => cos(lambda), &
                         sinp => sin(lambda) &
@@ -171,31 +171,31 @@ contains
     end subroutine get_geopotential
 
 
-    subroutine get_vector_velocities(this, u, v)
+    subroutine get_vector_velocities(self, u, v)
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        class (AdvectionSolver), intent (in out) :: this
-        real (wp),               intent (out)    :: u(:,:)
-        real (wp),               intent (out)    :: v(:,:)
+        class(AdvectionSolver), intent(inout)  :: self
+        real(wp),               intent(out)    :: u(:,:)
+        real(wp),               intent(out)    :: v(:,:)
         !----------------------------------------------------------------------
         ! Local variables
         !----------------------------------------------------------------------
-        integer (ip) :: i, j
-        real (wp)    :: sinp, cosp, sint, cost, sinl, cosl
-        real (wp)    :: cth, xlhat, uhat
+        integer(ip) :: i, j
+        real(wp)    :: sinp, cosp, sint, cost, sinl, cosl
+        real(wp)    :: cth, xlhat, uhat
         !----------------------------------------------------------------------
 
         associate( &
-            nlats => this%NUMBER_OF_LATITUDES, &
-            nlons => this%NUMBER_OF_LONGITUDES, &
-            colat => this%grid%latitudes, &
-            omega => this%ROTATION_RATE_OF_EARTH, &
-            alpha => this%TILT_ANGLE &
+            nlats => self%NUMBER_OF_LATITUDES, &
+            nlons => self%NUMBER_OF_LONGITUDES, &
+            colat => self%grid%latitudes, &
+            omega => self%ROTATION_RATE_OF_EARTH, &
+            alpha => self%TILT_ANGLE &
             )
 
             do j=1,nlons
-                associate( xlm => this%grid%longitudes(j) )
+                associate( xlm => self%grid%longitudes(j) )
                     sinp = sin(xlm)
                     cosp = cos(xlm)
                     do i=1,nlats
@@ -207,7 +207,7 @@ contains
                             cthslh => sint*sinp &
                             )
 
-                            xlhat = this%atanxy(cthclh,cthslh)
+                            xlhat = self%atanxy(cthclh,cthslh)
                             cosl = cos(xlhat)
                             sinl = sin(xlhat)
                             cth = cosl*cthclh+sinl*cthslh
@@ -229,8 +229,8 @@ contains
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        real (wp), intent (in) :: x
-        real (wp), intent (in) :: y
+        real(wp), intent(in) :: x
+        real(wp), intent(in) :: y
         real                   :: return_value
         !--------------------------------------------------------------------------------
 
@@ -247,10 +247,10 @@ contains
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        real (wp), intent (in)  :: r
-        real (wp), intent (in)  :: theta
-        real (wp), intent (in)  :: phi
-        real (wp), intent (out) :: x, y, z
+        real(wp), intent(in)  :: r
+        real(wp), intent(in)  :: theta
+        real(wp), intent(in)  :: phi
+        real(wp), intent(out) :: x, y, z
         !----------------------------------------------------------------------
 
         x = r * sin(theta) * cos(phi)

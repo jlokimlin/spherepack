@@ -246,34 +246,34 @@ contains
     subroutine dives(nlat, nlon, isym, nt, dv, idv, jdv, br, bi, mdb, ndb, &
         wshses, lshses, work, lwork, ierror)
         implicit none
-        real (wp) :: bi
-        real (wp) :: br
-        real (wp) :: dv
-        integer (ip) :: ia
-        integer (ip) :: ib
-        integer (ip) :: idv
-        integer (ip) :: ierror
-        integer (ip) :: imid
-        integer (ip) :: is
-        integer (ip) :: isym
-        integer (ip) :: iwk
-        integer (ip) :: jdv
-        integer (ip) :: lpimn
-        integer (ip) :: ls
-        integer (ip) :: lshses
-        integer (ip) :: lwk
-        integer (ip) :: lwork
-        integer (ip) :: mab
-        integer (ip) :: mdb
-        integer (ip) :: mmax
-        integer (ip) :: mn
-        integer (ip) :: ndb
-        integer (ip) :: nlat
-        integer (ip) :: nln
-        integer (ip) :: nlon
-        integer (ip) :: nt
-        real (wp) :: work
-        real (wp) :: wshses
+        real(wp) :: bi
+        real(wp) :: br
+        real(wp) :: dv
+        integer(ip) :: ia
+        integer(ip) :: ib
+        integer(ip) :: idv
+        integer(ip) :: ierror
+        integer(ip) :: imid
+        integer(ip) :: is
+        integer(ip) :: isym
+        integer(ip) :: iwk
+        integer(ip) :: jdv
+        integer(ip) :: lpimn
+        integer(ip) :: ls
+        integer(ip) :: lshses
+        integer(ip) :: lwk
+        integer(ip) :: lwork
+        integer(ip) :: mab
+        integer(ip) :: mdb
+        integer(ip) :: mmax
+        integer(ip) :: mn
+        integer(ip) :: ndb
+        integer(ip) :: nlat
+        integer(ip) :: nln
+        integer(ip) :: nlon
+        integer(ip) :: nt
+        real(wp) :: work
+        real(wp) :: wshses
 
         dimension dv(idv, jdv, nt), br(mdb, ndb, nt), bi(mdb, ndb, nt)
         dimension wshses(lshses), work(lwork)
@@ -339,31 +339,31 @@ contains
         subroutine dives1(nlat, nlon, isym, nt, dv, idv, jdv, br, bi, mdb, ndb, &
             a, b, mab, sqnn, wshses, lshses, wk, lwk, ierror)
             implicit none
-            real (wp) :: a
-            real (wp) :: b
-            real (wp) :: bi
-            real (wp) :: br
-            real (wp) :: dv
-            real (wp) :: fn
-            integer (ip) :: idv
-            integer (ip) :: ierror
-            integer (ip) :: isym
-            integer (ip) :: jdv
-            integer (ip) :: k
-            integer (ip) :: lshses
-            integer (ip) :: lwk
-            integer (ip) :: m
-            integer (ip) :: mab
-            integer (ip) :: mdb
-            integer (ip) :: mmax
-            integer (ip) :: n
-            integer (ip) :: ndb
-            integer (ip) :: nlat
-            integer (ip) :: nlon
-            integer (ip) :: nt
-            real (wp) :: sqnn
-            real (wp) :: wk
-            real (wp) :: wshses
+            real(wp) :: a
+            real(wp) :: b
+            real(wp) :: bi
+            real(wp) :: br
+            real(wp) :: dv
+            real(wp) :: fn
+            integer(ip) :: idv
+            integer(ip) :: ierror
+            integer(ip) :: isym
+            integer(ip) :: jdv
+            integer(ip) :: k
+            integer(ip) :: lshses
+            integer(ip) :: lwk
+            integer(ip) :: m
+            integer(ip) :: mab
+            integer(ip) :: mdb
+            integer(ip) :: mmax
+            integer(ip) :: n
+            integer(ip) :: ndb
+            integer(ip) :: nlat
+            integer(ip) :: nlon
+            integer(ip) :: nt
+            real(wp) :: sqnn
+            real(wp) :: wk
+            real(wp) :: wshses
             dimension dv(idv, jdv, nt), br(mdb, ndb, nt), bi(mdb, ndb, nt)
             dimension a(mab, nlat, nt), b(mab, nlat, nt), sqnn(nlat)
             dimension wshses(lshses), wk(lwk)

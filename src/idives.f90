@@ -275,34 +275,34 @@ contains
     subroutine idives(nlat, nlon, isym, nt, v, w, idvw, jdvw, a, b, mdab, ndab, &
         wvhses, lvhses, work, lwork, pertrb, ierror)
 
-        real (wp) :: a
-        real (wp) :: b
-        integer (ip) :: ibi
-        integer (ip) :: ibr
-        integer (ip) :: idvw
-        integer (ip) :: idz
-        integer (ip) :: ierror
-        integer (ip) :: imid
-        integer (ip) :: is
-        integer (ip) :: isym
-        integer (ip) :: iwk
-        integer (ip) :: jdvw
-        integer (ip) :: liwk
-        integer (ip) :: lvhses
-        integer (ip) :: lwork
-        integer (ip) :: lzimn
-        integer (ip) :: mdab
-        integer (ip) :: mmax
-        integer (ip) :: mn
-        integer (ip) :: ndab
-        integer (ip) :: nlat
-        integer (ip) :: nlon
-        integer (ip) :: nt
-        real (wp) :: pertrb
-        real (wp) :: v
-        real (wp) :: w
-        real (wp) :: work
-        real (wp) :: wvhses
+        real(wp) :: a
+        real(wp) :: b
+        integer(ip) :: ibi
+        integer(ip) :: ibr
+        integer(ip) :: idvw
+        integer(ip) :: idz
+        integer(ip) :: ierror
+        integer(ip) :: imid
+        integer(ip) :: is
+        integer(ip) :: isym
+        integer(ip) :: iwk
+        integer(ip) :: jdvw
+        integer(ip) :: liwk
+        integer(ip) :: lvhses
+        integer(ip) :: lwork
+        integer(ip) :: lzimn
+        integer(ip) :: mdab
+        integer(ip) :: mmax
+        integer(ip) :: mn
+        integer(ip) :: ndab
+        integer(ip) :: nlat
+        integer(ip) :: nlon
+        integer(ip) :: nt
+        real(wp) :: pertrb
+        real(wp) :: v
+        real(wp) :: w
+        real(wp) :: work
+        real(wp) :: wvhses
         dimension v(idvw, jdvw, nt), w(idvw, jdvw, nt), pertrb(nt)
         dimension a(mdab, ndab, nt), b(mdab, ndab, nt)
         dimension wvhses(lvhses), work(lwork)
@@ -361,35 +361,35 @@ contains
         subroutine idves1(nlat, nlon, isym, nt, v, w, idvw, jdvw, br, bi, mmax, &
             sqnn, mdab, ndab, a, b, wsav, lwsav, wk, lwk, pertrb, ierror)
 
-            real (wp) :: a
-            real (wp) :: b
-            real (wp) :: bi
-            real (wp) :: br
-            real (wp) :: ci(mmax, nlat, nt)
-            real (wp) :: cr(mmax, nlat, nt)
-            real (wp) :: fn
-            integer (ip) :: idvw
-            integer (ip) :: ierror
-            integer (ip) :: isym
-            integer (ip) :: ityp
-            integer (ip) :: jdvw
-            integer (ip) :: k
-            integer (ip) :: lwk
-            integer (ip) :: lwsav
-            integer (ip) :: m
-            integer (ip) :: mdab
-            integer (ip) :: mmax
-            integer (ip) :: n
-            integer (ip) :: ndab
-            integer (ip) :: nlat
-            integer (ip) :: nlon
-            integer (ip) :: nt
-            real (wp) :: pertrb
-            real (wp) :: sqnn
-            real (wp) :: v
-            real (wp) :: w
-            real (wp) :: wk
-            real (wp) :: wsav
+            real(wp) :: a
+            real(wp) :: b
+            real(wp) :: bi
+            real(wp) :: br
+            real(wp) :: ci(mmax, nlat, nt)
+            real(wp) :: cr(mmax, nlat, nt)
+            real(wp) :: fn
+            integer(ip) :: idvw
+            integer(ip) :: ierror
+            integer(ip) :: isym
+            integer(ip) :: ityp
+            integer(ip) :: jdvw
+            integer(ip) :: k
+            integer(ip) :: lwk
+            integer(ip) :: lwsav
+            integer(ip) :: m
+            integer(ip) :: mdab
+            integer(ip) :: mmax
+            integer(ip) :: n
+            integer(ip) :: ndab
+            integer(ip) :: nlat
+            integer(ip) :: nlon
+            integer(ip) :: nt
+            real(wp) :: pertrb
+            real(wp) :: sqnn
+            real(wp) :: v
+            real(wp) :: w
+            real(wp) :: wk
+            real(wp) :: wsav
             dimension v(idvw, jdvw, nt), w(idvw, jdvw, nt), pertrb(nt)
             dimension br(mmax, nlat, nt), bi(mmax, nlat, nt), sqnn(nlat)
             dimension a(mdab, ndab, nt), b(mdab, ndab, nt)

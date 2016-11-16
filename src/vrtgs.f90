@@ -238,37 +238,37 @@ contains
     subroutine vrtgs(nlat, nlon, isym, nt, vort, ivrt, jvrt, cr, ci, mdc, ndc, &
         wshsgs, lshsgs, work, lwork, ierror)
 
-        real (wp) :: ci
-        real (wp) :: cr
-        integer (ip) :: ia
-        integer (ip) :: ib
-        integer (ip) :: ierror
-        integer (ip) :: imid
-        integer (ip) :: is
-        integer (ip) :: isym
-        integer (ip) :: ivrt
-        integer (ip) :: iwk
-        integer (ip) :: jvrt
-        integer (ip) :: l1
-        integer (ip) :: l2
-        integer (ip) :: lp
-        integer (ip) :: lpimn
-        integer (ip) :: ls
-        integer (ip) :: lshsgs
-        integer (ip) :: lwk
-        integer (ip) :: lwork
-        integer (ip) :: mab
-        integer (ip) :: mdc
-        integer (ip) :: mmax
-        integer (ip) :: mn
-        integer (ip) :: ndc
-        integer (ip) :: nlat
-        integer (ip) :: nln
-        integer (ip) :: nlon
-        integer (ip) :: nt
-        real (wp) :: vort
-        real (wp) :: work
-        real (wp) :: wshsgs
+        real(wp) :: ci
+        real(wp) :: cr
+        integer(ip) :: ia
+        integer(ip) :: ib
+        integer(ip) :: ierror
+        integer(ip) :: imid
+        integer(ip) :: is
+        integer(ip) :: isym
+        integer(ip) :: ivrt
+        integer(ip) :: iwk
+        integer(ip) :: jvrt
+        integer(ip) :: l1
+        integer(ip) :: l2
+        integer(ip) :: lp
+        integer(ip) :: lpimn
+        integer(ip) :: ls
+        integer(ip) :: lshsgs
+        integer(ip) :: lwk
+        integer(ip) :: lwork
+        integer(ip) :: mab
+        integer(ip) :: mdc
+        integer(ip) :: mmax
+        integer(ip) :: mn
+        integer(ip) :: ndc
+        integer(ip) :: nlat
+        integer(ip) :: nln
+        integer(ip) :: nlon
+        integer(ip) :: nt
+        real(wp) :: vort
+        real(wp) :: work
+        real(wp) :: wshsgs
 
         dimension vort(ivrt, jvrt, nt), cr(mdc, ndc, nt), ci(mdc, ndc, nt)
         dimension wshsgs(lshsgs), work(lwork)
@@ -332,31 +332,31 @@ contains
         subroutine vrtgs1(nlat, nlon, isym, nt, vort, ivrt, jvrt, cr, ci, mdc, ndc, &
             a, b, mab, sqnn, wsav, lwsav, wk, lwk, ierror)
 
-            real (wp) :: a
-            real (wp) :: b
-            real (wp) :: ci
-            real (wp) :: cr
-            real (wp) :: fn
-            integer (ip) :: ierror
-            integer (ip) :: isym
-            integer (ip) :: ivrt
-            integer (ip) :: jvrt
-            integer (ip) :: k
-            integer (ip) :: lwk
-            integer (ip) :: lwsav
-            integer (ip) :: m
-            integer (ip) :: mab
-            integer (ip) :: mdc
-            integer (ip) :: mmax
-            integer (ip) :: n
-            integer (ip) :: ndc
-            integer (ip) :: nlat
-            integer (ip) :: nlon
-            integer (ip) :: nt
-            real (wp) :: sqnn
-            real (wp) :: vort
-            real (wp) :: wk
-            real (wp) :: wsav
+            real(wp) :: a
+            real(wp) :: b
+            real(wp) :: ci
+            real(wp) :: cr
+            real(wp) :: fn
+            integer(ip) :: ierror
+            integer(ip) :: isym
+            integer(ip) :: ivrt
+            integer(ip) :: jvrt
+            integer(ip) :: k
+            integer(ip) :: lwk
+            integer(ip) :: lwsav
+            integer(ip) :: m
+            integer(ip) :: mab
+            integer(ip) :: mdc
+            integer(ip) :: mmax
+            integer(ip) :: n
+            integer(ip) :: ndc
+            integer(ip) :: nlat
+            integer(ip) :: nlon
+            integer(ip) :: nt
+            real(wp) :: sqnn
+            real(wp) :: vort
+            real(wp) :: wk
+            real(wp) :: wsav
             dimension vort(ivrt, jvrt, nt), cr(mdc, ndc, nt), ci(mdc, ndc, nt)
             dimension a(mab, nlat, nt), b(mab, nlat, nt), sqnn(nlat)
             dimension wsav(lwsav), wk(lwk)

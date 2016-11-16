@@ -136,7 +136,7 @@ subroutine shpgi(nlat, nlon, isym, mtrunc, wshp, lwshp, iwshp, &
  liwshp, work, lwork, ierror)
 
 
-    type (HFFTpack) :: hfft
+    type(HFFTpack) :: hfft
 integer :: ierror
 integer :: isym
 integer :: iw1
@@ -738,7 +738,7 @@ subroutine shpg(nlat, nlon, isym, mtrunc, x, y, idxy, &
         wshp, lwshp, iwshp, liwshp, work, lwork, ierror)
 
 
-    type (HFFTpack) :: hfft
+    type(HFFTpack) :: hfft
 integer :: i
 integer :: idxy
 integer :: ierror

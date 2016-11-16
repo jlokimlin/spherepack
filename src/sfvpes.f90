@@ -249,13 +249,13 @@ contains
     subroutine sfvpes(nlat, nlon, isym, nt, sf, vp, idv, jdv, br, bi, cr, ci, &
         mdb, ndb, wshses, lshses, work, lwork, ierror)
 
-        integer (ip) :: nlat, nlon, isym, nt, idv, jdv, mdb, ndb, lshses, lwork, ierror
-        real (wp) :: sf(idv, jdv, nt), vp(idv, jdv, nt)
-        real (wp) :: br(mdb, ndb, nt), bi(mdb, ndb, nt)
-        real (wp) :: cr(mdb, ndb, nt), ci(mdb, ndb, nt)
-        real (wp) :: wshses(lshses), work(lwork)
-        integer (ip) :: imid, mmax, ls, mab, mn, ia, ib, is, lwk, iwk
-        integer (ip) :: lpimn
+        integer(ip) :: nlat, nlon, isym, nt, idv, jdv, mdb, ndb, lshses, lwork, ierror
+        real(wp) :: sf(idv, jdv, nt), vp(idv, jdv, nt)
+        real(wp) :: br(mdb, ndb, nt), bi(mdb, ndb, nt)
+        real(wp) :: cr(mdb, ndb, nt), ci(mdb, ndb, nt)
+        real(wp) :: wshses(lshses), work(lwork)
+        integer(ip) :: imid, mmax, ls, mab, mn, ia, ib, is, lwk, iwk
+        integer(ip) :: lpimn
         !
         !     check input parameters
         !
@@ -317,12 +317,12 @@ contains
         subroutine sfvpes1(nlat, nlon, isym, nt, sf, vp, idv, jdv, br, bi, cr, ci, &
             mdb, ndb, a, b, mab, fnn, wshses, lshses, wk, lwk, ierror)
 
-            integer (ip) :: nlat, nlon, isym, nt, idv, jdv, mdb, ndb, mab, lshses, lwk, ierror
-            real (wp) :: sf(idv, jdv, nt), vp(idv, jdv, nt)
-            real (wp) :: br(mdb, ndb, nt), bi(mdb, ndb, nt), cr(mdb, ndb, nt), ci(mdb, ndb, nt)
-            real (wp) :: a(mab, nlat, nt), b(mab, nlat, nt)
-            real (wp) :: wshses(lshses), wk(lwk), fnn(nlat)
-            integer (ip) :: n, m, mmax, k
+            integer(ip) :: nlat, nlon, isym, nt, idv, jdv, mdb, ndb, mab, lshses, lwk, ierror
+            real(wp) :: sf(idv, jdv, nt), vp(idv, jdv, nt)
+            real(wp) :: br(mdb, ndb, nt), bi(mdb, ndb, nt), cr(mdb, ndb, nt), ci(mdb, ndb, nt)
+            real(wp) :: a(mab, nlat, nt), b(mab, nlat, nt)
+            real(wp) :: wshses(lshses), wk(lwk), fnn(nlat)
+            integer(ip) :: n, m, mmax, k
             !
             !     set coefficient multiplyers
             !

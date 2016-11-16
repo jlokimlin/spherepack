@@ -263,37 +263,37 @@ contains
     subroutine ivrtgc(nlat, nlon, isym, nt, v, w, idvw, jdvw, a, b, mdab, ndab, &
         wvhsgc, lvhsgc, work, lwork, pertrb, ierror)
 
-        real (wp) :: a
-        real (wp) :: b
-        integer (ip) :: ici
-        integer (ip) :: icr
-        integer (ip) :: idvw
-        integer (ip) :: ierror
-        integer (ip) :: imid
-        integer (ip) :: is
-        integer (ip) :: isym
-        integer (ip) :: iwk
-        integer (ip) :: jdvw
-        integer (ip) :: l1
-        integer (ip) :: l2
-        integer (ip) :: labc
-        integer (ip) :: liwk
-        integer (ip) :: lvhsgc
-        integer (ip) :: lwmin
-        integer (ip) :: lwork
-        integer (ip) :: lzz1
-        integer (ip) :: mdab
-        integer (ip) :: mmax
-        integer (ip) :: mn
-        integer (ip) :: ndab
-        integer (ip) :: nlat
-        integer (ip) :: nlon
-        integer (ip) :: nt
-        real (wp) :: pertrb
-        real (wp) :: v
-        real (wp) :: w
-        real (wp) :: work
-        real (wp) :: wvhsgc
+        real(wp) :: a
+        real(wp) :: b
+        integer(ip) :: ici
+        integer(ip) :: icr
+        integer(ip) :: idvw
+        integer(ip) :: ierror
+        integer(ip) :: imid
+        integer(ip) :: is
+        integer(ip) :: isym
+        integer(ip) :: iwk
+        integer(ip) :: jdvw
+        integer(ip) :: l1
+        integer(ip) :: l2
+        integer(ip) :: labc
+        integer(ip) :: liwk
+        integer(ip) :: lvhsgc
+        integer(ip) :: lwmin
+        integer(ip) :: lwork
+        integer(ip) :: lzz1
+        integer(ip) :: mdab
+        integer(ip) :: mmax
+        integer(ip) :: mn
+        integer(ip) :: ndab
+        integer(ip) :: nlat
+        integer(ip) :: nlon
+        integer(ip) :: nt
+        real(wp) :: pertrb
+        real(wp) :: v
+        real(wp) :: w
+        real(wp) :: work
+        real(wp) :: wvhsgc
         dimension v(idvw, jdvw, nt), w(idvw, jdvw, nt), pertrb(nt)
         dimension a(mdab, ndab, nt), b(mdab, ndab, nt)
         dimension wvhsgc(lvhsgc), work(lwork)
@@ -358,35 +358,35 @@ contains
         subroutine ivtgc1(nlat, nlon, isym, nt, v, w, idvw, jdvw, cr, ci, mmax, &
             sqnn, mdab, ndab, a, b, wsav, lsav, wk, lwk, pertrb, ierror)
 
-            real (wp) :: a
-            real (wp) :: b
-            real (wp) :: bi(mmax, nlat, nt)
-            real (wp) :: br(mmax, nlat, nt)
-            real (wp) :: ci
-            real (wp) :: cr
-            real (wp) :: fn
-            integer (ip) :: idvw
-            integer (ip) :: ierror
-            integer (ip) :: isym
-            integer (ip) :: ityp
-            integer (ip) :: jdvw
-            integer (ip) :: k
-            integer (ip) :: lsav
-            integer (ip) :: lwk
-            integer (ip) :: m
-            integer (ip) :: mdab
-            integer (ip) :: mmax
-            integer (ip) :: n
-            integer (ip) :: ndab
-            integer (ip) :: nlat
-            integer (ip) :: nlon
-            integer (ip) :: nt
-            real (wp) :: pertrb
-            real (wp) :: sqnn
-            real (wp) :: v
-            real (wp) :: w
-            real (wp) :: wk
-            real (wp) :: wsav
+            real(wp) :: a
+            real(wp) :: b
+            real(wp) :: bi(mmax, nlat, nt)
+            real(wp) :: br(mmax, nlat, nt)
+            real(wp) :: ci
+            real(wp) :: cr
+            real(wp) :: fn
+            integer(ip) :: idvw
+            integer(ip) :: ierror
+            integer(ip) :: isym
+            integer(ip) :: ityp
+            integer(ip) :: jdvw
+            integer(ip) :: k
+            integer(ip) :: lsav
+            integer(ip) :: lwk
+            integer(ip) :: m
+            integer(ip) :: mdab
+            integer(ip) :: mmax
+            integer(ip) :: n
+            integer(ip) :: ndab
+            integer(ip) :: nlat
+            integer(ip) :: nlon
+            integer(ip) :: nt
+            real(wp) :: pertrb
+            real(wp) :: sqnn
+            real(wp) :: v
+            real(wp) :: w
+            real(wp) :: wk
+            real(wp) :: wsav
             dimension v(idvw, jdvw, nt), w(idvw, jdvw, nt), pertrb(nt)
             dimension cr(mmax, nlat, nt), ci(mmax, nlat, nt), sqnn(nlat)
             dimension a(mdab, ndab, nt), b(mdab, ndab, nt)

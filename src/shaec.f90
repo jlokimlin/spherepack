@@ -320,30 +320,30 @@ contains
 
     subroutine shaec(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, &
         wshaec, lshaec, work, lwork, ierror)
-        real (wp) :: a(mdab, ndab, *)
-        real (wp) :: b(mdab, ndab, *)
-        real (wp) :: g(idg, jdg, *)
-        integer (ip) :: idg
-        integer (ip) :: ierror
-        integer (ip) :: imid
-        integer (ip) :: ist
-        integer (ip) :: isym
-        integer (ip) :: iw1, jw1, jw2, jw3
-        integer (ip) :: jdg
-        integer (ip) :: labc
-        integer (ip) :: ls
-        integer (ip) :: lshaec
-        integer (ip) :: lwork
-        integer (ip) :: lzz1
-        integer (ip) :: mdab
-        integer (ip) :: mmax
-        integer (ip) :: ndab
-        integer (ip) :: nlat
-        integer (ip) :: nln
-        integer (ip) :: nlon
-        integer (ip) :: nt
-        real (wp) :: work(lwork)
-        real (wp) :: wshaec(lshaec)
+        real(wp) :: a(mdab, ndab, *)
+        real(wp) :: b(mdab, ndab, *)
+        real(wp) :: g(idg, jdg, *)
+        integer(ip) :: idg
+        integer(ip) :: ierror
+        integer(ip) :: imid
+        integer(ip) :: ist
+        integer(ip) :: isym
+        integer(ip) :: iw1, jw1, jw2, jw3
+        integer(ip) :: jdg
+        integer(ip) :: labc
+        integer(ip) :: ls
+        integer(ip) :: lshaec
+        integer(ip) :: lwork
+        integer(ip) :: lzz1
+        integer(ip) :: mdab
+        integer(ip) :: mmax
+        integer(ip) :: ndab
+        integer(ip) :: nlat
+        integer(ip) :: nln
+        integer(ip) :: nlon
+        integer(ip) :: nt
+        real(wp) :: work(lwork)
+        real(wp) :: wshaec(lshaec)
 
 
         mmax = min(nlat, nlon/2+1)
@@ -418,43 +418,43 @@ contains
     subroutine shaec1(nlat, isym, nt, g, idgs, jdgs, a, b, mdab, ndab, imid, &
         idg, jdg, ge, go, work, zb, wzfin, whrfft)
 
-        real (wp) :: a
-        real (wp) :: b
-        real (wp) :: fsn
-        real (wp) :: g
-        real (wp) :: ge
-        real (wp) :: go
-        integer (ip) :: i
-        integer (ip) :: i3
-        integer (ip) :: idg
-        integer (ip) :: idgs
-        integer (ip) :: imid
-        integer (ip) :: imm1
-        integer (ip) :: isym
-        integer (ip) :: j
-        integer (ip) :: jdg
-        integer (ip) :: jdgs
-        integer (ip) :: k
-        integer (ip) :: ls
-        integer (ip) :: m
-        integer (ip) :: mdab
-        integer (ip) :: mdo
-        integer (ip) :: mmax
-        integer (ip) :: modl
-        integer (ip) :: mp1
-        integer (ip) :: mp2
-        integer (ip) :: ndab
-        integer (ip) :: ndo
-        integer (ip) :: nlat
-        integer (ip) :: nlon
-        integer (ip) :: nlp1
-        integer (ip) :: np1
-        integer (ip) :: nt
-        real (wp) :: tsn
-        real (wp) :: whrfft
-        real (wp) :: work
-        real (wp) :: wzfin
-        real (wp) :: zb
+        real(wp) :: a
+        real(wp) :: b
+        real(wp) :: fsn
+        real(wp) :: g
+        real(wp) :: ge
+        real(wp) :: go
+        integer(ip) :: i
+        integer(ip) :: i3
+        integer(ip) :: idg
+        integer(ip) :: idgs
+        integer(ip) :: imid
+        integer(ip) :: imm1
+        integer(ip) :: isym
+        integer(ip) :: j
+        integer(ip) :: jdg
+        integer(ip) :: jdgs
+        integer(ip) :: k
+        integer(ip) :: ls
+        integer(ip) :: m
+        integer(ip) :: mdab
+        integer(ip) :: mdo
+        integer(ip) :: mmax
+        integer(ip) :: modl
+        integer(ip) :: mp1
+        integer(ip) :: mp2
+        integer(ip) :: ndab
+        integer(ip) :: ndo
+        integer(ip) :: nlat
+        integer(ip) :: nlon
+        integer(ip) :: nlp1
+        integer(ip) :: np1
+        integer(ip) :: nt
+        real(wp) :: tsn
+        real(wp) :: whrfft
+        real(wp) :: work
+        real(wp) :: wzfin
+        real(wp) :: zb
         !
         !     whrfft must have at least nlon+15 locations
         !     wzfin must have 2*l*(nlat+1)/2 + ((l-3)*l+2)/2 locations
@@ -465,8 +465,8 @@ contains
             ge(idg, jdg, *), go(idg, jdg, *), zb(imid, nlat, 3), wzfin(*), &
             whrfft(*), work(*)
 
-        type (HFFTpack)      :: hfft
-        type (SpherepackAux) :: sphere_aux
+        type(HFFTpack)      :: hfft
+        type(SpherepackAux) :: sphere_aux
 
         ls = idg
         nlon = jdg
@@ -635,19 +635,19 @@ contains
         !--------------------------------------------------------------
         ! Dummy arguments
         !--------------------------------------------------------------
-        integer (ip), intent (in)  :: nlat
-        integer (ip), intent (in)  :: nlon
-        real (wp),    intent (out) :: wshaec(lshaec)
-        integer (ip), intent (in)  :: lshaec
-        real (wp),    intent (out) :: dwork(ldwork)
-        integer (ip), intent (in)  :: ldwork
-        integer (ip), intent (out) :: ierror
+        integer(ip), intent(in)  :: nlat
+        integer(ip), intent(in)  :: nlon
+        real(wp),    intent(out) :: wshaec(lshaec)
+        integer(ip), intent(in)  :: lshaec
+        real(wp),    intent(out) :: dwork(ldwork)
+        integer(ip), intent(in)  :: ldwork
+        integer(ip), intent(out) :: ierror
         !--------------------------------------------------------------
         ! Local variables
         !--------------------------------------------------------------
-        integer (ip)         :: imid, iw1, labc, lzz1, mmax
-        type (HFFTpack)      :: hfft
-        type (SpherepackAux) :: sphere_aux
+        integer(ip)         :: imid, iw1, labc, lzz1, mmax
+        type(HFFTpack)      :: hfft
+        type(SpherepackAux) :: sphere_aux
         !--------------------------------------------------------------
 
         imid = (nlat+1)/2

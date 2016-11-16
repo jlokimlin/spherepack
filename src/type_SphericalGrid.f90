@@ -19,12 +19,12 @@ module type_SphericalGrid
         ! Type components
         !----------------------------------------------------------------------
         logical,                        public :: initialized = .false.
-        integer (ip),                   public :: NUMBER_OF_LONGITUDES = 0  !! number of longitudinal points
-        integer (ip),                   public :: NUMBER_OF_LATITUDES = 0 !! number of latitudinal points
-        real (wp),                      public :: LONGITUDINAL_MESH = 0.0_wp !! Only used in RegularGrid
-        real (wp),         allocatable, public :: latitudes(:)  !! 0 <= theta <= pi
-        real (wp),         allocatable, public :: longitudes(:) !! 0 <= phi <= 2*p
-        character (len=:), allocatable, public :: grid_type
+        integer(ip),                   public :: NUMBER_OF_LONGITUDES = 0  !! number of longitudinal points
+        integer(ip),                   public :: NUMBER_OF_LATITUDES = 0 !! number of latitudinal points
+        real(wp),                      public :: LONGITUDINAL_MESH = 0.0_wp !! Only used in RegularGrid
+        real(wp),         allocatable, public :: latitudes(:)  !! 0 <= theta <= pi
+        real(wp),         allocatable, public :: longitudes(:) !! 0 <= phi <= 2*p
+        character(len=:), allocatable, public :: grid_type
         !----------------------------------------------------------------------
     contains
         !----------------------------------------------------------------------
@@ -42,53 +42,53 @@ contains
 
 
 
-    subroutine destroy_grid(this)
+    subroutine destroy_grid(self)
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        class (SphericalGrid), intent (in out) :: this
+        class(SphericalGrid), intent(inout)  :: self
         !----------------------------------------------------------------------
 
         ! Check flag
-        if (.not.this%initialized) return
+        if (.not.self%initialized) return
 
         !
         !==> Release memory
         !
-        if (allocated(this%grid_type)) deallocate( this%grid_type )
-        if (allocated(this%longitudes)) deallocate( this%longitudes )
-        if (allocated(this%latitudes)) deallocate( this%latitudes )
+        if (allocated(self%grid_type)) deallocate( self%grid_type )
+        if (allocated(self%longitudes)) deallocate( self%longitudes )
+        if (allocated(self%latitudes)) deallocate( self%latitudes )
 
         ! Reset constants
-        this%NUMBER_OF_LONGITUDES = 0
-        this%NUMBER_OF_LATITUDES = 0
-        this%LONGITUDINAL_MESH = 0.0_wp
+        self%NUMBER_OF_LONGITUDES = 0
+        self%NUMBER_OF_LATITUDES = 0
+        self%LONGITUDINAL_MESH = 0.0_wp
 
         ! Reset flag
-        this%initialized = .false.
+        self%initialized = .false.
 
     end subroutine destroy_grid
 
 
 
-    subroutine get_equally_spaced_longitudes(this, nlon, phi)
+    subroutine get_equally_spaced_longitudes(self, nlon, phi)
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        class (SphericalGrid),  intent (in out) :: this
-        integer (ip),           intent (in)     :: nlon !! number of longitudinal points
-        real (wp), allocatable, intent (out)    :: phi(:)  !! longitudes: 0 <= phi <= 2*pi
+        class(SphericalGrid),  intent(inout)  :: self
+        integer(ip),           intent(in)     :: nlon !! number of longitudinal points
+        real(wp), allocatable, intent(out)    :: phi(:)  !! longitudes: 0 <= phi <= 2*pi
         !----------------------------------------------------------------------
         ! Local variables
         !----------------------------------------------------------------------
-        integer (ip) :: i !! counter
+        integer(ip) :: i !! counter
         !----------------------------------------------------------------------
 
         !
         !==> Check validity of calling argument
         !
         if (nlon <= 0) then
-            error stop 'Object of class (SphericalGrid): '&
+            error stop 'Object of class(SphericalGrid): '&
                 //'invalid calling argument nlon <= 0 '&
                 //'in get_equally_spaced_longitudes'
         end if
@@ -101,7 +101,7 @@ contains
         !
         !==> Compute equally space (uniform) longitudinal grid
         !
-        associate( dphi => this%LONGITUDINAL_MESH )
+        associate( dphi => self%LONGITUDINAL_MESH )
 
             ! Set equally spaced (uniform) mesh size
             dphi= TWO_PI / nlon
@@ -115,29 +115,29 @@ contains
 
 
 
-    subroutine print_to_unformatted_binary_files(this, header)
+    subroutine print_to_unformatted_binary_files(self, header)
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        class (SphericalGrid), intent (in out) :: this
-        character (len=*),     intent (in)     :: header
+        class(SphericalGrid), intent(inout)  :: self
+        character(len=*),     intent(in)     :: header
         !----------------------------------------------------------------------
         ! Local variables
         !----------------------------------------------------------------------
-        integer (ip)  :: file_unit
+        integer(ip)  :: file_unit
         !----------------------------------------------------------------------
 
         ! Check if object is usable
-        if (.not.this%initialized) then
-            error stop 'Uninitialized object of class (SphericalGrid): '&
+        if (.not.self%initialized) then
+            error stop 'Uninitialized object of class(SphericalGrid): '&
                 //'in print_to_unformatted_binary_files'
         end if
 
         ! Write latitudes
-        associate( theta => this%latitudes )
+        associate( theta => self%latitudes )
 
             open( newunit=file_unit, &
-                file=header//this%grid_type//'_latitudes.dat', &
+                file=header//self%grid_type//'_latitudes.dat', &
                 status='replace', action='write', &
                 form='unformatted', access='stream' )
             write( file_unit ) theta
@@ -146,10 +146,10 @@ contains
         end associate
 
         ! Write longitudes
-        associate( phi => this%longitudes )
+        associate( phi => self%longitudes )
 
             open( newunit=file_unit, &
-                file=header//this%grid_type//'_longitudes.dat', &
+                file=header//self%grid_type//'_longitudes.dat', &
                 status='replace', action='write', &
                 form='unformatted', access='stream' )
             write( file_unit ) phi

@@ -283,39 +283,39 @@ contains
     subroutine idvtgs(nlat, nlon, isym, nt, v, w, idvw, jdvw, ad, bd, av, bv, &
         mdab, ndab, wvhsgs, lvhsgs, work, lwork, pertbd, pertbv, ierror)
 
-        real (wp) :: ad
-        real (wp) :: av
-        real (wp) :: bd
-        real (wp) :: bv
-        integer (ip) :: ibi
-        integer (ip) :: ibr
-        integer (ip) :: ici
-        integer (ip) :: icr
-        integer (ip) :: idvw
-        integer (ip) :: idz
-        integer (ip) :: ierror
-        integer (ip) :: imid
-        integer (ip) :: is
-        integer (ip) :: isym
-        integer (ip) :: iwk
-        integer (ip) :: jdvw
-        integer (ip) :: liwk
-        integer (ip) :: lvhsgs
-        integer (ip) :: lwork
-        integer (ip) :: lzimn
-        integer (ip) :: mdab
-        integer (ip) :: mmax
-        integer (ip) :: mn
-        integer (ip) :: ndab
-        integer (ip) :: nlat
-        integer (ip) :: nlon
-        integer (ip) :: nt
-        real (wp) :: pertbd
-        real (wp) :: pertbv
-        real (wp) :: v
-        real (wp) :: w
-        real (wp) :: work
-        real (wp) :: wvhsgs
+        real(wp) :: ad
+        real(wp) :: av
+        real(wp) :: bd
+        real(wp) :: bv
+        integer(ip) :: ibi
+        integer(ip) :: ibr
+        integer(ip) :: ici
+        integer(ip) :: icr
+        integer(ip) :: idvw
+        integer(ip) :: idz
+        integer(ip) :: ierror
+        integer(ip) :: imid
+        integer(ip) :: is
+        integer(ip) :: isym
+        integer(ip) :: iwk
+        integer(ip) :: jdvw
+        integer(ip) :: liwk
+        integer(ip) :: lvhsgs
+        integer(ip) :: lwork
+        integer(ip) :: lzimn
+        integer(ip) :: mdab
+        integer(ip) :: mmax
+        integer(ip) :: mn
+        integer(ip) :: ndab
+        integer(ip) :: nlat
+        integer(ip) :: nlon
+        integer(ip) :: nt
+        real(wp) :: pertbd
+        real(wp) :: pertbv
+        real(wp) :: v
+        real(wp) :: w
+        real(wp) :: work
+        real(wp) :: wvhsgs
         dimension w(idvw, jdvw, nt), v(idvw, jdvw, nt), pertbd(nt), pertbv(nt)
         dimension ad(mdab, ndab, nt), bd(mdab, ndab, nt)
         dimension av(mdab, ndab, nt), bv(mdab, ndab, nt)
@@ -379,38 +379,38 @@ contains
             cr, ci, mmax, sqnn, mdab, ndab, ad, bd, av, bv, wvhsgs, lvhsgs, wk, lwk, &
             pertbd, pertbv, ierror)
 
-            real (wp) :: ad
-            real (wp) :: av
-            real (wp) :: bd
-            real (wp) :: bi
-            real (wp) :: br
-            real (wp) :: bv
-            real (wp) :: ci
-            real (wp) :: cr
-            real (wp) :: fn
-            integer (ip) :: idvw
-            integer (ip) :: ierror
-            integer (ip) :: isym
-            integer (ip) :: ityp
-            integer (ip) :: jdvw
-            integer (ip) :: k
-            integer (ip) :: lvhsgs
-            integer (ip) :: lwk
-            integer (ip) :: m
-            integer (ip) :: mdab
-            integer (ip) :: mmax
-            integer (ip) :: n
-            integer (ip) :: ndab
-            integer (ip) :: nlat
-            integer (ip) :: nlon
-            integer (ip) :: nt
-            real (wp) :: pertbd
-            real (wp) :: pertbv
-            real (wp) :: sqnn
-            real (wp) :: v
-            real (wp) :: w
-            real (wp) :: wk
-            real (wp) :: wvhsgs
+            real(wp) :: ad
+            real(wp) :: av
+            real(wp) :: bd
+            real(wp) :: bi
+            real(wp) :: br
+            real(wp) :: bv
+            real(wp) :: ci
+            real(wp) :: cr
+            real(wp) :: fn
+            integer(ip) :: idvw
+            integer(ip) :: ierror
+            integer(ip) :: isym
+            integer(ip) :: ityp
+            integer(ip) :: jdvw
+            integer(ip) :: k
+            integer(ip) :: lvhsgs
+            integer(ip) :: lwk
+            integer(ip) :: m
+            integer(ip) :: mdab
+            integer(ip) :: mmax
+            integer(ip) :: n
+            integer(ip) :: ndab
+            integer(ip) :: nlat
+            integer(ip) :: nlon
+            integer(ip) :: nt
+            real(wp) :: pertbd
+            real(wp) :: pertbv
+            real(wp) :: sqnn
+            real(wp) :: v
+            real(wp) :: w
+            real(wp) :: wk
+            real(wp) :: wvhsgs
             dimension w(idvw, jdvw, nt), v(idvw, jdvw, nt)
             dimension br(mmax, nlat, nt), bi(mmax, nlat, nt), sqnn(nlat)
             dimension cr(mmax, nlat, nt), ci(mmax, nlat, nt)

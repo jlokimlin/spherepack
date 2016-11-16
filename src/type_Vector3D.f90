@@ -25,9 +25,9 @@ module type_Vector3D
         !----------------------------------------------------------------------
         ! Type components
         !----------------------------------------------------------------------
-        real (wp), public :: x = 0.0_wp
-        real (wp), public :: y = 0.0_wp
-        real (wp), public :: z = 0.0_wp
+        real(wp), public :: x = 0.0_wp
+        real(wp), public :: y = 0.0_wp
+        real(wp), public :: z = 0.0_wp
         !----------------------------------------------------------------------
     contains
         !----------------------------------------------------------------------
@@ -62,8 +62,6 @@ module type_Vector3D
         !----------------------------------------------------------------------
     end type Vector3D
 
-
-
     ! Interface for assignment operator
     interface assignment (=)
         module procedure assign_vector_from_int_array
@@ -71,8 +69,6 @@ module type_Vector3D
         module procedure assign_array_from_vector
         module procedure copy_vector
     end interface
-
-
 
     ! Interface for multiplication operator
     interface  operator (*)
@@ -83,14 +79,12 @@ module type_Vector3D
         module procedure get_cross_product
     end interface
 
-
-
     ! Declare derived data type to create array of pointers
     type, public :: Vector3DPointer
         !----------------------------------------------------------------------
         ! Type components
         !----------------------------------------------------------------------
-        type (Vector3D), pointer :: ptr => null()
+        type(Vector3D), pointer :: ptr => null()
         !----------------------------------------------------------------------
     contains
         !----------------------------------------------------------------------
@@ -100,141 +94,125 @@ module type_Vector3D
         !----------------------------------------------------------------------
     end type Vector3DPointer
 
-
-
 contains
 
-
-
-    subroutine assign_vector_from_int_array(this, array)
+    subroutine assign_vector_from_int_array(self, array)
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        class (Vector3D),  intent (out) :: this
-        integer (ip),      intent (in)  :: array(:)
+        class(Vector3D),  intent(out) :: self
+        integer(ip),      intent(in)  :: array(:)
         !----------------------------------------------------------------------
 
-        select type (this)
+        select type(self)
             type is (Vector3D)
-            this%x = real(array(1), kind=wp)
-            this%y = real(array(2), kind=wp)
-            this%z = real(array(3), kind=wp)
+            self%x = real(array(1), kind=wp)
+            self%y = real(array(2), kind=wp)
+            self%z = real(array(3), kind=wp)
         end select
 
     end subroutine assign_vector_from_int_array
 
-
-
-    subroutine assign_vector_from_float_array(this, array)
+    subroutine assign_vector_from_float_array(self, array)
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        class (Vector3D),  intent (out) :: this
-        real (wp),                       intent (in)  :: array(:)
+        class(Vector3D),  intent(out) :: self
+        real(wp),         intent(in)  :: array(:)
         !----------------------------------------------------------------------
 
-        select type (this)
+        select type(self)
             type is (Vector3D)
-            this%x = array(1)
-            this%y = array(2)
-            this%z = array(3)
+            self%x = array(1)
+            self%y = array(2)
+            self%z = array(3)
         end select
 
     end subroutine assign_vector_from_float_array
 
-
-    subroutine assign_array_from_vector( array, this )
+    subroutine assign_array_from_vector(array, self)
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        real (wp),        intent (out)  :: array(:)
-        class (Vector3D), intent (in)   :: this
+        real(wp),        intent(out)  :: array(:)
+        class(Vector3D), intent(in)   :: self
         !----------------------------------------------------------------------
 
-        select type (this)
+        select type(self)
             type is (Vector3D)
-            array(1) = this%x
-            array(2) = this%y
-            array(3) = this%z
+            array(1) = self%x
+            array(2) = self%y
+            array(3) = self%z
         end select
 
     end subroutine assign_array_from_vector
 
-
-
-    subroutine copy_vector(this, vector_to_be_copied)
+    subroutine copy_vector(self, vector_to_be_copied)
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        class (Vector3D), intent (out) :: this
-        class (Vector3D), intent (in)  :: vector_to_be_copied
+        class(Vector3D), intent(out) :: self
+        class(Vector3D), intent(in)  :: vector_to_be_copied
         !----------------------------------------------------------------------
 
-        this%x = vector_to_be_copied%x
-        this%y = vector_to_be_copied%y
-        this%z = vector_to_be_copied%z
+        self%x = vector_to_be_copied%x
+        self%y = vector_to_be_copied%y
+        self%z = vector_to_be_copied%z
 
     end subroutine copy_vector
 
-
-
-    function add_vectors(this, vec) result (return_value)
+    function add_vectors(self, vec) result (return_value)
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        type (Vector3D)               :: return_value
-        class (Vector3D), intent (in) :: this
-        class (Vector3D), intent (in) :: vec
+        type(Vector3D)               :: return_value
+        class(Vector3D), intent(in) :: self
+        class(Vector3D), intent(in) :: vec
         !----------------------------------------------------------------------
 
-        return_value%x = this%x + vec%x
-        return_value%y = this%y + vec%y
-        return_value%z = this%z + vec%z
+        return_value%x = self%x + vec%x
+        return_value%y = self%y + vec%y
+        return_value%z = self%z + vec%z
 
     end function add_vectors
 
-
-
-    function subtract_vectors(this, vec) result (return_value)
+    function subtract_vectors(self, vec) result (return_value)
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        class (Vector3D), intent (in) :: this
-        class (Vector3D), intent (in) :: vec
-        type (Vector3D)               :: return_value
+        class(Vector3D), intent(in) :: self
+        class(Vector3D), intent(in) :: vec
+        type(Vector3D)               :: return_value
         !----------------------------------------------------------------------
 
-        return_value%x = this%x - vec%x
-        return_value%y = this%y - vec%y
-        return_value%z = this%z - vec%z
+        return_value%x = self%x - vec%x
+        return_value%y = self%y - vec%y
+        return_value%z = self%z - vec%z
 
     end function subtract_vectors
 
-
-
-    pure function multiply_vector_times_float(this, float) result (return_value)
+    pure function multiply_vector_times_float(self, float) result (return_value)
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        class (Vector3D), intent (in) :: this
-        real (wp),        intent (in) :: float
-        type (Vector3D)               :: return_value
+        class(Vector3D), intent(in) :: self
+        real(wp),        intent(in) :: float
+        type(Vector3D)               :: return_value
         !----------------------------------------------------------------------
 
-        return_value%x = this%x * float
-        return_value%y = this%y * float
-        return_value%z = this%z * float
+        return_value%x = self%x * float
+        return_value%y = self%y * float
+        return_value%z = self%z * float
 
     end function multiply_vector_times_float
-
 
     function multiply_real_times_vector(float, vec) result (return_value)
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        real (wp),        intent (in) :: float
-        class (Vector3D), intent (in) :: vec
-        type (Vector3D)               :: return_value
+        real(wp),        intent(in) :: float
+        class(Vector3D), intent(in) :: vec
+        type(Vector3D)               :: return_value
         !----------------------------------------------------------------------
 
         return_value%x = float * vec%x
@@ -243,30 +221,28 @@ contains
 
     end function multiply_real_times_vector
 
-
-    function multiply_vector_times_integer(this, int) result (return_value)
+    function multiply_vector_times_integer(self, int) result (return_value)
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        class (Vector3D), intent (in)  :: this
-        integer (ip),     intent (in)  :: int
-        type (Vector3D)                :: return_value
+        class(Vector3D), intent(in)  :: self
+        integer(ip),     intent(in)  :: int
+        type(Vector3D)                :: return_value
         !----------------------------------------------------------------------
 
-        return_value%x = this%x * real(int, kind=wp)
-        return_value%y = this%y * real(int, kind=wp)
-        return_value%z = this%z * real(int, kind=wp)
+        return_value%x = self%x * real(int, kind=wp)
+        return_value%y = self%y * real(int, kind=wp)
+        return_value%z = self%z * real(int, kind=wp)
 
     end function multiply_vector_times_integer
-
 
     pure function multiply_integer_times_vector(int, vec) result (return_value)
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        integer (ip),     intent (in) :: int
-        class (Vector3D), intent (in) :: vec
-        type (Vector3D)               :: return_value
+        integer(ip),     intent(in) :: int
+        class(Vector3D), intent(in) :: vec
+        type(Vector3D)               :: return_value
         !----------------------------------------------------------------------
 
         return_value%x = real(int, kind=wp) * vec%x
@@ -275,52 +251,47 @@ contains
 
     end function multiply_integer_times_vector
 
-
-    pure function divide_vector_by_float(this, float) result (return_value)
+    pure function divide_vector_by_float(self, float) result (return_value)
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        class (Vector3D), intent (in)  :: this
-        real (wp),                      intent (in)  :: float
-        type (Vector3D)                :: return_value
+        class(Vector3D), intent(in)  :: self
+        real(wp),                      intent(in)  :: float
+        type(Vector3D)                :: return_value
         !----------------------------------------------------------------------
 
-        return_value%x = this%x / float
-        return_value%y = this%y / float
-        return_value%z = this%z / float
+        return_value%x = self%x / float
+        return_value%y = self%y / float
+        return_value%z = self%z / float
 
     end function divide_vector_by_float
 
-
-
-    pure function divide_vector_by_integer(this, int) result (return_value)
+    pure function divide_vector_by_integer(self, int) result (return_value)
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        class (Vector3D), intent (in)  :: this
-        integer (ip),                   intent (in)  :: int
-        type (Vector3D)                :: return_value
+        class(Vector3D), intent(in)  :: self
+        integer(ip),                   intent(in)  :: int
+        type(Vector3D)                :: return_value
         !----------------------------------------------------------------------
 
-        return_value%x = this%x / int
-        return_value%y = this%y / int
-        return_value%z = this%z / int
+        return_value%x = self%x / int
+        return_value%y = self%y / int
+        return_value%z = self%z / int
 
     end function divide_vector_by_integer
 
-
-
-    function get_dot_product(this, vec) result (return_value)
+    function get_dot_product(self, vec) result (return_value)
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        real (wp)                                   :: return_value
-        class (Vector3D), intent (in) :: this
-        class (Vector3D), intent (in) :: vec
+        real(wp)                    :: return_value
+        class(Vector3D), intent(in) :: self
+        class(Vector3D), intent(in) :: vec
         !----------------------------------------------------------------------
 
         associate( &
-            a => [ this%x, this%y, this%z ], &
+            a => [ self%x, self%y, self%z ], &
             b => [ vec%x, vec%y, vec%z ] &
             )
 
@@ -330,67 +301,59 @@ contains
 
     end function get_dot_product
 
-
-
-    function get_cross_product(this, vec) result (return_value)
+    function get_cross_product(self, vec) result (return_value)
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        class (Vector3D), intent (in) :: this
-        class (Vector3D), intent (in) :: vec
-        type (Vector3D)               :: return_value
+        class(Vector3D), intent(in) :: self
+        class(Vector3D), intent(in) :: vec
+        type(Vector3D)              :: return_value
         !----------------------------------------------------------------------
 
-        return_value%x = this%y*vec%z - this%z*vec%y
-        return_value%y = this%z*vec%x - this%x*vec%z
-        return_value%z = this%x*vec%y - this%y*vec%x
+        return_value%x = self%y*vec%z - self%z*vec%y
+        return_value%y = self%z*vec%x - self%x*vec%z
+        return_value%z = self%x*vec%y - self%y*vec%x
 
     end function get_cross_product
 
-
-    function get_norm(this) result (return_value)
+    function get_norm(self) result (return_value)
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        class (Vector3D), intent (in out) :: this
-        real (wp)                         :: return_value
+        class(Vector3D), intent(inout)  :: self
+        real(wp)                        :: return_value
         !----------------------------------------------------------------------
 
-        associate( array => [ this%x, this%y, this%z ] )
-
+        associate( array => [ self%x, self%y, self%z ] )
             return_value = norm2(array)
-
         end associate
 
     end function get_norm
 
-
-    elemental subroutine finalize_vector3d(this)
+    elemental subroutine finalize_vector3d(self)
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        type (Vector3D), intent (in out) :: this
+        type(Vector3D), intent(inout)  :: self
         !----------------------------------------------------------------------
 
         ! Reset constants
-        this%x = 0.0_wp
-        this%y = 0.0_wp
-        this%z = 0.0_wp
+        self%x = 0.0_wp
+        self%y = 0.0_wp
+        self%z = 0.0_wp
 
     end subroutine finalize_vector3d
 
-
-    elemental subroutine finalize_vector3d_pointer(this)
+    elemental subroutine finalize_vector3d_pointer(self)
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        type (Vector3DPointer), intent (in out) :: this
+        type(Vector3DPointer), intent(inout)  :: self
         !----------------------------------------------------------------------
 
         ! Check if pointer is associated
-        if (associated(this%ptr)) nullify(this%ptr )
+        if (associated(self%ptr)) nullify(self%ptr )
 
     end subroutine finalize_vector3d_pointer
-
 
 end module type_Vector3D

@@ -36,7 +36,7 @@
 !
 program tsha
 
-    use, intrinsic :: iso_fortran_env, only: &
+    use, intrinsic :: ISO_Fortran_env, only: &
         ip => INT32, &
         wp => REAL64, &
         stdout => OUTPUT_UNIT
@@ -52,7 +52,7 @@ program tsha
     !----------------------------------------------------------------------
     ! Dictionary
     !----------------------------------------------------------------------
-    class (Sphere), allocatable :: sphere_dat
+    class(Sphere), allocatable :: sphere_dat
     !----------------------------------------------------------------------
 
     !
@@ -82,23 +82,23 @@ contains
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        class (Sphere), intent (in out) :: sphere_type
+        class(Sphere), intent(inout)  :: sphere_type
         !----------------------------------------------------------------------
         ! Local variables
         !----------------------------------------------------------------------
-        integer (ip), parameter        :: NLONS = 128
-        integer (ip), parameter        :: NLATS = NLONS/2 + 1
-        integer (ip), parameter        :: NSYNTHS = 3
-        integer (ip)                   :: i, j, k !! Counters
-        real (wp)                      :: original_scalar_function(NLATS,NLONS,NSYNTHS)
-        real (wp)                      :: approximate_scalar_function(NLATS,NLONS,NSYNTHS)
-        character (len=:), allocatable :: error_previous_platform
+        integer(ip), parameter        :: NLONS = 128
+        integer(ip), parameter        :: NLATS = NLONS/2 + 1
+        integer(ip), parameter        :: NSYNTHS = 3
+        integer(ip)                   :: i, j, k !! Counters
+        real(wp)                      :: original_scalar_function(NLATS,NLONS,NSYNTHS)
+        real(wp)                      :: approximate_scalar_function(NLATS,NLONS,NSYNTHS)
+        character(len=:), allocatable :: error_previous_platform
         !----------------------------------------------------------------------
 
         !
         !==> Set up workspace arrays
         !
-        select type (sphere_type)
+        select type(sphere_type)
             type is (GaussianSphere)
 
             !  Initialize gaussian sphere object

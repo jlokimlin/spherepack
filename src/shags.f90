@@ -321,26 +321,26 @@ contains
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        integer (ip), intent (in)     :: nlat
-        integer (ip), intent (in)     :: nlon
-        integer (ip), intent (in)     :: mode
-        integer (ip), intent (in)     :: nt
-        real (wp),    intent (in)     :: g(idg, jdg, nt)
-        integer (ip), intent (in)     :: idg
-        integer (ip), intent (in)     :: jdg
-        real (wp),    intent (out)    :: a(mdab, ndab, nt)
-        real (wp),    intent (out)    :: b(mdab, ndab, nt)
-        integer (ip), intent (in)     :: mdab
-        integer (ip), intent (in)     :: ndab
-        real (wp),    intent (in out) :: wshags(lshags)
-        integer (ip), intent (in)     :: lshags
-        real (wp),    intent (in out) :: work(lwork)
-        integer (ip), intent (in)     :: lwork
-        integer (ip), intent (out)    :: ierror
+        integer(ip), intent(in)     :: nlat
+        integer(ip), intent(in)     :: nlon
+        integer(ip), intent(in)     :: mode
+        integer(ip), intent(in)     :: nt
+        real(wp),    intent(in)     :: g(idg, jdg, nt)
+        integer(ip), intent(in)     :: idg
+        integer(ip), intent(in)     :: jdg
+        real(wp),    intent(out)    :: a(mdab, ndab, nt)
+        real(wp),    intent(out)    :: b(mdab, ndab, nt)
+        integer(ip), intent(in)     :: mdab
+        integer(ip), intent(in)     :: ndab
+        real(wp),    intent(inout)  :: wshags(lshags)
+        integer(ip), intent(in)     :: lshags
+        real(wp),    intent(inout)  :: work(lwork)
+        integer(ip), intent(in)     :: lwork
+        integer(ip), intent(out)    :: ierror
         !----------------------------------------------------------------------
         ! Local variables
         !----------------------------------------------------------------------
-        integer (ip) :: l, l1, l2, lp, iw, lat, late, ifft, ipmn, iwts
+        integer(ip) :: l, l1, l2, lp, iw, lat, late, ifft, ipmn, iwts
         !----------------------------------------------------------------------
 
         ! Set m limit for pmn
@@ -439,19 +439,19 @@ contains
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        integer (ip), intent (in)     :: nlat
-        integer (ip), intent (in)     :: nlon
-        real (wp),    intent (in out) :: wshags(lshags)
-        integer (ip), intent (in)     :: lshags
-        real (wp),    intent (in out) :: work(lwork)
-        integer (ip), intent (in)     :: lwork
-        real (wp),    intent (in out) :: dwork(ldwork)
-        integer (ip), intent (in)     :: ldwork
-        integer (ip), intent (out)    :: ierror
+        integer(ip), intent(in)     :: nlat
+        integer(ip), intent(in)     :: nlon
+        real(wp),    intent(inout)  :: wshags(lshags)
+        integer(ip), intent(in)     :: lshags
+        real(wp),    intent(inout)  :: work(lwork)
+        integer(ip), intent(in)     :: lwork
+        real(wp),    intent(inout)  :: dwork(ldwork)
+        integer(ip), intent(in)     :: ldwork
+        integer(ip), intent(out)    :: ierror
         !----------------------------------------------------------------------
         ! Local variables
         !----------------------------------------------------------------------
-        integer (ip) :: ntrunc, l1, l2, late, lp, ldw, ipmnf
+        integer(ip) :: ntrunc, l1, l2, late, lp, ldw, ipmnf
         !----------------------------------------------------------------------
 
         !
@@ -515,32 +515,32 @@ contains
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        integer (ip), intent (in)     :: nlat
-        integer (ip), intent (in)     :: nlon
-        integer (ip), intent (in)     :: l
-        integer (ip), intent (in)     :: lat
-        integer (ip), intent (in)     :: mode
-        real (wp),    intent (in)     :: gs(idg, jdg, nt)
-        integer (ip), intent (in)     :: idg
-        integer (ip), intent (in)     :: jdg
-        integer (ip), intent (in)     :: nt
-        real (wp),    intent (in out) :: a(mdab, ndab, nt)
-        real (wp),    intent (in out) :: b(mdab, ndab, nt)
-        integer (ip), intent (in)     :: mdab
-        integer (ip), intent (in)     :: ndab
-        integer (ip), intent (in)     :: late
-        real (wp),    intent (in out) :: g(lat, nlon, nt)
-        real (wp),    intent (in out) :: wfft(*)
-        real (wp),    intent (in out) :: pmn(late,*)
-        real (wp),    intent (in out) :: wts(nlat)
-        real (wp),    intent (in out) :: work(*)
+        integer(ip), intent(in)     :: nlat
+        integer(ip), intent(in)     :: nlon
+        integer(ip), intent(in)     :: l
+        integer(ip), intent(in)     :: lat
+        integer(ip), intent(in)     :: mode
+        real(wp),    intent(in)     :: gs(idg, jdg, nt)
+        integer(ip), intent(in)     :: idg
+        integer(ip), intent(in)     :: jdg
+        integer(ip), intent(in)     :: nt
+        real(wp),    intent(inout)  :: a(mdab, ndab, nt)
+        real(wp),    intent(inout)  :: b(mdab, ndab, nt)
+        integer(ip), intent(in)     :: mdab
+        integer(ip), intent(in)     :: ndab
+        integer(ip), intent(in)     :: late
+        real(wp),    intent(inout)  :: g(lat, nlon, nt)
+        real(wp),    intent(inout)  :: wfft(*)
+        real(wp),    intent(inout)  :: pmn(late,*)
+        real(wp),    intent(inout)  :: wts(nlat)
+        real(wp),    intent(inout)  :: work(*)
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        integer (ip)    :: i, j, k, m, mml1
-        integer (ip)    :: mn, is, ms, ns, lm1, nl2, lp1, mp1, np1, mp2
-        real (wp)       :: t1, t2, sfn
-        type (HFFTpack) :: hfft
+        integer(ip)    :: i, j, k, m, mml1
+        integer(ip)    :: mn, is, ms, ns, lm1, nl2, lp1, mp1, np1, mp2
+        real(wp)       :: t1, t2, sfn
+        type(HFFTpack) :: hfft
         !----------------------------------------------------------------------
 
         !
@@ -778,17 +778,17 @@ contains
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        integer (ip), intent (in)     :: nlat
-        integer (ip), intent (in)     :: l
-        integer (ip), intent (in)     :: late
-        real (wp),    intent (in out) :: w(*)
-        real (wp),    intent (in out) :: pmn(nlat, late, 3)
-        real (wp),    intent (in out) :: pmnf(late, *)
+        integer(ip), intent(in)     :: nlat
+        integer(ip), intent(in)     :: l
+        integer(ip), intent(in)     :: late
+        real(wp),    intent(inout)  :: w(*)
+        real(wp),    intent(inout)  :: pmn(nlat, late, 3)
+        real(wp),    intent(inout)  :: pmnf(late, *)
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        integer (ip)         :: mp1, m, mode, i, np1, km, mml1, mn
-        type (SpherepackAux) :: sphere_aux
+        integer(ip)         :: mp1, m, mode, i, np1, km, mml1, mn
+        type(SpherepackAux) :: sphere_aux
         !----------------------------------------------------------------------
 
         !
@@ -823,18 +823,18 @@ contains
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        integer (ip), intent (in)     :: nlat
-        integer (ip), intent (in)     :: nlon
-        real (wp),    intent (in out) :: wshags(lshags)
-        integer (ip), intent (in)     :: lshags
-        real (wp),    intent (in out) :: dwork(ldwork)
-        integer (ip), intent (in)     :: ldwork
-        integer (ip), intent (out)    :: ierror
+        integer(ip), intent(in)     :: nlat
+        integer(ip), intent(in)     :: nlon
+        real(wp),    intent(inout)  :: wshags(lshags)
+        integer(ip), intent(in)     :: lshags
+        real(wp),    intent(inout)  :: dwork(ldwork)
+        integer(ip), intent(in)     :: ldwork
+        integer(ip), intent(out)    :: ierror
         !----------------------------------------------------------------------
         ! Local variables
         !----------------------------------------------------------------------
-        integer (ip) :: ntrunc, l1, l2, late
-        integer (ip) :: workspace_indices(10)
+        integer(ip) :: ntrunc, l1, l2, late
+        integer(ip) :: workspace_indices(10)
         !----------------------------------------------------------------------
 
         !
@@ -906,10 +906,10 @@ contains
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        integer (ip), intent (in)  :: nlat
-        integer (ip), intent (in)  :: late
-        integer (ip), intent (in)  :: l
-        integer (ip)               :: return_value(10)
+        integer(ip), intent(in)  :: nlat
+        integer(ip), intent(in)  :: late
+        integer(ip), intent(in)  :: l
+        integer(ip)               :: return_value(10)
         !----------------------------------------------------------------------
 
         associate( i => return_value )
@@ -937,28 +937,28 @@ contains
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        integer (ip), intent (in)     :: nlat
-        integer (ip), intent (in)     :: nlon
-        integer (ip), intent (in)     :: l
-        integer (ip), intent (in)     :: late
-        real (wp),    intent (in out) :: wts(nlat)
-        real (wp),    intent (in out) :: p0n(nlat, late)
-        real (wp),    intent (in out) :: p1n(nlat, late)
-        real (wp),    intent (in out) :: abel(*)
-        real (wp),    intent (in out) :: bbel(*)
-        real (wp),    intent (in out) :: cbel(*)
-        real (wp),    intent (in out) :: wfft(*)
-        real (wp),    intent (in out) :: dtheta(nlat)
-        real (wp),    intent (in out) :: dwts(nlat)
-        real (wp),    intent (in out) :: work(*)
-        integer (ip), intent (out)    :: ier
+        integer(ip), intent(in)     :: nlat
+        integer(ip), intent(in)     :: nlon
+        integer(ip), intent(in)     :: l
+        integer(ip), intent(in)     :: late
+        real(wp),    intent(inout)  :: wts(nlat)
+        real(wp),    intent(inout)  :: p0n(nlat, late)
+        real(wp),    intent(inout)  :: p1n(nlat, late)
+        real(wp),    intent(inout)  :: abel(*)
+        real(wp),    intent(inout)  :: bbel(*)
+        real(wp),    intent(inout)  :: cbel(*)
+        real(wp),    intent(inout)  :: wfft(*)
+        real(wp),    intent(inout)  :: dtheta(nlat)
+        real(wp),    intent(inout)  :: dwts(nlat)
+        real(wp),    intent(inout)  :: work(*)
+        integer(ip), intent(out)    :: ier
         !----------------------------------------------------------------------
         ! Local variables
         !----------------------------------------------------------------------
-        integer (ip)         :: i, m, n, lw, np1, imn, mlim
-        real (wp)            :: pb, dummy_variable
-        type (HFFTpack)      :: hfft
-        type (SpherepackAux) :: sphere_aux
+        integer(ip)         :: i, m, n, lw, np1, imn, mlim
+        real(wp)            :: pb, dummy_variable
+        type(HFFTpack)      :: hfft
+        type(SpherepackAux) :: sphere_aux
         !----------------------------------------------------------------------
 
         call hfft%initialize(nlon, wfft)

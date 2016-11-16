@@ -280,7 +280,7 @@
 !     igrida(2) = 0.  da must be dimensioned nlata by nlona in the program
 !     calling trssph if igrida(2) = 1.  if da is not properly dimensioned
 !     and if the latitude (colatitude) values do not run south to north or
-!     north to south as flagged by igrida(1) (this cannot be checked!) then
+!     north to south as flagged by igrida(1) (self cannot be checked!) then
 !     incorrect results will be produced.
 !
 ! ... igridb
@@ -424,7 +424,7 @@
 !     igridb(2) = 0 or 1.  db must be dimensioned nlatb by nlonb in the
 !     program calling trssph if igridb(2) = 1.  if db is not properly
 !     dimensioned and if the latitude (colatitude) values do not run south
-!     north or north to south as flagged by igrdb(1) (this cannot be checked!)
+!     north or north to south as flagged by igrdb(1) (self cannot be checked!)
 !     then incorrect results will be produced.
 !
 ! ... lsvmin
@@ -509,24 +509,24 @@ contains
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        integer, intent (in)     :: intl
-        integer, intent (in)     :: igrida(2)
-        integer, intent (in)     :: nlona
-        integer, intent (in)     :: nlata
-        integer, intent (in)     :: igridb(2)
-        integer, intent (in)     :: nlonb
-        integer, intent (in)     :: nlatb
-        integer, intent (in)     :: lsave
-        integer, intent (in out) :: lsvmin
-        integer, intent (in)     :: lwork
-        integer, intent (in out) :: lwkmin
-        integer, intent (in)     :: ldwork
-        integer, intent (out)    :: ier
-        real,    intent (in out) :: da(*)
-        real,    intent (out)    :: db(*)
-        real,    intent (in out) :: wsave(*)
-        real,    intent (in out) :: work(*)
-        real,    intent (in out) :: dwork(*)
+        integer, intent(in)     :: intl
+        integer, intent(in)     :: igrida(2)
+        integer, intent(in)     :: nlona
+        integer, intent(in)     :: nlata
+        integer, intent(in)     :: igridb(2)
+        integer, intent(in)     :: nlonb
+        integer, intent(in)     :: nlatb
+        integer, intent(in)     :: lsave
+        integer, intent(inout)  :: lsvmin
+        integer, intent(in)     :: lwork
+        integer, intent(inout)  :: lwkmin
+        integer, intent(in)     :: ldwork
+        integer, intent(out)    :: ier
+        real,    intent(inout)  :: da(*)
+        real,    intent(out)    :: db(*)
+        real,    intent(inout)  :: wsave(*)
+        real,    intent(inout)  :: work(*)
+        real,    intent(inout)  :: dwork(*)
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
@@ -758,14 +758,14 @@ contains
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        integer, intent (in)  :: ma
-        integer, intent (in)  :: na
-        integer, intent (in)  :: mb
-        integer, intent (in)  :: nb
-        real,    intent (in)  :: aa(ma, na)
-        real,    intent (in)  :: ba(ma, na)
-        real,    intent (out) :: ab(mb, nb)
-        real,    intent (out) :: bb(mb, nb)
+        integer, intent(in)  :: ma
+        integer, intent(in)  :: na
+        integer, intent(in)  :: mb
+        integer, intent(in)  :: nb
+        real,    intent(in)  :: aa(ma, na)
+        real,    intent(in)  :: ba(ma, na)
+        real,    intent(out) :: ab(mb, nb)
+        real,    intent(out) :: bb(mb, nb)
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
@@ -812,10 +812,10 @@ contains
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        integer, intent (in)     :: n
-        integer, intent (in)     :: m
-        real,    intent (in out) :: data(*)
-        real,    intent (in out) :: work(*)
+        integer, intent(in)     :: n
+        integer, intent(in)     :: m
+        real,    intent(inout)  :: data(*)
+        real,    intent(inout)  :: work(*)
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
@@ -851,9 +851,9 @@ contains
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        integer, intent (in)     :: nlat
-        integer, intent (in)     :: nlon
-        real,    intent (in out) :: data(nlat,nlon)
+        integer, intent(in)     :: nlat
+        integer, intent(in)     :: nlon
+        real,    intent(inout)  :: data(nlat,nlon)
         !----------------------------------------------------------------------
         ! Local variables
         !----------------------------------------------------------------------

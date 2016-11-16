@@ -20,12 +20,12 @@ module type_TrigonometricFunctions
         ! Type components
         !----------------------------------------------------------------------
         logical,                public :: initialized = .false. !! Initialization flag
-        integer (ip),           public :: NUMBER_OF_LONGITUDES = 0 !! number of longitudinal points in phi
-        integer (ip),           public :: NUMBER_OF_LATITUDES = 0 !! number of latitudinal points in theta
-        real (wp), allocatable, public :: sint(:)  !! sin(theta): 0 <= theta <= pi
-        real (wp), allocatable, public :: cost(:)  !! cos(theta): 0 <= theta <= pi
-        real (wp), allocatable, public :: sinp(:)  !! sin(phi):   0 <=  phi  <= 2*pi
-        real (wp), allocatable, public :: cosp(:)  !! cos(phi):   0 <=  phi  <= 2*pi
+        integer(ip),           public :: NUMBER_OF_LONGITUDES = 0 !! number of longitudinal points in phi
+        integer(ip),           public :: NUMBER_OF_LATITUDES = 0 !! number of latitudinal points in theta
+        real(wp), allocatable, public :: sint(:)  !! sin(theta): 0 <= theta <= pi
+        real(wp), allocatable, public :: cost(:)  !! cos(theta): 0 <= theta <= pi
+        real(wp), allocatable, public :: sinp(:)  !! sin(phi):   0 <=  phi  <= 2*pi
+        real(wp), allocatable, public :: cosp(:)  !! cos(phi):   0 <=  phi  <= 2*pi
         !----------------------------------------------------------------------
     contains
         !----------------------------------------------------------------------
@@ -53,8 +53,8 @@ contains
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        class (SphericalGrid), intent (in out) :: grid
-        type (TrigonometricFunctions)          :: return_value
+        class(SphericalGrid), intent(inout)  :: grid
+        type(TrigonometricFunctions)          :: return_value
         !----------------------------------------------------------------------
 
         call return_value%create(grid)
@@ -63,22 +63,22 @@ contains
 
 
 
-    subroutine create_trigonometric_functions(this, grid_type)
+    subroutine create_trigonometric_functions(self, grid_type)
         !
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        class (TrigonometricFunctions), intent (in out) :: this
-        class (SphericalGrid),          intent (in)     :: grid_type
+        class(TrigonometricFunctions), intent(inout)  :: self
+        class(SphericalGrid),          intent(in)     :: grid_type
         !----------------------------------------------------------------------
 
         ! Ensure that object is usable
-        call this%destroy()
+        call self%destroy()
 
         ! Check if polymorphic argument is usable
         if ( grid_type%initialized .eqv. .false.) then
-            error stop 'Object of class (TrigonometricFunctions): '&
-                //'initialized polymorphic argument of class (SphericalGrid) '&
+            error stop 'Object of class(TrigonometricFunctions): '&
+                //'initialized polymorphic argument of class(SphericalGrid) '&
                 //'in create_trigonometric_functions'
         end if
 
@@ -89,23 +89,23 @@ contains
             )
 
             ! Set contants
-            this%NUMBER_OF_LATITUDES = nlat
-            this%NUMBER_OF_LONGITUDES = nlon
+            self%NUMBER_OF_LATITUDES = nlat
+            self%NUMBER_OF_LONGITUDES = nlon
 
-            allocate(this%sint(nlat) )
-            allocate(this%cost(nlat) )
-            allocate(this%sinp(nlon) )
-            allocate(this%cosp(nlon) )
+            allocate(self%sint(nlat) )
+            allocate(self%cost(nlat) )
+            allocate(self%sinp(nlon) )
+            allocate(self%cosp(nlon) )
         end associate
 
         ! compute trigonometric functions
         associate( &
             theta => grid_type%latitudes, &
             phi => grid_type%longitudes, &
-            sint => this%sint, &
-            cost => this%cost, &
-            sinp => this%sinp, &
-            cosp => this%cosp &
+            sint => self%sint, &
+            cost => self%cost, &
+            sinp => self%sinp, &
+            cosp => self%cosp &
             )
 
             sint = sin(theta)
@@ -116,47 +116,47 @@ contains
         end associate
 
         ! Set flag
-        this%initialized = .true.
+        self%initialized = .true.
 
     end subroutine create_trigonometric_functions
 
 
 
-    subroutine destroy_trigonometric_functions(this)
+    subroutine destroy_trigonometric_functions(self)
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        class (TrigonometricFunctions), intent (in out) :: this
+        class(TrigonometricFunctions), intent(inout)  :: self
         !----------------------------------------------------------------------
 
         ! Check flag
-        if (.not.this%initialized) return
+        if (.not.self%initialized) return
 
         ! Release memory
-        if (allocated(this%sint)) deallocate(this%sint)
-        if (allocated(this%cost)) deallocate(this%cost)
-        if (allocated(this%sinp)) deallocate(this%sinp)
-        if (allocated(this%cosp)) deallocate(this%cosp)
+        if (allocated(self%sint)) deallocate(self%sint)
+        if (allocated(self%cost)) deallocate(self%cost)
+        if (allocated(self%sinp)) deallocate(self%sinp)
+        if (allocated(self%cosp)) deallocate(self%cosp)
 
         ! Reset constants
-        this%NUMBER_OF_LONGITUDES = 0
-        this%NUMBER_OF_LATITUDES = 0
+        self%NUMBER_OF_LONGITUDES = 0
+        self%NUMBER_OF_LATITUDES = 0
 
         ! Reset flag
-        this%initialized = .false.
+        self%initialized = .false.
 
     end subroutine destroy_trigonometric_functions
 
 
 
-    subroutine finalize_trigonometric_functions(this)
+    subroutine finalize_trigonometric_functions(self)
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        type (TrigonometricFunctions), intent (in out)    :: this
+        type(TrigonometricFunctions), intent(inout)     :: self
         !----------------------------------------------------------------------
 
-        call this%destroy()
+        call self%destroy()
 
     end subroutine finalize_trigonometric_functions
 

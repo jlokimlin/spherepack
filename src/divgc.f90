@@ -243,37 +243,37 @@ contains
     subroutine divgc(nlat, nlon, isym, nt, dv, idv, jdv, br, bi, mdb, ndb, &
         wshsgc, lshsgc, work, lwork, ierror)
         implicit none
-        real (wp) :: bi
-        real (wp) :: br
-        real (wp) :: dv
-        integer (ip) :: ia
-        integer (ip) :: ib
-        integer (ip) :: idv
-        integer (ip) :: ierror
-        integer (ip) :: imid
-        integer (ip) :: is
-        integer (ip) :: isym
-        integer (ip) :: iwk
-        integer (ip) :: jdv
-        integer (ip) :: l1
-        integer (ip) :: l2
-        integer (ip) :: lpimn
-        integer (ip) :: ls
-        integer (ip) :: lshsgc
-        integer (ip) :: lwk
-        integer (ip) :: lwkmin
-        integer (ip) :: lwork
-        integer (ip) :: mab
-        integer (ip) :: mdb
-        integer (ip) :: mmax
-        integer (ip) :: mn
-        integer (ip) :: ndb
-        integer (ip) :: nlat
-        integer (ip) :: nln
-        integer (ip) :: nlon
-        integer (ip) :: nt
-        real (wp) :: work
-        real (wp) :: wshsgc
+        real(wp) :: bi
+        real(wp) :: br
+        real(wp) :: dv
+        integer(ip) :: ia
+        integer(ip) :: ib
+        integer(ip) :: idv
+        integer(ip) :: ierror
+        integer(ip) :: imid
+        integer(ip) :: is
+        integer(ip) :: isym
+        integer(ip) :: iwk
+        integer(ip) :: jdv
+        integer(ip) :: l1
+        integer(ip) :: l2
+        integer(ip) :: lpimn
+        integer(ip) :: ls
+        integer(ip) :: lshsgc
+        integer(ip) :: lwk
+        integer(ip) :: lwkmin
+        integer(ip) :: lwork
+        integer(ip) :: mab
+        integer(ip) :: mdb
+        integer(ip) :: mmax
+        integer(ip) :: mn
+        integer(ip) :: ndb
+        integer(ip) :: nlat
+        integer(ip) :: nln
+        integer(ip) :: nlon
+        integer(ip) :: nt
+        real(wp) :: work
+        real(wp) :: wshsgc
 
         dimension dv(idv, jdv, nt), br(mdb, ndb, nt), bi(mdb, ndb, nt)
         dimension wshsgc(lshsgc), work(lwork)
@@ -345,31 +345,31 @@ contains
 
         subroutine divgc1(nlat, nlon, isym, nt, dv, idv, jdv, br, bi, mdb, ndb, &
             a, b, mab, sqnn, wshsgc, lshsgc, wk, lwk, ierror)
-            real (wp) :: a
-            real (wp) :: b
-            real (wp) :: bi
-            real (wp) :: br
-            real (wp) :: dv
-            real (wp) :: fn
-            integer (ip) :: idv
-            integer (ip) :: ierror
-            integer (ip) :: isym
-            integer (ip) :: jdv
-            integer (ip) :: k
-            integer (ip) :: lshsgc
-            integer (ip) :: lwk
-            integer (ip) :: m
-            integer (ip) :: mab
-            integer (ip) :: mdb
-            integer (ip) :: mmax
-            integer (ip) :: n
-            integer (ip) :: ndb
-            integer (ip) :: nlat
-            integer (ip) :: nlon
-            integer (ip) :: nt
-            real (wp) :: sqnn
-            real (wp) :: wk
-            real (wp) :: wshsgc
+            real(wp) :: a
+            real(wp) :: b
+            real(wp) :: bi
+            real(wp) :: br
+            real(wp) :: dv
+            real(wp) :: fn
+            integer(ip) :: idv
+            integer(ip) :: ierror
+            integer(ip) :: isym
+            integer(ip) :: jdv
+            integer(ip) :: k
+            integer(ip) :: lshsgc
+            integer(ip) :: lwk
+            integer(ip) :: m
+            integer(ip) :: mab
+            integer(ip) :: mdb
+            integer(ip) :: mmax
+            integer(ip) :: n
+            integer(ip) :: ndb
+            integer(ip) :: nlat
+            integer(ip) :: nlon
+            integer(ip) :: nt
+            real(wp) :: sqnn
+            real(wp) :: wk
+            real(wp) :: wshsgc
             dimension dv(idv, jdv, nt), br(mdb, ndb, nt), bi(mdb, ndb, nt)
             dimension a(mab, nlat, nt), b(mab, nlat, nt), sqnn(nlat)
             dimension wshsgc(lshsgc), wk(lwk)

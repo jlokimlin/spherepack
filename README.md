@@ -29,10 +29,10 @@ Test programs are provided for solving these equations. Each program serves two 
     ! Explicit typing only
     implicit none
     
-    type (GaussianSphere)  :: foo
-    real (wp), allocatable :: scalar_function(:,:)
-    real (wp), allocatable :: laplacian(:,:)
-    real (wp), allocatable :: solution(:,:)
+    type(GaussianSphere)  :: foo
+    real(wp), allocatable :: scalar_function(:,:)
+    real(wp), allocatable :: laplacian(:,:)
+    real(wp), allocatable :: solution(:,:)
     
     ! Initialize object
     foo = GaussianSphere(nlat=19, nlon=36)
@@ -69,9 +69,7 @@ Type the following command line arguments
 
 ```bash
 
-	git clone https://github.com/jlokimlin/modern_spherepack.git
-	
-	cd modern_spherepack; make all
+	git clone https://github.com/jlokimlin/modern_spherepack.git; cd modern_spherepack; make all
 ```
 
 -----------------------------------------------------------------------------

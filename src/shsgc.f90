@@ -311,29 +311,29 @@ contains
 
     subroutine shsgc(nlat, nlon, mode, nt, g, idg, jdg, a, b, mdab, ndab, &
         wshsgc, lshsgc, work, lwork, ierror)
-        real (wp) :: a
-        real (wp) :: b
-        real (wp) :: g
-        integer (ip) :: idg
-        integer (ip) :: ierror
-        integer (ip) :: ifft
-        integer (ip) :: ipmn
-        integer (ip) :: jdg
-        integer (ip) :: l
-        integer (ip) :: l1
-        integer (ip) :: l2
-        integer (ip) :: lat
-        integer (ip) :: late
-        integer (ip) :: lshsgc
-        integer (ip) :: lwork
-        integer (ip) :: mdab
-        integer (ip) :: mode
-        integer (ip) :: ndab
-        integer (ip) :: nlat
-        integer (ip) :: nlon
-        integer (ip) :: nt
-        real (wp) :: work
-        real (wp) :: wshsgc
+        real(wp) :: a
+        real(wp) :: b
+        real(wp) :: g
+        integer(ip) :: idg
+        integer(ip) :: ierror
+        integer(ip) :: ifft
+        integer(ip) :: ipmn
+        integer(ip) :: jdg
+        integer(ip) :: l
+        integer(ip) :: l1
+        integer(ip) :: l2
+        integer(ip) :: lat
+        integer(ip) :: late
+        integer(ip) :: lshsgc
+        integer(ip) :: lwork
+        integer(ip) :: mdab
+        integer(ip) :: mode
+        integer(ip) :: ndab
+        integer(ip) :: nlat
+        integer(ip) :: nlon
+        integer(ip) :: nt
+        real(wp) :: work
+        real(wp) :: wshsgc
         !     subroutine shsgc performs the spherical harmonic synthesis on
         !     a gaussian grid using the coefficients in array(s) a, b and returns
         !     the results in array(s) g.  the legendre polynomials are computed
@@ -392,49 +392,49 @@ contains
             ndab, w, wfft, late, pmn, g)
 
 
-            real (wp) :: a
-            real (wp) :: b
-            real (wp) :: g
-            real (wp) :: gs
-            integer (ip) :: i
-            integer (ip) :: idg
-            integer (ip) :: is
-            integer (ip) :: j
-            integer (ip) :: jdg
-            integer (ip) :: k
-            integer (ip) :: km
-            integer (ip) :: l
-            integer (ip) :: lat
-            integer (ip) :: late
-            integer (ip) :: lm1
-            integer (ip) :: lp1
-            integer (ip) :: m
-            integer (ip) :: mdab
-            integer (ip) :: meo
-            integer (ip) :: mode
-            integer (ip) :: mp1
-            integer (ip) :: mp2
-            integer (ip) :: ms
-            integer (ip) :: ndab
-            integer (ip) :: nl2
-            integer (ip) :: nlat
-            integer (ip) :: nlon
-            integer (ip) :: np1
-            integer (ip) :: ns
-            integer (ip) :: nt
-            real (wp) :: pmn
-            real (wp) :: t1
-            real (wp) :: t2
-            real (wp) :: t3
-            real (wp) :: t4
-            real (wp) :: w
-            real (wp) :: wfft
+            real(wp) :: a
+            real(wp) :: b
+            real(wp) :: g
+            real(wp) :: gs
+            integer(ip) :: i
+            integer(ip) :: idg
+            integer(ip) :: is
+            integer(ip) :: j
+            integer(ip) :: jdg
+            integer(ip) :: k
+            integer(ip) :: km
+            integer(ip) :: l
+            integer(ip) :: lat
+            integer(ip) :: late
+            integer(ip) :: lm1
+            integer(ip) :: lp1
+            integer(ip) :: m
+            integer(ip) :: mdab
+            integer(ip) :: meo
+            integer(ip) :: mode
+            integer(ip) :: mp1
+            integer(ip) :: mp2
+            integer(ip) :: ms
+            integer(ip) :: ndab
+            integer(ip) :: nl2
+            integer(ip) :: nlat
+            integer(ip) :: nlon
+            integer(ip) :: np1
+            integer(ip) :: ns
+            integer(ip) :: nt
+            real(wp) :: pmn
+            real(wp) :: t1
+            real(wp) :: t2
+            real(wp) :: t3
+            real(wp) :: t4
+            real(wp) :: w
+            real(wp) :: wfft
             dimension gs(idg, jdg, nt), a(mdab, ndab, nt), b(mdab, ndab, nt)
             dimension w(*), pmn(nlat, late, 3), g(lat, nlon, nt), wfft(*)
 
 
-            type (HFFTpack)      :: hfft
-            type (SpherepackAux) :: sphere_aux
+            type(HFFTpack)      :: hfft
+            type(SpherepackAux) :: sphere_aux
 
             !     reconstruct fourier coefficients in g on gaussian grid
             !     using coefficients in a, b
@@ -606,27 +606,27 @@ contains
 
     subroutine shsgci(nlat, nlon, wshsgc, lshsgc, dwork, ldwork, ierror)
 
-        integer (ip) :: i1
-        integer (ip) :: i2
-        integer (ip) :: i3
-        integer (ip) :: i4
-        integer (ip) :: i5
-        integer (ip) :: i6
-        integer (ip) :: i7
-        integer (ip) :: idth
-        integer (ip) :: idwts
-        integer (ip) :: ierror
-        integer (ip) :: iw
-        integer (ip) :: l
-        integer (ip) :: l1
-        integer (ip) :: l2
-        integer (ip) :: late
-        integer (ip) :: ldwork
-        integer (ip) :: lshsgc
-        integer (ip) :: nlat
-        integer (ip) :: nlon
-        real (wp) :: wshsgc(lshsgc)
-        real (wp) :: dwork(ldwork)
+        integer(ip) :: i1
+        integer(ip) :: i2
+        integer(ip) :: i3
+        integer(ip) :: i4
+        integer(ip) :: i5
+        integer(ip) :: i6
+        integer(ip) :: i7
+        integer(ip) :: idth
+        integer(ip) :: idwts
+        integer(ip) :: ierror
+        integer(ip) :: iw
+        integer(ip) :: l
+        integer(ip) :: l1
+        integer(ip) :: l2
+        integer(ip) :: late
+        integer(ip) :: ldwork
+        integer(ip) :: lshsgc
+        integer(ip) :: nlat
+        integer(ip) :: nlon
+        real(wp) :: wshsgc(lshsgc)
+        real(wp) :: dwork(ldwork)
 
         !     this subroutine must be called before calling shsgc with
         !     fixed nlat, nlon. it precomputes quantites such as the gaussian
@@ -673,34 +673,34 @@ contains
             wfft, dtheta, dwts, work, ier)
 
 
-            real (wp) :: abel
-            real (wp) :: bbel
-            real (wp) :: cbel
-            integer (ip) :: i
-            integer (ip) :: ier
-            integer (ip) :: imn
-            integer (ip) :: imndx
-            integer (ip) :: indx
-            integer (ip) :: l
-            integer (ip) :: late
-            integer (ip) :: lw
-            integer (ip) :: m
-            integer (ip) :: mlim
-            integer (ip) :: n
-            integer (ip) :: nlat
-            integer (ip) :: nlon
-            integer (ip) :: np1
-            real (wp) :: p0n
-            real (wp) :: p1n
-            real (wp) :: wfft
-            real (wp) :: wts
+            real(wp) :: abel
+            real(wp) :: bbel
+            real(wp) :: cbel
+            integer(ip) :: i
+            integer(ip) :: ier
+            integer(ip) :: imn
+            integer(ip) :: imndx
+            integer(ip) :: indx
+            integer(ip) :: l
+            integer(ip) :: late
+            integer(ip) :: lw
+            integer(ip) :: m
+            integer(ip) :: mlim
+            integer(ip) :: n
+            integer(ip) :: nlat
+            integer(ip) :: nlon
+            integer(ip) :: np1
+            real(wp) :: p0n
+            real(wp) :: p1n
+            real(wp) :: wfft
+            real(wp) :: wts
             dimension wts(nlat), p0n(nlat, late), p1n(nlat, late), abel(*), bbel(*), &
                 cbel(*), wfft(*)
-            real (wp) :: pb, dtheta(nlat), dwts(nlat), work(*)
-            real (wp) :: dummy_variable
+            real(wp) :: pb, dtheta(nlat), dwts(nlat), work(*)
+            real(wp) :: dummy_variable
 
-            type (HFFTpack)      :: hfft
-            type (SpherepackAux) :: sphere_aux
+            type(HFFTpack)      :: hfft
+            type(SpherepackAux) :: sphere_aux
 
             !     compute the nlat  gaussian points and weights, the
             !     m=0, 1 legendre polys for gaussian points and all n,

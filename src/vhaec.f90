@@ -340,40 +340,40 @@ contains
 subroutine vhaec(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
            mdab, ndab, wvhaec, lvhaec, work, lwork, ierror)
 implicit none
-real (wp) :: bi
-real (wp) :: br
-real (wp) :: ci
-real (wp) :: cr
-integer (ip) :: idv
-integer (ip) :: idvw
-integer (ip) :: ierror
-integer (ip) :: imid
-integer (ip) :: ist
-integer (ip) :: ityp
-integer (ip) :: iw1
-integer (ip) :: iw2
-integer (ip) :: iw3
-integer (ip) :: iw4
-integer (ip) :: iw5
-integer (ip) :: jdvw
-integer (ip) :: jw1
-integer (ip) :: jw2
-integer (ip) :: labc
-integer (ip) :: lnl
-integer (ip) :: lvhaec
-integer (ip) :: lwork
-integer (ip) :: lwzvin
-integer (ip) :: lzz1
-integer (ip) :: mdab
-integer (ip) :: mmax
-integer (ip) :: ndab
-integer (ip) :: nlat
-integer (ip) :: nlon
-integer (ip) :: nt
-real (wp) :: v
-real (wp) :: w
-real (wp) :: work
-real (wp) :: wvhaec
+real(wp) :: bi
+real(wp) :: br
+real(wp) :: ci
+real(wp) :: cr
+integer(ip) :: idv
+integer(ip) :: idvw
+integer(ip) :: ierror
+integer(ip) :: imid
+integer(ip) :: ist
+integer(ip) :: ityp
+integer(ip) :: iw1
+integer(ip) :: iw2
+integer(ip) :: iw3
+integer(ip) :: iw4
+integer(ip) :: iw5
+integer(ip) :: jdvw
+integer(ip) :: jw1
+integer(ip) :: jw2
+integer(ip) :: labc
+integer(ip) :: lnl
+integer(ip) :: lvhaec
+integer(ip) :: lwork
+integer(ip) :: lwzvin
+integer(ip) :: lzz1
+integer(ip) :: mdab
+integer(ip) :: mmax
+integer(ip) :: ndab
+integer(ip) :: nlat
+integer(ip) :: nlon
+integer(ip) :: nt
+real(wp) :: v
+real(wp) :: w
+real(wp) :: work
+real(wp) :: wvhaec
 dimension v(idvw, jdvw, nt), w(idvw, jdvw, nt), br(mdab, ndab, nt), &
           bi(mdab, ndab, nt), cr(mdab, ndab, nt), ci(mdab, ndab, nt), &
           work(lwork), wvhaec(lvhaec)
@@ -429,58 +429,58 @@ contains
 subroutine vhaec1(nlat, nlon, ityp, nt, imid, idvw, jdvw, v, w, mdab, &
    ndab, br, bi, cr, ci, idv, ve, vo, we, wo, zv, zw, wzvin, wzwin, wrfft)
 
-real (wp) :: bi
-real (wp) :: br
-real (wp) :: ci
-real (wp) :: cr
-real (wp) :: fsn
-integer (ip) :: i
-integer (ip) :: idv
-integer (ip) :: idvw
-integer (ip) :: imid
-integer (ip) :: imm1
-integer (ip) :: ityp
+real(wp) :: bi
+real(wp) :: br
+real(wp) :: ci
+real(wp) :: cr
+real(wp) :: fsn
+integer(ip) :: i
+integer(ip) :: idv
+integer(ip) :: idvw
+integer(ip) :: imid
+integer(ip) :: imm1
+integer(ip) :: ityp
 
-integer (ip) :: iv
-integer (ip) :: iw
-integer (ip) :: j
-integer (ip) :: jdvw
-integer (ip) :: k
-integer (ip) :: m
-integer (ip) :: mdab
-integer (ip) :: mlat
-integer (ip) :: mlon
-integer (ip) :: mmax
-integer (ip) :: mp1
-integer (ip) :: mp2
-integer (ip) :: ndab
-integer (ip) :: ndo1
-integer (ip) :: ndo2
-integer (ip) :: nlat
-integer (ip) :: nlon
-integer (ip) :: nlp1
-integer (ip) :: np1
-integer (ip) :: nt
-real (wp) :: tsn
-real (wp) :: v
-real (wp) :: ve
-real (wp) :: vo
-real (wp) :: w
-real (wp) :: we
-real (wp) :: wo
-real (wp) :: wrfft
-real (wp) :: wzvin
-real (wp) :: wzwin
-real (wp) :: zv
-real (wp) :: zw
+integer(ip) :: iv
+integer(ip) :: iw
+integer(ip) :: j
+integer(ip) :: jdvw
+integer(ip) :: k
+integer(ip) :: m
+integer(ip) :: mdab
+integer(ip) :: mlat
+integer(ip) :: mlon
+integer(ip) :: mmax
+integer(ip) :: mp1
+integer(ip) :: mp2
+integer(ip) :: ndab
+integer(ip) :: ndo1
+integer(ip) :: ndo2
+integer(ip) :: nlat
+integer(ip) :: nlon
+integer(ip) :: nlp1
+integer(ip) :: np1
+integer(ip) :: nt
+real(wp) :: tsn
+real(wp) :: v
+real(wp) :: ve
+real(wp) :: vo
+real(wp) :: w
+real(wp) :: we
+real(wp) :: wo
+real(wp) :: wrfft
+real(wp) :: wzvin
+real(wp) :: wzwin
+real(wp) :: zv
+real(wp) :: zw
 dimension v(idvw, jdvw, *), w(idvw, jdvw, *), br(mdab, ndab, *), &
           bi(mdab, ndab, *), cr(mdab, ndab, *), ci(mdab, ndab, *), &
           ve(idv, nlon, *), vo(idv, nlon, *), we(idv, nlon, *), &
           wo(idv, nlon, *), wzvin(*), wzwin(*), wrfft(*), &
           zv(imid, nlat, 3), zw(imid, nlat, 3)
 
-type (HFFTpack)      :: hfft
-type (SpherepackAux) :: sphere_aux
+type(HFFTpack)      :: hfft
+type(SpherepackAux) :: sphere_aux
 
 nlp1 = nlat+1
 tsn = 2.0_wp/nlon
@@ -1025,23 +1025,23 @@ end subroutine vhaec
 
 subroutine vhaeci(nlat, nlon, wvhaec, lvhaec, dwork, ldwork, ierror)
 
-integer (ip) :: ierror
-integer (ip) :: imid
-integer (ip) :: iw1
-integer (ip) :: iw2
-integer (ip) :: labc
-integer (ip) :: ldwork
-integer (ip) :: lvhaec
-integer (ip) :: lwzvin
-integer (ip) :: lzz1
-integer (ip) :: mmax
-integer (ip) :: nlat
-integer (ip) :: nlon
-real (wp) :: wvhaec(lvhaec)
-real (wp) :: dwork(ldwork)
+integer(ip) :: ierror
+integer(ip) :: imid
+integer(ip) :: iw1
+integer(ip) :: iw2
+integer(ip) :: labc
+integer(ip) :: ldwork
+integer(ip) :: lvhaec
+integer(ip) :: lwzvin
+integer(ip) :: lzz1
+integer(ip) :: mmax
+integer(ip) :: nlat
+integer(ip) :: nlon
+real(wp) :: wvhaec(lvhaec)
+real(wp) :: dwork(ldwork)
 
-type (HFFTpack)      :: hfft
-type (SpherepackAux) :: sphere_aux
+type(HFFTpack)      :: hfft
+type(SpherepackAux) :: sphere_aux
 
 imid = (nlat+1)/2
 lzz1 = 2*nlat*imid

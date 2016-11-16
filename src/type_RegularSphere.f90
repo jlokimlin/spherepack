@@ -57,63 +57,56 @@ module type_RegularSphere
         !----------------------------------------------------------------------
     end type RegularSphere
 
-
     ! Declare constructor
     interface RegularSphere
         module procedure regular_sphere_constructor
     end interface
 
-
-
 contains
-
-
 
     function regular_sphere_constructor(nlat, nlon) result (return_value)
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        integer (ip), intent (in) :: nlat !! number of latitudinal points 0 <= theta <= pi
-        integer (ip), intent (in) :: nlon !! number of longitudinal points 0 <= phi <= 2*pi
-        type (RegularSphere)      :: return_value
+        integer(ip), intent(in) :: nlat !! number of latitudinal points 0 <= theta <= pi
+        integer(ip), intent(in) :: nlon !! number of longitudinal points 0 <= phi <= 2*pi
+        type(RegularSphere)      :: return_value
         !----------------------------------------------------------------------
 
         call return_value%create(nlat, nlon)
 
     end function regular_sphere_constructor
 
-
-
-    subroutine create_regular_sphere(this, nlat, nlon, ntrunc, isym, itype, nt, rsphere)
+    subroutine create_regular_sphere(self, nlat, nlon, ntrunc, isym, itype, nt, rsphere)
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        class (RegularSphere), intent (in out)        :: this
-        integer (ip),          intent (in)            :: nlat
-        integer (ip),          intent (in)            :: nlon
-        integer (ip),          intent (in), optional  :: ntrunc
-        integer (ip),          intent (in), optional  :: isym  !! Either 0, 1, or 2
-        integer (ip),          intent (in), optional  :: itype !! Either 0, 1, 2, 3, ..., 8
-        integer (ip),          intent (in), optional  :: nt !!
-        real (wp),             intent (in), optional  :: rsphere !!
+        class(RegularSphere), intent(inout)         :: self
+        integer(ip),          intent(in)            :: nlat
+        integer(ip),          intent(in)            :: nlon
+        integer(ip),          intent(in), optional  :: ntrunc
+        integer(ip),          intent(in), optional  :: isym  !! Either 0, 1, or 2
+        integer(ip),          intent(in), optional  :: itype !! Either 0, 1, 2, 3, ..., 8
+        integer(ip),          intent(in), optional  :: nt !!
+        real(wp),             intent(in), optional  :: rsphere !!
         !--------------------------------------------------------------------------------
         ! Local variables
         !----------------------------------------------------------------------
-        integer (ip) :: ntrunc_op
-        integer (ip) :: isym_op
-        integer (ip) :: ityp_op
-        integer (ip) :: nt_op
-        real (wp)    :: rsphere_op
+        integer(ip) :: ntrunc_op
+        integer(ip) :: isym_op
+        integer(ip) :: ityp_op
+        integer(ip) :: nt_op
+        real(wp)    :: rsphere_op
         !----------------------------------------------------------------------
 
         ! Ensure that object is usable
-        call this%destroy()
+        call self%destroy()
 
         !
         !==> Allocate polymorphic components
         !
-        allocate( this%grid, source=RegularGrid(nlat, nlon) )
-        allocate( this%workspace, source=RegularWorkspace(nlat,nlon) )
+        allocate( self%grid, source=RegularGrid(nlat, nlon) )
+        allocate( self%workspace, source=RegularWorkspace(nlat,nlon) )
 
         !
         !==> Address optional arguments
@@ -157,71 +150,67 @@ contains
         !
         !==> Create parent type
         !
-        call this%create_sphere(nlat, nlon, ntrunc_op, isym_op, ityp_op, nt_op, rsphere_op)
+        call self%create_sphere(nlat, nlon, ntrunc_op, isym_op, ityp_op, nt_op, rsphere_op)
 
         ! Set flag
-        this%initialized = .true.
+        self%initialized = .true.
         
     end subroutine create_regular_sphere
 
-
-
-    subroutine destroy_regular_sphere(this)
+    subroutine destroy_regular_sphere(self)
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        class (RegularSphere), intent (in out) :: this
+        class(RegularSphere), intent(inout)  :: self
         !----------------------------------------------------------------------
 
         ! Check flag
-        if (.not.this%initialized) return
+        if (.not.self%initialized) return
 
         ! Release memory from parent type
-        call this%destroy_sphere()
+        call self%destroy_sphere()
 
         ! Reset initialization flag
-        this%initialized = .false.
+        self%initialized = .false.
 
     end subroutine destroy_regular_sphere
 
-
-
-    subroutine regular_scalar_analysis(this, scalar_function)
+    subroutine regular_scalar_analysis(self, scalar_function)
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        class (RegularSphere), intent (in out) :: this
-        real (wp),             intent (in)     :: scalar_function(:,:)
+        class(RegularSphere), intent(inout)  :: self
+        real(wp),             intent(in)     :: scalar_function(:,:)
         !----------------------------------------------------------------------
         ! Local variables
         !----------------------------------------------------------------------
-        integer (ip)    :: error_flag
-        type (ShaesAux) :: aux
+        integer(ip)    :: error_flag
+        type(ShaesAux) :: aux
         !----------------------------------------------------------------------
 
         ! Check if object is usable
-        if (.not.this%initialized) then
-            error stop 'Uninitialized object of class (RegularSphere): '&
+        if (.not.self%initialized) then
+            error stop 'Uninitialized object of class(RegularSphere): '&
                 //' in regular_scalar_analysis'
         end if
 
-        select type (this)
+        select type(self)
             class is (RegularSphere)
-            associate( workspace => this%workspace )
-                select type (workspace)
+            associate( workspace => self%workspace )
+                select type(workspace)
                     class is (RegularWorkspace)
                     associate( &
-                        nlat => this%NUMBER_OF_LATITUDES, &
-                        nlon => this%NUMBER_OF_LONGITUDES, &
-                        isym => this%SCALAR_SYMMETRIES, &
-                        nt => this%NUMBER_OF_SYNTHESES, &
+                        nlat => self%NUMBER_OF_LATITUDES, &
+                        nlon => self%NUMBER_OF_LONGITUDES, &
+                        isym => self%SCALAR_SYMMETRIES, &
+                        nt => self%NUMBER_OF_SYNTHESES, &
                         g => scalar_function, &
-                        idg => this%NUMBER_OF_LATITUDES, &
-                        jdg => this%NUMBER_OF_LONGITUDES, &
+                        idg => self%NUMBER_OF_LATITUDES, &
+                        jdg => self%NUMBER_OF_LONGITUDES, &
                         a => workspace%real_harmonic_coefficients, &
                         b => workspace%imaginary_harmonic_coefficients, &
-                        mdab => this%NUMBER_OF_LATITUDES, &
-                        ndab => this%NUMBER_OF_LATITUDES, &
+                        mdab => self%NUMBER_OF_LATITUDES, &
+                        ndab => self%NUMBER_OF_LATITUDES, &
                         wshaes => workspace%forward_scalar, &
                         lshaes => size(workspace%forward_scalar), &
                         work => workspace%legendre_workspace, &
@@ -246,59 +235,57 @@ contains
             case (0)
                 return
             case (1)
-                error stop 'type (RegularSphere) in regular_scalar_analysis'&
+                error stop 'type(RegularSphere) in regular_scalar_analysis'&
                     // ' invalid specification of NUMBER_OF_LATITUDES'
             case (2)
-                error stop 'type (RegularSphere) in regular_scalar_analysis'&
+                error stop 'type(RegularSphere) in regular_scalar_analysis'&
                     //' invalid specification of NUMBER_OF_LONGITUDES'
             case (3)
-                error stop 'type (RegularSphere) in regular_scalar_analysis'&
+                error stop 'type(RegularSphere) in regular_scalar_analysis'&
                     //' invalid extent for scalar_forward'
             case (4)
-                error stop 'type (RegularSphere) in regular_scalar_analysis'&
+                error stop 'type(RegularSphere) in regular_scalar_analysis'&
                     //' invalid extent for legendre_workspace'
             case (5)
-                error stop 'type (RegularSphere) in regular_scalar_analysis'&
+                error stop 'type(RegularSphere) in regular_scalar_analysis'&
                     //' invalid extent for dwork'
             case default
-                error stop 'type (RegularSphere) in regular_scalar_analysis'&
+                error stop 'type(RegularSphere) in regular_scalar_analysis'&
                     // 'Undetermined error flag'
         end select
 
     end subroutine regular_scalar_analysis
-    
 
-
-    subroutine regular_scalar_synthesis(this, scalar_function )
+    subroutine regular_scalar_synthesis(self, scalar_function )
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        class (RegularSphere), intent (in out) :: this
-        real (wp),             intent (out)    :: scalar_function(:,:)
+        class(RegularSphere), intent(inout)  :: self
+        real(wp),             intent(out)    :: scalar_function(:,:)
         !----------------------------------------------------------------------
         ! Local variables
         !----------------------------------------------------------------------
-        integer (ip)    :: error_flag
-        type (ShsesAux) :: aux
+        integer(ip)    :: error_flag
+        type(ShsesAux) :: aux
         !----------------------------------------------------------------------
 
         ! Check if object is usable
-        if (.not.this%initialized) then
-            error stop 'Uninitialized object of class (RegularSphere): '&
+        if (.not.self%initialized) then
+            error stop 'Uninitialized object of class(RegularSphere): '&
                 //' in regular_scalar_synthesis'
         end if
 
 
-        select type (this)
+        select type(self)
             class is (RegularSphere)
-            associate( workspace => this%workspace )
-                select type (workspace)
+            associate( workspace => self%workspace )
+                select type(workspace)
                     class is (RegularWorkspace)
                     associate( &
-                        nlat => this%NUMBER_OF_LATITUDES, &
-                        nlon => this%NUMBER_OF_LONGITUDES, &
-                        isym => this%SCALAR_SYMMETRIES, &
-                        nt => this%NUMBER_OF_SYNTHESES, &
+                        nlat => self%NUMBER_OF_LATITUDES, &
+                        nlon => self%NUMBER_OF_LONGITUDES, &
+                        isym => self%SCALAR_SYMMETRIES, &
+                        nt => self%NUMBER_OF_SYNTHESES, &
                         g => scalar_function, &
                         idg => size(scalar_function, dim=1), &
                         jdg => size(scalar_function, dim=2), &
@@ -330,22 +317,22 @@ contains
             case (0)
                 return
             case (1)
-                error stop 'type (RegularSphere) in regular_scalar_synthesis '&
+                error stop 'type(RegularSphere) in regular_scalar_synthesis '&
                     // ' invalid specification of NUMBER_OF_LATITUDES'
             case (2)
-                error stop 'type (RegularSphere) in regular_scalar_synthesis '&
+                error stop 'type(RegularSphere) in regular_scalar_synthesis '&
                     //' invalid specification of NUMBER_OF_LONGITUDES'
             case (3)
-                error stop 'type (RegularSphere) in regular_scalar_synthesis '&
+                error stop 'type(RegularSphere) in regular_scalar_synthesis '&
                     //' invalid extent for scalar_forward'
             case (4)
-                error stop 'type (RegularSphere) in regular_scalar_synthesis '&
+                error stop 'type(RegularSphere) in regular_scalar_synthesis '&
                     //' invalid extent for legendre_workspace'
             case (5)
-                error stop 'type (RegularSphere) in regular_scalar_synthesis '&
+                error stop 'type(RegularSphere) in regular_scalar_synthesis '&
                     //' invalid extent for dwork'
             case default
-                error stop 'type (RegularSphere) in regular_scalar_synthesis '&
+                error stop 'type(RegularSphere) in regular_scalar_synthesis '&
                     // 'Undetermined error flag'
         end select
 
@@ -353,36 +340,36 @@ contains
 
 
 
-    subroutine regular_vector_analysis(this, polar_component, azimuthal_component)
+    subroutine regular_vector_analysis(self, polar_component, azimuthal_component)
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        class (RegularSphere), intent (in out) :: this
-        real (wp),             intent (in)     :: polar_component(:,:)
-        real (wp),             intent (in)     :: azimuthal_component(:,:)
+        class(RegularSphere), intent(inout)  :: self
+        real(wp),             intent(in)     :: polar_component(:,:)
+        real(wp),             intent(in)     :: azimuthal_component(:,:)
         !----------------------------------------------------------------------
         ! Local variables
         !----------------------------------------------------------------------
-        integer (ip)    :: error_flag
-        type (VhaesAux) :: aux
+        integer(ip)    :: error_flag
+        type(VhaesAux) :: aux
         !----------------------------------------------------------------------
 
         ! Check if object is usable
-        if (.not.this%initialized) then
-            error stop 'Uninitialized object of class (RegularSphere): '&
+        if (.not.self%initialized) then
+            error stop 'Uninitialized object of class(RegularSphere): '&
                 //' in regular_vector_analysis'
         end if
 
-        select type (this)
+        select type(self)
             class is (RegularSphere)
-            associate( workspace => this%workspace )
-                select type (workspace)
+            associate( workspace => self%workspace )
+                select type(workspace)
                     class is (RegularWorkspace)
                     associate( &
-                        nlat => this%NUMBER_OF_LATITUDES, &
-                        nlon => this%NUMBER_OF_LONGITUDES, &
-                        ityp => this%VECTOR_SYMMETRIES, &
-                        nt => this%NUMBER_OF_SYNTHESES, &
+                        nlat => self%NUMBER_OF_LATITUDES, &
+                        nlon => self%NUMBER_OF_LONGITUDES, &
+                        ityp => self%VECTOR_SYMMETRIES, &
+                        nt => self%NUMBER_OF_SYNTHESES, &
                         v => polar_component, &
                         w => azimuthal_component, &
                         idvw => size(polar_component, dim=1), &
@@ -417,39 +404,39 @@ contains
             case (0)
                 return
             case (1)
-                error stop 'type (RegularSphere) in regular_vector_analysis'&
+                error stop 'type(RegularSphere) in regular_vector_analysis'&
                     //' invalid specification of NUMBER_OF_LATITUDES'
             case (2)
-                error stop 'type (RegularSphere) in regular_vector_analysis'&
+                error stop 'type(RegularSphere) in regular_vector_analysis'&
                     //' invalid specification of NUMBER_OF_LONGITUDES'
             case (3)
-                error stop 'type (RegularSphere) in regular_vector_analysis'&
+                error stop 'type(RegularSphere) in regular_vector_analysis'&
                     //' invalid specification of VECTOR_SYMMETRIES'
             case (4)
-                error stop 'type (RegularSphere) in regular_vector_analysis'&
+                error stop 'type(RegularSphere) in regular_vector_analysis'&
                     //' invalid specification of NUMBER_OF_SYNTHESES'
             case (5)
-                error stop 'type (RegularSphere) in regular_vector_analysis'&
+                error stop 'type(RegularSphere) in regular_vector_analysis'&
                     //' invalid dim=1 extent for '&
                     //' polar_component (theta) or azimuthal_component (phi)'
             case (6)
-                error stop 'type (RegularSphere) in regular_vector_analysis'&
+                error stop 'type(RegularSphere) in regular_vector_analysis'&
                     //' invalid dim=2 extent '&
                     //'polar_component (theta) or azimuthal_component (phi)'
             case (7)
-                error stop 'type (RegularSphere) in regular_vector_analysis'&
+                error stop 'type(RegularSphere) in regular_vector_analysis'&
                     //' invalid dim=1 extent for br or cr'
             case (8)
-                error stop 'type (RegularSphere) in regular_vector_analysis'&
+                error stop 'type(RegularSphere) in regular_vector_analysis'&
                     //' invalid dim=1 extent for bi or ci'
             case (9)
-                error stop 'type (RegularSphere) in regular_vector_analysis'&
+                error stop 'type(RegularSphere) in regular_vector_analysis'&
                     //' invalid extent for forward_vector'
             case (10)
-                error stop 'type (RegularSphere) in regular_vector_analysis'&
+                error stop 'type(RegularSphere) in regular_vector_analysis'&
                     //' invalid extent for legendre_workspace'
             case default
-                error stop 'type (RegularSphere) in regular_vector_analysis'&
+                error stop 'type(RegularSphere) in regular_vector_analysis'&
                     //' undetermined error'
         end select
 
@@ -457,36 +444,36 @@ contains
 
 
 
-    subroutine regular_vector_synthesis(this, polar_component, azimuthal_component)
+    subroutine regular_vector_synthesis(self, polar_component, azimuthal_component)
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        class (RegularSphere), intent (in out) :: this
-        real (wp),             intent (out)    :: polar_component(:,:)
-        real (wp),             intent (out)    :: azimuthal_component(:,:)
+        class(RegularSphere), intent(inout)  :: self
+        real(wp),             intent(out)    :: polar_component(:,:)
+        real(wp),             intent(out)    :: azimuthal_component(:,:)
         !----------------------------------------------------------------------
         ! Local variables
         !----------------------------------------------------------------------
-        integer (ip)    :: error_flag
-        type (VhsesAux) :: aux
+        integer(ip)     :: error_flag
+        type(VhsesAux) :: aux
         !----------------------------------------------------------------------
 
         ! Check if object is usable
-        if (.not.this%initialized) then
-            error stop 'Uninitialized object of class (RegularSphere): '&
+        if (.not.self%initialized) then
+            error stop 'Uninitialized object of class(RegularSphere): '&
                 //' in regular_vector_synthesis'
         end if
 
-        select type (this)
+        select type(self)
             class is (RegularSphere)
-            associate( workspace => this%workspace )
-                select type (workspace)
+            associate( workspace => self%workspace )
+                select type(workspace)
                     class is (RegularWorkspace)
                     associate( &
-                        nlat => this%NUMBER_OF_LATITUDES, &
-                        nlon => this%NUMBER_OF_LONGITUDES, &
-                        ityp => this%VECTOR_SYMMETRIES, &
-                        nt => this%NUMBER_OF_SYNTHESES, &
+                        nlat => self%NUMBER_OF_LATITUDES, &
+                        nlon => self%NUMBER_OF_LONGITUDES, &
+                        ityp => self%VECTOR_SYMMETRIES, &
+                        nt => self%NUMBER_OF_SYNTHESES, &
                         v => polar_component, &
                         w => azimuthal_component, &
                         idvw => size(polar_component, dim=1),  &
@@ -521,57 +508,53 @@ contains
             case (0)
                 return
             case (1)
-                error stop 'type (RegularSphere) in regular_vector_synthesis'&
+                error stop 'type(RegularSphere) in regular_vector_synthesis'&
                     //' invalid specification of NUMBER_OF_LATITUDES'
             case (2)
-                error stop 'type (RegularSphere) in regular_vector_synthesis'&
+                error stop 'type(RegularSphere) in regular_vector_synthesis'&
                     //' invalid specification of NUMBER_OF_LONGITUDES'
             case (3)
-                error stop 'type (RegularSphere) in regular_vector_synthesis'&
+                error stop 'type(RegularSphere) in regular_vector_synthesis'&
                     //' invalid specification of VECTOR_SYMMETRIES'
             case (4)
-                error stop 'type (RegularSphere) in regular_vector_synthesis'&
+                error stop 'type(RegularSphere) in regular_vector_synthesis'&
                     //' invalid specification of NUMBER_OF_SYNTHESES'
             case (5)
-                error stop 'type (RegularSphere) in regular_vector_synthesis'&
+                error stop 'type(RegularSphere) in regular_vector_synthesis'&
                     //' invalid dim=1 extent for '&
                     //' polar_component (theta) or azimuthal_component (phi)'
             case (6)
-                error stop 'type (RegularSphere) in regular_vector_synthesis'&
+                error stop 'type(RegularSphere) in regular_vector_synthesis'&
                     //' invalid dim=2 extent '&
                     //' polar_component (theta) or azimuthal_component (phi)'
             case (7)
-                error stop 'type (RegularSphere) in regular_vector_synthesis'&
+                error stop 'type(RegularSphere) in regular_vector_synthesis'&
                     //' invalid dim=1 extent for br or cr'
             case (8)
-                error stop 'type (regularsphere) in regular_vector_synthesis'&
+                error stop 'type(regularsphere) in regular_vector_synthesis'&
                     //' invalid dim=1 extent for bi or ci'
             case (9)
-                error stop 'type (RegularSphere) in regular_vector_synthesis'&
+                error stop 'type(RegularSphere) in regular_vector_synthesis'&
                     //' invalid extent for backward_vector'
             case (10)
-                error stop 'type (RegularSphere) in regular_vector_synthesis'&
+                error stop 'type(RegularSphere) in regular_vector_synthesis'&
                     //' invalid extent for legendre_workspace'
             case default
-                error stop 'type (RegularSphere) in regular_vector_synthesis'&
+                error stop 'type(RegularSphere) in regular_vector_synthesis'&
                     //' undetermined error'
         end select
 
     end subroutine regular_vector_synthesis
 
-
-
-    subroutine finalize_regular_sphere(this)
+    subroutine finalize_regular_sphere(self)
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        type (RegularSphere), intent (in out) :: this
+        type(RegularSphere), intent(inout)  :: self
         !----------------------------------------------------------------------
 
-        call this%destroy()
+        call self%destroy()
 
     end subroutine finalize_regular_sphere
-
-
 
 end module type_RegularSphere

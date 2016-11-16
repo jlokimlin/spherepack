@@ -11,9 +11,6 @@ module type_ShallowWaterSolver
 
     ! Declare derived data type
     type, extends (RegularSphere) :: ShallowWaterSolver
-        !--------------------------------------------------------------
-        ! Type components
-        !--------------------------------------------------------------
     contains
         !--------------------------------------------------------------
         ! Type-bound procedures
@@ -29,26 +26,23 @@ module type_ShallowWaterSolver
         !--------------------------------------------------------------
     end type ShallowWaterSolver
 
-
-
 contains
-
 
     pure function get_initial_velocity(amp, thetad) result (return_value)
         !
-        !     computes the initial unrotated longitudinal velocity
+        !     Computes the initial unrotated longitudinal velocity
         !     see section 3.3
         !
         !------------------------------------------------------
         ! Dummy arguments
         !------------------------------------------------------
-        real (wp), intent (in) :: amp
-        real (wp), intent (in) :: thetad
-        real (wp)              :: return_value
+        real(wp), intent(in) :: amp
+        real(wp), intent(in) :: thetad
+        real(wp)              :: return_value
         !------------------------------------------------------
         ! Local variables
         !------------------------------------------------------
-        real (wp)            :: thetab, thetae, xe, x
+        real(wp)            :: thetab, thetae, xe, x
         !------------------------------------------------------
 
         thetab = -PI/6
@@ -65,14 +59,12 @@ contains
 
     end function get_initial_velocity
 
-
-
     pure function atanxy(x,y) result (return_value)
         !--------------------------------------------------------------
         ! Dummy arguments
         !--------------------------------------------------------------
-        real (wp), intent (in) :: x
-        real (wp), intent (in) :: y
+        real(wp), intent(in) :: x
+        real(wp), intent(in) :: y
         real                   :: return_value
         !--------------------------------------------------------------
 
@@ -84,8 +76,6 @@ contains
 
     end function atanxy
 
-
-
     subroutine sine_transform(n, x)
         !
         ! Purpose:
@@ -95,14 +85,14 @@ contains
         !--------------------------------------------------------------
         ! Dummy arguments
         !--------------------------------------------------------------
-        integer (ip), intent (in)     :: n
-        real (wp),    intent (in out) :: x(n)
+        integer(ip), intent(in)     :: n
+        real(wp),    intent(inout)  :: x(n)
         !--------------------------------------------------------------
         ! Local variables
         !--------------------------------------------------------------
-        integer (ip)           :: i, j
-        real (wp)              :: arg
-        real (wp), allocatable :: w(:)
+        integer(ip)           :: i, j
+        real(wp)              :: arg
+        real(wp), allocatable :: w(:)
         !--------------------------------------------------------------
 
         arg = PI/(n+1)
@@ -124,8 +114,6 @@ contains
 
     end subroutine sine_transform
 
-
-
     pure function cosine_transform(theta, n, cf) result (return_value)
         !
         ! Purpose:
@@ -135,14 +123,14 @@ contains
         !--------------------------------------------------------------
         ! Dummy arguments
         !--------------------------------------------------------------
-        real (wp),    intent (in) :: theta
-        integer (ip), intent (in) :: n
-        real (wp),    intent (in) :: cf(n)
-        real (wp)                 :: return_value
+        real(wp),    intent(in) :: theta
+        integer(ip), intent(in) :: n
+        real(wp),    intent(in) :: cf(n)
+        real(wp)                 :: return_value
         !--------------------------------------------------------------
         ! Local variables
         !--------------------------------------------------------------
-        integer (ip) ::  i
+        integer(ip) ::  i
         !--------------------------------------------------------------
 
         return_value = 0.0_wp
@@ -153,9 +141,7 @@ contains
 
     end function cosine_transform
 
-
-
-    subroutine grid_to_spec(this, datagrid, dataspec)
+    subroutine grid_to_spec(self, datagrid, dataspec)
         !
         ! Purpose:
         !
@@ -165,14 +151,14 @@ contains
         !--------------------------------------------------------------
         ! Dummy arguments
         !--------------------------------------------------------------
-        class (ShallowWaterSolver), intent (in out) :: this
-        real (wp),                  intent (in)     :: datagrid(:,:)
-        complex (wp),               intent (out)    :: dataspec(:)
+        class(ShallowWaterSolver), intent(inout)  :: self
+        real(wp),                  intent(in)     :: datagrid(:,:)
+        complex(wp),               intent(out)    :: dataspec(:)
         !--------------------------------------------------------------
         ! Dummy arguments
         !--------------------------------------------------------------
-        integer (ip)           :: n, m
-        real (wp), allocatable :: temp(:,:)
+        integer(ip)           :: n, m
+        real(wp), allocatable :: temp(:,:)
         !--------------------------------------------------------------
 
         associate( &
@@ -194,12 +180,12 @@ contains
         !
         !==> spherical harmonic analysis
         !
-        call this%perform_scalar_analysis(temp)
+        call self%perform_scalar_analysis(temp)
 
         associate( &
-            ntrunc => this%TRIANGULAR_TRUNCATION_LIMIT, &
-            a => this%workspace%real_harmonic_coefficients, &
-            b => this%workspace%imaginary_harmonic_coefficients &
+            ntrunc => self%TRIANGULAR_TRUNCATION_LIMIT, &
+            a => self%workspace%real_harmonic_coefficients, &
+            b => self%workspace%imaginary_harmonic_coefficients &
             )
 
             !
@@ -222,9 +208,7 @@ contains
 
     end subroutine grid_to_spec
 
-
-
-    subroutine spec_to_grid(this, dataspec, datagrid)
+    subroutine spec_to_grid(self, dataspec, datagrid)
         !
         ! Purpose:
         !
@@ -234,14 +218,14 @@ contains
         !--------------------------------------------------------------
         ! Dummy arguments
         !--------------------------------------------------------------
-        class (ShallowWaterSolver), intent (in out) :: this
-        real (wp),                  intent (in out) :: datagrid(:,:)
-        complex (wp),               intent (in)     :: dataspec(:)
+        class(ShallowWaterSolver), intent(inout)  :: self
+        real(wp),                  intent(inout)  :: datagrid(:,:)
+        complex(wp),               intent(in)     :: dataspec(:)
         !--------------------------------------------------------------
         ! Local variables
         !--------------------------------------------------------------
-        integer (ip)           :: n, m, nm, i
-        real (wp), allocatable :: temp(:,:)
+        integer(ip)           :: n, m, nm, i
+        real(wp), allocatable :: temp(:,:)
         !--------------------------------------------------------------
 
         associate( &
@@ -260,9 +244,9 @@ contains
         !==> fill two real arrays (a, b) with contents of dataspec.
         !
         associate( &
-            ntrunc => this%TRIANGULAR_TRUNCATION_LIMIT, &
-            a => this%workspace%real_harmonic_coefficients, &
-            b => this%workspace%imaginary_harmonic_coefficients &
+            ntrunc => self%TRIANGULAR_TRUNCATION_LIMIT, &
+            a => self%workspace%real_harmonic_coefficients, &
+            b => self%workspace%imaginary_harmonic_coefficients &
             )
 
             a = 0.0_wp
@@ -278,7 +262,7 @@ contains
             !
             !==> Perform spherical harmonic synthesis
             !
-            call this%perform_scalar_synthesis(temp)
+            call self%perform_scalar_synthesis(temp)
 
             !
             !==> Reset coefficients
@@ -298,9 +282,7 @@ contains
 
     end subroutine spec_to_grid
 
-
-
-    subroutine get_vrtdivspec(this, ugrid, vgrid, vrtspec, divspec)
+    subroutine get_vrtdivspec(self, ugrid, vgrid, vrtspec, divspec)
         !
         ! Purpose:
         !
@@ -310,17 +292,17 @@ contains
         !--------------------------------------------------------------
         ! Dummy arguments
         !--------------------------------------------------------------
-        class (ShallowWaterSolver), intent (in out) :: this
-        real (wp),                  intent (in)     :: ugrid(:,:)
-        real (wp),                  intent (in)     :: vgrid(:,:)
-        complex (wp),               intent (out)    :: vrtspec(:)
-        complex (wp),               intent (out)    :: divspec(:)
+        class(ShallowWaterSolver), intent(inout)  :: self
+        real(wp),                  intent(in)     :: ugrid(:,:)
+        real(wp),                  intent(in)     :: vgrid(:,:)
+        complex(wp),               intent(out)    :: vrtspec(:)
+        complex(wp),               intent(out)    :: divspec(:)
         !--------------------------------------------------------------
         ! Local variables
         !--------------------------------------------------------------
-        real (wp)              :: fn
-        real (wp), allocatable :: v(:,:), w(:,:), sqnn(:)
-        integer (ip)           :: n, m !! Counters
+        real(wp)              :: fn
+        real(wp), allocatable :: v(:,:), w(:,:), sqnn(:)
+        integer(ip)           :: n, m !! Counters
         !--------------------------------------------------------------
 
         associate( &
@@ -347,7 +329,7 @@ contains
         !
         !==> Calculate vector spherical harmonic analysis.
         !
-        call this%vector_analysis_from_spherical_components(v, w)
+        call self%vector_analysis_from_spherical_components(v, w)
 
         !
         !==> Multiply vector harmonic coefficients of winds by
@@ -355,15 +337,15 @@ contains
         !    divergence coefficients.
         !
         associate( &
-            ntrunc => this%TRIANGULAR_TRUNCATION_LIMIT, &
-            nlat => this%NUMBER_OF_LATITUDES, &
-            rsphere => this%RADIUS_OF_SPHERE, &
-            a => this%workspace%real_harmonic_coefficients, &
-            b => this%workspace%imaginary_harmonic_coefficients, &
-            br => this%workspace%real_polar_harmonic_coefficients, &
-            bi => this%workspace%imaginary_polar_harmonic_coefficients, &
-            cr => this%workspace%real_azimuthal_harmonic_coefficients, &
-            ci => this%workspace%imaginary_azimuthal_harmonic_coefficients &
+            ntrunc => self%TRIANGULAR_TRUNCATION_LIMIT, &
+            nlat => self%NUMBER_OF_LATITUDES, &
+            rsphere => self%RADIUS_OF_SPHERE, &
+            a => self%workspace%real_harmonic_coefficients, &
+            b => self%workspace%imaginary_harmonic_coefficients, &
+            br => self%workspace%real_polar_harmonic_coefficients, &
+            bi => self%workspace%imaginary_polar_harmonic_coefficients, &
+            cr => self%workspace%real_azimuthal_harmonic_coefficients, &
+            ci => self%workspace%imaginary_azimuthal_harmonic_coefficients &
             )
 
             do n=1, nlat
@@ -415,9 +397,7 @@ contains
 
     end subroutine get_vrtdivspec
 
-
-
-    subroutine get_uv(this, vrtspec, divspec, ugrid, vgrid)
+    subroutine get_uv(self, vrtspec, divspec, ugrid, vgrid)
         !
         ! Purpose:
         !
@@ -427,17 +407,17 @@ contains
         !--------------------------------------------------------------
         ! Dummy arguments
         !--------------------------------------------------------------
-        class (ShallowWaterSolver), intent (in out) :: this
-        complex (wp),               intent (in)     :: vrtspec(:)
-        complex (wp),               intent (in)     :: divspec(:)
-        real (wp),                  intent (out)    :: ugrid(:,:)
-        real (wp),                  intent (out)    :: vgrid(:,:)
+        class(ShallowWaterSolver), intent(inout)  :: self
+        complex(wp),               intent(in)     :: vrtspec(:)
+        complex(wp),               intent(in)     :: divspec(:)
+        real(wp),                  intent(out)    :: ugrid(:,:)
+        real(wp),                  intent(out)    :: vgrid(:,:)
         !--------------------------------------------------------------
         ! Local variables
         !--------------------------------------------------------------
-        real (wp)              :: fn
-        real (wp), allocatable :: v(:,:), w(:,:), isqnn(:)
-        integer (ip)           :: n, m, nm, i !! Counters
+        real(wp)              :: fn
+        real(wp), allocatable :: v(:,:), w(:,:), isqnn(:)
+        integer(ip)           :: n, m, nm, i !! Counters
         !--------------------------------------------------------------
 
         associate( &
@@ -459,20 +439,20 @@ contains
         !    coefficients of winds.
         !
         associate( &
-            ntrunc => this%TRIANGULAR_TRUNCATION_LIMIT, &
-            nlat => this%NUMBER_OF_LATITUDES, &
-            rsphere => this%RADIUS_OF_SPHERE, &
-            a => this%workspace%real_harmonic_coefficients, &
-            b => this%workspace%imaginary_harmonic_coefficients, &
-            br => this%workspace%real_polar_harmonic_coefficients, &
-            bi => this%workspace%imaginary_polar_harmonic_coefficients, &
-            cr => this%workspace%real_azimuthal_harmonic_coefficients, &
-            ci => this%workspace%imaginary_azimuthal_harmonic_coefficients &
+            ntrunc => self%TRIANGULAR_TRUNCATION_LIMIT, &
+            nlat => self%NUMBER_OF_LATITUDES, &
+            rsphere => self%RADIUS_OF_SPHERE, &
+            a => self%workspace%real_harmonic_coefficients, &
+            b => self%workspace%imaginary_harmonic_coefficients, &
+            br => self%workspace%real_polar_harmonic_coefficients, &
+            bi => self%workspace%imaginary_polar_harmonic_coefficients, &
+            cr => self%workspace%real_azimuthal_harmonic_coefficients, &
+            ci => self%workspace%imaginary_azimuthal_harmonic_coefficients &
             )
 
             isqnn(1) = 0.0_wp
             do n=2, nlat
-                fn = real(n - 1, wp)
+                fn = real(n - 1, kind=wp)
                 isqnn(n) = rsphere/sqrt(fn*(fn+1.0_wp))
             end do
 
@@ -514,7 +494,7 @@ contains
             !
             !==> compute vector harmonic synthesis to get winds on grid.
             !
-            call this%perform_vector_synthesis(v, w)
+            call self%perform_vector_synthesis(v, w)
 
             !
             !==> Reset coefficients
@@ -543,7 +523,5 @@ contains
         deallocate( isqnn )
 
     end subroutine get_uv
-
-
 
 end module type_ShallowWaterSolver

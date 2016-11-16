@@ -252,37 +252,37 @@ contains
 
     subroutine gradec(nlat, nlon, isym, nt, v, w, idvw, jdvw, a, b, mdab, ndab, &
         wvhsec, lvhsec, work, lwork, ierror)
-        real (wp) :: a
-        real (wp) :: b
-        integer (ip) :: ibi
-        integer (ip) :: ibr
-        integer (ip) :: idvw
-        integer (ip) :: idz
-        integer (ip) :: ierror
-        integer (ip) :: imid
-        integer (ip) :: is
-        integer (ip) :: isym
-        integer (ip) :: iwk
-        integer (ip) :: jdvw
-        integer (ip) :: l1
-        integer (ip) :: l2
-        integer (ip) :: liwk
-        integer (ip) :: lvhsec
-        integer (ip) :: lwkmin
-        integer (ip) :: lwmin
-        integer (ip) :: lwork
-        integer (ip) :: lzimn
-        integer (ip) :: mdab
-        integer (ip) :: mmax
-        integer (ip) :: mn
-        integer (ip) :: ndab
-        integer (ip) :: nlat
-        integer (ip) :: nlon
-        integer (ip) :: nt
-        real (wp) :: v
-        real (wp) :: w
-        real (wp) :: work
-        real (wp) :: wvhsec
+        real(wp) :: a
+        real(wp) :: b
+        integer(ip) :: ibi
+        integer(ip) :: ibr
+        integer(ip) :: idvw
+        integer(ip) :: idz
+        integer(ip) :: ierror
+        integer(ip) :: imid
+        integer(ip) :: is
+        integer(ip) :: isym
+        integer(ip) :: iwk
+        integer(ip) :: jdvw
+        integer(ip) :: l1
+        integer(ip) :: l2
+        integer(ip) :: liwk
+        integer(ip) :: lvhsec
+        integer(ip) :: lwkmin
+        integer(ip) :: lwmin
+        integer(ip) :: lwork
+        integer(ip) :: lzimn
+        integer(ip) :: mdab
+        integer(ip) :: mmax
+        integer(ip) :: mn
+        integer(ip) :: ndab
+        integer(ip) :: nlat
+        integer(ip) :: nlon
+        integer(ip) :: nt
+        real(wp) :: v
+        real(wp) :: w
+        real(wp) :: work
+        real(wp) :: wvhsec
         dimension v(idvw, jdvw, nt), w(idvw, jdvw, nt)
         dimension a(mdab, ndab, nt), b(mdab, ndab, nt)
         dimension wvhsec(lvhsec), work(lwork)
@@ -348,34 +348,34 @@ contains
         subroutine gradec1(nlat, nlon, isym, nt, v, w, idvw, jdvw, br, bi, mmax, &
             sqnn, mdab, ndab, a, b, wvhsec, lvhsec, wk, lwk, ierror)
 
-            real (wp) :: a
-            real (wp) :: b
-            real (wp) :: bi
-            real (wp) :: br
-            real (wp) :: ci(mmax, nlat, nt)
-            real (wp) :: cr(mmax, nlat, nt)
-            real (wp) :: fn
-            integer (ip) :: idvw
-            integer (ip) :: ierror
-            integer (ip) :: isym
-            integer (ip) :: ityp
-            integer (ip) :: jdvw
-            integer (ip) :: k
-            integer (ip) :: lvhsec
-            integer (ip) :: lwk
-            integer (ip) :: m
-            integer (ip) :: mdab
-            integer (ip) :: mmax
-            integer (ip) :: n
-            integer (ip) :: ndab
-            integer (ip) :: nlat
-            integer (ip) :: nlon
-            integer (ip) :: nt
-            real (wp) :: sqnn
-            real (wp) :: v
-            real (wp) :: w
-            real (wp) :: wk
-            real (wp) :: wvhsec
+            real(wp) :: a
+            real(wp) :: b
+            real(wp) :: bi
+            real(wp) :: br
+            real(wp) :: ci(mmax, nlat, nt)
+            real(wp) :: cr(mmax, nlat, nt)
+            real(wp) :: fn
+            integer(ip) :: idvw
+            integer(ip) :: ierror
+            integer(ip) :: isym
+            integer(ip) :: ityp
+            integer(ip) :: jdvw
+            integer(ip) :: k
+            integer(ip) :: lvhsec
+            integer(ip) :: lwk
+            integer(ip) :: m
+            integer(ip) :: mdab
+            integer(ip) :: mmax
+            integer(ip) :: n
+            integer(ip) :: ndab
+            integer(ip) :: nlat
+            integer(ip) :: nlon
+            integer(ip) :: nt
+            real(wp) :: sqnn
+            real(wp) :: v
+            real(wp) :: w
+            real(wp) :: wk
+            real(wp) :: wvhsec
             dimension v(idvw, jdvw, nt), w(idvw, jdvw, nt)
             dimension br(mmax, nlat, nt), bi(mmax, nlat, nt), sqnn(nlat)
             dimension a(mdab, ndab, nt), b(mdab, ndab, nt)

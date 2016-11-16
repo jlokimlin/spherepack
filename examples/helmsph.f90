@@ -60,15 +60,15 @@
 !
 program helmsph
 
-    use, intrinsic :: iso_fortran_env, only: &
-        ip => INT32, &
-        wp => REAL64, &
+    use, intrinsic :: ISO_Fortran_env, only: &
         stdout => OUTPUT_UNIT
 
     use spherepack_library, only: &
         Sphere, &
         Regularsphere, &
-        GaussianSphere
+        GaussianSphere, &
+        wp, & ! Working precision
+        ip    ! Integer precision
 
     ! Explicit typing only
     implicit none
@@ -76,7 +76,7 @@ program helmsph
     !----------------------------------------------------------------------
     ! Dictionary
     !----------------------------------------------------------------------
-    class (Sphere), pointer :: sphere_dat
+    class(Sphere), pointer :: sphere_dat
     !----------------------------------------------------------------------
 
     ! Cast to gaussian case
@@ -96,24 +96,24 @@ contains
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        class (Sphere), intent (in out) :: sphere_type
+        class(Sphere), intent(inout)  :: sphere_type
         !----------------------------------------------------------------------
         ! Local variables
         !----------------------------------------------------------------------
-        integer (ip), parameter        :: NLONS = 36
-        integer (ip), parameter        :: NLATS = NLONS/2 + 1
-        integer (ip)                   :: i, j !! Counters
-        real (wp)                      :: exact_solution(NLATS, NLONS)
-        real (wp)                      :: approximate_solution(NLATS, NLONS)
-        real (wp)                      :: source_term(NLATS, NLONS)
-        real (wp), parameter           :: HELMHOLTZ_CONSTANT = 1.0_wp
-        character (len=:), allocatable :: error_previous_platform
+        integer(ip), parameter        :: NLONS = 36
+        integer(ip), parameter        :: NLATS = NLONS/2 + 1
+        integer(ip)                   :: i, j !! Counters
+        real(wp)                      :: exact_solution(NLATS, NLONS)
+        real(wp)                      :: approximate_solution(NLATS, NLONS)
+        real(wp)                      :: source_term(NLATS, NLONS)
+        real(wp), parameter           :: HELMHOLTZ_CONSTANT = 1.0_wp
+        character(len=:), allocatable :: error_previous_platform
         !----------------------------------------------------------------------
 
         !
         !==> Set up workspace arrays
         !
-        select type (sphere_type)
+        select type(sphere_type)
             type is (GaussianSphere)
 
             !  Initialize gaussian sphere object

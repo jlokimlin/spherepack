@@ -22,7 +22,7 @@ module type_RegularGrid
         !----------------------------------------------------------------------
         ! Type components
         !----------------------------------------------------------------------
-        real (wp), public :: LATITUDINAL_MESH = 0.0_wp
+        real(wp), public :: LATITUDINAL_MESH = 0.0_wp
         !----------------------------------------------------------------------
     contains
         !----------------------------------------------------------------------
@@ -53,9 +53,9 @@ contains
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        integer (ip),         intent (in) :: nlat !! number of latitudinal points 0 <= theta <= pi
-        integer (ip),         intent (in) :: nlon !! number of longitudinal points 0 <= phi <= 2*pi
-        type (RegularGrid)                :: return_value
+        integer(ip),         intent(in) :: nlat !! number of latitudinal points 0 <= theta <= pi
+        integer(ip),         intent(in) :: nlon !! number of longitudinal points 0 <= phi <= 2*pi
+        type(RegularGrid)                :: return_value
         !----------------------------------------------------------------------
 
         call return_value%create(nlat, nlon)
@@ -64,117 +64,117 @@ contains
 
 
 
-    subroutine copy_regular_grid(this, object_to_be_copied)
+    subroutine copy_regular_grid(self, object_to_be_copied)
         !--------------------------------------------------------------------------------
         ! Dummy arguments
         !--------------------------------------------------------------------------------
-        class (RegularGrid), intent (out) :: this
-        class (RegularGrid), intent (in)  :: object_to_be_copied
+        class(RegularGrid), intent(out) :: self
+        class(RegularGrid), intent(in)  :: object_to_be_copied
         !--------------------------------------------------------------------------------
 
         ! Check if object is usable
         if (.not.object_to_be_copied%initialized) then
-            error stop 'Uninitialized object of class (RegularGrid): '&
+            error stop 'Uninitialized object of class(RegularGrid): '&
                 //'in assignment (=) '
         end if
 
         !
         !==> Make copies
         !
-        this%initialized = object_to_be_copied%initialized
-        this%NUMBER_OF_LONGITUDES = object_to_be_copied%NUMBER_OF_LONGITUDES
-        this%NUMBER_OF_LATITUDES = object_to_be_copied%NUMBER_OF_LATITUDES
-        this%LONGITUDINAL_MESH = object_to_be_copied%LONGITUDINAL_MESH
-        this%LATITUDINAL_MESH = object_to_be_copied%LATITUDINAL_MESH
-        this%latitudes = object_to_be_copied%latitudes
-        this%longitudes = object_to_be_copied%longitudes
-        this%grid_type = object_to_be_copied%grid_type
+        self%initialized = object_to_be_copied%initialized
+        self%NUMBER_OF_LONGITUDES = object_to_be_copied%NUMBER_OF_LONGITUDES
+        self%NUMBER_OF_LATITUDES = object_to_be_copied%NUMBER_OF_LATITUDES
+        self%LONGITUDINAL_MESH = object_to_be_copied%LONGITUDINAL_MESH
+        self%LATITUDINAL_MESH = object_to_be_copied%LATITUDINAL_MESH
+        self%latitudes = object_to_be_copied%latitudes
+        self%longitudes = object_to_be_copied%longitudes
+        self%grid_type = object_to_be_copied%grid_type
 
     end subroutine copy_regular_grid
 
 
 
-    subroutine create_regular_grid(this, nlat, nlon)
+    subroutine create_regular_grid(self, nlat, nlon)
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        class (RegularGrid), intent (in out) :: this
-        integer (ip),         intent (in)    :: nlat !! number of latitudinal points 0 <= theta <= pi
-        integer (ip),         intent (in)    :: nlon !! number of longitudinal points 0 <= phi <= 2*pi
+        class(RegularGrid), intent(inout)  :: self
+        integer(ip),         intent(in)    :: nlat !! number of latitudinal points 0 <= theta <= pi
+        integer(ip),         intent(in)    :: nlon !! number of longitudinal points 0 <= phi <= 2*pi
         !----------------------------------------------------------------------
 
         ! Ensure that object is usable
-        call this%destroy()
+        call self%destroy()
 
         !
         !==> Set contants
         !
-        this%NUMBER_OF_LATITUDES = nlat
-        this%NUMBER_OF_LONGITUDES = nlon
+        self%NUMBER_OF_LATITUDES = nlat
+        self%NUMBER_OF_LONGITUDES = nlon
 
         !
         !==> Set the equally-spaced (regular) grid type
         !
-        allocate(this%grid_type, source='regular')
+        allocate(self%grid_type, source='regular')
 
         !
         !==> Set longitudinal grid: 0 <= phi <= 2*pi
         !
-        call this%get_equally_spaced_longitudes(nlon, this%longitudes)
+        call self%get_equally_spaced_longitudes(nlon, self%longitudes)
 
         !
         !==> Compute equally-spaced latitudes: 0 <= theta <= pi
         !
-        call this%get_equally_spaced_latitudes(nlat, this%latitudes)
+        call self%get_equally_spaced_latitudes(nlat, self%latitudes)
 
         ! Set initialization flag
-        this%initialized = .true.
+        self%initialized = .true.
 
     end subroutine create_regular_grid
 
 
 
-    subroutine destroy_regular_grid(this)
+    subroutine destroy_regular_grid(self)
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        class (RegularGrid), intent (in out) :: this
+        class(RegularGrid), intent(inout)  :: self
         !----------------------------------------------------------------------
 
         ! Check initialization flag
-        if (.not.this%initialized) return
+        if (.not.self%initialized) return
 
         ! Reset constant
-        this%LATITUDINAL_MESH = 0.0_wp
+        self%LATITUDINAL_MESH = 0.0_wp
 
         ! Release parent type
-        call this%destroy_grid()
+        call self%destroy_grid()
 
         ! Reset flag
-        this%initialized = .false.
+        self%initialized = .false.
 
     end subroutine destroy_regular_grid
 
 
 
-    subroutine get_equally_spaced_latitudes(this, nlat, theta)
+    subroutine get_equally_spaced_latitudes(self, nlat, theta)
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        class (RegularGrid),    intent (in out) :: this
-        integer (ip),           intent (in)     :: nlat  !! number of latitudinal points
-        real (wp), allocatable, intent (out)    :: theta(:) !! latitudes: 0 <= theta <= pi
+        class(RegularGrid),    intent(inout)  :: self
+        integer(ip),           intent(in)     :: nlat  !! number of latitudinal points
+        real(wp), allocatable, intent(out)    :: theta(:) !! latitudes: 0 <= theta <= pi
         !----------------------------------------------------------------------
         ! Local variables
         !----------------------------------------------------------------------
-        integer (ip) :: k !! counter
+        integer(ip) :: k !! counter
         !----------------------------------------------------------------------
 
         !
         !==> Check validity of input argument
         !
         if (nlat <= 0) then
-            error stop 'Object of class (RegularGrid): '&
+            error stop 'Object of class(RegularGrid): '&
                 //'invalid argument nlat <= 0 in '&
                 //'get_equally_spaced_latitudes'
         end if
@@ -187,7 +187,7 @@ contains
         !
         !==> Compute equally spaced latitudinal grid
         !
-        associate( dtheta => this%LATITUDINAL_MESH )
+        associate( dtheta => self%LATITUDINAL_MESH )
 
             ! Set equally spaced (uniform) mesh size
             dtheta = PI / (nlat-1)
@@ -201,35 +201,35 @@ contains
 
 
 
-    subroutine unformatted_print(this, header)
+    subroutine unformatted_print(self, header)
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        class (RegularGrid), intent (in out) :: this
-        character (len=*),   intent (in)     :: header
+        class(RegularGrid), intent(inout)  :: self
+        character(len=*),   intent(in)     :: header
         !----------------------------------------------------------------------
 
         ! Check if object is usable
-        if (.not.this%initialized) then
+        if (.not.self%initialized) then
             error stop 'Uninitialized object of class(RegularGrid): '&
                 //'in unformatted_print'
         end if
 
         ! Write latitudes and longitudes
-        call this%print_to_unformatted_binary_files(header)
+        call self%print_to_unformatted_binary_files(header)
 
     end subroutine unformatted_print
 
 
 
-    subroutine finalize_regular_grid(this)
+    subroutine finalize_regular_grid(self)
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        type (RegularGrid), intent (in out) :: this
+        type(RegularGrid), intent(inout)  :: self
         !----------------------------------------------------------------------
 
-        call this%destroy()
+        call self%destroy()
 
     end subroutine finalize_regular_grid
 

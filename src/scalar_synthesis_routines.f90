@@ -74,22 +74,22 @@ module scalar_synthesis_routines
             !----------------------------------------------------------------------
             ! Dummy arguments
             !----------------------------------------------------------------------
-            integer (ip), intent (in)     :: nlat
-            integer (ip), intent (in)     :: nlon
-            integer (ip), intent (in)     :: isym
-            integer (ip), intent (in)     :: nt
-            real (wp),    intent (out)    :: g(idg,jdg,nt)
-            integer (ip), intent (in)     :: idg
-            integer (ip), intent (in)     :: jdg
-            real (wp),    intent (in out) :: a(mdab,ndab,nt)
-            real (wp),    intent (in out) :: b(mdab,ndab,nt)
-            integer (ip), intent (in)     :: mdab
-            integer (ip), intent (in)     :: ndab
-            real (wp),    intent (in out) :: wshses(lshses)
-            integer (ip), intent (in)     :: lshses
-            real (wp),    intent (in out) :: work(lwork)
-            integer (ip), intent (in)     :: lwork
-            integer (ip), intent (out)    :: ierror
+            integer(ip), intent(in)     :: nlat
+            integer(ip), intent(in)     :: nlon
+            integer(ip), intent(in)     :: isym
+            integer(ip), intent(in)     :: nt
+            real(wp),    intent(out)    :: g(idg,jdg,nt)
+            integer(ip), intent(in)     :: idg
+            integer(ip), intent(in)     :: jdg
+            real(wp),    intent(inout)  :: a(mdab,ndab,nt)
+            real(wp),    intent(inout)  :: b(mdab,ndab,nt)
+            integer(ip), intent(in)     :: mdab
+            integer(ip), intent(in)     :: ndab
+            real(wp),    intent(inout)  :: wshses(lshses)
+            integer(ip), intent(in)     :: lshses
+            real(wp),    intent(inout)  :: work(lwork)
+            integer(ip), intent(in)     :: lwork
+            integer(ip), intent(out)    :: ierror
             !----------------------------------------------------------------------
         end subroutine shses
 
@@ -98,15 +98,15 @@ module scalar_synthesis_routines
             !----------------------------------------------------------------------
             ! Dummy arguments
             !----------------------------------------------------------------------
-            integer (ip), intent (in)  :: nlat
-            integer (ip), intent (in)  :: nlon
-            real (wp),    intent (out) :: wshses(lshses)
-            integer (ip), intent (in)  :: lshses
-            real (wp),    intent (out) :: work(lwork)
-            integer (ip), intent (in)  :: lwork
-            real (wp),    intent (out) :: dwork(ldwork)
-            integer (ip), intent (in)  :: ldwork
-            integer (ip), intent (out) :: ierror
+            integer(ip), intent(in)  :: nlat
+            integer(ip), intent(in)  :: nlon
+            real(wp),    intent(out) :: wshses(lshses)
+            integer(ip), intent(in)  :: lshses
+            real(wp),    intent(out) :: work(lwork)
+            integer(ip), intent(in)  :: lwork
+            real(wp),    intent(out) :: dwork(ldwork)
+            integer(ip), intent(in)  :: ldwork
+            integer(ip), intent(out) :: ierror
             !----------------------------------------------------------------------
         end subroutine shsesi
 
@@ -115,22 +115,22 @@ module scalar_synthesis_routines
             !----------------------------------------------------------------------
             ! Dummy arguments
             !----------------------------------------------------------------------
-            integer (ip), intent (in)      :: nlat
-            integer (ip), intent (in)      :: nlon
-            integer (ip), intent (in)      :: mode
-            integer (ip), intent (in)      :: nt
-            real (wp),    intent (out)     :: g(idg, jdg, nt)
-            integer (ip), intent (in)      :: idg
-            integer (ip), intent (in)      :: jdg
-            real (wp),    intent (in)      :: a(mdab, ndab, nt)
-            real (wp),    intent (in)      :: b(mdab, ndab, nt)
-            integer (ip), intent (in)      :: mdab
-            integer (ip), intent (in)      :: ndab
-            real (wp),    intent (in out)  :: wshsgs(lshsgs)
-            integer (ip), intent (in)      :: lshsgs
-            real (wp),    intent (in out)  :: work(lwork)
-            integer (ip), intent (in)      :: lwork
-            integer (ip), intent (out)     :: ierror
+            integer(ip), intent(in)      :: nlat
+            integer(ip), intent(in)      :: nlon
+            integer(ip), intent(in)      :: mode
+            integer(ip), intent(in)      :: nt
+            real(wp),    intent(out)     :: g(idg, jdg, nt)
+            integer(ip), intent(in)      :: idg
+            integer(ip), intent(in)      :: jdg
+            real(wp),    intent(in)      :: a(mdab, ndab, nt)
+            real(wp),    intent(in)      :: b(mdab, ndab, nt)
+            integer(ip), intent(in)      :: mdab
+            integer(ip), intent(in)      :: ndab
+            real(wp),    intent(inout)   :: wshsgs(lshsgs)
+            integer(ip), intent(in)      :: lshsgs
+            real(wp),    intent(inout)   :: work(lwork)
+            integer(ip), intent(in)      :: lwork
+            integer(ip), intent(out)     :: ierror
             !----------------------------------------------------------------------
         end subroutine shsgs
 
@@ -147,15 +147,15 @@ module scalar_synthesis_routines
             !----------------------------------------------------------------------
             ! Dummy arguments
             !----------------------------------------------------------------------
-            integer (ip), intent (in)     :: nlat
-            integer (ip), intent (in)     :: nlon
-            real (wp),    intent (in out) :: wshsgs(lshsgs)
-            integer (ip), intent (in)     :: lshsgs
-            real (wp),    intent (in out) :: work(lwork)
-            integer (ip), intent (in)     :: lwork
-            real (wp),    intent (in out) :: dwork(ldwork)
-            integer (ip), intent (in)     :: ldwork
-            integer (ip), intent (out)    :: ierror
+            integer(ip), intent(in)     :: nlat
+            integer(ip), intent(in)     :: nlon
+            real(wp),    intent(inout)  :: wshsgs(lshsgs)
+            integer(ip), intent(in)     :: lshsgs
+            real(wp),    intent(inout)  :: work(lwork)
+            integer(ip), intent(in)     :: lwork
+            real(wp),    intent(inout)  :: dwork(ldwork)
+            integer(ip), intent(in)     :: ldwork
+            integer(ip), intent(out)    :: ierror
             !----------------------------------------------------------------------
         end subroutine shsgsi
 
@@ -167,14 +167,14 @@ contains
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        integer (ip), intent (in)  :: nlat
-        integer (ip), intent (in)  :: nlon
-        integer (ip)               :: return_value
+        integer(ip), intent(in)  :: nlat
+        integer(ip), intent(in)  :: nlon
+        integer(ip)               :: return_value
         !----------------------------------------------------------------------
         ! Local variables
         !----------------------------------------------------------------------
-        integer (ip)         :: l1, l2
-        type (SpherepackAux) :: sphere_aux
+        integer(ip)         :: l1, l2
+        type(SpherepackAux) :: sphere_aux
         !----------------------------------------------------------------------
 
         call sphere_aux%compute_parity(nlat, nlon, l1, l2)
@@ -188,14 +188,14 @@ contains
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        integer (ip), intent (in)  :: nlat
-        integer (ip), intent (in)  :: nlon
-        integer (ip)               :: return_value
+        integer(ip), intent(in)  :: nlat
+        integer(ip), intent(in)  :: nlon
+        integer(ip)               :: return_value
         !----------------------------------------------------------------------
         ! Local variables
         !----------------------------------------------------------------------
-        integer (ip)         :: l1, l2
-        type (SpherepackAux) :: sphere_aux
+        integer(ip)         :: l1, l2
+        type(SpherepackAux) :: sphere_aux
         !----------------------------------------------------------------------
 
         call sphere_aux%compute_parity(nlat, nlon, l1, l2)
@@ -209,8 +209,8 @@ contains
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        integer (ip), intent (in)  :: nlat
-        integer (ip)               :: return_value
+        integer(ip), intent(in)  :: nlat
+        integer(ip)               :: return_value
         !----------------------------------------------------------------------
 
         return_value = nlat + 1
@@ -222,15 +222,15 @@ contains
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        integer (ip),           intent (in) :: nlat
-        integer (ip),           intent (in) :: nlon
-        integer (ip), optional, intent (in) :: nt
-        integer (ip), optional, intent (in) :: ityp
-        integer (ip)                        :: return_value
+        integer(ip),           intent(in) :: nlat
+        integer(ip),           intent(in) :: nlon
+        integer(ip), optional, intent(in) :: nt
+        integer(ip), optional, intent(in) :: ityp
+        integer(ip)                        :: return_value
         !----------------------------------------------------------------------
         ! Local variables
         !----------------------------------------------------------------------
-        integer (ip) :: nt_op, ityp_op, l2
+        integer(ip) :: nt_op, ityp_op, l2
         !----------------------------------------------------------------------
 
         !
@@ -273,14 +273,14 @@ contains
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        integer (ip), intent (in)  :: nlat
-        integer (ip), intent (in)  :: nlon
-        integer (ip)               :: return_value
+        integer(ip), intent(in)  :: nlat
+        integer(ip), intent(in)  :: nlon
+        integer(ip)               :: return_value
         !----------------------------------------------------------------------
         ! Local variables
         !----------------------------------------------------------------------
-        integer (ip)         :: l1, l2
-        type (SpherepackAux) :: sphere_aux
+        integer(ip)         :: l1, l2
+        type(SpherepackAux) :: sphere_aux
         !----------------------------------------------------------------------
 
         call sphere_aux%compute_parity(nlat, nlon, l1, l2)
@@ -295,8 +295,8 @@ contains
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        integer (ip), intent (in) :: nlat
-        integer (ip)              :: return_value
+        integer(ip), intent(in) :: nlat
+        integer(ip)              :: return_value
         !----------------------------------------------------------------------
 
         return_value = 4*nlat*(nlat+2)+2
@@ -308,8 +308,8 @@ contains
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        integer (ip), intent (in)  :: nlat
-        integer (ip)               :: return_value
+        integer(ip), intent(in)  :: nlat
+        integer(ip)               :: return_value
         !----------------------------------------------------------------------
 
         return_value = nlat*(nlat+4)
@@ -321,15 +321,15 @@ contains
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        integer (ip),           intent (in) :: nlat
-        integer (ip),           intent (in) :: nlon
-        integer (ip), optional, intent (in) :: nt
-        integer (ip), optional, intent (in) :: isym
-        integer (ip)                        :: return_value
+        integer(ip),           intent(in) :: nlat
+        integer(ip),           intent(in) :: nlon
+        integer(ip), optional, intent(in) :: nt
+        integer(ip), optional, intent(in) :: isym
+        integer(ip)                        :: return_value
         !----------------------------------------------------------------------
         ! Local variables
         !----------------------------------------------------------------------
-        integer (ip) :: nt_op, isym_op, l2
+        integer(ip) :: nt_op, isym_op, l2
         !----------------------------------------------------------------------
 
         !

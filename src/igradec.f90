@@ -255,37 +255,37 @@ contains
     subroutine igradec(nlat, nlon, isym, nt, sf, isf, jsf, br, bi, mdb, ndb, &
         wshsec, lshsec, work, lwork, ierror)
 
-        real (wp) :: bi
-        real (wp) :: br
-        integer (ip) :: ia
-        integer (ip) :: ib
-        integer (ip) :: ierror
-        integer (ip) :: imid
-        integer (ip) :: is
-        integer (ip) :: isf
-        integer (ip) :: isym
-        integer (ip) :: iwk
-        integer (ip) :: jsf
-        integer (ip) :: l1
-        integer (ip) :: l2
-        integer (ip) :: liwk
-        integer (ip) :: lpimn
-        integer (ip) :: ls
-        integer (ip) :: lshsec
-        integer (ip) :: lwkmin
-        integer (ip) :: lwork
-        integer (ip) :: mab
-        integer (ip) :: mdb
-        integer (ip) :: mmax
-        integer (ip) :: mn
-        integer (ip) :: ndb
-        integer (ip) :: nlat
-        integer (ip) :: nln
-        integer (ip) :: nlon
-        integer (ip) :: nt
-        real (wp) :: sf
-        real (wp) :: work
-        real (wp) :: wshsec
+        real(wp) :: bi
+        real(wp) :: br
+        integer(ip) :: ia
+        integer(ip) :: ib
+        integer(ip) :: ierror
+        integer(ip) :: imid
+        integer(ip) :: is
+        integer(ip) :: isf
+        integer(ip) :: isym
+        integer(ip) :: iwk
+        integer(ip) :: jsf
+        integer(ip) :: l1
+        integer(ip) :: l2
+        integer(ip) :: liwk
+        integer(ip) :: lpimn
+        integer(ip) :: ls
+        integer(ip) :: lshsec
+        integer(ip) :: lwkmin
+        integer(ip) :: lwork
+        integer(ip) :: mab
+        integer(ip) :: mdb
+        integer(ip) :: mmax
+        integer(ip) :: mn
+        integer(ip) :: ndb
+        integer(ip) :: nlat
+        integer(ip) :: nln
+        integer(ip) :: nlon
+        integer(ip) :: nt
+        real(wp) :: sf
+        real(wp) :: work
+        real(wp) :: wshsec
         dimension sf(isf, jsf, nt)
         dimension br(mdb, ndb, nt), bi(mdb, ndb, nt)
         dimension wshsec(lshsec), work(lwork)
@@ -358,31 +358,31 @@ contains
         subroutine igrdec1(nlat, nlon, isym, nt, sf, isf, jsf, a, b, mab, &
             sqnn, mdb, ndb, br, bi, wshsec, lshsec, wk, lwk, ierror)
             implicit none
-            real (wp) :: a
-            real (wp) :: b
-            real (wp) :: bi
-            real (wp) :: br
-            real (wp) :: fn
-            integer (ip) :: ierror
-            integer (ip) :: isf
-            integer (ip) :: isym
-            integer (ip) :: jsf
-            integer (ip) :: k
-            integer (ip) :: lshsec
-            integer (ip) :: lwk
-            integer (ip) :: m
-            integer (ip) :: mab
-            integer (ip) :: mdb
-            integer (ip) :: mmax
-            integer (ip) :: n
-            integer (ip) :: ndb
-            integer (ip) :: nlat
-            integer (ip) :: nlon
-            integer (ip) :: nt
-            real (wp) :: sf
-            real (wp) :: sqnn
-            real (wp) :: wk
-            real (wp) :: wshsec
+            real(wp) :: a
+            real(wp) :: b
+            real(wp) :: bi
+            real(wp) :: br
+            real(wp) :: fn
+            integer(ip) :: ierror
+            integer(ip) :: isf
+            integer(ip) :: isym
+            integer(ip) :: jsf
+            integer(ip) :: k
+            integer(ip) :: lshsec
+            integer(ip) :: lwk
+            integer(ip) :: m
+            integer(ip) :: mab
+            integer(ip) :: mdb
+            integer(ip) :: mmax
+            integer(ip) :: n
+            integer(ip) :: ndb
+            integer(ip) :: nlat
+            integer(ip) :: nlon
+            integer(ip) :: nt
+            real(wp) :: sf
+            real(wp) :: sqnn
+            real(wp) :: wk
+            real(wp) :: wshsec
             dimension sf(isf, jsf, nt)
             dimension br(mdb, ndb, nt), bi(mdb, ndb, nt), sqnn(nlat)
             dimension a(mab, nlat, nt), b(mab, nlat, nt)

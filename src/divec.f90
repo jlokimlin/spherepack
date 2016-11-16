@@ -245,28 +245,28 @@ contains
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        integer (ip), intent (in)     :: nlat
-        integer (ip), intent (in)     :: nlon
-        integer (ip), intent (in)     :: isym
-        integer (ip), intent (in)     :: nt
-        real (wp),    intent (in out) :: dv(idv, jdv,*)
-        integer (ip), intent (in)     :: idv
-        integer (ip), intent (in)     :: jdv
-        real (wp),    intent (in out) :: br(mdb, ndb,*)
-        real (wp),    intent (in out) :: bi(mdb, ndb,*)
-        integer (ip), intent (in)     :: mdb
-        integer (ip), intent (in)     :: ndb
-        real (wp),    intent (in out) :: wshsec(lshsec)
-        integer (ip), intent (in)     :: lshsec
-        real (wp),    intent (in out) :: work(lwork)
-        integer (ip), intent (in)     :: lwork
-        integer (ip), intent (out)    :: ierror
+        integer(ip), intent(in)     :: nlat
+        integer(ip), intent(in)     :: nlon
+        integer(ip), intent(in)     :: isym
+        integer(ip), intent(in)     :: nt
+        real(wp),    intent(inout)  :: dv(idv, jdv,*)
+        integer(ip), intent(in)     :: idv
+        integer(ip), intent(in)     :: jdv
+        real(wp),    intent(inout)  :: br(mdb, ndb,*)
+        real(wp),    intent(inout)  :: bi(mdb, ndb,*)
+        integer(ip), intent(in)     :: mdb
+        integer(ip), intent(in)     :: ndb
+        real(wp),    intent(inout)  :: wshsec(lshsec)
+        integer(ip), intent(in)     :: lshsec
+        real(wp),    intent(inout)  :: work(lwork)
+        integer(ip), intent(in)     :: lwork
+        integer(ip), intent(out)    :: ierror
         !----------------------------------------------------------------------
         ! Local variables
         !----------------------------------------------------------------------
-        integer (ip) :: l1, l2, ia, ib, mn, is, ls, mab, nln
-        integer (ip) :: iwk, lwk, lzz1, labc, imid
-        integer (ip) :: mmax, lwmin, lwkmin
+        integer(ip) :: l1, l2, ia, ib, mn, is, ls, mab, nln
+        integer(ip) :: iwk, lwk, lzz1, labc, imid
+        integer(ip) :: mmax, lwmin, lwkmin
         !----------------------------------------------------------------------
 
         imid = (nlat+1)/2
@@ -369,22 +369,22 @@ contains
             real :: br
             real :: dv
             real :: fn
-            integer (ip) :: idv
-            integer (ip) :: ierror
-            integer (ip) :: isym
-            integer (ip) :: jdv
-            integer (ip) :: k
-            integer (ip) :: lshsec
-            integer (ip) :: lwk
-            integer (ip) :: m
-            integer (ip) :: mab
-            integer (ip) :: mdb
-            integer (ip) :: mmax
-            integer (ip) :: n
-            integer (ip) :: ndb
-            integer (ip) :: nlat
-            integer (ip) :: nlon
-            integer (ip) :: nt
+            integer(ip) :: idv
+            integer(ip) :: ierror
+            integer(ip) :: isym
+            integer(ip) :: jdv
+            integer(ip) :: k
+            integer(ip) :: lshsec
+            integer(ip) :: lwk
+            integer(ip) :: m
+            integer(ip) :: mab
+            integer(ip) :: mdb
+            integer(ip) :: mmax
+            integer(ip) :: n
+            integer(ip) :: ndb
+            integer(ip) :: nlat
+            integer(ip) :: nlon
+            integer(ip) :: nt
             real :: sqnn
             real :: wk
             real :: wshsec

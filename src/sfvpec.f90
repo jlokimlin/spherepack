@@ -249,12 +249,12 @@ contains
     subroutine sfvpec(nlat, nlon, isym, nt, sf, vp, idv, jdv, br, bi, cr, ci, &
         mdb, ndb, wshsec, lshsec, work, lwork, ierror)
 
-        integer (ip) :: nlat, nlon, isym, nt, idv, jdv, mdb, ndb, lshsec, lwork, ierror
-        real (wp) :: sf(idv, jdv, nt), vp(idv, jdv, nt)
-        real (wp) :: br(mdb, ndb, nt), bi(mdb, ndb, nt)
-        real (wp) :: cr(mdb, ndb, nt), ci(mdb, ndb, nt)
-        real (wp) :: wshsec(lshsec), work(lwork)
-        integer (ip) :: imid, mmax, lzz1, labc, ls, nln, mab, mn, ia, ib, is, lwk, iwk, lwmin
+        integer(ip) :: nlat, nlon, isym, nt, idv, jdv, mdb, ndb, lshsec, lwork, ierror
+        real(wp) :: sf(idv, jdv, nt), vp(idv, jdv, nt)
+        real(wp) :: br(mdb, ndb, nt), bi(mdb, ndb, nt)
+        real(wp) :: cr(mdb, ndb, nt), ci(mdb, ndb, nt)
+        real(wp) :: wshsec(lshsec), work(lwork)
+        integer(ip) :: imid, mmax, lzz1, labc, ls, nln, mab, mn, ia, ib, is, lwk, iwk, lwmin
         !
         !     check input parameters
         !
@@ -318,12 +318,12 @@ contains
         subroutine sfvpec1(nlat, nlon, isym, nt, sf, vp, idv, jdv, br, bi, cr, ci, &
             mdb, ndb, a, b, mab, fnn, wshsec, lshsec, wk, lwk, ierror)
 
-            integer (ip) :: nlat, nlon, isym, nt, idv, jdv, mdb, ndb, mab, lshsec, lwk, ierror
-            real (wp) :: sf(idv, jdv, nt), vp(idv, jdv, nt)
-            real (wp) :: br(mdb, ndb, nt), bi(mdb, ndb, nt), cr(mdb, ndb, nt), ci(mdb, ndb, nt)
-            real (wp) :: a(mab, nlat, nt), b(mab, nlat, nt)
-            real (wp) :: wshsec(lshsec), wk(lwk), fnn(nlat)
-            integer (ip) :: n, m, mmax, k
+            integer(ip) :: nlat, nlon, isym, nt, idv, jdv, mdb, ndb, mab, lshsec, lwk, ierror
+            real(wp) :: sf(idv, jdv, nt), vp(idv, jdv, nt)
+            real(wp) :: br(mdb, ndb, nt), bi(mdb, ndb, nt), cr(mdb, ndb, nt), ci(mdb, ndb, nt)
+            real(wp) :: a(mab, nlat, nt), b(mab, nlat, nt)
+            real(wp) :: wshsec(lshsec), wk(lwk), fnn(nlat)
+            integer(ip) :: n, m, mmax, k
              !
              !     set coefficient multiplyers
              !

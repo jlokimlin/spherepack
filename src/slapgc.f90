@@ -257,35 +257,35 @@ contains
     subroutine slapgc(nlat, nlon, isym, nt, slap, ids, jds, a, b, mdab, ndab, &
         wshsgc, lshsgc, work, lwork, ierror)
 
-        real (wp) :: a
-        real (wp) :: b
-        integer (ip) :: ia
-        integer (ip) :: ib
-        integer (ip) :: ids
-        integer (ip) :: ierror
-        integer (ip) :: ifn
-        integer (ip) :: imid
-        integer (ip) :: isym
-        integer (ip) :: iwk
-        integer (ip) :: jds
-        integer (ip) :: l1
-        integer (ip) :: l2
-        integer (ip) :: ls
-        integer (ip) :: lshsgc
-        integer (ip) :: lwk
-        integer (ip) :: lwkmin
-        integer (ip) :: lwork
-        integer (ip) :: mdab
-        integer (ip) :: mmax
-        integer (ip) :: mn
-        integer (ip) :: ndab
-        integer (ip) :: nlat
-        integer (ip) :: nln
-        integer (ip) :: nlon
-        integer (ip) :: nt
-        real (wp) :: slap
-        real (wp) :: work
-        real (wp) :: wshsgc
+        real(wp) :: a
+        real(wp) :: b
+        integer(ip) :: ia
+        integer(ip) :: ib
+        integer(ip) :: ids
+        integer(ip) :: ierror
+        integer(ip) :: ifn
+        integer(ip) :: imid
+        integer(ip) :: isym
+        integer(ip) :: iwk
+        integer(ip) :: jds
+        integer(ip) :: l1
+        integer(ip) :: l2
+        integer(ip) :: ls
+        integer(ip) :: lshsgc
+        integer(ip) :: lwk
+        integer(ip) :: lwkmin
+        integer(ip) :: lwork
+        integer(ip) :: mdab
+        integer(ip) :: mmax
+        integer(ip) :: mn
+        integer(ip) :: ndab
+        integer(ip) :: nlat
+        integer(ip) :: nln
+        integer(ip) :: nlon
+        integer(ip) :: nt
+        real(wp) :: slap
+        real(wp) :: work
+        real(wp) :: wshsgc
         dimension slap(ids, jds, nt), a(mdab, ndab, nt), b(mdab, ndab, nt)
         dimension wshsgc(lshsgc), work(lwork)
         !
@@ -354,30 +354,30 @@ contains
         subroutine slapgc1(nlat, nlon, isym, nt, slap, ids, jds, a, b, mdab, ndab, &
             alap, blap, mmax, fnn, wsave, lsave, wk, lwk, ierror)
 
-            real (wp) :: a
-            real (wp) :: alap
-            real (wp) :: b
-            real (wp) :: blap
-            real (wp) :: fn
-            real (wp) :: fnn
-            integer (ip) :: ids
-            integer (ip) :: ierror
-            integer (ip) :: isym
-            integer (ip) :: jds
-            integer (ip) :: k
-            integer (ip) :: lsave
-            integer (ip) :: lwk
-            integer (ip) :: m
-            integer (ip) :: mdab
-            integer (ip) :: mmax
-            integer (ip) :: n
-            integer (ip) :: ndab
-            integer (ip) :: nlat
-            integer (ip) :: nlon
-            integer (ip) :: nt
-            real (wp) :: slap
-            real (wp) :: wk
-            real (wp) :: wsave
+            real(wp) :: a
+            real(wp) :: alap
+            real(wp) :: b
+            real(wp) :: blap
+            real(wp) :: fn
+            real(wp) :: fnn
+            integer(ip) :: ids
+            integer(ip) :: ierror
+            integer(ip) :: isym
+            integer(ip) :: jds
+            integer(ip) :: k
+            integer(ip) :: lsave
+            integer(ip) :: lwk
+            integer(ip) :: m
+            integer(ip) :: mdab
+            integer(ip) :: mmax
+            integer(ip) :: n
+            integer(ip) :: ndab
+            integer(ip) :: nlat
+            integer(ip) :: nlon
+            integer(ip) :: nt
+            real(wp) :: slap
+            real(wp) :: wk
+            real(wp) :: wsave
             dimension slap(ids, jds, nt), a(mdab, ndab, nt), b(mdab, ndab, nt)
             dimension alap(mmax, nlat, nt), blap(mmax, nlat, nt), fnn(nlat)
             dimension wsave(lsave), wk(lwk)

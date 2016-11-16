@@ -452,8 +452,8 @@ contains
                 b(mdab, ndab, nt), g(lat, nlon, nt)
             dimension w(*), wts(nlat), wfft(*), pmn(nlat, late, 3)
 
-            type (HFFTpack)      :: hfft
-            type (SpherepackAux) :: sphere_aux
+            type(HFFTpack)      :: hfft
+            type(SpherepackAux) :: sphere_aux
 
             !     set gs array internally in shagc1
             do k=1, nt
@@ -727,8 +727,8 @@ contains
                 cbel(*), wfft(*)
             real pb, dtheta(nlat), dwts(nlat), work(*)
 
-            type (HFFTpack)      :: hfft
-            type (SpherepackAux) :: sphere_aux
+            type(HFFTpack)      :: hfft
+            type(SpherepackAux) :: sphere_aux
 
             !     compute the nlat  gaussian points and weights, the
             !     m=0, 1 legendre polys for gaussian points and all n,

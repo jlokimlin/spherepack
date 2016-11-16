@@ -271,38 +271,38 @@ contains
     subroutine islapgc(nlat, nlon, isym, nt, xlmbda, sf, ids, jds, a, b, &
         mdab, ndab, wshsgc, lshsgc, work, lwork, pertrb, ierror)
 
-        real (wp) :: a
-        real (wp) :: b
-        integer (ip) :: ia
-        integer (ip) :: ib
-        integer (ip) :: ids
-        integer (ip) :: ierror
-        integer (ip) :: ifn
-        integer (ip) :: imid
-        integer (ip) :: isym
-        integer (ip) :: iwk
-        integer (ip) :: jds
-        integer (ip) :: k
-        integer (ip) :: l1
-        integer (ip) :: l2
-        integer (ip) :: ls
-        integer (ip) :: lshsgc
-        integer (ip) :: lwk
-        integer (ip) :: lwmin
-        integer (ip) :: lwork
-        integer (ip) :: mdab
-        integer (ip) :: mmax
-        integer (ip) :: mn
-        integer (ip) :: ndab
-        integer (ip) :: nlat
-        integer (ip) :: nln
-        integer (ip) :: nlon
-        integer (ip) :: nt
-        real (wp) :: pertrb
-        real (wp) :: sf
-        real (wp) :: work
-        real (wp) :: wshsgc
-        real (wp) :: xlmbda
+        real(wp) :: a
+        real(wp) :: b
+        integer(ip) :: ia
+        integer(ip) :: ib
+        integer(ip) :: ids
+        integer(ip) :: ierror
+        integer(ip) :: ifn
+        integer(ip) :: imid
+        integer(ip) :: isym
+        integer(ip) :: iwk
+        integer(ip) :: jds
+        integer(ip) :: k
+        integer(ip) :: l1
+        integer(ip) :: l2
+        integer(ip) :: ls
+        integer(ip) :: lshsgc
+        integer(ip) :: lwk
+        integer(ip) :: lwmin
+        integer(ip) :: lwork
+        integer(ip) :: mdab
+        integer(ip) :: mmax
+        integer(ip) :: mn
+        integer(ip) :: ndab
+        integer(ip) :: nlat
+        integer(ip) :: nln
+        integer(ip) :: nlon
+        integer(ip) :: nt
+        real(wp) :: pertrb
+        real(wp) :: sf
+        real(wp) :: work
+        real(wp) :: wshsgc
+        real(wp) :: xlmbda
         dimension sf(ids, jds, nt), a(mdab, ndab, nt), b(mdab, ndab, nt)
         dimension wshsgc(lshsgc), work(lwork), xlmbda(nt), pertrb(nt)
         !
@@ -381,32 +381,32 @@ contains
         subroutine islpgc1(nlat, nlon, isym, nt, xlmbda, sf, ids, jds, a, b, &
             mdab, ndab, as, bs, mmax, fnn, wsav, lsav, wk, lwk, pertrb, ierror)
 
-            real (wp) :: a
-            real (wp) :: as
-            real (wp) :: b
-            real (wp) :: bs
-            real (wp) :: fn
-            real (wp) :: fnn
-            integer (ip) :: ids
-            integer (ip) :: ierror
-            integer (ip) :: isym
-            integer (ip) :: jds
-            integer (ip) :: k
-            integer (ip) :: lsav
-            integer (ip) :: lwk
-            integer (ip) :: m
-            integer (ip) :: mdab
-            integer (ip) :: mmax
-            integer (ip) :: n
-            integer (ip) :: ndab
-            integer (ip) :: nlat
-            integer (ip) :: nlon
-            integer (ip) :: nt
-            real (wp) :: pertrb
-            real (wp) :: sf
-            real (wp) :: wk
-            real (wp) :: wsav
-            real (wp) :: xlmbda
+            real(wp) :: a
+            real(wp) :: as
+            real(wp) :: b
+            real(wp) :: bs
+            real(wp) :: fn
+            real(wp) :: fnn
+            integer(ip) :: ids
+            integer(ip) :: ierror
+            integer(ip) :: isym
+            integer(ip) :: jds
+            integer(ip) :: k
+            integer(ip) :: lsav
+            integer(ip) :: lwk
+            integer(ip) :: m
+            integer(ip) :: mdab
+            integer(ip) :: mmax
+            integer(ip) :: n
+            integer(ip) :: ndab
+            integer(ip) :: nlat
+            integer(ip) :: nlon
+            integer(ip) :: nt
+            real(wp) :: pertrb
+            real(wp) :: sf
+            real(wp) :: wk
+            real(wp) :: wsav
+            real(wp) :: xlmbda
             dimension sf(ids, jds, nt), a(mdab, ndab, nt), b(mdab, ndab, nt)
             dimension as(mmax, nlat, nt), bs(mmax, nlat, nt), fnn(nlat)
             dimension wsav(lsav), wk(lwk), xlmbda(nt), pertrb(nt)

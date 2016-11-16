@@ -141,7 +141,7 @@ program shallow
         ip, & ! integer precision
         PI
 
-    use, intrinsic :: iso_fortran_env, only: &
+    use, intrinsic :: ISO_Fortran_env, only: &
         stdout => OUTPUT_UNIT
 
     use type_ShallowWaterSolver
@@ -152,27 +152,27 @@ program shallow
     !--------------------------------------------------------------------------------
     ! Dictionary
     !--------------------------------------------------------------------------------
-    integer (ip), parameter           :: nlon = 128
-    integer (ip), parameter           :: nlat = nlon/2+1
-    integer (ip), parameter           :: ntrunc = 42
-    integer (ip), parameter           :: nmdim = (ntrunc+1)*(ntrunc+2)/2
-    integer (ip), parameter           :: nl = 91
-    integer (ip), parameter           :: nlm1 = nl-1
-    integer (ip), parameter           :: nlm2 = nl-2
-    integer (ip)                      :: itmax, mprint, i, j, ncycle
-    integer (ip)                      :: temp_save_new, temp_save_now,old,now,new
-    real (wp), dimension(nlon, nlat)  :: uxact, vxact, pxact, u, v, p, f
-    real (wp), dimension(nlon, nlat)  :: ug, vg, pg, vrtg, divg, scrg1, scrg2
-    real (wp)                         :: phlt(nlm2)
-    real (wp)                         :: theta_mesh, lambda, lhat, uhat, aa, uzero, pzero, HALF_PI, radian_unit, omega, alphad
-    real (wp)                         :: alpha, fzero, dt, cfn, dlath, theta, sth
-    real (wp)                         :: cth, cosa, sina, lambda_mesh, st, ct, cthclh, cthslh
-    real (wp)                         :: clh, time, that, sl, slh, evmax, epmax, dvmax, dpmax, htime, dvgm, cl
-    real (wp)                         :: v2max, p2max, vmax, pmax
-    complex (wp), dimension(nmdim)    :: vrtnm, divnm, pnm, scrnm
-    complex (wp), dimension(nmdim, 3) :: dvrtdtnm, ddivdtnm, dpdtnm
-    type (ShallowWaterSolver)         :: solver
-    character (len=:), allocatable    :: write_fmt
+    integer(ip), parameter           :: nlon = 128
+    integer(ip), parameter           :: nlat = nlon/2+1
+    integer(ip), parameter           :: ntrunc = 42
+    integer(ip), parameter           :: nmdim = (ntrunc+1)*(ntrunc+2)/2
+    integer(ip), parameter           :: nl = 91
+    integer(ip), parameter           :: nlm1 = nl-1
+    integer(ip), parameter           :: nlm2 = nl-2
+    integer(ip)                      :: itmax, mprint, i, j, ncycle
+    integer(ip)                      :: temp_save_new, temp_save_now,old,now,new
+    real(wp), dimension(nlon, nlat)  :: uxact, vxact, pxact, u, v, p, f
+    real(wp), dimension(nlon, nlat)  :: ug, vg, pg, vrtg, divg, scrg1, scrg2
+    real(wp)                         :: phlt(nlm2)
+    real(wp)                         :: theta_mesh, lambda, lhat, uhat, aa, uzero, pzero, HALF_PI, radian_unit, omega, alphad
+    real(wp)                         :: alpha, fzero, dt, cfn, dlath, theta, sth
+    real(wp)                         :: cth, cosa, sina, lambda_mesh, st, ct, cthclh, cthslh
+    real(wp)                         :: clh, time, that, sl, slh, evmax, epmax, dvmax, dpmax, htime, dvgm, cl
+    real(wp)                         :: v2max, p2max, vmax, pmax
+    complex(wp), dimension(nmdim)    :: vrtnm, divnm, pnm, scrnm
+    complex(wp), dimension(nmdim, 3) :: dvrtdtnm, ddivdtnm, dpdtnm
+    type(ShallowWaterSolver)         :: solver
+    character(len=:), allocatable    :: write_fmt
     !--------------------------------------------------------------------------------
 
     write( stdout, '(/a)') '     shallow *** TEST RUN *** '

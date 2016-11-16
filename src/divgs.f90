@@ -246,28 +246,28 @@ contains
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        integer (ip), intent (in)     :: nlat
-        integer (ip), intent (in)     :: nlon
-        integer (ip), intent (in)     :: isym
-        integer (ip), intent (in)     :: nt
-        real (wp),    intent (in out) :: divg(idiv, jdiv, nt)
-        integer (ip), intent (in)     :: idiv
-        integer (ip), intent (in)     :: jdiv
-        real (wp),    intent (in out) :: br(mdb, ndb, nt)
-        real (wp),    intent (in out) :: bi(mdb, ndb, nt)
-        integer (ip), intent (in)     :: mdb
-        integer (ip), intent (in)     :: ndb
-        real (wp),    intent (in out) :: wshsgs(lshsgs)
-        integer (ip), intent (in)     :: lshsgs
-        real (wp),    intent (in out) :: work(lwork)
-        integer (ip), intent (in)     :: lwork
-        integer (ip), intent (out)    :: ierror
+        integer(ip), intent(in)     :: nlat
+        integer(ip), intent(in)     :: nlon
+        integer(ip), intent(in)     :: isym
+        integer(ip), intent(in)     :: nt
+        real(wp),    intent(inout)  :: divg(idiv, jdiv, nt)
+        integer(ip), intent(in)     :: idiv
+        integer(ip), intent(in)     :: jdiv
+        real(wp),    intent(inout)  :: br(mdb, ndb, nt)
+        real(wp),    intent(inout)  :: bi(mdb, ndb, nt)
+        integer(ip), intent(in)     :: mdb
+        integer(ip), intent(in)     :: ndb
+        real(wp),    intent(inout)  :: wshsgs(lshsgs)
+        integer(ip), intent(in)     :: lshsgs
+        real(wp),    intent(inout)  :: work(lwork)
+        integer(ip), intent(in)     :: lwork
+        integer(ip), intent(out)    :: ierror
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        integer (ip) :: l1, l2, ia, ib, mn, lp
-        integer (ip) :: is, ls, mab, nln
-        integer (ip) :: iwk, lwk, imid, mmax, lpimn
+        integer(ip) :: l1, l2, ia, ib, mn, lp
+        integer(ip) :: is, ls, mab, nln
+        integer(ip) :: iwk, lwk, imid, mmax, lpimn
         !------------------------------------------------------------------------
 
         !

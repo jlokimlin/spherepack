@@ -80,15 +80,15 @@ contains
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        real (wp),              intent (in)  :: lat
-        integer (ip),           intent (in)  :: ntrunc
-        real (wp), allocatable, intent (out) :: legfunc(:)
+        real(wp),              intent(in)  :: lat
+        integer(ip),           intent(in)  :: ntrunc
+        real(wp), allocatable, intent(out) :: legfunc(:)
         !----------------------------------------------------------------------
         ! Local variables
         !----------------------------------------------------------------------
-        real (wp)              :: theta
-        real (wp), allocatable :: cp(:)
-        integer (ip)           :: i, n, m, nm, nmstrt !! Counters
+        real(wp)              :: theta
+        real(wp), allocatable :: cp(:)
+        integer(ip)           :: i, n, m, nm, nmstrt !! Counters
         !----------------------------------------------------------------------
 
         !
@@ -208,19 +208,19 @@ contains
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        integer (ip), intent (in)   :: n
-        integer (ip), intent (in)   :: m
-        real (wp),    intent (out)  :: cp(n/2+1)
+        integer(ip), intent(in)   :: n
+        integer(ip), intent(in)   :: m
+        real(wp),    intent(out)  :: cp(n/2+1)
         !----------------------------------------------------------------------
         ! Local variables
         !----------------------------------------------------------------------
-        integer (ip)         :: i, l, ma, nex, nmms2
-        real (wp), parameter :: sc10 = 1024.0_wp
-        real (wp), parameter :: sc20 = sc10**2
-        real (wp), parameter :: sc40 = sc20**2
-        real (wp)            :: a1, b1, c1, t1, t2
-        real (wp)            :: fk, cp2, pm1
-        real (wp)            :: fden, fnmh, fnum, fnnp1, fnmsq
+        integer(ip)         :: i, l, ma, nex, nmms2
+        real(wp), parameter :: sc10 = 1024.0_wp
+        real(wp), parameter :: sc20 = sc10**2
+        real(wp), parameter :: sc40 = sc20**2
+        real(wp)            :: a1, b1, c1, t1, t2
+        real(wp)            :: fk, cp2, pm1
+        real(wp)            :: fden, fnmh, fnum, fnnp1, fnmsq
         !----------------------------------------------------------------------
 
         cp(1) = 0.0_wp
@@ -424,18 +424,18 @@ contains
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        integer (ip), intent (in)  :: init
-        real (wp),    intent (in)  :: theta(*)
-        integer (ip), intent (in)  :: l
-        integer (ip), intent (in)  :: n
-        integer (ip), intent (in)  :: nm
-        real (wp),    intent (out) :: pb(1)
-        integer (ip), intent (in)  :: id
-        real (wp),    intent (out) :: wlfim(1)
+        integer(ip), intent(in)  :: init
+        real(wp),    intent(in)  :: theta(*)
+        integer(ip), intent(in)  :: l
+        integer(ip), intent(in)  :: n
+        integer(ip), intent(in)  :: nm
+        real(wp),    intent(out) :: pb(1)
+        integer(ip), intent(in)  :: id
+        real(wp),    intent(out) :: wlfim(1)
         !----------------------------------------------------------------------
         ! Local variables
         !----------------------------------------------------------------------
-        integer (ip) :: workspace_indices(3)
+        integer(ip) :: workspace_indices(3)
         !----------------------------------------------------------------------
 
         !
@@ -461,13 +461,13 @@ contains
             !----------------------------------------------------------------------
             ! Dummy arguments
             !----------------------------------------------------------------------
-            integer (ip), intent (in) :: l
-            integer (ip), intent (in) :: nm
-            integer (ip)              :: return_value(3)
+            integer(ip), intent(in) :: l
+            integer(ip), intent(in) :: nm
+            integer(ip)              :: return_value(3)
             !----------------------------------------------------------------------
             ! Local variables
             !----------------------------------------------------------------------
-            integer (ip) :: lnx
+            integer(ip) :: lnx
             !----------------------------------------------------------------------
 
             associate( i => return_value )
@@ -486,30 +486,30 @@ contains
             !----------------------------------------------------------------------
             ! Dummy arguments
             !----------------------------------------------------------------------
-            integer (ip), intent (in)  :: init
-            real (wp),    intent (in)  :: theta(*)
-            integer (ip), intent (in)  :: l
-            integer (ip), intent (in)  :: n
-            integer (ip), intent (in)  :: nm
-            integer (ip), intent (in)  :: id
-            real (wp),    intent (out) :: p3(id,*)
-            real (wp),    intent (out) :: phz(l,*)
-            real (wp),    intent (out) :: ph1(l,*)
-            real (wp),    intent (out) :: p1(l,*)
-            real (wp),    intent (out) :: p2(l,*)
-            real (wp),    intent (out) :: cp(*)
+            integer(ip), intent(in)  :: init
+            real(wp),    intent(in)  :: theta(*)
+            integer(ip), intent(in)  :: l
+            integer(ip), intent(in)  :: n
+            integer(ip), intent(in)  :: nm
+            integer(ip), intent(in)  :: id
+            real(wp),    intent(out) :: p3(id,*)
+            real(wp),    intent(out) :: phz(l,*)
+            real(wp),    intent(out) :: ph1(l,*)
+            real(wp),    intent(out) :: p1(l,*)
+            real(wp),    intent(out) :: p2(l,*)
+            real(wp),    intent(out) :: cp(*)
             !----------------------------------------------------------------------
             ! Local variables
             !----------------------------------------------------------------------
-            integer (ip)         :: i, m, nm1, nh, mp1, np1, nmp1
-            real (wp)            :: cc, dd, ee, cn, fm, fn, fnmm, fnpm
-            real (wp)            :: tn, temp
-            real (wp), parameter :: SQRT2 = sqrt(2.0_wp)
-            real (wp), parameter :: SQRT5 = sqrt(5.0_wp)
-            real (wp), parameter :: SQRT6 = sqrt(6.0_wp)
-            real (wp), parameter :: ONE_OVER_SQRT2 = 1.0_wp/SQRT2
-            real (wp), parameter :: ONE_OVER_SQRT6 = 1.0_wp/SQRT6
-            real (wp), parameter :: SQRT5_OVER_SQRT6 = SQRT5/SQRT6
+            integer(ip)         :: i, m, nm1, nh, mp1, np1, nmp1
+            real(wp)            :: cc, dd, ee, cn, fm, fn, fnmm, fnpm
+            real(wp)            :: tn, temp
+            real(wp), parameter :: SQRT2 = sqrt(2.0_wp)
+            real(wp), parameter :: SQRT5 = sqrt(5.0_wp)
+            real(wp), parameter :: SQRT6 = sqrt(6.0_wp)
+            real(wp), parameter :: ONE_OVER_SQRT2 = 1.0_wp/SQRT2
+            real(wp), parameter :: ONE_OVER_SQRT6 = 1.0_wp/SQRT6
+            real(wp), parameter :: SQRT5_OVER_SQRT6 = SQRT5/SQRT6
             !----------------------------------------------------------------------
             nmp1 = nm+1
 
@@ -683,18 +683,18 @@ contains
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        integer (ip), intent (in)  :: init
-        real (wp),    intent (in)  :: theta(l)
-        integer (ip), intent (in)  :: l
-        integer (ip), intent (in)  :: m
-        integer (ip), intent (in)  :: nm
-        real (wp),    intent (out) :: pb(id, nm+1)
-        integer (ip), intent (in)  :: id
-        real (wp),    intent (out) :: wlfin(4*l*(nm+1))
+        integer(ip), intent(in)  :: init
+        real(wp),    intent(in)  :: theta(l)
+        integer(ip), intent(in)  :: l
+        integer(ip), intent(in)  :: m
+        integer(ip), intent(in)  :: nm
+        real(wp),    intent(out) :: pb(id, nm+1)
+        integer(ip), intent(in)  :: id
+        real(wp),    intent(out) :: wlfin(4*l*(nm+1))
         !----------------------------------------------------------------------
         ! Local variables
         !----------------------------------------------------------------------
-        integer (ip) :: workspace_indices(3)
+        integer(ip) :: workspace_indices(3)
         !----------------------------------------------------------------------
 
         !
@@ -721,13 +721,13 @@ contains
             !----------------------------------------------------------------------
             ! Dummy arguments
             !----------------------------------------------------------------------
-            integer (ip), intent (in) :: l
-            integer (ip), intent (in) :: nm
-            integer (ip)              :: return_value(3)
+            integer(ip), intent(in) :: l
+            integer(ip), intent(in) :: nm
+            integer(ip)              :: return_value(3)
             !----------------------------------------------------------------------
             ! Local variables
             !----------------------------------------------------------------------
-            integer (ip) :: lnx
+            integer(ip) :: lnx
             !----------------------------------------------------------------------
 
             associate( i => return_value )
@@ -745,18 +745,18 @@ contains
             !----------------------------------------------------------------------
             ! Dummy arguments
             !----------------------------------------------------------------------
-            integer (ip), intent (in)  :: init
-            real (wp),    intent (in)  :: theta(l)
-            integer (ip), intent (in)  :: l
-            integer (ip), intent (in)  :: m
-            integer (ip), intent (in)  :: nm
-            integer (ip), intent (in)  :: id
-            real (wp),    intent (out) :: p3(id,*)
-            real (wp),    intent (out) :: phz(l,*)
-            real (wp),    intent (out) :: ph1(l,*)
-            real (wp),    intent (out) :: p1(l,*)
-            real (wp),    intent (out) :: p2(l,*)
-            real (wp),    intent (out) :: cp(*)
+            integer(ip), intent(in)  :: init
+            real(wp),    intent(in)  :: theta(l)
+            integer(ip), intent(in)  :: l
+            integer(ip), intent(in)  :: m
+            integer(ip), intent(in)  :: nm
+            integer(ip), intent(in)  :: id
+            real(wp),    intent(out) :: p3(id,*)
+            real(wp),    intent(out) :: phz(l,*)
+            real(wp),    intent(out) :: ph1(l,*)
+            real(wp),    intent(out) :: p1(l,*)
+            real(wp),    intent(out) :: p2(l,*)
+            real(wp),    intent(out) :: cp(*)
             !----------------------------------------------------------------------
             ! Local variables
             !----------------------------------------------------------------------
@@ -959,17 +959,17 @@ contains
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        integer (ip), intent (in)  :: init
-        integer (ip), intent (in)  :: n
-        integer (ip), intent (in)  :: m
-        integer (ip), intent (in)  :: l
-        real (wp)                  :: cp(n/2 + 1)
-        real (wp)                  :: pb(l)
-        real (wp)                  :: w(5*l+41)
+        integer(ip), intent(in)  :: init
+        integer(ip), intent(in)  :: n
+        integer(ip), intent(in)  :: m
+        integer(ip), intent(in)  :: l
+        real(wp)                  :: cp(n/2 + 1)
+        real(wp)                  :: pb(l)
+        real(wp)                  :: w(5*l+41)
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        integer (ip) :: ma, iw1, iw2
+        integer(ip) :: ma, iw1, iw2
         !----------------------------------------------------------------------
 
         pb = 0.0_wp
@@ -992,24 +992,24 @@ contains
             !----------------------------------------------------------------------
             ! Dummy arguments
             !----------------------------------------------------------------------
-            integer (ip), intent (in) :: init
-            integer (ip), intent (in) :: n
-            integer (ip), intent (in) :: m
-            integer (ip), intent (in) :: l
-            real (wp)                 :: cp(*)
-            real (wp)                 :: p(*)
-            real (wp)                 :: wsave1(*)
-            real (wp)                 :: wsave2(*)
-            real (wp)                 :: wsave3(*)
+            integer(ip), intent(in) :: init
+            integer(ip), intent(in) :: n
+            integer(ip), intent(in) :: m
+            integer(ip), intent(in) :: l
+            real(wp)                 :: cp(*)
+            real(wp)                 :: p(*)
+            real(wp)                 :: wsave1(*)
+            real(wp)                 :: wsave2(*)
+            real(wp)                 :: wsave3(*)
             !----------------------------------------------------------------------
             ! Dummy arguments
             !----------------------------------------------------------------------
-            integer (ip), save   :: lc, lq, ls
-            integer (ip)         :: i
-            integer (ip)         :: lm1, np1, ls2, kdp, lmi
-            real (wp)            :: dt
-            real (wp), parameter :: ONE_OVER_SQRT2 = 1.0_wp/sqrt(2.0_wp)
-            type (FFTpack)       :: fft
+            integer(ip), save   :: lc, lq, ls
+            integer(ip)         :: i
+            integer(ip)         :: lm1, np1, ls2, kdp, lmi
+            real(wp)            :: dt
+            real(wp), parameter :: ONE_OVER_SQRT2 = 1.0_wp/sqrt(2.0_wp)
+            type(FFTpack)       :: fft
             !----------------------------------------------------------------------
 
             select case (init)
@@ -1168,15 +1168,15 @@ contains
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        integer (ip), intent (in)  :: n
-        integer (ip), intent (in)  :: m
-        real (wp),    intent (in)  :: theta
-        real (wp),    intent (in)  :: cp(n/2+1)
-        real (wp),    intent (out) :: pb
+        integer(ip), intent(in)  :: n
+        integer(ip), intent(in)  :: m
+        real(wp),    intent(in)  :: theta
+        real(wp),    intent(in)  :: cp(n/2+1)
+        real(wp),    intent(out) :: pb
         !----------------------------------------------------------------------
         ! Local variables
         !----------------------------------------------------------------------
-        integer (ip) :: ma, np1, k, kdo, kp1
+        integer(ip) :: ma, np1, k, kdo, kp1
         real (ip)    :: cos2t, sin2t, cost, sint, temp, summation
         !----------------------------------------------------------------------
 

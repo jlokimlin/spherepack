@@ -50,7 +50,7 @@
 !     (5) invert dv,vt with idvt(ec,es,gc,gs) and compare with vector field from (1)
 !
 program tidvt
-    use, intrinsic :: iso_fortran_env, only: &
+    use, intrinsic :: ISO_Fortran_env, only: &
         ip => INT32, &
         wp => REAL64, &
         stdout => OUTPUT_UNIT
@@ -66,8 +66,8 @@ program tidvt
     !----------------------------------------------------------------------
     ! Dictionary
     !----------------------------------------------------------------------
-    type (GaussianSphere) :: gaussian_sphere
-    type (RegularSphere)  :: regular_sphere
+    type(GaussianSphere) :: gaussian_sphere
+    type(RegularSphere)  :: regular_sphere
     !----------------------------------------------------------------------
 
     call test_divergence_vorticity_routines(gaussian_sphere)
@@ -80,31 +80,31 @@ contains
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        class (Sphere), intent (in out) :: sphere_type
+        class(Sphere), intent(inout)  :: sphere_type
         !----------------------------------------------------------------------
         ! Local variables
         !----------------------------------------------------------------------
-        integer (ip), parameter        :: NLONS = 16
-        integer (ip), parameter        :: NLATS = 25
-        integer (ip), parameter        :: NSYNTHS = 3
-        integer (ip)                   :: i, j, k !! Counters
-        real (wp)                      :: exact_polar_component(NLATS, NLONS, NSYNTHS)
-        real (wp)                      :: exact_azimuthal_component(NLATS, NLONS, NSYNTHS)
-        real (wp)                      :: exact_vorticity(NLATS, NLONS, NSYNTHS)
-        real (wp)                      :: exact_divergence(NLATS, NLONS, NSYNTHS)
-        real (wp)                      :: approximate_polar_component(NLATS, NLONS, NSYNTHS)
-        real (wp)                      :: approximate_azimuthal_component(NLATS, NLONS, NSYNTHS)
-        real (wp)                      :: approximate_vorticity(NLATS, NLONS, NSYNTHS)
-        real (wp)                      :: approximate_divergence(NLATS, NLONS, NSYNTHS)
-        character (len=:), allocatable :: previous_vorticity_error, previous_divergence_error
-        character (len=:), allocatable :: previous_polar_inversion_error
-        character (len=:), allocatable :: previous_azimuthal_inversion_error
+        integer(ip), parameter        :: NLONS = 16
+        integer(ip), parameter        :: NLATS = 25
+        integer(ip), parameter        :: NSYNTHS = 3
+        integer(ip)                   :: i, j, k !! Counters
+        real(wp)                      :: exact_polar_component(NLATS, NLONS, NSYNTHS)
+        real(wp)                      :: exact_azimuthal_component(NLATS, NLONS, NSYNTHS)
+        real(wp)                      :: exact_vorticity(NLATS, NLONS, NSYNTHS)
+        real(wp)                      :: exact_divergence(NLATS, NLONS, NSYNTHS)
+        real(wp)                      :: approximate_polar_component(NLATS, NLONS, NSYNTHS)
+        real(wp)                      :: approximate_azimuthal_component(NLATS, NLONS, NSYNTHS)
+        real(wp)                      :: approximate_vorticity(NLATS, NLONS, NSYNTHS)
+        real(wp)                      :: approximate_divergence(NLATS, NLONS, NSYNTHS)
+        character(len=:), allocatable :: previous_vorticity_error, previous_divergence_error
+        character(len=:), allocatable :: previous_polar_inversion_error
+        character(len=:), allocatable :: previous_azimuthal_inversion_error
         !----------------------------------------------------------------------
 
         !
         !==> Set up workspace arrays
         !
-        select type (sphere_type)
+        select type(sphere_type)
             !
             !==> For gaussian sphere
             !

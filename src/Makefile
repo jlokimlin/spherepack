@@ -483,7 +483,7 @@ islapgs.f90
 
 sfvpec.o: \
 spherepack_precision.o \
-scalar_synthesis_routines.o \
+shsec.o \
 sfvpec.f90
 	$(FC) $(FFLAGS) -c sfvpec.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
