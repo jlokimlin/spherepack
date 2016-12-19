@@ -230,11 +230,7 @@ module type_HFFTpack
         !-------------------------------------------------------
     end type HFFTpack
 
-
-
 contains
-
-
 
     subroutine hrffti(n, wsave)
         !----------------------------------------------------------------------
@@ -413,41 +409,41 @@ contains
             select case (iip)
                 case (2)
                     if (na == 0) then
-                        call  hradf2(m, ido, l1, c, mdimc, ch, m, wa(iw))
+                        call  half_forward_pass_2(m, ido, l1, c, mdimc, ch, m, wa(iw))
                     else
-                        call hradf2(m, ido, l1, ch, m, c, mdimc, wa(iw))
+                        call half_forward_pass_2(m, ido, l1, ch, m, c, mdimc, wa(iw))
                     end if
                 case (3)
                     ix2 = iw+ido
                     if (na == 0) then
-                        call  hradf3(m, ido, l1, c, mdimc, ch, m, wa(iw), wa(ix2))
+                        call  half_forward_pass_3(m, ido, l1, c, mdimc, ch, m, wa(iw), wa(ix2))
                     else
-                        call hradf3(m, ido, l1, ch, m, c, mdimc, wa(iw), wa(ix2))
+                        call half_forward_pass_3(m, ido, l1, ch, m, c, mdimc, wa(iw), wa(ix2))
                     end if
                 case(4)
                     ix2 = iw+ido
                     ix3 = ix2+ido
                     if (na == 0) then
-                        call  hradf4(m, ido, l1, c, mdimc, ch, m, wa(iw), wa(ix2), wa(ix3))
+                        call  half_forward_pass_4(m, ido, l1, c, mdimc, ch, m, wa(iw), wa(ix2), wa(ix3))
                     else
-                        call hradf4(m, ido, l1, ch, m, c, mdimc, wa(iw), wa(ix2), wa(ix3))
+                        call half_forward_pass_4(m, ido, l1, ch, m, c, mdimc, wa(iw), wa(ix2), wa(ix3))
                     end if
                 case (5)
                     ix2 = iw+ido
                     ix3 = ix2+ido
                     ix4 = ix3+ido
                     if (na == 0) then
-                        call hradf5(m, ido, l1, c, mdimc, ch, m, wa(iw), wa(ix2), wa(ix3), wa(ix4))
+                        call half_forward_pass_5(m, ido, l1, c, mdimc, ch, m, wa(iw), wa(ix2), wa(ix3), wa(ix4))
                     else
-                        call hradf5(m, ido, l1, ch, m, c, mdimc, wa(iw), wa(ix2), wa(ix3), wa(ix4))
+                        call half_forward_pass_5(m, ido, l1, ch, m, c, mdimc, wa(iw), wa(ix2), wa(ix3), wa(ix4))
                     end if
                 case default
                     if (ido == 1) na = 1-na
                     if (na == 0) then
-                        call  hradfg(m, ido, iip, l1, idl1, c, c, c, mdimc, ch, ch, m, wa(iw))
+                        call  half_forward_pass_n(m, ido, iip, l1, idl1, c, c, c, mdimc, ch, ch, m, wa(iw))
                         na = 1
                     else
-                        call hradfg(m, ido, iip, l1, idl1, ch, ch, ch, m, c, c, mdimc, wa(iw))
+                        call half_forward_pass_n(m, ido, iip, l1, idl1, ch, ch, ch, m, c, c, mdimc, wa(iw))
                         na = 0
                     end if
             end select
@@ -460,7 +456,7 @@ contains
 
 
 
-    subroutine hradf2(mp, ido, l1, cc, mdimcc, ch, mdimch, wa1)
+    subroutine half_forward_pass_2(mp, ido, l1, cc, mdimcc, ch, mdimch, wa1)
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
@@ -518,10 +514,10 @@ contains
         ch(1:mp, ido, 1, :) = cc(1:mp, ido,:, 1)
 
 
-    end subroutine hradf2
+    end subroutine half_forward_pass_2
 
 
-    subroutine hradf3(mp, ido, l1, cc, mdimcc, ch, mdimch, wa1, wa2)
+    subroutine half_forward_pass_3(mp, ido, l1, cc, mdimcc, ch, mdimch, wa1, wa2)
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
@@ -607,10 +603,10 @@ contains
             end do
         end do
 
-    end subroutine hradf3
+    end subroutine half_forward_pass_3
 
 
-    subroutine hradf4(mp, ido, l1, cc, mdimcc, ch, mdimch, wa1, wa2, wa3)
+    subroutine half_forward_pass_4(mp, ido, l1, cc, mdimcc, ch, mdimch, wa1, wa2, wa3)
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
@@ -731,10 +727,10 @@ contains
             end do
         end do
 
-    end subroutine hradf4
+    end subroutine half_forward_pass_4
 
 
-    subroutine hradf5(mp, ido, l1, cc, mdimcc, ch, mdimch, &
+    subroutine half_forward_pass_5(mp, ido, l1, cc, mdimcc, ch, mdimch, &
         wa1, wa2, wa3, wa4)
         !----------------------------------------------------------------------
         ! Dummy arguments
@@ -898,11 +894,11 @@ contains
             end do
         end do
 
-    end subroutine hradf5
+    end subroutine half_forward_pass_5
 
 
 
-    subroutine hradfg(mp, ido, iip, l1, idl1, cc, c1, c2, mdimcc, &
+    subroutine half_forward_pass_n(mp, ido, iip, l1, idl1, cc, c1, c2, mdimcc, &
         ch, ch2, mdimch, wa)
         !----------------------------------------------------------------------
         ! Dummy arguments
@@ -1081,7 +1077,7 @@ contains
             end associate
         end associate
 
-    end subroutine hradfg
+    end subroutine half_forward_pass_n
 
 
 
@@ -1136,39 +1132,39 @@ contains
             select case (iip)
                 case (2)
                     if (na == 0) then
-                        call hradb2(m, ido, l1, c, mdimc, ch, m, wa(iw))
+                        call half_backward_pass_2(m, ido, l1, c, mdimc, ch, m, wa(iw))
                     else
-                        call hradb2(m, ido, l1, ch, m, c, mdimc, wa(iw))
+                        call half_backward_pass_2(m, ido, l1, ch, m, c, mdimc, wa(iw))
                     end if
                 case (3)
                     ix2 = iw+ido
                     if (na == 0) then
-                        call  hradb3(m, ido, l1, c, mdimc, ch, m, wa(iw), wa(ix2))
+                        call  half_backward_pass_3(m, ido, l1, c, mdimc, ch, m, wa(iw), wa(ix2))
                     else
-                        call hradb3(m, ido, l1, ch, m, c, mdimc, wa(iw), wa(ix2))
+                        call half_backward_pass_3(m, ido, l1, ch, m, c, mdimc, wa(iw), wa(ix2))
                     end if
                 case (4)
                     ix2 = iw+ido
                     ix3 = ix2+ido
                     if (na == 0) then
-                        call hradb4(m, ido, l1, c, mdimc, ch, m, wa(iw), wa(ix2), wa(ix3))
+                        call half_backward_pass_4(m, ido, l1, c, mdimc, ch, m, wa(iw), wa(ix2), wa(ix3))
                     else
-                        call hradb4(m, ido, l1, ch, m, c, mdimc, wa(iw), wa(ix2), wa(ix3))
+                        call half_backward_pass_4(m, ido, l1, ch, m, c, mdimc, wa(iw), wa(ix2), wa(ix3))
                     end if
                 case (5)
                     ix2 = iw+ido
                     ix3 = ix2+ido
                     ix4 = ix3+ido
                     if (na == 0) then
-                        call hradb5(m, ido, l1, c, mdimc, ch, m, wa(iw), wa(ix2), wa(ix3), wa(ix4))
+                        call half_backward_pass_5(m, ido, l1, c, mdimc, ch, m, wa(iw), wa(ix2), wa(ix3), wa(ix4))
                     else
-                        call hradb5(m, ido, l1, ch, m, c, mdimc, wa(iw), wa(ix2), wa(ix3), wa(ix4))
+                        call half_backward_pass_5(m, ido, l1, ch, m, c, mdimc, wa(iw), wa(ix2), wa(ix3), wa(ix4))
                     end if
                 case default
                     if (na == 0) then
-                        call hradbg(m, ido, iip, l1, idl1, c, c, c, mdimc, ch, ch, m, wa(iw))
+                        call half_backward_pass_n(m, ido, iip, l1, idl1, c, c, c, mdimc, ch, ch, m, wa(iw))
                     else
-                        call hradbg(m, ido, iip, l1, idl1, ch, ch, ch, m, c, c, mdimc, wa(iw))
+                        call half_backward_pass_n(m, ido, iip, l1, idl1, ch, ch, ch, m, c, c, mdimc, wa(iw))
                     end if
                     if (ido /= 1) na = 1-na
             end select
@@ -1185,7 +1181,7 @@ contains
 
 
 
-    subroutine hradb2(mp, ido, l1, cc, mdimcc, ch, mdimch, wa1)
+    subroutine half_backward_pass_2(mp, ido, l1, cc, mdimcc, ch, mdimch, wa1)
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
@@ -1236,11 +1232,11 @@ contains
         ch(1:mp, ido,:, 1) = cc(1:mp, ido, 1,:)+cc(1:mp, ido, 1,:)
         ch(1:mp, ido,:, 2) = -(cc(1:mp, 1, 2,:)+cc(1:mp, 1, 2,:))
 
-    end subroutine hradb2
+    end subroutine half_backward_pass_2
 
 
 
-    subroutine hradb3(mp, ido, l1, cc, mdimcc, ch, mdimch, wa1, wa2)
+    subroutine half_backward_pass_3(mp, ido, l1, cc, mdimcc, ch, mdimch, wa1, wa2)
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
@@ -1319,11 +1315,11 @@ contains
             end do
         end do
 
-    end subroutine hradb3
+    end subroutine half_backward_pass_3
 
 
 
-    subroutine hradb4(mp, ido, l1, cc, mdimcc, ch, mdimch, wa1, wa2, wa3)
+    subroutine half_backward_pass_4(mp, ido, l1, cc, mdimcc, ch, mdimch, wa1, wa2, wa3)
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
@@ -1421,11 +1417,11 @@ contains
             -SQRT2*((cc(1: mp, ido, 1, 1: l1)-cc(1: mp, ido, 3, 1: l1)) &
             +(cc(1: mp, 1, 2, 1: l1)+cc(1: mp, 1, 4, 1: l1)))
 
-    end subroutine hradb4
+    end subroutine half_backward_pass_4
 
 
 
-    subroutine hradb5(mp, ido, l1, cc, mdimcc, ch, mdimch, &
+    subroutine half_backward_pass_5(mp, ido, l1, cc, mdimcc, ch, mdimch, &
         wa1, wa2, wa3, wa4)
         !----------------------------------------------------------------------
         ! Dummy arguments
@@ -1576,11 +1572,11 @@ contains
             end do
         end do
 
-    end subroutine hradb5
+    end subroutine half_backward_pass_5
 
 
 
-    subroutine hradbg(mp, ido, iip, l1, idl1, cc, c1, c2, mdimcc, &
+    subroutine half_backward_pass_n(mp, ido, iip, l1, idl1, cc, c1, c2, mdimcc, &
         ch, ch2, mdimch, wa)
         !----------------------------------------------------------------------
         ! Dummy arguments
@@ -1748,8 +1744,6 @@ contains
             end do
         end if
 
-    end subroutine hradbg
-
-
+    end subroutine half_backward_pass_n
 
 end module type_HFFTpack
