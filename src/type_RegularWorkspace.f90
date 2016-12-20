@@ -16,7 +16,7 @@ module type_RegularWorkspace
     use vector_analysis_routines, only: &
         VhaesAux
 
-    use module_vhses, only: &
+    use vector_synthesis_routines, only: &
         VhsesAux
 
     ! Explicit typing only

@@ -16,7 +16,7 @@ module type_GaussianWorkspace
     use vector_analysis_routines, only: &
         VhagsAux
 
-    use module_vhsgs, only: &
+    use vector_synthesis_routines, only: &
         VhsgsAux
 
     ! Explicit typing only

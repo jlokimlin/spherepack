@@ -289,7 +289,7 @@
 !                 (due to failure in eigenvalue routine)
 !
 !
-submodule (scalar_synthesis_routines) scalar_synthesis_gaussian_grid_saved
+submodule(scalar_synthesis_routines) scalar_synthesis_gaussian_grid_saved
 
 contains
 

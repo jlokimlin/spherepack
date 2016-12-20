@@ -314,7 +314,7 @@
 !
 !
 !
-submodule (scalar_analysis_routines) scalar_analysis_regular_grid_saved
+submodule(scalar_analysis_routines) scalar_analysis_regular_grid_saved
 
 contains
 

@@ -331,7 +331,7 @@
 !            = 4  error in the specification of ldwork
 !
 !
-submodule (scalar_synthesis_routines) scalar_synthesis_regular_grid
+submodule(scalar_synthesis_routines) scalar_synthesis_regular_grid
 
 contains
 

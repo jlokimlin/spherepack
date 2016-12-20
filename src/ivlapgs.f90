@@ -304,7 +304,7 @@ module module_ivlapgs
         wp, & ! working precision
         ip ! integer precision
 
-    use module_vhsgs, only: &
+    use vector_synthesis_routines, only: &
         vhsgs
 
     ! Explicit typing only

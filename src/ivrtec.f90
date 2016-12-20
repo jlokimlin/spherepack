@@ -253,7 +253,7 @@ module module_ivrtec
         wp, & ! working precision
         ip ! integer precision
 
-    use module_vhsec, only: &
+    use vector_synthesis_routines, only: &
         vhsec
 
     ! Explicit typing only

@@ -168,38 +168,37 @@ vector_analysis_gaussian_grid_saved.f90
 	$(FC) $(FFLAGS) -c vector_analysis_gaussian_grid_saved.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 
-vhsec.o: \
-spherepack_precision.o \
-type_HFFTpack.o \
-type_SpherepackAux.o\
-vhsec.f90
-	$(FC) $(FFLAGS) -c vhsec.f90 $(LINKS)\
-	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
-
-vhses.o: \
-spherepack_precision.o \
-type_HFFTpack.o \
-type_SpherepackAux.o\
-vhses.f90
-	$(FC) $(FFLAGS) -c vhses.f90 $(LINKS)\
-	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
-
-vhsgc.o: \
+vector_synthesis_routines.o: \
 spherepack_precision.o \
 type_HFFTpack.o \
 type_SpherepackAux.o\
 gaussian_latitudes_and_weights_routines.o \
-vhsgc.f90
-	$(FC) $(FFLAGS) -c vhsgc.f90 $(LINKS)\
+vector_synthesis_routines.f90
+	$(FC) $(FFLAGS) -c vector_synthesis_routines.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 
-vhsgs.o: \
-spherepack_precision.o \
-type_HFFTpack.o \
-type_SpherepackAux.o\
-gaussian_latitudes_and_weights_routines.o \
-vhsgs.f90
-	$(FC) $(FFLAGS) -c vhsgs.f90 $(LINKS)\
+vector_synthesis_regular_grid.o: \
+vector_synthesis_routines.o \
+vector_synthesis_regular_grid.f90
+	$(FC) $(FFLAGS) -c vector_synthesis_regular_grid.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
+
+vector_synthesis_regular_grid_saved.o: \
+vector_synthesis_routines.o \
+vector_synthesis_regular_grid_saved.f90
+	$(FC) $(FFLAGS) -c vector_synthesis_regular_grid_saved.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
+
+vector_synthesis_gaussian_grid.o: \
+vector_synthesis_routines.o \
+vector_synthesis_gaussian_grid.f90
+	$(FC) $(FFLAGS) -c vector_synthesis_gaussian_grid.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
+
+vector_synthesis_gaussian_grid_saved.o: \
+vector_synthesis_routines.o \
+vector_synthesis_gaussian_grid_saved.f90
+	$(FC) $(FFLAGS) -c vector_synthesis_gaussian_grid_saved.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 
 vtsec.o: \
@@ -263,37 +262,37 @@ trvsph.o: \
 spherepack_precision.o \
 type_HFFTpack.o \
 vector_analysis_routines.o \
-vhsec.o \
+vector_synthesis_routines.o \
 vector_analysis_routines.o \
-vhsgc.o \
+vector_synthesis_routines.o \
 trvsph.f90
 	$(FC) $(FFLAGS) -c trvsph.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 
 gradec.o: \
 spherepack_precision.o \
-vhsec.o \
+vector_synthesis_routines.o \
 gradec.f90
 	$(FC) $(FFLAGS) -c gradec.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 
 grades.o: \
 spherepack_precision.o \
-vhses.o \
+vector_synthesis_routines.o \
 grades.f90
 	$(FC) $(FFLAGS) -c grades.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 
 gradgc.o: \
 spherepack_precision.o \
-vhsgc.o \
+vector_synthesis_routines.o \
 gradgc.f90
 	$(FC) $(FFLAGS) -c gradgc.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 
 gradgs.o: \
 spherepack_precision.o \
-vhsgs.o \
+vector_synthesis_routines.o \
 gradgs.f90
 	$(FC) $(FFLAGS) -c gradgs.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
@@ -359,56 +358,56 @@ divergence_gaussian_grid_saved.f90
 
 idivec.o: \
 spherepack_precision.o \
-vhsec.o \
+vector_synthesis_routines.o \
 idivec.f90
 	$(FC) $(FFLAGS) -c idivec.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 
 idives.o: \
 spherepack_precision.o \
-vhses.o \
+vector_synthesis_routines.o \
 idives.f90
 	$(FC) $(FFLAGS) -c idives.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 
 idivgc.o: \
 spherepack_precision.o \
-vhsgc.o \
+vector_synthesis_routines.o \
 idivgc.f90
 	$(FC) $(FFLAGS) -c idivgc.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 
 idivgs.o: \
 spherepack_precision.o \
-vhsgs.o \
+vector_synthesis_routines.o \
 idivgs.f90
 	$(FC) $(FFLAGS) -c idivgs.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 
 idvtec.o: \
 spherepack_precision.o \
-vhsec.o \
+vector_synthesis_routines.o \
 idvtec.f90
 	$(FC) $(FFLAGS) -c idvtec.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 
 idvtes.o: \
 spherepack_precision.o \
-vhses.o \
+vector_synthesis_routines.o \
 idvtes.f90
 	$(FC) $(FFLAGS) -c idvtes.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 
 idvtgc.o: \
 spherepack_precision.o \
-vhsgc.o \
+vector_synthesis_routines.o \
 idvtgc.f90
 	$(FC) $(FFLAGS) -c idvtgc.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 
 idvtgs.o: \
 spherepack_precision.o \
-vhsgs.o \
+vector_synthesis_routines.o \
 idvtgs.f90
 	$(FC) $(FFLAGS) -c idvtgs.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
@@ -499,28 +498,28 @@ sfvpgs.f90
 
 isfvpec.o: \
 spherepack_precision.o \
-vhsec.o \
+vector_synthesis_routines.o \
 isfvpec.f90
 	$(FC) $(FFLAGS) -c isfvpec.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 
 isfvpes.o: \
 spherepack_precision.o \
-vhses.o \
+vector_synthesis_routines.o \
 isfvpes.f90
 	$(FC) $(FFLAGS) -c isfvpes.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 
 isfvpgc.o: \
 spherepack_precision.o \
-vhsgc.o \
+vector_synthesis_routines.o \
 isfvpgc.f90
 	$(FC) $(FFLAGS) -c isfvpgc.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 
 isfvpgs.o: \
 spherepack_precision.o \
-vhsgs.o \
+vector_synthesis_routines.o \
 isfvpgs.f90
 	$(FC) $(FFLAGS) -c isfvpgs.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
@@ -555,84 +554,84 @@ vrtgs.f90
 
 ivrtec.o: \
 spherepack_precision.o \
-vhsec.o \
+vector_synthesis_routines.o \
 ivrtec.f90
 	$(FC) $(FFLAGS) -c ivrtec.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 
 ivrtes.o: \
 spherepack_precision.o \
-vhses.o \
+vector_synthesis_routines.o \
 ivrtes.f90
 	$(FC) $(FFLAGS) -c ivrtes.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 
 ivrtgc.o: \
 spherepack_precision.o \
-vhsgc.o \
+vector_synthesis_routines.o \
 ivrtgc.f90
 	$(FC) $(FFLAGS) -c ivrtgc.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 
 ivrtgs.o: \
 spherepack_precision.o \
-vhsgs.o \
+vector_synthesis_routines.o \
 ivrtgs.f90
 	$(FC) $(FFLAGS) -c ivrtgs.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 
 vlapec.o: \
 spherepack_precision.o \
-vhsec.o \
+vector_synthesis_routines.o \
 vlapec.f90
 	$(FC) $(FFLAGS) -c vlapec.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 
 vlapes.o: \
 spherepack_precision.o \
-vhses.o \
+vector_synthesis_routines.o \
 vlapes.f90
 	$(FC) $(FFLAGS) -c vlapes.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 
 vlapgc.o: \
 spherepack_precision.o \
-vhsgc.o \
+vector_synthesis_routines.o \
 vlapgc.f90
 	$(FC) $(FFLAGS) -c vlapgc.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 
 vlapgs.o: \
 spherepack_precision.o \
-vhsgs.o \
+vector_synthesis_routines.o \
 vlapgs.f90
 	$(FC) $(FFLAGS) -c vlapgs.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 
 ivlapec.o: \
 spherepack_precision.o \
-vhsec.o \
+vector_synthesis_routines.o \
 ivlapec.f90
 	$(FC) $(FFLAGS) -c ivlapec.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 
 ivlapes.o: \
 spherepack_precision.o \
-vhses.o \
+vector_synthesis_routines.o \
 ivlapes.f90
 	$(FC) $(FFLAGS) -c ivlapes.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 
 ivlapgc.o: \
 spherepack_precision.o \
-vhsgc.o \
+vector_synthesis_routines.o \
 ivlapgc.f90
 	$(FC) $(FFLAGS) -c ivlapgc.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 
 ivlapgs.o: \
 spherepack_precision.o \
-vhsgs.o \
+vector_synthesis_routines.o \
 ivlapgs.f90
 	$(FC) $(FFLAGS) -c ivlapgs.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
@@ -670,7 +669,7 @@ type_Workspace.o\
 scalar_analysis_routines.o \
 scalar_synthesis_routines.o \
 vector_analysis_routines.o \
-vhses.o \
+vector_synthesis_routines.o \
 type_RegularWorkspace.f90
 	$(FC) $(FFLAGS) -c type_RegularWorkspace.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
@@ -681,7 +680,7 @@ type_Workspace.o\
 scalar_analysis_routines.o \
 scalar_synthesis_routines.o \
 vector_analysis_routines.o \
-vhsgs.o \
+vector_synthesis_routines.o \
 type_GaussianWorkspace.f90
 	$(FC) $(FFLAGS) -c type_GaussianWorkspace.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
@@ -730,7 +729,7 @@ type_SphericalUnitVectors.o \
 scalar_analysis_routines.o \
 scalar_synthesis_routines.o \
 vector_analysis_routines.o \
-vhsgs.o \
+vector_synthesis_routines.o \
 type_GaussianSphere.f90
 	$(FC) $(FFLAGS) -c type_GaussianSphere.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
@@ -746,7 +745,7 @@ type_SphericalUnitVectors.o \
 scalar_analysis_routines.o \
 scalar_synthesis_routines.o \
 vector_analysis_routines.o \
-vhses.o \
+vector_synthesis_routines.o \
 type_RegularSphere.f90
 	$(FC) $(FFLAGS) -c type_RegularSphere.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
@@ -805,10 +804,7 @@ sshifte.o \
 trssph.o \
 trvsph.o \
 vector_analysis_routines.o \
-vhsec.o \
-vhses.o \
-vhsgc.o \
-vhsgs.o \
+vector_synthesis_routines.o \
 vlapec.o \
 vlapes.o \
 vlapgc.o \

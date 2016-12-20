@@ -312,7 +312,7 @@ module module_vlapgc
         wp, & ! working precision
         ip ! integer precision
 
-    use module_vhsgc, only: &
+    use vector_synthesis_routines, only: &
         vhsgc
 
     ! Explicit typing only

@@ -525,13 +525,13 @@ module module_trvsph
     use vector_analysis_routines, only: &
         vhaec, vhaeci
 
-    use module_vhsec, only: &
+    use vector_synthesis_routines, only: &
         vhsec, vhseci
 
     use vector_analysis_routines, only: &
         vhagc, vhagci
 
-    use module_vhsgc, only: &
+    use vector_synthesis_routines, only: &
         vhsgc, vhsgci
 
     ! Explicit typing only

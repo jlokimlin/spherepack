@@ -304,7 +304,7 @@
 !                 (due to failure in eigenvalue routine)
 !
 !
-submodule (scalar_analysis_routines) scalar_analysis_gaussian_grid_saved
+submodule(scalar_analysis_routines) scalar_analysis_gaussian_grid_saved
 
 contains
 

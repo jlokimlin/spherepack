@@ -260,7 +260,7 @@ module module_idives
         wp, & ! working precision
         ip ! integer precision
 
-    use module_vhses, only: &
+    use vector_synthesis_routines, only: &
         vhses
 
     ! Explicit typing only

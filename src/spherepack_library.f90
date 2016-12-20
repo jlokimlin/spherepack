@@ -174,16 +174,16 @@ module spherepack_library
         vhagc, vhagci, &
         vhags, vhagsi
 
-    use module_vhsec, only: &
+    use vector_synthesis_routines, only: &
         vhsec, vhseci
 
-    use module_vhses, only: &
+    use vector_synthesis_routines, only: &
         vhses, vhsesi
 
-    use module_vhsgc, only: &
+    use vector_synthesis_routines, only: &
         vhsgc, vhsgci
 
-    use module_vhsgs, only: &
+    use vector_synthesis_routines, only: &
         vhsgs, vhsgsi
 
     !    use module_visequ, only: &
