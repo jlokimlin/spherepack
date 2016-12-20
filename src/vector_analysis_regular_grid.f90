@@ -316,67 +316,44 @@
 !            = 4  error in the specification of ldwork
 !
 !
-module module_vhaec
-
-    use spherepack_precision, only: &
-        wp, & ! working precision
-        ip ! integer precision
-
-    use type_HFFTpack, only: &
-        HFFTpack
-
-    use type_SpherepackAux, only: &
-        SpherepackAux
-
-    ! Explicit typing only
-    implicit none
-
-    ! Everything is private unless stated otherwise
-    public :: vhaec
-    public :: vhaeci
+submodule(vector_analysis_routines) vector_analysis_regular_grid
 
 contains
 
-subroutine vhaec(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
+module subroutine vhaec(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
            mdab, ndab, wvhaec, lvhaec, work, lwork, ierror)
-implicit none
-real(wp) :: bi
-real(wp) :: br
-real(wp) :: ci
-real(wp) :: cr
+real(wp) :: br(mdab, ndab, nt), bi(mdab, ndab, nt)
+real(wp) :: cr(mdab, ndab, nt), ci(mdab, ndab, nt)
 integer(ip) :: idv
 integer(ip) :: idvw
 integer(ip) :: ierror
-integer(ip) :: imid
-integer(ip) :: ist
 integer(ip) :: ityp
+integer(ip) :: jdvw
+integer(ip) :: lvhaec
+integer(ip) :: lwork
+integer(ip) :: mdab
+integer(ip) :: ndab
+integer(ip) :: nlat
+integer(ip) :: nlon
+integer(ip) :: nt
+real(wp) :: v(idvw, jdvw, nt), w(idvw, jdvw, nt)
+real(wp) :: work(lwork), wvhaec(lvhaec)
+
+! Local variables
+integer(ip) :: mmax
+integer(ip) :: lwzvin
+integer(ip) :: lzz1
+integer(ip) :: jw1
+integer(ip) :: jw2
+integer(ip) :: labc
+integer(ip) :: lnl
 integer(ip) :: iw1
 integer(ip) :: iw2
 integer(ip) :: iw3
 integer(ip) :: iw4
 integer(ip) :: iw5
-integer(ip) :: jdvw
-integer(ip) :: jw1
-integer(ip) :: jw2
-integer(ip) :: labc
-integer(ip) :: lnl
-integer(ip) :: lvhaec
-integer(ip) :: lwork
-integer(ip) :: lwzvin
-integer(ip) :: lzz1
-integer(ip) :: mdab
-integer(ip) :: mmax
-integer(ip) :: ndab
-integer(ip) :: nlat
-integer(ip) :: nlon
-integer(ip) :: nt
-real(wp) :: v
-real(wp) :: w
-real(wp) :: work
-real(wp) :: wvhaec
-dimension v(idvw, jdvw, nt), w(idvw, jdvw, nt), br(mdab, ndab, nt), &
-          bi(mdab, ndab, nt), cr(mdab, ndab, nt), ci(mdab, ndab, nt), &
-          work(lwork), wvhaec(lvhaec)
+integer(ip) :: imid
+integer(ip) :: ist
 
 ierror = 1
 if (nlat < 3) return
@@ -420,13 +397,65 @@ iw5 = iw4+3*imid*nlat
 lwzvin = lzz1+labc
 jw1 = lwzvin+1
 jw2 = jw1+lwzvin
-call vhaec1(nlat, nlon, ityp, nt, imid, idvw, jdvw, v, w, mdab, ndab, &
+call vhaec_lower_routine(nlat, nlon, ityp, nt, imid, idvw, jdvw, v, w, mdab, ndab, &
      br, bi, cr, ci, idv, work, work(iw1), work(iw2), work(iw3), &
      work(iw4), work(iw5), wvhaec, wvhaec(jw1), wvhaec(jw2))
 
-contains
+end subroutine vhaec
 
-subroutine vhaec1(nlat, nlon, ityp, nt, imid, idvw, jdvw, v, w, mdab, &
+module subroutine vhaeci(nlat, nlon, wvhaec, lvhaec, dwork, ldwork, ierror)
+integer(ip) :: ierror
+integer(ip) :: ldwork
+integer(ip) :: nlat
+integer(ip) :: nlon
+real(wp) :: wvhaec(lvhaec)
+real(wp) :: dwork(ldwork)
+
+! Local variables
+type(HFFTpack)      :: hfft
+type(SpherepackAux) :: sphere_aux
+integer(ip) :: imid
+integer(ip) :: iw1
+integer(ip) :: iw2
+integer(ip) :: labc
+integer(ip) :: lvhaec
+integer(ip) :: lwzvin
+integer(ip) :: lzz1
+integer(ip) :: mmax
+
+imid = (nlat+1)/2
+lzz1 = 2*nlat*imid
+mmax = min(nlat, (nlon+1)/2)
+labc = 3*(max(mmax-2, 0)*(2*nlat-mmax-1))/2
+
+
+ierror = 1
+if (nlat < 3) return
+ierror = 2
+if (nlon < 1) return
+ierror = 3
+
+if (lvhaec < 2*(lzz1+labc)+nlon+15) return
+ierror = 4
+if (ldwork < 2*nlat+2) return
+ierror = 0
+
+call sphere_aux%zvinit(nlat, nlon, wvhaec, dwork)
+
+!
+!  Set workspace pointers
+!
+lwzvin = lzz1+labc
+iw1 = lwzvin+1
+iw2 = iw1+lwzvin
+
+call sphere_aux%zwinit(nlat, nlon, wvhaec(iw1), dwork)
+
+call hfft%initialize(nlon, wvhaec(iw2))
+
+end subroutine vhaeci
+
+subroutine vhaec_lower_routine(nlat, nlon, ityp, nt, imid, idvw, jdvw, v, w, mdab, &
    ndab, br, bi, cr, ci, idv, ve, vo, we, wo, zv, zw, wzvin, wzwin, wrfft)
 
 real(wp) :: bi
@@ -483,8 +512,8 @@ type(HFFTpack)      :: hfft
 type(SpherepackAux) :: sphere_aux
 
 nlp1 = nlat+1
-tsn = 2.0_wp/nlon
-fsn = 4.0_wp/nlon
+tsn = TWO/nlon
+fsn = FOUR/nlon
 mlat = mod(nlat, 2)
 mlon = mod(nlon, 2)
 mmax = min(nlat, (nlon+1)/2)
@@ -526,15 +555,15 @@ if (ityp==2 .or. ityp==5 .or. ityp==8) goto 11
 do 10 k=1, nt
 do 10 mp1=1, mmax
 do 10 np1=mp1, nlat
-br(mp1, np1, k)=0.
-bi(mp1, np1, k)=0.
+br(mp1, np1, k) = ZERO
+bi(mp1, np1, k) = ZERO
 10 continue
 11 if (ityp==1 .or. ityp==4 .or. ityp==7) goto 13 
 do 12 k=1, nt
 do 12 mp1=1, mmax
 do 12 np1=mp1, nlat
-cr(mp1, np1, k)=0.
-ci(mp1, np1, k)=0.
+cr(mp1, np1, k) = ZERO
+ci(mp1, np1, k) = ZERO
 12 continue
 13 select case (ityp)
   case (0)
@@ -1018,61 +1047,6 @@ end do
 end do
 820 continue
 
-end subroutine vhaec1
+end subroutine vhaec_lower_routine
 
-end subroutine vhaec
-
-
-subroutine vhaeci(nlat, nlon, wvhaec, lvhaec, dwork, ldwork, ierror)
-
-integer(ip) :: ierror
-integer(ip) :: imid
-integer(ip) :: iw1
-integer(ip) :: iw2
-integer(ip) :: labc
-integer(ip) :: ldwork
-integer(ip) :: lvhaec
-integer(ip) :: lwzvin
-integer(ip) :: lzz1
-integer(ip) :: mmax
-integer(ip) :: nlat
-integer(ip) :: nlon
-real(wp) :: wvhaec(lvhaec)
-real(wp) :: dwork(ldwork)
-
-type(HFFTpack)      :: hfft
-type(SpherepackAux) :: sphere_aux
-
-imid = (nlat+1)/2
-lzz1 = 2*nlat*imid
-mmax = min(nlat, (nlon+1)/2)
-labc = 3*(max(mmax-2, 0)*(2*nlat-mmax-1))/2
-
-
-ierror = 1
-if (nlat < 3) return
-ierror = 2
-if (nlon < 1) return
-ierror = 3
-
-if (lvhaec < 2*(lzz1+labc)+nlon+15) return
-ierror = 4
-if (ldwork < 2*nlat+2) return
-ierror = 0
-
-call sphere_aux%zvinit(nlat, nlon, wvhaec, dwork)
-
-!
-!  Set workspace pointers
-!
-lwzvin = lzz1+labc
-iw1 = lwzvin+1
-iw2 = iw1+lwzvin
-
-call sphere_aux%zwinit(nlat, nlon, wvhaec(iw1), dwork)
-
-call hfft%initialize(nlon, wvhaec(iw2))
-
-end subroutine vhaeci
-
-end module module_vhaec
+end submodule vector_analysis_regular_grid

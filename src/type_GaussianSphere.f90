@@ -30,7 +30,7 @@ module type_GaussianSphere
     use scalar_synthesis_routines, only: &
         ShsgsAux
 
-    use module_vhags, only: &
+    use vector_analysis_routines, only: &
         VhagsAux
 
     use module_vhsgs, only: &

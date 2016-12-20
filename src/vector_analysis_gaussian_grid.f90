@@ -319,70 +319,47 @@
 !            = 3  error in the specification of lvhagc
 !            = 4  error in the specification of lwork
 !
-module module_vhagc
-
-    use spherepack_precision, only: &
-        wp, & ! working precision
-        ip ! integer precision
-
-    use type_HFFTpack, only: &
-        HFFTpack
-
-    use type_SpherepackAux, only: &
-        SpherepackAux
-
-    use gaussian_latitudes_and_weights_routines, only: &
-        compute_gaussian_latitudes_and_weights
-
-    ! Explicit typing only
-    implicit none
-
-    ! Everything is private unless stated otherwise
-    public :: vhagc
-    public :: vhagci
+submodule(vector_analysis_routines) vector_analysis_gaussian_grid
 
 contains
 
-subroutine vhagc(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
+module subroutine vhagc(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
            mdab, ndab, wvhagc, lvhagc, work, lwork, ierror)
-
-real(wp) :: bi
-real(wp) :: br
-real(wp) :: ci
-real(wp) :: cr
+! Dummy arguments
+real(wp) :: br(mdab, ndab, *), bi(mdab, ndab, *)
+real(wp) :: cr(mdab, ndab, *), ci(mdab, ndab, *)
 integer(ip) :: idv
 integer(ip) :: idvw
 integer(ip) :: ierror
+integer(ip) :: ityp
+integer(ip) :: jdvw
+integer(ip) :: lvhagc
+integer(ip) :: lwork
+integer(ip) :: mdab
+integer(ip) :: ndab
+integer(ip) :: nlat
+integer(ip) :: nlon
+integer(ip) :: nt
+real(wp) :: v(idvw, jdvw, *), w(idvw, jdvw, *)
+real(wp) :: work(lwork)
+real(wp) :: wvhagc(lvhagc)
+
+! Local variables
 integer(ip) :: imid
 integer(ip) :: ist
-integer(ip) :: ityp
 integer(ip) :: iw1
 integer(ip) :: iw2
 integer(ip) :: iw3
 integer(ip) :: iw4
 integer(ip) :: iw5
-integer(ip) :: jdvw
 integer(ip) :: jw1
 integer(ip) :: jw2
 integer(ip) :: jw3
 integer(ip) :: labc
 integer(ip) :: lnl
-integer(ip) :: lvhagc
-integer(ip) :: lwork
 integer(ip) :: lwzvin
 integer(ip) :: lzz1
-integer(ip) :: mdab
 integer(ip) :: mmax
-integer(ip) :: ndab
-integer(ip) :: nlat
-integer(ip) :: nlon
-integer(ip) :: nt
-real(wp) :: v
-real(wp) :: w
-real(wp) :: work(lwork)
-real(wp) :: wvhagc(lvhagc)
-dimension v(idvw, jdvw, *), w(idvw, jdvw, *), br(mdab, ndab, *), &
-          bi(mdab, ndab, *), cr(mdab, ndab, *), ci(mdab, ndab, *)
 
 ierror = 1
 if (nlat < 3) return
@@ -425,13 +402,92 @@ lwzvin = lzz1+labc
 jw1 = (nlat+1)/2+1
 jw2 = jw1+lwzvin
 jw3 = jw2+lwzvin
-call vhagc1(nlat, nlon, ityp, nt, imid, idvw, jdvw, v, w, mdab, ndab, &
+
+call vhagc_lower_routine(nlat, nlon, ityp, nt, imid, idvw, jdvw, v, w, mdab, ndab, &
 br, bi, cr, ci, idv, work, work(iw1), work(iw2), work(iw3), &
 work(iw4), work(iw5), wvhagc, wvhagc(jw1), wvhagc(jw2), wvhagc(jw3))
 
-contains
+end subroutine vhagc
 
-subroutine vhagc1(nlat, nlon, ityp, nt, imid, idvw, jdvw, v, w, mdab, &
+module subroutine vhagci(nlat, nlon, wvhagc, lvhagc, dwork, ldwork, ierror)
+! Dummy arguments
+integer(ip) :: ierror
+integer(ip) :: ldwork
+integer(ip) :: lvhagc
+integer(ip) :: nlat
+integer(ip) :: nlon
+real(wp) :: wvhagc(lvhagc)
+real(wp) :: dwork(ldwork)
+
+! Local variables
+integer(ip) :: imid
+integer(ip) :: iw1
+integer(ip) :: iw2
+integer(ip) :: iw3
+integer(ip) :: iwrk
+integer(ip) :: jw1
+integer(ip) :: jw2
+integer(ip) :: jw3
+integer(ip) :: labc
+real(wp) :: dummy_variable
+integer(ip) :: lwk
+integer(ip) :: lwvbin
+integer(ip) :: lzz1
+integer(ip) :: mmax
+type(HFFTpack)      :: hfft
+type(SpherepackAux) :: sphere_aux
+
+ierror = 1
+if (nlat < 3) return
+ierror = 2
+if (nlon < 1) return
+ierror = 3
+imid = (nlat+1)/2
+lzz1 = 2*nlat*imid
+mmax = min(nlat, (nlon+1)/2)
+labc = 3*(max(mmax-2, 0)*(nlat+nlat-mmax-1))/2
+imid = (nlat+1)/2
+if (lvhagc < 2*(lzz1+labc)+nlon+imid+15) return
+ierror = 4
+if (ldwork < 2*nlat*(nlat+1)+1) return
+ierror = 0
+!
+!     compute gaussian points in first nlat+1 words of dwork
+!     real
+!
+lwk = nlat*(nlat+2)
+
+jw1 = 1
+!     jw2 = jw1+nlat+nlat
+!     jw3 = jw2+nlat+nlat
+jw2 = jw1+nlat
+jw3 = jw2+nlat
+call compute_gaussian_latitudes_and_weights(nlat, dwork(jw1), dwork(jw2), dummy_variable, lwk, ierror)
+imid = (nlat+1)/2
+!
+!     set first imid words of real weights in dwork
+!     as single precision in first imid words of wvhagc
+!
+call setwts(imid, dwork(nlat+1), wvhagc)
+!
+!     first nlat+1 words of dwork contain  double theta
+!
+!     iwrk = nlat+2
+iwrk = (nlat+1)/2 +1
+iw1 = imid+1
+lwvbin = lzz1+labc
+iw2 = iw1+lwvbin
+iw3 = iw2+lwvbin
+
+call sphere_aux%vbgint(nlat, nlon, dwork, wvhagc(iw1), dwork(iwrk))
+
+call sphere_aux%wbgint(nlat, nlon, dwork, wvhagc(iw2), dwork(iwrk))
+
+call hfft%initialize(nlon, wvhagc(iw3))
+
+end subroutine vhagci
+
+subroutine vhagc_lower_routine(nlat, nlon, ityp, nt, imid, idvw, jdvw, v, w, mdab, &
 ndab, br, bi, cr, ci, idv, ve, vo, we, wo, vb, wb, wts, wvbin, wwbin, wrfft)
 
 real(wp) :: bi
@@ -499,8 +555,8 @@ type(HFFTpack)      :: hfft
 type(SpherepackAux) :: sphere_aux
 
 nlp1 = nlat+1
-tsn = 2.0_wp/nlon
-fsn = 4.0_wp/nlon
+tsn = TWO/nlon
+fsn = FOUR/nlon
 mlat = mod(nlat, 2)
 mlon = mod(nlon, 2)
 mmax = min(nlat, (nlon+1)/2)
@@ -542,15 +598,15 @@ if (ityp==2 .or. ityp==5 .or. ityp==8) goto 11
 do 10 k=1, nt
 do 10 mp1=1, mmax
 do 10 np1=mp1, nlat
-br(mp1, np1, k)=0.
-bi(mp1, np1, k)=0.
+br(mp1, np1, k) = ZERO
+bi(mp1, np1, k) = ZERO
 10 continue
 11 if (ityp==1 .or. ityp==4 .or. ityp==7) goto 13 
 do 12 k=1, nt
 do 12 mp1=1, mmax
 do 12 np1=mp1, nlat
-cr(mp1, np1, k)=0.
-ci(mp1, np1, k)=0.
+cr(mp1, np1, k) = ZERO
+ci(mp1, np1, k) = ZERO
 12 continue
 13 itypp = ityp+1
 goto (1, 100, 200, 300, 400, 500, 600, 700, 800), itypp
@@ -1119,88 +1175,7 @@ ci(mp1, np1, k) = ci(mp1, np1, k)-vb(i, np1, iv)*we(i, 2*mp1-1, k)*wts(i)
 822 continue
 820 continue
 
-end subroutine vhagc1
-
-end subroutine vhagc
-
-subroutine vhagci(nlat, nlon, wvhagc, lvhagc, dwork, ldwork, ierror)
-
-integer(ip) :: ierror
-integer(ip) :: imid
-integer(ip) :: iw1
-integer(ip) :: iw2
-integer(ip) :: iw3
-integer(ip) :: iwrk
-integer(ip) :: jw1
-integer(ip) :: jw2
-integer(ip) :: jw3
-integer(ip) :: labc
-integer(ip) :: ldwork
-integer(ip) :: lvhagc
-integer(ip) :: lwk
-integer(ip) :: lwvbin
-integer(ip) :: lzz1
-integer(ip) :: mmax
-integer(ip) :: nlat
-integer(ip) :: nlon
-real(wp) :: wvhagc(lvhagc)
-real(wp) :: dwork(ldwork)
-real(wp) :: dummy_variable
-
-type(HFFTpack)      :: hfft
-type(SpherepackAux) :: sphere_aux
-
-ierror = 1
-if (nlat < 3) return
-ierror = 2
-if (nlon < 1) return
-ierror = 3
-imid = (nlat+1)/2
-lzz1 = 2*nlat*imid
-mmax = min(nlat, (nlon+1)/2)
-labc = 3*(max(mmax-2, 0)*(nlat+nlat-mmax-1))/2
-imid = (nlat+1)/2
-if (lvhagc < 2*(lzz1+labc)+nlon+imid+15) return
-ierror = 4
-if (ldwork < 2*nlat*(nlat+1)+1) return
-ierror = 0
-!
-!     compute gaussian points in first nlat+1 words of dwork
-!     real
-!
-lwk = nlat*(nlat+2)
-
-jw1 = 1
-!     jw2 = jw1+nlat+nlat
-!     jw3 = jw2+nlat+nlat
-jw2 = jw1+nlat
-jw3 = jw2+nlat
-call compute_gaussian_latitudes_and_weights(nlat, dwork(jw1), dwork(jw2), dummy_variable, lwk, ierror)
-imid = (nlat+1)/2
-!
-!     set first imid words of real weights in dwork
-!     as single precision in first imid words of wvhagc
-!
-call setwts(imid, dwork(nlat+1), wvhagc)
-!
-!     first nlat+1 words of dwork contain  double theta
-!
-!     iwrk = nlat+2
-iwrk = (nlat+1)/2 +1
-iw1 = imid+1
-lwvbin = lzz1+labc
-iw2 = iw1+lwvbin
-iw3 = iw2+lwvbin
-
-call sphere_aux%vbgint(nlat, nlon, dwork, wvhagc(iw1), dwork(iwrk))
-
-call sphere_aux%wbgint(nlat, nlon, dwork, wvhagc(iw2), dwork(iwrk))
-
-call hfft%initialize(nlon, wvhagc(iw3))
-
-end subroutine vhagci
-
-
+end subroutine vhagc_lower_routine
 
 subroutine setwts(imid, dwts, wts)
 
@@ -1216,4 +1191,4 @@ wts(1:imid) = dwts(1:imid)
 
 end subroutine setwts
 
-end module module_vhagc
+end submodule vector_analysis_gaussian_grid

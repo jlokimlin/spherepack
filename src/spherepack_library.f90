@@ -168,16 +168,10 @@ module spherepack_library
     use module_trvsph, only: &
         trvsph
 
-    use module_vhaec, only: &
-        vhaec, vhaeci
-
-    use module_vhaes, only: &
-        vhaes, vhaesi
-
-    use module_vhagc, only: &
-        vhagc, vhagci
-
-    use module_vhags, only: &
+    use vector_analysis_routines, only: &
+        vhaec, vhaeci, &
+        vhaes, vhaesi, &
+        vhagc, vhagci, &
         vhags, vhagsi
 
     use module_vhsec, only: &

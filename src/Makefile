@@ -135,38 +135,37 @@ scalar_synthesis_gaussian_grid_saved.f90
 	$(FC) $(FFLAGS) -c scalar_synthesis_gaussian_grid_saved.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 
-vhaec.o: \
-spherepack_precision.o \
-type_HFFTpack.o \
-type_SpherepackAux.o\
-vhaec.f90
-	$(FC) $(FFLAGS) -c vhaec.f90 $(LINKS)\
-	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
-
-vhaes.o: \
-spherepack_precision.o \
-type_HFFTpack.o \
-type_SpherepackAux.o\
-vhaes.f90
-	$(FC) $(FFLAGS) -c vhaes.f90 $(LINKS)\
-	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
-
-vhagc.o: \
+vector_analysis_routines.o: \
 spherepack_precision.o \
 type_HFFTpack.o \
 type_SpherepackAux.o\
 gaussian_latitudes_and_weights_routines.o\
-vhagc.f90
-	$(FC) $(FFLAGS) -c vhagc.f90 $(LINKS)\
+vector_analysis_routines.f90
+	$(FC) $(FFLAGS) -c vector_analysis_routines.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 
-vhags.o: \
-spherepack_precision.o \
-type_HFFTpack.o \
-type_SpherepackAux.o\
-gaussian_latitudes_and_weights_routines.o\
-vhags.f90
-	$(FC) $(FFLAGS) -c vhags.f90 $(LINKS)\
+vector_analysis_regular_grid.o: \
+vector_analysis_routines.o \
+vector_analysis_regular_grid.f90
+	$(FC) $(FFLAGS) -c vector_analysis_regular_grid.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
+
+vector_analysis_regular_grid_saved.o: \
+vector_analysis_routines.o \
+vector_analysis_regular_grid_saved.f90
+	$(FC) $(FFLAGS) -c vector_analysis_regular_grid_saved.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
+
+vector_analysis_gaussian_grid.o: \
+vector_analysis_routines.o \
+vector_analysis_gaussian_grid.f90
+	$(FC) $(FFLAGS) -c vector_analysis_gaussian_grid.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
+
+vector_analysis_gaussian_grid_saved.o: \
+vector_analysis_routines.o \
+vector_analysis_gaussian_grid_saved.f90
+	$(FC) $(FFLAGS) -c vector_analysis_gaussian_grid_saved.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 
 vhsec.o: \
@@ -263,9 +262,9 @@ trssph.f90
 trvsph.o: \
 spherepack_precision.o \
 type_HFFTpack.o \
-vhaec.o \
+vector_analysis_routines.o \
 vhsec.o \
-vhagc.o \
+vector_analysis_routines.o \
 vhsgc.o \
 trvsph.f90
 	$(FC) $(FFLAGS) -c trvsph.f90 $(LINKS)\
@@ -670,7 +669,7 @@ spherepack_precision.o \
 type_Workspace.o\
 scalar_analysis_routines.o \
 scalar_synthesis_routines.o \
-vhaes.o \
+vector_analysis_routines.o \
 vhses.o \
 type_RegularWorkspace.f90
 	$(FC) $(FFLAGS) -c type_RegularWorkspace.f90 $(LINKS)\
@@ -681,7 +680,7 @@ spherepack_precision.o \
 type_Workspace.o\
 scalar_analysis_routines.o \
 scalar_synthesis_routines.o \
-vhags.o \
+vector_analysis_routines.o \
 vhsgs.o \
 type_GaussianWorkspace.f90
 	$(FC) $(FFLAGS) -c type_GaussianWorkspace.f90 $(LINKS)\
@@ -730,7 +729,7 @@ type_GaussianWorkspace.o\
 type_SphericalUnitVectors.o \
 scalar_analysis_routines.o \
 scalar_synthesis_routines.o \
-vhags.o \
+vector_analysis_routines.o \
 vhsgs.o \
 type_GaussianSphere.f90
 	$(FC) $(FFLAGS) -c type_GaussianSphere.f90 $(LINKS)\
@@ -746,7 +745,7 @@ type_RegularWorkspace.o\
 type_SphericalUnitVectors.o \
 scalar_analysis_routines.o \
 scalar_synthesis_routines.o \
-vhaes.o \
+vector_analysis_routines.o \
 vhses.o \
 type_RegularSphere.f90
 	$(FC) $(FFLAGS) -c type_RegularSphere.f90 $(LINKS)\
@@ -805,10 +804,7 @@ slapgs.o \
 sshifte.o \
 trssph.o \
 trvsph.o \
-vhaec.o \
-vhaes.o \
-vhagc.o \
-vhags.o \
+vector_analysis_routines.o \
 vhsec.o \
 vhses.o \
 vhsgc.o \

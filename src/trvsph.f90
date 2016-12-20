@@ -522,13 +522,13 @@ module module_trvsph
         wp, & ! working precision
         ip ! integer precision
 
-    use module_vhaec, only: &
+    use vector_analysis_routines, only: &
         vhaec, vhaeci
 
     use module_vhsec, only: &
         vhsec, vhseci
 
-    use module_vhagc, only: &
+    use vector_analysis_routines, only: &
         vhagc, vhagci
 
     use module_vhsgc, only: &

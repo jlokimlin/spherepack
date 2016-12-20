@@ -13,7 +13,7 @@ module type_RegularWorkspace
     use scalar_synthesis_routines, only: &
         ShsesAux
 
-    use module_vhaes, only: &
+    use vector_analysis_routines, only: &
         VhaesAux
 
     use module_vhses, only: &
