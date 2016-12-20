@@ -31,24 +31,23 @@
 !
 !
 !
-!
-! ... file divgs.f
+! ... file divgc.f
 !
 !     this file includes documentation and code for
-!     subroutine divgs          i
+!     subroutine divgc          i
 !
-! ... files which must be loaded with divgs.f
+! ... files which must be loaded with divgc.f
 !
-!     type_SpherepackAux.f, type_HFFTpack.f, vhags.f, shsgs.f, compute_gaussian_latitudes_and_weights.f
+!     type_SpherepackAux.f, type_HFFTpack.f, vhagc.f, shsgc.f, compute_gaussian_latitudes_and_weights.f
 !
 !
-!     subroutine divgs(nlat, nlon, isym, nt, divg, idiv, jdiv, br, bi, mdb, ndb, 
-!    +                 wshsgs, lshsgs, work, lwork, ierror)
+!     subroutine divgc(nlat, nlon, isym, nt, dv, idv, jdv, br, bi, mdb, ndb, 
+!    +                 wshsgc, lshsgc, work, lwork, ierror)
 !
 !     given the vector spherical harmonic coefficients br and bi, precomputed
-!     by subroutine vhags for a vector field (v, w), subroutine divgs
-!     computes the divergence of the vector field in the scalar array divg.
-!     divg(i, j) is the divergence at the gaussian colatitude point theta(i)
+!     by subroutine vhagc for a vector field (v, w), subroutine divgc
+!     computes the divergence of the vector field in the scalar array dv.
+!     dv(i, j) is the divergence at the gaussian colatitude point theta(i)
 !     (see nlat as input parameter) and east longitude
 !
 !            lambda(j) = (j-1)*2*pi/nlon
@@ -59,7 +58,8 @@
 !
 !     where sint = sin(theta(i)).  w is the east longitudinal and v
 !     is the colatitudinal component of the vector field from which
-!     br, bi were precomputed
+!     br, bi were precomputed.  required associated legendre polynomials
+!     are recomputed rather than stored as they are in subroutine divgs.
 !
 !
 !     input parameters
@@ -92,7 +92,7 @@
 !            do not exist in (v, w) about the equator.  in this case the
 !            divergence is neither symmetric nor antisymmetric about
 !            the equator.  the divergence is computed on the entire
-!            sphere.  i.e., in the array divg(i, j) for i=1, ..., nlat and
+!            sphere.  i.e., in the array dv(i, j) for i=1, ..., nlat and
 !            j=1, ..., nlon.
 !
 !      = 1
@@ -101,23 +101,23 @@
 !            in this case the divergence is antisymmetyric about
 !            the equator and is computed for the northern hemisphere
 !            only.  i.e., if nlat is odd the divergence is computed
-!            in the array divg(i, j) for i=1, ..., (nlat+1)/2 and for
+!            in the array dv(i, j) for i=1, ..., (nlat+1)/2 and for
 !            j=1, ..., nlon.  if nlat is even the divergence is computed
-!            in the array divg(i, j) for i=1, ..., nlat/2 and j=1, ..., nlon.
+!            in the array dv(i, j) for i=1, ..., nlat/2 and j=1, ..., nlon.
 !
 !      = 2
 !            w is symmetric and v is antisymmetric about the equator
 !            in this case the divergence is symmetyric about the
 !            equator and is computed for the northern hemisphere
 !            only.  i.e., if nlat is odd the divergence is computed
-!            in the array divg(i, j) for i=1, ..., (nlat+1)/2 and for
+!            in the array dv(i, j) for i=1, ..., (nlat+1)/2 and for
 !            j=1, ..., nlon.  if nlat is even the divergence is computed
-!            in the array divg(i, j) for i=1, ..., nlat/2 and j=1, ..., nlon.
+!            in the array dv(i, j) for i=1, ..., nlat/2 and j=1, ..., nlon.
 !
 !
 !     nt     nt is the number of scalar and vector fields.  some
 !            computational efficiency is obtained for multiple fields.
-!            in the program that calls divgs, the arrays br, bi, and divg
+!            in the program that calls divgc, the arrays br, bi, and dv
 !            can be three dimensional corresponding to an indexed multiple
 !            vector field.  in this case multiple scalar synthesis will
 !            be performed to compute the divergence for each field.  the
@@ -126,40 +126,39 @@
 !            description of the remaining parameters is simplified by
 !            assuming that nt=1 or that all the arrays are two dimensional.
 !
-!     idiv   the first dimension of the array divg as it appears in
-!            the program that calls divgs. if isym = 0 then idiv
+!     idv    the first dimension of the array dv as it appears in
+!            the program that calls divgc. if isym = 0 then idv
 !            must be at least nlat.  if isym = 1 or 2 and nlat is
-!            even then idiv must be at least nlat/2. if isym = 1 or 2
-!            and nlat is odd then idiv must be at least (nlat+1)/2.
+!            even then idv must be at least nlat/2. if isym = 1 or 2
+!            and nlat is odd then idv must be at least (nlat+1)/2.
 !
-!     jdiv   the second dimension of the array divg as it appears in
-!            the program that calls divgs. jdiv must be at least nlon.
+!     jdv    the second dimension of the array dv as it appears in
+!            the program that calls divgc. jdv must be at least nlon.
 !
 !     br, bi  two or three dimensional arrays (see input parameter nt)
 !            that contain vector spherical harmonic coefficients
-!            of the vector field (v, w) as computed by subroutine vhags.
-!     ***    br and bi must be computed by vhags prior to calling
-!            divgs.
+!            of the vector field (v, w) as computed by subroutine vhagc.
+!     ***    br and bi must be computed by vhagc prior to calling
+!            divgc.
 !
 !     mdb    the first dimension of the arrays br and bi as it
-!            appears in the program that calls divgs. mdb must be at
+!            appears in the program that calls divgc. mdb must be at
 !            least min(nlat, nlon/2) if nlon is even or at least
 !            min(nlat, (nlon+1)/2) if nlon is odd.
 !
 !     ndb    the second dimension of the arrays br and bi as it
-!            appears in the program that calls divgs. ndb must be at
+!            appears in the program that calls divgc. ndb must be at
 !            least nlat.
 !
 !
-!     wshsgs an array which must be intialized by subroutine shsgsi.
-!            once initialized, 
-!            wshsgs can be used repeatedly by divgs as long as nlon
-!            and nlat remain unchanged.  wshsgs must not be altered
-!            between calls of divgs.
+!     wshsgc an array which must be initialized by subroutine shsgci
+!            once initialized, wshsgc can be used repeatedly by divgc
+!            as long as nlon and nlat remain unchanged.  wshsgc must
+!            not be altered between calls of divgc.
 !
 !
-!     lshsgs the dimension of the array wshsgs as it appears in the
-!            program that calls divgs. define
+!     lshsgc the dimension of the array wshsgc as it appears in the
+!            program that calls divgc. define
 !
 !               l1 = min(nlat, (nlon+2)/2) if nlon is even or
 !               l1 = min(nlat, (nlon+1)/2) if nlon is odd
@@ -169,15 +168,14 @@
 !               l2 = nlat/2        if nlat is even or
 !               l2 = (nlat+1)/2    if nlat is odd
 !
-!            then lshsgs must be at least
+!            then lshsgc must be at least
 !
-!               nlat*(3*(l1+l2)-2)+(l1-1)*(l2*(2*nlat-l1)-3*l1)/2+nlon+15
-!
+!               nlat*(2*l2+3*l1-2)+3*l1*(1-l1)/2+nlon+15
 !
 !     work   a work array that does not have to be saved.
 !
 !     lwork  the dimension of the array work as it appears in the
-!            program that calls divgs. define
+!            program that calls divgc. define
 !
 !               l1 = min(nlat, (nlon+2)/2) if nlon is even or
 !               l1 = min(nlat, (nlon+1)/2) if nlon is odd
@@ -187,23 +185,25 @@
 !               l2 = nlat/2                    if nlat is even or
 !               l2 = (nlat+1)/2                if nlat is odd
 !
-!            if isym = 0 then lwork must be at least
 !
-!               nlat*((nt+1)*nlon+2*nt*l1+1)
+!            if isym is zero then lwork must be at least
 !
-!            if isym > 0 then lwork must be at least
+!               nlat*(nlon*nt+max(3*l2, nlon) + 2*nt*l1+1)
 !
-!               (nt+1)*l2*nlon+nlat*(2*nt*l1+1)
+!            if isym is not zero then lwork must be at least
+!
+!               l2*(nlon*nt+max(3*nlat, nlon)) + nlat*(2*nt*l1+1)
+!
 !
 !     **************************************************************
 !
 !     output parameters
 !
 !
-!    divg   a two or three dimensional array (see input parameter nt)
+!    dv     a two or three dimensional array (see input parameter nt)
 !           that contains the divergence of the vector field (v, w)
 !           whose coefficients br, bi where computed by subroutine
-!           vhags.  divg(i, j) is the divergence at the gaussian colatitude
+!           vhagc.  dv(i, j) is the divergence at the gaussian colatitude
 !           point theta(i) and longitude point lambda(j) = (j-1)*2*pi/nlon.
 !           the index ranges are defined above at the input parameter
 !           isym.
@@ -214,128 +214,100 @@
 !           = 2  error in the specification of nlon
 !           = 3  error in the specification of isym
 !           = 4  error in the specification of nt
-!           = 5  error in the specification of idiv
-!           = 6  error in the specification of jdiv
+!           = 5  error in the specification of idv
+!           = 6  error in the specification of jdv
 !           = 7  error in the specification of mdb
 !           = 8  error in the specification of ndb
-!           = 9  error in the specification of lshsgs
+!           = 9  error in the specification of lshsgc
 !           = 10 error in the specification of lwork
-! **********************************************************************
-!                                                                              
-!   
-module module_divgs
-
-    use spherepack_precision, only: &
-        wp, & ! working precision
-        ip ! integer precision
-
-    use scalar_synthesis_routines, only: &
-        shsgs
-
-    ! Explicit typing only
-    implicit none
-
-    ! Everything is private unless stated otherwise
-    private
-    public :: divgs
+!
+!
+submodule(divergence_routines) divergence_gaussian_grid
 
 contains
 
-    subroutine divgs(nlat, nlon, isym, nt, divg, idiv, jdiv, br, bi, mdb, ndb, &
-        wshsgs, lshsgs, work, lwork, ierror)
-        !----------------------------------------------------------------------
-        ! Dummy arguments
-        !----------------------------------------------------------------------
-        integer(ip), intent(in)     :: nlat
-        integer(ip), intent(in)     :: nlon
-        integer(ip), intent(in)     :: isym
-        integer(ip), intent(in)     :: nt
-        real(wp),    intent(inout)  :: divg(idiv, jdiv, nt)
-        integer(ip), intent(in)     :: idiv
-        integer(ip), intent(in)     :: jdiv
-        real(wp),    intent(inout)  :: br(mdb, ndb, nt)
-        real(wp),    intent(inout)  :: bi(mdb, ndb, nt)
-        integer(ip), intent(in)     :: mdb
-        integer(ip), intent(in)     :: ndb
-        real(wp),    intent(inout)  :: wshsgs(lshsgs)
-        integer(ip), intent(in)     :: lshsgs
-        real(wp),    intent(inout)  :: work(lwork)
-        integer(ip), intent(in)     :: lwork
-        integer(ip), intent(out)    :: ierror
-        !----------------------------------------------------------------------
-        ! Dummy arguments
-        !----------------------------------------------------------------------
-        integer(ip) :: l1, l2, ia, ib, mn, lp
-        integer(ip) :: is, ls, mab, nln
-        integer(ip) :: iwk, lwk, imid, mmax, lpimn
-        !------------------------------------------------------------------------
-
+    module subroutine divgc(nlat, nlon, isym, nt, dv, idv, jdv, br, bi, mdb, ndb, &
+        wshsgc, lshsgc, work, lwork, ierror)
+        real(wp) :: dv(idv, jdv, nt), br(mdb, ndb, nt), bi(mdb, ndb, nt)
+        integer(ip) :: ia
+        integer(ip) :: ib
+        integer(ip) :: idv
+        integer(ip) :: ierror
+        integer(ip) :: imid
+        integer(ip) :: is
+        integer(ip) :: isym
+        integer(ip) :: iwk
+        integer(ip) :: jdv
+        integer(ip) :: l1
+        integer(ip) :: l2
+        integer(ip) :: lpimn
+        integer(ip) :: ls
+        integer(ip) :: lshsgc
+        integer(ip) :: lwk
+        integer(ip) :: lwkmin
+        integer(ip) :: lwork
+        integer(ip) :: mab
+        integer(ip) :: mdb
+        integer(ip) :: mmax
+        integer(ip) :: mn
+        integer(ip) :: ndb
+        integer(ip) :: nlat
+        integer(ip) :: nln
+        integer(ip) :: nlon
+        integer(ip) :: nt
+        real(wp) :: wshsgc(lshsgc), work(lwork)
         !
-        !  Compute constants
+        !     check input parameters
         !
+        ierror = 1
+        if (nlat < 3) return
+        ierror = 2
+        if (nlon < 4) return
+        ierror = 3
+        if (isym < 0 .or. isym > 2) return
+        ierror = 4
+        if (nt < 0) return
+        ierror = 5
         imid = (nlat+1)/2
+        if ((isym == 0 .and. idv<nlat) .or. &
+            (isym>0 .and. idv<imid)) return
+        ierror = 6
+        if (jdv < nlon) return
+        ierror = 7
+        if (mdb < min(nlat, (nlon+1)/2)) return
         mmax = min(nlat, (nlon+2)/2)
-        lpimn = (imid*mmax*(2*nlat-mmax+1))/2
+        ierror = 8
+        if (ndb < nlat) return
+        ierror = 9
+        imid = (nlat+1)/2
+        lpimn = (imid*mmax*(nlat+nlat-mmax+1))/2
+        !     check permanent work space length
         l2 = (nlat+1)/2
         l1 = min((nlon+2)/2, nlat)
-        lp=nlat*(3*(l1+l2)-2)+(l1-1)*(l2*(2*nlat-l1)-3*l1)/2+nlon+15
+        if (lshsgc < nlat*(2*l2+3*l1-2)+3*l1*(1-l1)/2+nlon+15)return
+        ierror = 10
         !
-        !  verify unsaved work space (add to what shses requires, file f3)
+        !     verify unsaved work space (add to what shsgc requires)
         !
-        select case (isym)
-            case (0)
-                ls = nlat
-            case default
-                ls = imid
-        end select
-
+        ls = nlat
+        if (isym > 0) ls = imid
         nln = nt*ls*nlon
         !
-        !  set first dimension for a, b (as requried by shses)
+        !     set first dimension for a, b (as requried by shsgc)
         !
         mab = min(nlat, nlon/2+1)
         mn = mab*nlat*nt
-
-        !
-        !  Check validity of input parameters
-        !
-        if (nlat < 3) then
-            ierror = 1
-            return
-        else if (nlon < 4) then
-            ierror = 2
-            return
-        else if (isym < 0 .or. isym > 2) then
-            ierror = 3
-            return
-        else if (nt < 0) then
-            ierror = 4
-            return
-        else if (&
-            (isym == 0 .and. idiv < nlat) &
-            .or. &
-            (isym > 0 .and. idiv < imid) &
-            ) then
-            ierror = 5
-            return
-        else if (jdiv < nlon) then
-            ierror = 6
-            return
-        else if (mdb < min(nlat, (nlon+1)/2)) then
-            ierror = 7
-            return
-        else if (ndb < nlat) then
-            ierror = 8
-            return
-        else if (lshsgs < lp) then
-            ierror = 9
-            return
-        else if (lwork < nln+ls*nlon+2*mn+nlat) then
-            ierror = 10
-            return
+        !     if (lwork.lt. nln+ls*nlon+2*mn+nlat) return
+        l1 = min(nlat, (nlon+2)/2)
+        l2 = (nlat+1)/2
+        if (isym == 0) then
+            lwkmin =  nlat*(nt*nlon+max(3*l2, nlon)+2*nt*l1+1)
         else
-            ierror = 0
+            lwkmin = l2*(nt*nlon+max(3*nlat, nlon)) + nlat*(2*nt*l1+1)
         end if
+        if (lwork < lwkmin) return
+
+        ierror = 0
         !
         !     set work space pointers
         !
@@ -344,57 +316,55 @@ contains
         is = ib+mn
         iwk = is+nlat
         lwk = lwork-2*mn-nlat
-
-        call divgs1(nlat, nlon, isym, nt, divg, idiv, jdiv, br, bi, mdb, ndb, &
-            work(ia), work(ib), mab, work(is), wshsgs, lshsgs, work(iwk), lwk, &
+        call divgc_lower_routine(nlat, nlon, isym, nt, dv, idv, jdv, br, bi, mdb, ndb, &
+            work(ia), work(ib), mab, work(is), wshsgc, lshsgc, work(iwk), lwk, &
             ierror)
 
+    end subroutine divgc
 
-    end subroutine divgs
-
-    subroutine divgs1(nlat, nlon, isym, nt, divg, idiv, jdiv, br, bi, mdb, ndb, &
-        a, b, mab, sqnn, wshsgs, lshsgs, wk, lwk, ierror)
-        real :: a
-        real :: b
-        real :: bi
-        real :: br
-        real :: divg
-        real :: fn
-        integer :: idiv
-        integer :: ierror
-        integer :: isym
-        integer :: jdiv
-        integer :: k
-        integer :: lshsgs
-        integer :: lwk
-        integer :: m
-        integer :: mab
-        integer :: mdb
-        integer :: mmax
-        integer :: n
-        integer :: ndb
-        integer :: nlat
-        integer :: nlon
-        integer :: nt
-        real :: sqnn
-        real :: wk
-        real :: wshsgs
-        dimension divg(idiv, jdiv, nt), br(mdb, ndb, nt), bi(mdb, ndb, nt)
+    subroutine divgc_lower_routine(nlat, nlon, isym, nt, dv, idv, jdv, br, bi, mdb, ndb, &
+        a, b, mab, sqnn, wshsgc, lshsgc, wk, lwk, ierror)
+        real(wp) :: a
+        real(wp) :: b
+        real(wp) :: bi
+        real(wp) :: br
+        real(wp) :: dv
+        real(wp) :: fn
+        integer(ip) :: idv
+        integer(ip) :: ierror
+        integer(ip) :: isym
+        integer(ip) :: jdv
+        integer(ip) :: k
+        integer(ip) :: lshsgc
+        integer(ip) :: lwk
+        integer(ip) :: m
+        integer(ip) :: mab
+        integer(ip) :: mdb
+        integer(ip) :: mmax
+        integer(ip) :: n
+        integer(ip) :: ndb
+        integer(ip) :: nlat
+        integer(ip) :: nlon
+        integer(ip) :: nt
+        real(wp) :: sqnn
+        real(wp) :: wk
+        real(wp) :: wshsgc
+        dimension dv(idv, jdv, nt), br(mdb, ndb, nt), bi(mdb, ndb, nt)
         dimension a(mab, nlat, nt), b(mab, nlat, nt), sqnn(nlat)
-        dimension wshsgs(lshsgs), wk(lwk)
+        dimension wshsgc(lshsgc), wk(lwk)
         !
         !     set coefficient multiplyers
         !
         do  n=2, nlat
             fn = real(n - 1, kind=wp)
-            sqnn(n) = sqrt(fn * (fn + 1.0_wp))
+            sqnn(n) = sqrt(fn * (fn + ONE))
         end do
         !
         !     compute divergence scalar coefficients for each vector field
         !
         do  k=1, nt
-            a(1: mab, 1: nlat, k) = 0.0_wp
-            b(1: mab, 1: nlat, k) = 0.0_wp
+            a(1: mab, 1: nlat, k) = ZERO
+            b(1: mab, 1: nlat, k) = ZERO
             !
             !     compute m=0 coefficients
             !
@@ -414,11 +384,11 @@ contains
             end do
         end do
         !
-        !     synthesize a, b into divg
+        !     synthesize a, b into dv
         !
-        call shsgs(nlat, nlon, isym, nt, divg, idiv, jdiv, a, b, &
-            mab, nlat, wshsgs, lshsgs, wk, lwk, ierror)
+        call shsgc(nlat, nlon, isym, nt, dv, idv, jdv, a, b, &
+            mab, nlat, wshsgc, lshsgc, wk, lwk, ierror)
 
-    end subroutine divgs1
+    end subroutine divgc_lower_routine
 
-end module module_divgs
+end submodule divergence_gaussian_grid

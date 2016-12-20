@@ -6,16 +6,10 @@ module spherepack_library
         PI, &
         TWO_PI
 
-    use module_divec, only: &
-        divec
-
-    use module_dives, only: &
-        dives
-
-    use module_divgc, only: &
-        divgc
-
-    use module_divgs, only: &
+    use divergence_routines, only: &
+        divec, &
+        dives, &
+        divgc, &
         divgs
 
     use gaussian_latitudes_and_weights_routines, only: &
@@ -148,15 +142,9 @@ module spherepack_library
         shpg, shpgi
 
     use scalar_synthesis_routines, only: &
-        shsec, shseci
-
-    use scalar_synthesis_routines, only: &
-        shses, shsesi
-
-    use scalar_synthesis_routines, only: &
-        shsgc, shsgci
-
-    use scalar_synthesis_routines, only: &
+        shsec, shseci, &
+        shses, shsesi, &
+        shsgc, shsgci, &
         shsgs, shsgsi
 
     use module_slapec, only: &

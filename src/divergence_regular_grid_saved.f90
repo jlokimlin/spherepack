@@ -225,30 +225,13 @@
 !
 !
 !
-module module_dives
-
-    use spherepack_precision, only: &
-        wp, & ! working precision
-        ip ! integer precision
-
-    use scalar_synthesis_routines, only: &
-        shses
-
-    ! Explicit typing only
-    implicit none
-
-    ! Everything is private unless stated otherwise
-    private
-    public :: dives
+submodule(divergence_routines) divergence_regular_grid_saved
 
 contains
 
-    subroutine dives(nlat, nlon, isym, nt, dv, idv, jdv, br, bi, mdb, ndb, &
+    module subroutine dives(nlat, nlon, isym, nt, dv, idv, jdv, br, bi, mdb, ndb, &
         wshses, lshses, work, lwork, ierror)
-        implicit none
-        real(wp) :: bi
-        real(wp) :: br
-        real(wp) :: dv
+        real(wp) :: dv(idv, jdv, nt), br(mdb, ndb, nt), bi(mdb, ndb, nt)
         integer(ip) :: ia
         integer(ip) :: ib
         integer(ip) :: idv
@@ -272,11 +255,8 @@ contains
         integer(ip) :: nln
         integer(ip) :: nlon
         integer(ip) :: nt
-        real(wp) :: work
-        real(wp) :: wshses
+        real(wp) :: wshses(lshses), work(lwork)
 
-        dimension dv(idv, jdv, nt), br(mdb, ndb, nt), bi(mdb, ndb, nt)
-        dimension wshses(lshses), work(lwork)
         !
         !     check input parameters
         !
@@ -329,13 +309,13 @@ contains
         iwk = is+nlat
         lwk = lwork-2*mn-nlat
 
-        call dives1(nlat, nlon, isym, nt, dv, idv, jdv, br, bi, mdb, ndb, &
+        call dives_lower_routine(nlat, nlon, isym, nt, dv, idv, jdv, br, bi, mdb, ndb, &
             work(ia), work(ib), mab, work(is), wshses, lshses, work(iwk), lwk, &
             ierror)
 
     end subroutine dives
 
-    subroutine dives1(nlat, nlon, isym, nt, dv, idv, jdv, br, bi, mdb, ndb, &
+    subroutine dives_lower_routine(nlat, nlon, isym, nt, dv, idv, jdv, br, bi, mdb, ndb, &
         a, b, mab, sqnn, wshses, lshses, wk, lwk, ierror)
         implicit none
         real(wp) :: a
@@ -370,14 +350,14 @@ contains
         !     set coefficient multiplyers
         do n=2, nlat
             fn = real(n - 1, kind=wp)
-            sqnn(n) = sqrt(fn * (fn + 1.0_wp))
+            sqnn(n) = sqrt(fn * (fn + ONE))
         end do
         !
         !     compute divergence scalar coefficients for each vector field
         !
         do  k=1, nt
-            a(1: mab, 1: nlat, k) = 0.0_wp
-            b(1: mab, 1: nlat, k) = 0.0_wp
+            a(1: mab, 1: nlat, k) = ZERO
+            b(1: mab, 1: nlat, k) = ZERO
             !
             !     compute m=0 coefficients
             !
@@ -402,6 +382,6 @@ contains
         call shses(nlat, nlon, isym, nt, dv, idv, jdv, a, b, &
             mab, nlat, wshses, lshses, wk, lwk, ierror)
 
-    end subroutine dives1
+    end subroutine dives_lower_routine
 
-end module module_dives
+end submodule divergence_regular_grid_saved

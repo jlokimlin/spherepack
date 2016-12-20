@@ -222,25 +222,11 @@
 !           = 9  error in the specification of lshsec
 !           = 10 error in the specification of lwork
 !
-module module_divec
-
-    use spherepack_precision, only: &
-        wp, & ! working precision
-        ip ! integer precision
-
-    use scalar_synthesis_routines, only: &
-        shsec
-
-    ! Explicit typing only
-    implicit none
-
-    ! Everything is private unless stated otherwise
-    private
-    public :: divec
+submodule(divergence_routines) divergence_regular_grid
 
 contains
 
-    subroutine divec(nlat, nlon, isym, nt, dv, idv, jdv, br, bi, mdb, ndb, &
+    module subroutine divec(nlat, nlon, isym, nt, dv, idv, jdv, br, bi, mdb, ndb, &
         wshsec, lshsec, work, lwork, ierror)
         !----------------------------------------------------------------------
         ! Dummy arguments
@@ -355,82 +341,79 @@ contains
         iwk = is+nlat
         lwk = lwork-2*mn-nlat
 
-        call divec1(nlat, nlon, isym, nt, dv, idv, jdv, br, bi, mdb, ndb, &
+        call divec_lower_routine(nlat, nlon, isym, nt, dv, idv, jdv, br, bi, mdb, ndb, &
             work(ia), work(ib), mab, work(is), wshsec, lshsec, work(iwk), lwk, &
             ierror)
 
-    contains
-
-        subroutine divec1(nlat, nlon, isym, nt, dv, idv, jdv, br, bi, mdb, ndb, &
-            a, b, mab, sqnn, wshsec, lshsec, wk, lwk, ierror)
-            real :: a
-            real :: b
-            real :: bi
-            real :: br
-            real :: dv
-            real :: fn
-            integer(ip) :: idv
-            integer(ip) :: ierror
-            integer(ip) :: isym
-            integer(ip) :: jdv
-            integer(ip) :: k
-            integer(ip) :: lshsec
-            integer(ip) :: lwk
-            integer(ip) :: m
-            integer(ip) :: mab
-            integer(ip) :: mdb
-            integer(ip) :: mmax
-            integer(ip) :: n
-            integer(ip) :: ndb
-            integer(ip) :: nlat
-            integer(ip) :: nlon
-            integer(ip) :: nt
-            real :: sqnn
-            real :: wk
-            real :: wshsec
-            dimension dv(idv, jdv, nt), br(mdb, ndb, nt), bi(mdb, ndb, nt)
-            dimension a(mab, nlat, nt), b(mab, nlat, nt), sqnn(nlat)
-            dimension wshsec(lshsec), wk(lwk)
-            !
-            !     set coefficient multiplyers
-            !
-            do n=2, nlat
-                fn = real(n - 1, kind=wp)
-                sqnn(n) = sqrt(fn * (fn + 1.0_wp))
-            end do
-            !
-            !     compute divergence scalar coefficients for each vector field
-            !
-            do k=1, nt
-                a(1: mab, 1: nlat, k) = 0.0_wp
-                b(1: mab, 1: nlat, k) = 0.0_wp
-                !
-                !     compute m=0 coefficients
-                !
-                do n=2, nlat
-                    a(1, n, k) = -sqnn(n)*br(1, n, k)
-                    b(1, n, k) = -sqnn(n)*bi(1, n, k)
-                end do
-                !
-                !     compute m>0 coefficients using vector spherepack value for mmax
-                !
-                mmax = min(nlat, (nlon+1)/2)
-                do m=2, mmax
-                    do n=m, nlat
-                        a(m, n, k) = -sqnn(n)*br(m, n, k)
-                        b(m, n, k) = -sqnn(n)*bi(m, n, k)
-                    end do
-                end do
-            end do
-            !
-            !     synthesize a, b into dv
-            !
-            call shsec(nlat, nlon, isym, nt, dv, idv, jdv, a, b, &
-                mab, nlat, wshsec, lshsec, wk, lwk, ierror)
-
-        end subroutine divec1
-
-
     end subroutine divec
 
-end module module_divec
+    subroutine divec_lower_routine(nlat, nlon, isym, nt, dv, idv, jdv, br, bi, mdb, ndb, &
+        a, b, mab, sqnn, wshsec, lshsec, wk, lwk, ierror)
+        real :: a
+        real :: b
+        real :: bi
+        real :: br
+        real :: dv
+        real :: fn
+        integer(ip) :: idv
+        integer(ip) :: ierror
+        integer(ip) :: isym
+        integer(ip) :: jdv
+        integer(ip) :: k
+        integer(ip) :: lshsec
+        integer(ip) :: lwk
+        integer(ip) :: m
+        integer(ip) :: mab
+        integer(ip) :: mdb
+        integer(ip) :: mmax
+        integer(ip) :: n
+        integer(ip) :: ndb
+        integer(ip) :: nlat
+        integer(ip) :: nlon
+        integer(ip) :: nt
+        real :: sqnn
+        real :: wk
+        real :: wshsec
+        dimension dv(idv, jdv, nt), br(mdb, ndb, nt), bi(mdb, ndb, nt)
+        dimension a(mab, nlat, nt), b(mab, nlat, nt), sqnn(nlat)
+        dimension wshsec(lshsec), wk(lwk)
+        !
+        !     set coefficient multiplyers
+        !
+        do n=2, nlat
+            fn = real(n - 1, kind=wp)
+            sqnn(n) = sqrt(fn * (fn + ONE))
+        end do
+        !
+        !     compute divergence scalar coefficients for each vector field
+        !
+        do k=1, nt
+            a(1: mab, 1: nlat, k) = ZERO
+            b(1: mab, 1: nlat, k) = ZERO
+            !
+            !     compute m=0 coefficients
+            !
+            do n=2, nlat
+                a(1, n, k) = -sqnn(n)*br(1, n, k)
+                b(1, n, k) = -sqnn(n)*bi(1, n, k)
+            end do
+            !
+            !     compute m>0 coefficients using vector spherepack value for mmax
+            !
+            mmax = min(nlat, (nlon+1)/2)
+            do m=2, mmax
+                do n=m, nlat
+                    a(m, n, k) = -sqnn(n)*br(m, n, k)
+                    b(m, n, k) = -sqnn(n)*bi(m, n, k)
+                end do
+            end do
+        end do
+        !
+        !     synthesize a, b into dv
+        !
+        call shsec(nlat, nlon, isym, nt, dv, idv, jdv, a, b, &
+            mab, nlat, wshsec, lshsec, wk, lwk, ierror)
+
+    end subroutine divec_lower_routine
+
+end submodule divergence_regular_grid

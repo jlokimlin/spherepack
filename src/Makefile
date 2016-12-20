@@ -327,32 +327,35 @@ igradgs.f90
 	$(FC) $(FFLAGS) -c igradgs.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 
-divec.o: \
+divergence_routines.o: \
 spherepack_precision.o \
 scalar_synthesis_routines.o \
-divec.f90
-	$(FC) $(FFLAGS) -c divec.f90 $(LINKS)\
+divergence_routines.f90
+	$(FC) $(FFLAGS) -c divergence_routines.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 
-dives.o: \
-spherepack_precision.o \
-scalar_synthesis_routines.o \
-dives.f90
-	$(FC) $(FFLAGS) -c dives.f90 $(LINKS)\
+divergence_regular_grid.o: \
+divergence_routines.o \
+divergence_regular_grid.f90
+	$(FC) $(FFLAGS) -c divergence_regular_grid.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 
-divgc.o: \
-spherepack_precision.o \
-scalar_synthesis_routines.o \
-divgc.f90
-	$(FC) $(FFLAGS) -c divgc.f90 $(LINKS)\
+divergence_regular_grid_saved.o: \
+divergence_routines.o \
+divergence_regular_grid_saved.f90
+	$(FC) $(FFLAGS) -c divergence_regular_grid_saved.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 
-divgs.o: \
-spherepack_precision.o \
-scalar_synthesis_routines.o \
-divgs.f90
-	$(FC) $(FFLAGS) -c divgs.f90 $(LINKS)\
+divergence_gaussian_grid.o: \
+divergence_routines.o \
+divergence_gaussian_grid.f90
+	$(FC) $(FFLAGS) -c divergence_gaussian_grid.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
+
+divergence_gaussian_grid_saved.o: \
+divergence_routines.o \
+divergence_gaussian_grid_saved.f90
+	$(FC) $(FFLAGS) -c divergence_gaussian_grid_saved.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 
 idivec.o: \
@@ -751,10 +754,7 @@ type_RegularSphere.f90
 
 spherepack_library.o: \
 spherepack_precision.o \
-divec.o \
-dives.o \
-divgc.o \
-divgs.o \
+divergence_routines.o \
 gaussian_latitudes_and_weights_routines.o \
 geo2math.o \
 gradec.o \
