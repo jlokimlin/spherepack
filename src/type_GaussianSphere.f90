@@ -43,7 +43,7 @@ module type_GaussianSphere
     private
     public :: GaussianSphere
 
-    ! Declare derived data type
+    
     type, extends (Sphere), public :: GaussianSphere
         !----------------------------------------------------------------------
         ! Type components
@@ -110,13 +110,13 @@ contains
         call self%destroy()
 
         !
-        !==> Allocate polymorphic components
+        !  Allocate polymorphic components
         !
         allocate( self%grid, source=GaussianGrid(nlat,nlon) )
         allocate( self%workspace, source=GaussianWorkspace(nlat, nlon) )
 
         !
-        !==> Address optional arguments
+        !  Address optional arguments
         !
         if (present(ntrunc)) then
             ntrunc_op = ntrunc
@@ -149,7 +149,7 @@ contains
         end if
 
         !
-        !==> Create parent type
+        !  Create parent type
         !
         call self%create_sphere(nlat, nlon, ntrunc_op, isym_op, ityp_op, nt_op, rsphere_op)
 
@@ -219,7 +219,7 @@ contains
                         ierror => error_flag &
                         )
                         !
-                        !==> perform the (real) spherical harmonic scalar analysis
+                        !  perform the (real) spherical harmonic scalar analysis
                         !
                         call aux%shags(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, &
                             wshags, lshags, work, lwork, ierror)
@@ -301,7 +301,7 @@ contains
                         ierror => error_flag &
                         )
                         !
-                        !==> Perform gaussian scalar synthesis
+                        !  Perform gaussian scalar synthesis
                         !
                         call aux%shsgs(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, &
                             wshsgs, lshsgs, work, lwork, ierror)
@@ -312,7 +312,7 @@ contains
         end select
 
         !
-        !==> Address error flag
+        !  Address error flag
         !
         select case (error_flag)
             case (0)
@@ -391,7 +391,7 @@ contains
                         )
 
                         !
-                        !==> Perform gaussian vector analysis
+                        !  Perform gaussian vector analysis
                         !
                         call aux%vhags(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
                             mdab, ndab, wvhags, lvhags, work, lwork, ierror)
@@ -402,7 +402,7 @@ contains
         end select
 
         !
-        !==> Address error flag
+        !  Address error flag
         !
         select case (error_flag)
             case (0)
@@ -504,7 +504,7 @@ contains
                         ierror => error_flag &
                         )
                         !
-                        !==> Perform gaussian vector synthesis
+                        !  Perform gaussian vector synthesis
                         !
                         call aux%vhsgs(nlat, nlon, ityp, nt, v, w, idvw, jdvw, &
                             br, bi, cr, ci, mdab, ndab, wvhsgs, lvhsgs, work, lwork, ierror)
@@ -515,7 +515,7 @@ contains
         end select
 
         !
-        !==> Address error flag
+        !  Address error flag
         !
         select case (error_flag)
             case (0)
@@ -595,7 +595,7 @@ contains
         end if
 
         !
-        !==> Allocate memory
+        !  Allocate memory
         !
         associate( nlat => self%NUMBER_OF_LATITUDES )
 
@@ -604,7 +604,7 @@ contains
         end associate
 
         !
-        !==> compute the integrant
+        !  compute the integrant
         !
         associate( grid => self%grid )
             select type(grid)
@@ -616,13 +616,13 @@ contains
                     f => scalar_function &
                     )
                     !
-                    !==> Apply trapezoidal rule
+                    !  Apply trapezoidal rule
                     !
                     do k = 1, nlat
                         summation(k) = sum(f(k, :)) * dphi
                     end do
                     !
-                    !==> Apply gaussian quadrature
+                    !  Apply gaussian quadrature
                     !
                     summation = summation * wts
                 end associate
@@ -630,12 +630,12 @@ contains
         end associate
 
         !
-        !==> Set integral \int_{S^2} f( theta, phi ) dS
+        !  Set integral \int_{S^2} f( theta, phi ) dS
         !
         return_value = sum(summation)
 
         !
-        !==> Release memory
+        !  Release memory
         !
         deallocate(summation)
 
@@ -667,7 +667,7 @@ contains
             nlon => self%NUMBER_OF_LONGITUDES &
             )
             !
-            !==> Allocate memory
+            !  Allocate memory
             !
             allocate( integrant(nlat, nlon, 3) )
 
@@ -679,7 +679,7 @@ contains
                         f => scalar_function(k, l) &
                         )
                         !
-                        !==> Compute integrant
+                        !  Compute integrant
                         !
                         integrant(k, l, 1) = u%x * f
                         integrant(k, l, 2) = u%y * f
@@ -697,7 +697,7 @@ contains
             f3 => integrant(:,:,3) &
             )
             !
-            !==> Compute first moment
+            !  Compute first moment
             !
             m%x = self%compute_surface_integral(f1)
             m%y = self%compute_surface_integral(f2)

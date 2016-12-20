@@ -2191,7 +2191,7 @@ end subroutine daxpy
         !----------------------------------------------------------------------
 
         !
-        !==> Executable Statements
+        !  Executable Statements
         !
         if (n < 1  .or.  incx < 1 ) then
             norm = ZERO
@@ -2219,7 +2219,7 @@ end subroutine daxpy
         end if
 
         !
-        !==> Return norm
+        !  Return norm
         !
         return_value = norm
 

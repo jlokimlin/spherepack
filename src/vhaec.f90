@@ -1063,7 +1063,7 @@ ierror = 0
 call sphere_aux%zvinit(nlat, nlon, wvhaec, dwork)
 
 !
-!==> Set workspace pointers
+!  Set workspace pointers
 !
 lwzvin = lzz1+labc
 iw1 = lwzvin+1

@@ -24,7 +24,6 @@ module scalar_synthesis_routines
     public :: shsgsi
     public :: ShsgsAux
 
-    ! Declare derived data type
     type, public :: ShsesAux
         !-----------------------------------------
         ! Type components
@@ -45,7 +44,6 @@ module scalar_synthesis_routines
         !-----------------------------------------
     end type ShsesAux
 
-    ! Declare derived data type
     type, public :: ShsgsAux
         !-----------------------------------------
         ! Type components
@@ -158,8 +156,16 @@ module scalar_synthesis_routines
             integer(ip), intent(out)    :: ierror
             !----------------------------------------------------------------------
         end subroutine shsgsi
-
     end interface
+
+    !------------------------------------------------------------------
+    ! Parameters confined to the module
+    !------------------------------------------------------------------
+    real(wp), parameter :: ZERO = 0.0_wp
+    real(wp), parameter :: HALF = 0.5_wp
+    real(wp), parameter :: ONE = 1.0_wp
+    real(wp), parameter :: TWO = 2.0_wp
+    !------------------------------------------------------------------
 
 contains
 
@@ -234,7 +240,7 @@ contains
         !----------------------------------------------------------------------
 
         !
-        !==> Address optional arguments
+        !  Address optional arguments
         !
         if (present(nt)) then
             nt_op = nt
@@ -249,7 +255,7 @@ contains
         end if
 
         !
-        !==> Compute workspace size
+        !  Compute workspace size
         !
         if (ityp_op <= 2) then
             ! Set workspace size
@@ -333,7 +339,7 @@ contains
         !----------------------------------------------------------------------
 
         !
-        !==> Address optional arguments
+        !  Address optional arguments
         !
         if (present(nt)) then
             nt_op = nt
@@ -348,7 +354,7 @@ contains
         end if
 
         !
-        !==> Compute workspace size
+        !  Compute workspace size
         !
         select case (isym)
             case (0)

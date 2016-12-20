@@ -77,7 +77,7 @@ program tvha
     !----------------------------------------------------------------------
 
     !
-    !==> Test gaussian case
+    !  Test gaussian case
     !
     allocate( GaussianSphere :: sphere_dat )
 
@@ -86,7 +86,7 @@ program tvha
     deallocate( sphere_dat )
 
     !
-    !==> Test regular case
+    !  Test regular case
     !
     allocate( RegularSphere :: sphere_dat )
 
@@ -121,7 +121,7 @@ contains
         !----------------------------------------------------------------------
 
         !
-        !==> Set up workspace arrays
+        !  Set up workspace arrays
         !
         select type(sphere_type)
             type is (GaussianSphere)
@@ -144,7 +144,7 @@ contains
         end select
 
         !
-        !==> Set scalar stream and velocity potential fields as polys in x,y,z
+        !  Set scalar stream and velocity potential fields as polys in x,y,z
         !    and then set v,w from st,sv scalar fields
         !
         associate( &
@@ -201,7 +201,7 @@ contains
 
 
         !
-        !==> Perform analysis then synthesis
+        !  Perform analysis then synthesis
         !
         do k = 1, NSYNTHS
             associate( &
@@ -221,7 +221,7 @@ contains
 
 
         !
-        !==> Compute discretization error
+        !  Compute discretization error
         !
         associate( &
             ve => polar_component, &
@@ -234,7 +234,7 @@ contains
                 err2w => maxval(abs(w - we)) &
                 )
                 !
-                !==> Print earlier output from platform with 64-bit floating point
+                !  Print earlier output from platform with 64-bit floating point
                 !    arithmetic followed by the output from this computer
                 !
                 write( stdout, '(a)') ''
@@ -253,7 +253,7 @@ contains
             end associate
         end associate
         !
-        !==> Release memory
+        !  Release memory
         !
         call sphere_type%destroy()
         deallocate( previous_polar_error )

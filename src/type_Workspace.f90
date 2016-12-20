@@ -12,7 +12,7 @@ module type_Workspace
     public :: Workspace
 
 
-    ! Declare derived data type
+    
     type, abstract, public :: Workspace
         !----------------------------------------------------------------------
         ! Type components
@@ -59,7 +59,7 @@ contains
         end if
 
         !
-        !==> Make copies
+        !  Make copies
         !
         self%initialized = object_to_be_copied%initialized
         self%legendre_workspace = object_to_be_copied%legendre_workspace
@@ -89,7 +89,7 @@ contains
         if (.not.self%initialized) return
 
         !
-        !==> Release memory
+        !  Release memory
         !
         if (allocated(self%legendre_workspace)) then
             deallocate(self%legendre_workspace)

@@ -74,7 +74,7 @@ program tvlap
     !----------------------------------------------------------------------
 
     !
-    !==> Test gaussian case
+    !  Test gaussian case
     !
     allocate( GaussianSphere :: sphere_dat )
 
@@ -83,7 +83,7 @@ program tvlap
     deallocate( sphere_dat )
 
     !
-    !==> Test regular case
+    !  Test regular case
     !
     allocate( RegularSphere :: sphere_dat )
 
@@ -120,7 +120,7 @@ contains
         !----------------------------------------------------------------------
 
         !
-        !==> Set up workspace arrays
+        !  Set up workspace arrays
         !
         select type(sphere_type)
             type is (GaussianSphere)
@@ -147,7 +147,7 @@ contains
         end select
 
         !
-        !==> test all vector laplacian and inverse vector laplacian subroutines
+        !  test all vector laplacian and inverse vector laplacian subroutines
         !
         associate( &
             r => sphere_type%unit_vectors%radial, &
@@ -165,12 +165,12 @@ contains
                         sinp => -phi(i,j)%x &
                         )
                         !
-                        !==> set vector field v,w
+                        !  set vector field v,w
                         !
                         ve(i,j) = cosp
                         we(i,j) = -cost*sinp
                         !
-                        !==> set vector laplacian vlap, wlap
+                        !  set vector laplacian vlap, wlap
                         !
                         velap(i,j) = -2.0_wp * ve(i,j)
                         welap(i,j) = -2.0_wp * we(i,j)
@@ -187,14 +187,14 @@ contains
             wlap => approximate_azimuthal_laplacian &
             )
             !
-            !==> Compute vector laplacian
+            !  Compute vector laplacian
             !
             call sphere_type%get_laplacian(ve, we, vlap, wlap)
 
         end associate
 
         !
-        !==> Compute laplacian error
+        !  Compute laplacian error
         !
         associate( &
             velap => exact_polar_laplacian, &
@@ -208,7 +208,7 @@ contains
                 )
 
                 !
-                !==> Print earlier output from platform with 64-bit floating point
+                !  Print earlier output from platform with 64-bit floating point
                 !    arithmetic followed by the output from this computer
                 !
                 write( stdout, '(/a/)') '     tvlap *** TEST RUN *** '
@@ -224,7 +224,7 @@ contains
             end associate
         end associate
         !
-        !==> Now recompute (v,w) inverting (velap,welap)
+        !  Now recompute (v,w) inverting (velap,welap)
         !
         associate( &
             v => polar_component, &
@@ -236,7 +236,7 @@ contains
         end associate
 
         !
-        !==> compare this v,w with original
+        !  compare this v,w with original
         !
         associate( &
             ve => original_polar_component, &
@@ -249,7 +249,7 @@ contains
                 err2w => maxval(abs(w - we)) &
                 )
                 !
-                !==> Print earlier output from platform with 64-bit floating point
+                !  Print earlier output from platform with 64-bit floating point
                 !    arithmetic followed by the output from this computer
                 !
                 write( stdout, '(/a/)') '     tvlap *** TEST RUN *** '
@@ -265,7 +265,7 @@ contains
             end associate
         end associate
         !
-        !==> Release memory
+        !  Release memory
         deallocate( previous_polar_laplacian_error )
         deallocate( previous_polar_inversion_error )
         deallocate( previous_azimuthal_laplacian_error )

@@ -23,7 +23,7 @@ module type_AdvectionSolver
     integer(ip), parameter :: TIME_TO_CIRCUMVENT_THE_EARTH = 12*24*3600
     !----------------------------------------------------------------------
 
-    ! Declare derived data type
+    
     type, public, extends (GaussianSphere) :: AdvectionSolver
         !----------------------------------------------------------------------
         ! Type components
@@ -143,11 +143,11 @@ contains
                             !
                             call sph2cart(1.0_wp, that, lhat, x1, y1, z1)
                             !
-                            !==> compute distance
+                            !  compute distance
                             !
                             associate( dist => norm2([x1-xc, y1-yc, z1-zc]) )
                                 !
-                                !==> Initialize geopotential
+                                !  Initialize geopotential
                                 !
                                 geopot(i,j) = 0.0_wp
 
@@ -160,7 +160,7 @@ contains
                             if (r >= re) cycle
 
                             !
-                            !==> Set geopotential
+                            !  Set geopotential
                             geopot(i,j) = hzero * (cos(r*PI/re)+1.0_wp)/2
                         end do
                     end associate

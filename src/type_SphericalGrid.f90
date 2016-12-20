@@ -13,7 +13,7 @@ module type_SphericalGrid
     public :: SphericalGrid
 
 
-    ! Declare derived data type
+    
     type, abstract, public :: SphericalGrid
         !----------------------------------------------------------------------
         ! Type components
@@ -53,7 +53,7 @@ contains
         if (.not.self%initialized) return
 
         !
-        !==> Release memory
+        !  Release memory
         !
         if (allocated(self%grid_type)) deallocate( self%grid_type )
         if (allocated(self%longitudes)) deallocate( self%longitudes )
@@ -85,7 +85,7 @@ contains
         !----------------------------------------------------------------------
 
         !
-        !==> Check validity of calling argument
+        !  Check validity of calling argument
         !
         if (nlon <= 0) then
             error stop 'Object of class(SphericalGrid): '&
@@ -94,12 +94,12 @@ contains
         end if
 
         !
-        !==> Allocate memory
+        !  Allocate memory
         !
         allocate( phi(nlon) )
 
         !
-        !==> Compute equally space (uniform) longitudinal grid
+        !  Compute equally space (uniform) longitudinal grid
         !
         associate( dphi => self%LONGITUDINAL_MESH )
 

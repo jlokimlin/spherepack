@@ -51,7 +51,7 @@
 !
 !     output parameter
 !
-!     wsave   a work array which must be dimensioned at least 2*n+15.
+!     wsave   a work array which must be dimensioned at least 2*n+NUMBER_OF_FACTORS.
 !             the same work array can be used for both hrfftf and 
 !             hrfftb as long as n remains unchanged. different wsave 
 !             arrays are required for different values of n. the 
@@ -83,7 +83,7 @@
 !             greater than or equal to m.
 !
 !
-!     wsave   a work array with at least least 2*n+15 locations
+!     wsave   a work array with at least least 2*n+NUMBER_OF_FACTORS locations
 !             in the program that calls hrfftf. the wsave array must be
 !             initialized by calling subroutine hrffti(n, wsave) and a
 !             different wsave array must be used for each different
@@ -154,7 +154,7 @@
 !             in the program that calls hrfftb. mdimr must be
 !             greater than or equal to m.
 !
-!     wsave   a work array which must be dimensioned at least 2*n+15.
+!     wsave   a work array which must be dimensioned at least 2*n+NUMBER_OF_FACTORS.
 !             in the program that calls hrfftb. the wsave array must be
 !             initialized by calling subroutine hrffti(n, wsave) and a
 !             different wsave array must be used for each different
@@ -218,7 +218,7 @@ module type_HFFTpack
     public :: hrffti, hrfftf, hrfftb
 
 
-    ! Declare derived data type
+    
     type, public :: HFFTpack
     contains
         !-------------------------------------------------------
@@ -230,6 +230,15 @@ module type_HFFTpack
         !-------------------------------------------------------
     end type HFFTpack
 
+    !------------------------------------------------------------------
+    ! Parameters confined to the module
+    !------------------------------------------------------------------
+    real(wp),    parameter :: ZERO = 0.0_wp
+    real(wp),    parameter :: ONE = 1.0_wp
+    real(wp),    parameter :: TWO = 2.0_wp
+    integer(ip), parameter :: NUMBER_OF_FACTORS = 15_ip
+    !------------------------------------------------------------------
+
 contains
 
     subroutine hrffti(n, wsave)
@@ -237,24 +246,22 @@ contains
         ! Dummy arguments
         !----------------------------------------------------------------------
         integer(ip), intent(in)  :: n
-        real(wp),    intent(out) :: wsave(n+15)
+        real(wp),    intent(out) :: wsave(n+NUMBER_OF_FACTORS)
         !----------------------------------------------------------------------
 
         if (n == 1) return
 
-        call hrfti1(n, wsave(1), wsave(n+1))
+        call half_initialize_lower_routine(n, wsave(1), wsave(n+1))
 
     end subroutine hrffti
 
-
-
-    subroutine hrfti1(n, wa, fac)
+    subroutine half_initialize_lower_routine(n, wa, fac)
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
         integer(ip), intent(in)  :: n
         real(wp),    intent(out) :: wa(n)
-        real(wp),    intent(out) :: fac(15)
+        real(wp),    intent(out) :: fac(NUMBER_OF_FACTORS)
         !--------------------------------------------------------------
         ! Local variables
         !--------------------------------------------------------------
@@ -329,10 +336,10 @@ contains
                     ld = ld+l1
                     i = is
                     argld = real(ld, kind=wp) * argh
-                    fi = 0.0_wp
+                    fi = ZERO
                     do ii=3,ido,2
                         i = i+2
-                        fi = fi + 1.0_wp
+                        fi = fi + ONE
                         arg = fi*argld
                         wa(i-1) = cos(arg)
                         wa(i) = sin(arg)
@@ -343,10 +350,7 @@ contains
             end do
         end if
 
-    end subroutine hrfti1
-
-
-
+    end subroutine half_initialize_lower_routine
 
     subroutine hrfftf(m, n, r, mdimr, whrfft, work)
         !
@@ -361,19 +365,17 @@ contains
         integer(ip), intent(in)     :: n
         real(wp),    intent(inout)  :: r(mdimr, n)
         integer(ip), intent(in)     :: mdimr
-        real(wp),    intent(in)     :: whrfft(n+15)
+        real(wp),    intent(in)     :: whrfft(n+NUMBER_OF_FACTORS)
         real(wp),    intent(out)    :: work(*)
          !----------------------------------------------------------------------
 
         if (n == 1) return
 
-        call hrftf1(m, n, r, mdimr, work, whrfft, whrfft(n+1))
+        call half_forward_lower_routine(m, n, r, mdimr, work, whrfft, whrfft(n+1))
 
     end subroutine hrfftf
 
-
-
-    subroutine hrftf1(m, n, c, mdimc, ch, wa, fac)
+    subroutine half_forward_lower_routine(m, n, c, mdimc, ch, wa, fac)
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
@@ -383,7 +385,7 @@ contains
         integer(ip), intent(in)     :: mdimc
         real(wp),    intent(out)    :: ch(m, n)
         real(wp),    intent(in)     :: wa(n)
-        real(wp),    intent(in)     :: fac(15)
+        real(wp),    intent(in)     :: fac(NUMBER_OF_FACTORS)
         !----------------------------------------------------------------------
         ! Local variables
         !----------------------------------------------------------------------
@@ -409,14 +411,14 @@ contains
             select case (iip)
                 case (2)
                     if (na == 0) then
-                        call  half_forward_pass_2(m, ido, l1, c, mdimc, ch, m, wa(iw))
+                        call half_forward_pass_2(m, ido, l1, c, mdimc, ch, m, wa(iw))
                     else
                         call half_forward_pass_2(m, ido, l1, ch, m, c, mdimc, wa(iw))
                     end if
                 case (3)
                     ix2 = iw+ido
                     if (na == 0) then
-                        call  half_forward_pass_3(m, ido, l1, c, mdimc, ch, m, wa(iw), wa(ix2))
+                        call half_forward_pass_3(m, ido, l1, c, mdimc, ch, m, wa(iw), wa(ix2))
                     else
                         call half_forward_pass_3(m, ido, l1, ch, m, c, mdimc, wa(iw), wa(ix2))
                     end if
@@ -424,7 +426,7 @@ contains
                     ix2 = iw+ido
                     ix3 = ix2+ido
                     if (na == 0) then
-                        call  half_forward_pass_4(m, ido, l1, c, mdimc, ch, m, wa(iw), wa(ix2), wa(ix3))
+                        call half_forward_pass_4(m, ido, l1, c, mdimc, ch, m, wa(iw), wa(ix2), wa(ix3))
                     else
                         call half_forward_pass_4(m, ido, l1, ch, m, c, mdimc, wa(iw), wa(ix2), wa(ix3))
                     end if
@@ -440,7 +442,7 @@ contains
                 case default
                     if (ido == 1) na = 1-na
                     if (na == 0) then
-                        call  half_forward_pass_n(m, ido, iip, l1, idl1, c, c, c, mdimc, ch, ch, m, wa(iw))
+                        call half_forward_pass_n(m, ido, iip, l1, idl1, c, c, c, mdimc, ch, ch, m, wa(iw))
                         na = 1
                     else
                         call half_forward_pass_n(m, ido, iip, l1, idl1, ch, ch, ch, m, c, c, mdimc, wa(iw))
@@ -452,9 +454,7 @@ contains
 
         if (na /= 1) c(1:m, 1:n) = ch
 
-    end subroutine hrftf1
-
-
+    end subroutine half_forward_lower_routine
 
     subroutine half_forward_pass_2(mp, ido, l1, cc, mdimcc, ch, mdimch, wa1)
         !----------------------------------------------------------------------
@@ -477,7 +477,6 @@ contains
         ch(1:mp, 1, 1,:) = cc(1:mp, 1,:, 1)+cc(1:mp, 1,:, 2)
         ch(1:mp, ido, 2,:) = cc(1:mp, 1,:, 1)-cc(1:mp, 1,:, 2)
 
-
         if (ido < 2) then
             return
         else if (ido /= 2) then
@@ -486,7 +485,6 @@ contains
                 do i=3, ido, 2
                     ic = idp2-i
                     do m=1, mp
-
                         ch(m, i, 1, k) = &
                             cc(m, i, k, 1)+(wa1(i-2)*cc(m, i, k, 2)- &
                             wa1(i-1)*cc(m, i-1, k, 2))
@@ -505,17 +503,13 @@ contains
                     end do
                 end do
             end do
-
             if (mod(ido, 2) == 1) return
-
         end if
 
         ch(1:mp, 1, 2, :) = -cc(1:mp, ido,:, 2)
         ch(1:mp, ido, 1, :) = cc(1:mp, ido,:, 1)
 
-
     end subroutine half_forward_pass_2
-
 
     subroutine half_forward_pass_3(mp, ido, l1, cc, mdimcc, ch, mdimch, wa1, wa2)
         !----------------------------------------------------------------------
@@ -535,13 +529,12 @@ contains
         !----------------------------------------------------------------------
         integer(ip)         :: i, k, m, ic, idp2
         real(wp), parameter :: ARG=TWO_PI/3
-        real(wp), parameter :: TAUR=cos(ARG)! -0.5_wp
-        real(wp), parameter :: TAUI=sin(ARG)
+        real(wp), parameter :: TAUR = cos(ARG)
+        real(wp), parameter :: TAUI = sin(ARG)
         !----------------------------------------------------------------------
 
         do k=1, l1
             do m=1, mp
-
                 ch(m, 1, 1, k) = &
                     cc(m, 1, k, 1)+(cc(m, 1, k, 2)+cc(m, 1, k, 3))
 
@@ -605,7 +598,6 @@ contains
 
     end subroutine half_forward_pass_3
 
-
     subroutine half_forward_pass_4(mp, ido, l1, cc, mdimcc, ch, mdimch, wa1, wa2, wa3)
         !----------------------------------------------------------------------
         ! Dummy arguments
@@ -624,7 +616,7 @@ contains
         ! Local variables
         !----------------------------------------------------------------------
         integer(ip)         :: i, k, m, ic, idp2
-        real(wp), parameter :: HALF_SQRT2 = sqrt(2.0_wp)/2
+        real(wp), parameter :: HALF_SQRT2 = sqrt(TWO)/2
         !----------------------------------------------------------------------
 
         do k=1, l1
@@ -729,7 +721,6 @@ contains
 
     end subroutine half_forward_pass_4
 
-
     subroutine half_forward_pass_5(mp, ido, l1, cc, mdimcc, ch, mdimch, &
         wa1, wa2, wa3, wa4)
         !----------------------------------------------------------------------
@@ -753,8 +744,8 @@ contains
         real(wp), parameter :: ARG = TWO_PI/5
         real(wp), parameter :: TR11=cos(ARG)
         real(wp), parameter :: TI11=sin(ARG)
-        real(wp), parameter :: TR12=cos(2.0_wp*ARG)
-        real(wp), parameter :: TI12=sin(2.0_wp*ARG)
+        real(wp), parameter :: TR12=cos(TWO*ARG)
+        real(wp), parameter :: TI12=sin(TWO*ARG)
         !----------------------------------------------------------------------
 
         do k=1, l1
@@ -896,8 +887,6 @@ contains
 
     end subroutine half_forward_pass_5
 
-
-
     subroutine half_forward_pass_n(mp, ido, iip, l1, idl1, cc, c1, c2, mdimcc, &
         ch, ch2, mdimch, wa)
         !----------------------------------------------------------------------
@@ -1001,8 +990,8 @@ contains
                     c1(1: mp, 1, 1: l1, jc) = ch(1: mp, 1, 1: l1, jc)-ch(1: mp, 1, 1: l1, j)
                 end do
 
-                ar1 = 1.0_wp
-                ai1 = 0.0_wp
+                ar1 = ONE
+                ai1 = ZERO
                 do l=2, ipph
                     lc = ipp2-l
                     ar1h = dcp*ar1-dsp*ai1
@@ -1079,8 +1068,6 @@ contains
 
     end subroutine half_forward_pass_n
 
-
-
     subroutine hrfftb(m, n, r, mdimr, whrfft, work)
         !----------------------------------------------------------------------
         ! Dummy arguments
@@ -1089,19 +1076,17 @@ contains
         integer(ip), intent(in)     :: n
         real(wp),    intent(inout)  :: r(mdimr, n)
         integer(ip), intent(in)     :: mdimr
-        real(wp),    intent(in)     :: whrfft(n+15)
+        real(wp),    intent(in)     :: whrfft(n+NUMBER_OF_FACTORS)
         real(wp),    intent(out)    :: work(*)
         !----------------------------------------------------------------------
 
         if (n == 1) return
 
-        call hrftb1(m, n, r, mdimr, work, whrfft, whrfft(n+1))
+        call half_backward_lower_routine(m, n, r, mdimr, work, whrfft, whrfft(n+1))
 
     end subroutine hrfftb
 
-
-
-    subroutine hrftb1(m, n, c, mdimc, ch, wa, fac)
+    subroutine half_backward_lower_routine(m, n, c, mdimc, ch, wa, fac)
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
@@ -1111,7 +1096,7 @@ contains
         integer(ip), intent(in)     :: mdimc
         real(wp),    intent(out)    :: ch(m, n)
         real(wp),    intent(in)     :: wa(n)
-        real(wp),    intent(in)     :: fac(15)
+        real(wp),    intent(in)     :: fac(NUMBER_OF_FACTORS)
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
@@ -1139,7 +1124,7 @@ contains
                 case (3)
                     ix2 = iw+ido
                     if (na == 0) then
-                        call  half_backward_pass_3(m, ido, l1, c, mdimc, ch, m, wa(iw), wa(ix2))
+                        call half_backward_pass_3(m, ido, l1, c, mdimc, ch, m, wa(iw), wa(ix2))
                     else
                         call half_backward_pass_3(m, ido, l1, ch, m, c, mdimc, wa(iw), wa(ix2))
                     end if
@@ -1177,9 +1162,7 @@ contains
             c(1:m, 1:n) = ch
         end if
 
-    end subroutine hrftb1
-
-
+    end subroutine half_backward_lower_routine
 
     subroutine half_backward_pass_2(mp, ido, l1, cc, mdimcc, ch, mdimch, wa1)
         !----------------------------------------------------------------------
@@ -1224,17 +1207,13 @@ contains
                         *(cc(1: mp, i-1, 1, k)-cc(1: mp, ic-1, 2, k))
                 end do
             end do
-
             if (mod(ido,2) == 1) return
-
         end if
 
         ch(1:mp, ido,:, 1) = cc(1:mp, ido, 1,:)+cc(1:mp, ido, 1,:)
         ch(1:mp, ido,:, 2) = -(cc(1:mp, 1, 2,:)+cc(1:mp, 1, 2,:))
 
     end subroutine half_backward_pass_2
-
-
 
     subroutine half_backward_pass_3(mp, ido, l1, cc, mdimcc, ch, mdimch, wa1, wa2)
         !----------------------------------------------------------------------
@@ -1259,15 +1238,15 @@ contains
         !----------------------------------------------------------------------
 
         ch(1: mp, 1, 1: l1, 1) = &
-            cc(1: mp, 1, 1, 1: l1)+2.0_wp * cc(1: mp, ido, 2, 1: l1)
+            cc(1: mp, 1, 1, 1: l1)+TWO * cc(1: mp, ido, 2, 1: l1)
 
         ch(1: mp, 1, 1: l1, 2) = &
-            cc(1: mp, 1, 1, 1: l1)+(2.0_wp * TAUR)*cc(1: mp, ido, 2, 1: l1) &
-            -(2.0_wp *TAUI)*cc(1: mp, 1, 3, 1: l1)
+            cc(1: mp, 1, 1, 1: l1)+(TWO * TAUR)*cc(1: mp, ido, 2, 1: l1) &
+            -(TWO *TAUI)*cc(1: mp, 1, 3, 1: l1)
 
         ch(1: mp, 1, 1: l1, 3) = &
-            cc(1: mp, 1, 1, 1: l1)+(2.0_wp * TAUR)*cc(1: mp, ido, 2, 1: l1) &
-            +2.0_wp *TAUI*cc(1: mp, 1, 3, 1: l1)
+            cc(1: mp, 1, 1, 1: l1)+(TWO * TAUR)*cc(1: mp, ido, 2, 1: l1) &
+            +TWO *TAUI*cc(1: mp, 1, 3, 1: l1)
 
         if (ido == 1) return
 
@@ -1317,8 +1296,6 @@ contains
 
     end subroutine half_backward_pass_3
 
-
-
     subroutine half_backward_pass_4(mp, ido, l1, cc, mdimcc, ch, mdimch, wa1, wa2, wa3)
         !----------------------------------------------------------------------
         ! Dummy arguments
@@ -1337,7 +1314,7 @@ contains
         ! Dummy arguments
         !----------------------------------------------------------------------
         integer(ip)         :: i, k, ic, idp2
-        real(wp), parameter :: SQRT2 = sqrt(2.0_wp)
+        real(wp), parameter :: SQRT2 = sqrt(TWO)
         !----------------------------------------------------------------------
 
         ch(1: mp, 1, 1: l1, 3) = (cc(1: mp, 1, 1, 1: l1)+cc(1: mp, ido, 4, 1: l1)) &
@@ -1396,9 +1373,7 @@ contains
                         *((cc(1: mp, i-1, 1, k)-cc(1: mp, ic-1, 4, k))+(cc(1: mp, i, 3, k)+cc(1: mp, ic, 2, k)))      !
                 end do
             end do
-
             if (mod(ido, 2) == 1) return
-
         end if
 
         ch(1: mp, ido, 1: l1, 1) = &
@@ -1418,8 +1393,6 @@ contains
             +(cc(1: mp, 1, 2, 1: l1)+cc(1: mp, 1, 4, 1: l1)))
 
     end subroutine half_backward_pass_4
-
-
 
     subroutine half_backward_pass_5(mp, ido, l1, cc, mdimcc, ch, mdimch, &
         wa1, wa2, wa3, wa4)
@@ -1444,38 +1417,39 @@ contains
         real(wp), parameter :: ARG = TWO_PI/5
         real(wp), parameter :: TR11=cos(ARG)
         real(wp), parameter :: TI11=sin(ARG)
-        real(wp), parameter :: TR12=cos(2.0_wp *ARG)
-        real(wp), parameter :: TI12=sin(2.0_wp *ARG)
+        real(wp), parameter :: TR12=cos(TWO *ARG)
+        real(wp), parameter :: TI12=sin(TWO *ARG)
         !----------------------------------------------------------------------
 
         do k=1, l1
             ch(1: mp, 1, k, 1) = &
-                cc(1: mp, 1, 1, k)+2.0_wp *cc(1: mp, ido, 2, k)+2.0_wp *cc(1: mp, ido, 4, k)          !
+                cc(1: mp, 1, 1, k)+TWO *cc(1: mp, ido, 2, k)+TWO *cc(1: mp, ido, 4, k)          !
 
             ch(1: mp, 1, k, 2) = &
-                (cc(1: mp, 1, 1, k)+TR11*2.0_wp *cc(1: mp, ido, 2, k) &
-                +TR12*2.0_wp *cc(1: mp, ido, 4, k))-(TI11*2.0_wp *cc(1: mp, 1, 3, k) &
-                +TI12*2.0_wp *cc(1: mp, 1, 5, k))
+                (cc(1: mp, 1, 1, k)+TR11*TWO *cc(1: mp, ido, 2, k) &
+                +TR12*TWO *cc(1: mp, ido, 4, k))-(TI11*TWO *cc(1: mp, 1, 3, k) &
+                +TI12*TWO *cc(1: mp, 1, 5, k))
 
             ch(1: mp, 1, k, 3) = &
-                (cc(1: mp, 1, 1, k)+TR12*2.0_wp *cc(1: mp, ido, 2, k) &
-                +TR11*2.0_wp *cc(1: mp, ido, 4, k))-(TI12*2.0_wp *cc(1: mp, 1, 3, k) &
-                -TI11*2.0_wp *cc(1: mp, 1, 5, k))
+                (cc(1: mp, 1, 1, k)+TR12*TWO *cc(1: mp, ido, 2, k) &
+                +TR11*TWO *cc(1: mp, ido, 4, k))-(TI12*TWO *cc(1: mp, 1, 3, k) &
+                -TI11*TWO *cc(1: mp, 1, 5, k))
 
             ch(1: mp, 1, k, 4) = &
-                (cc(1: mp, 1, 1, k)+TR12*2.0_wp *cc(1: mp, ido, 2, k) &
-                +TR11*2.0_wp *cc(1: mp, ido, 4, k))+(TI12*2.0_wp *cc(1: mp, 1, 3, k) &
-                -TI11*2.0_wp *cc(1: mp, 1, 5, k))
+                (cc(1: mp, 1, 1, k)+TR12*TWO *cc(1: mp, ido, 2, k) &
+                +TR11*TWO *cc(1: mp, ido, 4, k))+(TI12*TWO *cc(1: mp, 1, 3, k) &
+                -TI11*TWO *cc(1: mp, 1, 5, k))
 
             ch(1: mp, 1, k, 5) = &
-                (cc(1: mp, 1, 1, k)+TR11*2.0_wp *cc(1: mp, ido, 2, k) &
-                +TR12*2.0_wp *cc(1: mp, ido, 4, k))+(TI11*2.0_wp *cc(1: mp, 1, 3, k) &
-                +TI12*2.0_wp *cc(1: mp, 1, 5, k))
+                (cc(1: mp, 1, 1, k)+TR11*TWO *cc(1: mp, ido, 2, k) &
+                +TR12*TWO *cc(1: mp, ido, 4, k))+(TI11*TWO *cc(1: mp, 1, 3, k) &
+                +TI12*TWO *cc(1: mp, 1, 5, k))
         end do
 
         if (ido == 1) return
 
         idp2 = ido+2
+
         do k=1, l1
             do i=3, ido, 2
                 ic = idp2-i
@@ -1574,8 +1548,6 @@ contains
 
     end subroutine half_backward_pass_5
 
-
-
     subroutine half_backward_pass_n(mp, ido, iip, l1, idl1, cc, c1, c2, mdimcc, &
         ch, ch2, mdimch, wa)
         !----------------------------------------------------------------------
@@ -1648,8 +1620,8 @@ contains
             end if
         end if
 
-        ar1 = 1.0_wp
-        ai1 = 0.0_wp
+        ar1 = ONE
+        ai1 = ZERO
         do l=2, ipph
             lc = ipp2-l
             ar1h = dcp*ar1-dsp*ai1

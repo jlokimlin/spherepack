@@ -356,201 +356,201 @@ contains
         call shsec1(nlat, isym, nt, g, idg, jdg, a, b, mdab, ndab, imid, ls, nlon, &
             work, work(ist+1), work(nln+1), work(nln+1), wshsec, wshsec(iw1))
 
-    contains
+    end subroutine shsec
 
-        subroutine shsec1(nlat, isym, nt, g, idgs, jdgs, a, b, mdab, ndab, imid, &
-            idg, jdg, ge, go, work, pb, walin, whrfft)
-
-
-            real(wp) :: a
-            real(wp) :: b
-            real(wp) :: g
-            real(wp) :: ge
-            real(wp) :: go
-            integer(ip) :: i
-            integer(ip) :: i3
-            integer(ip) :: idg
-            integer(ip) :: idgs
-            integer(ip) :: imid
-            integer(ip) :: imm1
-            integer(ip) :: isym
-            integer(ip) :: j
-            integer(ip) :: jdg
-            integer(ip) :: jdgs
-            integer(ip) :: k
-            integer(ip) :: ls
-            integer(ip) :: m
-            integer(ip) :: mdab
-            integer(ip) :: mdo
-            integer(ip) :: mmax
-            integer(ip) :: modl
-            integer(ip) :: mp1
-            integer(ip) :: mp2
-            integer(ip) :: ndab
-            integer(ip) :: ndo
-            integer(ip) :: nlat
-            integer(ip) :: nlon
-            integer(ip) :: nlp1
-            integer(ip) :: np1
-            integer(ip) :: nt
-            real(wp) :: pb
-            real(wp) :: walin
-            real(wp) :: whrfft
-            real(wp) :: work
+    subroutine shsec1(nlat, isym, nt, g, idgs, jdgs, a, b, mdab, ndab, imid, &
+        idg, jdg, ge, go, work, pb, walin, whrfft)
 
 
-            type(HFFTpack)      :: hfft
-            type(SpherepackAux) :: sphere_aux
-            !
-            !     whrfft must have at least nlon+15 locations
-            !     walin must have 3*l*imid + 3*((l-3)*l+2)/2 locations
-            !     zb must have 3*l*imid locations
-            !
-            dimension g(idgs, jdgs, nt), a(mdab, ndab, nt), b(mdab, ndab, nt), &
-                ge(idg, jdg, nt), go(idg, jdg, nt), pb(imid, nlat, 3), walin(*), &
-                whrfft(*), work(*)
+        real(wp) :: a
+        real(wp) :: b
+        real(wp) :: g
+        real(wp) :: ge
+        real(wp) :: go
+        integer(ip) :: i
+        integer(ip) :: i3
+        integer(ip) :: idg
+        integer(ip) :: idgs
+        integer(ip) :: imid
+        integer(ip) :: imm1
+        integer(ip) :: isym
+        integer(ip) :: j
+        integer(ip) :: jdg
+        integer(ip) :: jdgs
+        integer(ip) :: k
+        integer(ip) :: ls
+        integer(ip) :: m
+        integer(ip) :: mdab
+        integer(ip) :: mdo
+        integer(ip) :: mmax
+        integer(ip) :: modl
+        integer(ip) :: mp1
+        integer(ip) :: mp2
+        integer(ip) :: ndab
+        integer(ip) :: ndo
+        integer(ip) :: nlat
+        integer(ip) :: nlon
+        integer(ip) :: nlp1
+        integer(ip) :: np1
+        integer(ip) :: nt
+        real(wp) :: pb
+        real(wp) :: walin
+        real(wp) :: whrfft
+        real(wp) :: work
 
-            ls = idg
-            nlon = jdg
-            mmax = min(nlat, nlon/2+1)
 
-            if (2*mmax-1 > nlon) then
-                mdo = mmax-1
-            else
-                mdo = mmax
-            end if
+        type(HFFTpack)      :: hfft
+        type(SpherepackAux) :: sphere_aux
+        !
+        !     whrfft must have at least nlon+15 locations
+        !     walin must have 3*l*imid + 3*((l-3)*l+2)/2 locations
+        !     zb must have 3*l*imid locations
+        !
+        dimension g(idgs, jdgs, nt), a(mdab, ndab, nt), b(mdab, ndab, nt), &
+            ge(idg, jdg, nt), go(idg, jdg, nt), pb(imid, nlat, 3), walin(*), &
+            whrfft(*), work(*)
 
-            nlp1 = nlat+1
-            modl = mod(nlat, 2)
+        ls = idg
+        nlon = jdg
+        mmax = min(nlat, nlon/2+1)
 
-            if (modl /= 0) then
-                imm1 = imid-1
-            else
-                imm1 = imid
-            end if
+        if (2*mmax-1 > nlon) then
+            mdo = mmax-1
+        else
+            mdo = mmax
+        end if
 
-            do k=1, nt
-                ge(1: ls, 1: nlon, k)=0.0_wp
-            end do
+        nlp1 = nlat+1
+        modl = mod(nlat, 2)
 
-            if_block: block
+        if (modl /= 0) then
+            imm1 = imid-1
+        else
+            imm1 = imid
+        end if
 
-                if (isym /= 1) then
-                    call sphere_aux%alin(2, nlat, nlon, 0, pb, i3, walin)
-                    do k=1, nt
-                        do np1=1, nlat, 2
-                            do i=1, imid
-                                ge(i, 1, k)=ge(i, 1, k)+a(1, np1, k)*pb(i, np1, i3)
-                            end do
-                        end do
-                    end do
+        do k=1, nt
+            ge(1: ls, 1: nlon, k)=0.0_wp
+        end do
 
-                    if (mod(nlat, 2) == 0) then
-                        ndo = nlat-1
-                    else
-                        ndo = nlat
-                    end if
+        if_block: block
 
-                    do mp1=2, mdo
-                        m = mp1-1
-                        call sphere_aux%alin(2, nlat, nlon, m, pb, i3, walin)
-                        do np1=mp1, ndo, 2
-                            do k=1, nt
-                                do i=1, imid
-                                    ge(i, 2*mp1-2, k) = ge(i, 2*mp1-2, k)+a(mp1, np1, k)*pb(i, np1, i3)
-                                    ge(i, 2*mp1-1, k) = ge(i, 2*mp1-1, k)+b(mp1, np1, k)*pb(i, np1, i3)
-                                end do
-                            end do
-                        end do
-                    end do
-
-                    if (.not.(mdo == mmax .or. mmax > ndo)) then
-                        call sphere_aux%alin(2, nlat, nlon, mdo, pb, i3, walin)
-                        do np1=mmax, ndo, 2
-                            do k=1, nt
-                                do i=1, imid
-                                    ge(i, 2*mmax-2, k) = ge(i, 2*mmax-2, k)+a(mmax, np1, k)*pb(i, np1, i3)
-                                end do
-                            end do
-                        end do
-                    end if
-                    if (isym == 2) exit if_block
-                end if
-
-                call sphere_aux%alin(1, nlat, nlon, 0, pb, i3, walin)
-
+            if (isym /= 1) then
+                call sphere_aux%alin(2, nlat, nlon, 0, pb, i3, walin)
                 do k=1, nt
-                    do np1=2, nlat, 2
-                        do i=1, imm1
-                            go(i, 1, k)=go(i, 1, k)+a(1, np1, k)*pb(i, np1, i3)
+                    do np1=1, nlat, 2
+                        do i=1, imid
+                            ge(i, 1, k)=ge(i, 1, k)+a(1, np1, k)*pb(i, np1, i3)
                         end do
                     end do
                 end do
 
-
-                if (mod(nlat, 2) /= 0) then
+                if (mod(nlat, 2) == 0) then
                     ndo = nlat-1
                 else
                     ndo = nlat
                 end if
 
                 do mp1=2, mdo
-                    mp2 = mp1+1
                     m = mp1-1
-                    call sphere_aux%alin(1, nlat, nlon, m, pb, i3, walin)
-                    do np1=mp2, ndo, 2
+                    call sphere_aux%alin(2, nlat, nlon, m, pb, i3, walin)
+                    do np1=mp1, ndo, 2
                         do k=1, nt
-                            do i=1, imm1
-                                go(i, 2*mp1-2, k) = go(i, 2*mp1-2, k)+a(mp1, np1, k)*pb(i, np1, i3)
-                                go(i, 2*mp1-1, k) = go(i, 2*mp1-1, k)+b(mp1, np1, k)*pb(i, np1, i3)
+                            do i=1, imid
+                                ge(i, 2*mp1-2, k) = ge(i, 2*mp1-2, k)+a(mp1, np1, k)*pb(i, np1, i3)
+                                ge(i, 2*mp1-1, k) = ge(i, 2*mp1-1, k)+b(mp1, np1, k)*pb(i, np1, i3)
                             end do
                         end do
                     end do
                 end do
 
-                mp2 = mmax+1
+                if (.not.(mdo == mmax .or. mmax > ndo)) then
+                    call sphere_aux%alin(2, nlat, nlon, mdo, pb, i3, walin)
+                    do np1=mmax, ndo, 2
+                        do k=1, nt
+                            do i=1, imid
+                                ge(i, 2*mmax-2, k) = ge(i, 2*mmax-2, k)+a(mmax, np1, k)*pb(i, np1, i3)
+                            end do
+                        end do
+                    end do
+                end if
+                if (isym == 2) exit if_block
+            end if
 
-                if (mdo == mmax .or. mp2 > ndo) exit if_block
+            call sphere_aux%alin(1, nlat, nlon, 0, pb, i3, walin)
 
-                call sphere_aux%alin(1, nlat, nlon, mdo, pb, i3, walin)
+            do k=1, nt
+                do np1=2, nlat, 2
+                    do i=1, imm1
+                        go(i, 1, k)=go(i, 1, k)+a(1, np1, k)*pb(i, np1, i3)
+                    end do
+                end do
+            end do
 
+
+            if (mod(nlat, 2) /= 0) then
+                ndo = nlat-1
+            else
+                ndo = nlat
+            end if
+
+            do mp1=2, mdo
+                mp2 = mp1+1
+                m = mp1-1
+                call sphere_aux%alin(1, nlat, nlon, m, pb, i3, walin)
                 do np1=mp2, ndo, 2
                     do k=1, nt
                         do i=1, imm1
-                            go(i, 2*mmax-2, k) = go(i, 2*mmax-2, k)+a(mmax, np1, k)*pb(i, np1, i3)
+                            go(i, 2*mp1-2, k) = go(i, 2*mp1-2, k)+a(mp1, np1, k)*pb(i, np1, i3)
+                            go(i, 2*mp1-1, k) = go(i, 2*mp1-1, k)+b(mp1, np1, k)*pb(i, np1, i3)
                         end do
                     end do
                 end do
-
-            end block if_block
-
-            do k=1, nt
-
-                if (mod(nlon, 2) == 0) ge(1: ls, nlon, k) = 2.0_wp*ge(1: ls, nlon, k)
-
-                call hfft%backward(ls, nlon, ge(1, 1, k), ls, whrfft, work)
             end do
 
-            select case (isym)
-                case (0)
-                    do k=1, nt
-                        do j=1, nlon
-                            do i=1, imm1
-                                g(i, j, k) = 0.5_wp*(ge(i, j, k)+go(i, j, k))
-                                g(nlp1-i, j, k) = 0.5_wp*(ge(i, j, k)-go(i, j, k))
-                            end do
-                            if (modl /= 0) g(imid, j, k) = 0.5_wp*ge(imid, j, k)
+            mp2 = mmax+1
+
+            if (mdo == mmax .or. mp2 > ndo) exit if_block
+
+            call sphere_aux%alin(1, nlat, nlon, mdo, pb, i3, walin)
+
+            do np1=mp2, ndo, 2
+                do k=1, nt
+                    do i=1, imm1
+                        go(i, 2*mmax-2, k) = go(i, 2*mmax-2, k)+a(mmax, np1, k)*pb(i, np1, i3)
+                    end do
+                end do
+            end do
+
+        end block if_block
+
+        do k=1, nt
+
+            if (mod(nlon, 2) == 0) ge(1: ls, nlon, k) = 2.0_wp*ge(1: ls, nlon, k)
+
+            call hfft%backward(ls, nlon, ge(1, 1, k), ls, whrfft, work)
+        end do
+
+        select case (isym)
+            case (0)
+                do k=1, nt
+                    do j=1, nlon
+                        do i=1, imm1
+                            g(i, j, k) = 0.5_wp*(ge(i, j, k)+go(i, j, k))
+                            g(nlp1-i, j, k) = 0.5_wp*(ge(i, j, k)-go(i, j, k))
                         end do
+                        if (modl /= 0) g(imid, j, k) = 0.5_wp*ge(imid, j, k)
                     end do
-                case default
-                    do k=1, nt
-                        g(1: imid, 1: nlon, k) = 0.5_wp*ge(1: imid, 1: nlon, k)
-                    end do
-            end select
+                end do
+            case default
+                do k=1, nt
+                    g(1: imid, 1: nlon, k) = 0.5_wp*ge(1: imid, 1: nlon, k)
+                end do
+        end select
 
-        end subroutine shsec1
+    end subroutine shsec1
 
-    end subroutine shsec
+
 
     !     subroutine shseci(nlat, nlon, wshsec, lshsec, dwork, ldwork, ierror)
     !
@@ -611,7 +611,6 @@ contains
     !            = 4  error in the specification of ldwork
     !
     !
-    ! ****************************************************************
     subroutine shseci(nlat, nlon, wshsec, lshsec, dwork, ldwork, ierror)
 
         integer(ip) :: ierror

@@ -50,7 +50,6 @@ module type_SpherepackAux
     private
     public :: SpherepackAux
 
-    ! Declare derived data type
     type, public :: SpherepackAux
     contains
         !----------------------------------------------------------------------
@@ -101,9 +100,18 @@ module type_SpherepackAux
         !----------------------------------------------------------------------
     end type SpherepackAux
 
+    !------------------------------------------------------------------
+    ! Parameters confined to the module
+    !------------------------------------------------------------------
+    real(wp), parameter :: ZERO = 0.0_wp
+    real(wp), parameter :: HALF = 0.5_wp
+    real(wp), parameter :: ONE = 1.0_wp
+    real(wp), parameter :: TWO = 2.0_wp
+    real(wp), parameter :: THREE = 3.0_wp
+    real(wp), parameter :: SIX = 6.0_wp
+    !------------------------------------------------------------------
 
 contains
-
 
     pure subroutine compute_parity(nlat, nlon, l1, l2)
         !----------------------------------------------------------------------
@@ -133,7 +141,6 @@ contains
 
     end subroutine compute_parity
 
-
     pure subroutine dnlfk(m, n, cp)
         !
         !     cp requires n/2+1 real locations
@@ -151,7 +158,7 @@ contains
         real(wp)            :: a1, b1, c1, t1, t2
         real(wp)            :: fk, cp2, pm1
         real(wp)            :: fden, fnmh, fnum, fnnp1, fnmsq
-        real(wp), parameter :: SC10=1024.0_wp
+        real(wp), parameter :: SC10=1024
         real(wp), parameter :: SC20=SC10**2
         real(wp), parameter :: SC40=SC20**2
         !----------------------------------------------------------------------
@@ -159,12 +166,12 @@ contains
         ma = abs(m)
 
         if (ma > n) then
-            cp(1) = 0.0_wp
+            cp(1) = ZERO
             return
         end if
 
         if (n < 1) then
-            cp(1) = sqrt(2.0_wp)
+            cp(1) = sqrt(TWO)
         else if (n == 1) then
             if (ma /= 0) then
                 cp(1) = sqrt(0.75_wp)
@@ -179,17 +186,17 @@ contains
                 nmms2 = (n-ma-1)/2
                 fnum = real(n+ma+2, kind=wp)
                 fnmh = real(n-ma+2, kind=wp)
-                pm1 = -1.0_wp
+                pm1 = -ONE
             else
                 nmms2 = (n-ma)/2
                 fnum = real(n+ma+1, kind=wp)
                 fnmh = real(n-ma+1, kind=wp)
-                pm1 = 1.0_wp
+                pm1 = ONE
             end if
 
-            t1 = 1.0_wp/SC20
+            t1 = ONE/SC20
             nex = 20
-            fden = 2.0_wp
+            fden = TWO
 
             if (nmms2 >= 1) then
                 do i=1, nmms2
@@ -198,27 +205,27 @@ contains
                         t1 = t1/SC40
                         nex = nex+40
                     end if
-                    fnum = fnum+2.0_wp
-                    fden = fden+2.0_wp
+                    fnum = fnum+TWO
+                    fden = fden+TWO
                 end do
             end if
 
-            t1 = t1/2.0**(n-1-nex)
+            t1 = t1/TWO**(n-1-nex)
 
             if (mod(ma/2, 2) /= 0) t1 = -t1
 
-            t2 = 1.0_wp
+            t2 = ONE
 
             if (ma /= 0) then
                 do i=1, ma
                     t2 = fnmh*t2/(fnmh+pm1)
-                    fnmh = fnmh+2.0_wp
+                    fnmh = fnmh+TWO
                 end do
             end if
 
-            cp2 = t1*sqrt((real(n, kind=wp)+0.5_wp)*t2)
+            cp2 = t1*sqrt((real(n, kind=wp)+HALF)*t2)
             fnnp1 = real(n*(n+1), kind=wp)
-            fnmsq = fnnp1 - 2.0_wp * real(ma**2, kind=wp)
+            fnmsq = fnnp1 - TWO * real(ma**2, kind=wp)
             l = (n+1)/2
 
             if (mod(n, 2) == 0 .and. mod(ma, 2) == 0) l = l+1
@@ -230,17 +237,17 @@ contains
             if (l <= 1) return
 
             fk = real(n, kind=wp)
-            a1 = (fk-2.0_wp)*(fk-1.0_wp)-fnnp1
-            b1 = 2.0_wp*(fk**2-fnmsq)
+            a1 = (fk-TWO)*(fk-ONE)-fnnp1
+            b1 = TWO*(fk**2-fnmsq)
             cp(l-1) = b1*cp(l)/a1
 
             l = l - 1
 
             do while (l > 1)
-                fk = fk-2.0_wp
-                a1 = (fk-2.0_wp)*(fk-1.0_wp)-fnnp1
-                b1 = -2.0_wp*(fk**2-fnmsq)
-                c1 = (fk+1.0_wp)*(fk+2.0_wp)-fnnp1
+                fk = fk-TWO
+                a1 = (fk-TWO)*(fk-ONE)-fnnp1
+                b1 = -TWO*(fk**2-fnmsq)
+                c1 = (fk+ONE)*(fk+TWO)-fnnp1
                 cp(l-1) = -(b1*cp(l)+c1*cp(l+1))/a1
                 l=l-1
             end do
@@ -270,16 +277,16 @@ contains
         real(wp)    :: cos2t, sin2t, cost, sint, temp
         !----------------------------------------------------------------------
 
-        cos2t = cos(2.0_wp*theta)
-        sin2t = sin(2.0_wp*theta)
+        cos2t = cos(TWO*theta)
+        sin2t = sin(TWO*theta)
 
         if (mod(n, 2) <= 0) then
             if (mod(abs(m), 2) <= 0) then
                 !
-                !==> n even, m even
+                !  n even, m even
                 !
                 kdo=n/2
-                pb = 0.0_wp
+                pb = ZERO
 
                 if (n == 0) return
 
@@ -287,22 +294,22 @@ contains
                 sint = sin2t
                 do k=1, kdo
                     !     pb = pb+cp(k+1)*cos(2*k*theta)
-                    pb = pb-2.0_wp*real(k, kind=wp)*cp(k+1)*sint
+                    pb = pb-TWO*real(k, kind=wp)*cp(k+1)*sint
                     temp = cos2t*cost-sin2t*sint
                     sint = sin2t*cost+cos2t*sint
                     cost = temp
                 end do
             else
                 !
-                !==> n even, m odd
+                !  n even, m odd
                 !
                 kdo = n/2
-                pb = 0.0_wp
+                pb = ZERO
                 cost = cos2t
                 sint = sin2t
                 do k=1, kdo
                     !     pb = pb+cp(k)*sin(2*k*theta)
-                    pb = pb+2.0_wp*real(k, kind=wp)*cp(k)*cost
+                    pb = pb+TWO*real(k, kind=wp)*cp(k)*cost
                     temp = cos2t*cost-sin2t*sint
                     sint = sin2t*cost+cos2t*sint
                     cost = temp
@@ -311,30 +318,30 @@ contains
         else
             if (mod(abs(m), 2) <= 0) then
                 !
-                !==> n odd, m even
+                !  n odd, m even
                 !
                 kdo = (n+1)/2
-                pb = 0.0_wp
+                pb = ZERO
                 cost = cos(theta)
                 sint = sin(theta)
                 do k=1, kdo
                     !     pb = pb+cp(k)*cos((2*k-1)*theta)
-                    pb = pb-(2.0_wp*real(k-1, kind=wp))*cp(k)*sint
+                    pb = pb-(TWO*real(k-1, kind=wp))*cp(k)*sint
                     temp = cos2t*cost-sin2t*sint
                     sint = sin2t*cost+cos2t*sint
                     cost = temp
                 end do
             else
                 !
-                !==> n odd, m odd
+                !  n odd, m odd
                 !
                 kdo = (n+1)/2
-                pb = 0.0_wp
+                pb = ZERO
                 cost = cos(theta)
                 sint = sin(theta)
                 do k=1, kdo
                     !     pb = pb+cp(k)*sin((2*k-1)*theta)
-                    pb = pb+(2.0_wp*real(k-1, kind=wp))*cp(k)*cost
+                    pb = pb+(TWO*real(k-1, kind=wp))*cp(k)*cost
                     temp = cos2t*cost-sin2t*sint
                     sint = sin2t*cost+cos2t*sint
                     cost = temp
@@ -361,16 +368,16 @@ contains
         real(wp)    :: temp, cos2t, cost, sin2t, sint
         !----------------------------------------------------------------------
 
-        cos2t = cos(2.0_wp * theta)
-        sin2t = sin(2.0_wp * theta)
+        cos2t = cos(TWO * theta)
+        sin2t = sin(TWO * theta)
 
         if (mod(n, 2) <= 0) then
             if (mod(m, 2) <= 0) then
                 !
-                !==>  n even, m even
+                !   n even, m even
                 !
                 kdo = n/2
-                pb = 0.5_wp * cp(1)
+                pb = HALF * cp(1)
 
                 if (n == 0) return
 
@@ -385,10 +392,10 @@ contains
                 end do
             else
                 !
-                !==> n even, m odd
+                !  n even, m odd
                 !
                 kdo = n/2
-                pb = 0.0_wp
+                pb = ZERO
                 cost = cos2t
                 sint = sin2t
 
@@ -402,10 +409,10 @@ contains
         else
             if (mod(m, 2) <= 0) then
                 !
-                !==> n odd, m even
+                !  n odd, m even
                 !
                 kdo = (n+1)/2
-                pb = 0.0_wp
+                pb = ZERO
                 cost = cos(theta)
                 sint = sin(theta)
 
@@ -417,10 +424,10 @@ contains
                 end do
             else
                 !
-                !==>  n odd, m odd
+                !   n odd, m odd
                 !
                 kdo = (n+1)/2
-                pb = 0.0_wp
+                pb = ZERO
                 cost = cos(theta)
                 sint = sin(theta)
 
@@ -466,12 +473,12 @@ contains
         !----------------------------------------------------------------------
 
         !
-        !==> set size of pole to equator gaussian grid
+        !  set size of pole to equator gaussian grid
         !
         late = (nlat+mod(nlat,2))/2
 
         !
-        !==> partition w (set pointers for p0n, p1n, abel, bbel, cbel, pmn)
+        !  partition w (set pointers for p0n, p1n, abel, bbel, cbel, pmn)
         !
         workspace_indices = get_workspace_indices(l, late, nlat)
 
@@ -556,7 +563,7 @@ contains
                 end if
 
                 !
-                !==>  Permute column indices
+                !   Permute column indices
                 !     km0, km1, km2 store m, m-1, m-2 columns
                 kmt = km0
                 km0 = km2
@@ -660,7 +667,7 @@ contains
 
         imid = (nlat+1)/2
         !
-        !==> The length of wzfin is 2*lim+3*labc
+        !  The length of wzfin is 2*lim+3*labc
         !
         workspace = get_workspace_indices(nlat, nlon, imid)
 
@@ -849,7 +856,7 @@ contains
                         call dnzft(nlat, m, n, th, cz, zh)
                         z(i, np1, mp1) = zh
                     end do
-                    z(1, np1, mp1) = 0.5_wp*z(1, np1, mp1)
+                    z(1, np1, mp1) = HALF*z(1, np1, mp1)
                 end do
             end do
 
@@ -888,7 +895,7 @@ contains
         !----------------------------------------------------------------------
 
         lc = (nlat+1)/2
-        sc1 = 2.0_wp/(nlat-1)
+        sc1 = TWO/(nlat-1)
 
         call dnlfk(m, n, work)
 
@@ -897,12 +904,12 @@ contains
                 kdo = n/2+1
                 do idx=1, lc
                     i = 2*idx-2
-                    summation = work(1)/(1.0_wp-real(i**2, kind=wp))
+                    summation = work(1)/(ONE-real(i**2, kind=wp))
                     if (kdo >= 2) then
                         do kp1=2, kdo
                             k = kp1-1
-                            t1 = 1.0_wp-real((2*k+i)**2, kind=wp)
-                            t2 = 1.0_wp-real((2*k-i)**2, kind=wp)
+                            t1 = ONE-real((2*k+i)**2, kind=wp)
+                            t2 = ONE-real((2*k-i)**2, kind=wp)
                             summation = summation+work(kp1)*(t1+t2)/(t1*t2)
                         end do
                     end if
@@ -912,10 +919,10 @@ contains
                 kdo = n/2
                 do idx=1, lc
                     i = 2*idx-2
-                    summation = 0.0_wp
+                    summation = ZERO
                     do k=1, kdo
-                        t1 = 1.0_wp-real((2*k+i)**2, kind=wp)
-                        t2 = 1.0_wp-real((2*k-i)**2, kind=wp)
+                        t1 = ONE-real((2*k+i)**2, kind=wp)
+                        t2 = ONE-real((2*k-i)**2, kind=wp)
                         summation=summation+work(k)*(t1-t2)/(t1*t2)
                     end do
                     cz(idx) = sc1*summation
@@ -924,15 +931,15 @@ contains
         else
             if (mod(m,2) <= 0) then
                 !
-                !==>  n odd, m even
+                !   n odd, m even
                 !
                 kdo = (n+1)/2
                 do idx=1, lc
                     i = 2*idx-1
-                    summation = 0.0_wp
+                    summation = ZERO
                     do k=1, kdo
-                        t1 = 1.0_wp-real((2*k-1+i)**2, kind=wp)
-                        t2 = 1.0_wp-real((2*k-1-i)**2, kind=wp)
+                        t1 = ONE-real((2*k-1+i)**2, kind=wp)
+                        t2 = ONE-real((2*k-1-i)**2, kind=wp)
                         summation=summation+work(k)*(t1+t2)/(t1*t2)
                     end do
                     cz(idx)=sc1*summation
@@ -941,10 +948,10 @@ contains
                 kdo = (n+1)/2
                 do idx=1, lc
                     i = 2*idx-3
-                    summation=0.0_wp
+                    summation=ZERO
                     do k=1, kdo
-                        t1 = 1.0_wp-real((2*k-1+i)**2, kind=wp)
-                        t2 = 1.0_wp-real((2*k-1-i)**2, kind=wp)
+                        t1 = ONE-real((2*k-1+i)**2, kind=wp)
+                        t2 = ONE-real((2*k-1-i)**2, kind=wp)
                         summation=summation+work(k)*(t1-t2)/(t1*t2)
                     end do
                     cz(idx)=sc1*summation
@@ -973,16 +980,16 @@ contains
         real(wp)    :: cos2t, sin2t, cost, sint, temp
         !----------------------------------------------------------------------
 
-        zh = 0.0_wp
-        cos2t = cos(2.0_wp*th)
-        sin2t = sin(2.0_wp*th)
+        zh = ZERO
+        cos2t = cos(TWO*th)
+        sin2t = sin(TWO*th)
 
         if (mod(nlat, 2) <= 0) then
             lc = nlat/2
             lq = lc-1
             if (mod(n, 2) <= 0) then
                 if (mod(m, 2) <= 0) then
-                    zh = 0.5_wp*cz(1)
+                    zh = HALF*cz(1)
                     cost = cos2t
                     sint = sin2t
                     do k=2, lc
@@ -1005,7 +1012,7 @@ contains
                 end if
             else
                 if (mod(m, 2) <= 0) then
-                    zh = 0.5_wp*cz(lc)*cos((nlat-1)*th)
+                    zh = HALF*cz(lc)*cos((nlat-1)*th)
                     cost = cos(th)
                     sint = sin(th)
                     do k=1, lq
@@ -1033,7 +1040,7 @@ contains
             ls = lc-2
             if (mod(n, 2) <= 0) then
                 if (mod(m, 2) <= 0) then
-                    zh = 0.5_wp*(cz(1)+cz(lc)*cos(2*lq*th))
+                    zh = HALF*(cz(1)+cz(lc)*cos(2*lq*th))
                     cost = cos2t
                     sint = sin2t
                     do k=2, lq
@@ -1343,17 +1350,17 @@ contains
                 m = mp1-1
                 ns = ((m-2)*(nlat+nlat-m-1))/2+1
                 fm = real(m, kind=wp)
-                tm = 2.0_wp * fm
-                temp = tm*(tm-1.0_wp)
-                a(ns) = sqrt((tm+1.0_wp)*(tm-2.0_wp)/temp)
-                c(ns) = sqrt(2.0_wp/temp)
+                tm = TWO * fm
+                temp = tm*(tm-ONE)
+                a(ns) = sqrt((tm+ONE)*(tm-TWO)/temp)
+                c(ns) = sqrt(TWO/temp)
 
                 if (m == nlat-1) cycle outer_loop
 
                 ns = ns+1
-                temp = tm*(tm+1.0_wp)
-                a(ns) = sqrt((tm+3.0_wp)*(tm-2.0_wp)/temp)
-                c(ns) = sqrt(6.0_wp/temp)
+                temp = tm*(tm+ONE)
+                a(ns) = sqrt((tm+THREE)*(tm-TWO)/temp)
+                c(ns) = sqrt(SIX/temp)
                 mp3 = m+3
 
                 if (mp3 > nlat) cycle outer_loop
@@ -1362,14 +1369,14 @@ contains
                     n = np1-1
                     ns = ns+1
                     fn = real(n, kind=wp)
-                    tn = 2.0_wp * fn
-                    cn = (tn+1.0_wp)/(tn-3.0_wp)
+                    tn = TWO * fn
+                    cn = (tn+ONE)/(tn-THREE)
                     fnpm = fn+fm
                     fnmm = fn-fm
-                    temp = fnpm*(fnpm-1.0_wp)
-                    a(ns) = sqrt(cn*(fnpm-3.0_wp)*(fnpm-2.0_wp)/temp)
-                    b(ns) = sqrt(cn*fnmm*(fnmm-1.0_wp)/temp)
-                    c(ns) = sqrt((fnmm+1.0_wp)*(fnmm+2.0_wp)/temp)
+                    temp = fnpm*(fnpm-ONE)
+                    a(ns) = sqrt(cn*(fnpm-THREE)*(fnpm-TWO)/temp)
+                    b(ns) = sqrt(cn*fnmm*(fnmm-ONE)/temp)
+                    c(ns) = sqrt((fnmm+ONE)*(fnmm+TWO)/temp)
                 end do
             end do outer_loop
 
@@ -1509,7 +1516,7 @@ contains
                         call dzvt(nlat, m, n, th, czv, zvh)
                         zv(i, np1, mp1) = zvh
                     end do
-                    zv(1, np1, mp1) = 0.5_wp*zv(1, np1, mp1)
+                    zv(1, np1, mp1) = HALF*zv(1, np1, mp1)
                 end do
             end do
 
@@ -1586,7 +1593,7 @@ contains
                         call dzwt(nlat, m, n, th, czw, zwh)
                         zw(i, np1, m) = zwh
                     end do
-                    zw(1, np1, m) = 0.5_wp*zw(1, np1, m)
+                    zw(1, np1, m) = HALF*zw(1, np1, m)
                 end do
             end do
 
@@ -2258,7 +2265,7 @@ contains
         if (n <= 0) return
 
         lc = (nlat+1)/2
-        sc1 = 2.0/(nlat-1)
+        sc1 = TWO/(nlat-1)
 
         call dvbk(m, n, work, czv)
 
@@ -2267,30 +2274,30 @@ contains
                 select case (mod(m, 2))
                     case (0)
                         !
-                        !==> n even, m even
+                        !  n even, m even
                         !
                         kdo = n/2
                         do id=1, lc
                             i = id+id-2
-                            summation = 0.0
+                            summation = ZERO
                             do k=1, kdo
-                                t1 = 1.0-(k+k+i)**2
-                                t2 = 1.0-(k+k-i)**2
+                                t1 = ONE-(k+k+i)**2
+                                t2 = ONE-(k+k-i)**2
                                 summation = summation+work(k)*(t1-t2)/(t1*t2)
                             end do
                             czv(id) = sc1*summation
                         end do
                     case (1)
                         !
-                        !==> n even, m odd
+                        !  n even, m odd
                         !
                         kdo = n/2
                         do id=1, lc
                             i = 2*id-2
-                            summation = 0.0
+                            summation = ZERO
                             do k=1, kdo
-                                t1 = 1.0-(k+k+i)**2
-                                t2 = 1.0-(k+k-i)**2
+                                t1 = ONE-(k+k+i)**2
+                                t2 = ONE-(k+k-i)**2
                                 summation = summation+work(k)*(t1+t2)/(t1*t2)
                             end do
                             czv(id) = sc1*summation
@@ -2301,30 +2308,30 @@ contains
                 select case (mod(m, 2))
                     case (0)
                         !
-                        !==> n odd, m even
+                        !  n odd, m even
                         !
                         kdo = (n+1)/2
                         do id=1, lc
                             i = 2*id-3
-                            summation = 0.0
+                            summation = ZERO
                             do k=1, kdo
-                                t1 = 1.0-(k+k-1+i)**2
-                                t2 = 1.0-(k+k-1-i)**2
+                                t1 = ONE-(k+k-1+i)**2
+                                t2 = ONE-(k+k-1-i)**2
                                 summation = summation+work(k)*(t1-t2)/(t1*t2)
                             end do
                             czv(id) = sc1*summation
                         end do
                     case (1)
                         !
-                        !==> n odd, m odd
+                        !  n odd, m odd
                         !
                         kdo = (n+1)/2
                         do id=1, lc
                             i = 2*id-1
-                            summation = 0.0
+                            summation = ZERO
                             do k=1, kdo
-                                t1 = 1.0-(k+k-1+i)**2
-                                t2 = 1.0-(k+k-1-i)**2
+                                t1 = ONE-(k+k-1+i)**2
+                                t2 = ONE-(k+k-1-i)**2
                                 summation = summation+work(k)*(t1+t2)/(t1*t2)
                             end do
                             czv(id) = sc1*summation
@@ -2367,7 +2374,7 @@ contains
         !     zvh     zvbar(m, n, theta) evaluated at theta = th
         !
 
-        zvh = 0.0
+        zvh = ZERO
 
         if (n <= 0) return
 
@@ -2377,7 +2384,7 @@ contains
         cost = cos(th)
         sint = sin(th)
         cdt = cost**2-sint**2
-        sdt = 2.0*sint*cost
+        sdt = TWO*sint*cost
 
         select case (mod(nlat, 2))
             case(0) ! nlat even
@@ -2388,7 +2395,7 @@ contains
                         select case (mod(m, 2))
                             case (0) ! m even
                                 !
-                                !==> nlat even n even  m even
+                                !  nlat even n even  m even
                                 !
                                 do k=1, lq
                                     zvh = zvh+czv(k+1)*sint
@@ -2398,9 +2405,9 @@ contains
                                 end do
                             case (1) ! m odd
                                 !
-                                !==> nlat even n even m odd
+                                !  nlat even n even m odd
                                 !
-                                zvh = 0.5*czv(1)
+                                zvh = HALF*czv(1)
                                 do k=2, lc
                                     zvh = zvh+czv(k)*cost
                                     temp = cdt*cost-sdt*sint
@@ -2412,7 +2419,7 @@ contains
                         select case (mod(m, 2))
                             case (0) ! m even
                                 !
-                                !==> nlat even n odd  m even
+                                !  nlat even n odd  m even
                                 !
                                 do k=1, lq
                                     zvh = zvh+czv(k+1)*sint
@@ -2422,9 +2429,9 @@ contains
                                 end do
                             case (1) ! m odd
                                 !
-                                !==> nlat even  n odd  m odd
+                                !  nlat even  n odd  m odd
                                 !
-                                zvh = 0.5*czv(lc)*cos(real(nlat-1)*th)
+                                zvh = HALF*czv(lc)*cos(real(nlat-1)*th)
 
                                 do k=1, lq
                                     zvh = zvh+czv(k)*cost
@@ -2442,7 +2449,7 @@ contains
                         select case (mod(m, 2))
                             case (0) ! m even
                                 !
-                                !==> nlat odd  n even  m even
+                                !  nlat odd  n even  m even
                                 !
                                 do k=1, ls
                                     zvh = zvh+czv(k+1)*sint
@@ -2451,20 +2458,20 @@ contains
                                     cost = temp
                                 end do
                             case (1) ! m odd
-                                zvh = 0.5*czv(1)
+                                zvh = HALF*czv(1)
                                 do k=2, lq
                                     zvh = zvh+czv(k)*cost
                                     temp = cdt*cost-sdt*sint
                                     sint = sdt*cost+cdt*sint
                                     cost = temp
                                 end do
-                                zvh = zvh+0.5*czv(lc)*cos((nlat-1)*th)
+                                zvh = zvh+HALF*czv(lc)*cos((nlat-1)*th)
                         end select
                     case (1) ! n odd
                         select case (mod(m, 2))
                             case (0) ! m even
                                 !
-                                !==> nlat odd n odd m even
+                                !  nlat odd n odd m even
                                 !
                                 do k=1, lq
                                     zvh = zvh+czv(k+1)*sint
@@ -2474,7 +2481,7 @@ contains
                                 end do
                             case (1) ! m odd
                                 !
-                                !==> nlat odd n odd m odd
+                                !  nlat odd n odd m odd
                                 !
                                 do k=1, lq
                                     zvh = zvh+czv(k)*cost
@@ -2526,7 +2533,7 @@ contains
         if (n <= 0) return
 
         lc = (nlat+1)/2
-        sc1 = 2.0/(nlat-1)
+        sc1 = TWO/(nlat-1)
 
         call dwbk(m, n, work, czw)
 
@@ -2535,30 +2542,30 @@ contains
                 select case (mod(m,2))
                     case (0) ! m even
                         !
-                        !==> n even, m even
+                        !  n even, m even
                         !
                         kdo = n/2
                         do id=1, lc
                             i = 2*id-3
-                            summation = 0.0
+                            summation = ZERO
                             do k=1, kdo
-                                t1 = 1.0-(k+k-1+i)**2
-                                t2 = 1.0-(k+k-1-i)**2
+                                t1 = ONE-(k+k-1+i)**2
+                                t2 = ONE-(k+k-1-i)**2
                                 summation = summation+work(k)*(t1-t2)/(t1*t2)
                             end do
                             czw(id) = sc1*summation
                         end do
                     case (1) ! m odd
                         !
-                        !==> n even, m odd
+                        !  n even, m odd
                         !
                         kdo = n/2
                         do id=1, lc
                             i = 2*id-1
-                            summation = 0.0
+                            summation = ZERO
                             do k=1, kdo
-                                t1 = 1.0-(k+k-1+i)**2
-                                t2 = 1.0-(k+k-1-i)**2
+                                t1 = ONE-(k+k-1+i)**2
+                                t2 = ONE-(k+k-1-i)**2
                                 summation = summation+work(k)*(t1+t2)/(t1*t2)
                             end do
                             czw(id) = sc1*summation
@@ -2568,33 +2575,33 @@ contains
                 select case (mod(m,2))
                     case (0) ! m even
                         !
-                        !==> n odd, m even
+                        !  n odd, m even
                         !
                         kdo = (n-1)/2
                         do id=1, lc
                             i = 2*id-2
-                            summation = 0.0
+                            summation = ZERO
                             do k=1, kdo
-                                t1 = 1.0-(k+k+i)**2
-                                t2 = 1.0-(k+k-i)**2
+                                t1 = ONE-(k+k+i)**2
+                                t2 = ONE-(k+k-i)**2
                                 summation = summation+work(k)*(t1-t2)/(t1*t2)
                             end do
                             czw(id) = sc1*summation
                         end do
                     case (1) ! m odd
                         !
-                        !==> n odd, m odd
+                        !  n odd, m odd
                         !
                         kdo = (n+1)/2
                         do id=1, lc
                             i = 2*id-2
-                            summation = work(1)/(1.0-i**2)
+                            summation = work(1)/(ONE-i**2)
 
                             if (kdo >= 2) then
                                 do kp1=2, kdo
                                     k = kp1-1
-                                    t1 = 1.0-(2*k+i)**2
-                                    t2 = 1.0-(2*k-i)**2
+                                    t1 = ONE-(2*k+i)**2
+                                    t2 = ONE-(2*k-i)**2
                                     summation = summation+work(kp1)*(t1+t2)/(t1*t2)
                                 end do
                             end if
@@ -2639,7 +2646,7 @@ contains
         !     zwh     zwbar(m, n, theta) evaluated at theta = th
         !
 
-        zwh = 0.0
+        zwh = ZERO
 
         if (n <= 0) return
 
@@ -2649,7 +2656,7 @@ contains
         cost = cos(th)
         sint = sin(th)
         cdt = cost**2-sint**2
-        sdt = 2.0*sint*cost
+        sdt = TWO*sint*cost
 
         select case (mod(nlat,2))
             case (0) ! nlat even
@@ -2658,7 +2665,7 @@ contains
                         select case (mod(m,2))
                             case (0) ! m even
                                 !
-                                !==> nlat even  n even  m even
+                                !  nlat even  n even  m even
                                 !
                                 do k=1, lq
                                     zwh = zwh+czw(k+1)*sint
@@ -2670,7 +2677,7 @@ contains
                                    !
                                    !     nlat even  n even  m odd
                                    !
-                                zwh = 0.5*czw(lc)*cos(real(nlat-1)*th)
+                                zwh = HALF*czw(lc)*cos(real(nlat-1)*th)
                                 do k=1, lq
                                     zwh = zwh+czw(k)*cost
                                     temp = cdt*cost-sdt*sint
@@ -2684,7 +2691,7 @@ contains
                         select case (mod(m,2))
                             case (0) ! m even
                                 !
-                                !==> nlat even  n odd  m even
+                                !  nlat even  n odd  m even
                                 !
                                 do k=1, lq
                                     zwh = zwh+czw(k+1)*sint
@@ -2694,9 +2701,9 @@ contains
                                 end do
                             case (1) ! m odd
                                    !
-                                   !==> nlat even  n odd  m odd
+                                   !  nlat even  n odd  m odd
                                    !
-                                zwh = 0.5*czw(1)
+                                zwh = HALF*czw(1)
                                 do k=2, lc
                                     zwh = zwh+czw(k)*cost
                                     temp = cdt*cost-sdt*sint
@@ -2711,7 +2718,7 @@ contains
                         select case (mod(m,2))
                             case (0) ! m even
                                 !
-                                !==> nlat odd  n even  m even
+                                !  nlat odd  n even  m even
                                 !
                                 do k=1, lq
                                     zwh = zwh+czw(k+1)*sint
@@ -2721,7 +2728,7 @@ contains
                                 end do
                             case (1) ! m odd
                                 !
-                                !==> nlat odd  n even  m odd
+                                !  nlat odd  n even  m odd
                                 !
                                 do k=1, lq
                                     zwh = zwh+czw(k)*cost
@@ -2736,7 +2743,7 @@ contains
                         select case (mod(m,2))
                             case (0) ! m even
                                 !
-                                !==> nlat odd  n odd  m even
+                                !  nlat odd  n odd  m even
                                 !
                                 do k=1, ls
                                     zwh = zwh+czw(k+1)*sint
@@ -2746,16 +2753,16 @@ contains
                                 end do
                             case (1) ! m odd
                                  !
-                                 !==> nlat odd  n odd  m odd
+                                 !  nlat odd  n odd  m odd
                                  !
-                                zwh = 0.5*czw(1)
+                                zwh = HALF*czw(1)
                                 do k=2, lq
                                     zwh = zwh+czw(k)*cost
                                     temp = cdt*cost-sdt*sint
                                     sint = sdt*cost+cdt*sint
                                     cost = temp
                                 end do
-                                zwh = zwh+0.5*czw(lc)*cos(real(nlat-1)*th)
+                                zwh = zwh+HALF*czw(lc)*cos(real(nlat-1)*th)
                         end select
                 end select
         end select
@@ -2779,13 +2786,13 @@ contains
         real(wp)    :: srnp1, fn, fk, cf
         !----------------------------------------------------------------------
 
-        cv(1) = 0.0_wp
+        cv(1) = ZERO
 
         if (n <= 0) return
 
         fn = n
-        srnp1 = sqrt(fn * (fn + 1.0_wp))
-        cf = 2.0_wp*real(m, kind=wp)/srnp1
+        srnp1 = sqrt(fn * (fn + ONE))
+        cf = TWO*real(m, kind=wp)/srnp1
 
         call dnlfk(m, n, work)
 
@@ -2793,43 +2800,43 @@ contains
             case (0) ! n even
                 ncv = n/2
                 if (ncv == 0) return
-                fk = 0.0
+                fk = ZERO
                 select case (mod(m,2))
                     case (0) ! m even
                         !
-                        !==> n even m even
+                        !  n even m even
                         !
                         do l=1, ncv
-                            fk = fk+2.0
+                            fk = fk+TWO
                             cv(l) = -fk*work(l+1)/srnp1
                         end do
                     case (1) ! m odd
                         !
-                        !==> n even m odd
+                        !  n even m odd
                         !
                         do l=1, ncv
-                            fk = fk+2.0_wp
+                            fk = fk+TWO
                             cv(l) = fk*work(l)/srnp1
                         end do
                 end select
             case (1) ! n odd
                 ncv = (n+1)/2
-                fk = -1.0_wp
+                fk = -ONE
                 select case (mod(m,2))
                     case (0) ! m even
                         !
                         !     n odd m even
                         !
                         do l=1, ncv
-                            fk = fk+2.0_wp
+                            fk = fk+TWO
                             cv(l) = -fk*work(l)/srnp1
                         end do
                     case (1) ! m odd
                         !
-                        !==>     n odd m odd
+                        !      n odd m odd
                         !
                         do l=1, ncv
-                            fk = fk+2.0_wp
+                            fk = fk+TWO
                             cv(l) = fk*work(l)/srnp1
                         end do
                 end select
@@ -2853,13 +2860,13 @@ contains
         real(wp)    :: fn, cf, srnp1
         !----------------------------------------------------------------------
 
-        cw(1) = 0.0_wp
+        cw(1) = ZERO
 
         if (n <= 0 .or. m <= 0) return
 
         fn = n
-        srnp1 = sqrt(fn * (fn + 1.0_wp))
-        cf = 2.0_wp * real(m, kind=wp)/srnp1
+        srnp1 = sqrt(fn * (fn + ONE))
+        cf = TWO * real(m, kind=wp)/srnp1
 
         call dnlfk(m, n, work)
 
@@ -2872,7 +2879,7 @@ contains
                 select case (mod(m,2))
                     case (0) ! m even
                         !
-                        !==> n even m even
+                        !  n even m even
                         !
                         cw(l) = -cf*work(l+1)
                         do
@@ -2897,7 +2904,7 @@ contains
                         l = (n-1)/2
                         if (l == 0) return
                         !
-                        !==> n odd m even
+                        !  n odd m even
                         !
                         cw(l) = -cf*work(l+1)
                         do
@@ -2907,7 +2914,7 @@ contains
                         end do
                     case (1) ! m odd
                         !
-                        !==> n odd m odd
+                        !  n odd m odd
                         !
                         l = (n+1)/2
                         cw(l) = cf*work(l)
@@ -2938,14 +2945,14 @@ contains
         real(wp)    :: cost, sint, cdt, sdt, temp
         !----------------------------------------------------------------------
 
-        vh = 0.0_wp
+        vh = ZERO
 
         if (n == 0) return
 
         cost = cos(theta)
         sint = sin(theta)
         cdt = cost**2-sint**2
-        sdt = 2.0*sint*cost
+        sdt = TWO*sint*cost
 
         select case (mod(n,2))
             case (0) ! n even
@@ -2954,7 +2961,7 @@ contains
                 select case (mod(m,2))
                     case (0) ! m even
                         !
-                        !==> n even m even
+                        !  n even m even
                         !
                         ncv = n/2
                         do k=1, ncv
@@ -2965,7 +2972,7 @@ contains
                         end do
                     case (1) ! m odd
                         !
-                        !==> n even  m odd
+                        !  n even  m odd
                         !
                         ncv = n/2
                         do k=1, ncv
@@ -2979,7 +2986,7 @@ contains
                 select case (mod(m,2))
                     case (0) ! m even
                         !
-                        !==> n odd m even
+                        !  n odd m even
                         !
                         ncv = (n+1)/2
                         do k=1, ncv
@@ -2990,7 +2997,7 @@ contains
                         end do
                     case (1) ! m odd
                         !
-                        !==> n odd m odd
+                        !  n odd m odd
                         !
                         ncv = (n+1)/2
                         do k=1, ncv
@@ -3015,21 +3022,21 @@ contains
         real(wp) :: cw(*)
         real(wp) :: theta, wh, cost, sint, cdt, sdt, temp
 
-        wh = 0.0
+        wh = ZERO
 
         if (n <= 0 .or. m <= 0) return
 
         cost = cos(theta)
         sint = sin(theta)
         cdt = cost*cost-sint*sint
-        sdt = 2.0*sint*cost
+        sdt = TWO*sint*cost
 
         select case (mod(n,2))
             case (0) ! n even
                 select case (mod(m,2))
                     case (0) ! m even
                         !
-                        !==> n even  m even
+                        !  n even  m even
                         !
                         ncw = n/2
                         do k=1, ncw
@@ -3040,7 +3047,7 @@ contains
                         end do
                     case (1) ! m odd
                          !
-                         !==> n even m odd
+                         !  n even m odd
                          !
                         ncw = n/2
                         do k=1, ncw
@@ -3056,7 +3063,7 @@ contains
                 select case (mod(m,2))
                     case (0) ! m even
                         !
-                        !==> n odd m even
+                        !  n odd m even
                         !
                         ncw = (n-1)/2
                         do k=1, ncw
@@ -3067,10 +3074,10 @@ contains
                         end do
                     case (1) ! m odd
                         !
-                        !==> n odd m odd
+                        !  n odd m odd
                         !
                         ncw = (n+1)/2
-                        wh = 0.5*cw(1)
+                        wh = HALF*cw(1)
 
                         if (ncw < 2) return
 
@@ -3148,31 +3155,31 @@ contains
                 ns = ((m-2)*(2*nlat-m-1))/2+1
                 fm = real(m, kind=wp)
                 tm = fm+fm
-                temp = tm*(tm-1.0)
-                tpn = (fm-2.0)*(fm-1.0)/(fm*(fm+1.0))
-                a(ns) = sqrt(tpn*(tm+1.0)*(tm-2.0)/temp)
-                c(ns) = sqrt(2.0/temp)
+                temp = tm*(tm-ONE)
+                tpn = (fm-TWO)*(fm-ONE)/(fm*(fm+ONE))
+                a(ns) = sqrt(tpn*(tm+ONE)*(tm-TWO)/temp)
+                c(ns) = sqrt(TWO/temp)
                 if (m == nlat-1) cycle outer_loop
                 ns = ns+1
-                temp = tm*(tm+1.0)
-                tpn = (fm-1.0)*fm/((fm+1.0)*(fm+2.0))
-                a(ns) = sqrt(tpn*(tm+3.0)*(tm-2.0)/temp)
-                c(ns) = sqrt(6.0/temp)
+                temp = tm*(tm+ONE)
+                tpn = (fm-ONE)*fm/((fm+ONE)*(fm+TWO))
+                a(ns) = sqrt(tpn*(tm+THREE)*(tm-TWO)/temp)
+                c(ns) = sqrt(SIX/temp)
                 mp3 = m+3
                 if (mp3 > nlat) cycle outer_loop
                 do np1=mp3, nlat
                     n = np1-1
                     ns = ns+1
                     fn = real(n)
-                    tn = 2.0*fn
-                    cn = (tn+1.0)/(tn-3.0)
-                    tpn = (fn-2.0)*(fn-1.0)/(fn*(fn + 1.0))
+                    tn = TWO*fn
+                    cn = (tn+ONE)/(tn-THREE)
+                    tpn = (fn-TWO)*(fn-ONE)/(fn*(fn + ONE))
                     fnpm = fn+fm
                     fnmm = fn-fm
-                    temp = fnpm*(fnpm-1.0)
-                    a(ns) = sqrt(tpn*cn*(fnpm-3.0)*(fnpm-2.0)/temp)
-                    b(ns) = sqrt(tpn*cn*fnmm*(fnmm-1.0)/temp)
-                    c(ns) = sqrt((fnmm+1.0)*(fnmm+2.0)/temp)
+                    temp = fnpm*(fnpm-ONE)
+                    a(ns) = sqrt(tpn*cn*(fnpm-THREE)*(fnpm-TWO)/temp)
+                    b(ns) = sqrt(tpn*cn*fnmm*(fnmm-ONE)/temp)
+                    c(ns) = sqrt((fnmm+ONE)*(fnmm+TWO)/temp)
                 end do
             end do outer_loop
 
@@ -3240,35 +3247,35 @@ contains
                 m = mp1-1
                 ns = ((m-2)*(nlat+nlat-m-1))/2+1
                 fm = real(m, kind=wp)
-                tm = 2.0*fm
-                temp = tm*(tm-1.0)
-                tpn = (fm-2.0)*(fm-1.0)/(fm*(fm+1.0))
-                tph = fm/(fm-2.0)
-                a(ns) = tph*sqrt(tpn*(tm+1.0)*(tm-2.0)/temp)
-                c(ns) = tph*sqrt(2.0/temp)
+                tm = TWO*fm
+                temp = tm*(tm-ONE)
+                tpn = (fm-TWO)*(fm-ONE)/(fm*(fm+ONE))
+                tph = fm/(fm-TWO)
+                a(ns) = tph*sqrt(tpn*(tm+ONE)*(tm-TWO)/temp)
+                c(ns) = tph*sqrt(TWO/temp)
                 if (m == nlat-1) cycle outer_loop
                 ns = ns+1
-                temp = tm*(tm+1.0)
-                tpn = (fm-1.0)*fm/((fm+1.0)*(fm+2.0))
-                tph = fm/(fm-2.0)
-                a(ns) = tph*sqrt(tpn*(tm+3.0)*(tm-2.0)/temp)
-                c(ns) = tph*sqrt(6.0/temp)
+                temp = tm*(tm+ONE)
+                tpn = (fm-ONE)*fm/((fm+ONE)*(fm+TWO))
+                tph = fm/(fm-TWO)
+                a(ns) = tph*sqrt(tpn*(tm+THREE)*(tm-TWO)/temp)
+                c(ns) = tph*sqrt(SIX/temp)
                 mp3 = m+3
                 if (mp3 > nlat) cycle outer_loop
                 do np1=mp3, nlat
                     n = np1-1
                     ns = ns+1
                     fn = real(n)
-                    tn = 2.0*fn
-                    cn = (tn+1.0)/(tn-3.0)
+                    tn = TWO*fn
+                    cn = (tn+ONE)/(tn-THREE)
                     fnpm = fn+fm
                     fnmm = fn-fm
-                    temp = fnpm*(fnpm-1.0)
-                    tpn = (fn-2.0)*(fn-1.0)/(fn*(fn + 1.0))
-                    tph = fm/(fm-2.0)
-                    a(ns) = tph*sqrt(tpn*cn*(fnpm-3.0)*(fnpm-2.0)/temp)
-                    b(ns) = sqrt(tpn*cn*fnmm*(fnmm-1.0)/temp)
-                    c(ns) = tph*sqrt((fnmm+1.0)*(fnmm+2.0)/temp)
+                    temp = fnpm*(fnpm-ONE)
+                    tpn = (fn-TWO)*(fn-ONE)/(fn*(fn + ONE))
+                    tph = fm/(fm-TWO)
+                    a(ns) = tph*sqrt(tpn*cn*(fnpm-THREE)*(fnpm-TWO)/temp)
+                    b(ns) = sqrt(tpn*cn*fnmm*(fnmm-ONE)/temp)
+                    c(ns) = tph*sqrt((fnmm+ONE)*(fnmm+TWO)/temp)
                 end do
             end do outer_loop
 
@@ -3554,13 +3561,13 @@ contains
         real(wp)    :: fn, fk, cf, srnp1
         !----------------------------------------------------------------------
 
-        cv(1) = 0.0_wp
+        cv(1) = ZERO
 
         if (n <= 0) return
 
         fn = n
-        srnp1 = sqrt(fn * (fn + 1.0_wp))
-        cf = 2.0_wp * real(m, kind=wp)/srnp1
+        srnp1 = sqrt(fn * (fn + ONE))
+        cf = TWO * real(m, kind=wp)/srnp1
 
         call dnlfk(m, n, work)
 
@@ -3568,43 +3575,43 @@ contains
             case (0) ! n even
                 ncv = n/2
                 if (ncv == 0) return
-                fk = 0.0
+                fk = ZERO
                 select case (mod(m,2))
                     case (0) ! m even
                         !
-                        !==> n even m even
+                        !  n even m even
                         !
                         do l=1, ncv
-                            fk = fk+2.0
+                            fk = fk+TWO
                             cv(l) = -(fk**2)*work(l+1)/srnp1
                         end do
                     case (1) ! m odd
                         !
-                        !==> n even m odd
+                        !  n even m odd
                         !
                         do l=1, ncv
-                            fk = fk+2.0
+                            fk = fk+TWO
                             cv(l) = -(fk**2)*work(l)/srnp1
                         end do
                 end select
             case (1) ! n odd
                 ncv = (n+1)/2
-                fk = -1.0
+                fk = -ONE
                 select case (mod(m,2))
                     case (0) ! m even
                         !
-                        !==> n odd m even
+                        !  n odd m even
                         !
                         do l=1, ncv
-                            fk = fk+2.0
+                            fk = fk+TWO
                             cv(l) = -(fk**2)*work(l)/srnp1
                         end do
                     case (1) ! m odd
                         !
-                        !==> n odd m odd
+                        !  n odd m odd
                         !
                         do l=1, ncv
-                            fk = fk+2.0
+                            fk = fk+TWO
                             cv(l) = -(fk**2)*work(l)/srnp1
                         end do
                 end select
@@ -3622,13 +3629,13 @@ contains
         real(wp) :: cw(*), work(*)
         real(wp) :: fn, cf, srnp1
 
-        cw(1) = 0.0
+        cw(1) = ZERO
 
         if (n <= 0 .or. m <= 0) return
 
         fn = n
-        srnp1 = sqrt(fn * (fn + 1.0_wp))
-        cf = 2.0_wp * real(m, kind=wp)/srnp1
+        srnp1 = sqrt(fn * (fn + ONE))
+        cf = TWO * real(m, kind=wp)/srnp1
 
         call dnlfk(m, n, work)
 
@@ -3652,7 +3659,7 @@ contains
                         end do
                     case (1) ! m odd
                         !
-                        !==> n even m odd
+                        !  n even m odd
                         !
                         cw(l) = cf*work(l)
                         do
@@ -3673,7 +3680,7 @@ contains
                         l = (n-1)/2
                         if (l == 0) return
                         !
-                        !==> n odd m even
+                        !  n odd m even
                         !
                         cw(l) = -cf*work(l+1)
                         do
@@ -3690,7 +3697,7 @@ contains
                         end do
                     case (1) ! m odd
                         !
-                        !==> n odd m odd
+                        !  n odd m odd
                         !
                         l = (n+1)/2
                         cw(l) = cf*work(l)
@@ -3728,14 +3735,14 @@ contains
         real(wp)    :: cost, sint, cdt, sdt, temp
         !----------------------------------------------------------------------
 
-        vh = 0.0_wp
+        vh = ZERO
 
         if (n == 0) return
 
         cost = cos(theta)
         sint = sin(theta)
         cdt = cost**2-sint**2
-        sdt = 2.0_wp*sint*cost
+        sdt = TWO*sint*cost
 
         select case (mod(n,2))
             case (0) ! n even
@@ -3744,7 +3751,7 @@ contains
                 select case (mod(m,2))
                     case (0) ! m even
                         !
-                        !==> n even  m even
+                        !  n even  m even
                         !
                         ncv = n/2
                         do k=1, ncv
@@ -3755,7 +3762,7 @@ contains
                         end do
                     case (1) ! m odd
                          !
-                         !==> n even  m odd
+                         !  n even  m odd
                          !
                         ncv = n/2
                         do k=1, ncv
@@ -3780,7 +3787,7 @@ contains
                         end do
                     case (1) ! m odd
                          !
-                         !==> n odd m odd
+                         !  n odd m odd
                          !
                         ncv = (n+1)/2
                         do k=1, ncv
@@ -3804,21 +3811,21 @@ contains
         real(wp) :: cw(*)
         real(wp) :: theta, wh, cost, sint, cdt, sdt, temp
 
-        wh = 0.0
+        wh = ZERO
 
         if (n <= 0 .or. m <= 0) return
 
         cost = cos(theta)
         sint = sin(theta)
         cdt = cost**2-sint**2
-        sdt = 2.0*sint*cost
+        sdt = TWO*sint*cost
 
         select case (mod(n,2))
             case (0) ! n even
                 select case (mod(m,2))
                     case (0) ! m even
                         !
-                        !==> n even m even
+                        !  n even m even
                         !
                         ncw = n/2
                         do k=1, ncw
@@ -3829,7 +3836,7 @@ contains
                         end do
                     case (1) ! m odd
                           !
-                          !==> n even m odd
+                          !  n even m odd
                           !
                         ncw = n/2
                         do k=1, ncw
@@ -3845,7 +3852,7 @@ contains
                 select case (mod(m,2))
                     case (0) ! m even
                         !
-                        !==> n odd m even
+                        !  n odd m even
                         !
                         ncw = (n-1)/2
                         do k=1, ncw
@@ -3856,10 +3863,10 @@ contains
                         end do
                     case (1) ! m odd
                           !
-                          !==> n odd m odd
+                          !  n odd m odd
                           !
                         ncw = (n+1)/2
-                        wh = 0.0
+                        wh = ZERO
 
                         if (ncw < 2) return
 

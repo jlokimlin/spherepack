@@ -411,7 +411,6 @@ contains
         call shaec1(nlat, isym, nt, g, idg, jdg, a, b, mdab, ndab, imid, ls, nlon, &
             work, work(jw1), work(jw2), work(jw3), wshaec, wshaec(iw1))
 
-
     end subroutine shaec
 
 
@@ -592,10 +591,10 @@ contains
             end do
         end do
 
-        ndo = nlat
-
         if (mod(nlat, 2) /= 0) then
             ndo = nlat-1
+        else
+            ndo = nlat
         end if
 
         do mp1=2, mdo
@@ -614,9 +613,7 @@ contains
 
         mp2 = mmax+1
 
-        if (mdo == mmax .or. mp2 > ndo) then
-            return
-        end if
+        if (mdo == mmax .or. mp2 > ndo) return
 
         call sphere_aux%zfin(1, nlat, nlon, mdo, zb, i3, wzfin)
 
@@ -629,7 +626,6 @@ contains
         end do
 
     end subroutine shaec1
-
 
     subroutine shaeci(nlat, nlon, wshaec, lshaec, dwork, ldwork, ierror)
         !--------------------------------------------------------------

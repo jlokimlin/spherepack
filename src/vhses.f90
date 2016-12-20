@@ -452,7 +452,7 @@ module module_vhses
     public :: VhsesAux
 
 
-    ! Declare derived data type
+    
     type, public :: VhsesAux
         !-----------------------------------------
         ! Type components
@@ -548,7 +548,7 @@ contains
         !----------------------------------------------------------------------
 
         !
-        !==> Address optional arguments
+        !  Address optional arguments
         !
         if (present(nt)) then
             nt_op = nt
@@ -563,7 +563,7 @@ contains
         end if
 
         !
-        !==> Compute workspace size
+        !  Compute workspace size
         !
         if (ityp_op <= 2) then
             ! Set workspace size
@@ -632,7 +632,7 @@ contains
         lnl = nt*idv*nlon
 
         !
-        !==> Check validity of input arguments
+        !  Check validity of input arguments
         !
         if (nlat < 3) then
             ierror = 1
@@ -669,7 +669,7 @@ contains
         end if
 
         !
-        !==> Set workspace indices
+        !  Set workspace indices
         !
         workspace_indices = get_workspace_indices(ist, lnl, lzimn)
 
@@ -1383,7 +1383,7 @@ contains
         labc = 3*(max(mmax-2, 0)*(2*nlat-mmax-1))/2
 
         !
-        !==> Check validity of input arguments
+        !  Check validity of input arguments
         !
         if (nlat < 3) then
             ierror = 1
@@ -1405,7 +1405,7 @@ contains
         end if
 
         !
-        !==> Set workspace indices
+        !  Set workspace indices
         !
         workspace_indices = get_workspace_indices(nlat, imid, mmax, lzimn)
 

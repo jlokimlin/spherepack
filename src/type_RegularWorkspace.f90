@@ -27,7 +27,7 @@ module type_RegularWorkspace
     public :: RegularWorkspace
 
 
-    ! Declare derived data type
+    
     type, extends (Workspace), public :: RegularWorkspace
     contains
         !----------------------------------------------------------------------
@@ -86,7 +86,7 @@ contains
         end if
 
         !
-        !==> Make copies
+        !  Make copies
         !
         self%initialized = object_to_be_copied%initialized
         self%legendre_workspace = object_to_be_copied%legendre_workspace
@@ -176,14 +176,14 @@ contains
         !----------------------------------------------------------------------
 
         !
-        !==> Compute dimensions of various workspace arrays
+        !  Compute dimensions of various workspace arrays
         !
         lwork = get_lwork(nlat, nlon)
         ldwork = get_ldwork(nlat)
         lshaes = aux%get_lshaes(nlat, nlon)
 
         !
-        !==>  Allocate memory
+        !   Allocate memory
         !
         if (allocated(self%forward_scalar)) deallocate( self%forward_scalar )
         allocate( work(lwork) )
@@ -196,14 +196,14 @@ contains
             ierror => error_flag &
             )
             !
-            !==> Initialize workspace for scalar synthesis
+            !  Initialize workspace for scalar synthesis
             !
             call aux%shaesi(nlat, nlon, wshaes, lshaes, work, lwork, dwork, ldwork, ierror)
 
         end associate
 
         !
-        !==>  Address error flag
+        !   Address error flag
         !
         select case (error_flag)
             case(0)
@@ -231,7 +231,7 @@ contains
         end select
 
         !
-        !==> Release memory
+        !  Release memory
         !
         deallocate( work )
         deallocate( dwork )
@@ -262,7 +262,7 @@ contains
         lshses = aux%get_lshses(nlat, nlon)
 
         !
-        !==> Allocate memory
+        !  Allocate memory
         !
         if (allocated(self%backward_scalar)) deallocate( self%backward_scalar )
         allocate( self%backward_scalar(lshses) )
@@ -275,7 +275,7 @@ contains
             ierror => error_flag &
             )
             !
-            !==> Initialize workspace for scalar synthesis
+            !  Initialize workspace for scalar synthesis
             !
             call aux%shsesi(nlat, nlon, wshses, lshses, work, lwork, dwork, ldwork, ierror)
 
@@ -309,7 +309,7 @@ contains
         end select
 
         !
-        !==> Release memory
+        !  Release memory
         !
         deallocate( work )
         deallocate( dwork )
@@ -369,7 +369,7 @@ contains
         lvhaes = aux%get_lvhaes(nlat, nlon)
 
         !
-        !==> Allocate memory
+        !  Allocate memory
         !
         if (allocated(self%forward_vector)) deallocate( self%forward_vector )
         allocate( work(lwork) )
@@ -382,7 +382,7 @@ contains
             ierror => error_flag &
             )
             !
-            !==> Initialize workspace for analysis
+            !  Initialize workspace for analysis
             !
             call aux%vhaesi(nlat, nlon, wvhaes, lvhaes, work, lwork, dwork, ldwork, ierror)
 
@@ -419,7 +419,7 @@ contains
         end select
 
         !
-        !==> Release memory
+        !  Release memory
         !
         deallocate( work )
         deallocate( dwork )
@@ -450,7 +450,7 @@ contains
         lvhses = aux%get_lvhses(nlat, nlon)
 
         !
-        !==> Allocate memory
+        !  Allocate memory
         !
         if (allocated(self%backward_vector)) deallocate( self%backward_vector )
         allocate( work(lwork) )
@@ -463,7 +463,7 @@ contains
             )
 
             !
-            !==> Initialize workspace for vector synthesis
+            !  Initialize workspace for vector synthesis
             !
             call aux%vhsesi(nlat, nlon, wvhses, lvhses, work, lwork, dwork, ldwork, ierror)
 
@@ -500,7 +500,7 @@ contains
         end select
 
         !
-        !==> Release memory
+        !  Release memory
         !
         deallocate( work )
         deallocate( dwork )
@@ -616,7 +616,7 @@ contains
         !----------------------------------------------------------------------
 
         !
-        !==> Address optional arguments
+        !  Address optional arguments
         !
         if (present(nt)) then
             nt_op = nt
@@ -637,7 +637,7 @@ contains
 
         lwork = maxval(work_size)
         !
-        !==> Allocate memory
+        !  Allocate memory
         !
         allocate( workspace(lwork) )
 

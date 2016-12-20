@@ -71,7 +71,7 @@ program tgrad
     !----------------------------------------------------------------------
 
     !
-    !==> Test gaussian case
+    !  Test gaussian case
     !
     allocate( GaussianSphere :: sphere_dat )
 
@@ -80,7 +80,7 @@ program tgrad
     deallocate( sphere_dat )
 
     !
-    !==> Test regular case
+    !  Test regular case
     !
     allocate( RegularSphere :: sphere_dat )
 
@@ -118,7 +118,7 @@ contains
         !----------------------------------------------------------------------
 
         !
-        !==> Set up workspace arrays
+        !  Set up workspace arrays
         !
         select type(sphere_type)
             type is (GaussianSphere)
@@ -144,7 +144,7 @@ contains
         end select
 
         !
-        !==> set scalar stream and velocity potential fields as polys in x,y,z
+        !  set scalar stream and velocity potential fields as polys in x,y,z
         !    and then set v,w from st,sv scalar fields
         !
         associate( &
@@ -216,7 +216,7 @@ contains
         end associate
 
         !
-        !==> Compute gradient
+        !  Compute gradient
         !
         do k=1, NSYNTHS
             associate( &
@@ -229,7 +229,7 @@ contains
         end do
 
         !
-        !==> compare this v,w with original
+        !  compare this v,w with original
         !
         associate( &
             ve => original_polar_gradient_component, &
@@ -242,7 +242,7 @@ contains
                 err2w => maxval(abs(w-we)) &
                 )
                 !
-                !==> Print earlier output from platform with 64-bit floating point
+                !  Print earlier output from platform with 64-bit floating point
                 !    arithmetic followed by the output from this computer
                 !
                 write( stdout, '(a)') ''
@@ -262,7 +262,7 @@ contains
         end associate
 
         !
-        !==> Now recompute sf inverting (ve, we)
+        !  Now recompute sf inverting (ve, we)
         !
         do k=1, NSYNTHS
             associate( &
@@ -274,7 +274,7 @@ contains
             end associate
         end do
         !
-        !==> Compute gradient inversion error
+        !  Compute gradient inversion error
         !
         associate( &
             sf => approximate_scalar_function, &
@@ -282,7 +282,7 @@ contains
             )
             associate( err2 => maxval(abs(sf-sfe)) )
                 !
-                !==> Print earlier output from platform with 64-bit floating point
+                !  Print earlier output from platform with 64-bit floating point
                 !    arithmetic followed by the output from this computer
                 !
                 write( stdout, '(a)') ''
@@ -299,7 +299,7 @@ contains
             end associate
         end associate
         !
-        !==> Release memory
+        !  Release memory
         !
         deallocate( previous_gradient_inversion_error )
         deallocate( previous_polar_gradient_error )

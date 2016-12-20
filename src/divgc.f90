@@ -341,7 +341,7 @@ contains
             work(ia), work(ib), mab, work(is), wshsgc, lshsgc, work(iwk), lwk, &
             ierror)
 
-    contains
+    end subroutine divgc
 
         subroutine divgc1(nlat, nlon, isym, nt, dv, idv, jdv, br, bi, mdb, ndb, &
             a, b, mab, sqnn, wshsgc, lshsgc, wk, lwk, ierror)
@@ -411,7 +411,5 @@ contains
                 mab, nlat, wshsgc, lshsgc, wk, lwk, ierror)
 
         end subroutine divgc1
-
-    end subroutine divgc
 
 end module module_divgc

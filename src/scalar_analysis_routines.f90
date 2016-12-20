@@ -28,11 +28,7 @@ module scalar_analysis_routines
     public :: shagsi
     public :: ShagsAux
 
-    ! Declare derived data type
     type, public :: ShaesAux
-        !-----------------------------------------
-        ! Type components
-        !-----------------------------------------
     contains
         !-----------------------------------------
         ! Type-bound procedures
@@ -48,12 +44,8 @@ module scalar_analysis_routines
             => get_legendre_workspace_size_shaes
         !-----------------------------------------
     end type ShaesAux
-
-    ! Declare derived data type
+    
     type, public :: ShagsAux
-        !-----------------------------------------
-        ! Type components
-        !-----------------------------------------
     contains
         !-----------------------------------------
         ! Type-bound procedures
@@ -70,9 +62,7 @@ module scalar_analysis_routines
         !-----------------------------------------
     end type ShagsAux
 
-    ! Declare module subroutine interfaces
     interface
-
         module subroutine shaes(nlat, nlon, isym, nt, g, idg, jdg, a, b, &
             mdab, ndab, wshaes, lshaes, work, lwork, ierror)
             !----------------------------------------------------------
@@ -179,11 +169,18 @@ module scalar_analysis_routines
             integer(ip), intent(out)    :: ierror
             !----------------------------------------------------------
         end subroutine shagsi
-
     end interface
 
-contains
+    !------------------------------------------------------------------
+    ! Parameters confined to the module
+    !------------------------------------------------------------------
+    real(wp), parameter :: ZERO = 0.0_wp
+    real(wp), parameter :: HALF = 0.5_wp
+    real(wp), parameter :: ONE = 1.0_wp
+    real(wp), parameter :: TWO = 2.0_wp
+    !------------------------------------------------------------------
 
+contains
 
     pure function get_lshaes(nlat, nlon) result (return_value)
         !----------------------------------------------------------------------
@@ -256,7 +253,7 @@ contains
         !----------------------------------------------------------------------
 
         !
-        !==> Address optional arguments
+        !  Address optional arguments
         !
         if (present(nt)) then
             nt_op = nt
@@ -271,7 +268,7 @@ contains
         end if
 
         !
-        !==> Compute workspace size
+        !  Compute workspace size
         !
         if (ityp_op <= 2) then
             ! Set workspace size
@@ -354,7 +351,7 @@ contains
         !----------------------------------------------------------------------
 
         !
-        !==> Address optional arguments
+        !  Address optional arguments
         !
         if (present(nt)) then
             nt_op = nt
@@ -369,7 +366,7 @@ contains
         end if
 
         !
-        !==> Compute workspace size
+        !  Compute workspace size
         !
         select case (isym)
             case (0)

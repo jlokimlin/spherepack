@@ -28,7 +28,7 @@ module type_GaussianWorkspace
 
 
 
-    ! Declare derived data type
+    
     type, extends (Workspace), public :: GaussianWorkspace
         !----------------------------------------------------------------------
         ! Type components
@@ -94,7 +94,7 @@ contains
         end if
 
         !
-        !==> Make copies
+        !  Make copies
         !
         self%initialized = object_to_be_copied%initialized
         self%legendre_workspace = object_to_be_copied%legendre_workspace
@@ -179,12 +179,12 @@ contains
         lshags = aux%get_lshags(nlat, nlon)
 
         !
-        !==> Allocate memory
+        !  Allocate memory
         !
         if (allocated(self%forward_scalar)) deallocate(self%forward_scalar )
 
         !
-        !==> Allocate memory
+        !  Allocate memory
         !
         allocate( self%forward_scalar(lshags) )
         allocate( work(lwork) )
@@ -195,7 +195,7 @@ contains
             ierror => error_flag &
             )
             !
-            !==> Initialize workspace array for analysis
+            !  Initialize workspace array for analysis
             !
             call aux%shagsi(nlat, nlon, wshags, lshags, work, lwork, dwork, ldwork, ierror)
 
@@ -239,7 +239,7 @@ contains
 
 
         !
-        !==> Release memory
+        !  Release memory
         !
         deallocate( work )
         deallocate( dwork )
@@ -270,7 +270,7 @@ contains
         lshsgs = aux%get_lshsgs(nlat, nlon)
 
         !
-        !==> Allocate memory
+        !  Allocate memory
         !
         if (allocated(self%backward_scalar)) deallocate(self%backward_scalar )
 
@@ -284,7 +284,7 @@ contains
             ierror => error_flag &
             )
             !
-            !==> Initialize workspace array for synthesis
+            !  Initialize workspace array for synthesis
             !
             call aux%shsgsi(nlat, nlon, wshsgs, lshsgs, work, lwork, dwork, ldwork, ierror)
 
@@ -325,7 +325,7 @@ contains
         end select
 
         !
-        !==> Release memory
+        !  Release memory
         !
         deallocate( work )
         deallocate( dwork )
@@ -356,7 +356,7 @@ contains
         call self%initialize_gaussian_scalar_synthesis(nlat, nlon)
 
         !
-        !==> Allocate memory
+        !  Allocate memory
         !
         allocate( self%real_harmonic_coefficients(nlat, nlat) )
         allocate( self%imaginary_harmonic_coefficients(nlat, nlat) )
@@ -386,7 +386,7 @@ contains
         lvhags = aux%get_lvhags(nlat, nlon)
 
         !
-        !==> Allocate memory
+        !  Allocate memory
         !
         if (allocated(self%forward_vector)) deallocate( self%forward_vector )
 
@@ -400,7 +400,7 @@ contains
             )
 
             !
-            !==> Initialize workspace arrays for vector analysis
+            !  Initialize workspace arrays for vector analysis
             !
             call aux%vhagsi(nlat, nlon, wvhags, lvhags, dwork, ldwork, ierror)
 
@@ -434,7 +434,7 @@ contains
         end select
 
         !
-        !==> Release memory
+        !  Release memory
         !
         deallocate( dwork )
 
@@ -463,7 +463,7 @@ contains
         lvhsgs = aux%get_lvhsgs(nlat, nlon)
 
         !
-        !==> Allocate memory
+        !  Allocate memory
         !
         if (allocated(self%backward_vector)) deallocate( self%backward_vector )
 
@@ -476,7 +476,7 @@ contains
             ierror => error_flag &
             )
             !
-            !==> Initialize workspace arrays for vector synthesis
+            !  Initialize workspace arrays for vector synthesis
             !
             call aux%vhsgsi(nlat, nlon, wvhsgs, lvhsgs, dwork, ldwork, ierror)
 
@@ -509,7 +509,7 @@ contains
         end select
 
         !
-        !==> Release memory
+        !  Release memory
         !
         deallocate( dwork )
 
@@ -539,7 +539,7 @@ contains
         call self%initialize_gaussian_vector_synthesis(nlat, nlon)
 
         !
-        !==> Allocate memory
+        !  Allocate memory
         !
         allocate( self%real_polar_harmonic_coefficients(nlat, nlat) )
         allocate( self%imaginary_polar_harmonic_coefficients(nlat, nlat) )
@@ -615,7 +615,7 @@ contains
         !----------------------------------------------------------------------
 
         !
-        !==> Address optional arguments
+        !  Address optional arguments
         !
         if (present(nt)) then
             nt_op = nt
@@ -642,7 +642,7 @@ contains
 
         lwork = maxval(work_size)
         !
-        !==> Allocate memory
+        !  Allocate memory
         !
         allocate( workspace(lwork) )
 

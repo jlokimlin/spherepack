@@ -286,7 +286,7 @@ contains
         nln = nt*ls*nlon
 
         !
-        !==> Set first dimension for a, b (as requiried by shsec)
+        !  Set first dimension for a, b (as requiried by shsec)
         !
         mab = min(nlat, nlon/2+1)
         mn = mab*nlat*nt
@@ -301,7 +301,7 @@ contains
         end select
 
         !
-        !==> check validity of input parameters
+        !  check validity of input parameters
         !
 
         ! Initialize error flag

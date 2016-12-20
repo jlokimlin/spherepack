@@ -338,7 +338,7 @@ contains
         lp=nlat*(3*(l1+l2)-2)+(l1-1)*(l2*(2*nlat-l1)-3*l1)/2+nlon+15
 
         !
-        !==> Check validity of input arguments
+        !  Check validity of input arguments
         !
         if (nlat < 3) then
             ierror = 1
@@ -390,7 +390,6 @@ contains
 
     end subroutine shsgs
 
-
     module subroutine shsgsi(nlat, nlon, wshsgs, lshsgs, work, lwork, dwork, ldwork, ierror)
         !
         ! Remark:
@@ -429,7 +428,7 @@ contains
         lp = nlat*(3*(l1+l2)-2)+(l1-1)*(l2*(2*nlat-l1)-3*l1)/2+nlon+15
 
         !
-        !==> Check validity of input arguments
+        !  Check validity of input arguments
         !
         if (nlat < 3) then
             ierror = 1
@@ -451,7 +450,7 @@ contains
         end if
 
         !
-        !==> set preliminary quantites needed to compute and store legendre polys
+        !  set preliminary quantites needed to compute and store legendre polys
         !
         ldw = nlat*(nlat+4)
         call shsgsp(nlat, nlon, wshsgs, lshsgs, dwork, ldwork, ierror)
@@ -460,14 +459,13 @@ contains
         if (ierror /= 0) return
 
         !
-        !==>  set legendre poly pointer in wshsgs
+        !   set legendre poly pointer in wshsgs
         !
         ipmnf = nlat+2*nlat*late+3*(ntrunc*(ntrunc-1)/2+(nlat-ntrunc)*(ntrunc-1))+nlon+16
 
         call shsgss1(nlat, ntrunc, late, wshsgs, work, wshsgs(ipmnf))
 
     end subroutine shsgsi
-
 
     subroutine shsgs1(nlat, nlon, l, lat, mode, gs, idg, jdg, nt, a, b, mdab, &
         ndab, wfft, pmn, late, g, work)
@@ -508,9 +506,9 @@ contains
         !----------------------------------------------------------------------
 
         !
-        !==> initialize to zero
+        !  initialize to zero
         !
-        g = 0.0_wp
+        g = ZERO
 
         if (nlon == 2*l-2) then
             lm1 = l-1
@@ -520,13 +518,13 @@ contains
 
         if (mode == 0) then
             !
-            !==> set first column in g
+            !  set first column in g
             !
             m = 0
             mml1 = m*(2*nlat-m-1)/2
             do k=1, nt
                 !
-                !==>  n even
+                !   n even
                 !
                 do np1=1, nlat, 2
                     mn = mml1+np1
@@ -535,7 +533,7 @@ contains
                     end do
                 end do
                 !
-                !==> n odd
+                !  n odd
                 !
                 nl2 = nlat/2
                 do np1=2, nlat, 2
@@ -548,7 +546,7 @@ contains
             end do
 
             !
-            !==> restore m=0 coefficients from odd/even
+            !  restore m=0 coefficients from odd/even
             !
             do k=1, nt
                 do i=1, nl2
@@ -561,7 +559,7 @@ contains
             end do
 
             !
-            !==> sweep interior columns of g
+            !  sweep interior columns of g
             !
             do mp1=2, lm1
                 m = mp1-1
@@ -569,7 +567,7 @@ contains
                 mp2 = m+2
                 do k=1, nt
                     !
-                    !==> for n-m even store (g(i, p, k)+g(nlat-i+1, p, k))/2 in g(i, p, k) p=2*m, 2*m+1
+                    !  for n-m even store (g(i, p, k)+g(nlat-i+1, p, k))/2 in g(i, p, k) p=2*m, 2*m+1
                     !    for i=1, ..., late
                     !
                     do np1=mp1, nlat, 2
@@ -580,7 +578,7 @@ contains
                         end do
                     end do
                     !
-                    !==> for n-m odd store g(i, p, k)-g(nlat-i+1, p, k) in g(nlat-i+1, p, k)
+                    !  for n-m odd store g(i, p, k)-g(nlat-i+1, p, k) in g(nlat-i+1, p, k)
                     !    for i=1, ..., nlat/2 (p=2*m, p=2*m+1)
                     !
                     do np1=mp2, nlat, 2
@@ -593,7 +591,7 @@ contains
                     end do
 
                     !
-                    !==> now set fourier coefficients using even-odd reduction above
+                    !  now set fourier coefficients using even-odd reduction above
                     !
                     do i=1, nl2
                         is = nlat-i+1
@@ -610,31 +608,31 @@ contains
             end do
 
             !
-            !==> set last column (using a only) if necessary
+            !  set last column (using a only) if necessary
             !
             if (nlon== l+l-2) then
                 m = l-1
                 mml1 = m*(2*nlat-m-1)/2
                 do k=1, nt
                     !
-                    !==> (n - m) even
+                    !  (n - m) even
                     !
                     do np1=l, nlat, 2
                         mn = mml1+np1
                         do i=1, late
-                            g(i, nlon, k) = g(i, nlon, k)+2.0_wp *a(l, np1, k)*pmn(i, mn)
+                            g(i, nlon, k) = g(i, nlon, k)+TWO *a(l, np1, k)*pmn(i, mn)
                         end do
                     end do
 
                     lp1 = l+1
                     !
-                    !==> (n - m) odd
+                    !  (n - m) odd
                     !
                     do np1=lp1, nlat, 2
                         mn = mml1+np1
                         do i=1, nl2
                             is = nlat-i+1
-                            g(is, nlon, k) = g(is, nlon, k)+2.0_wp *a(l, np1, k)*pmn(i, mn)
+                            g(is, nlon, k) = g(is, nlon, k)+TWO *a(l, np1, k)*pmn(i, mn)
                         end do
                     end do
 
@@ -683,7 +681,7 @@ contains
 
             if (nlon == 2*l-2) then
                 !
-                !==> set last column
+                !  set last column
                 !
                 m = l-1
                 mml1 = m*(2*nlat-m-1)/2
@@ -698,7 +696,7 @@ contains
                     do np1=ns, nlat, 2
                         mn = mml1+np1
                         do i=1, late
-                            g(i, nlon, k) = g(i, nlon, k)+2.0_wp *a(l, np1, k)*pmn(i, mn)
+                            g(i, nlon, k) = g(i, nlon, k)+TWO *a(l, np1, k)*pmn(i, mn)
                         end do
                     end do
                 end do
@@ -706,19 +704,18 @@ contains
         end if
 
         !
-        !==> Perform inverse fourier transform
+        !  Perform inverse fourier transform
         !
         do k=1, nt
             call hfft%backward(lat, nlon, g(1, 1, k), lat, wfft, work)
         end do
 
         !
-        !==> scale output in gs
+        !  scale output in gs
         !
-        gs(1:lat, 1:nlon, :) = 0.5_wp *g(1:lat, 1:nlon, :)
+        gs(1:lat, 1:nlon, :) = HALF *g(1:lat, 1:nlon, :)
 
     end subroutine shsgs1
-
 
     subroutine shsgss1(nlat, l, late, w, pmn, pmnf)
         !
@@ -744,20 +741,20 @@ contains
         !----------------------------------------------------------------------
 
         !
-        !==> Initialize
+        !  Initialize
         !
-        pmn = 0.0_wp
+        pmn = ZERO
 
         do mp1=1, l
             m = mp1-1
             mml1 = m*(2*nlat-m-1)/2
             !
-            !==> compute pmn for n=m, ..., nlat-1 and i=1, ..., (l+1)/2
+            !  compute pmn for n=m, ..., nlat-1 and i=1, ..., (l+1)/2
             !
             mode = 0
             call sphere_aux%legin(mode, l, nlat, m, w, pmn, km)
             !
-            !==> store above in pmnf
+            !  store above in pmnf
             !
             do np1=mp1, nlat
                 mn = mml1+np1
@@ -766,7 +763,6 @@ contains
         end do
 
     end subroutine shsgss1
-
 
     subroutine shsgsp(nlat, nlon, wshsgs, lshsgs, dwork, ldwork, ierror)
         !----------------------------------------------------------------------
@@ -795,7 +791,7 @@ contains
         l2 = late
 
         !
-        !==> Check validity of input arguments
+        !  Check validity of input arguments
         !
         if (nlat < 3) then
             ierror = 1
@@ -814,7 +810,7 @@ contains
         end if
 
         !
-        !==> set pointers
+        !  set pointers
         !
         i1 = 1
         i2 = i1+nlat
@@ -825,7 +821,7 @@ contains
         i7 = i6+ntrunc*(ntrunc-1)/2 +(nlat-ntrunc)*(ntrunc-1)
 
         !
-        !==> set indices in temp work for real gaussian wts and pts
+        !  set indices in temp work for real gaussian wts and pts
         idth = 1
         idwts = idth+nlat
         iw = idwts+nlat
@@ -840,8 +836,6 @@ contains
         end if
 
     end subroutine shsgsp
-
-
 
     subroutine shsgsp1(nlat, nlon, l, late, wts, p0n, p1n, abel, bbel, cbel, &
         wfft, dtheta, dwts, work, ier)
@@ -873,12 +867,12 @@ contains
         !----------------------------------------------------------------------
 
         !
-        !==> Initialize FFT
+        !  Initialize FFT
         !
         call hfft%initialize(nlon, wfft)
 
         !
-        !==> compute real gaussian points and weights
+        !  compute real gaussian points and weights
         !
         lw = nlat*(nlat+2)
         call compute_gaussian_latitudes_and_weights(nlat, dtheta, dwts, dummy_variable, lw, ier)
@@ -887,20 +881,20 @@ contains
         if (ier /= 0) return
 
         !
-        !==> store gaussian weights single precision to save computation
+        !  store gaussian weights single precision to save computation
         !    in inner loops in analysis
         !
         wts = dwts
 
 
         !
-        !==> initialize p0n, p1n using real dnlfk, dnlft
+        !  initialize p0n, p1n using real dnlfk, dnlft
         !
-        p0n = 0.0_wp
-        p1n = 0.0_wp
+        p0n = ZERO
+        p1n = ZERO
 
         !
-        !==> compute m=n=0 legendre polynomials for all theta(i)
+        !  compute m=n=0 legendre polynomials for all theta(i)
         !
         np1 = 1
         n = 0
@@ -913,7 +907,7 @@ contains
         end do
 
         !
-        !==> compute p0n, p1n for all theta(i) when n.gt.0
+        !  compute p0n, p1n for all theta(i) when n.gt.0
         !
         do np1=2, nlat
             n = np1-1
@@ -924,7 +918,7 @@ contains
                 p0n(np1, i) = pb
             end do
             !
-            !==> compute m=1 legendre polynomials for all n and theta(i)
+            !  compute m=1 legendre polynomials for all n and theta(i)
             !
             m = 1
             call sphere_aux%dnlfk(m, n, work)
@@ -935,7 +929,7 @@ contains
         end do
 
         !
-        !==> compute and store swarztrauber recursion coefficients
+        !  compute and store swarztrauber recursion coefficients
         !    for 2<=m<=n and 2<=n<=nlat in abel, bbel, cbel
         !
         do n=2, nlat
@@ -956,6 +950,5 @@ contains
         end do
 
     end subroutine shsgsp1
-
 
 end submodule scalar_synthesis_shsgs

@@ -18,7 +18,7 @@ module type_GaussianGrid
     public :: GaussianGrid
 
 
-    ! Declare derived data type
+    
     type, extends (SphericalGrid), public ::  GaussianGrid
         !----------------------------------------------------------------------
         ! Type components
@@ -82,7 +82,7 @@ contains
         end if
 
         !
-        !==> Make copies
+        !  Make copies
         !
         self%initialized = object_to_be_copied%initialized
         self%NUMBER_OF_LONGITUDES = object_to_be_copied%NUMBER_OF_LONGITUDES
@@ -140,7 +140,7 @@ contains
         if (.not.self%initialized) return
 
         !
-        !==> Release memory
+        !  Release memory
         !
         if (allocated(self%gaussian_weights)) deallocate(self%gaussian_weights)
 
@@ -191,7 +191,7 @@ contains
         end if
 
         !
-        !==> Allocate memory
+        !  Allocate memory
         !
         allocate( theta(nlat) )
         allocate( wts(nlat) )
@@ -203,14 +203,14 @@ contains
             ierror => error_flag &
             )
             !
-            !==> Compute gaussian weights and latitudes
+            !  Compute gaussian weights and latitudes
             !
             call compute_gaussian_latitudes_and_weights(nlat, theta, wts, w, lwork, ierror)
 
         end associate
 
         !
-        !==> Address error flag
+        !  Address error flag
         !
         select case (error_flag)
             case(0)

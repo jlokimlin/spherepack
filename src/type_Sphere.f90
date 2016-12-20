@@ -28,7 +28,7 @@ module type_Sphere
     private
     public :: Sphere
 
-    ! Declare derived data type
+    
     type, abstract, public :: Sphere
         !----------------------------------------------------------------------
         ! Type components
@@ -189,7 +189,7 @@ contains
         call self%destroy_sphere()
 
         !
-        !==> Set constants
+        !  Set constants
         !
         self%NUMBER_OF_LATITUDES = nlat
         self%NUMBER_OF_LONGITUDES = nlon
@@ -198,17 +198,17 @@ contains
         self%RADIUS_OF_SPHERE = rsphere
 
         !
-        !==> Set scalar symmetries
+        !  Set scalar symmetries
         !
         call self%get_scalar_symmetries(isym)
 
         !
-        !==> Set vector symmetries
+        !  Set vector symmetries
         !
         call self%get_vector_symmetries(itype)
 
         !
-        !==> Allocate memory
+        !  Allocate memory
         !
         associate( nm_dim => (ntrunc+1)*(ntrunc+2)/2 )
             allocate(self%INDEX_ORDER_M(nm_dim) )
@@ -218,7 +218,7 @@ contains
             allocate(self%complex_spectral_coefficients(nm_dim) )
             allocate(self%vorticity_and_divergence_coefficients(nlat) )
             !
-            !==> Fill arrays
+            !  Fill arrays
             !
             associate( &
                 ntrunc => self%TRIANGULAR_TRUNCATION_LIMIT, &
@@ -229,31 +229,31 @@ contains
                 sqnn => self%vorticity_and_divergence_coefficients &
                 )
                 !
-                !==> Precompute indices of order m
+                !  Precompute indices of order m
                 !
                 indxm = [ ((m, n=m, ntrunc), m=0, ntrunc) ]
                 !
-                !==> Precompute indices of degree n
+                !  Precompute indices of degree n
                 !
                 indxn = [ ((n, n=m, ntrunc), m=0, ntrunc) ]
                 !
-                !==> Precompute laplacian coefficients
+                !  Precompute laplacian coefficients
                 !
                 lap = -real(indxn, kind=wp) * real(indxn + 1, kind=wp)/(rsphere**2)
                 !
-                !==> Precompute inverse laplacian coefficients
+                !  Precompute inverse laplacian coefficients
                 !
                 ilap(1) = 0.0_wp
                 ilap(2:nm_dim) = 1.0_wp/lap(2:nm_dim)
                 !
-                !==> Precompute vorticity and divergence coefficients
+                !  Precompute vorticity and divergence coefficients
                 !
                 sqnn = [ (sqrt(real((n - 1) * n, kind=wp)/rsphere), n=1, nlat) ]
 
             end associate
         end associate
         !
-        !==> Initialize derived data types
+        !  Initialize derived data types
         !
         associate( &
             grid => self%grid, &
@@ -268,7 +268,7 @@ contains
         end associate
 
         !
-        !==> Set initialization flag
+        !  Set initialization flag
         !
         self%initialized = .true.
         
@@ -287,7 +287,7 @@ contains
         if (.not.self%initialized) return
 
         !
-        !==> Release memory
+        !  Release memory
         !
         if (allocated(self%INDEX_ORDER_M)) then
             deallocate(self%INDEX_ORDER_M)
@@ -314,19 +314,19 @@ contains
         end if
 
         !
-        !==> Release memory from polymorphic class variables
+        !  Release memory from polymorphic class variables
         !
         if (allocated(self%grid)) deallocate( self%grid )
 
         if (allocated(self%workspace)) deallocate( self%workspace )
         !
-        !==>  Release memory from derived data types
+        !   Release memory from derived data types
         !
         call self%trigonometric_functions%destroy()
         call self%unit_vectors%destroy()
 
         !
-        !==> Reset constants
+        !  Reset constants
         !
         self%NUMBER_OF_LONGITUDES = 0
         self%NUMBER_OF_LATITUDES = 0
@@ -336,7 +336,7 @@ contains
         self%NUMBER_OF_SYNTHESES = 0
 
         !
-        !==> Reset initialization flag
+        !  Reset initialization flag
         !
         self%initialized = .false.
 
@@ -386,7 +386,7 @@ contains
         end if
 
         !
-        !==>  compute the (real) spherical harmonic coefficients
+        !   compute the (real) spherical harmonic coefficients
         !
         associate( f => scalar_function )
 
@@ -395,7 +395,7 @@ contains
         end associate
 
         !
-        !==> Set complex spherical harmonic coefficients
+        !  Set complex spherical harmonic coefficients
         !
         associate( &
             ntrunc => self%TRIANGULAR_TRUNCATION_LIMIT, &
@@ -438,7 +438,7 @@ contains
         end if
 
         !
-        !==> Convert complex spherical harmonic coefficients to real version
+        !  Convert complex spherical harmonic coefficients to real version
         !
         associate( &
             ntrunc => self%TRIANGULAR_TRUNCATION_LIMIT, &
@@ -465,7 +465,7 @@ contains
         end associate
 
         !
-        !==> synthesise the scalar function from the (real) harmonic coefficients
+        !  synthesise the scalar function from the (real) harmonic coefficients
         !
         call self%perform_scalar_synthesis(scalar_function)
 
@@ -694,7 +694,7 @@ contains
             select case (ityp)
                 case (0, 3, 6)
                     !
-                    !==>  All coefficients needed
+                    !   All coefficients needed
                     !
                     do n=1, nlat
                         ! Set polar coefficients
@@ -706,7 +706,7 @@ contains
                     end do
                 case (1, 4, 7)
                     !
-                    !==>     vorticity is zero so cr,ci=0 not used
+                    !      vorticity is zero so cr,ci=0 not used
                     !
                     do n=1, nlat
                         ! Set polar coefficients
@@ -715,7 +715,7 @@ contains
                     end do
                 case default
                     !
-                    !==> divergence is zero so br,bi=0 not used
+                    !  divergence is zero so br,bi=0 not used
                     !
                     do n=1, nlat
                         ! Set azimuthal coefficients
@@ -845,7 +845,7 @@ contains
             select case (ityp)
                 case (0, 3, 6)
                     !
-                    !==>  All coefficients needed
+                    !   All coefficients needed
                     !
                     do n=1, nlat
                         ! Set polar coefficients
@@ -857,7 +857,7 @@ contains
                     end do
                 case (1, 4, 7)
                     !
-                    !==>     vorticity is zero so cr,ci=0 not used
+                    !      vorticity is zero so cr,ci=0 not used
                     !
                     do n=1, nlat
                         ! Set polar coefficients
@@ -866,7 +866,7 @@ contains
                     end do
                 case default
                     !
-                    !==> divergence is zero so br,bi=0 not used
+                    !  divergence is zero so br,bi=0 not used
                     !
                     do n=1, nlat
                         ! Set azimuthal coefficients
@@ -875,7 +875,7 @@ contains
                     end do
             end select
             !
-            !==> synthesize coefficients inot vector field (v,w)
+            !  synthesize coefficients inot vector field (v,w)
             !
             call self%perform_vector_synthesis(v, w)
         end associate
@@ -906,7 +906,7 @@ contains
         end if
 
         !
-        !==> Set (real) scalar spherica harmonic coefficients
+        !  Set (real) scalar spherica harmonic coefficients
         !
         call self%perform_complex_analysis(source)
 
@@ -919,7 +919,7 @@ contains
             xlmbda => helmholtz_constant &
             )
             !
-            !==> Associate local pointer
+            !  Associate local pointer
             !
             if ( xlmbda == ZERO ) then
                 ! Assign pointer
@@ -931,17 +931,17 @@ contains
             end if
 
             !
-            !==> Set coefficients
+            !  Set coefficients
             !
             psi = iptr * psi
 
             !
-            !==> Synthesize complex coefficients into gridded array
+            !  Synthesize complex coefficients into gridded array
             !
             call self%perform_complex_synthesis(solution)
 
             !
-            !==> Garbage collection
+            !  Garbage collection
             !
             if ( xlmbda == ZERO ) then
                 ! Nullify pointer
@@ -1053,24 +1053,24 @@ contains
             bi => self%workspace%imaginary_polar_harmonic_coefficients &
             )
             !
-            !==> Initialize (real) coefficients
+            !  Initialize (real) coefficients
             !
             a = 0.0_wp
             b = 0.0_wp
 
             !
-            !==> compute m=0 coefficients
+            !  compute m=0 coefficients
             !
             do n=2, nlat
                 a(1, n) = br(1, n)/sqnn(n)
                 b(1, n) = bi(1, n)/sqnn(n)
             end do
             !
-            !==> set upper limit for vector m subscript
+            !  set upper limit for vector m subscript
             !
             associate( mmax => min(nlat, (nlon+1)/2) )
                 !
-                !==> compute m > 0 coefficients
+                !  compute m > 0 coefficients
                 !
                 do m=2, mmax
                     do n=m, nlat
@@ -1080,7 +1080,7 @@ contains
                 end do
             end associate
             !
-            !==> Perform scalar synthesis
+            !  Perform scalar synthesis
             !
             call self%perform_scalar_synthesis(f)
         end associate
@@ -1123,20 +1123,20 @@ contains
             ci => self%workspace%imaginary_azimuthal_harmonic_coefficients &
             )
             !
-            !==> Perform vector analysis
+            !  Perform vector analysis
             !
             call self%vector_analysis_from_spherical_components(v, w)
             !
-            !==> Initialize (real) coefficients
+            !  Initialize (real) coefficients
             !
             a = 0.0_wp
             b = 0.0_wp
             !
-            !==> set upper limit for vector m subscript
+            !  set upper limit for vector m subscript
             !
             associate( mmax => min(nlat, (nlon+1)/2) )
                 !
-                !==> compute m > 0 coefficients
+                !  compute m > 0 coefficients
                 !
                 do m=1, mmax
                     do n=m, nlat
@@ -1146,7 +1146,7 @@ contains
                 end do
             end associate
             !
-            !==> Compute vector harmonic synthesis
+            !  Compute vector harmonic synthesis
             !
             call self%perform_scalar_synthesis(vt)
         end associate
@@ -1177,7 +1177,7 @@ contains
         end if
 
         !
-        !==> Allocate memory
+        !  Allocate memory
         !
         associate( &
             nlat => self%NUMBER_OF_LATITUDES, &
@@ -1188,7 +1188,7 @@ contains
         end associate
 
         !
-        !==> Compute vorticity
+        !  Compute vorticity
         !
         associate( &
             F => vector_field, &
@@ -1197,17 +1197,17 @@ contains
             vort => vorticity &
             )
             !
-            !==> Get spherical components
+            !  Get spherical components
             !
             call self%unit_vectors%get_spherical_angle_components(F, v, w)
             !
-            !==> Get vorticity from spherical components
+            !  Get vorticity from spherical components
             !
             call self%get_vorticity_from_spherical_components(v, w, vort)
         end associate
 
         !
-        !==> Release memory
+        !  Release memory
         !
         deallocate( polar_component )
         deallocate( azimuthal_component )
@@ -1238,12 +1238,12 @@ contains
         end if
 
         !
-        !==> compute the (real) spherical harmonic coefficients
+        !  compute the (real) spherical harmonic coefficients
         !
         call self%perform_scalar_analysis(source)
 
         !
-        !==> Invert vorticity
+        !  Invert vorticity
         !
         associate( &
             nlat => self%NUMBER_OF_LATITUDES, &
@@ -1260,13 +1260,13 @@ contains
             )
             associate( mmax => min(nlat, (nlon+1)/2) )
                 !
-                !==> Initialize coefficients
+                !  Initialize coefficients
                 !
                 cr = 0.0_wp
                 ci = 0.0_wp
 
                 !
-                !==>  Compute m = 0 coefficients
+                !   Compute m = 0 coefficients
                 !
                 do n = 2, nlat
                     cr(1, n) = a(1, n)/sqnn(n)
@@ -1274,7 +1274,7 @@ contains
                 end do
 
                 !
-                !==> Compute m > 0 coefficients
+                !  Compute m > 0 coefficients
                 !
                 do m=2, mmax
                     do n=m, nlat
@@ -1284,12 +1284,12 @@ contains
                 end do
 
                 !
-                !==> Save old vector symmetry
+                !  Save old vector symmetry
                 !
                 ityp_temp_save = ityp
 
                 !
-                !==> Set symmetries for synthesis
+                !  Set symmetries for synthesis
                 !
                 select case (isym)
                     case (0)
@@ -1301,12 +1301,12 @@ contains
                 end select
 
                 !
-                !==> Compute scalar synthesis
+                !  Compute scalar synthesis
                 !
                 call self%perform_vector_synthesis(v, w)
 
                 !
-                !==> Reset old vector symmetry
+                !  Reset old vector symmetry
                 !
                 ityp = ityp_temp_save
             end associate
@@ -1337,7 +1337,7 @@ contains
         end if
 
         !
-        !==> Allocate memory
+        !  Allocate memory
         !
         associate( &
             nlat => self%NUMBER_OF_LATITUDES, &
@@ -1348,7 +1348,7 @@ contains
         end associate
 
         !
-        !==> Compute vorticity
+        !  Compute vorticity
         !
         associate( &
             F => vector_field, &
@@ -1357,17 +1357,17 @@ contains
             dv => divergence &
             )
             !
-            !==> Get spherical components
+            !  Get spherical components
             !
             call self%unit_vectors%get_spherical_angle_components(F, v, w)
             !
-            !==> Get vorticity from spherical components
+            !  Get vorticity from spherical components
             !
             call self%get_divergence_from_spherical_components(v, w, dv)
         end associate
 
         !
-        !==> Release memory
+        !  Release memory
         !
         deallocate( polar_component )
         deallocate( azimuthal_component )
@@ -1410,20 +1410,20 @@ contains
             bi => self%workspace%imaginary_polar_harmonic_coefficients &
             )
             !
-            !==> Perform vector analysis
+            !  Perform vector analysis
             !
             call self%vector_analysis_from_spherical_components(v, w)
             !
-            !==> Initialize (real) coefficients
+            !  Initialize (real) coefficients
             !
             a = 0.0_wp
             b = 0.0_wp
             !
-            !==> set upper limit for vector m subscript
+            !  set upper limit for vector m subscript
             !
             associate( mmax => min(nlat, (nlon+1)/2) )
                 !
-                !==> compute m > 0 coefficients
+                !  compute m > 0 coefficients
                 !
                 do m=1, mmax
                     do n=m, nlat
@@ -1433,7 +1433,7 @@ contains
                 end do
             end associate
             !
-            !==> Compute vector harmonic synthesis
+            !  Compute vector harmonic synthesis
             !
             call self%perform_scalar_synthesis(dv)
         end associate
@@ -1541,11 +1541,11 @@ contains
             dv => divergence &
             )
             !
-            !==> Compute vorticity
+            !  Compute vorticity
             !
             call self%get_vorticity(v, w, vt)
             !
-            !==> Compute divergence
+            !  Compute divergence
             !
             call self%get_divergence(v, w, dv)
         end associate
@@ -1592,7 +1592,7 @@ contains
             ci => self%workspace%imaginary_azimuthal_harmonic_coefficients &
             )
             !
-            !==> Allocate memory
+            !  Allocate memory
             !
             allocate( isqnn(size(sqnn)) )
 
@@ -1602,13 +1602,13 @@ contains
             end do
 
             !
-            !==> Initialize (real) scalar coefficients
+            !  Initialize (real) scalar coefficients
             !
             a = 0.0_wp
             b = 0.0_wp
 
             !
-            !==> Set (real) auxiliary coefficients
+            !  Set (real) auxiliary coefficients
             !    from complex divergence harmonic coefficients
             !
             do m=1, ntrunc+1
@@ -1620,13 +1620,13 @@ contains
             end do
 
             !
-            !==> Initialize polar vector coefficients
+            !  Initialize polar vector coefficients
             !
             br = 0.0_wp
             bi = 0.0_wp
 
             !
-            !==> Set polar vector coefficients
+            !  Set polar vector coefficients
             !
             do n=1, nlat
                 br(:, n) = isqnn(n)*a(:, n)
@@ -1634,13 +1634,13 @@ contains
             end do
 
             !
-            !==> Re-initialize (real) scalar coefficients
+            !  Re-initialize (real) scalar coefficients
             !
             a = 0.0_wp
             b = 0.0_wp
 
             !
-            !==> Set (real) auxiliary coefficients
+            !  Set (real) auxiliary coefficients
             !    from complex vorticity harmonic coefficients
             !
             do m=1, ntrunc+1
@@ -1652,13 +1652,13 @@ contains
             end do
 
             !
-            !==> Initialize azimuthal vector coefficients
+            !  Initialize azimuthal vector coefficients
             !
             cr = 0.0_wp
             ci = 0.0_wp
 
             !
-            !==> Set azimuthal vector coefficients
+            !  Set azimuthal vector coefficients
             !
             do n=1, nlat
                 cr(:, n) = isqnn(n)*a(:, n)
@@ -1666,13 +1666,13 @@ contains
             end do
 
             !
-            !==> Compute vector harmonic sysnthesis to get components
+            !  Compute vector harmonic sysnthesis to get components
             !
             call self%perform_vector_synthesis(v, w)
         end associate
 
         !
-        !==> Release memory
+        !  Release memory
         !
         deallocate( isqnn )
 
@@ -1703,7 +1703,7 @@ contains
 
         associate( nm_dim => size(self%complex_spectral_coefficients) )
             !
-            !==> Allocate memory
+            !  Allocate memory
             !
             allocate( vorticity_coefficients(nm_dim) )
             allocate( divergence_coefficients(nm_dim) )
@@ -1720,12 +1720,12 @@ contains
             dv => divergence &
             )
             !
-            !==> Compute complex spectral coefficients
+            !  Compute complex spectral coefficients
             !
             call self%analyze_into_complex_spectral_coefficients(vt, vt_spec)
             call self%analyze_into_complex_spectral_coefficients(dv, dv_spec)
             !
-            !==> Compute velocities
+            !  Compute velocities
             !
             call self%get_velocities_from_vorticity_and_divergence_coefficients( &
                 vt_spec, dv_spec, v, w)
@@ -1760,7 +1760,7 @@ contains
             nlon => self%NUMBER_OF_LONGITUDES &
             )
             !
-            !==>  Allocate memory
+            !   Allocate memory
             !
             allocate( polar_gradient_component(nlat, nlon) )
             allocate( azimuthal_gradient_component(nlat, nlon) )
@@ -1773,7 +1773,7 @@ contains
             grad_phi => azimuthal_gradient_component &
             )
             !
-            !==> Calculate the spherical surface gradient components
+            !  Calculate the spherical surface gradient components
             !
             call self%get_gradient(f, grad_theta, grad_phi)
 
@@ -1794,7 +1794,7 @@ contains
                         grad_phi => azimuthal_gradient_component(k, l) &
                         )
                         !
-                        !==> Calculate the rotation operator applied to a scalar function
+                        !  Calculate the rotation operator applied to a scalar function
                         !
                         R(:, k, l) = phi * grad_theta - theta * grad_phi
 
@@ -1804,7 +1804,7 @@ contains
         end associate
 
         !
-        !==> Release memory
+        !  Release memory
         !
         deallocate( polar_gradient_component )
         deallocate( azimuthal_gradient_component )

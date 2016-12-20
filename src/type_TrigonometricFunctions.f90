@@ -14,7 +14,7 @@ module type_TrigonometricFunctions
     private
     public :: TrigonometricFunctions
 
-    ! Declare derived data type
+    
     type, public :: TrigonometricFunctions
         !----------------------------------------------------------------------
         ! Type components

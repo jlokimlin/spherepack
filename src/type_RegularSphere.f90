@@ -41,7 +41,7 @@ module type_RegularSphere
     public :: RegularSphere
 
 
-    ! Declare derived data type
+    
     type, extends (Sphere), public :: RegularSphere
     contains
         !----------------------------------------------------------------------
@@ -103,13 +103,13 @@ contains
         call self%destroy()
 
         !
-        !==> Allocate polymorphic components
+        !  Allocate polymorphic components
         !
         allocate( self%grid, source=RegularGrid(nlat, nlon) )
         allocate( self%workspace, source=RegularWorkspace(nlat,nlon) )
 
         !
-        !==> Address optional arguments
+        !  Address optional arguments
         !
 
         ! Set truncation number
@@ -148,7 +148,7 @@ contains
         end if
 
         !
-        !==> Create parent type
+        !  Create parent type
         !
         call self%create_sphere(nlat, nlon, ntrunc_op, isym_op, ityp_op, nt_op, rsphere_op)
 
@@ -218,7 +218,7 @@ contains
                         ierror => error_flag &
                         )
                         !
-                        !==> Perform regular (real) spherical harmonic analysis
+                        !  Perform regular (real) spherical harmonic analysis
                         !
                         call aux%shaes(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, &
                             wshaes, lshaes, work, lwork, ierror)
@@ -229,7 +229,7 @@ contains
         end select
 
         !
-        !==> Address the error flag
+        !  Address the error flag
         !
         select case (error_flag)
             case (0)
@@ -300,7 +300,7 @@ contains
                         ierror => error_flag &
                         )
                         !
-                        !==> Perform (real) spherical harmonic scalar synthesis
+                        !  Perform (real) spherical harmonic scalar synthesis
                         !
                         call aux%shses(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, &
                             wshses, lshses, work, lwork, ierror)
@@ -311,7 +311,7 @@ contains
         end select
 
         !
-        !==> Address the error flag
+        !  Address the error flag
         !
         select case (error_flag)
             case (0)
@@ -387,7 +387,7 @@ contains
                         ierror => error_flag &
                         )
                         !
-                        !==> Perform (real) vector spherical harmonic analysis
+                        !  Perform (real) vector spherical harmonic analysis
                         !
                         call aux%vhaes(nlat, nlon, ityp, nt, v, w, idvw, jdvw, &
                             br, bi, cr, ci, mdab, ndab, wvhaes, lvhaes, work, lwork, ierror)
@@ -398,7 +398,7 @@ contains
         end select
 
         !
-        !==> Address error flag
+        !  Address error flag
         !
         select case (error_flag)
             case (0)
@@ -491,7 +491,7 @@ contains
                         ierror => error_flag &
                         )
                         !
-                        !==> Perform (real) vector spherical harmonic analysis
+                        !  Perform (real) vector spherical harmonic analysis
                         !
                         call aux%vhses(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
                             mdab, ndab, wvhses, lvhses, work, lwork, ierror)
@@ -502,7 +502,7 @@ contains
         end select
 
         !
-        !==> Address error flag
+        !  Address error flag
         !
         select case (error_flag)
             case (0)

@@ -343,7 +343,7 @@ module module_vhags
     public :: vhagsi
     public :: VhagsAux
 
-    ! Declare derived data type
+    
     type, public :: VhagsAux
         !-----------------------------------------
         ! Type components
@@ -419,7 +419,7 @@ contains
         !----------------------------------------------------------------------
 
         !
-        !==> Address optional arguments
+        !  Address optional arguments
         !
         if (present(nt)) then
             nt_op = nt
@@ -434,7 +434,7 @@ contains
         end if
 
         !
-        !==> Compute workspace size
+        !  Compute workspace size
         !
         if (ityp <= 2) then
             ! Set workspace size
@@ -505,7 +505,7 @@ contains
         lnl = nt*idv*nlon
 
         !
-        !==> Check validity of input arguments
+        !  Check validity of input arguments
         !
         if (nlat < 3) then
             ierror = 1
@@ -546,7 +546,7 @@ contains
         end if
 
         !
-        !==> Compute workspace pointers
+        !  Compute workspace pointers
         !
         workspace_indices = get_workspace_indices(nlat, imid, ist, lnl)
 
@@ -587,14 +587,14 @@ contains
 
             associate( i => return_value )
                 !
-                !==> set wvhags pointers
+                !  set wvhags pointers
                 !
                 lmn = nlat*(nlat+1)/2
                 i(1) = 1
                 i(2) = i(1)+imid*lmn
                 i(3) = i(2)+imid*lmn
                 !
-                !==> set work pointers
+                !  set work pointers
                 !
                 i(4) = ist+1
                 i(5) = lnl+1
@@ -717,7 +717,7 @@ contains
             end do
 
             !
-            !==> Set polar coefficients to zero
+            !  Set polar coefficients to zero
             !
             select case (ityp)
                 case (0:1,3:4,6:7)
@@ -732,7 +732,7 @@ contains
             end select
 
             !
-            !==> Set azimuthal coefficients to zero
+            !  Set azimuthal coefficients to zero
             !
             select case (ityp)
                 case (0,2:3,5:6,8)
@@ -749,7 +749,7 @@ contains
             select case (ityp)
                 case (0)
                     !
-                    !==> case ityp=0 ,  no symmetries
+                    !  case ityp=0 ,  no symmetries
                     !
                     !    case m=0
                     !
@@ -771,7 +771,7 @@ contains
                         end do
                     end do
                     !
-                    !==> case m = 1 through nlat-1
+                    !  case m = 1 through nlat-1
                     !
                     if (mmax < 2) return
 
@@ -840,7 +840,7 @@ contains
                     end do
                 case (1)
                     !
-                    !==> case ityp=1 ,  no symmetries but cr and ci equal zero
+                    !  case ityp=1 ,  no symmetries but cr and ci equal zero
                     !
                     !    case m=0
                     !
@@ -860,7 +860,7 @@ contains
                         end do
                     end do
                     !
-                    !==> case m = 1 through nlat-1
+                    !  case m = 1 through nlat-1
                     !
                     if (mmax < 2) return
 
@@ -916,7 +916,7 @@ contains
                     end do
                 case (2)
                     !
-                    !==> case ityp=2 ,  no symmetries but br and bi equal zero
+                    !  case ityp=2 ,  no symmetries but br and bi equal zero
                     !
                     !    case m=0
                     !
@@ -936,7 +936,7 @@ contains
                         end do
                     end do
                     !
-                    !==> case m = 1 through nlat-1
+                    !  case m = 1 through nlat-1
                     !
                     if (mmax < 2) return
 
@@ -992,7 +992,7 @@ contains
                     end do
                 case (3)
                     !
-                    !==> case ityp=3 ,  v even , w odd
+                    !  case ityp=3 ,  v even , w odd
                     !
                     !    case m=0
                     !
@@ -1012,7 +1012,7 @@ contains
                         end do
                     end do
                     !
-                    !==> case m = 1 through nlat-1
+                    !  case m = 1 through nlat-1
                     !
                     if (mmax < 2) return
 
@@ -1069,7 +1069,7 @@ contains
                     end do
                 case (4)
                     !
-                    !==> case ityp=4 ,  v even, w odd, and cr and ci equal 0.
+                    !  case ityp=4 ,  v even, w odd, and cr and ci equal 0.
                     !
                     !     case m=0
                     !
@@ -1081,7 +1081,7 @@ contains
                         end do
                     end do
                     !
-                    !==> case m = 1 through nlat-1
+                    !  case m = 1 through nlat-1
                     !
                     if (mmax < 2) return
 
@@ -1114,7 +1114,7 @@ contains
                     end do
                 case (5)
                     !
-                    !==> case ityp=5   v even, w odd, and br and bi equal zero
+                    !  case ityp=5   v even, w odd, and br and bi equal zero
                     !
                     !     case m=0
                     !
@@ -1126,7 +1126,7 @@ contains
                         end do
                     end do
                     !
-                    !==> case m = 1 through nlat-1
+                    !  case m = 1 through nlat-1
                     !
                     if (mmax < 2) return
 
@@ -1159,7 +1159,7 @@ contains
                     end do
                 case (6)
                     !
-                    !==> case ityp=6 ,  v odd , w even
+                    !  case ityp=6 ,  v odd , w even
                     !
                     !     case m=0
                     !
@@ -1179,7 +1179,7 @@ contains
                         end do
                     end do
                     !
-                    !==> case m = 1 through nlat-1
+                    !  case m = 1 through nlat-1
                     !
                     if (mmax < 2) return
 
@@ -1237,7 +1237,7 @@ contains
                     end do
                 case (7)
                     !
-                    !==> case ityp=7   v odd, w even, and cr and ci equal zero
+                    !  case ityp=7   v odd, w even, and cr and ci equal zero
                     !
                     !    case m=0
                     !
@@ -1249,7 +1249,7 @@ contains
                         end do
                     end do
                     !
-                    !==> case m = 1 through nlat-1
+                    !  case m = 1 through nlat-1
                     !
                     if (mmax < 2) return
 
@@ -1283,7 +1283,7 @@ contains
                     end do
                 case (8)
                     !
-                    !==> case ityp=8   v odd, w even, and both br and bi equal zero
+                    !  case ityp=8   v odd, w even, and both br and bi equal zero
                     !
                     !     case m=0
                     !
@@ -1295,7 +1295,7 @@ contains
                         end do
                     end do
                     !
-                    !==> case m = 1 through nlat-1
+                    !  case m = 1 through nlat-1
                     !
                     if (mmax < 2) return
 
@@ -1357,7 +1357,7 @@ contains
         lmn = (nlat*(nlat+1))/2
 
         !
-        !==> Check validity of input arguments
+        !  Check validity of input arguments
         !
         if (nlat < 3) then
             ierror = 1
@@ -1376,7 +1376,7 @@ contains
         end if
 
         !
-        !==> Compute workspace indices
+        !  Compute workspace indices
         !
         workspace_indices = get_workspace_indices(nlat, imid, lmn)
 
@@ -1411,7 +1411,7 @@ contains
 
             associate( i => return_value )
                 !
-                !==> set pointers
+                !  set pointers
                 !
                 i(1) = 1
                 i(2) = i(1)+imid*lmn
@@ -1450,12 +1450,12 @@ contains
             !----------------------------------------------------------------------
 
             !
-            !==> Compute gaussian grid
+            !  Compute gaussian grid
             !
             call compute_gaussian_latitudes_and_weights(nlat, dthet, dwts, dummy_real, dummy_integer, local_error_flag)
 
             !
-            !==> Compute associated legendre functions
+            !  Compute associated legendre functions
             !
             !    Set m=n=0 legendre polynomials for all theta(i)
             !
@@ -1464,14 +1464,14 @@ contains
             wb(:,1) = 0.0_wp
 
             !
-            !==> main loop for remaining vb, and wb
+            !  main loop for remaining vb, and wb
             !
             do n=1, nlat-1
                 nm = mod(n-2, 3)+1
                 nz = mod(n-1, 3)+1
                 np = mod(n, 3)+1
                 !
-                !==> compute dpbar for m=0
+                !  compute dpbar for m=0
                 !
                 call sphere_aux%dnlfk(0, n, work)
                 mn = indx(0, n, nlat)
@@ -1479,7 +1479,7 @@ contains
                     call sphere_aux%dnlft(0, n, dthet(i), work, dpbar(i, 1, np))
                 end do
                 !
-                !==> compute dpbar for m=1
+                !  compute dpbar for m=1
                 !
                 call sphere_aux%dnlfk(1, n, work)
 
@@ -1490,7 +1490,7 @@ contains
                 end do
 
                 !
-                !==> compute and store dpbar for m=2, n
+                !  compute and store dpbar for m=2, n
                 !
                 if (n >= 2) then
                     do m=2, n
@@ -1522,7 +1522,7 @@ contains
 
                 if (n==1) then
                     !
-                    !==> compute the vector harmonic w(theta) = m*pbar/cos(theta)
+                    !  compute the vector harmonic w(theta) = m*pbar/cos(theta)
                     !
                     !     set wb=0 for m=0
                     !
@@ -1540,7 +1540,7 @@ contains
                     end do
                 end if
                 !
-                !==> compute wb for m=1, n
+                !  compute wb for m=1, n
                 !
                 dcf = sqrt(real(2*n+1, kind=wp)/real(4*n*(n+1)*(n+n-1), kind=wp))
                 do m=1, n

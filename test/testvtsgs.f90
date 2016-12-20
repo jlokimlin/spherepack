@@ -206,7 +206,7 @@ program tvtsgs
 !    if (ierror /= 0) write( stdout, 79) ierror
 !79  format(' testvtsgs: error' i4 ' in vhsgs at point 1')
 !    !
-!    !==> Initialize
+!    !  Initialize
 !    u = 0.0
 !    !
 !    !     convert to cartesian coordinates

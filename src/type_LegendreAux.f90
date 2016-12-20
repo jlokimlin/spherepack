@@ -58,7 +58,7 @@ module type_LegendreAux
     public :: alfk, lfp, lfpt, lfim, lfin, get_legendre_function
 
 
-    ! Declare derived data type
+    
     type, public :: LegendreAux
     contains
         !-------------------------------------------------------
@@ -92,7 +92,7 @@ contains
         !----------------------------------------------------------------------
 
         !
-        !==> Allocate memory
+        !  Allocate memory
         !
         allocate( legfunc((ntrunc+1)*(ntrunc+2)/2) )
         allocate( cp((ntrunc/2)+1) )
@@ -105,7 +105,7 @@ contains
             do n=m,ntrunc+1
                 nm = nmstrt + n - m + 1
                 !
-                !==> Compute normalized associate Legendre function at theta
+                !  Compute normalized associate Legendre function at theta
                 !
                 call alfk(n-1, m-1, cp)
                 call lfpt(n-1, m-1, theta, cp, legfunc(nm))
@@ -115,7 +115,7 @@ contains
         end do
 
         !
-        !==> Release memory
+        !  Release memory
         !
         deallocate( cp )
 
@@ -230,12 +230,12 @@ contains
 
         if (n < 1) then
             !
-            !==> n less than 1
+            !  n less than 1
             !
             cp(1) = sqrt(2.0_wp)
         else if (n == 1) then
             !
-            !==> n equals 1
+            !  n equals 1
             !
             if (ma == 0) then
                 cp(1) = sqrt(1.5_wp)
@@ -248,7 +248,7 @@ contains
             end if
         else
             !
-            !==> n greater than 1
+            !  n greater than 1
             !
             select case (mod(n+ma,2))
                 case (0)
@@ -439,7 +439,7 @@ contains
         !----------------------------------------------------------------------
 
         !
-        !==>  total length of wlfim is 4*l*(nm+1)
+        !   total length of wlfim is 4*l*(nm+1)
         !
         workspace_indices = get_workspace_indices(l, nm)
 
@@ -698,7 +698,7 @@ contains
         !----------------------------------------------------------------------
 
         !
-        !==> total length of wlfin is 4*l*(nm+1)
+        !  total length of wlfin is 4*l*(nm+1)
         !
         workspace_indices = get_workspace_indices(l, nm)
 
@@ -979,7 +979,7 @@ contains
         if (ma > n) return
 
         !
-        !==> Set workspace indices
+        !  Set workspace indices
         !
         iw1 = 2*l+12
         iw2 = iw1+3*(l+1)/2+15

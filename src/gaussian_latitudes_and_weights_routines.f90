@@ -92,7 +92,7 @@ module gaussian_latitudes_and_weights_routines
     public :: compute_gaussian_latitudes_and_weights
 
     !------------------------------------------------------------------
-    ! Dictionary: Variables confined to the module
+    ! Parameters confined to the module
     !------------------------------------------------------------------
     real(wp), parameter :: ZERO = 0.0_wp
     real(wp), parameter :: HALF = 0.5_wp
@@ -127,7 +127,7 @@ contains
         !----------------------------------------------------------------------
 
         !
-        !==> Check validity of input arguments
+        !  Check validity of input arguments
         !
         if (nlat <= 0) then
             ierror = 1
@@ -137,7 +137,7 @@ contains
         end if
 
         !
-        !==> compute weights and points analytically when nlat=1, 2
+        !  compute weights and points analytically when nlat=1, 2
         !
         select case (nlat)
             case(1)
@@ -159,18 +159,18 @@ contains
                 dt = HALF_PI/nhalf
                 half_dt = dt/2
                 !
-                !==> Estimate first point next to theta = pi/2
+                !  Estimate first point next to theta = pi/2
                 !
                 select case (mod(nlat,2))
                     case (0)
                         !
-                        !==> nlat even
+                        !  nlat even
                         !
                         eff_zero = HALF_PI-half_dt
                         nix = nhalf
                     case default
                         !
-                        !==> nlat odd
+                        !  nlat odd
                         !
                         eff_zero = HALF_PI-dt
                         zprev = HALF_PI
@@ -183,7 +183,7 @@ contains
                         it = it+1
                         zlast = eff_zero
                         !
-                        !==> Newton iterations
+                        !  Newton iterations
                         !
                         call compute_legendre_poly_and_deriv(nlat, eff_zero, cz, theta(half_nlat+1), wts(half_nlat+1), pb, dpb)
 
@@ -196,7 +196,7 @@ contains
                         eff_zero = eff_zero-dcor
 
                         !
-                        !==> Repeat iteration
+                        !  Repeat iteration
                         !
                         if (abs(eff_zero-zlast) - eps*abs(eff_zero) > ZERO) cycle newton_iteration
 
@@ -219,7 +219,7 @@ contains
                             zprev = zhold
 
                             !
-                            !==> Re-initialize loop
+                            !  Re-initialize loop
                             !
                             cycle start_iteration
                         end if
@@ -228,7 +228,7 @@ contains
                     exit start_iteration
                 end do start_iteration
                 !
-                !==> Extend points and weights via symmetries
+                !  Extend points and weights via symmetries
                 !
                 if (mod(nlat,2) /= 0) then
 
@@ -245,7 +245,7 @@ contains
                     theta(nlat-i+1) = PI-theta(i)
                 end do
                 !
-                !==> Set weights
+                !  Set weights
                 !
                 wts = TWO * wts/sum(wts)
         end select
@@ -295,7 +295,7 @@ contains
             select case (mod(n,2))
                 case (0)
                     !
-                    !==> n even
+                    !  n even
                     !
                     cp(ncp) = ONE
 
@@ -319,7 +319,7 @@ contains
 
                 case default
                     !
-                    !==> odd
+                    !  odd
                     !
                     cp(ncp) = ONE
                     do j = ncp-1, 1, -1
@@ -378,7 +378,7 @@ contains
             select case (mod(n,2))
                 case (0)
                     !
-                    !==> n even
+                    !  n even
                     !
                     kdo = n/2
                     pb = HALF * cz
@@ -396,7 +396,7 @@ contains
                     end if
                 case default
                     !
-                    !==> n odd
+                    !  n odd
                     !
                     kdo = (n + 1)/2
                     pb = ZERO

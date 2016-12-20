@@ -62,7 +62,7 @@ program tslap
     !----------------------------------------------------------------------
 
     !
-    !==> Test gaussian case
+    !  Test gaussian case
     !
     allocate( GaussianSphere :: sphere_dat )
 
@@ -71,7 +71,7 @@ program tslap
     deallocate( sphere_dat )
 
     !
-    !==> Test regular case
+    !  Test regular case
     !
     allocate( RegularSphere :: sphere_dat )
 
@@ -105,7 +105,7 @@ contains
         !----------------------------------------------------------------------
 
         !
-        !==> Set up workspace arrays
+        !  Set up workspace arrays
         !
         select type(sphere_type)
             type is (GaussianSphere)
@@ -128,7 +128,7 @@ contains
         end select
 
         !
-        !==> test all analysis and synthesis subroutines
+        !  test all analysis and synthesis subroutines
         !    set scalar field as polynomial in x,y,z
         !    restricted to the sphere
         !
@@ -163,7 +163,7 @@ contains
         end associate
 
         !
-        !==> Compute scalar laplacian
+        !  Compute scalar laplacian
         !
         do k = 1, NSYNTHS
             associate( &
@@ -175,7 +175,7 @@ contains
         end do
 
         !
-        !==> Compute discretization error in sclp
+        !  Compute discretization error in sclp
         !
         associate( &
             sclp => approximate_laplacian, &
@@ -183,7 +183,7 @@ contains
             )
             associate( err2 => maxval(abs(sclp - sclpe)) )
                 !
-                !==> Print earlier output from platform with 64-bit floating point
+                !  Print earlier output from platform with 64-bit floating point
                 !    arithmetic followed by the output from this computer
                 !
                 write( stdout, '(a)') ''
@@ -200,7 +200,7 @@ contains
             end associate
         end associate
         !
-        !==> invert scalar laplacian
+        !  invert scalar laplacian
         !
         do k = 1, NSYNTHS
             associate( &
@@ -212,7 +212,7 @@ contains
         end do
 
         !
-        !==> Compare s with se
+        !  Compare s with se
         !
         associate( &
             s => approximate_scalar_function, &
@@ -220,7 +220,7 @@ contains
             )
             associate( err2 => maxval(abs(s - se)) )
                 !
-                !==> Print earlier output from platform with 64-bit floating point
+                !  Print earlier output from platform with 64-bit floating point
                 !    arithmetic followed by the output from this computer
                 !
                 write( stdout, '(a)') ''
@@ -237,7 +237,7 @@ contains
             end associate
         end associate
         !
-        !==> Release memory
+        !  Release memory
         !
         deallocate( laplacian_error )
         deallocate( inversion_error )

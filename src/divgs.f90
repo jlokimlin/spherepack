@@ -271,7 +271,7 @@ contains
         !------------------------------------------------------------------------
 
         !
-        !==> Compute constants
+        !  Compute constants
         !
         imid = (nlat+1)/2
         mmax = min(nlat, (nlon+2)/2)
@@ -280,7 +280,7 @@ contains
         l1 = min((nlon+2)/2, nlat)
         lp=nlat*(3*(l1+l2)-2)+(l1-1)*(l2*(2*nlat-l1)-3*l1)/2+nlon+15
         !
-        !==> verify unsaved work space (add to what shses requires, file f3)
+        !  verify unsaved work space (add to what shses requires, file f3)
         !
         select case (isym)
             case (0)
@@ -291,13 +291,13 @@ contains
 
         nln = nt*ls*nlon
         !
-        !==> set first dimension for a, b (as requried by shses)
+        !  set first dimension for a, b (as requried by shses)
         !
         mab = min(nlat, nlon/2+1)
         mn = mab*nlat*nt
 
         !
-        !==> Check validity of input parameters
+        !  Check validity of input parameters
         !
         if (nlat < 3) then
             ierror = 1
@@ -349,77 +349,76 @@ contains
             work(ia), work(ib), mab, work(is), wshsgs, lshsgs, work(iwk), lwk, &
             ierror)
 
-    contains
-
-        subroutine divgs1(nlat, nlon, isym, nt, divg, idiv, jdiv, br, bi, mdb, ndb, &
-            a, b, mab, sqnn, wshsgs, lshsgs, wk, lwk, ierror)
-            real :: a
-            real :: b
-            real :: bi
-            real :: br
-            real :: divg
-            real :: fn
-            integer :: idiv
-            integer :: ierror
-            integer :: isym
-            integer :: jdiv
-            integer :: k
-            integer :: lshsgs
-            integer :: lwk
-            integer :: m
-            integer :: mab
-            integer :: mdb
-            integer :: mmax
-            integer :: n
-            integer :: ndb
-            integer :: nlat
-            integer :: nlon
-            integer :: nt
-            real :: sqnn
-            real :: wk
-            real :: wshsgs
-            dimension divg(idiv, jdiv, nt), br(mdb, ndb, nt), bi(mdb, ndb, nt)
-            dimension a(mab, nlat, nt), b(mab, nlat, nt), sqnn(nlat)
-            dimension wshsgs(lshsgs), wk(lwk)
-            !
-            !     set coefficient multiplyers
-            !
-            do  n=2, nlat
-                fn = real(n - 1, kind=wp)
-                sqnn(n) = sqrt(fn * (fn + 1.0_wp))
-            end do
-            !
-            !     compute divergence scalar coefficients for each vector field
-            !
-            do  k=1, nt
-                a(1: mab, 1: nlat, k) = 0.0_wp
-                b(1: mab, 1: nlat, k) = 0.0_wp
-                !
-                !     compute m=0 coefficients
-                !
-                do  n=2, nlat
-                    a(1, n, k) = -sqnn(n)*br(1, n, k)
-                    b(1, n, k) = -sqnn(n)*bi(1, n, k)
-                end do
-                !
-                !     compute m>0 coefficients using vector spherepack value for mmax
-                !
-                mmax = min(nlat, (nlon+1)/2)
-                do  m=2, mmax
-                    do  n=m, nlat
-                        a(m, n, k) = -sqnn(n)*br(m, n, k)
-                        b(m, n, k) = -sqnn(n)*bi(m, n, k)
-                    end do
-                end do
-            end do
-            !
-            !     synthesize a, b into divg
-            !
-            call shsgs(nlat, nlon, isym, nt, divg, idiv, jdiv, a, b, &
-                mab, nlat, wshsgs, lshsgs, wk, lwk, ierror)
-
-        end subroutine divgs1
 
     end subroutine divgs
+
+    subroutine divgs1(nlat, nlon, isym, nt, divg, idiv, jdiv, br, bi, mdb, ndb, &
+        a, b, mab, sqnn, wshsgs, lshsgs, wk, lwk, ierror)
+        real :: a
+        real :: b
+        real :: bi
+        real :: br
+        real :: divg
+        real :: fn
+        integer :: idiv
+        integer :: ierror
+        integer :: isym
+        integer :: jdiv
+        integer :: k
+        integer :: lshsgs
+        integer :: lwk
+        integer :: m
+        integer :: mab
+        integer :: mdb
+        integer :: mmax
+        integer :: n
+        integer :: ndb
+        integer :: nlat
+        integer :: nlon
+        integer :: nt
+        real :: sqnn
+        real :: wk
+        real :: wshsgs
+        dimension divg(idiv, jdiv, nt), br(mdb, ndb, nt), bi(mdb, ndb, nt)
+        dimension a(mab, nlat, nt), b(mab, nlat, nt), sqnn(nlat)
+        dimension wshsgs(lshsgs), wk(lwk)
+        !
+        !     set coefficient multiplyers
+        !
+        do  n=2, nlat
+            fn = real(n - 1, kind=wp)
+            sqnn(n) = sqrt(fn * (fn + 1.0_wp))
+        end do
+        !
+        !     compute divergence scalar coefficients for each vector field
+        !
+        do  k=1, nt
+            a(1: mab, 1: nlat, k) = 0.0_wp
+            b(1: mab, 1: nlat, k) = 0.0_wp
+            !
+            !     compute m=0 coefficients
+            !
+            do  n=2, nlat
+                a(1, n, k) = -sqnn(n)*br(1, n, k)
+                b(1, n, k) = -sqnn(n)*bi(1, n, k)
+            end do
+            !
+            !     compute m>0 coefficients using vector spherepack value for mmax
+            !
+            mmax = min(nlat, (nlon+1)/2)
+            do  m=2, mmax
+                do  n=m, nlat
+                    a(m, n, k) = -sqnn(n)*br(m, n, k)
+                    b(m, n, k) = -sqnn(n)*bi(m, n, k)
+                end do
+            end do
+        end do
+        !
+        !     synthesize a, b into divg
+        !
+        call shsgs(nlat, nlon, isym, nt, divg, idiv, jdiv, a, b, &
+            mab, nlat, wshsgs, lshsgs, wk, lwk, ierror)
+
+    end subroutine divgs1
 
 end module module_divgs

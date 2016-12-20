@@ -361,7 +361,7 @@ contains
         lp = nlat*(3*(l1+l2)-2)+(l1-1)*(l2*(2*nlat-l1)-3*l1)/2+nlon+15
 
         !
-        !==> Check validity of input values
+        !  Check validity of input values
         !
         if (nlat < 3) then
             ierror = 1
@@ -403,19 +403,19 @@ contains
         end if
 
         !
-        !==> set starting address for gaussian wts , fft values,
+        !  set starting address for gaussian wts , fft values,
         !    and fully stored legendre polys in wshags
         !
         iwts = 1
         ifft = nlat+2*nlat*late+3*(l*(l-1)/2+(nlat-l)*(l-1))+1
         ipmn = ifft+nlon+15
         !
-        !==> set pointer for internal storage of g
+        !  set pointer for internal storage of g
         !
         iw = lat*nlon*nt+1
 
         !
-        !==> Perform analysis
+        !  Perform analysis
         !
         call shags1(nlat, nlon, l, lat, mode, g, idg, jdg, nt, a, b, mdab, ndab, &
             wshags(iwts), wshags(ifft), wshags(ipmn), late, work, work(iw))
@@ -455,7 +455,7 @@ contains
         !----------------------------------------------------------------------
 
         !
-        !==> Compute constants
+        !  Compute constants
         !
 
         ! set triangular truncation limit for spherical harmonic basis
@@ -473,7 +473,7 @@ contains
         ldw = nlat*(nlat+4)
 
         !
-        !==> Check validity of input argument
+        !  Check validity of input argument
         !
         if (nlat < 3) then
             ierror = 1
@@ -501,7 +501,7 @@ contains
         if (ierror /= 0) return
 
         !
-        !==> set legendre poly pointer in wshags
+        !  set legendre poly pointer in wshags
         !
         ipmnf = nlat+2*nlat*late+3*(ntrunc*(ntrunc-1)/2+(nlat-ntrunc)*(ntrunc-1))+nlon+16
 
@@ -544,19 +544,19 @@ contains
         !----------------------------------------------------------------------
 
         !
-        !==> set gs array internally in shags1
+        !  set gs array internally in shags1
         !
         g(1:lat,1:nlon, :) = gs(1:lat,1:nlon,:)
 
         !
-        !==> do fourier transform
+        !  do fourier transform
         !
         do k=1, nt
             call hfft%forward(lat, nlon, g(1, 1, k), lat, wfft, work)
         end do
 
         !
-        !==> scale result
+        !  scale result
         !
         sfn = 2.0_wp/nlon
         g = sfn * g
@@ -578,7 +578,7 @@ contains
         b = 0.0_wp
 
         !
-        !==> set mp1 limit on b(mp1) calculation
+        !  set mp1 limit on b(mp1) calculation
         !
         if (nlon == 2*l-2) then
             lm1 = l-1
@@ -601,7 +601,7 @@ contains
                         g(is, j, k) = wts(i)*(t1-t2)
                     end do
                     !
-                    !==> adjust equator if necessary(nlat odd)
+                    !  adjust equator if necessary(nlat odd)
                     !
                     if (mod(nlat, 2) /= 0) then
                         g(late, j, k) = wts(late)*g(late, j, k)
@@ -609,7 +609,7 @@ contains
                 end do
             end do
             !
-            !==> set m = 0 coefficients first
+            !  set m = 0 coefficients first
             !
             mp1 = 1
             m = 0
@@ -619,20 +619,20 @@ contains
                     is = nlat-i+1
                     do np1=1, nlat, 2
                         !
-                        !==> n even
+                        !  n even
                         !
                         a(1, np1, k) = a(1, np1, k)+g(i, 1, k)*pmn(i, mml1+np1)
                     end do
                     do np1=2, nlat, 2
                         !
-                        !==> n odd
+                        !  n odd
                         !
                         a(1, np1, k) = a(1, np1, k)+g(is, 1, k)*pmn(i, mml1+np1)
                     end do
                 end do
             end do
             !
-            !==> compute m >= 1  coefficients next
+            !  compute m >= 1  coefficients next
             !
             do mp1=2, lm1
                 m = mp1-1
@@ -642,14 +642,14 @@ contains
                     do i=1, late
                         is = nlat-i+1
                         !
-                        !==> (n - m) even
+                        !  (n - m) even
                         !
                         do np1=mp1, nlat, 2
                             a(mp1, np1, k) = a(mp1, np1, k)+g(i, 2*m, k)*pmn(i, mml1+np1)
                             b(mp1, np1, k) = b(mp1, np1, k)+g(i, 2*m+1, k)*pmn(i, mml1+np1)
                         end do
                         !
-                        !==> (n - m) odd
+                        !  (n - m) odd
                         !
                         do np1=mp2, nlat, 2
                             a(mp1, np1, k) = a(mp1, np1, k)+g(is, 2*m, k)*pmn(i, mml1+np1)
@@ -661,7 +661,7 @@ contains
 
             if (nlon == 2*l-2) then
                 !
-                !==> compute m=l-1, n=l-1, l, ..., nlat-1 coefficients
+                !  compute m=l-1, n=l-1, l, ..., nlat-1 coefficients
                 !
                 m = l-1
                 mml1 = m*(2*nlat-m-1)/2
@@ -673,7 +673,7 @@ contains
                             a(l, np1, k) = a(l, np1, k) + 0.5_wp * g(i, nlon, k) * pmn(i, mn)
                         end do
                         !
-                        !==> (n - m)  odd
+                        !  (n - m)  odd
                         !
                         lp1 = l+1
                         do np1=lp1, nlat, 2
@@ -685,7 +685,7 @@ contains
             end if
         else
             !
-            !==> half sphere
+            !  half sphere
             !    overwrite g(i) with wts(i)*(g(i)+g(i)) for i=1, ..., nlate/2
             !
             nl2 = nlat/2
@@ -693,14 +693,14 @@ contains
                 do j=1, nlon
                     g(1:nl2, j, k) = wts(1:nl2)*(g(1:nl2, j, k)+g(1:nl2, j, k))
                     !
-                    !==> adjust equator separately if a grid point
+                    !  adjust equator separately if a grid point
                     !
                     if (nl2 < late) g(late, j, k) = wts(late) * g(late, j, k)
 
                 end do
             end do
             !
-            !==> set m = 0 coefficients first
+            !  set m = 0 coefficients first
             !
             mp1 = 1
             m = 0
@@ -720,7 +720,7 @@ contains
                 end do
             end do
             !
-            !==> compute m >= 1  coefficients next
+            !  compute m >= 1  coefficients next
             !
             do mp1=2, lm1
                 m = mp1-1
@@ -744,19 +744,19 @@ contains
 
             if (nlon == 2*l-2) then
                 !
-                !==> compute n=m=l-1 coefficients last
+                !  compute n=m=l-1 coefficients last
                 !
                 m = l-1
                 mml1 = m*(2*nlat-m-1)/2
 
                 if (mode == 1) then
                     !
-                    !==> set starting n for mode odd
+                    !  set starting n for mode odd
                     !
                     ns = l+1
                 else
                     !
-                    !==> set starting n for mode even
+                    !  set starting n for mode even
                     !
                     ns = l
                 end if
@@ -792,7 +792,7 @@ contains
         !----------------------------------------------------------------------
 
         !
-        !==> Compute and store legendre polys for i=1, ..., late, m=0, ..., l-1
+        !  Compute and store legendre polys for i=1, ..., late, m=0, ..., l-1
         !
         pmn = 0.0_wp
 
@@ -800,12 +800,12 @@ contains
             m = mp1-1
             mml1 = m*(2*nlat-m-1)/2
             !
-            !==> Compute pmn for n=m, ..., nlat-1 and i=1, ..., (l+1)/2
+            !  Compute pmn for n=m, ..., nlat-1 and i=1, ..., (l+1)/2
             !
             mode = 0
             call sphere_aux%legin(mode, l, nlat, m, w, pmn, km)
             !
-            !==> Store above in pmnf
+            !  Store above in pmnf
             !
             do np1=mp1, nlat
                 mn = mml1+np1
@@ -838,7 +838,7 @@ contains
         !----------------------------------------------------------------------
 
         !
-        !==> Compute constants
+        !  Compute constants
         !
 
         ! Set triangular truncation limit for spherical harmonic basis
@@ -850,7 +850,7 @@ contains
         l2 = late
 
         !
-        !==> Check validity of input arguments
+        !  Check validity of input arguments
         !
         if (nlat < 3) then
             ierror = 1
@@ -869,7 +869,7 @@ contains
         end if
 
         !
-        !==> Compute workspace index pointers
+        !  Compute workspace index pointers
         !
         workspace_indices = get_workspace_indices(nlat, late, ntrunc)
 
@@ -921,7 +921,7 @@ contains
             i(6) = i(5)+l*(l-1)/2 +(nlat-l)*(l-1)
             i(7) = i(6)+l*(l-1)/2 +(nlat-l)*(l-1)
             !
-            !==> set indices in temp work for real gaussian wts and pts
+            !  set indices in temp work for real gaussian wts and pts
             !
             i(8) = 1
             i(9) = nlat + 1
@@ -964,7 +964,7 @@ contains
         call hfft%initialize(nlon, wfft)
 
         !
-        !==> Compute real gaussian points and weights
+        !  Compute real gaussian points and weights
         !    lw = 4*nlat*(nlat+2)
         lw = nlat*(nlat+2)
 
@@ -977,13 +977,13 @@ contains
         wts = dwts
 
         !
-        !==> initialize p0n, p1n using real dnlfk, dnlft
+        !  initialize p0n, p1n using real dnlfk, dnlft
         !
         p0n = 0.0_wp
         p1n = 0.0_wp
 
         !
-        !==> compute m=n=0 legendre polynomials for all theta(i)
+        !  compute m=n=0 legendre polynomials for all theta(i)
         !
         np1 = 1
         n = 0
@@ -995,7 +995,7 @@ contains
             p0n(1, i) = pb
         end do
         !
-        !==> Compute p0n, p1n for all theta(i) when n.gt.0
+        !  Compute p0n, p1n for all theta(i) when n.gt.0
         !
         do np1=2, nlat
             n = np1-1
@@ -1006,7 +1006,7 @@ contains
                 p0n(np1, i) = pb
             end do
             !
-            !==> compute m=1 legendre polynomials for all n and theta(i)
+            !  compute m=1 legendre polynomials for all n and theta(i)
             !
             m = 1
             call sphere_aux%dnlfk(m, n, work)
@@ -1016,7 +1016,7 @@ contains
             end do
         end do
         !
-        !==> Compute and store swarztrauber recursion coefficients
+        !  Compute and store swarztrauber recursion coefficients
         !    for 2 <= m <= n and 2 <= n <= nlat in abel, bbel, cbel
         !
         do n=2, nlat

@@ -1207,7 +1207,7 @@ contains
         ierror = 0
 
         !
-        !==> Set workspace pointers
+        !  Set workspace pointers
         !
         lwvbin = lzz1+labc
         iw1 = lwvbin+1

@@ -346,105 +346,102 @@ contains
             mmax, work(is), mdab, ndab, a, b, wvhsgs, lvhsgs, work(iwk), &
             liwk, pertrb, ierror)
 
-    contains
+    end subroutine ivrtgs
 
+    subroutine ivtgs1(nlat, nlon, isym, nt, v, w, idvw, jdvw, cr, ci, mmax, &
+        sqnn, mdab, ndab, a, b, wsav, lsav, wk, lwk, pertrb, ierror)
 
-        subroutine ivtgs1(nlat, nlon, isym, nt, v, w, idvw, jdvw, cr, ci, mmax, &
-            sqnn, mdab, ndab, a, b, wsav, lsav, wk, lwk, pertrb, ierror)
-
-            real(wp) :: a
-            real(wp) :: b
-            real(wp) :: bi(mmax, nlat, nt)
-            real(wp) :: br(mmax, nlat, nt)
-            real(wp) :: ci
-            real(wp) :: cr
-            real(wp) :: fn
-            integer(ip) :: idvw
-            integer(ip) :: ierror
-            integer(ip) :: isym
-            integer(ip) :: ityp
-            integer(ip) :: jdvw
-            integer(ip) :: k
-            integer(ip) :: lsav
-            integer(ip) :: lwk
-            integer(ip) :: m
-            integer(ip) :: mdab
-            integer(ip) :: mmax
-            integer(ip) :: n
-            integer(ip) :: ndab
-            integer(ip) :: nlat
-            integer(ip) :: nlon
-            integer(ip) :: nt
-            real(wp) :: pertrb
-            real(wp) :: sqnn
-            real(wp) :: v
-            real(wp) :: w
-            real(wp) :: wk
-            real(wp) :: wsav
-            dimension v(idvw, jdvw, nt), w(idvw, jdvw, nt), pertrb(nt)
-            dimension cr(mmax, nlat, nt), ci(mmax, nlat, nt), sqnn(nlat)
-            dimension a(mdab, ndab, nt), b(mdab, ndab, nt)
-            dimension wsav(lsav), wk(lwk)
+        real(wp) :: a
+        real(wp) :: b
+        real(wp) :: bi(mmax, nlat, nt)
+        real(wp) :: br(mmax, nlat, nt)
+        real(wp) :: ci
+        real(wp) :: cr
+        real(wp) :: fn
+        integer(ip) :: idvw
+        integer(ip) :: ierror
+        integer(ip) :: isym
+        integer(ip) :: ityp
+        integer(ip) :: jdvw
+        integer(ip) :: k
+        integer(ip) :: lsav
+        integer(ip) :: lwk
+        integer(ip) :: m
+        integer(ip) :: mdab
+        integer(ip) :: mmax
+        integer(ip) :: n
+        integer(ip) :: ndab
+        integer(ip) :: nlat
+        integer(ip) :: nlon
+        integer(ip) :: nt
+        real(wp) :: pertrb
+        real(wp) :: sqnn
+        real(wp) :: v
+        real(wp) :: w
+        real(wp) :: wk
+        real(wp) :: wsav
+        dimension v(idvw, jdvw, nt), w(idvw, jdvw, nt), pertrb(nt)
+        dimension cr(mmax, nlat, nt), ci(mmax, nlat, nt), sqnn(nlat)
+        dimension a(mdab, ndab, nt), b(mdab, ndab, nt)
+        dimension wsav(lsav), wk(lwk)
+        !
+        !     preset coefficient multiplyers in vector
+        !
+        do n=2, nlat
+            fn = real(n - 1)
+            sqnn(n) = sqrt(fn * (fn + 1.0))
+        end do
+        !
+        !     compute multiple vector fields coefficients
+        !
+        do k=1, nt
             !
-            !     preset coefficient multiplyers in vector
+            !     set vorticity field perturbation adjustment
+            !
+            pertrb(k) = a(1, 1, k)/(2.*sqrt(2.))
+            !
+            !     preset br, bi to 0.0
+            !
+            do n=1, nlat
+                do m=1, mmax
+                    cr(m, n, k) = 0.0
+                    ci(m, n, k) = 0.0
+                end do
+            end do
+            !
+            !     compute m=0 coefficients
             !
             do n=2, nlat
-                fn = real(n - 1)
-                sqnn(n) = sqrt(fn * (fn + 1.0))
+                cr(1, n, k) = a(1, n, k)/sqnn(n)
+                ci(1, n, k) = b(1, n, k)/sqnn(n)
             end do
             !
-            !     compute multiple vector fields coefficients
+            !     compute m>0 coefficients
             !
-            do k=1, nt
-                !
-                !     set vorticity field perturbation adjustment
-                !
-                pertrb(k) = a(1, 1, k)/(2.*sqrt(2.))
-                !
-                !     preset br, bi to 0.0
-                !
-                do n=1, nlat
-                    do m=1, mmax
-                        cr(m, n, k) = 0.0
-                        ci(m, n, k) = 0.0
-                    end do
-                end do
-                !
-                !     compute m=0 coefficients
-                !
-                do n=2, nlat
-                    cr(1, n, k) = a(1, n, k)/sqnn(n)
-                    ci(1, n, k) = b(1, n, k)/sqnn(n)
-                end do
-                !
-                !     compute m>0 coefficients
-                !
-                do m=2, mmax
-                    do n=m, nlat
-                        cr(m, n, k) = a(m, n, k)/sqnn(n)
-                        ci(m, n, k) = b(m, n, k)/sqnn(n)
-                    end do
+            do m=2, mmax
+                do n=m, nlat
+                    cr(m, n, k) = a(m, n, k)/sqnn(n)
+                    ci(m, n, k) = b(m, n, k)/sqnn(n)
                 end do
             end do
-            !
-            !     set ityp for vector synthesis with divergence=0
-            !
-            select case (isym)
-                case (0)
-                    ityp = 2
-                case (1)
-                    ityp = 5
-                case (2)
-                    ityp = 8
-            end select
-            !
-            !     vector sythesize cr, ci into divergence free vector field (v, w)
-            !
-            call vhsgs(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
-                mmax, nlat, wsav, lsav, wk, lwk, ierror)
+        end do
+        !
+        !     set ityp for vector synthesis with divergence=0
+        !
+        select case (isym)
+            case (0)
+                ityp = 2
+            case (1)
+                ityp = 5
+            case (2)
+                ityp = 8
+        end select
+        !
+        !     vector sythesize cr, ci into divergence free vector field (v, w)
+        !
+        call vhsgs(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
+            mmax, nlat, wsav, lsav, wk, lwk, ierror)
 
-        end subroutine ivtgs1
-
-    end subroutine ivrtgs
+    end subroutine ivtgs1
 
 end module module_ivrtgs

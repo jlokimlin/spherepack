@@ -178,7 +178,7 @@ program shallow
     write( stdout, '(/a)') '     shallow *** TEST RUN *** '
 
     !
-    !==> Initialize constants
+    !  Initialize constants
     !
     HALF_PI = PI/2
     radian_unit = PI/180.0_wp
@@ -194,7 +194,7 @@ program shallow
     mprint = itmax/10
 
     !
-    !==> Allocate memory
+    !  Allocate memory
     !
     call solver%create(nlat=nlat, nlon=nlon, ntrunc=ntrunc, rsphere=aa)
 
@@ -203,7 +203,7 @@ program shallow
         //'a, i10/, a, 1pe15.6, a, 1pe15.6, /a, 1pe15.6, a, 1pe15.6)' )
 
     !
-    !==> compute the derivative of the unrotated geopotential
+    !  compute the derivative of the unrotated geopotential
     !    p as a function of latitude
     !
     cfn = 1.0_wp / nlm1
@@ -296,13 +296,13 @@ program shallow
     pg = p
 
     !
-    !==> Compute spectral coeffs of initial vrt, div, p
+    !  Compute spectral coeffs of initial vrt, div, p
     !
     call solver%get_vrtdivspec(ug, vg, vrtnm, divnm)
     call solver%grid_to_spec(pg, pnm)
 
     !
-    !==> time step loop
+    !  time step loop
     !
     new = 1
     now = 2
@@ -312,17 +312,17 @@ program shallow
         time = real(ncycle, kind=wp) * dt
 
         !
-        !==> Inverse transform to get vort and phig on grid
+        !  Inverse transform to get vort and phig on grid
         !
         call solver%spec_to_grid(vrtnm, vrtg)
         call solver%spec_to_grid(pnm, pg)
 
         !
-        !==> compute u and v on grid from spectral coeffs of vort and div.
+        !  compute u and v on grid from spectral coeffs of vort and div.
         !
         call solver%get_uv(vrtnm, divnm, ug, vg)
 
-        !==> compute error statistics
+        !  compute error statistics
 
         if (mod(ncycle, mprint) == 0) then
 
@@ -377,7 +377,7 @@ program shallow
 
         end if
         !
-        !==> Compute right-hand sides of prognostic eqns
+        !  Compute right-hand sides of prognostic eqns
         !
         scrg1 = ug * (vrtg + f)
         scrg2 = vg * (vrtg + f)
@@ -402,11 +402,11 @@ program shallow
 
         end associate
         !
-        !==> Update vrt and div with third-order adams-bashforth
+        !  Update vrt and div with third-order adams-bashforth
         !
         select case (ncycle)
             !
-            !==> forward euler, then 2nd-order adams-bashforth time steps to start
+            !  forward euler, then 2nd-order adams-bashforth time steps to start
             !
             case (0)
                 dvrtdtnm(:,now) = dvrtdtnm(:,new)
@@ -437,7 +437,7 @@ program shallow
             + (5.0_wp/12)*dpdtnm(:,old) )
 
         !
-        !==> Switch indices
+        !  Switch indices
         !
         temp_save_new = new
         temp_save_now = now
@@ -448,7 +448,7 @@ program shallow
     end do
 
     !
-    !==> Release memory
+    !  Release memory
     !
     call solver%destroy()
     deallocate( write_fmt )

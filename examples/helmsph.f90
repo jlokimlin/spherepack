@@ -111,7 +111,7 @@ contains
         !----------------------------------------------------------------------
 
         !
-        !==> Set up workspace arrays
+        !  Set up workspace arrays
         !
         select type(sphere_type)
             type is (GaussianSphere)
@@ -132,7 +132,7 @@ contains
         end select
 
         !
-        !==> Set right hand side as helmholtz operator
+        !  Set right hand side as helmholtz operator
         !    applied to ue = (1.+x*y)*exp(z)
         !
         associate( &
@@ -161,14 +161,14 @@ contains
             u => approximate_solution &
             )
             !
-            !==> Solve Helmholtz equation on the sphere
+            !  Solve Helmholtz equation on the sphere
             !
             call sphere_type%invert_helmholtz( xlmbda, rhs, u)
 
         end associate
 
         !
-        !==> Compare ue with u
+        !  Compare ue with u
         !
         associate( &
             u => approximate_solution, &
@@ -176,7 +176,7 @@ contains
             )
             associate( err2 => norm2(u-ue) )
                 !
-                !==> Print earlier output from platform with 64-bit floating point
+                !  Print earlier output from platform with 64-bit floating point
                 !    arithmetic followed by the output from this computer
                 !
                 write( stdout, '(/A)') '     helmsph *** TEST RUN *** '
@@ -192,7 +192,7 @@ contains
             end associate
         end associate
         !
-        !==> Release memory
+        !  Release memory
         !
         call sphere_type%destroy()
         deallocate( error_previous_platform )

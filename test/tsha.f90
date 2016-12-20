@@ -56,7 +56,7 @@ program tsha
     !----------------------------------------------------------------------
 
     !
-    !==> Test gaussian case
+    !  Test gaussian case
     !
     allocate( GaussianSphere :: sphere_dat )
 
@@ -65,7 +65,7 @@ program tsha
     deallocate( sphere_dat )
 
     !
-    !==> Test regular case
+    !  Test regular case
     !
     allocate( RegularSphere :: sphere_dat )
 
@@ -96,7 +96,7 @@ contains
         !----------------------------------------------------------------------
 
         !
-        !==> Set up workspace arrays
+        !  Set up workspace arrays
         !
         select type(sphere_type)
             type is (GaussianSphere)
@@ -117,7 +117,7 @@ contains
         end select
 
         !
-        !==> Test all analysis and synthesis subroutines.
+        !  Test all analysis and synthesis subroutines.
         !    Set scalar field as (x*y*z)**k) restricted to the sphere
         !
         associate( &
@@ -145,7 +145,7 @@ contains
         end associate
 
         !
-        !==> Perform analysis then synthesis
+        !  Perform analysis then synthesis
         !
         do k = 1, NSYNTHS
             associate( &
@@ -161,7 +161,7 @@ contains
             end associate
         end do
         !
-        !==> Compute discretization error
+        !  Compute discretization error
         !
         associate( &
             se => original_scalar_function, &
@@ -169,7 +169,7 @@ contains
             )
             associate( err2 => maxval(abs(s - se)) )
                 !
-                !==> Print earlier output from platform with 64-bit floating point
+                !  Print earlier output from platform with 64-bit floating point
                 !    arithmetic followed by the output from this computer
                 !
                 write( stdout, '(a)') ''
@@ -186,7 +186,7 @@ contains
             end associate
         end associate
         !
-        !==> Release memory
+        !  Release memory
         !
         call sphere_type%destroy()
         deallocate( error_previous_platform )

@@ -102,16 +102,16 @@ contains
         !----------------------------------------------------------------------
 
         !
-        !==> Set up workspace arrays
+        !  Set up workspace arrays
         !
         select type(sphere_type)
             !
-            !==> For gaussian sphere
+            !  For gaussian sphere
             !
             class is (GaussianSphere)
 
             !
-            !==> Initialize gaussian sphere object
+            !  Initialize gaussian sphere object
             !
             call sphere_type%create(nlat=NLATS, nlon=NLONS)
 
@@ -121,12 +121,12 @@ contains
             allocate( previous_polar_inversion_error, source='     polar inversion error     = 1.776357e-15' )
             allocate( previous_azimuthal_inversion_error, source='     azimuthal inversion error = 1.776357e-15' )
             !
-            !==> For regular sphere
+            !  For regular sphere
             !
             class is (RegularSphere)
 
             !
-            !==> Initialize regular sphere object
+            !  Initialize regular sphere object
             !
             call sphere_type%create(nlat=NLATS, nlon=NLONS)
 
@@ -138,7 +138,7 @@ contains
         end select
 
         !
-        !==> set scalar stream and velocity potential fields as polys in x,y,z
+        !  set scalar stream and velocity potential fields as polys in x,y,z
         !    and then set v,w from st,sv scalar fields
         !
         associate( &
@@ -210,7 +210,7 @@ contains
         end associate
 
         !
-        !==> Compute vt and dv from (ve,we)
+        !  Compute vt and dv from (ve,we)
         !
         do k=1, NSYNTHS
             associate( &
@@ -220,14 +220,14 @@ contains
                 dv => approximate_divergence(:,:,k) &
                 )
                 !
-                !==> Compute vorticity and divergence
+                !  Compute vorticity and divergence
                 !
                 call sphere_type%get_vorticity_and_divergence_from_velocities(ve, we, vt, dv)
             end associate
         end do
 
         !
-        !==> Compute "error" in dv,vt
+        !  Compute "error" in dv,vt
         !
         associate( &
             vt => approximate_vorticity, &
@@ -240,7 +240,7 @@ contains
                 err2dv => maxval(abs(dv-dve)) &
                 )
                 !
-                !==> Print earlier output from platform with 64-bit floating point
+                !  Print earlier output from platform with 64-bit floating point
                 !    arithmetic followed by the output from this computer
                 !
                 write( stdout, '(a)') ''
@@ -260,7 +260,7 @@ contains
         end associate
 
         !
-        !==> Now compute (v,w) inverting vte, dve
+        !  Now compute (v,w) inverting vte, dve
         !
         do k=1, NSYNTHS
             associate( &
@@ -273,7 +273,7 @@ contains
             end associate
         end do
         !
-        !==> compare this v,w with original
+        !  compare this v,w with original
         !
         associate( &
             ve => exact_polar_component, &
@@ -286,7 +286,7 @@ contains
                 err2w => maxval(abs(w-we)) &
                 )
                 !
-                !==> Print earlier output from platform with 64-bit floating point
+                !  Print earlier output from platform with 64-bit floating point
                 !    arithmetic followed by the output from this computer
                 !
                 write( stdout, '(a)') ''
@@ -305,7 +305,7 @@ contains
             end associate
         end associate
         !
-        !==> Release memory
+        !  Release memory
         !
         deallocate( previous_vorticity_error )
         deallocate( previous_divergence_error )

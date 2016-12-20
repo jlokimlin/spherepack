@@ -17,7 +17,7 @@ module type_RegularGrid
 
 
 
-    ! Declare derived data type
+    
     type, extends (SphericalGrid), public :: RegularGrid
         !----------------------------------------------------------------------
         ! Type components
@@ -79,7 +79,7 @@ contains
         end if
 
         !
-        !==> Make copies
+        !  Make copies
         !
         self%initialized = object_to_be_copied%initialized
         self%NUMBER_OF_LONGITUDES = object_to_be_copied%NUMBER_OF_LONGITUDES
@@ -107,23 +107,23 @@ contains
         call self%destroy()
 
         !
-        !==> Set contants
+        !  Set contants
         !
         self%NUMBER_OF_LATITUDES = nlat
         self%NUMBER_OF_LONGITUDES = nlon
 
         !
-        !==> Set the equally-spaced (regular) grid type
+        !  Set the equally-spaced (regular) grid type
         !
         allocate(self%grid_type, source='regular')
 
         !
-        !==> Set longitudinal grid: 0 <= phi <= 2*pi
+        !  Set longitudinal grid: 0 <= phi <= 2*pi
         !
         call self%get_equally_spaced_longitudes(nlon, self%longitudes)
 
         !
-        !==> Compute equally-spaced latitudes: 0 <= theta <= pi
+        !  Compute equally-spaced latitudes: 0 <= theta <= pi
         !
         call self%get_equally_spaced_latitudes(nlat, self%latitudes)
 
@@ -171,7 +171,7 @@ contains
         !----------------------------------------------------------------------
 
         !
-        !==> Check validity of input argument
+        !  Check validity of input argument
         !
         if (nlat <= 0) then
             error stop 'Object of class(RegularGrid): '&
@@ -180,12 +180,12 @@ contains
         end if
 
         !
-        !==> Allocate memory
+        !  Allocate memory
         !
         allocate( theta(nlat) )
 
         !
-        !==> Compute equally spaced latitudinal grid
+        !  Compute equally spaced latitudinal grid
         !
         associate( dtheta => self%LATITUDINAL_MESH )
 

@@ -73,7 +73,7 @@ program tvrt
     !----------------------------------------------------------------------
 
     !
-    !==> Test gaussian case
+    !  Test gaussian case
     !
     allocate( GaussianSphere :: sphere_dat )
 
@@ -82,7 +82,7 @@ program tvrt
     deallocate( sphere_dat )
 
     !
-    !==> Test regular case
+    !  Test regular case
     !
     allocate( RegularSphere :: sphere_dat )
 
@@ -120,7 +120,7 @@ contains
         !----------------------------------------------------------------------
 
         !
-        !==> Set up workspace arrays
+        !  Set up workspace arrays
         !
         select type(sphere_type)
             type is (GaussianSphere)
@@ -145,7 +145,7 @@ contains
         end select
 
         !
-        !==> set scalar stream and velocity potential fields as polys in x,y,z
+        !  set scalar stream and velocity potential fields as polys in x,y,z
         !    and then set v,w from st,sv scalar fields
         !
         associate( &
@@ -193,7 +193,7 @@ contains
         end associate
 
         !
-        !==> Compute vt from (ve,we)
+        !  Compute vt from (ve,we)
         !
         do k=1, NSYNTHS
             associate( &
@@ -205,7 +205,7 @@ contains
             end associate
         end do
         !
-        !==> Compute vorticity error
+        !  Compute vorticity error
         !
         associate( &
             vt => approximate_vorticity, &
@@ -213,7 +213,7 @@ contains
             )
             associate( err2 => maxval(abs(vt-vte)) )
                 !
-                !==> Print earlier output from platform with 64-bit floating point
+                !  Print earlier output from platform with 64-bit floating point
                 !    arithmetic followed by the output from this computer
                 !
                 write( stdout, '(/a/)') '     tvrt *** TEST RUN *** '
@@ -227,7 +227,7 @@ contains
             end associate
         end associate
         !
-        !==> Now recompute (v,w) inverting vte
+        !  Now recompute (v,w) inverting vte
         !
         do k=1, NSYNTHS
             associate( &
@@ -240,7 +240,7 @@ contains
         end do
 
         !
-        !==> compute vector field (ve,we) using br,bi,cr,ci from (ve,we) with
+        !  compute vector field (ve,we) using br,bi,cr,ci from (ve,we) with
         !    br = bi = 0.0
         !
         do k = 1, NSYNTHS
@@ -249,11 +249,11 @@ contains
                 we => exact_azimuthal_component(:,:,k) &
                 )
                 !
-                !==> Get polar coefficients (br, bi) and azimuthal coefficients (cr, ci) from (ve, we)
+                !  Get polar coefficients (br, bi) and azimuthal coefficients (cr, ci) from (ve, we)
                 !
                 call sphere_type%vector_analysis_from_spherical_components(ve, we)
                 !
-                !==> Set polar coefficients to zero
+                !  Set polar coefficients to zero
                 !
                 associate( &
                     br => sphere_type%workspace%real_polar_harmonic_coefficients, &
@@ -262,13 +262,13 @@ contains
                     br = 0.0_wp; bi = 0.0_wp
                 end associate
                 !
-                !==> Synthesize azimuthal coefficients (cr, ci) into (ve, we)
+                !  Synthesize azimuthal coefficients (cr, ci) into (ve, we)
                 !
                 call sphere_type%perform_vector_synthesis(ve, we)
             end associate
         end do
         !
-        !==> compare this v,w with original
+        !  compare this v,w with original
         !
         associate( &
             ve => exact_polar_component, &
@@ -281,7 +281,7 @@ contains
                 err2w => maxval(abs(w-we)) &
                 )
                 !
-                !==> Print earlier output from platform with 64-bit floating point
+                !  Print earlier output from platform with 64-bit floating point
                 !    arithmetic followed by the output from this computer
                 !
                 write( stdout, '(a)') ''
@@ -300,7 +300,7 @@ contains
             end associate
         end associate
         !
-        !==> Release memory
+        !  Release memory
         !
         deallocate( previous_vorticity_error )
         deallocate( previous_polar_inversion_error )

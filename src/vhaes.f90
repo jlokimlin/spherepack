@@ -346,7 +346,7 @@ module module_vhaes
     public :: VhaesAux
 
 
-    ! Declare derived data type
+    
     type, public :: VhaesAux
         !-----------------------------------------
         ! Type components
@@ -442,7 +442,7 @@ contains
         !----------------------------------------------------------------------
 
         !
-        !==> Address optional arguments
+        !  Address optional arguments
         !
         if (present(nt)) then
             nt_op = nt
@@ -457,7 +457,7 @@ contains
         end if
 
         !
-        !==> Compute workspace size
+        !  Compute workspace size
         !
         if (ityp_op <= 2) then
             ! Set workspace size
@@ -524,7 +524,7 @@ contains
         lnl = nt*idv*nlon
 
         !
-        !==> Check validity of input arguments
+        !  Check validity of input arguments
         !
         if (nlat < 3) then
             ierror = 1
@@ -561,7 +561,7 @@ contains
         end if
 
         !
-        !==> Set workspace indices
+        !  Set workspace indices
         !
         workspace_indices = get_workspace_indices(ist, lnl, lzimn)
 
@@ -697,7 +697,7 @@ contains
             end do
 
             !
-            !==> Set polar coefficients to zero
+            !  Set polar coefficients to zero
             !
             select case (ityp)
                 case (0:1,3:4,6:7)
@@ -710,7 +710,7 @@ contains
             end select
 
             !
-            !==> Set azimuthal coefficients to zero
+            !  Set azimuthal coefficients to zero
             !
             select case (ityp)
                 case (0,2:3,5:6,8)
@@ -723,12 +723,12 @@ contains
             end select
 
             !
-            !==> Compute coefficients br, bi, cr, ci
+            !  Compute coefficients br, bi, cr, ci
             !
             select case (ityp)
                 case (0)
                     !
-                    !==> case ityp=0,  no symmetries
+                    !  case ityp=0,  no symmetries
                     !
                     ! case m=0
                     !
@@ -817,7 +817,7 @@ contains
                     end do
                 case (1)
                     !
-                    !==> case ityp=1 ,  no symmetries but cr and ci equal zero
+                    !  case ityp=1 ,  no symmetries but cr and ci equal zero
                     !
                     !    case m=0
                     !
@@ -837,7 +837,7 @@ contains
                         end do
                     end do
                     !
-                    !==> case m = 1 through nlat-1
+                    !  case m = 1 through nlat-1
                     !
                     if (mmax < 2) then
                         return
@@ -894,7 +894,7 @@ contains
                     end do
                 case (2)
                     !
-                    !==> case ityp=2 ,  no symmetries but br and bi equal zero
+                    !  case ityp=2 ,  no symmetries but br and bi equal zero
                     !
                     !    case m=0
                     !
@@ -914,7 +914,7 @@ contains
                         end do
                     end do
                     !
-                    !==> case m = 1 through nlat-1
+                    !  case m = 1 through nlat-1
                     !
                     if (mmax < 2) return
 
@@ -969,7 +969,7 @@ contains
                     end do
                 case (3)
                     !
-                    !==> case ityp=3 ,  v even , w odd
+                    !  case ityp=3 ,  v even , w odd
                     !
                     !    case m=0
                     !
@@ -989,7 +989,7 @@ contains
                         end do
                     end do
                     !
-                    !==> case m = 1 through nlat-1
+                    !  case m = 1 through nlat-1
                     !
                     if (mmax < 2) return
 
@@ -1044,7 +1044,7 @@ contains
                     end do
                 case (4)
                     !
-                    !==> case ityp=4 ,  v even, w odd, and cr and ci equal 0.
+                    !  case ityp=4 ,  v even, w odd, and cr and ci equal 0.
                     !
                     !    case m=0
                     !
@@ -1056,7 +1056,7 @@ contains
                         end do
                     end do
                     !
-                    !==> case m = 1 through nlat-1
+                    !  case m = 1 through nlat-1
                     !
                     if (mmax < 2) return
 
@@ -1089,7 +1089,7 @@ contains
                     end do
                 case (5)
                     !
-                    !==> case ityp=5   v even, w odd, and br and bi equal zero
+                    !  case ityp=5   v even, w odd, and br and bi equal zero
                     !
                     !    case m=0
                     !
@@ -1101,7 +1101,7 @@ contains
                         end do
                     end do
                     !
-                    !==> case m = 1 through nlat-1
+                    !  case m = 1 through nlat-1
                     !
                     if (mmax < 2) return
 
@@ -1134,7 +1134,7 @@ contains
                     end do
                 case (6)
                     !
-                    !==> case ityp=6 ,  v odd , w even
+                    !  case ityp=6 ,  v odd , w even
                     !
                     !    case m=0
                     !
@@ -1154,7 +1154,7 @@ contains
                         end do
                     end do
                     !
-                    !==> case m = 1 through nlat-1
+                    !  case m = 1 through nlat-1
                     !
                     if (mmax < 2) return
 
@@ -1210,7 +1210,7 @@ contains
                     end do
                 case (7)
                     !
-                    !==> case ityp=7   v odd, w even, and cr and ci equal zero
+                    !  case ityp=7   v odd, w even, and cr and ci equal zero
                     !
                     !    case m=0
                     !
@@ -1222,7 +1222,7 @@ contains
                         end do
                     end do
                     !
-                    !==> case m = 1 through nlat-1
+                    !  case m = 1 through nlat-1
                     !
                     if (mmax < 2) return
 
@@ -1255,7 +1255,7 @@ contains
                     end do
                 case (8)
                     !
-                    !==> case ityp=8   v odd, w even, and both br and bi equal zero
+                    !  case ityp=8   v odd, w even, and both br and bi equal zero
                     !
                     !    case m=0
                     !
@@ -1337,7 +1337,7 @@ contains
         labc = 3*(max(mmax-2, 0)*(2*nlat-mmax-1))/2
 
         !
-        !==> Check validity of input arguments
+        !  Check validity of input arguments
         !
         if (nlat < 3) then
             ierror = 1
@@ -1359,7 +1359,7 @@ contains
         end if
 
         !
-        !==> Set workspace indices
+        !  Set workspace indices
         !
         workspace_indices = get_workspace_indices(lzimn, nlat, imid, mmax)
 

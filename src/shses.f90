@@ -390,7 +390,6 @@ contains
 
     end subroutine shses
 
-
     module subroutine shsesi(nlat,nlon,wshses,lshses,work,lwork,dwork, &
         ldwork,ierror)
         !----------------------------------------------------------------------
@@ -419,7 +418,7 @@ contains
         labc = 3*((mmax-2)*(2*nlat-mmax-1))/2
 
         !
-        !==> Check validity of input arguments
+        !  Check validity of input arguments
         !
         if (nlat < 3) then
             ierror = 1
@@ -449,7 +448,6 @@ contains
         end associate
 
     end subroutine shsesi
-
 
     subroutine shses1(nlat,isym,nt,g,idgs,jdgs,a,b,mdab,ndab,p,imid, &
         idg,jdg,ge,go,work,whrfft)
@@ -501,7 +499,7 @@ contains
             imm1 = imid
         end if
 
-        ge(1:ls,1:nlon,1:nt) = 0.0_wp
+        ge(1:ls,1:nlon,1:nt) = ZERO
 
         block_construct: block
 
@@ -607,21 +605,20 @@ contains
                 do k=1,nt
                     do j=1,nlon
                         do i=1,imm1
-                            g(i,j,k) = 0.5_wp*(ge(i,j,k)+go(i,j,k))
-                            g(nlp1-i,j,k) = 0.5_wp*(ge(i,j,k)-go(i,j,k))
+                            g(i,j,k) = HALF*(ge(i,j,k)+go(i,j,k))
+                            g(nlp1-i,j,k) = HALF*(ge(i,j,k)-go(i,j,k))
                         end do
 
-                        if (modl /= 0) g(imid,j,k) = 0.5_wp*ge(imid,j,k)
+                        if (modl /= 0) g(imid,j,k) = HALF*ge(imid,j,k)
 
                     end do
                 end do
             case default
                 do k=1,nt
-                    g(1:imid,1:nlon,k) = 0.5_wp*ge(1:imid,1:nlon,k)
+                    g(1:imid,1:nlon,k) = HALF*ge(1:imid,1:nlon,k)
                 end do
         end select
 
     end subroutine shses1
-
 
 end submodule scalar_synthesis_shses

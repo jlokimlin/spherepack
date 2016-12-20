@@ -9,7 +9,7 @@ module type_ShallowWaterSolver
     ! Explicit typing only
     implicit none
 
-    ! Declare derived data type
+    
     type, extends (RegularSphere) :: ShallowWaterSolver
     contains
         !--------------------------------------------------------------
@@ -166,19 +166,19 @@ contains
             nlon => size(datagrid, dim=1) &
             )
             !
-            !==> Allocate memory
+            !  Allocate memory
             !
             allocate( temp(nlat,nlon) )
 
         end associate
 
         !
-        !==> Transpose data
+        !  Transpose data
         !
         temp = transpose(datagrid)
 
         !
-        !==> spherical harmonic analysis
+        !  spherical harmonic analysis
         !
         call self%perform_scalar_analysis(temp)
 
@@ -189,20 +189,20 @@ contains
             )
 
             !
-            !==> Fill complex array dataspec with result.
+            !  Fill complex array dataspec with result.
             !
             dataspec = 0.5_wp * cmplx( &
                 [((a(m, n), n=m, ntrunc+1), m=1, ntrunc+1)], &
                 [((b(m, n), n=m, ntrunc+1), m=1, ntrunc+1)], &
                 kind=wp)
             !
-            !==> Reset constants
+            !  Reset constants
             !
             a = 0.0_wp
             b = 0.0_wp
         end associate
         !
-        !==> Release memory
+        !  Release memory
         !
         deallocate( temp )
 
@@ -233,7 +233,7 @@ contains
             nlon => size(datagrid, dim=1) &
             )
             !
-            !==> Allocate memory
+            !  Allocate memory
             !
             allocate( temp(nlat,nlon) )
 
@@ -241,7 +241,7 @@ contains
 
 
         !
-        !==> fill two real arrays (a, b) with contents of dataspec.
+        !  fill two real arrays (a, b) with contents of dataspec.
         !
         associate( &
             ntrunc => self%TRIANGULAR_TRUNCATION_LIMIT, &
@@ -260,23 +260,23 @@ contains
             end do
 
             !
-            !==> Perform spherical harmonic synthesis
+            !  Perform spherical harmonic synthesis
             !
             call self%perform_scalar_synthesis(temp)
 
             !
-            !==> Reset coefficients
+            !  Reset coefficients
             !
             a = 0.0_wp
             b = 0.0_wp
         end associate
         !
-        !==> Transpose data
+        !  Transpose data
         !
         datagrid = transpose(temp)
 
         !
-        !==> Release memory
+        !  Release memory
         !
         deallocate( temp )
 
@@ -310,7 +310,7 @@ contains
             nlon => size(ugrid, dim=1) &
             )
             !
-            !==> Allocate memory
+            !  Allocate memory
             !
             allocate( v(nlat,nlon) )
             allocate( w(nlat,nlon) )
@@ -319,7 +319,7 @@ contains
         end associate
 
         !
-        !==> Transpose data.
+        !  Transpose data.
         !    minus sign to account for difference between
         !    mathematical and geophysical spherical coords
         !
@@ -327,12 +327,12 @@ contains
         w = transpose(ugrid)
 
         !
-        !==> Calculate vector spherical harmonic analysis.
+        !  Calculate vector spherical harmonic analysis.
         !
         call self%vector_analysis_from_spherical_components(v, w)
 
         !
-        !==> Multiply vector harmonic coefficients of winds by
+        !  Multiply vector harmonic coefficients of winds by
         !    appropriate factors to convert into vorticity and
         !    divergence coefficients.
         !
@@ -378,7 +378,7 @@ contains
                 kind=wp)
 
             !
-            !==> Reset coefficients
+            !  Reset coefficients
             !
             a = 0.0_wp
             b = 0.0_wp
@@ -389,7 +389,7 @@ contains
         end associate
 
         !
-        !==> Release memory
+        !  Release memory
         !
         deallocate( v )
         deallocate( w )
@@ -425,7 +425,7 @@ contains
             nlon => size(ugrid, dim=1) &
             )
             !
-            !==> Allocate memory
+            !  Allocate memory
             !
             allocate( v(nlat,nlon) )
             allocate( w(nlat,nlon) )
@@ -434,7 +434,7 @@ contains
         end associate
 
         !
-        !==> multiply spectral coefficients of vorticity and divergence
+        !  multiply spectral coefficients of vorticity and divergence
         !    by appropriate factors to convert them into vector harmonic
         !    coefficients of winds.
         !
@@ -492,12 +492,12 @@ contains
 
 
             !
-            !==> compute vector harmonic synthesis to get winds on grid.
+            !  compute vector harmonic synthesis to get winds on grid.
             !
             call self%perform_vector_synthesis(v, w)
 
             !
-            !==> Reset coefficients
+            !  Reset coefficients
             !
             a = 0.0_wp
             b = 0.0_wp
@@ -508,7 +508,7 @@ contains
 
         end associate
         !
-        !==> Transpose data
+        !  Transpose data
         !    minus sign to account for differences
         !    between mathematical and geophysical spherical coords.
         !
@@ -516,7 +516,7 @@ contains
         ugrid = transpose(w)
 
         !
-        !==> Release memory
+        !  Release memory
         !
         deallocate( v )
         deallocate( w )

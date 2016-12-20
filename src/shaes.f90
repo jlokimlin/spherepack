@@ -346,7 +346,7 @@ contains
         !----------------------------------------------------------------------
 
         !
-        !==> Set constants
+        !  Set constants
         !
         mmax = min(nlat, nlon/2+1)
         imid = (nlat+1)/2
@@ -354,7 +354,7 @@ contains
         lzimn = idz*imid
 
         !
-        !==> Set calling argument for analysis
+        !  Set calling argument for analysis
         !
         select case (isym)
             case (0)
@@ -368,7 +368,7 @@ contains
         nln = nt*ls*nlon
 
         !
-        !==> Check validity of input arguments
+        !  Check validity of input arguments
         !
         if (nlat < 3) then
             ierror = 1
@@ -414,7 +414,7 @@ contains
             iw3 => lzimn+1 &
             )
             !
-            !==> Perform analysis
+            !  Perform analysis
             !
             call shaes1(nlat, isym, nt, g, idg, jdg, a, b, mdab, ndab, wshaes, idz, &
                 ls, nlon, work, work(iw1), work(iw2), wshaes(iw3))
@@ -458,7 +458,7 @@ contains
         labc = 3*((mmax-2)*(2*nlat-mmax-1))/2
         lzimn = (imid*mmax*(2*nlat-mmax+1))/2
         !
-        !==> Check validity of input values
+        !  Check validity of input values
         !
         if (nlat < 3) then
             ierror = 1
@@ -480,11 +480,11 @@ contains
         end if
 
         !
-        !==> Set workspace indices
+        !  Set workspace indices
         !
         workspace_indices = get_workspace_indices(nlat, nlon, mmax, imid, lzimn)
         !
-        !==> Compute workspace
+        !  Compute workspace
         !
         associate( &
             idz => workspace_indices(1), &
@@ -579,7 +579,7 @@ contains
         end block if_block
 
         !
-        !==> Fast Fourier Transform
+        !  Fast Fourier Transform
         !
         fft_loop: do k=1, nt
 

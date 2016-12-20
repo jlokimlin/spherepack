@@ -120,12 +120,12 @@ program advec
     write( stdout, '(/a)') '     advec *** TEST RUN *** '
 
     !
-    !==> Allocate memory
+    !  Allocate memory
     !
     call solver%create(nlat=NLATS, nlon=NLONS)
 
     !
-    !==> set vector velocities and cosine bell in geopotential
+    !  set vector velocities and cosine bell in geopotential
     !
     call solver%get_vector_velocities(u, v)
 
@@ -133,7 +133,7 @@ program advec
 
     associate( dt => solver%TIME_STEP )
         !
-        !==> Compute geopotential at t=-dt in phi_old and at t=0.0 in phi
+        !  Compute geopotential at t=-dt in phi_old and at t=0.0 in phi
         !    to start up leapfrog scheme
         !
         call solver%get_geopotential(-dt, phi_old)
@@ -143,7 +143,7 @@ program advec
 
 
     !
-    !==> smooth geopotential at t=-dt and t=0. by synthesizing after analysis
+    !  smooth geopotential at t=-dt and t=0. by synthesizing after analysis
     !
     call solver%perform_scalar_analysis(phi_old)
     call solver%perform_scalar_synthesis(phi_old)
@@ -152,7 +152,7 @@ program advec
 
 
     !
-    !==> compute l2 and max norms of geopotential at t=0.
+    !  compute l2 and max norms of geopotential at t=0.
     !
     p0_l2 = norm2(phi)
     p0_max = maxval(abs(phi))
@@ -160,7 +160,7 @@ program advec
 
     associate( dt => solver%TIME_STEP )
         !
-        !==> set number of time steps for 12 days (time to circumvent the earth)
+        !  set number of time steps for 12 days (time to circumvent the earth)
         !
         ntime = int(real(TIME_TO_CIRCUMVENT_THE_EARTH, kind=wp)/dt + 0.5_wp, kind=ip)
         mprint = ntime/12
@@ -171,29 +171,29 @@ program advec
 
 
     !
-    !==> Start time loop
+    !  Start time loop
     !
     time_loop: do while (ncycle <= ntime)
         !
-        !==> Compute gradient of phi at current time
+        !  Compute gradient of phi at current time
         !
         call solver%get_gradient(phi, grad_phi_lat, grad_phi_lon)
         !
-        !==> Compute the time derivative of phi, note that the sign
+        !  Compute the time derivative of phi, note that the sign
         !    of the last term is positive because the gradient is
         !    computed with respect to colatitude rather than latitude.
         !
         grad_phi = -u * grad_phi_lon + v * grad_phi_lat
         !
-        !==> write variables to standard output
+        !  write variables to standard output
         !
         if (mod(ncycle,mprint) == 0) then
             !
-            !==> Compute exact solution
+            !  Compute exact solution
             !
             call solver%get_geopotential(time, exact_phi)
             !
-            !==> Compute errors
+            !  Compute errors
             !
             associate( &
                 htime => time/3600, &
@@ -223,16 +223,16 @@ program advec
         end if
 
         !
-        !==> Update various quantities
+        !  Update various quantities
         !
         associate( dt => solver%TIME_STEP )
             !
-            !==> increment
+            !  increment
             !
             time = time + dt
             ncycle = ncycle + 1
             !
-            !==> update phi_old,phi for next time step
+            !  update phi_old,phi for next time step
             !
             phi_new = phi_old + 2.0_wp * dt * grad_phi
             phi_old = phi
@@ -240,12 +240,12 @@ program advec
 
         end associate
         !
-        !==> end of time loop
+        !  end of time loop
         !
     end do time_loop
 
     !
-    !==> Release memory
+    !  Release memory
     !
     call solver%destroy()
 

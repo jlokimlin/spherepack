@@ -18,9 +18,7 @@ module type_Vector3D
     public :: Vector3DPointer
     public :: assignment(=)
     public :: operator(*)
-
-
-    ! Declare derived data type
+    
     type, public :: Vector3D
         !----------------------------------------------------------------------
         ! Type components
@@ -48,7 +46,6 @@ module type_Vector3D
         procedure, nopass,  private  :: multiply_integer_times_vector
         procedure,          private  :: get_cross_product
         procedure,          public   :: get_norm
-        final                        :: finalize_vector3d
         !----------------------------------------------------------------------
         ! Generic type-bound procedures
         !----------------------------------------------------------------------
@@ -79,7 +76,6 @@ module type_Vector3D
         module procedure get_cross_product
     end interface
 
-    ! Declare derived data type to create array of pointers
     type, public :: Vector3DPointer
         !----------------------------------------------------------------------
         ! Type components
@@ -329,20 +325,6 @@ contains
         end associate
 
     end function get_norm
-
-    elemental subroutine finalize_vector3d(self)
-        !----------------------------------------------------------------------
-        ! Dummy arguments
-        !----------------------------------------------------------------------
-        type(Vector3D), intent(inout)  :: self
-        !----------------------------------------------------------------------
-
-        ! Reset constants
-        self%x = 0.0_wp
-        self%y = 0.0_wp
-        self%z = 0.0_wp
-
-    end subroutine finalize_vector3d
 
     elemental subroutine finalize_vector3d_pointer(self)
         !----------------------------------------------------------------------

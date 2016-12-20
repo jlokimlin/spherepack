@@ -24,7 +24,7 @@ module type_SphericalUnitVectors
 
 
 
-    ! Declare derived data type
+    
     type, public :: SphericalUnitVectors
         !----------------------------------------------------------------------
         ! Type components
@@ -108,7 +108,7 @@ contains
             self%NUMBER_OF_LONGITUDES = nlon
 
             !
-            !==> Allocate memory
+            !  Allocate memory
             !
             allocate(self%radial(nlat, nlon) )
             allocate(self%polar(nlat, nlon) )
@@ -276,7 +276,7 @@ contains
                         phi => self%azimuthal(k, l) &
                         )
                         !
-                        !==> Calculate the spherical angle components
+                        !  Calculate the spherical angle components
                         !
                         vector_function(:, k, l ) = &
                             r * radial_component(k, l) &

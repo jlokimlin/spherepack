@@ -447,7 +447,7 @@ module module_vhsgs
     public :: vhsgsi
     public :: VhsgsAux
 
-    ! Declare derived data type
+    
     type, public :: VhsgsAux
         !-----------------------------------------
         ! Type components
@@ -521,7 +521,7 @@ contains
         !----------------------------------------------------------------------
 
         !
-        !==> Address optional arguments
+        !  Address optional arguments
         !
         if (present(nt)) then
             nt_op = nt
@@ -536,7 +536,7 @@ contains
         end if
 
         !
-        !==> Compute workspace size
+        !  Compute workspace size
         !
         if (ityp <= 2) then
             ! Set workspace size
@@ -604,7 +604,7 @@ contains
         lnl = nt*idv*nlon
 
         !
-        !==> Check validity of input arguments
+        !  Check validity of input arguments
         !
         if (nlat < 3) then
             ierror = 1
@@ -646,7 +646,7 @@ contains
 
 
         !
-        !==> Compute workspace indices
+        !  Compute workspace indices
         !
         workspace_indices = get_workspace_indices(nlat, imid, ist, lnl)
 
@@ -685,7 +685,7 @@ contains
 
             associate( i => return_value )
                 !
-                !==> set wvhsgs pointers
+                !  set wvhsgs pointers
                 !
                 lmn = nlat*(nlat+1)/2
                 i(1) = 1
@@ -693,7 +693,7 @@ contains
                 i(3) = i(2)+imid*lmn
 
                 !
-                !==> set work pointers
+                !  set work pointers
                 !
                 i(4) = ist+1
                 i(5) = lnl+1
@@ -1376,7 +1376,7 @@ contains
         lmn = (nlat*(nlat+1))/2
 
         !
-        !==> Check validity of input arguments
+        !  Check validity of input arguments
         !
         if (nlat < 3) then
             ierror = 1
@@ -1436,13 +1436,13 @@ contains
             !----------------------------------------------------------------------
 
             !
-            !==> Compute gauss points and weights
+            !  Compute gauss points and weights
             !    use dpbar (length 3*nnlat*(nnlat+1)) as work space for compute_gaussian_latitudes_and_weights
             !
             lwk = nlat*(nlat+2)
             call compute_gaussian_latitudes_and_weights(nlat,dthet,dwts,dummy_variable,lwk,ierror)
             !
-            !==> Compute associated legendre functions
+            !  Compute associated legendre functions
             !
             !    Compute m=n=0 legendre polynomials for all theta(i)
             !
@@ -1450,14 +1450,14 @@ contains
             vb(:,1) = 0.0_wp
             wb(:,1) = 0.0_wp
             !
-            !==> main loop for remaining vb, and wb
+            !  main loop for remaining vb, and wb
             !
             do n=1,nlat-1
                 nm = mod(n-2,3)+1
                 nz = mod(n-1,3)+1
                 np = mod(n,3)+1
                 !
-                !==> Compute dpbar for m=0
+                !  Compute dpbar for m=0
                 !
                 call sphere_aux%dnlfk(0,n,work)
                 mn = indx(0,n,nlat)
@@ -1465,7 +1465,7 @@ contains
                     call sphere_aux%dnlft(0,n,dthet(i),work,dpbar(i,1,np))
                 end do
                 !
-                !==> Compute dpbar for m=1
+                !  Compute dpbar for m=1
                 !
                 call sphere_aux%dnlfk(1,n,work)
                 mn = indx(1,n,nlat)
@@ -1473,7 +1473,7 @@ contains
                     call sphere_aux%dnlft(1,n,dthet(i),work,dpbar(i,2,np))
                 end do
                 !
-                !==> Compute and store dpbar for m=2,n
+                !  Compute and store dpbar for m=2,n
                 !
                 if (n >= 2) then
                     do m=2,n
@@ -1492,7 +1492,7 @@ contains
                     end do
                 end if
                 !
-                !==> Compute the derivative of the functions
+                !  Compute the derivative of the functions
                 !
                 ix = indx(0,n,nlat)
                 iy = indx(n,n,nlat)

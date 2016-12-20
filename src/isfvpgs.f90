@@ -248,7 +248,7 @@ contains
         integer(ip) :: l1, l2, mn, is, lwk, iwk, lwmin
         integer(ip) :: ibr, ibi, icr, ici
         !
-        !==> Check validity of input parameters
+        !  Check validity of input parameters
         !
 
         ! Initialize error flag
@@ -331,11 +331,11 @@ contains
             return
         end if
         !
-        !==> set first dimension for br, bi, cr, ci (as requried by vhsgs)
+        !  set first dimension for br, bi, cr, ci (as requried by vhsgs)
         !
         mn = l1*nlat*nt
         !
-        !==> set work space pointers
+        !  set work space pointers
         !
         ibr = 1
         ibi = ibr+mn
@@ -365,14 +365,14 @@ contains
             real(wp) :: wvhsgs(lvhsgs), wk(lwk), fnn(nlat)
             integer(ip) :: n, m, mmax, k, ityp
             !
-            !==> set coefficient multiplyers
+            !  set coefficient multiplyers
             !
             do n=2, nlat
                 fnn(n) = -sqrt(real(n*(n-1)))
             end do
             mmax = min(nlat, (nlon+1)/2)
             !
-            !==> compute (v, w) coefficients from as, bs, av, bv
+            !  compute (v, w) coefficients from as, bs, av, bv
             !
             do k=1, nt
                 do n=1, nlat
@@ -384,7 +384,7 @@ contains
                     end do
                 end do
                 !
-                !==> compute m = 0 coefficients
+                !  compute m = 0 coefficients
                 !
                 do n=2, nlat
                     br(1, n, k) = -fnn(n)*av(1, n, k)
@@ -393,7 +393,7 @@ contains
                     ci(1, n, k) =  fnn(n)*bs(1, n, k)
                 end do
                 !
-                !==> compute m > 0 coefficients
+                !  compute m > 0 coefficients
                 !    using vector spherepack value for mmax
                 !
                 do m=2, mmax
@@ -406,7 +406,7 @@ contains
                 end do
             end do
             !
-            !==> synthesize br, bi, cr, ci into (v, w)
+            !  synthesize br, bi, cr, ci into (v, w)
             !
             select case (isym)
                 case (0)
