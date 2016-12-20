@@ -567,23 +567,23 @@ ci(mp1, np1, k) = ZERO
 12 continue
 13 select case (ityp)
   case (0)
-          go to 1
+          goto 1
   case (1)
-          go to 100
+          goto 100
   case (2)
-          go to 200
+          goto 200
   case (3)
-          go to 300
+          goto 300
   case (4)
-          go to 400
+          goto 400
   case (5)
-          go to 500
+          goto 500
   case (6)
-          go to 600
+          goto 600
   case (7)
-          go to 700
+          goto 700
   case (8)
-          go to 800
+          goto 800
   end select
 !
 !     case ityp=0 ,  no symmetries

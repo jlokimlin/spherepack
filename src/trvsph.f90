@@ -523,15 +523,11 @@ module module_trvsph
         ip ! integer precision
 
     use vector_analysis_routines, only: &
-        vhaec, vhaeci
-
-    use vector_synthesis_routines, only: &
-        vhsec, vhseci
-
-    use vector_analysis_routines, only: &
+        vhaec, vhaeci, &
         vhagc, vhagci
 
     use vector_synthesis_routines, only: &
+        vhsec, vhseci, &
         vhsgc, vhsgci
 
     ! Explicit typing only

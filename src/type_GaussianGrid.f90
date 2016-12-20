@@ -19,7 +19,7 @@ module type_GaussianGrid
 
 
     
-    type, extends (SphericalGrid), public ::  GaussianGrid
+    type, extends(SphericalGrid), public ::  GaussianGrid
         !----------------------------------------------------------------------
         ! Type components
         !----------------------------------------------------------------------

@@ -14,11 +14,8 @@ module type_RegularGrid
     ! Everything is private unless stated otherwise
     private
     public :: RegularGrid
-
-
-
     
-    type, extends (SphericalGrid), public :: RegularGrid
+    type, extends(SphericalGrid), public :: RegularGrid
         !----------------------------------------------------------------------
         ! Type components
         !----------------------------------------------------------------------
@@ -36,18 +33,12 @@ module type_RegularGrid
         !----------------------------------------------------------------------
     end type RegularGrid
 
-
-
     ! Declare constructor
     interface RegularGrid
         module procedure regular_grid_constructor
     end interface
 
-
-
 contains
-
-
 
     function regular_grid_constructor(nlat, nlon) result (return_value)
         !----------------------------------------------------------------------

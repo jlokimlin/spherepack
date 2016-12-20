@@ -28,7 +28,7 @@ module type_RegularWorkspace
 
 
     
-    type, extends (Workspace), public :: RegularWorkspace
+    type, extends(Workspace), public :: RegularWorkspace
     contains
         !----------------------------------------------------------------------
         ! Type-bound procedures

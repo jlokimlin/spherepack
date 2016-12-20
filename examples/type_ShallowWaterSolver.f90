@@ -10,7 +10,7 @@ module type_ShallowWaterSolver
     implicit none
 
     
-    type, extends (RegularSphere) :: ShallowWaterSolver
+    type, extends(RegularSphere) :: ShallowWaterSolver
     contains
         !--------------------------------------------------------------
         ! Type-bound procedures

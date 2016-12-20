@@ -42,7 +42,7 @@ module type_RegularSphere
 
 
     
-    type, extends (Sphere), public :: RegularSphere
+    type, extends(Sphere), public :: RegularSphere
     contains
         !----------------------------------------------------------------------
         ! Type-bound procedures

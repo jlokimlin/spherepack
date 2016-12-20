@@ -24,7 +24,7 @@ module type_AdvectionSolver
     !----------------------------------------------------------------------
 
     
-    type, public, extends (GaussianSphere) :: AdvectionSolver
+    type, public, extends(GaussianSphere) :: AdvectionSolver
         !----------------------------------------------------------------------
         ! Type components
         !----------------------------------------------------------------------

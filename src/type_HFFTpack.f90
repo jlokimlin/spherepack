@@ -216,8 +216,6 @@ module type_HFFTpack
     private
     public :: HFFTpack
     public :: hrffti, hrfftf, hrfftb
-
-
     
     type, public :: HFFTpack
     contains

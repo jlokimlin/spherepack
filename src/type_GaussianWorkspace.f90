@@ -29,7 +29,7 @@ module type_GaussianWorkspace
 
 
     
-    type, extends (Workspace), public :: GaussianWorkspace
+    type, extends(Workspace), public :: GaussianWorkspace
         !----------------------------------------------------------------------
         ! Type components
         !----------------------------------------------------------------------

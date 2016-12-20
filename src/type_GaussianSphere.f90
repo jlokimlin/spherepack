@@ -44,7 +44,7 @@ module type_GaussianSphere
     public :: GaussianSphere
 
     
-    type, extends (Sphere), public :: GaussianSphere
+    type, extends(Sphere), public :: GaussianSphere
         !----------------------------------------------------------------------
         ! Type components
         !----------------------------------------------------------------------
