@@ -304,7 +304,7 @@
 !                 (due to failure in eigenvalue routine)
 !
 !
-submodule (scalar_analysis_routines) scalar_analysis_shags
+submodule (scalar_analysis_routines) scalar_analysis_gaussian_grid_saved
 
 contains
 
@@ -422,7 +422,6 @@ contains
 
     end subroutine shags
 
-
     module subroutine shagsi(nlat, nlon, wshags, lshags, work, lwork, dwork, ldwork, ierror)
         !
         !     Remark:
@@ -509,7 +508,6 @@ contains
 
     end subroutine shagsi
 
-
     subroutine shags1(nlat, nlon, l, lat, mode, gs, idg, jdg, nt, a, b, mdab, &
         ndab, wts, wfft, pmn, late, g, work)
         !----------------------------------------------------------------------
@@ -558,7 +556,7 @@ contains
         !
         !  scale result
         !
-        sfn = 2.0_wp/nlon
+        sfn = TWO/nlon
         g = sfn * g
 
         !     compute using gaussian quadrature
@@ -574,8 +572,8 @@ contains
         !     g(i, 1), g(i, 2), g(i, 3), g(i, 4), g(i, 5), ..., g(i, 2l-4), g(i, 2l-3), g(i, 2l-2)
         !     whenever 2*l-2 = nlon exactly
         !     initialize coefficients to zero
-        a = 0.0_wp
-        b = 0.0_wp
+        a = ZERO
+        b = ZERO
 
         !
         !  set mp1 limit on b(mp1) calculation
@@ -670,7 +668,7 @@ contains
                         is = nlat-i+1
                         do np1=l, nlat, 2
                             mn = mml1+np1
-                            a(l, np1, k) = a(l, np1, k) + 0.5_wp * g(i, nlon, k) * pmn(i, mn)
+                            a(l, np1, k) = a(l, np1, k) + HALF * g(i, nlon, k) * pmn(i, mn)
                         end do
                         !
                         !  (n - m)  odd
@@ -678,7 +676,7 @@ contains
                         lp1 = l+1
                         do np1=lp1, nlat, 2
                             mn = mml1+np1
-                            a(l, np1, k) = a(l, np1, k) + 0.5_wp * g(is, nlon, k) * pmn(i, mn)
+                            a(l, np1, k) = a(l, np1, k) + HALF * g(is, nlon, k) * pmn(i, mn)
                         end do
                     end do
                 end do
@@ -764,14 +762,13 @@ contains
                 do k=1, nt
                     do i=1, late
                         a(l,ns:nlat:2,k) = &
-                            a(l,ns:nlat:2,k) + 0.5_wp * g(i, nlon, k) * pmn(i,mml1+ns:mml1+nlat:2)
+                            a(l,ns:nlat:2,k) + HALF * g(i, nlon, k) * pmn(i,mml1+ns:mml1+nlat:2)
                     end do
                 end do
             end if
         end if
 
     end subroutine shags1
-
 
     subroutine shagss1(nlat, l, late, w, pmn, pmnf)
         ! External subroutines  :: legin
@@ -794,7 +791,7 @@ contains
         !
         !  Compute and store legendre polys for i=1, ..., late, m=0, ..., l-1
         !
-        pmn = 0.0_wp
+        pmn = ZERO
 
         do mp1=1, l
             m = mp1-1
@@ -816,8 +813,6 @@ contains
         end do
 
     end subroutine shagss1
-
-
 
     subroutine shagsp(nlat, nlon, wshags, lshags, dwork, ldwork, ierror)
         !----------------------------------------------------------------------
@@ -900,8 +895,6 @@ contains
 
     end subroutine shagsp
 
-
-
     pure function get_workspace_indices(nlat, late, l) result (return_value)
         !----------------------------------------------------------------------
         ! Dummy arguments
@@ -929,8 +922,6 @@ contains
         end associate
 
     end function get_workspace_indices
-
-
 
     subroutine shagsp1(nlat, nlon, l, late, wts, p0n, p1n, abel, bbel, cbel, &
         wfft, dtheta, dwts, work, ier)
@@ -979,8 +970,8 @@ contains
         !
         !  initialize p0n, p1n using real dnlfk, dnlft
         !
-        p0n = 0.0_wp
-        p1n = 0.0_wp
+        p0n = ZERO
+        p1n = ZERO
 
         !
         !  compute m=n=0 legendre polynomials for all theta(i)
@@ -1038,4 +1029,4 @@ contains
 
     end subroutine shagsp1
 
-end submodule scalar_analysis_shags
+end submodule scalar_analysis_gaussian_grid_saved

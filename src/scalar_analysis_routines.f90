@@ -17,16 +17,11 @@ module scalar_analysis_routines
     implicit none
 
     ! Everything is private unless stated otherwise
-    !public :: shaec
-    !public :: shaeci
-    public :: shaes
-    public :: shaesi
-    public :: ShaesAux
-    !public :: shagc
-    !public :: shagci
-    public :: shags
-    public :: shagsi
-    public :: ShagsAux
+    public :: shaec, shaeci
+    public :: shaes, shaesi
+    public :: shagc, shagci
+    public :: shags, shagsi
+    public :: ShaesAux, ShagsAux
 
     type, public :: ShaesAux
     contains
@@ -89,12 +84,6 @@ module scalar_analysis_routines
 
         module subroutine shaesi(nlat, nlon, wshaes, lshaes, work, lwork, dwork, &
             ldwork, ierror)
-            !
-            ! Remarks:
-            !
-            ! size(wshaes) = (l*(l+1)*imid)/2+nlon+15
-            ! size(work) = 5*l*imid + 3*((l-3)*l+2)/2
-            !
             !----------------------------------------------------------
             ! Dummy arguments
             !----------------------------------------------------------
@@ -112,14 +101,6 @@ module scalar_analysis_routines
 
         module subroutine shags(nlat, nlon, mode, nt, g, idg, jdg, a, b, mdab, ndab, &
             wshags, lshags, work, lwork, ierror)
-            !
-            ! Purpose:
-            !
-            ! Performs the spherical harmonic analysis on
-            ! a gaussian grid on the array(s) in g and returns the coefficients
-            ! in array(s) a, b. the necessary legendre polynomials are fully
-            ! stored in this version.
-            !
             !----------------------------------------------------------
             ! Dummy arguments
             !----------------------------------------------------------
@@ -143,18 +124,6 @@ module scalar_analysis_routines
         end subroutine shags
 
         module subroutine shagsi(nlat, nlon, wshags, lshags, work, lwork, dwork, ldwork, ierror)
-            !
-            !     Remark:
-            !
-            !     this subroutine must be called before calling shags or shsgs with
-            !     fixed nlat, nlon. it precomputes the gaussian weights, points
-            !     and all necessary legendre polys and stores them in wshags.
-            !     these quantities must be preserved when calling shags or shsgs
-            !     repeatedly with fixed nlat, nlon.  dwork must be of length at
-            !     least nlat*(nlat+4) in the routine calling shagsi.  This is
-            !     not checked.  undetectable errors will result if dwork is
-            !     smaller than nlat*(nlat+4).
-            !
             !----------------------------------------------------------
             ! Dummy arguments
             !----------------------------------------------------------
@@ -169,6 +138,70 @@ module scalar_analysis_routines
             integer(ip), intent(out)    :: ierror
             !----------------------------------------------------------
         end subroutine shagsi
+
+        module subroutine shaec(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, &
+            wshaec, lshaec, work, lwork, ierror)
+            real(wp) :: a(mdab, ndab, *)
+            real(wp) :: b(mdab, ndab, *)
+            real(wp) :: g(idg, jdg, *)
+            integer(ip) :: idg
+            integer(ip) :: ierror
+            integer(ip) :: isym
+            integer(ip) :: jdg
+            integer(ip) :: lshaec
+            integer(ip) :: lwork
+            integer(ip) :: mdab
+            integer(ip) :: ndab
+            integer(ip) :: nlat
+            integer(ip) :: nln
+            integer(ip) :: nlon
+            integer(ip) :: nt
+            real(wp) :: work(lwork)
+            real(wp) :: wshaec(lshaec)
+        end subroutine shaec
+
+        module subroutine shaeci(nlat, nlon, wshaec, lshaec, dwork, ldwork, ierror)
+            !--------------------------------------------------------------
+            ! Dummy arguments
+            !--------------------------------------------------------------
+            integer(ip), intent(in)  :: nlat
+            integer(ip), intent(in)  :: nlon
+            real(wp),    intent(out) :: wshaec(lshaec)
+            integer(ip), intent(in)  :: lshaec
+            real(wp),    intent(out) :: dwork(ldwork)
+            integer(ip), intent(in)  :: ldwork
+            integer(ip), intent(out) :: ierror
+            !--------------------------------------------------------------
+        end subroutine shaeci
+
+        module subroutine shagc(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, &
+            wshagc, lshagc, work, lwork, ierror)
+            real(wp) :: a(mdab, ndab, *)
+            real(wp) :: b(mdab, ndab,*)
+            real(wp) :: g(idg, jdg, *)
+            integer(ip) :: idg
+            integer(ip) :: ierror
+            integer(ip) :: isym
+            integer(ip) :: jdg
+            integer(ip) :: lshagc
+            integer(ip) :: lwork
+            integer(ip) :: mdab
+            integer(ip) :: ndab
+            integer(ip) :: nlat
+            integer(ip) :: nlon
+            integer(ip) :: nt
+            real(wp) :: work(lwork)
+            real(wp) :: wshagc(lshagc)
+        end subroutine shagc
+
+        module subroutine shagci(nlat, nlon, wshagc, lshagc, dwork, ldwork, ierror)
+            integer(ip) :: ldwork, ierror
+            integer(ip) :: lshagc
+            integer(ip) :: nlat
+            integer(ip) :: nlon
+            real(wp) :: wshagc(lshagc)
+            real(wp) :: dwork(ldwork)
+        end subroutine shagci
     end interface
 
     !------------------------------------------------------------------

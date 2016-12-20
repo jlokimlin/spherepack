@@ -162,7 +162,7 @@ program tvts
     !
     !     test all theta derivative subroutines
     !
-    do icase=1,4
+    do icase=1, 3!4
         !
         !     icase=1 test vtsec
         !     icase=2 test vtses

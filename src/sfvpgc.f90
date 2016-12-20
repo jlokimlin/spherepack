@@ -218,11 +218,11 @@
 !
 module module_sfvpgc
 
-    use, intrinsic :: ISO_Fortran_env, only: &
-        wp => REAL64, &
-        ip => INT32
+    use spherepack_precision, only: &
+        wp, & ! working precision
+        ip ! integer precision
 
-    use module_shsgc, only: &
+    use scalar_synthesis_routines, only: &
         shsgc
 
     ! Explicit typing only

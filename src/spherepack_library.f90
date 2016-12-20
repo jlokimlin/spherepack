@@ -135,14 +135,10 @@ module spherepack_library
     use module_sfvpgs, only: &
         sfvpgs
 
-    use module_shaec, only: &
-        shaec, shaeci
-
     use scalar_analysis_routines, only: &
         shaes, shaesi, &
-        shags, shagsi
-
-    use module_shagc, only: &
+        shaec, shaeci, &
+        shags, shagsi, &
         shagc, shagci
 
     use module_shpe, only: &
@@ -151,13 +147,13 @@ module spherepack_library
     use module_shpg, only: &
         shpg, shpgi
 
-    use module_shsec, only: &
+    use scalar_synthesis_routines, only: &
         shsec, shseci
 
     use scalar_synthesis_routines, only: &
         shses, shsesi
 
-    use module_shsgc, only: &
+    use scalar_synthesis_routines, only: &
         shsgc, shsgci
 
     use scalar_synthesis_routines, only: &

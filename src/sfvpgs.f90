@@ -218,9 +218,9 @@
 !
 module module_sfvpgs
 
-    use, intrinsic :: ISO_Fortran_env, only: &
-        wp => REAL64, &
-        ip => INT32
+    use spherepack_precision, only: &
+        wp, & ! working precision
+        ip ! integer precision
 
     use scalar_synthesis_routines, only: &
         shsgs

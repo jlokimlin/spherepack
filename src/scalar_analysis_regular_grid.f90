@@ -297,28 +297,11 @@
 !
 !
 !
-module module_shaec
-
-    use spherepack_precision, only: &
-        wp, & ! working precision
-        ip ! integer precision
-
-    use type_HFFTpack, only: &
-        HFFTpack
-
-    use type_SpherepackAux, only: &
-        SpherepackAux
-
-    ! Explicit typing only
-    implicit none
-
-    ! Everything is private unless stated otherwise
-    public :: shaec
-    public :: shaeci
+submodule(scalar_analysis_routines) scalar_analysis_regular_grid
 
 contains
 
-    subroutine shaec(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, &
+    module subroutine shaec(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, &
         wshaec, lshaec, work, lwork, ierror)
         real(wp) :: a(mdab, ndab, *)
         real(wp) :: b(mdab, ndab, *)
@@ -408,13 +391,62 @@ contains
         jw2 = nln + 1
         jw3 = jw2
 
-        call shaec1(nlat, isym, nt, g, idg, jdg, a, b, mdab, ndab, imid, ls, nlon, &
+        call shaec_lower_routine(nlat, isym, nt, g, idg, jdg, a, b, mdab, ndab, imid, ls, nlon, &
             work, work(jw1), work(jw2), work(jw3), wshaec, wshaec(iw1))
 
     end subroutine shaec
 
+    module subroutine shaeci(nlat, nlon, wshaec, lshaec, dwork, ldwork, ierror)
+        !--------------------------------------------------------------
+        ! Dummy arguments
+        !--------------------------------------------------------------
+        integer(ip), intent(in)  :: nlat
+        integer(ip), intent(in)  :: nlon
+        real(wp),    intent(out) :: wshaec(lshaec)
+        integer(ip), intent(in)  :: lshaec
+        real(wp),    intent(out) :: dwork(ldwork)
+        integer(ip), intent(in)  :: ldwork
+        integer(ip), intent(out) :: ierror
+        !--------------------------------------------------------------
+        ! Local variables
+        !--------------------------------------------------------------
+        integer(ip)         :: imid, iw1, labc, lzz1, mmax
+        type(HFFTpack)      :: hfft
+        type(SpherepackAux) :: sphere_aux
+        !--------------------------------------------------------------
 
-    subroutine shaec1(nlat, isym, nt, g, idgs, jdgs, a, b, mdab, ndab, imid, &
+        imid = (nlat+1)/2
+        mmax = min(nlat, nlon/2+1)
+        lzz1 = 2*nlat*imid
+        labc = 3*((mmax-2)*(2*nlat-mmax-1))/2
+
+        ! Check validity of input arguments
+        if (nlat < 3) then
+            ierror = 1
+            return
+        else if (nlon < 4) then
+            ierror = 2
+            return
+        else if (lshaec < lzz1+labc+nlon+15) then
+            ierror = 3
+            return
+        else if (ldwork < nlat+1) then
+            ierror = 4
+            return
+        else
+            ierror = 0
+        end if
+
+        call sphere_aux%zfinit(nlat, nlon, wshaec, dwork)
+
+        ! Set workspace pointer
+        iw1 = lzz1+labc+1
+
+        call hfft%initialize(nlon, wshaec(iw1))
+
+    end subroutine shaeci
+
+    subroutine shaec_lower_routine(nlat, isym, nt, g, idgs, jdgs, a, b, mdab, ndab, imid, &
         idg, jdg, ge, go, work, zb, wzfin, whrfft)
 
         real(wp) :: a
@@ -518,15 +550,15 @@ contains
             call hfft%forward(ls, nlon, ge(1, 1, k), ls, whrfft, work)
             if (mod(nlon, 2) /= 0) exit !goto 35
             do i=1, ls
-                ge(i, nlon, k) = .5*ge(i, nlon, k)
+                ge(i, nlon, k) = HALF * ge(i, nlon, k)
             end do
         end do
 
         do k=1, nt
             do mp1=1, mmax
                 do np1=mp1, nlat
-                    a(mp1, np1, k) = 0.
-                    b(mp1, np1, k) = 0.
+                    a(mp1, np1, k) = ZERO
+                    b(mp1, np1, k) = ZERO
                 end do
             end do
         end do
@@ -625,56 +657,6 @@ contains
             end do
         end do
 
-    end subroutine shaec1
+    end subroutine shaec_lower_routine
 
-    subroutine shaeci(nlat, nlon, wshaec, lshaec, dwork, ldwork, ierror)
-        !--------------------------------------------------------------
-        ! Dummy arguments
-        !--------------------------------------------------------------
-        integer(ip), intent(in)  :: nlat
-        integer(ip), intent(in)  :: nlon
-        real(wp),    intent(out) :: wshaec(lshaec)
-        integer(ip), intent(in)  :: lshaec
-        real(wp),    intent(out) :: dwork(ldwork)
-        integer(ip), intent(in)  :: ldwork
-        integer(ip), intent(out) :: ierror
-        !--------------------------------------------------------------
-        ! Local variables
-        !--------------------------------------------------------------
-        integer(ip)         :: imid, iw1, labc, lzz1, mmax
-        type(HFFTpack)      :: hfft
-        type(SpherepackAux) :: sphere_aux
-        !--------------------------------------------------------------
-
-        imid = (nlat+1)/2
-        mmax = min(nlat, nlon/2+1)
-        lzz1 = 2*nlat*imid
-        labc = 3*((mmax-2)*(2*nlat-mmax-1))/2
-
-        ! Check validity of input arguments
-        if (nlat < 3) then
-            ierror = 1
-            return
-        else if (nlon < 4) then
-            ierror = 2
-            return
-        else if (lshaec < lzz1+labc+nlon+15) then
-            ierror = 3
-            return
-        else if (ldwork < nlat+1) then
-            ierror = 4
-            return
-        else
-            ierror = 0
-        end if
-
-        call sphere_aux%zfinit(nlat, nlon, wshaec, dwork)
-
-        ! Set workspace pointer
-        iw1 = lzz1+labc+1
-
-        call hfft%initialize(nlon, wshaec(iw1))
-
-    end subroutine shaeci
-
-end module module_shaec
+end submodule scalar_analysis_regular_grid

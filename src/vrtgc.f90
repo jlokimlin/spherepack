@@ -224,7 +224,7 @@ module module_vrtgc
         wp, & ! working precision
         ip ! integer precision
 
-    use module_shsgc, only: &
+    use scalar_synthesis_routines, only: &
         shsgc
 
     ! Explicit typing only

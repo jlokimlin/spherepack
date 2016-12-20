@@ -263,7 +263,7 @@ module module_islapec
         wp, & ! working precision
         ip ! integer precision
 
-    use module_shsec, only: &
+    use scalar_synthesis_routines, only: &
         shsec
 
     ! Explicit typing only

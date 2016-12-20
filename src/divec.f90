@@ -228,7 +228,7 @@ module module_divec
         wp, & ! working precision
         ip ! integer precision
 
-    use module_shsec, only: &
+    use scalar_synthesis_routines, only: &
         shsec
 
     ! Explicit typing only

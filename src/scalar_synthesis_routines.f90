@@ -17,17 +17,13 @@ module scalar_synthesis_routines
     implicit none
 
     ! Everything is private unless stated otherwise
-    public :: shses
-    public :: shsesi
-    public :: ShsesAux
-    public :: shsgs
-    public :: shsgsi
-    public :: ShsgsAux
+    public :: shses, shsesi
+    public :: shsec, shseci
+    public :: shsgs, shsgsi
+    public :: shsgc, shsgci
+    public :: ShsesAux, ShsgsAux
 
     type, public :: ShsesAux
-        !-----------------------------------------
-        ! Type components
-        !-----------------------------------------
     contains
         !-----------------------------------------
         ! Type-bound procedures
@@ -45,9 +41,6 @@ module scalar_synthesis_routines
     end type ShsesAux
 
     type, public :: ShsgsAux
-        !-----------------------------------------
-        ! Type components
-        !-----------------------------------------
     contains
         !-----------------------------------------
         ! Type-bound procedures
@@ -66,7 +59,6 @@ module scalar_synthesis_routines
 
     ! Declare interfaces
     interface
-
         module subroutine shses(nlat,nlon,isym,nt,g,idg,jdg,a,b,mdab,ndab, &
             wshses,lshses,work,lwork,ierror)
             !----------------------------------------------------------------------
@@ -133,15 +125,6 @@ module scalar_synthesis_routines
         end subroutine shsgs
 
         module subroutine shsgsi(nlat, nlon, wshsgs, lshsgs, work, lwork, dwork, ldwork, ierror)
-            !
-            ! Remark:
-            !
-            ! This subroutine must be called before calling shags or shsgs with
-            ! fixed nlat, nlon. it precomputes the gaussian weights, points
-            ! and all necessary legendre polys and stores them in wshsgs.
-            ! these quantities must be preserved when calling shsgs
-            ! repeatedly with fixed nlat, nlon.
-            !
             !----------------------------------------------------------------------
             ! Dummy arguments
             !----------------------------------------------------------------------
@@ -156,6 +139,68 @@ module scalar_synthesis_routines
             integer(ip), intent(out)    :: ierror
             !----------------------------------------------------------------------
         end subroutine shsgsi
+
+        module subroutine shsec(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, &
+            wshsec, lshsec, work, lwork, ierror)
+            real(wp) :: a(mdab, ndab, nt)
+            real(wp) :: b(mdab, ndab, nt)
+            real(wp) :: g(idg, jdg, nt)
+            integer(ip) :: idg
+            integer(ip) :: ierror
+            integer(ip) :: isym
+            integer(ip) :: jdg
+            integer(ip) :: lshsec
+            integer(ip) :: lwork
+            integer(ip) :: mdab
+            integer(ip) :: ndab
+            integer(ip) :: nlat
+            integer(ip) :: nln
+            integer(ip) :: nlon
+            integer(ip) :: nt
+            real(wp) :: work(lwork)
+            real(wp) :: wshsec(lshsec)
+        end subroutine shsec
+
+        module subroutine shseci(nlat, nlon, wshsec, lshsec, dwork, ldwork, ierror)
+            integer(ip) :: ierror
+            integer(ip) :: ldwork
+            integer(ip) :: lshsec
+            integer(ip) :: nlat
+            integer(ip) :: nlon
+            real(wp) :: wshsec(lshsec)
+            real(wp) :: dwork(ldwork)
+        end subroutine shseci
+
+        module subroutine shsgc(nlat, nlon, mode, nt, g, idg, jdg, a, b, mdab, ndab, &
+            wshsgc, lshsgc, work, lwork, ierror)
+            real(wp) :: a(mdab, ndab, nt)
+            real(wp) :: b(mdab, ndab, nt)
+            real(wp) ::  g(idg, jdg, nt)
+            integer(ip) :: idg
+            integer(ip) :: ierror
+            integer(ip) :: jdg
+            integer(ip) :: lshsgc
+            integer(ip) :: lwork
+            integer(ip) :: mdab
+            integer(ip) :: mode
+            integer(ip) :: ndab
+            integer(ip) :: nlat
+            integer(ip) :: nlon
+            integer(ip) :: nt
+            real(wp) :: work(lwork)
+            real(wp) :: wshsgc(lshsgc)
+        end subroutine shsgc
+
+        module subroutine shsgci(nlat, nlon, wshsgc, lshsgc, dwork, ldwork, ierror)
+            integer(ip) :: ierror
+            integer(ip) :: ldwork
+            integer(ip) :: lshsgc
+            integer(ip) :: nlat
+            integer(ip) :: nlon
+            real(wp)    :: wshsgc(lshsgc)
+            real(wp)    :: dwork(ldwork)
+        end subroutine shsgci
+
     end interface
 
     !------------------------------------------------------------------

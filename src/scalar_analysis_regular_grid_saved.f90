@@ -314,7 +314,7 @@
 !
 !
 !
-submodule (scalar_analysis_routines) scalar_analysis_shaes
+submodule (scalar_analysis_routines) scalar_analysis_regular_grid_saved
 
 contains
 
@@ -416,13 +416,12 @@ contains
             !
             !  Perform analysis
             !
-            call shaes1(nlat, isym, nt, g, idg, jdg, a, b, mdab, ndab, wshaes, idz, &
+            call shaes_lower_routine(nlat, isym, nt, g, idg, jdg, a, b, mdab, ndab, wshaes, idz, &
                 ls, nlon, work, work(iw1), work(iw2), wshaes(iw3))
 
         end associate
 
     end subroutine shaes
-
 
     module subroutine shaesi(nlat, nlon, wshaes, lshaes, work, lwork, dwork, &
         ldwork, ierror)
@@ -498,7 +497,7 @@ contains
     end subroutine shaesi
 
 
-    subroutine shaes1(nlat, isym, nt, g, idgs, jdgs, a, b, mdab, ndab, &
+    subroutine shaes_lower_routine(nlat, isym, nt, g, idgs, jdgs, a, b, mdab, ndab, &
         z, idz, idg, jdg, ge, go, work, whrfft)
         !----------------------------------------------------------------------
         ! Dummy arguments
@@ -690,8 +689,7 @@ contains
             end do
         end do
 
-    end subroutine shaes1
-
+    end subroutine shaes_lower_routine
 
     pure function get_workspace_indices(nlat, nlon, mmax, imid, lzimn) &
         result (return_value)
@@ -714,5 +712,4 @@ contains
 
     end function get_workspace_indices
 
-
-end submodule scalar_analysis_shaes
+end submodule scalar_analysis_regular_grid_saved

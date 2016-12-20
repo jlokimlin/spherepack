@@ -289,7 +289,7 @@
 !                 (due to failure in eigenvalue routine)
 !
 !
-submodule (scalar_synthesis_routines) scalar_synthesis_shsgs
+submodule (scalar_synthesis_routines) scalar_synthesis_gaussian_grid_saved
 
 contains
 
@@ -385,7 +385,7 @@ contains
         ! set pointer for internal storage of g
         iw = lat*nlon*nt+1
 
-        call shsgs1(nlat, nlon, mtrunc, lat, mode, g, idg, jdg, nt, a, b, mdab, ndab, &
+        call reconstruct_fft_coefficients(nlat, nlon, mtrunc, lat, mode, g, idg, jdg, nt, a, b, mdab, ndab, &
             wshsgs(ifft), wshsgs(ipmn), late, work, work(iw))
 
     end subroutine shsgs
@@ -463,11 +463,11 @@ contains
         !
         ipmnf = nlat+2*nlat*late+3*(ntrunc*(ntrunc-1)/2+(nlat-ntrunc)*(ntrunc-1))+nlon+16
 
-        call shsgss1(nlat, ntrunc, late, wshsgs, work, wshsgs(ipmnf))
+        call compute_and_store_legendre_polys(nlat, ntrunc, late, wshsgs, work, wshsgs(ipmnf))
 
     end subroutine shsgsi
 
-    subroutine shsgs1(nlat, nlon, l, lat, mode, gs, idg, jdg, nt, a, b, mdab, &
+    subroutine reconstruct_fft_coefficients(nlat, nlon, l, lat, mode, gs, idg, jdg, nt, a, b, mdab, &
         ndab, wfft, pmn, late, g, work)
         !
         ! Purpose:
@@ -715,9 +715,9 @@ contains
         !
         gs(1:lat, 1:nlon, :) = HALF *g(1:lat, 1:nlon, :)
 
-    end subroutine shsgs1
+    end subroutine reconstruct_fft_coefficients
 
-    subroutine shsgss1(nlat, l, late, w, pmn, pmnf)
+    subroutine compute_and_store_legendre_polys(nlat, l, late, w, pmn, pmnf)
         !
         ! Purpose:
         !
@@ -762,7 +762,7 @@ contains
             end do
         end do
 
-    end subroutine shsgss1
+    end subroutine compute_and_store_legendre_polys
 
     subroutine shsgsp(nlat, nlon, wshsgs, lshsgs, dwork, ldwork, ierror)
         !----------------------------------------------------------------------
@@ -951,4 +951,4 @@ contains
 
     end subroutine shsgsp1
 
-end submodule scalar_synthesis_shsgs
+end submodule scalar_synthesis_gaussian_grid_saved

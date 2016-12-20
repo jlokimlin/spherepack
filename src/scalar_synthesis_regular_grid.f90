@@ -190,7 +190,7 @@
 !
 !     then g(i, j) = the sum from n=0 to n=nlat-1 of
 !
-!                   0.5_wp*pbar(0, n, theta(i))*a(1, n+1)
+!                   HALF*pbar(0, n, theta(i))*a(1, n+1)
 !
 !              plus the sum from m=1 to m=mmax-1 of
 !
@@ -272,29 +272,70 @@
 !            = 3  error in the specification of lshsec
 !            = 4  error in the specification of ldwork
 !
+!     subroutine shseci(nlat, nlon, wshsec, lshsec, dwork, ldwork, ierror)
 !
-module module_shsec
-
-    use spherepack_precision, only: &
-        wp, & ! working precision
-        ip ! integer precision
-
-    use type_HFFTpack, only: &
-        HFFTpack
-
-    use type_SpherepackAux, only: &
-        SpherepackAux
-
-    ! Explicit typing only
-    implicit none
-
-    ! Everything is private unless stated otherwise
-    public :: shsec
-    public :: shseci
+!     subroutine shseci initializes the array wshsec which can then
+!     be used repeatedly by subroutine shsec.
+!
+!     input parameters
+!
+!     nlat   the number of colatitudes on the full sphere including the
+!            poles. for example, nlat = 37 for a five degree grid.
+!            nlat determines the grid increment in colatitude as
+!            pi/(nlat-1).  if nlat is odd the equator is located at
+!            grid point i=(nlat+1)/2. if nlat is even the equator is
+!            located half way between points i=nlat/2 and i=nlat/2+1.
+!            nlat must be at least 3. note: on the half sphere, the
+!            number of grid points in the colatitudinal direction is
+!            nlat/2 if nlat is even or (nlat+1)/2 if nlat is odd.
+!
+!     nlon   the number of distinct londitude points.  nlon determines
+!            the grid increment in longitude as 2*pi/nlon. for example
+!            nlon = 72 for a five degree grid. nlon must be greater
+!            than or equal to 4. the efficiency of the computation is
+!            improved when nlon is a product of small prime numbers.
+!
+!     lshsec the dimension of the array wshsec as it appears in the
+!            program that calls shseci. the array wshsec is an output
+!            parameter which is described below. define
+!
+!               l1 = min(nlat, (nlon+2)/2) if nlon is even or
+!               l1 = min(nlat, (nlon+1)/2) if nlon is odd
+!
+!            and
+!
+!               l2 = nlat/2        if nlat is even or
+!               l2 = (nlat+1)/2    if nlat is odd
+!
+!            then lshsec must be at least
+!
+!            2*nlat*l2+3*((l1-2)*(nlat+nlat-l1-1))/2+nlon+15
+!
+!     dwork  a real work array that does not have to be
+!            saved.
+!
+!     ldwork the dimension of array dwork as it appears in the program
+!            that calls shseci.  ldwork must be at least nlat+1.
+!
+!     output parameters
+!
+!     wshsec an array which is initialized for use by subroutine shsec.
+!            once initialized, wshsec can be used repeatedly by shsec
+!            as long as nlon and nlat remain unchanged.  wshsec must
+!            not be altered between calls of shsec.
+!
+!     ierror = 0  no errors
+!            = 1  error in the specification of nlat
+!            = 2  error in the specification of nlon
+!            = 3  error in the specification of lshsec
+!            = 4  error in the specification of ldwork
+!
+!
+submodule (scalar_synthesis_routines) scalar_synthesis_regular_grid
 
 contains
 
-    subroutine shsec(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, &
+    module subroutine shsec(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, &
         wshsec, lshsec, work, lwork, ierror)
         real(wp) :: a(mdab, ndab, nt)
         real(wp) :: b(mdab, ndab, nt)
@@ -353,12 +394,51 @@ contains
         ist = 0
         if (isym == 0) ist = imid
         iw1 = lzz1+labc+1
-        call shsec1(nlat, isym, nt, g, idg, jdg, a, b, mdab, ndab, imid, ls, nlon, &
+        call shsec_lower_routine(nlat, isym, nt, g, idg, jdg, a, b, mdab, ndab, imid, ls, nlon, &
             work, work(ist+1), work(nln+1), work(nln+1), wshsec, wshsec(iw1))
 
     end subroutine shsec
 
-    subroutine shsec1(nlat, isym, nt, g, idgs, jdgs, a, b, mdab, ndab, imid, &
+    module subroutine shseci(nlat, nlon, wshsec, lshsec, dwork, ldwork, ierror)
+        integer(ip) :: ierror
+        integer(ip) :: imid
+        integer(ip) :: iw1
+        integer(ip) :: labc
+        integer(ip) :: ldwork
+        integer(ip) :: lshsec
+        integer(ip) :: lzz1
+        integer(ip) :: mmax
+        integer(ip) :: nlat
+        integer(ip) :: nlon
+        real(wp) :: wshsec(lshsec)
+        real(wp) :: dwork(ldwork)
+
+        type(HFFTpack)      :: hfft
+        type(SpherepackAux) :: sphere_aux
+
+        ierror = 1
+        if (nlat < 3) return
+        ierror = 2
+        if (nlon < 4) return
+        ierror = 3
+        imid = (nlat+1)/2
+        mmax = min(nlat, nlon/2+1)
+        lzz1 = 2*nlat*imid
+        labc = 3*((mmax-2)*(nlat+nlat-mmax-1))/2
+        if (lshsec < lzz1+labc+nlon+15) return
+        ierror = 4
+        if (ldwork < nlat+1) return
+        ierror = 0
+
+        call sphere_aux%alinit(nlat, nlon, wshsec, dwork)
+
+        iw1 = lzz1+labc+1
+
+        call hfft%initialize(nlon, wshsec(iw1))
+
+    end subroutine shseci
+
+    subroutine shsec_lower_routine(nlat, isym, nt, g, idgs, jdgs, a, b, mdab, ndab, imid, &
         idg, jdg, ge, go, work, pb, walin, whrfft)
 
 
@@ -526,7 +606,7 @@ contains
 
         do k=1, nt
 
-            if (mod(nlon, 2) == 0) ge(1: ls, nlon, k) = 2.0_wp*ge(1: ls, nlon, k)
+            if (mod(nlon, 2) == 0) ge(1: ls, nlon, k) = TWO*ge(1: ls, nlon, k)
 
             call hfft%backward(ls, nlon, ge(1, 1, k), ls, whrfft, work)
         end do
@@ -536,119 +616,18 @@ contains
                 do k=1, nt
                     do j=1, nlon
                         do i=1, imm1
-                            g(i, j, k) = 0.5_wp*(ge(i, j, k)+go(i, j, k))
-                            g(nlp1-i, j, k) = 0.5_wp*(ge(i, j, k)-go(i, j, k))
+                            g(i, j, k) = HALF*(ge(i, j, k)+go(i, j, k))
+                            g(nlp1-i, j, k) = HALF*(ge(i, j, k)-go(i, j, k))
                         end do
-                        if (modl /= 0) g(imid, j, k) = 0.5_wp*ge(imid, j, k)
+                        if (modl /= 0) g(imid, j, k) = HALF*ge(imid, j, k)
                     end do
                 end do
             case default
                 do k=1, nt
-                    g(1: imid, 1: nlon, k) = 0.5_wp*ge(1: imid, 1: nlon, k)
+                    g(1: imid, 1: nlon, k) = HALF*ge(1: imid, 1: nlon, k)
                 end do
         end select
 
-    end subroutine shsec1
+    end subroutine shsec_lower_routine
 
-
-
-    !     subroutine shseci(nlat, nlon, wshsec, lshsec, dwork, ldwork, ierror)
-    !
-    !     subroutine shseci initializes the array wshsec which can then
-    !     be used repeatedly by subroutine shsec.
-    !
-    !     input parameters
-    !
-    !     nlat   the number of colatitudes on the full sphere including the
-    !            poles. for example, nlat = 37 for a five degree grid.
-    !            nlat determines the grid increment in colatitude as
-    !            pi/(nlat-1).  if nlat is odd the equator is located at
-    !            grid point i=(nlat+1)/2. if nlat is even the equator is
-    !            located half way between points i=nlat/2 and i=nlat/2+1.
-    !            nlat must be at least 3. note: on the half sphere, the
-    !            number of grid points in the colatitudinal direction is
-    !            nlat/2 if nlat is even or (nlat+1)/2 if nlat is odd.
-    !
-    !     nlon   the number of distinct londitude points.  nlon determines
-    !            the grid increment in longitude as 2*pi/nlon. for example
-    !            nlon = 72 for a five degree grid. nlon must be greater
-    !            than or equal to 4. the efficiency of the computation is
-    !            improved when nlon is a product of small prime numbers.
-    !
-    !     lshsec the dimension of the array wshsec as it appears in the
-    !            program that calls shseci. the array wshsec is an output
-    !            parameter which is described below. define
-    !
-    !               l1 = min(nlat, (nlon+2)/2) if nlon is even or
-    !               l1 = min(nlat, (nlon+1)/2) if nlon is odd
-    !
-    !            and
-    !
-    !               l2 = nlat/2        if nlat is even or
-    !               l2 = (nlat+1)/2    if nlat is odd
-    !
-    !            then lshsec must be at least
-    !
-    !            2*nlat*l2+3*((l1-2)*(nlat+nlat-l1-1))/2+nlon+15
-    !
-    !     dwork  a real work array that does not have to be
-    !            saved.
-    !
-    !     ldwork the dimension of array dwork as it appears in the program
-    !            that calls shseci.  ldwork must be at least nlat+1.
-    !
-    !     output parameters
-    !
-    !     wshsec an array which is initialized for use by subroutine shsec.
-    !            once initialized, wshsec can be used repeatedly by shsec
-    !            as long as nlon and nlat remain unchanged.  wshsec must
-    !            not be altered between calls of shsec.
-    !
-    !     ierror = 0  no errors
-    !            = 1  error in the specification of nlat
-    !            = 2  error in the specification of nlon
-    !            = 3  error in the specification of lshsec
-    !            = 4  error in the specification of ldwork
-    !
-    !
-    subroutine shseci(nlat, nlon, wshsec, lshsec, dwork, ldwork, ierror)
-
-        integer(ip) :: ierror
-        integer(ip) :: imid
-        integer(ip) :: iw1
-        integer(ip) :: labc
-        integer(ip) :: ldwork
-        integer(ip) :: lshsec
-        integer(ip) :: lzz1
-        integer(ip) :: mmax
-        integer(ip) :: nlat
-        integer(ip) :: nlon
-        real(wp) :: wshsec(lshsec)
-        real(wp) :: dwork(ldwork)
-
-        type(HFFTpack)      :: hfft
-        type(SpherepackAux) :: sphere_aux
-
-        ierror = 1
-        if (nlat < 3) return
-        ierror = 2
-        if (nlon < 4) return
-        ierror = 3
-        imid = (nlat+1)/2
-        mmax = min(nlat, nlon/2+1)
-        lzz1 = 2*nlat*imid
-        labc = 3*((mmax-2)*(nlat+nlat-mmax-1))/2
-        if (lshsec < lzz1+labc+nlon+15) return
-        ierror = 4
-        if (ldwork < nlat+1) return
-        ierror = 0
-
-        call sphere_aux%alinit(nlat, nlon, wshsec, dwork)
-
-        iw1 = lzz1+labc+1
-
-        call hfft%initialize(nlon, wshsec(iw1))
-
-    end subroutine shseci
-
-end module module_shsec
+end submodule scalar_synthesis_regular_grid

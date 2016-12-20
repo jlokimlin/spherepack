@@ -483,16 +483,12 @@ module module_trssph
         wp, & ! working precision
         ip ! integer precision
 
-    use module_shaec, only: &
-        shaec, shaeci
-
-    use module_shsec, only: &
-        shsec, shseci
-
-    use module_shagc, only: &
+    use scalar_analysis_routines, only: &
+        shaec, shaeci, &
         shagc, shagci
 
-    use module_shsgc, only: &
+    use scalar_synthesis_routines, only: &
+        shsec, shseci, &
         shsgc, shsgci
 
     ! Explicit typing only
