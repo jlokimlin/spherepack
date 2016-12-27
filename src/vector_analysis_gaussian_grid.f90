@@ -462,7 +462,7 @@ jw1 = 1
 !     jw3 = jw2+nlat+nlat
 jw2 = jw1+nlat
 jw3 = jw2+nlat
-call compute_gaussian_latitudes_and_weights(nlat, dwork(jw1), dwork(jw2), dummy_variable, lwk, ierror)
+call compute_gaussian_latitudes_and_weights(nlat, dwork(jw1), dwork(jw2), ierror)
 imid = (nlat+1)/2
 !
 !     set first imid words of real weights in dwork

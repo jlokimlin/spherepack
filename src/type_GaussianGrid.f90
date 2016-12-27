@@ -205,7 +205,7 @@ contains
             !
             !  Compute gaussian weights and latitudes
             !
-            call compute_gaussian_latitudes_and_weights(nlat, theta, wts, w, lwork, ierror)
+            call compute_gaussian_latitudes_and_weights(nlat, theta, wts, ierror)
 
         end associate
 

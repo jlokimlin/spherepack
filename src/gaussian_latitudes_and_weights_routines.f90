@@ -89,29 +89,28 @@ module gaussian_latitudes_and_weights_routines
 
     ! Everything is private unless stated otherwise
     private
-    public :: compute_gaussian_latitudes_and_weights
+    public :: compute_gaussian_latitudes_and_weights, gaqd
 
-    !------------------------------------------------------------------
     ! Parameters confined to the module
-    !------------------------------------------------------------------
     real(wp), parameter :: ZERO = 0.0_wp
     real(wp), parameter :: HALF = 0.5_wp
     real(wp), parameter :: ONE = 1.0_wp
     real(wp), parameter :: TWO = 2.0_wp
     real(wp), parameter :: THREE = 3.0_wp
-    !------------------------------------------------------------------
+
+    interface gaqd
+        module procedure compute_gaussian_latitudes_and_weights
+    end interface
 
 contains
 
-    subroutine compute_gaussian_latitudes_and_weights(nlat, theta, wts, w, lwork, ierror)
+    subroutine compute_gaussian_latitudes_and_weights(nlat, theta, wts, ierror)
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
         integer(ip), intent(in)  :: nlat
         real(wp),    intent(out) :: theta(nlat)
         real(wp),    intent(out) :: wts(nlat)
-        real(wp),    intent(in)  :: w
-        integer(ip), intent(in)  :: lwork
         integer(ip), intent(out) :: ierror
         !----------------------------------------------------------------------
         ! Local variables
@@ -250,9 +249,7 @@ contains
                 wts = TWO * wts/sum(wts)
         end select
 
-
     end subroutine compute_gaussian_latitudes_and_weights
-
 
     pure subroutine compute_fourier_coefficients( &
         n, cz, legendre_poly_coeff, legendre_deriv_coeff)

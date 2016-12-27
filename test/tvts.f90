@@ -9,7 +9,7 @@
 !     *                                                               *
 !     *                      SPHEREPACK version 3.2                   *
 !     *                                                               *
-!     *       A Package of Fortran Subroutines and Programs           *
+!     *       A Package of Fortran77 Subroutines and Programs         *
 !     *                                                               *
 !     *              for Modeling Geophysical Processes               *
 !     *                                                               *
@@ -46,20 +46,8 @@
 !     (3) compute (vt,wt) using vtses,vtsec,vtsgs,vtsgc and compare with (2)
 !
 program tvts
-
-    use, intrinsic :: ISO_Fortran_env, only: &
-        stdout => OUTPUT_UNIT
-
-    use spherepack_library, only: &
-        wp, & ! working precision
-        PI, &
-        compute_gaussian_latitudes_and_weights, vhaeci, vhaec, vtseci, vtsec, vhaesi, &
-        vhaes, vtsesi, vtses, vhagci, vhagc, vtsgci, vtsgc, &
-        vhagsi, vhags, vtsgsi, vtsgs
-
-    ! Explicit typing only
+    use spherepack_library
     implicit none
-
     real :: bi
     real :: br
     real :: ci
@@ -97,6 +85,7 @@ program tvts
     integer :: nnt
     integer :: nt
     real :: phi
+
     real :: sinp
     real :: sint
     real :: theta
@@ -127,10 +116,6 @@ program tvts
     dimension vt(nnlat,nnlon,nnt),wt(nnlat,nnlon,nnt)
     dimension vtsav(nnlat,nnlon,nnt),wtsav(nnlat,nnlon,nnt)
     real dtheta, dwts
-    real dummy_variable
-
-    write( stdout, '(/a/)') '     tvts *** TEST RUN *** '
-
     !
     !     set dimension variables
     !
@@ -152,17 +137,17 @@ program tvts
     !     compute nlat gaussian points in thetag
     !
     ldwork = lldwork
-    call compute_gaussian_latitudes_and_weights(nlat,dtheta,dwts,ier)
+    call compute_gaussian_latitudes_and_weights(nlat, dtheta, dwts, ier)
     do  i=1,nlat
         thetag(i) = dtheta(i)
     end do
-    call name("compute_gaussian_latitudes_and_weights")
+    call name("gaqd")
     call iout(ier," ier")
     call vecout(thetag,"thtg",nlat)
     !
     !     test all theta derivative subroutines
     !
-    do icase=1, 3!4
+    do icase=1,4
         !
         !     icase=1 test vtsec
         !     icase=2 test vtses
@@ -182,8 +167,8 @@ program tvts
                 sinp = sin(phi)
                 cosp = cos(phi)
                 do i=1,nlat
-                    theta = real(i - 1, kind=wp)*dlat
-                    if (icase ==3 .or. icase==4) theta = thetag(i)
+                    theta = (i-1)*dlat
+                    if (icase==3 .or. icase==4) theta = thetag(i)
                     cost = cos(theta)
                     sint = sin(theta)
                        !
@@ -301,7 +286,7 @@ program tvts
         else if (icase==4) then
 
             call name("**gs")
-            call vhagsi(nlat,nlon,wsave,lsave,work,lwork,ierror)
+            call vhagsi(nlat, nlon, wsave, lsave, dwork, ldwork, ierror)
             call name("vhai")
             call iout(ierror,"ierr")
 
@@ -321,66 +306,58 @@ program tvts
 
         end if
 
+        !     call a3out(wt,"wt  ",nlat,nlon,nt)
+        !     call a3out(vt,"vt  ",nlat,nlon,nt)
+
         !
         !     compute "error" in vt,wt
         !
-        err2v = norm2(vt- vtsav)
-        err2w = norm2(wt - wtsav)
+        err2v = 0.0
+        err2w = 0.0
+        do k=1,nt
+            do j=1,nlon
+                do i=1,nlat
+                    err2v = err2v + (vt(i,j,k) - vtsav(i,j,k))**2
+                    err2w = err2w + (wt(i,j,k) - wtsav(i,j,k))**2
+                end do
+            end do
+        end do
         !
         !     set and print least squares error in v,w
         !
+        err2v = sqrt(err2v/(nt*nlat*nlon))
+        err2w = sqrt(err2w/(nt*nlat*nlon))
         call vout(err2v,"errv")
         call vout(err2w,"errw")
     !
     !     end of icase loop
     !
     end do
-
-
-contains
-
-
-    subroutine iout(ivar,nam)
-        implicit none
-        integer :: ivar
-        character(len=*) nam
-        write( stdout, 10) nam , ivar
-10      format(1h a4, 3h = ,i8)
-        return
-    end subroutine iout
-
-
-
-    subroutine vout(var,nam)
-        implicit none
-        real :: var
-        character(len=*) nam
-        write( stdout, 10) nam , var
-10      format(1h a4,3h = ,e12.5)
-        return
-    end subroutine vout
-
-
-    subroutine name(nam)
-        implicit none
-        character(len=*) nam
-        write( stdout, 100) nam
-100     format(1h a8)
-        return
-    end subroutine name
-
-
-
-    subroutine vecout(vec,nam,vec_size)
-        implicit none
-        integer :: l
-        integer :: vec_size
-        real :: vec
-        dimension vec(vec_size)
-        character(len=*) nam
-        write( stdout, 109) nam, (vec(l),l=1,vec_size)
-109     format(1h a4,/(1h 8e11.4))
-
-    end subroutine vecout
-
 end program tvts
+subroutine iout(ivar,nam)
+    implicit none
+    integer :: ivar
+    character(len=*), intent(in) :: nam
+    write(6,10) nam , ivar
+10  format(1h a4, 3h = ,i8)
+    return
+end subroutine iout
+!
+subroutine vout(var,nam)
+    implicit none
+    real :: var
+    character(len=*), intent(in) :: nam
+    write(6,10) nam , var
+10  format(1h a4,3h = ,e12.5)
+    return
+end subroutine vout
+!
+subroutine name(nam)
+    implicit none
+    character(len=*), intent(in) :: nam
+    write(6,100) nam
+100 format(1h a8)
+    return
+end subroutine name
+
+

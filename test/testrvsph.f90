@@ -9,7 +9,7 @@
 !     *                                                               *
 !     *                      SPHEREPACK version 3.2                   *
 !     *                                                               *
-!     *       A Package of Fortran Subroutines and Programs           *
+!     *       A Package of Fortran77 Subroutines and Programs         *
 !     *                                                               *
 !     *              for Modeling Geophysical Processes               *
 !     *                                                               *
@@ -36,7 +36,7 @@
 !
 ! ... required files
 !
-!     trvsph.f, type_SpherepackAux.f, type_HFFTpack.f, compute_gaussian_latitudes_and_weights.f, vhaec.f, vhsec.f, vhagc.f, vhsgc.f
+!     trvsph.f, sphcom.f, hrfft.f, gaqd.f, vhaec.f, vhsec.f, vhagc.f, vhsgc.f
 !
 ! ... description (see documentation in file trvsph.f)
 !
@@ -144,17 +144,7 @@
 !
 ! **********************************************************************
 program testrvsph
-
-    use, intrinsic :: ISO_Fortran_env, only: &
-        stdout => OUTPUT_UNIT
-
-    use spherepack_library, only: &
-        pi, &
-        TWO_PI, &
-        trvsph, &
-        compute_gaussian_latitudes_and_weights
-
-    ! Explicit typing only
+use spherepack_library
     implicit none
     !
     !     set grid sizes with parameter statements
@@ -181,10 +171,7 @@ program testrvsph
     integer nlatg,nlong,nlate,nlone,lwork,lsave,ldwork
     real dlate,dlone,dlong,t,p,cosp,sinp,cost,sint,x,y,z
     real erru2,errv2,ex,ey,ez,emz,uee,vee
-    integer i,j,ib,intl,error_flag,lsvmin,lwkmin
-    real dummy_variable
-
-    write( stdout, '(/a/)') '     testrvsph *** TEST RUN *** '
+    integer i,j,ib,intl,ier,lsvmin,lwkmin
     !
     !     set grid sizes and dimensions from parameter statements
     !
@@ -199,8 +186,8 @@ program testrvsph
     !     set equally spaced grid increments
     !
     dlate = pi/(nlate-1)
-    dlone = TWO_PI/nlone
-    dlong = TWO_PI/nlong
+    dlone = (pi+pi)/nlone
+    dlong = (pi+pi)/nlong
     !
     !     set vector data in (ue,ve)
     !
@@ -252,7 +239,7 @@ program testrvsph
     !
     !     print trvsph input arguments
     !
-    write( stdout, 100) intl,igride(1),igride(2),nlone,nlate,ive, &
+    write(*,100) intl,igride(1),igride(2),nlone,nlate,ive, &
         igridg(1),igridg(2),nlong,nlatg,ivg,lsave,lwork,ldwork
 100 format(//' EQUALLY SPACED TO GAUSSIAN GRID TRANSFER ' , &
         /' trvsph input arguments: ' , &
@@ -269,20 +256,20 @@ program testrvsph
     !
     call trvsph(intl,igride,nlone,nlate,ive,ue,ve,igridg,nlong, &
         nlatg,ivg,ug,vg,wsave,lsave,lsvmin,work,lwork,lwkmin,dwork, &
-        ldwork,error_flag)
+        ldwork,ier)
     !
     !     print output arguments
     !
-    write( stdout, 200) error_flag, lsvmin, lwkmin
+    write (*,200) ier, lsvmin, lwkmin
 200 format(//' trvsph output: ' &
         / ' ier = ', i8,2x, 'lsvmin = ',i7, 2x,'lwkmin = ',i7)
 
-    if (error_flag == 0) then
+    if (ier == 0) then
         !
         !     compute nlatg gaussian colatitude points and
         !     set with south to north orientation in thetag
         !
-        call compute_gaussian_latitudes_and_weights(nlatg,dtheta,dwts,dummy_variable,ldwork,error_flag)
+        call compute_gaussian_latitudes_and_weights(nlatg, dtheta, dwts, ier)
         do  i=1,nlatg
             ib = nlatg-i+1
             thetag(i) = dtheta(ib)
@@ -316,7 +303,7 @@ program testrvsph
         end do
         erru2 = sqrt(erru2/(nlong*nlatg))
         errv2 = sqrt(errv2/(nlong*nlatg))
-        write( stdout, 300) erru2, errv2
+        write (6,300) erru2, errv2
 300     format(' least squares error in u = ', e10.3 &
             /' least squares error in v = ', e10.3)
     end if
@@ -329,7 +316,7 @@ program testrvsph
             ve(i,j) = 0.0
         end do
     end do
-    write( stdout, 101) intl,igridg(1),igridg(2),nlong,nlatg,ivg, &
+    write(*,101) intl,igridg(1),igridg(2),nlong,nlatg,ivg, &
         igride(1),igride(2),nlone,nlate,ive,lsave,lwork,ldwork
 101 format(//' GAUSSIAN TO EQUALLY SPACED GRID TRANSFER ' , &
         /' trvsph input arguments: ' , &
@@ -342,12 +329,12 @@ program testrvsph
         /' ive = ',i2 &
         /' lsave = ',i7,2x,' lwork = ',i7,2x,' ldwork = ',i5)
     call trvsph(intl,igridg,nlong,nlatg,ivg,ug,vg,igride,nlone,nlate, &
-        ive,ue,ve,wsave,lsave,lsvmin,work,lwork,lwkmin,dwork,ldwork,error_flag)
+        ive,ue,ve,wsave,lsave,lsvmin,work,lwork,lwkmin,dwork,ldwork,ier)
     !
     !     print output arguments
     !
-    write( stdout, 200) error_flag, lsvmin, lwkmin
-    if (error_flag == 0) then
+    write (*,200) ier, lsvmin, lwkmin
+    if (ier == 0) then
         !
         !     compute the least squares error in (ue,ve)
         !     by comparing with exact mathematical vector
@@ -377,7 +364,6 @@ program testrvsph
         end do
         erru2 = sqrt(erru2/(nlone*nlate))
         errv2 = sqrt(errv2/(nlone*nlate))
-        write( stdout, 300) erru2, errv2
+        write (6,300) erru2, errv2
     end if
-
 end program testrvsph

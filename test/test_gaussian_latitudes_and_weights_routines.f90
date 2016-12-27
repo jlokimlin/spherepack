@@ -103,7 +103,7 @@ program tcompute_gaussian_latitudes_and_weights
     ldw = nlat+2
     hold = etime(t1)
     hold = t1(1)
-    call compute_gaussian_latitudes_and_weights(nlat,dtheta,dwts,dummy_variable,ldw,ierror)
+    call compute_gaussian_latitudes_and_weights(nlat,dtheta,dwts,ierror)
     tdoub = etime(t1)
     tdoub = t1(1)-hold
     if (ierror /= 0) write( stdout,30) ierror

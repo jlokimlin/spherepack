@@ -1,5 +1,8 @@
 module spherepack_library
 
+    use, intrinsic :: ISO_Fortran_env, only: &
+        stdout => OUTPUT_UNIT
+
     use spherepack_precision, only: &
         wp, & ! working precision
         ip, & ! integer precision
@@ -325,11 +328,39 @@ module spherepack_library
     public :: vtsec, vtses, vtsgc, vtsgs
     public :: vtseci, vtsesi, vtsgci, vtsgsi
     public :: alfk, lfp, lfpt, lfim, lfin
+    public :: vecout
+
+    interface vecout
+        module procedure vecout_array
+        module procedure vecout_scalar
+    end interface vecout
 
 contains
 
+    subroutine vecout_array(vec,nam,vec_size)
 
+        ! Dummy arguments
+        real(wp),         intent(in) ::vec(vec_size)
+        character(len=*), intent(in) :: nam
+        integer(ip),      intent(in) :: vec_size
 
+        ! Local variables
+        integer(ip) :: i
 
+        write( stdout, 109) nam, (vec(i),i=1,vec_size)
+109     format(1h a4,/(1h 8e11.4))
+
+    end subroutine vecout_array
+
+    subroutine vecout_scalar(vec,nam,vec_size)
+
+        ! Dummy arguments
+        real(wp),         intent(in) :: vec
+        integer(ip),      intent(in) :: vec_size
+        character(len=*), intent(in) ::  nam
+
+        write( stdout, '(a, 8e11.4)') nam, vec
+
+    end subroutine vecout_scalar
 
 end module spherepack_library

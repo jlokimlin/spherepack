@@ -34,14 +34,14 @@
 !
 !     a program for testing all scalar analysis and synthesis subroutines
 !
-program tsha
+program test_analysis_and_synthesis_routines
 
     use, intrinsic :: ISO_Fortran_env, only: &
-        ip => INT32, &
-        wp => REAL64, &
         stdout => OUTPUT_UNIT
 
     use spherepack_library, only: &
+        wp, & ! Working precison
+        ip, & ! Integer precision
         Sphere, &
         Regularsphere, &
         GaussianSphere
@@ -49,43 +49,27 @@ program tsha
     ! Explicit typing only
     implicit none
 
-    !----------------------------------------------------------------------
     ! Dictionary
-    !----------------------------------------------------------------------
     class(Sphere), allocatable :: sphere_dat
-    !----------------------------------------------------------------------
 
-    !
     !  Test gaussian case
-    !
     allocate( GaussianSphere :: sphere_dat )
-
-    call test_analysis_and_synthesis_routines(sphere_dat)
-
+    call test_case(sphere_dat)
     deallocate( sphere_dat )
 
-    !
     !  Test regular case
-    !
     allocate( RegularSphere :: sphere_dat )
-
-    call test_analysis_and_synthesis_routines(sphere_dat)
-
+    call test_case(sphere_dat)
     deallocate( sphere_dat )
-
 
 contains
 
+    subroutine test_case(sphere_type)
 
-
-    subroutine test_analysis_and_synthesis_routines( sphere_type )
-        !----------------------------------------------------------------------
         ! Dummy arguments
-        !----------------------------------------------------------------------
         class(Sphere), intent(inout)  :: sphere_type
-        !----------------------------------------------------------------------
+
         ! Local variables
-        !----------------------------------------------------------------------
         integer(ip), parameter        :: NLONS = 128
         integer(ip), parameter        :: NLATS = NLONS/2 + 1
         integer(ip), parameter        :: NSYNTHS = 3
@@ -93,11 +77,8 @@ contains
         real(wp)                      :: original_scalar_function(NLATS,NLONS,NSYNTHS)
         real(wp)                      :: approximate_scalar_function(NLATS,NLONS,NSYNTHS)
         character(len=:), allocatable :: error_previous_platform
-        !----------------------------------------------------------------------
 
-        !
         !  Set up workspace arrays
-        !
         select type(sphere_type)
             type is (GaussianSphere)
 
@@ -105,7 +86,8 @@ contains
             sphere_type = GaussianSphere(NLATS, NLONS)
 
             ! Allocate known error from previous platform
-            allocate( error_previous_platform, source='     discretization error = 3.375078e-14' )
+            allocate( error_previous_platform, &
+                source='     discretization error = 3.375078e-14' )
 
             type is (RegularSphere)
 
@@ -113,13 +95,12 @@ contains
             sphere_type = RegularSphere(NLATS, NLONS)
 
             ! Allocate known error from previous platform
-            allocate( error_previous_platform, source='     discretization error = 2.664535e-14' )
+            allocate( error_previous_platform, &
+                source='     discretization error = 2.664535e-14' )
         end select
 
-        !
         !  Test all analysis and synthesis subroutines.
-        !    Set scalar field as (x*y*z)**k) restricted to the sphere
-        !
+        !  Set scalar field as (x*y*z)**k) restricted to the sphere
         associate( &
             se => original_scalar_function, &
             radial => sphere_type%unit_vectors%radial &
@@ -134,7 +115,7 @@ contains
                             )
                             select case (k)
                                 case(1)
-                                    se(i,j,k) = exp( x + y + z )
+                                    se(i,j,k) = exp(x + y + z)
                                 case default
                                     se(i,j,k) = (x*y*z)**k
                             end select
@@ -144,9 +125,7 @@ contains
             end do
         end associate
 
-        !
         !  Perform analysis then synthesis
-        !
         do k = 1, NSYNTHS
             associate( &
                 se => original_scalar_function(:,:,k), &
@@ -160,9 +139,8 @@ contains
                 call sphere_type%perform_complex_synthesis(s)
             end associate
         end do
-        !
+
         !  Compute discretization error
-        !
         associate( &
             se => original_scalar_function, &
             s => approximate_scalar_function &
@@ -185,12 +163,11 @@ contains
                 write( stdout, '(a)' ) ''
             end associate
         end associate
-        !
+
         !  Release memory
-        !
         call sphere_type%destroy()
         deallocate( error_previous_platform )
 
-    end subroutine test_analysis_and_synthesis_routines
+    end subroutine test_case
 
-end program tsha
+end program test_analysis_and_synthesis_routines

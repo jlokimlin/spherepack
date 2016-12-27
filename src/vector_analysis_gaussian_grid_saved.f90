@@ -1304,7 +1304,7 @@ contains
         !
         !  Compute gaussian grid
         !
-        call compute_gaussian_latitudes_and_weights(nlat, dthet, dwts, dummy_real, dummy_integer, local_error_flag)
+        call compute_gaussian_latitudes_and_weights(nlat, dthet, dwts, local_error_flag)
 
         !
         !  Compute associated legendre functions

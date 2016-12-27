@@ -569,7 +569,7 @@ contains
         iw1 = lwvbin+1
         iw2 = iw1+lwvbin
 
-        call compute_gaussian_latitudes_and_weights(nlat, dwork(jw1), dwork(jw2), dwork(jw3), ldwork, ierror)
+        call compute_gaussian_latitudes_and_weights(nlat, dwork(jw1), dwork(jw2), ierror)
 
         call sphere_aux%vbgint(nlat, nlon, dwork, wvhsgc, dwork(iwrk))
 

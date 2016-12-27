@@ -959,7 +959,7 @@ contains
         !    lw = 4*nlat*(nlat+2)
         lw = nlat*(nlat+2)
 
-        call compute_gaussian_latitudes_and_weights(nlat, dtheta, dwts, dummy_variable, lw, ier)
+        call compute_gaussian_latitudes_and_weights(nlat, dtheta, dwts, ier)
 
         if (ier /= 0) return
 

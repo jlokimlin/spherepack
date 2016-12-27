@@ -9,7 +9,7 @@
 !     *                                                               *
 !     *                      SPHEREPACK version 3.2                   *
 !     *                                                               *
-!     *       A Package of Fortran Subroutines and Programs           *
+!     *       A Package of Fortran77 Subroutines and Programs         *
 !     *                                                               *
 !     *              for Modeling Geophysical Processes               *
 !     *                                                               *
@@ -118,26 +118,12 @@
 ! **********************************************************************
 !
 program testrssph
-
-    use, intrinsic :: ISO_Fortran_env, only: &
-        stdout => OUTPUT_UNIT
-
-    use spherepack_library, only: &
-        wp, & ! working precision
-        PI, TWO_PI, trssph, compute_gaussian_latitudes_and_weights
-
-    ! Explicit typing only
+use spherepack_library
     implicit none
     !
     !     set grid sizes with parameter statements
     !
-    integer :: nnlatg
-    integer :: nnlong
-    integer :: nnlate
-    integer :: nnlone
-    integer :: llwork
-    integer :: llsave
-    integer :: lldwork
+    integer nnlatg,nnlong,nnlate,nnlone,llwork,llsave,lldwork
     parameter (nnlatg=92, nnlong=194, nnlate=19,nnlone=36)
     !
     !     set predetermined minimum saved and unsaved work space lengths
@@ -150,77 +136,47 @@ program testrssph
     !
     !     dimension and type data arrays and grid vectors and internal variables
     !
-    real :: regular_data(nnlate,nnlone)
-    real :: gaussian_data(nnlong,nnlatg)
-    real :: work(llwork)
-    real :: wsave(llsave)
-    real :: thetag(nnlatg)
-    real :: dwork(lldwork)
-    real :: dtheta(nnlatg)
-    real :: dwts(nnlatg)
-    integer :: igride(2)
-    integer :: igridg(2)
-    integer :: GAUSSIAN_NLATS
-    integer :: GAUSSIAN_NLONS
-    integer :: REGULAR_NLATS
-    integer :: REGULAR_NLONS
-    integer :: lwork
-    integer :: lsave
-    integer :: ldwork
-    real :: dlate
-    real :: dlone
-    real :: dlong
-    real :: cp
-    real :: sp
-    real :: ct
-    real :: st
-    real :: xyz
-    real :: err2
-    real :: t
-    real :: p
-    real :: dif
-    integer :: i
-    integer :: j
-    integer :: intl
-    integer :: ier
-    integer :: lsvmin
-    integer :: lwkmin
-    real :: dummy_variable
+    real datae(nnlate,nnlone), datag(nnlong,nnlatg)
+    real work(llwork),wsave(llsave),thetag(nnlatg)
+    real dwork(lldwork)
+    real dtheta(nnlatg),dwts(nnlatg)
+    integer igride(2),igridg(2)
+    integer nlatg,nlong,nlate,nlone,lwork,lsave,ldwork
+    real dlate,dlone,dlong,cp,sp,ct,st,xyz,err2,t,p,dif
+    integer i,j,intl,ier,lsvmin,lwkmin
     !
     !     set grid sizes and dimensions from parameter statements
     !
-    write( stdout, '(/a/)') '     testrssph *** TEST RUN *** '
-
-    GAUSSIAN_NLATS = nnlatg
-    GAUSSIAN_NLONS = nnlong
-    REGULAR_NLATS = nnlate
-    REGULAR_NLONS = nnlone
+    nlatg = nnlatg
+    nlong = nnlong
+    nlate = nnlate
+    nlone = nnlone
     lwork = llwork
     ldwork = lldwork
     lsave = llsave
     !
     !     set equally spaced grid increments
     !
-    dlate = pi/(REGULAR_NLATS-1)
-    dlone = (TWO_PI)/REGULAR_NLONS
-    dlong = (TWO_PI)/GAUSSIAN_NLONS
+    dlate = pi/(nlate-1)
+    dlone = (pi+pi)/nlone
+    dlong = (pi+pi)/nlong
     !
     !     set given data in DATAE from f(x,y,z)= exp(x*y*z) restricted
     !     to nlate by nlone equally spaced grid on the sphere
     !
-    do  j=1,REGULAR_NLONS
-        p = real(j - 1, kind=wp)*dlone
+    do  j=1,nlone
+        p = (j-1)*dlone
         cp = cos(p)
         sp = sin(p)
-        do i=1,REGULAR_NLATS
+        do i=1,nlate
             !
             !     set north to south oriented colatitude point
             !
-            t = real(i - 1, kind=wp)*dlate
+            t = (i-1)*dlate
             ct = cos(t)
             st = sin(t)
             xyz = (st*(st*ct*sp*cp))
-            regular_data(i,j) = exp(xyz)
+            datae(i,j) = exp(xyz)
         end do
     end do
     !
@@ -246,8 +202,8 @@ program testrssph
     !
     !     print trssph input parameters
     !
-    write( stdout, 100) intl,igride(1),igride(2),REGULAR_NLONS,REGULAR_NLATS, &
-        igridg(1),igridg(2),GAUSSIAN_NLONS,GAUSSIAN_NLATS,lsave,lwork,ldwork
+    write(*,100) intl,igride(1),igride(2),nlone,nlate, &
+        igridg(1),igridg(2),nlong,nlatg,lsave,lwork,ldwork
 100 format(//' EQUALLY SPACED TO GAUSSIAN GRID TRANSFER ' , &
         /' trssph input arguments: ' , &
         /' intl = ',i2, &
@@ -259,57 +215,57 @@ program testrssph
     !
     !     transfer data from DATAE to DATAG
     !
-    call trssph(intl,igride,REGULAR_NLONS,REGULAR_NLATS,regular_data,igridg,GAUSSIAN_NLONS, &
-        GAUSSIAN_NLATS,gaussian_data,wsave,lsave,lsvmin,work,lwork,lwkmin,dwork, &
+    call trssph(intl,igride,nlone,nlate,datae,igridg,nlong, &
+        nlatg,datag,wsave,lsave,lsvmin,work,lwork,lwkmin,dwork, &
         ldwork,ier)
     !
     !     print output parameters
     !
-    write( stdout, 200) ier, lsvmin, lwkmin
+    write (*,200) ier, lsvmin, lwkmin
 200 format(//' trssph output: ' &
         / ' ier = ', i2,2x, 'lsvmin = ',i7, 2x,'lwkmin = ',i7)
     if (ier == 0) then
         !
-        !     compute nlatg gaussian colatitude points using spherepack routine "compute_gaussian_latitudes_and_weights"
+        !     compute nlatg gaussian colatitude points using spherepack routine "gaqd"
         !     and set in single precision vector thetag with south to north orientation
         !     for computing error in DATAG
         !
-        call compute_gaussian_latitudes_and_weights(GAUSSIAN_NLATS,dtheta,dwts,dummy_variable,ldwork,ier)
-        do  i=1,GAUSSIAN_NLATS
-            thetag(i) = PI-dtheta(i)
+        call compute_gaussian_latitudes_and_weights(nlatg, dtheta, dwts, ier)
+        do  i=1,nlatg
+            thetag(i) = pi-dtheta(i)
         end do
         !
         !     compute the least squares error in DATAG
         !
-        err2 = 0.0_wp
-        do j=1,GAUSSIAN_NLONS
-            p = real(j-1, kind=wp)*dlong
+        err2 = 0.0
+        do j=1,nlong
+            p = (j-1)*dlong
             cp = cos(p)
             sp = sin(p)
-            do i=1,GAUSSIAN_NLATS
+            do i=1,nlatg
                 t = thetag(i)
                 ct = cos(t)
                 st = sin(t)
                 xyz = (st*(st*ct*sp*cp))
-                dif = abs(gaussian_data(j,i)-exp(xyz))
+                dif = abs(DATAG(j,i)-exp(xyz))
                 err2 = err2+dif*dif
             end do
         end do
-        err2 = sqrt(err2/size(gaussian_data))
-        write( stdout, 300) err2
+        err2 = sqrt(err2/(nlong*nlatg))
+        write (6,300) err2
 300     format(' least squares error = ',e10.3)
     end if
     !
     !     set DATAE to zero
     !
-    do j=1,REGULAR_NLONS
-        do i=1,REGULAR_NLATS
-            regular_data(i,j) = 0.0_wp
+    do j=1,nlone
+        do i=1,nlate
+            datae(i,j) = 0.0
         end do
     end do
 
-    write( stdout, 400) intl,igridg(1),igridg(2),GAUSSIAN_NLONS,GAUSSIAN_NLATS,igride(1), &
-        igride(2),REGULAR_NLONS,REGULAR_NLATS,lsave,lwork,ldwork
+    write(*,400) intl,igridg(1),igridg(2),nlong,nlatg,igride(1), &
+        igride(2),nlone,nlate,lsave,lwork,ldwork
 400 format(/' GAUSSIAN TO EQUALLY SPACED GRID TRANSFER ' , &
         /' trssph input arguments: ' , &
         /' intl = ',i2, &
@@ -321,33 +277,32 @@ program testrssph
     !
     !     transfer DATAG back to DATAE
     !
-    call trssph(intl,igridg,GAUSSIAN_NLONS,GAUSSIAN_NLATS,gaussian_data,igride,REGULAR_NLONS, &
-        REGULAR_NLATS,regular_data,wsave,lsave,lsvmin,work,lwork,lwkmin,dwork, &
+    call TRSSPH(intl,igridg,nlong,nlatg,datag,igride,nlone, &
+        nlate,datae,wsave,lsave,lsvmin,work,lwork,lwkmin,dwork, &
         ldwork,ier)
     !
     !     print output parameters
     !
-    write( stdout, 200) ier, lsvmin, lwkmin
+    write (*,200) ier, lsvmin, lwkmin
     if (ier == 0) then
         !
         !     compute the least squares error in DATAE
         !
-        err2 = 0.0_wp
-        do j=1,REGULAR_NLONS
-            p = real(j-1, kind=wp)*dlone
+        err2 = 0.0
+        do j=1,nlone
+            p = (j-1)*dlone
             cp = cos(p)
             sp = sin(p)
-            do i=1,REGULAR_NLATS
-                t = real(i-1, kind=wp)*dlate
+            do i=1,nlate
+                t = (i-1)*dlate
                 ct = cos(t)
                 st = sin(t)
                 xyz = (st*(st*ct*sp*cp))
-                dif = abs(regular_data(i,j)-exp(xyz))
+                dif = abs(DATAE(i,j)-exp(xyz))
                 err2 = err2+dif*dif
             end do
         end do
-        err2 = sqrt(err2/size(regular_data))
-        write( stdout,300) err2
+        err2 = sqrt(err2/(nlate*nlone))
+        write (6,300) err2
     end if
-
 end program testrssph

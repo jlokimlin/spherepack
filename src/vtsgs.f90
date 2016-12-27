@@ -1231,7 +1231,7 @@ contains
             type(SpherepackAux) :: sphere_aux
 
 
-            call compute_gaussian_latitudes_and_weights(nlat, theta, wts, dummy_real, dummy_int, local_error_flag)
+            call compute_gaussian_latitudes_and_weights(nlat, theta, wts, local_error_flag)
 
             if (local_error_flag /= 0) then
                 ierror = 10+local_error_flag

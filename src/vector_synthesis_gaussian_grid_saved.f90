@@ -1299,7 +1299,7 @@ contains
         !    use dpbar (length 3*nnlat*(nnlat+1)) as work space for compute_gaussian_latitudes_and_weights
         !
         lwk = nlat*(nlat+2)
-        call compute_gaussian_latitudes_and_weights(nlat,dthet,dwts,dummy_variable,lwk,ierror)
+        call compute_gaussian_latitudes_and_weights(nlat, dthet, dwts, ierror)
         !
         !  Compute associated legendre functions
         !

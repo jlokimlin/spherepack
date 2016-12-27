@@ -728,7 +728,7 @@ contains
         !     compute real gaussian points and weights
         !     lw = 4*nlat*(nlat+1)+2
         lw = nlat*(nlat+2)
-        call compute_gaussian_latitudes_and_weights(nlat, dtheta, dwts, work(1), lw, ier)
+        call compute_gaussian_latitudes_and_weights(nlat, dtheta, dwts, ier)
         if (ier/=0) return
         !     store gaussian weights single precision to save computation
         !     in inner loops in analysis

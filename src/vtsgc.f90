@@ -1201,7 +1201,7 @@ contains
         if (ldwork < 3*nlat+2) return
         !     call compute_gaussian_latitudes_and_weights(nlat, work, work(2*nlat+1), work(4*nlat+1), lwork, ierr)
         ldwk = 1
-        call compute_gaussian_latitudes_and_weights(nlat, dwork, dwork(nlat+1), dummy_variable, ldwk, ierr)
+        call compute_gaussian_latitudes_and_weights(nlat, dwork, dwork(nlat+1), ierr)
         ierror = 5
         if (ierr /= 0) return
         ierror = 0
