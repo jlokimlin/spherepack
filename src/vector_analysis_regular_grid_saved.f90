@@ -330,9 +330,9 @@ contains
 
     module subroutine vhaes(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
         mdab, ndab, wvhaes, lvhaes, work, lwork, ierror)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
+
         integer(ip), intent(in)  :: nlat
         integer(ip), intent(in)  :: nlon
         integer(ip), intent(in)  :: ityp
@@ -352,12 +352,12 @@ contains
         real(wp),    intent(out) :: work(lwork)
         integer(ip), intent(in)  :: lwork
         integer(ip), intent(out) :: ierror
-        !----------------------------------------------------------------------
+
         ! Local variables
-        !----------------------------------------------------------------------
+
         integer(ip) :: idv, imid, idz, ist, lnl, lzimn, mmax
         integer(ip) :: workspace_indices(6)
-        !----------------------------------------------------------------------
+
 
         imid = (nlat+1)/2
         mmax = min(nlat, (nlon+1)/2)
@@ -437,9 +437,9 @@ contains
         !
         ! dwork must be of length at least 2*(nlat+1)
         !
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
+
         integer(ip), intent(in)  :: nlat
         integer(ip), intent(in)  :: nlon
         real(wp),    intent(out) :: wvhaes(lvhaes)
@@ -449,13 +449,13 @@ contains
         real(wp),    intent(out) :: dwork(ldwork)
         integer(ip), intent(in)  :: ldwork
         integer(ip), intent(out) :: ierror
-        !----------------------------------------------------------------------
+
         ! Local variables
-        !----------------------------------------------------------------------
+
         integer(ip)    :: imid, labc, lzimn, mmax
         integer(ip)    :: workspace_indices(4)
-        type(HFFTpack) :: hfft
-        !----------------------------------------------------------------------
+        type(SpherepackAux) :: sphere_aux
+
 
         mmax = min(nlat, (nlon+1)/2)
         imid = (nlat+1)/2
@@ -496,20 +496,20 @@ contains
             idz => workspace_indices(4) &
             )
             call vhaesi_lower_routine(nlat, nlon, imid, wvhaes, wvhaes(jw1), idz, work, work(iw1), dwork)
-            call hfft%initialize(nlon, wvhaes(jw2))
+            call sphere_aux%hfft%initialize(nlon, wvhaes(jw2))
         end associate
 
     end subroutine vhaesi
 
     pure function get_vhaes_workspace_indices(ist, lnl, lzimn) result (return_value)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
+
         integer(ip), intent(in)  :: ist
         integer(ip), intent(in)  :: lnl
         integer(ip), intent(in)  :: lzimn
         integer(ip)              :: return_value(6)
-        !----------------------------------------------------------------------
+
 
         associate( i => return_value )
 
@@ -526,9 +526,8 @@ contains
 
     subroutine vhaes_lower_routine(nlat, nlon, ityp, nt, imid, idvw, jdvw, v, w, mdab, &
         ndab, br, bi, cr, ci, idv, ve, vo, we, wo, work, idz, zv, zw, wrfft)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
         integer(ip), intent(in)  :: nlat
         integer(ip), intent(in)  :: nlon
         integer(ip), intent(in)  :: ityp
@@ -554,14 +553,13 @@ contains
         real(wp),    intent(in)  :: zv(idz, *)
         real(wp),    intent(in)  :: zw(idz, *)
         real(wp),    intent(in)  :: wrfft(*)
-        !----------------------------------------------------------------------
+
         ! Local variables
-        !----------------------------------------------------------------------
         integer(ip)    :: i,imm1, j, k, m, mb, mlat, mlon
         integer(ip)    :: mmax, mp1, mp2, ndo1, ndo2,  nlp1, np1
         real(wp)       :: fsn, tsn
-        type(HFFTpack) :: hfft
-        !----------------------------------------------------------------------
+        type(SpherepackAux) :: sphere_aux
+
 
         nlp1 = nlat+1
         tsn = TWO/nlon
@@ -610,8 +608,8 @@ contains
         end if
 
         do k=1, nt
-            call hfft%forward(idv, nlon, ve(1, 1, k), idv, wrfft, work)
-            call hfft%forward(idv, nlon, we(1, 1, k), idv, wrfft, work)
+            call sphere_aux%hfft%forward(idv, nlon, ve(1, 1, k), idv, wrfft, work)
+            call sphere_aux%hfft%forward(idv, nlon, we(1, 1, k), idv, wrfft, work)
         end do
 
         !
@@ -757,9 +755,7 @@ contains
                 !
                 !  case m = 1 through nlat-1
                 !
-                if (mmax < 2) then
-                    return
-                end if
+                if (mmax < 2) return
 
                 do mp1=2, mmax
                     m = mp1-1
@@ -1220,16 +1216,16 @@ contains
 
     end subroutine vhaes_lower_routine
 
-    pure function get_vhaesi_workspace_indices(lzimn, nlat, imid, mmax) result (return_value)
-        !----------------------------------------------------------------------
+    pure function get_vhaesi_workspace_indices(lzimn, nlat, imid, mmax) &
+        result (return_value)
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
         integer(ip), intent(in)  :: lzimn
         integer(ip), intent(in)  :: nlat
         integer(ip), intent(in)  :: imid
         integer(ip), intent(in)  :: mmax
         integer(ip)              :: return_value(4)
-        !----------------------------------------------------------------------
+
 
         associate( i => return_value )
             i(1) = lzimn+1
@@ -1241,9 +1237,8 @@ contains
     end function get_vhaesi_workspace_indices
 
     subroutine vhaesi_lower_routine(nlat, nlon, imid, zv, zw, idz, zin, wzvin, dwork)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
         integer(ip), intent(in)  :: nlat
         integer(ip), intent(in)  :: nlon
         integer(ip), intent(in)  :: imid
@@ -1253,12 +1248,10 @@ contains
         real(wp),    intent(out) :: zin(imid, nlat, 3)
         real(wp),    intent(out) :: wzvin(*)
         real(wp),    intent(out) :: dwork(*)
-        !----------------------------------------------------------------------
+
         ! Local variables
-        !----------------------------------------------------------------------
         integer(ip)         :: i3, m, mn, mp1, np1, mmax
         type(SpherepackAux) :: sphere_aux
-        !----------------------------------------------------------------------
 
         mmax = min(nlat, (nlon+1)/2)
 

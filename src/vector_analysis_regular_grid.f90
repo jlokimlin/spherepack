@@ -412,7 +412,6 @@ real(wp) :: wvhaec(lvhaec)
 real(wp) :: dwork(ldwork)
 
 ! Local variables
-type(HFFTpack)      :: hfft
 type(SpherepackAux) :: sphere_aux
 integer(ip) :: imid
 integer(ip) :: iw1
@@ -451,7 +450,7 @@ iw2 = iw1+lwzvin
 
 call sphere_aux%zwinit(nlat, nlon, wvhaec(iw1), dwork)
 
-call hfft%initialize(nlon, wvhaec(iw2))
+call sphere_aux%hfft%initialize(nlon, wvhaec(iw2))
 
 end subroutine vhaeci
 
@@ -508,7 +507,6 @@ dimension v(idvw, jdvw, *), w(idvw, jdvw, *), br(mdab, ndab, *), &
           wo(idv, nlon, *), wzvin(*), wzwin(*), wrfft(*), &
           zv(imid, nlat, 3), zw(imid, nlat, 3)
 
-type(HFFTpack)      :: hfft
 type(SpherepackAux) :: sphere_aux
 
 nlp1 = nlat+1
@@ -544,8 +542,8 @@ ve(imid, j, k) = tsn*v(imid, j, k)
 we(imid, j, k) = tsn*w(imid, j, k)
 6 continue
 7 do 9 k=1, nt
-call hfft%forward(idv, nlon, ve(1, 1, k), idv, wrfft, zv)
-call hfft%forward(idv, nlon, we(1, 1, k), idv, wrfft, zv)
+call sphere_aux%hfft%forward(idv, nlon, ve(1, 1, k), idv, wrfft, zv)
+call sphere_aux%hfft%forward(idv, nlon, we(1, 1, k), idv, wrfft, zv)
 9 continue 
 ndo1 = nlat
 ndo2 = nlat

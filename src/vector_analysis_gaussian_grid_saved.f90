@@ -324,9 +324,8 @@ contains
 
     module subroutine vhags(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
         mdab, ndab, wvhags, lvhags, work, lwork, ierror)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
         integer(ip), intent(in)  :: nlat
         integer(ip), intent(in)  :: nlon
         integer(ip), intent(in)  :: ityp
@@ -346,13 +345,12 @@ contains
         real(wp),    intent(out) :: work(lwork)
         integer(ip), intent(in)  :: lwork
         integer(ip), intent(out) :: ierror
-        !----------------------------------------------------------------------
+
         ! Local variables
-        !----------------------------------------------------------------------
         integer(ip) :: idv, idz, imid, ist
         integer(ip) :: lnl, lzimn, mmax
         integer(ip) :: workspace_indices(7)
-        !----------------------------------------------------------------------
+
 
         mmax = min(nlat, (nlon+1)/2)
         idz = (mmax*(2*nlat-mmax+1))/2
@@ -435,9 +433,8 @@ contains
     end subroutine vhags
 
     module subroutine vhagsi(nlat, nlon, wvhags, lvhags, dwork, ldwork, ierror)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
         integer(ip), intent(in)  :: nlat
         integer(ip), intent(in)  :: nlon
         real(wp),    intent(out) :: wvhags(lvhags)
@@ -445,13 +442,11 @@ contains
         real(wp),    intent(out) :: dwork(ldwork)
         integer(ip), intent(in)  :: ldwork
         integer(ip), intent(out) :: ierror
-        !----------------------------------------------------------------------
+
         ! Local variables
-        !----------------------------------------------------------------------
         integer(ip)    :: imid, lmn
         integer(ip)    :: workspace_indices(7)
-        type(HFFTpack) :: hfft
-        !----------------------------------------------------------------------
+        type(SpherepackAux) :: sphere_aux
 
         imid = (nlat+1)/2
         lmn = (nlat*(nlat+1))/2
@@ -491,25 +486,23 @@ contains
             )
             call vhagsi_lower_routine(nlat, imid, wvhags(jw1), wvhags(jw2), &
                 dwork(iw1), dwork(iw2), dwork(iw3), dwork(iw4))
-            call hfft%initialize(nlon, wvhags(jw3))
+            call sphere_aux%hfft%initialize(nlon, wvhags(jw3))
         end associate
 
     end subroutine vhagsi
 
-    pure function get_vhags_workspace_indices(nlat, imid, ist, lnl) result (return_value)
-        !----------------------------------------------------------------------
+    pure function get_vhags_workspace_indices(nlat, imid, ist, lnl) &
+        result (return_value)
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
         integer(ip), intent(in)  :: nlat
         integer(ip), intent(in)  :: imid
         integer(ip), intent(in)  :: ist
         integer(ip), intent(in)  :: lnl
         integer(ip)               :: return_value(7)
-        !----------------------------------------------------------------------
+
         ! Local variables
-        !----------------------------------------------------------------------
         integer(ip) :: lmn
-        !----------------------------------------------------------------------
 
         associate( i => return_value )
             !
@@ -581,7 +574,7 @@ contains
             wo(idv, nlon, *), work(*), &
             vb(imid,*), wb(imid,*), wrfft(*)
 
-        type(HFFTpack)      :: hfft
+        type(SpherepackAux) :: sphere_aux
 
         nlp1 = nlat+1
         tsn = TWO/nlon
@@ -635,8 +628,8 @@ contains
         end if
 
         do k=1, nt
-            call hfft%forward(idv, nlon, ve(1, 1, k), idv, wrfft, work)
-            call hfft%forward(idv, nlon, we(1, 1, k), idv, wrfft, work)
+            call sphere_aux%hfft%forward(idv, nlon, ve(1, 1, k), idv, wrfft, work)
+            call sphere_aux%hfft%forward(idv, nlon, we(1, 1, k), idv, wrfft, work)
         end do
 
         !
@@ -1254,14 +1247,14 @@ contains
     end subroutine vhags_lower_routine
 
     pure function get_vhagsi_workspace_indices(nlat, imid, lmn) result (return_value)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
+
         integer(ip), intent(in)  :: nlat
         integer(ip), intent(in)  :: imid
         integer(ip), intent(in)  :: lmn
         integer(ip)               :: return_value(7)
-        !----------------------------------------------------------------------
+
 
         associate( i => return_value )
             !
@@ -1279,9 +1272,8 @@ contains
     end function get_vhagsi_workspace_indices
 
     subroutine vhagsi_lower_routine(nlat, imid, vb, wb, dthet, dwts, dpbar, work)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
         integer(ip), intent(in)  :: nlat
         integer(ip), intent(in)  :: imid
         real(wp),    intent(out) :: vb(imid, *)
@@ -1290,16 +1282,15 @@ contains
         real(wp),    intent(out) :: dwts(nlat)
         real(wp),    intent(out) :: dpbar(imid, nlat, 3)
         real(wp),    intent(out) :: work(*)
-        !----------------------------------------------------------------------
-        ! Dummy arguments
-        !----------------------------------------------------------------------
+
+        ! Local variables
         integer(ip)         :: i, local_error_flag, id, ix, iy
         integer(ip)         :: m, mn, n, nm, np, nz
         real(wp)            :: abel, bbel, cbel, dcf
         integer(ip)         :: dummy_integer
         real(wp)            :: dummy_real
         type(SpherepackAux) :: sphere_aux
-        !----------------------------------------------------------------------
+
 
         !
         !  Compute gaussian grid
@@ -1326,7 +1317,7 @@ contains
             !  compute dpbar for m=0
             !
             call sphere_aux%dnlfk(0, n, work)
-            mn = indx(0, n, nlat)
+            mn = get_index(0, n, nlat)
             do i=1, imid
                 call sphere_aux%dnlft(0, n, dthet(i), work, dpbar(i, 1, np))
             end do
@@ -1335,7 +1326,7 @@ contains
             !
             call sphere_aux%dnlfk(1, n, work)
 
-            mn = indx(1, n, nlat)
+            mn = get_index(1, n, nlat)
 
             do i=1, imid
                 call sphere_aux%dnlft(1, n, dthet(i), work, dpbar(i, 2, np))
@@ -1352,7 +1343,7 @@ contains
                         real((2*n-3)*(m+n-1)*(m+n)))
                     cbel = sqrt(real((n-m+1)*(n-m+2))/ &
                         real((m+n-1)*(m+n)))
-                    id = indx(m, n, nlat)
+                    id = get_index(m, n, nlat)
 
                     if (m >= n-1) then
                         dpbar(1:imid, m+1, np) = &
@@ -1367,8 +1358,8 @@ contains
             !
             !     compute the derivative of the functions
             !
-            ix = indx(0, n, nlat)
-            iy = indx(n, n, nlat)
+            ix = get_index(0, n, nlat)
+            iy = get_index(n, n, nlat)
             vb(1:imid, ix) = -dpbar(1:imid, 2, np)*dwts(1:imid)
             vb(1:imid, iy) = dpbar(1:imid, n, np)/sqrt(real(2*(n+1), kind=wp))*dwts(1:imid)
 
@@ -1378,12 +1369,12 @@ contains
                 !
                 !     set wb=0 for m=0
                 !
-                ix = indx(0, n, nlat)
+                ix = get_index(0, n, nlat)
                 wb(1:imid, ix) = ZERO
             else
                 dcf = sqrt(real(4*n*(n+1), kind=wp))
                 do m=1, n-1
-                    ix = indx(m, n, nlat)
+                    ix = get_index(m, n, nlat)
                     abel = sqrt(real((n+m)*(n-m+1), kind=wp))/dcf
                     bbel = sqrt(real((n-m)*(n+m+1), kind=wp))/dcf
                     vb(1:imid, ix) = &
@@ -1396,7 +1387,7 @@ contains
             !
             dcf = sqrt(real(2*n+1, kind=wp)/real(4*n*(n+1)*(n+n-1), kind=wp))
             do m=1, n
-                ix = indx(m, n, nlat)
+                ix = get_index(m, n, nlat)
                 abel = dcf*sqrt(real((n+m)*(n+m-1), kind=wp))
                 bbel = dcf*sqrt(real((n-m)*(n-m-1), kind=wp))
                 if (m >= n-1) then
@@ -1411,18 +1402,17 @@ contains
 
     end subroutine vhagsi_lower_routine
 
-    pure function indx(m, n, nlat) result (return_value)
-        !----------------------------------------------------------------------
+    pure function get_index(m, n, nlat) &
+        result (return_value)
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
         integer, intent(in) :: m
         integer, intent(in) :: n
         integer, intent(in) :: nlat
         integer              :: return_value
-        !----------------------------------------------------------------------
 
         return_value = m*nlat-(m*(m+1))/2+n+1
 
-    end function indx
+    end function get_index
 
 end submodule vector_analysis_gaussian_grid_saved

@@ -5,9 +5,6 @@ module vector_synthesis_routines
         ip, & ! integer precision
         PI
 
-    use type_HFFTpack, only: &
-        HFFTpack
-
     use type_SpherepackAux, only: &
         SpherepackAux
 
@@ -24,12 +21,19 @@ module vector_synthesis_routines
     public :: vhsec, vhseci
     public :: vhsgs, vhsgsi, VhsgsAux
     
+    ! Parameters confined to the module
+    real(wp), parameter :: ZERO = 0.0_wp
+    real(wp), parameter :: HALF = 0.5_wp
+    real(wp), parameter :: ONE = 1.0_wp
+    real(wp), parameter :: TWO = 2.0_wp
+    real(wp), parameter :: FOUR = 4.0_wp
+
+    ! Declare interfaces for submodule implementation
     interface
         module subroutine vhses(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
             mdab, ndab, wvhses, lvhses, work, lwork, ierror)
-            !----------------------------------------------------------------------
+
             ! Dummy arguments
-            !----------------------------------------------------------------------
             integer(ip), intent(in)  :: nlat
             integer(ip), intent(in)  :: nlon
             integer(ip), intent(in)  :: ityp
@@ -49,14 +53,13 @@ module vector_synthesis_routines
             real(wp),    intent(out) :: work(lwork)
             integer(ip), intent(in)  :: lwork
             integer(ip), intent(out) :: ierror
-            !----------------------------------------------------------------------
+
         end subroutine vhses
 
         module subroutine vhsesi(nlat, nlon, wvhses, lvhses, work, lwork, dwork, &
             ldwork, ierror)
-            !----------------------------------------------------------------------
+
             ! Dummy arguments
-            !----------------------------------------------------------------------
             integer(ip), intent(in)  :: nlat
             integer(ip), intent(in)  :: nlon
             real(wp),    intent(out) :: wvhses(lvhses)
@@ -66,14 +69,13 @@ module vector_synthesis_routines
             real(wp),    intent(out) :: dwork(ldwork)
             integer(ip), intent(in)  :: ldwork
             integer(ip), intent(out) :: ierror
-            !----------------------------------------------------------------------
+
         end subroutine vhsesi
 
         module subroutine vhsgs(nlat,nlon,ityp,nt,v,w,idvw,jdvw,br,bi,cr,ci, &
             mdab,ndab,wvhsgs,lvhsgs,work,lwork,ierror)
-            !----------------------------------------------------------------------
+
             ! Dummy arguments
-            !----------------------------------------------------------------------
             integer(ip), intent(in)     :: nlat
             integer(ip), intent(in)     :: nlon
             integer(ip), intent(in)     :: ityp
@@ -93,13 +95,12 @@ module vector_synthesis_routines
             real(wp),    intent(out)    :: work(lwork)
             integer(ip), intent(in)     :: lwork
             integer(ip), intent(out)    :: ierror
-            !----------------------------------------------------------------------
+
         end subroutine vhsgs
 
         module subroutine vhsgsi(nlat,nlon,wvhsgs,lvhsgs,dwork,ldwork,ierror)
-            !----------------------------------------------------------------------
+
             ! Dummy arguments
-            !----------------------------------------------------------------------
             integer(ip), intent(in)     :: nlat
             integer(ip), intent(in)     :: nlon
             real(wp),    intent(out)    :: wvhsgs(lvhsgs)
@@ -107,11 +108,12 @@ module vector_synthesis_routines
             real(wp),    intent(out)    :: dwork(ldwork)
             integer(ip), intent(in)     :: ldwork
             integer(ip), intent(out)    :: ierror
-            !----------------------------------------------------------------------
+
         end subroutine vhsgsi
 
         module subroutine vhsgc(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
             mdab, ndab, wvhsgc, lvhsgc, work, lwork, ierror)
+
             ! Dummy arguments
             real(wp) :: br(mdab, ndab, nt), bi(mdab, ndab, nt)
             real(wp) :: cr(mdab, ndab, nt), ci(mdab, ndab, nt)
@@ -131,6 +133,7 @@ module vector_synthesis_routines
         end subroutine vhsgc
 
         module subroutine vhsgci(nlat, nlon, wvhsgc, lvhsgc, dwork, ldwork, ierror)
+
             ! Dummy arguments
             integer(ip) :: ierror
             integer(ip) :: ldwork
@@ -143,6 +146,7 @@ module vector_synthesis_routines
 
         module subroutine vhsec(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
             mdab, ndab, wvhsec, lvhsec, work, lwork, ierror)
+
             ! Dummy arguments
             real(wp) :: br(mdab, ndab, nt), bi(mdab, ndab, nt)
             real(wp) :: cr(mdab, ndab, nt), ci(mdab, ndab, nt)
@@ -161,6 +165,7 @@ module vector_synthesis_routines
         end subroutine vhsec
 
         module subroutine vhseci(nlat, nlon, wvhsec, lvhsec, dwork, ldwork, ierror)
+
             ! Dummy arguments
             integer(ip) :: ierror
             integer(ip) :: nlat
@@ -174,9 +179,7 @@ module vector_synthesis_routines
 
     type, public :: VhsesAux
     contains
-        !-----------------------------------------
         ! Type-bound procedures
-        !-----------------------------------------
         procedure, nopass :: vhses
         procedure, nopass :: vhsesi
         procedure, nopass :: get_lvhses
@@ -184,47 +187,31 @@ module vector_synthesis_routines
         procedure, nopass :: get_ldwork => get_vhses_ldwork
         procedure, nopass :: get_legendre_workspace_size &
             => get_vhses_legendre_workspace_size
-        !-----------------------------------------
     end type VhsesAux
 
     type, public :: VhsgsAux
     contains
-        !-----------------------------------------
         ! Type-bound procedures
-        !-----------------------------------------
         procedure, nopass :: vhsgs
         procedure, nopass :: vhsgsi
         procedure, nopass :: get_lvhsgs
         procedure, nopass :: get_ldwork
         procedure, nopass :: get_legendre_workspace_size
-        !-----------------------------------------
     end type VhsgsAux
-
-    !------------------------------------------------------------------
-    ! Parameters confined to the module
-    !------------------------------------------------------------------
-    real(wp), parameter :: ZERO = 0.0_wp
-    real(wp), parameter :: HALF = 0.5_wp
-    real(wp), parameter :: ONE = 1.0_wp
-    real(wp), parameter :: TWO = 2.0_wp
-    real(wp), parameter :: FOUR = 4.0_wp
-    !------------------------------------------------------------------
 
 contains
 
-    pure function get_lvhsgs(nlat, nlon) result (return_value)
-        !----------------------------------------------------------------------
+    pure function get_lvhsgs(nlat, nlon) &
+        result (return_value)
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
         integer(ip), intent(in)  :: nlat
         integer(ip), intent(in)  :: nlon
         integer(ip)               :: return_value
-        !----------------------------------------------------------------------
+
         ! Local variables
-        !----------------------------------------------------------------------
         integer(ip)         :: l1, l2
         type(SpherepackAux) :: sphere_aux
-        !----------------------------------------------------------------------
 
         call sphere_aux%compute_parity(nlat, nlon, l1, l2)
 
@@ -232,36 +219,31 @@ contains
 
     end function get_lvhsgs
 
-    pure function get_ldwork(nlat) result (return_value)
-        !----------------------------------------------------------------------
+    pure function get_ldwork(nlat) &
+        result (return_value)
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
         integer(ip), intent(in)  :: nlat
         integer(ip)               :: return_value
-        !----------------------------------------------------------------------
 
         return_value = (3*nlat*(nlat+3)+2)/2
 
     end function get_ldwork
 
-    pure function get_legendre_workspace_size(nlat, nlon, nt, ityp) result (return_value)
-        !----------------------------------------------------------------------
+    pure function get_legendre_workspace_size(nlat, nlon, nt, ityp) &
+        result (return_value)
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
         integer(ip),           intent(in) :: nlat
         integer(ip),           intent(in) :: nlon
         integer(ip), optional, intent(in) :: ityp
         integer(ip), optional, intent(in) :: nt
         integer(ip)                        :: return_value
-        !----------------------------------------------------------------------
-        ! Local variables
-        !----------------------------------------------------------------------
-        integer(ip) :: nt_op, ityp_op, l2
-        !----------------------------------------------------------------------
 
-        !
+        ! Local variables
+        integer(ip) :: nt_op, ityp_op, l2
+
         !  Address optional arguments
-        !
         if (present(nt)) then
             nt_op = nt
         else
@@ -295,18 +277,18 @@ contains
     end function get_legendre_workspace_size
 
     pure function get_lvhses(nlat, nlon) result (return_value)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
+
         integer(ip), intent(in)  :: nlat
         integer(ip), intent(in)  :: nlon
         integer(ip)               :: return_value
-        !----------------------------------------------------------------------
+
         ! Local variables
-        !----------------------------------------------------------------------
+
         integer(ip)         :: l1, l2
         type(SpherepackAux) :: sphere_aux
-        !----------------------------------------------------------------------
+
 
         call sphere_aux%compute_parity(nlat, nlon, l1, l2)
 
@@ -315,18 +297,18 @@ contains
     end function get_lvhses
 
     pure function get_vhses_lwork(nlat, nlon) result (return_value)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
+
         integer(ip), intent(in)  :: nlat
         integer(ip), intent(in)  :: nlon
         integer(ip)               :: return_value
-        !----------------------------------------------------------------------
+
         ! Local variables
-        !----------------------------------------------------------------------
+
         integer(ip)         :: l1, l2
         type(SpherepackAux) :: sphere_aux
-        !----------------------------------------------------------------------
+
 
         call sphere_aux%compute_parity(nlat, nlon, l1, l2)
 
@@ -335,31 +317,31 @@ contains
     end function get_vhses_lwork
 
     pure function get_vhses_ldwork(nlat) result (return_value)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
+
         integer(ip), intent(in)  :: nlat
         integer(ip)               :: return_value
-        !----------------------------------------------------------------------
+
 
         return_value = 2*(nlat+1)
 
     end function get_vhses_ldwork
 
     pure function get_vhses_legendre_workspace_size(nlat, nlon, nt, ityp) result (return_value)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
+
         integer(ip),           intent(in) :: nlat
         integer(ip),           intent(in) :: nlon
         integer(ip), optional, intent(in) :: nt
         integer(ip), optional, intent(in) :: ityp
         integer(ip)                        :: return_value
-        !----------------------------------------------------------------------
+
         ! Local variables
-        !----------------------------------------------------------------------
+
         integer(ip) :: nt_op, ityp_op, l2
-        !----------------------------------------------------------------------
+
 
         !
         !  Address optional arguments

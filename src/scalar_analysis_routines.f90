@@ -55,6 +55,7 @@ module scalar_analysis_routines
             => get_legendre_workspace_size_shags
     end type ShagsAux
 
+    ! Declare interfaces for submodule implementation
     interface
         module subroutine shaes(nlat, nlon, isym, nt, g, idg, jdg, a, b, &
             mdab, ndab, wshaes, lshaes, work, lwork, ierror)

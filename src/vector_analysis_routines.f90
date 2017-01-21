@@ -323,9 +323,6 @@ module vector_analysis_routines
         ip, & ! integer precision
         PI
 
-    use type_HFFTpack, only: &
-        HFFTpack
-
     use type_SpherepackAux, only: &
         SpherepackAux
 
@@ -341,9 +338,19 @@ module vector_analysis_routines
     public :: vhagc, vhagci
     public :: vhags, vhagsi, VhagsAux
 
+    ! Parameters confined to the module
+    real(wp), parameter :: ZERO = 0.0_wp
+    real(wp), parameter :: HALF = 0.5_wp
+    real(wp), parameter :: ONE = 1.0_wp
+    real(wp), parameter :: TWO = 2.0_wp
+    real(wp), parameter :: FOUR = 4.0_wp
+
+    ! Declare interfaces for submodule implementation
     interface
         module subroutine vhaec(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
             mdab, ndab, wvhaec, lvhaec, work, lwork, ierror)
+
+            ! Dummy arguments
             real(wp) :: br(mdab, ndab, nt), bi(mdab, ndab, nt)
             real(wp) :: cr(mdab, ndab, nt), ci(mdab, ndab, nt)
             integer(ip) :: idv
@@ -363,6 +370,8 @@ module vector_analysis_routines
         end subroutine vhaec
 
         module subroutine vhaeci(nlat, nlon, wvhaec, lvhaec, dwork, ldwork, ierror)
+
+            ! Dummy arguments
             integer(ip) :: ierror
             integer(ip) :: ldwork, lvhaec
             integer(ip) :: nlat
@@ -373,9 +382,8 @@ module vector_analysis_routines
 
         module subroutine vhaes(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
             mdab, ndab, wvhaes, lvhaes, work, lwork, ierror)
-            !----------------------------------------------------------------------
+
             ! Dummy arguments
-            !----------------------------------------------------------------------
             integer(ip), intent(in)  :: nlat
             integer(ip), intent(in)  :: nlon
             integer(ip), intent(in)  :: ityp
@@ -395,13 +403,11 @@ module vector_analysis_routines
             real(wp),    intent(out) :: work(lwork)
             integer(ip), intent(in)  :: lwork
             integer(ip), intent(out) :: ierror
-            !----------------------------------------------------------------------
         end subroutine vhaes
 
         module subroutine vhaesi(nlat, nlon, wvhaes, lvhaes, work, lwork, dwork, ldwork, ierror)
-            !----------------------------------------------------------------------
+
             ! Dummy arguments
-            !----------------------------------------------------------------------
             integer(ip), intent(in)  :: nlat
             integer(ip), intent(in)  :: nlon
             real(wp),    intent(out) :: wvhaes(lvhaes)
@@ -411,14 +417,12 @@ module vector_analysis_routines
             real(wp),    intent(out) :: dwork(ldwork)
             integer(ip), intent(in)  :: ldwork
             integer(ip), intent(out) :: ierror
-            !----------------------------------------------------------------------
         end subroutine vhaesi
 
         module subroutine vhags(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
             mdab, ndab, wvhags, lvhags, work, lwork, ierror)
-            !----------------------------------------------------------------------
+
             ! Dummy arguments
-            !----------------------------------------------------------------------
             integer(ip), intent(in)  :: nlat
             integer(ip), intent(in)  :: nlon
             integer(ip), intent(in)  :: ityp
@@ -438,13 +442,11 @@ module vector_analysis_routines
             real(wp),    intent(out) :: work(lwork)
             integer(ip), intent(in)  :: lwork
             integer(ip), intent(out) :: ierror
-            !----------------------------------------------------------------------
         end subroutine vhags
 
         module subroutine vhagsi(nlat, nlon, wvhags, lvhags, dwork, ldwork, ierror)
-            !----------------------------------------------------------------------
+
             ! Dummy arguments
-            !----------------------------------------------------------------------
             integer(ip), intent(in)  :: nlat
             integer(ip), intent(in)  :: nlon
             real(wp),    intent(out) :: wvhags(lvhags)
@@ -452,11 +454,11 @@ module vector_analysis_routines
             real(wp),    intent(out) :: dwork(ldwork)
             integer(ip), intent(in)  :: ldwork
             integer(ip), intent(out) :: ierror
-            !----------------------------------------------------------------------
         end subroutine vhagsi
 
         module subroutine vhagc(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
             mdab, ndab, wvhagc, lvhagc, work, lwork, ierror)
+
             ! Dummy arguments
             real(wp) :: br(mdab, ndab, *), bi(mdab, ndab, *)
             real(wp) :: cr(mdab, ndab, *), ci(mdab, ndab, *)
@@ -477,6 +479,7 @@ module vector_analysis_routines
         end subroutine vhagc
 
         module subroutine vhagci(nlat, nlon, wvhagc, lvhagc, dwork, ldwork, ierror)
+
             ! Dummy arguments
             integer(ip) :: ierror
             integer(ip) :: ldwork
@@ -490,9 +493,7 @@ module vector_analysis_routines
 
     type, public :: VhaesAux
     contains
-        !-----------------------------------------
         ! Type-bound procedures
-        !-----------------------------------------
         procedure, nopass :: vhaes
         procedure, nopass :: vhaesi
         procedure, nopass :: get_lvhaes
@@ -500,47 +501,30 @@ module vector_analysis_routines
         procedure, nopass :: get_ldwork => get_vhaes_ldwork
         procedure, nopass :: get_legendre_workspace_size => &
             get_vhaes_legendre_workspace_size
-        !-----------------------------------------
     end type VhaesAux
 
     type, public :: VhagsAux
     contains
-        !-----------------------------------------
         ! Type-bound procedures
-        !-----------------------------------------
         procedure, nopass :: vhags
         procedure, nopass :: vhagsi
         procedure, nopass :: get_lvhags
         procedure, nopass :: get_ldwork
         procedure, nopass :: get_legendre_workspace_size
-        !-----------------------------------------
     end type VhagsAux
-
-    !------------------------------------------------------------------
-    ! Parameters confined to the module
-    !------------------------------------------------------------------
-    real(wp), parameter :: ZERO = 0.0_wp
-    real(wp), parameter :: HALF = 0.5_wp
-    real(wp), parameter :: ONE = 1.0_wp
-    real(wp), parameter :: TWO = 2.0_wp
-    real(wp), parameter :: FOUR = 4.0_wp
-    !------------------------------------------------------------------
 
 contains
 
     pure function get_lvhags(nlat, nlon) result (return_value)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
         integer(ip), intent(in)  :: nlat
         integer(ip), intent(in)  :: nlon
         integer(ip)               :: return_value
-        !----------------------------------------------------------------------
+
         ! Local variables
-        !----------------------------------------------------------------------
         integer(ip)         :: l1, l2
         type(SpherepackAux) :: sphere_aux
-        !----------------------------------------------------------------------
 
         call sphere_aux%compute_parity(nlat, nlon, l1, l2)
 
@@ -550,31 +534,31 @@ contains
     end function get_lvhags
 
     pure function get_ldwork(nlat) result (return_value)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
+
         integer(ip), intent(in)  :: nlat
         integer(ip)               :: return_value
-        !----------------------------------------------------------------------
+
 
         return_value = (3*nlat*(nlat+3)+2)/2
 
     end function get_ldwork
 
     pure function get_legendre_workspace_size(nlat, nlon, nt, ityp) result (return_value)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
+
         integer(ip),           intent(in) :: nlat
         integer(ip),           intent(in) :: nlon
         integer(ip), optional, intent(in) :: nt
         integer(ip), optional, intent(in) :: ityp
         integer(ip)                        :: return_value
-        !----------------------------------------------------------------------
+
         ! Local variables
-        !----------------------------------------------------------------------
+
         integer(ip) :: nt_op, ityp_op, l2
-        !----------------------------------------------------------------------
+
 
         !
         !  Address optional arguments
@@ -612,18 +596,18 @@ contains
     end function get_legendre_workspace_size
 
     pure function get_lvhaes(nlat, nlon) result (return_value)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
+
         integer(ip), intent(in)  :: nlat
         integer(ip), intent(in)  :: nlon
         integer(ip)               :: return_value
-        !----------------------------------------------------------------------
+
         ! Local variables
-        !----------------------------------------------------------------------
+
         integer(ip)         :: l1, l2
         type(SpherepackAux) :: sphere_aux
-        !----------------------------------------------------------------------
+
 
         call sphere_aux%compute_parity(nlat, nlon, l1, l2)
 
@@ -632,18 +616,18 @@ contains
     end function get_lvhaes
 
     pure function get_vhaes_lwork(nlat, nlon) result (return_value)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
+
         integer(ip), intent(in)  :: nlat
         integer(ip), intent(in)  :: nlon
         integer(ip)               :: return_value
-        !----------------------------------------------------------------------
+
         ! Local variables
-        !----------------------------------------------------------------------
+
         integer(ip)         :: l1, l2
         type(SpherepackAux) :: sphere_aux
-        !----------------------------------------------------------------------
+
 
         call sphere_aux%compute_parity(nlat, nlon, l1, l2)
 
@@ -652,31 +636,31 @@ contains
     end function get_vhaes_lwork
 
     pure function get_vhaes_ldwork(nlat) result (return_value)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
+
         integer(ip), intent(in)  :: nlat
         integer(ip)               :: return_value
-        !----------------------------------------------------------------------
+
 
         return_value = 2*(nlat+1)
 
     end function get_vhaes_ldwork
 
     pure function get_vhaes_legendre_workspace_size(nlat, nlon, nt, ityp) result (return_value)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
+
         integer(ip),           intent(in) :: nlat
         integer(ip),           intent(in) :: nlon
         integer(ip), optional, intent(in) :: nt
         integer(ip), optional, intent(in) :: ityp
         integer(ip)                        :: return_value
-        !----------------------------------------------------------------------
+
         ! Local variables
-        !----------------------------------------------------------------------
+
         integer(ip) :: nt_op, ityp_op, l2
-        !----------------------------------------------------------------------
+
 
         !
         !  Address optional arguments

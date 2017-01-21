@@ -135,7 +135,6 @@ scalar_synthesis_gaussian_grid_saved.f90
 
 vector_analysis_routines.o: \
 spherepack_precision.o \
-type_HFFTpack.o \
 type_SpherepackAux.o\
 gaussian_latitudes_and_weights_routines.o\
 vector_analysis_routines.f90
@@ -168,7 +167,6 @@ vector_analysis_gaussian_grid_saved.f90
 
 vector_synthesis_routines.o: \
 spherepack_precision.o \
-type_HFFTpack.o \
 type_SpherepackAux.o\
 gaussian_latitudes_and_weights_routines.o \
 vector_synthesis_routines.f90

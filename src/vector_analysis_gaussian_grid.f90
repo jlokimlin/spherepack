@@ -434,7 +434,6 @@ integer(ip) :: lwk
 integer(ip) :: lwvbin
 integer(ip) :: lzz1
 integer(ip) :: mmax
-type(HFFTpack)      :: hfft
 type(SpherepackAux) :: sphere_aux
 
 ierror = 1
@@ -483,7 +482,7 @@ call sphere_aux%vbgint(nlat, nlon, dwork, wvhagc(iw1), dwork(iwrk))
 
 call sphere_aux%wbgint(nlat, nlon, dwork, wvhagc(iw2), dwork(iwrk))
 
-call hfft%initialize(nlon, wvhagc(iw3))
+call sphere_aux%hfft%initialize(nlon, wvhagc(iw3))
 
 end subroutine vhagci
 
@@ -551,7 +550,6 @@ dimension v(idvw, jdvw, *), w(idvw, jdvw, *), br(mdab, ndab, *), &
           wo(idv, nlon, *), wts(*), wvbin(*), wwbin(*), wrfft(*), &
           vb(imid, nlat, 3), wb(imid, nlat, 3)
 
-type(HFFTpack)      :: hfft
 type(SpherepackAux) :: sphere_aux
 
 nlp1 = nlat+1
@@ -587,8 +585,8 @@ ve(imid, j, k) = tsn*v(imid, j, k)
 we(imid, j, k) = tsn*w(imid, j, k)
 6 continue
 7 do 9 k=1, nt
-call hfft%forward(idv, nlon, ve(1, 1, k), idv, wrfft, vb)
-call hfft%forward(idv, nlon, we(1, 1, k), idv, wrfft, vb)
+call sphere_aux%hfft%forward(idv, nlon, ve(1, 1, k), idv, wrfft, vb)
+call sphere_aux%hfft%forward(idv, nlon, we(1, 1, k), idv, wrfft, vb)
 9 continue 
 ndo1 = nlat
 ndo2 = nlat

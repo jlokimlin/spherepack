@@ -428,6 +428,7 @@ contains
 
     module subroutine vhsec(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
         mdab, ndab, wvhsec, lvhsec, work, lwork, ierror)
+
         ! Dummy arguments
         real(wp) :: br(mdab, ndab, nt), bi(mdab, ndab, nt)
         real(wp) :: cr(mdab, ndab, nt), ci(mdab, ndab, nt)
@@ -443,6 +444,7 @@ contains
         integer(ip) :: nt
         real(wp) :: v(idvw, jdvw, nt), w(idvw, jdvw, nt)
         real(wp) :: work(lwork), wvhsec(lvhsec)
+
         ! Local variables
         integer(ip) :: idv
         integer(ip) :: imid
@@ -513,6 +515,7 @@ contains
     end subroutine vhsec
 
     module subroutine vhseci(nlat, nlon, wvhsec, lvhsec, dwork, ldwork, ierror)
+
         ! Dummy arguments
         integer(ip) :: ierror
         integer(ip) :: nlat
@@ -521,6 +524,7 @@ contains
         real(wp) :: dwork(ldwork)
         integer(ip) :: ldwork
         integer(ip) :: lvhsec
+
         ! Local variables
         integer(ip) :: imid
         integer(ip) :: iw1
@@ -529,7 +533,6 @@ contains
         integer(ip) :: lwvbin
         integer(ip) :: lzz1
         integer(ip) :: mmax
-        type(HFFTpack)      :: hfft
         type(SpherepackAux) :: sphere_aux
 
         imid =(nlat+1)/2
@@ -556,7 +559,7 @@ contains
 
         call sphere_aux%wbinit(nlat, nlon, wvhsec(iw1), dwork)
 
-        call hfft%initialize(nlon, wvhsec(iw2))
+        call sphere_aux%hfft%initialize(nlon, wvhsec(iw2))
 
     end subroutine vhseci
 
@@ -611,7 +614,6 @@ contains
             wo(idv, nlon, *), wvbin(*), wwbin(*), wrfft(*), &
             vb(imid, nlat, 3), wb(imid, nlat, 3)
 
-        type(HFFTpack)      :: hfft
         type(SpherepackAux) :: sphere_aux
 
         nlp1 = nlat+1
@@ -1202,8 +1204,8 @@ contains
 830     continue
         end do
         950 do k=1, nt
-            call hfft%backward(idv, nlon, ve(1, 1, k), idv, wrfft, vb)
-            call hfft%backward(idv, nlon, we(1, 1, k), idv, wrfft, vb)
+            call sphere_aux%hfft%backward(idv, nlon, ve(1, 1, k), idv, wrfft, vb)
+            call sphere_aux%hfft%backward(idv, nlon, we(1, 1, k), idv, wrfft, vb)
 14      continue
         end do
         if (ityp > 2) goto 12

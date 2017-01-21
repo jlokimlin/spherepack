@@ -54,7 +54,7 @@ module scalar_synthesis_routines
             => get_legendre_workspace_size_shsgs
     end type ShsgsAux
 
-    ! Declare interfaces
+    ! Declare interfaces for submodule implementation
     interface
         module subroutine shses(nlat,nlon,isym,nt,g,idg,jdg,a,b,mdab,ndab, &
             wshses,lshses,work,lwork,ierror)

@@ -424,6 +424,7 @@ contains
 
     module subroutine vhsgc(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
         mdab, ndab, wvhsgc, lvhsgc, work, lwork, ierror)
+
         ! Dummy arguments
         real(wp) :: br(mdab, ndab, nt), bi(mdab, ndab, nt)
         real(wp) :: cr(mdab, ndab, nt), ci(mdab, ndab, nt)
@@ -440,6 +441,7 @@ contains
         integer(ip) :: nt
         real(wp) :: v(idvw, jdvw, nt), w(idvw, jdvw, nt)
         real(wp) :: work(lwork), wvhsgc(lvhsgc)
+
         ! Local variables
         integer(ip) :: idv
         integer(ip) :: imid
@@ -521,6 +523,7 @@ contains
     end subroutine vhsgc
 
     module subroutine vhsgci(nlat, nlon, wvhsgc, lvhsgc, dwork, ldwork, ierror)
+
         ! Dummy arguments
         integer(ip) :: ierror
         integer(ip) :: ldwork
@@ -529,8 +532,8 @@ contains
         integer(ip) :: nlon
         real(wp)    :: wvhsgc(lvhsgc)
         real(wp)    :: dwork(ldwork)
+
         ! Local variables
-        type(HFFTpack)      :: hfft
         type(SpherepackAux) :: sphere_aux
         integer(ip) :: imid
         integer(ip) :: iw1
@@ -575,7 +578,7 @@ contains
 
         call sphere_aux%wbgint(nlat, nlon, dwork, wvhsgc(iw1), dwork(iwrk))
 
-        call hfft%initialize(nlon, wvhsgc(iw2))
+        call sphere_aux%hfft%initialize(nlon, wvhsgc(iw2))
 
     end subroutine vhsgci
 
@@ -630,8 +633,6 @@ contains
             wo(idv, nlon, *), wvbin(*), wwbin(*), wrfft(*), &
             vb(imid, nlat, 3), wb(imid, nlat, 3)
 
-
-        type(HFFTpack)      :: hfft
         type(SpherepackAux) :: sphere_aux
 
         nlp1 = nlat+1
@@ -1240,8 +1241,8 @@ contains
 830     continue
         end do
         950 do k=1, nt
-            call hfft%backward(idv, nlon, ve(1, 1, k), idv, wrfft, vb)
-            call hfft%backward(idv, nlon, we(1, 1, k), idv, wrfft, vb)
+            call sphere_aux%hfft%backward(idv, nlon, ve(1, 1, k), idv, wrfft, vb)
+            call sphere_aux%hfft%backward(idv, nlon, we(1, 1, k), idv, wrfft, vb)
 14      continue
         end do
         if (ityp > 2) goto 12
