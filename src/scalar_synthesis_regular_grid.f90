@@ -413,7 +413,6 @@ contains
         real(wp) :: wshsec(lshsec)
         real(wp) :: dwork(ldwork)
 
-        type(HFFTpack)      :: hfft
         type(SpherepackAux) :: sphere_aux
 
         ierror = 1
@@ -432,9 +431,10 @@ contains
 
         call sphere_aux%alinit(nlat, nlon, wshsec, dwork)
 
+        ! set workspace index
         iw1 = lzz1+labc+1
 
-        call hfft%initialize(nlon, wshsec(iw1))
+        call sphere_aux%hfft%initialize(nlon, wshsec(iw1))
 
     end subroutine shseci
 
@@ -479,8 +479,6 @@ contains
         real(wp) :: work
 
 
-        type(HFFTpack)      :: hfft
-        type(SpherepackAux) :: sphere_aux
         !
         !     whrfft must have at least nlon+15 locations
         !     walin must have 3*l*imid + 3*((l-3)*l+2)/2 locations
@@ -489,6 +487,8 @@ contains
         dimension g(idgs, jdgs, nt), a(mdab, ndab, nt), b(mdab, ndab, nt), &
             ge(idg, jdg, nt), go(idg, jdg, nt), pb(imid, nlat, 3), walin(*), &
             whrfft(*), work(*)
+
+        type(SpherepackAux) :: sphere_aux
 
         ls = idg
         nlon = jdg
@@ -608,7 +608,7 @@ contains
 
             if (mod(nlon, 2) == 0) ge(1: ls, nlon, k) = TWO*ge(1: ls, nlon, k)
 
-            call hfft%backward(ls, nlon, ge(1, 1, k), ls, whrfft, work)
+            call sphere_aux%hfft%backward(ls, nlon, ge(1, 1, k), ls, whrfft, work)
         end do
 
         select case (isym)

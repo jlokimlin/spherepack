@@ -306,6 +306,12 @@ submodule(scalar_analysis_routines) scalar_analysis_gaussian_grid
 
 contains
 
+    ! Purpose:
+    !
+    ! Performs the spherical harmonic analysis on
+    ! a gaussian grid on the array(s) in g and returns the coefficients
+    ! in array(s) a, b. the necessary legendre polynomials are computed
+    ! as needed in this version.
     module subroutine shagc(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, &
         wshagc, lshagc, work, lwork, ierror)
         real(wp) :: a(mdab, ndab, *)
@@ -324,12 +330,6 @@ contains
         integer(ip) :: nt
         real(wp) :: work(lwork)
         real(wp) :: wshagc(lshagc)
-
-        !     subroutine shagc performs the spherical harmonic analysis on
-        !     a gaussian grid on the array(s) in g and returns the coefficients
-        !     in array(s) a, b. the necessary legendre polynomials are computed
-        !     as needed in this version.
-        !
 
         ! Local variables
         integer(ip) :: ifft
@@ -499,7 +499,6 @@ contains
             b(mdab, ndab, nt), g(lat, nlon, nt)
         dimension w(*), wts(nlat), wfft(*), pmn(nlat, late, 3)
 
-        type(HFFTpack)      :: hfft
         type(SpherepackAux) :: sphere_aux
 
         !     set gs array internally in shagc_lower_routine
@@ -512,7 +511,7 @@ contains
         end do
         !     do fourier transform
         do k=1, nt
-            call hfft%forward(lat, nlon, g(1, 1, k), lat, wfft, pmn)
+            call sphere_aux%hfft%forward(lat, nlon, g(1, 1, k), lat, wfft, pmn)
         end do
         !     scale result
         sfn = 2.0/real(nlon)
@@ -707,7 +706,6 @@ contains
             cbel(*), wfft(*)
         real pb, dtheta(nlat), dwts(nlat), work(*)
 
-        type(HFFTpack)      :: hfft
         type(SpherepackAux) :: sphere_aux
 
         !     compute the nlat  gaussian points and weights, the
@@ -723,13 +721,17 @@ contains
         !indx(m, n) = imn = (n-1)*(n-2)/2+m-1
         !     define index function for l.le.n.le.nlat
         !imndx(m, n) = l*(l-1)/2+(n-l-1)*(l-1)+m-1
+
         !     preset quantites for fourier transform
-        call hfft%initialize(nlon, wfft)
+        call sphere_aux%hfft%initialize(nlon, wfft)
+
         !     compute real gaussian points and weights
         !     lw = 4*nlat*(nlat+1)+2
         lw = nlat*(nlat+2)
         call compute_gaussian_latitudes_and_weights(nlat, dtheta, dwts, ier)
+
         if (ier/=0) return
+
         !     store gaussian weights single precision to save computation
         !     in inner loops in analysis
         do i=1, nlat

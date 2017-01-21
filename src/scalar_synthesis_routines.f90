@@ -4,9 +4,6 @@ module scalar_synthesis_routines
         wp, & ! working precision
         ip ! integer precision
 
-    use type_HFFTpack, only: &
-        HFFTpack
-
     use type_SpherepackAux, only: &
         SpherepackAux
 
@@ -23,11 +20,15 @@ module scalar_synthesis_routines
     public :: shsgc, shsgci
     public :: ShsesAux, ShsgsAux
 
+    ! Parameters confined to the module
+    real(wp), parameter :: ZERO = 0.0_wp
+    real(wp), parameter :: HALF = 0.5_wp
+    real(wp), parameter :: ONE = 1.0_wp
+    real(wp), parameter :: TWO = 2.0_wp
+
     type, public :: ShsesAux
     contains
-        !-----------------------------------------
         ! Type-bound procedures
-        !-----------------------------------------
         procedure, nopass :: shses
         procedure, nopass :: shsesi
         procedure, nopass :: get_lshses
@@ -37,14 +38,11 @@ module scalar_synthesis_routines
             => get_ldwork_shses
         procedure, nopass :: get_legendre_workspace_size &
             => get_legendre_workspace_size_shses
-        !-----------------------------------------
     end type ShsesAux
 
     type, public :: ShsgsAux
     contains
-        !-----------------------------------------
         ! Type-bound procedures
-        !-----------------------------------------
         procedure, nopass :: shsgs
         procedure, nopass :: shsgsi
         procedure, nopass :: get_lshsgs
@@ -54,16 +52,14 @@ module scalar_synthesis_routines
             => get_ldwork_shsgs
         procedure, nopass :: get_legendre_workspace_size &
             => get_legendre_workspace_size_shsgs
-        !-----------------------------------------
     end type ShsgsAux
 
     ! Declare interfaces
     interface
         module subroutine shses(nlat,nlon,isym,nt,g,idg,jdg,a,b,mdab,ndab, &
             wshses,lshses,work,lwork,ierror)
-            !----------------------------------------------------------------------
+
             ! Dummy arguments
-            !----------------------------------------------------------------------
             integer(ip), intent(in)     :: nlat
             integer(ip), intent(in)     :: nlon
             integer(ip), intent(in)     :: isym
@@ -80,14 +76,13 @@ module scalar_synthesis_routines
             real(wp),    intent(inout)  :: work(lwork)
             integer(ip), intent(in)     :: lwork
             integer(ip), intent(out)    :: ierror
-            !----------------------------------------------------------------------
+
         end subroutine shses
 
         module subroutine shsesi(nlat,nlon,wshses,lshses,work,lwork,dwork, &
             ldwork,ierror)
-            !----------------------------------------------------------------------
+
             ! Dummy arguments
-            !----------------------------------------------------------------------
             integer(ip), intent(in)  :: nlat
             integer(ip), intent(in)  :: nlon
             real(wp),    intent(out) :: wshses(lshses)
@@ -97,14 +92,13 @@ module scalar_synthesis_routines
             real(wp),    intent(out) :: dwork(ldwork)
             integer(ip), intent(in)  :: ldwork
             integer(ip), intent(out) :: ierror
-            !----------------------------------------------------------------------
+
         end subroutine shsesi
 
         module subroutine shsgs(nlat, nlon, mode, nt, g, idg, jdg, a, b, mdab, ndab, &
             wshsgs, lshsgs, work, lwork, ierror)
-            !----------------------------------------------------------------------
+
             ! Dummy arguments
-            !----------------------------------------------------------------------
             integer(ip), intent(in)      :: nlat
             integer(ip), intent(in)      :: nlon
             integer(ip), intent(in)      :: mode
@@ -121,13 +115,12 @@ module scalar_synthesis_routines
             real(wp),    intent(inout)   :: work(lwork)
             integer(ip), intent(in)      :: lwork
             integer(ip), intent(out)     :: ierror
-            !----------------------------------------------------------------------
+
         end subroutine shsgs
 
         module subroutine shsgsi(nlat, nlon, wshsgs, lshsgs, work, lwork, dwork, ldwork, ierror)
-            !----------------------------------------------------------------------
+
             ! Dummy arguments
-            !----------------------------------------------------------------------
             integer(ip), intent(in)     :: nlat
             integer(ip), intent(in)     :: nlon
             real(wp),    intent(inout)  :: wshsgs(lshsgs)
@@ -137,7 +130,7 @@ module scalar_synthesis_routines
             real(wp),    intent(inout)  :: dwork(ldwork)
             integer(ip), intent(in)     :: ldwork
             integer(ip), intent(out)    :: ierror
-            !----------------------------------------------------------------------
+
         end subroutine shsgsi
 
         module subroutine shsec(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, &
@@ -203,30 +196,19 @@ module scalar_synthesis_routines
 
     end interface
 
-    !------------------------------------------------------------------
-    ! Parameters confined to the module
-    !------------------------------------------------------------------
-    real(wp), parameter :: ZERO = 0.0_wp
-    real(wp), parameter :: HALF = 0.5_wp
-    real(wp), parameter :: ONE = 1.0_wp
-    real(wp), parameter :: TWO = 2.0_wp
-    !------------------------------------------------------------------
-
 contains
 
     pure function get_lshses(nlat, nlon) result (return_value)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
         integer(ip), intent(in)  :: nlat
         integer(ip), intent(in)  :: nlon
         integer(ip)               :: return_value
-        !----------------------------------------------------------------------
+
         ! Local variables
-        !----------------------------------------------------------------------
         integer(ip)         :: l1, l2
         type(SpherepackAux) :: sphere_aux
-        !----------------------------------------------------------------------
+
 
         call sphere_aux%compute_parity(nlat, nlon, l1, l2)
 
@@ -234,20 +216,16 @@ contains
 
     end function get_lshses
 
-
     pure function get_lwork_shses(nlat, nlon) result (return_value)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
         integer(ip), intent(in)  :: nlat
         integer(ip), intent(in)  :: nlon
         integer(ip)               :: return_value
-        !----------------------------------------------------------------------
+
         ! Local variables
-        !----------------------------------------------------------------------
         integer(ip)         :: l1, l2
         type(SpherepackAux) :: sphere_aux
-        !----------------------------------------------------------------------
 
         call sphere_aux%compute_parity(nlat, nlon, l1, l2)
 
@@ -257,12 +235,12 @@ contains
 
 
     pure function get_ldwork_shses(nlat) result (return_value)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
+
         integer(ip), intent(in)  :: nlat
         integer(ip)               :: return_value
-        !----------------------------------------------------------------------
+
 
         return_value = nlat + 1
 
@@ -270,19 +248,19 @@ contains
 
 
     pure function get_legendre_workspace_size_shses(nlat, nlon, nt, ityp) result (return_value)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
+
         integer(ip),           intent(in) :: nlat
         integer(ip),           intent(in) :: nlon
         integer(ip), optional, intent(in) :: nt
         integer(ip), optional, intent(in) :: ityp
         integer(ip)                        :: return_value
-        !----------------------------------------------------------------------
+
         ! Local variables
-        !----------------------------------------------------------------------
+
         integer(ip) :: nt_op, ityp_op, l2
-        !----------------------------------------------------------------------
+
 
         !
         !  Address optional arguments
@@ -321,18 +299,18 @@ contains
 
 
     pure function get_lshsgs(nlat, nlon) result (return_value)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
+
         integer(ip), intent(in)  :: nlat
         integer(ip), intent(in)  :: nlon
         integer(ip)               :: return_value
-        !----------------------------------------------------------------------
+
         ! Local variables
-        !----------------------------------------------------------------------
+
         integer(ip)         :: l1, l2
         type(SpherepackAux) :: sphere_aux
-        !----------------------------------------------------------------------
+
 
         call sphere_aux%compute_parity(nlat, nlon, l1, l2)
 
@@ -343,12 +321,12 @@ contains
 
 
     pure function get_lwork_shsgs(nlat) result (return_value)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
+
         integer(ip), intent(in) :: nlat
         integer(ip)              :: return_value
-        !----------------------------------------------------------------------
+
 
         return_value = 4*nlat*(nlat+2)+2
 
@@ -356,12 +334,12 @@ contains
 
 
     pure function get_ldwork_shsgs(nlat) result (return_value)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
+
         integer(ip), intent(in)  :: nlat
         integer(ip)               :: return_value
-        !----------------------------------------------------------------------
+
 
         return_value = nlat*(nlat+4)
 
@@ -369,23 +347,18 @@ contains
 
 
     pure function get_legendre_workspace_size_shsgs(nlat, nlon, nt, isym) result (return_value)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
         integer(ip),           intent(in) :: nlat
         integer(ip),           intent(in) :: nlon
         integer(ip), optional, intent(in) :: nt
         integer(ip), optional, intent(in) :: isym
         integer(ip)                        :: return_value
-        !----------------------------------------------------------------------
-        ! Local variables
-        !----------------------------------------------------------------------
-        integer(ip) :: nt_op, isym_op, l2
-        !----------------------------------------------------------------------
 
-        !
+        ! Local variables
+        integer(ip) :: nt_op, isym_op, l2
+
         !  Address optional arguments
-        !
         if (present(nt)) then
             nt_op = nt
         else

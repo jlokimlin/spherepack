@@ -4,9 +4,6 @@ module scalar_analysis_routines
         wp, & ! working precision
         ip ! integer precision
 
-    use type_HFFTpack, only: &
-        HFFTpack
-
     use type_SpherepackAux, only: &
         SpherepackAux
 
@@ -23,11 +20,16 @@ module scalar_analysis_routines
     public :: shags, shagsi
     public :: ShaesAux, ShagsAux
 
+    ! Parameters confined to the module
+    real(wp), parameter :: ZERO = 0.0_wp
+    real(wp), parameter :: HALF = 0.5_wp
+    real(wp), parameter :: ONE = 1.0_wp
+    real(wp), parameter :: TWO = 2.0_wp
+    real(wp), parameter :: FOUR = 4.0_wp
+
     type, public :: ShaesAux
     contains
-        !-----------------------------------------
         ! Type-bound procedures
-        !-----------------------------------------
         procedure, nopass :: shaes
         procedure, nopass :: shaesi
         procedure, nopass :: get_lshaes
@@ -37,14 +39,11 @@ module scalar_analysis_routines
             => get_ldwork_shaes
         procedure, nopass :: get_legendre_workspace_size &
             => get_legendre_workspace_size_shaes
-        !-----------------------------------------
     end type ShaesAux
     
     type, public :: ShagsAux
     contains
-        !-----------------------------------------
         ! Type-bound procedures
-        !-----------------------------------------
         procedure, nopass :: shags
         procedure, nopass :: shagsi
         procedure, nopass :: get_lshags
@@ -54,15 +53,13 @@ module scalar_analysis_routines
             => get_ldwork_shags
         procedure, nopass :: get_legendre_workspace_size &
             => get_legendre_workspace_size_shags
-        !-----------------------------------------
     end type ShagsAux
 
     interface
         module subroutine shaes(nlat, nlon, isym, nt, g, idg, jdg, a, b, &
             mdab, ndab, wshaes, lshaes, work, lwork, ierror)
-            !----------------------------------------------------------
+
             ! Dummy arguments
-            !----------------------------------------------------------
             integer(ip), intent(in)     :: nlat
             integer(ip), intent(in)     :: nlon
             integer(ip), intent(in)     :: isym
@@ -79,14 +76,12 @@ module scalar_analysis_routines
             real(wp),    intent(inout)  :: work(lwork)
             integer(ip), intent(in)     :: lwork
             integer(ip), intent(out)    :: ierror
-            !----------------------------------------------------------
         end subroutine shaes
 
         module subroutine shaesi(nlat, nlon, wshaes, lshaes, work, lwork, dwork, &
             ldwork, ierror)
-            !----------------------------------------------------------
+
             ! Dummy arguments
-            !----------------------------------------------------------
             integer(ip), intent(in)     :: nlat
             integer(ip), intent(in)     :: nlon
             real(wp),    intent(out)    :: wshaes(lshaes)
@@ -96,14 +91,12 @@ module scalar_analysis_routines
             real(wp),    intent(out)    :: dwork(ldwork)
             integer(ip), intent(in)     :: ldwork
             integer(ip), intent(out)    :: ierror
-            !----------------------------------------------------------
         end subroutine shaesi
 
         module subroutine shags(nlat, nlon, mode, nt, g, idg, jdg, a, b, mdab, ndab, &
             wshags, lshags, work, lwork, ierror)
-            !----------------------------------------------------------
+
             ! Dummy arguments
-            !----------------------------------------------------------
             integer(ip), intent(in)     :: nlat
             integer(ip), intent(in)     :: nlon
             integer(ip), intent(in)     :: mode
@@ -120,13 +113,12 @@ module scalar_analysis_routines
             real(wp),    intent(inout)  :: work(lwork)
             integer(ip), intent(in)     :: lwork
             integer(ip), intent(out)    :: ierror
-            !----------------------------------------------------------
+
         end subroutine shags
 
         module subroutine shagsi(nlat, nlon, wshags, lshags, work, lwork, dwork, ldwork, ierror)
-            !----------------------------------------------------------
+
             ! Dummy arguments
-            !----------------------------------------------------------
             integer(ip), intent(in)     :: nlat
             integer(ip), intent(in)     :: nlon
             real(wp),    intent(inout)  :: wshags(lshags)
@@ -136,11 +128,13 @@ module scalar_analysis_routines
             real(wp),    intent(inout)  :: dwork(ldwork)
             integer(ip), intent(in)     :: ldwork
             integer(ip), intent(out)    :: ierror
-            !----------------------------------------------------------
+
         end subroutine shagsi
 
         module subroutine shaec(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, &
             wshaec, lshaec, work, lwork, ierror)
+
+            ! Dummy arguments
             real(wp) :: a(mdab, ndab, *)
             real(wp) :: b(mdab, ndab, *)
             real(wp) :: g(idg, jdg, *)
@@ -161,9 +155,8 @@ module scalar_analysis_routines
         end subroutine shaec
 
         module subroutine shaeci(nlat, nlon, wshaec, lshaec, dwork, ldwork, ierror)
-            !--------------------------------------------------------------
+
             ! Dummy arguments
-            !--------------------------------------------------------------
             integer(ip), intent(in)  :: nlat
             integer(ip), intent(in)  :: nlon
             real(wp),    intent(out) :: wshaec(lshaec)
@@ -171,11 +164,12 @@ module scalar_analysis_routines
             real(wp),    intent(out) :: dwork(ldwork)
             integer(ip), intent(in)  :: ldwork
             integer(ip), intent(out) :: ierror
-            !--------------------------------------------------------------
         end subroutine shaeci
 
         module subroutine shagc(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, &
             wshagc, lshagc, work, lwork, ierror)
+
+            ! Dummy arguments
             real(wp) :: a(mdab, ndab, *)
             real(wp) :: b(mdab, ndab,*)
             real(wp) :: g(idg, jdg, *)
@@ -195,6 +189,8 @@ module scalar_analysis_routines
         end subroutine shagc
 
         module subroutine shagci(nlat, nlon, wshagc, lshagc, dwork, ldwork, ierror)
+
+            ! Dummy arguments
             integer(ip) :: ldwork, ierror
             integer(ip) :: lshagc
             integer(ip) :: nlat
@@ -204,30 +200,18 @@ module scalar_analysis_routines
         end subroutine shagci
     end interface
 
-    !------------------------------------------------------------------
-    ! Parameters confined to the module
-    !------------------------------------------------------------------
-    real(wp), parameter :: ZERO = 0.0_wp
-    real(wp), parameter :: HALF = 0.5_wp
-    real(wp), parameter :: ONE = 1.0_wp
-    real(wp), parameter :: TWO = 2.0_wp
-    !------------------------------------------------------------------
-
 contains
 
     pure function get_lshaes(nlat, nlon) result (return_value)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
         integer(ip), intent(in)  :: nlat
         integer(ip), intent(in)  :: nlon
         integer(ip)               :: return_value
-        !----------------------------------------------------------------------
+
         ! Local variables
-        !----------------------------------------------------------------------
         integer(ip)         :: l1, l2
         type(SpherepackAux) :: sphere_aux
-        !----------------------------------------------------------------------
 
         call sphere_aux%compute_parity(nlat, nlon, l1, l2)
 
@@ -237,18 +221,15 @@ contains
 
 
     pure function get_lwork_shaes(nlat, nlon) result (return_value)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
         integer(ip), intent(in)  :: nlat
         integer(ip), intent(in)  :: nlon
         integer(ip)               :: return_value
-        !----------------------------------------------------------------------
+
         ! Local variables
-        !----------------------------------------------------------------------
         integer(ip)         :: l1, l2
         type(SpherepackAux) :: sphere_aux
-        !----------------------------------------------------------------------
 
         call sphere_aux%compute_parity(nlat, nlon, l1, l2)
 
@@ -258,12 +239,12 @@ contains
 
 
     pure function get_ldwork_shaes(nlat) result (return_value)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
+
         integer(ip), intent(in)  :: nlat
         integer(ip)               :: return_value
-        !----------------------------------------------------------------------
+
 
         return_value = nlat + 1
 
@@ -271,19 +252,19 @@ contains
 
 
     pure function get_legendre_workspace_size_shaes(nlat, nlon, nt, ityp) result (return_value)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
+
         integer(ip),           intent(in) :: nlat
         integer(ip),           intent(in) :: nlon
         integer(ip), optional, intent(in) :: nt
         integer(ip), optional, intent(in) :: ityp
         integer(ip)                        :: return_value
-        !----------------------------------------------------------------------
+
         ! Local variables
-        !----------------------------------------------------------------------
+
         integer(ip) :: nt_op, ityp_op, l2
-        !----------------------------------------------------------------------
+
 
         !
         !  Address optional arguments
@@ -322,18 +303,18 @@ contains
 
 
     pure function get_lshags(nlat, nlon) result (return_value)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
+
         integer(ip), intent(in)  :: nlat
         integer(ip), intent(in)  :: nlon
         integer(ip)               :: return_value
-        !----------------------------------------------------------------------
+
         ! Local variables
-        !----------------------------------------------------------------------
+
         integer(ip)         :: l1, l2
         type(SpherepackAux) :: sphere_aux
-        !----------------------------------------------------------------------
+
 
         call sphere_aux%compute_parity(nlat, nlon, l1, l2)
 
@@ -343,12 +324,12 @@ contains
 
 
     pure function get_lwork_shags(nlat) result (return_value)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
+
         integer(ip), intent(in) :: nlat
         integer(ip)              :: return_value
-        !----------------------------------------------------------------------
+
 
         return_value = 4*nlat*(nlat+2)+2
 
@@ -356,12 +337,12 @@ contains
 
 
     pure function get_ldwork_shags(nlat) result (return_value)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
+
         integer(ip), intent(in)  :: nlat
         integer(ip)               :: return_value
-        !----------------------------------------------------------------------
+
 
         return_value = nlat*(nlat+4)
 
@@ -369,19 +350,19 @@ contains
 
 
     pure function get_legendre_workspace_size_shags(nlat, nlon, nt, isym) result (return_value)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
+
         integer(ip),           intent(in) :: nlat
         integer(ip),           intent(in) :: nlon
         integer(ip), optional, intent(in) :: nt
         integer(ip), optional, intent(in) :: isym
         integer(ip)                        :: return_value
-        !----------------------------------------------------------------------
+
         ! Local variables
-        !----------------------------------------------------------------------
+
         integer(ip) :: nt_op, isym_op, l2
-        !----------------------------------------------------------------------
+
 
         !
         !  Address optional arguments

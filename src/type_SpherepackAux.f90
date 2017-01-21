@@ -43,6 +43,9 @@ module type_SpherepackAux
         ip, & ! integer precision
         PI
 
+    use type_HFFTpack, only: &
+        HFFTpack
+
     ! Explicit typing only
     implicit none
 
@@ -51,10 +54,10 @@ module type_SpherepackAux
     public :: SpherepackAux
 
     type, public :: SpherepackAux
+        ! Type components
+        type(HFFTpack) :: hfft
     contains
-        !----------------------------------------------------------------------
         ! Type-bound procedures
-        !----------------------------------------------------------------------
         procedure, nopass :: alin
         procedure, nopass :: alinit
         procedure, nopass :: compute_parity
@@ -79,8 +82,8 @@ module type_SpherepackAux
         procedure, nopass :: rabcp
         procedure, nopass :: rabcv
         procedure, nopass :: rabcw
-        procedure, nopass :: sea1
-        procedure, nopass :: ses1
+        procedure, nopass :: initialize_workspace_for_regular_scalar_analysis
+        procedure, nopass :: initialize_workspace_for_regular_scalar_synthesis
         procedure, nopass :: vbgint
         procedure, nopass :: vbin
         procedure, nopass :: vbinit
@@ -97,7 +100,7 @@ module type_SpherepackAux
         procedure, nopass :: zvinit
         procedure, nopass :: zwin
         procedure, nopass :: zwinit
-        !----------------------------------------------------------------------
+
     end type SpherepackAux
 
     !------------------------------------------------------------------
@@ -114,14 +117,14 @@ module type_SpherepackAux
 contains
 
     pure subroutine compute_parity(nlat, nlon, l1, l2)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
+
         integer(ip), intent(in)  :: nlat
         integer(ip), intent(in)  :: nlon
         integer(ip), intent(out) :: l1
         integer(ip), intent(out) :: l2
-        !----------------------------------------------------------------------
+
 
         ! Compute parity in nlon
         select case (mod(nlon, 2))
@@ -145,15 +148,15 @@ contains
         !
         !     cp requires n/2+1 real locations
         !
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
+
         integer(ip), intent(in)  :: m
         integer(ip), intent(in)  :: n
         real(wp),    intent(out) :: cp(n/2+1)
-        !----------------------------------------------------------------------
+
         ! Local variables
-        !----------------------------------------------------------------------
+
         integer(ip)         :: i, l, ma, nex,  nmms2
         real(wp)            :: a1, b1, c1, t1, t2
         real(wp)            :: fk, cp2, pm1
@@ -161,7 +164,7 @@ contains
         real(wp), parameter :: SC10=1024
         real(wp), parameter :: SC20=SC10**2
         real(wp), parameter :: SC40=SC20**2
-        !----------------------------------------------------------------------
+
 
         ma = abs(m)
 
@@ -262,20 +265,20 @@ contains
         !
         ! Computes the derivative of pmn(theta) with respect to theta
         !
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
+
         integer(ip), intent(in)  :: m
         integer(ip), intent(in)  :: n
         real(wp),    intent(in)  :: theta
         real(wp),    intent(out) :: cp(*)
         real(wp),    intent(out) :: pb
-        !----------------------------------------------------------------------
+
         ! Local variables
-        !----------------------------------------------------------------------
+
         integer(ip) ::  k, kdo
         real(wp)    :: cos2t, sin2t, cost, sint, temp
-        !----------------------------------------------------------------------
+
 
         cos2t = cos(TWO*theta)
         sin2t = sin(TWO*theta)
@@ -353,20 +356,20 @@ contains
 
 
     pure subroutine dnlft(m, n, theta, cp, pb)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
+
         integer(ip), intent(in)  :: m
         integer(ip), intent(in)  :: n
         real(wp),    intent(in)  :: theta
         real(wp),    intent(out) :: cp(*)
         real(wp),    intent(out) :: pb
-        !----------------------------------------------------------------------
+
         ! Local variables
-        !----------------------------------------------------------------------
+
         integer(ip) ::  k, kdo
         real(wp)    :: temp, cos2t, cost, sin2t, sint
-        !----------------------------------------------------------------------
+
 
         cos2t = cos(TWO * theta)
         sin2t = sin(TWO * theta)
@@ -443,7 +446,7 @@ contains
     end subroutine dnlft
 
 
-   subroutine legin(mode, l, nlat, m, w, pmn, km)
+    subroutine legin(mode, l, nlat, m, w, pmn, km)
         !
         ! Purpose:
         !
@@ -455,9 +458,9 @@ contains
         ! (e.g., if m=10 is sought it must be preceded by calls with
         ! m=0, 1, 2, ..., 9 in that order)
         !
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
+
         integer(ip), intent(in)  :: mode
         integer(ip), intent(in)  :: l
         integer(ip), intent(in)  :: nlat
@@ -465,12 +468,12 @@ contains
         real(wp),    intent(out) :: w(*)
         real(wp),    intent(out) :: pmn(*)
         integer(ip), intent(out) :: km
-        !----------------------------------------------------------------------
+
         ! Local variables
-        !----------------------------------------------------------------------
+
         integer(ip) :: late
         integer(ip) :: workspace_indices(5)
-        !----------------------------------------------------------------------
+
 
         !
         !  set size of pole to equator gaussian grid
@@ -495,9 +498,9 @@ contains
 
         subroutine legin1(mode, l, nlat, late, m, p0n, p1n, abel, bbel, cbel, &
             pmn, km)
-            !----------------------------------------------------------------------
+
             ! Dummy arguments
-            !----------------------------------------------------------------------
+
             integer(ip), intent(in)  :: mode
             integer(ip), intent(in)  :: l
             integer(ip), intent(in)  :: nlat
@@ -510,12 +513,12 @@ contains
             real(wp),    intent(out) :: cbel(*)
             real(wp),    intent(out) :: pmn(nlat, late, 3)
             integer(ip), intent(out) :: km
-            !----------------------------------------------------------------------
+
             ! Dummy arguments
-            !----------------------------------------------------------------------
+
             integer(ip)       :: i, n, ms, np1, imn, kmt, ninc
             integer(ip), save :: column_indices(0:2) = [1, 2, 3]
-            !----------------------------------------------------------------------
+
 
             !     set do loop indices for full or half sphere
             ms = m+1
@@ -579,14 +582,14 @@ contains
 
         pure function get_workspace_indices(l, late, nlat) &
             result (return_value)
-            !----------------------------------------------------------------------
+
             ! Dummy arguments
-            !----------------------------------------------------------------------
+
             integer(ip), intent(in) :: l
             integer(ip), intent(in) :: late
             integer(ip), intent(in) :: nlat
             integer(ip)              :: return_value(5)
-            !----------------------------------------------------------------------
+
 
             associate( i => return_value )
 
@@ -608,13 +611,13 @@ contains
             !     index function used in storing triangular
             !     arrays for recursion coefficients (functions of (m, n))
             !     for 2 <= m <= n-1 and 2 <= n <= l-1
-            !----------------------------------------------------------------------
+
             ! Dummy arguments
-            !----------------------------------------------------------------------
+
             integer(ip), intent(in) :: m
             integer(ip), intent(in) :: n
             integer(ip)              :: return_value
-            !----------------------------------------------------------------------
+
 
 
             return_value = (n-1)*(n-2)/2+m-1
@@ -630,14 +633,14 @@ contains
             !     arrays for recursion coefficients (functions of (m, n))
             !     for l <= n <= nlat and 2 <= m <= l
             !
-            !----------------------------------------------------------------------
+
             ! Dummy arguments
-            !----------------------------------------------------------------------
+
             integer(ip), intent(in) :: l
             integer(ip), intent(in) :: m
             integer(ip), intent(in) :: n
             integer(ip)              :: return_value
-            !----------------------------------------------------------------------
+
 
             return_value = l*(l-1)/2+(n-l-1)*(l-1)+m-1
 
@@ -648,9 +651,9 @@ contains
 
 
     subroutine zfin(isym, nlat, nlon, m, z, i3, wzfin)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
+
         integer(ip), intent(in)     :: isym
         integer(ip), intent(in)     :: nlat
         integer(ip), intent(in)     :: nlon
@@ -658,12 +661,12 @@ contains
         real(wp),    intent(inout)  :: z(*)
         integer(ip), intent(inout)  :: i3
         real(wp),    intent(inout)  :: wzfin(*)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
+
         integer(ip) :: imid
         integer(ip) :: workspace(4)
-        !----------------------------------------------------------------------
+
 
         imid = (nlat+1)/2
         !
@@ -687,9 +690,9 @@ contains
     contains
 
         subroutine zfin1(isym, nlat, m, z, imid, i3, zz, z1, a, b, c)
-            !----------------------------------------------------------------------
+
             ! Dummy arguments
-            !----------------------------------------------------------------------
+
             integer(ip), intent(in)     :: isym
             integer(ip), intent(in)     :: nlat
             integer(ip), intent(in)     :: m
@@ -701,12 +704,12 @@ contains
             real(wp),    intent(inout)  :: a(*)
             real(wp),    intent(inout)  :: b(*)
             real(wp),    intent(inout)  :: c(*)
-            !----------------------------------------------------------------------
+
             ! Dummy arguments
-            !----------------------------------------------------------------------
+
             integer(ip), save :: i1, i2
             integer(ip)       :: ns, np1, nstp, itemp, nstrt
-            !----------------------------------------------------------------------
+
 
             itemp = i1
             i1 = i2
@@ -757,18 +760,18 @@ contains
 
         pure function get_workspace_indices(nlat, nlon, imid) &
             result (return_value)
-            !----------------------------------------------------------------------
+
             ! Dummy arguments
-            !----------------------------------------------------------------------
+
             integer(ip), intent(in) :: nlat
             integer(ip), intent(in) :: nlon
             integer(ip), intent(in) :: imid
             integer(ip)              :: return_value(4)
-            !----------------------------------------------------------------------
+
             ! Dummy arguments
-            !----------------------------------------------------------------------
+
             integer(ip) :: mmax, lim, labc
-            !----------------------------------------------------------------------
+
 
             associate( i => return_value )
 
@@ -788,19 +791,19 @@ contains
 
 
     subroutine zfinit(nlat, nlon, wzfin, dwork)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
+
         integer(ip), intent(in)     :: nlat
         integer(ip), intent(in)     :: nlon
         real(wp),    intent(inout)  :: wzfin(*)
         real(wp),    intent(inout)  :: dwork(nlat+2)
-        !----------------------------------------------------------------------
+
         ! Local variables
-        !----------------------------------------------------------------------
+
         integer(ip) :: imid
         integer(ip) :: iw1, iw2
-        !----------------------------------------------------------------------
+
 
         imid = (nlat+1)/2
 
@@ -827,9 +830,9 @@ contains
             !     where mmax = min(nlat, nlon/2+1)
             !     cz and work must each have nlat+1 locations
             !
-            !----------------------------------------------------------------------
+
             ! Dummy arguments
-            !----------------------------------------------------------------------
+
             integer(ip), intent(in)     :: nlat
             integer(ip), intent(in)     :: nlon
             integer(ip), intent(in)     :: imid
@@ -837,12 +840,12 @@ contains
             real(wp),    intent(inout)  :: abc(*)
             real(wp),    intent(inout)  :: cz(nlat+1)
             real(wp),    intent(inout)  :: work(nlat+1)
-            !----------------------------------------------------------------------
+
             ! Local variables
-            !----------------------------------------------------------------------
+
             integer(ip)         :: i, m, n, mp1, np1
             real(wp)            :: dt, th, zh
-            !----------------------------------------------------------------------
+
 
             dt = PI/(nlat-1)
 
@@ -881,18 +884,18 @@ contains
         !
         !    cz and work must both have nlat/2+1 locations
         !
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
+
         integer(ip), intent(in)     :: nlat
         integer(ip), intent(in)     :: m
         integer(ip), intent(in)     :: n
         real(wp),    intent(inout)  :: cz(nlat/2 + 1)
         real(wp),    intent(inout)  :: work(nlat/2 + 1)
-        !----------------------------------------------------------------------
+
         integer(ip) :: i, k, lc, kp1, kdo, idx
         real(wp)    :: summation, sc1, t1, t2
-        !----------------------------------------------------------------------
+
 
         lc = (nlat+1)/2
         sc1 = TWO/(nlat-1)
@@ -964,21 +967,21 @@ contains
 
 
     subroutine dnzft(nlat, m, n, th, cz, zh)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
+
         integer(ip), intent(in)   :: nlat
         integer(ip), intent(in)   :: m
         integer(ip), intent(in)   :: n
         real(wp),    intent(in)   :: th
         real(wp),    intent(in)   :: cz(*)
         real(wp),    intent(out)  :: zh
-        !----------------------------------------------------------------------
+
         ! Local variables
-        !----------------------------------------------------------------------
+
         integer(ip) :: i, k, lc, lq, ls
         real(wp)    :: cos2t, sin2t, cost, sint, temp
-        !----------------------------------------------------------------------
+
 
         zh = ZERO
         cos2t = cos(TWO*th)
@@ -1091,9 +1094,9 @@ contains
 
 
     subroutine alin(isym, nlat, nlon, m, p, i3, walin)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
+
         integer(ip), intent(in)     :: isym
         integer(ip), intent(in)     :: nlat
         integer(ip), intent(in)     :: nlon
@@ -1101,12 +1104,12 @@ contains
         real(wp),    intent(inout)  :: p(*)
         integer(ip), intent(inout)  :: i3
         real(wp),    intent(inout)  :: walin(*)
-        !----------------------------------------------------------------------
+
         ! Local variables
-        !----------------------------------------------------------------------
+
         integer(ip) :: imid
         integer(ip) :: workspace_indices(4)
-        !----------------------------------------------------------------------
+
 
         imid = (nlat+1)/2
 
@@ -1130,9 +1133,9 @@ contains
 
 
         subroutine alin1(isym, nlat, m, p, imid, i3, pz, p1, a, b, c)
-            !----------------------------------------------------------------------
+
             ! Dummy arguments
-            !----------------------------------------------------------------------
+
             integer(ip), intent(in)     :: isym
             integer(ip), intent(in)     :: nlat
             integer(ip), intent(in)     :: m
@@ -1144,12 +1147,12 @@ contains
             real(wp),    intent(inout)  :: a(*)
             real(wp),    intent(inout)  :: b(*)
             real(wp),    intent(inout)  :: c(*)
-            !----------------------------------------------------------------------
+
             ! Local variables
-            !----------------------------------------------------------------------
+
             integer(ip)       :: ns, np1, nstp, itemp, nstrt
             integer(ip), save :: i1, i2
-            !----------------------------------------------------------------------
+
 
             itemp = i1
             i1 = i2
@@ -1196,18 +1199,18 @@ contains
 
         pure function get_workspace_indices(nlat, nlon, imid) &
             result (return_value)
-            !----------------------------------------------------------------------
+
             ! Dummy arguments
-            !----------------------------------------------------------------------
+
             integer(ip), intent(in) :: nlat
             integer(ip), intent(in) :: nlon
             integer(ip), intent(in) :: imid
             integer(ip)              :: return_value(4)
-            !----------------------------------------------------------------------
+
             ! Local variables arguments
-            !----------------------------------------------------------------------
+
             integer(ip) :: lim, mmax, labc
-            !----------------------------------------------------------------------
+
 
             associate( i => return_value )
 
@@ -1228,18 +1231,18 @@ contains
 
 
     subroutine alinit(nlat, nlon, walin, dwork)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
+
         integer(ip), intent(in)     :: nlat
         integer(ip), intent(in)     :: nlon
         real(wp),    intent(inout)  :: walin(*)
         real(wp),    intent(inout)  :: dwork(nlat+1)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
+
         integer(ip) :: imid, iw1
-        !----------------------------------------------------------------------
+
 
         imid = (nlat+1)/2
         iw1 = 2*nlat*imid+1
@@ -1252,21 +1255,21 @@ contains
     contains
 
         subroutine alini1(nlat, nlon, imid, p, abc, cp)
-            !----------------------------------------------------------------------
+
             ! Dummy arguments
-            !----------------------------------------------------------------------
+
             integer(ip), intent(in)     :: nlat
             integer(ip), intent(in)     :: nlon
             integer(ip), intent(in)     :: imid
             real(wp),    intent(inout)  :: p(imid, nlat,2)
             real(wp),    intent(inout)  :: abc(*)
             real(wp),    intent(inout)  :: cp(*)
-            !----------------------------------------------------------------------
+
             ! Dummy arguments
-            !----------------------------------------------------------------------
+
             integer(ip)         :: i, m, n, mp1, np1
             real(wp)            :: dt, ph, th
-            !----------------------------------------------------------------------
+
 
             dt = PI/(nlat-1)
 
@@ -1298,17 +1301,17 @@ contains
         ! relation for the associated legendre functions. array abc
         ! must have 3*((mmax-2)*(2*nlat-mmax-1))/2 locations.
         !
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
+
         integer(ip), intent(in)     :: nlat
         integer(ip), intent(in)     :: nlon
         real(wp),    intent(inout)  :: abc(*)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
+
         integer(ip) :: mmax, labc, iw1, iw2
-        !----------------------------------------------------------------------
+
 
         ! Compute workspace indices
         mmax = min(nlat, nlon/2+1)
@@ -1327,21 +1330,21 @@ contains
             ! Coefficients a, b, and c for computing pbar(m, n, theta) are
             ! stored in location ((m-2)*(nlat+nlat-m-1))/2+n+1
             !
-            !----------------------------------------------------------------------
+
             ! Dummy arguments
-            !----------------------------------------------------------------------
+
             integer(ip), intent(in)     :: nlat
             integer(ip), intent(in)     :: nlon
             real(wp),    intent(inout)  :: a(*)
             real(wp),    intent(inout)  :: b(*)
             real(wp),    intent(inout)  :: c(*)
-            !----------------------------------------------------------------------
+
             ! Dummy arguments
-            !----------------------------------------------------------------------
+
             integer(ip) :: m, n, ns, mp1, np1, mp3, mmax
             real(wp)    :: cn, fm, fn
             real(wp)    :: tm, tn, fnmm, fnpm, temp
-            !----------------------------------------------------------------------
+
 
             mmax = min(nlat, nlon/2+1)
 
@@ -1384,10 +1387,10 @@ contains
     end subroutine rabcp
 
 
-    subroutine sea1(nlat, nlon, imid, z, idz, zin, wzfin, dwork)
-        !----------------------------------------------------------------------
+    subroutine initialize_workspace_for_regular_scalar_analysis(nlat, nlon, imid, z, idz, zin, wzfin, dwork)
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
+
         integer(ip), intent(in)     :: nlat
         integer(ip), intent(in)     :: nlon
         integer(ip), intent(in)     :: imid
@@ -1396,11 +1399,11 @@ contains
         real(wp),    intent(inout)  :: zin(imid, nlat,3)
         real(wp),    intent(inout)  :: wzfin(*)
         real(wp),    intent(inout)  :: dwork(*)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
+
         integer(ip) :: i, m, i3, mn, mp1, np1, mmax
-        !----------------------------------------------------------------------
+
 
         call zfinit(nlat, nlon, wzfin, dwork)
 
@@ -1417,14 +1420,14 @@ contains
             end do
         end do
 
-    end subroutine sea1
+    end subroutine initialize_workspace_for_regular_scalar_analysis
 
 
 
-    subroutine ses1(nlat, nlon, imid, p, pin, walin, dwork)
-        !----------------------------------------------------------------------
+    subroutine initialize_workspace_for_regular_scalar_synthesis(nlat, nlon, imid, p, pin, walin, dwork)
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
+
         integer(ip), intent(in)     :: nlat
         integer(ip), intent(in)     :: nlon
         integer(ip), intent(in)     :: imid
@@ -1432,11 +1435,11 @@ contains
         real(wp),    intent(inout)  :: pin(imid,nlat,3)
         real(wp),    intent(inout)  :: walin(*)
         real(wp),    intent(inout)  :: dwork(*)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
+
         integer(ip) :: m, i3, mn, mp1, np1, mmax
-        !----------------------------------------------------------------------
+
 
         call alinit(nlat, nlon, walin, dwork)
 
@@ -1451,23 +1454,21 @@ contains
             end do
         end do
 
-    end subroutine ses1
-
-
+    end subroutine initialize_workspace_for_regular_scalar_synthesis
 
     subroutine zvinit(nlat, nlon, wzvin, dwork)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
+
         integer(ip), intent(in)     :: nlat
         integer(ip), intent(in)     :: nlon
         real(wp),    intent(inout)  :: wzvin(*)
         real(wp),    intent(inout)  :: dwork(nlat+2)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
+
         integer(ip) :: imid, iw1, iw2
-        !----------------------------------------------------------------------
+
 
         imid = (nlat+1)/2
         iw1 = 2*nlat*imid+1
@@ -1487,9 +1488,9 @@ contains
             !     locations where mmax = min(nlat, (nlon+1)/2)
             !     czv and work must each have nlat/2+1  locations
             !
-            !----------------------------------------------------------------------
+
             ! Dummy arguments
-            !----------------------------------------------------------------------
+
             integer(ip), intent(in)     :: nlat
             integer(ip), intent(in)     :: nlon
             integer(ip), intent(in)     :: imid
@@ -1497,12 +1498,12 @@ contains
             real(wp),    intent(inout)  :: abc(*)
             real(wp),    intent(inout)  :: czv(nlat/2+1)
             real(wp),    intent(inout)  :: work(nlat/2+1)
-            !----------------------------------------------------------------------
+
             ! Dummy arguments
-            !----------------------------------------------------------------------
+
             integer(ip)         :: i,m, mdo, mp1, n, np1
             real(wp)            :: dt, th, zvh
-            !----------------------------------------------------------------------
+
 
             dt = PI/(nlat-1)
             mdo = min(2, nlat, (nlon+1)/2)
@@ -1534,18 +1535,18 @@ contains
         ! The length of wzvin is 2*nlat*imid+3*((nlat-3)*nlat+2)/2
         ! The length of dwork is nlat+2
         !
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
+
         integer(ip), intent(in)     :: nlat
         integer(ip), intent(in)     :: nlon
         real(wp),    intent(inout)  :: wzwin(2*nlat*((nlat+1)/2)+3*((nlat-3)*nlat+2)/2)
         real(wp),    intent(inout)  :: dwork(nlat+2)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
+
         integer(ip) :: imid, iw1, iw2
-        !----------------------------------------------------------------------
+
 
         imid = (nlat+1)/2
         iw1 = 2*nlat*imid+1
@@ -1561,9 +1562,9 @@ contains
             !     locations where mmax = min(nlat, (nlon+1)/2)
             !     czw and work must each have nlat+1 locations
             !
-            !----------------------------------------------------------------------
+
             ! Dummy arguments
-            !----------------------------------------------------------------------
+
             integer(ip), intent(in)     :: nlat
             integer(ip), intent(in)     :: nlon
             integer(ip), intent(in)     :: imid
@@ -1571,12 +1572,12 @@ contains
             real(wp),    intent(inout)  :: abc(*)
             real(wp),    intent(inout)  :: czw(nlat+1)
             real(wp),    intent(inout)  :: work(nlat+1)
-            !----------------------------------------------------------------------
+
             ! Dummy arguments
-            !----------------------------------------------------------------------
+
             integer(ip)         :: i, m, mdo, mp1, n, np1
             real(wp)            :: dt, th, zwh
-            !----------------------------------------------------------------------
+
 
             dt = pi/(nlat-1)
             mdo = min(3, nlat, (nlon+1)/2)
@@ -1606,9 +1607,9 @@ contains
 
 
     subroutine zvin(ityp, nlat, nlon, m, zv, i3, wzvin)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
+
         integer(ip), intent(in)  :: ityp
         integer(ip), intent(in)  :: nlat
         integer(ip), intent(in)  :: nlon
@@ -1616,13 +1617,13 @@ contains
         real(wp),    intent(out) :: zv(*)
         integer(ip), intent(out) :: i3
         real(wp),    intent(in)  :: wzvin(*)
-        !----------------------------------------------------------------------
+
         ! Local variables
-        !----------------------------------------------------------------------
+
         integer(ip) :: imid
         integer(ip) :: iw1, iw2, iw3, iw4
         integer(ip) :: labc, lim, mmax
-        !----------------------------------------------------------------------
+
 
         imid = (nlat+1)/2
         lim = nlat*imid
@@ -1641,9 +1642,9 @@ contains
     contains
 
         subroutine zvin1(ityp, nlat, m, zv, imid, i3, zvz, zv1, a, b, c)
-            !----------------------------------------------------------------------
+
             ! Dummy arguments
-            !----------------------------------------------------------------------
+
             integer(ip), intent(in)     :: ityp
             integer(ip), intent(in)     :: nlat
             integer(ip), intent(in)     :: m
@@ -1655,13 +1656,13 @@ contains
             real(wp),    intent(in)     :: a(*)
             real(wp),    intent(in)     :: b(*)
             real(wp),    intent(in)     :: c(*)
-            !----------------------------------------------------------------------
+
             ! Local variables
-            !----------------------------------------------------------------------
+
             integer(ip)       :: i, ihold
             integer(ip)       :: np1, ns, nstp, nstrt
             integer(ip), save :: i1, i2
-            !----------------------------------------------------------------------
+
 
             ihold = i1
             i1 = i2
@@ -1725,9 +1726,9 @@ contains
 
 
     subroutine zwin(ityp, nlat, nlon, m, zw, i3, wzwin)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
+
         integer(ip), intent(in)     :: ityp
         integer(ip), intent(in)     :: nlat
         integer(ip), intent(in)     :: nlon
@@ -1735,12 +1736,12 @@ contains
         real(wp),    intent(out)    :: zw(*)
         integer(ip), intent(inout)  :: i3
         real(wp),    intent(in)     :: wzwin(*)
-        !----------------------------------------------------------------------
+
         ! Local variables
-        !----------------------------------------------------------------------
+
         integer(ip) :: imid, iw1, iw2, iw3, iw4
         integer(ip) :: labc, lim, mmax
-        !----------------------------------------------------------------------
+
 
         imid = (nlat+1)/2
         lim = nlat*imid
@@ -1759,9 +1760,9 @@ contains
     contains
 
         subroutine zwin1(ityp, nlat, m, zw, imid, i3, zw1, zw2, a, b, c)
-            !----------------------------------------------------------------------
+
             ! Dummy arguments
-            !----------------------------------------------------------------------
+
             integer(ip), intent(in)     :: ityp
             integer(ip), intent(in)     :: nlat
             integer(ip), intent(in)     :: m
@@ -1773,13 +1774,13 @@ contains
             real(wp),    intent(in)     :: a(*)
             real(wp),    intent(in)     :: b(*)
             real(wp),    intent(in)     :: c(*)
-            !----------------------------------------------------------------------
+
             ! Local variables
-            !----------------------------------------------------------------------
+
             integer(ip)       :: i, ihold
             integer(ip)       :: np1, ns, nstp, nstrt
             integer(ip), save :: i1, i2
-            !----------------------------------------------------------------------
+
 
             ihold = i1
             i1 = i2
@@ -1847,18 +1848,18 @@ contains
         ! The length of wvbin is 2*nlat*imid+3*((nlat-3)*nlat+2)/2
         ! The length of dwork is nlat+2
         !
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
+
         integer(ip), intent(in)  :: nlat
         integer(ip), intent(in)  :: nlon
         real(wp),    intent(out) :: wvbin(2*nlat*((nlat+1)/2)+3*((nlat-3)*nlat+2)/2)
         real(wp),    intent(out) :: dwork(nlat+2)
-        !----------------------------------------------------------------------
+
         ! Local variables
-        !----------------------------------------------------------------------
+
         integer(ip) :: imid, iw1, iw2
-        !----------------------------------------------------------------------
+
 
         imid = (nlat+1)/2
         iw1 = 2*nlat*imid+1
@@ -1876,9 +1877,9 @@ contains
             !     locations where mmax = min(nlat, (nlon+1)/2)
             !     cvb and work must each have nlat+1 locations
             !
-            !----------------------------------------------------------------------
+
             ! Dummy arguments
-            !----------------------------------------------------------------------
+
             integer(ip), intent(in)  :: nlat
             integer(ip), intent(in)  :: nlon
             integer(ip), intent(in)  :: imid
@@ -1886,12 +1887,12 @@ contains
             real(wp),    intent(out) :: abc(*)
             real(wp),    intent(out) :: cvb(nlat+1)
             real(wp),    intent(out) :: work(nlat+1)
-            !----------------------------------------------------------------------
+
             ! Local variables
-            !----------------------------------------------------------------------
+
             integer(ip)    :: i, m, mdo, mp1, n, np1
             real(wp)       :: dth, theta, vbh
-            !----------------------------------------------------------------------
+
 
             dth = pi/(nlat-1)
             mdo = min(2, nlat, (nlon+1)/2)
@@ -1922,18 +1923,18 @@ contains
         ! The length of wwbin is 2*nlat*imid+3*((nlat-3)*nlat+2)/2
         ! The length of dwork is nlat+2
         !
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
+
         integer(ip), intent(in)  :: nlat
         integer(ip), intent(in)  :: nlon
         real(wp),    intent(out) :: wwbin(2*nlat*((nlat+1)/2)+3*((nlat-3)*nlat+2)/2)
         real(wp),    intent(out) :: dwork(nlat+2)
-        !----------------------------------------------------------------------
+
         ! Local variables
-        !----------------------------------------------------------------------
+
         integer(ip) :: imid, iw1, iw2
-        !----------------------------------------------------------------------
+
 
         imid = (nlat+1)/2
         iw1 = 2*nlat*imid+1
@@ -1951,9 +1952,9 @@ contains
             ! locations where mmax = min(nlat, (nlon+1)/2)
             ! cwb and work must each have nlat/2+1 locations
             !
-            !----------------------------------------------------------------------
+
             ! Dummy arguments
-            !----------------------------------------------------------------------
+
             integer(ip), intent(in)  :: nlat
             integer(ip), intent(in)  :: nlon
             integer(ip), intent(in)  :: imid
@@ -1961,12 +1962,12 @@ contains
             real(wp),    intent(out) :: abc(*)
             real(wp),    intent(out) :: cwb(nlat/2+1)
             real(wp),    intent(out) :: work(nlat/2+1)
-            !----------------------------------------------------------------------
+
             ! Local variables
-            !----------------------------------------------------------------------
+
             integer(ip)         :: i, m, mdo, mp1, n, np1
             real(wp)            :: dth, wbh, theta
-            !----------------------------------------------------------------------
+
 
             dth = pi/(nlat-1)
             mdo = min(3, nlat, (nlon+1)/2)
@@ -1995,9 +1996,9 @@ contains
 
 
     subroutine vbin(ityp, nlat, nlon, m, vb, i3, wvbin)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
+
         integer(ip), intent(in)     :: ityp
         integer(ip), intent(in)     :: nlat
         integer(ip), intent(in)     :: nlon
@@ -2005,13 +2006,13 @@ contains
         real(wp),    intent(out)    :: vb(*)
         integer(ip), intent(inout)  :: i3
         real(wp),    intent(in)     :: wvbin(*)
-        !----------------------------------------------------------------------
+
         ! Local variables
-        !----------------------------------------------------------------------
+
         integer(ip) :: imid
         integer(ip) :: iw1, iw2, iw3, iw4
         integer(ip) :: labc, lim, mmax
-        !----------------------------------------------------------------------
+
 
         imid = (nlat+1)/2
         lim = nlat*imid
@@ -2030,9 +2031,9 @@ contains
     contains
 
         subroutine vbin1(ityp, nlat, m, vb, imid, i3, vbz, vb1, a, b, c)
-            !----------------------------------------------------------------------
+
             ! Dummy arguments
-            !----------------------------------------------------------------------
+
             integer(ip), intent(in)     :: ityp
             integer(ip), intent(in)     :: nlat
             integer(ip), intent(in)     :: m
@@ -2044,13 +2045,13 @@ contains
             real(wp),    intent(in)     :: a(*)
             real(wp),    intent(in)     :: b(*)
             real(wp),    intent(in)     :: c(*)
-            !----------------------------------------------------------------------
+
             ! Local variables
-            !----------------------------------------------------------------------
+
             integer(ip)       :: i, ihold
             integer(ip)       :: np1, ns, nstp, nstrt
             integer(ip), save :: i1, i2
-            !----------------------------------------------------------------------
+
 
             ihold = i1
             i1 = i2
@@ -2772,19 +2773,19 @@ contains
 
 
     subroutine dvbk(m, n, cv, work)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
+
         integer(ip), intent(in)  :: m
         integer(ip), intent(in)  :: n
         real(wp),    intent(out) :: cv(*)
         real(wp),    intent(out) :: work(*)
-        !----------------------------------------------------------------------
+
         ! Local variables
-        !----------------------------------------------------------------------
+
         integer(ip) :: l, ncv
         real(wp)    :: srnp1, fn, fk, cf
-        !----------------------------------------------------------------------
+
 
         cv(1) = ZERO
 
@@ -2846,19 +2847,19 @@ contains
 
 
     subroutine dwbk(m, n, cw, work)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
+
         integer(ip), intent(in)  :: m
         integer(ip), intent(in)  :: n
         real(wp),    intent(out) :: cw(*)
         real(wp),    intent(out) :: work(*)
-        !----------------------------------------------------------------------
+
         ! Local variables
-        !----------------------------------------------------------------------
+
         integer(ip) :: l
         real(wp)    :: fn, cf, srnp1
-        !----------------------------------------------------------------------
+
 
         cw(1) = ZERO
 
@@ -2930,20 +2931,20 @@ contains
 
 
     subroutine dvbt(m, n, theta, cv, vh)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
+
         integer(ip), intent(in)  :: m
         integer(ip), intent(in)  :: n
         real(wp),    intent(in)  :: theta
         real(wp),    intent(out) :: cv(*)
         real(wp),    intent(out) :: vh
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
+
         integer(ip) :: k, ncv
         real(wp)    :: cost, sint, cdt, sdt, temp
-        !----------------------------------------------------------------------
+
 
         vh = ZERO
 
@@ -3547,19 +3548,19 @@ contains
 
 
     subroutine dvtk(m, n, cv, work)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
+
         integer(ip), intent(in)  :: m
         integer(ip), intent(in)  :: n
         real(wp),    intent(out) :: cv(*)
         real(wp),    intent(out) :: work(*)
-        !----------------------------------------------------------------------
+
         ! Local variables
-        !----------------------------------------------------------------------
+
         integer(ip) :: l, ncv
         real(wp)    :: fn, fk, cf, srnp1
-        !----------------------------------------------------------------------
+
 
         cv(1) = ZERO
 
@@ -3720,20 +3721,20 @@ contains
 
 
     subroutine dvtt(m, n, theta, cv, vh)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
+
         integer(ip), intent(in)  :: m
         integer(ip), intent(in)  :: n
         real(wp),    intent(in)  :: theta
         real(wp),    intent(out) :: cv(*)
         real(wp),    intent(out) :: vh
-        !----------------------------------------------------------------------
+
         ! Local variables
-        !----------------------------------------------------------------------
+
         integer(ip) :: k, ncv
         real(wp)    :: cost, sint, cdt, sdt, temp
-        !----------------------------------------------------------------------
+
 
         vh = ZERO
 
@@ -3952,19 +3953,19 @@ contains
 
 
     subroutine wbgint(nlat, nlon, theta, wwbin, work)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
+
         integer(ip), intent(in) :: nlat
         integer(ip), intent(in) :: nlon
         real(wp),    intent(in) :: theta((nlat+1)/2)
         real(wp)                 :: wwbin(2*nlat*((nlat+1)/2)+3*((nlat-3)*nlat+2)/2)
         real(wp)                 :: work(nlat+2)
-        !----------------------------------------------------------------------
+
         ! Local variables
-        !----------------------------------------------------------------------
+
         integer(ip) :: imid, iw1, iw2
-        !----------------------------------------------------------------------
+
 
         imid = (nlat+1)/2
         iw1 = 2*nlat*imid+1
@@ -3980,9 +3981,9 @@ contains
     contains
 
         subroutine wbgit1(nlat, nlon, imid, theta, wb, abc, cwb, work)
-            !----------------------------------------------------------------------
+
             ! Dummy arguments
-            !----------------------------------------------------------------------
+
             integer(ip), intent(in) :: nlat
             integer(ip), intent(in) :: nlon
             integer(ip), intent(in) :: imid
@@ -3991,12 +3992,12 @@ contains
             real(wp)                 :: abc(3*((nlat-3)*nlat+2)/2)
             real(wp)                 :: cwb(nlat/2+1)
             real(wp)                 :: work(nlat/2+1)
-            !----------------------------------------------------------------------
+
             ! Local variables
-            !----------------------------------------------------------------------
+
             integer(ip) :: i, m, mdo, mp1, n, np1
             real(wp)    :: wbh
-            !----------------------------------------------------------------------
+
 
             !
             !     abc must have 3*((nlat-3)*nlat+2)/2 locations

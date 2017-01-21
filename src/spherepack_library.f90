@@ -6,6 +6,7 @@ module spherepack_library
     use spherepack_precision, only: &
         wp, & ! working precision
         ip, & ! integer precision
+        HALF_PI, &
         PI, &
         TWO_PI
 
@@ -277,8 +278,9 @@ module spherepack_library
 
     ! Constants
     public :: wp, ip
-    public :: PI, TWO_PI
-    ! Classes
+    public :: HALF_PI, PI, TWO_PI
+
+    ! Derived data types
     public :: FFTpack
     public :: HFFTpack
     public :: LegendreAux
@@ -291,6 +293,7 @@ module spherepack_library
     public :: Vector3DPointer
     public :: assignment(=)
     public :: operator(*)
+
     ! Procedural methods
     public :: divec, dives, divgc, divgs
     public :: compute_gaussian_latitudes_and_weights

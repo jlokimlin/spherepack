@@ -37,7 +37,7 @@ type_HFFTpack.f90
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 
 type_SpherepackAux.o: \
-spherepack_precision.o \
+type_HFFTpack.o \
 type_SpherepackAux.f90
 	$(FC) $(FFLAGS) -c type_SpherepackAux.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
@@ -71,7 +71,6 @@ gaussian_latitudes_and_weights_routines.f90
 
 scalar_analysis_routines.o: \
 spherepack_precision.o \
-type_HFFTpack.o \
 type_SpherepackAux.o\
 gaussian_latitudes_and_weights_routines.o\
 scalar_analysis_routines.f90
@@ -104,7 +103,6 @@ scalar_analysis_gaussian_grid_saved.f90
 
 scalar_synthesis_routines.o: \
 spherepack_precision.o \
-type_HFFTpack.o \
 type_SpherepackAux.o\
 gaussian_latitudes_and_weights_routines.o\
 scalar_synthesis_routines.f90

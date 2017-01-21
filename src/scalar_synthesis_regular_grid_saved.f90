@@ -297,9 +297,9 @@ contains
 
     module subroutine shses(nlat,nlon,isym,nt,g,idg,jdg,a,b,mdab,ndab, &
         wshses,lshses,work,lwork,ierror)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
+
         integer(ip), intent(in)     :: nlat
         integer(ip), intent(in)     :: nlon
         integer(ip), intent(in)     :: isym
@@ -316,11 +316,9 @@ contains
         real(wp),    intent(inout)  :: work(lwork)
         integer(ip), intent(in)     :: lwork
         integer(ip), intent(out)    :: ierror
-        !----------------------------------------------------------------------
+
         ! Local variables
-        !----------------------------------------------------------------------
         integer(ip) :: imid, ist, lpimn, ls, mmax, nln
-        !----------------------------------------------------------------------
 
         mmax = min(nlat,nlon/2+1)
         imid = (nlat+1)/2
@@ -392,9 +390,8 @@ contains
 
     module subroutine shsesi(nlat,nlon,wshses,lshses,work,lwork,dwork, &
         ldwork,ierror)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
         integer(ip), intent(in)  :: nlat
         integer(ip), intent(in)  :: nlon
         real(wp),    intent(out) :: wshses(lshses)
@@ -404,13 +401,10 @@ contains
         real(wp),    intent(out) :: dwork(ldwork)
         integer(ip), intent(in)  :: ldwork
         integer(ip), intent(out) :: ierror
-        !----------------------------------------------------------------------
+
         ! Local variables
-        !----------------------------------------------------------------------
         integer(ip)         :: imid, labc, lpimn, mmax
-        type(HFFTpack)      :: hfft
         type(SpherepackAux) :: sphere_aux
-        !----------------------------------------------------------------------
 
         mmax = min(nlat,nlon/2+1)
         imid = (nlat+1)/2
@@ -443,17 +437,17 @@ contains
             iw1 => 3*nlat*imid+1, &
             iw2 => lpimn+1 &
             )
-            call sphere_aux%ses1(nlat, nlon, imid, wshses, work, work(iw1), dwork)
-            call hfft%initialize(nlon, wshses(iw2))
+            call sphere_aux%initialize_workspace_for_regular_scalar_synthesis( &
+                nlat, nlon, imid, wshses, work, work(iw1), dwork)
+            call sphere_aux%hfft%initialize(nlon, wshses(iw2))
         end associate
 
     end subroutine shsesi
 
     subroutine shses_lower_routine(nlat,isym,nt,g,idgs,jdgs,a,b,mdab,ndab,p,imid, &
         idg,jdg,ge,go,work,whrfft)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
         integer(ip), intent(in)     :: nlat
         integer(ip), intent(in)     :: isym
         integer(ip), intent(in)     :: nt
@@ -471,14 +465,12 @@ contains
         real(wp),    intent(inout)  :: go(idg,jdg,*)
         real(wp),    intent(inout)  :: work(*)
         real(wp),    intent(inout)  :: whrfft(*)
-        !----------------------------------------------------------------------
+
         ! Local variables
-        !----------------------------------------------------------------------
         integer(ip)    :: i, j, imid, imm1, k, ls
         integer(ip)    :: m, mb, mdo, mmax, mn, modl, nlon
         integer(ip)    :: mp1, mp2,  ndo, nlp1, np1
-        type(HFFTpack) :: hfft
-        !----------------------------------------------------------------------
+        type(SpherepackAux) :: sphere_aux
 
         ls = idg
         nlon = jdg
@@ -596,8 +588,8 @@ contains
         end block block_construct
 
         do k=1,nt
-            if(mod(nlon,2) == 0) ge(1:ls,nlon,k) = 2.0_wp*ge(1:ls,nlon,k)
-            call hfft%backward(ls,nlon,ge(1,1,k),ls,whrfft,work)
+            if(mod(nlon,2) == 0) ge(1:ls,nlon,k) = TWO * ge(1:ls,nlon,k)
+            call sphere_aux%hfft%backward(ls,nlon,ge(1,1,k),ls,whrfft,work)
         end do
 
         select case (isym)

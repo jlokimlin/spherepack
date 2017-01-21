@@ -303,6 +303,8 @@ contains
 
     module subroutine shaec(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, &
         wshaec, lshaec, work, lwork, ierror)
+
+        ! Dummy arguments
         real(wp) :: a(mdab, ndab, *)
         real(wp) :: b(mdab, ndab, *)
         real(wp) :: g(idg, jdg, *)
@@ -397,9 +399,8 @@ contains
     end subroutine shaec
 
     module subroutine shaeci(nlat, nlon, wshaec, lshaec, dwork, ldwork, ierror)
-        !--------------------------------------------------------------
+
         ! Dummy arguments
-        !--------------------------------------------------------------
         integer(ip), intent(in)  :: nlat
         integer(ip), intent(in)  :: nlon
         real(wp),    intent(out) :: wshaec(lshaec)
@@ -407,13 +408,10 @@ contains
         real(wp),    intent(out) :: dwork(ldwork)
         integer(ip), intent(in)  :: ldwork
         integer(ip), intent(out) :: ierror
-        !--------------------------------------------------------------
+
         ! Local variables
-        !--------------------------------------------------------------
         integer(ip)         :: imid, iw1, labc, lzz1, mmax
-        type(HFFTpack)      :: hfft
         type(SpherepackAux) :: sphere_aux
-        !--------------------------------------------------------------
 
         imid = (nlat+1)/2
         mmax = min(nlat, nlon/2+1)
@@ -442,7 +440,7 @@ contains
         ! Set workspace pointer
         iw1 = lzz1+labc+1
 
-        call hfft%initialize(nlon, wshaec(iw1))
+        call sphere_aux%hfft%initialize(nlon, wshaec(iw1))
 
     end subroutine shaeci
 
@@ -496,7 +494,6 @@ contains
             ge(idg, jdg, *), go(idg, jdg, *), zb(imid, nlat, 3), wzfin(*), &
             whrfft(*), work(*)
 
-        type(HFFTpack)      :: hfft
         type(SpherepackAux) :: sphere_aux
 
         ls = idg
@@ -547,8 +544,8 @@ contains
         end do
 
         27 do k=1, nt
-            call hfft%forward(ls, nlon, ge(1, 1, k), ls, whrfft, work)
-            if (mod(nlon, 2) /= 0) exit !goto 35
+            call sphere_aux%hfft%forward(ls, nlon, ge(1, 1, k), ls, whrfft, work)
+            if (mod(nlon, 2) /= 0) exit
             do i=1, ls
                 ge(i, nlon, k) = HALF * ge(i, nlon, k)
             end do
@@ -562,6 +559,7 @@ contains
                 end do
             end do
         end do
+
         if (isym == 1) then
             goto 145
         end if
@@ -609,9 +607,7 @@ contains
             end do
         end do
 
-135     if (isym == 2) then
-            return
-        end if
+135     if (isym == 2) return
 
 145     call sphere_aux%zfin(1, nlat, nlon, 0, zb, i3, wzfin)
 

@@ -320,9 +320,8 @@ contains
 
     module subroutine shaes(nlat, nlon, isym, nt, g, idg, jdg, a, b, &
         mdab, ndab, wshaes, lshaes, work, lwork, ierror)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
         integer(ip), intent(in)     :: nlat
         integer(ip), intent(in)     :: nlon
         integer(ip), intent(in)     :: isym
@@ -339,11 +338,10 @@ contains
         real(wp),    intent(inout)  :: work(lwork)
         integer(ip), intent(in)     :: lwork
         integer(ip), intent(out)    :: ierror
-        !----------------------------------------------------------------------
-        ! Dummy arguments
-        !----------------------------------------------------------------------
+
+        ! Local variables
         integer(ip) :: ist, mmax, imid, idz, lzimn, ls, nln
-        !----------------------------------------------------------------------
+
 
         !
         !  Set constants
@@ -431,9 +429,8 @@ contains
         ! size(wshaes) = (l*(l+1)*imid)/2+nlon+15
         ! size(work) = 5*l*imid + 3*((l-3)*l+2)/2
         !
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
         integer(ip), intent(in)     :: nlat
         integer(ip), intent(in)     :: nlon
         real(wp),    intent(out)    :: wshaes(lshaes)
@@ -443,14 +440,11 @@ contains
         real(wp),    intent(out)    :: dwork(ldwork)
         integer(ip), intent(in)     :: ldwork
         integer(ip), intent(out)    :: ierror
-        !----------------------------------------------------------------------
+
         ! Local variables
-        !----------------------------------------------------------------------
         integer(ip)         :: mmax, imid, labc, lzimn
         integer(ip)         :: workspace_indices(3)
-        type(HFFTpack)      :: hfft
         type(SpherepackAux) :: sphere_aux
-        !----------------------------------------------------------------------
 
         mmax = min(nlat, nlon/2+1)
         imid = (nlat+1)/2
@@ -490,8 +484,9 @@ contains
             iw1 => workspace_indices(2), &
             iw2 => workspace_indices(3) &
             )
-            call sphere_aux%sea1(nlat, nlon, imid, wshaes, idz, work, work(iw1), dwork)
-            call hfft%initialize(nlon, wshaes(iw2))
+            call sphere_aux%initialize_workspace_for_regular_scalar_analysis( &
+                nlat, nlon, imid, wshaes, idz, work, work(iw1), dwork)
+            call sphere_aux%hfft%initialize(nlon, wshaes(iw2))
         end associate
 
     end subroutine shaesi
@@ -499,9 +494,9 @@ contains
 
     subroutine shaes_lower_routine(nlat, isym, nt, g, idgs, jdgs, a, b, mdab, ndab, &
         z, idz, idg, jdg, ge, go, work, whrfft)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
+
         integer(ip), intent(in)     :: nlat
         integer(ip), intent(in)     :: isym
         integer(ip), intent(in)     :: nt
@@ -520,14 +515,14 @@ contains
         real(wp),    intent(inout)  :: go(idg, jdg, *)
         real(wp),    intent(inout)  :: work(*)
         real(wp),    intent(inout)  :: whrfft(*)
-        !----------------------------------------------------------------------
+
         ! Local variables
-        !----------------------------------------------------------------------
+
         integer(ip)    :: i, j, k, m, mb, ls, mp1, np1, mp2, mdo, ndo
         integer(ip)    :: imm1, nlp1, imid, modl, mmax, nlon
         real(wp)       :: fsn, tsn
-        type(HFFTpack) :: hfft
-        !----------------------------------------------------------------------
+        type(SpherepackAux) :: sphere_aux
+
 
         ls = idg
         nlon = jdg
@@ -540,8 +535,8 @@ contains
         end if
 
         nlp1 = nlat+1
-        tsn = 2.0_wp/nlon
-        fsn = 4.0_wp/nlon
+        tsn = TWO/nlon
+        fsn = FOUR/nlon
         imid = (nlat+1)/2
         modl = mod(nlat, 2)
 
@@ -551,7 +546,7 @@ contains
             imm1 = imid
         end if
 
-        if_block: block
+        block_construct: block
 
             if (isym == 0) then
                 do k=1, nt
@@ -565,7 +560,7 @@ contains
                     ge(1:imm1,1:nlon,k) = fsn*g(1:imm1,1:nlon,k)
                 end do
 
-                if (isym == 1) exit if_block
+                if (isym == 1) exit block_construct
 
             end if
 
@@ -575,26 +570,26 @@ contains
                 end do
             end if
 
-        end block if_block
+        end block block_construct
 
         !
         !  Fast Fourier Transform
         !
         fft_loop: do k=1, nt
 
-            call hfft%forward(ls, nlon, ge(1, 1, k), ls, whrfft, work)
+            call sphere_aux%hfft%forward(ls, nlon, ge(1, 1, k), ls, whrfft, work)
 
             if (mod(nlon, 2) /= 0) exit fft_loop
 
-            ge(1:ls, nlon, k) = 0.5_wp * ge(1:ls, nlon, k)
+            ge(1:ls, nlon, k) = HALF * ge(1:ls, nlon, k)
 
         end do fft_loop
 
         do k=1, nt
             do mp1=1, mmax
                 do np1=mp1, nlat
-                    a(mp1, np1, k) = 0.0_wp
-                    b(mp1, np1, k) = 0.0_wp
+                    a(mp1, np1, k) = ZERO
+                    b(mp1, np1, k) = ZERO
                 end do
             end do
         end do
@@ -693,16 +688,14 @@ contains
 
     pure function get_workspace_indices(nlat, nlon, mmax, imid, lzimn) &
         result (return_value)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
         integer(ip), intent(in) :: nlat
         integer(ip), intent(in) :: nlon
         integer(ip), intent(in) :: mmax
         integer(ip), intent(in) :: imid
         integer(ip), intent(in) :: lzimn
-        integer(ip)              :: return_value(3)
-        !----------------------------------------------------------------------
+        integer(ip)             :: return_value(3)
 
         associate( i => return_value )
             i(1) = (mmax*(2*nlat-mmax+1))/2

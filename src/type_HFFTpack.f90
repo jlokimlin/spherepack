@@ -217,35 +217,27 @@ module type_HFFTpack
     public :: HFFTpack
     public :: hrffti, hrfftf, hrfftb
     
-    type, public :: HFFTpack
-    contains
-        !-------------------------------------------------------
-        ! Type-bound procedures
-        !-------------------------------------------------------
-        procedure, nopass :: initialize => hrffti
-        procedure, nopass :: forward => hrfftf
-        procedure, nopass :: backward => hrfftb
-        !-------------------------------------------------------
-    end type HFFTpack
-
-    !------------------------------------------------------------------
     ! Parameters confined to the module
-    !------------------------------------------------------------------
     real(wp),    parameter :: ZERO = 0.0_wp
     real(wp),    parameter :: ONE = 1.0_wp
     real(wp),    parameter :: TWO = 2.0_wp
     integer(ip), parameter :: NUMBER_OF_FACTORS = 15_ip
-    !------------------------------------------------------------------
+
+    type, public :: HFFTpack
+    contains
+        ! Type-bound procedures
+        procedure, nopass :: initialize => hrffti
+        procedure, nopass :: forward => hrfftf
+        procedure, nopass :: backward => hrfftb
+    end type HFFTpack
 
 contains
 
     subroutine hrffti(n, wsave)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
         integer(ip), intent(in)  :: n
         real(wp),    intent(out) :: wsave(n+NUMBER_OF_FACTORS)
-        !----------------------------------------------------------------------
 
         if (n == 1) return
 
@@ -254,21 +246,18 @@ contains
     end subroutine hrffti
 
     subroutine half_initialize_lower_routine(n, wa, fac)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
         integer(ip), intent(in)  :: n
         real(wp),    intent(out) :: wa(n)
         real(wp),    intent(out) :: fac(NUMBER_OF_FACTORS)
-        !--------------------------------------------------------------
+
         ! Local variables
-        !--------------------------------------------------------------
         integer(ip)            :: i, ib, ido, ii, iip, ipm, is
         integer(ip)            :: j, k1, l1, l2, ld
         integer(ip)            :: nf, nfm1, nl, nq, nr, ntry
         integer(ip), parameter :: NTRYH(*) = [4, 2, 3, 5]
         real(wp)               :: arg,  argh, argld, fi
-        !--------------------------------------------------------------
 
         ! Initialize
         ntry = 0
@@ -351,21 +340,14 @@ contains
     end subroutine half_initialize_lower_routine
 
     subroutine hrfftf(m, n, r, mdimr, whrfft, work)
-        !
-        ! Purpose:
-        !
-        ! A multiple fft package for spherepack
-        !
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
         integer(ip), intent(in)     :: m
         integer(ip), intent(in)     :: n
         real(wp),    intent(inout)  :: r(mdimr, n)
         integer(ip), intent(in)     :: mdimr
         real(wp),    intent(in)     :: whrfft(n+NUMBER_OF_FACTORS)
         real(wp),    intent(out)    :: work(*)
-         !----------------------------------------------------------------------
 
         if (n == 1) return
 
@@ -374,9 +356,8 @@ contains
     end subroutine hrfftf
 
     subroutine half_forward_lower_routine(m, n, c, mdimc, ch, wa, fac)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
         integer(ip), intent(in)     :: m
         integer(ip), intent(in)     :: n
         real(wp),    intent(inout)  :: c(mdimc, n)
@@ -384,13 +365,11 @@ contains
         real(wp),    intent(out)    :: ch(m, n)
         real(wp),    intent(in)     :: wa(n)
         real(wp),    intent(in)     :: fac(NUMBER_OF_FACTORS)
-        !----------------------------------------------------------------------
+
         ! Local variables
-        !----------------------------------------------------------------------
         integer(ip) :: k1, l1, l2
         integer(ip) :: na, kh, nf, iip
         integer(ip) :: iw, ix2, ix3, ix4, ido, idl1
-        !----------------------------------------------------------------------
 
         nf = int(fac(2), kind=ip)
         na = 1
@@ -455,9 +434,8 @@ contains
     end subroutine half_forward_lower_routine
 
     subroutine half_forward_pass_2(mp, ido, l1, cc, mdimcc, ch, mdimch, wa1)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
         integer(ip), intent(in)     :: mp
         integer(ip), intent(in)     :: ido
         integer(ip), intent(in)     :: l1
@@ -466,11 +444,9 @@ contains
         real(wp),    intent(inout)  :: cc(mdimcc, ido, l1, 2)
         integer(ip), intent(in)     :: mdimcc
         real(wp),    intent(in)     :: wa1(ido)
-        !----------------------------------------------------------------------
+
         ! Local variables
-        !----------------------------------------------------------------------
         integer(ip) :: i, k, m, ic, idp2
-        !----------------------------------------------------------------------
 
         ch(1:mp, 1, 1,:) = cc(1:mp, 1,:, 1)+cc(1:mp, 1,:, 2)
         ch(1:mp, ido, 2,:) = cc(1:mp, 1,:, 1)-cc(1:mp, 1,:, 2)
@@ -510,9 +486,8 @@ contains
     end subroutine half_forward_pass_2
 
     subroutine half_forward_pass_3(mp, ido, l1, cc, mdimcc, ch, mdimch, wa1, wa2)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
         integer(ip), intent(in)     :: mp
         integer(ip), intent(in)     :: ido
         integer(ip), intent(in)     :: l1
@@ -522,14 +497,12 @@ contains
         integer(ip), intent(in)     :: mdimcc
         real(wp),    intent(in)     :: wa1(ido)
         real(wp),    intent(in)     :: wa2(ido)
-        !----------------------------------------------------------------------
+
         ! Local variables
-        !----------------------------------------------------------------------
         integer(ip)         :: i, k, m, ic, idp2
         real(wp), parameter :: ARG=TWO_PI/3
         real(wp), parameter :: TAUR = cos(ARG)
         real(wp), parameter :: TAUI = sin(ARG)
-        !----------------------------------------------------------------------
 
         do k=1, l1
             do m=1, mp
@@ -597,9 +570,8 @@ contains
     end subroutine half_forward_pass_3
 
     subroutine half_forward_pass_4(mp, ido, l1, cc, mdimcc, ch, mdimch, wa1, wa2, wa3)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
         integer(ip), intent(in)     :: mp
         integer(ip), intent(in)     :: ido
         integer(ip), intent(in)     :: l1
@@ -610,12 +582,10 @@ contains
         real(wp),    intent(in)     :: wa1(ido)
         real(wp),    intent(in)     :: wa2(ido)
         real(wp),    intent(in)     :: wa3(ido)
-        !----------------------------------------------------------------------
+
         ! Local variables
-        !----------------------------------------------------------------------
         integer(ip)         :: i, k, m, ic, idp2
         real(wp), parameter :: HALF_SQRT2 = sqrt(TWO)/2
-        !----------------------------------------------------------------------
 
         do k=1, l1
             do m=1, mp
@@ -721,9 +691,8 @@ contains
 
     subroutine half_forward_pass_5(mp, ido, l1, cc, mdimcc, ch, mdimch, &
         wa1, wa2, wa3, wa4)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
         integer(ip), intent(in)     :: mp
         integer(ip), intent(in)     :: ido
         integer(ip), intent(in)     :: l1
@@ -735,16 +704,15 @@ contains
         real(wp),    intent(in)     :: wa2(ido)
         real(wp),    intent(in)     :: wa3(ido)
         real(wp),    intent(in)     :: wa4(ido)
-        !----------------------------------------------------------------------
+
         ! Local variables
-        !----------------------------------------------------------------------
         integer(ip)         :: i, k, m, ic, idp2
         real(wp), parameter :: ARG = TWO_PI/5
         real(wp), parameter :: TR11=cos(ARG)
         real(wp), parameter :: TI11=sin(ARG)
         real(wp), parameter :: TR12=cos(TWO*ARG)
         real(wp), parameter :: TI12=sin(TWO*ARG)
-        !----------------------------------------------------------------------
+
 
         do k=1, l1
             do m=1, mp
@@ -850,33 +818,33 @@ contains
                     ch(m, ic-1, 4, k) = &
                         (cc(m, i-1, k, 1)+TR12*((wa1(i-2)* &
                         cc(m, i-1, k, 2)+wa1(i-1)*cc(m, i, k, 2))+(wa4(i-2)* &
-                        cc(m, i-1, k, 5)+wa4(i-1)*cc(m, i, k, 5)))+TR11*((wa2(i-2)* &          !
+                        cc(m, i-1, k, 5)+wa4(i-1)*cc(m, i, k, 5)))+TR11*((wa2(i-2)* &
                         cc(m, i-1, k, 3)+wa2(i-1)*cc(m, i, k, 3))+(wa3(i-2)* &
-                        cc(m, i-1, k, 4)+wa3(i-1)*cc(m, i, k, 4))))-(TI12*((wa1(i-2)* &        !
-                        cc(m, i, k, 2)-wa1(i-1)*cc(m, i-1, k, 2))-(wa4(i-2)*cc(m, i, k, 5)- &     !
-                        wa4(i-1)*cc(m, i-1, k, 5)))-TI11*((wa2(i-2)*cc(m, i, k, 3)- &          !
-                        wa2(i-1)*cc(m, i-1, k, 3))-(wa3(i-2)*cc(m, i, k, 4)-wa3(i-1)* &        !
+                        cc(m, i-1, k, 4)+wa3(i-1)*cc(m, i, k, 4))))-(TI12*((wa1(i-2)* &
+                        cc(m, i, k, 2)-wa1(i-1)*cc(m, i-1, k, 2))-(wa4(i-2)*cc(m, i, k, 5)- &
+                        wa4(i-1)*cc(m, i-1, k, 5)))-TI11*((wa2(i-2)*cc(m, i, k, 3)- &
+                        wa2(i-1)*cc(m, i-1, k, 3))-(wa3(i-2)*cc(m, i, k, 4)-wa3(i-1)* &
                         cc(m, i-1, k, 4))))
 
                     ch(m, i, 5, k) = &
-                        (cc(m, i, k, 1)+TR12*((wa1(i-2)*cc(m, i, k, 2)- &         !
-                        wa1(i-1)*cc(m, i-1, k, 2))+(wa4(i-2)*cc(m, i, k, 5)-wa4(i-1)* &        !
-                        cc(m, i-1, k, 5)))+TR11*((wa2(i-2)*cc(m, i, k, 3)-wa2(i-1)* &          !
+                        (cc(m, i, k, 1)+TR12*((wa1(i-2)*cc(m, i, k, 2)- &
+                        wa1(i-1)*cc(m, i-1, k, 2))+(wa4(i-2)*cc(m, i, k, 5)-wa4(i-1)* &
+                        cc(m, i-1, k, 5)))+TR11*((wa2(i-2)*cc(m, i, k, 3)-wa2(i-1)* &
                         cc(m, i-1, k, 3))+(wa3(i-2)*cc(m, i, k, 4)-wa3(i-1)* &
-                        cc(m, i-1, k, 4))))+(TI12*((wa4(i-2)*cc(m, i-1, k, 5)+ &               !
-                        wa4(i-1)*cc(m, i, k, 5))-(wa1(i-2)*cc(m, i-1, k, 2)+wa1(i-1)* &        !
-                        cc(m, i, k, 2)))-TI11*((wa3(i-2)*cc(m, i-1, k, 4)+wa3(i-1)* &          !
+                        cc(m, i-1, k, 4))))+(TI12*((wa4(i-2)*cc(m, i-1, k, 5)+ &
+                        wa4(i-1)*cc(m, i, k, 5))-(wa1(i-2)*cc(m, i-1, k, 2)+wa1(i-1)* &
+                        cc(m, i, k, 2)))-TI11*((wa3(i-2)*cc(m, i-1, k, 4)+wa3(i-1)* &
                         cc(m, i, k, 4))-(wa2(i-2)*cc(m, i-1, k, 3)+wa2(i-1)* &
                         cc(m, i, k, 3))))
 
                     ch(m, ic, 4, k) = &
-                        (TI12*((wa4(i-2)*cc(m, i-1, k, 5)+wa4(i-1)* &         !
+                        (TI12*((wa4(i-2)*cc(m, i-1, k, 5)+wa4(i-1)* &
                         cc(m, i, k, 5))-(wa1(i-2)*cc(m, i-1, k, 2)+wa1(i-1)* &
-                        cc(m, i, k, 2)))-TI11*((wa3(i-2)*cc(m, i-1, k, 4)+wa3(i-1)* &          !
+                        cc(m, i, k, 2)))-TI11*((wa3(i-2)*cc(m, i-1, k, 4)+wa3(i-1)* &
                         cc(m, i, k, 4))-(wa2(i-2)*cc(m, i-1, k, 3)+wa2(i-1)* &
-                        cc(m, i, k, 3))))-(cc(m, i, k, 1)+TR12*((wa1(i-2)*cc(m, i, k, 2)- &       !
-                        wa1(i-1)*cc(m, i-1, k, 2))+(wa4(i-2)*cc(m, i, k, 5)-wa4(i-1)* &        !
-                        cc(m, i-1, k, 5)))+TR11*((wa2(i-2)*cc(m, i, k, 3)-wa2(i-1)* &          !
+                        cc(m, i, k, 3))))-(cc(m, i, k, 1)+TR12*((wa1(i-2)*cc(m, i, k, 2)- &
+                        wa1(i-1)*cc(m, i-1, k, 2))+(wa4(i-2)*cc(m, i, k, 5)-wa4(i-1)* &
+                        cc(m, i-1, k, 5)))+TR11*((wa2(i-2)*cc(m, i, k, 3)-wa2(i-1)* &
                         cc(m, i-1, k, 3))+(wa3(i-2)*cc(m, i, k, 4)-wa3(i-1)* &
                         cc(m, i-1, k, 4))))
                 end do
@@ -887,9 +855,8 @@ contains
 
     subroutine half_forward_pass_n(mp, ido, iip, l1, idl1, cc, c1, c2, mdimcc, &
         ch, ch2, mdimch, wa)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
         integer(ip), intent(in)     :: mp
         integer(ip), intent(in)     :: ido
         integer(ip), intent(in)     :: iip
@@ -903,13 +870,11 @@ contains
         real(wp),    intent(inout)  :: ch2(mdimch, idl1, iip)
         integer(ip), intent(in)     :: mdimch
         real(wp),    intent(in)     :: wa(ido)
-        !----------------------------------------------------------------------
+
         ! Local variables
-        !----------------------------------------------------------------------
         integer(ip) :: i, j, k, l, j2, ic, jc, lc, ik, is, idij
         real(wp)    :: dc2, ai1, ai2, ar1, ar2, ds2
         real(wp)    :: ar1h, ar2h
-        !----------------------------------------------------------------------
 
         associate( &
             ipph => (iip+1)/2, &
@@ -1067,16 +1032,14 @@ contains
     end subroutine half_forward_pass_n
 
     subroutine hrfftb(m, n, r, mdimr, whrfft, work)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
         integer(ip), intent(in)     :: m
         integer(ip), intent(in)     :: n
         real(wp),    intent(inout)  :: r(mdimr, n)
         integer(ip), intent(in)     :: mdimr
         real(wp),    intent(in)     :: whrfft(n+NUMBER_OF_FACTORS)
         real(wp),    intent(out)    :: work(*)
-        !----------------------------------------------------------------------
 
         if (n == 1) return
 
@@ -1085,9 +1048,8 @@ contains
     end subroutine hrfftb
 
     subroutine half_backward_lower_routine(m, n, c, mdimc, ch, wa, fac)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
         integer(ip), intent(in)     :: m
         integer(ip), intent(in)     :: n
         real(wp),    intent(inout)  :: c(mdimc, n)
@@ -1095,12 +1057,10 @@ contains
         real(wp),    intent(out)    :: ch(m, n)
         real(wp),    intent(in)     :: wa(n)
         real(wp),    intent(in)     :: fac(NUMBER_OF_FACTORS)
-        !----------------------------------------------------------------------
-        ! Dummy arguments
-        !----------------------------------------------------------------------
+
+        ! Local variables
         integer(ip) :: k1, l1, l2, na
         integer(ip) :: nf, iip, iw, ix2, ix3, ix4, ido, idl1
-        !----------------------------------------------------------------------
 
         nf = int(fac(2), kind=ip)
         na = 0
@@ -1163,9 +1123,8 @@ contains
     end subroutine half_backward_lower_routine
 
     subroutine half_backward_pass_2(mp, ido, l1, cc, mdimcc, ch, mdimch, wa1)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
         integer(ip), intent(in)     :: mp
         integer(ip), intent(in)     :: ido
         integer(ip), intent(in)     :: l1
@@ -1174,11 +1133,9 @@ contains
         real(wp),    intent(out)    :: ch(mdimch, ido, l1, 2)
         integer(ip), intent(in)     :: mdimch
         real(wp),    intent(in)     :: wa1(ido)
-        !----------------------------------------------------------------------
-        ! Dummy arguments
-        !----------------------------------------------------------------------
+
+        ! Local variables
         integer(ip) :: i, k, ic, idp2
-        !----------------------------------------------------------------------
 
         ch(1:mp, 1,:, 1) = cc(1:mp, 1, 1, :)+cc(1:mp, ido, 2, :)
         ch(1:mp, 1,:, 2) = cc(1:mp, 1, 1, :)-cc(1:mp, ido, 2, :)
@@ -1214,9 +1171,8 @@ contains
     end subroutine half_backward_pass_2
 
     subroutine half_backward_pass_3(mp, ido, l1, cc, mdimcc, ch, mdimch, wa1, wa2)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
         integer(ip), intent(in)     :: mp
         integer(ip), intent(in)     :: ido
         integer(ip), intent(in)     :: l1
@@ -1226,14 +1182,12 @@ contains
         integer(ip), intent(in)     :: mdimch
         real(wp),    intent(in)     :: wa1(ido)
         real(wp),    intent(in)     :: wa2(ido)
-        !----------------------------------------------------------------------
-        ! Dummy arguments
-        !----------------------------------------------------------------------
+
+        ! Local variables
         integer(ip)         :: i, k, ic, idp2
         real(wp), parameter :: ARG = TWO_PI/3
         real(wp), parameter :: TAUR = cos(ARG)
         real(wp), parameter :: TAUI = sin(ARG)
-        !----------------------------------------------------------------------
 
         ch(1: mp, 1, 1: l1, 1) = &
             cc(1: mp, 1, 1, 1: l1)+TWO * cc(1: mp, ido, 2, 1: l1)
@@ -1295,9 +1249,8 @@ contains
     end subroutine half_backward_pass_3
 
     subroutine half_backward_pass_4(mp, ido, l1, cc, mdimcc, ch, mdimch, wa1, wa2, wa3)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
         integer(ip), intent(in)     :: mp
         integer(ip), intent(in)     :: ido
         integer(ip), intent(in)     :: l1
@@ -1308,12 +1261,11 @@ contains
         real(wp),    intent(in)     :: wa1(ido)
         real(wp),    intent(in)     :: wa2(ido)
         real(wp),    intent(in)     :: wa3(ido)
-        !----------------------------------------------------------------------
-        ! Dummy arguments
-        !----------------------------------------------------------------------
+
+        ! Local variables
         integer(ip)         :: i, k, ic, idp2
         real(wp), parameter :: SQRT2 = sqrt(TWO)
-        !----------------------------------------------------------------------
+
 
         ch(1: mp, 1, 1: l1, 3) = (cc(1: mp, 1, 1, 1: l1)+cc(1: mp, ido, 4, 1: l1)) &
             -(cc(1: mp, ido, 2, 1: l1)+cc(1: mp, ido, 2, 1: l1))
@@ -1394,9 +1346,8 @@ contains
 
     subroutine half_backward_pass_5(mp, ido, l1, cc, mdimcc, ch, mdimch, &
         wa1, wa2, wa3, wa4)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
         integer(ip), intent(in)     :: mp
         integer(ip), intent(in)     :: ido
         integer(ip), intent(in)     :: l1
@@ -1408,16 +1359,14 @@ contains
         real(wp),    intent(in)     :: wa2(ido)
         real(wp),    intent(in)     :: wa3(ido)
         real(wp),    intent(in)     :: wa4(ido)
-        !----------------------------------------------------------------------
+
         ! Local variables
-        !----------------------------------------------------------------------
         integer(ip)         :: i, k, ic, idp2
         real(wp), parameter :: ARG = TWO_PI/5
         real(wp), parameter :: TR11=cos(ARG)
         real(wp), parameter :: TI11=sin(ARG)
         real(wp), parameter :: TR12=cos(TWO *ARG)
         real(wp), parameter :: TI12=sin(TWO *ARG)
-        !----------------------------------------------------------------------
 
         do k=1, l1
             ch(1: mp, 1, k, 1) = &
@@ -1548,9 +1497,8 @@ contains
 
     subroutine half_backward_pass_n(mp, ido, iip, l1, idl1, cc, c1, c2, mdimcc, &
         ch, ch2, mdimch, wa)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
         integer(ip), intent(in)     :: mp
         integer(ip), intent(in)     :: ido
         integer(ip), intent(in)     :: iip
@@ -1564,14 +1512,12 @@ contains
         real(wp),    intent(inout)  :: ch2(mdimch, idl1, iip)
         integer(ip), intent(in)     :: mdimch
         real(wp),    intent(in)     :: wa(ido)
-        !----------------------------------------------------------------------
-        ! Dummy arguments
-        !----------------------------------------------------------------------
-        integer(ip)         :: i, j, k, l, j2, ic, jc, lc, is, nbd
-        integer(ip)         :: idp2, ipp2, idij, ipph
-        real(wp)            :: dc2, ai1, ai2, ar1, ar2, ds2
-        real(wp)            :: dcp, arg, dsp, ar1h, ar2h
-        !----------------------------------------------------------------------
+
+        ! Local variables
+        integer(ip)  :: i, j, k, l, j2, ic, jc, lc, is, nbd
+        integer(ip)  :: idp2, ipp2, idij, ipph
+        real(wp)     :: dc2, ai1, ai2, ar1, ar2, ds2
+        real(wp)     :: dcp, arg, dsp, ar1h, ar2h
 
         arg = TWO_PI/iip
         dcp = cos(arg)

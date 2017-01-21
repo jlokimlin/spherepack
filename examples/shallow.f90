@@ -136,99 +136,91 @@
 !
 program shallow
 
-    use spherepack_precision, only: &
-        wp, & ! working precision
-        ip, & ! integer precision
-        PI
-
     use, intrinsic :: ISO_Fortran_env, only: &
         stdout => OUTPUT_UNIT
 
-    use type_ShallowWaterSolver
+    use spherepack_precision, only: &
+        wp, & ! working precision
+        ip, & ! integer precision
+        PI, &
+        TWO_PI
+
+    use type_ShallowWaterSolver, only: &
+        ShallowwaterSolver
 
     ! Explicit typing only
     implicit none
 
-    !--------------------------------------------------------------------------------
     ! Dictionary
-    !--------------------------------------------------------------------------------
-    integer(ip), parameter           :: nlon = 128
-    integer(ip), parameter           :: nlat = nlon/2+1
-    integer(ip), parameter           :: ntrunc = 42
-    integer(ip), parameter           :: nmdim = (ntrunc+1)*(ntrunc+2)/2
+    integer(ip), parameter           :: NLON = 128 ! Number of longitudinal points
+    integer(ip), parameter           :: NLAT = NLON/2+1 ! Number of latitudinal points
+    integer(ip), parameter           :: NTRUNC = 42
+    integer(ip), parameter           :: NMDIM = (NTRUNC+1)*(NTRUNC+2)/2
     integer(ip), parameter           :: nl = 91
-    integer(ip), parameter           :: nlm1 = nl-1
-    integer(ip), parameter           :: nlm2 = nl-2
-    integer(ip)                      :: itmax, mprint, i, j, ncycle
+    integer(ip)                      :: max_iter, mprint, i, j, ncycle
     integer(ip)                      :: temp_save_new, temp_save_now,old,now,new
-    real(wp), dimension(nlon, nlat)  :: uxact, vxact, pxact, u, v, p, f
-    real(wp), dimension(nlon, nlat)  :: ug, vg, pg, vrtg, divg, scrg1, scrg2
-    real(wp)                         :: phlt(nlm2)
-    real(wp)                         :: theta_mesh, lambda, lhat, uhat, aa, uzero, pzero, HALF_PI, radian_unit, omega, alphad
-    real(wp)                         :: alpha, fzero, dt, cfn, dlath, theta, sth
-    real(wp)                         :: cth, cosa, sina, lambda_mesh, st, ct, cthclh, cthslh
-    real(wp)                         :: clh, time, that, sl, slh, evmax, epmax, dvmax, dpmax, htime, dvgm, cl
+    real(wp), dimension(NLON, NLAT)  :: uxact, vxact, pxact, u, v, p, f
+    real(wp), dimension(NLON, NLAT)  :: ug, vg, pg, vrtg, divg, scrg1, scrg2
+    real(wp)                         :: phlt(nl-2)
+    real(wp)                         :: lhat, uhat, aa, uzero, pzero, HALF_PI, radian_unit, omega, alpha_in_degrees
+    real(wp)                         :: alpha, fzero, dt, theta, sth
+    real(wp)                         :: cth, cthclh, cthslh
+    real(wp)                         :: clh, time, that, slh, htime
     real(wp)                         :: v2max, p2max, vmax, pmax
-    complex(wp), dimension(nmdim)    :: vrtnm, divnm, pnm, scrnm
-    complex(wp), dimension(nmdim, 3) :: dvrtdtnm, ddivdtnm, dpdtnm
+    real(wp), parameter              :: ZERO = 0.0_wp, HALF = 0.5_wp, ONE = 1.0_wp
+    complex(wp), dimension(NMDIM)    :: vrtnm, divnm, pnm, scrnm
+    complex(wp), dimension(NMDIM, 3) :: dvrtdtnm, ddivdtnm, dpdtnm
     type(ShallowWaterSolver)         :: solver
     character(len=:), allocatable    :: write_fmt
-    !--------------------------------------------------------------------------------
 
     write( stdout, '(/a)') '     shallow *** TEST RUN *** '
 
-    !
-    !  Initialize constants
-    !
+    !  Parameters for test
     HALF_PI = PI/2
-    radian_unit = PI/180.0_wp
-    aa = 6.37122e+6_wp
-    omega = 7.292e-5_wp
+    radian_unit = PI/180
+    aa = 6.37122e+6_wp ! Earth radius
+    omega = 7.292e-5_wp ! Rotation rate
     fzero = 2.0_wp * omega
     uzero = 40.0_wp
     pzero = 2.94e+4_wp
-    alphad = 60.0_wp
-    alpha = radian_unit * alphad
-    dt = 300.0_wp
-    itmax = nint(86400.0_wp * 5.0_wp/dt, kind=ip)
-    mprint = itmax/10
+    alpha_in_degrees = 60.0_wp
+    alpha = radian_unit * alpha_in_degrees
+    dt = 300.0_wp ! Time step in seconds
+    max_iter = nint(86400.0_wp * HALF/dt, kind=ip) ! Integration length in days
+    mprint = max_iter/10
 
-    !
-    !  Allocate memory
-    !
-    call solver%create(nlat=nlat, nlon=nlon, ntrunc=ntrunc, rsphere=aa)
+    !  Allocate memory. Setup spherical harmonic instance
+    call solver%create(nlat=NLAT, nlon=NLON, ntrunc=NTRUNC, rsphere=aa)
 
     allocate( write_fmt, source=&
         '(a, i10, a, f10.2/, a, f10.0, a, i10/, a, i10, '&
         //'a, i10/, a, 1pe15.6, a, 1pe15.6, /a, 1pe15.6, a, 1pe15.6)' )
 
-    !
-    !  compute the derivative of the unrotated geopotential
-    !    p as a function of latitude
-    !
-    cfn = 1.0_wp / nlm1
-    dlath = PI / nlm1
-    do i=1, nlm2
-        theta = i*dlath
-        sth = sin(theta)
-        cth = cos(theta)
-        uhat = solver%get_initial_velocity(uzero, HALF_PI-theta)
-        phlt(i) = cfn*cth*uhat*(uhat/sth+aa*fzero)
-    end do
-    !
-    !     compute sine transform of the derivative of the geopotential
-    !     for the purpose of computing the geopotential by integration
-    !     see equation (3.9) in reference [1] above
-    !
-    call solver%sine_transform(nlm2, phlt)
-       !
-       !     compute the cosine coefficients of the unrotated geopotential
-       !     by the formal integration of the sine series representation
-       !
-    do i=1, nlm2
+    ! Compute the derivative of the unrotated geopotential
+    ! p as a function of latitude
+    block
+        real(wp) :: cfn, dlath
+
+        cfn = ONE / (nl - 1)
+        dlath = PI / (nl - 1)
+        do i=1, size(phlt)
+            theta = real(i, kind=wp) * dlath
+            uhat = solver%get_initial_velocity(uzero, HALF_PI-theta)
+            phlt(i) = cfn * cos(theta) * uhat * (uhat/sin(theta) + aa*fzero)
+        end do
+    end block
+
+    ! Compute sine transform of the derivative of the geopotential
+    ! for the purpose of computing the geopotential by integration
+    ! see equation (3.9) in reference [1] above
+    call solver%sine_transform(phlt)
+
+    ! Compute the cosine coefficients of the unrotated geopotential
+    ! by the formal integration of the sine series representation
+    do i=1, size(phlt)
         phlt(i) = -phlt(i)/i
     end do
-    !
+
     !     phlt(i) contains the coefficients in the cosine series
     !     representation of the unrotated geopotential that are used
     !     below to compute the geopotential on the rotated grid.
@@ -236,58 +228,62 @@ program shallow
     !     compute the initial values of  east longitudinal
     !     and latitudinal velocities u and v as well as the
     !     geopotential p and coriolis f on the rotated grid.
-    !
-    cosa = cos(alpha)
-    sina = sin(alpha)
-    lambda_mesh = (2.0_wp*PI)/nlon
-    theta_mesh = PI/(nlat-1)
+    block
+        real(wp) :: cosa, sina, lambda_mesh, theta_mesh
+        real(wp) :: lambda, cosl, sinl
+        real(wp) :: sint, cost
 
-    do j=1, nlon
-        lambda = real(j - 1, kind=wp) * lambda_mesh
-        cl = cos(lambda)
-        sl = sin(lambda)
-        do i=1, nlat
-            !
-            !     lambda is longitude, theta is colatitude, and pi/2-theta is
-            !     latitude on the rotated grid. lhat and that are longitude
-            !     and colatitude on the unrotated grid. see text starting at
-            !     equation (3.10)
-            !
-            theta = real(i - 1, kind=wp)*theta_mesh
-            st = cos(theta)
-            ct = sin(theta)
-            sth = cosa*st+sina*ct*cl
-            cthclh = cosa*ct*cl-sina*st
-            cthslh = ct*sl
-            lhat = atanxy(cthclh, cthslh)
-            clh = cos(lhat)
-            slh = sin(lhat)
-            cth = clh*cthclh+slh*cthslh
-            that = solver%atanxy(sth, cth)
-            uhat = solver%get_initial_velocity(uzero, HALF_PI-that)
-            pxact(j, i) = solver%cosine_transform(that, nlm2, phlt)
-            uxact(j, i) = uhat*(cosa*sl*slh+cl*clh)
-            vxact(j, i) = uhat*(cosa*cl*slh*st-clh*sl*st+sina*slh*ct)
-            f(j, i) = fzero*sth
+        cosa = cos(alpha)
+        sina = sin(alpha)
+        lambda_mesh = TWO_PI/NLON
+        theta_mesh = PI/(NLAT-1)
+
+        do j=1, NLON
+            lambda = real(j - 1, kind=wp) * lambda_mesh
+            cosl = cos(lambda)
+            sinl = sin(lambda)
+            do i=1, NLAT
+                !
+                !     lambda is longitude, theta is colatitude, and pi/2-theta is
+                !     latitude on the rotated grid. lhat and that are longitude
+                !     and colatitude on the unrotated grid. see text starting at
+                !     equation (3.10)
+                !
+                theta = real(i - 1, kind=wp) * theta_mesh
+                sint = cos(theta)
+                cost = sin(theta)
+                sth = cosa*sint+sina*cost*cosl
+                cthclh = cosa*cost*cosl-sina*sint
+                cthslh = cost*sinl
+                lhat = solver%atanxy(cthclh, cthslh)
+                clh = cos(lhat)
+                slh = sin(lhat)
+                cth = clh*cthclh+slh*cthslh
+                that = solver%atanxy(sth, cth)
+                uhat = solver%get_initial_velocity(uzero, HALF_PI-that)
+                pxact(j, i) = solver%cosine_transform(that, phlt)
+                uxact(j, i) = uhat*(cosa*sinl*slh+cosl*clh)
+                vxact(j, i) = uhat*(cosa*cosl*slh*sint-clh*sinl*sint+sina*slh*cost)
+                f(j, i) = fzero*sth ! Coriolis
+            end do
         end do
-    end do
+    end block
 
-    vmax = 0.0_wp
-    pmax = 0.0_wp
-    v2max = 0.0_wp
-    p2max = 0.0_wp
+    vmax = ZERO
+    pmax = ZERO
+    v2max = ZERO
+    p2max = ZERO
 
-    do j=1, nlat
-        do i=1, nlon
-            v2max = v2max+uxact(i, j)**2+vxact(i, j)**2
-            p2max = p2max+pxact(i, j)**2
+    do j=1, NLAT
+        do i=1, NLON
+            v2max = v2max + uxact(i, j)**2 + vxact(i, j)**2
+            p2max = p2max + pxact(i, j)**2
             vmax = max(abs(uxact(i, j)), abs(vxact(i, j)), vmax)
             pmax = max(abs(pxact(i, j)), pmax)
         end do
     end do
-    !
-    !     initialize first time step
-    !
+
+    ! Initialize first time step
     u = uxact
     v = vxact
     p = pxact
@@ -295,35 +291,26 @@ program shallow
     vg = v
     pg = p
 
-    !
     !  Compute spectral coeffs of initial vrt, div, p
-    !
     call solver%get_vrtdivspec(ug, vg, vrtnm, divnm)
     call solver%grid_to_spec(pg, pnm)
 
-    !
-    !  time step loop
-    !
+    ! Time step loop
     new = 1
     now = 2
     old = 3
-    do ncycle = 0, itmax
+    do ncycle=0, max_iter
 
         time = real(ncycle, kind=wp) * dt
 
-        !
         !  Inverse transform to get vort and phig on grid
-        !
         call solver%spec_to_grid(vrtnm, vrtg)
         call solver%spec_to_grid(pnm, pg)
 
-        !
-        !  compute u and v on grid from spectral coeffs of vort and div.
-        !
+        ! Compute u and v on grid from spectral coeffs of vort and div.
         call solver%get_uv(vrtnm, divnm, ug, vg)
 
-        !  compute error statistics
-
+        ! Calculate error statistics
         if (mod(ncycle, mprint) == 0) then
 
             call solver%spec_to_grid(divnm, divg)
@@ -338,76 +325,72 @@ program shallow
                 ' cycle number              ', ncycle, &
                 ' model time in  hours      ', htime, &
                 ' time step in seconds      ', dt, &
-                ' number of latitudes       ', nlat, &
-                ' number of longitudes      ', nlon, &
-                ' max wave number           ', ntrunc, &
+                ' number of latitudes       ', NLAT, &
+                ' number of longitudes      ', NLON, &
+                ' max wave number           ', NTRUNC, &
                 ' rotation rate        '     , omega, &
                 ' mean height          '     , pzero, &
                 ' maximum velocity     '     , uzero, &
-                ' tilt angle           '     , alphad
+                ' tilt angle           '     , alpha_in_degrees
 
-            dvgm = 0.0_wp
-            dvmax = 0.0_wp
-            dpmax = 0.0_wp
-            evmax = 0.0_wp
-            epmax = 0.0_wp
+            block
+                real(wp) :: dvgm, dvmax, dpmax, evmax, epmax
 
-            do j=1, nlat
-                do i=1, nlon
-                    dvgm = max(dvgm, abs(divg(i, j)))
-                    dvmax = dvmax+(u(i, j)-uxact(i, j))**2+(v(i, j)-vxact(i, j))**2
-                    dpmax = dpmax+(p(i, j)-pxact(i, j))**2
-                    evmax = &
-                        max(evmax, abs(v(i, j)-vxact(i, j)), abs(u(i, j)-uxact(i, j)))
-                    epmax = max(epmax, abs(p(i, j)-pxact(i, j)))
+                dvgm = ZERO
+                dvmax = ZERO
+                dpmax = ZERO
+                evmax = ZERO
+                epmax = ZERO
+
+                do j=1, NLAT
+                    do i=1, NLON
+                        dvgm = max(dvgm, abs(divg(i, j)))
+                        dvmax = dvmax+(u(i, j)-uxact(i, j))**2 + (v(i, j)-vxact(i, j))**2
+                        dpmax = dpmax+(p(i, j)-pxact(i, j))**2
+                        evmax = &
+                            max(evmax, abs(v(i, j)-vxact(i, j)), abs(u(i, j)-uxact(i, j)))
+                        epmax = max(epmax, abs(p(i, j)-pxact(i, j)))
+                    end do
                 end do
-            end do
 
-            dvmax = sqrt(dvmax/v2max)
-            dpmax = sqrt(dpmax/p2max)
-            evmax = evmax/vmax
-            epmax = epmax/pmax
+                dvmax = sqrt(dvmax/v2max)
+                dpmax = sqrt(dpmax/p2max)
+                evmax = evmax/vmax
+                epmax = epmax/pmax
 
-            write( stdout, fmt='(2(a, 1pe15.6)/, a, 1pe15.6)') &
-                ' max error in velocity', evmax, &
-                ' max error in geopot. ', epmax, &
-                ' l2 error in velocity ', dvmax, &
-                ' l2 error in geopot.  ', dpmax, &
-                ' maximum divergence   ', dvgm
-
+                write( stdout, fmt='(2(a, 1pe15.6)/, a, 1pe15.6)') &
+                    ' max error in velocity', evmax, &
+                    ' max error in geopot. ', epmax, &
+                    ' l2 error in velocity ', dvmax, &
+                    ' l2 error in geopot.  ', dpmax, &
+                    ' maximum divergence   ', dvgm
+            end block
         end if
-        !
+
         !  Compute right-hand sides of prognostic eqns
-        !
         scrg1 = ug * (vrtg + f)
         scrg2 = vg * (vrtg + f)
 
         call solver%get_vrtdivspec(scrg1, scrg2, ddivdtnm(:,new), dvrtdtnm(:,new))
 
         dvrtdtnm(:,new) = -dvrtdtnm(:,new)
-        scrg1 = ug*(pg+pzero)
-        scrg2 = vg*(pg+pzero)
+        scrg1 = ug * (pg + pzero)
+        scrg2 = vg * (pg + pzero)
 
         call solver%get_vrtdivspec(scrg1, scrg2, scrnm, dpdtnm(:,new))
 
         dpdtnm(:,new) = -dpdtnm(:,new)
-        scrg1 = pg + 0.5_wp * (ug**2+vg**2)
+        scrg1 = pg + HALF * (ug**2 + vg**2)
 
         call solver%grid_to_spec(scrg1, scrnm)
 
-
         associate( lap => solver%laplacian_coefficients )
-
-            ddivdtnm(:,new) = ddivdtnm(:,new)-lap*scrnm
-
+            ddivdtnm(:,new) = ddivdtnm(:,new) - lap * scrnm
         end associate
-        !
-        !  Update vrt and div with third-order adams-bashforth
-        !
+
+        ! Update vrt and div with third-order adams-bashforth
+        ! Forward Euler, then 2nd-order Adams-Bashforth time steps to start
         select case (ncycle)
-            !
-            !  forward euler, then 2nd-order adams-bashforth time steps to start
-            !
             case (0)
                 dvrtdtnm(:,now) = dvrtdtnm(:,new)
                 dvrtdtnm(:,old) = dvrtdtnm(:,new)
@@ -421,35 +404,30 @@ program shallow
                 dpdtnm(:,old) = dpdtnm(:,new)
         end select
 
-        vrtnm = vrtnm + dt*( &
-            (23.0_wp/12)*dvrtdtnm(:,new) &
-            - (16.0_wp/12)*dvrtdtnm(:,now) &
-            + (5.0_wp/12)*dvrtdtnm(:,old) )
+        vrtnm = vrtnm + dt * ( &
+            (23.0_wp/12) * dvrtdtnm(:,new) &
+            - (16.0_wp/12) * dvrtdtnm(:,now) &
+            + (5.0_wp/12) * dvrtdtnm(:,old) )
 
         divnm = divnm + dt*( &
-            (23.0_wp/12)*ddivdtnm(:,new) &
-            - (16.0_wp/12)*ddivdtnm(:,now) &
-            + (5.0_wp/12)*ddivdtnm(:,old) )
+            (23.0_wp/12) * ddivdtnm(:,new) &
+            - (16.0_wp/12) * ddivdtnm(:,now) &
+            + (5.0_wp/12) * ddivdtnm(:,old) )
 
         pnm = pnm + dt*( &
-            (23.0_wp/12)*dpdtnm(:,new) &
-            - (16.0_wp/12)*dpdtnm(:,now) &
-            + (5.0_wp/12)*dpdtnm(:,old) )
+            (23.0_wp/12) * dpdtnm(:,new) &
+            - (16.0_wp/12) * dpdtnm(:,now) &
+            + (5.0_wp/12) * dpdtnm(:,old) )
 
-        !
         !  Switch indices
-        !
         temp_save_new = new
         temp_save_now = now
         new = old
         now = temp_save_new
         old = temp_save_now
-
     end do
 
-    !
     !  Release memory
-    !
     call solver%destroy()
     deallocate( write_fmt )
 

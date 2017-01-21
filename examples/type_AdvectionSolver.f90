@@ -7,7 +7,8 @@ module type_AdvectionSolver
 
     use spherepack_library, only: &
         GaussianSphere, &
-        PI
+        PI, &
+        TWO_PI
 
     ! Explicit typing only
     implicit none
@@ -15,88 +16,84 @@ module type_AdvectionSolver
     private
     public :: DEGREES_TO_RADIANS
     public :: TIME_TO_CIRCUMVENT_THE_EARTH
+    public :: AdvectionSolver
 
-    !----------------------------------------------------------------------
-    ! Dictionary: global variables
-    !----------------------------------------------------------------------
+    ! Parameters confined to the module
+    real(wp),    parameter :: ZERO = 0.0_wp
+    real(wp),    parameter :: ONE = 1.0_wp
+    real(wp),    parameter :: TWO = 2.0_wp
+    real(wp),    parameter :: SIXTY = 6.0e+1_wp
+    real(wp),    parameter :: SIX_HUNDRED = 6.0e+2_wp
+    real(wp),    parameter :: ONE_THOUSAND = 1.0e+3_wp
     real(wp),    parameter :: DEGREES_TO_RADIANS = PI/180
     integer(ip), parameter :: TIME_TO_CIRCUMVENT_THE_EARTH = 12*24*3600
-    !----------------------------------------------------------------------
-
     
     type, public, extends(GaussianSphere) :: AdvectionSolver
-        !----------------------------------------------------------------------
+
         ! Type components
-        !----------------------------------------------------------------------
-        real(wp) :: TIME_STEP = 6.0e+2_wp
-        real(wp) :: ROTATION_RATE_OF_EARTH = 2.0_wp * PI/TIME_TO_CIRCUMVENT_THE_EARTH
+        real(wp) :: TIME_STEP = SIX_HUNDRED
+        real(wp) :: ROTATION_RATE_OF_EARTH = TWO_PI/TIME_TO_CIRCUMVENT_THE_EARTH
         real(wp) :: LATITUDE_OF_COSINE_BELL = PI/6
-        real(wp) :: RADIUS_OF_EARTH_IN_METERS = 1.0_wp/3
-        real(wp) :: TILT_ANGLE_IN_DEGREES = 60.0_wp
-        real(wp) :: TILT_ANGLE = 60.0_wp * DEGREES_TO_RADIANS
-        real(wp) :: MAXIMUM_VALUE_OF_COSINE_BELL = 1.0e+3_wp
-        !----------------------------------------------------------------------
+        real(wp) :: RADIUS_OF_EARTH_IN_METERS = ONE/3
+        real(wp) :: TILT_ANGLE_IN_DEGREES = SIXTY
+        real(wp) :: TILT_ANGLE = SIXTY * DEGREES_TO_RADIANS
+        real(wp) :: MAXIMUM_VALUE_OF_COSINE_BELL = ONE_THOUSAND
     contains
-        !----------------------------------------------------------------------
+
         ! Type-bound procedures
-        !----------------------------------------------------------------------
         procedure, public :: get_geopotential
         procedure, public :: get_vector_velocities
         procedure, nopass :: atanxy
-        !----------------------------------------------------------------------
     end type AdvectionSolver
-
 
 contains
 
-
+    ! Purpose:
+    !
+    ! Computes advecting cosine bell on a tilted grid a time t.
+    !
+    ! input parameters
+    !
+    !     t      time in seconds
+    !
+    !     alpha  tilt angle in radians
+    !
+    !     beta   colatitude of cosine bell in untilted coordinate
+    !            system in radians
+    !
+    !     omega  angular velocity in radians per second
+    !
+    !     hzero  maximum value of cosine bell
+    !
+    !     re     radius of support for cosine bell in radians
+    !
+    !     nlat   number of latitudes including the poles
+    !
+    !     nlon   number of distinct longitude lines
+    !
+    !     idim   first dimension of output array h
+    !
+    !     colat  vector of Gauss colatitude grid points
+    !
+    ! output parameter
+    !
+    !     geopot     an nlat by nlon array containing the geopotential
+    !
+    !             on a tilted grid
+    !
     subroutine get_geopotential(self, t, geopot)
-        !
-        !     computes advecting cosine bell on a tilted grid a time t.
-        !
-        ! input parameters
-        !
-        !     t      time in seconds
-        !
-        !     alpha  tilt angle in radians
-        !
-        !     beta   colatitude of cosine bell in untilted coordinate
-        !            system in radians
-        !
-        !     omega  angular velocity in radians per second
-        !
-        !     hzero  maximum value of cosine bell
-        !
-        !     re     radius of support for cosine bell in radians
-        !
-        !     nlat   number of latitudes including the poles
-        !
-        !     nlon   number of distinct longitude lines
-        !
-        !     idim   first dimension of output array h
-        !
-        !     colat  vector of Gauss colatitude grid points
-        !
-        ! output parameter
-        !
-        !     geopot     an nlat by nlon array containing the geopotential
-        !
-        !             on a tilted grid
-        !
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
-        class(AdvectionSolver), intent(inout)  :: self
-        real(wp),               intent(in)     :: t
-        real(wp),               intent(out)    :: geopot(:,:)
-        !----------------------------------------------------------------------
+        class(AdvectionSolver), intent(inout) :: self
+        real(wp),               intent(in)    :: t
+        real(wp),               intent(out)   :: geopot(:,:)
+
         ! Local variables
-        !----------------------------------------------------------------------
         integer(ip) :: i, j
         real(wp)    :: xc, yc, zc, x1, y1, z1
         real(wp)    :: lambda, theta, cost, sint, sth ,cthclh
         real(wp)    :: cthslh,lhat,cosl,sinl,cth ,that, r
-        !----------------------------------------------------------------------
+
 
         associate( &
             nlat => self%NUMBER_OF_LATITUDES, &
@@ -110,11 +107,8 @@ contains
             )
 
             associate( lambdc => omega*t )
-
-                call sph2cart(1.0_wp, beta, lambdc, xc, yc, zc)
-
+                call sph2cart(ONE, beta, lambdc, xc, yc, zc)
             end associate
-
 
             associate( &
                 cosa => cos(alpha), &
@@ -138,30 +132,26 @@ contains
                             sinl = sin(lhat)
                             cth = cosl*cthclh+sinl*cthslh
                             that = atanxy(sth,cth)
-                            !
-                            !== Compute scaled radial unit vector
-                            !
-                            call sph2cart(1.0_wp, that, lhat, x1, y1, z1)
-                            !
-                            !  compute distance
-                            !
+
+                            ! Compute scaled radial unit vector
+                            call sph2cart(ONE, that, lhat, x1, y1, z1)
+
+                            ! Compute distance
                             associate( dist => norm2([x1-xc, y1-yc, z1-zc]) )
-                                !
+
                                 !  Initialize geopotential
-                                !
-                                geopot(i,j) = 0.0_wp
+                                geopot(i,j) = ZERO
 
                                 if (dist >= re) cycle
 
-                                r = 2.0_wp * asin(dist/2)
+                                r = TWO * asin(dist/2)
 
                             end associate
 
                             if (r >= re) cycle
 
-                            !
                             !  Set geopotential
-                            geopot(i,j) = hzero * (cos(r*PI/re)+1.0_wp)/2
+                            geopot(i,j) = hzero * (cos(r*PI/re)+ONE)/2
                         end do
                     end associate
                 end do
@@ -170,21 +160,17 @@ contains
 
     end subroutine get_geopotential
 
-
     subroutine get_vector_velocities(self, u, v)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
         class(AdvectionSolver), intent(inout)  :: self
         real(wp),               intent(out)    :: u(:,:)
         real(wp),               intent(out)    :: v(:,:)
-        !----------------------------------------------------------------------
+
         ! Local variables
-        !----------------------------------------------------------------------
         integer(ip) :: i, j
         real(wp)    :: sinp, cosp, sint, cost, sinl, cosl
         real(wp)    :: cth, xlhat, uhat
-        !----------------------------------------------------------------------
 
         associate( &
             nlats => self%NUMBER_OF_LATITUDES, &
@@ -224,40 +210,33 @@ contains
 
     end subroutine get_vector_velocities
 
-
     pure function atanxy(x,y) result (return_value)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
         real(wp), intent(in) :: x
         real(wp), intent(in) :: y
-        real                   :: return_value
-        !--------------------------------------------------------------------------------
+        real(wp)             :: return_value
 
-        return_value = 0.0_wp
+        return_value = ZERO
 
-        if (x == 0.0_wp .and. y == 0.0_wp) return
+        if (x == ZERO .and. y == ZERO) return
 
         return_value = atan2(y,x)
 
     end function atanxy
 
-
     pure subroutine sph2cart(r, theta, phi, x, y, z)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
         real(wp), intent(in)  :: r
         real(wp), intent(in)  :: theta
         real(wp), intent(in)  :: phi
         real(wp), intent(out) :: x, y, z
-        !----------------------------------------------------------------------
 
         x = r * sin(theta) * cos(phi)
         y = r * sin(theta) * sin(phi)
         z = r * cos(theta)
 
     end subroutine sph2cart
-
 
 end module type_AdvectionSolver

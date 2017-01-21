@@ -295,9 +295,9 @@ contains
 
     module subroutine shsgs(nlat, nlon, mode, nt, g, idg, jdg, a, b, mdab, ndab, &
         wshsgs, lshsgs, work, lwork, ierror)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
+
         integer(ip), intent(in)      :: nlat
         integer(ip), intent(in)      :: nlon
         integer(ip), intent(in)      :: mode
@@ -314,11 +314,11 @@ contains
         real(wp),    intent(inout)   :: work(lwork)
         integer(ip), intent(in)      :: lwork
         integer(ip), intent(out)     :: ierror
-        !----------------------------------------------------------------------
+
         ! Local variables
-        !----------------------------------------------------------------------
+
         integer(ip) :: mtrunc, l1, l2, lp, iw, lat, late, ifft, ipmn
-        !----------------------------------------------------------------------
+
 
         ! Set limit on m subscript
         mtrunc = min((nlon+2)/2, nlat)
@@ -400,9 +400,9 @@ contains
         ! these quantities must be preserved when calling shsgs
         ! repeatedly with fixed nlat, nlon.
         !
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
+
         integer(ip), intent(in)     :: nlat
         integer(ip), intent(in)     :: nlon
         real(wp),    intent(inout)  :: wshsgs(lshsgs)
@@ -412,11 +412,11 @@ contains
         real(wp),    intent(inout)  :: dwork(ldwork)
         integer(ip), intent(in)     :: ldwork
         integer(ip), intent(out)    :: ierror
-        !----------------------------------------------------------------------
+
         ! Local variables
-        !----------------------------------------------------------------------
+
         integer(ip) :: ntrunc, l1, l2, lp, ldw, late, ipmnf
-        !----------------------------------------------------------------------
+
 
         ! Set triangular truncation limit for spherical harmonic basis
         ntrunc = min((nlon+2)/2, nlat)
@@ -475,9 +475,9 @@ contains
         ! Reconstruct fourier coefficients in g on gaussian grid
         ! using coefficients in a, b
         !
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
+
         integer(ip), intent(in)     :: nlat
         integer(ip), intent(in)     :: nlon
         integer(ip), intent(in)     :: l
@@ -496,18 +496,14 @@ contains
         integer(ip), intent(in)     :: late
         real(wp),    intent(out)    :: g(lat, nlon, nt)
         real(wp),    intent(inout)  :: work(*)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
         integer(ip)    :: i, j, k, m, mn, is, ms, ns, lm1, nl2
         integer(ip)    :: lp1, mp1, np1, mp2, meo, mml1
         real(wp)       :: t1, t2, t3, t4
-        type(HFFTpack) :: hfft
-        !----------------------------------------------------------------------
+        type(SpherepackAux) :: sphere_aux
 
-        !
         !  initialize to zero
-        !
         g = ZERO
 
         if (nlon == 2*l-2) then
@@ -707,7 +703,7 @@ contains
         !  Perform inverse fourier transform
         !
         do k=1, nt
-            call hfft%backward(lat, nlon, g(1, 1, k), lat, wfft, work)
+            call sphere_aux%hfft%backward(lat, nlon, g(1, 1, k), lat, wfft, work)
         end do
 
         !
@@ -717,32 +713,27 @@ contains
 
     end subroutine reconstruct_fft_coefficients
 
+    !
+    ! Purpose:
+    !
+    ! Compute and store legendre polys for i=1, ..., late, m=0, ..., l-1
+    ! and n=m, ..., l-1
+    !
     subroutine compute_and_store_legendre_polys(nlat, l, late, w, pmn, pmnf)
-        !
-        ! Purpose:
-        !
-        ! Compute and store legendre polys for i=1, ..., late, m=0, ..., l-1
-        ! and n=m, ..., l-1
-        !
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
         integer(ip), intent(in)     :: nlat
         integer(ip), intent(in)     :: l
         integer(ip), intent(in)     :: late
         real(wp),    intent(inout)  :: w(*)
         real(wp),    intent(out)    :: pmn(nlat, late, 3)
         real(wp),    intent(inout)  :: pmnf(late,*)
-        !----------------------------------------------------------------------
+
         ! Local variables
-        !----------------------------------------------------------------------
         integer(ip)         :: m, km, mn, mp1, np1, mml1, mode
         type(SpherepackAux) :: sphere_aux
-        !----------------------------------------------------------------------
 
-        !
         !  Initialize
-        !
         pmn = ZERO
 
         do mp1=1, l
@@ -765,9 +756,8 @@ contains
     end subroutine compute_and_store_legendre_polys
 
     subroutine shsgsp(nlat, nlon, wshsgs, lshsgs, dwork, ldwork, ierror)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
         integer(ip), intent(in)     :: nlat
         integer(ip), intent(in)     :: nlon
         real(wp),    intent(inout)  :: wshsgs(lshsgs)
@@ -775,12 +765,10 @@ contains
         real(wp),    intent(inout)  :: dwork(ldwork)
         integer(ip), intent(in)     :: ldwork
         integer(ip), intent(out)    :: ierror
-        !----------------------------------------------------------------------
+
         ! Local variables
-        !----------------------------------------------------------------------
         integer(ip) :: ntrunc, i1, i2, i3, l1, l2, i4, i5, i6, i7
         integer(ip) :: iw, late, idth, idwts
-        !----------------------------------------------------------------------
 
         ! Set triangular truncation limit for spherical harmonic basis
         ntrunc = min((nlon+2)/2, nlat)
@@ -826,7 +814,7 @@ contains
         idwts = idth+nlat
         iw = idwts+nlat
 
-        call shsgsp1(nlat, nlon, ntrunc, late, wshsgs(i1), wshsgs(i2), wshsgs(i3), &
+        call shsgsp_lower_routine(nlat, nlon, ntrunc, late, wshsgs(i1), wshsgs(i2), wshsgs(i3), &
             wshsgs(i4), wshsgs(i5), wshsgs(i6), wshsgs(i7), dwork(idth), &
             dwork(idwts), dwork(iw), ierror)
 
@@ -837,11 +825,10 @@ contains
 
     end subroutine shsgsp
 
-    subroutine shsgsp1(nlat, nlon, l, late, wts, p0n, p1n, abel, bbel, cbel, &
+    subroutine shsgsp_lower_routine(nlat, nlon, l, late, wts, p0n, p1n, abel, bbel, cbel, &
         wfft, dtheta, dwts, work, ier)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
         integer(ip), intent(in)     :: nlat
         integer(ip), intent(in)     :: nlon
         integer(ip), intent(in)     :: l
@@ -857,23 +844,16 @@ contains
         real(wp),    intent(out)    :: dwts(nlat)
         real(wp),    intent(inout)  :: work(*)
         integer(ip), intent(out)    :: ier
-        !----------------------------------------------------------------------
-        ! Dummy arguments
-        !----------------------------------------------------------------------
+
+        ! Local variables
         integer(ip)         :: i, m, n, lw, np1, imn, mlim
         real(wp)            :: pb, dummy_variable
-        type(HFFTpack)      :: hfft
         type(SpherepackAux) :: sphere_aux
-        !----------------------------------------------------------------------
 
-        !
-        !  Initialize FFT
-        !
-        call hfft%initialize(nlon, wfft)
+        !  Initialize half Fourier transform
+        call sphere_aux%hfft%initialize(nlon, wfft)
 
-        !
         !  compute real gaussian points and weights
-        !
         lw = nlat*(nlat+2)
         call compute_gaussian_latitudes_and_weights(nlat, dtheta, dwts, ier)
 
@@ -949,6 +929,6 @@ contains
             end do
         end do
 
-    end subroutine shsgsp1
+    end subroutine shsgsp_lower_routine
 
 end submodule scalar_synthesis_gaussian_grid_saved

@@ -473,8 +473,6 @@ contains
         dimension gs(idg, jdg, nt), a(mdab, ndab, nt), b(mdab, ndab, nt)
         dimension w(*), pmn(nlat, late, 3), g(lat, nlon, nt), wfft(*)
 
-
-        type(HFFTpack)      :: hfft
         type(SpherepackAux) :: sphere_aux
 
         !     reconstruct fourier coefficients in g on gaussian grid
@@ -629,7 +627,7 @@ contains
         end if
         !     do inverse fourier transform
         do k=1, nt
-            call hfft%backward(lat, nlon, g(1, 1, k), lat, wfft, pmn)
+            call sphere_aux%hfft%backward(lat, nlon, g(1, 1, k), lat, wfft, pmn)
         end do
         !     scale output in gs
         do k=1, nt
@@ -644,7 +642,6 @@ contains
 
     subroutine shsgci_lower_routine(nlat, nlon, l, late, wts, p0n, p1n, abel, bbel, cbel, &
         wfft, dtheta, dwts, work, ier)
-
 
         real(wp) :: abel
         real(wp) :: bbel
@@ -672,7 +669,6 @@ contains
         real(wp) :: pb, dtheta(nlat), dwts(nlat), work(*)
         real(wp) :: dummy_variable
 
-        type(HFFTpack)      :: hfft
         type(SpherepackAux) :: sphere_aux
 
         !     compute the nlat  gaussian points and weights, the
@@ -689,7 +685,7 @@ contains
         !     define index function for l.le.n.le.nlat
         !imndx(m, n) = l*(l-1)/2+(n-l-1)*(l-1)+m-1
         !     preset quantites for fourier transform
-        call hfft%initialize(nlon, wfft)
+        call sphere_aux%hfft%initialize(nlon, wfft)
         !     compute real gaussian points and weights
         !     lw = 4*nlat*(nlat+1)+2
         lw = nlat*(nlat+2)

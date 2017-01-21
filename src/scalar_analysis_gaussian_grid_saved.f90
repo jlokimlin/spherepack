@@ -307,20 +307,18 @@
 submodule(scalar_analysis_routines) scalar_analysis_gaussian_grid_saved
 
 contains
-
+    !
+    ! Purpose:
+    !
+    ! Performs the spherical harmonic analysis on
+    ! a gaussian grid on the array(s) in g and returns the coefficients
+    ! in array(s) a, b. the necessary legendre polynomials are fully
+    ! stored in this version.
+    !
     module subroutine shags(nlat, nlon, mode, nt, g, idg, jdg, a, b, mdab, ndab, &
         wshags, lshags, work, lwork, ierror)
-        !
-        ! Purpose:
-        !
-        ! Performs the spherical harmonic analysis on
-        ! a gaussian grid on the array(s) in g and returns the coefficients
-        ! in array(s) a, b. the necessary legendre polynomials are fully
-        ! stored in this version.
-        !
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
         integer(ip), intent(in)     :: nlat
         integer(ip), intent(in)     :: nlon
         integer(ip), intent(in)     :: mode
@@ -337,11 +335,9 @@ contains
         real(wp),    intent(inout)  :: work(lwork)
         integer(ip), intent(in)     :: lwork
         integer(ip), intent(out)    :: ierror
-        !----------------------------------------------------------------------
+
         ! Local variables
-        !----------------------------------------------------------------------
         integer(ip) :: l, l1, l2, lp, iw, lat, late, ifft, ipmn, iwts
-        !----------------------------------------------------------------------
 
         ! Set m limit for pmn
         l = min((nlon+2)/2, nlat)
@@ -417,27 +413,26 @@ contains
         !
         !  Perform analysis
         !
-        call shags1(nlat, nlon, l, lat, mode, g, idg, jdg, nt, a, b, mdab, ndab, &
+        call shags_lower_routine(nlat, nlon, l, lat, mode, g, idg, jdg, nt, a, b, mdab, ndab, &
             wshags(iwts), wshags(ifft), wshags(ipmn), late, work, work(iw))
 
     end subroutine shags
 
+    !
+    !     Purpose:
+    !
+    !     This subroutine must be called before calling shags or shsgs with
+    !     fixed nlat, nlon. it precomputes the gaussian weights, points
+    !     and all necessary legendre polys and stores them in wshags.
+    !     these quantities must be preserved when calling shags or shsgs
+    !     repeatedly with fixed nlat, nlon.  dwork must be of length at
+    !     least nlat*(nlat+4) in the routine calling shagsi.  This is
+    !     not checked.  undetectable errors will result if dwork is
+    !     smaller than nlat*(nlat+4).
+    !
     module subroutine shagsi(nlat, nlon, wshags, lshags, work, lwork, dwork, ldwork, ierror)
-        !
-        !     Remark:
-        !
-        !     this subroutine must be called before calling shags or shsgs with
-        !     fixed nlat, nlon. it precomputes the gaussian weights, points
-        !     and all necessary legendre polys and stores them in wshags.
-        !     these quantities must be preserved when calling shags or shsgs
-        !     repeatedly with fixed nlat, nlon.  dwork must be of length at
-        !     least nlat*(nlat+4) in the routine calling shagsi.  This is
-        !     not checked.  undetectable errors will result if dwork is
-        !     smaller than nlat*(nlat+4).
-        !
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
         integer(ip), intent(in)     :: nlat
         integer(ip), intent(in)     :: nlon
         real(wp),    intent(inout)  :: wshags(lshags)
@@ -447,11 +442,9 @@ contains
         real(wp),    intent(inout)  :: dwork(ldwork)
         integer(ip), intent(in)     :: ldwork
         integer(ip), intent(out)    :: ierror
-        !----------------------------------------------------------------------
+
         ! Local variables
-        !----------------------------------------------------------------------
         integer(ip) :: ntrunc, l1, l2, late, lp, ldw, ipmnf
-        !----------------------------------------------------------------------
 
         !
         !  Compute constants
@@ -504,15 +497,14 @@ contains
         !
         ipmnf = nlat+2*nlat*late+3*(ntrunc*(ntrunc-1)/2+(nlat-ntrunc)*(ntrunc-1))+nlon+16
 
-        call shagss1(nlat, ntrunc, late, wshags, work, wshags(ipmnf))
+        call compute_and_store_legendre_polys(nlat, ntrunc, late, wshags, work, wshags(ipmnf))
 
     end subroutine shagsi
 
-    subroutine shags1(nlat, nlon, l, lat, mode, gs, idg, jdg, nt, a, b, mdab, &
+    subroutine shags_lower_routine(nlat, nlon, l, lat, mode, gs, idg, jdg, nt, a, b, mdab, &
         ndab, wts, wfft, pmn, late, g, work)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
         integer(ip), intent(in)     :: nlat
         integer(ip), intent(in)     :: nlon
         integer(ip), intent(in)     :: l
@@ -532,30 +524,22 @@ contains
         real(wp),    intent(inout)  :: pmn(late,*)
         real(wp),    intent(inout)  :: wts(nlat)
         real(wp),    intent(inout)  :: work(*)
-        !----------------------------------------------------------------------
-        ! Dummy arguments
-        !----------------------------------------------------------------------
+
+        ! Local variables
         integer(ip)    :: i, j, k, m, mml1
         integer(ip)    :: mn, is, ms, ns, lm1, nl2, lp1, mp1, np1, mp2
         real(wp)       :: t1, t2, sfn
-        type(HFFTpack) :: hfft
-        !----------------------------------------------------------------------
+        type(SpherepackAux) :: sphere_aux
 
-        !
-        !  set gs array internally in shags1
-        !
+        !  set gs array internally in shags_lower_routine
         g(1:lat,1:nlon, :) = gs(1:lat,1:nlon,:)
 
-        !
-        !  do fourier transform
-        !
+        ! Perform fourier transform
         do k=1, nt
-            call hfft%forward(lat, nlon, g(1, 1, k), lat, wfft, work)
+            call sphere_aux%hfft%forward(lat, nlon, g(1, 1, k), lat, wfft, work)
         end do
 
-        !
         !  scale result
-        !
         sfn = TWO/nlon
         g = sfn * g
 
@@ -768,42 +752,34 @@ contains
             end if
         end if
 
-    end subroutine shags1
+    end subroutine shags_lower_routine
 
-    subroutine shagss1(nlat, l, late, w, pmn, pmnf)
-        ! External subroutines  :: legin
-        !----------------------------------------------------------------------
+    subroutine compute_and_store_legendre_polys(nlat, l, late, w, pmn, pmnf)
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
         integer(ip), intent(in)     :: nlat
         integer(ip), intent(in)     :: l
         integer(ip), intent(in)     :: late
         real(wp),    intent(inout)  :: w(*)
         real(wp),    intent(inout)  :: pmn(nlat, late, 3)
         real(wp),    intent(inout)  :: pmnf(late, *)
-        !----------------------------------------------------------------------
-        ! Dummy arguments
-        !----------------------------------------------------------------------
+
+        ! Local variables
         integer(ip)         :: mp1, m, mode, i, np1, km, mml1, mn
         type(SpherepackAux) :: sphere_aux
-        !----------------------------------------------------------------------
 
-        !
         !  Compute and store legendre polys for i=1, ..., late, m=0, ..., l-1
-        !
         pmn = ZERO
 
         do mp1=1, l
             m = mp1-1
             mml1 = m*(2*nlat-m-1)/2
-            !
+
             !  Compute pmn for n=m, ..., nlat-1 and i=1, ..., (l+1)/2
-            !
             mode = 0
             call sphere_aux%legin(mode, l, nlat, m, w, pmn, km)
-            !
+
             !  Store above in pmnf
-            !
             do np1=mp1, nlat
                 mn = mml1+np1
                 do i=1, late
@@ -812,12 +788,11 @@ contains
             end do
         end do
 
-    end subroutine shagss1
+    end subroutine compute_and_store_legendre_polys
 
     subroutine shagsp(nlat, nlon, wshags, lshags, dwork, ldwork, ierror)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
         integer(ip), intent(in)     :: nlat
         integer(ip), intent(in)     :: nlon
         real(wp),    intent(inout)  :: wshags(lshags)
@@ -825,12 +800,11 @@ contains
         real(wp),    intent(inout)  :: dwork(ldwork)
         integer(ip), intent(in)     :: ldwork
         integer(ip), intent(out)    :: ierror
-        !----------------------------------------------------------------------
+
         ! Local variables
-        !----------------------------------------------------------------------
         integer(ip) :: ntrunc, l1, l2, late
         integer(ip) :: workspace_indices(10)
-        !----------------------------------------------------------------------
+
 
         !
         !  Compute constants
@@ -881,7 +855,7 @@ contains
             iw => workspace_indices(10) &
             )
 
-            call shagsp1(nlat, nlon, ntrunc, late, wshags(i1), wshags(i2), wshags(i3), &
+            call shagsp_lower_routine(nlat, nlon, ntrunc, late, wshags(i1), wshags(i2), wshags(i3), &
                 wshags(i4), wshags(i5), wshags(i6), wshags(i7), dwork(idth), &
                 dwork(idwts), dwork(iw), ierror)
 
@@ -896,14 +870,14 @@ contains
     end subroutine shagsp
 
     pure function get_workspace_indices(nlat, late, l) result (return_value)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
+
         integer(ip), intent(in)  :: nlat
         integer(ip), intent(in)  :: late
         integer(ip), intent(in)  :: l
         integer(ip)               :: return_value(10)
-        !----------------------------------------------------------------------
+
 
         associate( i => return_value )
             i(1) = 1
@@ -923,11 +897,11 @@ contains
 
     end function get_workspace_indices
 
-    subroutine shagsp1(nlat, nlon, l, late, wts, p0n, p1n, abel, bbel, cbel, &
+    subroutine shagsp_lower_routine(nlat, nlon, l, late, wts, p0n, p1n, abel, bbel, cbel, &
         wfft, dtheta, dwts, work, ier)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
+
         integer(ip), intent(in)     :: nlat
         integer(ip), intent(in)     :: nlon
         integer(ip), intent(in)     :: l
@@ -943,16 +917,13 @@ contains
         real(wp),    intent(inout)  :: dwts(nlat)
         real(wp),    intent(inout)  :: work(*)
         integer(ip), intent(out)    :: ier
-        !----------------------------------------------------------------------
+
         ! Local variables
-        !----------------------------------------------------------------------
         integer(ip)         :: i, m, n, lw, np1, imn, mlim
         real(wp)            :: pb, dummy_variable
-        type(HFFTpack)      :: hfft
         type(SpherepackAux) :: sphere_aux
-        !----------------------------------------------------------------------
 
-        call hfft%initialize(nlon, wfft)
+        call sphere_aux%hfft%initialize(nlon, wfft)
 
         !
         !  Compute real gaussian points and weights
@@ -1027,6 +998,6 @@ contains
             end do
         end do
 
-    end subroutine shagsp1
+    end subroutine shagsp_lower_routine
 
 end submodule scalar_analysis_gaussian_grid_saved

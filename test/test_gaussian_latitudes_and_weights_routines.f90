@@ -43,10 +43,11 @@
 !     publication in the SIAM journal of scientific computing.
 !                         April 2002
 !
-program tcompute_gaussian_latitudes_and_weights
+program test_gaussian_latitudes_and_weights_routines
 
     use, intrinsic :: ISO_Fortran_env, only: &
         stdout => OUTPUT_UNIT, &
+        wp => REAL64, &
         sp => REAL32
 
     use spherepack_library, only: &
@@ -55,7 +56,6 @@ program tcompute_gaussian_latitudes_and_weights
     ! Explicit typing only
     implicit none
 
-    real :: diff
     real :: dmax
     real :: hold
     integer :: i
@@ -64,69 +64,70 @@ program tcompute_gaussian_latitudes_and_weights
     integer :: irm
     integer :: ldw
     integer :: lwork
-    integer, parameter :: nlat = 63
+    integer, parameter :: NLAT = 63
     real :: pmax
     real :: rerr
     real :: rmax
-    real :: stheta
+
     real :: sums
-    real :: swork
-    real :: swts
+
     real :: tdoub
     real :: tsing
     real :: wmax
 
-    real theta(nlat),wts(nlat),work(nlat+2), &
-        dtheta(nlat),dwts(nlat),dw(nlat+1)
-    real dwmx,tmax,dwmax,dtmax
-    dimension stheta(nlat),swts(nlat),swork(nlat+1)
-    dimension diff(nlat)
-    real (sp) :: t1(2),t2(2)
-    real sumw
-    real dummy_variable
-    !
-    write( *, '(/a/)') '     tcompute_gaussian_latitudes_and_weights *** TEST RUN *** '
+    real(wp) :: theta(NLAT), wts(NLAT), work(NLAT+2)
+    real(wp) :: dtheta(NLAT), dwts(NLAT)
+    real(wp) :: dwmx, tmax, dwmax, dtmax
+    real     :: theta_sp(NLAT), wts_sp(NLAT), work_sp(NLAT+1)
+    real     :: diff(NLAT)
+    real(sp) :: t1(2),t2(2)
+    real     :: sumw
+    
+    ! Description
+    write( stdout, '(/a/)') &
+        '     gaussian_latitudes_and_weights_routines *** TEST RUN *** '
 
-    lwork = nlat+1
+    lwork = NLAT+1
     hold = etime(t1)
     hold = t1(1)
-    call gsqd(nlat,theta,wts,work,lwork,ierror)
+    call gsqd(NLAT,theta,wts,work,lwork,ierror)
     tdoub = etime(t1)
     tdoub = t1(1)-hold
-    if (ierror /= 0) write( stdout,4) ierror
-4   format(' ierror=',i5)
-    write( stdout, 739) tdoub
-739 format(' tdoub ',1pe15.6)
-    !
-    !     compare double with double
-    !
-    ldw = nlat+2
+
+    ! Check error flag
+    if (ierror /= 0) write( stdout, '(a,i5)') ' ierror = ', ierror
+
+    write( stdout, '(a,1pe15.6)') ' tdoub ', tdoub
+
+    ! Compare double with double
+    ldw = NLAT+2
     hold = etime(t1)
     hold = t1(1)
-    call compute_gaussian_latitudes_and_weights(nlat,dtheta,dwts,ierror)
+    call compute_gaussian_latitudes_and_weights(NLAT,dtheta,dwts,ierror)
     tdoub = etime(t1)
     tdoub = t1(1)-hold
-    if (ierror /= 0) write( stdout,30) ierror
-30  format(' ierror=',i5)
-    write( stdout, 31) tdoub
-31  format(' tdoub compute_gaussian_latitudes_and_weights',1pe15.6)
-    !
+
+    if (ierror /= 0) write( stdout,'(a,i5)') ' ierror = ', ierror
+
+    write( stdout, '(a,1pe15.6)') &
+        ' tdoub compute_gaussian_latitudes_and_weights', tdoub
+
     dwmx = 0.0
     tmax = 0.0
     dwmax = 0.0
     dtmax = 0.0
-    ido = (nlat+1)/2
+    ido = (NLAT+1)/2
 
     do i=1,ido
-        dtmax = max(dtmax,abs(theta(i)-dtheta(i)))
-        dwmax = max(dwmax,abs(wts(i)-dwts(i)))
-        tmax = max(tmax,abs(theta(i)))
-        dwmx = max(dwmx,abs(wts(i)))
+        dtmax = max(dtmax, abs(theta(i)-dtheta(i)))
+        dwmax = max(dwmax, abs(wts(i)-dwts(i)))
+        tmax = max(tmax, abs(theta(i)))
+        dwmx = max(dwmx, abs(wts(i)))
     end do
 
     dtmax = dtmax/tmax
     dwmax = dwmax/dwmx
-    write( stdout, 33) nlat,dtmax,dwmax
+    write( stdout, 33) NLAT,dtmax,dwmax
 33  format(' nlat',i6,'  points ',1pd15.6,' weights ',d15.6)
 
     sumw = sum(wts)
@@ -136,26 +137,26 @@ program tcompute_gaussian_latitudes_and_weights
 
     hold = etime(t2)
     hold = t2(1)
-    lwork = nlat+2
-    call scompute_gaussian_latitudes_and_weights(nlat,stheta,swts,swork,lwork,ierror)
+    lwork = NLAT+2
+    call sgaqd(NLAT,theta_sp,wts_sp,work_sp,lwork,ierror)
     tsing = etime(t2)
     tsing = t2(1)-hold
     if (ierror /= 0) write( stdout, 5) ierror
 5   format(' iserror=',i5)
 
-    sums =sum(swts)
+    sums =sum(wts_sp)
 
     write( stdout, 636) sums
 636 format('  sums ',1pe24.15)
-    dmax = 0.
-    wmax = 0.
-    rmax = 0.
-    ido = (nlat+1)/2
+    dmax = 0.0
+    wmax = 0.0
+    rmax = 0.0
+    ido = (NLAT+1)/2
     do i=1,ido
-        diff(i) = wts(i)-swts(i)
+        diff(i) = wts(i)-wts_sp(i)
         dmax = max(dmax,abs(diff(i)))
-        wmax = max(wmax,abs(swts(i)))
-        rerr = abs(diff(i)/swts(i))
+        wmax = max(wmax,abs(wts_sp(i)))
+        rerr = abs(diff(i)/wts_sp(i))
         if (rerr>rmax) then
             rmax = rerr
             irm = i
@@ -164,41 +165,41 @@ program tcompute_gaussian_latitudes_and_weights
     end do
 
     !      write( stdout, 7) (diff(i),i=nlat-25,nlat)
-7   format(' diff in weights'/(1p8e10.3))
+7   format(' diff in weights'/(1p8e10.03))
     dmax = dmax/wmax
-    write( stdout, 9) nlat,irm,dmax,rmax
+    write( stdout, 9) NLAT,irm,dmax,rmax
 9   format(' weights: nlat ',i6,' irele ',i6, &
         ' dmax ',1pe15.6,' rmax ',1pe15.6)
-    dmax = 0.
-    pmax = 0.
-    rmax = 0.
+    dmax = 0.0
+    pmax = 0.0
+    rmax = 0.0
     do i=1,ido
-        diff(i) = theta(i)-stheta(i)
+        diff(i) = theta(i)-theta_sp(i)
         dmax = max(dmax,abs(diff(i)))
-        pmax = max(pmax,abs(stheta(i)))
-        rerr = abs(diff(i)/stheta(i))
+        pmax = max(pmax,abs(theta_sp(i)))
+        rerr = abs(diff(i)/theta_sp(i))
         if (rerr>rmax) then
             rmax = rerr
             irm = i
         end if
     end do
     !      write( stdout, 11) (diff(i),i=nlat-25,nlat)
-11  format(' diff in points'/(1p8e10.3))
+11  format(' diff in points'/(1p8e10.03))
     dmax = dmax/pmax
-    write( stdout, 12) nlat,irm,dmax,rmax
+    write( stdout, 12) NLAT,irm,dmax,rmax
 12  format(' points:  nlat ',i6,' irele ',i6, &
         ' dmax ',1pe15.6,' rmax ',1pe15.6)
 
     dmax = 0.0
-    do i=1,nlat
-        diff(i) = cos(theta(i))-cos(stheta(i))
+    do i=1,NLAT
+        diff(i) = cos(theta(i))-cos(theta_sp(i))
         dmax = max(dmax,abs(diff(i)))
     end do
 
-    ! format(' diff in points'/(1p8e10.3))
+    ! format(' diff in points'/(1p8e10.03))
     write( stdout, 112) dmax
 112 format(' max difference in mu',1pe15.6)
-    write( stdout, 1) nlat,tsing,tdoub
+    write( stdout, 1) NLAT,tsing,tdoub
 1   format(' nlat',i6,' tsing',1pe15.6,' tdoub',e15.6)
 
 contains
@@ -213,7 +214,7 @@ contains
     !                         April 2002
     !
     subroutine gsqd(nlat,theta,wts,dwork,ldwork,ierror)
-        implicit none
+
         integer :: i
         integer :: ierror
         integer :: ldwork
@@ -279,7 +280,7 @@ contains
         !
         !     compute points
         !
-        call gsqd1(nlat,theta,dwork)
+        call gsqd_lower_routine(nlat,theta,dwork)
         !
         !     compute weights
         !
@@ -296,11 +297,11 @@ contains
         return
     end subroutine gsqd
     !
-    subroutine gsqd1(nlat,theta,cp)
-        implicit none
+    subroutine gsqd_lower_routine(nlat,theta,cp)
+
         real :: eps
         real :: summation
-        integer :: i
+        
         integer :: it
         integer :: nhalf
         integer :: nix
@@ -361,9 +362,10 @@ contains
         if (nix<nhalf-1)  zero = zero+zero-theta(nix+2)
         goto 9
 30      return
-    end subroutine gsqd1
+    end subroutine gsqd_lower_routine
+
     subroutine egwts(n,theta,wts,work)
-        implicit none
+
         integer :: n
         !
         !     computes gauss weights as described in swarztrauber
@@ -372,10 +374,11 @@ contains
         real theta(n),wts(n),work(n+1)
         !
         call egwts1(n,theta,wts,work,work(n/2+2))
-        return
+
     end subroutine egwts
+
     subroutine egwts1(n,theta,wts,dcp,cp)
-        implicit none
+
         integer :: i
         integer :: n
         integer :: nhalf
@@ -387,14 +390,15 @@ contains
         call dlfcz (n,dcp)
         nhalf = (n+1)/2
         do i=1,nhalf
-            call lft (0,n-1,theta(i),cp,pb)
-            call dlft (0,n,theta(i),dcp,dpb)
+            call lft(0,n-1,theta(i),cp,pb)
+            call dlft(0,n,theta(i),dcp,dpb)
             wts(i) = -sqnn*sin(theta(i))/(fn*pb*dpb)
         end do
-        return
+
     end subroutine egwts1
+
     subroutine lfc (m,n,cp)
-        implicit none
+
         integer :: i
         integer :: l
         integer :: m
@@ -410,7 +414,7 @@ contains
         parameter (sc20=sc10*sc10)
         parameter (sc40=sc20*sc20)
         !
-        cp(1) = 0.
+        cp(1) = 0.0
         ma = iabs(m)
         if (ma > n) return
         if (n-1< 0) then
@@ -485,7 +489,7 @@ contains
         goto 30
     end subroutine lfc
     subroutine lft (m,n,theta,cp,pb)
-        implicit none
+
         integer :: k
         integer :: kdo
         integer :: m
@@ -531,7 +535,7 @@ contains
         !     n even, m odd
         !
 4       kdo = n/2
-        pb = 0.
+        pb = 0.0
         cth = cdt
         sth = sdt
         do 180 k=1,kdo
@@ -553,7 +557,7 @@ contains
         !     n odd, m even
         !
 13      kdo = (n+1)/2
-        pb = 0.
+        pb = 0.0
         cth = cos(theta)
         sth = sin(theta)
         do 190 k=1,kdo
@@ -568,7 +572,7 @@ contains
         !     n odd, m odd
         !
 14      kdo = (n+1)/2
-        pb = 0.
+        pb = 0.0
         cth = cos(theta)
         sth = sin(theta)
         do 200 k=1,kdo
@@ -581,7 +585,7 @@ contains
         return
     end subroutine lft
     subroutine dlft (m,n,theta,cp,pb)
-        implicit none
+
         integer :: k
         integer :: kdo
         integer :: m
@@ -631,7 +635,7 @@ contains
         !     n even, m odd
         !
 4       kdo = n/2
-        pb = 0.
+        pb = 0.0
         cth = cdt
         sth = sdt
         do 180 k=1,kdo
@@ -653,7 +657,7 @@ contains
         !     n odd, m even
         !
 13      kdo = (n+1)/2
-        pb = 0.
+        pb = 0.0
         cth = cos(theta)
         sth = sin(theta)
         do 190 k=1,kdo
@@ -668,7 +672,7 @@ contains
         !     n odd, m odd
         !
 14      kdo = (n+1)/2
-        pb = 0.
+        pb = 0.0
         cth = cos(theta)
         sth = sin(theta)
         do 200 k=1,kdo
@@ -678,10 +682,11 @@ contains
             sth = sdt*cth+cdt*sth
             cth = chh
 200     continue
-        return
+
     end subroutine dlft
+
     subroutine dlfcz(n,cp)
-        implicit none
+
         integer :: i
         integer :: ic
         integer :: j
@@ -697,14 +702,14 @@ contains
         !
         cn = 2.0
         write( stdout, 9) cn
-9       format(' check1 on dble cn ',1pd20.11)
+9       format(' check1 on dble cn ',1pd20.011)
         if (n>0) then
             ic = 0
             fi = 0.0
             do i=1,n
                 fi = fi+2.0
                 cn = (1.0-1.0/fi**2)*cn
-                if (abs(cn)> 5.0.and.ic==0) then
+                if (abs(cn) > 5.0 .and. ic == 0) then
                     ic = 1
                     write( stdout, 7) i,cn
 7                   format('  i ',i7,' check3 on cn',1pd15.6)
@@ -712,17 +717,17 @@ contains
             end do
         end if
         write( stdout, 8) cn
-8       format(' check2 on dble cn ',1pd20.11)
+8       format(' check2 on dble cn ',1pd20.011)
         cn = sqrt(cn)
         ncp = n/2+1
         t1 = -1.0
         t2 = n+1.0
-        t3 = 0.
+        t3 = 0.0
         t4 = n+n+1.0
         cp(ncp) = cn
         coef = 1.0
         write( stdout, 11) cn
-11      format(' check on dble cn ',1pd20.11)
+11      format(' check on dble cn ',1pd20.011)
         !      do j = ncp-1,1,-1
         j = ncp
 10      j = j-1
@@ -737,8 +742,8 @@ contains
         return
     end subroutine dlfcz
     !
-    subroutine scompute_gaussian_latitudes_and_weights(nlat,theta,wts,w,lwork,ierror)
-        implicit none
+    subroutine sgaqd(nlat,theta,wts,w,lwork,ierror)
+
         real :: cmax
         real :: cz
         real :: dcor
@@ -779,7 +784,7 @@ contains
         !     This routine is faster and more accurate than older program
         !     with the same name.
         !
-        !     subroutine scompute_gaussian_latitudes_and_weights computes the nlat gaussian colatitudes and
+        !     subroutine sgaqd computes the nlat gaussian colatitudes and
         !     weights in single precision. the colatitudes are in radians
         !     and lie in the interval (0,pi).
         !
@@ -896,7 +901,7 @@ contains
             wts(nlat-i+1) = wts(i)
             theta(nlat-i+1) = pi-theta(i)
         end do
-        summation = 0.
+        summation = 0.0
         do i=1,nlat
             summation = summation+wts(i)
         end do
@@ -904,9 +909,9 @@ contains
             wts(i) = 2.0*wts(i)/summation
         end do
         return
-    end subroutine scompute_gaussian_latitudes_and_weights
+    end subroutine sgaqd
     subroutine lfcz(n,cz,cp,dcp)
-        implicit none
+
         real :: cp
         real :: cz
         real :: dcp
@@ -930,7 +935,7 @@ contains
         ncp = (n+1)/2
         t1 = -1.0
         t2 = n+1.0
-        t3 = 0.
+        t3 = 0.0
         t4 = n+n+1.0
         if (mod(n,2)==0) then
             cp(ncp) = 1.0
@@ -965,13 +970,12 @@ contains
 
     end subroutine lfcz
 
-
     subroutine slpdp (n,theta,cz,cp,dcp,pb,dpb)
-        implicit none
+
         real :: cdt
         real :: chh
         real :: cp
-        real :: cth
+        real :: cost
         real :: cz
         real :: dcp
         real :: dpb
@@ -981,7 +985,7 @@ contains
         integer :: n
         real :: pb
         real :: sdt
-        real :: sth
+        real :: sint
         real :: theta
         !
         !     computes pn(theta) and its derivative dpb(theta) with
@@ -1000,16 +1004,16 @@ contains
             pb = .5*cz
             dpb = 0.0
             if (n > 0) then
-                cth = cdt
-                sth = sdt
+                cost = cdt
+                sint = sdt
                 do k=1,kdo
                     !      pb = pb+cp(k)*cos(2*k*theta)
-                    pb = pb+cp(k)*cth
+                    pb = pb+cp(k)*cost
                     !      dpb = dpb-(k+k)*cp(k)*sin(2*k*theta)
-                    dpb = dpb-dcp(k)*sth
-                    chh = cdt*cth-sdt*sth
-                    sth = sdt*cth+cdt*sth
-                    cth = chh
+                    dpb = dpb-dcp(k)*sint
+                    chh = cdt*cost-sdt*sint
+                    sint = sdt*cost+cdt*sint
+                    cost = chh
                 end do
             end if
         else
@@ -1017,21 +1021,21 @@ contains
             !     n odd
             !
             kdo = (n+1)/2
-            pb = 0.
-            dpb = 0.
-            cth = cos(theta)
-            sth = sin(theta)
+            pb = 0.0
+            dpb = 0.0
+            cost = cos(theta)
+            sint = sin(theta)
             do k=1,kdo
                 !      pb = pb+cp(k)*cos((2*k-1)*theta)
-                pb = pb+cp(k)*cth
+                pb = pb+cp(k)*cost
                 !      dpb = dpb-(k+k-1)*cp(k)*sin((2*k-1)*theta)
-                dpb = dpb-dcp(k)*sth
-                chh = cdt*cth-sdt*sth
-                sth = sdt*cth+cdt*sth
-                cth = chh
+                dpb = dpb-dcp(k)*sint
+                chh = cdt*cost-sdt*sint
+                sint = sdt*cost+cdt*sint
+                cost = chh
             end do
         end if
-        return
+
     end subroutine slpdp
 
-end program tcompute_gaussian_latitudes_and_weights
+end program test_gaussian_latitudes_and_weights_routines

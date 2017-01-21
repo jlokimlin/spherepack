@@ -92,109 +92,78 @@ program advec
         wp, & ! Working precision
         ip    ! Integer precision
 
-    use type_AdvectionSolver
+    use type_AdvectionSolver, only: &
+        AdvectionSolver, &
+        TIME_TO_CIRCUMVENT_THE_EARTH
 
     ! Explicit typing only
     implicit none
 
-    !----------------------------------------------------------------------
-    ! Local variables
-    !----------------------------------------------------------------------
-    type(AdvectionSolver)        :: solver
-    integer(ip), parameter       :: NLONS = 45
-    integer(ip), parameter       :: NLATS = 23
-    integer(ip)                  :: i, j !! Counters
-    integer(ip)                  :: mprint, ncycle, ntime
-    real(wp)                     :: u(NLATS,NLONS),v(NLATS,NLONS)
-    real(wp)                     :: phi_old(NLATS,NLONS),phi_new(NLATS,NLONS)
-    real(wp)                     :: phi(NLATS,NLONS)
-    real(wp)                     :: exact_phi(NLATS,NLONS)
-    real(wp)                     :: grad_phi(NLATS,NLONS)
-    real(wp)                     :: grad_phi_lon(NLATS,NLONS),grad_phi_lat(NLATS,NLONS)
-    real(wp)                     :: p0_l2, p0_max, time, htime
-    character(len=*), parameter  :: WRITE_FMT = &
+    ! Dictionary
+    type(AdvectionSolver)             :: solver
+    integer(ip), parameter            :: NLONS = 45
+    integer(ip), parameter            :: NLATS = 23
+    integer(ip)                       :: i, j !! Counters
+    integer(ip)                       :: mprint, ncycle, ntime
+    real(wp), dimension(NLATS, NLONS) :: u, v, phi, phi_old, phi_new
+    real(wp), dimension(NLATS, NLONS) :: exact_phi, grad_phi, grad_phi_lon, grad_phi_lat
+    real(wp)                          :: p0_l2, p0_max, time, htime
+    real(wp),         parameter       :: ZERO = 0.0_wp, HALF = 0.5_wp
+    character(len=*), parameter       :: WRITE_FMT = &
         '(a, i10, a, f10.2/, a, f10.0, a, i10/, a, i10, '&
         //'a, 1pe15.6/, a, 1pe15.6, a, 0pf10.2/a, 1pe15.6, a, 1pe15.6)'
-    !----------------------------------------------------------------------
 
     write( stdout, '(/a)') '     advec *** TEST RUN *** '
 
-    !
-    !  Allocate memory
-    !
+    ! Allocate memory
     call solver%create(nlat=NLATS, nlon=NLONS)
 
-    !
-    !  set vector velocities and cosine bell in geopotential
-    !
+    ! Set vector velocities and cosine bell in geopotential
     call solver%get_vector_velocities(u, v)
 
-
-
+    ! Compute geopotential at t=-dt in phi_old and at t=0.0 in phi
+    ! to start up leapfrog scheme
     associate( dt => solver%TIME_STEP )
-        !
-        !  Compute geopotential at t=-dt in phi_old and at t=0.0 in phi
-        !    to start up leapfrog scheme
-        !
         call solver%get_geopotential(-dt, phi_old)
-        call solver%get_geopotential(0.0_wp, phi)
-
+        call solver%get_geopotential(ZERO, phi)
     end associate
 
-
-    !
-    !  smooth geopotential at t=-dt and t=0. by synthesizing after analysis
-    !
+    ! Smooth geopotential at t=-dt and t=0. by synthesizing after analysis
     call solver%perform_scalar_analysis(phi_old)
     call solver%perform_scalar_synthesis(phi_old)
     call solver%perform_scalar_analysis(phi)
     call solver%perform_scalar_synthesis(phi)
 
-
-    !
-    !  compute l2 and max norms of geopotential at t=0.
-    !
+    ! Compute l2 and max norms of geopotential at t=0.
     p0_l2 = norm2(phi)
     p0_max = maxval(abs(phi))
 
-
+    ! Set number of time steps for 12 days (time to circumvent the earth)
     associate( dt => solver%TIME_STEP )
-        !
-        !  set number of time steps for 12 days (time to circumvent the earth)
-        !
-        ntime = int(real(TIME_TO_CIRCUMVENT_THE_EARTH, kind=wp)/dt + 0.5_wp, kind=ip)
+        ntime = int(real(TIME_TO_CIRCUMVENT_THE_EARTH, kind=wp)/dt + HALF, kind=ip)
         mprint = ntime/12
-        time = 0.0_wp
+        time = ZERO
         ncycle = 0
-
     end associate
 
-
-    !
     !  Start time loop
-    !
     time_loop: do while (ncycle <= ntime)
-        !
+
         !  Compute gradient of phi at current time
-        !
         call solver%get_gradient(phi, grad_phi_lat, grad_phi_lon)
-        !
+
         !  Compute the time derivative of phi, note that the sign
-        !    of the last term is positive because the gradient is
-        !    computed with respect to colatitude rather than latitude.
-        !
+        !  of the last term is positive because the gradient is
+        !  computed with respect to colatitude rather than latitude.
         grad_phi = -u * grad_phi_lon + v * grad_phi_lat
-        !
-        !  write variables to standard output
-        !
+
+        ! Write variables to standard output
         if (mod(ncycle,mprint) == 0) then
-            !
-            !  Compute exact solution
-            !
+
+            ! Compute exact solution
             call solver%get_geopotential(time, exact_phi)
-            !
+
             !  Compute errors
-            !
             associate( &
                 htime => time/3600, &
                 dt => solver%TIME_STEP, &
@@ -222,31 +191,21 @@ program advec
             end associate
         end if
 
-        !
         !  Update various quantities
-        !
         associate( dt => solver%TIME_STEP )
-            !
-            !  increment
-            !
+
+            ! Increment
             time = time + dt
             ncycle = ncycle + 1
-            !
-            !  update phi_old,phi for next time step
-            !
+
+            ! Update phi_old,phi for next time step
             phi_new = phi_old + 2.0_wp * dt * grad_phi
             phi_old = phi
             phi = phi_new
-
         end associate
-        !
-        !  end of time loop
-        !
     end do time_loop
 
-    !
     !  Release memory
-    !
     call solver%destroy()
 
 end program advec
