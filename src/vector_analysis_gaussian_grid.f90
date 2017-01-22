@@ -467,7 +467,7 @@ imid = (nlat+1)/2
 !     set first imid words of real weights in dwork
 !     as single precision in first imid words of wvhagc
 !
-call setwts(imid, dwork(nlat+1), wvhagc)
+call copy_gaussian_weights(imid, dwork(nlat+1), wvhagc)
 !
 !     first nlat+1 words of dwork contain  double theta
 !
@@ -558,87 +558,115 @@ fsn = FOUR/nlon
 mlat = mod(nlat, 2)
 mlon = mod(nlon, 2)
 mmax = min(nlat, (nlon+1)/2)
-imm1 = imid
-if (mlat /= 0) imm1 = imid-1
-if (ityp > 2) goto 3  
-do 5 k=1, nt 
-do 5 i=1, imm1
-do 5 j=1, nlon
+
+        select case (mlat)
+            case (0)
+                imm1 = imid
+                ndo1 = nlat
+                ndo2 = nlat-1
+            case default
+                imm1 = imid-1
+                ndo1 = nlat-1
+                ndo2 = nlat
+        end select
+
+if (ityp <= 2) then
+do k=1, nt
+do i=1, imm1
+do j=1, nlon
 ve(i, j, k) = tsn*(v(i, j, k)+v(nlp1-i, j, k))
 vo(i, j, k) = tsn*(v(i, j, k)-v(nlp1-i, j, k))
 we(i, j, k) = tsn*(w(i, j, k)+w(nlp1-i, j, k))
 wo(i, j, k) = tsn*(w(i, j, k)-w(nlp1-i, j, k))
-5 continue
-goto 2
-3 do 8 k=1, nt
-do 8 i=1, imm1 
-do 8 j=1, nlon
+end do
+end do
+end do
+else
+do k=1, nt
+do i=1, imm1
+do j=1, nlon
 ve(i, j, k) = fsn*v(i, j, k)
 vo(i, j, k) = fsn*v(i, j, k)
 we(i, j, k) = fsn*w(i, j, k)
 wo(i, j, k) = fsn*w(i, j, k)
-8 continue
-2 if (mlat == 0) goto 7
-do 6 k=1, nt 
-do 6 j=1, nlon
+end do
+end do
+end do
+end if
+
+if (mlat /= 0) then
+do k=1, nt
+do j=1, nlon
 ve(imid, j, k) = tsn*v(imid, j, k)
 we(imid, j, k) = tsn*w(imid, j, k)
-6 continue
-7 do 9 k=1, nt
+end do
+end do
+end if
+
+do k=1, nt
 call sphere_aux%hfft%forward(idv, nlon, ve(1, 1, k), idv, wrfft, vb)
 call sphere_aux%hfft%forward(idv, nlon, we(1, 1, k), idv, wrfft, vb)
-9 continue 
-ndo1 = nlat
-ndo2 = nlat
-if (mlat /= 0) ndo1 = nlat-1
-if (mlat == 0) ndo2 = nlat-1
-if (ityp==2 .or. ityp==5 .or. ityp==8) goto 11 
-do 10 k=1, nt
-do 10 mp1=1, mmax
-do 10 np1=mp1, nlat
-br(mp1, np1, k) = ZERO
-bi(mp1, np1, k) = ZERO
-10 continue
-11 if (ityp==1 .or. ityp==4 .or. ityp==7) goto 13 
-do 12 k=1, nt
-do 12 mp1=1, mmax
-do 12 np1=mp1, nlat
-cr(mp1, np1, k) = ZERO
-ci(mp1, np1, k) = ZERO
-12 continue
-13 itypp = ityp+1
-goto (1, 100, 200, 300, 400, 500, 600, 700, 800), itypp
-!
-!     case ityp=0 ,  no symmetries
-!
-1 call sphere_aux%vbin(0, nlat, nlon, 0, vb, iv, wvbin)
-!
-!     case m=0
-!
-do 15 k=1, nt
-do 1015 i=1, imid
+end do
+
+        !  Set polar coefficients to zero
+        select case (ityp)
+            case (0:1, 3:4, 6:7)
+                do k=1, nt
+                    do mp1=1, mmax
+                        do np1=mp1, nlat
+                            br(mp1, np1, k) = ZERO
+                            bi(mp1, np1, k) = ZERO
+                        end do
+                    end do
+                end do
+        end select
+
+        !  Set azimuthal coefficients to zero
+        select case (ityp)
+            case (0, 2:3, 5:6, 8)
+                do k=1, nt
+                    do mp1=1, mmax
+                        do np1=mp1, nlat
+                            cr(mp1, np1, k) = ZERO
+                            ci(mp1, np1, k) = ZERO
+                        end do
+                    end do
+                end do
+        end select
+
+vector_symmetry_cases: select case (ityp)
+case (0)
+
+! Case ityp=0 ,  no symmetries
+
+call sphere_aux%vbin(0, nlat, nlon, 0, vb, iv, wvbin)
+
+! Case m=0
+do k=1, nt
+do i=1, imid
 tv = ve(i, 1, k)*wts(i)
 tw = we(i, 1, k)*wts(i)
-do 10015 np1=2, ndo2, 2
+do np1=2, ndo2, 2
 br(1, np1, k) = br(1, np1, k)+vb(i, np1, iv)*tv
 cr(1, np1, k) = cr(1, np1, k)-vb(i, np1, iv)*tw
-10015 continue
-1015 continue
-15 continue
-do 16 k=1, nt
-do 1016 i=1, imm1
+end do
+end do
+end do
+
+do k=1, nt
+do i=1, imm1
 tv = vo(i, 1, k)*wts(i)
 tw = wo(i, 1, k)*wts(i)
-do 10016 np1=3, ndo1, 2
+do np1=3, ndo1, 2
 br(1, np1, k) = br(1, np1, k)+vb(i, np1, iv)*tv
 cr(1, np1, k) = cr(1, np1, k)-vb(i, np1, iv)*tw
-10016 continue
-1016 continue
-16 continue
-!
-!     case m = 1 through nlat-1
-!
+end do
+end do
+end do
+
+! Case m = 1 through nlat-1
 if (mmax < 2) return
+
 do 20 mp1=2, mmax
 m = mp1-1
 mp2 = mp1+1
@@ -681,7 +709,7 @@ cr(mp1, np1, k)=cr(mp1, np1, k)+wb(i, np1, iw)*ve(i, 2*mp1-1, k)*wts(i)
 ci(mp1, np1, k)=ci(mp1, np1, k)-wb(i, np1, iw)*ve(i, 2*mp1-2, k)*wts(i)
 1024 continue
 24 continue
-17 if (mp2 > ndo2) goto 20
+17 if (mp2 > ndo2) return
 do 21 k=1, nt
 do 1021 i=1, imm1
 tvo1 = vo(i, 2*mp1-1, k)*wts(i)
@@ -705,7 +733,7 @@ ci(mp1, np1, k) = ci(mp1, np1, k)-vb(i, np1, iv)*twe1 &
 1021 continue
 21 continue
 
-if (mlat == 0) goto 20
+if (mlat == 0) return
 i = imid
 do 22 k=1, nt
 do 1022 np1=mp2, ndo2, 2
@@ -716,11 +744,12 @@ ci(mp1, np1, k)=ci(mp1, np1, k)-vb(i, np1, iv)*we(i, 2*mp1-1, k)*wts(i)
 1022 continue
 22 continue
 20 continue
-return
+
+case(1)
 !
 !     case ityp=1 ,  no symmetries but cr and ci equal zero
 !
-100 call sphere_aux%vbin(0, nlat, nlon, 0, vb, iv, wvbin)
+call sphere_aux%vbin(0, nlat, nlon, 0, vb, iv, wvbin)
 !
 !     case m=0
 !
@@ -786,11 +815,12 @@ br(mp1, np1, k) = br(mp1, np1, k)+vb(i, np1, iv)*ve(i, 2*mp1-2, k)*wts(i)
 bi(mp1, np1, k) = bi(mp1, np1, k)+vb(i, np1, iv)*ve(i, 2*mp1-1, k)*wts(i)
 122 continue
 120 continue
-return
+
+case(2)
 !
-!     case ityp=2 ,  no symmetries but br and bi equal zero   
+!     case ityp=2 ,  no symmetries but br and bi equal zero
 !
-200 call sphere_aux%vbin(0, nlat, nlon, 0, vb, iv, wvbin)
+call sphere_aux%vbin(0, nlat, nlon, 0, vb, iv, wvbin)
 !
 !     case m=0
 !
@@ -856,11 +886,11 @@ cr(mp1, np1, k) = cr(mp1, np1, k)-vb(i, np1, iv)*we(i, 2*mp1-2, k)*wts(i)
 ci(mp1, np1, k) = ci(mp1, np1, k)-vb(i, np1, iv)*we(i, 2*mp1-1, k)*wts(i)
 222 continue
 220 continue
-return
+case(3)
 !
 !     case ityp=3 ,  v even , w odd
 !
-300 call sphere_aux%vbin(0, nlat, nlon, 0, vb, iv, wvbin)
+call sphere_aux%vbin(0, nlat, nlon, 0, vb, iv, wvbin)
 !
 !     case m=0
 !
@@ -926,11 +956,11 @@ br(mp1, np1, k) = br(mp1, np1, k)+vb(i, np1, iv)*ve(i, 2*mp1-2, k)*wts(i)
 bi(mp1, np1, k) = bi(mp1, np1, k)+vb(i, np1, iv)*ve(i, 2*mp1-1, k)*wts(i)
 322 continue
 320 continue
-return
+case(4)
 !
-!     case ityp=4 ,  v even, w odd, and cr and ci equal 0. 
+!     case ityp=4 ,  v even, w odd, and cr and ci equal 0.
 !
-400 call sphere_aux%vbin(1, nlat, nlon, 0, vb, iv, wvbin)
+call sphere_aux%vbin(1, nlat, nlon, 0, vb, iv, wvbin)
 !
 !     case m=0
 !
@@ -970,11 +1000,11 @@ br(mp1, np1, k) = br(mp1, np1, k)+vb(i, np1, iv)*ve(i, 2*mp1-2, k)*wts(i)
 bi(mp1, np1, k) = bi(mp1, np1, k)+vb(i, np1, iv)*ve(i, 2*mp1-1, k)*wts(i)
 422 continue
 420 continue
-return
+case(5)
 !
 !     case ityp=5   v even, w odd, and br and bi equal zero
 !
-500 call sphere_aux%vbin(2, nlat, nlon, 0, vb, iv, wvbin)
+call sphere_aux%vbin(2, nlat, nlon, 0, vb, iv, wvbin)
 !
 !     case m=0
 !
@@ -1014,11 +1044,11 @@ cr(mp1, np1, k) = cr(mp1, np1, k)+wb(i, np1, iw)*ve(i, 2*mp1-1, k)*wts(i)
 ci(mp1, np1, k) = ci(mp1, np1, k)-wb(i, np1, iw)*ve(i, 2*mp1-2, k)*wts(i)
 524 continue
 520 continue
-return
+case(6)
 !
 !     case ityp=6 ,  v odd , w even
 !
-600 call sphere_aux%vbin(0, nlat, nlon, 0, vb, iv, wvbin)
+call sphere_aux%vbin(0, nlat, nlon, 0, vb, iv, wvbin)
 !
 !     case m=0
 !
@@ -1084,11 +1114,11 @@ cr(mp1, np1, k) = cr(mp1, np1, k)-vb(i, np1, iv)*we(i, 2*mp1-2, k)*wts(i)
 ci(mp1, np1, k) = ci(mp1, np1, k)-vb(i, np1, iv)*we(i, 2*mp1-1, k)*wts(i)
 622 continue
 620 continue
-return
+case(7)
 !
 !     case ityp=7   v odd, w even, and cr and ci equal zero
 !
-700 call sphere_aux%vbin(2, nlat, nlon, 0, vb, iv, wvbin)
+call sphere_aux%vbin(2, nlat, nlon, 0, vb, iv, wvbin)
 !
 !     case m=0
 !
@@ -1128,11 +1158,11 @@ br(mp1, np1, k) = br(mp1, np1, k)+wb(i, np1, iw)*we(i, 2*mp1-1, k)*wts(i)
 bi(mp1, np1, k) = bi(mp1, np1, k)-wb(i, np1, iw)*we(i, 2*mp1-2, k)*wts(i)
 724 continue
 720 continue
-return
+case(8)
 !
 !     case ityp=8   v odd, w even, and both br and bi equal zero
 !
-800 call sphere_aux%vbin(1, nlat, nlon, 0, vb, iv, wvbin)
+call sphere_aux%vbin(1, nlat, nlon, 0, vb, iv, wvbin)
 !
 !     case m=0
 !
@@ -1146,12 +1176,12 @@ cr(1, np1, k) = cr(1, np1, k)-vb(i, np1, iv)*tw
 !     case m = 1 through nlat-1
 !
 if (mmax < 2) return
-do 820 mp1=2, mmax
+do mp1=2, mmax
 m = mp1-1
 mp2 = mp1+1
 call sphere_aux%vbin(1, nlat, nlon, m, vb, iv, wvbin)
 call sphere_aux%wbin(1, nlat, nlon, m, wb, iw, wwbin)
-if (mp2 > ndo2) goto 820
+if (mp2 > ndo2) return
 do 821 k=1, nt
 do 821 i=1, imm1
 twe1 = we(i, 2*mp1-1, k)*wts(i)
@@ -1164,29 +1194,32 @@ cr(mp1, np1, k) = cr(mp1, np1, k)-vb(i, np1, iv)*twe2 &
 ci(mp1, np1, k) = ci(mp1, np1, k)-vb(i, np1, iv)*twe1 &
                              -wb(i, np1, iw)*tvo2
 821 continue
-if (mlat == 0) goto 820
+if (mlat == 0) return
 i = imid
 do 822 k=1, nt
 do 822 np1=mp2, ndo2, 2
 cr(mp1, np1, k) = cr(mp1, np1, k)-vb(i, np1, iv)*we(i, 2*mp1-2, k)*wts(i)
 ci(mp1, np1, k) = ci(mp1, np1, k)-vb(i, np1, iv)*we(i, 2*mp1-1, k)*wts(i)
 822 continue
-820 continue
+end do
+end select vector_symmetry_cases
 
 end subroutine vhagc_lower_routine
 
-subroutine setwts(imid, dwts, wts)
+! Purpose:
+!
+! Set first imid =(nlat+1)/2 of real weights in dwts
+! as single precision in wts.
+!
+subroutine copy_gaussian_weights(imid, dwts, wts)
 
+! Dummy arguments
 integer(ip), intent(in)  :: imid
 real(wp),    intent(in)  :: dwts(imid)
 real(wp),    intent(out) :: wts(imid)
-!
-!     set first imid =(nlat+1)/2 of real weights in dwts
-!     as single precision in wts
-!
 
 wts(1:imid) = dwts(1:imid)
 
-end subroutine setwts
+end subroutine copy_gaussian_weights
 
 end submodule vector_analysis_gaussian_grid

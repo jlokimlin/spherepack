@@ -182,7 +182,7 @@
 !     mdab   the first dimension of the arrays br, bi, cr, and ci as it
 !            appears in the program that calls vhags. mdab must be at
 !            least min(nlat, nlon/2) if nlon is even or at least
-!            min(nlat, (nlon+1)/2) if nlon is odd.
+!            min(nlat, (nlon + 1)/2) if nlon is odd.
 !
 !     ndab   the second dimension of the arrays br, bi, cr, and ci as it
 !            appears in the program that calls vhags. ndab must be at
@@ -197,7 +197,7 @@
 !            program that calls vhags. define
 !
 !               l1 = min(nlat, nlon/2) if nlon is even or
-!               l1 = min(nlat, (nlon+1)/2) if nlon is odd
+!               l1 = min(nlat, (nlon + 1)/2) if nlon is odd
 !
 !            and
 !
@@ -206,7 +206,7 @@
 !
 !            then lvhags must be at least
 !
-!            l1*l2(nlat+nlat-l1+1)+nlon+15
+!            l1*l2(nlat+ nlat-l1+1)+ nlon + 15
 !
 !        ??? (nlat+1)*(nlat+1)*nlat/2 + nlon + 15
 !
@@ -250,7 +250,7 @@
 !            bi(mp1, np1), cr(mp1, np1), and ci(mp1, np1) are computed
 !            for mp1=1, ..., mmax and np1=mp1, ..., nlat except for np1=nlat
 !            and odd mp1. mmax=min(nlat, nlon/2) if nlon is even or
-!            mmax=min(nlat, (nlon+1)/2) if nlon is odd.
+!            mmax=min(nlat, (nlon + 1)/2) if nlon is odd.
 !      
 !     ierror = 0  no errors
 !            = 1  error in the specification of nlat
@@ -334,10 +334,10 @@ contains
         real(wp),    intent(in)  :: w(idvw, jdvw, nt)
         integer(ip), intent(in)  :: idvw
         integer(ip), intent(in)  :: jdvw
-        real(wp),    intent(out) :: br(mdab,ndab,nt)
-        real(wp),    intent(out) :: bi(mdab, ndab,nt)
-        real(wp),    intent(out) :: cr(mdab,ndab,nt)
-        real(wp),    intent(out) :: ci(mdab, ndab,nt)
+        real(wp),    intent(out) :: br(mdab, ndab, nt)
+        real(wp),    intent(out) :: bi(mdab, ndab, nt)
+        real(wp),    intent(out) :: cr(mdab, ndab, nt)
+        real(wp),    intent(out) :: ci(mdab, ndab, nt)
         integer(ip), intent(in)  :: mdab
         integer(ip), intent(in)  :: ndab
         real(wp),    intent(in)  :: wvhags(lvhags)
@@ -352,7 +352,7 @@ contains
         integer(ip) :: workspace_indices(7)
 
 
-        mmax = min(nlat, (nlon+1)/2)
+        mmax = min(nlat, (nlon + 1)/2)
         idz = (mmax*(2*nlat-mmax+1))/2
         imid = (nlat+1)/2
         lzimn = idz*imid
@@ -367,9 +367,7 @@ contains
 
         lnl = nt*idv*nlon
 
-        !
         !  Check validity of input arguments
-        !
         if (nlat < 3) then
             ierror = 1
             return
@@ -398,7 +396,7 @@ contains
         else if (ndab < nlat) then
             ierror = 8
             return
-        else if (lvhags < 2*lzimn+nlon+15) then
+        else if (lvhags < 2*lzimn + nlon + 15) then
             ierror = 9
             return
         else if (lwork < 2*lnl+idv*nlon) then
@@ -408,9 +406,7 @@ contains
             ierror = 0
         end if
 
-        !
         !  Compute workspace pointers
-        !
         workspace_indices = get_vhags_workspace_indices(nlat, imid, ist, lnl)
 
         associate( &
@@ -422,13 +418,10 @@ contains
             iw3 => workspace_indices(6), &
             iw4 => workspace_indices(7) &
             )
-
             call vhags_lower_routine(nlat, nlon, ityp, nt, imid, idvw, jdvw, v, w, mdab, ndab, &
                 br, bi, cr, ci, idv, work, work(iw1), work(iw2), work(iw3), &
                 work(iw4), idz, wvhags(jw1), wvhags(jw2), wvhags(jw3))
-
         end associate
-
 
     end subroutine vhags
 
@@ -451,16 +444,14 @@ contains
         imid = (nlat+1)/2
         lmn = (nlat*(nlat+1))/2
 
-        !
-        !  Check validity of input arguments
-        !
+        !  Check input arguments
         if (nlat < 3) then
             ierror = 1
             return
         else if (nlon < 1) then
             ierror = 2
             return
-        else if (lvhags < 2*(imid*lmn)+nlon+15) then
+        else if (lvhags < 2*(imid*lmn)+ nlon + 15) then
             ierror = 3
             return
         else if (ldwork < (nlat*(3*nlat+9)+2)/2) then
@@ -470,9 +461,7 @@ contains
             ierror = 0
         end if
 
-        !
         !  Compute workspace indices
-        !
         workspace_indices = get_vhagsi_workspace_indices(nlat, imid, lmn)
 
         associate( &
@@ -484,7 +473,7 @@ contains
             iw3 => workspace_indices(6), &
             iw4 => workspace_indices(7) &
             )
-            call vhagsi_lower_routine(nlat, imid, wvhags(jw1), wvhags(jw2), &
+            call precompute_associated_legendre_functions(nlat, imid, wvhags(jw1), wvhags(jw2), &
                 dwork(iw1), dwork(iw2), dwork(iw3), dwork(iw4))
             call sphere_aux%hfft%initialize(nlon, wvhags(jw3))
         end associate
@@ -499,7 +488,7 @@ contains
         integer(ip), intent(in)  :: imid
         integer(ip), intent(in)  :: ist
         integer(ip), intent(in)  :: lnl
-        integer(ip)               :: return_value(7)
+        integer(ip)              :: return_value(7)
 
         ! Local variables
         integer(ip) :: lmn
@@ -568,11 +557,11 @@ contains
         real(wp) :: wo
         real(wp) :: work
         real(wp) :: wrfft
-        dimension v(idvw, jdvw, *), w(idvw, jdvw, *), br(mdab, ndab,*), &
+        dimension v(idvw, jdvw, *), w(idvw, jdvw, *), br(mdab, ndab, *), &
             bi(mdab, ndab, *), cr(mdab, ndab, *), ci(mdab, ndab, *), &
             ve(idv, nlon, *), vo(idv, nlon, *), we(idv, nlon, *), &
             wo(idv, nlon, *), work(*), &
-            vb(imid,*), wb(imid,*), wrfft(*)
+            vb(imid, *), wb(imid, *), wrfft(*)
 
         type(SpherepackAux) :: sphere_aux
 
@@ -581,7 +570,7 @@ contains
         fsn = FOUR/nlon
         mlat = mod(nlat, 2)
         mlon = mod(nlon, 2)
-        mmax = min(nlat, (nlon+1)/2)
+        mmax = min(nlat, (nlon + 1)/2)
 
         select case (mlat)
             case (0)
@@ -632,11 +621,9 @@ contains
             call sphere_aux%hfft%forward(idv, nlon, we(1, 1, k), idv, wrfft, work)
         end do
 
-        !
         !  Set polar coefficients to zero
-        !
         select case (ityp)
-            case (0:1,3:4,6:7)
+            case (0:1, 3:4, 6:7)
                 do k=1, nt
                     do mp1=1, mmax
                         do np1=mp1, nlat
@@ -647,11 +634,9 @@ contains
                 end do
         end select
 
-        !
         !  Set azimuthal coefficients to zero
-        !
         select case (ityp)
-            case (0,2:3,5:6,8)
+            case (0, 2:3, 5:6, 8)
                 do k=1, nt
                     do mp1=1, mmax
                         do np1=mp1, nlat
@@ -662,7 +647,7 @@ contains
                 end do
         end select
 
-        select case (ityp)
+        vector_symmetry_cases: select case (ityp)
             case (0)
                 !
                 !  case ityp=0 ,  no symmetries
@@ -693,7 +678,7 @@ contains
 
                 do mp1=2, mmax
                     m = mp1-1
-                    mb = m*nlat-(m*(m+1))/2
+                    mb = m*nlat-(m*(m + 1))/2
                     mp2 = mp1+1
 
                     if (mp1 <= ndo1) then
@@ -726,7 +711,7 @@ contains
                         end if
                     end if
 
-                    if (mp2 > ndo2) exit
+                    if (mp2 > ndo2) return
 
                     do k=1, nt
                         do i=1, imm1
@@ -743,7 +728,7 @@ contains
                         end do
                     end do
 
-                    if (mlat == 0) exit
+                    if (mlat == 0) return
 
                     do k=1, nt
                         do np1=mp2, ndo2, 2
@@ -782,7 +767,7 @@ contains
 
                 do mp1=2, mmax
                     m = mp1-1
-                    mb = m*nlat-(m*(m+1))/2
+                    mb = m*nlat-(m*(m + 1))/2
                     mp2 = mp1+1
 
                     if (mp1 <= ndo1) then
@@ -808,7 +793,7 @@ contains
                         end if
                     end if
 
-                    if (mp2 > ndo2) exit
+                    if (mp2 > ndo2) return
 
                     do k=1, nt
                         do i=1, imm1
@@ -821,7 +806,7 @@ contains
                         end do
                     end do
 
-                    if (mlat == 0) exit
+                    if (mlat == 0) return
 
                     do k=1, nt
                         do np1=mp2, ndo2, 2
@@ -858,7 +843,7 @@ contains
 
                 do mp1=2, mmax
                     m = mp1-1
-                    mb = m*nlat-(m*(m+1))/2
+                    mb = m*nlat-(m*(m + 1))/2
                     mp2 = mp1+1
 
                     if (mp1 <= ndo1) then
@@ -884,7 +869,7 @@ contains
                         end if
                     end if
 
-                    if (mp2 > ndo2) exit
+                    if (mp2 > ndo2) return
 
                     do k=1, nt
                         do i=1, imm1
@@ -897,7 +882,7 @@ contains
                         end do
                     end do
 
-                    if (mlat == 0) exit
+                    if (mlat == 0) return
 
                     do k=1, nt
                         do np1=mp2, ndo2, 2
@@ -934,7 +919,7 @@ contains
 
                 do mp1=2, mmax
                     m = mp1-1
-                    mb = m*nlat-(m*(m+1))/2
+                    mb = m*nlat-(m*(m + 1))/2
                     mp2 = mp1+1
 
                     if (mp1 <= ndo1) then
@@ -961,7 +946,7 @@ contains
                         end if
                     end if
 
-                    if (mp2 > ndo2) exit
+                    if (mp2 > ndo2) return
 
                     do k=1, nt
                         do i=1, imm1
@@ -974,7 +959,7 @@ contains
                         end do
                     end do
 
-                    if (mlat == 0) exit
+                    if (mlat == 0) return
 
                     do k=1, nt
                         do np1=mp2, ndo2, 2
@@ -1003,10 +988,10 @@ contains
 
                 do mp1=2, mmax
                     m = mp1-1
-                    mb = m*nlat-(m*(m+1))/2
+                    mb = m*nlat-(m*(m + 1))/2
                     mp2 = mp1+1
 
-                    if (mp2 > ndo2) exit
+                    if (mp2 > ndo2) return
 
                     do k=1, nt
                         do i=1, imm1
@@ -1019,7 +1004,7 @@ contains
                         end do
                     end do
 
-                    if (mlat == 0) exit
+                    if (mlat == 0) return
 
                     do k=1, nt
                         do np1=mp2, ndo2, 2
@@ -1048,10 +1033,10 @@ contains
 
                 do mp1=2, mmax
                     m = mp1-1
-                    mb = m*nlat-(m*(m+1))/2
+                    mb = m*nlat-(m*(m + 1))/2
                     mp2 = mp1+1
 
-                    if (mp1 > ndo1) exit
+                    if (mp1 > ndo1) return
 
                     do  k=1, nt
                         do  i=1, imm1
@@ -1064,7 +1049,7 @@ contains
                         end do
                     end do
 
-                    if (mlat == 0) exit
+                    if (mlat == 0) return
 
                     do k=1, nt
                         do np1=mp1, ndo1, 2
@@ -1101,7 +1086,7 @@ contains
 
                 do mp1=2, mmax
                     m = mp1-1
-                    mb = m*nlat-(m*(m+1))/2
+                    mb = m*nlat-(m*(m + 1))/2
                     mp2 = mp1+1
 
                     if (mp1 <= ndo1) then
@@ -1129,7 +1114,7 @@ contains
 
                     end if
 
-                    if (mp2 > ndo2) exit
+                    if (mp2 > ndo2) return
 
                     do k=1, nt
                         do i=1, imm1
@@ -1142,7 +1127,7 @@ contains
                         end do
                     end do
 
-                    if (mlat == 0) exit
+                    if (mlat == 0) return
 
                     do k=1, nt
                         do np1=mp2, ndo2, 2
@@ -1171,7 +1156,7 @@ contains
 
                 do mp1=2, mmax
                     m = mp1-1
-                    mb = m*nlat-(m*(m+1))/2
+                    mb = m*nlat-(m*(m + 1))/2
                     mp2 = mp1+1
 
                     if (mp1 > ndo1) exit
@@ -1188,7 +1173,7 @@ contains
                     end do
 
 
-                    if (mlat == 0) exit
+                    if (mlat == 0) return
 
                     do  k=1, nt
                         do np1=mp1, ndo1, 2
@@ -1217,10 +1202,10 @@ contains
 
                 do mp1=2, mmax
                     m = mp1-1
-                    mb = m*nlat-(m*(m+1))/2
+                    mb = m*nlat-(m*(m + 1))/2
                     mp2 = mp1+1
 
-                    if (mp2 > ndo2) exit
+                    if (mp2 > ndo2) return
 
                     do k=1, nt
                         do i=1, imm1
@@ -1233,7 +1218,7 @@ contains
                         end do
                     end do
 
-                    if (mlat == 0) exit
+                    if (mlat == 0) return
 
                     do  k=1, nt
                         do  np1=mp2, ndo2, 2
@@ -1242,36 +1227,36 @@ contains
                         end do
                     end do
                 end do
-        end select
+        end select vector_symmetry_cases
 
     end subroutine vhags_lower_routine
 
-    pure function get_vhagsi_workspace_indices(nlat, imid, lmn) result (return_value)
+    pure function get_vhagsi_workspace_indices(nlat, imid, lmn) &
+        result (return_value)
 
         ! Dummy arguments
-
         integer(ip), intent(in)  :: nlat
         integer(ip), intent(in)  :: imid
         integer(ip), intent(in)  :: lmn
-        integer(ip)               :: return_value(7)
+        integer(ip)              :: return_value(7)
 
-
+        ! Set workspace pointers for indices
         associate( i => return_value )
-            !
-            !  set pointers
-            !
             i(1) = 1
             i(2) = i(1)+imid*lmn
             i(3) = i(2)+imid*lmn
             i(4) = 1
-            i(5) = i(4)+nlat
-            i(6) = i(5)+nlat
+            i(5) = i(4)+ nlat
+            i(6) = i(5)+ nlat
             i(7) = i(6)+3*imid*nlat
         end associate
 
     end function get_vhagsi_workspace_indices
 
-    subroutine vhagsi_lower_routine(nlat, imid, vb, wb, dthet, dwts, dpbar, work)
+    ! Purpose:
+    !
+    ! Computes associated legendre functions.
+    subroutine precompute_associated_legendre_functions(nlat, imid, vb, wb, dthet, dwts, dpbar, work)
 
         ! Dummy arguments
         integer(ip), intent(in)  :: nlat
@@ -1287,43 +1272,31 @@ contains
         integer(ip)         :: i, local_error_flag, id, ix, iy
         integer(ip)         :: m, mn, n, nm, np, nz
         real(wp)            :: abel, bbel, cbel, dcf
-        integer(ip)         :: dummy_integer
-        real(wp)            :: dummy_real
         type(SpherepackAux) :: sphere_aux
 
-
-        !
         !  Compute gaussian grid
-        !
         call compute_gaussian_latitudes_and_weights(nlat, dthet, dwts, local_error_flag)
 
-        !
-        !  Compute associated legendre functions
-        !
-        !    Set m=n=0 legendre polynomials for all theta(i)
-        !
-        dpbar(:,1,1) = cos(PI/4)
-        vb(:,1) = ZERO
-        wb(:,1) = ZERO
+        ! Set m=n=0 legendre polynomials for all theta(i)
+        dpbar(:, 1, 1) = cos(PI/4)
+        vb(:, 1) = ZERO
+        wb(:, 1) = ZERO
 
-        !
-        !  main loop for remaining vb, and wb
-        !
-        do n=1, nlat-1
-            nm = mod(n-2, 3)+1
-            nz = mod(n-1, 3)+1
-            np = mod(n, 3)+1
-            !
-            !  compute dpbar for m=0
-            !
+        ! Main loop for remaining vb, and wb
+        main_loop: do n=1, nlat - 1
+
+            nm = mod(n - 2, 3) + 1
+            nz = mod(n - 1, 3) + 1
+            np = mod(n, 3) + 1
+
+            !  Compute dpbar for m=0
             call sphere_aux%dnlfk(0, n, work)
             mn = get_index(0, n, nlat)
             do i=1, imid
                 call sphere_aux%dnlft(0, n, dthet(i), work, dpbar(i, 1, np))
             end do
-            !
-            !  compute dpbar for m=1
-            !
+
+            !  Compute dpbar for m=1
             call sphere_aux%dnlfk(1, n, work)
 
             mn = get_index(1, n, nlat)
@@ -1332,86 +1305,81 @@ contains
                 call sphere_aux%dnlft(1, n, dthet(i), work, dpbar(i, 2, np))
             end do
 
-            !
-            !  compute and store dpbar for m=2, n
-            !
-            if (n >= 2) then
+            ! Compute and store dpbar for m=2, n
+            if (2 <= n) then
                 do m=2, n
-                    abel = sqrt(real((2*n+1)*(m+n-2)*(m+n-3))/ &
-                        real((2*n-3)*(m+n-1)*(m+n)))
-                    bbel = sqrt(real((2*n+1)*(n-m-1)*(n-m))/ &
-                        real((2*n-3)*(m+n-1)*(m+n)))
-                    cbel = sqrt(real((n-m+1)*(n-m+2))/ &
-                        real((m+n-1)*(m+n)))
+                    abel = sqrt(real((2*n + 1)*(m + n-2)*(m + n - 3))/ &
+                        real((2*n - 3)*(m + n - 1)*(m + n)))
+                    bbel = sqrt(real((2*n + 1)*(n - m - 1)*(n - m))/ &
+                        real((2*n - 3)*(m + n - 1)*(m + n)))
+                    cbel = sqrt(real((n - m + 1)*(n - m + 2))/ &
+                        real((m + n - 1)*(m + n)))
                     id = get_index(m, n, nlat)
 
-                    if (m >= n-1) then
-                        dpbar(1:imid, m+1, np) = &
-                            abel*dpbar(1:imid, m-1, nm)-cbel*dpbar(1:imid, m-1, np)
+                    if (n - 1 <= m) then
+                        dpbar(1:imid, m + 1, np) = &
+                            abel*dpbar(1:imid, m - 1, nm)-cbel*dpbar(1:imid, m - 1, np)
                     else
-                        dpbar(1:imid, m+1, np) = &
-                            abel*dpbar(1:imid, m-1, nm)+bbel*dpbar(1:imid, m+1, nm) &
-                            -cbel*dpbar(1:imid, m-1, np)
+                        dpbar(1:imid, m + 1, np) = &
+                            abel*dpbar(1:imid, m - 1, nm)+bbel*dpbar(1:imid, m + 1, nm) &
+                            -cbel*dpbar(1:imid, m - 1, np)
                     end if
                 end do
             end if
-            !
-            !     compute the derivative of the functions
-            !
+
+            ! Compute the derivative of the functions
             ix = get_index(0, n, nlat)
             iy = get_index(n, n, nlat)
             vb(1:imid, ix) = -dpbar(1:imid, 2, np)*dwts(1:imid)
-            vb(1:imid, iy) = dpbar(1:imid, n, np)/sqrt(real(2*(n+1), kind=wp))*dwts(1:imid)
+            vb(1:imid, iy) = dpbar(1:imid, n, np)/sqrt(real(2*(n + 1), kind=wp))*dwts(1:imid)
 
-            if (n==1) then
-                !
-                !  compute the vector harmonic w(theta) = m*pbar/cos(theta)
-                !
-                !     set wb=0 for m=0
-                !
-                ix = get_index(0, n, nlat)
-                wb(1:imid, ix) = ZERO
-            else
-                dcf = sqrt(real(4*n*(n+1), kind=wp))
-                do m=1, n-1
-                    ix = get_index(m, n, nlat)
-                    abel = sqrt(real((n+m)*(n-m+1), kind=wp))/dcf
-                    bbel = sqrt(real((n-m)*(n+m+1), kind=wp))/dcf
-                    vb(1:imid, ix) = &
-                        (abel*dpbar(1:imid, m, np)-bbel*dpbar(1:imid, m+2, np))&
-                        * dwts(1:imid)
-                end do
-            end if
-            !
-            !  compute wb for m=1, n
-            !
-            dcf = sqrt(real(2*n+1, kind=wp)/real(4*n*(n+1)*(n+n-1), kind=wp))
+            select case (n)
+                case (1)
+                    ! Compute the vector harmonic w(theta) = m*pbar/cos(theta)
+                    !
+                    ! Set wb=0 for m=0
+                    ix = get_index(0, n, nlat)
+                    wb(1:imid, ix) = ZERO
+                case default
+                    dcf = sqrt(real(4*n*(n + 1), kind=wp))
+                    do m=1, n - 1
+                        ix = get_index(m, n, nlat)
+                        abel = sqrt(real((n + m)*(n - m + 1), kind=wp))/dcf
+                        bbel = sqrt(real((n - m)*(n + m + 1), kind=wp))/dcf
+                        vb(1:imid, ix) = &
+                            (abel * dpbar(1:imid, m, np) - bbel * dpbar(1:imid, m + 2, np))&
+                            * dwts(1:imid)
+                    end do
+            end select
+
+            ! Compute wb for m=1, n
+            dcf = sqrt(real(2*n + 1, kind=wp)/real(4*n*(n + 1)*(n + n - 1), kind=wp))
             do m=1, n
                 ix = get_index(m, n, nlat)
-                abel = dcf*sqrt(real((n+m)*(n+m-1), kind=wp))
-                bbel = dcf*sqrt(real((n-m)*(n-m-1), kind=wp))
-                if (m >= n-1) then
+                abel = dcf * sqrt(real((n + m)*(n + m - 1), kind=wp))
+                bbel = dcf * sqrt(real((n - m)*(n - m - 1), kind=wp))
+                if (n - 1 <= m) then
                     wb(1:imid, ix) = abel * dpbar(1:imid, m, nz) * dwts(1:imid)
                 else
                     wb(1:imid, ix) = &
-                        (abel*dpbar(1:imid, m, nz) + bbel*dpbar(1:imid, m+2, nz))&
+                        (abel * dpbar(1:imid, m, nz) + bbel * dpbar(1:imid, m + 2, nz))&
                         * dwts(1:imid)
                 end if
             end do
-        end do
+        end do main_loop
 
-    end subroutine vhagsi_lower_routine
+    end subroutine precompute_associated_legendre_functions
 
     pure function get_index(m, n, nlat) &
         result (return_value)
 
         ! Dummy arguments
-        integer, intent(in) :: m
-        integer, intent(in) :: n
-        integer, intent(in) :: nlat
-        integer              :: return_value
+        integer(ip), intent(in) :: m
+        integer(ip), intent(in) :: n
+        integer(ip), intent(in) :: nlat
+        integer(ip)             :: return_value
 
-        return_value = m*nlat-(m*(m+1))/2+n+1
+        return_value = m*nlat-(m*(m + 1))/2 + n + 1
 
     end function get_index
 
