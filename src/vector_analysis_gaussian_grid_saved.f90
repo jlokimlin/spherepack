@@ -682,7 +682,6 @@ contains
                     mp2 = mp1+1
 
                     if (mp1 <= ndo1) then
-
                         do k=1, nt
                             do i=1, imm1
                                 do np1=mp1, ndo1, 2
@@ -707,7 +706,6 @@ contains
                                     ci(mp1, np1, k) = ci(mp1, np1, k)-wb(imid, np1+mb)*ve(imid, 2*mp1-2, k)
                                 end do
                             end do
-
                         end if
                     end if
 
@@ -1090,7 +1088,6 @@ contains
                     mp2 = mp1+1
 
                     if (mp1 <= ndo1) then
-
                         do k=1, nt
                             do i=1, imm1
                                 do np1=mp1, ndo1, 2
@@ -1101,8 +1098,6 @@ contains
                                 end do
                             end do
                         end do
-
-
                         if (mlat /= 0) then
                             do k=1, nt
                                 do np1=mp1, ndo1, 2
@@ -1111,7 +1106,6 @@ contains
                                 end do
                             end do
                         end if
-
                     end if
 
                     if (mp2 > ndo2) return
