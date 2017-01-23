@@ -340,19 +340,19 @@ contains
         real :: bi
         real :: br
         real :: dv
-        real :: fn
+        
         integer(ip) :: idv
         integer(ip) :: ierror
         integer(ip) :: isym
         integer(ip) :: jdv
-        integer(ip) :: k
+        
         integer(ip) :: lshsec
         integer(ip) :: lwk
-        integer(ip) :: m
+        
         integer(ip) :: mab
         integer(ip) :: mdb
-        integer(ip) :: mmax
-        integer(ip) :: n
+        
+        
         integer(ip) :: ndb
         integer(ip) :: nlat
         integer(ip) :: nlon
@@ -363,40 +363,10 @@ contains
         dimension dv(idv, jdv, nt), br(mdb, ndb, nt), bi(mdb, ndb, nt)
         dimension a(mab, nlat, nt), b(mab, nlat, nt), sqnn(nlat)
         dimension wshsec(lshsec), wk(lwk)
-        !
-        !     set coefficient multiplyers
-        !
-        do n=2, nlat
-            fn = real(n - 1, kind=wp)
-            sqnn(n) = sqrt(fn * (fn + ONE))
-        end do
-        !
-        !     compute divergence scalar coefficients for each vector field
-        !
-        do k=1, nt
-            a(1: mab, 1: nlat, k) = ZERO
-            b(1: mab, 1: nlat, k) = ZERO
-            !
-            !     compute m=0 coefficients
-            !
-            do n=2, nlat
-                a(1, n, k) = -sqnn(n)*br(1, n, k)
-                b(1, n, k) = -sqnn(n)*bi(1, n, k)
-            end do
-            !
-            !     compute m>0 coefficients using vector spherepack value for mmax
-            !
-            mmax = min(nlat, (nlon+1)/2)
-            do m=2, mmax
-                do n=m, nlat
-                    a(m, n, k) = -sqnn(n)*br(m, n, k)
-                    b(m, n, k) = -sqnn(n)*bi(m, n, k)
-                end do
-            end do
-        end do
-        !
-        !     synthesize a, b into dv
-        !
+
+        call perform_setup_for_divergence(nlon, a, b, br, bi, sqnn)
+
+        ! Synthesize a, b into divg
         call shsec(nlat, nlon, isym, nt, dv, idv, jdv, a, b, &
             mab, nlat, wshsec, lshsec, wk, lwk, ierror)
 

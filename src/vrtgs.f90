@@ -368,7 +368,7 @@ contains
                 sqnn(n) = sqrt(fn * (fn + 1.0))
             end do
             !
-            !     compute divergence scalar coefficients for each vector field
+            ! Compute divergence scalar coefficients for each vector field
             !
             do k=1, nt
                 do n=1, nlat
@@ -378,7 +378,7 @@ contains
                     end do
                 end do
                 !
-                !     compute m=0 coefficients
+                ! Compute m=0 coefficients
                 !
                 do n=2, nlat
                     a(1, n, k) = sqnn(n)*cr(1, n, k)

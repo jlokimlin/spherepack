@@ -434,7 +434,7 @@ contains
             sqnn(n) = sqrt(fn * (fn + 1.0))
         end do
         !
-        !     compute multiple vector fields coefficients
+        ! Compute multiple vector fields coefficients
         !
         do k=1, nt
             !
@@ -454,7 +454,7 @@ contains
                 end do
             end do
             !
-            !     compute m=0 coefficients
+            ! Compute m=0 coefficients
             !
             do n=2, nlat
                 br(1, n, k) = -ad(1, n, k)/sqnn(n)

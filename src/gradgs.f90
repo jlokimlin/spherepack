@@ -374,16 +374,16 @@ contains
             sqnn(n) = sqrt(fn * (fn + 1.0_wp))
         end do
         !
-        !     compute multiple vector fields coefficients
+        ! Compute multiple vector fields coefficients
         !
         do k=1, nt
             !
-            !     preset br, bi to 0.0
+            ! Preset br, bi to 0.0
             !
             br(1: mmax, 1: nlat, k) = 0.0
             bi(1: mmax, 1: nlat, k) = 0.0
             !
-            !     compute m=0 coefficients
+            ! Compute m=0 coefficients
             !
             do n=2, nlat
                 br(1, n, k) = sqnn(n)*a(1, n, k)

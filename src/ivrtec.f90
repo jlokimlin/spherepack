@@ -391,9 +391,9 @@ contains
             do n=2, nlat
                 fn = real(n - 1)
                 sqnn(n) = sqrt(fn * (fn + 1.0))
-            END DO
+            end do
             !
-            !     compute multiple vector fields coefficients
+            ! Compute multiple vector fields coefficients
             !
             do k=1, nt
                 !
@@ -407,15 +407,15 @@ contains
                     do m=1, mmax
                         cr(m, n, k) = 0.0
                         ci(m, n, k) = 0.0
-                    END DO
-                END DO
+                    end do
+                end do
                 !
-                !     compute m=0 coefficients
+                ! Compute m=0 coefficients
                 !
                 do n=2, nlat
                     cr(1, n, k) = a(1, n, k)/sqnn(n)
                     ci(1, n, k) = b(1, n, k)/sqnn(n)
-                END DO
+                end do
                 !
                 !     compute m>0 coefficients
                 !
@@ -423,9 +423,9 @@ contains
                     do n=m, nlat
                         cr(m, n, k) = a(m, n, k)/sqnn(n)
                         ci(m, n, k) = b(m, n, k)/sqnn(n)
-                    END DO
-                END DO
-            END DO
+                    end do
+                end do
+            end do
             !
             !     set ityp for vector synthesis with divergence=0
             !

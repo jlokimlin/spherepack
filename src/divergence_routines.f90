@@ -23,8 +23,8 @@ module divergence_routines
     private
     public :: divec, dives, divgc, divgs
     public :: idivec, idives, idivgc, idivgs
-    public :: compute_coefficient_multipliers
-    public :: get_perturbation
+    public :: perform_setup_for_inversion
+    public :: perform_setup_for_divergence
 
     ! Parameters confined to the module
     real(wp), parameter :: ZERO = 0.0_wp
@@ -65,7 +65,7 @@ module divergence_routines
             integer(ip) :: jdv
             integer(ip) :: lshsgc
             integer(ip) :: lwork
-            integer(ip) :: mab
+            
             integer(ip) :: mdb
             integer(ip) :: ndb
             integer(ip) :: nlat
@@ -80,13 +80,13 @@ module divergence_routines
             integer(ip) :: idv
             integer(ip) :: ierror
             integer(ip) :: isym
-            integer(ip) :: iwk
+            
             integer(ip) :: jdv
             integer(ip) :: lshses
             integer(ip) :: lwork
-            integer(ip) :: mab
+            
             integer(ip) :: mdb
-            integer(ip) :: mmax
+            
             integer(ip) :: ndb
             integer(ip) :: nlat
             integer(ip) :: nlon
@@ -244,5 +244,116 @@ contains
         return_value = a(1,1,k)/(TWO * SQRT2)
 
     end function get_perturbation
+
+    pure subroutine perform_setup_for_divergence(nlon, a, b, br, bi, sqnn)
+
+        ! Dummy arguments
+        integer(ip), intent(in)  :: nlon
+        real(wp),    intent(out) :: a(:,:,:)
+        real(wp),    intent(out) :: b(:,:,:)
+        real(wp),    intent(in)  :: br(:,:,:)
+        real(wp),    intent(in)  :: bi(:,:,:)
+        real(wp),    intent(out) :: sqnn(:)
+
+        ! Local variables
+        integer(ip) :: k, n, m, mmax
+
+        associate( &
+            nlat => size(sqnn), &
+            nt => size(a, dim=3) &
+            )
+
+            ! Set coefficient multiplyers
+            call compute_coefficient_multipliers(sqnn)
+
+            ! Compute divergence scalar coefficients for each vector field
+            do k=1, nt
+                a(:,:, k) = ZERO
+                b(:,:, k) = ZERO
+
+                ! Compute m=0 coefficients
+                do n=2, nlat
+                    a(1, n, k) = -sqnn(n)*br(1, n, k)
+                    b(1, n, k) = -sqnn(n)*bi(1, n, k)
+                end do
+
+                ! Compute m > 0 coefficients using vector spherepack value for mmax
+                mmax = min(nlat, (nlon+1)/2)
+                do m=2, mmax
+                    do n=m, nlat
+                        a(m, n, k) = -sqnn(n)*br(m, n, k)
+                        b(m, n, k) = -sqnn(n)*bi(m, n, k)
+                    end do
+                end do
+            end do
+        end associate
+
+    end subroutine perform_setup_for_divergence
+
+    pure subroutine perform_setup_for_inversion(isym, ityp, a, b, sqnn, pertrb, br, bi)
+
+        ! Dummy arguments
+        integer(ip), intent(in)  :: isym
+        integer(ip), intent(out) :: ityp
+        real(wp),    intent(in)  :: a(:,:,:)
+        real(wp),    intent(in)  :: b(:,:,:)
+        real(wp),    intent(out) :: sqnn(:)
+        real(wp),    intent(out) :: pertrb(:)
+        real(wp),    intent(out) :: br(:,:,:)
+        real(wp),    intent(out) :: bi(:,:,:)
+
+        ! Local variables
+        integer(ip) :: k, n, m
+
+        associate( &
+            mmax => size(br, dim=1), &
+            nlat => size(br, dim=2), &
+            nt => size(br, dim=3) &
+            )
+
+            ! Preset coefficient multiplyers in vector
+            call compute_coefficient_multipliers(sqnn)
+
+            ! Compute multiple vector fields coefficients
+            do k=1, nt
+
+                ! Set divergence field perturbation adjustment
+                pertrb(k) = get_perturbation(a, k)
+
+                ! Preset br, bi to 0.0
+                do n=1, nlat
+                    do m=1, mmax
+                        br(m, n, k) = ZERO
+                        bi(m, n, k) = ZERO
+                    end do
+                end do
+
+                ! Compute m=0 coefficients
+                do n=2, nlat
+                    br(1, n, k) = -a(1, n, k)/sqnn(n)
+                    bi(1, n, k) = -b(1, n, k)/sqnn(n)
+                end do
+
+                ! Compute m > 0 coefficients
+                do m=2, mmax
+                    do n=m, nlat
+                        br(m, n, k) = -a(m, n, k)/sqnn(n)
+                        bi(m, n, k) = -b(m, n, k)/sqnn(n)
+                    end do
+                end do
+            end do
+
+            ! Set ityp for vector synthesis with curl=0
+            select case (isym)
+                case (0)
+                    ityp = 1
+                case (1)
+                    ityp = 4
+                case (2)
+                    ityp = 7
+            end select
+        end associate
+
+    end subroutine perform_setup_for_inversion
 
 end module divergence_routines

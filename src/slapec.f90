@@ -415,7 +415,7 @@ contains
                     end do
                 end do
                 !
-                !     compute m=0 coefficients
+                ! Compute m=0 coefficients
                 !
                 do n=2, nlat
                     alap(1, n, k) = -fnn(n)*a(1, n, k)

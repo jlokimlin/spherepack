@@ -400,7 +400,7 @@ subroutine ivtes1(nlat, nlon, isym, nt, v, w, idvw, jdvw, cr, ci, mmax, &
         sqnn(n) = sqrt(fn * (fn + 1.0))
     end do
     !
-    !     compute multiple vector fields coefficients
+    ! Compute multiple vector fields coefficients
     !
     do k=1, nt
         !
@@ -408,7 +408,7 @@ subroutine ivtes1(nlat, nlon, isym, nt, v, w, idvw, jdvw, cr, ci, mmax, &
         !
         pertrb(k) = a(1, 1, k)/(2.*sqrt(2.))
         !
-        !     preset br, bi to 0.0
+        ! Preset br, bi to 0.0
         !
         do n=1, nlat
             do m=1, mmax
@@ -417,7 +417,7 @@ subroutine ivtes1(nlat, nlon, isym, nt, v, w, idvw, jdvw, cr, ci, mmax, &
             end do
         end do
         !
-        !     compute m=0 coefficients
+        ! Compute m=0 coefficients
         !
         do n=2, nlat
             cr(1, n, k) = a(1, n, k)/sqnn(n)

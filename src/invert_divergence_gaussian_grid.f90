@@ -350,19 +350,19 @@ contains
         real(wp) :: br
         real(wp) :: ci(mmax, nlat, nt)
         real(wp) :: cr(mmax, nlat, nt)
-        real(wp) :: fn
+        
         integer(ip) :: idvw
         integer(ip) :: ierror
         integer(ip) :: isym
         integer(ip) :: ityp
         integer(ip) :: jdvw
-        integer(ip) :: k
+        
         integer(ip) :: lwk
         integer(ip) :: lwsav
-        integer(ip) :: m
+        
         integer(ip) :: mdab
         integer(ip) :: mmax
-        integer(ip) :: n
+        
         integer(ip) :: ndab
         integer(ip) :: nlat
         integer(ip) :: nlon
@@ -378,57 +378,9 @@ contains
         dimension a(mdab, ndab, nt), b(mdab, ndab, nt)
         dimension wsav(lwsav), wk(lwk)
 
-        ! Preset coefficient multiplyers in vector
-        call compute_coefficient_multipliers(sqnn)
+        call perform_setup_for_inversion(isym, ityp, a, b, sqnn, pertrb, br, bi)
 
-        !
-        !     compute multiple vector fields coefficients
-        !
-        do k=1, nt
-            !
-            !     set divergence field perturbation adjustment
-            !
-            pertrb(k) = get_perturbation(a, k)
-            !
-            !     preset br, bi to 0.0
-            !
-            do n=1, nlat
-                do m=1, mmax
-                    br(m, n, k) = ZERO
-                    bi(m, n, k) = ZERO
-                end do
-            end do
-            !
-            !     compute m=0 coefficients
-            !
-            do n=2, nlat
-                br(1, n, k) = -a(1, n, k)/sqnn(n)
-                bi(1, n, k) = -b(1, n, k)/sqnn(n)
-            end do
-            !
-            !     compute m>0 coefficients
-            !
-            do m=2, mmax
-                do n=m, nlat
-                    br(m, n, k) = -a(m, n, k)/sqnn(n)
-                    bi(m, n, k) = -b(m, n, k)/sqnn(n)
-                end do
-            end do
-        end do
-        !
-        !     set ityp for vector synthesis with curl=0
-        !
-        select case (isym)
-            case (0)
-                ityp = 1
-            case (1)
-                ityp = 4
-            case (2)
-                ityp = 7
-        end select
-        !
-        !     vector sythesize br, bi into irrotational (v, w)
-        !
+        ! Vector sythesize br, bi into irrotational (v, w)
         call vhsgc(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
             mmax, nlat, wsav, lwsav, wk, lwk, ierror)
 

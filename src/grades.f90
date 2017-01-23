@@ -333,99 +333,97 @@ contains
         iwk = is + nlat
         liwk = lwork-2*mn-nlat
 
-        call grades1(nlat, nlon, isym, nt, v, w, idvw, jdvw, work(ibr), work(ibi), &
+        call grades_lower_routine(nlat, nlon, isym, nt, v, w, idvw, jdvw, work(ibr), work(ibi), &
             mmax, work(is), mdab, ndab, a, b, wvhses, lvhses, work(iwk), liwk, &
             ierror)
 
-    contains
+    end subroutine grades
 
-        subroutine grades1(nlat, nlon, isym, nt, v, w, idvw, jdvw, br, bi, mmax, &
-            sqnn, mdab, ndab, a, b, wvhses, lvhses, wk, lwk, ierror)
+    subroutine grades_lower_routine(nlat, nlon, isym, nt, v, w, idvw, jdvw, br, bi, mmax, &
+        sqnn, mdab, ndab, a, b, wvhses, lvhses, wk, lwk, ierror)
 
-            real(wp) :: a
-            real(wp) :: b
-            real(wp) :: bi
-            real(wp) :: br
-            real(wp) :: ci(mmax, nlat, nt)
-            real(wp) :: cr(mmax, nlat, nt)
-            real(wp) :: fn
-            integer(ip) :: idvw
-            integer(ip) :: ierror
-            integer(ip) :: isym
-            integer(ip) :: ityp
-            integer(ip) :: jdvw
-            integer(ip) :: k
-            integer(ip) :: lvhses
-            integer(ip) :: lwk
-            integer(ip) :: m
-            integer(ip) :: mdab
-            integer(ip) :: mmax
-            integer(ip) :: n
-            integer(ip) :: ndab
-            integer(ip) :: nlat
-            integer(ip) :: nlon
-            integer(ip) :: nt
-            real(wp) :: sqnn
-            real(wp) :: v
-            real(wp) :: w
-            real(wp) :: wk
-            real(wp) :: wvhses
-            dimension v(idvw, jdvw, nt), w(idvw, jdvw, nt)
-            dimension br(mmax, nlat, nt), bi(mmax, nlat, nt), sqnn(nlat)
-            dimension a(mdab, ndab, nt), b(mdab, ndab, nt)
-            dimension wvhses(lvhses), wk(lwk)
+        real(wp) :: a
+        real(wp) :: b
+        real(wp) :: bi
+        real(wp) :: br
+        real(wp) :: ci(mmax, nlat, nt)
+        real(wp) :: cr(mmax, nlat, nt)
+        real(wp) :: fn
+        integer(ip) :: idvw
+        integer(ip) :: ierror
+        integer(ip) :: isym
+        integer(ip) :: ityp
+        integer(ip) :: jdvw
+        integer(ip) :: k
+        integer(ip) :: lvhses
+        integer(ip) :: lwk
+        integer(ip) :: m
+        integer(ip) :: mdab
+        integer(ip) :: mmax
+        integer(ip) :: n
+        integer(ip) :: ndab
+        integer(ip) :: nlat
+        integer(ip) :: nlon
+        integer(ip) :: nt
+        real(wp) :: sqnn
+        real(wp) :: v
+        real(wp) :: w
+        real(wp) :: wk
+        real(wp) :: wvhses
+        dimension v(idvw, jdvw, nt), w(idvw, jdvw, nt)
+        dimension br(mmax, nlat, nt), bi(mmax, nlat, nt), sqnn(nlat)
+        dimension a(mdab, ndab, nt), b(mdab, ndab, nt)
+        dimension wvhses(lvhses), wk(lwk)
+        !
+        ! Preset coefficient multiplyers in vector
+        !
+        do n=2, nlat
+            fn = real(n - 1, kind=wp)
+            sqnn(n) = sqrt(fn * (fn + 1.0_wp))
+        end do
+        !
+        ! Compute multiple vector fields coefficients
+        !
+        do k=1, nt
             !
-            ! Preset coefficient multiplyers in vector
+            ! Preset br, bi to 0.0
+            !
+            br(1: mmax, 1: nlat, k) = 0.0_wp
+            bi(1: mmax, 1: nlat, k) = 0.0_wp
+            !
+            ! Compute m=0 coefficients
             !
             do n=2, nlat
-                fn = real(n - 1, kind=wp)
-                sqnn(n) = sqrt(fn * (fn + 1.0_wp))
+                br(1, n, k) = sqnn(n)*a(1, n, k)
+                bi(1, n, k) = sqnn(n)*b(1, n, k)
             end do
             !
-            !     compute multiple vector fields coefficients
+            !     compute m>0 coefficients
             !
-            do k=1, nt
-                !
-                !     preset br, bi to 0.0
-                !
-                br(1: mmax, 1: nlat, k) = 0.0_wp
-                bi(1: mmax, 1: nlat, k) = 0.0_wp
-                !
-                !     compute m=0 coefficients
-                !
-                do n=2, nlat
-                    br(1, n, k) = sqnn(n)*a(1, n, k)
-                    bi(1, n, k) = sqnn(n)*b(1, n, k)
-                end do
-                !
-                !     compute m>0 coefficients
-                !
-                do m=2, mmax
-                    do n=m, nlat
-                        br(m, n, k) = sqnn(n)*a(m, n, k)
-                        bi(m, n, k) = sqnn(n)*b(m, n, k)
-                    end do
+            do m=2, mmax
+                do n=m, nlat
+                    br(m, n, k) = sqnn(n)*a(m, n, k)
+                    bi(m, n, k) = sqnn(n)*b(m, n, k)
                 end do
             end do
-            !
-            !     set ityp for irrotational vector synthesis to compute gradient
-            !
-            select case (isym)
-                case (0)
-                    ityp = 1
-                case (1)
-                    ityp = 4
-                case (2)
-                    ityp = 7
-            end select
-            !
-            !     vector sythesize br, bi into (v, w) (cr, ci are dummy variables)
-            !
-            call vhses(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
-                mmax, nlat, wvhses, lvhses, wk, lwk, ierror)
+        end do
+        !
+        !     set ityp for irrotational vector synthesis to compute gradient
+        !
+        select case (isym)
+            case (0)
+                ityp = 1
+            case (1)
+                ityp = 4
+            case (2)
+                ityp = 7
+        end select
+        !
+        !     vector sythesize br, bi into (v, w) (cr, ci are dummy variables)
+        !
+        call vhses(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
+            mmax, nlat, wvhses, lvhses, wk, lwk, ierror)
 
-        end subroutine grades1
-
-    end subroutine grades
+    end subroutine grades_lower_routine
 
 end module module_grades

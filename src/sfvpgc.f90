@@ -332,7 +332,7 @@ contains
                     end do
                 end do
                 !
-                !     compute m=0 coefficients
+                ! Compute m=0 coefficients
                 !
                 do n=2, nlat
                     a(1, n, k) =-fnn(n)*cr(1, n, k)
@@ -364,7 +364,7 @@ contains
                     end do
                 end do
                  !
-                 !     compute m=0 coefficients
+                 ! Compute m=0 coefficients
                  !
                 do n=2, nlat
                     a(1, n, k) = fnn(n)*br(1, n, k)

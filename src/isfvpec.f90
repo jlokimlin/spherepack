@@ -349,7 +349,7 @@ contains
                     end do
                 end do
                 !
-                !     compute m=0 coefficients
+                ! Compute m=0 coefficients
                 !
                 do n=2, nlat
                     br(1, n, k) = -fnn(n)*av(1, n, k)
