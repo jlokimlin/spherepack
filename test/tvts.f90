@@ -131,8 +131,8 @@ program tvts
     !
     !     set equally spaced colatitude and longitude increments
     !
-    dphi = (pi+pi)/nlon
-    dlat = pi/(nlat-1)
+    dphi = TWO_PI/nlon
+    dlat = PI/(nlat-1)
     !
     !     compute nlat gaussian points in thetag
     !
@@ -207,104 +207,101 @@ program tvts
 
 
 
-        if (icase==1) then
-
-            call name("**ec")
-
-            call vhaeci(nlat,nlon,wsave,lsave,dwork,ldwork,ierror)
-            call name("vhai")
-            call iout(ierror,"ierr")
-
-            call vhaec(nlat,nlon,ityp,nt,v,w,nlat,nlon,br,bi,cr,ci,nlat, &
-                nlat,wsave,lsave,work,lwork,ierror)
-            call name("vha ")
-            call iout(ierror,"ierr")
-
-            !
-            !     now compute theta derivatives of v,w
-            !
-            call vtseci(nlat,nlon,wsave,lsave,dwork,ldwork,ierror)
-
-            call name("vtsi")
-            call iout(ierror,"ierr")
-
-            call vtsec(nlat,nlon,ityp,nt,vt,wt,nlat,nlon,br,bi,cr,ci,nlat, &
-                nlat,wsave,lsave,work,lwork,ierror)
-            call name("vts ")
-            call iout(ierror,"ierr")
-
-        else if (icase==2) then
-
-            call name("**es")
-
-            call vhaesi(nlat,nlon,wsave,lsave,work,lwork,dwork,ldwork,ierror)
-            call name("vhai")
-            call iout(ierror,"ierr")
-
-            call vhaes(nlat,nlon,ityp,nt,v,w,nlat,nlon,br,bi,cr,ci,nlat, &
-                nlat,wsave,lsave,work,lwork,ierror)
-            call name("vha ")
-            call iout(ierror,"ierr")
-
-            call vtsesi(nlat,nlon,wsave,lsave,work,lwork,dwork,ldwork,ierror)
-            call name("vtsi")
-            call iout(ierror,"ierr")
-
-            call vtses(nlat,nlon,ityp,nt,vt,wt,nlat,nlon,br,bi,cr,ci,nlat, &
-                nlat,wsave,lsave,work,lwork,ierror)
-            call name("vts ")
-            call iout(ierror,"ierr")
-
-        else if (icase==3) then
-
-            call name("**gc")
-
-            call name("vhgi")
-            call iout(nlat,"nlat")
-
-            call vhagci(nlat,nlon,wsave,lsave,dwork,ldwork,ierror)
-            call name("vhai")
-            call iout(ierror,"ierr")
-
-            call vhagc(nlat,nlon,ityp,nt,v,w,nlat,nlon,br,bi,cr,ci,nlat, &
-                nlat,wsave,lsave,work,lwork,ierror)
-            call name("vha ")
-            call iout(ierror,"ierr")
-
-            !
-            !     now synthesize v,w from br,bi,cr,ci and compare with original
-            !
-            call vtsgci(nlat,nlon,wsave,lsave,dwork,ldwork,ierror)
-            call name("vtsi")
-            call iout(ierror,"ierr")
-
-            call vtsgc(nlat,nlon,ityp,nt,vt,wt,nlat,nlon,br,bi,cr,ci,nlat, &
-                nlat,wsave,lsave,work,lwork,ierror)
-            call name("vts ")
-            call iout(ierror,"ierr")
-
-        else if (icase==4) then
-
-            call name("**gs")
-            call vhagsi(nlat, nlon, wsave, lsave, dwork, ldwork, ierror)
-            call name("vhai")
-            call iout(ierror,"ierr")
-
-            call vhags(nlat,nlon,ityp,nt,v,w,nlat,nlon,br,bi,cr,ci,nlat, &
-                nlat,wsave,lsave,work,lwork,ierror)
-            call name("vha ")
-            call iout(ierror,"ierr")
-
-            call vtsgsi(nlat,nlon,wsave,lsave,work,lwork,dwork,ldwork,ierror)
-            call name("vtsi")
-            call iout(ierror,"ierr")
-
-            call vtsgs(nlat,nlon,ityp,nt,vt,wt,nlat,nlon,br,bi,cr,ci,nlat, &
-                nlat,wsave,lsave,work,lwork,ierror)
-            call name("vts ")
-            call iout(ierror,"ierr")
-
-        end if
+        select case (icase)
+        	case (1)
+        		
+        		call name("**ec")
+        		
+        		call vhaeci(nlat,nlon,wsave,lsave,dwork,ldwork,ierror)
+        		call name("vhai")
+        		call iout(ierror,"ierr")
+        		
+        		call vhaec(nlat,nlon,ityp,nt,v,w,nlat,nlon,br,bi,cr,ci,nlat, &
+        		nlat,wsave,lsave,work,lwork,ierror)
+        		call name("vha ")
+        		call iout(ierror,"ierr")
+        		
+        		!
+        		!     now compute theta derivatives of v,w
+        		!
+        		call vtseci(nlat,nlon,wsave,lsave,dwork,ldwork,ierror)
+        		
+        		call name("vtsi")
+        		call iout(ierror,"ierr")
+        		
+        		call vtsec(nlat,nlon,ityp,nt,vt,wt,nlat,nlon,br,bi,cr,ci,nlat, &
+        		nlat,wsave,lsave,work,lwork,ierror)
+        		call name("vts ")
+        		call iout(ierror,"ierr")
+        	case (2)
+        		
+        		call name("**es")
+        		
+        		call vhaesi(nlat,nlon,wsave,lsave,work,lwork,dwork,ldwork,ierror)
+        		call name("vhai")
+        		call iout(ierror,"ierr")
+        		
+        		call vhaes(nlat,nlon,ityp,nt,v,w,nlat,nlon,br,bi,cr,ci,nlat, &
+        		nlat,wsave,lsave,work,lwork,ierror)
+        		call name("vha ")
+        		call iout(ierror,"ierr")
+        		
+        		call vtsesi(nlat,nlon,wsave,lsave,work,lwork,dwork,ldwork,ierror)
+        		call name("vtsi")
+        		call iout(ierror,"ierr")
+        		
+        		call vtses(nlat,nlon,ityp,nt,vt,wt,nlat,nlon,br,bi,cr,ci,nlat, &
+        		nlat,wsave,lsave,work,lwork,ierror)
+        		call name("vts ")
+        		call iout(ierror,"ierr")
+        	case (3)
+        		
+        		call name("**gc")
+        		
+        		call name("vhgi")
+        		call iout(nlat,"nlat")
+        		
+        		call vhagci(nlat,nlon,wsave,lsave,dwork,ldwork,ierror)
+        		call name("vhai")
+        		call iout(ierror,"ierr")
+        		
+        		call vhagc(nlat,nlon,ityp,nt,v,w,nlat,nlon,br,bi,cr,ci,nlat, &
+        		nlat,wsave,lsave,work,lwork,ierror)
+        		call name("vha ")
+        		call iout(ierror,"ierr")
+        		
+        		!
+        		!     now synthesize v,w from br,bi,cr,ci and compare with original
+        		!
+        		call vtsgci(nlat,nlon,wsave,lsave,dwork,ldwork,ierror)
+        		call name("vtsi")
+        		call iout(ierror,"ierr")
+        		
+        		call vtsgc(nlat,nlon,ityp,nt,vt,wt,nlat,nlon,br,bi,cr,ci,nlat, &
+        		nlat,wsave,lsave,work,lwork,ierror)
+        		call name("vts ")
+        		call iout(ierror,"ierr")
+        	case (4)
+        		
+        		call name("**gs")
+        		call vhagsi(nlat, nlon, wsave, lsave, dwork, ldwork, ierror)
+        		call name("vhai")
+        		call iout(ierror,"ierr")
+        		
+        		call vhags(nlat,nlon,ityp,nt,v,w,nlat,nlon,br,bi,cr,ci,nlat, &
+        		nlat,wsave,lsave,work,lwork,ierror)
+        		call name("vha ")
+        		call iout(ierror,"ierr")
+        		
+        		call vtsgsi(nlat,nlon,wsave,lsave,work,lwork,dwork,ldwork,ierror)
+        		call name("vtsi")
+        		call iout(ierror,"ierr")
+        		
+        		call vtsgs(nlat,nlon,ityp,nt,vt,wt,nlat,nlon,br,bi,cr,ci,nlat, &
+        		nlat,wsave,lsave,work,lwork,ierror)
+        		call name("vts ")
+        		call iout(ierror,"ierr")
+        end select
 
         !     call a3out(wt,"wt  ",nlat,nlon,nt)
         !     call a3out(vt,"vt  ",nlat,nlon,nt)

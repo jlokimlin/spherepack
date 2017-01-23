@@ -11,10 +11,8 @@ module spherepack_library
         TWO_PI
 
     use divergence_routines, only: &
-        divec, &
-        dives, &
-        divgc, &
-        divgs
+        divec, dives, divgc, divgs, &
+        idivec, idives, idivgc, idivgs
 
     use gaussian_latitudes_and_weights_routines, only: &
         compute_gaussian_latitudes_and_weights
@@ -33,18 +31,6 @@ module spherepack_library
 
     use module_gradgs, only: &
         gradgs
-
-    use module_idivec, only: &
-        idivec
-
-    use module_idives, only: &
-        idives
-
-    use module_idivgc, only: &
-        idivgc
-
-    use module_idivgs, only: &
-        idivgs
 
     use module_idvtec, only: &
         idvtec
@@ -179,15 +165,9 @@ module spherepack_library
         vhags, vhagsi
 
     use vector_synthesis_routines, only: &
-        vhsec, vhseci
-
-    use vector_synthesis_routines, only: &
-        vhses, vhsesi
-
-    use vector_synthesis_routines, only: &
-        vhsgc, vhsgci
-
-    use vector_synthesis_routines, only: &
+        vhsec, vhseci, &
+        vhses, vhsesi, &
+        vhsgc, vhsgci, &
         vhsgs, vhsgsi
 
     !    use module_visequ, only: &
@@ -241,8 +221,8 @@ module spherepack_library
     use type_FFTpack, only: &
         FFTpack
 
-    use type_HFFTpack, only: &
-        HFFTpack, &
+    use type_RealPeriodicTransform, only: &
+        RealPeriodicTransform, &
         hrffti, hrfftf, hrfftb
 
     use type_LegendreAux, only: &
@@ -282,7 +262,7 @@ module spherepack_library
 
     ! Derived data types
     public :: FFTpack
-    public :: HFFTpack
+    public :: RealPeriodicTransform
     public :: LegendreAux
     public :: GaussianGrid
     public :: GaussianSphere

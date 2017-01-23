@@ -38,7 +38,7 @@
 !
 ! ... files which must be loaded with divgc.f
 !
-!     type_SpherepackAux.f, type_HFFTpack.f, vhagc.f, shsgc.f, compute_gaussian_latitudes_and_weights.f
+!     type_SpherepackAux.f, type_RealPeriodicTransform.f, vhagc.f, shsgc.f, compute_gaussian_latitudes_and_weights.f
 !
 !
 !     subroutine divgc(nlat, nlon, isym, nt, dv, idv, jdv, br, bi, mdb, ndb, 
@@ -257,7 +257,7 @@ contains
         integer(ip) :: nt
         real(wp) :: wshsgc(lshsgc), work(lwork)
         !
-        !     check input parameters
+        ! Check input arguments
         !
         ierror = 1
         if (nlat < 3) return

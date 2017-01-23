@@ -38,7 +38,7 @@
 !
 ! ... files which must be loaded with isfvpes.f
 !
-!     type_SpherepackAux.f, type_HFFTpack.f, vhses.f, shaes.f
+!     type_SpherepackAux.f, type_RealPeriodicTransform.f, vhses.f, shaes.f
 !
 !
 !     subroutine isfvpes(nlat, nlon, isym, nt, sf, vp, idv, jdv, as, bs, av, bv, 
@@ -263,7 +263,7 @@ contains
         integer(ip) :: l1, l2, mn, is, lwk, iwk
         integer(ip) :: ibr, ibi, icr, ici
         !
-        !     check input parameters
+        ! Check input arguments
         !
         ierror = 1
         if (nlat < 3) return

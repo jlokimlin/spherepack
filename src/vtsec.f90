@@ -38,7 +38,7 @@
 !
 ! ... files which must be loaded with vtsec.f90
 !
-!     type_SpherepackAux.f90, type_HFFTpack.f90, vhaec.f90, vhsec.f90
+!     type_SpherepackAux.f90, type_RealPeriodicTransform.f90, vhaec.f90, vhsec.f90
 !   
 !     subroutine vtsec(nlat, nlon, ityp, nt, vt, wt, idvw, jdvw, br, bi, cr, ci, 
 !    +                 mdab, ndab, wvts, lwvts, work, lwork, ierror)
@@ -340,8 +340,8 @@ module module_vtsec
         wp, & ! working precision
         ip ! integer precision
 
-    use type_HFFTpack, only: &
-        HFFTpack
+    use type_RealPeriodicTransform, only: &
+        RealPeriodicTransform
 
     use type_SpherepackAux, only: &
         SpherepackAux
@@ -498,7 +498,7 @@ contains
                 vb(imid, nlat, 3), wb(imid, nlat, 3)
 
 
-            type(HFFTpack)      :: hfft
+            type(RealPeriodicTransform)      :: hfft
             type(SpherepackAux) :: sphere_aux
 
             nlp1 = nlat+1
@@ -1164,7 +1164,7 @@ contains
         real(wp) :: wvts(lwvts)
         real(wp) :: dwork(ldwork)
 
-        type(HFFTpack)      :: hfft
+        type(RealPeriodicTransform)      :: hfft
         type(SpherepackAux) :: sphere_aux
 
         ierror = 1

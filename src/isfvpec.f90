@@ -39,7 +39,7 @@
 !
 ! ... files which must be loaded with isfvpec.f
 !
-!     type_SpherepackAux.f, type_HFFTpack.f, vhsec.f, shaec.f
+!     type_SpherepackAux.f, type_RealPeriodicTransform.f, vhsec.f, shaec.f
 !
 !
 !     subroutine isfvpec(nlat, nlon, isym, nt, sf, vp, idv, jdv, as, bs, av, bv, 
@@ -263,7 +263,7 @@ contains
         integer(ip) :: mmax, l1, l2, lzz1, labc, mn, is, lwk, iwk, lwmin
         integer(ip) :: ibr, ibi, icr, ici
         !
-        !     check input parameters
+        ! Check input arguments
         !
         ierror = 1
         if (nlat < 3) return

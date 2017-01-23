@@ -38,7 +38,7 @@
 !
 ! ... files which must be loaded with shpg.f
 !
-!     type_HFFTpack.f
+!     type_RealPeriodicTransform.f
 !
 !     shpgi initializes the arrays wshp and iwshp for subsequent 
 !     use in subroutine shpg, which performs the harmonic projection 
@@ -119,8 +119,8 @@ module module_shpg
         ip, & ! integer precision
         PI
 
-    use type_HFFTpack, only: &
-    HFFTpack
+    use type_RealPeriodicTransform, only: &
+    RealPeriodicTransform
 
     ! Explicit typing only
     implicit none
@@ -136,7 +136,7 @@ subroutine shpgi(nlat, nlon, isym, mtrunc, wshp, lwshp, iwshp, &
  liwshp, work, lwork, ierror)
 
 
-    type(HFFTpack) :: hfft
+    type(RealPeriodicTransform) :: hfft
 integer :: ierror
 integer :: isym
 integer :: iw1
@@ -638,7 +638,7 @@ end subroutine shpgi1
 !
 ! ... files which must be loaded with shpg.f
 !
-!     type_HFFTpack.f
+!     type_RealPeriodicTransform.f
 !
 !     shpg computes the harmonic projection, which is
 !     equivalent to a harmonic analysis (forward) followed
@@ -738,7 +738,7 @@ subroutine shpg(nlat, nlon, isym, mtrunc, x, y, idxy, &
         wshp, lwshp, iwshp, liwshp, work, lwork, ierror)
 
 
-    type(HFFTpack) :: hfft
+    type(RealPeriodicTransform) :: hfft
 integer :: i
 integer :: idxy
 integer :: ierror

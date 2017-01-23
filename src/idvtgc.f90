@@ -38,7 +38,7 @@
 !
 ! ... files which must be loaded with idvtgc.f
 !
-!     type_SpherepackAux.f, type_HFFTpack.f, vhsgc.f, shagc.f, compute_gaussian_latitudes_and_weights.f
+!     type_SpherepackAux.f, type_RealPeriodicTransform.f, vhsgc.f, shagc.f, compute_gaussian_latitudes_and_weights.f
 !
 !
 !     subroutine idvtgc(nlat, nlon, isym, nt, v, w, idvw, jdvw, ad, bd, av, bv, 
@@ -322,7 +322,7 @@ contains
         dimension av(mdab, ndab, nt), bv(mdab, ndab, nt)
         dimension wvhsgc(lvhsgc), work(lwork)
         !
-        !     check input parameters
+        ! Check input arguments
         !
         ierror = 1
         if (nlat < 3) return
@@ -419,7 +419,7 @@ contains
             dimension wvhsgc(lvhsgc), wk(lwk)
             dimension pertbd(nt), pertbv(nt)
             !
-            !     preset coefficient multiplyers in vector
+            ! Preset coefficient multiplyers in vector
             !
             do n=2, nlat
                 fn = real(n - 1)

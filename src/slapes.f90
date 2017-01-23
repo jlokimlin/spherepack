@@ -39,7 +39,7 @@
 !
 ! ... files which must be loaded with slapec.f
 !
-!     type_SpherepackAux.f, type_HFFTpack.f, shaes.f, shses.f
+!     type_SpherepackAux.f, type_RealPeriodicTransform.f, shaes.f, shses.f
 !
 !
 !
@@ -299,7 +299,7 @@ contains
         dimension slap(ids, jds, nt), a(mdab, ndab, nt), b(mdab, ndab, nt)
         dimension wshses(lshses), work(lwork)
         !
-        !     check input parameters
+        ! Check input arguments
         !
         ierror = 1
         if (nlat < 3) return

@@ -38,7 +38,7 @@
 !
 ! ... files which must be loaded with vlapgs.f
 !
-!     type_SpherepackAux.f, type_HFFTpack.f, vhags.f, vhsgs.f, compute_gaussian_latitudes_and_weights.f
+!     type_SpherepackAux.f, type_RealPeriodicTransform.f, vhags.f, vhsgs.f, compute_gaussian_latitudes_and_weights.f
 !
 !
 !

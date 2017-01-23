@@ -1,5 +1,8 @@
 module type_Sphere
 
+    use, intrinsic :: ISO_Fortran_env, only: &
+        stderr => ERROR_UNIT
+
     use spherepack_precision, only: &
         wp, & ! working precision
         ip ! integer precision
@@ -27,38 +30,39 @@ module type_Sphere
     ! Everything is private unless stated otherwise
     private
     public :: Sphere
-
     
+    ! Parameters confined to the module
+    real(wp), parameter :: ZERO = 0.0_wp
+    real(wp), parameter :: HALF = 0.5_wp
+    real(wp), parameter :: ONE = 1.0_wp
+    real(wp), parameter :: TWO = 2.0_wp
+
     type, abstract, public :: Sphere
-        !----------------------------------------------------------------------
         ! Type components
-        !----------------------------------------------------------------------
-        logical,                            public :: initialized = .false.
-        integer(ip),                        public :: NUMBER_OF_LONGITUDES = 0
-        integer(ip),                        public :: NUMBER_OF_LATITUDES = 0
-        integer(ip),                        public :: TRIANGULAR_TRUNCATION_LIMIT = 0
-        integer(ip),                        public :: SCALAR_SYMMETRIES = 0
-        integer(ip),                        public :: VECTOR_SYMMETRIES = 0
-        integer(ip),                        public :: NUMBER_OF_SYNTHESES = 0
-        integer(ip),          allocatable,  public :: INDEX_ORDER_M(:)
-        integer(ip),          allocatable,  public :: INDEX_DEGREE_N(:)
-        real(wp),                           public :: RADIUS_OF_SPHERE = 0.0_wp
-        real(wp),             allocatable,  public :: vorticity_and_divergence_coefficients(:)
-        real(wp),             allocatable,  public :: laplacian_coefficients(:)
-        real(wp),             allocatable,  public :: inverse_laplacian_coefficients(:)
+        logical,                           public :: initialized = .false.
+        integer(ip),                       public :: NUMBER_OF_LONGITUDES = 0
+        integer(ip),                       public :: NUMBER_OF_LATITUDES = 0
+        integer(ip),                       public :: TRIANGULAR_TRUNCATION_LIMIT = 0
+        integer(ip),                       public :: SCALAR_SYMMETRIES = 0
+        integer(ip),                       public :: VECTOR_SYMMETRIES = 0
+        integer(ip),                       public :: NUMBER_OF_SYNTHESES = 0
+        integer(ip),          allocatable, public :: INDEX_ORDER_M(:)
+        integer(ip),          allocatable, public :: INDEX_DEGREE_N(:)
+        real(wp),                          public :: RADIUS_OF_SPHERE = ZERO
+        real(wp),             allocatable, public :: vorticity_and_divergence_coefficients(:)
+        real(wp),             allocatable, public :: laplacian_coefficients(:)
+        real(wp),             allocatable, public :: inverse_laplacian_coefficients(:)
         complex(wp),          allocatable, public :: complex_spectral_coefficients(:)
         class(Workspace),     allocatable, public :: workspace
         class(SphericalGrid), allocatable, public :: grid
         type(TrigonometricFunctions),      public :: trigonometric_functions
         type(SphericalUnitVectors),        public :: unit_vectors
-        !----------------------------------------------------------------------
     contains
-        !----------------------------------------------------------------------
         ! Type-bound procedures
-        !----------------------------------------------------------------------
         procedure, public  :: create_sphere
         procedure, public  :: destroy => destroy_sphere
         procedure, public  :: destroy_sphere
+        procedure, public  :: assert_initialized
         procedure, public  :: get_index
         procedure, public  :: get_coefficient
         procedure, public  :: invert_helmholtz
@@ -87,9 +91,7 @@ module type_Sphere
         procedure, private :: get_vector_laplacian_from_vector_field
         procedure, private :: invert_scalar_laplacian
         procedure, private :: invert_vector_laplacian
-        !----------------------------------------------------------------------
         ! Deferred type-bound procedures
-        !----------------------------------------------------------------------
         procedure (scalar_analysis),  deferred, public :: &
             perform_scalar_analysis
         procedure (scalar_synthesis), deferred, public :: &
@@ -98,9 +100,7 @@ module type_Sphere
             vector_analysis_from_spherical_components
         procedure (vector_synthesis), deferred, public :: &
             perform_vector_synthesis
-        !----------------------------------------------------------------------
         ! Generic type-bound procedures
-        !----------------------------------------------------------------------
         generic, public :: perform_vector_analysis => &
             perform_vector_analysis_from_vector_field
         generic, public :: invert_laplacian => &
@@ -118,59 +118,50 @@ module type_Sphere
             get_vorticity_from_vector_field
         generic, public :: invert_gradient => &
             invert_gradient_from_spherical_components
-        !----------------------------------------------------------------------
     end type Sphere
 
+    ! Declare deferred type-bound procedures
     abstract interface
         subroutine scalar_analysis(self, scalar_function)
             import :: Sphere, wp
-            !----------------------------------------------------------------------
+
             ! Dummy arguments
-            !----------------------------------------------------------------------
             class(Sphere), intent(inout)  :: self
             real(wp),      intent(in)     :: scalar_function(:,:)
-            !----------------------------------------------------------------------
         end subroutine scalar_analysis
 
         subroutine scalar_synthesis(self, scalar_function)
             import :: Sphere, wp
-            !----------------------------------------------------------------------
+
             ! Dummy arguments
-            !----------------------------------------------------------------------
             class(Sphere), intent(inout)  :: self
             real(wp),      intent(out)   :: scalar_function(:,:)
-            !----------------------------------------------------------------------
         end subroutine scalar_synthesis
 
         subroutine vector_analysis(self, polar_component, azimuthal_component)
             import :: Sphere, wp
-            !----------------------------------------------------------------------
+
             ! Dummy arguments
-            !----------------------------------------------------------------------
             class(Sphere), intent(inout)  :: self
             real(wp),      intent(in)     :: polar_component(:,:)
             real(wp),      intent(in)     :: azimuthal_component(:,:)
-            !----------------------------------------------------------------------
         end subroutine vector_analysis
 
         subroutine vector_synthesis(self, polar_component, azimuthal_component)
             import :: Sphere, wp
-            !----------------------------------------------------------------------
+
             ! Dummy arguments
-            !----------------------------------------------------------------------
             class(Sphere), intent(inout)  :: self
             real(wp),      intent(out)    :: polar_component(:,:)
             real(wp),      intent(out)    :: azimuthal_component(:,:)
-            !----------------------------------------------------------------------
         end subroutine vector_synthesis
     end interface
 
 contains
 
     subroutine create_sphere(self, nlat, nlon, ntrunc, isym, itype, nt, rsphere)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
         class(Sphere), intent(inout)  :: self
         integer(ip),   intent(in)     :: nlat
         integer(ip),   intent(in)     :: nlon
@@ -179,37 +170,27 @@ contains
         integer(ip),   intent(in)     :: itype !! Either 0, 1, 2, 3, ..., 8
         integer(ip),   intent(in)     :: nt
         real(wp),      intent(in)     :: rsphere
-        !--------------------------------------------------------------------------------
+
         ! Local variables
-        !--------------------------------------------------------------------------------
-        integer(ip) :: m, n !! Counters
-        !--------------------------------------------------------------------------------
+        integer(ip) :: m, n
 
         ! Ensure that object is usable
         call self%destroy_sphere()
 
-        !
         !  Set constants
-        !
         self%NUMBER_OF_LATITUDES = nlat
         self%NUMBER_OF_LONGITUDES = nlon
         self%TRIANGULAR_TRUNCATION_LIMIT = ntrunc
         self%NUMBER_OF_SYNTHESES = nt
         self%RADIUS_OF_SPHERE = rsphere
 
-        !
         !  Set scalar symmetries
-        !
         call self%get_scalar_symmetries(isym)
 
-        !
         !  Set vector symmetries
-        !
         call self%get_vector_symmetries(itype)
 
-        !
         !  Allocate memory
-        !
         associate( nm_dim => (ntrunc+1)*(ntrunc+2)/2 )
             allocate(self%INDEX_ORDER_M(nm_dim) )
             allocate(self%INDEX_DEGREE_N(nm_dim) )
@@ -217,9 +198,8 @@ contains
             allocate(self%inverse_laplacian_coefficients(nm_dim) )
             allocate(self%complex_spectral_coefficients(nm_dim) )
             allocate(self%vorticity_and_divergence_coefficients(nlat) )
-            !
+
             !  Fill arrays
-            !
             associate( &
                 ntrunc => self%TRIANGULAR_TRUNCATION_LIMIT, &
                 indxm => self%INDEX_ORDER_M, &
@@ -228,60 +208,45 @@ contains
                 ilap => self%inverse_laplacian_coefficients, &
                 sqnn => self%vorticity_and_divergence_coefficients &
                 )
-                !
+
                 !  Precompute indices of order m
-                !
                 indxm = [ ((m, n=m, ntrunc), m=0, ntrunc) ]
-                !
+
                 !  Precompute indices of degree n
-                !
                 indxn = [ ((n, n=m, ntrunc), m=0, ntrunc) ]
-                !
+
                 !  Precompute laplacian coefficients
-                !
                 lap = -real(indxn, kind=wp) * real(indxn + 1, kind=wp)/(rsphere**2)
-                !
+
                 !  Precompute inverse laplacian coefficients
-                !
-                ilap(1) = 0.0_wp
-                ilap(2:nm_dim) = 1.0_wp/lap(2:nm_dim)
+                ilap(1) = ZERO
+                ilap(2:nm_dim) = ONE/lap(2:nm_dim)
                 !
                 !  Precompute vorticity and divergence coefficients
-                !
                 sqnn = [ (sqrt(real((n - 1) * n, kind=wp)/rsphere), n=1, nlat) ]
 
             end associate
         end associate
-        !
+
         !  Initialize derived data types
-        !
         associate( &
             grid => self%grid, &
             trig_func => self%trigonometric_functions, &
             unit_vectors => self%unit_vectors &
             )
-
             trig_func = TrigonometricFunctions(grid)
-
             unit_vectors = SphericalUnitVectors(grid)
-
         end associate
 
-        !
         !  Set initialization flag
-        !
         self%initialized = .true.
         
     end subroutine create_sphere
 
-
-
     subroutine destroy_sphere(self)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
         class(Sphere), intent(inout)  :: self
-        !----------------------------------------------------------------------
 
         ! Check flag
         if (.not.self%initialized) return
@@ -342,104 +307,91 @@ contains
 
     end subroutine destroy_sphere
 
+    subroutine assert_initialized(self, routine)
 
-
-    subroutine perform_complex_analysis(self, scalar_function)
-        !
-        ! Purpose:
-        !
-        ! Converts gridded input array (scalar_function) to (complex)
-        ! spherical harmonic coefficients (psi).
-        !
-        ! The spectral data is assumed to be in a complex array of dimension
-        ! (mtrunc+1)*(mtrunc+2)/2, whre mtrunc is the triangular truncation limit, 
-        ! for instance, mtrunc = 42 for T42.
-        ! mtrunc must be <= nlat-1.
-        ! Coefficients are ordered so that first (nm=1) is m=0, n=0, second is m=0, n=1, 
-        ! nm=mtrunc is m=0, n=mtrunc, nm=mtrunc+1 is m=1, n=1, etc.
-        !
-        ! In Fortran syntax, values of m (degree) and n (order) as a function
-        ! of the index nm are:
-        !
-        ! integer(ip), dimension ((mtrunc+1)*(mtrunc+2)/2) :: indxm, indxn
-        ! indxm = [((m, n=m, mtrunc), m=0, mtrunc)]
-        ! indxn = [((n, n=m, mtrunc), m=0, mtrunc)]
-        !
-        ! Conversely, the index nm as a function of m and n is:
-        ! nm = sum([(i, i=mtrunc+1, mtrunc-m+2, -1)])+n-m+1
-        !
-        !----------------------------------------------------------------------
         ! Dummy arguments
-        !----------------------------------------------------------------------
-        class(Sphere), intent(inout)  :: self
-        real(wp),      intent(in)     :: scalar_function(:,:)
-        !----------------------------------------------------------------------
-        ! Local variables
-        !----------------------------------------------------------------------
-        integer(ip) :: n, m !! Counters
-        !----------------------------------------------------------------------
+        class(Sphere),    intent(inout) :: self
+        character(len=*), intent(in)    :: routine
 
         ! Check if object is usable
         if (.not.self%initialized) then
-            error stop 'Uninitialized object of class(Sphere): '&
-                //' in perform_complex_analysis'
+            write(stderr, '(a)') &
+                'Uninitialized object of class(Sphere) in '//routine
         end if
 
-        !
+    end subroutine assert_initialized
+
+    !
+    ! Purpose:
+    !
+    ! Converts gridded input array (scalar_function) to (complex)
+    ! spherical harmonic coefficients (psi).
+    !
+    ! The spectral data is assumed to be in a complex array of dimension
+    ! (mtrunc+1)*(mtrunc+2)/2, whre mtrunc is the triangular truncation limit,
+    ! for instance, mtrunc = 42 for T42.
+    ! mtrunc must be <= nlat-1.
+    ! Coefficients are ordered so that first (nm=1) is m=0, n=0, second is m=0, n=1,
+    ! nm=mtrunc is m=0, n=mtrunc, nm=mtrunc+1 is m=1, n=1, etc.
+    !
+    ! In Fortran syntax, values of m (degree) and n (order) as a function
+    ! of the index nm are:
+    !
+    ! integer(ip), dimension ((mtrunc+1)*(mtrunc+2)/2) :: indxm, indxn
+    ! indxm = [((m, n=m, mtrunc), m=0, mtrunc)]
+    ! indxn = [((n, n=m, mtrunc), m=0, mtrunc)]
+    !
+    ! Conversely, the index nm as a function of m and n is:
+    ! nm = sum([(i, i=mtrunc+1, mtrunc-m+2, -1)])+n-m+1
+    !
+    subroutine perform_complex_analysis(self, scalar_function)
+
+        ! Dummy arguments
+        class(Sphere), intent(inout) :: self
+        real(wp),      intent(in)    :: scalar_function(:,:)
+
+        ! Local variables
+        integer(ip) :: n, m
+
+        ! Check if object is usable
+        call self%assert_initialized('perform_complex_analysis')
+
         !   compute the (real) spherical harmonic coefficients
-        !
-        associate( f => scalar_function )
+        call self%perform_scalar_analysis(scalar_function)
 
-            call self%perform_scalar_analysis(f)
-
-        end associate
-
-        !
         !  Set complex spherical harmonic coefficients
-        !
         associate( &
             ntrunc => self%TRIANGULAR_TRUNCATION_LIMIT, &
             a => self%workspace%real_harmonic_coefficients, &
             b => self%workspace%imaginary_harmonic_coefficients, &
             psi => self%complex_spectral_coefficients &
             )
-
-            psi = 0.5_wp * cmplx( &
+            psi = HALF * cmplx( &
                 [((a(m+1, n+1), n=m, ntrunc), m=0, ntrunc)], &
                 [((b(m+1, n+1), n=m, ntrunc), m=0, ntrunc)], &
                 kind=wp )
-
         end associate
 
     end subroutine perform_complex_analysis
 
+    !
+    ! Purpose:
+    !
+    ! Converts gridded input array to (complex) spherical harmonic coefficients
+    !
+    subroutine perform_complex_synthesis(self, scalar_function)
 
-
-    subroutine perform_complex_synthesis(self, scalar_function )
-        !
-        ! Purpose:
-        ! Converts gridded input array to (complex) spherical harmonic coefficients
-        !
-        !----------------------------------------------------------------------
         ! Dummy arguments
-        !----------------------------------------------------------------------
-        class(Sphere), intent(inout)  :: self
-        real(wp),      intent(out)    :: scalar_function(:,:)
-        !----------------------------------------------------------------------
+        class(Sphere), intent(inout) :: self
+        real(wp),      intent(out)   :: scalar_function(:,:)
+
         ! Local variables
-        !----------------------------------------------------------------------
-        integer(ip) :: n, m, i !! Counters
-        !----------------------------------------------------------------------
+        integer(ip) :: n, m, i
 
         ! Check if object is usable
-        if (.not.self%initialized) then
-            error stop 'Uninitialized object of class(Sphere): '&
-                //' in perform_complex_synthesis'
-        end if
+        call self%assert_initialized('perform_complex_synthesis')
 
-        !
         !  Convert complex spherical harmonic coefficients to real version
-        !
         associate( &
             ntrunc => self%TRIANGULAR_TRUNCATION_LIMIT, &
             a => self%workspace%real_harmonic_coefficients, &
@@ -447,47 +399,38 @@ contains
             psi => self%complex_spectral_coefficients &
             )
             ! Initialize (real) coefficients
-            a = 0.0_wp
-            b = 0.0_wp
+            a = ZERO
+            b = ZERO
 
             ! Fill real arrays with contents of spec
             do m = 0, ntrunc
                 do n = m, ntrunc
                     ! set the spectral index
-                    associate( nm => sum ([(i, i=ntrunc+1, ntrunc-m+2, -1)]) + n-m+1 )
+                    associate( nm => sum([(i, i=ntrunc + 1, ntrunc - m + 2, -1)]) + n - m + 1 )
                         ! set the real component
-                        a( m+1, n+1 ) = 2.0_wp * real(psi(nm))
+                        a(m + 1, n + 1) = TWO * real(psi(nm))
                         ! set the imaginary component
-                        b( m+1, n+1 ) = 2.0_wp * aimag(psi(nm))
+                        b(m + 1, n + 1) = TWO * aimag(psi(nm))
                     end associate
                 end do
             end do
         end associate
 
-        !
-        !  synthesise the scalar function from the (real) harmonic coefficients
-        !
+        ! Synthesise the scalar function from the (real) harmonic coefficients
         call self%perform_scalar_synthesis(scalar_function)
 
     end subroutine perform_complex_synthesis
 
-
-
     subroutine analyze_into_complex_spectral_coefficients(self, &
         scalar_function, spectral_coefficients )
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
         class(Sphere), intent(inout)  :: self
         real(wp),      intent(in)     :: scalar_function(:,:)
         complex(wp),   intent(out)    :: spectral_coefficients(:)
-        !----------------------------------------------------------------------
 
         ! Check if object is usable
-        if (.not.self%initialized) then
-            error stop 'Uninitialized object of class(Sphere): '&
-                //' in analyze_into_complex_spectral_coefficients'
-        end if
+        call self%assert_initialized('analyze_into_complex_spectral_coefficients')
 
         ! analyze the scalar function into (complex) harmonic coefficients
         call self%perform_complex_analysis(scalar_function)
@@ -497,27 +440,19 @@ contains
 
     end subroutine analyze_into_complex_spectral_coefficients
 
-
-
     subroutine synthesize_from_complex_spectral_coefficients(self, &
-        spectral_coefficients, scalar_function )
-        !----------------------------------------------------------------------
+        spectral_coefficients, scalar_function)
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
-        class(Sphere), intent(inout)  :: self
-        complex(wp),   intent(in)     :: spectral_coefficients(:)
-        real(wp),      intent(out)    :: scalar_function(:,:)
-        !----------------------------------------------------------------------
+        class(Sphere), intent(inout) :: self
+        complex(wp),   intent(in)    :: spectral_coefficients(:)
+        real(wp),      intent(out)   :: scalar_function(:,:)
+
         ! Local variables
-        !----------------------------------------------------------------------
-        integer(ip) :: n, m, i !! Counters
-        !----------------------------------------------------------------------
+        integer(ip) :: n, m, i
 
         ! Check if object is usable
-        if (.not.self%initialized) then
-            error stop 'Uninitialized object of class(Sphere): '&
-                //' in synthesize_from_complex_spectral_coefficients'
-        end if
+        call self%assert_initialized('synthesize_from_complex_spectral_coefficients')
 
         ! Convert complex coefficients to real version
         associate( &
@@ -527,8 +462,8 @@ contains
             psi => spectral_coefficients &
             )
             ! Initialize (real) coefficients
-            a = 0.0_wp
-            b = 0.0_wp
+            a = ZERO
+            b = ZERO
 
             ! fill real arrays with contents of spec
             do m = 0, ntrunc
@@ -536,9 +471,9 @@ contains
                      ! set the spectral index
                     associate( nm => sum ([(i, i=ntrunc+1, ntrunc-m+2, -1)]) + n-m+1 )
                         ! set the real component
-                        a(m + 1, n + 1) = 2.0_wp * real(psi(nm))
+                        a(m + 1, n + 1) = TWO * real(psi(nm))
                         ! set the imaginary component
-                        b(m + 1, n + 1) = 2.0_wp * aimag(psi(nm))
+                        b(m + 1, n + 1) = TWO * aimag(psi(nm))
                     end associate
                 end do
             end do
@@ -549,27 +484,19 @@ contains
 
     end subroutine synthesize_from_complex_spectral_coefficients
 
-
-
     subroutine perform_vector_analysis_from_vector_field(self, vector_field )
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
         class(Sphere), intent(inout)  :: self
         real(wp),      intent(in)    :: vector_field(:,:,:)
-        !----------------------------------------------------------------------
+
         ! Local variables
-        !----------------------------------------------------------------------
         integer(ip)           :: error_flag
         real(wp), allocatable :: polar_component(:,:)
         real(wp), allocatable :: azimuthal_component(:,:)
-        !----------------------------------------------------------------------
 
         ! Check if object is usable
-        if (.not.self%initialized) then
-            error stop 'Uninitialized object of class(Sphere): '&
-                //'in perform_vector_analysis'
-        end if
+        call self%assert_initialized('perform_vector_analysis')
 
         ! Allocate memory
         associate( &
@@ -598,22 +525,15 @@ contains
 
     end subroutine perform_vector_analysis_from_vector_field
 
-
-
     subroutine get_scalar_laplacian(self, scalar_function, scalar_laplacian )
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
-        class(Sphere), intent(inout)  :: self
-        real(wp),      intent(in)     :: scalar_function(:,:)
-        real(wp),      intent(out)    :: scalar_laplacian(:,:)
-        !----------------------------------------------------------------------
+        class(Sphere), intent(inout) :: self
+        real(wp),      intent(in)    :: scalar_function(:,:)
+        real(wp),      intent(out)   :: scalar_laplacian(:,:)
 
         ! Check if object is usable
-        if (.not.self%initialized) then
-            error stop 'Uninitialized object of class(Sphere): '&
-                //' in get_scalar_laplacian'
-        end if
+        call self%assert_initialized('get_scalar_laplacian')
 
         ! Set (real) scalar spherica harmonic coefficients
         call self%perform_complex_analysis(scalar_function)
@@ -631,16 +551,13 @@ contains
 
     end subroutine get_scalar_laplacian
 
-
-
     subroutine invert_scalar_laplacian(self, source, solution)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
-        class(Sphere), intent(inout)  :: self
+        class(Sphere), intent(inout) :: self
         real(wp),      intent(in)    :: source(:,:)
         real(wp),      intent(out)   :: solution(:,:)
-        !----------------------------------------------------------------------
+
 
         ! Check if object is usable
         if (.not.self%initialized) then
@@ -665,23 +582,17 @@ contains
     end subroutine invert_scalar_laplacian
 
     subroutine compute_vector_laplacian_coefficients(self)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
-        class(Sphere), intent(inout)  :: self
-        !----------------------------------------------------------------------
-        ! Dummy arguments
-        !----------------------------------------------------------------------
-        integer(ip) :: n !! Counter
-        !----------------------------------------------------------------------
+        class(Sphere), intent(inout) :: self
+
+        ! Local variables
+        integer(ip) :: n
 
         ! Check if object is usable
-        if (.not.self%initialized) then
-            error stop 'Uninitialized object of class(Sphere): '&
-                //' in compute_vector_laplacian_coefficients'
-        end if
+        call self%assert_initialized('compute_vector_laplacian_coefficients')
 
-        ! compute vector laplacian
+        ! Compute vector laplacian
         associate( &
             nlat => self%NUMBER_OF_LATITUDES, &
             ityp => self%VECTOR_SYMMETRIES, &
@@ -693,30 +604,29 @@ contains
             )
             select case (ityp)
                 case (0, 3, 6)
-                    !
-                    !   All coefficients needed
-                    !
+
+                    ! All coefficients needed
                     do n=1, nlat
+
                         ! Set polar coefficients
                         br(:,n) = lap(n) * br(:,n)
                         bi(:,n) = lap(n) * bi(:,n)
+
                         ! Set azimuthal coefficients
                         cr(:,n) = lap(n) * cr(:,n)
                         ci(:,n) = lap(n) * ci(:,n)
                     end do
                 case (1, 4, 7)
-                    !
-                    !      vorticity is zero so cr,ci=0 not used
-                    !
+
+                    ! Vorticity is zero so cr,ci=0 not used
                     do n=1, nlat
                         ! Set polar coefficients
                         br(:,n) = lap(n) * br(:,n)
                         bi(:,n) = lap(n) * bi(:,n)
                     end do
                 case default
-                    !
-                    !  divergence is zero so br,bi=0 not used
-                    !
+
+                    ! Divergence is zero so br,bi=0 not used
                     do n=1, nlat
                         ! Set azimuthal coefficients
                         cr(:,n) = lap(n) * cr(:,n)
@@ -729,21 +639,16 @@ contains
 
     subroutine get_vector_laplacian_from_spherical_components(self, &
         polar_component, azimuthal_component, polar_laplacian, azimuthal_laplacian )
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
-        class(Sphere), intent(inout)  :: self
-        real(wp),      intent(in)     :: polar_component(:,:)
-        real(wp),      intent(in)     :: azimuthal_component(:,:)
-        real(wp),      intent(out)    :: polar_laplacian(:,:)
-        real(wp),      intent(out)    :: azimuthal_laplacian(:,:)
-        !----------------------------------------------------------------------
+        class(Sphere), intent(inout) :: self
+        real(wp),      intent(in)    :: polar_component(:,:)
+        real(wp),      intent(in)    :: azimuthal_component(:,:)
+        real(wp),      intent(out)   :: polar_laplacian(:,:)
+        real(wp),      intent(out)   :: azimuthal_laplacian(:,:)
 
         ! Check if object is usable
-        if (.not.self%initialized) then
-            error stop 'Uninitialized object of class(Sphere): '&
-                //' in get_vector_laplacian_from_spherical_components'
-        end if
+        call self%assert_initialized('get_vector_laplacian_from_spherical_components')
 
         ! Set vector spherical harmonic coefficients
         associate( &
@@ -756,7 +661,6 @@ contains
         ! Compute vector laplacian coefficients
         call self%compute_vector_laplacian_coefficients()
 
-
         ! Synthesize vector laplacian from coefficients
         associate( &
             vlap => polar_laplacian, &
@@ -767,60 +671,46 @@ contains
 
     end subroutine get_vector_laplacian_from_spherical_components
 
-
     subroutine get_vector_laplacian_from_vector_field(self, &
         vector_field, polar_laplacian, azimuthal_laplacian)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
-        class(Sphere), intent(inout)  :: self
-        real(wp),      intent(in)     :: vector_field(:,:,:)
-        real(wp),      intent(out)    :: polar_laplacian(:,:)
-        real(wp),      intent(out)    :: azimuthal_laplacian(:,:)
-        !----------------------------------------------------------------------
+        class(Sphere), intent(inout) :: self
+        real(wp),      intent(in)    :: vector_field(:,:,:)
+        real(wp),      intent(out)   :: polar_laplacian(:,:)
+        real(wp),      intent(out)   :: azimuthal_laplacian(:,:)
 
         ! Check if object is usable
-        if (.not.self%initialized) then
-            error stop 'Uninitialized object of class(Sphere): '&
-                //' in get_vector_laplacian_from_vector_field'
-        end if
+        call self%assert_initialized('get_vector_laplacian_from_vector_field')
 
         ! Compute vector laplacian coefficients
-        call self%perform_vector_analysis( vector_field )
-
+        call self%perform_vector_analysis(vector_field)
 
         ! Synthesize vector laplacian from coefficients
         associate( &
             vlap => polar_laplacian, &
             wlap => azimuthal_laplacian &
             )
-            call self%perform_vector_synthesis( vlap, wlap )
+            call self%perform_vector_synthesis(vlap, wlap)
         end associate
 
     end subroutine get_vector_laplacian_from_vector_field
 
-
     subroutine invert_vector_laplacian(self, &
         polar_source, azimuthal_source, polar_solution, azimuthal_solution)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
-        class(Sphere), intent(inout)  :: self
-        real(wp),      intent(in)     :: polar_source(:,:)
-        real(wp),      intent(in)     :: azimuthal_source(:,:)
-        real(wp),      intent(out)    :: polar_solution(:,:)
-        real(wp),      intent(out)    :: azimuthal_solution(:,:)
-        !----------------------------------------------------------------------
-        ! Dummy arguments
-        !----------------------------------------------------------------------
-        integer(ip) :: n !! Counter
-        !----------------------------------------------------------------------
+        class(Sphere), intent(inout) :: self
+        real(wp),      intent(in)    :: polar_source(:,:)
+        real(wp),      intent(in)    :: azimuthal_source(:,:)
+        real(wp),      intent(out)   :: polar_solution(:,:)
+        real(wp),      intent(out)   :: azimuthal_solution(:,:)
+
+        ! Local variables
+        integer(ip) :: n
 
         ! Check if object is usable
-        if (.not.self%initialized) then
-            error stop 'Uninitialized object of class(Sphere): '&
-                //' in invert_vector_laplacian'
-        end if
+        call self%assert_initialized('invert_vector_laplacian')
 
         ! Set vector spherical harmonic coefficients
         associate( &
@@ -844,70 +734,59 @@ contains
             )
             select case (ityp)
                 case (0, 3, 6)
-                    !
+
                     !   All coefficients needed
-                    !
                     do n=1, nlat
+
                         ! Set polar coefficients
                         br(:,n) = ilap(n) * br(:,n)
                         bi(:,n) = ilap(n) * bi(:,n)
+
                         ! Set azimuthal coefficients
                         cr(:,n) = ilap(n) * cr(:,n)
                         ci(:,n) = ilap(n) * ci(:,n)
                     end do
                 case (1, 4, 7)
-                    !
-                    !      vorticity is zero so cr,ci=0 not used
-                    !
+
+                    ! Vorticity is zero so cr,ci=0 not used
                     do n=1, nlat
+
                         ! Set polar coefficients
                         br(:,n) = ilap(n) * br(:,n)
                         bi(:,n) = ilap(n) * bi(:,n)
                     end do
                 case default
-                    !
-                    !  divergence is zero so br,bi=0 not used
-                    !
+
+                    ! Divergence is zero so br,bi=0 not used
                     do n=1, nlat
+
                         ! Set azimuthal coefficients
                         cr(:,n) = ilap(n) * cr(:,n)
                         ci(:,n) = ilap(n) * ci(:,n)
                     end do
             end select
-            !
-            !  synthesize coefficients inot vector field (v,w)
-            !
+
+            ! Synthesize coefficients inot vector field (v,w)
             call self%perform_vector_synthesis(v, w)
         end associate
 
-
     end subroutine invert_vector_laplacian
 
-
     subroutine invert_helmholtz(self, helmholtz_constant, source, solution )
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
-        class(Sphere), target, intent(inout)  :: self
-        real(wp),              intent(in)     :: helmholtz_constant
-        real(wp),              intent(in)     :: source(:,:)
-        real(wp),              intent(out)    :: solution(:,:)
-        !----------------------------------------------------------------------
+        class(Sphere), target, intent(inout) :: self
+        real(wp),              intent(in)    :: helmholtz_constant
+        real(wp),              intent(in)    :: source(:,:)
+        real(wp),              intent(out)   :: solution(:,:)
+
         ! Local variables
-        !----------------------------------------------------------------------
-        real(wp), parameter :: ZERO=nearest(1.0_wp, 1.0_wp)-nearest(1.0_wp, -1.0_wp)
-        real(wp), pointer   :: iptr(:) => null()
-        !----------------------------------------------------------------------
+        real(wp), pointer :: iptr(:) => null()
 
         ! Check if object is usable
-        if (.not.self%initialized) then
-            error stop 'Uninitialized object of class(Sphere): '&
-                //' in invert_helmholtz'
-        end if
+        call self%assert_initialized('invert_helmholtz')
 
-        !
         !  Set (real) scalar spherica harmonic coefficients
-        !
         call self%perform_complex_analysis(source)
 
         ! Associate various quantities
@@ -918,69 +797,54 @@ contains
             lap => self%laplacian_coefficients, &
             xlmbda => helmholtz_constant &
             )
-            !
+
             !  Associate local pointer
-            !
-            if ( xlmbda == ZERO ) then
+            if (xlmbda == ZERO) then
+
                 ! Assign pointer
                 iptr => ilap
             else
+
                 ! Allocate memory
                 allocate( iptr(nm_dim) )
-                iptr = 1.0_wp/(lap - xlmbda)
+                iptr = ONE/(lap - xlmbda)
             end if
 
-            !
-            !  Set coefficients
-            !
+            ! Set coefficients
             psi = iptr * psi
 
-            !
             !  Synthesize complex coefficients into gridded array
-            !
             call self%perform_complex_synthesis(solution)
 
-            !
             !  Garbage collection
-            !
             if ( xlmbda == ZERO ) then
-                ! Nullify pointer
                 nullify( iptr )
             else
-                ! Release memory
                 deallocate( iptr )
             end if
         end associate
 
     end subroutine invert_helmholtz
 
-
-
     subroutine get_gradient(self, scalar_function, &
         polar_gradient_component, azimuthal_gradient_component)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
-        class(Sphere), intent(inout)  :: self
-        real(wp),      intent(in)     :: scalar_function(:,:)
-        real(wp),      intent(out)    :: polar_gradient_component(:,:)
-        real(wp),      intent(out)    :: azimuthal_gradient_component(:,:)
-        !----------------------------------------------------------------------
+        class(Sphere), intent(inout) :: self
+        real(wp),      intent(in)    :: scalar_function(:,:)
+        real(wp),      intent(out)   :: polar_gradient_component(:,:)
+        real(wp),      intent(out)   :: azimuthal_gradient_component(:,:)
+
         ! Local variables
-        !----------------------------------------------------------------------
-        integer(ip) :: n, m !! Counters
-        !----------------------------------------------------------------------
+        integer(ip) :: n, m
 
         ! Check if object is usable
-        if (.not.self%initialized) then
-            error stop 'Uninitialized object of class(Sphere): '&
-                //' in get_gradient'
-        end if
+        call self%assert_initialized('get_gradient')
 
-        ! compute the (real) spherical harmonic coefficients
+        ! Compute the (real) spherical harmonic coefficients
         call self%perform_scalar_analysis(scalar_function)
 
-        ! compute gradient
+        ! Compute gradient
         associate( &
             nlat => self%NUMBER_OF_LATITUDES, &
             v => polar_gradient_component, &
@@ -994,8 +858,8 @@ contains
             ci => self%workspace%imaginary_azimuthal_harmonic_coefficients &
             )
             ! Initialize polar coefficients
-            br = 0.0_wp
-            bi = 0.0_wp
+            br = ZERO
+            bi = ZERO
 
             ! Set polar coefficients
             do n=1, nlat
@@ -1003,35 +867,29 @@ contains
                 bi(:, n) = b(:, n) * sqnn(n)
             end do
             ! Set azimuthal coefficients
-            cr = 0.0_wp
-            ci = 0.0_wp
+            cr = ZERO
+            ci = ZERO
             ! Compute vector harmonic synthesis
             call self%perform_vector_synthesis(v, w)
         end associate
 
     end subroutine get_gradient
 
-
     subroutine invert_gradient_from_spherical_components(self, &
         polar_source, azimuthal_source, solution )
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
-        class(Sphere), intent(inout)  :: self
-        real(wp),      intent(in)     :: polar_source(:,:)
-        real(wp),      intent(in)     :: azimuthal_source(:,:)
-        real(wp),      intent(out)    :: solution(:,:)
-        !----------------------------------------------------------------------
+        class(Sphere), intent(inout) :: self
+        real(wp),      intent(in)    :: polar_source(:,:)
+        real(wp),      intent(in)    :: azimuthal_source(:,:)
+        real(wp),      intent(out)   :: solution(:,:)
+
         ! Local variables
-        !----------------------------------------------------------------------
-        integer(ip) :: n, m !! Counters
-        !----------------------------------------------------------------------
+        integer(ip) :: n, m
+
 
         ! Check if object is usable
-        if (.not.self%initialized) then
-            error stop 'Uninitialized object of class(Sphere): '&
-                //' in invert_gradient_from_spherical_components'
-        end if
+        call self%assert_initialized('invert_gradient_from_spherical_components')
 
         ! Set vector spherical harmonic coefficients
         associate( &
@@ -1052,26 +910,21 @@ contains
             br => self%workspace%real_polar_harmonic_coefficients, &
             bi => self%workspace%imaginary_polar_harmonic_coefficients &
             )
-            !
-            !  Initialize (real) coefficients
-            !
-            a = 0.0_wp
-            b = 0.0_wp
 
-            !
-            !  compute m=0 coefficients
-            !
+            ! Initialize (real) coefficients
+            a = ZERO
+            b = ZERO
+
+            ! Compute m=0 coefficients
             do n=2, nlat
                 a(1, n) = br(1, n)/sqnn(n)
                 b(1, n) = bi(1, n)/sqnn(n)
             end do
-            !
-            !  set upper limit for vector m subscript
-            !
+
+            !  Set upper limit for vector m subscript
             associate( mmax => min(nlat, (nlon+1)/2) )
-                !
-                !  compute m > 0 coefficients
-                !
+
+                !  Compute m > 0 coefficients
                 do m=2, mmax
                     do n=m, nlat
                         a(m, n) = br(m, n)/sqnn(n)
@@ -1079,36 +932,27 @@ contains
                     end do
                 end do
             end associate
-            !
+
             !  Perform scalar synthesis
-            !
             call self%perform_scalar_synthesis(f)
         end associate
 
     end subroutine invert_gradient_from_spherical_components
 
-
-
     subroutine get_vorticity_from_spherical_components(self, &
         polar_component, azimuthal_component, vorticity)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
-        class(Sphere), intent(inout)  :: self
-        real(wp),      intent(in)     :: polar_component(:,:)
-        real(wp),      intent(in)     :: azimuthal_component(:,:)
-        real(wp),      intent(out)    :: vorticity(:,:)
-        !----------------------------------------------------------------------
+        class(Sphere), intent(inout) :: self
+        real(wp),      intent(in)    :: polar_component(:,:)
+        real(wp),      intent(in)    :: azimuthal_component(:,:)
+        real(wp),      intent(out)   :: vorticity(:,:)
+
         ! Local variables
-        !----------------------------------------------------------------------
-        integer(ip) :: n, m !! Counters
-        !----------------------------------------------------------------------
+        integer(ip) :: n, m
 
         ! Check if object is usable
-        if (.not.self%initialized) then
-            error stop 'Uninitialized object of class(Sphere): '&
-                //' in get_vorticity_from_spherical_components'
-        end if
+        call self%assert_initialized('get_vorticity_from_spherical_components')
 
         associate( &
             v => polar_component, &
@@ -1122,22 +966,18 @@ contains
             cr => self%workspace%real_azimuthal_harmonic_coefficients, &
             ci => self%workspace%imaginary_azimuthal_harmonic_coefficients &
             )
-            !
+
             !  Perform vector analysis
-            !
             call self%vector_analysis_from_spherical_components(v, w)
-            !
+
             !  Initialize (real) coefficients
-            !
-            a = 0.0_wp
-            b = 0.0_wp
-            !
-            !  set upper limit for vector m subscript
-            !
+            a = ZERO
+            b = ZERO
+
+            ! Set upper limit for vector m subscript
             associate( mmax => min(nlat, (nlon+1)/2) )
-                !
-                !  compute m > 0 coefficients
-                !
+
+                ! Compute m > 0 coefficients
                 do m=1, mmax
                     do n=m, nlat
                         a(m, n) = sqnn(n) * cr(m, n)
@@ -1145,40 +985,28 @@ contains
                     end do
                 end do
             end associate
-            !
-            !  Compute vector harmonic synthesis
-            !
+
+            ! Compute vector harmonic synthesis
             call self%perform_scalar_synthesis(vt)
         end associate
 
-
     end subroutine get_vorticity_from_spherical_components
 
-
-
     subroutine get_vorticity_from_vector_field(self, vector_field, vorticity)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
-        class(Sphere), intent(inout)  :: self
-        real(wp),      intent(in)     :: vector_field(:,:,:)
-        real(wp),      intent(out)    :: vorticity(:,:)
-        !----------------------------------------------------------------------
+        class(Sphere), intent(inout) :: self
+        real(wp),      intent(in)    :: vector_field(:,:,:)
+        real(wp),      intent(out)   :: vorticity(:,:)
+
         ! Local variables
-        !----------------------------------------------------------------------
         real(wp), allocatable :: polar_component(:,:)
         real(wp), allocatable :: azimuthal_component(:,:)
-        !----------------------------------------------------------------------
 
         ! Check if object is usable
-        if (.not.self%initialized) then
-            error stop 'Uninitialized object of class(Sphere): '&
-                //'in get_vorticity_from_vector_field'
-        end if
+        call self%assert_initialized('get_vorticity_from_vector_field')
 
-        !
         !  Allocate memory
-        !
         associate( &
             nlat => self%NUMBER_OF_LATITUDES, &
             nlon => self%NUMBER_OF_LONGITUDES &
@@ -1187,9 +1015,7 @@ contains
             allocate( azimuthal_component(nlat, nlon) )
         end associate
 
-        !
         !  Compute vorticity
-        !
         associate( &
             F => vector_field, &
             v => polar_component, &
@@ -1217,19 +1043,19 @@ contains
 
 
     subroutine invert_vorticity(self, source, polar_solution, azimuthal_solution)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
+
         class(Sphere), intent(inout)  :: self
         real(wp),      intent(in)     :: source(:,:)
         real(wp),      intent(out)    :: polar_solution(:,:)
         real(wp),      intent(out)    :: azimuthal_solution(:,:)
-        !----------------------------------------------------------------------
+
         ! Local variables
-        !----------------------------------------------------------------------
-        integer(ip) :: n, m !! Counters
+
+        integer(ip) :: n, m
         integer(ip) :: ityp_temp_save
-        !----------------------------------------------------------------------
+
 
         ! Check if object is usable
         if (.not.self%initialized) then
@@ -1262,8 +1088,8 @@ contains
                 !
                 !  Initialize coefficients
                 !
-                cr = 0.0_wp
-                ci = 0.0_wp
+                cr = ZERO
+                ci = ZERO
 
                 !
                 !   Compute m = 0 coefficients
@@ -1317,18 +1143,18 @@ contains
 
 
     subroutine get_divergence_from_vector_field(self, vector_field, divergence)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
+
         class(Sphere), intent(inout)  :: self
         real(wp),      intent(in)     :: vector_field (:,:,:)
         real(wp),      intent(out)    :: divergence (:,:)
-        !----------------------------------------------------------------------
+
         ! Local variables
-        !----------------------------------------------------------------------
+
         real(wp), allocatable :: polar_component(:,:)
         real(wp), allocatable :: azimuthal_component(:,:)
-        !----------------------------------------------------------------------
+
 
         ! Check if object is usable
         if (.not.self%initialized) then
@@ -1378,18 +1204,18 @@ contains
 
     subroutine get_divergence_from_spherical_components(self, &
         polar_component, azimuthal_component, divergence )
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
+
         class(Sphere), intent(inout)  :: self
         real(wp),      intent(in)     :: polar_component(:,:)
         real(wp),      intent(in)     :: azimuthal_component(:,:)
         real(wp),      intent(out)    :: divergence (:,:)
-        !----------------------------------------------------------------------
+
         ! Local variables
-        !----------------------------------------------------------------------
-        integer(ip) :: n, m !! Counters
-        !----------------------------------------------------------------------
+
+        integer(ip) :: n, m
+
 
         ! Check if object is usable
         if (.not.self%initialized) then
@@ -1416,8 +1242,8 @@ contains
             !
             !  Initialize (real) coefficients
             !
-            a = 0.0_wp
-            b = 0.0_wp
+            a = ZERO
+            b = ZERO
             !
             !  set upper limit for vector m subscript
             !
@@ -1442,21 +1268,21 @@ contains
 
 
     subroutine invert_divergence(self, source, polar_solution, azimuthal_solution )
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
-        !----------------------------------------------------------------------
+
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
+
         class(Sphere), intent(inout)  :: self
         real(wp),      intent(in)     :: source(:,:)
         real(wp),      intent(out)    :: polar_solution(:,:)
         real(wp),      intent(out)    :: azimuthal_solution(:,:)
-        !----------------------------------------------------------------------
+
         ! Local variables
-        !----------------------------------------------------------------------
-        integer(ip) :: n, m !! Counters
-        !----------------------------------------------------------------------
+
+        integer(ip) :: n, m
+
 
         ! Check if object is usable
         if (.not.self%initialized) then
@@ -1486,8 +1312,8 @@ contains
             ci => self%workspace%imaginary_azimuthal_harmonic_coefficients &
             )
             ! Initialize polar coefficients
-            br = 0.0_wp
-            bi = 0.0_wp
+            br = ZERO
+            bi = ZERO
 
             ! Compute m = 0 coefficients
             do n = 1, nlat
@@ -1507,8 +1333,8 @@ contains
                 end do
             end do
             ! Set azimuthal coefficients
-            cr = 0.0_wp !Not present in original source
-            ci = 0.0_wp
+            cr = ZERO !Not present in original source
+            ci = ZERO
             ! Compute scalar synthesis
             call self%perform_vector_synthesis(v, w)
         end associate
@@ -1518,15 +1344,15 @@ contains
 
     subroutine get_vorticity_and_divergence_from_velocities(self, &
         polar_component, azimuthal_component, vorticity, divergence)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
+
         class(Sphere),         intent(inout)  :: self
         real(wp),              intent(in)     :: polar_component(:,:)
         real(wp),              intent(in)     :: azimuthal_component(:,:)
         real(wp),              intent(out)    :: vorticity(:,:)
         real(wp),              intent(out)    :: divergence(:,:)
-        !----------------------------------------------------------------------
+
 
         ! Check if object is usable
         if (.not.self%initialized) then
@@ -1556,20 +1382,20 @@ contains
 
     subroutine get_velocities_from_vorticity_and_divergence_coefficients(self, &
         vort_spec, div_spec, polar_component, azimuthal_component)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
+
         class(Sphere), intent(inout)  :: self
         complex(wp),   intent(in)     :: vort_spec(:)
         complex(wp),   intent(in)     :: div_spec(:)
         real(wp),      intent(out)    :: polar_component(:,:)
         real(wp),      intent(out)    :: azimuthal_component(:,:)
-        !----------------------------------------------------------------------
+
         ! Local variables
-        !----------------------------------------------------------------------
-        integer(ip)           :: nm, n, m, i !! Counters
+
+        integer(ip)           :: nm, n, m, i
         real(wp), allocatable :: isqnn(:)
-        !----------------------------------------------------------------------
+
 
         ! Check if object is usable
         if (.not.self%initialized) then
@@ -1596,16 +1422,16 @@ contains
             !
             allocate( isqnn(size(sqnn)) )
 
-            isqnn(1) = 0.0_wp
+            isqnn(1) = ZERO
             do n = 2, nlat
-                isqnn(n) = 1.0_wp/sqnn(n)
+                isqnn(n) = ONE/sqnn(n)
             end do
 
             !
             !  Initialize (real) scalar coefficients
             !
-            a = 0.0_wp
-            b = 0.0_wp
+            a = ZERO
+            b = ZERO
 
             !
             !  Set (real) auxiliary coefficients
@@ -1614,16 +1440,16 @@ contains
             do m=1, ntrunc+1
                 do n=m, ntrunc+1
                     nm = sum([(i, i=ntrunc+1, ntrunc-m+3, -1)])+n-m+1
-                    a(m, n) = -2.0_wp * real(div_spec(nm))
-                    b(m, n) = -2.0_wp * aimag(div_spec(nm))
+                    a(m, n) = -TWO * real(div_spec(nm))
+                    b(m, n) = -TWO * aimag(div_spec(nm))
                 end do
             end do
 
             !
             !  Initialize polar vector coefficients
             !
-            br = 0.0_wp
-            bi = 0.0_wp
+            br = ZERO
+            bi = ZERO
 
             !
             !  Set polar vector coefficients
@@ -1636,8 +1462,8 @@ contains
             !
             !  Re-initialize (real) scalar coefficients
             !
-            a = 0.0_wp
-            b = 0.0_wp
+            a = ZERO
+            b = ZERO
 
             !
             !  Set (real) auxiliary coefficients
@@ -1646,16 +1472,16 @@ contains
             do m=1, ntrunc+1
                 do n=m, ntrunc+1
                     nm = sum([(i, i=ntrunc+1, ntrunc-m+3, -1)])+n-m+1
-                    a(m, n) = 2.0_wp * real(vort_spec(nm))
-                    b(m, n) = 2.0_wp * aimag(vort_spec(nm))
+                    a(m, n) = TWO * real(vort_spec(nm))
+                    b(m, n) = TWO * aimag(vort_spec(nm))
                 end do
             end do
 
             !
             !  Initialize azimuthal vector coefficients
             !
-            cr = 0.0_wp
-            ci = 0.0_wp
+            cr = ZERO
+            ci = ZERO
 
             !
             !  Set azimuthal vector coefficients
@@ -1680,20 +1506,20 @@ contains
 
     subroutine get_velocities_from_vorticity_and_divergence(self, &
         vorticity, divergence, polar_component, azimuthal_component)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
+
         class(Sphere), intent(inout)  :: self
         real(wp),      intent(in)     :: vorticity(:,:)
         real(wp),      intent(in)     :: divergence(:,:)
         real(wp),      intent(out)    :: polar_component(:,:)
         real(wp),      intent(out)    :: azimuthal_component(:,:)
-        !----------------------------------------------------------------------
+
         ! Local variables
-        !----------------------------------------------------------------------
+
         complex(wp), allocatable  :: vorticity_coefficients(:)
         complex(wp), allocatable  :: divergence_coefficients(:)
-        !----------------------------------------------------------------------
+
 
         ! Check if object is usable
         if (.not.self%initialized) then
@@ -1735,19 +1561,16 @@ contains
     end subroutine get_velocities_from_vorticity_and_divergence
 
     subroutine compute_angular_momentum(self, scalar_function, angular_momentum)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
         class(Sphere), intent(inout)  :: self
         real(wp),      intent(in)     :: scalar_function(:,:)
         real(wp),      intent(out)    :: angular_momentum(:,:,:)
-        !----------------------------------------------------------------------
+
         ! Local variables
-        !----------------------------------------------------------------------
-        integer(ip)           :: k, l   !! Counters
+        integer(ip)           :: k, l
         real(wp), allocatable :: polar_gradient_component(:,:)
         real(wp), allocatable :: azimuthal_gradient_component(:,:)
-        !----------------------------------------------------------------------
 
         ! Check if object is usable
         if (.not.self%initialized) then
@@ -1811,77 +1634,68 @@ contains
 
     end subroutine compute_angular_momentum
     
+    ! Purpose:
+    !
+    ! The spectral data is assumed to be in a complex array of dimension
+    ! (mtrunc+1)*(mtrunc+2)/2. mtrunc is the triangular truncation limit
+    ! (mtrunc = 42 for T42). mtrunc must be <= nlat-1.
+    !
+    ! The coefficients are ordered so that
+    !
+    ! first (nm=1)  is m=0, n=0, second (nm=2) is m=0, n=1,
+    ! nm=mtrunc is m=0, n=mtrunc, nm=mtrunc+1 is m=1, n=1, etc.
+    !
+    ! In other words,
+    !
+    ! 00, 01, 02, 03, 04.........0mtrunc
+    !     11, 12, 13, 14.........1mtrunc
+    !         22, 23, 24.........2mtrunc
+    !             33, 34.........3mtrunc
+    !                 44.........4mtrunc
+    !                    .
+    !                      .
+    !                        .etc...
+    !
+    ! In modern Fortran syntax, values of m (degree) and n (order)
+    ! as a function of the index nm are:
+    !
+    ! integer(ip), dimension ((mtrunc+1)*(mtrunc+2)/2) :: indxm, indxn
+    ! indxm = [((m, n=m, mtrunc), m=0, mtrunc)]
+    ! indxn = [((n, n=m, mtrunc), m=0, mtrunc)]
+    !
+    ! Conversely, the index nm as a function of m and n is:
+    ! nm = sum([(i, i=mtrunc+1, mtrunc-m+2, -1)])+n-m+1
+    !
+    function get_index(self, n, m) &
+        result (return_value)
 
-
-    function get_index(self, n, m) result (return_value)
-        !
-        !< Purpose:
-        ! The spectral data is assumed to be in a complex array of dimension
-        ! (MTRUNC+1)*(MTRUNC+2)/2. MTRUNC is the triangular truncation limit
-        ! (MTRUNC = 42 for T42). MTRUNC must be <= nlat-1.
-        !
-        ! The coefficients are ordered so that
-        !
-        ! first (nm=1)  is m=0, n=0, second (nm=2) is m=0, n=1,
-        ! nm=MTRUNC is m=0, n=MTRUNC, nm=MTRUNC+1 is m=1, n=1, etc.
-        !
-        ! In other words,
-        !
-        ! 00, 01, 02, 03, 04.........0MTRUNC
-        !     11, 12, 13, 14.........1MTRUNC
-        !         22, 23, 24.........2MTRUNC
-        !             33, 34.........3MTRUNC
-        !                 44.........4MTRUNC
-        !                    .
-        !                      .
-        !                        .etc...
-        !
-        ! In modern Fortran syntax, values of m (degree) and n (order)
-        ! as a function of the index nm are:
-        !
-        ! integer(ip), dimension ((MTRUNC+1)*(MTRUNC+2)/2) :: indxm, indxn
-        ! indxm = [((m, n=m, MTRUNC), m=0, MTRUNC)]
-        ! indxn = [((n, n=m, MTRUNC), m=0, MTRUNC)]
-        !
-        ! Conversely, the index nm as a function of m and n is:
-        ! nm = sum([(i, i=MTRUNC+1, MTRUNC-m+2, -1)])+n-m+1
-        !
-        !----------------------------------------------------------------------
         ! Dummy arguments
-        !----------------------------------------------------------------------
-        class(Sphere), intent(inout)  :: self
-        integer(ip),   intent(in)     :: n
-        integer(ip),   intent(in)     :: m
-        integer(ip)                    :: return_value
-        !----------------------------------------------------------------------
-        ! Local variables
-        !----------------------------------------------------------------------
-        integer(ip) :: i !! Counter
-        !----------------------------------------------------------------------
+        class(Sphere), intent(inout) :: self
+        integer(ip),   intent(in)    :: n
+        integer(ip),   intent(in)    :: m
+        integer(ip)                  :: return_value
 
-        ! Initialize return value
-        return_value = -1
+        ! Local variables
+        integer(ip) :: i
 
         associate( ntrunc => self%TRIANGULAR_TRUNCATION_LIMIT )
-
             if ( m <= n .and. max(n, m) <= ntrunc ) then
                 return_value = sum ([(i, i=ntrunc+1, ntrunc-m+2, -1)]) + n-m+1
+            else
+                return_value = -1
             end if
-
         end associate
 
     end function get_index
 
+    function get_coefficient(self, n, m) &
+        result (return_value)
 
-    function get_coefficient(self, n, m) result (return_value)
-        !----------------------------------------------------------------------
         ! Dummy arguments
-        !----------------------------------------------------------------------
         class(Sphere), intent(inout)  :: self
         integer(ip),   intent(in)     :: n
         integer(ip),   intent(in)     :: m
         complex(wp)                    :: return_value
-        !----------------------------------------------------------------------
 
         ! Check if object is usable
         if (.not.self%initialized) then
@@ -1897,25 +1711,22 @@ contains
             )
 
             if (m < 0 .and. nm_conjg > 0) then
-                return_value = ( (-1.0_wp)**(-m) ) * conjg(psi(nm_conjg))
+                return_value = ( (-ONE)**(-m) ) * conjg(psi(nm_conjg))
             else if (nm > 0) then
                 return_value = psi(nm)
             else
-                return_value = 0.0_wp
+                return_value = ZERO
             end if
 
         end associate
 
     end function get_coefficient
 
-
     subroutine get_scalar_symmetries(self, isym)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
-        class(Sphere), intent(inout)  :: self
-        integer(ip),   intent(in)     :: isym
-        !----------------------------------------------------------------------
+        class(Sphere), intent(inout) :: self
+        integer(ip),   intent(in)    :: isym
 
         select case (isym)
             case (0:2)
@@ -1929,12 +1740,10 @@ contains
     end subroutine get_scalar_symmetries
     
     subroutine get_vector_symmetries(self, itype)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
-        class(Sphere), intent(inout)  :: self
-        integer(ip),   intent(in)     :: itype
-        !----------------------------------------------------------------------
+        class(Sphere), intent(inout) :: self
+        integer(ip),   intent(in)    :: itype
 
         select case (itype)
             case (0:8)

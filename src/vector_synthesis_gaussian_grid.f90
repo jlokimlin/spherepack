@@ -38,7 +38,7 @@
 !
 ! ... files which must be loaded with vhsgc.f
 !
-!     type_SpherepackAux.f, type_HFFTpack.f, compute_gaussian_latitudes_and_weights.f
+!     type_SpherepackAux.f, type_RealPeriodicTransform.f, compute_gaussian_latitudes_and_weights.f
 !
 !     subroutine vhsgc(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, 
 !    +                 mdab, ndab, wvhsgc, lvhsgc, work, lwork, ierror)

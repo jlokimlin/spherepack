@@ -38,7 +38,7 @@
 !
 ! ... files which must be loaded with isfvpgc.f
 !
-!     type_SpherepackAux.f, type_HFFTpack.f, vhsgc.f, shagc.f, compute_gaussian_latitudes_and_weights.f
+!     type_SpherepackAux.f, type_RealPeriodicTransform.f, vhsgc.f, shagc.f, compute_gaussian_latitudes_and_weights.f
 !
 !
 !     subroutine isfvpgc(nlat, nlon, isym, nt, sf, vp, idv, jdv, as, bs, av, bv, 
@@ -249,7 +249,7 @@ contains
         integer(ip) :: l1, l2, mn, is, lwk, iwk, lwmin
         integer(ip) :: ibr, ibi, icr, ici
         !
-        !     check input parameters
+        ! Check input arguments
         !
         ierror = 1
         if (nlat < 3) return

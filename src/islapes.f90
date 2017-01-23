@@ -37,7 +37,7 @@
 !
 ! ... files which must be loaded with islapes.f
 !
-!     type_SpherepackAux.f, type_HFFTpack.f, shaes.f, shses.f
+!     type_SpherepackAux.f, type_RealPeriodicTransform.f, shaes.f, shses.f
 !
 !     subroutine islapes(nlat, nlon, isym, nt, xlmbda, sf, ids, jds, a, b, 
 !    +mdab, ndab, wshses, lshses, work, lwork, pertrb, ierror)
@@ -306,7 +306,7 @@ contains
         dimension sf(ids, jds, nt), a(mdab, ndab, nt), b(mdab, ndab, nt)
         dimension wshses(lshses), work(lwork), xlmbda(nt), pertrb(nt)
         !
-        !     check input parameters
+        ! Check input arguments
         !
         ierror = 1
         if (nlat < 3) return

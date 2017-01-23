@@ -38,7 +38,7 @@
 !
 ! ... files which must be loaded with ivrtec.f
 !
-!     type_SpherepackAux.f, type_HFFTpack.f, vhsec.f, shaec.f
+!     type_SpherepackAux.f, type_RealPeriodicTransform.f, vhsec.f, shaec.f
 !
 !     subroutine ivrtec(nlat, nlon, isym, nt, v, w, idvw, jdvw, a, b, mdab, ndab, 
 !    +                  wvhsec, lvhsec, work, lwork, pertrb, ierror)
@@ -300,7 +300,7 @@ contains
         dimension a(mdab, ndab, nt), b(mdab, ndab, nt)
         dimension wvhsec(lvhsec), work(lwork)
         !
-        !     check input parameters
+        ! Check input arguments
         !
         ierror = 1
         if (nlat < 3) return
@@ -386,7 +386,7 @@ contains
             dimension a(mdab, ndab, nt), b(mdab, ndab, nt)
             dimension wsav(lwsav), wk(lwk)
             !
-            !     preset coefficient multiplyers in vector
+            ! Preset coefficient multiplyers in vector
             !
             do n=2, nlat
                 fn = real(n - 1)

@@ -38,7 +38,7 @@
 !
 ! ... files which must be loaded with vtses.f
 !
-!     type_SpherepackAux.f, type_HFFTpack.f, vhaes.f, vhses.f
+!     type_SpherepackAux.f, type_RealPeriodicTransform.f, vhaes.f, vhses.f
 !   
 !   
 !     subroutine vtses(nlat, nlon, ityp, nt, vt, wt, idvw, jdvw, br, bi, cr, ci, 
@@ -350,8 +350,8 @@ module module_vtses
         wp, & ! working precision
         ip ! integer precision
 
-    use type_HFFTpack, only: &
-        HFFTpack
+    use type_RealPeriodicTransform, only: &
+        RealPeriodicTransform
 
     use type_SpherepackAux, only: &
         SpherepackAux
@@ -499,7 +499,7 @@ contains
 
             integer(ip) :: i, j, k, hack_counter !! Counters
 
-            type(HFFTpack) :: hfft
+            type(RealPeriodicTransform) :: hfft
 
             nlp1 = nlat+1
             mlat = mod(nlat,2)
@@ -1151,7 +1151,7 @@ contains
         real(wp) :: wvts(lwvts), work(lwork)
         real(wp) :: dwork(ldwork)
 
-        type(HFFTpack) :: hfft
+        type(RealPeriodicTransform) :: hfft
 
         ierror = 1
         if(nlat < 3) return

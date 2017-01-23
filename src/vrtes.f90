@@ -38,7 +38,7 @@
 !
 ! ... files which must be loaded with vrtes.f
 !
-!     type_SpherepackAux.f, type_HFFTpack.f, vhaes.f, shses.f
+!     type_SpherepackAux.f, type_RealPeriodicTransform.f, vhaes.f, shses.f
 !
 !     subroutine vrtes(nlat, nlon, isym, nt, vt, ivrt, jvrt, cr, ci, mdc, ndc, 
 !    +                 wshses, lshses, work, lwork, ierror)
@@ -275,7 +275,7 @@ contains
         dimension vort(ivrt, jvrt, nt), cr(mdc, ndc, nt), ci(mdc, ndc, nt)
         dimension wshses(lshses), work(lwork)
         !
-        !     check input parameters
+        ! Check input arguments
         !
         ierror = 1
         if (nlat < 3) return

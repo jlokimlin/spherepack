@@ -30,7 +30,7 @@
 !     * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !
 !
-! ... file type_HFFTpack.f90
+! ... file type_RealPeriodicTransform.f90
 !
 !     This file contains a multiple fft package for spherepack. It
 !     includes code and documentation for performing fast Fourier
@@ -201,7 +201,7 @@
 !
 !
 !
-module type_HFFTpack
+module type_RealPeriodicTransform
 
     use spherepack_precision, only: &
         wp, & ! working precision
@@ -214,8 +214,8 @@ module type_HFFTpack
 
     ! Everything is private unless stated otherwise
     private
-    public :: HFFTpack
     public :: hrffti, hrfftf, hrfftb
+    public :: RealPeriodicTransform
     
     ! Parameters confined to the module
     real(wp),    parameter :: ZERO = 0.0_wp
@@ -223,13 +223,13 @@ module type_HFFTpack
     real(wp),    parameter :: TWO = 2.0_wp
     integer(ip), parameter :: NUMBER_OF_FACTORS = 15_ip
 
-    type, public :: HFFTpack
+    type, public :: RealPeriodicTransform
     contains
         ! Type-bound procedures
         procedure, nopass :: initialize => hrffti
         procedure, nopass :: forward => hrfftf
         procedure, nopass :: backward => hrfftb
-    end type HFFTpack
+    end type RealPeriodicTransform
 
 contains
 
@@ -241,11 +241,11 @@ contains
 
         if (n == 1) return
 
-        call half_initialize_lower_routine(n, wsave(1), wsave(n+1))
+        call initialize_lower_routine(n, wsave(1), wsave(n+1))
 
     end subroutine hrffti
 
-    subroutine half_initialize_lower_routine(n, wa, fac)
+    subroutine initialize_lower_routine(n, wa, fac)
 
         ! Dummy arguments
         integer(ip), intent(in)  :: n
@@ -337,7 +337,7 @@ contains
             end do
         end if
 
-    end subroutine half_initialize_lower_routine
+    end subroutine initialize_lower_routine
 
     subroutine hrfftf(m, n, r, mdimr, whrfft, work)
 
@@ -351,11 +351,11 @@ contains
 
         if (n == 1) return
 
-        call half_forward_lower_routine(m, n, r, mdimr, work, whrfft, whrfft(n+1))
+        call forward_lower_routine(m, n, r, mdimr, work, whrfft, whrfft(n+1))
 
     end subroutine hrfftf
 
-    subroutine half_forward_lower_routine(m, n, c, mdimc, ch, wa, fac)
+    subroutine forward_lower_routine(m, n, c, mdimc, ch, wa, fac)
 
         ! Dummy arguments
         integer(ip), intent(in)     :: m
@@ -388,41 +388,41 @@ contains
             select case (iip)
                 case (2)
                     if (na == 0) then
-                        call half_forward_pass_2(m, ido, l1, c, mdimc, ch, m, wa(iw))
+                        call forward_pass_2(m, ido, l1, c, mdimc, ch, m, wa(iw))
                     else
-                        call half_forward_pass_2(m, ido, l1, ch, m, c, mdimc, wa(iw))
+                        call forward_pass_2(m, ido, l1, ch, m, c, mdimc, wa(iw))
                     end if
                 case (3)
                     ix2 = iw+ido
                     if (na == 0) then
-                        call half_forward_pass_3(m, ido, l1, c, mdimc, ch, m, wa(iw), wa(ix2))
+                        call forward_pass_3(m, ido, l1, c, mdimc, ch, m, wa(iw), wa(ix2))
                     else
-                        call half_forward_pass_3(m, ido, l1, ch, m, c, mdimc, wa(iw), wa(ix2))
+                        call forward_pass_3(m, ido, l1, ch, m, c, mdimc, wa(iw), wa(ix2))
                     end if
                 case(4)
                     ix2 = iw+ido
                     ix3 = ix2+ido
                     if (na == 0) then
-                        call half_forward_pass_4(m, ido, l1, c, mdimc, ch, m, wa(iw), wa(ix2), wa(ix3))
+                        call forward_pass_4(m, ido, l1, c, mdimc, ch, m, wa(iw), wa(ix2), wa(ix3))
                     else
-                        call half_forward_pass_4(m, ido, l1, ch, m, c, mdimc, wa(iw), wa(ix2), wa(ix3))
+                        call forward_pass_4(m, ido, l1, ch, m, c, mdimc, wa(iw), wa(ix2), wa(ix3))
                     end if
                 case (5)
                     ix2 = iw+ido
                     ix3 = ix2+ido
                     ix4 = ix3+ido
                     if (na == 0) then
-                        call half_forward_pass_5(m, ido, l1, c, mdimc, ch, m, wa(iw), wa(ix2), wa(ix3), wa(ix4))
+                        call forward_pass_5(m, ido, l1, c, mdimc, ch, m, wa(iw), wa(ix2), wa(ix3), wa(ix4))
                     else
-                        call half_forward_pass_5(m, ido, l1, ch, m, c, mdimc, wa(iw), wa(ix2), wa(ix3), wa(ix4))
+                        call forward_pass_5(m, ido, l1, ch, m, c, mdimc, wa(iw), wa(ix2), wa(ix3), wa(ix4))
                     end if
                 case default
                     if (ido == 1) na = 1-na
                     if (na == 0) then
-                        call half_forward_pass_n(m, ido, iip, l1, idl1, c, c, c, mdimc, ch, ch, m, wa(iw))
+                        call forward_pass_n(m, ido, iip, l1, idl1, c, c, c, mdimc, ch, ch, m, wa(iw))
                         na = 1
                     else
-                        call half_forward_pass_n(m, ido, iip, l1, idl1, ch, ch, ch, m, c, c, mdimc, wa(iw))
+                        call forward_pass_n(m, ido, iip, l1, idl1, ch, ch, ch, m, c, c, mdimc, wa(iw))
                         na = 0
                     end if
             end select
@@ -431,9 +431,9 @@ contains
 
         if (na /= 1) c(1:m, 1:n) = ch
 
-    end subroutine half_forward_lower_routine
+    end subroutine forward_lower_routine
 
-    subroutine half_forward_pass_2(mp, ido, l1, cc, mdimcc, ch, mdimch, wa1)
+    subroutine forward_pass_2(mp, ido, l1, cc, mdimcc, ch, mdimch, wa1)
 
         ! Dummy arguments
         integer(ip), intent(in)     :: mp
@@ -483,9 +483,9 @@ contains
         ch(1:mp, 1, 2, :) = -cc(1:mp, ido,:, 2)
         ch(1:mp, ido, 1, :) = cc(1:mp, ido,:, 1)
 
-    end subroutine half_forward_pass_2
+    end subroutine forward_pass_2
 
-    subroutine half_forward_pass_3(mp, ido, l1, cc, mdimcc, ch, mdimch, wa1, wa2)
+    subroutine forward_pass_3(mp, ido, l1, cc, mdimcc, ch, mdimch, wa1, wa2)
 
         ! Dummy arguments
         integer(ip), intent(in)     :: mp
@@ -567,9 +567,9 @@ contains
             end do
         end do
 
-    end subroutine half_forward_pass_3
+    end subroutine forward_pass_3
 
-    subroutine half_forward_pass_4(mp, ido, l1, cc, mdimcc, ch, mdimch, wa1, wa2, wa3)
+    subroutine forward_pass_4(mp, ido, l1, cc, mdimcc, ch, mdimch, wa1, wa2, wa3)
 
         ! Dummy arguments
         integer(ip), intent(in)     :: mp
@@ -585,7 +585,7 @@ contains
 
         ! Local variables
         integer(ip)         :: i, k, m, ic, idp2
-        real(wp), parameter :: HALF_SQRT2 = sqrt(TWO)/2
+        real(wp), parameter :: SQRT2 = sqrt(TWO)/2
 
         do k=1, l1
             do m=1, mp
@@ -670,26 +670,26 @@ contains
             do m=1, mp
 
                 ch(m, ido, 1, k) = &
-                    (HALF_SQRT2*(cc(m, ido, k, 2)-cc(m, ido, k, 4)))+ &
+                    (SQRT2*(cc(m, ido, k, 2)-cc(m, ido, k, 4)))+ &
                     cc(m, ido, k, 1)
 
                 ch(m, ido, 3, k) = &
-                    cc(m, ido, k, 1)-(HALF_SQRT2*(cc(m, ido, k, 2)- &
+                    cc(m, ido, k, 1)-(SQRT2*(cc(m, ido, k, 2)- &
                     cc(m, ido, k, 4)))
 
                 ch(m, 1, 2, k) = &
-                    (-HALF_SQRT2*(cc(m, ido, k, 2)+cc(m, ido, k, 4)))- &
+                    (-SQRT2*(cc(m, ido, k, 2)+cc(m, ido, k, 4)))- &
                     cc(m, ido, k, 3)
 
                 ch(m, 1, 4, k) = &
-                    (-HALF_SQRT2*(cc(m, ido, k, 2)+cc(m, ido, k, 4)))+ &
+                    (-SQRT2*(cc(m, ido, k, 2)+cc(m, ido, k, 4)))+ &
                     cc(m, ido, k, 3)
             end do
         end do
 
-    end subroutine half_forward_pass_4
+    end subroutine forward_pass_4
 
-    subroutine half_forward_pass_5(mp, ido, l1, cc, mdimcc, ch, mdimch, &
+    subroutine forward_pass_5(mp, ido, l1, cc, mdimcc, ch, mdimch, &
         wa1, wa2, wa3, wa4)
 
         ! Dummy arguments
@@ -851,9 +851,9 @@ contains
             end do
         end do
 
-    end subroutine half_forward_pass_5
+    end subroutine forward_pass_5
 
-    subroutine half_forward_pass_n(mp, ido, iip, l1, idl1, cc, c1, c2, mdimcc, &
+    subroutine forward_pass_n(mp, ido, iip, l1, idl1, cc, c1, c2, mdimcc, &
         ch, ch2, mdimch, wa)
 
         ! Dummy arguments
@@ -995,9 +995,7 @@ contains
                     cc(1: mp, 1, j2-1, 1: l1) = ch(1: mp, 1, 1: l1, jc)
                 end do
 
-                if (ido == 1) then
-                    return
-                end if
+                if (ido == 1) return
 
                 if (nbd >= l1) then
                     do j=2, ipph
@@ -1029,7 +1027,7 @@ contains
             end associate
         end associate
 
-    end subroutine half_forward_pass_n
+    end subroutine forward_pass_n
 
     subroutine hrfftb(m, n, r, mdimr, whrfft, work)
 
@@ -1043,11 +1041,11 @@ contains
 
         if (n == 1) return
 
-        call half_backward_lower_routine(m, n, r, mdimr, work, whrfft, whrfft(n+1))
+        call backward_lower_routine(m, n, r, mdimr, work, whrfft, whrfft(n+1))
 
     end subroutine hrfftb
 
-    subroutine half_backward_lower_routine(m, n, c, mdimc, ch, wa, fac)
+    subroutine backward_lower_routine(m, n, c, mdimc, ch, wa, fac)
 
         ! Dummy arguments
         integer(ip), intent(in)     :: m
@@ -1075,39 +1073,39 @@ contains
             select case (iip)
                 case (2)
                     if (na == 0) then
-                        call half_backward_pass_2(m, ido, l1, c, mdimc, ch, m, wa(iw))
+                        call backward_pass_2(m, ido, l1, c, mdimc, ch, m, wa(iw))
                     else
-                        call half_backward_pass_2(m, ido, l1, ch, m, c, mdimc, wa(iw))
+                        call backward_pass_2(m, ido, l1, ch, m, c, mdimc, wa(iw))
                     end if
                 case (3)
                     ix2 = iw+ido
                     if (na == 0) then
-                        call half_backward_pass_3(m, ido, l1, c, mdimc, ch, m, wa(iw), wa(ix2))
+                        call backward_pass_3(m, ido, l1, c, mdimc, ch, m, wa(iw), wa(ix2))
                     else
-                        call half_backward_pass_3(m, ido, l1, ch, m, c, mdimc, wa(iw), wa(ix2))
+                        call backward_pass_3(m, ido, l1, ch, m, c, mdimc, wa(iw), wa(ix2))
                     end if
                 case (4)
                     ix2 = iw+ido
                     ix3 = ix2+ido
                     if (na == 0) then
-                        call half_backward_pass_4(m, ido, l1, c, mdimc, ch, m, wa(iw), wa(ix2), wa(ix3))
+                        call backward_pass_4(m, ido, l1, c, mdimc, ch, m, wa(iw), wa(ix2), wa(ix3))
                     else
-                        call half_backward_pass_4(m, ido, l1, ch, m, c, mdimc, wa(iw), wa(ix2), wa(ix3))
+                        call backward_pass_4(m, ido, l1, ch, m, c, mdimc, wa(iw), wa(ix2), wa(ix3))
                     end if
                 case (5)
                     ix2 = iw+ido
                     ix3 = ix2+ido
                     ix4 = ix3+ido
                     if (na == 0) then
-                        call half_backward_pass_5(m, ido, l1, c, mdimc, ch, m, wa(iw), wa(ix2), wa(ix3), wa(ix4))
+                        call backward_pass_5(m, ido, l1, c, mdimc, ch, m, wa(iw), wa(ix2), wa(ix3), wa(ix4))
                     else
-                        call half_backward_pass_5(m, ido, l1, ch, m, c, mdimc, wa(iw), wa(ix2), wa(ix3), wa(ix4))
+                        call backward_pass_5(m, ido, l1, ch, m, c, mdimc, wa(iw), wa(ix2), wa(ix3), wa(ix4))
                     end if
                 case default
                     if (na == 0) then
-                        call half_backward_pass_n(m, ido, iip, l1, idl1, c, c, c, mdimc, ch, ch, m, wa(iw))
+                        call backward_pass_n(m, ido, iip, l1, idl1, c, c, c, mdimc, ch, ch, m, wa(iw))
                     else
-                        call half_backward_pass_n(m, ido, iip, l1, idl1, ch, ch, ch, m, c, c, mdimc, wa(iw))
+                        call backward_pass_n(m, ido, iip, l1, idl1, ch, ch, ch, m, c, c, mdimc, wa(iw))
                     end if
                     if (ido /= 1) na = 1-na
             end select
@@ -1116,13 +1114,11 @@ contains
             iw = iw+(iip-1)*ido
         end do
 
-        if (na /= 0) then
-            c(1:m, 1:n) = ch
-        end if
+        if (na /= 0) c(1:m, 1:n) = ch
 
-    end subroutine half_backward_lower_routine
+    end subroutine backward_lower_routine
 
-    subroutine half_backward_pass_2(mp, ido, l1, cc, mdimcc, ch, mdimch, wa1)
+    subroutine backward_pass_2(mp, ido, l1, cc, mdimcc, ch, mdimch, wa1)
 
         ! Dummy arguments
         integer(ip), intent(in)     :: mp
@@ -1168,9 +1164,9 @@ contains
         ch(1:mp, ido,:, 1) = cc(1:mp, ido, 1,:)+cc(1:mp, ido, 1,:)
         ch(1:mp, ido,:, 2) = -(cc(1:mp, 1, 2,:)+cc(1:mp, 1, 2,:))
 
-    end subroutine half_backward_pass_2
+    end subroutine backward_pass_2
 
-    subroutine half_backward_pass_3(mp, ido, l1, cc, mdimcc, ch, mdimch, wa1, wa2)
+    subroutine backward_pass_3(mp, ido, l1, cc, mdimcc, ch, mdimch, wa1, wa2)
 
         ! Dummy arguments
         integer(ip), intent(in)     :: mp
@@ -1246,9 +1242,9 @@ contains
             end do
         end do
 
-    end subroutine half_backward_pass_3
+    end subroutine backward_pass_3
 
-    subroutine half_backward_pass_4(mp, ido, l1, cc, mdimcc, ch, mdimch, wa1, wa2, wa3)
+    subroutine backward_pass_4(mp, ido, l1, cc, mdimcc, ch, mdimch, wa1, wa2, wa3)
 
         ! Dummy arguments
         integer(ip), intent(in)     :: mp
@@ -1342,9 +1338,9 @@ contains
             -SQRT2*((cc(1: mp, ido, 1, 1: l1)-cc(1: mp, ido, 3, 1: l1)) &
             +(cc(1: mp, 1, 2, 1: l1)+cc(1: mp, 1, 4, 1: l1)))
 
-    end subroutine half_backward_pass_4
+    end subroutine backward_pass_4
 
-    subroutine half_backward_pass_5(mp, ido, l1, cc, mdimcc, ch, mdimch, &
+    subroutine backward_pass_5(mp, ido, l1, cc, mdimcc, ch, mdimch, &
         wa1, wa2, wa3, wa4)
 
         ! Dummy arguments
@@ -1493,9 +1489,9 @@ contains
             end do
         end do
 
-    end subroutine half_backward_pass_5
+    end subroutine backward_pass_5
 
-    subroutine half_backward_pass_n(mp, ido, iip, l1, idl1, cc, c1, c2, mdimcc, &
+    subroutine backward_pass_n(mp, ido, iip, l1, idl1, cc, c1, c2, mdimcc, &
         ch, ch2, mdimch, wa)
 
         ! Dummy arguments
@@ -1660,6 +1656,6 @@ contains
             end do
         end if
 
-    end subroutine half_backward_pass_n
+    end subroutine backward_pass_n
 
-end module type_HFFTpack
+end module type_RealPeriodicTransform

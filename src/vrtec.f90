@@ -39,7 +39,7 @@
 !
 ! ... files which must be loaded with vrtec.f
 !
-!     type_SpherepackAux.f, type_HFFTpack.f, vhaec.f, shsec.f
+!     type_SpherepackAux.f, type_RealPeriodicTransform.f, vhaec.f, shsec.f
 !
 !     subroutine vrtec(nlat, nlon, isym, nt, vt, ivrt, jvrt, cr, ci, mdc, ndc, 
 !    +                 wshsec, lshsec, work, lwork, ierror)
@@ -281,7 +281,7 @@ contains
         dimension vort(ivrt, jvrt, nt), cr(mdc, ndc, nt), ci(mdc, ndc, nt)
         dimension wshsec(lshsec), work(lwork)
         !
-        !     check input parameters
+        ! Check input arguments
         !
         ierror = 1
         if (nlat < 3) return

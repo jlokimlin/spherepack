@@ -38,7 +38,7 @@
 !
 ! ... files which must be loaded with shagc.f
 !
-!     type_SpherepackAux.f, type_HFFTpack.f, compute_gaussian_latitudes_and_weights.f
+!     type_SpherepackAux.f, type_RealPeriodicTransform.f, compute_gaussian_latitudes_and_weights.f
 !
 !
 !     subroutine shagc(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, 
@@ -341,7 +341,7 @@ contains
         integer(ip) :: lat
         integer(ip) :: late
 
-        !     check input parameters
+        ! Check input arguments
         ierror = 1
         if (nlat < 3) return
         ierror = 2

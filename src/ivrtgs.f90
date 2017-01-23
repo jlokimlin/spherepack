@@ -38,7 +38,7 @@
 !
 ! ... files which must be loaded with ivrtgs.f
 !
-!     type_SpherepackAux.f, type_HFFTpack.f, vhsgs.f, shags.f, compute_gaussian_latitudes_and_weights.f
+!     type_SpherepackAux.f, type_RealPeriodicTransform.f, vhsgs.f, shags.f, compute_gaussian_latitudes_and_weights.f
 !
 !
 !     subroutine ivrtgs(nlat, nlon, isym, nt, v, w, idvw, jdvw, a, b, mdab, ndab, 
@@ -296,7 +296,7 @@ contains
         dimension a(mdab, ndab, nt), b(mdab, ndab, nt)
         dimension wvhsgs(lvhsgs), work(lwork)
         !
-        !     check input parameters
+        ! Check input arguments
         !
         ierror = 1
         if (nlat < 3) return
@@ -385,7 +385,7 @@ contains
         dimension a(mdab, ndab, nt), b(mdab, ndab, nt)
         dimension wsav(lsav), wk(lwk)
         !
-        !     preset coefficient multiplyers in vector
+        ! Preset coefficient multiplyers in vector
         !
         do n=2, nlat
             fn = real(n - 1)

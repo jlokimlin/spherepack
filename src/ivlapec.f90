@@ -38,7 +38,7 @@
 !
 ! ... files which must be loaded with ivlapec.f
 !
-!     type_SpherepackAux.f, type_HFFTpack.f, vhaec.f, vhsec.f
+!     type_SpherepackAux.f, type_RealPeriodicTransform.f, vhaec.f, vhsec.f
 !
 !
 !

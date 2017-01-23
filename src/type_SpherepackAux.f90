@@ -43,8 +43,8 @@ module type_SpherepackAux
         ip, & ! integer precision
         PI
 
-    use type_HFFTpack, only: &
-        HFFTpack
+    use type_RealPeriodicTransform, only: &
+        RealPeriodicTransform
 
     ! Explicit typing only
     implicit none
@@ -55,7 +55,7 @@ module type_SpherepackAux
 
     type, public :: SpherepackAux
         ! Type components
-        type(HFFTpack) :: hfft
+        type(RealPeriodicTransform) :: hfft
     contains
         ! Type-bound procedures
         procedure, nopass :: alin
@@ -100,26 +100,21 @@ module type_SpherepackAux
         procedure, nopass :: zvinit
         procedure, nopass :: zwin
         procedure, nopass :: zwinit
-
     end type SpherepackAux
 
-    !------------------------------------------------------------------
     ! Parameters confined to the module
-    !------------------------------------------------------------------
     real(wp), parameter :: ZERO = 0.0_wp
     real(wp), parameter :: HALF = 0.5_wp
     real(wp), parameter :: ONE = 1.0_wp
     real(wp), parameter :: TWO = 2.0_wp
     real(wp), parameter :: THREE = 3.0_wp
     real(wp), parameter :: SIX = 6.0_wp
-    !------------------------------------------------------------------
 
 contains
 
     pure subroutine compute_parity(nlat, nlon, l1, l2)
 
         ! Dummy arguments
-
         integer(ip), intent(in)  :: nlat
         integer(ip), intent(in)  :: nlon
         integer(ip), intent(out) :: l1
@@ -3415,7 +3410,7 @@ contains
 
     end subroutine wtinit
 
-    subroutine vtgint (nlat, nlon, theta, wvbin, work)
+    subroutine vtgint(nlat, nlon, theta, wvbin, work)
 
         integer(ip) :: imid
         integer(ip) :: iw1
@@ -3423,8 +3418,8 @@ contains
         integer(ip), intent(in) :: nlat
         integer(ip), intent(in) :: nlon
         real(wp) :: wvbin(*)
-        real(wp) :: theta((nlat+1)/2)
-        real(wp) :: work(nlat+2)
+        real(wp) :: theta(*)!(nlat+1)/2)
+        real(wp) :: work(*)!nlat+2)
 
 
         imid = (nlat+1)/2
@@ -3438,46 +3433,45 @@ contains
         !
         call vtgit1(nlat, nlon, imid, theta, wvbin, wvbin(iw1), work, work(iw2))
 
-    contains
+    end subroutine vtgint
 
-        subroutine vtgit1(nlat, nlon, imid, theta, vb, abc, cvb, work)
+    subroutine vtgit1(nlat, nlon, imid, theta, vb, abc, cvb, work)
 
-            real(wp) :: abc(*)
-            integer(ip) :: i
-            integer(ip) :: imid
-            integer(ip) :: m
-            integer(ip) :: mdo
-            integer(ip) :: mp1
-            integer(ip) :: n
-            integer(ip), intent(in) :: nlat
-            integer(ip), intent(in) :: nlon
-            integer(ip) :: np1
-            real(wp) :: vb(imid, nlat, 2)
-            real(wp) :: theta(*), cvb(nlat/2+1), work(nlat/2+1), vbh
-            !
-            !     abc must have 3*(max(mmax-2, 0)*(2*nlat-mmax-1))/2
-            !     locations where mmax = min(nlat, (nlon+1)/2)
-            !     cvb and work must each have nlat/2+1   locations
-            !
+        real(wp) :: abc(*)
+        integer(ip) :: i
+        integer(ip) :: imid
+        integer(ip) :: m
+        integer(ip) :: mdo
+        integer(ip) :: mp1
+        integer(ip) :: n
+        integer(ip), intent(in) :: nlat
+        integer(ip), intent(in) :: nlon
+        integer(ip) :: np1
+        real(wp) :: vb(imid, nlat, 2)
+        real(wp) :: theta(*), cvb(*), work(*), vbh
+        !real(wp) :: theta(*), cvb(nlat/2+1), work(nlat/2+1), vbh
+        !
+        !     abc must have 3*(max(mmax-2, 0)*(2*nlat-mmax-1))/2
+        !     locations where mmax = min(nlat, (nlon+1)/2)
+        !     cvb and work must each have nlat/2+1   locations
+        !
 
-            mdo = min(2, nlat, (nlon+1)/2)
-            do mp1=1, mdo
-                m = mp1-1
-                do np1=mp1, nlat
-                    n = np1-1
-                    call dvtk(m, n, cvb, work)
-                    do i=1, imid
-                        call dvtt(m, n, theta(i), cvb, vbh)
-                        vb(i, np1, mp1) = vbh
-                    end do
+        mdo = min(2, nlat, (nlon+1)/2)
+        do mp1=1, mdo
+            m = mp1-1
+            do np1=mp1, nlat
+                n = np1-1
+                call dvtk(m, n, cvb, work)
+                do i=1, imid
+                    call dvtt(m, n, theta(i), cvb, vbh)
+                    vb(i, np1, mp1) = vbh
                 end do
             end do
+        end do
 
-            call rabcv(nlat, nlon, abc)
+        call rabcv(nlat, nlon, abc)
 
-        end subroutine vtgit1
-
-    end subroutine vtgint
+    end subroutine vtgit1
 
     subroutine wtgint(nlat, nlon, theta, wwbin, work)
 
@@ -3487,9 +3481,8 @@ contains
         integer(ip), intent(in) :: nlat
         integer(ip), intent(in) :: nlon
         real(wp) :: wwbin(*)
-        real(wp) :: theta((nlat+1)/2)
-        real(wp) :: work(nlat+2)
-
+        real(wp) :: theta(*)
+        real(wp) :: work(*)
 
         imid = (nlat+1)/2
         iw1 = 2*nlat*imid+1
@@ -3502,50 +3495,47 @@ contains
         !
         call wtgit1(nlat, nlon, imid, theta, wwbin, wwbin(iw1), work, work(iw2))
 
-    contains
-
-        subroutine wtgit1(nlat, nlon, imid, theta, wb, abc, cwb, work)
-
-            real(wp) :: abc(*)
-            integer(ip) :: i
-            integer(ip) :: imid
-            integer(ip) :: m
-            integer(ip) :: mdo
-            integer(ip) :: mp1
-            integer(ip) :: n
-            integer(ip), intent(in) :: nlat
-            integer(ip), intent(in) :: nlon
-            integer(ip) :: np1
-            real(wp) :: wb(imid, nlat, 2)
-            real(wp) :: theta(*)
-            real(wp) :: cwb(nlat/2+1)
-            real(wp) :: work(nlat/2+1), wbh
-            !
-            !     abc must have 3*((nlat-3)*nlat+2)/2 locations
-            !     cwb and work must each have nlat/2+1 locations
-            !
-
-            mdo = min(3, nlat, (nlon+1)/2)
-            if (mdo < 2) return
-            do mp1=2, mdo
-                m = mp1-1
-                do np1=mp1, nlat
-                    n = np1-1
-                    call dwtk(m, n, cwb, work)
-                    do i=1, imid
-                        call dwtt(m, n, theta(i), cwb, wbh)
-                        wb(i, np1, m) = wbh
-                    end do
-                end do
-            end do
-
-            call rabcw(nlat, nlon, abc)
-
-        end subroutine wtgit1
-
     end subroutine wtgint
 
+    subroutine wtgit1(nlat, nlon, imid, theta, wb, abc, cwb, work)
 
+        real(wp) :: abc(*)
+        integer(ip) :: i
+        integer(ip) :: imid
+        integer(ip) :: m
+        integer(ip) :: mdo
+        integer(ip) :: mp1
+        integer(ip) :: n
+        integer(ip), intent(in) :: nlat
+        integer(ip), intent(in) :: nlon
+        integer(ip) :: np1
+        real(wp) :: wb(imid, nlat, 2)
+        real(wp) :: theta(*)
+        real(wp) :: cwb(*)!nlat/2+1)
+        real(wp) :: work(*)!nlat/2+1)
+        real(wp) :: wbh
+        !
+        !     abc must have 3*((nlat-3)*nlat+2)/2 locations
+        !     cwb and work must each have nlat/2+1 locations
+        !
+
+        mdo = min(3, nlat, (nlon+1)/2)
+        if (mdo < 2) return
+        do mp1=2, mdo
+            m = mp1-1
+            do np1=mp1, nlat
+                n = np1-1
+                call dwtk(m, n, cwb, work)
+                do i=1, imid
+                    call dwtt(m, n, theta(i), cwb, wbh)
+                    wb(i, np1, m) = wbh
+                end do
+            end do
+        end do
+
+        call rabcw(nlat, nlon, abc)
+
+    end subroutine wtgit1
 
     subroutine dvtk(m, n, cv, work)
 

@@ -38,7 +38,7 @@
 !
 ! ... files which must be loaded with sfvpec.f
 !
-!     type_SpherepackAux.f, type_HFFTpack.f, vhaec.f, shsec.f
+!     type_SpherepackAux.f, type_RealPeriodicTransform.f, vhaec.f, shsec.f
 !
 !
 !     subroutine sfvpec(nlat, nlon, isym, nt, sf, vp, idv, jdv, br, bi, cr, ci, 
@@ -256,7 +256,7 @@ contains
         real(wp) :: wshsec(lshsec), work(lwork)
         integer(ip) :: imid, mmax, lzz1, labc, ls, nln, mab, mn, ia, ib, is, lwk, iwk, lwmin
         !
-        !     check input parameters
+        ! Check input arguments
         !
         ierror = 1
         if (nlat < 3) return

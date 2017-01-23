@@ -38,7 +38,7 @@
 !
 ! ... required spherepack files
 !
-!     islapec.f, shaec.f, shsec.f, type_SpherepackAux.f, type_HFFTpack.f
+!     islapec.f, shaec.f, shsec.f, type_SpherepackAux.f, type_RealPeriodicTransform.f
 !
 ! ... description
 !
@@ -152,7 +152,7 @@ contains
             rhs => source_term, &
             u => approximate_solution &
             )
-            call sphere_type%invert_helmholtz( xlmbda, rhs, u)
+            call sphere_type%invert_helmholtz(xlmbda, rhs, u)
         end associate
 
         !  Compare ue with u

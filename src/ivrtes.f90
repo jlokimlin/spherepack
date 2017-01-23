@@ -38,7 +38,7 @@
 !
 ! ... files which must be loaded with ivrtes.f
 !
-!     type_SpherepackAux.f, type_HFFTpack.f, vhses.f, shaes.f
+!     type_SpherepackAux.f, type_RealPeriodicTransform.f, vhses.f, shaes.f
 !
 !
 !     subroutine ivrtes(nlat, nlon, isym, nt, v, w, idvw, jdvw, a, b, mdab, ndab, 
@@ -303,7 +303,7 @@ subroutine ivrtes(nlat, nlon, isym, nt, v, w, idvw, jdvw, a, b, mdab, ndab, &
     dimension a(mdab, ndab, nt), b(mdab, ndab, nt)
     dimension wvhses(lvhses), work(lwork)
     !
-    !     check input parameters
+    ! Check input arguments
     !
     ierror = 1
     if (nlat < 3) return
@@ -393,7 +393,7 @@ subroutine ivtes1(nlat, nlon, isym, nt, v, w, idvw, jdvw, cr, ci, mmax, &
     dimension a(mdab, ndab, nt), b(mdab, ndab, nt)
     dimension wsav(lwsav), wk(lwk)
     !
-    !     preset coefficient multiplyers in vector
+    ! Preset coefficient multiplyers in vector
     !
     do n=2, nlat
         fn = real(n - 1)

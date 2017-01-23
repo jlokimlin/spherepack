@@ -38,7 +38,7 @@
 !
 ! ... files which must be loaded with vhaec.f
 !
-!     type_SpherepackAux.f, type_HFFTpack.f
+!     type_SpherepackAux.f, type_RealPeriodicTransform.f
 !
 !                                                                              
 !     subroutine vhaec(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, 

@@ -35,7 +35,7 @@
 !
 ! ... required spherepack files 
 !
-!     type_HFFTpack.f
+!     type_RealPeriodicTransform.f
 !
 !     subroutine sshifte(ioff, nlon, nlat, goff, greg, wsav, lsav, work, lwork, ier)
 !
@@ -106,7 +106,7 @@
 !
 ! *** required spherepack files
 !
-!     type_HFFTpack.f
+!     type_RealPeriodicTransform.f
 !
 ! *** argument description
 !
@@ -220,8 +220,8 @@ module module_sshifte
         ip, & ! integer precision
         PI
 
-    use type_HFFTpack, only: &
-        HFFTpack
+    use type_RealPeriodicTransform, only: &
+        RealPeriodicTransform
 
     ! Explicit typing only
     implicit none
@@ -238,7 +238,7 @@ contains
         integer ioff, nlon, nlat, n2, nr, nlat2, nlatp1, lsav, lwrk, i1, i2, ier
         real goff(nlon, nlat), greg(nlon, *), wsav(lsav), wrk(lwrk)
         !
-        !     check input parameters
+        ! Check input arguments
         !
         ier = 1
         if (ioff*(ioff-1)/=0) return
@@ -559,7 +559,7 @@ contains
 
     subroutine shifth(m, n, r, wsav, work)
 
-        type(HFFTpack) :: hfft
+        type(RealPeriodicTransform) :: hfft
         integer m, n, n2, k, l
         real r(m, n), wsav(*), work(*), r2km2, r2km1
         n2 = (n+1)/2
@@ -591,7 +591,7 @@ contains
         !     initialize wsav for subroutine shifth
         !
 
-        type(HFFTpack) :: hfft
+        type(RealPeriodicTransform) :: hfft
         integer n, n2, k
         real wsav(*), dp
         n2 = (n+1)/2

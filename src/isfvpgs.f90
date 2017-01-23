@@ -38,7 +38,7 @@
 !
 ! ... files which must be loaded with isfvpgs.f
 !
-!     type_SpherepackAux.f, type_HFFTpack.f, vhsgs.f, shags.f, compute_gaussian_latitudes_and_weights.f
+!     type_SpherepackAux.f, type_RealPeriodicTransform.f, vhsgs.f, shags.f, compute_gaussian_latitudes_and_weights.f
 !
 !
 !     subroutine isfvpgs(nlat, nlon, isym, nt, sf, vp, idv, jdv, as, bs, av, bv, 

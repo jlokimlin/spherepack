@@ -148,32 +148,37 @@ module vector_synthesis_routines
             mdab, ndab, wvhsec, lvhsec, work, lwork, ierror)
 
             ! Dummy arguments
-            real(wp) :: br(mdab, ndab, nt), bi(mdab, ndab, nt)
-            real(wp) :: cr(mdab, ndab, nt), ci(mdab, ndab, nt)
-            integer(ip) :: idvw, jdvw
-            integer(ip) :: ierror
-            integer(ip) :: ityp
-            integer(ip) :: lvhsec
-            integer(ip) :: lwork
-            integer(ip) :: mdab
-            integer(ip) :: ndab
-            integer(ip) :: nlat
-            integer(ip) :: nlon
-            integer(ip) :: nt
-            real(wp) :: v(idvw, jdvw, nt), w(idvw, jdvw, nt)
-            real(wp) :: work(lwork), wvhsec(lvhsec)
+            integer(ip), intent(in)  :: nlat
+            integer(ip), intent(in)  :: nlon
+            integer(ip), intent(in)  :: ityp
+            integer(ip), intent(in)  :: nt
+            real(wp),    intent(out) :: v(idvw, jdvw, nt)
+            real(wp),    intent(out) :: w(idvw, jdvw, nt)
+            integer(ip), intent(in)  :: idvw
+            integer(ip), intent(in)  :: jdvw
+            real(wp),    intent(in)  :: br(mdab, ndab, nt)
+            real(wp),    intent(in)  :: bi(mdab, ndab, nt)
+            real(wp),    intent(in)  :: cr(mdab, ndab, nt)
+            real(wp),    intent(in)  :: ci(mdab, ndab, nt)
+            integer(ip), intent(in)  :: mdab
+            integer(ip), intent(in)  :: ndab
+            real(wp),    intent(in)  :: wvhsec(lvhsec)
+            integer(ip), intent(in)  :: lvhsec
+            real(wp),    intent(out) :: work(lwork)
+            integer(ip), intent(in)  :: lwork
+            integer(ip), intent(out) :: ierror
         end subroutine vhsec
 
         module subroutine vhseci(nlat, nlon, wvhsec, lvhsec, dwork, ldwork, ierror)
 
             ! Dummy arguments
-            integer(ip) :: ierror
-            integer(ip) :: nlat
-            integer(ip) :: nlon
-            real(wp) :: wvhsec(lvhsec)
-            real(wp) :: dwork(ldwork)
-            integer(ip) :: ldwork
-            integer(ip) :: lvhsec
+            integer(ip), intent(in)  :: nlat
+            integer(ip), intent(in)  :: nlon
+            real(wp),    intent(out) :: wvhsec(lvhsec)
+            integer(ip), intent(in)  :: lvhsec
+            real(wp),    intent(out) :: dwork(ldwork)
+            integer(ip), intent(in)  :: ldwork
+            integer(ip), intent(out) :: ierror
         end subroutine vhseci
     end interface
 

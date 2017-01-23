@@ -38,7 +38,7 @@
 !
 ! ... files which must be loaded with gradges.f
 !
-!     type_SpherepackAux.f, type_HFFTpack.f, shaes.f, vhses.f
+!     type_SpherepackAux.f, type_RealPeriodicTransform.f, shaes.f, vhses.f
 !
 !     subroutine grades(nlat, nlon, isym, nt, v, w, idvw, jdvw, a, b, mdab, ndab, 
 !    +                  wvhses, lvhses, work, lwork, ierror)
@@ -284,7 +284,7 @@ contains
         dimension a(mdab, ndab, nt), b(mdab, ndab, nt)
         dimension wvhses(lvhses), work(lwork)
         !
-        !     check input parameters
+        ! Check input arguments
         !
         ierror = 1
         if (nlat < 3) return
@@ -375,7 +375,7 @@ contains
             dimension a(mdab, ndab, nt), b(mdab, ndab, nt)
             dimension wvhses(lvhses), wk(lwk)
             !
-            !     preset coefficient multiplyers in vector
+            ! Preset coefficient multiplyers in vector
             !
             do n=2, nlat
                 fn = real(n - 1, kind=wp)

@@ -37,7 +37,7 @@
 !
 ! ... files which must be loaded with shsgc.f90
 !
-!     type_SpherepackAux.f90, type_HFFTpack.f90, compute_gaussian_latitudes_and_weights.f90
+!     type_SpherepackAux.f90, type_RealPeriodicTransform.f90, compute_gaussian_latitudes_and_weights.f90
 !
 !     subroutine shsgc(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, 
 !    +                 wshsgc, lshsgc, work, lwork, ierror)
@@ -317,7 +317,7 @@ contains
         !     the results in array(s) g.  the legendre polynomials are computed
         !     as needed in this version.
         !
-        !     check input parameters
+        ! Check input arguments
         ierror = 1
         if (nlat < 3) return
         ierror = 2

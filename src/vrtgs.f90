@@ -38,7 +38,7 @@
 !
 ! ... files which must be loaded with vrtgs.f
 !
-!     type_SpherepackAux.f, type_HFFTpack.f, vhgsc.f, shsgs.f, compute_gaussian_latitudes_and_weights.f
+!     type_SpherepackAux.f, type_RealPeriodicTransform.f, vhgsc.f, shsgs.f, compute_gaussian_latitudes_and_weights.f
 !
 !     subroutine vrtgs(nlat, nlon, isym, nt, vort, ivrt, jvrt, cr, ci, mdc, ndc, 
 !    +                 wshsgs, lshsgs, work, lwork, ierror)
@@ -273,7 +273,7 @@ contains
         dimension vort(ivrt, jvrt, nt), cr(mdc, ndc, nt), ci(mdc, ndc, nt)
         dimension wshsgs(lshsgs), work(lwork)
         !
-        !     check input parameters
+        ! Check input arguments
         !
         ierror = 1
         if (nlat < 3) return

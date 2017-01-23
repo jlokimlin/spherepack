@@ -38,7 +38,7 @@
 !
 ! ... files which must be loaded with idvtec.f90
 !
-!     type_SpherepackAux.f90, type_HFFTpack.f90, vhsec.f90, shaec.f90
+!     type_SpherepackAux.f90, type_RealPeriodicTransform.f90, vhsec.f90, shaec.f90
 !
 !
 !     subroutine idvtec(nlat, nlon, isym, nt, v, w, idvw, jdvw, ad, bd, av, bv, 
@@ -331,7 +331,7 @@ contains
         dimension av(mdab, ndab, nt), bv(mdab, ndab, nt)
         dimension wvhsec(lvhsec), work(lwork)
         !
-        !     check input parameters
+        ! Check input arguments
         !
         ierror = 1
         if (nlat < 3) return
@@ -377,123 +377,120 @@ contains
         iwk = is + nlat
         liwk = lwork-4*mn-nlat
 
-        call idvtec1(nlat, nlon, isym, nt, v, w, idvw, jdvw, work(ibr), &
+        call idvtec_lower_routine(nlat, nlon, isym, nt, v, w, idvw, jdvw, work(ibr), &
             work(ibi), work(icr), work(ici), mmax, work(is), mdab, ndab, ad, bd, &
             av, bv, wvhsec, lvhsec, work(iwk), liwk, pertbd, pertbv, ierror)
 
-    contains
+    end subroutine idvtec
 
+    subroutine idvtec_lower_routine(nlat, nlon, isym, nt, v, w, idvw, jdvw, br, bi, &
+        cr, ci, mmax, sqnn, mdab, ndab, ad, bd, av, bv, wvhsec, lvhsec, wk, lwk, &
+        pertbd, pertbv, ierror)
 
-        subroutine idvtec1(nlat, nlon, isym, nt, v, w, idvw, jdvw, br, bi, &
-            cr, ci, mmax, sqnn, mdab, ndab, ad, bd, av, bv, wvhsec, lvhsec, wk, lwk, &
-            pertbd, pertbv, ierror)
-
-            real(wp) :: ad
-            real(wp) :: av
-            real(wp) :: bd
-            real(wp) :: bi
-            real(wp) :: br
-            real(wp) :: bv
-            real(wp) :: ci
-            real(wp) :: cr
-            real(wp) :: fn
-            integer(ip) :: idvw
-            integer(ip) :: ierror
-            integer(ip) :: isym
-            integer(ip) :: ityp
-            integer(ip) :: jdvw
-            integer(ip) :: k
-            integer(ip) :: lvhsec
-            integer(ip) :: lwk
-            integer(ip) :: m
-            integer(ip) :: mdab
-            integer(ip) :: mmax
-            integer(ip) :: n
-            integer(ip) :: ndab
-            integer(ip) :: nlat
-            integer(ip) :: nlon
-            integer(ip) :: nt
-            real(wp) :: pertbd
-            real(wp) :: pertbv
-            real(wp) :: sqnn
-            real(wp) :: v
-            real(wp) :: w
-            real(wp) :: wk
-            real(wp) :: wvhsec
-            dimension w(idvw, jdvw, nt), v(idvw, jdvw, nt)
-            dimension br(mmax, nlat, nt), bi(mmax, nlat, nt), sqnn(nlat)
-            dimension cr(mmax, nlat, nt), ci(mmax, nlat, nt)
-            dimension ad(mdab, ndab, nt), bd(mdab, ndab, nt)
-            dimension av(mdab, ndab, nt), bv(mdab, ndab, nt)
-            dimension wvhsec(lvhsec), wk(lwk)
-            dimension pertbd(nt), pertbv(nt)
+        real(wp) :: ad
+        real(wp) :: av
+        real(wp) :: bd
+        real(wp) :: bi
+        real(wp) :: br
+        real(wp) :: bv
+        real(wp) :: ci
+        real(wp) :: cr
+        real(wp) :: fn
+        integer(ip) :: idvw
+        integer(ip) :: ierror
+        integer(ip) :: isym
+        integer(ip) :: ityp
+        integer(ip) :: jdvw
+        integer(ip) :: k
+        integer(ip) :: lvhsec
+        integer(ip) :: lwk
+        integer(ip) :: m
+        integer(ip) :: mdab
+        integer(ip) :: mmax
+        integer(ip) :: n
+        integer(ip) :: ndab
+        integer(ip) :: nlat
+        integer(ip) :: nlon
+        integer(ip) :: nt
+        real(wp) :: pertbd
+        real(wp) :: pertbv
+        real(wp) :: sqnn
+        real(wp) :: v
+        real(wp) :: w
+        real(wp) :: wk
+        real(wp) :: wvhsec
+        dimension w(idvw, jdvw, nt), v(idvw, jdvw, nt)
+        dimension br(mmax, nlat, nt), bi(mmax, nlat, nt), sqnn(nlat)
+        dimension cr(mmax, nlat, nt), ci(mmax, nlat, nt)
+        dimension ad(mdab, ndab, nt), bd(mdab, ndab, nt)
+        dimension av(mdab, ndab, nt), bv(mdab, ndab, nt)
+        dimension wvhsec(lvhsec), wk(lwk)
+        dimension pertbd(nt), pertbv(nt)
+        !
+        ! Preset coefficient multiplyers in vector
+        !
+        do n=2, nlat
+            fn = real(n - 1)
+            sqnn(n) = sqrt(fn * (fn + 1.0))
+        end do
+        !
+        !     compute multiple vector fields coefficients
+        !
+        do k=1, nt
             !
-            !     preset coefficient multiplyers in vector
+            !     set divergence, vorticity perturbation constants
+            !
+            pertbd(k) = ad(1, 1, k)/(2.*sqrt(2.))
+            pertbv(k) = av(1, 1, k)/(2.*sqrt(2.))
+            !
+            !     preset br, bi, cr, ci to 0.0
+            !
+            do n=1, nlat
+                do m=1, mmax
+                    br(m, n, k) = 0.0
+                    bi(m, n, k) = 0.0
+                    cr(m, n, k) = 0.0
+                    ci(m, n, k) = 0.0
+                end do
+            end do
+            !
+            !     compute m=0 coefficients
             !
             do n=2, nlat
-                fn = real(n - 1)
-                sqnn(n) = sqrt(fn * (fn + 1.0))
+                br(1, n, k) = -ad(1, n, k)/sqnn(n)
+                bi(1, n, k) = -bd(1, n, k)/sqnn(n)
+                cr(1, n, k) = av(1, n, k)/sqnn(n)
+                ci(1, n, k) = bv(1, n, k)/sqnn(n)
             end do
             !
-            !     compute multiple vector fields coefficients
+            !     compute m>0 coefficients
             !
-            do k=1, nt
-                !
-                !     set divergence, vorticity perturbation constants
-                !
-                pertbd(k) = ad(1, 1, k)/(2.*sqrt(2.))
-                pertbv(k) = av(1, 1, k)/(2.*sqrt(2.))
-                !
-                !     preset br, bi, cr, ci to 0.0
-                !
-                do n=1, nlat
-                    do m=1, mmax
-                        br(m, n, k) = 0.0
-                        bi(m, n, k) = 0.0
-                        cr(m, n, k) = 0.0
-                        ci(m, n, k) = 0.0
-                    end do
-                end do
-                !
-                !     compute m=0 coefficients
-                !
-                do n=2, nlat
-                    br(1, n, k) = -ad(1, n, k)/sqnn(n)
-                    bi(1, n, k) = -bd(1, n, k)/sqnn(n)
-                    cr(1, n, k) = av(1, n, k)/sqnn(n)
-                    ci(1, n, k) = bv(1, n, k)/sqnn(n)
-                end do
-                !
-                !     compute m>0 coefficients
-                !
-                do m=2, mmax
-                    do n=m, nlat
-                        br(m, n, k) = -ad(m, n, k)/sqnn(n)
-                        bi(m, n, k) = -bd(m, n, k)/sqnn(n)
-                        cr(m, n, k) = av(m, n, k)/sqnn(n)
-                        ci(m, n, k) = bv(m, n, k)/sqnn(n)
-                    end do
+            do m=2, mmax
+                do n=m, nlat
+                    br(m, n, k) = -ad(m, n, k)/sqnn(n)
+                    bi(m, n, k) = -bd(m, n, k)/sqnn(n)
+                    cr(m, n, k) = av(m, n, k)/sqnn(n)
+                    ci(m, n, k) = bv(m, n, k)/sqnn(n)
                 end do
             end do
-            !
-            !     set ityp for vector synthesis without assuming div=0 or curl=0
-            !
-            select case (isym)
-                case (0)
-                    ityp = 0
-                case (1)
-                    ityp = 3
-                case (2)
-                    ityp = 6
-            end select
-            !
-            !     sythesize br, bi, cr, ci into the vector field (v, w)
-            !
-            call vhsec(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
-                mmax, nlat, wvhsec, lvhsec, wk, lwk, ierror)
+        end do
+        !
+        !     set ityp for vector synthesis without assuming div=0 or curl=0
+        !
+        select case (isym)
+            case (0)
+                ityp = 0
+            case (1)
+                ityp = 3
+            case (2)
+                ityp = 6
+        end select
+        !
+        !     sythesize br, bi, cr, ci into the vector field (v, w)
+        !
+        call vhsec(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
+            mmax, nlat, wvhsec, lvhsec, wk, lwk, ierror)
 
-        end subroutine idvtec1
-
-    end subroutine idvtec
+    end subroutine idvtec_lower_routine
 
 end module module_idvtec

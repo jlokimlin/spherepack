@@ -38,7 +38,7 @@
 !
 ! ... files which must be loaded with vhsgs.f90
 !
-!     type_SpherepackAux.f90, type_HFFTpack.f90, compute_gaussian_latitudes_and_weights.f90
+!     type_SpherepackAux.f90, type_RealPeriodicTransform.f90, compute_gaussian_latitudes_and_weights.f90
 !
 !     subroutine vhsgs(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci,
 !    +                 mdab, ndab, wvhsgs, lvhsgs, work, lwork, ierror)

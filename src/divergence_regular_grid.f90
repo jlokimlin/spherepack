@@ -38,7 +38,7 @@
 !
 ! ... files which must be loaded with divec.f
 !
-!     type_SpherepackAux.f, type_HFFTpack.f, vhaec.f, shsec.f
+!     type_SpherepackAux.f, type_RealPeriodicTransform.f, vhaec.f, shsec.f
 !
 !
 !     subroutine divec(nlat, nlon, isym, nt, dv, idv, jdv, br, bi, mdb, ndb, 
@@ -228,18 +228,17 @@ contains
 
     module subroutine divec(nlat, nlon, isym, nt, dv, idv, jdv, br, bi, mdb, ndb, &
         wshsec, lshsec, work, lwork, ierror)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
         integer(ip), intent(in)     :: nlat
         integer(ip), intent(in)     :: nlon
         integer(ip), intent(in)     :: isym
         integer(ip), intent(in)     :: nt
-        real(wp),    intent(inout)  :: dv(idv, jdv,*)
+        real(wp),    intent(inout)  :: dv(idv, jdv, nt)
         integer(ip), intent(in)     :: idv
         integer(ip), intent(in)     :: jdv
-        real(wp),    intent(inout)  :: br(mdb, ndb,*)
-        real(wp),    intent(inout)  :: bi(mdb, ndb,*)
+        real(wp),    intent(inout)  :: br(mdb, ndb, nt)
+        real(wp),    intent(inout)  :: bi(mdb, ndb, nt)
         integer(ip), intent(in)     :: mdb
         integer(ip), intent(in)     :: ndb
         real(wp),    intent(inout)  :: wshsec(lshsec)
@@ -247,13 +246,11 @@ contains
         real(wp),    intent(inout)  :: work(lwork)
         integer(ip), intent(in)     :: lwork
         integer(ip), intent(out)    :: ierror
-        !----------------------------------------------------------------------
+
         ! Local variables
-        !----------------------------------------------------------------------
         integer(ip) :: l1, l2, ia, ib, mn, is, ls, mab, nln
         integer(ip) :: iwk, lwk, lzz1, labc, imid
         integer(ip) :: mmax, lwmin, lwkmin
-        !----------------------------------------------------------------------
 
         imid = (nlat+1)/2
         mmax = min(nlat, (nlon+2)/2)
@@ -271,9 +268,7 @@ contains
 
         nln = nt*ls*nlon
 
-        !
         !  Set first dimension for a, b (as requiried by shsec)
-        !
         mab = min(nlat, nlon/2+1)
         mn = mab*nlat*nt
         l1 = min(nlat, (nlon+2)/2)
@@ -286,14 +281,7 @@ contains
                 lwkmin = l2*(nt*nlon+max(3*nlat, nlon)) + nlat*(2*nt*l1+1)
         end select
 
-        !
-        !  check validity of input parameters
-        !
-
-        ! Initialize error flag
-        ierror = 0
-
-        ! Check case 1
+        ! Check input arguments
         if (nlat < 3) then
             ierror = 1
             return
@@ -332,9 +320,7 @@ contains
             ierror = 0
         end if
 
-        !
-        !     set work space pointers
-        !
+        ! Set workspace points
         ia = 1
         ib = ia+mn
         is = ib+mn

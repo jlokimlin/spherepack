@@ -38,7 +38,7 @@
 !
 ! ... files which must be loaded with vtsgc.f
 !
-!     type_SpherepackAux.f, type_HFFTpack.f, vhagc.f, vhsgc.f, compute_gaussian_latitudes_and_weights.f
+!     type_SpherepackAux.f, type_RealPeriodicTransform.f, vhagc.f, vhsgc.f, compute_gaussian_latitudes_and_weights.f
 !   
 !
 !     subroutine vtsgc(nlat, nlon, ityp, nt, vt, wt, idvw, jdvw, br, bi, cr, ci, 
@@ -349,8 +349,8 @@ module module_vtsgc
         wp, & ! working precision
         ip ! integer precision
 
-    use type_HFFTpack, only: &
-        HFFTpack
+    use type_RealPeriodicTransform, only: &
+        RealPeriodicTransform
 
     use type_SpherepackAux, only: &
         SpherepackAux
@@ -405,9 +405,9 @@ contains
         real(wp) :: wt
         real(wp) :: wvts
         !
-        dimension vt(idvw, jdvw, 1), wt(idvw, jdvw, 1), br(mdab, ndab, 1), &
-            bi(mdab, ndab, 1), cr(mdab, ndab, 1), ci(mdab, ndab, 1), &
-            work(1), wvts(1)
+        dimension vt(idvw, jdvw, nt), wt(idvw, jdvw, nt), br(mdab, ndab, nt), &
+            bi(mdab, ndab, nt), cr(mdab, ndab, nt), ci(mdab, ndab, nt), &
+            work(*), wvts(*)
         ierror = 1
         if (nlat < 3) return
         ierror = 2
@@ -513,7 +513,7 @@ contains
                 wto(idv, nlon, *), wvbin(*), wwbin(*), wrfft(*), &
                 vb(imid, nlat, 3), wb(imid, nlat, 3)
 
-            type(HFFTpack)      :: hfft
+            type(RealPeriodicTransform)      :: hfft
             type(SpherepackAux) :: sphere_aux
 
             nlp1 = nlat+1
@@ -1182,7 +1182,7 @@ contains
         real(wp) :: dwork(ldwork)
 
         real(wp) :: dummy_variable
-        type(HFFTpack)      :: hfft
+        type(RealPeriodicTransform)      :: hfft
         type(SpherepackAux) :: sphere_aux
 
 

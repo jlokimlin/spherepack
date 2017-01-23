@@ -38,7 +38,7 @@
 !
 ! ... files which must be loaded with igradgc.f
 !
-!     type_SpherepackAux.f, type_HFFTpack.f, shsgc.f, vhagc.f
+!     type_SpherepackAux.f, type_RealPeriodicTransform.f, shsgc.f, vhagc.f
 !
 !     subroutine igradgc(nlat, nlon, isym, nt, sf, isf, jsf, br, bi, mdb, ndb, 
 !    +                   wshsgc, lshsgc, work, lwork, ierror)
@@ -280,7 +280,7 @@ contains
         dimension br(mdb, ndb, nt), bi(mdb, ndb, nt)
         dimension wshsgc(lshsgc), work(lwork)
         !
-        !     check input parameters
+        ! Check input arguments
         !
         ierror = 1
         if (nlat < 3) return
@@ -377,7 +377,7 @@ contains
             dimension a(mab, nlat, nt), b(mab, nlat, nt)
             dimension wsav(lsav), wk(lwk)
             !
-            !     preset coefficient multiplyers in vector
+            ! Preset coefficient multiplyers in vector
             !
             do n=2, nlat
                 fn = real(n - 1)

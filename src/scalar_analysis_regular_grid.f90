@@ -37,7 +37,7 @@
 !
 ! ... files which must be loaded with shaec.f
 !
-!     type_SpherepackAux.f, type_HFFTpack.f
+!     type_SpherepackAux.f, type_RealPeriodicTransform.f
 !
 !     subroutine shaec(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, 
 !    +                 wshaec, lshaec, work, lwork, ierror)

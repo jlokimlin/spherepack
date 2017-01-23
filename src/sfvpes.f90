@@ -38,7 +38,7 @@
 !
 ! ... files which must be loaded with sfvpes.f
 !
-!     type_SpherepackAux.f, type_HFFTpack.f, vhaes.f, shses.f
+!     type_SpherepackAux.f, type_RealPeriodicTransform.f, vhaes.f, shses.f
 !
 !
 !     subroutine sfvpes(nlat, nlon, isym, nt, sf, vp, idv, jdv, br, bi, cr, ci, 
@@ -257,7 +257,7 @@ contains
         integer(ip) :: imid, mmax, ls, mab, mn, ia, ib, is, lwk, iwk
         integer(ip) :: lpimn
         !
-        !     check input parameters
+        ! Check input arguments
         !
         ierror = 1
         if (nlat < 3) return

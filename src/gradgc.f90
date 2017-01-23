@@ -37,7 +37,7 @@
 !
 ! ... files which must be loaded with gradgc.f
 !
-!     type_SpherepackAux.f, type_HFFTpack.f, shagc.f, vhsgc.f
+!     type_SpherepackAux.f, type_RealPeriodicTransform.f, shagc.f, vhsgc.f
 !
 !     subroutine gradgc(nlat, nlon, isym, nt, v, w, idvw, jdvw, a, b, mdab, ndab, 
 !    +                  wvhsgc, lvhsgc, work, lwork, ierror)
@@ -279,7 +279,7 @@ contains
         dimension a(mdab, ndab, nt), b(mdab, ndab, nt)
         dimension wvhsgc(lvhsgc), work(lwork)
         !
-        !     check input parameters
+        ! Check input arguments
         !
         ierror = 1
         if (nlat < 3) return
@@ -371,7 +371,7 @@ contains
             dimension a(mdab, ndab, nt), b(mdab, ndab, nt)
             dimension wvhsgc(lvhsgc), wk(lwk)
             !
-            !     preset coefficient multiplyers in vector
+            ! Preset coefficient multiplyers in vector
             !
             do n=2, nlat
                 fn = real(n - 1, kind=wp)

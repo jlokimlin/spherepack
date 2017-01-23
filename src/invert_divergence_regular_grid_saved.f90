@@ -38,7 +38,7 @@
 !
 ! ... files which must be loaded with idivec.f
 !
-!     type_SpherepackAux.f, type_HFFTpack.f, vhses.f, shaes.f
+!     type_SpherepackAux.f, type_RealPeriodicTransform.f, vhses.f, shaes.f
 !
 !
 !     subroutine idives(nlat, nlon, isym, nt, v, w, idvw, jdvw, a, b, mdab, ndab, 
@@ -254,61 +254,45 @@
 !           = 10 error in the specification of lwork
 !
 !
-module module_idives
-
-    use spherepack_precision, only: &
-        wp, & ! working precision
-        ip ! integer precision
-
-    use vector_synthesis_routines, only: &
-        vhses
-
-    ! Explicit typing only
-    implicit none
-
-    ! Everything is private unless stated otherwise
-    private
-    public :: idives
+submodule(divergence_routines) invert_divergence_regular_grid_saved
 
 contains
-
-    subroutine idives(nlat, nlon, isym, nt, v, w, idvw, jdvw, a, b, mdab, ndab, &
+    module subroutine idives(nlat, nlon, isym, nt, v, w, idvw, jdvw, a, b, mdab, ndab, &
         wvhses, lvhses, work, lwork, pertrb, ierror)
 
-        real(wp) :: a
-        real(wp) :: b
+        ! Dummy arguments
+        integer(ip), intent(in)  :: nlat
+        integer(ip), intent(in)  :: nlon
+        integer(ip), intent(in)  :: isym
+        integer(ip), intent(in)  :: nt
+        real(wp),    intent(out) :: v(idvw, jdvw, nt)
+        real(wp),    intent(out) :: w(idvw, jdvw, nt)
+        integer(ip), intent(in)  :: idvw
+        integer(ip), intent(in)  :: jdvw
+        real(wp),    intent(in)  :: a(mdab, ndab, nt)
+        real(wp),    intent(in)  :: b(mdab, ndab, nt)
+        integer(ip), intent(in)  :: mdab
+        integer(ip), intent(in)  :: ndab
+        real(wp),    intent(out) :: wvhses(lvhses)
+        integer(ip), intent(in)  :: lvhses
+        real(wp),    intent(out) :: work(lwork)
+        integer(ip), intent(in)  :: lwork
+        real(wp),    intent(out) :: pertrb(nt)
+        integer(ip), intent(out) :: ierror
+
+        ! Local variables
         integer(ip) :: ibi
         integer(ip) :: ibr
-        integer(ip) :: idvw
         integer(ip) :: idz
-        integer(ip) :: ierror
         integer(ip) :: imid
-        integer(ip) :: is
-        integer(ip) :: isym
+        integer(ip) :: iis
         integer(ip) :: iwk
-        integer(ip) :: jdvw
         integer(ip) :: liwk
-        integer(ip) :: lvhses
-        integer(ip) :: lwork
         integer(ip) :: lzimn
-        integer(ip) :: mdab
         integer(ip) :: mmax
         integer(ip) :: mn
-        integer(ip) :: ndab
-        integer(ip) :: nlat
-        integer(ip) :: nlon
-        integer(ip) :: nt
-        real(wp) :: pertrb
-        real(wp) :: v
-        real(wp) :: w
-        real(wp) :: work
-        real(wp) :: wvhses
-        dimension v(idvw, jdvw, nt), w(idvw, jdvw, nt), pertrb(nt)
-        dimension a(mdab, ndab, nt), b(mdab, ndab, nt)
-        dimension wvhses(lvhses), work(lwork)
-        !
-        !     check input parameters
-        !
+
+        ! Check input arguments
         ierror = 1
         if (nlat < 3) return
         ierror = 2
@@ -347,112 +331,106 @@ contains
         !
         ibr = 1
         ibi = ibr + mn
-        is = ibi + mn
-        iwk = is + nlat
+        iis = ibi + mn
+        iwk = iis + nlat
         liwk = lwork-2*mn-nlat
 
-        call idves1(nlat, nlon, isym, nt, v, w, idvw, jdvw, work(ibr), work(ibi), &
-            mmax, work(is), mdab, ndab, a, b, wvhses, lvhses, work(iwk), &
+        call idives_lower_routine(nlat, nlon, isym, nt, v, w, idvw, jdvw, work(ibr), work(ibi), &
+            mmax, work(iis), mdab, ndab, a, b, wvhses, lvhses, work(iwk), &
             liwk, pertrb, ierror)
-
-    contains
-
-
-        subroutine idves1(nlat, nlon, isym, nt, v, w, idvw, jdvw, br, bi, mmax, &
-            sqnn, mdab, ndab, a, b, wsav, lwsav, wk, lwk, pertrb, ierror)
-
-            real(wp) :: a
-            real(wp) :: b
-            real(wp) :: bi
-            real(wp) :: br
-            real(wp) :: ci(mmax, nlat, nt)
-            real(wp) :: cr(mmax, nlat, nt)
-            real(wp) :: fn
-            integer(ip) :: idvw
-            integer(ip) :: ierror
-            integer(ip) :: isym
-            integer(ip) :: ityp
-            integer(ip) :: jdvw
-            integer(ip) :: k
-            integer(ip) :: lwk
-            integer(ip) :: lwsav
-            integer(ip) :: m
-            integer(ip) :: mdab
-            integer(ip) :: mmax
-            integer(ip) :: n
-            integer(ip) :: ndab
-            integer(ip) :: nlat
-            integer(ip) :: nlon
-            integer(ip) :: nt
-            real(wp) :: pertrb
-            real(wp) :: sqnn
-            real(wp) :: v
-            real(wp) :: w
-            real(wp) :: wk
-            real(wp) :: wsav
-            dimension v(idvw, jdvw, nt), w(idvw, jdvw, nt), pertrb(nt)
-            dimension br(mmax, nlat, nt), bi(mmax, nlat, nt), sqnn(nlat)
-            dimension a(mdab, ndab, nt), b(mdab, ndab, nt)
-            dimension wsav(lwsav), wk(lwk)
-            !     preset coefficient multiplyers in vector
-            !
-            do n=2, nlat
-                fn = real(n - 1, kind=wp)
-                sqnn(n) = sqrt(fn * (fn + 1.0_wp))
-            end do
-            !
-            !     compute multiple vector fields coefficients
-            !
-            do k=1, nt
-                !
-                !     set divergence field perturbation adjustment
-                !
-                pertrb(k) = a(1, 1, k)/(2.0 * sqrt(2.0))
-                !
-                !     preset br, bi to 0.0
-                !
-                do n=1, nlat
-                    do m=1, mmax
-                        br(m, n, k) = 0.0
-                        bi(m, n, k) = 0.0
-                    end do
-                end do
-                !
-                !     compute m=0 coefficients
-                !
-                do n=2, nlat
-                    br(1, n, k) = -a(1, n, k)/sqnn(n)
-                    bi(1, n, k) = -b(1, n, k)/sqnn(n)
-                end do
-                !
-                !     compute m>0 coefficients
-                !
-                do m=2, mmax
-                    do n=m, nlat
-                        br(m, n, k) = -a(m, n, k)/sqnn(n)
-                        bi(m, n, k) = -b(m, n, k)/sqnn(n)
-                    end do
-                end do
-            end do
-            !
-            !     set ityp for vector synthesis with curl=0
-            !
-            select case (isym)
-                case (0)
-                    ityp = 1
-                case (1)
-                    ityp = 4
-                case (2)
-                    ityp = 7
-            end select
-            !
-            !     vector sythesize br, bi into irrotational (v, w)
-            !
-            call vhses(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
-                mmax, nlat, wsav, lwsav, wk, lwk, ierror)
-
-        end subroutine idves1
 
     end subroutine idives
 
-end module module_idives
+    subroutine idives_lower_routine(nlat, nlon, isym, nt, v, w, idvw, jdvw, br, bi, mmax, &
+        sqnn, mdab, ndab, a, b, wsav, lwsav, wk, lwk, pertrb, ierror)
+
+        real(wp) :: a
+        real(wp) :: b
+        real(wp) :: bi
+        real(wp) :: br
+        real(wp) :: ci(mmax, nlat, nt)
+        real(wp) :: cr(mmax, nlat, nt)
+        real(wp) :: fn
+        integer(ip) :: idvw
+        integer(ip) :: ierror
+        integer(ip) :: isym
+        integer(ip) :: ityp
+        integer(ip) :: jdvw
+        integer(ip) :: k
+        integer(ip) :: lwk
+        integer(ip) :: lwsav
+        integer(ip) :: m
+        integer(ip) :: mdab
+        integer(ip) :: mmax
+        integer(ip) :: n
+        integer(ip) :: ndab
+        integer(ip) :: nlat
+        integer(ip) :: nlon
+        integer(ip) :: nt
+        real(wp) :: pertrb
+        real(wp) :: sqnn
+        real(wp) :: v
+        real(wp) :: w
+        real(wp) :: wk
+        real(wp) :: wsav
+        dimension v(idvw, jdvw, nt), w(idvw, jdvw, nt), pertrb(nt)
+        dimension br(mmax, nlat, nt), bi(mmax, nlat, nt), sqnn(nlat)
+        dimension a(mdab, ndab, nt), b(mdab, ndab, nt)
+        dimension wsav(lwsav), wk(lwk)
+
+        ! Preset coefficient multiplyers in vector
+        call compute_coefficient_multipliers(sqnn)
+        !
+        !     compute multiple vector fields coefficients
+        !
+        do k=1, nt
+            !
+            !     set divergence field perturbation adjustment
+            !
+            pertrb(k) = get_perturbation(a, k)
+            !
+            !     preset br, bi to 0.0
+            !
+            do n=1, nlat
+                do m=1, mmax
+                    br(m, n, k) = ZERO
+                    bi(m, n, k) = ZERO
+                end do
+            end do
+            !
+            !     compute m=0 coefficients
+            !
+            do n=2, nlat
+                br(1, n, k) = -a(1, n, k)/sqnn(n)
+                bi(1, n, k) = -b(1, n, k)/sqnn(n)
+            end do
+            !
+            !     compute m>0 coefficients
+            !
+            do m=2, mmax
+                do n=m, nlat
+                    br(m, n, k) = -a(m, n, k)/sqnn(n)
+                    bi(m, n, k) = -b(m, n, k)/sqnn(n)
+                end do
+            end do
+        end do
+        !
+        !     set ityp for vector synthesis with curl=0
+        !
+        select case (isym)
+            case (0)
+                ityp = 1
+            case (1)
+                ityp = 4
+            case (2)
+                ityp = 7
+        end select
+        !
+        !     vector sythesize br, bi into irrotational (v, w)
+        !
+        call vhses(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
+            mmax, nlat, wsav, lwsav, wk, lwk, ierror)
+
+    end subroutine idives_lower_routine
+
+end submodule invert_divergence_regular_grid_saved

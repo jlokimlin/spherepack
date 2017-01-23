@@ -38,7 +38,7 @@
 !
 ! ... files which must be loaded with vrtgc.f
 !
-!     type_SpherepackAux.f, type_HFFTpack.f, vhagc.f, shsgc.f, compute_gaussian_latitudes_and_weights.f
+!     type_SpherepackAux.f, type_RealPeriodicTransform.f, vhagc.f, shsgc.f, compute_gaussian_latitudes_and_weights.f
 !
 !     subroutine vrtgc(nlat, nlon, isym, nt, vort, ivrt, jvrt, cr, ci, mdc, ndc, 
 !    +                 wshsgc, lshsgc, work, lwork, ierror)
@@ -275,7 +275,7 @@ contains
         dimension vort(ivrt, jvrt, nt), cr(mdc, ndc, nt), ci(mdc, ndc, nt)
         dimension wshsgc(lshsgc), work(lwork)
         !
-        !     check input parameters
+        ! Check input arguments
         !
         ierror = 1
         if (nlat < 3) return

@@ -30,14 +30,14 @@ type_FFTpack.f90
 	$(FC) $(FFLAGS) -c type_FFTpack.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 
-type_HFFTpack.o: \
+type_RealPeriodicTransform.o: \
 spherepack_precision.o \
-type_HFFTpack.f90
-	$(FC) $(FFLAGS) -c type_HFFTpack.f90 $(LINKS)\
+type_RealPeriodicTransform.f90
+	$(FC) $(FFLAGS) -c type_RealPeriodicTransform.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 
 type_SpherepackAux.o: \
-type_HFFTpack.o \
+type_RealPeriodicTransform.o \
 type_SpherepackAux.f90
 	$(FC) $(FFLAGS) -c type_SpherepackAux.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
@@ -51,14 +51,14 @@ type_LegendreAux.f90
 
 shpg.o: \
 spherepack_precision.o \
-type_HFFTpack.o \
+type_RealPeriodicTransform.o \
 shpg.f90
 	$(FC) $(FFLAGS) -c shpg.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 
 shpe.o: \
 spherepack_precision.o \
-type_HFFTpack.o \
+type_RealPeriodicTransform.o \
 shpe.f90
 	$(FC) $(FFLAGS) -c shpe.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
@@ -199,7 +199,7 @@ vector_synthesis_gaussian_grid_saved.f90
 
 vtsec.o: \
 spherepack_precision.o \
-type_HFFTpack.o \
+type_RealPeriodicTransform.o \
 type_SpherepackAux.o\
 vtsec.f90
 	$(FC) $(FFLAGS) -c vtsec.f90 $(LINKS)\
@@ -207,7 +207,7 @@ vtsec.f90
 
 vtses.o: \
 spherepack_precision.o \
-type_HFFTpack.o \
+type_RealPeriodicTransform.o \
 type_SpherepackAux.o\
 vtses.f90
 	$(FC) $(FFLAGS) -c vtses.f90 $(LINKS)\
@@ -215,7 +215,7 @@ vtses.f90
 
 vtsgc.o: \
 spherepack_precision.o \
-type_HFFTpack.o \
+type_RealPeriodicTransform.o \
 type_SpherepackAux.o\
 gaussian_latitudes_and_weights_routines.o \
 vtsgc.f90
@@ -224,7 +224,6 @@ vtsgc.f90
 
 vtsgs.o: \
 spherepack_precision.o \
-type_HFFTpack.o \
 type_SpherepackAux.o\
 gaussian_latitudes_and_weights_routines.o \
 vtsgs.f90
@@ -234,14 +233,14 @@ vtsgs.f90
 
 sshifte.o: \
 spherepack_precision.o \
-type_HFFTpack.o \
+type_RealPeriodicTransform.o \
 sshifte.f90
 	$(FC) $(FFLAGS) -c sshifte.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 
 vshifte.o: \
 spherepack_precision.o \
-type_HFFTpack.o \
+type_RealPeriodicTransform.o \
 vshifte.f90
 	$(FC) $(FFLAGS) -c vshifte.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
@@ -256,7 +255,7 @@ trssph.f90
 
 trvsph.o: \
 spherepack_precision.o \
-type_HFFTpack.o \
+type_RealPeriodicTransform.o \
 vector_analysis_routines.o \
 vector_synthesis_routines.o \
 vector_analysis_routines.o \
@@ -324,6 +323,7 @@ igradgs.f90
 divergence_routines.o: \
 spherepack_precision.o \
 scalar_synthesis_routines.o \
+vector_synthesis_routines.o \
 divergence_routines.f90
 	$(FC) $(FFLAGS) -c divergence_routines.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
@@ -352,32 +352,28 @@ divergence_gaussian_grid_saved.f90
 	$(FC) $(FFLAGS) -c divergence_gaussian_grid_saved.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 
-idivec.o: \
-spherepack_precision.o \
-vector_synthesis_routines.o \
-idivec.f90
-	$(FC) $(FFLAGS) -c idivec.f90 $(LINKS)\
+invert_divergence_regular_grid.o: \
+divergence_routines.o \
+invert_divergence_regular_grid.f90
+	$(FC) $(FFLAGS) -c invert_divergence_regular_grid.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 
-idives.o: \
-spherepack_precision.o \
-vector_synthesis_routines.o \
-idives.f90
-	$(FC) $(FFLAGS) -c idives.f90 $(LINKS)\
+invert_divergence_regular_grid_saved.o: \
+divergence_routines.o \
+invert_divergence_regular_grid_saved.f90
+	$(FC) $(FFLAGS) -c invert_divergence_regular_grid_saved.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 
-idivgc.o: \
-spherepack_precision.o \
-vector_synthesis_routines.o \
-idivgc.f90
-	$(FC) $(FFLAGS) -c idivgc.f90 $(LINKS)\
+invert_divergence_gaussian_grid.o: \
+divergence_routines.o \
+invert_divergence_gaussian_grid.f90
+	$(FC) $(FFLAGS) -c invert_divergence_gaussian_grid.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 
-idivgs.o: \
-spherepack_precision.o \
-vector_synthesis_routines.o \
-idivgs.f90
-	$(FC) $(FFLAGS) -c idivgs.f90 $(LINKS)\
+invert_divergence_gaussian_grid_saved.o: \
+divergence_routines.o \
+invert_divergence_gaussian_grid_saved.f90
+	$(FC) $(FFLAGS) -c invert_divergence_gaussian_grid_saved.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 
 idvtec.o: \
@@ -755,10 +751,6 @@ gradec.o \
 grades.o \
 gradgc.o \
 gradgs.o \
-idivec.o \
-idives.o \
-idivgc.o \
-idivgs.o \
 idvtec.o \
 idvtes.o \
 idvtgc.o \
@@ -814,7 +806,7 @@ vtsec.o \
 vtses.o \
 vtsgc.o \
 vtsgs.o \
-type_HFFTpack.o \
+type_RealPeriodicTransform.o \
 type_FFTpack.o \
 type_LegendreAux.o \
 type_Vector3D.o \

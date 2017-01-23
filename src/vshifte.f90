@@ -36,7 +36,7 @@
 !
 ! ... required files
 !
-!     type_HFFTpack.f
+!     type_RealPeriodicTransform.f
 !
 !     subroutine vshifte(ioff, nlon, nlat, uoff, voff, ureg, vreg, 
 !    +                   wsave, lsave, work, lwork, ierror)
@@ -254,8 +254,8 @@ module module_vshifte
         ip, & ! integer precision
         PI
 
-    use type_HFFTpack, only: &
-        HFFTpack
+    use type_RealPeriodicTransform, only: &
+        RealPeriodicTransform
 
     ! Explicit typing only
     implicit none
@@ -275,7 +275,7 @@ contains
         real ureg(nlon, *), vreg(nlon, *)
         real wsav(lsav), wrk(lwrk)
         !
-        !     check input parameters
+        ! Check input arguments
         !
         ier = 1
         if (ioff*(ioff-1)/=0) return
@@ -583,7 +583,7 @@ contains
 
     subroutine vhifth(m, n, r, wsav, work)
 
-        type(HFFTpack) :: hfft
+        type(RealPeriodicTransform) :: hfft
         integer m, n, n2, k, l
         real r(m, n), wsav(*), work(*), r2km2, r2km1
         n2 = (n+1)/2
@@ -617,12 +617,12 @@ contains
         !
         !     initialize wsav for subroutine vhifth
         !
-        use type_HFFTpack, only: &
-            HFFTpack
+        use type_RealPeriodicTransform, only: &
+            RealPeriodicTransform
 
 
 
-        type(HFFTpack) :: hfft
+        type(RealPeriodicTransform) :: hfft
         integer n, n2, k
         real wsav(*), dp
 

@@ -38,7 +38,7 @@
 !
 ! ... required spherepack files
 !
-!     vtses.f90, dives.f90, vrtes.f90, grades.f90, type_SpherepackAux.f90, type_HFFTpack.f90,
+!     vtses.f90, dives.f90, vrtes.f90, grades.f90, type_SpherepackAux.f90, type_RealPeriodicTransform.f90,
 !     vhaes.f90,vhses.f90,shaes.f90,shses.f90
 !
 !

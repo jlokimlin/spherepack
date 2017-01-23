@@ -38,7 +38,7 @@
 !
 ! ... files which must be loaded with igradgs.f
 !
-!     type_SpherepackAux.f, type_HFFTpack.f, shsgs.f, vhags.f
+!     type_SpherepackAux.f, type_RealPeriodicTransform.f, shsgs.f, vhags.f
 !
 !     subroutine igradgs(nlat, nlon, isym, nt, sf, isf, jsf, br, bi, mdb, ndb, 
 !    +                   wshsgs, lshsgs, work, lwork, ierror)
@@ -281,7 +281,7 @@ contains
         dimension br(mdb, ndb, nt), bi(mdb, ndb, nt)
         dimension wshsgs(lshsgs), work(lwork)
         !
-        !     check input parameters
+        ! Check input arguments
         !
         ierror = 1
         if (nlat < 3) return
@@ -374,7 +374,7 @@ contains
             dimension a(mab, nlat, nt), b(mab, nlat, nt)
             dimension wsav(lsav), wk(lwk)
             !
-            !     preset coefficient multiplyers in vector
+            ! Preset coefficient multiplyers in vector
             !
             do n=2, nlat
                 fn = real(n - 1)

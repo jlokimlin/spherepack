@@ -38,7 +38,7 @@
 !
 ! ... files which must be loaded with vhses.f90
 !
-!     type_SpherepackAux.f90, type_HFFTpack.f90
+!     type_SpherepackAux.f90, type_RealPeriodicTransform.f90
 !
 !   
 !     subroutine vhses(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, 
@@ -677,7 +677,7 @@ contains
             we(:,:, k) = ZERO
         end do
 
-        symmetry_case: select case (ityp)
+        vector_symmetry_cases: select case (ityp)
             case (0)
                 !
                 !     case ityp=0   no symmetries
@@ -692,6 +692,7 @@ contains
                         end do
                     end do
                 end do
+
                 do k=1, nt
                     do np1=3, ndo1, 2
                         do i=1, imm1
@@ -703,7 +704,7 @@ contains
                 !
                 !     case m = 1 through nlat-1
                 !
-                if (mmax < 2) exit symmetry_case
+                if (mmax < 2) exit vector_symmetry_cases
 
                 do mp1=2, mmax
                     m = mp1-1
@@ -790,7 +791,7 @@ contains
                 !
                 !     case m = 1 through nlat-1
                 !
-                if (mmax < 2) exit symmetry_case
+                if (mmax < 2) exit vector_symmetry_cases
 
                 do mp1=2, mmax
                     m = mp1-1
@@ -860,7 +861,7 @@ contains
                 !
                 !     case m = 1 through nlat-1
                 !
-                if (mmax < 2) exit symmetry_case
+                if (mmax < 2) exit vector_symmetry_cases
 
                 do mp1=2, mmax
                     m = mp1-1
@@ -931,7 +932,7 @@ contains
                 !
                 !     case m = 1 through nlat-1
                 !
-                if (mmax < 2) exit symmetry_case
+                if (mmax < 2) exit vector_symmetry_cases
 
                 do mp1=2, mmax
                     m = mp1-1
@@ -993,7 +994,7 @@ contains
                 !
                 !     case m = 1 through nlat-1
                 !
-                if (mmax < 2) exit symmetry_case
+                if (mmax < 2) exit vector_symmetry_cases
 
                 do mp1=2, mmax
                     m = mp1-1
@@ -1035,7 +1036,7 @@ contains
                 !
                 !     case m = 1 through nlat-1
                 !
-                if (mmax < 2) exit symmetry_case
+                if (mmax < 2) exit vector_symmetry_cases
 
                 do mp1=2, mmax
                     m = mp1-1
@@ -1086,7 +1087,7 @@ contains
                 !
                 !     case m = 1 through nlat-1
                 !
-                if (mmax < 2) exit symmetry_case
+                if (mmax < 2) exit vector_symmetry_cases
 
                 do mp1=2, mmax
                     m = mp1-1
@@ -1148,7 +1149,7 @@ contains
                 !
                 !     case m = 1 through nlat-1
                 !
-                if (mmax < 2) exit symmetry_case
+                if (mmax < 2) exit vector_symmetry_cases
 
                 do mp1=2, mmax
                     m = mp1-1
@@ -1190,7 +1191,7 @@ contains
                 !
                 !     case m = 1 through nlat-1
                 !
-                if (mmax < 2) exit symmetry_case
+                if (mmax < 2) exit vector_symmetry_cases
 
                 do mp1=2, mmax
                     m = mp1-1
@@ -1216,7 +1217,7 @@ contains
                         end do
                     end if
                 end do
-        end select symmetry_case
+        end select vector_symmetry_cases
 
         do k=1, nt
             call sphere_aux%hfft%backward(idv, nlon, ve(1, 1, k), idv, wrfft, work)

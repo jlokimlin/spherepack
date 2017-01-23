@@ -39,7 +39,7 @@
 !
 ! ... files which must be loaded with divgs.f
 !
-!     type_SpherepackAux.f, type_HFFTpack.f, vhags.f, shsgs.f, compute_gaussian_latitudes_and_weights.f
+!     type_SpherepackAux.f, type_RealPeriodicTransform.f, vhags.f, shsgs.f, compute_gaussian_latitudes_and_weights.f
 !
 !
 !     subroutine divgs(nlat, nlon, isym, nt, divg, idiv, jdiv, br, bi, mdb, ndb, 
@@ -229,9 +229,8 @@ contains
 
     module subroutine divgs(nlat, nlon, isym, nt, divg, idiv, jdiv, br, bi, mdb, ndb, &
         wshsgs, lshsgs, work, lwork, ierror)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
         integer(ip), intent(in)     :: nlat
         integer(ip), intent(in)     :: nlon
         integer(ip), intent(in)     :: isym
@@ -248,13 +247,12 @@ contains
         real(wp),    intent(inout)  :: work(lwork)
         integer(ip), intent(in)     :: lwork
         integer(ip), intent(out)    :: ierror
-        !----------------------------------------------------------------------
-        ! Dummy arguments
-        !----------------------------------------------------------------------
+
+        ! Local variables
         integer(ip) :: l1, l2, ia, ib, mn, lp
-        integer(ip) :: is, ls, mab, nln
+        integer(ip) :: iis, ls, mab, nln
         integer(ip) :: iwk, lwk, imid, mmax, lpimn
-        !------------------------------------------------------------------------
+
 
         !
         !  Compute constants
@@ -327,12 +325,12 @@ contains
         !
         ia = 1
         ib = ia+mn
-        is = ib+mn
-        iwk = is+nlat
+        iis = ib+mn
+        iwk = iis+nlat
         lwk = lwork-2*mn-nlat
 
         call divgs_lower_routine(nlat, nlon, isym, nt, divg, idiv, jdiv, br, bi, mdb, ndb, &
-            work(ia), work(ib), mab, work(is), wshsgs, lshsgs, work(iwk), lwk, &
+            work(ia), work(ib), mab, work(iis), wshsgs, lshsgs, work(iwk), lwk, &
             ierror)
 
     end subroutine divgs

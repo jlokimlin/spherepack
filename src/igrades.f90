@@ -38,7 +38,7 @@
 !
 ! ... files which must be loaded with igradec.f
 !
-!     type_SpherepackAux.f, type_HFFTpack.f, shses.f, vhaes.f
+!     type_SpherepackAux.f, type_RealPeriodicTransform.f, shses.f, vhaes.f
 !
 !     subroutine igrades(nlat, nlon, isym, nt, sf, isf, jsf, br, bi, mdb, ndb, 
 !    +                   wshses, lshses, work, lwork, ierror)
@@ -286,7 +286,7 @@ contains
         dimension br(mdb, ndb, nt), bi(mdb, ndb, nt)
         dimension wshses(lshses), work(lwork)
         !
-        !     check input parameters
+        ! Check input arguments
         !
         ierror = 1
         if (nlat < 3) return
@@ -377,7 +377,7 @@ contains
             dimension a(mab, nlat, nt), b(mab, nlat, nt)
             dimension wshses(lshses), wk(lwk)
             !
-            !     preset coefficient multiplyers in vector
+            ! Preset coefficient multiplyers in vector
             !
             do n=2, nlat
                 fn = real(n - 1)

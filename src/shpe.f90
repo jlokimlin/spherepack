@@ -38,7 +38,7 @@
 !
 ! ... files which must be loaded with shpe.f
 !
-!     type_SpherepackAux.f, type_HFFTpack.f
+!     type_SpherepackAux.f, type_RealPeriodicTransform.f
 !
 !     subroutine shpei initializes arrays wshp and iwshp for
 !     subsequent repeated use by subroutine shpe, which
@@ -119,8 +119,8 @@ module module_shpe
         ip, & ! integer precision
         PI
 
-    use type_HFFTpack, only: &
-    HFFTpack
+    use type_RealPeriodicTransform, only: &
+    RealPeriodicTransform
 
     ! Explicit typing only
     implicit none
@@ -135,7 +135,7 @@ contains
 subroutine shpei(nlat, nlon, isym, mtrunc, wshp, lwshp, iwshp, &
  liwshp, work, lwork, ierror)
 
-    type(HFFTpack) :: hfft
+    type(RealPeriodicTransform) :: hfft
 integer :: ierror
 integer :: isym
 integer :: iw1
@@ -693,7 +693,7 @@ end subroutine shpei1
 !
 ! ... files which must be loaded with shpe.f
 !
-!     type_SpherepackAux.f, type_HFFTpack.f
+!     type_SpherepackAux.f, type_RealPeriodicTransform.f
 !
 !     the n**2 projection with complement, odd/even
 !     factorization and zero truncation on an
@@ -790,7 +790,7 @@ end subroutine shpei1
 subroutine shpe(nlat, nlon, isym, mtrunc, x, y, idxy, &
         wshp, lwshp, iwshp, liwshp, work, lwork, ierror)
 
-    type(HFFTpack) :: hfft
+    type(RealPeriodicTransform) :: hfft
 integer :: i
 integer :: idxy
 integer :: ierror
