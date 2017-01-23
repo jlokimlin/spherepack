@@ -305,31 +305,32 @@ contains
         wshaec, lshaec, work, lwork, ierror)
 
         ! Dummy arguments
-        real(wp) :: a(mdab, ndab, *)
-        real(wp) :: b(mdab, ndab, *)
-        real(wp) :: g(idg, jdg, *)
-        integer(ip) :: idg
-        integer(ip) :: ierror
+        integer(ip), intent(in)   :: nlat
+        integer(ip), intent(in)   :: nlon
+        integer(ip), intent(in)   :: isym
+        integer(ip), intent(in)   :: nt
+        real(wp),    intent(in)   :: g(idg, jdg, nt)
+        integer(ip), intent(in)   :: idg
+        integer(ip), intent(in)   :: jdg
+        real(wp),    intent(out)  :: a(mdab, ndab, nt)
+        real(wp),    intent(out)  :: b(mdab, ndab, nt)
+        integer(ip), intent(in)   :: mdab
+        integer(ip), intent(in)   :: ndab
+        real(wp),    intent(in)   :: wshaec(lshaec)
+        integer(ip), intent(in)   :: lshaec
+        real(wp),    intent(out)  :: work(lwork)
+        integer(ip), intent(in)   :: lwork
+        integer(ip), intent(out)  :: ierror
+
+        ! Local variables
         integer(ip) :: imid
         integer(ip) :: ist
-        integer(ip) :: isym
         integer(ip) :: iw1, jw1, jw2, jw3
-        integer(ip) :: jdg
         integer(ip) :: labc
         integer(ip) :: ls
-        integer(ip) :: lshaec
-        integer(ip) :: lwork
         integer(ip) :: lzz1
-        integer(ip) :: mdab
         integer(ip) :: mmax
-        integer(ip) :: ndab
-        integer(ip) :: nlat
         integer(ip) :: nln
-        integer(ip) :: nlon
-        integer(ip) :: nt
-        real(wp) :: work(lwork)
-        real(wp) :: wshaec(lshaec)
-
 
         mmax = min(nlat, nlon/2+1)
         imid = (nlat+1)/2
@@ -502,8 +503,8 @@ contains
         mdo = mmax
         if (mdo+mdo-1 > nlon) mdo = mmax-1
         nlp1 = nlat+1
-        tsn = 2./nlon
-        fsn = 4./nlon
+        tsn = TWO/nlon
+        fsn = FOUR/nlon
         modl = mod(nlat, 2)
         imm1 = imid
         if (modl /= 0) imm1 = imid-1

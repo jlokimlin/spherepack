@@ -61,22 +61,22 @@ module scalar_analysis_routines
             mdab, ndab, wshaes, lshaes, work, lwork, ierror)
 
             ! Dummy arguments
-            integer(ip), intent(in)     :: nlat
-            integer(ip), intent(in)     :: nlon
-            integer(ip), intent(in)     :: isym
-            integer(ip), intent(in)     :: nt
-            real(wp),    intent(in)     :: g(idg, jdg, nt)
-            integer(ip), intent(in)     :: idg
-            integer(ip), intent(in)     :: jdg
-            real(wp),    intent(out)    :: a(mdab, ndab, nt)
-            real(wp),    intent(out)    :: b(mdab, ndab, nt)
-            integer(ip), intent(in)     :: mdab
-            integer(ip), intent(in)     :: ndab
-            real(wp),    intent(inout)  :: wshaes(lshaes)
-            integer(ip), intent(in)     :: lshaes
-            real(wp),    intent(inout)  :: work(lwork)
-            integer(ip), intent(in)     :: lwork
-            integer(ip), intent(out)    :: ierror
+            integer(ip), intent(in)   :: nlat
+            integer(ip), intent(in)   :: nlon
+            integer(ip), intent(in)   :: isym
+            integer(ip), intent(in)   :: nt
+            real(wp),    intent(in)   :: g(idg, jdg, nt)
+            integer(ip), intent(in)   :: idg
+            integer(ip), intent(in)   :: jdg
+            real(wp),    intent(out)  :: a(mdab, ndab, nt)
+            real(wp),    intent(out)  :: b(mdab, ndab, nt)
+            integer(ip), intent(in)   :: mdab
+            integer(ip), intent(in)   :: ndab
+            real(wp),    intent(in)   :: wshaes(lshaes)
+            integer(ip), intent(in)   :: lshaes
+            real(wp),    intent(out)  :: work(lwork)
+            integer(ip), intent(in)   :: lwork
+            integer(ip), intent(out)  :: ierror
         end subroutine shaes
 
         module subroutine shaesi(nlat, nlon, wshaes, lshaes, work, lwork, dwork, &
@@ -98,61 +98,58 @@ module scalar_analysis_routines
             wshags, lshags, work, lwork, ierror)
 
             ! Dummy arguments
-            integer(ip), intent(in)     :: nlat
-            integer(ip), intent(in)     :: nlon
-            integer(ip), intent(in)     :: mode
-            integer(ip), intent(in)     :: nt
-            real(wp),    intent(in)     :: g(idg, jdg, nt)
-            integer(ip), intent(in)     :: idg
-            integer(ip), intent(in)     :: jdg
-            real(wp),    intent(out)    :: a(mdab, ndab, nt)
-            real(wp),    intent(out)    :: b(mdab, ndab, nt)
-            integer(ip), intent(in)     :: mdab
-            integer(ip), intent(in)     :: ndab
-            real(wp),    intent(inout)  :: wshags(lshags)
-            integer(ip), intent(in)     :: lshags
-            real(wp),    intent(inout)  :: work(lwork)
-            integer(ip), intent(in)     :: lwork
-            integer(ip), intent(out)    :: ierror
-
+            integer(ip), intent(in)   :: nlat
+            integer(ip), intent(in)   :: nlon
+            integer(ip), intent(in)   :: mode
+            integer(ip), intent(in)   :: nt
+            real(wp),    intent(in)   :: g(idg, jdg, nt)
+            integer(ip), intent(in)   :: idg
+            integer(ip), intent(in)   :: jdg
+            real(wp),    intent(out)  :: a(mdab, ndab, nt)
+            real(wp),    intent(out)  :: b(mdab, ndab, nt)
+            integer(ip), intent(in)   :: mdab
+            integer(ip), intent(in)   :: ndab
+            real(wp),    intent(in)   :: wshags(lshags)
+            integer(ip), intent(in)   :: lshags
+            real(wp),    intent(out)  :: work(lwork)
+            integer(ip), intent(in)   :: lwork
+            integer(ip), intent(out)  :: ierror
         end subroutine shags
 
         module subroutine shagsi(nlat, nlon, wshags, lshags, work, lwork, dwork, ldwork, ierror)
 
             ! Dummy arguments
-            integer(ip), intent(in)     :: nlat
-            integer(ip), intent(in)     :: nlon
-            real(wp),    intent(inout)  :: wshags(lshags)
-            integer(ip), intent(in)     :: lshags
-            real(wp),    intent(inout)  :: work(lwork)
-            integer(ip), intent(in)     :: lwork
-            real(wp),    intent(inout)  :: dwork(ldwork)
-            integer(ip), intent(in)     :: ldwork
-            integer(ip), intent(out)    :: ierror
-
+            integer(ip), intent(in)   :: nlat
+            integer(ip), intent(in)   :: nlon
+            real(wp),    intent(out)  :: wshags(lshags)
+            integer(ip), intent(in)   :: lshags
+            real(wp),    intent(out)  :: work(lwork)
+            integer(ip), intent(in)   :: lwork
+            real(wp),    intent(out)  :: dwork(ldwork)
+            integer(ip), intent(in)   :: ldwork
+            integer(ip), intent(out)  :: ierror
         end subroutine shagsi
 
         module subroutine shaec(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, &
             wshaec, lshaec, work, lwork, ierror)
 
             ! Dummy arguments
-            real(wp) :: a(mdab, ndab, *)
-            real(wp) :: b(mdab, ndab, *)
-            real(wp) :: g(idg, jdg, *)
-            integer(ip) :: idg
-            integer(ip) :: ierror
-            integer(ip) :: isym
-            integer(ip) :: jdg
-            integer(ip) :: lshaec
-            integer(ip) :: lwork
-            integer(ip) :: mdab
-            integer(ip) :: ndab
-            integer(ip) :: nlat
-            integer(ip) :: nln
-            integer(ip) :: nlon
-            integer(ip) :: nt
-            real(wp) :: work(lwork)
-            real(wp) :: wshaec(lshaec)
+            integer(ip), intent(in)   :: nlat
+            integer(ip), intent(in)   :: nlon
+            integer(ip), intent(in)   :: isym
+            integer(ip), intent(in)   :: nt
+            real(wp),    intent(in)   :: g(idg, jdg, nt)
+            integer(ip), intent(in)   :: idg
+            integer(ip), intent(in)   :: jdg
+            real(wp),    intent(out)  :: a(mdab, ndab, nt)
+            real(wp),    intent(out)  :: b(mdab, ndab, nt)
+            integer(ip), intent(in)   :: mdab
+            integer(ip), intent(in)   :: ndab
+            real(wp),    intent(in)   :: wshaec(lshaec)
+            integer(ip), intent(in)   :: lshaec
+            real(wp),    intent(out)  :: work(lwork)
+            integer(ip), intent(in)   :: lwork
+            integer(ip), intent(out)  :: ierror
         end subroutine shaec
 
         module subroutine shaeci(nlat, nlon, wshaec, lshaec, dwork, ldwork, ierror)
@@ -171,33 +168,35 @@ module scalar_analysis_routines
             wshagc, lshagc, work, lwork, ierror)
 
             ! Dummy arguments
-            real(wp) :: a(mdab, ndab, *)
-            real(wp) :: b(mdab, ndab,*)
-            real(wp) :: g(idg, jdg, *)
-            integer(ip) :: idg
-            integer(ip) :: ierror
-            integer(ip) :: isym
-            integer(ip) :: jdg
-            integer(ip) :: lshagc
-            integer(ip) :: lwork
-            integer(ip) :: mdab
-            integer(ip) :: ndab
-            integer(ip) :: nlat
-            integer(ip) :: nlon
-            integer(ip) :: nt
-            real(wp) :: work(lwork)
-            real(wp) :: wshagc(lshagc)
+            ! Dummy arguments
+            integer(ip), intent(in)   :: nlat
+            integer(ip), intent(in)   :: nlon
+            integer(ip), intent(in)   :: isym
+            integer(ip), intent(in)   :: nt
+            real(wp),    intent(in)   :: g(idg, jdg, nt)
+            integer(ip), intent(in)   :: idg
+            integer(ip), intent(in)   :: jdg
+            real(wp),    intent(out)  :: a(mdab, ndab, nt)
+            real(wp),    intent(out)  :: b(mdab, ndab, nt)
+            integer(ip), intent(in)   :: mdab
+            integer(ip), intent(in)   :: ndab
+            real(wp),    intent(in)   :: wshagc(lshagc)
+            integer(ip), intent(in)   :: lshagc
+            real(wp),    intent(out)  :: work(lwork)
+            integer(ip), intent(in)   :: lwork
+            integer(ip), intent(out)  :: ierror
         end subroutine shagc
 
         module subroutine shagci(nlat, nlon, wshagc, lshagc, dwork, ldwork, ierror)
 
             ! Dummy arguments
-            integer(ip) :: ldwork, ierror
-            integer(ip) :: lshagc
-            integer(ip) :: nlat
-            integer(ip) :: nlon
-            real(wp) :: wshagc(lshagc)
-            real(wp) :: dwork(ldwork)
+            integer(ip), intent(in)  :: nlat
+            integer(ip), intent(in)  :: nlon
+            real(wp),    intent(out) :: wshagc(lshagc)
+            integer(ip), intent(in)  :: lshagc
+            real(wp),    intent(out) :: dwork(ldwork)
+            integer(ip), intent(in)  :: ldwork
+            integer(ip), intent(out) :: ierror
         end subroutine shagci
     end interface
 

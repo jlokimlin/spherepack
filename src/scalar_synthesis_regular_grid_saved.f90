@@ -299,23 +299,22 @@ contains
         wshses,lshses,work,lwork,ierror)
 
         ! Dummy arguments
-
-        integer(ip), intent(in)     :: nlat
-        integer(ip), intent(in)     :: nlon
-        integer(ip), intent(in)     :: isym
-        integer(ip), intent(in)     :: nt
-        real(wp),    intent(out)    :: g(idg,jdg,nt)
-        integer(ip), intent(in)     :: idg
-        integer(ip), intent(in)     :: jdg
-        real(wp),    intent(inout)  :: a(mdab,ndab,nt)
-        real(wp),    intent(inout)  :: b(mdab,ndab,nt)
-        integer(ip), intent(in)     :: mdab
-        integer(ip), intent(in)     :: ndab
-        real(wp),    intent(inout)  :: wshses(lshses)
-        integer(ip), intent(in)     :: lshses
-        real(wp),    intent(inout)  :: work(lwork)
-        integer(ip), intent(in)     :: lwork
-        integer(ip), intent(out)    :: ierror
+        integer(ip), intent(in)  :: nlat
+        integer(ip), intent(in)  :: nlon
+        integer(ip), intent(in)  :: isym
+        integer(ip), intent(in)  :: nt
+        real(wp),    intent(out) :: g(idg,jdg,nt)
+        integer(ip), intent(in)  :: idg
+        integer(ip), intent(in)  :: jdg
+        real(wp),    intent(in)  :: a(mdab,ndab,nt)
+        real(wp),    intent(in)  :: b(mdab,ndab,nt)
+        integer(ip), intent(in)  :: mdab
+        integer(ip), intent(in)  :: ndab
+        real(wp),    intent(in)  :: wshses(lshses)
+        integer(ip), intent(in)  :: lshses
+        real(wp),    intent(out) :: work(lwork)
+        integer(ip), intent(in)  :: lwork
+        integer(ip), intent(out) :: ierror
 
         ! Local variables
         integer(ip) :: imid, ist, lpimn, ls, mmax, nln
@@ -448,23 +447,23 @@ contains
         idg,jdg,ge,go,work,whrfft)
 
         ! Dummy arguments
-        integer(ip), intent(in)     :: nlat
-        integer(ip), intent(in)     :: isym
-        integer(ip), intent(in)     :: nt
-        real(wp),    intent(inout)  :: g(idgs, jdgs, nt)
-        integer(ip), intent(in)     :: idgs
-        integer(ip), intent(in)     :: jdgs
-        real(wp),    intent(in)     :: a(mdab, ndab, nt)
-        real(wp),    intent(in)     :: b(mdab, ndab, nt)
-        integer(ip), intent(in)     :: mdab
-        integer(ip), intent(in)     :: ndab
-        real(wp),    intent(in)     :: p(imid,*)
-        integer(ip), intent(in)     :: idg
-        integer(ip), intent(in)     :: jdg
-        real(wp),    intent(inout)  :: ge(idg,jdg,*)
-        real(wp),    intent(inout)  :: go(idg,jdg,*)
-        real(wp),    intent(inout)  :: work(*)
-        real(wp),    intent(inout)  :: whrfft(*)
+        integer(ip), intent(in)  :: nlat
+        integer(ip), intent(in)  :: isym
+        integer(ip), intent(in)  :: nt
+        real(wp),    intent(out) :: g(idgs, jdgs, nt)
+        integer(ip), intent(in)  :: idgs
+        integer(ip), intent(in)  :: jdgs
+        real(wp),    intent(in)  :: a(mdab, ndab, nt)
+        real(wp),    intent(in)  :: b(mdab, ndab, nt)
+        integer(ip), intent(in)  :: mdab
+        integer(ip), intent(in)  :: ndab
+        real(wp),    intent(in)  :: p(imid,*)
+        integer(ip), intent(in)  :: idg
+        integer(ip), intent(in)  :: jdg
+        real(wp),    intent(out) :: ge(idg,jdg,nt)
+        real(wp),    intent(out) :: go(idg,jdg,nt)
+        real(wp),    intent(out) :: work(*)
+        real(wp),    intent(in)  :: whrfft(*)
 
         ! Local variables
         integer(ip)    :: i, j, imid, imm1, k, ls

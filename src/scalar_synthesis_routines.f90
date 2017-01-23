@@ -60,23 +60,22 @@ module scalar_synthesis_routines
             wshses,lshses,work,lwork,ierror)
 
             ! Dummy arguments
-            integer(ip), intent(in)     :: nlat
-            integer(ip), intent(in)     :: nlon
-            integer(ip), intent(in)     :: isym
-            integer(ip), intent(in)     :: nt
-            real(wp),    intent(out)    :: g(idg,jdg,nt)
-            integer(ip), intent(in)     :: idg
-            integer(ip), intent(in)     :: jdg
-            real(wp),    intent(inout)  :: a(mdab,ndab,nt)
-            real(wp),    intent(inout)  :: b(mdab,ndab,nt)
-            integer(ip), intent(in)     :: mdab
-            integer(ip), intent(in)     :: ndab
-            real(wp),    intent(inout)  :: wshses(lshses)
-            integer(ip), intent(in)     :: lshses
-            real(wp),    intent(inout)  :: work(lwork)
-            integer(ip), intent(in)     :: lwork
-            integer(ip), intent(out)    :: ierror
-
+            integer(ip), intent(in)  :: nlat
+            integer(ip), intent(in)  :: nlon
+            integer(ip), intent(in)  :: isym
+            integer(ip), intent(in)  :: nt
+            real(wp),    intent(out) :: g(idg,jdg,nt)
+            integer(ip), intent(in)  :: idg
+            integer(ip), intent(in)  :: jdg
+            real(wp),    intent(in)  :: a(mdab,ndab,nt)
+            real(wp),    intent(in)  :: b(mdab,ndab,nt)
+            integer(ip), intent(in)  :: mdab
+            integer(ip), intent(in)  :: ndab
+            real(wp),    intent(in)  :: wshses(lshses)
+            integer(ip), intent(in)  :: lshses
+            real(wp),    intent(out) :: work(lwork)
+            integer(ip), intent(in)  :: lwork
+            integer(ip), intent(out) :: ierror
         end subroutine shses
 
         module subroutine shsesi(nlat,nlon,wshses,lshses,work,lwork,dwork, &
@@ -92,118 +91,122 @@ module scalar_synthesis_routines
             real(wp),    intent(out) :: dwork(ldwork)
             integer(ip), intent(in)  :: ldwork
             integer(ip), intent(out) :: ierror
-
         end subroutine shsesi
 
         module subroutine shsgs(nlat, nlon, mode, nt, g, idg, jdg, a, b, mdab, ndab, &
             wshsgs, lshsgs, work, lwork, ierror)
 
             ! Dummy arguments
-            integer(ip), intent(in)      :: nlat
-            integer(ip), intent(in)      :: nlon
-            integer(ip), intent(in)      :: mode
-            integer(ip), intent(in)      :: nt
-            real(wp),    intent(out)     :: g(idg, jdg, nt)
-            integer(ip), intent(in)      :: idg
-            integer(ip), intent(in)      :: jdg
-            real(wp),    intent(in)      :: a(mdab, ndab, nt)
-            real(wp),    intent(in)      :: b(mdab, ndab, nt)
-            integer(ip), intent(in)      :: mdab
-            integer(ip), intent(in)      :: ndab
-            real(wp),    intent(inout)   :: wshsgs(lshsgs)
-            integer(ip), intent(in)      :: lshsgs
-            real(wp),    intent(inout)   :: work(lwork)
-            integer(ip), intent(in)      :: lwork
-            integer(ip), intent(out)     :: ierror
-
+            integer(ip), intent(in)  :: nlat
+            integer(ip), intent(in)  :: nlon
+            integer(ip), intent(in)  :: mode
+            integer(ip), intent(in)  :: nt
+            real(wp),    intent(out) :: g(idg,jdg,nt)
+            integer(ip), intent(in)  :: idg
+            integer(ip), intent(in)  :: jdg
+            real(wp),    intent(in)  :: a(mdab,ndab,nt)
+            real(wp),    intent(in)  :: b(mdab,ndab,nt)
+            integer(ip), intent(in)  :: mdab
+            integer(ip), intent(in)  :: ndab
+            real(wp),    intent(in)  :: wshsgs(lshsgs)
+            integer(ip), intent(in)  :: lshsgs
+            real(wp),    intent(out) :: work(lwork)
+            integer(ip), intent(in)  :: lwork
+            integer(ip), intent(out) :: ierror
         end subroutine shsgs
 
         module subroutine shsgsi(nlat, nlon, wshsgs, lshsgs, work, lwork, dwork, ldwork, ierror)
 
             ! Dummy arguments
-            integer(ip), intent(in)     :: nlat
-            integer(ip), intent(in)     :: nlon
-            real(wp),    intent(inout)  :: wshsgs(lshsgs)
-            integer(ip), intent(in)     :: lshsgs
-            real(wp),    intent(inout)  :: work(lwork)
-            integer(ip), intent(in)     :: lwork
-            real(wp),    intent(inout)  :: dwork(ldwork)
-            integer(ip), intent(in)     :: ldwork
-            integer(ip), intent(out)    :: ierror
-
+            integer(ip), intent(in)   :: nlat
+            integer(ip), intent(in)   :: nlon
+            real(wp),    intent(out)  :: wshsgs(lshsgs)
+            integer(ip), intent(in)   :: lshsgs
+            real(wp),    intent(out)  :: work(lwork)
+            integer(ip), intent(in)   :: lwork
+            real(wp),    intent(out)  :: dwork(ldwork)
+            integer(ip), intent(in)   :: ldwork
+            integer(ip), intent(out)  :: ierror
         end subroutine shsgsi
 
         module subroutine shsec(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, &
             wshsec, lshsec, work, lwork, ierror)
-            real(wp) :: a(mdab, ndab, nt)
-            real(wp) :: b(mdab, ndab, nt)
-            real(wp) :: g(idg, jdg, nt)
-            integer(ip) :: idg
-            integer(ip) :: ierror
-            integer(ip) :: isym
-            integer(ip) :: jdg
-            integer(ip) :: lshsec
-            integer(ip) :: lwork
-            integer(ip) :: mdab
-            integer(ip) :: ndab
-            integer(ip) :: nlat
-            integer(ip) :: nln
-            integer(ip) :: nlon
-            integer(ip) :: nt
-            real(wp) :: work(lwork)
-            real(wp) :: wshsec(lshsec)
+
+            ! Dummy arguments
+            integer(ip), intent(in)  :: nlat
+            integer(ip), intent(in)  :: nlon
+            integer(ip), intent(in)  :: isym
+            integer(ip), intent(in)  :: nt
+            real(wp),    intent(out) :: g(idg,jdg,nt)
+            integer(ip), intent(in)  :: idg
+            integer(ip), intent(in)  :: jdg
+            real(wp),    intent(in)  :: a(mdab,ndab,nt)
+            real(wp),    intent(in)  :: b(mdab,ndab,nt)
+            integer(ip), intent(in)  :: mdab
+            integer(ip), intent(in)  :: ndab
+            real(wp),    intent(in)  :: wshsec(lshsec)
+            integer(ip), intent(in)  :: lshsec
+            real(wp),    intent(out) :: work(lwork)
+            integer(ip), intent(in)  :: lwork
+            integer(ip), intent(out) :: ierror
         end subroutine shsec
 
         module subroutine shseci(nlat, nlon, wshsec, lshsec, dwork, ldwork, ierror)
-            integer(ip) :: ierror
-            integer(ip) :: ldwork
-            integer(ip) :: lshsec
-            integer(ip) :: nlat
-            integer(ip) :: nlon
-            real(wp) :: wshsec(lshsec)
-            real(wp) :: dwork(ldwork)
+
+            ! Dummy arguments
+            integer(ip), intent(in)  :: nlat
+            integer(ip), intent(in)  :: nlon
+            real(wp),    intent(out) :: wshsec(lshsec)
+            integer(ip), intent(in)  :: lshsec
+            real(wp),    intent(out) :: dwork(ldwork)
+            integer(ip), intent(in)  :: ldwork
+            integer(ip), intent(out) :: ierror
         end subroutine shseci
 
         module subroutine shsgc(nlat, nlon, mode, nt, g, idg, jdg, a, b, mdab, ndab, &
             wshsgc, lshsgc, work, lwork, ierror)
-            real(wp) :: a(mdab, ndab, nt)
-            real(wp) :: b(mdab, ndab, nt)
-            real(wp) ::  g(idg, jdg, nt)
-            integer(ip) :: idg
-            integer(ip) :: ierror
-            integer(ip) :: jdg
-            integer(ip) :: lshsgc
-            integer(ip) :: lwork
-            integer(ip) :: mdab
-            integer(ip) :: mode
-            integer(ip) :: ndab
-            integer(ip) :: nlat
-            integer(ip) :: nlon
-            integer(ip) :: nt
-            real(wp) :: work(lwork)
-            real(wp) :: wshsgc(lshsgc)
+
+            ! Dummy arguments
+            integer(ip), intent(in)  :: nlat
+            integer(ip), intent(in)  :: nlon
+            integer(ip), intent(in)  :: mode
+            integer(ip), intent(in)  :: nt
+            real(wp),    intent(out) :: g(idg,jdg,nt)
+            integer(ip), intent(in)  :: idg
+            integer(ip), intent(in)  :: jdg
+            real(wp),    intent(in)  :: a(mdab,ndab,nt)
+            real(wp),    intent(in)  :: b(mdab,ndab,nt)
+            integer(ip), intent(in)  :: mdab
+            integer(ip), intent(in)  :: ndab
+            real(wp),    intent(in)  :: wshsgc(lshsgc)
+            integer(ip), intent(in)  :: lshsgc
+            real(wp),    intent(out) :: work(lwork)
+            integer(ip), intent(in)  :: lwork
+            integer(ip), intent(out) :: ierror
         end subroutine shsgc
 
         module subroutine shsgci(nlat, nlon, wshsgc, lshsgc, dwork, ldwork, ierror)
-            integer(ip) :: ierror
-            integer(ip) :: ldwork
-            integer(ip) :: lshsgc
-            integer(ip) :: nlat
-            integer(ip) :: nlon
-            real(wp)    :: wshsgc(lshsgc)
-            real(wp)    :: dwork(ldwork)
-        end subroutine shsgci
 
+            ! Dummy arguments
+            integer(ip), intent(in)  :: nlat
+            integer(ip), intent(in)  :: nlon
+            real(wp),    intent(out) :: wshsgc(lshsgc)
+            integer(ip), intent(in)  :: lshsgc
+            real(wp),    intent(out) :: dwork(ldwork)
+            integer(ip), intent(in)  :: ldwork
+            integer(ip), intent(out) :: ierror
+        end subroutine shsgci
     end interface
 
 contains
 
-    pure function get_lshses(nlat, nlon) result (return_value)
+    pure function get_lshses(nlat, nlon) &
+        result (return_value)
 
         ! Dummy arguments
         integer(ip), intent(in)  :: nlat
         integer(ip), intent(in)  :: nlon
-        integer(ip)               :: return_value
+        integer(ip)              :: return_value
 
         ! Local variables
         integer(ip)         :: l1, l2
@@ -216,7 +219,8 @@ contains
 
     end function get_lshses
 
-    pure function get_lwork_shses(nlat, nlon) result (return_value)
+    pure function get_lwork_shses(nlat, nlon) &
+        result (return_value)
 
         ! Dummy arguments
         integer(ip), intent(in)  :: nlat
@@ -233,24 +237,20 @@ contains
 
     end function get_lwork_shses
 
-
-    pure function get_ldwork_shses(nlat) result (return_value)
+    pure function get_ldwork_shses(nlat) &
+        result (return_value)
 
         ! Dummy arguments
-
         integer(ip), intent(in)  :: nlat
         integer(ip)               :: return_value
-
 
         return_value = nlat + 1
 
     end function get_ldwork_shses
 
-
     pure function get_legendre_workspace_size_shses(nlat, nlon, nt, ityp) result (return_value)
 
         ! Dummy arguments
-
         integer(ip),           intent(in) :: nlat
         integer(ip),           intent(in) :: nlon
         integer(ip), optional, intent(in) :: nt
@@ -258,9 +258,7 @@ contains
         integer(ip)                        :: return_value
 
         ! Local variables
-
         integer(ip) :: nt_op, ityp_op, l2
-
 
         !
         !  Address optional arguments

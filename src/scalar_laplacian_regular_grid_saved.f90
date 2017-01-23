@@ -346,33 +346,28 @@ contains
     subroutine slapes_lower_routine(nlat, nlon, isym, nt, slap, ids, jds, a, b, mdab, ndab, &
         alap, blap, mmax, fnn, wsave, lsave, wk, lwk, ierror)
 
-        real(wp) :: a
-        real(wp) :: alap
-        real(wp) :: b
-        real(wp) :: blap
+        ! Dummy arguments
+        integer(ip), intent(in)  :: nlat
+        integer(ip), intent(in)  :: nlon
+        integer(ip), intent(in)  :: isym
+        integer(ip), intent(in)  :: nt
+        real(wp),    intent(out) :: slap(ids, jds, nt)
+        integer(ip), intent(in)  :: ids
+        integer(ip), intent(in)  :: jds
+        real(wp),    intent(in)  :: a(mdab, ndab, nt)
+        real(wp),    intent(in)  :: b(mdab, ndab, nt)
+        integer(ip), intent(in)  :: mdab
+        integer(ip), intent(in)  :: ndab
+        real(wp),    intent(out) :: alap(mmax, nlat, nt)
+        real(wp),    intent(out) :: blap(mmax, nlat, nt)
+        integer(ip), intent(in)  :: mmax
+        real(wp),    intent(out) :: fnn(nlat)
+        real(wp),    intent(in)  :: wsave(lsave)
+        integer(ip), intent(in)  :: lsave
+        real(wp),    intent(out) :: wk(lwk)
+        integer(ip), intent(in)  :: lwk
+        integer(ip), intent(out) :: ierror
         
-        real(wp) :: fnn
-        integer(ip) :: ids
-        integer(ip) :: ierror
-        integer(ip) :: isym
-        integer(ip) :: jds
-        
-        integer(ip) :: lsave
-        integer(ip) :: lwk
-        
-        integer(ip) :: mdab
-        integer(ip) :: mmax
-        
-        integer(ip) :: ndab
-        integer(ip) :: nlat
-        integer(ip) :: nlon
-        integer(ip) :: nt
-        real(wp) :: slap
-        real(wp) :: wk
-        real(wp) :: wsave
-        dimension slap(ids, jds, nt), a(mdab, ndab, nt), b(mdab, ndab, nt)
-        dimension alap(mmax, nlat, nt), blap(mmax, nlat, nt), fnn(nlat)
-
         call perform_setup_for_scalar_laplacian(a, b, alap, blap, fnn)
 
         ! Synthesize alap, blap into slap

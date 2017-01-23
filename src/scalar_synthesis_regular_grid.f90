@@ -337,31 +337,36 @@ contains
 
     module subroutine shsec(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, &
         wshsec, lshsec, work, lwork, ierror)
-        real(wp) :: a(mdab, ndab, nt)
-        real(wp) :: b(mdab, ndab, nt)
-        real(wp) :: g(idg, jdg, nt)
-        integer(ip) :: idg
-        integer(ip) :: ierror
+
+        ! Dummy arguments
+        integer(ip), intent(in)  :: nlat
+        integer(ip), intent(in)  :: nlon
+        integer(ip), intent(in)  :: isym
+        integer(ip), intent(in)  :: nt
+        real(wp),    intent(out) :: g(idg,jdg,nt)
+        integer(ip), intent(in)  :: idg
+        integer(ip), intent(in)  :: jdg
+        real(wp),    intent(in)  :: a(mdab,ndab,nt)
+        real(wp),    intent(in)  :: b(mdab,ndab,nt)
+        integer(ip), intent(in)  :: mdab
+        integer(ip), intent(in)  :: ndab
+        real(wp),    intent(in)  :: wshsec(lshsec)
+        integer(ip), intent(in)  :: lshsec
+        real(wp),    intent(out) :: work(lwork)
+        integer(ip), intent(in)  :: lwork
+        integer(ip), intent(out) :: ierror
+
+        ! Local variables
         integer(ip) :: imid
         integer(ip) :: ist
-        integer(ip) :: isym
         integer(ip) :: iw1
-        integer(ip) :: jdg
         integer(ip) :: labc
         integer(ip) :: ls
-        integer(ip) :: lshsec
-        integer(ip) :: lwork
         integer(ip) :: lzz1
-        integer(ip) :: mdab
         integer(ip) :: mmax
-        integer(ip) :: ndab
-        integer(ip) :: nlat
         integer(ip) :: nln
-        integer(ip) :: nlon
-        integer(ip) :: nt
-        real(wp) :: work(lwork)
-        real(wp) :: wshsec(lshsec)
 
+        ! Check input arguments
         ierror = 1
         if (nlat < 3) return
         ierror = 2
@@ -400,19 +405,22 @@ contains
     end subroutine shsec
 
     module subroutine shseci(nlat, nlon, wshsec, lshsec, dwork, ldwork, ierror)
-        integer(ip) :: ierror
+
+        ! Dummy arguments
+        integer(ip), intent(in)  :: nlat
+        integer(ip), intent(in)  :: nlon
+        real(wp),    intent(out) :: wshsec(lshsec)
+        integer(ip), intent(in)  :: lshsec
+        real(wp),    intent(out) :: dwork(ldwork)
+        integer(ip), intent(in)  :: ldwork
+        integer(ip), intent(out) :: ierror
+
+        ! Local variables
         integer(ip) :: imid
         integer(ip) :: iw1
         integer(ip) :: labc
-        integer(ip) :: ldwork
-        integer(ip) :: lshsec
         integer(ip) :: lzz1
         integer(ip) :: mmax
-        integer(ip) :: nlat
-        integer(ip) :: nlon
-        real(wp) :: wshsec(lshsec)
-        real(wp) :: dwork(ldwork)
-
         type(SpherepackAux) :: sphere_aux
 
         ierror = 1

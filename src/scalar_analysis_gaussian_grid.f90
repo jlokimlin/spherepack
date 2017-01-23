@@ -314,22 +314,24 @@ contains
     ! as needed in this version.
     module subroutine shagc(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, &
         wshagc, lshagc, work, lwork, ierror)
-        real(wp) :: a(mdab, ndab, *)
-        real(wp) :: b(mdab, ndab,*)
-        real(wp) :: g(idg, jdg, *)
-        integer(ip) :: idg
-        integer(ip) :: ierror
-        integer(ip) :: isym
-        integer(ip) :: jdg
-        integer(ip) :: lshagc
-        integer(ip) :: lwork
-        integer(ip) :: mdab
-        integer(ip) :: ndab
-        integer(ip) :: nlat
-        integer(ip) :: nlon
-        integer(ip) :: nt
-        real(wp) :: work(lwork)
-        real(wp) :: wshagc(lshagc)
+
+        ! Dummy arguments
+        integer(ip), intent(in)   :: nlat
+        integer(ip), intent(in)   :: nlon
+        integer(ip), intent(in)   :: isym
+        integer(ip), intent(in)   :: nt
+        real(wp),    intent(in)   :: g(idg, jdg, nt)
+        integer(ip), intent(in)   :: idg
+        integer(ip), intent(in)   :: jdg
+        real(wp),    intent(out)  :: a(mdab, ndab, nt)
+        real(wp),    intent(out)  :: b(mdab, ndab, nt)
+        integer(ip), intent(in)   :: mdab
+        integer(ip), intent(in)   :: ndab
+        real(wp),    intent(in)   :: wshagc(lshagc)
+        integer(ip), intent(in)   :: lshagc
+        real(wp),    intent(out)  :: work(lwork)
+        integer(ip), intent(in)   :: lwork
+        integer(ip), intent(out)  :: ierror
 
         ! Local variables
         integer(ip) :: ifft
@@ -389,19 +391,22 @@ contains
 
     end subroutine shagc
 
+    ! Purpose:
+    !
+    ! This subroutine must be called before calling shagc with
+    ! fixed nlat, nlon. it precomputes quantites such as the gaussian
+    ! points and weights, m=0, m=1 legendre polynomials, recursion
+    ! recursion coefficients.
     module subroutine shagci(nlat, nlon, wshagc, lshagc, dwork, ldwork, ierror)
 
-        integer(ip) :: ldwork
-        integer(ip) :: lshagc
-        integer(ip) :: nlat
-        integer(ip) :: nlon
-        real(wp) :: wshagc(lshagc)
-        real(wp) :: dwork(ldwork)
-
-        !     this subroutine must be called before calling shagc with
-        !     fixed nlat, nlon. it precomputes quantites such as the gaussian
-        !     points and weights, m=0, m=1 legendre polynomials, recursion
-        !     recursion coefficients.
+        ! Dummy arguments
+        integer(ip), intent(in)  :: nlat
+        integer(ip), intent(in)  :: nlon
+        real(wp),    intent(out) :: wshagc(lshagc)
+        integer(ip), intent(in)  :: lshagc
+        real(wp),    intent(out) :: dwork(ldwork)
+        integer(ip), intent(in)  :: ldwork
+        integer(ip), intent(out) :: ierror
 
         ! Local variables
         integer(ip) :: i1

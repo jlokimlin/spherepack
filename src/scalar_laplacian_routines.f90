@@ -68,7 +68,7 @@ module scalar_laplacian_routines
         end subroutine slapes
 
         module subroutine slapgc(nlat, nlon, isym, nt, slap, ids, jds, a, b, mdab, ndab, &
-            wshsec, lshsec, work, lwork, ierror)
+            wshsgc, lshsgc, work, lwork, ierror)
 
             ! Dummy arguments
             integer(ip), intent(in)  :: nlat
@@ -82,7 +82,7 @@ module scalar_laplacian_routines
             real(wp),    intent(in)  :: b(mdab, ndab, nt)
             integer(ip), intent(in)  :: mdab
             integer(ip), intent(in)  :: ndab
-            
+            real(wp),    intent(in)  :: wshsgc(lshsgc)
             integer(ip), intent(in)  :: lshsgc
             real(wp),    intent(out) :: work(lwork)
             integer(ip), intent(in)  :: lwork

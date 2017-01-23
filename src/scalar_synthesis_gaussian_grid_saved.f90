@@ -297,28 +297,25 @@ contains
         wshsgs, lshsgs, work, lwork, ierror)
 
         ! Dummy arguments
-
-        integer(ip), intent(in)      :: nlat
-        integer(ip), intent(in)      :: nlon
-        integer(ip), intent(in)      :: mode
-        integer(ip), intent(in)      :: nt
-        real(wp),    intent(out)     :: g(idg, jdg, nt)
-        integer(ip), intent(in)      :: idg
-        integer(ip), intent(in)      :: jdg
-        real(wp),    intent(in)      :: a(mdab, ndab, nt)
-        real(wp),    intent(in)      :: b(mdab, ndab, nt)
-        integer(ip), intent(in)      :: mdab
-        integer(ip), intent(in)      :: ndab
-        real(wp),    intent(inout)   :: wshsgs(lshsgs)
-        integer(ip), intent(in)      :: lshsgs
-        real(wp),    intent(inout)   :: work(lwork)
-        integer(ip), intent(in)      :: lwork
-        integer(ip), intent(out)     :: ierror
+        integer(ip), intent(in)  :: nlat
+        integer(ip), intent(in)  :: nlon
+        integer(ip), intent(in)  :: mode
+        integer(ip), intent(in)  :: nt
+        real(wp),    intent(out) :: g(idg,jdg,nt)
+        integer(ip), intent(in)  :: idg
+        integer(ip), intent(in)  :: jdg
+        real(wp),    intent(in)  :: a(mdab,ndab,nt)
+        real(wp),    intent(in)  :: b(mdab,ndab,nt)
+        integer(ip), intent(in)  :: mdab
+        integer(ip), intent(in)  :: ndab
+        real(wp),    intent(in)  :: wshsgs(lshsgs)
+        integer(ip), intent(in)  :: lshsgs
+        real(wp),    intent(out) :: work(lwork)
+        integer(ip), intent(in)  :: lwork
+        integer(ip), intent(out) :: ierror
 
         ! Local variables
-
         integer(ip) :: mtrunc, l1, l2, lp, iw, lat, late, ifft, ipmn
-
 
         ! Set limit on m subscript
         mtrunc = min((nlon+2)/2, nlat)
@@ -390,33 +387,29 @@ contains
 
     end subroutine shsgs
 
+    ! Purpose
+    !
+    ! This subroutine must be called before calling shags or shsgs with
+    ! fixed nlat, nlon. it precomputes the gaussian weights, points
+    ! and all necessary legendre polys and stores them in wshsgs.
+    ! these quantities must be preserved when calling shsgs
+    ! repeatedly with fixed nlat, nlon.
+    !
     module subroutine shsgsi(nlat, nlon, wshsgs, lshsgs, work, lwork, dwork, ldwork, ierror)
-        !
-        ! Remark:
-        !
-        ! This subroutine must be called before calling shags or shsgs with
-        ! fixed nlat, nlon. it precomputes the gaussian weights, points
-        ! and all necessary legendre polys and stores them in wshsgs.
-        ! these quantities must be preserved when calling shsgs
-        ! repeatedly with fixed nlat, nlon.
-        !
 
         ! Dummy arguments
-
-        integer(ip), intent(in)     :: nlat
-        integer(ip), intent(in)     :: nlon
-        real(wp),    intent(inout)  :: wshsgs(lshsgs)
-        integer(ip), intent(in)     :: lshsgs
-        real(wp),    intent(inout)  :: work(lwork)
-        integer(ip), intent(in)     :: lwork
-        real(wp),    intent(inout)  :: dwork(ldwork)
-        integer(ip), intent(in)     :: ldwork
-        integer(ip), intent(out)    :: ierror
+        integer(ip), intent(in)   :: nlat
+        integer(ip), intent(in)   :: nlon
+        real(wp),    intent(out)  :: wshsgs(lshsgs)
+        integer(ip), intent(in)   :: lshsgs
+        real(wp),    intent(out)  :: work(lwork)
+        integer(ip), intent(in)   :: lwork
+        real(wp),    intent(out)  :: dwork(ldwork)
+        integer(ip), intent(in)   :: ldwork
+        integer(ip), intent(out)  :: ierror
 
         ! Local variables
-
         integer(ip) :: ntrunc, l1, l2, lp, ldw, late, ipmnf
-
 
         ! Set triangular truncation limit for spherical harmonic basis
         ntrunc = min((nlon+2)/2, nlat)
@@ -467,23 +460,22 @@ contains
 
     end subroutine shsgsi
 
+    !
+    ! Purpose:
+    !
+    ! Reconstruct fourier coefficients in g on gaussian grid
+    ! using coefficients in a, b
+    !
     subroutine reconstruct_fft_coefficients(nlat, nlon, l, lat, mode, gs, idg, jdg, nt, a, b, mdab, &
         ndab, wfft, pmn, late, g, work)
-        !
-        ! Purpose:
-        !
-        ! Reconstruct fourier coefficients in g on gaussian grid
-        ! using coefficients in a, b
-        !
 
         ! Dummy arguments
-
         integer(ip), intent(in)     :: nlat
         integer(ip), intent(in)     :: nlon
         integer(ip), intent(in)     :: l
         integer(ip), intent(in)     :: lat
         integer(ip), intent(in)     :: mode
-        real(wp),    intent(inout)  :: gs(idg, jdg, nt)
+        real(wp),    intent(out)    :: gs(idg, jdg, nt)
         integer(ip), intent(in)     :: idg
         integer(ip), intent(in)     :: jdg
         integer(ip), intent(in)     :: nt
@@ -491,13 +483,13 @@ contains
         real(wp),    intent(in)     :: b(mdab, ndab, nt)
         integer(ip), intent(in)     :: mdab
         integer(ip), intent(in)     :: ndab
-        real(wp),    intent(inout)  :: wfft(*)
-        real(wp),    intent(inout)  :: pmn(late,*)
+        real(wp),    intent(in)     :: wfft(*)
+        real(wp),    intent(in)     :: pmn(late,*)
         integer(ip), intent(in)     :: late
         real(wp),    intent(out)    :: g(lat, nlon, nt)
-        real(wp),    intent(inout)  :: work(*)
+        real(wp),    intent(out)    :: work(*)
 
-        ! Dummy arguments
+        ! Local variables
         integer(ip)    :: i, j, k, m, mn, is, ms, ns, lm1, nl2
         integer(ip)    :: lp1, mp1, np1, mp2, meo, mml1
         real(wp)       :: t1, t2, t3, t4

@@ -322,38 +322,33 @@ contains
         mdab, ndab, wshaes, lshaes, work, lwork, ierror)
 
         ! Dummy arguments
-        integer(ip), intent(in)     :: nlat
-        integer(ip), intent(in)     :: nlon
-        integer(ip), intent(in)     :: isym
-        integer(ip), intent(in)     :: nt
-        real(wp),    intent(in)     :: g(idg, jdg, nt)
-        integer(ip), intent(in)     :: idg
-        integer(ip), intent(in)     :: jdg
-        real(wp),    intent(out)    :: a(mdab, ndab, nt)
-        real(wp),    intent(out)    :: b(mdab, ndab, nt)
-        integer(ip), intent(in)     :: mdab
-        integer(ip), intent(in)     :: ndab
-        real(wp),    intent(inout)  :: wshaes(lshaes)
-        integer(ip), intent(in)     :: lshaes
-        real(wp),    intent(inout)  :: work(lwork)
-        integer(ip), intent(in)     :: lwork
-        integer(ip), intent(out)    :: ierror
+        integer(ip), intent(in)   :: nlat
+        integer(ip), intent(in)   :: nlon
+        integer(ip), intent(in)   :: isym
+        integer(ip), intent(in)   :: nt
+        real(wp),    intent(in)   :: g(idg, jdg, nt)
+        integer(ip), intent(in)   :: idg
+        integer(ip), intent(in)   :: jdg
+        real(wp),    intent(out)  :: a(mdab, ndab, nt)
+        real(wp),    intent(out)  :: b(mdab, ndab, nt)
+        integer(ip), intent(in)   :: mdab
+        integer(ip), intent(in)   :: ndab
+        real(wp),    intent(in)   :: wshaes(lshaes)
+        integer(ip), intent(in)   :: lshaes
+        real(wp),    intent(out)  :: work(lwork)
+        integer(ip), intent(in)   :: lwork
+        integer(ip), intent(out)  :: ierror
 
         ! Local variables
         integer(ip) :: ist, mmax, imid, idz, lzimn, ls, nln
 
-
-        !
         !  Set constants
-        !
         mmax = min(nlat, nlon/2+1)
         imid = (nlat+1)/2
         idz = (mmax*(2*nlat-mmax+1))/2
         lzimn = idz*imid
 
-        !
         !  Set calling argument for analysis
-        !
         select case (isym)
             case (0)
                 ls = nlat
@@ -365,9 +360,7 @@ contains
 
         nln = nt*ls*nlon
 
-        !
         !  Check validity of input arguments
-        !
         if (nlat < 3) then
             ierror = 1
             return
@@ -503,18 +496,18 @@ contains
         real(wp),    intent(in)     :: g(idgs, jdgs, nt)
         integer(ip), intent(in)     :: idgs
         integer(ip), intent(in)     :: jdgs
-        real(wp),    intent(inout)  :: a(mdab, ndab, nt)
-        real(wp),    intent(inout)  :: b(mdab, ndab, nt)
+        real(wp),    intent(out)  :: a(mdab, ndab, nt)
+        real(wp),    intent(out)  :: b(mdab, ndab, nt)
         integer(ip), intent(in)     :: mdab
         integer(ip), intent(in)     :: ndab
-        real(wp),    intent(inout)  :: z(idz, *)
+        real(wp),    intent(in)  :: z(idz, *)
         integer(ip), intent(in)     :: idz
         integer(ip), intent(in)     :: idg
         integer(ip), intent(in)     :: jdg
-        real(wp),    intent(inout)  :: ge(idg, jdg, *)
-        real(wp),    intent(inout)  :: go(idg, jdg, *)
-        real(wp),    intent(inout)  :: work(*)
-        real(wp),    intent(inout)  :: whrfft(*)
+        real(wp),    intent(out)  :: ge(idg, jdg, *)
+        real(wp),    intent(out)  :: go(idg, jdg, *)
+        real(wp),    intent(out)  :: work(*)
+        real(wp),    intent(in)  :: whrfft(*)
 
         ! Local variables
 

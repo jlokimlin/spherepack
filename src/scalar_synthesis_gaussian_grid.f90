@@ -289,34 +289,37 @@ submodule(scalar_synthesis_routines) scalar_synthesis_gaussian_grid
 
 contains
 
+    ! Purpose:
+    !
+    ! This subroutine performs the spherical harmonic synthesis on
+    ! a gaussian grid using the coefficients in array(s) a, b and returns
+    ! the results in array(s) g.  the legendre polynomials are computed
+    ! as needed in this version.
+    !
     module subroutine shsgc(nlat, nlon, mode, nt, g, idg, jdg, a, b, mdab, ndab, &
         wshsgc, lshsgc, work, lwork, ierror)
-        real(wp) :: a(mdab, ndab, nt)
-        real(wp) :: b(mdab, ndab, nt)
-        real(wp) ::  g(idg, jdg, nt)
-        integer(ip) :: idg
-        integer(ip) :: ierror
-        integer(ip) :: ipmn
-        integer(ip) :: jdg
-        integer(ip) :: lshsgc
-        integer(ip) :: lwork
-        integer(ip) :: mdab
-        integer(ip) :: mode
-        integer(ip) :: ndab
-        integer(ip) :: nlat
-        integer(ip) :: nlon
-        integer(ip) :: nt
-        real(wp) :: work(lwork)
-        real(wp) :: wshsgc(lshsgc)
+
+        ! Dummy arguments
+        integer(ip), intent(in)  :: nlat
+        integer(ip), intent(in)  :: nlon
+        integer(ip), intent(in)  :: mode
+        integer(ip), intent(in)  :: nt
+        real(wp),    intent(out) :: g(idg,jdg,nt)
+        integer(ip), intent(in)  :: idg
+        integer(ip), intent(in)  :: jdg
+        real(wp),    intent(in)  :: a(mdab,ndab,nt)
+        real(wp),    intent(in)  :: b(mdab,ndab,nt)
+        integer(ip), intent(in)  :: mdab
+        integer(ip), intent(in)  :: ndab
+        real(wp),    intent(in)  :: wshsgc(lshsgc)
+        integer(ip), intent(in)  :: lshsgc
+        real(wp),    intent(out) :: work(lwork)
+        integer(ip), intent(in)  :: lwork
+        integer(ip), intent(out) :: ierror
 
         ! Local variables
-        integer(ip) :: ifft, l, l1, l2, lat, late
+        integer(ip) :: ipmn, ifft, l, l1, l2, lat, late
 
-        !     subroutine shsgc performs the spherical harmonic synthesis on
-        !     a gaussian grid using the coefficients in array(s) a, b and returns
-        !     the results in array(s) g.  the legendre polynomials are computed
-        !     as needed in this version.
-        !
         ! Check input arguments
         ierror = 1
         if (nlat < 3) return
@@ -364,19 +367,22 @@ contains
 
     end subroutine shsgc
 
+    ! Purpose:
+    !
+    ! This subroutine must be called before calling shsgc with
+    ! fixed nlat, nlon. it precomputes quantites such as the gaussian
+    ! points and weights, m=0, m=1 legendre polynomials, recursion
+    ! recursion coefficients.
     module subroutine shsgci(nlat, nlon, wshsgc, lshsgc, dwork, ldwork, ierror)
-        integer(ip) :: ierror
-        integer(ip) :: ldwork
-        integer(ip) :: lshsgc
-        integer(ip) :: nlat
-        integer(ip) :: nlon
-        real(wp)    :: wshsgc(lshsgc)
-        real(wp)    :: dwork(ldwork)
 
-        !     this subroutine must be called before calling shsgc with
-        !     fixed nlat, nlon. it precomputes quantites such as the gaussian
-        !     points and weights, m=0, m=1 legendre polynomials, recursion
-        !     recursion coefficients.
+        ! Dummy arguments
+        integer(ip), intent(in)  :: nlat
+        integer(ip), intent(in)  :: nlon
+        real(wp),    intent(out) :: wshsgc(lshsgc)
+        integer(ip), intent(in)  :: lshsgc
+        real(wp),    intent(out) :: dwork(ldwork)
+        integer(ip), intent(in)  :: ldwork
+        integer(ip), intent(out) :: ierror
 
         ! Local variables
         integer(ip) :: i1
@@ -431,7 +437,6 @@ contains
 
     subroutine shsgc_lower_routine(nlat, nlon, l, lat, mode, gs, idg, jdg, nt, a, b, mdab, &
         ndab, w, wfft, late, pmn, g)
-
 
         real(wp) :: a
         real(wp) :: b

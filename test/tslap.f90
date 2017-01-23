@@ -188,16 +188,17 @@ use spherepack_library
                     d2zdt2 = -z
                     dzdp = 0.
                     d2zdp2 = 0.
-                    if (k==1) then
-                        s(i,j,k) = x+y
-                        sclpe(i,j,k) = -2.*(x+y)
-                    else if (k==2) then
-                        s(i,j,k) = x+z
-                        sclpe(i,j,k) = -2.*(x+z)
-                    else if (k==3) then
-                        s(i,j,k) = y+z
-                        sclpe(i,j,k) = -2.*(y+z)
-                    end if
+                    select case (k)
+                    	case (1)
+                    		s(i,j,k) = x+y
+                    		sclpe(i,j,k) = -2.*(x+y)
+                    	case (2)
+                    		s(i,j,k) = x+z
+                    		sclpe(i,j,k) = -2.*(x+z)
+                    	case (3)
+                    		s(i,j,k) = y+z
+                    		sclpe(i,j,k) = -2.*(y+z)
+                    end select
                 end do
             end do
         end do
@@ -210,94 +211,92 @@ use spherepack_library
         !     call aout(s,"   s",nlat,nlon)
 
 
-        if (icase==1) then
-
-            call name("**ec")
-
-            call shaeci(nlat,nlon,wsave,lsave,dwork,ldwork,ierror)
-            call name("shai")
-            call iout(ierror,"ierr")
-
-            call shaec(nlat,nlon,isym,nt,s,nlat,nlon,a,b,mdab,nlat,wsave, &
-                lsave,work,lwork,ierror)
-            call name("sha ")
-            call iout(ierror,"ierr")
-
-            call shseci(nlat,nlon,wsave,lsave,dwork,ldwork,ierror)
-            call name("shsi")
-            call iout(ierror,"ierr")
-
-            call slapec(nlat,nlon,isym,nt,sclp,nlat,nlon,a,b,mdab,nlat, &
-                wsave,lsave,work,lwork,ierror)
-            call name("slap")
-            call iout(ierror,"ierr")
-
-        else if (icase==2) then
-
-            call name("**es")
-
-            call shaesi(nlat,nlon,wsave,lsave,work,lwork,dwork,ldwork,ierror)
-            call name("shai")
-            call iout(ierror,"ierr")
-
-            call shaes(nlat,nlon,isym,nt,s,nlat,nlon,a,b,mdab,nlat,wsave, &
-                lsave,work,lwork,ierror)
-            call name("sha ")
-            call iout(ierror,"ierr")
-
-            call shsesi(nlat,nlon,wsave,lsave,work,lwork,dwork,ldwork,ierror)
-            call name("shsi")
-            call iout(ierror,"ierr")
-
-            call slapes(nlat,nlon,isym,nt,sclp,nlat,nlon,a,b,mdab,nlat, &
-                wsave,lsave,work,lwork,ierror)
-            call name("slap")
-            call iout(ierror,"ierr")
-
-        else if (icase==3) then
-
-            call name("**gc")
-
-            call shagci(nlat,nlon,wsave,lsave,dwork,ldwork,ierror)
-            call name("shai")
-            call iout(ierror,"ierr")
-
-            call shagc(nlat,nlon,isym,nt,s,nlat,nlon,a,b,mdab,nlat,wsave, &
-                lsave,work,lwork,ierror)
-            call name("sha ")
-            call iout(ierror,"ierr")
-
-            call shsgci(nlat,nlon,wsave,lsave,dwork,ldwork,ierror)
-            call name("shsi")
-            call iout(ierror,"ierr")
-
-            call slapgc(nlat,nlon,isym,nt,sclp,nlat,nlon,a,b,mdab,nlat, &
-                wsave,lsave,work,lwork,ierror)
-            call name("slap")
-            call iout(ierror,"ierr")
-
-        else if (icase==4) then
-
-            call name("**gs")
-
-            call shagsi(nlat,nlon,wsave,lsave,work,lwork,dwork,ldwork,ierror)
-            call name("shai")
-            call iout(ierror,"ierr")
-
-            call shags(nlat,nlon,isym,nt,s,nlat,nlon,a,b,mdab,nlat,wsave, &
-                lsave,work,lwork,ierror)
-            call name("sha ")
-            call iout(ierror,"ierr")
-
-            call shsgsi(nlat,nlon,wsave,lsave,work,lwork,dwork,ldwork,ierror)
-            call name("shsi")
-            call iout(ierror,"ierr")
-
-            call slapgs(nlat,nlon,isym,nt,sclp,nlat,nlon,a,b,mdab,nlat, &
-                wsave,lsave,work,lwork,ierror)
-            call name("slap")
-            call iout(ierror,"ierr")
-        end if
+        select case (icase)
+        	case (1)
+        		
+        		call name("**ec")
+        		
+        		call shaeci(nlat,nlon,wsave,lsave,dwork,ldwork,ierror)
+        		call name("shai")
+        		call iout(ierror,"ierr")
+        		
+        		call shaec(nlat,nlon,isym,nt,s,nlat,nlon,a,b,mdab,nlat,wsave, &
+        		lsave,work,lwork,ierror)
+        		call name("sha ")
+        		call iout(ierror,"ierr")
+        		
+        		call shseci(nlat,nlon,wsave,lsave,dwork,ldwork,ierror)
+        		call name("shsi")
+        		call iout(ierror,"ierr")
+        		
+        		call slapec(nlat,nlon,isym,nt,sclp,nlat,nlon,a,b,mdab,nlat, &
+        		wsave,lsave,work,lwork,ierror)
+        		call name("slap")
+        		call iout(ierror,"ierr")
+        	case (2)
+        		
+        		call name("**es")
+        		
+        		call shaesi(nlat,nlon,wsave,lsave,work,lwork,dwork,ldwork,ierror)
+        		call name("shai")
+        		call iout(ierror,"ierr")
+        		
+        		call shaes(nlat,nlon,isym,nt,s,nlat,nlon,a,b,mdab,nlat,wsave, &
+        		lsave,work,lwork,ierror)
+        		call name("sha ")
+        		call iout(ierror,"ierr")
+        		
+        		call shsesi(nlat,nlon,wsave,lsave,work,lwork,dwork,ldwork,ierror)
+        		call name("shsi")
+        		call iout(ierror,"ierr")
+        		
+        		call slapes(nlat,nlon,isym,nt,sclp,nlat,nlon,a,b,mdab,nlat, &
+        		wsave,lsave,work,lwork,ierror)
+        		call name("slap")
+        		call iout(ierror,"ierr")
+        	case (3)
+        		
+        		call name("**gc")
+        		
+        		call shagci(nlat,nlon,wsave,lsave,dwork,ldwork,ierror)
+        		call name("shai")
+        		call iout(ierror,"ierr")
+        		
+        		call shagc(nlat,nlon,isym,nt,s,nlat,nlon,a,b,mdab,nlat,wsave, &
+        		lsave,work,lwork,ierror)
+        		call name("sha ")
+        		call iout(ierror,"ierr")
+        		
+        		call shsgci(nlat,nlon,wsave,lsave,dwork,ldwork,ierror)
+        		call name("shsi")
+        		call iout(ierror,"ierr")
+        		
+        		call slapgc(nlat,nlon,isym,nt,sclp,nlat,nlon,a,b,mdab,nlat, &
+        		wsave,lsave,work,lwork,ierror)
+        		call name("slap")
+        		call iout(ierror,"ierr")
+        	case (4)
+        		
+        		call name("**gs")
+        		
+        		call shagsi(nlat,nlon,wsave,lsave,work,lwork,dwork,ldwork,ierror)
+        		call name("shai")
+        		call iout(ierror,"ierr")
+        		
+        		call shags(nlat,nlon,isym,nt,s,nlat,nlon,a,b,mdab,nlat,wsave, &
+        		lsave,work,lwork,ierror)
+        		call name("sha ")
+        		call iout(ierror,"ierr")
+        		
+        		call shsgsi(nlat,nlon,wsave,lsave,work,lwork,dwork,ldwork,ierror)
+        		call name("shsi")
+        		call iout(ierror,"ierr")
+        		
+        		call slapgs(nlat,nlon,isym,nt,sclp,nlat,nlon,a,b,mdab,nlat, &
+        		wsave,lsave,work,lwork,ierror)
+        		call name("slap")
+        		call iout(ierror,"ierr")
+        end select
         !
         !     compute "error" in sclp
         !
@@ -316,73 +315,70 @@ use spherepack_library
         !
         !     invert sclp
         !
-        if (icase==1) then
-
-            call shaeci(nlat,nlon,wsave,lsave,dwork,ldwork,ierror)
-            call shaec(nlat,nlon,isym,nt,sclp,nlat,nlon,a,b,mdab,nlat, &
-                wsave,lsave,work,lwork,ierror)
-
-            call shseci(nlat,nlon,wsave,lsave,dwork,ldwork,ierror)
-            call name("shsi")
-            call iout(ierror,"ierr")
-
-            call islapec(nlat,nlon,isym,nt,xlm,s,nlat,nlon,a,b,mdab,nlat, &
-                wsave,lsave,work,lwork,ptrb,ierror)
-            call name("isla")
-            call iout(ierror,"ierr")
-            call vecout(ptrb,"ptrb",nt)
-
-        else if (icase==2) then
-
-            call shaesi(nlat,nlon,wsave,lsave,work,lwork,dwork,ldwork,ierror)
-            call shaes(nlat,nlon,isym,nt,sclp,nlat,nlon,a,b,mdab,nlat, &
-                wsave,lsave,work,lwork,ierror)
-
-            call shsesi(nlat,nlon,wsave,lsave,work,lwork,dwork,ldwork,ierror)
-            call name("shsi")
-            call iout(ierror,"ierr")
-
-            call islapes(nlat,nlon,isym,nt,xlm,s,nlat,nlon,a,b,mdab,nlat, &
-                wsave,lsave,work,lwork,ptrb,ierror)
-            call name("isla")
-            call iout(ierror,"ierr")
-            call vecout(ptrb,"ptrb",nt)
-
-        else if (icase==3) then
-
-            call shagci(nlat,nlon,wsave,lsave,dwork,ldwork,ierror)
-            call shagc(nlat,nlon,isym,nt,sclp,nlat,nlon,a,b,mdab,nlat, &
-                wsave,lsave,work,lwork,ierror)
-
-            call shsgci(nlat,nlon,wsave,lsave,dwork,ldwork,ierror)
-            call name("shsi")
-            call iout(ierror,"ierr")
-
-            call islapgc(nlat,nlon,isym,nt,xlm,s,nlat,nlon,a,b,mdab,nlat, &
-                wsave,lsave,work,lwork,ptrb,ierror)
-            call name("isla")
-            call iout(ierror,"ierr")
-            call vecout(ptrb,"ptrb",nt)
-
-        else if (icase==4) then
-
-            call name("**gs")
-
-            call shagsi(nlat,nlon,wsave,lsave,work,lwork,dwork,ldwork,ierror)
-            call shags(nlat,nlon,isym,nt,sclp,nlat,nlon,a,b,mdab,nlat, &
-                wsave,lsave,work,lwork,ierror)
-
-            call shsgsi(nlat,nlon,wsave,lsave,work,lwork,dwork,ldwork,ierror)
-            call name("shsi")
-            call iout(ierror,"ierr")
-
-            call islapgs(nlat,nlon,isym,nt,xlm,s,nlat,nlon,a,b,mdab,nlat, &
-                wsave,lsave,work,lwork,ptrb,ierror)
-            call name("isla")
-            call iout(ierror,"ierr")
-            call vecout(ptrb,"ptrb",nt)
-
-        end if
+        select case (icase)
+        	case (1)
+        		
+        		call shaeci(nlat,nlon,wsave,lsave,dwork,ldwork,ierror)
+        		call shaec(nlat,nlon,isym,nt,sclp,nlat,nlon,a,b,mdab,nlat, &
+        		wsave,lsave,work,lwork,ierror)
+        		
+        		call shseci(nlat,nlon,wsave,lsave,dwork,ldwork,ierror)
+        		call name("shsi")
+        		call iout(ierror,"ierr")
+        		
+        		call islapec(nlat,nlon,isym,nt,xlm,s,nlat,nlon,a,b,mdab,nlat, &
+        		wsave,lsave,work,lwork,ptrb,ierror)
+        		call name("isla")
+        		call iout(ierror,"ierr")
+        		call vecout(ptrb,"ptrb",nt)
+        	case (2)
+        		
+        		call shaesi(nlat,nlon,wsave,lsave,work,lwork,dwork,ldwork,ierror)
+        		call shaes(nlat,nlon,isym,nt,sclp,nlat,nlon,a,b,mdab,nlat, &
+        		wsave,lsave,work,lwork,ierror)
+        		
+        		call shsesi(nlat,nlon,wsave,lsave,work,lwork,dwork,ldwork,ierror)
+        		call name("shsi")
+        		call iout(ierror,"ierr")
+        		
+        		call islapes(nlat,nlon,isym,nt,xlm,s,nlat,nlon,a,b,mdab,nlat, &
+        		wsave,lsave,work,lwork,ptrb,ierror)
+        		call name("isla")
+        		call iout(ierror,"ierr")
+        		call vecout(ptrb,"ptrb",nt)
+        	case (3)
+        		
+        		call shagci(nlat,nlon,wsave,lsave,dwork,ldwork,ierror)
+        		call shagc(nlat,nlon,isym,nt,sclp,nlat,nlon,a,b,mdab,nlat, &
+        		wsave,lsave,work,lwork,ierror)
+        		
+        		call shsgci(nlat,nlon,wsave,lsave,dwork,ldwork,ierror)
+        		call name("shsi")
+        		call iout(ierror,"ierr")
+        		
+        		call islapgc(nlat,nlon,isym,nt,xlm,s,nlat,nlon,a,b,mdab,nlat, &
+        		wsave,lsave,work,lwork,ptrb,ierror)
+        		call name("isla")
+        		call iout(ierror,"ierr")
+        		call vecout(ptrb,"ptrb",nt)
+        	case (4)
+        		
+        		call name("**gs")
+        		
+        		call shagsi(nlat,nlon,wsave,lsave,work,lwork,dwork,ldwork,ierror)
+        		call shags(nlat,nlon,isym,nt,sclp,nlat,nlon,a,b,mdab,nlat, &
+        		wsave,lsave,work,lwork,ierror)
+        		
+        		call shsgsi(nlat,nlon,wsave,lsave,work,lwork,dwork,ldwork,ierror)
+        		call name("shsi")
+        		call iout(ierror,"ierr")
+        		
+        		call islapgs(nlat,nlon,isym,nt,xlm,s,nlat,nlon,a,b,mdab,nlat, &
+        		wsave,lsave,work,lwork,ptrb,ierror)
+        		call name("isla")
+        		call iout(ierror,"ierr")
+        		call vecout(ptrb,"ptrb",nt)
+        end select
 
         !     call aout(s,"   s",nlat,nlon)
 
@@ -404,13 +400,14 @@ use spherepack_library
                     x = sint*cosp
                     y = sint*sinp
                     z = cost
-                    if (k==1) then
-                        se = x+y
-                    else if (k==2) then
-                        se = x+z
-                    else if (k==3) then
-                        se = y+z
-                    end if
+                    select case (k)
+                    	case (1)
+                    		se = x+y
+                    	case (2)
+                    		se = x+z
+                    	case (3)
+                    		se = y+z
+                    end select
                     err2s = err2s+(s(i,j,k) - se)**2
                 end do
             end do

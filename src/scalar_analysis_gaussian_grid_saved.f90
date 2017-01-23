@@ -319,22 +319,22 @@ contains
         wshags, lshags, work, lwork, ierror)
 
         ! Dummy arguments
-        integer(ip), intent(in)     :: nlat
-        integer(ip), intent(in)     :: nlon
-        integer(ip), intent(in)     :: mode
-        integer(ip), intent(in)     :: nt
-        real(wp),    intent(in)     :: g(idg, jdg, nt)
-        integer(ip), intent(in)     :: idg
-        integer(ip), intent(in)     :: jdg
-        real(wp),    intent(out)    :: a(mdab, ndab, nt)
-        real(wp),    intent(out)    :: b(mdab, ndab, nt)
-        integer(ip), intent(in)     :: mdab
-        integer(ip), intent(in)     :: ndab
-        real(wp),    intent(inout)  :: wshags(lshags)
-        integer(ip), intent(in)     :: lshags
-        real(wp),    intent(inout)  :: work(lwork)
-        integer(ip), intent(in)     :: lwork
-        integer(ip), intent(out)    :: ierror
+        integer(ip), intent(in)   :: nlat
+        integer(ip), intent(in)   :: nlon
+        integer(ip), intent(in)   :: mode
+        integer(ip), intent(in)   :: nt
+        real(wp),    intent(in)   :: g(idg, jdg, nt)
+        integer(ip), intent(in)   :: idg
+        integer(ip), intent(in)   :: jdg
+        real(wp),    intent(out)  :: a(mdab, ndab, nt)
+        real(wp),    intent(out)  :: b(mdab, ndab, nt)
+        integer(ip), intent(in)   :: mdab
+        integer(ip), intent(in)   :: ndab
+        real(wp),    intent(in)   :: wshags(lshags)
+        integer(ip), intent(in)   :: lshags
+        real(wp),    intent(out)  :: work(lwork)
+        integer(ip), intent(in)   :: lwork
+        integer(ip), intent(out)  :: ierror
 
         ! Local variables
         integer(ip) :: l, l1, l2, lp, iw, lat, late, ifft, ipmn, iwts
@@ -410,9 +410,7 @@ contains
         !
         iw = lat*nlon*nt+1
 
-        !
         !  Perform analysis
-        !
         call shags_lower_routine(nlat, nlon, l, lat, mode, g, idg, jdg, nt, a, b, mdab, ndab, &
             wshags(iwts), wshags(ifft), wshags(ipmn), late, work, work(iw))
 
@@ -433,22 +431,18 @@ contains
     module subroutine shagsi(nlat, nlon, wshags, lshags, work, lwork, dwork, ldwork, ierror)
 
         ! Dummy arguments
-        integer(ip), intent(in)     :: nlat
-        integer(ip), intent(in)     :: nlon
-        real(wp),    intent(inout)  :: wshags(lshags)
-        integer(ip), intent(in)     :: lshags
-        real(wp),    intent(inout)  :: work(lwork)
-        integer(ip), intent(in)     :: lwork
-        real(wp),    intent(inout)  :: dwork(ldwork)
-        integer(ip), intent(in)     :: ldwork
-        integer(ip), intent(out)    :: ierror
+        integer(ip), intent(in)   :: nlat
+        integer(ip), intent(in)   :: nlon
+        real(wp),    intent(out)  :: wshags(lshags)
+        integer(ip), intent(in)   :: lshags
+        real(wp),    intent(out)  :: work(lwork)
+        integer(ip), intent(in)   :: lwork
+        real(wp),    intent(out)  :: dwork(ldwork)
+        integer(ip), intent(in)   :: ldwork
+        integer(ip), intent(out)  :: ierror
 
         ! Local variables
         integer(ip) :: ntrunc, l1, l2, late, lp, ldw, ipmnf
-
-        !
-        !  Compute constants
-        !
 
         ! set triangular truncation limit for spherical harmonic basis
         ntrunc = min((nlon+2)/2, nlat)
@@ -505,25 +499,25 @@ contains
         ndab, wts, wfft, pmn, late, g, work)
 
         ! Dummy arguments
-        integer(ip), intent(in)     :: nlat
-        integer(ip), intent(in)     :: nlon
-        integer(ip), intent(in)     :: l
-        integer(ip), intent(in)     :: lat
-        integer(ip), intent(in)     :: mode
-        real(wp),    intent(in)     :: gs(idg, jdg, nt)
-        integer(ip), intent(in)     :: idg
-        integer(ip), intent(in)     :: jdg
-        integer(ip), intent(in)     :: nt
-        real(wp),    intent(inout)  :: a(mdab, ndab, nt)
-        real(wp),    intent(inout)  :: b(mdab, ndab, nt)
-        integer(ip), intent(in)     :: mdab
-        integer(ip), intent(in)     :: ndab
-        integer(ip), intent(in)     :: late
-        real(wp),    intent(inout)  :: g(lat, nlon, nt)
-        real(wp),    intent(inout)  :: wfft(*)
-        real(wp),    intent(inout)  :: pmn(late,*)
-        real(wp),    intent(inout)  :: wts(nlat)
-        real(wp),    intent(inout)  :: work(*)
+        integer(ip), intent(in)  :: nlat
+        integer(ip), intent(in)  :: nlon
+        integer(ip), intent(in)  :: l
+        integer(ip), intent(in)  :: lat
+        integer(ip), intent(in)  :: mode
+        real(wp),    intent(in)  :: gs(idg, jdg, nt)
+        integer(ip), intent(in)  :: idg
+        integer(ip), intent(in)  :: jdg
+        integer(ip), intent(in)  :: nt
+        real(wp),    intent(out) :: a(mdab, ndab, nt)
+        real(wp),    intent(out) :: b(mdab, ndab, nt)
+        integer(ip), intent(in)  :: mdab
+        integer(ip), intent(in)  :: ndab
+        integer(ip), intent(in)  :: late
+        real(wp),    intent(in)  :: wfft(*)
+        real(wp),    intent(in)  :: pmn(late,*)
+        real(wp),    intent(in)  :: wts(nlat)
+        real(wp),    intent(out) :: g(lat, nlon, nt)
+        real(wp),    intent(out) :: work(*)
 
         ! Local variables
         integer(ip)    :: i, j, k, m, mml1
