@@ -31,23 +31,23 @@
 !
 !
 !
-! ... file igradgc.f
+! ... file igradgs.f
 !
 !     this file includes documentation and code for
-!     subroutine igradgc         i
+!     subroutine igradgs         i
 !
-! ... files which must be loaded with igradgc.f
+! ... files which must be loaded with igradgs.f
 !
-!     type_SpherepackAux.f, type_RealPeriodicTransform.f, shsgc.f, vhagc.f
+!     type_SpherepackAux.f, type_RealPeriodicTransform.f, shsgs.f, vhags.f
 !
-!     subroutine igradgc(nlat, nlon, isym, nt, sf, isf, jsf, br, bi, mdb, ndb, 
-!    +                   wshsgc, lshsgc, work, lwork, ierror)
+!     subroutine igradgs(nlat, nlon, isym, nt, sf, isf, jsf, br, bi, mdb, ndb, 
+!    +                   wshsgs, lshsgs, work, lwork, ierror)
 !
 !     let br, bi, cr, ci be the vector spherical harmonic coefficients
-!     precomputed by vhagc for a vector field (v, w).  let (v', w') be
+!     precomputed by vhags for a vector field (v, w).  let (v', w') be
 !     the irrotational component of (v, w) (i.e., (v', w') is generated
 !     by assuming cr, ci are zero and synthesizing br, bi with vhsgs).
-!     then subroutine igradgc computes a scalar field sf such that
+!     then subroutine igradgs computes a scalar field sf such that
 !
 !            gradient(sf) = (v', w').
 !
@@ -63,9 +63,9 @@
 !     at the gaussian colatitude theta(i) (see nlat as input parameter)
 !     and longitude lambda(j) = (j-1)*2*pi/nlon where sint = sin(theta(i)).
 !
-!     note:  for an irrotational vector field (v, w), subroutine igradgc
+!     note:  for an irrotational vector field (v, w), subroutine igradgs
 !     computes a scalar field whose gradient is (v, w).  in ay case, 
-!     subroutine igradgc "inverts" the gradient subroutine gradgc.
+!     subroutine igradgs "inverts" the gradient subroutine gradgs.
 !
 !     input parameters
 !
@@ -131,38 +131,38 @@
 !            and sf are two dimensional arrays.
 !
 !     isf    the first dimension of the array sf as it appears in
-!            the program that calls igradgc. if isym = 0 then isf
+!            the program that calls igradgs. if isym = 0 then isf
 !            must be at least nlat.  if isym = 1 or 2 and nlat is
 !            even then isf must be at least nlat/2. if isym = 1 or 2
 !            and nlat is odd then isf must be at least (nlat+1)/2.
 !
 !     jsf    the second dimension of the array sf as it appears in
-!            the program that calls igradgc. jsf must be at least nlon.
+!            the program that calls igradgs. jsf must be at least nlon.
 !
 !     br, bi  two or three dimensional arrays (see input parameter nt)
 !            that contain vector spherical harmonic coefficients
-!            of the vector field (v, w) as computed by subroutine vhagc.
-!     ***    br, bi must be computed by vhagc prior to calling igradgc.
+!            of the vector field (v, w) as computed by subroutine vhags.
+!     ***    br, bi must be computed by vhags prior to calling igradgs.
 !
 !     mdb    the first dimension of the arrays br and bi as it appears in
-!            the program that calls igradgc (and vhagc). mdb must be at
+!            the program that calls igradgs (and vhags). mdb must be at
 !            least min(nlat, nlon/2) if nlon is even or at least
 !            min(nlat, (nlon+1)/2) if nlon is odd.
 !
 !     ndb    the second dimension of the arrays br and bi as it appears in
-!            the program that calls igradgc (and vhagc). ndb must be at
+!            the program that calls igradgs (and vhags). ndb must be at
 !            least nlat.
 !
 !
-!  wshsgc    an array which must be initialized by subroutine shsgci.
-!            once initialized, 
-!            wshsgc can be used repeatedly by igradgc as long as nlon
-!            and nlat remain unchanged.  wshsgc must not be altered
-!            between calls of igradgc.
+!  wshsgs    an array which must be initialized by subroutine igradgsi
+!            (or equivalently by subroutine shsesi).  once initialized, 
+!            wshsgs can be used repeatedly by igradgs as long as nlon
+!            and nlat remain unchanged.  wshsgs must not be altered
+!            between calls of igradgs.
 !
 !
-!  lshsgc    the dimension of the array wshsgc as it appears in the
-!            program that calls igradgc. define
+!  lshsgs    the dimension of the array wshsgs as it appears in the
+!            program that calls igradgs. define
 !
 !               l1 = min(nlat, (nlon+2)/2) if nlon is even or
 !               l1 = min(nlat, (nlon+1)/2) if nlon is odd
@@ -173,28 +173,28 @@
 !               l2 = (nlat+1)/2    if nlat is odd.
 !
 !
-!            then lshsgc must be at least
+!            then lshsgs must be greater than or equal to
 !
-!               nlat*(2*l2+3*l1-2)+3*l1*(1-l1)/2+nlon+15
+!               nlat*(3*(l1+l2)-2)+(l1-1)*(l2*(2*nlat-l1)-3*l1)/2+nlon+15
 !
 !
 !     work   a work array that does not have to be saved.
 !
 !     lwork  the dimension of the array work as it appears in the
-!            program that calls igradgc  define
+!            program that calls igradgs. define
 !
 !               l2 = nlat/2                    if nlat is even or
 !               l2 = (nlat+1)/2                if nlat is odd
 !               l1 = min(nlat, (nlon+2)/2) if nlon is even or
 !               l1 = min(nlat, (nlon+1)/2) if nlon is odd
-
-!            if isym is zero then lwork must be at least
 !
-!               nlat*(nlon*nt+max(3*l2, nlon)+2*nt*l1+1)
+!            if isym = 0 lwork must be greater than or equal to
 !
-!            if isym is not zero then lwork must be at least
+!               nlat*((nt+1)*nlon+2*nt*l1+1)
 !
-!               l2*(nlon*nt+max(3*nlat, nlon)) + nlat*(2*nt*l1+1)
+!            if isym > 0 lwork must be greater than or equal to
+!
+!               (nt+1)*l2*nlon+nlat*(2*nt*l1+1)
 !
 !
 !
@@ -207,7 +207,7 @@
 !           contain a scalar field whose gradient is the irrotational
 !           component of the vector field (v, w).  the vector spherical
 !           harmonic coefficients br, bi were precomputed by subroutine
-!           vhagc.  sf(i, j) is given at the gaussian colatitude theta(i)
+!           vhags.  sf(i, j) is given at the gaussian colatitude theta(i)
 !           and longitude lambda(j) = (j-1)*2*pi/nlon.  the index ranges
 !           are defined at input parameter isym.
 !
@@ -221,67 +221,54 @@
 !           = 6  error in the specification of jsf
 !           = 7  error in the specification of mdb
 !           = 8  error in the specification of ndb
-!           = 9  error in the specification of lshsgc
+!           = 9  error in the specification of lshsgs
 !           = 10 error in the specification of lwork
 !
 ! **********************************************************************
 !
-module module_igradgc
-
-    use spherepack_precision, only: &
-        wp, & ! working precision
-        ip ! integer precision
-
-    use scalar_synthesis_routines, only: &
-        shsgc
-
-    ! Explicit typing only
-    implicit none
-
-    ! Everything is private unless stated otherwise
-    public :: igradgc
+submodule(gradient_routines) invert_gradient_gaussian_grid_saved
 
 contains
 
-    subroutine igradgc(nlat, nlon, isym, nt, sf, isf, jsf, br, bi, mdb, ndb, &
-        wshsgc, lshsgc, work, lwork, ierror)
+    subroutine igradgs(nlat, nlon, isym, nt, sf, isf, jsf, br, bi, mdb, ndb, &
+        wshsgs, lshsgs, work, lwork, ierror)
 
-        real(wp) :: bi
-        real(wp) :: br
+        ! Dummy arguments
+        integer(ip), intent(in)  :: nlat
+        integer(ip), intent(in)  :: nlon
+        integer(ip), intent(in)  :: isym
+        integer(ip), intent(in)  :: nt
+        real(wp),    intent(out) :: sf(isf, jsf, nt)
+        integer(ip), intent(in)  :: isf
+        integer(ip), intent(in)  :: jsf
+        real(wp),    intent(in)  :: br(mdb, ndb, nt)
+        real(wp),    intent(in)  :: bi(mdb, ndb, nt)
+        integer(ip), intent(in)  :: mdb
+        integer(ip), intent(in)  :: ndb
+        real(wp),    intent(in)  :: wshsgs(lshsgs)
+        integer(ip), intent(in)  :: lshsgs
+        real(wp),    intent(out) :: work(lwork)
+        integer(ip), intent(in)  :: lwork
+        integer(ip), intent(out) :: ierror
+
+        ! Local variables
         integer(ip) :: ia
         integer(ip) :: ib
-        integer(ip) :: ierror
         integer(ip) :: imid
-        integer(ip) :: is
-        integer(ip) :: isf
-        integer(ip) :: isym
+        integer(ip) :: iis
         integer(ip) :: iwk
-        integer(ip) :: jsf
         integer(ip) :: l1
         integer(ip) :: l2
         integer(ip) :: liwk
+        integer(ip) :: lp
         integer(ip) :: ls
-        integer(ip) :: lshsgc
         integer(ip) :: lwkmin
-        integer(ip) :: lwork
         integer(ip) :: mab
-        integer(ip) :: mdb
         integer(ip) :: mmax
         integer(ip) :: mn
-        integer(ip) :: ndb
-        integer(ip) :: nlat
         integer(ip) :: nln
-        integer(ip) :: nlon
-        integer(ip) :: nt
-        real(wp) :: sf
-        real(wp) :: work
-        real(wp) :: wshsgc
-        dimension sf(isf, jsf, nt)
-        dimension br(mdb, ndb, nt), bi(mdb, ndb, nt)
-        dimension wshsgc(lshsgc), work(lwork)
-        !
+
         ! Check input arguments
-        !
         ierror = 1
         if (nlat < 3) return
         ierror = 2
@@ -307,7 +294,8 @@ contains
         !
         l2 = (nlat+mod(nlat, 2))/2
         l1 = min((nlon+2)/2, nlat)
-        if (lshsgc < nlat*(2*l2+3*l1-2)+3*l1*(1-l1)/2+nlon+15)return
+        lp=nlat*(3*(l1+l2)-2)+(l1-1)*(l2*(2*nlat-l1)-3*l1)/2+nlon+15
+        if (lshsgs < lp) return
         ierror = 10
         !
         !     set minimum and verify unsaved work space
@@ -316,16 +304,11 @@ contains
         if (isym > 0) ls = imid
         nln = nt*ls*nlon
         !
-        !     set first dimension for a, b (as requried by shsgc)
+        !     set first dimension for a, b (as requried by shses)
         !
         mab = min(nlat, nlon/2+1)
         mn = mab*nlat*nt
-        !     lwkmin = nln+ls*nlon+2*mn+nlat
-        if (isym == 0) then
-            lwkmin = nlat*(nt*nlon+max(3*l2, nlon)+2*nt*l1+1)
-        else
-            lwkmin = l2*(nt*nlon+max(3*nlat, nlon))+nlat*(2*nt*l1+1)
-        end if
+        lwkmin = nln+ls*nlon+2*mn+nlat
         if (lwork < lwkmin) return
         ierror = 0
         !
@@ -333,98 +316,54 @@ contains
         !
         ia = 1
         ib = ia + mn
-        is = ib + mn
-        iwk = is + nlat
+        iis = ib + mn
+        iwk = iis + nlat
         liwk = lwork-2*mn-nlat
 
-        call igrdgc1(nlat, nlon, isym, nt, sf, isf, jsf, work(ia), work(ib), mab, &
-            work(is), mdb, ndb, br, bi, wshsgc, lshsgc, work(iwk), liwk, ierror)
+        call igradgs_lower_routine(nlat, nlon, isym, nt, sf, isf, jsf, work(ia), work(ib), mab, &
+            work(iis), mdb, ndb, br, bi, wshsgs, lshsgs, work(iwk), liwk, ierror)
 
+    end subroutine igradgs
 
-    contains
+    subroutine igradgs_lower_routine(nlat, nlon, isym, nt, sf, isf, jsf, a, b, mab, &
+        sqnn, mdb, ndb, br, bi, wsav, lsav, wk, lwk, ierror)
 
+        real(wp) :: a
+        real(wp) :: b
+        real(wp) :: bi
+        real(wp) :: br
+        
+        integer(ip) :: ierror
+        integer(ip) :: isf
+        integer(ip) :: isym
+        integer(ip) :: jsf
+        
+        integer(ip) :: lsav
+        integer(ip) :: lwk
+        
+        integer(ip) :: mab
+        integer(ip) :: mdb
+        
+        
+        integer(ip) :: ndb
+        integer(ip) :: nlat
+        integer(ip) :: nlon
+        integer(ip) :: nt
+        real(wp) :: sf
+        real(wp) :: sqnn
+        real(wp) :: wk
+        real(wp) :: wsav
+        dimension sf(isf, jsf, nt)
+        dimension br(mdb, ndb, nt), bi(mdb, ndb, nt), sqnn(nlat)
+        dimension a(mab, nlat, nt), b(mab, nlat, nt)
+        dimension wsav(lsav), wk(lwk)
 
-        subroutine igrdgc1(nlat, nlon, isym, nt, sf, isf, jsf, a, b, mab, &
-            sqnn, mdb, ndb, br, bi, wsav, lsav, wk, lwk, ierror)
+        call perform_setup_for_inversion(nlon, a, b, br, bi, sqnn)
 
-            real(wp) :: a
-            real(wp) :: b
-            real(wp) :: bi
-            real(wp) :: br
-            real(wp) :: fn
-            integer(ip) :: ierror
-            integer(ip) :: isf
-            integer(ip) :: isym
-            integer(ip) :: jsf
-            integer(ip) :: k
-            integer(ip) :: lsav
-            integer(ip) :: lwk
-            integer(ip) :: m
-            integer(ip) :: mab
-            integer(ip) :: mdb
-            integer(ip) :: mmax
-            integer(ip) :: n
-            integer(ip) :: ndb
-            integer(ip) :: nlat
-            integer(ip) :: nlon
-            integer(ip) :: nt
-            real(wp) :: sf
-            real(wp) :: sqnn
-            real(wp) :: wk
-            real(wp) :: wsav
-            dimension sf(isf, jsf, nt)
-            dimension br(mdb, ndb, nt), bi(mdb, ndb, nt), sqnn(nlat)
-            dimension a(mab, nlat, nt), b(mab, nlat, nt)
-            dimension wsav(lsav), wk(lwk)
-            !
-            ! Preset coefficient multiplyers in vector
-            !
-            do n=2, nlat
-                fn = real(n - 1)
-                sqnn(n) = 1.0/sqrt(fn * (fn + 1.0))
-            end do
-            !
-            !     set upper limit for vector m subscript
-            !
-            mmax = min(nlat, (nlon+1)/2)
-            !
-            !     compute multiple scalar field coefficients
-            !
-            do k=1, nt
-                !
-                !     preset to 0.0
-                !
-                do n=1, nlat
-                    do m=1, mab
-                        a(m, n, k) = 0.0
-                        b(m, n, k) = 0.0
-                    end do
-                end do
-                !
-                ! Compute m=0 coefficients
-                !
-                do n=2, nlat
-                    a(1, n, k) = br(1, n, k)*sqnn(n)
-                    b(1, n, k)= bi(1, n, k)*sqnn(n)
-                end do
-                !
-                !     compute m>0 coefficients
-                !
-                do m=2, mmax
-                    do n=m, nlat
-                        a(m, n, k) = sqnn(n)*br(m, n, k)
-                        b(m, n, k) = sqnn(n)*bi(m, n, k)
-                    end do
-                end do
-            end do
-            !
-            !     scalar sythesize a, b into sf
-            !
-            call shsgc(nlat, nlon, isym, nt, sf, isf, jsf, a, b, mab, nlat, wsav, &
-                lsav, wk, lwk, ierror)
+        ! Scalar synthesize a, b into sf
+        call shsgs(nlat, nlon, isym, nt, sf, isf, jsf, a, b, mab, nlat, wsav, &
+            lsav, wk, lwk, ierror)
 
-        end subroutine igrdgc1
+    end subroutine igradgs_lower_routine
 
-    end subroutine igradgc
-
-end module module_igradgc
+end submodule invert_gradient_gaussian_grid_saved

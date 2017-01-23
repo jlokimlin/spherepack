@@ -20,17 +20,9 @@ module spherepack_library
     use module_geo2math, only: &
         geo2maths, math2geos, geo2mathv, math2geov
 
-    use module_gradec, only: &
-        gradec
-
-    use module_grades, only: &
-        grades
-
-    use module_gradgc, only: &
-        gradgc
-
-    use module_gradgs, only: &
-        gradgs
+    use gradient_routines, only: &
+        gradec, grades, gradgc, gradgs, &
+        igradec, igrades, igradgc, igradgs
 
     use module_idvtec, only: &
         idvtec
@@ -43,18 +35,6 @@ module spherepack_library
 
     use module_idvtgs, only: &
         idvtgs
-
-    use module_igradec, only: &
-        igradec
-
-    use module_igrades, only: &
-        igrades
-
-    use module_igradgc, only: &
-        igradgc
-
-    use module_igradgs, only: &
-        igradgs
 
     use module_ihgeod, only: &
         ihgeod

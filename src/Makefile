@@ -264,60 +264,60 @@ trvsph.f90
 	$(FC) $(FFLAGS) -c trvsph.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 
-gradec.o: \
-spherepack_precision.o \
-vector_synthesis_routines.o \
-gradec.f90
-	$(FC) $(FFLAGS) -c gradec.f90 $(LINKS)\
-	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
-
-grades.o: \
-spherepack_precision.o \
-vector_synthesis_routines.o \
-grades.f90
-	$(FC) $(FFLAGS) -c grades.f90 $(LINKS)\
-	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
-
-gradgc.o: \
-spherepack_precision.o \
-vector_synthesis_routines.o \
-gradgc.f90
-	$(FC) $(FFLAGS) -c gradgc.f90 $(LINKS)\
-	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
-
-gradgs.o: \
-spherepack_precision.o \
-vector_synthesis_routines.o \
-gradgs.f90
-	$(FC) $(FFLAGS) -c gradgs.f90 $(LINKS)\
-	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
-
-igradec.o: \
+gradient_routines.o: \
 spherepack_precision.o \
 scalar_synthesis_routines.o \
-igradec.f90
-	$(FC) $(FFLAGS) -c igradec.f90 $(LINKS)\
+vector_synthesis_routines.o \
+gradient_routines.f90
+	$(FC) $(FFLAGS) -c gradient_routines.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 
-igrades.o: \
-spherepack_precision.o \
-scalar_synthesis_routines.o \
-igrades.f90
-	$(FC) $(FFLAGS) -c igrades.f90 $(LINKS)\
+gradient_regular_grid.o: \
+gradient_routines.o \
+gradient_regular_grid.f90
+	$(FC) $(FFLAGS) -c gradient_regular_grid.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 
-igradgc.o: \
-spherepack_precision.o \
-scalar_synthesis_routines.o \
-igradgc.f90
-	$(FC) $(FFLAGS) -c igradgc.f90 $(LINKS)\
+gradient_regular_grid_saved.o: \
+gradient_routines.o \
+gradient_regular_grid_saved.f90
+	$(FC) $(FFLAGS) -c gradient_regular_grid_saved.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 
-igradgs.o: \
-spherepack_precision.o \
-scalar_synthesis_routines.o \
-igradgs.f90
-	$(FC) $(FFLAGS) -c igradgs.f90 $(LINKS)\
+gradient_gaussian_grid.o: \
+gradient_routines.o \
+gradient_gaussian_grid.f90
+	$(FC) $(FFLAGS) -c gradient_gaussian_grid.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
+
+gradient_gaussian_grid_saved.o: \
+gradient_routines.o \
+gradient_gaussian_grid_saved.f90
+	$(FC) $(FFLAGS) -c gradient_gaussian_grid_saved.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
+
+invert_gradient_regular_grid.o: \
+gradient_routines.o \
+invert_gradient_regular_grid.f90
+	$(FC) $(FFLAGS) -c invert_gradient_regular_grid.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
+
+invert_gradient_regular_grid_saved.o: \
+gradient_routines.o \
+invert_gradient_regular_grid_saved.f90
+	$(FC) $(FFLAGS) -c invert_gradient_regular_grid_saved.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
+
+invert_gradient_gaussian_grid.o: \
+gradient_routines.o \
+invert_gradient_gaussian_grid.f90
+	$(FC) $(FFLAGS) -c invert_gradient_gaussian_grid.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
+
+invert_gradient_gaussian_grid_saved.o: \
+gradient_routines.o \
+invert_gradient_gaussian_grid_saved.f90
+	$(FC) $(FFLAGS) -c invert_gradient_gaussian_grid_saved.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 
 divergence_routines.o: \
@@ -747,18 +747,11 @@ spherepack_precision.o \
 divergence_routines.o \
 gaussian_latitudes_and_weights_routines.o \
 geo2math.o \
-gradec.o \
-grades.o \
-gradgc.o \
-gradgs.o \
+gradient_routines.o \
 idvtec.o \
 idvtes.o \
 idvtgc.o \
 idvtgs.o \
-igradec.o \
-igrades.o \
-igradgc.o \
-igradgs.o \
 ihgeod.o \
 isfvpec.o \
 isfvpes.o \

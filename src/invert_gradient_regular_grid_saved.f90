@@ -31,23 +31,23 @@
 !
 !
 !
-! ... file igradgs.f
+! ... file igrades.f
 !
 !     this file includes documentation and code for
-!     subroutine igradgs         i
+!     subroutine igrades         i
 !
-! ... files which must be loaded with igradgs.f
+! ... files which must be loaded with igradec.f
 !
-!     type_SpherepackAux.f, type_RealPeriodicTransform.f, shsgs.f, vhags.f
+!     type_SpherepackAux.f, type_RealPeriodicTransform.f, shses.f, vhaes.f
 !
-!     subroutine igradgs(nlat, nlon, isym, nt, sf, isf, jsf, br, bi, mdb, ndb, 
-!    +                   wshsgs, lshsgs, work, lwork, ierror)
+!     subroutine igrades(nlat, nlon, isym, nt, sf, isf, jsf, br, bi, mdb, ndb, 
+!    +                   wshses, lshses, work, lwork, ierror)
 !
 !     let br, bi, cr, ci be the vector spherical harmonic coefficients
-!     precomputed by vhags for a vector field (v, w).  let (v', w') be
+!     precomputed by vhaes for a vector field (v, w).  let (v', w') be
 !     the irrotational component of (v, w) (i.e., (v', w') is generated
-!     by assuming cr, ci are zero and synthesizing br, bi with vhsgs).
-!     then subroutine igradgs computes a scalar field sf such that
+!     by assuming cr, ci are zero and synthesizing br, bi with vhses).
+!     then subroutine igrades computes a scalar field sf such that
 !
 !            gradient(sf) = (v', w').
 !
@@ -60,25 +60,33 @@
 !            w'(i, j) = 1/sint*d(sf(i, j))/dlambda  (east longitudinal component
 !                                                 of the gradient)
 !
-!     at the gaussian colatitude theta(i) (see nlat as input parameter)
-!     and longitude lambda(j) = (j-1)*2*pi/nlon where sint = sin(theta(i)).
+!     at colatitude
 !
-!     note:  for an irrotational vector field (v, w), subroutine igradgs
+!            theta(i) = (i-1)*pi/(nlat-1)
+!
+!     and longitude
+!
+!            lambda(j) = (j-1)*2*pi/nlon
+!
+!     where sint = sin(theta(i)).  required associated legendre polynomials
+!     are stored rather than recomputed as they are in subroutine igradec.
+!
+!     note:  for an irrotational vector field (v, w), subroutine igrades
 !     computes a scalar field whose gradient is (v, w).  in ay case, 
-!     subroutine igradgs "inverts" the gradient subroutine gradgs.
+!     subroutine igrades "inverts" the gradient subroutine grades.
+!
 !
 !     input parameters
 !
-!     nlat   the number of points in the gaussian colatitude grid on the
-!            full sphere. these lie in the interval (0, pi) and are computed
-!            in radians in theta(1) <...< theta(nlat) by subroutine compute_gaussian_latitudes_and_weights.
-!            if nlat is odd the equator will be included as the grid point
-!            theta((nlat+1)/2).  if nlat is even the equator will be
-!            excluded as a grid point and will lie half way between
-!            theta(nlat/2) and theta(nlat/2+1). nlat must be at least 3.
-!            note: on the half sphere, the number of grid points in the
-!            colatitudinal direction is nlat/2 if nlat is even or
-!            (nlat+1)/2 if nlat is odd.
+!     nlat   the number of colatitudes on the full sphere including the
+!            poles. for example, nlat = 37 for a five degree grid.
+!            nlat determines the grid increment in colatitude as
+!            pi/(nlat-1).  if nlat is odd the equator is located at
+!            grid point i=(nlat+1)/2. if nlat is even the equator is
+!            located half way between points i=nlat/2 and i=nlat/2+1.
+!            nlat must be at least 3. note: on the half sphere, the
+!            number of grid points in the colatitudinal direction is
+!            nlat/2 if nlat is even or (nlat+1)/2 if nlat is odd.
 !
 !     nlon   the number of distinct londitude points.  nlon determines
 !            the grid increment in longitude as 2*pi/nlon. for example
@@ -131,38 +139,38 @@
 !            and sf are two dimensional arrays.
 !
 !     isf    the first dimension of the array sf as it appears in
-!            the program that calls igradgs. if isym = 0 then isf
+!            the program that calls igrades. if isym = 0 then isf
 !            must be at least nlat.  if isym = 1 or 2 and nlat is
 !            even then isf must be at least nlat/2. if isym = 1 or 2
 !            and nlat is odd then isf must be at least (nlat+1)/2.
 !
 !     jsf    the second dimension of the array sf as it appears in
-!            the program that calls igradgs. jsf must be at least nlon.
+!            the program that calls igrades. jsf must be at least nlon.
 !
 !     br, bi  two or three dimensional arrays (see input parameter nt)
 !            that contain vector spherical harmonic coefficients
-!            of the vector field (v, w) as computed by subroutine vhags.
-!     ***    br, bi must be computed by vhags prior to calling igradgs.
+!            of the vector field (v, w) as computed by subroutine vhaes.
+!     ***    br, bi must be computed by vhaes prior to calling igrades.
 !
 !     mdb    the first dimension of the arrays br and bi as it appears in
-!            the program that calls igradgs (and vhags). mdb must be at
+!            the program that calls igrades (and vhaes). mdb must be at
 !            least min(nlat, nlon/2) if nlon is even or at least
 !            min(nlat, (nlon+1)/2) if nlon is odd.
 !
 !     ndb    the second dimension of the arrays br and bi as it appears in
-!            the program that calls igradgs (and vhags). ndb must be at
+!            the program that calls igrades (and vhaes). ndb must be at
 !            least nlat.
 !
 !
-!  wshsgs    an array which must be initialized by subroutine igradgsi
+!  wshses    an array which must be initialized by subroutine igradesi
 !            (or equivalently by subroutine shsesi).  once initialized, 
-!            wshsgs can be used repeatedly by igradgs as long as nlon
-!            and nlat remain unchanged.  wshsgs must not be altered
-!            between calls of igradgs.
+!            wshses can be used repeatedly by igrades as long as nlon
+!            and nlat remain unchanged.  wshses must not be altered
+!            between calls of igrades.
 !
 !
-!  lshsgs    the dimension of the array wshsgs as it appears in the
-!            program that calls igradgs. define
+!  lshses    the dimension of the array wshses as it appears in the
+!            program that calls igrades. define
 !
 !               l1 = min(nlat, (nlon+2)/2) if nlon is even or
 !               l1 = min(nlat, (nlon+1)/2) if nlon is odd
@@ -173,15 +181,14 @@
 !               l2 = (nlat+1)/2    if nlat is odd.
 !
 !
-!            then lshsgs must be greater than or equal to
+!            then lshses must be greater than or equal to
 !
-!               nlat*(3*(l1+l2)-2)+(l1-1)*(l2*(2*nlat-l1)-3*l1)/2+nlon+15
-!
+!               (l1*l2*(nlat+nlat-l1+1))/2+nlon+15
 !
 !     work   a work array that does not have to be saved.
 !
 !     lwork  the dimension of the array work as it appears in the
-!            program that calls igradgs. define
+!            program that calls igrades. define
 !
 !               l2 = nlat/2                    if nlat is even or
 !               l2 = (nlat+1)/2                if nlat is odd
@@ -207,7 +214,7 @@
 !           contain a scalar field whose gradient is the irrotational
 !           component of the vector field (v, w).  the vector spherical
 !           harmonic coefficients br, bi were precomputed by subroutine
-!           vhags.  sf(i, j) is given at the gaussian colatitude theta(i)
+!           vhaes.  sf(i, j) is given at the gaussian colatitude theta(i)
 !           and longitude lambda(j) = (j-1)*2*pi/nlon.  the index ranges
 !           are defined at input parameter isym.
 !
@@ -221,68 +228,52 @@
 !           = 6  error in the specification of jsf
 !           = 7  error in the specification of mdb
 !           = 8  error in the specification of ndb
-!           = 9  error in the specification of lshsgs
+!           = 9  error in the specification of lshses
 !           = 10 error in the specification of lwork
 !
 ! **********************************************************************
 !
-module module_igradgs
-
-    use spherepack_precision, only: &
-        wp, & ! working precision
-        ip ! integer precision
-
-    use scalar_synthesis_routines, only: &
-        shsgs
-
-    ! Explicit typing only
-    implicit none
-
-    ! Everything is private unless stated otherwise
-    public :: igradgs
+submodule(gradient_routines) invert_gradient_regular_grid_saved
 
 contains
 
-    subroutine igradgs(nlat, nlon, isym, nt, sf, isf, jsf, br, bi, mdb, ndb, &
-        wshsgs, lshsgs, work, lwork, ierror)
+    subroutine igrades(nlat, nlon, isym, nt, sf, isf, jsf, br, bi, mdb, ndb, &
+        wshses, lshses, work, lwork, ierror)
 
-        real(wp) :: bi
-        real(wp) :: br
+        ! Dummy arguments
+        integer(ip), intent(in)  :: nlat
+        integer(ip), intent(in)  :: nlon
+        integer(ip), intent(in)  :: isym
+        integer(ip), intent(in)  :: nt
+        real(wp),    intent(out) :: sf(isf, jsf, nt)
+        integer(ip), intent(in)  :: isf
+        integer(ip), intent(in)  :: jsf
+        real(wp),    intent(in)  :: br(mdb, ndb, nt)
+        real(wp),    intent(in)  :: bi(mdb, ndb, nt)
+        integer(ip), intent(in)  :: mdb
+        integer(ip), intent(in)  :: ndb
+        real(wp),    intent(in)  :: wshses(lshses)
+        integer(ip), intent(in)  :: lshses
+        real(wp),    intent(out) :: work(lwork)
+        integer(ip), intent(in)  :: lwork
+        integer(ip), intent(out) :: ierror
+
+        ! Local variables
         integer(ip) :: ia
         integer(ip) :: ib
-        integer(ip) :: ierror
         integer(ip) :: imid
-        integer(ip) :: is
-        integer(ip) :: isf
-        integer(ip) :: isym
+        integer(ip) :: iis
         integer(ip) :: iwk
-        integer(ip) :: jsf
-        integer(ip) :: l1
-        integer(ip) :: l2
         integer(ip) :: liwk
-        integer(ip) :: lp
+        integer(ip) :: lpimn
         integer(ip) :: ls
-        integer(ip) :: lshsgs
         integer(ip) :: lwkmin
-        integer(ip) :: lwork
         integer(ip) :: mab
-        integer(ip) :: mdb
         integer(ip) :: mmax
         integer(ip) :: mn
-        integer(ip) :: ndb
-        integer(ip) :: nlat
         integer(ip) :: nln
-        integer(ip) :: nlon
-        integer(ip) :: nt
-        real(wp) :: sf
-        real(wp) :: work
-        real(wp) :: wshsgs
-        dimension sf(isf, jsf, nt)
-        dimension br(mdb, ndb, nt), bi(mdb, ndb, nt)
-        dimension wshsgs(lshsgs), work(lwork)
-        !
+
         ! Check input arguments
-        !
         ierror = 1
         if (nlat < 3) return
         ierror = 2
@@ -306,10 +297,9 @@ contains
         !
         !     verify saved work space length
         !
-        l2 = (nlat+mod(nlat, 2))/2
-        l1 = min((nlon+2)/2, nlat)
-        lp=nlat*(3*(l1+l2)-2)+(l1-1)*(l2*(2*nlat-l1)-3*l1)/2+nlon+15
-        if (lshsgs < lp) return
+        imid = (nlat+1)/2
+        lpimn = (imid*mmax*(nlat+nlat-mmax+1))/2
+        if (lshses < lpimn+nlon+15) return
         ierror = 10
         !
         !     set minimum and verify unsaved work space
@@ -330,98 +320,54 @@ contains
         !
         ia = 1
         ib = ia + mn
-        is = ib + mn
-        iwk = is + nlat
+        iis = ib + mn
+        iwk = iis + nlat
         liwk = lwork-2*mn-nlat
 
-        call igrdgs1(nlat, nlon, isym, nt, sf, isf, jsf, work(ia), work(ib), mab, &
-            work(is), mdb, ndb, br, bi, wshsgs, lshsgs, work(iwk), liwk, ierror)
+        call igrades_lower_routine(nlat, nlon, isym, nt, sf, isf, jsf, work(ia), work(ib), mab, &
+            work(iis), mdb, ndb, br, bi, wshses, lshses, work(iwk), liwk, ierror)
 
+    end subroutine igrades
 
-    contains
+    subroutine igrades_lower_routine(nlat, nlon, isym, nt, sf, isf, jsf, a, b, mab, &
+        sqnn, mdb, ndb, br, bi, wshses, lshses, wk, lwk, ierror)
 
+        real(wp) :: a
+        real(wp) :: b
+        real(wp) :: bi
+        real(wp) :: br
+        
+        integer(ip) :: ierror
+        integer(ip) :: isf
+        integer(ip) :: isym
+        integer(ip) :: jsf
+        
+        integer(ip) :: lshses
+        integer(ip) :: lwk
+        
+        integer(ip) :: mab
+        integer(ip) :: mdb
+        
+        
+        integer(ip) :: ndb
+        integer(ip) :: nlat
+        integer(ip) :: nlon
+        integer(ip) :: nt
+        real(wp) :: sf
+        real(wp) :: sqnn
+        real(wp) :: wk
+        real(wp) :: wshses
+        dimension sf(isf, jsf, nt)
+        dimension br(mdb, ndb, nt), bi(mdb, ndb, nt), sqnn(nlat)
+        dimension a(mab, nlat, nt), b(mab, nlat, nt)
+        dimension wshses(lshses), wk(lwk)
 
-        subroutine igrdgs1(nlat, nlon, isym, nt, sf, isf, jsf, a, b, mab, &
-            sqnn, mdb, ndb, br, bi, wsav, lsav, wk, lwk, ierror)
+        call perform_setup_for_inversion(nlon, a, b, br, bi, sqnn)
 
-            real(wp) :: a
-            real(wp) :: b
-            real(wp) :: bi
-            real(wp) :: br
-            real(wp) :: fn
-            integer(ip) :: ierror
-            integer(ip) :: isf
-            integer(ip) :: isym
-            integer(ip) :: jsf
-            integer(ip) :: k
-            integer(ip) :: lsav
-            integer(ip) :: lwk
-            integer(ip) :: m
-            integer(ip) :: mab
-            integer(ip) :: mdb
-            integer(ip) :: mmax
-            integer(ip) :: n
-            integer(ip) :: ndb
-            integer(ip) :: nlat
-            integer(ip) :: nlon
-            integer(ip) :: nt
-            real(wp) :: sf
-            real(wp) :: sqnn
-            real(wp) :: wk
-            real(wp) :: wsav
-            dimension sf(isf, jsf, nt)
-            dimension br(mdb, ndb, nt), bi(mdb, ndb, nt), sqnn(nlat)
-            dimension a(mab, nlat, nt), b(mab, nlat, nt)
-            dimension wsav(lsav), wk(lwk)
-            !
-            ! Preset coefficient multiplyers in vector
-            !
-            do n=2, nlat
-                fn = real(n - 1)
-                sqnn(n) = 1.0/sqrt(fn * (fn + 1.0))
-            end do
-            !
-            !     set upper limit for vector m subscript
-            !
-            mmax = min(nlat, (nlon+1)/2)
-            !
-            !     compute multiple scalar field coefficients
-            !
-            do k=1, nt
-                !
-                !     preset to 0.0
-                !
-                do n=1, nlat
-                    do m=1, mab
-                        a(m, n, k) = 0.0
-                        b(m, n, k) = 0.0
-                    end do
-                end do
-                !
-                ! Compute m=0 coefficients
-                !
-                do n=2, nlat
-                    a(1, n, k) = br(1, n, k)*sqnn(n)
-                    b(1, n, k)= bi(1, n, k)*sqnn(n)
-                end do
-                !
-                !     compute m>0 coefficients
-                !
-                do m=2, mmax
-                    do n=m, nlat
-                        a(m, n, k) = sqnn(n)*br(m, n, k)
-                        b(m, n, k) = sqnn(n)*bi(m, n, k)
-                    end do
-                end do
-            end do
-            !
-            !     scalar sythesize a, b into sf
-            !
-            call shsgs(nlat, nlon, isym, nt, sf, isf, jsf, a, b, mab, nlat, wsav, &
-                lsav, wk, lwk, ierror)
+        ! Scalar synthesize a, b into sf
+        call shses(nlat, nlon, isym, nt, sf, isf, jsf, a, b, mab, nlat, &
+            wshses, lshses, wk, lwk, ierror)
 
-        end subroutine igrdgs1
+    end subroutine igrades_lower_routine
 
-    end subroutine igradgs
-
-end module module_igradgs
+end  submodule invert_gradient_regular_grid_saved

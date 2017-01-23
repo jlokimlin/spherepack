@@ -5,16 +5,10 @@ module divergence_routines
         ip ! integer precision
 
     use scalar_synthesis_routines, only: &
-        shsec, &
-        shses, &
-        shsgc, &
-        shsgs
+        shsec, shses, shsgc, shsgs
 
     use vector_synthesis_routines, only: &
-        vhsgc, &
-        vhses, &
-        vhsec, &
-        vhsgs
+        vhses, vhsec, vhsgc, vhsgs
 
     ! Explicit typing only
     implicit none

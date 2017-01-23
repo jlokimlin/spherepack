@@ -30,20 +30,20 @@
 !     * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !
 !
-! ... file gradgc.f
+! ... file gradgs.f90
 !
 !     this file includes documentation and code for
-!     subroutine gradgc         i
+!     subroutine gradgs
 !
-! ... files which must be loaded with gradgc.f
+! ... files which must be loaded with gradgec.f90
 !
-!     type_SpherepackAux.f, type_RealPeriodicTransform.f, shagc.f, vhsgc.f
+!     type_SpherepackAux.f90, type_RealPeriodicTransform.f90, shags.f90, vhsgs.f90
 !
-!     subroutine gradgc(nlat, nlon, isym, nt, v, w, idvw, jdvw, a, b, mdab, ndab, 
-!    +                  wvhsgc, lvhsgc, work, lwork, ierror)
+!     subroutine gradgs(nlat, nlon, isym, nt, v, w, idvw, jdvw, a, b, mdab, ndab, 
+!                      wvhsgs, lvhsgs, work, lwork, ierror)
 !
 !     given the scalar spherical harmonic coefficients a and b, precomputed
-!     by subroutine shagc for a scalar field sf, subroutine gradgc computes
+!     by subroutine shags for a scalar field sf, subroutine gradgs computes
 !     an irrotational vector field (v, w) such that
 !
 !           gradient(sf) = (v, w).
@@ -59,10 +59,7 @@
 !
 !     at the gaussian colatitude point theta(i) (see nlat as input
 !     parameter) and longitude lambda(j) = (j-1)*2*pi/nlon where
-!     where sint = sin(theta(i)).  required associated legendre polynomials
-!     are recomputed rather than stored as they are in subroutine gradgs. this
-!     saves storage (compare lsav with lsav in gradgs) but increases
-!     computational requirements.
+!     sint = sin(theta(i)).
 !
 !
 !     input parameters
@@ -86,7 +83,7 @@
 !
 !
 !     isym   this has the same value as the isym that was input to
-!            subroutine shagc to compute the arrays a and b from the
+!            subroutine shags to compute the arrays a and b from the
 !            scalar field sf.  isym determines whether (v, w) are
 !            computed on the full or half sphere as follows:
 !
@@ -128,56 +125,56 @@
 !            and w are two dimensional arrays.
 !
 !     idvw   the first dimension of the arrays v, w as it appears in
-!            the program that calls gradgc. if isym = 0 then idvw
+!            the program that calls gradgs. if isym = 0 then idvw
 !            must be at least nlat.  if isym = 1 or 2 and nlat is
 !            even then idvw must be at least nlat/2. if isym = 1 or 2
 !            and nlat is odd then idvw must be at least (nlat+1)/2.
 !
 !     jdvw   the second dimension of the arrays v, w as it appears in
-!            the program that calls gradgc. jdvw must be at least nlon.
+!            the program that calls gradgs. jdvw must be at least nlon.
 !
 !     a, b    two or three dimensional arrays (see input parameter nt)
 !            that contain scalar spherical harmonic coefficients
-!            of the scalar field array sf as computed by subroutine shagc.
-!     ***    a, b must be computed by shagc prior to calling gradgc.
+!            of the scalar field array sf as computed by subroutine shags.
+!     ***    a, b must be computed by shags prior to calling gradgs.
 !
 !     mdab   the first dimension of the arrays a and b as it appears in
-!            the program that calls gradgc (and shagc). mdab must be at
+!            the program that calls gradgs (and shags). mdab must be at
 !            least min(nlat, (nlon+2)/2) if nlon is even or at least
 !            min(nlat, (nlon+1)/2) if nlon is odd.
 !
 !     ndab   the second dimension of the arrays a and b as it appears in
-!            the program that calls gradgc (and shagc). ndab must be at
+!            the program that calls gradgs (and shags). ndab must be at
 !            least nlat.
 !
 !
-!     wvhsgc an array which must be initialized by subroutine vhsgci.
+!     wvhsgs an array which must be initialized by subroutine vhsgsi.
 !            once initialized, 
-!            wvhsgc can be used repeatedly by gradgc as long as nlon
-!            and nlat remain unchanged.  wvhsgc must not be altered
-!            between calls of gradgc.
+!            wvhsgs can be used repeatedly by gradgs as long as nlon
+!            and nlat remain unchanged.  wvhsgs must not be altered
+!            between calls of gradgs.
 !
 !
-!     lvhsgc the dimension of the array wvhsgc as it appears in the
-!            program that calls gradgc. Let
+!     lvhsgs the dimension of the array wvhsgs as it appears in the
+!            program that calls grradgs.  define
 !
 !               l1 = min(nlat, nlon/2) if nlon is even or
 !               l1 = min(nlat, (nlon+1)/2) if nlon is odd
 !
 !            and
 !
-!               l2 = nlat/2                  if nlat is even or
-!               l2 = (nlat+1)/2              if nlat is odd
+!               l2 = nlat/2        if nlat is even or
+!               l2 = (nlat+1)/2    if nlat is odd
 !
-!            lvhsgc must be at least
+!            then lvhsgs must be at least
 !
-!               4*nlat*l2+3*max(l1-2, 0)*(nlat+nlat-l1-1)+nlon+15
+!                 l1*l2*(nlat+nlat-l1+1)+nlon+15+2*nlat
 !
 !
 !     work   a work array that does not have to be saved.
 !
 !     lwork  the dimension of the array work as it appears in the
-!            program that calls gradgc. define
+!            program that calls gradgs. define
 !
 !               l1 = min(nlat, nlon/2) if nlon is even or
 !               l1 = min(nlat, (nlon+1)/2) if nlon is odd
@@ -187,14 +184,13 @@
 !               l2 = nlat/2                  if nlat is even or
 !               l2 = (nlat+1)/2              if nlat is odd
 !
-!            if isym = 0 then lwork must be at least
+!            if isym = 0, lwork must be greater than or equal to
 !
-!                nlat*(2*nt*nlon+max(6*l2, nlon)) + nlat*(2*l1*nt+1)
+!               nlat*((2*nt+1)*nlon+2*l1*nt+1).
 !
-!            if isym = 1 or 2 then lwork must be at least
+!            if isym = 1 or 2, lwork must be greater than or equal to
 !
-!                l2*(2*nt*nlon+max(6*nlat, nlon)) + nlat*(2*l1*nt+1)
-!
+!               (2*nt+1)*l2*nlon+nlat*(2*l1*nt+1).
 !
 !
 !     **************************************************************
@@ -222,65 +218,53 @@
 !           = 6  error in the specification of jdvw
 !           = 7  error in the specification of mdab
 !           = 8  error in the specification of ndab
-!           = 9  error in the specification of lvhsgc
+!           = 9  error in the specification of lvhsgs
 !           = 10 error in the specification of lwork
 !
 !
-module module_gradgc
-
-    use spherepack_precision, only: &
-        wp, & ! working precision
-        ip ! integer precision
-
-    use vector_synthesis_routines, only: &
-        vhsgc
-
-    ! Explicit typing only
-    implicit none
-
-    ! Everything is private unless stated otherwise
-    public :: gradgc
+submodule(gradient_routines) gradient_gaussian_grid_saved
 
 contains
 
-    subroutine gradgc(nlat, nlon, isym, nt, v, w, idvw, jdvw, a, b, mdab, ndab, &
-        wvhsgc, lvhsgc, work, lwork, ierror)
+    module subroutine gradgs(nlat, nlon, isym, nt, v, w, idvw, jdvw, a, b, mdab, ndab, &
+        wvhsgs, lvhsgs, work, lwork, ierror)
 
-        real(wp) :: a
-        real(wp) :: b
+        ! Dummy arguments
+        integer(ip), intent(in)  :: nlat
+        integer(ip), intent(in)  :: nlon
+        integer(ip), intent(in)  :: isym
+        integer(ip), intent(in)  :: nt
+        real(wp),    intent(out) :: v(idvw, jdvw, nt)
+        real(wp),    intent(out) :: w(idvw, jdvw, nt)
+        integer(ip), intent(in)  :: idvw
+        integer(ip), intent(in)  :: jdvw
+        real(wp),    intent(in)  :: a(mdab, ndab, nt)
+        real(wp),    intent(in)  :: b(mdab, ndab, nt)
+        integer(ip), intent(in)  :: mdab
+        integer(ip), intent(in)  :: ndab
+        real(wp),    intent(in)  :: wvhsgs(lvhsgs)
+        integer(ip), intent(in)  :: lvhsgs
+        real(wp),    intent(out) :: work(lwork)
+        integer(ip), intent(in)  :: lwork
+        integer(ip), intent(out) :: ierror
+
+        ! Local variables
         integer(ip) :: ibi
         integer(ip) :: ibr
-        integer(ip) :: idvw
-        integer(ip) :: ierror
+        integer(ip) :: idv
+        integer(ip) :: idz
         integer(ip) :: imid
-        integer(ip) :: is
-        integer(ip) :: isym
+        integer(ip) :: iis
         integer(ip) :: iwk
-        integer(ip) :: jdvw
-        integer(ip) :: l1
-        integer(ip) :: l2
+        integer(ip) :: lgdmin
         integer(ip) :: liwk
-        integer(ip) :: lvhsgc
+        integer(ip) :: lnl
         integer(ip) :: lwkmin
-        integer(ip) :: lwmin
-        integer(ip) :: lwork
-        integer(ip) :: mdab
+        integer(ip) :: lzimn
         integer(ip) :: mmax
         integer(ip) :: mn
-        integer(ip) :: ndab
-        integer(ip) :: nlat
-        integer(ip) :: nlon
-        integer(ip) :: nt
-        real(wp) :: v
-        real(wp) :: w
-        real(wp) :: work
-        real(wp) :: wvhsgc
-        dimension v(idvw, jdvw, nt), w(idvw, jdvw, nt)
-        dimension a(mdab, ndab, nt), b(mdab, ndab, nt)
-        dimension wvhsgc(lvhsgc), work(lwork)
-        !
+
         ! Check input arguments
-        !
         ierror = 1
         if (nlat < 3) return
         ierror = 2
@@ -304,124 +288,77 @@ contains
         !
         !     verify minimum saved work space length
         !
-        l1 = min(nlat, (nlon+1)/2)
-        l2 = (nlat+1)/2
-        lwmin =   4*nlat*l2+3*max(l1-2, 0)*(2*nlat-l1-1)+nlon+15
-        if (lvhsgc < lwmin) return
+        idz = (mmax*(nlat+nlat-mmax+1))/2
+        lzimn = idz*imid
+        lgdmin = lzimn+lzimn+nlon+15
+        if (lvhsgs < lgdmin) return
         ierror = 10
         !
         !     verify minimum unsaved work space length
         !
-        if (isym == 0) then
-            lwkmin = nlat*(2*nt*nlon+max(6*l2, nlon)+2*l1*nt+1)
-        else
-            lwkmin = l2*(2*nt*nlon+max(6*nlat, nlon)) + nlat*(2*l1*nt+1)
-        end if
+        mn = mmax*nlat*nt
+        idv = nlat
+        if (isym /= 0) idv = imid
+        lnl = nt*idv*nlon
+        lwkmin =  lnl+lnl+idv*nlon+2*mn+nlat
         if (lwork < lwkmin) return
-
         ierror = 0
         !
         !     set work space pointers
         !
-        mn = mmax*nlat*nt
         ibr = 1
         ibi = ibr + mn
-        is = ibi + mn
-        iwk = is + nlat
+        iis = ibi + mn
+        iwk = iis + nlat
         liwk = lwork-2*mn-nlat
-        call gradgc1(nlat, nlon, isym, nt, v, w, idvw, jdvw, work(ibr), work(ibi), &
-            mmax, work(is), mdab, ndab, a, b, wvhsgc, lvhsgc, work(iwk), liwk, &
+        call gradgs_lower_routine(nlat, nlon, isym, nt, v, w, idvw, jdvw, work(ibr), work(ibi), &
+            mmax, work(iis), mdab, ndab, a, b, wvhsgs, lvhsgs, work(iwk), liwk, &
             ierror)
 
-    contains
+    end subroutine gradgs
 
-        subroutine gradgc1(nlat, nlon, isym, nt, v, w, idvw, jdvw, br, bi, mmax, &
-            sqnn, mdab, ndab, a, b, wvhsgc, lvhsgc, wk, lwk, ierror)
+    subroutine gradgs_lower_routine(nlat, nlon, isym, nt, v, w, idvw, jdvw, br, bi, mmax, &
+        sqnn, mdab, ndab, a, b, wvhsgs, lvhsgs, wk, lwk, ierror)
 
-            real(wp) :: a
-            real(wp) :: b
-            real(wp) :: bi
-            real(wp) :: br
-            real(wp) :: ci(mmax, nlat, nt)
-            real(wp) :: cr(mmax, nlat, nt)
-            real(wp) :: fn
-            integer(ip) :: idvw
-            integer(ip) :: ierror
-            integer(ip) :: isym
-            integer(ip) :: ityp
-            integer(ip) :: jdvw
-            integer(ip) :: k
-            integer(ip) :: lvhsgc
-            integer(ip) :: lwk
-            integer(ip) :: m
-            integer(ip) :: mdab
-            integer(ip) :: mmax
-            integer(ip) :: n
-            integer(ip) :: ndab
-            integer(ip) :: nlat
-            integer(ip) :: nlon
-            integer(ip) :: nt
-            real(wp) :: sqnn
-            real(wp) :: v
-            real(wp) :: w
-            real(wp) :: wk
-            real(wp) :: wvhsgc
-            dimension v(idvw, jdvw, nt), w(idvw, jdvw, nt)
-            dimension br(mmax, nlat, nt), bi(mmax, nlat, nt), sqnn(nlat)
-            dimension a(mdab, ndab, nt), b(mdab, ndab, nt)
-            dimension wvhsgc(lvhsgc), wk(lwk)
-            !
-            ! Preset coefficient multiplyers in vector
-            !
-            do n=2, nlat
-                fn = real(n - 1, kind=wp)
-                sqnn(n) = sqrt(fn * (fn + 1.0_wp))
-            end do
-            !
-            ! Compute multiple vector fields coefficients
-            !
-            do k=1, nt
-                !
-                ! Preset br, bi to 0.0
-                !
-                br(1: mmax, 1: nlat, k) = 0.0
-                bi(1: mmax, 1: nlat, k) = 0.0
-                !
-                ! Compute m=0 coefficients
-                !
-                do n=2, nlat
-                    br(1, n, k) = sqnn(n)*a(1, n, k)
-                    bi(1, n, k) = sqnn(n)*b(1, n, k)
-                end do
-                !
-                !     compute m>0 coefficients
-                !
-                do m=2, mmax
-                    do n=m, nlat
-                        br(m, n, k) = sqnn(n)*a(m, n, k)
-                        bi(m, n, k) = sqnn(n)*b(m, n, k)
-                    end do
-                end do
-            end do
-            !
-            !     set ityp for irrotational vector synthesis to compute gradient
-            !
-            select case (isym)
-                case (0)
-                    ityp = 1
-                case (1)
-                    ityp = 4
-                case (2)
-                    ityp = 7
-            end select
-            !
-            !     vector sythesize br, bi into (v, w) (cr, ci are dummy variables)
-            !
-            call vhsgc(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
-                mmax, nlat, wvhsgc, lvhsgc, wk, lwk, ierror)
+        real(wp) :: a
+        real(wp) :: b
+        real(wp) :: bi
+        real(wp) :: br
+        real(wp) :: ci(mmax, nlat, nt)
+        real(wp) :: cr(mmax, nlat, nt)
+        
+        integer(ip) :: idvw
+        integer(ip) :: ierror
+        integer(ip) :: isym
+        integer(ip) :: ityp
+        integer(ip) :: jdvw
+        
+        integer(ip) :: lvhsgs
+        integer(ip) :: lwk
+        
+        integer(ip) :: mdab
+        integer(ip) :: mmax
+        
+        integer(ip) :: ndab
+        integer(ip) :: nlat
+        integer(ip) :: nlon
+        integer(ip) :: nt
+        real(wp) :: sqnn
+        real(wp) :: v
+        real(wp) :: w
+        real(wp) :: wk
+        real(wp) :: wvhsgs
+        dimension v(idvw, jdvw, nt), w(idvw, jdvw, nt)
+        dimension br(mmax, nlat, nt), bi(mmax, nlat, nt), sqnn(nlat)
+        dimension a(mdab, ndab, nt), b(mdab, ndab, nt)
+        dimension wvhsgs(lvhsgs), wk(lwk)
 
-        end subroutine gradgc1
+        call perform_setup_for_gradient(isym, ityp, a, b, br, bi, sqnn)
 
-    end subroutine gradgc
+        ! Vector synthesize br, bi into (v, w) (cr, ci are dummy variables)
+        call vhsgs(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
+            mmax, nlat, wvhsgs, lvhsgs, wk, lwk, ierror)
 
-end module module_gradgc
+    end subroutine gradgs_lower_routine
+
+end submodule gradient_gaussian_grid_saved

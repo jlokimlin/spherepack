@@ -234,64 +234,49 @@
 !
 ! **********************************************************************
 !
-module module_igradec
-
-    use spherepack_precision, only: &
-        wp, & ! working precision
-        ip ! integer precision
-
-    use scalar_synthesis_routines, only: &
-        shsec
-
-    ! Explicit typing only
-    implicit none
-
-    ! Everything is private unless stated otherwise
-    public :: igradec
+submodule(gradient_routines) invert_gradient_regular_grid
 
 contains
 
-
-    subroutine igradec(nlat, nlon, isym, nt, sf, isf, jsf, br, bi, mdb, ndb, &
+    module subroutine igradec(nlat, nlon, isym, nt, sf, isf, jsf, br, bi, mdb, ndb, &
         wshsec, lshsec, work, lwork, ierror)
 
-        real(wp) :: bi
-        real(wp) :: br
+        ! Dummy arguments
+        integer(ip), intent(in)  :: nlat
+        integer(ip), intent(in)  :: nlon
+        integer(ip), intent(in)  :: isym
+        integer(ip), intent(in)  :: nt
+        real(wp),    intent(out) :: sf(isf, jsf, nt)
+        integer(ip), intent(in)  :: isf
+        integer(ip), intent(in)  :: jsf
+        real(wp),    intent(in)  :: br(mdb, ndb, nt)
+        real(wp),    intent(in)  :: bi(mdb, ndb, nt)
+        integer(ip), intent(in)  :: mdb
+        integer(ip), intent(in)  :: ndb
+        real(wp),    intent(in)  :: wshsec(lshsec)
+        integer(ip), intent(in)  :: lshsec
+        real(wp),    intent(out) :: work(lwork)
+        integer(ip), intent(in)  :: lwork
+        integer(ip), intent(out) :: ierror
+
+        ! Local variables
         integer(ip) :: ia
         integer(ip) :: ib
-        integer(ip) :: ierror
         integer(ip) :: imid
-        integer(ip) :: is
-        integer(ip) :: isf
-        integer(ip) :: isym
+        integer(ip) :: iis
         integer(ip) :: iwk
-        integer(ip) :: jsf
         integer(ip) :: l1
         integer(ip) :: l2
         integer(ip) :: liwk
         integer(ip) :: lpimn
         integer(ip) :: ls
-        integer(ip) :: lshsec
         integer(ip) :: lwkmin
-        integer(ip) :: lwork
         integer(ip) :: mab
-        integer(ip) :: mdb
         integer(ip) :: mmax
         integer(ip) :: mn
-        integer(ip) :: ndb
-        integer(ip) :: nlat
         integer(ip) :: nln
-        integer(ip) :: nlon
-        integer(ip) :: nt
-        real(wp) :: sf
-        real(wp) :: work
-        real(wp) :: wshsec
-        dimension sf(isf, jsf, nt)
-        dimension br(mdb, ndb, nt), bi(mdb, ndb, nt)
-        dimension wshsec(lshsec), work(lwork)
-        !
+
         ! Check input arguments
-        !
         ierror = 1
         if (nlat < 3) return
         ierror = 2
@@ -346,96 +331,54 @@ contains
         !
         ia = 1
         ib = ia + mn
-        is = ib + mn
-        iwk = is + nlat
+        iis = ib + mn
+        iwk = iis + nlat
         liwk = lwork-2*mn-nlat
 
-        call igrdec1(nlat, nlon, isym, nt, sf, isf, jsf, work(ia), work(ib), mab, &
-            work(is), mdb, ndb, br, bi, wshsec, lshsec, work(iwk), liwk, ierror)
-
-    contains
-
-        subroutine igrdec1(nlat, nlon, isym, nt, sf, isf, jsf, a, b, mab, &
-            sqnn, mdb, ndb, br, bi, wshsec, lshsec, wk, lwk, ierror)
-            implicit none
-            real(wp) :: a
-            real(wp) :: b
-            real(wp) :: bi
-            real(wp) :: br
-            real(wp) :: fn
-            integer(ip) :: ierror
-            integer(ip) :: isf
-            integer(ip) :: isym
-            integer(ip) :: jsf
-            integer(ip) :: k
-            integer(ip) :: lshsec
-            integer(ip) :: lwk
-            integer(ip) :: m
-            integer(ip) :: mab
-            integer(ip) :: mdb
-            integer(ip) :: mmax
-            integer(ip) :: n
-            integer(ip) :: ndb
-            integer(ip) :: nlat
-            integer(ip) :: nlon
-            integer(ip) :: nt
-            real(wp) :: sf
-            real(wp) :: sqnn
-            real(wp) :: wk
-            real(wp) :: wshsec
-            dimension sf(isf, jsf, nt)
-            dimension br(mdb, ndb, nt), bi(mdb, ndb, nt), sqnn(nlat)
-            dimension a(mab, nlat, nt), b(mab, nlat, nt)
-            dimension wshsec(lshsec), wk(lwk)
-            !
-            ! Preset coefficient multiplyers in vector
-            !
-            do n=2, nlat
-                fn = real(n - 1)
-                sqnn(n) = 1.0/sqrt(fn * (fn + 1.0))
-            end do
-            !
-            !     set upper limit for vector m subscript
-            !
-            mmax = min(nlat, (nlon+1)/2)
-            !
-            !     compute multiple scalar field coefficients
-            !
-            do k=1, nt
-                !
-                !     preset to 0.0
-                !
-                do n=1, nlat
-                    do m=1, mab
-                        a(m, n, k) = 0.0
-                        b(m, n, k) = 0.0
-                    end do
-                end do
-                !
-                ! Compute m=0 coefficients
-                !
-                do n=2, nlat
-                    a(1, n, k) = br(1, n, k)*sqnn(n)
-                    b(1, n, k)= bi(1, n, k)*sqnn(n)
-                end do
-                !
-                !     compute m>0 coefficients
-                !
-                do m=2, mmax
-                    do n=m, nlat
-                        a(m, n, k) = sqnn(n)*br(m, n, k)
-                        b(m, n, k) = sqnn(n)*bi(m, n, k)
-                    end do
-                end do
-            end do
-            !
-            !     scalar sythesize a, b into sf
-            !
-            call shsec(nlat, nlon, isym, nt, sf, isf, jsf, a, b, mab, nlat, &
-                wshsec, lshsec, wk, lwk, ierror)
-
-        end subroutine igrdec1
+        call igradec_lower_routine(nlat, nlon, isym, nt, sf, isf, jsf, work(ia), work(ib), mab, &
+            work(iis), mdb, ndb, br, bi, wshsec, lshsec, work(iwk), liwk, ierror)
 
     end subroutine igradec
 
-end module module_igradec
+    subroutine igradec_lower_routine(nlat, nlon, isym, nt, sf, isf, jsf, a, b, mab, &
+        sqnn, mdb, ndb, br, bi, wshsec, lshsec, wk, lwk, ierror)
+
+        real(wp) :: a
+        real(wp) :: b
+        real(wp) :: bi
+        real(wp) :: br
+        
+        integer(ip) :: ierror
+        integer(ip) :: isf
+        integer(ip) :: isym
+        integer(ip) :: jsf
+        
+        integer(ip) :: lshsec
+        integer(ip) :: lwk
+        
+        integer(ip) :: mab
+        integer(ip) :: mdb
+        
+        
+        integer(ip) :: ndb
+        integer(ip) :: nlat
+        integer(ip) :: nlon
+        integer(ip) :: nt
+        real(wp) :: sf
+        real(wp) :: sqnn
+        real(wp) :: wk
+        real(wp) :: wshsec
+        dimension sf(isf, jsf, nt)
+        dimension br(mdb, ndb, nt), bi(mdb, ndb, nt), sqnn(nlat)
+        dimension a(mab, nlat, nt), b(mab, nlat, nt)
+        dimension wshsec(lshsec), wk(lwk)
+
+        call perform_setup_for_inversion(nlon, a, b, br, bi, sqnn)
+
+        ! Scalar synthesize a, b into sf
+        call shsec(nlat, nlon, isym, nt, sf, isf, jsf, a, b, mab, nlat, &
+            wshsec, lshsec, wk, lwk, ierror)
+
+    end subroutine igradec_lower_routine
+
+end submodule invert_gradient_regular_grid

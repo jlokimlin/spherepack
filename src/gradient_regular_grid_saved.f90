@@ -31,20 +31,20 @@
 !
 !
 !
-! ... file gradec.f
+! ... file gradges.f
 !
 !     this file includes documentation and code for
-!     subroutine gradec         i
+!     subroutine grades         i
 !
-! ... files which must be loaded with gradec.f
+! ... files which must be loaded with gradges.f
 !
-!     type_SpherepackAux.f, type_RealPeriodicTransform.f, shaec.f, vhsec.f
+!     type_SpherepackAux.f, type_RealPeriodicTransform.f, shaes.f, vhses.f
 !
-!     subroutine gradec(nlat, nlon, isym, nt, v, w, idvw, jdvw, a, b, mdab, ndab, 
-!    +                  wvhsec, lvhsec, work, lwork, ierror)
+!     subroutine grades(nlat, nlon, isym, nt, v, w, idvw, jdvw, a, b, mdab, ndab, 
+!    +                  wvhses, lvhses, work, lwork, ierror)
 !
 !     given the scalar spherical harmonic coefficients a and b, precomputed
-!     by subroutine shaec for a scalar field sf, subroutine gradec computes
+!     by subroutine shaes for a scalar field sf, subroutine grades computes
 !     an irrotational vector field (v, w) such that
 !
 !           gradient(sf) = (v, w).
@@ -67,9 +67,7 @@
 !            lambda(j) = (j-1)*2*pi/nlon.
 !
 !     where sint = sin(theta(i)).  required associated legendre polynomials
-!     are recomputed rather than stored as they are in subroutine grades. this
-!     saves storage (compare wvhsec here and wvhses in grades) but increases
-!     computational requirements.
+!     are stored rather than recomputed as they are in subroutine gradec
 !
 !
 !     input parameters
@@ -81,7 +79,7 @@
 !            pi/(nlat-1).  if nlat is odd the equator is located at
 !            grid point i=(nlat+1)/2. if nlat is even the equator is
 !            located half way between points i=nlat/2 and i=nlat/2+1.
-!            nlat must be at least 3. note:on the half sphere, the
+!            nlat must be at least 3. note: on the half sphere, the
 !            number of grid points in the colatitudinal direction is
 !            nlat/2 if nlat is even or (nlat+1)/2 if nlat is odd.
 !
@@ -93,7 +91,7 @@
 !
 !
 !     isym   this has the same value as the isym that was input to
-!            subroutine shaec to compute the arrays a and b from the
+!            subroutine shaes to compute the arrays a and b from the
 !            scalar field sf.  isym determines whether (v, w) are
 !            computed on the full or half sphere as follows:
 !
@@ -135,38 +133,38 @@
 !            and w are two dimensional arrays.
 !
 !     idvw   the first dimension of the arrays v, w as it appears in
-!            the program that calls gradec. if isym = 0 then idvw
+!            the program that calls grades. if isym = 0 then idvw
 !            must be at least nlat.  if isym = 1 or 2 and nlat is
 !            even then idvw must be at least nlat/2. if isym = 1 or 2
 !            and nlat is odd then idvw must be at least (nlat+1)/2.
 !
 !     jdvw   the second dimension of the arrays v, w as it appears in
-!            the program that calls gradec. jdvw must be at least nlon.
+!            the program that calls grades. jdvw must be at least nlon.
 !
 !     a, b    two or three dimensional arrays (see input parameter nt)
 !            that contain scalar spherical harmonic coefficients
-!            of the scalar field array sf as computed by subroutine shaec.
-!     ***    a, b must be computed by shaec prior to calling gradec.
+!            of the scalar field array sf as computed by subroutine shaes.
+!     ***    a, b must be computed by shaes prior to calling grades.
 !
 !     mdab   the first dimension of the arrays a and b as it appears in
-!            the program that calls gradec (and shaec). mdab must be at
+!            the program that calls grades (and shaes). mdab must be at
 !            least min(nlat, (nlon+2)/2) if nlon is even or at least
 !            min(nlat, (nlon+1)/2) if nlon is odd.
 !
 !     ndab   the second dimension of the arrays a and b as it appears in
-!            the program that calls gradec (and shaec). ndab must be at
+!            the program that calls grades (and shaes). ndab must be at
 !            least nlat.
 !
 !
-!     wvhsec an array which must be initialized by subroutine vhseci.
-!            once initialized, 
-!            wvhsec can be used repeatedly by gradec as long as nlon
-!            and nlat remain unchanged.  wvhsec must not be altered
-!            between calls of gradec.
+!   wvhses   an array which must be initialized by subroutine gradesi
+!            (or equivalently by subroutine vhsesi).  once initialized, 
+!            wsav can be used repeatedly by grades as long as nlon
+!            and nlat remain unchanged.  wvhses must not be altered
+!            between calls of grades.
 !
 !
-!     lvhsec the dimension of the array wvhsec as it appears in the
-!            program that calls gradec. define
+!  lvhses    the dimension of the array wvhses as it appears in the
+!            program that calls grades. define
 !
 !               l1 = min(nlat, nlon/2) if nlon is even or
 !               l1 = min(nlat, (nlon+1)/2) if nlon is odd
@@ -176,15 +174,14 @@
 !               l2 = nlat/2        if nlat is even or
 !               l2 = (nlat+1)/2    if nlat is odd.
 !
-!            then lvhsec must be greater than or equal to
+!            then lvhses must be greater than or equal to
 !
-!               4*nlat*l2+3*max(l1-2, 0)*(nlat+nlat-l1-1)+nlon+15
-!
+!               (l1*l2*(nlat+nlat-l1+1))/2+nlon+15
 !
 !     work   a work array that does not have to be saved.
 !
 !     lwork  the dimension of the array work as it appears in the
-!            program that calls gradec. define
+!            program that calls grades. define
 !
 !               l1 = min(nlat, nlon/2) if nlon is even or
 !               l1 = min(nlat, (nlon+1)/2) if nlon is odd
@@ -194,14 +191,13 @@
 !               l2 = nlat/2                  if nlat is even or
 !               l2 = (nlat+1)/2              if nlat is odd
 !
+!            if isym = 0, lwork must be greater than or equal to
 !
-!            if isym = 0 then lwork must be at least
+!               nlat*((2*nt+1)*nlon+2*l1*nt+1).
 !
-!                nlat*(2*nt*nlon+max(6*l2, nlon)) + nlat*(2*l1*nt+1)
+!            if isym = 1 or 2, lwork must be greater than or equal to
 !
-!            if isym = 1 or 2 then lwork must be at least
-!
-!                l2*(2*nt*nlon+max(6*nlat, nlon)) + nlat*(2*l1*nt+1)
+!               (2*nt+1)*l2*nlon+nlat*(2*l1*nt+1).
 !
 !
 !     **************************************************************
@@ -229,66 +225,53 @@
 !           = 6  error in the specification of jdvw
 !           = 7  error in the specification of mdab
 !           = 8  error in the specification of ndab
-!           = 9  error in the specification of lvhsec
+!           = 9  error in the specification of lvhses
 !           = 10 error in the specification of lwork
 !
 !
-module module_gradec
-
-    use spherepack_precision, only:&
-        wp, & ! working precision
-        ip ! integer precision
-
-    use vector_synthesis_routines, only:&
-        vhsec
-
-    ! Explicit typing only
-    implicit none
-
-    ! Everything is private unless stated otherwise
-    public :: gradec
+submodule(gradient_routines) gradient_regular_grid_saved
 
 contains
 
-    subroutine gradec(nlat, nlon, isym, nt, v, w, idvw, jdvw, a, b, mdab, ndab, &
-        wvhsec, lvhsec, work, lwork, ierror)
-        real(wp) :: a
-        real(wp) :: b
+   module subroutine grades(nlat, nlon, isym, nt, v, w, idvw, jdvw, a, b, mdab, ndab, &
+        wvhses, lvhses, work, lwork, ierror)
+
+        ! Dummy arguments
+        integer(ip), intent(in)  :: nlat
+        integer(ip), intent(in)  :: nlon
+        integer(ip), intent(in)  :: isym
+        integer(ip), intent(in)  :: nt
+        real(wp),    intent(out) :: v(idvw, jdvw, nt)
+        real(wp),    intent(out) :: w(idvw, jdvw, nt)
+        integer(ip), intent(in)  :: idvw
+        integer(ip), intent(in)  :: jdvw
+        real(wp),    intent(in)  :: a(mdab, ndab, nt)
+        real(wp),    intent(in)  :: b(mdab, ndab, nt)
+        integer(ip), intent(in)  :: mdab
+        integer(ip), intent(in)  :: ndab
+        real(wp),    intent(in)  :: wvhses(lvhses)
+        integer(ip), intent(in)  :: lvhses
+        real(wp),    intent(out) :: work(lwork)
+        integer(ip), intent(in)  :: lwork
+        integer(ip), intent(out) :: ierror
+
+        ! Local variables
         integer(ip) :: ibi
         integer(ip) :: ibr
-        integer(ip) :: idvw
+        integer(ip) :: idv
         integer(ip) :: idz
-        integer(ip) :: ierror
         integer(ip) :: imid
-        integer(ip) :: is
-        integer(ip) :: isym
+        integer(ip) :: iis
         integer(ip) :: iwk
-        integer(ip) :: jdvw
-        integer(ip) :: l1
-        integer(ip) :: l2
+        integer(ip) :: lgdmin
         integer(ip) :: liwk
-        integer(ip) :: lvhsec
+        integer(ip) :: lnl
         integer(ip) :: lwkmin
-        integer(ip) :: lwmin
-        integer(ip) :: lwork
         integer(ip) :: lzimn
-        integer(ip) :: mdab
         integer(ip) :: mmax
         integer(ip) :: mn
-        integer(ip) :: ndab
-        integer(ip) :: nlat
-        integer(ip) :: nlon
-        integer(ip) :: nt
-        real(wp) :: v
-        real(wp) :: w
-        real(wp) :: work
-        real(wp) :: wvhsec
-        dimension v(idvw, jdvw, nt), w(idvw, jdvw, nt)
-        dimension a(mdab, ndab, nt), b(mdab, ndab, nt)
-        dimension wvhsec(lvhsec), work(lwork)
-        !
+
         ! Check input arguments
-        !
         ierror = 1
         if (nlat < 3) return
         ierror = 2
@@ -314,39 +297,36 @@ contains
         !
         idz = (mmax*(nlat+nlat-mmax+1))/2
         lzimn = idz*imid
-        l1 = min(nlat, (nlon+1)/2)
-        l2 = (nlat+1)/2
-        lwmin = 4*nlat*l2+3*max(l1-2, 0)*(nlat+nlat-l1-1)+nlon+15
-        if (lvhsec < lwmin) return
+        lgdmin = lzimn+lzimn+nlon+15
+        if (lvhses < lgdmin) return
         ierror = 10
         !
         !     verify minimum unsaved work space length
         !
         mn = mmax*nlat*nt
-        if (isym == 0) then
-            lwkmin = nlat*(2*nt*nlon+max(6*l2, nlon)) + nlat*(2*l1*nt+1)
-        else
-            lwkmin = l2*(2*nt*nlon+max(6*nlat, nlon)) + nlat*(2*l1*nt+1)
-        end if
+        idv = nlat
+        if (isym /= 0) idv = imid
+        lnl = nt*idv*nlon
+        lwkmin =  lnl+lnl+idv*nlon+2*mn+nlat
         if (lwork < lwkmin) return
-
         ierror = 0
         !
         !     set work space pointers
         !
         ibr = 1
         ibi = ibr + mn
-        is = ibi + mn
-        iwk = is + nlat
+        iis = ibi + mn
+        iwk = iis + nlat
         liwk = lwork-2*mn-nlat
-        call gradec_lower_routine(nlat, nlon, isym, nt, v, w, idvw, jdvw, work(ibr), work(ibi), &
-            mmax, work(is), mdab, ndab, a, b, wvhsec, lvhsec, work(iwk), liwk, &
+
+        call grades_lower_routine(nlat, nlon, isym, nt, v, w, idvw, jdvw, work(ibr), work(ibi), &
+            mmax, work(iis), mdab, ndab, a, b, wvhses, lvhses, work(iwk), liwk, &
             ierror)
 
-    end subroutine gradec
+    end subroutine grades
 
-    subroutine gradec_lower_routine(nlat, nlon, isym, nt, v, w, idvw, jdvw, br, bi, mmax, &
-        sqnn, mdab, ndab, a, b, wvhsec, lvhsec, wk, lwk, ierror)
+    subroutine grades_lower_routine(nlat, nlon, isym, nt, v, w, idvw, jdvw, br, bi, mmax, &
+        sqnn, mdab, ndab, a, b, wvhses, lvhses, wk, lwk, ierror)
 
         real(wp) :: a
         real(wp) :: b
@@ -354,19 +334,19 @@ contains
         real(wp) :: br
         real(wp) :: ci(mmax, nlat, nt)
         real(wp) :: cr(mmax, nlat, nt)
-        real(wp) :: fn
+        
         integer(ip) :: idvw
         integer(ip) :: ierror
         integer(ip) :: isym
         integer(ip) :: ityp
         integer(ip) :: jdvw
-        integer(ip) :: k
-        integer(ip) :: lvhsec
+        
+        integer(ip) :: lvhses
         integer(ip) :: lwk
-        integer(ip) :: m
+        
         integer(ip) :: mdab
         integer(ip) :: mmax
-        integer(ip) :: n
+        
         integer(ip) :: ndab
         integer(ip) :: nlat
         integer(ip) :: nlon
@@ -375,61 +355,18 @@ contains
         real(wp) :: v
         real(wp) :: w
         real(wp) :: wk
-        real(wp) :: wvhsec
+        real(wp) :: wvhses
         dimension v(idvw, jdvw, nt), w(idvw, jdvw, nt)
         dimension br(mmax, nlat, nt), bi(mmax, nlat, nt), sqnn(nlat)
         dimension a(mdab, ndab, nt), b(mdab, ndab, nt)
-        dimension wvhsec(lvhsec), wk(lwk)
-        !
-        ! Preset coefficient multiplyers in vector
-        !
-        do n=2, nlat
-            fn = real(n - 1, kind=wp)
-            sqnn(n) = sqrt(fn * (fn + 1.0_wp))
-        end do
-        !
-        ! Compute multiple vector fields coefficients
-        !
-        do k=1, nt
-            !
-            ! Preset br, bi to 0.0
-            !
-            br(1:mmax, 1:nlat, k) = 0.0
-            bi(1:mmax, 1:nlat, k) = 0.0
-            !
-            ! Compute m=0 coefficients
-            !
-            do n=2, nlat
-                br(1, n, k) = sqnn(n)*a(1, n, k)
-                bi(1, n, k) = sqnn(n)*b(1, n, k)
-            end do
-            !
-            !     compute m>0 coefficients
-            !
-            do m=2, mmax
-                do n=m, nlat
-                    br(m, n, k) = sqnn(n)*a(m, n, k)
-                    bi(m, n, k) = sqnn(n)*b(m, n, k)
-                end do
-            end do
-        end do
-        !
-        !     set ityp for irrotational vector synthesis to compute gradient
-        !
-        select case (isym)
-            case (0)
-                ityp = 1
-            case (1)
-                ityp = 4
-            case (2)
-                ityp = 7
-        end select
-        !
-        !     vector sythesize br, bi into (v, w) (cr, ci are dummy variables)
-        !
-        call vhsec(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
-            mmax, nlat, wvhsec, lvhsec, wk, lwk, ierror)
+        dimension wvhses(lvhses), wk(lwk)
 
-    end subroutine gradec_lower_routine
+        call perform_setup_for_gradient(isym, ityp, a, b, br, bi, sqnn)
 
-end module module_gradec
+        ! Vector synthesize br, bi into (v, w) (cr, ci are dummy variables)
+        call vhses(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
+            mmax, nlat, wvhses, lvhses, wk, lwk, ierror)
+
+    end subroutine grades_lower_routine
+
+end submodule gradient_regular_grid_saved

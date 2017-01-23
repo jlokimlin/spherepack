@@ -50,8 +50,11 @@
 !     (5) the inverse gradient of (v,w) is computed and compared with (1)
 !
 program tgrad
-use spherepack_library
+
+    use spherepack_library
+
     implicit none
+
     real :: a
     real :: b
     real :: bi
@@ -104,7 +107,7 @@ use spherepack_library
     real :: sinp
     real :: sint
     real :: theta
-    real :: thetag
+    real :: gaussian_latitudes
     real :: v
     real :: ve
     real :: w
@@ -127,7 +130,7 @@ use spherepack_library
     dimension cr(mmdb,nnlat,nnt),ci(mmdb,nnlat,nnt)
     dimension a(mmdab,nnlat,nnt),b(mmdab,nnlat,nnt)
     dimension sf(nnlat,nnlon,nnt)
-    dimension thetag(nnlat),dtheta(nnlat),dwts(nnlat)
+    dimension gaussian_latitudes(nnlat),dtheta(nnlat),dwts(nnlat)
     dimension v(nnlat,nnlon,nnt),w(nnlat,nnlon,nnt)
     real dtheta, dwts
     !
@@ -148,19 +151,19 @@ use spherepack_library
     !
     !     set equally spaced colatitude and longitude increments
     !
-    dphi = (pi+pi)/nlon
-    dlat = pi/(nlat-1)
+    dphi = TWO_PI/nlon
+    dlat = PI/(nlat-1)
     !
     !     compute nlat gaussian points in thetag
     !
     ldwork = lldwork
     call compute_gaussian_latitudes_and_weights(nlat,dtheta,dwts,ier)
     do  i=1,nlat
-        thetag(i) = dtheta(i)
+        gaussian_latitudes(i) = dtheta(i)
     end do
     call name("gaqd")
     call iout(ier," ier")
-    call vecout(thetag,"thtg",nlat)
+    call vecout(gaussian_latitudes,"thtg",nlat)
     !
     !     test all analysis and synthesis subroutines
     !
@@ -186,7 +189,7 @@ use spherepack_library
                 cosp = cos(phi)
                 do i=1,nlat
                     theta = (i-1)*dlat
-                    if (icase>2) theta=thetag(i)
+                    if (icase>2) theta=gaussian_latitudes(i)
                     cost = cos(theta)
                     sint = sin(theta)
                     x = sint*cosp
@@ -198,31 +201,32 @@ use spherepack_library
                     dydp = sint*cosp
                     dzdt = -sint
                     dzdp = 0.0
-                    if (k==1) then
-                        sf(i,j,k) = x*y
-                        dsfdt = x*dydt+y*dxdt
-                        dsfdp = x*dydp+y*dxdp
-                        v(i,j,k) = dsfdt
-                        w(i,j,k) = (cosp*dydp+sinp*dxdp)
-                    else if (k==2) then
-                        sf(i,j,k) = x*z
-                        dsfdp = x*dzdp+z*dxdp
-                        dsfdt = x*dzdt+z*dxdt
-                        v(i,j,k) = dsfdt
-                        w(i,j,k) = cosp*dzdp-z*sinp
-                    else if (k==3) then
-                        sf(i,j,k) = y*z
-                        dsfdt = y*dzdt + z*dydt
-                        dsfdp = y*dzdp+ z*dydp
-                        v(i,j,k) = dsfdt
-                        w(i,j,k) = sinp*dzdp + z*cosp
-                    else if (k==4) then
-                        sf(i,j,k) = x*y*z
-                        dsfdt = x*y*dzdt + x*z*dydt + y*z*dxdt
-                        dsfdp = x*y*dzdp + x*z*dydp + y*z*dxdp
-                        v(i,j,k) = dsfdt
-                        w(i,j,k) = cosp*y*dzdp+cosp*z*dydp+sinp*z*dxdp
-                    end if
+                    select case (k)
+                        case (1)
+                            sf(i,j,k) = x*y
+                            dsfdt = x*dydt+y*dxdt
+                            dsfdp = x*dydp+y*dxdp
+                            v(i,j,k) = dsfdt
+                            w(i,j,k) = (cosp*dydp+sinp*dxdp)
+                        case (2)
+                            sf(i,j,k) = x*z
+                            dsfdp = x*dzdp+z*dxdp
+                            dsfdt = x*dzdt+z*dxdt
+                            v(i,j,k) = dsfdt
+                            w(i,j,k) = cosp*dzdp-z*sinp
+                        case (3)
+                            sf(i,j,k) = y*z
+                            dsfdt = y*dzdt + z*dydt
+                            dsfdp = y*dzdp+ z*dydp
+                            v(i,j,k) = dsfdt
+                            w(i,j,k) = sinp*dzdp + z*cosp
+                        case (4)
+                            sf(i,j,k) = x*y*z
+                            dsfdt = x*y*dzdt + x*z*dydt + y*z*dxdt
+                            dsfdp = x*y*dzdp + x*z*dydp + y*z*dxdp
+                            v(i,j,k) = dsfdt
+                            w(i,j,k) = cosp*y*dzdp+cosp*z*dydp+sinp*z*dxdp
+                    end select
                 end do
             end do
         end do
@@ -234,139 +238,140 @@ use spherepack_library
         !     call aout(w(1,1,kk),"   w",nlat,nlon)
         !     end do
 
-        if (icase==1) then
+        select case(icase)
+            case(1)
 
-            call name("**ec")
-            !
-            !     analyze scalar field st
-            !
-            call shaeci(nlat,nlon,wsave,lsave,dwork,ldwork,ierror)
-            call name("shai")
-            call iout(ierror,"ierr")
+                call name("**ec")
+                !
+                !     analyze scalar field st
+                !
+                call shaeci(nlat,nlon,wsave,lsave,dwork,ldwork,ierror)
+                call name("shai")
+                call iout(ierror,"ierr")
 
-            call shaec(nlat,nlon,isym,nt,sf,nlat,nlon,a,b,mdab,nlat,wsave, &
-                lsave,work,lwork,ierror)
-            call name("sha ")
-            call iout(ierror,"ierr")
+                call shaec(nlat,nlon,isym,nt,sf,nlat,nlon,a,b,mdab,nlat,wsave, &
+                    lsave,work,lwork,ierror)
+                call name("sha ")
+                call iout(ierror,"ierr")
 
-            !     do kk=1,nt
-            !     call iout(kk,"**kk")
-            !     call aout(a(1,1,kk),"   a",nlat,nlat)
-            !     call aout(b(1,1,kk),"   b",nlat,nlat)
-            !     end do
+                !     do kk=1,nt
+                !     call iout(kk,"**kk")
+                !     call aout(a(1,1,kk),"   a",nlat,nlat)
+                !     call aout(b(1,1,kk),"   b",nlat,nlat)
+                !     end do
 
-            !
-            !     compute gradient of st in v,w
-            !
+                !
+                !     compute gradient of st in v,w
+                !
 
-            call vhseci(nlat,nlon,wsave,lsave,dwork,ldwork,ierror)
-            call name("vhci")
-            call iout(ierror,"ierr")
+                call vhseci(nlat,nlon,wsave,lsave,dwork,ldwork,ierror)
+                call name("vhci")
+                call iout(ierror,"ierr")
 
-            call gradec(nlat,nlon,isym,nt,v,w,nlat,nlon,a,b,mdab,nlat,wsave, &
-                lsave,work,lwork,ierror)
-            call name("grad")
-            call iout(ierror,"ierr")
+                call gradec(nlat,nlon,isym,nt,v,w,nlat,nlon,a,b,mdab,nlat,wsave, &
+                    lsave,work,lwork,ierror)
+                call name("grad")
+                call iout(ierror,"ierr")
 
-        else if (icase==2) then
+            case(2)
 
-            call name("**es")
-            !
-            !     analyze scalar field st
-            !
-            call shaesi(nlat,nlon,wsave,lsave,work,lwork,dwork,ldwork,ierror)
-            call name("shai")
-            call iout(ierror,"ierr")
+                call name("**es")
+                !
+                !     analyze scalar field st
+                !
+                call shaesi(nlat,nlon,wsave,lsave,work,lwork,dwork,ldwork,ierror)
+                call name("shai")
+                call iout(ierror,"ierr")
 
-            call shaes(nlat,nlon,isym,nt,sf,nlat,nlon,a,b,mdab,nlat,wsave, &
-                lsave,work,lwork,ierror)
-            call name("sha ")
-            call iout(ierror,"ierr")
+                call shaes(nlat,nlon,isym,nt,sf,nlat,nlon,a,b,mdab,nlat,wsave, &
+                    lsave,work,lwork,ierror)
+                call name("sha ")
+                call iout(ierror,"ierr")
 
-            !     do kk=1,nt
-            !     call iout(kk,"**kk")
-            !     call aout(a(1,1,kk),"   a",nlat,nlat)
-            !     call aout(b(1,1,kk),"   b",nlat,nlat)
-            !     end do
+                !     do kk=1,nt
+                !     call iout(kk,"**kk")
+                !     call aout(a(1,1,kk),"   a",nlat,nlat)
+                !     call aout(b(1,1,kk),"   b",nlat,nlat)
+                !     end do
 
-            !
-            !     compute gradient of st in v,w
-            !
+                !
+                !     compute gradient of st in v,w
+                !
 
-            call vhsesi(nlat,nlon,wsave,lsave,work,lwork,dwork,ldwork,ierror)
-            call name("vhsi")
-            call iout(ierror,"ierr")
+                call vhsesi(nlat,nlon,wsave,lsave,work,lwork,dwork,ldwork,ierror)
+                call name("vhsi")
+                call iout(ierror,"ierr")
 
-            call grades(nlat,nlon,isym,nt,v,w,nlat,nlon,a,b,mdab,nlat,wsave, &
-                lsave,work,lwork,ierror)
-            call name("grad")
-            call iout(ierror,"ierr")
+                call grades(nlat,nlon,isym,nt,v,w,nlat,nlon,a,b,mdab,nlat,wsave, &
+                    lsave,work,lwork,ierror)
+                call name("grad")
+                call iout(ierror,"ierr")
 
-        else if (icase == 3) then
-
-
-            call name("**gc")
-            call shagci(nlat,nlon,wsave,lsave,dwork,ldwork,ierror)
-            call name("shai")
-            call iout(ierror,"ierr")
-
-            call shagc(nlat,nlon,isym,nt,sf,nlat,nlon,a,b,mdab,nlat,wsave, &
-                lsave,work,lwork,ierror)
-            call name("sha ")
-            call iout(ierror,"ierr")
-
-            !     do kk=1,nt
-            !     call iout(kk,"**kk")
-            !     call aout(a(1,1,kk),"   a",nlat,nlat)
-            !     call aout(b(1,1,kk),"   b",nlat,nlat)
-            !     end do
-
-            !
-            !     compute gradient of st in v,w
-            !
-
-            call vhsgci(nlat,nlon,wsave,lsave,dwork,ldwork,ierror)
-            call name("vhgc")
-            call iout(ierror,"ierr")
-
-            call gradgc(nlat,nlon,isym,nt,v,w,nlat,nlon,a,b,mdab,nlat,wsave, &
-                lsave,work,lwork,ierror)
-            call name("grad")
-            call iout(ierror,"ierr")
+            case(3)
 
 
-        else if (icase == 4) then
+                call name("**gc")
+                call shagci(nlat,nlon,wsave,lsave,dwork,ldwork,ierror)
+                call name("shai")
+                call iout(ierror,"ierr")
 
-            call name("**gs")
+                call shagc(nlat,nlon,isym,nt,sf,nlat,nlon,a,b,mdab,nlat,wsave, &
+                    lsave,work,lwork,ierror)
+                call name("sha ")
+                call iout(ierror,"ierr")
 
-            call shagsi(nlat,nlon,wsave,lsave,work,lwork,dwork,ldwork,ierror)
-            call name("shai")
-            call iout(ierror,"ierr")
+                !     do kk=1,nt
+                !     call iout(kk,"**kk")
+                !     call aout(a(1,1,kk),"   a",nlat,nlat)
+                !     call aout(b(1,1,kk),"   b",nlat,nlat)
+                !     end do
 
-            call shags(nlat,nlon,isym,nt,sf,nlat,nlon,a,b,mdab,nlat,wsave, &
-                lsave,work,lwork,ierror)
-            call name("sha ")
-            call iout(ierror,"ierr")
+                !
+                !     compute gradient of st in v,w
+                !
 
-            !     do kk=1,nt
-            !     call iout(kk,"**kk")
-            !     call aout(a(1,1,kk),"   a",nlat,nlat)
-            !     call aout(b(1,1,kk),"   b",nlat,nlat)
-            !     end do
+                call vhsgci(nlat,nlon,wsave,lsave,dwork,ldwork,ierror)
+                call name("vhgc")
+                call iout(ierror,"ierr")
 
-            !
-            !     compute gradient of st in v,w
-            !
+                call gradgc(nlat,nlon,isym,nt,v,w,nlat,nlon,a,b,mdab,nlat,wsave, &
+                    lsave,work,lwork,ierror)
+                call name("grad")
+                call iout(ierror,"ierr")
 
-            call vhsgsi(nlat, nlon, wsave, lsave, dwork, ldwork, ierror)
-            call name("vhgs")
-            call iout(ierror,"ierr")
 
-            call gradgs(nlat,nlon,isym,nt,v,w,nlat,nlon,a,b,mdab,nlat,wsave, &
-                lsave,work,lwork,ierror)
-            call name("grad")
-            call iout(ierror,"ierr")
-        end if
+            case(4)
+
+                call name("**gs")
+
+                call shagsi(nlat,nlon,wsave,lsave,work,lwork,dwork,ldwork,ierror)
+                call name("shai")
+                call iout(ierror,"ierr")
+
+                call shags(nlat,nlon,isym,nt,sf,nlat,nlon,a,b,mdab,nlat,wsave, &
+                    lsave,work,lwork,ierror)
+                call name("sha ")
+                call iout(ierror,"ierr")
+
+                !     do kk=1,nt
+                !     call iout(kk,"**kk")
+                !     call aout(a(1,1,kk),"   a",nlat,nlat)
+                !     call aout(b(1,1,kk),"   b",nlat,nlat)
+                !     end do
+
+                !
+                !     compute gradient of st in v,w
+                !
+
+                call vhsgsi(nlat, nlon, wsave, lsave, dwork, ldwork, ierror)
+                call name("vhgs")
+                call iout(ierror,"ierr")
+
+                call gradgs(nlat,nlon,isym,nt,v,w,nlat,nlon,a,b,mdab,nlat,wsave, &
+                    lsave,work,lwork,ierror)
+                call name("grad")
+                call iout(ierror,"ierr")
+        end select
 
 
         !     do kk=1,nt
@@ -387,7 +392,7 @@ use spherepack_library
                 cosp = cos(phi)
                 do i=1,nlat
                     theta = (i-1)*dlat
-                    if (icase>2) theta=thetag(i)
+                    if (icase>2) theta=gaussian_latitudes(i)
                     cost = cos(theta)
                     sint = sin(theta)
                     x = sint*cosp
@@ -399,27 +404,28 @@ use spherepack_library
                     dydp = sint*cosp
                     dzdt = -sint
                     dzdp = 0.0
-                    if (k==1) then
-                        dsfdt = x*dydt+y*dxdt
-                        dsfdp = x*dydp+y*dxdp
-                        ve = dsfdt
-                        we = (cosp*dydp+sinp*dxdp)
-                    else if (k==2) then
-                        dsfdp = x*dzdp+z*dxdp
-                        dsfdt = x*dzdt+z*dxdt
-                        ve = dsfdt
-                        we = cosp*dzdp-z*sinp
-                    else if (k==3) then
-                        dsfdt = y*dzdt + z*dydt
-                        dsfdp = y*dzdp+ z*dydp
-                        ve = dsfdt
-                        we = sinp*dzdp + z*cosp
-                    else if (k==4) then
-                        dsfdt = x*y*dzdt + x*z*dydt + y*z*dxdt
-                        dsfdp = x*y*dzdp + x*z*dydp + y*z*dxdp
-                        ve = dsfdt
-                        we = cosp*y*dzdp+cosp*z*dydp+sinp*z*dxdp
-                    end if
+                    select case (k)
+                        case (1)
+                            dsfdt = x*dydt+y*dxdt
+                            dsfdp = x*dydp+y*dxdp
+                            ve = dsfdt
+                            we = (cosp*dydp+sinp*dxdp)
+                        case (2)
+                            dsfdp = x*dzdp+z*dxdp
+                            dsfdt = x*dzdt+z*dxdt
+                            ve = dsfdt
+                            we = cosp*dzdp-z*sinp
+                        case (3)
+                            dsfdt = y*dzdt + z*dydt
+                            dsfdp = y*dzdp+ z*dydp
+                            ve = dsfdt
+                            we = sinp*dzdp + z*cosp
+                        case (4)
+                            dsfdt = x*y*dzdt + x*z*dydt + y*z*dxdt
+                            dsfdp = x*y*dzdp + x*z*dydp + y*z*dxdp
+                            ve = dsfdt
+                            we = cosp*y*dzdp+cosp*z*dydp+sinp*z*dxdp
+                    end select
                     err2v = err2v + (v(i,j,k)-ve)**2
                     err2w = err2w + (w(i,j,k)-we)**2
                 end do
@@ -435,96 +441,97 @@ use spherepack_library
         !
         !     now recompute sf by inverting (v,w) using igrad(ec,es,gc,gs)
         !
-        if (icase==1) then
+        select case (icase)
+            case(1)
 
-            call vhaeci(nlat,nlon,wsave,lsave,dwork,ldwork,ierror)
-            call name("vhai")
-            call iout(ierror,"ierr")
+                call vhaeci(nlat,nlon,wsave,lsave,dwork,ldwork,ierror)
+                call name("vhai")
+                call iout(ierror,"ierr")
 
-            call vhaec(nlat,nlon,ityp,nt,v,w,nlat,nlon,br,bi,cr,ci, &
-                mdb,nlat,wsave,lsave,work,lwork,ierror)
-            call name("vha ")
-            call iout(ierror,"ierr")
+                call vhaec(nlat,nlon,ityp,nt,v,w,nlat,nlon,br,bi,cr,ci, &
+                    mdb,nlat,wsave,lsave,work,lwork,ierror)
+                call name("vha ")
+                call iout(ierror,"ierr")
 
-            call shseci(nlat,nlon,wsave,lsave,dwork,ldwork,ierror)
-            call name("shec")
-            call iout(ierror,"ierr")
+                call shseci(nlat,nlon,wsave,lsave,dwork,ldwork,ierror)
+                call name("shec")
+                call iout(ierror,"ierr")
 
-            call igradec(nlat,nlon,isym,nt,sf,nlat,nlon,br,bi, &
-                mdb,nlat,wsave,lsave,work,lwork,ierror)
-            call name("igra")
-            call iout(ierror,"ierr")
+                call igradec(nlat,nlon,isym,nt,sf,nlat,nlon,br,bi, &
+                    mdb,nlat,wsave,lsave,work,lwork,ierror)
+                call name("igra")
+                call iout(ierror,"ierr")
 
-        else if (icase==2) then
-            !
-            !     analyze vector field (v,w)
-            !
-            call vhaesi(nlat,nlon,wsave,lsave,work,lwork,dwork,ldwork,ierror)
-            call name("vhai")
-            call iout(ierror,"ierr")
+            case(2)
+                !
+                !     analyze vector field (v,w)
+                !
+                call vhaesi(nlat,nlon,wsave,lsave,work,lwork,dwork,ldwork,ierror)
+                call name("vhai")
+                call iout(ierror,"ierr")
 
-            call vhaes(nlat,nlon,ityp,nt,v,w,nlat,nlon,br,bi,cr,ci, &
-                mdb,nlat,wsave,lsave,work,lwork,ierror)
-            call name("vha ")
-            call iout(ierror,"ierr")
+                call vhaes(nlat,nlon,ityp,nt,v,w,nlat,nlon,br,bi,cr,ci, &
+                    mdb,nlat,wsave,lsave,work,lwork,ierror)
+                call name("vha ")
+                call iout(ierror,"ierr")
 
-            !     do kk=1,nt
-            !     call iout(kk,"**kk")
-            !     call aout(br(1,1,kk),"  br",nlat,nlat)
-            !     call aout(bi(1,1,kk),"  bi",nlat,nlat)
-            !     call aout(cr(1,1,kk),"  cr",nlat,nlat)
-            !     call aout(ci(1,1,kk),"  ci",nlat,nlat)
-            !     end do
+                !     do kk=1,nt
+                !     call iout(kk,"**kk")
+                !     call aout(br(1,1,kk),"  br",nlat,nlat)
+                !     call aout(bi(1,1,kk),"  bi",nlat,nlat)
+                !     call aout(cr(1,1,kk),"  cr",nlat,nlat)
+                !     call aout(ci(1,1,kk),"  ci",nlat,nlat)
+                !     end do
 
-            call shsesi(nlat,nlon,wsave,lsave,work,lwork,dwork,ldwork,ierror)
-            call name("shes")
-            call iout(ierror,"ierr")
+                call shsesi(nlat,nlon,wsave,lsave,work,lwork,dwork,ldwork,ierror)
+                call name("shes")
+                call iout(ierror,"ierr")
 
-            call igrades(nlat,nlon,isym,nt,sf,nlat,nlon,br,bi, &
-                mdb,nlat,wsave,lsave,work,lwork,ierror)
-            call name("igra")
-            call iout(ierror,"ierr")
+                call igrades(nlat,nlon,isym,nt,sf,nlat,nlon,br,bi, &
+                    mdb,nlat,wsave,lsave,work,lwork,ierror)
+                call name("igra")
+                call iout(ierror,"ierr")
 
-        else if (icase == 3) then
+            case(3)
 
-            call vhagci(nlat,nlon,wsave,lsave,dwork,ldwork,ierror)
-            call name("vhai")
-            call iout(ierror,"ierr")
+                call vhagci(nlat,nlon,wsave,lsave,dwork,ldwork,ierror)
+                call name("vhai")
+                call iout(ierror,"ierr")
 
-            call vhagc(nlat,nlon,ityp,nt,v,w,nlat,nlon,br,bi,cr,ci, &
-                mdb,nlat,wsave,lsave,work,lwork,ierror)
-            call name("vha ")
-            call iout(ierror,"ierr")
+                call vhagc(nlat,nlon,ityp,nt,v,w,nlat,nlon,br,bi,cr,ci, &
+                    mdb,nlat,wsave,lsave,work,lwork,ierror)
+                call name("vha ")
+                call iout(ierror,"ierr")
 
-            call shsgci(nlat,nlon,wsave,lsave,dwork,ldwork,ierror)
-            call name("shgc")
-            call iout(ierror,"ierr")
+                call shsgci(nlat,nlon,wsave,lsave,dwork,ldwork,ierror)
+                call name("shgc")
+                call iout(ierror,"ierr")
 
-            call igradgc(nlat,nlon,isym,nt,sf,nlat,nlon,br,bi, &
-                mdb,nlat,wsave,lsave,work,lwork,ierror)
-            call name("igra")
-            call iout(ierror,"ierr")
+                call igradgc(nlat,nlon,isym,nt,sf,nlat,nlon,br,bi, &
+                    mdb,nlat,wsave,lsave,work,lwork,ierror)
+                call name("igra")
+                call iout(ierror,"ierr")
 
-        else if (icase == 4) then
-            call vhagsi(nlat, nlon, wsave, lsave, dwork, ldwork, ierror)
-            call name("vhai")
-            call iout(ierror,"ierr")
+            case(4)
+                call vhagsi(nlat, nlon, wsave, lsave, dwork, ldwork, ierror)
+                call name("vhai")
+                call iout(ierror,"ierr")
 
-            call vhags(nlat,nlon,ityp,nt,v,w,nlat,nlon,br,bi,cr,ci, &
-                mdb,nlat,wsave,lsave,work,lwork,ierror)
-            call name("vha ")
-            call iout(ierror,"ierr")
+                call vhags(nlat,nlon,ityp,nt,v,w,nlat,nlon,br,bi,cr,ci, &
+                    mdb,nlat,wsave,lsave,work,lwork,ierror)
+                call name("vha ")
+                call iout(ierror,"ierr")
 
-            call shsgsi(nlat,nlon,wsave,lsave,work,lwork,dwork,ldwork,ierror)
-            call name("shgs")
-            call iout(ierror,"ierr")
+                call shsgsi(nlat,nlon,wsave,lsave,work,lwork,dwork,ldwork,ierror)
+                call name("shgs")
+                call iout(ierror,"ierr")
 
-            call igradgs(nlat,nlon,isym,nt,sf,nlat,nlon,br,bi, &
-                mdb,nlat,wsave,lsave,work,lwork,ierror)
-            call name("igra")
-            call iout(ierror,"ierr")
+                call igradgs(nlat,nlon,isym,nt,sf,nlat,nlon,br,bi, &
+                    mdb,nlat,wsave,lsave,work,lwork,ierror)
+                call name("igra")
+                call iout(ierror,"ierr")
 
-        end if
+        end select
 
         !     do kk=1,nt
         !     call iout(kk,"**kk")
@@ -542,21 +549,22 @@ use spherepack_library
                 cosp = cos(phi)
                 do i=1,nlat
                     theta = (i-1)*dlat
-                    if (icase>2) theta=thetag(i)
+                    if (icase>2) theta=gaussian_latitudes(i)
                     cost = cos(theta)
                     sint = sin(theta)
                     x = sint*cosp
                     y = sint*sinp
                     z = cost
-                    if (k==1) then
-                        se = x*y
-                    else if (k==2) then
-                        se = x*z
-                    else if (k==3) then
-                        se = y*z
-                    else if (k==4) then
-                        se = x*y*z
-                    end if
+                    select case (k)
+                        case (1)
+                            se = x*y
+                        case (2)
+                            se = x*z
+                        case (3)
+                            se = y*z
+                        case (4)
+                            se = x*y*z
+                    end select
                     err2s = err2s + (sf(i,j,k)-se)**2
                 end do
             end do
