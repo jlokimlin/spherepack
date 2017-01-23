@@ -51,18 +51,6 @@ module spherepack_library
     use module_isfvpgs, only: &
         isfvpgs
 
-    use module_islapec, only: &
-        islapec
-
-    use module_islapes, only: &
-        islapes
-
-    use module_islapgc, only: &
-        islapgc
-
-    use module_islapgs, only: &
-        islapgs
-
     use module_ivlapec, only: &
         ivlapec
 
@@ -117,17 +105,9 @@ module spherepack_library
         shsgc, shsgci, &
         shsgs, shsgsi
 
-    use module_slapec, only: &
-        slapec
-
-    use module_slapes, only: &
-        slapes
-
-    use module_slapgc, only: &
-        slapgc
-
-    use module_slapgs, only: &
-        slapgs
+    use scalar_laplacian_routines, only: &
+        slapec, slapes, slapgc, slapgs, &
+        islapec, islapes, islapgc, islapgs
 
     use module_sshifte, only: &
         sshifte, sshifti

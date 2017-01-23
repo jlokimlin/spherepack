@@ -30,21 +30,23 @@
 !     * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !
 !
-! ... file islapgs.f
+!
+! ... file islapgc.f
 !
 !     this file includes documentation and code for
-!     subroutine islapgs         i
+!     subroutine islapgc         i
 !
-! ... files which must be loaded with islapec.f
+! ... files which must be loaded with islapgc.f
 !
-!     type_SpherepackAux.f, type_RealPeriodicTransform.f, shags.f, shsgs.f
+!     type_SpherepackAux.f, type_RealPeriodicTransform.f, shagc.f, shsgc.f
 !
-!     subroutine islapgs(nlat, nlon, isym, nt, xlmbda, sf, ids, jds, a, b, 
-!    +mdab, ndab, wshsgs, lshsgs, work, lwork, pertrb, ierror)
+!     subroutine islapgc(nlat, nlon, isym, nt, xlmbda, sf, ids, jds, a, b, 
+!    +mdab, ndab, wshsgc, lshsgc, work, lwork, pertrb, ierror)
 !
-!     islapgs inverts the laplace or helmholz operator on a Gaussian grid.
-!     Given the spherical harmonic coefficients a(m, n) and b(m, n) of the
-!     right hand side slap(i, j), islapgc computes a solution sf(i, j) to
+!     islapgc inverts the laplace or helmholz operator on a Gaussian
+!     grid using o(n**2) storage. given the
+!     spherical harmonic coefficients a(m, n) and b(m, n) of the right
+!     hand side slap(i, j), islapgc computes a solution sf(i, j) to
 !     the following helmhotz equation :
 !
 !           2                2
@@ -58,7 +60,6 @@
 !                 lambda(j) = (j-1)*2*pi/nlon
 !
 !            for i=1, ..., nlat and j=1, ..., nlon.
-!
 !
 !
 !     input parameters
@@ -82,7 +83,7 @@
 !            is a product of small prime numbers.
 !
 !     isym   this parameter should have the same value input to subroutine
-!            shags to compute the coefficients a and b for the scalar field
+!            shagc to compute the coefficients a and b for the scalar field
 !            slap.  isym is set as follows:
 !
 !            = 0  no symmetries exist in slap about the equator. scalar
@@ -106,14 +107,13 @@
 !                and j=1, ..., nlon.
 !
 !
-!     nt     the number of analyses.  in the program that calls islapgs
+!   nt       the number of solutions. in the program that calls islapgc
 !            the arrays sf, a, and b can be three dimensional in which
-!            case multiple synthesis will be performed.  the third index
-!            is the synthesis index which assumes the values k=1, ..., nt.
-!            k is also the index for the perturbation array pertrb.
-!            for a single analysis set nt=1. the description of the
+!            case multiple solutions are computed. the third index
+!            is the solution index with values k=1, ..., nt.
+!            for a single solution set nt=1. the description of the
 !            remaining parameters is simplified by assuming that nt=1
-!            or that sf, a, b are two dimensional and pertrb is a constant.
+!            and sf, a, b are two dimensional.
 !
 !   xlmbda   a one dimensional array with nt elements. if xlmbda is
 !            is identically zero islapgc solves poisson's equation.
@@ -123,42 +123,41 @@
 !            by zero.
 !
 !   ids      the first dimension of the array sf as it appears in the
-!            program that calls islapgs.  if isym = 0 then ids must be at
+!            program that calls islapgc.  if isym = 0 then ids must be at
 !            least nlat.  if isym > 0 and nlat is even then ids must be
 !            at least nlat/2. if isym > 0 and nlat is odd then ids must
 !            be at least (nlat+1)/2.
 !
 !   jds      the second dimension of the array sf as it appears in the
-!            program that calls islapgs. jds must be at least nlon.
+!            program that calls islapgc. jds must be at least nlon.
 !
 !
 !   a, b      two or three dimensional arrays (see input parameter nt)
 !            that contain scalar spherical harmonic coefficients
-!            of the scalar field slap as computed by subroutine shags.
-!     ***    a, b must be computed by shags prior to calling islapgs.
+!            of the scalar field slap. a, b must be computed by shagc
+!            prior to calling islapgc.
 !
 !
-!    mdab    the first dimension of the arrays a and b as it appears
-!            in the program that calls islapgs.  mdab must be at
+!   mdab     the first dimension of the arrays a and b as it appears
+!            in the program that calls islapgc.  mdab must be at
 !            least min(nlat, (nlon+2)/2) if nlon is even or at least
 !            min(nlat, (nlon+1)/2) if nlon is odd.
 !
-!    ndab    the second dimension of the arrays a and b as it appears
-!            in the program that calls islapgs. ndbc must be at least
+!   ndab     the second dimension of the arrays a and b as it appears
+!            in the program that calls islapgc. ndbc must be at least
 !            least nlat.
 !
-!            mdab, ndab should have the same values input to shags to
+!            mdab, ndab should have the same values input to shagc to
 !            compute the coefficients a and b.
 !
+!     wshsgc an array which must be initialized by subroutine shsgci
+!            once initialized, wshsgc can be used repeatedly by islapgc
+!            as long as nlon and nlat remain unchanged.  wshsgc must
+!            not be altered between calls of islapgc.
 !
-!    wshsgs  an array which must be initialized by subroutine islapgsi
-!            (or equivalently by shsesi).  once initialized, wshsgs
-!            can be used repeatedly by islapgs as long as nlat and nlon
-!            remain unchanged.  wshsgs  must not be altered between calls
-!            of islapgs.
 !
-!    lshsgs  the dimension of the array wshsgs as it appears in the
-!            program that calls islapgs.  let
+!    lshsgc  the dimension of the array wshsgc as it appears in the
+!            program that calls islapgc.  let
 !
 !               l1 = min(nlat, (nlon+2)/2) if nlon is even or
 !               l1 = min(nlat, (nlon+1)/2) if nlon is odd
@@ -168,28 +167,30 @@
 !               l2 = nlat/2        if nlat is even or
 !               l2 = (nlat+1)/2    if nlat is odd
 !
-!            then lshsgs must be at least
+!            then lshsgc must be at least
 !
-!            nlat*(3*(l1+l2)-2)+(l1-1)*(l2*(2*nlat-l1)-3*l1)/2+nlon+15
+!               nlat*(2*l2+3*l1-2)+3*l1*(1-l1)/2+nlon+15
 !
 !     work   a work array that does not have to be saved.
 !
 !     lwork  the dimension of the array work as it appears in the
-!            program that calls islapgs. define
+!            program that calls islapgc. define
 !
 !               l2 = nlat/2                    if nlat is even or
 !               l2 = (nlat+1)/2                if nlat is odd
 !               l1 = min(nlat, (nlon+2)/2) if nlon is even or
 !               l1 = min(nlat, (nlon+1)/2) if nlon is odd
 !
-!            if isym is zero then lwork must be at least
+!            if isym = 0 let
 !
-!               (nt+1)*nlat*nlon + nlat*(2*nt*l1+1)
+!               lwkmin = nlat*(2*nt*nlon+max(6*l2, nlon)+2*nt*l1+1).
 !
-!            if isym is nonzero lwork must be at least
+!            if isym > 0 let
 !
-!               (nt+1)*l2*nlon + nlat*(2*nt*l1+1)
+!               lwkmin = l2*(2*nt*nlon+max(6*nlat, nlon))+nlat*(2*nt*l1+1)
 !
+!
+!     then lwork must be greater than or equal to lwkmin (see ierror=10)
 !
 !     **************************************************************
 !
@@ -213,7 +214,7 @@
 !           that nt=1. if xlmbda > 0.0 then pertrb=0.0 is always 
 !           returned because the helmholtz operator is invertible.
 !           if xlmbda = 0.0 then a solution exists only if a(1, 1)
-!           is zero. islapec sets a(1, 1) to zero. the resulting
+!           is zero. islapgc sets a(1, 1) to zero. the resulting
 !           solution sf(i, j) solves poisson's equation with
 !           pertrb = a(1, 1)/(2.*sqrt(2.)) subtracted from the
 !           right side slap(i, j).
@@ -238,77 +239,61 @@
 !
 !            = 8  error in the specification of ndbc
 !
-!            = 9  error in the specification of lshsgs
+!            = 9  error in the specification of lshsgc
 !
 !            = 10 error in the specification of lwork
 !
 !
 ! **********************************************************************
 !                                                                              
-!     end of documentation for islapgs
+!     end of documentation for islapgc
 !
 ! **********************************************************************
 !
-!
-module module_islapgs
-
-    use spherepack_precision, only: &
-        wp, & ! working precision
-        ip ! integer precision
-
-    use scalar_synthesis_routines, only: &
-        shsgs
-
-    ! Explicit typing only
-    implicit none
-
-    ! Everything is private unless stated otherwise
-    private
-    public :: islapgs
+submodule(scalar_laplacian_routines) invert_scalar_laplacian_gaussian_grid
 
 contains
 
-    subroutine islapgs(nlat, nlon, isym, nt, xlmbda, sf, ids, jds, a, b, &
-        mdab, ndab, wshsgs, lshsgs, work, lwork, pertrb, ierror)
+    module subroutine islapgc(nlat, nlon, isym, nt, xlmbda, sf, ids, jds, a, b, &
+        mdab, ndab, wshsgc, lshsgc, work, lwork, pertrb, ierror)
 
-        real(wp) :: a
-        real(wp) :: b
+        ! Dummy arguments
+        integer(ip), intent(in)  :: nlat
+        integer(ip), intent(in)  :: nlon
+        integer(ip), intent(in)  :: isym
+        integer(ip), intent(in)  :: nt
+        real(wp),    intent(in)  :: xlmbda(nt)
+        real(wp),    intent(out) :: sf(ids, jds, nt)
+        integer(ip), intent(in)  :: ids
+        integer(ip), intent(in)  :: jds
+        real(wp),    intent(in)  :: a(mdab, ndab, nt)
+        real(wp),    intent(in)  :: b(mdab, ndab, nt)
+        integer(ip), intent(in)  :: mdab
+        integer(ip), intent(in)  :: ndab
+        real(wp),    intent(in)  :: wshsgc(lshsgc)
+        integer(ip), intent(in)  :: lshsgc
+        real(wp),    intent(out) :: work(lwork)
+        integer(ip), intent(in)  :: lwork
+        real(wp),    intent(out) :: pertrb(nt)
+        integer(ip), intent(out) :: ierror
+
+        ! Local variables
         integer(ip) :: ia
         integer(ip) :: ib
-        integer(ip) :: ids
         integer(ip) :: ierror
         integer(ip) :: ifn
         integer(ip) :: imid
-        integer(ip) :: isym
         integer(ip) :: iwk
-        integer(ip) :: jds
-        integer(ip) :: k
         integer(ip) :: l1
         integer(ip) :: l2
-        integer(ip) :: lp
         integer(ip) :: ls
-        integer(ip) :: lshsgs
         integer(ip) :: lwk
-        integer(ip) :: lwkmin
-        integer(ip) :: lwork
-        integer(ip) :: mdab
+        integer(ip) :: lwmin
         integer(ip) :: mmax
         integer(ip) :: mn
-        integer(ip) :: ndab
-        integer(ip) :: nlat
         integer(ip) :: nln
-        integer(ip) :: nlon
-        integer(ip) :: nt
-        real(wp) :: pertrb
-        real(wp) :: sf
-        real(wp) :: work
-        real(wp) :: wshsgs
-        real(wp) :: xlmbda
-        dimension sf(ids, jds, nt), a(mdab, ndab, nt), b(mdab, ndab, nt)
-        dimension wshsgs(lshsgs), work(lwork), xlmbda(nt), pertrb(nt)
-        !
+
         ! Check input arguments
-        !
         ierror = 1
         if (nlat < 3) return
         ierror = 2
@@ -332,11 +317,11 @@ contains
         !
         !     set and verify saved work space length
         !
-        imid = (nlat+1)/2
-        l2 = (nlat+mod(nlat, 2))/2
-        l1 = min((nlon+2)/2, nlat)
-        lp=nlat*(3*(l1+l2)-2)+(l1-1)*(l2*(2*nlat-l1)-3*l1)/2+nlon+15
-        if (lshsgs < lp) return
+        !
+        l1 = min(nlat, (nlon+2)/2)
+        l2 = (nlat+1)/2
+        lwmin = nlat*(2*l2+3*l1-2)+3*l1*(1-l1)/2+nlon+15
+        if (lshsgc < lwmin) return
         ierror = 10
         !
         !     set and verify unsaved work space length
@@ -345,129 +330,74 @@ contains
         if (isym > 0) ls = imid
         nln = nt*ls*nlon
         mn = mmax*nlat*nt
-        !     lwkmin = nln+ls*nlon+2*mn+nlat
-        !     if (lwork .lt. lwkmin) return
-        l2 = (nlat+1)/2
-        l1 = min(nlat, nlon/2+1)
+        !     lwmin = nln+ls*nlon+2*mn+nlat
+        !     if (lwork .lt. lwmin) return
         if (isym == 0) then
-            lwkmin = (nt+1)*nlat*nlon + nlat*(2*nt*l1+1)
+            lwmin = nlat*(2*nt*nlon+max(6*l2, nlon)+2*l1*nt+1)
         else
-            lwkmin = (nt+1)*l2*nlon + nlat*(2*nt*l1+1)
+            lwmin = l2*(2*nt*nlon+max(6*nlat, nlon))+nlat*(2*l1*nt+1)
         end if
-        if (lwork < lwkmin) return
+        if (lwork < lwmin) return
         ierror = 0
-        !
-        !     check sign of xlmbda
-        !
-        do  k=1, nt
-            if (xlmbda(k) < 0.0) then
-                ierror = -1
-            end if
-        end do
-        !
-        !     set work space pointers
-        !
+
+        ! Check sign of xlmbda
+        if (any(xlmbda < ZERO)) then
+            ierror = -1
+            return
+        end if
+
+        ! Set workspace pointers
         ia = 1
         ib = ia+mn
         ifn = ib+mn
         iwk = ifn+nlat
         lwk = lwork-2*mn-nlat
 
-        call islpgs1(nlat, nlon, isym, nt, xlmbda, sf, ids, jds, a, b, mdab, ndab, &
-            work(ia), work(ib), mmax, work(ifn), wshsgs, lshsgs, work(iwk), lwk, &
+        call islapgc_lower_routine(nlat, nlon, isym, nt, xlmbda, sf, ids, jds, a, b, mdab, ndab, &
+            work(ia), work(ib), mmax, work(ifn), wshsgc, lshsgc, work(iwk), lwk, &
             pertrb, ierror)
 
-    contains
+    end subroutine islapgc
 
-        subroutine islpgs1(nlat, nlon, isym, nt, xlmbda, sf, ids, jds, a, b, &
-            mdab, ndab, as, bs, mmax, fnn, wsav, lsav, wk, lwk, pertrb, ierror)
+    subroutine islapgc_lower_routine(nlat, nlon, isym, nt, xlmbda, sf, ids, jds, a, b, &
+        mdab, ndab, as, bs, mmax, fnn, wsav, lsav, wk, lwk, pertrb, ierror)
 
-            real(wp) :: a
-            real(wp) :: as
-            real(wp) :: b
-            real(wp) :: bs
-            real(wp) :: fn
-            real(wp) :: fnn
-            integer(ip) :: ids
-            integer(ip) :: ierror
-            integer(ip) :: isym
-            integer(ip) :: jds
-            integer(ip) :: k
-            integer(ip) :: lsav
-            integer(ip) :: lwk
-            integer(ip) :: m
-            integer(ip) :: mdab
-            integer(ip) :: mmax
-            integer(ip) :: n
-            integer(ip) :: ndab
-            integer(ip) :: nlat
-            integer(ip) :: nlon
-            integer(ip) :: nt
-            real(wp) :: pertrb
-            real(wp) :: sf
-            real(wp) :: wk
-            real(wp) :: wsav
-            real(wp) :: xlmbda
-            dimension sf(ids, jds, nt), a(mdab, ndab, nt), b(mdab, ndab, nt)
-            dimension as(mmax, nlat, nt), bs(mmax, nlat, nt), fnn(nlat)
-            dimension wsav(lsav), wk(lwk), xlmbda(nt), pertrb(nt)
-            !
-            !     set multipliers and preset synthesis coefficients to zero
-            !
-            do n=1, nlat
-                fn = real(n - 1)
-                fnn(n) = fn*(fn+1.0)
-                do m=1, mmax
-                    do k=1, nt
-                        as(m, n, k) = 0.0
-                        bs(m, n, k) = 0.0
-                    end do
-                end do
-            end do
+        real(wp) :: a
+        real(wp) :: as
+        real(wp) :: b
+        real(wp) :: bs
+        
+        real(wp) :: fnn
+        integer(ip) :: ids
+        integer(ip) :: ierror
+        integer(ip) :: isym
+        integer(ip) :: jds
+        
+        integer(ip) :: lsav
+        integer(ip) :: lwk
+        
+        integer(ip) :: mdab
+        integer(ip) :: mmax
+        
+        integer(ip) :: ndab
+        integer(ip) :: nlat
+        integer(ip) :: nlon
+        integer(ip) :: nt
+        real(wp) :: pertrb
+        real(wp) :: sf
+        real(wp) :: wk
+        real(wp) :: wsav
+        real(wp) :: xlmbda
+        dimension sf(ids, jds, nt), a(mdab, ndab, nt), b(mdab, ndab, nt)
+        dimension as(mmax, nlat, nt), bs(mmax, nlat, nt), fnn(nlat)
+        dimension wsav(lsav), wk(lwk), xlmbda(nt), pertrb(nt)
 
-            do k=1, nt
-                    !
-                    !     compute synthesis coefficients for xlmbda zero or nonzero
-                    !
-                if (xlmbda(k) == 0.0) then
-                    do n=2, nlat
-                        as(1, n, k) = -a(1, n, k)/fnn(n)
-                        bs(1, n, k) = -b(1, n, k)/fnn(n)
-                    end do
-                    do m=2, mmax
-                        do n=m, nlat
-                            as(m, n, k) = -a(m, n, k)/fnn(n)
-                            bs(m, n, k) = -b(m, n, k)/fnn(n)
-                        end do
-                    end do
-                else
-                          !
-                          !     xlmbda nonzero so operator invertible unless
-                          !     -n*(n-1) = xlmbda(k) < 0.0  for some n
-                          !
-                    pertrb(k) = 0.0
-                    do n=1, nlat
-                        as(1, n, k) = -a(1, n, k)/(fnn(n)+xlmbda(k))
-                        bs(1, n, k) = -b(1, n, k)/(fnn(n)+xlmbda(k))
-                    end do
-                    do m=2, mmax
-                        do n=m, nlat
-                            as(m, n, k) = -a(m, n, k)/(fnn(n)+xlmbda(k))
-                            bs(m, n, k) = -b(m, n, k)/(fnn(n)+xlmbda(k))
-                        end do
-                    end do
-                end if
-            end do
-            !
-            !     synthesize as, bs into sf
-            !
-            call shsgs(nlat, nlon, isym, nt, sf, ids, jds, as, bs, mmax, nlat, &
-                wsav, lsav, wk, lwk, ierror)
+        call perform_setup_for_inversion(a, b, as, bs, fnn, xlmbda, pertrb)
 
+        ! Synthesize as, bs into sf
+        call shsgc(nlat, nlon, isym, nt, sf, ids, jds, as, bs, mmax, nlat, &
+            wsav, lsav, wk, lwk, ierror)
 
-        end subroutine islpgs1
+    end subroutine islapgc_lower_routine
 
-    end subroutine islapgs
-
-
-end module module_islapgs
+end submodule invert_scalar_laplacian_gaussian_grid

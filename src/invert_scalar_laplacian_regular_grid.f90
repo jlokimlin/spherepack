@@ -30,22 +30,23 @@
 !     * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !
 !
-! ... file islapes.f
+!
+! ... file islapec.f
 !
 !     this file includes documentation and code for
-!     subroutine islapes         i
+!     subroutine islapec         i
 !
-! ... files which must be loaded with islapes.f
+! ... files which must be loaded with islapec.f
 !
-!     type_SpherepackAux.f, type_RealPeriodicTransform.f, shaes.f, shses.f
+!     type_SpherepackAux.f, type_RealPeriodicTransform.f, shaec.f, shsec.f
 !
-!     subroutine islapes(nlat, nlon, isym, nt, xlmbda, sf, ids, jds, a, b, 
-!    +mdab, ndab, wshses, lshses, work, lwork, pertrb, ierror)
+!     subroutine islapec(nlat, nlon, isym, nt, xlmbda, sf, ids, jds, a, b, 
+!    +mdab, ndab, wshsec, lshsec, work, lwork, pertrb, ierror)
 !
-!     islapes inverts the laplace or helmholz operator on an equally
-!     spaced latitudinal grid using o(n**3) storage. given the
+!     islapec inverts the laplace or helmholz operator on an equally
+!     spaced latitudinal grid using o(n**2) storage. given the
 !     spherical harmonic coefficients a(m, n) and b(m, n) of the right
-!     hand side slap(i, j), islapes computes a solution sf(i, j) to
+!     hand side slap(i, j), islapec computes a solution sf(i, j) to
 !     the following helmhotz equation :
 !
 !           2                2
@@ -84,7 +85,7 @@
 !            is a product of small prime numbers.
 !
 !     isym   this parameter should have the same value input to subroutine
-!            shaes to compute the coefficients a and b for the scalar field
+!            shaec to compute the coefficients a and b for the scalar field
 !            slap.  isym is set as follows:
 !
 !            = 0  no symmetries exist in slap about the equator. scalar
@@ -108,7 +109,7 @@
 !                and j=1, ..., nlon.
 !
 !
-!   nt       the number of solutions. in the program that calls islapes
+!   nt       the number of solutions. in the program that calls islapec
 !            the arrays sf, a, and b can be three dimensional in which
 !            case multiple solutions are computed. the third index
 !            is the solution index with values k=1, ..., nt.
@@ -117,48 +118,48 @@
 !            and sf, a, b are two dimensional.
 !
 !   xlmbda   a one dimensional array with nt elements. if xlmbda is
-!            is identically zero islapes solves poisson's equation.
-!            if xlmbda > 0.0 islapes solves the helmholtz equation.
+!            is identically zero islapec solves poisson's equation.
+!            if xlmbda > 0.0 islapec solves the helmholtz equation.
 !            if xlmbda < 0.0 the nonfatal error flag ierror=-1 is
 !            returned. negative xlambda could result in a division
 !            by zero.
 !
 !   ids      the first dimension of the array sf as it appears in the
-!            program that calls islapes.  if isym = 0 then ids must be at
+!            program that calls islapec.  if isym = 0 then ids must be at
 !            least nlat.  if isym > 0 and nlat is even then ids must be
 !            at least nlat/2. if isym > 0 and nlat is odd then ids must
 !            be at least (nlat+1)/2.
 !
 !   jds      the second dimension of the array sf as it appears in the
-!            program that calls islapes. jds must be at least nlon.
+!            program that calls islapec. jds must be at least nlon.
 !
 !
 !   a, b      two or three dimensional arrays (see input parameter nt)
 !            that contain scalar spherical harmonic coefficients
-!            of the scalar field slap. a, b must be computed by shaes
-!            prior to calling islapes.
+!            of the scalar field slap. a, b must be computed by shaec
+!            prior to calling islapec.
 !
 !
 !   mdab     the first dimension of the arrays a and b as it appears
-!            in the program that calls islapes.  mdab must be at
+!            in the program that calls islapec.  mdab must be at
 !            least min(nlat, (nlon+2)/2) if nlon is even or at least
 !            min(nlat, (nlon+1)/2) if nlon is odd.
 !
 !   ndab     the second dimension of the arrays a and b as it appears
-!            in the program that calls islapes. ndbc must be at least
+!            in the program that calls islapec. ndab must be at least
 !            least nlat.
 !
-!            mdab, ndab should have the same values input to shaes to
+!            mdab, ndab should have the same values input to shaec to
 !            compute the coefficients a and b.
 !
 !
-!   wshses   an array which must be initialized by subroutine shsesi.
-!            once initialized, wshses can be used repeatedly by
-!            islapes as long as nlat and nlon  remain unchanged.
-!            wshses must not be altered between calls of islapes.
+!   wshsec   an array which must be initialized by subroutine shseci.
+!            once initialized, wshsec can be used repeatedly by
+!            islapec as long as nlat and nlon  remain unchanged.
+!            wshsec must not be altered between calls of islapec.
 !
-!    lshses  the dimension of the array wshses as it appears in the
-!            program that calls islapes.  let
+!   lshsec   the dimension of the array wshsec as it appears in the
+!            program that calls islapec.  let
 !
 !               l1 = min(nlat, (nlon+2)/2) if nlon is even or
 !               l1 = min(nlat, (nlon+1)/2) if nlon is odd
@@ -168,37 +169,41 @@
 !               l2 = nlat/2        if nlat is even or
 !               l2 = (nlat+1)/2    if nlat is odd
 !
-!            then lshses must be at least
+!            then lsave must be greater than or equal to
 !
-!               (l1*l2*(nlat+nlat-l1+1))/2+nlon+15
+!               2*nlat*l2+3*((l1-2)*(nlat+nlat-l1-1))/2+nlon+15
+!
 !
 !     work   a work array that does not have to be saved.
 !
 !     lwork  the dimension of the array work as it appears in the
-!            program that calls islapes. define
+!            program that calls islapec. define
 !
 !               l2 = nlat/2                    if nlat is even or
 !               l2 = (nlat+1)/2                if nlat is odd
 !               l1 = min(nlat, (nlon+2)/2) if nlon is even or
 !               l1 = min(nlat, (nlon+1)/2) if nlon is odd
 !
-!            if isym is zero then lwork must be at least
+!            if isym = 0 let
 !
-!               (nt+1)*nlat*nlon + nlat*(2*nt*l1+1)
+!               lwkmin = nlat*(2*nt*nlon+max(6*l2, nlon)+2*nt*l1+1).
 !
-!            if isym is nonzero lwork must be at least
+!            if isym > 0 let
 !
-!               (nt+1)*l2*nlon + nlat*(2*nt*l1+1)
+!               lwkmin = l2*(2*nt*nlon+max(6*nlat, nlon))+nlat*(2*nt*l1+1)
 !
+!
+!     then lwork must be greater than or equal to lwkmin (see ierror=10)
 !
 !     **************************************************************
 !
 !     output parameters
 !
 !
-!    sf      a two or three dimensional arrays (see input parameter nt) that
-!            inverts the scalar laplacian in slap - pertrb.  sf(i, j) is given
-!            at the colatitude
+!    sf      two or three dimensional arrays (see input parameter nt)
+!            that contain the solution to either the helmholtz 
+!            (xlmbda>0.0) or poisson's equation. sf(i, j) is computed
+!            at colatitude
 !
 !                 theta(i) = (i-1)*pi/(nlat-1)
 !
@@ -218,7 +223,10 @@
 !           pertrb = a(1, 1)/(2.*sqrt(2.)) subtracted from the
 !           right side slap(i, j).
 !
-!  ierror    a parameter which flags errors in input parameters as follows:
+!
+!  ierror   a parameter which flags errors in input parameters as follows:
+!
+!            =-1  xlmbda is input negative (nonfatal error)
 !
 !            = 0  no errors detected
 !
@@ -238,76 +246,61 @@
 !
 !            = 8  error in the specification of ndbc
 !
-!            = 9  error in the specification of lshses
+!            = 9  error in the specification of lsave
 !
 !            = 10 error in the specification of lwork
 !
 !
 ! **********************************************************************
 !                                                                              
-!     end of documentation for islapes
+!     end of documentation for islapec
 !
 ! **********************************************************************
 !
-module module_islapes
-
-    use spherepack_precision, only: &
-        wp, & ! working precision
-        ip ! integer precision
-
-    use scalar_synthesis_routines, only: &
-        shses
-
-    ! Explicit typing only
-    implicit none
-
-    ! Everything is private unless stated otherwise
-    private
-    public :: islapes
+submodule(scalar_laplacian_routines) invert_scalar_laplacian_regular_grid
 
 contains
 
-    subroutine islapes(nlat, nlon, isym, nt, xlmbda, sf, ids, jds, a, b, &
-        mdab, ndab, wshses, lshses, work, lwork, pertrb, ierror)
+    module subroutine islapec(nlat, nlon, isym, nt, xlmbda, sf, ids, jds, a, b, &
+        mdab, ndab, wshsec, lshsec, work, lwork, pertrb, ierror)
 
-        real(wp) :: a
-        real(wp) :: b
+        ! Dummy arguments
+        integer(ip), intent(in)  :: nlat
+        integer(ip), intent(in)  :: nlon
+        integer(ip), intent(in)  :: isym
+        integer(ip), intent(in)  :: nt
+        real(wp),    intent(in)  :: xlmbda(nt)
+        real(wp),    intent(out) :: sf(ids, jds, nt)
+        integer(ip), intent(in)  :: ids
+        integer(ip), intent(in)  :: jds
+        real(wp),    intent(in)  :: a(mdab, ndab, nt)
+        real(wp),    intent(in)  :: b(mdab, ndab, nt)
+        integer(ip), intent(in)  :: mdab
+        integer(ip), intent(in)  :: ndab
+        real(wp),    intent(in)  :: wshsec(lshsec)
+        integer(ip), intent(in)  :: lshsec
+        real(wp),    intent(out) :: work(lwork)
+        integer(ip), intent(in)  :: lwork
+        real(wp),    intent(out) :: pertrb(nt)
+        integer(ip), intent(out) :: ierror
+
+        ! Local variables
         integer(ip) :: ia
         integer(ip) :: ib
-        integer(ip) :: ids
-        integer(ip) :: ierror
         integer(ip) :: ifn
         integer(ip) :: imid
-        integer(ip) :: isym
         integer(ip) :: iwk
-        integer(ip) :: jds
-        integer(ip) :: k
         integer(ip) :: l1
         integer(ip) :: l2
-        integer(ip) :: lpimn
         integer(ip) :: ls
-        integer(ip) :: lshses
         integer(ip) :: lwk
         integer(ip) :: lwkmin
-        integer(ip) :: lwork
-        integer(ip) :: mdab
+        integer(ip) :: lwmin
         integer(ip) :: mmax
         integer(ip) :: mn
-        integer(ip) :: ndab
-        integer(ip) :: nlat
         integer(ip) :: nln
-        integer(ip) :: nlon
-        integer(ip) :: nt
-        real(wp) :: pertrb
-        real(wp) :: sf
-        real(wp) :: work
-        real(wp) :: wshses
-        real(wp) :: xlmbda
-        dimension sf(ids, jds, nt), a(mdab, ndab, nt), b(mdab, ndab, nt)
-        dimension wshses(lshses), work(lwork), xlmbda(nt), pertrb(nt)
-        !
+
         ! Check input arguments
-        !
         ierror = 1
         if (nlat < 3) return
         ierror = 2
@@ -331,9 +324,11 @@ contains
         !
         !     set and verify saved work space length
         !
-        imid = (nlat+1)/2
-        lpimn = (imid*mmax*(nlat+nlat-mmax+1))/2
-        if (lshses < lpimn+nlon+15) return
+        !
+        l1 = min(nlat, (nlon+2)/2)
+        l2 = (nlat+1)/2
+        lwmin = 2*nlat*l2+3*((l1-2)*(nlat+nlat-l1-1))/2+nlon+15
+        if (lshsec < lwmin) return
         ierror = 10
         !
         !     set and verify unsaved work space length
@@ -342,126 +337,75 @@ contains
         if (isym > 0) ls = imid
         nln = nt*ls*nlon
         mn = mmax*nlat*nt
-        !     lwkmin = nln+ls*nlon+2*mn+nlat
-        !     if (lwork .lt. lwkmin) return
+        !     lwmin = nln+ls*nlon+2*mn+nlat
+        !     if (lwork .lt. lwmin) return
         l2 = (nlat+1)/2
         l1 = min(nlat, nlon/2+1)
         if (isym == 0) then
-            lwkmin = (nt+1)*nlat*nlon + nlat*(2*nt*l1+1)
+            lwkmin = nlat*(2*nt*nlon+max(6*l2, nlon)+2*nt*l1+1)
         else
-            lwkmin = (nt+1)*l2*nlon + nlat*(2*nt*l1+1)
+            lwkmin = l2*(2*nt*nlon+max(6*nlat, nlon))+nlat*(2*nt*l1+1)
         end if
         if (lwork < lwkmin) return
         ierror = 0
-        !
-        !     check sign of xlmbda
-        !
-        do  k=1, nt
-            if (xlmbda(k) < 0.0) then
-                ierror = -1
-            end if
-        end do
-        !
-        !     set work space pointers
-        !
+
+        ! Check sign of xlmbda
+        if (any(xlmbda < ZERO)) then
+            ierror = -1
+            return
+        end if
+
+        ! Set workspace pointers
         ia = 1
         ib = ia+mn
         ifn = ib+mn
         iwk = ifn+nlat
         lwk = lwork-2*mn-nlat
-
-        call islpes1(nlat, nlon, isym, nt, xlmbda, sf, ids, jds, a, b, mdab, ndab, &
-            work(ia), work(ib), mmax, work(ifn), wshses, lshses, work(iwk), lwk, &
+        call islapec_lower_routine(nlat, nlon, isym, nt, xlmbda, sf, ids, jds, a, b, mdab, ndab, &
+            work(ia), work(ib), mmax, work(ifn), wshsec, lshsec, work(iwk), lwk, &
             pertrb, ierror)
 
-    contains
+    end subroutine islapec
 
-        subroutine islpes1(nlat, nlon, isym, nt, xlmbda, sf, ids, jds, a, b, &
-            mdab, ndab, as, bs, mmax, fnn, wshses, lshses, wk, lwk, pertrb, ierror)
+    subroutine islapec_lower_routine(nlat, nlon, isym, nt, xlmbda, sf, ids, jds, a, b, &
+        mdab, ndab, as, bs, mmax, fnn, wshsec, lshsec, wk, lwk, pertrb, ierror)
 
-            real(wp) :: a
-            real(wp) :: as
-            real(wp) :: b
-            real(wp) :: bs
-            real(wp) :: fn
-            real(wp) :: fnn
-            integer(ip) :: ids
-            integer(ip) :: ierror
-            integer(ip) :: isym
-            integer(ip) :: jds
-            integer(ip) :: k
-            integer(ip) :: lshses
-            integer(ip) :: lwk
-            integer(ip) :: m
-            integer(ip) :: mdab
-            integer(ip) :: mmax
-            integer(ip) :: n
-            integer(ip) :: ndab
-            integer(ip) :: nlat
-            integer(ip) :: nlon
-            integer(ip) :: nt
-            real(wp) :: pertrb
-            real(wp) :: sf
-            real(wp) :: wk
-            real(wp) :: wshses
-            real(wp) :: xlmbda
-            dimension sf(ids, jds, nt), a(mdab, ndab, nt), b(mdab, ndab, nt)
-            dimension as(mmax, nlat, nt), bs(mmax, nlat, nt), fnn(nlat)
-            dimension wshses(lshses), wk(lwk), pertrb(nt), xlmbda(nt)
-            !
-            !     set multipliers and preset synthesis coefficients to zero
-            !
-            do n=1, nlat
-                fn = real(n - 1)
-                fnn(n) = fn*(fn+1.0)
-                do m=1, mmax
-                    do k=1, nt
-                        as(m, n, k) = 0.0
-                        bs(m, n, k) = 0.0
-                    end do
-                end do
-            end do
-            do k=1, nt
-                    !
-                    !     compute synthesis coefficients for xlmbda zero or nonzero
-                    !
-                if (xlmbda(k) == 0.0) then
-                    do n=2, nlat
-                        as(1, n, k) = -a(1, n, k)/fnn(n)
-                        bs(1, n, k) = -b(1, n, k)/fnn(n)
-                    end do
-                    do m=2, mmax
-                        do n=m, nlat
-                            as(m, n, k) = -a(m, n, k)/fnn(n)
-                            bs(m, n, k) = -b(m, n, k)/fnn(n)
-                        end do
-                    end do
-                else
-                    !
-                    !     xlmbda nonzero so operator invertible unless
-                    !     -n*(n-1) = xlmbda(k) < 0.0  for some n
-                    !
-                    pertrb(k) = 0.0
-                    do n=1, nlat
-                        as(1, n, k) = -a(1, n, k)/(fnn(n)+xlmbda(k))
-                        bs(1, n, k) = -b(1, n, k)/(fnn(n)+xlmbda(k))
-                    end do
-                    do m=2, mmax
-                        do n=m, nlat
-                            as(m, n, k) = -a(m, n, k)/(fnn(n)+xlmbda(k))
-                            bs(m, n, k) = -b(m, n, k)/(fnn(n)+xlmbda(k))
-                        end do
-                    end do
-                end if
-            end do
-            !
-            !     synthesize as, bs into sf
-            !
-            call shses(nlat, nlon, isym, nt, sf, ids, jds, as, bs, mmax, nlat, &
-                wshses, lshses, wk, lwk, ierror)
+        real(wp) :: a
+        real(wp) :: as
+        real(wp) :: b
+        real(wp) :: bs
+        
+        real(wp) :: fnn
+        integer(ip) :: ids
+        integer(ip) :: ierror
+        integer(ip) :: isym
+        integer(ip) :: jds
+        
+        integer(ip) :: lshsec
+        integer(ip) :: lwk
+        
+        integer(ip) :: mdab
+        integer(ip) :: mmax
+        
+        integer(ip) :: ndab
+        integer(ip) :: nlat
+        integer(ip) :: nlon
+        integer(ip) :: nt
+        real(wp) :: pertrb
+        real(wp) :: sf
+        real(wp) :: wk
+        real(wp) :: wshsec
+        real(wp) :: xlmbda
+        dimension sf(ids, jds, nt), a(mdab, ndab, nt), b(mdab, ndab, nt)
+        dimension as(mmax, nlat, nt), bs(mmax, nlat, nt), fnn(nlat)
+        dimension wshsec(lshsec), wk(lwk), pertrb(nt), xlmbda(nt)
 
-        end subroutine islpes1
+        call perform_setup_for_inversion(a, b, as, bs, fnn, xlmbda, pertrb)
 
-    end subroutine islapes
+        ! Synthesize as, bs into sf
+        call shsec(nlat, nlon, isym, nt, sf, ids, jds, as, bs, mmax, nlat, &
+            wshsec, lshsec, wk, lwk, ierror)
 
-end module module_islapes
+    end subroutine islapec_lower_routine
+
+end submodule invert_scalar_laplacian_regular_grid
