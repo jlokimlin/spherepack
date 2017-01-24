@@ -231,41 +231,37 @@ contains
         wshsgs, lshsgs, work, lwork, ierror)
 
         ! Dummy arguments
-        integer(ip), intent(in)     :: nlat
-        integer(ip), intent(in)     :: nlon
-        integer(ip), intent(in)     :: isym
-        integer(ip), intent(in)     :: nt
-        real(wp),    intent(inout)  :: divg(idiv, jdiv, nt)
-        integer(ip), intent(in)     :: idiv
-        integer(ip), intent(in)     :: jdiv
-        real(wp),    intent(inout)  :: br(mdb, ndb, nt)
-        real(wp),    intent(inout)  :: bi(mdb, ndb, nt)
-        integer(ip), intent(in)     :: mdb
-        integer(ip), intent(in)     :: ndb
-        real(wp),    intent(inout)  :: wshsgs(lshsgs)
-        integer(ip), intent(in)     :: lshsgs
-        real(wp),    intent(inout)  :: work(lwork)
-        integer(ip), intent(in)     :: lwork
-        integer(ip), intent(out)    :: ierror
+        integer(ip), intent(in)  :: nlat
+        integer(ip), intent(in)  :: nlon
+        integer(ip), intent(in)  :: isym
+        integer(ip), intent(in)  :: nt
+        real(wp),    intent(out) :: divg(idiv, jdiv, nt)
+        integer(ip), intent(in)  :: idiv
+        integer(ip), intent(in)  :: jdiv
+        real(wp),    intent(in)  :: br(mdb, ndb, nt)
+        real(wp),    intent(in)  :: bi(mdb, ndb, nt)
+        integer(ip), intent(in)  :: mdb
+        integer(ip), intent(in)  :: ndb
+        real(wp),    intent(in)  :: wshsgs(lshsgs)
+        integer(ip), intent(in)  :: lshsgs
+        real(wp),    intent(out) :: work(lwork)
+        integer(ip), intent(in)  :: lwork
+        integer(ip), intent(out) :: ierror
 
         ! Local variables
         integer(ip) :: l1, l2, ia, ib, mn, lp
         integer(ip) :: iis, ls, mab, nln
         integer(ip) :: iwk, lwk, imid, mmax, lpimn
 
-
-        !
         !  Compute constants
-        !
         imid = (nlat+1)/2
         mmax = min(nlat, (nlon+2)/2)
         lpimn = (imid*mmax*(2*nlat-mmax+1))/2
         l2 = (nlat+1)/2
         l1 = min((nlon+2)/2, nlat)
         lp=nlat*(3*(l1+l2)-2)+(l1-1)*(l2*(2*nlat-l1)-3*l1)/2+nlon+15
-        !
+
         !  verify unsaved work space (add to what shses requires, file f3)
-        !
         select case (isym)
             case (0)
                 ls = nlat
@@ -275,14 +271,12 @@ contains
 
         nln = nt*ls*nlon
         !
-        !  set first dimension for a, b (as requried by shses)
+        !  set first dimension for a, b (as required by shses)
         !
         mab = min(nlat, nlon/2+1)
         mn = mab*nlat*nt
 
-        !
-        !  Check validity of input parameters
-        !
+        ! Check input arguments
         if (nlat < 3) then
             ierror = 1
             return

@@ -248,7 +248,7 @@ contains
         integer(ip) :: l1, l2, mn, is, lwk, iwk, lwmin
         integer(ip) :: ibr, ibi, icr, ici
         !
-        !  Check validity of input parameters
+        ! Check input arguments
         !
 
         ! Initialize error flag

@@ -230,22 +230,22 @@ contains
         wshsec, lshsec, work, lwork, ierror)
 
         ! Dummy arguments
-        integer(ip), intent(in)     :: nlat
-        integer(ip), intent(in)     :: nlon
-        integer(ip), intent(in)     :: isym
-        integer(ip), intent(in)     :: nt
-        real(wp),    intent(inout)  :: dv(idv, jdv, nt)
-        integer(ip), intent(in)     :: idv
-        integer(ip), intent(in)     :: jdv
-        real(wp),    intent(inout)  :: br(mdb, ndb, nt)
-        real(wp),    intent(inout)  :: bi(mdb, ndb, nt)
-        integer(ip), intent(in)     :: mdb
-        integer(ip), intent(in)     :: ndb
-        real(wp),    intent(inout)  :: wshsec(lshsec)
-        integer(ip), intent(in)     :: lshsec
-        real(wp),    intent(inout)  :: work(lwork)
-        integer(ip), intent(in)     :: lwork
-        integer(ip), intent(out)    :: ierror
+        integer(ip), intent(in)  :: nlat
+        integer(ip), intent(in)  :: nlon
+        integer(ip), intent(in)  :: isym
+        integer(ip), intent(in)  :: nt
+        real(wp),    intent(out) :: dv(idv, jdv, nt)
+        integer(ip), intent(in)  :: idv
+        integer(ip), intent(in)  :: jdv
+        real(wp),    intent(in)  :: br(mdb, ndb, nt)
+        real(wp),    intent(in)  :: bi(mdb, ndb, nt)
+        integer(ip), intent(in)  :: mdb
+        integer(ip), intent(in)  :: ndb
+        real(wp),    intent(in)  :: wshsec(lshsec)
+        integer(ip), intent(in)  :: lshsec
+        real(wp),    intent(out) :: work(lwork)
+        integer(ip), intent(in)  :: lwork
+        integer(ip), intent(out) :: ierror
 
         ! Local variables
         integer(ip) :: l1, l2, ia, ib, mn, is, ls, mab, nln

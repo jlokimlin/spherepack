@@ -231,35 +231,40 @@ contains
 
     module subroutine dives(nlat, nlon, isym, nt, dv, idv, jdv, br, bi, mdb, ndb, &
         wshses, lshses, work, lwork, ierror)
-        real(wp) :: dv(idv, jdv, nt), br(mdb, ndb, nt), bi(mdb, ndb, nt)
+
+        ! Dummy arguments
+        integer(ip), intent(in)  :: nlat
+        integer(ip), intent(in)  :: nlon
+        integer(ip), intent(in)  :: isym
+        integer(ip), intent(in)  :: nt
+        real(wp),    intent(out) :: dv(idv, jdv, nt)
+        integer(ip), intent(in)  :: idv
+        integer(ip), intent(in)  :: jdv
+        real(wp),    intent(in)  :: br(mdb, ndb, nt)
+        real(wp),    intent(in)  :: bi(mdb, ndb, nt)
+        integer(ip), intent(in)  :: mdb
+        integer(ip), intent(in)  :: ndb
+        real(wp),    intent(in)  :: wshses(lshses)
+        integer(ip), intent(in)  :: lshses
+        real(wp),    intent(out) :: work(lwork)
+        integer(ip), intent(in)  :: lwork
+        integer(ip), intent(out) :: ierror
+
+        ! Local variables
         integer(ip) :: ia
         integer(ip) :: ib
-        integer(ip) :: idv
-        integer(ip) :: ierror
         integer(ip) :: imid
-        integer(ip) :: is
-        integer(ip) :: isym
+        integer(ip) :: iis
         integer(ip) :: iwk
-        integer(ip) :: jdv
         integer(ip) :: lpimn
         integer(ip) :: ls
-        integer(ip) :: lshses
         integer(ip) :: lwk
-        integer(ip) :: lwork
         integer(ip) :: mab
-        integer(ip) :: mdb
         integer(ip) :: mmax
         integer(ip) :: mn
-        integer(ip) :: ndb
-        integer(ip) :: nlat
         integer(ip) :: nln
-        integer(ip) :: nlon
-        integer(ip) :: nt
-        real(wp) :: wshses(lshses), work(lwork)
 
-        !
         ! Check input arguments
-        !
         ierror = 1
         if (nlat < 3) return
         ierror = 2
@@ -305,12 +310,12 @@ contains
         !
         ia = 1
         ib = ia+mn
-        is = ib+mn
-        iwk = is+nlat
+        iis = ib+mn
+        iwk = iis+nlat
         lwk = lwork-2*mn-nlat
 
         call dives_lower_routine(nlat, nlon, isym, nt, dv, idv, jdv, br, bi, mdb, ndb, &
-            work(ia), work(ib), mab, work(is), wshses, lshses, work(iwk), lwk, &
+            work(ia), work(ib), mab, work(iis), wshses, lshses, work(iwk), lwk, &
             ierror)
 
     end subroutine dives
