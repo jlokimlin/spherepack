@@ -173,7 +173,7 @@ integer :: nloc1
 integer :: nloc2
 integer :: nlon
 integer :: nte
-real :: wshp
+real(wp) :: wshp
 real work(*)
 dimension wshp(*), iwshp(*)
 !
@@ -237,7 +237,7 @@ subroutine shpei_lower_routine(nlat, nlon, isym, mtrunc, idp, ierror, &
   pe, po, ze, zo, ipse, jzse, ipso, jzso, &
   cp, work, wx, s, e, thet, xx, z, a, b, we, ped, wo, pod, u)
 
-real :: dfn
+real(wp) :: dfn
 integer :: i
 integer :: idp
 integer :: ierror
@@ -271,12 +271,12 @@ integer :: nshe
 integer :: nsho
 integer :: nte
 integer :: nto
-real :: pe
-real :: po
-real :: toe
-real :: tusl
-real :: ze
-real :: zo
+real(wp) :: pe
+real(wp) :: po
+real(wp) :: toe
+real(wp) :: tusl
+real(wp) :: ze
+real(wp) :: zo
 !
 real summation, eps, dthet, v(1,1), a1, b1, c1
 parameter (eps=epsilon(1.0))
@@ -820,11 +820,11 @@ integer :: nloc1
 integer :: nloc2
 integer :: nlon
 integer :: nte
-real :: sn
-real :: work
-real :: wshp
-real :: x
-real :: y
+real(wp) :: sn
+real(wp) :: work
+real(wp) :: wshp
+real(wp) :: x
+real(wp) :: y
 !
 dimension wshp(*), iwshp(*), work(*), x(idxy, nlon), y(idxy, nlon)
 !
@@ -918,16 +918,16 @@ integer :: nshe
 integer :: nsho
 integer :: nte
 integer :: nto
-real :: pe
-real :: po
-real :: sx
-real :: sy
-real :: xe
-real :: xo
-real :: ye
-real :: yo
-real :: ze
-real :: zo
+real(wp) :: pe
+real(wp) :: po
+real(wp) :: sx
+real(wp) :: sy
+real(wp) :: xe
+real(wp) :: xo
+real(wp) :: ye
+real(wp) :: yo
+real(wp) :: ze
+real(wp) :: zo
 !
 dimension sx(idxy, nlon), sy(idxy, nlon), nshe(2), nsho(2), &
   pe(idp, idp, 2), po(idp, idp, 2), ze(idp, idp, 2), zo(idp, idp, 2), &
@@ -1068,9 +1068,9 @@ end subroutine mxm
 
 subroutine smxm(lr, lc, ld, a, mc, md, b, nd, c)
 
-real :: a
-real :: b
-real :: c
+real(wp) :: a
+real(wp) :: b
+real(wp) :: c
 integer :: i
 integer :: j
 integer :: k
@@ -1094,8 +1094,8 @@ end subroutine smxm
 
 subroutine mxmx(lr, lc, ld, a, mc, md, b, x, y)
 
-real :: a
-real :: b
+real(wp) :: a
+real(wp) :: b
 integer :: i
 integer :: j
 integer :: k
@@ -1104,10 +1104,10 @@ integer :: ld
 integer :: lr
 integer :: mc
 integer :: md
-real :: sum1
-real :: sum2
-real :: x
-real :: y
+real(wp) :: sum1
+real(wp) :: sum2
+real(wp) :: x
+real(wp) :: y
 dimension a(ld, *), b(md, *), x(ld, 2), y(ld, 2)
 do k=1, lr
 y(k, 1) = 0.0
@@ -1163,8 +1163,8 @@ return
 end subroutine dmxmx
 subroutine tmxmx(lr, lc, ld, a, mc, md, b, x, y, is, js)
 
-real :: a
-real :: b
+real(wp) :: a
+real(wp) :: b
 integer :: i
 integer :: is
 integer :: j
@@ -1176,10 +1176,10 @@ integer :: ld
 integer :: lr
 integer :: mc
 integer :: md
-real :: sum1
-real :: sum2
-real :: x
-real :: y
+real(wp) :: sum1
+real(wp) :: sum2
+real(wp) :: x
+real(wp) :: y
 dimension a(ld, *), b(md, *), x(ld, 2), y(ld, 2), &
               is(*), js(*)
 !

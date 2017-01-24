@@ -533,7 +533,7 @@ contains
 
     subroutine vshifti(ioff, nlon, nlat, lsav, wsav, ier)
 
-        integer :: lsav
+        integer(ip) :: lsav
         !
         !     initialize wsav for vshifte
         !

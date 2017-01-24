@@ -52,70 +52,70 @@
 program tidvt
 use spherepack_library
     implicit none
-    real :: ad
-    real :: av
-    real :: bd
-    real :: bi
-    real :: br
-    real :: bv
-    real :: ci
-    real :: cosp
-    real :: cost
-    real :: cr
-    real :: dlat
-    real :: dphi
-    real :: dv
-    real :: dvsav
-    real :: err2d
-    real :: err2v
-    real :: err2w
-    integer :: i
-    integer :: icase
-    integer :: ier
-    integer :: ierror
-    integer :: isym
-    integer :: ityp
-    integer :: j
-    integer :: k
-    integer :: kk
-    integer :: ldwork
-    integer :: lldwork
-    integer :: lleng
-    integer :: llsav
-    integer :: lsave
-    integer :: lwork
-    integer :: mdab
-    integer :: mdb
-    integer :: mmdab
-    integer :: mmdb
-    integer :: nlat
-    integer :: nlon
-    integer :: nmax
-    integer :: nnlat
-    integer :: nnlon
-    integer :: nnt
-    integer :: nt
-    real :: phi
+    real(wp) :: ad
+    real(wp) :: av
+    real(wp) :: bd
+    real(wp) :: bi
+    real(wp) :: br
+    real(wp) :: bv
+    real(wp) :: ci
+    real(wp) :: cosp
+    real(wp) :: cost
+    real(wp) :: cr
+    real(wp) :: dlat
+    real(wp) :: dphi
+    real(wp) :: dv
+    real(wp) :: dvsav
+    real(wp) :: err2d
+    real(wp) :: err2v
+    real(wp) :: err2w
+    integer(ip) :: i
+    integer(ip) :: icase
+    integer(ip) :: ier
+    integer(ip) :: ierror
+    integer(ip) :: isym
+    integer(ip) :: ityp
+    integer(ip) :: j
+    integer(ip) :: k
+    integer(ip) :: kk
+    integer(ip) :: ldwork
+    integer(ip) :: lldwork
+    integer(ip) :: lleng
+    integer(ip) :: llsav
+    integer(ip) :: lsave
+    integer(ip) :: lwork
+    integer(ip) :: mdab
+    integer(ip) :: mdb
+    integer(ip) :: mmdab
+    integer(ip) :: mmdb
+    integer(ip) :: nlat
+    integer(ip) :: nlon
+    integer(ip) :: nmax
+    integer(ip) :: nnlat
+    integer(ip) :: nnlon
+    integer(ip) :: nnt
+    integer(ip) :: nt
+    real(wp) :: phi
 
-    real :: prtbd
-    real :: prtbv
-    real :: ptrbd
-    real :: ptrbv
-    real :: sinp
-    real :: sint
-    real :: theta
-    real :: thetag
-    real :: v
-    real :: vsav
-    real :: vt
-    real :: vtsav
-    real :: w
-    real :: work
-    real :: wsav
-    real :: wsave
-    real :: x
-    real :: y
-    real :: z
+    real(wp) :: prtbd
+    real(wp) :: prtbv
+    real(wp) :: ptrbd
+    real(wp) :: ptrbv
+    real(wp) :: sinp
+    real(wp) :: sint
+    real(wp) :: theta
+    real(wp) :: thetag
+    real(wp) :: v
+    real(wp) :: vsav
+    real(wp) :: vt
+    real(wp) :: vtsav
+    real(wp) :: w
+    real(wp) :: work
+    real(wp) :: wsav
+    real(wp) :: wsave
+    real(wp) :: x
+    real(wp) :: y
+    real(wp) :: z
     !
     !     set dimensions with parameter statements
     !
@@ -528,30 +528,6 @@ use spherepack_library
     !     end of icase loop
     !
     end do
+
 end program tidvt
-!
-subroutine iout(ivar,nam)
-    implicit none
-    integer :: ivar
-    character(len=*), intent(in) :: nam
-    write(6,10) nam , ivar
-10  format(1h a4, 3h = ,i8)
-    return
-end subroutine iout
-!
-subroutine vout(var,nam)
-    implicit none
-    real :: var
-    character(len=*), intent(in) :: nam
-    write(6,10) nam , var
-10  format(1h a4,3h = ,e12.5)
-    return
-end subroutine vout
-!
-subroutine name(nam)
-    implicit none
-    character(len=*), intent(in) :: nam
-    write(6,100) nam
-100 format(1h a8)
-    return
-end subroutine name
+

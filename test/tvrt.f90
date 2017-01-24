@@ -54,75 +54,75 @@
 program tvrt
     use spherepack_library
     implicit none
-    real :: a
-    real :: b
-    real :: bi
-    real :: br
-    real :: ci
-    real :: cosp
-    real :: cost
-    real :: cr
-    real :: d2xdp2
-    real :: d2xdt2
-    real :: d2ydp2
-    real :: d2ydt2
-    real :: d2zdp2
-    real :: d2zdt2
-    real :: dlat
-    real :: dphi
-    real :: dwork
-    real :: dxdp
-    real :: dxdt
-    real :: dydp
-    real :: dydt
-    real :: dzdp
-    real :: dzdt
-    real :: err2
-    real :: err2v
-    real :: err2w
-    integer :: i
-    integer :: icase
-    integer :: ier
-    integer :: ierror
-    integer :: isym
-    integer :: ityp
-    integer :: j
-    integer :: k
-    integer :: ldwork
-    integer :: lldwork
-    integer :: lleng
-    integer :: llsav
-    integer :: lsave
-    integer :: lwork
-    integer :: mdab
-    integer :: mdc
-    integer :: mmdab
-    integer :: mmdc
-    integer :: nlat
-    integer :: nlon
-    integer :: nmax
-    integer :: nnlat
-    integer :: nnlon
-    integer :: nnt
-    integer :: nt
-    real :: pertrb
-    real :: phi
+    real(wp) :: a
+    real(wp) :: b
+    real(wp) :: bi
+    real(wp) :: br
+    real(wp) :: ci
+    real(wp) :: cosp
+    real(wp) :: cost
+    real(wp) :: cr
+    real(wp) :: d2xdp2
+    real(wp) :: d2xdt2
+    real(wp) :: d2ydp2
+    real(wp) :: d2ydt2
+    real(wp) :: d2zdp2
+    real(wp) :: d2zdt2
+    real(wp) :: dlat
+    real(wp) :: dphi
+    real(wp) :: dwork
+    real(wp) :: dxdp
+    real(wp) :: dxdt
+    real(wp) :: dydp
+    real(wp) :: dydt
+    real(wp) :: dzdp
+    real(wp) :: dzdt
+    real(wp) :: err2
+    real(wp) :: err2v
+    real(wp) :: err2w
+    integer(ip) :: i
+    integer(ip) :: icase
+    integer(ip) :: ier
+    integer(ip) :: ierror
+    integer(ip) :: isym
+    integer(ip) :: ityp
+    integer(ip) :: j
+    integer(ip) :: k
+    integer(ip) :: ldwork
+    integer(ip) :: lldwork
+    integer(ip) :: lleng
+    integer(ip) :: llsav
+    integer(ip) :: lsave
+    integer(ip) :: lwork
+    integer(ip) :: mdab
+    integer(ip) :: mdc
+    integer(ip) :: mmdab
+    integer(ip) :: mmdc
+    integer(ip) :: nlat
+    integer(ip) :: nlon
+    integer(ip) :: nmax
+    integer(ip) :: nnlat
+    integer(ip) :: nnlon
+    integer(ip) :: nnt
+    integer(ip) :: nt
+    real(wp) :: pertrb
+    real(wp) :: phi
 
-    real :: sinp
-    real :: sint
-    real :: theta
-    real :: thetag
-    real :: v
-    real :: ve
-    real :: vt
-    real :: vte
-    real :: w
-    real :: we
-    real :: work
-    real :: wsave
-    real :: x
-    real :: y
-    real :: z
+    real(wp) :: sinp
+    real(wp) :: sint
+    real(wp) :: theta
+    real(wp) :: thetag
+    real(wp) :: v
+    real(wp) :: ve
+    real(wp) :: vt
+    real(wp) :: vte
+    real(wp) :: w
+    real(wp) :: we
+    real(wp) :: work
+    real(wp) :: wsave
+    real(wp) :: x
+    real(wp) :: y
+    real(wp) :: z
     !
     !     set dimensions with parameter statements
     !
@@ -205,34 +205,34 @@ program tvrt
                     dzdt = -sint
                     dzdp = 0.0
                     select case (k)
-                    	case (1)
-                    		!              st(i,j,k) = x
-                    		!              sv(i,j,k) = y
-                    		!
-                    		!          v = -1/sin(theta)*dstdp + dsvdt
-                    		!
-                    		!          w =  1/sin(theta)*dsvdp + dstdt
-                    		!
-                    		v(i,j,k) = sinp + cost*sinp
-                    		w(i,j,k) = cosp + cost*cosp
-                    		vt(i,j,k) = -2.0*sint*cosp
-                    	case (2)
-                    		!              st = y
-                    		!              sv = z
-                    		v(i,j,k) = -cosp-sint
-                    		w(i,j,k) = cost*sinp
-                    		!         sint*vt = -dvdp + sint*dwdt + cost*w
-                    		!                 = sinp + sint*(-sint*sinp)+cost*cost*sinp
-                    		!                 = sinp + (cost**2-sint**2)*sinp
-                    		vt(i,j,k) = -2.*sint*sinp
-                    	case (3)
-                    		!           st = x
-                    		!           sv = z
-                    		v(i,j,k) = sinp - sint
-                    		w(i,j,k) = cost*cosp
-                    		!     sint*vt = -cosp-sint*sint*sinp+cost*cost*cosp
-                    		!             = -cosp + (1-2.*sint**2)*cosp =
-                    		vt(i,j,k) = -2.*sint*cosp
+                        case (1)
+                            !              st(i,j,k) = x
+                            !              sv(i,j,k) = y
+                            !
+                            !          v = -1/sin(theta)*dstdp + dsvdt
+                            !
+                            !          w =  1/sin(theta)*dsvdp + dstdt
+                            !
+                            v(i,j,k) = sinp + cost*sinp
+                            w(i,j,k) = cosp + cost*cosp
+                            vt(i,j,k) = -2.0*sint*cosp
+                        case (2)
+                            !              st = y
+                            !              sv = z
+                            v(i,j,k) = -cosp-sint
+                            w(i,j,k) = cost*sinp
+                            !         sint*vt = -dvdp + sint*dwdt + cost*w
+                            !                 = sinp + sint*(-sint*sinp)+cost*cost*sinp
+                            !                 = sinp + (cost**2-sint**2)*sinp
+                            vt(i,j,k) = -2.*sint*sinp
+                        case (3)
+                            !           st = x
+                            !           sv = z
+                            v(i,j,k) = sinp - sint
+                            w(i,j,k) = cost*cosp
+                            !     sint*vt = -cosp-sint*sint*sinp+cost*cost*cosp
+                            !             = -cosp + (1-2.*sint**2)*cosp =
+                            vt(i,j,k) = -2.*sint*cosp
                     end select
                 end do
             end do
@@ -367,12 +367,12 @@ program tvrt
                     dzdp = 0.0
                     d2zdp2 = 0.0
                     select case (k)
-                    	case (1)
-                    		vte = -2.0*sint*cosp
-                    	case (2)
-                    		vte = -2.*sint*sinp
-                    	case (3)
-                    		vte = -2.*sint*cosp
+                        case (1)
+                            vte = -2.0*sint*cosp
+                        case (2)
+                            vte = -2.*sint*sinp
+                        case (3)
+                            vte = -2.*sint*cosp
                     end select
                     err2 = err2 + (vt(i,j,k)-vte)**2
                 end do
@@ -396,159 +396,159 @@ program tvrt
         end do
 
         select case (icase)
-        	case (1)
+            case (1)
         		
-        		call name("**ec")
+                call name("**ec")
         		
-        		!
-        		!     set vector field (ve,we) with br=bi=0.0 for comparison with inverted vt
-        		!
-        		call vhseci(nlat,nlon,wsave,lsave,dwork,ldwork,ierror)
-        		call name("vhsi")
-        		call iout(ierror,"ierr")
+                !
+                !     set vector field (ve,we) with br=bi=0.0 for comparison with inverted vt
+                !
+                call vhseci(nlat,nlon,wsave,lsave,dwork,ldwork,ierror)
+                call name("vhsi")
+                call iout(ierror,"ierr")
         		
-        		call vhsec(nlat,nlon,ityp,nt,ve,we,nlat,nlon,br,bi,cr,ci, &
-        		mdc,nlat,wsave,lsave,work,lwork,ierror)
+                call vhsec(nlat,nlon,ityp,nt,ve,we,nlat,nlon,br,bi,cr,ci, &
+                    mdc,nlat,wsave,lsave,work,lwork,ierror)
         		
-        		call name("vhs ")
-        		call iout(ierror,"ierr")
+                call name("vhs ")
+                call iout(ierror,"ierr")
         		
-        		call shaeci(nlat,nlon,wsave,lsave,dwork,ldwork,ierror)
-        		call name("shai")
-        		call iout(ierror,"ierr")
+                call shaeci(nlat,nlon,wsave,lsave,dwork,ldwork,ierror)
+                call name("shai")
+                call iout(ierror,"ierr")
         		
-        		call shaec(nlat,nlon,isym,nt,vt,nlat,nlon,a,b, &
-        		mdab,nlat,wsave,lsave,work,lwork,ierror)
-        		call name("sha ")
-        		call iout(ierror,"ierr")
-        		call iout(lsave,"lsav")
-        		call iout(lwork,"lwrk")
+                call shaec(nlat,nlon,isym,nt,vt,nlat,nlon,a,b, &
+                    mdab,nlat,wsave,lsave,work,lwork,ierror)
+                call name("sha ")
+                call iout(ierror,"ierr")
+                call iout(lsave,"lsav")
+                call iout(lwork,"lwrk")
         		
-        		!     if (nmax.lt.10) then
-        		!     do kk=1,nt
-        		!     call iout(kk,"**kk")
-        		!     call aout(a(1,1,kk),"   a",nlat,nlat)
-        		!     call aout(b(1,1,kk),"   b",nlat,nlat)
-        		!     end do
-        		!     end if
+                !     if (nmax.lt.10) then
+                !     do kk=1,nt
+                !     call iout(kk,"**kk")
+                !     call aout(a(1,1,kk),"   a",nlat,nlat)
+                !     call aout(b(1,1,kk),"   b",nlat,nlat)
+                !     end do
+                !     end if
         		
-        		call vhseci(nlat,nlon,wsave,lsave,dwork,ldwork,ierror)
-        		call name("vhsi")
-        		call iout(ierror,"ierr")
+                call vhseci(nlat,nlon,wsave,lsave,dwork,ldwork,ierror)
+                call name("vhsi")
+                call iout(ierror,"ierr")
         		
-        		call ivrtec(nlat,nlon,isym,nt,v,w,nlat,nlon,a,b, &
-        		mdab,nlat,wsave,lsave,work,lwork,pertrb,ierror)
-        		call name("ivrt")
-        		call iout(ierror,"ierr")
-        		call vout(pertrb,"prtb")
-        	case (2)
+                call ivrtec(nlat,nlon,isym,nt,v,w,nlat,nlon,a,b, &
+                    mdab,nlat,wsave,lsave,work,lwork,pertrb,ierror)
+                call name("ivrt")
+                call iout(ierror,"ierr")
+                call vout(pertrb,"prtb")
+            case (2)
         		
-        		call name("**es")
-        		!
-        		!     set vector field (ve,we) with br=bi=0.0 for comparison with inverted vt
-        		!
-        		call vhsesi(nlat,nlon,wsave,lsave,work,lwork,dwork,ldwork,ierror)
-        		call name("vhsi")
-        		call iout(ierror,"ierr")
+                call name("**es")
+                !
+                !     set vector field (ve,we) with br=bi=0.0 for comparison with inverted vt
+                !
+                call vhsesi(nlat,nlon,wsave,lsave,work,lwork,dwork,ldwork,ierror)
+                call name("vhsi")
+                call iout(ierror,"ierr")
         		
-        		call vhses(nlat,nlon,ityp,nt,ve,we,nlat,nlon,br,bi,cr,ci, &
-        		mdc,nlat,wsave,lsave,work,lwork,ierror)
-        		call name("vhs ")
-        		call iout(ierror,"ierr")
+                call vhses(nlat,nlon,ityp,nt,ve,we,nlat,nlon,br,bi,cr,ci, &
+                    mdc,nlat,wsave,lsave,work,lwork,ierror)
+                call name("vhs ")
+                call iout(ierror,"ierr")
         		
         		
-        		call shaesi(nlat,nlon,wsave,lsave,work,lwork,dwork,ldwork,ierror)
-        		call name("shai")
-        		call iout(ierror,"ierr")
+                call shaesi(nlat,nlon,wsave,lsave,work,lwork,dwork,ldwork,ierror)
+                call name("shai")
+                call iout(ierror,"ierr")
         		
-        		call shaes(nlat,nlon,isym,nt,vt,nlat,nlon,a,b, &
-        		mdab,nlat,wsave,lsave,work,lwork,ierror)
-        		call name("sha ")
-        		call iout(ierror,"ierr")
-        		call iout(lsave,"lsav")
-        		call iout(lwork,"lwrk")
+                call shaes(nlat,nlon,isym,nt,vt,nlat,nlon,a,b, &
+                    mdab,nlat,wsave,lsave,work,lwork,ierror)
+                call name("sha ")
+                call iout(ierror,"ierr")
+                call iout(lsave,"lsav")
+                call iout(lwork,"lwrk")
         		
-        		call vhsesi(nlat,nlon,wsave,lsave,work,lwork,dwork,ldwork,ierror)
-        		call name("ivti")
-        		call iout(ierror,"ierr")
+                call vhsesi(nlat,nlon,wsave,lsave,work,lwork,dwork,ldwork,ierror)
+                call name("ivti")
+                call iout(ierror,"ierr")
         		
-        		call ivrtes(nlat,nlon,isym,nt,v,w,nlat,nlon,a,b, &
-        		mdab,nlat,wsave,lsave,work,lwork,pertrb,ierror)
-        		call name("ivrt")
-        		call iout(ierror,"ierr")
-        		call vout(pertrb,"prtb")
-        	case (3)
+                call ivrtes(nlat,nlon,isym,nt,v,w,nlat,nlon,a,b, &
+                    mdab,nlat,wsave,lsave,work,lwork,pertrb,ierror)
+                call name("ivrt")
+                call iout(ierror,"ierr")
+                call vout(pertrb,"prtb")
+            case (3)
         		
-        		call name("**gc")
-        		!
-        		!     set vector field (ve,we) with br=bi=0.0 for comparison with inverted vt
-        		!
-        		call vhsgci(nlat,nlon,wsave,lsave,dwork,ldwork,ierror)
-        		call name("vhsi")
-        		call iout(ierror,"ierr")
+                call name("**gc")
+                !
+                !     set vector field (ve,we) with br=bi=0.0 for comparison with inverted vt
+                !
+                call vhsgci(nlat,nlon,wsave,lsave,dwork,ldwork,ierror)
+                call name("vhsi")
+                call iout(ierror,"ierr")
         		
-        		call vhsgc(nlat,nlon,ityp,nt,ve,we,nlat,nlon,br,bi,cr,ci, &
-        		mdc,nlat,wsave,lsave,work,lwork,ierror)
+                call vhsgc(nlat,nlon,ityp,nt,ve,we,nlat,nlon,br,bi,cr,ci, &
+                    mdc,nlat,wsave,lsave,work,lwork,ierror)
         		
-        		call name("vhs ")
-        		call iout(ierror,"ierr")
+                call name("vhs ")
+                call iout(ierror,"ierr")
         		
-        		call shagci(nlat,nlon,wsave,lsave,dwork,ldwork,ierror)
-        		call name("shai")
-        		call iout(ierror,"ierr")
+                call shagci(nlat,nlon,wsave,lsave,dwork,ldwork,ierror)
+                call name("shai")
+                call iout(ierror,"ierr")
         		
-        		call shagc(nlat,nlon,isym,nt,vt,nlat,nlon,a,b, &
-        		mdab,nlat,wsave,lsave,work,lwork,ierror)
-        		call name("sha ")
-        		call iout(ierror,"ierr")
-        		call iout(lsave,"lsav")
-        		call iout(lwork,"lwrk")
+                call shagc(nlat,nlon,isym,nt,vt,nlat,nlon,a,b, &
+                    mdab,nlat,wsave,lsave,work,lwork,ierror)
+                call name("sha ")
+                call iout(ierror,"ierr")
+                call iout(lsave,"lsav")
+                call iout(lwork,"lwrk")
         		
-        		call vhsgci(nlat,nlon,wsave,lsave,dwork,ldwork,ierror)
-        		call name("ivti")
-        		call iout(ierror,"ierr")
+                call vhsgci(nlat,nlon,wsave,lsave,dwork,ldwork,ierror)
+                call name("ivti")
+                call iout(ierror,"ierr")
         		
-        		call ivrtgc(nlat,nlon,isym,nt,v,w,nlat,nlon,a,b, &
-        		mdab,nlat,wsave,lsave,work,lwork,pertrb,ierror)
+                call ivrtgc(nlat,nlon,isym,nt,v,w,nlat,nlon,a,b, &
+                    mdab,nlat,wsave,lsave,work,lwork,pertrb,ierror)
         		
-        		call name("ivrt")
-        		call iout(ierror,"ierr")
-        		call vout(pertrb,"prtb")
-        	case (4)
+                call name("ivrt")
+                call iout(ierror,"ierr")
+                call vout(pertrb,"prtb")
+            case (4)
         		
-        		call name("**gs")
-        		!
-        		!     set vector field (ve,we) with br=bi=0.0 for comparison with inverted vt
-        		!
-        		call vhsgsi(nlat, nlon, wsave, lsave, dwork, ldwork, ierror)
-        		call name("vhsi")
-        		call iout(ierror,"ierr")
+                call name("**gs")
+                !
+                !     set vector field (ve,we) with br=bi=0.0 for comparison with inverted vt
+                !
+                call vhsgsi(nlat, nlon, wsave, lsave, dwork, ldwork, ierror)
+                call name("vhsi")
+                call iout(ierror,"ierr")
         		
-        		call vhsgs(nlat,nlon,ityp,nt,ve,we,nlat,nlon,br,bi,cr,ci, &
-        		mdc,nlat,wsave,lsave,work,lwork,ierror)
-        		call name("vhs ")
-        		call iout(ierror,"ierr")
+                call vhsgs(nlat,nlon,ityp,nt,ve,we,nlat,nlon,br,bi,cr,ci, &
+                    mdc,nlat,wsave,lsave,work,lwork,ierror)
+                call name("vhs ")
+                call iout(ierror,"ierr")
         		
-        		call shagsi(nlat,nlon,wsave,lsave,work,lwork,dwork,ldwork,ierror)
-        		call name("shai")
-        		call iout(ierror,"ierr")
+                call shagsi(nlat,nlon,wsave,lsave,work,lwork,dwork,ldwork,ierror)
+                call name("shai")
+                call iout(ierror,"ierr")
         		
-        		call shags(nlat,nlon,isym,nt,vt,nlat,nlon,a,b, &
-        		mdab,nlat,wsave,lsave,work,lwork,ierror)
-        		call name("sha ")
-        		call iout(ierror,"ierr")
-        		call iout(lsave,"lsav")
-        		call iout(lwork,"lwrk")
+                call shags(nlat,nlon,isym,nt,vt,nlat,nlon,a,b, &
+                    mdab,nlat,wsave,lsave,work,lwork,ierror)
+                call name("sha ")
+                call iout(ierror,"ierr")
+                call iout(lsave,"lsav")
+                call iout(lwork,"lwrk")
         		
-        		call vhsgsi(nlat, nlon, wsave, lsave, dwork, ldwork, ierror)
-        		call name("ivti")
-        		call iout(ierror,"ierr")
+                call vhsgsi(nlat, nlon, wsave, lsave, dwork, ldwork, ierror)
+                call name("ivti")
+                call iout(ierror,"ierr")
         		
-        		call ivrtgs(nlat,nlon,isym,nt,v,w,nlat,nlon,a,b, &
-        		mdab,nlat,wsave,lsave,work,lwork,pertrb,ierror)
-        		call name("ivrt")
-        		call iout(ierror,"ierr")
-        		call vout(pertrb,"prtb")
+                call ivrtgs(nlat,nlon,isym,nt,v,w,nlat,nlon,a,b, &
+                    mdab,nlat,wsave,lsave,work,lwork,pertrb,ierror)
+                call name("ivrt")
+                call iout(ierror,"ierr")
+                call vout(pertrb,"prtb")
         end select
 
 
@@ -581,30 +581,5 @@ program tvrt
     !     end of icase loop
     !
     end do
+
 end program tvrt
-!
-subroutine iout(ivar,nam)
-    implicit none
-    integer :: ivar
-    character(len=*), intent(in) :: nam
-    write(6,10) nam , ivar
-10  format(1h a4, 3h = ,i8)
-    return
-end subroutine iout
-!
-subroutine vout(var,nam)
-    implicit none
-    real :: var
-    character(len=*), intent(in) :: nam
-    write(6,10) nam , var
-10  format(1h a4,3h = ,e12.5)
-    return
-end subroutine vout
-!
-subroutine name(nam)
-    implicit none
-    character(len=*), intent(in) :: nam
-    write(6,100) nam
-100 format(1h a8)
-    return
-end subroutine name

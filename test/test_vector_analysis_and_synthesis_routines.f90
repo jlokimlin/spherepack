@@ -58,11 +58,11 @@
 program tvha
 
     use, intrinsic :: ISO_Fortran_env, only: &
-        ip => INT32, &
-        wp => REAL64, &
         stdout => OUTPUT_UNIT
 
     use spherepack_library, only: &
+        ip, & ! Integer precision
+        wp, & ! Working precision
         Sphere, &
         Regularsphere, &
         GaussianSphere
@@ -70,45 +70,27 @@ program tvha
     ! Explicit typing only
     implicit none
 
-    !----------------------------------------------------------------------
     ! Dictionary
-    !----------------------------------------------------------------------
-    class(Sphere), allocatable :: sphere_dat
-    !----------------------------------------------------------------------
+    class(Sphere), allocatable :: solver
 
-    !
-    !  Test gaussian case
-    !
-    allocate( GaussianSphere :: sphere_dat )
+    ! Test gaussian grid
+    allocate( GaussianSphere :: solver )
+    call test_vector_analysis_and_synthesis_routines(solver)
+    deallocate( solver )
 
-    call test_vector_analysis_and_synthesis_routines(sphere_dat)
-
-    deallocate( sphere_dat )
-
-    !
-    !  Test regular case
-    !
-    allocate( RegularSphere :: sphere_dat )
-
-    call test_vector_analysis_and_synthesis_routines(sphere_dat)
-
-    deallocate( sphere_dat )
-
-
+    ! Test regular grid
+    allocate( RegularSphere :: solver )
+    call test_vector_analysis_and_synthesis_routines(solver)
+    deallocate( solver )
 
 contains
 
-
-
-
     subroutine test_vector_analysis_and_synthesis_routines(sphere_type)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
         class(Sphere), intent(inout)  :: sphere_type
-        !----------------------------------------------------------------------
+
         ! Local variables
-        !----------------------------------------------------------------------
         integer(ip), parameter        :: NLONS = 19
         integer(ip), parameter        :: NLATS = 25
         integer(ip), parameter        :: NSYNTHS = 2
@@ -118,11 +100,8 @@ contains
         real(wp)                      :: synthesized_polar(NLATS,NLONS,NSYNTHS)
         real(wp)                      :: synthesized_azimuthal(NLATS,NLONS,NSYNTHS)
         character(len=:), allocatable :: previous_polar_error, previous_azimuthal_error
-        !----------------------------------------------------------------------
 
-        !
         !  Set up workspace arrays
-        !
         select type(sphere_type)
             type is (GaussianSphere)
 
@@ -238,11 +217,11 @@ contains
                 !    arithmetic followed by the output from this computer
                 !
                 write( stdout, '(a)') ''
-                write( stdout, '(a)') '     tvha *** TEST RUN *** '
+                write( stdout, '(a)') '     test vector analysis and synthesis *** TEST RUN *** '
                 write( stdout, '(a)') ''
                 write( stdout, '(a)') '     grid type = '//sphere_type%grid%grid_type
                 write( stdout, '(a)') '     Testing vector analysis and synthesis'
-                write( stdout, '(2(A,I2))') '     nlat = ', NLATS,' nlon = ', NLONS
+                write( stdout, '(2(a,i3))') '     nlat = ', NLATS,' nlon = ', NLONS
                 write( stdout, '(a)') '     Previous 64 bit floating point arithmetic result '
                 write( stdout, '(a)') previous_polar_error
                 write( stdout, '(a)') previous_azimuthal_error

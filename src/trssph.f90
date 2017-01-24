@@ -526,8 +526,8 @@ contains
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        integer :: ig, igrda, igrdb, la1, la2, lb1, lb2, lwa, lwb, iaa, iab, iba, ibb
-        integer :: lwk3, lwk4, lw, iw, jb, nt, isym, nlat
+        integer(ip) :: ig, igrda, igrdb, la1, la2, lb1, lb2, lwa, lwb, iaa, iab, iba, ibb
+        integer(ip) :: lwk3, lwk4, lw, iw, jb, nt, isym, nlat
         !----------------------------------------------------------------------
         !
         !     include a save statement to ensure local variables in trssph, set during
@@ -765,7 +765,7 @@ contains
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        integer :: i, j, m, n !! Counters
+        integer(ip) :: i, j, m, n !! Counters
         !----------------------------------------------------------------------
 
         m = min(ma, mb)
@@ -815,7 +815,7 @@ contains
         !----------------------------------------------------------------------
         ! Dummy arguments
         !----------------------------------------------------------------------
-        integer :: i, j, ij, ji !! Counters
+        integer(ip) :: i, j, ij, ji !! Counters
         !----------------------------------------------------------------------
 
         do j=1, m
@@ -853,7 +853,7 @@ contains
         !----------------------------------------------------------------------
         ! Local variables
         !----------------------------------------------------------------------
-        integer :: i, j, half_nlat, ib !! Counters
+        integer(ip) :: i, j, half_nlat, ib !! Counters
         real    :: temp
          !----------------------------------------------------------------------
 

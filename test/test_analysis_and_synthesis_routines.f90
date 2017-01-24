@@ -50,17 +50,17 @@ program test_analysis_and_synthesis_routines
     implicit none
 
     ! Dictionary
-    class(Sphere), allocatable :: sphere_dat
+    class(Sphere), allocatable :: solver
 
-    !  Test gaussian case
-    allocate( GaussianSphere :: sphere_dat )
-    call test_case(sphere_dat)
-    deallocate( sphere_dat )
+    ! Test gaussian grid
+    allocate( GaussianSphere :: solver )
+    call test_case(solver)
+    deallocate( solver )
 
-    !  Test regular case
-    allocate( RegularSphere :: sphere_dat )
-    call test_case(sphere_dat)
-    deallocate( sphere_dat )
+    ! Test regular grid
+    allocate( RegularSphere :: solver )
+    call test_case(solver)
+    deallocate( solver )
 
 contains
 
@@ -146,16 +146,15 @@ contains
             s => approximate_scalar_function &
             )
             associate( err2 => maxval(abs(s - se)) )
-                !
+
                 !  Print earlier output from platform with 64-bit floating point
                 !    arithmetic followed by the output from this computer
-                !
                 write( stdout, '(a)') ''
-                write( stdout, '(a)') '     tsha *** TEST RUN *** '
+                write( stdout, '(/a/)') '     test analysis and synthesis routines *** TEST RUN *** '
                 write( stdout, '(a)') ''
                 write( stdout, '(a)') '     grid type = '//sphere_type%grid%grid_type
                 write( stdout, '(a)') '     Testing scalar analysis and synthesis'
-                write( stdout, '(2(A,I2))') '     nlat = ', NLATS,' nlon = ', NLONS
+                write( stdout, '(2(a,i3))') '     nlat = ', NLATS,' nlon = ', NLONS
                 write( stdout, '(a)') '     Previous 64 bit floating point arithmetic result '
                 write( stdout, '(a)') error_previous_platform
                 write( stdout, '(a)') '     The output from your computer is: '

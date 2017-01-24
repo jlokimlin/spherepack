@@ -48,59 +48,59 @@
 program tvts
     use spherepack_library
     implicit none
-    real :: bi
-    real :: br
-    real :: ci
-    real :: cosp
-    real :: cost
-    real :: cr
-    real :: dlat
-    real :: dphi
-    real :: dxdt
-    real :: dydt
-    real :: dzdt
-    real :: emz
-    real :: err2v
-    real :: err2w
-    real :: ex
-    real :: ey
-    real :: ez
-    integer :: i
-    integer :: icase
-    integer :: ier
-    integer :: ierror
-    integer :: ityp
-    integer :: j
-    integer :: k
-    integer :: ldwork
-    integer :: lldwork
-    integer :: lleng
-    integer :: llsav
-    integer :: lsave
-    integer :: lwork
-    integer :: nlat
-    integer :: nlon
-    integer :: nnlat
-    integer :: nnlon
-    integer :: nnt
-    integer :: nt
-    real :: phi
+    real(wp) :: bi
+    real(wp) :: br
+    real(wp) :: ci
+    real(wp) :: cosp
+    real(wp) :: cost
+    real(wp) :: cr
+    real(wp) :: dlat
+    real(wp) :: dphi
+    real(wp) :: dxdt
+    real(wp) :: dydt
+    real(wp) :: dzdt
+    real(wp) :: emz
+    real(wp) :: err2v
+    real(wp) :: err2w
+    real(wp) :: ex
+    real(wp) :: ey
+    real(wp) :: ez
+    integer(ip) :: i
+    integer(ip) :: icase
+    integer(ip) :: ier
+    integer(ip) :: ierror
+    integer(ip) :: ityp
+    integer(ip) :: j
+    integer(ip) :: k
+    integer(ip) :: ldwork
+    integer(ip) :: lldwork
+    integer(ip) :: lleng
+    integer(ip) :: llsav
+    integer(ip) :: lsave
+    integer(ip) :: lwork
+    integer(ip) :: nlat
+    integer(ip) :: nlon
+    integer(ip) :: nnlat
+    integer(ip) :: nnlon
+    integer(ip) :: nnt
+    integer(ip) :: nt
+    real(wp) :: phi
 
-    real :: sinp
-    real :: sint
-    real :: theta
-    real :: thetag
-    real :: v
-    real :: vt
-    real :: vtsav
-    real :: w
-    real :: work
-    real :: wsave
-    real :: wt
-    real :: wtsav
-    real :: x
-    real :: y
-    real :: z
+    real(wp) :: sinp
+    real(wp) :: sint
+    real(wp) :: theta
+    real(wp) :: thetag
+    real(wp) :: v
+    real(wp) :: vt
+    real(wp) :: vtsav
+    real(wp) :: w
+    real(wp) :: work
+    real(wp) :: wsave
+    real(wp) :: wt
+    real(wp) :: wtsav
+    real(wp) :: x
+    real(wp) :: y
+    real(wp) :: z
     !
     !     set dimensions with parameter statements
     !
@@ -208,99 +208,99 @@ program tvts
 
 
         select case (icase)
-        	case (1)
+            case (1)
         		
-        		call name("**ec")
+                call name("**ec")
         		
-        		call vhaeci(nlat,nlon,wsave,lsave,dwork,ldwork,ierror)
-        		call name("vhai")
-        		call iout(ierror,"ierr")
+                call vhaeci(nlat,nlon,wsave,lsave,dwork,ldwork,ierror)
+                call name("vhai")
+                call iout(ierror,"ierr")
         		
-        		call vhaec(nlat,nlon,ityp,nt,v,w,nlat,nlon,br,bi,cr,ci,nlat, &
-        		nlat,wsave,lsave,work,lwork,ierror)
-        		call name("vha ")
-        		call iout(ierror,"ierr")
+                call vhaec(nlat,nlon,ityp,nt,v,w,nlat,nlon,br,bi,cr,ci,nlat, &
+                    nlat,wsave,lsave,work,lwork,ierror)
+                call name("vha ")
+                call iout(ierror,"ierr")
         		
-        		!
-        		!     now compute theta derivatives of v,w
-        		!
-        		call vtseci(nlat,nlon,wsave,lsave,dwork,ldwork,ierror)
+                !
+                !     now compute theta derivatives of v,w
+                !
+                call vtseci(nlat,nlon,wsave,lsave,dwork,ldwork,ierror)
         		
-        		call name("vtsi")
-        		call iout(ierror,"ierr")
+                call name("vtsi")
+                call iout(ierror,"ierr")
         		
-        		call vtsec(nlat,nlon,ityp,nt,vt,wt,nlat,nlon,br,bi,cr,ci,nlat, &
-        		nlat,wsave,lsave,work,lwork,ierror)
-        		call name("vts ")
-        		call iout(ierror,"ierr")
-        	case (2)
+                call vtsec(nlat,nlon,ityp,nt,vt,wt,nlat,nlon,br,bi,cr,ci,nlat, &
+                    nlat,wsave,lsave,work,lwork,ierror)
+                call name("vts ")
+                call iout(ierror,"ierr")
+            case (2)
         		
-        		call name("**es")
+                call name("**es")
         		
-        		call vhaesi(nlat,nlon,wsave,lsave,work,lwork,dwork,ldwork,ierror)
-        		call name("vhai")
-        		call iout(ierror,"ierr")
+                call vhaesi(nlat,nlon,wsave,lsave,work,lwork,dwork,ldwork,ierror)
+                call name("vhai")
+                call iout(ierror,"ierr")
         		
-        		call vhaes(nlat,nlon,ityp,nt,v,w,nlat,nlon,br,bi,cr,ci,nlat, &
-        		nlat,wsave,lsave,work,lwork,ierror)
-        		call name("vha ")
-        		call iout(ierror,"ierr")
+                call vhaes(nlat,nlon,ityp,nt,v,w,nlat,nlon,br,bi,cr,ci,nlat, &
+                    nlat,wsave,lsave,work,lwork,ierror)
+                call name("vha ")
+                call iout(ierror,"ierr")
         		
-        		call vtsesi(nlat,nlon,wsave,lsave,work,lwork,dwork,ldwork,ierror)
-        		call name("vtsi")
-        		call iout(ierror,"ierr")
+                call vtsesi(nlat,nlon,wsave,lsave,work,lwork,dwork,ldwork,ierror)
+                call name("vtsi")
+                call iout(ierror,"ierr")
         		
-        		call vtses(nlat,nlon,ityp,nt,vt,wt,nlat,nlon,br,bi,cr,ci,nlat, &
-        		nlat,wsave,lsave,work,lwork,ierror)
-        		call name("vts ")
-        		call iout(ierror,"ierr")
-        	case (3)
+                call vtses(nlat,nlon,ityp,nt,vt,wt,nlat,nlon,br,bi,cr,ci,nlat, &
+                    nlat,wsave,lsave,work,lwork,ierror)
+                call name("vts ")
+                call iout(ierror,"ierr")
+            case (3)
         		
-        		call name("**gc")
+                call name("**gc")
         		
-        		call name("vhgi")
-        		call iout(nlat,"nlat")
+                call name("vhgi")
+                call iout(nlat,"nlat")
         		
-        		call vhagci(nlat,nlon,wsave,lsave,dwork,ldwork,ierror)
-        		call name("vhai")
-        		call iout(ierror,"ierr")
+                call vhagci(nlat,nlon,wsave,lsave,dwork,ldwork,ierror)
+                call name("vhai")
+                call iout(ierror,"ierr")
         		
-        		call vhagc(nlat,nlon,ityp,nt,v,w,nlat,nlon,br,bi,cr,ci,nlat, &
-        		nlat,wsave,lsave,work,lwork,ierror)
-        		call name("vha ")
-        		call iout(ierror,"ierr")
+                call vhagc(nlat,nlon,ityp,nt,v,w,nlat,nlon,br,bi,cr,ci,nlat, &
+                    nlat,wsave,lsave,work,lwork,ierror)
+                call name("vha ")
+                call iout(ierror,"ierr")
         		
-        		!
-        		!     now synthesize v,w from br,bi,cr,ci and compare with original
-        		!
-        		call vtsgci(nlat,nlon,wsave,lsave,dwork,ldwork,ierror)
-        		call name("vtsi")
-        		call iout(ierror,"ierr")
+                !
+                !     now synthesize v,w from br,bi,cr,ci and compare with original
+                !
+                call vtsgci(nlat,nlon,wsave,lsave,dwork,ldwork,ierror)
+                call name("vtsi")
+                call iout(ierror,"ierr")
         		
-        		call vtsgc(nlat,nlon,ityp,nt,vt,wt,nlat,nlon,br,bi,cr,ci,nlat, &
-        		nlat,wsave,lsave,work,lwork,ierror)
-        		call name("vts ")
-        		call iout(ierror,"ierr")
-        	case (4)
+                call vtsgc(nlat,nlon,ityp,nt,vt,wt,nlat,nlon,br,bi,cr,ci,nlat, &
+                    nlat,wsave,lsave,work,lwork,ierror)
+                call name("vts ")
+                call iout(ierror,"ierr")
+            case (4)
         		
-        		call name("**gs")
-        		call vhagsi(nlat, nlon, wsave, lsave, dwork, ldwork, ierror)
-        		call name("vhai")
-        		call iout(ierror,"ierr")
+                call name("**gs")
+                call vhagsi(nlat, nlon, wsave, lsave, dwork, ldwork, ierror)
+                call name("vhai")
+                call iout(ierror,"ierr")
         		
-        		call vhags(nlat,nlon,ityp,nt,v,w,nlat,nlon,br,bi,cr,ci,nlat, &
-        		nlat,wsave,lsave,work,lwork,ierror)
-        		call name("vha ")
-        		call iout(ierror,"ierr")
+                call vhags(nlat,nlon,ityp,nt,v,w,nlat,nlon,br,bi,cr,ci,nlat, &
+                    nlat,wsave,lsave,work,lwork,ierror)
+                call name("vha ")
+                call iout(ierror,"ierr")
         		
-        		call vtsgsi(nlat,nlon,wsave,lsave,work,lwork,dwork,ldwork,ierror)
-        		call name("vtsi")
-        		call iout(ierror,"ierr")
+                call vtsgsi(nlat,nlon,wsave,lsave,work,lwork,dwork,ldwork,ierror)
+                call name("vtsi")
+                call iout(ierror,"ierr")
         		
-        		call vtsgs(nlat,nlon,ityp,nt,vt,wt,nlat,nlon,br,bi,cr,ci,nlat, &
-        		nlat,wsave,lsave,work,lwork,ierror)
-        		call name("vts ")
-        		call iout(ierror,"ierr")
+                call vtsgs(nlat,nlon,ityp,nt,vt,wt,nlat,nlon,br,bi,cr,ci,nlat, &
+                    nlat,wsave,lsave,work,lwork,ierror)
+                call name("vts ")
+                call iout(ierror,"ierr")
         end select
 
         !     call a3out(wt,"wt  ",nlat,nlon,nt)
@@ -330,31 +330,5 @@ program tvts
     !     end of icase loop
     !
     end do
+
 end program tvts
-subroutine iout(ivar,nam)
-    implicit none
-    integer :: ivar
-    character(len=*), intent(in) :: nam
-    write(6,10) nam , ivar
-10  format(1h a4, 3h = ,i8)
-    return
-end subroutine iout
-!
-subroutine vout(var,nam)
-    implicit none
-    real :: var
-    character(len=*), intent(in) :: nam
-    write(6,10) nam , var
-10  format(1h a4,3h = ,e12.5)
-    return
-end subroutine vout
-!
-subroutine name(nam)
-    implicit none
-    character(len=*), intent(in) :: nam
-    write(6,100) nam
-100 format(1h a8)
-    return
-end subroutine name
-
-

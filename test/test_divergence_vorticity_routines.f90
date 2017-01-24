@@ -50,12 +50,13 @@
 !     (5) invert dv,vt with idvt(ec,es,gc,gs) and compare with vector field from (1)
 !
 program tidvt
+
     use, intrinsic :: ISO_Fortran_env, only: &
-        ip => INT32, &
-        wp => REAL64, &
         stdout => OUTPUT_UNIT
 
     use spherepack_library, only: &
+        ip, & ! Integer precision
+        wp, & ! Working precision
         Sphere, &
         Regularsphere, &
         GaussianSphere
@@ -63,27 +64,27 @@ program tidvt
     ! Explicit typing only
     implicit none
 
-    !----------------------------------------------------------------------
     ! Dictionary
-    !----------------------------------------------------------------------
-    type(GaussianSphere) :: gaussian_sphere
-    type(RegularSphere)  :: regular_sphere
-    !----------------------------------------------------------------------
+    class(Sphere), allocatable :: solver
 
-    call test_divergence_vorticity_routines(gaussian_sphere)
-    call test_divergence_vorticity_routines(regular_sphere)
+    ! Test gaussian grid
+    allocate( GaussianSphere :: solver )
+    call test_divergence_vorticity_routines(solver)
+    deallocate( solver )
 
+    ! Test regular grid
+    allocate( RegularSphere :: solver )
+    call test_divergence_vorticity_routines(solver)
+    deallocate( solver )
 
 contains
 
-    subroutine test_divergence_vorticity_routines(sphere_type )
-        !----------------------------------------------------------------------
+    subroutine test_divergence_vorticity_routines(sphere_type)
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
         class(Sphere), intent(inout)  :: sphere_type
-        !----------------------------------------------------------------------
+
         ! Local variables
-        !----------------------------------------------------------------------
         integer(ip), parameter        :: NLONS = 16
         integer(ip), parameter        :: NLATS = 25
         integer(ip), parameter        :: NSYNTHS = 3
@@ -99,11 +100,9 @@ contains
         character(len=:), allocatable :: previous_vorticity_error, previous_divergence_error
         character(len=:), allocatable :: previous_polar_inversion_error
         character(len=:), allocatable :: previous_azimuthal_inversion_error
-        !----------------------------------------------------------------------
 
-        !
+
         !  Set up workspace arrays
-        !
         select type(sphere_type)
             !
             !  For gaussian sphere
@@ -248,7 +247,7 @@ contains
                 write( stdout, '(a)') ''
                 write( stdout, '(a)') '     grid type = '//sphere_type%grid%grid_type
                 write( stdout, '(a)') '     Testing vorticity'
-                write( stdout, '(2(A,I2))') '     nlat = ', NLATS,' nlon = ', NLONS
+                write( stdout, '(2(a,i3))') '     nlat = ', NLATS,' nlon = ', NLONS
                 write( stdout, '(a)') '     Previous 64 bit floating point arithmetic result '
                 write( stdout, '(a)') previous_vorticity_error
                 write( stdout, '(a)') previous_divergence_error
@@ -290,11 +289,11 @@ contains
                 !    arithmetic followed by the output from this computer
                 !
                 write( stdout, '(a)') ''
-                write( stdout, '(a)') '     tidvt *** TEST RUN *** '
+                write( stdout, '(a)') '     test divergence and vorticity *** TEST RUN *** '
                 write( stdout, '(a)') ''
                 write( stdout, '(a)') '     grid type = '//sphere_type%grid%grid_type
                 write( stdout, '(a)') '     Testing vorticity inversion'
-                write( stdout, '(2(A,I2))') '     nlat = ', NLATS,' nlon = ', NLONS
+                write( stdout, '(2(a,i3))') '     nlat = ', NLATS,' nlon = ', NLONS
                 write( stdout, '(a)') '     Previous 64 bit floating point arithmetic result '
                 write( stdout, '(a)') previous_polar_inversion_error
                 write( stdout, '(a)') previous_azimuthal_inversion_error
@@ -304,9 +303,8 @@ contains
                 write( stdout, '(a)' ) ''
             end associate
         end associate
-        !
+
         !  Release memory
-        !
         deallocate( previous_vorticity_error )
         deallocate( previous_divergence_error )
         deallocate( previous_polar_inversion_error )

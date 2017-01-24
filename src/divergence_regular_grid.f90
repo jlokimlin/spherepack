@@ -335,11 +335,11 @@ contains
 
     subroutine divec_lower_routine(nlat, nlon, isym, nt, dv, idv, jdv, br, bi, mdb, ndb, &
         a, b, mab, sqnn, wshsec, lshsec, wk, lwk, ierror)
-        real :: a
-        real :: b
-        real :: bi
-        real :: br
-        real :: dv
+        real(wp) :: a
+        real(wp) :: b
+        real(wp) :: bi
+        real(wp) :: br
+        real(wp) :: dv
         
         integer(ip) :: idv
         integer(ip) :: ierror
@@ -357,9 +357,9 @@ contains
         integer(ip) :: nlat
         integer(ip) :: nlon
         integer(ip) :: nt
-        real :: sqnn
-        real :: wk
-        real :: wshsec
+        real(wp) :: sqnn
+        real(wp) :: wk
+        real(wp) :: wshsec
         dimension dv(idv, jdv, nt), br(mdb, ndb, nt), bi(mdb, ndb, nt)
         dimension a(mab, nlat, nt), b(mab, nlat, nt), sqnn(nlat)
         dimension wshsec(lshsec), wk(lwk)

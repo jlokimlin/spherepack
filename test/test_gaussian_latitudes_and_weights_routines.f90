@@ -46,34 +46,35 @@
 program test_gaussian_latitudes_and_weights_routines
 
     use, intrinsic :: ISO_Fortran_env, only: &
-        stdout => OUTPUT_UNIT, &
-        wp => REAL64, &
-        sp => REAL32
+        sp => REAL32, &
+        stdout => OUTPUT_UNIT
 
     use spherepack_library, only: &
+        ip, & ! Integer precision
+        wp, & ! Working precision
         compute_gaussian_latitudes_and_weights, pi
 
     ! Explicit typing only
     implicit none
 
-    real :: dmax
-    real :: hold
-    integer :: i
-    integer :: ido
-    integer :: ierror
-    integer :: irm
-    integer :: ldw
-    integer :: lwork
-    integer, parameter :: NLAT = 63
-    real :: pmax
-    real :: rerr
-    real :: rmax
+    real(wp) :: dmax
+    real(wp) :: hold
+    integer(ip) :: i
+    integer(ip) :: ido
+    integer(ip) :: ierror
+    integer(ip) :: irm
+    integer(ip) :: ldw
+    integer(ip) :: lwork
+    integer(ip), parameter :: NLAT = 63
+    real(wp) :: pmax
+    real(wp) :: rerr
+    real(wp) :: rmax
 
-    real :: sums
+    real(wp) :: sums
 
-    real :: tdoub
-    real :: tsing
-    real :: wmax
+    real(wp) :: tdoub
+    real(wp) :: tsing
+    real(wp) :: wmax
 
     real(wp) :: theta(NLAT), wts(NLAT), work(NLAT+2)
     real(wp) :: dtheta(NLAT), dwts(NLAT)
@@ -215,11 +216,11 @@ contains
     !
     subroutine gsqd(nlat,theta,wts,dwork,ldwork,ierror)
 
-        integer :: i
-        integer :: ierror
-        integer :: ldwork
-        integer :: nlat
-        integer :: ns2
+        integer(ip) :: i
+        integer(ip) :: ierror
+        integer(ip) :: ldwork
+        integer(ip) :: nlat
+        integer(ip) :: ns2
         !
         !
         !     subroutine gsqd computes the nlat gaussian colatitudes and weights
@@ -299,14 +300,14 @@ contains
     !
     subroutine gsqd_lower_routine(nlat,theta,cp)
 
-        real :: eps
-        real :: summation
+        real(wp) :: eps
+        real(wp) :: summation
         
-        integer :: it
-        integer :: nhalf
-        integer :: nix
-        integer :: nlat
-        integer :: ns2
+        integer(ip) :: it
+        integer(ip) :: nhalf
+        integer(ip) :: nix
+        integer(ip) :: nlat
+        integer(ip) :: ns2
         real  theta((nlat+1)/2),cp(nlat/2+1)
         real pi,HALF_PI,dtheta,dthalf, &
             cmax,dcor,pb,dpb,sgnd,zero,zlast
@@ -366,7 +367,7 @@ contains
 
     subroutine egwts(n,theta,wts,work)
 
-        integer :: n
+        integer(ip) :: n
         !
         !     computes gauss weights as described in swarztrauber
         !     and spotz, generalized harmonic transforms
@@ -379,9 +380,9 @@ contains
 
     subroutine egwts1(n,theta,wts,dcp,cp)
 
-        integer :: i
-        integer :: n
-        integer :: nhalf
+        integer(ip) :: i
+        integer(ip) :: n
+        integer(ip) :: nhalf
         real theta((n+1)/2),wts((n+1)/2),cp((n-1)/2+1), &
             dcp(n/2+1),fn,sqnn,pb,dpb
         fn = n
@@ -399,13 +400,13 @@ contains
 
     subroutine lfc (m,n,cp)
 
-        integer :: i
-        integer :: l
-        integer :: m
-        integer :: ma
-        integer :: n
-        integer :: nex
-        integer :: nmms2
+        integer(ip) :: i
+        integer(ip) :: l
+        integer(ip) :: m
+        integer(ip) :: ma
+        integer(ip) :: n
+        integer(ip) :: nex
+        integer(ip) :: nmms2
         !
         real cp,fnum,fden,fnmh,a1,b1,c1,cp2,fnnp1,fnmsq,fk, &
             t1,t2,pm1,sc10,sc20,sc40
@@ -490,12 +491,12 @@ contains
     end subroutine lfc
     subroutine lft (m,n,theta,cp,pb)
 
-        integer :: k
-        integer :: kdo
-        integer :: m
-        integer :: mmod
-        integer :: n
-        integer :: nmod
+        integer(ip) :: k
+        integer(ip) :: kdo
+        integer(ip) :: m
+        integer(ip) :: mmod
+        integer(ip) :: n
+        integer(ip) :: nmod
         real cp(*),pb,theta,cdt,sdt,cth,sth,chh
         cdt = cos(2.0*theta)
         sdt = sin(2.0*theta)
@@ -586,12 +587,12 @@ contains
     end subroutine lft
     subroutine dlft (m,n,theta,cp,pb)
 
-        integer :: k
-        integer :: kdo
-        integer :: m
-        integer :: mmod
-        integer :: n
-        integer :: nmod
+        integer(ip) :: k
+        integer(ip) :: kdo
+        integer(ip) :: m
+        integer(ip) :: mmod
+        integer(ip) :: n
+        integer(ip) :: nmod
         !
         !     computes the derivative of pmn(theta) with respect to theta
         !
@@ -687,11 +688,11 @@ contains
 
     subroutine dlfcz(n,cp)
 
-        integer :: i
-        integer :: ic
-        integer :: j
-        integer :: n
-        integer :: ncp
+        integer(ip) :: i
+        integer(ip) :: ic
+        integer(ip) :: j
+        integer(ip) :: n
+        integer(ip) :: ncp
         !
         !     computes the fourier coefficients of the legendre
         !     polynomials. n is the degree and integer(n/2+1)
@@ -744,36 +745,36 @@ contains
     !
     subroutine sgaqd(nlat,theta,wts,w,lwork,ierror)
 
-        real :: cmax
-        real :: cz
-        real :: dcor
-        real :: dpb
-        real :: dthalf
-        real :: dtheta
-        real :: eps
-        integer :: i
-        integer :: idx
-        integer :: ierror
-        integer :: it
-        integer :: itmax
-        integer :: lwork
-        integer :: mnlat
-        integer :: nhalf
-        integer :: nix
-        integer :: nlat
-        integer :: ns2
-        real :: pb
-        real :: pi
-        real :: HALF_PI
-        real :: sgnd
-        real :: theta
-        real :: w
-        real :: wts
-        real :: x
-        real :: zero
-        real :: zhold
-        real :: zlast
-        real :: zprev
+        real(wp) :: cmax
+        real(wp) :: cz
+        real(wp) :: dcor
+        real(wp) :: dpb
+        real(wp) :: dthalf
+        real(wp) :: dtheta
+        real(wp) :: eps
+        integer(ip) :: i
+        integer(ip) :: idx
+        integer(ip) :: ierror
+        integer(ip) :: it
+        integer(ip) :: itmax
+        integer(ip) :: lwork
+        integer(ip) :: mnlat
+        integer(ip) :: nhalf
+        integer(ip) :: nix
+        integer(ip) :: nlat
+        integer(ip) :: ns2
+        real(wp) :: pb
+        real(wp) :: pi
+        real(wp) :: HALF_PI
+        real(wp) :: sgnd
+        real(wp) :: theta
+        real(wp) :: w
+        real(wp) :: wts
+        real(wp) :: x
+        real(wp) :: zero
+        real(wp) :: zhold
+        real(wp) :: zlast
+        real(wp) :: zprev
         !
         !                             February 2002
         !
@@ -814,7 +815,7 @@ contains
         !  *****************************************************************
         !
         dimension theta(nlat),wts(nlat), w(*)
-        real :: summation
+        real(wp) :: summation
         !
         !     check work space length
         !
@@ -912,16 +913,16 @@ contains
     end subroutine sgaqd
     subroutine lfcz(n,cz,cp,dcp)
 
-        real :: cp
-        real :: cz
-        real :: dcp
-        integer :: j
-        integer :: n
-        integer :: ncp
-        real :: t1
-        real :: t2
-        real :: t3
-        real :: t4
+        real(wp) :: cp
+        real(wp) :: cz
+        real(wp) :: dcp
+        integer(ip) :: j
+        integer(ip) :: n
+        integer(ip) :: ncp
+        real(wp) :: t1
+        real(wp) :: t2
+        real(wp) :: t3
+        real(wp) :: t4
         !
         !     computes the fourier coefficients of the legendre
         !     polynomial p_n^0 and its derivative.
@@ -972,21 +973,21 @@ contains
 
     subroutine slpdp (n,theta,cz,cp,dcp,pb,dpb)
 
-        real :: cdt
-        real :: chh
-        real :: cp
-        real :: cost
-        real :: cz
-        real :: dcp
-        real :: dpb
-        real :: fn
-        integer :: k
-        integer :: kdo
-        integer :: n
-        real :: pb
-        real :: sdt
-        real :: sint
-        real :: theta
+        real(wp) :: cdt
+        real(wp) :: chh
+        real(wp) :: cp
+        real(wp) :: cost
+        real(wp) :: cz
+        real(wp) :: dcp
+        real(wp) :: dpb
+        real(wp) :: fn
+        integer(ip) :: k
+        integer(ip) :: kdo
+        integer(ip) :: n
+        real(wp) :: pb
+        real(wp) :: sdt
+        real(wp) :: sint
+        real(wp) :: theta
         !
         !     computes pn(theta) and its derivative dpb(theta) with
         !                          respect to theta

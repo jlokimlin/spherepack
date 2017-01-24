@@ -43,11 +43,11 @@
 program tslap
 
     use, intrinsic :: ISO_Fortran_env, only: &
-        ip => INT32, &
-        wp => REAL64, &
         stdout => OUTPUT_UNIT
 
     use spherepack_library, only: &
+        ip, & ! Integer precision
+        wp, & ! Working precision
         Sphere, &
         Regularsphere, &
         GaussianSphere
@@ -55,44 +55,27 @@ program tslap
     ! Explicit typing only
     implicit none
 
-    !----------------------------------------------------------------------
     ! Dictionary
-    !----------------------------------------------------------------------
-    class(Sphere), allocatable :: sphere_dat
-    !----------------------------------------------------------------------
+    class(Sphere), allocatable :: solver
 
-    !
-    !  Test gaussian case
-    !
-    allocate( GaussianSphere :: sphere_dat )
+    ! Test gaussian grid
+    allocate( GaussianSphere :: solver )
+    call test_scalar_laplacian_routines(solver)
+    deallocate( solver )
 
-    call test_scalar_laplacian_routines(sphere_dat)
-
-    deallocate( sphere_dat )
-
-    !
-    !  Test regular case
-    !
-    allocate( RegularSphere :: sphere_dat )
-
-    call test_scalar_laplacian_routines(sphere_dat)
-
-    deallocate( sphere_dat )
-
-
+    ! Test regular grid
+    allocate( RegularSphere :: solver )
+    call test_scalar_laplacian_routines(solver)
+    deallocate( solver )
 
 contains
 
-
-
     subroutine test_scalar_laplacian_routines(sphere_type)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
         class(Sphere), intent(inout)  :: sphere_type
-        !----------------------------------------------------------------------
+
         ! Local variables
-        !----------------------------------------------------------------------
         integer(ip), parameter        :: NLATS = 15
         integer(ip), parameter        :: NLONS = 22
         integer(ip), parameter        :: NSYNTHS = 3
@@ -102,11 +85,8 @@ contains
         real(wp)                      :: approximate_scalar_function(NLATS,NLONS,NSYNTHS)
         real(wp)                      :: approximate_laplacian(NLATS,NLONS,NSYNTHS)
         character(len=:), allocatable :: laplacian_error, inversion_error
-        !----------------------------------------------------------------------
 
-        !
         !  Set up workspace arrays
-        !
         select type(sphere_type)
             type is (GaussianSphere)
 
@@ -187,11 +167,11 @@ contains
                 !    arithmetic followed by the output from this computer
                 !
                 write( stdout, '(a)') ''
-                write( stdout, '(a)') '     tslap *** TEST RUN *** '
+                write( stdout, '(a)') '     test scalar laplacian routines *** TEST RUN *** '
                 write( stdout, '(a)') ''
                 write( stdout, '(a)') '     grid type = '//sphere_type%grid%grid_type
                 write( stdout, '(a)') '     scalar laplacian approximation'
-                write( stdout, '(2(A,I2))') '     nlat = ', NLATS,' nlon = ', NLONS
+                write( stdout, '(2(a,i3))') '     nlat = ', NLATS,' nlon = ', NLONS
                 write( stdout, '(a)') '     Previous 64 bit floating point arithmetic result '
                 write( stdout, '(a)') laplacian_error
                 write( stdout, '(a)') '     The output from your computer is: '
@@ -211,9 +191,7 @@ contains
             end associate
         end do
 
-        !
         !  Compare s with se
-        !
         associate( &
             s => approximate_scalar_function, &
             se => original_scalar_function &
@@ -228,7 +206,7 @@ contains
                 write( stdout, '(a)') ''
                 write( stdout, '(a)') '     grid type = '//sphere_type%grid%grid_type
                 write( stdout, '(a)') '     scalar laplacian inversion'
-                write( stdout, '(2(A,I2))') '     nlat = ', NLATS,' nlon = ', NLONS
+                write( stdout, '(2(a,i3))') '     nlat = ', NLATS,' nlon = ', NLONS
                 write( stdout, '(a)') '     Previous 64 bit floating point arithmetic result '
                 write( stdout, '(a)') inversion_error
                 write( stdout, '(a)') '     The output from your computer is: '
@@ -236,9 +214,8 @@ contains
                 write( stdout, '(a)' ) ''
             end associate
         end associate
-        !
+
         !  Release memory
-        !
         deallocate( laplacian_error )
         deallocate( inversion_error )
         call sphere_type%destroy()

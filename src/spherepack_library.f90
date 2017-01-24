@@ -251,12 +251,19 @@ module spherepack_library
     public :: vtsec, vtses, vtsgc, vtsgs
     public :: vtseci, vtsesi, vtsgci, vtsgsi
     public :: alfk, lfp, lfpt, lfim, lfin
-    public :: vecout
+
+    ! Temporary solution for testing
+    public :: vecout, iout, name, vout
 
     interface vecout
         module procedure vecout_array
         module procedure vecout_scalar
     end interface vecout
+
+    interface vout
+        module procedure vout_array
+        module procedure vout_scalar
+    end interface vout
 
 contains
 
@@ -285,5 +292,44 @@ contains
         write( stdout, '(a, 8e11.4)') nam, vec
 
     end subroutine vecout_scalar
+
+    subroutine vout_scalar(var,nam)
+
+        ! Dummy arguments
+        real(wp),         intent(in) :: var
+        character(len=*), intent(in) :: nam
+
+        write( stdout,'(a, e12.5)') nam, var
+
+    end subroutine vout_scalar
+
+    subroutine vout_array(var,nam)
+
+        ! Dummy arguments
+        real(wp),         intent(in) :: var(:)
+        character(len=*), intent(in) :: nam
+
+        write( stdout, *) nam, var
+
+    end subroutine vout_array
+
+    subroutine iout(ivar,nam)
+
+        ! Dummy arguments
+        integer(ip),      intent(in) :: ivar
+        character(len=*), intent(in) :: nam
+
+        write( stdout, '(a,i5)') nam, ivar
+
+    end subroutine iout
+
+    subroutine name(routine_name)
+
+        ! Dummy arguments
+        character(len=*), intent(in) :: routine_name
+
+        write(stdout,'(a)') routine_name
+
+    end subroutine name
 
 end module spherepack_library

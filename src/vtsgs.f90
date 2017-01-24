@@ -400,19 +400,19 @@ contains
         integer(ip), intent(out) :: ierror
 
         ! Local variables
-        integer :: idv
-        integer :: idz
-        integer :: imid
-        integer :: ist
-        integer :: iw1
-        integer :: iw2
-        integer :: iw3
-        integer :: iw4
-        integer :: jw1
-        integer :: jw2
-        integer :: lnl
-        integer :: lzimn
-        integer :: mmax
+        integer(ip) :: idv
+        integer(ip) :: idz
+        integer(ip) :: imid
+        integer(ip) :: ist
+        integer(ip) :: iw1
+        integer(ip) :: iw2
+        integer(ip) :: iw3
+        integer(ip) :: iw4
+        integer(ip) :: jw1
+        integer(ip) :: jw2
+        integer(ip) :: lnl
+        integer(ip) :: lzimn
+        integer(ip) :: mmax
 
         ierror = 1
         if(nlat < 3) return
@@ -460,47 +460,47 @@ contains
     subroutine vtsgs_lower_routine(nlat, nlon, ityp, nt, imid, idvw, jdvw, vt, wt, mdab, &
         ndab, br, bi, cr, ci, idv, vte, vto, wte, wto, work, idz, vb, wb, wrfft)
         implicit none
-        real :: bi
-        real :: br
-        real :: ci
-        real :: cr
-        integer :: i
-        integer :: idv
-        integer :: idvw
-        integer :: idz
-        integer :: imid
-        integer :: imm1
-        integer :: ityp
-        integer :: j
-        integer :: jdvw
-        integer :: k
-        integer :: m
-        integer :: mb
-        integer :: mdab
-        integer :: mlat
-        integer :: mlon
-        integer :: mmax
-        integer :: mn
-        integer :: mp1
-        integer :: mp2
-        integer :: ndab
-        integer :: ndo1
-        integer :: ndo2
-        integer :: nlat
-        integer :: nlon
-        integer :: nlp1
-        integer :: np1
-        integer :: nt
-        real :: vb
-        real :: vt
-        real :: vte
-        real :: vto
-        real :: wb
-        real :: work
-        real :: wrfft
-        real :: wt
-        real :: wte
-        real :: wto
+        real(wp) :: bi
+        real(wp) :: br
+        real(wp) :: ci
+        real(wp) :: cr
+        integer(ip) :: i
+        integer(ip) :: idv
+        integer(ip) :: idvw
+        integer(ip) :: idz
+        integer(ip) :: imid
+        integer(ip) :: imm1
+        integer(ip) :: ityp
+        integer(ip) :: j
+        integer(ip) :: jdvw
+        integer(ip) :: k
+        integer(ip) :: m
+        integer(ip) :: mb
+        integer(ip) :: mdab
+        integer(ip) :: mlat
+        integer(ip) :: mlon
+        integer(ip) :: mmax
+        integer(ip) :: mn
+        integer(ip) :: mp1
+        integer(ip) :: mp2
+        integer(ip) :: ndab
+        integer(ip) :: ndo1
+        integer(ip) :: ndo2
+        integer(ip) :: nlat
+        integer(ip) :: nlon
+        integer(ip) :: nlp1
+        integer(ip) :: np1
+        integer(ip) :: nt
+        real(wp) :: vb
+        real(wp) :: vt
+        real(wp) :: vte
+        real(wp) :: vto
+        real(wp) :: wb
+        real(wp) :: work
+        real(wp) :: wrfft
+        real(wp) :: wt
+        real(wp) :: wte
+        real(wp) :: wto
         dimension vt(idvw, jdvw, nt), wt(idvw, jdvw, nt), br(mdab, ndab, nt), &
             bi(mdab, ndab, nt), cr(mdab, ndab, nt), ci(mdab, ndab, nt), &
             vte(idv, nlon, nt), vto(idv, nlon, nt), wte(idv, nlon, nt), &
@@ -1104,17 +1104,17 @@ contains
         integer(ip), intent(out) :: ierror
 
         ! Local variables
-        integer :: imid
-        integer :: iw1
-        integer :: iw2
-        integer :: jw1
-        integer :: jw2
-        integer :: labc
-        integer :: ltheta
-        integer :: lvin
-        integer :: lwvbin
-        integer :: lzimn
-        integer :: mmax
+        integer(ip) :: imid
+        integer(ip) :: iw1
+        integer(ip) :: iw2
+        integer(ip) :: jw1
+        integer(ip) :: jw2
+        integer(ip) :: labc
+        integer(ip) :: ltheta
+        integer(ip) :: lvin
+        integer(ip) :: lwvbin
+        integer(ip) :: lzimn
+        integer(ip) :: mmax
         type(SpherepackAux) :: sphere_aux
 
         ! Check input arguments
@@ -1150,23 +1150,23 @@ contains
     subroutine vtsgsi_lower_routine(nlat, nlon, imid, vb, wb, vin, wvbin, &
         theta, wts, dwork, ierror)
 
-        integer :: i
-        integer :: i3
-        integer :: ierr
-        integer :: ierror
-        integer :: imid
+        integer(ip) :: i
+        integer(ip) :: i3
+        integer(ip) :: ierr
+        integer(ip) :: ierror
+        integer(ip) :: imid
 
-        integer :: m
-        integer :: mmax
-        integer :: mn
-        integer :: mp1
-        integer :: nlat
-        integer :: nlon
-        integer :: np1
-        real :: vb
-        real :: vin
-        real :: wb
-        real :: wvbin
+        integer(ip) :: m
+        integer(ip) :: mmax
+        integer(ip) :: mn
+        integer(ip) :: mp1
+        integer(ip) :: nlat
+        integer(ip) :: nlon
+        integer(ip) :: np1
+        real(wp) :: vb
+        real(wp) :: vin
+        real(wp) :: wb
+        real(wp) :: wvbin
         dimension vb(imid, *), wb(imid, *), vin(imid, nlat, 3), wvbin(*)
         real dwork(*), theta(*), wts(*)
         type(SpherepackAux) :: sphere_aux

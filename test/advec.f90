@@ -85,50 +85,50 @@
 program advec
     use spherepack_library
     implicit none
-    real :: alpha
-    real :: alphad
-    real :: beta
-    real :: ca
-    real :: cl
-    real :: clh
-    real :: ct
-    real :: cth
-    real :: cthclh
-    real :: cthslh
-    real :: ddt
-    real :: dlon
-    real :: dt
-    real :: err2
-    real :: errm
-    real :: error
-    real :: htime
-    real :: hzero
-    integer :: i
-    integer :: ier
-    integer :: ierror
-    integer :: isym
-    integer :: j
-    integer :: k
-    integer :: mprint
-    integer :: ncycle
-    integer :: nt
-    integer :: ntime
-    real :: omega
-    real :: p0
-    real :: p2
+    real(wp) :: alpha
+    real(wp) :: alphad
+    real(wp) :: beta
+    real(wp) :: ca
+    real(wp) :: cl
+    real(wp) :: clh
+    real(wp) :: ct
+    real(wp) :: cth
+    real(wp) :: cthclh
+    real(wp) :: cthslh
+    real(wp) :: ddt
+    real(wp) :: dlon
+    real(wp) :: dt
+    real(wp) :: err2
+    real(wp) :: errm
+    real(wp) :: error
+    real(wp) :: htime
+    real(wp) :: hzero
+    integer(ip) :: i
+    integer(ip) :: ier
+    integer(ip) :: ierror
+    integer(ip) :: isym
+    integer(ip) :: j
+    integer(ip) :: k
+    integer(ip) :: mprint
+    integer(ip) :: ncycle
+    integer(ip) :: nt
+    integer(ip) :: ntime
+    real(wp) :: omega
+    real(wp) :: p0
+    real(wp) :: p2
 
-    real :: pmax
-    real :: re
-    real :: sa
-    real :: sl
-    real :: slh
-    real :: st
-    real :: sth
-    real :: tdt
-    real :: time
-    real :: uhat
-    real :: xlhat
-    real :: xlm
+    real(wp) :: pmax
+    real(wp) :: re
+    real(wp) :: sa
+    real(wp) :: sl
+    real(wp) :: slh
+    real(wp) :: st
+    real(wp) :: sth
+    real(wp) :: tdt
+    real(wp) :: time
+    real(wp) :: uhat
+    real(wp) :: xlhat
+    real(wp) :: xlm
     !
     !     set grid size with parameter statements
     !
@@ -362,44 +362,44 @@ contains
     subroutine gpot(t,alpha,beta,omega,hzero,re,nlat,nlon,idim, &
         colat,h)
         implicit none
-        real :: alpha
-        real :: beta
-        real :: ca
-        real :: cl
-        real :: clh
-        real :: colat
-        real :: ct
-        real :: cth
-        real :: cthclh
-        real :: cthslh
-        real :: dist
-        real :: dlon
-        real :: h
-        real :: hzero
-        integer :: i
-        integer :: idim
-        integer :: j
-        integer :: nlat
-        integer :: nlon
-        real :: omega
-        real :: pi
-        real :: r
-        real :: re
-        real :: sa
-        real :: sl
-        real :: slh
-        real :: st
-        real :: sth
-        real :: t
-        real :: that
-        real :: theta
-        real :: tpi
-        real :: x1
-        real :: xc
-        real :: y1
-        real :: yc
-        real :: z1
-        real :: zc
+        real(wp) :: alpha
+        real(wp) :: beta
+        real(wp) :: ca
+        real(wp) :: cl
+        real(wp) :: clh
+        real(wp) :: colat
+        real(wp) :: ct
+        real(wp) :: cth
+        real(wp) :: cthclh
+        real(wp) :: cthslh
+        real(wp) :: dist
+        real(wp) :: dlon
+        real(wp) :: h
+        real(wp) :: hzero
+        integer(ip) :: i
+        integer(ip) :: idim
+        integer(ip) :: j
+        integer(ip) :: nlat
+        integer(ip) :: nlon
+        real(wp) :: omega
+        real(wp) :: pi
+        real(wp) :: r
+        real(wp) :: re
+        real(wp) :: sa
+        real(wp) :: sl
+        real(wp) :: slh
+        real(wp) :: st
+        real(wp) :: sth
+        real(wp) :: t
+        real(wp) :: that
+        real(wp) :: theta
+        real(wp) :: tpi
+        real(wp) :: x1
+        real(wp) :: xc
+        real(wp) :: y1
+        real(wp) :: yc
+        real(wp) :: z1
+        real(wp) :: zc
         !
         !     computes advecting cosine bell on a tilted grid a time t.
         !
@@ -472,8 +472,8 @@ contains
 
         real function atanxy(x,y)
             implicit none
-            real :: x
-            real :: y
+            real(wp) :: x
+            real(wp) :: y
             atanxy = 0.
             if(x==0. .and. y==0.) return
             atanxy = atan2(y,x)
@@ -483,13 +483,13 @@ contains
 
         subroutine ctos(x,y,z,r,theta,phi)
             implicit none
-            real :: phi
-            real :: r
-            real :: r1
-            real :: theta
-            real :: x
-            real :: y
-            real :: z
+            real(wp) :: phi
+            real(wp) :: r
+            real(wp) :: r1
+            real(wp) :: theta
+            real(wp) :: x
+            real(wp) :: y
+            real(wp) :: z
             r1 = x*x+y*y
             if(r1 /= 0.) go to 10
             phi = 0.
@@ -506,13 +506,13 @@ contains
 
         subroutine stoc(r,theta,phi,x,y,z)
             implicit none
-            real :: phi
-            real :: r
-            real :: st
-            real :: theta
-            real :: x
-            real :: y
-            real :: z
+            real(wp) :: phi
+            real(wp) :: r
+            real(wp) :: st
+            real(wp) :: theta
+            real(wp) :: x
+            real(wp) :: y
+            real(wp) :: z
             st = sin(theta)
             x = r*st*cos(phi)
             y = r*st*sin(phi)

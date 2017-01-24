@@ -35,45 +35,45 @@
 !     a program for testing all scalar analysis and synthesis subroutines
 !
 program tsha
-use spherepack_library
+    use spherepack_library
     implicit none
-    real :: a
-    real :: b
-    real :: cosp
-    real :: cost
-    real :: dlat
-    real :: dphi
-    real :: err2
-    integer :: i
-    integer :: icase
-    integer :: ier
-    integer :: ierror
-    integer :: isym
-    integer :: j
-    integer :: k
-    integer :: l
-    integer :: ldwork
-    integer :: lldwork
-    integer :: lleng
-    integer :: llsav
-    integer :: lsave
-    integer :: lwork
-    integer :: nlat
-    integer :: nlon
-    integer :: nnlat
-    integer :: nnlon
-    integer :: nnt
-    integer :: nt
-    real :: phi
+    real(wp) :: a
+    real(wp) :: b
+    real(wp) :: cosp
+    real(wp) :: cost
+    real(wp) :: dlat
+    real(wp) :: dphi
+    real(wp) :: err2
+    integer(ip) :: i
+    integer(ip) :: icase
+    integer(ip) :: ier
+    integer(ip) :: ierror
+    integer(ip) :: isym
+    integer(ip) :: j
+    integer(ip) :: k
+    integer(ip) :: l
+    integer(ip) :: ldwork
+    integer(ip) :: lldwork
+    integer(ip) :: lleng
+    integer(ip) :: llsav
+    integer(ip) :: lsave
+    integer(ip) :: lwork
+    integer(ip) :: nlat
+    integer(ip) :: nlon
+    integer(ip) :: nnlat
+    integer(ip) :: nnlon
+    integer(ip) :: nnt
+    integer(ip) :: nt
+    real(wp) :: phi
 
-    real :: s
-    real :: sinp
-    real :: sint
-    real :: theta
-    real :: thetag
-    real :: work
-    real :: wsave
-    real :: xyzk
+    real(wp) :: s
+    real(wp) :: sinp
+    real(wp) :: sint
+    real(wp) :: theta
+    real(wp) :: thetag
+    real(wp) :: work
+    real(wp) :: wsave
+    real(wp) :: xyzk
     !
     !     set dimensions with parameter statements
     !
@@ -279,30 +279,5 @@ use spherepack_library
         err2 = sqrt(err2/(nt*nlat*nlon))
         call vout(err2,"err2")
     end do
-end program tsha
-subroutine iout(ivar,nam)
-    implicit none
-    integer :: ivar
-    character(len=*), intent(in) :: nam
-    write(6,10) nam , ivar
-10  format(1h a4, 3h = ,i8)
-    return
-end subroutine iout
-!
-subroutine vout(var,nam)
-    implicit none
-    real :: var
-    character(len=*), intent(in) :: nam
-    write(6,10) nam , var
-10  format(1h a4,3h = ,e12.5)
-    return
-end subroutine vout
-!
-subroutine name(nam)
-    implicit none
-    character(len=*), intent(in) :: nam
-    write(6,100) nam
-100 format(1h a8)
-    return
-end subroutine name
 
+end program tsha

@@ -50,68 +50,63 @@ program tvts
     use, intrinsic :: ISO_Fortran_env, only: &
         stdout => OUTPUT_UNIT
 
-    use spherepack_library, only: &
-        wp, & ! working precision
-        PI, &
-        compute_gaussian_latitudes_and_weights, vhaeci, vhaec, vtseci, vtsec, vhaesi, &
-        vhaes, vtsesi, vtses, vhagci, vhagc, vtsgci, vtsgc, &
-        vhagsi, vhags, vtsgsi, vtsgs
+    use spherepack_library
 
     ! Explicit typing only
     implicit none
 
-    real :: bi
-    real :: br
-    real :: ci
-    real :: cosp
-    real :: cost
-    real :: cr
-    real :: dlat
-    real :: dphi
-    real :: dxdt
-    real :: dydt
-    real :: dzdt
-    real :: emz
-    real :: err2v
-    real :: err2w
-    real :: ex
-    real :: ey
-    real :: ez
-    integer :: i
-    integer :: icase
-    integer :: ier
-    integer :: ierror
-    integer :: ityp
-    integer :: j
-    integer :: k
-    integer :: ldwork
-    integer :: lldwork
-    integer :: lleng
-    integer :: llsav
-    integer :: lsave
-    integer :: lwork
-    integer :: nlat
-    integer :: nlon
-    integer :: nnlat
-    integer :: nnlon
-    integer :: nnt
-    integer :: nt
-    real :: phi
-    real :: sinp
-    real :: sint
-    real :: theta
-    real :: gaussian_latitudes
-    real :: v
-    real :: vt
-    real :: vtsav
-    real :: w
-    real :: work
-    real :: wsave
-    real :: wt
-    real :: wtsav
-    real :: x
-    real :: y
-    real :: z
+    real(wp) :: bi
+    real(wp) :: br
+    real(wp) :: ci
+    real(wp) :: cosp
+    real(wp) :: cost
+    real(wp) :: cr
+    real(wp) :: dlat
+    real(wp) :: dphi
+    real(wp) :: dxdt
+    real(wp) :: dydt
+    real(wp) :: dzdt
+    real(wp) :: emz
+    real(wp) :: err2v
+    real(wp) :: err2w
+    real(wp) :: ex
+    real(wp) :: ey
+    real(wp) :: ez
+    integer(ip) :: i
+    integer(ip) :: icase
+    integer(ip) :: ier
+    integer(ip) :: ierror
+    integer(ip) :: ityp
+    integer(ip) :: j
+    integer(ip) :: k
+    integer(ip) :: ldwork
+    integer(ip) :: lldwork
+    integer(ip) :: lleng
+    integer(ip) :: llsav
+    integer(ip) :: lsave
+    integer(ip) :: lwork
+    integer(ip) :: nlat
+    integer(ip) :: nlon
+    integer(ip) :: nnlat
+    integer(ip) :: nnlon
+    integer(ip) :: nnt
+    integer(ip) :: nt
+    real(wp) :: phi
+    real(wp) :: sinp
+    real(wp) :: sint
+    real(wp) :: theta
+    real(wp) :: gaussian_latitudes
+    real(wp) :: v
+    real(wp) :: vt
+    real(wp) :: vtsav
+    real(wp) :: w
+    real(wp) :: work
+    real(wp) :: wsave
+    real(wp) :: wt
+    real(wp) :: wtsav
+    real(wp) :: x
+    real(wp) :: y
+    real(wp) :: z
     !
     !     set dimensions with parameter statements
     !
@@ -334,52 +329,5 @@ program tvts
     !     end of icase loop
     !
     end do
-
-
-contains
-
-
-    subroutine iout(ivar,nam)
-        implicit none
-        integer :: ivar
-        character(len=*) nam
-        write( stdout, 10) nam , ivar
-10      format(1h a4, 3h = ,i8)
-        return
-    end subroutine iout
-
-
-
-    subroutine vout(var,nam)
-        implicit none
-        real :: var
-        character(len=*) nam
-        write( stdout, 10) nam , var
-10      format(1h a4,3h = ,e12.5)
-        return
-    end subroutine vout
-
-
-    subroutine name(nam)
-        implicit none
-        character(len=*) nam
-        write( stdout, 100) nam
-100     format(1h a8)
-        return
-    end subroutine name
-
-
-
-    subroutine vecout(vec,nam,vec_size)
-        implicit none
-        integer :: l
-        integer :: vec_size
-        real :: vec
-        dimension vec(vec_size)
-        character(len=*) nam
-        write( stdout, 109) nam, (vec(l),l=1,vec_size)
-109     format(1h a4,/(1h 8e11.4))
-
-    end subroutine vecout
 
 end program tvts

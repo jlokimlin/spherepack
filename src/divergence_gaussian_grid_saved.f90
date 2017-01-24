@@ -331,31 +331,31 @@ contains
 
     subroutine divgs_lower_routine(nlat, nlon, isym, nt, divg, idiv, jdiv, br, bi, mdb, ndb, &
         a, b, mab, sqnn, wshsgs, lshsgs, wk, lwk, ierror)
-        real :: a
-        real :: b
-        real :: bi
-        real :: br
-        real :: divg
+        real(wp) :: a
+        real(wp) :: b
+        real(wp) :: bi
+        real(wp) :: br
+        real(wp) :: divg
         
-        integer :: idiv
-        integer :: ierror
-        integer :: isym
-        integer :: jdiv
+        integer(ip) :: idiv
+        integer(ip) :: ierror
+        integer(ip) :: isym
+        integer(ip) :: jdiv
         
-        integer :: lshsgs
-        integer :: lwk
+        integer(ip) :: lshsgs
+        integer(ip) :: lwk
         
-        integer :: mab
-        integer :: mdb
+        integer(ip) :: mab
+        integer(ip) :: mdb
         
         
-        integer :: ndb
-        integer :: nlat
-        integer :: nlon
-        integer :: nt
-        real :: sqnn
-        real :: wk
-        real :: wshsgs
+        integer(ip) :: ndb
+        integer(ip) :: nlat
+        integer(ip) :: nlon
+        integer(ip) :: nt
+        real(wp) :: sqnn
+        real(wp) :: wk
+        real(wp) :: wshsgs
         dimension divg(idiv, jdiv, nt), br(mdb, ndb, nt), bi(mdb, ndb, nt)
         dimension a(mab, nlat, nt), b(mab, nlat, nt), sqnn(nlat)
         dimension wshsgs(lshsgs), wk(lwk)

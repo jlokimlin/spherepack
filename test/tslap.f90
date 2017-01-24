@@ -46,64 +46,64 @@
 program tslap
 use spherepack_library
     implicit none
-    real :: a
-    real :: b
-    real :: cosp
-    real :: cost
-    real :: d2xdp2
-    real :: d2xdt2
-    real :: d2ydp2
-    real :: d2ydt2
-    real :: d2zdp2
-    real :: d2zdt2
-    real :: dlat
-    real :: dphi
-    real :: dxdp
-    real :: dxdt
-    real :: dydp
-    real :: dydt
-    real :: dzdp
-    real :: dzdt
-    real :: err2
-    real :: err2s
-    integer :: i
-    integer :: icase
-    integer :: ier
-    integer :: ierror
-    integer :: isym
-    integer :: j
-    integer :: k
-    integer :: ldwork
-    integer :: lldwork
-    integer :: lleng
-    integer :: llsav
-    integer :: lsave
-    integer :: lwork
-    integer :: mdab
-    integer :: mmdab
-    integer :: nlat
-    integer :: nlon
-    integer :: nnlat
-    integer :: nnlon
-    integer :: nnt
-    integer :: nt
-    real :: phi
+    real(wp) :: a
+    real(wp) :: b
+    real(wp) :: cosp
+    real(wp) :: cost
+    real(wp) :: d2xdp2
+    real(wp) :: d2xdt2
+    real(wp) :: d2ydp2
+    real(wp) :: d2ydt2
+    real(wp) :: d2zdp2
+    real(wp) :: d2zdt2
+    real(wp) :: dlat
+    real(wp) :: dphi
+    real(wp) :: dxdp
+    real(wp) :: dxdt
+    real(wp) :: dydp
+    real(wp) :: dydt
+    real(wp) :: dzdp
+    real(wp) :: dzdt
+    real(wp) :: err2
+    real(wp) :: err2s
+    integer(ip) :: i
+    integer(ip) :: icase
+    integer(ip) :: ier
+    integer(ip) :: ierror
+    integer(ip) :: isym
+    integer(ip) :: j
+    integer(ip) :: k
+    integer(ip) :: ldwork
+    integer(ip) :: lldwork
+    integer(ip) :: lleng
+    integer(ip) :: llsav
+    integer(ip) :: lsave
+    integer(ip) :: lwork
+    integer(ip) :: mdab
+    integer(ip) :: mmdab
+    integer(ip) :: nlat
+    integer(ip) :: nlon
+    integer(ip) :: nnlat
+    integer(ip) :: nnlon
+    integer(ip) :: nnt
+    integer(ip) :: nt
+    real(wp) :: phi
 
-    real :: ptrb
-    real :: s
-    real :: sclp
-    real :: sclpe
-    real :: se
-    real :: sinp
-    real :: sint
-    real :: theta
-    real :: thetag
-    real :: work
-    real :: wsave
-    real :: x
-    real :: xlm
-    real :: y
-    real :: z
+    real(wp) :: ptrb
+    real(wp) :: s
+    real(wp) :: sclp
+    real(wp) :: sclpe
+    real(wp) :: se
+    real(wp) :: sinp
+    real(wp) :: sint
+    real(wp) :: theta
+    real(wp) :: thetag
+    real(wp) :: work
+    real(wp) :: wsave
+    real(wp) :: x
+    real(wp) :: xlm
+    real(wp) :: y
+    real(wp) :: z
     parameter(nnlat=15,nnlon= 22, nnt = 3)
     parameter (mmdab = (nnlon+2)/2)
 
@@ -418,30 +418,5 @@ use spherepack_library
     !     end of icase loop
     !
     end do
+
 end program tslap
-!
-subroutine iout(ivar,nam)
-    implicit none
-    integer :: ivar
-    character(len=*), intent(in) :: nam
-    write(6,10) nam , ivar
-10  format(1h a4, 3h = ,i8)
-    return
-end subroutine iout
-!
-subroutine vout(var,nam)
-    implicit none
-    real :: var
-    character(len=*), intent(in) :: nam
-    write(6,10) nam , var
-10  format(1h a4,3h = ,e12.5)
-    return
-end subroutine vout
-!
-subroutine name(nam)
-    implicit none
-    character(len=*), intent(in) :: nam
-    write(6,100) nam
-100 format(1h a8)
-    return
-end subroutine name

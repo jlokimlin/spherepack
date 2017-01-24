@@ -57,8 +57,8 @@ program tvrt
         stdout => OUTPUT_UNIT
 
     use spherepack_library, only: &
-        wp, & ! working precision
-        ip, & ! integer precision
+        ip, & ! Integer precision
+        wp, & ! Working precision
         Sphere, &
         Regularsphere, &
         GaussianSphere
@@ -66,44 +66,27 @@ program tvrt
     ! Explicit typing only
     implicit none
 
-    !----------------------------------------------------------------------
     ! Dictionary
-    !----------------------------------------------------------------------
-    class(Sphere), allocatable :: sphere_dat
-    !----------------------------------------------------------------------
+    class(Sphere), allocatable :: solver
 
-    !
-    !  Test gaussian case
-    !
-    allocate( GaussianSphere :: sphere_dat )
+    ! Test gaussian grid
+    allocate( GaussianSphere :: solver )
+    call test_vorticity_routines(solver)
+    deallocate( solver )
 
-    call test_vorticity_routines(sphere_dat)
-
-    deallocate( sphere_dat )
-
-    !
-    !  Test regular case
-    !
-    allocate( RegularSphere :: sphere_dat )
-
-    call test_vorticity_routines(sphere_dat)
-
-    deallocate( sphere_dat )
-
-
+    ! Test regular grid
+    allocate( RegularSphere :: solver )
+    call test_vorticity_routines(solver)
+    deallocate( solver )
 
 contains
 
+    subroutine test_vorticity_routines(sphere_type)
 
-
-    subroutine test_vorticity_routines(sphere_type )
-        !----------------------------------------------------------------------
         ! Dummy arguments
-        !----------------------------------------------------------------------
         class(Sphere), intent(inout)  :: sphere_type
-        !----------------------------------------------------------------------
+
         ! Local variables
-        !----------------------------------------------------------------------
         integer(ip), parameter        :: NLONS = 14
         integer(ip), parameter        :: NLATS = 24
         integer(ip), parameter        :: NSYNTHS = 3
@@ -117,11 +100,8 @@ contains
         character(len=:), allocatable :: previous_vorticity_error
         character(len=:), allocatable :: previous_polar_inversion_error
         character(len=:), allocatable :: previous_azimuthal_inversion_error
-        !----------------------------------------------------------------------
 
-        !
         !  Set up workspace arrays
-        !
         select type(sphere_type)
             type is (GaussianSphere)
 
@@ -219,7 +199,7 @@ contains
                 write( stdout, '(/a/)') '     tvrt *** TEST RUN *** '
                 write( stdout, '(a)') '     grid type = '//sphere_type%grid%grid_type
                 write( stdout, '(a)') '     Testing vorticity'
-                write( stdout, '(2(A,I2))') '     nlat = ', NLATS,' nlon = ', NLONS
+                write( stdout, '(2(a,i3))') '     nlat = ', NLATS,' nlon = ', NLONS
                 write( stdout, '(a)') '     Previous 64 bit floating point arithmetic result '
                 write( stdout, '(a)') previous_vorticity_error
                 write( stdout, '(a)') '     The output from your computer is: '
@@ -289,7 +269,7 @@ contains
                 write( stdout, '(a)') ''
                 write( stdout, '(a)') '     grid type = '//sphere_type%grid%grid_type
                 write( stdout, '(a)') '     Testing vorticity inversion'
-                write( stdout, '(2(A,I2))') '     nlat = ', NLATS,' nlon = ', NLONS
+                write( stdout, '(2(a,i3))') '     nlat = ', NLATS,' nlon = ', NLONS
                 write( stdout, '(a)') '     Previous 64 bit floating point arithmetic result '
                 write( stdout, '(a)') previous_polar_inversion_error
                 write( stdout, '(a)') previous_azimuthal_inversion_error
@@ -299,9 +279,8 @@ contains
                 write( stdout, '(a)' ) ''
             end associate
         end associate
-        !
+
         !  Release memory
-        !
         deallocate( previous_vorticity_error )
         deallocate( previous_polar_inversion_error )
         deallocate( previous_azimuthal_inversion_error )

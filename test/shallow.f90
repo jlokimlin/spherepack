@@ -45,110 +45,110 @@
 program shallow
     use spherepack_library
     implicit none
-    real :: a
-    real :: aa
-    real :: alpha
-    real :: alphad
-    real :: b
-    real :: bi
-    real :: br
-    real :: ca
-    real :: cfn
-    real :: ci
-    real :: cl
-    real :: clh
-    real :: cr
-    real :: ct
-    real :: cth
-    real :: cthclh
-    real :: cthslh
-    real :: ctime
-    real :: divg
-    real :: dlam
-    real :: dlath
-    real :: dpdt
-    real :: dpmax
-    real :: dt
-    real :: dtheta
-    real :: dtr
-    real :: dudt
-    real :: dvdt
-    real :: dvgm
-    real :: dvmax
-    real :: epmax
-    real :: evmax
-    real :: f
-    real :: fzero
-    real :: gpdl
-    real :: gpdt
-    real :: hpi
-    real :: htime
-    integer :: i
-    integer :: idp
-    integer :: ierror
-    integer :: isym
-    integer :: itmax
-    integer :: j
-    integer :: jdp
-    integer :: ldwork
-    integer :: lldwork
-    integer :: lwork
-    integer :: lwsha
-    integer :: lwshs
-    integer :: lwvha
-    integer :: lwvhs
-    integer :: lwvts
-    integer :: mdab
-    integer :: mmode
-    integer :: mprint
-    integer :: ncycle
-    integer :: ndab
-    integer :: nl
-    integer :: nlat
-    integer :: nlm1
-    integer :: nlm2
-    integer :: nlon
-    integer :: nt
-    real :: omega
-    real :: p
-    real :: p2max
-    real :: phlt
+    real(wp) :: a
+    real(wp) :: aa
+    real(wp) :: alpha
+    real(wp) :: alphad
+    real(wp) :: b
+    real(wp) :: bi
+    real(wp) :: br
+    real(wp) :: ca
+    real(wp) :: cfn
+    real(wp) :: ci
+    real(wp) :: cl
+    real(wp) :: clh
+    real(wp) :: cr
+    real(wp) :: ct
+    real(wp) :: cth
+    real(wp) :: cthclh
+    real(wp) :: cthslh
+    real(wp) :: ctime
+    real(wp) :: divg
+    real(wp) :: dlam
+    real(wp) :: dlath
+    real(wp) :: dpdt
+    real(wp) :: dpmax
+    real(wp) :: dt
+    real(wp) :: dtheta
+    real(wp) :: dtr
+    real(wp) :: dudt
+    real(wp) :: dvdt
+    real(wp) :: dvgm
+    real(wp) :: dvmax
+    real(wp) :: epmax
+    real(wp) :: evmax
+    real(wp) :: f
+    real(wp) :: fzero
+    real(wp) :: gpdl
+    real(wp) :: gpdt
+    real(wp) :: hpi
+    real(wp) :: htime
+    integer(ip) :: i
+    integer(ip) :: idp
+    integer(ip) :: ierror
+    integer(ip) :: isym
+    integer(ip) :: itmax
+    integer(ip) :: j
+    integer(ip) :: jdp
+    integer(ip) :: ldwork
+    integer(ip) :: lldwork
+    integer(ip) :: lwork
+    integer(ip) :: lwsha
+    integer(ip) :: lwshs
+    integer(ip) :: lwvha
+    integer(ip) :: lwvhs
+    integer(ip) :: lwvts
+    integer(ip) :: mdab
+    integer(ip) :: mmode
+    integer(ip) :: mprint
+    integer(ip) :: ncycle
+    integer(ip) :: ndab
+    integer(ip) :: nl
+    integer(ip) :: nlat
+    integer(ip) :: nlm1
+    integer(ip) :: nlm2
+    integer(ip) :: nlon
+    integer(ip) :: nt
+    real(wp) :: omega
+    real(wp) :: p
+    real(wp) :: p2max
+    real(wp) :: phlt
 
-    real :: pmax
-    real :: pnew
-    real :: pold
-    real :: pxact
-    real :: pzero
-    real :: sa
-    real :: sl
-    real :: slh
-    real :: st
-    real :: sth
-    real :: tdt
-    real :: that
-    real :: theta
-    real :: time
-    real :: u
-    real :: uhat
-    real :: unew
-    real :: uold
-    real :: ut
-    real :: uxact
-    real :: uzero
-    real :: v
-    real :: v2max
-    real :: vmax
-    real :: vnew
-    real :: vold
-    real :: vort
-    real :: vt
-    real :: vxact
-    real :: work
-    real :: wsha
-    real :: wshs
-    real :: wvha
-    real :: wvhs
-    real :: wvts
+    real(wp) :: pmax
+    real(wp) :: pnew
+    real(wp) :: pold
+    real(wp) :: pxact
+    real(wp) :: pzero
+    real(wp) :: sa
+    real(wp) :: sl
+    real(wp) :: slh
+    real(wp) :: st
+    real(wp) :: sth
+    real(wp) :: tdt
+    real(wp) :: that
+    real(wp) :: theta
+    real(wp) :: time
+    real(wp) :: u
+    real(wp) :: uhat
+    real(wp) :: unew
+    real(wp) :: uold
+    real(wp) :: ut
+    real(wp) :: uxact
+    real(wp) :: uzero
+    real(wp) :: v
+    real(wp) :: v2max
+    real(wp) :: vmax
+    real(wp) :: vnew
+    real(wp) :: vold
+    real(wp) :: vort
+    real(wp) :: vt
+    real(wp) :: vxact
+    real(wp) :: work
+    real(wp) :: wsha
+    real(wp) :: wshs
+    real(wp) :: wvha
+    real(wp) :: wvhs
+    real(wp) :: wvts
     !
     !     the nonlinear shallow-water equations on the sphere are
     !     solved using a spectral method based on the spherical
@@ -593,28 +593,28 @@ contains
     subroutine vtsesgo(nlat,nlon,ityp,nt,ut,vt,idvw,jdvw,br,bi,cr,ci, &
         mdab,ndab,wvts,lwvts,work,lwork,ierror)
         implicit none
-        real :: bi
-        real :: br
-        real :: ci
-        real :: cr
-        integer :: i
-        integer :: idvw
-        integer :: ierror
-        integer :: ityp
-        integer :: j
-        integer :: jdvw
-        integer :: k
-        integer :: lwork
-        integer :: lwvts
-        integer :: mdab
-        integer :: ndab
-        integer :: nlat
-        integer :: nlon
-        integer :: nt
-        real :: ut
-        real :: vt
-        real :: work
-        real :: wvts
+        real(wp) :: bi
+        real(wp) :: br
+        real(wp) :: ci
+        real(wp) :: cr
+        integer(ip) :: i
+        integer(ip) :: idvw
+        integer(ip) :: ierror
+        integer(ip) :: ityp
+        integer(ip) :: j
+        integer(ip) :: jdvw
+        integer(ip) :: k
+        integer(ip) :: lwork
+        integer(ip) :: lwvts
+        integer(ip) :: mdab
+        integer(ip) :: ndab
+        integer(ip) :: nlat
+        integer(ip) :: nlon
+        integer(ip) :: nt
+        real(wp) :: ut
+        real(wp) :: vt
+        real(wp) :: work
+        real(wp) :: wvts
         !
         !     vtsesgo computes the latitudinal derivatives of the
         !     velocity components using subroutine vtses which
@@ -638,13 +638,13 @@ contains
 
     real function ui(amp,thetad)
         implicit none
-        real :: amp
-        real :: pi
-        real :: thetab
-        real :: thetad
-        real :: thetae
-        real :: x
-        real :: xe
+        real(wp) :: amp
+        real(wp) :: pi
+        real(wp) :: thetab
+        real(wp) :: thetad
+        real(wp) :: thetae
+        real(wp) :: x
+        real(wp) :: xe
         !
         !     computes the initial unrotated longitudinal velocity
         !     see section 3.3.
@@ -662,8 +662,8 @@ contains
 
     real function atanxy(x,y)
         implicit none
-        real :: x
-        real :: y
+        real(wp) :: x
+        real(wp) :: y
         atanxy = 0.
         if(x==0. .and. y==0.) return
         atanxy = atan2(y,x)
@@ -672,12 +672,12 @@ contains
 
     subroutine sine(n,x,w)
         implicit none
-        real :: arg
-        integer :: i
-        integer :: j
-        integer :: n
-        real :: w
-        real :: x
+        real(wp) :: arg
+        integer(ip) :: i
+        integer(ip) :: j
+        integer(ip) :: n
+        real(wp) :: w
+        real(wp) :: x
         !
         !     computes the sine transform
         !
@@ -698,10 +698,10 @@ contains
 
     real function cosine(theta,n,cf)
         implicit none
-        real :: cf
-        integer :: i
-        integer :: n
-        real :: theta
+        real(wp) :: cf
+        integer(ip) :: i
+        integer(ip) :: n
+        real(wp) :: theta
         !
         !     computes the cosine transform
         !
@@ -715,14 +715,14 @@ contains
     !
     subroutine trunc(nm,ms,id,a,b)
         implicit none
-        real :: a
-        real :: b
-        integer :: id
-        integer :: m
-        integer :: mp
-        integer :: ms
-        integer :: n
-        integer :: nm
+        real(wp) :: a
+        real(wp) :: b
+        integer(ip) :: id
+        integer(ip) :: m
+        integer(ip) :: mp
+        integer(ip) :: ms
+        integer(ip) :: n
+        integer(ip) :: nm
         !
         !     truncates spectral coefficients so that aliasing
         !     does not occur when computing the spectral representations
@@ -742,28 +742,28 @@ contains
     subroutine vhaesgo(nlat,nlon,ityp,nt,u,v,iduv,jduv, &
         br,bi,cr,ci,mdab,ndab,wsav,lwsav,work,lwork,ierror)
         implicit none
-        real :: bi
-        real :: br
-        real :: ci
-        real :: cr
-        integer :: i
-        integer :: iduv
-        integer :: ierror
-        integer :: ityp
-        integer :: j
-        integer :: jduv
-        integer :: k
-        integer :: lwork
-        integer :: lwsav
-        integer :: mdab
-        integer :: ndab
-        integer :: nlat
-        integer :: nlon
-        integer :: nt
-        real :: u
-        real :: v
-        real :: work
-        real :: wsav
+        real(wp) :: bi
+        real(wp) :: br
+        real(wp) :: ci
+        real(wp) :: cr
+        integer(ip) :: i
+        integer(ip) :: iduv
+        integer(ip) :: ierror
+        integer(ip) :: ityp
+        integer(ip) :: j
+        integer(ip) :: jduv
+        integer(ip) :: k
+        integer(ip) :: lwork
+        integer(ip) :: lwsav
+        integer(ip) :: mdab
+        integer(ip) :: ndab
+        integer(ip) :: nlat
+        integer(ip) :: nlon
+        integer(ip) :: nt
+        real(wp) :: u
+        real(wp) :: v
+        real(wp) :: work
+        real(wp) :: wsav
         dimension u(iduv,jduv,*),v(iduv,jduv,*),br(mdab,ndab,*), &
             bi(mdab,ndab,*),cr(mdab,ndab,*),ci(mdab,ndab,*), &
             work(1),wsav(1)
@@ -799,28 +799,28 @@ contains
     subroutine vhsesgo(nlat,nlon,ityp,nt,u,v,iduv,jduv, &
         br,bi,cr,ci,mdab,ndab,wsav,lwsav,work,lwork,ierror)
         implicit none
-        real :: bi
-        real :: br
-        real :: ci
-        real :: cr
-        integer :: i
-        integer :: iduv
-        integer :: ierror
-        integer :: ityp
-        integer :: j
-        integer :: jduv
-        integer :: k
-        integer :: lwork
-        integer :: lwsav
-        integer :: mdab
-        integer :: ndab
-        integer :: nlat
-        integer :: nlon
-        integer :: nt
-        real :: u
-        real :: v
-        real :: work
-        real :: wsav
+        real(wp) :: bi
+        real(wp) :: br
+        real(wp) :: ci
+        real(wp) :: cr
+        integer(ip) :: i
+        integer(ip) :: iduv
+        integer(ip) :: ierror
+        integer(ip) :: ityp
+        integer(ip) :: j
+        integer(ip) :: jduv
+        integer(ip) :: k
+        integer(ip) :: lwork
+        integer(ip) :: lwsav
+        integer(ip) :: mdab
+        integer(ip) :: ndab
+        integer(ip) :: nlat
+        integer(ip) :: nlon
+        integer(ip) :: nt
+        real(wp) :: u
+        real(wp) :: v
+        real(wp) :: work
+        real(wp) :: wsav
         dimension u(iduv,jduv,*),v(iduv,jduv,*),br(mdab,ndab,*), &
             bi(mdab,ndab,*),cr(mdab,ndab,*),ci(mdab,ndab,*), &
             work(1),wsav(1)
@@ -844,26 +844,26 @@ contains
     subroutine gradesgo(nlat,nlon,isym,nt,u,v,iduv,jduv,a,b, &
         mdab,ndab,wsav,lwsav,work,lwork,ierror)
         implicit none
-        real :: a
-        real :: b
-        integer :: i
-        integer :: iduv
-        integer :: ierror
-        integer :: isym
-        integer :: j
-        integer :: jduv
-        integer :: k
-        integer :: lwork
-        integer :: lwsav
-        integer :: mdab
-        integer :: ndab
-        integer :: nlat
-        integer :: nlon
-        integer :: nt
-        real :: u
-        real :: v
-        real :: work
-        real :: wsav
+        real(wp) :: a
+        real(wp) :: b
+        integer(ip) :: i
+        integer(ip) :: iduv
+        integer(ip) :: ierror
+        integer(ip) :: isym
+        integer(ip) :: j
+        integer(ip) :: jduv
+        integer(ip) :: k
+        integer(ip) :: lwork
+        integer(ip) :: lwsav
+        integer(ip) :: mdab
+        integer(ip) :: ndab
+        integer(ip) :: nlat
+        integer(ip) :: nlon
+        integer(ip) :: nt
+        real(wp) :: u
+        real(wp) :: v
+        real(wp) :: work
+        real(wp) :: wsav
         dimension u(iduv,jduv,nt),v(iduv,jduv,nt)
         dimension a(mdab,ndab,nt),b(mdab,ndab,nt)
         dimension wsav(lwsav),work(lwork)

@@ -168,7 +168,7 @@ contains
                 write( stdout, '(a)') ''
                 write( stdout, '(a)') '     grid type = '//sphere_type%grid%grid_type
                 write( stdout, '(a)') '     Helmholtz approximation on a ten degree grid'
-                write( stdout, '(2(a,i2))') '     nlat = ', NLATS,' nlon = ', NLONS
+                write( stdout, '(2(a,i3))') '     nlat = ', NLATS,' nlon = ', NLONS
                 write( stdout, '(a)') '     Previous 64 bit floating point arithmetic result '
                 write( stdout, '(a)') error_previous_platform
                 write( stdout, '(a)') '     The output from your computer is: '

@@ -55,68 +55,68 @@ program tgrad
 
     implicit none
 
-    real :: a
-    real :: b
-    real :: bi
-    real :: br
-    real :: ci
-    real :: cosp
-    real :: cost
-    real :: cr
-    real :: dlat
-    real :: dphi
-    real :: dsfdp
-    real :: dsfdt
-    real :: dxdp
-    real :: dxdt
-    real :: dydp
-    real :: dydt
-    real :: dzdp
-    real :: dzdt
-    real :: err2s
-    real :: err2v
-    real :: err2w
-    integer :: i
-    integer :: icase
-    integer :: ier
-    integer :: ierror
-    integer :: isym
-    integer :: ityp
-    integer :: j
-    integer :: k
-    integer :: ldwork
-    integer :: lldwork
-    integer :: lleng
-    integer :: llsav
-    integer :: lsave
-    integer :: lwork
-    integer :: mdab
-    integer :: mdb
-    integer :: mmdab
-    integer :: mmdb
-    integer :: nlat
-    integer :: nlon
-    integer :: nnlat
-    integer :: nnlon
-    integer :: nnt
-    integer :: nt
-    real :: phi
+    real(wp) :: a
+    real(wp) :: b
+    real(wp) :: bi
+    real(wp) :: br
+    real(wp) :: ci
+    real(wp) :: cosp
+    real(wp) :: cost
+    real(wp) :: cr
+    real(wp) :: dlat
+    real(wp) :: dphi
+    real(wp) :: dsfdp
+    real(wp) :: dsfdt
+    real(wp) :: dxdp
+    real(wp) :: dxdt
+    real(wp) :: dydp
+    real(wp) :: dydt
+    real(wp) :: dzdp
+    real(wp) :: dzdt
+    real(wp) :: err2s
+    real(wp) :: err2v
+    real(wp) :: err2w
+    integer(ip) :: i
+    integer(ip) :: icase
+    integer(ip) :: ier
+    integer(ip) :: ierror
+    integer(ip) :: isym
+    integer(ip) :: ityp
+    integer(ip) :: j
+    integer(ip) :: k
+    integer(ip) :: ldwork
+    integer(ip) :: lldwork
+    integer(ip) :: lleng
+    integer(ip) :: llsav
+    integer(ip) :: lsave
+    integer(ip) :: lwork
+    integer(ip) :: mdab
+    integer(ip) :: mdb
+    integer(ip) :: mmdab
+    integer(ip) :: mmdb
+    integer(ip) :: nlat
+    integer(ip) :: nlon
+    integer(ip) :: nnlat
+    integer(ip) :: nnlon
+    integer(ip) :: nnt
+    integer(ip) :: nt
+    real(wp) :: phi
 
-    real :: se
-    real :: sf
-    real :: sinp
-    real :: sint
-    real :: theta
-    real :: gaussian_latitudes
-    real :: v
-    real :: ve
-    real :: w
-    real :: we
-    real :: work
-    real :: wsave
-    real :: x
-    real :: y
-    real :: z
+    real(wp) :: se
+    real(wp) :: sf
+    real(wp) :: sinp
+    real(wp) :: sint
+    real(wp) :: theta
+    real(wp) :: gaussian_latitudes
+    real(wp) :: v
+    real(wp) :: ve
+    real(wp) :: w
+    real(wp) :: we
+    real(wp) :: work
+    real(wp) :: wsave
+    real(wp) :: x
+    real(wp) :: y
+    real(wp) :: z
     !
     !     set dimensions with parameter statements
     !
@@ -549,7 +549,7 @@ program tgrad
                 cosp = cos(phi)
                 do i=1,nlat
                     theta = (i-1)*dlat
-                    if (icase>2) theta=gaussian_latitudes(i)
+                    if (icase > 2) theta=gaussian_latitudes(i)
                     cost = cos(theta)
                     sint = sin(theta)
                     x = sint*cosp
@@ -575,31 +575,6 @@ program tgrad
     !     end of icase loop
     !
     end do
+
 end program tgrad
-!
-subroutine iout(ivar,nam)
-    implicit none
-    integer :: ivar
-    character(len=*), intent(in) :: nam
-    write(6,10) nam , ivar
-10  format(1h a4, 3h = ,i8)
-    return
-end subroutine iout
-!
-subroutine vout(var,nam)
-    implicit none
-    real :: var
-    character(len=*), intent(in) :: nam
-    write(6,10) nam , var
-10  format(1h a4,3h = ,e12.5)
-    return
-end subroutine vout
-!
-subroutine name(nam)
-    implicit none
-    character(len=*), intent(in) :: nam
-    write(6,100) nam
-100 format(1h a8)
-    return
-end subroutine name
 

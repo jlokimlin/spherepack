@@ -49,81 +49,81 @@
 program tdiv
 use spherepack_library
     implicit none
-    real :: a
-    real :: b
-    real :: bi
-    real :: br
-    real :: ci
-    real :: cosp
-    real :: cost
-    real :: cr
-    real :: d2xdp2
-    real :: d2xdt2
-    real :: d2ydp2
-    real :: d2ydt2
-    real :: d2zdp2
-    real :: d2zdt2
-    real :: dlat
-    real :: dphi
-    real :: dsfdp
-    real :: dsfdt
-    real :: dv
-    real :: dvdt
-    real :: dve
-    real :: dwork
-    real :: dx2dt2
-    real :: dxdp
-    real :: dxdt
-    real :: dydp
-    real :: dydt
-    real :: dzdp
-    real :: dzdt
-    real :: err2
-    real :: err2v
-    real :: err2w
-    integer :: i
-    integer :: icase
-    integer :: ier
-    integer :: ierror
-    integer :: isym
-    integer :: ityp
-    integer :: j
-    integer :: k
-    integer :: kk
-    integer :: ldwork
-    integer :: lldwork
-    integer :: lleng
-    integer :: llsav
-    integer :: lsave
-    integer :: lwork
-    integer :: mdab
-    integer :: mdb
-    integer :: mmdab
-    integer :: mmdb
-    integer :: nlat
-    integer :: nlon
-    integer :: nmax
-    integer :: nnlat
-    integer :: nnlon
-    integer :: nnt
-    integer :: nt
-    real :: pertrb
-    real :: phi
+    real(wp) :: a
+    real(wp) :: b
+    real(wp) :: bi
+    real(wp) :: br
+    real(wp) :: ci
+    real(wp) :: cosp
+    real(wp) :: cost
+    real(wp) :: cr
+    real(wp) :: d2xdp2
+    real(wp) :: d2xdt2
+    real(wp) :: d2ydp2
+    real(wp) :: d2ydt2
+    real(wp) :: d2zdp2
+    real(wp) :: d2zdt2
+    real(wp) :: dlat
+    real(wp) :: dphi
+    real(wp) :: dsfdp
+    real(wp) :: dsfdt
+    real(wp) :: dv
+    real(wp) :: dvdt
+    real(wp) :: dve
+    real(wp) :: dwork
+    real(wp) :: dx2dt2
+    real(wp) :: dxdp
+    real(wp) :: dxdt
+    real(wp) :: dydp
+    real(wp) :: dydt
+    real(wp) :: dzdp
+    real(wp) :: dzdt
+    real(wp) :: err2
+    real(wp) :: err2v
+    real(wp) :: err2w
+    integer(ip) :: i
+    integer(ip) :: icase
+    integer(ip) :: ier
+    integer(ip) :: ierror
+    integer(ip) :: isym
+    integer(ip) :: ityp
+    integer(ip) :: j
+    integer(ip) :: k
+    integer(ip) :: kk
+    integer(ip) :: ldwork
+    integer(ip) :: lldwork
+    integer(ip) :: lleng
+    integer(ip) :: llsav
+    integer(ip) :: lsave
+    integer(ip) :: lwork
+    integer(ip) :: mdab
+    integer(ip) :: mdb
+    integer(ip) :: mmdab
+    integer(ip) :: mmdb
+    integer(ip) :: nlat
+    integer(ip) :: nlon
+    integer(ip) :: nmax
+    integer(ip) :: nnlat
+    integer(ip) :: nnlon
+    integer(ip) :: nnt
+    integer(ip) :: nt
+    real(wp) :: pertrb
+    real(wp) :: phi
 
-    real :: sf
-    real :: sinp
-    real :: sint
-    real :: theta
-    real :: thetag
-    real :: v
-    real :: ve
-    real :: w
-    real :: we
-    real :: work
-    real :: wsave
-    real :: x
-    real :: y
-    real :: z
+    real(wp) :: sf
+    real(wp) :: sinp
+    real(wp) :: sint
+    real(wp) :: theta
+    real(wp) :: thetag
+    real(wp) :: v
+    real(wp) :: ve
+    real(wp) :: w
+    real(wp) :: we
+    real(wp) :: work
+    real(wp) :: wsave
+    real(wp) :: x
+    real(wp) :: y
+    real(wp) :: z
     !
     !     set dimensions with parameter statements
     !
@@ -582,30 +582,6 @@ use spherepack_library
     !     end of icase loop
     !
     end do
+
 end program tdiv
-!
-subroutine iout(ivar,nam)
-    implicit none
-    integer :: ivar
-    character(len=*), intent(in) :: nam
-    write(6,10) nam , ivar
-10  format(1h a4, " = ",i8)
-    return
-end subroutine iout
-!
-subroutine vout(var,nam)
-    implicit none
-    real :: var
-    character(len=*), intent(in) :: nam
-    write(6,10) nam , var
-10  format(1h a4," = ",e12.5)
-    return
-end subroutine vout
-!
-subroutine name(nam)
-    implicit none
-    character(len=*), intent(in) :: nam
-    write(6,100) nam
-100 format(1h a8)
-    return
-end subroutine name
+

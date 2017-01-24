@@ -58,8 +58,8 @@ program tvlap
         stdout => OUTPUT_UNIT
 
     use spherepack_library, only: &
-        wp, & ! working precision
-        ip, & ! integer precision
+        ip, & ! Integer precision
+        wp, & ! Working precision
         Sphere, &
         Regularsphere, &
         GaussianSphere
@@ -67,41 +67,27 @@ program tvlap
     ! Explicit typing only
     implicit none
 
-    !----------------------------------------------------------------------
     ! Dictionary
-    !----------------------------------------------------------------------
-    class(Sphere), allocatable :: sphere_dat
-    !----------------------------------------------------------------------
+    class(Sphere), allocatable :: solver
 
-    !
-    !  Test gaussian case
-    !
-    allocate( GaussianSphere :: sphere_dat )
+    ! Test gaussian grid
+    allocate( GaussianSphere :: solver )
+    call test_vector_laplacian_routines(solver)
+    deallocate( solver )
 
-    call test_vector_laplacian_routines(sphere_dat)
-
-    deallocate( sphere_dat )
-
-    !
-    !  Test regular case
-    !
-    allocate( RegularSphere :: sphere_dat )
-
-    call test_vector_laplacian_routines(sphere_dat)
-
-    deallocate( sphere_dat )
-
+    ! Test regular grid
+    allocate( RegularSphere :: solver )
+    call test_vector_laplacian_routines(solver)
+    deallocate( solver )
 
 contains
 
     subroutine test_vector_laplacian_routines( sphere_type )
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
         class(Sphere), intent(inout)  :: sphere_type
-        !----------------------------------------------------------------------
+
         ! Local variables
-        !----------------------------------------------------------------------
         integer(ip), parameter        :: NLONS = 16
         integer(ip), parameter        :: NLATS = 29
         integer(ip)                   :: i, j, k !! Counters
@@ -117,11 +103,8 @@ contains
         character(len=:), allocatable :: previous_polar_inversion_error
         character(len=:), allocatable :: previous_azimuthal_laplacian_error
         character(len=:), allocatable :: previous_azimuthal_inversion_error
-        !----------------------------------------------------------------------
 
-        !
         !  Set up workspace arrays
-        !
         select type(sphere_type)
             type is (GaussianSphere)
 
@@ -214,7 +197,7 @@ contains
                 write( stdout, '(/a/)') '     tvlap *** TEST RUN *** '
                 write( stdout, '(a)') '     grid type = '//sphere_type%grid%grid_type
                 write( stdout, '(a)') '     Testing vector laplacian'
-                write( stdout, '(2(A,I2))') '     nlat = ', NLATS,' nlon = ', NLONS
+                write( stdout, '(2(a,i3))') '     nlat = ', NLATS,' nlon = ', NLONS
                 write( stdout, '(a)') '     Previous 64 bit floating point arithmetic result '
                 write( stdout, '(a)') previous_polar_laplacian_error
                 write( stdout, '(a)') previous_azimuthal_laplacian_error
@@ -255,7 +238,7 @@ contains
                 write( stdout, '(/a/)') '     tvlap *** TEST RUN *** '
                 write( stdout, '(a)') '     grid type = '//sphere_type%grid%grid_type
                 write( stdout, '(a)') '     Testing vector laplacian inversion'
-                write( stdout, '(2(A,I2))') '     nlat = ', NLATS,' nlon = ', NLONS
+                write( stdout, '(2(a,i3))') '     nlat = ', NLATS,' nlon = ', NLONS
                 write( stdout, '(a)') '     Previous 64 bit floating point arithmetic result '
                 write( stdout, '(a)') previous_polar_inversion_error
                 write( stdout, '(a)') previous_azimuthal_inversion_error

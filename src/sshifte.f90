@@ -516,7 +516,7 @@ contains
 
     subroutine sshifti(ioff, nlon, nlat, lsav, wsav, ier)
 
-        integer :: lsav
+        integer(ip) :: lsav
         integer ioff, nlat, nlon, nlat2, isav, ier
         real wsav(lsav)
         real dlat, dlon, dp

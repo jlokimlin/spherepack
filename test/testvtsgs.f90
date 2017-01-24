@@ -33,60 +33,60 @@
 !program tvtsgs
 !    use spherepack_library
 !    implicit none
-!    real :: a
-!    real :: b
-!    real :: bi
-!    real :: br
-!    real :: c
-!    real :: ci
-!    real :: cr
-!    real :: da
-!    real :: db
-!    real :: dmax1
-!    real :: dmax2
-!    real :: dphi
-!    real :: dtr
-!    real :: hpi
-!    integer :: i
-!    integer :: idp
-!    integer :: ierror
-!    integer :: iq
-!    integer :: isym
-!    integer :: j
-!    integer :: jdp
-!    integer :: jq
-!    integer :: k
-!    integer :: ldwork
-!    integer :: lwork
-!    integer :: lwshi
-!    integer :: lwvha
-!    integer :: lwvhs
-!    integer :: lwvts
-!    integer :: mdab
-!    integer :: mp1
-!    integer :: ndab
-!    integer :: nlat
-!    integer :: nlon
-!    integer :: np1
-!    integer :: nt
-!    real :: phi
+!    real(wp) :: a
+!    real(wp) :: b
+!    real(wp) :: bi
+!    real(wp) :: br
+!    real(wp) :: c
+!    real(wp) :: ci
+!    real(wp) :: cr
+!    real(wp) :: da
+!    real(wp) :: db
+!    real(wp) :: dmax1
+!    real(wp) :: dmax2
+!    real(wp) :: dphi
+!    real(wp) :: dtr
+!    real(wp) :: hpi
+!    integer(ip) :: i
+!    integer(ip) :: idp
+!    integer(ip) :: ierror
+!    integer(ip) :: iq
+!    integer(ip) :: isym
+!    integer(ip) :: j
+!    integer(ip) :: jdp
+!    integer(ip) :: jq
+!    integer(ip) :: k
+!    integer(ip) :: ldwork
+!    integer(ip) :: lwork
+!    integer(ip) :: lwshi
+!    integer(ip) :: lwvha
+!    integer(ip) :: lwvhs
+!    integer(ip) :: lwvts
+!    integer(ip) :: mdab
+!    integer(ip) :: mp1
+!    integer(ip) :: ndab
+!    integer(ip) :: nlat
+!    integer(ip) :: nlon
+!    integer(ip) :: np1
+!    integer(ip) :: nt
+!    real(wp) :: phi
 !
-!    real :: s
-!    real :: theta
-!    real :: tmp
-!    real :: u
-!    real :: v
-!    real :: vt
-!    real :: w
-!    real :: work
-!    real :: wshi
-!    real :: wt
-!    real :: wvha
-!    real :: wvhs
-!    real :: wvts
-!    real :: x
-!    real :: y
-!    real :: z
+!    real(wp) :: s
+!    real(wp) :: theta
+!    real(wp) :: tmp
+!    real(wp) :: u
+!    real(wp) :: v
+!    real(wp) :: vt
+!    real(wp) :: w
+!    real(wp) :: work
+!    real(wp) :: wshi
+!    real(wp) :: wt
+!    real(wp) :: wvha
+!    real(wp) :: wvhs
+!    real(wp) :: wvts
+!    real(wp) :: x
+!    real(wp) :: y
+!    real(wp) :: z
 !    !
 !    !     this program checks vtsgs for computing the colatitudinal
 !    !     derivatives of the velocity ....
@@ -351,20 +351,20 @@
 !end program tvtsgs
 !subroutine ctos(theta,phi,x,y,z,u,v,w)
 !    implicit none
-!    real :: cp
-!    real :: ct
-!    real :: phi
-!    real :: sp
-!    real :: st
-!    real :: temp1
-!    real :: temp2
-!    real :: theta
-!    real :: u
-!    real :: v
-!    real :: w
-!    real :: x
-!    real :: y
-!    real :: z
+!    real(wp) :: cp
+!    real(wp) :: ct
+!    real(wp) :: phi
+!    real(wp) :: sp
+!    real(wp) :: st
+!    real(wp) :: temp1
+!    real(wp) :: temp2
+!    real(wp) :: theta
+!    real(wp) :: u
+!    real(wp) :: v
+!    real(wp) :: w
+!    real(wp) :: x
+!    real(wp) :: y
+!    real(wp) :: z
 !    !
 !    !     this program computes the components of a vector
 !    !     field in spherical coordinates u, v, and w, from
@@ -383,20 +383,20 @@
 !end subroutine ctos
 !subroutine stoc(theta,phi,u,v,w,x,y,z)
 !    implicit none
-!    real :: cp
-!    real :: ct
-!    real :: phi
-!    real :: sp
-!    real :: st
-!    real :: temp1
-!    real :: temp2
-!    real :: theta
-!    real :: u
-!    real :: v
-!    real :: w
-!    real :: x
-!    real :: y
-!    real :: z
+!    real(wp) :: cp
+!    real(wp) :: ct
+!    real(wp) :: phi
+!    real(wp) :: sp
+!    real(wp) :: st
+!    real(wp) :: temp1
+!    real(wp) :: temp2
+!    real(wp) :: theta
+!    real(wp) :: u
+!    real(wp) :: v
+!    real(wp) :: w
+!    real(wp) :: x
+!    real(wp) :: y
+!    real(wp) :: z
 !    !
 !    !     this program computes the components of a vector
 !    !     field in cartesian coordinates x, y, and z, from
@@ -415,21 +415,21 @@
 !end subroutine stoc
 !subroutine dbdx(l,mdim,a,b,dxa,dxb)
 !    implicit none
-!    real :: a
-!    real :: a1
-!    real :: a2
-!    real :: b
-!    real :: cn
-!    real :: dxa
-!    real :: dxb
-!    real :: fm
-!    real :: fn
-!    integer :: l
-!    integer :: lm1
-!    integer :: mdim
-!    integer :: mp1
-!    integer :: n
-!    integer :: np1
+!    real(wp) :: a
+!    real(wp) :: a1
+!    real(wp) :: a2
+!    real(wp) :: b
+!    real(wp) :: cn
+!    real(wp) :: dxa
+!    real(wp) :: dxb
+!    real(wp) :: fm
+!    real(wp) :: fn
+!    integer(ip) :: l
+!    integer(ip) :: lm1
+!    integer(ip) :: mdim
+!    integer(ip) :: mp1
+!    integer(ip) :: n
+!    integer(ip) :: np1
 !    !
 !    !     subroutine to compute the coefficients in the spherical
 !    !     harmonic representation of the derivative with respect to x
@@ -469,21 +469,21 @@
 !    end subroutine dbdx
 !    subroutine dbdy(l,mdim,a,b,dya,dyb)
 !        implicit none
-!        real :: a
-!        real :: a1
-!        real :: a2
-!        real :: b
-!        real :: cn
-!        real :: dya
-!        real :: dyb
-!        real :: fm
-!        real :: fn
-!        integer :: l
-!        integer :: lm1
-!        integer :: mdim
-!        integer :: mp1
-!        integer :: n
-!        integer :: np1
+!        real(wp) :: a
+!        real(wp) :: a1
+!        real(wp) :: a2
+!        real(wp) :: b
+!        real(wp) :: cn
+!        real(wp) :: dya
+!        real(wp) :: dyb
+!        real(wp) :: fm
+!        real(wp) :: fn
+!        integer(ip) :: l
+!        integer(ip) :: lm1
+!        integer(ip) :: mdim
+!        integer(ip) :: mp1
+!        integer(ip) :: n
+!        integer(ip) :: np1
 !        !
 !        !     subroutine to compute the coefficients in the spherical
 !        !     harmonic representation of the derivative with respect to y
@@ -523,20 +523,20 @@
 !        end subroutine dbdy
 !        subroutine dbdz(l,mdim,a,b,dza,dzb)
 !            implicit none
-!            real :: a
-!            real :: a1
-!            real :: b
-!            real :: cn
-!            real :: dza
-!            real :: dzb
-!            real :: fm
-!            real :: fn
-!            integer :: l
-!            integer :: lm1
-!            integer :: mdim
-!            integer :: mp1
-!            integer :: n
-!            integer :: np1
+!            real(wp) :: a
+!            real(wp) :: a1
+!            real(wp) :: b
+!            real(wp) :: cn
+!            real(wp) :: dza
+!            real(wp) :: dzb
+!            real(wp) :: fm
+!            real(wp) :: fn
+!            integer(ip) :: l
+!            integer(ip) :: lm1
+!            integer(ip) :: mdim
+!            integer(ip) :: mp1
+!            integer(ip) :: n
+!            integer(ip) :: np1
 !            !
 !            !     subroutine to compute the coefficients in the spherical
 !            !     harmonic representation of the derivative with respect to z

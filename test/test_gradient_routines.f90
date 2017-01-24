@@ -52,11 +52,11 @@
 program tgrad
 
     use, intrinsic :: ISO_Fortran_env, only: &
-        ip => INT32, &
-        wp => REAL64, &
         stdout => OUTPUT_UNIT
 
     use spherepack_library, only: &
+        ip, & ! Integer precision
+        wp, & ! Working precision
         Sphere, &
         Regularsphere, &
         GaussianSphere
@@ -64,44 +64,27 @@ program tgrad
     ! Explicit typing only
     implicit none
 
-    !----------------------------------------------------------------------
     ! Dictionary
-    !----------------------------------------------------------------------
-    class(Sphere), allocatable :: sphere_dat
-    !----------------------------------------------------------------------
+    class(Sphere), allocatable :: solver
 
-    !
-    !  Test gaussian case
-    !
-    allocate( GaussianSphere :: sphere_dat )
+    !  Test gaussian grid
+    allocate( GaussianSphere :: solver )
+    call test_gradient_routines(solver)
+    deallocate( solver )
 
-    call test_gradient_routines(sphere_dat)
-
-    deallocate( sphere_dat )
-
-    !
-    !  Test regular case
-    !
-    allocate( RegularSphere :: sphere_dat )
-
-    call test_gradient_routines(sphere_dat)
-
-    deallocate( sphere_dat )
-
-
+    !  Test regular grid
+    allocate( RegularSphere :: solver )
+    call test_gradient_routines(solver)
+    deallocate( solver )
 
 contains
 
-
-
     subroutine test_gradient_routines(sphere_type)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
         class(Sphere), intent(inout)  :: sphere_type
-        !----------------------------------------------------------------------
+
         ! Local variables
-        !----------------------------------------------------------------------
         integer(ip), parameter        :: NLATS = 33
         integer(ip), parameter        :: NLONS = 18
         integer(ip), parameter        :: NSYNTHS = 4
@@ -115,11 +98,8 @@ contains
         character(len=:), allocatable :: previous_gradient_inversion_error
         character(len=:), allocatable :: previous_polar_gradient_error
         character(len=:), allocatable :: previous_azimuthal_gradient_error
-        !----------------------------------------------------------------------
 
-        !
         !  Set up workspace arrays
-        !
         select type(sphere_type)
             type is (GaussianSphere)
 
@@ -250,7 +230,7 @@ contains
                 write( stdout, '(a)') ''
                 write( stdout, '(a)') '     grid type = '//sphere_type%grid%grid_type
                 write( stdout, '(a)') '     Testing gradient'
-                write( stdout, '(2(A,I2))') '     nlat = ', NLATS,' nlon = ', NLONS
+                write( stdout, '(2(a,i3))') '     nlat = ', NLATS,' nlon = ', NLONS
                 write( stdout, '(a)') '     Previous 64 bit floating point arithmetic result '
                 write( stdout, '(a)') previous_polar_gradient_error
                 write( stdout, '(a)') previous_azimuthal_gradient_error
@@ -286,11 +266,11 @@ contains
                 !    arithmetic followed by the output from this computer
                 !
                 write( stdout, '(a)') ''
-                write( stdout, '(a)') '     tgrad *** TEST RUN *** '
+                write( stdout, '(a)') '     test gradient routines *** TEST RUN *** '
                 write( stdout, '(a)') ''
                 write( stdout, '(a)') '     grid type = '//sphere_type%grid%grid_type
                 write( stdout, '(a)') '     Testing gradient inversion'
-                write( stdout, '(2(A,I2))') '     nlat = ', NLATS,' nlon = ', NLONS
+                write( stdout, '(2(a,i3))') '     nlat = ', NLATS,' nlon = ', NLONS
                 write( stdout, '(a)') '     Previous 64 bit floating point arithmetic result '
                 write( stdout, '(a)') previous_gradient_inversion_error
                 write( stdout, '(a)') '     The output from your computer is: '
