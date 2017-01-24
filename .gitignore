@@ -1,3 +1,9 @@
+# Hidden project folders
+.cproject
+.project
+.settings/
+lib/
+
 # Compiled Object files
 *.slo
 *.lo
