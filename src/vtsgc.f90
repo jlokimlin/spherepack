@@ -1083,33 +1083,38 @@ contains
             call sphere_aux%hfft%backward(idv, nlon, vte(1, 1, k), idv, wrfft, vb)
             call sphere_aux%hfft%backward(idv, nlon, wte(1, 1, k), idv, wrfft, vb)
         end do
-        if (ityp > 2) goto 12
-        do k=1, nt
-            do j=1, nlon
-                do i=1, imm1
-                    vt(i, j, k) = HALF *(vte(i, j, k)+vto(i, j, k))
-                    wt(i, j, k) = HALF *(wte(i, j, k)+wto(i, j, k))
-                    vt(nlp1-i, j, k) = HALF *(vte(i, j, k)-vto(i, j, k))
-                    wt(nlp1-i, j, k) = HALF *(wte(i, j, k)-wto(i, j, k))
+
+        select case (ityp)
+            case(0:1)
+                do k=1, nt
+                    do j=1, nlon
+                        do i=1, imm1
+                            vt(i, j, k) = HALF *(vte(i, j, k)+vto(i, j, k))
+                            wt(i, j, k) = HALF *(wte(i, j, k)+wto(i, j, k))
+                            vt(nlp1-i, j, k) = HALF *(vte(i, j, k)-vto(i, j, k))
+                            wt(nlp1-i, j, k) = HALF *(wte(i, j, k)-wto(i, j, k))
+                        end do
+                    end do
+                end do
+            case default
+                do k=1, nt
+                    do j=1, nlon
+                        do i=1, imm1
+                            vt(i, j, k) = HALF *vte(i, j, k)
+                            wt(i, j, k) = HALF *wte(i, j, k)
+                        end do
+                    end do
+                end do
+        end select
+
+        if (mlat /= 0) then
+            do k=1, nt
+                do j=1, nlon
+                    vt(imid, j, k) = HALF *vte(imid, j, k)
+                    wt(imid, j, k) = HALF *wte(imid, j, k)
                 end do
             end do
-        end do
-        goto 13
-        12 do k=1, nt
-            do j=1, nlon
-                do i=1, imm1
-                    vt(i, j, k) = HALF *vte(i, j, k)
-                    wt(i, j, k) = HALF *wte(i, j, k)
-                end do
-            end do
-        end do
-13      if (mlat == 0) return
-        do k=1, nt
-            do j=1, nlon
-                vt(imid, j, k) = HALF *vte(imid, j, k)
-                wt(imid, j, k) = HALF *wte(imid, j, k)
-            end do
-        end do
+        end if
 
     end subroutine vtsgc_lower_routine
 

@@ -1195,6 +1195,7 @@ contains
         end do
 
         call sphere_aux%wtgint(nlat, nlon, theta, wvbin, dwork)
+
         do mp1=1, mmax
             m = mp1-1
             call sphere_aux%wbin(0, nlat, nlon, m, vin, i3, wvbin)
