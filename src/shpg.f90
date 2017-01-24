@@ -198,7 +198,7 @@ if (lwork <mlwk) return
 ierror = 0
 !
 call hfft%initialize(nlon, wshp(lw1+1))
-!
+
 nte = (nlat+1)/2
 nloc1 = 2*nte*nte
 nloc2 = nlat+1
@@ -222,14 +222,15 @@ kw9 = kw8+2*nte
 kw10 = kw9+nloc1
 kw11 = kw10+nloc1
 ktot = kw11+nte*nte
-!
-call shpgi1(nlat, nlon, isym, mtrunc, nte, ierror, wshp(iw1), wshp(iw2), &
+
+call shpgi_lower_routine(nlat, nlon, isym, mtrunc, nte, ierror, wshp(iw1), wshp(iw2), &
   wshp(iw3), wshp(iw4), iwshp(jw1), iwshp(jw2), iwshp(jw3), &
   iwshp(jw4), work(kw1), work(kw2), work(kw3), work(kw4), work(kw5), &
   work(kw6), work(kw7), work(kw8), work(kw9), work(kw10), work(kw11))
-return
+
 end subroutine shpgi
-subroutine shpgi1(nlat, nlon, isym, mtrunc, idp, ierror, &
+
+subroutine shpgi_lower_routine(nlat, nlon, isym, mtrunc, idp, ierror, &
   pe, po, ze, zo, ipse, jzse, ipso, jzso, &
   cp, wx, thet, gwts, xx, z, a, b, ped, pod, u)
 
@@ -301,7 +302,7 @@ toe = 0.
 !     compute gauss grid distribution
 !
 lwork = nlat+1
-call compute_gaussian_latitudes_and_weightsp(nlat, thet, gwts, work, lwork, ierr)
+call compute_gaussian_latitudes_and_weights(nlat, thet, gwts, work, lwork, ierr)
 if (ierr /= 0) write(*, 160) ierr
 160 format(' error in compute_gaussian_latitudes_and_weights =', i5)
 do i=1, nto
@@ -384,7 +385,7 @@ if (nec<=0) goto 200
 !
 ! replacement code
 !
-call RANDOM_SEED()
+call random_seed()
 call random_number(xx(1:nte))
 !
 it = 0
@@ -630,8 +631,9 @@ end if
 end do
 end do
 end do
-return
-end subroutine shpgi1
+
+end subroutine shpgi_lower_routine
+
 !
 !
 ! ... file shpg.f
@@ -813,7 +815,7 @@ jw2 = jw1+nloc2
 jw3 = jw2+nloc2
 jw4 = jw3+nloc2
 !
-call shpg1(nlat, nlon, isym, mtrunc, y, y, idxy, ierror, &
+call shpg_lower_routine(nlat, nlon, isym, mtrunc, y, y, idxy, ierror, &
  nte, wshp(iw1), wshp(iw2), wshp(iw3), wshp(iw4), iwshp(jw1), &
  iwshp(jw2), iwshp(jw3), iwshp(jw4), work(jw1), &
  work(jw2), work(jw3), work(jw4))
@@ -826,9 +828,10 @@ do j=1, nlon
   y(i, j) = sn*y(i, j)
  end do
 end do
-return
+
 end subroutine shpg
-subroutine shpg1(nlat, nlon, isym, mtrunc, sx, sy, idxy, ierror, &
+
+subroutine shpg_lower_routine(nlat, nlon, isym, mtrunc, sx, sy, idxy, ierror, &
  idp, pe, po, ze, zo, ipse, jzse, ipso, jzso, xe, xo, ye, yo)
 
 integer :: i
@@ -999,8 +1002,9 @@ do i=1, nlat
 sy(i, j) = 0.
 end do
 end do
-return
-end subroutine shpg1
+
+end subroutine shpg_lower_routine
+
 subroutine mxm(lr, lc, ld, a, mc, md, b, nd, c)
 
 integer :: i
@@ -1046,8 +1050,9 @@ c(i, j) = c(i, j)+a(i, k)*b(k, j)
 end do
 end do
 end do
-return
+
 end subroutine smxm
+
 subroutine mxmx(lr, lc, ld, a, mc, md, b, x, y)
 
 real :: a
@@ -1528,7 +1533,7 @@ cth = chh
 return
 end subroutine dlftg
 !
-subroutine compute_gaussian_latitudes_and_weightsp(nlat, theta, wts, w, lwork, ierror)
+subroutine compute_gaussian_latitudes_and_weights(nlat, theta, wts, w, lwork, ierror)
 
 real :: eps
 integer :: i
@@ -1552,7 +1557,7 @@ real :: sgnd
 !     This routine is faster and more accurate than older program 
 !     with the same name.
 !
-!     subroutine compute_gaussian_latitudes_and_weightsp computes the nlat gaussian colatitudes and weights
+!     subroutine compute_gaussian_latitudes_and_weights computes the nlat gaussian colatitudes and weights
 !     in real. the colatitudes are in radians and lie in the
 !     in the interval (0, pi).
 !
@@ -1676,7 +1681,8 @@ do i=1, nlat
 wts(i) = 2.0_wp*wts(i)/summation
 end do
 return
-end subroutine compute_gaussian_latitudes_and_weightsp
+end subroutine compute_gaussian_latitudes_and_weights
+
 subroutine cpdp1(n, cz, cp, dcp)
 
 integer :: j

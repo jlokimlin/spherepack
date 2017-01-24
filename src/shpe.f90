@@ -225,14 +225,15 @@ kw11 = kw10+nloc2
 kw12 = kw11+nloc1
 kw13 = kw12+nloc1
 !
-call shpei1(nlat, nlon, isym, mtrunc, nte, ierror, wshp(iw1), wshp(iw2), &
+call shpei_lower_routine(nlat, nlon, isym, mtrunc, nte, ierror, wshp(iw1), wshp(iw2), &
   wshp(iw3), wshp(iw4), iwshp(jw1), iwshp(jw2), iwshp(jw3), &
   iwshp(jw4), work(kw1), work(kw2), work(kw3), work(kw4), work(kw5), &
   work(kw6), work(kw7), work(kw8), work(kw9), work(kw10), work(kw11), &
   work(kw12), work(kw11), work(kw12), work(kw13))
-return
+
 end subroutine shpei
-subroutine shpei1(nlat, nlon, isym, mtrunc, idp, ierror, &
+
+subroutine shpei_lower_routine(nlat, nlon, isym, mtrunc, idp, ierror, &
   pe, po, ze, zo, ipse, jzse, ipso, jzso, &
   cp, work, wx, s, e, thet, xx, z, a, b, we, ped, wo, pod, u)
 
@@ -420,7 +421,7 @@ if (ms2<=0. .or. ms2>=nte) goto 200
 !
 ! replacement code
 !
-call RANDOM_SEED()
+call random_seed()
 call random_number(xx(1:nte))
 it = 0
 201 do i=1, nte
@@ -497,7 +498,7 @@ end do
 !
 !     compute weight matrices for odd functions
 !
-do 50 mp1=1, 2
+do mp1=1, 2
 m = mp1-1
 mrank = nlat-m-m
 nem = (mrank+1)/2
@@ -533,7 +534,8 @@ end do
 wo(i+m, j+m, mp1) = summation
 end do
 end do
-50 continue
+end do
+
 wo(1, 1, 2) = 1.0  
 if (modn==1) then
 wo(nte, nte, 1) = 1.0  
@@ -685,8 +687,8 @@ end if
 end do
 end do
 end do
-return
-end subroutine shpei1
+
+end subroutine shpei_lower_routine
 !
 !
 ! ... file shpe.f
@@ -865,7 +867,7 @@ jw2 = jw1+nloc2
 jw3 = jw2+nloc2
 jw4 = jw3+nloc2
 !
-call shpe1(nlat, nlon, isym, mtrunc, y, y, idxy, ierror, &
+call shpe_lower_routine(nlat, nlon, isym, mtrunc, y, y, idxy, ierror, &
  nte, wshp(iw1), wshp(iw2), wshp(iw3), wshp(iw4), iwshp(jw1), &
  iwshp(jw2), iwshp(jw3), iwshp(jw4), work(jw1), &
  work(jw2), work(jw3), work(jw4))
@@ -878,10 +880,10 @@ do j=1, nlon
   y(i, j) = sn*y(i, j)
  end do
 end do
-return
+
 end subroutine shpe
 
-subroutine shpe1(nlat, nlon, isym, mtrunc, sx, sy, idxy, ierror, &
+subroutine shpe_lower_routine(nlat, nlon, isym, mtrunc, sx, sy, idxy, ierror, &
  idp, pe, po, ze, zo, ipse, jzse, ipso, jzso, xe, xo, ye, yo)
 
 integer :: i
@@ -1032,13 +1034,15 @@ end do
 end if
 100 continue
 js = mxtr+mxtr+2
+
 do j=js, nlon
 do i=1, nlat
 sy(i, j) = 0.0
 end do
 end do
-return
-end subroutine shpe1
+
+end subroutine shpe_lower_routine
+
 subroutine mxm(lr, lc, ld, a, mc, md, b, nd, c)
 
 integer :: i
@@ -1059,8 +1063,9 @@ c(i, j) = c(i, j)+a(i, k)*b(k, j)
 end do
 end do
 end do
-return
+
 end subroutine mxm
+
 subroutine smxm(lr, lc, ld, a, mc, md, b, nd, c)
 
 real :: a
@@ -1084,8 +1089,9 @@ c(i, j) = c(i, j)+a(i, k)*b(k, j)
 end do
 end do
 end do
-return
+
 end subroutine smxm
+
 subroutine mxmx(lr, lc, ld, a, mc, md, b, x, y)
 
 real :: a
@@ -2046,11 +2052,13 @@ ix = 1
 iy = 1
 if (incx<0)ix = (-n+1)*incx + 1
 if (incy<0)iy = (-n+1)*incy + 1
-do 10 i = 1, n
+
+do i = 1, n
   dy(iy) = dy(iy) + da*dx(ix)
   ix = ix + incx
   iy = iy + incy
-10 continue
+end do
+
 return
 !
 !        code for both increments equal to 1
@@ -2059,18 +2067,20 @@ return
 !        clean-up loop
 !
 20 m = mod(n, 4)
-if ( m == 0 ) goto 40
-do 30 i = 1, m
+if (m == 0) goto 40
+
+do i = 1, m
   dy(i) = dy(i) + da*dx(i)
-30 continue
+end do
+
 if ( n < 4 ) return
 40 mp1 = m + 1
-do 50 i = mp1, n, 4
+do i = mp1, n, 4
   dy(i) = dy(i) + da*dx(i)
   dy(i + 1) = dy(i + 1) + da*dx(i + 1)
   dy(i + 2) = dy(i + 2) + da*dx(i + 2)
   dy(i + 3) = dy(i + 3) + da*dx(i + 3)
-50 continue
+end do
 
 end subroutine daxpy
 
@@ -2247,24 +2257,26 @@ ix = 1
 iy = 1
 if (incx<0)ix = (-n+1)*incx + 1
 if (incy<0)iy = (-n+1)*incy + 1
-do 10 i = 1, n
+do i = 1, n
   dtemp = c*dx(ix) + s*dy(iy)
   dy(iy) = c*dy(iy) - s*dx(ix)
   dx(ix) = dtemp
   ix = ix + incx
   iy = iy + incy
-10 continue
+end do
+
 return
 !
 !       code for both increments equal to 1
 !
-20 do 30 i = 1, n
+20 do i = 1, n
   dtemp = c*dx(i) + s*dy(i)
   dy(i) = c*dy(i) - s*dx(i)
   dx(i) = dtemp
-30 continue
-return
+end do
+
 end subroutine  drot
+
 subroutine drotg(da, db, c, s)
 
 !
@@ -2311,9 +2323,11 @@ if (incx == 1)goto 20
 !        code for increment not equal to 1
 !
 nincx = n*incx
-do 10 i = 1, nincx, incx
+
+do i = 1, nincx, incx
   dx(i) = da*dx(i)
-10 continue
+end do
+
 return
 !
 !        code for increment equal to 1
@@ -2323,19 +2337,21 @@ return
 !
 20 m = mod(n, 5)
 if ( m == 0 ) goto 40
-do 30 i = 1, m
+
+do i = 1, m
   dx(i) = da*dx(i)
-30 continue
+end do
+
 if ( n < 5 ) return
 40 mp1 = m + 1
-do 50 i = mp1, n, 5
+do i = mp1, n, 5
   dx(i) = da*dx(i)
   dx(i + 1) = da*dx(i + 1)
   dx(i + 2) = da*dx(i + 2)
   dx(i + 3) = da*dx(i + 3)
   dx(i + 4) = da*dx(i + 4)
-50 continue
-return
+end do
+
 end subroutine  dscal
 
 
@@ -2361,13 +2377,14 @@ ix = 1
 iy = 1
 if (incx<0)ix = (-n+1)*incx + 1
 if (incy<0)iy = (-n+1)*incy + 1
-do 10 i = 1, n
+do i = 1, n
   dtemp = dx(ix)
   dx(ix) = dy(iy)
   dy(iy) = dtemp
   ix = ix + incx
   iy = iy + incy
-10 continue
+end do
+
 return
 !
 !       code for both increments equal to 1
@@ -2377,14 +2394,16 @@ return
 !
 20 m = mod(n, 3)
 if ( m == 0 ) goto 40
-do 30 i = 1, m
+
+do i = 1, m
   dtemp = dx(i)
   dx(i) = dy(i)
   dy(i) = dtemp
-30 continue
+end do
+
 if ( n < 3 ) return
 40 mp1 = m + 1
-do 50 i = mp1, n, 3
+do i = mp1, n, 3
   dtemp = dx(i)
   dx(i) = dy(i)
   dy(i) = dtemp
@@ -2394,7 +2413,7 @@ do 50 i = mp1, n, 3
   dtemp = dx(i + 2)
   dx(i + 2) = dy(i + 2)
   dy(i + 2) = dtemp
-50 continue
+end do
 
 end subroutine  dswap
 
