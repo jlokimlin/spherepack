@@ -356,7 +356,6 @@ contains
         integer(ip) :: nlat
         integer(ip) :: nlon
         integer(ip) :: nt
-        real(wp) :: typ
         real(wp) :: v
         real(wp) :: w
         real(wp) :: work
@@ -402,7 +401,7 @@ contains
         mn = mmax*nlat*nt
         if (ityp<3) then
             !     no symmetry
-            if ( typ==0) then
+            if (ityp==0) then
                     !       br, bi, cr, ci nonzero
                 lwkmin = nlat*(2*nt*nlon+max(6*imid, nlon)+1)+4*mn
             else
@@ -411,8 +410,8 @@ contains
             end if
         else
             !     symmetry
-            if ( typ==3 .or. ityp==6) then
-                        !       br, bi, cr, ci nonzero
+            if (ityp==3 .or. ityp==6) then
+                !       br, bi, cr, ci nonzero
                 lwkmin = imid*(2*nt*nlon+max(6*nlat, nlon))+4*mn+nlat
             else
                 !       br, bi or cr, ci zero
@@ -425,32 +424,7 @@ contains
         !     set work space pointers for vector laplacian coefficients
         !
         select case (ityp)
-            case (0)
-                ibr = 1
-                ibi = ibr+mn
-                icr = ibi+mn
-                ici = icr+mn
-            case (3)
-                ibr = 1
-                ibi = ibr+mn
-                icr = ibi+mn
-                ici = icr+mn
-            case (6)
-                ibr = 1
-                ibi = ibr+mn
-                icr = ibi+mn
-                ici = icr+mn
-            case (1)
-                ibr = 1
-                ibi = ibr+mn
-                icr = ibi+mn
-                ici = icr
-            case (4)
-                ibr = 1
-                ibi = ibr+mn
-                icr = ibi+mn
-                ici = icr
-            case (7)
+            case (0:1, 3:4, 6:7)
                 ibr = 1
                 ibi = ibr+mn
                 icr = ibi+mn

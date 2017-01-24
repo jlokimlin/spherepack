@@ -238,32 +238,26 @@ module module_geo2math
 
     ! Everything is private unless stated otherwise
     private
-    public :: geo2maths
-    public :: math2geos
-    public :: geo2mathv
-    public :: math2geov
+    public :: geo2maths, math2geos
+    public :: geo2mathv, math2geov
 
 contains
 
     subroutine geo2maths(ig, nlon, nlat, sg, sm, work)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
         integer(ip), intent(in)     :: ig
         integer(ip), intent(in)     :: nlon
         integer(ip), intent(in)     :: nlat
         real(wp),    intent(in)     :: sg(nlon, nlat)
         real(wp),    intent(out)    :: sm(nlat, nlon)
         real(wp),    intent(inout)  :: work(*)
-        !----------------------------------------------------------------------
-        ! Dummy arguments
-        !----------------------------------------------------------------------
-        integer(ip) :: i, j, ij ! counters
-        !----------------------------------------------------------------------
 
-        !
-        !     transpose sg into sm and reverse colatitude subscript order
-        !     if necessary
+        ! Local variables
+        integer(ip) :: i, j, ij ! counters
+
+        ! Transpose sg into sm and reverse colatitude subscript order
+        ! if necessary
         !
         do i=1, nlat
             do j=1, nlon
@@ -290,27 +284,21 @@ contains
 
     end subroutine geo2maths
 
-
-
     subroutine math2geos(ig, nlat, nlon, sm, sg, work)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
         integer(ip), intent(in)     :: ig
         integer(ip), intent(in)     :: nlon
         integer(ip), intent(in)     :: nlat
         real(wp),    intent(in)     :: sm(nlon, nlat)
         real(wp),    intent(out)    :: sg(nlat, nlon)
         real(wp),    intent(inout)  :: work(*)
-        !----------------------------------------------------------------------
-        ! Dummy arguments
-        !----------------------------------------------------------------------
-        integer(ip) :: i, j, ij ! counters
-        !----------------------------------------------------------------------
 
-        !
-        !     transpose sm into sg and reverse colatitude subscript order
-        !     if necessary
+        ! Local variables
+        integer(ip) :: i, j, ij ! counters
+
+        ! Transpose sm into sg and reverse colatitude subscript order
+        ! if necessary
         !
         do i=1, nlat
             do j=1, nlon
@@ -337,12 +325,9 @@ contains
 
     end subroutine math2geos
 
-
-
     subroutine geo2mathv(ig, nlon, nlat, ug, vg, vm, wm, work)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
         integer(ip), intent(in)     :: ig
         integer(ip), intent(in)     :: nlon
         integer(ip), intent(in)     :: nlat
@@ -351,15 +336,11 @@ contains
         real(wp),    intent(out)    :: vm(nlat, nlon)
         real(wp),    intent(out)    :: wm(nlat, nlon)
         real(wp),    intent(inout)  :: work(*)
-        !----------------------------------------------------------------------
-        ! Dummy arguments
-        !----------------------------------------------------------------------
-        integer(ip) :: i, j, ij ! counters
-        !----------------------------------------------------------------------
 
-        !
-        !     convert vg to vm, ug to wm
-        !
+        ! Local variables
+        integer(ip) :: i, j, ij ! counters
+
+        ! Convert vg to vm, ug to wm
         if (ig == 0) then
             do i=1, nlat
                 do j=1, nlon
@@ -414,12 +395,9 @@ contains
 
     end subroutine geo2mathv
 
-
-
     subroutine math2geov(ig, nlat, nlon, vm, wm, ug, vg, work)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
         integer(ip), intent(in)     :: ig
         integer(ip), intent(in)     :: nlon
         integer(ip), intent(in)     :: nlat
@@ -428,15 +406,11 @@ contains
         real(wp),    intent(out)    :: ug(nlon, nlat)
         real(wp),    intent(out)    :: vg(nlon, nlat)
         real(wp),    intent(inout)  :: work(*)
-        !----------------------------------------------------------------------
-        ! Dummy arguments
-        !----------------------------------------------------------------------
-        integer(ip) :: i, j, ij ! counters
-        !----------------------------------------------------------------------
 
-        !
-        !     convert vm to vg, wm to ug
-        !
+        ! Local variables
+        integer(ip) :: i, j, ij ! counters
+
+        ! Convert vm to vg, wm to ug
         if (ig == 0) then
             do i=1, nlat
                 do j=1, nlon

@@ -363,7 +363,7 @@ module module_vtsgs
         compute_gaussian_latitudes_and_weights
 
     ! Explicit typing only
-    implicit none
+    !implicit none
 
     ! Everything is private unless stated otherwise
     public :: vtsgs
@@ -371,139 +371,64 @@ module module_vtsgs
 
 contains
 
-    subroutine vtsgs(nlat, nlon, ityp, nt, vt, wt, idvw, jdvw, br, bi, cr, ci, &
-        mdab, ndab, wvts, lwvts, work, lwork, ierror)
+subroutine vtsgs(nlat,nlon,ityp,nt,vt,wt,idvw,jdvw,br,bi,cr,ci, &
+           mdab,ndab,wvts,lwvts,work,lwork,ierror)
+!
+dimension vt(idvw,jdvw,1),wt(idvw,jdvw,1),br(mdab,ndab,1), &
+          bi(mdab,ndab,1),cr(mdab,ndab,1),ci(mdab,ndab,1), &
+          work(1),wvts(1)
+ierror = 1
+if(nlat < 3) return
+ierror = 2
+if(nlon < 1) return
+ierror = 3
+if(ityp<0 .or. ityp>8) return
+ierror = 4
+if(nt < 0) return
+ierror = 5
+imid = (nlat+1)/2
+if((ityp<=2 .and. idvw<nlat) .or. &
+   (ityp>2 .and. idvw<imid)) return
+ierror = 6
+if(jdvw < nlon) return
+ierror = 7
+mmax = min(nlat,(nlon+1)/2)
+if(mdab < mmax) return
+ierror = 8
+if(ndab < nlat) return
+ierror = 9
+idz = (mmax*(nlat+nlat-mmax+1))/2
+lzimn = idz*imid
+if(lwvts < lzimn+lzimn+nlon+15) return
+ierror = 10
+idv = nlat
+if(ityp > 2) idv = imid
+lnl = nt*idv*nlon
+if(lwork < lnl+lnl+idv*nlon) return
+ierror = 0
+ist = 0
+if(ityp <= 2) ist = imid
+iw1 = ist+1
+iw2 = lnl+1
+iw3 = iw2+ist
+iw4 = iw2+lnl
+jw1 = lzimn+1
+jw2 = jw1+lzimn
+call vtsgs1(nlat,nlon,ityp,nt,imid,idvw,jdvw,vt,wt,mdab,ndab, &
+     br,bi,cr,ci,idv,work,work(iw1),work(iw2),work(iw3), &
+     work(iw4),idz,wvts,wvts(jw1),wvts(jw2))
 
-        real(wp) :: bi
-        real(wp) :: br
-        real(wp) :: ci
-        real(wp) :: cr
-        integer(ip) :: idv
-        integer(ip) :: idvw
-        integer(ip) :: idz
-        integer(ip) :: ierror
-        integer(ip) :: imid
-        integer(ip) :: ist
-        integer(ip) :: ityp
-        integer(ip) :: iw1
-        integer(ip) :: iw2
-        integer(ip) :: iw3
-        integer(ip) :: iw4
-        integer(ip) :: jdvw
-        integer(ip) :: jw1
-        integer(ip) :: jw2
-        integer(ip) :: lnl
-        integer(ip) :: lwork
-        integer(ip) :: lwvts
-        integer(ip) :: lzimn
-        integer(ip) :: mdab
-        integer(ip) :: mmax
-        integer(ip) :: ndab
-        integer(ip) :: nlat
-        integer(ip) :: nlon
-        integer(ip) :: nt
-        real(wp) :: vt
-        real(wp) :: work
-        real(wp) :: wt
-        real(wp) :: wvts
-        !
-        dimension vt(idvw, jdvw, nt), wt(idvw, jdvw, nt), br(mdab, ndab, nt), &
-            bi(mdab, ndab, nt), cr(mdab, ndab, nt), ci(mdab, ndab, nt), &
-            work(*), wvts(*)
+end subroutine vtsgs
 
-        ierror = 1
-        if (nlat < 3) return
-        ierror = 2
-        if (nlon < 1) return
-        ierror = 3
-        if (ityp<0 .or. ityp>8) return
-        ierror = 4
-        if (nt < 0) return
-        ierror = 5
-        imid = (nlat+1)/2
-        if ((ityp<=2 .and. idvw<nlat) .or. &
-            (ityp>2 .and. idvw<imid)) return
-        ierror = 6
-        if (jdvw < nlon) return
-        ierror = 7
-        mmax = min(nlat, (nlon+1)/2)
-        if (mdab < mmax) return
-        ierror = 8
-        if (ndab < nlat) return
-        ierror = 9
-        idz = (mmax*(nlat+nlat-mmax+1))/2
-        lzimn = idz*imid
-        if (lwvts < lzimn+lzimn+nlon+15) return
-        ierror = 10
-        idv = nlat
-        if (ityp > 2) idv = imid
-        lnl = nt*idv*nlon
-        if (lwork < lnl+lnl+idv*nlon) return
-        ierror = 0
-        ist = 0
-        if (ityp <= 2) ist = imid
-        iw1 = ist+1
-        iw2 = lnl+1
-        iw3 = iw2+ist
-        iw4 = iw2+lnl
-        jw1 = lzimn+1
-        jw2 = jw1+lzimn
-        call vtsgs1(nlat, nlon, ityp, nt, imid, idvw, jdvw, vt, wt, mdab, ndab, &
-            br, bi, cr, ci, idv, work, work(iw1), work(iw2), work(iw3), &
-            work(iw4), idz, wvts, wvts(jw1), wvts(jw2))
+subroutine vtsgs1(nlat,nlon,ityp,nt,imid,idvw,jdvw,vt,wt,mdab, &
+   ndab,br,bi,cr,ci,idv,vte,vto,wte,wto,work,idz,vb,wb,wrfft)
+dimension vt(idvw,jdvw,1),wt(idvw,jdvw,1),br(mdab,ndab,1), &
+          bi(mdab,ndab,1),cr(mdab,ndab,1),ci(mdab,ndab,1), &
+          vte(idv,nlon,1),vto(idv,nlon,1),wte(idv,nlon,1), &
+          wto(idv,nlon,1),work(1),wrfft(1), &
+          vb(imid,1),wb(imid,1)
 
-    end subroutine vtsgs
-
-    subroutine vtsgs1(nlat, nlon, ityp, nt, imid, idvw, jdvw, vt, wt, mdab, &
-        ndab, br, bi, cr, ci, idv, vte, vto, wte, wto, work, idz, vb, wb, wrfft)
-
-        real(wp) :: bi
-        real(wp) :: br
-        real(wp) :: ci
-        real(wp) :: cr
-        integer(ip) :: idv
-        integer(ip) :: idvw
-        integer(ip) :: idz
-        integer(ip) :: imid
-        integer(ip) :: imm1
-        integer(ip) :: ityp
-        integer(ip) :: jdvw
-        integer(ip) :: m
-        integer(ip) :: mb
-        integer(ip) :: mdab
-        integer(ip) :: mlat
-        integer(ip) :: mlon
-        integer(ip) :: mmax
-        integer(ip) :: mn
-        integer(ip) :: mp1
-        integer(ip) :: mp2
-        integer(ip) :: ndab
-        integer(ip) :: ndo1
-        integer(ip) :: ndo2
-        integer(ip) :: nlat
-        integer(ip) :: nlon
-        integer(ip) :: nlp1
-        integer(ip) :: np1
-        integer(ip) :: nt
-        real(wp) :: vb
-        real(wp) :: vt
-        real(wp) :: vte
-        real(wp) :: vto
-        real(wp) :: wb
-        real(wp) :: work
-        real(wp) :: wrfft
-        real(wp) :: wt
-        real(wp) :: wte
-        real(wp) :: wto
-        dimension vt(idvw, jdvw, *), wt(idvw, jdvw, *), br(mdab, ndab, *), &
-            bi(mdab, ndab, *), cr(mdab, ndab, *), ci(mdab, ndab, *), &
-            vte(idv, nlon, *), vto(idv, nlon, *), wte(idv, nlon, *), &
-            wto(idv, nlon, *), work(*), wrfft(*), &
-            vb(imid, *), wb(imid, *)
-
-        ! Local variables
-        integer(ip) :: i, j, k, itypp
-        type(SpherepackAux) :: sphere_aux
+type(SpherepackAux) :: sphere_aux
 
 nlp1 = nlat+1
 mlat = mod(nlat,2)
@@ -1010,108 +935,61 @@ vt(imid,j,k) = .5*vte(imid,j,k)
 wt(imid,j,k) = .5*wte(imid,j,k)
 65 continue
 return
+end subroutine vtsgs1
+subroutine vtsgsi(nlat,nlon,wvts,lwvts,work,lwork,dwork,ldwork, &
+                  ierror)
+!
+!     define imid = (nlat+1)/2 and mmax = min(nlat,(nlon+1)/2)
+!     the length of wvts is imid*mmax*(nlat+nlat-mmax+1)+nlon+15
+!     and the length of work is labc+5*nlat*imid+2*nlat where
+!     labc = 3*(max(mmax-2,0)*(nlat+nlat-mmax-1))/2
+!
+dimension wvts(lwvts),work(lwork)
+real dwork(ldwork)
+type(SpherepackAux) :: sphere_aux
 
+ierror = 1
+if(nlat < 3) return
+ierror = 2
+if(nlon < 1) return
+ierror = 3
+mmax = min(nlat,nlon/2+1)
+imid = (nlat+1)/2
+lzimn = (imid*mmax*(nlat+nlat-mmax+1))/2
+if(lwvts < lzimn+lzimn+nlon+15) return
+ierror = 4
+labc = 3*(max(mmax-2,0)*(nlat+nlat-mmax-1))/2
+lvin = 3*nlat*imid
+lwvbin = 2*nlat*imid+labc
+ltheta = nlat+nlat
+if(lwork < lvin+lwvbin+ltheta) return
+ierror = 5
+if (ldwork < 3*nlat+2) return
+ierror = 0
+iw1 = lvin+1
+iw2 = iw1+lwvbin
+jw1 = nlat+1
+jw2 = jw1+nlat
+call vetg1(nlat,nlon,imid,wvts,wvts(lzimn+1),work,work(iw1), &
+              dwork,dwork(jw1),dwork(jw2),ierror)
+if(ierror /= 0) return
+call sphere_aux%hfft%initialize(nlon,wvts(2*lzimn+1))
 
-    end subroutine vtsgs1
+end subroutine vtsgsi
 
-    subroutine vtsgsi(nlat, nlon, wvts, lwvts, work, lwork, dwork, ldwork, &
-        ierror)
+subroutine vetg1(nlat,nlon,imid,vb,wb,vin,wvbin, &
+                       theta,wts,dwork,ierror)
+dimension vb(imid,*),wb(imid,*),vin(imid,nlat,3),wvbin(*)
+real dwork(*),theta(*),wts(*)
+type(SpherepackAux) :: sphere_aux
 
-        integer(ip) :: ierror
-        integer(ip) :: imid
-        integer(ip) :: iw1
-        integer(ip) :: iw2
-        integer(ip) :: jw1
-        integer(ip) :: jw2
-        integer(ip) :: labc
-        integer(ip) :: ldwork
-        integer(ip) :: ltheta
-        integer(ip) :: lvin
-        integer(ip) :: lwork
-        integer(ip) :: lwvbin
-        integer(ip) :: lwvts
-        integer(ip) :: lzimn
-        integer(ip) :: mmax
-        integer(ip) :: nlat
-        integer(ip) :: nlon
-        !
-        !     define imid = (nlat+1)/2 and mmax = min(nlat, (nlon+1)/2)
-        !     the length of wvts is imid*mmax*(nlat+nlat-mmax+1)+nlon+15
-        !     and the length of work is labc+5*nlat*imid+2*nlat where
-        !     labc = 3*(max(mmax-2, 0)*(nlat+nlat-mmax-1))/2
-        !
-        real(wp) :: wvts(lwvts), work(lwork)
-        real(wp) :: dwork(ldwork)
-
-        ! Local variables
-        type(SpherepackAux) :: sphere_aux
-
-        ierror = 1
-        if (nlat < 3) return
-        ierror = 2
-        if (nlon < 1) return
-        ierror = 3
-        mmax = min(nlat, nlon/2+1)
-        imid = (nlat+1)/2
-        lzimn = (imid*mmax*(nlat+nlat-mmax+1))/2
-        if (lwvts < lzimn+lzimn+nlon+15) return
-        ierror = 4
-        labc = 3*(max(mmax-2, 0)*(nlat+nlat-mmax-1))/2
-        lvin = 3*nlat*imid
-        lwvbin = 2*nlat*imid+labc
-        ltheta = nlat+nlat
-        if (lwork < lvin+lwvbin+ltheta) return
-        ierror = 5
-        if (ldwork < 3*nlat+2) return
-        ierror = 0
-        iw1 = lvin+1
-        iw2 = iw1+lwvbin
-        jw1 = nlat+1
-        jw2 = jw1+nlat
-
-        call vetg1(nlat, nlon, imid, wvts, wvts(lzimn+1), work, work(iw1), &
-            dwork, dwork(jw1), dwork(jw2), ierror)
-
-        if (ierror /= 0) return
-
-        call sphere_aux%hfft%initialize(nlon, wvts(2*lzimn+1))
-
-    end subroutine vtsgsi
-
-    subroutine vetg1(nlat, nlon, imid, vb, wb, vin, wvbin, &
-        theta, wts, dwork, ierror)
-
-        integer(ip) :: i3
-        integer(ip) :: local_error_flag
-        integer(ip) :: ierror
-        integer(ip) :: imid
-        integer(ip) :: m
-        integer(ip) :: mn
-        integer(ip) :: mp1
-        integer(ip) :: nlat
-        integer(ip) :: nlon
-        integer(ip) :: np1
-        real(wp) :: vb
-        real(wp) :: vin
-        real(wp) :: wb
-        real(wp) :: wvbin
-        dimension vb(imid, *), wb(imid, *), vin(imid, nlat, 3), wvbin(*)
-        real(wp) :: dwork(*), theta(*), wts(*)
-
-        integer(ip) :: mmax, i
-        type(SpherepackAux) :: sphere_aux
-
-
-        ! Compute gaussian weights and latitudes
-        call compute_gaussian_latitudes_and_weights(nlat, theta, wts, local_error_flag)
-
-        ! Check error flag
-        if (local_error_flag /= 0) then
-            ierror = 10 + local_error_flag
-            return
-        end if
-
-call sphere_aux%vtgint(nlat,nlon,theta,wvbin,dwork)
+mmax = min(nlat,nlon/2+1)
+ldwork = 1
+call compute_gaussian_latitudes_and_weights(nlat,theta,wts,ierr)
+if(ierr == 0) go to 10
+ierror = 10+ierr
+return
+10 call sphere_aux%vtgint(nlat,nlon,theta,wvbin,dwork)
 do 33 mp1=1,mmax
 m = mp1-1
 call sphere_aux%vbin(0,nlat,nlon,m,vin,i3,wvbin)
@@ -1129,8 +1007,7 @@ mn = m*(nlat-1)-(m*(m-1))/2+np1
 do 34 i=1,imid
 wb(i,mn) = vin(i,np1,i3)
 34 continue
-return
 
-    end subroutine vetg1
+end subroutine vetg1
 
 end module module_vtsgs

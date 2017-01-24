@@ -414,32 +414,7 @@ contains
         !     set work space pointers for vector laplacian coefficients
         !
         select case (ityp)
-            case (0)
-                ibr = 1
-                ibi = ibr+mn
-                icr = ibi+mn
-                ici = icr+mn
-            case (3)
-                ibr = 1
-                ibi = ibr+mn
-                icr = ibi+mn
-                ici = icr+mn
-            case (6)
-                ibr = 1
-                ibi = ibr+mn
-                icr = ibi+mn
-                ici = icr+mn
-            case (1)
-                ibr = 1
-                ibi = ibr+mn
-                icr = ibi+mn
-                ici = icr
-            case (4)
-                ibr = 1
-                ibi = ibr+mn
-                icr = ibi+mn
-                ici = icr
-            case (7)
+            case (0:1, 3:4, 6:7)
                 ibr = 1
                 ibi = ibr+mn
                 icr = ibi+mn
@@ -450,16 +425,18 @@ contains
                 icr = ibi+mn
                 ici = icr+mn
         end select
+
         ifn = ici + mn
         iwk = ifn + nlat
         liwk = lwork-4*mn-nlat
-        call vlapes1(nlat, nlon, ityp, nt, vlap, wlap, idvw, jdvw, work(ibr), &
+
+        call vlapes_lower_routine(nlat, nlon, ityp, nt, vlap, wlap, idvw, jdvw, work(ibr), &
             work(ibi), work(icr), work(ici), mmax, work(ifn), mdbc, ndbc, br, bi, &
             cr, ci, wvhses, lvhses, work(iwk), liwk, ierror)
 
-    contains
+end subroutine vlapes
 
-        subroutine vlapes1(nlat, nlon, ityp, nt, vlap, wlap, idvw, jdvw, brlap, &
+        subroutine vlapes_lower_routine(nlat, nlon, ityp, nt, vlap, wlap, idvw, jdvw, brlap, &
             bilap, crlap, cilap, mmax, fnn, mdb, ndb, br, bi, cr, ci, wsave, lsave, &
             wk, lwk, ierror)
 
@@ -688,8 +665,6 @@ contains
             call vhses(nlat, nlon, ityp, nt, vlap, wlap, idvw, jdvw, brlap, bilap, &
                 crlap, cilap, mmax, nlat, wsave, lsave, wk, lwk, ierror)
 
-        end subroutine vlapes1
-
-    end subroutine vlapes
+        end subroutine vlapes_lower_routine
 
 end module module_vlapes
