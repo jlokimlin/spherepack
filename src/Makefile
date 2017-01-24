@@ -12,16 +12,16 @@ spherepack_precision.f90
 	$(FC) $(FFLAGS) -c spherepack_precision.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 
-geo2math.o: \
+geo2math_coordinate_transfer_routines.o: \
 spherepack_precision.o \
-geo2math.f90
-	$(FC) $(FFLAGS) -c geo2math.f90 $(LINKS)\
+geo2math_coordinate_transfer_routines.f90
+	$(FC) $(FFLAGS) -c geo2math_coordinate_transfer_routines.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 
-ihgeod.o: \
+icosahedral_geodesic_routines.o: \
 spherepack_precision.o \
-ihgeod.f90
-	$(FC) $(FFLAGS) -c ihgeod.f90 $(LINKS)\
+icosahedral_geodesic_routines.f90
+	$(FC) $(FFLAGS) -c icosahedral_geodesic_routines.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 
 type_FFTpack.o: \
@@ -745,13 +745,13 @@ spherepack_library.o: \
 spherepack_precision.o \
 divergence_routines.o \
 gaussian_latitudes_and_weights_routines.o \
-geo2math.o \
+geo2math_coordinate_transfer_routines.o \
 gradient_routines.o \
 idvtec.o \
 idvtes.o \
 idvtgc.o \
 idvtgs.o \
-ihgeod.o \
+icosahedral_geodesic_routines.o \
 isfvpec.o \
 isfvpes.o \
 isfvpgc.o \

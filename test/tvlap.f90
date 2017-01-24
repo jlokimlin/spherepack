@@ -7,7 +7,7 @@
 !     *                                                               *
 !     *                      all rights reserved                      *
 !     *                                                               *
-!     *                      SPHEREPACK version 3.2                   *
+!     *                      SPHEREPACK                               *
 !     *                                                               *
 !     *       A Package of Fortran77 Subroutines and Programs         *
 !     *                                                               *

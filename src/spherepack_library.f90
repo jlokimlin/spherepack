@@ -17,7 +17,7 @@ module spherepack_library
     use gaussian_latitudes_and_weights_routines, only: &
         compute_gaussian_latitudes_and_weights
 
-    use module_geo2math, only: &
+    use geo2math_coordinate_transfer_routines, only: &
         geo2maths, math2geos, geo2mathv, math2geov
 
     use gradient_routines, only: &
@@ -36,7 +36,7 @@ module spherepack_library
     use module_idvtgs, only: &
         idvtgs
 
-    use module_ihgeod, only: &
+    use icosahedral_geodesic_routines, only: &
         ihgeod
 
     use module_isfvpec, only: &

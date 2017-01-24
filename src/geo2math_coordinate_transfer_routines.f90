@@ -7,7 +7,7 @@
 !     *                                                               *
 !     *                      all rights reserved                      *
 !     *                                                               *
-!     *                      SPHEREPACK version 3.2                   *
+!     *                      SPHEREPACK                               *
 !     *                                                               *
 !     *       A Package of Fortran Subroutines and Programs           *
 !     *                                                               *
@@ -31,12 +31,12 @@
 !
 !
 !
-! ... geo2math.f
+! ... geo2math_coordinate_transfer_routines.f90
 !
-!     file geo2math.f contains subroutines for converting scalar and
+!     file geo2math_coordinate_transfer_routines.f90 contains subroutines for converting scalar and
 !     vector fields between geophysical and mathematical spherical
 !     coordinates.  The latter is required when using most spherepack
-!     software.  The four main subroutines in geo2math.f are described
+!     software.  The four main subroutines in geo2math_coordinate_transfer_routines.f90 are described
 !     as follows:
 !
 !     (1) subroutine geo2maths(ig, nlon, nlat, sg, sm, work)
@@ -227,7 +227,7 @@
 ! *** END OF DOCUMENTATION ... CODE FOLLOWS:
 !
 !
-module module_geo2math
+module geo2math_coordinate_transfer_routines
 
     use spherepack_precision, only: &
         wp, & ! working precision
@@ -243,15 +243,15 @@ module module_geo2math
 
 contains
 
-    subroutine geo2maths(ig, nlon, nlat, sg, sm, work)
+    pure subroutine geo2maths(ig, nlon, nlat, sg, sm, work)
 
         ! Dummy arguments
-        integer(ip), intent(in)     :: ig
-        integer(ip), intent(in)     :: nlon
-        integer(ip), intent(in)     :: nlat
-        real(wp),    intent(in)     :: sg(nlon, nlat)
-        real(wp),    intent(out)    :: sm(nlat, nlon)
-        real(wp),    intent(inout)  :: work(*)
+        integer(ip), intent(in)   :: ig
+        integer(ip), intent(in)   :: nlon
+        integer(ip), intent(in)   :: nlat
+        real(wp),    intent(in)   :: sg(nlon, nlat)
+        real(wp),    intent(out)  :: sm(nlat, nlon)
+        real(wp),    intent(out)  :: work(:)
 
         ! Local variables
         integer(ip) :: i, j, ij ! counters
@@ -284,15 +284,15 @@ contains
 
     end subroutine geo2maths
 
-    subroutine math2geos(ig, nlat, nlon, sm, sg, work)
+    pure subroutine math2geos(ig, nlat, nlon, sm, sg, work)
 
         ! Dummy arguments
-        integer(ip), intent(in)     :: ig
-        integer(ip), intent(in)     :: nlon
-        integer(ip), intent(in)     :: nlat
-        real(wp),    intent(in)     :: sm(nlon, nlat)
-        real(wp),    intent(out)    :: sg(nlat, nlon)
-        real(wp),    intent(inout)  :: work(*)
+        integer(ip), intent(in)   :: ig
+        integer(ip), intent(in)   :: nlon
+        integer(ip), intent(in)   :: nlat
+        real(wp),    intent(in)   :: sm(nlon, nlat)
+        real(wp),    intent(out)  :: sg(nlat, nlon)
+        real(wp),    intent(out)  :: work(:)
 
         ! Local variables
         integer(ip) :: i, j, ij ! counters
@@ -325,17 +325,17 @@ contains
 
     end subroutine math2geos
 
-    subroutine geo2mathv(ig, nlon, nlat, ug, vg, vm, wm, work)
+    pure subroutine geo2mathv(ig, nlon, nlat, ug, vg, vm, wm, work)
 
         ! Dummy arguments
-        integer(ip), intent(in)     :: ig
-        integer(ip), intent(in)     :: nlon
-        integer(ip), intent(in)     :: nlat
-        real(wp),    intent(in)     :: ug(nlon, nlat)
-        real(wp),    intent(in)     :: vg(nlon, nlat)
-        real(wp),    intent(out)    :: vm(nlat, nlon)
-        real(wp),    intent(out)    :: wm(nlat, nlon)
-        real(wp),    intent(inout)  :: work(*)
+        integer(ip), intent(in)   :: ig
+        integer(ip), intent(in)   :: nlon
+        integer(ip), intent(in)   :: nlat
+        real(wp),    intent(in)   :: ug(nlon, nlat)
+        real(wp),    intent(in)   :: vg(nlon, nlat)
+        real(wp),    intent(out)  :: vm(nlat, nlon)
+        real(wp),    intent(out)  :: wm(nlat, nlon)
+        real(wp),    intent(out)  :: work(:)
 
         ! Local variables
         integer(ip) :: i, j, ij ! counters
@@ -395,17 +395,17 @@ contains
 
     end subroutine geo2mathv
 
-    subroutine math2geov(ig, nlat, nlon, vm, wm, ug, vg, work)
+    pure subroutine math2geov(ig, nlat, nlon, vm, wm, ug, vg, work)
 
         ! Dummy arguments
-        integer(ip), intent(in)     :: ig
-        integer(ip), intent(in)     :: nlon
-        integer(ip), intent(in)     :: nlat
-        real(wp),    intent(in)     :: vm(nlat, nlon)
-        real(wp),    intent(in)     :: wm(nlat, nlon)
-        real(wp),    intent(out)    :: ug(nlon, nlat)
-        real(wp),    intent(out)    :: vg(nlon, nlat)
-        real(wp),    intent(inout)  :: work(*)
+        integer(ip), intent(in)   :: ig
+        integer(ip), intent(in)   :: nlon
+        integer(ip), intent(in)   :: nlat
+        real(wp),    intent(in)   :: vm(nlat, nlon)
+        real(wp),    intent(in)   :: wm(nlat, nlon)
+        real(wp),    intent(out)  :: ug(nlon, nlat)
+        real(wp),    intent(out)  :: vg(nlon, nlat)
+        real(wp),    intent(out)  :: work(:)
 
         ! Local variables
         integer(ip) :: i, j, ij ! counters
@@ -465,4 +465,4 @@ contains
 
     end subroutine math2geov
 
-end module module_geo2math
+end module geo2math_coordinate_transfer_routines
