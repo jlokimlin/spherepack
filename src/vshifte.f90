@@ -617,11 +617,6 @@ contains
         !
         !     initialize wsav for subroutine vhifth
         !
-        use type_RealPeriodicTransform, only: &
-            RealPeriodicTransform
-
-
-
         type(RealPeriodicTransform) :: hfft
         integer n, n2, k
         real wsav(*), dp

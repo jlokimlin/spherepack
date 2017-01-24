@@ -340,9 +340,6 @@ module module_vtsec
         wp, & ! working precision
         ip ! integer precision
 
-    use type_RealPeriodicTransform, only: &
-        RealPeriodicTransform
-
     use type_SpherepackAux, only: &
         SpherepackAux
 
@@ -353,50 +350,54 @@ module module_vtsec
     public :: vtsec
     public :: vtseci
 
+    ! Parameters confined to the module
+    real(wp), parameter :: ZERO = 0.0_wp
+    real(wp), parameter :: HALF = 0.5_wp
+    
 contains
 
     subroutine vtsec(nlat, nlon, ityp, nt, vt, wt, idvw, jdvw, br, bi, cr, ci, &
         mdab, ndab, wvts, lwvts, work, lwork, ierror)
 
-        real(wp) :: bi
-        real(wp) :: br
-        real(wp) :: ci
-        real(wp) :: cr
+        ! Dummy arguments
+        integer(ip), intent(in)  :: nlat
+        integer(ip), intent(in)  :: nlon
+        integer(ip), intent(in)  :: ityp
+        integer(ip), intent(in)  :: nt
+        real(wp),    intent(out) :: vt(idvw, jdvw, nt)
+        real(wp),    intent(out) :: wt(idvw, jdvw, nt)
+        integer(ip), intent(in)  :: idvw
+        integer(ip), intent(in)  :: jdvw
+        real(wp),    intent(in)  :: br(mdab, ndab, nt)
+        real(wp),    intent(in)  :: bi(mdab, ndab, nt)
+        real(wp),    intent(in)  :: cr(mdab, ndab, nt)
+        real(wp),    intent(in)  :: ci(mdab, ndab, nt)
+        integer(ip), intent(in)  :: mdab
+        integer(ip), intent(in)  :: ndab
+        real(wp),    intent(in)  :: wvts(lwvts)
+        integer(ip), intent(in)  :: lwvts
+        real(wp),    intent(out) :: work(lwork)
+        integer(ip), intent(in)  :: lwork
+        integer(ip), intent(out) :: ierror
+
+        ! Local variables
         integer(ip) :: idv
-        integer(ip) :: idvw
-        integer(ip) :: ierror
         integer(ip) :: imid
         integer(ip) :: ist
-        integer(ip) :: ityp
         integer(ip) :: iw1
         integer(ip) :: iw2
         integer(ip) :: iw3
         integer(ip) :: iw4
         integer(ip) :: iw5
-        integer(ip) :: jdvw
         integer(ip) :: jw1
         integer(ip) :: jw2
         integer(ip) :: labc
         integer(ip) :: lnl
-        integer(ip) :: lwork
-        integer(ip) :: lwvts
         integer(ip) :: lwzvin
         integer(ip) :: lzz1
-        integer(ip) :: mdab
         integer(ip) :: mmax
-        integer(ip) :: ndab
-        integer(ip) :: nlat
-        integer(ip) :: nlon
-        integer(ip) :: nt
-        real(wp) :: vt
-        real(wp) :: work
-        real(wp) :: wt
-        real(wp) :: wvts
-        dimension vt(idvw, jdvw, *), wt(idvw, jdvw, *), br(mdab, ndab, *), &
-            bi(mdab, ndab, *), cr(mdab, ndab, *), ci(mdab, ndab, *), &
-            work(*), wvts(*)
 
-
+        ! Check input arguments
         ierror = 1
         if (nlat < 3) return
         ierror = 2
@@ -427,10 +428,14 @@ contains
             lwork < imid*(2*nt*nlon+max(6*nlat, nlon))) return
         ierror = 0
         idv = nlat
+
         if (ityp > 2) idv = imid
+
         lnl = nt*idv*nlon
         ist = 0
+
         if (ityp <= 2) ist = imid
+
         iw1 = ist+1
         iw2 = lnl+1
         iw3 = iw2+ist
@@ -441,730 +446,681 @@ contains
         lwzvin = lzz1+labc
         jw1 = lwzvin+1
         jw2 = jw1+lwzvin
-        call vtsec1(nlat, nlon, ityp, nt, imid, idvw, jdvw, vt, wt, mdab, ndab, &
+
+        call vtsec_lower_routine(nlat, nlon, ityp, nt, imid, idvw, jdvw, vt, wt, mdab, ndab, &
             br, bi, cr, ci, idv, work, work(iw1), work(iw2), work(iw3), &
             work(iw4), work(iw5), wvts, wvts(jw1), wvts(jw2))
 
-    contains
-
-        subroutine vtsec1(nlat, nlon, ityp, nt, imid, idvw, jdvw, vt, wt, mdab, &
-            ndab, br, bi, cr, ci, idv, vte, vto, wte, wto, vb, wb, wvbin, wwbin, wrfft)
-
-            real(wp) :: bi
-            real(wp) :: br
-            real(wp) :: ci
-            real(wp) :: cr
-            integer(ip) :: i
-            integer(ip) :: idv
-            integer(ip) :: idvw
-            integer(ip) :: imid
-            integer(ip) :: imm1
-            integer(ip) :: ityp
-            integer(ip) :: iv
-            integer(ip) :: iw
-            integer(ip) :: j
-            integer(ip) :: jdvw
-            integer(ip) :: k
-            integer(ip) :: m
-            integer(ip) :: mdab
-            integer(ip) :: mlat
-            integer(ip) :: mlon
-            integer(ip) :: mmax
-            integer(ip) :: mp1
-            integer(ip) :: mp2
-            integer(ip) :: ndab
-            integer(ip) :: ndo1
-            integer(ip) :: ndo2
-            integer(ip) :: nlat
-            integer(ip) :: nlon
-            integer(ip) :: nlp1
-            integer(ip) :: np1
-            integer(ip) :: nt
-            real(wp) :: vb
-            real(wp) :: vt
-            real(wp) :: vte
-            real(wp) :: vto
-            real(wp) :: wb
-            real(wp) :: wrfft
-            real(wp) :: wt
-            real(wp) :: wte
-            real(wp) :: wto
-            real(wp) :: wvbin
-            real(wp) :: wwbin
-            dimension vt(idvw, jdvw, *), wt(idvw, jdvw, *), br(mdab, ndab, *), &
-                bi(mdab, ndab, *), cr(mdab, ndab, *), ci(mdab, ndab, *), &
-                vte(idv, nlon, *), vto(idv, nlon, *), wte(idv, nlon, *), &
-                wto(idv, nlon, *), wvbin(*), wwbin(*), wrfft(*), &
-                vb(imid, nlat, 3), wb(imid, nlat, 3)
-
-
-            type(RealPeriodicTransform)      :: hfft
-            type(SpherepackAux) :: sphere_aux
-
-            nlp1 = nlat+1
-            mlat = mod(nlat, 2)
-            mlon = mod(nlon, 2)
-            mmax = min(nlat, (nlon+1)/2)
-            imm1 = imid
-            if (mlat /= 0) imm1 = imid-1
-            do k=1, nt
-                do j=1, nlon
-                    do i=1, idv
-                        vte(i, j, k) = 0.
-                        wte(i, j, k) = 0.
-                    end do
-                end do
-            end do
-            ndo1 = nlat
-            ndo2 = nlat
-            if (mlat /= 0) ndo1 = nlat-1
-            if (mlat == 0) ndo2 = nlat-1
-
-            select case (ityp)
-                case (0)
-                    goto 1
-                case (1)
-                    goto 100
-                case (2)
-                    goto 200
-                case (3)
-                    goto 300
-                case (4)
-                    goto 400
-                case (5)
-                    goto 500
-                case (6)
-                    goto 600
-                case (7)
-                    goto 700
-                case (8)
-                    goto 800
-            end select
-            !
-            !     case ityp=0   no symmetries
-            !
-1           call sphere_aux%vbin(0, nlat, nlon, 0, vb, iv, wvbin)
-            !
-            !     case m = 0
-            !
-            do k=1, nt
-                do np1=2, ndo2, 2
-                    do i=1, imm1
-                        vto(i, 1, k)=vto(i, 1, k)+br(1, np1, k)*vb(i, np1, iv)
-                        wto(i, 1, k)=wto(i, 1, k)-cr(1, np1, k)*vb(i, np1, iv)
-15                  continue
-                    end do
-                end do
-            end do
-            do k=1, nt
-                do np1=3, ndo1, 2
-                    do i=1, imid
-                        vte(i, 1, k)=vte(i, 1, k)+br(1, np1, k)*vb(i, np1, iv)
-                        wte(i, 1, k)=wte(i, 1, k)-cr(1, np1, k)*vb(i, np1, iv)
-16                  continue
-                    end do
-                end do
-            end do
-            !
-            !     case m = 1 through nlat-1
-            !
-            if (mmax < 2) goto 950
-            do mp1=2, mmax
-                m = mp1-1
-                mp2 = mp1+1
-                call sphere_aux%vbin(0, nlat, nlon, m, vb, iv, wvbin)
-                call sphere_aux%wbin(0, nlat, nlon, m, wb, iw, wwbin)
-                if (mp1 > ndo1) goto 26
-                do k=1, nt
-                    do np1=mp1, ndo1, 2
-                        do i=1, imm1
-                            vte(i, 2*mp1-2, k) = vte(i, 2*mp1-2, k)+br(mp1, np1, k)*vb(i, np1, iv)
-                            vto(i, 2*mp1-2, k) = vto(i, 2*mp1-2, k)-ci(mp1, np1, k)*wb(i, np1, iw)
-                            vte(i, 2*mp1-1, k) = vte(i, 2*mp1-1, k)+bi(mp1, np1, k)*vb(i, np1, iv)
-                            vto(i, 2*mp1-1, k) = vto(i, 2*mp1-1, k)+cr(mp1, np1, k)*wb(i, np1, iw)
-                            wte(i, 2*mp1-2, k) = wte(i, 2*mp1-2, k)-cr(mp1, np1, k)*vb(i, np1, iv)
-                            wto(i, 2*mp1-2, k) = wto(i, 2*mp1-2, k)-bi(mp1, np1, k)*wb(i, np1, iw)
-                            wte(i, 2*mp1-1, k) = wte(i, 2*mp1-1, k)-ci(mp1, np1, k)*vb(i, np1, iv)
-                            wto(i, 2*mp1-1, k) = wto(i, 2*mp1-1, k)+br(mp1, np1, k)*wb(i, np1, iw)
-23                      continue
-                        end do
-                        if (mlat == 0) goto 24
-                        vte(imid, 2*mp1-2, k) = vte(imid, 2*mp1-2, k) &
-                            +br(mp1, np1, k)*vb(imid, np1, iv)
-                        vte(imid, 2*mp1-1, k) = vte(imid, 2*mp1-1, k) &
-                            +bi(mp1, np1, k)*vb(imid, np1, iv)
-                        wte(imid, 2*mp1-2, k) = wte(imid, 2*mp1-2, k) &
-                            -cr(mp1, np1, k)*vb(imid, np1, iv)
-                        wte(imid, 2*mp1-1, k) = wte(imid, 2*mp1-1, k) &
-                            -ci(mp1, np1, k)*vb(imid, np1, iv)
-24                  continue
-                    end do
-25              continue
-                end do
-26              if (mp2 > ndo2) goto 30
-                do k=1, nt
-                    do np1=mp2, ndo2, 2
-                        do i=1, imm1
-                            vto(i, 2*mp1-2, k) = vto(i, 2*mp1-2, k)+br(mp1, np1, k)*vb(i, np1, iv)
-                            vte(i, 2*mp1-2, k) = vte(i, 2*mp1-2, k)-ci(mp1, np1, k)*wb(i, np1, iw)
-                            vto(i, 2*mp1-1, k) = vto(i, 2*mp1-1, k)+bi(mp1, np1, k)*vb(i, np1, iv)
-                            vte(i, 2*mp1-1, k) = vte(i, 2*mp1-1, k)+cr(mp1, np1, k)*wb(i, np1, iw)
-                            wto(i, 2*mp1-2, k) = wto(i, 2*mp1-2, k)-cr(mp1, np1, k)*vb(i, np1, iv)
-                            wte(i, 2*mp1-2, k) = wte(i, 2*mp1-2, k)-bi(mp1, np1, k)*wb(i, np1, iw)
-                            wto(i, 2*mp1-1, k) = wto(i, 2*mp1-1, k)-ci(mp1, np1, k)*vb(i, np1, iv)
-                            wte(i, 2*mp1-1, k) = wte(i, 2*mp1-1, k)+br(mp1, np1, k)*wb(i, np1, iw)
-27                      continue
-                        end do
-                        if (mlat == 0) goto 28
-                        vte(imid, 2*mp1-2, k) = vte(imid, 2*mp1-2, k) &
-                            -ci(mp1, np1, k)*wb(imid, np1, iw)
-                        vte(imid, 2*mp1-1, k) = vte(imid, 2*mp1-1, k) &
-                            +cr(mp1, np1, k)*wb(imid, np1, iw)
-                        wte(imid, 2*mp1-2, k) = wte(imid, 2*mp1-2, k) &
-                            -bi(mp1, np1, k)*wb(imid, np1, iw)
-                        wte(imid, 2*mp1-1, k) = wte(imid, 2*mp1-1, k) &
-                            +br(mp1, np1, k)*wb(imid, np1, iw)
-28                  continue
-                    end do
-29              continue
-                end do
-30          continue
-            end do
-            goto 950
-            !
-            !     case ityp=1   no symmetries,  cr and ci equal zero
-            !
-100         call sphere_aux%vbin(0, nlat, nlon, 0, vb, iv, wvbin)
-            !
-            !     case m = 0
-            !
-            do k=1, nt
-                do np1=2, ndo2, 2
-                    do i=1, imm1
-                        vto(i, 1, k)=vto(i, 1, k)+br(1, np1, k)*vb(i, np1, iv)
-115                 continue
-                    end do
-                end do
-            end do
-            do k=1, nt
-                do np1=3, ndo1, 2
-                    do i=1, imid
-                        vte(i, 1, k)=vte(i, 1, k)+br(1, np1, k)*vb(i, np1, iv)
-116                 continue
-                    end do
-                end do
-            end do
-            !
-            !     case m = 1 through nlat-1
-            !
-            if (mmax < 2) goto 950
-            do mp1=2, mmax
-                m = mp1-1
-                mp2 = mp1+1
-                call sphere_aux%vbin(0, nlat, nlon, m, vb, iv, wvbin)
-                call sphere_aux%wbin(0, nlat, nlon, m, wb, iw, wwbin)
-                if (mp1 > ndo1) goto 126
-                do k=1, nt
-                    do np1=mp1, ndo1, 2
-                        do i=1, imm1
-                            vte(i, 2*mp1-2, k) = vte(i, 2*mp1-2, k)+br(mp1, np1, k)*vb(i, np1, iv)
-                            vte(i, 2*mp1-1, k) = vte(i, 2*mp1-1, k)+bi(mp1, np1, k)*vb(i, np1, iv)
-                            wto(i, 2*mp1-2, k) = wto(i, 2*mp1-2, k)-bi(mp1, np1, k)*wb(i, np1, iw)
-                            wto(i, 2*mp1-1, k) = wto(i, 2*mp1-1, k)+br(mp1, np1, k)*wb(i, np1, iw)
-123                     continue
-                        end do
-                        if (mlat == 0) goto 124
-                        vte(imid, 2*mp1-2, k) = vte(imid, 2*mp1-2, k) &
-                            +br(mp1, np1, k)*vb(imid, np1, iv)
-                        vte(imid, 2*mp1-1, k) = vte(imid, 2*mp1-1, k) &
-                            +bi(mp1, np1, k)*vb(imid, np1, iv)
-124                 continue
-                    end do
-125             continue
-                end do
-126             if (mp2 > ndo2) goto 130
-                do k=1, nt
-                    do np1=mp2, ndo2, 2
-                        do i=1, imm1
-                            vto(i, 2*mp1-2, k) = vto(i, 2*mp1-2, k)+br(mp1, np1, k)*vb(i, np1, iv)
-                            vto(i, 2*mp1-1, k) = vto(i, 2*mp1-1, k)+bi(mp1, np1, k)*vb(i, np1, iv)
-                            wte(i, 2*mp1-2, k) = wte(i, 2*mp1-2, k)-bi(mp1, np1, k)*wb(i, np1, iw)
-                            wte(i, 2*mp1-1, k) = wte(i, 2*mp1-1, k)+br(mp1, np1, k)*wb(i, np1, iw)
-127                     continue
-                        end do
-                        if (mlat == 0) goto 128
-                        wte(imid, 2*mp1-2, k) = wte(imid, 2*mp1-2, k) &
-                            -bi(mp1, np1, k)*wb(imid, np1, iw)
-                        wte(imid, 2*mp1-1, k) = wte(imid, 2*mp1-1, k) &
-                            +br(mp1, np1, k)*wb(imid, np1, iw)
-128                 continue
-                    end do
-129             continue
-                end do
-130         continue
-            end do
-            goto 950
-            !
-            !     case ityp=2   no symmetries,  br and bi are equal to zero
-            !
-200         call sphere_aux%vbin(0, nlat, nlon, 0, vb, iv, wvbin)
-            !
-            !     case m = 0
-            !
-            do k=1, nt
-                do np1=2, ndo2, 2
-                    do i=1, imm1
-                        wto(i, 1, k)=wto(i, 1, k)-cr(1, np1, k)*vb(i, np1, iv)
-215                 continue
-                    end do
-                end do
-            end do
-            do k=1, nt
-                do np1=3, ndo1, 2
-                    do i=1, imid
-                        wte(i, 1, k)=wte(i, 1, k)-cr(1, np1, k)*vb(i, np1, iv)
-216                 continue
-                    end do
-                end do
-            end do
-            !
-            !     case m = 1 through nlat-1
-            !
-            if (mmax < 2) goto 950
-            do mp1=2, mmax
-                m = mp1-1
-                mp2 = mp1+1
-                call sphere_aux%vbin(0, nlat, nlon, m, vb, iv, wvbin)
-                call sphere_aux%wbin(0, nlat, nlon, m, wb, iw, wwbin)
-                if (mp1 > ndo1) goto 226
-                do k=1, nt
-                    do np1=mp1, ndo1, 2
-                        do i=1, imm1
-                            vto(i, 2*mp1-2, k) = vto(i, 2*mp1-2, k)-ci(mp1, np1, k)*wb(i, np1, iw)
-                            vto(i, 2*mp1-1, k) = vto(i, 2*mp1-1, k)+cr(mp1, np1, k)*wb(i, np1, iw)
-                            wte(i, 2*mp1-2, k) = wte(i, 2*mp1-2, k)-cr(mp1, np1, k)*vb(i, np1, iv)
-                            wte(i, 2*mp1-1, k) = wte(i, 2*mp1-1, k)-ci(mp1, np1, k)*vb(i, np1, iv)
-223                     continue
-                        end do
-                        if (mlat == 0) goto 224
-                        wte(imid, 2*mp1-2, k) = wte(imid, 2*mp1-2, k) &
-                            -cr(mp1, np1, k)*vb(imid, np1, iv)
-                        wte(imid, 2*mp1-1, k) = wte(imid, 2*mp1-1, k) &
-                            -ci(mp1, np1, k)*vb(imid, np1, iv)
-224                 continue
-                    end do
-225             continue
-                end do
-226             if (mp2 > ndo2) goto 230
-                do k=1, nt
-                    do np1=mp2, ndo2, 2
-                        do i=1, imm1
-                            vte(i, 2*mp1-2, k) = vte(i, 2*mp1-2, k)-ci(mp1, np1, k)*wb(i, np1, iw)
-                            vte(i, 2*mp1-1, k) = vte(i, 2*mp1-1, k)+cr(mp1, np1, k)*wb(i, np1, iw)
-                            wto(i, 2*mp1-2, k) = wto(i, 2*mp1-2, k)-cr(mp1, np1, k)*vb(i, np1, iv)
-                            wto(i, 2*mp1-1, k) = wto(i, 2*mp1-1, k)-ci(mp1, np1, k)*vb(i, np1, iv)
-227                     continue
-                        end do
-                        if (mlat == 0) goto 228
-                        vte(imid, 2*mp1-2, k) = vte(imid, 2*mp1-2, k) &
-                            -ci(mp1, np1, k)*wb(imid, np1, iw)
-                        vte(imid, 2*mp1-1, k) = vte(imid, 2*mp1-1, k) &
-                            +cr(mp1, np1, k)*wb(imid, np1, iw)
-228                 continue
-                    end do
-229             continue
-                end do
-230         continue
-            end do
-            goto 950
-            !
-            !     case ityp=3   v odd,  w even
-            !
-300         call sphere_aux%vbin(0, nlat, nlon, 0, vb, iv, wvbin)
-            !
-            !     case m = 0
-            !
-            do k=1, nt
-                do np1=2, ndo2, 2
-                    do i=1, imm1
-                        vto(i, 1, k)=vto(i, 1, k)+br(1, np1, k)*vb(i, np1, iv)
-315                 continue
-                    end do
-                end do
-            end do
-            do k=1, nt
-                do np1=3, ndo1, 2
-                    do i=1, imid
-                        wte(i, 1, k)=wte(i, 1, k)-cr(1, np1, k)*vb(i, np1, iv)
-316                 continue
-                    end do
-                end do
-            end do
-            !
-            !     case m = 1 through nlat-1
-            !
-            if (mmax < 2) goto 950
-            do mp1=2, mmax
-                m = mp1-1
-                mp2 = mp1+1
-                call sphere_aux%vbin(0, nlat, nlon, m, vb, iv, wvbin)
-                call sphere_aux%wbin(0, nlat, nlon, m, wb, iw, wwbin)
-                if (mp1 > ndo1) goto 326
-                do k=1, nt
-                    do np1=mp1, ndo1, 2
-                        do i=1, imm1
-                            vto(i, 2*mp1-2, k) = vto(i, 2*mp1-2, k)-ci(mp1, np1, k)*wb(i, np1, iw)
-                            vto(i, 2*mp1-1, k) = vto(i, 2*mp1-1, k)+cr(mp1, np1, k)*wb(i, np1, iw)
-                            wte(i, 2*mp1-2, k) = wte(i, 2*mp1-2, k)-cr(mp1, np1, k)*vb(i, np1, iv)
-                            wte(i, 2*mp1-1, k) = wte(i, 2*mp1-1, k)-ci(mp1, np1, k)*vb(i, np1, iv)
-323                     continue
-                        end do
-                        if (mlat == 0) goto 324
-                        wte(imid, 2*mp1-2, k) = wte(imid, 2*mp1-2, k) &
-                            -cr(mp1, np1, k)*vb(imid, np1, iv)
-                        wte(imid, 2*mp1-1, k) = wte(imid, 2*mp1-1, k) &
-                            -ci(mp1, np1, k)*vb(imid, np1, iv)
-324                 continue
-                    end do
-325             continue
-                end do
-326             if (mp2 > ndo2) goto 330
-                do k=1, nt
-                    do np1=mp2, ndo2, 2
-                        do i=1, imm1
-                            vto(i, 2*mp1-2, k) = vto(i, 2*mp1-2, k)+br(mp1, np1, k)*vb(i, np1, iv)
-                            vto(i, 2*mp1-1, k) = vto(i, 2*mp1-1, k)+bi(mp1, np1, k)*vb(i, np1, iv)
-                            wte(i, 2*mp1-2, k) = wte(i, 2*mp1-2, k)-bi(mp1, np1, k)*wb(i, np1, iw)
-                            wte(i, 2*mp1-1, k) = wte(i, 2*mp1-1, k)+br(mp1, np1, k)*wb(i, np1, iw)
-327                     continue
-                        end do
-                        if (mlat == 0) goto 328
-                        wte(imid, 2*mp1-2, k) = wte(imid, 2*mp1-2, k) &
-                            -bi(mp1, np1, k)*wb(imid, np1, iw)
-                        wte(imid, 2*mp1-1, k) = wte(imid, 2*mp1-1, k) &
-                            +br(mp1, np1, k)*wb(imid, np1, iw)
-328                 continue
-                    end do
-329             continue
-                end do
-330         continue
-            end do
-            goto 950
-            !
-            !     case ityp=4   v odd,  w even, and both cr and ci equal zero
-            !
-400         call sphere_aux%vbin(1, nlat, nlon, 0, vb, iv, wvbin)
-            !
-            !     case m = 0
-            !
-            do k=1, nt
-                do np1=2, ndo2, 2
-                    do i=1, imm1
-                        vto(i, 1, k)=vto(i, 1, k)+br(1, np1, k)*vb(i, np1, iv)
-415                 continue
-                    end do
-                end do
-            end do
-            !
-            !     case m = 1 through nlat-1
-            !
-            if (mmax < 2) goto 950
-            do mp1=2, mmax
-                m = mp1-1
-                mp2 = mp1+1
-                call sphere_aux%vbin(1, nlat, nlon, m, vb, iv, wvbin)
-                call sphere_aux%wbin(1, nlat, nlon, m, wb, iw, wwbin)
-                if (mp2 > ndo2) goto 430
-                do k=1, nt
-                    do np1=mp2, ndo2, 2
-                        do i=1, imm1
-                            vto(i, 2*mp1-2, k) = vto(i, 2*mp1-2, k)+br(mp1, np1, k)*vb(i, np1, iv)
-                            vto(i, 2*mp1-1, k) = vto(i, 2*mp1-1, k)+bi(mp1, np1, k)*vb(i, np1, iv)
-                            wte(i, 2*mp1-2, k) = wte(i, 2*mp1-2, k)-bi(mp1, np1, k)*wb(i, np1, iw)
-                            wte(i, 2*mp1-1, k) = wte(i, 2*mp1-1, k)+br(mp1, np1, k)*wb(i, np1, iw)
-427                     continue
-                        end do
-                        if (mlat == 0) goto 428
-                        wte(imid, 2*mp1-2, k) = wte(imid, 2*mp1-2, k) &
-                            -bi(mp1, np1, k)*wb(imid, np1, iw)
-                        wte(imid, 2*mp1-1, k) = wte(imid, 2*mp1-1, k) &
-                            +br(mp1, np1, k)*wb(imid, np1, iw)
-428                 continue
-                    end do
-429             continue
-                end do
-430         continue
-            end do
-            goto 950
-            !
-            !     case ityp=5   v odd,  w even,     br and bi equal zero
-            !
-500         call sphere_aux%vbin(2, nlat, nlon, 0, vb, iv, wvbin)
-            !
-            !     case m = 0
-            !
-            do k=1, nt
-                do np1=3, ndo1, 2
-                    do i=1, imid
-                        wte(i, 1, k)=wte(i, 1, k)-cr(1, np1, k)*vb(i, np1, iv)
-516                 continue
-                    end do
-                end do
-            end do
-            !
-            !     case m = 1 through nlat-1
-            !
-            if (mmax < 2) goto 950
-            do mp1=2, mmax
-                m = mp1-1
-                mp2 = mp1+1
-                call sphere_aux%vbin(2, nlat, nlon, m, vb, iv, wvbin)
-                call sphere_aux%wbin(2, nlat, nlon, m, wb, iw, wwbin)
-                if (mp1 > ndo1) goto 530
-                do k=1, nt
-                    do np1=mp1, ndo1, 2
-                        do i=1, imm1
-                            vto(i, 2*mp1-2, k) = vto(i, 2*mp1-2, k)-ci(mp1, np1, k)*wb(i, np1, iw)
-                            vto(i, 2*mp1-1, k) = vto(i, 2*mp1-1, k)+cr(mp1, np1, k)*wb(i, np1, iw)
-                            wte(i, 2*mp1-2, k) = wte(i, 2*mp1-2, k)-cr(mp1, np1, k)*vb(i, np1, iv)
-                            wte(i, 2*mp1-1, k) = wte(i, 2*mp1-1, k)-ci(mp1, np1, k)*vb(i, np1, iv)
-523                     continue
-                        end do
-                        if (mlat == 0) goto 524
-                        wte(imid, 2*mp1-2, k) = wte(imid, 2*mp1-2, k) &
-                            -cr(mp1, np1, k)*vb(imid, np1, iv)
-                        wte(imid, 2*mp1-1, k) = wte(imid, 2*mp1-1, k) &
-                            -ci(mp1, np1, k)*vb(imid, np1, iv)
-524                 continue
-                    end do
-525             continue
-                end do
-530         continue
-            end do
-            goto 950
-            !
-            !     case ityp=6   v even  ,  w odd
-            !
-600         call sphere_aux%vbin(0, nlat, nlon, 0, vb, iv, wvbin)
-            !
-            !     case m = 0
-            !
-            do k=1, nt
-                do np1=2, ndo2, 2
-                    do i=1, imm1
-                        wto(i, 1, k)=wto(i, 1, k)-cr(1, np1, k)*vb(i, np1, iv)
-615                 continue
-                    end do
-                end do
-            end do
-            do k=1, nt
-                do np1=3, ndo1, 2
-                    do i=1, imid
-                        vte(i, 1, k)=vte(i, 1, k)+br(1, np1, k)*vb(i, np1, iv)
-616                 continue
-                    end do
-                end do
-            end do
-            !
-            !     case m = 1 through nlat-1
-            !
-            if (mmax < 2) goto 950
-            do mp1=2, mmax
-                m = mp1-1
-                mp2 = mp1+1
-                call sphere_aux%vbin(0, nlat, nlon, m, vb, iv, wvbin)
-                call sphere_aux%wbin(0, nlat, nlon, m, wb, iw, wwbin)
-                if (mp1 > ndo1) goto 626
-                do k=1, nt
-                    do np1=mp1, ndo1, 2
-                        do i=1, imm1
-                            vte(i, 2*mp1-2, k) = vte(i, 2*mp1-2, k)+br(mp1, np1, k)*vb(i, np1, iv)
-                            vte(i, 2*mp1-1, k) = vte(i, 2*mp1-1, k)+bi(mp1, np1, k)*vb(i, np1, iv)
-                            wto(i, 2*mp1-2, k) = wto(i, 2*mp1-2, k)-bi(mp1, np1, k)*wb(i, np1, iw)
-                            wto(i, 2*mp1-1, k) = wto(i, 2*mp1-1, k)+br(mp1, np1, k)*wb(i, np1, iw)
-623                     continue
-                        end do
-                        if (mlat == 0) goto 624
-                        vte(imid, 2*mp1-2, k) = vte(imid, 2*mp1-2, k) &
-                            +br(mp1, np1, k)*vb(imid, np1, iv)
-                        vte(imid, 2*mp1-1, k) = vte(imid, 2*mp1-1, k) &
-                            +bi(mp1, np1, k)*vb(imid, np1, iv)
-624                 continue
-                    end do
-625             continue
-                end do
-626             if (mp2 > ndo2) goto 630
-                do k=1, nt
-                    do np1=mp2, ndo2, 2
-                        do i=1, imm1
-                            vte(i, 2*mp1-2, k) = vte(i, 2*mp1-2, k)-ci(mp1, np1, k)*wb(i, np1, iw)
-                            vte(i, 2*mp1-1, k) = vte(i, 2*mp1-1, k)+cr(mp1, np1, k)*wb(i, np1, iw)
-                            wto(i, 2*mp1-2, k) = wto(i, 2*mp1-2, k)-cr(mp1, np1, k)*vb(i, np1, iv)
-                            wto(i, 2*mp1-1, k) = wto(i, 2*mp1-1, k)-ci(mp1, np1, k)*vb(i, np1, iv)
-627                     continue
-                        end do
-                        if (mlat == 0) goto 628
-                        vte(imid, 2*mp1-2, k) = vte(imid, 2*mp1-2, k) &
-                            -ci(mp1, np1, k)*wb(imid, np1, iw)
-                        vte(imid, 2*mp1-1, k) = vte(imid, 2*mp1-1, k) &
-                            +cr(mp1, np1, k)*wb(imid, np1, iw)
-628                 continue
-                    end do
-629             continue
-                end do
-630         continue
-            end do
-            goto 950
-            !
-            !     case ityp=7   v even, w odd   cr and ci equal zero
-            !
-700         call sphere_aux%vbin(2, nlat, nlon, 0, vb, iv, wvbin)
-            !
-            !     case m = 0
-            !
-            do k=1, nt
-                do np1=3, ndo1, 2
-                    do i=1, imid
-                        vte(i, 1, k)=vte(i, 1, k)+br(1, np1, k)*vb(i, np1, iv)
-716                 continue
-                    end do
-                end do
-            end do
-            !
-            !     case m = 1 through nlat-1
-            !
-            if (mmax < 2) goto 950
-            do mp1=2, mmax
-                m = mp1-1
-                mp2 = mp1+1
-                call sphere_aux%vbin(2, nlat, nlon, m, vb, iv, wvbin)
-                call sphere_aux%wbin(2, nlat, nlon, m, wb, iw, wwbin)
-                if (mp1 > ndo1) goto 730
-                do k=1, nt
-                    do np1=mp1, ndo1, 2
-                        do i=1, imm1
-                            vte(i, 2*mp1-2, k) = vte(i, 2*mp1-2, k)+br(mp1, np1, k)*vb(i, np1, iv)
-                            vte(i, 2*mp1-1, k) = vte(i, 2*mp1-1, k)+bi(mp1, np1, k)*vb(i, np1, iv)
-                            wto(i, 2*mp1-2, k) = wto(i, 2*mp1-2, k)-bi(mp1, np1, k)*wb(i, np1, iw)
-                            wto(i, 2*mp1-1, k) = wto(i, 2*mp1-1, k)+br(mp1, np1, k)*wb(i, np1, iw)
-723                     continue
-                        end do
-                        if (mlat == 0) goto 724
-                        vte(imid, 2*mp1-2, k) = vte(imid, 2*mp1-2, k) &
-                            +br(mp1, np1, k)*vb(imid, np1, iv)
-                        vte(imid, 2*mp1-1, k) = vte(imid, 2*mp1-1, k) &
-                            +bi(mp1, np1, k)*vb(imid, np1, iv)
-724                 continue
-                    end do
-725             continue
-                end do
-730         continue
-            end do
-            goto 950
-            !
-            !     case ityp=8   v even,  w odd   br and bi equal zero
-            !
-800         call sphere_aux%vbin(1, nlat, nlon, 0, vb, iv, wvbin)
-            !
-            !     case m = 0
-            !
-            do k=1, nt
-                do np1=2, ndo2, 2
-                    do i=1, imm1
-                        wto(i, 1, k)=wto(i, 1, k)-cr(1, np1, k)*vb(i, np1, iv)
-815                 continue
-                    end do
-                end do
-            end do
-            !
-            !     case m = 1 through nlat-1
-            !
-            if (mmax < 2) goto 950
-            do mp1=2, mmax
-                m = mp1-1
-                mp2 = mp1+1
-                call sphere_aux%vbin(1, nlat, nlon, m, vb, iv, wvbin)
-                call sphere_aux%wbin(1, nlat, nlon, m, wb, iw, wwbin)
-                if (mp2 > ndo2) goto 830
-                do k=1, nt
-                    do np1=mp2, ndo2, 2
-                        do i=1, imm1
-                            vte(i, 2*mp1-2, k) = vte(i, 2*mp1-2, k)-ci(mp1, np1, k)*wb(i, np1, iw)
-                            vte(i, 2*mp1-1, k) = vte(i, 2*mp1-1, k)+cr(mp1, np1, k)*wb(i, np1, iw)
-                            wto(i, 2*mp1-2, k) = wto(i, 2*mp1-2, k)-cr(mp1, np1, k)*vb(i, np1, iv)
-                            wto(i, 2*mp1-1, k) = wto(i, 2*mp1-1, k)-ci(mp1, np1, k)*vb(i, np1, iv)
-827                     continue
-                        end do
-                        if (mlat == 0) goto 828
-                        vte(imid, 2*mp1-2, k) = vte(imid, 2*mp1-2, k) &
-                            -ci(mp1, np1, k)*wb(imid, np1, iw)
-                        vte(imid, 2*mp1-1, k) = vte(imid, 2*mp1-1, k) &
-                            +cr(mp1, np1, k)*wb(imid, np1, iw)
-828                 continue
-                    end do
-829             continue
-                end do
-830         continue
-            end do
-            950 do k=1, nt
-                call hfft%backward(idv, nlon, vte(1, 1, k), idv, wrfft, vb)
-                call hfft%backward(idv, nlon, wte(1, 1, k), idv, wrfft, vb)
-14          continue
-            end do
-            if (ityp > 2) goto 12
-            do k=1, nt
-                do j=1, nlon
-                    do i=1, imm1
-                        vt(i, j, k) = .5*(vte(i, j, k)+vto(i, j, k))
-                        wt(i, j, k) = .5*(wte(i, j, k)+wto(i, j, k))
-                        vt(nlp1-i, j, k) = .5*(vte(i, j, k)-vto(i, j, k))
-                        wt(nlp1-i, j, k) = .5*(wte(i, j, k)-wto(i, j, k))
-60                  continue
-                    end do
-                end do
-            end do
-            goto 13
-            12 do k=1, nt
-                do j=1, nlon
-                    do i=1, imm1
-                        vt(i, j, k) = .5*vte(i, j, k)
-                        wt(i, j, k) = .5*wte(i, j, k)
-11                  continue
-                    end do
-                end do
-            end do
-13          if (mlat == 0) return
-            do k=1, nt
-                do j=1, nlon
-                    vt(imid, j, k) = .5*vte(imid, j, k)
-                    wt(imid, j, k) = .5*wte(imid, j, k)
-65              continue
-                end do
-            end do
-
-        end subroutine vtsec1
-
     end subroutine vtsec
 
+    subroutine vtsec_lower_routine(nlat, nlon, ityp, nt, imid, idvw, jdvw, vt, wt, mdab, &
+        ndab, br, bi, cr, ci, idv, vte, vto, wte, wto, vb, wb, wvbin, wwbin, wrfft)
+
+        real(wp) :: bi
+        real(wp) :: br
+        real(wp) :: ci
+        real(wp) :: cr
+        integer(ip) :: i
+        integer(ip) :: idv
+        integer(ip) :: idvw
+        integer(ip) :: imid
+        integer(ip) :: imm1
+        integer(ip) :: ityp
+        integer(ip) :: iv
+        integer(ip) :: iw
+        integer(ip) :: j
+        integer(ip) :: jdvw
+        integer(ip) :: k
+        integer(ip) :: m
+        integer(ip) :: mdab
+        integer(ip) :: mlat
+        integer(ip) :: mlon
+        integer(ip) :: mmax
+        integer(ip) :: mp1
+        integer(ip) :: mp2
+        integer(ip) :: ndab
+        integer(ip) :: ndo1
+        integer(ip) :: ndo2
+        integer(ip) :: nlat
+        integer(ip) :: nlon
+        integer(ip) :: nlp1
+        integer(ip) :: np1
+        integer(ip) :: nt
+        real(wp) :: vb
+        real(wp) :: vt
+        real(wp) :: vte
+        real(wp) :: vto
+        real(wp) :: wb
+        real(wp) :: wrfft
+        real(wp) :: wt
+        real(wp) :: wte
+        real(wp) :: wto
+        real(wp) :: wvbin
+        real(wp) :: wwbin
+        dimension vt(idvw, jdvw, nt), wt(idvw, jdvw, nt), br(mdab, ndab, nt), &
+            bi(mdab, ndab, nt), cr(mdab, ndab, nt), ci(mdab, ndab, nt), &
+            vte(idv, nlon, nt), vto(idv, nlon, nt), wte(idv, nlon, nt), &
+            wto(idv, nlon, nt), wvbin(*), wwbin(*), wrfft(*), &
+            vb(imid, nlat, 3), wb(imid, nlat, 3)
+        
+        type(SpherepackAux) :: sphere_aux
+
+        nlp1 = nlat+1
+        mlat = mod(nlat, 2)
+        mlon = mod(nlon, 2)
+        mmax = min(nlat, (nlon+1)/2)
+        imm1 = imid
+        if (mlat /= 0) imm1 = imid-1
+        do k=1, nt
+            do j=1, nlon
+                do i=1, idv
+                    vte(i, j, k) = ZERO
+                    wte(i, j, k) = ZERO
+                end do
+            end do
+        end do
+        ndo1 = nlat
+        ndo2 = nlat
+        if (mlat /= 0) ndo1 = nlat-1
+        if (mlat == 0) ndo2 = nlat-1
+
+        select case (ityp)
+            case (0)
+                goto 1
+            case (1)
+                goto 100
+            case (2)
+                goto 200
+            case (3)
+                goto 300
+            case (4)
+                goto 400
+            case (5)
+                goto 500
+            case (6)
+                goto 600
+            case (7)
+                goto 700
+            case (8)
+                goto 800
+        end select
+        !
+        !     case ityp=0   no symmetries
+        !
+1       call sphere_aux%vbin(0, nlat, nlon, 0, vb, iv, wvbin)
+        !
+        !     case m = 0
+        !
+        do k=1, nt
+            do np1=2, ndo2, 2
+                do i=1, imm1
+                    vto(i, 1, k)=vto(i, 1, k)+br(1, np1, k)*vb(i, np1, iv)
+                    wto(i, 1, k)=wto(i, 1, k)-cr(1, np1, k)*vb(i, np1, iv)
+                end do
+            end do
+        end do
+        do k=1, nt
+            do np1=3, ndo1, 2
+                do i=1, imid
+                    vte(i, 1, k)=vte(i, 1, k)+br(1, np1, k)*vb(i, np1, iv)
+                    wte(i, 1, k)=wte(i, 1, k)-cr(1, np1, k)*vb(i, np1, iv)
+                end do
+            end do
+        end do
+        !
+        !     case m = 1 through nlat-1
+        !
+        if (mmax < 2) goto 950
+        do mp1=2, mmax
+            m = mp1-1
+            mp2 = mp1+1
+            call sphere_aux%vbin(0, nlat, nlon, m, vb, iv, wvbin)
+            call sphere_aux%wbin(0, nlat, nlon, m, wb, iw, wwbin)
+            if (mp1 > ndo1) goto 26
+            do k=1, nt
+                do np1=mp1, ndo1, 2
+                    do i=1, imm1
+                        vte(i, 2*mp1-2, k) = vte(i, 2*mp1-2, k)+br(mp1, np1, k)*vb(i, np1, iv)
+                        vto(i, 2*mp1-2, k) = vto(i, 2*mp1-2, k)-ci(mp1, np1, k)*wb(i, np1, iw)
+                        vte(i, 2*mp1-1, k) = vte(i, 2*mp1-1, k)+bi(mp1, np1, k)*vb(i, np1, iv)
+                        vto(i, 2*mp1-1, k) = vto(i, 2*mp1-1, k)+cr(mp1, np1, k)*wb(i, np1, iw)
+                        wte(i, 2*mp1-2, k) = wte(i, 2*mp1-2, k)-cr(mp1, np1, k)*vb(i, np1, iv)
+                        wto(i, 2*mp1-2, k) = wto(i, 2*mp1-2, k)-bi(mp1, np1, k)*wb(i, np1, iw)
+                        wte(i, 2*mp1-1, k) = wte(i, 2*mp1-1, k)-ci(mp1, np1, k)*vb(i, np1, iv)
+                        wto(i, 2*mp1-1, k) = wto(i, 2*mp1-1, k)+br(mp1, np1, k)*wb(i, np1, iw)
+                    end do
+                    if (mlat == 0) goto 24
+                    vte(imid, 2*mp1-2, k) = vte(imid, 2*mp1-2, k) &
+                        +br(mp1, np1, k)*vb(imid, np1, iv)
+                    vte(imid, 2*mp1-1, k) = vte(imid, 2*mp1-1, k) &
+                        +bi(mp1, np1, k)*vb(imid, np1, iv)
+                    wte(imid, 2*mp1-2, k) = wte(imid, 2*mp1-2, k) &
+                        -cr(mp1, np1, k)*vb(imid, np1, iv)
+                    wte(imid, 2*mp1-1, k) = wte(imid, 2*mp1-1, k) &
+                        -ci(mp1, np1, k)*vb(imid, np1, iv)
+24              continue
+                end do
+            end do
+26          if (mp2 > ndo2) goto 30
+            do k=1, nt
+                do np1=mp2, ndo2, 2
+                    do i=1, imm1
+                        vto(i, 2*mp1-2, k) = vto(i, 2*mp1-2, k)+br(mp1, np1, k)*vb(i, np1, iv)
+                        vte(i, 2*mp1-2, k) = vte(i, 2*mp1-2, k)-ci(mp1, np1, k)*wb(i, np1, iw)
+                        vto(i, 2*mp1-1, k) = vto(i, 2*mp1-1, k)+bi(mp1, np1, k)*vb(i, np1, iv)
+                        vte(i, 2*mp1-1, k) = vte(i, 2*mp1-1, k)+cr(mp1, np1, k)*wb(i, np1, iw)
+                        wto(i, 2*mp1-2, k) = wto(i, 2*mp1-2, k)-cr(mp1, np1, k)*vb(i, np1, iv)
+                        wte(i, 2*mp1-2, k) = wte(i, 2*mp1-2, k)-bi(mp1, np1, k)*wb(i, np1, iw)
+                        wto(i, 2*mp1-1, k) = wto(i, 2*mp1-1, k)-ci(mp1, np1, k)*vb(i, np1, iv)
+                        wte(i, 2*mp1-1, k) = wte(i, 2*mp1-1, k)+br(mp1, np1, k)*wb(i, np1, iw)
+                    end do
+                    if (mlat == 0) goto 28
+                    vte(imid, 2*mp1-2, k) = vte(imid, 2*mp1-2, k) &
+                        -ci(mp1, np1, k)*wb(imid, np1, iw)
+                    vte(imid, 2*mp1-1, k) = vte(imid, 2*mp1-1, k) &
+                        +cr(mp1, np1, k)*wb(imid, np1, iw)
+                    wte(imid, 2*mp1-2, k) = wte(imid, 2*mp1-2, k) &
+                        -bi(mp1, np1, k)*wb(imid, np1, iw)
+                    wte(imid, 2*mp1-1, k) = wte(imid, 2*mp1-1, k) &
+                        +br(mp1, np1, k)*wb(imid, np1, iw)
+28              continue
+                end do
+            end do
+30      continue
+        end do
+        goto 950
+        !
+        !     case ityp=1   no symmetries,  cr and ci equal zero
+        !
+100     call sphere_aux%vbin(0, nlat, nlon, 0, vb, iv, wvbin)
+        !
+        !     case m = 0
+        !
+        do k=1, nt
+            do np1=2, ndo2, 2
+                do i=1, imm1
+                    vto(i, 1, k)=vto(i, 1, k)+br(1, np1, k)*vb(i, np1, iv)
+                end do
+            end do
+        end do
+        do k=1, nt
+            do np1=3, ndo1, 2
+                do i=1, imid
+                    vte(i, 1, k)=vte(i, 1, k)+br(1, np1, k)*vb(i, np1, iv)
+                end do
+            end do
+        end do
+        !
+        !     case m = 1 through nlat-1
+        !
+        if (mmax < 2) goto 950
+        do mp1=2, mmax
+            m = mp1-1
+            mp2 = mp1+1
+            call sphere_aux%vbin(0, nlat, nlon, m, vb, iv, wvbin)
+            call sphere_aux%wbin(0, nlat, nlon, m, wb, iw, wwbin)
+            if (mp1 > ndo1) goto 126
+            do k=1, nt
+                do np1=mp1, ndo1, 2
+                    do i=1, imm1
+                        vte(i, 2*mp1-2, k) = vte(i, 2*mp1-2, k)+br(mp1, np1, k)*vb(i, np1, iv)
+                        vte(i, 2*mp1-1, k) = vte(i, 2*mp1-1, k)+bi(mp1, np1, k)*vb(i, np1, iv)
+                        wto(i, 2*mp1-2, k) = wto(i, 2*mp1-2, k)-bi(mp1, np1, k)*wb(i, np1, iw)
+                        wto(i, 2*mp1-1, k) = wto(i, 2*mp1-1, k)+br(mp1, np1, k)*wb(i, np1, iw)
+                    end do
+                    if (mlat == 0) goto 124
+                    vte(imid, 2*mp1-2, k) = vte(imid, 2*mp1-2, k) &
+                        +br(mp1, np1, k)*vb(imid, np1, iv)
+                    vte(imid, 2*mp1-1, k) = vte(imid, 2*mp1-1, k) &
+                        +bi(mp1, np1, k)*vb(imid, np1, iv)
+124             continue
+                end do
+            end do
+126         if (mp2 > ndo2) goto 130
+            do k=1, nt
+                do np1=mp2, ndo2, 2
+                    do i=1, imm1
+                        vto(i, 2*mp1-2, k) = vto(i, 2*mp1-2, k)+br(mp1, np1, k)*vb(i, np1, iv)
+                        vto(i, 2*mp1-1, k) = vto(i, 2*mp1-1, k)+bi(mp1, np1, k)*vb(i, np1, iv)
+                        wte(i, 2*mp1-2, k) = wte(i, 2*mp1-2, k)-bi(mp1, np1, k)*wb(i, np1, iw)
+                        wte(i, 2*mp1-1, k) = wte(i, 2*mp1-1, k)+br(mp1, np1, k)*wb(i, np1, iw)
+                    end do
+                    if (mlat == 0) goto 128
+                    wte(imid, 2*mp1-2, k) = wte(imid, 2*mp1-2, k) &
+                        -bi(mp1, np1, k)*wb(imid, np1, iw)
+                    wte(imid, 2*mp1-1, k) = wte(imid, 2*mp1-1, k) &
+                        +br(mp1, np1, k)*wb(imid, np1, iw)
+128             continue
+                end do
+            end do
+130     continue
+        end do
+        goto 950
+        !
+        !     case ityp=2   no symmetries,  br and bi are equal to zero
+        !
+200     call sphere_aux%vbin(0, nlat, nlon, 0, vb, iv, wvbin)
+        !
+        !     case m = 0
+        !
+        do k=1, nt
+            do np1=2, ndo2, 2
+                do i=1, imm1
+                    wto(i, 1, k)=wto(i, 1, k)-cr(1, np1, k)*vb(i, np1, iv)
+                end do
+            end do
+        end do
+        do k=1, nt
+            do np1=3, ndo1, 2
+                do i=1, imid
+                    wte(i, 1, k)=wte(i, 1, k)-cr(1, np1, k)*vb(i, np1, iv)
+                end do
+            end do
+        end do
+        !
+        !     case m = 1 through nlat-1
+        !
+        if (mmax < 2) goto 950
+        do mp1=2, mmax
+            m = mp1-1
+            mp2 = mp1+1
+            call sphere_aux%vbin(0, nlat, nlon, m, vb, iv, wvbin)
+            call sphere_aux%wbin(0, nlat, nlon, m, wb, iw, wwbin)
+            if (mp1 > ndo1) goto 226
+            do k=1, nt
+                do np1=mp1, ndo1, 2
+                    do i=1, imm1
+                        vto(i, 2*mp1-2, k) = vto(i, 2*mp1-2, k)-ci(mp1, np1, k)*wb(i, np1, iw)
+                        vto(i, 2*mp1-1, k) = vto(i, 2*mp1-1, k)+cr(mp1, np1, k)*wb(i, np1, iw)
+                        wte(i, 2*mp1-2, k) = wte(i, 2*mp1-2, k)-cr(mp1, np1, k)*vb(i, np1, iv)
+                        wte(i, 2*mp1-1, k) = wte(i, 2*mp1-1, k)-ci(mp1, np1, k)*vb(i, np1, iv)
+                    end do
+                    if (mlat == 0) goto 224
+                    wte(imid, 2*mp1-2, k) = wte(imid, 2*mp1-2, k) &
+                        -cr(mp1, np1, k)*vb(imid, np1, iv)
+                    wte(imid, 2*mp1-1, k) = wte(imid, 2*mp1-1, k) &
+                        -ci(mp1, np1, k)*vb(imid, np1, iv)
+224             continue
+                end do
+            end do
+226         if (mp2 > ndo2) goto 230
+            do k=1, nt
+                do np1=mp2, ndo2, 2
+                    do i=1, imm1
+                        vte(i, 2*mp1-2, k) = vte(i, 2*mp1-2, k)-ci(mp1, np1, k)*wb(i, np1, iw)
+                        vte(i, 2*mp1-1, k) = vte(i, 2*mp1-1, k)+cr(mp1, np1, k)*wb(i, np1, iw)
+                        wto(i, 2*mp1-2, k) = wto(i, 2*mp1-2, k)-cr(mp1, np1, k)*vb(i, np1, iv)
+                        wto(i, 2*mp1-1, k) = wto(i, 2*mp1-1, k)-ci(mp1, np1, k)*vb(i, np1, iv)
+                    end do
+                    if (mlat == 0) goto 228
+                    vte(imid, 2*mp1-2, k) = vte(imid, 2*mp1-2, k) &
+                        -ci(mp1, np1, k)*wb(imid, np1, iw)
+                    vte(imid, 2*mp1-1, k) = vte(imid, 2*mp1-1, k) &
+                        +cr(mp1, np1, k)*wb(imid, np1, iw)
+228             continue
+                end do
+            end do
+230     continue
+        end do
+        goto 950
+        !
+        !     case ityp=3   v odd,  w even
+        !
+300     call sphere_aux%vbin(0, nlat, nlon, 0, vb, iv, wvbin)
+        !
+        !     case m = 0
+        !
+        do k=1, nt
+            do np1=2, ndo2, 2
+                do i=1, imm1
+                    vto(i, 1, k)=vto(i, 1, k)+br(1, np1, k)*vb(i, np1, iv)
+                end do
+            end do
+        end do
+        do k=1, nt
+            do np1=3, ndo1, 2
+                do i=1, imid
+                    wte(i, 1, k)=wte(i, 1, k)-cr(1, np1, k)*vb(i, np1, iv)
+                end do
+            end do
+        end do
+        !
+        !     case m = 1 through nlat-1
+        !
+        if (mmax < 2) goto 950
+        do mp1=2, mmax
+            m = mp1-1
+            mp2 = mp1+1
+            call sphere_aux%vbin(0, nlat, nlon, m, vb, iv, wvbin)
+            call sphere_aux%wbin(0, nlat, nlon, m, wb, iw, wwbin)
+            if (mp1 > ndo1) goto 326
+            do k=1, nt
+                do np1=mp1, ndo1, 2
+                    do i=1, imm1
+                        vto(i, 2*mp1-2, k) = vto(i, 2*mp1-2, k)-ci(mp1, np1, k)*wb(i, np1, iw)
+                        vto(i, 2*mp1-1, k) = vto(i, 2*mp1-1, k)+cr(mp1, np1, k)*wb(i, np1, iw)
+                        wte(i, 2*mp1-2, k) = wte(i, 2*mp1-2, k)-cr(mp1, np1, k)*vb(i, np1, iv)
+                        wte(i, 2*mp1-1, k) = wte(i, 2*mp1-1, k)-ci(mp1, np1, k)*vb(i, np1, iv)
+                    end do
+                    if (mlat == 0) goto 324
+                    wte(imid, 2*mp1-2, k) = wte(imid, 2*mp1-2, k) &
+                        -cr(mp1, np1, k)*vb(imid, np1, iv)
+                    wte(imid, 2*mp1-1, k) = wte(imid, 2*mp1-1, k) &
+                        -ci(mp1, np1, k)*vb(imid, np1, iv)
+324             continue
+                end do
+            end do
+326         if (mp2 > ndo2) goto 330
+            do k=1, nt
+                do np1=mp2, ndo2, 2
+                    do i=1, imm1
+                        vto(i, 2*mp1-2, k) = vto(i, 2*mp1-2, k)+br(mp1, np1, k)*vb(i, np1, iv)
+                        vto(i, 2*mp1-1, k) = vto(i, 2*mp1-1, k)+bi(mp1, np1, k)*vb(i, np1, iv)
+                        wte(i, 2*mp1-2, k) = wte(i, 2*mp1-2, k)-bi(mp1, np1, k)*wb(i, np1, iw)
+                        wte(i, 2*mp1-1, k) = wte(i, 2*mp1-1, k)+br(mp1, np1, k)*wb(i, np1, iw)
+                    end do
+                    if (mlat == 0) goto 328
+                    wte(imid, 2*mp1-2, k) = wte(imid, 2*mp1-2, k) &
+                        -bi(mp1, np1, k)*wb(imid, np1, iw)
+                    wte(imid, 2*mp1-1, k) = wte(imid, 2*mp1-1, k) &
+                        +br(mp1, np1, k)*wb(imid, np1, iw)
+328             continue
+                end do
+            end do
+330     continue
+        end do
+        goto 950
+        !
+        !     case ityp=4   v odd,  w even, and both cr and ci equal zero
+        !
+400     call sphere_aux%vbin(1, nlat, nlon, 0, vb, iv, wvbin)
+        !
+        !     case m = 0
+        !
+        do k=1, nt
+            do np1=2, ndo2, 2
+                do i=1, imm1
+                    vto(i, 1, k)=vto(i, 1, k)+br(1, np1, k)*vb(i, np1, iv)
+                end do
+            end do
+        end do
+        !
+        !     case m = 1 through nlat-1
+        !
+        if (mmax < 2) goto 950
+        do mp1=2, mmax
+            m = mp1-1
+            mp2 = mp1+1
+            call sphere_aux%vbin(1, nlat, nlon, m, vb, iv, wvbin)
+            call sphere_aux%wbin(1, nlat, nlon, m, wb, iw, wwbin)
+            if (mp2 > ndo2) goto 430
+            do k=1, nt
+                do np1=mp2, ndo2, 2
+                    do i=1, imm1
+                        vto(i, 2*mp1-2, k) = vto(i, 2*mp1-2, k)+br(mp1, np1, k)*vb(i, np1, iv)
+                        vto(i, 2*mp1-1, k) = vto(i, 2*mp1-1, k)+bi(mp1, np1, k)*vb(i, np1, iv)
+                        wte(i, 2*mp1-2, k) = wte(i, 2*mp1-2, k)-bi(mp1, np1, k)*wb(i, np1, iw)
+                        wte(i, 2*mp1-1, k) = wte(i, 2*mp1-1, k)+br(mp1, np1, k)*wb(i, np1, iw)
+                    end do
+                    if (mlat == 0) goto 428
+                    wte(imid, 2*mp1-2, k) = wte(imid, 2*mp1-2, k) &
+                        -bi(mp1, np1, k)*wb(imid, np1, iw)
+                    wte(imid, 2*mp1-1, k) = wte(imid, 2*mp1-1, k) &
+                        +br(mp1, np1, k)*wb(imid, np1, iw)
+428             continue
+                end do
+            end do
+430     continue
+        end do
+        goto 950
+        !
+        !     case ityp=5   v odd,  w even,     br and bi equal zero
+        !
+500     call sphere_aux%vbin(2, nlat, nlon, 0, vb, iv, wvbin)
+        !
+        !     case m = 0
+        !
+        do k=1, nt
+            do np1=3, ndo1, 2
+                do i=1, imid
+                    wte(i, 1, k)=wte(i, 1, k)-cr(1, np1, k)*vb(i, np1, iv)
+                end do
+            end do
+        end do
+        !
+        !     case m = 1 through nlat-1
+        !
+        if (mmax < 2) goto 950
+        do mp1=2, mmax
+            m = mp1-1
+            mp2 = mp1+1
+            call sphere_aux%vbin(2, nlat, nlon, m, vb, iv, wvbin)
+            call sphere_aux%wbin(2, nlat, nlon, m, wb, iw, wwbin)
+            if (mp1 > ndo1) goto 530
+            do k=1, nt
+                do np1=mp1, ndo1, 2
+                    do i=1, imm1
+                        vto(i, 2*mp1-2, k) = vto(i, 2*mp1-2, k)-ci(mp1, np1, k)*wb(i, np1, iw)
+                        vto(i, 2*mp1-1, k) = vto(i, 2*mp1-1, k)+cr(mp1, np1, k)*wb(i, np1, iw)
+                        wte(i, 2*mp1-2, k) = wte(i, 2*mp1-2, k)-cr(mp1, np1, k)*vb(i, np1, iv)
+                        wte(i, 2*mp1-1, k) = wte(i, 2*mp1-1, k)-ci(mp1, np1, k)*vb(i, np1, iv)
+                    end do
+                    if (mlat == 0) goto 524
+                    wte(imid, 2*mp1-2, k) = wte(imid, 2*mp1-2, k) &
+                        -cr(mp1, np1, k)*vb(imid, np1, iv)
+                    wte(imid, 2*mp1-1, k) = wte(imid, 2*mp1-1, k) &
+                        -ci(mp1, np1, k)*vb(imid, np1, iv)
+524             continue
+                end do
+            end do
+530     continue
+        end do
+        goto 950
+        !
+        !     case ityp=6   v even  ,  w odd
+        !
+600     call sphere_aux%vbin(0, nlat, nlon, 0, vb, iv, wvbin)
+        !
+        !     case m = 0
+        !
+        do k=1, nt
+            do np1=2, ndo2, 2
+                do i=1, imm1
+                    wto(i, 1, k)=wto(i, 1, k)-cr(1, np1, k)*vb(i, np1, iv)
+                end do
+            end do
+        end do
+        do k=1, nt
+            do np1=3, ndo1, 2
+                do i=1, imid
+                    vte(i, 1, k)=vte(i, 1, k)+br(1, np1, k)*vb(i, np1, iv)
+                end do
+            end do
+        end do
+        !
+        !     case m = 1 through nlat-1
+        !
+        if (mmax < 2) goto 950
+        do mp1=2, mmax
+            m = mp1-1
+            mp2 = mp1+1
+            call sphere_aux%vbin(0, nlat, nlon, m, vb, iv, wvbin)
+            call sphere_aux%wbin(0, nlat, nlon, m, wb, iw, wwbin)
+            if (mp1 > ndo1) goto 626
+            do k=1, nt
+                do np1=mp1, ndo1, 2
+                    do i=1, imm1
+                        vte(i, 2*mp1-2, k) = vte(i, 2*mp1-2, k)+br(mp1, np1, k)*vb(i, np1, iv)
+                        vte(i, 2*mp1-1, k) = vte(i, 2*mp1-1, k)+bi(mp1, np1, k)*vb(i, np1, iv)
+                        wto(i, 2*mp1-2, k) = wto(i, 2*mp1-2, k)-bi(mp1, np1, k)*wb(i, np1, iw)
+                        wto(i, 2*mp1-1, k) = wto(i, 2*mp1-1, k)+br(mp1, np1, k)*wb(i, np1, iw)
+                    end do
+                    if (mlat == 0) goto 624
+                    vte(imid, 2*mp1-2, k) = vte(imid, 2*mp1-2, k) &
+                        +br(mp1, np1, k)*vb(imid, np1, iv)
+                    vte(imid, 2*mp1-1, k) = vte(imid, 2*mp1-1, k) &
+                        +bi(mp1, np1, k)*vb(imid, np1, iv)
+624             continue
+                end do
+            end do
+626         if (mp2 > ndo2) goto 630
+            do k=1, nt
+                do np1=mp2, ndo2, 2
+                    do i=1, imm1
+                        vte(i, 2*mp1-2, k) = vte(i, 2*mp1-2, k)-ci(mp1, np1, k)*wb(i, np1, iw)
+                        vte(i, 2*mp1-1, k) = vte(i, 2*mp1-1, k)+cr(mp1, np1, k)*wb(i, np1, iw)
+                        wto(i, 2*mp1-2, k) = wto(i, 2*mp1-2, k)-cr(mp1, np1, k)*vb(i, np1, iv)
+                        wto(i, 2*mp1-1, k) = wto(i, 2*mp1-1, k)-ci(mp1, np1, k)*vb(i, np1, iv)
+                    end do
+                    if (mlat == 0) goto 628
+                    vte(imid, 2*mp1-2, k) = vte(imid, 2*mp1-2, k) &
+                        -ci(mp1, np1, k)*wb(imid, np1, iw)
+                    vte(imid, 2*mp1-1, k) = vte(imid, 2*mp1-1, k) &
+                        +cr(mp1, np1, k)*wb(imid, np1, iw)
+628             continue
+                end do
+            end do
+630     continue
+        end do
+        goto 950
+        !
+        !     case ityp=7   v even, w odd   cr and ci equal zero
+        !
+700     call sphere_aux%vbin(2, nlat, nlon, 0, vb, iv, wvbin)
+        !
+        !     case m = 0
+        !
+        do k=1, nt
+            do np1=3, ndo1, 2
+                do i=1, imid
+                    vte(i, 1, k)=vte(i, 1, k)+br(1, np1, k)*vb(i, np1, iv)
+                end do
+            end do
+        end do
+        !
+        !     case m = 1 through nlat-1
+        !
+        if (mmax < 2) goto 950
+        do mp1=2, mmax
+            m = mp1-1
+            mp2 = mp1+1
+            call sphere_aux%vbin(2, nlat, nlon, m, vb, iv, wvbin)
+            call sphere_aux%wbin(2, nlat, nlon, m, wb, iw, wwbin)
+            if (mp1 > ndo1) goto 730
+            do k=1, nt
+                do np1=mp1, ndo1, 2
+                    do i=1, imm1
+                        vte(i, 2*mp1-2, k) = vte(i, 2*mp1-2, k)+br(mp1, np1, k)*vb(i, np1, iv)
+                        vte(i, 2*mp1-1, k) = vte(i, 2*mp1-1, k)+bi(mp1, np1, k)*vb(i, np1, iv)
+                        wto(i, 2*mp1-2, k) = wto(i, 2*mp1-2, k)-bi(mp1, np1, k)*wb(i, np1, iw)
+                        wto(i, 2*mp1-1, k) = wto(i, 2*mp1-1, k)+br(mp1, np1, k)*wb(i, np1, iw)
+                    end do
+                    if (mlat == 0) goto 724
+                    vte(imid, 2*mp1-2, k) = vte(imid, 2*mp1-2, k) &
+                        +br(mp1, np1, k)*vb(imid, np1, iv)
+                    vte(imid, 2*mp1-1, k) = vte(imid, 2*mp1-1, k) &
+                        +bi(mp1, np1, k)*vb(imid, np1, iv)
+724             continue
+                end do
+            end do
+730     continue
+        end do
+        goto 950
+        !
+        !     case ityp=8   v even,  w odd   br and bi equal zero
+        !
+800     call sphere_aux%vbin(1, nlat, nlon, 0, vb, iv, wvbin)
+        !
+        !     case m = 0
+        !
+        do k=1, nt
+            do np1=2, ndo2, 2
+                do i=1, imm1
+                    wto(i, 1, k)=wto(i, 1, k)-cr(1, np1, k)*vb(i, np1, iv)
+                end do
+            end do
+        end do
+        !
+        !     case m = 1 through nlat-1
+        !
+        if (mmax < 2) goto 950
+        do mp1=2, mmax
+            m = mp1-1
+            mp2 = mp1+1
+            call sphere_aux%vbin(1, nlat, nlon, m, vb, iv, wvbin)
+            call sphere_aux%wbin(1, nlat, nlon, m, wb, iw, wwbin)
+            if (mp2 > ndo2) goto 830
+            do k=1, nt
+                do np1=mp2, ndo2, 2
+                    do i=1, imm1
+                        vte(i, 2*mp1-2, k) = vte(i, 2*mp1-2, k)-ci(mp1, np1, k)*wb(i, np1, iw)
+                        vte(i, 2*mp1-1, k) = vte(i, 2*mp1-1, k)+cr(mp1, np1, k)*wb(i, np1, iw)
+                        wto(i, 2*mp1-2, k) = wto(i, 2*mp1-2, k)-cr(mp1, np1, k)*vb(i, np1, iv)
+                        wto(i, 2*mp1-1, k) = wto(i, 2*mp1-1, k)-ci(mp1, np1, k)*vb(i, np1, iv)
+                    end do
+                    if (mlat == 0) goto 828
+                    vte(imid, 2*mp1-2, k) = vte(imid, 2*mp1-2, k) &
+                        -ci(mp1, np1, k)*wb(imid, np1, iw)
+                    vte(imid, 2*mp1-1, k) = vte(imid, 2*mp1-1, k) &
+                        +cr(mp1, np1, k)*wb(imid, np1, iw)
+828             continue
+                end do
+            end do
+830     continue
+        end do
+        950 do k=1, nt
+            call sphere_aux%hfft%backward(idv, nlon, vte(1, 1, k), idv, wrfft, vb)
+            call sphere_aux%hfft%backward(idv, nlon, wte(1, 1, k), idv, wrfft, vb)
+        end do
+        if (ityp > 2) goto 12
+        do k=1, nt
+            do j=1, nlon
+                do i=1, imm1
+                    vt(i, j, k) = HALF *(vte(i, j, k)+vto(i, j, k))
+                    wt(i, j, k) = HALF *(wte(i, j, k)+wto(i, j, k))
+                    vt(nlp1-i, j, k) = HALF *(vte(i, j, k)-vto(i, j, k))
+                    wt(nlp1-i, j, k) = HALF *(wte(i, j, k)-wto(i, j, k))
+                end do
+            end do
+        end do
+        goto 13
+        12 do k=1, nt
+            do j=1, nlon
+                do i=1, imm1
+                    vt(i, j, k) = HALF *vte(i, j, k)
+                    wt(i, j, k) = HALF *wte(i, j, k)
+                end do
+            end do
+        end do
+13      if (mlat == 0) return
+        do k=1, nt
+            do j=1, nlon
+                vt(imid, j, k) = HALF *vte(imid, j, k)
+                wt(imid, j, k) = HALF *wte(imid, j, k)
+            end do
+        end do
+
+    end subroutine vtsec_lower_routine
 
     subroutine vtseci(nlat, nlon, wvts, lwvts, dwork, ldwork, ierror)
 
-        integer(ip) :: ierror
+        ! Dummy arguments
+        integer(ip), intent(in)  :: nlat
+        integer(ip), intent(in)  :: nlon
+        real(wp),    intent(out) :: wvts(lwvts)
+        integer(ip), intent(in)  :: lwvts
+        real(wp),    intent(out) :: dwork(ldwork)
+        integer(ip), intent(in)  :: ldwork
+        integer(ip), intent(out) :: ierror
+
+        ! Local variables
         integer(ip) :: imid
         integer(ip) :: iw1
         integer(ip) :: iw2
         integer(ip) :: labc
-        integer(ip) :: ldwork
         integer(ip) :: lwvbin
-        integer(ip) :: lwvts
         integer(ip) :: lzz1
         integer(ip) :: mmax
-        integer(ip) :: nlat
-        integer(ip) :: nlon
-        real(wp) :: wvts(lwvts)
-        real(wp) :: dwork(ldwork)
-
-        type(RealPeriodicTransform)      :: hfft
         type(SpherepackAux) :: sphere_aux
 
         ierror = 1
@@ -1181,9 +1137,7 @@ contains
         if (ldwork < 2*nlat+2) return
         ierror = 0
 
-        !
         !  Set workspace pointers
-        !
         lwvbin = lzz1+labc
         iw1 = lwvbin+1
         iw2 = iw1+lwvbin
@@ -1192,7 +1146,7 @@ contains
 
         call sphere_aux%wtinit(nlat, nlon, wvts(iw1), dwork)
 
-        call hfft%initialize(nlon, wvts(iw2))
+        call sphere_aux%hfft%initialize(nlon, wvts(iw2))
 
     end subroutine vtseci
 
