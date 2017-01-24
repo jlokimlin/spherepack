@@ -505,20 +505,21 @@ contains
         mlat = mod(nlat,2)
         mlon = mod(nlon,2)
         mmax = min(nlat,(nlon+1)/2)
-        imm1 = imid
-        if(mlat /= 0) imm1 = imid-1
-        do k=1,nt
-            do j=1,nlon
-                do i=1,idv
-                    vte(i,j,k) = ZERO
-                    wte(i,j,k) = ZERO
-                end do
-            end do
-        end do
-        ndo1 = nlat
-        ndo2 = nlat
-        if(mlat /= 0) ndo1 = nlat-1
-        if(mlat == 0) ndo2 = nlat-1
+
+         select case(mlat)
+            case(0)
+                imm1 = imid
+                ndo1 = nlat
+                ndo2 = nlat-1
+            case default
+                imm1 = imid-1
+                ndo1 = nlat-1
+                ndo2 = nlat
+        end select
+
+        ! Preset even fields to zero
+        vte = ZERO
+        wte = ZERO
 
         select case (ityp)
             case (0)
