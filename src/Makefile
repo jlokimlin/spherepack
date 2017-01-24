@@ -376,6 +376,62 @@ invert_divergence_gaussian_grid_saved.f90
 	$(FC) $(FFLAGS) -c invert_divergence_gaussian_grid_saved.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 
+vorticity_routines.o: \
+spherepack_precision.o \
+scalar_synthesis_routines.o \
+vector_synthesis_routines.o \
+vorticity_routines.f90
+	$(FC) $(FFLAGS) -c vorticity_routines.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
+
+vorticity_regular_grid.o: \
+vorticity_routines.o \
+vorticity_regular_grid.f90
+	$(FC) $(FFLAGS) -c vorticity_regular_grid.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
+
+vorticity_regular_grid_saved.o: \
+vorticity_routines.o \
+vorticity_regular_grid_saved.f90
+	$(FC) $(FFLAGS) -c vorticity_regular_grid_saved.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
+
+vorticity_gaussian_grid.o: \
+vorticity_routines.o \
+vorticity_gaussian_grid.f90
+	$(FC) $(FFLAGS) -c vorticity_gaussian_grid.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
+
+vorticity_gaussian_grid_saved.o: \
+vorticity_routines.o \
+vorticity_gaussian_grid_saved.f90
+	$(FC) $(FFLAGS) -c vorticity_gaussian_grid_saved.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
+
+invert_vorticity_regular_grid.o: \
+vorticity_routines.o \
+invert_vorticity_regular_grid.f90
+	$(FC) $(FFLAGS) -c invert_vorticity_regular_grid.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
+
+invert_vorticity_regular_grid_saved.o: \
+vorticity_routines.o \
+invert_vorticity_regular_grid_saved.f90
+	$(FC) $(FFLAGS) -c invert_vorticity_regular_grid_saved.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
+
+invert_vorticity_gaussian_grid.o: \
+vorticity_routines.o \
+invert_vorticity_gaussian_grid.f90
+	$(FC) $(FFLAGS) -c invert_vorticity_gaussian_grid.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
+
+invert_vorticity_gaussian_grid_saved.o: \
+vorticity_routines.o \
+invert_vorticity_gaussian_grid_saved.f90
+	$(FC) $(FFLAGS) -c invert_vorticity_gaussian_grid_saved.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
+
 scalar_laplacian_routines.o: \
 spherepack_precision.o \
 scalar_synthesis_routines.o \
@@ -513,62 +569,6 @@ spherepack_precision.o \
 vector_synthesis_routines.o \
 isfvpgs.f90
 	$(FC) $(FFLAGS) -c isfvpgs.f90 $(LINKS)\
-	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
-
-vrtec.o: \
-spherepack_precision.o \
-scalar_synthesis_routines.o \
-vrtec.f90
-	$(FC) $(FFLAGS) -c vrtec.f90 $(LINKS)\
-	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
-
-vrtes.o: \
-spherepack_precision.o \
-scalar_synthesis_routines.o \
-vrtes.f90
-	$(FC) $(FFLAGS) -c vrtes.f90 $(LINKS)\
-	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
-
-vrtgc.o: \
-spherepack_precision.o \
-scalar_synthesis_routines.o \
-vrtgc.f90
-	$(FC) $(FFLAGS) -c vrtgc.f90 $(LINKS)\
-	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
-
-vrtgs.o: \
-spherepack_precision.o \
-scalar_synthesis_routines.o \
-vrtgs.f90
-	$(FC) $(FFLAGS) -c vrtgs.f90 $(LINKS)\
-	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
-
-ivrtec.o: \
-spherepack_precision.o \
-vector_synthesis_routines.o \
-ivrtec.f90
-	$(FC) $(FFLAGS) -c ivrtec.f90 $(LINKS)\
-	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
-
-ivrtes.o: \
-spherepack_precision.o \
-vector_synthesis_routines.o \
-ivrtes.f90
-	$(FC) $(FFLAGS) -c ivrtes.f90 $(LINKS)\
-	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
-
-ivrtgc.o: \
-spherepack_precision.o \
-vector_synthesis_routines.o \
-ivrtgc.f90
-	$(FC) $(FFLAGS) -c ivrtgc.f90 $(LINKS)\
-	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
-
-ivrtgs.o: \
-spherepack_precision.o \
-vector_synthesis_routines.o \
-ivrtgs.f90
-	$(FC) $(FFLAGS) -c ivrtgs.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 
 vlapec.o: \
@@ -760,10 +760,6 @@ ivlapec.o \
 ivlapes.o \
 ivlapgc.o \
 ivlapgs.o \
-ivrtec.o \
-ivrtes.o \
-ivrtgc.o \
-ivrtgs.o \
 sfvpec.o \
 sfvpes.o \
 sfvpgc.o \
@@ -782,10 +778,7 @@ vlapec.o \
 vlapes.o \
 vlapgc.o \
 vlapgs.o \
-vrtec.o \
-vrtes.o \
-vrtgc.o \
-vrtgs.o \
+vorticity_routines.o \
 vshifte.o \
 vtsec.o \
 vtses.o \

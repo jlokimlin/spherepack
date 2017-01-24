@@ -247,211 +247,142 @@
 ! **********************************************************************
 !                                                                              
 !
-module module_ivrtes
-
-    use spherepack_precision, only: &
-        wp, & ! working precision
-        ip ! integer precision
-
-    use vector_synthesis_routines, only: &
-        vhses
-
-    ! Explicit typing only
-    implicit none
-
-    ! Everything is private unless stated otherwise
-    private
-    public :: ivrtes
+submodule(vorticity_routines) invert_vorticity_regular_grid_saved
 
 contains
 
-subroutine ivrtes(nlat, nlon, isym, nt, v, w, idvw, jdvw, a, b, mdab, ndab, &
-    wvhses, lvhses, work, lwork, pertrb, ierror)
+    module subroutine ivrtes(nlat, nlon, isym, nt, v, w, idvw, jdvw, a, b, mdab, ndab, &
+        wvhses, lvhses, work, lwork, pertrb, ierror)
 
-    real(wp) :: a
-    real(wp) :: b
-    integer(ip) :: ici
-    integer(ip) :: icr
-    integer(ip) :: idvw
-    integer(ip) :: ierror
-    integer(ip) :: imid
-    integer(ip) :: is
-    integer(ip) :: isym
-    integer(ip) :: iwk
-    integer(ip) :: jdvw
-    integer(ip) :: l1
-    integer(ip) :: l2
-    integer(ip) :: labc
-    integer(ip) :: liwk
-    integer(ip) :: lvhses
-    integer(ip) :: lwmin
-    integer(ip) :: lwork
-    integer(ip) :: lzz1
-    integer(ip) :: mdab
-    integer(ip) :: mmax
-    integer(ip) :: mn
-    integer(ip) :: ndab
-    integer(ip) :: nlat
-    integer(ip) :: nlon
-    integer(ip) :: nt
-    real(wp) :: pertrb
-    real(wp) :: v
-    real(wp) :: w
-    real(wp) :: work
-    real(wp) :: wvhses
-    dimension v(idvw, jdvw, nt), w(idvw, jdvw, nt), pertrb(nt)
-    dimension a(mdab, ndab, nt), b(mdab, ndab, nt)
-    dimension wvhses(lvhses), work(lwork)
-    !
-    ! Check input arguments
-    !
-    ierror = 1
-    if (nlat < 3) return
-    ierror = 2
-    if (nlon < 4) return
-    ierror = 3
-    if (isym < 0 .or. isym > 2) return
-    ierror = 4
-    if (nt < 0) return
-    ierror = 5
-    imid = (nlat+1)/2
-    if ((isym == 0 .and. idvw<nlat) .or. &
-        (isym /= 0 .and. idvw<imid)) return
-    ierror = 6
-    if (jdvw < nlon) return
-    ierror = 7
-    mmax = min(nlat, (nlon+1)/2)
-    if (mdab < min(nlat, (nlon+2)/2)) return
-    ierror = 8
-    if (ndab < nlat) return
-    ierror = 9
-    lzz1 = 2*nlat*imid
-    labc = 3*(max(mmax-2, 0)*(nlat+nlat-mmax-1))/2
-    l1 = min(nlat, (nlon+2)/2)
-    l2 = (nlat+1)/2
-    lwmin = (l1*l2*(nlat+nlat-l1+1))/2+nlon+15
-    ierror = 10
-    !
-    !     verify unsaved work space length
-    !
-    mn = mmax*nlat*nt
-    if (isym /= 0  .and. lwork < &
-        nlat*(2*nt*nlon+max(6*imid, nlon))+2*mn+nlat) return
-    if (isym == 0  .and. lwork < &
-        imid*(2*nt*nlon+max(6*nlat, nlon))+2*mn+nlat) return
-    ierror = 0
-    !
-    !     set work space pointers
-    !
-    icr = 1
-    ici = icr + mn
-    is = ici + mn
-    iwk = is + nlat
-    liwk = lwork-2*mn-nlat
+        ! Dummy arguments
+        integer(ip), intent(in)  :: nlat
+        integer(ip), intent(in)  :: nlon
+        integer(ip), intent(in)  :: isym
+        integer(ip), intent(in)  :: nt
+        real(wp),    intent(out) :: v(idvw, jdvw, nt)
+        real(wp),    intent(out) :: w(idvw, jdvw, nt)
+        integer(ip), intent(in)  :: idvw
+        integer(ip), intent(in)  :: jdvw
+        real(wp),    intent(in)  :: a(mdab, ndab, nt)
+        real(wp),    intent(in)  :: b(mdab, ndab, nt)
+        integer(ip), intent(in)  :: mdab
+        integer(ip), intent(in)  :: ndab
+        real(wp),    intent(out) :: wvhses(lvhses)
+        integer(ip), intent(in)  :: lvhses
+        real(wp),    intent(out) :: work(lwork)
+        integer(ip), intent(in)  :: lwork
+        real(wp),    intent(out) :: pertrb(nt)
+        integer(ip), intent(out) :: ierror
 
-    call ivtes1(nlat, nlon, isym, nt, v, w, idvw, jdvw, work(icr), work(ici), &
-        mmax, work(is), mdab, ndab, a, b, wvhses, lvhses, work(iwk), &
-        liwk, pertrb, ierror)
+        ! Local variables
+        integer(ip) :: ici
+        integer(ip) :: icr
+        integer(ip) :: imid
+        integer(ip) :: iis
+        integer(ip) :: iwk
+        integer(ip) :: l1
+        integer(ip) :: l2
+        integer(ip) :: labc
+        integer(ip) :: liwk
+        integer(ip) :: lwmin
+        integer(ip) :: lzz1
+        integer(ip) :: mmax
+        integer(ip) :: mn
 
-
-contains
-
-subroutine ivtes1(nlat, nlon, isym, nt, v, w, idvw, jdvw, cr, ci, mmax, &
-    sqnn, mdab, ndab, a, b, wsav, lwsav, wk, lwk, pertrb, ierror)
-
-    real(wp) :: a
-    real(wp) :: b
-    real(wp) :: bi(mmax, nlat, nt)
-    real(wp) :: br(mmax, nlat, nt)
-    real(wp) :: ci
-    real(wp) :: cr
-    real(wp) :: fn
-    integer(ip) :: idvw
-    integer(ip) :: ierror
-    integer(ip) :: isym
-    integer(ip) :: ityp
-    integer(ip) :: jdvw
-    integer(ip) :: k
-    integer(ip) :: lwk
-    integer(ip) :: lwsav
-    integer(ip) :: m
-    integer(ip) :: mdab
-    integer(ip) :: mmax
-    integer(ip) :: n
-    integer(ip) :: ndab
-    integer(ip) :: nlat
-    integer(ip) :: nlon
-    integer(ip) :: nt
-    real(wp) :: pertrb
-    real(wp) :: sqnn
-    real(wp) :: v
-    real(wp) :: w
-    real(wp) :: wk
-    real(wp) :: wsav
-    dimension v(idvw, jdvw, nt), w(idvw, jdvw, nt), pertrb(nt)
-    dimension cr(mmax, nlat, nt), ci(mmax, nlat, nt), sqnn(nlat)
-    dimension a(mdab, ndab, nt), b(mdab, ndab, nt)
-    dimension wsav(lwsav), wk(lwk)
-    !
-    ! Preset coefficient multiplyers in vector
-    !
-    do n=2, nlat
-        fn = real(n - 1)
-        sqnn(n) = sqrt(fn * (fn + 1.0))
-    end do
-    !
-    ! Compute multiple vector fields coefficients
-    !
-    do k=1, nt
+        ! Check input arguments
+        ierror = 1
+        if (nlat < 3) return
+        ierror = 2
+        if (nlon < 4) return
+        ierror = 3
+        if (isym < 0 .or. isym > 2) return
+        ierror = 4
+        if (nt < 0) return
+        ierror = 5
+        imid = (nlat+1)/2
+        if ((isym == 0 .and. idvw<nlat) .or. &
+            (isym /= 0 .and. idvw<imid)) return
+        ierror = 6
+        if (jdvw < nlon) return
+        ierror = 7
+        mmax = min(nlat, (nlon+1)/2)
+        if (mdab < min(nlat, (nlon+2)/2)) return
+        ierror = 8
+        if (ndab < nlat) return
+        ierror = 9
+        lzz1 = 2*nlat*imid
+        labc = 3*(max(mmax-2, 0)*(nlat+nlat-mmax-1))/2
+        l1 = min(nlat, (nlon+2)/2)
+        l2 = (nlat+1)/2
+        lwmin = (l1*l2*(nlat+nlat-l1+1))/2+nlon+15
+        ierror = 10
         !
-        !     set vorticity field perturbation adjustment
+        !     verify unsaved work space length
         !
-        pertrb(k) = a(1, 1, k)/(2.*sqrt(2.))
+        mn = mmax*nlat*nt
+        if (isym /= 0  .and. lwork < &
+            nlat*(2*nt*nlon+max(6*imid, nlon))+2*mn+nlat) return
+        if (isym == 0  .and. lwork < &
+            imid*(2*nt*nlon+max(6*nlat, nlon))+2*mn+nlat) return
+        ierror = 0
         !
-        ! Preset br, bi to 0.0
+        !     set work space pointers
         !
-        do n=1, nlat
-            do m=1, mmax
-                cr(m, n, k) = 0.0
-                ci(m, n, k) = 0.0
-            end do
-        end do
-        !
-        ! Compute m=0 coefficients
-        !
-        do n=2, nlat
-            cr(1, n, k) = a(1, n, k)/sqnn(n)
-            ci(1, n, k) = b(1, n, k)/sqnn(n)
-        end do
-        !
-        !     compute m>0 coefficients
-        !
-        do m=2, mmax
-            do n=m, nlat
-                cr(m, n, k) = a(m, n, k)/sqnn(n)
-                ci(m, n, k) = b(m, n, k)/sqnn(n)
-            end do
-        end do
-    end do
-    !
-    !     set ityp for vector synthesis with divergence=0
-    !
-    select case (isym)
-        case (0)
-            ityp = 2
-        case (1)
-            ityp = 5
-        case (2)
-            ityp = 8
-    end select
-    !
-    !     vector sythesize cr, ci into divergence free vector field (v, w)
-    !
-    call vhses(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
-        mmax, nlat, wsav, lwsav, wk, lwk, ierror)
+        icr = 1
+        ici = icr + mn
+        iis = ici + mn
+        iwk = iis + nlat
+        liwk = lwork-2*mn-nlat
 
-end subroutine ivtes1
+        call ivrtes_lower_routine(nlat, nlon, isym, nt, v, w, idvw, jdvw, work(icr), work(ici), &
+            mmax, work(iis), mdab, ndab, a, b, wvhses, lvhses, work(iwk), &
+            liwk, pertrb, ierror)
 
-end subroutine ivrtes
+    end subroutine ivrtes
 
-end module module_ivrtes
+    subroutine ivrtes_lower_routine(nlat, nlon, isym, nt, v, w, idvw, jdvw, cr, ci, mmax, &
+        sqnn, mdab, ndab, a, b, wsav, lwsav, wk, lwk, pertrb, ierror)
+
+        real(wp) :: a
+        real(wp) :: b
+        real(wp) :: bi(mmax, nlat, nt)
+        real(wp) :: br(mmax, nlat, nt)
+        real(wp) :: ci
+        real(wp) :: cr
+        
+        integer(ip) :: idvw
+        integer(ip) :: ierror
+        integer(ip) :: isym
+        integer(ip) :: ityp
+        integer(ip) :: jdvw
+        
+        integer(ip) :: lwk
+        integer(ip) :: lwsav
+        
+        integer(ip) :: mdab
+        integer(ip) :: mmax
+        
+        integer(ip) :: ndab
+        integer(ip) :: nlat
+        integer(ip) :: nlon
+        integer(ip) :: nt
+        real(wp) :: pertrb
+        real(wp) :: sqnn
+        real(wp) :: v
+        real(wp) :: w
+        real(wp) :: wk
+        real(wp) :: wsav
+        dimension v(idvw, jdvw, nt), w(idvw, jdvw, nt), pertrb(nt)
+        dimension cr(mmax, nlat, nt), ci(mmax, nlat, nt), sqnn(nlat)
+        dimension a(mdab, ndab, nt), b(mdab, ndab, nt)
+        dimension wsav(lwsav), wk(lwk)
+
+        call perform_setup_for_inversion(isym, ityp, a, b, sqnn, pertrb, cr, ci)
+
+        ! Vector synthesize cr, ci into divergence free vector field (v, w)
+        call vhses(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
+            mmax, nlat, wsav, lwsav, wk, lwk, ierror)
+
+    end subroutine ivrtes_lower_routine
+
+end submodule invert_vorticity_regular_grid_saved

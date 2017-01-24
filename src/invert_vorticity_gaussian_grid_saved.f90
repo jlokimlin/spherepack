@@ -243,61 +243,46 @@
 ! **********************************************************************
 !                                                                              
 !
-module module_ivrtgs
-
-    use spherepack_precision, only: &
-        wp, & ! working precision
-        ip ! integer precision
-
-    use vector_synthesis_routines, only: &
-        vhsgs
-
-    ! Explicit typing only
-    implicit none
-
-    ! Everything is private unless stated otherwise
-    private
-    public :: ivrtgs
+submodule(vorticity_routines) invert_vorticity_gaussian_grid_saved
 
 contains
 
-    subroutine ivrtgs(nlat, nlon, isym, nt, v, w, idvw, jdvw, a, b, mdab, ndab, &
+    module subroutine ivrtgs(nlat, nlon, isym, nt, v, w, idvw, jdvw, a, b, mdab, ndab, &
         wvhsgs, lvhsgs, work, lwork, pertrb, ierror)
 
-        real(wp) :: a
-        real(wp) :: b
+        ! Dummy arguments
+        integer(ip), intent(in)  :: nlat
+        integer(ip), intent(in)  :: nlon
+        integer(ip), intent(in)  :: isym
+        integer(ip), intent(in)  :: nt
+        real(wp),    intent(out) :: v(idvw, jdvw, nt)
+        real(wp),    intent(out) :: w(idvw, jdvw, nt)
+        integer(ip), intent(in)  :: idvw
+        integer(ip), intent(in)  :: jdvw
+        real(wp),    intent(in)  :: a(mdab, ndab, nt)
+        real(wp),    intent(in)  :: b(mdab, ndab, nt)
+        integer(ip), intent(in)  :: mdab
+        integer(ip), intent(in)  :: ndab
+        real(wp),    intent(out) :: wvhsgs(lvhsgs)
+        integer(ip), intent(in)  :: lvhsgs
+        real(wp),    intent(out) :: work(lwork)
+        integer(ip), intent(in)  :: lwork
+        real(wp),    intent(out) :: pertrb(nt)
+        integer(ip), intent(out) :: ierror
+
+        ! Local variables
         integer(ip) :: ici
         integer(ip) :: icr
-        integer(ip) :: idvw
         integer(ip) :: idz
-        integer(ip) :: ierror
         integer(ip) :: imid
-        integer(ip) :: is
-        integer(ip) :: isym
+        integer(ip) :: iis
         integer(ip) :: iwk
-        integer(ip) :: jdvw
         integer(ip) :: liwk
-        integer(ip) :: lvhsgs
-        integer(ip) :: lwork
         integer(ip) :: lzimn
-        integer(ip) :: mdab
         integer(ip) :: mmax
         integer(ip) :: mn
-        integer(ip) :: ndab
-        integer(ip) :: nlat
-        integer(ip) :: nlon
-        integer(ip) :: nt
-        real(wp) :: pertrb
-        real(wp) :: v
-        real(wp) :: w
-        real(wp) :: work
-        real(wp) :: wvhsgs
-        dimension v(idvw, jdvw, nt), w(idvw, jdvw, nt), pertrb(nt)
-        dimension a(mdab, ndab, nt), b(mdab, ndab, nt)
-        dimension wvhsgs(lvhsgs), work(lwork)
-        !
+
         ! Check input arguments
-        !
         ierror = 1
         if (nlat < 3) return
         ierror = 2
@@ -339,16 +324,16 @@ contains
         !
         icr = 1
         ici = icr + mn
-        is = ici + mn
-        iwk = is + nlat
+        iis = ici + mn
+        iwk = iis + nlat
         liwk = lwork-2*mn-nlat
-        call ivtgs1(nlat, nlon, isym, nt, v, w, idvw, jdvw, work(icr), work(ici), &
-            mmax, work(is), mdab, ndab, a, b, wvhsgs, lvhsgs, work(iwk), &
+        call ivrtgs_lower_routine(nlat, nlon, isym, nt, v, w, idvw, jdvw, work(icr), work(ici), &
+            mmax, work(iis), mdab, ndab, a, b, wvhsgs, lvhsgs, work(iwk), &
             liwk, pertrb, ierror)
 
     end subroutine ivrtgs
 
-    subroutine ivtgs1(nlat, nlon, isym, nt, v, w, idvw, jdvw, cr, ci, mmax, &
+    subroutine ivrtgs_lower_routine(nlat, nlon, isym, nt, v, w, idvw, jdvw, cr, ci, mmax, &
         sqnn, mdab, ndab, a, b, wsav, lsav, wk, lwk, pertrb, ierror)
 
         real(wp) :: a
@@ -357,19 +342,19 @@ contains
         real(wp) :: br(mmax, nlat, nt)
         real(wp) :: ci
         real(wp) :: cr
-        real(wp) :: fn
+        
         integer(ip) :: idvw
         integer(ip) :: ierror
         integer(ip) :: isym
         integer(ip) :: ityp
         integer(ip) :: jdvw
-        integer(ip) :: k
+        
         integer(ip) :: lsav
         integer(ip) :: lwk
-        integer(ip) :: m
+        
         integer(ip) :: mdab
         integer(ip) :: mmax
-        integer(ip) :: n
+        
         integer(ip) :: ndab
         integer(ip) :: nlat
         integer(ip) :: nlon
@@ -384,64 +369,13 @@ contains
         dimension cr(mmax, nlat, nt), ci(mmax, nlat, nt), sqnn(nlat)
         dimension a(mdab, ndab, nt), b(mdab, ndab, nt)
         dimension wsav(lsav), wk(lwk)
-        !
-        ! Preset coefficient multiplyers in vector
-        !
-        do n=2, nlat
-            fn = real(n - 1)
-            sqnn(n) = sqrt(fn * (fn + 1.0))
-        end do
-        !
-        ! Compute multiple vector fields coefficients
-        !
-        do k=1, nt
-            !
-            !     set vorticity field perturbation adjustment
-            !
-            pertrb(k) = a(1, 1, k)/(2.*sqrt(2.))
-            !
-            ! Preset br, bi to 0.0
-            !
-            do n=1, nlat
-                do m=1, mmax
-                    cr(m, n, k) = 0.0
-                    ci(m, n, k) = 0.0
-                end do
-            end do
-            !
-            ! Compute m=0 coefficients
-            !
-            do n=2, nlat
-                cr(1, n, k) = a(1, n, k)/sqnn(n)
-                ci(1, n, k) = b(1, n, k)/sqnn(n)
-            end do
-            !
-            !     compute m>0 coefficients
-            !
-            do m=2, mmax
-                do n=m, nlat
-                    cr(m, n, k) = a(m, n, k)/sqnn(n)
-                    ci(m, n, k) = b(m, n, k)/sqnn(n)
-                end do
-            end do
-        end do
-        !
-        !     set ityp for vector synthesis with divergence=0
-        !
-        select case (isym)
-            case (0)
-                ityp = 2
-            case (1)
-                ityp = 5
-            case (2)
-                ityp = 8
-        end select
-        !
-        !     vector sythesize cr, ci into divergence free vector field (v, w)
-        !
+
+        call perform_setup_for_inversion(isym, ityp, a, b, sqnn, pertrb, cr, ci)
+
+        ! Vector synthesize cr, ci into divergence free vector field (v, w)
         call vhsgs(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
             mmax, nlat, wsav, lsav, wk, lwk, ierror)
 
-    end subroutine ivtgs1
+    end subroutine ivrtgs_lower_routine
 
-end module module_ivrtgs
+end submodule invert_vorticity_gaussian_grid_saved

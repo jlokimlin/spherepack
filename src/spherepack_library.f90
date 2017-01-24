@@ -63,18 +63,6 @@ module spherepack_library
     use module_ivlapgs, only: &
         ivlapgs
 
-    use module_ivrtec, only: &
-        ivrtec
-
-    use module_ivrtes, only: &
-        ivrtes
-
-    use module_ivrtgc, only: &
-        ivrtgc
-
-    use module_ivrtgs, only: &
-        ivrtgs
-
     use module_sfvpec, only: &
         sfvpec
 
@@ -151,17 +139,9 @@ module spherepack_library
     use module_vlapgs, only: &
         vlapgs
 
-    use module_vrtec, only: &
-        vrtec
-
-    use module_vrtes, only: &
-        vrtes
-
-    use module_vrtgc, only: &
-        vrtgc
-
-    use module_vrtgs, only: &
-        vrtgs
+    use vorticity_routines, only: &
+        vrtec, vrtes, vrtgc, vrtgs, &
+        ivrtec, ivrtes, ivrtgc, ivrtgs
 
     use module_vshifte, only: &
         vshifte, vshifti

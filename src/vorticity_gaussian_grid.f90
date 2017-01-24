@@ -218,65 +218,50 @@
 ! **********************************************************************
 !                                                                              
 !
-module module_vrtgc
-
-    use spherepack_precision, only: &
-        wp, & ! working precision
-        ip ! integer precision
-
-    use scalar_synthesis_routines, only: &
-        shsgc
-
-    ! Explicit typing only
-    implicit none
-
-    ! Everything is private unless stated otherwise
-    private
-    public :: vrtgc
+submodule(vorticity_routines) vorticity_gaussian_grid
 
 contains
 
-    subroutine vrtgc(nlat, nlon, isym, nt, vort, ivrt, jvrt, cr, ci, mdc, ndc, &
+    module subroutine vrtgc(nlat, nlon, isym, nt, vort, ivrt, jvrt, cr, ci, mdc, ndc, &
         wshsgc, lshsgc, work, lwork, ierror)
 
-        real(wp) :: ci
-        real(wp) :: cr
+        ! Dummy arguments
+        integer(ip), intent(in)  :: nlat
+        integer(ip), intent(in)  :: nlon
+        integer(ip), intent(in)  :: isym
+        integer(ip), intent(in)  :: nt
+        real(wp),    intent(out) :: vort(ivrt, jvrt, nt)
+        integer(ip), intent(in)  :: ivrt
+        integer(ip), intent(in)  :: jvrt
+        real(wp),    intent(in)  :: cr(mdc, ndc, nt)
+        real(wp),    intent(in)  :: ci(mdc, ndc, nt)
+        integer(ip), intent(in)  :: mdc
+        integer(ip), intent(in)  :: ndc
+        real(wp),    intent(in)  :: wshsgc(lshsgc)
+        integer(ip), intent(in)  :: lshsgc
+        real(wp),    intent(out) :: work(lwork)
+        integer(ip), intent(in)  :: lwork
+        integer(ip), intent(out) :: ierror
+
+        ! Local variables
         integer(ip) :: ia
         integer(ip) :: ib
-        integer(ip) :: ierror
         integer(ip) :: imid
         integer(ip) :: is
-        integer(ip) :: isym
-        integer(ip) :: ivrt
         integer(ip) :: iwk
-        integer(ip) :: jvrt
         integer(ip) :: l1
         integer(ip) :: l2
         integer(ip) :: lpimn
         integer(ip) :: ls
-        integer(ip) :: lshsgc
         integer(ip) :: lwk
         integer(ip) :: lwkmin
         integer(ip) :: lwmin
-        integer(ip) :: lwork
         integer(ip) :: mab
-        integer(ip) :: mdc
         integer(ip) :: mmax
         integer(ip) :: mn
-        integer(ip) :: ndc
-        integer(ip) :: nlat
         integer(ip) :: nln
-        integer(ip) :: nlon
-        integer(ip) :: nt
-        real(wp) :: vort
-        real(wp) :: work
-        real(wp) :: wshsgc
 
-        dimension vort(ivrt, jvrt, nt), cr(mdc, ndc, nt), ci(mdc, ndc, nt)
-        dimension wshsgc(lshsgc), work(lwork)
-        !
         ! Check input arguments
-        !
         ierror = 1
         if (nlat < 3) return
         ierror = 2
@@ -333,87 +318,50 @@ contains
         is = ib+mn
         iwk = is+nlat
         lwk = lwork-2*mn-nlat
-        call vrtgc1(nlat, nlon, isym, nt, vort, ivrt, jvrt, cr, ci, mdc, ndc, &
+        call vrtgc_lower_routine(nlat, nlon, isym, nt, vort, ivrt, jvrt, cr, ci, mdc, ndc, &
             work(ia), work(ib), mab, work(is), wshsgc, lshsgc, work(iwk), lwk, &
             ierror)
 
-    contains
-
-        subroutine vrtgc1(nlat, nlon, isym, nt, vort, ivrt, jvrt, cr, ci, mdc, ndc, &
-            a, b, mab, sqnn, wsav, lwsav, wk, lwk, ierror)
-
-            real(wp) :: a
-            real(wp) :: b
-            real(wp) :: ci
-            real(wp) :: cr
-            real(wp) :: fn
-            integer(ip) :: ierror
-            integer(ip) :: isym
-            integer(ip) :: ivrt
-            integer(ip) :: jvrt
-            integer(ip) :: k
-            integer(ip) :: lwk
-            integer(ip) :: lwsav
-            integer(ip) :: m
-            integer(ip) :: mab
-            integer(ip) :: mdc
-            integer(ip) :: mmax
-            integer(ip) :: n
-            integer(ip) :: ndc
-            integer(ip) :: nlat
-            integer(ip) :: nlon
-            integer(ip) :: nt
-            real(wp) :: sqnn
-            real(wp) :: vort
-            real(wp) :: wk
-            real(wp) :: wsav
-            dimension vort(ivrt, jvrt, nt), cr(mdc, ndc, nt), ci(mdc, ndc, nt)
-            dimension a(mab, nlat, nt), b(mab, nlat, nt), sqnn(nlat)
-            dimension wsav(lwsav), wk(lwk)
-            !
-            !     set coefficient multiplyers
-            !
-            do n=2, nlat
-                fn = real(n - 1)
-                sqnn(n) = sqrt(fn * (fn + 1.0))
-            end do
-            !
-            ! Compute divergence scalar coefficients for each vector field
-            !
-            do k=1, nt
-                do n=1, nlat
-                    do m=1, mab
-                        a(m, n, k) = 0.0
-                        b(m, n, k) = 0.0
-                    end do
-                end do
-                !
-                ! Compute m=0 coefficients
-                !
-                do n=2, nlat
-                    a(1, n, k) = sqnn(n)*cr(1, n, k)
-                    b(1, n, k) = sqnn(n)*ci(1, n, k)
-                end do
-                !
-                !     compute m>0 coefficients
-                !
-                mmax = min(nlat, (nlon+1)/2)
-                do m=2, mmax
-                    do n=m, nlat
-                        a(m, n, k) = sqnn(n)*cr(m, n, k)
-                        b(m, n, k) = sqnn(n)*ci(m, n, k)
-                    end do
-                end do
-            end do
-            !
-            !     synthesize a, b into vort
-            !
-            call shsgc(nlat, nlon, isym, nt, vort, ivrt, jvrt, a, b, &
-                mab, nlat, wsav, lwsav, wk, lwk, ierror)
-
-        end subroutine vrtgc1
-
     end subroutine vrtgc
 
+    subroutine vrtgc_lower_routine(nlat, nlon, isym, nt, vort, ivrt, jvrt, cr, ci, mdc, ndc, &
+        a, b, mab, sqnn, wsav, lwsav, wk, lwk, ierror)
 
-end module module_vrtgc
+        real(wp) :: a
+        real(wp) :: b
+        real(wp) :: ci
+        real(wp) :: cr
+        
+        integer(ip) :: ierror
+        integer(ip) :: isym
+        integer(ip) :: ivrt
+        integer(ip) :: jvrt
+        
+        integer(ip) :: lwk
+        integer(ip) :: lwsav
+        
+        integer(ip) :: mab
+        integer(ip) :: mdc
+        
+        
+        integer(ip) :: ndc
+        integer(ip) :: nlat
+        integer(ip) :: nlon
+        integer(ip) :: nt
+        real(wp) :: sqnn
+        real(wp) :: vort
+        real(wp) :: wk
+        real(wp) :: wsav
+        dimension vort(ivrt, jvrt, nt), cr(mdc, ndc, nt), ci(mdc, ndc, nt)
+        dimension a(mab, nlat, nt), b(mab, nlat, nt), sqnn(nlat)
+        dimension wsav(lwsav), wk(lwk)
+
+        call perform_setup_for_vorticity(nlon, a, b, cr, ci, sqnn)
+
+        ! Synthesize a, b into vort
+        call shsgc(nlat, nlon, isym, nt, vort, ivrt, jvrt, a, b, &
+            mab, nlat, wsav, lwsav, wk, lwk, ierror)
+
+    end subroutine vrtgc_lower_routine
+
+end submodule vorticity_gaussian_grid
