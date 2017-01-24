@@ -367,7 +367,7 @@ contains
 
         lnl = nt*idv*nlon
 
-        !  Check validity of input arguments
+        !  Check input arguments
         if (nlat < 3) then
             ierror = 1
             return

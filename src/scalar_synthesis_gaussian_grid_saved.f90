@@ -335,7 +335,7 @@ contains
         lp=nlat*(3*(l1+l2)-2)+(l1-1)*(l2*(2*nlat-l1)-3*l1)/2+nlon+15
 
         !
-        !  Check validity of input arguments
+        !  Check input arguments
         !
         if (nlat < 3) then
             ierror = 1
@@ -421,7 +421,7 @@ contains
         lp = nlat*(3*(l1+l2)-2)+(l1-1)*(l2*(2*nlat-l1)-3*l1)/2+nlon+15
 
         !
-        !  Check validity of input arguments
+        !  Check input arguments
         !
         if (nlat < 3) then
             ierror = 1
@@ -735,7 +735,7 @@ contains
             !  compute pmn for n=m, ..., nlat-1 and i=1, ..., (l+1)/2
             !
             mode = 0
-            call sphere_aux%legin(mode, l, nlat, m, w, pmn, km)
+            call sphere_aux%compute_legendre_polys_for_gaussian_grids(mode, l, nlat, m, w, pmn, km)
             !
             !  store above in pmnf
             !
@@ -771,7 +771,7 @@ contains
         l2 = late
 
         !
-        !  Check validity of input arguments
+        !  Check input arguments
         !
         if (nlat < 3) then
             ierror = 1

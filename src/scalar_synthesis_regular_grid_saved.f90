@@ -411,7 +411,7 @@ contains
         labc = 3*((mmax-2)*(2*nlat-mmax-1))/2
 
         !
-        !  Check validity of input arguments
+        !  Check input arguments
         !
         if (nlat < 3) then
             ierror = 1
@@ -436,7 +436,7 @@ contains
             iw1 => 3*nlat*imid+1, &
             iw2 => lpimn+1 &
             )
-            call sphere_aux%initialize_workspace_for_regular_scalar_synthesis( &
+            call sphere_aux%initialize_workspace_for_scalar_synthesis_regular_grid_saved( &
                 nlat, nlon, imid, wshses, work, work(iw1), dwork)
             call sphere_aux%hfft%initialize(nlon, wshses(iw2))
         end associate

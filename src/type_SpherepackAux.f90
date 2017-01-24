@@ -59,31 +59,14 @@ module type_SpherepackAux
     contains
         ! Type-bound procedures
         procedure, nopass :: alin
-        procedure, nopass :: alinit
         procedure, nopass :: compute_parity
         procedure, nopass :: dnlfk
         procedure, nopass :: dnlft
-        procedure, nopass :: dnlftd
-        procedure, nopass :: dnzfk
-        procedure, nopass :: dnzft
-        procedure, nopass :: dvbk
-        procedure, nopass :: dvbt
-        procedure, nopass :: dvtk
-        procedure, nopass :: dvtt
-        procedure, nopass :: dwbk
-        procedure, nopass :: dwbt
-        procedure, nopass :: dwtk
-        procedure, nopass :: dwtt
-        procedure, nopass :: dzvk
-        procedure, nopass :: dzvt
-        procedure, nopass :: dzwk
-        procedure, nopass :: dzwt
-        procedure, nopass :: legin
-        procedure, nopass :: rabcp
-        procedure, nopass :: rabcv
-        procedure, nopass :: rabcw
-        procedure, nopass :: initialize_workspace_for_regular_scalar_analysis
-        procedure, nopass :: initialize_workspace_for_regular_scalar_synthesis
+        procedure, nopass :: compute_legendre_polys_for_gaussian_grids
+        procedure, nopass :: initialize_workspace_for_scalar_analysis_regular_grid
+        procedure, nopass :: initialize_workspace_for_scalar_analysis_regular_grid_saved
+        procedure, nopass :: initialize_workspace_for_scalar_synthesis_regular_grid
+        procedure, nopass :: initialize_workspace_for_scalar_synthesis_regular_grid_saved
         procedure, nopass :: vbgint
         procedure, nopass :: vbin
         procedure, nopass :: vbinit
@@ -95,7 +78,6 @@ module type_SpherepackAux
         procedure, nopass :: wtgint
         procedure, nopass :: wtinit
         procedure, nopass :: zfin
-        procedure, nopass :: zfinit
         procedure, nopass :: zvin
         procedure, nopass :: zvinit
         procedure, nopass :: zwin
@@ -120,7 +102,6 @@ contains
         integer(ip), intent(out) :: l1
         integer(ip), intent(out) :: l2
 
-
         ! Compute parity in nlon
         select case (mod(nlon, 2))
             case (0)
@@ -140,18 +121,13 @@ contains
     end subroutine compute_parity
 
     pure subroutine dnlfk(m, n, cp)
-        !
-        !     cp requires n/2+1 real locations
-        !
 
         ! Dummy arguments
-
         integer(ip), intent(in)  :: m
         integer(ip), intent(in)  :: n
         real(wp),    intent(out) :: cp(n/2+1)
 
         ! Local variables
-
         integer(ip)         :: i, l, ma, nex,  nmms2
         real(wp)            :: a1, b1, c1, t1, t2
         real(wp)            :: fk, cp2, pm1
@@ -196,7 +172,7 @@ contains
             nex = 20
             fden = TWO
 
-            if (nmms2 >= 1) then
+            if (1 <= nmms2) then
                 do i=1, nmms2
                     t1 = fnum*t1/fden
                     if (t1 > SC20) then
@@ -222,9 +198,9 @@ contains
             end if
 
             cp2 = t1*sqrt((real(n, kind=wp)+HALF)*t2)
-            fnnp1 = real(n*(n+1), kind=wp)
+            fnnp1 = real(n*(n + 1), kind=wp)
             fnmsq = fnnp1 - TWO * real(ma**2, kind=wp)
-            l = (n+1)/2
+            l = (n + 1)/2
 
             if (mod(n, 2) == 0 .and. mod(ma, 2) == 0) l = l+1
 
@@ -252,103 +228,6 @@ contains
         end if
 
     end subroutine dnlfk
-
-
-    pure subroutine dnlftd(m, n, theta, cp, pb)
-        !
-        ! Purpose:
-        !
-        ! Computes the derivative of pmn(theta) with respect to theta
-        !
-
-        ! Dummy arguments
-
-        integer(ip), intent(in)  :: m
-        integer(ip), intent(in)  :: n
-        real(wp),    intent(in)  :: theta
-        real(wp),    intent(out) :: cp(*)
-        real(wp),    intent(out) :: pb
-
-        ! Local variables
-
-        integer(ip) ::  k, kdo
-        real(wp)    :: cos2t, sin2t, cost, sint, temp
-
-
-        cos2t = cos(TWO*theta)
-        sin2t = sin(TWO*theta)
-
-        if (mod(n, 2) <= 0) then
-            if (mod(abs(m), 2) <= 0) then
-                !
-                !  n even, m even
-                !
-                kdo=n/2
-                pb = ZERO
-
-                if (n == 0) return
-
-                cost = cos2t
-                sint = sin2t
-                do k=1, kdo
-                    !     pb = pb+cp(k+1)*cos(2*k*theta)
-                    pb = pb-TWO*real(k, kind=wp)*cp(k+1)*sint
-                    temp = cos2t*cost-sin2t*sint
-                    sint = sin2t*cost+cos2t*sint
-                    cost = temp
-                end do
-            else
-                !
-                !  n even, m odd
-                !
-                kdo = n/2
-                pb = ZERO
-                cost = cos2t
-                sint = sin2t
-                do k=1, kdo
-                    !     pb = pb+cp(k)*sin(2*k*theta)
-                    pb = pb+TWO*real(k, kind=wp)*cp(k)*cost
-                    temp = cos2t*cost-sin2t*sint
-                    sint = sin2t*cost+cos2t*sint
-                    cost = temp
-                end do
-            end if
-        else
-            if (mod(abs(m), 2) <= 0) then
-                !
-                !  n odd, m even
-                !
-                kdo = (n+1)/2
-                pb = ZERO
-                cost = cos(theta)
-                sint = sin(theta)
-                do k=1, kdo
-                    !     pb = pb+cp(k)*cos((2*k-1)*theta)
-                    pb = pb-(TWO*real(k-1, kind=wp))*cp(k)*sint
-                    temp = cos2t*cost-sin2t*sint
-                    sint = sin2t*cost+cos2t*sint
-                    cost = temp
-                end do
-            else
-                !
-                !  n odd, m odd
-                !
-                kdo = (n+1)/2
-                pb = ZERO
-                cost = cos(theta)
-                sint = sin(theta)
-                do k=1, kdo
-                    !     pb = pb+cp(k)*sin((2*k-1)*theta)
-                    pb = pb+(TWO*real(k-1, kind=wp))*cp(k)*cost
-                    temp = cos2t*cost-sin2t*sint
-                    sint = sin2t*cost+cos2t*sint
-                    cost = temp
-                end do
-            end if
-        end if
-
-    end subroutine dnlftd
-
 
     pure subroutine dnlft(m, n, theta, cp, pb)
 
@@ -409,7 +288,7 @@ contains
                 !
                 !  n odd, m even
                 !
-                kdo = (n+1)/2
+                kdo = (n + 1)/2
                 pb = ZERO
                 cost = cos(theta)
                 sint = sin(theta)
@@ -424,7 +303,7 @@ contains
                 !
                 !   n odd, m odd
                 !
-                kdo = (n+1)/2
+                kdo = (n + 1)/2
                 pb = ZERO
                 cost = cos(theta)
                 sint = sin(theta)
@@ -440,22 +319,20 @@ contains
 
     end subroutine dnlft
 
-
-    subroutine legin(mode, l, nlat, m, w, pmn, km)
-        !
-        ! Purpose:
-        !
-        ! Computes legendre polynomials for n=m, ..., l-1
-        ! and  i=1, ..., late (late=((nlat+mod(nlat, 2))/2)gaussian grid
-        ! in pmn(n+1, i, km) using swarztrauber's recursion formula.
-        ! the vector w contains quantities precomputed in shigc.
-        ! legin must be called in the order m=0, 1, ..., l-1
-        ! (e.g., if m=10 is sought it must be preceded by calls with
-        ! m=0, 1, 2, ..., 9 in that order)
-        !
+    !
+    ! Purpose:
+    !
+    ! Computes legendre polynomials for n=m, ..., l-1
+    ! and  i=1, ..., late (late=((nlat+mod(nlat, 2))/2)gaussian grid
+    ! in pmn(n+1, i, km) using swarztrauber's recursion formula.
+    ! the vector w contains quantities precomputed in shigc.
+    ! legin must be called in the order m=0, 1, ..., l-1
+    ! (e.g., if m=10 is sought it must be preceded by calls with
+    ! m=0, 1, 2, ..., 9 in that order)
+    !
+    subroutine compute_legendre_polys_for_gaussian_grids(mode, l, nlat, m, w, pmn, km)
 
         ! Dummy arguments
-
         integer(ip), intent(in)  :: mode
         integer(ip), intent(in)  :: l
         integer(ip), intent(in)  :: nlat
@@ -465,190 +342,164 @@ contains
         integer(ip), intent(out) :: km
 
         ! Local variables
-
         integer(ip) :: late
         integer(ip) :: workspace_indices(5)
 
-
-        !
         !  set size of pole to equator gaussian grid
-        !
         late = (nlat+mod(nlat,2))/2
 
-        !
         !  partition w (set pointers for p0n, p1n, abel, bbel, cbel, pmn)
-        !
-        workspace_indices = get_workspace_indices(l, late, nlat)
+        workspace_indices = get_legin_workspace_indices(l, late, nlat)
 
         associate( i => workspace_indices )
-
-            call legin1(mode, l, nlat, late, m, &
+            call legin_lower_routine(mode, l, nlat, late, m, &
                 w(i(1)), w(i(2)), w(i(3)), w(i(4)), w(i(5)), pmn, km)
-
         end associate
 
+    end subroutine compute_legendre_polys_for_gaussian_grids
 
-    contains
+    ! TODO:
+    !
+    ! Improve computational purity and remove the save attribute for column_indices
+    !
+    subroutine legin_lower_routine(mode, l, nlat, late, m, p0n, p1n, abel, bbel, cbel, &
+        pmn, km)
 
+        ! Dummy arguments
+        integer(ip), intent(in)  :: mode
+        integer(ip), intent(in)  :: l
+        integer(ip), intent(in)  :: nlat
+        integer(ip), intent(in)  :: late
+        integer(ip), intent(in)  :: m
+        real(wp),    intent(out) :: p0n(nlat, late)
+        real(wp),    intent(out) :: p1n(nlat, late)
+        real(wp),    intent(out) :: abel(*)
+        real(wp),    intent(out) :: bbel(*)
+        real(wp),    intent(out) :: cbel(*)
+        real(wp),    intent(out) :: pmn(nlat, late, 3)
+        integer(ip), intent(out) :: km
 
-        subroutine legin1(mode, l, nlat, late, m, p0n, p1n, abel, bbel, cbel, &
-            pmn, km)
+        ! Local variables
+        integer(ip)       :: i, n, ms, np1, imn, kmt, ninc
+        integer(ip), save :: column_indices(0:2) = [1, 2, 3]
 
-            ! Dummy arguments
+        ! Set do loop indices for full or half sphere
+        ms = m+1
+        ninc = 1
+        select case (mode)
+            case (1)
+                !     only compute pmn for n-m odd
+                ms = m+2
+                ninc = 2
+            case (2)
+                !     only compute pmn for n-m even
+                ms = m+1
+                ninc = 2
+        end select
 
-            integer(ip), intent(in)  :: mode
-            integer(ip), intent(in)  :: l
-            integer(ip), intent(in)  :: nlat
-            integer(ip), intent(in)  :: late
-            integer(ip), intent(in)  :: m
-            real(wp),    intent(out) :: p0n(nlat, late)
-            real(wp),    intent(out) :: p1n(nlat, late)
-            real(wp),    intent(out) :: abel(*)
-            real(wp),    intent(out) :: bbel(*)
-            real(wp),    intent(out) :: cbel(*)
-            real(wp),    intent(out) :: pmn(nlat, late, 3)
-            integer(ip), intent(out) :: km
+        associate( &
+            km0 => column_indices(0), &
+            km1 => column_indices(1), &
+            km2 => column_indices(2) &
+            )
 
-            ! Dummy arguments
-
-            integer(ip)       :: i, n, ms, np1, imn, kmt, ninc
-            integer(ip), save :: column_indices(0:2) = [1, 2, 3]
-
-
-            !     set do loop indices for full or half sphere
-            ms = m+1
-            ninc = 1
-            select case (mode)
-                case (1)
-                    !     only compute pmn for n-m odd
-                    ms = m+2
-                    ninc = 2
-                case (2)
-                    !     only compute pmn for n-m even
-                    ms = m+1
-                    ninc = 2
-            end select
-
-            associate( &
-                km0 => column_indices(0), &
-                km1 => column_indices(1), &
-                km2 => column_indices(2) &
-                )
-
-                if (m > 1) then
-                    do np1=ms, nlat, ninc
-                        n = np1-1
-                        imn = indx(m, n)
-                        if (n >= l) imn = imndx(l, m, n)
-                        do i=1, late
-                            pmn(np1, i, km0) = abel(imn)*pmn(n-1, i, km2) &
-                                +bbel(imn)*pmn(n-1, i, km0) &
-                                -cbel(imn)*pmn(np1, i, km2)
-                        end do
+            if (m > 1) then
+                do np1=ms, nlat, ninc
+                    n = np1-1
+                    imn = get_legin_indx(m, n)
+                    if (n >= l) imn = get_legin_imndx(l, m, n)
+                    do i=1, late
+                        pmn(np1, i, km0) = abel(imn)*pmn(n-1, i, km2) &
+                            +bbel(imn)*pmn(n-1, i, km0) &
+                            -cbel(imn)*pmn(np1, i, km2)
                     end do
-                else if (m == 0) then
-                    do np1=ms, nlat, ninc
-                        do i=1, late
-                            pmn(np1, i, km0) = p0n(np1, i)
-                        end do
+                end do
+            else if (m == 0) then
+                do np1=ms, nlat, ninc
+                    do i=1, late
+                        pmn(np1, i, km0) = p0n(np1, i)
                     end do
-                else if (m == 1) then
-                    do np1=ms, nlat, ninc
-                        do i=1, late
-                            pmn(np1, i, km0) = p1n(np1, i)
-                        end do
+                end do
+            else if (m == 1) then
+                do np1=ms, nlat, ninc
+                    do i=1, late
+                        pmn(np1, i, km0) = p1n(np1, i)
                     end do
-                end if
+                end do
+            end if
 
-                !
-                !   Permute column indices
-                !     km0, km1, km2 store m, m-1, m-2 columns
-                kmt = km0
-                km0 = km2
-                km2 = km1
-                km1 = kmt
-            end associate
+            !   Permute column indices
+            !   km0, km1, km2 store m, m-1, m-2 columns
+            kmt = km0
+            km0 = km2
+            km2 = km1
+            km1 = kmt
+        end associate
 
-            !     set current m index in output param km
-            km = kmt
+        !     set current m index in output param km
+        km = kmt
 
-        end subroutine legin1
+    end subroutine legin_lower_routine
 
+    pure function get_legin_workspace_indices(l, late, nlat) &
+        result (return_value)
 
-        pure function get_workspace_indices(l, late, nlat) &
-            result (return_value)
+        ! Dummy arguments
+        integer(ip), intent(in) :: l
+        integer(ip), intent(in) :: late
+        integer(ip), intent(in) :: nlat
+        integer(ip)             :: return_value(5)
 
-            ! Dummy arguments
+        associate( i => return_value )
+            i(1) = 1+nlat
+            i(2) = i(1)+nlat*late
+            i(3) = i(2)+nlat*late
+            i(4) = i(3)+(2*nlat-l)*(l-1)/2
+            i(5) = i(4)+(2*nlat-l)*(l-1)/2
+        end associate
 
-            integer(ip), intent(in) :: l
-            integer(ip), intent(in) :: late
-            integer(ip), intent(in) :: nlat
-            integer(ip)              :: return_value(5)
+    end function get_legin_workspace_indices
 
-
-            associate( i => return_value )
-
-                i(1) = 1+nlat
-                i(2) = i(1)+nlat*late
-                i(3) = i(2)+nlat*late
-                i(4) = i(3)+(2*nlat-l)*(l-1)/2
-                i(5) = i(4)+(2*nlat-l)*(l-1)/2
-
-            end associate
-
-        end function get_workspace_indices
-
-
-        pure function indx(m, n) result (return_value)
-            !
-            ! Purpose:
-            !
-            !     index function used in storing triangular
-            !     arrays for recursion coefficients (functions of (m, n))
-            !     for 2 <= m <= n-1 and 2 <= n <= l-1
-
-            ! Dummy arguments
-
-            integer(ip), intent(in) :: m
-            integer(ip), intent(in) :: n
-            integer(ip)              :: return_value
+    ! Purpose:
+    !
+    ! index function used in storing triangular
+    ! arrays for recursion coefficients (functions of (m, n))
+    ! for 2 <= m <= n-1 and 2 <= n <= l-1
+    pure function get_legin_indx(m, n) &
+        result (return_value)
 
 
+        ! Dummy arguments
+        integer(ip), intent(in) :: m
+        integer(ip), intent(in) :: n
+        integer(ip)              :: return_value
 
-            return_value = (n-1)*(n-2)/2+m-1
+        return_value = (n - 1)*(n-2)/2+m-1
 
+    end function get_legin_indx
 
-        end function indx
+    ! Purpose:
+    !
+    !     index function used in storing triangular
+    !     arrays for recursion coefficients (functions of (m, n))
+    !     for l <= n <= nlat and 2 <= m <= l
+    !
+    pure function get_legin_imndx(l, m, n) &
+        result (return_value)
 
-        pure function imndx(l, m, n) result (return_value)
-            !
-            ! Purpose:
-            !
-            !     index function used in storing triangular
-            !     arrays for recursion coefficients (functions of (m, n))
-            !     for l <= n <= nlat and 2 <= m <= l
-            !
+        ! Dummy arguments
+        integer(ip), intent(in) :: l
+        integer(ip), intent(in) :: m
+        integer(ip), intent(in) :: n
+        integer(ip)             :: return_value
 
-            ! Dummy arguments
+        return_value = l*(l-1)/2+(n-l-1)*(l-1)+m-1
 
-            integer(ip), intent(in) :: l
-            integer(ip), intent(in) :: m
-            integer(ip), intent(in) :: n
-            integer(ip)              :: return_value
-
-
-            return_value = l*(l-1)/2+(n-l-1)*(l-1)+m-1
-
-        end function imndx
-
-    end subroutine legin
-
-
+    end function get_legin_imndx
 
     subroutine zfin(isym, nlat, nlon, m, z, i3, wzfin)
 
         ! Dummy arguments
-
         integer(ip), intent(in)     :: isym
         integer(ip), intent(in)     :: nlat
         integer(ip), intent(in)     :: nlon
@@ -657,17 +508,15 @@ contains
         integer(ip), intent(inout)  :: i3
         real(wp),    intent(inout)  :: wzfin(*)
 
-        ! Dummy arguments
-
+        ! Local variables
         integer(ip) :: imid
         integer(ip) :: workspace(4)
-
 
         imid = (nlat+1)/2
         !
         !  The length of wzfin is 2*lim+3*labc
         !
-        workspace = get_workspace_indices(nlat, nlon, imid)
+        workspace = get_zfin_workspace_indices(nlat, nlon, imid)
 
         associate( &
             iw1 => workspace(1), &
@@ -676,129 +525,114 @@ contains
             iw4 => workspace(4) &
             )
 
-            call zfin1(isym, nlat, m, z, imid, i3, wzfin, &
+            call zfin_lower_routine(isym, nlat, m, z, imid, i3, wzfin, &
                 wzfin(iw1), wzfin(iw2), wzfin(iw3), wzfin(iw4))
 
         end associate
 
-
-    contains
-
-        subroutine zfin1(isym, nlat, m, z, imid, i3, zz, z1, a, b, c)
-
-            ! Dummy arguments
-
-            integer(ip), intent(in)     :: isym
-            integer(ip), intent(in)     :: nlat
-            integer(ip), intent(in)     :: m
-            real(wp),    intent(inout)  :: z(imid, nlat, 3)
-            integer(ip), intent(in)     :: imid
-            integer(ip), intent(inout)  :: i3
-            real(wp),    intent(inout)  :: zz(imid,*)
-            real(wp),    intent(inout)  :: z1(imid,*)
-            real(wp),    intent(inout)  :: a(*)
-            real(wp),    intent(inout)  :: b(*)
-            real(wp),    intent(inout)  :: c(*)
-
-            ! Dummy arguments
-
-            integer(ip), save :: i1, i2
-            integer(ip)       :: ns, np1, nstp, itemp, nstrt
-
-
-            itemp = i1
-            i1 = i2
-            i2 = i3
-            i3 = itemp
-
-            if (m < 1) then
-                i1 = 1
-                i2 = 2
-                i3 = 3
-                z(:,1:nlat, i3) = zz(:,1:nlat)
-            else if (m == 1) then
-                z(:,2:nlat, i3) = z1(:,2:nlat)
-            else
-                ns = ((m-2)*(nlat+nlat-m-1))/2+1
-
-                if (isym /= 1) then
-                    z(:,m+1,i3) = a(ns)*z(:,m-1,i1)-c(ns)*z(:,m+1,i1)
-                end if
-
-                if (m == nlat-1) return
-
-                if (isym /= 2) then
-                    ns = ns+1
-                    z(:, m+2, i3) = a(ns)*z(:, m, i1) -c(ns)*z(:, m+2, i1)
-                end if
-
-                nstrt = m+3
-
-                if (isym == 1) nstrt = m+4
-
-                if (nstrt > nlat) return
-
-                nstp = 2
-
-                if (isym == 0) nstp = 1
-
-                do np1=nstrt, nlat, nstp
-                    ns = ns+nstp
-                    z(:,np1,i3) = &
-                        a(ns)*z(:,np1-2,i1)+b(ns)*z(:,np1-2,i3)-c(ns)*z(:,np1,i1)
-                end do
-            end if
-
-        end subroutine zfin1
-
-
-
-        pure function get_workspace_indices(nlat, nlon, imid) &
-            result (return_value)
-
-            ! Dummy arguments
-
-            integer(ip), intent(in) :: nlat
-            integer(ip), intent(in) :: nlon
-            integer(ip), intent(in) :: imid
-            integer(ip)              :: return_value(4)
-
-            ! Dummy arguments
-
-            integer(ip) :: mmax, lim, labc
-
-
-            associate( i => return_value )
-
-                mmax = min(nlat, nlon/2+1)
-                lim = nlat*imid
-                labc = ((mmax-2)*(2*nlat-mmax-1))/2
-                i(1) = lim+1
-                i(2) = i(1)+lim
-                i(3) = i(2)+labc
-                i(4) = i(3)+labc
-
-            end associate
-
-        end function get_workspace_indices
-
     end subroutine zfin
 
-
-    subroutine zfinit(nlat, nlon, wzfin, dwork)
+    subroutine zfin_lower_routine(isym, nlat, m, z, imid, i3, zz, z1, a, b, c)
 
         ! Dummy arguments
-
+        integer(ip), intent(in)     :: isym
         integer(ip), intent(in)     :: nlat
-        integer(ip), intent(in)     :: nlon
-        real(wp),    intent(inout)  :: wzfin(*)
-        real(wp),    intent(inout)  :: dwork(nlat+2)
+        integer(ip), intent(in)     :: m
+        real(wp),    intent(inout)  :: z(imid, nlat, 3)
+        integer(ip), intent(in)     :: imid
+        integer(ip), intent(inout)  :: i3
+        real(wp),    intent(inout)  :: zz(imid,*)
+        real(wp),    intent(inout)  :: z1(imid,*)
+        real(wp),    intent(inout)  :: a(*)
+        real(wp),    intent(inout)  :: b(*)
+        real(wp),    intent(inout)  :: c(*)
 
         ! Local variables
+        integer(ip), save :: i1, i2
+        integer(ip)       :: ns, np1, nstp, itemp, nstrt
 
+        itemp = i1
+        i1 = i2
+        i2 = i3
+        i3 = itemp
+
+        if (m < 1) then
+            i1 = 1
+            i2 = 2
+            i3 = 3
+            z(:,1:nlat, i3) = zz(:,1:nlat)
+        else if (m == 1) then
+            z(:,2:nlat, i3) = z1(:,2:nlat)
+        else
+            ns = ((m-2)*(nlat+nlat-m-1))/2+1
+
+            if (isym /= 1) then
+                z(:,m+1,i3) = a(ns)*z(:,m-1,i1)-c(ns)*z(:,m+1,i1)
+            end if
+
+            if (m == nlat-1) return
+
+            if (isym /= 2) then
+                ns = ns+1
+                z(:, m+2, i3) = a(ns)*z(:, m, i1) -c(ns)*z(:, m+2, i1)
+            end if
+
+            nstrt = m+3
+
+            if (isym == 1) nstrt = m+4
+
+            if (nstrt > nlat) return
+
+            nstp = 2
+
+            if (isym == 0) nstp = 1
+
+            do np1=nstrt, nlat, nstp
+                ns = ns+nstp
+                z(:,np1,i3) = &
+                    a(ns)*z(:,np1-2,i1)+b(ns)*z(:,np1-2,i3)-c(ns)*z(:,np1,i1)
+            end do
+        end if
+
+    end subroutine zfin_lower_routine
+
+    pure function get_zfin_workspace_indices(nlat, nlon, imid) &
+        result (return_value)
+
+        ! Dummy arguments
+        integer(ip), intent(in) :: nlat
+        integer(ip), intent(in) :: nlon
+        integer(ip), intent(in) :: imid
+        integer(ip)              :: return_value(4)
+
+        ! Local variables
+        integer(ip) :: mmax, lim, labc
+
+        associate( i => return_value )
+
+            mmax = min(nlat, nlon/2+1)
+            lim = nlat*imid
+            labc = ((mmax-2)*(2*nlat-mmax-1))/2
+            i(1) = lim+1
+            i(2) = i(1)+lim
+            i(3) = i(2)+labc
+            i(4) = i(3)+labc
+
+        end associate
+
+    end function get_zfin_workspace_indices
+
+    subroutine initialize_workspace_for_scalar_analysis_regular_grid(nlat, nlon, wzfin, dwork)
+
+        ! Dummy arguments
+        integer(ip), intent(in)   :: nlat
+        integer(ip), intent(in)   :: nlon
+        real(wp),    intent(out)  :: wzfin(*)
+        real(wp),    intent(out)  :: dwork(nlat+2)
+
+        ! Local variables
         integer(ip) :: imid
         integer(ip) :: iw1, iw2
-
 
         imid = (nlat+1)/2
 
@@ -813,84 +647,71 @@ contains
         iw1 = 2*nlat*imid+1
         iw2 = nlat/2+1
 
-        call zfini1(nlat, nlon, imid, wzfin, wzfin(iw1), dwork, dwork(iw2))
+        call zfinit_lower_routine(nlat, nlon, imid, wzfin, wzfin(iw1), dwork, dwork(iw2))
 
-    contains
+    end subroutine initialize_workspace_for_scalar_analysis_regular_grid
 
-        subroutine zfini1(nlat, nlon, imid, z, abc, cz, work)
-            !
-            !     Remarks:
-            !
-            !     abc must have 3*((mmax-2)*(2*nlat-mmax-1))/2 locations
-            !     where mmax = min(nlat, nlon/2+1)
-            !     cz and work must each have nlat+1 locations
-            !
-
-            ! Dummy arguments
-
-            integer(ip), intent(in)     :: nlat
-            integer(ip), intent(in)     :: nlon
-            integer(ip), intent(in)     :: imid
-            real(wp),    intent(inout)  :: z(imid, nlat, 2)
-            real(wp),    intent(inout)  :: abc(*)
-            real(wp),    intent(inout)  :: cz(nlat+1)
-            real(wp),    intent(inout)  :: work(nlat+1)
-
-            ! Local variables
-
-            integer(ip)         :: i, m, n, mp1, np1
-            real(wp)            :: dt, th, zh
-
-
-            dt = PI/(nlat-1)
-
-            do mp1=1, 2
-                m = mp1-1
-                do np1=mp1, nlat
-                    n = np1-1
-                    call dnzfk(nlat, m, n, cz, work)
-                    do i=1, imid
-                        th = real(i-1, kind=wp)*dt
-                        call dnzft(nlat, m, n, th, cz, zh)
-                        z(i, np1, mp1) = zh
-                    end do
-                    z(1, np1, mp1) = HALF*z(1, np1, mp1)
-                end do
-            end do
-
-            call rabcp(nlat, nlon, abc)
-
-        end subroutine zfini1
-
-    end subroutine zfinit
-
-
-
-    subroutine dnzfk(nlat, m, n, cz, work)
-        !
-        ! Purpose:
-        !
-        !     Computes the coefficients in the trigonometric
-        !     expansion of the z functions that are used in spherical
-        !     harmonic analysis.
-        !
-        !
-        ! Remark:
-        !
-        !    cz and work must both have nlat/2+1 locations
-        !
+    !
+    !     Remarks:
+    !
+    !     abc must have 3*((mmax-2)*(2*nlat-mmax-1))/2 locations
+    !     where mmax = min(nlat, nlon/2+1)
+    !     cz and work must each have nlat+1 locations
+    !
+    subroutine zfinit_lower_routine(nlat, nlon, imid, z, abc, cz, work)
 
         ! Dummy arguments
+        integer(ip), intent(in)  :: nlat
+        integer(ip), intent(in)  :: nlon
+        integer(ip), intent(in)  :: imid
+        real(wp),    intent(out) :: z(imid, nlat, 2)
+        real(wp),    intent(out) :: abc(*)
+        real(wp),    intent(out) :: cz(nlat+1)
+        real(wp),    intent(out) :: work(nlat+1)
 
-        integer(ip), intent(in)     :: nlat
-        integer(ip), intent(in)     :: m
-        integer(ip), intent(in)     :: n
-        real(wp),    intent(inout)  :: cz(nlat/2 + 1)
-        real(wp),    intent(inout)  :: work(nlat/2 + 1)
+        ! Local variables
+        integer(ip) :: i, m, n, mp1, np1
+        real(wp)    :: dt, th, zh
 
+        dt = PI/(nlat-1)
+
+        do mp1=1, 2
+            m = mp1-1
+            do np1=mp1, nlat
+                n = np1-1
+                call dnzfk(nlat, m, n, cz, work)
+                do i=1, imid
+                    th = real(i-1, kind=wp)*dt
+                    call dnzft(nlat, m, n, th, cz, zh)
+                    z(i, np1, mp1) = zh
+                end do
+                z(1, np1, mp1) = HALF*z(1, np1, mp1)
+            end do
+        end do
+
+        call compute_recurrence_relation_coefficients(nlat, nlon, abc)
+
+    end subroutine zfinit_lower_routine
+
+    !
+    ! Purpose:
+    !
+    ! Computes the coefficients in the trigonometric
+    ! expansion of the z functions that are used in spherical
+    ! harmonic analysis.
+    !
+    subroutine dnzfk(nlat, m, n, cz, work)
+
+        ! Dummy arguments
+        integer(ip), intent(in)   :: nlat
+        integer(ip), intent(in)   :: m
+        integer(ip), intent(in)   :: n
+        real(wp),    intent(out)  :: cz(nlat/2 + 1)
+        real(wp),    intent(out)  :: work(nlat/2 + 1)
+
+        ! Local variables
         integer(ip) :: i, k, lc, kp1, kdo, idx
         real(wp)    :: summation, sc1, t1, t2
-
 
         lc = (nlat+1)/2
         sc1 = TWO/(nlat-1)
@@ -931,7 +752,7 @@ contains
                 !
                 !   n odd, m even
                 !
-                kdo = (n+1)/2
+                kdo = (n + 1)/2
                 do idx=1, lc
                     i = 2*idx-1
                     summation = ZERO
@@ -943,7 +764,7 @@ contains
                     cz(idx)=sc1*summation
                 end do
             else
-                kdo = (n+1)/2
+                kdo = (n + 1)/2
                 do idx=1, lc
                     i = 2*idx-3
                     summation=ZERO
@@ -959,12 +780,9 @@ contains
 
     end subroutine dnzfk
 
-
-
     subroutine dnzft(nlat, m, n, th, cz, zh)
 
         ! Dummy arguments
-
         integer(ip), intent(in)   :: nlat
         integer(ip), intent(in)   :: m
         integer(ip), intent(in)   :: n
@@ -973,10 +791,8 @@ contains
         real(wp),    intent(out)  :: zh
 
         ! Local variables
-
         integer(ip) :: i, k, lc, lq, ls
         real(wp)    :: cos2t, sin2t, cost, sint, temp
-
 
         zh = ZERO
         cos2t = cos(TWO*th)
@@ -1085,8 +901,6 @@ contains
         end if
 
     end subroutine dnzft
-
-
 
     subroutine alin(isym, nlat, nlon, m, p, i3, walin)
 
@@ -1223,90 +1037,75 @@ contains
 
     end subroutine alin
 
-
-
-    subroutine alinit(nlat, nlon, walin, dwork)
+    pure subroutine initialize_workspace_for_scalar_synthesis_regular_grid(nlat, nlon, walin, dwork)
 
         ! Dummy arguments
+        integer(ip), intent(in)   :: nlat
+        integer(ip), intent(in)   :: nlon
+        real(wp),    intent(out)  :: walin(*)
+        real(wp),    intent(out)  :: dwork(nlat+1)
 
-        integer(ip), intent(in)     :: nlat
-        integer(ip), intent(in)     :: nlon
-        real(wp),    intent(inout)  :: walin(*)
-        real(wp),    intent(inout)  :: dwork(nlat+1)
-
-        ! Dummy arguments
-
+        ! Local variables
         integer(ip) :: imid, iw1
-
 
         imid = (nlat+1)/2
         iw1 = 2*nlat*imid+1
-        !
+
         !     the length of walin is 3*((l-3)*l+2)/2 + 2*l*imid
         !     the length of work is nlat+1
         !
-        call alini1(nlat, nlon, imid, walin, walin(iw1), dwork)
+        call alinit_lower_routine(nlat, nlon, imid, walin, walin(iw1), dwork)
 
-    contains
+    end subroutine initialize_workspace_for_scalar_synthesis_regular_grid
 
-        subroutine alini1(nlat, nlon, imid, p, abc, cp)
+    pure subroutine alinit_lower_routine(nlat, nlon, imid, p, abc, cp)
 
-            ! Dummy arguments
+        ! Dummy arguments
+        integer(ip), intent(in)   :: nlat
+        integer(ip), intent(in)   :: nlon
+        integer(ip), intent(in)   :: imid
+        real(wp),    intent(out)  :: p(imid, nlat,2)
+        real(wp),    intent(out)  :: abc(*)
+        real(wp),    intent(out)  :: cp(*)
 
-            integer(ip), intent(in)     :: nlat
-            integer(ip), intent(in)     :: nlon
-            integer(ip), intent(in)     :: imid
-            real(wp),    intent(inout)  :: p(imid, nlat,2)
-            real(wp),    intent(inout)  :: abc(*)
-            real(wp),    intent(inout)  :: cp(*)
+        ! Local variables
+        integer(ip) :: i, m, n, mp1, np1
+        real(wp)    :: dt, ph, th
 
-            ! Dummy arguments
+        dt = PI/(nlat-1)
 
-            integer(ip)         :: i, m, n, mp1, np1
-            real(wp)            :: dt, ph, th
-
-
-            dt = PI/(nlat-1)
-
-            do mp1=1, 2
-                m = mp1-1
-                do np1=mp1, nlat
-                    n = np1-1
-                    call dnlfk(m, n, cp)
-                    do i=1, imid
-                        th = real(i-1, kind=wp)*dt
-                        call dnlft(m, n, th, cp, ph)
-                        p(i, np1, mp1) = ph
-                    end do
+        do mp1=1, 2
+            m = mp1-1
+            do np1=mp1, nlat
+                n = np1-1
+                call dnlfk(m, n, cp)
+                do i=1, imid
+                    th = real(i-1, kind=wp)*dt
+                    call dnlft(m, n, th, cp, ph)
+                    p(i, np1, mp1) = ph
                 end do
             end do
+        end do
 
-            call rabcp(nlat, nlon, abc)
+        call compute_recurrence_relation_coefficients(nlat, nlon, abc)
 
-        end subroutine alini1
+    end subroutine alinit_lower_routine
 
-    end subroutine alinit
-
-
-    subroutine rabcp(nlat, nlon, abc)
-        !
-        ! Purpose:
-        !
-        ! Computes the coefficients in the recurrence
-        ! relation for the associated legendre functions. array abc
-        ! must have 3*((mmax-2)*(2*nlat-mmax-1))/2 locations.
-        !
+    ! Purpose:
+    !
+    ! Computes the coefficients in the recurrence
+    ! relation for the associated legendre functions. array abc
+    ! must have 3*((mmax-2)*(2*nlat-mmax-1))/2 locations.
+    !
+    pure subroutine compute_recurrence_relation_coefficients(nlat, nlon, abc)
 
         ! Dummy arguments
+        integer(ip), intent(in)   :: nlat
+        integer(ip), intent(in)   :: nlon
+        real(wp),    intent(out)  :: abc(*)
 
-        integer(ip), intent(in)     :: nlat
-        integer(ip), intent(in)     :: nlon
-        real(wp),    intent(inout)  :: abc(*)
-
-        ! Dummy arguments
-
+        ! Local variables
         integer(ip) :: mmax, labc, iw1, iw2
-
 
         ! Compute workspace indices
         mmax = min(nlat, nlon/2+1)
@@ -1314,78 +1113,72 @@ contains
         iw1 = labc+1
         iw2 = iw1+labc
 
-        call rabcp1(nlat, nlon, abc, abc(iw1), abc(iw2))
+        call rabcp_lower_routine(nlat, nlon, abc, abc(iw1), abc(iw2))
 
-    contains
+    end subroutine compute_recurrence_relation_coefficients
 
-        subroutine rabcp1(nlat, nlon, a, b, c)
-            !
-            ! Purpose:
-            !
-            ! Coefficients a, b, and c for computing pbar(m, n, theta) are
-            ! stored in location ((m-2)*(nlat+nlat-m-1))/2+n+1
-            !
-
-            ! Dummy arguments
-
-            integer(ip), intent(in)     :: nlat
-            integer(ip), intent(in)     :: nlon
-            real(wp),    intent(inout)  :: a(*)
-            real(wp),    intent(inout)  :: b(*)
-            real(wp),    intent(inout)  :: c(*)
-
-            ! Dummy arguments
-
-            integer(ip) :: m, n, ns, mp1, np1, mp3, mmax
-            real(wp)    :: cn, fm, fn
-            real(wp)    :: tm, tn, fnmm, fnpm, temp
-
-
-            mmax = min(nlat, nlon/2+1)
-
-            outer_loop: do mp1=3, mmax
-
-                m = mp1-1
-                ns = ((m-2)*(nlat+nlat-m-1))/2+1
-                fm = real(m, kind=wp)
-                tm = TWO * fm
-                temp = tm*(tm-ONE)
-                a(ns) = sqrt((tm+ONE)*(tm-TWO)/temp)
-                c(ns) = sqrt(TWO/temp)
-
-                if (m == nlat-1) cycle outer_loop
-
-                ns = ns+1
-                temp = tm*(tm+ONE)
-                a(ns) = sqrt((tm+THREE)*(tm-TWO)/temp)
-                c(ns) = sqrt(SIX/temp)
-                mp3 = m+3
-
-                if (mp3 > nlat) cycle outer_loop
-
-                do np1=mp3, nlat
-                    n = np1-1
-                    ns = ns+1
-                    fn = real(n, kind=wp)
-                    tn = TWO * fn
-                    cn = (tn+ONE)/(tn-THREE)
-                    fnpm = fn+fm
-                    fnmm = fn-fm
-                    temp = fnpm*(fnpm-ONE)
-                    a(ns) = sqrt(cn*(fnpm-THREE)*(fnpm-TWO)/temp)
-                    b(ns) = sqrt(cn*fnmm*(fnmm-ONE)/temp)
-                    c(ns) = sqrt((fnmm+ONE)*(fnmm+TWO)/temp)
-                end do
-            end do outer_loop
-
-        end subroutine rabcp1
-    end subroutine rabcp
-
-
-    subroutine initialize_workspace_for_regular_scalar_analysis(nlat, nlon, imid, z, idz, zin, wzfin, dwork)
+    !
+    ! Remark:
+    !
+    ! Coefficients a, b, and c for computing pbar(m, n, theta) are
+    ! stored in location ((m-2)*(nlat+nlat-m-1))/2+n+1
+    !
+    pure subroutine rabcp_lower_routine(nlat, nlon, a, b, c)
 
         ! Dummy arguments
+        integer(ip), intent(in)   :: nlat
+        integer(ip), intent(in)   :: nlon
+        real(wp),    intent(out)  :: a(*)
+        real(wp),    intent(out)  :: b(*)
+        real(wp),    intent(out)  :: c(*)
 
+        ! Local variables
+        integer(ip) :: m, n, ns, mp1, np1, mp3, mmax
+        real(wp)    :: cn, fm, fn
+        real(wp)    :: tm, tn, fnmm, fnpm, temp
+
+        mmax = min(nlat, nlon/2+1)
+
+        outer_loop: do mp1=3, mmax
+
+            m = mp1-1
+            ns = ((m-2)*(nlat+nlat-m-1))/2+1
+            fm = real(m, kind=wp)
+            tm = TWO * fm
+            temp = tm*(tm-ONE)
+            a(ns) = sqrt((tm+ONE)*(tm-TWO)/temp)
+            c(ns) = sqrt(TWO/temp)
+
+            if (m == nlat-1) cycle outer_loop
+
+            ns = ns+1
+            temp = tm*(tm+ONE)
+            a(ns) = sqrt((tm+THREE)*(tm-TWO)/temp)
+            c(ns) = sqrt(SIX/temp)
+            mp3 = m+3
+
+            if (mp3 > nlat) cycle outer_loop
+
+            do np1=mp3, nlat
+                n = np1-1
+                ns = ns+1
+                fn = real(n, kind=wp)
+                tn = TWO * fn
+                cn = (tn+ONE)/(tn-THREE)
+                fnpm = fn+fm
+                fnmm = fn-fm
+                temp = fnpm*(fnpm-ONE)
+                a(ns) = sqrt(cn*(fnpm-THREE)*(fnpm-TWO)/temp)
+                b(ns) = sqrt(cn*fnmm*(fnmm-ONE)/temp)
+                c(ns) = sqrt((fnmm+ONE)*(fnmm+TWO)/temp)
+            end do
+        end do outer_loop
+
+    end subroutine rabcp_lower_routine
+
+    subroutine initialize_workspace_for_scalar_analysis_regular_grid_saved(nlat, nlon, imid, z, idz, zin, wzfin, dwork)
+
+        ! Dummy arguments
         integer(ip), intent(in)     :: nlat
         integer(ip), intent(in)     :: nlon
         integer(ip), intent(in)     :: imid
@@ -1395,12 +1188,10 @@ contains
         real(wp),    intent(inout)  :: wzfin(*)
         real(wp),    intent(inout)  :: dwork(*)
 
-        ! Dummy arguments
-
+        ! Local variables
         integer(ip) :: i, m, i3, mn, mp1, np1, mmax
 
-
-        call zfinit(nlat, nlon, wzfin, dwork)
+        call initialize_workspace_for_scalar_analysis_regular_grid(nlat, nlon, wzfin, dwork)
 
         mmax = min(nlat, nlon/2+1)
 
@@ -1415,14 +1206,11 @@ contains
             end do
         end do
 
-    end subroutine initialize_workspace_for_regular_scalar_analysis
+    end subroutine initialize_workspace_for_scalar_analysis_regular_grid_saved
 
-
-
-    subroutine initialize_workspace_for_regular_scalar_synthesis(nlat, nlon, imid, p, pin, walin, dwork)
+    subroutine initialize_workspace_for_scalar_synthesis_regular_grid_saved(nlat, nlon, imid, p, pin, walin, dwork)
 
         ! Dummy arguments
-
         integer(ip), intent(in)     :: nlat
         integer(ip), intent(in)     :: nlon
         integer(ip), intent(in)     :: imid
@@ -1431,12 +1219,10 @@ contains
         real(wp),    intent(inout)  :: walin(*)
         real(wp),    intent(inout)  :: dwork(*)
 
-        ! Dummy arguments
-
+        ! Local variables
         integer(ip) :: m, i3, mn, mp1, np1, mmax
 
-
-        call alinit(nlat, nlon, walin, dwork)
+        call initialize_workspace_for_scalar_synthesis_regular_grid(nlat, nlon, walin, dwork)
 
         mmax = min(nlat, nlon/2+1)
 
@@ -1449,19 +1235,17 @@ contains
             end do
         end do
 
-    end subroutine initialize_workspace_for_regular_scalar_synthesis
+    end subroutine initialize_workspace_for_scalar_synthesis_regular_grid_saved
 
     subroutine zvinit(nlat, nlon, wzvin, dwork)
 
         ! Dummy arguments
-
         integer(ip), intent(in)     :: nlat
         integer(ip), intent(in)     :: nlon
         real(wp),    intent(inout)  :: wzvin(*)
         real(wp),    intent(inout)  :: dwork(nlat+2)
 
-        ! Dummy arguments
-
+        ! Local variables
         integer(ip) :: imid, iw1, iw2
 
 
@@ -1473,55 +1257,51 @@ contains
         !         2*nlat*imid +3*(max(mmax-2, 0)*(2*nlat-mmax-1))/2
         !     the length of dwork is nlat+2
         !
-        call zvini1(nlat, nlon, imid, wzvin, wzvin(iw1), dwork, dwork(iw2))
+        call zvinit_lower_routine(nlat, nlon, imid, wzvin, wzvin(iw1), dwork, dwork(iw2))
 
-    contains
-
-        subroutine zvini1(nlat, nlon, imid, zv, abc, czv, work)
-            !
-            !     abc must have 3*(max(mmax-2, 0)*(2*nlat-mmax-1))/2
-            !     locations where mmax = min(nlat, (nlon+1)/2)
-            !     czv and work must each have nlat/2+1  locations
-            !
-
-            ! Dummy arguments
-
-            integer(ip), intent(in)     :: nlat
-            integer(ip), intent(in)     :: nlon
-            integer(ip), intent(in)     :: imid
-            real(wp),    intent(inout)  :: zv(imid,nlat,2)
-            real(wp),    intent(inout)  :: abc(*)
-            real(wp),    intent(inout)  :: czv(nlat/2+1)
-            real(wp),    intent(inout)  :: work(nlat/2+1)
-
-            ! Dummy arguments
-
-            integer(ip)         :: i,m, mdo, mp1, n, np1
-            real(wp)            :: dt, th, zvh
-
-
-            dt = PI/(nlat-1)
-            mdo = min(2, nlat, (nlon+1)/2)
-            do mp1=1, mdo
-                m = mp1-1
-                do np1=mp1, nlat
-                    n = np1-1
-                    call dzvk(nlat, m, n, czv, work)
-                    do i=1, imid
-                        th = real(i-1, kind=wp)*dt
-                        call dzvt(nlat, m, n, th, czv, zvh)
-                        zv(i, np1, mp1) = zvh
-                    end do
-                    zv(1, np1, mp1) = HALF*zv(1, np1, mp1)
-                end do
-            end do
-
-            call rabcv(nlat, nlon, abc)
-
-        end subroutine zvini1
     end subroutine zvinit
 
+    ! Remark:
+    !
+    !     abc must have 3*(max(mmax-2, 0)*(2*nlat-mmax-1))/2
+    !     locations where mmax = min(nlat, (nlon+1)/2)
+    !     czv and work must each have nlat/2+1  locations
+    !
+    subroutine zvinit_lower_routine(nlat, nlon, imid, zv, abc, czv, work)
 
+        ! Dummy arguments
+        integer(ip), intent(in)     :: nlat
+        integer(ip), intent(in)     :: nlon
+        integer(ip), intent(in)     :: imid
+        real(wp),    intent(inout)  :: zv(imid,nlat,2)
+        real(wp),    intent(inout)  :: abc(*)
+        real(wp),    intent(inout)  :: czv(nlat/2+1)
+        real(wp),    intent(inout)  :: work(nlat/2+1)
+
+        ! Local variables
+        integer(ip)         :: i,m, mdo, mp1, n, np1
+        real(wp)            :: dt, th, zvh
+
+
+        dt = PI/(nlat-1)
+        mdo = min(2, nlat, (nlon+1)/2)
+        do mp1=1, mdo
+            m = mp1-1
+            do np1=mp1, nlat
+                n = np1-1
+                call dzvk(nlat, m, n, czv, work)
+                do i=1, imid
+                    th = real(i-1, kind=wp)*dt
+                    call dzvt(nlat, m, n, th, czv, zvh)
+                    zv(i, np1, mp1) = zvh
+                end do
+                zv(1, np1, mp1) = HALF*zv(1, np1, mp1)
+            end do
+        end do
+
+        call compute_polar_recurrence_relation_coefficients(nlat, nlon, abc)
+
+    end subroutine zvinit_lower_routine
 
     subroutine zwinit(nlat, nlon, wzwin, dwork)
         !
@@ -1547,64 +1327,57 @@ contains
         iw1 = 2*nlat*imid+1
         iw2 = nlat/2+2
 
-        call zwini1(nlat, nlon, imid, wzwin, wzwin(iw1), dwork, dwork(iw2))
-
-    contains
-
-        subroutine zwini1(nlat, nlon, imid, zw, abc, czw, work)
-            !
-            !     abc must have 3*(max(mmax-2, 0)*(2*nlat-mmax-1))/2
-            !     locations where mmax = min(nlat, (nlon+1)/2)
-            !     czw and work must each have nlat+1 locations
-            !
-
-            ! Dummy arguments
-
-            integer(ip), intent(in)     :: nlat
-            integer(ip), intent(in)     :: nlon
-            integer(ip), intent(in)     :: imid
-            real(wp),    intent(inout)  :: zw(imid,nlat,2)
-            real(wp),    intent(inout)  :: abc(*)
-            real(wp),    intent(inout)  :: czw(nlat+1)
-            real(wp),    intent(inout)  :: work(nlat+1)
-
-            ! Dummy arguments
-
-            integer(ip)         :: i, m, mdo, mp1, n, np1
-            real(wp)            :: dt, th, zwh
-
-
-            dt = pi/(nlat-1)
-            mdo = min(3, nlat, (nlon+1)/2)
-
-            if (mdo < 2) return
-
-            do mp1=2, mdo
-                m = mp1-1
-                do np1=mp1, nlat
-                    n = np1-1
-                    call dzwk(nlat, m, n, czw, work)
-                    do i=1, imid
-                        th = real(i-1, kind=wp)*dt
-                        call dzwt(nlat, m, n, th, czw, zwh)
-                        zw(i, np1, m) = zwh
-                    end do
-                    zw(1, np1, m) = HALF*zw(1, np1, m)
-                end do
-            end do
-
-            call rabcw(nlat, nlon, abc)
-
-        end subroutine zwini1
+        call zwinit_lower_routine(nlat, nlon, imid, wzwin, wzwin(iw1), dwork, dwork(iw2))
 
     end subroutine zwinit
 
+    ! Remark:
+    !
+    ! abc must have 3*(max(mmax-2, 0)*(2*nlat-mmax-1))/2
+    ! locations where mmax = min(nlat, (nlon+1)/2)
+    ! czw and work must each have nlat+1 locations
+    !
+    subroutine zwinit_lower_routine(nlat, nlon, imid, zw, abc, czw, work)
 
+        ! Dummy arguments
+        integer(ip), intent(in)     :: nlat
+        integer(ip), intent(in)     :: nlon
+        integer(ip), intent(in)     :: imid
+        real(wp),    intent(inout)  :: zw(imid,nlat,2)
+        real(wp),    intent(inout)  :: abc(*)
+        real(wp),    intent(inout)  :: czw(nlat+1)
+        real(wp),    intent(inout)  :: work(nlat+1)
+
+        ! Local variables
+        integer(ip) :: i, m, mdo, mp1, n, np1
+        real(wp)    :: dt, th, zwh
+
+        dt = PI/(nlat-1)
+        mdo = min(3, nlat, (nlon+1)/2)
+
+        if (mdo < 2) return
+
+        do mp1=2, mdo
+            m = mp1-1
+            do np1=mp1, nlat
+                n = np1-1
+                call dzwk(nlat, m, n, czw, work)
+                do i=1, imid
+                    th = real(i - 1, kind=wp) * dt
+                    call dzwt(nlat, m, n, th, czw, zwh)
+                    zw(i, np1, m) = zwh
+                end do
+                zw(1, np1, m) = HALF * zw(1, np1, m)
+            end do
+        end do
+
+        call compute_azimuthal_recurrence_relation_coefficients(nlat, nlon, abc)
+
+    end subroutine zwinit_lower_routine
 
     subroutine zvin(ityp, nlat, nlon, m, zv, i3, wzvin)
 
         ! Dummy arguments
-
         integer(ip), intent(in)  :: ityp
         integer(ip), intent(in)  :: nlat
         integer(ip), intent(in)  :: nlon
@@ -1614,7 +1387,6 @@ contains
         real(wp),    intent(in)  :: wzvin(*)
 
         ! Local variables
-
         integer(ip) :: imid
         integer(ip) :: iw1, iw2, iw3, iw4
         integer(ip) :: labc, lim, mmax
@@ -1631,99 +1403,92 @@ contains
         !
         !     the length of wzvin is 2*lim+3*labc
         !
-        call zvin1(ityp, nlat, m, zv, imid, i3, wzvin, wzvin(iw1), wzvin(iw2), &
+        call zvin_lower_routine(ityp, nlat, m, zv, imid, i3, wzvin, wzvin(iw1), wzvin(iw2), &
             wzvin(iw3), wzvin(iw4))
-
-    contains
-
-        subroutine zvin1(ityp, nlat, m, zv, imid, i3, zvz, zv1, a, b, c)
-
-            ! Dummy arguments
-
-            integer(ip), intent(in)     :: ityp
-            integer(ip), intent(in)     :: nlat
-            integer(ip), intent(in)     :: m
-            real(wp),    intent(out)    :: zv(imid, nlat, 3)
-            integer(ip), intent(in)     :: imid
-            integer(ip), intent(inout)  :: i3
-            real(wp),    intent(in)     :: zvz(imid, *)
-            real(wp),    intent(in)     :: zv1(imid, *)
-            real(wp),    intent(in)     :: a(*)
-            real(wp),    intent(in)     :: b(*)
-            real(wp),    intent(in)     :: c(*)
-
-            ! Local variables
-
-            integer(ip)       :: i, ihold
-            integer(ip)       :: np1, ns, nstp, nstrt
-            integer(ip), save :: i1, i2
-
-
-            ihold = i1
-            i1 = i2
-            i2 = i3
-            i3 = ihold
-            if (m < 1) then
-                i1 = 1
-                i2 = 2
-                i3 = 3
-                do np1=1, nlat
-                    do i=1, imid
-                        zv(i, np1, i3) = zvz(i, np1)
-                    end do
-                end do
-            else if (m == 1) then
-                do np1=2, nlat
-                    do i=1, imid
-                        zv(i, np1, i3) = zv1(i, np1)
-                    end do
-                end do
-            else
-                ns = ((m-2)*(nlat+nlat-m-1))/2+1
-
-                if (ityp /= 1) then
-                    do i=1, imid
-                        zv(i, m+1, i3) = a(ns)*zv(i, m-1, i1)-c(ns)*zv(i, m+1, i1)
-                    end do
-                end if
-
-                if (m == nlat-1) return
-
-                if (ityp /= 2) then
-                    ns = ns+1
-                    do i=1, imid
-                        zv(i, m+2, i3) = a(ns)*zv(i, m, i1)-c(ns)*zv(i, m+2, i1)
-                    end do
-                end if
-
-                nstrt = m+3
-
-                if (ityp == 1) nstrt = m+4
-
-                if (nstrt > nlat) return
-
-                nstp = 2
-
-                if (ityp == 0) nstp = 1
-
-                do np1=nstrt, nlat, nstp
-                    ns = ns+nstp
-                    do i=1, imid
-                        zv(i, np1, i3) = a(ns)*zv(i, np1-2, i1)+b(ns)*zv(i, np1-2, i3) &
-                            -c(ns)*zv(i, np1, i1)
-                    end do
-                end do
-            end if
-
-        end subroutine zvin1
 
     end subroutine zvin
 
+    subroutine zvin_lower_routine(ityp, nlat, m, zv, imid, i3, zvz, zv1, a, b, c)
+
+        ! Dummy arguments
+        integer(ip), intent(in)     :: ityp
+        integer(ip), intent(in)     :: nlat
+        integer(ip), intent(in)     :: m
+        real(wp),    intent(out)    :: zv(imid, nlat, 3)
+        integer(ip), intent(in)     :: imid
+        integer(ip), intent(inout)  :: i3
+        real(wp),    intent(in)     :: zvz(imid, *)
+        real(wp),    intent(in)     :: zv1(imid, *)
+        real(wp),    intent(in)     :: a(*)
+        real(wp),    intent(in)     :: b(*)
+        real(wp),    intent(in)     :: c(*)
+
+        ! Local variables
+        integer(ip)       :: i, ihold
+        integer(ip)       :: np1, ns, nstp, nstrt
+        integer(ip), save :: i1, i2
+
+        ihold = i1
+        i1 = i2
+        i2 = i3
+        i3 = ihold
+        if (m < 1) then
+            i1 = 1
+            i2 = 2
+            i3 = 3
+            do np1=1, nlat
+                do i=1, imid
+                    zv(i, np1, i3) = zvz(i, np1)
+                end do
+            end do
+        else if (m == 1) then
+            do np1=2, nlat
+                do i=1, imid
+                    zv(i, np1, i3) = zv1(i, np1)
+                end do
+            end do
+        else
+            ns = ((m-2)*(nlat+nlat-m-1))/2+1
+
+            if (ityp /= 1) then
+                do i=1, imid
+                    zv(i, m+1, i3) = a(ns)*zv(i, m-1, i1)-c(ns)*zv(i, m+1, i1)
+                end do
+            end if
+
+            if (m == nlat-1) return
+
+            if (ityp /= 2) then
+                ns = ns+1
+                do i=1, imid
+                    zv(i, m+2, i3) = a(ns)*zv(i, m, i1)-c(ns)*zv(i, m+2, i1)
+                end do
+            end if
+
+            nstrt = m+3
+
+            if (ityp == 1) nstrt = m+4
+
+            if (nstrt > nlat) return
+
+            nstp = 2
+
+            if (ityp == 0) nstp = 1
+
+            do np1=nstrt, nlat, nstp
+                ns = ns+nstp
+                do i=1, imid
+                    zv(i, np1, i3) = a(ns)*zv(i, np1-2, i1)+b(ns)*zv(i, np1-2, i3) &
+                        -c(ns)*zv(i, np1, i1)
+                end do
+            end do
+        end if
+
+    end subroutine zvin_lower_routine
 
     subroutine zwin(ityp, nlat, nlon, m, zw, i3, wzwin)
 
         ! Dummy arguments
-
         integer(ip), intent(in)     :: ityp
         integer(ip), intent(in)     :: nlat
         integer(ip), intent(in)     :: nlon
@@ -1733,7 +1498,6 @@ contains
         real(wp),    intent(in)     :: wzwin(*)
 
         ! Local variables
-
         integer(ip) :: imid, iw1, iw2, iw3, iw4
         integer(ip) :: labc, lim, mmax
 
@@ -1749,251 +1513,225 @@ contains
         !
         !     the length of wzwin is 2*lim+3*labc
         !
-        call zwin1(ityp, nlat, m, zw, imid, i3, wzwin, wzwin(iw1), wzwin(iw2), &
+        call zwin_lower_routine(ityp, nlat, m, zw, imid, i3, wzwin, wzwin(iw1), wzwin(iw2), &
             wzwin(iw3), wzwin(iw4))
 
-    contains
+    end subroutine zwin
 
-        subroutine zwin1(ityp, nlat, m, zw, imid, i3, zw1, zw2, a, b, c)
+    subroutine zwin_lower_routine(ityp, nlat, m, zw, imid, i3, zw1, zw2, a, b, c)
 
-            ! Dummy arguments
+        ! Dummy arguments
+        integer(ip), intent(in)     :: ityp
+        integer(ip), intent(in)     :: nlat
+        integer(ip), intent(in)     :: m
+        real(wp),    intent(out)    :: zw(imid, nlat, 3)
+        integer(ip), intent(in)     :: imid
+        integer(ip), intent(inout)  :: i3
+        real(wp),    intent(in)     :: zw1(imid,*)
+        real(wp),    intent(in)     :: zw2(imid,*)
+        real(wp),    intent(in)     :: a(*)
+        real(wp),    intent(in)     :: b(*)
+        real(wp),    intent(in)     :: c(*)
 
-            integer(ip), intent(in)     :: ityp
-            integer(ip), intent(in)     :: nlat
-            integer(ip), intent(in)     :: m
-            real(wp),    intent(out)    :: zw(imid, nlat, 3)
-            integer(ip), intent(in)     :: imid
-            integer(ip), intent(inout)  :: i3
-            real(wp),    intent(in)     :: zw1(imid,*)
-            real(wp),    intent(in)     :: zw2(imid,*)
-            real(wp),    intent(in)     :: a(*)
-            real(wp),    intent(in)     :: b(*)
-            real(wp),    intent(in)     :: c(*)
-
-            ! Local variables
-
-            integer(ip)       :: i, ihold
-            integer(ip)       :: np1, ns, nstp, nstrt
-            integer(ip), save :: i1, i2
+        ! Local variables
+        integer(ip)       :: i, ihold
+        integer(ip)       :: np1, ns, nstp, nstrt
+        integer(ip), save :: i1, i2
 
 
-            ihold = i1
-            i1 = i2
-            i2 = i3
-            i3 = ihold
-            if (m < 2) then
-                i1 = 1
-                i2 = 2
-                i3 = 3
-                do np1=2, nlat
-                    do i=1, imid
-                        zw(i, np1, i3) = zw1(i, np1)
-                    end do
+        ihold = i1
+        i1 = i2
+        i2 = i3
+        i3 = ihold
+        if (m < 2) then
+            i1 = 1
+            i2 = 2
+            i3 = 3
+            do np1=2, nlat
+                do i=1, imid
+                    zw(i, np1, i3) = zw1(i, np1)
                 end do
-            else if (m == 2) then
-                do np1=3, nlat
-                    do i=1, imid
-                        zw(i, np1, i3) = zw2(i, np1)
-                    end do
+            end do
+        else if (m == 2) then
+            do np1=3, nlat
+                do i=1, imid
+                    zw(i, np1, i3) = zw2(i, np1)
                 end do
-            else
-                ns = ((m-2)*(2*nlat-m-1))/2+1
+            end do
+        else
+            ns = ((m-2)*(2*nlat-m-1))/2+1
 
-                if (ityp /= 1) then
-                    do i=1, imid
-                        zw(i, m+1, i3) = a(ns)*zw(i, m-1, i1)-c(ns)*zw(i, m+1, i1)
-                    end do
-                end if
-
-                if (m == nlat-1) return
-
-                if (ityp /= 2) then
-                    ns = ns+1
-                    do i=1, imid
-                        zw(i, m+2, i3) = a(ns)*zw(i, m, i1)-c(ns)*zw(i, m+2, i1)
-                    end do
-                end if
-
-                nstrt = m+3
-
-                if (ityp == 1) nstrt = m+4
-
-                if (nstrt > nlat) return
-
-                nstp = 2
-
-                if (ityp == 0) nstp = 1
-
-                do np1=nstrt, nlat, nstp
-                    ns = ns+nstp
-                    do i=1, imid
-                        zw(i, np1, i3) = a(ns)*zw(i, np1-2, i1)+b(ns)*zw(i, np1-2, i3) &
-                            -c(ns)*zw(i, np1, i1)
-                    end do
+            if (ityp /= 1) then
+                do i=1, imid
+                    zw(i, m+1, i3) = a(ns)*zw(i, m-1, i1)-c(ns)*zw(i, m+1, i1)
                 end do
             end if
 
-        end subroutine zwin1
-    end subroutine zwin
+            if (m == nlat-1) return
 
+            if (ityp /= 2) then
+                ns = ns+1
+                do i=1, imid
+                    zw(i, m+2, i3) = a(ns)*zw(i, m, i1)-c(ns)*zw(i, m+2, i1)
+                end do
+            end if
+
+            nstrt = m+3
+
+            if (ityp == 1) nstrt = m+4
+
+            if (nstrt > nlat) return
+
+            nstp = 2
+
+            if (ityp == 0) nstp = 1
+
+            do np1=nstrt, nlat, nstp
+                ns = ns+nstp
+                do i=1, imid
+                    zw(i, np1, i3) = a(ns)*zw(i, np1-2, i1)+b(ns)*zw(i, np1-2, i3) &
+                        -c(ns)*zw(i, np1, i1)
+                end do
+            end do
+        end if
+
+    end subroutine zwin_lower_routine
+
+    ! Remark:
+    !
+    ! The length of wvbin is 2*nlat*imid+3*((nlat-3)*nlat+2)/2
+    ! The length of dwork is nlat+2
+    !
     subroutine vbinit(nlat, nlon, wvbin, dwork)
-        !
-        ! Remark:
-        !
-        ! The length of wvbin is 2*nlat*imid+3*((nlat-3)*nlat+2)/2
-        ! The length of dwork is nlat+2
-        !
 
         ! Dummy arguments
-
         integer(ip), intent(in)  :: nlat
         integer(ip), intent(in)  :: nlon
         real(wp),    intent(out) :: wvbin(2*nlat*((nlat+1)/2)+3*((nlat-3)*nlat+2)/2)
         real(wp),    intent(out) :: dwork(nlat+2)
 
         ! Local variables
-
         integer(ip) :: imid, iw1, iw2
-
 
         imid = (nlat+1)/2
         iw1 = 2*nlat*imid+1
         iw2 = nlat/2 + 2
 
-        call vbini1(nlat, nlon, imid, wvbin, wvbin(iw1), dwork, dwork(iw2))
-
-    contains
-
-        subroutine vbini1(nlat, nlon, imid, vb, abc, cvb, work)
-            !
-            ! Remarks:
-            !
-            !     abc must have 3*(max(mmax-2, 0)*(2*nlat-mmax-1))/2
-            !     locations where mmax = min(nlat, (nlon+1)/2)
-            !     cvb and work must each have nlat+1 locations
-            !
-
-            ! Dummy arguments
-
-            integer(ip), intent(in)  :: nlat
-            integer(ip), intent(in)  :: nlon
-            integer(ip), intent(in)  :: imid
-            real(wp),    intent(out) :: vb(imid, nlat, 2)
-            real(wp),    intent(out) :: abc(*)
-            real(wp),    intent(out) :: cvb(nlat+1)
-            real(wp),    intent(out) :: work(nlat+1)
-
-            ! Local variables
-
-            integer(ip)    :: i, m, mdo, mp1, n, np1
-            real(wp)       :: dth, theta, vbh
-
-
-            dth = pi/(nlat-1)
-            mdo = min(2, nlat, (nlon+1)/2)
-            do mp1=1, mdo
-                m = mp1-1
-                do np1=mp1, nlat
-                    n = np1-1
-                    call dvbk(m, n, cvb, work)
-                    do  i=1, imid
-                        theta = real(i-1, kind=wp)*dth
-                        call dvbt(m, n, theta, cvb, vbh)
-                        vb(i, np1, mp1) = vbh
-                    end do
-                end do
-            end do
-
-            call rabcv(nlat, nlon, abc)
-
-        end subroutine vbini1
+        call vbinit_lower_routine(nlat, nlon, imid, wvbin, wvbin(iw1), dwork, dwork(iw2))
 
     end subroutine vbinit
 
-
-    subroutine wbinit (nlat, nlon, wwbin, dwork)
-        !
-        ! Remark:
-        !
-        ! The length of wwbin is 2*nlat*imid+3*((nlat-3)*nlat+2)/2
-        ! The length of dwork is nlat+2
-        !
+    ! Remarks:
+    !
+    !     abc must have 3*(max(mmax-2, 0)*(2*nlat-mmax-1))/2
+    !     locations where mmax = min(nlat, (nlon+1)/2)
+    !     cvb and work must each have nlat+1 locations
+    !
+    subroutine vbinit_lower_routine(nlat, nlon, imid, vb, abc, cvb, work)
 
         ! Dummy arguments
+        integer(ip), intent(in)  :: nlat
+        integer(ip), intent(in)  :: nlon
+        integer(ip), intent(in)  :: imid
+        real(wp),    intent(out) :: vb(imid, nlat, 2)
+        real(wp),    intent(out) :: abc(*)
+        real(wp),    intent(out) :: cvb(nlat+1)
+        real(wp),    intent(out) :: work(nlat+1)
 
+        ! Local variables
+        integer(ip)    :: i, m, mdo, mp1, n, np1
+        real(wp)       :: dth, theta, vbh
+
+
+        dth = pi/(nlat-1)
+        mdo = min(2, nlat, (nlon+1)/2)
+        do mp1=1, mdo
+            m = mp1-1
+            do np1=mp1, nlat
+                n = np1-1
+                call dvbk(m, n, cvb, work)
+                do  i=1, imid
+                    theta = real(i-1, kind=wp)*dth
+                    call dvbt(m, n, theta, cvb, vbh)
+                    vb(i, np1, mp1) = vbh
+                end do
+            end do
+        end do
+
+        call compute_polar_recurrence_relation_coefficients(nlat, nlon, abc)
+
+    end subroutine vbinit_lower_routine
+
+    !
+    ! Remark:
+    !
+    ! The length of wwbin is 2*nlat*imid+3*((nlat-3)*nlat+2)/2
+    ! The length of dwork is nlat+2
+    !
+    subroutine wbinit(nlat, nlon, wwbin, dwork)
+
+        ! Dummy arguments
         integer(ip), intent(in)  :: nlat
         integer(ip), intent(in)  :: nlon
         real(wp),    intent(out) :: wwbin(2*nlat*((nlat+1)/2)+3*((nlat-3)*nlat+2)/2)
         real(wp),    intent(out) :: dwork(nlat+2)
 
         ! Local variables
-
         integer(ip) :: imid, iw1, iw2
-
 
         imid = (nlat+1)/2
         iw1 = 2*nlat*imid+1
         iw2 = nlat/2 + 2
 
-        call wbini1(nlat, nlon, imid, wwbin, wwbin(iw1), dwork, dwork(iw2))
-
-    contains
-
-        subroutine wbini1(nlat, nlon, imid, wb, abc, cwb, work)
-            !
-            ! Remarks:
-            !
-            ! abc must have 3*(max(mmax-2, 0)*(2*nlat-mmax-1))/2
-            ! locations where mmax = min(nlat, (nlon+1)/2)
-            ! cwb and work must each have nlat/2+1 locations
-            !
-
-            ! Dummy arguments
-
-            integer(ip), intent(in)  :: nlat
-            integer(ip), intent(in)  :: nlon
-            integer(ip), intent(in)  :: imid
-            real(wp),    intent(out) :: wb(imid, nlat, 2)
-            real(wp),    intent(out) :: abc(*)
-            real(wp),    intent(out) :: cwb(nlat/2+1)
-            real(wp),    intent(out) :: work(nlat/2+1)
-
-            ! Local variables
-
-            integer(ip)         :: i, m, mdo, mp1, n, np1
-            real(wp)            :: dth, wbh, theta
-
-
-            dth = pi/(nlat-1)
-            mdo = min(3, nlat, (nlon+1)/2)
-
-            if (mdo >= 2) then
-                do mp1=2, mdo
-                    m = mp1-1
-                    do np1=mp1, nlat
-                        n = np1-1
-                        call dwbk(m, n, cwb, work)
-                        do i=1, imid
-                            theta = real(i-1, kind=wp)*dth
-                            call dwbt(m, n, theta, cwb, wbh)
-                            wb(i, np1, m) = wbh
-                        end do
-                    end do
-                end do
-
-                call rabcw(nlat, nlon, abc)
-            end if
-
-        end subroutine wbini1
+        call wbinit_lower_routine(nlat, nlon, imid, wwbin, wwbin(iw1), dwork, dwork(iw2))
 
     end subroutine wbinit
 
+    ! Remarks:
+    !
+    ! abc must have 3*(max(mmax-2, 0)*(2*nlat-mmax-1))/2
+    ! locations where mmax = min(nlat, (nlon+1)/2)
+    ! cwb and work must each have nlat/2+1 locations
+    !
+    subroutine wbinit_lower_routine(nlat, nlon, imid, wb, abc, cwb, work)
 
+        ! Dummy arguments
+        integer(ip), intent(in)  :: nlat
+        integer(ip), intent(in)  :: nlon
+        integer(ip), intent(in)  :: imid
+        real(wp),    intent(out) :: wb(imid, nlat, 2)
+        real(wp),    intent(out) :: abc(*)
+        real(wp),    intent(out) :: cwb(nlat/2+1)
+        real(wp),    intent(out) :: work(nlat/2+1)
+
+        ! Local variables
+        integer(ip) :: i, m, mdo, mp1, n, np1
+        real(wp)    :: dth, wbh, theta
+
+        dth = pi/(nlat-1)
+        mdo = min(3, nlat, (nlon+1)/2)
+
+        if (2 <= mdo) then
+            do mp1=2, mdo
+                m = mp1-1
+                do np1=mp1, nlat
+                    n = np1-1
+                    call dwbk(m, n, cwb, work)
+                    do i=1, imid
+                        theta = real(i-1, kind=wp)*dth
+                        call dwbt(m, n, theta, cwb, wbh)
+                        wb(i, np1, m) = wbh
+                    end do
+                end do
+            end do
+            call compute_azimuthal_recurrence_relation_coefficients(nlat, nlon, abc)
+        end if
+
+    end subroutine wbinit_lower_routine
 
     subroutine vbin(ityp, nlat, nlon, m, vb, i3, wvbin)
 
         ! Dummy arguments
-
         integer(ip), intent(in)     :: ityp
         integer(ip), intent(in)     :: nlat
         integer(ip), intent(in)     :: nlon
@@ -2003,7 +1741,6 @@ contains
         real(wp),    intent(in)     :: wvbin(*)
 
         ! Local variables
-
         integer(ip) :: imid
         integer(ip) :: iw1, iw2, iw3, iw4
         integer(ip) :: labc, lim, mmax
@@ -2020,94 +1757,89 @@ contains
         !
         !     the length of wvbin is 2*lim+3*labc
         !
-        call vbin1(ityp, nlat, m, vb, imid, i3, wvbin, wvbin(iw1), wvbin(iw2), &
+        call vbin_lower_routine(ityp, nlat, m, vb, imid, i3, wvbin, wvbin(iw1), wvbin(iw2), &
             wvbin(iw3), wvbin(iw4))
-
-    contains
-
-        subroutine vbin1(ityp, nlat, m, vb, imid, i3, vbz, vb1, a, b, c)
-
-            ! Dummy arguments
-
-            integer(ip), intent(in)     :: ityp
-            integer(ip), intent(in)     :: nlat
-            integer(ip), intent(in)     :: m
-            real(wp),    intent(out)    :: vb(imid, nlat, 3)
-            integer(ip), intent(in)     :: imid
-            integer(ip), intent(inout)  :: i3
-            real(wp),    intent(in)     :: vbz(imid,*)
-            real(wp),    intent(in)     :: vb1(imid,*)
-            real(wp),    intent(in)     :: a(*)
-            real(wp),    intent(in)     :: b(*)
-            real(wp),    intent(in)     :: c(*)
-
-            ! Local variables
-
-            integer(ip)       :: i, ihold
-            integer(ip)       :: np1, ns, nstp, nstrt
-            integer(ip), save :: i1, i2
-
-
-            ihold = i1
-            i1 = i2
-            i2 = i3
-            i3 = ihold
-            if (m < 1) then
-                i1 = 1
-                i2 = 2
-                i3 = 3
-                do np1=1, nlat
-                    do i=1, imid
-                        vb(i, np1, i3) = vbz(i, np1)
-                    end do
-                end do
-            else if (m == 1) then
-                do np1=2, nlat
-                    do i=1, imid
-                        vb(i, np1, i3) = vb1(i, np1)
-                    end do
-                end do
-            else
-                ns = ((m-2)*(nlat+nlat-m-1))/2+1
-
-                if (ityp /= 1) then
-                    do i=1, imid
-                        vb(i, m+1, i3) = a(ns)*vb(i, m-1, i1)-c(ns)*vb(i, m+1, i1)
-                    end do
-                end if
-
-                if (m == nlat-1) return
-
-                if (ityp /= 2) then
-                    ns = ns+1
-                    do i=1, imid
-                        vb(i, m+2, i3) = a(ns)*vb(i, m, i1)-c(ns)*vb(i, m+2, i1)
-                    end do
-                end if
-
-                nstrt = m+3
-
-                if (ityp == 1) nstrt = m+4
-
-                if (nstrt > nlat) return
-
-                nstp = 2
-
-                if (ityp == 0) nstp = 1
-
-                do np1=nstrt, nlat, nstp
-                    ns = ns+nstp
-                    do i=1, imid
-                        vb(i, np1, i3) = a(ns)*vb(i, np1-2, i1)+b(ns)*vb(i, np1-2, i3) &
-                            -c(ns)*vb(i, np1, i1)
-                    end do
-                end do
-            end if
-
-        end subroutine vbin1
 
     end subroutine vbin
 
+    subroutine vbin_lower_routine(ityp, nlat, m, vb, imid, i3, vbz, vb1, a, b, c)
+
+        ! Dummy arguments
+        integer(ip), intent(in)     :: ityp
+        integer(ip), intent(in)     :: nlat
+        integer(ip), intent(in)     :: m
+        real(wp),    intent(out)    :: vb(imid, nlat, 3)
+        integer(ip), intent(in)     :: imid
+        integer(ip), intent(inout)  :: i3
+        real(wp),    intent(in)     :: vbz(imid,*)
+        real(wp),    intent(in)     :: vb1(imid,*)
+        real(wp),    intent(in)     :: a(*)
+        real(wp),    intent(in)     :: b(*)
+        real(wp),    intent(in)     :: c(*)
+
+        ! Local variables
+        integer(ip)       :: i, ihold
+        integer(ip)       :: np1, ns, nstp, nstrt
+        integer(ip), save :: i1, i2
+
+
+        ihold = i1
+        i1 = i2
+        i2 = i3
+        i3 = ihold
+        if (m < 1) then
+            i1 = 1
+            i2 = 2
+            i3 = 3
+            do np1=1, nlat
+                do i=1, imid
+                    vb(i, np1, i3) = vbz(i, np1)
+                end do
+            end do
+        else if (m == 1) then
+            do np1=2, nlat
+                do i=1, imid
+                    vb(i, np1, i3) = vb1(i, np1)
+                end do
+            end do
+        else
+            ns = ((m-2)*(nlat+nlat-m-1))/2+1
+
+            if (ityp /= 1) then
+                do i=1, imid
+                    vb(i, m+1, i3) = a(ns)*vb(i, m-1, i1)-c(ns)*vb(i, m+1, i1)
+                end do
+            end if
+
+            if (m == nlat-1) return
+
+            if (ityp /= 2) then
+                ns = ns+1
+                do i=1, imid
+                    vb(i, m+2, i3) = a(ns)*vb(i, m, i1)-c(ns)*vb(i, m+2, i1)
+                end do
+            end if
+
+            nstrt = m+3
+
+            if (ityp == 1) nstrt = m+4
+
+            if (nstrt > nlat) return
+
+            nstp = 2
+
+            if (ityp == 0) nstp = 1
+
+            do np1=nstrt, nlat, nstp
+                ns = ns+nstp
+                do i=1, imid
+                    vb(i, np1, i3) = a(ns)*vb(i, np1-2, i1)+b(ns)*vb(i, np1-2, i3) &
+                        -c(ns)*vb(i, np1, i1)
+                end do
+            end do
+        end if
+
+    end subroutine vbin_lower_routine
 
     subroutine wbin(ityp, nlat, nlon, m, wb, i3, wwbin)
 
@@ -2139,92 +1871,88 @@ contains
         !
         !     the length of wwbin is 2*lim+3*labc
         !
-        call wbin1(ityp, nlat, m, wb, imid, i3, wwbin, wwbin(iw1), wwbin(iw2), &
+        call wbin_lower_routine(ityp, nlat, m, wb, imid, i3, wwbin, wwbin(iw1), wwbin(iw2), &
             wwbin(iw3), wwbin(iw4))
-
-    contains
-
-        subroutine wbin1(ityp, nlat, m, wb, imid, i3, wb1, wb2, a, b, c)
-
-            real(wp) :: a(*)
-            real(wp) :: b(*)
-            real(wp) :: c(*)
-            integer(ip) :: i
-            integer(ip) :: i3
-            integer(ip) :: ihold
-            integer(ip) :: imid
-            integer(ip), intent(in) :: ityp
-            integer(ip) :: m
-            integer(ip), intent(in) :: nlat
-            integer(ip) :: np1
-            integer(ip) :: ns
-            integer(ip) :: nstp
-            integer(ip) :: nstrt
-            real(wp) :: wb(imid, nlat, 3)
-            real(wp) :: wb1(imid, *)
-            real(wp) ::  wb2(imid, *)
-            integer(ip), save :: i1, i2
-
-            ihold = i1
-            i1 = i2
-            i2 = i3
-            i3 = ihold
-            if (m < 2) then
-                i1 = 1
-                i2 = 2
-                i3 = 3
-                do np1=2, nlat
-                    do i=1, imid
-                        wb(i, np1, i3) = wb1(i, np1)
-                    end do
-                end do
-            else if (m == 2) then
-                do np1=3, nlat
-                    do i=1, imid
-                        wb(i, np1, i3) = wb2(i, np1)
-                    end do
-                end do
-            else
-                ns = ((m-2)*(nlat+nlat-m-1))/2+1
-
-                if (ityp /= 1) then
-                    do i=1, imid
-                        wb(i, m+1, i3) = a(ns)*wb(i, m-1, i1)-c(ns)*wb(i, m+1, i1)
-                    end do
-                end if
-
-                if (m == nlat-1) return
-
-                if (ityp /= 2) then
-                    ns = ns+1
-                    do i=1, imid
-                        wb(i, m+2, i3) = a(ns)*wb(i, m, i1)-c(ns)*wb(i, m+2, i1)
-                    end do
-                end if
-
-                nstrt = m+3
-
-                if (ityp == 1) nstrt = m+4
-
-                if (nstrt > nlat) return
-
-                nstp = 2
-                if (ityp == 0) nstp = 1
-                do np1=nstrt, nlat, nstp
-                    ns = ns+nstp
-                    do i=1, imid
-                        wb(i, np1, i3) = a(ns)*wb(i, np1-2, i1)+b(ns)*wb(i, np1-2, i3) &
-                            -c(ns)*wb(i, np1, i1)
-                    end do
-                end do
-            end if
-
-
-        end subroutine wbin1
 
     end subroutine wbin
 
+    subroutine wbin_lower_routine(ityp, nlat, m, wb, imid, i3, wb1, wb2, a, b, c)
 
+        real(wp) :: a(*)
+        real(wp) :: b(*)
+        real(wp) :: c(*)
+        integer(ip) :: i
+        integer(ip) :: i3
+        integer(ip) :: ihold
+        integer(ip) :: imid
+        integer(ip), intent(in) :: ityp
+        integer(ip) :: m
+        integer(ip), intent(in) :: nlat
+        integer(ip) :: np1
+        integer(ip) :: ns
+        integer(ip) :: nstp
+        integer(ip) :: nstrt
+        real(wp) :: wb(imid, nlat, 3)
+        real(wp) :: wb1(imid, *)
+        real(wp) ::  wb2(imid, *)
+        integer(ip), save :: i1, i2
+
+        ihold = i1
+        i1 = i2
+        i2 = i3
+        i3 = ihold
+        if (m < 2) then
+            i1 = 1
+            i2 = 2
+            i3 = 3
+            do np1=2, nlat
+                do i=1, imid
+                    wb(i, np1, i3) = wb1(i, np1)
+                end do
+            end do
+        else if (m == 2) then
+            do np1=3, nlat
+                do i=1, imid
+                    wb(i, np1, i3) = wb2(i, np1)
+                end do
+            end do
+        else
+            ns = ((m-2)*(nlat+nlat-m-1))/2+1
+
+            if (ityp /= 1) then
+                do i=1, imid
+                    wb(i, m+1, i3) = a(ns)*wb(i, m-1, i1)-c(ns)*wb(i, m+1, i1)
+                end do
+            end if
+
+            if (m == nlat-1) return
+
+            if (ityp /= 2) then
+                ns = ns+1
+                do i=1, imid
+                    wb(i, m+2, i3) = a(ns)*wb(i, m, i1)-c(ns)*wb(i, m+2, i1)
+                end do
+            end if
+
+            nstrt = m+3
+
+            if (ityp == 1) nstrt = m+4
+
+            if (nstrt > nlat) return
+
+            nstp = 2
+            if (ityp == 0) nstp = 1
+            do np1=nstrt, nlat, nstp
+                ns = ns+nstp
+                do i=1, imid
+                    wb(i, np1, i3) = a(ns)*wb(i, np1-2, i1)+b(ns)*wb(i, np1-2, i3) &
+                        -c(ns)*wb(i, np1, i1)
+                end do
+            end do
+        end if
+
+
+    end subroutine wbin_lower_routine
 
     subroutine dzvk(nlat, m, n, czv, work)
 
@@ -2306,7 +2034,7 @@ contains
                         !
                         !  n odd, m even
                         !
-                        kdo = (n+1)/2
+                        kdo = (n + 1)/2
                         do id=1, lc
                             i = 2*id-3
                             summation = ZERO
@@ -2321,7 +2049,7 @@ contains
                         !
                         !  n odd, m odd
                         !
-                        kdo = (n+1)/2
+                        kdo = (n + 1)/2
                         do id=1, lc
                             i = 2*id-1
                             summation = ZERO
@@ -2573,7 +2301,7 @@ contains
                         !
                         !  n odd, m even
                         !
-                        kdo = (n-1)/2
+                        kdo = (n - 1)/2
                         do id=1, lc
                             i = 2*id-2
                             summation = ZERO
@@ -2588,7 +2316,7 @@ contains
                         !
                         !  n odd, m odd
                         !
-                        kdo = (n+1)/2
+                        kdo = (n + 1)/2
                         do id=1, lc
                             i = 2*id-2
                             summation = work(1)/(ONE-i**2)
@@ -2816,7 +2544,7 @@ contains
                         end do
                 end select
             case (1) ! n odd
-                ncv = (n+1)/2
+                ncv = (n + 1)/2
                 fk = -ONE
                 select case (mod(m,2))
                     case (0) ! m even
@@ -2897,7 +2625,7 @@ contains
             case (1) ! n odd
                 select case (mod(m,2))
                     case (0) ! m even
-                        l = (n-1)/2
+                        l = (n - 1)/2
                         if (l == 0) return
                         !
                         !  n odd m even
@@ -2912,7 +2640,7 @@ contains
                         !
                         !  n odd m odd
                         !
-                        l = (n+1)/2
+                        l = (n + 1)/2
                         cw(l) = cf*work(l)
                         do
                             l = l-1
@@ -2984,7 +2712,7 @@ contains
                         !
                         !  n odd m even
                         !
-                        ncv = (n+1)/2
+                        ncv = (n + 1)/2
                         do k=1, ncv
                             vh = vh+cv(k)*sint
                             temp = cdt*cost-sdt*sint
@@ -2995,7 +2723,7 @@ contains
                         !
                         !  n odd m odd
                         !
-                        ncv = (n+1)/2
+                        ncv = (n + 1)/2
                         do k=1, ncv
                             vh = vh+cv(k)*cost
                             temp = cdt*cost-sdt*sint
@@ -3061,7 +2789,7 @@ contains
                         !
                         !  n odd m even
                         !
-                        ncw = (n-1)/2
+                        ncw = (n - 1)/2
                         do k=1, ncw
                             wh = wh+cw(k)*sint
                             temp = cdt*cost-sdt*sint
@@ -3072,7 +2800,7 @@ contains
                         !
                         !  n odd m odd
                         !
-                        ncw = (n+1)/2
+                        ncw = (n + 1)/2
                         wh = HALF*cw(1)
 
                         if (ncw < 2) return
@@ -3089,197 +2817,211 @@ contains
 
     end subroutine dwbt
 
+    ! Purpose:
+    !
+    ! This subroutine computes the coefficients in the recurrence
+    ! relation for the functions vbar(m, n, theta). array abc
+    ! must have 3*(max(mmax-2, 0)*(2*nlat-mmax-1))/2 locations.
+    !
+    subroutine compute_polar_recurrence_relation_coefficients(nlat, nlon, abc)
 
+        ! Dummy arguments
+        integer(ip), intent(in)  :: nlat
+        integer(ip), intent(in)  :: nlon
+        real(wp),    intent(out) :: abc(*)
 
-    subroutine rabcv(nlat, nlon, abc)
+        ! Local variables
+        integer(ip) :: iw1, iw2, labc, mmax
 
-        real(wp) :: abc(*)
-        integer(ip) :: iw1
-        integer(ip) :: iw2
-        integer(ip) :: labc
-        integer(ip) :: mmax
-        integer(ip), intent(in) :: nlat
-        integer(ip), intent(in) :: nlon
-        !
-        !     subroutine rabcp computes the coefficients in the recurrence
-        !     relation for the functions vbar(m, n, theta). array abc
-        !     must have 3*(max(mmax-2, 0)*(2*nlat-mmax-1))/2 locations.
-        !
+        ! Compute workspace index pointers
         mmax = min(nlat, (nlon+1)/2)
         labc = (max(mmax-2, 0)*(2*nlat-mmax-1))/2
         iw1 = labc+1
         iw2 = iw1+labc
 
-        call rabcv1(nlat, nlon, abc, abc(iw1), abc(iw2))
+        call rabcv_lower_routine(nlat, nlon, abc, abc(iw1), abc(iw2))
 
-    contains
+    end subroutine compute_polar_recurrence_relation_coefficients
 
-        subroutine rabcv1(nlat, nlon, a, b, c)
+    ! Remark:
+    !
+    ! Coefficients a, b, and c for computing vbar(m, n, theta) are
+    ! stored in location ((m-2)*(nlat+nlat-m-1))/2+n+1
+    !
+    pure subroutine rabcv_lower_routine(nlat, nlon, a, b, c)
 
-            real(wp) :: a(*)
-            real(wp) :: b(*)
-            real(wp) :: c(*)
-            real(wp) :: cn
-            real(wp) :: fm
-            real(wp) :: fn
-            real(wp) :: fnmm
-            real(wp) :: fnpm
-            integer(ip) :: m
-            integer(ip) :: mmax
-            integer(ip) :: mp1
-            integer(ip) :: mp3
-            integer(ip) :: n
-            integer(ip), intent(in) :: nlat
-            integer(ip), intent(in) :: nlon
-            integer(ip) :: np1
-            integer(ip) :: ns
-            real(wp) :: temp
-            real(wp) :: tm
-            real(wp) :: tn
-            real(wp) :: tpn
-            !
-            !     coefficients a, b, and c for computing vbar(m, n, theta) are
-            !     stored in location ((m-2)*(nlat+nlat-m-1))/2+n+1
-            !
+        ! Dummy arguments
+        integer(ip), intent(in)  :: nlat
+        integer(ip), intent(in)  :: nlon
+        real(wp),    intent(out) :: a(*)
+        real(wp),    intent(out) :: b(*)
+        real(wp),    intent(out) :: c(*)
 
-            mmax = min(nlat, (nlon+1)/2)
+        ! Local variables
+        real(wp) :: cn
+        real(wp) :: fm
+        real(wp) :: fn
+        real(wp) :: fnmm
+        real(wp) :: fnpm
+        integer(ip) :: m
+        integer(ip) :: mmax
+        integer(ip) :: mp1
+        integer(ip) :: mp3
+        integer(ip) :: n
+        integer(ip) :: np1
+        integer(ip) :: ns
+        real(wp) :: temp
+        real(wp) :: tm
+        real(wp) :: tn
+        real(wp) :: tpn
 
-            if (mmax < 3) return
+        mmax = min(nlat, (nlon+1)/2)
 
-            outer_loop: do mp1=3, mmax
-                m = mp1-1
-                ns = ((m-2)*(2*nlat-m-1))/2+1
-                fm = real(m, kind=wp)
-                tm = fm+fm
-                temp = tm*(tm-ONE)
-                tpn = (fm-TWO)*(fm-ONE)/(fm*(fm+ONE))
-                a(ns) = sqrt(tpn*(tm+ONE)*(tm-TWO)/temp)
-                c(ns) = sqrt(TWO/temp)
-                if (m == nlat-1) cycle outer_loop
+        if (mmax < 3) return
+
+        outer_loop: do mp1=3, mmax
+
+            m = mp1-1
+            ns = ((m-2)*(2*nlat-m-1))/2+1
+            fm = real(m, kind=wp)
+            tm = fm+fm
+            temp = tm*(tm-ONE)
+            tpn = (fm-TWO)*(fm-ONE)/(fm*(fm+ONE))
+            a(ns) = sqrt(tpn*(tm+ONE)*(tm-TWO)/temp)
+            c(ns) = sqrt(TWO/temp)
+
+            if (m == nlat-1) cycle outer_loop
+
+            ns = ns+1
+            temp = tm*(tm+ONE)
+            tpn = (fm-ONE)*fm/((fm+ONE)*(fm+TWO))
+            a(ns) = sqrt(tpn*(tm+THREE)*(tm-TWO)/temp)
+            c(ns) = sqrt(SIX/temp)
+            mp3 = m+3
+
+            if (mp3 > nlat) cycle outer_loop
+
+            do np1=mp3, nlat
+                n = np1-1
                 ns = ns+1
-                temp = tm*(tm+ONE)
-                tpn = (fm-ONE)*fm/((fm+ONE)*(fm+TWO))
-                a(ns) = sqrt(tpn*(tm+THREE)*(tm-TWO)/temp)
-                c(ns) = sqrt(SIX/temp)
-                mp3 = m+3
-                if (mp3 > nlat) cycle outer_loop
-                do np1=mp3, nlat
-                    n = np1-1
-                    ns = ns+1
-                    fn = real(n)
-                    tn = TWO*fn
-                    cn = (tn+ONE)/(tn-THREE)
-                    tpn = (fn-TWO)*(fn-ONE)/(fn*(fn + ONE))
-                    fnpm = fn+fm
-                    fnmm = fn-fm
-                    temp = fnpm*(fnpm-ONE)
-                    a(ns) = sqrt(tpn*cn*(fnpm-THREE)*(fnpm-TWO)/temp)
-                    b(ns) = sqrt(tpn*cn*fnmm*(fnmm-ONE)/temp)
-                    c(ns) = sqrt((fnmm+ONE)*(fnmm+TWO)/temp)
-                end do
-            end do outer_loop
+                fn = real(n)
+                tn = TWO*fn
+                cn = (tn+ONE)/(tn-THREE)
+                tpn = (fn-TWO)*(fn-ONE)/(fn*(fn + ONE))
+                fnpm = fn+fm
+                fnmm = fn-fm
+                temp = fnpm*(fnpm-ONE)
+                a(ns) = sqrt(tpn*cn*(fnpm-THREE)*(fnpm-TWO)/temp)
+                b(ns) = sqrt(tpn*cn*fnmm*(fnmm-ONE)/temp)
+                c(ns) = sqrt((fnmm+ONE)*(fnmm+TWO)/temp)
+            end do
+        end do outer_loop
 
-        end subroutine rabcv1
+    end subroutine rabcv_lower_routine
 
-    end subroutine rabcv
+    ! Purpose:
+    !
+    ! Computes the coefficients in the recurrence
+    ! relation for the functions wbar(m, n, theta). array abc
+    ! must have 3*(max(mmax-2, 0)*(2*nlat-mmax-1))/2 locations.
+    !
+    subroutine compute_azimuthal_recurrence_relation_coefficients(nlat, nlon, abc)
 
+        ! Dummy arguments
+        integer(ip), intent(in)  :: nlat
+        integer(ip), intent(in)  :: nlon
+        real(wp),    intent(out) :: abc(*)
 
-    subroutine rabcw(nlat, nlon, abc)
-
-        real(wp) :: abc(*)
+        ! Local variables
         integer(ip) :: iw1
         integer(ip) :: iw2
         integer(ip) :: labc
         integer(ip) :: mmax
-        integer(ip), intent(in) :: nlat
-        integer(ip), intent(in) :: nlon
-        !
-        !     subroutine rabcw computes the coefficients in the recurrence
-        !     relation for the functions wbar(m, n, theta). array abc
-        !     must have 3*(max(mmax-2, 0)*(2*nlat-mmax-1))/2 locations.
-        !
+
         mmax = min(nlat, (nlon+1)/2)
         labc = (max(mmax-2, 0)*(2*nlat-mmax-1))/2
         iw1 = labc+1
         iw2 = iw1+labc
-        call rabcw1(nlat, nlon, abc, abc(iw1), abc(iw2))
+        call rabcw_lower_routine(nlat, nlon, abc, abc(iw1), abc(iw2))
 
-    contains
+    end subroutine compute_azimuthal_recurrence_relation_coefficients
 
-        subroutine rabcw1(nlat, nlon, a, b, c)
+    ! Remark:
+    !
+    ! Coefficients a, b, and c for computing wbar(m, n, theta) are
+    ! stored in location ((m-2)*(nlat+nlat-m-1))/2+n+1
+    !
+    pure subroutine rabcw_lower_routine(nlat, nlon, a, b, c)
 
-            real(wp) :: a(*)
-            real(wp) :: b(*)
-            real(wp) :: c(*)
-            real(wp) :: cn
-            real(wp) :: fm
-            real(wp) :: fn
-            real(wp) :: fnmm
-            real(wp) :: fnpm
-            integer(ip) :: m
-            integer(ip) :: mmax
-            integer(ip) :: mp1
-            integer(ip) :: mp3
-            integer(ip) :: n
-            integer(ip), intent(in) :: nlat
-            integer(ip), intent(in) :: nlon
-            integer(ip) :: np1
-            integer(ip) :: ns
-            real(wp) :: temp
-            real(wp) :: tm
-            real(wp) :: tn
-            real(wp) :: tph
-            real(wp) :: tpn
-            !
-            !     coefficients a, b, and c for computing wbar(m, n, theta) are
-            !     stored in location ((m-2)*(nlat+nlat-m-1))/2+n+1
-            !
+        ! Dummy arguments
+        integer(ip), intent(in)  :: nlat
+        integer(ip), intent(in)  :: nlon
+        real(wp),    intent(out) :: a(*)
+        real(wp),    intent(out) :: b(*)
+        real(wp),    intent(out) :: c(*)
 
-            mmax = min(nlat, (nlon+1)/2)
+        ! Local variables
+        real(wp) :: cn
+        real(wp) :: fm
+        real(wp) :: fn
+        real(wp) :: fnmm
+        real(wp) :: fnpm
+        integer(ip) :: m
+        integer(ip) :: mmax
+        integer(ip) :: mp1
+        integer(ip) :: mp3
+        integer(ip) :: n
+        integer(ip) :: np1
+        integer(ip) :: ns
+        real(wp) :: temp
+        real(wp) :: tm
+        real(wp) :: tn
+        real(wp) :: tph
+        real(wp) :: tpn
 
-            if (mmax < 4) return
+        mmax = min(nlat, (nlon+1)/2)
 
-            outer_loop: do mp1=4, mmax
-                m = mp1-1
-                ns = ((m-2)*(nlat+nlat-m-1))/2+1
-                fm = real(m, kind=wp)
-                tm = TWO*fm
-                temp = tm*(tm-ONE)
-                tpn = (fm-TWO)*(fm-ONE)/(fm*(fm+ONE))
-                tph = fm/(fm-TWO)
-                a(ns) = tph*sqrt(tpn*(tm+ONE)*(tm-TWO)/temp)
-                c(ns) = tph*sqrt(TWO/temp)
-                if (m == nlat-1) cycle outer_loop
+        if (mmax < 4) return
+
+        outer_loop: do mp1=4, mmax
+            m = mp1-1
+            ns = ((m-2)*(nlat+nlat-m-1))/2+1
+            fm = real(m, kind=wp)
+            tm = TWO*fm
+            temp = tm*(tm-ONE)
+            tpn = (fm-TWO)*(fm-ONE)/(fm*(fm+ONE))
+            tph = fm/(fm-TWO)
+            a(ns) = tph*sqrt(tpn*(tm+ONE)*(tm-TWO)/temp)
+            c(ns) = tph*sqrt(TWO/temp)
+            if (m == nlat-1) cycle outer_loop
+            ns = ns+1
+            temp = tm*(tm+ONE)
+            tpn = (fm-ONE)*fm/((fm+ONE)*(fm+TWO))
+            tph = fm/(fm-TWO)
+            a(ns) = tph*sqrt(tpn*(tm+THREE)*(tm-TWO)/temp)
+            c(ns) = tph*sqrt(SIX/temp)
+            mp3 = m+3
+            if (mp3 > nlat) cycle outer_loop
+            do np1=mp3, nlat
+                n = np1-1
                 ns = ns+1
-                temp = tm*(tm+ONE)
-                tpn = (fm-ONE)*fm/((fm+ONE)*(fm+TWO))
+                fn = real(n)
+                tn = TWO*fn
+                cn = (tn+ONE)/(tn-THREE)
+                fnpm = fn+fm
+                fnmm = fn-fm
+                temp = fnpm*(fnpm-ONE)
+                tpn = (fn-TWO)*(fn-ONE)/(fn*(fn + ONE))
                 tph = fm/(fm-TWO)
-                a(ns) = tph*sqrt(tpn*(tm+THREE)*(tm-TWO)/temp)
-                c(ns) = tph*sqrt(SIX/temp)
-                mp3 = m+3
-                if (mp3 > nlat) cycle outer_loop
-                do np1=mp3, nlat
-                    n = np1-1
-                    ns = ns+1
-                    fn = real(n)
-                    tn = TWO*fn
-                    cn = (tn+ONE)/(tn-THREE)
-                    fnpm = fn+fm
-                    fnmm = fn-fm
-                    temp = fnpm*(fnpm-ONE)
-                    tpn = (fn-TWO)*(fn-ONE)/(fn*(fn + ONE))
-                    tph = fm/(fm-TWO)
-                    a(ns) = tph*sqrt(tpn*cn*(fnpm-THREE)*(fnpm-TWO)/temp)
-                    b(ns) = sqrt(tpn*cn*fnmm*(fnmm-ONE)/temp)
-                    c(ns) = tph*sqrt((fnmm+ONE)*(fnmm+TWO)/temp)
-                end do
-            end do outer_loop
+                a(ns) = tph*sqrt(tpn*cn*(fnpm-THREE)*(fnpm-TWO)/temp)
+                b(ns) = sqrt(tpn*cn*fnmm*(fnmm-ONE)/temp)
+                c(ns) = tph*sqrt((fnmm+ONE)*(fnmm+TWO)/temp)
+            end do
+        end do outer_loop
 
-        end subroutine rabcw1
+    end subroutine rabcw_lower_routine
 
-    end subroutine rabcw
-
-    subroutine vtinit (nlat, nlon, wvbin, dwork)
+    subroutine vtinit(nlat, nlon, wvbin, dwork)
 
         integer(ip) :: imid
         integer(ip) :: iw1
@@ -3297,53 +3039,56 @@ contains
         !     the length of wvbin is 2*nlat*imid+3*((nlat-3)*nlat+2)/2
         !     the length of dwork is nlat+2
         !
-        call vtini1(nlat, nlon, imid, wvbin, wvbin(iw1), dwork, dwork(iw2))
-
-    contains
-
-        subroutine vtini1(nlat, nlon, imid, vb, abc, cvb, work)
-            !
-            !     abc must have 3*(max(mmax-2, 0)*(2*nlat-mmax-1))/2
-            !     locations where mmax = min(nlat, (nlon+1)/2)
-            !     cvb and work must each have nlat/2+1 locations
-            !
-            real(wp) :: abc(*)
-            integer(ip) :: i
-            integer(ip) :: imid
-            integer(ip) :: m
-            integer(ip) :: mdo
-            integer(ip) :: mp1
-            integer(ip) :: n
-            integer(ip), intent(in) :: nlat
-            integer(ip), intent(in) :: nlon
-            integer(ip) :: np1
-            real(wp) :: vb(imid, nlat, 2)
-            real(wp) :: dt
-            real(wp) :: cvb(nlat/2+1)
-            real(wp) :: th, vbh
-            real(wp) :: work(nlat/2+1)
-
-
-            dt = PI/(nlat-1)
-            mdo = min(2, nlat, (nlon+1)/2)
-            do mp1=1, mdo
-                m = mp1-1
-                do np1=mp1, nlat
-                    n = np1-1
-                    call dvtk(m, n, cvb, work)
-                    do i=1, imid
-                        th = real(i-1)*dt
-                        call dvtt(m, n, th, cvb, vbh)
-                        vb(i, np1, mp1) = vbh
-                    end do
-                end do
-            end do
-            call rabcv(nlat, nlon, abc)
-
-        end subroutine vtini1
+        call vtinit_lower_routine(nlat, nlon, imid, wvbin, wvbin(iw1), dwork, dwork(iw2))
 
     end subroutine vtinit
 
+    ! Remark:
+    !
+    ! abc must have 3*(max(mmax-2, 0)*(2*nlat-mmax-1))/2
+    ! locations where mmax = min(nlat, (nlon+1)/2)
+    ! cvb and work must each have nlat/2+1 locations
+    !
+    subroutine vtinit_lower_routine(nlat, nlon, imid, vb, abc, cvb, work)
+
+        ! Dummy arguments
+        integer(ip), intent(in)  :: nlat
+        integer(ip), intent(in)  :: nlon
+        integer(ip), intent(in)  :: imid
+        real(wp),    intent(out) :: vb(imid, nlat, 2)
+        real(wp),    intent(out) :: abc(*)
+        real(wp),    intent(out) :: cvb(nlat/2+1)
+        real(wp),    intent(out) :: work(nlat/2+1)
+
+        ! Local variables
+        integer(ip) :: i
+        integer(ip) :: m
+        integer(ip) :: mdo
+        integer(ip) :: mp1
+        integer(ip) :: n
+        integer(ip) :: np1
+        real(wp) :: dt
+        real(wp) :: th, vbh
+
+        dt = PI/(nlat-1)
+        mdo = min(2, nlat, (nlon+1)/2)
+
+        do mp1=1, mdo
+            m = mp1-1
+            do np1=mp1, nlat
+                n = np1-1
+                call dvtk(m, n, cvb, work)
+                do i=1, imid
+                    th = real(i-1, kind=wp) * dt
+                    call dvtt(m, n, th, cvb, vbh)
+                    vb(i, np1, mp1) = vbh
+                end do
+            end do
+        end do
+
+        call compute_polar_recurrence_relation_coefficients(nlat, nlon, abc)
+
+    end subroutine vtinit_lower_routine
 
     subroutine wtinit(nlat, nlon, wwbin, dwork)
 
@@ -3362,53 +3107,51 @@ contains
         !     the length of wwbin is 2*nlat*imid+3*((nlat-3)*nlat+2)/2
         !     the length of dwork is nlat+2
         !
-        call wtini1(nlat, nlon, imid, wwbin, wwbin(iw1), dwork, dwork(iw2))
-
-    contains
-
-        subroutine wtini1(nlat, nlon, imid, wb, abc, cwb, work)
-
-            real(wp) :: abc(*)
-            integer(ip) :: i
-            integer(ip) :: imid
-            integer(ip) :: m
-            integer(ip) :: mdo
-            integer(ip) :: mp1
-            integer(ip) :: n
-            integer(ip), intent(in) :: nlat
-            integer(ip), intent(in) :: nlon
-            integer(ip) :: np1
-            real(wp) :: wb(imid, nlat, 2)
-            real(wp) :: dt
-            real(wp) :: cwb(nlat/2+1), wbh, th
-            real(wp) :: work(nlat/2+1)
-            !
-            !     abc must have 3*(max(mmax-2, 0)*(2*nlat-mmax-1))/2
-            !     locations where mmax = min(nlat, (nlon+1)/2)
-            !     cwb and work must each have nlat/2+1 locations
-            !
-
-            dt = PI/(nlat-1)
-            mdo = min(3, nlat, (nlon+1)/2)
-            if (mdo < 2) return
-            do mp1=2, mdo
-                m = mp1-1
-                do np1=mp1, nlat
-                    n = np1-1
-                    call dwtk(m, n, cwb, work)
-                    do i=1, imid
-                        th = real(i-1)*dt
-                        call dwtt(m, n, th, cwb, wbh)
-                        wb(i, np1, m) = wbh
-                    end do
-                end do
-            end do
-
-            call rabcw(nlat, nlon, abc)
-
-        end subroutine wtini1
+        call wtinit_lower_routine(nlat, nlon, imid, wwbin, wwbin(iw1), dwork, dwork(iw2))
 
     end subroutine wtinit
+
+    subroutine wtinit_lower_routine(nlat, nlon, imid, wb, abc, cwb, work)
+
+        real(wp) :: abc(*)
+        integer(ip) :: i
+        integer(ip) :: imid
+        integer(ip) :: m
+        integer(ip) :: mdo
+        integer(ip) :: mp1
+        integer(ip) :: n
+        integer(ip), intent(in) :: nlat
+        integer(ip), intent(in) :: nlon
+        integer(ip) :: np1
+        real(wp) :: wb(imid, nlat, 2)
+        real(wp) :: dt
+        real(wp) :: cwb(nlat/2+1), wbh, th
+        real(wp) :: work(nlat/2+1)
+        !
+        !     abc must have 3*(max(mmax-2, 0)*(2*nlat-mmax-1))/2
+        !     locations where mmax = min(nlat, (nlon+1)/2)
+        !     cwb and work must each have nlat/2+1 locations
+        !
+
+        dt = PI/(nlat-1)
+        mdo = min(3, nlat, (nlon+1)/2)
+        if (mdo < 2) return
+        do mp1=2, mdo
+            m = mp1-1
+            do np1=mp1, nlat
+                n = np1-1
+                call dwtk(m, n, cwb, work)
+                do i=1, imid
+                    th = real(i-1, kind=wp) * dt
+                    call dwtt(m, n, th, cwb, wbh)
+                    wb(i, np1, m) = wbh
+                end do
+            end do
+        end do
+
+        call compute_azimuthal_recurrence_relation_coefficients(nlat, nlon, abc)
+
+    end subroutine wtinit_lower_routine
 
     subroutine vtgint(nlat, nlon, theta, wvbin, work)
 
@@ -3431,11 +3174,11 @@ contains
         !     the length of wvbin is 2*nlat*imid+3*((nlat-3)*nlat+2)/2
         !     the length of work is nlat+2
         !
-        call vtgit1(nlat, nlon, imid, theta, wvbin, wvbin(iw1), work, work(iw2))
+        call vtgint_lower_routine(nlat, nlon, imid, theta, wvbin, wvbin(iw1), work, work(iw2))
 
     end subroutine vtgint
 
-    subroutine vtgit1(nlat, nlon, imid, theta, vb, abc, cvb, work)
+    subroutine vtgint_lower_routine(nlat, nlon, imid, theta, vb, abc, cvb, work)
 
         real(wp) :: abc(*)
         integer(ip) :: i
@@ -3469,9 +3212,9 @@ contains
             end do
         end do
 
-        call rabcv(nlat, nlon, abc)
+        call compute_polar_recurrence_relation_coefficients(nlat, nlon, abc)
 
-    end subroutine vtgit1
+    end subroutine vtgint_lower_routine
 
     subroutine wtgint(nlat, nlon, theta, wwbin, work)
 
@@ -3493,11 +3236,11 @@ contains
         !     the length of wwbin is 2*nlat*imid+3*((nlat-3)*nlat+2)/2
         !     the length of work is nlat+2
         !
-        call wtgit1(nlat, nlon, imid, theta, wwbin, wwbin(iw1), work, work(iw2))
+        call wtgint_lower_routine(nlat, nlon, imid, theta, wwbin, wwbin(iw1), work, work(iw2))
 
     end subroutine wtgint
 
-    subroutine wtgit1(nlat, nlon, imid, theta, wb, abc, cwb, work)
+    subroutine wtgint_lower_routine(nlat, nlon, imid, theta, wb, abc, cwb, work)
 
         real(wp) :: abc(*)
         integer(ip) :: i
@@ -3533,24 +3276,21 @@ contains
             end do
         end do
 
-        call rabcw(nlat, nlon, abc)
+        call compute_azimuthal_recurrence_relation_coefficients(nlat, nlon, abc)
 
-    end subroutine wtgit1
+    end subroutine wtgint_lower_routine
 
     subroutine dvtk(m, n, cv, work)
 
         ! Dummy arguments
-
         integer(ip), intent(in)  :: m
         integer(ip), intent(in)  :: n
         real(wp),    intent(out) :: cv(*)
         real(wp),    intent(out) :: work(*)
 
         ! Local variables
-
         integer(ip) :: l, ncv
         real(wp)    :: fn, fk, cf, srnp1
-
 
         cv(1) = ZERO
 
@@ -3586,7 +3326,7 @@ contains
                         end do
                 end select
             case (1) ! n odd
-                ncv = (n+1)/2
+                ncv = (n + 1)/2
                 fk = -ONE
                 select case (mod(m,2))
                     case (0) ! m even
@@ -3609,8 +3349,6 @@ contains
         end select
 
     end subroutine dvtk
-
-
 
     subroutine dwtk(m, n, cw, work)
 
@@ -3668,7 +3406,7 @@ contains
             case (1) ! n odd
                 select case (mod(m,2))
                     case (0) ! m even
-                        l = (n-1)/2
+                        l = (n - 1)/2
                         if (l == 0) return
                         !
                         !  n odd m even
@@ -3690,7 +3428,7 @@ contains
                         !
                         !  n odd m odd
                         !
-                        l = (n+1)/2
+                        l = (n + 1)/2
                         cw(l) = cf*work(l)
                         do
                             l = l-1
@@ -3708,12 +3446,9 @@ contains
 
     end subroutine dwtk
 
-
-
     subroutine dvtt(m, n, theta, cv, vh)
 
         ! Dummy arguments
-
         integer(ip), intent(in)  :: m
         integer(ip), intent(in)  :: n
         real(wp),    intent(in)  :: theta
@@ -3721,10 +3456,8 @@ contains
         real(wp),    intent(out) :: vh
 
         ! Local variables
-
         integer(ip) :: k, ncv
         real(wp)    :: cost, sint, cdt, sdt, temp
-
 
         vh = ZERO
 
@@ -3769,7 +3502,7 @@ contains
                         !
                         !     n odd m even
                         !
-                        ncv = (n+1)/2
+                        ncv = (n + 1)/2
                         do k=1, ncv
                             vh = vh+cv(k)*cost
                             temp = cdt*cost-sdt*sint
@@ -3780,7 +3513,7 @@ contains
                          !
                          !  n odd m odd
                          !
-                        ncv = (n+1)/2
+                        ncv = (n + 1)/2
                         do k=1, ncv
                             vh = vh+cv(k)*sint
                             temp = cdt*cost-sdt*sint
@@ -3845,7 +3578,7 @@ contains
                         !
                         !  n odd m even
                         !
-                        ncw = (n-1)/2
+                        ncw = (n - 1)/2
                         do k=1, ncw
                             wh = wh+cw(k)*cost
                             temp = cdt*cost-sdt*sint
@@ -3856,7 +3589,7 @@ contains
                           !
                           !  n odd m odd
                           !
-                        ncw = (n+1)/2
+                        ncw = (n + 1)/2
                         wh = ZERO
 
                         if (ncw < 2) return
@@ -3872,10 +3605,7 @@ contains
 
     end subroutine dwtt
 
-
-
-
-    subroutine vbgint (nlat, nlon, theta, wvbin, work)
+    subroutine vbgint(nlat, nlon, theta, wvbin, work)
 
         integer(ip) :: imid
         integer(ip) :: iw1
@@ -3895,57 +3625,53 @@ contains
         !     the length of wvbin is 2*nlat*imid+3*((nlat-3)*nlat+2)/2
         !     the length of work is nlat+2
         !
-        call vbgit1(nlat, nlon, imid, theta, wvbin, wvbin(iw1), work, work(iw2))
+        call vbgint_lower_routine(nlat, nlon, imid, theta, wvbin, wvbin(iw1), work, work(iw2))
 
-
-    contains
-
-        subroutine vbgit1(nlat, nlon, imid, theta, vb, abc, cvb, work)
-
-            real(wp) :: abc(*)
-            integer(ip) :: i
-            integer(ip) :: imid
-            integer(ip) :: m
-            integer(ip) :: mdo
-            integer(ip) :: mp1
-            integer(ip) :: n
-            integer(ip), intent(in) :: nlat
-            integer(ip), intent(in) :: nlon
-            integer(ip) :: np1
-            real(wp) :: vb(imid, nlat, 2)
-            real(wp) :: cvb(nlat/2+1)
-            real(wp) :: theta(*), vbh
-            real(wp) :: work(nlat/2+1)
-            !
-            !     abc must have 3*(max(mmax-2, 0)*(2*nlat-mmax-1))/2
-            !     locations where mmax = min(nlat, (nlon+1)/2)
-            !     cvb and work must each have nlat/2+1 locations
-            !
-
-            mdo = min(2, nlat, (nlon+1)/2)
-            do mp1=1, mdo
-                m = mp1-1
-                do np1=mp1, nlat
-                    n = np1-1
-                    call dvbk(m, n, cvb, work)
-                    do i=1, imid
-                        call dvbt(m, n, theta(i), cvb, vbh)
-                        vb(i, np1, mp1) = vbh
-                    end do
-                end do
-            end do
-
-            call rabcv(nlat, nlon, abc)
-
-        end subroutine vbgit1
 
     end subroutine vbgint
 
+    subroutine vbgint_lower_routine(nlat, nlon, imid, theta, vb, abc, cvb, work)
+
+        real(wp) :: abc(*)
+        integer(ip) :: i
+        integer(ip) :: imid
+        integer(ip) :: m
+        integer(ip) :: mdo
+        integer(ip) :: mp1
+        integer(ip) :: n
+        integer(ip), intent(in) :: nlat
+        integer(ip), intent(in) :: nlon
+        integer(ip) :: np1
+        real(wp) :: vb(imid, nlat, 2)
+        real(wp) :: cvb(nlat/2+1)
+        real(wp) :: theta(*), vbh
+        real(wp) :: work(nlat/2+1)
+        !
+        !     abc must have 3*(max(mmax-2, 0)*(2*nlat-mmax-1))/2
+        !     locations where mmax = min(nlat, (nlon+1)/2)
+        !     cvb and work must each have nlat/2+1 locations
+        !
+
+        mdo = min(2, nlat, (nlon+1)/2)
+        do mp1=1, mdo
+            m = mp1-1
+            do np1=mp1, nlat
+                n = np1-1
+                call dvbk(m, n, cvb, work)
+                do i=1, imid
+                    call dvbt(m, n, theta(i), cvb, vbh)
+                    vb(i, np1, mp1) = vbh
+                end do
+            end do
+        end do
+
+        call compute_polar_recurrence_relation_coefficients(nlat, nlon, abc)
+
+    end subroutine vbgint_lower_routine
 
     subroutine wbgint(nlat, nlon, theta, wwbin, work)
 
         ! Dummy arguments
-
         integer(ip), intent(in) :: nlat
         integer(ip), intent(in) :: nlon
         real(wp),    intent(in) :: theta((nlat+1)/2)
@@ -3953,7 +3679,6 @@ contains
         real(wp)                 :: work(nlat+2)
 
         ! Local variables
-
         integer(ip) :: imid, iw1, iw2
 
 
@@ -3966,51 +3691,46 @@ contains
         !     the length of wwbin is 2*nlat*imid+3*((nlat-3)*nlat+2)/2
         !     the length of work is nlat+2
         !
-        call wbgit1(nlat, nlon, imid, theta, wwbin, wwbin(iw1), work, work(iw2))
-
-    contains
-
-        subroutine wbgit1(nlat, nlon, imid, theta, wb, abc, cwb, work)
-
-            ! Dummy arguments
-
-            integer(ip), intent(in) :: nlat
-            integer(ip), intent(in) :: nlon
-            integer(ip), intent(in) :: imid
-            real(wp),    intent(in) :: theta(*)
-            real(wp)                 :: wb(imid, nlat, 2)
-            real(wp)                 :: abc(3*((nlat-3)*nlat+2)/2)
-            real(wp)                 :: cwb(nlat/2+1)
-            real(wp)                 :: work(nlat/2+1)
-
-            ! Local variables
-
-            integer(ip) :: i, m, mdo, mp1, n, np1
-            real(wp)    :: wbh
-
-
-            !
-            !     abc must have 3*((nlat-3)*nlat+2)/2 locations
-            !     cwb and work must each have nlat/2+1 locations
-            !
-            mdo = min(3, nlat, (nlon+1)/2)
-            if (mdo < 2) return
-            do mp1=2, mdo
-                m = mp1-1
-                do np1=mp1, nlat
-                    n = np1-1
-                    call dwbk(m, n, cwb, work)
-                    do i=1, imid
-                        call dwbt(m, n, theta(i), cwb, wbh)
-                        wb(i, np1, m) = wbh
-                    end do
-                end do
-            end do
-
-            call rabcw(nlat, nlon, abc)
-
-        end subroutine wbgit1
+        call wbgint_lower_routine(nlat, nlon, imid, theta, wwbin, wwbin(iw1), work, work(iw2))
 
     end subroutine wbgint
+
+    subroutine wbgint_lower_routine(nlat, nlon, imid, theta, wb, abc, cwb, work)
+
+        ! Dummy arguments
+        integer(ip), intent(in) :: nlat
+        integer(ip), intent(in) :: nlon
+        integer(ip), intent(in) :: imid
+        real(wp),    intent(in) :: theta(*)
+        real(wp)                 :: wb(imid, nlat, 2)
+        real(wp)                 :: abc(3*((nlat-3)*nlat+2)/2)
+        real(wp)                 :: cwb(nlat/2+1)
+        real(wp)                 :: work(nlat/2+1)
+
+        ! Local variables
+        integer(ip) :: i, m, mdo, mp1, n, np1
+        real(wp)    :: wbh
+
+        !
+        !     abc must have 3*((nlat-3)*nlat+2)/2 locations
+        !     cwb and work must each have nlat/2+1 locations
+        !
+        mdo = min(3, nlat, (nlon+1)/2)
+        if (mdo < 2) return
+        do mp1=2, mdo
+            m = mp1-1
+            do np1=mp1, nlat
+                n = np1-1
+                call dwbk(m, n, cwb, work)
+                do i=1, imid
+                    call dwbt(m, n, theta(i), cwb, wbh)
+                    wb(i, np1, m) = wbh
+                end do
+            end do
+        end do
+
+        call compute_azimuthal_recurrence_relation_coefficients(nlat, nlon, abc)
+
+    end subroutine wbgint_lower_routine
 
 end module type_SpherepackAux

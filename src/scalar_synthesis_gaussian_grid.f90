@@ -493,7 +493,7 @@ contains
             !     set first column in g
             m = 0
             !     compute pmn for all i and n=m, ..., l-1
-            call sphere_aux%legin(mode, l, nlat, m, w, pmn, km)
+            call sphere_aux%compute_legendre_polys_for_gaussian_grids(mode, l, nlat, m, w, pmn, km)
             do k=1, nt
                 !     n even
                 do np1=1, nlat, 2
@@ -523,7 +523,7 @@ contains
                 m = mp1-1
                 mp2 = m+2
                 !     compute pmn for all i and n=m, ..., l-1
-                call sphere_aux%legin(mode, l, nlat, m, w, pmn, km)
+                call sphere_aux%compute_legendre_polys_for_gaussian_grids(mode, l, nlat, m, w, pmn, km)
                 do k=1, nt
                     !     for n-m even store (g(i, p, k)+g(nlat-i+1, p, k))/2 in g(i, p, k) p=2*m,
                     !     for i=1, ..., late
@@ -559,7 +559,7 @@ contains
             !     set last column (using a only)
             if (nlon== l+l-2) then
                 m = l-1
-                call sphere_aux%legin(mode, l, nlat, m, w, pmn, km)
+                call sphere_aux%compute_legendre_polys_for_gaussian_grids(mode, l, nlat, m, w, pmn, km)
                 do k=1, nt
                     !     n-m even
                     do np1=l, nlat, 2
@@ -592,7 +592,7 @@ contains
             if (mode == 1) meo = 2
             ms = m+meo
             !     compute pmn for all i and n=m, ..., l-1
-            call sphere_aux%legin(mode, l, nlat, m, w, pmn, km)
+            call sphere_aux%compute_legendre_polys_for_gaussian_grids(mode, l, nlat, m, w, pmn, km)
             do k=1, nt
                 do np1=ms, nlat, 2
                     do i=1, late
@@ -605,7 +605,7 @@ contains
                 m = mp1-1
                 ms = m+meo
                 !     compute pmn for all i and n=m, ..., l-1
-                call sphere_aux%legin(mode, l, nlat, m, w, pmn, km)
+                call sphere_aux%compute_legendre_polys_for_gaussian_grids(mode, l, nlat, m, w, pmn, km)
                 do k=1, nt
                     do np1=ms, nlat, 2
                         do i=1, late
@@ -618,7 +618,7 @@ contains
             if (nlon==l+l-2) then
                 !     set last column
                 m = l-1
-                call sphere_aux%legin(mode, l, nlat, m, w, pmn, km)
+                call sphere_aux%compute_legendre_polys_for_gaussian_grids(mode, l, nlat, m, w, pmn, km)
                 ns = l
                 if (mode == 1) ns = l+1
                 do k=1, nt

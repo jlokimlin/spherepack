@@ -471,7 +471,7 @@ contains
         lnl = nt*idv*nlon
 
         !
-        !  Check validity of input arguments
+        !  Check input arguments
         !
         if (nlat < 3) then
             ierror = 1
@@ -568,7 +568,7 @@ contains
         lmn = (nlat*(nlat+1))/2
 
         !
-        !  Check validity of input arguments
+        !  Check input arguments
         !
         if (nlat < 3) then
             ierror = 1

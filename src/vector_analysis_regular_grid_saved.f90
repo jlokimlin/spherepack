@@ -375,7 +375,7 @@ contains
         lnl = nt*idv*nlon
 
         !
-        !  Check validity of input arguments
+        !  Check input arguments
         !
         if (nlat < 3) then
             ierror = 1
@@ -463,7 +463,7 @@ contains
         labc = 3*(max(mmax-2, 0)*(2*nlat-mmax-1))/2
 
         !
-        !  Check validity of input arguments
+        !  Check input arguments
         !
         if (nlat < 3) then
             ierror = 1

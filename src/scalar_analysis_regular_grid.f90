@@ -436,7 +436,7 @@ contains
             ierror = 0
         end if
 
-        call sphere_aux%zfinit(nlat, nlon, wshaec, dwork)
+        call sphere_aux%initialize_workspace_for_scalar_analysis_regular_grid(nlat, nlon, wshaec, dwork)
 
         ! Set workspace pointer
         iw1 = lzz1+labc+1

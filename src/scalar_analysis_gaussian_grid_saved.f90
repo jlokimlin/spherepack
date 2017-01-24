@@ -771,7 +771,7 @@ contains
 
             !  Compute pmn for n=m, ..., nlat-1 and i=1, ..., (l+1)/2
             mode = 0
-            call sphere_aux%legin(mode, l, nlat, m, w, pmn, km)
+            call sphere_aux%compute_legendre_polys_for_gaussian_grids(mode, l, nlat, m, w, pmn, km)
 
             !  Store above in pmnf
             do np1=mp1, nlat
@@ -799,11 +799,6 @@ contains
         integer(ip) :: ntrunc, l1, l2, late
         integer(ip) :: workspace_indices(10)
 
-
-        !
-        !  Compute constants
-        !
-
         ! Set triangular truncation limit for spherical harmonic basis
         ntrunc = min((nlon+2)/2, nlat)
 
@@ -812,9 +807,7 @@ contains
         l1 = ntrunc
         l2 = late
 
-        !
-        !  Check validity of input arguments
-        !
+        !  Check input arguments
         if (nlat < 3) then
             ierror = 1
             return
@@ -831,9 +824,7 @@ contains
             ierror = 0
         end if
 
-        !
         !  Compute workspace index pointers
-        !
         workspace_indices = get_workspace_indices(nlat, late, ntrunc)
 
         associate( &
@@ -863,15 +854,14 @@ contains
 
     end subroutine shagsp
 
-    pure function get_workspace_indices(nlat, late, l) result (return_value)
+    pure function get_workspace_indices(nlat, late, l) &
+    result (return_value)
 
         ! Dummy arguments
-
         integer(ip), intent(in)  :: nlat
         integer(ip), intent(in)  :: late
         integer(ip), intent(in)  :: l
-        integer(ip)               :: return_value(10)
-
+        integer(ip)              :: return_value(10)
 
         associate( i => return_value )
             i(1) = 1
@@ -895,7 +885,6 @@ contains
         wfft, dtheta, dwts, work, ier)
 
         ! Dummy arguments
-
         integer(ip), intent(in)     :: nlat
         integer(ip), intent(in)     :: nlon
         integer(ip), intent(in)     :: l

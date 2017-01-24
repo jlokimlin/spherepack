@@ -360,7 +360,7 @@ contains
 
         nln = nt*ls*nlon
 
-        !  Check validity of input arguments
+        !  Check input arguments
         if (nlat < 3) then
             ierror = 1
             return
@@ -477,7 +477,7 @@ contains
             iw1 => workspace_indices(2), &
             iw2 => workspace_indices(3) &
             )
-            call sphere_aux%initialize_workspace_for_regular_scalar_analysis( &
+            call sphere_aux%initialize_workspace_for_scalar_analysis_regular_grid_saved( &
                 nlat, nlon, imid, wshaes, idz, work, work(iw1), dwork)
             call sphere_aux%hfft%initialize(nlon, wshaes(iw2))
         end associate
