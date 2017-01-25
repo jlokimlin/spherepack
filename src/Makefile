@@ -487,6 +487,61 @@ invert_scalar_laplacian_gaussian_grid_saved.f90
 	$(FC) $(FFLAGS) -c invert_scalar_laplacian_gaussian_grid_saved.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 
+vector_laplacian_routines.o: \
+spherepack_precision.o \
+vector_synthesis_routines.o \
+vector_laplacian_routines.f90
+	$(FC) $(FFLAGS) -c vector_laplacian_routines.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
+
+vector_laplacian_regular_grid.o: \
+vector_laplacian_routines.o \
+vector_laplacian_regular_grid.f90
+	$(FC) $(FFLAGS) -c vector_laplacian_regular_grid.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
+
+vector_laplacian_regular_grid_saved.o: \
+vector_laplacian_routines.o \
+vector_laplacian_regular_grid_saved.f90
+	$(FC) $(FFLAGS) -c vector_laplacian_regular_grid_saved.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
+
+vector_laplacian_gaussian_grid.o: \
+vector_laplacian_routines.o \
+vector_laplacian_gaussian_grid.f90
+	$(FC) $(FFLAGS) -c vector_laplacian_gaussian_grid.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
+
+vector_laplacian_gaussian_grid_saved.o: \
+vector_laplacian_routines.o \
+vector_laplacian_gaussian_grid_saved.f90
+	$(FC) $(FFLAGS) -c vector_laplacian_gaussian_grid_saved.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
+
+invert_vector_laplacian_regular_grid.o: \
+vector_laplacian_routines.o \
+invert_vector_laplacian_regular_grid.f90
+	$(FC) $(FFLAGS) -c invert_vector_laplacian_regular_grid.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
+
+invert_vector_laplacian_regular_grid_saved.o: \
+vector_laplacian_routines.o \
+invert_vector_laplacian_regular_grid_saved.f90
+	$(FC) $(FFLAGS) -c invert_vector_laplacian_regular_grid_saved.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
+
+invert_vector_laplacian_gaussian_grid.o: \
+vector_laplacian_routines.o \
+invert_vector_laplacian_gaussian_grid.f90
+	$(FC) $(FFLAGS) -c invert_vector_laplacian_gaussian_grid.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
+
+invert_vector_laplacian_gaussian_grid_saved.o: \
+vector_laplacian_routines.o \
+invert_vector_laplacian_gaussian_grid_saved.f90
+	$(FC) $(FFLAGS) -c invert_vector_laplacian_gaussian_grid_saved.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
+
 idvtec.o: \
 spherepack_precision.o \
 vector_synthesis_routines.o \
@@ -569,62 +624,6 @@ spherepack_precision.o \
 vector_synthesis_routines.o \
 isfvpgs.f90
 	$(FC) $(FFLAGS) -c isfvpgs.f90 $(LINKS)\
-	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
-
-vlapec.o: \
-spherepack_precision.o \
-vector_synthesis_routines.o \
-vlapec.f90
-	$(FC) $(FFLAGS) -c vlapec.f90 $(LINKS)\
-	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
-
-vlapes.o: \
-spherepack_precision.o \
-vector_synthesis_routines.o \
-vlapes.f90
-	$(FC) $(FFLAGS) -c vlapes.f90 $(LINKS)\
-	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
-
-vlapgc.o: \
-spherepack_precision.o \
-vector_synthesis_routines.o \
-vlapgc.f90
-	$(FC) $(FFLAGS) -c vlapgc.f90 $(LINKS)\
-	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
-
-vlapgs.o: \
-spherepack_precision.o \
-vector_synthesis_routines.o \
-vlapgs.f90
-	$(FC) $(FFLAGS) -c vlapgs.f90 $(LINKS)\
-	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
-
-ivlapec.o: \
-spherepack_precision.o \
-vector_synthesis_routines.o \
-ivlapec.f90
-	$(FC) $(FFLAGS) -c ivlapec.f90 $(LINKS)\
-	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
-
-ivlapes.o: \
-spherepack_precision.o \
-vector_synthesis_routines.o \
-ivlapes.f90
-	$(FC) $(FFLAGS) -c ivlapes.f90 $(LINKS)\
-	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
-
-ivlapgc.o: \
-spherepack_precision.o \
-vector_synthesis_routines.o \
-ivlapgc.f90
-	$(FC) $(FFLAGS) -c ivlapgc.f90 $(LINKS)\
-	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
-
-ivlapgs.o: \
-spherepack_precision.o \
-vector_synthesis_routines.o \
-ivlapgs.f90
-	$(FC) $(FFLAGS) -c ivlapgs.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 
 type_SphericalGrid.o: \
@@ -756,10 +755,6 @@ isfvpec.o \
 isfvpes.o \
 isfvpgc.o \
 isfvpgs.o \
-ivlapec.o \
-ivlapes.o \
-ivlapgc.o \
-ivlapgs.o \
 sfvpec.o \
 sfvpes.o \
 sfvpgc.o \
@@ -774,10 +769,7 @@ trssph.o \
 trvsph.o \
 vector_analysis_routines.o \
 vector_synthesis_routines.o \
-vlapec.o \
-vlapes.o \
-vlapgc.o \
-vlapgs.o \
+vector_laplacian_routines.o \
 vorticity_routines.o \
 vshifte.o \
 vtsec.o \

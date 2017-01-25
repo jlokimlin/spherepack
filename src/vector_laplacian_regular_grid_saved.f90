@@ -31,30 +31,32 @@
 !
 !
 !
-! ... file vlapec.f
+! ... file vlapes.f
 !
 !     this file includes documentation and code for
-!     subroutine vlapec          i
+!     subroutine vlapes          i
 !
-! ... files which must be loaded with vlapec.f
+! ... files which must be loaded with vlapes.f
 !
-!     type_SpherepackAux.f, type_RealPeriodicTransform.f, vhaec.f, vhsec.f
-!
-!
-!     subroutine vlapec(nlat, nlon, ityp, nt, vlap, wlap, idvw, jdvw, br, bi, cr, ci, 
-!    +mdbc, ndbc, wvhsec, lvhsec, work, lwork, ierror)
+!     type_SpherepackAux.f, type_RealPeriodicTransform.f, vhaes.f, vhses.f
 !
 !
-!     subroutine vlapec computes the vector laplacian of the vector field
+!
+!
+!     subroutine vlapes(nlat, nlon, ityp, nt, vlap, wlap, idvw, jdvw, br, bi, cr, ci, 
+!    +mdbc, ndbc, wvhses, lvhses, work, lwork, ierror)
+!
+!
+!     subroutine vlapes computes the vector laplacian of the vector field
 !     (v, w) in (vlap, wlap) (see the definition of the vector laplacian at
 !     the output parameter description of vlap, wlap below).  w and wlap
 !     are east longitudinal components of the vectors.  v and vlap are
 !     colatitudinal components of the vectors.  br, bi, cr, and ci are the
 !     vector harmonic coefficients of (v, w).  these must be precomputed by
-!     vhaec and are input parameters to vlapec.  the laplacian components
+!     vhaes and are input parameters to vlapes.  the laplacian components
 !     in (vlap, wlap) have the same symmetry or lack of symmetry about the
 !     equator as (v, w).  the input parameters ityp, nt, mdbc, nbdc must have
-!     the same values used by vhaec to compute br, bi, cr, and ci for (v, w).
+!     the same values used by vhaes to compute br, bi, cr, and ci for (v, w).
 !     vlap(i, j) and wlap(i, j) are given on the sphere at the colatitude
 !
 !            theta(i) = (i-1)*pi/(nlat-1)
@@ -86,7 +88,7 @@
 !            is a product of small prime numbers.
 !
 !     ityp   this parameter should have the same value input to subroutine
-!            vhaec to compute the coefficients br, bi, cr, and ci for the
+!            vhaes to compute the coefficients br, bi, cr, and ci for the
 !            vector field (v, w).  ityp is set as follows:
 !
 !            = 0  no symmetries exist in (v, w) about the equator. (vlap, wlap)
@@ -173,7 +175,7 @@
 !
 !     nt     nt is the number of vector fields (v, w).  some computational
 !            efficiency is obtained for multiple fields.  in the program
-!            that calls vlapec, the arrays vlap, wlap, br, bi, cr and ci
+!            that calls vlapes, the arrays vlap, wlap, br, bi, cr and ci
 !            can be three dimensional corresponding to an indexed multiple
 !            vector field.  in this case multiple vector synthesis will
 !            be performed to compute the vector laplacian for each field.
@@ -183,40 +185,40 @@
 !            or that all arrays are two dimensional.
 !
 !   idvw     the first dimension of the arrays vlap and wlap as it appears
-!            in the program that calls vlapec.  if ityp=0, 1, or 2  then idvw
+!            in the program that calls vlapes.  if ityp=0, 1, or 2  then idvw
 !            must be at least nlat.  if ityp > 2 and nlat is even then idvw
 !            must be at least nlat/2. if ityp > 2 and nlat is odd then idvw
 !            must be at least (nlat+1)/2.
 !
 !   jdvw     the second dimension of the arrays vlap and wlap as it appears
-!            in the program that calls vlapec. jdvw must be at least nlon.
+!            in the program that calls vlapes. jdvw must be at least nlon.
 !
 !
 !   br, bi    two or three dimensional arrays (see input parameter nt)
 !   cr, ci    that contain vector spherical harmonic coefficients
-!            of the vector field (v, w) as computed by subroutine vhaec.
-!            br, bi, cr and ci must be computed by vhaec prior to calling
-!            vlapec.  if ityp=1, 4, or 7 then cr, ci are not used and can
+!            of the vector field (v, w) as computed by subroutine vhaes.
+!            br, bi, cr and ci must be computed by vhaes prior to calling
+!            vlapes.  if ityp=1, 4, or 7 then cr, ci are not used and can
 !            be dummy arguments.  if ityp=2, 5, or 8 then br, bi are not
 !            used and can be dummy arguments.
 !
 !    mdbc    the first dimension of the arrays br, bi, cr and ci as it
-!            appears in the program that calls vlapec.  mdbc must be
+!            appears in the program that calls vlapes.  mdbc must be
 !            at least min(nlat, nlon/2) if nlon is even or at least
 !            min(nlat, (nlon+1)/2) if nlon is odd.
 !
 !    ndbc    the second dimension of the arrays br, bi, cr and ci as it
-!            appears in the program that calls vlapec. ndbc must be at
+!            appears in the program that calls vlapes. ndbc must be at
 !            least nlat.
 !
-!    wvhsec  an array which must be initialized by subroutine vhseci.
-!            once initialized, wvhsec
-!            can be used repeatedly by vlapec as long as nlat and nlon
-!            remain unchanged.  wvhsec must not be altered between calls
-!            of vlapec.
+!    wvhses  an array which must be initialized by subroutine vhsesi.
+!            once initialized, vhses
+!            can be used repeatedly by vlapes as long as nlat and nlon
+!            remain unchanged.  wvhses must not be altered between calls
+!            of vlapes.
 !
-!    lvhsec  the dimension of the array wvhsec as it appears in the
-!            program that calls vlapec.  let
+!    lvhses  the dimension of the array wvhses as it appears in the
+!            program that calls vlapes.  let
 !
 !               l1 = min(nlat, (nlon+2)/2) if nlon is even or
 !               l1 = min(nlat, (nlon+1)/2) if nlon is odd
@@ -226,33 +228,29 @@
 !               l2 = nlat/2        if nlat is even or
 !               l2 = (nlat+1)/2    if nlat is odd.
 !
-!            then lvhsec must be at least
+!            then lvhses must be greater than or equal
 !
-!            4*nlat*l2+3*max(l1-2, 0)*(nlat+nlat-l1-1)+nlon+15
-
-!            (see ierror=9 below).
+!               (l1*l2*(nlat+nlat-l1+1))/2+nlon+15
 !
 !     work   a work array that does not have to be saved.
 !
 !     lwork  the dimension of the array work as it appears in the
-!            program that calls vlapec. define
+!            program that calls vlapes. define
 !
 !               l2 = nlat/2                    if nlat is even or
 !               l2 = (nlat+1)/2                if nlat is odd
 !               l1 = min(nlat, (nlon+2)/2) if nlon is even or
 !               l1 = min(nlat, (nlon+1)/2) if nlon is odd
 !
-!
 !            if ityp .le. 2 then
 !
-!               nlat*(2*nt*nlon+max(6*l2, nlon)) + nlat*(4*nt*l1+1)
+!               (2*nt+1)*nlat*nlon + nlat*(4*nt*l1+1)
 !
-!            or if ityp .gt. 2 let
+!            or if ityp .gt. 2 then
 !
-!               l2*(2*nt*nlon+max(6*nlat, nlon)) + nlat*(4*nt*l1+1)
+!               (2*nt+1)*l2*nlon + nlat*(4*nt*l1+1)
 !
-!            will suffice as a minimum length for lwork
-!            (see ierror=10 below)
+!            will suffice as a length for lwork.
 !
 !     **************************************************************
 !
@@ -304,37 +302,23 @@
 !
 !            = 8  error in the specification of ndbc
 !
-!            = 9  error in the specification of lvhsec
+!            = 9  error in the specification of lvhses
 !
-!            = 10 error in the specification of lwork (lwork < lwkmin)
+!            = 10 error in the specification of lwork
 !
 !
 ! **********************************************************************
 !                                                                              
-!     end of documentation for vlapec
+!     end of documentation for vlapes
 !
 ! **********************************************************************
 !
-module module_vlapec
-
-    use spherepack_precision, only: &
-        wp, & ! working precision
-        ip ! integer precision
-
-    use vector_synthesis_routines, only: &
-        vhsec
-
-    ! Explicit typing only
-    implicit none
-
-    ! Everything is private unless stated otherwise
-    private
-    public :: vlapec
+submodule(vector_laplacian_routines) vector_laplacian_regular_grid_saved
 
 contains
 
-    subroutine vlapec(nlat, nlon, ityp, nt, vlap, wlap, idvw, jdvw, br, bi, &
-        cr, ci, mdbc, ndbc, wvhsec, lvhsec, work, lwork, ierror)
+    module subroutine vlapes(nlat, nlon, ityp, nt, vlap, wlap, idvw, jdvw, br, bi, &
+        cr, ci, mdbc, ndbc, wvhses, lvhses, work, lwork, ierror)
 
         ! Dummy arguments
         integer(ip), intent(in)  :: nlat
@@ -351,8 +335,8 @@ contains
         real(wp),    intent(in)  :: ci(mdbc, ndbc, nt)
         integer(ip), intent(in)  :: mdbc
         integer(ip), intent(in)  :: ndbc
-        real(wp),    intent(in)  :: wvhsec(lvhsec)
-        integer(ip), intent(in)  :: lvhsec
+        real(wp),    intent(in)  :: wvhses(lvhses)
+        integer(ip), intent(in)  :: lvhses
         real(wp),    intent(out) :: work(lwork)
         integer(ip), intent(in)  :: lwork
         integer(ip), intent(out) :: ierror
@@ -369,13 +353,12 @@ contains
         integer(ip) :: l1
         integer(ip) :: l2
         integer(ip) :: liwk
+        integer(ip) :: lsavmin
         integer(ip) :: lwkmin
-        integer(ip) :: lwmin
         integer(ip) :: lzimn
         integer(ip) :: mmax
         integer(ip) :: mn
 
-        ! Check input arguments
         ierror = 1
         if (nlat < 3) return
         ierror = 2
@@ -398,42 +381,28 @@ contains
         ierror = 9
         idz = (mmax*(nlat+nlat-mmax+1))/2
         lzimn = idz*imid
-        !
-        !     check saved work space
-        !
-        l1 = min(nlat, (nlon+1)/2)
-        l2 = (nlat+1)/2
-        lwmin = 4*nlat*l2+3*max(l1-2, 0)*(nlat+nlat-l1-1)+nlon+15
-        if (lvhsec < lwmin) return
+        lsavmin = lzimn+lzimn+nlon+15
+        if (lvhses < lsavmin) return
         !
         ! Verify unsaved workspace length
         !
-        ierror = 10
         mn = mmax*nlat*nt
+        l2 = (nlat+1)/2
+        l1 = min(nlat, nlon/2+1)
 
-        select case(ityp)
-            case(0)
-                ! No symmetry
-                ! br, bi, cr, ci nonzero
-                lwkmin = nlat*(2*nt*nlon+max(6*imid, nlon)+1)+4*mn
-            case(1:2)
-                ! No symmetry
-                ! br, bi or cr, ci zero
-                lwkmin = nlat*(2*nt*nlon+max(6*imid, nlon)+1)+2*mn
-            case(3, 6)
-                ! Symmetry about equator
-                ! br, bi, cr, ci nonzero
-                lwkmin = imid*(2*nt*nlon+max(6*nlat, nlon))+4*mn+nlat
+        select case (ityp)
+            case(0:2)
+                lwkmin = (2*nt+1)*nlat*nlon + nlat*(4*nt*l1+1)
             case default
-                ! Symmetry about equator
-                ! br, bi or cr, ci zero
-                lwkmin = imid*(2*nt*nlon+max(6*nlat, nlon))+2*mn+nlat
+                lwkmin = (2*nt+1)*l2*nlon + nlat*(4*nt*l1+1)
         end select
 
         if (lwork < lwkmin) return
-        ierror = 0
 
+        ierror = 0
+        !
         ! Set workspace index pointers for vector laplacian coefficients
+        !
         select case(ityp)
             case(0, 3, 6)
                 ibr = 1
@@ -456,14 +425,14 @@ contains
         iwk = ifn + nlat
         liwk = lwork-4*mn-nlat
 
-        call vlapec_lower_routine(nlat, nlon, ityp, nt, vlap, wlap, idvw, jdvw, work(ibr), &
+        call vlapes_lower_routine(nlat, nlon, ityp, nt, vlap, wlap, idvw, jdvw, work(ibr), &
             work(ibi), work(icr), work(ici), mmax, work(ifn), mdbc, ndbc, br, bi, &
-            cr, ci, wvhsec, lvhsec, work(iwk), liwk, ierror)
+            cr, ci, wvhses, lvhses, work(iwk), liwk, ierror)
 
-    end subroutine vlapec
+    end subroutine vlapes
 
-    subroutine vlapec_lower_routine(nlat, nlon, ityp, nt, vlap, wlap, idvw, jdvw, brlap, &
-        bilap, crlap, cilap, mmax, fnn, mdb, ndb, br, bi, cr, ci, wsave, lwsav, &
+    subroutine vlapes_lower_routine(nlat, nlon, ityp, nt, vlap, wlap, idvw, jdvw, brlap, &
+        bilap, crlap, cilap, mmax, fnn, mdb, ndb, br, bi, cr, ci, wsave, lsave, &
         wk, lwk, ierror)
 
         real(wp) :: bi
@@ -474,19 +443,19 @@ contains
         real(wp) :: cilap
         real(wp) :: cr
         real(wp) :: crlap
-        real(wp) :: fn
+        
         real(wp) :: fnn
         integer(ip) :: idvw
         integer(ip) :: ierror
         integer(ip) :: ityp
         integer(ip) :: jdvw
-        integer(ip) :: k
+        
+        integer(ip) :: lsave
         integer(ip) :: lwk
-        integer(ip) :: lwsav
-        integer(ip) :: m
+        
         integer(ip) :: mdb
         integer(ip) :: mmax
-        integer(ip) :: n
+        
         integer(ip) :: ndb
         integer(ip) :: nlat
         integer(ip) :: nlon
@@ -500,97 +469,15 @@ contains
         dimension crlap(mmax, nlat, nt), cilap(mmax, nlat, nt)
         dimension br(mdb, ndb, nt), bi(mdb, ndb, nt)
         dimension cr(mdb, ndb, nt), ci(mdb, ndb, nt)
-        dimension wsave(lwsav), wk(lwk)
-        !
-        !     preset coefficient multiplyers
-        !
-        do n=2, nlat
-            fn = real(n - 1)
-            fnn(n) = -fn*(fn + 1.0)
-        end do
-        !
-        !     set laplacian coefficients from br, bi, cr, ci
-        !
-        select case (ityp)
-            case (0, 3, 6)
-                !
-                !     all coefficients needed
-                !
-                do k=1, nt
-                    do n=1, nlat
-                        do m=1, mmax
-                            brlap(m, n, k) = 0.0
-                            bilap(m, n, k) = 0.0
-                            crlap(m, n, k) = 0.0
-                            cilap(m, n, k) = 0.0
-                        end do
-                    end do
-                    do n=2, nlat
-                        brlap(1, n, k) = fnn(n)*br(1, n, k)
-                        bilap(1, n, k) = fnn(n)*bi(1, n, k)
-                        crlap(1, n, k) = fnn(n)*cr(1, n, k)
-                        cilap(1, n, k) = fnn(n)*ci(1, n, k)
-                    end do
-                    do m=2, mmax
-                        do n=m, nlat
-                            brlap(m, n, k) = fnn(n)*br(m, n, k)
-                            bilap(m, n, k) = fnn(n)*bi(m, n, k)
-                            crlap(m, n, k) = fnn(n)*cr(m, n, k)
-                            cilap(m, n, k) = fnn(n)*ci(m, n, k)
-                        end do
-                    end do
-                end do
-            case (1, 4, 7)
-                !
-                !     vorticity is zero so cr, ci=0 not used
-                !
-                do k=1, nt
-                    do n=1, nlat
-                        do m=1, mmax
-                            brlap(m, n, k) = 0.0
-                            bilap(m, n, k) = 0.0
-                        end do
-                    end do
-                    do n=2, nlat
-                        brlap(1, n, k) = fnn(n)*br(1, n, k)
-                        bilap(1, n, k) = fnn(n)*bi(1, n, k)
-                    end do
-                    do m=2, mmax
-                        do n=m, nlat
-                            brlap(m, n, k) = fnn(n)*br(m, n, k)
-                            bilap(m, n, k) = fnn(n)*bi(m, n, k)
-                        end do
-                    end do
-                end do
-            case default
-                !
-                !     divergence is zero so br, bi=0 not used
-                !
-                do k=1, nt
-                    do n=1, nlat
-                        do m=1, mmax
-                            crlap(m, n, k) = 0.0
-                            cilap(m, n, k) = 0.0
-                        end do
-                    end do
-                    do n=2, nlat
-                        crlap(1, n, k) = fnn(n)*cr(1, n, k)
-                        cilap(1, n, k) = fnn(n)*ci(1, n, k)
-                    end do
-                    do m=2, mmax
-                        do n=m, nlat
-                            crlap(m, n, k) = fnn(n)*cr(m, n, k)
-                            cilap(m, n, k) = fnn(n)*ci(m, n, k)
-                        end do
-                    end do
-                end do
-        end select
-        !
-        !     sythesize coefs into vector field (vlap, wlap)
-        !
-        call vhsec(nlat, nlon, ityp, nt, vlap, wlap, idvw, jdvw, brlap, bilap, &
-            crlap, cilap, mmax, nlat, wsave, lwsav, wk, lwk, ierror)
+        dimension wsave(lsave), wk(lwk)
 
-    end subroutine vlapec_lower_routine
+        call perform_setup_for_vector_laplacian(&
+            ityp, brlap, bilap, crlap, cilap, br, bi, cr, ci, fnn)
 
-end module module_vlapec
+        ! Synthesize coefs into vector field (v, w)
+        call vhses(nlat, nlon, ityp, nt, vlap, wlap, idvw, jdvw, brlap, bilap, &
+            crlap, cilap, mmax, nlat, wsave, lsave, wk, lwk, ierror)
+
+    end subroutine vlapes_lower_routine
+
+end submodule vector_laplacian_regular_grid_saved

@@ -51,18 +51,6 @@ module spherepack_library
     use module_isfvpgs, only: &
         isfvpgs
 
-    use module_ivlapec, only: &
-        ivlapec
-
-    use module_ivlapes, only: &
-        ivlapes
-
-    use module_ivlapgc, only: &
-        ivlapgc
-
-    use module_ivlapgs, only: &
-        ivlapgs
-
     use module_sfvpec, only: &
         sfvpec
 
@@ -127,17 +115,9 @@ module spherepack_library
     !    use module_visgeo, only: &
     !        visgeo
 
-    use module_vlapec, only: &
-        vlapec
-
-    use module_vlapes, only: &
-        vlapes
-
-    use module_vlapgc, only: &
-        vlapgc
-
-    use module_vlapgs, only: &
-        vlapgs
+    use vector_laplacian_routines, only: &
+        vlapec, vlapes, vlapgc, vlapgs, &
+        ivlapec, ivlapes, ivlapgc, ivlapgs
 
     use vorticity_routines, only: &
         vrtec, vrtes, vrtgc, vrtgs, &

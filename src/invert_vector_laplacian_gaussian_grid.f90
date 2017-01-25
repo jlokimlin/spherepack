@@ -297,64 +297,45 @@
 !
 ! **********************************************************************
 !
-module module_ivlapgc
-
-    use spherepack_precision, only: &
-        wp, & ! working precision
-        ip ! integer precision
-
-    use vector_synthesis_routines, only: &
-        vhsgc
-
-    ! Explicit typing only
-    implicit none
-
-    ! Everything is private unless stated otherwise
-    private
-    public :: ivlapgc
+submodule(vector_laplacian_routines) invert_vector_laplacian_gaussian_grid
 
 contains
 
-    subroutine ivlapgc(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
+    module subroutine ivlapgc(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
         mdbc, ndbc, wvhsgc, lvhsgc, work, lwork, ierror)
 
-        real(wp) :: bi
-        real(wp) :: br
-        real(wp) :: ci
-        real(wp) :: cr
-        integer(ip) :: ibi
-        integer(ip) :: ibr
-        integer(ip) :: ici
-        integer(ip) :: icr
-        integer(ip) :: idvw
+        ! Dummy arguments
+        integer(ip), intent(in)  :: nlat
+        integer(ip), intent(in)  :: nlon
+        integer(ip), intent(in)  :: ityp
+        integer(ip), intent(in)  :: nt
+        real(wp),    intent(out) :: v(idvw, jdvw, nt)
+        real(wp),    intent(out) :: w(idvw, jdvw, nt)
+        integer(ip), intent(in)  :: idvw
+        integer(ip), intent(in)  :: jdvw
+        real(wp),    intent(in)  :: br(mdbc, ndbc, nt)
+        real(wp),    intent(in)  :: bi(mdbc, ndbc, nt)
+        real(wp),    intent(in)  :: cr(mdbc, ndbc, nt)
+        real(wp),    intent(in)  :: ci(mdbc, ndbc, nt)
+        integer(ip), intent(in)  :: mdbc
+        integer(ip), intent(in)  :: ndbc
+        real(wp),    intent(in)  :: wvhsgc(lvhsgc)
+        integer(ip), intent(in)  :: lvhsgc
+        real(wp),    intent(out) :: work(lwork)
+        integer(ip), intent(in)  :: lwork
+        integer(ip), intent(out) :: ierror
+
+        ! Local variables
         integer(ip) :: idz
-        integer(ip) :: ierror
-        integer(ip) :: ifn
         integer(ip) :: imid
-        integer(ip) :: ityp
-        integer(ip) :: iwk
-        integer(ip) :: jdvw
-        integer(ip) :: liwk
         integer(ip) :: lsavmin
-        integer(ip) :: lvhsgc
         integer(ip) :: lwkmin
-        integer(ip) :: lwork
         integer(ip) :: lzimn
-        integer(ip) :: mdbc
         integer(ip) :: mmax
         integer(ip) :: mn
-        integer(ip) :: ndbc
-        integer(ip) :: nlat
-        integer(ip) :: nlon
-        integer(ip) :: nt
-        real(wp) :: v
-        real(wp) :: w
-        real(wp) :: work
-        real(wp) :: wvhsgc
-        dimension v(idvw, jdvw, nt), w(idvw, jdvw, nt)
-        dimension br(mdbc, ndbc, nt), bi(mdbc, ndbc, nt)
-        dimension cr(mdbc, ndbc, nt), ci(mdbc, ndbc, nt)
-        dimension wvhsgc(lvhsgc), work(lwork)
+        integer(ip) :: workspace_indices(7)
+
+        ! Check input arguments
         ierror = 1
         if (nlat < 3) return
         ierror = 2
@@ -408,40 +389,22 @@ contains
         if (lwork < lwkmin) return
         ierror = 0
 
-        !
         ! Set workspace index pointers for vector laplacian coefficients
-        !
-        select case(ityp)
-            case(0, 3, 6)
-                ibr = 1
-                ibi = ibr+mn
-                icr = ibi+mn
-                ici = icr+mn
-            case(1, 4, 7)
-                ibr = 1
-                ibi = ibr+mn
-                icr = ibi+mn
-                ici = icr
-            case default
-                ibr = 1
-                ibi = 1
-                icr = ibi+mn
-                ici = icr+mn
-        end select
+        workspace_indices = get_workspace_indices_for_inversion(ityp, nlat, mn, lwork)
 
-        ifn = ici + mn
-        iwk = ifn + nlat
-
-        select case(ityp)
-            case(0, 3, 6)
-                liwk = lwork-4*mn-nlat
-            case default
-                liwk = lwork-2*mn-nlat
-        end select
-
-        call ivlapgc_lower_routine(nlat, nlon, ityp, nt, v, w, idvw, jdvw, work(ibr), &
-            work(ibi), work(icr), work(ici), mmax, work(ifn), mdbc, ndbc, br, bi, &
-            cr, ci, wvhsgc, lvhsgc, work(iwk), liwk, ierror)
+        associate(&
+            ibr => workspace_indices(1), &
+            ibi => workspace_indices(2), &
+            icr => workspace_indices(3), &
+            ici => workspace_indices(4), &
+            ifn => workspace_indices(5), &
+            iwk => workspace_indices(6), &
+            liwk => workspace_indices(7) &
+            )
+            call ivlapgc_lower_routine(nlat, nlon, ityp, nt, v, w, idvw, jdvw, work(ibr), &
+                work(ibi), work(icr), work(ici), mmax, work(ifn), mdbc, ndbc, br, bi, &
+                cr, ci, wvhsgc, lvhsgc, work(iwk), liwk, ierror)
+        end associate
 
     end subroutine ivlapgc
 
@@ -457,19 +420,19 @@ contains
         real(wp) :: civw
         real(wp) :: cr
         real(wp) :: crvw
-        real(wp) :: fn
+        
         real(wp) :: fnn
         integer(ip) :: idvw
         integer(ip) :: ierror
         integer(ip) :: ityp
         integer(ip) :: jdvw
-        integer(ip) :: k
+        
         integer(ip) :: lvhsgc
         integer(ip) :: lwk
-        integer(ip) :: m
+        
         integer(ip) :: mdbc
         integer(ip) :: mmax
-        integer(ip) :: n
+        
         integer(ip) :: ndbc
         integer(ip) :: nlat
         integer(ip) :: nlon
@@ -484,96 +447,14 @@ contains
         dimension br(mdbc, ndbc, nt), bi(mdbc, ndbc, nt)
         dimension cr(mdbc, ndbc, nt), ci(mdbc, ndbc, nt)
         dimension wvhsgc(lvhsgc), wk(lwk)
-        !
-        !     preset coefficient multiplyers
-        !
-        do n=2, nlat
-            fn = real(n - 1)
-            fnn(n) = -1.0/(fn*(fn + 1.0))
-        end do
-        !
-        !     set (u, v) coefficients from br, bi, cr, ci
-        !
-        select case (ityp)
-            case (0, 3, 6)
-                !
-                !     all coefficients needed
-                !
-                do k=1, nt
-                    do n=1, nlat
-                        do m=1, mmax
-                            brvw(m, n, k) = 0.0
-                            bivw(m, n, k) = 0.0
-                            crvw(m, n, k) = 0.0
-                            civw(m, n, k) = 0.0
-                        end do
-                    end do
-                    do n=2, nlat
-                        brvw(1, n, k) = fnn(n)*br(1, n, k)
-                        bivw(1, n, k) = fnn(n)*bi(1, n, k)
-                        crvw(1, n, k) = fnn(n)*cr(1, n, k)
-                        civw(1, n, k) = fnn(n)*ci(1, n, k)
-                    end do
-                    do m=2, mmax
-                        do n=m, nlat
-                            brvw(m, n, k) = fnn(n)*br(m, n, k)
-                            bivw(m, n, k) = fnn(n)*bi(m, n, k)
-                            crvw(m, n, k) = fnn(n)*cr(m, n, k)
-                            civw(m, n, k) = fnn(n)*ci(m, n, k)
-                        end do
-                    end do
-                end do
-            case (1, 4, 7)
-                !
-                !     vorticity is zero so cr, ci=0 not used
-                !
-                do k=1, nt
-                    do n=1, nlat
-                        do m=1, mmax
-                            brvw(m, n, k) = 0.0
-                            bivw(m, n, k) = 0.0
-                        end do
-                    end do
-                    do n=2, nlat
-                        brvw(1, n, k) = fnn(n)*br(1, n, k)
-                        bivw(1, n, k) = fnn(n)*bi(1, n, k)
-                    end do
-                    do m=2, mmax
-                        do n=m, nlat
-                            brvw(m, n, k) = fnn(n)*br(m, n, k)
-                            bivw(m, n, k) = fnn(n)*bi(m, n, k)
-                        end do
-                    end do
-                end do
-            case default
-                !
-                !     divergence is zero so br, bi=0 not used
-                !
-                do k=1, nt
-                    do n=1, nlat
-                        do m=1, mmax
-                            crvw(m, n, k) = 0.0
-                            civw(m, n, k) = 0.0
-                        end do
-                    end do
-                    do n=2, nlat
-                        crvw(1, n, k) = fnn(n)*cr(1, n, k)
-                        civw(1, n, k) = fnn(n)*ci(1, n, k)
-                    end do
-                    do m=2, mmax
-                        do n=m, nlat
-                            crvw(m, n, k) = fnn(n)*cr(m, n, k)
-                            civw(m, n, k) = fnn(n)*ci(m, n, k)
-                        end do
-                    end do
-                end do
-        end select
-        !
-        !     sythesize coefs into vector field (v, w)
-        !
+
+        call perform_setup_for_inversion( &
+            ityp,  br, bi, cr, ci, brvw, bivw, crvw, civw, fnn)
+
+        ! Synthesize coefs into vector field (v, w)
         call vhsgc(nlat, nlon, ityp, nt, v, w, idvw, jdvw, brvw, bivw, &
             crvw, civw, mmax, nlat, wvhsgc, lvhsgc, wk, lwk, ierror)
 
     end subroutine ivlapgc_lower_routine
 
-end module module_ivlapgc
+end submodule invert_vector_laplacian_gaussian_grid

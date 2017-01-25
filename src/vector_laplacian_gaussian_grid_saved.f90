@@ -306,25 +306,11 @@
 !
 ! **********************************************************************
 !
-module module_vlapgs
-
-    use spherepack_precision, only: &
-        wp, & ! working precision
-        ip ! integer precision
-
-    use vector_synthesis_routines, only: &
-        vhsgs
-
-    ! Explicit typing only
-    implicit none
-
-    ! Everything is private unless stated otherwise
-    private
-    public :: vlapgs
+submodule(vector_laplacian_routines) vector_laplacian_gaussian_grid_saved
 
 contains
 
-    subroutine vlapgs(nlat, nlon, ityp, nt, vlap, wlap, idvw, jdvw, br, bi, &
+    module subroutine vlapgs(nlat, nlon, ityp, nt, vlap, wlap, idvw, jdvw, br, bi, &
         cr, ci, mdbc, ndbc, wvhsgs, lvhsgs, work, lwork, ierror)
 
         ! Dummy arguments
@@ -450,19 +436,19 @@ contains
         real(wp) :: cilap
         real(wp) :: cr
         real(wp) :: crlap
-        real(wp) :: fn
+        
         real(wp) :: fnn
         integer(ip) :: idvw
         integer(ip) :: ierror
         integer(ip) :: ityp
         integer(ip) :: jdvw
-        integer(ip) :: k
+        
         integer(ip) :: lsave
         integer(ip) :: lwk
-        integer(ip) :: m
+        
         integer(ip) :: mdb
         integer(ip) :: mmax
-        integer(ip) :: n
+        
         integer(ip) :: ndb
         integer(ip) :: nlat
         integer(ip) :: nlon
@@ -477,99 +463,15 @@ contains
         dimension br(mdb, ndb, nt), bi(mdb, ndb, nt)
         dimension cr(mdb, ndb, nt), ci(mdb, ndb, nt)
         dimension wsave(lsave), wk(lwk)
-        !
-        !     preset coefficient multiplyers
-        !
-        do n=2, nlat
-            fn = real(n - 1)
-            fnn(n) = -fn*(fn + 1.0)
-        end do
-        !
-        !     set laplacian coefficients from br, bi, cr, ci
-        !
-        select case (ityp)
-            case (0, 3, 6)
-                !
-                !     all coefficients needed
-                !
-                do k=1, nt
-                    do n=1, nlat
-                        do m=1, mmax
-                            brlap(m, n, k) = 0.0
-                            bilap(m, n, k) = 0.0
-                            crlap(m, n, k) = 0.0
-                            cilap(m, n, k) = 0.0
-                        end do
-                    end do
-                    do n=2, nlat
-                        brlap(1, n, k) = fnn(n)*br(1, n, k)
-                        bilap(1, n, k) = fnn(n)*bi(1, n, k)
-                        crlap(1, n, k) = fnn(n)*cr(1, n, k)
-                        cilap(1, n, k) = fnn(n)*ci(1, n, k)
-                    end do
-                    do m=2, mmax
-                        do n=m, nlat
-                            brlap(m, n, k) = fnn(n)*br(m, n, k)
-                            bilap(m, n, k) = fnn(n)*bi(m, n, k)
-                            crlap(m, n, k) = fnn(n)*cr(m, n, k)
-                            cilap(m, n, k) = fnn(n)*ci(m, n, k)
-                        end do
-                    end do
-                end do
-            case (1, 4, 7)
-                !
-                !     vorticity is zero so cr, ci=0 not used
-                !
-                do k=1, nt
-                    do n=1, nlat
-                        do m=1, mmax
-                            brlap(m, n, k) = 0.0
-                            bilap(m, n, k) = 0.0
-                        end do
-                    end do
-                    do n=2, nlat
-                        brlap(1, n, k) = fnn(n)*br(1, n, k)
-                        bilap(1, n, k) = fnn(n)*bi(1, n, k)
-                    end do
-                    do m=2, mmax
-                        do n=m, nlat
-                            brlap(m, n, k) = fnn(n)*br(m, n, k)
-                            bilap(m, n, k) = fnn(n)*bi(m, n, k)
-                        end do
-                    end do
-                end do
-            case default
-                !
-                !     divergence is zero so br, bi=0 not used
-                !
-                do k=1, nt
-                    do n=1, nlat
-                        do m=1, mmax
-                            crlap(m, n, k) = 0.0
-                            cilap(m, n, k) = 0.0
-                        end do
-                    end do
 
-                    do n=2, nlat
-                        crlap(1, n, k) = fnn(n)*cr(1, n, k)
-                        cilap(1, n, k) = fnn(n)*ci(1, n, k)
-                    end do
+        call perform_setup_for_vector_laplacian(&
+            ityp, brlap, bilap, crlap, cilap, br, bi, cr, ci, fnn)
 
-                    do m=2, mmax
-                        do n=m, nlat
-                            crlap(m, n, k) = fnn(n)*cr(m, n, k)
-                            cilap(m, n, k) = fnn(n)*ci(m, n, k)
-                        end do
-                    end do
-                end do
-        end select
-        !
-        !     sythesize coefs into vector field (vlap, wlap)
-        !
+        ! Synthesize coefs into vector field (v, w)
         call vhsgs(nlat, nlon, ityp, nt, vlap, wlap, idvw, jdvw, brlap, bilap, &
             crlap, cilap, mmax, nlat, wsave, lsave, wk, lwk, ierror)
 
     end subroutine vlapgs_lower_routine
 
 
-end module module_vlapgs
+end submodule vector_laplacian_gaussian_grid_saved

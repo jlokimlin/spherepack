@@ -31,44 +31,42 @@
 !
 !
 !
-!
-! ... file ivlapes.f
+! ... file ivlapgs.f
 !
 !     this file includes documentation and code for
-!     subroutine ivlapes
+!     subroutine ivlapgs
 !
-! ... files which must be loaded with ivlapes.f
+! ... files which must be loaded with ivlapgs.f
 !
-!     type_SpherepackAux.f, type_RealPeriodicTransform.f, vhaes.f, vhses.f
-!
-!
-!
-!     subroutine ivlapes(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, 
-!    +mdbc, ndbc, wvhses, lvhses, work, lwork, ierror)
+!     type_SpherepackAux.f, type_RealPeriodicTransform.f, vhags.f, vhsgs.f, compute_gaussian_latitudes_and_weights.f
 !
 !
-!     subroutine ivlapes computes a the vector field (v, w) whose vector
-!     laplacian is (vlap, wlap).  w and wlap are east longitudinal
-!     components of the vectors.  v and vlap are colatitudinal components
-!     of the vectors.  br, bi, cr, and ci are the vector harmonic coefficients
-!     of (vlap, wlap).  these must be precomputed by vhaes and are input
-!     parameters to ivlapes.  (v, w) have the same symmetry or lack of
-!     symmetry about the about the equator as (vlap, wlap).  the input
-!     parameters ityp, nt, mdbc, ndbc must have the same values used by
-!     vhaes to compute br, bi, cr, and ci for (vlap, wlap).
+!     subroutine ivlapgs(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, 
+!    +mdbc, ndbc, wvhsgs, lvhsgs, work, lwork, ierror)
+!
+!     given the vector spherical harmonic coefficients (br, bi, cr, ci)
+!     precomputed by subroutine vhags for a vector field (vlap, wlap), 
+!     subroutine ivlapgs computes a vector field (v, w) whose vector
+!     laplacian is (vlap, wlap).  v, vlap are the colatitudinal
+!     components and w, wlap are the east longitudinal components of
+!     the vectors.  (v, w) have the same symmetry or lack of symmetry
+!     about the equator as (vlap, wlap).  the input parameters ityp, 
+!     nt, mdbc, ndbc must have the same values used by vhags to compute
+!     br, bi, cr, ci for (vlap, wlap).
 !
 !
 !     input parameters
 !
-!     nlat   the number of colatitudes on the full sphere including the
-!            poles. for example, nlat = 37 for a five degree grid.
-!            nlat determines the grid increment in colatitude as
-!            pi/(nlat-1).  if nlat is odd the equator is located at
-!            grid point i=(nlat+1)/2. if nlat is even the equator is
-!            located half way between points i=nlat/2 and i=nlat/2+1.
-!            nlat must be at least 3. note: on the half sphere, the
-!            number of grid points in the colatitudinal direction is
-!            nlat/2 if nlat is even or (nlat+1)/2 if nlat is odd.
+!     nlat   the number of points in the gaussian colatitude grid on the
+!            full sphere. these lie in the interval (0, pi) and are computed
+!            in radians in theta(1) <...< theta(nlat) by subroutine compute_gaussian_latitudes_and_weights.
+!            if nlat is odd the equator will be included as the grid point
+!            theta((nlat+1)/2).  if nlat is even the equator will be
+!            excluded as a grid point and will lie half way between
+!            theta(nlat/2) and theta(nlat/2+1). nlat must be at least 3.
+!            note: on the half sphere, the number of grid points in the
+!            colatitudinal direction is nlat/2 if nlat is even or
+!            (nlat+1)/2 if nlat is odd.
 !
 !     nlon   the number of distinct longitude points.  nlon determines
 !            the grid increment in longitude as 2*pi/nlon. for example
@@ -78,7 +76,7 @@
 !            is a product of small prime numbers.
 !
 !     ityp   this parameter should have the same value input to subroutine
-!            vhaes to compute the coefficients br, bi, cr, and ci for the
+!            vhags to compute the coefficients br, bi, cr, and ci for the
 !            vector field (vlap, wlap).  ityp is set as follows:
 !
 !            = 0  no symmetries exist in (vlap, wlap) about the equator. (v, w)
@@ -160,7 +158,7 @@
 !
 !     nt     nt is the number of vector fields (vlap, wlap). some computational
 !            efficiency is obtained for multiple fields.  in the program
-!            that calls ivlapes, the arrays v, w, br, bi, cr and ci can be
+!            that calls ivlapgs, the arrays v, w, br, bi, cr and ci can be
 !            three dimensional corresponding to an indexed multiple vector
 !            field.  in this case multiple vector synthesis will be performed
 !            to compute the (v, w) for each field (vlap, wlap).  the third
@@ -170,40 +168,40 @@
 !            that all arrays are two dimensional.
 !
 !   idvw     the first dimension of the arrays w and v as it appears in
-!            the program that calls ivlapes.  if ityp=0, 1, or 2  then idvw
+!            the program that calls ivlapgs.  if ityp=0, 1, or 2  then idvw
 !            must be at least nlat.  if ityp > 2 and nlat is even then idvw
 !            must be at least nlat/2. if ityp > 2 and nlat is odd then idvw
 !            must be at least (nlat+1)/2.
 !
 !   jdvw     the second dimension of the arrays w and v as it appears in
-!            the program that calls ivlapes. jdvw must be at least nlon.
+!            the program that calls ivlapgs. jdvw must be at least nlon.
 !
 !
 !   br, bi    two or three dimensional arrays (see input parameter nt)
 !   cr, ci    that contain vector spherical harmonic coefficients of the
-!            vector field (vlap, wlap) as computed by subroutine vhaes.
-!            br, bi, cr and ci must be computed by vhaes prior to calling
-!            ivlapes.  if ityp=1, 4, or 7 then cr, ci are not used and can
+!            vector field (vlap, wlap) as computed by subroutine vhags.
+!            br, bi, cr and ci must be computed by vhags prior to calling
+!            ivlapgs.  if ityp=1, 4, or 7 then cr, ci are not used and can
 !            be dummy arguments.  if ityp=2, 5, or 8 then br, bi are not
 !            used and can be dummy arguments.
 !
 !    mdbc    the first dimension of the arrays br, bi, cr and ci as it
-!            appears in the program that calls ivlapes.  mdbc must be
+!            appears in the program that calls ivlapgs.  mdbc must be
 !            at least min(nlat, nlon/2) if nlon is even or at least
 !            min(nlat, (nlon+1)/2) if nlon is odd.
 !
 !    ndbc    the second dimension of the arrays br, bi, cr and ci as it
-!            appears in the program that calls ivlapes. ndbc must be at
+!            appears in the program that calls ivlapgs. ndbc must be at
 !            least nlat.
 !
-!    wvhses  an array which must be initialized by subroutine vhsesi.
-!            once initialized, wvhses
-!            can be used repeatedly by ivlapes as long as nlat and nlon
-!            remain unchanged.  wvhses must not be altered between calls
-!            of ivlapes.
+!    wvhsgs  an array which must be initialized by subroutine vhsgsi.
+!            once initialized, wvhsgsi
+!            can be used repeatedly by ivlapgs as long as nlat and nlon
+!            remain unchanged.  wvhsgs must not be altered between calls
+!            of ivlapgs.
 !
-!    lvhses  the dimension of the array wvhses as it appears in the
-!            program that calls ivlapes.  let
+!    lvhsgs  the dimension of the array wvhsgs as it appears in the
+!            program that calls ivlapgs.  let
 !
 !               l1 = min(nlat, nlon/2) if nlon is even or
 !               l1 = min(nlat, (nlon+1)/2) if nlon is odd
@@ -217,13 +215,13 @@
 !
 !               lsavmin = (l1*l2*(nlat+nlat-l1+1))/2+nlon+15
 !
-!            then lvhses must be greater than or equal to lsavmin
+!            then lvhsgs must be greater than or equal to lsavmin
 !            (see ierror=9 below).
 !
 !     work   a work array that does not have to be saved.
 !
 !     lwork  the dimension of the array work as it appears in the
-!            program that calls ivlapes. define
+!            program that calls ivlapgs. define
 !
 !               l2 = nlat/2                    if nlat is even or
 !               l2 = (nlat+1)/2                if nlat is odd
@@ -249,16 +247,8 @@
 !            contain a vector field whose vector laplacian is (vlap, wlap).
 !            w(i, j) is the east longitude and v(i, j) is the colatitudinal
 !            component of the vector. v(i, j) and w(i, j) are given on the
-!            sphere at the colatitude
-!
-!                 theta(i) = (i-1)*pi/(nlat-1)
-!
-!            for i=1, ..., nlat and east longitude
-!
-!                 lambda(j) = (j-1)*2*pi/nlon
-!
-!            for j=1, ..., nlon.
-!
+!            sphere at the guassian colatitude theta(i) for i=1, ..., nlat
+!            and east longitude lambda(j)=(j-1)*2*pi/nlon for j = 1, ..., nlon.
 !            let cost and sint be the cosine and sine at colatitude theta.
 !            let d( )/dlambda  and d( )/dtheta be the first order partial
 !            derivatives in longitude and colatitude.  let sf be either v
@@ -297,77 +287,64 @@
 !
 !            = 8  error in the specification of ndbc
 !
-!            = 9  error in the specification of lvhses
+!            = 9  error in the specification of lvhsgs
 !
 !            = 10 error in the specification of lwork
 !
 !
 ! **********************************************************************
 !                                                                              
-!     end of documentation for ivlapes
+!     end of documentation for ivlapgs
 !
 ! **********************************************************************
 !
-module module_ivlapes
-
-    use spherepack_precision, only: &
-        wp, & ! working precision
-        ip ! integer precision
-
-    use vector_synthesis_routines, only: &
-        vhses
-
-    ! Explicit typing only
-    implicit none
-
-    ! Everything is private unless stated otherwise
-    private
-    public :: ivlapes
+submodule(vector_laplacian_routines) invert_vector_laplacian_gaussian_grid_saved
 
 contains
 
-    subroutine ivlapes(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
-        mdbc, ndbc, wvhses, lvhses, work, lwork, ierror)
+    module subroutine ivlapgs(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
+        mdbc, ndbc, wvhsgs, lvhsgs, work, lwork, ierror)
 
-        real(wp) :: bi
-        real(wp) :: br
-        real(wp) :: ci
-        real(wp) :: cr
+        ! Dummy arguments
+        integer(ip), intent(in)  :: nlat
+        integer(ip), intent(in)  :: nlon
+        integer(ip), intent(in)  :: ityp
+        integer(ip), intent(in)  :: nt
+        real(wp),    intent(out) :: v(idvw, jdvw, nt)
+        real(wp),    intent(out) :: w(idvw, jdvw, nt)
+        integer(ip), intent(in)  :: idvw
+        integer(ip), intent(in)  :: jdvw
+        real(wp),    intent(in)  :: br(mdbc, ndbc, nt)
+        real(wp),    intent(in)  :: bi(mdbc, ndbc, nt)
+        real(wp),    intent(in)  :: cr(mdbc, ndbc, nt)
+        real(wp),    intent(in)  :: ci(mdbc, ndbc, nt)
+        integer(ip), intent(in)  :: mdbc
+        integer(ip), intent(in)  :: ndbc
+        real(wp),    intent(in)  :: wvhsgs(lvhsgs)
+        integer(ip), intent(in)  :: lvhsgs
+        real(wp),    intent(out) :: work(lwork)
+        integer(ip), intent(in)  :: lwork
+        integer(ip), intent(out) :: ierror
+
+        ! Local variables
         integer(ip) :: ibi
         integer(ip) :: ibr
         integer(ip) :: ici
         integer(ip) :: icr
-        integer(ip) :: idvw
         integer(ip) :: idz
-        integer(ip) :: ierror
         integer(ip) :: ifn
         integer(ip) :: imid
-        integer(ip) :: ityp
         integer(ip) :: iwk
-        integer(ip) :: jdvw
         integer(ip) :: l1
         integer(ip) :: l2
         integer(ip) :: liwk
         integer(ip) :: lsavmin
-        integer(ip) :: lvhses
         integer(ip) :: lwkmin
-        integer(ip) :: lwork
         integer(ip) :: lzimn
-        integer(ip) :: mdbc
         integer(ip) :: mmax
         integer(ip) :: mn
-        integer(ip) :: ndbc
-        integer(ip) :: nlat
-        integer(ip) :: nlon
-        integer(ip) :: nt
-        real(wp) :: v
-        real(wp) :: w
-        real(wp) :: work
-        real(wp) :: wvhses
-        dimension v(idvw, jdvw, nt), w(idvw, jdvw, nt)
-        dimension br(mdbc, ndbc, nt), bi(mdbc, ndbc, nt)
-        dimension cr(mdbc, ndbc, nt), ci(mdbc, ndbc, nt)
-        dimension wvhses(lvhses), work(lwork)
+
+        ! Check input arguments
         ierror = 1
         if (nlat < 3) return
         ierror = 2
@@ -394,7 +371,7 @@ contains
         idz = (mmax*(nlat+nlat-mmax+1))/2
         lzimn = idz*imid
         lsavmin = lzimn+lzimn+nlon+15
-        if (lvhses < lsavmin) return
+        if (lvhsgs < lsavmin) return
         !
         !     set minimum and verify unsaved work space length
         !
@@ -402,7 +379,7 @@ contains
         l2 = (nlat+1)/2
         l1 = min(nlat, (nlon+1)/2)
 
-        select case(ityp)
+        select case (ityp)
             case(0:2)
                 lwkmin = (2*nt+1)*nlat*nlon + nlat*(4*nt*l1+1)
             case default
@@ -411,9 +388,10 @@ contains
 
         if (lwork < lwkmin) return
         ierror = 0
-        !
-        ! Set workspace index pointers for vector laplacian coefficients
-        !
+
+         !
+         ! Set workspace index pointers for vector laplacian coefficients
+         !
         select case(ityp)
             case(0, 3, 6)
                 ibr = 1
@@ -436,19 +414,19 @@ contains
         iwk = ifn + nlat
 
         select case (ityp)
-            case (0, 3, 6)
+            case(0, 3, 6)
                 liwk = lwork-4*mn-nlat
             case default
                 liwk = lwork-2*mn-nlat
         end select
 
-        call ivlapes_lower_routine(nlat, nlon, ityp, nt, v, w, idvw, jdvw, work(ibr), &
+        call ivlapgs_lower_routine(nlat, nlon, ityp, nt, v, w, idvw, jdvw, work(ibr), &
             work(ibi), work(icr), work(ici), mmax, work(ifn), mdbc, ndbc, br, bi, &
-            cr, ci, wvhses, lvhses, work(iwk), liwk, ierror)
+            cr, ci, wvhsgs, lvhsgs, work(iwk), liwk, ierror)
 
-    end subroutine ivlapes
+    end subroutine ivlapgs
 
-    subroutine ivlapes_lower_routine(nlat, nlon, ityp, nt, v, w, idvw, jdvw, brvw, &
+    subroutine ivlapgs_lower_routine(nlat, nlon, ityp, nt, v, w, idvw, jdvw, brvw, &
         bivw, crvw, civw, mmax, fnn, mdbc, ndbc, br, bi, cr, ci, wsave, lsave, &
         wk, lwk, ierror)
 
@@ -460,19 +438,19 @@ contains
         real(wp) :: civw
         real(wp) :: cr
         real(wp) :: crvw
-        real(wp) :: fn
+        
         real(wp) :: fnn
         integer(ip) :: idvw
         integer(ip) :: ierror
         integer(ip) :: ityp
         integer(ip) :: jdvw
-        integer(ip) :: k
+        
         integer(ip) :: lsave
         integer(ip) :: lwk
-        integer(ip) :: m
+        
         integer(ip) :: mdbc
         integer(ip) :: mmax
-        integer(ip) :: n
+        
         integer(ip) :: ndbc
         integer(ip) :: nlat
         integer(ip) :: nlon
@@ -487,96 +465,14 @@ contains
         dimension br(mdbc, ndbc, nt), bi(mdbc, ndbc, nt)
         dimension cr(mdbc, ndbc, nt), ci(mdbc, ndbc, nt)
         dimension wsave(lsave), wk(lwk)
-        !
-        !     preset coefficient multiplyers
-        !
-        do n=2, nlat
-            fn = real(n - 1)
-            fnn(n) = -1.0/(fn*(fn + 1.0))
-        end do
-        !
-        !     set (u, v) coefficients from br, bi, cr, ci
-        !
-        select case (ityp)
-            case (0, 3, 6)
-                !
-                !     all coefficients needed
-                !
-                do k=1, nt
-                    do n=1, nlat
-                        do m=1, mmax
-                            brvw(m, n, k) = 0.0
-                            bivw(m, n, k) = 0.0
-                            crvw(m, n, k) = 0.0
-                            civw(m, n, k) = 0.0
-                        end do
-                    end do
-                    do n=2, nlat
-                        brvw(1, n, k) = fnn(n)*br(1, n, k)
-                        bivw(1, n, k) = fnn(n)*bi(1, n, k)
-                        crvw(1, n, k) = fnn(n)*cr(1, n, k)
-                        civw(1, n, k) = fnn(n)*ci(1, n, k)
-                    end do
-                    do m=2, mmax
-                        do n=m, nlat
-                            brvw(m, n, k) = fnn(n)*br(m, n, k)
-                            bivw(m, n, k) = fnn(n)*bi(m, n, k)
-                            crvw(m, n, k) = fnn(n)*cr(m, n, k)
-                            civw(m, n, k) = fnn(n)*ci(m, n, k)
-                        end do
-                    end do
-                end do
-            case (1, 4, 7)
-                !
-                !     vorticity is zero so cr, ci=0 not used
-                !
-                do k=1, nt
-                    do n=1, nlat
-                        do m=1, mmax
-                            brvw(m, n, k) = 0.0
-                            bivw(m, n, k) = 0.0
-                        end do
-                    end do
-                    do n=2, nlat
-                        brvw(1, n, k) = fnn(n)*br(1, n, k)
-                        bivw(1, n, k) = fnn(n)*bi(1, n, k)
-                    end do
-                    do m=2, mmax
-                        do n=m, nlat
-                            brvw(m, n, k) = fnn(n)*br(m, n, k)
-                            bivw(m, n, k) = fnn(n)*bi(m, n, k)
-                        end do
-                    end do
-                end do
-            case default
-                !
-                !     divergence is zero so br, bi=0 not used
-                !
-                do k=1, nt
-                    do n=1, nlat
-                        do m=1, mmax
-                            crvw(m, n, k) = 0.0
-                            civw(m, n, k) = 0.0
-                        end do
-                    end do
-                    do n=2, nlat
-                        crvw(1, n, k) = fnn(n)*cr(1, n, k)
-                        civw(1, n, k) = fnn(n)*ci(1, n, k)
-                    end do
-                    do m=2, mmax
-                        do n=m, nlat
-                            crvw(m, n, k) = fnn(n)*cr(m, n, k)
-                            civw(m, n, k) = fnn(n)*ci(m, n, k)
-                        end do
-                    end do
-                end do
-        end select
-        !
-        !     sythesize coefs into vector field (v, w)
-        !
-        call vhses(nlat, nlon, ityp, nt, v, w, idvw, jdvw, brvw, bivw, &
+
+        call perform_setup_for_inversion( &
+            ityp,  br, bi, cr, ci, brvw, bivw, crvw, civw, fnn)
+
+        ! Synthesize coefs into vector field (v, w)
+        call vhsgs(nlat, nlon, ityp, nt, v, w, idvw, jdvw, brvw, bivw, &
             crvw, civw, mmax, nlat, wsave, lsave, wk, lwk, ierror)
 
-    end subroutine ivlapes_lower_routine
+    end subroutine ivlapgs_lower_routine
 
-end module module_ivlapes
+end submodule invert_vector_laplacian_gaussian_grid_saved
