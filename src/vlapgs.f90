@@ -396,43 +396,26 @@ contains
         mn = mmax*nlat*nt
         l2 = (nlat+1)/2
         l1 = mmax
-        if (ityp <= 2) then
-            lwkmin = (2*nt+1)*nlat*nlon + nlat*(4*nt*l1+1)
-        else
-            lwkmin = (2*nt+1)*l2*nlon + nlat*(4*nt*l1+1)
-        end if
+
+        select case(ityp)
+            case(0:2)
+                lwkmin = (2*nt+1)*nlat*nlon + nlat*(4*nt*l1+1)
+            case default
+                lwkmin = (2*nt+1)*l2*nlon + nlat*(4*nt*l1+1)
+        end select
+
         if (lwork < lwkmin) return
         ierror = 0
         !
         !     set work space pointers for vector laplacian coefficients
         !
         select case (ityp)
-            case (0)
+            case (0, 3, 6)
                 ibr = 1
                 ibi = ibr+mn
                 icr = ibi+mn
                 ici = icr+mn
-            case (3)
-                ibr = 1
-                ibi = ibr+mn
-                icr = ibi+mn
-                ici = icr+mn
-            case (6)
-                ibr = 1
-                ibi = ibr+mn
-                icr = ibi+mn
-                ici = icr+mn
-            case (1)
-                ibr = 1
-                ibi = ibr+mn
-                icr = ibi+mn
-                ici = icr
-            case (4)
-                ibr = 1
-                ibi = ibr+mn
-                icr = ibi+mn
-                ici = icr
-            case (7)
+            case (1, 4, 7)
                 ibr = 1
                 ibi = ibr+mn
                 icr = ibi+mn
@@ -443,251 +426,149 @@ contains
                 icr = ibi+mn
                 ici = icr+mn
         end select
+
         ifn = ici + mn
         iwk = ifn + nlat
         liwk = lwork-4*mn-nlat
 
-        call vlapgs1(nlat, nlon, ityp, nt, vlap, wlap, idvw, jdvw, work(ibr), &
+        call vlapgs_lower_routine(nlat, nlon, ityp, nt, vlap, wlap, idvw, jdvw, work(ibr), &
             work(ibi), work(icr), work(ici), mmax, work(ifn), mdbc, ndbc, br, bi, &
             cr, ci, wvhsgs, lvhsgs, work(iwk), liwk, ierror)
 
-
-    contains
-
-
-        subroutine vlapgs1(nlat, nlon, ityp, nt, vlap, wlap, idvw, jdvw, brlap, &
-            bilap, crlap, cilap, mmax, fnn, mdb, ndb, br, bi, cr, ci, wsave, lsave, &
-            wk, lwk, ierror)
-
-            real(wp) :: bi
-            real(wp) :: bilap
-            real(wp) :: br
-            real(wp) :: brlap
-            real(wp) :: ci
-            real(wp) :: cilap
-            real(wp) :: cr
-            real(wp) :: crlap
-            real(wp) :: fn
-            real(wp) :: fnn
-            integer(ip) :: idvw
-            integer(ip) :: ierror
-            integer(ip) :: ityp
-            integer(ip) :: jdvw
-            integer(ip) :: k
-            integer(ip) :: lsave
-            integer(ip) :: lwk
-            integer(ip) :: m
-            integer(ip) :: mdb
-            integer(ip) :: mmax
-            integer(ip) :: n
-            integer(ip) :: ndb
-            integer(ip) :: nlat
-            integer(ip) :: nlon
-            integer(ip) :: nt
-            real(wp) :: vlap
-            real(wp) :: wk
-            real(wp) :: wlap
-            real(wp) :: wsave
-            dimension vlap(idvw, jdvw, nt), wlap(idvw, jdvw, nt)
-            dimension fnn(nlat), brlap(mmax, nlat, nt), bilap(mmax, nlat, nt)
-            dimension crlap(mmax, nlat, nt), cilap(mmax, nlat, nt)
-            dimension br(mdb, ndb, nt), bi(mdb, ndb, nt)
-            dimension cr(mdb, ndb, nt), ci(mdb, ndb, nt)
-            dimension wsave(lsave), wk(lwk)
-            !
-            !     preset coefficient multiplyers
-            !
-            do n=2, nlat
-                fn = real(n - 1)
-                fnn(n) = -fn*(fn + 1.0)
-            end do
-            !
-            !     set laplacian coefficients from br, bi, cr, ci
-            !
-            select case (ityp)
-                case (0)
-                    !
-                    !     all coefficients needed
-                    !
-                    do k=1, nt
-                        do n=1, nlat
-                            do m=1, mmax
-                                brlap(m, n, k) = 0.0
-                                bilap(m, n, k) = 0.0
-                                crlap(m, n, k) = 0.0
-                                cilap(m, n, k) = 0.0
-                            end do
-                        end do
-                        do n=2, nlat
-                            brlap(1, n, k) = fnn(n)*br(1, n, k)
-                            bilap(1, n, k) = fnn(n)*bi(1, n, k)
-                            crlap(1, n, k) = fnn(n)*cr(1, n, k)
-                            cilap(1, n, k) = fnn(n)*ci(1, n, k)
-                        end do
-                        do m=2, mmax
-                            do n=m, nlat
-                                brlap(m, n, k) = fnn(n)*br(m, n, k)
-                                bilap(m, n, k) = fnn(n)*bi(m, n, k)
-                                crlap(m, n, k) = fnn(n)*cr(m, n, k)
-                                cilap(m, n, k) = fnn(n)*ci(m, n, k)
-                            end do
-                        end do
-                    end do
-                case (3)
-                    !
-                    !     all coefficients needed
-                    !
-                    do k=1, nt
-                        do n=1, nlat
-                            do m=1, mmax
-                                brlap(m, n, k) = 0.0
-                                bilap(m, n, k) = 0.0
-                                crlap(m, n, k) = 0.0
-                                cilap(m, n, k) = 0.0
-                            end do
-                        end do
-                        do n=2, nlat
-                            brlap(1, n, k) = fnn(n)*br(1, n, k)
-                            bilap(1, n, k) = fnn(n)*bi(1, n, k)
-                            crlap(1, n, k) = fnn(n)*cr(1, n, k)
-                            cilap(1, n, k) = fnn(n)*ci(1, n, k)
-                        end do
-                        do m=2, mmax
-                            do n=m, nlat
-                                brlap(m, n, k) = fnn(n)*br(m, n, k)
-                                bilap(m, n, k) = fnn(n)*bi(m, n, k)
-                                crlap(m, n, k) = fnn(n)*cr(m, n, k)
-                                cilap(m, n, k) = fnn(n)*ci(m, n, k)
-                            end do
-                        end do
-                    end do
-                case (6)
-                    !
-                    !     all coefficients needed
-                    !
-                    do k=1, nt
-                        do n=1, nlat
-                            do m=1, mmax
-                                brlap(m, n, k) = 0.0
-                                bilap(m, n, k) = 0.0
-                                crlap(m, n, k) = 0.0
-                                cilap(m, n, k) = 0.0
-                            end do
-                        end do
-                        do n=2, nlat
-                            brlap(1, n, k) = fnn(n)*br(1, n, k)
-                            bilap(1, n, k) = fnn(n)*bi(1, n, k)
-                            crlap(1, n, k) = fnn(n)*cr(1, n, k)
-                            cilap(1, n, k) = fnn(n)*ci(1, n, k)
-                        end do
-                        do m=2, mmax
-                            do n=m, nlat
-                                brlap(m, n, k) = fnn(n)*br(m, n, k)
-                                bilap(m, n, k) = fnn(n)*bi(m, n, k)
-                                crlap(m, n, k) = fnn(n)*cr(m, n, k)
-                                cilap(m, n, k) = fnn(n)*ci(m, n, k)
-                            end do
-                        end do
-                    end do
-                case (1)
-                    !
-                    !     vorticity is zero so cr, ci=0 not used
-                    !
-                    do k=1, nt
-                        do n=1, nlat
-                            do m=1, mmax
-                                brlap(m, n, k) = 0.0
-                                bilap(m, n, k) = 0.0
-                            end do
-                        end do
-                        do n=2, nlat
-                            brlap(1, n, k) = fnn(n)*br(1, n, k)
-                            bilap(1, n, k) = fnn(n)*bi(1, n, k)
-                        end do
-                        do m=2, mmax
-                            do n=m, nlat
-                                brlap(m, n, k) = fnn(n)*br(m, n, k)
-                                bilap(m, n, k) = fnn(n)*bi(m, n, k)
-                            end do
-                        end do
-                    end do
-                case (4)
-                    !
-                    !     vorticity is zero so cr, ci=0 not used
-                    !
-                    do k=1, nt
-                        do n=1, nlat
-                            do m=1, mmax
-                                brlap(m, n, k) = 0.0
-                                bilap(m, n, k) = 0.0
-                            end do
-                        end do
-                        do n=2, nlat
-                            brlap(1, n, k) = fnn(n)*br(1, n, k)
-                            bilap(1, n, k) = fnn(n)*bi(1, n, k)
-                        end do
-                        do m=2, mmax
-                            do n=m, nlat
-                                brlap(m, n, k) = fnn(n)*br(m, n, k)
-                                bilap(m, n, k) = fnn(n)*bi(m, n, k)
-                            end do
-                        end do
-                    end do
-                case (7)
-                    !
-                    !     vorticity is zero so cr, ci=0 not used
-                    !
-                    do k=1, nt
-                        do n=1, nlat
-                            do m=1, mmax
-                                brlap(m, n, k) = 0.0
-                                bilap(m, n, k) = 0.0
-                            end do
-                        end do
-                        do n=2, nlat
-                            brlap(1, n, k) = fnn(n)*br(1, n, k)
-                            bilap(1, n, k) = fnn(n)*bi(1, n, k)
-                        end do
-                        do m=2, mmax
-                            do n=m, nlat
-                                brlap(m, n, k) = fnn(n)*br(m, n, k)
-                                bilap(m, n, k) = fnn(n)*bi(m, n, k)
-                            end do
-                        end do
-                    end do
-                case default
-                    !
-                    !     divergence is zero so br, bi=0 not used
-                    !
-                    do k=1, nt
-                        do n=1, nlat
-                            do m=1, mmax
-                                crlap(m, n, k) = 0.0
-                                cilap(m, n, k) = 0.0
-                            end do
-                        end do
-
-                        do n=2, nlat
-                            crlap(1, n, k) = fnn(n)*cr(1, n, k)
-                            cilap(1, n, k) = fnn(n)*ci(1, n, k)
-                        end do
-
-                        do m=2, mmax
-                            do n=m, nlat
-                                crlap(m, n, k) = fnn(n)*cr(m, n, k)
-                                cilap(m, n, k) = fnn(n)*ci(m, n, k)
-                            end do
-                        end do
-                    end do
-            end select
-            !
-            !     sythesize coefs into vector field (vlap, wlap)
-            !
-            call vhsgs(nlat, nlon, ityp, nt, vlap, wlap, idvw, jdvw, brlap, bilap, &
-                crlap, cilap, mmax, nlat, wsave, lsave, wk, lwk, ierror)
-
-        end subroutine vlapgs1
-
     end subroutine vlapgs
+
+    subroutine vlapgs_lower_routine(nlat, nlon, ityp, nt, vlap, wlap, idvw, jdvw, brlap, &
+        bilap, crlap, cilap, mmax, fnn, mdb, ndb, br, bi, cr, ci, wsave, lsave, &
+        wk, lwk, ierror)
+
+        real(wp) :: bi
+        real(wp) :: bilap
+        real(wp) :: br
+        real(wp) :: brlap
+        real(wp) :: ci
+        real(wp) :: cilap
+        real(wp) :: cr
+        real(wp) :: crlap
+        real(wp) :: fn
+        real(wp) :: fnn
+        integer(ip) :: idvw
+        integer(ip) :: ierror
+        integer(ip) :: ityp
+        integer(ip) :: jdvw
+        integer(ip) :: k
+        integer(ip) :: lsave
+        integer(ip) :: lwk
+        integer(ip) :: m
+        integer(ip) :: mdb
+        integer(ip) :: mmax
+        integer(ip) :: n
+        integer(ip) :: ndb
+        integer(ip) :: nlat
+        integer(ip) :: nlon
+        integer(ip) :: nt
+        real(wp) :: vlap
+        real(wp) :: wk
+        real(wp) :: wlap
+        real(wp) :: wsave
+        dimension vlap(idvw, jdvw, nt), wlap(idvw, jdvw, nt)
+        dimension fnn(nlat), brlap(mmax, nlat, nt), bilap(mmax, nlat, nt)
+        dimension crlap(mmax, nlat, nt), cilap(mmax, nlat, nt)
+        dimension br(mdb, ndb, nt), bi(mdb, ndb, nt)
+        dimension cr(mdb, ndb, nt), ci(mdb, ndb, nt)
+        dimension wsave(lsave), wk(lwk)
+        !
+        !     preset coefficient multiplyers
+        !
+        do n=2, nlat
+            fn = real(n - 1)
+            fnn(n) = -fn*(fn + 1.0)
+        end do
+        !
+        !     set laplacian coefficients from br, bi, cr, ci
+        !
+        select case (ityp)
+            case (0, 3, 6)
+                !
+                !     all coefficients needed
+                !
+                do k=1, nt
+                    do n=1, nlat
+                        do m=1, mmax
+                            brlap(m, n, k) = 0.0
+                            bilap(m, n, k) = 0.0
+                            crlap(m, n, k) = 0.0
+                            cilap(m, n, k) = 0.0
+                        end do
+                    end do
+                    do n=2, nlat
+                        brlap(1, n, k) = fnn(n)*br(1, n, k)
+                        bilap(1, n, k) = fnn(n)*bi(1, n, k)
+                        crlap(1, n, k) = fnn(n)*cr(1, n, k)
+                        cilap(1, n, k) = fnn(n)*ci(1, n, k)
+                    end do
+                    do m=2, mmax
+                        do n=m, nlat
+                            brlap(m, n, k) = fnn(n)*br(m, n, k)
+                            bilap(m, n, k) = fnn(n)*bi(m, n, k)
+                            crlap(m, n, k) = fnn(n)*cr(m, n, k)
+                            cilap(m, n, k) = fnn(n)*ci(m, n, k)
+                        end do
+                    end do
+                end do
+            case (1, 4, 7)
+                !
+                !     vorticity is zero so cr, ci=0 not used
+                !
+                do k=1, nt
+                    do n=1, nlat
+                        do m=1, mmax
+                            brlap(m, n, k) = 0.0
+                            bilap(m, n, k) = 0.0
+                        end do
+                    end do
+                    do n=2, nlat
+                        brlap(1, n, k) = fnn(n)*br(1, n, k)
+                        bilap(1, n, k) = fnn(n)*bi(1, n, k)
+                    end do
+                    do m=2, mmax
+                        do n=m, nlat
+                            brlap(m, n, k) = fnn(n)*br(m, n, k)
+                            bilap(m, n, k) = fnn(n)*bi(m, n, k)
+                        end do
+                    end do
+                end do
+            case default
+                !
+                !     divergence is zero so br, bi=0 not used
+                !
+                do k=1, nt
+                    do n=1, nlat
+                        do m=1, mmax
+                            crlap(m, n, k) = 0.0
+                            cilap(m, n, k) = 0.0
+                        end do
+                    end do
+
+                    do n=2, nlat
+                        crlap(1, n, k) = fnn(n)*cr(1, n, k)
+                        cilap(1, n, k) = fnn(n)*ci(1, n, k)
+                    end do
+
+                    do m=2, mmax
+                        do n=m, nlat
+                            crlap(m, n, k) = fnn(n)*cr(m, n, k)
+                            cilap(m, n, k) = fnn(n)*ci(m, n, k)
+                        end do
+                    end do
+                end do
+        end select
+        !
+        !     sythesize coefs into vector field (vlap, wlap)
+        !
+        call vhsgs(nlat, nlon, ityp, nt, vlap, wlap, idvw, jdvw, brlap, bilap, &
+            crlap, cilap, mmax, nlat, wsave, lsave, wk, lwk, ierror)
+
+    end subroutine vlapgs_lower_routine
+
 
 end module module_vlapgs

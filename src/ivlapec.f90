@@ -364,6 +364,8 @@ contains
         dimension br(mdbc, ndbc, nt), bi(mdbc, ndbc, nt)
         dimension cr(mdbc, ndbc, nt), ci(mdbc, ndbc, nt)
         dimension wvhsec(lvhsec), work(lwork)
+
+        ! Check input arguments
         ierror = 1
         if (nlat < 3) return
         ierror = 2
@@ -399,46 +401,47 @@ contains
         !
         ierror = 10
         mn = mmax*nlat*nt
-        if (ityp<3) then
-            !     no symmetry
-            if (ityp==0) then
-                    !       br, bi, cr, ci nonzero
+
+        select case (ityp)
+            case(0)
+                !     no symmetry
+                !       br, bi, cr, ci nonzero
                 lwkmin = nlat*(2*nt*nlon+max(6*imid, nlon)+1)+4*mn
-            else
+            case(1:2)
                 !       br, bi or cr, ci zero
                 lwkmin = nlat*(2*nt*nlon+max(6*imid, nlon)+1)+2*mn
-            end if
-        else
-            !     symmetry
-            if (ityp==3 .or. ityp==6) then
+            case(3, 6)
+                !     symmetry
                 !       br, bi, cr, ci nonzero
                 lwkmin = imid*(2*nt*nlon+max(6*nlat, nlon))+4*mn+nlat
-            else
+            case default
                 !       br, bi or cr, ci zero
                 lwkmin = imid*(2*nt*nlon+max(6*nlat, nlon))+2*mn+nlat
-            end if
-        end if
+        end select
+
         if (lwork < lwkmin) return
+
         ierror = 0
         !
         !     set work space pointers for vector laplacian coefficients
         !
-    if (ityp==0 .or. ityp==3 .or. ityp==6) then
-        ibr = 1
-        ibi = ibr+mn
-        icr = ibi+mn
-        ici = icr+mn
-    else if (ityp==1 .or. ityp==4 .or. ityp==7) then
-        ibr = 1
-        ibi = ibr+mn
-        icr = ibi+mn
-        ici = icr
-    else
-        ibr = 1
-        ibi = 1
-        icr = ibi+mn
-        ici = icr+mn
-    end if
+        select case (ityp)
+            case(0, 3, 6)
+                ibr = 1
+                ibi = ibr+mn
+                icr = ibi+mn
+                ici = icr+mn
+            case(1, 4, 7)
+                ibr = 1
+                ibi = ibr+mn
+                icr = ibi+mn
+                ici = icr
+            case default
+                ibr = 1
+                ibi = 1
+                icr = ibi+mn
+                ici = icr+mn
+        end select
 
         ifn = ici + mn
         iwk = ifn + nlat
@@ -450,243 +453,141 @@ contains
                 liwk = lwork-2*mn-nlat
         end select
 
-        call ivlapec1(nlat, nlon, ityp, nt, v, w, idvw, jdvw, work(ibr), &
+        call ivlapec_lower_routine(nlat, nlon, ityp, nt, v, w, idvw, jdvw, work(ibr), &
             work(ibi), work(icr), work(ici), mmax, work(ifn), mdbc, ndbc, br, bi, &
             cr, ci, wvhsec, lvhsec, work(iwk), liwk, ierror)
 
-    contains
-
-        subroutine ivlapec1(nlat, nlon, ityp, nt, v, w, idvw, jdvw, brvw, &
-            bivw, crvw, civw, mmax, fnn, mdbc, ndbc, br, bi, cr, ci, wsave, lwsav, &
-            wk, lwk, ierror)
-
-            real(wp) :: bi
-            real(wp) :: bivw
-            real(wp) :: br
-            real(wp) :: brvw
-            real(wp) :: ci
-            real(wp) :: civw
-            real(wp) :: cr
-            real(wp) :: crvw
-            real(wp) :: fn
-            real(wp) :: fnn
-            integer(ip) :: idvw
-            integer(ip) :: ierror
-            integer(ip) :: ityp
-            integer(ip) :: jdvw
-            integer(ip) :: k
-            integer(ip) :: lwk
-            integer(ip) :: lwsav
-            integer(ip) :: m
-            integer(ip) :: mdbc
-            integer(ip) :: mmax
-            integer(ip) :: n
-            integer(ip) :: ndbc
-            integer(ip) :: nlat
-            integer(ip) :: nlon
-            integer(ip) :: nt
-            real(wp) :: v
-            real(wp) :: w
-            real(wp) :: wk
-            real(wp) :: wsave
-            dimension v(idvw, jdvw, nt), w(idvw, jdvw, nt)
-            dimension fnn(nlat), brvw(mmax, nlat, nt), bivw(mmax, nlat, nt)
-            dimension crvw(mmax, nlat, nt), civw(mmax, nlat, nt)
-            dimension br(mdbc, ndbc, nt), bi(mdbc, ndbc, nt)
-            dimension cr(mdbc, ndbc, nt), ci(mdbc, ndbc, nt)
-            dimension wsave(lwsav), wk(lwk)
-            !
-            !     preset coefficient multiplyers
-            !
-            do n=2, nlat
-                fn = real(n - 1)
-                fnn(n) = -1.0/(fn*(fn + 1.0))
-            end do
-            !
-            !     set (v, w) coefficients from br, bi, cr, ci
-            !
-            select case (ityp)
-                case (0)
-                    !
-                    !     all coefficients needed
-                    !
-                    do k=1, nt
-                        do n=1, nlat
-                            do m=1, mmax
-                                brvw(m, n, k) = 0.0
-                                bivw(m, n, k) = 0.0
-                                crvw(m, n, k) = 0.0
-                                civw(m, n, k) = 0.0
-                            end do
-                        end do
-                        do n=2, nlat
-                            brvw(1, n, k) = fnn(n)*br(1, n, k)
-                            bivw(1, n, k) = fnn(n)*bi(1, n, k)
-                            crvw(1, n, k) = fnn(n)*cr(1, n, k)
-                            civw(1, n, k) = fnn(n)*ci(1, n, k)
-                        end do
-                        do m=2, mmax
-                            do n=m, nlat
-                                brvw(m, n, k) = fnn(n)*br(m, n, k)
-                                bivw(m, n, k) = fnn(n)*bi(m, n, k)
-                                crvw(m, n, k) = fnn(n)*cr(m, n, k)
-                                civw(m, n, k) = fnn(n)*ci(m, n, k)
-                            end do
-                        end do
-                    end do
-                case (3)
-                    !
-                    !     all coefficients needed
-                    !
-                    do k=1, nt
-                        do n=1, nlat
-                            do m=1, mmax
-                                brvw(m, n, k) = 0.0
-                                bivw(m, n, k) = 0.0
-                                crvw(m, n, k) = 0.0
-                                civw(m, n, k) = 0.0
-                            end do
-                        end do
-                        do n=2, nlat
-                            brvw(1, n, k) = fnn(n)*br(1, n, k)
-                            bivw(1, n, k) = fnn(n)*bi(1, n, k)
-                            crvw(1, n, k) = fnn(n)*cr(1, n, k)
-                            civw(1, n, k) = fnn(n)*ci(1, n, k)
-                        end do
-                        do m=2, mmax
-                            do n=m, nlat
-                                brvw(m, n, k) = fnn(n)*br(m, n, k)
-                                bivw(m, n, k) = fnn(n)*bi(m, n, k)
-                                crvw(m, n, k) = fnn(n)*cr(m, n, k)
-                                civw(m, n, k) = fnn(n)*ci(m, n, k)
-                            end do
-                        end do
-                    end do
-                case (6)
-                    !
-                    !     all coefficients needed
-                    !
-                    do k=1, nt
-                        do n=1, nlat
-                            do m=1, mmax
-                                brvw(m, n, k) = 0.0
-                                bivw(m, n, k) = 0.0
-                                crvw(m, n, k) = 0.0
-                                civw(m, n, k) = 0.0
-                            end do
-                        end do
-                        do n=2, nlat
-                            brvw(1, n, k) = fnn(n)*br(1, n, k)
-                            bivw(1, n, k) = fnn(n)*bi(1, n, k)
-                            crvw(1, n, k) = fnn(n)*cr(1, n, k)
-                            civw(1, n, k) = fnn(n)*ci(1, n, k)
-                        end do
-                        do m=2, mmax
-                            do n=m, nlat
-                                brvw(m, n, k) = fnn(n)*br(m, n, k)
-                                bivw(m, n, k) = fnn(n)*bi(m, n, k)
-                                crvw(m, n, k) = fnn(n)*cr(m, n, k)
-                                civw(m, n, k) = fnn(n)*ci(m, n, k)
-                            end do
-                        end do
-                    end do
-                case (1)
-                    !
-                    !     vorticity is zero so cr, ci=0 not used
-                    !
-                    do k=1, nt
-                        do n=1, nlat
-                            do m=1, mmax
-                                brvw(m, n, k) = 0.0
-                                bivw(m, n, k) = 0.0
-                            end do
-                        end do
-                        do n=2, nlat
-                            brvw(1, n, k) = fnn(n)*br(1, n, k)
-                            bivw(1, n, k) = fnn(n)*bi(1, n, k)
-                        end do
-                        do m=2, mmax
-                            do n=m, nlat
-                                brvw(m, n, k) = fnn(n)*br(m, n, k)
-                                bivw(m, n, k) = fnn(n)*bi(m, n, k)
-                            end do
-                        end do
-                    end do
-                case (4)
-                    !
-                    !     vorticity is zero so cr, ci=0 not used
-                    !
-                    do k=1, nt
-                        do n=1, nlat
-                            do m=1, mmax
-                                brvw(m, n, k) = 0.0
-                                bivw(m, n, k) = 0.0
-                            end do
-                        end do
-                        do n=2, nlat
-                            brvw(1, n, k) = fnn(n)*br(1, n, k)
-                            bivw(1, n, k) = fnn(n)*bi(1, n, k)
-                        end do
-                        do m=2, mmax
-                            do n=m, nlat
-                                brvw(m, n, k) = fnn(n)*br(m, n, k)
-                                bivw(m, n, k) = fnn(n)*bi(m, n, k)
-                            end do
-                        end do
-                    end do
-                case (7)
-                    !
-                    !     vorticity is zero so cr, ci=0 not used
-                    !
-                    do k=1, nt
-                        do n=1, nlat
-                            do m=1, mmax
-                                brvw(m, n, k) = 0.0
-                                bivw(m, n, k) = 0.0
-                            end do
-                        end do
-                        do n=2, nlat
-                            brvw(1, n, k) = fnn(n)*br(1, n, k)
-                            bivw(1, n, k) = fnn(n)*bi(1, n, k)
-                        end do
-                        do m=2, mmax
-                            do n=m, nlat
-                                brvw(m, n, k) = fnn(n)*br(m, n, k)
-                                bivw(m, n, k) = fnn(n)*bi(m, n, k)
-                            end do
-                        end do
-                    end do
-                case default
-                    !
-                    !     divergence is zero so br, bi=0 not used
-                    !
-                    do k=1, nt
-                        do n=1, nlat
-                            do m=1, mmax
-                                crvw(m, n, k) = 0.0
-                                civw(m, n, k) = 0.0
-                            end do
-                        end do
-                        do n=2, nlat
-                            crvw(1, n, k) = fnn(n)*cr(1, n, k)
-                            civw(1, n, k) = fnn(n)*ci(1, n, k)
-                        end do
-                        do m=2, mmax
-                            do n=m, nlat
-                                crvw(m, n, k) = fnn(n)*cr(m, n, k)
-                                civw(m, n, k) = fnn(n)*ci(m, n, k)
-                            end do
-                        end do
-                    end do
-            end select
-            !
-            !     sythesize coefs into vector field (v, w)
-            !
-            call vhsec(nlat, nlon, ityp, nt, v, w, idvw, jdvw, brvw, bivw, &
-                crvw, civw, mmax, nlat, wsave, lwsav, wk, lwk, ierror)
-
-        end subroutine ivlapec1
-
     end subroutine ivlapec
+
+    subroutine ivlapec_lower_routine(nlat, nlon, ityp, nt, v, w, idvw, jdvw, brvw, &
+        bivw, crvw, civw, mmax, fnn, mdbc, ndbc, br, bi, cr, ci, wsave, lwsav, &
+        wk, lwk, ierror)
+
+        real(wp) :: bi
+        real(wp) :: bivw
+        real(wp) :: br
+        real(wp) :: brvw
+        real(wp) :: ci
+        real(wp) :: civw
+        real(wp) :: cr
+        real(wp) :: crvw
+        real(wp) :: fn
+        real(wp) :: fnn
+        integer(ip) :: idvw
+        integer(ip) :: ierror
+        integer(ip) :: ityp
+        integer(ip) :: jdvw
+        integer(ip) :: k
+        integer(ip) :: lwk
+        integer(ip) :: lwsav
+        integer(ip) :: m
+        integer(ip) :: mdbc
+        integer(ip) :: mmax
+        integer(ip) :: n
+        integer(ip) :: ndbc
+        integer(ip) :: nlat
+        integer(ip) :: nlon
+        integer(ip) :: nt
+        real(wp) :: v
+        real(wp) :: w
+        real(wp) :: wk
+        real(wp) :: wsave
+        dimension v(idvw, jdvw, nt), w(idvw, jdvw, nt)
+        dimension fnn(nlat), brvw(mmax, nlat, nt), bivw(mmax, nlat, nt)
+        dimension crvw(mmax, nlat, nt), civw(mmax, nlat, nt)
+        dimension br(mdbc, ndbc, nt), bi(mdbc, ndbc, nt)
+        dimension cr(mdbc, ndbc, nt), ci(mdbc, ndbc, nt)
+        dimension wsave(lwsav), wk(lwk)
+        !
+        !     preset coefficient multiplyers
+        !
+        do n=2, nlat
+            fn = real(n - 1)
+            fnn(n) = -1.0/(fn*(fn + 1.0))
+        end do
+        !
+        !     set (v, w) coefficients from br, bi, cr, ci
+        !
+        select case (ityp)
+            case (0, 3, 6)
+                !
+                !     all coefficients needed
+                !
+                do k=1, nt
+                    do n=1, nlat
+                        do m=1, mmax
+                            brvw(m, n, k) = 0.0
+                            bivw(m, n, k) = 0.0
+                            crvw(m, n, k) = 0.0
+                            civw(m, n, k) = 0.0
+                        end do
+                    end do
+                    do n=2, nlat
+                        brvw(1, n, k) = fnn(n)*br(1, n, k)
+                        bivw(1, n, k) = fnn(n)*bi(1, n, k)
+                        crvw(1, n, k) = fnn(n)*cr(1, n, k)
+                        civw(1, n, k) = fnn(n)*ci(1, n, k)
+                    end do
+                    do m=2, mmax
+                        do n=m, nlat
+                            brvw(m, n, k) = fnn(n)*br(m, n, k)
+                            bivw(m, n, k) = fnn(n)*bi(m, n, k)
+                            crvw(m, n, k) = fnn(n)*cr(m, n, k)
+                            civw(m, n, k) = fnn(n)*ci(m, n, k)
+                        end do
+                    end do
+                end do
+            case (1, 4, 7)
+                !
+                !     vorticity is zero so cr, ci=0 not used
+                !
+                do k=1, nt
+                    do n=1, nlat
+                        do m=1, mmax
+                            brvw(m, n, k) = 0.0
+                            bivw(m, n, k) = 0.0
+                        end do
+                    end do
+                    do n=2, nlat
+                        brvw(1, n, k) = fnn(n)*br(1, n, k)
+                        bivw(1, n, k) = fnn(n)*bi(1, n, k)
+                    end do
+                    do m=2, mmax
+                        do n=m, nlat
+                            brvw(m, n, k) = fnn(n)*br(m, n, k)
+                            bivw(m, n, k) = fnn(n)*bi(m, n, k)
+                        end do
+                    end do
+                end do
+            case default
+                !
+                !     divergence is zero so br, bi=0 not used
+                !
+                do k=1, nt
+                    do n=1, nlat
+                        do m=1, mmax
+                            crvw(m, n, k) = 0.0
+                            civw(m, n, k) = 0.0
+                        end do
+                    end do
+                    do n=2, nlat
+                        crvw(1, n, k) = fnn(n)*cr(1, n, k)
+                        civw(1, n, k) = fnn(n)*ci(1, n, k)
+                    end do
+                    do m=2, mmax
+                        do n=m, nlat
+                            crvw(m, n, k) = fnn(n)*cr(m, n, k)
+                            civw(m, n, k) = fnn(n)*ci(m, n, k)
+                        end do
+                    end do
+                end do
+        end select
+        !
+        !     sythesize coefs into vector field (v, w)
+        !
+        call vhsec(nlat, nlon, ityp, nt, v, w, idvw, jdvw, brvw, bivw, &
+            crvw, civw, mmax, nlat, wsave, lwsav, wk, lwk, ierror)
+
+    end subroutine ivlapec_lower_routine
 
 end module module_ivlapec

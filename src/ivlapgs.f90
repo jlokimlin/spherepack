@@ -391,39 +391,47 @@ contains
         mn = mmax*nlat*nt
         l2 = (nlat+1)/2
         l1 = min(nlat, (nlon+1)/2)
-        if (ityp <= 2) then
-            lwkmin = (2*nt+1)*nlat*nlon + nlat*(4*nt*l1+1)
-        else
-            lwkmin = (2*nt+1)*l2*nlon + nlat*(4*nt*l1+1)
-        end if
+
+        select case (ityp)
+            case(0:2)
+                lwkmin = (2*nt+1)*nlat*nlon + nlat*(4*nt*l1+1)
+            case default
+                lwkmin = (2*nt+1)*l2*nlon + nlat*(4*nt*l1+1)
+        end select
+
         if (lwork < lwkmin) return
         ierror = 0
-        !
-        !     set work space pointers for vector laplacian coefficients
-        !
-    if (ityp==0 .or. ityp==3 .or. ityp==6) then
-        ibr = 1
-        ibi = ibr+mn
-        icr = ibi+mn
-        ici = icr+mn
-    else if (ityp==1 .or. ityp==4 .or. ityp==7) then
-        ibr = 1
-        ibi = ibr+mn
-        icr = ibi+mn
-        ici = icr
-    else
-        ibr = 1
-        ibi = 1
-        icr = ibi+mn
-        ici = icr+mn
-    end if
-    ifn = ici + mn
-    iwk = ifn + nlat
-    if (ityp==0 .or. ityp==3 .or. ityp==6) then
-        liwk = lwork-4*mn-nlat
-    else
-        liwk = lwork-2*mn-nlat
-    end if
+
+         !
+         !     set work space pointers for vector laplacian coefficients
+         !
+        select case(ityp)
+            case(0, 3, 6)
+                ibr = 1
+                ibi = ibr+mn
+                icr = ibi+mn
+                ici = icr+mn
+            case(1, 4, 7)
+                ibr = 1
+                ibi = ibr+mn
+                icr = ibi+mn
+                ici = icr
+            case default
+                ibr = 1
+                ibi = 1
+                icr = ibi+mn
+                ici = icr+mn
+        end select
+
+        ifn = ici + mn
+        iwk = ifn + nlat
+
+        select case (ityp)
+            case(0, 3, 6)
+                liwk = lwork-4*mn-nlat
+            case default
+                liwk = lwork-2*mn-nlat
+        end select
 
         call ivlapgs_lower_routine(nlat, nlon, ityp, nt, v, w, idvw, jdvw, work(ibr), &
             work(ibi), work(icr), work(ici), mmax, work(ifn), mdbc, ndbc, br, bi, &

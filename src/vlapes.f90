@@ -403,32 +403,37 @@ contains
         mn = mmax*nlat*nt
         l2 = (nlat+1)/2
         l1 = min(nlat, nlon/2+1)
-        if (ityp <= 2) then
-            lwkmin = (2*nt+1)*nlat*nlon + nlat*(4*nt*l1+1)
-        else
-            lwkmin = (2*nt+1)*l2*nlon + nlat*(4*nt*l1+1)
-        end if
+
+        select case (ityp)
+            case(0:2)
+                lwkmin = (2*nt+1)*nlat*nlon + nlat*(4*nt*l1+1)
+            case default
+                lwkmin = (2*nt+1)*l2*nlon + nlat*(4*nt*l1+1)
+        end select
+
         if (lwork < lwkmin) return
+
         ierror = 0
-            !
-            !     set work space pointers for vector laplacian coefficients
-            !
-        if (ityp==0 .or. ityp==3 .or. ityp==6) then
-            ibr = 1
-            ibi = ibr+mn
-            icr = ibi+mn
-            ici = icr+mn
-        else if (ityp==1 .or. ityp==4 .or. ityp==7) then
-            ibr = 1
-            ibi = ibr+mn
-            icr = ibi+mn
-            ici = icr
-        else
-            ibr = 1
-            ibi = 1
-            icr = ibi+mn
-            ici = icr+mn
-        end if
+        !
+        !     set work space pointers for vector laplacian coefficients
+        !
+        select case(ityp)
+            case(0, 3, 6)
+                ibr = 1
+                ibi = ibr+mn
+                icr = ibi+mn
+                ici = icr+mn
+            case(1, 4, 7)
+                ibr = 1
+                ibi = ibr+mn
+                icr = ibi+mn
+                ici = icr
+            case default
+                ibr = 1
+                ibi = 1
+                icr = ibi+mn
+                ici = icr+mn
+        end select
 
         ifn = ici + mn
         iwk = ifn + nlat
@@ -490,7 +495,7 @@ contains
         !     set laplacian coefficients from br, bi, cr, ci
         !
         select case (ityp)
-            case (0)
+            case (0, 3, 6)
                 !
                 !     all coefficients needed
                 !
@@ -518,107 +523,7 @@ contains
                         end do
                     end do
                 end do
-            case (3)
-                !
-                !     all coefficients needed
-                !
-                do k=1, nt
-                    do n=1, nlat
-                        do m=1, mmax
-                            brlap(m, n, k) = 0.0
-                            bilap(m, n, k) = 0.0
-                            crlap(m, n, k) = 0.0
-                            cilap(m, n, k) = 0.0
-                        end do
-                    end do
-                    do n=2, nlat
-                        brlap(1, n, k) = fnn(n)*br(1, n, k)
-                        bilap(1, n, k) = fnn(n)*bi(1, n, k)
-                        crlap(1, n, k) = fnn(n)*cr(1, n, k)
-                        cilap(1, n, k) = fnn(n)*ci(1, n, k)
-                    end do
-                    do m=2, mmax
-                        do n=m, nlat
-                            brlap(m, n, k) = fnn(n)*br(m, n, k)
-                            bilap(m, n, k) = fnn(n)*bi(m, n, k)
-                            crlap(m, n, k) = fnn(n)*cr(m, n, k)
-                            cilap(m, n, k) = fnn(n)*ci(m, n, k)
-                        end do
-                    end do
-                end do
-            case (6)
-                !
-                !     all coefficients needed
-                !
-                do k=1, nt
-                    do n=1, nlat
-                        do m=1, mmax
-                            brlap(m, n, k) = 0.0
-                            bilap(m, n, k) = 0.0
-                            crlap(m, n, k) = 0.0
-                            cilap(m, n, k) = 0.0
-                        end do
-                    end do
-                    do n=2, nlat
-                        brlap(1, n, k) = fnn(n)*br(1, n, k)
-                        bilap(1, n, k) = fnn(n)*bi(1, n, k)
-                        crlap(1, n, k) = fnn(n)*cr(1, n, k)
-                        cilap(1, n, k) = fnn(n)*ci(1, n, k)
-                    end do
-                    do m=2, mmax
-                        do n=m, nlat
-                            brlap(m, n, k) = fnn(n)*br(m, n, k)
-                            bilap(m, n, k) = fnn(n)*bi(m, n, k)
-                            crlap(m, n, k) = fnn(n)*cr(m, n, k)
-                            cilap(m, n, k) = fnn(n)*ci(m, n, k)
-                        end do
-                    end do
-                end do
-            case (1)
-                !
-                !     vorticity is zero so cr, ci=0 not used
-                !
-                do k=1, nt
-                    do n=1, nlat
-                        do m=1, mmax
-                            brlap(m, n, k) = 0.0
-                            bilap(m, n, k) = 0.0
-                        end do
-                    end do
-                    do n=2, nlat
-                        brlap(1, n, k) = fnn(n)*br(1, n, k)
-                        bilap(1, n, k) = fnn(n)*bi(1, n, k)
-                    end do
-                    do m=2, mmax
-                        do n=m, nlat
-                            brlap(m, n, k) = fnn(n)*br(m, n, k)
-                            bilap(m, n, k) = fnn(n)*bi(m, n, k)
-                        end do
-                    end do
-                end do
-            case (4)
-                !
-                !     vorticity is zero so cr, ci=0 not used
-                !
-                do k=1, nt
-                    do n=1, nlat
-                        do m=1, mmax
-                            brlap(m, n, k) = 0.0
-                            bilap(m, n, k) = 0.0
-                        end do
-                    end do
-                    do n=2, nlat
-                        brlap(1, n, k) = fnn(n)*br(1, n, k)
-                        bilap(1, n, k) = fnn(n)*bi(1, n, k)
-                    end do
-                    do m=2, mmax
-                        do n=m, nlat
-                            brlap(m, n, k) = fnn(n)*br(m, n, k)
-                            bilap(m, n, k) = fnn(n)*bi(m, n, k)
-                        end do
-                    end do
-                end do
-            case (7)
+            case (1, 4, 7)
                 !
                 !     vorticity is zero so cr, ci=0 not used
                 !
