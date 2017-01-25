@@ -14,7 +14,7 @@ module vector_laplacian_routines
     private
     public :: vlapec, vlapes, vlapgc, vlapgs
     public :: ivlapec, ivlapes, ivlapgc, ivlapgs
-    public :: perform_setup_for_inversion
+    public :: get_workspace_indices_for_inversion, perform_setup_for_inversion
     public :: perform_setup_for_vector_laplacian
 
     ! Parameters confined to the module
