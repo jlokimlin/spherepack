@@ -317,7 +317,7 @@ contains
         lwmin = (l1*l2*(nlat+nlat-l1+1))/2+nlon+15
         ierror = 10
         !
-        !     verify unsaved work space length
+        ! Verify unsaved workspace length
         !
         mn = mmax*nlat*nt
         if (isym /= 0  .and. lwork < &

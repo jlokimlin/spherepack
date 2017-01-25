@@ -312,7 +312,7 @@ contains
         if (lvhsec < 2*(lzz1+labc)+nlon+15) return
         ierror = 10
         !
-        !     verify unsaved work space length
+        ! Verify unsaved workspace length
         !
         mn = mmax*nlat*nt
         if (isym /= 0  .and. lwork < &

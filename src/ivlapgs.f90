@@ -403,7 +403,7 @@ contains
         ierror = 0
 
          !
-         !     set work space pointers for vector laplacian coefficients
+         ! Set workspace index pointers for vector laplacian coefficients
          !
         select case(ityp)
             case(0, 3, 6)

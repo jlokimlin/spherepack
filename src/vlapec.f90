@@ -336,46 +336,46 @@ contains
     subroutine vlapec(nlat, nlon, ityp, nt, vlap, wlap, idvw, jdvw, br, bi, &
         cr, ci, mdbc, ndbc, wvhsec, lvhsec, work, lwork, ierror)
 
-        real(wp) :: bi
-        real(wp) :: br
-        real(wp) :: ci
-        real(wp) :: cr
+        ! Dummy arguments
+        integer(ip), intent(in)  :: nlat
+        integer(ip), intent(in)  :: nlon
+        integer(ip), intent(in)  :: ityp
+        integer(ip), intent(in)  :: nt
+        real(wp),    intent(out) :: vlap(idvw, jdvw, nt)
+        real(wp),    intent(out) :: wlap(idvw, jdvw, nt)
+        integer(ip), intent(in)  :: idvw
+        integer(ip), intent(in)  :: jdvw
+        real(wp),    intent(in)  :: br(mdbc, ndbc, nt)
+        real(wp),    intent(in)  :: bi(mdbc, ndbc, nt)
+        real(wp),    intent(in)  :: cr(mdbc, ndbc, nt)
+        real(wp),    intent(in)  :: ci(mdbc, ndbc, nt)
+        integer(ip), intent(in)  :: mdbc
+        integer(ip), intent(in)  :: ndbc
+        real(wp),    intent(in)  :: wvhsec(lvhsec)
+        integer(ip), intent(in)  :: lvhsec
+        real(wp),    intent(out) :: work(lwork)
+        integer(ip), intent(in)  :: lwork
+        integer(ip), intent(out) :: ierror
+
+        ! Local variables
         integer(ip) :: ibi
         integer(ip) :: ibr
         integer(ip) :: ici
         integer(ip) :: icr
-        integer(ip) :: idvw
         integer(ip) :: idz
-        integer(ip) :: ierror
         integer(ip) :: ifn
         integer(ip) :: imid
-        integer(ip) :: ityp
         integer(ip) :: iwk
-        integer(ip) :: jdvw
         integer(ip) :: l1
         integer(ip) :: l2
         integer(ip) :: liwk
-        integer(ip) :: lvhsec
         integer(ip) :: lwkmin
         integer(ip) :: lwmin
-        integer(ip) :: lwork
         integer(ip) :: lzimn
-        integer(ip) :: mdbc
         integer(ip) :: mmax
         integer(ip) :: mn
-        integer(ip) :: ndbc
-        integer(ip) :: nlat
-        integer(ip) :: nlon
-        integer(ip) :: nt
-        real(wp) :: typ
-        real(wp) :: vlap
-        real(wp) :: wlap
-        real(wp) :: work
-        real(wp) :: wvhsec
-        dimension vlap(idvw, jdvw, nt), wlap(idvw, jdvw, nt)
-        dimension br(mdbc, ndbc, nt), bi(mdbc, ndbc, nt)
-        dimension cr(mdbc, ndbc, nt), ci(mdbc, ndbc, nt)
-        dimension wvhsec(lvhsec), work(lwork)
+
+        ! Check input arguments
         ierror = 1
         if (nlat < 3) return
         ierror = 2
@@ -406,7 +406,7 @@ contains
         lwmin = 4*nlat*l2+3*max(l1-2, 0)*(nlat+nlat-l1-1)+nlon+15
         if (lvhsec < lwmin) return
         !
-        !     verify unsaved work space length
+        ! Verify unsaved workspace length
         !
         ierror = 10
         mn = mmax*nlat*nt
@@ -432,9 +432,8 @@ contains
 
         if (lwork < lwkmin) return
         ierror = 0
-        !
-        !     set work space pointers for vector laplacian coefficients
-        !
+
+        ! Set workspace index pointers for vector laplacian coefficients
         select case(ityp)
             case(0, 3, 6)
                 ibr = 1

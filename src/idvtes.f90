@@ -352,7 +352,7 @@ contains
         if (lvhses < lzimn+lzimn+nlon+15) return
         ierror = 10
         !
-        !     verify unsaved work space length
+        ! Verify unsaved workspace length
         !
         mn = mmax*nlat*nt
         if (isym /= 0  .and. lwork < &

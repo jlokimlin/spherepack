@@ -326,7 +326,7 @@ contains
 
         ierror = 10
         !
-        !     verify unsaved work space length
+        ! Verify unsaved workspace length
         !
         associate( mn => mmax*nlat*nt )
 
