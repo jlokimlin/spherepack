@@ -535,8 +535,8 @@ contains
         integer(ip), intent(in)  :: imid
         integer(ip), intent(in)  :: idvw
         integer(ip), intent(in)  :: jdvw
-        real(wp),    intent(in)  :: v(idvw, jdvw,*)
-        real(wp),    intent(in)  :: w(idvw, jdvw,*)
+        real(wp),    intent(in)  :: v(idvw, jdvw, nt)
+        real(wp),    intent(in)  :: w(idvw, jdvw, nt)
         integer(ip), intent(in)  :: mdab
         integer(ip), intent(in)  :: ndab
         real(wp),    intent(out) :: br(mdab, ndab, nt)

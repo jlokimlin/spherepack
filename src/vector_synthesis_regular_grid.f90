@@ -612,10 +612,10 @@ contains
         real(wp) :: wrfft
         real(wp) :: wvbin
         real(wp) :: wwbin
-        dimension v(idvw, jdvw, *), w(idvw, jdvw, *), br(mdab, ndab, *), &
-            bi(mdab, ndab, *), cr(mdab, ndab, *), ci(mdab, ndab, *), &
-            ve(idv, nlon, *), vo(idv, nlon, *), we(idv, nlon, *), &
-            wo(idv, nlon, *), wvbin(*), wwbin(*), wrfft(*), &
+        dimension v(idvw, jdvw, nt), w(idvw, jdvw, nt), br(mdab, ndab, nt), &
+            bi(mdab, ndab, nt), cr(mdab, ndab, *), ci(mdab, ndab, nt), &
+            ve(idv, nlon, nt), vo(idv, nlon, nt), we(idv, nlon, nt), &
+            wo(idv, nlon, nt), wvbin(*), wwbin(*), wrfft(*), &
             vb(imid, nlat, 3), wb(imid, nlat, 3)
 
         type(SpherepackAux) :: sphere_aux
@@ -636,10 +636,9 @@ contains
                 ndo2 = nlat
         end select
 
-        do k=1, nt
-            ve(:, :, k) = ZERO
-            we(:, :, k) = ZERO
-        end do
+        ! Preset even spherical components to 0.0
+        ve = ZERO
+        we = ZERO
 
         vector_symmetry_cases: select case (ityp)
             case(0)
@@ -1213,27 +1212,28 @@ contains
             call sphere_aux%hfft%backward(idv, nlon, we(1, 1, k), idv, wrfft, vb)
         end do
 
-        if (ityp <= 2) then
-            do k=1, nt
-                do j=1, nlon
-                    do i=1, imm1
-                        v(i, j, k) = HALF *(ve(i, j, k)+vo(i, j, k))
-                        w(i, j, k) = HALF *(we(i, j, k)+wo(i, j, k))
-                        v(nlp1-i, j, k) = HALF *(ve(i, j, k)-vo(i, j, k))
-                        w(nlp1-i, j, k) = HALF *(we(i, j, k)-wo(i, j, k))
+        select case (ityp)
+            case(0:2)
+                do k=1, nt
+                    do j=1, nlon
+                        do i=1, imm1
+                            v(i, j, k) = HALF *(ve(i, j, k)+vo(i, j, k))
+                            w(i, j, k) = HALF *(we(i, j, k)+wo(i, j, k))
+                            v(nlp1-i, j, k) = HALF *(ve(i, j, k)-vo(i, j, k))
+                            w(nlp1-i, j, k) = HALF *(we(i, j, k)-wo(i, j, k))
+                        end do
                     end do
                 end do
-            end do
-        else
-            do k=1, nt
-                do j=1, nlon
-                    do i=1, imm1
-                        v(i, j, k) = HALF * ve(i, j, k)
-                        w(i, j, k) = HALF * we(i, j, k)
+            case default
+                do k=1, nt
+                    do j=1, nlon
+                        do i=1, imm1
+                            v(i, j, k) = HALF * ve(i, j, k)
+                            w(i, j, k) = HALF * we(i, j, k)
+                        end do
                     end do
                 end do
-            end do
-        end if
+        end select
 
         if (mlat /= 0) then
             do k=1, nt

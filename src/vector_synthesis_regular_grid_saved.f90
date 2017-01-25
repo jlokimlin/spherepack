@@ -1253,16 +1253,15 @@ contains
 
     end subroutine vhses_lower_routine
 
-    pure function get_vhsesi_workspace_indices(nlat, imid, mmax, lzimn) result (return_value)
+    pure function get_vhsesi_workspace_indices(nlat, imid, mmax, lzimn) &
+        result (return_value)
 
         ! Dummy arguments
-
         integer(ip), intent(in)  :: nlat
         integer(ip), intent(in)  :: imid
         integer(ip), intent(in)  :: mmax
         integer(ip), intent(in)  :: lzimn
         integer(ip)              :: return_value(4)
-
 
         associate( i => return_value )
             i(1) = 3*nlat*imid+1

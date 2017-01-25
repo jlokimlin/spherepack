@@ -58,21 +58,21 @@ module type_SpherepackAux
         type(RealPeriodicTransform) :: hfft
     contains
         ! Type-bound procedures
-        procedure, nopass :: alin
+        procedure, nopass :: compute_legendre_polys_regular_grid
+        procedure, nopass :: compute_legendre_polys_for_gaussian_grids
         procedure, nopass :: compute_parity
         procedure, nopass :: dnlfk
         procedure, nopass :: dnlft
-        procedure, nopass :: compute_legendre_polys_for_gaussian_grids
         procedure, nopass :: initialize_workspace_for_scalar_analysis_regular_grid
         procedure, nopass :: initialize_workspace_for_scalar_analysis_regular_grid_saved
         procedure, nopass :: initialize_workspace_for_scalar_synthesis_regular_grid
         procedure, nopass :: initialize_workspace_for_scalar_synthesis_regular_grid_saved
-        procedure, nopass :: vbgint
+        procedure, nopass :: initialize_workspace_for_polar_components_gaussian_grid
         procedure, nopass :: vbin
         procedure, nopass :: vbinit
         procedure, nopass :: vtgint
         procedure, nopass :: vtinit
-        procedure, nopass :: wbgint
+        procedure, nopass :: initialize_workspace_for_azimuthal_components_gaussian_grid
         procedure, nopass :: wbin
         procedure, nopass :: wbinit
         procedure, nopass :: wtgint
@@ -902,27 +902,24 @@ contains
 
     end subroutine dnzft
 
-    subroutine alin(isym, nlat, nlon, m, p, i3, walin)
+    subroutine compute_legendre_polys_regular_grid(isym, nlat, nlon, m, p, i3, walin)
 
         ! Dummy arguments
-
-        integer(ip), intent(in)     :: isym
-        integer(ip), intent(in)     :: nlat
-        integer(ip), intent(in)     :: nlon
-        integer(ip), intent(in)     :: m
-        real(wp),    intent(inout)  :: p(*)
-        integer(ip), intent(inout)  :: i3
-        real(wp),    intent(inout)  :: walin(*)
+        integer(ip), intent(in)    :: isym
+        integer(ip), intent(in)    :: nlat
+        integer(ip), intent(in)    :: nlon
+        integer(ip), intent(in)    :: m
+        real(wp),    intent(out)   :: p(*)
+        integer(ip), intent(inout) :: i3
+        real(wp),    intent(in)    :: walin(*)
 
         ! Local variables
-
         integer(ip) :: imid
         integer(ip) :: workspace_indices(4)
 
-
         imid = (nlat+1)/2
 
-        workspace_indices = get_workspace_indices(nlat, nlon, imid)
+        workspace_indices = get_alin_workspace_indices(nlat, nlon, imid)
 
         associate( &
             iw1 => workspace_indices(1), &
@@ -933,109 +930,108 @@ contains
             !
             !     the length of walin is ((5*l-7)*l+6)/2
             !
-            call alin1(isym, nlat, m, p, imid, i3, walin, walin(iw1), walin(iw2), &
+            call alin_lower_routine(isym, nlat, m, p, imid, i3, walin, walin(iw1), walin(iw2), &
                 walin(iw3), walin(iw4))
 
         end associate
 
-    contains
+    end subroutine compute_legendre_polys_regular_grid
 
+    subroutine alin_lower_routine(isym, nlat, m, p, imid, i3, pz, p1, a, b, c)
 
-        subroutine alin1(isym, nlat, m, p, imid, i3, pz, p1, a, b, c)
+        ! Dummy arguments
+        integer(ip), intent(in)    :: isym
+        integer(ip), intent(in)    :: nlat
+        integer(ip), intent(in)    :: m
+        real(wp),    intent(out)   :: p(imid,nlat,3)
+        integer(ip), intent(in)    :: imid
+        integer(ip), intent(inout) :: i3
+        real(wp),    intent(in)    :: pz(imid,*)
+        real(wp),    intent(in)    :: p1(imid,*)
+        real(wp),    intent(in)    :: a(*)
+        real(wp),    intent(in)    :: b(*)
+        real(wp),    intent(in)    :: c(*)
 
-            ! Dummy arguments
+        ! Local variables
+        integer(ip)       :: ns, np1, nstp, itemp, nstrt
+        integer(ip), save :: i1, i2
 
-            integer(ip), intent(in)     :: isym
-            integer(ip), intent(in)     :: nlat
-            integer(ip), intent(in)     :: m
-            real(wp),    intent(inout)  :: p(imid,nlat,3)
-            integer(ip), intent(in)     :: imid
-            integer(ip), intent(inout)  :: i3
-            real(wp),    intent(inout)  :: pz(imid,*)
-            real(wp),    intent(inout)  :: p1(imid,*)
-            real(wp),    intent(inout)  :: a(*)
-            real(wp),    intent(inout)  :: b(*)
-            real(wp),    intent(inout)  :: c(*)
+        itemp = i1
+        i1 = i2
+        i2 = i3
+        i3 = itemp
 
-            ! Local variables
+        if (m < 1) then
+            i1 = 1
+            i2 = 2
+            i3 = 3
+            p(:,:, i3) = pz(:,1:nlat)
+        else if (m == 1) then
+            p(:,2:nlat, i3) = p1(:,2:nlat)
+        else
+            ns = ((m-2)*(nlat+nlat-m-1))/2+1
 
-            integer(ip)       :: ns, np1, nstp, itemp, nstrt
-            integer(ip), save :: i1, i2
+            if (isym /= 1) p(:, m+1, i3) = a(ns)*p(:, m-1, i1)-c(ns)*p(:, m+1, i1)
 
+            if (m == nlat-1) return
 
-            itemp = i1
-            i1 = i2
-            i2 = i3
-            i3 = itemp
-
-            if (m < 1) then
-                i1 = 1
-                i2 = 2
-                i3 = 3
-                p(:,:, i3) = pz(:,1:nlat)
-            else if (m == 1) then
-                p(:,2:nlat, i3) = p1(:,2:nlat)
-            else
-                ns = ((m-2)*(nlat+nlat-m-1))/2+1
-
-                if (isym /= 1) p(:, m+1, i3) = a(ns)*p(:, m-1, i1)-c(ns)*p(:, m+1, i1)
-
-                if (m == nlat-1) return
-
-                if (isym /= 2) then
-                    ns = ns+1
-                    p(:, m+2, i3) = a(ns)*p(:, m, i1)-c(ns)*p(:, m+2, i1)
-                end if
-
-                nstrt = m+3
-
-                if (isym == 1) nstrt = m+4
-
-                if (nstrt > nlat) return
-
-                nstp = 2
-
-                if (isym == 0) nstp = 1
-
-                do np1=nstrt, nlat, nstp
-                    ns = ns+nstp
-                    p(:,np1,i3) = &
-                        a(ns)*p(:,np1-2,i1)+b(ns)*p(:,np1-2,i3)-c(ns)*p(:,np1,i1)
-                end do
+            if (isym /= 2) then
+                ns = ns+1
+                p(:, m+2, i3) = a(ns)*p(:, m, i1)-c(ns)*p(:, m+2, i1)
             end if
 
-        end subroutine alin1
+            select case(isym)
+                case(1)
+                    nstrt = m+4
+                case default
+                    nstrt = m+3
+            end select
 
-        pure function get_workspace_indices(nlat, nlon, imid) &
-            result (return_value)
+            if (nstrt > nlat) return
 
-            ! Dummy arguments
+            select case (isym)
+                case(0)
+                    nstp = 1
+                case default
+                    nstp = 2
+            end select
 
-            integer(ip), intent(in) :: nlat
-            integer(ip), intent(in) :: nlon
-            integer(ip), intent(in) :: imid
-            integer(ip)              :: return_value(4)
+            do np1=nstrt, nlat, nstp
+                ns = ns+nstp
+                p(:,np1,i3) = &
+                    a(ns) * p(:,np1-2,i1) &
+                    + b(ns) * p(:,np1-2,i3) &
+                    - c(ns) * p(:,np1,i1)
+            end do
+        end if
 
-            ! Local variables arguments
+    end subroutine alin_lower_routine
 
-            integer(ip) :: lim, mmax, labc
+    pure function get_alin_workspace_indices(nlat, nlon, imid) &
+        result (return_value)
 
+        ! Dummy arguments
+        integer(ip), intent(in) :: nlat
+        integer(ip), intent(in) :: nlon
+        integer(ip), intent(in) :: imid
+        integer(ip)              :: return_value(4)
 
-            associate( i => return_value )
+        ! Local variables
+        integer(ip) :: lim, mmax, labc
 
-                lim = nlat*imid
-                mmax = min(nlat, nlon/2+1)
-                labc = ((mmax-2)*(2*nlat-mmax-1))/2
-                i(1) = lim+1
-                i(2) = i(1)+lim
-                i(3) = i(2)+labc
-                i(4) = i(3)+labc
+        associate( i => return_value )
 
-            end associate
+            lim = nlat*imid
+            mmax = min(nlat, nlon/2+1)
+            labc = ((mmax-2)*(2*nlat-mmax-1))/2
+            i(1) = lim+1
+            i(2) = i(1)+lim
+            i(3) = i(2)+labc
+            i(4) = i(3)+labc
 
-        end function get_workspace_indices
+        end associate
 
-    end subroutine alin
+    end function get_alin_workspace_indices
 
     pure subroutine initialize_workspace_for_scalar_synthesis_regular_grid(nlat, nlon, walin, dwork)
 
@@ -1228,7 +1224,7 @@ contains
 
         do mp1=1, mmax
             m = mp1-1
-            call alin(0, nlat, nlon, m, pin, i3, walin)
+            call compute_legendre_polys_regular_grid(0, nlat, nlon, m, pin, i3, walin)
             do np1=mp1, nlat
                 mn = m*(nlat-1)-(m*(m-1))/2+np1
                 p(:, mn) = pin(:, np1, i3)
@@ -3605,7 +3601,7 @@ contains
 
     end subroutine dwtt
 
-    subroutine vbgint(nlat, nlon, theta, wvbin, work)
+    subroutine initialize_workspace_for_polar_components_gaussian_grid(nlat, nlon, theta, wvbin, work)
 
         integer(ip) :: imid
         integer(ip) :: iw1
@@ -3627,8 +3623,7 @@ contains
         !
         call vbgint_lower_routine(nlat, nlon, imid, theta, wvbin, wvbin(iw1), work, work(iw2))
 
-
-    end subroutine vbgint
+    end subroutine initialize_workspace_for_polar_components_gaussian_grid
 
     subroutine vbgint_lower_routine(nlat, nlon, imid, theta, vb, abc, cvb, work)
 
@@ -3669,7 +3664,7 @@ contains
 
     end subroutine vbgint_lower_routine
 
-    subroutine wbgint(nlat, nlon, theta, wwbin, work)
+    subroutine initialize_workspace_for_azimuthal_components_gaussian_grid(nlat, nlon, theta, wwbin, work)
 
         ! Dummy arguments
         integer(ip), intent(in) :: nlat
@@ -3693,7 +3688,7 @@ contains
         !
         call wbgint_lower_routine(nlat, nlon, imid, theta, wwbin, wwbin(iw1), work, work(iw2))
 
-    end subroutine wbgint
+    end subroutine initialize_workspace_for_azimuthal_components_gaussian_grid
 
     subroutine wbgint_lower_routine(nlat, nlon, imid, theta, wb, abc, cwb, work)
 

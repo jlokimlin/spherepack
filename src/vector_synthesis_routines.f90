@@ -30,120 +30,6 @@ module vector_synthesis_routines
 
     ! Declare interfaces for submodule implementation
     interface
-        module subroutine vhses(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
-            mdab, ndab, wvhses, lvhses, work, lwork, ierror)
-
-            ! Dummy arguments
-            integer(ip), intent(in)  :: nlat
-            integer(ip), intent(in)  :: nlon
-            integer(ip), intent(in)  :: ityp
-            integer(ip), intent(in)  :: nt
-            real(wp),    intent(out) :: v(idvw, jdvw, nt)
-            real(wp),    intent(out) :: w(idvw, jdvw, nt)
-            integer(ip), intent(in)  :: idvw
-            integer(ip), intent(in)  :: jdvw
-            real(wp),    intent(in)  :: br(mdab, ndab, nt)
-            real(wp),    intent(in)  :: bi(mdab, ndab, nt)
-            real(wp),    intent(in)  :: cr(mdab, ndab, nt)
-            real(wp),    intent(in)  :: ci(mdab, ndab, nt)
-            integer(ip), intent(in)  :: mdab
-            integer(ip), intent(in)  :: ndab
-            real(wp),    intent(in)  :: wvhses(lvhses)
-            integer(ip), intent(in)  :: lvhses
-            real(wp),    intent(out) :: work(lwork)
-            integer(ip), intent(in)  :: lwork
-            integer(ip), intent(out) :: ierror
-
-        end subroutine vhses
-
-        module subroutine vhsesi(nlat, nlon, wvhses, lvhses, work, lwork, dwork, &
-            ldwork, ierror)
-
-            ! Dummy arguments
-            integer(ip), intent(in)  :: nlat
-            integer(ip), intent(in)  :: nlon
-            real(wp),    intent(out) :: wvhses(lvhses)
-            integer(ip), intent(in)  :: lvhses
-            real(wp),    intent(out) :: work(lwork)
-            integer(ip), intent(in)  :: lwork
-            real(wp),    intent(out) :: dwork(ldwork)
-            integer(ip), intent(in)  :: ldwork
-            integer(ip), intent(out) :: ierror
-
-        end subroutine vhsesi
-
-        module subroutine vhsgs(nlat,nlon,ityp,nt,v,w,idvw,jdvw,br,bi,cr,ci, &
-            mdab,ndab,wvhsgs,lvhsgs,work,lwork,ierror)
-
-            ! Dummy arguments
-            integer(ip), intent(in)     :: nlat
-            integer(ip), intent(in)     :: nlon
-            integer(ip), intent(in)     :: ityp
-            integer(ip), intent(in)     :: nt
-            real(wp),    intent(out)    :: v(idvw,jdvw,nt)
-            real(wp),    intent(out)    :: w(idvw,jdvw,nt)
-            integer(ip), intent(in)     :: idvw
-            integer(ip), intent(in)     :: jdvw
-            real(wp),    intent(in)     :: br(mdab,ndab,nt)
-            real(wp),    intent(in)     :: bi(mdab,ndab,nt)
-            real(wp),    intent(in)     :: cr(mdab,ndab,nt)
-            real(wp),    intent(in)     :: ci(mdab,ndab,nt)
-            integer(ip), intent(in)     :: mdab
-            integer(ip), intent(in)     :: ndab
-            real(wp),    intent(in)     :: wvhsgs(lvhsgs)
-            integer(ip), intent(in)     :: lvhsgs
-            real(wp),    intent(out)    :: work(lwork)
-            integer(ip), intent(in)     :: lwork
-            integer(ip), intent(out)    :: ierror
-
-        end subroutine vhsgs
-
-        module subroutine vhsgsi(nlat,nlon,wvhsgs,lvhsgs,dwork,ldwork,ierror)
-
-            ! Dummy arguments
-            integer(ip), intent(in)     :: nlat
-            integer(ip), intent(in)     :: nlon
-            real(wp),    intent(out)    :: wvhsgs(lvhsgs)
-            integer(ip), intent(in)     :: lvhsgs
-            real(wp),    intent(out)    :: dwork(ldwork)
-            integer(ip), intent(in)     :: ldwork
-            integer(ip), intent(out)    :: ierror
-
-        end subroutine vhsgsi
-
-        module subroutine vhsgc(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
-            mdab, ndab, wvhsgc, lvhsgc, work, lwork, ierror)
-
-            ! Dummy arguments
-            real(wp) :: br(mdab, ndab, nt), bi(mdab, ndab, nt)
-            real(wp) :: cr(mdab, ndab, nt), ci(mdab, ndab, nt)
-            integer(ip) :: idvw
-            integer(ip) :: ierror
-            integer(ip) :: ityp
-            integer(ip) :: jdvw
-            integer(ip) :: lvhsgc
-            integer(ip) :: lwork
-            integer(ip) :: mdab
-            integer(ip) :: ndab
-            integer(ip) :: nlat
-            integer(ip) :: nlon
-            integer(ip) :: nt
-            real(wp) :: v(idvw, jdvw, nt), w(idvw, jdvw, nt)
-            real(wp) :: work(lwork), wvhsgc(lvhsgc)
-        end subroutine vhsgc
-
-        module subroutine vhsgci(nlat, nlon, wvhsgc, lvhsgc, dwork, ldwork, ierror)
-
-            ! Dummy arguments
-            integer(ip) :: ierror
-            integer(ip) :: ldwork
-            integer(ip) :: lvhsgc
-            integer(ip) :: nlat
-            integer(ip) :: nlon
-            real(wp)    :: wvhsgc(lvhsgc)
-            real(wp)    :: dwork(ldwork)
-        end subroutine vhsgci
-
         module subroutine vhsec(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
             mdab, ndab, wvhsec, lvhsec, work, lwork, ierror)
 
@@ -169,6 +55,81 @@ module vector_synthesis_routines
             integer(ip), intent(out) :: ierror
         end subroutine vhsec
 
+        module subroutine vhses(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
+            mdab, ndab, wvhses, lvhses, work, lwork, ierror)
+
+            ! Dummy arguments
+            integer(ip), intent(in)  :: nlat
+            integer(ip), intent(in)  :: nlon
+            integer(ip), intent(in)  :: ityp
+            integer(ip), intent(in)  :: nt
+            real(wp),    intent(out) :: v(idvw, jdvw, nt)
+            real(wp),    intent(out) :: w(idvw, jdvw, nt)
+            integer(ip), intent(in)  :: idvw
+            integer(ip), intent(in)  :: jdvw
+            real(wp),    intent(in)  :: br(mdab, ndab, nt)
+            real(wp),    intent(in)  :: bi(mdab, ndab, nt)
+            real(wp),    intent(in)  :: cr(mdab, ndab, nt)
+            real(wp),    intent(in)  :: ci(mdab, ndab, nt)
+            integer(ip), intent(in)  :: mdab
+            integer(ip), intent(in)  :: ndab
+            real(wp),    intent(in)  :: wvhses(lvhses)
+            integer(ip), intent(in)  :: lvhses
+            real(wp),    intent(out) :: work(lwork)
+            integer(ip), intent(in)  :: lwork
+            integer(ip), intent(out) :: ierror
+        end subroutine vhses
+
+        module subroutine vhsgc(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
+            mdab, ndab, wvhsgc, lvhsgc, work, lwork, ierror)
+
+            ! Dummy arguments
+            integer(ip), intent(in)  :: nlat
+            integer(ip), intent(in)  :: nlon
+            integer(ip), intent(in)  :: ityp
+            integer(ip), intent(in)  :: nt
+            real(wp),    intent(out) :: v(idvw, jdvw, nt)
+            real(wp),    intent(out) :: w(idvw, jdvw, nt)
+            integer(ip), intent(in)  :: idvw
+            integer(ip), intent(in)  :: jdvw
+            real(wp),    intent(in)  :: br(mdab, ndab, nt)
+            real(wp),    intent(in)  :: bi(mdab, ndab, nt)
+            real(wp),    intent(in)  :: cr(mdab, ndab, nt)
+            real(wp),    intent(in)  :: ci(mdab, ndab, nt)
+            integer(ip), intent(in)  :: mdab
+            integer(ip), intent(in)  :: ndab
+            real(wp),    intent(in)  :: wvhsgc(lvhsgc)
+            integer(ip), intent(in)  :: lvhsgc
+            real(wp),    intent(out) :: work(lwork)
+            integer(ip), intent(in)  :: lwork
+            integer(ip), intent(out) :: ierror
+        end subroutine vhsgc
+
+        module subroutine vhsgs(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
+            mdab, ndab, wvhsgs, lvhsgs, work, lwork, ierror)
+
+            ! Dummy arguments
+            integer(ip), intent(in)  :: nlat
+            integer(ip), intent(in)  :: nlon
+            integer(ip), intent(in)  :: ityp
+            integer(ip), intent(in)  :: nt
+            real(wp),    intent(out) :: v(idvw, jdvw, nt)
+            real(wp),    intent(out) :: w(idvw, jdvw, nt)
+            integer(ip), intent(in)  :: idvw
+            integer(ip), intent(in)  :: jdvw
+            real(wp),    intent(in)  :: br(mdab, ndab, nt)
+            real(wp),    intent(in)  :: bi(mdab, ndab, nt)
+            real(wp),    intent(in)  :: cr(mdab, ndab, nt)
+            real(wp),    intent(in)  :: ci(mdab, ndab, nt)
+            integer(ip), intent(in)  :: mdab
+            integer(ip), intent(in)  :: ndab
+            real(wp),    intent(in)  :: wvhsgs(lvhsgs)
+            integer(ip), intent(in)  :: lvhsgs
+            real(wp),    intent(out) :: work(lwork)
+            integer(ip), intent(in)  :: lwork
+            integer(ip), intent(out) :: ierror
+        end subroutine vhsgs
+
         module subroutine vhseci(nlat, nlon, wvhsec, lvhsec, dwork, ldwork, ierror)
 
             ! Dummy arguments
@@ -180,6 +141,45 @@ module vector_synthesis_routines
             integer(ip), intent(in)  :: ldwork
             integer(ip), intent(out) :: ierror
         end subroutine vhseci
+
+        module subroutine vhsesi(nlat, nlon, wvhses, lvhses, work, lwork, dwork, &
+            ldwork, ierror)
+
+            ! Dummy arguments
+            integer(ip), intent(in)  :: nlat
+            integer(ip), intent(in)  :: nlon
+            real(wp),    intent(out) :: wvhses(lvhses)
+            integer(ip), intent(in)  :: lvhses
+            real(wp),    intent(out) :: work(lwork)
+            integer(ip), intent(in)  :: lwork
+            real(wp),    intent(out) :: dwork(ldwork)
+            integer(ip), intent(in)  :: ldwork
+            integer(ip), intent(out) :: ierror
+        end subroutine vhsesi
+
+        module subroutine vhsgci(nlat, nlon, wvhsgc, lvhsgc, dwork, ldwork, ierror)
+
+            ! Dummy arguments
+            integer(ip), intent(in)  :: nlat
+            integer(ip), intent(in)  :: nlon
+            real(wp),    intent(out) :: wvhsgc(lvhsgc)
+            integer(ip), intent(in)  :: lvhsgc
+            real(wp),    intent(out) :: dwork(ldwork)
+            integer(ip), intent(in)  :: ldwork
+            integer(ip), intent(out) :: ierror
+        end subroutine vhsgci
+
+        module subroutine vhsgsi(nlat,nlon,wvhsgs,lvhsgs,dwork,ldwork,ierror)
+
+            ! Dummy arguments
+            integer(ip), intent(in)  :: nlat
+            integer(ip), intent(in)  :: nlon
+            real(wp),    intent(out) :: wvhsgs(lvhsgs)
+            integer(ip), intent(in)  :: lvhsgs
+            real(wp),    intent(out) :: dwork(ldwork)
+            integer(ip), intent(in)  :: ldwork
+            integer(ip), intent(out) :: ierror
+        end subroutine vhsgsi
     end interface
 
     type, public :: VhsesAux

@@ -237,21 +237,21 @@ program tvlap
             !     analyze vector field
             !
             call vhaesi(nlat,nlon,wsave,lsave,work,lwork,dwork,ldwork,ierror)
-            call name("vhai")
+            call name("vhaesi")
             call iout(ierror,"ierr")
 
             call vhaes(nlat,nlon,isym,nt,v,w,nlat,nlon,br,bi,cr,ci,mdbc, &
                 nlat,wsave,lsave,work,lwork,ierror)
-            call name("vhae")
+            call name("vhaes")
             call iout(ierror,"ierr")
 
             call vhsesi(nlat,nlon,wsave,lsave,work,lwork,dwork,ldwork,ierror)
-            call name("vhsi")
+            call name("vhsesi")
             call iout(ierror,"ierr")
 
             call vlapes(nlat,nlon,isym,nt,vlap,wlap,nlat,nlon,br,bi, &
                 cr,ci,mdbc,nlat,wsave,lsave,work,lwork,ierror)
-            call name("vlap")
+            call name("vlapes")
             call iout(ierror,"ierr")
 
         else if (icase ==3 ) then
@@ -261,12 +261,12 @@ program tvlap
             !     analyze vector field
             !
             call vhagci(nlat,nlon,wsave,lsave,dwork,ldwork,ierror)
-            call name("vhai")
+            call name("vhagci")
             call iout(ierror,"ierr")
 
             call vhagc(nlat,nlon,ityp,nt,v,w,nlat,nlon,br,bi,cr,ci,mdbc, &
                 nlat,wsave,lsave,work,lwork,ierror)
-            call name("vha ")
+            call name("vhagc")
             call iout(ierror,"ierr")
 
             !     if (nmax.lt.10) then
@@ -283,12 +283,12 @@ program tvlap
             !
 
             call vhsgci(nlat,nlon,wsave,lsave,dwork,ldwork,ierror)
-            call name("vhsi")
+            call name("vhsgci")
             call iout(ierror,"ierr")
 
             call vlapgc(nlat,nlon,ityp,nt,vlap,wlap,nlat,nlon,br,bi, &
                 cr,ci,mdbc,nlat,wsave,lsave,work,lwork,ierror)
-            call name("vlap")
+            call name("vlapgc")
             call iout(ierror,"ierr")
 
         else if (icase == 4) then
@@ -298,12 +298,12 @@ program tvlap
             !     analyze vector field
             !
             call vhagsi(nlat, nlon, wsave, lsave, dwork, ldwork, ierror)
-            call name("vhai")
+            call name("vhagsi")
             call iout(ierror,"ierr")
 
             call vhags(nlat,nlon,ityp,nt,v,w,nlat,nlon,br,bi,cr,ci,mdbc, &
                 nlat,wsave,lsave,work,lwork,ierror)
-            call name("vha ")
+            call name("vhags")
             call iout(ierror,"ierr")
 
             !     if (nmax.lt.10) then
@@ -320,12 +320,12 @@ program tvlap
             !
 
             call vhsgsi(nlat, nlon, wsave, lsave, dwork, ldwork, ierror)
-            call name("vhsi")
+            call name("vhsgsi")
             call iout(ierror,"ierr")
 
             call vlapgs(nlat,nlon,ityp,nt,vlap,wlap,nlat,nlon,br,bi, &
                 cr,ci,mdbc,nlat,wsave,lsave,work,lwork,ierror)
-            call name("vlap")
+            call name("vlapgs")
             call iout(ierror,"ierr")
 
         end if
@@ -374,100 +374,100 @@ program tvlap
 
         if (icase==1) then
 
-            call name("**ec")
+            call name("analyze vector field (vlap,wlap)")
             !
             !     analyze vector field (vlap,wlap)
             !
             call vhaeci(nlat,nlon,wsave,lsave,dwork,ldwork,ierror)
-            call name("vhai")
+            call name("vhaeci")
             call iout(ierror,"ierr")
 
             call vhaec(nlat,nlon,ityp,nt,vlap,wlap,nlat,nlon, &
                 br,bi,cr,ci,mdbc,nlat,wsave,lsave,work,lwork,ierror)
-            call name("vha ")
+            call name("vhaec ")
             call iout(ierror,"ierr")
 
             call vhseci(nlat,nlon,wsave,lsave,dwork,ldwork,ierror)
-            call name("vhsi")
+            call name("vhseci")
             call iout(ierror,"ierr")
 
             call ivlapec(nlat,nlon,isym,nt,v,w,nlat,nlon,br,bi, &
                 cr,ci,mdbc,nlat,wsave,lsave,work,lwork,ierror)
-            call name("ivlp")
+            call name("ivlapec")
             call iout(ierror,"ierr")
 
         else if (icase==2) then
 
-            call name("**es")
+            call name("analyze vector field (vlap,wlap)")
             !
             !     analyze vector field (vlap,wlap)
             !
             call vhaesi(nlat,nlon,wsave,lsave,work,lwork,dwork,ldwork,ierror)
-            call name("vhai")
+            call name("vhaesi")
             call iout(ierror,"ierr")
 
             call vhaes(nlat,nlon,isym,nt,vlap,wlap,nlat,nlon, &
                 br,bi,cr,ci,mdbc,nlat,wsave,lsave,work,lwork,ierror)
-            call name("vha ")
+            call name("vhaes")
             call iout(ierror,"ierr")
 
             call vhsesi(nlat,nlon,wsave,lsave,work,lwork,dwork,ldwork,ierror)
-            call name("vhsi")
+            call name("vhsesi")
             call iout(ierror,"ierr")
 
             call ivlapes(nlat,nlon,isym,nt,v,w,nlat,nlon,br,bi, &
                 cr,ci,mdbc,nlat,wsave,lsave,work,lwork, ierror)
-            call name("ivlp")
+            call name("ivlapes")
             call iout(ierror,"ierr")
 
         else if (icase == 3) then
 
-            call name("**gc")
+            call name("analyze vector field (vlap,wlap)")
 
             !
             !     analyze vector field (vlap,wlap)
             !
             call vhagci(nlat,nlon,wsave,lsave,dwork,ldwork,ierror)
-            call name("vhai")
+            call name("vhagci")
             call iout(ierror,"ierr")
 
             call vhagc(nlat,nlon,ityp,nt,vlap,wlap,nlat,nlon, &
                 br,bi,cr,ci,mdbc,nlat,wsave,lsave,work,lwork,ierror)
-            call name("vha ")
+            call name("vhagc")
             call iout(ierror,"ierr")
 
             call vhsgci(nlat,nlon,wsave,lsave,work,ldwork,ierror)
-            call name("vhsi")
+            call name("vhsgci")
             call iout(ierror,"ierr")
 
             call ivlapgc(nlat,nlon,isym,nt,v,w,nlat,nlon,br,bi, &
                 cr,ci,mdbc,nlat,wsave,lsave,work,lwork,ierror)
-            call name("ivlp")
+            call name("ivlapgc")
             call iout(ierror,"ierr")
 
         else if (icase == 4) then
 
-            call name("**gs")
+            call name("analyze vector field (vlap,wlap)")
 
             !
             !     analyze vector field (vlap,wlap)
             !
             call vhagsi(nlat, nlon, wsave, lsave, dwork, ldwork, ierror)
-            call name("vhai")
+            call name("vhagsi")
             call iout(ierror,"ierr")
 
             call vhags(nlat,nlon,ityp,nt,vlap,wlap,nlat,nlon, &
                 br,bi,cr,ci,mdbc,nlat,wsave,lsave,work,lwork,ierror)
-            call name("vha ")
+            call name("vhags")
             call iout(ierror,"ierr")
 
             call vhsgsi(nlat, nlon, wsave, lsave, dwork, ldwork, ierror)
-            call name("vhsi")
+            call name("vhsgsi")
             call iout(ierror,"ierr")
 
             call ivlapgs(nlat,nlon,isym,nt,v,w,nlat,nlon,br,bi, &
                 cr,ci,mdbc,nlat,wsave,lsave,work,lwork,ierror)
-            call name("ivlp")
+            call name("ivlapgs")
             call iout(ierror,"ierr")
 
         end if

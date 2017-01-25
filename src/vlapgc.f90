@@ -403,7 +403,7 @@ contains
         mn = mmax*nlat*nt
         if (ityp<3) then
             !       no symmetry
-            if ( typ==0) then
+            if ( ityp==0) then
                 !       br, bi, cr, ci nonzero
                 lwkmin = nlat*(2*nt*nlon+max(6*imid, nlon)+1)+4*mn
             else
@@ -412,7 +412,7 @@ contains
             end if
         else
             !     symmetry about equator
-            if ( typ==3 .or. ityp==6) then
+            if ( ityp==3 .or. ityp==6) then
                 !       br, bi, cr, ci nonzero
                 lwkmin = imid*(2*nt*nlon+max(6*nlat, nlon))+4*mn+nlat
             else
@@ -422,46 +422,26 @@ contains
         end if
         if (lwork < lwkmin) return
         ierror = 0
-        !
-        !     set work space pointers for vector laplacian coefficients
-        !
-        select case (ityp)
-            case (0)
-                ibr = 1
-                ibi = ibr+mn
-                icr = ibi+mn
-                ici = icr+mn
-            case (3)
-                ibr = 1
-                ibi = ibr+mn
-                icr = ibi+mn
-                ici = icr+mn
-            case (6)
-                ibr = 1
-                ibi = ibr+mn
-                icr = ibi+mn
-                ici = icr+mn
-            case (1)
-                ibr = 1
-                ibi = ibr+mn
-                icr = ibi+mn
-                ici = icr
-            case (4)
-                ibr = 1
-                ibi = ibr+mn
-                icr = ibi+mn
-                ici = icr
-            case (7)
-                ibr = 1
-                ibi = ibr+mn
-                icr = ibi+mn
-                ici = icr
-            case default
-                ibr = 1
-                ibi = 1
-                icr = ibi+mn
-                ici = icr+mn
-        end select
+            !
+            !     set work space pointers for vector laplacian coefficients
+            !
+        if (ityp==0 .or. ityp==3 .or. ityp==6) then
+            ibr = 1
+            ibi = ibr+mn
+            icr = ibi+mn
+            ici = icr+mn
+        else if (ityp==1 .or. ityp==4 .or. ityp==7) then
+            ibr = 1
+            ibi = ibr+mn
+            icr = ibi+mn
+            ici = icr
+        else
+            ibr = 1
+            ibi = 1
+            icr = ibi+mn
+            ici = icr+mn
+        end if
+
         ifn = ici + mn
         iwk = ifn + nlat
         liwk = lwork-4*mn-nlat

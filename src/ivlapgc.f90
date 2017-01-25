@@ -411,27 +411,29 @@ contains
         !
         !     set work space pointers for vector laplacian coefficients
         !
-        select case (ityp)
-            case (0:1, 3:4, 6:7)
-                ibr = 1
-                ibi = ibr+mn
-                icr = ibi+mn
-                ici = icr
-            case default
-                ibr = 1
-                ibi = 1
-                icr = ibi+mn
-                ici = icr+mn
-        end select
-        ifn = ici + mn
-        iwk = ifn + nlat
-
-        select case (ityp)
-            case (0, 3, 6)
-                liwk = lwork-4*mn-nlat
-            case default
-                liwk = lwork-2*mn-nlat
-        end select
+    if (ityp==0 .or. ityp==3 .or. ityp==6) then
+        ibr = 1
+        ibi = ibr+mn
+        icr = ibi+mn
+        ici = icr+mn
+    else if (ityp==1 .or. ityp==4 .or. ityp==7) then
+        ibr = 1
+        ibi = ibr+mn
+        icr = ibi+mn
+        ici = icr
+    else
+        ibr = 1
+        ibi = 1
+        icr = ibi+mn
+        ici = icr+mn
+    end if
+    ifn = ici + mn
+    iwk = ifn + nlat
+    if (ityp==0 .or. ityp==3 .or. ityp==6) then
+        liwk = lwork-4*mn-nlat
+    else
+        liwk = lwork-2*mn-nlat
+    end if
 
         call ivlapgc_lower_routine(nlat, nlon, ityp, nt, v, w, idvw, jdvw, work(ibr), &
             work(ibi), work(icr), work(ici), mmax, work(ifn), mdbc, ndbc, br, bi, &

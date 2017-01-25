@@ -411,18 +411,22 @@ contains
         !
         !     set work space pointers for vector laplacian coefficients
         !
-        select case (ityp)
-            case (0:1, 3:4, 6:7)
-                ibr = 1
-                ibi = ibr+mn
-                icr = ibi+mn
-                ici = icr
-            case default
-                ibr = 1
-                ibi = 1
-                icr = ibi+mn
-                ici = icr+mn
-        end select
+    if (ityp==0 .or. ityp==3 .or. ityp==6) then
+        ibr = 1
+        ibi = ibr+mn
+        icr = ibi+mn
+        ici = icr+mn
+    else if (ityp==1 .or. ityp==4 .or. ityp==7) then
+        ibr = 1
+        ibi = ibr+mn
+        icr = ibi+mn
+        ici = icr
+    else
+        ibr = 1
+        ibi = 1
+        icr = ibi+mn
+        ici = icr+mn
+    end if
 
         ifn = ici + mn
         iwk = ifn + nlat

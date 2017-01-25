@@ -325,27 +325,30 @@ contains
 
     module subroutine vhagc(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
         mdab, ndab, wvhagc, lvhagc, work, lwork, ierror)
+
         ! Dummy arguments
-        real(wp) :: br(mdab, ndab, *), bi(mdab, ndab, *)
-        real(wp) :: cr(mdab, ndab, *), ci(mdab, ndab, *)
-        integer(ip) :: idv
-        integer(ip) :: idvw
-        integer(ip) :: ierror
-        integer(ip) :: ityp
-        integer(ip) :: jdvw
-        integer(ip) :: lvhagc
-        integer(ip) :: lwork
-        integer(ip) :: mdab
-        integer(ip) :: ndab
-        integer(ip) :: nlat
-        integer(ip) :: nlon
-        integer(ip) :: nt
-        real(wp) :: v(idvw, jdvw, *), w(idvw, jdvw, *)
-        real(wp) :: work(lwork)
-        real(wp) :: wvhagc(lvhagc)
+        integer(ip), intent(in)  :: nlat
+        integer(ip), intent(in)  :: nlon
+        integer(ip), intent(in)  :: ityp
+        integer(ip), intent(in)  :: nt
+        real(wp),    intent(in)  :: v(idvw, jdvw, nt)
+        real(wp),    intent(in)  :: w(idvw, jdvw, nt)
+        integer(ip), intent(in)  :: idvw
+        integer(ip), intent(in)  :: jdvw
+        real(wp),    intent(out) :: br(mdab,ndab,nt)
+        real(wp),    intent(out) :: bi(mdab, ndab,nt)
+        real(wp),    intent(out) :: cr(mdab,ndab,nt)
+        real(wp),    intent(out) :: ci(mdab, ndab,nt)
+        integer(ip), intent(in)  :: mdab
+        integer(ip), intent(in)  :: ndab
+        real(wp),    intent(in)  :: wvhagc(lvhagc)
+        integer(ip), intent(in)  :: lvhagc
+        real(wp),    intent(out) :: work(lwork)
+        integer(ip), intent(in)  :: lwork
+        integer(ip), intent(out) :: ierror
 
         ! Local variables
-        integer(ip) :: imid
+        integer(ip) :: imid, idv
         integer(ip) :: ist
         integer(ip) :: iw1
         integer(ip) :: iw2
@@ -410,14 +413,15 @@ contains
     end subroutine vhagc
 
     module subroutine vhagci(nlat, nlon, wvhagc, lvhagc, dwork, ldwork, ierror)
+
         ! Dummy arguments
-        integer(ip) :: ierror
-        integer(ip) :: ldwork
-        integer(ip) :: lvhagc
-        integer(ip) :: nlat
-        integer(ip) :: nlon
-        real(wp) :: wvhagc(lvhagc)
-        real(wp) :: dwork(ldwork)
+        integer(ip), intent(in)  :: nlat
+        integer(ip), intent(in)  :: nlon
+        real(wp),    intent(out) :: wvhagc(lvhagc)
+        integer(ip), intent(in)  :: lvhagc
+        real(wp),    intent(out) :: dwork(ldwork)
+        integer(ip), intent(in)  :: ldwork
+        integer(ip), intent(out) :: ierror
 
         ! Local variables
         integer(ip) :: imid
@@ -478,9 +482,9 @@ contains
         iw2 = iw1+lwvbin
         iw3 = iw2+lwvbin
 
-        call sphere_aux%vbgint(nlat, nlon, dwork, wvhagc(iw1), dwork(iwrk))
+        call sphere_aux%initialize_workspace_for_polar_components_gaussian_grid(nlat, nlon, dwork, wvhagc(iw1), dwork(iwrk))
 
-        call sphere_aux%wbgint(nlat, nlon, dwork, wvhagc(iw2), dwork(iwrk))
+        call sphere_aux%initialize_workspace_for_azimuthal_components_gaussian_grid(nlat, nlon, dwork, wvhagc(iw2), dwork(iwrk))
 
         call sphere_aux%hfft%initialize(nlon, wvhagc(iw3))
 
@@ -550,7 +554,7 @@ contains
             wo(idv, nlon, *), wts(*), wvbin(*), wwbin(*), wrfft(*), &
             vb(imid, nlat, 3), wb(imid, nlat, 3)
 
-        type(SpherepackAux) :: sphere_aux
+ type(SpherepackAux) :: sphere_aux
 
         nlp1 = nlat+1
         tsn = TWO/nlon
@@ -1351,6 +1355,7 @@ contains
                     end do
                 end do
         end select vector_symmetry_cases
+
 
     end subroutine vhagc_lower_routine
 

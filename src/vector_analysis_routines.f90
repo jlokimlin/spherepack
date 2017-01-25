@@ -333,10 +333,8 @@ module vector_analysis_routines
     implicit none
 
     ! Everything is private unless stated otherwise
-    public :: vhaec, vhaeci
-    public :: vhaes, vhaesi, VhaesAux
-    public :: vhagc, vhagci
-    public :: vhags, vhagsi, VhagsAux
+    public :: vhaec, vhaes, vhagc, vhags
+    public :: vhaeci, vhaesi, vhagci, vhagsi
 
     ! Parameters confined to the module
     real(wp), parameter :: ZERO = 0.0_wp
@@ -351,34 +349,26 @@ module vector_analysis_routines
             mdab, ndab, wvhaec, lvhaec, work, lwork, ierror)
 
             ! Dummy arguments
-            real(wp) :: br(mdab, ndab, nt), bi(mdab, ndab, nt)
-            real(wp) :: cr(mdab, ndab, nt), ci(mdab, ndab, nt)
-            integer(ip) :: idv
-            integer(ip) :: idvw
-            integer(ip) :: ierror
-            integer(ip) :: ityp
-            integer(ip) :: jdvw
-            integer(ip) :: lvhaec
-            integer(ip) :: lwork
-            integer(ip) :: mdab
-            integer(ip) :: ndab
-            integer(ip) :: nlat
-            integer(ip) :: nlon
-            integer(ip) :: nt
-            real(wp) :: v(idvw, jdvw, nt), w(idvw, jdvw, nt)
-            real(wp) :: work(lwork), wvhaec(lvhaec)
+            integer(ip), intent(in)  :: nlat
+            integer(ip), intent(in)  :: nlon
+            integer(ip), intent(in)  :: ityp
+            integer(ip), intent(in)  :: nt
+            real(wp),    intent(in)  :: v(idvw, jdvw, nt)
+            real(wp),    intent(in)  :: w(idvw, jdvw, nt)
+            integer(ip), intent(in)  :: idvw
+            integer(ip), intent(in)  :: jdvw
+            real(wp),    intent(out) :: br(mdab,ndab,nt)
+            real(wp),    intent(out) :: bi(mdab, ndab,nt)
+            real(wp),    intent(out) :: cr(mdab,ndab,nt)
+            real(wp),    intent(out) :: ci(mdab, ndab,nt)
+            integer(ip), intent(in)  :: mdab
+            integer(ip), intent(in)  :: ndab
+            real(wp),    intent(in)  :: wvhaec(lvhaec)
+            integer(ip), intent(in)  :: lvhaec
+            real(wp),    intent(out) :: work(lwork)
+            integer(ip), intent(in)  :: lwork
+            integer(ip), intent(out) :: ierror
         end subroutine vhaec
-
-        module subroutine vhaeci(nlat, nlon, wvhaec, lvhaec, dwork, ldwork, ierror)
-
-            ! Dummy arguments
-            integer(ip) :: ierror
-            integer(ip) :: ldwork, lvhaec
-            integer(ip) :: nlat
-            integer(ip) :: nlon
-            real(wp) :: wvhaec(lvhaec)
-            real(wp) :: dwork(ldwork)
-        end subroutine vhaeci
 
         module subroutine vhaes(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
             mdab, ndab, wvhaes, lvhaes, work, lwork, ierror)
@@ -392,10 +382,10 @@ module vector_analysis_routines
             real(wp),    intent(in)  :: w(idvw, jdvw, nt)
             integer(ip), intent(in)  :: idvw
             integer(ip), intent(in)  :: jdvw
-            real(wp),    intent(out) :: br(mdab, ndab, nt)
-            real(wp),    intent(out) :: bi(mdab, ndab, nt)
-            real(wp),    intent(out) :: cr(mdab, ndab, nt)
-            real(wp),    intent(out) :: ci(mdab, ndab, nt)
+            real(wp),    intent(out) :: br(mdab,ndab,nt)
+            real(wp),    intent(out) :: bi(mdab, ndab,nt)
+            real(wp),    intent(out) :: cr(mdab,ndab,nt)
+            real(wp),    intent(out) :: ci(mdab, ndab,nt)
             integer(ip), intent(in)  :: mdab
             integer(ip), intent(in)  :: ndab
             real(wp),    intent(in)  :: wvhaes(lvhaes)
@@ -405,19 +395,30 @@ module vector_analysis_routines
             integer(ip), intent(out) :: ierror
         end subroutine vhaes
 
-        module subroutine vhaesi(nlat, nlon, wvhaes, lvhaes, work, lwork, dwork, ldwork, ierror)
+        module subroutine vhagc(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
+            mdab, ndab, wvhagc, lvhagc, work, lwork, ierror)
 
             ! Dummy arguments
             integer(ip), intent(in)  :: nlat
             integer(ip), intent(in)  :: nlon
-            real(wp),    intent(out) :: wvhaes(lvhaes)
-            integer(ip), intent(in)  :: lvhaes
+            integer(ip), intent(in)  :: ityp
+            integer(ip), intent(in)  :: nt
+            real(wp),    intent(in)  :: v(idvw, jdvw, nt)
+            real(wp),    intent(in)  :: w(idvw, jdvw, nt)
+            integer(ip), intent(in)  :: idvw
+            integer(ip), intent(in)  :: jdvw
+            real(wp),    intent(out) :: br(mdab,ndab,nt)
+            real(wp),    intent(out) :: bi(mdab, ndab,nt)
+            real(wp),    intent(out) :: cr(mdab,ndab,nt)
+            real(wp),    intent(out) :: ci(mdab, ndab,nt)
+            integer(ip), intent(in)  :: mdab
+            integer(ip), intent(in)  :: ndab
+            real(wp),    intent(in)  :: wvhagc(lvhagc)
+            integer(ip), intent(in)  :: lvhagc
             real(wp),    intent(out) :: work(lwork)
             integer(ip), intent(in)  :: lwork
-            real(wp),    intent(out) :: dwork(ldwork)
-            integer(ip), intent(in)  :: ldwork
             integer(ip), intent(out) :: ierror
-        end subroutine vhaesi
+        end subroutine vhagc
 
         module subroutine vhags(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
             mdab, ndab, wvhags, lvhags, work, lwork, ierror)
@@ -444,6 +445,44 @@ module vector_analysis_routines
             integer(ip), intent(out) :: ierror
         end subroutine vhags
 
+        module subroutine vhaeci(nlat, nlon, wvhaec, lvhaec, dwork, ldwork, ierror)
+
+            ! Dummy arguments
+            integer(ip), intent(in)  :: nlat
+            integer(ip), intent(in)  :: nlon
+            real(wp),    intent(out) :: wvhaec(lvhaec)
+            integer(ip), intent(in)  :: lvhaec
+            real(wp),    intent(out) :: dwork(ldwork)
+            integer(ip), intent(in)  :: ldwork
+            integer(ip), intent(out) :: ierror
+        end subroutine vhaeci
+
+        module subroutine vhaesi(nlat, nlon, wvhaes, lvhaes, work, lwork, dwork, ldwork, ierror)
+
+            ! Dummy arguments
+            integer(ip), intent(in)  :: nlat
+            integer(ip), intent(in)  :: nlon
+            real(wp),    intent(out) :: wvhaes(lvhaes)
+            integer(ip), intent(in)  :: lvhaes
+            real(wp),    intent(out) :: work(lwork)
+            integer(ip), intent(in)  :: lwork
+            real(wp),    intent(out) :: dwork(ldwork)
+            integer(ip), intent(in)  :: ldwork
+            integer(ip), intent(out) :: ierror
+        end subroutine vhaesi
+
+        module subroutine vhagci(nlat, nlon, wvhagc, lvhagc, dwork, ldwork, ierror)
+
+            ! Dummy arguments
+            integer(ip), intent(in)  :: nlat
+            integer(ip), intent(in)  :: nlon
+            real(wp),    intent(out) :: wvhagc(lvhagc)
+            integer(ip), intent(in)  :: lvhagc
+            real(wp),    intent(out) :: dwork(ldwork)
+            integer(ip), intent(in)  :: ldwork
+            integer(ip), intent(out) :: ierror
+        end subroutine vhagci
+
         module subroutine vhagsi(nlat, nlon, wvhags, lvhags, dwork, ldwork, ierror)
 
             ! Dummy arguments
@@ -455,40 +494,6 @@ module vector_analysis_routines
             integer(ip), intent(in)  :: ldwork
             integer(ip), intent(out) :: ierror
         end subroutine vhagsi
-
-        module subroutine vhagc(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
-            mdab, ndab, wvhagc, lvhagc, work, lwork, ierror)
-
-            ! Dummy arguments
-            real(wp) :: br(mdab, ndab, *), bi(mdab, ndab, *)
-            real(wp) :: cr(mdab, ndab, *), ci(mdab, ndab, *)
-            integer(ip) :: idvw
-            integer(ip) :: ierror
-            integer(ip) :: ityp
-            integer(ip) :: jdvw
-            integer(ip) :: lvhagc
-            integer(ip) :: lwork
-            integer(ip) :: mdab
-            integer(ip) :: ndab
-            integer(ip) :: nlat
-            integer(ip) :: nlon
-            integer(ip) :: nt
-            real(wp) :: v(idvw, jdvw, *), w(idvw, jdvw, *)
-            real(wp) :: work(lwork)
-            real(wp) :: wvhagc(lvhagc)
-        end subroutine vhagc
-
-        module subroutine vhagci(nlat, nlon, wvhagc, lvhagc, dwork, ldwork, ierror)
-
-            ! Dummy arguments
-            integer(ip) :: ierror
-            integer(ip) :: ldwork
-            integer(ip) :: lvhagc
-            integer(ip) :: nlat
-            integer(ip) :: nlon
-            real(wp) :: wvhagc(lvhagc)
-            real(wp) :: dwork(ldwork)
-        end subroutine vhagci
     end interface
 
     type, public :: VhaesAux

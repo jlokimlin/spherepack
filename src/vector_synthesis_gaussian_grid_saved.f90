@@ -679,20 +679,22 @@ contains
         mlon = mod(nlon, 2)
         mmax = min(nlat, (nlon+1)/2)
 
-        if (mlat /= 0) then
-            imm1 = imid-1
-            ndo1 = nlat-1
-            ndo2 = nlat
-        else
-            imm1 = imid
-            ndo1 = nlat
-            ndo2 = nlat-1
-        end if
+        select case(mlat)
+            case(0)
+                imm1 = imid
+                ndo1 = nlat
+                ndo2 = nlat-1
+            case default
+                imm1 = imid-1
+                ndo1 = nlat-1
+                ndo2 = nlat
+        end select
 
+        ! Set even spherical components equal to 0.0
         ve = ZERO
         we = ZERO
 
-        symmetry_case: select case (ityp)
+        vector_symmetry_cases: select case (ityp)
             case (0)
                 !
                 !     case ityp=0   no symmetries
@@ -718,7 +720,7 @@ contains
                 !
                 !     case m = 1 through nlat-1
                 !
-                if (mmax < 2) exit symmetry_case
+                if (mmax < 2) exit vector_symmetry_cases
                 do mp1=2, mmax
                     m = mp1-1
                     mb = m*nlat-(m*(m+1))/2
@@ -803,7 +805,7 @@ contains
                 !
                 !     case m = 1 through nlat-1
                 !
-                if (mmax < 2) exit symmetry_case
+                if (mmax < 2) exit vector_symmetry_cases
                 do mp1=2, mmax
                     m = mp1-1
                     !     mb = m*(nlat-1)-(m*(m-1))/2
@@ -873,7 +875,7 @@ contains
                 !
                 !     case m = 1 through nlat-1
                 !
-                if (mmax < 2) exit symmetry_case
+                if (mmax < 2) exit vector_symmetry_cases
 
                 do mp1=2, mmax
                     m = mp1-1
@@ -944,7 +946,7 @@ contains
                 !
                 !     case m = 1 through nlat-1
                 !
-                if (mmax < 2) exit symmetry_case
+                if (mmax < 2) exit vector_symmetry_cases
 
                 do mp1=2, mmax
                     m = mp1-1
@@ -1006,7 +1008,7 @@ contains
                 !
                 !     case m = 1 through nlat-1
                 !
-                if (mmax < 2) exit symmetry_case
+                if (mmax < 2) exit vector_symmetry_cases
 
                 do mp1=2, mmax
                     m = mp1-1
@@ -1049,7 +1051,7 @@ contains
                 !
                 !     case m = 1 through nlat-1
                 !
-                if (mmax < 2) exit symmetry_case
+                if (mmax < 2) exit vector_symmetry_cases
 
                 do mp1=2, mmax
                     m = mp1-1
@@ -1100,7 +1102,7 @@ contains
                 !
                 !     case m = 1 through nlat-1
                 !
-                if (mmax < 2) exit symmetry_case
+                if (mmax < 2) exit vector_symmetry_cases
 
                 do mp1=2, mmax
                     m = mp1-1
@@ -1162,7 +1164,7 @@ contains
                 !
                 !     case m = 1 through nlat-1
                 !
-                if (mmax < 2) exit symmetry_case
+                if (mmax < 2) exit vector_symmetry_cases
 
                 do mp1=2, mmax
                     m = mp1-1
@@ -1204,7 +1206,7 @@ contains
                 !
                 !     case m = 1 through nlat-1
                 !
-                if (mmax < 2) exit symmetry_case
+                if (mmax < 2) exit vector_symmetry_cases
 
                 do mp1=2, mmax
                     m = mp1-1
@@ -1230,30 +1232,31 @@ contains
                         end do
                     end if
                 end do
-        end select symmetry_case
+        end select vector_symmetry_cases
 
         do k=1, nt
             call sphere_aux%hfft%backward(idv, nlon, ve(1, 1, k), idv, wrfft, work)
             call sphere_aux%hfft%backward(idv, nlon, we(1, 1, k), idv, wrfft, work)
         end do
 
-        if(ityp <= 2) then
-            do k=1, nt
-                do j=1, nlon
-                    do i=1, imm1
-                        v(i, j, k) = HALF * (ve(i, j, k)+vo(i, j, k))
-                        w(i, j, k) = HALF * (we(i, j, k)+wo(i, j, k))
-                        v(nlp1-i, j, k) = HALF * (ve(i, j, k)-vo(i, j, k))
-                        w(nlp1-i, j, k) = HALF * (we(i, j, k)-wo(i, j, k))
+        select case(ityp)
+            case(0:2)
+                do k=1, nt
+                    do j=1, nlon
+                        do i=1, imm1
+                            v(i, j, k) = HALF * (ve(i, j, k)+vo(i, j, k))
+                            w(i, j, k) = HALF * (we(i, j, k)+wo(i, j, k))
+                            v(nlp1-i, j, k) = HALF * (ve(i, j, k)-vo(i, j, k))
+                            w(nlp1-i, j, k) = HALF * (we(i, j, k)-wo(i, j, k))
+                        end do
                     end do
                 end do
-            end do
-        else
-            do k=1, nt
-                v(1:imm1, 1:nlon, k) = HALF * ve(1:imm1, 1:nlon, k)
-                w(1:imm1, 1:nlon, k) = HALF * we(1:imm1, 1:nlon, k)
-            end do
-        end if
+            case default
+                do k=1, nt
+                    v(1:imm1, 1:nlon, k) = HALF * ve(1:imm1, 1:nlon, k)
+                    w(1:imm1, 1:nlon, k) = HALF * we(1:imm1, 1:nlon, k)
+                end do
+        end select
 
         if (mlat /= 0) then
             do k=1, nt
