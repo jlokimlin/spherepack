@@ -558,7 +558,7 @@ contains
         !
         !     case ityp=0   no symmetries
         !
-1       call sphere_aux%vbin(0, nlat, nlon, 0, vb, iv, wvbin)
+1       call sphere_aux%compute_polar_component(0, nlat, nlon, 0, vb, iv, wvbin)
         !
         !     case m = 0
         !
@@ -585,8 +585,8 @@ contains
         do mp1=2, mmax
             m = mp1-1
             mp2 = mp1+1
-            call sphere_aux%vbin(0, nlat, nlon, m, vb, iv, wvbin)
-            call sphere_aux%wbin(0, nlat, nlon, m, wb, iw, wwbin)
+            call sphere_aux%compute_polar_component(0, nlat, nlon, m, vb, iv, wvbin)
+            call sphere_aux%compute_azimuthal_component(0, nlat, nlon, m, wb, iw, wwbin)
             if (mp1 > ndo1) goto 26
             do k=1, nt
                 do np1=mp1, ndo1, 2
@@ -643,7 +643,7 @@ contains
         !
         !     case ityp=1   no symmetries,  cr and ci equal zero
         !
-100     call sphere_aux%vbin(0, nlat, nlon, 0, vb, iv, wvbin)
+100     call sphere_aux%compute_polar_component(0, nlat, nlon, 0, vb, iv, wvbin)
         !
         !     case m = 0
         !
@@ -668,8 +668,8 @@ contains
         do mp1=2, mmax
             m = mp1-1
             mp2 = mp1+1
-            call sphere_aux%vbin(0, nlat, nlon, m, vb, iv, wvbin)
-            call sphere_aux%wbin(0, nlat, nlon, m, wb, iw, wwbin)
+            call sphere_aux%compute_polar_component(0, nlat, nlon, m, vb, iv, wvbin)
+            call sphere_aux%compute_azimuthal_component(0, nlat, nlon, m, wb, iw, wwbin)
             if (mp1 > ndo1) goto 126
             do k=1, nt
                 do np1=mp1, ndo1, 2
@@ -710,7 +710,7 @@ contains
         !
         !     case ityp=2   no symmetries,  br and bi are equal to zero
         !
-200     call sphere_aux%vbin(0, nlat, nlon, 0, vb, iv, wvbin)
+200     call sphere_aux%compute_polar_component(0, nlat, nlon, 0, vb, iv, wvbin)
         !
         !     case m = 0
         !
@@ -735,8 +735,8 @@ contains
         do mp1=2, mmax
             m = mp1-1
             mp2 = mp1+1
-            call sphere_aux%vbin(0, nlat, nlon, m, vb, iv, wvbin)
-            call sphere_aux%wbin(0, nlat, nlon, m, wb, iw, wwbin)
+            call sphere_aux%compute_polar_component(0, nlat, nlon, m, vb, iv, wvbin)
+            call sphere_aux%compute_azimuthal_component(0, nlat, nlon, m, wb, iw, wwbin)
             if (mp1 > ndo1) goto 226
             do k=1, nt
                 do np1=mp1, ndo1, 2
@@ -777,7 +777,7 @@ contains
         !
         !     case ityp=3   v odd,  w even
         !
-300     call sphere_aux%vbin(0, nlat, nlon, 0, vb, iv, wvbin)
+300     call sphere_aux%compute_polar_component(0, nlat, nlon, 0, vb, iv, wvbin)
         !
         !     case m = 0
         !
@@ -802,8 +802,8 @@ contains
         do mp1=2, mmax
             m = mp1-1
             mp2 = mp1+1
-            call sphere_aux%vbin(0, nlat, nlon, m, vb, iv, wvbin)
-            call sphere_aux%wbin(0, nlat, nlon, m, wb, iw, wwbin)
+            call sphere_aux%compute_polar_component(0, nlat, nlon, m, vb, iv, wvbin)
+            call sphere_aux%compute_azimuthal_component(0, nlat, nlon, m, wb, iw, wwbin)
             if (mp1 > ndo1) goto 326
             do k=1, nt
                 do np1=mp1, ndo1, 2
@@ -844,7 +844,7 @@ contains
         !
         !     case ityp=4   v odd,  w even, and both cr and ci equal zero
         !
-400     call sphere_aux%vbin(1, nlat, nlon, 0, vb, iv, wvbin)
+400     call sphere_aux%compute_polar_component(1, nlat, nlon, 0, vb, iv, wvbin)
         !
         !     case m = 0
         !
@@ -862,8 +862,8 @@ contains
         do mp1=2, mmax
             m = mp1-1
             mp2 = mp1+1
-            call sphere_aux%vbin(1, nlat, nlon, m, vb, iv, wvbin)
-            call sphere_aux%wbin(1, nlat, nlon, m, wb, iw, wwbin)
+            call sphere_aux%compute_polar_component(1, nlat, nlon, m, vb, iv, wvbin)
+            call sphere_aux%compute_azimuthal_component(1, nlat, nlon, m, wb, iw, wwbin)
             if (mp2 > ndo2) goto 430
             do k=1, nt
                 do np1=mp2, ndo2, 2
@@ -887,7 +887,7 @@ contains
         !
         !     case ityp=5   v odd,  w even,     br and bi equal zero
         !
-500     call sphere_aux%vbin(2, nlat, nlon, 0, vb, iv, wvbin)
+500     call sphere_aux%compute_polar_component(2, nlat, nlon, 0, vb, iv, wvbin)
         !
         !     case m = 0
         !
@@ -905,8 +905,8 @@ contains
         do mp1=2, mmax
             m = mp1-1
             mp2 = mp1+1
-            call sphere_aux%vbin(2, nlat, nlon, m, vb, iv, wvbin)
-            call sphere_aux%wbin(2, nlat, nlon, m, wb, iw, wwbin)
+            call sphere_aux%compute_polar_component(2, nlat, nlon, m, vb, iv, wvbin)
+            call sphere_aux%compute_azimuthal_component(2, nlat, nlon, m, wb, iw, wwbin)
             if (mp1 > ndo1) goto 530
             do k=1, nt
                 do np1=mp1, ndo1, 2
@@ -930,7 +930,7 @@ contains
         !
         !     case ityp=6   v even  ,  w odd
         !
-600     call sphere_aux%vbin(0, nlat, nlon, 0, vb, iv, wvbin)
+600     call sphere_aux%compute_polar_component(0, nlat, nlon, 0, vb, iv, wvbin)
         !
         !     case m = 0
         !
@@ -955,8 +955,8 @@ contains
         do mp1=2, mmax
             m = mp1-1
             mp2 = mp1+1
-            call sphere_aux%vbin(0, nlat, nlon, m, vb, iv, wvbin)
-            call sphere_aux%wbin(0, nlat, nlon, m, wb, iw, wwbin)
+            call sphere_aux%compute_polar_component(0, nlat, nlon, m, vb, iv, wvbin)
+            call sphere_aux%compute_azimuthal_component(0, nlat, nlon, m, wb, iw, wwbin)
             if (mp1 > ndo1) goto 626
             do k=1, nt
                 do np1=mp1, ndo1, 2
@@ -997,7 +997,7 @@ contains
         !
         !     case ityp=7   v even, w odd   cr and ci equal zero
         !
-700     call sphere_aux%vbin(2, nlat, nlon, 0, vb, iv, wvbin)
+700     call sphere_aux%compute_polar_component(2, nlat, nlon, 0, vb, iv, wvbin)
         !
         !     case m = 0
         !
@@ -1015,8 +1015,8 @@ contains
         do mp1=2, mmax
             m = mp1-1
             mp2 = mp1+1
-            call sphere_aux%vbin(2, nlat, nlon, m, vb, iv, wvbin)
-            call sphere_aux%wbin(2, nlat, nlon, m, wb, iw, wwbin)
+            call sphere_aux%compute_polar_component(2, nlat, nlon, m, vb, iv, wvbin)
+            call sphere_aux%compute_azimuthal_component(2, nlat, nlon, m, wb, iw, wwbin)
             if (mp1 > ndo1) goto 730
             do k=1, nt
                 do np1=mp1, ndo1, 2
@@ -1040,7 +1040,7 @@ contains
         !
         !     case ityp=8   v even,  w odd   br and bi equal zero
         !
-800     call sphere_aux%vbin(1, nlat, nlon, 0, vb, iv, wvbin)
+800     call sphere_aux%compute_polar_component(1, nlat, nlon, 0, vb, iv, wvbin)
         !
         !     case m = 0
         !
@@ -1058,8 +1058,8 @@ contains
         do mp1=2, mmax
             m = mp1-1
             mp2 = mp1+1
-            call sphere_aux%vbin(1, nlat, nlon, m, vb, iv, wvbin)
-            call sphere_aux%wbin(1, nlat, nlon, m, wb, iw, wwbin)
+            call sphere_aux%compute_polar_component(1, nlat, nlon, m, vb, iv, wvbin)
+            call sphere_aux%compute_azimuthal_component(1, nlat, nlon, m, wb, iw, wwbin)
             if (mp2 > ndo2) goto 830
             do k=1, nt
                 do np1=mp2, ndo2, 2
@@ -1170,10 +1170,10 @@ contains
         iw2 = iw1+lwvbin
 
         !     call vtgint (nlat, nlon, work, wvts, work(4*nlat+1))
-        call sphere_aux%vtgint(nlat, nlon, dwork, wvts, dwork(2*nlat+1))
+        call sphere_aux%initialize_polar_components_gaussian_colat_deriv(nlat, nlon, dwork, wvts, dwork(2*nlat+1))
 
         !     call wtgint (nlat, nlon, work, wvts(iw1), work(4*nlat+1))
-        call sphere_aux%wtgint(nlat, nlon, dwork, wvts(iw1), dwork(2*nlat+1))
+        call sphere_aux%initialize_azimuthal_components_gaussian_colat_deriv(nlat, nlon, dwork, wvts(iw1), dwork(2*nlat+1))
 
         call sphere_aux%hfft%initialize(nlon, wvts(iw2))
 

@@ -436,7 +436,7 @@ contains
             iw1 => 3*nlat*imid+1, &
             iw2 => lpimn+1 &
             )
-            call sphere_aux%initialize_workspace_for_scalar_synthesis_regular_grid_saved( &
+            call sphere_aux%initialize_scalar_synthesis_regular_grid_saved( &
                 nlat, nlon, imid, wshses, work, work(iw1), dwork)
             call sphere_aux%hfft%initialize(nlon, wshses(iw2))
         end associate

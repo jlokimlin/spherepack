@@ -61,22 +61,22 @@ module type_SpherepackAux
         procedure, nopass :: compute_legendre_polys_regular_grid
         procedure, nopass :: compute_legendre_polys_for_gaussian_grids
         procedure, nopass :: compute_parity
-        procedure, nopass :: dnlfk
-        procedure, nopass :: dnlft
-        procedure, nopass :: initialize_workspace_for_scalar_analysis_regular_grid
-        procedure, nopass :: initialize_workspace_for_scalar_analysis_regular_grid_saved
-        procedure, nopass :: initialize_workspace_for_scalar_synthesis_regular_grid
-        procedure, nopass :: initialize_workspace_for_scalar_synthesis_regular_grid_saved
-        procedure, nopass :: initialize_workspace_for_polar_components_gaussian_grid
-        procedure, nopass :: vbin
-        procedure, nopass :: vbinit
-        procedure, nopass :: vtgint
-        procedure, nopass :: vtinit
-        procedure, nopass :: initialize_workspace_for_azimuthal_components_gaussian_grid
-        procedure, nopass :: wbin
-        procedure, nopass :: wbinit
-        procedure, nopass :: wtgint
-        procedure, nopass :: wtinit
+        procedure, nopass :: compute_fourier_coefficients
+        procedure, nopass :: compute_legendre_polys_from_fourier_coeff
+        procedure, nopass :: initialize_scalar_analysis_regular_grid
+        procedure, nopass :: initialize_scalar_analysis_regular_grid_saved
+        procedure, nopass :: initialize_scalar_synthesis_regular_grid
+        procedure, nopass :: initialize_scalar_synthesis_regular_grid_saved
+        procedure, nopass :: compute_polar_component
+        procedure, nopass :: initialize_polar_components_for_regular_grids
+        procedure, nopass :: initialize_polar_components_gaussian_grid
+        procedure, nopass :: initialize_polar_components_gaussian_colat_deriv
+        procedure, nopass :: initialize_polar_components_regular_colat_deriv
+        procedure, nopass :: compute_azimuthal_component
+        procedure, nopass :: initialize_azimuthal_components_for_regular_grids
+        procedure, nopass :: initialize_azimuthal_components_gaussian_grid
+        procedure, nopass :: initialize_azimuthal_components_gaussian_colat_deriv
+        procedure, nopass :: initialize_azimuthal_components_regular_colat_deriv
         procedure, nopass :: zfin
         procedure, nopass :: zvin
         procedure, nopass :: zvinit
@@ -85,12 +85,16 @@ module type_SpherepackAux
     end type SpherepackAux
 
     ! Parameters confined to the module
-    real(wp), parameter :: ZERO = 0.0_wp
-    real(wp), parameter :: HALF = 0.5_wp
-    real(wp), parameter :: ONE = 1.0_wp
-    real(wp), parameter :: TWO = 2.0_wp
-    real(wp), parameter :: THREE = 3.0_wp
-    real(wp), parameter :: SIX = 6.0_wp
+    real(wp),    parameter :: ZERO = 0.0_wp
+    real(wp),    parameter :: HALF = 0.5_wp
+    real(wp),    parameter :: ONE = 1.0_wp
+    real(wp),    parameter :: TWO = 2.0_wp
+    real(wp),    parameter :: THREE = 3.0_wp
+    real(wp),    parameter :: SIX = 6.0_wp
+    integer(ip), parameter :: BOTH_EVEN = 0
+    integer(ip), parameter :: N_EVEN_M_ODD = 1
+    integer(ip), parameter :: N_ODD_M_EVEN = 3
+    integer(ip), parameter :: BOTH_ODD = 4
 
 contains
 
@@ -120,7 +124,68 @@ contains
 
     end subroutine compute_parity
 
-    pure subroutine dnlfk(m, n, cp)
+
+    ! Purpose:
+    !
+    ! Computes fourier coefficients in the trigonometric series
+    ! representation of the normalized associated
+    ! legendre function pbar(n, m, theta) for use by
+    ! routines lfp and lfpt in calculating double
+    ! precision pbar(n, m, theta).
+    !
+    ! first define the normalized associated
+    ! legendre functions
+    !
+    ! pbar(m, n, theta) = sqrt((2*n+1)*factorial(n-m)
+    ! /(2*factorial(n+m)))*sin(theta)**m/(2**n*
+    ! factorial(n)) times the (n+m)th derivative of
+    ! (x**2-1)**n with respect to x=cos(theta)
+    !
+    ! where theta is colatitude.
+    !
+    ! then subroutine alfk computes the coefficients
+    ! cp(k) in the following trigonometric
+    ! expansion of pbar(m, n, theta).
+    !
+    ! 1) for n even and m even, pbar(m, n, theta) =
+    !    .5*cp(1) plus the sum from k=1 to k=n/2
+    !    of cp(k+1)*cos(2*k*th)
+    !
+    ! 2) for n even and m odd, pbar(m, n, theta) =
+    !    the sum from k=1 to k=n/2 of
+    !    cp(k)*sin(2*k*th)
+    !
+    ! 3) for n odd and m even, pbar(m, n, theta) =
+    !    the sum from k=1 to k=(n+1)/2 of
+    !    cp(k)*cos((2*k-1)*th)
+    !
+    ! 4) for n odd and m odd,  pbar(m, n, theta) =
+    !    the sum from k=1 to k=(n+1)/2 of
+    !    cp(k)*sin((2*k-1)*th)
+    !
+    !
+    ! usage                  call compute_fourier_coefficients(n, m, cp)
+    !
+    ! arguments
+    !
+    ! on input               n
+    !                          nonnegative integer specifying the degree of
+    !                          pbar(n, m, theta)
+    !
+    !                        m
+    !                          is the order of pbar(n, m, theta). m can be
+    !                          any integer however cp is computed such that
+    !                          pbar(n, m, theta) = 0 if abs(m) is greater
+    !                          than n and pbar(n, m, theta) = (-1)**m*
+    !                          pbar(n, -m, theta) for negative m.
+    !
+    ! on output              cp
+    !                          array of length (n/2)+1
+    !                          which contains the fourier coefficients in
+    !                          the trigonometric series representation of
+    !                          pbar(n, m, theta)
+    !
+    pure subroutine compute_fourier_coefficients(m, n, cp)
 
         ! Dummy arguments
         integer(ip), intent(in)  :: m
@@ -128,111 +193,122 @@ contains
         real(wp),    intent(out) :: cp(n/2+1)
 
         ! Local variables
-        integer(ip)         :: i, l, ma, nex,  nmms2
+        integer(ip)         :: i, j, ma, nex,  nmms2
         real(wp)            :: a1, b1, c1, t1, t2
         real(wp)            :: fk, cp2, pm1
         real(wp)            :: fden, fnmh, fnum, fnnp1, fnmsq
-        real(wp), parameter :: SC10=1024
+        real(wp), parameter :: SC10=1024_wp
         real(wp), parameter :: SC20=SC10**2
         real(wp), parameter :: SC40=SC20**2
-
+        real(wp), parameter :: SQRT3 = sqrt(THREE)
+        real(wp), parameter :: SQRT6 = sqrt(SIX)
 
         ma = abs(m)
 
-        if (ma > n) then
-            cp(1) = ZERO
-            return
-        end if
+        ! Preset cp(1) to 0.0
+        cp(1) = ZERO
 
-        if (n < 1) then
-            cp(1) = sqrt(TWO)
-        else if (n == 1) then
-            if (ma /= 0) then
-                cp(1) = sqrt(0.75_wp)
-                if (m == -1) then
-                    cp(1) = -cp(1)
+        if (ma > n) return
+
+        select case(n)
+            case(:0)
+                cp(1) = sqrt(TWO)
+            case(1)
+                select case (ma)
+                    case(0)
+                        cp(1) = SQRT6/TWO
+                    case default
+                        select case(m)
+                            case(-1)
+                                cp(1) = -SQRT3/TWO
+                            case default
+                                cp(1) = SQRT3/TWO
+                        end select
+                end select
+            case default
+                select case(mod(n+ma, 2))
+                    case(0)
+                        nmms2 = (n-ma)/2
+                        fnum = real(n+ma+1, kind=wp)
+                        fnmh = real(n-ma+1, kind=wp)
+                        pm1 = ONE
+                    case default
+                        nmms2 = (n-ma-1)/2
+                        fnum = real(n+ma+2, kind=wp)
+                        fnmh = real(n-ma+2, kind=wp)
+                        pm1 = -ONE
+                end select
+
+                t1 = ONE/SC20
+                nex = 20
+                fden = TWO
+
+                if (1 <= nmms2) then
+                    do i=1, nmms2
+                        t1 = fnum*t1/fden
+                        if (t1 > SC20) then
+                            t1 = t1/SC40
+                            nex = nex+40
+                        end if
+                        fnum = fnum+TWO
+                        fden = fden+TWO
+                    end do
                 end if
-            else
-                cp(1) = sqrt(1.5_wp)
-            end if
-        else
-            if (mod(n+ma, 2) /= 0) then
-                nmms2 = (n-ma-1)/2
-                fnum = real(n+ma+2, kind=wp)
-                fnmh = real(n-ma+2, kind=wp)
-                pm1 = -ONE
-            else
-                nmms2 = (n-ma)/2
-                fnum = real(n+ma+1, kind=wp)
-                fnmh = real(n-ma+1, kind=wp)
-                pm1 = ONE
-            end if
 
-            t1 = ONE/SC20
-            nex = 20
-            fden = TWO
+                if (mod(ma/2, 2) /= 0)then
+                    t1 = -(t1/TWO**(n-1-nex))
+                else
+                    t1 = t1/TWO**(n-1-nex)
+                end if
 
-            if (1 <= nmms2) then
-                do i=1, nmms2
-                    t1 = fnum*t1/fden
-                    if (t1 > SC20) then
-                        t1 = t1/SC40
-                        nex = nex+40
-                    end if
-                    fnum = fnum+TWO
-                    fden = fden+TWO
-                end do
-            end if
+                t2 = ONE
 
-            t1 = t1/TWO**(n-1-nex)
+                if (ma /= 0) then
+                    do i=1, ma
+                        t2 = fnmh*t2/(fnmh+pm1)
+                        fnmh = fnmh+TWO
+                    end do
+                end if
 
-            if (mod(ma/2, 2) /= 0) t1 = -t1
+                cp2 = t1*sqrt((real(n, kind=wp)+HALF)*t2)
+                fnnp1 = real(n*(n + 1), kind=wp)
+                fnmsq = fnnp1 - TWO * real(ma**2, kind=wp)
 
-            t2 = ONE
+                if (mod(n, 2) == 0 .and. mod(ma, 2) == 0) then
+                    j = (n + 1)/2 + 1
+                else
+                    j = (n + 1)/2
+                end if
 
-            if (ma /= 0) then
-                do i=1, ma
-                    t2 = fnmh*t2/(fnmh+pm1)
-                    fnmh = fnmh+TWO
-                end do
-            end if
+                if ((m < 0) .and. (mod(ma, 2) /= 0)) then
+                    cp(j) = -cp2
+                else
+                    cp(j) = cp2
+                end if
 
-            cp2 = t1*sqrt((real(n, kind=wp)+HALF)*t2)
-            fnnp1 = real(n*(n + 1), kind=wp)
-            fnmsq = fnnp1 - TWO * real(ma**2, kind=wp)
-            l = (n + 1)/2
+                if (j <= 1) return
 
-            if (mod(n, 2) == 0 .and. mod(ma, 2) == 0) l = l+1
-
-            cp(l) = cp2
-
-            if ((m < 0) .and. (mod(ma, 2) /= 0)) cp(l) = -cp(l)
-
-            if (l <= 1) return
-
-            fk = real(n, kind=wp)
-            a1 = (fk-TWO)*(fk-ONE)-fnnp1
-            b1 = TWO*(fk**2-fnmsq)
-            cp(l-1) = b1*cp(l)/a1
-
-            l = l - 1
-
-            do while (l > 1)
-                fk = fk-TWO
+                fk = real(n, kind=wp)
                 a1 = (fk-TWO)*(fk-ONE)-fnnp1
-                b1 = -TWO*(fk**2-fnmsq)
-                c1 = (fk+ONE)*(fk+TWO)-fnnp1
-                cp(l-1) = -(b1*cp(l)+c1*cp(l+1))/a1
-                l=l-1
-            end do
-        end if
+                b1 = TWO*(fk**2-fnmsq)
+                cp(j-1) = b1*cp(j)/a1
 
-    end subroutine dnlfk
+                do
+                    j = j - 1
+                    if (j <= 1) exit
+                    fk = fk-TWO
+                    a1 = (fk-TWO)*(fk-ONE)-fnnp1
+                    b1 = -TWO*(fk**2-fnmsq)
+                    c1 = (fk+ONE)*(fk+TWO)-fnnp1
+                    cp(j-1) = -(b1*cp(j)+c1*cp(j+1))/a1
+                end do
+        end select
 
-    pure subroutine dnlft(m, n, theta, cp, pb)
+    end subroutine compute_fourier_coefficients
+
+    pure subroutine compute_legendre_polys_from_fourier_coeff(m, n, theta, cp, pb)
 
         ! Dummy arguments
-
         integer(ip), intent(in)  :: m
         integer(ip), intent(in)  :: n
         real(wp),    intent(in)  :: theta
@@ -240,10 +316,8 @@ contains
         real(wp),    intent(out) :: pb
 
         ! Local variables
-
         integer(ip) ::  k, kdo
         real(wp)    :: temp, cos2t, cost, sin2t, sint
-
 
         cos2t = cos(TWO * theta)
         sin2t = sin(TWO * theta)
@@ -317,7 +391,7 @@ contains
             end if
         end if
 
-    end subroutine dnlft
+    end subroutine compute_legendre_polys_from_fourier_coeff
 
     !
     ! Purpose:
@@ -388,11 +462,11 @@ contains
         ninc = 1
         select case (mode)
             case (1)
-                !     only compute pmn for n-m odd
+                ! Only compute pmn for n-m odd
                 ms = m+2
                 ninc = 2
             case (2)
-                !     only compute pmn for n-m even
+                ! Only compute pmn for n-m even
                 ms = m+1
                 ninc = 2
         end select
@@ -403,40 +477,46 @@ contains
             km2 => column_indices(2) &
             )
 
-            if (m > 1) then
-                do np1=ms, nlat, ninc
-                    n = np1-1
-                    imn = get_legin_indx(m, n)
-                    if (n >= l) imn = get_legin_imndx(l, m, n)
-                    do i=1, late
-                        pmn(np1, i, km0) = abel(imn)*pmn(n-1, i, km2) &
-                            +bbel(imn)*pmn(n-1, i, km0) &
-                            -cbel(imn)*pmn(np1, i, km2)
+            select case (m)
+                case(0)
+                    do np1=ms, nlat, ninc
+                        do i=1, late
+                            pmn(np1, i, km0) = p0n(np1, i)
+                        end do
                     end do
-                end do
-            else if (m == 0) then
-                do np1=ms, nlat, ninc
-                    do i=1, late
-                        pmn(np1, i, km0) = p0n(np1, i)
+                case(1)
+                    do np1=ms, nlat, ninc
+                        do i=1, late
+                            pmn(np1, i, km0) = p1n(np1, i)
+                        end do
                     end do
-                end do
-            else if (m == 1) then
-                do np1=ms, nlat, ninc
-                    do i=1, late
-                        pmn(np1, i, km0) = p1n(np1, i)
-                    end do
-                end do
-            end if
+                case(2:)
+                    do np1=ms, nlat, ninc
+                        n = np1-1
 
-            !   Permute column indices
-            !   km0, km1, km2 store m, m-1, m-2 columns
+                        if (l <= n) then
+                            imn = get_legin_imndx(l, m, n)
+                        else
+                            imn = get_legin_indx(m, n)
+                        end if
+
+                        do i=1, late
+                            pmn(np1, i, km0) = abel(imn)*pmn(n-1, i, km2) &
+                                +bbel(imn)*pmn(n-1, i, km0) &
+                                -cbel(imn)*pmn(np1, i, km2)
+                        end do
+                    end do
+            end select
+
+            ! Permute column indices
+            ! km0, km1, km2 store m, m-1, m-2 columns
             kmt = km0
             km0 = km2
             km2 = km1
             km1 = kmt
         end associate
 
-        !     set current m index in output param km
+        ! Set current m index in output param km
         km = kmt
 
     end subroutine legin_lower_routine
@@ -556,43 +636,44 @@ contains
         i2 = i3
         i3 = itemp
 
-        if (m < 1) then
-            i1 = 1
-            i2 = 2
-            i3 = 3
-            z(:,1:nlat, i3) = zz(:,1:nlat)
-        else if (m == 1) then
-            z(:,2:nlat, i3) = z1(:,2:nlat)
-        else
-            ns = ((m-2)*(nlat+nlat-m-1))/2+1
+        select case (m)
+            case(:0)
+                i1 = 1
+                i2 = 2
+                i3 = 3
+                z(:,1:nlat, i3) = zz(:,1:nlat)
+            case(1)
+                z(:,2:nlat, i3) = z1(:,2:nlat)
+            case default
+                ns = ((m-2)*(nlat+nlat-m-1))/2+1
 
-            if (isym /= 1) then
-                z(:,m+1,i3) = a(ns)*z(:,m-1,i1)-c(ns)*z(:,m+1,i1)
-            end if
+                if (isym /= 1) then
+                    z(:,m+1,i3) = a(ns)*z(:,m-1,i1)-c(ns)*z(:,m+1,i1)
+                end if
 
-            if (m == nlat-1) return
+                if (m == nlat-1) return
 
-            if (isym /= 2) then
-                ns = ns+1
-                z(:, m+2, i3) = a(ns)*z(:, m, i1) -c(ns)*z(:, m+2, i1)
-            end if
+                if (isym /= 2) then
+                    ns = ns+1
+                    z(:, m+2, i3) = a(ns)*z(:, m, i1) -c(ns)*z(:, m+2, i1)
+                end if
 
-            nstrt = m+3
+                nstrt = m+3
 
-            if (isym == 1) nstrt = m+4
+                if (isym == 1) nstrt = m+4
 
-            if (nstrt > nlat) return
+                if (nstrt > nlat) return
 
-            nstp = 2
+                nstp = 2
 
-            if (isym == 0) nstp = 1
+                if (isym == 0) nstp = 1
 
-            do np1=nstrt, nlat, nstp
-                ns = ns+nstp
-                z(:,np1,i3) = &
-                    a(ns)*z(:,np1-2,i1)+b(ns)*z(:,np1-2,i3)-c(ns)*z(:,np1,i1)
-            end do
-        end if
+                do np1=nstrt, nlat, nstp
+                    ns = ns+nstp
+                    z(:,np1,i3) = &
+                        a(ns)*z(:,np1-2,i1)+b(ns)*z(:,np1-2,i3)-c(ns)*z(:,np1,i1)
+                end do
+        end select
 
     end subroutine zfin_lower_routine
 
@@ -622,7 +703,7 @@ contains
 
     end function get_zfin_workspace_indices
 
-    subroutine initialize_workspace_for_scalar_analysis_regular_grid(nlat, nlon, wzfin, dwork)
+    subroutine initialize_scalar_analysis_regular_grid(nlat, nlon, wzfin, dwork)
 
         ! Dummy arguments
         integer(ip), intent(in)   :: nlat
@@ -649,7 +730,7 @@ contains
 
         call zfinit_lower_routine(nlat, nlon, imid, wzfin, wzfin(iw1), dwork, dwork(iw2))
 
-    end subroutine initialize_workspace_for_scalar_analysis_regular_grid
+    end subroutine initialize_scalar_analysis_regular_grid
 
     !
     !     Remarks:
@@ -716,7 +797,7 @@ contains
         lc = (nlat+1)/2
         sc1 = TWO/(nlat-1)
 
-        call dnlfk(m, n, work)
+        call compute_fourier_coefficients(m, n, work)
 
         if (mod(n,2) <= 0) then
             if (mod(m,2) <= 0) then
@@ -1033,7 +1114,7 @@ contains
 
     end function get_alin_workspace_indices
 
-    pure subroutine initialize_workspace_for_scalar_synthesis_regular_grid(nlat, nlon, walin, dwork)
+    pure subroutine initialize_scalar_synthesis_regular_grid(nlat, nlon, walin, dwork)
 
         ! Dummy arguments
         integer(ip), intent(in)   :: nlat
@@ -1052,7 +1133,7 @@ contains
         !
         call alinit_lower_routine(nlat, nlon, imid, walin, walin(iw1), dwork)
 
-    end subroutine initialize_workspace_for_scalar_synthesis_regular_grid
+    end subroutine initialize_scalar_synthesis_regular_grid
 
     pure subroutine alinit_lower_routine(nlat, nlon, imid, p, abc, cp)
 
@@ -1074,10 +1155,10 @@ contains
             m = mp1-1
             do np1=mp1, nlat
                 n = np1-1
-                call dnlfk(m, n, cp)
+                call compute_fourier_coefficients(m, n, cp)
                 do i=1, imid
                     th = real(i-1, kind=wp)*dt
-                    call dnlft(m, n, th, cp, ph)
+                    call compute_legendre_polys_from_fourier_coeff(m, n, th, cp, ph)
                     p(i, np1, mp1) = ph
                 end do
             end do
@@ -1172,7 +1253,7 @@ contains
 
     end subroutine rabcp_lower_routine
 
-    subroutine initialize_workspace_for_scalar_analysis_regular_grid_saved(nlat, nlon, imid, z, idz, zin, wzfin, dwork)
+    subroutine initialize_scalar_analysis_regular_grid_saved(nlat, nlon, imid, z, idz, zin, wzfin, dwork)
 
         ! Dummy arguments
         integer(ip), intent(in)     :: nlat
@@ -1187,7 +1268,7 @@ contains
         ! Local variables
         integer(ip) :: i, m, i3, mn, mp1, np1, mmax
 
-        call initialize_workspace_for_scalar_analysis_regular_grid(nlat, nlon, wzfin, dwork)
+        call initialize_scalar_analysis_regular_grid(nlat, nlon, wzfin, dwork)
 
         mmax = min(nlat, nlon/2+1)
 
@@ -1202,9 +1283,9 @@ contains
             end do
         end do
 
-    end subroutine initialize_workspace_for_scalar_analysis_regular_grid_saved
+    end subroutine initialize_scalar_analysis_regular_grid_saved
 
-    subroutine initialize_workspace_for_scalar_synthesis_regular_grid_saved(nlat, nlon, imid, p, pin, walin, dwork)
+    subroutine initialize_scalar_synthesis_regular_grid_saved(nlat, nlon, imid, p, pin, walin, dwork)
 
         ! Dummy arguments
         integer(ip), intent(in)     :: nlat
@@ -1218,7 +1299,7 @@ contains
         ! Local variables
         integer(ip) :: m, i3, mn, mp1, np1, mmax
 
-        call initialize_workspace_for_scalar_synthesis_regular_grid(nlat, nlon, walin, dwork)
+        call initialize_scalar_synthesis_regular_grid(nlat, nlon, walin, dwork)
 
         mmax = min(nlat, nlon/2+1)
 
@@ -1231,7 +1312,7 @@ contains
             end do
         end do
 
-    end subroutine initialize_workspace_for_scalar_synthesis_regular_grid_saved
+    end subroutine initialize_scalar_synthesis_regular_grid_saved
 
     subroutine zvinit(nlat, nlon, wzvin, dwork)
 
@@ -1598,7 +1679,7 @@ contains
     ! The length of wvbin is 2*nlat*imid+3*((nlat-3)*nlat+2)/2
     ! The length of dwork is nlat+2
     !
-    subroutine vbinit(nlat, nlon, wvbin, dwork)
+    subroutine initialize_polar_components_for_regular_grids(nlat, nlon, wvbin, dwork)
 
         ! Dummy arguments
         integer(ip), intent(in)  :: nlat
@@ -1615,7 +1696,7 @@ contains
 
         call vbinit_lower_routine(nlat, nlon, imid, wvbin, wvbin(iw1), dwork, dwork(iw2))
 
-    end subroutine vbinit
+    end subroutine initialize_polar_components_for_regular_grids
 
     ! Remarks:
     !
@@ -1664,7 +1745,7 @@ contains
     ! The length of wwbin is 2*nlat*imid+3*((nlat-3)*nlat+2)/2
     ! The length of dwork is nlat+2
     !
-    subroutine wbinit(nlat, nlon, wwbin, dwork)
+    subroutine initialize_azimuthal_components_for_regular_grids(nlat, nlon, wwbin, dwork)
 
         ! Dummy arguments
         integer(ip), intent(in)  :: nlat
@@ -1681,7 +1762,7 @@ contains
 
         call wbinit_lower_routine(nlat, nlon, imid, wwbin, wwbin(iw1), dwork, dwork(iw2))
 
-    end subroutine wbinit
+    end subroutine initialize_azimuthal_components_for_regular_grids
 
     ! Remarks:
     !
@@ -1725,7 +1806,7 @@ contains
 
     end subroutine wbinit_lower_routine
 
-    subroutine vbin(ityp, nlat, nlon, m, vb, i3, wvbin)
+    subroutine compute_polar_component(ityp, nlat, nlon, m, vb, i3, wvbin)
 
         ! Dummy arguments
         integer(ip), intent(in)     :: ityp
@@ -1756,7 +1837,7 @@ contains
         call vbin_lower_routine(ityp, nlat, m, vb, imid, i3, wvbin, wvbin(iw1), wvbin(iw2), &
             wvbin(iw3), wvbin(iw4))
 
-    end subroutine vbin
+    end subroutine compute_polar_component
 
     subroutine vbin_lower_routine(ityp, nlat, m, vb, imid, i3, vbz, vb1, a, b, c)
 
@@ -1783,83 +1864,89 @@ contains
         i1 = i2
         i2 = i3
         i3 = ihold
-        if (m < 1) then
-            i1 = 1
-            i2 = 2
-            i3 = 3
-            do np1=1, nlat
-                do i=1, imid
-                    vb(i, np1, i3) = vbz(i, np1)
+
+        select case(m)
+            case(:0)
+                i1 = 1
+                i2 = 2
+                i3 = 3
+                do np1=1, nlat
+                    do i=1, imid
+                        vb(i, np1, i3) = vbz(i, np1)
+                    end do
                 end do
-            end do
-        else if (m == 1) then
-            do np1=2, nlat
-                do i=1, imid
-                    vb(i, np1, i3) = vb1(i, np1)
+            case(1)
+                do np1=2, nlat
+                    do i=1, imid
+                        vb(i, np1, i3) = vb1(i, np1)
+                    end do
                 end do
-            end do
-        else
-            ns = ((m-2)*(nlat+nlat-m-1))/2+1
+            case default
+                ns = ((m-2)*(nlat+nlat-m-1))/2+1
 
-            if (ityp /= 1) then
-                do i=1, imid
-                    vb(i, m+1, i3) = a(ns)*vb(i, m-1, i1)-c(ns)*vb(i, m+1, i1)
+                if (ityp /= 1) then
+                    do i=1, imid
+                        vb(i, m+1, i3) = a(ns)*vb(i, m-1, i1)-c(ns)*vb(i, m+1, i1)
+                    end do
+                end if
+
+                if (m == nlat-1) return
+
+                if (ityp /= 2) then
+                    ns = ns+1
+                    do i=1, imid
+                        vb(i, m+2, i3) = a(ns)*vb(i, m, i1)-c(ns)*vb(i, m+2, i1)
+                    end do
+                end if
+
+                nstrt = m+3
+
+                if (ityp == 1) nstrt = m+4
+
+                if (nstrt > nlat) return
+
+                nstp = 2
+
+                if (ityp == 0) nstp = 1
+
+                do np1=nstrt, nlat, nstp
+                    ns = ns+nstp
+                    do i=1, imid
+                        vb(i, np1, i3) = a(ns)*vb(i, np1-2, i1)+b(ns)*vb(i, np1-2, i3) &
+                            -c(ns)*vb(i, np1, i1)
+                    end do
                 end do
-            end if
-
-            if (m == nlat-1) return
-
-            if (ityp /= 2) then
-                ns = ns+1
-                do i=1, imid
-                    vb(i, m+2, i3) = a(ns)*vb(i, m, i1)-c(ns)*vb(i, m+2, i1)
-                end do
-            end if
-
-            nstrt = m+3
-
-            if (ityp == 1) nstrt = m+4
-
-            if (nstrt > nlat) return
-
-            nstp = 2
-
-            if (ityp == 0) nstp = 1
-
-            do np1=nstrt, nlat, nstp
-                ns = ns+nstp
-                do i=1, imid
-                    vb(i, np1, i3) = a(ns)*vb(i, np1-2, i1)+b(ns)*vb(i, np1-2, i3) &
-                        -c(ns)*vb(i, np1, i1)
-                end do
-            end do
-        end if
+        end select
 
     end subroutine vbin_lower_routine
 
-    subroutine wbin(ityp, nlat, nlon, m, wb, i3, wwbin)
+    subroutine compute_azimuthal_component(ityp, nlat, nlon, m, wb, i3, wwbin)
 
-        integer(ip) :: i3
+        ! Dummy arguments
+        integer(ip), intent(in)    :: ityp
+        integer(ip), intent(in)    :: nlat
+        integer(ip), intent(in)    :: nlon
+        integer(ip), intent(in)    :: m
+        integer(ip), intent(inout) :: i3
+        real(wp),    intent(out)   :: wb(*)
+        real(wp),    intent(in)    :: wwbin(*)
+
+        ! Local variables
         integer(ip) :: imid
-        integer(ip), intent(in) :: ityp
         integer(ip) :: iw1
         integer(ip) :: iw2
         integer(ip) :: iw3
         integer(ip) :: iw4
         integer(ip) :: labc
         integer(ip) :: lim
-        integer(ip) :: m
         integer(ip) :: mmax
-        integer(ip), intent(in) :: nlat
-        integer(ip), intent(in) :: nlon
-        real(wp) :: wb(*)
-        real(wp) :: wwbin(*)
-
 
         imid = (nlat+1)/2
         lim = nlat*imid
         mmax = min(nlat, (nlon+1)/2)
         labc = (max(mmax-2, 0)*(2*nlat-mmax-1))/2
+
+        ! Set workspace index pointers
         iw1 = lim+1
         iw2 = iw1+lim
         iw3 = iw2+labc
@@ -1870,7 +1957,7 @@ contains
         call wbin_lower_routine(ityp, nlat, m, wb, imid, i3, wwbin, wwbin(iw1), wwbin(iw2), &
             wwbin(iw3), wwbin(iw4))
 
-    end subroutine wbin
+    end subroutine compute_azimuthal_component
 
     subroutine wbin_lower_routine(ityp, nlat, m, wb, imid, i3, wb1, wb2, a, b, c)
 
@@ -1897,56 +1984,59 @@ contains
         i1 = i2
         i2 = i3
         i3 = ihold
-        if (m < 2) then
-            i1 = 1
-            i2 = 2
-            i3 = 3
-            do np1=2, nlat
-                do i=1, imid
-                    wb(i, np1, i3) = wb1(i, np1)
+
+        select case(m)
+            case(:1)
+                i1 = 1
+                i2 = 2
+                i3 = 3
+
+                do np1=2, nlat
+                    do i=1, imid
+                        wb(i, np1, i3) = wb1(i, np1)
+                    end do
                 end do
-            end do
-        else if (m == 2) then
-            do np1=3, nlat
-                do i=1, imid
-                    wb(i, np1, i3) = wb2(i, np1)
+            case(2)
+                do np1=3, nlat
+                    do i=1, imid
+                        wb(i, np1, i3) = wb2(i, np1)
+                    end do
                 end do
-            end do
-        else
-            ns = ((m-2)*(nlat+nlat-m-1))/2+1
+            case default
 
-            if (ityp /= 1) then
-                do i=1, imid
-                    wb(i, m+1, i3) = a(ns)*wb(i, m-1, i1)-c(ns)*wb(i, m+1, i1)
+                ns = ((m-2)*(nlat+nlat-m-1))/2+1
+
+                if (ityp /= 1) then
+                    do i=1, imid
+                        wb(i, m+1, i3) = a(ns)*wb(i, m-1, i1)-c(ns)*wb(i, m+1, i1)
+                    end do
+                end if
+
+                if (m == nlat-1) return
+
+                if (ityp /= 2) then
+                    ns = ns+1
+                    do i=1, imid
+                        wb(i, m+2, i3) = a(ns)*wb(i, m, i1)-c(ns)*wb(i, m+2, i1)
+                    end do
+                end if
+
+                nstrt = m+3
+
+                if (ityp == 1) nstrt = m+4
+
+                if (nstrt > nlat) return
+
+                nstp = 2
+                if (ityp == 0) nstp = 1
+                do np1=nstrt, nlat, nstp
+                    ns = ns+nstp
+                    do i=1, imid
+                        wb(i, np1, i3) = a(ns)*wb(i, np1-2, i1)+b(ns)*wb(i, np1-2, i3) &
+                            -c(ns)*wb(i, np1, i1)
+                    end do
                 end do
-            end if
-
-            if (m == nlat-1) return
-
-            if (ityp /= 2) then
-                ns = ns+1
-                do i=1, imid
-                    wb(i, m+2, i3) = a(ns)*wb(i, m, i1)-c(ns)*wb(i, m+2, i1)
-                end do
-            end if
-
-            nstrt = m+3
-
-            if (ityp == 1) nstrt = m+4
-
-            if (nstrt > nlat) return
-
-            nstp = 2
-            if (ityp == 0) nstp = 1
-            do np1=nstrt, nlat, nstp
-                ns = ns+nstp
-                do i=1, imid
-                    wb(i, np1, i3) = a(ns)*wb(i, np1-2, i1)+b(ns)*wb(i, np1-2, i3) &
-                        -c(ns)*wb(i, np1, i1)
-                end do
-            end do
-        end if
-
+        end select
 
     end subroutine wbin_lower_routine
 
@@ -2489,12 +2579,9 @@ contains
 
     end subroutine dzwt
 
-
-
     subroutine dvbk(m, n, cv, work)
 
         ! Dummy arguments
-
         integer(ip), intent(in)  :: m
         integer(ip), intent(in)  :: n
         real(wp),    intent(out) :: cv(*)
@@ -2514,7 +2601,7 @@ contains
         srnp1 = sqrt(fn * (fn + ONE))
         cf = TWO*real(m, kind=wp)/srnp1
 
-        call dnlfk(m, n, work)
+        call compute_fourier_coefficients(m, n, work)
 
         select case (mod(n,2))
             case (0) ! n even
@@ -2588,7 +2675,7 @@ contains
         srnp1 = sqrt(fn * (fn + ONE))
         cf = TWO * real(m, kind=wp)/srnp1
 
-        call dnlfk(m, n, work)
+        call compute_fourier_coefficients(m, n, work)
 
         if (m == 0) return
 
@@ -3017,7 +3104,7 @@ contains
 
     end subroutine rabcw_lower_routine
 
-    subroutine vtinit(nlat, nlon, wvbin, dwork)
+    subroutine initialize_polar_components_regular_colat_deriv(nlat, nlon, wvbin, dwork)
 
         integer(ip) :: imid
         integer(ip) :: iw1
@@ -3037,7 +3124,7 @@ contains
         !
         call vtinit_lower_routine(nlat, nlon, imid, wvbin, wvbin(iw1), dwork, dwork(iw2))
 
-    end subroutine vtinit
+    end subroutine initialize_polar_components_regular_colat_deriv
 
     ! Remark:
     !
@@ -3086,7 +3173,7 @@ contains
 
     end subroutine vtinit_lower_routine
 
-    subroutine wtinit(nlat, nlon, wwbin, dwork)
+    subroutine initialize_azimuthal_components_regular_colat_deriv(nlat, nlon, wwbin, dwork)
 
         integer(ip) :: imid
         integer(ip) :: iw1
@@ -3105,7 +3192,7 @@ contains
         !
         call wtinit_lower_routine(nlat, nlon, imid, wwbin, wwbin(iw1), dwork, dwork(iw2))
 
-    end subroutine wtinit
+    end subroutine initialize_azimuthal_components_regular_colat_deriv
 
     subroutine wtinit_lower_routine(nlat, nlon, imid, wb, abc, cwb, work)
 
@@ -3149,7 +3236,7 @@ contains
 
     end subroutine wtinit_lower_routine
 
-    subroutine vtgint(nlat, nlon, theta, wvbin, work)
+    subroutine initialize_polar_components_gaussian_colat_deriv(nlat, nlon, theta, wvbin, work)
 
         integer(ip) :: imid
         integer(ip) :: iw1
@@ -3172,7 +3259,7 @@ contains
         !
         call vtgint_lower_routine(nlat, nlon, imid, theta, wvbin, wvbin(iw1), work, work(iw2))
 
-    end subroutine vtgint
+    end subroutine initialize_polar_components_gaussian_colat_deriv
 
     subroutine vtgint_lower_routine(nlat, nlon, imid, theta, vb, abc, cvb, work)
 
@@ -3212,7 +3299,7 @@ contains
 
     end subroutine vtgint_lower_routine
 
-    subroutine wtgint(nlat, nlon, theta, wwbin, work)
+    subroutine initialize_azimuthal_components_gaussian_colat_deriv(nlat, nlon, theta, wwbin, work)
 
         integer(ip) :: imid
         integer(ip) :: iw1
@@ -3234,7 +3321,7 @@ contains
         !
         call wtgint_lower_routine(nlat, nlon, imid, theta, wwbin, wwbin(iw1), work, work(iw2))
 
-    end subroutine wtgint
+    end subroutine initialize_azimuthal_components_gaussian_colat_deriv
 
     subroutine wtgint_lower_routine(nlat, nlon, imid, theta, wb, abc, cwb, work)
 
@@ -3296,7 +3383,7 @@ contains
         srnp1 = sqrt(fn * (fn + ONE))
         cf = TWO * real(m, kind=wp)/srnp1
 
-        call dnlfk(m, n, work)
+        call compute_fourier_coefficients(m, n, work)
 
         select case (mod(n,2))
             case (0) ! n even
@@ -3362,7 +3449,7 @@ contains
         srnp1 = sqrt(fn * (fn + ONE))
         cf = TWO * real(m, kind=wp)/srnp1
 
-        call dnlfk(m, n, work)
+        call compute_fourier_coefficients(m, n, work)
 
         if (m == 0) return
 
@@ -3601,7 +3688,7 @@ contains
 
     end subroutine dwtt
 
-    subroutine initialize_workspace_for_polar_components_gaussian_grid(nlat, nlon, theta, wvbin, work)
+    subroutine initialize_polar_components_gaussian_grid(nlat, nlon, theta, wvbin, work)
 
         integer(ip) :: imid
         integer(ip) :: iw1
@@ -3623,7 +3710,7 @@ contains
         !
         call vbgint_lower_routine(nlat, nlon, imid, theta, wvbin, wvbin(iw1), work, work(iw2))
 
-    end subroutine initialize_workspace_for_polar_components_gaussian_grid
+    end subroutine initialize_polar_components_gaussian_grid
 
     subroutine vbgint_lower_routine(nlat, nlon, imid, theta, vb, abc, cvb, work)
 
@@ -3664,7 +3751,7 @@ contains
 
     end subroutine vbgint_lower_routine
 
-    subroutine initialize_workspace_for_azimuthal_components_gaussian_grid(nlat, nlon, theta, wwbin, work)
+    subroutine initialize_azimuthal_components_gaussian_grid(nlat, nlon, theta, wwbin, work)
 
         ! Dummy arguments
         integer(ip), intent(in) :: nlat
@@ -3688,7 +3775,7 @@ contains
         !
         call wbgint_lower_routine(nlat, nlon, imid, theta, wwbin, wwbin(iw1), work, work(iw2))
 
-    end subroutine initialize_workspace_for_azimuthal_components_gaussian_grid
+    end subroutine initialize_azimuthal_components_gaussian_grid
 
     subroutine wbgint_lower_routine(nlat, nlon, imid, theta, wb, abc, cwb, work)
 

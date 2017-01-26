@@ -437,7 +437,7 @@ contains
         if (ldwork < nlat+1) return
         ierror = 0
 
-        call sphere_aux%initialize_workspace_for_scalar_synthesis_regular_grid(nlat, nlon, wshsec, dwork)
+        call sphere_aux%initialize_scalar_synthesis_regular_grid(nlat, nlon, wshsec, dwork)
 
         ! set workspace index
         iw1 = lzz1+labc+1

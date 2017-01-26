@@ -753,25 +753,25 @@ contains
         np1 = 1
         n = 0
         m = 0
-        call sphere_aux%dnlfk(m, n, work)
+        call sphere_aux%compute_fourier_coefficients(m, n, work)
         do i=1, late
-            call sphere_aux%dnlft(m, n, dtheta(i), work, pb)
+            call sphere_aux%compute_legendre_polys_from_fourier_coeff(m, n, dtheta(i), work, pb)
             p0n(1, i) = pb
         end do
         !     compute p0n, p1n for all theta(i) when n.gt.0
         do np1=2, nlat
             n = np1-1
             m = 0
-            call sphere_aux%dnlfk(m, n, work)
+            call sphere_aux%compute_fourier_coefficients(m, n, work)
             do i=1, late
-                call sphere_aux%dnlft(m, n, dtheta(i), work, pb)
+                call sphere_aux%compute_legendre_polys_from_fourier_coeff(m, n, dtheta(i), work, pb)
                 p0n(np1, i) = pb
             end do
             !     compute m=1 legendre polynomials for all n and theta(i)
             m = 1
-            call sphere_aux%dnlfk(m, n, work)
+            call sphere_aux%compute_fourier_coefficients(m, n, work)
             do i=1, late
-                call sphere_aux%dnlft(m, n, dtheta(i), work, pb)
+                call sphere_aux%compute_legendre_polys_from_fourier_coeff(m, n, dtheta(i), work, pb)
                 p1n(np1, i) = pb
             end do
         end do

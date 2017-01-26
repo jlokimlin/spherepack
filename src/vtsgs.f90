@@ -1181,11 +1181,11 @@ contains
             return
         end if
 
-        call sphere_aux%vtgint(nlat, nlon, theta, wvbin, dwork)
+        call sphere_aux%initialize_polar_components_gaussian_colat_deriv(nlat, nlon, theta, wvbin, dwork)
 
         do mp1=1, mmax
             m = mp1-1
-            call sphere_aux%vbin(0, nlat, nlon, m, vin, i3, wvbin)
+            call sphere_aux%compute_polar_component(0, nlat, nlon, m, vin, i3, wvbin)
             do np1=mp1, nlat
                 mn = m*(nlat-1)-(m*(m-1))/2+np1
                 do i=1, imid
@@ -1194,11 +1194,11 @@ contains
             end do
         end do
 
-        call sphere_aux%wtgint(nlat, nlon, theta, wvbin, dwork)
+        call sphere_aux%initialize_azimuthal_components_gaussian_colat_deriv(nlat, nlon, theta, wvbin, dwork)
 
         do mp1=1, mmax
             m = mp1-1
-            call sphere_aux%wbin(0, nlat, nlon, m, vin, i3, wvbin)
+            call sphere_aux%compute_azimuthal_component(0, nlat, nlon, m, vin, i3, wvbin)
             do np1=mp1, nlat
                 mn = m*(nlat-1)-(m*(m-1))/2+np1
                 do i=1, imid

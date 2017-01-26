@@ -1310,18 +1310,18 @@ contains
             !
             !  Compute dpbar for m=0
             !
-            call sphere_aux%dnlfk(0, n, work)
+            call sphere_aux%compute_fourier_coefficients(0, n, work)
             mn = get_index(0, n, nlat)
             do i=1, imid
-                call sphere_aux%dnlft(0, n, dthet(i), work, dpbar(i, 1, np))
+                call sphere_aux%compute_legendre_polys_from_fourier_coeff(0, n, dthet(i), work, dpbar(i, 1, np))
             end do
             !
             !  Compute dpbar for m=1
             !
-            call sphere_aux%dnlfk(1, n, work)
+            call sphere_aux%compute_fourier_coefficients(1, n, work)
             mn = get_index(1, n, nlat)
             do i=1, imid
-                call sphere_aux%dnlft(1, n, dthet(i), work, dpbar(i, 2, np))
+                call sphere_aux%compute_legendre_polys_from_fourier_coeff(1, n, dthet(i), work, dpbar(i, 2, np))
             end do
             !
             !  Compute and store dpbar for m=2, n

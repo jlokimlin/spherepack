@@ -1156,22 +1156,22 @@ contains
 
         mmax = min(nlat, (nlon+1)/2)
 
-        call sphere_aux%vtinit(nlat, nlon, wzvin, dwork)
+        call sphere_aux%initialize_polar_components_regular_colat_deriv(nlat, nlon, wzvin, dwork)
 
         do mp1=1, mmax
             m = mp1-1
-            call sphere_aux%vbin(0, nlat, nlon, m, vin, i3, wzvin)
+            call sphere_aux%compute_polar_component(0, nlat, nlon, m, vin, i3, wzvin)
             do np1=mp1, nlat
                 mn = m*(nlat-1)-(m*(m-1))/2+np1
                 vb(1:imid, mn) = vin(1:imid, np1, i3)
             end do
         end do
 
-        call sphere_aux%wtinit(nlat, nlon, wzvin, dwork)
+        call sphere_aux%initialize_azimuthal_components_regular_colat_deriv(nlat, nlon, wzvin, dwork)
 
         do mp1=1, mmax
             m = mp1-1
-            call sphere_aux%wbin(0, nlat, nlon, m, vin, i3, wzvin)
+            call sphere_aux%compute_azimuthal_component(0, nlat, nlon, m, vin, i3, wzvin)
             do np1=mp1, nlat
                 mn = m*(nlat-1)-(m*(m-1))/2+np1
                 wb(1:imid, mn) = vin(1:imid, np1, i3)
