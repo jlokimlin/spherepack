@@ -970,7 +970,7 @@ contains
                 !
                 !  case ityp=4 ,  v even, w odd, and cr and ci equal 0.
                 !
-                !     case m=0
+                ! case m=0
                 !
                 do k=1, nt
                     do i=1, imid
@@ -1015,7 +1015,7 @@ contains
                 !
                 !  case ityp=5   v even, w odd, and br and bi equal zero
                 !
-                !     case m=0
+                ! case m=0
                 !
                 do k=1, nt
                     do i=1, imm1
@@ -1060,7 +1060,7 @@ contains
                 !
                 !  case ityp=6 ,  v odd , w even
                 !
-                !     case m=0
+                ! case m=0
                 !
                 do k=1, nt
                     do i=1, imid
@@ -1180,7 +1180,7 @@ contains
                 !
                 !  case ityp=8   v odd, w even, and both br and bi equal zero
                 !
-                !     case m=0
+                ! case m=0
                 !
                 do k=1, nt
                     do i=1, imid

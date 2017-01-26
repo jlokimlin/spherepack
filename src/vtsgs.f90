@@ -532,9 +532,9 @@ contains
         vector_symmetry_cases: select case (ityp)
             case (0)
                 !
-                !     case ityp=0   no symmetries
+                ! case ityp=0   no symmetries
                 !
-                !     case m = 0
+                ! case m = 0
                 !
                 do k=1, nt
                     do np1=2, ndo2, 2
@@ -553,72 +553,73 @@ contains
                     end do
                 end do
                 !
-                !     case m = 1 through nlat-1
+                ! case m = 1 through nlat-1
                 !
-                if(mmax < 2) exit vector_symmetry_cases
+                if (mmax < 2) exit vector_symmetry_cases
                 do mp1=2, mmax
                     m = mp1-1
                     mb = m*(nlat-1)-(m*(m-1))/2
                     mp2 = mp1+1
-                    if(mp1 > ndo1) goto 26
-                    do k=1, nt
-                        do np1=mp1, ndo1, 2
-                            mn = mb+np1
-                            do i=1, imm1
-                                vte(i, 2*mp1-2, k) = vte(i, 2*mp1-2, k)+br(mp1, np1, k)*vb(i, mn)
-                                vto(i, 2*mp1-2, k) = vto(i, 2*mp1-2, k)-ci(mp1, np1, k)*wb(i, mn)
-                                vte(i, 2*mp1-1, k) = vte(i, 2*mp1-1, k)+bi(mp1, np1, k)*vb(i, mn)
-                                vto(i, 2*mp1-1, k) = vto(i, 2*mp1-1, k)+cr(mp1, np1, k)*wb(i, mn)
-                                wte(i, 2*mp1-2, k) = wte(i, 2*mp1-2, k)-cr(mp1, np1, k)*vb(i, mn)
-                                wto(i, 2*mp1-2, k) = wto(i, 2*mp1-2, k)-bi(mp1, np1, k)*wb(i, mn)
-                                wte(i, 2*mp1-1, k) = wte(i, 2*mp1-1, k)-ci(mp1, np1, k)*vb(i, mn)
-                                wto(i, 2*mp1-1, k) = wto(i, 2*mp1-1, k)+br(mp1, np1, k)*wb(i, mn)
+                    if (mp1 <= ndo1) then
+                        do k=1, nt
+                            do np1=mp1, ndo1, 2
+                                mn = mb+np1
+                                do i=1, imm1
+                                    vte(i, 2*mp1-2, k) = vte(i, 2*mp1-2, k)+br(mp1, np1, k)*vb(i, mn)
+                                    vto(i, 2*mp1-2, k) = vto(i, 2*mp1-2, k)-ci(mp1, np1, k)*wb(i, mn)
+                                    vte(i, 2*mp1-1, k) = vte(i, 2*mp1-1, k)+bi(mp1, np1, k)*vb(i, mn)
+                                    vto(i, 2*mp1-1, k) = vto(i, 2*mp1-1, k)+cr(mp1, np1, k)*wb(i, mn)
+                                    wte(i, 2*mp1-2, k) = wte(i, 2*mp1-2, k)-cr(mp1, np1, k)*vb(i, mn)
+                                    wto(i, 2*mp1-2, k) = wto(i, 2*mp1-2, k)-bi(mp1, np1, k)*wb(i, mn)
+                                    wte(i, 2*mp1-1, k) = wte(i, 2*mp1-1, k)-ci(mp1, np1, k)*vb(i, mn)
+                                    wto(i, 2*mp1-1, k) = wto(i, 2*mp1-1, k)+br(mp1, np1, k)*wb(i, mn)
+                                end do
+                                if (mlat /= 0) then
+                                    vte(imid, 2*mp1-2, k) = vte(imid, 2*mp1-2, k) &
+                                        +br(mp1, np1, k)*vb(imid, mn)
+                                    vte(imid, 2*mp1-1, k) = vte(imid, 2*mp1-1, k) &
+                                        +bi(mp1, np1, k)*vb(imid, mn)
+                                    wte(imid, 2*mp1-2, k) = wte(imid, 2*mp1-2, k) &
+                                        -cr(mp1, np1, k)*vb(imid, mn)
+                                    wte(imid, 2*mp1-1, k) = wte(imid, 2*mp1-1, k) &
+                                        -ci(mp1, np1, k)*vb(imid, mn)
+                                end if
                             end do
-                            if(mlat == 0) goto 24
-                            vte(imid, 2*mp1-2, k) = vte(imid, 2*mp1-2, k) &
-                                +br(mp1, np1, k)*vb(imid, mn)
-                            vte(imid, 2*mp1-1, k) = vte(imid, 2*mp1-1, k) &
-                                +bi(mp1, np1, k)*vb(imid, mn)
-                            wte(imid, 2*mp1-2, k) = wte(imid, 2*mp1-2, k) &
-                                -cr(mp1, np1, k)*vb(imid, mn)
-                            wte(imid, 2*mp1-1, k) = wte(imid, 2*mp1-1, k) &
-                                -ci(mp1, np1, k)*vb(imid, mn)
-24                      continue
                         end do
-                    end do
-26                  if(mp2 > ndo2) goto 30
-                    do k=1, nt
-                        do np1=mp2, ndo2, 2
-                            mn = mb+np1
-                            do i=1, imm1
-                                vto(i, 2*mp1-2, k) = vto(i, 2*mp1-2, k)+br(mp1, np1, k)*vb(i, mn)
-                                vte(i, 2*mp1-2, k) = vte(i, 2*mp1-2, k)-ci(mp1, np1, k)*wb(i, mn)
-                                vto(i, 2*mp1-1, k) = vto(i, 2*mp1-1, k)+bi(mp1, np1, k)*vb(i, mn)
-                                vte(i, 2*mp1-1, k) = vte(i, 2*mp1-1, k)+cr(mp1, np1, k)*wb(i, mn)
-                                wto(i, 2*mp1-2, k) = wto(i, 2*mp1-2, k)-cr(mp1, np1, k)*vb(i, mn)
-                                wte(i, 2*mp1-2, k) = wte(i, 2*mp1-2, k)-bi(mp1, np1, k)*wb(i, mn)
-                                wto(i, 2*mp1-1, k) = wto(i, 2*mp1-1, k)-ci(mp1, np1, k)*vb(i, mn)
-                                wte(i, 2*mp1-1, k) = wte(i, 2*mp1-1, k)+br(mp1, np1, k)*wb(i, mn)
+                    end if
+                    if (mp2 <= ndo2) then
+                        do k=1, nt
+                            do np1=mp2, ndo2, 2
+                                mn = mb+np1
+                                do i=1, imm1
+                                    vto(i, 2*mp1-2, k) = vto(i, 2*mp1-2, k)+br(mp1, np1, k)*vb(i, mn)
+                                    vte(i, 2*mp1-2, k) = vte(i, 2*mp1-2, k)-ci(mp1, np1, k)*wb(i, mn)
+                                    vto(i, 2*mp1-1, k) = vto(i, 2*mp1-1, k)+bi(mp1, np1, k)*vb(i, mn)
+                                    vte(i, 2*mp1-1, k) = vte(i, 2*mp1-1, k)+cr(mp1, np1, k)*wb(i, mn)
+                                    wto(i, 2*mp1-2, k) = wto(i, 2*mp1-2, k)-cr(mp1, np1, k)*vb(i, mn)
+                                    wte(i, 2*mp1-2, k) = wte(i, 2*mp1-2, k)-bi(mp1, np1, k)*wb(i, mn)
+                                    wto(i, 2*mp1-1, k) = wto(i, 2*mp1-1, k)-ci(mp1, np1, k)*vb(i, mn)
+                                    wte(i, 2*mp1-1, k) = wte(i, 2*mp1-1, k)+br(mp1, np1, k)*wb(i, mn)
+                                end do
+                                if (mlat /= 0) then
+                                    vte(imid, 2*mp1-2, k) = vte(imid, 2*mp1-2, k) &
+                                        -ci(mp1, np1, k)*wb(imid, mn)
+                                    vte(imid, 2*mp1-1, k) = vte(imid, 2*mp1-1, k) &
+                                        +cr(mp1, np1, k)*wb(imid, mn)
+                                    wte(imid, 2*mp1-2, k) = wte(imid, 2*mp1-2, k) &
+                                        -bi(mp1, np1, k)*wb(imid, mn)
+                                    wte(imid, 2*mp1-1, k) = wte(imid, 2*mp1-1, k) &
+                                        +br(mp1, np1, k)*wb(imid, mn)
+                                end if
                             end do
-                            if(mlat == 0) goto 28
-                            vte(imid, 2*mp1-2, k) = vte(imid, 2*mp1-2, k) &
-                                -ci(mp1, np1, k)*wb(imid, mn)
-                            vte(imid, 2*mp1-1, k) = vte(imid, 2*mp1-1, k) &
-                                +cr(mp1, np1, k)*wb(imid, mn)
-                            wte(imid, 2*mp1-2, k) = wte(imid, 2*mp1-2, k) &
-                                -bi(mp1, np1, k)*wb(imid, mn)
-                            wte(imid, 2*mp1-1, k) = wte(imid, 2*mp1-1, k) &
-                                +br(mp1, np1, k)*wb(imid, mn)
-28                      continue
                         end do
-                    end do
-30              continue
+                    end if
                 end do
             case(1)
                 !
-                !     case ityp=1   no symmetries,  cr and ci equal zero
+                ! case ityp=1   no symmetries,  cr and ci equal zero
                 !
-                !     case m = 0
+                ! case m = 0
                 !
                 do k=1, nt
                     do np1=2, ndo2, 2
@@ -635,56 +636,57 @@ contains
                     end do
                 end do
                 !
-                !     case m = 1 through nlat-1
+                ! case m = 1 through nlat-1
                 !
-                if(mmax < 2) exit vector_symmetry_cases
+                if (mmax < 2) exit vector_symmetry_cases
                 do mp1=2, mmax
                     m = mp1-1
                     mb = m*(nlat-1)-(m*(m-1))/2
                     mp2 = mp1+1
-                    if(mp1 > ndo1) goto 126
-                    do k=1, nt
-                        do np1=mp1, ndo1, 2
-                            mn = mb+np1
-                            do i=1, imm1
-                                vte(i, 2*mp1-2, k) = vte(i, 2*mp1-2, k)+br(mp1, np1, k)*vb(i, mn)
-                                vte(i, 2*mp1-1, k) = vte(i, 2*mp1-1, k)+bi(mp1, np1, k)*vb(i, mn)
-                                wto(i, 2*mp1-2, k) = wto(i, 2*mp1-2, k)-bi(mp1, np1, k)*wb(i, mn)
-                                wto(i, 2*mp1-1, k) = wto(i, 2*mp1-1, k)+br(mp1, np1, k)*wb(i, mn)
+                    if (mp1 <= ndo1) then
+                        do k=1, nt
+                            do np1=mp1, ndo1, 2
+                                mn = mb+np1
+                                do i=1, imm1
+                                    vte(i, 2*mp1-2, k) = vte(i, 2*mp1-2, k)+br(mp1, np1, k)*vb(i, mn)
+                                    vte(i, 2*mp1-1, k) = vte(i, 2*mp1-1, k)+bi(mp1, np1, k)*vb(i, mn)
+                                    wto(i, 2*mp1-2, k) = wto(i, 2*mp1-2, k)-bi(mp1, np1, k)*wb(i, mn)
+                                    wto(i, 2*mp1-1, k) = wto(i, 2*mp1-1, k)+br(mp1, np1, k)*wb(i, mn)
+                                end do
+                                if (mlat /= 0) then
+                                    vte(imid, 2*mp1-2, k) = vte(imid, 2*mp1-2, k) &
+                                        +br(mp1, np1, k)*vb(imid, mn)
+                                    vte(imid, 2*mp1-1, k) = vte(imid, 2*mp1-1, k) &
+                                        +bi(mp1, np1, k)*vb(imid, mn)
+                                end if
                             end do
-                            if(mlat == 0) goto 124
-                            vte(imid, 2*mp1-2, k) = vte(imid, 2*mp1-2, k) &
-                                +br(mp1, np1, k)*vb(imid, mn)
-                            vte(imid, 2*mp1-1, k) = vte(imid, 2*mp1-1, k) &
-                                +bi(mp1, np1, k)*vb(imid, mn)
-124                     continue
                         end do
-                    end do
-126                 if(mp2 > ndo2) goto 130
-                    do k=1, nt
-                        do np1=mp2, ndo2, 2
-                            mn = mb+np1
-                            do i=1, imm1
-                                vto(i, 2*mp1-2, k) = vto(i, 2*mp1-2, k)+br(mp1, np1, k)*vb(i, mn)
-                                vto(i, 2*mp1-1, k) = vto(i, 2*mp1-1, k)+bi(mp1, np1, k)*vb(i, mn)
-                                wte(i, 2*mp1-2, k) = wte(i, 2*mp1-2, k)-bi(mp1, np1, k)*wb(i, mn)
-                                wte(i, 2*mp1-1, k) = wte(i, 2*mp1-1, k)+br(mp1, np1, k)*wb(i, mn)
+                    end if
+                    if (mp2 <= ndo2) then
+                        do k=1, nt
+                            do np1=mp2, ndo2, 2
+                                mn = mb+np1
+                                do i=1, imm1
+                                    vto(i, 2*mp1-2, k) = vto(i, 2*mp1-2, k)+br(mp1, np1, k)*vb(i, mn)
+                                    vto(i, 2*mp1-1, k) = vto(i, 2*mp1-1, k)+bi(mp1, np1, k)*vb(i, mn)
+                                    wte(i, 2*mp1-2, k) = wte(i, 2*mp1-2, k)-bi(mp1, np1, k)*wb(i, mn)
+                                    wte(i, 2*mp1-1, k) = wte(i, 2*mp1-1, k)+br(mp1, np1, k)*wb(i, mn)
+                                end do
+                                if (mlat /= 0) then
+                                    wte(imid, 2*mp1-2, k) = wte(imid, 2*mp1-2, k) &
+                                        -bi(mp1, np1, k)*wb(imid, mn)
+                                    wte(imid, 2*mp1-1, k) = wte(imid, 2*mp1-1, k) &
+                                        +br(mp1, np1, k)*wb(imid, mn)
+                                end if
                             end do
-                            if(mlat == 0) goto 128
-                            wte(imid, 2*mp1-2, k) = wte(imid, 2*mp1-2, k) &
-                                -bi(mp1, np1, k)*wb(imid, mn)
-                            wte(imid, 2*mp1-1, k) = wte(imid, 2*mp1-1, k) &
-                                +br(mp1, np1, k)*wb(imid, mn)
-128                     continue
                         end do
-                    end do
-130             continue
+                    end if
                 end do
             case(2)
                 !
-                !     case ityp=2   no symmetries,  br and bi are equal to zero
+                ! case ityp=2   no symmetries,  br and bi are equal to zero
                 !
-                !     case m = 0
+                ! case m = 0
                 !
                 do k=1, nt
                     do np1=2, ndo2, 2
@@ -701,56 +703,57 @@ contains
                     end do
                 end do
                 !
-                !     case m = 1 through nlat-1
+                ! case m = 1 through nlat-1
                 !
-                if(mmax < 2) exit vector_symmetry_cases
+                if (mmax < 2) exit vector_symmetry_cases
                 do mp1=2, mmax
                     m = mp1-1
                     mb = m*(nlat-1)-(m*(m-1))/2
                     mp2 = mp1+1
-                    if(mp1 > ndo1) goto 226
-                    do k=1, nt
-                        do np1=mp1, ndo1, 2
-                            mn = mb+np1
-                            do i=1, imm1
-                                vto(i, 2*mp1-2, k) = vto(i, 2*mp1-2, k)-ci(mp1, np1, k)*wb(i, mn)
-                                vto(i, 2*mp1-1, k) = vto(i, 2*mp1-1, k)+cr(mp1, np1, k)*wb(i, mn)
-                                wte(i, 2*mp1-2, k) = wte(i, 2*mp1-2, k)-cr(mp1, np1, k)*vb(i, mn)
-                                wte(i, 2*mp1-1, k) = wte(i, 2*mp1-1, k)-ci(mp1, np1, k)*vb(i, mn)
+                    if (mp1 <= ndo1) then
+                        do k=1, nt
+                            do np1=mp1, ndo1, 2
+                                mn = mb+np1
+                                do i=1, imm1
+                                    vto(i, 2*mp1-2, k) = vto(i, 2*mp1-2, k)-ci(mp1, np1, k)*wb(i, mn)
+                                    vto(i, 2*mp1-1, k) = vto(i, 2*mp1-1, k)+cr(mp1, np1, k)*wb(i, mn)
+                                    wte(i, 2*mp1-2, k) = wte(i, 2*mp1-2, k)-cr(mp1, np1, k)*vb(i, mn)
+                                    wte(i, 2*mp1-1, k) = wte(i, 2*mp1-1, k)-ci(mp1, np1, k)*vb(i, mn)
+                                end do
+                                if (mlat /= 0) then
+                                    wte(imid, 2*mp1-2, k) = wte(imid, 2*mp1-2, k) &
+                                        -cr(mp1, np1, k)*vb(imid, mn)
+                                    wte(imid, 2*mp1-1, k) = wte(imid, 2*mp1-1, k) &
+                                        -ci(mp1, np1, k)*vb(imid, mn)
+                                end if
                             end do
-                            if(mlat == 0) goto 224
-                            wte(imid, 2*mp1-2, k) = wte(imid, 2*mp1-2, k) &
-                                -cr(mp1, np1, k)*vb(imid, mn)
-                            wte(imid, 2*mp1-1, k) = wte(imid, 2*mp1-1, k) &
-                                -ci(mp1, np1, k)*vb(imid, mn)
-224                     continue
                         end do
-                    end do
-226                 if(mp2 > ndo2) goto 230
-                    do k=1, nt
-                        do np1=mp2, ndo2, 2
-                            mn = mb+np1
-                            do i=1, imm1
-                                vte(i, 2*mp1-2, k) = vte(i, 2*mp1-2, k)-ci(mp1, np1, k)*wb(i, mn)
-                                vte(i, 2*mp1-1, k) = vte(i, 2*mp1-1, k)+cr(mp1, np1, k)*wb(i, mn)
-                                wto(i, 2*mp1-2, k) = wto(i, 2*mp1-2, k)-cr(mp1, np1, k)*vb(i, mn)
-                                wto(i, 2*mp1-1, k) = wto(i, 2*mp1-1, k)-ci(mp1, np1, k)*vb(i, mn)
+                    end if
+                    if (mp2 <= ndo2) then
+                        do k=1, nt
+                            do np1=mp2, ndo2, 2
+                                mn = mb+np1
+                                do i=1, imm1
+                                    vte(i, 2*mp1-2, k) = vte(i, 2*mp1-2, k)-ci(mp1, np1, k)*wb(i, mn)
+                                    vte(i, 2*mp1-1, k) = vte(i, 2*mp1-1, k)+cr(mp1, np1, k)*wb(i, mn)
+                                    wto(i, 2*mp1-2, k) = wto(i, 2*mp1-2, k)-cr(mp1, np1, k)*vb(i, mn)
+                                    wto(i, 2*mp1-1, k) = wto(i, 2*mp1-1, k)-ci(mp1, np1, k)*vb(i, mn)
+                                end do
+                                if (mlat /= 0) then
+                                    vte(imid, 2*mp1-2, k) = vte(imid, 2*mp1-2, k) &
+                                        -ci(mp1, np1, k)*wb(imid, mn)
+                                    vte(imid, 2*mp1-1, k) = vte(imid, 2*mp1-1, k) &
+                                        +cr(mp1, np1, k)*wb(imid, mn)
+                                end if
                             end do
-                            if(mlat == 0) goto 228
-                            vte(imid, 2*mp1-2, k) = vte(imid, 2*mp1-2, k) &
-                                -ci(mp1, np1, k)*wb(imid, mn)
-                            vte(imid, 2*mp1-1, k) = vte(imid, 2*mp1-1, k) &
-                                +cr(mp1, np1, k)*wb(imid, mn)
-228                     continue
                         end do
-                    end do
-230             continue
+                    end if
                 end do
             case(3)
                 !
-                !     case ityp=3   v odd,  w even
+                ! case ityp=3   v odd,  w even
                 !
-                !     case m = 0
+                ! case m = 0
                 !
                 do k=1, nt
                     do np1=2, ndo2, 2
@@ -767,56 +770,57 @@ contains
                     end do
                 end do
                 !
-                !     case m = 1 through nlat-1
+                ! case m = 1 through nlat-1
                 !
-                if(mmax < 2) exit vector_symmetry_cases
+                if (mmax < 2) exit vector_symmetry_cases
                 do mp1=2, mmax
                     m = mp1-1
                     mb = m*(nlat-1)-(m*(m-1))/2
                     mp2 = mp1+1
-                    if(mp1 > ndo1) goto 326
-                    do k=1, nt
-                        do np1=mp1, ndo1, 2
-                            mn = mb+np1
-                            do i=1, imm1
-                                vto(i, 2*mp1-2, k) = vto(i, 2*mp1-2, k)-ci(mp1, np1, k)*wb(i, mn)
-                                vto(i, 2*mp1-1, k) = vto(i, 2*mp1-1, k)+cr(mp1, np1, k)*wb(i, mn)
-                                wte(i, 2*mp1-2, k) = wte(i, 2*mp1-2, k)-cr(mp1, np1, k)*vb(i, mn)
-                                wte(i, 2*mp1-1, k) = wte(i, 2*mp1-1, k)-ci(mp1, np1, k)*vb(i, mn)
+                    if (mp1 <= ndo1) then
+                        do k=1, nt
+                            do np1=mp1, ndo1, 2
+                                mn = mb+np1
+                                do i=1, imm1
+                                    vto(i, 2*mp1-2, k) = vto(i, 2*mp1-2, k)-ci(mp1, np1, k)*wb(i, mn)
+                                    vto(i, 2*mp1-1, k) = vto(i, 2*mp1-1, k)+cr(mp1, np1, k)*wb(i, mn)
+                                    wte(i, 2*mp1-2, k) = wte(i, 2*mp1-2, k)-cr(mp1, np1, k)*vb(i, mn)
+                                    wte(i, 2*mp1-1, k) = wte(i, 2*mp1-1, k)-ci(mp1, np1, k)*vb(i, mn)
+                                end do
+                                if (mlat /= 0) then
+                                    wte(imid, 2*mp1-2, k) = wte(imid, 2*mp1-2, k) &
+                                        -cr(mp1, np1, k)*vb(imid, mn)
+                                    wte(imid, 2*mp1-1, k) = wte(imid, 2*mp1-1, k) &
+                                        -ci(mp1, np1, k)*vb(imid, mn)
+                                end if
                             end do
-                            if(mlat == 0) goto 324
-                            wte(imid, 2*mp1-2, k) = wte(imid, 2*mp1-2, k) &
-                                -cr(mp1, np1, k)*vb(imid, mn)
-                            wte(imid, 2*mp1-1, k) = wte(imid, 2*mp1-1, k) &
-                                -ci(mp1, np1, k)*vb(imid, mn)
-324                     continue
                         end do
-                    end do
-326                 if(mp2 > ndo2) goto 330
-                    do k=1, nt
-                        do np1=mp2, ndo2, 2
-                            mn = mb+np1
-                            do i=1, imm1
-                                vto(i, 2*mp1-2, k) = vto(i, 2*mp1-2, k)+br(mp1, np1, k)*vb(i, mn)
-                                vto(i, 2*mp1-1, k) = vto(i, 2*mp1-1, k)+bi(mp1, np1, k)*vb(i, mn)
-                                wte(i, 2*mp1-2, k) = wte(i, 2*mp1-2, k)-bi(mp1, np1, k)*wb(i, mn)
-                                wte(i, 2*mp1-1, k) = wte(i, 2*mp1-1, k)+br(mp1, np1, k)*wb(i, mn)
+                    end if
+                    if (mp2 <= ndo2) then
+                        do k=1, nt
+                            do np1=mp2, ndo2, 2
+                                mn = mb+np1
+                                do i=1, imm1
+                                    vto(i, 2*mp1-2, k) = vto(i, 2*mp1-2, k)+br(mp1, np1, k)*vb(i, mn)
+                                    vto(i, 2*mp1-1, k) = vto(i, 2*mp1-1, k)+bi(mp1, np1, k)*vb(i, mn)
+                                    wte(i, 2*mp1-2, k) = wte(i, 2*mp1-2, k)-bi(mp1, np1, k)*wb(i, mn)
+                                    wte(i, 2*mp1-1, k) = wte(i, 2*mp1-1, k)+br(mp1, np1, k)*wb(i, mn)
+                                end do
+                                if (mlat /= 0) then
+                                    wte(imid, 2*mp1-2, k) = wte(imid, 2*mp1-2, k) &
+                                        -bi(mp1, np1, k)*wb(imid, mn)
+                                    wte(imid, 2*mp1-1, k) = wte(imid, 2*mp1-1, k) &
+                                        +br(mp1, np1, k)*wb(imid, mn)
+                                end if
                             end do
-                            if(mlat == 0) goto 328
-                            wte(imid, 2*mp1-2, k) = wte(imid, 2*mp1-2, k) &
-                                -bi(mp1, np1, k)*wb(imid, mn)
-                            wte(imid, 2*mp1-1, k) = wte(imid, 2*mp1-1, k) &
-                                +br(mp1, np1, k)*wb(imid, mn)
-328                     continue
                         end do
-                    end do
-330             continue
+                    end if
                 end do
             case(4)
                 !
-                !     case ityp=4   v odd,  w even, and both cr and ci equal zero
+                ! case ityp=4   v odd,  w even, and both cr and ci equal zero
                 !
-                !     case m = 0
+                ! case m = 0
                 !
                 do k=1, nt
                     do np1=2, ndo2, 2
@@ -826,38 +830,38 @@ contains
                     end do
                 end do
                 !
-                !     case m = 1 through nlat-1
+                ! case m = 1 through nlat-1
                 !
-                if(mmax < 2) exit vector_symmetry_cases
+                if (mmax < 2) exit vector_symmetry_cases
                 do mp1=2, mmax
                     m = mp1-1
                     mb = m*(nlat-1)-(m*(m-1))/2
                     mp2 = mp1+1
-                    if(mp2 > ndo2) goto 430
-                    do k=1, nt
-                        do np1=mp2, ndo2, 2
-                            mn = mb+np1
-                            do i=1, imm1
-                                vto(i, 2*mp1-2, k) = vto(i, 2*mp1-2, k)+br(mp1, np1, k)*vb(i, mn)
-                                vto(i, 2*mp1-1, k) = vto(i, 2*mp1-1, k)+bi(mp1, np1, k)*vb(i, mn)
-                                wte(i, 2*mp1-2, k) = wte(i, 2*mp1-2, k)-bi(mp1, np1, k)*wb(i, mn)
-                                wte(i, 2*mp1-1, k) = wte(i, 2*mp1-1, k)+br(mp1, np1, k)*wb(i, mn)
+                    if (mp2 <= ndo2) then
+                        do k=1, nt
+                            do np1=mp2, ndo2, 2
+                                mn = mb+np1
+                                do i=1, imm1
+                                    vto(i, 2*mp1-2, k) = vto(i, 2*mp1-2, k)+br(mp1, np1, k)*vb(i, mn)
+                                    vto(i, 2*mp1-1, k) = vto(i, 2*mp1-1, k)+bi(mp1, np1, k)*vb(i, mn)
+                                    wte(i, 2*mp1-2, k) = wte(i, 2*mp1-2, k)-bi(mp1, np1, k)*wb(i, mn)
+                                    wte(i, 2*mp1-1, k) = wte(i, 2*mp1-1, k)+br(mp1, np1, k)*wb(i, mn)
+                                end do
+                                if (mlat /= 0) then
+                                    wte(imid, 2*mp1-2, k) = wte(imid, 2*mp1-2, k) &
+                                        -bi(mp1, np1, k)*wb(imid, mn)
+                                    wte(imid, 2*mp1-1, k) = wte(imid, 2*mp1-1, k) &
+                                        +br(mp1, np1, k)*wb(imid, mn)
+                                end if
                             end do
-                            if(mlat == 0) goto 428
-                            wte(imid, 2*mp1-2, k) = wte(imid, 2*mp1-2, k) &
-                                -bi(mp1, np1, k)*wb(imid, mn)
-                            wte(imid, 2*mp1-1, k) = wte(imid, 2*mp1-1, k) &
-                                +br(mp1, np1, k)*wb(imid, mn)
-428                     continue
                         end do
-                    end do
-430             continue
+                    end if
                 end do
             case(5)
                 !
-                !     case ityp=5   v odd,  w even,     br and bi equal zero
+                ! case ityp=5   v odd,  w even,     br and bi equal zero
                 !
-                !     case m = 0
+                ! case m = 0
                 !
                 do k=1, nt
                     do np1=3, ndo1, 2
@@ -867,38 +871,38 @@ contains
                     end do
                 end do
                 !
-                !     case m = 1 through nlat-1
+                ! case m = 1 through nlat-1
                 !
-                if(mmax < 2) exit vector_symmetry_cases
+                if (mmax < 2) exit vector_symmetry_cases
                 do mp1=2, mmax
                     m = mp1-1
                     mb = m*(nlat-1)-(m*(m-1))/2
                     mp2 = mp1+1
-                    if(mp1 > ndo1) goto 530
-                    do k=1, nt
-                        do np1=mp1, ndo1, 2
-                            mn = mb+np1
-                            do i=1, imm1
-                                vto(i, 2*mp1-2, k) = vto(i, 2*mp1-2, k)-ci(mp1, np1, k)*wb(i, mn)
-                                vto(i, 2*mp1-1, k) = vto(i, 2*mp1-1, k)+cr(mp1, np1, k)*wb(i, mn)
-                                wte(i, 2*mp1-2, k) = wte(i, 2*mp1-2, k)-cr(mp1, np1, k)*vb(i, mn)
-                                wte(i, 2*mp1-1, k) = wte(i, 2*mp1-1, k)-ci(mp1, np1, k)*vb(i, mn)
+                    if (mp1 <= ndo1) then
+                        do k=1, nt
+                            do np1=mp1, ndo1, 2
+                                mn = mb+np1
+                                do i=1, imm1
+                                    vto(i, 2*mp1-2, k) = vto(i, 2*mp1-2, k)-ci(mp1, np1, k)*wb(i, mn)
+                                    vto(i, 2*mp1-1, k) = vto(i, 2*mp1-1, k)+cr(mp1, np1, k)*wb(i, mn)
+                                    wte(i, 2*mp1-2, k) = wte(i, 2*mp1-2, k)-cr(mp1, np1, k)*vb(i, mn)
+                                    wte(i, 2*mp1-1, k) = wte(i, 2*mp1-1, k)-ci(mp1, np1, k)*vb(i, mn)
+                                end do
+                                if (mlat /= 0) then
+                                    wte(imid, 2*mp1-2, k) = wte(imid, 2*mp1-2, k) &
+                                        -cr(mp1, np1, k)*vb(imid, mn)
+                                    wte(imid, 2*mp1-1, k) = wte(imid, 2*mp1-1, k) &
+                                        -ci(mp1, np1, k)*vb(imid, mn)
+                                end if
                             end do
-                            if(mlat == 0) goto 524
-                            wte(imid, 2*mp1-2, k) = wte(imid, 2*mp1-2, k) &
-                                -cr(mp1, np1, k)*vb(imid, mn)
-                            wte(imid, 2*mp1-1, k) = wte(imid, 2*mp1-1, k) &
-                                -ci(mp1, np1, k)*vb(imid, mn)
-524                     continue
                         end do
-                    end do
-530             continue
+                    end if
                 end do
             case(6)
                 !
-                !     case ityp=6   v even  ,  w odd
+                ! case ityp=6   v even  ,  w odd
                 !
-                !     case m = 0
+                ! case m = 0
                 !
                 do k=1, nt
                     do np1=2, ndo2, 2
@@ -915,56 +919,57 @@ contains
                     end do
                 end do
                 !
-                !     case m = 1 through nlat-1
+                ! case m = 1 through nlat-1
                 !
-                if(mmax < 2) exit vector_symmetry_cases
+                if (mmax < 2) exit vector_symmetry_cases
                 do mp1=2, mmax
                     m = mp1-1
                     mb = m*(nlat-1)-(m*(m-1))/2
                     mp2 = mp1+1
-                    if(mp1 > ndo1) goto 626
-                    do k=1, nt
-                        do np1=mp1, ndo1, 2
-                            mn = mb+np1
-                            do i=1, imm1
-                                vte(i, 2*mp1-2, k) = vte(i, 2*mp1-2, k)+br(mp1, np1, k)*vb(i, mn)
-                                vte(i, 2*mp1-1, k) = vte(i, 2*mp1-1, k)+bi(mp1, np1, k)*vb(i, mn)
-                                wto(i, 2*mp1-2, k) = wto(i, 2*mp1-2, k)-bi(mp1, np1, k)*wb(i, mn)
-                                wto(i, 2*mp1-1, k) = wto(i, 2*mp1-1, k)+br(mp1, np1, k)*wb(i, mn)
+                    if (mp1 <= ndo1) then
+                        do k=1, nt
+                            do np1=mp1, ndo1, 2
+                                mn = mb+np1
+                                do i=1, imm1
+                                    vte(i, 2*mp1-2, k) = vte(i, 2*mp1-2, k)+br(mp1, np1, k)*vb(i, mn)
+                                    vte(i, 2*mp1-1, k) = vte(i, 2*mp1-1, k)+bi(mp1, np1, k)*vb(i, mn)
+                                    wto(i, 2*mp1-2, k) = wto(i, 2*mp1-2, k)-bi(mp1, np1, k)*wb(i, mn)
+                                    wto(i, 2*mp1-1, k) = wto(i, 2*mp1-1, k)+br(mp1, np1, k)*wb(i, mn)
+                                end do
+                                if (mlat /= 0) then
+                                    vte(imid, 2*mp1-2, k) = vte(imid, 2*mp1-2, k) &
+                                        +br(mp1, np1, k)*vb(imid, mn)
+                                    vte(imid, 2*mp1-1, k) = vte(imid, 2*mp1-1, k) &
+                                        +bi(mp1, np1, k)*vb(imid, mn)
+                                end if
                             end do
-                            if(mlat == 0) goto 624
-                            vte(imid, 2*mp1-2, k) = vte(imid, 2*mp1-2, k) &
-                                +br(mp1, np1, k)*vb(imid, mn)
-                            vte(imid, 2*mp1-1, k) = vte(imid, 2*mp1-1, k) &
-                                +bi(mp1, np1, k)*vb(imid, mn)
-624                     continue
                         end do
-                    end do
-626                 if(mp2 > ndo2) goto 630
-                    do k=1, nt
-                        do np1=mp2, ndo2, 2
-                            mn = mb+np1
-                            do i=1, imm1
-                                vte(i, 2*mp1-2, k) = vte(i, 2*mp1-2, k)-ci(mp1, np1, k)*wb(i, mn)
-                                vte(i, 2*mp1-1, k) = vte(i, 2*mp1-1, k)+cr(mp1, np1, k)*wb(i, mn)
-                                wto(i, 2*mp1-2, k) = wto(i, 2*mp1-2, k)-cr(mp1, np1, k)*vb(i, mn)
-                                wto(i, 2*mp1-1, k) = wto(i, 2*mp1-1, k)-ci(mp1, np1, k)*vb(i, mn)
+                    end if
+                    if (mp2 <= ndo2) then
+                        do k=1, nt
+                            do np1=mp2, ndo2, 2
+                                mn = mb+np1
+                                do i=1, imm1
+                                    vte(i, 2*mp1-2, k) = vte(i, 2*mp1-2, k)-ci(mp1, np1, k)*wb(i, mn)
+                                    vte(i, 2*mp1-1, k) = vte(i, 2*mp1-1, k)+cr(mp1, np1, k)*wb(i, mn)
+                                    wto(i, 2*mp1-2, k) = wto(i, 2*mp1-2, k)-cr(mp1, np1, k)*vb(i, mn)
+                                    wto(i, 2*mp1-1, k) = wto(i, 2*mp1-1, k)-ci(mp1, np1, k)*vb(i, mn)
+                                end do
+                                if (mlat /= 0) then
+                                    vte(imid, 2*mp1-2, k) = vte(imid, 2*mp1-2, k) &
+                                        -ci(mp1, np1, k)*wb(imid, mn)
+                                    vte(imid, 2*mp1-1, k) = vte(imid, 2*mp1-1, k) &
+                                        +cr(mp1, np1, k)*wb(imid, mn)
+                                end if
                             end do
-                            if(mlat == 0) goto 628
-                            vte(imid, 2*mp1-2, k) = vte(imid, 2*mp1-2, k) &
-                                -ci(mp1, np1, k)*wb(imid, mn)
-                            vte(imid, 2*mp1-1, k) = vte(imid, 2*mp1-1, k) &
-                                +cr(mp1, np1, k)*wb(imid, mn)
-628                     continue
                         end do
-                    end do
-630             continue
+                    end if
                 end do
             case(7)
                 !
-                !     case ityp=7   v even, w odd   cr and ci equal zero
+                ! case ityp=7   v even, w odd   cr and ci equal zero
                 !
-                !     case m = 0
+                ! case m = 0
                 !
                 do k=1, nt
                     do np1=3, ndo1, 2
@@ -974,38 +979,38 @@ contains
                     end do
                 end do
                 !
-                !     case m = 1 through nlat-1
+                ! case m = 1 through nlat-1
                 !
-                if(mmax < 2) exit vector_symmetry_cases
+                if (mmax < 2) exit vector_symmetry_cases
                 do mp1=2, mmax
                     m = mp1-1
                     mb = m*(nlat-1)-(m*(m-1))/2
                     mp2 = mp1+1
-                    if(mp1 > ndo1) goto 730
-                    do k=1, nt
-                        do np1=mp1, ndo1, 2
-                            mn = mb+np1
-                            do i=1, imm1
-                                vte(i, 2*mp1-2, k) = vte(i, 2*mp1-2, k)+br(mp1, np1, k)*vb(i, mn)
-                                vte(i, 2*mp1-1, k) = vte(i, 2*mp1-1, k)+bi(mp1, np1, k)*vb(i, mn)
-                                wto(i, 2*mp1-2, k) = wto(i, 2*mp1-2, k)-bi(mp1, np1, k)*wb(i, mn)
-                                wto(i, 2*mp1-1, k) = wto(i, 2*mp1-1, k)+br(mp1, np1, k)*wb(i, mn)
+                    if (mp1 <= ndo1) then
+                        do k=1, nt
+                            do np1=mp1, ndo1, 2
+                                mn = mb+np1
+                                do i=1, imm1
+                                    vte(i, 2*mp1-2, k) = vte(i, 2*mp1-2, k)+br(mp1, np1, k)*vb(i, mn)
+                                    vte(i, 2*mp1-1, k) = vte(i, 2*mp1-1, k)+bi(mp1, np1, k)*vb(i, mn)
+                                    wto(i, 2*mp1-2, k) = wto(i, 2*mp1-2, k)-bi(mp1, np1, k)*wb(i, mn)
+                                    wto(i, 2*mp1-1, k) = wto(i, 2*mp1-1, k)+br(mp1, np1, k)*wb(i, mn)
+                                end do
+                                if (mlat /= 0) then
+                                    vte(imid, 2*mp1-2, k) = vte(imid, 2*mp1-2, k) &
+                                        +br(mp1, np1, k)*vb(imid, mn)
+                                    vte(imid, 2*mp1-1, k) = vte(imid, 2*mp1-1, k) &
+                                        +bi(mp1, np1, k)*vb(imid, mn)
+                                end if
                             end do
-                            if(mlat == 0) goto 724
-                            vte(imid, 2*mp1-2, k) = vte(imid, 2*mp1-2, k) &
-                                +br(mp1, np1, k)*vb(imid, mn)
-                            vte(imid, 2*mp1-1, k) = vte(imid, 2*mp1-1, k) &
-                                +bi(mp1, np1, k)*vb(imid, mn)
-724                     continue
                         end do
-                    end do
-730             continue
+                    end if
                 end do
             case(8)
                 !
-                !     case ityp=8   v even,  w odd,   br and bi equal zero
+                ! case ityp=8   v even,  w odd,   br and bi equal zero
                 !
-                !     case m = 0
+                ! case m = 0
                 !
                 do k=1, nt
                     do np1=2, ndo2, 2
@@ -1015,32 +1020,32 @@ contains
                     end do
                 end do
                 !
-                !     case m = 1 through nlat-1
+                ! case m = 1 through nlat-1
                 !
-                if(mmax < 2) exit vector_symmetry_cases
+                if (mmax < 2) exit vector_symmetry_cases
                 do mp1=2, mmax
                     m = mp1-1
                     mb = m*(nlat-1)-(m*(m-1))/2
                     mp2 = mp1+1
-                    if(mp2 > ndo2) goto 830
-                    do k=1, nt
-                        do np1=mp2, ndo2, 2
-                            mn = mb+np1
-                            do i=1, imm1
-                                vte(i, 2*mp1-2, k) = vte(i, 2*mp1-2, k)-ci(mp1, np1, k)*wb(i, mn)
-                                vte(i, 2*mp1-1, k) = vte(i, 2*mp1-1, k)+cr(mp1, np1, k)*wb(i, mn)
-                                wto(i, 2*mp1-2, k) = wto(i, 2*mp1-2, k)-cr(mp1, np1, k)*vb(i, mn)
-                                wto(i, 2*mp1-1, k) = wto(i, 2*mp1-1, k)-ci(mp1, np1, k)*vb(i, mn)
+                    if(mp2 <= ndo2) then
+                        do k=1, nt
+                            do np1=mp2, ndo2, 2
+                                mn = mb+np1
+                                do i=1, imm1
+                                    vte(i, 2*mp1-2, k) = vte(i, 2*mp1-2, k)-ci(mp1, np1, k)*wb(i, mn)
+                                    vte(i, 2*mp1-1, k) = vte(i, 2*mp1-1, k)+cr(mp1, np1, k)*wb(i, mn)
+                                    wto(i, 2*mp1-2, k) = wto(i, 2*mp1-2, k)-cr(mp1, np1, k)*vb(i, mn)
+                                    wto(i, 2*mp1-1, k) = wto(i, 2*mp1-1, k)-ci(mp1, np1, k)*vb(i, mn)
+                                end do
+                                if (mlat /= 0) then
+                                    vte(imid, 2*mp1-2, k) = vte(imid, 2*mp1-2, k) &
+                                        -ci(mp1, np1, k)*wb(imid, mn)
+                                    vte(imid, 2*mp1-1, k) = vte(imid, 2*mp1-1, k) &
+                                        +cr(mp1, np1, k)*wb(imid, mn)
+                                end if
                             end do
-                            if(mlat == 0) goto 828
-                            vte(imid, 2*mp1-2, k) = vte(imid, 2*mp1-2, k) &
-                                -ci(mp1, np1, k)*wb(imid, mn)
-                            vte(imid, 2*mp1-1, k) = vte(imid, 2*mp1-1, k) &
-                                +cr(mp1, np1, k)*wb(imid, mn)
-828                     continue
                         end do
-                    end do
-830             continue
+                    end if
                 end do
         end select vector_symmetry_cases
 

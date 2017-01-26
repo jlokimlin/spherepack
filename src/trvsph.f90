@@ -71,7 +71,7 @@
 !     discussions with the ncar scd data support group and others indicate
 !     there is no standard grid for storing observational or model generated
 !     data on the sphere.  subroutine trvsph was designed to handle most
-!     cases likely to be encountered when moving data from one grid format
+! cases likely to be encountered when moving data from one grid format
 !     to another.
 !
 !     the grid on which (ua, va) is given must be equally spaced in longitude

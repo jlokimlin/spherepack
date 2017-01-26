@@ -601,11 +601,11 @@ contains
                 goto 800
         end select
         !
-        !     case ityp=0 ,  no symmetries
+        ! case ityp=0 ,  no symmetries
         !
 1       call sphere_aux%zvin(0, nlat, nlon, 0, zv, iv, wzvin)
         !
-        !     case m=0
+        ! case m=0
         !
         do k=1, nt
             do i=1, imid
@@ -624,7 +624,7 @@ contains
             end do
         end do
         !
-        !     case m = 1 through nlat-1
+        ! case m = 1 through nlat-1
         !
         if (mmax < 2) return
         do mp1=2, mmax
@@ -692,11 +692,11 @@ contains
         end do
         return
         !
-        !     case ityp=1 ,  no symmetries but cr and ci equal zero
+        ! case ityp=1 ,  no symmetries but cr and ci equal zero
         !
 100     call sphere_aux%zvin(0, nlat, nlon, 0, zv, iv, wzvin)
         !
-        !     case m=0
+        ! case m=0
         !
         do k=1, nt
             do i=1, imid
@@ -714,7 +714,7 @@ contains
             end do
         end do
         !
-        !     case m = 1 through nlat-1
+        ! case m = 1 through nlat-1
         !
         if (mmax < 2) return
         do mp1=2, mmax
@@ -767,11 +767,11 @@ contains
         end do
         return
         !
-        !     case ityp=2 ,  no symmetries but br and bi equal zero
+        ! case ityp=2 ,  no symmetries but br and bi equal zero
         !
 200     call sphere_aux%zvin(0, nlat, nlon, 0, zv, iv, wzvin)
         !
-        !     case m=0
+        ! case m=0
         !
         do k=1, nt
             do i=1, imid
@@ -789,7 +789,7 @@ contains
             end do
         end do
         !
-        !     case m = 1 through nlat-1
+        ! case m = 1 through nlat-1
         !
         if (mmax < 2) return
         do mp1=2, mmax
@@ -839,11 +839,11 @@ contains
         end do
         return
         !
-        !     case ityp=3 ,  v even , w odd
+        ! case ityp=3 ,  v even , w odd
         !
 300     call sphere_aux%zvin(0, nlat, nlon, 0, zv, iv, wzvin)
         !
-        !     case m=0
+        ! case m=0
         !
         do k=1, nt
             do i=1, imid
@@ -860,7 +860,7 @@ contains
             end do
         end do
         !
-        !     case m = 1 through nlat-1
+        ! case m = 1 through nlat-1
         !
         if (mmax < 2) return
         do mp1=2, mmax
@@ -908,11 +908,11 @@ contains
         end do
         return
         !
-        !     case ityp=4 ,  v even, w odd, and cr and ci equal 0.
+        ! case ityp=4 ,  v even, w odd, and cr and ci equal 0.
         !
 400     call sphere_aux%zvin(1, nlat, nlon, 0, zv, iv, wzvin)
         !
-        !     case m=0
+        ! case m=0
         !
         do k=1, nt
             do i=1, imid
@@ -922,7 +922,7 @@ contains
             end do
         end do
         !
-        !     case m = 1 through nlat-1
+        ! case m = 1 through nlat-1
         !
         if (mmax < 2) return
         do mp1=2, mmax
@@ -952,11 +952,11 @@ contains
         end do
         return
         !
-        !     case ityp=5   v even, w odd, and br and bi equal zero
+        ! case ityp=5   v even, w odd, and br and bi equal zero
         !
 500     call sphere_aux%zvin(2, nlat, nlon, 0, zv, iv, wzvin)
         !
-        !     case m=0
+        ! case m=0
         !
         do k=1, nt
             do i=1, imm1
@@ -966,7 +966,7 @@ contains
             end do
         end do
         !
-        !     case m = 1 through nlat-1
+        ! case m = 1 through nlat-1
         !
         if (mmax < 2) return
         do mp1=2, mmax
@@ -996,11 +996,11 @@ contains
         end do
         return
         !
-        !     case ityp=6 ,  v odd , w even
+        ! case ityp=6 ,  v odd , w even
         !
 600     call sphere_aux%zvin(0, nlat, nlon, 0, zv, iv, wzvin)
         !
-        !     case m=0
+        ! case m=0
         !
         do k=1, nt
             do i=1, imid
@@ -1017,7 +1017,7 @@ contains
             end do
         end do
         !
-        !     case m = 1 through nlat-1
+        ! case m = 1 through nlat-1
         !
         if (mmax < 2) return
         do mp1=2, mmax
@@ -1065,11 +1065,11 @@ contains
         end do
         return
         !
-        !     case ityp=7   v odd, w even, and cr and ci equal zero
+        ! case ityp=7   v odd, w even, and cr and ci equal zero
         !
 700     call sphere_aux%zvin(2, nlat, nlon, 0, zv, iv, wzvin)
         !
-        !     case m=0
+        ! case m=0
         !
         do k=1, nt
             do i=1, imm1
@@ -1079,7 +1079,7 @@ contains
             end do
         end do
         !
-        !     case m = 1 through nlat-1
+        ! case m = 1 through nlat-1
         !
         if (mmax < 2) return
         do mp1=2, mmax
@@ -1109,11 +1109,11 @@ contains
         end do
         return
         !
-        !     case ityp=8   v odd, w even, and both br and bi equal zero
+        ! case ityp=8   v odd, w even, and both br and bi equal zero
         !
 800     call sphere_aux%zvin(1, nlat, nlon, 0, zv, iv, wzvin)
         !
-        !     case m=0
+        ! case m=0
         !
         do k=1, nt
             do i=1, imid
@@ -1123,7 +1123,7 @@ contains
             end do
         end do
         !
-        !     case m = 1 through nlat-1
+        ! case m = 1 through nlat-1
         !
         if (mmax < 2) return
         do mp1=2, mmax

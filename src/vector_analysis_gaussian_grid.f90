@@ -756,11 +756,11 @@ contains
                 end do
             case(1)
                 !
-                !     case ityp=1 ,  no symmetries but cr and ci equal zero
+                ! case ityp=1 ,  no symmetries but cr and ci equal zero
                 !
                 call sphere_aux%compute_polar_component(0, nlat, nlon, 0, vb, iv, wvbin)
                 !
-                !     case m=0
+                ! case m=0
                 !
                 do k=1, nt
                     do i=1, imid
@@ -780,7 +780,7 @@ contains
                     end do
                 end do
                 !
-                !     case m = 1 through nlat-1
+                ! case m = 1 through nlat-1
                 !
                 if (mmax < 2) return
 
@@ -849,11 +849,11 @@ contains
 
             case(2)
                 !
-                !     case ityp=2 ,  no symmetries but br and bi equal zero
+                ! case ityp=2 ,  no symmetries but br and bi equal zero
                 !
                 call sphere_aux%compute_polar_component(0, nlat, nlon, 0, vb, iv, wvbin)
                 !
-                !     case m=0
+                ! case m=0
                 !
                 do k=1, nt
                     do i=1, imid
@@ -873,7 +873,7 @@ contains
                     end do
                 end do
                 !
-                !     case m = 1 through nlat-1
+                ! case m = 1 through nlat-1
                 !
                 if (mmax < 2) return
 
@@ -942,11 +942,11 @@ contains
 
             case(3)
                 !
-                !     case ityp=3 ,  v even , w odd
+                ! case ityp=3 ,  v even , w odd
                 !
                 call sphere_aux%compute_polar_component(0, nlat, nlon, 0, vb, iv, wvbin)
                 !
-                !     case m=0
+                ! case m=0
                 !
                 do k=1, nt
                     do i=1, imid
@@ -966,7 +966,7 @@ contains
                     end do
                 end do
                 !
-                !     case m = 1 through nlat-1
+                ! case m = 1 through nlat-1
                 !
                 if (mmax < 2) return
 
@@ -1035,11 +1035,11 @@ contains
 
             case(4)
                 !
-                !     case ityp=4 ,  v even, w odd, and cr and ci equal 0.
+                ! case ityp=4 ,  v even, w odd, and cr and ci equal 0.
                 !
                 call sphere_aux%compute_polar_component(1, nlat, nlon, 0, vb, iv, wvbin)
                 !
-                !     case m=0
+                ! case m=0
                 !
                 do k=1, nt
                     do i=1, imid
@@ -1050,7 +1050,7 @@ contains
                     end do
                 end do
                 !
-                !     case m = 1 through nlat-1
+                ! case m = 1 through nlat-1
                 !
                 if (mmax < 2) return
 
@@ -1093,11 +1093,11 @@ contains
 
             case(5)
                 !
-                !     case ityp=5   v even, w odd, and br and bi equal zero
+                ! case ityp=5   v even, w odd, and br and bi equal zero
                 !
                 call sphere_aux%compute_polar_component(2, nlat, nlon, 0, vb, iv, wvbin)
                 !
-                !     case m=0
+                ! case m=0
                 !
                 do k=1, nt
                     do i=1, imm1
@@ -1108,7 +1108,7 @@ contains
                     end do
                 end do
                 !
-                !     case m = 1 through nlat-1
+                ! case m = 1 through nlat-1
                 !
                 if (mmax < 2) return
 
@@ -1151,11 +1151,11 @@ contains
 
             case(6)
                 !
-                !     case ityp=6 ,  v odd , w even
+                ! case ityp=6 ,  v odd , w even
                 !
                 call sphere_aux%compute_polar_component(0, nlat, nlon, 0, vb, iv, wvbin)
                 !
-                !     case m=0
+                ! case m=0
                 !
                 do k=1, nt
                     do i=1, imid
@@ -1175,7 +1175,7 @@ contains
                     end do
                 end do
                 !
-                !     case m = 1 through nlat-1
+                ! case m = 1 through nlat-1
                 !
                 if (mmax < 2) return
 
@@ -1242,11 +1242,11 @@ contains
 
             case(7)
                 !
-                !     case ityp=7   v odd, w even, and cr and ci equal zero
+                ! case ityp=7   v odd, w even, and cr and ci equal zero
                 !
                 call sphere_aux%compute_polar_component(2, nlat, nlon, 0, vb, iv, wvbin)
                 !
-                !     case m=0
+                ! case m=0
                 !
                 do k=1, nt
                     do i=1, imm1
@@ -1257,7 +1257,7 @@ contains
                     end do
                 end do
                 !
-                !     case m = 1 through nlat-1
+                ! case m = 1 through nlat-1
                 !
                 if (mmax < 2) return
 
@@ -1300,11 +1300,11 @@ contains
 
             case(8)
                 !
-                !     case ityp=8   v odd, w even, and both br and bi equal zero
+                ! case ityp=8   v odd, w even, and both br and bi equal zero
                 !
                 call sphere_aux%compute_polar_component(1, nlat, nlon, 0, vb, iv, wvbin)
                 !
-                !     case m=0
+                ! case m=0
                 !
                 do k=1, nt
                     do i=1, imid
@@ -1315,7 +1315,7 @@ contains
                     end do
                 end do
                 !
-                !     case m = 1 through nlat-1
+                ! case m = 1 through nlat-1
                 !
                 if (mmax < 2) return
                 do mp1=2, mmax

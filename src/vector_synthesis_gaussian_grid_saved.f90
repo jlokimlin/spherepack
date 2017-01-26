@@ -697,9 +697,9 @@ contains
         vector_symmetry_cases: select case (ityp)
             case (0)
                 !
-                !     case ityp=0   no symmetries
+                ! case ityp=0   no symmetries
                 !
-                !     case m = 0
+                ! case m = 0
                 !
                 do k=1, nt
                     do np1=2, ndo2, 2
@@ -718,7 +718,7 @@ contains
                     end do
                 end do
                 !
-                !     case m = 1 through nlat-1
+                ! case m = 1 through nlat-1
                 !
                 if (mmax < 2) exit vector_symmetry_cases
                 do mp1=2, mmax
@@ -783,9 +783,9 @@ contains
                 end do
             case (1)
                 !
-                !     case ityp=1   no symmetries,  cr and ci equal zero
+                ! case ityp=1   no symmetries,  cr and ci equal zero
                 !
-                !     case m = 0
+                ! case m = 0
                 !
                 do k=1, nt
                     do np1=2, ndo2, 2
@@ -803,7 +803,7 @@ contains
                     end do
                 end do
                 !
-                !     case m = 1 through nlat-1
+                ! case m = 1 through nlat-1
                 !
                 if (mmax < 2) exit vector_symmetry_cases
                 do mp1=2, mmax
@@ -853,9 +853,9 @@ contains
                 end do
             case (2)
                 !
-                !     case ityp=2   no symmetries,  br and bi are equal to zero
+                ! case ityp=2   no symmetries,  br and bi are equal to zero
                 !
-                !     case m = 0
+                ! case m = 0
                 !
                 do k=1, nt
                     do np1=2, ndo2, 2
@@ -873,7 +873,7 @@ contains
                     end do
                 end do
                 !
-                !     case m = 1 through nlat-1
+                ! case m = 1 through nlat-1
                 !
                 if (mmax < 2) exit vector_symmetry_cases
 
@@ -924,9 +924,9 @@ contains
                 end do
             case (3)
                 !
-                !     case ityp=3   v even,  w odd
+                ! case ityp=3   v even,  w odd
                 !
-                !     case m = 0
+                ! case m = 0
                 !
                 do k=1, nt
                     do np1=2, ndo2, 2
@@ -944,7 +944,7 @@ contains
                     end do
                 end do
                 !
-                !     case m = 1 through nlat-1
+                ! case m = 1 through nlat-1
                 !
                 if (mmax < 2) exit vector_symmetry_cases
 
@@ -994,9 +994,9 @@ contains
                 end do
             case (4)
                 !
-                !     case ityp=4   v even,  w odd, and both cr and ci equal zero
+                ! case ityp=4   v even,  w odd, and both cr and ci equal zero
                 !
-                !     case m = 0
+                ! case m = 0
                 !
                 do k=1, nt
                     do np1=2, ndo2, 2
@@ -1006,7 +1006,7 @@ contains
                     end do
                 end do
                 !
-                !     case m = 1 through nlat-1
+                ! case m = 1 through nlat-1
                 !
                 if (mmax < 2) exit vector_symmetry_cases
 
@@ -1037,9 +1037,9 @@ contains
                 end do
             case (5)
                  !
-                 !     case ityp=5   v even,  w odd,     br and bi equal zero
+                 ! case ityp=5   v even,  w odd,     br and bi equal zero
                  !
-                 !     case m = 0
+                 ! case m = 0
                  !
                 do k=1, nt
                     do np1=3, ndo1, 2
@@ -1049,7 +1049,7 @@ contains
                     end do
                 end do
                 !
-                !     case m = 1 through nlat-1
+                ! case m = 1 through nlat-1
                 !
                 if (mmax < 2) exit vector_symmetry_cases
 
@@ -1080,9 +1080,9 @@ contains
                 end do
             case (6)
                 !
-                !     case ityp=6   v odd  ,  w even
+                ! case ityp=6   v odd  ,  w even
                 !
-                !     case m = 0
+                ! case m = 0
                 !
                 do k=1, nt
                     do np1=2, ndo2, 2
@@ -1100,7 +1100,7 @@ contains
                     end do
                 end do
                 !
-                !     case m = 1 through nlat-1
+                ! case m = 1 through nlat-1
                 !
                 if (mmax < 2) exit vector_symmetry_cases
 
@@ -1150,9 +1150,9 @@ contains
                 end do
             case (7)
                 !
-                !     case ityp=7   v odd, w even   cr and ci equal zero
+                ! case ityp=7   v odd, w even   cr and ci equal zero
                 !
-                !     case m = 0
+                ! case m = 0
                 !
                 do k=1, nt
                     do np1=3, ndo1, 2
@@ -1162,7 +1162,7 @@ contains
                     end do
                 end do
                 !
-                !     case m = 1 through nlat-1
+                ! case m = 1 through nlat-1
                 !
                 if (mmax < 2) exit vector_symmetry_cases
 
@@ -1192,9 +1192,9 @@ contains
                 end do
             case (8)
                 !
-                !     case ityp=8   v odd,  w even   br and bi equal zero
+                ! case ityp=8   v odd,  w even   br and bi equal zero
                 !
-                !     case m = 0
+                ! case m = 0
                 !
                 do k=1, nt
                     do np1=2, ndo2, 2
@@ -1204,7 +1204,7 @@ contains
                     end do
                 end do
                 !
-                !     case m = 1 through nlat-1
+                ! case m = 1 through nlat-1
                 !
                 if (mmax < 2) exit vector_symmetry_cases
 

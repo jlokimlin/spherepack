@@ -666,7 +666,7 @@ contains
                     end do
                 end do
                 !
-                !     case m = 1 through nlat-1
+                ! case m = 1 through nlat-1
                 !
                 if (mmax < 2) return
 
@@ -1181,7 +1181,7 @@ contains
                     end do
                 end do
                 !
-                !     case m = 1 through nlat-1
+                ! case m = 1 through nlat-1
                 !
                 if (mmax < 2) return
 
