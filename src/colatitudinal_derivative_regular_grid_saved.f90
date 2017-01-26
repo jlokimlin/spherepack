@@ -344,29 +344,11 @@
 !            = 5  error in the specification of ldwork
 !
 !
-module module_vtses
-
-    use spherepack_precision, only: &
-        wp, & ! working precision
-        ip ! integer precision
-
-    use type_SpherepackAux, only: &
-        SpherepackAux
-
-    ! Explicit typing only
-    implicit none
-
-    ! Everything is private unless stated otherwise
-    public :: vtses
-    public :: vtsesi
-
-    ! Parameters confined to the module
-    real(wp), parameter :: ZERO = 0.0_wp
-    real(wp), parameter :: HALF = 0.5_wp
+submodule(colatitudinal_derivative_routines) colatitudinal_derivative_regular_grid_saved
 
 contains
 
-    subroutine vtses(nlat, nlon, ityp, nt, vt, wt, idvw, jdvw, br, bi, cr, ci, &
+    module subroutine vtses(nlat, nlon, ityp, nt, vt, wt, idvw, jdvw, br, bi, cr, ci, &
         mdab, ndab, wvts, lwvts, work, lwork, ierror)
 
         ! Dummy arguments
@@ -449,6 +431,53 @@ contains
             work(iw4), idz, wvts, wvts(jw1), wvts(jw2))
 
     end subroutine vtses
+
+    module subroutine vtsesi(nlat, nlon, wvts, lwvts, work, lwork, dwork, ldwork, &
+        ierror)
+
+        ! Dummy arguments
+        integer(ip), intent(in)  :: nlat
+        integer(ip), intent(in)  :: nlon
+        real(wp),    intent(out) :: wvts(lwvts)
+        integer(ip), intent(in)  :: lwvts
+        real(wp),    intent(out) :: work(lwork)
+        integer(ip), intent(in)  :: lwork
+        real(wp),    intent(out) :: dwork(ldwork)
+        integer(ip), intent(in)  :: ldwork
+        integer(ip), intent(out) :: ierror
+
+        ! Local variables
+        integer(ip) :: idz
+        integer(ip) :: imid
+        integer(ip) :: iw1
+        integer(ip) :: labc
+        integer(ip) :: lzimn
+        integer(ip) :: mmax
+        type(SpherepackAux) :: sphere_aux
+
+        ierror = 1
+        if(nlat < 3) return
+        ierror = 2
+        if (nlon < 1) return
+        ierror = 3
+        mmax = min(nlat, (nlon+1)/2)
+        imid =(nlat+1)/2
+        lzimn = (imid*mmax*(nlat+nlat-mmax+1))/2
+        if (lwvts < lzimn+lzimn+nlon+15) return
+        ierror = 4
+        labc = 3*(max(mmax-2, 0)*(nlat+nlat-mmax-1))/2
+        if (lwork < 5*nlat*imid+labc) return
+        ierror = 5
+        if (ldwork < 2*(nlat+1)) return
+        ierror = 0
+        iw1 = 3*nlat*imid+1
+        idz = (mmax*(nlat+nlat-mmax+1))/2
+
+        call vtsesi_lower_routine(nlat, nlon, imid, wvts, wvts(lzimn+1), idz, work, work(iw1), dwork)
+
+        call sphere_aux%hfft%initialize(nlon, wvts(2*lzimn+1))
+
+    end subroutine vtsesi
 
     subroutine vtses_lower_routine(nlat, nlon, ityp, nt, imid, idvw, jdvw, vt, wt, mdab, &
         ndab, br, bi, cr, ci, idv, vte, vto, wte, wto, work, idz, vb, wb, wrfft)
@@ -1061,50 +1090,6 @@ contains
 
     end subroutine vtses_lower_routine
 
-    subroutine vtsesi(nlat, nlon, wvts, lwvts, work, lwork, dwork, ldwork, &
-        ierror)
-
-        integer(ip) :: idz
-        integer(ip) :: ierror
-        integer(ip) :: imid
-        integer(ip) :: iw1
-        integer(ip) :: labc
-        integer(ip) :: ldwork
-        integer(ip) :: lwork
-        integer(ip) :: lwvts
-        integer(ip) :: lzimn
-        integer(ip) :: mmax
-        integer(ip) :: nlat
-        integer(ip) :: nlon
-        real(wp) :: wvts(lwvts), work(lwork)
-        real(wp) :: dwork(ldwork)
-
-        type(SpherepackAux) :: sphere_aux
-
-        ierror = 1
-        if(nlat < 3) return
-        ierror = 2
-        if (nlon < 1) return
-        ierror = 3
-        mmax = min(nlat, (nlon+1)/2)
-        imid =(nlat+1)/2
-        lzimn = (imid*mmax*(nlat+nlat-mmax+1))/2
-        if (lwvts < lzimn+lzimn+nlon+15) return
-        ierror = 4
-        labc = 3*(max(mmax-2, 0)*(nlat+nlat-mmax-1))/2
-        if (lwork < 5*nlat*imid+labc) return
-        ierror = 5
-        if (ldwork < 2*(nlat+1)) return
-        ierror = 0
-        iw1 = 3*nlat*imid+1
-        idz = (mmax*(nlat+nlat-mmax+1))/2
-
-        call vtsesi_lower_routine(nlat, nlon, imid, wvts, wvts(lzimn+1), idz, work, work(iw1), dwork)
-
-        call sphere_aux%hfft%initialize(nlon, wvts(2*lzimn+1))
-
-    end subroutine vtsesi
-
     subroutine vtsesi_lower_routine(nlat, nlon, imid, vb, wb, idz, vin, wzvin, dwork)
         integer(ip) :: i3
         integer(ip) :: idz
@@ -1150,4 +1135,4 @@ contains
 
     end subroutine vtsesi_lower_routine
 
-end module module_vtses
+end submodule colatitudinal_derivative_regular_grid_saved

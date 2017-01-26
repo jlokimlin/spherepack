@@ -197,39 +197,37 @@ vector_synthesis_gaussian_grid_saved.f90
 	$(FC) $(FFLAGS) -c vector_synthesis_gaussian_grid_saved.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 
-vtsec.o: \
-spherepack_precision.o \
-type_RealPeriodicTransform.o \
-type_SpherepackAux.o\
-vtsec.f90
-	$(FC) $(FFLAGS) -c vtsec.f90 $(LINKS)\
-	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
-
-vtses.o: \
-spherepack_precision.o \
-type_RealPeriodicTransform.o \
-type_SpherepackAux.o\
-vtses.f90
-	$(FC) $(FFLAGS) -c vtses.f90 $(LINKS)\
-	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
-
-vtsgc.o: \
-spherepack_precision.o \
-type_RealPeriodicTransform.o \
-type_SpherepackAux.o\
-gaussian_latitudes_and_weights_routines.o \
-vtsgc.f90
-	$(FC) $(FFLAGS) -c vtsgc.f90 $(LINKS)\
-	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
-
-vtsgs.o: \
+colatitudinal_derivative_routines.o: \
 spherepack_precision.o \
 type_SpherepackAux.o\
 gaussian_latitudes_and_weights_routines.o \
-vtsgs.f90
-	$(FC) $(FFLAGS) -c vtsgs.f90 $(LINKS)\
+colatitudinal_derivative_routines.f90
+	$(FC) $(FFLAGS) -c colatitudinal_derivative_routines.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 
+colatitudinal_derivative_regular_grid.o: \
+colatitudinal_derivative_routines.o \
+colatitudinal_derivative_regular_grid.f90
+	$(FC) $(FFLAGS) -c colatitudinal_derivative_regular_grid.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
+
+colatitudinal_derivative_regular_grid_saved.o: \
+colatitudinal_derivative_routines.o \
+colatitudinal_derivative_regular_grid_saved.f90
+	$(FC) $(FFLAGS) -c colatitudinal_derivative_regular_grid_saved.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
+
+colatitudinal_derivative_gaussian_grid.o: \
+colatitudinal_derivative_routines.o \
+colatitudinal_derivative_gaussian_grid.f90
+	$(FC) $(FFLAGS) -c colatitudinal_derivative_gaussian_grid.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
+
+colatitudinal_derivative_gaussian_grid_saved.o: \
+colatitudinal_derivative_routines.o \
+colatitudinal_derivative_gaussian_grid_saved.f90
+	$(FC) $(FFLAGS) -c colatitudinal_derivative_gaussian_grid_saved.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 
 sshifte.o: \
 spherepack_precision.o \
@@ -772,10 +770,7 @@ vector_synthesis_routines.o \
 vector_laplacian_routines.o \
 vorticity_routines.o \
 vshifte.o \
-vtsec.o \
-vtses.o \
-vtsgc.o \
-vtsgs.o \
+colatitudinal_derivative_routines.o \
 type_RealPeriodicTransform.o \
 type_FFTpack.o \
 type_LegendreAux.o \

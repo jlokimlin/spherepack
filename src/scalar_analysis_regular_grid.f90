@@ -491,8 +491,8 @@ contains
         !     zb must have 3*l*(nlat+1)/2 locations
         !     work must have ls*nlon locations
         !
-        dimension g(idgs, jdgs, *), a(mdab, ndab, *), b(mdab, ndab, *), &
-            ge(idg, jdg, *), go(idg, jdg, *), zb(imid, nlat, 3), wzfin(*), &
+        dimension g(idgs, jdgs, nt), a(mdab, ndab, nt), b(mdab, ndab, nt), &
+            ge(idg, jdg, nt), go(idg, jdg, nt), zb(imid, nlat, 3), wzfin(*), &
             whrfft(*), work(*)
 
         type(SpherepackAux) :: sphere_aux
@@ -500,57 +500,62 @@ contains
         ls = idg
         nlon = jdg
         mmax = min(nlat, nlon/2+1)
-        mdo = mmax
-        if (mdo+mdo-1 > nlon) mdo = mmax-1
+
+        if (2*mmax-1 > nlon) then
+            mdo = mmax-1
+        else
+            mdo = mmax
+        end if
+
         nlp1 = nlat+1
         tsn = TWO/nlon
         fsn = FOUR/nlon
         modl = mod(nlat, 2)
-        imm1 = imid
-        if (modl /= 0) imm1 = imid-1
-        if (isym /= 0) then
-            goto 15
-        end if
 
-        do k=1, nt
-            do i=1, imm1
-                do j=1, nlon
-                    ge(i, j, k) = tsn*(g(i, j, k)+g(nlp1-i, j, k))
-                    go(i, j, k) = tsn*(g(i, j, k)-g(nlp1-i, j, k))
+        select case (modl)
+            case(0)
+                imm1 = imid
+            case default
+                imm1 = imid-1
+        end select
+
+        block_construct: block
+            select case(isym)
+                case(0)
+                    do k=1, nt
+                        do i=1, imm1
+                            do j=1, nlon
+                                ge(i, j, k) = tsn*(g(i, j, k)+g(nlp1-i, j, k))
+                                go(i, j, k) = tsn*(g(i, j, k)-g(nlp1-i, j, k))
+                            end do
+                        end do
+                    end do
+                case default
+                    do k=1, nt
+                        do i=1, imm1
+                            do j=1, nlon
+                                ge(i, j, k) = fsn*g(i, j, k)
+                            end do
+                        end do
+                    end do
+                    if (isym == 1) exit block_construct
+            end select
+
+            if (modl /= 0) then
+                do k=1, nt
+                    do j=1, nlon
+                        ge(imid, j, k) = tsn*g(imid, j, k)
+                    end do
                 end do
-            end do
-        end do
-        goto 30
+            end if
+        end block block_construct
 
-        15 do k=1, nt
-            do i=1, imm1
-                do j=1, nlon
-                    ge(i, j, k) = fsn*g(i, j, k)
-                end do
-            end do
-        end do
-
-        if (isym == 1) then
-            goto 27
-        end if
-
-30      if (modl == 0) then
-            goto 27
-        end if
-
-        do k=1, nt
-            do j=1, nlon
-                ge(imid, j, k) = tsn*g(imid, j, k)
-            end do
-        end do
-
-        27 do k=1, nt
+        ! Fast Fourier transform
+        fft_loop: do k=1, nt
             call sphere_aux%hfft%forward(ls, nlon, ge(1, 1, k), ls, whrfft, work)
-            if (mod(nlon, 2) /= 0) exit
-            do i=1, ls
-                ge(i, nlon, k) = HALF * ge(i, nlon, k)
-            end do
-        end do
+            if (mod(nlon, 2) /= 0) exit fft_loop
+            ge(1:ls, nlon, k) = HALF * ge(1:ls, nlon, k)
+        end do fft_loop
 
         do k=1, nt
             do mp1=1, mmax
@@ -561,56 +566,52 @@ contains
             end do
         end do
 
-        if (isym == 1) then
-            goto 145
-        end if
+        if (isym /= 1) then
 
-        call sphere_aux%zfin(2, nlat, nlon, 0, zb, i3, wzfin)
+            call sphere_aux%zfin(2, nlat, nlon, 0, zb, i3, wzfin)
 
-        do k=1, nt
-            do i=1, imid
-                do np1=1, nlat, 2
-                    a(1, np1, k) = a(1, np1, k)+zb(i, np1, i3)*ge(i, 1, k)
-                end do
-            end do
-        end do
-
-        ndo = nlat
-
-        if (mod(nlat, 2) == 0) then
-            ndo = nlat-1
-        end if
-
-        do mp1=2, mdo
-            m = mp1-1
-            call sphere_aux%zfin(2, nlat, nlon, m, zb, i3, wzfin)
             do k=1, nt
                 do i=1, imid
-                    do np1=mp1, ndo, 2
-                        a(mp1, np1, k) = a(mp1, np1, k)+zb(i, np1, i3)*ge(i, 2*mp1-2, k)
-                        b(mp1, np1, k) = b(mp1, np1, k)+zb(i, np1, i3)*ge(i, 2*mp1-1, k)
+                    do np1=1, nlat, 2
+                        a(1, np1, k) = a(1, np1, k)+zb(i, np1, i3)*ge(i, 1, k)
                     end do
                 end do
             end do
-        end do
 
-        if (mdo == mmax .or. mmax > ndo) then
-            goto 135
-        end if
+            select case (mod(nlat, 2))
+                case(0)
+                    ndo = nlat-1
+                case default
+                    ndo = nlat
+            end select
 
-        call sphere_aux%zfin(2, nlat, nlon, mdo, zb, i3, wzfin)
-
-        do k=1, nt
-            do i=1, imid
-                do np1=mmax, ndo, 2
-                    a(mmax, np1, k) = a(mmax, np1, k)+zb(i, np1, i3)*ge(i, 2*mmax-2, k)
+            do mp1=2, mdo
+                m = mp1-1
+                call sphere_aux%zfin(2, nlat, nlon, m, zb, i3, wzfin)
+                do k=1, nt
+                    do i=1, imid
+                        do np1=mp1, ndo, 2
+                            a(mp1, np1, k) = a(mp1, np1, k)+zb(i, np1, i3)*ge(i, 2*mp1-2, k)
+                            b(mp1, np1, k) = b(mp1, np1, k)+zb(i, np1, i3)*ge(i, 2*mp1-1, k)
+                        end do
+                    end do
                 end do
             end do
-        end do
 
-135     if (isym == 2) return
+            if (mdo /= mmax .and. mmax <= ndo) then
+                call sphere_aux%zfin(2, nlat, nlon, mdo, zb, i3, wzfin)
+                do k=1, nt
+                    do i=1, imid
+                        do np1=mmax, ndo, 2
+                            a(mmax, np1, k) = a(mmax, np1, k)+zb(i, np1, i3)*ge(i, 2*mmax-2, k)
+                        end do
+                    end do
+                end do
+            end if
+            if (isym == 2) return
+        end if
 
-145     call sphere_aux%zfin(1, nlat, nlon, 0, zb, i3, wzfin)
+        call sphere_aux%zfin(1, nlat, nlon, 0, zb, i3, wzfin)
 
         do k=1, nt
             do i=1, imm1
@@ -620,11 +621,12 @@ contains
             end do
         end do
 
-        if (mod(nlat, 2) /= 0) then
-            ndo = nlat-1
-        else
-            ndo = nlat
-        end if
+        select case (mod(nlat, 2))
+            case(0)
+                ndo = nlat
+            case default
+                ndo = nlat-1
+        end select
 
         do mp1=2, mdo
             m = mp1-1
@@ -641,18 +643,16 @@ contains
         end do
 
         mp2 = mmax+1
-
-        if (mdo == mmax .or. mp2 > ndo) return
-
-        call sphere_aux%zfin(1, nlat, nlon, mdo, zb, i3, wzfin)
-
-        do k=1, nt
-            do i=1, imm1
-                do np1=mp2, ndo, 2
-                    a(mmax, np1, k) = a(mmax, np1, k)+zb(i, np1, i3)*go(i, 2*mmax-2, k)
+        if (mdo /= mmax .and. mp2 <= ndo) then
+            call sphere_aux%zfin(1, nlat, nlon, mdo, zb, i3, wzfin)
+            do k=1, nt
+                do i=1, imm1
+                    do np1=mp2, ndo, 2
+                        a(mmax, np1, k) = a(mmax, np1, k)+zb(i, np1, i3)*go(i, 2*mmax-2, k)
+                    end do
                 end do
             end do
-        end do
+        end if
 
     end subroutine shaec_lower_routine
 

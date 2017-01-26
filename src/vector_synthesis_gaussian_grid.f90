@@ -566,7 +566,7 @@ contains
         if (ldwork < 2*nlat*(nlat+1)+1) return
         ierror = 0
         !
-        !  Set workspace pointers
+        ! Set workspace index pointers
         !
         jw1 = 1
         jw2 = jw1+nlat

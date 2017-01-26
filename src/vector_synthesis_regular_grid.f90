@@ -554,7 +554,7 @@ contains
 
         if (ierror /= 0) return
 
-        !  Set workspace pointers
+        ! Set workspace index pointers
         lwvbin = lzz1+labc
         iw1 = lwvbin+1
         iw2 = iw1+lwvbin

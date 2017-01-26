@@ -484,38 +484,34 @@ contains
 
     end subroutine shaesi
 
-
     subroutine shaes_lower_routine(nlat, isym, nt, g, idgs, jdgs, a, b, mdab, ndab, &
-        z, idz, idg, jdg, ge, go, work, whrfft)
+        z, idz, idg, jdg, g_even, g_odd, work, whrfft)
 
         ! Dummy arguments
-
-        integer(ip), intent(in)     :: nlat
-        integer(ip), intent(in)     :: isym
-        integer(ip), intent(in)     :: nt
-        real(wp),    intent(in)     :: g(idgs, jdgs, nt)
-        integer(ip), intent(in)     :: idgs
-        integer(ip), intent(in)     :: jdgs
-        real(wp),    intent(out)  :: a(mdab, ndab, nt)
-        real(wp),    intent(out)  :: b(mdab, ndab, nt)
-        integer(ip), intent(in)     :: mdab
-        integer(ip), intent(in)     :: ndab
+        integer(ip), intent(in)  :: nlat
+        integer(ip), intent(in)  :: isym
+        integer(ip), intent(in)  :: nt
+        real(wp),    intent(in)  :: g(idgs, jdgs, nt)
+        integer(ip), intent(in)  :: idgs
+        integer(ip), intent(in)  :: jdgs
+        real(wp),    intent(out) :: a(mdab, ndab, nt)
+        real(wp),    intent(out) :: b(mdab, ndab, nt)
+        integer(ip), intent(in)  :: mdab
+        integer(ip), intent(in)  :: ndab
         real(wp),    intent(in)  :: z(idz, *)
-        integer(ip), intent(in)     :: idz
-        integer(ip), intent(in)     :: idg
-        integer(ip), intent(in)     :: jdg
-        real(wp),    intent(out)  :: ge(idg, jdg, *)
-        real(wp),    intent(out)  :: go(idg, jdg, *)
-        real(wp),    intent(out)  :: work(*)
+        integer(ip), intent(in)  :: idz
+        integer(ip), intent(in)  :: idg
+        integer(ip), intent(in)  :: jdg
+        real(wp),    intent(out) :: g_even(idg, jdg, nt)
+        real(wp),    intent(out) :: g_odd(idg, jdg, nt)
+        real(wp),    intent(out) :: work(*)
         real(wp),    intent(in)  :: whrfft(*)
 
         ! Local variables
-
-        integer(ip)    :: i, j, k, m, mb, ls, mp1, np1, mp2, mdo, ndo
+        integer(ip)    :: i, k, m, mb, ls, mp1, np1, mp2, mdo, ndo
         integer(ip)    :: imm1, nlp1, imid, modl, mmax, nlon
         real(wp)       :: fsn, tsn
         type(SpherepackAux) :: sphere_aux
-
 
         ls = idg
         nlon = jdg
@@ -533,49 +529,42 @@ contains
         imid = (nlat+1)/2
         modl = mod(nlat, 2)
 
-        if (modl /= 0) then
-            imm1 = imid-1
-        else
-            imm1 = imid
-        end if
+        select case (modl)
+            case(0)
+                imm1 = imid
+            case default
+                imm1 = imid-1
+        end select
 
         block_construct: block
-
-            if (isym == 0) then
-                do k=1, nt
-                    do i=1, imm1
-                        ge(i,1:nlon,k) = tsn*(g(i,1:nlon,k)+g(nlp1-i,1:nlon,k))
-                        go(i,1:nlon,k) = tsn*(g(i,1:nlon,k)-g(nlp1-i,1:nlon,k))
+            select case (isym)
+                case(0)
+                    do k=1, nt
+                        do i=1, imm1
+                            g_even(i,1:nlon,k) = tsn*(g(i,1:nlon,k)+g(nlp1-i,1:nlon,k))
+                            g_odd(i,1:nlon,k) = tsn*(g(i,1:nlon,k)-g(nlp1-i,1:nlon,k))
+                        end do
                     end do
-                end do
-            else
-                do k=1, nt
-                    ge(1:imm1,1:nlon,k) = fsn*g(1:imm1,1:nlon,k)
-                end do
+                case default
+                    do k=1, nt
+                        g_even(1:imm1,1:nlon,k) = fsn*g(1:imm1,1:nlon,k)
+                    end do
 
-                if (isym == 1) exit block_construct
-
-            end if
+                    if (isym == 1) exit block_construct
+            end select
 
             if (modl /= 0) then
                 do k=1, nt
-                    ge(imid, 1:nlon, k) = tsn*g(imid,1:nlon, k)
+                    g_even(imid, 1:nlon, k) = tsn*g(imid,1:nlon, k)
                 end do
             end if
-
         end block block_construct
 
-        !
         !  Fast Fourier Transform
-        !
         fft_loop: do k=1, nt
-
-            call sphere_aux%hfft%forward(ls, nlon, ge(1, 1, k), ls, whrfft, work)
-
+            call sphere_aux%hfft%forward(ls, nlon, g_even(1, 1, k), ls, whrfft, work)
             if (mod(nlon, 2) /= 0) exit fft_loop
-
-            ge(1:ls, nlon, k) = HALF * ge(1:ls, nlon, k)
-
+            g_even(1:ls, nlon, k) = HALF * g_even(1:ls, nlon, k)
         end do fft_loop
 
         do k=1, nt
@@ -592,17 +581,17 @@ contains
             do k=1, nt
                 do i=1, imid
                     do np1=1, nlat, 2
-                        a(1, np1, k) = a(1, np1, k)+z(np1, i)*ge(i, 1, k)
+                        a(1, np1, k) = a(1, np1, k)+z(np1, i)*g_even(i, 1, k)
                     end do
                 end do
             end do
 
-
-            if (mod(nlat, 2) == 0) then
-                ndo = nlat-1
-            else
-                ndo = nlat
-            end if
+            select case (mod(nlat, 2))
+                case(0)
+                    ndo = nlat-1
+                case default
+                    ndo = nlat
+            end select
 
             do mp1=2, mdo
                 m = mp1-1
@@ -610,44 +599,40 @@ contains
                 do k=1, nt
                     do i=1, imid
                         do np1=mp1, ndo, 2
-                            a(mp1, np1, k) = a(mp1, np1, k)+z(np1+mb, i)*ge(i, 2*mp1-2, k)
-                            b(mp1, np1, k) = b(mp1, np1, k)+z(np1+mb, i)*ge(i, 2*mp1-1, k)
+                            a(mp1, np1, k) = a(mp1, np1, k)+z(np1+mb, i)*g_even(i, 2*mp1-2, k)
+                            b(mp1, np1, k) = b(mp1, np1, k)+z(np1+mb, i)*g_even(i, 2*mp1-1, k)
                         end do
                     end do
                 end do
             end do
 
             if (mdo /= mmax .and. mmax <= ndo) then
-
                 mb = mdo*(nlat-1)-(mdo*(mdo-1))/2
-
                 do k=1, nt
                     do i=1, imid
                         do np1=mmax, ndo, 2
-                            a(mmax, np1, k) = a(mmax, np1, k)+z(np1+mb, i)*ge(i, 2*mmax-2, k)
+                            a(mmax, np1, k) = a(mmax, np1, k)+z(np1+mb, i)*g_even(i, 2*mmax-2, k)
                         end do
                     end do
                 end do
-
             end if
-
             if (isym == 2) return
-
         end if
 
         do k=1, nt
             do i=1, imm1
                 do np1=2, nlat, 2
-                    a(1, np1, k) = a(1, np1, k)+z(np1, i)*go(i, 1, k)
+                    a(1, np1, k) = a(1, np1, k)+z(np1, i)*g_odd(i, 1, k)
                 end do
             end do
         end do
 
-        if (mod(nlat, 2) /= 0) then
-            ndo = nlat-1
-        else
-            ndo = nlat
-        end if
+        select case (mod(nlat, 2))
+            case(0)
+                ndo = nlat
+            case default
+                ndo = nlat-1
+        end select
 
         do mp1=2, mdo
             m = mp1-1
@@ -656,26 +641,24 @@ contains
             do k=1, nt
                 do i=1, imm1
                     do np1=mp2, ndo, 2
-                        a(mp1, np1, k) = a(mp1, np1, k)+z(np1+mb, i)*go(i, 2*mp1-2, k)
-                        b(mp1, np1, k) = b(mp1, np1, k)+z(np1+mb, i)*go(i, 2*mp1-1, k)
+                        a(mp1, np1, k) = a(mp1, np1, k)+z(np1+mb, i)*g_odd(i, 2*mp1-2, k)
+                        b(mp1, np1, k) = b(mp1, np1, k)+z(np1+mb, i)*g_odd(i, 2*mp1-1, k)
                     end do
                 end do
             end do
         end do
 
         mp2 = mmax+1
-
-        if (mdo == mmax .or. mp2 > ndo)  return
-
-        mb = mdo*(nlat-1)-(mdo*(mdo-1))/2
-
-        do k=1, nt
-            do i=1, imm1
-                do np1=mp2, ndo, 2
-                    a(mmax, np1, k) = a(mmax, np1, k)+z(np1+mb, i)*go(i, 2*mmax-2, k)
+        if (mdo /= mmax .and. mp2 <= ndo) then
+            mb = mdo*(nlat-1)-(mdo*(mdo-1))/2
+            do k=1, nt
+                do i=1, imm1
+                    do np1=mp2, ndo, 2
+                        a(mmax, np1, k) = a(mmax, np1, k)+z(np1+mb, i)*g_odd(i, 2*mmax-2, k)
+                    end do
                 end do
             end do
-        end do
+        end if
 
     end subroutine shaes_lower_routine
 

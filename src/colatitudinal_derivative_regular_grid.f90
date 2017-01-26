@@ -31,43 +31,41 @@
 !
 !
 !
-! ... file vtsgs.f
+! ... file vtsec.f90
 !
 !     this file includes documentation and code for
-!     subroutines vtsgs and vtsgsi
+!     subroutines vtsec and vtseci
 !
-! ... files which must be loaded with vtsgs.f
+! ... files which must be loaded with vtsec.f90
 !
-!     type_SpherepackAux.f, type_RealPeriodicTransform.f, vhags.f, vhsgs.f, compute_gaussian_latitudes_and_weights.f
+!     type_SpherepackAux.f90, type_RealPeriodicTransform.f90, vhaec.f90, vhsec.f90
 !   
-!   
-!     subroutine vtsgs(nlat, nlon, ityp, nt, vt, wt, idvw, jdvw, br, bi, cr, ci, 
+!     subroutine vtsec(nlat, nlon, ityp, nt, vt, wt, idvw, jdvw, br, bi, cr, ci, 
 !    +                 mdab, ndab, wvts, lwvts, work, lwork, ierror)
 !
 !     given the vector harmonic analysis br, bi, cr, and ci (computed
-!     by subroutine vhags) of some vector function (v, w), this 
+!     by subroutine vhaec) of some vector function (v, w), this 
 !     subroutine computes the vector function (vt, wt) which is
-!     the derivative of (v, w) with respect to colatitude theta. vtsgs
-!     is similar to vhsgs except the vector harmonics are replaced by 
+!     the derivative of (v, w) with respect to colatitude theta. vtsec
+!     is similar to vhsec except the vector harmonics are replaced by 
 !     their derivative with respect to colatitude with the result that
 !     (vt, wt) is computed instead of (v, w). vt(i, j) is the derivative
-!     of the colatitudinal component v(i, j) at the gaussian colatitude
-!     point theta(i) and longitude phi(j) = (j-1)*2*pi/nlon. the
+!     of the colatitudinal component v(i, j) at the point theta(i) =
+!     (i-1)*pi/(nlat-1) and longitude phi(j) = (j-1)*2*pi/nlon. the
 !     spectral representation of (vt, wt) is given below at output
 !     parameters vt, wt.
 !
 !     input parameters
 !
-!     nlat   the number of gaussian colatitudinal grid points theta(i)
-!            such that 0 < theta(1) <...< theta(nlat) < pi. they are
-!            computed by subroutine compute_gaussian_latitudes_and_weights which is called by this
-!            subroutine. if nlat is odd the equator is
-!            theta((nlat+1)/2). if nlat is even the equator lies
-!            half way between theta(nlat/2) and theta(nlat/2+1). nlat
-!            must be at least 3. note: if (v, w) is symmetric about
-!            the equator (see parameter ityp below) the number of
-!            colatitudinal grid points is nlat/2 if nlat is even or
-!            (nlat+1)/2 if nlat is odd.
+!     nlat   the number of colatitudes on the full sphere including the
+!            poles. for example, nlat = 37 for a five degree grid.
+!            nlat determines the grid increment in colatitude as
+!            pi/(nlat-1).  if nlat is odd the equator is located at
+!            grid point i=(nlat+1)/2. if nlat is even the equator is
+!            located half way between points i=nlat/2 and i=nlat/2+1.
+!            nlat must be at least 3. note: on the half sphere, the
+!            number of grid points in the colatitudinal direction is
+!            nlat/2 if nlat is even or (nlat+1)/2 if nlat is odd.
 !
 !     nlon   the number of distinct londitude points.  nlon determines
 !            the grid increment in longitude as 2*pi/nlon. for example
@@ -82,27 +80,23 @@
 !                 j=1, ..., nlon.   
 !
 !            = 1  no symmetries exist about the equator however the
-!                 the coefficients cr and ci are zero which implies
-!                 that the curl of (v, w) is zero. that is, 
-!                 (d/dtheta (sin(theta) w) - dv/dphi)/sin(theta) = 0. 
-!                 the calculations are performed on the entire sphere.
-!                 i.e. the arrays vt(i, j), wt(i, j) are computed for 
-!                 i=1, ..., nlat and j=1, ..., nlon.
+!                 the coefficients cr and ci are zero. the synthesis
+!                 is performed on the entire sphere.  i.e. the arrays
+!                 vt(i, j), wt(i, j) are computed for i=1, ..., nlat and
+!                 j=1, ..., nlon.
 !
 !            = 2  no symmetries exist about the equator however the
-!                 the coefficients br and bi are zero which implies
-!                 that the divergence of (v, w) is zero. that is, 
-!                 (d/dtheta (sin(theta) v) + dw/dphi)/sin(theta) = 0. 
-!                 the calculations are performed on the entire sphere.
-!                 i.e. the arrays vt(i, j), wt(i, j) are computed for 
-!                 i=1, ..., nlat and j=1, ..., nlon.
+!                 the coefficients br and bi are zero. the synthesis
+!                 is performed on the entire sphere.  i.e. the arrays
+!                 vt(i, j), wt(i, j) are computed for i=1, ..., nlat and 
+!                 j=1, ..., nlon.
 !
 !            = 3  vt is odd and wt is even about the equator. the 
 !                 synthesis is performed on the northern hemisphere
-!                 only.  i.e., if nlat is odd the arrays vt(i, j)
-!                 and wt(i, j) are computed for i=1, ..., (nlat+1)/2
-!                 and j=1, ..., nlon. if nlat is even the arrays 
-!                 are computed for i=1, ..., nlat/2 and j=1, ..., nlon.
+!                 only.  i.e., if nlat is odd the arrays vt(i, j), wt(i, j)
+!                 are computed for i=1, ..., (nlat+1)/2 and j=1, ..., nlon.
+!                 if nlat is even the arrays vt(i, j), wt(i, j) are computed 
+!                 for i=1, ..., nlat/2 and j=1, ..., nlon.
 !
 !            = 4  vt is odd and wt is even about the equator and the 
 !                 coefficients cr and ci are zero. the synthesis is
@@ -143,7 +137,7 @@
 !                 even the arrays vt(i, j), wt(i, j) are computed for 
 !                 i=1, ..., nlat/2 and j=1, ..., nlon.
 !
-!     nt     the number of syntheses.  in the program that calls vtsgs, 
+!     nt     the number of syntheses.  in the program that calls vtsec, 
 !            the arrays vt, wt, br, bi, cr, and ci can be three dimensional
 !            in which case multiple syntheses will be performed.
 !            the third index is the synthesis index which assumes the 
@@ -153,34 +147,34 @@
 !            dimensional.
 !
 !     idvw   the first dimension of the arrays vt, wt as it appears in
-!            the program that calls vtsgs. if ityp .le. 2 then idvw
+!            the program that calls vtsec. if ityp .le. 2 then idvw
 !            must be at least nlat.  if ityp .gt. 2 and nlat is
 !            even then idvw must be at least nlat/2. if ityp .gt. 2
 !            and nlat is odd then idvw must be at least (nlat+1)/2.
 !
 !     jdvw   the second dimension of the arrays vt, wt as it appears in
-!            the program that calls vtsgs. jdvw must be at least nlon.
+!            the program that calls vtsec. jdvw must be at least nlon.
 !
 !     br, bi  two or three dimensional arrays (see input parameter nt)
 !     cr, ci  that contain the vector spherical harmonic coefficients
-!            of (v, w) as computed by subroutine vhags.
-!            
+!            of (v, w) as computed by subroutine vhaec.
+!
 !     mdab   the first dimension of the arrays br, bi, cr, and ci as it
-!            appears in the program that calls vtsgs. mdab must be at
+!            appears in the program that calls vtsec. mdab must be at
 !            least min(nlat, nlon/2) if nlon is even or at least
 !            min(nlat, (nlon+1)/2) if nlon is odd.
 !
 !     ndab   the second dimension of the arrays br, bi, cr, and ci as it
-!            appears in the program that calls vtsgs. ndab must be at
+!            appears in the program that calls vtsec. ndab must be at
 !            least nlat.
 !
-!     wvts   an array which must be initialized by subroutine vtsgsi.
-!            once initialized, wvts can be used repeatedly by vtsgs
+!     wvts   an array which must be initialized by subroutine vtseci.
+!            once initialized, wvts can be used repeatedly by vtsec
 !            as long as nlon and nlat remain unchanged.  wvts must
-!            not be altered between calls of vtsgs.
+!            not be altered between calls of vtsec.
 !
 !     lwvts  the dimension of the array wvts as it appears in the
-!            program that calls vtsgs. define
+!            program that calls vtsec. define
 !
 !               l1 = min(nlat, nlon/2) if nlon is even or
 !               l1 = min(nlat, (nlon+1)/2) if nlon is odd
@@ -192,24 +186,24 @@
 !
 !            then lwvts must be at least
 !
-!                 l1*l2*(nlat+nlat-l1+1)+nlon+15
+!            4*nlat*l2+3*max(l1-2, 0)*(nlat+nlat-l1-1)+nlon+15
 !
 !
 !     work   a work array that does not have to be saved.
 !
 !     lwork  the dimension of the array work as it appears in the
-!            program that calls vtsgs. define
+!            program that calls vtsec. define
 !
 !               l2 = nlat/2        if nlat is even or
 !               l2 = (nlat+1)/2    if nlat is odd
 !
 !            if ityp .le. 2 then lwork must be at least
 !
-!                       (2*nt+1)*nlat*nlon
+!                    nlat*(2*nt*nlon+max(6*l2, nlon))
 !
 !            if ityp .gt. 2 then lwork must be at least
 !
-!                        (2*nt+1)*l2*nlon 
+!                    l2*(2*nt*nlon+max(6*nlat, nlon))
 !
 !     **************************************************************
 !
@@ -218,16 +212,13 @@
 !     vt, wt  two or three dimensional arrays (see input parameter nt)
 !            in which the derivative of (v, w) with respect to 
 !            colatitude theta is stored. vt(i, j), wt(i, j) contain the
-!            derivatives at gaussian colatitude points theta(i) for
-!            i=1, ..., nlat and longitude phi(j) = (j-1)*2*pi/nlon. 
-!            the index ranges are defined above at the input parameter
-!            ityp. vt and wt are computed from the formulas for v and 
-!            w given in subroutine vhsgs but with vbar and wbar replaced
-!           with their derivatives with respect to colatitude. these
+!            derivatives at colatitude theta(i) = (i-1)*pi/(nlat-1)
+!            and longitude phi(j) = (j-1)*2*pi/nlon. the index ranges
+!            are defined above at the input parameter ityp. vt and wt
+!            are computed from the formulas for v and w given in 
+!            subroutine vhsec but with vbar and wbar replaced with
+!            their derivatives with respect to colatitude. these
 !            derivatives are denoted by vtbar and wtbar. 
-!
-!
-!   *************************************************************
 !
 !   in terms of real variables this expansion takes the form
 !
@@ -279,24 +270,22 @@
 !
 ! *******************************************************************
 !
-!     subroutine vtsgsi(nlat, nlon, wvts, lwvts, work, lwork, dwork, ldwork, 
-!    +                  ierror)
+!     subroutine vtseci(nlat, nlon, wvts, lwvts, dwork, ldwork, ierror)
 !
-!     subroutine vtsgsi initializes the array wvts which can then be
-!     used repeatedly by subroutine vtsgs until nlat or nlon is changed.
+!     subroutine vtseci initializes the array wvts which can then be
+!     used repeatedly by subroutine vtsec until nlat or nlon is changed.
 !
 !     input parameters
 !
-!     nlat   the number of gaussian colatitudinal grid points theta(i)
-!            such that 0 < theta(1) <...< theta(nlat) < pi. they are
-!            computed by subroutine compute_gaussian_latitudes_and_weights which is called by this
-!            subroutine. if nlat is odd the equator is
-!            theta((nlat+1)/2). if nlat is even the equator lies
-!            half way between theta(nlat/2) and theta(nlat/2+1). nlat
-!            must be at least 3. note: if (v, w) is symmetric about
-!            the equator (see parameter ityp below) the number of
-!            colatitudinal grid points is nlat/2 if nlat is even or
-!            (nlat+1)/2 if nlat is odd.
+!     nlat   the number of colatitudes on the full sphere including the
+!            poles. for example, nlat = 37 for a five degree grid.
+!            nlat determines the grid increment in colatitude as
+!            pi/(nlat-1).  if nlat is odd the equator is located at
+!            grid point i=(nlat+1)/2. if nlat is even the equator is
+!            located half way between points i=nlat/2 and i=nlat/2+1.
+!            nlat must be at least 3. note: on the half sphere, the
+!            number of grid points in the colatitudinal direction is
+!            nlat/2 if nlat is even or (nlat+1)/2 if nlat is odd.
 !
 !     nlon   the number of distinct londitude points.  nlon determines
 !            the grid increment in longitude as 2*pi/nlon. for example
@@ -306,7 +295,7 @@
 !            is a product of small prime numbers.
 !
 !     lwvts  the dimension of the array wvts as it appears in the
-!            program that calls vtsgs. define
+!            program that calls vtsec. define
 !
 !               l1 = min(nlat, nlon/2) if nlon is even or
 !               l1 = min(nlat, (nlon+1)/2) if nlon is odd
@@ -318,64 +307,38 @@
 !
 !            then lwvts must be at least
 !
-!                  l1*l2*(nlat+nlat-l1+1)+nlon+15
+!            4*nlat*l2+3*max(l1-2, 0)*(nlat+nlat-l1-1)+nlon+15
 !
 !
-!     work   a work array that does not have to be saved.
+!     dwork  a real work array that does not have to be saved.
 !
-!     lwork  the dimension of the array work as it appears in the
-!            program that calls vtsgs. lwork must be at least
-!
-!            3*(max(l1-2, 0)*(nlat+nlat-l1-1))/2+(5*l2+2)*nlat
-!
-!     dwork  a real work array that does not have to be saved
-!
-!     ldwork the length of dwork.  ldwork must be at least
-!            3*nlat+2
+!     ldwork the dimension of the array work as it appears in the
+!            program that calls vtsec. lwork must be at least
+!            2*(nlat+1)
 !
 !     **************************************************************
 !
 !     output parameters
 !
-!     wvts   an array which is initialized for use by subroutine vtsgs.
-!            once initialized, wvts can be used repeatedly by vtsgs
+!     wvts   an array which is initialized for use by subroutine vtsec.
+!            once initialized, wvts can be used repeatedly by vtsec
 !            as long as nlat or nlon remain unchanged.  wvts must not
-!            be altered between calls of vtsgs.
+!            be altered between calls of vtsec.
 !
 !
 !     ierror = 0  no errors
 !            = 1  error in the specification of nlat
 !            = 2  error in the specification of nlon
 !            = 3  error in the specification of lwvts
-!            = 4  error in the specification of lwork
-!            = 5  error in the specification of ldwork
+!            = 4  error in the specification of ldwork
 !
-module module_vtsgs
-
-    use spherepack_precision, only: &
-        wp, & ! working precision
-        ip ! integer precision
-
-    use type_SpherepackAux, only: &
-        SpherepackAux
-
-    use gaussian_latitudes_and_weights_routines, only: &
-        compute_gaussian_latitudes_and_weights
-
-    ! Explicit typing only
-    implicit none
-
-    ! Everything is private unless stated otherwise
-    public :: vtsgs
-    public :: vtsgsi
-
-    ! Parameters confined to the module
-    real(wp), parameter :: ZERO = 0.0_wp
-    real(wp), parameter :: HALF = 0.5_wp
+! **********************************************************************
+!
+submodule(colatitudinal_derivative_routines) colatitudinal_derivative_regular_grid
     
 contains
 
-    subroutine vtsgs(nlat, nlon, ityp, nt, vt, wt, idvw, jdvw, br, bi, cr, ci, &
+    module subroutine vtsec(nlat, nlon, ityp, nt, vt, wt, idvw, jdvw, br, bi, cr, ci, &
         mdab, ndab, wvts, lwvts, work, lwork, ierror)
 
         ! Dummy arguments
@@ -401,65 +364,129 @@ contains
 
         ! Local variables
         integer(ip) :: idv
-        integer(ip) :: idz
         integer(ip) :: imid
         integer(ip) :: ist
         integer(ip) :: iw1
         integer(ip) :: iw2
         integer(ip) :: iw3
         integer(ip) :: iw4
+        integer(ip) :: iw5
         integer(ip) :: jw1
         integer(ip) :: jw2
+        integer(ip) :: labc
         integer(ip) :: lnl
-        integer(ip) :: lzimn
+        integer(ip) :: lwzvin
+        integer(ip) :: lzz1
         integer(ip) :: mmax
 
+        ! Check input arguments
         ierror = 1
-        if(nlat < 3) return
+        if (nlat < 3) return
         ierror = 2
-        if(nlon < 1) return
+        if (nlon < 1) return
         ierror = 3
-        if(ityp<0 .or. ityp>8) return
+        if (ityp<0 .or. ityp>8) return
         ierror = 4
-        if(nt < 0) return
+        if (nt < 0) return
         ierror = 5
         imid = (nlat+1)/2
-        if((ityp<=2 .and. idvw<nlat) .or. &
+        if ((ityp<=2 .and. idvw<nlat) .or. &
             (ityp>2 .and. idvw<imid)) return
         ierror = 6
-        if(jdvw < nlon) return
+        if (jdvw < nlon) return
         ierror = 7
         mmax = min(nlat, (nlon+1)/2)
-        if(mdab < mmax) return
+        if (mdab < mmax) return
         ierror = 8
-        if(ndab < nlat) return
+        if (ndab < nlat) return
         ierror = 9
-        idz = (mmax*(nlat+nlat-mmax+1))/2
-        lzimn = idz*imid
-        if(lwvts < lzimn+lzimn+nlon+15) return
+        lzz1 = 2*nlat*imid
+        labc = 3*(max(mmax-2, 0)*(nlat+nlat-mmax-1))/2
+        if (lwvts < 2*(lzz1+labc)+nlon+15) return
         ierror = 10
-        idv = nlat
-        if(ityp > 2) idv = imid
-        lnl = nt*idv*nlon
-        if(lwork < lnl+lnl+idv*nlon) return
+        if (ityp <= 2 .and. &
+            lwork < nlat*(2*nt*nlon+max(6*imid, nlon))) return
+        if (ityp > 2 .and. &
+            lwork < imid*(2*nt*nlon+max(6*nlat, nlon))) return
         ierror = 0
+        idv = nlat
+
+        if (ityp > 2) idv = imid
+
+        lnl = nt*idv*nlon
         ist = 0
-        if(ityp <= 2) ist = imid
+
+        if (ityp <= 2) ist = imid
+
         iw1 = ist+1
         iw2 = lnl+1
         iw3 = iw2+ist
         iw4 = iw2+lnl
-        jw1 = lzimn+1
-        jw2 = jw1+lzimn
-        call vtsgs_lower_routine(nlat, nlon, ityp, nt, imid, idvw, jdvw, vt, wt, mdab, ndab, &
+        iw5 = iw4+3*imid*nlat
+        lzz1 = 2*nlat*imid
+        labc = 3*(max(mmax-2, 0)*(nlat+nlat-mmax-1))/2
+        lwzvin = lzz1+labc
+        jw1 = lwzvin+1
+        jw2 = jw1+lwzvin
+
+        call vtsec_lower_routine(nlat, nlon, ityp, nt, imid, idvw, jdvw, vt, wt, mdab, ndab, &
             br, bi, cr, ci, idv, work, work(iw1), work(iw2), work(iw3), &
-            work(iw4), idz, wvts, wvts(jw1), wvts(jw2))
+            work(iw4), work(iw5), wvts, wvts(jw1), wvts(jw2))
 
-    end subroutine vtsgs
+    end subroutine vtsec
 
-    subroutine vtsgs_lower_routine(nlat, nlon, ityp, nt, imid, idvw, jdvw, vt, wt, mdab, &
-        ndab, br, bi, cr, ci, idv, vte, vto, wte, wto, work, idz, vb, wb, wrfft)
-        implicit none
+    module subroutine vtseci(nlat, nlon, wvts, lwvts, dwork, ldwork, ierror)
+
+        ! Dummy arguments
+        integer(ip), intent(in)  :: nlat
+        integer(ip), intent(in)  :: nlon
+        real(wp),    intent(out) :: wvts(lwvts)
+        integer(ip), intent(in)  :: lwvts
+        real(wp),    intent(out) :: dwork(ldwork)
+        integer(ip), intent(in)  :: ldwork
+        integer(ip), intent(out) :: ierror
+
+        ! Local variables
+        integer(ip) :: imid
+        integer(ip) :: iw1
+        integer(ip) :: iw2
+        integer(ip) :: labc
+        integer(ip) :: lwvbin
+        integer(ip) :: lzz1
+        integer(ip) :: mmax
+        type(SpherepackAux) :: sphere_aux
+
+        ierror = 1
+        if (nlat < 3) return
+        ierror = 2
+        if (nlon < 1) return
+        ierror = 3
+        imid = (nlat+1)/2
+        lzz1 = 2*nlat*imid
+        mmax = min(nlat, (nlon+1)/2)
+        labc = 3*(max(mmax-2, 0)*(nlat+nlat-mmax-1))/2
+        if (lwvts < 2*(lzz1+labc)+nlon+15) return
+        ierror = 4
+        if (ldwork < 2*nlat+2) return
+        ierror = 0
+
+        ! Set workspace index pointers
+        lwvbin = lzz1+labc
+        iw1 = lwvbin+1
+        iw2 = iw1+lwvbin
+
+        call sphere_aux%initialize_polar_components_regular_colat_deriv(nlat, nlon, wvts, dwork)
+
+        call sphere_aux%initialize_azimuthal_components_regular_colat_deriv(nlat, nlon, wvts(iw1), dwork)
+
+        call sphere_aux%hfft%initialize(nlon, wvts(iw2))
+
+    end subroutine vtseci
+
+
+    subroutine vtsec_lower_routine(nlat, nlon, ityp, nt, imid, idvw, jdvw, vt, wt, mdab, &
+        ndab, br, bi, cr, ci, idv, vte, vto, wte, wto, vb, wb, wvbin, wwbin, wrfft)
+
         real(wp) :: bi
         real(wp) :: br
         real(wp) :: ci
@@ -467,20 +494,19 @@ contains
         integer(ip) :: i
         integer(ip) :: idv
         integer(ip) :: idvw
-        integer(ip) :: idz
         integer(ip) :: imid
         integer(ip) :: imm1
         integer(ip) :: ityp
+        integer(ip) :: iv
+        integer(ip) :: iw
         integer(ip) :: j
         integer(ip) :: jdvw
         integer(ip) :: k
         integer(ip) :: m
-        integer(ip) :: mb
         integer(ip) :: mdab
         integer(ip) :: mlat
         integer(ip) :: mlon
         integer(ip) :: mmax
-        integer(ip) :: mn
         integer(ip) :: mp1
         integer(ip) :: mp2
         integer(ip) :: ndab
@@ -496,17 +522,18 @@ contains
         real(wp) :: vte
         real(wp) :: vto
         real(wp) :: wb
-        real(wp) :: work
         real(wp) :: wrfft
         real(wp) :: wt
         real(wp) :: wte
         real(wp) :: wto
+        real(wp) :: wvbin
+        real(wp) :: wwbin
         dimension vt(idvw, jdvw, nt), wt(idvw, jdvw, nt), br(mdab, ndab, nt), &
             bi(mdab, ndab, nt), cr(mdab, ndab, nt), ci(mdab, ndab, nt), &
             vte(idv, nlon, nt), vto(idv, nlon, nt), wte(idv, nlon, nt), &
-            wto(idv, nlon, nt), work(*), wrfft(*), &
-            vb(imid, *), wb(imid, *)
-
+            wto(idv, nlon, nt), wvbin(*), wwbin(*), wrfft(*), &
+            vb(imid, nlat, 3), wb(imid, nlat, 3)
+        
         type(SpherepackAux) :: sphere_aux
 
         nlp1 = nlat+1
@@ -531,24 +558,24 @@ contains
 
         vector_symmetry_cases: select case (ityp)
             case (0)
-                !
                 ! case ityp=0   no symmetries
+                call sphere_aux%compute_polar_component(0, nlat, nlon, 0, vb, iv, wvbin)
                 !
                 ! case m = 0
                 !
                 do k=1, nt
                     do np1=2, ndo2, 2
                         do i=1, imm1
-                            vto(i, 1, k)=vto(i, 1, k)+br(1, np1, k)*vb(i, np1)
-                            wto(i, 1, k)=wto(i, 1, k)-cr(1, np1, k)*vb(i, np1)
+                            vto(i, 1, k)=vto(i, 1, k)+br(1, np1, k)*vb(i, np1, iv)
+                            wto(i, 1, k)=wto(i, 1, k)-cr(1, np1, k)*vb(i, np1, iv)
                         end do
                     end do
                 end do
                 do k=1, nt
                     do np1=3, ndo1, 2
                         do i=1, imid
-                            vte(i, 1, k)=vte(i, 1, k)+br(1, np1, k)*vb(i, np1)
-                            wte(i, 1, k)=wte(i, 1, k)-cr(1, np1, k)*vb(i, np1)
+                            vte(i, 1, k)=vte(i, 1, k)+br(1, np1, k)*vb(i, np1, iv)
+                            wte(i, 1, k)=wte(i, 1, k)-cr(1, np1, k)*vb(i, np1, iv)
                         end do
                     end do
                 end do
@@ -558,31 +585,31 @@ contains
                 if (mmax < 2) exit vector_symmetry_cases
                 do mp1=2, mmax
                     m = mp1-1
-                    mb = m*(nlat-1)-(m*(m-1))/2
                     mp2 = mp1+1
+                    call sphere_aux%compute_polar_component(0, nlat, nlon, m, vb, iv, wvbin)
+                    call sphere_aux%compute_azimuthal_component(0, nlat, nlon, m, wb, iw, wwbin)
                     if (mp1 <= ndo1) then
                         do k=1, nt
                             do np1=mp1, ndo1, 2
-                                mn = mb+np1
                                 do i=1, imm1
-                                    vte(i, 2*mp1-2, k) = vte(i, 2*mp1-2, k)+br(mp1, np1, k)*vb(i, mn)
-                                    vto(i, 2*mp1-2, k) = vto(i, 2*mp1-2, k)-ci(mp1, np1, k)*wb(i, mn)
-                                    vte(i, 2*mp1-1, k) = vte(i, 2*mp1-1, k)+bi(mp1, np1, k)*vb(i, mn)
-                                    vto(i, 2*mp1-1, k) = vto(i, 2*mp1-1, k)+cr(mp1, np1, k)*wb(i, mn)
-                                    wte(i, 2*mp1-2, k) = wte(i, 2*mp1-2, k)-cr(mp1, np1, k)*vb(i, mn)
-                                    wto(i, 2*mp1-2, k) = wto(i, 2*mp1-2, k)-bi(mp1, np1, k)*wb(i, mn)
-                                    wte(i, 2*mp1-1, k) = wte(i, 2*mp1-1, k)-ci(mp1, np1, k)*vb(i, mn)
-                                    wto(i, 2*mp1-1, k) = wto(i, 2*mp1-1, k)+br(mp1, np1, k)*wb(i, mn)
+                                    vte(i, 2*mp1-2, k) = vte(i, 2*mp1-2, k)+br(mp1, np1, k)*vb(i, np1, iv)
+                                    vto(i, 2*mp1-2, k) = vto(i, 2*mp1-2, k)-ci(mp1, np1, k)*wb(i, np1, iw)
+                                    vte(i, 2*mp1-1, k) = vte(i, 2*mp1-1, k)+bi(mp1, np1, k)*vb(i, np1, iv)
+                                    vto(i, 2*mp1-1, k) = vto(i, 2*mp1-1, k)+cr(mp1, np1, k)*wb(i, np1, iw)
+                                    wte(i, 2*mp1-2, k) = wte(i, 2*mp1-2, k)-cr(mp1, np1, k)*vb(i, np1, iv)
+                                    wto(i, 2*mp1-2, k) = wto(i, 2*mp1-2, k)-bi(mp1, np1, k)*wb(i, np1, iw)
+                                    wte(i, 2*mp1-1, k) = wte(i, 2*mp1-1, k)-ci(mp1, np1, k)*vb(i, np1, iv)
+                                    wto(i, 2*mp1-1, k) = wto(i, 2*mp1-1, k)+br(mp1, np1, k)*wb(i, np1, iw)
                                 end do
                                 if (mlat /= 0) then
                                     vte(imid, 2*mp1-2, k) = vte(imid, 2*mp1-2, k) &
-                                        +br(mp1, np1, k)*vb(imid, mn)
+                                        +br(mp1, np1, k)*vb(imid, np1, iv)
                                     vte(imid, 2*mp1-1, k) = vte(imid, 2*mp1-1, k) &
-                                        +bi(mp1, np1, k)*vb(imid, mn)
+                                        +bi(mp1, np1, k)*vb(imid, np1, iv)
                                     wte(imid, 2*mp1-2, k) = wte(imid, 2*mp1-2, k) &
-                                        -cr(mp1, np1, k)*vb(imid, mn)
+                                        -cr(mp1, np1, k)*vb(imid, np1, iv)
                                     wte(imid, 2*mp1-1, k) = wte(imid, 2*mp1-1, k) &
-                                        -ci(mp1, np1, k)*vb(imid, mn)
+                                        -ci(mp1, np1, k)*vb(imid, np1, iv)
                                 end if
                             end do
                         end do
@@ -590,48 +617,47 @@ contains
                     if (mp2 <= ndo2) then
                         do k=1, nt
                             do np1=mp2, ndo2, 2
-                                mn = mb+np1
                                 do i=1, imm1
-                                    vto(i, 2*mp1-2, k) = vto(i, 2*mp1-2, k)+br(mp1, np1, k)*vb(i, mn)
-                                    vte(i, 2*mp1-2, k) = vte(i, 2*mp1-2, k)-ci(mp1, np1, k)*wb(i, mn)
-                                    vto(i, 2*mp1-1, k) = vto(i, 2*mp1-1, k)+bi(mp1, np1, k)*vb(i, mn)
-                                    vte(i, 2*mp1-1, k) = vte(i, 2*mp1-1, k)+cr(mp1, np1, k)*wb(i, mn)
-                                    wto(i, 2*mp1-2, k) = wto(i, 2*mp1-2, k)-cr(mp1, np1, k)*vb(i, mn)
-                                    wte(i, 2*mp1-2, k) = wte(i, 2*mp1-2, k)-bi(mp1, np1, k)*wb(i, mn)
-                                    wto(i, 2*mp1-1, k) = wto(i, 2*mp1-1, k)-ci(mp1, np1, k)*vb(i, mn)
-                                    wte(i, 2*mp1-1, k) = wte(i, 2*mp1-1, k)+br(mp1, np1, k)*wb(i, mn)
+                                    vto(i, 2*mp1-2, k) = vto(i, 2*mp1-2, k)+br(mp1, np1, k)*vb(i, np1, iv)
+                                    vte(i, 2*mp1-2, k) = vte(i, 2*mp1-2, k)-ci(mp1, np1, k)*wb(i, np1, iw)
+                                    vto(i, 2*mp1-1, k) = vto(i, 2*mp1-1, k)+bi(mp1, np1, k)*vb(i, np1, iv)
+                                    vte(i, 2*mp1-1, k) = vte(i, 2*mp1-1, k)+cr(mp1, np1, k)*wb(i, np1, iw)
+                                    wto(i, 2*mp1-2, k) = wto(i, 2*mp1-2, k)-cr(mp1, np1, k)*vb(i, np1, iv)
+                                    wte(i, 2*mp1-2, k) = wte(i, 2*mp1-2, k)-bi(mp1, np1, k)*wb(i, np1, iw)
+                                    wto(i, 2*mp1-1, k) = wto(i, 2*mp1-1, k)-ci(mp1, np1, k)*vb(i, np1, iv)
+                                    wte(i, 2*mp1-1, k) = wte(i, 2*mp1-1, k)+br(mp1, np1, k)*wb(i, np1, iw)
                                 end do
                                 if (mlat /= 0) then
                                     vte(imid, 2*mp1-2, k) = vte(imid, 2*mp1-2, k) &
-                                        -ci(mp1, np1, k)*wb(imid, mn)
+                                        -ci(mp1, np1, k)*wb(imid, np1, iw)
                                     vte(imid, 2*mp1-1, k) = vte(imid, 2*mp1-1, k) &
-                                        +cr(mp1, np1, k)*wb(imid, mn)
+                                        +cr(mp1, np1, k)*wb(imid, np1, iw)
                                     wte(imid, 2*mp1-2, k) = wte(imid, 2*mp1-2, k) &
-                                        -bi(mp1, np1, k)*wb(imid, mn)
+                                        -bi(mp1, np1, k)*wb(imid, np1, iw)
                                     wte(imid, 2*mp1-1, k) = wte(imid, 2*mp1-1, k) &
-                                        +br(mp1, np1, k)*wb(imid, mn)
+                                        +br(mp1, np1, k)*wb(imid, np1, iw)
                                 end if
                             end do
                         end do
                     end if
                 end do
             case(1)
-                !
-                ! case ityp=1   no symmetries,  cr and ci equal zero
+                     ! case ityp=1   no symmetries,  cr and ci equal zero
+                call sphere_aux%compute_polar_component(0, nlat, nlon, 0, vb, iv, wvbin)
                 !
                 ! case m = 0
                 !
                 do k=1, nt
                     do np1=2, ndo2, 2
                         do i=1, imm1
-                            vto(i, 1, k)=vto(i, 1, k)+br(1, np1, k)*vb(i, np1)
+                            vto(i, 1, k)=vto(i, 1, k)+br(1, np1, k)*vb(i, np1, iv)
                         end do
                     end do
                 end do
                 do k=1, nt
                     do np1=3, ndo1, 2
                         do i=1, imid
-                            vte(i, 1, k)=vte(i, 1, k)+br(1, np1, k)*vb(i, np1)
+                            vte(i, 1, k)=vte(i, 1, k)+br(1, np1, k)*vb(i, np1, iv)
                         end do
                     end do
                 end do
@@ -641,23 +667,23 @@ contains
                 if (mmax < 2) exit vector_symmetry_cases
                 do mp1=2, mmax
                     m = mp1-1
-                    mb = m*(nlat-1)-(m*(m-1))/2
                     mp2 = mp1+1
+                    call sphere_aux%compute_polar_component(0, nlat, nlon, m, vb, iv, wvbin)
+                    call sphere_aux%compute_azimuthal_component(0, nlat, nlon, m, wb, iw, wwbin)
                     if (mp1 <= ndo1) then
                         do k=1, nt
                             do np1=mp1, ndo1, 2
-                                mn = mb+np1
                                 do i=1, imm1
-                                    vte(i, 2*mp1-2, k) = vte(i, 2*mp1-2, k)+br(mp1, np1, k)*vb(i, mn)
-                                    vte(i, 2*mp1-1, k) = vte(i, 2*mp1-1, k)+bi(mp1, np1, k)*vb(i, mn)
-                                    wto(i, 2*mp1-2, k) = wto(i, 2*mp1-2, k)-bi(mp1, np1, k)*wb(i, mn)
-                                    wto(i, 2*mp1-1, k) = wto(i, 2*mp1-1, k)+br(mp1, np1, k)*wb(i, mn)
+                                    vte(i, 2*mp1-2, k) = vte(i, 2*mp1-2, k)+br(mp1, np1, k)*vb(i, np1, iv)
+                                    vte(i, 2*mp1-1, k) = vte(i, 2*mp1-1, k)+bi(mp1, np1, k)*vb(i, np1, iv)
+                                    wto(i, 2*mp1-2, k) = wto(i, 2*mp1-2, k)-bi(mp1, np1, k)*wb(i, np1, iw)
+                                    wto(i, 2*mp1-1, k) = wto(i, 2*mp1-1, k)+br(mp1, np1, k)*wb(i, np1, iw)
                                 end do
                                 if (mlat /= 0) then
                                     vte(imid, 2*mp1-2, k) = vte(imid, 2*mp1-2, k) &
-                                        +br(mp1, np1, k)*vb(imid, mn)
+                                        +br(mp1, np1, k)*vb(imid, np1, iv)
                                     vte(imid, 2*mp1-1, k) = vte(imid, 2*mp1-1, k) &
-                                        +bi(mp1, np1, k)*vb(imid, mn)
+                                        +bi(mp1, np1, k)*vb(imid, np1, iv)
                                 end if
                             end do
                         end do
@@ -665,40 +691,39 @@ contains
                     if (mp2 <= ndo2) then
                         do k=1, nt
                             do np1=mp2, ndo2, 2
-                                mn = mb+np1
                                 do i=1, imm1
-                                    vto(i, 2*mp1-2, k) = vto(i, 2*mp1-2, k)+br(mp1, np1, k)*vb(i, mn)
-                                    vto(i, 2*mp1-1, k) = vto(i, 2*mp1-1, k)+bi(mp1, np1, k)*vb(i, mn)
-                                    wte(i, 2*mp1-2, k) = wte(i, 2*mp1-2, k)-bi(mp1, np1, k)*wb(i, mn)
-                                    wte(i, 2*mp1-1, k) = wte(i, 2*mp1-1, k)+br(mp1, np1, k)*wb(i, mn)
+                                    vto(i, 2*mp1-2, k) = vto(i, 2*mp1-2, k)+br(mp1, np1, k)*vb(i, np1, iv)
+                                    vto(i, 2*mp1-1, k) = vto(i, 2*mp1-1, k)+bi(mp1, np1, k)*vb(i, np1, iv)
+                                    wte(i, 2*mp1-2, k) = wte(i, 2*mp1-2, k)-bi(mp1, np1, k)*wb(i, np1, iw)
+                                    wte(i, 2*mp1-1, k) = wte(i, 2*mp1-1, k)+br(mp1, np1, k)*wb(i, np1, iw)
                                 end do
                                 if (mlat /= 0) then
                                     wte(imid, 2*mp1-2, k) = wte(imid, 2*mp1-2, k) &
-                                        -bi(mp1, np1, k)*wb(imid, mn)
+                                        -bi(mp1, np1, k)*wb(imid, np1, iw)
                                     wte(imid, 2*mp1-1, k) = wte(imid, 2*mp1-1, k) &
-                                        +br(mp1, np1, k)*wb(imid, mn)
+                                        +br(mp1, np1, k)*wb(imid, np1, iw)
                                 end if
                             end do
                         end do
                     end if
                 end do
             case(2)
-                !
-                ! case ityp=2   no symmetries,  br and bi are equal to zero
+                        ! case ityp=2   no symmetries,  br and bi are equal to zero
+                call sphere_aux%compute_polar_component(0, nlat, nlon, 0, vb, iv, wvbin)
                 !
                 ! case m = 0
                 !
                 do k=1, nt
                     do np1=2, ndo2, 2
                         do i=1, imm1
-                            wto(i, 1, k)=wto(i, 1, k)-cr(1, np1, k)*vb(i, np1)
+                            wto(i, 1, k)=wto(i, 1, k)-cr(1, np1, k)*vb(i, np1, iv)
                         end do
                     end do
                 end do
                 do k=1, nt
                     do np1=3, ndo1, 2
                         do i=1, imid
-                            wte(i, 1, k)=wte(i, 1, k)-cr(1, np1, k)*vb(i, np1)
+                            wte(i, 1, k)=wte(i, 1, k)-cr(1, np1, k)*vb(i, np1, iv)
                         end do
                     end do
                 end do
@@ -708,23 +733,23 @@ contains
                 if (mmax < 2) exit vector_symmetry_cases
                 do mp1=2, mmax
                     m = mp1-1
-                    mb = m*(nlat-1)-(m*(m-1))/2
                     mp2 = mp1+1
+                    call sphere_aux%compute_polar_component(0, nlat, nlon, m, vb, iv, wvbin)
+                    call sphere_aux%compute_azimuthal_component(0, nlat, nlon, m, wb, iw, wwbin)
                     if (mp1 <= ndo1) then
                         do k=1, nt
                             do np1=mp1, ndo1, 2
-                                mn = mb+np1
                                 do i=1, imm1
-                                    vto(i, 2*mp1-2, k) = vto(i, 2*mp1-2, k)-ci(mp1, np1, k)*wb(i, mn)
-                                    vto(i, 2*mp1-1, k) = vto(i, 2*mp1-1, k)+cr(mp1, np1, k)*wb(i, mn)
-                                    wte(i, 2*mp1-2, k) = wte(i, 2*mp1-2, k)-cr(mp1, np1, k)*vb(i, mn)
-                                    wte(i, 2*mp1-1, k) = wte(i, 2*mp1-1, k)-ci(mp1, np1, k)*vb(i, mn)
+                                    vto(i, 2*mp1-2, k) = vto(i, 2*mp1-2, k)-ci(mp1, np1, k)*wb(i, np1, iw)
+                                    vto(i, 2*mp1-1, k) = vto(i, 2*mp1-1, k)+cr(mp1, np1, k)*wb(i, np1, iw)
+                                    wte(i, 2*mp1-2, k) = wte(i, 2*mp1-2, k)-cr(mp1, np1, k)*vb(i, np1, iv)
+                                    wte(i, 2*mp1-1, k) = wte(i, 2*mp1-1, k)-ci(mp1, np1, k)*vb(i, np1, iv)
                                 end do
                                 if (mlat /= 0) then
                                     wte(imid, 2*mp1-2, k) = wte(imid, 2*mp1-2, k) &
-                                        -cr(mp1, np1, k)*vb(imid, mn)
+                                        -cr(mp1, np1, k)*vb(imid, np1, iv)
                                     wte(imid, 2*mp1-1, k) = wte(imid, 2*mp1-1, k) &
-                                        -ci(mp1, np1, k)*vb(imid, mn)
+                                        -ci(mp1, np1, k)*vb(imid, np1, iv)
                                 end if
                             end do
                         end do
@@ -732,40 +757,39 @@ contains
                     if (mp2 <= ndo2) then
                         do k=1, nt
                             do np1=mp2, ndo2, 2
-                                mn = mb+np1
                                 do i=1, imm1
-                                    vte(i, 2*mp1-2, k) = vte(i, 2*mp1-2, k)-ci(mp1, np1, k)*wb(i, mn)
-                                    vte(i, 2*mp1-1, k) = vte(i, 2*mp1-1, k)+cr(mp1, np1, k)*wb(i, mn)
-                                    wto(i, 2*mp1-2, k) = wto(i, 2*mp1-2, k)-cr(mp1, np1, k)*vb(i, mn)
-                                    wto(i, 2*mp1-1, k) = wto(i, 2*mp1-1, k)-ci(mp1, np1, k)*vb(i, mn)
+                                    vte(i, 2*mp1-2, k) = vte(i, 2*mp1-2, k)-ci(mp1, np1, k)*wb(i, np1, iw)
+                                    vte(i, 2*mp1-1, k) = vte(i, 2*mp1-1, k)+cr(mp1, np1, k)*wb(i, np1, iw)
+                                    wto(i, 2*mp1-2, k) = wto(i, 2*mp1-2, k)-cr(mp1, np1, k)*vb(i, np1, iv)
+                                    wto(i, 2*mp1-1, k) = wto(i, 2*mp1-1, k)-ci(mp1, np1, k)*vb(i, np1, iv)
                                 end do
                                 if (mlat /= 0) then
                                     vte(imid, 2*mp1-2, k) = vte(imid, 2*mp1-2, k) &
-                                        -ci(mp1, np1, k)*wb(imid, mn)
+                                        -ci(mp1, np1, k)*wb(imid, np1, iw)
                                     vte(imid, 2*mp1-1, k) = vte(imid, 2*mp1-1, k) &
-                                        +cr(mp1, np1, k)*wb(imid, mn)
+                                        +cr(mp1, np1, k)*wb(imid, np1, iw)
                                 end if
                             end do
                         end do
                     end if
                 end do
             case(3)
-                !
-                ! case ityp=3   v odd,  w even
+                        ! case ityp=3   v odd,  w even
+                call sphere_aux%compute_polar_component(0, nlat, nlon, 0, vb, iv, wvbin)
                 !
                 ! case m = 0
                 !
                 do k=1, nt
                     do np1=2, ndo2, 2
                         do i=1, imm1
-                            vto(i, 1, k)=vto(i, 1, k)+br(1, np1, k)*vb(i, np1)
+                            vto(i, 1, k)=vto(i, 1, k)+br(1, np1, k)*vb(i, np1, iv)
                         end do
                     end do
                 end do
                 do k=1, nt
                     do np1=3, ndo1, 2
                         do i=1, imid
-                            wte(i, 1, k)=wte(i, 1, k)-cr(1, np1, k)*vb(i, np1)
+                            wte(i, 1, k)=wte(i, 1, k)-cr(1, np1, k)*vb(i, np1, iv)
                         end do
                     end do
                 end do
@@ -775,23 +799,23 @@ contains
                 if (mmax < 2) exit vector_symmetry_cases
                 do mp1=2, mmax
                     m = mp1-1
-                    mb = m*(nlat-1)-(m*(m-1))/2
                     mp2 = mp1+1
+                    call sphere_aux%compute_polar_component(0, nlat, nlon, m, vb, iv, wvbin)
+                    call sphere_aux%compute_azimuthal_component(0, nlat, nlon, m, wb, iw, wwbin)
                     if (mp1 <= ndo1) then
                         do k=1, nt
                             do np1=mp1, ndo1, 2
-                                mn = mb+np1
                                 do i=1, imm1
-                                    vto(i, 2*mp1-2, k) = vto(i, 2*mp1-2, k)-ci(mp1, np1, k)*wb(i, mn)
-                                    vto(i, 2*mp1-1, k) = vto(i, 2*mp1-1, k)+cr(mp1, np1, k)*wb(i, mn)
-                                    wte(i, 2*mp1-2, k) = wte(i, 2*mp1-2, k)-cr(mp1, np1, k)*vb(i, mn)
-                                    wte(i, 2*mp1-1, k) = wte(i, 2*mp1-1, k)-ci(mp1, np1, k)*vb(i, mn)
+                                    vto(i, 2*mp1-2, k) = vto(i, 2*mp1-2, k)-ci(mp1, np1, k)*wb(i, np1, iw)
+                                    vto(i, 2*mp1-1, k) = vto(i, 2*mp1-1, k)+cr(mp1, np1, k)*wb(i, np1, iw)
+                                    wte(i, 2*mp1-2, k) = wte(i, 2*mp1-2, k)-cr(mp1, np1, k)*vb(i, np1, iv)
+                                    wte(i, 2*mp1-1, k) = wte(i, 2*mp1-1, k)-ci(mp1, np1, k)*vb(i, np1, iv)
                                 end do
                                 if (mlat /= 0) then
                                     wte(imid, 2*mp1-2, k) = wte(imid, 2*mp1-2, k) &
-                                        -cr(mp1, np1, k)*vb(imid, mn)
+                                        -cr(mp1, np1, k)*vb(imid, np1, iv)
                                     wte(imid, 2*mp1-1, k) = wte(imid, 2*mp1-1, k) &
-                                        -ci(mp1, np1, k)*vb(imid, mn)
+                                        -ci(mp1, np1, k)*vb(imid, np1, iv)
                                 end if
                             end do
                         end do
@@ -799,33 +823,32 @@ contains
                     if (mp2 <= ndo2) then
                         do k=1, nt
                             do np1=mp2, ndo2, 2
-                                mn = mb+np1
                                 do i=1, imm1
-                                    vto(i, 2*mp1-2, k) = vto(i, 2*mp1-2, k)+br(mp1, np1, k)*vb(i, mn)
-                                    vto(i, 2*mp1-1, k) = vto(i, 2*mp1-1, k)+bi(mp1, np1, k)*vb(i, mn)
-                                    wte(i, 2*mp1-2, k) = wte(i, 2*mp1-2, k)-bi(mp1, np1, k)*wb(i, mn)
-                                    wte(i, 2*mp1-1, k) = wte(i, 2*mp1-1, k)+br(mp1, np1, k)*wb(i, mn)
+                                    vto(i, 2*mp1-2, k) = vto(i, 2*mp1-2, k)+br(mp1, np1, k)*vb(i, np1, iv)
+                                    vto(i, 2*mp1-1, k) = vto(i, 2*mp1-1, k)+bi(mp1, np1, k)*vb(i, np1, iv)
+                                    wte(i, 2*mp1-2, k) = wte(i, 2*mp1-2, k)-bi(mp1, np1, k)*wb(i, np1, iw)
+                                    wte(i, 2*mp1-1, k) = wte(i, 2*mp1-1, k)+br(mp1, np1, k)*wb(i, np1, iw)
                                 end do
                                 if (mlat /= 0) then
                                     wte(imid, 2*mp1-2, k) = wte(imid, 2*mp1-2, k) &
-                                        -bi(mp1, np1, k)*wb(imid, mn)
+                                        -bi(mp1, np1, k)*wb(imid, np1, iw)
                                     wte(imid, 2*mp1-1, k) = wte(imid, 2*mp1-1, k) &
-                                        +br(mp1, np1, k)*wb(imid, mn)
+                                        +br(mp1, np1, k)*wb(imid, np1, iw)
                                 end if
                             end do
                         end do
                     end if
                 end do
             case(4)
-                !
-                ! case ityp=4   v odd,  w even, and both cr and ci equal zero
+                       ! case ityp=4   v odd,  w even, and both cr and ci equal zero
+                call sphere_aux%compute_polar_component(1, nlat, nlon, 0, vb, iv, wvbin)
                 !
                 ! case m = 0
                 !
                 do k=1, nt
                     do np1=2, ndo2, 2
                         do i=1, imm1
-                            vto(i, 1, k)=vto(i, 1, k)+br(1, np1, k)*vb(i, np1)
+                            vto(i, 1, k)=vto(i, 1, k)+br(1, np1, k)*vb(i, np1, iv)
                         end do
                     end do
                 end do
@@ -835,38 +858,38 @@ contains
                 if (mmax < 2) exit vector_symmetry_cases
                 do mp1=2, mmax
                     m = mp1-1
-                    mb = m*(nlat-1)-(m*(m-1))/2
                     mp2 = mp1+1
+                    call sphere_aux%compute_polar_component(1, nlat, nlon, m, vb, iv, wvbin)
+                    call sphere_aux%compute_azimuthal_component(1, nlat, nlon, m, wb, iw, wwbin)
                     if (mp2 <= ndo2) then
                         do k=1, nt
                             do np1=mp2, ndo2, 2
-                                mn = mb+np1
                                 do i=1, imm1
-                                    vto(i, 2*mp1-2, k) = vto(i, 2*mp1-2, k)+br(mp1, np1, k)*vb(i, mn)
-                                    vto(i, 2*mp1-1, k) = vto(i, 2*mp1-1, k)+bi(mp1, np1, k)*vb(i, mn)
-                                    wte(i, 2*mp1-2, k) = wte(i, 2*mp1-2, k)-bi(mp1, np1, k)*wb(i, mn)
-                                    wte(i, 2*mp1-1, k) = wte(i, 2*mp1-1, k)+br(mp1, np1, k)*wb(i, mn)
+                                    vto(i, 2*mp1-2, k) = vto(i, 2*mp1-2, k)+br(mp1, np1, k)*vb(i, np1, iv)
+                                    vto(i, 2*mp1-1, k) = vto(i, 2*mp1-1, k)+bi(mp1, np1, k)*vb(i, np1, iv)
+                                    wte(i, 2*mp1-2, k) = wte(i, 2*mp1-2, k)-bi(mp1, np1, k)*wb(i, np1, iw)
+                                    wte(i, 2*mp1-1, k) = wte(i, 2*mp1-1, k)+br(mp1, np1, k)*wb(i, np1, iw)
                                 end do
                                 if (mlat /= 0) then
                                     wte(imid, 2*mp1-2, k) = wte(imid, 2*mp1-2, k) &
-                                        -bi(mp1, np1, k)*wb(imid, mn)
+                                        -bi(mp1, np1, k)*wb(imid, np1, iw)
                                     wte(imid, 2*mp1-1, k) = wte(imid, 2*mp1-1, k) &
-                                        +br(mp1, np1, k)*wb(imid, mn)
+                                        +br(mp1, np1, k)*wb(imid, np1, iw)
                                 end if
                             end do
                         end do
                     end if
                 end do
             case(5)
-                !
-                ! case ityp=5   v odd,  w even,     br and bi equal zero
+                        ! case ityp=5   v odd,  w even,     br and bi equal zero
+                call sphere_aux%compute_polar_component(2, nlat, nlon, 0, vb, iv, wvbin)
                 !
                 ! case m = 0
                 !
                 do k=1, nt
                     do np1=3, ndo1, 2
                         do i=1, imid
-                            wte(i, 1, k)=wte(i, 1, k)-cr(1, np1, k)*vb(i, np1)
+                            wte(i, 1, k)=wte(i, 1, k)-cr(1, np1, k)*vb(i, np1, iv)
                         end do
                     end do
                 end do
@@ -876,45 +899,44 @@ contains
                 if (mmax < 2) exit vector_symmetry_cases
                 do mp1=2, mmax
                     m = mp1-1
-                    mb = m*(nlat-1)-(m*(m-1))/2
                     mp2 = mp1+1
+                    call sphere_aux%compute_polar_component(2, nlat, nlon, m, vb, iv, wvbin)
+                    call sphere_aux%compute_azimuthal_component(2, nlat, nlon, m, wb, iw, wwbin)
                     if (mp1 <= ndo1) then
                         do k=1, nt
                             do np1=mp1, ndo1, 2
-                                mn = mb+np1
                                 do i=1, imm1
-                                    vto(i, 2*mp1-2, k) = vto(i, 2*mp1-2, k)-ci(mp1, np1, k)*wb(i, mn)
-                                    vto(i, 2*mp1-1, k) = vto(i, 2*mp1-1, k)+cr(mp1, np1, k)*wb(i, mn)
-                                    wte(i, 2*mp1-2, k) = wte(i, 2*mp1-2, k)-cr(mp1, np1, k)*vb(i, mn)
-                                    wte(i, 2*mp1-1, k) = wte(i, 2*mp1-1, k)-ci(mp1, np1, k)*vb(i, mn)
+                                    vto(i, 2*mp1-2, k) = vto(i, 2*mp1-2, k)-ci(mp1, np1, k)*wb(i, np1, iw)
+                                    vto(i, 2*mp1-1, k) = vto(i, 2*mp1-1, k)+cr(mp1, np1, k)*wb(i, np1, iw)
+                                    wte(i, 2*mp1-2, k) = wte(i, 2*mp1-2, k)-cr(mp1, np1, k)*vb(i, np1, iv)
+                                    wte(i, 2*mp1-1, k) = wte(i, 2*mp1-1, k)-ci(mp1, np1, k)*vb(i, np1, iv)
                                 end do
                                 if (mlat /= 0) then
                                     wte(imid, 2*mp1-2, k) = wte(imid, 2*mp1-2, k) &
-                                        -cr(mp1, np1, k)*vb(imid, mn)
+                                        -cr(mp1, np1, k)*vb(imid, np1, iv)
                                     wte(imid, 2*mp1-1, k) = wte(imid, 2*mp1-1, k) &
-                                        -ci(mp1, np1, k)*vb(imid, mn)
+                                        -ci(mp1, np1, k)*vb(imid, np1, iv)
                                 end if
                             end do
                         end do
                     end if
                 end do
             case(6)
-                !
-                ! case ityp=6   v even  ,  w odd
-                !
-                ! case m = 0
-                !
+                       ! case ityp=6   v even  ,  w odd
+                call sphere_aux%compute_polar_component(0, nlat, nlon, 0, vb, iv, wvbin)
+                        !
+                        ! case m = 0
                 do k=1, nt
                     do np1=2, ndo2, 2
                         do i=1, imm1
-                            wto(i, 1, k)=wto(i, 1, k)-cr(1, np1, k)*vb(i, np1)
+                            wto(i, 1, k)=wto(i, 1, k)-cr(1, np1, k)*vb(i, np1, iv)
                         end do
                     end do
                 end do
                 do k=1, nt
                     do np1=3, ndo1, 2
                         do i=1, imid
-                            vte(i, 1, k)=vte(i, 1, k)+br(1, np1, k)*vb(i, np1)
+                            vte(i, 1, k)=vte(i, 1, k)+br(1, np1, k)*vb(i, np1, iv)
                         end do
                     end do
                 end do
@@ -924,23 +946,23 @@ contains
                 if (mmax < 2) exit vector_symmetry_cases
                 do mp1=2, mmax
                     m = mp1-1
-                    mb = m*(nlat-1)-(m*(m-1))/2
                     mp2 = mp1+1
+                    call sphere_aux%compute_polar_component(0, nlat, nlon, m, vb, iv, wvbin)
+                    call sphere_aux%compute_azimuthal_component(0, nlat, nlon, m, wb, iw, wwbin)
                     if (mp1 <= ndo1) then
                         do k=1, nt
                             do np1=mp1, ndo1, 2
-                                mn = mb+np1
                                 do i=1, imm1
-                                    vte(i, 2*mp1-2, k) = vte(i, 2*mp1-2, k)+br(mp1, np1, k)*vb(i, mn)
-                                    vte(i, 2*mp1-1, k) = vte(i, 2*mp1-1, k)+bi(mp1, np1, k)*vb(i, mn)
-                                    wto(i, 2*mp1-2, k) = wto(i, 2*mp1-2, k)-bi(mp1, np1, k)*wb(i, mn)
-                                    wto(i, 2*mp1-1, k) = wto(i, 2*mp1-1, k)+br(mp1, np1, k)*wb(i, mn)
+                                    vte(i, 2*mp1-2, k) = vte(i, 2*mp1-2, k)+br(mp1, np1, k)*vb(i, np1, iv)
+                                    vte(i, 2*mp1-1, k) = vte(i, 2*mp1-1, k)+bi(mp1, np1, k)*vb(i, np1, iv)
+                                    wto(i, 2*mp1-2, k) = wto(i, 2*mp1-2, k)-bi(mp1, np1, k)*wb(i, np1, iw)
+                                    wto(i, 2*mp1-1, k) = wto(i, 2*mp1-1, k)+br(mp1, np1, k)*wb(i, np1, iw)
                                 end do
                                 if (mlat /= 0) then
                                     vte(imid, 2*mp1-2, k) = vte(imid, 2*mp1-2, k) &
-                                        +br(mp1, np1, k)*vb(imid, mn)
+                                        +br(mp1, np1, k)*vb(imid, np1, iv)
                                     vte(imid, 2*mp1-1, k) = vte(imid, 2*mp1-1, k) &
-                                        +bi(mp1, np1, k)*vb(imid, mn)
+                                        +bi(mp1, np1, k)*vb(imid, np1, iv)
                                 end if
                             end do
                         end do
@@ -948,33 +970,32 @@ contains
                     if (mp2 <= ndo2) then
                         do k=1, nt
                             do np1=mp2, ndo2, 2
-                                mn = mb+np1
                                 do i=1, imm1
-                                    vte(i, 2*mp1-2, k) = vte(i, 2*mp1-2, k)-ci(mp1, np1, k)*wb(i, mn)
-                                    vte(i, 2*mp1-1, k) = vte(i, 2*mp1-1, k)+cr(mp1, np1, k)*wb(i, mn)
-                                    wto(i, 2*mp1-2, k) = wto(i, 2*mp1-2, k)-cr(mp1, np1, k)*vb(i, mn)
-                                    wto(i, 2*mp1-1, k) = wto(i, 2*mp1-1, k)-ci(mp1, np1, k)*vb(i, mn)
+                                    vte(i, 2*mp1-2, k) = vte(i, 2*mp1-2, k)-ci(mp1, np1, k)*wb(i, np1, iw)
+                                    vte(i, 2*mp1-1, k) = vte(i, 2*mp1-1, k)+cr(mp1, np1, k)*wb(i, np1, iw)
+                                    wto(i, 2*mp1-2, k) = wto(i, 2*mp1-2, k)-cr(mp1, np1, k)*vb(i, np1, iv)
+                                    wto(i, 2*mp1-1, k) = wto(i, 2*mp1-1, k)-ci(mp1, np1, k)*vb(i, np1, iv)
                                 end do
                                 if (mlat /= 0) then
                                     vte(imid, 2*mp1-2, k) = vte(imid, 2*mp1-2, k) &
-                                        -ci(mp1, np1, k)*wb(imid, mn)
+                                        -ci(mp1, np1, k)*wb(imid, np1, iw)
                                     vte(imid, 2*mp1-1, k) = vte(imid, 2*mp1-1, k) &
-                                        +cr(mp1, np1, k)*wb(imid, mn)
+                                        +cr(mp1, np1, k)*wb(imid, np1, iw)
                                 end if
                             end do
                         end do
                     end if
                 end do
             case(7)
-                !
-                ! case ityp=7   v even, w odd   cr and ci equal zero
+                       ! case ityp=7   v even, w odd   cr and ci equal zero
+                call sphere_aux%compute_polar_component(2, nlat, nlon, 0, vb, iv, wvbin)
                 !
                 ! case m = 0
                 !
                 do k=1, nt
                     do np1=3, ndo1, 2
                         do i=1, imid
-                            vte(i, 1, k)=vte(i, 1, k)+br(1, np1, k)*vb(i, np1)
+                            vte(i, 1, k)=vte(i, 1, k)+br(1, np1, k)*vb(i, np1, iv)
                         end do
                     end do
                 end do
@@ -984,38 +1005,38 @@ contains
                 if (mmax < 2) exit vector_symmetry_cases
                 do mp1=2, mmax
                     m = mp1-1
-                    mb = m*(nlat-1)-(m*(m-1))/2
                     mp2 = mp1+1
+                    call sphere_aux%compute_polar_component(2, nlat, nlon, m, vb, iv, wvbin)
+                    call sphere_aux%compute_azimuthal_component(2, nlat, nlon, m, wb, iw, wwbin)
                     if (mp1 <= ndo1) then
                         do k=1, nt
                             do np1=mp1, ndo1, 2
-                                mn = mb+np1
                                 do i=1, imm1
-                                    vte(i, 2*mp1-2, k) = vte(i, 2*mp1-2, k)+br(mp1, np1, k)*vb(i, mn)
-                                    vte(i, 2*mp1-1, k) = vte(i, 2*mp1-1, k)+bi(mp1, np1, k)*vb(i, mn)
-                                    wto(i, 2*mp1-2, k) = wto(i, 2*mp1-2, k)-bi(mp1, np1, k)*wb(i, mn)
-                                    wto(i, 2*mp1-1, k) = wto(i, 2*mp1-1, k)+br(mp1, np1, k)*wb(i, mn)
+                                    vte(i, 2*mp1-2, k) = vte(i, 2*mp1-2, k)+br(mp1, np1, k)*vb(i, np1, iv)
+                                    vte(i, 2*mp1-1, k) = vte(i, 2*mp1-1, k)+bi(mp1, np1, k)*vb(i, np1, iv)
+                                    wto(i, 2*mp1-2, k) = wto(i, 2*mp1-2, k)-bi(mp1, np1, k)*wb(i, np1, iw)
+                                    wto(i, 2*mp1-1, k) = wto(i, 2*mp1-1, k)+br(mp1, np1, k)*wb(i, np1, iw)
                                 end do
                                 if (mlat /= 0) then
                                     vte(imid, 2*mp1-2, k) = vte(imid, 2*mp1-2, k) &
-                                        +br(mp1, np1, k)*vb(imid, mn)
+                                        +br(mp1, np1, k)*vb(imid, np1, iv)
                                     vte(imid, 2*mp1-1, k) = vte(imid, 2*mp1-1, k) &
-                                        +bi(mp1, np1, k)*vb(imid, mn)
+                                        +bi(mp1, np1, k)*vb(imid, np1, iv)
                                 end if
                             end do
                         end do
                     end if
                 end do
             case(8)
-                !
-                ! case ityp=8   v even,  w odd,   br and bi equal zero
+                        ! case ityp=8   v even,  w odd   br and bi equal zero
+                call sphere_aux%compute_polar_component(1, nlat, nlon, 0, vb, iv, wvbin)
                 !
                 ! case m = 0
                 !
                 do k=1, nt
                     do np1=2, ndo2, 2
                         do i=1, imm1
-                            wto(i, 1, k)=wto(i, 1, k)-cr(1, np1, k)*vb(i, np1)
+                            wto(i, 1, k)=wto(i, 1, k)-cr(1, np1, k)*vb(i, np1, iv)
                         end do
                     end do
                 end do
@@ -1025,23 +1046,23 @@ contains
                 if (mmax < 2) exit vector_symmetry_cases
                 do mp1=2, mmax
                     m = mp1-1
-                    mb = m*(nlat-1)-(m*(m-1))/2
                     mp2 = mp1+1
-                    if(mp2 <= ndo2) then
+                    call sphere_aux%compute_polar_component(1, nlat, nlon, m, vb, iv, wvbin)
+                    call sphere_aux%compute_azimuthal_component(1, nlat, nlon, m, wb, iw, wwbin)
+                    if (mp2 <= ndo2) then
                         do k=1, nt
                             do np1=mp2, ndo2, 2
-                                mn = mb+np1
                                 do i=1, imm1
-                                    vte(i, 2*mp1-2, k) = vte(i, 2*mp1-2, k)-ci(mp1, np1, k)*wb(i, mn)
-                                    vte(i, 2*mp1-1, k) = vte(i, 2*mp1-1, k)+cr(mp1, np1, k)*wb(i, mn)
-                                    wto(i, 2*mp1-2, k) = wto(i, 2*mp1-2, k)-cr(mp1, np1, k)*vb(i, mn)
-                                    wto(i, 2*mp1-1, k) = wto(i, 2*mp1-1, k)-ci(mp1, np1, k)*vb(i, mn)
+                                    vte(i, 2*mp1-2, k) = vte(i, 2*mp1-2, k)-ci(mp1, np1, k)*wb(i, np1, iw)
+                                    vte(i, 2*mp1-1, k) = vte(i, 2*mp1-1, k)+cr(mp1, np1, k)*wb(i, np1, iw)
+                                    wto(i, 2*mp1-2, k) = wto(i, 2*mp1-2, k)-cr(mp1, np1, k)*vb(i, np1, iv)
+                                    wto(i, 2*mp1-1, k) = wto(i, 2*mp1-1, k)-ci(mp1, np1, k)*vb(i, np1, iv)
                                 end do
                                 if (mlat /= 0) then
                                     vte(imid, 2*mp1-2, k) = vte(imid, 2*mp1-2, k) &
-                                        -ci(mp1, np1, k)*wb(imid, mn)
+                                        -ci(mp1, np1, k)*wb(imid, np1, iw)
                                     vte(imid, 2*mp1-1, k) = vte(imid, 2*mp1-1, k) &
-                                        +cr(mp1, np1, k)*wb(imid, mn)
+                                        +cr(mp1, np1, k)*wb(imid, np1, iw)
                                 end if
                             end do
                         end do
@@ -1050,11 +1071,11 @@ contains
         end select vector_symmetry_cases
 
         do k=1, nt
-            call sphere_aux%hfft%backward(idv, nlon, vte(1, 1, k), idv, wrfft, work)
-            call sphere_aux%hfft%backward(idv, nlon, wte(1, 1, k), idv, wrfft, work)
+            call sphere_aux%hfft%backward(idv, nlon, vte(1, 1, k), idv, wrfft, vb)
+            call sphere_aux%hfft%backward(idv, nlon, wte(1, 1, k), idv, wrfft, vb)
         end do
 
-        select case(ityp)
+        select case (ityp)
             case(0:1)
                 do k=1, nt
                     do j=1, nlon
@@ -1086,132 +1107,6 @@ contains
             end do
         end if
 
-    end subroutine vtsgs_lower_routine
+    end subroutine vtsec_lower_routine
 
-    ! Remark:
-    !
-    !     define imid = (nlat+1)/2 and mmax = min(nlat, (nlon+1)/2)
-    !     the length of wvts is imid*mmax*(nlat+nlat-mmax+1)+nlon+15
-    !     and the length of work is labc+5*nlat*imid+2*nlat where
-    !     labc = 3*(max(mmax-2, 0)*(nlat+nlat-mmax-1))/2
-    !
-    subroutine vtsgsi(nlat, nlon, wvts, lwvts, work, lwork, dwork, ldwork, ierror)
-
-        ! Dummy arguments
-        integer(ip), intent(in)  :: nlat
-        integer(ip), intent(in)  :: nlon
-        real(wp),    intent(out) :: wvts(lwvts)
-        integer(ip), intent(in)  :: lwvts
-        real(wp),    intent(out) :: work(lwork)
-        integer(ip), intent(in)  :: lwork
-        real(wp),    intent(out) :: dwork(ldwork)
-        integer(ip), intent(in)  :: ldwork
-        integer(ip), intent(out) :: ierror
-
-        ! Local variables
-        integer(ip) :: imid
-        integer(ip) :: iw1
-        integer(ip) :: iw2
-        integer(ip) :: jw1
-        integer(ip) :: jw2
-        integer(ip) :: labc
-        integer(ip) :: ltheta
-        integer(ip) :: lvin
-        integer(ip) :: lwvbin
-        integer(ip) :: lzimn
-        integer(ip) :: mmax
-        type(SpherepackAux) :: sphere_aux
-
-        ! Check input arguments
-        ierror = 1
-        if(nlat < 3) return
-        ierror = 2
-        if(nlon < 1) return
-        ierror = 3
-        mmax = min(nlat, nlon/2+1)
-        imid = (nlat+1)/2
-        lzimn = (imid*mmax*(nlat+nlat-mmax+1))/2
-        if(lwvts < lzimn+lzimn+nlon+15) return
-        ierror = 4
-        labc = 3*(max(mmax-2, 0)*(nlat+nlat-mmax-1))/2
-        lvin = 3*nlat*imid
-        lwvbin = 2*nlat*imid+labc
-        ltheta = nlat+nlat
-        if(lwork < lvin+lwvbin+ltheta) return
-        ierror = 5
-        if (ldwork < 3*nlat+2) return
-        ierror = 0
-        iw1 = lvin+1
-        iw2 = iw1+lwvbin
-        jw1 = nlat+1
-        jw2 = jw1+nlat
-        call vtsgsi_lower_routine(nlat, nlon, imid, wvts, wvts(lzimn+1), work, work(iw1), &
-            dwork, dwork(jw1), dwork(jw2), ierror)
-        if(ierror /= 0) return
-        call sphere_aux%hfft%initialize(nlon, wvts(2*lzimn+1))
-
-    end subroutine vtsgsi
-
-    subroutine vtsgsi_lower_routine(nlat, nlon, imid, vb, wb, vin, wvbin, &
-        theta, wts, dwork, ierror)
-
-        integer(ip) :: i
-        integer(ip) :: i3
-        integer(ip) :: ierr
-        integer(ip) :: ierror
-        integer(ip) :: imid
-
-        integer(ip) :: m
-        integer(ip) :: mmax
-        integer(ip) :: mn
-        integer(ip) :: mp1
-        integer(ip) :: nlat
-        integer(ip) :: nlon
-        integer(ip) :: np1
-        real(wp) :: vb
-        real(wp) :: vin
-        real(wp) :: wb
-        real(wp) :: wvbin
-        dimension vb(imid, *), wb(imid, *), vin(imid, nlat, 3), wvbin(*)
-        real dwork(*), theta(*), wts(*)
-        type(SpherepackAux) :: sphere_aux
-
-        mmax = min(nlat, nlon/2+1)
-
-        call compute_gaussian_latitudes_and_weights(nlat, theta, wts, ierr)
-
-        ! Check error flag
-        if(ierr /= 0) then
-            ierror = 10+ierr
-            return
-        end if
-
-        call sphere_aux%initialize_polar_components_gaussian_colat_deriv(nlat, nlon, theta, wvbin, dwork)
-
-        do mp1=1, mmax
-            m = mp1-1
-            call sphere_aux%compute_polar_component(0, nlat, nlon, m, vin, i3, wvbin)
-            do np1=mp1, nlat
-                mn = m*(nlat-1)-(m*(m-1))/2+np1
-                do i=1, imid
-                    vb(i, mn) = vin(i, np1, i3)
-                end do
-            end do
-        end do
-
-        call sphere_aux%initialize_azimuthal_components_gaussian_colat_deriv(nlat, nlon, theta, wvbin, dwork)
-
-        do mp1=1, mmax
-            m = mp1-1
-            call sphere_aux%compute_azimuthal_component(0, nlat, nlon, m, vin, i3, wvbin)
-            do np1=mp1, nlat
-                mn = m*(nlat-1)-(m*(m-1))/2+np1
-                do i=1, imid
-                    wb(i, mn) = vin(i, np1, i3)
-                end do
-            end do
-        end do
-
-    end subroutine vtsgsi_lower_routine
-
-end module module_vtsgs
+end submodule colatitudinal_derivative_regular_grid

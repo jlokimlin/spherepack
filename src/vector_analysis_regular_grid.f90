@@ -450,7 +450,7 @@ contains
         call sphere_aux%zvinit(nlat, nlon, wvhaec, dwork)
 
         !
-        !  Set workspace pointers
+        ! Set workspace index pointers
         !
         lwzvin = lzz1+labc
         iw1 = lwzvin+1

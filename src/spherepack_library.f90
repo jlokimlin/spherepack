@@ -126,17 +126,9 @@ module spherepack_library
     use module_vshifte, only: &
         vshifte, vshifti
 
-    use module_vtsec, only: &
-        vtsec, vtseci
-
-    use module_vtses, only: &
-        vtses, vtsesi
-
-    use module_vtsgc, only: &
-        vtsgc, vtsgci
-
-    use module_vtsgs, only: &
-        vtsgs, vtsgsi
+    use colatitudinal_derivative_routines, only: &
+        vtsec, vtses, vtsgc, vtsgs, &
+        vtseci, vtsesi, vtsgci, vtsgsi
     
     use type_FFTpack, only: &
         FFTpack

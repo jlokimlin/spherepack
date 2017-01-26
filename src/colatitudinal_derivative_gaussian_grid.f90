@@ -31,41 +31,43 @@
 !
 !
 !
-! ... file vtsec.f90
+! ... file vtsgc.f
 !
 !     this file includes documentation and code for
-!     subroutines vtsec and vtseci
+!     subroutines vtsgc and vtsgci
 !
-! ... files which must be loaded with vtsec.f90
+! ... files which must be loaded with vtsgc.f
 !
-!     type_SpherepackAux.f90, type_RealPeriodicTransform.f90, vhaec.f90, vhsec.f90
+!     type_SpherepackAux.f, type_RealPeriodicTransform.f, vhagc.f, vhsgc.f, compute_gaussian_latitudes_and_weights.f
 !   
-!     subroutine vtsec(nlat, nlon, ityp, nt, vt, wt, idvw, jdvw, br, bi, cr, ci, 
+!
+!     subroutine vtsgc(nlat, nlon, ityp, nt, vt, wt, idvw, jdvw, br, bi, cr, ci, 
 !    +                 mdab, ndab, wvts, lwvts, work, lwork, ierror)
 !
 !     given the vector harmonic analysis br, bi, cr, and ci (computed
-!     by subroutine vhaec) of some vector function (v, w), this 
+!     by subroutine vhagc) of some vector function (v, w), this 
 !     subroutine computes the vector function (vt, wt) which is
-!     the derivative of (v, w) with respect to colatitude theta. vtsec
-!     is similar to vhsec except the vector harmonics are replaced by 
+!     the derivative of (v, w) with respect to colatitude theta. vtsgc
+!     is similar to vhsgc except the vector harmonics are replaced by 
 !     their derivative with respect to colatitude with the result that
 !     (vt, wt) is computed instead of (v, w). vt(i, j) is the derivative
-!     of the colatitudinal component v(i, j) at the point theta(i) =
-!     (i-1)*pi/(nlat-1) and longitude phi(j) = (j-1)*2*pi/nlon. the
-!     spectral representation of (vt, wt) is given below at output
-!     parameters vt, wt.
+!     of the colatitudinal component v(i, j) at the gaussian colatitude
+!     theta(i) and longitude phi(j) = (j-1)*2*pi/nlon. the spectral
+!     representation of (vt, wt) is given below at the definition of 
+!     output parameters vt, wt.
 !
 !     input parameters
 !
-!     nlat   the number of colatitudes on the full sphere including the
-!            poles. for example, nlat = 37 for a five degree grid.
-!            nlat determines the grid increment in colatitude as
-!            pi/(nlat-1).  if nlat is odd the equator is located at
-!            grid point i=(nlat+1)/2. if nlat is even the equator is
-!            located half way between points i=nlat/2 and i=nlat/2+1.
-!            nlat must be at least 3. note: on the half sphere, the
-!            number of grid points in the colatitudinal direction is
-!            nlat/2 if nlat is even or (nlat+1)/2 if nlat is odd.
+!     nlat   the number of gaussian colatitudinal grid points theta(i)
+!            such that 0 < theta(1) <...< theta(nlat) < pi. they are
+!            computed by subroutine compute_gaussian_latitudes_and_weights which is called by this
+!            subroutine. if nlat is odd the equator is
+!            theta((nlat+1)/2). if nlat is even the equator lies
+!            half way between theta(nlat/2) and theta(nlat/2+1). nlat
+!            must be at least 3. note: if (v, w) is symmetric about
+!            the equator (see parameter ityp below) the number of
+!            colatitudinal grid points is nlat/2 if nlat is even or
+!            (nlat+1)/2 if nlat is odd.
 !
 !     nlon   the number of distinct londitude points.  nlon determines
 !            the grid increment in longitude as 2*pi/nlon. for example
@@ -80,23 +82,27 @@
 !                 j=1, ..., nlon.   
 !
 !            = 1  no symmetries exist about the equator however the
-!                 the coefficients cr and ci are zero. the synthesis
-!                 is performed on the entire sphere.  i.e. the arrays
-!                 vt(i, j), wt(i, j) are computed for i=1, ..., nlat and
-!                 j=1, ..., nlon.
+!                 the coefficients cr and ci are zero which implies
+!                 that the curl of (v, w) is zero. that is, 
+!                 (d/dtheta (sin(theta) w) - dv/dphi)/sin(theta) = 0. 
+!                 the calculations are performed on the entire sphere.
+!                 i.e. the arrays vt(i, j), wt(i, j) are computed for 
+!                 i=1, ..., nlat and j=1, ..., nlon.
 !
 !            = 2  no symmetries exist about the equator however the
-!                 the coefficients br and bi are zero. the synthesis
-!                 is performed on the entire sphere.  i.e. the arrays
-!                 vt(i, j), wt(i, j) are computed for i=1, ..., nlat and 
-!                 j=1, ..., nlon.
+!                 the coefficients br and bi are zero which implies
+!                 that the divergence of (v, w) is zero. that is, 
+!                 (d/dtheta (sin(theta) v) + dw/dphi)/sin(theta) = 0. 
+!                 the calculations are performed on the entire sphere.
+!                 i.e. the arrays vt(i, j), wt(i, j) are computed for 
+!                 i=1, ..., nlat and j=1, ..., nlon.
 !
 !            = 3  vt is odd and wt is even about the equator. the 
 !                 synthesis is performed on the northern hemisphere
-!                 only.  i.e., if nlat is odd the arrays vt(i, j), wt(i, j)
-!                 are computed for i=1, ..., (nlat+1)/2 and j=1, ..., nlon.
-!                 if nlat is even the arrays vt(i, j), wt(i, j) are computed 
-!                 for i=1, ..., nlat/2 and j=1, ..., nlon.
+!                 only.  i.e., if nlat is odd the arrays vt(i, j)
+!                 and wt(i, j) are computed for i=1, ..., (nlat+1)/2
+!                 and j=1, ..., nlon. if nlat is even the arrays 
+!                 are computed for i=1, ..., nlat/2 and j=1, ..., nlon.
 !
 !            = 4  vt is odd and wt is even about the equator and the 
 !                 coefficients cr and ci are zero. the synthesis is
@@ -137,7 +143,7 @@
 !                 even the arrays vt(i, j), wt(i, j) are computed for 
 !                 i=1, ..., nlat/2 and j=1, ..., nlon.
 !
-!     nt     the number of syntheses.  in the program that calls vtsec, 
+!     nt     the number of syntheses.  in the program that calls vtsgc, 
 !            the arrays vt, wt, br, bi, cr, and ci can be three dimensional
 !            in which case multiple syntheses will be performed.
 !            the third index is the synthesis index which assumes the 
@@ -147,34 +153,34 @@
 !            dimensional.
 !
 !     idvw   the first dimension of the arrays vt, wt as it appears in
-!            the program that calls vtsec. if ityp .le. 2 then idvw
+!            the program that calls vtsgc. if ityp .le. 2 then idvw
 !            must be at least nlat.  if ityp .gt. 2 and nlat is
 !            even then idvw must be at least nlat/2. if ityp .gt. 2
 !            and nlat is odd then idvw must be at least (nlat+1)/2.
 !
 !     jdvw   the second dimension of the arrays vt, wt as it appears in
-!            the program that calls vtsec. jdvw must be at least nlon.
+!            the program that calls vtsgc. jdvw must be at least nlon.
 !
 !     br, bi  two or three dimensional arrays (see input parameter nt)
 !     cr, ci  that contain the vector spherical harmonic coefficients
-!            of (v, w) as computed by subroutine vhaec.
+!            of (v, w) as computed by subroutine vhagc.
 !
 !     mdab   the first dimension of the arrays br, bi, cr, and ci as it
-!            appears in the program that calls vtsec. mdab must be at
+!            appears in the program that calls vtsgc. mdab must be at
 !            least min(nlat, nlon/2) if nlon is even or at least
 !            min(nlat, (nlon+1)/2) if nlon is odd.
 !
 !     ndab   the second dimension of the arrays br, bi, cr, and ci as it
-!            appears in the program that calls vtsec. ndab must be at
+!            appears in the program that calls vtsgc. ndab must be at
 !            least nlat.
 !
-!     wvts   an array which must be initialized by subroutine vtseci.
-!            once initialized, wvts can be used repeatedly by vtsec
+!     wvts   an array which must be initialized by subroutine vtsgci.
+!            once initialized, wvts can be used repeatedly by vtsgc
 !            as long as nlon and nlat remain unchanged.  wvts must
-!            not be altered between calls of vtsec.
+!            not be altered between calls of vtsgc.
 !
 !     lwvts  the dimension of the array wvts as it appears in the
-!            program that calls vtsec. define
+!            program that calls vtsgc. define
 !
 !               l1 = min(nlat, nlon/2) if nlon is even or
 !               l1 = min(nlat, (nlon+1)/2) if nlon is odd
@@ -192,7 +198,7 @@
 !     work   a work array that does not have to be saved.
 !
 !     lwork  the dimension of the array work as it appears in the
-!            program that calls vtsec. define
+!            program that calls vtsgc. define
 !
 !               l2 = nlat/2        if nlat is even or
 !               l2 = (nlat+1)/2    if nlat is odd
@@ -212,11 +218,11 @@
 !     vt, wt  two or three dimensional arrays (see input parameter nt)
 !            in which the derivative of (v, w) with respect to 
 !            colatitude theta is stored. vt(i, j), wt(i, j) contain the
-!            derivatives at colatitude theta(i) = (i-1)*pi/(nlat-1)
+!            derivatives at gaussian colatitude points theta(i)
 !            and longitude phi(j) = (j-1)*2*pi/nlon. the index ranges
 !            are defined above at the input parameter ityp. vt and wt
 !            are computed from the formulas for v and w given in 
-!            subroutine vhsec but with vbar and wbar replaced with
+!            subroutine vhsgc but with vbar and wbar replaced with
 !            their derivatives with respect to colatitude. these
 !            derivatives are denoted by vtbar and wtbar. 
 !
@@ -270,22 +276,23 @@
 !
 ! *******************************************************************
 !
-!     subroutine vtseci(nlat, nlon, wvts, lwvts, dwork, ldwork, ierror)
+!     subroutine vtsgci(nlat, nlon, wvts, lwvts, dwork, ldwork, ierror)
 !
-!     subroutine vtseci initializes the array wvts which can then be
-!     used repeatedly by subroutine vtsec until nlat or nlon is changed.
+!     subroutine vtsgci initializes the array wvts which can then be
+!     used repeatedly by subroutine vtsgc until nlat or nlon is changed.
 !
 !     input parameters
 !
-!     nlat   the number of colatitudes on the full sphere including the
-!            poles. for example, nlat = 37 for a five degree grid.
-!            nlat determines the grid increment in colatitude as
-!            pi/(nlat-1).  if nlat is odd the equator is located at
-!            grid point i=(nlat+1)/2. if nlat is even the equator is
-!            located half way between points i=nlat/2 and i=nlat/2+1.
-!            nlat must be at least 3. note: on the half sphere, the
-!            number of grid points in the colatitudinal direction is
-!            nlat/2 if nlat is even or (nlat+1)/2 if nlat is odd.
+!     nlat   the number of gaussian colatitudinal grid points theta(i)
+!            such that 0 < theta(1) <...< theta(nlat) < pi. they are
+!            computed by subroutine compute_gaussian_latitudes_and_weights which is called by this
+!            subroutine. if nlat is odd the equator is
+!            theta((nlat+1)/2). if nlat is even the equator lies
+!            half way between theta(nlat/2) and theta(nlat/2+1). nlat
+!            must be at least 3. note: if (v, w) is symmetric about
+!            the equator (see parameter ityp below) the number of
+!            colatitudinal grid points is nlat/2 if nlat is even or
+!            (nlat+1)/2 if nlat is odd.
 !
 !     nlon   the number of distinct londitude points.  nlon determines
 !            the grid increment in longitude as 2*pi/nlon. for example
@@ -295,7 +302,7 @@
 !            is a product of small prime numbers.
 !
 !     lwvts  the dimension of the array wvts as it appears in the
-!            program that calls vtsec. define
+!            program that calls vtsgc. define
 !
 !               l1 = min(nlat, nlon/2) if nlon is even or
 !               l1 = min(nlat, (nlon+1)/2) if nlon is odd
@@ -312,51 +319,34 @@
 !
 !     dwork  a real work array that does not have to be saved.
 !
-!     ldwork the dimension of the array work as it appears in the
-!            program that calls vtsec. lwork must be at least
-!            2*(nlat+1)
+!     ldwork the dimension of the array dwork as it appears in the
+!            program that calls vtsgc. ldwork must be at least
+!            3*nlat+2
 !
 !     **************************************************************
 !
 !     output parameters
 !
-!     wvts   an array which is initialized for use by subroutine vtsec.
-!            once initialized, wvts can be used repeatedly by vtsec
+!     wvts   an array which is initialized for use by subroutine vtsgc.
+!            once initialized, wvts can be used repeatedly by vtsgc
 !            as long as nlat or nlon remain unchanged.  wvts must not
-!            be altered between calls of vtsec.
+!            be altered between calls of vtsgc.
 !
 !
 !     ierror = 0  no errors
 !            = 1  error in the specification of nlat
 !            = 2  error in the specification of nlon
 !            = 3  error in the specification of lwvts
-!            = 4  error in the specification of ldwork
+!            = 4  error in the specification of lwork
+!
+!
 !
 ! **********************************************************************
 !
-module module_vtsec
-
-    use spherepack_precision, only: &
-        wp, & ! working precision
-        ip ! integer precision
-
-    use type_SpherepackAux, only: &
-        SpherepackAux
-
-    ! Explicit typing only
-    implicit none
-
-    ! Everything is private unless stated otherwise
-    public :: vtsec
-    public :: vtseci
-
-    ! Parameters confined to the module
-    real(wp), parameter :: ZERO = 0.0_wp
-    real(wp), parameter :: HALF = 0.5_wp
-    
+submodule(colatitudinal_derivative_routines) colatitudinal_derivative_gaussian_grid
 contains
 
-    subroutine vtsec(nlat, nlon, ityp, nt, vt, wt, idvw, jdvw, br, bi, cr, ci, &
+    subroutine vtsgc(nlat, nlon, ityp, nt, vt, wt, idvw, jdvw, br, bi, cr, ci, &
         mdab, ndab, wvts, lwvts, work, lwork, ierror)
 
         ! Dummy arguments
@@ -428,14 +418,10 @@ contains
             lwork < imid*(2*nt*nlon+max(6*nlat, nlon))) return
         ierror = 0
         idv = nlat
-
         if (ityp > 2) idv = imid
-
         lnl = nt*idv*nlon
         ist = 0
-
         if (ityp <= 2) ist = imid
-
         iw1 = ist+1
         iw2 = lnl+1
         iw3 = iw2+ist
@@ -447,13 +433,68 @@ contains
         jw1 = lwzvin+1
         jw2 = jw1+lwzvin
 
-        call vtsec_lower_routine(nlat, nlon, ityp, nt, imid, idvw, jdvw, vt, wt, mdab, ndab, &
+        call vtsgc_lower_routine(nlat, nlon, ityp, nt, imid, idvw, jdvw, vt, wt, mdab, ndab, &
             br, bi, cr, ci, idv, work, work(iw1), work(iw2), work(iw3), &
             work(iw4), work(iw5), wvts, wvts(jw1), wvts(jw2))
 
-    end subroutine vtsec
+    end subroutine vtsgc
 
-    subroutine vtsec_lower_routine(nlat, nlon, ityp, nt, imid, idvw, jdvw, vt, wt, mdab, &
+    module subroutine vtsgci(nlat, nlon, wvts, lwvts, dwork, ldwork, ierror)
+
+        ! Dummy arguments
+        integer(ip), intent(in)  :: nlat
+        integer(ip), intent(in)  :: nlon
+        real(wp),    intent(out) :: wvts(lwvts)
+        integer(ip), intent(in)  :: lwvts
+        real(wp),    intent(out) :: dwork(ldwork)
+        integer(ip), intent(in)  :: ldwork
+        integer(ip), intent(out) :: ierror
+
+        ! Local variables
+        integer(ip) :: ierr
+        integer(ip) :: imid
+        integer(ip) :: iw1
+        integer(ip) :: iw2
+        integer(ip) :: labc
+        integer(ip) :: ldwk
+        integer(ip) :: lwvbin
+        integer(ip) :: lzz1
+        integer(ip) :: mmax
+        type(SpherepackAux) :: sphere_aux
+
+        ierror = 1
+        if (nlat < 3) return
+        ierror = 2
+        if (nlon < 1) return
+        ierror = 3
+        imid = (nlat+1)/2
+        lzz1 = 2*nlat*imid
+        mmax = min(nlat, (nlon+1)/2)
+        labc = 3*(max(mmax-2, 0)*(nlat+nlat-mmax-1))/2
+        if (lwvts < 2*(lzz1+labc)+nlon+15) return
+        ierror = 4
+        if (ldwork < 3*nlat+2) return
+        ldwk = 1
+        call compute_gaussian_latitudes_and_weights(nlat, dwork, dwork(nlat+1), ierr)
+        ierror = 5
+        if (ierr /= 0) return
+        ierror = 0
+
+        ! Set workspace index pointers
+        lwvbin = lzz1+labc
+        iw1 = lwvbin+1
+        iw2 = iw1+lwvbin
+
+        call sphere_aux%initialize_polar_components_gaussian_colat_deriv(nlat, nlon, dwork, wvts, dwork(2*nlat+1))
+
+        call sphere_aux%initialize_azimuthal_components_gaussian_colat_deriv(nlat, nlon, dwork, wvts(iw1), dwork(2*nlat+1))
+
+        call sphere_aux%hfft%initialize(nlon, wvts(iw2))
+
+    end subroutine vtsgci
+
+
+    subroutine vtsgc_lower_routine(nlat, nlon, ityp, nt, imid, idvw, jdvw, vt, wt, mdab, &
         ndab, br, bi, cr, ci, idv, vte, vto, wte, wto, vb, wb, wvbin, wwbin, wrfft)
 
         real(wp) :: bi
@@ -466,6 +507,7 @@ contains
         integer(ip) :: imid
         integer(ip) :: imm1
         integer(ip) :: ityp
+        
         integer(ip) :: iv
         integer(ip) :: iw
         integer(ip) :: j
@@ -502,6 +544,7 @@ contains
             vte(idv, nlon, nt), vto(idv, nlon, nt), wte(idv, nlon, nt), &
             wto(idv, nlon, nt), wvbin(*), wwbin(*), wrfft(*), &
             vb(imid, nlat, 3), wb(imid, nlat, 3)
+
         
         type(SpherepackAux) :: sphere_aux
 
@@ -528,6 +571,7 @@ contains
         vector_symmetry_cases: select case (ityp)
             case (0)
                 ! case ityp=0   no symmetries
+                !
                 call sphere_aux%compute_polar_component(0, nlat, nlon, 0, vb, iv, wvbin)
                 !
                 ! case m = 0
@@ -611,7 +655,8 @@ contains
                     end if
                 end do
             case(1)
-                     ! case ityp=1   no symmetries,  cr and ci equal zero
+                        ! case ityp=1   no symmetries,  cr and ci equal zero
+                        !
                 call sphere_aux%compute_polar_component(0, nlat, nlon, 0, vb, iv, wvbin)
                 !
                 ! case m = 0
@@ -678,6 +723,7 @@ contains
                 end do
             case(2)
                         ! case ityp=2   no symmetries,  br and bi are equal to zero
+                        !
                 call sphere_aux%compute_polar_component(0, nlat, nlon, 0, vb, iv, wvbin)
                 !
                 ! case m = 0
@@ -744,6 +790,7 @@ contains
                 end do
             case(3)
                         ! case ityp=3   v odd,  w even
+                        !
                 call sphere_aux%compute_polar_component(0, nlat, nlon, 0, vb, iv, wvbin)
                 !
                 ! case m = 0
@@ -809,7 +856,8 @@ contains
                     end if
                 end do
             case(4)
-                       ! case ityp=4   v odd,  w even, and both cr and ci equal zero
+                        ! case ityp=4   v odd,  w even, and both cr and ci equal zero
+                        !
                 call sphere_aux%compute_polar_component(1, nlat, nlon, 0, vb, iv, wvbin)
                 !
                 ! case m = 0
@@ -851,6 +899,7 @@ contains
                 end do
             case(5)
                         ! case ityp=5   v odd,  w even,     br and bi equal zero
+                        !
                 call sphere_aux%compute_polar_component(2, nlat, nlon, 0, vb, iv, wvbin)
                 !
                 ! case m = 0
@@ -891,10 +940,12 @@ contains
                     end if
                 end do
             case(6)
-                       ! case ityp=6   v even  ,  w odd
-                call sphere_aux%compute_polar_component(0, nlat, nlon, 0, vb, iv, wvbin)
+                        ! case ityp=6   v even  ,  w odd
                         !
-                        ! case m = 0
+                call sphere_aux%compute_polar_component(0, nlat, nlon, 0, vb, iv, wvbin)
+                !
+                ! case m = 0
+                !
                 do k=1, nt
                     do np1=2, ndo2, 2
                         do i=1, imm1
@@ -956,7 +1007,8 @@ contains
                     end if
                 end do
             case(7)
-                       ! case ityp=7   v even, w odd   cr and ci equal zero
+                        ! case ityp=7   v even, w odd   cr and ci equal zero
+                        !
                 call sphere_aux%compute_polar_component(2, nlat, nlon, 0, vb, iv, wvbin)
                 !
                 ! case m = 0
@@ -997,7 +1049,9 @@ contains
                     end if
                 end do
             case(8)
+                        !
                         ! case ityp=8   v even,  w odd   br and bi equal zero
+                        !
                 call sphere_aux%compute_polar_component(1, nlat, nlon, 0, vb, iv, wvbin)
                 !
                 ! case m = 0
@@ -1076,54 +1130,6 @@ contains
             end do
         end if
 
-    end subroutine vtsec_lower_routine
+    end subroutine vtsgc_lower_routine
 
-    subroutine vtseci(nlat, nlon, wvts, lwvts, dwork, ldwork, ierror)
-
-        ! Dummy arguments
-        integer(ip), intent(in)  :: nlat
-        integer(ip), intent(in)  :: nlon
-        real(wp),    intent(out) :: wvts(lwvts)
-        integer(ip), intent(in)  :: lwvts
-        real(wp),    intent(out) :: dwork(ldwork)
-        integer(ip), intent(in)  :: ldwork
-        integer(ip), intent(out) :: ierror
-
-        ! Local variables
-        integer(ip) :: imid
-        integer(ip) :: iw1
-        integer(ip) :: iw2
-        integer(ip) :: labc
-        integer(ip) :: lwvbin
-        integer(ip) :: lzz1
-        integer(ip) :: mmax
-        type(SpherepackAux) :: sphere_aux
-
-        ierror = 1
-        if (nlat < 3) return
-        ierror = 2
-        if (nlon < 1) return
-        ierror = 3
-        imid = (nlat+1)/2
-        lzz1 = 2*nlat*imid
-        mmax = min(nlat, (nlon+1)/2)
-        labc = 3*(max(mmax-2, 0)*(nlat+nlat-mmax-1))/2
-        if (lwvts < 2*(lzz1+labc)+nlon+15) return
-        ierror = 4
-        if (ldwork < 2*nlat+2) return
-        ierror = 0
-
-        !  Set workspace pointers
-        lwvbin = lzz1+labc
-        iw1 = lwvbin+1
-        iw2 = iw1+lwvbin
-
-        call sphere_aux%initialize_polar_components_regular_colat_deriv(nlat, nlon, wvts, dwork)
-
-        call sphere_aux%initialize_azimuthal_components_regular_colat_deriv(nlat, nlon, wvts(iw1), dwork)
-
-        call sphere_aux%hfft%initialize(nlon, wvts(iw2))
-
-    end subroutine vtseci
-
-end module module_vtsec
+end submodule colatitudinal_derivative_gaussian_grid
