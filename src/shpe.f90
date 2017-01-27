@@ -1135,6 +1135,7 @@ contains
         real(wp),    intent(in)    :: y(n)
         real(wp),    intent(inout) :: z(n)
 
+        !  Let the intrinsic function dot_product take care of optimization.
         z = z + dot_product(x,y) * y
 
     end subroutine accumulate_inner_products
