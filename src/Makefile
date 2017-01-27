@@ -49,9 +49,17 @@ type_LegendreAux.f90
 	$(FC) $(FFLAGS) -c type_LegendreAux.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 
+
+gaussian_latitudes_and_weights_routines.o: \
+spherepack_precision.o \
+gaussian_latitudes_and_weights_routines.f90
+	$(FC) $(FFLAGS) -c gaussian_latitudes_and_weights_routines.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
+
 shpg.o: \
 spherepack_precision.o \
-type_RealPeriodicTransform.o \
+type_SpherepackAux.o \
+gaussian_latitudes_and_weights_routines.o \
 shpg.f90
 	$(FC) $(FFLAGS) -c shpg.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
@@ -61,12 +69,6 @@ spherepack_precision.o \
 type_SpherepackAux.o \
 shpe.f90
 	$(FC) $(FFLAGS) -c shpe.f90 $(LINKS)\
-	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
-
-gaussian_latitudes_and_weights_routines.o: \
-spherepack_precision.o \
-gaussian_latitudes_and_weights_routines.f90
-	$(FC) $(FFLAGS) -c gaussian_latitudes_and_weights_routines.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 
 scalar_analysis_routines.o: \
@@ -800,5 +802,5 @@ all:
 	$(MAKE) lib
 
 clean:
-	rm -f $(OBJS) $(LIB) $(MOD_DIRECTORY)/*.mod
+	rm -f $(OBJS) $(LIB) $(MOD_DIRECTORY)/*.mod $(MOD_DIRECTORY)/*.smod
 	rm -f $(EXECUTABLE)

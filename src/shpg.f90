@@ -119,8 +119,8 @@ module module_shpg
         ip, & ! integer precision
         PI
 
-    use type_RealPeriodicTransform, only: &
-    RealPeriodicTransform
+    use type_SpherepackAux, only: &
+    SpherepackAux
 
     ! Explicit typing only
     implicit none
@@ -136,7 +136,7 @@ subroutine shpgi(nlat, nlon, isym, mtrunc, wshp, lwshp, iwshp, &
  liwshp, work, lwork, ierror)
 
 
-    type(RealPeriodicTransform) :: hfft
+    type(SpherepackAux) :: sphere_aux
 integer :: ierror
 integer :: isym
 integer :: iw1
@@ -197,7 +197,7 @@ mlwk = 1.25*(nlat+1)**2+7*nlat+8
 if (lwork <mlwk) return
 ierror = 0
 !
-call hfft%initialize(nlon, wshp(lw1+1))
+call sphere_aux%hfft%initialize(nlon, wshp(lw1+1))
 
 nte = (nlat+1)/2
 nloc1 = 2*nte*nte
@@ -355,13 +355,13 @@ b1 = a(n-m+1)/a(n+m-1)
 if (n-m<=1) then
 do i=1, nte
 u(i, j+nec) = a1*ped(i, j+nec-1, iip) &
-                   - b1*ped(i, j+nec, iip)    
+                   - b1*ped(i, j+nec, iip)
 end do
 else
 c1 = b(n-1)*a(n-m-1)/a(n+m-1)
 do i=1, nte
 u(i, j+nec) = a1*ped(i, j+nec-1, iip) &
-   - b1*ped(i, j+nec, iip) + c1*u(i, j+nec-1)    
+   - b1*ped(i, j+nec, iip) + c1*u(i, j+nec-1)
 end do
 end if
 207 continue
@@ -373,7 +373,7 @@ end do
 end if
 if (nec<=0) goto 200
 !
-!     generate orthogonal vector with 
+!     generate orthogonal vector with
 !     random numbers using Fortran90
 !     intrinsics RANDOM_{SEED, NUMBER}
 !
@@ -397,7 +397,7 @@ do 220 j=1, nte
 if (j==nec) goto 220
 call gs(nte, wx, ped(1, j, iip), z)
 220 continue
-!  
+!
 do i=1, nte
 xx(i) = xx(i)-z(i)
 end do
@@ -409,7 +409,7 @@ ped(i, nec, iip) = xx(i)
 end do
 200 continue
 !
-!     reorder if mtrunc is less than nlat-1 
+!     reorder if mtrunc is less than nlat-1
 !         case of even functions
 !
 nmx = nlat-mxtr
@@ -484,7 +484,7 @@ iip = 3-iip
 m = mp1-1
 ms2 = mp1/2
 nem = (nlat-m+1)/2
-nom = nlat-m-nem 
+nom = nlat-m-nem
 noc = nto-nom
 !
 !     compute associated legendre functions
@@ -514,13 +514,13 @@ b1 = a(n-m+1)/a(n+m-1)
 if (n-m<=1) then
 do i=1, nte
 u(i, j+noc) = a1*pod(i, j+noc-1, iip) &
-                   - b1*pod(i, j+noc, iip)    
+                   - b1*pod(i, j+noc, iip)
 end do
 else
 c1 = b(n-1)*a(n-m-1)/a(n+m-1)
 do i=1, nte
 u(i, j+noc) = a1*pod(i, j+noc-1, iip) &
-   - b1*pod(i, j+noc, iip) + c1*u(i, j+noc-1)    
+   - b1*pod(i, j+noc, iip) + c1*u(i, j+noc-1)
 end do
 end if
 304 if (modn==1) u(nte, j+noc) = 0.0_wp
@@ -541,7 +541,7 @@ if (noc<=0) goto 300
 !     xx(i) = rand()
 !     end do
 !
-!     replacement code with standard Fortran90 
+!     replacement code with standard Fortran90
 !     intrinsic
 !
 call random_number(xx(1:nte))
@@ -555,7 +555,7 @@ do 330 j=1, nto
 if (j==noc) goto 330
 call gs(nte, wx, pod(1, j, iip), z(1))
 330 continue
-!  
+!
 do i=1, nte
 xx(i) = xx(i)-z(i)
 end do
@@ -648,11 +648,11 @@ end subroutine shpgi_lower_routine
 !     shpg uses the n**2 projection or complement when appropriate
 !     as well as  odd/even factorization and zero truncation on an
 !     on a Gaussian distributed grid as defined in the JCP paper
-!     "Generalized discrete spherical harmonic transforms" 
+!     "Generalized discrete spherical harmonic transforms"
 !     by Paul N. Swarztrauber and William F. Spotz
 !     J. Comp. Phys., 159(2000) pp. 213-230.
 !
-!     subroutine shpg(nlat, nlon, isym, mtrunc, x, y, idxy, 
+!     subroutine shpg(nlat, nlon, isym, mtrunc, x, y, idxy,
 !    1        wshp, lwshp, iwshp, liwshp, work, lwork, ierror)
 !
 !     shpg projects the array x onto the set of functions represented
@@ -667,15 +667,15 @@ end subroutine shpgi_lower_routine
 !            grid point i=(nlat+1)/2. if nlat is even the equator is
 !            located half way between points i=nlat/2 and i=nlat/2+1.
 !            nlat must be at least 3.
-! 
+!
 !     nlon   the number of distinct londitude points.  nlon determines
 !            the grid increment in longitude as 2*pi/nlon. for example
 !            nlon = 72 for a five degree grid. nlon must be greater
 !            than or equal to 4. the efficiency of the computation is
 !            improved when nlon is a product of small prime numbers.
-!            nlon must be at least 4. 
+!            nlon must be at least 4.
 !
-!     isym   currently not used.    
+!     isym   currently not used.
 !
 !     mtrunc the highest longitudinal wave number retained in the
 !            projection. It must be less than or equal to
@@ -686,30 +686,30 @@ end subroutine shpgi_lower_routine
 !            zero.
 !
 !     x      a two dimensional array that contains the the nlat
-!            by nlon array x(i, j) defined at the colatitude point 
+!            by nlon array x(i, j) defined at the colatitude point
 !            theta(i) = (i-1)*pi/(nlat-1) and longitude point phi(j) =
 !            (j-1)*2*pi/nlon.
 !
 !     idxy   the first dimension of the arrays x and y as they
 !            appear in the program that calls shpg. It must be
-!            at least nlat. 
+!            at least nlat.
 !
 !     wshp   a single precision array that must be saved for
-!            repeated use by subroutine shpg.        
+!            repeated use by subroutine shpg.
 !
 !     lwshp  the dimension of the array wshp as it appears in the
 !            program that calls shpgi. It must be at least
 !            2*(nlat+1)**2+nlon+log2(nlon)
 !
 !     iwshp  an integer array that must be saved for repeated
-!            use by subroutine shpg.        
+!            use by subroutine shpg.
 !
 !
 !     liwshp the dimension of the array iwshp as it appears in the
 !            program that calls shpgi. It must be at least
 !            4*(nlat+1).
 !
-!     work   a single precision work array that does 
+!     work   a single precision work array that does
 !            not have to be saved.
 !
 !     lwork  the dimension of the array work as it appears in the
@@ -720,11 +720,11 @@ end subroutine shpgi_lower_routine
 !
 !     output parameters
 !
-!     y      an nlat by nlon single precision array that contains 
+!     y      an nlat by nlon single precision array that contains
 !            the projection of x onto the set of functions that
-!            can be represented by the discrete set of spherical 
+!            can be represented by the discrete set of spherical
 !            harmonics. The arrays x(i, j) and y(i, j) are located
-!            at colatitude point theta(i) = (i-1)*pi/(nlat-1) and 
+!            at colatitude point theta(i) = (i-1)*pi/(nlat-1) and
 !            longitude point phi(j) = (j-1)*2*pi/nlon.
 !
 !     ierror = 0  no errors
@@ -740,7 +740,7 @@ subroutine shpg(nlat, nlon, isym, mtrunc, x, y, idxy, &
         wshp, lwshp, iwshp, liwshp, work, lwork, ierror)
 
 
-    type(RealPeriodicTransform) :: hfft
+    type(SpherepackAux) :: sphere_aux
 integer :: i
 integer :: idxy
 integer :: ierror
@@ -801,7 +801,7 @@ do j=1, nlon
   y(i, j) = x(i, j)
  end do
 end do
-call hfft%forward(nlat, nlon, y, idxy, wshp(lw1+1), work)
+call sphere_aux%hfft%forward(nlat, nlon, y, idxy, wshp(lw1+1), work)
 !
 nte = (nlat+1)/2
 nloc1 = 2*nte*nte
@@ -820,7 +820,7 @@ call shpg_lower_routine(nlat, nlon, isym, mtrunc, y, y, idxy, ierror, &
  iwshp(jw2), iwshp(jw3), iwshp(jw4), work(jw1), &
  work(jw2), work(jw3), work(jw4))
 !
-call hfft%backward(nlat, nlon, y, idxy, wshp(lw1+1), work)
+call sphere_aux%hfft%backward(nlat, nlon, y, idxy, wshp(lw1+1), work)
 !
 sn = 1.0_wp/nlon
 do j=1, nlon
@@ -901,7 +901,7 @@ nsho(1) = nmx/2
 nsho(2) = (nmx-1)/2
 end if
 !
-iip = 2 
+iip = 2
 do 100 mp1=1, mxtr+1
 iip = 3-iip
 if (mxtr==nlat-1.and.mp1==1) then
@@ -924,7 +924,7 @@ end if
 m = mp1-1
 mpm = max(1, m+m)
 ms2 = mp1/2
-!      mrank = min(nlat-m, nlat-ms2-ms2)   
+!      mrank = min(nlat-m, nlat-ms2-ms2)
 !      nrank = nlat-mrank
 !      nem = (mrank+1)/2-nshe(ip)
 !      nom = mrank-(mrank+1)/2-nsho(ip)
@@ -954,7 +954,7 @@ lag = 0
 if (m==0.or.mpm==nlon) lag = 1
 if (3*nec<2*nem.or.nem==0) then
 call tmxmx(lag, nte, nec, idp, pe(1, 1, iip), nte, idp, &
-          ze(1, 1, iip), xe, ye, ipse(1, iip), jzse(1, iip))  
+          ze(1, 1, iip), xe, ye, ipse(1, iip), jzse(1, iip))
 do i=1, nte
 ye(i, 1) = xe(i, 1)-ye(i, 1)
 end do
@@ -980,7 +980,7 @@ end do
 end if
 else
 call tmxmx(lag, nto, nom, idp, po(1, noc+1, iip), nto, idp, &
-zo(1, noc+1, iip), xo, yo, ipso(noc+1, iip), jzso(noc+1, iip))  
+zo(1, noc+1, iip), xo, yo, ipso(noc+1, iip), jzso(noc+1, iip))
 end if
 do i=1, nto
 sy(i, mpm) = ye(i, 1)+yo(i, 1)
@@ -991,7 +991,7 @@ if (mpm<nlon.and.m/=0) then
 do i=1, nto
 sy(i, mpm+1) = ye(i, 2)+yo(i, 2)
 sy(nlat+1-i, mpm+1) = ye(i, 2)-yo(i, 2)
-end do 
+end do
 if (nte>nto) sy(nte, mpm+1) = ye(nte, 2)
 end if
 100 continue
@@ -1005,123 +1005,6 @@ end do
 
 end subroutine shpg_lower_routine
 
-subroutine mxm(lr, lc, ld, a, mc, md, b, nd, c)
-
-integer :: i
-integer :: j
-integer :: k
-integer :: lc
-integer :: ld
-integer :: lr
-integer :: mc
-integer :: md
-integer :: nd
-real a(ld, *), b(md, *), c(nd, *)
-do i=1, lr
-do j=1, mc
-c(i, j) = 0.
-do k=1, lc 
-c(i, j) = c(i, j)+a(i, k)*b(k, j)
-end do
-end do
-end do
-return
-end subroutine mxm
-subroutine smxm(lr, lc, ld, a, mc, md, b, nd, c)
-
-real(wp) :: a
-real(wp) :: b
-real(wp) :: c
-integer :: i
-integer :: j
-integer :: k
-integer :: lc
-integer :: ld
-integer :: lr
-integer :: mc
-integer :: md
-integer :: nd
-dimension a(ld, *), b(md, *), c(nd, *)
-do i=1, lr
-do j=1, mc
-c(i, j) = 0.
-do k=1, lc 
-c(i, j) = c(i, j)+a(i, k)*b(k, j)
-end do
-end do
-end do
-
-end subroutine smxm
-
-subroutine mxmx(lr, lc, ld, a, mc, md, b, x, y)
-
-real(wp) :: a
-real(wp) :: b
-integer :: i
-integer :: j
-integer :: k
-integer :: lc
-integer :: ld
-integer :: lr
-integer :: mc
-integer :: md
-real(wp) :: sum1
-real(wp) :: sum2
-real(wp) :: x
-real(wp) :: y
-dimension a(ld, *), b(md, *), x(ld, 2), y(ld, 2)
-do k=1, lr
-y(k, 1) = 0.
-y(k, 2) = 0.
-end do
-!
-if (lc<=0) return
-do i=1, lc
-sum1 = 0.
-sum2 = 0.
-do j=1, mc
-sum1 = sum1 + b(i, j)*x(j, 1)
-sum2 = sum2 + b(i, j)*x(j, 2)
-end do
-do k=1, lr
-y(k, 1) = y(k, 1)+sum1*a(k, i)
-y(k, 2) = y(k, 2)+sum2*a(k, i)
-end do
-end do
-return
-end subroutine mxmx
-subroutine dmxmx(lr, lc, ld, a, mc, md, b, x, y)
-
-integer :: i
-integer :: j
-integer :: k
-integer :: lc
-integer :: ld
-integer :: lr
-integer :: mc
-integer :: md
-real a(ld, *), b(md, *), x(ld, 2), y(ld, 2), &
-                 sum1, sum2
-do k=1, lr
-y(k, 1) = 0.
-y(k, 2) = 0.
-end do
-!
-if (lc<=0) return
-do i=1, lc
-sum1 = 0.
-sum2 = 0.
-do j=1, mc
-sum1 = sum1 + b(i, j)*x(j, 1)
-sum2 = sum2 + b(i, j)*x(j, 2)
-end do
-do k=1, lr
-y(k, 1) = y(k, 1)+sum1*a(k, i)
-y(k, 2) = y(k, 2)+sum2*a(k, i)
-end do
-end do
-return
-end subroutine dmxmx
 subroutine tmxmx(lag, lr, lc, ld, a, mc, md, b, x, y, is, js)
 
 real(wp) :: a
@@ -1267,30 +1150,7 @@ x(i) = x(i)/sqs
 end do
 return
 end subroutine normal
-subroutine coe(moe, n, x, dmax)
 
-integer :: i
-integer :: moe
-integer :: n
-integer :: nh
-real x(n), dmax
-nh = (n+1)/2
-dmax = 0.
-if (moe/=0) goto 1
-do i=1, nh
-dmax = max(dmax, abs(x(i)-x(n-i+1)))
-x(i) = .5*(x(i)+x(n-i+1))
-x(n-i+1) = x(i)
-end do
-return
-1 do i=1, nh
-dmax = max(dmax, abs(x(i)+x(n-i+1)))
-x(i) = .5*(x(i)-x(n-i+1))
-x(n-i+1) = -x(i)
-end do
-if (mod(n, 2)/=0) x(nh) = 0.
-return
-end subroutine coe
 !     subroutine dlfkg(m, n, cp)
 !
 !     subroutine dlfkg computes the coefficients in the trigonometric
@@ -1369,9 +1229,9 @@ ma = abs(m)
 if (ma > n) return
 if (n-1< 0) then
     goto 2
-else if (n-1 == 0) then 
+else if (n-1 == 0) then
     goto 3
-else 
+else
     goto 5
 end if
 2 cp(1) = sqrt(2.0_wp)
@@ -1407,7 +1267,7 @@ fden = fden+2.
 18 continue
 20 t1 = t1/2.0_wp**(n-1-nex)
 if (mod(ma/2, 2) /= 0) t1 = -t1
-t2 = 1. 
+t2 = 1.
 if (ma == 0) goto 26
 do 25 i=1, ma
 t2 = fnmh*t2/(fnmh+pm1)
@@ -1451,16 +1311,16 @@ nmod=mod(n, 2)
 mmod=mod(abs(m), 2)
 if (nmod< 0) then
     goto 1
-else if (nmod == 0) then 
+else if (nmod == 0) then
     goto 1
-else 
+else
     goto 2
 end if
 1 if (mmod< 0) then
     goto 3
-else if (mmod == 0) then 
+else if (mmod == 0) then
     goto 3
-else 
+else
     goto 4
 end if
 !
@@ -1496,9 +1356,9 @@ cth = chh
 return
 2 if (mmod< 0) then
     goto 13
-else if (mmod == 0) then 
+else if (mmod == 0) then
     goto 13
-else 
+else
     goto 14
 end if
 !
@@ -1549,12 +1409,12 @@ integer :: ns2
 real(wp) :: sgnd
 !
 !                             April 2002
-!                        
+!
 !     gauss points and weights are computed using the fourier-newton
 !     described in "on computing the points and weights for 
 !     gauss-legendre quadrature", paul n. swarztrauber, siam journal 
 !     on scientific computing that has been accepted for publication.
-!     This routine is faster and more accurate than older program 
+!     This routine is faster and more accurate than older program
 !     with the same name.
 !
 !     subroutine compute_gaussian_latitudes_and_weights computes the nlat gaussian colatitudes and weights
@@ -1651,7 +1511,7 @@ if (abs(zero-zlast)>eps*abs(zero)) goto 10
 theta(nix) = zero
 zhold = zero
 !      wts(nix) = (nlat+nlat+1)/(dpb*dpb)
-!    
+!
 !     yakimiw's formula permits using old pb and dpb
 !
 wts(nix) = (nlat+nlat+1)/(dpb+pb*cos(zlast)/sin(zlast))**2
@@ -1690,12 +1550,12 @@ integer :: n
 integer :: ncp
 !
 !     computes the fourier coefficients of the legendre
-!     polynomial p_n^0 and its derivative. 
+!     polynomial p_n^0 and its derivative.
 !     n is the degree and n/2 or (n+1)/2
 !     coefficients are returned in cp depending on whether
 !     n is even or odd. The same number of coefficients
-!     are returned in dcp. For n even the constant 
-!     coefficient is returned in cz. 
+!     are returned in dcp. For n even the constant
+!     coefficient is returned in cz.
 !
 real cp(n/2+1), dcp(n/2+1), &
  t1, t2, t3, t4, cz
@@ -1742,7 +1602,7 @@ integer :: k
 integer :: kdo
 integer :: n
 !
-!     computes pn(theta) and its derivative dpb(theta) with 
+!     computes pn(theta) and its derivative dpb(theta) with
 !     respect to theta
 !
 real cp(n/2+1), dcp(n/2+1), cz, &
