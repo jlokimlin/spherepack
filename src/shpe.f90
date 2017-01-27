@@ -284,7 +284,7 @@ contains
         real(wp) :: tusl
         real(wp) :: ze
         real(wp) :: zo
-        real (wp) :: summation, dthet, v(1,1), a1, b1, c1
+        real (wp) :: summation, dthet, v(1, 1), a1, b1, c1
         real cp(idp), work(idp), wx(idp), s(idp+1), &
             e(idp), thet(idp), xx(idp), z(idp), u(idp, idp), &
             we(idp, idp, 2), ped(idp, idp, 2), a(4*idp), b(2*idp), &
@@ -313,7 +313,7 @@ contains
         !
         !     compute weight matrices for even functions
         !
-        do 40 mp1=1, 2
+        do mp1=1, 2
             m = mp1-1
             mrank = nlat-m-m
             nem = (mrank+1)/2
@@ -326,7 +326,7 @@ contains
                 if (m>0) ped(1, j, mp1) = ZERO
             end do
             call dsvdc(ped(m+1, 1, mp1), idp, nem, nem, s, e, u, &
-                idp, v(1,1), idp, work, 10, info)
+                idp, v(1, 1), idp, work, 10, info)
 
             do j=1, nem
                 s(j) = ONE/(s(j)*s(j))
@@ -349,6 +349,7 @@ contains
                 end do
             end do
 40      continue
+        end do
         we(1, 1, 2) = ONE
         !
         !     compute n**2 basis (even functions)
@@ -364,7 +365,7 @@ contains
         !
         mxtr = min(nlat-1, nlon/2, mtrunc)
         iip = 2
-        do 200 mp1=1, mxtr+1
+        do mp1=1, mxtr+1
             m = mp1-1
             iip = 3-iip
             ms2 = mp1/2
@@ -374,8 +375,8 @@ contains
             !
             !     compute associated legendre functions
             !
-            if (m<=1) then
-                do 205 j=1, nem
+            if (m <= 1) then
+                do j=1, nem
                     n = 2*j+m-2
                     call sphere_aux%compute_fourier_coefficients(m, n, cp)
                     do i=1, nte
@@ -383,10 +384,11 @@ contains
                     end do
 202                 if (m>0) ped(1, j+ms2, iip) = ZERO
 205             continue
+                end do
             !
             else
                 !
-                do 207 j=1, nem
+                do j=1, nem
                     n = 2*j+m-2
                     if (m>1 .and. n>mxtr) then
                         do i=1, nte
@@ -396,7 +398,7 @@ contains
                     end if
                     a1 = b(n-1)*a(n+m-3)/a(n+m-1)
                     b1 = a(n-m+1)/a(n+m-1)
-                    if (n-m<=1) then
+                    if (n-m <= 1) then
                         do i=1, nte
                             u(i, j+ms2) = a1*ped(i, j+ms2-1, iip) &
                                 - b1*ped(i, j+ms2, iip)
@@ -409,6 +411,7 @@ contains
                         end do
                     end if
 207             continue
+                end do
                 do j=1, nem
                     do i=1, nte
                         ped(i, j+ms2, iip) = u(i, j+ms2)
@@ -416,7 +419,7 @@ contains
                 end do
             end if
             !
-            if (ms2<=0. .or. ms2>=nte) goto 200
+            if (ms2 <= 0. .or. ms2>=nte) goto 200
             !
             ! initialize array with random numbers using
             ! Fortran90 intrinsics RANDOM_{SEED, NUMBER}
@@ -438,26 +441,28 @@ contains
                     wx(i) = wx(i)+we(i, j, iip)*xx(j)
                 end do
             end do
-            do 220 j=1, nte
-                if (j==ms2) goto 220
+            do j=1, nte
+                if (j == ms2) goto 220
                 call accumulate_inner_products(nte, wx, ped(1, j, iip), z)
 220         continue
+            end do
             !
             do i=1, nte
                 xx(i) = xx(i)-z(i)
             end do
             call normal(nte, xx, idp, we(1, 1, iip))
             it = it+1
-            if (it<=2) goto 201
+            if (it <= 2) goto 201
             do i=1, nte
                 ped(i, ms2, iip) = xx(i)
             end do
 200     continue
+        end do
         !
         !     reorder if mtrunc is less than nlat-1
         !         case of even functions
         !
-        if (modn==0) then
+        if (modn == 0) then
             nshe(1) = (nlat-mtrunc-1)/2
             nshe(2) = (nlat-mtrunc-2)/2
         else
@@ -465,7 +470,7 @@ contains
             nshe(2) = (nlat-mtrunc-1)/2
         end if
         !
-        do 210 mp1=1, 2
+        do mp1=1, 2
             do j=1, nte
                 js = j+nshe(mp1)
                 if (js>nte) js = js-nte
@@ -479,13 +484,14 @@ contains
                 end do
             end do
 210     continue
+        end do
         !
         call trunc(0, nte, idp, ped(1, 1, 1), nte, ipse(1, 1))
         call trunc(0, nte, idp, ped(1, 1, 2), nte, ipse(1, 2))
         !
         !     compute the analysis matrices
         !
-        do 250 iip=1, 2
+        do iip=1, 2
             do i=1, nte
                 lock = 0
                 do j=1, nte
@@ -495,13 +501,14 @@ contains
                     end do
                     pe(i, j, iip) = ped(i, j, iip)
                     ze(j, i, iip) =  summation
-                    if (abs(summation)>MACHINE_EPSILON .and. lock==0) then
+                    if (abs(summation)>MACHINE_EPSILON .and. lock == 0) then
                         lock = 1
                         jzse(i, iip) = j
                     end if
                 end do
             end do
 250     continue
+        end do
         !
         !     compute weight matrices for odd functions
         !
@@ -516,10 +523,10 @@ contains
                 do i=1, nte
                     call sphere_aux%compute_legendre_polys_from_fourier_coeff(m, n, thet(i), cp, pod(i, j, mp1))
                 end do
-                if (modn==1) pod(nte, j, mp1) = ZERO
+                if (modn == 1) pod(nte, j, mp1) = ZERO
             end do
             call dsvdc(pod(m+1, 1, mp1), idp, nom, nom, s, e, u, &
-                idp, v(1,1), idp, work, 10, info)
+                idp, v(1, 1), idp, work, 10, info)
             !
             do j=1, nom
                 s(j) = ONE/(s(j)*s(j))
@@ -544,7 +551,7 @@ contains
         end do
 
         wo(1, 1, 2) = ONE
-        if (modn==1) then
+        if (modn == 1) then
             wo(nte, nte, 1) = ONE
             wo(nte, nte, 2) = ONE
         end if
@@ -552,7 +559,7 @@ contains
         !     compute n**2 basis (odd functions)
         !
         iip = 2
-        do 300 mp1=1, mxtr+1
+        do mp1=1, mxtr+1
             iip = 3-iip
             m = mp1-1
             ms2 = mp1/2
@@ -563,20 +570,21 @@ contains
             !
             !     compute associated legendre functions
             !
-            if (m<=1) then
-                do 305 j=1, nom
+            if (m <= 1) then
+                do j=1, nom
                     n = 2*j+m-1
                     call sphere_aux%compute_fourier_coefficients(m, n, cp)
                     do i=1, nte
                         call sphere_aux%compute_legendre_polys_from_fourier_coeff(m, n, thet(i), cp, pod(i, j+ms2, iip))
                     end do
-302                 if (modn==1) pod(nte, j+ms2, iip) = ZERO
+302                 if (modn == 1) pod(nte, j+ms2, iip) = ZERO
                     if (m>0) pod(1, j+ms2, iip) = ZERO
 305             continue
+                end do
             !
             else
                 !
-                do 307 j=1, nom
+                do j=1, nom
                     n = 2*j+m-1
                     if (m>1 .and. n>mxtr) then
                         do i=1, nte
@@ -586,7 +594,7 @@ contains
                     end if
                     a1 = b(n-1)*a(n+m-3)/a(n+m-1)
                     b1 = a(n-m+1)/a(n+m-1)
-                    if (n-m<=1) then
+                    if (n-m <= 1) then
                         do i=1, nte
                             u(i, j+ms2) = a1*pod(i, j+ms2-1, iip) &
                                 - b1*pod(i, j+ms2, iip)
@@ -598,8 +606,9 @@ contains
                                 - b1*pod(i, j+ms2, iip) + c1*u(i, j+ms2-1)
                         end do
                     end if
-304                 if (modn==1) u(nte, j+ms2) = ZERO
+304                 if (modn == 1) u(nte, j+ms2) = ZERO
 307             continue
+                end do
                 do j=1, nom
                     do i=1, nte
                         pod(i, j+ms2, iip) = u(i, j+ms2)
@@ -607,7 +616,7 @@ contains
                 end do
             end if
             !
-            if (ms2<=0. .or. ms2>=nto) goto 300
+            if (ms2 <= 0. .or. ms2>=nto) goto 300
             !
             ! initialize array with random numbers using
             ! Fortran 90 intrinsics random_seed and random_number
@@ -620,7 +629,7 @@ contains
             ! replacement code
             !
             call random_number(xx(1:nte))
-            if (modn==1) xx(nte) = ZERO
+            if (modn == 1) xx(nte) = ZERO
             it = 0
             306 do i=1, nte
                 z(i) = ZERO
@@ -631,7 +640,7 @@ contains
             end do
 
             do j=1, nto
-                if (j==ms2) cycle
+                if (j == ms2) cycle
                 call accumulate_inner_products(nte, wx, pod(1, j, iip), z(1))
             end do
 
@@ -642,19 +651,20 @@ contains
             call normal(nte, xx, idp, wo(1, 1, iip))
 
             it = it+1
-            if (it<=2) goto 306
+            if (it <= 2) goto 306
 
             do i=1, nte
                 pod(i, ms2, iip) = xx(i)
             end do
 
-            if (modn==1) pod(nte, ms2, iip) = ZERO
+            if (modn == 1) pod(nte, ms2, iip) = ZERO
 300     continue
+        end do
         !
         !     reorder if mtrunc is less than nlat-1
         !        case of odd functions
         !
-        if (modn==0) then
+        if (modn == 0) then
             nsho(1) = (nlat-mtrunc)/2
             nsho(2) = (nlat-mtrunc-1)/2
         else
@@ -692,7 +702,7 @@ contains
                     end do
                     po(i, j, iip) = pod(i, j, iip)
                     zo(j, i, iip) = summation
-                    if (abs(summation)>MACHINE_EPSILON .and. lock==0) then
+                    if (abs(summation)>MACHINE_EPSILON .and. lock == 0) then
                         lock = 1
                         jzso(i, iip) = j
                     end if
@@ -856,7 +866,7 @@ contains
         if (lwork <mwrk) return
         ierror = 0
 
-        y(1:nlat,:) = x(1:nlat,:)
+        y(1:nlat, :) = x(1:nlat, :)
 
         call sphere_aux%hfft%forward(nlat, nlon, y, idxy, wshp(lw1+1), work)
 
@@ -882,7 +892,7 @@ contains
 
         call sphere_aux%hfft%backward(nlat, nlon, y, idxy, wshp(lw1+1), work)
 
-        y(1:nlat,:) = y(1:nlat,:)/nlon
+        y(1:nlat, :) = y(1:nlat, :)/nlon
 
     end subroutine shpe
 
@@ -931,18 +941,18 @@ contains
         real(wp) :: yo
         real(wp) :: ze
         real(wp) :: zo
-        !
+
         dimension sx(idxy, nlon), sy(idxy, nlon), nshe(2), nsho(2), &
             pe(idp, idp, 2), po(idp, idp, 2), ze(idp, idp, 2), zo(idp, idp, 2), &
             ipse(idp, 2), jzse(idp, 2), ipso(idp, 2), jzso(idp, 2), &
             xe(idp, 2), xo(idp, 2), ye(idp, 2), yo(idp, 2)
-        !
+
         ns2 = nlat/2
         modn = nlat-ns2-ns2
         nte = (nlat+1)/2
         nto = nlat-nte
-        !
-        if (modn==0) then
+
+        if (modn == 0) then
             nshe(1) = (nlat-mtrunc-1)/2
             nshe(2) = (nlat-mtrunc-2)/2
             nsho(1) = (nlat-mtrunc)/2
@@ -958,15 +968,15 @@ contains
 
         main_loop: do mp1=1, mxtr+1
             iip = 3-iip
-            if (mxtr==nlat-1 .and. mp1<=2) then
+            if (mxtr == nlat-1 .and. mp1 <= 2) then
                 do i=1, nlat
                     sy(i, mp1) = sx(i, mp1)
                 end do
-                if (mp1==2) then
+                if (mp1 == 2) then
                     sy(1, 2) = ZERO
                     sy(nlat, 2) = ZERO
                 end if
-                if (nlon>=3) then
+                if (3 <= nlon) then
                     sy(1, 3) = ZERO
                     sy(nlat, 3) = ZERO
                     do i=2, nlat-1
@@ -975,34 +985,35 @@ contains
                 end if
                 cycle main_loop
             end if
+
             m = mp1-1
             mpm = max(1, m+m)
             ms2 = mp1/2
             mrank = min(nlat-m, nlat-ms2-ms2)
-            !      mrank = mxtr+1-ms2-ms2
             nrank = nlat-mrank
             nem = (mrank+1)/2-nshe(iip)
             nom = mrank-(mrank+1)/2-nsho(iip)
             nec = nte-nem
             noc = nto-nom
-            !
+
             do i=1, nte
                 xe(i, 1) = HALF * (sx(i, mpm)+sx(nlat+1-i, mpm))
                 xo(i, 1) = HALF * (sx(i, mpm)-sx(nlat+1-i, mpm))
             end do
+
             if (mpm<nlon) then
                 do i=1, nte
                     xe(i, 2) = HALF * (sx(i, mpm+1)+sx(nlat+1-i, mpm+1))
                     xo(i, 2) = HALF * (sx(i, mpm+1)-sx(nlat+1-i, mpm+1))
                 end do
             end if
-            if (3*nec<2*nem .or. nem==0) then
+            if (3*nec<2*nem .or. nem == 0) then
                 call tmxmx(nte, nec, idp, pe(1, 1, iip), nte, idp, &
                     ze(1, 1, iip), xe, ye, ipse(1, iip), jzse(1, iip))
                 do i=1, nte
                     ye(i, 1) = xe(i, 1)-ye(i, 1)
                 end do
-                if (mpm<nlon .and. m/=0) then
+                if (mpm<nlon .and. m /= 0) then
                     do i=1, nte
                         ye(i, 2) = xe(i, 2)-ye(i, 2)
                     end do
@@ -1011,13 +1022,13 @@ contains
                 call tmxmx(nte, nem, idp, pe(1, nec+1, iip), nte, idp, &
                     ze(1, nec+1, iip), xe, ye, ipse(nec+1, iip), jzse(nec+1, iip))
             end if
-            if (3*noc<2*nom .or. nom==0) then
+            if (3*noc<2*nom .or. nom == 0) then
                 call tmxmx(nto, noc, idp, po(1, 1, iip), nto, idp, &
                     zo(1, 1, iip), xo, yo, ipso(1, iip), jzso(1, iip))
                 do i=1, nte
                     yo(i, 1) = xo(i, 1)-yo(i, 1)
                 end do
-                if (mpm<nlon .and. m/=0) then
+                if (mpm<nlon .and. m /= 0) then
                     do i=1, nte
                         yo(i, 2) = xo(i, 2)-yo(i, 2)
                     end do
@@ -1030,7 +1041,7 @@ contains
                 sy(i, mpm) = ye(i, 1)+yo(i, 1)
                 sy(nlat+1-i, mpm) = ye(i, 1)-yo(i, 1)
             end do
-            if (mpm<nlon .and. m/=0) then
+            if (mpm<nlon .and. m /= 0) then
                 do i=1, nte
                     sy(i, mpm+1) = ye(i, 2)+yo(i, 2)
                     sy(nlat+1-i, mpm+1) = ye(i, 2)-yo(i, 2)
@@ -1060,7 +1071,8 @@ contains
         integer(ip) :: mc
         integer(ip) :: md
         integer(ip) :: nd
-        real a(ld, *), b(md, *), c(nd, *)
+        real(wp) :: a(ld, *), b(md, *), c(nd, *)
+
         do i=1, lr
             do j=1, mc
                 c(i, j) = ZERO
@@ -1074,9 +1086,7 @@ contains
 
     subroutine smxm(lr, lc, ld, a, mc, md, b, nd, c)
 
-        real(wp) :: a
-        real(wp) :: b
-        real(wp) :: c
+        real(wp) :: a(ld, *), b(md, *), c(nd, *)
         integer(ip) :: i
         integer(ip) :: j
         integer(ip) :: k
@@ -1086,7 +1096,7 @@ contains
         integer(ip) :: mc
         integer(ip) :: md
         integer(ip) :: nd
-        dimension a(ld, *), b(md, *), c(nd, *)
+
         do i=1, lr
             do j=1, mc
                 c(i, j) = ZERO
@@ -1100,8 +1110,7 @@ contains
 
     subroutine mxmx(lr, lc, ld, a, mc, md, b, x, y)
 
-        real(wp) :: a
-        real(wp) :: b
+        real(wp) :: a(ld, *), b(md, *), x(ld, 2), y(ld, 2)
         integer(ip) :: i
         integer(ip) :: j
         integer(ip) :: k
@@ -1112,27 +1121,23 @@ contains
         integer(ip) :: md
         real(wp) :: sum1
         real(wp) :: sum2
-        real(wp) :: x
-        real(wp) :: y
-        dimension a(ld, *), b(md, *), x(ld, 2), y(ld, 2)
-        do k=1, lr
-            y(k, 1) = ZERO
-            y(k, 2) = ZERO
-        end do
-        !
-        if (lc <= 0) return
-        do i=1, lc
-            sum1 = ZERO
-            sum2 = ZERO
-            do j=1, mc
-                sum1 = sum1 + b(i, j)*x(j, 1)
-                sum2 = sum2 + b(i, j)*x(j, 2)
+
+        y(1: lr,:) = ZERO
+
+        if (lc > 0) then
+            do i=1, lc
+                sum1 = ZERO
+                sum2 = ZERO
+                do j=1, mc
+                    sum1 = sum1 + b(i, j)*x(j, 1)
+                    sum2 = sum2 + b(i, j)*x(j, 2)
+                end do
+                do k=1, lr
+                    y(k, 1) = y(k, 1)+sum1*a(k, i)
+                    y(k, 2) = y(k, 2)+sum2*a(k, i)
+                end do
             end do
-            do k=1, lr
-                y(k, 1) = y(k, 1)+sum1*a(k, i)
-                y(k, 2) = y(k, 2)+sum2*a(k, i)
-            end do
-        end do
+        end if
 
     end subroutine mxmx
 
@@ -1146,37 +1151,35 @@ contains
         integer(ip) :: lr
         integer(ip) :: mc
         integer(ip) :: md
-        real a(ld, *), b(md, *), x(ld, 2), y(ld, 2), &
-            sum1, sum2
-        do k=1, lr
-            y(k, 1) = ZERO
-            y(k, 2) = ZERO
-        end do
-        !
-        if (lc <= 0) return
-        do i=1, lc
-            sum1 = ZERO
-            sum2 = ZERO
-            do j=1, mc
-                sum1 = sum1 + b(i, j)*x(j, 1)
-                sum2 = sum2 + b(i, j)*x(j, 2)
+        real(wp) :: a(ld, *), b(md, *), x(ld, 2), y(ld, 2)
+        real(wp) :: sum1, sum2
+
+        y(1:lr,:) = ZERO
+
+        if (lc > 0) then
+            do i=1, lc
+                sum1 = ZERO
+                sum2 = ZERO
+                do j=1, mc
+                    sum1 = sum1 + b(i, j)*x(j, 1)
+                    sum2 = sum2 + b(i, j)*x(j, 2)
+                end do
+                do k=1, lr
+                    y(k, 1) = y(k, 1)+sum1*a(k, i)
+                    y(k, 2) = y(k, 2)+sum2*a(k, i)
+                end do
             end do
-            do k=1, lr
-                y(k, 1) = y(k, 1)+sum1*a(k, i)
-                y(k, 2) = y(k, 2)+sum2*a(k, i)
-            end do
-        end do
+        end if
 
     end subroutine dmxmx
 
     subroutine tmxmx(lr, lc, ld, a, mc, md, b, x, y, is, js)
 
-        real(wp) :: a
-        real(wp) :: b
+        real(wp) :: a(ld, *), b(md, *)
         integer(ip) :: i
-        integer(ip) :: is
+        integer(ip) :: is(*)
         integer(ip) :: j
-        integer(ip) :: js
+        integer(ip) :: js(*)
         integer(ip) :: k
         integer(ip) :: kmx
         integer(ip) :: lc
@@ -1186,31 +1189,25 @@ contains
         integer(ip) :: md
         real(wp) :: sum1
         real(wp) :: sum2
-        real(wp) :: x
-        real(wp) :: y
-        dimension a(ld, *), b(md, *), x(ld, 2), y(ld, 2), &
-            is(*), js(*)
+        real(wp) :: x(ld, 2), y(ld, 2)
 
         kmx = min(lr+1, ld)
-        do k=1, kmx
-            y(k, 1) = ZERO
-            y(k, 2) = ZERO
-        end do
+        y(1: kmx,:) = ZERO
 
-        if (lc <= 0) return
-
-        do i=1, lc
-            sum1 = ZERO
-            sum2 = ZERO
-            do j=js(i), mc
-                sum1 = sum1 + b(j, i)*x(j, 1)
-                sum2 = sum2 + b(j, i)*x(j, 2)
+        if (lc > 0) then
+            do i=1, lc
+                sum1 = ZERO
+                sum2 = ZERO
+                do j=js(i), mc
+                    sum1 = sum1 + b(j, i)*x(j, 1)
+                    sum2 = sum2 + b(j, i)*x(j, 2)
+                end do
+                do k=is(i), lr
+                    y(k, 1) = y(k, 1)+sum1*a(k, i)
+                    y(k, 2) = y(k, 2)+sum2*a(k, i)
+                end do
             end do
-            do k=is(i), lr
-                y(k, 1) = y(k, 1)+sum1*a(k, i)
-                y(k, 2) = y(k, 2)+sum2*a(k, i)
-            end do
-        end do
+        end if
 
     end subroutine tmxmx
 
@@ -1224,17 +1221,16 @@ contains
         integer(ip) :: n
         integer(ip) :: nrc
         real(wp) :: a(idp, *)
-        !
+
         !     irc = 0 for columns , or irc = 1 for rows
-        !
         select case (irc)
             case(0)
-                loop_20: do j=1, nrc
+                outer_loop: do j=1, nrc
                     do i=1, n
                         ijs(j) = i
-                        if (abs(a(i, j)) > MACHINE_EPSILON) cycle loop_20
+                        if (abs(a(i, j)) > MACHINE_EPSILON) cycle outer_loop
                     end do
-                end do loop_20
+                end do outer_loop
             case default
                 default_outer_loop: do i=1, nrc
                     do j=1, n
@@ -1253,47 +1249,38 @@ contains
     subroutine accumulate_inner_products(n, x, y, z)
 
         ! Dummy arguments
-        integer(ip), intent(in)  :: n
-        real(wp),    intent(in)  :: x(n)
-        real(wp),    intent(in)  :: y(n)
-        real(wp),    intent(out) :: z(n)
+        integer(ip), intent(in)    :: n
+        real(wp),    intent(in)    :: x(n)
+        real(wp),    intent(in)    :: y(n)
+        real(wp),    intent(inout) :: z(n)
 
-        ! Local variables
-        integer(ip) :: i
-        real(wp)    :: summation
-
-        summation = dot_product(x, y)
-
-        do i=1, n
-            z(i) = z(i)+summation*y(i)
-        end do
+        z = z + dot_product(x,y) * y
 
     end subroutine accumulate_inner_products
 
     subroutine normal(n, x, id, q)
 
-        integer(ip) :: i
-        integer(ip) :: id
-        integer(ip) :: j
-        integer(ip) :: n
-        dimension x(n), q(id, n)
-        real x, q, summation, sqs
-        !
-        !     normalize x
-        !
+        ! Dummy arguments
+        integer(ip), intent(in)    :: n
+        real(wp),    intent(inout) :: x(n)
+        integer(ip), intent(in)    :: id
+        real(wp),    intent(in)    :: q(id, n)
+
+        ! Local variables
+        integer(ip) :: i, j
+        real(wp)    :: summation, sqs
+
+        ! Normalize x
         sqs = ZERO
         do i=1, n
             summation = ZERO
             do j=1, n
-                summation = summation+q(i, j)*x(j)
+                summation = summation + q(i, j)*x(j)
             end do
             sqs = sqs+summation*x(i)
         end do
 
-        sqs = sqrt(sqs)
-        do i=1, n
-            x(i) = x(i)/sqs
-        end do
+        x = x/sqrt(sqs)
 
     end subroutine normal
 
@@ -1321,695 +1308,899 @@ contains
                     x(i) = HALF * (x(i)-x(n-i+1))
                     x(n-i+1) = -x(i)
                 end do
-                if (mod(n, 2)/=0) x(nh) = ZERO
+                if (mod(n, 2) /= 0) x(nh) = ZERO
         end select
 
     end subroutine coe
 
-    subroutine dsvdc(x, ldx, n, p, s, e, u, ldu, v, ldv, work, job, info)
+    ! Purpose:
+    !
+    ! Performs the singular value decomposition of a real rectangular matrix.
+    !
+    !    This routine reduces an m by n matrix a to diagonal form by orthogonal
+    !    transformations u and v.  The diagonal elements s(i) are the singular
+    !    values of a.  The columns of u are the corresponding left singular
+    !    vectors, and the columns of v the right singular vectors.
+    !
+    !    The form of the singular value decomposition is then
+    !
+    !      a(mxn) = u(mxm) * s(mxn) * transpose(v(nxn))
+    !
+    !  Reference:
+    !
+    !    Jack Dongarra, Jim Bunch, Cleve Moler, Pete Stewart,
+    !    LINPACK User's Guide,
+    !    SIAM, 1979,
+    !    ISBN13: 978-0-898711-72-1,
+    !    LC: QA214.L56.
+    !
+    !  Parameters:
+    !
+    !    Input/output, real(wp) a(lda,n).  on input, the m by n
+    !    matrix whose singular value decomposition is to be computed.
+    !    on output, the matrix has been destroyed.  depending on the user's
+    !    requests, the matrix may contain other useful information.
+    !
+    !    input, integer(ip) lda, the leading dimension of the array a.
+    !    lda must be at least n.
+    !
+    !    input, integer(ip) m, the number of rows of the matrix.
+    !
+    !    input, integer(ip) n, the number of columns of the matrix a.
+    !
+    !    output, real(wp) s(mm), where mm = max(m+1,n).  the first
+    !    min(m,n) entries of s contain the singular values of a arranged in
+    !    descending order of magnitude.
+    !
+    !    output, real(wp) e(mm), where mm = max(m+1,n).  ordinarily
+    !    contains zeros.  however see the discussion of info for exceptions.
+    !
+    !    output, real(wp) u(ldu,k).  if joba = 1 then k = m;
+    !    if 2 <= joba, then k = min(m,n).  u contains the m by m matrix of
+    !    left singular vectors.  u is not referenced if joba = 0.  if m <= n
+    !    or if joba = 2, then u may be identified with a in the subroutine call.
+    !
+    !    input, integer(ip) ldu, the leading dimension of the array u.
+    !    ldu must be at least m.
+    !
+    !    output, real(wp) v(ldv,n), the n by n matrix of right singular
+    !    vectors.  v is not referenced if job is 0.  if n <= m, then v may be
+    !    identified with a in the subroutine call.
+    !
+    !    input, integer(ip) ldv, the leading dimension of the array v.
+    !    ldv must be at least n.
+    !
+    !    workspace, real(wp) work(m).
+    !
+    !    input, integer(ip) job, controls the computation of the singular
+    !    vectors.  it has the decimal expansion ab with the following meaning:
+    !      a =  0, do not compute the left singular vectors.
+    !      a =  1, return the m left singular vectors in u.
+    !      a >= 2, return the first min(m,n) singular vectors in u.
+    !      b =  0, do not compute the right singular vectors.
+    !      b =  1, return the right singular vectors in v.
+    !
+    !    output, integer(ip) info, status indicator.
+    !    the singular values (and their corresponding singular vectors)
+    !    s(info+1), s(info+2),...,s(mn) are correct.  here mn = min(m, n).
+    !    thus if info is 0, all the singular values and their vectors are
+    !    correct.  in any event, the matrix b = u' * a * v is the bidiagonal
+    !    matrix with the elements of s on its diagonal and the elements of e on
+    !    its superdiagonal.  thus the singular values of a and b are the same.
+    !
+    subroutine dsvdc(a, lda, m, n, s, e, u, ldu, v, ldv, work, job, info)
 
-        integer ldx, n, p, ldu, ldv, job, info
-        real x(ldx, 1), s(1), e(1), u(ldu, 1), v(ldv, 1), work(1)
-        !
-        !
-        !     dsvdc is a subroutine to reduce a real nxp matrix x
-        !     by orthogonal transformations u and v to diagonal form.  the
-        !     diagonal elements s(i) are the singular values of x.  the
-        !     columns of u are the corresponding left singular vectors,
-        !     and the columns of v the right singular vectors.
-        !
-        !     on entry
-        !
-        !         x         real(ldx, p), where ldx.ge.n.
-        !                   x contains the matrix whose singular value
-        !                   decomposition is to be computed.  x is
-        !                   destroyed by dsvdc.
-        !
-        !         ldx       integer.
-        !                   ldx is the leading dimension of the array x.
-        !
-        !         n         integer.
-        !                   n is the number of rows of the matrix x.
-        !
-        !         p         integer.
-        !                   p is the number of columns of the matrix x.
-        !
-        !         ldu       integer.
-        !                   ldu is the leading dimension of the array u.
-        !                   (see below).
-        !
-        !         ldv       integer.
-        !                   ldv is the leading dimension of the array v.
-        !                   (see below).
-        !
-        !         work      real(n).
-        !                   work is a scratch array.
-        !
-        !         job       integer.
-        !                   job controls the computation of the singular
-        !                   vectors.  it has the decimal expansion ab
-        !                   with the following meaning
-        !
-        !                        a.eq.0    do not compute the left singular
-        !                                  vectors.
-        !                        a.eq.1    return the n left singular vectors
-        !                                  in u.
-        !                        a.ge.2    return the first min(n, p) singular
-        !                                  vectors in u.
-        !                        b.eq.0    do not compute the right singular
-        !                                  vectors.
-        !                        b.eq.1    return the right singular vectors
-        !                                  in v.
-        !
-        !     on return
-        !
-        !         s         real(mm), where mm=min(n+1, p).
-        !                   the first min(n, p) entries of s contain the
-        !                   singular values of x arranged in descending
-        !                   order of magnitude.
-        !
-        !         e         real(p),
-        !                   e ordinarily contains zeros.  however see the
-        !                   discussion of info for exceptions.
-        !
-        !         u         real(ldu, k), where ldu.ge.n.  if
-        !                                   joba.eq.1 then k.eq.n, if joba.ge.2
-        !                                   then k.eq.min(n, p).
-        !                   u contains the matrix of left singular vectors.
-        !                   u is not referenced if joba.eq.ZERO  if n.le.p
-        !                   or if joba.eq.2, then u may be identified with x
-        !                   in the subroutine call.
-        !
-        !         v         real(ldv, p), where ldv.ge.p.
-        !                   v contains the matrix of right singular vectors.
-        !                   v is not referenced if job.eq.ZERO  if p.le.n,
-        !                   then v may be identified with x in the
-        !                   subroutine call.
-        !
-        !         info      integer.
-        !                   the singular values (and their corresponding
-        !                   singular vectors) s(info+1), s(info+2), ..., s(m)
-        !                   are correct (here m=min(n, p)).  thus if
-        !                   info.eq.0, all the singular values and their
-        !                   vectors are correct.  in any event, the matrix
-        !                   b = trans(u)*x*v is the bidiagonal matrix
-        !                   with the elements of s on its diagonal and the
-        !                   elements of e on its super-diagonal (trans(u)
-        !                   is the transpose of u).  thus the singular
-        !                   values of x and b are the same.
-        !
-        !     linpack. this version dated 08/14/78 .
-        !              correction made to shift 2/84.
-        !     g.w. stewart, university of maryland, argonne national lab.
-        !
-        !     dsvdc uses the following functions and subprograms.
-        !
-        !     external drot
-        !     blas daxpy, ddot, dscal, dswap, dnrm2, drotg
-        !     fortran dabs, dmax1, max0, min0, mod, dsqrt
-        !
-        !     internal variables
-        !
-        integer i, iter, j, jobu, k, kase, kk
-        integer l, ll, lls, lm1, lp1, ls, lu
-        integer  m, maxit, mm, mm1, mp1, nct, nctp1, ncu, nrt, nrtp1
-        real t, b, c, cs, el, emm1, f, g, scale_rename
-        real shift, sl, sm, sn, smm1, t1, test, ztest
-        logical wantu, wantv
-        !
-        !
-        !     set the maximum number of iterations.
-        !
-        maxit = 30
-        !
-        !     determine what is to be computed.
-        !
-        wantu = .false.
-        wantv = .false.
-        jobu = mod(job, 100)/10
-        ncu = n
-        if (jobu > 1) ncu = min(n, p)
-        if (jobu /= 0) wantu = .true.
-        if (mod(job, 10) /= 0) wantv = .true.
-        !
-        !     reduce x to bidiagonal form, storing the diagonal elements
-        !     in s and the super-diagonal elements in e.
-        !
+        ! Dummy arguments
+        real(wp),    intent(inout) :: a(lda,n)
+        integer(ip), intent(in)    :: lda
+        integer(ip), intent(in)    :: m
+        integer(ip), intent(in)    :: n
+        real(wp),    intent(out)   :: s(*)
+        real(wp),    intent(out)   :: e(*)
+        real(wp),    intent(out)   :: u(ldu,m)
+        integer(ip), intent(in)    :: ldu
+        real(wp),    intent(out)   :: v(ldv,n)
+        integer(ip), intent(in)    :: ldv
+        real(wp),    intent(out)   :: work(m)
+        integer(ip), intent(in)    :: job
+        integer(ip), intent(out)   :: info
+
+        ! Local variables
+        real(wp) b
+        real(wp) c
+        real(wp) cs
+        real(wp) el
+        real(wp) emm1
+        real(wp) f
+        real(wp) g
+        integer(ip) iter
+        integer(ip) j
+        integer(ip) job_u
+        integer(ip) k
+        integer(ip) k_case
+        integer(ip) kk
+        integer(ip) l
+        integer(ip) ll
+        integer(ip) lls
+        integer(ip) ls
+        integer(ip) lu
+        integer(ip), parameter :: MAX_ITER = 30
+        integer(ip) mm
+        integer(ip) mm1
+        integer(ip) mn
+        integer(ip) nct
+        integer(ip) nctp1
+        integer(ip) ncu
+        integer(ip) nrt
+        integer(ip) nrtp1
+        real(wp) scale_factor
+        real(wp) shift
+        real(wp) sl
+        real(wp) sm
+        real(wp) smm1
+        real(wp) sn
+        real(wp) t
+        real(wp) t1
+        real(wp) test
+        real(wp) ztest
+        logical :: u_desired, v_desired
+
+        !  Determine what is to be computed.
+        u_desired = .false.
+        v_desired = .false.
+        job_u = mod(job, 100)/10
+
+        if (1 < job_u) then
+            ncu = min(m, n)
+        else
+            ncu = m
+        end if
+
+        if (job_u /= 0) u_desired = .true.
+
+        if (mod(job, 10) /= 0) v_desired = .true.
+
+        !  Reduce a to bidiagonal form, storing the diagonal elements
+        !  in s and the super-diagonal elements in e.
         info = 0
-        nct = min(n-1, p)
-        nrt = max(0, min(p-2, n))
+        nct = min(m - 1, n)
+        nrt = max(0, min(m, n - 2))
         lu = max(nct, nrt)
-        if (lu < 1) goto 170
-        do 160 l = 1, lu
-            lp1 = l + 1
-            if (l > nct) goto 20
+
+        do l = 1, lu
+
+            !  Compute the transformation for the l-th column and
+            !  place the l-th diagonal in s(l).
+            if (l <= nct) then
+                s(l) = dnrm2(m-l+1, a(l,l), 1)
+                if (s(l) /= ZERO) then
+                    if (a(l,l) /= ZERO) s(l) = sign(s(l), a(l,l))
+                    call dscal( m-l+1, ONE / s(l), a(l,l), 1)
+                    a(l,l) = ONE + a(l,l)
+                end if
+                s(l) = -s(l)
+            end if
+
+            do j = l + 1, n
+
+                !  Apply the transformation.
+                if (l <= nct .and. s(l) /= ZERO) then
+                    t = -ddot( m-l+1, a(l,l), 1, a(l,j), 1) / a(l,l)
+                    call daxpy(m-l+1, t, a(l,l), 1, a(l,j), 1)
+                end if
+
+                !  Place the l-th row of a into e for the
+                !  subsequent calculation of the row transformation.
+                e(j) = a(l,j)
+            end do
+
+            !  Place the transformation in u for subsequent back multiplication.
+            if (u_desired .and. l <= nct) u(l:m,l) = a(l:m,l)
+
+            !  Compute the l-th row transformation and place the
+            !  l-th superdiagonal in e(l).
             !
-            !           compute the transformation for the l-th column and
-            !           place the l-th diagonal in s(l).
+            if (l <= nrt) then
+                e(l) = dnrm2(n - l, e(l+1), 1)
+                if (e(l) /= ZERO) then
+                    if (e(l+1) /= ZERO) then
+                        e(l) = sign(e(l), e(l+1))
+                    end if
+                    call dscal( n-l, ONE / e(l), e(l+1), 1)
+                    e(l+1) = ONE + e(l+1)
+                end if
+
+                e(l) = -e(l)
+                !
+                !  Apply the transformation.
+                !
+                if (l + 1 <= m .and. e(l) /= ZERO) then
+
+                    work(l+1:m) = ZERO
+
+                    do j = l + 1, n
+                        call daxpy(m-l, e(j), a(l+1,j), 1, work(l+1), 1)
+                    end do
+
+                    do j = l + 1, n
+                        call daxpy(m-l, -e(j)/e(l+1), work(l+1), 1, a(l+1,j), 1)
+                    end do
+
+                end if
+
+                !  Place the transformation in v for subsequent back multiplication.
+                if (v_desired) v(l+1:n,l) = e(l+1:n)
+            end if
+        end do
+
+        ! Set up the final bidiagonal matrix of order mn.
+        mn = min(m + 1, n)
+        nctp1 = nct + 1
+        nrtp1 = nrt + 1
+
+        if (nct < n) s(nctp1) = a(nctp1,nctp1)
+
+        if (m < mn) s(mn) = ZERO
+
+        if (nrtp1 < mn) e(nrtp1) = a(nrtp1,mn)
+
+        e(mn) = ZERO
+
+        !  If required, generate u.
+        if (u_desired) then
+
+            u(1:m,nctp1:ncu) = ZERO
+
+            do j = nctp1, ncu
+                u(j,j) = ONE
+            end do
+
+            do ll = 1, nct
+
+                l = nct - ll + 1
+
+                if (s(l) /= ZERO) then
+
+                    do j = l + 1, ncu
+                        t = -ddot( m-l+1, u(l,l), 1, u(l,j), 1) / u(l,l)
+                        call daxpy(m-l+1, t, u(l,l), 1, u(l,j), 1)
+                    end do
+
+                    u(l:m,l) = -u(l:m,l)
+                    u(l,l) = ONE + u(l,l)
+                    u(1:l-1,l) = ZERO
+
+                else
+                    u(1:m,l) = ZERO
+                    u(l,l) = ONE
+                end if
+            end do
+        end if
+
+        !  If it is required, generate v.
+        if (v_desired) then
+
+            do ll = 1, n
+                l = n - ll + 1
+                if (l <= nrt .and. e(l) /= ZERO) then
+                    do j = l + 1, n
+                        t = -ddot( n-l, v(l+1,l), 1, v(l+1,j), 1) / v(l+1,l)
+                        call daxpy(n-l, t, v(l+1,l), 1, v(l+1,j), 1)
+                    end do
+                end if
+                v(1:n,l) = ZERO
+                v(l,l) = ONE
+            end do
+        end if
+
+        !  Main iteration loop for the singular values.
+        mm = mn
+        iter = 0
+        main_iteration_loop: do
+
+            if (mn <= 0) exit main_iteration_loop
+
+            !  If too many iterations have been performed, set flag and return.
+
+            if (MAX_ITER <= iter) then
+                info = mn
+                return
+            end if
             !
-            s(l) = get_norm2(n-l+1, x(l, l), 1)
-            if (s(l) == ZERO) goto 10
-            if (x(l, l) /= ZERO) s(l) = sign(s(l), x(l, l))
-            call scale_vector_by_constant(n-l+1, ONE/s(l), x(l, l), 1)
-            x(l, l) = ONE + x(l, l)
-10      continue
-        s(l) = -s(l)
-20  continue
-    if (p < lp1) goto 50
-    do 40 j = lp1, p
-        if (l > nct) goto 30
-        if (s(l) == ZERO) goto 30
-        !
-        !              apply the transformation.
-        !
-        t = -get_dot_product(n-l+1, x(l, l), 1, x(l, j), 1)/x(l, l)
-        call daxpy(n-l+1, t, x(l, l), 1, x(l, j), 1)
-30  continue
+            !  This section of the program inspects for
+            !  negligible elements in the s and e arrays.
+            !
+            !  On completion the variables k_case and l are set as follows:
+            !
+            !  k_case = 1     if s(mn) and e(l-1) are negligible and l < mn
+            !  k_case = 2     if s(l) is negligible and l < mn
+            !  k_case = 3     if e(l-1) is negligible, l < mn, and
+            !               s(l), ..., s(mn) are not negligible (qr step).
+            !  k_case = 4     if e(mn-1) is negligible (convergence).
+            !
+            do ll = 1, mn
+                l = mn - ll
+                if (l == 0) exit
+                test = abs(s(l)) + abs(s(l+1))
+                ztest = test + abs(e(l))
+                if (ztest == test) then
+                    e(l) = ZERO
+                    exit
+                end if
+            end do
+
+            if (l == mn - 1) then
+                k_case = 4
+            else
+                do lls = l + 1, mn + 1
+                    ls = mn - lls + l + 1
+
+                    if (ls == l) exit
+
+                    test = ZERO
+
+                    if (ls /= mn) test = test + abs(e(ls))
+
+                    if (ls /= l + 1) test = test + abs(e(ls-1))
+
+                    ztest = test + abs(s(ls))
+
+                    if (ztest == test) then
+                        s(ls) = ZERO
+                        exit
+                    end if
+                end do
+
+                if (ls == l) then
+                    k_case = 3
+                else if (ls == mn) then
+                    k_case = 1
+                else
+                    k_case = 2
+                    l = ls
+                end if
+            end if
+
+            l = l + 1
+
+            !  Deflate negligible s(mn).
+            select case (k_case)
+                case (1)
+            		
+                    mm1 = mn - 1
+                    f = e(mn-1)
+                    e(mn-1) = ZERO
+            		
+                    do kk = l, mm1
+            		
+                        k = mm1 - kk + l
+                        t1 = s(k)
+                        call drotg(t1, f, cs, sn)
+                        s(k) = t1
+            		
+                        if (k /= l) then
+                            f = -sn * e(k-1)
+                            e(k-1) = cs * e(k-1)
+                        end if
+            		
+                        if (v_desired) call drot(n, v(1,k), 1, v(1,mn), 1, cs, sn)
+                    end do
+                case (2)
+            		
+                    f = e(l-1)
+                    e(l-1) = ZERO
+            		
+                    do k = l, mn
+                        t1 = s(k)
+                        call drotg(t1, f, cs, sn)
+                        s(k) = t1
+                        f = -sn * e(k)
+                        e(k) = cs * e(k)
+                        if (u_desired) call drot(m, u(1,k), 1, u(1,l-1), 1, cs, sn)
+                    end do
+                case (3)
+
+                    !  Calculate the shift.
+                    scale_factor = max(abs(s(mn)), abs(s(mn - 1)), abs(e(mn - 1)), &
+                        abs(s(l)), abs(e(l)))
+            		
+                    sm = s(mn)/scale_factor
+                    smm1 = s(mn-1)/scale_factor
+                    emm1 = e(mn-1)/scale_factor
+                    sl = s(l)/scale_factor
+                    el = e(l)/scale_factor
+                    b = ((smm1 + sm) * (smm1 - sm) + emm1**2)/TWO
+                    c = (sm**2) * (emm1**2)
+                    shift = ZERO
+            		
+                    if (b /= ZERO .or. c /= ZERO) then
+                        shift = sqrt(b**2 + c)
+                        if (b < ZERO) shift = -shift
+                        shift = c / (b + shift)
+                    end if
+            		
+                    f = ( sl + sm) * ( sl - sm) + shift
+                    g = sl * el
+
+                    !  Chase zeros.
+                    mm1 = mn - 1
+            		
+                    do k = l, mm1
+            		
+                        call drotg(f, g, cs, sn)
+            		
+                        if (k /= l) e(k-1) = f
+            		
+                        f = cs * s(k) + sn * e(k)
+                        e(k) = cs * e(k) - sn * s(k)
+                        g = sn * s(k+1)
+                        s(k+1) = cs * s(k+1)
+            		
+                        if (v_desired) call drot(n, v(1,k), 1, v(1,k+1), 1, cs, sn)
+
+                        call drotg(f, g, cs, sn)
+
+                        s(k) = f
+                        f = cs * e(k) + sn * s(k+1)
+                        s(k+1) = -sn * e(k) + cs * s(k+1)
+                        g = sn * e(k+1)
+                        e(k+1) = cs * e(k+1)
+            		
+                        if (u_desired .and. k < m) call drot(m, u(1,k), 1, u(1,k+1), 1, cs, sn)
+
+                    end do
+            		
+                    e(mn-1) = f
+                    iter = iter + 1
+                case (4)
+
+                    !  Make the singular value nonnegative.
+                    if (s(l) < ZERO) then
+                        s(l) = -s(l)
+                        if (v_desired) v(1:n,l) = -v(1:n,l)
+                    end if
+
+                    !  Order the singular value.
+                    do
+            		
+                        if (l == mm) exit
+            		
+                        if (s(l+1) <= s(l)) exit
+            		
+                        t = s(l)
+                        s(l) = s(l+1)
+                        s(l+1) = t
+            		
+                        if (v_desired .and. l < n) call dswap( n, v(1,l), 1, v(1,l+1), 1)
+
+                        if (u_desired .and. l < m) call dswap(m, u(1,l), 1, u(1,l+1), 1)
+                        l = l + 1
+                    end do
+                    iter = 0
+                    mn = mn - 1
+            end select
+        end do main_iteration_loop
+
+    end subroutine dsvdc
+
+    ! Purpose:
     !
-    !           place the l-th row of x into  e for the
-    !           subsequent calculation of the row transformation.
+    ! Computes constant times a vector plus a vector.
     !
-    e(j) = x(l, j)
-40 continue
-50 continue
-   if (.not.wantu  .or.  l > nct) goto 70
-   !
-   !           place the transformation in u for subsequent back
-   !           multiplication.
-   !
-   do 60 i = l, n
-       u(i, l) = x(i, l)
-60 continue
-70 continue
-   if (l > nrt) goto 150
-   !
-   !           compute the l-th row transformation and place the
-   !           l-th super-diagonal in e(l).
-   !
-   e(l) = get_norm2(p-l, e(lp1), 1)
-   if (e(l) == ZERO) goto 80
-   if (e(lp1) /= ZERO) e(l) = sign(e(l), e(lp1))
-   call scale_vector_by_constant(p-l, ONE/e(l), e(lp1), 1)
-   e(lp1) = ONE + e(lp1)
-80 continue
-   e(l) = -e(l)
-   if (lp1 > n  .or.  e(l) == ZERO) goto 120
-   !
-   !              apply the transformation.
-   !
-   do 90 i = lp1, n
-       work(i) = ZERO
-90 continue
-   do 100 j = lp1, p
-       call daxpy(n-l, e(j), x(lp1, j), 1, work(lp1), 1)
-100 continue
-    do 110 j = lp1, p
-        call daxpy(n-l, -e(j)/e(lp1), work(lp1), 1, x(lp1, j), 1)
-110 continue
-120 continue
-    if (.not.wantv) goto 140
+    ! Jack dongarra, linpack, 3/11/78.
+    ! Modified 12/3/93, array(1) declarations changed to array(*)
+    ! Modified 01/27/17, whole array operations to aid compiler optimization
     !
-    !              place the transformation in v for subsequent
-    !              back multiplication.
+    subroutine daxpy(n, da, dx, incx, dy, incy)
+
+        ! Dummy arguments
+        integer(ip), intent(in)    :: n
+        real(wp),    intent(in)    :: da
+        real(wp),    intent(in)    :: dx(*)
+        integer(ip), intent(in)    :: incx
+        real(wp),    intent(inout) :: dy(*)
+        integer(ip), intent(in)    :: incy
+
+        ! Local variables
+        integer(ip) :: i, ix, iy, m
+
+        if (n <= 0) then
+            return
+        else if (da == ZERO) then
+            return
+        else if (incx /= 1 .or. incy /= 1) then
+
+            !  Code for unequal increments or equal increments
+            !  not equal to 1.
+            if (0 <= incx) then
+                ix = 1
+            else
+                ix = (-n + 1) * incx + 1
+            end if
+
+            if (0 <= incy) then
+                iy = 1
+            else
+                iy = (-n + 1) * incy + 1
+            end if
+
+            do i = 1, n
+                dy(iy) = dy(iy) + da * dx(ix)
+                ix = ix + incx
+                iy = iy + incy
+            end do
+        else
+            !  Code for both increments equal to 1.
+            m = mod(n, 4)
+
+            dy(1:m) = dy(1:m) + da * dx(1:m)
+
+            do i = m + 1, n, 4
+                dy(i) = dy(i) + da * dx(i)
+                dy(i+1) = dy(i+1) + da * dx(i+1)
+                dy(i+2) = dy(i+2) + da * dx(i+2)
+                dy(i+3) = dy(i+3) + da * dx(i+3)
+            end do
+        end if
+
+    end subroutine daxpy
+
+    ! Purpose:
     !
-    do 130 i = lp1, p
-        v(i, l) = e(i)
-130 continue
-140 continue
-150 continue
-160 continue
-170 continue
+    ! Forms the dot product of two vectors.
+    ! Jack dongarra, linpack, 3/11/78.
+    ! Modified 12/3/93, array(1) declarations changed to array(*)
+    ! Modified 01/27/17, the function now wraps around the intrinsic dot_product
     !
-    !     set up the final bidiagonal matrix or order m.
+    pure function ddot(n, dx, incx, dy, incy) &
+        result (return_value)
+
+        ! Dummy arguments
+        integer(ip), intent(in) :: n
+        real(wp),    intent(in) :: dx(*)
+        integer(ip), intent(in) :: incx
+        real(wp),    intent(in) :: dy(*)
+        integer(ip), intent(in) :: incy
+        real(wp)                :: return_value
+
+        ! Local variables
+        integer(ip) :: x1, xn, xi
+        integer(ip) :: y1, yn, yi
+
+        if (0 < incx) then
+            x1 = 1
+            xn = 1 + (n - 1) * incx
+            xi = incx
+        else
+            x1 = 1 + (n - 1) * incx
+            xn = 1
+            xi = - incx
+        end if
+
+        if (0 < incy) then
+            y1 = 1
+            yn = 1 + (n - 1) * incy
+            yi = incy
+        else
+            y1 = 1 + (n - 1) * incy
+            yn = 1
+            yi = - incy
+        end if
+
+        !  Let the intrinsic function dot_product take care of optimization.
+        return_value = dot_product(dx(x1:xn:xi), dy(y1:yn:yi))
+
+    end function ddot
+
+    ! Purpose:
     !
-    m = min(p, n+1)
-    nctp1 = nct + 1
-    nrtp1 = nrt + 1
-    if (nct < p) s(nctp1) = x(nctp1, nctp1)
-    if (n < m) s(m) = ZERO
-    if (nrtp1 < m) e(nrtp1) = x(nrtp1, m)
-    e(m) = ZERO
+    !  Returns the euclidean norm of a vector via the function
+    !  name, so that
     !
-    !     if required, generate u.
+    !     return_value := sqrt( transpose(x) * x)
     !
-    if (.not.wantu) goto 300
-    if (ncu < nctp1) goto 200
-    do 190 j = nctp1, ncu
-        do 180 i = 1, n
-            u(i, j) = ZERO
-180     continue
-        u(j, j) = ONE
-190 continue
-200 continue
-    if (nct < 1) goto 290
-    do 280 ll = 1, nct
-        l = nct - ll + 1
-        if (s(l) == ZERO) goto 250
-        lp1 = l + 1
-        if (ncu < lp1) goto 220
-        do 210 j = lp1, ncu
-            t = -get_dot_product(n-l+1, u(l, l), 1, u(l, j), 1)/u(l, l)
-            call daxpy(n-l+1, t, u(l, l), 1, u(l, j), 1)
-210     continue
-220 continue
-    call scale_vector_by_constant(n-l+1, -ONE, u(l, l), 1)
-    u(l, l) = ONE + u(l, l)
-    lm1 = l - 1
-    if (lm1 < 1) goto 240
-    do 230 i = 1, lm1
-        u(i, l) = ZERO
-230 continue
-240 continue
-    goto 270
-250 continue
-    do 260 i = 1, n
-        u(i, l) = ZERO
-260 continue
-    u(l, l) = ONE
-270 continue
-280 continue
-290 continue
-300 continue
+    ! This version written on 25-October-1982.
+    ! Modified on 14-October-1993 to inline the call to DLASSQ.
+    ! Sven Hammarling, Nag Ltd.
     !
-    !     if it is required, generate v.
+    ! Modified 01/27/17, function now wraps around the intrinsic norm2
     !
-    if (.not.wantv) goto 350
-    do 340 ll = 1, p
-        l = p - ll + 1
-        lp1 = l + 1
-        if (l > nrt) goto 320
-        if (e(l) == ZERO) goto 320
-        do 310 j = lp1, p
-            t = -get_dot_product(p-l, v(lp1, l), 1, v(lp1, j), 1)/v(lp1, l)
-            call daxpy(p-l, t, v(lp1, l), 1, v(lp1, j), 1)
-310     continue
-320 continue
-    do 330 i = 1, p
-        v(i, l) = ZERO
-330 continue
-    v(l, l) = ONE
-340 continue
-350 continue
+    pure function dnrm2(n, x, incx) &
+        result (return_value)
+
+        ! Dummy arguments
+        integer(ip), intent(in) :: n
+        real(wp),    intent(in) :: x(*)
+        integer(ip), intent(in) :: incx
+        real(wp)                :: return_value
+
+        ! Local variables
+        integer(ip) :: x1, xn, xi
+
+        if (0 < incx) then
+            x1 = 1
+            xn = 1 + (n - 1) * incx
+            xi = incx
+        else
+            x1 = 1 + (n - 1) * incx
+            xn = 1
+            xi = -incx
+        end if
+
+        !  Let the intrinsic function norm2 take care of optimization.
+        return_value = norm2(x(x1:xn:xi))
+
+    end function dnrm2
+
+    ! Purpose:
     !
-    !     main iteration loop for the singular values.
+    ! Applies a plane rotation.
+    ! Jack dongarra, linpack, 3/11/78.
+    ! Modified 12/3/93, array(1) declarations changed to array(*)
     !
-    mm = m
-    iter = 0
-360 continue
+    subroutine drot(n, x, incx, y, incy, c, s)
+
+        ! Dummy arguments
+        integer(ip), intent(in)    :: n
+        real(wp),    intent(inout) :: x(*)
+        integer(ip), intent(in)    :: incx
+        real(wp),    intent(inout) :: y(*)
+        integer(ip), intent(in)    :: incy
+        real(wp),    intent(in)    :: c
+        real(wp),    intent(in)    :: s
+
+        ! Local variables
+        integer(ip) :: i, ix, iy
+        real(wp)    :: temp
+
+        if (n <= 0) then
+            return
+        else if (incx == 1 .and. incy == 1) then
+            do i = 1, n
+                temp = c * x(i) + s * y(i)
+                y(i) = c * y(i) - s * x(i)
+                x(i) = temp
+            end do
+        else
+            if (0 <= incx) then
+                ix = 1
+            else
+                ix = (-n + 1) * incx + 1
+            end if
+
+            if (0 <= incy) then
+                iy = 1
+            else
+                iy = (-n + 1) * incy + 1
+            end if
+
+            do i = 1, n
+                temp = c * x(ix) + s * y(iy)
+                y(iy) = c * y(iy) - s * x(ix)
+                x(ix) = temp
+                ix = ix + incx
+                iy = iy + incy
+            end do
+        end if
+
+    end subroutine drot
+
+    ! Purpose:
     !
-    !        quit if all the singular values have been found.
+    ! Constructs a Givens plane rotation.
     !
-    !     ...exit
-    if (m == 0) goto 620
+    ! Given values a and b, this routine computes
     !
-    !        if too many iterations have been performed, set
-    !        flag and return.
+    !    sigma = sign(a) if abs(a) >  abs(b)
+    !          = sign(b) if abs(a) <= abs(b);
     !
-    if (iter < maxit) goto 370
-    info = m
-    !     ......exit
-    goto 620
-370 continue
+    !    r     = sigma * (a**2 + b**2);
     !
-    !        this section of the program inspects for
-    !        negligible elements in the s and e arrays.  on
-    !        completion the variables kase and l are set as follows.
+    !    c = a / r if r is not 0
+    !      = 1     if r is 0;
     !
-    !           kase = 1     if s(m) and e(l-1) are negligible and l.lt.m
-    !           kase = 2     if s(l) is negligible and l.lt.m
-    !           kase = 3     if e(l-1) is negligible, l.lt.m, and
-    !                        s(l), ..., s(m) are not negligible (qr step).
-    !           kase = 4     if e(m-1) is negligible (convergence).
+    !    s = b / r if r is not 0,
+    !        0     if r is 0.
     !
-    do 390 ll = 1, m
-        l = m - ll
-        !        ...exit
-        if (l == 0) goto 400
-        test = abs(s(l)) + abs(s(l+1))
-        ztest = test + abs(e(l))
-        if (ztest /= test) goto 380
-        e(l) = ZERO
-        !        ......exit
-        goto 400
-380 continue
-390 continue
-400 continue
-    if (l /= m - 1) goto 410
-    kase = 4
-    goto 480
-410 continue
-    lp1 = l + 1
-    mp1 = m + 1
-    do 430 lls = lp1, mp1
-        ls = m - lls + lp1
-        !           ...exit
-        if (ls == l) goto 440
-        test = ZERO
-        if (ls /= m) test = test + abs(e(ls))
-        if (ls /= l + 1) test = test + abs(e(ls-1))
-        ztest = test + abs(s(ls))
-        if (ztest /= test) goto 420
-        s(ls) = ZERO
-        !           ......exit
-        goto 440
-420 continue
-430 continue
-440 continue
-    if (ls /= l) goto 450
-    kase = 3
-    goto 470
-450 continue
-    if (ls /= m) goto 460
-    kase = 1
-    goto 470
-460 continue
-    kase = 2
-    l = ls
-470 continue
-480 continue
-    l = l + 1
+    !    The computed numbers then satisfy the equation
     !
-    !        perform the task indicated by kase.
+    !    (  c  s) ( a) = ( r)
+    !    ( -s  c) ( b) = ( 0)
     !
-    goto (490, 520, 540, 570), kase
-!
-!        deflate negligible s(m).
-!
-490 continue
-    mm1 = m - 1
-    f = e(m-1)
-    e(m-1) = ZERO
-    do 510 kk = l, mm1
-        k = mm1 - kk + l
-        t1 = s(k)
-        call construct_given_plane_rotation(t1, f, cs, sn)
-        s(k) = t1
-        if (k == l) goto 500
-        f = -sn*e(k-1)
-        e(k-1) = cs*e(k-1)
-500 continue
-    if (wantv) call apply_plane_rotation(p, v(1, k), 1, v(1, m), 1, cs, sn)
-510 continue
-    goto 610
-!
-!        split at negligible s(l).
-!
-520 continue
-    f = e(l-1)
-    e(l-1) = ZERO
-    do 530 k = l, m
-        t1 = s(k)
-        call construct_given_plane_rotation(t1, f, cs, sn)
-        s(k) = t1
-        f = -sn*e(k)
-        e(k) = cs*e(k)
-        if (wantu) call apply_plane_rotation(n, u(1, k), 1, u(1, l-1), 1, cs, sn)
-530 continue
-    goto 610
-!
-!        perform one qr step.
-!
-540 continue
+    !    The routine also computes
     !
-    !           calculate the shift.
+    !    z = s     if abs(a) > abs(b),
+    !      = 1 / c if abs(a) <= abs(b) and c is not 0,
+    !      = 1     if c is 0.
     !
-    scale_rename = dmax1(abs(s(m)), abs(s(m-1)), abs(e(m-1)), &
-        abs(s(l)), abs(e(l)))
-    sm = s(m)/scale_rename
-    smm1 = s(m-1)/scale_rename
-    emm1 = e(m-1)/scale_rename
-    sl = s(l)/scale_rename
-    el = e(l)/scale_rename
-    b = ((smm1 + sm)*(smm1 - sm) + emm1**2)/TWO
-    c = (sm*emm1)**2
-    shift = ZERO
-    if (b == ZERO .and. c == ZERO) goto 550
-    shift = sqrt(b**2+c)
-    if (b < ZERO) shift = -shift
-    shift = c/(b + shift)
-550 continue
-    f = (sl + sm)*(sl - sm) + shift
-    g = sl*el
+    !    The single value z encodes c and s, and hence the rotation:
     !
-    !           chase zeros.
+    !    if z = 1, set c = 0 and s = 1;
+    !    if abs(z) < 1, set c = sqrt(1 - z**2) and s = z;
+    !    if abs(z) > 1, set c = 1/ z and s = sqrt(1 - c**2);
     !
-    mm1 = m - 1
-    do 560 k = l, mm1
-        call construct_given_plane_rotation(f, g, cs, sn)
-        if (k /= l) e(k-1) = f
-        f = cs*s(k) + sn*e(k)
-        e(k) = cs*e(k) - sn*s(k)
-        g = sn*s(k+1)
-        s(k+1) = cs*s(k+1)
-        if (wantv) call apply_plane_rotation(p, v(1, k), 1, v(1, k+1), 1, cs, sn)
-        call construct_given_plane_rotation(f, g, cs, sn)
-        s(k) = f
-        f = cs*e(k) + sn*s(k+1)
-        s(k+1) = -sn*e(k) + cs*s(k+1)
-        g = sn*e(k+1)
-        e(k+1) = cs*e(k+1)
-        if (wantu .and. k < n) &
-            call apply_plane_rotation(n, u(1, k), 1, u(1, k+1), 1, cs, sn)
-560 continue
-    e(m-1) = f
-    iter = iter + 1
-    goto 610
-!
-!        convergence.
-!
-570 continue
+    !  Reference:
     !
-    !           make the singular value  positive.
+    !    Jack Dongarra, Jim Bunch, Cleve Moler, Pete Stewart,
+    !    LINPACK User's Guide,
+    !    SIAM, 1979,
+    !    ISBN13: 978-0-898711-72-1,
+    !    LC: QA214.L56.
     !
-    if (s(l) >= ZERO) goto 580
-    s(l) = -s(l)
-    if (wantv) call scale_vector_by_constant(p, -ONE, v(1, l), 1)
-580 continue
+    !    Charles Lawson, Richard Hanson, David Kincaid, Fred Krogh,
+    !    Algorithm 539,
+    !    Basic Linear Algebra Subprograms for Fortran Usage,
+    !    ACM Transactions on Mathematical Software,
+    !    Volume 5, Number 3, September 1979, pages 308-323.
     !
-    !           order the singular value.
+    !  Dummy arguments:
     !
-590 if (l == mm) goto 600
-    !           ...exit
-    if (s(l) >= s(l+1)) goto 600
-    t = s(l)
-    s(l) = s(l+1)
-    s(l+1) = t
-    if (wantv .and. l < p) &
-        call swap_vectors(p, v(1, l), 1, v(1, l+1), 1)
-    if (wantu .and. l < n) &
-        call swap_vectors(n, u(1, l), 1, u(1, l+1), 1)
-    l = l + 1
-    goto 590
-600 continue
-    iter = 0
-    m = m - 1
-610 continue
-    goto 360
-620 continue
+    !    input/output, real sa, sb.  on input, sa and sb are the values
+    !    a and b.  on output, sa is overwritten with r, and sb is
+    !    overwritten with z.
+    !
+    !    Output, real c, s, the cosine and sine of the
+    !    Givens rotation.
+    !
+    subroutine drotg(sa, sb, c, s)
 
-end subroutine dsvdc
+        ! Dummy arguments
+        real(wp), intent(inout) :: sa
+        real(wp), intent(inout) :: sb
+        real(wp), intent(out) :: s
+        real(wp), intent(out) :: c
 
-! Purpose:
-!
-! Computes constant times a vector plus a vector.
-!
-! Jack dongarra, linpack, 3/11/78.
-! Modified 12/3/93, array(1) declarations changed to array(*)
-! Modified 01/27/17, whole array operations to aid compiler optimization
-!
-subroutine daxpy(n, da, dx, incx, dy, incy)
+        ! Local variables
+        real(wp) :: scale_factor, r, z, roe
 
-    ! Dummy arguments
-    integer(ip), intent(in)    :: n
-    real(wp),    intent(in)    :: da
-    real(wp),    intent(in)    :: dx(*)
-    integer(ip), intent(in)    :: incx
-    real(wp),    intent(inout) :: dy(*)
-    integer(ip), intent(in)    :: incy
+        if (abs(sb) < abs(sa)) then
+            roe = sa
+        else
+            roe = sb
+        end if
 
-    associate( &
-        x => dx(1:n:incx), &
-        y => dy(1:n:incy) &
-        )
-        y = y + da * x
-    end associate
+        scale_factor = abs(sa) + abs(sb)
 
-end subroutine daxpy
+        if (scale_factor == ZERO) then
+            c = ONE
+            s = ZERO
+            r = ZERO
+        else
+            r = scale_factor * hypot((sa/scale_factor), (sb/scale_factor))
+            r = sign(ONE, roe) * r
+            c = sa/r
+            s = sb/r
+        end if
 
-! Purpose:
-!
-! Forms the dot product of two vectors.
-! Jack dongarra, linpack, 3/11/78.
-! Modified 12/3/93, array(1) declarations changed to array(*)
-! Modified 01/27/17, the function now wraps around the intrinsic dot_product
-!
-pure function get_dot_product(n, dx, incx, dy, incy) &
-    result (return_value)
+        if (ZERO < abs(c) .and. abs(c) <= s) then
+            z = ONE/c
+        else
+            z = s
+        end if
 
-    ! Dummy arguments
-    integer(ip), intent(in) :: n
-    real(wp),    intent(in) :: dx(*)
-    integer(ip), intent(in) :: incx
-    real(wp),    intent(in) :: dy(*)
-    integer(ip), intent(in) :: incy
-    real(wp)                :: return_value
+        sa = r
+        sb = z
 
-    return_value = dot_product(dx(:n:incx), dy(:n:incy))
+    end subroutine drotg
 
-end function get_dot_product
+    ! Purpose:
+    !
+    ! Scales a vector by a constant.
+    !
+    ! Jack dongarra, linpack, 3/11/78.
+    ! Modified 3/93 to return if incx <= 0.0
+    ! Modified 12/3/93, array(1) declarations changed to array(*)
+    ! Modified 01/27/17, uses array operations to aid compiler optimization
+    !
+    subroutine dscal(n, sa, x, incx)
 
-! Purpose:
-!
-!  Returns the euclidean norm of a vector via the function
-!  name, so that
-!
-!     return_value := sqrt( transpose(x) * x )
-!
-! This version written on 25-October-1982.
-! Modified on 14-October-1993 to inline the call to DLASSQ.
-! Sven Hammarling, Nag Ltd.
-!
-! Modified 01/27/17, function now wraps around the intrinsic norm2
-!
-pure function get_norm2(n, x, incx) &
-    result (return_value)
+        ! Dummy arguments
+        integer(ip), intent(in)    :: n
+        real(wp),    intent(in)    :: sa
+        real(wp),    intent(inout) :: x(*)
+        integer(ip), intent(in)    :: incx
 
-    ! Dummy arguments
-    integer(ip), intent(in) :: n
-    real(wp),    intent(in) :: x(*)
-    integer(ip), intent(in) :: incx
-    real(wp)                :: return_value
+        ! Local variables
+        integer(ip) :: i, ix, m
 
-    return_value = norm2(x(1:n:incx))
+        if (n <= 0) then
+            return
+        else if (incx == 1) then
 
-end function get_norm2
+            m = mod(n, 5)
 
-! Purpose:
-!
-! Applies a plane rotation.
-! Jack dongarra, linpack, 3/11/78.
-! Modified 12/3/93, array(1) declarations changed to array(*)
-!
-subroutine  apply_plane_rotation(n, dx, incx, dy, incy, c, s)
+            x(1:m) = sa * x(1:m)
 
-    ! Dummy arguments
-    integer(ip), intent(in)    :: n
-    real(wp),    intent(inout) :: dx(*)
-    integer(ip), intent(in)    :: incx
-    real(wp),    intent(inout) :: dy(*)
-    integer(ip), intent(in)    :: incy
-    real(wp),    intent(in)    :: c
-    real(wp),    intent(in)    :: s
+            do i = m+1, n, 5
+                x(i) = sa * x(i)
+                x(i+1) = sa * x(i+1)
+                x(i+2) = sa * x(i+2)
+                x(i+3) = sa * x(i+3)
+                x(i+4) = sa * x(i+4)
+            end do
+        else
+            if (0 <= incx) then
+                ix = 1
+            else
+                ix = (-n + 1) * incx + 1
+            end if
 
-    associate( &
-        x => dx(1:n:incx), &
-        y => dy(1:n:incy) &
-        )
+            do i = 1, n
+                x(ix) = sa * x(ix)
+                ix = ix + incx
+            end do
 
-        block
-            real(wp) :: temp(size(x))
+        end if
 
-            temp = c * x + s * y
-            y = c * y - s * x
-            x = temp
-        end block
-    end associate
+    end subroutine dscal
 
-end subroutine apply_plane_rotation
+    ! Purpose:
+    !
+    ! Interchanges two vectors.
+    ! uses unrolled loops for increments equal one.
+    ! Jack dongarra, linpack, 3/11/78.
+    ! Modified 12/3/93, array(1) declarations changed to array(*)
+    ! Modified 01/27/17, whole array operations to improve compiler optimization
+    !
+    subroutine dswap(n, x, incx, y, incy)
 
-! Purpose:
-!
-! Construct givens plane rotation.
-! jack dongarra, linpack, 3/11/78.
-!
-subroutine construct_given_plane_rotation(da, db, c, s)
+        ! Dummy arguments
+        integer(ip), intent(in)    :: n
+        real(wp),    intent(inout) :: x(*)
+        integer(ip), intent(in)    :: incx
+        real(wp),    intent(inout) :: y(*)
+        integer(ip), intent(in)    :: incy
 
-    real(wp), intent(inout) :: da, db
-    real(wp), intent(out)   :: c, s
+        ! Local variables
+        integer(ip) :: m, i, ix, iy
+        real(wp)    :: temp
 
-    ! Local variables
-    real(wp) :: roe, scale_factor, r, z
+        if (n <= 0) then
+            return
+        else if (incx == 1 .and. incy == 1) then
+            m = mod(n, 3)
+            do i = 1, m
+                temp = x(i)
+                x(i) = y(i)
+                y(i) = temp
+            end do
 
-    if ( abs(da) > abs(db) ) then
-        roe = da
-    else
-        roe = db
-    end if
+            do i = m + 1, n, 3
+                temp = x(i)
+                x(i) = y(i)
+                y(i) = temp
 
-    scale_factor = abs(da) + abs(db)
+                temp = x(i+1)
+                x(i+1) = y(i+1)
+                y(i+1) = temp
 
-    if (scale_factor == ZERO) then
-        c = ONE
-        s = ZERO
-        r = ZERO
-        z = ZERO
-    else
-        r = scale_factor * hypot((da/scale_factor),(db/scale_factor))
-        r = sign(ONE, roe) * r
-        c = da/r
-        s = db/r
-        z = ONE
-        if ( abs(da) > abs(db) ) z = s
-        if ( abs(da) <= abs(db) .and. c /= ZERO ) z = ONE/c
-    end if
+                temp = x(i+2)
+                x(i+2) = y(i+2)
+                y(i+2) = temp
+            end do
+        else
 
-    da = r
-    db = z
+            if (0 <= incx) then
+                ix = 1
+            else
+                ix = (-n + 1) * incx + 1
+            end if
 
-end subroutine construct_given_plane_rotation
+            if (0 <= incy) then
+                iy = 1
+            else
+                iy = (-n + 1) * incy + 1
+            end if
 
-! Purpose:
-!
-! Scales a vector by a constant.
-!
-! Jack dongarra, linpack, 3/11/78.
-! Modified 3/93 to return if incx <= 0.0
-! Modified 12/3/93, array(1) declarations changed to array(*)
-! Modified 01/27/17, uses array operations to aid compiler optimization
-!
-subroutine scale_vector_by_constant(n, da, dx, incx)
+            do i = 1, n
+                temp = x(ix)
+                x(ix) = y(iy)
+                y(iy) = temp
+                ix = ix + incx
+                iy = iy + incy
+            end do
+        end if
 
-    ! Dummy arguments
-    integer(ip), intent(in)    :: n
-    real(wp),    intent(in)    :: da
-    real(wp),    intent(inout) :: dx(*)
-    integer(ip), intent(in)    :: incx
-
-    dx(1:n:incx) = da * dx(1:n:incx)
-
-end subroutine  scale_vector_by_constant
-
-! Purpose:
-!
-! Interchanges two vectors.
-! uses unrolled loops for increments equal one.
-! Jack dongarra, linpack, 3/11/78.
-! Modified 12/3/93, array(1) declarations changed to array(*)
-! Modified 01/27/17, whole array operations to improve compiler optimization
-!
-subroutine swap_vectors(n, dx, incx, dy, incy)
-
-    ! Dummy arguments
-    integer(ip), intent(in)    :: n
-    real(wp),    intent(inout) :: dx(*)
-    integer(ip), intent(in)    :: incx
-    real(wp),    intent(inout) :: dy(*)
-    integer(ip), intent(in)    :: incy
-
-    associate( &
-        x => dx(1:n:incx), &
-        y => dy(1:n:incy) &
-        )
-
-        block
-            real(wp) :: temp(size(x))
-
-            temp = x
-            x = y
-            y = temp
-        end block
-    end associate
-
-end subroutine swap_vectors
+    end subroutine dswap
 
 end module module_shpe
