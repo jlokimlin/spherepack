@@ -139,6 +139,7 @@ module module_shpg
     real(wp), parameter :: HALF = 0.5_wp
     real(wp), parameter :: ONE = 1.0_wp
     real(wp), parameter :: TWO = 2.0_wp
+    real(wp), parameter :: THREE = 3.0_wp
 
 contains
 
@@ -198,7 +199,7 @@ contains
         if (mtrunc<0 .or. mtrunc>mmax) return
         ierror = 5
         lw1 = 2*(nlat+1)**2
-        log2n = log(real(nlon))/log(2.0_wp)
+        log2n = log(real(nlon))/log(TWO)
         if (lwshp<lw1+nlon+log2n) return
         ierror = 6
         if (liwshp<4*(nlat+1)) return
@@ -261,7 +262,7 @@ contains
         integer :: jzso
         integer :: k
         integer :: lock
-        integer :: lwork
+        
         integer :: m
         integer :: modn
         integer :: mp1
@@ -290,7 +291,7 @@ contains
         real(wp) :: zo
         real(wp) :: zort
 
-        real(wp) :: summation, a1, b1, c1, work
+        real(wp) :: summation, a1, b1, c1
         real(wp) :: cp(idp), wx(idp), &
             thet(nlat), gwts(nlat), xx(idp), z(idp), a(4*idp), &
             b(2*idp), ped(idp, idp, 2), pod(idp, idp, 2), u(idp, idp)
@@ -304,15 +305,13 @@ contains
         type(SpherepackAux) :: sphere_aux
 
         ns2 = nlat/2
-        modn = nlat-ns2-ns2
+        modn = nlat-2*ns2
         nte = (nlat+1)/2
         nto = nlat-nte
-        tusl = 0.
-        toe = 0.
-        !
+        tusl = ZERO
+        toe = ZERO
+
         ! Compute gauss grid distribution
-        !
-        !lwork = nlat+1
         call compute_gaussian_latitudes_and_weights(nlat, thet, gwts, ierr)
 
         gwts(1:nto) = TWO * gwts(1:nto)
@@ -320,13 +319,14 @@ contains
         ! Compute n**2 basis (even functions)
         do n=1, 2*nlat-2
             dfn = n
-            a(n) = sqrt(dfn*(dfn+1.0_wp))
+            a(n) = sqrt(dfn * (dfn + ONE))
         end do
+
         do n=1, nlat-1
             dfn = n
-            b(n) = sqrt((dfn+dfn+3.0_wp)/(dfn+dfn-1.0_wp))
+            b(n) = sqrt((TWO * dfn + THREE)/(TWO * dfn - ONE))
         end do
-        !
+
         mxtr = min(nlat-1, nlon/2, mtrunc)
         iip = 2
         do 200 mp1=1, mxtr+1
@@ -335,9 +335,8 @@ contains
             ms2 = mp1/2
             nem = (nlat-m+1)/2
             nec = nte-nem
-            !
+
             ! Compute associated legendre functions
-            !
             if (m<=1) then
                 do 205 j=1, nem
                     n = 2*j+m-2
@@ -381,23 +380,13 @@ contains
             if (nec<=0) goto 200
             !
             !     generate orthogonal vector with
-            !     random numbers using Fortran90
-            !     intrinsics RANDOM_{SEED, NUMBER}
-            !
-            !     comment out old code
-            !
-            !     do i=1, nte
-            !     xx(i) = rand()
-            !     end do
-            !
-            ! replacement code
-            !
+            !     random numbers
             call random_seed()
             call random_number(xx(1:nte))
             !
             it = 0
             201 do i=1, nte
-                z(i) = 0.0_wp
+                z(i) = ZERO
                 wx(i) = gwts(i)*xx(i)
             end do
             do 220 j=1, nte
@@ -466,10 +455,10 @@ contains
         !     check orthogonality of pe(i, j, mp1)  mp1=1, 2
         !
         do iip=1, 2
-            dmax = 0.
+            dmax = ZERO
             do i=1, nte
                 do j=1, nte
-                    sum1 = 0.
+                    sum1 = ZERO
                     do k=1, nte
                         sum1 = sum1+ze(k, i, iip)*pe(k, j, iip)
                     end do
@@ -477,7 +466,7 @@ contains
                     if (i/=j) then
                         dmax = max(dmax, abs(sum1))
                     else
-                        dmax = max(dmax, abs(sum1-1.0_wp))
+                        dmax = max(dmax, abs(sum1-ONE))
                     end if
                 end do
             end do
@@ -503,7 +492,7 @@ contains
                     do i=1, nte
                         call sphere_aux%compute_legendre_polys_from_fourier_coeff(m, n, thet(i), cp, pod(i, j+noc, iip))
                     end do
-                    if (modn>0) pod(nte, j+noc, iip) = 0.0_wp
+                    if (modn>0) pod(nte, j+noc, iip) = ZERO
 305             continue
             !
             else
@@ -530,7 +519,7 @@ contains
                                 - b1*pod(i, j+noc, iip) + c1*u(i, j+noc-1)
                         end do
                     end if
-304                 if (modn==1) u(nte, j+noc) = 0.0_wp
+304                 if (modn==1) u(nte, j+noc) = ZERO
 307             continue
                 do j=1, nom
                     do i=1, nte
@@ -540,22 +529,11 @@ contains
             end if
             !
             if (noc<=0) goto 300
-            !
-            !     old code with nonstandard (s)rand
-            !     commented out
-            !
-            !     do i=1, nte
-            !     xx(i) = rand()
-            !     end do
-            !
-            !     replacement code with standard Fortran90
-            !     intrinsic
-            !
             call random_number(xx(1:nte))
-            if (modn==1) xx(nte) = 0.0_wp
+            if (modn==1) xx(nte) = ZERO
             it = 0
             306 do i=1, nte
-                z(i) = 0.
+                z(i) = ZERO
                 wx(i) = gwts(i)*xx(i)
             end do
             do 330 j=1, nto
@@ -572,7 +550,7 @@ contains
             do i=1, nte
                 pod(i, noc, iip) = xx(i)
             end do
-            if (modn==1) pod(nte, noc, iip) = 0.0_wp
+            if (modn==1) pod(nte, noc, iip) = ZERO
 300     continue
         !
         nmx = nlat-mxtr
@@ -622,10 +600,10 @@ contains
         !     check orthogonality of po(i, j, mp1)  mp1=1, 2
         !
         do iip=1, 2
-            dmax = 0.
+            dmax = ZERO
             do i=1, nto
                 do j=1, nto
-                    sum1 = 0.
+                    sum1 = ZERO
                     do k=1, nto
                         sum1 = sum1+zo(k, i, iip)*po(k, j, iip)
                     end do
@@ -633,7 +611,7 @@ contains
                     if (i/=j) then
                         dmax = max(dmax, abs(sum1))
                     else
-                        dmax = max(dmax, abs(sum1-1.0_wp))
+                        dmax = max(dmax, abs(sum1-ONE))
                     end if
                 end do
             end do
@@ -775,7 +753,7 @@ contains
         integer :: nloc2
         integer :: nlon
         integer :: nte
-        real(wp) :: sn
+        
         real(wp) :: work
         real(wp) :: wshp
         real(wp) :: x
@@ -826,15 +804,10 @@ contains
             nte, wshp(iw1), wshp(iw2), wshp(iw3), wshp(iw4), iwshp(jw1), &
             iwshp(jw2), iwshp(jw3), iwshp(jw4), work(jw1), &
             work(jw2), work(jw3), work(jw4))
-        !
+
         call sphere_aux%hfft%backward(nlat, nlon, y, idxy, wshp(lw1+1), work)
-        !
-        sn = 1.0_wp/nlon
-        do j=1, nlon
-            do i=1, nlat
-                y(i, j) = sn*y(i, j)
-            end do
-        end do
+
+        y(1: nlat,:) = y(1:nlat,:)/nlon
 
     end subroutine shpg
 
@@ -915,48 +888,28 @@ contains
                 do i=1, nlat
                     sy(i, mp1) = sx(i, mp1)
                 end do
-                !      if (mp1.eq.2) then
-                !      sy(1, 2) = 0.
-                !      sy(nlat, 2) = 0.
-                !      end if
-                !      if (nlon.ge.3) then
-                !      sy(1, 3) = 0.
-                !      sy(nlat, 3) = 0.
-                !      do i=2, nlat-1
-                !      sy(i, 3) = sx(i, 3)
-                !      end do
-                !      end if
                 goto 100
             end if
             m = mp1-1
             mpm = max(1, m+m)
             ms2 = mp1/2
-            !      mrank = min(nlat-m, nlat-ms2-ms2)
-            !      nrank = nlat-mrank
-            !      nem = (mrank+1)/2-nshe(ip)
-            !      nom = mrank-(mrank+1)/2-nsho(ip)
             nem = (nlat-m+1)/2-nshe(iip)
             nom = (nlat-m)/2-nsho(iip)
             nec = nte-nem
             noc = nto-nom
+
             do i=1, nte
-                xe(i, 1) = .5*(sx(i, mpm)+sx(nlat+1-i, mpm))
-                xo(i, 1) = .5*(sx(i, mpm)-sx(nlat+1-i, mpm))
+                xe(i, 1) = HALF * (sx(i, mpm)+sx(nlat+1-i, mpm))
+                xo(i, 1) = HALF * (sx(i, mpm)-sx(nlat+1-i, mpm))
             end do
-            !      if (modn.eq.1) then
-            !      xe(nte, 1) = sx(nte, mpm)
-            !      xo(nte, 1) = 0.
-            !      end if
+
             if (mpm<nlon) then
                 do i=1, nte
-                    xe(i, 2) = .5*(sx(i, mpm+1)+sx(nlat+1-i, mpm+1))
-                    xo(i, 2) = .5*(sx(i, mpm+1)-sx(nlat+1-i, mpm+1))
+                    xe(i, 2) = HALF * (sx(i, mpm+1)+sx(nlat+1-i, mpm+1))
+                    xo(i, 2) = HALF * (sx(i, mpm+1)-sx(nlat+1-i, mpm+1))
                 end do
-            !      if (modn.eq.1) then
-            !      xe(nte, 2) = sx(nte, mpm+1)
-            !      xo(nte, 2) = 0.
-            !      end if
             end if
+
             lag = 0
             if (m==0.or.mpm==nlon) lag = 1
             if (3*nec<2*nem.or.nem==0) then
@@ -1006,7 +959,7 @@ contains
         js = mxtr+mxtr+2
         do j=js, nlon
             do i=1, nlat
-                sy(i, j) = 0.
+                sy(i, j) = ZERO
             end do
         end do
 
