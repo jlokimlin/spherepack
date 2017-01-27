@@ -289,18 +289,20 @@ contains
         real(wp) :: ze
         real(wp) :: zo
         real(wp) :: zort
-        !
-        real summation, a1, b1, c1, work
-        real cp(idp), wx(idp), &
+
+        real(wp) :: summation, a1, b1, c1, work
+        real(wp) :: cp(idp), wx(idp), &
             thet(nlat), gwts(nlat), xx(idp), z(idp), a(4*idp), &
             b(2*idp), ped(idp, idp, 2), pod(idp, idp, 2), u(idp, idp)
-        !
+
         dimension pe(idp, idp, 2), po(idp, idp, 2), ze(idp, idp, 2), &
             zo(idp, idp, 2), &
             ipse(idp, 2), jzse(idp, 2), ipso(idp, 2), jzso(idp, 2), &
             nshe(2), nsho(2)
         dimension zort(64, 64, 2)
-        !
+
+        type(SpherepackAux) :: sphere_aux
+
         ns2 = nlat/2
         modn = nlat-ns2-ns2
         nte = (nlat+1)/2
@@ -308,18 +310,15 @@ contains
         tusl = 0.
         toe = 0.
         !
-        !     compute gauss grid distribution
+        ! Compute gauss grid distribution
         !
-        lwork = nlat+1
+        !lwork = nlat+1
         call compute_gaussian_latitudes_and_weights(nlat, thet, gwts, ierr)
 
-        do i=1, nto
-            gwts(i) = gwts(i)+gwts(i)
-        end do
-        !
-        !     compute n**2 basis (even functions)
-        !
-        do n=1, nlat+nlat-2
+        gwts(1:nto) = TWO * gwts(1:nto)
+
+        ! Compute n**2 basis (even functions)
+        do n=1, 2*nlat-2
             dfn = n
             a(n) = sqrt(dfn*(dfn+1.0_wp))
         end do
@@ -337,14 +336,14 @@ contains
             nem = (nlat-m+1)/2
             nec = nte-nem
             !
-            !     compute associated legendre functions
+            ! Compute associated legendre functions
             !
             if (m<=1) then
                 do 205 j=1, nem
                     n = 2*j+m-2
-                    call dlfkg(m, n, cp)
+                    call sphere_aux%compute_fourier_coefficients(m, n, cp)
                     do i=1, nte
-                        call dlftg (m, n, thet(i), cp, ped(i, j+nec, iip))
+                        call sphere_aux%compute_legendre_polys_from_fourier_coeff(m, n, thet(i), cp, ped(i, j+nec, iip))
                     end do
 205             continue
             !
@@ -447,7 +446,7 @@ contains
         call truncate(0, nte, idp, ped(1, 1, 1), nte, ipse(1, 1))
         call truncate(0, nte, idp, ped(1, 1, 2), nte, ipse(1, 2))
         !
-        !     compute the analysis matrices
+        ! Compute the analysis matrices
         !
         do 250 iip=1, 2
             do i=1, nte
@@ -484,7 +483,7 @@ contains
             end do
         end do
         !
-        !     compute n**2 basis (odd functions)
+        ! Compute n**2 basis (odd functions)
         !
         iip = 2
         do 300 mp1=1, mxtr+1
@@ -495,14 +494,14 @@ contains
             nom = nlat-m-nem
             noc = nto-nom
             !
-            !     compute associated legendre functions
+            ! Compute associated legendre functions
             !
             if (m<=1) then
                 do 305 j=1, nom
                     n = 2*j+m-1
-                    call dlfkg(m, n, cp)
+                    call sphere_aux%compute_fourier_coefficients(m, n, cp)
                     do i=1, nte
-                        call dlftg (m, n, thet(i), cp, pod(i, j+noc, iip))
+                        call sphere_aux%compute_legendre_polys_from_fourier_coeff(m, n, thet(i), cp, pod(i, j+noc, iip))
                     end do
                     if (modn>0) pod(nte, j+noc, iip) = 0.0_wp
 305             continue
@@ -603,7 +602,7 @@ contains
         call truncate(0, nte, idp, pod(1, 1, 1), nto, ipso(1, 1))
         call truncate(0, nte, idp, pod(1, 1, 2), nto, ipso(1, 2))
         !
-        !     compute the analysis matrices (odd functions)
+        ! Compute the analysis matrices (odd functions)
         !
         do iip=1, 2
             do i=1, nto
@@ -1141,247 +1140,5 @@ contains
         x = x/sqrt(sqs)
 
     end subroutine compute_normal_gaussian_grid
-
-    !     subroutine dlfkg(m, n, cp)
-    !
-    !     subroutine dlfkg computes the coefficients in the trigonometric
-    !     expansion of the normalized associated legendre functions:
-    !
-    !     pbar(m, n, theta) = sqrt((2*n+1)*factorial(n-m)/(2*factorial(n+m)))
-    !                        *sin(theta)**m/(2**n*factorial(n)) times the
-    !                        (n+m)th derivative of (x**2-1)**n with respect
-    !                        to x=cos(theta)
-    !
-    !     where theta is colatitude.
-    !
-    !     subroutine dlfkg computes the coefficients cp(k) in the
-    !     following trigonometric expansion of pbar(m, n, theta).
-    !
-    !            1) for n even and m even, pbar(m, n, theta) =
-    !               .5*cp(1) plus the sum from k=1 to k=n/2
-    !               of cp(k)*cos(2*k*th)
-    !
-    !            2) for n even and m odd, pbar(m, n, theta) =
-    !               the sum from k=1 to k=n/2 of
-    !               cp(k)*sin(2*k*th)
-    !
-    !            3) for n odd and m even, pbar(m, n, theta) =
-    !               the sum from k=1 to k=(n+1)/2 of
-    !               cp(k)*cos((2*k-1)*th)
-    !
-    !            4) for n odd and m odd,  pbar(m, n, theta) =
-    !               the sum from k=1 to k=(n+1)/2 of
-    !               cp(k)*sin((2*k-1)*th)
-    !
-    !     input parameters
-    !
-    !     m      is the order of pbar(n, m, theta). m can be any integer
-    !            however pbar(n, m, theta) = 0  if abs(m) is greater than
-    !            n and pbar(n, m, theta) = (-1)**m*pbar(n, -m, theta) for
-    !            negative m.
-    !
-    !     n      nonnegative integer specifying the degree of
-    !            pbar(n, m, theta)
-    !
-    !     output parameters
-    !
-    !     cp     a real array that contains the fourier
-    !            coefficients for pbar(m, n, theta). the length of the
-    !            array depends on the parity of m and n
-    !
-    !                  parity            length of cp
-    !
-    !               n even m even           n/2+1
-    !               n even m odd             n/2
-    !               n odd  m even          (n+1)/2
-    !               n odd  m odd           (n+1)/2
-    !
-    !
-    ! ****************************************************************
-    subroutine dlfkg (m, n, cp)
-
-        integer :: i
-        integer :: l
-        integer :: m
-        integer :: ma
-        integer :: n
-        integer :: nex
-        integer :: nmms2
-        !
-        real cp, fnum, fden, fnmh, a1, b1, c1, cp2, fnnp1, fnmsq, fk, &
-            t1, t2, pm1, sc10, sc20, sc40
-        dimension       cp(1)
-        parameter (sc10=1024.0_wp)
-        parameter (sc20=sc10*sc10)
-        parameter (sc40=sc20*sc20)
-        !
-        cp(1) = 0.
-        ma = abs(m)
-        if (ma > n) return
-        if (n-1< 0) then
-            goto 2
-        else if (n-1 == 0) then
-            goto 3
-        else
-            goto 5
-        end if
-2       cp(1) = sqrt(2.0_wp)
-        return
-3       if (ma /= 0) goto 4
-        cp(1) = sqrt(1.5)
-        return
-4       cp(1) = sqrt(.75)
-        if (m == -1) cp(1) = -cp(1)
-        return
-5       if (mod(n+ma, 2) /= 0) goto 10
-        nmms2 = (n-ma)/2
-        fnum = n+ma+1
-        fnmh = n-ma+1
-        pm1 = 1.0_wp
-        goto 15
-10      nmms2 = (n-ma-1)/2
-        fnum = n+ma+2
-        fnmh = n-ma+2
-        pm1 = -1.0_wp
-15      t1 = 1.0_wp/sc20
-        nex = 20
-        fden = 2.0_wp
-        if (nmms2 < 1) goto 20
-        do 18 i=1, nmms2
-            t1 = fnum*t1/fden
-            if (t1 > sc20) then
-                t1 = t1/sc40
-                nex = nex+40
-            end if
-            fnum = fnum+2.
-            fden = fden+2.
-18      continue
-20      t1 = t1/2.0_wp**(n-1-nex)
-        if (mod(ma/2, 2) /= 0) t1 = -t1
-        t2 = 1.
-        if (ma == 0) goto 26
-        do 25 i=1, ma
-            t2 = fnmh*t2/(fnmh+pm1)
-            fnmh = fnmh+2.
-25      continue
-26      cp2 = t1*sqrt((n+.5)*t2)
-        fnnp1 = n*(n+1)
-        fnmsq = fnnp1-2.0_wp*ma*ma
-        l = (n+1)/2
-        if (mod(n, 2) == 0 .and. mod(ma, 2) == 0) l = l+1
-        cp(l) = cp2
-        if (m >= 0) goto 29
-        if (mod(ma, 2) /= 0) cp(l) = -cp(l)
-29      if (l <= 1) return
-        fk = n
-        a1 = (fk-2.)*(fk-1.)-fnnp1
-        b1 = 2.*(fk*fk-fnmsq)
-        cp(l-1) = b1*cp(l)/a1
-30      l = l-1
-        if (l <= 1) return
-        fk = fk-2.
-        a1 = (fk-2.)*(fk-1.)-fnnp1
-        b1 = -2.*(fk*fk-fnmsq)
-        c1 = (fk+1.)*(fk+2.)-fnnp1
-        cp(l-1) = -(b1*cp(l)+c1*cp(l+1))/a1
-        goto 30
-    end subroutine dlfkg
-    subroutine dlftg (m, n, theta, cp, pb)
-
-        integer :: k
-        integer :: kdo
-        integer :: m
-        integer :: mmod
-        integer :: n
-        integer :: nmod
-        dimension cp(1)
-        real cp, pb, theta, cdt, sdt, cth, sth, chh
-        cdt = cos(2.0_wp*theta)
-        sdt = sin(2.0_wp*theta)
-        nmod=mod(n, 2)
-        mmod=mod(abs(m), 2)
-        if (nmod< 0) then
-            goto 1
-        else if (nmod == 0) then
-            goto 1
-        else
-            goto 2
-        end if
-1       if (mmod< 0) then
-            goto 3
-        else if (mmod == 0) then
-            goto 3
-        else
-            goto 4
-        end if
-        !
-        !     n even, m even
-        !
-3       kdo=n/2
-        pb = .5*cp(1)
-        if (n == 0) return
-        cth = cdt
-        sth = sdt
-        do 170 k=1, kdo
-            !     pb = pb+cp(k+1)*cos(2*k*theta)
-            pb = pb+cp(k+1)*cth
-            chh = cdt*cth-sdt*sth
-            sth = sdt*cth+cdt*sth
-            cth = chh
-170     continue
-        return
-        !
-        !     n even, m odd
-        !
-4       kdo = n/2
-        pb = 0.
-        cth = cdt
-        sth = sdt
-        do 180 k=1, kdo
-            !     pb = pb+cp(k)*sin(2*k*theta)
-            pb = pb+cp(k)*sth
-            chh = cdt*cth-sdt*sth
-            sth = sdt*cth+cdt*sth
-            cth = chh
-180     continue
-        return
-2       if (mmod< 0) then
-            goto 13
-        else if (mmod == 0) then
-            goto 13
-        else
-            goto 14
-        end if
-        !
-        !     n odd, m even
-        !
-13      kdo = (n+1)/2
-        pb = 0.
-        cth = cos(theta)
-        sth = sin(theta)
-        do 190 k=1, kdo
-            !     pb = pb+cp(k)*cos((2*k-1)*theta)
-            pb = pb+cp(k)*cth
-            chh = cdt*cth-sdt*sth
-            sth = sdt*cth+cdt*sth
-            cth = chh
-190     continue
-        return
-        !
-        !     n odd, m odd
-        !
-14      kdo = (n+1)/2
-        pb = 0.
-        cth = cos(theta)
-        sth = sin(theta)
-        do 200 k=1, kdo
-            !     pb = pb+cp(k)*sin((2*k-1)*theta)
-            pb = pb+cp(k)*sth
-            chh = cdt*cth-sdt*sth
-            sth = sdt*cth+cdt*sth
-            cth = chh
-200     continue
-        return
-    end subroutine dlftg
 
 end module module_shpg
