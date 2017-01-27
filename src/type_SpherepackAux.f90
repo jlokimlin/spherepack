@@ -185,6 +185,14 @@ contains
     !                          the trigonometric series representation of
     !                          pbar(n, m, theta)
     !
+    !                  parity            length of cp
+    !
+    !               n even m even           n/2+1
+    !               n even m odd             n/2
+    !               n odd  m even          (n+1)/2
+    !               n odd  m odd           (n+1)/2
+    !
+    !
     pure subroutine compute_fourier_coefficients(m, n, cp)
 
         ! Dummy arguments

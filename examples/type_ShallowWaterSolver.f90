@@ -58,12 +58,13 @@ contains
 
     end function get_initial_velocity
 
-    pure function atanxy(x,y) result (return_value)
+    pure function atanxy(x,y) &
+        result (return_value)
 
         ! Dummy arguments
         real(wp), intent(in) :: x
         real(wp), intent(in) :: y
-        real                 :: return_value
+        real(wp)             :: return_value
 
         return_value = ZERO
 

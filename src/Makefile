@@ -58,7 +58,7 @@ shpg.f90
 
 shpe.o: \
 spherepack_precision.o \
-type_RealPeriodicTransform.o \
+type_SpherepackAux.o \
 shpe.f90
 	$(FC) $(FFLAGS) -c shpe.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)

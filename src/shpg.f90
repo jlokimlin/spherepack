@@ -240,7 +240,7 @@ integer :: i
 integer :: idp
 integer :: ierr
 integer :: ierror
-integer :: ip
+integer :: iip
 integer :: ipse
 integer :: ipso
 integer :: isym
@@ -321,10 +321,10 @@ b(n) = sqrt((dfn+dfn+3.0_wp)/(dfn+dfn-1.0_wp))
 end do
 !
 mxtr = min(nlat-1, nlon/2, mtrunc)
-ip = 2
+iip = 2
 do 200 mp1=1, mxtr+1
 m = mp1-1
-ip = 3-ip
+iip = 3-iip
 ms2 = mp1/2
 nem = (nlat-m+1)/2
 nec = nte-nem
@@ -336,7 +336,7 @@ do 205 j=1, nem
 n = 2*j+m-2
 call dlfkg(m, n, cp)
 do i=1, nte
-call dlftg (m, n, thet(i), cp, ped(i, j+nec, ip))
+call dlftg (m, n, thet(i), cp, ped(i, j+nec, iip))
 end do
 205 continue
 !
@@ -346,7 +346,7 @@ do 207 j=1, nem
 n = 2*j+m-2
 if (m>1.and.n>mxtr) then
 do i=1, nte
-u(i, j+nec) = ped(i, j+nec, ip)
+u(i, j+nec) = ped(i, j+nec, iip)
 end do
 goto 207
 end if
@@ -354,20 +354,20 @@ a1 = b(n-1)*a(n+m-3)/a(n+m-1)
 b1 = a(n-m+1)/a(n+m-1)
 if (n-m<=1) then
 do i=1, nte
-u(i, j+nec) = a1*ped(i, j+nec-1, ip) &
-                   - b1*ped(i, j+nec, ip)    
+u(i, j+nec) = a1*ped(i, j+nec-1, iip) &
+                   - b1*ped(i, j+nec, iip)    
 end do
 else
 c1 = b(n-1)*a(n-m-1)/a(n+m-1)
 do i=1, nte
-u(i, j+nec) = a1*ped(i, j+nec-1, ip) &
-   - b1*ped(i, j+nec, ip) + c1*u(i, j+nec-1)    
+u(i, j+nec) = a1*ped(i, j+nec-1, iip) &
+   - b1*ped(i, j+nec, iip) + c1*u(i, j+nec-1)    
 end do
 end if
 207 continue
 do j=1, nem
 do i=1, nte
-ped(i, j+nec, ip) = u(i, j+nec)
+ped(i, j+nec, iip) = u(i, j+nec)
 end do
 end do
 end if
@@ -395,7 +395,7 @@ wx(i) = gwts(i)*xx(i)
 end do
 do 220 j=1, nte
 if (j==nec) goto 220
-call gs(nte, wx, ped(1, j, ip), z)
+call gs(nte, wx, ped(1, j, iip), z)
 220 continue
 !  
 do i=1, nte
@@ -405,7 +405,7 @@ call normal(nte, xx, idp, gwts)
 it = it+1
 if (it<=2) goto 201
 do i=1, nte
-ped(i, nec, ip) = xx(i)
+ped(i, nec, iip) = xx(i)
 end do
 200 continue
 !
@@ -441,16 +441,16 @@ call trunc(0, nte, idp, ped(1, 1, 2), nte, ipse(1, 2))
 !
 !     compute the analysis matrices
 !
-do 250 ip=1, 2
+do 250 iip=1, 2
 do i=1, nte
 lock = 0
 do j=1, nte
-summation = ped(j, i, ip)*gwts(j)
-ze(j, i, ip) =  summation
-pe(i, j, ip) = ped(i, j, ip)
+summation = ped(j, i, iip)*gwts(j)
+ze(j, i, iip) =  summation
+pe(i, j, iip) = ped(i, j, iip)
 if (abs(summation)>eps .and. lock==0) then
 lock = 1
-jzse(i, ip) = j
+jzse(i, iip) = j
 end if
 end do
 end do
@@ -458,15 +458,15 @@ end do
 !
 !     check orthogonality of pe(i, j, mp1)  mp1=1, 2
 !
-do ip=1, 2
+do iip=1, 2
 dmax = 0.
 do i=1, nte
 do j=1, nte
 sum1 = 0.
 do k=1, nte
-sum1 = sum1+ze(k, i, ip)*pe(k, j, ip)
+sum1 = sum1+ze(k, i, iip)*pe(k, j, iip)
 end do
-zo(i, j, ip) = sum1
+zo(i, j, iip) = sum1
 if (i/=j) then
 dmax = max(dmax, abs(sum1))
 else
@@ -478,9 +478,9 @@ end do
 !
 !     compute n**2 basis (odd functions)
 !
-ip = 2
+iip = 2
 do 300 mp1=1, mxtr+1
-ip = 3-ip
+iip = 3-iip
 m = mp1-1
 ms2 = mp1/2
 nem = (nlat-m+1)/2
@@ -494,9 +494,9 @@ do 305 j=1, nom
 n = 2*j+m-1
 call dlfkg(m, n, cp)
 do i=1, nte
-call dlftg (m, n, thet(i), cp, pod(i, j+noc, ip))
+call dlftg (m, n, thet(i), cp, pod(i, j+noc, iip))
 end do
-if (modn>0) pod(nte, j+noc, ip) = 0.0_wp
+if (modn>0) pod(nte, j+noc, iip) = 0.0_wp
 305 continue
 !
 else
@@ -505,7 +505,7 @@ do 307 j=1, nom
 n = 2*j+m-1
 if (m>1.and.n>mxtr) then
 do i=1, nte
-u(i, j+noc) = pod(i, j+noc, ip)
+u(i, j+noc) = pod(i, j+noc, iip)
 end do
 goto 304
 end if
@@ -513,21 +513,21 @@ a1 = b(n-1)*a(n+m-3)/a(n+m-1)
 b1 = a(n-m+1)/a(n+m-1)
 if (n-m<=1) then
 do i=1, nte
-u(i, j+noc) = a1*pod(i, j+noc-1, ip) &
-                   - b1*pod(i, j+noc, ip)    
+u(i, j+noc) = a1*pod(i, j+noc-1, iip) &
+                   - b1*pod(i, j+noc, iip)    
 end do
 else
 c1 = b(n-1)*a(n-m-1)/a(n+m-1)
 do i=1, nte
-u(i, j+noc) = a1*pod(i, j+noc-1, ip) &
-   - b1*pod(i, j+noc, ip) + c1*u(i, j+noc-1)    
+u(i, j+noc) = a1*pod(i, j+noc-1, iip) &
+   - b1*pod(i, j+noc, iip) + c1*u(i, j+noc-1)    
 end do
 end if
 304 if (modn==1) u(nte, j+noc) = 0.0_wp
 307 continue
 do j=1, nom
 do i=1, nte
-pod(i, j+noc, ip) = u(i, j+noc)
+pod(i, j+noc, iip) = u(i, j+noc)
 end do
 end do
 end if
@@ -553,7 +553,7 @@ wx(i) = gwts(i)*xx(i)
 end do
 do 330 j=1, nto
 if (j==noc) goto 330
-call gs(nte, wx, pod(1, j, ip), z(1))
+call gs(nte, wx, pod(1, j, iip), z(1))
 330 continue
 !  
 do i=1, nte
@@ -563,9 +563,9 @@ call normal(nte, xx, idp, gwts)
 it = it+1
 if (it<=2) goto 306
 do i=1, nte
-pod(i, noc, ip) = xx(i)
+pod(i, noc, iip) = xx(i)
 end do
-if (modn==1) pod(nte, noc, ip) = 0.0_wp
+if (modn==1) pod(nte, noc, iip) = 0.0_wp
 300 continue
 !
 nmx = nlat-mxtr
@@ -597,16 +597,16 @@ call trunc(0, nte, idp, pod(1, 1, 2), nto, ipso(1, 2))
 !
 !     compute the analysis matrices (odd functions)
 !
-do ip=1, 2
+do iip=1, 2
 do i=1, nto
 lock = 0
 do j=1, nto
-summation = pod(j, i, ip)*gwts(j)
-zo(j, i, ip) = summation
-po(i, j, ip) = pod(i, j, ip)
+summation = pod(j, i, iip)*gwts(j)
+zo(j, i, iip) = summation
+po(i, j, iip) = pod(i, j, iip)
 if (abs(summation)>eps .and. lock==0) then
 lock = 1
-jzso(i, ip) = j
+jzso(i, iip) = j
 end if
 end do
 end do
@@ -614,15 +614,15 @@ end do
 !
 !     check orthogonality of po(i, j, mp1)  mp1=1, 2
 !
-do ip=1, 2
+do iip=1, 2
 dmax = 0.
 do i=1, nto
 do j=1, nto
 sum1 = 0.
 do k=1, nto
-sum1 = sum1+zo(k, i, ip)*po(k, j, ip)
+sum1 = sum1+zo(k, i, iip)*po(k, j, iip)
 end do
-zort(i, j, ip) = sum1
+zort(i, j, iip) = sum1
 if (i/=j) then
 dmax = max(dmax, abs(sum1))
 else
@@ -838,7 +838,7 @@ integer :: i
 integer :: idp
 integer :: idxy
 integer :: ierror
-integer :: ip
+integer :: iip
 integer :: ipse
 integer :: ipso
 integer :: isym
@@ -901,9 +901,9 @@ nsho(1) = nmx/2
 nsho(2) = (nmx-1)/2
 end if
 !
-ip = 2 
+iip = 2 
 do 100 mp1=1, mxtr+1
-ip = 3-ip
+iip = 3-iip
 if (mxtr==nlat-1.and.mp1==1) then
 do i=1, nlat
 sy(i, mp1) = sx(i, mp1)
@@ -928,8 +928,8 @@ ms2 = mp1/2
 !      nrank = nlat-mrank
 !      nem = (mrank+1)/2-nshe(ip)
 !      nom = mrank-(mrank+1)/2-nsho(ip)
-nem = (nlat-m+1)/2-nshe(ip)
-nom = (nlat-m)/2-nsho(ip)
+nem = (nlat-m+1)/2-nshe(iip)
+nom = (nlat-m)/2-nsho(iip)
 nec = nte-nem
 noc = nto-nom
 do i=1, nte
@@ -953,8 +953,8 @@ end if
 lag = 0
 if (m==0.or.mpm==nlon) lag = 1
 if (3*nec<2*nem.or.nem==0) then
-call tmxmx(lag, nte, nec, idp, pe(1, 1, ip), nte, idp, &
-          ze(1, 1, ip), xe, ye, ipse(1, ip), jzse(1, ip))  
+call tmxmx(lag, nte, nec, idp, pe(1, 1, iip), nte, idp, &
+          ze(1, 1, iip), xe, ye, ipse(1, iip), jzse(1, iip))  
 do i=1, nte
 ye(i, 1) = xe(i, 1)-ye(i, 1)
 end do
@@ -964,12 +964,12 @@ ye(i, 2) = xe(i, 2)-ye(i, 2)
 end do
 end if
 else
-call tmxmx(lag, nte, nem, idp, pe(1, nec+1, ip), nte, idp, &
-ze(1, nec+1, ip), xe, ye, ipse(nec+1, ip), jzse(nec+1, ip))
+call tmxmx(lag, nte, nem, idp, pe(1, nec+1, iip), nte, idp, &
+ze(1, nec+1, iip), xe, ye, ipse(nec+1, iip), jzse(nec+1, iip))
 end if
 if (3*noc<2*nom.or.nom==0) then
-call tmxmx(lag, nto, noc, idp, po(1, 1, ip), nto, idp, &
-          zo(1, 1, ip), xo, yo, ipso(1, ip), jzso(1, ip))
+call tmxmx(lag, nto, noc, idp, po(1, 1, iip), nto, idp, &
+          zo(1, 1, iip), xo, yo, ipso(1, iip), jzso(1, iip))
 do i=1, nto
 yo(i, 1) = xo(i, 1)-yo(i, 1)
 end do
@@ -979,8 +979,8 @@ yo(i, 2) = xo(i, 2)-yo(i, 2)
 end do
 end if
 else
-call tmxmx(lag, nto, nom, idp, po(1, noc+1, ip), nto, idp, &
-zo(1, noc+1, ip), xo, yo, ipso(noc+1, ip), jzso(noc+1, ip))  
+call tmxmx(lag, nto, nom, idp, po(1, noc+1, iip), nto, idp, &
+zo(1, noc+1, iip), xo, yo, ipso(noc+1, iip), jzso(noc+1, iip))  
 end if
 do i=1, nto
 sy(i, mpm) = ye(i, 1)+yo(i, 1)
