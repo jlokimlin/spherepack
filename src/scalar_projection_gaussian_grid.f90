@@ -944,7 +944,7 @@ contains
         integer(ip), intent(in)  :: md
         real(wp),    intent(in)  :: b(md, *)
         real(wp),    intent(in)  :: x(ld, 2)
-        real(wp),    intent(inout) cd :: y(ld, 2)
+        real(wp),    intent(inout) :: y(ld, 2)
         integer(ip), intent(in)  :: is(*)
         integer(ip), intent(in)  :: js(*)
 

@@ -31,12 +31,12 @@
 !
 !
 !
-! ... geo2math_coordinate_transfer_routines.f90
+! ... coordinate_transfer_routines.f90
 !
-!     file geo2math_coordinate_transfer_routines.f90 contains subroutines for converting scalar and
+!     file coordinate_transfer_routines.f90 contains subroutines for converting scalar and
 !     vector fields between geophysical and mathematical spherical
 !     coordinates.  The latter is required when using most spherepack
-!     software.  The four main subroutines in geo2math_coordinate_transfer_routines.f90 are described
+!     software.  The four main subroutines in coordinate_transfer_routines.f90 are described
 !     as follows:
 !
 !     (1) subroutine geo2maths(ig, nlon, nlat, sg, sm, work)
@@ -227,7 +227,7 @@
 ! *** END OF DOCUMENTATION ... CODE FOLLOWS:
 !
 !
-module geo2math_coordinate_transfer_routines
+module coordinate_transfer_routines
 
     use spherepack_precision, only: &
         wp, & ! working precision
@@ -465,4 +465,4 @@ contains
 
     end subroutine math2geov
 
-end module geo2math_coordinate_transfer_routines
+end module coordinate_transfer_routines

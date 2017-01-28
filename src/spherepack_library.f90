@@ -18,7 +18,7 @@ module spherepack_library
     use gaussian_latitudes_and_weights_routines, only: &
         compute_gaussian_latitudes_and_weights
 
-    use geo2math_coordinate_transfer_routines, only: &
+    use coordinate_transfer_routines, only: &
         geo2maths, math2geos, geo2mathv, math2geov
 
     use gradient_routines, only: &
@@ -70,10 +70,8 @@ module spherepack_library
         shags, shagsi, &
         shagc, shagci
 
-    use module_shpe, only: &
-        shpe, shpei
-
-    use module_shpg, only: &
+    use scalar_projection_routines, only: &
+        shpe, shpei, &
         shpg, shpgi
 
     use scalar_synthesis_routines, only: &

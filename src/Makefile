@@ -12,10 +12,10 @@ spherepack_precision.f90
 	$(FC) $(FFLAGS) -c spherepack_precision.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 
-geo2math_coordinate_transfer_routines.o: \
+coordinate_transfer_routines.o: \
 spherepack_precision.o \
-geo2math_coordinate_transfer_routines.f90
-	$(FC) $(FFLAGS) -c geo2math_coordinate_transfer_routines.f90 $(LINKS)\
+coordinate_transfer_routines.f90
+	$(FC) $(FFLAGS) -c coordinate_transfer_routines.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 
 icosahedral_geodesic_routines.o: \
@@ -56,19 +56,24 @@ gaussian_latitudes_and_weights_routines.f90
 	$(FC) $(FFLAGS) -c gaussian_latitudes_and_weights_routines.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 
-shpg.o: \
+scalar_projection_routines.o: \
 spherepack_precision.o \
 type_SpherepackAux.o \
 gaussian_latitudes_and_weights_routines.o \
-shpg.f90
-	$(FC) $(FFLAGS) -c shpg.f90 $(LINKS)\
+scalar_projection_routines.f90
+	$(FC) $(FFLAGS) -c scalar_projection_routines.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 
-shpe.o: \
-spherepack_precision.o \
-type_SpherepackAux.o \
-shpe.f90
-	$(FC) $(FFLAGS) -c shpe.f90 $(LINKS)\
+scalar_projection_regular_grid.o: \
+scalar_projection_routines.o \
+scalar_projection_regular_grid.f90
+	$(FC) $(FFLAGS) -c scalar_projection_regular_grid.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
+
+scalar_projection_gaussian_grid.o: \
+scalar_projection_routines.o \
+scalar_projection_gaussian_grid.f90
+	$(FC) $(FFLAGS) -c scalar_projection_gaussian_grid.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 
 scalar_analysis_routines.o: \
@@ -744,7 +749,7 @@ spherepack_library.o: \
 spherepack_precision.o \
 divergence_routines.o \
 gaussian_latitudes_and_weights_routines.o \
-geo2math_coordinate_transfer_routines.o \
+coordinate_transfer_routines.o \
 gradient_routines.o \
 idvtec.o \
 idvtes.o \
@@ -761,8 +766,7 @@ sfvpgc.o \
 sfvpgs.o \
 scalar_analysis_routines.o \
 scalar_laplacian_routines.o \
-shpe.o \
-shpg.o \
+scalar_projection_routines.o \
 scalar_synthesis_routines.o \
 sshifte.o \
 trssph.o \
