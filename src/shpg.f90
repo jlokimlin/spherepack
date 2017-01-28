@@ -284,8 +284,8 @@ contains
         if (nlat<1) return
         ierror = 2
         if (nlon<1) return
-        !      ierror = 3
-        !      if (isym < 0 .or. isym > 2) return
+        ierror = 3
+        if (isym < 0 .or. isym > 2) return
         ierror = 4
         mmax = min(nlat-1, nlon/2)
         if (mtrunc<0 .or. mtrunc>mmax) return
@@ -299,12 +299,13 @@ contains
         mlwk = 1.25*(nlat+1)**2+7*nlat+8
         if (lwork <mlwk) return
         ierror = 0
-        !
+
         call sphere_aux%hfft%initialize(nlon, wshp(lw1+1))
 
         nte = (nlat+1)/2
         nloc1 = 2*nte*nte
         nloc2 = nlat+1
+        lw1 = 2*((nlat+1)**2)
         iw1 = 1
         iw2 = iw1+nloc1
         iw3 = iw2+nloc1
@@ -371,16 +372,16 @@ contains
 
         ! Check input arguments
         ierror = 1
-        if (nlat<1) return
+        if (nlat < 1) return
         ierror = 2
-        if (nlon<1) return
-        !      ierror = 3
-        !      if (isym < 0 .or. isym > 2) return
+        if (nlon < 1) return
+        ierror = 3
+        if (isym < 0 .or. isym > 2) return
         ierror = 4
         mmax = min(nlat-1, nlon/2)
         if (mtrunc<0 .or. mtrunc>mmax) return
         ierror = 5
-        log2n = log(real(nlon, kind=wp))/log(TWO)
+        log2n = int(log(real(nlon, kind=wp))/log(TWO), kind=ip)
         lw1 = 2*(nlat+1)**2
         if (lwshp<lw1+nlon+log2n) return
         ierror = 6
@@ -398,6 +399,7 @@ contains
         nte = (nlat+1)/2
         nloc1 = 2*(nte**2)
         nloc2 = nlat+1
+        lw1 = 2*(nlat+1)**2
         iw1 = 1
         iw2 = iw1+nloc1
         iw3 = iw2+nloc1

@@ -1,6 +1,7 @@
 module spherepack_library
 
     use, intrinsic :: ISO_Fortran_env, only: &
+        stderr => ERROR_UNIT, &
         stdout => OUTPUT_UNIT
 
     use spherepack_precision, only: &
@@ -225,7 +226,7 @@ module spherepack_library
     public :: alfk, lfp, lfpt, lfim, lfin
 
     ! Temporary solution for testing
-    public :: vecout, iout, name, vout
+    public :: vecout, iout, name, vout, check_error
 
     interface vecout
         module procedure vecout_array
@@ -303,5 +304,14 @@ contains
         write(stdout,'(a)') routine_name
 
     end subroutine name
+
+    subroutine check_error(ierror)
+
+        ! Dummy arguments
+        integer(ip), intent(in) :: ierror
+
+        if (ierror /= 0) write(stderr, '(a,i5)') '   ierror', ierror
+
+    end subroutine check_error
 
 end module spherepack_library

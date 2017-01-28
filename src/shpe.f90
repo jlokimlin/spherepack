@@ -142,14 +142,24 @@ contains
     subroutine shpei(nlat, nlon, isym, mtrunc, wshp, lwshp, iwshp, &
         liwshp, work, lwork, ierror)
 
-        type(SpherepackAux) :: sphere_aux
-        integer(ip) :: ierror
-        integer(ip) :: isym
+        ! Dummy arguments
+        integer(ip), intent(in)  :: nlat
+        integer(ip), intent(in)  :: nlon
+        integer(ip), intent(in)  :: isym
+        integer(ip), intent(in)  :: mtrunc
+        real(wp),    intent(out) :: wshp(lwshp)
+        integer(ip), intent(in)  :: lwshp
+        integer(ip), intent(in)  :: iwshp(liwshp)
+        integer(ip), intent(in)  :: liwshp
+        real(wp),    intent(out) :: work(lwork)
+        integer(ip), intent(in)  :: lwork
+        integer(ip), intent(out) :: ierror
+
+        ! Local variables
         integer(ip) :: iw1
         integer(ip) :: iw2
         integer(ip) :: iw3
         integer(ip) :: iw4
-        integer(ip) :: iwshp
         integer(ip) :: jw1
         integer(ip) :: jw2
         integer(ip) :: jw3
@@ -167,35 +177,28 @@ contains
         integer(ip) :: kw7
         integer(ip) :: kw8
         integer(ip) :: kw9
-        integer(ip) :: liwshp
         integer(ip) :: log2n
         integer(ip) :: lw1
-        integer(ip) :: lwork
-        integer(ip) :: lwshp
         integer(ip) :: mlwk
         integer(ip) :: mmax
-        integer(ip) :: mtrunc
-        integer(ip) :: nlat
         integer(ip) :: nloc1
         integer(ip) :: nloc2
-        integer(ip) :: nlon
         integer(ip) :: nte
-        real(wp) :: wshp
-        real work(*)
-        dimension wshp(*), iwshp(*)
-        !
+        type(SpherepackAux) :: sphere_aux
+
+        ! Check input arguments
         ierror = 1
         if (nlat < 3) return
         ierror = 2
         if (nlon < 4) return
-        !      ierror = 3
-        !      if (isym.lt.0  .or.  isym.gt.2) return
+        ierror = 3
+        if (isym < 0 .or. isym > 2) return
         ierror = 4
         mmax = min(nlat-1, nlon/2)
-        if (mtrunc<0  .or.  mtrunc>mmax) return
+        if (mtrunc<0 .or. mtrunc>mmax) return
         ierror = 5
         lw1 = 2*(nlat+1)**2
-        log2n = log(real(nlon))/log(TWO)
+        log2n = int(log(real(nlon))/log(TWO), kind=wp)
         if (lwshp<lw1+nlon+log2n) return
         ierror = 6
         if (liwshp<4*(nlat+1)) return
@@ -203,12 +206,14 @@ contains
         mlwk = 1.25*(nlat+1)**2+7*nlat+8
         if (lwork <mlwk) return
         ierror = 0
-        !
+
         call sphere_aux%hfft%initialize(nlon, wshp(lw1+1))
-        !
+
+        ! Set workspace index pointers
         nte = (nlat+1)/2
         nloc1 = 2*nte*nte
         nloc2 = nlat+1
+        lw1 = 2*(nlat+1)**2
         iw1 = 1
         iw2 = iw1+nloc1
         iw3 = iw2+nloc1
@@ -228,10 +233,9 @@ contains
         kw9 = kw8+nte
         kw10 = kw9+nloc2+nloc2
         kw11 = kw10+nloc2
-
         kw12 = kw11+nloc1
         kw13 = kw12+nloc1
-        !
+
         call shpei_lower_routine(nlat, nlon, isym, mtrunc, nte, ierror, wshp(iw1), wshp(iw2), &
             wshp(iw3), wshp(iw4), iwshp(jw1), iwshp(jw2), iwshp(jw3), &
             iwshp(jw4), work(kw1), work(kw2), work(kw3), work(kw4), work(kw5), &
@@ -304,14 +308,14 @@ contains
         tusl = ZERO
         toe = ZERO
         !
-        !     compute grid distribution
+        ! Compute grid distribution
         !
         dthet = pi/(nlat-1)
         do i=1, nte
             thet(i) = (i-1)*dthet
         end do
         !
-        !     compute weight matrices for even functions
+        ! Compute weight matrices for even functions
         !
         do mp1=1, 2
             m = mp1-1
@@ -332,7 +336,7 @@ contains
                 s(j) = ONE/(s(j)*s(j))
             end do
             !
-            !     compute weight matrix as u  s sup -2 u transpose
+            ! Compute weight matrix as u  s sup -2 u transpose
             !
             do j=1, nte
                 do i=1, nte
@@ -351,7 +355,7 @@ contains
         end do
         we(1, 1, 2) = ONE
         !
-        !     compute n**2 basis (even functions)
+        ! Compute n**2 basis (even functions)
         !
         do n=1, nlat+nlat-2
             dfn = n
@@ -372,7 +376,7 @@ contains
             mrank = nlat-nrank
             nem = (mrank+1)/2
             !
-            !     compute associated legendre functions
+            ! Compute associated legendre functions
             !
             if (m <= 1) then
                 do j=1, nem
@@ -416,50 +420,42 @@ contains
                     end do
                 end do
             end if
-            !
-            if (ms2 <= 0. .or. ms2>=nte) goto 200
-            !
-            ! initialize array with random numbers using
-            ! Fortran90 intrinsics RANDOM_{SEED, NUMBER}
-            !
-            ! old code commented out
-            !     do i=1, nte
-            !     xx(i) = rand()
-            !     end do
-            !
-            ! replacement code
-            !
-            call random_seed()
-            call random_number(xx(1:nte))
-            it = 0
-            201 do i=1, nte
-                z(i) = ZERO
-                wx(i) = ZERO
-                do j=1, nte
-                    wx(i) = wx(i)+we(i, j, iip)*xx(j)
+
+            if (.not.(ms2 <= 0. .or. nte <= ms2)) then
+
+                ! initialize array with random numbers
+                call random_seed()
+                call random_number(xx(1:nte))
+                it = 0
+                201 do i=1, nte
+                    z(i) = ZERO
+                    wx(i) = ZERO
+                    do j=1, nte
+                        wx(i) = wx(i)+we(i, j, iip)*xx(j)
+                    end do
                 end do
-            end do
-            do j=1, nte
-                if (j == ms2) goto 220
-                call accumulate_inner_products(nte, wx, ped(1, j, iip), z)
-220         continue
-            end do
-            !
-            do i=1, nte
-                xx(i) = xx(i)-z(i)
-            end do
-            call compute_normal_regular_grid(nte, xx, idp, we(1, 1, iip))
-            it = it+1
-            if (it <= 2) goto 201
-            do i=1, nte
-                ped(i, ms2, iip) = xx(i)
-            end do
-200     continue
+
+                do j=1, nte
+                    if (j == ms2) cycle
+                    call accumulate_inner_products(nte, wx, ped(1, j, iip), z)
+                end do
+
+                do i=1, nte
+                    xx(i) = xx(i)-z(i)
+                end do
+
+                call compute_normal_regular_grid(nte, xx, idp, we(1, 1, iip))
+
+                it = it+1
+                if (it <= 2) goto 201
+                do i=1, nte
+                    ped(i, ms2, iip) = xx(i)
+                end do
+            end if
         end do
-        !
-        !     reorder if mtrunc is less than nlat-1
-        !         case of even functions
-        !
+
+        ! Reorder if mtrunc is less than nlat-1
+        ! case of even functions
         if (modn == 0) then
             nshe(1) = (nlat-mtrunc-1)/2
             nshe(2) = (nlat-mtrunc-2)/2
@@ -467,7 +463,7 @@ contains
             nshe(1) = (nlat-mtrunc)/2
             nshe(2) = (nlat-mtrunc-1)/2
         end if
-        !
+
         do mp1=1, 2
             do j=1, nte
                 js = j+nshe(mp1)
@@ -482,12 +478,11 @@ contains
                 end do
             end do
         end do
-        !
+
         call truncate(0, nte, idp, ped(1, 1, 1), nte, ipse(1, 1))
         call truncate(0, nte, idp, ped(1, 1, 2), nte, ipse(1, 2))
-        !
-        !     compute the analysis matrices
-        !
+
+        ! Compute the analysis matrices
         do iip=1, 2
             do i=1, nte
                 lock = 0
@@ -505,9 +500,8 @@ contains
                 end do
             end do
         end do
-        !
-        !     compute weight matrices for odd functions
-        !
+
+        ! Compute weight matrices for odd functions
         do mp1=1, 2
             m = mp1-1
             mrank = nlat-m-m
@@ -523,13 +517,12 @@ contains
             end do
             call singular_value_decomposition(pod(m+1, 1, mp1), idp, nom, nom, s, e, u, &
                 idp, v(1, 1), idp, work, 10, info)
-            !
+
             do j=1, nom
-                s(j) = ONE/(s(j)*s(j))
+                s(j) = ONE/(s(j)**2)
             end do
-            !
-            !     compute weight matrix as u  s sup -2 u transpose
-            !
+
+            ! Compute weight matrix as u  s sup -2 u transpose
             do j=1, nte
                 do i=1, nte
                     wo(i, j, mp1) = ZERO
@@ -551,9 +544,8 @@ contains
             wo(nte, nte, 1) = ONE
             wo(nte, nte, 2) = ONE
         end if
-        !
-        !     compute n**2 basis (odd functions)
-        !
+
+        ! Compute n**2 basis (odd functions)
         iip = 2
         do mp1=1, mxtr+1
             iip = 3-iip
@@ -563,9 +555,8 @@ contains
             mrank = nlat-nrank
             nem = (mrank+1)/2
             nom = mrank-nem
-            !
-            !     compute associated legendre functions
-            !
+
+            ! Compute associated legendre functions
             if (m <= 1) then
                 do j=1, nom
                     n = 2*j+m-1
@@ -576,9 +567,7 @@ contains
                     if (modn == 1) pod(nte, j+ms2, iip) = ZERO
                     if (m>0) pod(1, j+ms2, iip) = ZERO
                 end do
-            !
             else
-                !
                 do j=1, nom
                     n = 2*j+m-1
                     if (m>1 .and. n>mxtr) then
@@ -609,50 +598,50 @@ contains
                     end do
                 end do
             end if
-            !
-            if (ms2 <= 0. .or. ms2>=nto) goto 300
-            !
-            ! initialize array with random numbers using
-            ! Fortran 90 intrinsics random_seed and random_number
-            !
-            ! old code commented out
-            !
-            !     do i=1, nte
-            !     xx(i) = rand()
-            !     end do
-            ! replacement code
-            !
-            call random_number(xx(1:nte))
-            if (modn == 1) xx(nte) = ZERO
-            it = 0
-            306 do i=1, nte
-                z(i) = ZERO
-                wx(i) = ZERO
-                do j=1, nto
-                    wx(i) = wx(i)+wo(i, j, iip)*xx(j)
+
+            if (.not.(ms2 <= 0. .or. nto <= ms2)) then
+                !
+                ! initialize array with random numbers using
+                ! Fortran 90 intrinsics random_seed and random_number
+                !
+                ! old code commented out
+                !
+                !     do i=1, nte
+                !     xx(i) = rand()
+                !     end do
+                ! replacement code
+                !
+                call random_number(xx(1:nte))
+                if (modn == 1) xx(nte) = ZERO
+                it = 0
+                306 do i=1, nte
+                    z(i) = ZERO
+                    wx(i) = ZERO
+                    do j=1, nto
+                        wx(i) = wx(i)+wo(i, j, iip)*xx(j)
+                    end do
                 end do
-            end do
 
-            do j=1, nto
-                if (j == ms2) cycle
-                call accumulate_inner_products(nte, wx, pod(1, j, iip), z(1))
-            end do
+                do j=1, nto
+                    if (j == ms2) cycle
+                    call accumulate_inner_products(nte, wx, pod(1, j, iip), z(1))
+                end do
 
-            do i=1, nte
-                xx(i) = xx(i)-z(i)
-            end do
+                do i=1, nte
+                    xx(i) = xx(i)-z(i)
+                end do
 
-            call compute_normal_regular_grid(nte, xx, idp, wo(1, 1, iip))
+                call compute_normal_regular_grid(nte, xx, idp, wo(1, 1, iip))
 
-            it = it+1
-            if (it <= 2) goto 306
+                it = it+1
+                if (it <= 2) goto 306
 
-            do i=1, nte
-                pod(i, ms2, iip) = xx(i)
-            end do
+                do i=1, nte
+                    pod(i, ms2, iip) = xx(i)
+                end do
 
-            if (modn == 1) pod(nte, ms2, iip) = ZERO
-300     continue
+                if (modn == 1) pod(nte, ms2, iip) = ZERO
+            end if
         end do
         !
         !     reorder if mtrunc is less than nlat-1
@@ -684,7 +673,7 @@ contains
         call truncate(0, nte, idp, pod(1, 1, 1), nto, ipso(1, 1))
         call truncate(0, nte, idp, pod(1, 1, 2), nto, ipso(1, 2))
         !
-        !     compute the analysis matrices (odd functions)
+        ! Compute the analysis matrices (odd functions)
         !
         do iip=1, 2
             do i=1, nto
@@ -808,47 +797,50 @@ contains
     subroutine shpe(nlat, nlon, isym, mtrunc, x, y, idxy, &
         wshp, lwshp, iwshp, liwshp, work, lwork, ierror)
 
-        type(SpherepackAux) :: sphere_aux
+        ! Dummy arguments
+        integer(ip), intent(in)  :: nlat
+        integer(ip), intent(in)  :: nlon
+        integer(ip), intent(in)  :: isym
+        integer(ip), intent(in)  :: mtrunc
+        real(wp),    intent(in)  :: x(idxy, nlon)
+        real(wp),    intent(out) :: y(idxy, nlon)
+        integer(ip), intent(in)  :: idxy
+        real(wp),    intent(in)  :: wshp(lwshp)
+        integer(ip), intent(in)  :: lwshp
+        integer(ip), intent(in)  :: iwshp(liwshp)
+        integer(ip), intent(in)  :: liwshp
+        real(wp),    intent(out) :: work(lwork)
+        integer(ip), intent(in)  :: lwork
+        integer(ip), intent(out) :: ierror
         
-        integer(ip) :: idxy
-        integer(ip) :: ierror
-        integer(ip) :: isym
+        ! Local variables
         integer(ip) :: iw1
         integer(ip) :: iw2
         integer(ip) :: iw3
         integer(ip) :: iw4
-        integer(ip) :: iwshp(liwshp)
         integer(ip) :: jw1
         integer(ip) :: jw2
         integer(ip) :: jw3
         integer(ip) :: jw4
-        integer(ip) :: liwshp
         integer(ip) :: log2n
         integer(ip) :: lw1
-        integer(ip) :: lwork
-        integer(ip) :: lwshp
         integer(ip) :: mmax
-        integer(ip) :: mtrunc
         integer(ip) :: mwrk
-        integer(ip) :: nlat
         integer(ip) :: nloc1
         integer(ip) :: nloc2
-        integer(ip) :: nlon
         integer(ip) :: nte
-        real(wp), intent(out) :: work(lwork)
-        real(wp) :: wshp(lwshp)
-        real(wp) :: x(idxy, nlon), y(idxy, nlon)
+        type(SpherepackAux) :: sphere_aux
 
         ! Check input arguments
         ierror = 1
         if (nlat < 3) return
         ierror = 2
         if (nlon < 4) return
-        !      ierror = 3
-        !      if (isym.lt.0  .or.  isym.gt.2) return
+        ierror = 3
+        if (isym < 0 .or. isym > 2) return
         ierror = 4
         mmax = min(nlat-1, nlon/2)
-        if (mtrunc<0  .or.  mtrunc>mmax) return
+        if (mtrunc < 0 .or. mtrunc > mmax) return
         ierror = 5
         log2n = log(real(nlon))/log(TWO)
         lw1 = 2*(nlat+1)**2
@@ -864,12 +856,11 @@ contains
 
         call sphere_aux%hfft%forward(nlat, nlon, y, idxy, wshp(lw1+1), work)
 
-
+        ! Set workspace index pointers
         nte = (nlat+1)/2
         nloc1 = 2*nte*nte
         nloc2 = nlat+1
-
-        ! Set workspace index pointers
+        lw1 = 2*(nlat+1)**2
         iw1 = 1
         iw2 = iw1+nloc1
         iw3 = iw2+nloc1
