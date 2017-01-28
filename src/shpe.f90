@@ -421,27 +421,29 @@ contains
                 call random_seed()
                 call random_number(xx(1:nte))
                 it = 0
-                201 do i=1, nte
-                    z(i) = ZERO
-                    wx(i) = ZERO
-                    do j=1, nte
-                        wx(i) = wx(i)+we(i, j, iip)*xx(j)
+                even_iteration: do
+                    do i=1, nte
+                        z(i) = ZERO
+                        wx(i) = ZERO
+                        do j=1, nte
+                            wx(i) = wx(i)+we(i, j, iip)*xx(j)
+                        end do
                     end do
-                end do
 
-                do j=1, nte
-                    if (j == ms2) cycle
-                    call accumulate_inner_products(nte, wx, ped(1, j, iip), z)
-                end do
+                    do j=1, nte
+                        if (j == ms2) cycle
+                        call accumulate_inner_products(nte, wx, ped(1, j, iip), z)
+                    end do
 
-                do i=1, nte
-                    xx(i) = xx(i)-z(i)
-                end do
+                    do i=1, nte
+                        xx(i) = xx(i)-z(i)
+                    end do
 
-                call compute_normal_regular_grid(nte, xx, idp, we(1, 1, iip))
+                    call compute_normal_regular_grid(nte, xx, idp, we(1, 1, iip))
 
-                it = it+1
-                if (it <= 2) goto 201
+                    it = it+1
+                    if (it > 2) exit even_iteration
+                end do even_iteration
                 do i=1, nte
                     ped(i, ms2, iip) = xx(i)
                 end do
@@ -601,27 +603,29 @@ contains
                 if (modn == 1) xx(nte) = ZERO
 
                 it = 0
-                306 do i=1, nte
-                    z(i) = ZERO
-                    wx(i) = ZERO
-                    do j=1, nto
-                        wx(i) = wx(i)+wo(i, j, iip)*xx(j)
+                odd_iteration: do
+                    do i=1, nte
+                        z(i) = ZERO
+                        wx(i) = ZERO
+                        do j=1, nto
+                            wx(i) = wx(i)+wo(i, j, iip)*xx(j)
+                        end do
                     end do
-                end do
 
-                do j=1, nto
-                    if (j == ms2) cycle
-                    call accumulate_inner_products(nte, wx, pod(1, j, iip), z(1))
-                end do
+                    do j=1, nto
+                        if (j == ms2) cycle
+                        call accumulate_inner_products(nte, wx, pod(1, j, iip), z(1))
+                    end do
 
-                do i=1, nte
-                    xx(i) = xx(i)-z(i)
-                end do
+                    do i=1, nte
+                        xx(i) = xx(i)-z(i)
+                    end do
 
-                call compute_normal_regular_grid(nte, xx, idp, wo(1, 1, iip))
+                    call compute_normal_regular_grid(nte, xx, idp, wo(1, 1, iip))
 
-                it = it+1
-                if (it <= 2) goto 306
+                    it = it+1
+                    if (it > 2) exit odd_iteration
+                end do odd_iteration
 
                 do i=1, nte
                     pod(i, ms2, iip) = xx(i)
