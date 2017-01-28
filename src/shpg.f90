@@ -329,7 +329,7 @@ contains
 
         mxtr = min(nlat-1, nlon/2, mtrunc)
         iip = 2
-        do 200 mp1=1, mxtr+1
+        loop_200: do mp1=1, mxtr+1
             m = mp1-1
             iip = 3-iip
             ms2 = mp1/2
@@ -337,24 +337,22 @@ contains
             nec = nte-nem
 
             ! Compute associated legendre functions
-            if (m<=1) then
-                do 205 j=1, nem
+            if (m <= 1) then
+                do j=1, nem
                     n = 2*j+m-2
                     call sphere_aux%compute_fourier_coefficients(m, n, cp)
                     do i=1, nte
                         call sphere_aux%compute_legendre_polys_from_fourier_coeff(m, n, thet(i), cp, ped(i, j+nec, iip))
                     end do
-205             continue
-            !
+                end do
             else
-                !
-                do 207 j=1, nem
+                loop_207: do j=1, nem
                     n = 2*j+m-2
                     if (m>1.and.n>mxtr) then
                         do i=1, nte
                             u(i, j+nec) = ped(i, j+nec, iip)
                         end do
-                        goto 207
+                        cycle loop_207
                     end if
                     a1 = b(n-1)*a(n+m-3)/a(n+m-1)
                     b1 = a(n-m+1)/a(n+m-1)
@@ -370,40 +368,47 @@ contains
                                 - b1*ped(i, j+nec, iip) + c1*u(i, j+nec-1)
                         end do
                     end if
-207             continue
+                end do loop_207
                 do j=1, nem
                     do i=1, nte
                         ped(i, j+nec, iip) = u(i, j+nec)
                     end do
                 end do
             end if
-            if (nec<=0) goto 200
+            if (nec<=0) cycle loop_200
             !
             !     generate orthogonal vector with
             !     random numbers
             call random_seed()
             call random_number(xx(1:nte))
-            !
+
             it = 0
-            201 do i=1, nte
-                z(i) = ZERO
-                wx(i) = gwts(i)*xx(i)
-            end do
-            do 220 j=1, nte
-                if (j==nec) goto 220
-                call accumulate_inner_products(nte, wx, ped(1, j, iip), z)
-220         continue
-            !
-            do i=1, nte
-                xx(i) = xx(i)-z(i)
-            end do
-            call compute_normal_gaussian_grid(nte, xx, idp, gwts)
-            it = it+1
-            if (it<=2) goto 201
+            iteration_201: do
+                it = it+1
+                if (it > 2) exit iteration_201
+
+                do i=1, nte
+                    z(i) = ZERO
+                    wx(i) = gwts(i)*xx(i)
+                end do
+
+                do j=1, nte
+                    if (j == nec) cycle
+                    call accumulate_inner_products(nte, wx, ped(1, j, iip), z)
+                end do
+
+                do i=1, nte
+                    xx(i) = xx(i)-z(i)
+                end do
+
+                call compute_normal_gaussian_grid(nte, xx, idp, gwts)
+
+            end do iteration_201
+
             do i=1, nte
                 ped(i, nec, iip) = xx(i)
             end do
-200     continue
+        end do loop_200
         !
         !     reorder if mtrunc is less than nlat-1
         !         case of even functions
@@ -417,7 +422,7 @@ contains
             nshe(2) = nmx/2
         end if
         !
-        do 210 mp1=1, 2
+        do mp1=1, 2
             do j=1, nte
                 js = j+nshe(mp1)
                 if (js>nte) js = js-nte
@@ -430,14 +435,14 @@ contains
                     ped(i, j, mp1) = u(i, j)
                 end do
             end do
-210     continue
+        end do
         !
         call truncate(0, nte, idp, ped(1, 1, 1), nte, ipse(1, 1))
         call truncate(0, nte, idp, ped(1, 1, 2), nte, ipse(1, 2))
         !
         ! Compute the analysis matrices
         !
-        do 250 iip=1, 2
+        do iip=1, 2
             do i=1, nte
                 lock = 0
                 do j=1, nte
@@ -450,7 +455,7 @@ contains
                     end if
                 end do
             end do
-250     continue
+        end do
         !
         !     check orthogonality of pe(i, j, mp1)  mp1=1, 2
         !
@@ -475,7 +480,7 @@ contains
         ! Compute n**2 basis (odd functions)
         !
         iip = 2
-        do 300 mp1=1, mxtr+1
+        main_loop: do mp1=1, mxtr+1
             iip = 3-iip
             m = mp1-1
             ms2 = mp1/2
@@ -486,74 +491,77 @@ contains
             ! Compute associated legendre functions
             !
             if (m<=1) then
-                do 305 j=1, nom
+                do j=1, nom
                     n = 2*j+m-1
                     call sphere_aux%compute_fourier_coefficients(m, n, cp)
                     do i=1, nte
                         call sphere_aux%compute_legendre_polys_from_fourier_coeff(m, n, thet(i), cp, pod(i, j+noc, iip))
                     end do
                     if (modn>0) pod(nte, j+noc, iip) = ZERO
-305             continue
-            !
+                end do
             else
-                !
-                do 307 j=1, nom
+                do j=1, nom
                     n = 2*j+m-1
                     if (m>1.and.n>mxtr) then
                         do i=1, nte
                             u(i, j+noc) = pod(i, j+noc, iip)
                         end do
-                        goto 304
-                    end if
-                    a1 = b(n-1)*a(n+m-3)/a(n+m-1)
-                    b1 = a(n-m+1)/a(n+m-1)
-                    if (n-m<=1) then
-                        do i=1, nte
-                            u(i, j+noc) = a1*pod(i, j+noc-1, iip) &
-                                - b1*pod(i, j+noc, iip)
-                        end do
                     else
-                        c1 = b(n-1)*a(n-m-1)/a(n+m-1)
-                        do i=1, nte
-                            u(i, j+noc) = a1*pod(i, j+noc-1, iip) &
-                                - b1*pod(i, j+noc, iip) + c1*u(i, j+noc-1)
-                        end do
+                        a1 = b(n-1)*a(n+m-3)/a(n+m-1)
+                        b1 = a(n-m+1)/a(n+m-1)
+                        if (n-m<=1) then
+                            do i=1, nte
+                                u(i, j+noc) = a1*pod(i, j+noc-1, iip) &
+                                    - b1*pod(i, j+noc, iip)
+                            end do
+                        else
+                            c1 = b(n-1)*a(n-m-1)/a(n+m-1)
+                            do i=1, nte
+                                u(i, j+noc) = a1*pod(i, j+noc-1, iip) &
+                                    - b1*pod(i, j+noc, iip) + c1*u(i, j+noc-1)
+                            end do
+                        end if
                     end if
-304                 if (modn==1) u(nte, j+noc) = ZERO
-307             continue
+                    if (modn==1) u(nte, j+noc) = ZERO
+                end do
                 do j=1, nom
                     do i=1, nte
                         pod(i, j+noc, iip) = u(i, j+noc)
                     end do
                 end do
             end if
-            !
-            if (noc<=0) goto 300
+
+            if (noc <= 0) cycle main_loop
+
             call random_number(xx(1:nte))
+
             if (modn==1) xx(nte) = ZERO
+
             it = 0
-            306 do i=1, nte
-                z(i) = ZERO
-                wx(i) = gwts(i)*xx(i)
-            end do
-            do 330 j=1, nto
-                if (j==noc) goto 330
-                call accumulate_inner_products(nte, wx, pod(1, j, iip), z(1))
-330         continue
-            !
-            do i=1, nte
-                xx(i) = xx(i)-z(i)
-            end do
-            call compute_normal_gaussian_grid(nte, xx, idp, gwts)
-            it = it+1
-            if (it<=2) goto 306
-            do i=1, nte
-                pod(i, noc, iip) = xx(i)
-            end do
+            iteration_306: do
+                it = it+1
+                if (it > 2) exit iteration_306
+
+                z(1: nte) = ZERO
+                wx(1: nte) = gwts(1: nte)*xx(1: nte)
+
+                do j=1, nto
+                    if (j==noc) cycle
+                    call accumulate_inner_products(nte, wx, pod(1, j, iip), z(1))
+                end do
+
+                xx(1: nte) = xx(1: nte)-z(1: nte)
+
+                call compute_normal_gaussian_grid(nte, xx, idp, gwts)
+            end do iteration_306
+
+            pod(1: nte, noc, iip) = xx(1: nte)
+
             if (modn==1) pod(nte, noc, iip) = ZERO
-300     continue
-        !
+        end do main_loop
+
         nmx = nlat-mxtr
+
         if (modn==1) then
             nsho(1) = (nmx-1)/2
             nsho(2) = nmx/2
@@ -562,7 +570,7 @@ contains
             nsho(2) = (nmx-1)/2
         end if
         !
-        do 310 mp1=1, 2
+        do mp1=1, 2
             do j=1, nto
                 js = j+nsho(mp1)
                 if (js>nto) js = js-nto
@@ -575,7 +583,7 @@ contains
                     pod(i, j, mp1) = u(i, j)
                 end do
             end do
-310     continue
+        end do
         !
         call truncate(0, nte, idp, pod(1, 1, 1), nto, ipso(1, 1))
         call truncate(0, nte, idp, pod(1, 1, 2), nto, ipso(1, 2))
@@ -882,13 +890,13 @@ contains
         end if
         !
         iip = 2
-        do 100 mp1=1, mxtr+1
+        outer_loop: do mp1=1, mxtr+1
             iip = 3-iip
             if (mxtr==nlat-1.and.mp1==1) then
                 do i=1, nlat
                     sy(i, mp1) = sx(i, mp1)
                 end do
-                goto 100
+                cycle outer_loop
             end if
             m = mp1-1
             mpm = max(1, m+m)
@@ -954,8 +962,8 @@ contains
                 end do
                 if (nte>nto) sy(nte, mpm+1) = ye(nte, 2)
             end if
-100     continue
-        !
+        end do outer_loop
+
         js = mxtr+mxtr+2
         do j=js, nlon
             do i=1, nlat
