@@ -288,7 +288,7 @@ contains
         real(wp) :: tusl
         real(wp) :: ze
         real(wp) :: zo
-        real (wp) :: summation, dthet, v(1, 1), a1, b1, c1
+        real (wp) :: summation, dtheta, v(1, 1), a1, b1, c1
         real cp(idp), work(idp), wx(idp), s(idp+1), &
             e(idp), thet(idp), xx(idp), z(idp), u(idp, idp), &
             we(idp, idp, 2), ped(idp, idp, 2), a(4*idp), b(2*idp), &
@@ -307,16 +307,14 @@ contains
         nto = nlat-nte
         tusl = ZERO
         toe = ZERO
-        !
+
         ! Compute grid distribution
-        !
-        dthet = pi/(nlat-1)
+        dtheta = pi/(nlat-1)
         do i=1, nte
-            thet(i) = (i-1)*dthet
+            thet(i) = real(i-1, kind=wp)*dtheta
         end do
-        !
+
         ! Compute weight matrices for even functions
-        !
         do mp1=1, 2
             m = mp1-1
             mrank = nlat-m-m
@@ -329,15 +327,15 @@ contains
                 end do
                 if (m>0) ped(1, j, mp1) = ZERO
             end do
+
             call singular_value_decomposition(ped(m+1, 1, mp1), idp, nem, nem, s, e, u, &
                 idp, v(1, 1), idp, work, 10, info)
 
             do j=1, nem
-                s(j) = ONE/(s(j)*s(j))
+                s(j) = ONE/(s(j)**2)
             end do
-            !
+
             ! Compute weight matrix as u  s sup -2 u transpose
-            !
             do j=1, nte
                 do i=1, nte
                     we(i, j, mp1) = ZERO
@@ -353,10 +351,10 @@ contains
                 end do
             end do
         end do
+
         we(1, 1, 2) = ONE
-        !
+
         ! Compute n**2 basis (even functions)
-        !
         do n=1, nlat+nlat-2
             dfn = n
             a(n) = sqrt(dfn*(dfn+ONE))
@@ -375,9 +373,8 @@ contains
             nrank = ms2+ms2
             mrank = nlat-nrank
             nem = (mrank+1)/2
-            !
+
             ! Compute associated legendre functions
-            !
             if (m <= 1) then
                 do j=1, nem
                     n = 2*j+m-2
@@ -385,34 +382,31 @@ contains
                     do i=1, nte
                         call sphere_aux%compute_legendre_polys_from_fourier_coeff(m, n, thet(i), cp, ped(i, j+ms2, iip))
                     end do
-                    if (m>0) ped(1, j+ms2, iip) = ZERO
+                    if (m > 0) ped(1, j+ms2, iip) = ZERO
                 end do
-            !
             else
-                !
                 do j=1, nem
                     n = 2*j+m-2
-                    if (m>1 .and. n>mxtr) then
+                    if (m > 1 .and. n > mxtr) then
                         do i=1, nte
                             u(i, j+ms2) = ped(i, j+ms2, iip)
                         end do
-                        goto 207
-                    end if
-                    a1 = b(n-1)*a(n+m-3)/a(n+m-1)
-                    b1 = a(n-m+1)/a(n+m-1)
-                    if (n-m <= 1) then
-                        do i=1, nte
-                            u(i, j+ms2) = a1*ped(i, j+ms2-1, iip) &
-                                - b1*ped(i, j+ms2, iip)
-                        end do
                     else
-                        c1 = b(n-1)*a(n-m-1)/a(n+m-1)
-                        do i=1, nte
-                            u(i, j+ms2) = a1*ped(i, j+ms2-1, iip) &
-                                - b1*ped(i, j+ms2, iip) + c1*u(i, j+ms2-1)
-                        end do
+                        a1 = b(n-1)*a(n+m-3)/a(n+m-1)
+                        b1 = a(n-m+1)/a(n+m-1)
+                        if (n-m <= 1) then
+                            do i=1, nte
+                                u(i, j+ms2) = a1*ped(i, j+ms2-1, iip) &
+                                    - b1*ped(i, j+ms2, iip)
+                            end do
+                        else
+                            c1 = b(n-1)*a(n-m-1)/a(n+m-1)
+                            do i=1, nte
+                                u(i, j+ms2) = a1*ped(i, j+ms2-1, iip) &
+                                    - b1*ped(i, j+ms2, iip) + c1*u(i, j+ms2-1)
+                            end do
+                        end if
                     end if
-207             continue
                 end do
                 do j=1, nem
                     do i=1, nte
@@ -570,27 +564,27 @@ contains
             else
                 do j=1, nom
                     n = 2*j+m-1
-                    if (m>1 .and. n>mxtr) then
+                    if (m > 1 .and. n > mxtr) then
                         do i=1, nte
                             u(i, j+ms2) = pod(i, j+ms2, iip)
                         end do
-                        goto 304
-                    end if
-                    a1 = b(n-1)*a(n+m-3)/a(n+m-1)
-                    b1 = a(n-m+1)/a(n+m-1)
-                    if (n-m <= 1) then
-                        do i=1, nte
-                            u(i, j+ms2) = a1*pod(i, j+ms2-1, iip) &
-                                - b1*pod(i, j+ms2, iip)
-                        end do
                     else
-                        c1 = b(n-1)*a(n-m-1)/a(n+m-1)
-                        do i=1, nte
-                            u(i, j+ms2) = a1*pod(i, j+ms2-1, iip) &
-                                - b1*pod(i, j+ms2, iip) + c1*u(i, j+ms2-1)
-                        end do
+                        a1 = b(n-1)*a(n+m-3)/a(n+m-1)
+                        b1 = a(n-m+1)/a(n+m-1)
+                        if (n-m <= 1) then
+                            do i=1, nte
+                                u(i, j+ms2) = a1*pod(i, j+ms2-1, iip) &
+                                    - b1*pod(i, j+ms2, iip)
+                            end do
+                        else
+                            c1 = b(n-1)*a(n-m-1)/a(n+m-1)
+                            do i=1, nte
+                                u(i, j+ms2) = a1*pod(i, j+ms2-1, iip) &
+                                    - b1*pod(i, j+ms2, iip) + c1*u(i, j+ms2-1)
+                            end do
+                        end if
                     end if
-304                 if (modn == 1) u(nte, j+ms2) = ZERO
+                    if (modn == 1) u(nte, j+ms2) = ZERO
                 end do
                 do j=1, nom
                     do i=1, nte
@@ -600,19 +594,12 @@ contains
             end if
 
             if (.not.(ms2 <= 0. .or. nto <= ms2)) then
-                !
-                ! initialize array with random numbers using
-                ! Fortran 90 intrinsics random_seed and random_number
-                !
-                ! old code commented out
-                !
-                !     do i=1, nte
-                !     xx(i) = rand()
-                !     end do
-                ! replacement code
-                !
+
+                ! initialize array with random numbers
                 call random_number(xx(1:nte))
+
                 if (modn == 1) xx(nte) = ZERO
+
                 it = 0
                 306 do i=1, nte
                     z(i) = ZERO
@@ -643,10 +630,9 @@ contains
                 if (modn == 1) pod(nte, ms2, iip) = ZERO
             end if
         end do
-        !
-        !     reorder if mtrunc is less than nlat-1
-        !        case of odd functions
-        !
+
+        ! Reorder if mtrunc is less than nlat-1
+        ! case of odd functions
         if (modn == 0) then
             nsho(1) = (nlat-mtrunc)/2
             nsho(2) = (nlat-mtrunc-1)/2
@@ -672,9 +658,8 @@ contains
 
         call truncate(0, nte, idp, pod(1, 1, 1), nto, ipso(1, 1))
         call truncate(0, nte, idp, pod(1, 1, 2), nto, ipso(1, 2))
-        !
+
         ! Compute the analysis matrices (odd functions)
-        !
         do iip=1, 2
             do i=1, nto
                 lock = 0
