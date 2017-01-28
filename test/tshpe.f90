@@ -29,11 +29,7 @@
 !     *                                                               *
 !     * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !
-!
-!
-!
-!    a program testing subroutines shpei and shpe in file shpe.f
-!    also requires files  shaec.f shsec.f sphcom.f and hrfft.f
+!    a program testing subroutines shpei and shpe
 !
 !    shpe is the n**2 filter with complement, odd/even
 !    factorization and zero truncation on an equally spaced
@@ -47,8 +43,6 @@
 program tshpe
 
     use, intrinsic :: ISO_Fortran_env, only: &
-        sp => REAL32, &
-        stderr => ERROR_UNIT, &
         stdout => OUTPUT_UNIT
 
     use spherepack_library

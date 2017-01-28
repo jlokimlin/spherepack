@@ -29,117 +29,269 @@
 !     *                                                               *
 !     * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !
-!                            August 2003
 !
-! ... file shpe.f
-!
-!     this file contains code and documentation for subroutines
+!     This file contains code and documentation for subroutines
 !     shpei and shpe.
 !
-! ... files which must be loaded with shpe.f
-!
-!     type_SpherepackAux.f, type_RealPeriodicTransform.f
-!
-!     subroutine shpei initializes arrays wshp and iwshp for
-!     subsequent repeated use by subroutine shpe, which
-!     performs the harmonic projection equivalent to a
-!     harmonic analysis followed by harmonic synthesis
-!     but faster and with less memory. (see description of
-!     subroutine shpe below)
-!
-!     subroutine shpei(nlat, nlon, isym, mtrunc, wshp, lwshp, iwshp, 
-!    1 liwshp, work, lwork, ierror)
-!
-!     shpei initializes arrays wshp and iwshp for repeated use
-!     by subroutine shpe ....
-!
-!     input parameters
-!
-!     nlat   the number of colatitudes on the full sphere including the
-!            poles. for example, nlat = 37 for a five degree grid.
-!            nlat determines the grid increment in colatitude as
-!            pi/(nlat-1).  if nlat is odd the equator is located at
-!            grid point i=(nlat+1)/2. if nlat is even the equator is
-!            located half way between points i=nlat/2 and i=nlat/2+1.
-!            nlat must be at least 3.
-!
-!     nlon   the number of distinct londitude points.  nlon determines
-!            the grid increment in longitude as 2*pi/nlon. for example
-!            nlon = 72 for a five degree grid. nlon must be greater
-!            than or equal to 4. the efficiency of the computation is
-!            improved when nlon is a product of small prime numbers.
-!            nlon must beat least 4.
-!
-!     isym   currently not used.    
-!
-!     mtrunc the highest longitudinal wave number retained in the
-!            projection. It must be less than or equal to
-!            the minimum of nlat-1 and nlon/2. The first wave
-!            number is zero. For example, if wave numbers 0 and
-!            1 are desired then mtrunc = 1.
-!
-!     lwshp  the dimension of the array wshp as it appears in the
-!            program that calls shpei. It must be at least
-!            2*(nlat+1)**2+nlon+log2(nlon)
-!
-!     liwshp the dimension of the array iwshp as it appears in the
-!            program that calls shpei. It must be at least
-!            4*(nlat+1).
-!
-!     lwork  the dimension of the array work as it appears in the
-!            program that calls shpei. It must be at least
-!            1.25*(nlat+1)**2+7*nlat+8.
-!
-!     **************************************************************
-!
-!     output parameters
-!
-!     wshp   a single precision array that must be saved for
-!            repeated use by subroutine shpe.        
-!
-!     iwshp  an integer array that must be saved for repeated
-!            use by subroutine shpe.        
-!
-!     work   a real work array that does
-!            not have to be saved.
-!
-!     ierror = 0  no errors
-!            = 1  error in the specification of nlat
-!            = 2  error in the specification of nlon
-!            = 3  error in the specification of isym
-!            = 4  error in the specification of mtrunc
-!            = 5  error in the specification of lwshp
-!            = 6  error in the specification of liwshp
-!            = 7  error in the specification of lwork
-!
-module module_shpe
-
-    use spherepack_precision, only: &
-        wp, & ! working precision
-        ip, & ! integer precision
-        PI, &
-        MACHINE_EPSILON
-
-    use type_SpherepackAux, only: &
-        SpherepackAux
-
-    ! Explicit typing only
-    implicit none
-
-    ! Everything is private unless stated otherwise
-    private
-    public :: shpe
-    public :: shpei
-
-    ! Parameters confined to the module
-    real(wp), parameter :: ZERO = 0.0_wp
-    real(wp), parameter :: HALF = 0.5_wp
-    real(wp), parameter :: ONE = 1.0_wp
-    real(wp), parameter :: TWO = 2.0_wp
+submodule(scalar_projection_routines) scalar_projection_regular_grid
 
 contains
 
-    subroutine shpei(nlat, nlon, isym, mtrunc, wshp, lwshp, iwshp, &
+    ! Purpose:
+    !
+    !     the n**2 projection with complement, odd/even
+    !     factorization and zero truncation on an
+    !     equally spaced grid as defined in the JCP paper
+    !     "Generalized discrete spherical harmonic transforms"
+    !     by Paul N. Swarztrauber and William F. Spotz
+    !     It is equivalent to a harmonic analysis followed
+    !     by a synthesis except faster and requires less memory.
+    !
+    !     subroutine shpe(nlat, nlon, isym, mtrunc, x, y, idxy, &
+    !     wshp, lwshp, iwshp, liwshp, work, lwork, ierror)
+    !
+    !     shpe projects the array x onto the set of functions represented
+    !     by a discrete set of spherical harmonics.
+    !
+    !     input parameters
+    !
+    !     nlat   the number of colatitudes on the full sphere including the
+    !            poles. for example, nlat = 37 for a five degree grid.
+    !            nlat determines the grid increment in colatitude as
+    !            pi/(nlat-1).  if nlat is odd the equator is located at
+    !            grid point i=(nlat+1)/2. if nlat is even the equator is
+    !            located half way between points i=nlat/2 and i=nlat/2+1.
+    !            nlat must be at least 3.
+    !
+    !     nlon   the number of distinct londitude points.  nlon determines
+    !            the grid increment in longitude as 2*pi/nlon. for example
+    !            nlon = 72 for a five degree grid. nlon must be greater
+    !            than or equal to 4. the efficiency of the computation is
+    !            improved when nlon is a product of small prime numbers.
+    !            nlon must beat least 4.
+    !
+    !     isym   currently not used.
+    !
+    !     mtrunc the highest longitudinal wave number retained in the
+    !            projection. It must be less than or equal to
+    !            the minimum of nlat-1 and nlon/2. The first wave
+    !            number is zero. For example, if wave numbers 0 and
+    !            1 are desired then mtrunc = 1.
+
+    !            zero.
+    !
+    !     x      a two dimensional array that contains the the nlat
+    !            by nlon array x(i, j) defined at the colatitude point
+    !            theta(i) = (i-1)*pi/(nlat-1) and longitude point phi(j) =
+    !            (j-1)*2*pi/nlon.
+    !
+    !     idxy   the first dimension of the arrays x and y as they
+    !            appear in the program that calls shpe. It must be
+    !            at least nlat.
+    !
+    !     wshp   a single precision array that must be saved for
+    !            repeated use by subroutine shpe.
+    !
+    !     lwshp  the dimension of the array wshp as it appears in the
+    !            program that calls shpei. It must be at least
+    !            2*(nlat+1)**2+nlon+log2(nlon)
+    !
+    !     iwshp  an integer array that must be saved for repeated
+    !            use by subroutine shpe.
+    !
+    !
+    !     liwshp the dimension of the array iwshp as it appears in the
+    !            program that calls shpei. It must be at least
+    !            4*(nlat+1).
+    !
+    !     work   a single precision work array that does
+    !            not have to be saved.
+    !
+    !     lwork  the dimension of the array work as it appears in the
+    !            program that calls shpe. It must be at least
+    !            max(nlat*nlon, 4*(nlat+1)).
+    !
+    !     **************************************************************
+    !
+    !     output parameters
+    !
+    !     y      an nlat by nlon single precision array that contains
+    !            the projection of x onto the set of functions that
+    !            can be represented by the discrete set of spherical
+    !            harmonics. The arrays x(i, j) and y(i, j) are located
+    !            at colatitude point theta(i) = (i-1)*pi/(nlat-1) and
+    !            longitude point phi(j) = (j-1)*2*pi/nlon.
+    !
+    !     ierror = 0  no errors
+    !            = 1  error in the specification of nlat
+    !            = 2  error in the specification of nlon
+    !            = 3  error in the specification of isym
+    !            = 4  error in the specification of mtrunc
+    !            = 5  error in the specification of lwshp
+    !            = 6  error in the specification of liwshp
+    !            = 7  error in the specification of lwork
+    !
+    module subroutine shpe(nlat, nlon, isym, mtrunc, x, y, idxy, &
+        wshp, lwshp, iwshp, liwshp, work, lwork, ierror)
+
+        ! Dummy arguments
+        integer(ip), intent(in)  :: nlat
+        integer(ip), intent(in)  :: nlon
+        integer(ip), intent(in)  :: isym
+        integer(ip), intent(in)  :: mtrunc
+        real(wp),    intent(in)  :: x(idxy, nlon)
+        real(wp),    intent(out) :: y(idxy, nlon)
+        integer(ip), intent(in)  :: idxy
+        real(wp),    intent(in)  :: wshp(lwshp)
+        integer(ip), intent(in)  :: lwshp
+        integer(ip), intent(in)  :: iwshp(liwshp)
+        integer(ip), intent(in)  :: liwshp
+        real(wp),    intent(out) :: work(lwork)
+        integer(ip), intent(in)  :: lwork
+        integer(ip), intent(out) :: ierror
+
+        ! Local variables
+        integer(ip) :: iw1
+        integer(ip) :: iw2
+        integer(ip) :: iw3
+        integer(ip) :: iw4
+        integer(ip) :: jw1
+        integer(ip) :: jw2
+        integer(ip) :: jw3
+        integer(ip) :: jw4
+        integer(ip) :: log2n
+        integer(ip) :: lw1
+        integer(ip) :: mmax
+        integer(ip) :: mwrk
+        integer(ip) :: nloc1
+        integer(ip) :: nloc2
+        integer(ip) :: nte
+        type(SpherepackAux) :: sphere_aux
+
+        ! Check input arguments
+        ierror = 1
+        if (nlat < 3) return
+        ierror = 2
+        if (nlon < 4) return
+        ierror = 3
+        if (isym < 0 .or. isym > 2) return
+        ierror = 4
+        mmax = min(nlat-1, nlon/2)
+        if (mtrunc < 0 .or. mtrunc > mmax) return
+        ierror = 5
+        log2n = log(real(nlon))/log(TWO)
+        lw1 = 2*(nlat+1)**2
+        if (lwshp<lw1+nlon+log2n) return
+        ierror = 6
+        if (liwshp<4*(nlat+1)) return
+        ierror = 7
+        mwrk = max(nlat*nlon, 4*(nlat+1))
+        if (lwork <mwrk) return
+        ierror = 0
+
+        y(1:nlat, :) = x(1:nlat, :)
+
+        call sphere_aux%hfft%forward(nlat, nlon, y, idxy, wshp(lw1+1), work)
+
+        ! Set workspace index pointers
+        nte = (nlat+1)/2
+        nloc1 = 2*nte*nte
+        nloc2 = nlat+1
+        lw1 = 2*(nlat+1)**2
+        iw1 = 1
+        iw2 = iw1+nloc1
+        iw3 = iw2+nloc1
+        iw4 = iw3+nloc1
+        jw1 = 1
+        jw2 = jw1+nloc2
+        jw3 = jw2+nloc2
+        jw4 = jw3+nloc2
+
+        call shpe_lower_routine(nlat, nlon, isym, mtrunc, y, y, idxy, ierror, &
+            nte, wshp(iw1), wshp(iw2), wshp(iw3), wshp(iw4), iwshp(jw1), &
+            iwshp(jw2), iwshp(jw3), iwshp(jw4), work(jw1), &
+            work(jw2), work(jw3), work(jw4))
+
+        call sphere_aux%hfft%backward(nlat, nlon, y, idxy, wshp(lw1+1), work)
+
+        y(1:nlat, :) = y(1:nlat, :)/nlon
+
+    end subroutine shpe
+
+    ! Purpose:
+    !
+    !     Initializes arrays wshp and iwshp for
+    !     subsequent repeated use by subroutine shpe, which
+    !     performs the harmonic projection equivalent to a
+    !     harmonic analysis followed by harmonic synthesis
+    !     but faster and with less memory.
+    !
+    !     subroutine shpei(nlat, nlon, isym, mtrunc, wshp, lwshp, iwshp,
+    !     liwshp, work, lwork, ierror)
+    !
+    !     shpei initializes arrays wshp and iwshp for repeated use
+    !     by subroutine shpe ....
+    !
+    !     input parameters
+    !
+    !     nlat   the number of colatitudes on the full sphere including the
+    !            poles. for example, nlat = 37 for a five degree grid.
+    !            nlat determines the grid increment in colatitude as
+    !            pi/(nlat-1).  if nlat is odd the equator is located at
+    !            grid point i=(nlat+1)/2. if nlat is even the equator is
+    !            located half way between points i=nlat/2 and i=nlat/2+1.
+    !            nlat must be at least 3.
+    !
+    !     nlon   the number of distinct londitude points.  nlon determines
+    !            the grid increment in longitude as 2*pi/nlon. for example
+    !            nlon = 72 for a five degree grid. nlon must be greater
+    !            than or equal to 4. the efficiency of the computation is
+    !            improved when nlon is a product of small prime numbers.
+    !            nlon must beat least 4.
+    !
+    !     isym   currently not used.
+    !
+    !     mtrunc the highest longitudinal wave number retained in the
+    !            projection. It must be less than or equal to
+    !            the minimum of nlat-1 and nlon/2. The first wave
+    !            number is zero. For example, if wave numbers 0 and
+    !            1 are desired then mtrunc = 1.
+    !
+    !     lwshp  the dimension of the array wshp as it appears in the
+    !            program that calls shpei. It must be at least
+    !            2*(nlat+1)**2+nlon+log2(nlon)
+    !
+    !     liwshp the dimension of the array iwshp as it appears in the
+    !            program that calls shpei. It must be at least
+    !            4*(nlat+1).
+    !
+    !     lwork  the dimension of the array work as it appears in the
+    !            program that calls shpei. It must be at least
+    !            1.25*(nlat+1)**2+7*nlat+8.
+    !
+    !     **************************************************************
+    !
+    !     output parameters
+    !
+    !     wshp   a single precision array that must be saved for
+    !            repeated use by subroutine shpe.
+    !
+    !     iwshp  an integer array that must be saved for repeated
+    !            use by subroutine shpe.
+    !
+    !     work   a real work array that does
+    !            not have to be saved.
+    !
+    !     ierror = 0  no errors
+    !            = 1  error in the specification of nlat
+    !            = 2  error in the specification of nlon
+    !            = 3  error in the specification of isym
+    !            = 4  error in the specification of mtrunc
+    !            = 5  error in the specification of lwshp
+    !            = 6  error in the specification of liwshp
+    !            = 7  error in the specification of lwork
+    !
+    module subroutine shpei(nlat, nlon, isym, mtrunc, wshp, lwshp, iwshp, &
         liwshp, work, lwork, ierror)
 
         ! Dummy arguments
@@ -186,26 +338,33 @@ contains
         integer(ip) :: nte
         type(SpherepackAux) :: sphere_aux
 
-        ! Check input arguments
-        ierror = 1
-        if (nlat < 3) return
-        ierror = 2
-        if (nlon < 4) return
-        ierror = 3
-        if (isym < 0 .or. isym > 2) return
-        ierror = 4
+        ! Set contants
         mmax = min(nlat-1, nlon/2)
-        if (mtrunc<0 .or. mtrunc>mmax) return
-        ierror = 5
         lw1 = 2*(nlat+1)**2
-        log2n = int(log(real(nlon))/log(TWO), kind=wp)
-        if (lwshp<lw1+nlon+log2n) return
-        ierror = 6
-        if (liwshp<4*(nlat+1)) return
-        ierror = 7
-        mlwk = 1.25*(nlat+1)**2+7*nlat+8
-        if (lwork <mlwk) return
-        ierror = 0
+        log2n = int(log(real(nlon, kind=wp))/log(TWO), kind=wp)
+        mlwk = 5*((nlat+1)**2 + 7*nlat + 8)/4
+
+        ! Check input arguments
+        if (nlat < 3) then
+            ierror = 1
+        else if (nlon < 4) then
+            ierror = 2
+        else if (isym < 0 .or. isym > 2) then
+            ierror = 3
+        else if (mtrunc < 0 .or. mtrunc > mmax) then
+            ierror = 4
+        else if (lwshp < lw1+nlon+log2n) then
+            ierror = 5
+        else if (liwshp < 4*(nlat+1)) then
+            ierror = 6
+        else if (lwork < mlwk) then
+            ierror = 7
+        else
+            ierror = 0
+        end if
+
+        ! Check error flag
+        if (ierror /= 0) return
 
         call sphere_aux%hfft%initialize(nlon, wshp(lw1+1))
 
@@ -683,192 +842,6 @@ contains
         end do
 
     end subroutine shpei_lower_routine
-    !
-    !
-    ! ... file shpe.f
-    !
-    ! ... files which must be loaded with shpe.f
-    !
-    !     type_SpherepackAux.f, type_RealPeriodicTransform.f
-    !
-    !     the n**2 projection with complement, odd/even
-    !     factorization and zero truncation on an
-    !     equally spaced grid as defined in the JCP paper
-    !     "Generalized discrete spherical harmonic transforms"
-    !     by Paul N. Swarztrauber and William F. Spotz
-    !     It is equivalent to a harmonic analysis followed
-    !     by a synthesis except faster and requires less memory.
-    !
-    !     subroutine shpe(nlat, nlon, isym, mtrunc, x, y, idxy,
-    !    1        wshp, lwshp, iwshp, liwshp, work, lwork, ierror)
-    !
-    !     shpe projects the array x onto the set of functions represented
-    !     by a discrete set of spherical harmonics.
-    !
-    !     input parameters
-    !
-    !     nlat   the number of colatitudes on the full sphere including the
-    !            poles. for example, nlat = 37 for a five degree grid.
-    !            nlat determines the grid increment in colatitude as
-    !            pi/(nlat-1).  if nlat is odd the equator is located at
-    !            grid point i=(nlat+1)/2. if nlat is even the equator is
-    !            located half way between points i=nlat/2 and i=nlat/2+1.
-    !            nlat must be at least 3.
-    !
-    !     nlon   the number of distinct londitude points.  nlon determines
-    !            the grid increment in longitude as 2*pi/nlon. for example
-    !            nlon = 72 for a five degree grid. nlon must be greater
-    !            than or equal to 4. the efficiency of the computation is
-    !            improved when nlon is a product of small prime numbers.
-    !            nlon must beat least 4.
-    !
-    !     isym   currently not used.
-    !
-    !     mtrunc the highest longitudinal wave number retained in the
-    !            projection. It must be less than or equal to
-    !            the minimum of nlat-1 and nlon/2. The first wave
-    !            number is zero. For example, if wave numbers 0 and
-    !            1 are desired then mtrunc = 1.
-
-    !            zero.
-    !
-    !     x      a two dimensional array that contains the the nlat
-    !            by nlon array x(i, j) defined at the colatitude point
-    !            theta(i) = (i-1)*pi/(nlat-1) and longitude point phi(j) =
-    !            (j-1)*2*pi/nlon.
-    !
-    !     idxy   the first dimension of the arrays x and y as they
-    !            appear in the program that calls shpe. It must be
-    !            at least nlat.
-    !
-    !     wshp   a single precision array that must be saved for
-    !            repeated use by subroutine shpe.
-    !
-    !     lwshp  the dimension of the array wshp as it appears in the
-    !            program that calls shpei. It must be at least
-    !            2*(nlat+1)**2+nlon+log2(nlon)
-    !
-    !     iwshp  an integer array that must be saved for repeated
-    !            use by subroutine shpe.
-    !
-    !
-    !     liwshp the dimension of the array iwshp as it appears in the
-    !            program that calls shpei. It must be at least
-    !            4*(nlat+1).
-    !
-    !     work   a single precision work array that does
-    !            not have to be saved.
-    !
-    !     lwork  the dimension of the array work as it appears in the
-    !            program that calls shpe. It must be at least
-    !            max(nlat*nlon, 4*(nlat+1)).
-    !
-    !     **************************************************************
-    !
-    !     output parameters
-    !
-    !     y      an nlat by nlon single precision array that contains
-    !            the projection of x onto the set of functions that
-    !            can be represented by the discrete set of spherical
-    !            harmonics. The arrays x(i, j) and y(i, j) are located
-    !            at colatitude point theta(i) = (i-1)*pi/(nlat-1) and
-    !            longitude point phi(j) = (j-1)*2*pi/nlon.
-    !
-    !     ierror = 0  no errors
-    !            = 1  error in the specification of nlat
-    !            = 2  error in the specification of nlon
-    !            = 3  error in the specification of isym
-    !            = 4  error in the specification of mtrunc
-    !            = 5  error in the specification of lwshp
-    !            = 6  error in the specification of liwshp
-    !            = 7  error in the specification of lwork
-    !
-    subroutine shpe(nlat, nlon, isym, mtrunc, x, y, idxy, &
-        wshp, lwshp, iwshp, liwshp, work, lwork, ierror)
-
-        ! Dummy arguments
-        integer(ip), intent(in)  :: nlat
-        integer(ip), intent(in)  :: nlon
-        integer(ip), intent(in)  :: isym
-        integer(ip), intent(in)  :: mtrunc
-        real(wp),    intent(in)  :: x(idxy, nlon)
-        real(wp),    intent(out) :: y(idxy, nlon)
-        integer(ip), intent(in)  :: idxy
-        real(wp),    intent(in)  :: wshp(lwshp)
-        integer(ip), intent(in)  :: lwshp
-        integer(ip), intent(in)  :: iwshp(liwshp)
-        integer(ip), intent(in)  :: liwshp
-        real(wp),    intent(out) :: work(lwork)
-        integer(ip), intent(in)  :: lwork
-        integer(ip), intent(out) :: ierror
-        
-        ! Local variables
-        integer(ip) :: iw1
-        integer(ip) :: iw2
-        integer(ip) :: iw3
-        integer(ip) :: iw4
-        integer(ip) :: jw1
-        integer(ip) :: jw2
-        integer(ip) :: jw3
-        integer(ip) :: jw4
-        integer(ip) :: log2n
-        integer(ip) :: lw1
-        integer(ip) :: mmax
-        integer(ip) :: mwrk
-        integer(ip) :: nloc1
-        integer(ip) :: nloc2
-        integer(ip) :: nte
-        type(SpherepackAux) :: sphere_aux
-
-        ! Check input arguments
-        ierror = 1
-        if (nlat < 3) return
-        ierror = 2
-        if (nlon < 4) return
-        ierror = 3
-        if (isym < 0 .or. isym > 2) return
-        ierror = 4
-        mmax = min(nlat-1, nlon/2)
-        if (mtrunc < 0 .or. mtrunc > mmax) return
-        ierror = 5
-        log2n = log(real(nlon))/log(TWO)
-        lw1 = 2*(nlat+1)**2
-        if (lwshp<lw1+nlon+log2n) return
-        ierror = 6
-        if (liwshp<4*(nlat+1)) return
-        ierror = 7
-        mwrk = max(nlat*nlon, 4*(nlat+1))
-        if (lwork <mwrk) return
-        ierror = 0
-
-        y(1:nlat, :) = x(1:nlat, :)
-
-        call sphere_aux%hfft%forward(nlat, nlon, y, idxy, wshp(lw1+1), work)
-
-        ! Set workspace index pointers
-        nte = (nlat+1)/2
-        nloc1 = 2*nte*nte
-        nloc2 = nlat+1
-        lw1 = 2*(nlat+1)**2
-        iw1 = 1
-        iw2 = iw1+nloc1
-        iw3 = iw2+nloc1
-        iw4 = iw3+nloc1
-        jw1 = 1
-        jw2 = jw1+nloc2
-        jw3 = jw2+nloc2
-        jw4 = jw3+nloc2
-
-        call shpe_lower_routine(nlat, nlon, isym, mtrunc, y, y, idxy, ierror, &
-            nte, wshp(iw1), wshp(iw2), wshp(iw3), wshp(iw4), iwshp(jw1), &
-            iwshp(jw2), iwshp(jw3), iwshp(jw4), work(jw1), &
-            work(jw2), work(jw3), work(jw4))
-
-        call sphere_aux%hfft%backward(nlat, nlon, y, idxy, wshp(lw1+1), work)
-
-        y(1:nlat, :) = y(1:nlat, :)/nlon
-
-    end subroutine shpe
 
     subroutine shpe_lower_routine(nlat, nlon, isym, mtrunc, sx, sy, idxy, ierror, &
         idp, pe, po, ze, zo, ipse, jzse, ipso, jzso, xe, xo, ye, yo)
@@ -1071,54 +1044,6 @@ contains
         end if
 
     end subroutine matrix_multiplication
-
-    subroutine truncate(irc, n, idp, a, nrc, ijs)
-
-        integer(ip) :: i
-        integer(ip) :: idp
-        integer(ip) :: ijs(n)
-        integer(ip) :: irc
-        integer(ip) :: j
-        integer(ip) :: n
-        integer(ip) :: nrc
-        real(wp) :: a(idp, *)
-
-        !     irc = 0 for columns , or irc = 1 for rows
-        select case (irc)
-            case(0)
-                outer_loop: do j=1, nrc
-                    do i=1, n
-                        ijs(j) = i
-                        if (abs(a(i, j)) > MACHINE_EPSILON) cycle outer_loop
-                    end do
-                end do outer_loop
-            case default
-                default_outer_loop: do i=1, nrc
-                    do j=1, n
-                        ijs(i) = j
-                        if (abs(a(i, j)) > MACHINE_EPSILON) cycle default_outer_loop
-                    end do
-                end do default_outer_loop
-        end select
-
-    end subroutine truncate
-
-    ! Purpose:
-    !
-    ! Accumulate inner products of x with respect to y.
-    !
-    subroutine accumulate_inner_products(n, x, y, z)
-
-        ! Dummy arguments
-        integer(ip), intent(in)    :: n
-        real(wp),    intent(in)    :: x(n)
-        real(wp),    intent(in)    :: y(n)
-        real(wp),    intent(inout) :: z(n)
-
-        !  Let the intrinsic function dot_product take care of optimization.
-        z = z + dot_product(x,y) * y
-
-    end subroutine accumulate_inner_products
 
     subroutine compute_normal_regular_grid(n, x, id, q)
 
@@ -2036,4 +1961,4 @@ contains
 
     end subroutine swap_vectors
 
-end module module_shpe
+end submodule scalar_projection_regular_grid

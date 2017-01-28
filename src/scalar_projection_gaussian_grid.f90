@@ -33,207 +33,265 @@
 !     this file contains code and documentation for subroutines
 !     shpgi and shpg.
 !
-! Purpose:
-!
-!     shpgi initializes the arrays wshp and iwshp for subsequent 
-!     use in subroutine shpg, which performs the harmonic projection 
-!     which is equivalent to a harmonic analysis followed by 
-!     harmonic synthesis but faster and with less memory.
-!     (see description of subroutine shpg below).
-!
-!     subroutine shpgi(nlat, nlon, isym, mtrunc, wshp, lwshp, iwshp, liwshp, work, lwork, ierror)
-!
-!     shpgi initializes arrays wshp and iwshp for repeated use
-!     by subroutine shpg ....
-!
-!     input parameters
-!
-!     nlat   the number of colatitudes on the full sphere including the
-!            poles. for example, nlat = 37 for a five degree grid.
-!            nlat determines the grid increment in colatitude as
-!            pi/(nlat-1).  if nlat is odd the equator is located at
-!            grid point i=(nlat+1)/2. if nlat is even the equator is
-!            located half way between points i=nlat/2 and i=nlat/2+1.
-!            nlat must be at least 3.
-!
-!     nlon   the number of distinct londitude points.  nlon determines
-!            the grid increment in longitude as 2*pi/nlon. for example
-!            nlon = 72 for a five degree grid. nlon must be greater
-!            than or equal to 4. the efficiency of the computation is
-!            improved when nlon is a product of small prime numbers.
-!            nlon must be at least 4.
-!
-!     isym   currently not used, no equatorial symmetries assumed, 
-!            only whole sphere computations.    
-!
-!     mtrunc the highest longitudinal wave number retained in the
-!            projection. It must be less than or equal to
-!            the minimum of nlat-1 and nlon/2. The first wave
-!            number is zero. For example, if wave numbers 0 and
-!            1 are desired then mtrunc = 1.
-!
-!     lwshp  the dimension of the array wshp as it appears in the
-!            program that calls shpgi. It must be at least
-!            2*(nlat+1)**2+nlon+log2(nlon)
-!
-!     liwshp the dimension of the array iwshp as it appears in the
-!            program that calls shpgi. It must be at least
-!            4*(nlat+1).
-!
-!     lwork  the dimension of the array work as it appears in the
-!            program that calls shpgi. It must be at least
-!            1.25*(nlat+1)**2+7*nlat+8.
-!
-!     **************************************************************
-!
-!     output parameters
-!
-!     wshp   a single precision array that must be saved for
-!            repeated use by subroutine shpg.        
-!
-!     iwshp  an integer array that must be saved for repeated
-!            use by subroutine shpg.        
-!
-!     work   a real work array that does 
-!            not have to be saved.
-!
-!     ierror = 0  no errors
-!            = 1  error in the specification of nlat
-!            = 2  error in the specification of nlon
-!            = 3  error in the specification of isym
-!            = 4  error in the specification of mtrunc
-!            = 5  error in the specification of lwshp
-!            = 6  error in the specification of liwshp
-!            = 7  error in the specification of lwork
-!
-!
-! Purpose:
-!
-!     shpg computes the harmonic projection, which is
-!     equivalent to a harmonic analysis (forward) followed
-!     by a harmonic synthesis (backward transform).
-!     shpg uses the n**2 projection or complement when appropriate
-!     as well as  odd/even factorization and zero truncation on an
-!     on a Gaussian distributed grid as defined in the JCP paper
-!     "Generalized discrete spherical harmonic transforms"
-!     by Paul N. Swarztrauber and William F. Spotz
-!     J. Comp. Phys., 159(2000) pp. 213-230.
-!
-!     subroutine shpg(nlat, nlon, isym, mtrunc, x, y, idxy, wshp, lwshp, iwshp, liwshp, work, lwork, ierror)
-!
-!     shpg projects the array x onto the set of functions represented
-!     by a discrete set of spherical harmonics.
-!
-!     input parameters
-!
-!     nlat   the number of colatitudes on the full sphere including the
-!            poles. for example, nlat = 37 for a five degree grid.
-!            nlat determines the grid increment in colatitude as
-!            pi/(nlat-1).  if nlat is odd the equator is located at
-!            grid point i=(nlat+1)/2. if nlat is even the equator is
-!            located half way between points i=nlat/2 and i=nlat/2+1.
-!            nlat must be at least 3.
-!
-!     nlon   the number of distinct londitude points.  nlon determines
-!            the grid increment in longitude as 2*pi/nlon. for example
-!            nlon = 72 for a five degree grid. nlon must be greater
-!            than or equal to 4. the efficiency of the computation is
-!            improved when nlon is a product of small prime numbers.
-!            nlon must be at least 4.
-!
-!     isym   currently not used.
-!
-!     mtrunc the highest longitudinal wave number retained in the
-!            projection. It must be less than or equal to
-!            the minimum of nlat-1 and nlon/2. The first wave
-!            number is zero. For example, if wave numbers 0 and
-!            1 are desired then mtrunc = 1.
-
-!            zero.
-!
-!     x      a two dimensional array that contains the the nlat
-!            by nlon array x(i, j) defined at the colatitude point
-!            theta(i) = (i-1)*pi/(nlat-1) and longitude point phi(j) =
-!            (j-1)*2*pi/nlon.
-!
-!     idxy   the first dimension of the arrays x and y as they
-!            appear in the program that calls shpg. It must be
-!            at least nlat.
-!
-!     wshp   a single precision array that must be saved for
-!            repeated use by subroutine shpg.
-!
-!     lwshp  the dimension of the array wshp as it appears in the
-!            program that calls shpgi. It must be at least
-!            2*(nlat+1)**2+nlon+log2(nlon)
-!
-!     iwshp  an integer array that must be saved for repeated
-!            use by subroutine shpg.
-!
-!
-!     liwshp the dimension of the array iwshp as it appears in the
-!            program that calls shpgi. It must be at least
-!            4*(nlat+1).
-!
-!     work   a single precision work array that does
-!            not have to be saved.
-!
-!     lwork  the dimension of the array work as it appears in the
-!            program that calls shpg. It must be at least
-!            max(nlat*nlon, 4*(nlat+1)).
-!
-!     **************************************************************
-!
-!     output parameters
-!
-!     y      an nlat by nlon single precision array that contains
-!            the projection of x onto the set of functions that
-!            can be represented by the discrete set of spherical
-!            harmonics. The arrays x(i, j) and y(i, j) are located
-!            at colatitude point theta(i) = (i-1)*pi/(nlat-1) and
-!            longitude point phi(j) = (j-1)*2*pi/nlon.
-!
-!     ierror = 0  no errors
-!            = 1  error in the specification of nlat
-!            = 2  error in the specification of nlon
-!            = 3  error in the specification of isym
-!            = 4  error in the specification of mtrunc
-!            = 5  error in the specification of lwshp
-!            = 6  error in the specification of liwshp
-!            = 7  error in the specification of lwork
-!
-module module_shpg
-
-    use spherepack_precision, only: &
-        wp, & ! working precision
-        ip, & ! integer precision
-        PI, &
-        MACHINE_EPSILON
-
-    use type_SpherepackAux, only: &
-        SpherepackAux
-
-    use gaussian_latitudes_and_weights_routines, only: &
-        compute_gaussian_latitudes_and_weights
-
-    ! Explicit typing only
-    implicit none
-
-    ! Everything is private unless stated otherwise
-    private
-    public :: shpg
-    public :: shpgi
-
-    ! Parameters confined to the module
-    real(wp), parameter :: ZERO = 0.0_wp
-    real(wp), parameter :: HALF = 0.5_wp
-    real(wp), parameter :: ONE = 1.0_wp
-    real(wp), parameter :: TWO = 2.0_wp
-    real(wp), parameter :: THREE = 3.0_wp
+submodule(scalar_projection_routines) scalar_projection_gaussian_grid
 
 contains
+    !
+    ! Purpose:
+    !
+    !     shpg computes the harmonic projection, which is
+    !     equivalent to a harmonic analysis (forward) followed
+    !     by a harmonic synthesis (backward transform).
+    !     shpg uses the n**2 projection or complement when appropriate
+    !     as well as  odd/even factorization and zero truncation on an
+    !     on a Gaussian distributed grid as defined in the JCP paper
+    !     "Generalized discrete spherical harmonic transforms"
+    !     by Paul N. Swarztrauber and William F. Spotz
+    !     J. Comp. Phys., 159(2000) pp. 213-230.
+    !
+    !     subroutine shpg(nlat, nlon, isym, mtrunc, x, y, idxy, wshp, lwshp, iwshp, liwshp, work, lwork, ierror)
+    !
+    !     shpg projects the array x onto the set of functions represented
+    !     by a discrete set of spherical harmonics.
+    !
+    !     input parameters
+    !
+    !     nlat   the number of colatitudes on the full sphere including the
+    !            poles. for example, nlat = 37 for a five degree grid.
+    !            nlat determines the grid increment in colatitude as
+    !            pi/(nlat-1).  if nlat is odd the equator is located at
+    !            grid point i=(nlat+1)/2. if nlat is even the equator is
+    !            located half way between points i=nlat/2 and i=nlat/2+1.
+    !            nlat must be at least 3.
+    !
+    !     nlon   the number of distinct londitude points.  nlon determines
+    !            the grid increment in longitude as 2*pi/nlon. for example
+    !            nlon = 72 for a five degree grid. nlon must be greater
+    !            than or equal to 4. the efficiency of the computation is
+    !            improved when nlon is a product of small prime numbers.
+    !            nlon must be at least 4.
+    !
+    !     isym   currently not used.
+    !
+    !     mtrunc the highest longitudinal wave number retained in the
+    !            projection. It must be less than or equal to
+    !            the minimum of nlat-1 and nlon/2. The first wave
+    !            number is zero. For example, if wave numbers 0 and
+    !            1 are desired then mtrunc = 1.
 
-    subroutine shpgi(nlat, nlon, isym, mtrunc, wshp, lwshp, iwshp, &
+    !            zero.
+    !
+    !     x      a two dimensional array that contains the the nlat
+    !            by nlon array x(i, j) defined at the colatitude point
+    !            theta(i) = (i-1)*pi/(nlat-1) and longitude point phi(j) =
+    !            (j-1)*2*pi/nlon.
+    !
+    !     idxy   the first dimension of the arrays x and y as they
+    !            appear in the program that calls shpg. It must be
+    !            at least nlat.
+    !
+    !     wshp   a single precision array that must be saved for
+    !            repeated use by subroutine shpg.
+    !
+    !     lwshp  the dimension of the array wshp as it appears in the
+    !            program that calls shpgi. It must be at least
+    !            2*(nlat+1)**2+nlon+log2(nlon)
+    !
+    !     iwshp  an integer array that must be saved for repeated
+    !            use by subroutine shpg.
+    !
+    !
+    !     liwshp the dimension of the array iwshp as it appears in the
+    !            program that calls shpgi. It must be at least
+    !            4*(nlat+1).
+    !
+    !     work   a single precision work array that does
+    !            not have to be saved.
+    !
+    !     lwork  the dimension of the array work as it appears in the
+    !            program that calls shpg. It must be at least
+    !            max(nlat*nlon, 4*(nlat+1)).
+    !
+    !     **************************************************************
+    !
+    !     output parameters
+    !
+    !     y      an nlat by nlon single precision array that contains
+    !            the projection of x onto the set of functions that
+    !            can be represented by the discrete set of spherical
+    !            harmonics. The arrays x(i, j) and y(i, j) are located
+    !            at colatitude point theta(i) = (i-1)*pi/(nlat-1) and
+    !            longitude point phi(j) = (j-1)*2*pi/nlon.
+    !
+    !     ierror = 0  no errors
+    !            = 1  error in the specification of nlat
+    !            = 2  error in the specification of nlon
+    !            = 3  error in the specification of isym
+    !            = 4  error in the specification of mtrunc
+    !            = 5  error in the specification of lwshp
+    !            = 6  error in the specification of liwshp
+    !            = 7  error in the specification of lwork
+    !
+    module subroutine shpg(nlat, nlon, isym, mtrunc, x, y, idxy, &
+        wshp, lwshp, iwshp, liwshp, work, lwork, ierror)
+
+        ! Dummy arguments
+        integer(ip), intent(in)  :: nlat
+        integer(ip), intent(in)  :: nlon
+        integer(ip), intent(in)  :: isym
+        integer(ip), intent(in)  :: mtrunc
+        real(wp),    intent(in)  :: x(idxy, nlon)
+        real(wp),    intent(out) :: y(idxy, nlon)
+        integer(ip), intent(in)  :: idxy
+        real(wp),    intent(in)  :: wshp(lwshp)
+        integer(ip), intent(in)  :: lwshp
+        integer(ip), intent(in)  :: iwshp(liwshp)
+        integer(ip), intent(in)  :: liwshp
+        real(wp),    intent(out) :: work(lwork)
+        integer(ip), intent(in)  :: lwork
+        integer(ip), intent(out) :: ierror
+
+        ! Local variables
+        integer(ip) :: iw1
+        integer(ip) :: iw2
+        integer(ip) :: iw3
+        integer(ip) :: iw4
+        integer(ip) :: jw1
+        integer(ip) :: jw2
+        integer(ip) :: jw3
+        integer(ip) :: jw4
+        integer(ip) :: log2n
+        integer(ip) :: lw1
+        integer(ip) :: mmax
+        integer(ip) :: mwrk
+        integer(ip) :: nloc1, nte
+        integer(ip) :: nloc2
+        type(SpherepackAux) :: sphere_aux
+
+        ! Check input arguments
+        ierror = 1
+        if (nlat < 1) return
+        ierror = 2
+        if (nlon < 1) return
+        ierror = 3
+        if (isym < 0 .or. isym > 2) return
+        ierror = 4
+        mmax = min(nlat-1, nlon/2)
+        if (mtrunc<0 .or. mtrunc>mmax) return
+        ierror = 5
+        log2n = int(log(real(nlon, kind=wp))/log(TWO), kind=ip)
+        lw1 = 2*(nlat+1)**2
+        if (lwshp<lw1+nlon+log2n) return
+        ierror = 6
+        if (liwshp<4*(nlat+1)) return
+        ierror = 7
+        mwrk = max(nlat*nlon, 4*(nlat+1))
+        if (lwork <mwrk) return
+        ierror = 0
+
+        y(1:nlat,:) = x(1:nlat,:)
+
+        call sphere_aux%hfft%forward(nlat, nlon, y, idxy, wshp(lw1+1), work)
+
+        ! Set workspace index pointers
+        nte = (nlat+1)/2
+        nloc1 = 2*(nte**2)
+        nloc2 = nlat+1
+        lw1 = 2*(nlat+1)**2
+        iw1 = 1
+        iw2 = iw1+nloc1
+        iw3 = iw2+nloc1
+        iw4 = iw3+nloc1
+        jw1 = 1
+        jw2 = jw1+nloc2
+        jw3 = jw2+nloc2
+        jw4 = jw3+nloc2
+
+        call shpg_lower_routine(nlat, nlon, isym, mtrunc, y, y, idxy, ierror, &
+            nte, wshp(iw1), wshp(iw2), wshp(iw3), wshp(iw4), iwshp(jw1), &
+            iwshp(jw2), iwshp(jw3), iwshp(jw4), work(jw1), &
+            work(jw2), work(jw3), work(jw4))
+
+        call sphere_aux%hfft%backward(nlat, nlon, y, idxy, wshp(lw1+1), work)
+
+        y(1: nlat,:) = y(1:nlat,:)/nlon
+
+    end subroutine shpg
+
+    ! Purpose:
+    !
+    !     shpgi initializes the arrays wshp and iwshp for subsequent
+    !     use in subroutine shpg, which performs the harmonic projection
+    !     which is equivalent to a harmonic analysis followed by
+    !     harmonic synthesis but faster and with less memory.
+    !     (see description of subroutine shpg below).
+    !
+    !     subroutine shpgi(nlat, nlon, isym, mtrunc, wshp, lwshp, iwshp, liwshp, work, lwork, ierror)
+    !
+    !     shpgi initializes arrays wshp and iwshp for repeated use
+    !     by subroutine shpg ....
+    !
+    !     input parameters
+    !
+    !     nlat   the number of colatitudes on the full sphere including the
+    !            poles. for example, nlat = 37 for a five degree grid.
+    !            nlat determines the grid increment in colatitude as
+    !            pi/(nlat-1).  if nlat is odd the equator is located at
+    !            grid point i=(nlat+1)/2. if nlat is even the equator is
+    !            located half way between points i=nlat/2 and i=nlat/2+1.
+    !            nlat must be at least 3.
+    !
+    !     nlon   the number of distinct londitude points.  nlon determines
+    !            the grid increment in longitude as 2*pi/nlon. for example
+    !            nlon = 72 for a five degree grid. nlon must be greater
+    !            than or equal to 4. the efficiency of the computation is
+    !            improved when nlon is a product of small prime numbers.
+    !            nlon must be at least 4.
+    !
+    !     isym   currently not used, no equatorial symmetries assumed,
+    !            only whole sphere computations.
+    !
+    !     mtrunc the highest longitudinal wave number retained in the
+    !            projection. It must be less than or equal to
+    !            the minimum of nlat-1 and nlon/2. The first wave
+    !            number is zero. For example, if wave numbers 0 and
+    !            1 are desired then mtrunc = 1.
+    !
+    !     lwshp  the dimension of the array wshp as it appears in the
+    !            program that calls shpgi. It must be at least
+    !            2*(nlat+1)**2+nlon+log2(nlon)
+    !
+    !     liwshp the dimension of the array iwshp as it appears in the
+    !            program that calls shpgi. It must be at least
+    !            4*(nlat+1).
+    !
+    !     lwork  the dimension of the array work as it appears in the
+    !            program that calls shpgi. It must be at least
+    !            1.25*(nlat+1)**2+7*nlat+8.
+    !
+    !     **************************************************************
+    !
+    !     output parameters
+    !
+    !     wshp   a single precision array that must be saved for
+    !            repeated use by subroutine shpg.
+    !
+    !     iwshp  an integer array that must be saved for repeated
+    !            use by subroutine shpg.
+    !
+    !     work   a real work array that does
+    !            not have to be saved.
+    !
+    !     ierror = 0  no errors
+    !            = 1  error in the specification of nlat
+    !            = 2  error in the specification of nlon
+    !            = 3  error in the specification of isym
+    !            = 4  error in the specification of mtrunc
+    !            = 5  error in the specification of lwshp
+    !            = 6  error in the specification of liwshp
+    !            = 7  error in the specification of lwork
+    !
+    module subroutine shpgi(nlat, nlon, isym, mtrunc, wshp, lwshp, iwshp, &
         liwshp, work, lwork, ierror)
 
         ! Dummy arguments
@@ -333,92 +391,6 @@ contains
             work(kw6), work(kw7), work(kw8), work(kw9), work(kw10), work(kw11))
 
     end subroutine shpgi
-
-    subroutine shpg(nlat, nlon, isym, mtrunc, x, y, idxy, &
-        wshp, lwshp, iwshp, liwshp, work, lwork, ierror)
-
-        ! Dummy arguments
-        integer(ip), intent(in)  :: nlat
-        integer(ip), intent(in)  :: nlon
-        integer(ip), intent(in)  :: isym
-        integer(ip), intent(in)  :: mtrunc
-        real(wp),    intent(in)  :: x(idxy, nlon)
-        real(wp),    intent(out) :: y(idxy, nlon)
-        integer(ip), intent(in)  :: idxy
-        real(wp),    intent(in)  :: wshp(lwshp)
-        integer(ip), intent(in)  :: lwshp
-        integer(ip), intent(in)  :: iwshp(liwshp)
-        integer(ip), intent(in)  :: liwshp
-        real(wp),    intent(out) :: work(lwork)
-        integer(ip), intent(in)  :: lwork
-        integer(ip), intent(out) :: ierror
-
-        ! Local variables
-        integer(ip) :: iw1
-        integer(ip) :: iw2
-        integer(ip) :: iw3
-        integer(ip) :: iw4
-        integer(ip) :: jw1
-        integer(ip) :: jw2
-        integer(ip) :: jw3
-        integer(ip) :: jw4
-        integer(ip) :: log2n
-        integer(ip) :: lw1
-        integer(ip) :: mmax
-        integer(ip) :: mwrk
-        integer(ip) :: nloc1, nte
-        integer(ip) :: nloc2
-        type(SpherepackAux) :: sphere_aux
-
-        ! Check input arguments
-        ierror = 1
-        if (nlat < 1) return
-        ierror = 2
-        if (nlon < 1) return
-        ierror = 3
-        if (isym < 0 .or. isym > 2) return
-        ierror = 4
-        mmax = min(nlat-1, nlon/2)
-        if (mtrunc<0 .or. mtrunc>mmax) return
-        ierror = 5
-        log2n = int(log(real(nlon, kind=wp))/log(TWO), kind=ip)
-        lw1 = 2*(nlat+1)**2
-        if (lwshp<lw1+nlon+log2n) return
-        ierror = 6
-        if (liwshp<4*(nlat+1)) return
-        ierror = 7
-        mwrk = max(nlat*nlon, 4*(nlat+1))
-        if (lwork <mwrk) return
-        ierror = 0
-
-        y(1:nlat,:) = x(1:nlat,:)
-
-        call sphere_aux%hfft%forward(nlat, nlon, y, idxy, wshp(lw1+1), work)
-
-        ! Set workspace index pointers
-        nte = (nlat+1)/2
-        nloc1 = 2*(nte**2)
-        nloc2 = nlat+1
-        lw1 = 2*(nlat+1)**2
-        iw1 = 1
-        iw2 = iw1+nloc1
-        iw3 = iw2+nloc1
-        iw4 = iw3+nloc1
-        jw1 = 1
-        jw2 = jw1+nloc2
-        jw3 = jw2+nloc2
-        jw4 = jw3+nloc2
-
-        call shpg_lower_routine(nlat, nlon, isym, mtrunc, y, y, idxy, ierror, &
-            nte, wshp(iw1), wshp(iw2), wshp(iw3), wshp(iw4), iwshp(jw1), &
-            iwshp(jw2), iwshp(jw3), iwshp(jw4), work(jw1), &
-            work(jw2), work(jw3), work(jw4))
-
-        call sphere_aux%hfft%backward(nlat, nlon, y, idxy, wshp(lw1+1), work)
-
-        y(1: nlat,:) = y(1:nlat,:)/nlon
-
-    end subroutine shpg
 
     subroutine shpgi_lower_routine(nlat, nlon, isym, mtrunc, idp, ierror, &
         pe, po, ze, zo, ipse, jzse, ipso, jzso, &
@@ -580,7 +552,7 @@ contains
                     xx(i) = xx(i)-z(i)
                 end do
 
-                call compute_normal_gaussian_grid(nte, xx, idp, gwts)
+                call calculate_normal(nte, xx, idp, gwts)
 
             end do generate_random_orth_vec_even
 
@@ -731,7 +703,7 @@ contains
 
                 xx(1: nte) = xx(1: nte)-z(1: nte)
 
-                call compute_normal_gaussian_grid(nte, xx, idp, gwts)
+                call calculate_normal(nte, xx, idp, gwts)
             end do generate_random_orth_vec_odd
 
             pod(1: nte, noc, iip) = xx(1: nte)
@@ -962,26 +934,23 @@ contains
 
     subroutine matrix_multiply(lag, lr, lc, ld, a, mc, md, b, x, y, is, js)
 
-        real(wp) :: a
-        real(wp) :: b
-        integer(ip) :: i
-        integer(ip) :: is
-        integer(ip) :: j
-        integer(ip) :: js
-        integer(ip) :: k
-        integer(ip) :: kmx
-        integer(ip) :: lag
-        integer(ip) :: lc
-        integer(ip) :: ld
-        integer(ip) :: lr
-        integer(ip) :: mc
-        integer(ip) :: md
-        real(wp) :: sum1
-        real(wp) :: sum2
-        real(wp) :: x
-        real(wp) :: y
-        dimension a(ld, *), b(md, *), x(ld, 2), y(ld, 2), &
-            is(*), js(*)
+        ! Dummy arguments
+        integer(ip), intent(in)  :: lag
+        integer(ip), intent(in)  :: lc
+        integer(ip), intent(in)  :: ld
+        integer(ip), intent(in)  :: lr
+        real(wp),    intent(in)  :: a(ld, *)
+        integer(ip), intent(in)  :: mc
+        integer(ip), intent(in)  :: md
+        real(wp),    intent(in)  :: b(md, *)
+        real(wp),    intent(in)  :: x(ld, 2)
+        real(wp),    intent(inout) cd :: y(ld, 2)
+        integer(ip), intent(in)  :: is(*)
+        integer(ip), intent(in)  :: js(*)
+
+        ! Local variables
+        integer(ip) :: i, j, k, kmx
+        real(wp)    :: sum1, sum2
 
         kmx = min(lr+1, ld)
 
@@ -1019,55 +988,7 @@ contains
 
     end subroutine matrix_multiply
 
-    subroutine truncate(irc, n, idp, a, nrc, ijs)
-
-        integer(ip) :: i
-        integer(ip) :: idp
-        integer(ip) :: ijs(n)
-        integer(ip) :: irc
-        integer(ip) :: j
-        integer(ip) :: n
-        integer(ip) :: nrc
-        real(wp) :: a(idp, *)
-
-        !     irc = 0 for columns , or irc = 1 for rows
-        select case (irc)
-            case(0)
-                outer_loop: do j=1, nrc
-                    do i=1, n
-                        ijs(j) = i
-                        if (abs(a(i, j)) > MACHINE_EPSILON) cycle outer_loop
-                    end do
-                end do outer_loop
-            case default
-                default_outer_loop: do i=1, nrc
-                    do j=1, n
-                        ijs(i) = j
-                        if (abs(a(i, j)) > MACHINE_EPSILON) cycle default_outer_loop
-                    end do
-                end do default_outer_loop
-        end select
-
-    end subroutine truncate
-
-    ! Purpose:
-    !
-    ! Accumulate inner products of x with respect to y.
-    !
-    subroutine accumulate_inner_products(n, x, y, z)
-
-        ! Dummy arguments
-        integer(ip), intent(in)    :: n
-        real(wp),    intent(in)    :: x(n)
-        real(wp),    intent(in)    :: y(n)
-        real(wp),    intent(inout) :: z(n)
-
-        !  Let the intrinsic function dot_product take care of optimization.
-        z = z + dot_product(x,y) * y
-
-    end subroutine accumulate_inner_products
-
-    subroutine compute_normal_gaussian_grid(n, x, id, q)
+    subroutine calculate_normal(n, x, id, q)
 
         ! Dummy arguments
         integer(ip), intent(in)    :: n
@@ -1087,6 +1008,6 @@ contains
 
         x = x/sqrt(sqs)
 
-    end subroutine compute_normal_gaussian_grid
+    end subroutine calculate_normal
 
-end module module_shpg
+end submodule scalar_projection_gaussian_grid
