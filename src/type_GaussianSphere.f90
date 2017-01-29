@@ -1,5 +1,8 @@
 module type_GaussianSphere
 
+    use, intrinsic :: ISO_Fortran_env, only: &
+        stderr => ERROR_UNIT
+
     use spherepack_precision, only: &
         wp, & ! working precision
         ip ! integer precision
@@ -43,17 +46,21 @@ module type_GaussianSphere
     private
     public :: GaussianSphere
     
+    ! Parameter confined to the module
+    real(wp), parameter :: ONE = 1.0_wp
+
     type, public, extends(Sphere) :: GaussianSphere
     contains
         ! Type-bound procedures
-        procedure, public  :: create => create_gaussian_sphere
-        procedure, public  :: destroy => destroy_gaussian_sphere
-        procedure, public  :: perform_scalar_analysis => gaussian_scalar_analysis
-        procedure, public  :: perform_scalar_synthesis => gaussian_scalar_synthesis
-        procedure, public  :: vector_analysis_from_spherical_components => gaussian_vector_analysis
-        procedure, public  :: perform_vector_synthesis => gaussian_vector_synthesis
-        procedure, public  :: compute_surface_integral
-        procedure, public  :: compute_first_moment
+        procedure, public :: assert_initialized => assert_init_gaussian_sphere
+        procedure, public :: create => create_gaussian_sphere
+        procedure, public :: destroy => destroy_gaussian_sphere
+        procedure, public :: perform_scalar_analysis => gaussian_scalar_analysis
+        procedure, public :: perform_scalar_synthesis => gaussian_scalar_synthesis
+        procedure, public :: vector_analysis_from_spherical_components => gaussian_vector_analysis
+        procedure, public :: perform_vector_synthesis => gaussian_vector_synthesis
+        procedure, public :: compute_surface_integral
+        procedure, public :: compute_first_moment
     end type GaussianSphere
 
     ! Declare user-defined constructor
@@ -78,14 +85,14 @@ contains
     subroutine create_gaussian_sphere(self, nlat, nlon, ntrunc, isym, itype, nt, rsphere)
 
         ! Dummy arguments
-        class(GaussianSphere), intent(inout)         :: self
-        integer(ip),           intent(in)            :: nlat
-        integer(ip),           intent(in)            :: nlon
-        integer(ip),           intent(in), optional  :: ntrunc
-        integer(ip),           intent(in), optional  :: isym      !! Either 0, 1, or 2
-        integer(ip),           intent(in), optional  :: itype     !! Either 0, 1, 2, 3, ..., 8
-        integer(ip),           intent(in), optional  :: nt
-        real(wp),              intent(in), optional  :: rsphere
+        class(GaussianSphere), intent(inout) :: self
+        integer(ip),           intent(in)    :: nlat
+        integer(ip),           intent(in)    :: nlon
+        integer(ip), optional, intent(in)    :: ntrunc
+        integer(ip), optional, intent(in)    :: isym  !! Either 0, 1, or 2
+        integer(ip), optional, intent(in)    :: itype !! Either 0, 1, 2, 3, ..., 8
+        integer(ip), optional, intent(in)    :: nt !!
+        real(wp),    optional, intent(in)    :: rsphere
 
         ! Local variables
         integer(ip) :: ntrunc_op
@@ -129,12 +136,10 @@ contains
         if (present(rsphere)) then
             rsphere_op = rsphere
         else
-            rsphere_op = 1.0_wp
+            rsphere_op = ONE
         end if
 
-        !
         !  Create parent type
-        !
         call self%create_sphere(nlat, nlon, ntrunc_op, isym_op, ityp_op, nt_op, rsphere_op)
 
         ! Set flag
@@ -158,22 +163,35 @@ contains
 
     end subroutine destroy_gaussian_sphere
 
+    subroutine assert_init_gaussian_sphere(self, routine)
+
+        ! Dummy arguments
+        class(GaussianSphere), intent(inout) :: self
+        character(len=*),      intent(in)    :: routine
+
+        ! Check if object is usable
+        select type(self)
+            class is (GaussianSphere)
+            if (.not.self%initialized) then
+                write(stderr, '(a)') &
+                    'Uninitialized object of class(RegularSphere) in '//routine
+            end if
+        end select
+
+    end subroutine assert_init_gaussian_sphere
+
     subroutine gaussian_scalar_analysis(self, scalar_function)
 
         ! Dummy arguments
-        class(GaussianSphere), intent(inout)  :: self
-        real(wp),              intent(in)     :: scalar_function(:,:)
+        class(GaussianSphere), intent(inout) :: self
+        real(wp),              intent(in)    :: scalar_function(:,:)
 
         ! Local variables
         integer(ip)    :: error_flag
         type(ShagsAux) :: aux
 
-
         ! Check if object is usable
-        if (.not.self%initialized) then
-            error stop 'Uninitialized object of class(GaussianSphere): '&
-                //'in gaussian_scalar_analysis'
-        end if
+        call self%assert_initialized('gaussian_scalar_analysis')
 
         select type(self)
             class is (GaussianSphere)
@@ -209,7 +227,7 @@ contains
 
         ! Address error flag
         select case (error_flag)
-        case(0)
+            case(0)
                 return
             case (1)
                 error stop 'Object of class(GaussianSphere) in gaussian_scalar_analysis'&
@@ -239,18 +257,15 @@ contains
     subroutine gaussian_scalar_synthesis(self, scalar_function)
 
         ! Dummy arguments
-        class(GaussianSphere), intent(inout)  :: self
-        real(wp),              intent(out)    :: scalar_function(:,:)
+        class(GaussianSphere), intent(inout) :: self
+        real(wp),              intent(out)   :: scalar_function(:,:)
 
         ! Local variables
         integer(ip)    :: error_flag
         type(ShsgsAux) :: aux
 
         ! Check if object is usable
-        if (.not.self%initialized) then
-            error stop 'Uninitialized object of class(GaussianSphere): '&
-                //'in gaussian_scalar_synthesis'
-        end if
+        call self%assert_initialized('gaussian_scalar_synthesis')
 
         select type(self)
             class is (GaussianSphere)
@@ -288,7 +303,7 @@ contains
 
         !  Address error flag
         select case (error_flag)
-        case(0)
+            case(0)
                 return
             case (1)
                 error stop 'Object of class(GaussianSphere) in gaussian_scalar_synthesis'&
@@ -327,12 +342,8 @@ contains
         integer(ip)    :: error_flag
         type(VhagsAux) :: aux
 
-
-        ! Check if object is usable
-        if (.not.self%initialized) then
-            error stop 'Uninitialized object of class(GaussianSphere): '&
-                //'in gaussian_vector_analysis'
-        end if
+         ! Check if object is usable
+        call self%assert_initialized('gaussian_vector_analysis')
 
         select type(self)
             class is (GaussianSphere)
@@ -361,9 +372,7 @@ contains
                         ierror => error_flag &
                         )
 
-                        !
                         !  Perform gaussian vector analysis
-                        !
                         call aux%vhags(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
                             mdab, ndab, wvhags, lvhags, work, lwork, ierror)
 
@@ -374,7 +383,7 @@ contains
 
         !  Address error flag
         select case (error_flag)
-        case(0)
+            case(0)
                 return
             case (1)
                 error stop 'Object of class(GaussianSphere) in '&
@@ -438,10 +447,7 @@ contains
         type(VhsgsAux) :: aux
 
         ! Check if object is usable
-        if (.not.self%initialized) then
-            error stop 'Uninitialized object of class(GaussianSphere): '&
-                //'in gaussian_vector_synthesis'
-        end if
+        call self%assert_initialized('gaussian_vector_synthesis')
 
         select type(self)
             class is (GaussianSphere)
@@ -480,7 +486,7 @@ contains
 
         !  Address error flag
         select case (error_flag)
-        case(0)
+            case(0)
                 return
             case (1)
                 error stop 'Object of class(GaussianSphere) in gaussian_vector_synthesis'&
@@ -535,7 +541,6 @@ contains
     !
     !   dS = sin(theta) dtheta dphi
     !
-    !
     function compute_surface_integral(self, scalar_function) &
         result (return_value)
 
@@ -545,120 +550,88 @@ contains
         real(wp)                             :: return_value
 
         ! Local variables
-        integer(ip)           :: k  !! counter
-        real(wp), allocatable :: summation(:)
+        integer(ip) :: k, nlat
 
         ! Check if object is usable
-        if (.not.self%initialized) then
-            error stop 'Uninitialized object of class(GaussianSphere): '&
-                //'in get_surface_integral'
-        end if
+        call self%assert_initialized('get_surface_integral')
 
-        !  Allocate memory
-        associate( nlat => self%NUMBER_OF_LATITUDES )
-            allocate(summation(nlat))
-        end associate
+        nlat = self%NUMBER_OF_LATITUDES
 
-        !  compute the integrant
-        associate( grid => self%grid )
-            select type(grid)
-                class is (GaussianGrid)
-                associate( &
-                    nlat => grid%NUMBER_OF_LATITUDES, &
-                    dphi => grid%LONGITUDINAL_MESH, &
-                    wts => grid%gaussian_weights, &
-                    f => scalar_function &
-                    )
+        block
+            real(wp) :: summation(nlat)
 
-                    !  Apply trapezoidal rule
-                    do k = 1, nlat
-                        summation(k) = sum(f(k, :)) * dphi
-                    end do
+            !  compute the integrant
+            associate( grid => self%grid )
+                select type(grid)
+                    class is (GaussianGrid)
+                    associate( &
+                        dphi => grid%LONGITUDINAL_MESH, &
+                        wts => grid%gaussian_weights, &
+                        f => scalar_function &
+                        )
 
-                    !  Apply gaussian quadrature
-                    summation = summation * wts
-                end associate
-            end select
-        end associate
+                        !  Apply trapezoidal rule
+                        do k = 1, nlat
+                            summation(k) = sum(f(k, :)) * dphi
+                        end do
 
-        !
-        !  Set integral \int_{S^2} f( theta, phi ) dS
-        !
-        return_value = sum(summation)
+                        !  Apply gaussian quadrature
+                        summation = summation * wts
+                    end associate
+                end select
+            end associate
 
-        !
-        !  Release memory
-        !
-        deallocate(summation)
+            !  Set integral \int_{S^2} f( theta, phi ) dS
+            return_value = sum(summation)
+        end block
 
     end function compute_surface_integral
 
     subroutine compute_first_moment(self, scalar_function, first_moment)
 
         ! Dummy arguments
-
-        class(GaussianSphere),  intent(inout)  :: self
-        real(wp),               intent(in)     :: scalar_function(:,:)
-        class(Vector),          intent(out)    :: first_moment
+        class(GaussianSphere), intent(inout) :: self
+        real(wp),              intent(in)    :: scalar_function(:,:)
+        class(Vector),         intent(out)   :: first_moment
 
         ! Local variables
-
-        integer(ip)           :: k, l !! Counters
-        real(wp), allocatable :: integrant(:,:,:)
-
+        integer(ip) :: i, j, nlat, nlon
 
         ! Check if object is usable
-        if (.not.self%initialized) then
-            error stop 'Uninitialized object of class(GaussianSphere): '&
-                //'in compute_first_moment'
-        end if
+        call self%assert_initialized('compute_first_moment')
 
+        nlat = self%NUMBER_OF_LATITUDES
+        nlon = self%NUMBER_OF_LONGITUDES
 
-        associate( &
-            nlat => self%NUMBER_OF_LATITUDES, &
-            nlon => self%NUMBER_OF_LONGITUDES &
-            )
-            !
-            !  Allocate memory
-            !
-            allocate( integrant(nlat, nlon, 3) )
+        block
+            real(wp) :: integrant(nlat, nlon, 3)
 
-
-            do l = 1, nlon
-                do k = 1, nlat
+            ! Compute integrant
+            do j = 1, nlon
+                do i = 1, nlat
                     associate( &
-                        u => self%unit_vectors%radial(k, l), &
-                        f => scalar_function(k, l) &
+                        u => self%unit_vectors%radial(i, j), &
+                        f => scalar_function(i, j) &
                         )
-                        !
-                        !  Compute integrant
-                        !
-                        integrant(k, l, 1) = u%x * f
-                        integrant(k, l, 2) = u%y * f
-                        integrant(k, l, 3) = u%z * f
-
+                        integrant(i, j, 1) = u%x * f
+                        integrant(i, j, 2) = u%y * f
+                        integrant(i, j, 3) = u%z * f
                     end associate
                 end do
             end do
-        end associate
 
-        associate( &
-            m => first_moment, &
-            f1 => integrant(:,:,1), &
-            f2 => integrant(:,:,2), &
-            f3 => integrant(:,:,3) &
-            )
-            !
-            !  Compute first moment
-            !
-            m%x = self%compute_surface_integral(f1)
-            m%y = self%compute_surface_integral(f2)
-            m%z = self%compute_surface_integral(f3)
-
-        end associate
-
-        ! Release memory
-        deallocate( integrant )
+            ! Compute first moment
+            associate( &
+                m => first_moment, &
+                f1 => integrant(:,:,1), &
+                f2 => integrant(:,:,2), &
+                f3 => integrant(:,:,3) &
+                )
+                m%x = self%compute_surface_integral(f1)
+                m%y = self%compute_surface_integral(f2)
+                m%z = self%compute_surface_integral(f3)
+            end associate
+        end block
 
     end subroutine compute_first_moment
 

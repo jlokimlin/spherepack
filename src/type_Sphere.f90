@@ -1,8 +1,5 @@
 module type_Sphere
 
-    use, intrinsic :: ISO_Fortran_env, only: &
-        stderr => ERROR_UNIT
-
     use spherepack_precision, only: &
         wp, & ! working precision
         ip ! integer precision
@@ -62,7 +59,6 @@ module type_Sphere
         procedure, public  :: create_sphere
         procedure, public  :: destroy => destroy_sphere
         procedure, public  :: destroy_sphere
-        procedure, public  :: assert_initialized
         procedure, public  :: get_index
         procedure, public  :: get_coefficient
         procedure, public  :: invert_helmholtz
@@ -92,11 +88,13 @@ module type_Sphere
         procedure, private :: invert_scalar_laplacian
         procedure, private :: invert_vector_laplacian
         ! Deferred type-bound procedures
-        procedure(scalar_analysis),  deferred, public :: &
+        procedure(assert_init), deferred, public :: &
+            assert_initialized
+        procedure(scalar_analysis), deferred, public :: &
             perform_scalar_analysis
         procedure(scalar_synthesis), deferred, public :: &
             perform_scalar_synthesis
-        procedure(vector_analysis),  deferred, public :: &
+        procedure(vector_analysis), deferred, public :: &
             vector_analysis_from_spherical_components
         procedure(vector_synthesis), deferred, public :: &
             perform_vector_synthesis
@@ -120,8 +118,16 @@ module type_Sphere
             invert_gradient_from_spherical_components
     end type Sphere
 
-    ! Declare deferred type-bound procedures
+    ! Declare interfaces for deferred type-bound procedures
     abstract interface
+        subroutine assert_init(self, routine)
+            import:: Sphere
+
+            ! Dummy arguments
+            class(Sphere),    intent(inout) :: self
+            character(len=*), intent(in)    :: routine
+        end subroutine assert_init
+
         subroutine scalar_analysis(self, scalar_function)
             import :: Sphere, wp
 
@@ -296,20 +302,6 @@ contains
         self%initialized = .false.
 
     end subroutine destroy_sphere
-
-    subroutine assert_initialized(self, routine)
-
-        ! Dummy arguments
-        class(Sphere),    intent(inout) :: self
-        character(len=*), intent(in)    :: routine
-
-        ! Check if object is usable
-        if (.not.self%initialized) then
-            write(stderr, '(a)') &
-                'Uninitialized object of class(Sphere) in '//routine
-        end if
-
-    end subroutine assert_initialized
 
     !
     ! Purpose:

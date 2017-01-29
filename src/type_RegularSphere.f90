@@ -1,5 +1,8 @@
 module type_RegularSphere
 
+    use, intrinsic :: ISO_Fortran_env, only: &
+        stderr => ERROR_UNIT
+
     use spherepack_precision, only: &
         wp, & ! working precision
         ip ! integer precision
@@ -40,77 +43,67 @@ module type_RegularSphere
     private
     public :: RegularSphere
 
+    ! Parameter confined to the module
+    real(wp), parameter :: ONE = 1.0_wp
 
-    
-    type, extends(Sphere), public :: RegularSphere
+    type, public, extends(Sphere) :: RegularSphere
     contains
-        !----------------------------------------------------------------------
         ! Type-bound procedures
-        !----------------------------------------------------------------------
-        procedure, public  :: create => create_regular_sphere
-        procedure, public  :: destroy => destroy_regular_sphere
-        procedure, public  :: perform_scalar_analysis => regular_scalar_analysis
-        procedure, public  :: perform_scalar_synthesis => regular_scalar_synthesis
-        procedure, public  :: vector_analysis_from_spherical_components => regular_vector_analysis
-        procedure, public  :: perform_vector_synthesis => regular_vector_synthesis
-        final              :: finalize_regular_sphere
-        !----------------------------------------------------------------------
+        procedure, public :: assert_initialized => assert_init_regular_sphere
+        procedure, public :: create => create_regular_sphere
+        procedure, public :: destroy => destroy_regular_sphere
+        procedure, public :: perform_scalar_analysis => regular_scalar_analysis
+        procedure, public :: perform_scalar_synthesis => regular_scalar_synthesis
+        procedure, public :: vector_analysis_from_spherical_components => regular_vector_analysis
+        procedure, public :: perform_vector_synthesis => regular_vector_synthesis
     end type RegularSphere
 
-    ! Declare constructor
+    ! Declare user-defined constructor
     interface RegularSphere
         module procedure regular_sphere_constructor
     end interface
 
 contains
 
-    function regular_sphere_constructor(nlat, nlon) result (return_value)
-        !----------------------------------------------------------------------
+    function regular_sphere_constructor(nlat, nlon) &
+        result (return_value)
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
         integer(ip), intent(in) :: nlat !! number of latitudinal points 0 <= theta <= pi
         integer(ip), intent(in) :: nlon !! number of longitudinal points 0 <= phi <= 2*pi
-        type(RegularSphere)      :: return_value
-        !----------------------------------------------------------------------
+        type(RegularSphere)     :: return_value
 
         call return_value%create(nlat, nlon)
 
     end function regular_sphere_constructor
 
     subroutine create_regular_sphere(self, nlat, nlon, ntrunc, isym, itype, nt, rsphere)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
-        class(RegularSphere), intent(inout)         :: self
-        integer(ip),          intent(in)            :: nlat
-        integer(ip),          intent(in)            :: nlon
-        integer(ip),          intent(in), optional  :: ntrunc
-        integer(ip),          intent(in), optional  :: isym  !! Either 0, 1, or 2
-        integer(ip),          intent(in), optional  :: itype !! Either 0, 1, 2, 3, ..., 8
-        integer(ip),          intent(in), optional  :: nt !!
-        real(wp),             intent(in), optional  :: rsphere !!
-        !--------------------------------------------------------------------------------
+        class(RegularSphere),  intent(inout) :: self
+        integer(ip),           intent(in)    :: nlat
+        integer(ip),           intent(in)    :: nlon
+        integer(ip), optional, intent(in)    :: ntrunc
+        integer(ip), optional, intent(in)    :: isym  !! Either 0, 1, or 2
+        integer(ip), optional, intent(in)    :: itype !! Either 0, 1, 2, 3, ..., 8
+        integer(ip), optional, intent(in)    :: nt !!
+        real(wp),    optional, intent(in)    :: rsphere
+
         ! Local variables
-        !----------------------------------------------------------------------
         integer(ip) :: ntrunc_op
         integer(ip) :: isym_op
         integer(ip) :: ityp_op
         integer(ip) :: nt_op
         real(wp)    :: rsphere_op
-        !----------------------------------------------------------------------
 
         ! Ensure that object is usable
         call self%destroy()
 
-        !
         !  Allocate polymorphic components
-        !
         allocate( self%grid, source=RegularGrid(nlat, nlon) )
         allocate( self%workspace, source=RegularWorkspace(nlat,nlon) )
 
-        !
         !  Address optional arguments
-        !
 
         ! Set truncation number
         if (present(ntrunc)) then
@@ -144,12 +137,10 @@ contains
         if (present(rsphere)) then
             rsphere_op = rsphere
         else
-            rsphere_op = 1.0_wp
+            rsphere_op = ONE
         end if
 
-        !
         !  Create parent type
-        !
         call self%create_sphere(nlat, nlon, ntrunc_op, isym_op, ityp_op, nt_op, rsphere_op)
 
         ! Set flag
@@ -158,11 +149,9 @@ contains
     end subroutine create_regular_sphere
 
     subroutine destroy_regular_sphere(self)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
-        class(RegularSphere), intent(inout)  :: self
-        !----------------------------------------------------------------------
+        class(RegularSphere), intent(inout) :: self
 
         ! Check flag
         if (.not.self%initialized) return
@@ -175,24 +164,35 @@ contains
 
     end subroutine destroy_regular_sphere
 
-    subroutine regular_scalar_analysis(self, scalar_function)
-        !----------------------------------------------------------------------
+    subroutine assert_init_regular_sphere(self, routine)
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
-        class(RegularSphere), intent(inout)  :: self
-        real(wp),             intent(in)     :: scalar_function(:,:)
-        !----------------------------------------------------------------------
-        ! Local variables
-        !----------------------------------------------------------------------
-        integer(ip)    :: error_flag
-        type(ShaesAux) :: aux
-        !----------------------------------------------------------------------
+        class(RegularSphere), intent(inout) :: self
+        character(len=*),     intent(in)    :: routine
 
         ! Check if object is usable
-        if (.not.self%initialized) then
-            error stop 'Uninitialized object of class(RegularSphere): '&
-                //' in regular_scalar_analysis'
-        end if
+        select type(self)
+            class is (RegularSphere)
+            if (.not.self%initialized) then
+                write(stderr, '(a)') &
+                    'Uninitialized object of class(RegularSphere) in '//routine
+            end if
+        end select
+
+    end subroutine assert_init_regular_sphere
+
+    subroutine regular_scalar_analysis(self, scalar_function)
+
+        ! Dummy arguments
+        class(RegularSphere), intent(inout) :: self
+        real(wp),             intent(in)    :: scalar_function(:,:)
+
+        ! Local variables
+        integer(ip)    :: error_flag
+        type(ShaesAux) :: aux
+
+        ! Check if object is usable
+        call self%assert_initialized('regular_scalar_analysis')
 
         select type(self)
             class is (RegularSphere)
@@ -217,9 +217,8 @@ contains
                         lwork => size(workspace%legendre_workspace), &
                         ierror => error_flag &
                         )
-                        !
+
                         !  Perform regular (real) spherical harmonic analysis
-                        !
                         call aux%shaes(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, &
                             wshaes, lshaes, work, lwork, ierror)
 
@@ -228,9 +227,7 @@ contains
             end associate
         end select
 
-        !
         !  Address the error flag
-        !
         select case (error_flag)
             case (0)
                 return
@@ -256,25 +253,18 @@ contains
 
     end subroutine regular_scalar_analysis
 
-    subroutine regular_scalar_synthesis(self, scalar_function )
-        !----------------------------------------------------------------------
+    subroutine regular_scalar_synthesis(self, scalar_function)
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
-        class(RegularSphere), intent(inout)  :: self
-        real(wp),             intent(out)    :: scalar_function(:,:)
-        !----------------------------------------------------------------------
+        class(RegularSphere), intent(inout) :: self
+        real(wp),             intent(out)   :: scalar_function(:,:)
+
         ! Local variables
-        !----------------------------------------------------------------------
         integer(ip)    :: error_flag
         type(ShsesAux) :: aux
-        !----------------------------------------------------------------------
 
         ! Check if object is usable
-        if (.not.self%initialized) then
-            error stop 'Uninitialized object of class(RegularSphere): '&
-                //' in regular_scalar_synthesis'
-        end if
-
+        call self%assert_initialized('regular_scalar_synthesis')
 
         select type(self)
             class is (RegularSphere)
@@ -299,9 +289,8 @@ contains
                         lwork => size(workspace%legendre_workspace), &
                         ierror => error_flag &
                         )
-                        !
+
                         !  Perform (real) spherical harmonic scalar synthesis
-                        !
                         call aux%shses(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, &
                             wshses, lshses, work, lwork, ierror)
 
@@ -310,9 +299,7 @@ contains
             end associate
         end select
 
-        !
         !  Address the error flag
-        !
         select case (error_flag)
             case (0)
                 return
@@ -338,27 +325,19 @@ contains
 
     end subroutine regular_scalar_synthesis
 
-
-
     subroutine regular_vector_analysis(self, polar_component, azimuthal_component)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
         class(RegularSphere), intent(inout)  :: self
         real(wp),             intent(in)     :: polar_component(:,:)
         real(wp),             intent(in)     :: azimuthal_component(:,:)
-        !----------------------------------------------------------------------
+
         ! Local variables
-        !----------------------------------------------------------------------
         integer(ip)    :: error_flag
         type(VhaesAux) :: aux
-        !----------------------------------------------------------------------
 
         ! Check if object is usable
-        if (.not.self%initialized) then
-            error stop 'Uninitialized object of class(RegularSphere): '&
-                //' in regular_vector_analysis'
-        end if
+        call self%assert_initialized('regular_vector_analysis')
 
         select type(self)
             class is (RegularSphere)
@@ -386,9 +365,8 @@ contains
                         lwork => size(workspace%legendre_workspace), &
                         ierror => error_flag &
                         )
-                        !
+
                         !  Perform (real) vector spherical harmonic analysis
-                        !
                         call aux%vhaes(nlat, nlon, ityp, nt, v, w, idvw, jdvw, &
                             br, bi, cr, ci, mdab, ndab, wvhaes, lvhaes, work, lwork, ierror)
 
@@ -397,9 +375,7 @@ contains
             end associate
         end select
 
-        !
         !  Address error flag
-        !
         select case (error_flag)
             case (0)
                 return
@@ -442,27 +418,19 @@ contains
 
     end subroutine regular_vector_analysis
 
-
-
     subroutine regular_vector_synthesis(self, polar_component, azimuthal_component)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
-        class(RegularSphere), intent(inout)  :: self
-        real(wp),             intent(out)    :: polar_component(:,:)
-        real(wp),             intent(out)    :: azimuthal_component(:,:)
-        !----------------------------------------------------------------------
+        class(RegularSphere), intent(inout) :: self
+        real(wp),             intent(out)   :: polar_component(:,:)
+        real(wp),             intent(out)   :: azimuthal_component(:,:)
+
         ! Local variables
-        !----------------------------------------------------------------------
-        integer(ip)     :: error_flag
+        integer(ip)    :: error_flag
         type(VhsesAux) :: aux
-        !----------------------------------------------------------------------
 
         ! Check if object is usable
-        if (.not.self%initialized) then
-            error stop 'Uninitialized object of class(RegularSphere): '&
-                //' in regular_vector_synthesis'
-        end if
+        call self%assert_initialized('regular_vector_synthesis')
 
         select type(self)
             class is (RegularSphere)
@@ -490,9 +458,8 @@ contains
                         lwork => size(workspace%legendre_workspace ), &
                         ierror => error_flag &
                         )
-                        !
+
                         !  Perform (real) vector spherical harmonic analysis
-                        !
                         call aux%vhses(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
                             mdab, ndab, wvhses, lvhses, work, lwork, ierror)
 
@@ -501,9 +468,7 @@ contains
             end associate
         end select
 
-        !
         !  Address error flag
-        !
         select case (error_flag)
             case (0)
                 return
@@ -545,16 +510,5 @@ contains
         end select
 
     end subroutine regular_vector_synthesis
-
-    subroutine finalize_regular_sphere(self)
-        !----------------------------------------------------------------------
-        ! Dummy arguments
-        !----------------------------------------------------------------------
-        type(RegularSphere), intent(inout)  :: self
-        !----------------------------------------------------------------------
-
-        call self%destroy()
-
-    end subroutine finalize_regular_sphere
 
 end module type_RegularSphere
