@@ -42,16 +42,10 @@ module type_GaussianSphere
     ! Everything is private unless stated otherwise
     private
     public :: GaussianSphere
-
     
-    type, extends(Sphere), public :: GaussianSphere
-        !----------------------------------------------------------------------
-        ! Type components
-        !----------------------------------------------------------------------
+    type, public, extends(Sphere) :: GaussianSphere
     contains
-        !----------------------------------------------------------------------
         ! Type-bound procedures
-        !----------------------------------------------------------------------
         procedure, public  :: create => create_gaussian_sphere
         procedure, public  :: destroy => destroy_gaussian_sphere
         procedure, public  :: perform_scalar_analysis => gaussian_scalar_analysis
@@ -60,34 +54,30 @@ module type_GaussianSphere
         procedure, public  :: perform_vector_synthesis => gaussian_vector_synthesis
         procedure, public  :: compute_surface_integral
         procedure, public  :: compute_first_moment
-        final              :: finalize_gaussian_sphere
-        !----------------------------------------------------------------------
     end type GaussianSphere
 
-    ! Declare constructor
+    ! Declare user-defined constructor
     interface GaussianSphere
         module procedure gaussian_sphere_constructor
     end interface
 
 contains
 
-    function gaussian_sphere_constructor(nlat, nlon) result (return_value)
-        !----------------------------------------------------------------------
+    function gaussian_sphere_constructor(nlat, nlon) &
+        result (return_value)
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
         integer(ip), intent(in) :: nlat !! number of latitudinal points 0 <= theta <= pi
         integer(ip), intent(in) :: nlon !! number of longitudinal points 0 <= phi <= 2*pi
-        type(GaussianSphere)     :: return_value
-        !----------------------------------------------------------------------
+        type(GaussianSphere)    :: return_value
 
         call return_value%create(nlat, nlon)
 
     end function gaussian_sphere_constructor
 
     subroutine create_gaussian_sphere(self, nlat, nlon, ntrunc, isym, itype, nt, rsphere)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
         class(GaussianSphere), intent(inout)         :: self
         integer(ip),           intent(in)            :: nlat
         integer(ip),           intent(in)            :: nlon
@@ -96,28 +86,22 @@ contains
         integer(ip),           intent(in), optional  :: itype     !! Either 0, 1, 2, 3, ..., 8
         integer(ip),           intent(in), optional  :: nt
         real(wp),              intent(in), optional  :: rsphere
-        !--------------------------------------------------------------------------------
+
         ! Local variables
-        !----------------------------------------------------------------------
         integer(ip) :: ntrunc_op
         integer(ip) :: isym_op
         integer(ip) :: ityp_op
         integer(ip) :: nt_op
         real(wp)    :: rsphere_op
-        !----------------------------------------------------------------------
 
         ! Ensure that object is usable
         call self%destroy()
 
-        !
         !  Allocate polymorphic components
-        !
         allocate( self%grid, source=GaussianGrid(nlat,nlon) )
         allocate( self%workspace, source=GaussianWorkspace(nlat, nlon) )
 
-        !
         !  Address optional arguments
-        !
         if (present(ntrunc)) then
             ntrunc_op = ntrunc
         else
@@ -159,11 +143,9 @@ contains
     end subroutine create_gaussian_sphere
 
     subroutine destroy_gaussian_sphere(self)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
         class(GaussianSphere), intent(inout)  :: self
-        !----------------------------------------------------------------------
 
         ! Check flag
         if (.not.self%initialized) return
@@ -177,17 +159,15 @@ contains
     end subroutine destroy_gaussian_sphere
 
     subroutine gaussian_scalar_analysis(self, scalar_function)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
         class(GaussianSphere), intent(inout)  :: self
         real(wp),              intent(in)     :: scalar_function(:,:)
-        !----------------------------------------------------------------------
+
         ! Local variables
-        !----------------------------------------------------------------------
         integer(ip)    :: error_flag
         type(ShagsAux) :: aux
-        !----------------------------------------------------------------------
+
 
         ! Check if object is usable
         if (.not.self%initialized) then
@@ -218,12 +198,10 @@ contains
                         lwork => size(workspace%legendre_workspace), &
                         ierror => error_flag &
                         )
-                        !
+
                         !  perform the (real) spherical harmonic scalar analysis
-                        !
                         call aux%shags(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, &
                             wshags, lshags, work, lwork, ierror)
-
                     end associate
                 end select
             end associate
@@ -231,7 +209,7 @@ contains
 
         ! Address error flag
         select case (error_flag)
-            case (0)
+        case(0)
                 return
             case (1)
                 error stop 'Object of class(GaussianSphere) in gaussian_scalar_analysis'&
@@ -259,17 +237,14 @@ contains
     end subroutine gaussian_scalar_analysis
     
     subroutine gaussian_scalar_synthesis(self, scalar_function)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
         class(GaussianSphere), intent(inout)  :: self
         real(wp),              intent(out)    :: scalar_function(:,:)
-        !----------------------------------------------------------------------
+
         ! Local variables
-        !----------------------------------------------------------------------
         integer(ip)    :: error_flag
         type(ShsgsAux) :: aux
-        !----------------------------------------------------------------------
 
         ! Check if object is usable
         if (.not.self%initialized) then
@@ -311,11 +286,9 @@ contains
             end associate
         end select
 
-        !
         !  Address error flag
-        !
         select case (error_flag)
-            case (0)
+        case(0)
                 return
             case (1)
                 error stop 'Object of class(GaussianSphere) in gaussian_scalar_synthesis'&
@@ -344,18 +317,16 @@ contains
     end subroutine gaussian_scalar_synthesis
 
     subroutine gaussian_vector_analysis(self, polar_component, azimuthal_component)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
         class(GaussianSphere), intent(inout)  :: self
         real(wp),              intent(in)     :: polar_component(:,:)
         real(wp),              intent(in)     :: azimuthal_component(:,:)
-        !----------------------------------------------------------------------
+
         ! Local variables
-        !----------------------------------------------------------------------
         integer(ip)    :: error_flag
         type(VhagsAux) :: aux
-        !----------------------------------------------------------------------
+
 
         ! Check if object is usable
         if (.not.self%initialized) then
@@ -401,11 +372,9 @@ contains
             end associate
         end select
 
-        !
         !  Address error flag
-        !
         select case (error_flag)
-            case (0)
+        case(0)
                 return
             case (1)
                 error stop 'Object of class(GaussianSphere) in '&
@@ -458,18 +427,15 @@ contains
     end subroutine gaussian_vector_analysis
 
     subroutine gaussian_vector_synthesis(self, polar_component, azimuthal_component)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
         class(GaussianSphere), intent(inout)  :: self
         real(wp),              intent(out)    :: polar_component(:,:)
         real(wp),              intent(out)    :: azimuthal_component(:,:)
-        !----------------------------------------------------------------------
+
         ! Local variables
-        !----------------------------------------------------------------------
         integer(ip)    :: error_flag
         type(VhsgsAux) :: aux
-        !----------------------------------------------------------------------
 
         ! Check if object is usable
         if (.not.self%initialized) then
@@ -503,22 +469,18 @@ contains
                         lwork => size(workspace%legendre_workspace), &
                         ierror => error_flag &
                         )
-                        !
+
                         !  Perform gaussian vector synthesis
-                        !
                         call aux%vhsgs(nlat, nlon, ityp, nt, v, w, idvw, jdvw, &
                             br, bi, cr, ci, mdab, ndab, wvhsgs, lvhsgs, work, lwork, ierror)
-
                     end associate
                 end select
             end associate
         end select
 
-        !
         !  Address error flag
-        !
         select case (error_flag)
-            case (0)
+        case(0)
                 return
             case (1)
                 error stop 'Object of class(GaussianSphere) in gaussian_vector_synthesis'&
@@ -559,34 +521,32 @@ contains
 
     end subroutine gaussian_vector_synthesis
 
-    function compute_surface_integral(self, scalar_function) result (return_value)
-        !
-        ! Purpose:
-        !
-        ! computes the (scalar) surface integral on the sphere (S^2):
-        !
-        ! * Trapezoidal rule    in phi:   0 <=  phi  <= 2*pi
-        ! * Gaussian quadrature in theta: 0 <= theta <= pi
-        !
-        !   \int_{S^2} f( theta, phi ) dS
-        !
-        !   where
-        !
-        !   dS = sin(theta) dtheta dphi
-        !
-        !
-        !----------------------------------------------------------------------
+    !
+    ! Purpose:
+    !
+    ! computes the (scalar) surface integral on the sphere (S^2):
+    !
+    ! * Trapezoidal rule    in phi:   0 <=  phi  <= 2*pi
+    ! * Gaussian quadrature in theta: 0 <= theta <= pi
+    !
+    !   \int_{S^2} f( theta, phi ) dS
+    !
+    !   where
+    !
+    !   dS = sin(theta) dtheta dphi
+    !
+    !
+    function compute_surface_integral(self, scalar_function) &
+        result (return_value)
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
-        class(GaussianSphere), intent(inout)  :: self
-        real(wp),              intent(in)     :: scalar_function(:,:)
-        real(wp)                               :: return_value
-        !----------------------------------------------------------------------
+        class(GaussianSphere), intent(inout) :: self
+        real(wp),              intent(in)    :: scalar_function(:,:)
+        real(wp)                             :: return_value
+
         ! Local variables
-        !----------------------------------------------------------------------
         integer(ip)           :: k  !! counter
         real(wp), allocatable :: summation(:)
-        !----------------------------------------------------------------------
 
         ! Check if object is usable
         if (.not.self%initialized) then
@@ -594,18 +554,12 @@ contains
                 //'in get_surface_integral'
         end if
 
-        !
         !  Allocate memory
-        !
         associate( nlat => self%NUMBER_OF_LATITUDES )
-
             allocate(summation(nlat))
-
         end associate
 
-        !
         !  compute the integrant
-        !
         associate( grid => self%grid )
             select type(grid)
                 class is (GaussianGrid)
@@ -615,15 +569,13 @@ contains
                     wts => grid%gaussian_weights, &
                     f => scalar_function &
                     )
-                    !
+
                     !  Apply trapezoidal rule
-                    !
                     do k = 1, nlat
                         summation(k) = sum(f(k, :)) * dphi
                     end do
-                    !
+
                     !  Apply gaussian quadrature
-                    !
                     summation = summation * wts
                 end associate
             end select
@@ -642,18 +594,18 @@ contains
     end function compute_surface_integral
 
     subroutine compute_first_moment(self, scalar_function, first_moment)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
+
         class(GaussianSphere),  intent(inout)  :: self
         real(wp),               intent(in)     :: scalar_function(:,:)
         class(Vector),          intent(out)    :: first_moment
-        !----------------------------------------------------------------------
+
         ! Local variables
-        !----------------------------------------------------------------------
+
         integer(ip)           :: k, l !! Counters
         real(wp), allocatable :: integrant(:,:,:)
-        !----------------------------------------------------------------------
+
 
         ! Check if object is usable
         if (.not.self%initialized) then
@@ -709,16 +661,5 @@ contains
         deallocate( integrant )
 
     end subroutine compute_first_moment
-
-    subroutine finalize_gaussian_sphere(self)
-        !----------------------------------------------------------------------
-        ! Dummy arguments
-        !----------------------------------------------------------------------
-        type(GaussianSphere), intent(inout)  :: self
-        !----------------------------------------------------------------------
-
-        call self%destroy()
-
-    end subroutine finalize_gaussian_sphere
 
 end module type_GaussianSphere

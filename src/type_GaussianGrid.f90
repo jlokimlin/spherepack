@@ -16,95 +16,69 @@ module type_GaussianGrid
     ! Everything is private unless stated otherwise
     private
     public :: GaussianGrid
-
-
     
-    type, extends(SphericalGrid), public ::  GaussianGrid
-        !----------------------------------------------------------------------
+    type, public, extends(SphericalGrid) ::  GaussianGrid
         ! Type components
-        !----------------------------------------------------------------------
         real(wp), allocatable, public :: gaussian_weights(:)
-        !----------------------------------------------------------------------
     contains
-        !----------------------------------------------------------------------
         ! Type-bound procedures
-        !----------------------------------------------------------------------
         procedure, public  :: create => create_gaussian_grid
         procedure, public  :: destroy => destroy_gaussian_grid
         procedure, public  :: get_latitudes_and_gaussian_weights
         procedure, public  :: unformatted_print
         generic,   public  :: assignment (=) => copy_gaussian_grid
         procedure, private :: copy_gaussian_grid
-        final              :: finalize_gaussian_grid
-        !----------------------------------------------------------------------
     end type GaussianGrid
-
-
 
     ! Declare constructor
     interface GaussianGrid
         module procedure gaussian_grid_constructor
     end interface
 
-
-
 contains
 
+    function gaussian_grid_constructor(nlat, nlon) &
+        result (return_value)
 
-
-    function gaussian_grid_constructor(nlat, nlon) result (return_value)
-        !----------------------------------------------------------------------
         ! Dummy arguments
-        !----------------------------------------------------------------------
         integer(ip), intent(in) :: nlat !! number of latitudinal points 0 <= theta <= pi
         integer(ip), intent(in) :: nlon !! number of longitudinal points 0 <= phi <= 2*pi
-        type(GaussianGrid)       :: return_value
-        !----------------------------------------------------------------------
+        type(GaussianGrid)      :: return_value
 
         call return_value%create(nlat, nlon)
 
     end function gaussian_grid_constructor
 
+    subroutine copy_gaussian_grid(self, other)
 
-
-    subroutine copy_gaussian_grid(self, object_to_be_copied)
-        !--------------------------------------------------------------------------------
         ! Dummy arguments
-        !--------------------------------------------------------------------------------
         class(GaussianGrid), intent(out) :: self
-        class(GaussianGrid), intent(in)  :: object_to_be_copied
-        !--------------------------------------------------------------------------------
+        class(GaussianGrid), intent(in)  :: other
 
         ! Check if object is usable
-        if (object_to_be_copied%initialized .eqv. .false.) then
+        if (.not.other%initialized) then
             error stop 'Uninitialized object of class(GaussianGrid): '&
                 //'in assignment (=) '
         end if
 
-        !
         !  Make copies
-        !
-        self%initialized = object_to_be_copied%initialized
-        self%NUMBER_OF_LONGITUDES = object_to_be_copied%NUMBER_OF_LONGITUDES
-        self%NUMBER_OF_LATITUDES = object_to_be_copied%NUMBER_OF_LATITUDES
-        self%LONGITUDINAL_MESH = object_to_be_copied%LONGITUDINAL_MESH
-        self%latitudes = object_to_be_copied%latitudes
-        self%longitudes = object_to_be_copied%longitudes
-        self%gaussian_weights = object_to_be_copied%gaussian_weights
-        self%grid_type = object_to_be_copied%grid_type
+        self%initialized = other%initialized
+        self%NUMBER_OF_LONGITUDES = other%NUMBER_OF_LONGITUDES
+        self%NUMBER_OF_LATITUDES = other%NUMBER_OF_LATITUDES
+        self%LONGITUDINAL_MESH = other%LONGITUDINAL_MESH
+        self%latitudes = other%latitudes
+        self%longitudes = other%longitudes
+        self%gaussian_weights = other%gaussian_weights
+        self%grid_type = other%grid_type
 
     end subroutine copy_gaussian_grid
 
-
-
     subroutine create_gaussian_grid(self, nlat, nlon)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
-        class(GaussianGrid), target, intent(inout)  :: self
-        integer(ip),                 intent(in)     :: nlat !! number of latitudinal points 0 <= theta <= pi
-        integer(ip),                 intent(in)     :: nlon !! number of longitudinal points 0 <= phi <= 2*pi
-        !----------------------------------------------------------------------
+        class(GaussianGrid), target, intent(inout) :: self
+        integer(ip),                 intent(in)    :: nlat !! number of latitudinal points 0 <= theta <= pi
+        integer(ip),                 intent(in)    :: nlon !! number of longitudinal points 0 <= phi <= 2*pi
 
         ! Ensure that object is usable
         call self%destroy()
@@ -127,21 +101,15 @@ contains
 
     end subroutine create_gaussian_grid
 
-
-
     subroutine destroy_gaussian_grid(self)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
-        class(GaussianGrid), intent(inout)  :: self
-        !----------------------------------------------------------------------
+        class(GaussianGrid), intent(inout) :: self
 
         ! Check initialization flag
         if (.not.self%initialized) return
 
-        !
         !  Release memory
-        !
         if (allocated(self%gaussian_weights)) deallocate(self%gaussian_weights)
 
         call self%destroy_grid()
@@ -151,37 +119,16 @@ contains
 
     end subroutine destroy_gaussian_grid
 
+    subroutine get_latitudes_and_gaussian_weights(self, nlat, gaussian_latitudes, gaussian_weights)
 
-
-    subroutine get_latitudes_and_gaussian_weights(self, nlat, theta, wts)
-        !
-        !<Purpose:
-        !
-        ! Computes the nlat-many gaussian (co)latitudes and weights.
-        ! the colatitudes are in radians and lie in the interval (0, pi).
-        !
-        ! References:
-        !
-        ! [1] Swarztrauber, Paul N.
-        !     "On computing the points and weights for Gauss--Legendre quadrature."
-        !     SIAM Journal on Scientific Computing 24.3 (2003): 945-954.
-        !
-        ! [2]  http://www2.cisl.ucar.edu/resources/legacy/spherepack/documentation#compute_gaussian_latitudes_and_weights.html
-        !
-        !----------------------------------------------------------------------
         ! Dummy arguments
-        !----------------------------------------------------------------------
-        class(GaussianGrid),   intent(inout)  :: self
-        integer(ip),           intent(in)     :: nlat     !! number of latitudinal points
-        real(wp), allocatable, intent(out)    :: theta(:) !! latitudinal points: 0 <= theta <= pi
-        real(wp), allocatable, intent(out)    :: wts(:)   !! gaussian weights
-        !----------------------------------------------------------------------
+        class(GaussianGrid),   intent(inout) :: self
+        integer(ip),           intent(in)    :: nlat ! number of latitudinal points
+        real(wp), allocatable, intent(out)   :: gaussian_latitudes(:) ! latitudinal points: 0 <= theta <= pi
+        real(wp), allocatable, intent(out)   :: gaussian_weights(:)
+
         ! Local variables
-        !----------------------------------------------------------------------
         integer(ip)  :: error_flag
-        integer(ip)  :: dummy_integer !! unused integer variable to maintain backwards compatibility
-        real(wp)     :: dummy_real    !! unused double precision variable to maintain backwards compatibility
-        !----------------------------------------------------------------------
 
         ! Check input argument
         if (nlat <= 0) then
@@ -190,28 +137,15 @@ contains
                 //'in get_equally_spaced_latitudes'
         end if
 
-        !
-        !  Allocate memory
-        !
-        allocate( theta(nlat) )
-        allocate( wts(nlat) )
+        ! Allocate memory
+        allocate( gaussian_latitudes(nlat) )
+        allocate( gaussian_weights(nlat) )
 
-        ! Associate various quantities
-        associate( &
-            w => dummy_real, &
-            lwork => dummy_integer, &
-            ierror => error_flag &
-            )
-            !
-            !  Compute gaussian weights and latitudes
-            !
-            call compute_gaussian_latitudes_and_weights(nlat, theta, wts, ierror)
+        ! Compute gaussian weights and latitudes
+        call compute_gaussian_latitudes_and_weights( &
+            nlat, gaussian_latitudes, gaussian_weights, error_flag)
 
-        end associate
-
-        !
-        !  Address error flag
-        !
+        ! Address error flag
         select case (error_flag)
             case(0)
                 return
@@ -227,18 +161,14 @@ contains
 
     end subroutine get_latitudes_and_gaussian_weights
 
-
     subroutine unformatted_print(self, header)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
-        class(GaussianGrid), intent(inout)  :: self
-        character(len=*),    intent(in)     :: header
-        !----------------------------------------------------------------------
+        class(GaussianGrid), intent(inout) :: self
+        character(len=*),    intent(in)    :: header
+
         ! Local variables
-        !----------------------------------------------------------------------
         integer(ip)  :: file_unit
-        !----------------------------------------------------------------------
 
         ! Check if object is usable
         if (.not.self%initialized) then
@@ -251,30 +181,14 @@ contains
 
         ! Write gaussian weights
         associate( wts => self%gaussian_weights )
-
-            open( newunit=file_unit, file=header//'gaussian_weights.dat', &
+            open( newunit=file_unit, &
+                file=header//'gaussian_weights.dat', &
                 status='replace', form='unformatted', &
                 action='write', access='stream' )
             write( file_unit ) wts
             close( file_unit )
-
         end associate
 
     end subroutine unformatted_print
-
-
-
-    subroutine finalize_gaussian_grid(self)
-        !----------------------------------------------------------------------
-        ! Dummy arguments
-        !----------------------------------------------------------------------
-        type(GaussianGrid), intent(inout)  :: self
-        !----------------------------------------------------------------------
-
-        call self%destroy()
-
-    end subroutine finalize_gaussian_grid
-
-
 
 end module type_GaussianGrid

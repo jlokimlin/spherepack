@@ -63,122 +63,98 @@ contains
 
     subroutine copy_regular_workspace(self, other)
 
-            ! Dummy arguments
-            class(RegularWorkspace), intent(out) :: self
-            class(RegularWorkspace), intent(in)  :: other
+        ! Dummy arguments
+        class(RegularWorkspace), intent(out) :: self
+        class(RegularWorkspace), intent(in)  :: other
 
-            ! Check if object is usable
-            if (.not.other%initialized) then
-                error stop 'Uninitialized object of class(RegularWorkspace): '&
-                    //'in assignment (=) '
-            end if
+        ! Check if object is usable
+        if (.not.other%initialized) then
+            error stop 'Uninitialized object of class(RegularWorkspace): '&
+                //'in assignment (=) '
+        end if
 
-            !  Make copies
-            self%initialized = other%initialized
-            self%legendre_workspace = other%legendre_workspace
-            self%forward_scalar = other%forward_scalar
-            self%forward_vector = other%forward_vector
-            self%backward_scalar = other%backward_scalar
-            self%backward_vector = other%backward_vector
-            self%real_harmonic_coefficients = other%real_harmonic_coefficients
-            self%imaginary_harmonic_coefficients = other%imaginary_harmonic_coefficients
-            self%real_polar_harmonic_coefficients = other%real_polar_harmonic_coefficients
-            self%imaginary_polar_harmonic_coefficients = other%imaginary_polar_harmonic_coefficients
-            self%real_azimuthal_harmonic_coefficients = other%real_azimuthal_harmonic_coefficients
-            self%imaginary_azimuthal_harmonic_coefficients = other%imaginary_azimuthal_harmonic_coefficients
+        !  Make copies
+        self%initialized = other%initialized
+        self%legendre_workspace = other%legendre_workspace
+        self%forward_scalar = other%forward_scalar
+        self%forward_vector = other%forward_vector
+        self%backward_scalar = other%backward_scalar
+        self%backward_vector = other%backward_vector
+        self%real_harmonic_coefficients = other%real_harmonic_coefficients
+        self%imaginary_harmonic_coefficients = other%imaginary_harmonic_coefficients
+        self%real_polar_harmonic_coefficients = other%real_polar_harmonic_coefficients
+        self%imaginary_polar_harmonic_coefficients = other%imaginary_polar_harmonic_coefficients
+        self%real_azimuthal_harmonic_coefficients = other%real_azimuthal_harmonic_coefficients
+        self%imaginary_azimuthal_harmonic_coefficients = other%imaginary_azimuthal_harmonic_coefficients
 
-        end subroutine copy_regular_workspace
+    end subroutine copy_regular_workspace
 
-        subroutine create_regular_workspace(self, nlat, nlon)
+    subroutine create_regular_workspace(self, nlat, nlon)
 
-            ! Dummy arguments
+        ! Dummy arguments
+        class(RegularWorkspace), intent(inout) :: self
+        integer(ip),             intent(in)    :: nlat
+        integer(ip),             intent(in)    :: nlon
 
-            class(RegularWorkspace), intent(inout)  :: self
-            integer(ip),             intent(in)     :: nlat
-            integer(ip),             intent(in)     :: nlon
+        ! Ensure that object is usable
+        call self%destroy()
 
+        ! Set up transforms for regular grids
+        call self%initialize_regular_scalar_transform(nlat, nlon)
+        call self%initialize_regular_vector_transform(nlat, nlon)
+        call get_legendre_workspace(nlat, nlon, self%legendre_workspace)
 
-            ! Ensure that object is usable
-            call self%destroy()
+        ! Set flag
+        self%initialized = .true.
 
-            ! Set up transforms for regular grids
-            call self%initialize_regular_scalar_transform(nlat, nlon)
-            call self%initialize_regular_vector_transform(nlat, nlon)
-            call get_legendre_workspace(nlat, nlon, self%legendre_workspace)
+    end subroutine create_regular_workspace
 
-            ! Set flag
-            self%initialized = .true.
+    subroutine destroy_regular_workspace(self)
 
-        end subroutine create_regular_workspace
+        ! Dummy arguments
+        class(RegularWorkspace), intent(inout) :: self
 
-        subroutine destroy_regular_workspace(self)
+        ! Check flag
+        if (.not.self%initialized) return
 
-            ! Dummy arguments
-            class(RegularWorkspace), intent(inout) :: self
+        ! Release memory from parent type
+        call self%destroy_workspace()
 
-            ! Check flag
-            if (.not.self%initialized) return
+        ! Reset flag
+        self%initialized = .false.
 
-            ! Release memory from parent type
-            call self%destroy_workspace()
+    end subroutine destroy_regular_workspace
 
-            ! Reset flag
-            self%initialized = .false.
+    subroutine initialize_regular_scalar_analysis(self, nlat, nlon)
 
-        end subroutine destroy_regular_workspace
+        ! Dummy arguments
+        class(RegularWorkspace), intent(inout) :: self
+        integer(ip),             intent(in)    :: nlat
+        integer(ip),             intent(in)    :: nlon
 
-        ! Purpose:
-        !
-        !  Set the various workspace arrays to perform the
-        !  (real) scalar harmonic analysis on a regular (equally-spaced) grid.
-        !
-        !  Reference:
-        !  https://www2.cisl.ucar.edu/spherepack/documentation#shaesi.html
-        !
-        subroutine initialize_regular_scalar_analysis(self, nlat, nlon)
+        ! Local variables
+        integer(ip)    :: error_flag
+        integer(ip)    :: lwork, ldwork, lshaes
+        type(ShaesAux) :: aux
 
-            ! Dummy arguments
-            class(RegularWorkspace), intent(inout) :: self
-            integer(ip),             intent(in)    :: nlat
-            integer(ip),             intent(in)    :: nlon
+        ! Compute dimensions of various workspace arrays
+        lwork = get_lwork(nlat, nlon)
+        ldwork = get_ldwork(nlat)
+        lshaes = aux%get_lshaes(nlat, nlon)
 
-            ! Local variables
-            integer(ip)           :: error_flag
-            integer(ip)           :: lwork, ldwork, lshaes
-            real(wp), allocatable :: dwork(:), work(:)
-            type(ShaesAux)        :: aux
+        ! Allocate memory
+        if (allocated(self%forward_scalar)) deallocate( self%forward_scalar )
+        allocate( self%forward_scalar(lshaes) )
 
+        ! Initialize workspace for scalar synthesis
+        block
+            real(wp) :: work(lwork)
+            real(wp) :: dwork(ldwork)
 
-            !
-            !  Compute dimensions of various workspace arrays
-            !
-            lwork = get_lwork(nlat, nlon)
-            ldwork = get_ldwork(nlat)
-            lshaes = aux%get_lshaes(nlat, nlon)
+            ! Call procedural routine
+            call aux%shaesi(nlat, nlon, self%forward_scalar, lshaes, work, lwork, dwork, ldwork, error_flag)
 
-            !
-            !   Allocate memory
-            !
-            if (allocated(self%forward_scalar)) deallocate( self%forward_scalar )
-            allocate( work(lwork) )
-            allocate( dwork(ldwork) )
-            allocate( self%forward_scalar(lshaes) )
-
-
-            associate( &
-                wshaes => self%forward_scalar, &
-                ierror => error_flag &
-                )
-                !
-                !  Initialize workspace for scalar synthesis
-                !
-                call aux%shaesi(nlat, nlon, wshaes, lshaes, work, lwork, dwork, ldwork, ierror)
-
-            end associate
-
-            !
-            !   Address error flag
-            !
+            ! Address error flag
             select case (error_flag)
                 case(0)
                     return
@@ -203,58 +179,37 @@ contains
                         //'in initialize_regular_scalar_analysis '&
                         //'Undetermined error flag'
             end select
+        end block
 
-            !
-            !  Release memory
-            !
-            deallocate( work )
-            deallocate( dwork )
+    end subroutine initialize_regular_scalar_analysis
 
-        end subroutine initialize_regular_scalar_analysis
+    subroutine initialize_regular_scalar_synthesis(self, nlat, nlon)
 
+        ! Dummy arguments
+        class(RegularWorkspace), intent(inout)  :: self
+        integer(ip),             intent(in)     :: nlat
+        integer(ip),             intent(in)     :: nlon
 
+        ! Local variables
+        integer(ip)    :: error_flag
+        integer(ip)    :: lwork, ldwork, lshses
+        type(ShsesAux) :: aux
 
-        subroutine initialize_regular_scalar_synthesis(self, nlat, nlon)
+        ! Set up various workspace dimensions
+        lwork = get_lwork(nlat, nlon)
+        ldwork = get_ldwork(nlat)
+        lshses = aux%get_lshses(nlat, nlon)
 
-            ! Dummy arguments
+        !  Allocate memory
+        if (allocated(self%backward_scalar)) deallocate( self%backward_scalar )
+        allocate( self%backward_scalar(lshses) )
 
-            class(RegularWorkspace), intent(inout)  :: self
-            integer(ip),             intent(in)     :: nlat
-            integer(ip),             intent(in)     :: nlon
+        ! Initialize workspace for scalar synthesis
+        block
+            real(wp) :: work(lwork), dwork(ldwork)
 
-            ! Local variables
-
-            integer(ip)           :: error_flag
-            integer(ip)           :: lwork, ldwork, lshses
-            real(wp), allocatable :: dwork(:), work(:)
-            type(ShsesAux)        :: aux
-
-
-            ! Set up various workspace dimensions
-            lwork = get_lwork(nlat, nlon)
-            ldwork = get_ldwork(nlat)
-            lshses = aux%get_lshses(nlat, nlon)
-
-            !
-            !  Allocate memory
-            !
-            if (allocated(self%backward_scalar)) deallocate( self%backward_scalar )
-            allocate( self%backward_scalar(lshses) )
-            allocate( work(lwork) )
-            allocate( dwork(ldwork) )
-
-
-            associate( &
-                wshses => self%backward_scalar, &
-                ierror => error_flag &
-                )
-                !
-                !  Initialize workspace for scalar synthesis
-                !
-                call aux%shsesi(nlat, nlon, wshses, lshses, work, lwork, dwork, ldwork, ierror)
-
-            end associate
-
+            call aux%shsesi( &
+                nlat, nlon, self%backward_scalar, lshses, work, lwork, dwork, ldwork, error_flag)
 
             !  Address error flag
             select case (error_flag)
@@ -281,86 +236,62 @@ contains
                         //'in initialize_regular_scalar_synthesis '&
                         //'Undetermined error flag'
             end select
+        end block
 
-            !
-            !  Release memory
-            !
-            deallocate( work )
-            deallocate( dwork )
+    end subroutine initialize_regular_scalar_synthesis
 
-        end subroutine initialize_regular_scalar_synthesis
+    ! Purpose:
+    !
+    !  Set the various workspace arrays and pointers to perform the
+    !  (real) scalar harmonic transform on a regular (equally-spaced) grid.
+    !
+    subroutine initialize_regular_scalar_transform(self, nlat, nlon)
 
+        ! Dummy arguments
+        class(RegularWorkspace), intent(inout) :: self
+        integer(ip),             intent(in)    :: nlat
+        integer(ip),             intent(in)    :: nlon
 
+        ! Set up scalar analysis
+        call self%initialize_regular_scalar_analysis(nlat, nlon)
 
-        subroutine initialize_regular_scalar_transform(self, nlat, nlon)
-            !
-            ! Purpose:
-            !
-            !  Set the various workspace arrays and pointers to perform the
-            !  (real) scalar harmonic transform on a regular (equally-spaced) grid.
-            !
+        ! Set up scalar synthesis
+        call self%initialize_regular_scalar_synthesis(nlat, nlon)
 
-            ! Dummy arguments
+        ! Allocate memory for the (real) scalar harmonic transform
+        allocate( self%real_harmonic_coefficients(nlat, nlat) )
+        allocate( self%imaginary_harmonic_coefficients(nlat, nlat) )
 
-            class(RegularWorkspace), intent(inout)  :: self
-            integer(ip),             intent(in)     :: nlat
-            integer(ip),             intent(in)     :: nlon
+    end subroutine initialize_regular_scalar_transform
 
+    subroutine initialize_regular_vector_analysis(self, nlat, nlon)
 
-            ! Set up scalar analysis
-            call self%initialize_regular_scalar_analysis(nlat, nlon)
+        ! Dummy arguments
+        class(RegularWorkspace), intent(inout) :: self
+        integer(ip),             intent(in)    :: nlat
+        integer(ip),             intent(in)    :: nlon
 
-            ! Set up scalar synthesis
-            call self%initialize_regular_scalar_synthesis(nlat, nlon)
-
-            ! Allocate memory for the (real) scalar harmonic transform
-            allocate( self%real_harmonic_coefficients(nlat, nlat) )
-            allocate( self%imaginary_harmonic_coefficients(nlat, nlat) )
-
-        end subroutine initialize_regular_scalar_transform
-
-
-
-        subroutine initialize_regular_vector_analysis(self, nlat, nlon)
-
-            ! Dummy arguments
-
-            class(RegularWorkspace), intent(inout)  :: self
-            integer(ip),             intent(in)     :: nlat
-            integer(ip),             intent(in)     :: nlon
-
-            ! Local variables
-
-            integer(ip)           :: error_flag
-            integer(ip)           :: lwork, ldwork, lvhaes
-            real(wp), allocatable :: work(:), dwork(:)
-            type(VhaesAux)        :: aux
+        ! Local variables
+        integer(ip)     :: error_flag
+        integer(ip)     :: lwork, ldwork, lvhaes
+        type(VhaesAux)  :: aux
 
 
-            ! Compute various workspace dimensions
-            lwork = get_lwork(nlat, nlon)
-            ldwork = get_ldwork(nlat)
-            lvhaes = aux%get_lvhaes(nlat, nlon)
+        ! Compute various workspace dimensions
+        lwork = get_lwork(nlat, nlon)
+        ldwork = get_ldwork(nlat)
+        lvhaes = aux%get_lvhaes(nlat, nlon)
 
-            !
-            !  Allocate memory
-            !
-            if (allocated(self%forward_vector)) deallocate( self%forward_vector )
-            allocate( work(lwork) )
-            allocate( dwork(ldwork) )
-            allocate( self%forward_vector(lvhaes) )
+        !  Allocate memory
+        if (allocated(self%forward_vector)) deallocate( self%forward_vector )
+        allocate( self%forward_vector(lvhaes) )
 
+        ! Initialize workspace for analysis
+        block
+            real(wp) :: work(lwork), dwork(ldwork)
 
-            associate( &
-                wvhaes => self%forward_vector, &
-                ierror => error_flag &
-                )
-                !
-                !  Initialize workspace for analysis
-                !
-                call aux%vhaesi(nlat, nlon, wvhaes, lvhaes, work, lwork, dwork, ldwork, ierror)
-
-            end associate
+            call aux%vhaesi( &
+                nlat, nlon, self%forward_vector, lvhaes, work, lwork, dwork, ldwork, error_flag)
 
             ! Address the error flag
             select case (error_flag)
@@ -391,57 +322,37 @@ contains
                         //'in initialize_regular_vector_analysis'&
                         //' Undetermined error flag'
             end select
+        end block
 
-            !
-            !  Release memory
-            !
-            deallocate( work )
-            deallocate( dwork )
+    end subroutine initialize_regular_vector_analysis
 
-        end subroutine initialize_regular_vector_analysis
+    subroutine initialize_regular_vector_synthesis(self, nlat, nlon)
 
+        ! Dummy arguments
+        class(RegularWorkspace), intent(inout) :: self
+        integer(ip),             intent(in)    :: nlat
+        integer(ip),             intent(in)    :: nlon
 
+        ! Local variables
+        integer(ip)    :: error_flag
+        integer(ip)    :: lwork, ldwork, lvhses
+        type(VhsesAux) :: aux
 
-        subroutine initialize_regular_vector_synthesis(self, nlat, nlon)
+        ! Compute various workspace dimensions
+        lwork = get_lwork(nlat, nlon)
+        ldwork = get_ldwork(nlat)
+        lvhses = aux%get_lvhses(nlat, nlon)
 
-            ! Dummy arguments
+        ! Allocate memory
+        if (allocated(self%backward_vector)) deallocate( self%backward_vector )
+        allocate( self%backward_vector(lvhses) )
 
-            class(RegularWorkspace), intent(inout)  :: self
-            integer(ip),             intent(in)     :: nlat
-            integer(ip),             intent(in)     :: nlon
+        ! Initialize workspace for vector synthesis
+        block
+            real(wp) :: work(lwork), dwork(ldwork)
 
-            ! Local variables
-
-            integer(ip)           :: error_flag
-            integer(ip)           :: lwork, ldwork, lvhses
-            real(wp), allocatable :: work(:), dwork(:)
-            type(VhsesAux)        :: aux
-
-
-            ! Compute various workspace dimensions
-            lwork = get_lwork(nlat, nlon)
-            ldwork = get_ldwork(nlat)
-            lvhses = aux%get_lvhses(nlat, nlon)
-
-            !
-            !  Allocate memory
-            !
-            if (allocated(self%backward_vector)) deallocate( self%backward_vector )
-            allocate( work(lwork) )
-            allocate( dwork(ldwork) )
-            allocate( self%backward_vector(lvhses) )
-
-            associate( &
-                wvhses => self%backward_vector, &
-                ierror => error_flag &
-                )
-
-                !
-                !  Initialize workspace for vector synthesis
-                !
-                call aux%vhsesi(nlat, nlon, wvhses, lvhses, work, lwork, dwork, ldwork, ierror)
-
-            end associate
+            call aux%vhsesi( &
+                nlat, nlon, self%backward_vector, lvhses, work, lwork, dwork, ldwork, error_flag)
 
             ! Address the error flag
             select case (error_flag)
@@ -472,149 +383,124 @@ contains
                         //'in initialize_regular_vector_synthesis'&
                         //' Undetermined error flag'
             end select
+        end block
 
-            !
-            !  Release memory
-            !
-            deallocate( work )
-            deallocate( dwork )
+    end subroutine initialize_regular_vector_synthesis
 
-        end subroutine initialize_regular_vector_synthesis
+    ! Purpose:
+    !
+    ! Sets the various workspace arrays and pointers
+    ! required for the (real) vector harmonic transform
+    ! on a regular (equally-spaced) grid
+    !
+    subroutine initialize_regular_vector_transform(self, nlat, nlon)
 
+        ! Dummy arguments
+        class(RegularWorkspace), intent(inout) :: self
+        integer(ip),             intent(in)    :: nlat
+        integer(ip),             intent(in)    :: nlon
 
+        ! Set up vector analysis
+        call self%initialize_regular_vector_analysis(nlat, nlon)
 
-        subroutine initialize_regular_vector_transform(self, nlat, nlon)
-            !
-            ! Purpose:
-            !
-            ! Sets the various workspace arrays and pointers
-            ! required for the (real) vector harmonic transform
-            ! on a regular (equally-spaced) grid
-            !
+        ! Set up vector synthesis
+        call self%initialize_regular_vector_synthesis(nlat, nlon)
 
-            ! Dummy arguments
+        ! Allocate memory for the vector transform coefficients
+        allocate( self%real_polar_harmonic_coefficients(nlat, nlat) )
+        allocate( self%imaginary_polar_harmonic_coefficients(nlat, nlat) )
+        allocate( self%real_azimuthal_harmonic_coefficients(nlat, nlat) )
+        allocate( self%imaginary_azimuthal_harmonic_coefficients(nlat, nlat) )
 
-            class(RegularWorkspace), intent(inout)  :: self
-            integer(ip),             intent(in)     :: nlat
-            integer(ip),             intent(in)     :: nlon
+    end subroutine initialize_regular_vector_transform
 
+    pure function get_lwork(nlat, nlon) &
+        result (return_value)
 
-            ! Set up vector analysis
-            call self%initialize_regular_vector_analysis(nlat, nlon)
+        ! Dummy arguments
+        integer(ip), intent(in) :: nlat
+        integer(ip), intent(in) :: nlon
+        integer(ip)             :: return_value
 
-            ! Set up vector synthesis
-            call self%initialize_regular_vector_synthesis(nlat, nlon)
+        ! Local variables
+        type(ShaesAux) :: shaes_aux
+        type(ShsesAux) :: shses_aux
+        type(VhaesAux) :: vhaes_aux
+        type(VhsesAux) :: vhses_aux
+        integer(ip)    :: lwork(4)
 
-            ! Allocate memory for the vector transform coefficients
-            allocate( self%real_polar_harmonic_coefficients(nlat, nlat) )
-            allocate( self%imaginary_polar_harmonic_coefficients(nlat, nlat) )
-            allocate( self%real_azimuthal_harmonic_coefficients(nlat, nlat) )
-            allocate( self%imaginary_azimuthal_harmonic_coefficients(nlat, nlat) )
+        lwork(1) = shaes_aux%get_lwork(nlat, nlon)
+        lwork(2) = shses_aux%get_lwork(nlat, nlon)
+        lwork(3) = vhaes_aux%get_lwork(nlat, nlon)
+        lwork(4) = vhses_aux%get_lwork(nlat, nlon)
 
-        end subroutine initialize_regular_vector_transform
+        return_value = maxval(lwork)
 
+    end function get_lwork
 
+    pure function get_ldwork(nlat) &
+        result (return_value)
 
-        pure function get_lwork(nlat, nlon) result (return_value)
+        ! Dummy arguments
+        integer(ip), intent(in) :: nlat
+        integer(ip)             :: return_value
 
-            ! Dummy arguments
+        ! Local variables
+        type(ShaesAux) :: shaes_aux
+        type(ShsesAux) :: shses_aux
+        type(VhaesAux) :: vhaes_aux
+        type(VhsesAux) :: vhses_aux
+        integer(ip)    :: ldwork(4)
 
-            integer(ip), intent(in)  :: nlat
-            integer(ip), intent(in)  :: nlon
-            integer(ip)               :: return_value
+        ldwork(1) = shaes_aux%get_ldwork(nlat)
+        ldwork(2) = shses_aux%get_ldwork(nlat)
+        ldwork(3) = vhaes_aux%get_ldwork(nlat)
+        ldwork(4) = vhses_aux%get_ldwork(nlat)
 
-            ! Local variables
+        return_value = maxval(ldwork)
 
-            type(ShaesAux) :: shaes_aux
-            type(ShsesAux) :: shses_aux
-            type(VhaesAux) :: vhaes_aux
-            type(VhsesAux) :: vhses_aux
-            integer(ip)    :: lwork(4)
+    end function get_ldwork
 
+    pure subroutine get_legendre_workspace(nlat, nlon, workspace, nt, ityp)
 
-            lwork(1) = shaes_aux%get_lwork(nlat, nlon)
-            lwork(2) = shses_aux%get_lwork(nlat, nlon)
-            lwork(3) = vhaes_aux%get_lwork(nlat, nlon)
-            lwork(4) = vhses_aux%get_lwork(nlat, nlon)
+        ! Dummy arguments
+        integer(ip),           intent(in)  :: nlat
+        integer(ip),           intent(in)  :: nlon
+        real(wp), allocatable, intent(out) :: workspace(:)
+        integer(ip), optional, intent(in)  :: nt
+        integer(ip), optional, intent(in)  :: ityp
 
-            return_value = maxval(lwork)
+        ! Local variables
+        type(ShaesAux) :: shaes_aux
+        type(ShsesAux) :: shses_aux
+        type(VhaesAux) :: vhaes_aux
+        type(VhsesAux) :: vhses_aux
+        integer(ip)    :: work_size(4)
+        integer(ip)    :: lwork, nt_op, ityp_op
 
-        end function get_lwork
+        !  Address optional arguments
+        if (present(nt)) then
+            nt_op = nt
+        else
+            nt_op = 1
+        end if
 
+        if (present(ityp)) then
+            ityp_op = ityp
+        else
+            ityp_op = 0
+        end if
 
-        pure function get_ldwork(nlat) result (return_value)
+        ! Get required workspace size
+        work_size(1) = shaes_aux%get_legendre_workspace_size(nlat, nlon, nt_op, ityp_op)
+        work_size(2) = shses_aux%get_legendre_workspace_size(nlat, nlon, nt_op, ityp_op)
+        work_size(3) = vhaes_aux%get_legendre_workspace_size(nlat, nlon, nt_op, ityp_op)
+        work_size(4) = vhses_aux%get_legendre_workspace_size(nlat, nlon, nt_op, ityp_op)
+        lwork = maxval(work_size)
 
-            ! Dummy arguments
+        !  Allocate memory
+        allocate( workspace(lwork) )
 
-            integer(ip), intent(in)  :: nlat
-            integer(ip)               :: return_value
+    end subroutine get_legendre_workspace
 
-            ! Local variables
-
-            type(ShaesAux) :: shaes_aux
-            type(ShsesAux) :: shses_aux
-            type(VhaesAux) :: vhaes_aux
-            type(VhsesAux) :: vhses_aux
-            integer(ip)    :: ldwork(4)
-
-
-            ldwork(1) = shaes_aux%get_ldwork(nlat)
-            ldwork(2) = shses_aux%get_ldwork(nlat)
-            ldwork(3) = vhaes_aux%get_ldwork(nlat)
-            ldwork(4) = vhses_aux%get_ldwork(nlat)
-
-            return_value = maxval(ldwork)
-
-        end function get_ldwork
-
-
-
-        pure subroutine get_legendre_workspace(nlat, nlon, workspace, nt, ityp)
-
-            ! Dummy arguments
-
-            integer(ip),           intent(in)  :: nlat
-            integer(ip),           intent(in)  :: nlon
-            real(wp), allocatable, intent(out) :: workspace(:)
-            integer(ip), optional, intent(in)  :: nt
-            integer(ip), optional, intent(in)  :: ityp
-
-            ! Local variables
-
-            type(ShaesAux) :: shaes_aux
-            type(ShsesAux) :: shses_aux
-            type(VhaesAux) :: vhaes_aux
-            type(VhsesAux) :: vhses_aux
-            integer(ip)    :: work_size(4)
-            integer(ip)    :: lwork, nt_op, ityp_op
-
-
-            !
-            !  Address optional arguments
-            !
-            if (present(nt)) then
-                nt_op = nt
-            else
-                nt_op = 1
-            end if
-
-            if (present(ityp)) then
-                ityp_op = ityp
-            else
-                ityp_op = 0
-            end if
-
-            work_size(1) = shaes_aux%get_legendre_workspace_size(nlat, nlon, nt_op, ityp_op)
-            work_size(2) = shses_aux%get_legendre_workspace_size(nlat, nlon, nt_op, ityp_op)
-            work_size(3) = vhaes_aux%get_legendre_workspace_size(nlat, nlon, nt_op, ityp_op)
-            work_size(4) = vhses_aux%get_legendre_workspace_size(nlat, nlon, nt_op, ityp_op)
-
-            lwork = maxval(work_size)
-            !
-            !  Allocate memory
-            !
-            allocate( workspace(lwork) )
-
-        end subroutine get_legendre_workspace
-
-    end module type_RegularWorkspace
+end module type_RegularWorkspace

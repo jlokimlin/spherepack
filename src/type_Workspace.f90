@@ -11,7 +11,7 @@ module type_Workspace
     private
     public :: Workspace
 
-    type, abstract, public :: Workspace
+    type, public, abstract :: Workspace
         ! Type components
         logical,               public :: initialized = .false.
         real(wp), allocatable, public :: legendre_workspace(:)

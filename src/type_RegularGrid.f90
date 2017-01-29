@@ -55,16 +55,16 @@ contains
 
 
 
-    subroutine copy_regular_grid(self, object_to_be_copied)
+    subroutine copy_regular_grid(self, other)
         !--------------------------------------------------------------------------------
         ! Dummy arguments
         !--------------------------------------------------------------------------------
         class(RegularGrid), intent(out) :: self
-        class(RegularGrid), intent(in)  :: object_to_be_copied
+        class(RegularGrid), intent(in)  :: other
         !--------------------------------------------------------------------------------
 
         ! Check if object is usable
-        if (.not.object_to_be_copied%initialized) then
+        if (.not.other%initialized) then
             error stop 'Uninitialized object of class(RegularGrid): '&
                 //'in assignment (=) '
         end if
@@ -72,14 +72,14 @@ contains
         !
         !  Make copies
         !
-        self%initialized = object_to_be_copied%initialized
-        self%NUMBER_OF_LONGITUDES = object_to_be_copied%NUMBER_OF_LONGITUDES
-        self%NUMBER_OF_LATITUDES = object_to_be_copied%NUMBER_OF_LATITUDES
-        self%LONGITUDINAL_MESH = object_to_be_copied%LONGITUDINAL_MESH
-        self%LATITUDINAL_MESH = object_to_be_copied%LATITUDINAL_MESH
-        self%latitudes = object_to_be_copied%latitudes
-        self%longitudes = object_to_be_copied%longitudes
-        self%grid_type = object_to_be_copied%grid_type
+        self%initialized = other%initialized
+        self%NUMBER_OF_LONGITUDES = other%NUMBER_OF_LONGITUDES
+        self%NUMBER_OF_LATITUDES = other%NUMBER_OF_LATITUDES
+        self%LONGITUDINAL_MESH = other%LONGITUDINAL_MESH
+        self%LATITUDINAL_MESH = other%LATITUDINAL_MESH
+        self%latitudes = other%latitudes
+        self%longitudes = other%longitudes
+        self%grid_type = other%grid_type
 
     end subroutine copy_regular_grid
 
