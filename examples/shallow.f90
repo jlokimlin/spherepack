@@ -384,7 +384,7 @@ program shallow
 
         call solver%grid_to_spec(scrg1, scrnm)
 
-        associate( lap => solver%laplacian_coefficients )
+        associate( lap => solver%LAPLACIAN_COEFFICIENT_MULTIPLIERS )
             ddivdtnm(:,new) = ddivdtnm(:,new) - lap * scrnm
         end associate
 

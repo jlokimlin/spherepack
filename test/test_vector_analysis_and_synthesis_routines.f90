@@ -53,7 +53,7 @@
 !
 !     (5) the synthesized vector field from (4) is compared with the vector field from (2)
 !
-!     note:  vhaec,vhaes,vhagc,vhags,vhsec,vhses,vhsgc,vhsgs are all tested!!
+!     note:  vhaec,vhaes,vhagc,vhags,vhsec,vhses,vhsgc,vhsgs are all tested!
 !
 program tvha
 
@@ -94,7 +94,7 @@ contains
         integer(ip), parameter        :: NLONS = 19
         integer(ip), parameter        :: NLATS = 25
         integer(ip), parameter        :: NSYNTHS = 2
-        integer(ip)                   :: i, j, k !! Counters
+        integer(ip)                   :: i, j, k ! Counters
         real(wp)                      :: polar_component(NLATS,NLONS,NSYNTHS)
         real(wp)                      :: azimuthal_component(NLATS,NLONS,NSYNTHS)
         real(wp)                      :: synthesized_polar(NLATS,NLONS,NSYNTHS)

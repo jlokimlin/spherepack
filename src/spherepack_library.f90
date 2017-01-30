@@ -185,20 +185,44 @@ module spherepack_library
     public :: assignment(=)
     public :: operator(*)
 
-    ! Procedural methods
-    public :: divec, dives, divgc, divgs
-    public :: compute_gaussian_latitudes_and_weights
-    public :: geo2maths, math2geos, geo2mathv, math2geov
+    ! Colatitude derivative
+    public :: vtsec, vtses, vtsgc, vtsgs
+    public :: vtseci, vtsesi, vtsgci, vtsgsi
+
+    ! Gradient
     public :: gradec, grades, gradgc, gradgs
-    public :: hrffti, hrfftf, hrfftb
-    public :: idivec, idives, idivgc, idivgs
-    public :: idvtec, idvtes, idvtgc, idvtgs
+
+    ! Inverse gradient
     public :: igradec, igrades, igradgc, igradgs
+
+    ! Divergence
+    public :: divec, dives, divgc, divgs
+
+    ! Inverse divergence
+    public :: idivec, idives, idivgc, idivgs
+
+    ! Vorticity
+    public :: vrtec, vrtes, vrtgc, vrtgs
+
+    ! Inverse vorticity
+    public :: ivrtec, ivrtes, ivrtgc, ivrtgs
+
+    ! Gaussian wts & pts
+    public :: compute_gaussian_latitudes_and_weights
+
+    ! Geo/math coordinate transfers
+    public :: geo2maths, math2geos, geo2mathv, math2geov
+
+    ! Multiple ffts
+    public :: hrffti, hrfftf, hrfftb
+
+    public :: idvtec, idvtes, idvtgc, idvtgs
+
     public :: ihgeod
     public :: isfvpec, isfvpes, isfvpgc, isfvpgs
     public :: islapec, islapes, islapgc, islapgs
     public :: ivlapec, ivlapes, ivlapgc, ivlapgs
-    public :: ivrtec, ivrtes, ivrtgc, ivrtgs
+
     public :: sfvpec, sfvpes, sfvpgc, sfvpgs
     public :: shaec, shaes, shagc, shags
     public :: shaeci, shaesi, shagci, shagsi
@@ -217,10 +241,9 @@ module spherepack_library
     !    public :: visgau
     !    public :: visgeo
     public :: vlapec, vlapes, vlapgc, vlapgs
-    public :: vrtec, vrtes, vrtgc, vrtgs
+
     public :: vshifte, vshifti
-    public :: vtsec, vtses, vtsgc, vtsgs
-    public :: vtseci, vtsesi, vtsgci, vtsgsi
+
     public :: alfk, lfp, lfpt, lfim, lfin
 
     ! Temporary solution for testing

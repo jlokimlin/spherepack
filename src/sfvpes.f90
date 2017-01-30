@@ -307,97 +307,94 @@ contains
         iwk = is+nlat
         lwk = lwork-2*mn-nlat
 
-        call sfvpes1(nlat, nlon, isym, nt, sf, vp, idv, jdv, br, bi, cr, ci, mdb, ndb, &
+        call sfvpes_lower_routine(nlat, nlon, isym, nt, sf, vp, idv, jdv, br, bi, cr, ci, mdb, ndb, &
             work(ia), work(ib), mab, work(is), wshses, lshses, work(iwk), lwk, &
             ierror)
 
-    contains
+    end subroutine sfvpes
 
+    subroutine sfvpes_lower_routine(nlat, nlon, isym, nt, sf, vp, idv, jdv, br, bi, cr, ci, &
+        mdb, ndb, a, b, mab, fnn, wshses, lshses, wk, lwk, ierror)
 
-        subroutine sfvpes1(nlat, nlon, isym, nt, sf, vp, idv, jdv, br, bi, cr, ci, &
-            mdb, ndb, a, b, mab, fnn, wshses, lshses, wk, lwk, ierror)
-
-            integer(ip) :: nlat, nlon, isym, nt, idv, jdv, mdb, ndb, mab, lshses, lwk, ierror
-            real(wp) :: sf(idv, jdv, nt), vp(idv, jdv, nt)
-            real(wp) :: br(mdb, ndb, nt), bi(mdb, ndb, nt), cr(mdb, ndb, nt), ci(mdb, ndb, nt)
-            real(wp) :: a(mab, nlat, nt), b(mab, nlat, nt)
-            real(wp) :: wshses(lshses), wk(lwk), fnn(nlat)
-            integer(ip) :: n, m, mmax, k
+        integer(ip) :: nlat, nlon, isym, nt, idv, jdv, mdb, ndb, mab, lshses, lwk, ierror
+        real(wp) :: sf(idv, jdv, nt), vp(idv, jdv, nt)
+        real(wp) :: br(mdb, ndb, nt), bi(mdb, ndb, nt), cr(mdb, ndb, nt), ci(mdb, ndb, nt)
+        real(wp) :: a(mab, nlat, nt), b(mab, nlat, nt)
+        real(wp) :: wshses(lshses), wk(lwk), fnn(nlat)
+        integer(ip) :: n, m, mmax, k
+        !
+        !     set coefficient multiplyers
+        !
+        do n=2, nlat
+            fnn(n) = 1.0/sqrt(real(n*(n-1)))
+        end do
+        mmax = min(nlat, (nlon+1)/2)
+        !
+        !     compute sf scalar coefficients from cr, ci
+        !
+        do k=1, nt
+            do n=1, nlat
+                do m=1, mab
+                    a(m, n, k) = 0.0
+                    b(m, n, k) = 0.0
+                end do
+            end do
             !
-            !     set coefficient multiplyers
+            ! Compute m=0 coefficients
             !
             do n=2, nlat
-                fnn(n) = 1.0/sqrt(real(n*(n-1)))
+                a(1, n, k) =-fnn(n)*cr(1, n, k)
+                b(1, n, k) =-fnn(n)*ci(1, n, k)
             end do
-            mmax = min(nlat, (nlon+1)/2)
             !
-            !     compute sf scalar coefficients from cr, ci
+            !     compute m>0 coefficients using vector spherepack value for mmax
             !
-            do k=1, nt
-                do n=1, nlat
-                    do m=1, mab
-                        a(m, n, k) = 0.0
-                        b(m, n, k) = 0.0
-                    end do
+            do m=2, mmax
+                do n=m, nlat
+                    a(m, n, k) =-fnn(n)*cr(m, n, k)
+                    b(m, n, k) =-fnn(n)*ci(m, n, k)
                 end do
+            end do
+        end do
+        !
+        !     synthesize a, b into st
+        !
+        call shses(nlat, nlon, isym, nt, sf, idv, jdv, a, b, &
+            mab, nlat, wshses, lshses, wk, lwk, ierror)
+        !
+        !    set coefficients for vp from br, bi
+        !
+        do k=1, nt
+            do n=1, nlat
+                do m=1, mab
+                    a(m, n, k) = 0.0
+                    b(m, n, k) = 0.0
+                end do
+            end do
                 !
                 ! Compute m=0 coefficients
                 !
-                do n=2, nlat
-                    a(1, n, k) =-fnn(n)*cr(1, n, k)
-                    b(1, n, k) =-fnn(n)*ci(1, n, k)
-                end do
+            do n=2, nlat
+                a(1, n, k) = fnn(n)*br(1, n, k)
+                b(1, n, k) = fnn(n)*bi(1, n, k)
+            end do
                 !
                 !     compute m>0 coefficients using vector spherepack value for mmax
                 !
-                do m=2, mmax
-                    do n=m, nlat
-                        a(m, n, k) =-fnn(n)*cr(m, n, k)
-                        b(m, n, k) =-fnn(n)*ci(m, n, k)
-                    end do
+            mmax = min(nlat, (nlon+1)/2)
+            do m=2, mmax
+                do n=m, nlat
+                    a(m, n, k) = fnn(n)*br(m, n, k)
+                    b(m, n, k) = fnn(n)*bi(m, n, k)
                 end do
             end do
-            !
-            !     synthesize a, b into st
-            !
-            call shses(nlat, nlon, isym, nt, sf, idv, jdv, a, b, &
-                mab, nlat, wshses, lshses, wk, lwk, ierror)
-            !
-            !    set coefficients for vp from br, bi
-            !
-            do k=1, nt
-                do n=1, nlat
-                    do m=1, mab
-                        a(m, n, k) = 0.0
-                        b(m, n, k) = 0.0
-                    end do
-                end do
-                    !
-                    ! Compute m=0 coefficients
-                    !
-                do n=2, nlat
-                    a(1, n, k) = fnn(n)*br(1, n, k)
-                    b(1, n, k) = fnn(n)*bi(1, n, k)
-                end do
-                    !
-                    !     compute m>0 coefficients using vector spherepack value for mmax
-                    !
-                mmax = min(nlat, (nlon+1)/2)
-                do m=2, mmax
-                    do n=m, nlat
-                        a(m, n, k) = fnn(n)*br(m, n, k)
-                        b(m, n, k) = fnn(n)*bi(m, n, k)
-                    end do
-                end do
-            end do
-            !
-            !     synthesize a, b into vp
-            !
-            call shses(nlat, nlon, isym, nt, vp, idv, jdv, a, b, &
-                mab, nlat, wshses, lshses, wk, lwk, ierror)
+        end do
+        !
+        !     synthesize a, b into vp
+        !
+        call shses(nlat, nlon, isym, nt, vp, idv, jdv, a, b, &
+            mab, nlat, wshses, lshses, wk, lwk, ierror)
 
-        end subroutine sfvpes1
-
-    end subroutine sfvpes
+    end subroutine sfvpes_lower_routine
 
 end module module_sfvpes

@@ -42,7 +42,7 @@ module type_GaussianWorkspace
         generic,   public  :: assignment (=) => copy_gaussian_workspace
     end type GaussianWorkspace
 
-    ! Declare constructor
+    ! Declare user-defined constructor
     interface GaussianWorkspace
         module procedure gaussian_workspace_constructor
     end interface
@@ -53,8 +53,8 @@ contains
         result (return_value)
 
         ! Dummy arguments
-        integer(ip), intent(in) :: nlat !! number of latitudinal points 0 <= theta <= pi
-        integer(ip), intent(in) :: nlon !! number of longitudinal points 0 <= phi <= 2*pi
+        integer(ip), intent(in) :: nlat ! number of latitudinal points 0 <= theta <= pi
+        integer(ip), intent(in) :: nlon ! number of longitudinal points 0 <= phi <= 2*pi
         type(GaussianWorkspace) :: return_value
 
         call return_value%create(nlat, nlon)

@@ -1,5 +1,8 @@
 module type_GaussianGrid
 
+    use, intrinsic :: ISO_Fortran_env, only: &
+        stderr => ERROR_UNIT
+
     use spherepack_precision, only: &
         wp, & ! working precision
         ip ! integer precision
@@ -17,20 +20,21 @@ module type_GaussianGrid
     private
     public :: GaussianGrid
     
-    type, public, extends(SphericalGrid) ::  GaussianGrid
+    type, public, extends(SphericalGrid) :: GaussianGrid
         ! Type components
         real(wp), allocatable, public :: gaussian_weights(:)
     contains
         ! Type-bound procedures
+        procedure, public  :: assert_initialized => assert_init_gaussian_grid
         procedure, public  :: create => create_gaussian_grid
         procedure, public  :: destroy => destroy_gaussian_grid
-        procedure, public  :: get_latitudes_and_gaussian_weights
+        procedure, public, nopass :: get_latitudes_and_gaussian_weights
         procedure, public  :: unformatted_print
         generic,   public  :: assignment (=) => copy_gaussian_grid
         procedure, private :: copy_gaussian_grid
     end type GaussianGrid
 
-    ! Declare constructor
+    ! Declare user-defined constructor
     interface GaussianGrid
         module procedure gaussian_grid_constructor
     end interface
@@ -41,13 +45,30 @@ contains
         result (return_value)
 
         ! Dummy arguments
-        integer(ip), intent(in) :: nlat !! number of latitudinal points 0 <= theta <= pi
-        integer(ip), intent(in) :: nlon !! number of longitudinal points 0 <= phi <= 2*pi
+        integer(ip), intent(in) :: nlat ! number of latitudinal points 0 <= theta <= pi
+        integer(ip), intent(in) :: nlon ! number of longitudinal points 0 <= phi <= 2*pi
         type(GaussianGrid)      :: return_value
 
         call return_value%create(nlat, nlon)
 
     end function gaussian_grid_constructor
+
+    subroutine assert_init_gaussian_grid(self, routine)
+
+        ! Dummy arguments
+        class(GaussianGrid), intent(inout) :: self
+        character(len=*),    intent(in)    :: routine
+
+        ! Check if object is usable
+        select type(self)
+            class is (GaussianGrid)
+            if (.not.self%initialized) then
+                write(stderr, '(a)') &
+                    'Uninitialized object of class(GaussianGrid) in '//routine
+            end if
+        end select
+
+    end subroutine assert_init_gaussian_grid
 
     subroutine copy_gaussian_grid(self, other)
 
@@ -76,9 +97,9 @@ contains
     subroutine create_gaussian_grid(self, nlat, nlon)
 
         ! Dummy arguments
-        class(GaussianGrid), target, intent(inout) :: self
-        integer(ip),                 intent(in)    :: nlat !! number of latitudinal points 0 <= theta <= pi
-        integer(ip),                 intent(in)    :: nlon !! number of longitudinal points 0 <= phi <= 2*pi
+        class(GaussianGrid), intent(inout) :: self
+        integer(ip),         intent(in)    :: nlat ! number of latitudinal points 0 <= theta <= pi
+        integer(ip),         intent(in)    :: nlon ! number of longitudinal points 0 <= phi <= 2*pi
 
         ! Ensure that object is usable
         call self%destroy()
@@ -119,10 +140,9 @@ contains
 
     end subroutine destroy_gaussian_grid
 
-    subroutine get_latitudes_and_gaussian_weights(self, nlat, gaussian_latitudes, gaussian_weights)
+    subroutine get_latitudes_and_gaussian_weights(nlat, gaussian_latitudes, gaussian_weights)
 
         ! Dummy arguments
-        class(GaussianGrid),   intent(inout) :: self
         integer(ip),           intent(in)    :: nlat ! number of latitudinal points
         real(wp), allocatable, intent(out)   :: gaussian_latitudes(:) ! latitudinal points: 0 <= theta <= pi
         real(wp), allocatable, intent(out)   :: gaussian_weights(:)
@@ -171,10 +191,7 @@ contains
         integer(ip)  :: file_unit
 
         ! Check if object is usable
-        if (.not.self%initialized) then
-            error stop 'Uninitialized object of class(GaussianGrid): '&
-                //'in unformatted_print'
-        end if
+        call self%assert_initialized('unformatted_print')
 
         ! Write latitudes and longitudes
         call self%print_to_unformatted_binary_files(header)

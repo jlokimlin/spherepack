@@ -88,7 +88,7 @@ contains
         integer(ip), parameter        :: NLATS = 33
         integer(ip), parameter        :: NLONS = 18
         integer(ip), parameter        :: NSYNTHS = 4
-        integer(ip)                   :: i, j, k !! Counters
+        integer(ip)                   :: i, j, k ! Counters
         real(wp)                      :: original_polar_gradient_component(NLATS,NLONS,NSYNTHS)
         real(wp)                      :: original_azimuthal_gradient_component(NLATS,NLONS,NSYNTHS)
         real(wp)                      :: original_scalar_function(NLATS,NLONS,NSYNTHS)

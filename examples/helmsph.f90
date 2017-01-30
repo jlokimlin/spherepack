@@ -96,7 +96,7 @@ contains
         ! Local variables
         integer(ip), parameter        :: NLONS = 36
         integer(ip), parameter        :: NLATS = NLONS/2 + 1
-        integer(ip)                   :: i, j !! Counters
+        integer(ip)                   :: i, j ! Counters
         real(wp)                      :: exact_solution(NLATS, NLONS)
         real(wp)                      :: approximate_solution(NLATS, NLONS)
         real(wp)                      :: source_term(NLATS, NLONS)

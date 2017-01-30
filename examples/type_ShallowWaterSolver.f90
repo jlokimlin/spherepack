@@ -9,13 +9,17 @@ module type_ShallowWaterSolver
     ! Explicit typing only
     implicit none
 
+    ! Everything is private unless stated otherwise
+    private
+    public :: ShallowWaterSolver
+
     ! Parameters confined to the module
     real(wp), parameter :: ZERO = 0.0_wp
     real(wp), parameter :: HALF = 0.5_wp
     real(wp), parameter :: ONE = 1.0_wp
     real(wp), parameter :: TWO = 2.0_wp
     
-    type, extends(RegularSphere) :: ShallowWaterSolver
+    type, extends(RegularSphere), public :: ShallowWaterSolver
     contains
         ! Type-bound procedures
         procedure         :: spec_to_grid
@@ -194,19 +198,19 @@ contains
 
                 !  fill two real arrays (a, b) with contents of dataspec.
                 associate( &
-                    ntrunc => self%TRIANGULAR_TRUNCATION_LIMIT, &
+                    indxn => self%INDEX_DEGREE_N, &
+                    indxm => self%INDEX_ORDER_M, &
                     a => self%workspace%real_harmonic_coefficients, &
                     b => self%workspace%imaginary_harmonic_coefficients &
                     )
 
                     a = ZERO
                     b = ZERO
-                    do m=1, ntrunc+1
-                        do n=m, ntrunc+1
-                            nm = sum([(i, i=ntrunc+1, ntrunc-m+3, -1)])+n-m+1
-                            a(m, n) = TWO * real(dataspec(nm))
-                            b(m, n) = TWO * aimag(dataspec(nm))
-                        end do
+                    do nm=1, size(dataspec)
+                        n = indxn(nm) ! Set degree n
+                        m = indxm(nm) ! Set order m
+                        a(m + 1, n + 1) = TWO * real(dataspec(nm))
+                        b(m + 1, n + 1) = TWO * aimag(dataspec(nm))
                     end do
 
                     !  Perform spherical harmonic synthesis
@@ -240,7 +244,7 @@ contains
 
         ! Local variables
         real(wp)    :: fn
-        integer(ip) :: n, m !! Counters
+        integer(ip) :: n, m ! Counters
 
         associate( &
             nlat => size(ugrid, dim=2), &
@@ -325,15 +329,15 @@ contains
     subroutine get_uv(self, vrtspec, divspec, ugrid, vgrid)
 
         ! Dummy arguments
-        class(ShallowWaterSolver), intent(inout)  :: self
-        complex(wp),               intent(in)     :: vrtspec(:)
-        complex(wp),               intent(in)     :: divspec(:)
-        real(wp),                  intent(out)    :: ugrid(:,:)
-        real(wp),                  intent(out)    :: vgrid(:,:)
+        class(ShallowWaterSolver), intent(inout) :: self
+        complex(wp),               intent(in)    :: vrtspec(:)
+        complex(wp),               intent(in)    :: divspec(:)
+        real(wp),                  intent(out)   :: ugrid(:,:)
+        real(wp),                  intent(out)   :: vgrid(:,:)
 
         ! Local variables
         real(wp)    :: fn
-        integer(ip) :: n, m, nm, i !! Counters
+        integer(ip) :: n, m, nm, i ! Counters
 
         associate( &
             nlat => size(ugrid, dim=2),&
@@ -348,7 +352,8 @@ contains
                 ! by appropriate factors to convert them into vector harmonic
                 ! coefficients of winds.
                 associate( &
-                    ntrunc => self%TRIANGULAR_TRUNCATION_LIMIT, &
+                    indxn => self%INDEX_DEGREE_N, &
+                    indxm => self%INDEX_ORDER_M, &
                     nlat => self%NUMBER_OF_LATITUDES, &
                     rsphere => self%RADIUS_OF_SPHERE, &
                     a => self%workspace%real_harmonic_coefficients, &
@@ -365,17 +370,19 @@ contains
                         isqnn(n) = rsphere/sqrt(fn*(fn+ONE))
                     end do
 
+                    ! Preset real harmonic coefficients to 0.0
                     a = ZERO
                     b = ZERO
+
+                    ! Preset polar coefficients to 0.0
                     br = ZERO
                     bi = ZERO
 
-                    do m=1, ntrunc+1
-                        do n=m, ntrunc+1
-                            nm = sum([(i, i=ntrunc+1, ntrunc-m+3, -1)])+n-m+1
-                            a(m, n) = -TWO * real(divspec(nm))
-                            b(m, n) = -TWO * aimag(divspec(nm))
-                        end do
+                    do nm=1, size(divspec)
+                        n = indxn(nm) ! Set degree n
+                        m = indxm(nm) ! Set order m
+                        a(m + 1, n + 1) = -TWO * real(divspec(nm))
+                        b(m + 1, n + 1) = -TWO * aimag(divspec(nm))
                     end do
 
                     do n=1, nlat
@@ -383,14 +390,15 @@ contains
                         bi(:,n) = isqnn(n)*b(:,n)
                     end do
 
+                    ! Preset azimuthal coefficients to 0.0
                     cr = ZERO
                     ci = ZERO
-                    do m=1, ntrunc+1
-                        do n=m, ntrunc+1
-                            nm = sum([(i, i=ntrunc+1, ntrunc-m+3, -1)])+n-m+1
-                            a(m, n) = TWO * real(vrtspec(nm))
-                            b(m, n) = TWO * aimag(vrtspec(nm))
-                        end do
+
+                    do nm=1, size(divspec)
+                        n = indxn(nm) ! Set degree n
+                        m = indxm(nm) ! Set order m
+                        a(m + 1, n + 1) = TWO * real(vrtspec(nm))
+                        b(m + 1, n + 1) = TWO * aimag(vrtspec(nm))
                     end do
 
                     do n=1, nlat

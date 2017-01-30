@@ -79,7 +79,7 @@ contains
         integer(ip), parameter        :: NLATS = 15
         integer(ip), parameter        :: NLONS = 22
         integer(ip), parameter        :: NSYNTHS = 3
-        integer(ip)                   :: i, j, k !! Counters
+        integer(ip)                   :: i, j, k ! Counters
         real(wp)                      :: original_scalar_function(NLATS,NLONS,NSYNTHS)
         real(wp)                      :: exact_laplacian(NLATS,NLONS,NSYNTHS)
         real(wp)                      :: approximate_scalar_function(NLATS,NLONS,NSYNTHS)

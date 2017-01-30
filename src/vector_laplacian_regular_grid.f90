@@ -460,19 +460,19 @@ contains
         real(wp) :: cilap
         real(wp) :: cr
         real(wp) :: crlap
-        real(wp) :: fn
+        
         real(wp) :: fnn
         integer(ip) :: idvw
         integer(ip) :: ierror
         integer(ip) :: ityp
         integer(ip) :: jdvw
-        integer(ip) :: k
+        
         integer(ip) :: lwk
         integer(ip) :: lwsav
-        integer(ip) :: m
+        
         integer(ip) :: mdb
         integer(ip) :: mmax
-        integer(ip) :: n
+        
         integer(ip) :: ndb
         integer(ip) :: nlat
         integer(ip) :: nlon

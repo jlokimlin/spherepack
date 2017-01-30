@@ -490,7 +490,7 @@ contains
         real(wp),    intent(out)    :: work(*)
 
         ! Local variables
-        integer(ip)    :: i, j, k, m, mn, is, ms, ns, lm1, nl2
+        integer(ip)    :: i, k, m, mn, is, ms, ns, lm1, nl2
         integer(ip)    :: lp1, mp1, np1, mp2, meo, mml1
         real(wp)       :: t1, t2, t3, t4
         type(SpherepackAux) :: sphere_aux
@@ -839,7 +839,7 @@ contains
 
         ! Local variables
         integer(ip)         :: i, m, n, lw, np1, imn, mlim
-        real(wp)            :: pb, dummy_variable
+        real(wp)            :: pb
         type(SpherepackAux) :: sphere_aux
 
         !  Initialize half Fourier transform

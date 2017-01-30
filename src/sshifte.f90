@@ -47,8 +47,8 @@
 !     (which excludes poles) and the nlon by nlat+1 "regular grid" in greg
 !     (which includes poles).  the transfer can go from goff to greg or from
 !     greg to goff (see ioff).  the grids which underly goff and greg are
-!     described below.  the north and south poles are at latitude 0.5*pi and
-!     -0.5*pi radians respectively.
+!     described below.  the north and south poles are at latitude HALF*pi and
+!     -HALF*pi radians respectively.
 !
 ! *** grid descriptions
 !
@@ -60,17 +60,17 @@
 !     the "1/2 increment offset" grid (long(j), lat(i)) on which goff(j, i)
 !     is given (ioff=0) or generated (ioff=1) is
 !
-!          long(j) =0.5*dlon + (j-1)*dlon  (j=1, ..., nlon)
+!          long(j) =HALF*dlon + (j-1)*dlon  (j=1, ..., nlon)
 !
 !     and
 !
-!          lat(i) = -0.5*pi + 0.5*dlat + (i-1)*dlat (i=1, ..., nlat)
+!          lat(i) = -HALF*pi + HALF*dlat + (i-1)*dlat (i=1, ..., nlat)
 !
 !     the data in goff is "shifted" one half a grid increment in longitude
 !     and latitude and excludes the poles.  each goff(j, 1) is given at
-!     latitude -0.5*pi+0.5*dlat and goff(j, nlat) is given at 0.5*pi-0.5*dlat
+!     latitude -HALF*pi+HALF*dlat and goff(j, nlat) is given at HALF*pi-HALF*dlat
 !     (1/2 a grid increment away from the poles).  each goff(1, i), goff(nlon, i)
-!     is given at longitude 0.5*dlon and 2.*pi-0.5*dlon.
+!     is given at longitude HALF*dlon and 2.*pi-HALF*dlon.
 !
 !     regular grid
 !
@@ -81,7 +81,7 @@
 !
 !      and
 !
-!          late(i) = -0.5*pi + (i-1)*dlat (i=1, ..., nlat+1)
+!          late(i) = -HALF*pi + (i-1)*dlat (i=1, ..., nlat+1)
 !
 !     values in greg include the poles and start at zero degrees longitude.
 !
@@ -230,13 +230,17 @@ module module_sshifte
     public :: sshifte
     public :: sshifti
 
+    ! Parameters confined to the module
+    real(wp), parameter :: ZERO = 0.0_wp
+    real(wp), parameter :: HALF = 0.5_wp
+
 contains
 
     subroutine sshifte(ioff, nlon, nlat, goff, greg, wsav, lsav, &
         wrk, lwrk, ier)
 
-        integer ioff, nlon, nlat, n2, nr, nlat2, nlatp1, lsav, lwrk, i1, i2, ier
-        real goff(nlon, nlat), greg(nlon, *), wsav(lsav), wrk(lwrk)
+        integer(ip) :: ioff, nlon, nlat, n2, nr, nlat2, nlatp1, lsav, lwrk, i1, i2, ier
+        real(wp) :: goff(nlon, nlat), greg(nlon, *), wsav(lsav), wrk(lwrk)
         !
         ! Check input arguments
         !
@@ -281,11 +285,11 @@ contains
         !     goff is given, greg is to be generated
         !
 
-        integer nlon, nlat, nlat2, n2, nr, j, i, js, isav
-        real goff(nlon, nlat), greg(nlon, nlat+1)
-        real rlat(nr, nlat2), rlon(nlat, nlon)
-        real wsav(*), wrk(*)
-        real gnorth, gsouth
+        integer(ip) :: nlon, nlat, nlat2, n2, nr, j, i, js, isav
+        real(wp) :: goff(nlon, nlat), greg(nlon, nlat+1)
+        real(wp) :: rlat(nr, nlat2), rlon(nlat, nlon)
+        real(wp) :: wsav(*), wrk(*)
+        real(wp) :: gnorth, gsouth
         isav = 4*nlat+17
         n2 = (nlon+1)/2
         !
@@ -328,8 +332,8 @@ contains
                 !
                 !       set nonpole values in greg and average for poles
                 !
-            gnorth = 0.0
-            gsouth = 0.0
+            gnorth = ZERO
+            gsouth = ZERO
             do j=1, nlon
                 gnorth = gnorth + rlat(j, 1)
                 gsouth = gsouth + rlat(j, nlat+1)
@@ -359,8 +363,8 @@ contains
             !
             !       set nonpole values in greg and average poles
             !
-            gnorth = 0.0
-            gsouth = 0.0
+            gnorth = ZERO
+            gsouth = ZERO
             do j=1, n2
                 js = n2+j
                 gnorth = gnorth + rlat(j, 1)
@@ -407,10 +411,10 @@ contains
         !     greg is given, goff is to be generated
         !
 
-        integer nlon, nlat, nlat2, nlatp1, n2, nr, j, i, js, isav
-        real goff(nlon, nlat), greg(nlon, nlatp1)
-        real rlat(nr, nlat2), rlon(nlatp1, nlon)
-        real wsav(*), wrk(*)
+        integer(ip) :: nlon, nlat, nlat2, nlatp1, n2, nr, j, i, js, isav
+        real(wp) :: goff(nlon, nlat), greg(nlon, nlatp1)
+        real(wp) :: rlat(nr, nlat2), rlon(nlatp1, nlon)
+        real(wp) :: wsav(*), wrk(*)
         isav = 4*nlat+17
         n2 = (nlon+1)/2
         !
@@ -517,9 +521,9 @@ contains
     subroutine sshifti(ioff, nlon, nlat, lsav, wsav, ier)
 
         integer(ip) :: lsav
-        integer ioff, nlat, nlon, nlat2, isav, ier
-        real wsav(lsav)
-        real dlat, dlon, dp
+        integer(ip) :: ioff, nlat, nlon, nlat2, isav, ier
+        real(wp) :: wsav(lsav)
+        real(wp) :: dlat, dlon, dp
         ier = 1
         if (ioff*(ioff-1)/=0) return
         ier = 2
@@ -538,9 +542,9 @@ contains
         !     initialize wsav for left or right latitude shifts
         !
         if (ioff==0) then
-            dp = -0.5*dlat
+            dp = -HALF*dlat
         else
-            dp = 0.5*dlat
+            dp = HALF*dlat
         end if
         nlat2 = nlat+nlat
         call shifthi(nlat2, dp, wsav)
@@ -548,9 +552,9 @@ contains
         !     initialize wsav for left or right longitude shifts
         !
         if (ioff==0) then
-            dp = -0.5*dlon
+            dp = -HALF*dlon
         else
-            dp = 0.5*dlon
+            dp = HALF*dlon
         end if
         isav = 4*nlat + 17
         call shifthi(nlon, dp, wsav(isav))
@@ -560,8 +564,8 @@ contains
     subroutine shifth(m, n, r, wsav, work)
 
         type(RealPeriodicTransform) :: hfft
-        integer m, n, n2, k, l
-        real r(m, n), wsav(*), work(*), r2km2, r2km1
+        integer(ip) :: m, n, n2, k, l
+        real(wp) :: r(m, n), wsav(*), work(*), r2km2, r2km1
         n2 = (n+1)/2
         !
         !     compute fourier coefficients for r on shifted grid
@@ -592,8 +596,8 @@ contains
         !
 
         type(RealPeriodicTransform) :: hfft
-        integer n, n2, k
-        real wsav(*), dp
+        integer(ip) :: n, n2, k
+        real(wp) :: wsav(*), dp
         n2 = (n+1)/2
         do k=2, n2
             wsav(k)    =  sin((k-1)*dp)

@@ -88,7 +88,7 @@ contains
         integer(ip), parameter        :: NLONS = 16
         integer(ip), parameter        :: NLATS = 25
         integer(ip), parameter        :: NSYNTHS = 3
-        integer(ip)                   :: i, j, k !! Counters
+        integer(ip)                   :: i, j, k ! Counters
         real(wp)                      :: exact_polar_component(NLATS, NLONS, NSYNTHS)
         real(wp)                      :: exact_azimuthal_component(NLATS, NLONS, NSYNTHS)
         real(wp)                      :: exact_vorticity(NLATS, NLONS, NSYNTHS)

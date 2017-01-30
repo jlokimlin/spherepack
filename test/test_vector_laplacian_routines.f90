@@ -90,7 +90,7 @@ contains
         ! Local variables
         integer(ip), parameter        :: NLONS = 16
         integer(ip), parameter        :: NLATS = 29
-        integer(ip)                   :: i, j, k !! Counters
+        integer(ip)                   :: i, j, k ! Counters
         real(wp)                      :: original_polar_component(NLATS,NLONS)
         real(wp)                      :: original_azimuthal_component(NLATS,NLONS)
         real(wp)                      :: exact_polar_laplacian(NLATS,NLONS)

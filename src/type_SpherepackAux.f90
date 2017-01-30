@@ -880,7 +880,7 @@ contains
         real(wp),    intent(out)  :: zh
 
         ! Local variables
-        integer(ip) :: i, k, lc, lq, ls
+        integer(ip) :: k, lc, lq, ls
         real(wp)    :: cos2t, sin2t, cost, sint, temp
 
         zh = ZERO
@@ -1274,7 +1274,7 @@ contains
         real(wp),    intent(inout)  :: dwork(*)
 
         ! Local variables
-        integer(ip) :: i, m, i3, mn, mp1, np1, mmax
+        integer(ip) :: m, i3, mn, mp1, np1, mmax
 
         call initialize_scalar_analysis_regular_grid(nlat, nlon, wzfin, dwork)
 
@@ -1282,9 +1282,7 @@ contains
 
         do mp1=1, mmax
             m = mp1-1
-
             call zfin(0, nlat, nlon, m, zin, i3, wzfin)
-
             do np1=mp1, nlat
                 mn = m*(nlat-1)-(m*(m-1))/2+np1
                 z(mn,1:imid) = zin(:,np1, i3)

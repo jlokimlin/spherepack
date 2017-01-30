@@ -555,7 +555,7 @@ contains
         real(wp),    intent(in)  :: wrfft(*)
 
         ! Local variables
-        integer(ip)    :: i,imm1, j, k, m, mb, mlat, mlon
+        integer(ip)    :: i, imm1, k, m, mb, mlat, mlon
         integer(ip)    :: mmax, mp1, mp2, ndo1, ndo2,  nlp1, np1
         real(wp)       :: fsn, tsn
         type(SpherepackAux) :: sphere_aux
@@ -592,18 +592,18 @@ contains
             case default
                 do k=1, nt
                     do i=1, imm1
-                        ve(i,:,k) = fsn*v(i,1:nlon,k)
-                        vo(i,:,k) = fsn*v(i,1:nlon,k)
-                        we(i,:,k) = fsn*w(i,1:nlon,k)
-                        wo(i,:,k) = fsn*w(i,1:nlon,k)
+                        ve(i, :, k) = fsn*v(i, 1:nlon, k)
+                        vo(i, :, k) = fsn*v(i, 1:nlon, k)
+                        we(i, :, k) = fsn*w(i, 1:nlon, k)
+                        wo(i, :, k) = fsn*w(i, 1:nlon, k)
                     end do
                 end do
         end select
 
         if (mlat /= 0) then
             do k=1, nt
-                ve(imid,:, k) = tsn*v(imid,1:nlon, k)
-                we(imid,:, k) = tsn*w(imid,1:nlon, k)
+                ve(imid, :, k) = tsn*v(imid, 1:nlon, k)
+                we(imid, :, k) = tsn*w(imid, 1:nlon, k)
             end do
         end if
 
@@ -616,7 +616,7 @@ contains
         !  Set polar coefficients to zero
         !
         select case (ityp)
-            case (0:1,3:4,6:7)
+            case (0:1, 3:4, 6:7)
                 do k=1, nt
                     do mp1=1, mmax
                         br(mp1, mp1: nlat, k) = ZERO
@@ -629,7 +629,7 @@ contains
         !  Set azimuthal coefficients to zero
         !
         select case (ityp)
-            case (0,2:3,5:6,8)
+            case (0, 2:3, 5:6, 8)
                 do k=1, nt
                     do mp1=1, mmax
                         cr(mp1, mp1: nlat, k) = ZERO
@@ -648,7 +648,7 @@ contains
                 !
                 ! case m=0
                 !
-                1 do k=1, nt
+                do k=1, nt
                     do i=1, imid
                         do np1=2, ndo2, 2
                             br(1, np1, k) = br(1, np1, k)+zv(np1, i)*ve(i, 1, k)
@@ -1242,8 +1242,8 @@ contains
         integer(ip), intent(in)  :: nlat
         integer(ip), intent(in)  :: nlon
         integer(ip), intent(in)  :: imid
-        real(wp),    intent(out) :: zv(idz,*)
-        real(wp),    intent(out) :: zw(idz,*)
+        real(wp),    intent(out) :: zv(idz, *)
+        real(wp),    intent(out) :: zw(idz, *)
         integer(ip), intent(in)  :: idz
         real(wp),    intent(out) :: zin(imid, nlat, 3)
         real(wp),    intent(out) :: wzvin(*)
@@ -1262,7 +1262,7 @@ contains
             call sphere_aux%zvin(0, nlat, nlon, m, zin, i3, wzvin)
             do np1=mp1, nlat
                 mn = m*(nlat-1)-(m*(m-1))/2+np1
-                zv(mn,1:imid) = zin(1:imid,np1,i3)
+                zv(mn, 1:imid) = zin(1:imid, np1, i3)
             end do
         end do
 
@@ -1273,7 +1273,7 @@ contains
             call sphere_aux%zwin(0, nlat, nlon, m, zin, i3, wzvin)
             do np1=mp1, nlat
                 mn = m*(nlat-1)-(m*(m-1))/2+np1
-                zw(mn,1:imid) = zin(1:imid,np1,i3)
+                zw(mn, 1:imid) = zin(1:imid, np1, i3)
             end do
         end do
 

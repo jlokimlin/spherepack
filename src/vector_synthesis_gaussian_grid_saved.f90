@@ -1282,7 +1282,7 @@ contains
         ! Local variables
         integer(ip)         :: i, id, ierror, ix, iy
         integer(ip)         :: lwk, m, mn, n, nm, np, nz
-        real(wp)            :: abel, bbel, cbel, dcf, dummy_variable
+        real(wp)            :: abel, bbel, cbel, dcf
         type(SpherepackAux) :: sphere_aux
 
 

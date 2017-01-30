@@ -1152,7 +1152,7 @@ contains
         real(wp) :: wb
         real(wp) :: wvbin
         dimension vb(imid, *), wb(imid, *), vin(imid, nlat, 3), wvbin(*)
-        real dwork(*), theta(*), wts(*)
+        real(wp) :: dwork(*), theta(*), wts(*)
         type(SpherepackAux) :: sphere_aux
 
         mmax = min(nlat, nlon/2+1)

@@ -7,8 +7,8 @@ module type_SphericalUnitVectors
     use type_SphericalGrid, only: &
         SphericalGrid
 
-    use type_TrigonometricFunctions, only: &
-        TrigonometricFunctions
+    use type_TrigonometricTable, only: &
+        TrigonometricTable
 
     use type_Vector3D, only: &
         Vector => Vector3D, &
@@ -21,82 +21,60 @@ module type_SphericalUnitVectors
     ! Everything is private unless stated otherwise
     private
     public :: SphericalUnitVectors
-
-
-
     
     type, public :: SphericalUnitVectors
-        !----------------------------------------------------------------------
         ! Type components
-        !----------------------------------------------------------------------
-        logical,                    public :: initialized = .false.
+        logical,                   public :: initialized = .false.
         integer(ip),               public :: NUMBER_OF_LONGITUDES = 0
         integer(ip),               public :: NUMBER_OF_LATITUDES = 0
         type(Vector), allocatable, public :: radial(:,:)
         type(Vector), allocatable, public :: polar(:,:)
         type(Vector), allocatable, public :: azimuthal(:,:)
-        !----------------------------------------------------------------------
     contains
-        !----------------------------------------------------------------------
         ! Type-bound procedures
-        !----------------------------------------------------------------------
         procedure, public :: create => create_spherical_unit_vectors
         procedure, public :: destroy => destroy_spherical_unit_vectors
         procedure, public :: get_spherical_angle_components
-        final             :: finalize_spherical_unit_vectors
-        !----------------------------------------------------------------------
+        procedure, public :: get_vector_function
     end type SphericalUnitVectors
 
-
-
-    ! Declare constructor
+    ! Declare user-defined constructor
     interface SphericalUnitVectors
         module procedure spherical_unit_vectors_constructor
     end interface
 
-
-
 contains
 
+    function spherical_unit_vectors_constructor(grid) &
+        result (return_value)
 
-
-    function spherical_unit_vectors_constructor(grid) result (return_value)
-        !----------------------------------------------------------------------
         ! Dummy arguments
-        !----------------------------------------------------------------------
-        class(SphericalGrid), intent(inout)  :: grid
-        type(SphericalUnitVectors)            :: return_value
-        !----------------------------------------------------------------------
+        class(SphericalGrid), intent(inout) :: grid
+        type(SphericalUnitVectors)          :: return_value
 
         call return_value%create(grid)
 
     end function spherical_unit_vectors_constructor
 
-
-
     subroutine create_spherical_unit_vectors(self, grid)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
-        class(SphericalUnitVectors),  intent(inout)  :: self
-        class(SphericalGrid),         intent(inout)  :: grid
-        !----------------------------------------------------------------------
+        class(SphericalUnitVectors), intent(inout) :: self
+        class(SphericalGrid),        intent(inout) :: grid
+
         ! Local variables
-        !----------------------------------------------------------------------
-        integer(ip)                  :: k,  l !! Counters
-        type(TrigonometricFunctions) :: trig_func
-        !----------------------------------------------------------------------
+        integer(ip)                  :: i, j ! Counters
+        type(TrigonometricTable) :: trig_func
 
         ! Check if object is usable
         call self%destroy()
 
         ! Check if polymorphic argument is usable
-        if ( grid%initialized .eqv. .false.) then
+        if (.not.grid%initialized) then
             error stop 'Object of class(SphericalUnitVectors): '&
                 //'uninitialized polymorphic argument of class(SphericalGrid) '&
                 //'in create_spherical_unit_vectors'
         end if
-
 
         associate( &
             nlat => grid%NUMBER_OF_LATITUDES, &
@@ -107,15 +85,13 @@ contains
             self%NUMBER_OF_LATITUDES = nlat
             self%NUMBER_OF_LONGITUDES = nlon
 
-            !
             !  Allocate memory
-            !
             allocate(self%radial(nlat, nlon) )
             allocate(self%polar(nlat, nlon) )
             allocate(self%azimuthal(nlat, nlon) )
 
             ! Compute required trigonometric functions
-            trig_func = TrigonometricFunctions(grid)
+            trig_func = TrigonometricTable(grid)
 
             ! Compute spherical unit vectors
             associate( &
@@ -128,30 +104,30 @@ contains
                 cosp => trig_func%cosp &
                 )
 
-                do l = 1, nlon
-                    do k = 1, nlat
+                do j = 1, nlon
+                    do i = 1, nlat
 
                         ! set radial unit vector
-                        r(k, l) = &
+                        r(i, j) = &
                             Vector(&
-                            sint(k) * cosp(l), &
-                            sint(k) * sinp(l), &
-                            cost(k) &
+                            sint(i) * cosp(j), &
+                            sint(i) * sinp(j), &
+                            cost(i) &
                             )
 
                         ! set polar unit vector
-                        theta(k, l) = &
+                        theta(i, j) = &
                             Vector( &
-                            cost(k) * cosp(l), &
-                            cost(k) * sinp(l), &
-                            -sint(k) &
+                            cost(i) * cosp(j), &
+                            cost(i) * sinp(j), &
+                            -sint(i) &
                             )
 
                         ! set azimuthal unit vector
-                        phi(k, l) = &
+                        phi(i, j) = &
                             Vector( &
-                            -sinp(l), &
-                            cosp(l), &
+                            -sinp(j), &
+                            cosp(j), &
                             0.0_wp &
                             )
                     end do
@@ -164,21 +140,17 @@ contains
 
     end subroutine create_spherical_unit_vectors
     
-
-
     subroutine destroy_spherical_unit_vectors(self)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
-        class(SphericalUnitVectors), intent(inout)  :: self
-        !----------------------------------------------------------------------
+        class(SphericalUnitVectors), intent(inout) :: self
 
         ! Check flag
         if (.not.self%initialized) return
 
         ! Release memory
         if (allocated(self%radial)) deallocate( self%radial )
-        if (allocated(self%polar)) deallocate(  self%polar )
+        if (allocated(self%polar)) deallocate( self%polar )
         if (allocated(self%azimuthal)) deallocate( self%azimuthal )
 
         ! Reset constants
@@ -190,23 +162,18 @@ contains
 
     end subroutine destroy_spherical_unit_vectors
 
-
-
     subroutine get_spherical_angle_components(self, &
         vector_function, polar_component, azimuthal_component )
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
-        class(SphericalUnitVectors), intent(inout)  :: self
-        real(wp),                    intent(in)     :: vector_function(:,:,:)
-        real(wp),                    intent(out)    :: polar_component(:,:)
-        real(wp),                    intent(out)    :: azimuthal_component(:,:)
-        !----------------------------------------------------------------------
+        class(SphericalUnitVectors), intent(inout) :: self
+        real(wp),                    intent(in)    :: vector_function(:,:,:)
+        real(wp),                    intent(out)   :: polar_component(:,:)
+        real(wp),                    intent(out)   :: azimuthal_component(:,:)
+
         ! Local variables
-        !----------------------------------------------------------------------
-        integer(ip)  :: k, l !! Counters
-        type(Vector) :: vector_field !! To cast array to vector
-        !----------------------------------------------------------------------
+        integer(ip)  :: k, l ! Counters
+        type(Vector) :: vector_field ! To cast array to vector
 
         ! Check if object is usable
         if (.not.self%initialized) then
@@ -238,31 +205,24 @@ contains
 
     end subroutine get_spherical_angle_components
 
-
-
-
     subroutine get_vector_function(self, &
         radial_component, polar_component, azimuthal_component, vector_function)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
-        class(SphericalUnitVectors), intent(inout)  :: self
-        real(wp),                    intent(in)     :: radial_component(:,:)
-        real(wp),                    intent(in)     :: polar_component(:,:)
-        real(wp),                    intent(in)     :: azimuthal_component(:,:)
-        real(wp),                    intent(out)    :: vector_function(:,:,:)
-        !----------------------------------------------------------------------
+        class(SphericalUnitVectors), intent(inout) :: self
+        real(wp),                    intent(in)    :: radial_component(:,:)
+        real(wp),                    intent(in)    :: polar_component(:,:)
+        real(wp),                    intent(in)    :: azimuthal_component(:,:)
+        real(wp),                    intent(out)   :: vector_function(:,:,:)
+
         ! Local variables
-        !----------------------------------------------------------------------
-        integer(ip)  :: k, l !! Counters
-        !----------------------------------------------------------------------
+        integer(ip)  :: k, l ! Counters
 
         ! Check if object is usable
         if (.not.self%initialized) then
             error stop 'TYPE(SphericalUnitVectors): '&
                 //'uninitialized object in GET_VECTOR_FUNCTION'
         end if
-
 
         associate( &
             nlat => self%NUMBER_OF_LATITUDES, &
@@ -275,9 +235,8 @@ contains
                         theta => self%polar(k, l), &
                         phi => self%azimuthal(k, l) &
                         )
-                        !
+
                         !  Calculate the spherical angle components
-                        !
                         vector_function(:, k, l ) = &
                             r * radial_component(k, l) &
                             + theta * polar_component(k, l) &
@@ -289,20 +248,5 @@ contains
         end associate
 
     end subroutine get_vector_function
-
-
-
-    subroutine finalize_spherical_unit_vectors(self)
-        !----------------------------------------------------------------------
-        ! Dummy arguments
-        !----------------------------------------------------------------------
-        type(SphericalUnitVectors), intent(inout)     :: self
-        !----------------------------------------------------------------------
-
-        call self%destroy()
-
-    end subroutine finalize_spherical_unit_vectors
-
-
 
 end module type_SphericalUnitVectors

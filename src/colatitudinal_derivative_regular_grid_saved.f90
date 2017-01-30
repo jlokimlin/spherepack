@@ -526,7 +526,7 @@ contains
             wto(idv, nlon, nt), work(*), wrfft(*), &
             vb(imid, *), wb(imid, *)
 
-        integer(ip) :: i, j, k !! Counters
+        integer(ip) :: i, j, k ! Counters
 
         type(SpherepackAux) :: sphere_aux
 
@@ -1105,7 +1105,7 @@ contains
         real(wp) :: wb
         real(wp) :: wzvin
         dimension vb(imid, *), wb(imid, *), vin(imid, nlat, 3), wzvin(*)
-        real dwork(*)
+        real(wp) :: dwork(*)
 
         type(SpherepackAux) :: sphere_aux
 

@@ -686,17 +686,17 @@ type_Vector3D.f90
 	$(FC) $(FFLAGS) -c type_Vector3D.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 
-type_TrigonometricFunctions.o: \
+type_TrigonometricTable.o: \
 spherepack_precision.o \
 type_SphericalGrid.o\
-type_TrigonometricFunctions.f90
-	$(FC) $(FFLAGS) -c type_TrigonometricFunctions.f90 $(LINKS)\
+type_TrigonometricTable.f90
+	$(FC) $(FFLAGS) -c type_TrigonometricTable.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 
 type_SphericalUnitVectors.o: \
 spherepack_precision.o \
 type_SphericalGrid.o\
-type_TrigonometricFunctions.o\
+type_TrigonometricTable.o\
 type_Vector3D.o \
 type_SphericalUnitVectors.f90
 	$(FC) $(FFLAGS) -c type_SphericalUnitVectors.f90 $(LINKS)\
@@ -704,7 +704,7 @@ type_SphericalUnitVectors.f90
 
 type_Sphere.o: \
 spherepack_precision.o \
-type_TrigonometricFunctions.o \
+type_TrigonometricTable.o \
 type_Vector3D.o \
 type_SphericalGrid.o\
 type_Workspace.o\
@@ -716,7 +716,7 @@ type_Sphere.f90
 type_GaussianSphere.o: \
 spherepack_precision.o \
 type_Sphere.o \
-type_TrigonometricFunctions.o \
+type_TrigonometricTable.o \
 type_Vector3D.o \
 type_GaussianGrid.o\
 type_GaussianWorkspace.o\
@@ -732,7 +732,7 @@ type_GaussianSphere.f90
 type_RegularSphere.o: \
 spherepack_precision.o \
 type_Sphere.o \
-type_TrigonometricFunctions.o \
+type_TrigonometricTable.o \
 type_Vector3D.o \
 type_RegularGrid.o\
 type_RegularWorkspace.o\

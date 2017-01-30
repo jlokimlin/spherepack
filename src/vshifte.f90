@@ -50,7 +50,7 @@
 !     grid" in (ureg, vreg) (which includes poles).  the transfer can go from
 !     (uoff, voff) to (ureg, vreg) or vice versa (see ioff).  the grids which
 !     underly the vector fields are described below.  the north and south
-!     pole are at 0.5*pi and-0.5*pi radians respectively.
+!     pole are at HALF*pi and-HALF*pi radians respectively.
 !     uoff and ureg are the east longitudinal vector data components.  voff
 !     and vreg are the latitudinal vector data components.
 !
@@ -72,11 +72,11 @@
 !     the "1/2 increment offset" grid (long(j), lat(i)) on which uoff(j, i)
 !     and voff(j, i) are given (ioff=0) or generated (ioff=1) is
 !
-!          long(j) =0.5*dlon + (j-1)*dlon  (j=1, ..., nlon)
+!          long(j) =HALF*dlon + (j-1)*dlon  (j=1, ..., nlon)
 !
 !     and
 !
-!          lat(i) = -0.5*pi + 0.5*dlat + (i-1)*dlat (i=1, ..., nlat)
+!          lat(i) = -HALF*pi + HALF*dlat + (i-1)*dlat (i=1, ..., nlat)
 !
 !     the data in (uoff, voff) is "shifted" one half a grid increment in both
 !     longitude and latitude and excludes the poles.  each uoff(j, 1), voff(j, 1)
@@ -94,7 +94,7 @@
 !
 !      and
 !
-!          late(i) = -0.5*pi + (i-1)*dlat (i=1, ..., nlat+1)
+!          late(i) = -HALF*pi + (i-1)*dlat (i=1, ..., nlat+1)
 !
 !     values in ureg, vreg include the poles and start at zero degrees
 !     longitude and at the south pole this is the "usual" equally spaced
@@ -264,16 +264,19 @@ module module_vshifte
     public :: vshifte
     public :: vshifti
 
+    ! Parameters confined to the module
+    real(wp), parameter :: HALF = 0.5_wp
+
 contains
 
     subroutine vshifte(ioff, nlon, nlat, uoff, voff, ureg, vreg, &
         wsav, lsav, wrk, lwrk, ier)
 
-        integer ioff, nlon, nlat, n2, nr, nlat2, nlatp1, lsav, lwrk, ier
-        integer i1, i2, i3
-        real uoff(nlon, nlat), voff(nlon, nlat)
-        real ureg(nlon, *), vreg(nlon, *)
-        real wsav(lsav), wrk(lwrk)
+        integer(ip) :: ioff, nlon, nlat, n2, nr, nlat2, nlatp1, lsav, lwrk, ier
+        integer(ip) :: i1, i2, i3
+        real(wp) :: uoff(nlon, nlat), voff(nlon, nlat)
+        real(wp) :: ureg(nlon, *), vreg(nlon, *)
+        real(wp) :: wsav(lsav), wrk(lwrk)
         !
         ! Check input arguments
         !
@@ -329,10 +332,10 @@ contains
         !     generate ureg from uoff (a vector component!)
         !
 
-        integer nlon, nlat, nlat2, nlatp1, n2, nr, j, i, js, isav
-        real uoff(nlon, nlat), ureg(nlon, nlatp1)
-        real rlatu(nr, nlat2), rlonu(nlatp1, nlon), rlou(nlat, nlon)
-        real wsav(*), wrk(*)
+        integer(ip) :: nlon, nlat, nlat2, nlatp1, n2, nr, j, i, js, isav
+        real(wp) :: uoff(nlon, nlat), ureg(nlon, nlatp1)
+        real(wp) :: rlatu(nr, nlat2), rlonu(nlatp1, nlon), rlou(nlat, nlon)
+        real(wp) :: wsav(*), wrk(*)
         isav = 4*nlat+17
         n2 = (nlon+1)/2
         !
@@ -431,10 +434,10 @@ contains
         !     generate uoff vector component from ureg
         !
 
-        integer nlon, nlat, nlat2, nlatp1, n2, nr, j, i, js, isav
-        real uoff(nlon, nlat), ureg(nlon, nlatp1)
-        real rlatu(nr, nlat2), rlonu(nlatp1, nlon), rlou(nlat, nlon)
-        real wsav(*), wrk(*)
+        integer(ip) :: nlon, nlat, nlat2, nlatp1, n2, nr, j, i, js, isav
+        real(wp) :: uoff(nlon, nlat), ureg(nlon, nlatp1)
+        real(wp) :: rlatu(nr, nlat2), rlonu(nlatp1, nlon), rlou(nlat, nlon)
+        real(wp) :: wsav(*), wrk(*)
         isav = 4*nlat+17
         n2 = (nlon+1)/2
         !
@@ -537,9 +540,9 @@ contains
         !
         !     initialize wsav for vshifte
         !
-        integer ioff, nlat, nlon, nlat2, isav, ier
-        real wsav(lsav)
-        real dlat, dlon, dp
+        integer(ip) :: ioff, nlat, nlon, nlat2, isav, ier
+        real(wp) :: wsav(lsav)
+        real(wp) :: dlat, dlon, dp
         ier = 1
         if (ioff*(ioff-1)/=0) return
         ier = 2
@@ -558,9 +561,9 @@ contains
         !     set left or right latitude shifts
         !
         if (ioff==0) then
-            dp = -0.5*dlat
+            dp = -HALF*dlat
         else
-            dp = 0.5*dlat
+            dp = HALF*dlat
         end if
 
         nlat2 = nlat+nlat
@@ -570,9 +573,9 @@ contains
         !     set left or right longitude shifts
         !
         if (ioff==0) then
-            dp = -0.5*dlon
+            dp = -HALF*dlon
         else
-            dp = 0.5*dlon
+            dp = HALF*dlon
         end if
 
         isav = 4*nlat + 17
@@ -584,8 +587,8 @@ contains
     subroutine vhifth(m, n, r, wsav, work)
 
         type(RealPeriodicTransform) :: hfft
-        integer m, n, n2, k, l
-        real r(m, n), wsav(*), work(*), r2km2, r2km1
+        integer(ip) :: m, n, n2, k, l
+        real(wp) :: r(m, n), wsav(*), work(*), r2km2, r2km1
         n2 = (n+1)/2
         !
         !     compute fourier coefficients for r on shifted grid
@@ -618,8 +621,8 @@ contains
         !     initialize wsav for subroutine vhifth
         !
         type(RealPeriodicTransform) :: hfft
-        integer n, n2, k
-        real wsav(*), dp
+        integer(ip) :: n, n2, k
+        real(wp) :: wsav(*), dp
 
 
         n2 = (n+1)/2

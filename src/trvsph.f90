@@ -536,19 +536,22 @@ module module_trvsph
     ! Everything is private unless stated otherwise
     public :: trvsph
 
+    ! Parameter confined to the module
+    real(wp), parameter :: ZERO = 0.0_wp
+
 contains
 
-    subroutine trvsph (intl, igrida, nlona, nlata, iveca, ua, va, &
+    subroutine trvsph(intl, igrida, nlona, nlata, iveca, ua, va, &
         igridb, nlonb, nlatb, ivecb, ub, vb, wsave, lsave, lsvmin, work, &
         lwork, lwkmin, dwork, ldwork, ier)
 
-        integer intl, igrida(2), nlona, nlata, igridb(2), nlonb, nlatb
-        integer iveca, ivecb, lsave, lsvmin, lwork, lwkmin, ldwork, ier
-        real ua(*), va(*), ub(*), vb(*), wsave(*), work(*)
-        real dwork(*)
-        integer ig, igrda, igrdb, la1, la2, lb1, lb2, lwa, lwb
-        integer iabr, iabi, iacr, iaci, ibbr, ibbi, ibcr, ibci
-        integer nlat, lwk1, lwk2, lw, iw, jb, nt, ityp
+        integer(ip) :: intl, igrida(2), nlona, nlata, igridb(2), nlonb, nlatb
+        integer(ip) :: iveca, ivecb, lsave, lsvmin, lwork, lwkmin, ldwork, ier
+        real(wp) :: ua(*), va(*), ub(*), vb(*), wsave(*), work(*)
+        real(wp) :: dwork(*)
+        integer(ip) :: ig, igrda, igrdb, la1, la2, lb1, lb2, lwa, lwb
+        integer(ip) :: iabr, iabi, iacr, iaci, ibbr, ibbi, ibcr, ibci
+        integer(ip) :: nlat, lwk1, lwk2, lw, iw, jb, nt, ityp
         !
         !     include a save statement to ensure local variables in trvsph, set during
         !     an intl=0 call, are preserved if trvsph is recalled with intl=1
@@ -766,27 +769,23 @@ contains
 
     end subroutine trvsph
 
-
-
     subroutine negv(nlat, nlon, v)
         !
         !     negate (co)latitudinal vector componenet
         !
 
-        integer nlat, nlon
-        real v(nlat, nlon)
+        integer(ip) :: nlat, nlon
+        real(wp) :: v(nlat, nlon)
 
         v = -v
 
     end subroutine negv
 
-
-
     subroutine trvab(ma, na, abr, abi, acr, aci, mb, nb, bbr, bbi, bcr, bci)
 
-        integer ma, na, mb, nb, i, j, m, n
-        real abr(ma, na), abi(ma, na), acr(ma, na), aci(ma, na)
-        real bbr(mb, nb), bbi(mb, nb), bcr(mb, nb), bci(mb, nb)
+        integer(ip) :: ma, na, mb, nb, i, j, m, n
+        real(wp) :: abr(ma, na), abi(ma, na), acr(ma, na), aci(ma, na)
+        real(wp) :: bbr(mb, nb), bbi(mb, nb), bcr(mb, nb), bci(mb, nb)
         !
         !     set coefficients for b grid from coefficients for a grid
         !
@@ -805,24 +804,22 @@ contains
         !
         do i=m+1, mb
             do j=1, nb
-                bbr(i, j) = 0.0
-                bbi(i, j) = 0.0
-                bcr(i, j) = 0.0
-                bci(i, j) = 0.0
+                bbr(i, j) = ZERO
+                bbi(i, j) = ZERO
+                bcr(i, j) = ZERO
+                bci(i, j) = ZERO
             end do
         end do
         do j=n+1, nb
             do i=1, mb
-                bbr(i, j) = 0.0
-                bbi(i, j) = 0.0
-                bcr(i, j) = 0.0
-                bci(i, j) = 0.0
+                bbr(i, j) = ZERO
+                bbi(i, j) = ZERO
+                bcr(i, j) = ZERO
+                bci(i, j) = ZERO
             end do
         end do
 
     end subroutine trvab
-
-
 
     subroutine trvplat(n, m, data, work)
         !
@@ -830,8 +827,9 @@ contains
         !     work must be at least n*m words long
         !
 
-        integer n, m, i, j, ij, ji
-        real data(*), work(*)
+        integer(ip) :: n, m, i, j, ij, ji
+        real(wp) :: data(*)
+        real(wp) :: work(*)
 
         do j=1, m
             do i=1, n
@@ -850,14 +848,14 @@ contains
 
     end subroutine trvplat
 
-
     subroutine covlat(nlat, nlon, data)
         !
         !     reverse order of latitude (colatitude) grids
         !
+        integer(ip) ::  nlat, nlon, nlat2, i, ib, j
+        real(wp) :: data(nlat, nlon)
+        real(wp) :: temp
 
-        integer nlat, nlon, nlat2, i, ib, j
-        real data(nlat, nlon), temp
         nlat2 = nlat/2
         do i=1, nlat2
             ib = nlat-i+1

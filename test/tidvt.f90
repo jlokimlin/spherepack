@@ -389,123 +389,120 @@ use spherepack_library
         end do
 
 
-        if (icase==1) then
-
-            call name("**ec")
-
-
-            call shaeci(nlat,nlon,wsave,lsave,dwork,ldwork,ierror)
-            call name("shai")
-            call iout(ierror,"ierr")
-
-            call shaec(nlat,nlon,isym,nt,dv,nlat,nlon,ad,bd, &
-                mdab,nlat,wsave,lsave,work,lwork,ierror)
-            call shaec(nlat,nlon,isym,nt,vt,nlat,nlon,av,bv, &
-                mdab,nlat,wsave,lsave,work,lwork,ierror)
-            call name("sha ")
-            call iout(ierror,"ierr")
-            call iout(lsave,"lsav")
-            call iout(lwork,"lwrk")
-
-            call vhseci(nlat,nlon,wsave,lsave,dwork,ldwork,ierror)
-            call name("idvi")
-            call iout(ierror,"ierr")
-
-            call idvtec(nlat,nlon,isym,nt,v,w,nlat,nlon,ad,bd,av,bv, &
-                mdab,nlat,wsave,lsave,work,lwork,ptrbd,ptrbv,ierror)
-            call name("idvt")
-            call iout(ierror,"ierr")
-            call vecout(prtbd,"prtd",nt)
-            call vecout(prtbv,"prtv",nt)
-
-        else if (icase==2) then
-
-            call name("**es")
-
-            call shaesi(nlat,nlon,wsave,lsave,work,lwork,dwork,ldwork,ierror)
-            call name("shai")
-            call iout(ierror,"ierr")
-
-            call shaes(nlat,nlon,isym,nt,dv,nlat,nlon,ad,bd, &
-                mdab,nlat,wsave,lsave,work,lwork,ierror)
-            call shaes(nlat,nlon,isym,nt,vt,nlat,nlon,av,bv, &
-                mdab,nlat,wsave,lsave,work,lwork,ierror)
-
-            call name("sha ")
-            call iout(ierror,"ierr")
-            call iout(lsave,"lsav")
-            call iout(lwork,"lwrk")
-
-            call vhsesi(nlat,nlon,wsave,lsave,work,lwork,dwork,ldwork,ierror)
-            call name("idvi")
-            call iout(ierror,"ierr")
-
-            call idvtes(nlat,nlon,isym,nt,v,w,nlat,nlon,ad,bd,av,bv, &
-                mdab,nlat,wsave,lsave,work,lwork,ptrbd,ptrbv,ierror)
-            call name("idvt")
-            call iout(ierror,"ierr")
-            call vecout(prtbd,"prtd",nt)
-            call vecout(prtbv,"prtv",nt)
-
-        else if (icase==3) then
-
-            call name("**gc")
-
-            call shagci(nlat,nlon,wsave,lsave,dwork,ldwork,ierror)
-            call name("shai")
-            call iout(ierror,"ierr")
-
-            call shagc(nlat,nlon,isym,nt,dv,nlat,nlon,ad,bd, &
-                mdab,nlat,wsave,lsave,work,lwork,ierror)
-            call shagc(nlat,nlon,isym,nt,vt,nlat,nlon,av,bv, &
-                mdab,nlat,wsave,lsave,work,lwork,ierror)
-
-            call name("sha ")
-            call iout(ierror,"ierr")
-            call iout(lsave,"lsav")
-            call iout(lwork,"lwrk")
-
-            call vhsgci(nlat,nlon,wsave,lsave,dwork,ldwork,ierror)
-            call name("idvi")
-            call iout(ierror,"ierr")
-
-            call idvtgc(nlat,nlon,isym,nt,v,w,nlat,nlon,ad,bd,av,bv, &
-                mdab,nlat,wsave,lsave,work,lwork,ptrbd,ptrbv,ierror)
-            call name("idvt")
-            call iout(ierror,"ierr")
-            call vecout(prtbd,"prtd",nt)
-            call vecout(prtbv,"prtv",nt)
-
-        else if (icase==4) then
-
-            call name("**gs")
-
-            call shagsi(nlat,nlon,wsave,lsave,work,lwork,dwork,ldwork,ierror)
-            call name("shai")
-            call iout(ierror,"ierr")
-
-            call shags(nlat,nlon,isym,nt,dv,nlat,nlon,ad,bd, &
-                mdab,nlat,wsave,lsave,work,lwork,ierror)
-            call shags(nlat,nlon,isym,nt,vt,nlat,nlon,av,bv, &
-                mdab,nlat,wsave,lsave,work,lwork,ierror)
-
-            call name("sha ")
-            call iout(ierror,"ierr")
-            call iout(lsave,"lsav")
-            call iout(lwork,"lwrk")
-
-            call vhsgsi(nlat, nlon, wsave, lsave, dwork, ldwork, ierror)
-            call name("idvi")
-            call iout(ierror,"ierr")
-
-            call idvtgs(nlat,nlon,isym,nt,v,w,nlat,nlon,ad,bd,av,bv, &
-                mdab,nlat,wsave,lsave,work,lwork,ptrbd,ptrbv,ierror)
-            call name("idvt")
-            call iout(ierror,"ierr")
-            call vecout(prtbd,"prtd",nt)
-            call vecout(prtbv,"prtv",nt)
-
-        end if
+        select case (icase)
+        	case (1)
+        		
+        		call name("**ec")
+        		
+        		
+        		call shaeci(nlat,nlon,wsave,lsave,dwork,ldwork,ierror)
+        		call name("shai")
+        		call iout(ierror,"ierr")
+        		
+        		call shaec(nlat,nlon,isym,nt,dv,nlat,nlon,ad,bd, &
+        		mdab,nlat,wsave,lsave,work,lwork,ierror)
+        		call shaec(nlat,nlon,isym,nt,vt,nlat,nlon,av,bv, &
+        		mdab,nlat,wsave,lsave,work,lwork,ierror)
+        		call name("sha ")
+        		call iout(ierror,"ierr")
+        		call iout(lsave,"lsav")
+        		call iout(lwork,"lwrk")
+        		
+        		call vhseci(nlat,nlon,wsave,lsave,dwork,ldwork,ierror)
+        		call name("idvi")
+        		call iout(ierror,"ierr")
+        		
+        		call idvtec(nlat,nlon,isym,nt,v,w,nlat,nlon,ad,bd,av,bv, &
+        		mdab,nlat,wsave,lsave,work,lwork,ptrbd,ptrbv,ierror)
+        		call name("idvt")
+        		call iout(ierror,"ierr")
+        		call vecout(prtbd,"prtd",nt)
+        		call vecout(prtbv,"prtv",nt)
+        	case (2)
+        		
+        		call name("**es")
+        		
+        		call shaesi(nlat,nlon,wsave,lsave,work,lwork,dwork,ldwork,ierror)
+        		call name("shai")
+        		call iout(ierror,"ierr")
+        		
+        		call shaes(nlat,nlon,isym,nt,dv,nlat,nlon,ad,bd, &
+        		mdab,nlat,wsave,lsave,work,lwork,ierror)
+        		call shaes(nlat,nlon,isym,nt,vt,nlat,nlon,av,bv, &
+        		mdab,nlat,wsave,lsave,work,lwork,ierror)
+        		
+        		call name("sha ")
+        		call iout(ierror,"ierr")
+        		call iout(lsave,"lsav")
+        		call iout(lwork,"lwrk")
+        		
+        		call vhsesi(nlat,nlon,wsave,lsave,work,lwork,dwork,ldwork,ierror)
+        		call name("idvi")
+        		call iout(ierror,"ierr")
+        		
+        		call idvtes(nlat,nlon,isym,nt,v,w,nlat,nlon,ad,bd,av,bv, &
+        		mdab,nlat,wsave,lsave,work,lwork,ptrbd,ptrbv,ierror)
+        		call name("idvt")
+        		call iout(ierror,"ierr")
+        		call vecout(prtbd,"prtd",nt)
+        		call vecout(prtbv,"prtv",nt)
+        	case (3)
+        		
+        		call name("**gc")
+        		
+        		call shagci(nlat,nlon,wsave,lsave,dwork,ldwork,ierror)
+        		call name("shai")
+        		call iout(ierror,"ierr")
+        		
+        		call shagc(nlat,nlon,isym,nt,dv,nlat,nlon,ad,bd, &
+        		mdab,nlat,wsave,lsave,work,lwork,ierror)
+        		call shagc(nlat,nlon,isym,nt,vt,nlat,nlon,av,bv, &
+        		mdab,nlat,wsave,lsave,work,lwork,ierror)
+        		
+        		call name("sha ")
+        		call iout(ierror,"ierr")
+        		call iout(lsave,"lsav")
+        		call iout(lwork,"lwrk")
+        		
+        		call vhsgci(nlat,nlon,wsave,lsave,dwork,ldwork,ierror)
+        		call name("idvi")
+        		call iout(ierror,"ierr")
+        		
+        		call idvtgc(nlat,nlon,isym,nt,v,w,nlat,nlon,ad,bd,av,bv, &
+        		mdab,nlat,wsave,lsave,work,lwork,ptrbd,ptrbv,ierror)
+        		call name("idvt")
+        		call iout(ierror,"ierr")
+        		call vecout(prtbd,"prtd",nt)
+        		call vecout(prtbv,"prtv",nt)
+        	case (4)
+        		
+        		call name("**gs")
+        		
+        		call shagsi(nlat,nlon,wsave,lsave,work,lwork,dwork,ldwork,ierror)
+        		call name("shai")
+        		call iout(ierror,"ierr")
+        		
+        		call shags(nlat,nlon,isym,nt,dv,nlat,nlon,ad,bd, &
+        		mdab,nlat,wsave,lsave,work,lwork,ierror)
+        		call shags(nlat,nlon,isym,nt,vt,nlat,nlon,av,bv, &
+        		mdab,nlat,wsave,lsave,work,lwork,ierror)
+        		
+        		call name("sha ")
+        		call iout(ierror,"ierr")
+        		call iout(lsave,"lsav")
+        		call iout(lwork,"lwrk")
+        		
+        		call vhsgsi(nlat, nlon, wsave, lsave, dwork, ldwork, ierror)
+        		call name("idvi")
+        		call iout(ierror,"ierr")
+        		
+        		call idvtgs(nlat,nlon,isym,nt,v,w,nlat,nlon,ad,bd,av,bv, &
+        		mdab,nlat,wsave,lsave,work,lwork,ptrbd,ptrbv,ierror)
+        		call name("idvt")
+        		call iout(ierror,"ierr")
+        		call vecout(prtbd,"prtd",nt)
+        		call vecout(prtbv,"prtv",nt)
+        end select
 
         !
         !     compare this v,w with original derived from sf,sv

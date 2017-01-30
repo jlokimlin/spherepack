@@ -124,6 +124,7 @@ use spherepack_library
     real(wp) :: x
     real(wp) :: y
     real(wp) :: z
+    real(wp) :: dtheta, dwts
     !
     !     set dimensions with parameter statements
     !
@@ -142,7 +143,7 @@ use spherepack_library
     dimension thetag(nnlat),dtheta(nnlat),dwts(nnlat)
     dimension v(nnlat,nnlon,nnt),w(nnlat,nnlon,nnt)
     dimension pertrb(nnt)
-    real dtheta, dwts
+
     !
     !     set dimension variables
     !

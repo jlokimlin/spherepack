@@ -53,7 +53,7 @@
 !
 !     (5) the synthesized vector field from (4) is compared with the vector field from (2)
 !
-!     note:  vhaec,vhaes,vhagc,vhags,vhsec,vhses,vhsgc,vhsgs are all tested!!
+!     note:  vhaec,vhaes,vhagc,vhags,vhsec,vhses,vhsgc,vhsgs are all tested!
 !
 program tvha
     use spherepack_library
@@ -331,7 +331,7 @@ program tvha
         !     call exit(0)
 
         !
-        ! **** problem with vhags.f, function indx not defined!!!! talk to Paul
+        ! **** problem with vhags.f, function indx not defined!! talk to Paul
         !
 
         else if (icase==4) then

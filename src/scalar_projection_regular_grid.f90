@@ -179,7 +179,7 @@ contains
         mmax = min(nlat-1, nlon/2)
         if (mtrunc < 0 .or. mtrunc > mmax) return
         ierror = 5
-        log2n = log(real(nlon))/log(TWO)
+        log2n = int(log(real(nlon, kind=wp))/log(TWO), kind=ip)
         lw1 = 2*(nlat+1)**2
         if (lwshp<lw1+nlon+log2n) return
         ierror = 6
@@ -341,7 +341,7 @@ contains
         ! Set contants
         mmax = min(nlat-1, nlon/2)
         lw1 = 2*(nlat+1)**2
-        log2n = int(log(real(nlon, kind=wp))/log(TWO), kind=wp)
+        log2n = int(log(real(nlon, kind=wp))/log(TWO), kind=ip)
         mlwk = 5*((nlat+1)**2 + 7*nlat + 8)/4
 
         ! Check input arguments
@@ -447,8 +447,8 @@ contains
         real(wp) :: tusl
         real(wp) :: ze
         real(wp) :: zo
-        real (wp) :: summation, dtheta, v(1, 1), a1, b1, c1
-        real cp(idp), work(idp), wx(idp), s(idp+1), &
+        real(wp) :: summation, dtheta, v(1, 1), a1, b1, c1
+        real(wp) :: cp(idp), work(idp), wx(idp), s(idp+1), &
             e(idp), thet(idp), xx(idp), z(idp), u(idp, idp), &
             we(idp, idp, 2), ped(idp, idp, 2), a(4*idp), b(2*idp), &
             wo(idp, idp, 2), pod(idp, idp, 2)

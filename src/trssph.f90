@@ -497,38 +497,38 @@ module module_trssph
     ! Everything is private unless stated otherwise
     public :: trssph
 
+    ! Parameter confined to the module
+    real(wp), parameter :: ZERO = 0.0_wp
+
 contains
 
     subroutine trssph(intl, igrida, nlona, nlata, da, igridb, nlonb, nlatb, &
         db, wsave, lsave, lsvmin, work, lwork, lwkmin, dwork, ldwork, ier)
 
-        !----------------------------------------------------------------------
         ! Dummy arguments
-        !----------------------------------------------------------------------
-        integer, intent(in)     :: intl
-        integer, intent(in)     :: igrida(2)
-        integer, intent(in)     :: nlona
-        integer, intent(in)     :: nlata
-        integer, intent(in)     :: igridb(2)
-        integer, intent(in)     :: nlonb
-        integer, intent(in)     :: nlatb
-        integer, intent(in)     :: lsave
-        integer, intent(inout)  :: lsvmin
-        integer, intent(in)     :: lwork
-        integer, intent(inout)  :: lwkmin
-        integer, intent(in)     :: ldwork
-        integer, intent(out)    :: ier
-        real,    intent(inout)  :: da(*)
-        real,    intent(out)    :: db(*)
-        real,    intent(inout)  :: wsave(*)
-        real,    intent(inout)  :: work(*)
-        real,    intent(inout)  :: dwork(*)
-        !----------------------------------------------------------------------
-        ! Dummy arguments
-        !----------------------------------------------------------------------
+        integer(ip), intent(in)     :: intl
+        integer(ip), intent(in)     :: igrida(2)
+        integer(ip), intent(in)     :: nlona
+        integer(ip), intent(in)     :: nlata
+        integer(ip), intent(in)     :: igridb(2)
+        integer(ip), intent(in)     :: nlonb
+        integer(ip), intent(in)     :: nlatb
+        integer(ip), intent(in)     :: lsave
+        integer(ip), intent(inout)  :: lsvmin
+        integer(ip), intent(in)     :: lwork
+        integer(ip), intent(inout)  :: lwkmin
+        integer(ip), intent(in)     :: ldwork
+        integer(ip), intent(out)    :: ier
+        real(wp),    intent(inout)  :: da(*)
+        real(wp),    intent(out)    :: db(*)
+        real(wp),    intent(inout)  :: wsave(*)
+        real(wp),    intent(inout)  :: work(*)
+        real(wp),    intent(inout)  :: dwork(*)
+
+        ! Local variables
         integer(ip) :: ig, igrda, igrdb, la1, la2, lb1, lb2, lwa, lwb, iaa, iab, iba, ibb
         integer(ip) :: lwk3, lwk4, lw, iw, jb, nt, isym, nlat
-        !----------------------------------------------------------------------
+
         !
         !     include a save statement to ensure local variables in trssph, set during
         !     an intl=0 call, are preserved if trssph is recalled with intl=1
@@ -742,35 +742,26 @@ contains
 
     end subroutine trssph
 
-
-
+    ! Purpose:
+    !
+    !     set coefficients for b grid from coefficients for a grid
+    !
     subroutine trab(ma, na, aa, ba, mb, nb, ab, bb)
-        !
-        ! Purpose:
-        !
-        !     set coefficients for b grid from coefficients for a grid
-        !
 
-        !----------------------------------------------------------------------
         ! Dummy arguments
-        !----------------------------------------------------------------------
-        integer, intent(in)  :: ma
-        integer, intent(in)  :: na
-        integer, intent(in)  :: mb
-        integer, intent(in)  :: nb
-        real,    intent(in)  :: aa(ma, na)
-        real,    intent(in)  :: ba(ma, na)
-        real,    intent(out) :: ab(mb, nb)
-        real,    intent(out) :: bb(mb, nb)
-        !----------------------------------------------------------------------
-        ! Dummy arguments
-        !----------------------------------------------------------------------
-        integer(ip) :: i, j, m, n !! Counters
-        !----------------------------------------------------------------------
+        integer(ip), intent(in)  :: ma
+        integer(ip), intent(in)  :: na
+        integer(ip), intent(in)  :: mb
+        integer(ip), intent(in)  :: nb
+        real(wp),    intent(in)  :: aa(ma, na)
+        real(wp),    intent(in)  :: ba(ma, na)
+        real(wp),    intent(out) :: ab(mb, nb)
+        real(wp),    intent(out) :: bb(mb, nb)
 
+        ! Local variables
+        integer(ip) :: i, j, m, n ! Counters
         m = min(ma, mb)
         n = min(na, nb)
-
 
         do j=1, n
             do i=1, m
@@ -783,40 +774,35 @@ contains
         !
         do i=m+1, mb
             do j=1, nb
-                ab(i, j) = 0.0
-                bb(i, j) = 0.0
+                ab(i, j) = ZERO
+                bb(i, j) = ZERO
             end do
         end do
 
         do j=n+1, nb
             do i=1, mb
-                ab(i, j) = 0.0
-                bb(i, j) = 0.0
+                ab(i, j) = ZERO
+                bb(i, j) = ZERO
             end do
         end do
 
     end subroutine trab
 
-
-
+    ! Purpose:
+    !
+    !     transpose the n by m array data to a m by n array data
+    !     work must be at least n*m words long
+    !
     subroutine trsplat(n, m, data, work)
-        !
-        !     transpose the n by m array data to a m by n array data
-        !     work must be at least n*m words long
-        !
 
-        !----------------------------------------------------------------------
         ! Dummy arguments
-        !----------------------------------------------------------------------
-        integer, intent(in)     :: n
-        integer, intent(in)     :: m
-        real,    intent(inout)  :: data(*)
-        real,    intent(inout)  :: work(*)
-        !----------------------------------------------------------------------
-        ! Dummy arguments
-        !----------------------------------------------------------------------
-        integer(ip) :: i, j, ij, ji !! Counters
-        !----------------------------------------------------------------------
+        integer(ip), intent(in)     :: n
+        integer(ip), intent(in)     :: m
+        real(wp),    intent(inout)  :: data(*)
+        real(wp),    intent(inout)  :: work(*)
+
+        ! Local variables
+        integer(ip) :: i, j, ij, ji ! Counters
 
         do j=1, m
             do i=1, n
@@ -835,27 +821,22 @@ contains
 
     end subroutine trsplat
 
-
-
+    !
+    ! Purpose:
+    !
+    ! Reverse order of latitude (colatitude) grids
+    !
     subroutine convlat(nlat, nlon, data)
-        !
-        ! Purpose:
-        !
-        ! Reverse order of latitude (colatitude) grids
-        !
 
-        !----------------------------------------------------------------------
         ! Dummy arguments
-        !----------------------------------------------------------------------
-        integer, intent(in)     :: nlat
-        integer, intent(in)     :: nlon
-        real,    intent(inout)  :: data(nlat,nlon)
-        !----------------------------------------------------------------------
+        integer(ip), intent(in)     :: nlat
+        integer(ip), intent(in)     :: nlon
+        real(wp),    intent(inout)  :: data(nlat,nlon)
+
         ! Local variables
-        !----------------------------------------------------------------------
-        integer(ip) :: i, j, half_nlat, ib !! Counters
-        real    :: temp
-         !----------------------------------------------------------------------
+        integer(ip) :: i, j, half_nlat, ib ! Counters
+        real(wp)    :: temp
+
 
         half_nlat = nlat/2
         do i=1, half_nlat

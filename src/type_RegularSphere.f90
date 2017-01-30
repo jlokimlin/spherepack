@@ -69,8 +69,8 @@ contains
         result (return_value)
 
         ! Dummy arguments
-        integer(ip), intent(in) :: nlat !! number of latitudinal points 0 <= theta <= pi
-        integer(ip), intent(in) :: nlon !! number of longitudinal points 0 <= phi <= 2*pi
+        integer(ip), intent(in) :: nlat ! number of latitudinal points 0 <= theta <= pi
+        integer(ip), intent(in) :: nlon ! number of longitudinal points 0 <= phi <= 2*pi
         type(RegularSphere)     :: return_value
 
         call return_value%create(nlat, nlon)
@@ -84,9 +84,9 @@ contains
         integer(ip),           intent(in)    :: nlat
         integer(ip),           intent(in)    :: nlon
         integer(ip), optional, intent(in)    :: ntrunc
-        integer(ip), optional, intent(in)    :: isym  !! Either 0, 1, or 2
-        integer(ip), optional, intent(in)    :: itype !! Either 0, 1, 2, 3, ..., 8
-        integer(ip), optional, intent(in)    :: nt !!
+        integer(ip), optional, intent(in)    :: isym  ! Either 0, 1, or 2
+        integer(ip), optional, intent(in)    :: itype ! Either 0, 1, 2, 3, ..., 8
+        integer(ip), optional, intent(in)    :: nt !
         real(wp),    optional, intent(in)    :: rsphere
 
         ! Local variables

@@ -103,7 +103,7 @@ program advec
     type(AdvectionSolver)             :: solver
     integer(ip), parameter            :: NLONS = 45
     integer(ip), parameter            :: NLATS = 23
-    integer(ip)                       :: i, j !! Counters
+    integer(ip)                       :: i, j ! Counters
     integer(ip)                       :: mprint, ncycle, ntime
     real(wp), dimension(NLATS, NLONS) :: u, v, phi, phi_old, phi_new
     real(wp), dimension(NLATS, NLONS) :: exact_phi, grad_phi, grad_phi_lon, grad_phi_lat

@@ -56,47 +56,36 @@ module type_LegendreAux
     private
     public :: LegendreAux
     public :: alfk, lfp, lfpt, lfim, lfin, get_legendre_function
-
-
     
     type, public :: LegendreAux
     contains
-        !-------------------------------------------------------
         ! Type-bound procedures
-        !-------------------------------------------------------
         procedure, nopass :: alfk
         procedure, nopass :: lfim
         procedure, nopass :: lfin
         procedure, nopass :: lfp
         procedure, nopass :: lfpt
         procedure, nopass :: get_legendre_function
-        !-------------------------------------------------------
     end type LegendreAux
-
 
 contains
 
     subroutine get_legendre_function(lat, ntrunc, legfunc)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
         real(wp),              intent(in)  :: lat
         integer(ip),           intent(in)  :: ntrunc
         real(wp), allocatable, intent(out) :: legfunc(:)
-        !----------------------------------------------------------------------
+
         ! Local variables
-        !----------------------------------------------------------------------
         real(wp)              :: theta
         real(wp), allocatable :: cp(:)
-        integer(ip)           :: i, n, m, nm, nmstrt !! Counters
-        !----------------------------------------------------------------------
+        integer(ip)           :: n, m, nm, nmstrt ! Counters
 
-        !
+
         !  Allocate memory
-        !
         allocate( legfunc((ntrunc+1)*(ntrunc+2)/2) )
         allocate( cp((ntrunc/2)+1) )
-
 
         theta = PI/2 - (PI/180)*lat
         nmstrt = 0
@@ -114,14 +103,10 @@ contains
             nmstrt = nmstrt + ntrunc - m + 2
         end do
 
-        !
         !  Release memory
-        !
         deallocate( cp )
 
     end subroutine get_legendre_function
-
-
 
     subroutine alfk(n, m, cp)
         ! subroutine alfk (n, m, cp)
@@ -205,15 +190,13 @@ contains
         !                        places was obtained for n=10 and to 13
         !                        places for n=100.
         !
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
         integer(ip), intent(in)   :: n
         integer(ip), intent(in)   :: m
         real(wp),    intent(out)  :: cp(n/2+1)
-        !----------------------------------------------------------------------
+
         ! Local variables
-        !----------------------------------------------------------------------
         integer(ip)         :: i, l, ma, nex, nmms2
         real(wp), parameter :: sc10 = 1024.0_wp
         real(wp), parameter :: sc20 = sc10**2
@@ -221,7 +204,7 @@ contains
         real(wp)            :: a1, b1, c1, t1, t2
         real(wp)            :: fk, cp2, pm1
         real(wp)            :: fden, fnmh, fnum, fnnp1, fnmsq
-        !----------------------------------------------------------------------
+
 
         cp(1) = 0.0_wp
         ma = abs(m)
@@ -421,9 +404,9 @@ contains
         !                        a four term recurrence relation. (unpublished
         !                        notes by paul n. swarztrauber)
         !
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
+
         integer(ip), intent(in)  :: init
         real(wp),    intent(in)  :: theta(*)
         integer(ip), intent(in)  :: l
@@ -432,11 +415,11 @@ contains
         real(wp),    intent(out) :: pb(1)
         integer(ip), intent(in)  :: id
         real(wp),    intent(out) :: wlfim(1)
-        !----------------------------------------------------------------------
+
         ! Local variables
-        !----------------------------------------------------------------------
+
         integer(ip) :: workspace_indices(3)
-        !----------------------------------------------------------------------
+
 
         !
         !   total length of wlfim is 4*l*(nm+1)
@@ -458,17 +441,17 @@ contains
     contains
 
         pure function get_workspace_indices(l, nm) result (return_value)
-            !----------------------------------------------------------------------
+
             ! Dummy arguments
-            !----------------------------------------------------------------------
+
             integer(ip), intent(in) :: l
             integer(ip), intent(in) :: nm
             integer(ip)              :: return_value(3)
-            !----------------------------------------------------------------------
+
             ! Local variables
-            !----------------------------------------------------------------------
+
             integer(ip) :: lnx
-            !----------------------------------------------------------------------
+
 
             associate( i => return_value )
 
@@ -483,9 +466,9 @@ contains
 
 
         subroutine lfim1(init, theta, l, n, nm, id, p3, phz, ph1, p1, p2, cp)
-            !----------------------------------------------------------------------
+
             ! Dummy arguments
-            !----------------------------------------------------------------------
+
             integer(ip), intent(in)  :: init
             real(wp),    intent(in)  :: theta(*)
             integer(ip), intent(in)  :: l
@@ -498,9 +481,9 @@ contains
             real(wp),    intent(out) :: p1(l,*)
             real(wp),    intent(out) :: p2(l,*)
             real(wp),    intent(out) :: cp(*)
-            !----------------------------------------------------------------------
+
             ! Local variables
-            !----------------------------------------------------------------------
+
             integer(ip)         :: i, m, nm1, nh, mp1, np1, nmp1
             real(wp)            :: cc, dd, ee, cn, fm, fn, fnmm, fnpm
             real(wp)            :: tn, temp
@@ -510,7 +493,7 @@ contains
             real(wp), parameter :: ONE_OVER_SQRT2 = 1.0_wp/SQRT2
             real(wp), parameter :: ONE_OVER_SQRT6 = 1.0_wp/SQRT6
             real(wp), parameter :: SQRT5_OVER_SQRT6 = SQRT5/SQRT6
-            !----------------------------------------------------------------------
+
             nmp1 = nm+1
 
             select case (init)
@@ -584,8 +567,6 @@ contains
         end subroutine lfim1
 
     end subroutine lfim
-
-
 
     subroutine lfin(init, theta, l, m, nm, pb, id, wlfin)
         !
@@ -680,9 +661,8 @@ contains
         !                        a four term recurrence relation. (unpublished
         !                        notes by paul n. swarztrauber)
         !
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
         integer(ip), intent(in)  :: init
         real(wp),    intent(in)  :: theta(l)
         integer(ip), intent(in)  :: l
@@ -691,15 +671,11 @@ contains
         real(wp),    intent(out) :: pb(id, nm+1)
         integer(ip), intent(in)  :: id
         real(wp),    intent(out) :: wlfin(4*l*(nm+1))
-        !----------------------------------------------------------------------
-        ! Local variables
-        !----------------------------------------------------------------------
-        integer(ip) :: workspace_indices(3)
-        !----------------------------------------------------------------------
 
-        !
+        ! Local variables
+        integer(ip) :: workspace_indices(3)
+
         !  total length of wlfin is 4*l*(nm+1)
-        !
         workspace_indices = get_workspace_indices(l, nm)
 
         associate( &
@@ -707,44 +683,34 @@ contains
             iw2 => workspace_indices(2), &
             iw3 => workspace_indices(3) &
             )
-
             call lfin1(init, theta, l, m, nm, id, pb, wlfin, wlfin(iw1), &
                 wlfin(iw2), wlfin(iw3), wlfin(iw2))
-
         end associate
-
 
     contains
 
-
         pure function get_workspace_indices(l, nm) result (return_value)
-            !----------------------------------------------------------------------
+
             ! Dummy arguments
-            !----------------------------------------------------------------------
             integer(ip), intent(in) :: l
             integer(ip), intent(in) :: nm
             integer(ip)              :: return_value(3)
-            !----------------------------------------------------------------------
+
             ! Local variables
-            !----------------------------------------------------------------------
             integer(ip) :: lnx
-            !----------------------------------------------------------------------
 
             associate( i => return_value )
-
                 lnx = l*(nm + 1)
                 i(1) = lnx + 1
                 i(2) = 2*lnx + 1
                 i(3) = 3*lnx + 1
-
             end associate
 
         end function get_workspace_indices
 
         subroutine lfin1(init, theta, l, m, nm, id, p3, phz, ph1, p1, p2, cp)
-            !----------------------------------------------------------------------
+
             ! Dummy arguments
-            !----------------------------------------------------------------------
             integer(ip), intent(in)  :: init
             real(wp),    intent(in)  :: theta(l)
             integer(ip), intent(in)  :: l
@@ -757,15 +723,14 @@ contains
             real(wp),    intent(out) :: p1(l,*)
             real(wp),    intent(out) :: p2(l,*)
             real(wp),    intent(out) :: cp(*)
-            !----------------------------------------------------------------------
+
             ! Local variables
-            !----------------------------------------------------------------------
-            integer         :: i, n, nh, mp1, np1, mp3, nmp1
-            real            :: cc, dd, ee, cn, fm, fn, fnmm, fnpm
-            real            :: tm, tn, temp
-            real, parameter :: SQRT2 = sqrt(2.0_wp)
-            real, parameter :: ONE_OVER_SQRT2 = 1.0_wp/sqrt2
-            !----------------------------------------------------------------------
+            integer(ip)         :: i, n, nh, mp1, np1, mp3, nmp1
+            real(wp)            :: cc, dd, ee, cn, fm, fn, fnmm, fnpm
+            real(wp)            :: tm, tn, temp
+            real(wp), parameter :: SQRT2 = sqrt(2.0_wp)
+            real(wp), parameter :: ONE_OVER_SQRT2 = 1.0_wp/sqrt2
+
             nmp1 = nm+1
 
             select case (init)
@@ -817,7 +782,7 @@ contains
                         if (nmp1 >= mp3) then
                             do np1=mp3, nmp1
                                 n = np1-1
-                                fn = real(n)
+                                fn = real(n, kind=wp)
                                 tn = fn+fn
                                 cn = (tn+1.0_wp)/(tn-3.0_wp)
                                 fnpm = fn+fm
@@ -956,9 +921,9 @@ contains
         ! timing                 time per call to routine lfp is dependent on
         !                        the input parameters l and n.
         !
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
+
         integer(ip), intent(in)  :: init
         integer(ip), intent(in)  :: n
         integer(ip), intent(in)  :: m
@@ -966,11 +931,11 @@ contains
         real(wp)                  :: cp(n/2 + 1)
         real(wp)                  :: pb(l)
         real(wp)                  :: w(5*l+41)
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
+
         integer(ip) :: ma, iw1, iw2
-        !----------------------------------------------------------------------
+
 
         pb = 0.0_wp
 
@@ -989,9 +954,9 @@ contains
     contains
 
         subroutine lfp1(init, n, m, l, cp, p, wsave1, wsave2, wsave3)
-            !----------------------------------------------------------------------
+
             ! Dummy arguments
-            !----------------------------------------------------------------------
+
             integer(ip), intent(in) :: init
             integer(ip), intent(in) :: n
             integer(ip), intent(in) :: m
@@ -1001,16 +966,15 @@ contains
             real(wp)                 :: wsave1(*)
             real(wp)                 :: wsave2(*)
             real(wp)                 :: wsave3(*)
-            !----------------------------------------------------------------------
-            ! Dummy arguments
-            !----------------------------------------------------------------------
+
+            ! Local variables
             integer(ip), save   :: lc, lq, ls
             integer(ip)         :: i
             integer(ip)         :: lm1, np1, ls2, kdp, lmi
             real(wp)            :: dt
             real(wp), parameter :: ONE_OVER_SQRT2 = 1.0_wp/sqrt(2.0_wp)
             type(FFTpack)       :: fft
-            !----------------------------------------------------------------------
+
 
             select case (init)
                 case (0)
@@ -1093,8 +1057,6 @@ contains
 
     end subroutine lfp
 
-
-
     subroutine lfpt(n, m, theta, cp, pb)
         !
         ! subroutine lfpt (n, m, theta, cp, pb)
@@ -1165,20 +1127,19 @@ contains
         ! timing                 time per call to routine lfpt is dependent on
         !                        the input parameter n.
         !
-        !----------------------------------------------------------------------
+
         ! Dummy arguments
-        !----------------------------------------------------------------------
+
         integer(ip), intent(in)  :: n
         integer(ip), intent(in)  :: m
         real(wp),    intent(in)  :: theta
         real(wp),    intent(in)  :: cp(n/2+1)
         real(wp),    intent(out) :: pb
-        !----------------------------------------------------------------------
+
         ! Local variables
-        !----------------------------------------------------------------------
+
         integer(ip) :: ma, np1, k, kdo, kp1
-        real (ip)    :: cos2t, sin2t, cost, sint, temp, summation
-        !----------------------------------------------------------------------
+        real(wp)    :: cos2t, sin2t, cost, sint, temp, summation
 
         pb = 0.0_wp
         ma = abs(m)

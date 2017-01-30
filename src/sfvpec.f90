@@ -244,20 +244,41 @@ module module_sfvpec
     private
     public :: sfvpec
 
+    ! Parameters confined to the module
+    real(wp), parameter :: ZERO = 0.0_wp
+    real(wp), parameter :: ONE = 1.0_wp
+
 contains
 
     subroutine sfvpec(nlat, nlon, isym, nt, sf, vp, idv, jdv, br, bi, cr, ci, &
         mdb, ndb, wshsec, lshsec, work, lwork, ierror)
 
-        integer(ip) :: nlat, nlon, isym, nt, idv, jdv, mdb, ndb, lshsec, lwork, ierror
-        real(wp) :: sf(idv, jdv, nt), vp(idv, jdv, nt)
-        real(wp) :: br(mdb, ndb, nt), bi(mdb, ndb, nt)
-        real(wp) :: cr(mdb, ndb, nt), ci(mdb, ndb, nt)
-        real(wp) :: wshsec(lshsec), work(lwork)
-        integer(ip) :: imid, mmax, lzz1, labc, ls, nln, mab, mn, ia, ib, is, lwk, iwk, lwmin
-        !
+        ! Dummy arguments
+        integer(ip), intent(in)  :: nlat
+        integer(ip), intent(in)  :: nlon
+        integer(ip), intent(in)  :: isym
+        integer(ip), intent(in)  :: nt
+        real(wp),    intent(out) :: sf(idv, jdv, nt)
+        real(wp),    intent(out) :: vp(idv, jdv, nt)
+        integer(ip), intent(in)  :: idv
+        integer(ip), intent(in)  :: jdv
+        real(wp),    intent(in)  :: br(mdb, ndb, nt)
+        real(wp),    intent(in)  :: bi(mdb, ndb, nt)
+        real(wp),    intent(in)  :: cr(mdb, ndb, nt)
+        real(wp),    intent(in)  :: ci(mdb, ndb, nt)
+        integer(ip), intent(in)  :: mdb
+        integer(ip), intent(in)  :: ndb
+        real(wp),    intent(in)  :: wshsec(lshsec)
+        integer(ip), intent(in)  :: lshsec
+        real(wp),    intent(out) :: work(lwork)
+        integer(ip), intent(in)  :: lwork
+        integer(ip), intent(out) :: ierror
+
+        ! Local variables
+        integer(ip) :: imid, mmax, lzz1, labc, ls, nln, mab, mn
+        integer(ip) :: ia, ib, is, lwk, iwk, lwmin
+
         ! Check input arguments
-        !
         ierror = 1
         if (nlat < 3) return
         ierror = 2
@@ -309,96 +330,147 @@ contains
         is = ib+mn
         iwk = is+nlat
         lwk = lwork-2*mn-nlat
-        call sfvpec1(nlat, nlon, isym, nt, sf, vp, idv, jdv, br, bi, cr, ci, mdb, ndb, &
+        call sfvpec_lower_routine(nlat, nlon, isym, nt, sf, vp, idv, jdv, br, bi, cr, ci, mdb, ndb, &
             work(ia), work(ib), mab, work(is), wshsec, lshsec, work(iwk), lwk, &
             ierror)
 
-    contains
-
-        subroutine sfvpec1(nlat, nlon, isym, nt, sf, vp, idv, jdv, br, bi, cr, ci, &
-            mdb, ndb, a, b, mab, fnn, wshsec, lshsec, wk, lwk, ierror)
-
-            integer(ip) :: nlat, nlon, isym, nt, idv, jdv, mdb, ndb, mab, lshsec, lwk, ierror
-            real(wp) :: sf(idv, jdv, nt), vp(idv, jdv, nt)
-            real(wp) :: br(mdb, ndb, nt), bi(mdb, ndb, nt), cr(mdb, ndb, nt), ci(mdb, ndb, nt)
-            real(wp) :: a(mab, nlat, nt), b(mab, nlat, nt)
-            real(wp) :: wshsec(lshsec), wk(lwk), fnn(nlat)
-            integer(ip) :: n, m, mmax, k
-             !
-             !     set coefficient multiplyers
-             !
-            do n=2, nlat
-                fnn(n) = 1.0/sqrt(real(n*(n-1)))
-            end do
-            mmax = min(nlat, (nlon+1)/2)
-            !
-            !     compute sf scalar coefficients from cr, ci
-            !
-            do k=1, nt
-                do n=1, nlat
-                    do m=1, mab
-                        a(m, n, k) = 0.0
-                        b(m, n, k) = 0.0
-                    end do
-                end do
-                !
-                ! Compute m=0 coefficients
-                !
-                do n=2, nlat
-                    a(1, n, k) =-fnn(n)*cr(1, n, k)
-                    b(1, n, k) =-fnn(n)*ci(1, n, k)
-                end do
-                   !
-                   !     compute m>0 coefficients using vector spherepack value for mmax
-                   !
-                do m=2, mmax
-                    do n=m, nlat
-                        a(m, n, k) =-fnn(n)*cr(m, n, k)
-                        b(m, n, k) =-fnn(n)*ci(m, n, k)
-                    end do
-                end do
-            end do
-            !
-            !     synthesize a, b into st
-            !
-            call shsec(nlat, nlon, isym, nt, sf, idv, jdv, a, b, &
-                mab, nlat, wshsec, lshsec, wk, lwk, ierror)
-            !
-            !    set coefficients for vp from br, bi
-            !
-            do k=1, nt
-                do n=1, nlat
-                    do m=1, mab
-                        a(m, n, k) = 0.0
-                        b(m, n, k) = 0.0
-                    end do
-                end do
-                  !
-                  ! Compute m=0 coefficients
-                  !
-                do n=2, nlat
-                    a(1, n, k) = fnn(n)*br(1, n, k)
-                    b(1, n, k) = fnn(n)*bi(1, n, k)
-                end do
-                    !
-                    !     compute m>0 coefficients using vector spherepack value for mmax
-                    !
-                mmax = min(nlat, (nlon+1)/2)
-                do m=2, mmax
-                    do n=m, nlat
-                        a(m, n, k) = fnn(n)*br(m, n, k)
-                        b(m, n, k) = fnn(n)*bi(m, n, k)
-                    end do
-                end do
-            end do
-            !
-            !     synthesize a, b into vp
-            !
-            call shsec(nlat, nlon, isym, nt, vp, idv, jdv, a, b, &
-                mab, nlat, wshsec, lshsec, wk, lwk, ierror)
-
-        end subroutine sfvpec1
-
     end subroutine sfvpec
+
+    subroutine sfvpec_lower_routine(nlat, nlon, isym, nt, sf, vp, idv, jdv, br, bi, cr, ci, &
+        mdb, ndb, a, b, mab, fnn, wshsec, lshsec, wk, lwk, ierror)
+
+        integer(ip) :: nlat, nlon, isym, nt, idv, jdv, mdb, ndb, mab, lshsec, lwk, ierror
+        real(wp) :: sf(idv, jdv, nt), vp(idv, jdv, nt)
+        real(wp) :: br(mdb, ndb, nt), bi(mdb, ndb, nt), cr(mdb, ndb, nt), ci(mdb, ndb, nt)
+        real(wp) :: a(mab, nlat, nt), b(mab, nlat, nt)
+        real(wp) :: wshsec(lshsec), wk(lwk), fnn(nlat)
+        integer(ip) :: n, m, mmax, k
+
+        ! Set coefficient multiplyers
+        call compute_coefficient_multipliers(fnn)
+
+        ! Compute sf scalar coefficients from cr, ci
+        call compute_stream_fms_scalar_coeff_from_azimuthal_vector_coeff( &
+            nlon, a, b, cr, ci, fnn)
+
+        ! Synthesize a, b into sf
+        call shsec(nlat, nlon, isym, nt, sf, idv, jdv, a, b, &
+            mab, nlat, wshsec, lshsec, wk, lwk, ierror)
+
+        !  Set coefficients for velocity potential from br, bi
+        call compute_vel_pot_scalar_coeff_from_polar_vector_coeff( &
+            nlon, a, b, br, bi, fnn)
+
+        ! Synthesize a, b into vp
+        call shsec(nlat, nlon, isym, nt, vp, idv, jdv, a, b, &
+            mab, nlat, wshsec, lshsec, wk, lwk, ierror)
+
+    end subroutine sfvpec_lower_routine
+
+    pure subroutine compute_coefficient_multipliers(fnn)
+
+        ! Dummy arguments
+        real(wp), intent(out) :: fnn(:)
+
+        ! Local variables
+        integer(ip) :: n
+
+        associate( nlat => size(fnn) )
+            do n=2, nlat
+                fnn(n) = ONE/sqrt(real(n*(n - 1), kind=wp))
+            end do
+        end associate
+
+    end subroutine compute_coefficient_multipliers
+
+    pure subroutine compute_stream_fms_scalar_coeff_from_azimuthal_vector_coeff( &
+        nlon, a, b, cr, ci, fnn)
+
+        ! Dummy arguments
+        integer(ip), intent(in)  :: nlon
+        real(wp),    intent(out) :: a(:, :, :)
+        real(wp),    intent(out) :: b(:, :, :)
+        real(wp),    intent(in)  :: cr(:, :, :)
+        real(wp),    intent(in)  :: ci(:, :, :)
+        real(wp),    intent(in)  :: fnn(:)
+
+        ! Local variables
+        integer(ip) :: k, n, m, mmax
+
+        associate( &
+            mab => size(a, dim=1), &
+            nlat => size(a, dim=2), &
+            nt => size(a, dim=3) &
+            )
+
+            mmax = min(nlat, (nlon+1)/2)
+
+            ! Compute stream function scalar coefficients from cr, ci
+            do k=1, nt
+                a(:, :, k) = ZERO
+                b(:, :, k) = ZERO
+
+                ! Compute m = 0 coefficients
+                do n=2, nlat
+                    a(1, n, k) = -fnn(n) * cr(1, n, k)
+                    b(1, n, k) = -fnn(n) * ci(1, n, k)
+                end do
+
+                ! Compute m > 0 coefficients using vector spherepack value for mmax
+                do m=2, mmax
+                    do n=m, nlat
+                        a(m, n, k) = -fnn(n) * cr(m, n, k)
+                        b(m, n, k) = -fnn(n) * ci(m, n, k)
+                    end do
+                end do
+            end do
+        end associate
+
+    end subroutine compute_stream_fms_scalar_coeff_from_azimuthal_vector_coeff
+
+    pure subroutine compute_vel_pot_scalar_coeff_from_polar_vector_coeff( &
+        nlon, a, b, br, bi, fnn)
+
+        ! Dummy arguments
+        integer(ip), intent(in)  :: nlon
+        real(wp),    intent(out) :: a(:, :, :)
+        real(wp),    intent(out) :: b(:, :, :)
+        real(wp),    intent(in)  :: br(:, :, :)
+        real(wp),    intent(in)  :: bi(:, :, :)
+        real(wp),    intent(in)  :: fnn(:)
+
+        ! Local variables
+        integer(ip) :: k, n, m, mmax
+
+        associate( &
+            mab => size(a, dim=1), &
+            nlat => size(a, dim=2), &
+            nt => size(a, dim=3) &
+            )
+
+            mmax = min(nlat, (nlon+1)/2)
+
+            ! Compute velocity potential scalar coefficients from br, bi
+            do k=1, nt
+                a(:, :, k) = ZERO
+                b(:, :, k) = ZERO
+
+                ! Compute m = 0 coefficients
+                do n=2, nlat
+                    a(1, n, k) = fnn(n) * br(1, n, k)
+                    b(1, n, k) = fnn(n) * bi(1, n, k)
+                end do
+
+                ! Compute m > 0 coefficients using vector spherepack value for mmax
+                do m=2, mmax
+                    do n=m, nlat
+                        a(m, n, k) = fnn(n) * br(m, n, k)
+                        b(m, n, k) = fnn(n) * bi(m, n, k)
+                    end do
+                end do
+            end do
+        end associate
+
+    end subroutine compute_vel_pot_scalar_coeff_from_polar_vector_coeff
 
 end module module_sfvpec

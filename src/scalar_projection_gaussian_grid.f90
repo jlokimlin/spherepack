@@ -349,12 +349,12 @@ contains
         if (mtrunc<0 .or. mtrunc>mmax) return
         ierror = 5
         lw1 = 2*((nlat+1)**2)
-        log2n = log(real(nlon, kind=wp))/log(TWO)
+        log2n = int(log(real(nlon, kind=wp))/log(TWO), kind=ip)
         if (lwshp<lw1+nlon+log2n) return
         ierror = 6
         if (liwshp<4*(nlat+1)) return
         ierror = 7
-        mlwk = 1.25*(nlat+1)**2+7*nlat+8
+        mlwk = (5*((nlat+1)**2+7*nlat+8))/4
         if (lwork <mlwk) return
         ierror = 0
 

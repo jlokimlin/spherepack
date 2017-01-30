@@ -13,8 +13,8 @@ module type_Sphere
     use type_SphericalUnitVectors, only: &
         SphericalUnitVectors
 
-    use type_TrigonometricFunctions, only: &
-        TrigonometricFunctions
+    use type_TrigonometricTable, only: &
+        TrigonometricTable
 
     use type_Vector3D, only: &
         Vector => Vector3D, &
@@ -46,13 +46,13 @@ module type_Sphere
         integer(ip),          allocatable, public :: INDEX_ORDER_M(:)
         integer(ip),          allocatable, public :: INDEX_DEGREE_N(:)
         real(wp),                          public :: RADIUS_OF_SPHERE = ZERO
-        real(wp),             allocatable, public :: vorticity_and_divergence_coefficients(:)
-        real(wp),             allocatable, public :: laplacian_coefficients(:)
-        real(wp),             allocatable, public :: inverse_laplacian_coefficients(:)
+        real(wp),             allocatable, public :: COEFFICIENT_MULTIPLIERS(:)
+        real(wp),             allocatable, public :: LAPLACIAN_COEFFICIENT_MULTIPLIERS(:)
+        real(wp),             allocatable, public :: INVERSE_LAPLACIAN_COEFFICIENT_MULTIPLIERS(:)
         complex(wp),          allocatable, public :: complex_spectral_coefficients(:)
         class(Workspace),     allocatable, public :: workspace
         class(SphericalGrid), allocatable, public :: grid
-        type(TrigonometricFunctions),      public :: trigonometric_functions
+        type(TrigonometricTable),          public :: trigonometric_table
         type(SphericalUnitVectors),        public :: unit_vectors
     contains
         ! Type-bound procedures
@@ -172,8 +172,8 @@ contains
         integer(ip),   intent(in)     :: nlat
         integer(ip),   intent(in)     :: nlon
         integer(ip),   intent(in)     :: ntrunc
-        integer(ip),   intent(in)     :: isym  !! Either 0, 1, or 2
-        integer(ip),   intent(in)     :: itype !! Either 0, 1, 2, 3, ..., 8
+        integer(ip),   intent(in)     :: isym  ! Either 0, 1, or 2
+        integer(ip),   intent(in)     :: itype ! Either 0, 1, 2, 3, ..., 8
         integer(ip),   intent(in)     :: nt
         real(wp),      intent(in)     :: rsphere
 
@@ -200,19 +200,19 @@ contains
         associate( nm_dim => (ntrunc+1)*(ntrunc+2)/2 )
             allocate(self%INDEX_ORDER_M(nm_dim) )
             allocate(self%INDEX_DEGREE_N(nm_dim) )
-            allocate(self%laplacian_coefficients(nm_dim) )
-            allocate(self%inverse_laplacian_coefficients(nm_dim) )
+            allocate(self%LAPLACIAN_COEFFICIENT_MULTIPLIERS(nm_dim) )
+            allocate(self%INVERSE_LAPLACIAN_COEFFICIENT_MULTIPLIERS(nm_dim) )
             allocate(self%complex_spectral_coefficients(nm_dim) )
-            allocate(self%vorticity_and_divergence_coefficients(nlat) )
+            allocate(self%COEFFICIENT_MULTIPLIERS(nlat) )
 
             !  Fill arrays
             associate( &
                 ntrunc => self%TRIANGULAR_TRUNCATION_LIMIT, &
                 indxm => self%INDEX_ORDER_M, &
                 indxn => self%INDEX_DEGREE_N, &
-                lap => self%laplacian_coefficients, &
-                ilap => self%inverse_laplacian_coefficients, &
-                sqnn => self%vorticity_and_divergence_coefficients &
+                lap => self%LAPLACIAN_COEFFICIENT_MULTIPLIERS, &
+                ilap => self%INVERSE_LAPLACIAN_COEFFICIENT_MULTIPLIERS, &
+                sqnn => self%COEFFICIENT_MULTIPLIERS &
                 )
 
                 !  Precompute indices of order m
@@ -237,10 +237,10 @@ contains
         !  Initialize derived data types
         associate( &
             grid => self%grid, &
-            trig_func => self%trigonometric_functions, &
+            trig_func => self%trigonometric_table, &
             unit_vectors => self%unit_vectors &
             )
-            trig_func = TrigonometricFunctions(grid)
+            trig_func = TrigonometricTable(grid)
             unit_vectors = SphericalUnitVectors(grid)
         end associate
 
@@ -259,27 +259,27 @@ contains
 
         !  Release memory
         if (allocated(self%INDEX_ORDER_M)) then
-            deallocate(self%INDEX_ORDER_M)
+            deallocate( self%INDEX_ORDER_M )
         end if
 
         if (allocated(self%INDEX_DEGREE_N)) then
-            deallocate(self%INDEX_DEGREE_N)
+            deallocate( self%INDEX_DEGREE_N )
         end if
 
-        if (allocated(self%laplacian_coefficients )) then
-            deallocate(self%laplacian_coefficients)
+        if (allocated(self%LAPLACIAN_COEFFICIENT_MULTIPLIERS )) then
+            deallocate( self%LAPLACIAN_COEFFICIENT_MULTIPLIERS )
         end if
 
-        if (allocated(self%inverse_laplacian_coefficients)) then
-            deallocate(self%inverse_laplacian_coefficients)
+        if (allocated(self%INVERSE_LAPLACIAN_COEFFICIENT_MULTIPLIERS)) then
+            deallocate( self%INVERSE_LAPLACIAN_COEFFICIENT_MULTIPLIERS )
         end if
 
         if (allocated(self%complex_spectral_coefficients)) then
-            deallocate(self%complex_spectral_coefficients)
+            deallocate( self%complex_spectral_coefficients )
         end if
 
-        if (allocated(self%vorticity_and_divergence_coefficients)) then
-            deallocate(self%vorticity_and_divergence_coefficients)
+        if (allocated(self%COEFFICIENT_MULTIPLIERS)) then
+            deallocate( self%COEFFICIENT_MULTIPLIERS )
         end if
 
         !  Release memory from polymorphic class variables
@@ -287,7 +287,7 @@ contains
         if (allocated(self%workspace)) deallocate( self%workspace )
 
         !   Release memory from derived data types
-        call self%trigonometric_functions%destroy()
+        call self%trigonometric_table%destroy()
         call self%unit_vectors%destroy()
 
         !  Reset constants
@@ -473,7 +473,7 @@ contains
         real(wp),      intent(in)    :: vector_field(:,:,:)
 
         ! Local variables
-        integer(ip) :: error_flag, nlat, nlon
+        integer(ip) :: nlat, nlon
 
         ! Check if object is usable
         call self%assert_initialized('perform_vector_analysis')
@@ -518,7 +518,7 @@ contains
         ! Associate various quantities
         associate( &
             psi => self%complex_spectral_coefficients, &
-            lap => self%laplacian_coefficients &
+            lap => self%LAPLACIAN_COEFFICIENT_MULTIPLIERS &
             )
             psi = lap * psi
         end associate
@@ -544,7 +544,7 @@ contains
         ! Associate various quantities
         associate( &
             psi => self%complex_spectral_coefficients, &
-            ilap => self%inverse_laplacian_coefficients &
+            ilap => self%INVERSE_LAPLACIAN_COEFFICIENT_MULTIPLIERS &
             )
             psi = ilap * psi
         end associate
@@ -569,7 +569,7 @@ contains
         associate( &
             nlat => self%NUMBER_OF_LATITUDES, &
             ityp => self%VECTOR_SYMMETRIES, &
-            lap => self%laplacian_coefficients, &
+            lap => self%LAPLACIAN_COEFFICIENT_MULTIPLIERS, &
             br => self%workspace%real_polar_harmonic_coefficients, &
             bi => self%workspace%imaginary_polar_harmonic_coefficients, &
             cr => self%workspace%real_azimuthal_harmonic_coefficients, &
@@ -697,7 +697,7 @@ contains
         associate( &
             nlat => self%NUMBER_OF_LATITUDES, &
             ityp => self%VECTOR_SYMMETRIES, &
-            ilap => self%inverse_laplacian_coefficients, &
+            ilap => self%INVERSE_LAPLACIAN_COEFFICIENT_MULTIPLIERS, &
             br => self%workspace%real_polar_harmonic_coefficients, &
             bi => self%workspace%imaginary_polar_harmonic_coefficients, &
             cr => self%workspace%real_azimuthal_harmonic_coefficients, &
@@ -766,8 +766,8 @@ contains
         associate( &
             nm_dim => size(self%complex_spectral_coefficients), &
             psi => self%complex_spectral_coefficients, &
-            ilap => self%inverse_laplacian_coefficients, &
-            lap => self%laplacian_coefficients, &
+            ilap => self%INVERSE_LAPLACIAN_COEFFICIENT_MULTIPLIERS, &
+            lap => self%LAPLACIAN_COEFFICIENT_MULTIPLIERS, &
             xlmbda => helmholtz_constant &
             )
 
@@ -809,7 +809,7 @@ contains
         real(wp),      intent(out)   :: azimuthal_gradient_component(:,:)
 
         ! Local variables
-        integer(ip) :: n, m
+        integer(ip) :: n
 
         ! Check if object is usable
         call self%assert_initialized('get_gradient')
@@ -822,7 +822,7 @@ contains
             nlat => self%NUMBER_OF_LATITUDES, &
             v => polar_gradient_component, &
             w => azimuthal_gradient_component, &
-            sqnn => self%vorticity_and_divergence_coefficients, &
+            sqnn => self%COEFFICIENT_MULTIPLIERS, &
             a => self%workspace%real_harmonic_coefficients, &
             b => self%workspace%imaginary_harmonic_coefficients, &
             br => self%workspace%real_polar_harmonic_coefficients, &
@@ -878,7 +878,7 @@ contains
             nlat => self%NUMBER_OF_LATITUDES, &
             nlon => self%NUMBER_OF_LONGITUDES, &
             f => solution, &
-            sqnn => self%vorticity_and_divergence_coefficients, &
+            sqnn => self%COEFFICIENT_MULTIPLIERS, &
             a => self%workspace%real_harmonic_coefficients, &
             b => self%workspace%imaginary_harmonic_coefficients, &
             br => self%workspace%real_polar_harmonic_coefficients, &
@@ -934,7 +934,7 @@ contains
             nlat => self%NUMBER_OF_LATITUDES, &
             nlon => self%NUMBER_OF_LONGITUDES, &
             vt => vorticity, &
-            sqnn => self%vorticity_and_divergence_coefficients, &
+            sqnn => self%COEFFICIENT_MULTIPLIERS, &
             a => self%workspace%real_harmonic_coefficients, &
             b => self%workspace%imaginary_harmonic_coefficients, &
             cr => self%workspace%real_azimuthal_harmonic_coefficients, &
@@ -1027,7 +1027,7 @@ contains
             nlon => self%NUMBER_OF_LONGITUDES, &
             v => polar_solution, &
             w => azimuthal_solution, &
-            sqnn => self%vorticity_and_divergence_coefficients, &
+            sqnn => self%COEFFICIENT_MULTIPLIERS, &
             a => self%workspace%real_harmonic_coefficients, &
             b => self%workspace%imaginary_harmonic_coefficients, &
             cr => self%workspace%real_azimuthal_harmonic_coefficients, &
@@ -1137,7 +1137,7 @@ contains
             nlat => self%NUMBER_OF_LATITUDES, &
             nlon => self%NUMBER_OF_LONGITUDES, &
             dv => divergence, &
-            sqnn => self%vorticity_and_divergence_coefficients, &
+            sqnn => self%COEFFICIENT_MULTIPLIERS, &
             a => self%workspace%real_harmonic_coefficients, &
             b => self%workspace%imaginary_harmonic_coefficients, &
             br => self%workspace%real_polar_harmonic_coefficients, &
@@ -1192,7 +1192,7 @@ contains
             ntrunc => self%TRIANGULAR_TRUNCATION_LIMIT, &
             v => polar_solution, &
             w => azimuthal_solution, &
-            sqnn => self%vorticity_and_divergence_coefficients, &
+            sqnn => self%COEFFICIENT_MULTIPLIERS, &
             a => self%workspace%real_harmonic_coefficients, &
             b => self%workspace%imaginary_harmonic_coefficients, &
             br => self%workspace%real_polar_harmonic_coefficients, &
@@ -1283,7 +1283,7 @@ contains
             nlat => self%NUMBER_OF_LATITUDES, &
             indxn => self%INDEX_DEGREE_N, &
             indxm => self%INDEX_ORDER_M, &
-            sqnn => self%vorticity_and_divergence_coefficients, &
+            sqnn => self%COEFFICIENT_MULTIPLIERS, &
             a => self%workspace%real_harmonic_coefficients, &
             b => self%workspace%imaginary_harmonic_coefficients, &
             br => self%workspace%real_polar_harmonic_coefficients, &

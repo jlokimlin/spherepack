@@ -299,99 +299,96 @@ contains
         iwk = is+nlat
         lwk = lwork-2*mn-nlat
 
-        call stvpgs1(nlat, nlon, isym, nt, sf, vp, idv, jdv, br, bi, cr, ci, mdb, ndb, &
+        call sfvpgs_lower_routine(nlat, nlon, isym, nt, sf, vp, idv, jdv, br, bi, cr, ci, mdb, ndb, &
             work(ia), work(ib), mab, work(is), wshsgs, lshsgs, work(iwk), lwk, &
             ierror)
 
-    contains
+    end subroutine sfvpgs
 
+    subroutine sfvpgs_lower_routine(nlat, nlon, isym, nt, sf, vp, idv, jdv, br, bi, cr, ci, &
+        mdb, ndb, a, b, mab, fnn, wshsgs, lshsgs, wk, lwk, ierror)
 
-        subroutine stvpgs1(nlat, nlon, isym, nt, sf, vp, idv, jdv, br, bi, cr, ci, &
-            mdb, ndb, a, b, mab, fnn, wshsgs, lshsgs, wk, lwk, ierror)
+        integer(ip) :: nlat, nlon, isym, nt, idv, jdv, mdb, ndb, mab, lshsgs, lwk, ierror
+        real(wp) :: sf(idv, jdv, nt), vp(idv, jdv, nt)
+        real(wp) :: br(mdb, ndb, nt), bi(mdb, ndb, nt), cr(mdb, ndb, nt), ci(mdb, ndb, nt)
+        real(wp) :: a(mab, nlat, nt), b(mab, nlat, nt)
+        real(wp) :: wshsgs(lshsgs), wk(lwk), fnn(nlat)
+        integer(ip) :: n, m, mmax, k
+        !
+        !     set coefficient multiplyers
+        !
+        do n=2, nlat
+            fnn(n) = 1.0_wp/sqrt(real(n*(n-1), kind=wp))
+        end do
 
-            integer(ip) :: nlat, nlon, isym, nt, idv, jdv, mdb, ndb, mab, lshsgs, lwk, ierror
-            real(wp) :: sf(idv, jdv, nt), vp(idv, jdv, nt)
-            real(wp) :: br(mdb, ndb, nt), bi(mdb, ndb, nt), cr(mdb, ndb, nt), ci(mdb, ndb, nt)
-            real(wp) :: a(mab, nlat, nt), b(mab, nlat, nt)
-            real(wp) :: wshsgs(lshsgs), wk(lwk), fnn(nlat)
-            integer(ip) :: n, m, mmax, k
+        mmax = min(nlat, (nlon+1)/2)
+        !
+        !     compute st scalar coefficients from cr, ci
+        !
+        do k=1, nt
+            do n=1, nlat
+                do m=1, mab
+                    a(m, n, k) = 0.0
+                    b(m, n, k) = 0.0
+                end do
+            end do
             !
-            !     set coefficient multiplyers
+            ! Compute m=0 coefficients
             !
             do n=2, nlat
-                fnn(n) = 1.0_wp/sqrt(real(n*(n-1), kind=wp))
+                a(1, n, k) =-fnn(n)*cr(1, n, k)
+                b(1, n, k) =-fnn(n)*ci(1, n, k)
             end do
-
+                !
+                !     compute m>0 coefficients using vector spherepack value for mmax
+                !
+            do m=2, mmax
+                do n=m, nlat
+                    a(m, n, k) =-fnn(n)*cr(m, n, k)
+                    b(m, n, k) =-fnn(n)*ci(m, n, k)
+                end do
+            end do
+        end do
+        !
+        !     synthesize a, b into st
+        !
+        call shsgs(nlat, nlon, isym, nt, sf, idv, jdv, a, b, &
+            mab, nlat, wshsgs, lshsgs, wk, lwk, ierror)
+        !
+        !    set coefficients for vp from br, bi
+        !
+        do k=1, nt
+            do n=1, nlat
+                do m=1, mab
+                    a(m, n, k) = 0.0
+                    b(m, n, k) = 0.0
+                end do
+            end do
+            !
+            ! Compute m=0 coefficients
+            !
+            do n=2, nlat
+                a(1, n, k) = fnn(n)*br(1, n, k)
+                b(1, n, k) = fnn(n)*bi(1, n, k)
+            end do
+                !
+                !     compute m>0 coefficients using vector spherepack value for mmax
+                !
             mmax = min(nlat, (nlon+1)/2)
-            !
-            !     compute st scalar coefficients from cr, ci
-            !
-            do k=1, nt
-                do n=1, nlat
-                    do m=1, mab
-                        a(m, n, k) = 0.0
-                        b(m, n, k) = 0.0
-                    end do
-                end do
-                !
-                ! Compute m=0 coefficients
-                !
-                do n=2, nlat
-                    a(1, n, k) =-fnn(n)*cr(1, n, k)
-                    b(1, n, k) =-fnn(n)*ci(1, n, k)
-                end do
-                    !
-                    !     compute m>0 coefficients using vector spherepack value for mmax
-                    !
-                do m=2, mmax
-                    do n=m, nlat
-                        a(m, n, k) =-fnn(n)*cr(m, n, k)
-                        b(m, n, k) =-fnn(n)*ci(m, n, k)
-                    end do
+            do m=2, mmax
+                do n=m, nlat
+                    a(m, n, k) = fnn(n)*br(m, n, k)
+                    b(m, n, k) = fnn(n)*bi(m, n, k)
                 end do
             end do
-            !
-            !     synthesize a, b into st
-            !
-            call shsgs(nlat, nlon, isym, nt, sf, idv, jdv, a, b, &
-                mab, nlat, wshsgs, lshsgs, wk, lwk, ierror)
-            !
-            !    set coefficients for vp from br, bi
-            !
-            do k=1, nt
-                do n=1, nlat
-                    do m=1, mab
-                        a(m, n, k) = 0.0
-                        b(m, n, k) = 0.0
-                    end do
-                end do
-                !
-                ! Compute m=0 coefficients
-                !
-                do n=2, nlat
-                    a(1, n, k) = fnn(n)*br(1, n, k)
-                    b(1, n, k) = fnn(n)*bi(1, n, k)
-                end do
-                    !
-                    !     compute m>0 coefficients using vector spherepack value for mmax
-                    !
-                mmax = min(nlat, (nlon+1)/2)
-                do m=2, mmax
-                    do n=m, nlat
-                        a(m, n, k) = fnn(n)*br(m, n, k)
-                        b(m, n, k) = fnn(n)*bi(m, n, k)
-                    end do
-                end do
-            end do
+        end do
 
-            !
-            !     synthesize a, b into vp
-            !
-            call shsgs(nlat, nlon, isym, nt, vp, idv, jdv, a, b, &
-                mab, nlat, wshsgs, lshsgs, wk, lwk, ierror)
+        !
+        !     synthesize a, b into vp
+        !
+        call shsgs(nlat, nlon, isym, nt, vp, idv, jdv, a, b, &
+            mab, nlat, wshsgs, lshsgs, wk, lwk, ierror)
 
-        end subroutine stvpgs1
-
-    end subroutine sfvpgs
+    end subroutine sfvpgs_lower_routine
 
 end module module_sfvpgs

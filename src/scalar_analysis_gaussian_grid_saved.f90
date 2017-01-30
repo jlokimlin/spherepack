@@ -903,7 +903,7 @@ contains
 
         ! Local variables
         integer(ip)         :: i, m, n, lw, np1, imn, mlim
-        real(wp)            :: pb, dummy_variable
+        real(wp)            :: pb
         type(SpherepackAux) :: sphere_aux
 
         call sphere_aux%hfft%initialize(nlon, wfft)

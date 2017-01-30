@@ -654,8 +654,8 @@ contains
         integer(ip) :: i
         integer(ip) :: ier
         integer(ip) :: imn
-        integer(ip) :: imndx
-        integer(ip) :: indx
+        
+        
         integer(ip) :: l
         integer(ip) :: late
         integer(ip) :: lw
@@ -672,8 +672,6 @@ contains
         dimension wts(nlat), p0n(nlat, late), p1n(nlat, late), abel(*), bbel(*), &
             cbel(*), wfft(*)
         real(wp) :: pb, dtheta(nlat), dwts(nlat), work(*)
-        real(wp) :: dummy_variable
-
         type(SpherepackAux) :: sphere_aux
 
         !     compute the nlat  gaussian points and weights, the
