@@ -157,7 +157,7 @@ contains
         self%NUMBER_OF_LONGITUDES = 0
         self%NUMBER_OF_LATITUDES = 0
 
-        ! Reset flag
+        ! Reset initialization flag
         self%initialized = .false.
 
     end subroutine destroy_spherical_unit_vectors

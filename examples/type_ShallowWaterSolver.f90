@@ -155,8 +155,8 @@ contains
 
                 associate( &
                     ntrunc => self%TRIANGULAR_TRUNCATION_LIMIT, &
-                    a => self%workspace%real_harmonic_coefficients, &
-                    b => self%workspace%imaginary_harmonic_coefficients &
+                    a => self%workspace%scalar_coefficients%real_component, &
+                    b => self%workspace%scalar_coefficients%imaginary_component &
                     )
 
                     !  Fill complex array dataspec with result.
@@ -200,8 +200,8 @@ contains
                 associate( &
                     indxn => self%INDEX_DEGREE_N, &
                     indxm => self%INDEX_ORDER_M, &
-                    a => self%workspace%real_harmonic_coefficients, &
-                    b => self%workspace%imaginary_harmonic_coefficients &
+                    a => self%workspace%scalar_coefficients%real_component, &
+                    b => self%workspace%scalar_coefficients%imaginary_component &
                     )
 
                     a = ZERO
@@ -271,12 +271,12 @@ contains
                     ntrunc => self%TRIANGULAR_TRUNCATION_LIMIT, &
                     nlat => self%NUMBER_OF_LATITUDES, &
                     rsphere => self%RADIUS_OF_SPHERE, &
-                    a => self%workspace%real_harmonic_coefficients, &
-                    b => self%workspace%imaginary_harmonic_coefficients, &
-                    br => self%workspace%real_polar_harmonic_coefficients, &
-                    bi => self%workspace%imaginary_polar_harmonic_coefficients, &
-                    cr => self%workspace%real_azimuthal_harmonic_coefficients, &
-                    ci => self%workspace%imaginary_azimuthal_harmonic_coefficients &
+                    a => self%workspace%scalar_coefficients%real_component, &
+                    b => self%workspace%scalar_coefficients%imaginary_component, &
+                    br => self%workspace%vector_coefficients%polar%real_component, &
+                    bi => self%workspace%vector_coefficients%polar%imaginary_component, &
+                    cr => self%workspace%vector_coefficients%azimuthal%real_component, &
+                    ci => self%workspace%vector_coefficients%azimuthal%imaginary_component &
                     )
 
                     do n=1, nlat
@@ -356,12 +356,12 @@ contains
                     indxm => self%INDEX_ORDER_M, &
                     nlat => self%NUMBER_OF_LATITUDES, &
                     rsphere => self%RADIUS_OF_SPHERE, &
-                    a => self%workspace%real_harmonic_coefficients, &
-                    b => self%workspace%imaginary_harmonic_coefficients, &
-                    br => self%workspace%real_polar_harmonic_coefficients, &
-                    bi => self%workspace%imaginary_polar_harmonic_coefficients, &
-                    cr => self%workspace%real_azimuthal_harmonic_coefficients, &
-                    ci => self%workspace%imaginary_azimuthal_harmonic_coefficients &
+                    a => self%workspace%scalar_coefficients%real_component, &
+                    b => self%workspace%scalar_coefficients%imaginary_component, &
+                    br => self%workspace%vector_coefficients%polar%real_component, &
+                    bi => self%workspace%vector_coefficients%polar%imaginary_component, &
+                    cr => self%workspace%vector_coefficients%azimuthal%real_component, &
+                    ci => self%workspace%vector_coefficients%azimuthal%imaginary_component &
                     )
 
                     isqnn(1) = ZERO

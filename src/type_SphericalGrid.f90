@@ -64,7 +64,7 @@ contains
         self%NUMBER_OF_LATITUDES = 0
         self%LONGITUDINAL_MESH = ZERO
 
-        ! Reset flag
+        ! Reset initialization flag
         self%initialized = .false.
 
     end subroutine destroy_grid

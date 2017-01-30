@@ -33,13 +33,11 @@ module type_GaussianWorkspace
         procedure, public  :: destroy => destroy_gaussian_workspace
         procedure, private :: initialize_gaussian_scalar_analysis
         procedure, private :: initialize_gaussian_scalar_synthesis
-        procedure, private :: initialize_gaussian_scalar_transform
         procedure, private :: initialize_gaussian_vector_analysis
         procedure, private :: initialize_gaussian_vector_synthesis
-        procedure, private :: initialize_gaussian_vector_transform
         procedure, private :: copy_gaussian_workspace
         ! Generic type-bound procedures
-        generic,   public  :: assignment (=) => copy_gaussian_workspace
+        generic, public :: assignment (=) => copy_gaussian_workspace
     end type GaussianWorkspace
 
     ! Declare user-defined constructor
@@ -49,15 +47,26 @@ module type_GaussianWorkspace
 
 contains
 
-    function gaussian_workspace_constructor(nlat, nlon) &
+    function gaussian_workspace_constructor(nlat, nlon, nt) &
         result (return_value)
 
         ! Dummy arguments
-        integer(ip), intent(in) :: nlat ! number of latitudinal points 0 <= theta <= pi
-        integer(ip), intent(in) :: nlon ! number of longitudinal points 0 <= phi <= 2*pi
-        type(GaussianWorkspace) :: return_value
+        integer(ip),           intent(in) :: nlat ! number of latitudinal points 0 <= theta <= pi
+        integer(ip),           intent(in) :: nlon ! number of longitudinal points 0 <= phi <= 2*pi
+        integer(ip), optional, intent(in) :: nt ! Number of syntheses
+        type(GaussianWorkspace)           :: return_value
 
-        call return_value%create(nlat, nlon)
+        ! Local variables
+        integer(ip) :: nt_op
+
+        ! Address optional argument
+        if (present(nt)) then
+            nt_op = nt
+        else
+            nt_op = 1
+        end if
+
+        call return_value%create(nlat, nlon, nt_op)
 
     end function gaussian_workspace_constructor
 
@@ -74,33 +83,36 @@ contains
         end if
 
         !  Make copies
-        self%initialized = other%initialized
-        self%legendre_workspace = other%legendre_workspace
-        self%forward_scalar = other%forward_scalar
-        self%forward_vector = other%forward_vector
-        self%backward_scalar = other%backward_scalar
-        self%backward_vector = other%backward_vector
-        self%real_harmonic_coefficients = other%real_harmonic_coefficients
-        self%imaginary_harmonic_coefficients = other%imaginary_harmonic_coefficients
-        self%real_polar_harmonic_coefficients = other%real_polar_harmonic_coefficients
-        self%imaginary_polar_harmonic_coefficients = other%imaginary_polar_harmonic_coefficients
-        self%real_azimuthal_harmonic_coefficients = other%real_azimuthal_harmonic_coefficients
-        self%imaginary_azimuthal_harmonic_coefficients = other%imaginary_azimuthal_harmonic_coefficients
+        call self%copy_workspace(other)
 
     end subroutine copy_gaussian_workspace
 
-    subroutine create_gaussian_workspace(self, nlat, nlon)
+    subroutine create_gaussian_workspace(self, nlat, nlon, nt)
 
         ! Dummy arguments
         class(GaussianWorkspace), intent(inout) :: self
         integer(ip),              intent(in)    :: nlat
         integer(ip),              intent(in)    :: nlon
+        integer(ip),              intent(in)    :: nt
 
         ! Ensure that object is usable
         call self%destroy()
 
-        call self%initialize_gaussian_scalar_transform(nlat, nlon)
-        call self%initialize_gaussian_vector_transform(nlat, nlon)
+        ! Initialize harmonic coefficients
+        call self%initialize_harmonic_coefficients(nlat, nlon, nt)
+
+        ! Set up scalar analysis
+        call self%initialize_gaussian_scalar_analysis(nlat, nlon)
+
+        ! Set up scalar synthesis
+        call self%initialize_gaussian_scalar_synthesis(nlat, nlon)
+
+        ! Set up vector analysis
+        call self%initialize_gaussian_vector_analysis(nlat, nlon)
+
+        ! Set up vector analysis
+        call self%initialize_gaussian_vector_synthesis(nlat, nlon)
+
         call get_legendre_workspace(nlat, nlon, self%legendre_workspace)
 
         ! Set flag
@@ -255,26 +267,6 @@ contains
 
     end subroutine initialize_gaussian_scalar_synthesis
 
-
-    subroutine initialize_gaussian_scalar_transform(self, nlat, nlon)
-
-        ! Dummy arguments
-        class(GaussianWorkspace), intent(inout) :: self
-        integer(ip),              intent(in)    :: nlat
-        integer(ip),              intent(in)    :: nlon
-
-        ! Set up scalar analysis
-        call self%initialize_gaussian_scalar_analysis(nlat, nlon)
-
-        ! Set up scalar synthesis
-        call self%initialize_gaussian_scalar_synthesis(nlat, nlon)
-
-        !  Allocate memory
-        allocate( self%real_harmonic_coefficients(nlat, nlat) )
-        allocate( self%imaginary_harmonic_coefficients(nlat, nlat) )
-
-    end subroutine initialize_gaussian_scalar_transform
-
     subroutine initialize_gaussian_vector_analysis(self, nlat, nlon)
 
         ! Dummy arguments
@@ -386,27 +378,6 @@ contains
         end block
 
     end subroutine initialize_gaussian_vector_synthesis
-
-    subroutine initialize_gaussian_vector_transform(self, nlat, nlon)
-
-        ! Dummy arguments
-        class(GaussianWorkspace), intent(inout)  :: self
-        integer(ip),              intent(in)     :: nlat
-        integer(ip),              intent(in)     :: nlon
-
-        ! Set up vector analysis
-        call self%initialize_gaussian_vector_analysis(nlat, nlon)
-
-        ! Set up vector analysis
-        call self%initialize_gaussian_vector_synthesis(nlat, nlon)
-
-        !  Allocate memory
-        allocate( self%real_polar_harmonic_coefficients(nlat, nlat) )
-        allocate( self%imaginary_polar_harmonic_coefficients(nlat, nlat) )
-        allocate( self%real_azimuthal_harmonic_coefficients(nlat, nlat) )
-        allocate( self%imaginary_azimuthal_harmonic_coefficients(nlat, nlat) )
-
-    end subroutine initialize_gaussian_vector_transform
 
     pure function get_lwork(nlat) result (return_value)
 

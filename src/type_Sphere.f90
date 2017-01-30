@@ -344,8 +344,8 @@ contains
         !  Set complex spherical harmonic coefficients
         associate( &
             ntrunc => self%TRIANGULAR_TRUNCATION_LIMIT, &
-            a => self%workspace%real_harmonic_coefficients, &
-            b => self%workspace%imaginary_harmonic_coefficients, &
+            a => self%workspace%scalar_coefficients%real_component, &
+            b => self%workspace%scalar_coefficients%imaginary_component, &
             psi => self%complex_spectral_coefficients &
             )
             psi = HALF * cmplx( &
@@ -377,8 +377,8 @@ contains
         associate( &
             indxn => self%INDEX_DEGREE_N, &
             indxm => self%INDEX_ORDER_M, &
-            a => self%workspace%real_harmonic_coefficients, &
-            b => self%workspace%imaginary_harmonic_coefficients, &
+            a => self%workspace%scalar_coefficients%real_component, &
+            b => self%workspace%scalar_coefficients%imaginary_component, &
             psi => self%complex_spectral_coefficients &
             )
             ! Initialize (real) coefficients
@@ -440,8 +440,8 @@ contains
         associate( &
             indxn => self%INDEX_DEGREE_N, &
             indxm => self%INDEX_ORDER_M, &
-            a => self%workspace%real_harmonic_coefficients, &
-            b => self%workspace%imaginary_harmonic_coefficients, &
+            a => self%workspace%scalar_coefficients%real_component, &
+            b => self%workspace%scalar_coefficients%imaginary_component, &
             psi => spectral_coefficients &
             )
             ! Initialize (real) coefficients
@@ -570,10 +570,10 @@ contains
             nlat => self%NUMBER_OF_LATITUDES, &
             ityp => self%VECTOR_SYMMETRIES, &
             lap => self%LAPLACIAN_COEFFICIENT_MULTIPLIERS, &
-            br => self%workspace%real_polar_harmonic_coefficients, &
-            bi => self%workspace%imaginary_polar_harmonic_coefficients, &
-            cr => self%workspace%real_azimuthal_harmonic_coefficients, &
-            ci => self%workspace%imaginary_azimuthal_harmonic_coefficients &
+            br => self%workspace%vector_coefficients%polar%real_component, &
+            bi => self%workspace%vector_coefficients%polar%imaginary_component, &
+            cr => self%workspace%vector_coefficients%azimuthal%real_component, &
+            ci => self%workspace%vector_coefficients%azimuthal%imaginary_component &
             )
             select case (ityp)
                 case (0, 3, 6)
@@ -698,10 +698,10 @@ contains
             nlat => self%NUMBER_OF_LATITUDES, &
             ityp => self%VECTOR_SYMMETRIES, &
             ilap => self%INVERSE_LAPLACIAN_COEFFICIENT_MULTIPLIERS, &
-            br => self%workspace%real_polar_harmonic_coefficients, &
-            bi => self%workspace%imaginary_polar_harmonic_coefficients, &
-            cr => self%workspace%real_azimuthal_harmonic_coefficients, &
-            ci => self%workspace%imaginary_azimuthal_harmonic_coefficients, &
+            br => self%workspace%vector_coefficients%polar%real_component, &
+            bi => self%workspace%vector_coefficients%polar%imaginary_component, &
+            cr => self%workspace%vector_coefficients%azimuthal%real_component, &
+            ci => self%workspace%vector_coefficients%azimuthal%imaginary_component, &
             v => polar_solution, &
             w => azimuthal_solution &
             )
@@ -823,12 +823,12 @@ contains
             v => polar_gradient_component, &
             w => azimuthal_gradient_component, &
             sqnn => self%COEFFICIENT_MULTIPLIERS, &
-            a => self%workspace%real_harmonic_coefficients, &
-            b => self%workspace%imaginary_harmonic_coefficients, &
-            br => self%workspace%real_polar_harmonic_coefficients, &
-            bi => self%workspace%imaginary_polar_harmonic_coefficients, &
-            cr => self%workspace%real_azimuthal_harmonic_coefficients, &
-            ci => self%workspace%imaginary_azimuthal_harmonic_coefficients &
+            a => self%workspace%scalar_coefficients%real_component, &
+            b => self%workspace%scalar_coefficients%imaginary_component, &
+            br => self%workspace%vector_coefficients%polar%real_component, &
+            bi => self%workspace%vector_coefficients%polar%imaginary_component, &
+            cr => self%workspace%vector_coefficients%azimuthal%real_component, &
+            ci => self%workspace%vector_coefficients%azimuthal%imaginary_component &
             )
             ! Initialize polar coefficients
             br = ZERO
@@ -879,10 +879,10 @@ contains
             nlon => self%NUMBER_OF_LONGITUDES, &
             f => solution, &
             sqnn => self%COEFFICIENT_MULTIPLIERS, &
-            a => self%workspace%real_harmonic_coefficients, &
-            b => self%workspace%imaginary_harmonic_coefficients, &
-            br => self%workspace%real_polar_harmonic_coefficients, &
-            bi => self%workspace%imaginary_polar_harmonic_coefficients &
+            a => self%workspace%scalar_coefficients%real_component, &
+            b => self%workspace%scalar_coefficients%imaginary_component, &
+            br => self%workspace%vector_coefficients%polar%real_component, &
+            bi => self%workspace%vector_coefficients%polar%imaginary_component &
             )
 
             ! Initialize (real) coefficients
@@ -935,10 +935,10 @@ contains
             nlon => self%NUMBER_OF_LONGITUDES, &
             vt => vorticity, &
             sqnn => self%COEFFICIENT_MULTIPLIERS, &
-            a => self%workspace%real_harmonic_coefficients, &
-            b => self%workspace%imaginary_harmonic_coefficients, &
-            cr => self%workspace%real_azimuthal_harmonic_coefficients, &
-            ci => self%workspace%imaginary_azimuthal_harmonic_coefficients &
+            a => self%workspace%scalar_coefficients%real_component, &
+            b => self%workspace%scalar_coefficients%imaginary_component, &
+            cr => self%workspace%vector_coefficients%azimuthal%real_component, &
+            ci => self%workspace%vector_coefficients%azimuthal%imaginary_component &
             )
 
             !  Perform vector analysis
@@ -1028,10 +1028,10 @@ contains
             v => polar_solution, &
             w => azimuthal_solution, &
             sqnn => self%COEFFICIENT_MULTIPLIERS, &
-            a => self%workspace%real_harmonic_coefficients, &
-            b => self%workspace%imaginary_harmonic_coefficients, &
-            cr => self%workspace%real_azimuthal_harmonic_coefficients, &
-            ci => self%workspace%imaginary_azimuthal_harmonic_coefficients, &
+            a => self%workspace%scalar_coefficients%real_component, &
+            b => self%workspace%scalar_coefficients%imaginary_component, &
+            cr => self%workspace%vector_coefficients%azimuthal%real_component, &
+            ci => self%workspace%vector_coefficients%azimuthal%imaginary_component, &
             isym => self%SCALAR_SYMMETRIES, &
             ityp => self%VECTOR_SYMMETRIES &
             )
@@ -1138,10 +1138,10 @@ contains
             nlon => self%NUMBER_OF_LONGITUDES, &
             dv => divergence, &
             sqnn => self%COEFFICIENT_MULTIPLIERS, &
-            a => self%workspace%real_harmonic_coefficients, &
-            b => self%workspace%imaginary_harmonic_coefficients, &
-            br => self%workspace%real_polar_harmonic_coefficients, &
-            bi => self%workspace%imaginary_polar_harmonic_coefficients &
+            a => self%workspace%scalar_coefficients%real_component, &
+            b => self%workspace%scalar_coefficients%imaginary_component, &
+            br => self%workspace%vector_coefficients%polar%real_component, &
+            bi => self%workspace%vector_coefficients%polar%imaginary_component &
             )
 
             !  Perform vector analysis
@@ -1193,12 +1193,12 @@ contains
             v => polar_solution, &
             w => azimuthal_solution, &
             sqnn => self%COEFFICIENT_MULTIPLIERS, &
-            a => self%workspace%real_harmonic_coefficients, &
-            b => self%workspace%imaginary_harmonic_coefficients, &
-            br => self%workspace%real_polar_harmonic_coefficients, &
-            bi => self%workspace%imaginary_polar_harmonic_coefficients, &
-            cr => self%workspace%real_azimuthal_harmonic_coefficients, &
-            ci => self%workspace%imaginary_azimuthal_harmonic_coefficients &
+            a => self%workspace%scalar_coefficients%real_component, &
+            b => self%workspace%scalar_coefficients%imaginary_component, &
+            br => self%workspace%vector_coefficients%polar%real_component, &
+            bi => self%workspace%vector_coefficients%polar%imaginary_component, &
+            cr => self%workspace%vector_coefficients%azimuthal%real_component, &
+            ci => self%workspace%vector_coefficients%azimuthal%imaginary_component &
             )
             ! Initialize polar coefficients
             br = ZERO
@@ -1284,12 +1284,12 @@ contains
             indxn => self%INDEX_DEGREE_N, &
             indxm => self%INDEX_ORDER_M, &
             sqnn => self%COEFFICIENT_MULTIPLIERS, &
-            a => self%workspace%real_harmonic_coefficients, &
-            b => self%workspace%imaginary_harmonic_coefficients, &
-            br => self%workspace%real_polar_harmonic_coefficients, &
-            bi => self%workspace%imaginary_polar_harmonic_coefficients, &
-            cr => self%workspace%real_azimuthal_harmonic_coefficients, &
-            ci => self%workspace%imaginary_azimuthal_harmonic_coefficients &
+            a => self%workspace%scalar_coefficients%real_component, &
+            b => self%workspace%scalar_coefficients%imaginary_component, &
+            br => self%workspace%vector_coefficients%polar%real_component, &
+            bi => self%workspace%vector_coefficients%polar%imaginary_component, &
+            cr => self%workspace%vector_coefficients%azimuthal%real_component, &
+            ci => self%workspace%vector_coefficients%azimuthal%imaginary_component &
             )
 
             ! Preset (real) scalar coefficients

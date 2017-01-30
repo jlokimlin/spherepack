@@ -135,7 +135,7 @@ contains
 
         call self%destroy_grid()
 
-        ! Reset flag
+        ! Reset initialization flag
         self%initialized = .false.
 
     end subroutine destroy_gaussian_grid

@@ -236,8 +236,8 @@ contains
                 !  Set polar coefficients to zero
                 !
                 associate( &
-                    br => sphere_type%workspace%real_polar_harmonic_coefficients, &
-                    bi => sphere_type%workspace%imaginary_polar_harmonic_coefficients &
+                    br => sphere_type%workspace%vector_coefficients%polar%real_component, &
+                    bi => sphere_type%workspace%vector_coefficients%polar%imaginary_component &
                     )
                     br = 0.0_wp; bi = 0.0_wp
                 end associate

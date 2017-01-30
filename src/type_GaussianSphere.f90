@@ -206,8 +206,8 @@ contains
                         g => scalar_function, &
                         idg => self%NUMBER_OF_LATITUDES, &
                         jdg => self%NUMBER_OF_LONGITUDES, &
-                        a => workspace%real_harmonic_coefficients, &
-                        b => workspace%imaginary_harmonic_coefficients, &
+                        a => workspace%scalar_coefficients%real_component, &
+                        b => workspace%scalar_coefficients%imaginary_component, &
                         mdab => self%NUMBER_OF_LATITUDES, &
                         ndab => self%NUMBER_OF_LATITUDES, &
                         wshags => workspace%forward_scalar, &
@@ -280,10 +280,10 @@ contains
                         g => scalar_function, &
                         idg => size(scalar_function, dim=1), &
                         jdg => size(scalar_function, dim=2), &
-                        a => workspace%real_harmonic_coefficients, &
-                        b => workspace%imaginary_harmonic_coefficients, &
-                        mdab => size(workspace%real_harmonic_coefficients, dim=1), &
-                        ndab => size(workspace%real_harmonic_coefficients, dim=2), &
+                        a => workspace%scalar_coefficients%real_component, &
+                        b => workspace%scalar_coefficients%imaginary_component, &
+                        mdab => size(workspace%scalar_coefficients%real_component, dim=1), &
+                        ndab => size(workspace%scalar_coefficients%real_component, dim=2), &
                         wshsgs => workspace%backward_scalar, &
                         lshsgs => size(workspace%backward_scalar), &
                         work => workspace%legendre_workspace, &
@@ -359,12 +359,12 @@ contains
                         w => azimuthal_component, &
                         idvw => size(polar_component, dim=1), &
                         jdvw => size(polar_component, dim=2), &
-                        br => workspace%real_polar_harmonic_coefficients, &
-                        bi => workspace%imaginary_polar_harmonic_coefficients, &
-                        cr => workspace%real_azimuthal_harmonic_coefficients, &
-                        ci => workspace%imaginary_azimuthal_harmonic_coefficients, &
-                        mdab => size(workspace%real_polar_harmonic_coefficients, dim=1), &
-                        ndab => size(workspace%real_polar_harmonic_coefficients, dim=2), &
+                        br => workspace%vector_coefficients%polar%real_component, &
+                        bi => workspace%vector_coefficients%polar%imaginary_component, &
+                        cr => workspace%vector_coefficients%azimuthal%real_component, &
+                        ci => workspace%vector_coefficients%azimuthal%imaginary_component, &
+                        mdab => size(workspace%vector_coefficients%polar%real_component, dim=1), &
+                        ndab => size(workspace%vector_coefficients%polar%real_component, dim=2), &
                         wvhags => workspace%forward_vector, &
                         lvhags => size(workspace%forward_vector), &
                         work => workspace%legendre_workspace, &
@@ -463,12 +463,12 @@ contains
                         w => azimuthal_component, &
                         idvw => size(polar_component, dim=1),  &
                         jdvw => size(polar_component, dim=2),  &
-                        br => workspace%real_polar_harmonic_coefficients, &
-                        bi => workspace%imaginary_polar_harmonic_coefficients, &
-                        cr => workspace%real_azimuthal_harmonic_coefficients, &
-                        ci => workspace%imaginary_azimuthal_harmonic_coefficients, &
-                        mdab => size(workspace%real_polar_harmonic_coefficients, dim=1), &
-                        ndab => size(workspace%real_polar_harmonic_coefficients, dim=2), &
+                        br => workspace%vector_coefficients%polar%real_component, &
+                        bi => workspace%vector_coefficients%polar%imaginary_component, &
+                        cr => workspace%vector_coefficients%azimuthal%real_component, &
+                        ci => workspace%vector_coefficients%azimuthal%imaginary_component, &
+                        mdab => size(workspace%vector_coefficients%polar%real_component, dim=1), &
+                        ndab => size(workspace%vector_coefficients%polar%real_component, dim=2), &
                         wvhsgs => workspace%backward_vector, &
                         lvhsgs => size(workspace%backward_vector), &
                         work => workspace%legendre_workspace, &

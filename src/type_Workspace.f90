@@ -4,6 +4,12 @@ module type_Workspace
         wp, & ! working precision
         ip ! integer precision
 
+    use type_ScalarHarmonicCoefficients, only: &
+        ScalarHarmonicCoefficients
+
+    use type_VectorHarmonicCoefficients, only: &
+        VectorHarmonicCoefficients
+
     ! Explicit typing only
     implicit none
 
@@ -13,25 +19,36 @@ module type_Workspace
 
     type, public, abstract :: Workspace
         ! Type components
-        logical,               public :: initialized = .false.
-        real(wp), allocatable, public :: legendre_workspace(:)
-        real(wp), allocatable, public :: forward_scalar(:)
-        real(wp), allocatable, public :: forward_vector(:)
-        real(wp), allocatable, public :: backward_scalar(:)
-        real(wp), allocatable, public :: backward_vector(:)
-        real(wp), allocatable, public :: real_harmonic_coefficients(:,:)
-        real(wp), allocatable, public :: imaginary_harmonic_coefficients(:,:)
-        real(wp), allocatable, public :: real_polar_harmonic_coefficients(:,:)
-        real(wp), allocatable, public :: imaginary_polar_harmonic_coefficients(:,:)
-        real(wp), allocatable, public :: real_azimuthal_harmonic_coefficients(:,:)
-        real(wp), allocatable, public :: imaginary_azimuthal_harmonic_coefficients(:,:)
+        logical,                          public :: initialized = .false.
+        real(wp), allocatable,            public :: legendre_workspace(:)
+        real(wp), allocatable,            public :: forward_scalar(:)
+        real(wp), allocatable,            public :: forward_vector(:)
+        real(wp), allocatable,            public :: backward_scalar(:)
+        real(wp), allocatable,            public :: backward_vector(:)
+        type(ScalarHarmonicCoefficients), public :: scalar_coefficients
+        type(VectorHarmonicCoefficients), public :: vector_coefficients
     contains
         ! Type-bound procedures
+        procedure, public :: initialize_harmonic_coefficients
         procedure, public :: destroy_workspace
         procedure, public :: copy_workspace
     end type Workspace
 
 contains
+
+    subroutine initialize_harmonic_coefficients(self, nlat, nlon, nt)
+
+        ! Dummy arguments
+        class(Workspace), intent(inout) :: self
+        integer(ip),      intent(in)    :: nlat
+        integer(ip),      intent(in)    :: nlon
+        integer(ip),      intent(in)    :: nt
+
+        !  Initialize derived data types
+        self%scalar_coefficients = ScalarHarmonicCoefficients(nlat, nlon, nt)
+        self%vector_coefficients = VectorHarmonicCoefficients(nlat, nlon, nt)
+
+    end subroutine initialize_harmonic_coefficients
 
     subroutine copy_workspace(self, other)
 
@@ -52,12 +69,8 @@ contains
         self%forward_vector = other%forward_vector
         self%backward_scalar = other%backward_scalar
         self%backward_vector = other%backward_vector
-        self%real_harmonic_coefficients = other%real_harmonic_coefficients
-        self%imaginary_harmonic_coefficients = other%imaginary_harmonic_coefficients
-        self%real_polar_harmonic_coefficients = other%real_polar_harmonic_coefficients
-        self%imaginary_polar_harmonic_coefficients = other%imaginary_polar_harmonic_coefficients
-        self%real_azimuthal_harmonic_coefficients = other%real_azimuthal_harmonic_coefficients
-        self%imaginary_azimuthal_harmonic_coefficients = other%imaginary_azimuthal_harmonic_coefficients
+        self%scalar_coefficients = other%scalar_coefficients
+        self%vector_coefficients = other%vector_coefficients
 
     end subroutine copy_workspace
 
@@ -90,31 +103,11 @@ contains
             deallocate(self%backward_vector)
         end if
 
-        if (allocated(self%real_harmonic_coefficients)) then
-            deallocate(self%real_harmonic_coefficients)
-        end if
+        ! Release memory from derived data types
+        call self%scalar_coefficients%destroy()
+        call self%vector_coefficients%destroy()
 
-        if (allocated(self%imaginary_harmonic_coefficients)) then
-            deallocate(self%imaginary_harmonic_coefficients)
-        end if
-
-        if (allocated(self%real_polar_harmonic_coefficients)) then
-            deallocate(self%real_polar_harmonic_coefficients)
-        end if
-
-        if (allocated(self%imaginary_polar_harmonic_coefficients)) then
-            deallocate(self%imaginary_polar_harmonic_coefficients)
-        end if
-
-        if (allocated(self%real_azimuthal_harmonic_coefficients)) then
-            deallocate(self%real_azimuthal_harmonic_coefficients)
-        end if
-
-        if (allocated(self%imaginary_azimuthal_harmonic_coefficients)) then
-            deallocate(self%imaginary_azimuthal_harmonic_coefficients)
-        end if
-
-        ! Reset flag
+        ! Reset initialization flag
         self%initialized = .false.
 
     end subroutine destroy_workspace

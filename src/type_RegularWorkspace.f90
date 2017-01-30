@@ -33,10 +33,8 @@ module type_RegularWorkspace
         procedure, public  :: destroy => destroy_regular_workspace
         procedure, private :: initialize_regular_scalar_analysis
         procedure, private :: initialize_regular_scalar_synthesis
-        procedure, private :: initialize_regular_scalar_transform
         procedure, private :: initialize_regular_vector_analysis
         procedure, private :: initialize_regular_vector_synthesis
-        procedure, private :: initialize_regular_vector_transform
         procedure, private :: copy_regular_workspace
         ! Generic type-bound procedures
         generic, public :: assignment (=) => copy_regular_workspace
@@ -49,15 +47,26 @@ module type_RegularWorkspace
 
 contains
 
-    function regular_workspace_constructor(nlat, nlon) &
+    function regular_workspace_constructor(nlat, nlon, nt) &
         result (return_value)
 
         ! Dummy arguments
-        integer(ip), intent(in) :: nlat ! number of latitudinal points 0 <= theta <= pi
-        integer(ip), intent(in) :: nlon ! number of longitudinal points 0 <= phi <= 2*pi
-        type(RegularWorkspace)  :: return_value
+        integer(ip),           intent(in) :: nlat ! number of latitudinal points 0 <= theta <= pi
+        integer(ip),           intent(in) :: nlon ! number of longitudinal points 0 <= phi <= 2*pi
+        integer(ip), optional, intent(in) :: nt ! Number of syntheses
+        type(RegularWorkspace)            :: return_value
 
-        call return_value%create(nlat, nlon)
+        ! Local variables
+        integer(ip) :: nt_op
+
+        ! Address optional argument
+        if (present(nt)) then
+            nt_op = nt
+        else
+            nt_op = 1
+        end if
+
+        call return_value%create(nlat, nlon, nt_op)
 
     end function regular_workspace_constructor
 
@@ -74,34 +83,36 @@ contains
         end if
 
         !  Make copies
-        self%initialized = other%initialized
-        self%legendre_workspace = other%legendre_workspace
-        self%forward_scalar = other%forward_scalar
-        self%forward_vector = other%forward_vector
-        self%backward_scalar = other%backward_scalar
-        self%backward_vector = other%backward_vector
-        self%real_harmonic_coefficients = other%real_harmonic_coefficients
-        self%imaginary_harmonic_coefficients = other%imaginary_harmonic_coefficients
-        self%real_polar_harmonic_coefficients = other%real_polar_harmonic_coefficients
-        self%imaginary_polar_harmonic_coefficients = other%imaginary_polar_harmonic_coefficients
-        self%real_azimuthal_harmonic_coefficients = other%real_azimuthal_harmonic_coefficients
-        self%imaginary_azimuthal_harmonic_coefficients = other%imaginary_azimuthal_harmonic_coefficients
+        call self%copy_workspace(other)
 
     end subroutine copy_regular_workspace
 
-    subroutine create_regular_workspace(self, nlat, nlon)
+    subroutine create_regular_workspace(self, nlat, nlon, nt)
 
         ! Dummy arguments
         class(RegularWorkspace), intent(inout) :: self
         integer(ip),             intent(in)    :: nlat
         integer(ip),             intent(in)    :: nlon
+        integer(ip),             intent(in)    :: nt
 
         ! Ensure that object is usable
         call self%destroy()
 
-        ! Set up transforms for regular grids
-        call self%initialize_regular_scalar_transform(nlat, nlon)
-        call self%initialize_regular_vector_transform(nlat, nlon)
+        ! Initialize harmonic coefficients
+        call self%initialize_harmonic_coefficients(nlat, nlon, nt)
+
+        ! Set up scalar analysis
+        call self%initialize_regular_scalar_analysis(nlat, nlon)
+
+        ! Set up scalar synthesis
+        call self%initialize_regular_scalar_synthesis(nlat, nlon)
+
+        ! Set up vector analysis
+        call self%initialize_regular_vector_analysis(nlat, nlon)
+
+        ! Set up vector synthesis
+        call self%initialize_regular_vector_synthesis(nlat, nlon)
+
         call get_legendre_workspace(nlat, nlon, self%legendre_workspace)
 
         ! Set flag
@@ -120,7 +131,7 @@ contains
         ! Release memory from parent type
         call self%destroy_workspace()
 
-        ! Reset flag
+        ! Reset initialization flag
         self%initialized = .false.
 
     end subroutine destroy_regular_workspace
@@ -239,30 +250,6 @@ contains
         end block
 
     end subroutine initialize_regular_scalar_synthesis
-
-    ! Purpose:
-    !
-    !  Set the various workspace arrays and pointers to perform the
-    !  (real) scalar harmonic transform on a regular (equally-spaced) grid.
-    !
-    subroutine initialize_regular_scalar_transform(self, nlat, nlon)
-
-        ! Dummy arguments
-        class(RegularWorkspace), intent(inout) :: self
-        integer(ip),             intent(in)    :: nlat
-        integer(ip),             intent(in)    :: nlon
-
-        ! Set up scalar analysis
-        call self%initialize_regular_scalar_analysis(nlat, nlon)
-
-        ! Set up scalar synthesis
-        call self%initialize_regular_scalar_synthesis(nlat, nlon)
-
-        ! Allocate memory for the (real) scalar harmonic transform
-        allocate( self%real_harmonic_coefficients(nlat, nlat) )
-        allocate( self%imaginary_harmonic_coefficients(nlat, nlat) )
-
-    end subroutine initialize_regular_scalar_transform
 
     subroutine initialize_regular_vector_analysis(self, nlat, nlon)
 
@@ -386,33 +373,6 @@ contains
         end block
 
     end subroutine initialize_regular_vector_synthesis
-
-    ! Purpose:
-    !
-    ! Sets the various workspace arrays and pointers
-    ! required for the (real) vector harmonic transform
-    ! on a regular (equally-spaced) grid
-    !
-    subroutine initialize_regular_vector_transform(self, nlat, nlon)
-
-        ! Dummy arguments
-        class(RegularWorkspace), intent(inout) :: self
-        integer(ip),             intent(in)    :: nlat
-        integer(ip),             intent(in)    :: nlon
-
-        ! Set up vector analysis
-        call self%initialize_regular_vector_analysis(nlat, nlon)
-
-        ! Set up vector synthesis
-        call self%initialize_regular_vector_synthesis(nlat, nlon)
-
-        ! Allocate memory for the vector transform coefficients
-        allocate( self%real_polar_harmonic_coefficients(nlat, nlat) )
-        allocate( self%imaginary_polar_harmonic_coefficients(nlat, nlat) )
-        allocate( self%real_azimuthal_harmonic_coefficients(nlat, nlat) )
-        allocate( self%imaginary_azimuthal_harmonic_coefficients(nlat, nlat) )
-
-    end subroutine initialize_regular_vector_transform
 
     pure function get_lwork(nlat, nlon) &
         result (return_value)
