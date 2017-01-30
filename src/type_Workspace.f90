@@ -4,8 +4,8 @@ module type_Workspace
         wp, & ! working precision
         ip ! integer precision
 
-    use type_ScalarHarmonicCoefficients, only: &
-        ScalarHarmonicCoefficients
+    use type_RealHarmonicCoefficients, only: &
+        RealHarmonicCoefficients
 
     use type_VectorHarmonicCoefficients, only: &
         VectorHarmonicCoefficients
@@ -25,7 +25,7 @@ module type_Workspace
         real(wp), allocatable,            public :: forward_vector(:)
         real(wp), allocatable,            public :: backward_scalar(:)
         real(wp), allocatable,            public :: backward_vector(:)
-        type(ScalarHarmonicCoefficients), public :: scalar_coefficients
+        type(RealHarmonicCoefficients),   public :: scalar_coefficients
         type(VectorHarmonicCoefficients), public :: vector_coefficients
     contains
         ! Type-bound procedures
@@ -45,7 +45,7 @@ contains
         integer(ip),      intent(in)    :: nt
 
         !  Initialize derived data types
-        self%scalar_coefficients = ScalarHarmonicCoefficients(nlat, nlon, nt)
+        self%scalar_coefficients = RealHarmonicCoefficients(nlat, nlon, nt)
         self%vector_coefficients = VectorHarmonicCoefficients(nlat, nlon, nt)
 
     end subroutine initialize_harmonic_coefficients

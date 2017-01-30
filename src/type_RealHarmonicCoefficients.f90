@@ -1,4 +1,4 @@
-module type_ScalarHarmonicCoefficients
+module type_RealHarmonicCoefficients
 
     use spherepack_precision, only: &
         wp, & ! working precision
@@ -9,9 +9,9 @@ module type_ScalarHarmonicCoefficients
 
     ! Everything is private unless stated otherwise
     private
-    public :: ScalarHarmonicCoefficients
+    public :: RealHarmonicCoefficients
 
-    type, public :: ScalarHarmonicCoefficients
+    type, public :: RealHarmonicCoefficients
         ! Type components
         logical,               public :: initialized = .false.
         integer(ip),           public :: NUMBER_OF_LONGITUDES = 0
@@ -21,28 +21,28 @@ module type_ScalarHarmonicCoefficients
         real(wp), allocatable, public :: imaginary_component(:,:)!,:)
     contains
         ! Type-bound procedures
-        procedure, public  :: create => create_scalar_harmonic_coefficients
-        procedure, public  :: destroy => destroy_scalar_harmonic_coefficients
-        procedure, private :: copy_scalar_harmonic_coefficients
+        procedure, public  :: create => create_real_harmonic_coefficients
+        procedure, public  :: destroy => destroy_real_harmonic_coefficients
+        procedure, private :: copy_real_harmonic_coefficients
         ! Generic type-bound procedures
-        generic, public :: assignment(=) => copy_scalar_harmonic_coefficients
-    end type ScalarHarmonicCoefficients
+        generic, public :: assignment(=) => copy_real_harmonic_coefficients
+    end type RealHarmonicCoefficients
 
     ! Declare user-defined constructor
-    interface ScalarHarmonicCoefficients
-        module procedure scalar_harmonic_coefficients_constructor
+    interface RealHarmonicCoefficients
+        module procedure real_harmonic_coefficients_constructor
     end interface
 
 contains
 
-    function scalar_harmonic_coefficients_constructor(nlat, nlon, nt) &
+    function real_harmonic_coefficients_constructor(nlat, nlon, nt) &
         result (return_value)
 
         ! Dummy arguments
         integer(ip),           intent(in) :: nlat ! Number of latitudinal points 0 <= theta <= pi
         integer(ip),           intent(in) :: nlon ! Number of longitudinal points 0 <= phi <= 2*pi
         integer(ip), optional, intent(in) :: nt ! Number of syntheses
-        type(ScalarHarmonicCoefficients)  :: return_value
+        type(RealHarmonicCoefficients)    :: return_value
 
         ! Local variables
         integer(ip) :: nt_op
@@ -56,15 +56,15 @@ contains
 
         call return_value%create(nlat, nlon, nt_op)
 
-    end function scalar_harmonic_coefficients_constructor
+    end function real_harmonic_coefficients_constructor
 
-    subroutine create_scalar_harmonic_coefficients(self, nlat, nlon, nt)
+    subroutine create_real_harmonic_coefficients(self, nlat, nlon, nt)
 
         ! Dummy arguments
-        class(ScalarHarmonicCoefficients), intent(inout) :: self
-        integer(ip),                       intent(in)    :: nlat
-        integer(ip),                       intent(in)    :: nlon
-        integer(ip),                       intent(in)    :: nt
+        class(RealHarmonicCoefficients), intent(inout) :: self
+        integer(ip),                     intent(in)    :: nlat
+        integer(ip),                     intent(in)    :: nlon
+        integer(ip),                     intent(in)    :: nt
 
         ! Local variables
         integer(ip) :: mdab, ndab
@@ -94,17 +94,17 @@ contains
         ! Set flag
         self%initialized = .true.
 
-    end subroutine create_scalar_harmonic_coefficients
+    end subroutine create_real_harmonic_coefficients
 
-    subroutine copy_scalar_harmonic_coefficients(self, other)
+    subroutine copy_real_harmonic_coefficients(self, other)
 
         ! Dummy arguments
-        class(ScalarHarmonicCoefficients), intent(out) :: self
-        class(ScalarHarmonicCoefficients), intent(in)  :: other
+        class(RealHarmonicCoefficients), intent(out) :: self
+        class(RealHarmonicCoefficients), intent(in)  :: other
 
         ! Check if object is usable
         if (.not.other%initialized) then
-            error stop 'Uninitialized object of class(ScalarHarmonicCoefficients): '&
+            error stop 'Uninitialized object of class(RealHarmonicCoefficients): '&
                 //'in assignment(=) '
         end if
 
@@ -116,12 +116,12 @@ contains
         self%real_component = other%real_component
         self%imaginary_component = other%imaginary_component
 
-    end subroutine copy_scalar_harmonic_coefficients
+    end subroutine copy_real_harmonic_coefficients
 
-    subroutine destroy_scalar_harmonic_coefficients(self)
+    subroutine destroy_real_harmonic_coefficients(self)
 
         ! Dummy arguments
-        class(ScalarHarmonicCoefficients), intent(inout) :: self
+        class(RealHarmonicCoefficients), intent(inout) :: self
 
         ! Check flag
         if (.not.self%initialized) return
@@ -142,6 +142,6 @@ contains
         ! Reset initialization flag
         self%initialized = .false.
 
-    end subroutine destroy_scalar_harmonic_coefficients
+    end subroutine destroy_real_harmonic_coefficients
 
-end module type_ScalarHarmonicCoefficients
+end module type_RealHarmonicCoefficients

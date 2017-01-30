@@ -652,22 +652,22 @@ type_GaussianGrid.f90
 	$(FC) $(FFLAGS) -c type_GaussianGrid.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 
-type_ScalarHarmonicCoefficients.o: \
+type_RealHarmonicCoefficients.o: \
 spherepack_precision.o \
-type_ScalarHarmonicCoefficients.f90
-	$(FC) $(FFLAGS) -c type_ScalarHarmonicCoefficients.f90 $(LINKS)\
+type_RealHarmonicCoefficients.f90
+	$(FC) $(FFLAGS) -c type_RealHarmonicCoefficients.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 
 type_VectorHarmonicCoefficients.o: \
 spherepack_precision.o \
-type_ScalarHarmonicCoefficients.o \
+type_RealHarmonicCoefficients.o \
 type_VectorHarmonicCoefficients.f90
 	$(FC) $(FFLAGS) -c type_VectorHarmonicCoefficients.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 
 type_Workspace.o: \
 spherepack_precision.o \
-type_ScalarHarmonicCoefficients.o \
+type_RealHarmonicCoefficients.o \
 type_VectorHarmonicCoefficients.o \
 type_Workspace.f90
 	$(FC) $(FFLAGS) -c type_Workspace.f90 $(LINKS)\

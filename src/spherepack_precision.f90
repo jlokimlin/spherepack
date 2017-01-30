@@ -7,8 +7,8 @@ module spherepack_precision
     private
     public :: wp ! Working precision
     public :: ip ! Integer precision
-    public :: PI, TWO_PI, HALF_PI, EPS, MACHINE_EPSILON
-    public :: pimach
+    public :: PI, TWO_PI, HALF_PI, MACHINE_EPSILON
+    public :: get_pi
 
     ! Floating point precision constants
     integer, parameter :: FLOAT128 = selected_real_kind(p=33, r=4931) ! 33 digits, range [10^(-4931), 10^(+4931) - 1], 128 bits
@@ -32,11 +32,10 @@ module spherepack_precision
     real(wp), parameter :: HALF_PI = PI/TWO
     real(wp), parameter :: TWO_PI = TWO * PI
     real(wp), parameter :: MACHINE_EPSILON = epsilon(ONE)
-    real(wp), parameter :: EPS = MACHINE_EPSILON
 
 contains
 
-    pure function pimach() &
+    pure function get_pi() &
         result (return_value)
 
         ! Dummy arguments
@@ -44,6 +43,6 @@ contains
 
         return_value = 3.141592653589793238462643383279502884197169399375105820974_wp
 
-    end function pimach
+    end function get_pi
 
 end module spherepack_precision

@@ -4,8 +4,8 @@ module type_VectorHarmonicCoefficients
         wp, & ! working precision
         ip ! integer precision
 
-    use type_ScalarHarmonicCoefficients, only: &
-        ScalarHarmonicCoefficients
+    use type_RealHarmonicCoefficients, only: &
+        RealHarmonicCoefficients
 
     ! Explicit typing only
     implicit none
@@ -16,12 +16,12 @@ module type_VectorHarmonicCoefficients
 
     type, public :: VectorHarmonicCoefficients
         ! Type components
-        logical,                          public :: initialized = .false.
-        integer(ip),                      public :: NUMBER_OF_LONGITUDES = 0
-        integer(ip),                      public :: NUMBER_OF_LATITUDES = 0
-        integer(ip),                      public :: NUMBER_OF_SYNTHESES = 0
-        type(ScalarHarmonicCoefficients), public :: polar
-        type(ScalarHarmonicCoefficients), public :: azimuthal
+        logical,                        public :: initialized = .false.
+        integer(ip),                    public :: NUMBER_OF_LONGITUDES = 0
+        integer(ip),                    public :: NUMBER_OF_LATITUDES = 0
+        integer(ip),                    public :: NUMBER_OF_SYNTHESES = 0
+        type(RealHarmonicCoefficients), public :: polar
+        type(RealHarmonicCoefficients), public :: azimuthal
     contains
         ! Type-bound procedures
         procedure, public  :: create => create_vector_harmonic_coefficients
@@ -81,8 +81,8 @@ contains
         self%NUMBER_OF_SYNTHESES = nt
 
         !  Initialize derived data types
-        self%polar = ScalarHarmonicCoefficients(nlat, nlon, nt)
-        self%azimuthal = ScalarHarmonicCoefficients(nlat, nlon, nt)
+        self%polar = RealHarmonicCoefficients(nlat, nlon, nt)
+        self%azimuthal = RealHarmonicCoefficients(nlat, nlon, nt)
 
         ! Set flag
         self%initialized = .true.
