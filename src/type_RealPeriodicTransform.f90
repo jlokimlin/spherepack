@@ -30,8 +30,6 @@
 !     * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !
 !
-! ... file type_RealPeriodicTransform.f90
-!
 !     This file contains a multiple fft package for spherepack. It
 !     includes code and documentation for performing fast Fourier
 !     transforms (see subroutines hrffti, hrfftf and hrfftb)
@@ -51,7 +49,7 @@
 !
 !     output parameter
 !
-!     wsave   a work array which must be dimensioned at least 2*n+NUMBER_OF_FACTORS.
+!     wsave   a work array which must be dimensioned at least 2*n+15.
 !             the same work array can be used for both hrfftf and 
 !             hrfftb as long as n remains unchanged. different wsave 
 !             arrays are required for different values of n. the 
@@ -245,6 +243,70 @@ contains
 
     end subroutine hrffti
 
+    subroutine compute_integer_factors(n, subtransforms, number_of_factors, factors)
+
+        ! Dummy arguments
+        integer(ip), intent(in)  :: n
+        integer(ip), intent(in)  :: subtransforms(0:)
+        integer(ip), intent(out) :: number_of_factors
+        integer(ip), intent(out) :: factors(0:)
+
+        ! Local variables
+        integer(ip) :: nf, ntest, i, factor
+
+        ! Initialize
+        nf = 0
+        ntest = n
+        i = 0
+
+        select case(n)
+            case(:0)
+                error stop 'Length n must be a positive integer'
+            case(1)
+                factors(0) = 1
+                number_of_factors = 1
+            case default
+
+                ! Address subtransforms
+                do while (ntest /= 1)
+                    factor = subtransforms(i)
+                    do while (mod(ntest, factor) == 0)
+                        ntest = ntest/factor
+                        factors(nf) = factor
+                        nf = nf + 1
+                    end do
+                    i = i + 1
+                end do
+
+                ! Address even prime factors
+                factor = 2
+                do while ((mod(ntest, factor) == 0) .and. (ntest /= 1))
+                    ntest = ntest/factor
+                    factors(nf) = factor
+                    nf = nf + 1
+                end do
+
+                ! Address other odd prime factors
+                factor = 3
+                do while (ntest /= 1)
+                    do while (mod(ntest, factor) /= 0)
+                        factor = factor + 2
+                    end do
+                    ntest = ntest / factor
+                    factors(nf) = factor
+                    nf = nf + 1
+                end do
+
+                ! Check that factorization is correct
+                print *, n, product(factors), factors
+                if (product(factors) /= n) then
+                    error stop 'Factorization failed'
+                end if
+                number_of_factors = nf
+        end select
+
+    end subroutine compute_integer_factors
+
     subroutine initialize_lower_routine(n, wa, fac)
 
         ! Dummy arguments
@@ -253,55 +315,46 @@ contains
         real(wp),    intent(out) :: fac(NUMBER_OF_FACTORS)
 
         ! Local variables
-        integer(ip)            :: i, ib, ido, ii, iip, ipm, is
+        integer(ip)            :: i, ido, ii, iip, ipm, is
         integer(ip)            :: j, k1, l1, l2, ld
-        integer(ip)            :: nf, nfm1, nl, nq, nr, ntry
-        integer(ip), parameter :: NTRYH(*) = [4, 2, 3, 5]
+        integer(ip)            :: nf, nfm1, ntest, nq, nr, factor
+        integer(ip), parameter :: subtransforms(*) = [4, 2, 3, 5]
         real(wp)               :: arg,  argh, argld, fi
 
         ! Initialize
-        ntry = 0
-        nl = n
+        ntest = n
         nf = 0
         j = 0
 
         factorize_loop: do
             ! Increment j
-            j = j+1
+            j = j + 1
 
-            ! Choose ntry
+            ! Choose factor
             if (j <= 4) then
-                ntry = NTRYH(j)
+                factor = subtransforms(j)
             else
-                ntry = ntry+2
+                factor = factor + 2
             end if
 
-            inner_loop: do
-                nq = nl/ntry
-                nr = nl-ntry*nq
-                if (nr < 0) then
-                    cycle factorize_loop
-                else if (nr == 0) then
-                    nf = nf+1
-                    fac(nf+2) = ntry
-                    nl = nq
+            do while (ntest /= 1)
+                nq = ntest/factor
+                nr = ntest-factor*nq
+                if (nr == 0) then
+                    nf = nf + 1
+                    fac(nf + 2) = factor
+                    ntest = ntest/factor
 
-                    if (ntry == 2 .and. nf /= 1) then
-                        do i=2,nf
-                            ib = nf-i+2
-                            fac(ib+2) = fac(ib+1)
+                    if (factor == 2 .and. nf /= 1) then
+                        do i=2, nf
+                            fac(nf - i + 4) = fac(nf - i + 3)
                         end do
                         fac(3) = 2
-                    end if
-
-                    if (nl /= 1) then
-                        cycle inner_loop
                     end if
                 else
                     cycle factorize_loop
                 end if
-                exit inner_loop
-            end do inner_loop
+            end do
             exit factorize_loop
         end do factorize_loop
 
