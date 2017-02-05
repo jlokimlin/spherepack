@@ -232,10 +232,10 @@ contains
         ! Dummy arguments
         integer(ip), intent(in)  :: isym
         integer(ip), intent(out) :: ityp
-        real(wp),    intent(in)  :: a(:,:,:)
-        real(wp),    intent(in)  :: b(:,:,:)
-        real(wp),    intent(out) :: br(:,:,:)
-        real(wp),    intent(out) :: bi(:,:,:)
+        real(wp),    intent(in)  :: a(:, :, :)
+        real(wp),    intent(in)  :: b(:, :, :)
+        real(wp),    intent(out) :: br(:, :, :)
+        real(wp),    intent(out) :: bi(:, :, :)
         real(wp),    intent(out) :: sqnn(:)
 
         ! Local variables
@@ -252,8 +252,8 @@ contains
 
             ! Compute multiple vector fields coefficients
             do k=1, nt
-                br(:,:, k) = ZERO
-                bi(:,:, k) = ZERO
+                br(:, :, k) = ZERO
+                bi(:, :, k) = ZERO
 
                 ! Compute m = 0 coefficients
                 do n=2, nlat
@@ -287,10 +287,10 @@ contains
 
         ! Dummy arguments
         integer(ip), intent(in)  :: nlon
-        real(wp),    intent(out) :: a(:,:,:)
-        real(wp),    intent(out) :: b(:,:,:)
-        real(wp),    intent(in)  :: br(:,:,:)
-        real(wp),    intent(in)  :: bi(:,:,:)
+        real(wp),    intent(out) :: a(:, :, :)
+        real(wp),    intent(out) :: b(:, :, :)
+        real(wp),    intent(in)  :: br(:, :, :)
+        real(wp),    intent(in)  :: bi(:, :, :)
         real(wp),    intent(out) :: sqnn(:)
 
         ! Local variables
@@ -311,8 +311,8 @@ contains
             do k=1, nt
 
                 ! Preset to 0.0
-                a(:,:,k) = ZERO
-                b(:,:,k) = ZERO
+                a(:, :, k) = ZERO
+                b(:, :, k) = ZERO
 
                 ! Compute m=0 coefficients
                 do n=2, nlat

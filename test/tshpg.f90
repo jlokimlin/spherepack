@@ -93,87 +93,87 @@ program tshpg
     parameter (idp=8)
     parameter (kdp=idp+idp-2)
     parameter (lwshp=2*(idp+1)**2+kdp+20, &
-        liwshp=4*(idp+1),lwrk=1.25*(idp+1)**2+7*idp+8)
+        liwshp=4*(idp+1), lwrk=1.25*(idp+1)**2+7*idp+8)
     parameter (lwrk1=idp*kdp)
     parameter(lwork = 4*idp*(idp-1), &
         lwsha=idp*(4*idp+1)+idp+idp+15)
     real(wp), parameter :: ZERO = 0.0_wp
     real(wp) :: work(lwrk)
-    dimension sx(idp,kdp),sy(idp,kdp), &
-        wshp(lwshp),iwshp(liwshp),wrk1(lwrk1)
-    dimension g(idp,kdp,2),ga(idp,idp,2),gb(idp,idp,2), &
-        gh(idp,kdp,2), &
-        wrk2(lwork),wshagc(lwsha),wshsgc(lwsha)
+    dimension sx(idp, kdp), sy(idp, kdp), &
+        wshp(lwshp), iwshp(liwshp), wrk1(lwrk1)
+    dimension g(idp, kdp, 2), ga(idp, idp, 2), gb(idp, idp, 2), &
+        gh(idp, kdp, 2), &
+        wrk2(lwork), wshagc(lwsha), wshsgc(lwsha)
     
     iprint = 0
     nt = 1
     isym = 0
     mode = 0
 
-    do nlat=6,8
-        do mtr=1,2
+    do nlat=6, 8
+        do mtr=1, 2
             nlon = 2*(nlat-1)
             mtrunc = nlat-mtr
-            mtrunc = min(mtrunc,nlat-1,nlon/2)
+            mtrunc = min(mtrunc, nlat-1, nlon/2)
             idimg = idp
             jdimg = kdp
-            call shagci(nlat,nlon,wshagc,lwsha,work,lwrk,ierror)
+            call shagci(nlat, nlon, wshagc, lwsha, work, lwrk, ierror)
             call check_error(ierror)
 
             lwshs = lwsha
-            call shsgci(nlat,nlon,wshsgc,lwshs,work,lwrk,ierror)
+            call shsgci(nlat, nlon, wshsgc, lwshs, work, lwrk, ierror)
             call check_error(ierror)
 
             ! Initiate faster filter
-            call shpgi(nlat,nlon,isym,mtrunc,wshp,lwshp,iwshp,liwshp, &
-                work,lwrk,ierror)
+            call shpgi(nlat, nlon, isym, mtrunc, wshp, lwshp, iwshp, liwshp, &
+                work, lwrk, ierror)
             call check_error(ierror)
 
             if (iprint /= 0) write(stdout, '(3(a, i5))') &
                 ' mode =' , nlon, '  nlat =', nlat, '  nlon =', nlon
 
             ! Initialize with pseudo random field
-            do i=1,nlat
-                do j=1,nlon
-                    sx(i,j) =  cos(real(i*j, kind=wp))
-                    g(i,j,1) = sx(i,j)
+            do i=1, nlat
+                do j=1, nlon
+                    sx(i, j) =  cos(real(i*j, kind=wp))
+                    g(i, j, 1) = sx(i, j)
                 end do
             end do
 
-            call shagc(nlat,nlon,mode,nt,g,idimg,jdimg,ga,gb,idimg,idimg, &
-                wshagc,lwsha,wrk2,lwork,ierror)
+            call shagc(nlat, nlon, mode, nt, g, idimg, jdimg, ga, gb, idimg, idimg, &
+                wshagc, lwsha, wrk2, lwork, ierror)
             call check_error(ierror)
 
             if(mtrunc < nlat-1) then
-                do np1=mtrunc+2,nlat
-                    do mp1=1,np1
-                        ga(mp1,np1,1) = ZERO
-                        gb(mp1,np1,1) = ZERO
+                do np1=mtrunc+2, nlat
+                    do mp1=1, np1
+                        ga(mp1, np1, 1) = ZERO
+                        gb(mp1, np1, 1) = ZERO
                     end do
                 end do
             end if
 
-            call shsgc(nlat,nlon,mode,nt,gh,idimg,jdimg,ga,gb,idimg,idimg, &
-                wshsgc,lwshs,wrk2,lwork,ierror)
+            call shsgc(nlat, nlon, mode, nt, gh, idimg, jdimg, ga, gb, idimg, idimg, &
+                wshsgc, lwshs, wrk2, lwork, ierror)
             call check_error(ierror)
 
-            call shpg(nlat,nlon,isym,mtrunc,sx,sy,idp, &
-                wshp,lwshp,iwshp,liwshp,wrk1,lwrk1,ierror)
+            call shpg(nlat, nlon, isym, mtrunc, sx, sy, idp, &
+                wshp, lwshp, iwshp, liwshp, wrk1, lwrk1, ierror)
             call check_error(ierror)
 
             if (iprint > 0) write(stdout, '(/a/)') ' approx and exact solution'
 
-            do j=1,nlon
-                if(iprint > 0) write(stdout, 437) j,(sy(i,j),gh(i,j,1),i=1,nlat)
-437             format(' j=',i5,1p4e15.6/(8x,1p4e15.6))
+            do j=1, nlon
+                if(iprint > 0) write(stdout, 437) j, (sy(i, j), gh(i, j, 1), i=1, nlat)
+437             format(' j=', i5, 1p4e15.6/(8x, 1p4e15.6))
             end do
 
-            discretization_error = maxval(abs(sy(:nlat,:nlon)-gh(:nlat,:nlon,1)))
+            discretization_error = maxval(abs(sy(:nlat, :nlon)-gh(:nlat, :nlon, 1)))
 
             write(stdout, '(/2(a, i5)/)') &
                 'case nlat =', nlat, ' and mtrunc =', mtrunc
 
-            write(stdout, '(3(a,1pe15.6/))') &
+            write(stdout, '(3(a, 1pe15.6/))') &
                 ' error =', discretization_error, &
                 ' tusl  =', tusl, &
                 ' toe   =', toe

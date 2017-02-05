@@ -147,9 +147,9 @@
 !            dimensional.
 !
 !     idvw   the first dimension of the arrays vt, wt as it appears in
-!            the program that calls vtsec. if ityp .le. 2 then idvw
-!            must be at least nlat.  if ityp .gt. 2 and nlat is
-!            even then idvw must be at least nlat/2. if ityp .gt. 2
+!            the program that calls vtsec. if ityp <= 2 then idvw
+!            must be at least nlat.  if ityp > 2 and nlat is
+!            even then idvw must be at least nlat/2. if ityp > 2
 !            and nlat is odd then idvw must be at least (nlat+1)/2.
 !
 !     jdvw   the second dimension of the arrays vt, wt as it appears in
@@ -197,11 +197,11 @@
 !               l2 = nlat/2        if nlat is even or
 !               l2 = (nlat+1)/2    if nlat is odd
 !
-!            if ityp .le. 2 then lwork must be at least
+!            if ityp <= 2 then lwork must be at least
 !
 !                    nlat*(2*nt*nlon+max(6*l2, nlon))
 !
-!            if ityp .gt. 2 then lwork must be at least
+!            if ityp > 2 then lwork must be at least
 !
 !                    l2*(2*nt*nlon+max(6*nlat, nlon))
 !

@@ -7,7 +7,7 @@
 !     *                                                               *
 !     *                      all rights reserved                      *
 !     *                                                               *
-!     *                      SPHEREPACK                               *
+!     *                          Spherepack                           *
 !     *                                                               *
 !     *       A Package of Fortran Subroutines and Programs           *
 !     *                                                               *
@@ -29,291 +29,206 @@
 !     *                                                               *
 !     * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !
-!
-!
-! ... file shags.f90
-!
-!     this file contains code and documentation for subroutines
-!     shags and shagsi
-!
-! ... files which must be loaded with shags.f90
-!
-!     type_SpherepackAux.f90, type_RealPeriodicFastFourierTransform.f90, compute_gaussian_latitudes_and_weights.f90
-!
-!     subroutine shags(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, 
-!    1                    wshags, lshags, work, lwork, ierror)
-!
-!     subroutine shags performs the spherical harmonic analysis
-!     on the array g and stores the result in the arrays a and b.
-!     the analysis is performed on a gaussian grid in colatitude
-!     and an equally spaced grid in longitude.  the associated
-!     legendre functions are stored rather than recomputed as they
-!     are in subroutine shagc.  the analysis is described below
-!     at output parameters a, b.
-!
-!     input parameters
-!
-!     nlat   the number of points in the gaussian colatitude grid on the
-!            full sphere. these lie in the interval (0, pi) and are compu
-!            in radians in theta(1), ..., theta(nlat) by subroutine compute_gaussian_latitudes_and_weights.
-!            if nlat is odd the equator will be included as the grid poi
-!            theta((nlat+1)/2).  if nlat is even the equator will be
-!            excluded as a grid point and will lie half way between
-!            theta(nlat/2) and theta(nlat/2+1). nlat must be at least 3.
-!            note: on the half sphere, the number of grid points in the
-!            colatitudinal direction is nlat/2 if nlat is even or
-!            (nlat+1)/2 if nlat is odd.
-!
-!     nlon   the number of distinct londitude points.  nlon determines
-!            the grid increment in longitude as 2*pi/nlon. for example
-!            nlon = 72 for a five degree grid. nlon must be greater
-!            than or equal to 4. the efficiency of the computation is
-!            improved when nlon is a product of small prime numbers.
-!
-!     isym   = 0  no symmetries exist about the equator. the analysis
-!                 is performed on the entire sphere.  i.e. on the
-!                 array g(i, j) for i=1, ..., nlat and j=1, ..., nlon.
-!                 (see description of g below)
-!
-!            = 1  g is antisymmetric about the equator. the analysis
-!                 is performed on the northern hemisphere only.  i.e.
-!                 if nlat is odd the analysis is performed on the
-!                 array g(i, j) for i=1, ..., (nlat+1)/2 and j=1, ..., nlon.
-!                 if nlat is even the analysis is performed on the
-!                 array g(i, j) for i=1, ..., nlat/2 and j=1, ..., nlon.
-!
-!
-!            = 2  g is symmetric about the equator. the analysis is
-!                 performed on the northern hemisphere only.  i.e.
-!                 if nlat is odd the analysis is performed on the
-!                 array g(i, j) for i=1, ..., (nlat+1)/2 and j=1, ..., nlon.
-!                 if nlat is even the analysis is performed on the
-!                 array g(i, j) for i=1, ..., nlat/2 and j=1, ..., nlon.
-!
-!     nt     the number of analyses.  in the program that calls shags, 
-!            the arrays g, a and b can be three dimensional in which
-!            case multiple analyses will be performed.  the third
-!            index is the analysis index which assumes the values
-!            k=1, ..., nt.  for a single analysis set nt=1. the
-!            discription of the remaining parameters is simplified
-!            by assuming that nt=1 or that the arrays g, a and b
-!            have only two dimensions.
-!
-!     g      a two or three dimensional array (see input parameter
-!            nt) that contains the discrete function to be analyzed.
-!            g(i, j) contains the value of the function at the gaussian
-!            point theta(i) and longitude point phi(j) = (j-1)*2*pi/nlon
-!            the index ranges are defined above at the input parameter
-!            isym.
-!
-!     idg    the first dimension of the array g as it appears in the
-!            program that calls shags. if isym equals zero then idg
-!            must be at least nlat.  if isym is nonzero then idg must
-!            be at least nlat/2 if nlat is even or at least (nlat+1)/2
-!            if nlat is odd.
-!
-!     jdg    the second dimension of the array g as it appears in the
-!            program that calls shags. jdg must be at least nlon.
-!
-!     mdab   the first dimension of the arrays a and b as it appears
-!            in the program that calls shags. mdab must be at least
-!            min((nlon+2)/2, nlat) if nlon is even or at least
-!            min((nlon+1)/2, nlat) if nlon is odd.
-!
-!     ndab   the second dimension of the arrays a and b as it appears
-!            in the program that calls shags. ndab must be at least nlat
-!
-!     wshags an array which must be initialized by subroutine shagsi.
-!            once initialized, wshags can be used repeatedly by shags
-!            as long as nlat and nlon remain unchanged.  wshags must
-!            not be altered between calls of shags.
-!
-!     lshags the dimension of the array wshags as it appears in the
-!            program that calls shags. define
-!
-!               l1 = min(nlat, (nlon+2)/2) if nlon is even or
-!               l1 = min(nlat, (nlon+1)/2) if nlon is odd
-!
-!            and
-!
-!               l2 = nlat/2        if nlat is even or
-!               l2 = (nlat+1)/2    if nlat is odd
-!
-!            then lshags must be at least
-!
-!            nlat*(3*(l1+l2)-2)+(l1-1)*(l2*(2*nlat-l1)-3*l1)/2+nlon+15
-!
-!     work   a real work space which need not be saved
-!
-!
-!     lwork  the dimension of the array work as it appears in the
-!            program that calls shags. define
-!
-!               l2 = nlat/2        if nlat is even or
-!               l2 = (nlat+1)/2    if nlat is odd
-!
-!
-!            if isym is zero then lwork must be at least
-!
-!                  nlat*nlon*(nt+1)
-!
-!            if isym is nonzero then lwork must be at least
-!
-!                  l2*nlon*(nt+1)
-!
-!     **************************************************************
-!
-!     output parameters
-!
-!     a, b    both a, b are two or three dimensional arrays (see input
-!            parameter nt) that contain the spherical harmonic
-!            coefficients in the representation of g(i, j) given in the
-!            discription of subroutine shags. for isym=0, a(m, n) and
-!            b(m, n) are given by the equations listed below. symmetric
-!            versions are used when isym is greater than zero.
-!
-!     definitions
-!
-!     1. the normalized associated legendre functions
-!
-!     pbar(m, n, theta) = sqrt((2*n+1)*factorial(n-m)/(2*factorial(n+m)))
-!                       *sin(theta)**m/(2**n*factorial(n)) times the
-!                       (n+m)th derivative of (x**2-1)**n with respect
-!                       to x=cos(theta).
-!
-!     2. the fourier transform of g(i, j).
-!
-!     c(m, i)          = 2/nlon times the sum from j=1 to j=nlon of
-!                       g(i, j)*cos((m-1)*(j-1)*2*pi/nlon)
-!                       (the first and last terms in this sum
-!                       are divided by 2)
-!
-!     s(m, i)          = 2/nlon times the sum from j=2 to j=nlon of
-!                       g(i, j)*sin((m-1)*(j-1)*2*pi/nlon)
-!
-!
-!     3. the gaussian points and weights on the sphere
-!        (computed by subroutine compute_gaussian_latitudes_and_weights).
-!
-!        theta(1), ..., theta(nlat) (gaussian pts in radians)
-!        wts(1), ..., wts(nlat) (corresponding gaussian weights)
-!
-!
-!     4. the maximum (plus one) longitudinal wave number
-!
-!            mmax = min(nlat, (nlon+2)/2) if nlon is even or
-!            mmax = min(nlat, (nlon+1)/2) if nlon is odd.
-!
-!
-!     then for m=0, ..., mmax-1 and n=m, ..., nlat-1 the arrays a, b
-!     are given by
-!
-!     a(m+1, n+1)     =  the sum from i=1 to i=nlat of
-!                       c(m+1, i)*wts(i)*pbar(m, n, theta(i))
-!
-!     b(m+1, n+1)      = the sum from i=1 to nlat of
-!                       s(m+1, i)*wts(i)*pbar(m, n, theta(i))
-!
-!     ierror = 0  no errors
-!            = 1  error in the specification of nlat
-!            = 2  error in the specification of nlon
-!            = 3  error in the specification of isym
-!            = 4  error in the specification of nt
-!            = 5  error in the specification of idg
-!            = 6  error in the specification of jdg
-!            = 7  error in the specification of mdab
-!            = 8  error in the specification of ndab
-!            = 9  error in the specification of lshags
-!            = 10 error in the specification of lwork
-!
-!
-! ****************************************************************
-!
-!     subroutine shagsi(nlat, nlon, wshags, lshags, work, lwork, dwork, ldwork, 
-!    +                  ierror)
-!
-!     subroutine shagsi initializes the array wshags which can then
-!     be used repeatedly by subroutines shags. it precomputes
-!     and stores in wshags quantities such as gaussian weights, 
-!     legendre polynomial coefficients, and fft trigonometric tables.
-!
-!     input parameters
-!
-!     nlat   the number of points in the gaussian colatitude grid on the
-!            full sphere. these lie in the interval (0, pi) and are compu
-!            in radians in theta(1), ..., theta(nlat) by subroutine compute_gaussian_latitudes_and_weights.
-!            if nlat is odd the equator will be included as the grid poi
-!            theta((nlat+1)/2).  if nlat is even the equator will be
-!            excluded as a grid point and will lie half way between
-!            theta(nlat/2) and theta(nlat/2+1). nlat must be at least 3.
-!            note: on the half sphere, the number of grid points in the
-!            colatitudinal direction is nlat/2 if nlat is even or
-!            (nlat+1)/2 if nlat is odd.
-!
-!     nlon   the number of distinct londitude points.  nlon determines
-!            the grid increment in longitude as 2*pi/nlon. for example
-!            nlon = 72 for a five degree grid. nlon must be greater
-!            than or equal to 4. the efficiency of the computation is
-!            improved when nlon is a product of small prime numbers.
-!
-!     wshags an array which must be initialized by subroutine shagsi.
-!            once initialized, wshags can be used repeatedly by shags
-!            as long as nlat and nlon remain unchanged.  wshags must
-!            not be altered between calls of shags.
-!
-!     lshags the dimension of the array wshags as it appears in the
-!            program that calls shags. define
-!
-!               l1 = min(nlat, (nlon+2)/2) if nlon is even or
-!               l1 = min(nlat, (nlon+1)/2) if nlon is odd
-!
-!            and
-!
-!               l2 = nlat/2        if nlat is even or
-!               l2 = (nlat+1)/2    if nlat is odd
-!
-!            then lshags must be at least
-!
-!            nlat*(3*(l1+l2)-2)+(l1-1)*(l2*(2*nlat-l1)-3*l1)/2+nlon+15
-!
-!     work   a real work space which need not be saved
-!
-!     lwork  the dimension of the array work as it appears in the
-!            program that calls shagsi. lwork must be at least
-!            4*nlat*(nlat+2)+2 in the routine calling shagsi
-!
-!     dwork   a real work array that does not have to be saved.
-!
-!     ldwork  the length of dwork in the calling routine.  ldwork must
-!             be at least nlat*(nlat+4)
-!
-!     output parameter
-!
-!     wshags an array which must be initialized before calling shags or
-!            once initialized, wshags can be used repeatedly by shags or
-!            as long as nlat and nlon remain unchanged.  wshags must not
-!            altered between calls of shasc.
-!
-!     ierror = 0  no errors
-!            = 1  error in the specification of nlat
-!            = 2  error in the specification of nlon
-!            = 3  error in the specification of lshags
-!            = 4  error in the specification of lwork
-!            = 5  error in the specification of ldwork
-!            = 6  failure in compute_gaussian_latitudes_and_weights to compute gaussian points
-!                 (due to failure in eigenvalue routine)
-!
+! This file contains code and documentation for subroutines
+! shags and shagsi
 !
 submodule(scalar_analysis_routines) scalar_analysis_gaussian_grid_saved
 
 contains
-    !
+
     ! Purpose:
     !
     ! Performs the spherical harmonic analysis on
     ! a gaussian grid on the array(s) in g and returns the coefficients
     ! in array(s) a, b. the necessary legendre polynomials are fully
     ! stored in this version.
+    !
+    !     subroutine shags(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, &
+    !                      wshags, lshags, work, lwork, ierror)
+    !
+    !     subroutine shags performs the spherical harmonic analysis
+    !     on the array g and stores the result in the arrays a and b.
+    !     the analysis is performed on a gaussian grid in colatitude
+    !     and an equally spaced grid in longitude.  the associated
+    !     legendre functions are stored rather than recomputed as they
+    !     are in subroutine shagc.  the analysis is described below
+    !     at output parameters a, b.
+    !
+    !     input parameters
+    !
+    !     nlat   the number of points in the gaussian colatitude grid on the
+    !            full sphere. these lie in the interval (0, pi) and are compu
+    !            in radians in theta(1), ..., theta(nlat) by subroutine
+    !            compute_gaussian_latitudes_and_weights.
+    !            if nlat is odd the equator will be included as the grid poi
+    !            theta((nlat+1)/2).  if nlat is even the equator will be
+    !            excluded as a grid point and will lie half way between
+    !            theta(nlat/2) and theta(nlat/2+1). nlat must be at least 3.
+    !            note: on the half sphere, the number of grid points in the
+    !            colatitudinal direction is nlat/2 if nlat is even or
+    !            (nlat+1)/2 if nlat is odd.
+    !
+    !     nlon   the number of distinct londitude points.  nlon determines
+    !            the grid increment in longitude as 2*pi/nlon. for example
+    !            nlon = 72 for a five degree grid. nlon must be greater
+    !            than or equal to 4. the efficiency of the computation is
+    !            improved when nlon is a product of small prime numbers.
+    !
+    !     isym   = 0  no symmetries exist about the equator. the analysis
+    !                 is performed on the entire sphere.  i.e. on the
+    !                 array g(i, j) for i=1, ..., nlat and j=1, ..., nlon.
+    !                 (see description of g below)
+    !
+    !            = 1  g is antisymmetric about the equator. the analysis
+    !                 is performed on the northern hemisphere only.  i.e.
+    !                 if nlat is odd the analysis is performed on the
+    !                 array g(i, j) for i=1, ..., (nlat+1)/2 and j=1, ..., nlon.
+    !                 if nlat is even the analysis is performed on the
+    !                 array g(i, j) for i=1, ..., nlat/2 and j=1, ..., nlon.
+    !
+    !
+    !            = 2  g is symmetric about the equator. the analysis is
+    !                 performed on the northern hemisphere only.  i.e.
+    !                 if nlat is odd the analysis is performed on the
+    !                 array g(i, j) for i=1, ..., (nlat+1)/2 and j=1, ..., nlon.
+    !                 if nlat is even the analysis is performed on the
+    !                 array g(i, j) for i=1, ..., nlat/2 and j=1, ..., nlon.
+    !
+    !     nt     the number of analyses.  in the program that calls shags, 
+    !            the arrays g, a and b can be three dimensional in which
+    !            case multiple analyses will be performed.  the third
+    !            index is the analysis index which assumes the values
+    !            k=1, ..., nt.  for a single analysis set nt=1. the
+    !            discription of the remaining parameters is simplified
+    !            by assuming that nt=1 or that the arrays g, a and b
+    !            have only two dimensions.
+    !
+    !     g      a two or three dimensional array (see input parameter
+    !            nt) that contains the discrete function to be analyzed.
+    !            g(i, j) contains the value of the function at the gaussian
+    !            point theta(i) and longitude point phi(j) = (j-1)*2*pi/nlon
+    !            the index ranges are defined above at the input parameter
+    !            isym.
+    !
+    !     idg    the first dimension of the array g as it appears in the
+    !            program that calls shags. if isym equals zero then idg
+    !            must be at least nlat.  if isym is nonzero then idg must
+    !            be at least nlat/2 if nlat is even or at least (nlat+1)/2
+    !            if nlat is odd.
+    !
+    !     jdg    the second dimension of the array g as it appears in the
+    !            program that calls shags. jdg must be at least nlon.
+    !
+    !     mdab   the first dimension of the arrays a and b as it appears
+    !            in the program that calls shags. mdab must be at least
+    !            min((nlon+2)/2, nlat) if nlon is even or at least
+    !            min((nlon+1)/2, nlat) if nlon is odd.
+    !
+    !     ndab   the second dimension of the arrays a and b as it appears
+    !            in the program that calls shags. ndab must be at least nlat
+    !
+    !     wshags an array which must be initialized by subroutine shagsi.
+    !            once initialized, wshags can be used repeatedly by shags
+    !            as long as nlat and nlon remain unchanged.  wshags must
+    !            not be altered between calls of shags.
+    !
+    !     lshags the dimension of the array wshags as it appears in the
+    !            program that calls shags. define
+    !
+    !               l1 = min(nlat, (nlon+2)/2) if nlon is even or
+    !               l1 = min(nlat, (nlon+1)/2) if nlon is odd
+    !
+    !            and
+    !
+    !               l2 = nlat/2        if nlat is even or
+    !               l2 = (nlat+1)/2    if nlat is odd
+    !
+    !            then lshags must be at least
+    !
+    !            nlat*(3*(l1+l2)-2)+(l1-1)*(l2*(2*nlat-l1)-3*l1)/2+nlon+15
+    !
+    !     work   a real work space which need not be saved
+    !
+    !
+    !     lwork  the dimension of the array work as it appears in the
+    !            program that calls shags. define
+    !
+    !               l2 = nlat/2        if nlat is even or
+    !               l2 = (nlat+1)/2    if nlat is odd
+    !
+    !
+    !            if isym is zero then lwork must be at least
+    !
+    !                  nlat*nlon*(nt+1)
+    !
+    !            if isym is nonzero then lwork must be at least
+    !
+    !                  l2*nlon*(nt+1)
+    !
+    !     **************************************************************
+    !
+    !     output parameters
+    !
+    !     a, b    both a, b are two or three dimensional arrays (see input
+    !            parameter nt) that contain the spherical harmonic
+    !            coefficients in the representation of g(i, j) given in the
+    !            discription of subroutine shags. for isym=0, a(m, n) and
+    !            b(m, n) are given by the equations listed below. symmetric
+    !            versions are used when isym is greater than zero.
+    !
+    !     definitions
+    !
+    !     1. the normalized associated legendre functions
+    !
+    !     pbar(m, n, theta) = sqrt((2*n+1)*factorial(n-m)/(2*factorial(n+m)))
+    !                       *sin(theta)**m/(2**n*factorial(n)) times the
+    !                       (n+m)th derivative of (x**2-1)**n with respect
+    !                       to x=cos(theta).
+    !
+    !     2. the fourier transform of g(i, j).
+    !
+    !     c(m, i)          = 2/nlon times the sum from j=1 to j=nlon of
+    !                       g(i, j)*cos((m-1)*(j-1)*2*pi/nlon)
+    !                       (the first and last terms in this sum
+    !                       are divided by 2)
+    !
+    !     s(m, i)          = 2/nlon times the sum from j=2 to j=nlon of
+    !                       g(i, j)*sin((m-1)*(j-1)*2*pi/nlon)
+    !
+    !
+    !     3. the gaussian points and weights on the sphere
+    !        (computed by subroutine compute_gaussian_latitudes_and_weights).
+    !
+    !        theta(1), ..., theta(nlat) (gaussian pts in radians)
+    !        wts(1), ..., wts(nlat) (corresponding gaussian weights)
+    !
+    !
+    !     4. the maximum (plus one) longitudinal wave number
+    !
+    !            mmax = min(nlat, (nlon+2)/2) if nlon is even or
+    !            mmax = min(nlat, (nlon+1)/2) if nlon is odd.
+    !
+    !
+    !     then for m=0, ..., mmax-1 and n=m, ..., nlat-1 the arrays a, b
+    !     are given by
+    !
+    !     a(m+1, n+1)     =  the sum from i=1 to i=nlat of
+    !                       c(m+1, i)*wts(i)*pbar(m, n, theta(i))
+    !
+    !     b(m+1, n+1)      = the sum from i=1 to nlat of
+    !                       s(m+1, i)*wts(i)*pbar(m, n, theta(i))
+    !
+    !     ierror = 0  no errors
+    !            = 1  error in the specification of nlat
+    !            = 2  error in the specification of nlon
+    !            = 3  error in the specification of isym
+    !            = 4  error in the specification of nt
+    !            = 5  error in the specification of idg
+    !            = 6  error in the specification of jdg
+    !            = 7  error in the specification of mdab
+    !            = 8  error in the specification of ndab
+    !            = 9  error in the specification of lshags
+    !            = 10 error in the specification of lwork
     !
     module subroutine shags(nlat, nlon, mode, nt, g, idg, jdg, a, b, mdab, ndab, &
         wshags, lshags, work, lwork, ierror)
@@ -356,9 +271,7 @@ contains
         l2 = late
         lp = nlat*(3*(l1+l2)-2)+(l1-1)*(l2*(2*nlat-l1)-3*l1)/2+nlon+15
 
-        !
-        !  Check validity of input values
-        !
+        ! Check input arguments
         if (nlat < 3) then
             ierror = 1
             return
@@ -399,7 +312,7 @@ contains
         end if
 
         !
-        !  set starting address for gaussian wts , fft values,
+        !  set starting address for gaussian wts , fft values, 
         !    and fully stored legendre polys in wshags
         !
         iwts = 1
@@ -416,7 +329,6 @@ contains
 
     end subroutine shags
 
-    !
     !     Purpose:
     !
     !     This subroutine must be called before calling shags or shsgs with
@@ -427,6 +339,81 @@ contains
     !     least nlat*(nlat+4) in the routine calling shagsi.  This is
     !     not checked.  undetectable errors will result if dwork is
     !     smaller than nlat*(nlat+4).
+    !
+    !
+    !     subroutine shagsi(nlat, nlon, wshags, lshags, work, lwork, dwork, ldwork, ierror)
+    !
+    !     subroutine shagsi initializes the array wshags which can then
+    !     be used repeatedly by subroutines shags. it precomputes
+    !     and stores in wshags quantities such as gaussian weights, 
+    !     legendre polynomial coefficients, and fft trigonometric tables.
+    !
+    !     input parameters
+    !
+    !     nlat   the number of points in the gaussian colatitude grid on the
+    !            full sphere. these lie in the interval (0, pi) and are compu
+    !            in radians in theta(1), ..., theta(nlat) by subroutine
+    !            compute_gaussian_latitudes_and_weights.
+    !            if nlat is odd the equator will be included as the grid poi
+    !            theta((nlat+1)/2).  if nlat is even the equator will be
+    !            excluded as a grid point and will lie half way between
+    !            theta(nlat/2) and theta(nlat/2+1). nlat must be at least 3.
+    !            note: on the half sphere, the number of grid points in the
+    !            colatitudinal direction is nlat/2 if nlat is even or
+    !            (nlat+1)/2 if nlat is odd.
+    !
+    !     nlon   the number of distinct londitude points.  nlon determines
+    !            the grid increment in longitude as 2*pi/nlon. for example
+    !            nlon = 72 for a five degree grid. nlon must be greater
+    !            than or equal to 4. the efficiency of the computation is
+    !            improved when nlon is a product of small prime numbers.
+    !
+    !     wshags an array which must be initialized by subroutine shagsi.
+    !            once initialized, wshags can be used repeatedly by shags
+    !            as long as nlat and nlon remain unchanged.  wshags must
+    !            not be altered between calls of shags.
+    !
+    !     lshags the dimension of the array wshags as it appears in the
+    !            program that calls shags. define
+    !
+    !               l1 = min(nlat, (nlon+2)/2) if nlon is even or
+    !               l1 = min(nlat, (nlon+1)/2) if nlon is odd
+    !
+    !            and
+    !
+    !               l2 = nlat/2        if nlat is even or
+    !               l2 = (nlat+1)/2    if nlat is odd
+    !
+    !            then lshags must be at least
+    !
+    !            nlat*(3*(l1+l2)-2)+(l1-1)*(l2*(2*nlat-l1)-3*l1)/2+nlon+15
+    !
+    !     work   a real work space which need not be saved
+    !
+    !     lwork  the dimension of the array work as it appears in the
+    !            program that calls shagsi. lwork must be at least
+    !            4*nlat*(nlat+2)+2 in the routine calling shagsi
+    !
+    !     dwork   a real work array that does not have to be saved.
+    !
+    !     ldwork  the length of dwork in the calling routine.  ldwork must
+    !             be at least nlat*(nlat+4)
+    !
+    !     output parameter
+    !
+    !     wshags an array which must be initialized before calling shags or
+    !            once initialized, wshags can be used repeatedly by shags or
+    !            as long as nlat and nlon remain unchanged.  wshags must not
+    !            altered between calls of shasc.
+    !
+    !     ierror = 0  no errors
+    !            = 1  error in the specification of nlat
+    !            = 2  error in the specification of nlon
+    !            = 3  error in the specification of lshags
+    !            = 4  error in the specification of lwork
+    !            = 5  error in the specification of ldwork
+    !            = 6  failure in compute_gaussian_latitudes_and_weights to compute gaussian points
+    !                 (due to failure in eigenvalue routine)
     !
     module subroutine shagsi(nlat, nlon, wshags, lshags, work, lwork, dwork, ldwork, ierror)
 
@@ -458,9 +445,7 @@ contains
         ! Set preliminary quantites needed to compute and store legendre polys
         ldw = nlat*(nlat+4)
 
-        !
-        !  Check validity of input argument
-        !
+        ! Check input arguments
         if (nlat < 3) then
             ierror = 1
             return
@@ -514,7 +499,7 @@ contains
         integer(ip), intent(in)  :: ndab
         integer(ip), intent(in)  :: late
         real(wp),    intent(in)  :: wfft(*)
-        real(wp),    intent(in)  :: pmn(late,*)
+        real(wp),    intent(in)  :: pmn(late, *)
         real(wp),    intent(in)  :: wts(nlat)
         real(wp),    intent(out) :: g(lat, nlon, nt)
         real(wp),    intent(out) :: work(*)
@@ -526,7 +511,7 @@ contains
         type(SpherepackAux) :: sphere_aux
 
         !  set gs array internally in shags_lower_routine
-        g(1:lat,1:nlon, :) = gs(1:lat,1:nlon,:)
+        g(1:lat, 1:nlon, :) = gs(1:lat, 1:nlon, :)
 
         ! Perform fourier transform
         do k=1, nt
@@ -739,8 +724,8 @@ contains
 
                 do k=1, nt
                     do i=1, late
-                        a(l,ns:nlat:2,k) = &
-                            a(l,ns:nlat:2,k) + HALF * g(i, nlon, k) * pmn(i,mml1+ns:mml1+nlat:2)
+                        a(l, ns:nlat:2, k) = &
+                            a(l, ns:nlat:2, k) + HALF * g(i, nlon, k) * pmn(i, mml1+ns:mml1+nlat:2)
                     end do
                 end do
             end if
@@ -855,7 +840,7 @@ contains
     end subroutine shagsp
 
     pure function get_workspace_indices(nlat, late, l) &
-    result (return_value)
+        result (return_value)
 
         ! Dummy arguments
         integer(ip), intent(in)  :: nlat
@@ -940,7 +925,7 @@ contains
             p0n(1, i) = pb
         end do
         !
-        !  Compute p0n, p1n for all theta(i) when n.gt.0
+        !  Compute p0n, p1n for all theta(i) when n>0
         !
         do np1=2, nlat
             n = np1-1
@@ -972,7 +957,7 @@ contains
                 else
                     imn = (n-1)*(n-2)/2+m-1
                 end if
-                abel(imn)=sqrt(real((2*n+1)*(m+n-2)*(m+n-3),kind=wp)/ &
+                abel(imn)=sqrt(real((2*n+1)*(m+n-2)*(m+n-3), kind=wp)/ &
                     real((2*n-3)*(m+n-1)*(m+n), kind=wp))
                 bbel(imn)=sqrt(real((2*n+1)*(n-m-1)*(n-m), kind=wp)/ &
                     real((2*n-3)*(m+n-1)*(m+n), kind=wp))

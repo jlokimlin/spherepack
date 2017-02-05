@@ -31,26 +31,26 @@ module type_Vector3D
         ! Type-bound procedures
         procedure,          private  :: add_vectors
         procedure,          private  :: subtract_vectors
-        procedure,          private  :: divide_vector_by_float
+        procedure,          private  :: divide_vector_by_real
         procedure,          private  :: divide_vector_by_integer
         procedure,          private  :: get_dot_product
-        procedure,          private  :: assign_vector_from_int_array
-        procedure,          private  :: assign_vector_from_float_array
-        procedure, nopass,  private  :: assign_array_from_vector
+        procedure,          private  :: assign_vector_from_integer_array
+        procedure,          private  :: assign_vector_from_real_array
+        procedure, nopass,  private  :: assign_real_array_from_vector
         procedure,          private  :: copy_vector
-        procedure,          private  :: multiply_vector_times_float
+        procedure,          private  :: multiply_vector_times_real
         procedure, nopass,  private  :: multiply_real_times_vector
         procedure,          private  :: multiply_vector_times_integer
         procedure, nopass,  private  :: multiply_integer_times_vector
         procedure,          private  :: get_cross_product
         procedure,          public   :: get_norm
         ! Generic type-bound procedures
-        generic, public :: operator (.dot.) => get_dot_product
-        generic, public :: operator (.cross.) => get_cross_product
-        generic, public :: operator (+) => add_vectors
-        generic, public :: operator (-) => subtract_vectors
-        generic, public :: operator (/) => &
-            divide_vector_by_float,&
+        generic, public :: operator(.dot.) => get_dot_product
+        generic, public :: operator(.cross.) => get_cross_product
+        generic, public :: operator(+) => add_vectors
+        generic, public :: operator(-) => subtract_vectors
+        generic, public :: operator(/) => &
+            divide_vector_by_real, &
             divide_vector_by_integer
     end type Vector3D
 
@@ -61,15 +61,15 @@ module type_Vector3D
 
     ! Interface for assignment operator
     interface assignment(=)
-        module procedure assign_vector_from_int_array
-        module procedure assign_vector_from_float_array
-        module procedure assign_array_from_vector
+        module procedure assign_vector_from_integer_array
+        module procedure assign_vector_from_real_array
+        module procedure assign_real_array_from_vector
         module procedure copy_vector
     end interface
 
     ! Interface for multiplication operator
     interface operator(*)
-        module procedure multiply_vector_times_float
+        module procedure multiply_vector_times_real
         module procedure multiply_real_times_vector
         module procedure multiply_vector_times_integer
         module procedure multiply_integer_times_vector
@@ -78,7 +78,7 @@ module type_Vector3D
 
 contains
 
-    subroutine assign_vector_from_int_array(self, array)
+    subroutine assign_vector_from_integer_array(self, array)
 
         ! Dummy arguments
         class(Vector3D),  intent(out) :: self
@@ -91,9 +91,9 @@ contains
             self%z = real(array(3), kind=wp)
         end select
 
-    end subroutine assign_vector_from_int_array
+    end subroutine assign_vector_from_integer_array
 
-    subroutine assign_vector_from_float_array(self, array)
+    subroutine assign_vector_from_real_array(self, array)
 
         ! Dummy arguments
         class(Vector3D), intent(out) :: self
@@ -105,14 +105,13 @@ contains
             self%y = array(2)
             self%z = array(3)
         end select
+    end subroutine assign_vector_from_real_array
 
-    end subroutine assign_vector_from_float_array
-
-    subroutine assign_array_from_vector(array, self)
+    pure subroutine assign_real_array_from_vector(array, self)
 
         ! Dummy arguments
-        real(wp),        intent(out)  :: array(:)
-        class(Vector3D), intent(in)   :: self
+        real(wp),        intent(out) :: array(:)
+        class(Vector3D), intent(in)  :: self
 
         select type(self)
             type is (Vector3D)
@@ -121,7 +120,7 @@ contains
             array(3) = self%z
         end select
 
-    end subroutine assign_array_from_vector
+    end subroutine assign_real_array_from_vector
 
     subroutine copy_vector(self, other)
 
@@ -135,158 +134,165 @@ contains
 
     end subroutine copy_vector
 
-    function add_vectors(self, vec) &
+    pure function add_vectors(self, other) &
         result (return_value)
 
         ! Dummy arguments
-        type(Vector3D)               :: return_value
         class(Vector3D), intent(in) :: self
-        class(Vector3D), intent(in) :: vec
+        class(Vector3D), intent(in) :: other
+        type(Vector3D)              :: return_value
 
-
-        return_value%x = self%x + vec%x
-        return_value%y = self%y + vec%y
-        return_value%z = self%z + vec%z
+        return_value%x = self%x + other%x
+        return_value%y = self%y + other%y
+        return_value%z = self%z + other%z
 
     end function add_vectors
 
-    function subtract_vectors(self, vec) &
+    pure function subtract_vectors(self, other) &
         result (return_value)
 
         ! Dummy arguments
         class(Vector3D), intent(in) :: self
-        class(Vector3D), intent(in) :: vec
+        class(Vector3D), intent(in) :: other
         type(Vector3D)              :: return_value
 
-        return_value%x = self%x - vec%x
-        return_value%y = self%y - vec%y
-        return_value%z = self%z - vec%z
+        return_value%x = self%x - other%x
+        return_value%y = self%y - other%y
+        return_value%z = self%z - other%z
 
     end function subtract_vectors
 
-    pure function multiply_vector_times_float(self, float) &
+    pure function multiply_vector_times_real(self, real_var) &
         result (return_value)
 
         ! Dummy arguments
         class(Vector3D), intent(in) :: self
-        real(wp),        intent(in) :: float
+        real(wp),        intent(in) :: real_var
         type(Vector3D)              :: return_value
 
-        return_value%x = self%x * float
-        return_value%y = self%y * float
-        return_value%z = self%z * float
+        return_value%x = self%x * real_var
+        return_value%y = self%y * real_var
+        return_value%z = self%z * real_var
 
-    end function multiply_vector_times_float
+    end function multiply_vector_times_real
 
-    function multiply_real_times_vector(float, vec) &
+    pure function multiply_real_times_vector(real_var, other) &
         result (return_value)
 
         ! Dummy arguments
-        real(wp),        intent(in) :: float
-        class(Vector3D), intent(in) :: vec
+        real(wp),        intent(in) :: real_var
+        class(Vector3D), intent(in) :: other
         type(Vector3D)              :: return_value
 
-        return_value%x = float * vec%x
-        return_value%y = float * vec%y
-        return_value%z = float * vec%z
+        return_value%x = real_var * other%x
+        return_value%y = real_var * other%y
+        return_value%z = real_var * other%z
 
     end function multiply_real_times_vector
 
-    function multiply_vector_times_integer(self, int) &
+    pure function multiply_vector_times_integer(self, int_var) &
         result (return_value)
 
         ! Dummy arguments
-        class(Vector3D), intent(in)  :: self
-        integer(ip),     intent(in)  :: int
-        type(Vector3D)                :: return_value
+        class(Vector3D), intent(in) :: self
+        integer(ip),     intent(in) :: int_var
+        type(Vector3D)              :: return_value
 
+        ! Local variables
+        real(wp) :: real_var
 
-        return_value%x = self%x * real(int, kind=wp)
-        return_value%y = self%y * real(int, kind=wp)
-        return_value%z = self%z * real(int, kind=wp)
+        real_var = real(int_var, kind=wp)
+
+        return_value%x = self%x * real_var
+        return_value%y = self%y * real_var
+        return_value%z = self%z * real_var
 
     end function multiply_vector_times_integer
 
-    pure function multiply_integer_times_vector(int, vec) &
+    pure function multiply_integer_times_vector(int_var, other) &
         result (return_value)
 
         ! Dummy arguments
-        integer(ip),     intent(in) :: int
-        class(Vector3D), intent(in) :: vec
-        type(Vector3D)               :: return_value
+        integer(ip),     intent(in) :: int_var
+        class(Vector3D), intent(in) :: other
+        type(Vector3D)              :: return_value
 
+        ! Local variables
+        real(wp) :: real_var
 
-        return_value%x = real(int, kind=wp) * vec%x
-        return_value%y = real(int, kind=wp) * vec%y
-        return_value%z = real(int, kind=wp) * vec%z
+        real_var = real(int_var, kind=wp)
+
+        return_value%x = real_var * other%x
+        return_value%y = real_var * other%y
+        return_value%z = real_var * other%z
 
     end function multiply_integer_times_vector
 
-    pure function divide_vector_by_float(self, float) &
+    pure function divide_vector_by_real(self, real_var) &
         result (return_value)
 
         ! Dummy arguments
         class(Vector3D), intent(in) :: self
-        real(wp),        intent(in) :: float
+        real(wp),        intent(in) :: real_var
         type(Vector3D)              :: return_value
 
-        return_value%x = self%x / float
-        return_value%y = self%y / float
-        return_value%z = self%z / float
+        return_value%x = self%x / real_var
+        return_value%y = self%y / real_var
+        return_value%z = self%z / real_var
 
-    end function divide_vector_by_float
+    end function divide_vector_by_real
 
-    pure function divide_vector_by_integer(self, int) &
+    pure function divide_vector_by_integer(self, int_var) &
         result (return_value)
 
         ! Dummy arguments
         class(Vector3D), intent(in) :: self
-        integer(ip),     intent(in) :: int
+        integer(ip),     intent(in) :: int_var
         type(Vector3D)              :: return_value
 
-        return_value%x = self%x / int
-        return_value%y = self%y / int
-        return_value%z = self%z / int
+        return_value%x = self%x / int_var
+        return_value%y = self%y / int_var
+        return_value%z = self%z / int_var
 
     end function divide_vector_by_integer
 
-    function get_dot_product(self, vec) result (return_value)
+    pure function get_dot_product(self, other) &
+        result (return_value)
 
         ! Dummy arguments
         real(wp)                    :: return_value
         class(Vector3D), intent(in) :: self
-        class(Vector3D), intent(in) :: vec
+        class(Vector3D), intent(in) :: other
 
         associate( &
             a => [self%x, self%y, self%z], &
-            b => [vec%x, vec%y, vec%z] &
+            b => [other%x, other%y, other%z] &
             )
             return_value = dot_product(a, b)
         end associate
 
     end function get_dot_product
 
-    function get_cross_product(self, vec) &
+    pure function get_cross_product(self, other) &
         result (return_value)
 
         ! Dummy arguments
         class(Vector3D), intent(in) :: self
-        class(Vector3D), intent(in) :: vec
+        class(Vector3D), intent(in) :: other
         type(Vector3D)              :: return_value
 
-
-        return_value%x = self%y*vec%z - self%z*vec%y
-        return_value%y = self%z*vec%x - self%x*vec%z
-        return_value%z = self%x*vec%y - self%y*vec%x
+        return_value%x = self%y * other%z - self%z * other%y
+        return_value%y = self%z * other%x - self%x * other%z
+        return_value%z = self%x * other%y - self%y * other%x
 
     end function get_cross_product
 
-    function get_norm(self) &
+    pure function get_norm(self) &
         result (return_value)
 
         ! Dummy arguments
-        class(Vector3D), intent(inout) :: self
-        real(wp)                       :: return_value
+        class(Vector3D), intent(in) :: self
+        real(wp)                    :: return_value
 
         associate( array => [self%x, self%y, self%z] )
             return_value = norm2(array)

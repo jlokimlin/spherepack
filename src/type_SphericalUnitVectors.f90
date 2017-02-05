@@ -27,9 +27,9 @@ module type_SphericalUnitVectors
         logical,                   public :: initialized = .false.
         integer(ip),               public :: NUMBER_OF_LONGITUDES = 0
         integer(ip),               public :: NUMBER_OF_LATITUDES = 0
-        type(Vector), allocatable, public :: radial(:,:)
-        type(Vector), allocatable, public :: polar(:,:)
-        type(Vector), allocatable, public :: azimuthal(:,:)
+        type(Vector), allocatable, public :: radial(:, :)
+        type(Vector), allocatable, public :: polar(:, :)
+        type(Vector), allocatable, public :: azimuthal(:, :)
     contains
         ! Type-bound procedures
         procedure, public :: create => create_spherical_unit_vectors
@@ -167,9 +167,9 @@ contains
 
         ! Dummy arguments
         class(SphericalUnitVectors), intent(inout) :: self
-        real(wp),                    intent(in)    :: vector_function(:,:,:)
-        real(wp),                    intent(out)   :: polar_component(:,:)
-        real(wp),                    intent(out)   :: azimuthal_component(:,:)
+        real(wp),                    intent(in)    :: vector_function(:, :, :)
+        real(wp),                    intent(out)   :: polar_component(:, :)
+        real(wp),                    intent(out)   :: azimuthal_component(:, :)
 
         ! Local variables
         integer(ip)  :: k, l ! Counters
@@ -210,10 +210,10 @@ contains
 
         ! Dummy arguments
         class(SphericalUnitVectors), intent(inout) :: self
-        real(wp),                    intent(in)    :: radial_component(:,:)
-        real(wp),                    intent(in)    :: polar_component(:,:)
-        real(wp),                    intent(in)    :: azimuthal_component(:,:)
-        real(wp),                    intent(out)   :: vector_function(:,:,:)
+        real(wp),                    intent(in)    :: radial_component(:, :)
+        real(wp),                    intent(in)    :: polar_component(:, :)
+        real(wp),                    intent(in)    :: azimuthal_component(:, :)
+        real(wp),                    intent(out)   :: vector_function(:, :, :)
 
         ! Local variables
         integer(ip)  :: k, l ! Counters
@@ -231,7 +231,7 @@ contains
             do l = 1, nlon
                 do k = 1, nlat
                     associate( &
-                        r => self%radial(k,l), &
+                        r => self%radial(k, l), &
                         theta => self%polar(k, l), &
                         phi => self%azimuthal(k, l) &
                         )
@@ -240,7 +240,7 @@ contains
                         vector_function(:, k, l ) = &
                             r * radial_component(k, l) &
                             + theta * polar_component(k, l) &
-                            + phi * azimuthal_component(k,l)
+                            + phi * azimuthal_component(k, l)
 
                     end associate
                 end do

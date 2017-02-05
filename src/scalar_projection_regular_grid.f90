@@ -226,7 +226,7 @@ contains
     !     harmonic analysis followed by harmonic synthesis
     !     but faster and with less memory.
     !
-    !     subroutine shpei(nlat, nlon, isym, mtrunc, wshp, lwshp, iwshp,
+    !     subroutine shpei(nlat, nlon, isym, mtrunc, wshp, lwshp, iwshp, 
     !     liwshp, work, lwork, ierror)
     !
     !     shpei initializes arrays wshp and iwshp for repeated use
@@ -1026,7 +1026,7 @@ contains
         real(wp) :: x(ld, 2), y(ld, 2)
 
         kmx = min(lr+1, ld)
-        y(1: kmx,:) = ZERO
+        y(1: kmx, :) = ZERO
 
         if (lc > 0) then
             do i=1, lc
@@ -1086,15 +1086,15 @@ contains
     !
     !  Reference:
     !
-    !    Jack Dongarra, Jim Bunch, Cleve Moler, Pete Stewart,
-    !    LINPACK User's Guide,
-    !    SIAM, 1979,
-    !    ISBN13: 978-0-898711-72-1,
+    !    Jack Dongarra, Jim Bunch, Cleve Moler, Pete Stewart, 
+    !    LINPACK User's Guide, 
+    !    SIAM, 1979, 
+    !    ISBN13: 978-0-898711-72-1, 
     !    LC: QA214.L56.
     !
     !  Parameters:
     !
-    !    Input/output, real(wp) a(lda,n).  on input, the m by n
+    !    Input/output, real(wp) a(lda, n).  on input, the m by n
     !    matrix whose singular value decomposition is to be computed.
     !    on output, the matrix has been destroyed.  depending on the user's
     !    requests, the matrix may contain other useful information.
@@ -1106,22 +1106,22 @@ contains
     !
     !    input, integer(ip) n, the number of columns of the matrix a.
     !
-    !    output, real(wp) s(mm), where mm = max(m+1,n).  the first
-    !    min(m,n) entries of s contain the singular values of a arranged in
+    !    output, real(wp) s(mm), where mm = max(m+1, n).  the first
+    !    min(m, n) entries of s contain the singular values of a arranged in
     !    descending order of magnitude.
     !
-    !    output, real(wp) e(mm), where mm = max(m+1,n).  ordinarily
+    !    output, real(wp) e(mm), where mm = max(m+1, n).  ordinarily
     !    contains zeros.  however see the discussion of info for exceptions.
     !
-    !    output, real(wp) u(ldu,k).  if joba = 1 then k = m;
-    !    if 2 <= joba, then k = min(m,n).  u contains the m by m matrix of
+    !    output, real(wp) u(ldu, k).  if joba = 1 then k = m;
+    !    if 2 <= joba, then k = min(m, n).  u contains the m by m matrix of
     !    left singular vectors.  u is not referenced if joba = 0.  if m <= n
     !    or if joba = 2, then u may be identified with a in the subroutine call.
     !
     !    input, integer(ip) ldu, the leading dimension of the array u.
     !    ldu must be at least m.
     !
-    !    output, real(wp) v(ldv,n), the n by n matrix of right singular
+    !    output, real(wp) v(ldv, n), the n by n matrix of right singular
     !    vectors.  v is not referenced if job is 0.  if n <= m, then v may be
     !    identified with a in the subroutine call.
     !
@@ -1134,13 +1134,13 @@ contains
     !    vectors.  it has the decimal expansion ab with the following meaning:
     !      a =  0, do not compute the left singular vectors.
     !      a =  1, return the m left singular vectors in u.
-    !      a >= 2, return the first min(m,n) singular vectors in u.
+    !      a >= 2, return the first min(m, n) singular vectors in u.
     !      b =  0, do not compute the right singular vectors.
     !      b =  1, return the right singular vectors in v.
     !
     !    output, integer(ip) info, status indicator.
     !    the singular values (and their corresponding singular vectors)
-    !    s(info+1), s(info+2),...,s(mn) are correct.  here mn = min(m, n).
+    !    s(info+1), s(info+2), ..., s(mn) are correct.  here mn = min(m, n).
     !    thus if info is 0, all the singular values and their vectors are
     !    correct.  in any event, the matrix b = u' * a * v is the bidiagonal
     !    matrix with the elements of s on its diagonal and the elements of e on
@@ -1149,15 +1149,15 @@ contains
     subroutine singular_value_decomposition(a, lda, m, n, s, e, u, ldu, v, ldv, work, job, info)
 
         ! Dummy arguments
-        real(wp),    intent(inout) :: a(lda,n)
+        real(wp),    intent(inout) :: a(lda, n)
         integer(ip), intent(in)    :: lda
         integer(ip), intent(in)    :: m
         integer(ip), intent(in)    :: n
         real(wp),    intent(out)   :: s(*)
         real(wp),    intent(out)   :: e(*)
-        real(wp),    intent(out)   :: u(ldu,m)
+        real(wp),    intent(out)   :: u(ldu, m)
         integer(ip), intent(in)    :: ldu
-        real(wp),    intent(out)   :: v(ldv,n)
+        real(wp),    intent(out)   :: v(ldv, n)
         integer(ip), intent(in)    :: ldv
         real(wp),    intent(out)   :: work(m)
         integer(ip), intent(in)    :: job
@@ -1230,11 +1230,11 @@ contains
             !  Compute the transformation for the l-th column and
             !  place the l-th diagonal in s(l).
             if (l <= nct) then
-                s(l) = get_norm2(m-l+1, a(l,l), 1)
+                s(l) = get_norm2(m-l+1, a(l, l), 1)
                 if (s(l) /= ZERO) then
-                    if (a(l,l) /= ZERO) s(l) = sign(s(l), a(l,l))
-                    call scale_vector_by_constant( m-l+1, ONE / s(l), a(l,l), 1)
-                    a(l,l) = ONE + a(l,l)
+                    if (a(l, l) /= ZERO) s(l) = sign(s(l), a(l, l))
+                    call scale_vector_by_constant( m-l+1, ONE / s(l), a(l, l), 1)
+                    a(l, l) = ONE + a(l, l)
                 end if
                 s(l) = -s(l)
             end if
@@ -1243,17 +1243,17 @@ contains
 
                 !  Apply the transformation.
                 if (l <= nct .and. s(l) /= ZERO) then
-                    t = -get_dot_product( m-l+1, a(l,l), 1, a(l,j), 1) / a(l,l)
-                    call daxpy(m-l+1, t, a(l,l), 1, a(l,j), 1)
+                    t = -get_dot_product( m-l+1, a(l, l), 1, a(l, j), 1) / a(l, l)
+                    call daxpy(m-l+1, t, a(l, l), 1, a(l, j), 1)
                 end if
 
                 !  Place the l-th row of a into e for the
                 !  subsequent calculation of the row transformation.
-                e(j) = a(l,j)
+                e(j) = a(l, j)
             end do
 
             !  Place the transformation in u for subsequent back multiplication.
-            if (u_desired .and. l <= nct) u(l:m,l) = a(l:m,l)
+            if (u_desired .and. l <= nct) u(l:m, l) = a(l:m, l)
 
             !  Compute the l-th row transformation and place the
             !  l-th superdiagonal in e(l).
@@ -1277,17 +1277,17 @@ contains
                     work(l+1:m) = ZERO
 
                     do j = l + 1, n
-                        call daxpy(m-l, e(j), a(l+1,j), 1, work(l+1), 1)
+                        call daxpy(m-l, e(j), a(l+1, j), 1, work(l+1), 1)
                     end do
 
                     do j = l + 1, n
-                        call daxpy(m-l, -e(j)/e(l+1), work(l+1), 1, a(l+1,j), 1)
+                        call daxpy(m-l, -e(j)/e(l+1), work(l+1), 1, a(l+1, j), 1)
                     end do
 
                 end if
 
                 !  Place the transformation in v for subsequent back multiplication.
-                if (v_desired) v(l+1:n,l) = e(l+1:n)
+                if (v_desired) v(l+1:n, l) = e(l+1:n)
             end if
         end do
 
@@ -1296,21 +1296,21 @@ contains
         nctp1 = nct + 1
         nrtp1 = nrt + 1
 
-        if (nct < n) s(nctp1) = a(nctp1,nctp1)
+        if (nct < n) s(nctp1) = a(nctp1, nctp1)
 
         if (m < mn) s(mn) = ZERO
 
-        if (nrtp1 < mn) e(nrtp1) = a(nrtp1,mn)
+        if (nrtp1 < mn) e(nrtp1) = a(nrtp1, mn)
 
         e(mn) = ZERO
 
         !  If required, generate u.
         if (u_desired) then
 
-            u(1:m,nctp1:ncu) = ZERO
+            u(1:m, nctp1:ncu) = ZERO
 
             do j = nctp1, ncu
-                u(j,j) = ONE
+                u(j, j) = ONE
             end do
 
             do ll = 1, nct
@@ -1320,17 +1320,17 @@ contains
                 if (s(l) /= ZERO) then
 
                     do j = l + 1, ncu
-                        t = -get_dot_product( m-l+1, u(l,l), 1, u(l,j), 1) / u(l,l)
-                        call daxpy(m-l+1, t, u(l,l), 1, u(l,j), 1)
+                        t = -get_dot_product( m-l+1, u(l, l), 1, u(l, j), 1) / u(l, l)
+                        call daxpy(m-l+1, t, u(l, l), 1, u(l, j), 1)
                     end do
 
-                    u(l:m,l) = -u(l:m,l)
-                    u(l,l) = ONE + u(l,l)
-                    u(1:l-1,l) = ZERO
+                    u(l:m, l) = -u(l:m, l)
+                    u(l, l) = ONE + u(l, l)
+                    u(1:l-1, l) = ZERO
 
                 else
-                    u(1:m,l) = ZERO
-                    u(l,l) = ONE
+                    u(1:m, l) = ZERO
+                    u(l, l) = ONE
                 end if
             end do
         end if
@@ -1342,12 +1342,12 @@ contains
                 l = n - ll + 1
                 if (l <= nrt .and. e(l) /= ZERO) then
                     do j = l + 1, n
-                        t = -get_dot_product( n-l, v(l+1,l), 1, v(l+1,j), 1) / v(l+1,l)
-                        call daxpy(n-l, t, v(l+1,l), 1, v(l+1,j), 1)
+                        t = -get_dot_product( n-l, v(l+1, l), 1, v(l+1, j), 1) / v(l+1, l)
+                        call daxpy(n-l, t, v(l+1, l), 1, v(l+1, j), 1)
                     end do
                 end if
-                v(1:n,l) = ZERO
-                v(l,l) = ONE
+                v(1:n, l) = ZERO
+                v(l, l) = ONE
             end do
         end if
 
@@ -1441,7 +1441,7 @@ contains
                             e(k-1) = cs * e(k-1)
                         end if
             		
-                        if (v_desired) call apply_plane_rotation(n, v(1,k), 1, v(1,mn), 1, cs, sn)
+                        if (v_desired) call apply_plane_rotation(n, v(1, k), 1, v(1, mn), 1, cs, sn)
                     end do
                 case (2)
             		
@@ -1454,7 +1454,7 @@ contains
                         s(k) = t1
                         f = -sn * e(k)
                         e(k) = cs * e(k)
-                        if (u_desired) call apply_plane_rotation(m, u(1,k), 1, u(1,l-1), 1, cs, sn)
+                        if (u_desired) call apply_plane_rotation(m, u(1, k), 1, u(1, l-1), 1, cs, sn)
                     end do
                 case (3)
 
@@ -1494,7 +1494,7 @@ contains
                         g = sn * s(k+1)
                         s(k+1) = cs * s(k+1)
             		
-                        if (v_desired) call apply_plane_rotation(n, v(1,k), 1, v(1,k+1), 1, cs, sn)
+                        if (v_desired) call apply_plane_rotation(n, v(1, k), 1, v(1, k+1), 1, cs, sn)
 
                         call construct_givens_plane_rotation(f, g, cs, sn)
 
@@ -1504,7 +1504,7 @@ contains
                         g = sn * e(k+1)
                         e(k+1) = cs * e(k+1)
             		
-                        if (u_desired .and. k < m) call apply_plane_rotation(m, u(1,k), 1, u(1,k+1), 1, cs, sn)
+                        if (u_desired .and. k < m) call apply_plane_rotation(m, u(1, k), 1, u(1, k+1), 1, cs, sn)
 
                     end do
             		
@@ -1515,7 +1515,7 @@ contains
                     !  Make the singular value nonnegative.
                     if (s(l) < ZERO) then
                         s(l) = -s(l)
-                        if (v_desired) v(1:n,l) = -v(1:n,l)
+                        if (v_desired) v(1:n, l) = -v(1:n, l)
                     end if
 
                     !  Order the singular value.
@@ -1529,9 +1529,9 @@ contains
                         s(l) = s(l+1)
                         s(l+1) = t
             		
-                        if (v_desired .and. l < n) call swap_vectors( n, v(1,l), 1, v(1,l+1), 1)
+                        if (v_desired .and. l < n) call swap_vectors( n, v(1, l), 1, v(1, l+1), 1)
 
-                        if (u_desired .and. l < m) call swap_vectors(m, u(1,l), 1, u(1,l+1), 1)
+                        if (u_desired .and. l < m) call swap_vectors(m, u(1, l), 1, u(1, l+1), 1)
                         l = l + 1
                     end do
                     iter = 0
@@ -1757,7 +1757,7 @@ contains
     !    c = a / r if r is not 0
     !      = 1     if r is 0;
     !
-    !    s = b / r if r is not 0,
+    !    s = b / r if r is not 0, 
     !        0     if r is 0.
     !
     !    The computed numbers then satisfy the equation
@@ -1767,8 +1767,8 @@ contains
     !
     !    The routine also computes
     !
-    !    z = s     if abs(a) > abs(b),
-    !      = 1 / c if abs(a) <= abs(b) and c is not 0,
+    !    z = s     if abs(a) > abs(b), 
+    !      = 1 / c if abs(a) <= abs(b) and c is not 0, 
     !      = 1     if c is 0.
     !
     !    The single value z encodes c and s, and hence the rotation:
@@ -1779,16 +1779,16 @@ contains
     !
     !  Reference:
     !
-    !    Jack Dongarra, Jim Bunch, Cleve Moler, Pete Stewart,
-    !    LINPACK User's Guide,
-    !    SIAM, 1979,
-    !    ISBN13: 978-0-898711-72-1,
+    !    Jack Dongarra, Jim Bunch, Cleve Moler, Pete Stewart, 
+    !    LINPACK User's Guide, 
+    !    SIAM, 1979, 
+    !    ISBN13: 978-0-898711-72-1, 
     !    LC: QA214.L56.
     !
-    !    Charles Lawson, Richard Hanson, David Kincaid, Fred Krogh,
-    !    Algorithm 539,
-    !    Basic Linear Algebra Subprograms for Fortran Usage,
-    !    ACM Transactions on Mathematical Software,
+    !    Charles Lawson, Richard Hanson, David Kincaid, Fred Krogh, 
+    !    Algorithm 539, 
+    !    Basic Linear Algebra Subprograms for Fortran Usage, 
+    !    ACM Transactions on Mathematical Software, 
     !    Volume 5, Number 3, September 1979, pages 308-323.
     !
     !  Dummy arguments:

@@ -219,13 +219,12 @@ contains
 
     end function get_lshaes
 
-
     pure function get_lwork_shaes(nlat, nlon) result (return_value)
 
         ! Dummy arguments
-        integer(ip), intent(in)  :: nlat
-        integer(ip), intent(in)  :: nlon
-        integer(ip)               :: return_value
+        integer(ip), intent(in) :: nlat
+        integer(ip), intent(in) :: nlon
+        integer(ip)             :: return_value
 
         ! Local variables
         integer(ip)         :: l1, l2
@@ -241,10 +240,8 @@ contains
     pure function get_ldwork_shaes(nlat) result (return_value)
 
         ! Dummy arguments
-
         integer(ip), intent(in)  :: nlat
-        integer(ip)               :: return_value
-
+        integer(ip)              :: return_value
 
         return_value = nlat + 1
 

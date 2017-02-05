@@ -53,7 +53,7 @@
 !     be the cartesian coordinates corresponding to theta and phi.
 !     on the unit sphere.  The exact solution
 !
-!        ue(theta,phi) = (1 + x*y)*exp(z)
+!        ue(theta, phi) = (1 + x*y)*exp(z)
 !
 !     is used to set the right hand side and compute error.
 !
@@ -111,7 +111,7 @@ contains
             type is (GaussianSphere)
 
             !  Initialize gaussian sphere object
-            sphere_type = GaussianSphere(NLATS,NLONS)
+            sphere_type = GaussianSphere(NLATS, NLONS)
 
             ! Allocate known error from previous platform
             allocate( error_previous_platform, source='     discretization error = 2.325553e-14' )
@@ -132,15 +132,15 @@ contains
             rhs => source_term, &
             radial => sphere_type%unit_vectors%radial &
             )
-            do j=1,NLONS
-                do i=1,NLATS
+            do j=1, NLONS
+                do i=1, NLATS
                     associate( &
-                        x => radial(i,j)%x, &
-                        y => radial(i,j)%y, &
-                        z => radial(i,j)%z &
+                        x => radial(i, j)%x, &
+                        y => radial(i, j)%y, &
+                        z => radial(i, j)%z &
                         )
-                        ue(i,j) = (ONE + x * y) * exp(z)
-                        rhs(i,j) = -(x * y * ((z**2) + SIX * (z + ONE)) + z*(z + TWO)) * exp(z)
+                        ue(i, j) = (ONE + x * y) * exp(z)
+                        rhs(i, j) = -(x * y * ((z**2) + SIX * (z + ONE)) + z*(z + TWO)) * exp(z)
                     end associate
                 end do
             end do
@@ -168,11 +168,11 @@ contains
                 write( stdout, '(a)') ''
                 write( stdout, '(a)') '     grid type = '//sphere_type%grid%grid_type
                 write( stdout, '(a)') '     Helmholtz approximation on a ten degree grid'
-                write( stdout, '(2(a,i3))') '     nlat = ', NLATS,' nlon = ', NLONS
+                write( stdout, '(2(a, i3))') '     nlat = ', NLATS, ' nlon = ', NLONS
                 write( stdout, '(a)') '     Previous 64 bit floating point arithmetic result '
                 write( stdout, '(a)') error_previous_platform
                 write( stdout, '(a)') '     The output from your computer is: '
-                write( stdout, '(a,1pe15.6/)') '     discretization error = ', err2
+                write( stdout, '(a, 1pe15.6/)') '     discretization error = ', err2
             end associate
         end associate
 

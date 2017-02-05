@@ -93,7 +93,7 @@
 !                 equator. the synthesis is performed on the northern
 !                 hemisphere only.  i.e., if nlat is odd the synthesis
 !                 is performed on the arrays v(i, j), w(i, j) for 
-!                 i=1, ...,(nlat+1)/2 and j=1, ..., nlon. if nlat is
+!                 i=1, ..., (nlat+1)/2 and j=1, ..., nlon. if nlat is
 !                 even the synthesis is performed on the the arrays
 !                 v(i, j), w(i, j) for i=1, ..., nlat/2 and j=1, ..., nlon.
 !
@@ -101,7 +101,7 @@
 !                 equator. the synthesis is performed on the northern
 !                 hemisphere only.  i.e., if nlat is odd the synthesis
 !                 is performed on the arrays v(i, j), w(i, j) for 
-!                 i=1, ...,(nlat+1)/2 and j=1, ..., nlon. if nlat is
+!                 i=1, ..., (nlat+1)/2 and j=1, ..., nlon. if nlat is
 !                 even the synthesis is performed on the the arrays
 !                 v(i, j), w(i, j) for i=1, ..., nlat/2 and j=1, ..., nlon.
 !                 the curl of (v, w) is zero. that is, 
@@ -112,7 +112,7 @@
 !                 equator. the synthesis is performed on the northern
 !                 hemisphere only.  i.e., if nlat is odd the synthesis
 !                 is performed on the arrays v(i, j), w(i, j) for 
-!                 i=1, ...,(nlat+1)/2 and j=1, ..., nlon. if nlat is
+!                 i=1, ..., (nlat+1)/2 and j=1, ..., nlon. if nlat is
 !                 even the synthesis is performed on the the arrays
 !                 v(i, j), w(i, j) for i=1, ..., nlat/2 and j=1, ..., nlon.
 !                 the divergence of (v, w) is zero. i.e., 
@@ -123,7 +123,7 @@
 !                 equator. the synthesis is performed on the northern
 !                 hemisphere only.  i.e., if nlat is odd the synthesis
 !                 is performed on the arrays v(i, j), w(i, j) for 
-!                 i=1, ...,(nlat+1)/2 and j=1, ..., nlon. if nlat is
+!                 i=1, ..., (nlat+1)/2 and j=1, ..., nlon. if nlat is
 !                 even the synthesis is performed on the the arrays
 !                 v(i, j), w(i, j) for i=1, ..., nlat/2 and j=1, ..., nlon.
 !
@@ -131,7 +131,7 @@
 !                 equator. the synthesis is performed on the northern
 !                 hemisphere only.  i.e., if nlat is odd the synthesis
 !                 is performed on the arrays v(i, j), w(i, j) for 
-!                 i=1, ...,(nlat+1)/2 and j=1, ..., nlon. if nlat is
+!                 i=1, ..., (nlat+1)/2 and j=1, ..., nlon. if nlat is
 !                 even the synthesis is performed on the the arrays
 !                 v(i, j), w(i, j) for i=1, ..., nlat/2 and j=1, ..., nlon.
 !                 the curl of (v, w) is zero. that is, 
@@ -142,7 +142,7 @@
 !                 equator. the synthesis is performed on the northern
 !                 hemisphere only.  i.e., if nlat is odd the synthesis
 !                 is performed on the arrays v(i, j), w(i, j) for 
-!                 i=1, ...,(nlat+1)/2 and j=1, ..., nlon. if nlat is
+!                 i=1, ..., (nlat+1)/2 and j=1, ..., nlon. if nlat is
 !                 even the synthesis is performed on the the arrays
 !                 v(i, j), w(i, j) for i=1, ..., nlat/2 and j=1, ..., nlon.
 !                 the divergence of (v, w) is zero. i.e., 
@@ -160,9 +160,9 @@
 !            dimensional.
 !
 !     idvw   the first dimension of the arrays v, w as it appears in
-!            the program that calls vhsec. if ityp .le. 2 then idvw
-!            must be at least nlat.  if ityp .gt. 2 and nlat is
-!            even then idvw must be at least nlat/2. if ityp .gt. 2
+!            the program that calls vhsec. if ityp <= 2 then idvw
+!            must be at least nlat.  if ityp > 2 and nlat is
+!            even then idvw must be at least nlat/2. if ityp > 2
 !            and nlat is odd then idvw must be at least(nlat+1)/2.
 !
 !     jdvw   the second dimension of the arrays v, w as it appears in
@@ -211,11 +211,11 @@
 !               l2 = nlat/2        if nlat is even or
 !               l2 =(nlat+1)/2    if nlat is odd
 !
-!            if ityp .le. 2 then lwork must be at least
+!            if ityp <= 2 then lwork must be at least
 !
 !                    nlat*(2*nt*nlon+max(6*l2, nlon))
 !
-!            if ityp .gt. 2 then lwork must be at least
+!            if ityp > 2 then lwork must be at least
 !
 !                    l2*(2*nt*nlon+max(6*nlat, nlon))
 !

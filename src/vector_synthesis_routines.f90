@@ -169,7 +169,7 @@ module vector_synthesis_routines
             integer(ip), intent(out) :: ierror
         end subroutine vhsgci
 
-        module subroutine vhsgsi(nlat,nlon,wvhsgs,lvhsgs,dwork,ldwork,ierror)
+        module subroutine vhsgsi(nlat, nlon, wvhsgs, lvhsgs, dwork, ldwork, ierror)
 
             ! Dummy arguments
             integer(ip), intent(in)  :: nlat

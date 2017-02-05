@@ -171,9 +171,9 @@
 !            are defined above at the input parameter ityp.
 !
 !     idvw   the first dimension of the arrays v, w as it appears in
-!            the program that calls vhagc. if ityp .le. 2 then idvw
-!            must be at least nlat.  if ityp .gt. 2 and nlat is
-!            even then idvw must be at least nlat/2. if ityp .gt. 2
+!            the program that calls vhagc. if ityp <= 2 then idvw
+!            must be at least nlat.  if ityp > 2 and nlat is
+!            even then idvw must be at least nlat/2. if ityp > 2
 !            and nlat is odd then idvw must be at least (nlat+1)/2.
 !
 !     jdvw   the second dimension of the arrays v, w as it appears in
@@ -217,11 +217,11 @@
 !               l2 = nlat/2        if nlat is even or
 !               l2 = (nlat+1)/2    if nlat is odd
 !
-!            if ityp .le. 2 then lwork must be at least
+!            if ityp <= 2 then lwork must be at least
 !
 !               2*nlat*(2*nlon*nt+3*l2)
 !
-!            if ityp .gt. 2 then lwork must be at least
+!            if ityp > 2 then lwork must be at least
 !
 !               2*l2*(2*nlon*nt+3*nlat)
 !
@@ -335,10 +335,10 @@ contains
         real(wp),    intent(in)  :: w(idvw, jdvw, nt)
         integer(ip), intent(in)  :: idvw
         integer(ip), intent(in)  :: jdvw
-        real(wp),    intent(out) :: br(mdab,ndab,nt)
-        real(wp),    intent(out) :: bi(mdab, ndab,nt)
-        real(wp),    intent(out) :: cr(mdab,ndab,nt)
-        real(wp),    intent(out) :: ci(mdab, ndab,nt)
+        real(wp),    intent(out) :: br(mdab, ndab, nt)
+        real(wp),    intent(out) :: bi(mdab, ndab, nt)
+        real(wp),    intent(out) :: cr(mdab, ndab, nt)
+        real(wp),    intent(out) :: ci(mdab, ndab, nt)
         integer(ip), intent(in)  :: mdab
         integer(ip), intent(in)  :: ndab
         real(wp),    intent(in)  :: wvhagc(lvhagc)

@@ -37,9 +37,9 @@
 !     a program for testing all vector analysis and synthesis subroutines
 !
 !     (1) first a scalar stream function and a scalar velocity potential function
-!         are set in st,sv by restricting polys in x,y,z to the sphere surface
+!         are set in st, sv by restricting polys in x, y, z to the sphere surface
 !
-!     (2) the vector vield (v,w) is set by analytically differenting the scalar fields in (1)
+!     (2) the vector vield (v, w) is set by analytically differenting the scalar fields in (1)
 !         using the standard formula relating a vector field and the stream and velocity
 !         potential scalar fields in colatitude X longitude spherical coordinates
 !
@@ -47,13 +47,13 @@
 !
 !          w =  1/sin(theta)*d(sv)/dphi + d(st)/dtheta
 !
-!     (3) a vector analysis is performed on (v,w)
+!     (3) a vector analysis is performed on (v, w)
 !
 !     (4) a vector synthesis is performed using coeffs from (3)
 !
 !     (5) the synthesized vector field from (4) is compared with the vector field from (2)
 !
-!     note:  vhaec,vhaes,vhagc,vhags,vhsec,vhses,vhsgc,vhsgs are all tested!
+!     note:  vhaec, vhaes, vhagc, vhags, vhsec, vhses, vhsgc, vhsgs are all tested!
 !
 program tvha
     use spherepack_library
@@ -117,16 +117,16 @@ program tvha
     !
     !     set dimensions with parameter statements
     !
-    parameter(nnlat= 25,nnlon= 19, nnt = 2)
-    parameter (lleng= 5*nnlat*nnlat*nnlon,llsav= 5*nnlat*nnlat*nnlon)
+    parameter(nnlat= 25, nnlon= 19, nnt = 2)
+    parameter (lleng= 5*nnlat*nnlat*nnlon, llsav= 5*nnlat*nnlat*nnlon)
     parameter (lldwork = 4*nnlat*nnlat )
     real dwork(lldwork)
-    dimension work(lleng),wsave(llsav)
-    dimension br(nnlat,nnlat,nnt),bi(nnlat,nnlat,nnt)
-    dimension cr(nnlat,nnlat,nnt),ci(nnlat,nnlat,nnt)
-    dimension st(nnlat,nnlon,nnt),sv(nnlat,nnlon,nnt)
-    dimension thetag(nnlat),dtheta(nnlat),dwts(nnlat)
-    dimension v(nnlat,nnlon,nnt),w(nnlat,nnlon,nnt)
+    dimension work(lleng), wsave(llsav)
+    dimension br(nnlat, nnlat, nnt), bi(nnlat, nnlat, nnt)
+    dimension cr(nnlat, nnlat, nnt), ci(nnlat, nnlat, nnt)
+    dimension st(nnlat, nnlon, nnt), sv(nnlat, nnlon, nnt)
+    dimension thetag(nnlat), dtheta(nnlat), dwts(nnlat)
+    dimension v(nnlat, nnlon, nnt), w(nnlat, nnlon, nnt)
     real dtheta, dwts
     !
     !     set dimension variables
@@ -136,9 +136,9 @@ program tvha
     lwork = lleng
     lsave = llsav
     nt = nnt
-    call iout(nlat,"nlat")
-    call iout(nlon,"nlon")
-    call iout(nt,"  nt")
+    call iout(nlat, "nlat")
+    call iout(nlon, "nlon")
+    call iout(nt, "  nt")
     ityp = 0
     !
     !     set equally spaced colatitude and longitude increments
@@ -150,38 +150,38 @@ program tvha
     !
     ldwork = lldwork
     call compute_gaussian_latitudes_and_weights(nlat, dtheta, dwts, ier)
-    do  i=1,nlat
+    do  i=1, nlat
         thetag(i) = dtheta(i)
     end do
     call name("gaqd")
-    call iout(ier," ier")
-    call vecout(thetag,"thtg",nlat)
+    call iout(ier, " ier")
+    call vecout(thetag, "thtg", nlat)
     !
     !     test all analysis and synthesis subroutines
     !
-    do icase=1,4
+    do icase=1, 4
         !
-        !     icase=1 test vhaec,vhsec
-        !     icase=2 test vhaes,vhses
-        !     icase=3 test vhagc,vhsgc
-        !     icase=4 test vhags,vhsgs
+        !     icase=1 test vhaec, vhsec
+        !     icase=2 test vhaes, vhses
+        !     icase=3 test vhagc, vhsgc
+        !     icase=4 test vhags, vhsgs
         !
         call name("****")
         call name("****")
-        call iout(icase,"icas")
+        call iout(icase, "icas")
         !
         !
-        !     set scalar stream and velocity potential fields as polys in x,y,z
-        !     and then set v,w from st,sv scalar fields
+        !     set scalar stream and velocity potential fields as polys in x, y, z
+        !     and then set v, w from st, sv scalar fields
         !
-        do k=1,nt
-            do j=1,nlon
+        do k=1, nt
+            do j=1, nlon
                 phi = (j-1)*dphi
                 sinp = sin(phi)
                 cosp = cos(phi)
-                do i=1,nlat
+                do i=1, nlat
                     theta = (i-1)*dlat
-                    ! if (icase.gt.2) theta=thetag(i)
+                    ! if (icase>2) theta=thetag(i)
                     if (icase==3 .or. icase==4) theta = thetag(i)
                     cost = cos(theta)
                     sint = sin(theta)
@@ -195,17 +195,17 @@ program tvha
                     dzdt = -sint
                     dzdp = 0.0
                     if (k==1) then
-                        st(i,j,k) = x*y
-                        sv(i,j,k) = y*z
+                        st(i, j, k) = x*y
+                        sv(i, j, k) = y*z
                         dstdt = x*dydt+y*dxdt
                         dstdp = x*dydp+y*dxdp
                         dsvdt = y*dzdt+z*dydt
                         dsvdp = y*dzdp+z*dydp
-                        v(i,j,k) = -(cosp*dydp+sinp*dxdp) + dsvdt
-                        w(i,j,k) = sinp*dzdp + cost*cosp + dstdt
+                        v(i, j, k) = -(cosp*dydp+sinp*dxdp) + dsvdt
+                        w(i, j, k) = sinp*dzdp + cost*cosp + dstdt
                     else if (k==2) then
-                        st(i,j,k) = x*z
-                        sv(i,j,k) = x*y
+                        st(i, j, k) = x*z
+                        sv(i, j, k) = x*y
                         dstdp = x*dzdp+z*dxdp
                         dstdt = x*dzdt+z*dxdt
                         dsvdp = x*dydp+y*dxdp
@@ -215,119 +215,119 @@ program tvha
                         !
                         !          w =  1/sin(theta)*d(sv)/dphi + d(st)/dtheta
                         !
-                        v(i,j,k) = z*sinp + dsvdt
-                        w(i,j,k) = cosp*dydp+ sinp*dxdp + dstdt
+                        v(i, j, k) = z*sinp + dsvdt
+                        w(i, j, k) = cosp*dydp+ sinp*dxdp + dstdt
                     end if
                 end do
             end do
         end do
 
-        !     do kk=1,nt
-        !     call iout(kk,"**kk")
-        !     call aout(v(1,1,kk),"   v",nlat,nlon)
-        !     call aout(w(1,1,kk),"   w",nlat,nlon)
+        !     do kk=1, nt
+        !     call iout(kk, "**kk")
+        !     call aout(v(1, 1, kk), "   v", nlat, nlon)
+        !     call aout(w(1, 1, kk), "   w", nlat, nlon)
         !     end do
 
         if (icase==1) then
 
             call name("**ec")
 
-            call vhaeci(nlat,nlon,wsave,lsave,dwork,ldwork,ierror)
+            call vhaeci(nlat, nlon, wsave, lsave, dwork, ldwork, ierror)
             call name("vhai")
-            call iout(ierror,"ierr")
+            call iout(ierror, "ierr")
 
-            call vhaec(nlat,nlon,ityp,nt,v,w,nlat,nlon,br,bi,cr,ci,nlat, &
-                nlat,wsave,lsave,work,lwork,ierror)
+            call vhaec(nlat, nlon, ityp, nt, v, w, nlat, nlon, br, bi, cr, ci, nlat, &
+                nlat, wsave, lsave, work, lwork, ierror)
             call name("vha ")
-            call iout(ierror,"ierr")
+            call iout(ierror, "ierr")
 
-            !     call aout(br,"  br",nlat,nlat)
-            !     call aout(bi,"  bi",nlat,nlat)
-            !     call aout(cr,"  cr",nlat,nlat)
-            !     call aout(ci,"  ci",nlat,nlat)
+            !     call aout(br, "  br", nlat, nlat)
+            !     call aout(bi, "  bi", nlat, nlat)
+            !     call aout(cr, "  cr", nlat, nlat)
+            !     call aout(ci, "  ci", nlat, nlat)
 
             !
-            !     now synthesize v,w from br,bi,cr,ci and compare with original
+            !     now synthesize v, w from br, bi, cr, ci and compare with original
             !
-            call vhseci(nlat,nlon,wsave,lsave,dwork,ldwork,ierror)
+            call vhseci(nlat, nlon, wsave, lsave, dwork, ldwork, ierror)
             call name("vhsi")
-            call iout(ierror,"ierr")
+            call iout(ierror, "ierr")
 
-            call vhsec(nlat,nlon,ityp,nt,v,w,nlat,nlon,br,bi,cr,ci,nlat, &
-                nlat,wsave,lsave,work,lwork,ierror)
+            call vhsec(nlat, nlon, ityp, nt, v, w, nlat, nlon, br, bi, cr, ci, nlat, &
+                nlat, wsave, lsave, work, lwork, ierror)
             call name("vhs ")
-            call iout(ierror,"ierr")
+            call iout(ierror, "ierr")
 
-        !     call aout(v,"   v",nlat,nlon)
-        !     call aout(w,"   w",nlat,nlon)
+        !     call aout(v, "   v", nlat, nlon)
+        !     call aout(w, "   w", nlat, nlon)
 
         else if (icase==2) then
 
             call name("**es")
 
-            call vhaesi(nlat,nlon,wsave,lsave,work,lwork,dwork,ldwork,ierror)
+            call vhaesi(nlat, nlon, wsave, lsave, work, lwork, dwork, ldwork, ierror)
             call name("vhai")
-            call iout(ierror,"ierr")
+            call iout(ierror, "ierr")
 
-            call vhaes(nlat,nlon,ityp,nt,v,w,nlat,nlon,br,bi,cr,ci,nlat, &
-                nlat,wsave,lsave,work,lwork,ierror)
+            call vhaes(nlat, nlon, ityp, nt, v, w, nlat, nlon, br, bi, cr, ci, nlat, &
+                nlat, wsave, lsave, work, lwork, ierror)
 
             call name("vha ")
-            call iout(ierror,"ierr")
+            call iout(ierror, "ierr")
 
-            !     call aout(br,"  br",nlat,nlat)
-            !     call aout(bi,"  bi",nlat,nlat)
-            !     call aout(cr,"  cr",nlat,nlat)
-            !     call aout(ci,"  ci",nlat,nlat)
+            !     call aout(br, "  br", nlat, nlat)
+            !     call aout(bi, "  bi", nlat, nlat)
+            !     call aout(cr, "  cr", nlat, nlat)
+            !     call aout(ci, "  ci", nlat, nlat)
 
             !
-            !     now synthesize v,w from br,bi,cr,ci and compare with original
+            !     now synthesize v, w from br, bi, cr, ci and compare with original
             !
-            call vhsesi(nlat,nlon,wsave,lsave,work,lwork,dwork,ldwork,ierror)
+            call vhsesi(nlat, nlon, wsave, lsave, work, lwork, dwork, ldwork, ierror)
             call name("vhsi")
-            call iout(ierror,"ierr")
+            call iout(ierror, "ierr")
 
-            call vhses(nlat,nlon,ityp,nt,v,w,nlat,nlon,br,bi,cr,ci,nlat, &
-                nlat,wsave,lsave,work,lwork,ierror)
+            call vhses(nlat, nlon, ityp, nt, v, w, nlat, nlon, br, bi, cr, ci, nlat, &
+                nlat, wsave, lsave, work, lwork, ierror)
 
             call name("vhs ")
-            call iout(ierror,"ierr")
+            call iout(ierror, "ierr")
 
         else if (icase==3) then
 
             call name("**gc")
 
             call name("vhgi")
-            call iout(nlat,"nlat")
+            call iout(nlat, "nlat")
 
-            call vhagci(nlat,nlon,wsave,lsave,dwork,ldwork,ierror)
+            call vhagci(nlat, nlon, wsave, lsave, dwork, ldwork, ierror)
             call name("vhai")
-            call iout(ierror,"ierr")
+            call iout(ierror, "ierr")
 
-            call vhagc(nlat,nlon,ityp,nt,v,w,nlat,nlon,br,bi,cr,ci,nlat, &
-                nlat,wsave,lsave,work,lwork,ierror)
+            call vhagc(nlat, nlon, ityp, nt, v, w, nlat, nlon, br, bi, cr, ci, nlat, &
+                nlat, wsave, lsave, work, lwork, ierror)
             call name("vha ")
-            call iout(ierror,"ierr")
+            call iout(ierror, "ierr")
 
-            !     call aout(br,"  br",nlat,nlat)
-            !     call aout(bi,"  bi",nlat,nlat)
-            !     call aout(cr,"  cr",nlat,nlat)
-            !     call aout(ci,"  ci",nlat,nlat)
+            !     call aout(br, "  br", nlat, nlat)
+            !     call aout(bi, "  bi", nlat, nlat)
+            !     call aout(cr, "  cr", nlat, nlat)
+            !     call aout(ci, "  ci", nlat, nlat)
 
             !
-            !     now synthesize v,w from br,bi,cr,ci and compare with original
+            !     now synthesize v, w from br, bi, cr, ci and compare with original
             !
-            call vhsgci(nlat,nlon,wsave,lsave,dwork,ldwork,ierror)
+            call vhsgci(nlat, nlon, wsave, lsave, dwork, ldwork, ierror)
             call name("vhsi")
-            call iout(ierror,"ierr")
+            call iout(ierror, "ierr")
 
-            call vhsgc(nlat,nlon,ityp,nt,v,w,nlat,nlon,br,bi,cr,ci,nlat, &
-                nlat,wsave,lsave,work,lwork,ierror)
+            call vhsgc(nlat, nlon, ityp, nt, v, w, nlat, nlon, br, bi, cr, ci, nlat, &
+                nlat, wsave, lsave, work, lwork, ierror)
             call name("vhs ")
-            call iout(ierror,"ierr")
+            call iout(ierror, "ierr")
 
-        !     call aout(v,"   v",nlat,nlon)
-        !     call aout(w,"   w",nlat,nlon)
+        !     call aout(v, "   v", nlat, nlon)
+        !     call aout(w, "   w", nlat, nlon)
         !     call exit(0)
 
         !
@@ -338,53 +338,53 @@ program tvha
 
             call name("**gs")
 
-            call vhagsi(nlat,nlon,wsave,lsave,dwork,ldwork,ierror)
+            call vhagsi(nlat, nlon, wsave, lsave, dwork, ldwork, ierror)
             call name("vhai")
-            call iout(ierror,"ierr")
+            call iout(ierror, "ierr")
 
-            call vhags(nlat,nlon,ityp,nt,v,w,nlat,nlon,br,bi,cr,ci,nlat, &
-                nlat,wsave,lsave,work,lwork,ierror)
+            call vhags(nlat, nlon, ityp, nt, v, w, nlat, nlon, br, bi, cr, ci, nlat, &
+                nlat, wsave, lsave, work, lwork, ierror)
             call name("vha ")
-            call iout(ierror,"ierr")
+            call iout(ierror, "ierr")
 
-            !     call aout(br,"  br",nlat,nlat)
-            !     call aout(bi,"  bi",nlat,nlat)
-            !     call aout(cr,"  cr",nlat,nlat)
-            !     call aout(ci,"  ci",nlat,nlat)
+            !     call aout(br, "  br", nlat, nlat)
+            !     call aout(bi, "  bi", nlat, nlat)
+            !     call aout(cr, "  cr", nlat, nlat)
+            !     call aout(ci, "  ci", nlat, nlat)
 
 
             !
-            !     now synthesize v,w from br,bi,cr,ci and compare with original
+            !     now synthesize v, w from br, bi, cr, ci and compare with original
             !
-            call vhsgsi(nlat,nlon,wsave,lsave,dwork,ldwork,ierror)
+            call vhsgsi(nlat, nlon, wsave, lsave, dwork, ldwork, ierror)
             call name("vhsi")
-            call iout(ierror,"ierr")
+            call iout(ierror, "ierr")
 
-            call vhsgs(nlat,nlon,ityp,nt,v,w,nlat,nlon,br,bi,cr,ci,nlat, &
-                nlat,wsave,lsave,work,lwork,ierror)
+            call vhsgs(nlat, nlon, ityp, nt, v, w, nlat, nlon, br, bi, cr, ci, nlat, &
+                nlat, wsave, lsave, work, lwork, ierror)
             call name("vhs ")
-            call iout(ierror,"ierr")
+            call iout(ierror, "ierr")
 
         end if
 
 
-        !     do kk=1,nt
-        !     call iout(kk,"**kk")
-        !     call aout(v(1,1,kk),"   v",nlat,nlon)
-        !     call aout(w(1,1,kk),"   w",nlat,nlon)
+        !     do kk=1, nt
+        !     call iout(kk, "**kk")
+        !     call aout(v(1, 1, kk), "   v", nlat, nlon)
+        !     call aout(w(1, 1, kk), "   w", nlat, nlon)
         !     end do
 
         !
-        !     compute "error" in v,w
+        !     compute "error" in v, w
         !
         err2v = 0.0
         err2w = 0.0
-        do k=1,nt
-            do j=1,nlon
+        do k=1, nt
+            do j=1, nlon
                 phi = (j-1)*dphi
                 sinp = sin(phi)
                 cosp = cos(phi)
-                do i=1,nlat
+                do i=1, nlat
                     theta = (i-1)*dlat
                     if (icase>2) theta=thetag(i)
                     cost = cos(theta)
@@ -399,8 +399,8 @@ program tvha
                     dzdt = -sint
                     dzdp = 0.0
                     if (k==1) then
-                        st(i,j,k) = x*y
-                        sv(i,j,k) = y*z
+                        st(i, j, k) = x*y
+                        sv(i, j, k) = y*z
                         dstdt = x*dydt+y*dxdt
                         dstdp = x*dydp+y*dxdp
                         dsvdt = y*dzdt+z*dydt
@@ -408,8 +408,8 @@ program tvha
                         ve = -(cosp*dydp+sinp*dxdp) + dsvdt
                         we = sinp*dzdp + cost*cosp + dstdt
                     else if (k==2) then
-                        st(i,j,k) = x*z
-                        sv(i,j,k) = x*y
+                        st(i, j, k) = x*z
+                        sv(i, j, k) = x*y
                         dstdp = x*dzdp+z*dxdp
                         dstdt = x*dzdt+z*dxdt
                         dsvdp =  x*dydp+y*dxdp
@@ -417,18 +417,18 @@ program tvha
                         ve = z*sinp + dsvdt
                         we = cosp*dydp+ sinp*dxdp + dstdt
                     end if
-                    err2v = err2v + (v(i,j,k) - ve)**2
-                    err2w = err2w + (w(i,j,k) - we)**2
+                    err2v = err2v + (v(i, j, k) - ve)**2
+                    err2w = err2w + (w(i, j, k) - we)**2
                 end do
             end do
         end do
         !
-        !     set and print least squares error in v,w
+        !     set and print least squares error in v, w
         !
         err2v = sqrt(err2v/(nt*nlat*nlon))
         err2w = sqrt(err2w/(nt*nlat*nlon))
-        call vout(err2v,"errv")
-        call vout(err2w,"errw")
+        call vout(err2v, "errv")
+        call vout(err2w, "errw")
     !
     !     end of icase loop
     !

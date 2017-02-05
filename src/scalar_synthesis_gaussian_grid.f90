@@ -304,11 +304,11 @@ contains
         integer(ip), intent(in)  :: nlon
         integer(ip), intent(in)  :: mode
         integer(ip), intent(in)  :: nt
-        real(wp),    intent(out) :: g(idg,jdg,nt)
+        real(wp),    intent(out) :: g(idg, jdg, nt)
         integer(ip), intent(in)  :: idg
         integer(ip), intent(in)  :: jdg
-        real(wp),    intent(in)  :: a(mdab,ndab,nt)
-        real(wp),    intent(in)  :: b(mdab,ndab,nt)
+        real(wp),    intent(in)  :: a(mdab, ndab, nt)
+        real(wp),    intent(in)  :: b(mdab, ndab, nt)
         integer(ip), intent(in)  :: mdab
         integer(ip), intent(in)  :: ndab
         real(wp),    intent(in)  :: wshsgc(lshsgc)
@@ -525,7 +525,7 @@ contains
                 !     compute pmn for all i and n=m, ..., l-1
                 call sphere_aux%compute_legendre_polys_for_gaussian_grids(mode, l, nlat, m, w, pmn, km)
                 do k=1, nt
-                    !     for n-m even store (g(i, p, k)+g(nlat-i+1, p, k))/2 in g(i, p, k) p=2*m,
+                    !     for n-m even store (g(i, p, k)+g(nlat-i+1, p, k))/2 in g(i, p, k) p=2*m, 
                     !     for i=1, ..., late
                     do np1=mp1, nlat, 2
                         do i=1, late
@@ -675,7 +675,7 @@ contains
         type(SpherepackAux) :: sphere_aux
 
         !     compute the nlat  gaussian points and weights, the
-        !     m=0, 1 legendre polys for gaussian points and all n,
+        !     m=0, 1 legendre polys for gaussian points and all n, 
         !     and the legendre recursion coefficients
         !     define index function used in storing
         !     arrays for recursion coefficients (functions of (m, n))
@@ -683,9 +683,9 @@ contains
         !     the pairs (m, n) map to [1, 2, ..., indx(l-1, l-1)] with no
         !     "holes" as m varies from 2 to n and n varies from 2 to l-1.
         !     (m=0, 1 are set from p0n, p1n for all n)
-        !     define for 2.le.n.le.l-1
+        !     define for 2<=n<=l-1
         !indx(m, n) = (n-1)*(n-2)/2+m-1
-        !     define index function for l.le.n.le.nlat
+        !     define index function for l<=n<=nlat
         !imndx(m, n) = l*(l-1)/2+(n-l-1)*(l-1)+m-1
         !     preset quantites for fourier transform
         call sphere_aux%hfft%initialize(nlon, wfft)
@@ -710,7 +710,7 @@ contains
             call sphere_aux%compute_legendre_polys_from_fourier_coeff(m, n, dtheta(i), work, pb)
             p0n(1, i) = pb
         end do
-        !     compute p0n, p1n for all theta(i) when n.gt.0
+        !     compute p0n, p1n for all theta(i) when n>0
         do np1=2, nlat
             n = np1-1
             m = 0
@@ -728,7 +728,7 @@ contains
             end do
         end do
         !     compute and store swarztrauber recursion coefficients
-        !     for 2.le.m.le.n and 2.le.n.le.nlat in abel, bbel, cbel
+        !     for 2<=m<=n and 2<=n<=nlat in abel, bbel, cbel
         do n=2, nlat
             mlim = min(n, l)
             do m=2, mlim

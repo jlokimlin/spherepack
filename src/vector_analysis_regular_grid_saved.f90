@@ -7,7 +7,7 @@
 !     *                                                               *
 !     *                      all rights reserved                      *
 !     *                                                               *
-!     *                      SPHEREPACK                               *
+!     *                          Spherepack                           *
 !     *                                                               *
 !     *       A Package of Fortran Subroutines and Programs           *
 !     *                                                               *
@@ -29,310 +29,227 @@
 !     *                                                               *
 !     * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !
-!
-!
-! ... file vhaes.f90
-!
-!     this file contains code and documentation for subroutines
-!     vhaes and vhaesi
-!
-! ... files which must be loaded with vhaes.f90
-!
-!     type_SpherepackAux.f90, type_RealPeriodicFastFourierTransform.f90
-!
-!                                                                              
-!     subroutine vhaes(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci,
-!    +                 mdab, ndab, wvhaes, lvhaes, work, lwork, ierror)
-!
-!     subroutine vhaes performs the vector spherical harmonic analysis
-!     on the vector field (v, w) and stores the result in the arrays
-!     br, bi, cr, and ci. v(i, j) and w(i, j) are the colatitudinal
-!     (measured from the north pole) and east longitudinal components
-!     respectively, located at colatitude theta(i) = (i-1)*pi/(nlat-1)
-!     and longitude phi(j) = (j-1)*2*pi/nlon. the spectral
-!     representation of (v, w) is given at output parameters v, w in
-!     subroutine vhses.  
-!
-!     input parameters
-!
-!     nlat   the number of colatitudes on the full sphere including the
-!            poles. for example, nlat = 37 for a five degree grid.
-!            nlat determines the grid increment in colatitude as
-!            pi/(nlat-1).  if nlat is odd the equator is located at
-!            grid point i=(nlat+1)/2. if nlat is even the equator is
-!            located half way between points i=nlat/2 and i=nlat/2+1.
-!            nlat must be at least 3. note: on the half sphere, the
-!            number of grid points in the colatitudinal direction is
-!            nlat/2 if nlat is even or (nlat+1)/2 if nlat is odd.
-!
-!     nlon   the number of distinct londitude points.  nlon determines
-!            the grid increment in longitude as 2*pi/nlon. for example
-!            nlon = 72 for a five degree grid. nlon must be greater
-!            than zero. the axisymmetric case corresponds to nlon=1.
-!            the efficiency of the computation is improved when nlon
-!            is a product of small prime numbers.
-!
-!     ityp   = 0  no symmetries exist about the equator. the analysis
-!                 is performed on the entire sphere.  i.e. on the
-!                 arrays v(i, j), w(i, j) for i=1, ..., nlat and
-!                 j=1, ..., nlon.
-!
-!            = 1  no symmetries exist about the equator. the analysis
-!                 is performed on the entire sphere.  i.e. on the
-!                 arrays v(i, j), w(i, j) for i=1, ..., nlat and
-!                 j=1, ..., nlon. the curl of (v, w) is zero. that is,
-!                 (d/dtheta (sin(theta) w) - dv/dphi)/sin(theta) = 0. 
-!                 the coefficients cr and ci are zero.
-!
-!            = 2  no symmetries exist about the equator. the analysis
-!                 is performed on the entire sphere.  i.e. on the
-!                 arrays v(i, j), w(i, j) for i=1, ..., nlat and
-!                 j=1, ..., nlon. the divergence of (v, w) is zero. i.e.,
-!                 (d/dtheta (sin(theta) v) + dw/dphi)/sin(theta) = 0. 
-!                 the coefficients br and bi are zero.
-!
-!            = 3  v is symmetric and w is antisymmetric about the 
-!                 equator. the analysis is performed on the northern
-!                 hemisphere only.  i.e., if nlat is odd the analysis
-!                 is performed on the arrays v(i, j), w(i, j) for
-!                 i=1, ..., (nlat+1)/2 and j=1, ..., nlon. if nlat is
-!                 even the analysis is performed on the the arrays
-!                 v(i, j), w(i, j) for i=1, ..., nlat/2 and j=1, ..., nlon.
-!
-!            = 4  v is symmetric and w is antisymmetric about the 
-!                 equator. the analysis is performed on the northern
-!                 hemisphere only.  i.e., if nlat is odd the analysis
-!                 is performed on the arrays v(i, j), w(i, j) for
-!                 i=1, ..., (nlat+1)/2 and j=1, ..., nlon. if nlat is
-!                 even the analysis is performed on the the arrays
-!                 v(i, j), w(i, j) for i=1, ..., nlat/2 and j=1, ..., nlon.
-!                 the curl of (v, w) is zero. that is,
-!                 (d/dtheta (sin(theta) w) - dv/dphi)/sin(theta) = 0. 
-!                 the coefficients cr and ci are zero.
-!
-!            = 5  v is symmetric and w is antisymmetric about the 
-!                 equator. the analysis is performed on the northern
-!                 hemisphere only.  i.e., if nlat is odd the analysis
-!                 is performed on the arrays v(i, j), w(i, j) for
-!                 i=1, ..., (nlat+1)/2 and j=1, ..., nlon. if nlat is
-!                 even the analysis is performed on the the arrays
-!                 v(i, j), w(i, j) for i=1, ..., nlat/2 and j=1, ..., nlon.
-!                 the divergence of (v, w) is zero. i.e.,
-!                 (d/dtheta (sin(theta) v) + dw/dphi)/sin(theta) = 0. 
-!                 the coefficients br and bi are zero.
-!
-!            = 6  v is antisymmetric and w is symmetric about the 
-!                 equator. the analysis is performed on the northern
-!                 hemisphere only.  i.e., if nlat is odd the analysis
-!                 is performed on the arrays v(i, j), w(i, j) for
-!                 i=1, ..., (nlat+1)/2 and j=1, ..., nlon. if nlat is
-!                 even the analysis is performed on the the arrays
-!                 v(i, j), w(i, j) for i=1, ..., nlat/2 and j=1, ..., nlon.
-!
-!            = 7  v is antisymmetric and w is symmetric about the 
-!                 equator. the analysis is performed on the northern
-!                 hemisphere only.  i.e., if nlat is odd the analysis
-!                 is performed on the arrays v(i, j), w(i, j) for
-!                 i=1, ..., (nlat+1)/2 and j=1, ..., nlon. if nlat is
-!                 even the analysis is performed on the the arrays
-!                 v(i, j), w(i, j) for i=1, ..., nlat/2 and j=1, ..., nlon.
-!                 the curl of (v, w) is zero. that is,
-!                 (d/dtheta (sin(theta) w) - dv/dphi)/sin(theta) = 0. 
-!                 the coefficients cr and ci are zero.
-!
-!            = 8  v is antisymmetric and w is symmetric about the 
-!                 equator. the analysis is performed on the northern
-!                 hemisphere only.  i.e., if nlat is odd the analysis
-!                 is performed on the arrays v(i, j), w(i, j) for
-!                 i=1, ..., (nlat+1)/2 and j=1, ..., nlon. if nlat is
-!                 even the analysis is performed on the the arrays
-!                 v(i, j), w(i, j) for i=1, ..., nlat/2 and j=1, ..., nlon.
-!                 the divergence of (v, w) is zero. i.e.,
-!                 (d/dtheta (sin(theta) v) + dw/dphi)/sin(theta) = 0. 
-!                 the coefficients br and bi are zero.
-!
-!
-!     nt     the number of analyses.  in the program that calls vhaes,
-!            the arrays v, w, br, bi, cr, and ci can be three dimensional
-!            in which case multiple analyses will be performed.
-!            the third index is the analysis index which assumes the 
-!            values k=1, ..., nt.  for a single analysis set nt=1. the
-!            discription of the remaining parameters is simplified
-!            by assuming that nt=1 or that all the arrays are two
-!            dimensional.
-!
-!     v, w    two or three dimensional arrays (see input parameter nt)
-!            that contain the vector function to be analyzed.
-!            v is the colatitudnal component and w is the east 
-!            longitudinal component. v(i, j), w(i, j) contain the
-!            components at colatitude theta(i) = (i-1)*pi/(nlat-1)
-!            and longitude phi(j) = (j-1)*2*pi/nlon. the index ranges
-!            are defined above at the input parameter ityp.
-!
-!     idvw   the first dimension of the arrays v, w as it appears in
-!            the program that calls vhaes. if ityp .le. 2 then idvw
-!            must be at least nlat.  if ityp .gt. 2 and nlat is
-!            even then idvw must be at least nlat/2. if ityp .gt. 2
-!            and nlat is odd then idvw must be at least (nlat+1)/2.
-!
-!     jdvw   the second dimension of the arrays v, w as it appears in
-!            the program that calls vhaes. jdvw must be at least nlon.
-!
-!     mdab   the first dimension of the arrays br, bi, cr, and ci as it
-!            appears in the program that calls vhaes. mdab must be at
-!            least min(nlat, nlon/2) if nlon is even or at least
-!            min(nlat, (nlon+1)/2) if nlon is odd.
-!
-!     ndab   the second dimension of the arrays br, bi, cr, and ci as it
-!            appears in the program that calls vhaes. ndab must be at
-!            least nlat.
-!
-!     lvhaes an array which must be initialized by subroutine vhaesi.
-!            once initialized, wvhaes can be used repeatedly by vhaes
-!            as long as nlon and nlat remain unchanged.  wvhaes must
-!            not be altered between calls of vhaes.
-!
-!     lvhaes the dimension of the array wvhaes as it appears in the
-!            program that calls vhaes. define
-!
-!               l1 = min(nlat, nlon/2) if nlon is even or
-!               l1 = min(nlat, (nlon+1)/2) if nlon is odd
-!
-!            and
-!
-!               l2 = nlat/2        if nlat is even or
-!               l2 = (nlat+1)/2    if nlat is odd
-!
-!            then lvhaes must be at least
-!
-!            l1*l2(nlat+nlat-l1+1)+nlon+15
-!
-!
-!     work   a work array that does not have to be saved.
-!
-!     lwork  the dimension of the array work as it appears in the
-!            program that calls vhaes. define
-!
-!               l2 = nlat/2        if nlat is even or
-!               l2 = (nlat+1)/2    if nlat is odd
-!
-!            if ityp .le. 2 then lwork must be at least
-!
-!                       (2*nt+1)*nlat*nlon
-!
-!            if ityp .gt. 2 then lwork must be at least
-!
-!                        (2*nt+1)*l2*nlon   
-!
-!     **************************************************************
-!
-!     output parameters
-!
-!     br, bi  two or three dimensional arrays (see input parameter nt)
-!     cr, ci  that contain the vector spherical harmonic coefficients
-!            in the spectral representation of v(i, j) and w(i, j) given
-!            in the discription of subroutine vhses. br(mp1, np1),
-!            bi(mp1, np1), cr(mp1, np1), and ci(mp1, np1) are computed
-!            for mp1=1, ..., mmax and np1=mp1, ..., nlat except for np1=nlat
-!            and odd mp1. mmax=min(nlat, nlon/2) if nlon is even or
-!            mmax=min(nlat, (nlon+1)/2) if nlon is odd.
-!      
-!     ierror = 0  no errors
-!            = 1  error in the specification of nlat
-!            = 2  error in the specification of nlon
-!            = 3  error in the specification of ityp
-!            = 4  error in the specification of nt
-!            = 5  error in the specification of idvw
-!            = 6  error in the specification of jdvw
-!            = 7  error in the specification of mdab
-!            = 8  error in the specification of ndab
-!            = 9  error in the specification of lvhaes
-!            = 10 error in the specification of lwork
-!
-! ********************************************************
-!
-!     subroutine vhaesi(nlat, nlon, wvhaes, lvhaes, work, lwork, dwork,
-!    +                  ldwork, ierror)
-!
-!     subroutine vhaesi initializes the array wvhaes which can then be
-!     used repeatedly by subroutine vhaes until nlat or nlon is changed.
-!
-!     input parameters
-!
-!     nlat   the number of colatitudes on the full sphere including the
-!            poles. for example, nlat = 37 for a five degree grid.
-!            nlat determines the grid increment in colatitude as
-!            pi/(nlat-1).  if nlat is odd the equator is located at
-!            grid point i=(nlat+1)/2. if nlat is even the equator is
-!            located half way between points i=nlat/2 and i=nlat/2+1.
-!            nlat must be at least 3. note: on the half sphere, the
-!            number of grid points in the colatitudinal direction is
-!            nlat/2 if nlat is even or (nlat+1)/2 if nlat is odd.
-!
-!     nlon   the number of distinct londitude points.  nlon determines
-!            the grid increment in longitude as 2*pi/nlon. for example
-!            nlon = 72 for a five degree grid. nlon must be greater
-!            than zero. the axisymmetric case corresponds to nlon=1.
-!            the efficiency of the computation is improved when nlon
-!            is a product of small prime numbers.
-!
-!     lvhaes the dimension of the array wvhaes as it appears in the
-!            program that calls vhaes. define
-!
-!               l1 = min(nlat, nlon/2) if nlon is even or
-!               l1 = min(nlat, (nlon+1)/2) if nlon is odd
-!
-!            and
-!
-!               l2 = nlat/2        if nlat is even or
-!               l2 = (nlat+1)/2    if nlat is odd
-!
-!            then lvhaes must be at least
-!
-!               l1*l2*(nlat+nlat-l1+1)+nlon+15
-!
-!
-!     work   a work array that does not have to be saved.
-!
-!     lwork  the dimension of the array work as it appears in the
-!            program that calls vhaes. lwork must be at least
-!
-!              3*(max(l1-2, 0)*(nlat+nlat-l1-1))/2+5*l2*nlat
-!
-!     dwork  an unsaved real work space
-!
-!     ldwork the length of the array dwork as it appears in the
-!            program that calls vhaesi.  ldwork must be at least
-!            2*(nlat+1)
-!
-!
-!     **************************************************************
-!
-!     output parameters
-!
-!     wvhaes an array which is initialized for use by subroutine vhaes.
-!            once initialized, wvhaes can be used repeatedly by vhaes
-!            as long as nlat or nlon remain unchanged.  wvhaes must not
-!            be altered between calls of vhaes.
-!
-!
-!     ierror = 0  no errors
-!            = 1  error in the specification of nlat
-!            = 2  error in the specification of nlon
-!            = 3  error in the specification of lvhaes
-!            = 4  error in the specification of lwork
-!            = 5  error in the specification of ldwork
-!
+! This file contains code and documentation for subroutines
+! vhaes and vhaesi
 !
 submodule(vector_analysis_routines) vector_analysis_regular_grid_saved
 
 contains
 
+    ! Purpose:
+    !
+    !     subroutine vhaes(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
+    !                      mdab, ndab, wvhaes, lvhaes, work, lwork, ierror)
+    !
+    !     subroutine vhaes performs the vector spherical harmonic analysis
+    !     on the vector field (v, w) and stores the result in the arrays
+    !     br, bi, cr, and ci. v(i, j) and w(i, j) are the colatitudinal
+    !     (measured from the north pole) and east longitudinal components
+    !     respectively, located at colatitude theta(i) = (i-1)*pi/(nlat-1)
+    !     and longitude phi(j) = (j-1)*2*pi/nlon. the spectral
+    !     representation of (v, w) is given at output parameters v, w in
+    !     subroutine vhses.
+    !
+    !     input parameters
+    !
+    !     nlat   the number of colatitudes on the full sphere including the
+    !            poles. for example, nlat = 37 for a five degree grid.
+    !            nlat determines the grid increment in colatitude as
+    !            pi/(nlat-1).  if nlat is odd the equator is located at
+    !            grid point i=(nlat+1)/2. if nlat is even the equator is
+    !            located half way between points i=nlat/2 and i=nlat/2+1.
+    !            nlat must be at least 3. note: on the half sphere, the
+    !            number of grid points in the colatitudinal direction is
+    !            nlat/2 if nlat is even or (nlat+1)/2 if nlat is odd.
+    !
+    !     nlon   the number of distinct londitude points.  nlon determines
+    !            the grid increment in longitude as 2*pi/nlon. for example
+    !            nlon = 72 for a five degree grid. nlon must be greater
+    !            than zero. the axisymmetric case corresponds to nlon=1.
+    !            the efficiency of the computation is improved when nlon
+    !            is a product of small prime numbers.
+    !
+    !     ityp   = 0  no symmetries exist about the equator. the analysis
+    !                 is performed on the entire sphere.  i.e. on the
+    !                 arrays v(i, j), w(i, j) for i=1, ..., nlat and
+    !                 j=1, ..., nlon.
+    !
+    !            = 1  no symmetries exist about the equator. the analysis
+    !                 is performed on the entire sphere.  i.e. on the
+    !                 arrays v(i, j), w(i, j) for i=1, ..., nlat and
+    !                 j=1, ..., nlon. the curl of (v, w) is zero. that is,
+    !                 (d/dtheta (sin(theta) w) - dv/dphi)/sin(theta) = 0.
+    !                 the coefficients cr and ci are zero.
+    !
+    !            = 2  no symmetries exist about the equator. the analysis
+    !                 is performed on the entire sphere.  i.e. on the
+    !                 arrays v(i, j), w(i, j) for i=1, ..., nlat and
+    !                 j=1, ..., nlon. the divergence of (v, w) is zero. i.e.,
+    !                 (d/dtheta (sin(theta) v) + dw/dphi)/sin(theta) = 0.
+    !                 the coefficients br and bi are zero.
+    !
+    !            = 3  v is symmetric and w is antisymmetric about the
+    !                 equator. the analysis is performed on the northern
+    !                 hemisphere only.  i.e., if nlat is odd the analysis
+    !                 is performed on the arrays v(i, j), w(i, j) for
+    !                 i=1, ..., (nlat+1)/2 and j=1, ..., nlon. if nlat is
+    !                 even the analysis is performed on the the arrays
+    !                 v(i, j), w(i, j) for i=1, ..., nlat/2 and j=1, ..., nlon.
+    !
+    !            = 4  v is symmetric and w is antisymmetric about the
+    !                 equator. the analysis is performed on the northern
+    !                 hemisphere only.  i.e., if nlat is odd the analysis
+    !                 is performed on the arrays v(i, j), w(i, j) for
+    !                 i=1, ..., (nlat+1)/2 and j=1, ..., nlon. if nlat is
+    !                 even the analysis is performed on the the arrays
+    !                 v(i, j), w(i, j) for i=1, ..., nlat/2 and j=1, ..., nlon.
+    !                 the curl of (v, w) is zero. that is,
+    !                 (d/dtheta (sin(theta) w) - dv/dphi)/sin(theta) = 0.
+    !                 the coefficients cr and ci are zero.
+    !
+    !            = 5  v is symmetric and w is antisymmetric about the
+    !                 equator. the analysis is performed on the northern
+    !                 hemisphere only.  i.e., if nlat is odd the analysis
+    !                 is performed on the arrays v(i, j), w(i, j) for
+    !                 i=1, ..., (nlat+1)/2 and j=1, ..., nlon. if nlat is
+    !                 even the analysis is performed on the the arrays
+    !                 v(i, j), w(i, j) for i=1, ..., nlat/2 and j=1, ..., nlon.
+    !                 the divergence of (v, w) is zero. i.e.,
+    !                 (d/dtheta (sin(theta) v) + dw/dphi)/sin(theta) = 0.
+    !                 the coefficients br and bi are zero.
+    !
+    !            = 6  v is antisymmetric and w is symmetric about the
+    !                 equator. the analysis is performed on the northern
+    !                 hemisphere only.  i.e., if nlat is odd the analysis
+    !                 is performed on the arrays v(i, j), w(i, j) for
+    !                 i=1, ..., (nlat+1)/2 and j=1, ..., nlon. if nlat is
+    !                 even the analysis is performed on the the arrays
+    !                 v(i, j), w(i, j) for i=1, ..., nlat/2 and j=1, ..., nlon.
+    !
+    !            = 7  v is antisymmetric and w is symmetric about the
+    !                 equator. the analysis is performed on the northern
+    !                 hemisphere only.  i.e., if nlat is odd the analysis
+    !                 is performed on the arrays v(i, j), w(i, j) for
+    !                 i=1, ..., (nlat+1)/2 and j=1, ..., nlon. if nlat is
+    !                 even the analysis is performed on the the arrays
+    !                 v(i, j), w(i, j) for i=1, ..., nlat/2 and j=1, ..., nlon.
+    !                 the curl of (v, w) is zero. that is,
+    !                 (d/dtheta (sin(theta) w) - dv/dphi)/sin(theta) = 0.
+    !                 the coefficients cr and ci are zero.
+    !
+    !            = 8  v is antisymmetric and w is symmetric about the
+    !                 equator. the analysis is performed on the northern
+    !                 hemisphere only.  i.e., if nlat is odd the analysis
+    !                 is performed on the arrays v(i, j), w(i, j) for
+    !                 i=1, ..., (nlat+1)/2 and j=1, ..., nlon. if nlat is
+    !                 even the analysis is performed on the the arrays
+    !                 v(i, j), w(i, j) for i=1, ..., nlat/2 and j=1, ..., nlon.
+    !                 the divergence of (v, w) is zero. i.e.,
+    !                 (d/dtheta (sin(theta) v) + dw/dphi)/sin(theta) = 0.
+    !                 the coefficients br and bi are zero.
+    !
+    !
+    !     nt     the number of analyses.  in the program that calls vhaes,
+    !            the arrays v, w, br, bi, cr, and ci can be three dimensional
+    !            in which case multiple analyses will be performed.
+    !            the third index is the analysis index which assumes the
+    !            values k=1, ..., nt.  for a single analysis set nt=1. the
+    !            discription of the remaining parameters is simplified
+    !            by assuming that nt=1 or that all the arrays are two
+    !            dimensional.
+    !
+    !     v, w    two or three dimensional arrays (see input parameter nt)
+    !            that contain the vector function to be analyzed.
+    !            v is the colatitudnal component and w is the east
+    !            longitudinal component. v(i, j), w(i, j) contain the
+    !            components at colatitude theta(i) = (i-1)*pi/(nlat-1)
+    !            and longitude phi(j) = (j-1)*2*pi/nlon. the index ranges
+    !            are defined above at the input parameter ityp.
+    !
+    !     idvw   the first dimension of the arrays v, w as it appears in
+    !            the program that calls vhaes. if ityp <= 2 then idvw
+    !            must be at least nlat.  if ityp > 2 and nlat is
+    !            even then idvw must be at least nlat/2. if ityp > 2
+    !            and nlat is odd then idvw must be at least (nlat+1)/2.
+    !
+    !     jdvw   the second dimension of the arrays v, w as it appears in
+    !            the program that calls vhaes. jdvw must be at least nlon.
+    !
+    !     mdab   the first dimension of the arrays br, bi, cr, and ci as it
+    !            appears in the program that calls vhaes. mdab must be at
+    !            least min(nlat, nlon/2) if nlon is even or at least
+    !            min(nlat, (nlon+1)/2) if nlon is odd.
+    !
+    !     ndab   the second dimension of the arrays br, bi, cr, and ci as it
+    !            appears in the program that calls vhaes. ndab must be at
+    !            least nlat.
+    !
+    !     lvhaes an array which must be initialized by subroutine vhaesi.
+    !            once initialized, wvhaes can be used repeatedly by vhaes
+    !            as long as nlon and nlat remain unchanged.  wvhaes must
+    !            not be altered between calls of vhaes.
+    !
+    !     lvhaes the dimension of the array wvhaes as it appears in the
+    !            program that calls vhaes. define
+    !
+    !               l1 = min(nlat, nlon/2) if nlon is even or
+    !               l1 = min(nlat, (nlon+1)/2) if nlon is odd
+    !
+    !            and
+    !
+    !               l2 = nlat/2        if nlat is even or
+    !               l2 = (nlat+1)/2    if nlat is odd
+    !
+    !            then lvhaes must be at least
+    !
+    !            l1*l2(nlat+nlat-l1+1)+nlon+15
+    !
+    !
+    !     work   a work array that does not have to be saved.
+    !
+    !     lwork  the dimension of the array work as it appears in the
+    !            program that calls vhaes. define
+    !
+    !               l2 = nlat/2        if nlat is even or
+    !               l2 = (nlat+1)/2    if nlat is odd
+    !
+    !            if ityp <= 2 then lwork must be at least
+    !
+    !                       (2*nt+1)*nlat*nlon
+    !
+    !            if ityp > 2 then lwork must be at least
+    !
+    !                        (2*nt+1)*l2*nlon
+    !
+    !     **************************************************************
+    !
+    !     output parameters
+    !
+    !     br, bi  two or three dimensional arrays (see input parameter nt)
+    !     cr, ci  that contain the vector spherical harmonic coefficients
+    !            in the spectral representation of v(i, j) and w(i, j) given
+    !            in the discription of subroutine vhses. br(mp1, np1),
+    !            bi(mp1, np1), cr(mp1, np1), and ci(mp1, np1) are computed
+    !            for mp1=1, ..., mmax and np1=mp1, ..., nlat except for np1=nlat
+    !            and odd mp1. mmax=min(nlat, nlon/2) if nlon is even or
+    !            mmax=min(nlat, (nlon+1)/2) if nlon is odd.
+    !
+    !     ierror = 0  no errors
+    !            = 1  error in the specification of nlat
+    !            = 2  error in the specification of nlon
+    !            = 3  error in the specification of ityp
+    !            = 4  error in the specification of nt
+    !            = 5  error in the specification of idvw
+    !            = 6  error in the specification of jdvw
+    !            = 7  error in the specification of mdab
+    !            = 8  error in the specification of ndab
+    !            = 9  error in the specification of lvhaes
+    !            = 10 error in the specification of lwork
+    !
     module subroutine vhaes(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
         mdab, ndab, wvhaes, lvhaes, work, lwork, ierror)
 
         ! Dummy arguments
-
         integer(ip), intent(in)  :: nlat
         integer(ip), intent(in)  :: nlon
         integer(ip), intent(in)  :: ityp
@@ -354,29 +271,26 @@ contains
         integer(ip), intent(out) :: ierror
 
         ! Local variables
-
         integer(ip) :: idv, imid, idz, ist, lnl, lzimn, mmax
         integer(ip) :: workspace_indices(6)
-
 
         imid = (nlat+1)/2
         mmax = min(nlat, (nlon+1)/2)
         idz = (mmax*(2*nlat-mmax+1))/2
         lzimn = idz*imid
 
-        if (ityp > 2) then
-            idv = imid
-            ist = 0
-        else
-            idv = nlat
-            ist = imid
-        end if
+        select case (ityp)
+            case(0:2)
+                idv = nlat
+                ist = imid
+            case default
+                idv = imid
+                ist = 0
+        end select
 
         lnl = nt*idv*nlon
 
-        !
         !  Check input arguments
-        !
         if (nlat < 3) then
             ierror = 1
             return
@@ -411,9 +325,7 @@ contains
             ierror = 0
         end if
 
-        !
         !  Set workspace indices
-        !
         workspace_indices = get_vhaes_workspace_indices(ist, lnl, lzimn)
 
         associate( &
@@ -431,15 +343,82 @@ contains
 
     end subroutine vhaes
 
+    ! Purpose:
+    !
+    !     subroutine vhaesi(nlat, nlon, wvhaes, lvhaes, work, lwork, dwork, ldwork, ierror)
+    !
+    !     subroutine vhaesi initializes the array wvhaes which can then be
+    !     used repeatedly by subroutine vhaes until nlat or nlon is changed.
+    !
+    !     input parameters
+    !
+    !     nlat   the number of colatitudes on the full sphere including the
+    !            poles. for example, nlat = 37 for a five degree grid.
+    !            nlat determines the grid increment in colatitude as
+    !            pi/(nlat-1).  if nlat is odd the equator is located at
+    !            grid point i=(nlat+1)/2. if nlat is even the equator is
+    !            located half way between points i=nlat/2 and i=nlat/2+1.
+    !            nlat must be at least 3. note: on the half sphere, the
+    !            number of grid points in the colatitudinal direction is
+    !            nlat/2 if nlat is even or (nlat+1)/2 if nlat is odd.
+    !
+    !     nlon   the number of distinct londitude points.  nlon determines
+    !            the grid increment in longitude as 2*pi/nlon. for example
+    !            nlon = 72 for a five degree grid. nlon must be greater
+    !            than zero. the axisymmetric case corresponds to nlon=1.
+    !            the efficiency of the computation is improved when nlon
+    !            is a product of small prime numbers.
+    !
+    !     lvhaes the dimension of the array wvhaes as it appears in the
+    !            program that calls vhaes. define
+    !
+    !               l1 = min(nlat, nlon/2) if nlon is even or
+    !               l1 = min(nlat, (nlon+1)/2) if nlon is odd
+    !
+    !            and
+    !
+    !               l2 = nlat/2        if nlat is even or
+    !               l2 = (nlat+1)/2    if nlat is odd
+    !
+    !            then lvhaes must be at least
+    !
+    !               l1*l2*(nlat+nlat-l1+1)+nlon+15
+    !
+    !
+    !     work   a work array that does not have to be saved.
+    !
+    !     lwork  the dimension of the array work as it appears in the
+    !            program that calls vhaes. lwork must be at least
+    !
+    !              3*(max(l1-2, 0)*(nlat+nlat-l1-1))/2+5*l2*nlat
+    !
+    !     dwork  an unsaved real work space
+    !
+    !     ldwork the length of the array dwork as it appears in the
+    !            program that calls vhaesi.  ldwork must be at least
+    !            2*(nlat+1)
+    !
+    !
+    !     **************************************************************
+    !
+    !     output parameters
+    !
+    !     wvhaes an array which is initialized for use by subroutine vhaes.
+    !            once initialized, wvhaes can be used repeatedly by vhaes
+    !            as long as nlat or nlon remain unchanged.  wvhaes must not
+    !            be altered between calls of vhaes.
+    !
+    !
+    !     ierror = 0  no errors
+    !            = 1  error in the specification of nlat
+    !            = 2  error in the specification of nlon
+    !            = 3  error in the specification of lvhaes
+    !            = 4  error in the specification of lwork
+    !            = 5  error in the specification of ldwork
+    !
     module subroutine vhaesi(nlat, nlon, wvhaes, lvhaes, work, lwork, dwork, ldwork, ierror)
-        !
-        ! Remark:
-        !
-        ! dwork must be of length at least 2*(nlat+1)
-        !
 
         ! Dummy arguments
-
         integer(ip), intent(in)  :: nlat
         integer(ip), intent(in)  :: nlon
         real(wp),    intent(out) :: wvhaes(lvhaes)
@@ -451,20 +430,16 @@ contains
         integer(ip), intent(out) :: ierror
 
         ! Local variables
-
-        integer(ip)    :: imid, labc, lzimn, mmax
-        integer(ip)    :: workspace_indices(4)
+        integer(ip)         :: imid, labc, lzimn, mmax
+        integer(ip)         :: workspace_indices(4)
         type(SpherepackAux) :: sphere_aux
-
 
         mmax = min(nlat, (nlon+1)/2)
         imid = (nlat+1)/2
         lzimn = (imid*mmax*(2*nlat-mmax+1))/2
         labc = 3*(max(mmax-2, 0)*(2*nlat-mmax-1))/2
 
-        !
         !  Check input arguments
-        !
         if (nlat < 3) then
             ierror = 1
             return
@@ -484,9 +459,7 @@ contains
             ierror = 0
         end if
 
-        !
         !  Set workspace indices
-        !
         workspace_indices = get_vhaesi_workspace_indices(lzimn, nlat, imid, mmax)
 
         associate( &
@@ -496,30 +469,28 @@ contains
             idz => workspace_indices(4) &
             )
             call vhaesi_lower_routine(nlat, nlon, imid, wvhaes, wvhaes(jw1), idz, work, work(iw1), dwork)
+
             call sphere_aux%hfft%initialize(nlon, wvhaes(jw2))
         end associate
 
     end subroutine vhaesi
 
-    pure function get_vhaes_workspace_indices(ist, lnl, lzimn) result (return_value)
+    pure function get_vhaes_workspace_indices(ist, lnl, lzimn) &
+        result (return_value)
 
         ! Dummy arguments
-
         integer(ip), intent(in)  :: ist
         integer(ip), intent(in)  :: lnl
         integer(ip), intent(in)  :: lzimn
         integer(ip)              :: return_value(6)
 
-
         associate( i => return_value )
-
             i(1) = ist+1
             i(2) = lnl+1
             i(3) = i(2)+ist
             i(4) = i(2)+lnl
             i(5) = lzimn+1
             i(6) = i(5)+lzimn
-
         end associate
 
     end function get_vhaes_workspace_indices
@@ -555,9 +526,9 @@ contains
         real(wp),    intent(in)  :: wrfft(*)
 
         ! Local variables
-        integer(ip)    :: i, imm1, k, m, mb, mlat, mlon
-        integer(ip)    :: mmax, mp1, mp2, ndo1, ndo2,  nlp1, np1
-        real(wp)       :: fsn, tsn
+        integer(ip)         :: i, imm1, k, m, mb, mlat, mlon
+        integer(ip)         :: mmax, mp1, mp2, ndo1, ndo2,  nlp1, np1
+        real(wp)            :: fsn, tsn
         type(SpherepackAux) :: sphere_aux
 
 

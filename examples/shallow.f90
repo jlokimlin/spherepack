@@ -38,8 +38,8 @@
 !
 ! ... required spherepack files
 !
-!     vtses.f90, dives.f90, vrtes.f90, grades.f90, type_SpherepackAux.f90, type_RealPeriodicFastFourierTransform.f90,
-!     vhaes.f90,vhses.f90,shaes.f90,shses.f90
+!     vtses.f90, dives.f90, vrtes.f90, grades.f90, type_SpherepackAux.f90, type_RealPeriodicFastFourierTransform.f90, 
+!     vhaes.f90, vhses.f90, shaes.f90, shses.f90
 !
 !
 !     the nonlinear shallow-water equations on the sphere are
@@ -47,7 +47,7 @@
 !     vector harmonics. the method is described in the paper:
 !
 ! [1] p. n. swarztrauber, spectral transform methods for solving
-!     the shallow-water equations on the sphere, p.n. swarztrauber,
+!     the shallow-water equations on the sphere, p.n. swarztrauber, 
 !     monthly weather review, vol. 124, no. 4, april 1996, pp. 730-744.
 !
 !     this program implements test case 3 (steady nonlinear rotated flow)
@@ -56,7 +56,7 @@
 ! [2] d.l. williamson, j.b. drake, j.j. hack, r. jakob, and
 !     p.n. swarztrauber, j. comp. phys., a standard test set
 !     for numerical approximations to the shallow-water
-!     equations in spherical geometry, j. comp. phys.,
+!     equations in spherical geometry, j. comp. phys., 
 !     vol. 102, no. 1, sept. 1992, pp. 211-224.
 !
 ! definitions:
@@ -77,58 +77,58 @@
 !     theta         colatitude
 !
 !   the first dimension of the following two dimensional arrays
-!   corresponds to the latitude index with values i=1,...,nlat
+!   corresponds to the latitude index with values i=1, ..., nlat
 !   where i=1 is the north pole and i=nlat is the south pole.
-!   the second dimension is longitude with values j=1,...,nlon
+!   the second dimension is longitude with values j=1, ..., nlon
 !   where j=1 corresponds to zero longitude and j=nlon corresponds
 !   to 2pi minus 2pi/nlon.
 !
-!     u(i,j)       east longitudinal velocity component at t=time
-!     v(i,j)       latitudinal velocity component at t=time
-!     p(i,j)       +pzero = geopotential at t=time
+!     u(i, j)       east longitudinal velocity component at t=time
+!     v(i, j)       latitudinal velocity component at t=time
+!     p(i, j)       +pzero = geopotential at t=time
 !
-!     unew(i,j)    east longitudinal velocity component at t=time+dt
-!     vnew(i,j)    latitudinal velocity component at t=time+dt
-!     pnew(i,j)    +pzero = geopotential at t=time+dt
+!     unew(i, j)    east longitudinal velocity component at t=time+dt
+!     vnew(i, j)    latitudinal velocity component at t=time+dt
+!     pnew(i, j)    +pzero = geopotential at t=time+dt
 !
-!     uold(i,j)    east longitudinal velocity component at t=time-dt
-!     vold(i,j)    latitudinal velocity component at t=time-dt
-!     pold(i,j)    +pzero = geopotential at t=time-dt
+!     uold(i, j)    east longitudinal velocity component at t=time-dt
+!     vold(i, j)    latitudinal velocity component at t=time-dt
+!     pold(i, j)    +pzero = geopotential at t=time-dt
 !
-!     divg(i,j)    divergence (d/dtheta (cos(theta) v)
+!     divg(i, j)    divergence (d/dtheta (cos(theta) v)
 !                                          + du/dlambda)/cos(theta)
-!     vort(i,j)    vorticity  (d/dtheta (cos(theta) u)
+!     vort(i, j)    vorticity  (d/dtheta (cos(theta) u)
 !                                          - dv/dlambda)/cos(theta)
 !
-!     ut(i,j)      latitudinal derivative of longitudinal
+!     ut(i, j)      latitudinal derivative of longitudinal
 !                  velocity component
-!     vt(i,j)      latitudinal derivative of latitudinal
+!     vt(i, j)      latitudinal derivative of latitudinal
 !                  velocity component
 !
-!     dudt(i,j)    time derivative of longitudinal velocity component
-!     dvdt(i,j)    time derivative of latitudinal  velocity component
-!     dpdt(i,j)    time derivative of geopotential
+!     dudt(i, j)    time derivative of longitudinal velocity component
+!     dvdt(i, j)    time derivative of latitudinal  velocity component
+!     dpdt(i, j)    time derivative of geopotential
 !
-!     gpdl(i,j)    first component of the gradient of p(i,j)
+!     gpdl(i, j)    first component of the gradient of p(i, j)
 !                  the longitudinal derivative of the geopotential
 !                  divided by the cosine of the latitude
 !
-!     gpdt(i,j)    second component of the gradient of p(i,j)
+!     gpdt(i, j)    second component of the gradient of p(i, j)
 !                  the latitudinal derivative of the geopotential
 !
-!     uxact(i,j)   the "exact" longitudinal veloctiy component
-!     vxact(i,j)   the "exact" latitudinal  veloctiy component
-!     uxact(i,j)   the "exact" geopotential
+!     uxact(i, j)   the "exact" longitudinal veloctiy component
+!     vxact(i, j)   the "exact" latitudinal  veloctiy component
+!     uxact(i, j)   the "exact" geopotential
 !
-!     f(i,j)       the coriolis force on rotated grid
+!     f(i, j)       the coriolis force on rotated grid
 !
 !   the following two dimensional arrays are nonzero in the triangle
-!   n=1,...,nlat and m less than or equal to n.
+!   n=1, ..., nlat and m less than or equal to n.
 !
-!     a(m,n),b(m,n)    spectral coefficients of the geopotential
+!     a(m, n), b(m, n)    spectral coefficients of the geopotential
 !
-!     br(m,n),bi(m,n)  spectral coefficients of the velocity
-!     cr(m,n),ci(m,n)  vector [u(i,j),v(i,j)]
+!     br(m, n), bi(m, n)  spectral coefficients of the velocity
+!     cr(m, n), ci(m, n)  vector [u(i, j), v(i, j)]
 !
 !
 !     phlt(i)      the coefficients in the cosine series
@@ -158,7 +158,7 @@ program shallow
     integer(ip), parameter           :: NMDIM = (NTRUNC+1)*(NTRUNC+2)/2
     integer(ip), parameter           :: nl = 91
     integer(ip)                      :: max_iter, mprint, i, j, ncycle
-    integer(ip)                      :: temp_save_new, temp_save_now,old,now,new
+    integer(ip)                      :: temp_save_new, temp_save_now, old, now, new
     real(wp), dimension(NLON, NLAT)  :: uxact, vxact, pxact, u, v, p, f
     real(wp), dimension(NLON, NLAT)  :: ug, vg, pg, vrtg, divg, scrg1, scrg2
     real(wp)                         :: phlt(nl-2)
@@ -371,53 +371,53 @@ program shallow
         scrg1 = ug * (vrtg + f)
         scrg2 = vg * (vrtg + f)
 
-        call solver%get_vrtdivspec(scrg1, scrg2, ddivdtnm(:,new), dvrtdtnm(:,new))
+        call solver%get_vrtdivspec(scrg1, scrg2, ddivdtnm(:, new), dvrtdtnm(:, new))
 
-        dvrtdtnm(:,new) = -dvrtdtnm(:,new)
+        dvrtdtnm(:, new) = -dvrtdtnm(:, new)
         scrg1 = ug * (pg + pzero)
         scrg2 = vg * (pg + pzero)
 
-        call solver%get_vrtdivspec(scrg1, scrg2, scrnm, dpdtnm(:,new))
+        call solver%get_vrtdivspec(scrg1, scrg2, scrnm, dpdtnm(:, new))
 
-        dpdtnm(:,new) = -dpdtnm(:,new)
+        dpdtnm(:, new) = -dpdtnm(:, new)
         scrg1 = pg + HALF * (ug**2 + vg**2)
 
         call solver%grid_to_spec(scrg1, scrnm)
 
         associate( lap => solver%LAPLACIAN_COEFFICIENT_MULTIPLIERS )
-            ddivdtnm(:,new) = ddivdtnm(:,new) - lap * scrnm
+            ddivdtnm(:, new) = ddivdtnm(:, new) - lap * scrnm
         end associate
 
         ! Update vrt and div with third-order adams-bashforth
         ! Forward Euler, then 2nd-order Adams-Bashforth time steps to start
         select case (ncycle)
             case (0)
-                dvrtdtnm(:,now) = dvrtdtnm(:,new)
-                dvrtdtnm(:,old) = dvrtdtnm(:,new)
-                ddivdtnm(:,now) = ddivdtnm(:,new)
-                ddivdtnm(:,old) = ddivdtnm(:,new)
-                dpdtnm(:,now) = dpdtnm(:,new)
-                dpdtnm(:,old) = dpdtnm(:,new)
+                dvrtdtnm(:, now) = dvrtdtnm(:, new)
+                dvrtdtnm(:, old) = dvrtdtnm(:, new)
+                ddivdtnm(:, now) = ddivdtnm(:, new)
+                ddivdtnm(:, old) = ddivdtnm(:, new)
+                dpdtnm(:, now) = dpdtnm(:, new)
+                dpdtnm(:, old) = dpdtnm(:, new)
             case (1)
-                dvrtdtnm(:,old) = dvrtdtnm(:,new)
-                ddivdtnm(:,old) = ddivdtnm(:,new)
-                dpdtnm(:,old) = dpdtnm(:,new)
+                dvrtdtnm(:, old) = dvrtdtnm(:, new)
+                ddivdtnm(:, old) = ddivdtnm(:, new)
+                dpdtnm(:, old) = dpdtnm(:, new)
         end select
 
         vrtnm = vrtnm + dt * ( &
-            (23.0_wp/12) * dvrtdtnm(:,new) &
-            - (16.0_wp/12) * dvrtdtnm(:,now) &
-            + (5.0_wp/12) * dvrtdtnm(:,old) )
+            (23.0_wp/12) * dvrtdtnm(:, new) &
+            - (16.0_wp/12) * dvrtdtnm(:, now) &
+            + (5.0_wp/12) * dvrtdtnm(:, old) )
 
         divnm = divnm + dt*( &
-            (23.0_wp/12) * ddivdtnm(:,new) &
-            - (16.0_wp/12) * ddivdtnm(:,now) &
-            + (5.0_wp/12) * ddivdtnm(:,old) )
+            (23.0_wp/12) * ddivdtnm(:, new) &
+            - (16.0_wp/12) * ddivdtnm(:, now) &
+            + (5.0_wp/12) * ddivdtnm(:, old) )
 
         pnm = pnm + dt*( &
-            (23.0_wp/12) * dpdtnm(:,new) &
-            - (16.0_wp/12) * dpdtnm(:,now) &
-            + (5.0_wp/12) * dpdtnm(:,old) )
+            (23.0_wp/12) * dpdtnm(:, new) &
+            - (16.0_wp/12) * dpdtnm(:, now) &
+            + (5.0_wp/12) * dpdtnm(:, old) )
 
         !  Switch indices
         temp_save_new = new

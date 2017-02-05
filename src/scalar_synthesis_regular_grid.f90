@@ -343,11 +343,11 @@ contains
         integer(ip), intent(in)  :: nlon
         integer(ip), intent(in)  :: isym
         integer(ip), intent(in)  :: nt
-        real(wp),    intent(out) :: g(idg,jdg,nt)
+        real(wp),    intent(out) :: g(idg, jdg, nt)
         integer(ip), intent(in)  :: idg
         integer(ip), intent(in)  :: jdg
-        real(wp),    intent(in)  :: a(mdab,ndab,nt)
-        real(wp),    intent(in)  :: b(mdab,ndab,nt)
+        real(wp),    intent(in)  :: a(mdab, ndab, nt)
+        real(wp),    intent(in)  :: b(mdab, ndab, nt)
         integer(ip), intent(in)  :: mdab
         integer(ip), intent(in)  :: ndab
         real(wp),    intent(in)  :: wshsec(lshsec)

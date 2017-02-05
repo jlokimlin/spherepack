@@ -237,11 +237,11 @@ contains
         result(return_value)
 
         ! Dummy arguments
-        real(wp),    intent(in) :: a(:,:,:)
+        real(wp),    intent(in) :: a(:, :, :)
         integer(ip), intent(in) :: k
         real(wp)                :: return_value
 
-        return_value = a(1,1,k)/(TWO * SQRT2)
+        return_value = a(1, 1, k)/(TWO * SQRT2)
 
     end function get_perturbation
 
@@ -249,10 +249,10 @@ contains
 
         ! Dummy arguments
         integer(ip), intent(in)  :: nlon
-        real(wp),    intent(out) :: a(:,:,:)
-        real(wp),    intent(out) :: b(:,:,:)
-        real(wp),    intent(in)  :: cr(:,:,:)
-        real(wp),    intent(in)  :: ci(:,:,:)
+        real(wp),    intent(out) :: a(:, :, :)
+        real(wp),    intent(out) :: b(:, :, :)
+        real(wp),    intent(in)  :: cr(:, :, :)
+        real(wp),    intent(in)  :: ci(:, :, :)
         real(wp),    intent(out) :: sqnn(:)
 
         ! Local variables
@@ -268,8 +268,8 @@ contains
 
             ! Compute vorticity scalar coefficients for each vector field
             do k=1, nt
-                a(:,:, k) = ZERO
-                b(:,:, k) = ZERO
+                a(:, :, k) = ZERO
+                b(:, :, k) = ZERO
 
                 ! Compute m=0 coefficients
                 do n=2, nlat
@@ -295,12 +295,12 @@ contains
         ! Dummy arguments
         integer(ip), intent(in)  :: isym
         integer(ip), intent(out) :: ityp
-        real(wp),    intent(in)  :: a(:,:,:)
-        real(wp),    intent(in)  :: b(:,:,:)
+        real(wp),    intent(in)  :: a(:, :, :)
+        real(wp),    intent(in)  :: b(:, :, :)
         real(wp),    intent(out) :: sqnn(:)
         real(wp),    intent(out) :: pertrb(:)
-        real(wp),    intent(out) :: cr(:,:,:)
-        real(wp),    intent(out) :: ci(:,:,:)
+        real(wp),    intent(out) :: cr(:, :, :)
+        real(wp),    intent(out) :: ci(:, :, :)
 
         ! Local variables
         integer(ip) :: k, n, m
@@ -321,8 +321,8 @@ contains
                 pertrb(k) = get_perturbation(a, k)
 
                 ! Preset cr, ci to 0.0
-                cr(:,:,k) = ZERO
-                ci(:,:,k) = ZERO
+                cr(:, :, k) = ZERO
+                ci(:, :, k) = ZERO
 
                 ! Compute m = 0 coefficients
                 do n=2, nlat

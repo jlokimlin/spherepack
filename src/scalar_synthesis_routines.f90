@@ -56,19 +56,19 @@ module scalar_synthesis_routines
 
     ! Declare interfaces for submodule implementation
     interface
-        module subroutine shses(nlat,nlon,isym,nt,g,idg,jdg,a,b,mdab,ndab, &
-            wshses,lshses,work,lwork,ierror)
+        module subroutine shses(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, &
+            wshses, lshses, work, lwork, ierror)
 
             ! Dummy arguments
             integer(ip), intent(in)  :: nlat
             integer(ip), intent(in)  :: nlon
             integer(ip), intent(in)  :: isym
             integer(ip), intent(in)  :: nt
-            real(wp),    intent(out) :: g(idg,jdg,nt)
+            real(wp),    intent(out) :: g(idg, jdg, nt)
             integer(ip), intent(in)  :: idg
             integer(ip), intent(in)  :: jdg
-            real(wp),    intent(in)  :: a(mdab,ndab,nt)
-            real(wp),    intent(in)  :: b(mdab,ndab,nt)
+            real(wp),    intent(in)  :: a(mdab, ndab, nt)
+            real(wp),    intent(in)  :: b(mdab, ndab, nt)
             integer(ip), intent(in)  :: mdab
             integer(ip), intent(in)  :: ndab
             real(wp),    intent(in)  :: wshses(lshses)
@@ -78,8 +78,8 @@ module scalar_synthesis_routines
             integer(ip), intent(out) :: ierror
         end subroutine shses
 
-        module subroutine shsesi(nlat,nlon,wshses,lshses,work,lwork,dwork, &
-            ldwork,ierror)
+        module subroutine shsesi(nlat, nlon, wshses, lshses, work, lwork, dwork, &
+            ldwork, ierror)
 
             ! Dummy arguments
             integer(ip), intent(in)  :: nlat
@@ -101,11 +101,11 @@ module scalar_synthesis_routines
             integer(ip), intent(in)  :: nlon
             integer(ip), intent(in)  :: mode
             integer(ip), intent(in)  :: nt
-            real(wp),    intent(out) :: g(idg,jdg,nt)
+            real(wp),    intent(out) :: g(idg, jdg, nt)
             integer(ip), intent(in)  :: idg
             integer(ip), intent(in)  :: jdg
-            real(wp),    intent(in)  :: a(mdab,ndab,nt)
-            real(wp),    intent(in)  :: b(mdab,ndab,nt)
+            real(wp),    intent(in)  :: a(mdab, ndab, nt)
+            real(wp),    intent(in)  :: b(mdab, ndab, nt)
             integer(ip), intent(in)  :: mdab
             integer(ip), intent(in)  :: ndab
             real(wp),    intent(in)  :: wshsgs(lshsgs)
@@ -137,11 +137,11 @@ module scalar_synthesis_routines
             integer(ip), intent(in)  :: nlon
             integer(ip), intent(in)  :: isym
             integer(ip), intent(in)  :: nt
-            real(wp),    intent(out) :: g(idg,jdg,nt)
+            real(wp),    intent(out) :: g(idg, jdg, nt)
             integer(ip), intent(in)  :: idg
             integer(ip), intent(in)  :: jdg
-            real(wp),    intent(in)  :: a(mdab,ndab,nt)
-            real(wp),    intent(in)  :: b(mdab,ndab,nt)
+            real(wp),    intent(in)  :: a(mdab, ndab, nt)
+            real(wp),    intent(in)  :: b(mdab, ndab, nt)
             integer(ip), intent(in)  :: mdab
             integer(ip), intent(in)  :: ndab
             real(wp),    intent(in)  :: wshsec(lshsec)
@@ -171,11 +171,11 @@ module scalar_synthesis_routines
             integer(ip), intent(in)  :: nlon
             integer(ip), intent(in)  :: mode
             integer(ip), intent(in)  :: nt
-            real(wp),    intent(out) :: g(idg,jdg,nt)
+            real(wp),    intent(out) :: g(idg, jdg, nt)
             integer(ip), intent(in)  :: idg
             integer(ip), intent(in)  :: jdg
-            real(wp),    intent(in)  :: a(mdab,ndab,nt)
-            real(wp),    intent(in)  :: b(mdab,ndab,nt)
+            real(wp),    intent(in)  :: a(mdab, ndab, nt)
+            real(wp),    intent(in)  :: b(mdab, ndab, nt)
             integer(ip), intent(in)  :: mdab
             integer(ip), intent(in)  :: ndab
             real(wp),    intent(in)  :: wshsgc(lshsgc)

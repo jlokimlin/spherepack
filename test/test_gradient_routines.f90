@@ -36,18 +36,18 @@
 !
 !     a program for testing all gradient and inverse gradient routines
 !
-!     (1) first a scalar field is set in st by restricting a poly in x,y,z
+!     (1) first a scalar field is set in st by restricting a poly in x, y, z
 !         to the sphere surface
 !
-!     (2) a scalar analysis is used to compute the coefs a,b of st
+!     (2) a scalar analysis is used to compute the coefs a, b of st
 !
-!     (3) a,b are input to the various gradient routines to compute a vector field
-!         (v,w)
+!     (3) a, b are input to the various gradient routines to compute a vector field
+!         (v, w)
 !
-!     (4) the vector field (v,w) is compared with the gradient of st obtained
+!     (4) the vector field (v, w) is compared with the gradient of st obtained
 !         analytically
 !
-!     (5) the inverse gradient of (v,w) is computed and compared with (1)
+!     (5) the inverse gradient of (v, w) is computed and compared with (1)
 !
 program tgrad
 
@@ -89,12 +89,12 @@ contains
         integer(ip), parameter        :: NLONS = 18
         integer(ip), parameter        :: NSYNTHS = 4
         integer(ip)                   :: i, j, k ! Counters
-        real(wp)                      :: original_polar_gradient_component(NLATS,NLONS,NSYNTHS)
-        real(wp)                      :: original_azimuthal_gradient_component(NLATS,NLONS,NSYNTHS)
-        real(wp)                      :: original_scalar_function(NLATS,NLONS,NSYNTHS)
-        real(wp)                      :: approximate_polar_gradient_component(NLATS,NLONS,NSYNTHS)
-        real(wp)                      :: approximate_azimuthal_gradient_component(NLATS,NLONS,NSYNTHS)
-        real(wp)                      :: approximate_scalar_function(NLATS,NLONS,NSYNTHS)
+        real(wp)                      :: original_polar_gradient_component(NLATS, NLONS, NSYNTHS)
+        real(wp)                      :: original_azimuthal_gradient_component(NLATS, NLONS, NSYNTHS)
+        real(wp)                      :: original_scalar_function(NLATS, NLONS, NSYNTHS)
+        real(wp)                      :: approximate_polar_gradient_component(NLATS, NLONS, NSYNTHS)
+        real(wp)                      :: approximate_azimuthal_gradient_component(NLATS, NLONS, NSYNTHS)
+        real(wp)                      :: approximate_scalar_function(NLATS, NLONS, NSYNTHS)
         character(len=:), allocatable :: previous_gradient_inversion_error
         character(len=:), allocatable :: previous_polar_gradient_error
         character(len=:), allocatable :: previous_azimuthal_gradient_error
@@ -124,8 +124,8 @@ contains
         end select
 
         !
-        !  set scalar stream and velocity potential fields as polys in x,y,z
-        !    and then set v,w from st,sv scalar fields
+        !  set scalar stream and velocity potential fields as polys in x, y, z
+        !    and then set v, w from st, sv scalar fields
         !
         associate( &
             ve => original_polar_gradient_component, &
@@ -139,17 +139,17 @@ contains
                 do j=1, NLONS
                     do i=1, NLATS
                         associate( &
-                            x => radial(i,j)%x, & !sint*cosp
-                            y => radial(i,j)%y, & !sint*sinp
-                            z => radial(i,j)%z, & !cost
-                            dxdt => theta(i,j)%x, &! cost*cosp
-                            dxdp => -radial(i,j)%y, & !-sint*sinp
-                            dydt => theta(i,j)%y, &! cost*sinp
-                            dydp => radial(i,j)%x, & ! sint*cosp
-                            dzdt => theta(i,j)%z, & ! -sint
-                            dzdp => phi(i,j)%z,& ! 0.0
-                            cosp => phi(i,j)%y, &
-                            sinp => -phi(i,j)%x &
+                            x => radial(i, j)%x, & !sint*cosp
+                            y => radial(i, j)%y, & !sint*sinp
+                            z => radial(i, j)%z, & !cost
+                            dxdt => theta(i, j)%x, &! cost*cosp
+                            dxdp => -radial(i, j)%y, & !-sint*sinp
+                            dydt => theta(i, j)%y, &! cost*sinp
+                            dydp => radial(i, j)%x, & ! sint*cosp
+                            dzdt => theta(i, j)%z, & ! -sint
+                            dzdp => phi(i, j)%z, & ! 0.0
+                            cosp => phi(i, j)%y, &
+                            sinp => -phi(i, j)%x &
                             )
                             select case (k)
                                 case (1)
@@ -157,36 +157,36 @@ contains
                                         dsfdt => x*dydt+y*dxdt, &
                                         dsfdp => x*dydp+y*dxdp &
                                         )
-                                        sfe(i,j,k) = x*y
-                                        ve(i,j,k) = dsfdt
-                                        we(i,j,k) = (cosp*dydp+sinp*dxdp)
+                                        sfe(i, j, k) = x*y
+                                        ve(i, j, k) = dsfdt
+                                        we(i, j, k) = (cosp*dydp+sinp*dxdp)
                                     end associate
                                 case (2)
                                     associate( &
                                         dsfdp => x*dzdp+z*dxdp, &
                                         dsfdt => x*dzdt+z*dxdt &
                                         )
-                                        sfe(i,j,k) = x*z
-                                        ve(i,j,k) = dsfdt
-                                        we(i,j,k) = cosp*dzdp-z*sinp
+                                        sfe(i, j, k) = x*z
+                                        ve(i, j, k) = dsfdt
+                                        we(i, j, k) = cosp*dzdp-z*sinp
                                     end associate
                                 case (3)
                                     associate( &
                                         dsfdt => y*dzdt + z*dydt, &
                                         dsfdp => y*dzdp+ z*dydp &
                                         )
-                                        sfe(i,j,k) = y*z
-                                        ve(i,j,k) = dsfdt
-                                        we(i,j,k) = sinp*dzdp + z*cosp
+                                        sfe(i, j, k) = y*z
+                                        ve(i, j, k) = dsfdt
+                                        we(i, j, k) = sinp*dzdp + z*cosp
                                     end associate
                                 case (4)
                                     associate( &
                                         dsfdt => x*y*dzdt + x*z*dydt + y*z*dxdt, &
                                         dsfdp => x*y*dzdp + x*z*dydp + y*z*dxdp &
                                         )
-                                        sfe(i,j,k) = x*y*z
-                                        ve(i,j,k) = dsfdt
-                                        we(i,j,k) = cosp*y*dzdp+cosp*z*dydp+sinp*z*dxdp
+                                        sfe(i, j, k) = x*y*z
+                                        ve(i, j, k) = dsfdt
+                                        we(i, j, k) = cosp*y*dzdp+cosp*z*dydp+sinp*z*dxdp
                                     end associate
                             end select
                         end associate
@@ -200,16 +200,16 @@ contains
         !
         do k=1, NSYNTHS
             associate( &
-                v => approximate_polar_gradient_component(:,:,k), &
-                w => approximate_azimuthal_gradient_component(:,:,k), &
-                sfe => original_scalar_function(:,:,k) &
+                v => approximate_polar_gradient_component(:, :, k), &
+                w => approximate_azimuthal_gradient_component(:, :, k), &
+                sfe => original_scalar_function(:, :, k) &
                 )
                 call sphere_type%get_gradient(sfe, v, w)
             end associate
         end do
 
         !
-        !  compare this v,w with original
+        !  compare this v, w with original
         !
         associate( &
             ve => original_polar_gradient_component, &
@@ -230,13 +230,13 @@ contains
                 write( stdout, '(a)') ''
                 write( stdout, '(a)') '     grid type = '//sphere_type%grid%grid_type
                 write( stdout, '(a)') '     Testing gradient'
-                write( stdout, '(2(a,i3))') '     nlat = ', NLATS,' nlon = ', NLONS
+                write( stdout, '(2(a, i3))') '     nlat = ', NLATS, ' nlon = ', NLONS
                 write( stdout, '(a)') '     Previous 64 bit floating point arithmetic result '
                 write( stdout, '(a)') previous_polar_gradient_error
                 write( stdout, '(a)') previous_azimuthal_gradient_error
                 write( stdout, '(a)') '     The output from your computer is: '
-                write( stdout, '(a,1pe15.6)') '     polar gradient error     = ', err2v
-                write( stdout, '(a,1pe15.6)') '     azimuthal gradient error = ', err2w
+                write( stdout, '(a, 1pe15.6)') '     polar gradient error     = ', err2v
+                write( stdout, '(a, 1pe15.6)') '     azimuthal gradient error = ', err2w
                 write( stdout, '(a)' ) ''
             end associate
         end associate
@@ -246,9 +246,9 @@ contains
         !
         do k=1, NSYNTHS
             associate( &
-                ve => original_polar_gradient_component(:,:,k), &
-                we => original_azimuthal_gradient_component(:,:,k), &
-                sf => approximate_scalar_function(:,:,k) &
+                ve => original_polar_gradient_component(:, :, k), &
+                we => original_azimuthal_gradient_component(:, :, k), &
+                sf => approximate_scalar_function(:, :, k) &
                 )
                 call sphere_type%invert_gradient(ve, we, sf)
             end associate
@@ -270,11 +270,11 @@ contains
                 write( stdout, '(a)') ''
                 write( stdout, '(a)') '     grid type = '//sphere_type%grid%grid_type
                 write( stdout, '(a)') '     Testing gradient inversion'
-                write( stdout, '(2(a,i3))') '     nlat = ', NLATS,' nlon = ', NLONS
+                write( stdout, '(2(a, i3))') '     nlat = ', NLATS, ' nlon = ', NLONS
                 write( stdout, '(a)') '     Previous 64 bit floating point arithmetic result '
                 write( stdout, '(a)') previous_gradient_inversion_error
                 write( stdout, '(a)') '     The output from your computer is: '
-                write( stdout, '(a,1pe15.6)') '     gradient inversion error     = ', err2
+                write( stdout, '(a, 1pe15.6)') '     gradient inversion error     = ', err2
                 write( stdout, '(a)' ) ''
             end associate
         end associate

@@ -47,7 +47,7 @@
 !     Ten Degree Grid (Mathematical Spherical Coordinates)
 !
 !     The equally spaced vector data, given in mathematical spherical
-!     coordinates,  is stored in 19 X 36 colatitude-longitude arrays (ue,ve).  The
+!     coordinates,  is stored in 19 X 36 colatitude-longitude arrays (ue, ve).  The
 !     colatitudinal values are stored north to south with increasing colatitude
 !     subscript values.  ue is the east longitudinal component and ve is the
 !     colatitudinal component of the vector.
@@ -55,15 +55,15 @@
 !     Gaussian Grid (Geophysical Spherical Coordinates)
 !
 !     The T42 Gaussian grid vector data is in geophysical spherical coordinates.
-!     It is stored in 128 X 64 longitude-latitude arrays (ug,vg).  Values are
+!     It is stored in 128 X 64 longitude-latitude arrays (ug, vg).  Values are
 !     stored south to north with increasing latitude subscript value.  ug
 !     is the longitudinal component and vg is the latitudinal componenet of the
 !     vector data.
 !
-!     For testing purposes we use an analytic vector field (u,v).  Let t and p
+!     For testing purposes we use an analytic vector field (u, v).  Let t and p
 !     be colatitude and longitude and x=sin(t)cos(p), y=sint(t)*sin(p), z=cos(t)
 !     be the cartesian coordinates restricted to the sphere in mathematical
-!     coordinates. We derive the vector field (u,v) from the stream function
+!     coordinates. We derive the vector field (u, v) from the stream function
 !     S and velocity function P given by
 !
 !               y    -z           x    z
@@ -81,14 +81,14 @@
 !     in mathematical spherical coordinates.  Values in geophysical
 !     coordinates can be obtained by negating v.
 !
-!     In the code below, (ue,ve) is set equal to (u,v) and trvsph is used to
-!     transfer (ue,ve) to (ug,vg).  (ug,vg) is then compared with (u,v) in
+!     In the code below, (ue, ve) is set equal to (u, v) and trvsph is used to
+!     transfer (ue, ve) to (ug, vg).  (ug, vg) is then compared with (u, v) in
 !     geophysical coordinates on the T42 Gaussian grid.  Finally, trvsph is
-!     used to transfer (ug,vg) back to (ue,vg) and this is compared with (u,v).
+!     used to transfer (ug, vg) back to (ue, vg) and this is compared with (u, v).
 !     Output from executing the test program on separate platforms with 32 bit
 !     and 64 bit floating point arithmetic is listed below.  The minimum required
 !     saved and unsaved work space lengths were predetermined by an earlier call
-!     trvsph with nlone=36,nlate=19,nlong=128,nlatg=64,lsave=0,lwork=0 and printout
+!     trvsph with nlone=36, nlate=19, nlong=128, nlatg=64, lsave=0, lwork=0 and printout
 !     of lsvmin and lwkmin.
 !
 !
@@ -149,8 +149,8 @@ use spherepack_library
     !
     !     set grid sizes with parameter statements
     !
-    integer nnlatg,nnlong,nnlate,nnlone,llwork,llsave,lldwork
-    parameter (nnlatg=64, nnlong=128, nnlate=19,nnlone=36)
+    integer nnlatg, nnlong, nnlate, nnlone, llwork, llsave, lldwork
+    parameter (nnlatg=64, nnlong=128, nnlate=19, nnlone=36)
     !
     !     set predetermined minimum saved and unsaved work space lengths
     !
@@ -163,15 +163,15 @@ use spherepack_library
     !
     !     dimension and type data arrays and grid vectors and internal variables
     !
-    real ue(nnlate,nnlone), ve(nnlate,nnlone)
-    real ug(nnlong,nnlatg), vg(nnlong,nnlatg)
-    real work(llwork),wsave(llsave),thetag(nnlatg)
-    real dtheta(nnlatg),dwts(nnlatg),dwork(lldwork)
-    integer igride(2),igridg(2),ive,ivg
-    integer nlatg,nlong,nlate,nlone,lwork,lsave,ldwork
-    real dlate,dlone,dlong,t,p,cosp,sinp,cost,sint,x,y,z
-    real erru2,errv2,ex,ey,ez,emz,uee,vee
-    integer i,j,ib,intl,ier,lsvmin,lwkmin
+    real ue(nnlate, nnlone), ve(nnlate, nnlone)
+    real ug(nnlong, nnlatg), vg(nnlong, nnlatg)
+    real work(llwork), wsave(llsave), thetag(nnlatg)
+    real dtheta(nnlatg), dwts(nnlatg), dwork(lldwork)
+    integer igride(2), igridg(2), ive, ivg
+    integer nlatg, nlong, nlate, nlone, lwork, lsave, ldwork
+    real dlate, dlone, dlong, t, p, cosp, sinp, cost, sint, x, y, z
+    real erru2, errv2, ex, ey, ez, emz, uee, vee
+    integer i, j, ib, intl, ier, lsvmin, lwkmin
     !
     !     set grid sizes and dimensions from parameter statements
     !
@@ -189,13 +189,13 @@ use spherepack_library
     dlone = (pi+pi)/nlone
     dlong = (pi+pi)/nlong
     !
-    !     set vector data in (ue,ve)
+    !     set vector data in (ue, ve)
     !
-    do  j=1,nlone
+    do  j=1, nlone
         p = (j-1)*dlone
         cosp = cos(p)
         sinp = sin(p)
-        do i=1,nlate
+        do i=1, nlate
             t = (i-1)*dlate
             cost = cos(t)
             sint = sin(t)
@@ -206,8 +206,8 @@ use spherepack_library
             ey = exp(y)
             ez = exp(z)
             emz = exp(-z)
-            ve(i,j) = ex*cost*cosp-ey*cosp-ez*sint
-            ue(i,j) = -ex*sinp + emz*sint + ey*cost*sinp
+            ve(i, j) = ex*cost*cosp-ey*cosp-ez*sint
+            ue(i, j) = -ex*sinp + emz*sint + ey*cost*sinp
         end do
     end do
     !
@@ -215,22 +215,22 @@ use spherepack_library
     !
     intl = 0
     !
-    !     flag (ue,ve) grid as north to south equally spaced
+    !     flag (ue, ve) grid as north to south equally spaced
     !
     igride(1) = -1
     !
-    !     flag (ue,ve) as nlate by nlone arrays
+    !     flag (ue, ve) as nlate by nlone arrays
     !
     igride(2) = 1
     !
     !     flag ve as colatitude component of vector
     ive = 1
     !
-    !     flag (ug,vg) as south to north gaussian
+    !     flag (ug, vg) as south to north gaussian
     !
     igridg(1) = +2
     !
-    !     flag (ug,vg) as nlong by nlatg arrays
+    !     flag (ug, vg) as nlong by nlatg arrays
     !
     igridg(2) = 0
     !
@@ -239,30 +239,30 @@ use spherepack_library
     !
     !     print trvsph input arguments
     !
-    write(*,100) intl,igride(1),igride(2),nlone,nlate,ive, &
-        igridg(1),igridg(2),nlong,nlatg,ivg,lsave,lwork,ldwork
+    write(*, 100) intl, igride(1), igride(2), nlone, nlate, ive, &
+        igridg(1), igridg(2), nlong, nlatg, ivg, lsave, lwork, ldwork
 100 format(//' EQUALLY SPACED TO GAUSSIAN GRID TRANSFER ' , &
         /' trvsph input arguments: ' , &
-        /' intl = ',i2, &
-        /' igride(1) = ',i2,2x,' igride(2) = ',i2, &
-        /' nlone = ',i3,2x,' nlate = ',i3, &
-        /' ive = ',i2, &
-        /' igridg(1) = ',i2,2x,' igridg(2) = ',i2, &
-        /' nlong = ',i3,2x,' nlatg = ',i3, &
-        /' ivg = ',i2 &
-        /' lsave = ',i7,2x,' lwork = ',i7,2x,' ldwork = ',i5)
+        /' intl = ', i2, &
+        /' igride(1) = ', i2, 2x, ' igride(2) = ', i2, &
+        /' nlone = ', i3, 2x, ' nlate = ', i3, &
+        /' ive = ', i2, &
+        /' igridg(1) = ', i2, 2x, ' igridg(2) = ', i2, &
+        /' nlong = ', i3, 2x, ' nlatg = ', i3, &
+        /' ivg = ', i2 &
+        /' lsave = ', i7, 2x, ' lwork = ', i7, 2x, ' ldwork = ', i5)
     !
-    !     transfer  (ue,ve) to (ug,vg)
+    !     transfer  (ue, ve) to (ug, vg)
     !
-    call trvsph(intl,igride,nlone,nlate,ive,ue,ve,igridg,nlong, &
-        nlatg,ivg,ug,vg,wsave,lsave,lsvmin,work,lwork,lwkmin,dwork, &
-        ldwork,ier)
+    call trvsph(intl, igride, nlone, nlate, ive, ue, ve, igridg, nlong, &
+        nlatg, ivg, ug, vg, wsave, lsave, lsvmin, work, lwork, lwkmin, dwork, &
+        ldwork, ier)
     !
     !     print output arguments
     !
-    write (*,200) ier, lsvmin, lwkmin
+    write (*, 200) ier, lsvmin, lwkmin
 200 format(//' trvsph output: ' &
-        / ' ier = ', i8,2x, 'lsvmin = ',i7, 2x,'lwkmin = ',i7)
+        / ' ier = ', i8, 2x, 'lsvmin = ', i7, 2x, 'lwkmin = ', i7)
 
     if (ier == 0) then
         !
@@ -270,21 +270,21 @@ use spherepack_library
         !     set with south to north orientation in thetag
         !
         call compute_gaussian_latitudes_and_weights(nlatg, dtheta, dwts, ier)
-        do  i=1,nlatg
+        do  i=1, nlatg
             ib = nlatg-i+1
             thetag(i) = dtheta(ib)
         end do
           !
-          !     compute the least squares error in (ug,vg)
+          !     compute the least squares error in (ug, vg)
           !     by comparing with exact geophysical vector
           !
         errv2 = 0.0
         erru2 = 0.0
-        do  j=1,nlong
+        do  j=1, nlong
             p = (j-1)*dlong
             cosp = cos(p)
             sinp = sin(p)
-            do i=1,nlatg
+            do i=1, nlatg
                 t = thetag(i)
                 cost = cos(t)
                 sint = sin(t)
@@ -297,55 +297,55 @@ use spherepack_library
                 emz = exp(-z)
                 vee = -ex*cost*cosp+ey*cosp+ez*sint
                 uee = -ex*sinp + emz*sint + ey*cost*sinp
-                erru2 = erru2 + (ug(j,i)-uee)**2
-                errv2 = errv2 + (vg(j,i)-vee)**2
+                erru2 = erru2 + (ug(j, i)-uee)**2
+                errv2 = errv2 + (vg(j, i)-vee)**2
             end do
         end do
         erru2 = sqrt(erru2/(nlong*nlatg))
         errv2 = sqrt(errv2/(nlong*nlatg))
-        write (6,300) erru2, errv2
+        write (6, 300) erru2, errv2
 300     format(' least squares error in u = ', e10.3 &
             /' least squares error in v = ', e10.3)
     end if
     !
-    !     now transfer (ug,vg) back to (ue,ve)
+    !     now transfer (ug, vg) back to (ue, ve)
     !
-    do j=1,nlone
-        do i=1,nlate
-            ue(i,j) = 0.0
-            ve(i,j) = 0.0
+    do j=1, nlone
+        do i=1, nlate
+            ue(i, j) = 0.0
+            ve(i, j) = 0.0
         end do
     end do
-    write(*,101) intl,igridg(1),igridg(2),nlong,nlatg,ivg, &
-        igride(1),igride(2),nlone,nlate,ive,lsave,lwork,ldwork
+    write(*, 101) intl, igridg(1), igridg(2), nlong, nlatg, ivg, &
+        igride(1), igride(2), nlone, nlate, ive, lsave, lwork, ldwork
 101 format(//' GAUSSIAN TO EQUALLY SPACED GRID TRANSFER ' , &
         /' trvsph input arguments: ' , &
-        /' intl = ',i2, &
-        /' igridg(1) = ',i2,2x,' igridg(2) = ',i2, &
-        /' nlong = ',i3,2x,' nlatg = ',i3, &
-        /' ivg = ',i2, &
-        /' igride(1) = ',i2,2x,' igride(2) = ',i2, &
-        /' nlone = ',i3,2x,' nlate = ',i3, &
-        /' ive = ',i2 &
-        /' lsave = ',i7,2x,' lwork = ',i7,2x,' ldwork = ',i5)
-    call trvsph(intl,igridg,nlong,nlatg,ivg,ug,vg,igride,nlone,nlate, &
-        ive,ue,ve,wsave,lsave,lsvmin,work,lwork,lwkmin,dwork,ldwork,ier)
+        /' intl = ', i2, &
+        /' igridg(1) = ', i2, 2x, ' igridg(2) = ', i2, &
+        /' nlong = ', i3, 2x, ' nlatg = ', i3, &
+        /' ivg = ', i2, &
+        /' igride(1) = ', i2, 2x, ' igride(2) = ', i2, &
+        /' nlone = ', i3, 2x, ' nlate = ', i3, &
+        /' ive = ', i2 &
+        /' lsave = ', i7, 2x, ' lwork = ', i7, 2x, ' ldwork = ', i5)
+    call trvsph(intl, igridg, nlong, nlatg, ivg, ug, vg, igride, nlone, nlate, &
+        ive, ue, ve, wsave, lsave, lsvmin, work, lwork, lwkmin, dwork, ldwork, ier)
     !
     !     print output arguments
     !
-    write (*,200) ier, lsvmin, lwkmin
+    write (*, 200) ier, lsvmin, lwkmin
     if (ier == 0) then
         !
-        !     compute the least squares error in (ue,ve)
+        !     compute the least squares error in (ue, ve)
         !     by comparing with exact mathematical vector
         !
         errv2 = 0.0
         erru2 = 0.0
-        do  j=1,nlone
+        do  j=1, nlone
             p = (j-1)*dlone
             cosp = cos(p)
             sinp = sin(p)
-            do i=1,nlate
+            do i=1, nlate
                 t = (i-1)*dlate
                 cost = cos(t)
                 sint = sin(t)
@@ -358,12 +358,12 @@ use spherepack_library
                 emz = exp(-z)
                 vee =  ex*cost*cosp-ey*cosp-ez*sint
                 uee = -ex*sinp + emz*sint + ey*cost*sinp
-                erru2 = erru2 + (ue(i,j)-uee)**2
-                errv2 = errv2 + (ve(i,j)-vee)**2
+                erru2 = erru2 + (ue(i, j)-uee)**2
+                errv2 = errv2 + (ve(i, j)-vee)**2
             end do
         end do
         erru2 = sqrt(erru2/(nlone*nlate))
         errv2 = sqrt(errv2/(nlone*nlate))
-        write (6,300) erru2, errv2
+        write (6, 300) erru2, errv2
     end if
 end program testrvsph

@@ -37,21 +37,21 @@
 !
 !     hrfft.f, vshifte.f
 !
-!     Let the analytic vector field (u,v) in geophysical coordinates be
+!     Let the analytic vector field (u, v) in geophysical coordinates be
 !     given by
 !
 !          u  = -exp(x)*sin(p) + exp(-z)*cos(p) + exp(y)*sin(t)*sin(p)
 !
 !          v  = exp(y)*cos(p) + exp(z)*cos(t) - exp(x)*sin(t)*cos(p)
 !
-!     where t is the latitude coordinate, p is the longitude coordinate,
-!     and x=cos(t)*cos(p),y=cos(t)*sin(p),z=sin(t) are the cartesian coordinates
+!     where t is the latitude coordinate, p is the longitude coordinate, 
+!     and x=cos(t)*cos(p), y=cos(t)*sin(p), z=sin(t) are the cartesian coordinates
 !     restricted to the sphere.
 
-!     The "offset" vector field (uoff,voff) is set equal to (u,v).
-!     This is transferred to the "regular" grid in (ureg,vreg).  (ureg,vreg)
-!     is then compared with (u,v) on the regular grid.  Finally (ureg,vreg)
-!     is transferred back to (uoff,voff) which is again compared with (u,v).
+!     The "offset" vector field (uoff, voff) is set equal to (u, v).
+!     This is transferred to the "regular" grid in (ureg, vreg).  (ureg, vreg)
+!     is then compared with (u, v) on the regular grid.  Finally (ureg, vreg)
+!     is transferred back to (uoff, voff) which is again compared with (u, v).
 !     The least squares error after each transformation with vshifte
 !     is computed and printed.  Results from running the program on
 !     a 2.5 degree equally spaced regular and offset grid is given.
@@ -89,27 +89,27 @@
 program testvshifte
 use spherepack_library
     implicit none
-    integer nnlon,nnlat,nnlatp1,nnlat2,llsave,llwork
+    integer nnlon, nnlat, nnlatp1, nnlat2, llsave, llwork
     !
-    !     set equally spaced grid sizes in nnlat,nnlon
+    !     set equally spaced grid sizes in nnlat, nnlon
     !
-    parameter(nnlon=144,nnlat=72)
+    parameter(nnlon=144, nnlat=72)
     !
-    !     set parameters which depend on nnlat,nnlon
+    !     set parameters which depend on nnlat, nnlon
     !
-    parameter(nnlatp1=nnlat+1,nnlat2=nnlat+nnlat)
+    parameter(nnlatp1=nnlat+1, nnlat2=nnlat+nnlat)
     !     save work space
     parameter (llsave=2*(2*nnlat+nnlon)+32)
     !     unsaved work space for nnlon even
     parameter (llwork = 2*nnlon*(nnlat+1))
     !     unsaved work space for nnlon odd
     !     parameter (llwork = nnlon*(5*nnlat+1))
-    integer ioff,nlon,nlat,nlat2,j,i,lsave,lwork,ier
-    real dlat,dlon,dlat2,dlon2,lat,long,x,y,z,ex,ey,ez,emz
-    real err2u,err2v,ue,ve,sint,sinp,cost,cosp
-    real uoff(nnlon,nnlat),voff(nnlon,nnlat)
-    real ureg(nnlon,nnlatp1),vreg(nnlon,nnlatp1)
-    real wsave(llsave),work(llwork)
+    integer ioff, nlon, nlat, nlat2, j, i, lsave, lwork, ier
+    real dlat, dlon, dlat2, dlon2, lat, long, x, y, z, ex, ey, ez, emz
+    real err2u, err2v, ue, ve, sint, sinp, cost, cosp
+    real uoff(nnlon, nnlat), voff(nnlon, nnlat)
+    real ureg(nnlon, nnlatp1), vreg(nnlon, nnlatp1)
+    real wsave(llsave), work(llwork)
     !
     !     set resolution, work space lengths, and grid increments
     !
@@ -123,13 +123,13 @@ use spherepack_library
     dlat2 = 0.5*dlat
     dlon2 = 0.5*dlon
     !
-    !     set (uoff,voff) = (u,v) on offset grid
+    !     set (uoff, voff) = (u, v) on offset grid
     !
-    do j=1,nlon
+    do j=1, nlon
         long = dlon2+(j-1)*dlon
         sinp = sin(long)
         cosp = cos(long)
-        do i=1,nlat
+        do i=1, nlat
             lat = -0.5*pi+dlat2+(i-1)*dlat
             sint = sin(lat)
             cost = cos(lat)
@@ -140,40 +140,40 @@ use spherepack_library
             ey = exp(y)
             ez = exp(z)
             emz = exp(-z)
-            uoff(j,i) =-ex*sinp+emz*cost+ey*sint*sinp
-            voff(j,i) = ey*cosp+ez*cost-ex*sint*cosp
+            uoff(j, i) =-ex*sinp+emz*cost+ey*sint*sinp
+            voff(j, i) = ey*cosp+ez*cost-ex*sint*cosp
         end do
     end do
     !
     !    initialize wsav for offset to regular shift
     !
     ioff = 0
-    call vshifti(ioff,nlon,nlat,lsave,wsave,ier)
+    call vshifti(ioff, nlon, nlat, lsave, wsave, ier)
     !
     !     write input arguments to vshifte
     !
-    write(*,100) ioff,nlon,nlat,lsave,lwork
+    write(*, 100) ioff, nlon, nlat, lsave, lwork
 100 format(' vshifte arguments', &
-        /' ioff = ',i2, ' nlon = ',i3,' nlat = ',i3, &
-        /' lsave = ',i5, ' lwork = ',i5)
+        /' ioff = ', i2, ' nlon = ', i3, ' nlat = ', i3, &
+        /' lsave = ', i5, ' lwork = ', i5)
     !
     !     shift offset to regular grid
     !
-    call vshifte(ioff,nlon,nlat,uoff,voff,ureg,vreg, &
-        wsave,lsave,work,lwork,ier)
-    write(*,200) ier
-200 format(' ier = ',i2)
+    call vshifte(ioff, nlon, nlat, uoff, voff, ureg, vreg, &
+        wsave, lsave, work, lwork, ier)
+    write(*, 200) ier
+200 format(' ier = ', i2)
     if (ier==0) then
         !
-        !     compute error in ureg,vreg
+        !     compute error in ureg, vreg
         !
         err2u = 0.0
         err2v = 0.0
-        do j=1,nlon
+        do j=1, nlon
             long = (j-1)*dlon
             sinp = sin(long)
             cosp = cos(long)
-            do i=1,nlat+1
+            do i=1, nlat+1
                 lat = -0.5*pi+(i-1)*dlat
                 sint = sin(lat)
                 cost = cos(lat)
@@ -186,45 +186,45 @@ use spherepack_library
                 emz = exp(-z)
                 ue = -ex*sinp+emz*cost+ey*sint*sinp
                 ve = ey*cosp+ez*cost-ex*sint*cosp
-                err2u = err2u + (ureg(j,i)-ue)**2
-                err2v = err2v + (vreg(j,i)-ve)**2
+                err2u = err2u + (ureg(j, i)-ue)**2
+                err2v = err2v + (vreg(j, i)-ve)**2
             end do
         end do
         err2u = sqrt(err2u/(nlon*(nlat+1)))
         err2v = sqrt(err2v/(nlon*(nlat+1)))
-        write(*,300) err2u,err2v
+        write(*, 300) err2u, err2v
 300     format(' least squares error ', &
-            /' err2u = ',e10.3, ' err2v = ',e10.3)
+            /' err2u = ', e10.3, ' err2v = ', e10.3)
     end if
     !
     !    initialize wsav for regular to offset shift
     !
     ioff = 1
-    call vshifti(ioff,nlon,nlat,lsave,wsave,ier)
+    call vshifti(ioff, nlon, nlat, lsave, wsave, ier)
     !
-    !     transfer regular grid values in (ureg,vreg) to offset grid in (uoff,voff)
+    !     transfer regular grid values in (ureg, vreg) to offset grid in (uoff, voff)
     !
-    do j=1,nlon
-        do i=1,nlat
-            uoff(j,i) = 0.0
-            voff(j,i) = 0.0
+    do j=1, nlon
+        do i=1, nlat
+            uoff(j, i) = 0.0
+            voff(j, i) = 0.0
         end do
     end do
-    write(*,100) ioff,nlon,nlat,lsave,lwork
-    call vshifte(ioff,nlon,nlat,uoff,voff,ureg,vreg, &
-        wsave,lsave,work,lwork,ier)
-    write(*,200) ier
+    write(*, 100) ioff, nlon, nlat, lsave, lwork
+    call vshifte(ioff, nlon, nlat, uoff, voff, ureg, vreg, &
+        wsave, lsave, work, lwork, ier)
+    write(*, 200) ier
     if (ier == 0) then
         !
-        !     compute error in uoff,voff
+        !     compute error in uoff, voff
         !
         err2u = 0.0
         err2v = 0.0
-        do j=1,nlon
+        do j=1, nlon
             long = dlon2+(j-1)*dlon
             sinp = sin(long)
             cosp = cos(long)
-            do i=1,nlat
+            do i=1, nlat
                 lat = -0.5*pi+dlat2+(i-1)*dlat
                 sint = sin(lat)
                 cost = cos(lat)
@@ -237,12 +237,12 @@ use spherepack_library
                 emz = exp(-z)
                 ue = -ex*sinp+emz*cost+ey*sint*sinp
                 ve = ey*cosp+ez*cost-ex*sint*cosp
-                err2u = err2u + (uoff(j,i)-ue)**2
-                err2v = err2v + (voff(j,i)-ve)**2
+                err2u = err2u + (uoff(j, i)-ue)**2
+                err2v = err2v + (voff(j, i)-ve)**2
             end do
         end do
         err2u = sqrt(err2u/(nlon*(nlat+1)))
         err2v = sqrt(err2v/(nlon*(nlat+1)))
-        write(*,300) err2u,err2v
+        write(*, 300) err2u, err2v
     end if
 end program testvshifte

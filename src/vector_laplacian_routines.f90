@@ -248,14 +248,14 @@ contains
 
         ! Dummy arguments
         integer(ip), intent(out) :: ityp
-        real(wp),    intent(in)  :: br(:,:,:)
-        real(wp),    intent(in)  :: bi(:,:,:)
-        real(wp),    intent(in)  :: cr(:,:,:)
-        real(wp),    intent(in)  :: ci(:,:,:)
-        real(wp),    intent(out) :: brlap(:,:,:)
-        real(wp),    intent(out) :: bilap(:,:,:)
-        real(wp),    intent(out) :: crlap(:,:,:)
-        real(wp),    intent(out) :: cilap(:,:,:)
+        real(wp),    intent(in)  :: br(:, :, :)
+        real(wp),    intent(in)  :: bi(:, :, :)
+        real(wp),    intent(in)  :: cr(:, :, :)
+        real(wp),    intent(in)  :: ci(:, :, :)
+        real(wp),    intent(out) :: brlap(:, :, :)
+        real(wp),    intent(out) :: bilap(:, :, :)
+        real(wp),    intent(out) :: crlap(:, :, :)
+        real(wp),    intent(out) :: cilap(:, :, :)
         real(wp),    intent(out) :: fnn(:)
 
         ! Local variables
@@ -394,14 +394,14 @@ contains
 
         ! Dummy arguments
         integer(ip), intent(out) :: ityp
-        real(wp),    intent(in)  :: br(:,:,:)
-        real(wp),    intent(in)  :: bi(:,:,:)
-        real(wp),    intent(in)  :: cr(:,:,:)
-        real(wp),    intent(in)  :: ci(:,:,:)
-        real(wp),    intent(out) :: brvw(:,:,:)
-        real(wp),    intent(out) :: bivw(:,:,:)
-        real(wp),    intent(out) :: crvw(:,:,:)
-        real(wp),    intent(out) :: civw(:,:,:)
+        real(wp),    intent(in)  :: br(:, :, :)
+        real(wp),    intent(in)  :: bi(:, :, :)
+        real(wp),    intent(in)  :: cr(:, :, :)
+        real(wp),    intent(in)  :: ci(:, :, :)
+        real(wp),    intent(out) :: brvw(:, :, :)
+        real(wp),    intent(out) :: bivw(:, :, :)
+        real(wp),    intent(out) :: crvw(:, :, :)
+        real(wp),    intent(out) :: civw(:, :, :)
         real(wp),    intent(out) :: fnn(:)
 
         ! Local variables

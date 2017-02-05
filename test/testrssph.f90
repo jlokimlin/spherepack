@@ -58,15 +58,15 @@
 !     For testing purposes, DATAE is set equal the analytic function
 !
 !                       x*y*z
-!           f(x,y,z) = e
+!           f(x, y, z) = e
 !
-!     in Cartesian coordinates x,y,z restricted to the surface of the sphere.
+!     in Cartesian coordinates x, y, z restricted to the surface of the sphere.
 !     The same function is used to compute error in DATAG after the data transfer
 !     with trssph.  Finally this is used to compute error in DATAE after the transfer
 !     back with trssph.  Output from executing the test program on machines with
 !     32 bit and 64 bit arithmetic is listed below.  The minimum required saved
 !     and unsaved work space lengths were predetermined by an earlier call to
-!     trssph with nlone=36,nlate=19,nlong=192,nlatg=94,lsave=1,lwork=1 and printout
+!     trssph with nlone=36, nlate=19, nlong=192, nlatg=94, lsave=1, lwork=1 and printout
 !     of lsvmin and lwkmin.
 !
 !
@@ -123,8 +123,8 @@ use spherepack_library
     !
     !     set grid sizes with parameter statements
     !
-    integer nnlatg,nnlong,nnlate,nnlone,llwork,llsave,lldwork
-    parameter (nnlatg=92, nnlong=194, nnlate=19,nnlone=36)
+    integer nnlatg, nnlong, nnlate, nnlone, llwork, llsave, lldwork
+    parameter (nnlatg=92, nnlong=194, nnlate=19, nnlone=36)
     !
     !     set predetermined minimum saved and unsaved work space lengths
     !
@@ -136,14 +136,14 @@ use spherepack_library
     !
     !     dimension and type data arrays and grid vectors and internal variables
     !
-    real datae(nnlate,nnlone), datag(nnlong,nnlatg)
-    real work(llwork),wsave(llsave),thetag(nnlatg)
+    real datae(nnlate, nnlone), datag(nnlong, nnlatg)
+    real work(llwork), wsave(llsave), thetag(nnlatg)
     real dwork(lldwork)
-    real dtheta(nnlatg),dwts(nnlatg)
-    integer igride(2),igridg(2)
-    integer nlatg,nlong,nlate,nlone,lwork,lsave,ldwork
-    real dlate,dlone,dlong,cp,sp,ct,st,xyz,err2,t,p,dif
-    integer i,j,intl,ier,lsvmin,lwkmin
+    real dtheta(nnlatg), dwts(nnlatg)
+    integer igride(2), igridg(2)
+    integer nlatg, nlong, nlate, nlone, lwork, lsave, ldwork
+    real dlate, dlone, dlong, cp, sp, ct, st, xyz, err2, t, p, dif
+    integer i, j, intl, ier, lsvmin, lwkmin
     !
     !     set grid sizes and dimensions from parameter statements
     !
@@ -161,14 +161,14 @@ use spherepack_library
     dlone = (pi+pi)/nlone
     dlong = (pi+pi)/nlong
     !
-    !     set given data in DATAE from f(x,y,z)= exp(x*y*z) restricted
+    !     set given data in DATAE from f(x, y, z)= exp(x*y*z) restricted
     !     to nlate by nlone equally spaced grid on the sphere
     !
-    do  j=1,nlone
+    do  j=1, nlone
         p = (j-1)*dlone
         cp = cos(p)
         sp = sin(p)
-        do i=1,nlate
+        do i=1, nlate
             !
             !     set north to south oriented colatitude point
             !
@@ -176,7 +176,7 @@ use spherepack_library
             ct = cos(t)
             st = sin(t)
             xyz = (st*(st*ct*sp*cp))
-            datae(i,j) = exp(xyz)
+            datae(i, j) = exp(xyz)
         end do
     end do
     !
@@ -202,28 +202,28 @@ use spherepack_library
     !
     !     print trssph input parameters
     !
-    write(*,100) intl,igride(1),igride(2),nlone,nlate, &
-        igridg(1),igridg(2),nlong,nlatg,lsave,lwork,ldwork
+    write(*, 100) intl, igride(1), igride(2), nlone, nlate, &
+        igridg(1), igridg(2), nlong, nlatg, lsave, lwork, ldwork
 100 format(//' EQUALLY SPACED TO GAUSSIAN GRID TRANSFER ' , &
         /' trssph input arguments: ' , &
-        /' intl = ',i2, &
-        /' igride(1) = ',i2,2x,' igride(2) = ',i2, &
-        /' nlone = ',i3,2x,' nlate = ',i3, &
-        /' igridg(1) = ',i2,2x,' igridg(2) = ',i2, &
-        /' nlong = ',i3,2x,' nlatg = ',i3, &
-        /' lsave = ',i7,2x,' lwork = ',i7,2x,' ldwork = ',i5)
+        /' intl = ', i2, &
+        /' igride(1) = ', i2, 2x, ' igride(2) = ', i2, &
+        /' nlone = ', i3, 2x, ' nlate = ', i3, &
+        /' igridg(1) = ', i2, 2x, ' igridg(2) = ', i2, &
+        /' nlong = ', i3, 2x, ' nlatg = ', i3, &
+        /' lsave = ', i7, 2x, ' lwork = ', i7, 2x, ' ldwork = ', i5)
     !
     !     transfer data from DATAE to DATAG
     !
-    call trssph(intl,igride,nlone,nlate,datae,igridg,nlong, &
-        nlatg,datag,wsave,lsave,lsvmin,work,lwork,lwkmin,dwork, &
-        ldwork,ier)
+    call trssph(intl, igride, nlone, nlate, datae, igridg, nlong, &
+        nlatg, datag, wsave, lsave, lsvmin, work, lwork, lwkmin, dwork, &
+        ldwork, ier)
     !
     !     print output parameters
     !
-    write (*,200) ier, lsvmin, lwkmin
+    write (*, 200) ier, lsvmin, lwkmin
 200 format(//' trssph output: ' &
-        / ' ier = ', i2,2x, 'lsvmin = ',i7, 2x,'lwkmin = ',i7)
+        / ' ier = ', i2, 2x, 'lsvmin = ', i7, 2x, 'lwkmin = ', i7)
     if (ier == 0) then
         !
         !     compute nlatg gaussian colatitude points using spherepack routine "gaqd"
@@ -231,78 +231,78 @@ use spherepack_library
         !     for computing error in DATAG
         !
         call compute_gaussian_latitudes_and_weights(nlatg, dtheta, dwts, ier)
-        do  i=1,nlatg
+        do  i=1, nlatg
             thetag(i) = pi-dtheta(i)
         end do
         !
         !     compute the least squares error in DATAG
         !
         err2 = 0.0
-        do j=1,nlong
+        do j=1, nlong
             p = (j-1)*dlong
             cp = cos(p)
             sp = sin(p)
-            do i=1,nlatg
+            do i=1, nlatg
                 t = thetag(i)
                 ct = cos(t)
                 st = sin(t)
                 xyz = (st*(st*ct*sp*cp))
-                dif = abs(DATAG(j,i)-exp(xyz))
+                dif = abs(DATAG(j, i)-exp(xyz))
                 err2 = err2+dif*dif
             end do
         end do
         err2 = sqrt(err2/(nlong*nlatg))
-        write (6,300) err2
-300     format(' least squares error = ',e10.3)
+        write (6, 300) err2
+300     format(' least squares error = ', e10.3)
     end if
     !
     !     set DATAE to zero
     !
-    do j=1,nlone
-        do i=1,nlate
-            datae(i,j) = 0.0
+    do j=1, nlone
+        do i=1, nlate
+            datae(i, j) = 0.0
         end do
     end do
 
-    write(*,400) intl,igridg(1),igridg(2),nlong,nlatg,igride(1), &
-        igride(2),nlone,nlate,lsave,lwork,ldwork
+    write(*, 400) intl, igridg(1), igridg(2), nlong, nlatg, igride(1), &
+        igride(2), nlone, nlate, lsave, lwork, ldwork
 400 format(/' GAUSSIAN TO EQUALLY SPACED GRID TRANSFER ' , &
         /' trssph input arguments: ' , &
-        /' intl = ',i2, &
-        /' igridg(1) = ',i2,2x,' igridg(2) = ',i2, &
-        /' nlong = ',i3,2x,' nlatg = ',i3, &
-        /' igride(1) = ',i2,2x,' igride(2) = ',i2, &
-        /' nlone = ',i3,2x,' nlate = ',i3, &
-        /' lsave = ',i7,2x,'lwork = ',i7, 2x, 'ldwork = ',i7)
+        /' intl = ', i2, &
+        /' igridg(1) = ', i2, 2x, ' igridg(2) = ', i2, &
+        /' nlong = ', i3, 2x, ' nlatg = ', i3, &
+        /' igride(1) = ', i2, 2x, ' igride(2) = ', i2, &
+        /' nlone = ', i3, 2x, ' nlate = ', i3, &
+        /' lsave = ', i7, 2x, 'lwork = ', i7, 2x, 'ldwork = ', i7)
     !
     !     transfer DATAG back to DATAE
     !
-    call TRSSPH(intl,igridg,nlong,nlatg,datag,igride,nlone, &
-        nlate,datae,wsave,lsave,lsvmin,work,lwork,lwkmin,dwork, &
-        ldwork,ier)
+    call TRSSPH(intl, igridg, nlong, nlatg, datag, igride, nlone, &
+        nlate, datae, wsave, lsave, lsvmin, work, lwork, lwkmin, dwork, &
+        ldwork, ier)
     !
     !     print output parameters
     !
-    write (*,200) ier, lsvmin, lwkmin
+    write (*, 200) ier, lsvmin, lwkmin
     if (ier == 0) then
         !
         !     compute the least squares error in DATAE
         !
         err2 = 0.0
-        do j=1,nlone
+        do j=1, nlone
             p = (j-1)*dlone
             cp = cos(p)
             sp = sin(p)
-            do i=1,nlate
+            do i=1, nlate
                 t = (i-1)*dlate
                 ct = cos(t)
                 st = sin(t)
                 xyz = (st*(st*ct*sp*cp))
-                dif = abs(DATAE(i,j)-exp(xyz))
+                dif = abs(DATAE(i, j)-exp(xyz))
                 err2 = err2+dif*dif
             end do
         end do
         err2 = sqrt(err2/(nlate*nlone))
-        write (6,300) err2
+        write (6, 300) err2
     end if
 end program testrssph

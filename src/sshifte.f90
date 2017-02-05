@@ -281,7 +281,7 @@ contains
     subroutine shftoff(nlon, nlat, goff, greg, wsav, nr, nlat2, &
         rlat, rlon, wrk)
         !
-        !     shift offset grid to regular grid, i.e.,
+        !     shift offset grid to regular grid, i.e., 
         !     goff is given, greg is to be generated
         !
 
@@ -407,7 +407,7 @@ contains
     subroutine shftreg(nlon, nlat, goff, greg, wsav, nr, nlat2, nlatp1, &
         rlat, rlon, wrk)
         !
-        !     shift regular grid to offset grid, i.e.,
+        !     shift regular grid to offset grid, i.e., 
         !     greg is given, goff is to be generated
         !
 

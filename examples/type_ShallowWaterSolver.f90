@@ -62,7 +62,7 @@ contains
 
     end function get_initial_velocity
 
-    pure function atanxy(x,y) &
+    pure function atanxy(x, y) &
         result (return_value)
 
         ! Dummy arguments
@@ -74,7 +74,7 @@ contains
 
         if (x == ZERO .and. y == ZERO) return
 
-        return_value = atan2(y,x)
+        return_value = atan2(y, x)
 
     end function atanxy
 
@@ -134,7 +134,7 @@ contains
 
         ! Dummy arguments
         class(ShallowWaterSolver), intent(inout)  :: self
-        real(wp),                  intent(in)     :: datagrid(:,:)
+        real(wp),                  intent(in)     :: datagrid(:, :)
         complex(wp),               intent(out)    :: dataspec(:)
 
         ! Local variables
@@ -145,7 +145,7 @@ contains
             nlon => size(datagrid, dim=1)  &
             )
             block
-                real(wp) :: temp(nlat,nlon)
+                real(wp) :: temp(nlat, nlon)
 
                 !  Transpose data
                 temp = transpose(datagrid)
@@ -183,7 +183,7 @@ contains
 
         ! Dummy arguments
         class(ShallowWaterSolver), intent(inout)  :: self
-        real(wp),                  intent(inout)  :: datagrid(:,:)
+        real(wp),                  intent(inout)  :: datagrid(:, :)
         complex(wp),               intent(in)     :: dataspec(:)
 
         ! Local variables
@@ -194,7 +194,7 @@ contains
             nlon => size(datagrid, dim=1)  &
             )
             block
-                real(wp) :: temp(nlat,nlon)
+                real(wp) :: temp(nlat, nlon)
 
                 !  fill two real arrays (a, b) with contents of dataspec.
                 associate( &
@@ -237,8 +237,8 @@ contains
 
         ! Dummy arguments
         class(ShallowWaterSolver), intent(inout)  :: self
-        real(wp),                  intent(in)     :: ugrid(:,:)
-        real(wp),                  intent(in)     :: vgrid(:,:)
+        real(wp),                  intent(in)     :: ugrid(:, :)
+        real(wp),                  intent(in)     :: vgrid(:, :)
         complex(wp),               intent(out)    :: vrtspec(:)
         complex(wp),               intent(out)    :: divspec(:)
 
@@ -251,8 +251,8 @@ contains
             nlon => size(ugrid, dim=1)  &
             )
             block
-                real(wp) :: v(nlat,nlon)
-                real(wp) :: w(nlat,nlon)
+                real(wp) :: v(nlat, nlon)
+                real(wp) :: w(nlat, nlon)
                 real(wp) :: sqnn(nlat)
 
                 !  Transpose data.
@@ -287,8 +287,8 @@ contains
                     a = ZERO
                     b = ZERO
                     do n=1, nlat
-                        a(:,n) = -(sqnn(n)/rsphere)*br(:,n)
-                        b(:,n) = -(sqnn(n)/rsphere)*bi(:,n)
+                        a(:, n) = -(sqnn(n)/rsphere)*br(:, n)
+                        b(:, n) = -(sqnn(n)/rsphere)*bi(:, n)
                     end do
 
                     divspec = HALF * cmplx( &
@@ -299,8 +299,8 @@ contains
                     a = ZERO
                     b = ZERO
                     do n=1, nlat
-                        a(:,n) = (sqnn(n)/rsphere)*cr(:,n)
-                        b(:,n) = (sqnn(n)/rsphere)*ci(:,n)
+                        a(:, n) = (sqnn(n)/rsphere)*cr(:, n)
+                        b(:, n) = (sqnn(n)/rsphere)*ci(:, n)
                     end do
 
                     vrtspec = HALF * cmplx( &
@@ -332,20 +332,20 @@ contains
         class(ShallowWaterSolver), intent(inout) :: self
         complex(wp),               intent(in)    :: vrtspec(:)
         complex(wp),               intent(in)    :: divspec(:)
-        real(wp),                  intent(out)   :: ugrid(:,:)
-        real(wp),                  intent(out)   :: vgrid(:,:)
+        real(wp),                  intent(out)   :: ugrid(:, :)
+        real(wp),                  intent(out)   :: vgrid(:, :)
 
         ! Local variables
         real(wp)    :: fn
         integer(ip) :: n, m, nm, i ! Counters
 
         associate( &
-            nlat => size(ugrid, dim=2),&
+            nlat => size(ugrid, dim=2), &
             nlon => size(ugrid, dim=1) &
             )
             block
-                real(wp) :: v(nlat,nlon)
-                real(wp) :: w(nlat,nlon)
+                real(wp) :: v(nlat, nlon)
+                real(wp) :: w(nlat, nlon)
                 real(wp) :: isqnn(nlat)
 
                 ! Multiply spectral coefficients of vorticity and divergence
@@ -386,8 +386,8 @@ contains
                     end do
 
                     do n=1, nlat
-                        br(:,n) = isqnn(n)*a(:,n)
-                        bi(:,n) = isqnn(n)*b(:,n)
+                        br(:, n) = isqnn(n)*a(:, n)
+                        bi(:, n) = isqnn(n)*b(:, n)
                     end do
 
                     ! Preset azimuthal coefficients to 0.0
@@ -402,8 +402,8 @@ contains
                     end do
 
                     do n=1, nlat
-                        cr(:,n) = isqnn(n)*a(:,n)
-                        ci(:,n) = isqnn(n)*b(:,n)
+                        cr(:, n) = isqnn(n)*a(:, n)
+                        ci(:, n) = isqnn(n)*b(:, n)
                     end do
 
                     ! Compute vector harmonic synthesis to get winds on grid.

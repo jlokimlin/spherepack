@@ -73,8 +73,8 @@
 !
 ! SPECIAL CONDITIONS
 ! ------------------
-!     before calling routines ezfftb and ezfftf for the first time,
-!     or before calling ezfftb and ezfftf with a different length,
+!     before calling routines ezfftb and ezfftf for the first time, 
+!     or before calling ezfftb and ezfftf with a different length, 
 !     users must initialize by calling routine ezffti.
 !
 ! I/O
@@ -1834,10 +1834,10 @@ contains
         !-----------------------------------------------
 
         if(ido <= 2) then
-            ch(1,:, 1) = cc(1, 1,:) + cc(1, 2,:)
-            ch(1,:, 2) = cc(1, 1,:) - cc(1, 2,:)
-            ch(2,:, 1) = cc(2, 1,:) + cc(2, 2,:)
-            ch(2,:, 2) = cc(2, 1,:) - cc(2, 2,:)
+            ch(1, :, 1) = cc(1, 1, :) + cc(1, 2, :)
+            ch(1, :, 2) = cc(1, 1, :) - cc(1, 2, :)
+            ch(2, :, 1) = cc(2, 1, :) + cc(2, 2, :)
+            ch(2, :, 2) = cc(2, 1, :) - cc(2, 2, :)
         else
             do k = 1, l1
                 do i = 2, ido, 2
@@ -2113,17 +2113,17 @@ contains
         if (l1 <= ido) then
             do j = 2, iipph
                 jc = iipp2 - j
-                ch(:,:, j) = cc(:, j,:) + cc(:, jc,:)
-                ch(:,:, jc) = cc(:, j,:) - cc(:, jc,:)
+                ch(:, :, j) = cc(:, j, :) + cc(:, jc, :)
+                ch(:, :, jc) = cc(:, j, :) - cc(:, jc, :)
             end do
-            ch(:,:, 1) = cc(:, 1,:)
+            ch(:, :, 1) = cc(:, 1, :)
         else
             do j = 2, iipph
                 jc = iipp2 - j
-                ch(:,:, j) = cc(:, j,:) + cc(:, jc,:)
-                ch(:,:, jc) = cc(:, j,:) - cc(:, jc,:)
+                ch(:, :, j) = cc(:, j, :) + cc(:, jc, :)
+                ch(:, :, jc) = cc(:, j, :) - cc(:, jc, :)
             end do
-            ch(:,:, 1) = cc(:, 1,:)
+            ch(:, :, 1) = cc(:, 1, :)
         end if
 
         idl = 2 - ido
@@ -2164,8 +2164,8 @@ contains
         if(ido /= 2) then
             nac = 0
             c2(:, 1) = ch2(:, 1)
-            c1(1,:, 2:iip) = ch(1,:, 2:iip)
-            c1(2,:, 2:iip) = ch(2,:, 2:iip)
+            c1(1, :, 2:iip) = ch(1, :, 2:iip)
+            c1(2, :, 2:iip) = ch(2, :, 2:iip)
 
             if(idot <= l1) then
                 idij = 0
@@ -2173,8 +2173,8 @@ contains
                     idij = idij + 2
                     do i = 4, ido, 2
                         idij = idij + 2
-                        c1(i-1,:, j) = wa(idij-1)*ch(i-1,:, j) - wa(idij)*ch(i,:, j)
-                        c1(i,:, j) = wa(idij-1)*ch(i,:, j) + wa(idij)*ch(i-1,:, j)
+                        c1(i-1, :, j) = wa(idij-1)*ch(i-1, :, j) - wa(idij)*ch(i, :, j)
+                        c1(i, :, j) = wa(idij-1)*ch(i, :, j) + wa(idij)*ch(i-1, :, j)
                     end do
                 end do
             else
@@ -2314,10 +2314,10 @@ contains
         !-----------------------------------------------
 
         if(ido <= 2) then
-            ch(1,:, 1) = cc(1, 1,:) + cc(1, 2,:)
-            ch(1,:, 2) = cc(1, 1,:) - cc(1, 2,:)
-            ch(2,:, 1) = cc(2, 1,:) + cc(2, 2,:)
-            ch(2,:, 2) = cc(2, 1,:) - cc(2, 2,:)
+            ch(1, :, 1) = cc(1, 1, :) + cc(1, 2, :)
+            ch(1, :, 2) = cc(1, 1, :) - cc(1, 2, :)
+            ch(2, :, 1) = cc(2, 1, :) + cc(2, 2, :)
+            ch(2, :, 2) = cc(2, 1, :) - cc(2, 2, :)
         else
             do k = 1, l1
                 do i = 2, ido, 2
@@ -2595,17 +2595,17 @@ contains
         if (l1 <= ido) then
             do j = 2, iipph
                 jc = iipp2 - j
-                ch(:,:, j) = cc(:, j,:) + cc(:, jc,:)
-                ch(:,:, jc) = cc(:, j,:) - cc(:, jc,:)
+                ch(:, :, j) = cc(:, j, :) + cc(:, jc, :)
+                ch(:, :, jc) = cc(:, j, :) - cc(:, jc, :)
             end do
-            ch(:,:, 1) = cc(:, 1,:)
+            ch(:, :, 1) = cc(:, 1, :)
         else
             do j = 2, iipph
                 jc = iipp2 - j
-                ch(:,:, j) = cc(:, j,:) + cc(:, jc,:)
-                ch(:,:, jc) = cc(:, j,:) - cc(:, jc,:)
+                ch(:, :, j) = cc(:, j, :) + cc(:, jc, :)
+                ch(:, :, jc) = cc(:, j, :) - cc(:, jc, :)
             end do
-            ch(:,:, 1) = cc(:, 1,:)
+            ch(:, :, 1) = cc(:, 1, :)
         end if
 
         idl = 2 - ido
@@ -2649,8 +2649,8 @@ contains
 
             nac = 0
             c2(:, 1) = ch2(:, 1)
-            c1(1,:, 2:iip) = ch(1,:, 2:iip)
-            c1(2,:, 2:iip) = ch(2,:, 2:iip)
+            c1(1, :, 2:iip) = ch(1, :, 2:iip)
+            c1(2, :, 2:iip) = ch(2, :, 2:iip)
 
             if (idot <= l1) then
                 idij = 0
@@ -2658,8 +2658,8 @@ contains
                     idij = idij + 2
                     do i = 4, ido, 2
                         idij = idij + 2
-                        c1(i-1,:, j) = wa(idij-1)*ch(i-1,:, j) + wa(idij)*ch(i,:, j)
-                        c1(i,:, j) = wa(idij-1)*ch(i,:, j) - wa(idij)*ch(i-1,:, j)
+                        c1(i-1, :, j) = wa(idij-1)*ch(i-1, :, j) + wa(idij)*ch(i, :, j)
+                        c1(i, :, j) = wa(idij-1)*ch(i, :, j) - wa(idij)*ch(i-1, :, j)
                     end do
                 end do
             else
@@ -2896,8 +2896,8 @@ contains
         real(wp) :: tr2, ti2
         !-----------------------------------------------
 
-        ch(1,:, 1) = cc(1, 1,:) + cc(ido, 2,:)
-        ch(1,:, 2) = cc(1, 1,:) - cc(ido, 2,:)
+        ch(1, :, 1) = cc(1, 1, :) + cc(ido, 2, :)
+        ch(1, :, 2) = cc(1, 1, :) - cc(ido, 2, :)
 
         if (ido >= 2) then
             if (ido /= 2) then
@@ -2917,8 +2917,8 @@ contains
                     return
                 end if
             end if
-            ch(ido,:, 1) = cc(ido, 1,:) + cc(ido, 1,:)
-            ch(ido,:, 2) = -(cc(1, 2,:)+cc(1, 2,:))
+            ch(ido, :, 1) = cc(ido, 1, :) + cc(ido, 1, :)
+            ch(ido, :, 2) = -(cc(1, 2, :)+cc(1, 2, :))
         end if
 
     end subroutine real_backward_pass_2
@@ -3173,39 +3173,39 @@ contains
         iipp2 = iip + 2
         iipph = (iip + 1)/2
 
-        ch(:,:, 1) = cc(:, 1,:)
+        ch(:, :, 1) = cc(:, 1, :)
 
         do j = 2, iipph
             jc = iipp2 - j
             j2 = j + j
-            ch(1,:, j) = cc(ido, j2-2,:) + cc(ido, j2-2,:)
-            ch(1,:, jc) = cc(1, j2-1,:) + cc(1, j2-1,:)
+            ch(1, :, j) = cc(ido, j2-2, :) + cc(ido, j2-2, :)
+            ch(1, :, jc) = cc(1, j2-1, :) + cc(1, j2-1, :)
         end do
 
         if(ido /= 1) then
             if (l1 <= nbd) then
                 do j = 2, iipph
                     jc = iipp2 - j
-                    ch(2:ido-1:2,:, j) = cc(2:ido-1:2, 2*j-1,:) + cc(idp2-4: &
-                        idp2-1-ido:(-2), 2*j-2,:)
-                    ch(2:ido-1:2,:, jc) = cc(2:ido-1:2, 2*j-1,:) - cc(idp2-4: &
-                        idp2-1-ido:(-2), 2*j-2,:)
-                    ch(3:ido:2,:, j) = cc(3:ido:2, 2*j-1,:) - cc(idp2-3:idp2- &
-                        ido:(-2), 2*j-2,:)
-                    ch(3:ido:2,:, jc) = cc(3:ido:2, 2*j-1,:) + cc(idp2-3:idp2- &
-                        ido:(-2), 2*j-2,:)
+                    ch(2:ido-1:2, :, j) = cc(2:ido-1:2, 2*j-1, :) + cc(idp2-4: &
+                        idp2-1-ido:(-2), 2*j-2, :)
+                    ch(2:ido-1:2, :, jc) = cc(2:ido-1:2, 2*j-1, :) - cc(idp2-4: &
+                        idp2-1-ido:(-2), 2*j-2, :)
+                    ch(3:ido:2, :, j) = cc(3:ido:2, 2*j-1, :) - cc(idp2-3:idp2- &
+                        ido:(-2), 2*j-2, :)
+                    ch(3:ido:2, :, jc) = cc(3:ido:2, 2*j-1, :) + cc(idp2-3:idp2- &
+                        ido:(-2), 2*j-2, :)
                 end do
             else
                 do j = 2, iipph
                     jc = iipp2 - j
-                    ch(2:ido-1:2,:, j) = cc(2:ido-1:2, 2*j-1,:) + cc(idp2-4: &
-                        idp2-1-ido:(-2), 2*j-2,:)
-                    ch(2:ido-1:2,:, jc) = cc(2:ido-1:2, 2*j-1,:) - cc(idp2-4: &
-                        idp2-1-ido:(-2), 2*j-2,:)
-                    ch(3:ido:2,:, j) = cc(3:ido:2, 2*j-1,:) - cc(idp2-3:idp2- &
-                        ido:(-2), 2*j-2,:)
-                    ch(3:ido:2,:, jc) = cc(3:ido:2, 2*j-1,:) + cc(idp2-3:idp2- &
-                        ido:(-2), 2*j-2,:)
+                    ch(2:ido-1:2, :, j) = cc(2:ido-1:2, 2*j-1, :) + cc(idp2-4: &
+                        idp2-1-ido:(-2), 2*j-2, :)
+                    ch(2:ido-1:2, :, jc) = cc(2:ido-1:2, 2*j-1, :) - cc(idp2-4: &
+                        idp2-1-ido:(-2), 2*j-2, :)
+                    ch(3:ido:2, :, j) = cc(3:ido:2, 2*j-1, :) - cc(idp2-3:idp2- &
+                        ido:(-2), 2*j-2, :)
+                    ch(3:ido:2, :, jc) = cc(3:ido:2, 2*j-1, :) + cc(idp2-3:idp2- &
+                        ido:(-2), 2*j-2, :)
                 end do
             end if
         end if
@@ -3240,33 +3240,33 @@ contains
 
         do j = 2, iipph
             jc = iipp2 - j
-            ch(1,:, j) = c1(1,:, j) - c1(1,:, jc)
-            ch(1,:, jc) = c1(1,:, j) + c1(1,:, jc)
+            ch(1, :, j) = c1(1, :, j) - c1(1, :, jc)
+            ch(1, :, jc) = c1(1, :, j) + c1(1, :, jc)
         end do
 
         if(ido /= 1) then
             if (l1 <= nbd) then
                 do j = 2, iipph
                     jc = iipp2 - j
-                    ch(2:ido-1:2,:, j) = c1(2:ido-1:2,:, j) - c1(3:ido:2,:, jc)
-                    ch(2:ido-1:2,:, jc) = c1(2:ido-1:2,:, j) + c1(3:ido:2,:, jc)
-                    ch(3:ido:2,:, j) = c1(3:ido:2,:, j) + c1(2:ido-1:2,:, jc)
-                    ch(3:ido:2,:, jc) = c1(3:ido:2,:, j) - c1(2:ido-1:2,:, jc)
+                    ch(2:ido-1:2, :, j) = c1(2:ido-1:2, :, j) - c1(3:ido:2, :, jc)
+                    ch(2:ido-1:2, :, jc) = c1(2:ido-1:2, :, j) + c1(3:ido:2, :, jc)
+                    ch(3:ido:2, :, j) = c1(3:ido:2, :, j) + c1(2:ido-1:2, :, jc)
+                    ch(3:ido:2, :, jc) = c1(3:ido:2, :, j) - c1(2:ido-1:2, :, jc)
                 end do
             else
                 do j = 2, iipph
                     jc = iipp2 - j
-                    ch(2:ido-1:2,:, j) = c1(2:ido-1:2,:, j) - c1(3:ido:2,:, jc)
-                    ch(2:ido-1:2,:, jc) = c1(2:ido-1:2,:, j) + c1(3:ido:2,:, jc)
-                    ch(3:ido:2,:, j) = c1(3:ido:2,:, j) + c1(2:ido-1:2,:, jc)
-                    ch(3:ido:2,:, jc) = c1(3:ido:2,:, j) - c1(2:ido-1:2,:, jc)
+                    ch(2:ido-1:2, :, j) = c1(2:ido-1:2, :, j) - c1(3:ido:2, :, jc)
+                    ch(2:ido-1:2, :, jc) = c1(2:ido-1:2, :, j) + c1(3:ido:2, :, jc)
+                    ch(3:ido:2, :, j) = c1(3:ido:2, :, j) + c1(2:ido-1:2, :, jc)
+                    ch(3:ido:2, :, jc) = c1(3:ido:2, :, j) - c1(2:ido-1:2, :, jc)
                 end do
             end if
         end if
 
         if(ido /= 1) then
             c2(:, 1) = ch2(:, 1)
-            c1(1,:, 2:iip) = ch(1,:, 2:iip)
+            c1(1, :, 2:iip) = ch(1, :, 2:iip)
             if (nbd <= l1) then
                 is = -ido
                 do j = 2, iip
@@ -3274,8 +3274,8 @@ contains
                     idij = is
                     do i = 3, ido, 2
                         idij = idij + 2
-                        c1(i-1,:, j) = wa(idij-1)*ch(i-1,:, j) - wa(idij)*ch(i,:, j)
-                        c1(i,:, j) = wa(idij-1)*ch(i,:, j) + wa(idij)*ch(i-1,:, j)
+                        c1(i-1, :, j) = wa(idij-1)*ch(i-1, :, j) - wa(idij)*ch(i, :, j)
+                        c1(i, :, j) = wa(idij-1)*ch(i, :, j) + wa(idij)*ch(i-1, :, j)
                     end do
                 end do
             else
@@ -3406,8 +3406,8 @@ contains
         real(wp) :: tr2, ti2
         !-----------------------------------------------
 
-        ch(1, 1,:) = cc(1,:, 1) + cc(1,:, 2)
-        ch(ido, 2,:) = cc(1,:, 1) - cc(1,:, 2)
+        ch(1, 1, :) = cc(1, :, 1) + cc(1, :, 2)
+        ch(ido, 2, :) = cc(1, :, 1) - cc(1, :, 2)
 
         if (ido >= 2) then
             if (ido /= 2) then
@@ -3427,8 +3427,8 @@ contains
                     return
                 end if
             end if
-            ch(1, 2,:) = -cc(ido,:, 2)
-            ch(ido, 1,:) = cc(ido,:, 1)
+            ch(1, 2, :) = -cc(ido, :, 2)
+            ch(ido, 1, :) = cc(ido, :, 1)
         end if
 
     end subroutine real_forward_pass_2
@@ -3678,7 +3678,7 @@ contains
         block_construct: block
             if (ido /= 1) then
                 ch2(:, 1) = c2(:, 1)
-                ch(1,:, 2:iip) = c1(1,:, 2:iip)
+                ch(1, :, 2:iip) = c1(1, :, 2:iip)
                 if (nbd <= l1) then
                     is = -ido
                     do j = 2, iip
@@ -3686,8 +3686,8 @@ contains
                         idij = is
                         do i = 3, ido, 2
                             idij = idij + 2
-                            ch(i-1,:, j)=wa(idij-1)*c1(i-1,:, j)+wa(idij)*c1(i,:, j)
-                            ch(i,:, j)=wa(idij-1)*c1(i,:, j)-wa(idij)*c1(i-1,:, j)
+                            ch(i-1, :, j)=wa(idij-1)*c1(i-1, :, j)+wa(idij)*c1(i, :, j)
+                            ch(i, :, j)=wa(idij-1)*c1(i, :, j)-wa(idij)*c1(i-1, :, j)
                         end do
                     end do
                 else
@@ -3706,19 +3706,19 @@ contains
                 if (l1 <= nbd) then
                     do j = 2, iipph
                         jc = iipp2 - j
-                        c1(2:ido-1:2,:, j)=ch(2:ido-1:2,:, j)+ch(2:ido-1:2,:, jc)
-                        c1(2:ido-1:2,:, jc) = ch(3:ido:2,:, j) - ch(3:ido:2,:, jc)
-                        c1(3:ido:2,:, j) = ch(3:ido:2,:, j) + ch(3:ido:2,:, jc)
-                        c1(3:ido:2,:, jc) = ch(2:ido-1:2,:, jc) - ch(2:ido-1:2,:, j)
+                        c1(2:ido-1:2, :, j)=ch(2:ido-1:2, :, j)+ch(2:ido-1:2, :, jc)
+                        c1(2:ido-1:2, :, jc) = ch(3:ido:2, :, j) - ch(3:ido:2, :, jc)
+                        c1(3:ido:2, :, j) = ch(3:ido:2, :, j) + ch(3:ido:2, :, jc)
+                        c1(3:ido:2, :, jc) = ch(2:ido-1:2, :, jc) - ch(2:ido-1:2, :, j)
                     end do
                     exit block_construct
                 end if
                 do j = 2, iipph
                     jc = iipp2 - j
-                    c1(2:ido-1:2,:, j) = ch(2:ido-1:2,:, j) + ch(2:ido-1:2,:, jc)
-                    c1(2:ido-1:2,:, jc) = ch(3:ido:2,:, j) - ch(3:ido:2,:, jc)
-                    c1(3:ido:2,:, j) = ch(3:ido:2,:, j) + ch(3:ido:2,:, jc)
-                    c1(3:ido:2,:, jc) = ch(2:ido-1:2,:, jc) - ch(2:ido-1:2,:, j)
+                    c1(2:ido-1:2, :, j) = ch(2:ido-1:2, :, j) + ch(2:ido-1:2, :, jc)
+                    c1(2:ido-1:2, :, jc) = ch(3:ido:2, :, j) - ch(3:ido:2, :, jc)
+                    c1(3:ido:2, :, j) = ch(3:ido:2, :, j) + ch(3:ido:2, :, jc)
+                    c1(3:ido:2, :, jc) = ch(2:ido-1:2, :, jc) - ch(2:ido-1:2, :, j)
                 end do
                 exit block_construct
             end if
@@ -3727,8 +3727,8 @@ contains
 
         do j = 2, iipph
             jc = iipp2 - j
-            c1(1,:, j) = ch(1,:, j) + ch(1,:, jc)
-            c1(1,:, jc) = ch(1,:, jc) - ch(1,:, j)
+            c1(1, :, j) = ch(1, :, j) + ch(1, :, jc)
+            c1(1, :, jc) = ch(1, :, jc) - ch(1, :, j)
         end do
 
         ar1 = ONE
@@ -3758,58 +3758,58 @@ contains
             ch2(:, 1) = ch2(:, 1) + c2(:, j)
         end do
 
-        cc(:, 1,:) = ch(:,:, 1)
-        cc(ido, 2:(iipph-1)*2:2,:) = transpose(ch(1,:, 2:iipph))
-        cc(1, 3:iipph*2-1:2,:) = transpose(ch(1,:, iipp2-2:iipp2-iipph:(-1)))
+        cc(:, 1, :) = ch(:, :, 1)
+        cc(ido, 2:(iipph-1)*2:2, :) = transpose(ch(1, :, 2:iipph))
+        cc(1, 3:iipph*2-1:2, :) = transpose(ch(1, :, iipp2-2:iipp2-iipph:(-1)))
 
         if(ido /= 1) then
             if (l1 <= nbd) then
-                cc(2:ido-1:2, 3:iipph*2-1:2,:) = &
+                cc(2:ido-1:2, 3:iipph*2-1:2, :) = &
                     reshape( &
-                    source = ch(2:ido-1:2,:,2:iipph)+ch(2:ido-1:2,:, iipp2-2:iipp2-iipph:(-1)), &
+                    source = ch(2:ido-1:2, :, 2:iipph)+ch(2:ido-1:2, :, iipp2-2:iipp2-iipph:(-1)), &
                     shape = [(ido-1)/2, iipph-1, l1], &
                     order = [1, 3, 2] &
                     )
-                cc(idp2-4:idp2-1-ido:(-2), 2:(iipph-1)*2:2,:) = &
+                cc(idp2-4:idp2-1-ido:(-2), 2:(iipph-1)*2:2, :) = &
                     reshape( &
-                    source = ch(2:ido-1:2,:, 2:iipph)-ch(2:ido-1:2,:, iipp2-2:iipp2-iipph:(-1)), &
+                    source = ch(2:ido-1:2, :, 2:iipph)-ch(2:ido-1:2, :, iipp2-2:iipp2-iipph:(-1)), &
                     shape = [(ido-1)/2, iipph-1, l1], &
                     order = [1, 3, 2] &
                     )
-                cc(3:ido:2, 3:iipph*2-1:2,:) = &
+                cc(3:ido:2, 3:iipph*2-1:2, :) = &
                     reshape(&
-                    source = ch(3:ido:2,:,2:iipph)+ch(3:ido:2,:,iipp2-2:iipp2-iipph:(-1)), &
+                    source = ch(3:ido:2, :, 2:iipph)+ch(3:ido:2, :, iipp2-2:iipp2-iipph:(-1)), &
                     shape = [(ido-1)/2, iipph-1, l1], &
                     order = [1, 3, 2] &
                     )
-                cc(idp2-3:idp2-ido:(-2), 2:(iipph-1)*2:2,:) = &
+                cc(idp2-3:idp2-ido:(-2), 2:(iipph-1)*2:2, :) = &
                     reshape(&
-                    source = ch(3:ido:2,:, iipp2-2:iipp2-iipph:(-1))-ch(3:ido:2,:, 2:iipph), &
+                    source = ch(3:ido:2, :, iipp2-2:iipp2-iipph:(-1))-ch(3:ido:2, :, 2:iipph), &
                     shape = [(ido-1)/2, iipph-1, l1], &
                     order = [1, 3, 2] &
                     )
             else
-                cc(2:ido-1:2, 3:iipph*2-1:2,:) = &
+                cc(2:ido-1:2, 3:iipph*2-1:2, :) = &
                     reshape( &
-                    source = ch(2:ido-1:2,:, 2:iipph)+ch(2:ido-1:2,:, iipp2-2:iipp2-iipph:(-1)), &
+                    source = ch(2:ido-1:2, :, 2:iipph)+ch(2:ido-1:2, :, iipp2-2:iipp2-iipph:(-1)), &
                     shape = [(ido-1)/2, iipph-1, l1], &
                     order = [1, 3, 2] &
                     )
-                cc(idp2-4:idp2-1-ido:(-2), 2:(iipph-1)*2:2,:) = &
+                cc(idp2-4:idp2-1-ido:(-2), 2:(iipph-1)*2:2, :) = &
                     reshape( &
-                    source = ch(2:ido-1:2,:, 2:iipph)-ch(2:ido-1:2,:, iipp2-2:iipp2-iipph:(-1)), &
+                    source = ch(2:ido-1:2, :, 2:iipph)-ch(2:ido-1:2, :, iipp2-2:iipp2-iipph:(-1)), &
                     shape = [(ido-1)/2, iipph-1, l1], &
                     order = [1, 3, 2] &
                     )
-                cc(3:ido:2, 3:iipph*2-1:2,:) = &
+                cc(3:ido:2, 3:iipph*2-1:2, :) = &
                     reshape( &
-                    source = ch(3:ido:2,:, 2:iipph)+ch(3:ido:2,:, iipp2-2:iipp2-iipph:(-1)), &
+                    source = ch(3:ido:2, :, 2:iipph)+ch(3:ido:2, :, iipp2-2:iipp2-iipph:(-1)), &
                     shape = [(ido-1)/2, iipph-1, l1], &
                     order = [1, 3, 2] &
                     )
-                cc(idp2-3:idp2-ido:(-2), 2:(iipph-1)*2:2,:) = &
+                cc(idp2-3:idp2-ido:(-2), 2:(iipph-1)*2:2, :) = &
                     reshape( &
-                    source = ch(3:ido:2,:,iipp2-2:iipp2-iipph:(-1))-ch(3:ido:2,:, 2:iipph), &
+                    source = ch(3:ido:2, :, iipp2-2:iipp2-iipph:(-1))-ch(3:ido:2, :, 2:iipph), &
                     shape = [(ido-1)/2, iipph-1, l1], &
                     order = [1, 3, 2] &
                     )

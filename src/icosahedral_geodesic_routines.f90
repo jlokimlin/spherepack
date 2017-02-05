@@ -210,7 +210,7 @@ contains
         ! Local variables
         real(wp) :: radial
 
-        radial = hypot(x,y)**2
+        radial = hypot(x, y)**2
 
         if (radial == ZERO) then
             phi = ZERO

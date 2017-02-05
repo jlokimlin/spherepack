@@ -17,10 +17,10 @@ module spherepack_precision
     integer, parameter :: wp = FLOAT64 ! Default floating point precision
 
     ! Integer precision constants
-    integer, parameter :: INT64 = selected_int_kind(r=18) ! 19 digits plus sign, range [-2^(63),+2^(63) - 1], 64 bits
-    integer, parameter :: INT32 = selected_int_kind(r=9) ! 10 digits plus sign, range [-2^(31),+2^(31) - 1], 32 bits
-    integer, parameter :: INT16 = selected_int_kind(r=4) ! 5 digits plus sign, range [-2^(15),+2^(15) - 1], 16 bits
-    integer, parameter :: INT8 = selected_int_kind(r=2) ! 3 digits plus sign, range [-2^(7) ,+2^(7)  - 1], 8 bits
+    integer, parameter :: INT64 = selected_int_kind(r=18) ! 19 digits plus sign, range [-2^(63), +2^(63) - 1], 64 bits
+    integer, parameter :: INT32 = selected_int_kind(r=9) ! 10 digits plus sign, range [-2^(31), +2^(31) - 1], 32 bits
+    integer, parameter :: INT16 = selected_int_kind(r=4) ! 5 digits plus sign, range [-2^(15), +2^(15) - 1], 16 bits
+    integer, parameter :: INT8 = selected_int_kind(r=2) ! 3 digits plus sign, range [-2^(7) , +2^(7)  - 1], 8 bits
     integer, parameter :: ip = INT32! Default integer precision
 
     ! Parameters confined to the module

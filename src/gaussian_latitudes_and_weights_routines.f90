@@ -34,7 +34,7 @@
 !     This version of compute_gaussian_latitudes_and_weights implements
 !     the method presented in:
 !     P. N. Swarztrauber, Computing the points and weights for
-!     Gauss-Legendre quadrature, SIAM J. Sci. Comput.,
+!     Gauss-Legendre quadrature, SIAM J. Sci. Comput., 
 !     24(2002) pp. 945-954.
 !
 !     The w and lwork arrays are dummy and included only to
@@ -160,7 +160,7 @@ contains
                 !
                 !  Estimate first point next to theta = pi/2
                 !
-                select case (mod(nlat,2))
+                select case (mod(nlat, 2))
                     case (0)
                         !
                         !  nlat even
@@ -229,7 +229,7 @@ contains
                 !
                 !  Extend points and weights via symmetries
                 !
-                if (mod(nlat,2) /= 0) then
+                if (mod(nlat, 2) /= 0) then
 
                     theta(nhalf) = HALF_PI
 
@@ -289,7 +289,7 @@ contains
             t3 = ZERO
             t4 = real(2*n + 1, kind=wp)
 
-            select case (mod(n,2))
+            select case (mod(n, 2))
                 case (0)
                     !
                     !  n even
@@ -372,7 +372,7 @@ contains
             dpb => legendre_deriv &
             )
 
-            select case (mod(n,2))
+            select case (mod(n, 2))
                 case (0)
                     !
                     !  n even

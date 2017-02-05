@@ -38,14 +38,14 @@
 !
 !
 !     (1) first set a stream function and velocity potential scalar fields as
-!         polys in x,y,z restricted to the sphere
+!         polys in x, y, z restricted to the sphere
 !
-!     (2) derive a vector field (v,w) from (1)
+!     (2) derive a vector field (v, w) from (1)
 !
 !     (3) compute the vorticity vt of (2) and compare with the vorticity
 !         computed analytically
 !
-!     (4) compute vector field (ve,we) using br,bi,cr,ci from (v,w) with
+!     (4) compute vector field (ve, we) using br, bi, cr, ci from (v, w) with
 !         br=bi=0.0
 !
 !     (5) invert the vorticity in (3) and compare with (4)
@@ -125,8 +125,8 @@ contains
         end select
 
         !
-        !  set scalar stream and velocity potential fields as polys in x,y,z
-        !    and then set v,w from st,sv scalar fields
+        !  set scalar stream and velocity potential fields as polys in x, y, z
+        !    and then set v, w from st, sv scalar fields
         !
         associate( &
             ve => exact_polar_component, &
@@ -140,31 +140,31 @@ contains
                 do j=1, NLONS
                     do i=1, NLATS
                         associate( &
-                            x => radial(i,j)%x, & !sint*cosp
-                            y => radial(i,j)%y, & !sint*sinp
-                            z => radial(i,j)%z, & !cost
-                            dxdt => theta(i,j)%x, &! cost*cosp
-                            dxdp => -radial(i,j)%y, & !-sint*sinp
-                            dydt => theta(i,j)%y, &! cost*sinp
-                            dydp => radial(i,j)%x, & ! sint*cosp
-                            dzdt => theta(i,j)%z, & ! -sint
-                            dzdp => phi(i,j)%z,& ! 0.0
-                            cosp => phi(i,j)%y, &
-                            sinp => -phi(i,j)%x &
+                            x => radial(i, j)%x, & !sint*cosp
+                            y => radial(i, j)%y, & !sint*sinp
+                            z => radial(i, j)%z, & !cost
+                            dxdt => theta(i, j)%x, &! cost*cosp
+                            dxdp => -radial(i, j)%y, & !-sint*sinp
+                            dydt => theta(i, j)%y, &! cost*sinp
+                            dydp => radial(i, j)%x, & ! sint*cosp
+                            dzdt => theta(i, j)%z, & ! -sint
+                            dzdp => phi(i, j)%z, & ! 0.0
+                            cosp => phi(i, j)%y, &
+                            sinp => -phi(i, j)%x &
                             )
                             select case (k)
                                 case (1)
-                                    ve(i,j,k) = sinp + dydt !sinp + cost*sinp
-                                    we(i,j,k) = cosp + dxdt !cosp + cost*cosp
-                                    vte(i,j,k) = -2.0_wp * x !-2.0*sint*cosp
+                                    ve(i, j, k) = sinp + dydt !sinp + cost*sinp
+                                    we(i, j, k) = cosp + dxdt !cosp + cost*cosp
+                                    vte(i, j, k) = -2.0_wp * x !-2.0*sint*cosp
                                 case (2)
-                                    ve(i,j,k) = -cosp + dzdt !-cosp-sint
-                                    we(i,j,k) = dydt !cost*sinp
-                                    vte(i,j,k) = -2.0_wp * y !-2.*sint*sinp
+                                    ve(i, j, k) = -cosp + dzdt !-cosp-sint
+                                    we(i, j, k) = dydt !cost*sinp
+                                    vte(i, j, k) = -2.0_wp * y !-2.*sint*sinp
                                 case (3)
-                                    ve(i,j,k) = sinp + dzdt !sinp - sint
-                                    we(i,j,k) = dxdt !cost*cosp
-                                    vte(i,j,k) = -2.0_wp * x !-2.*sint*cosp
+                                    ve(i, j, k) = sinp + dzdt !sinp - sint
+                                    we(i, j, k) = dxdt !cost*cosp
+                                    vte(i, j, k) = -2.0_wp * x !-2.*sint*cosp
                             end select
                         end associate
                     end do
@@ -173,13 +173,13 @@ contains
         end associate
 
         !
-        !  Compute vt from (ve,we)
+        !  Compute vt from (ve, we)
         !
         do k=1, NSYNTHS
             associate( &
-                ve => exact_polar_component(:,:,k), &
-                we => exact_azimuthal_component(:,:,k), &
-                vt => approximate_vorticity(:,:,k) &
+                ve => exact_polar_component(:, :, k), &
+                we => exact_azimuthal_component(:, :, k), &
+                vt => approximate_vorticity(:, :, k) &
                 )
                 call sphere_type%get_vorticity(ve, we, vt)
             end associate
@@ -199,34 +199,34 @@ contains
                 write( stdout, '(/a/)') '     tvrt *** TEST RUN *** '
                 write( stdout, '(a)') '     grid type = '//sphere_type%grid%grid_type
                 write( stdout, '(a)') '     Testing vorticity'
-                write( stdout, '(2(a,i3))') '     nlat = ', NLATS,' nlon = ', NLONS
+                write( stdout, '(2(a, i3))') '     nlat = ', NLATS, ' nlon = ', NLONS
                 write( stdout, '(a)') '     Previous 64 bit floating point arithmetic result '
                 write( stdout, '(a)') previous_vorticity_error
                 write( stdout, '(a)') '     The output from your computer is: '
-                write( stdout, '(a,1pe15.6/)') '     vorticity error     = ', err2
+                write( stdout, '(a, 1pe15.6/)') '     vorticity error     = ', err2
             end associate
         end associate
         !
-        !  Now recompute (v,w) inverting vte
+        !  Now recompute (v, w) inverting vte
         !
         do k=1, NSYNTHS
             associate( &
-                v => approximate_polar_component(:,:,k), &
-                w => approximate_azimuthal_component(:,:,k), &
-                vte => exact_vorticity(:,:,k) &
+                v => approximate_polar_component(:, :, k), &
+                w => approximate_azimuthal_component(:, :, k), &
+                vte => exact_vorticity(:, :, k) &
                 )
                 call sphere_type%invert_vorticity(vte, v, w)
             end associate
         end do
 
         !
-        !  compute vector field (ve,we) using br,bi,cr,ci from (ve,we) with
+        !  compute vector field (ve, we) using br, bi, cr, ci from (ve, we) with
         !    br = bi = 0.0
         !
         do k = 1, NSYNTHS
             associate( &
-                ve => exact_polar_component(:,:,k), &
-                we => exact_azimuthal_component(:,:,k) &
+                ve => exact_polar_component(:, :, k), &
+                we => exact_azimuthal_component(:, :, k) &
                 )
                 !
                 !  Get polar coefficients (br, bi) and azimuthal coefficients (cr, ci) from (ve, we)
@@ -248,7 +248,7 @@ contains
             end associate
         end do
         !
-        !  compare this v,w with original
+        !  compare this v, w with original
         !
         associate( &
             ve => exact_polar_component, &
@@ -269,13 +269,13 @@ contains
                 write( stdout, '(a)') ''
                 write( stdout, '(a)') '     grid type = '//sphere_type%grid%grid_type
                 write( stdout, '(a)') '     Testing vorticity inversion'
-                write( stdout, '(2(a,i3))') '     nlat = ', NLATS,' nlon = ', NLONS
+                write( stdout, '(2(a, i3))') '     nlat = ', NLATS, ' nlon = ', NLONS
                 write( stdout, '(a)') '     Previous 64 bit floating point arithmetic result '
                 write( stdout, '(a)') previous_polar_inversion_error
                 write( stdout, '(a)') previous_azimuthal_inversion_error
                 write( stdout, '(a)') '     The output from your computer is: '
-                write( stdout, '(a,1pe15.6)') '     polar inversion error     = ', err2v
-                write( stdout, '(a,1pe15.6)') '     azimuthal inversion error = ', err2w
+                write( stdout, '(a, 1pe15.6)') '     polar inversion error     = ', err2v
+                write( stdout, '(a, 1pe15.6)') '     azimuthal inversion error = ', err2w
                 write( stdout, '(a)' ) ''
             end associate
         end associate

@@ -101,7 +101,7 @@ contains
 
         !  Allocate polymorphic components
         allocate( self%grid, source=RegularGrid(nlat, nlon) )
-        allocate( self%workspace, source=RegularWorkspace(nlat,nlon) )
+        allocate( self%workspace, source=RegularWorkspace(nlat, nlon) )
 
         !  Address optional arguments
 
@@ -185,7 +185,7 @@ contains
 
         ! Dummy arguments
         class(RegularSphere), intent(inout) :: self
-        real(wp),             intent(in)    :: scalar_function(:,:)
+        real(wp),             intent(in)    :: scalar_function(:, :)
 
         ! Local variables
         integer(ip)    :: error_flag
@@ -257,7 +257,7 @@ contains
 
         ! Dummy arguments
         class(RegularSphere), intent(inout) :: self
-        real(wp),             intent(out)   :: scalar_function(:,:)
+        real(wp),             intent(out)   :: scalar_function(:, :)
 
         ! Local variables
         integer(ip)    :: error_flag
@@ -329,8 +329,8 @@ contains
 
         ! Dummy arguments
         class(RegularSphere), intent(inout)  :: self
-        real(wp),             intent(in)     :: polar_component(:,:)
-        real(wp),             intent(in)     :: azimuthal_component(:,:)
+        real(wp),             intent(in)     :: polar_component(:, :)
+        real(wp),             intent(in)     :: azimuthal_component(:, :)
 
         ! Local variables
         integer(ip)    :: error_flag
@@ -422,8 +422,8 @@ contains
 
         ! Dummy arguments
         class(RegularSphere), intent(inout) :: self
-        real(wp),             intent(out)   :: polar_component(:,:)
-        real(wp),             intent(out)   :: azimuthal_component(:,:)
+        real(wp),             intent(out)   :: polar_component(:, :)
+        real(wp),             intent(out)   :: azimuthal_component(:, :)
 
         ! Local variables
         integer(ip)    :: error_flag

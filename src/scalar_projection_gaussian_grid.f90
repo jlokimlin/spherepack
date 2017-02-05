@@ -189,7 +189,7 @@ contains
         if (lwork <mwrk) return
         ierror = 0
 
-        y(1:nlat,:) = x(1:nlat,:)
+        y(1:nlat, :) = x(1:nlat, :)
 
         call sphere_aux%hfft%forward(nlat, nlon, y, idxy, wshp(lw1+1), work)
 
@@ -214,7 +214,7 @@ contains
 
         call sphere_aux%hfft%backward(nlat, nlon, y, idxy, wshp(lw1+1), work)
 
-        y(1: nlat,:) = y(1:nlat,:)/nlon
+        y(1: nlat, :) = y(1:nlat, :)/nlon
 
     end subroutine shpg
 
@@ -248,7 +248,7 @@ contains
     !            improved when nlon is a product of small prime numbers.
     !            nlon must be at least 4.
     !
-    !     isym   currently not used, no equatorial symmetries assumed,
+    !     isym   currently not used, no equatorial symmetries assumed, 
     !            only whole sphere computations.
     !
     !     mtrunc the highest longitudinal wave number retained in the

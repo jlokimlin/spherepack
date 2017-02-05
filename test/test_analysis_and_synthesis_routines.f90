@@ -74,8 +74,8 @@ contains
         integer(ip), parameter        :: NLATS = NLONS/2 + 1
         integer(ip), parameter        :: NSYNTHS = 3
         integer(ip)                   :: i, j, k ! Counters
-        real(wp)                      :: original_scalar_function(NLATS,NLONS,NSYNTHS)
-        real(wp)                      :: approximate_scalar_function(NLATS,NLONS,NSYNTHS)
+        real(wp)                      :: original_scalar_function(NLATS, NLONS, NSYNTHS)
+        real(wp)                      :: approximate_scalar_function(NLATS, NLONS, NSYNTHS)
         character(len=:), allocatable :: error_previous_platform
 
         !  Set up workspace arrays
@@ -105,19 +105,19 @@ contains
             se => original_scalar_function, &
             radial => sphere_type%unit_vectors%radial &
             )
-            do k=1,NSYNTHS
-                do j=1,NLONS
-                    do i=1,NLATS
+            do k=1, NSYNTHS
+                do j=1, NLONS
+                    do i=1, NLATS
                         associate( &
-                            x => radial(i,j)%x, &
-                            y => radial(i,j)%y, &
-                            z => radial(i,j)%z &
+                            x => radial(i, j)%x, &
+                            y => radial(i, j)%y, &
+                            z => radial(i, j)%z &
                             )
                             select case (k)
                                 case(1)
-                                    se(i,j,k) = exp(x + y + z)
+                                    se(i, j, k) = exp(x + y + z)
                                 case default
-                                    se(i,j,k) = (x*y*z)**k
+                                    se(i, j, k) = (x*y*z)**k
                             end select
                         end associate
                     end do
@@ -128,8 +128,8 @@ contains
         !  Perform analysis then synthesis
         do k = 1, NSYNTHS
             associate( &
-                se => original_scalar_function(:,:,k), &
-                s => approximate_scalar_function(:,:,k) &
+                se => original_scalar_function(:, :, k), &
+                s => approximate_scalar_function(:, :, k) &
                 )
 
                 ! Analyse function into (real) coefficients
@@ -154,11 +154,11 @@ contains
                 write( stdout, '(a)') ''
                 write( stdout, '(a)') '     grid type = '//sphere_type%grid%grid_type
                 write( stdout, '(a)') '     Testing scalar analysis and synthesis'
-                write( stdout, '(2(a,i3))') '     nlat = ', NLATS,' nlon = ', NLONS
+                write( stdout, '(2(a, i3))') '     nlat = ', NLATS, ' nlon = ', NLONS
                 write( stdout, '(a)') '     Previous 64 bit floating point arithmetic result '
                 write( stdout, '(a)') error_previous_platform
                 write( stdout, '(a)') '     The output from your computer is: '
-                write( stdout, '(a,1pe15.6)') '     discretization error = ', err2
+                write( stdout, '(a, 1pe15.6)') '     discretization error = ', err2
                 write( stdout, '(a)' ) ''
             end associate
         end associate

@@ -90,8 +90,8 @@ contains
         theta = PI/2 - (PI/180)*lat
         nmstrt = 0
 
-        do m=1,ntrunc+1
-            do n=m,ntrunc+1
+        do m=1, ntrunc+1
+            do n=m, ntrunc+1
                 nm = nmstrt + n - m + 1
                 !
                 !  Compute normalized associate Legendre function at theta
@@ -233,7 +233,7 @@ contains
             !
             !  n greater than 1
             !
-            select case (mod(n+ma,2))
+            select case (mod(n+ma, 2))
                 case (0)
                     nmms2 = (n-ma)/2
                     fnum = n+ma+1
@@ -280,7 +280,7 @@ contains
             fnmsq = fnnp1-2.0_wp*(ma**2)
             l = (n+1)/2
 
-            if (mod(n,2) == 0 .and. mod(ma,2) == 0) l = l+1
+            if (mod(n, 2) == 0 .and. mod(ma, 2) == 0) l = l+1
 
             cp(l) = cp2
 
@@ -475,11 +475,11 @@ contains
             integer(ip), intent(in)  :: n
             integer(ip), intent(in)  :: nm
             integer(ip), intent(in)  :: id
-            real(wp),    intent(out) :: p3(id,*)
-            real(wp),    intent(out) :: phz(l,*)
-            real(wp),    intent(out) :: ph1(l,*)
-            real(wp),    intent(out) :: p1(l,*)
-            real(wp),    intent(out) :: p2(l,*)
+            real(wp),    intent(out) :: p3(id, *)
+            real(wp),    intent(out) :: phz(l, *)
+            real(wp),    intent(out) :: ph1(l, *)
+            real(wp),    intent(out) :: p1(l, *)
+            real(wp),    intent(out) :: p2(l, *)
             real(wp),    intent(out) :: cp(*)
 
             ! Local variables
@@ -559,8 +559,8 @@ contains
                         cc = sqrt(cn*(fnpm-3.0_wp)*(fnpm-2.0_wp)/temp)
                         ee = sqrt(2.0_wp/temp)
                         p3(:, n+1) = cc*p1(:, n-1)-ee*p3(:, n-1)
-                        p1(:,1:np1) = p2(:,1:np1)
-                        p2(:,:np1) = p3(:,1:np1)
+                        p1(:, 1:np1) = p2(:, 1:np1)
+                        p2(:, :np1) = p3(:, 1:np1)
                     end if
             end select
 
@@ -717,11 +717,11 @@ contains
             integer(ip), intent(in)  :: m
             integer(ip), intent(in)  :: nm
             integer(ip), intent(in)  :: id
-            real(wp),    intent(out) :: p3(id,*)
-            real(wp),    intent(out) :: phz(l,*)
-            real(wp),    intent(out) :: ph1(l,*)
-            real(wp),    intent(out) :: p1(l,*)
-            real(wp),    intent(out) :: p2(l,*)
+            real(wp),    intent(out) :: p3(id, *)
+            real(wp),    intent(out) :: phz(l, *)
+            real(wp),    intent(out) :: ph1(l, *)
+            real(wp),    intent(out) :: p1(l, *)
+            real(wp),    intent(out) :: p2(l, *)
             real(wp),    intent(out) :: cp(*)
 
             ! Local variables
@@ -757,13 +757,13 @@ contains
 
                     if (m < 1) then
 
-                        p3(:,1:nmp1) = phz(:,1:nmp1)
-                        p1(:, 1:nmp1) = phz(:,1:nmp1)
+                        p3(:, 1:nmp1) = phz(:, 1:nmp1)
+                        p1(:, 1:nmp1) = phz(:, 1:nmp1)
 
                     else if (m == 1) then
 
-                        p3(:, 2:nmp1) = ph1(:,2:nmp1)
-                        p2(:,2:nmp1) = ph1(:,2:nmp1)
+                        p3(:, 2:nmp1) = ph1(:, 2:nmp1)
+                        p2(:, 2:nmp1) = ph1(:, 2:nmp1)
 
                     else
                         temp = tm*(tm-1.0_wp)
@@ -795,8 +795,8 @@ contains
                             end do
                         end if
 
-                        p1(:,m:nmp1) = p2(:,m:nmp1)
-                        p2(:,m:nmp1) = p3(:,m:nmp1)
+                        p1(:, m:nmp1) = p2(:, m:nmp1)
+                        p2(:, m:nmp1) = p3(:, m:nmp1)
 
                     end if
             end select
@@ -817,8 +817,8 @@ contains
         !
         ! purpose                routine lfp uses coefficients computed by
         !                        routine alfk to calculate the 64-bit double precision
-        !                        normalized associated legendre function pbar(n,
-        !                        m, theta) at colatitudes theta=(i-1)*pi/(l-1),
+        !                        normalized associated legendre function pbar(n, 
+        !                        m, theta) at colatitudes theta=(i-1)*pi/(l-1), 
         !                        i=1, ..., l. subroutine lfp evaluates pbar
         !                        using one of the following trigonometric
         !                        expansions
@@ -1067,7 +1067,7 @@ contains
         !
         ! purpose                routine lfpt uses coefficients computed by
         !                        routine alfk to compute the single precision
-        !                        normalized associated legendre function pbar(n,
+        !                        normalized associated legendre function pbar(n, 
         !                        m, theta) at colatitude theta.
         !
         ! usage                  call lfpt(n, m, theta, cp, pb)

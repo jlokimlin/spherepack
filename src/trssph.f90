@@ -831,7 +831,7 @@ contains
         ! Dummy arguments
         integer(ip), intent(in)     :: nlat
         integer(ip), intent(in)     :: nlon
-        real(wp),    intent(inout)  :: data(nlat,nlon)
+        real(wp),    intent(inout)  :: data(nlat, nlon)
 
         ! Local variables
         integer(ip) :: i, j, half_nlat, ib ! Counters

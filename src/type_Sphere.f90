@@ -133,7 +133,7 @@ module type_Sphere
 
             ! Dummy arguments
             class(Sphere), intent(inout)  :: self
-            real(wp),      intent(in)     :: scalar_function(:,:)
+            real(wp),      intent(in)     :: scalar_function(:, :)
         end subroutine scalar_analysis
 
         subroutine scalar_synthesis(self, scalar_function)
@@ -141,7 +141,7 @@ module type_Sphere
 
             ! Dummy arguments
             class(Sphere), intent(inout)  :: self
-            real(wp),      intent(out)   :: scalar_function(:,:)
+            real(wp),      intent(out)   :: scalar_function(:, :)
         end subroutine scalar_synthesis
 
         subroutine vector_analysis(self, polar_component, azimuthal_component)
@@ -149,8 +149,8 @@ module type_Sphere
 
             ! Dummy arguments
             class(Sphere), intent(inout)  :: self
-            real(wp),      intent(in)     :: polar_component(:,:)
-            real(wp),      intent(in)     :: azimuthal_component(:,:)
+            real(wp),      intent(in)     :: polar_component(:, :)
+            real(wp),      intent(in)     :: azimuthal_component(:, :)
         end subroutine vector_analysis
 
         subroutine vector_synthesis(self, polar_component, azimuthal_component)
@@ -158,8 +158,8 @@ module type_Sphere
 
             ! Dummy arguments
             class(Sphere), intent(inout)  :: self
-            real(wp),      intent(out)    :: polar_component(:,:)
-            real(wp),      intent(out)    :: azimuthal_component(:,:)
+            real(wp),      intent(out)    :: polar_component(:, :)
+            real(wp),      intent(out)    :: azimuthal_component(:, :)
         end subroutine vector_synthesis
     end interface
 
@@ -310,10 +310,10 @@ contains
     ! spherical harmonic coefficients (psi).
     !
     ! The spectral data is assumed to be in a complex array of dimension
-    ! (mtrunc+1)*(mtrunc+2)/2, whre mtrunc is the triangular truncation limit,
+    ! (mtrunc+1)*(mtrunc+2)/2, whre mtrunc is the triangular truncation limit, 
     ! for instance, mtrunc = 42 for T42.
     ! mtrunc must be <= nlat-1.
-    ! Coefficients are ordered so that first (nm=1) is m=0, n=0, second is m=0, n=1,
+    ! Coefficients are ordered so that first (nm=1) is m=0, n=0, second is m=0, n=1, 
     ! nm=mtrunc is m=0, n=mtrunc, nm=mtrunc+1 is m=1, n=1, etc.
     !
     ! In Fortran syntax, values of m (degree) and n (order) as a function
@@ -330,7 +330,7 @@ contains
 
         ! Dummy arguments
         class(Sphere), intent(inout) :: self
-        real(wp),      intent(in)    :: scalar_function(:,:)
+        real(wp),      intent(in)    :: scalar_function(:, :)
 
         ! Local variables
         integer(ip) :: n, m
@@ -365,7 +365,7 @@ contains
 
         ! Dummy arguments
         class(Sphere), intent(inout) :: self
-        real(wp),      intent(out)   :: scalar_function(:,:)
+        real(wp),      intent(out)   :: scalar_function(:, :)
 
         ! Local variables
         integer(ip) :: n, m, nm
@@ -408,7 +408,7 @@ contains
 
         ! Dummy arguments
         class(Sphere), intent(inout)  :: self
-        real(wp),      intent(in)     :: scalar_function(:,:)
+        real(wp),      intent(in)     :: scalar_function(:, :)
         complex(wp),   intent(out)    :: spectral_coefficients(:)
 
         ! Check if object is usable
@@ -428,7 +428,7 @@ contains
         ! Dummy arguments
         class(Sphere), intent(inout) :: self
         complex(wp),   intent(in)    :: spectral_coefficients(:)
-        real(wp),      intent(out)   :: scalar_function(:,:)
+        real(wp),      intent(out)   :: scalar_function(:, :)
 
         ! Local variables
         integer(ip) :: n, m, nm
@@ -470,7 +470,7 @@ contains
 
         ! Dummy arguments
         class(Sphere), intent(inout) :: self
-        real(wp),      intent(in)    :: vector_field(:,:,:)
+        real(wp),      intent(in)    :: vector_field(:, :, :)
 
         ! Local variables
         integer(ip) :: nlat, nlon
@@ -506,8 +506,8 @@ contains
 
         ! Dummy arguments
         class(Sphere), intent(inout) :: self
-        real(wp),      intent(in)    :: scalar_function(:,:)
-        real(wp),      intent(out)   :: scalar_laplacian(:,:)
+        real(wp),      intent(in)    :: scalar_function(:, :)
+        real(wp),      intent(out)   :: scalar_laplacian(:, :)
 
         ! Check if object is usable
         call self%assert_initialized('get_scalar_laplacian')
@@ -532,8 +532,8 @@ contains
 
         ! Dummy arguments
         class(Sphere), intent(inout) :: self
-        real(wp),      intent(in)    :: source(:,:)
-        real(wp),      intent(out)   :: solution(:,:)
+        real(wp),      intent(in)    :: source(:, :)
+        real(wp),      intent(out)   :: solution(:, :)
 
         ! Check if object is usable
         call self%assert_initialized('invert_scalar_laplacian')
@@ -582,28 +582,28 @@ contains
                     do n=1, nlat
 
                         ! Set polar coefficients
-                        br(:,n) = lap(n) * br(:,n)
-                        bi(:,n) = lap(n) * bi(:,n)
+                        br(:, n) = lap(n) * br(:, n)
+                        bi(:, n) = lap(n) * bi(:, n)
 
                         ! Set azimuthal coefficients
-                        cr(:,n) = lap(n) * cr(:,n)
-                        ci(:,n) = lap(n) * ci(:,n)
+                        cr(:, n) = lap(n) * cr(:, n)
+                        ci(:, n) = lap(n) * ci(:, n)
                     end do
                 case (1, 4, 7)
 
-                    ! Vorticity is zero so cr,ci=0 not used
+                    ! Vorticity is zero so cr, ci=0 not used
                     do n=1, nlat
                         ! Set polar coefficients
-                        br(:,n) = lap(n) * br(:,n)
-                        bi(:,n) = lap(n) * bi(:,n)
+                        br(:, n) = lap(n) * br(:, n)
+                        bi(:, n) = lap(n) * bi(:, n)
                     end do
                 case default
 
-                    ! Divergence is zero so br,bi=0 not used
+                    ! Divergence is zero so br, bi=0 not used
                     do n=1, nlat
                         ! Set azimuthal coefficients
-                        cr(:,n) = lap(n) * cr(:,n)
-                        ci(:,n) = lap(n) * ci(:,n)
+                        cr(:, n) = lap(n) * cr(:, n)
+                        ci(:, n) = lap(n) * ci(:, n)
                     end do
             end select
         end associate
@@ -615,10 +615,10 @@ contains
 
         ! Dummy arguments
         class(Sphere), intent(inout) :: self
-        real(wp),      intent(in)    :: polar_component(:,:)
-        real(wp),      intent(in)    :: azimuthal_component(:,:)
-        real(wp),      intent(out)   :: polar_laplacian(:,:)
-        real(wp),      intent(out)   :: azimuthal_laplacian(:,:)
+        real(wp),      intent(in)    :: polar_component(:, :)
+        real(wp),      intent(in)    :: azimuthal_component(:, :)
+        real(wp),      intent(out)   :: polar_laplacian(:, :)
+        real(wp),      intent(out)   :: azimuthal_laplacian(:, :)
 
         ! Check if object is usable
         call self%assert_initialized('get_vector_laplacian_from_spherical_components')
@@ -649,9 +649,9 @@ contains
 
         ! Dummy arguments
         class(Sphere), intent(inout) :: self
-        real(wp),      intent(in)    :: vector_field(:,:,:)
-        real(wp),      intent(out)   :: polar_laplacian(:,:)
-        real(wp),      intent(out)   :: azimuthal_laplacian(:,:)
+        real(wp),      intent(in)    :: vector_field(:, :, :)
+        real(wp),      intent(out)   :: polar_laplacian(:, :)
+        real(wp),      intent(out)   :: azimuthal_laplacian(:, :)
 
         ! Check if object is usable
         call self%assert_initialized('get_vector_laplacian_from_vector_field')
@@ -674,10 +674,10 @@ contains
 
         ! Dummy arguments
         class(Sphere), intent(inout) :: self
-        real(wp),      intent(in)    :: polar_source(:,:)
-        real(wp),      intent(in)    :: azimuthal_source(:,:)
-        real(wp),      intent(out)   :: polar_solution(:,:)
-        real(wp),      intent(out)   :: azimuthal_solution(:,:)
+        real(wp),      intent(in)    :: polar_source(:, :)
+        real(wp),      intent(in)    :: azimuthal_source(:, :)
+        real(wp),      intent(out)   :: polar_solution(:, :)
+        real(wp),      intent(out)   :: azimuthal_solution(:, :)
 
         ! Local variables
         integer(ip) :: n
@@ -712,34 +712,34 @@ contains
                     do n=1, nlat
 
                         ! Set polar coefficients
-                        br(:,n) = ilap(n) * br(:,n)
-                        bi(:,n) = ilap(n) * bi(:,n)
+                        br(:, n) = ilap(n) * br(:, n)
+                        bi(:, n) = ilap(n) * bi(:, n)
 
                         ! Set azimuthal coefficients
-                        cr(:,n) = ilap(n) * cr(:,n)
-                        ci(:,n) = ilap(n) * ci(:,n)
+                        cr(:, n) = ilap(n) * cr(:, n)
+                        ci(:, n) = ilap(n) * ci(:, n)
                     end do
                 case (1, 4, 7)
 
-                    ! Vorticity is zero so cr,ci=0 not used
+                    ! Vorticity is zero so cr, ci=0 not used
                     do n=1, nlat
 
                         ! Set polar coefficients
-                        br(:,n) = ilap(n) * br(:,n)
-                        bi(:,n) = ilap(n) * bi(:,n)
+                        br(:, n) = ilap(n) * br(:, n)
+                        bi(:, n) = ilap(n) * bi(:, n)
                     end do
                 case default
 
-                    ! Divergence is zero so br,bi=0 not used
+                    ! Divergence is zero so br, bi=0 not used
                     do n=1, nlat
 
                         ! Set azimuthal coefficients
-                        cr(:,n) = ilap(n) * cr(:,n)
-                        ci(:,n) = ilap(n) * ci(:,n)
+                        cr(:, n) = ilap(n) * cr(:, n)
+                        ci(:, n) = ilap(n) * ci(:, n)
                     end do
             end select
 
-            ! Synthesize coefficients inot vector field (v,w)
+            ! Synthesize coefficients inot vector field (v, w)
             call self%perform_vector_synthesis(v, w)
         end associate
 
@@ -750,8 +750,8 @@ contains
         ! Dummy arguments
         class(Sphere), target, intent(inout) :: self
         real(wp),              intent(in)    :: helmholtz_constant
-        real(wp),              intent(in)    :: source(:,:)
-        real(wp),              intent(out)   :: solution(:,:)
+        real(wp),              intent(in)    :: source(:, :)
+        real(wp),              intent(out)   :: solution(:, :)
 
         ! Local variables
         real(wp), pointer :: iptr(:) => null()
@@ -804,9 +804,9 @@ contains
 
         ! Dummy arguments
         class(Sphere), intent(inout) :: self
-        real(wp),      intent(in)    :: scalar_function(:,:)
-        real(wp),      intent(out)   :: polar_gradient_component(:,:)
-        real(wp),      intent(out)   :: azimuthal_gradient_component(:,:)
+        real(wp),      intent(in)    :: scalar_function(:, :)
+        real(wp),      intent(out)   :: polar_gradient_component(:, :)
+        real(wp),      intent(out)   :: azimuthal_gradient_component(:, :)
 
         ! Local variables
         integer(ip) :: n
@@ -855,9 +855,9 @@ contains
 
         ! Dummy arguments
         class(Sphere), intent(inout) :: self
-        real(wp),      intent(in)    :: polar_source(:,:)
-        real(wp),      intent(in)    :: azimuthal_source(:,:)
-        real(wp),      intent(out)   :: solution(:,:)
+        real(wp),      intent(in)    :: polar_source(:, :)
+        real(wp),      intent(in)    :: azimuthal_source(:, :)
+        real(wp),      intent(out)   :: solution(:, :)
 
         ! Local variables
         integer(ip) :: n, m
@@ -918,9 +918,9 @@ contains
 
         ! Dummy arguments
         class(Sphere), intent(inout) :: self
-        real(wp),      intent(in)    :: polar_component(:,:)
-        real(wp),      intent(in)    :: azimuthal_component(:,:)
-        real(wp),      intent(out)   :: vorticity(:,:)
+        real(wp),      intent(in)    :: polar_component(:, :)
+        real(wp),      intent(in)    :: azimuthal_component(:, :)
+        real(wp),      intent(out)   :: vorticity(:, :)
 
         ! Local variables
         integer(ip) :: n, m
@@ -970,8 +970,8 @@ contains
 
         ! Dummy arguments
         class(Sphere), intent(inout) :: self
-        real(wp),      intent(in)    :: vector_field(:,:,:)
-        real(wp),      intent(out)   :: vorticity(:,:)
+        real(wp),      intent(in)    :: vector_field(:, :, :)
+        real(wp),      intent(out)   :: vorticity(:, :)
 
         ! Local variables
         integer(ip) :: nlat, nlon
@@ -1007,9 +1007,9 @@ contains
 
         ! Dummy arguments
         class(Sphere), intent(inout) :: self
-        real(wp),      intent(in)    :: source(:,:)
-        real(wp),      intent(out)   :: polar_solution(:,:)
-        real(wp),      intent(out)   :: azimuthal_solution(:,:)
+        real(wp),      intent(in)    :: source(:, :)
+        real(wp),      intent(out)   :: polar_solution(:, :)
+        real(wp),      intent(out)   :: azimuthal_solution(:, :)
 
         ! Local variables
         integer(ip) :: n, m
@@ -1082,8 +1082,8 @@ contains
 
         ! Dummy arguments
         class(Sphere), intent(inout) :: self
-        real(wp),      intent(in)    :: vector_field(:,:,:)
-        real(wp),      intent(out)   :: divergence(:,:)
+        real(wp),      intent(in)    :: vector_field(:, :, :)
+        real(wp),      intent(out)   :: divergence(:, :)
 
         ! Local variables
         integer(ip) :: nlat, nlon
@@ -1121,9 +1121,9 @@ contains
 
         ! Dummy arguments
         class(Sphere), intent(inout) :: self
-        real(wp),      intent(in)    :: polar_component(:,:)
-        real(wp),      intent(in)    :: azimuthal_component(:,:)
-        real(wp),      intent(out)   :: divergence(:,:)
+        real(wp),      intent(in)    :: polar_component(:, :)
+        real(wp),      intent(in)    :: azimuthal_component(:, :)
+        real(wp),      intent(out)   :: divergence(:, :)
 
         ! Local variables
         integer(ip) :: n, m
@@ -1173,9 +1173,9 @@ contains
 
         ! Dummy arguments
         class(Sphere), intent(inout) :: self
-        real(wp),      intent(in)    :: source(:,:)
-        real(wp),      intent(out)   :: polar_solution(:,:)
-        real(wp),      intent(out)   :: azimuthal_solution(:,:)
+        real(wp),      intent(in)    :: source(:, :)
+        real(wp),      intent(out)   :: polar_solution(:, :)
+        real(wp),      intent(out)   :: azimuthal_solution(:, :)
 
         ! Local variables
         integer(ip) :: n, m
@@ -1235,10 +1235,10 @@ contains
 
         ! Dummy arguments
         class(Sphere), intent(inout)  :: self
-        real(wp),      intent(in)     :: polar_component(:,:)
-        real(wp),      intent(in)     :: azimuthal_component(:,:)
-        real(wp),      intent(out)    :: vorticity(:,:)
-        real(wp),      intent(out)    :: divergence(:,:)
+        real(wp),      intent(in)     :: polar_component(:, :)
+        real(wp),      intent(in)     :: azimuthal_component(:, :)
+        real(wp),      intent(out)    :: vorticity(:, :)
+        real(wp),      intent(out)    :: divergence(:, :)
 
         ! Check if object is usable
         call self%assert_initialized('get_vorticity_and_divergence_from_velocities')
@@ -1266,8 +1266,8 @@ contains
         class(Sphere), intent(inout) :: self
         complex(wp),   intent(in)    :: vort_spec(:)
         complex(wp),   intent(in)    :: div_spec(:)
-        real(wp),      intent(out)   :: polar_component(:,:)
-        real(wp),      intent(out)   :: azimuthal_component(:,:)
+        real(wp),      intent(out)   :: polar_component(:, :)
+        real(wp),      intent(out)   :: azimuthal_component(:, :)
 
         ! Local variables
         integer(ip) :: nm, n, m
@@ -1350,10 +1350,10 @@ contains
 
         ! Dummy arguments
         class(Sphere), intent(inout)  :: self
-        real(wp),      intent(in)     :: vorticity(:,:)
-        real(wp),      intent(in)     :: divergence(:,:)
-        real(wp),      intent(out)    :: polar_component(:,:)
-        real(wp),      intent(out)    :: azimuthal_component(:,:)
+        real(wp),      intent(in)     :: vorticity(:, :)
+        real(wp),      intent(in)     :: divergence(:, :)
+        real(wp),      intent(out)    :: polar_component(:, :)
+        real(wp),      intent(out)    :: azimuthal_component(:, :)
 
         ! Local variables
         integer(ip) :: nm_dim
@@ -1392,8 +1392,8 @@ contains
 
         ! Dummy arguments
         class(Sphere), intent(inout)  :: self
-        real(wp),      intent(in)     :: scalar_function(:,:)
-        real(wp),      intent(out)    :: angular_momentum(:,:,:)
+        real(wp),      intent(in)     :: scalar_function(:, :)
+        real(wp),      intent(out)    :: angular_momentum(:, :, :)
 
         ! Local variables
         integer(ip) :: i, j, nlat, nlon
@@ -1446,10 +1446,10 @@ contains
     !
     ! The coefficients are ordered so that
     !
-    ! first (nm=1)  is m=0, n=0, second (nm=2) is m=0, n=1,
+    ! first (nm=1)  is m=0, n=0, second (nm=2) is m=0, n=1, 
     ! nm=mtrunc is m=0, n=mtrunc, nm=mtrunc+1 is m=1, n=1, etc.
     !
-    ! In other words,
+    ! In other words, 
     !
     ! 00, 01, 02, 03, 04.........0mtrunc
     !     11, 12, 13, 14.........1mtrunc

@@ -261,7 +261,7 @@ module spherepack_library
 
 contains
 
-    subroutine vecout_array(vec,nam,vec_size)
+    subroutine vecout_array(vec, nam, vec_size)
 
         ! Dummy arguments
         real(wp),         intent(in) ::vec(vec_size)
@@ -271,12 +271,12 @@ contains
         ! Local variables
         integer(ip) :: i
 
-        write( stdout, 109) nam, (vec(i),i=1,vec_size)
-109     format(1h a4,/(1h 8e11.4))
+        write( stdout, 109) nam, (vec(i), i=1, vec_size)
+109     format(1h a4, /(1h 8e11.4))
 
     end subroutine vecout_array
 
-    subroutine vecout_scalar(vec,nam,vec_size)
+    subroutine vecout_scalar(vec, nam, vec_size)
 
         ! Dummy arguments
         real(wp),         intent(in) :: vec
@@ -287,17 +287,17 @@ contains
 
     end subroutine vecout_scalar
 
-    subroutine vout_scalar(var,nam)
+    subroutine vout_scalar(var, nam)
 
         ! Dummy arguments
         real(wp),         intent(in) :: var
         character(len=*), intent(in) :: nam
 
-        write( stdout,'(a, e12.5)') nam, var
+        write( stdout, '(a, e12.5)') nam, var
 
     end subroutine vout_scalar
 
-    subroutine vout_array(var,nam)
+    subroutine vout_array(var, nam)
 
         ! Dummy arguments
         real(wp),         intent(in) :: var(:)
@@ -307,13 +307,13 @@ contains
 
     end subroutine vout_array
 
-    subroutine iout(ivar,nam)
+    subroutine iout(ivar, nam)
 
         ! Dummy arguments
         integer(ip),      intent(in) :: ivar
         character(len=*), intent(in) :: nam
 
-        write( stdout, '(a,i5)') nam, ivar
+        write( stdout, '(a, i5)') nam, ivar
 
     end subroutine iout
 
@@ -322,7 +322,7 @@ contains
         ! Dummy arguments
         character(len=*), intent(in) :: routine_name
 
-        write(stdout,'(a)') routine_name
+        write(stdout, '(a)') routine_name
 
     end subroutine name
 
@@ -331,7 +331,7 @@ contains
         ! Dummy arguments
         integer(ip), intent(in) :: ierror
 
-        if (ierror /= 0) write(stderr, '(a,i5)') '   ierror', ierror
+        if (ierror /= 0) write(stderr, '(a, i5)') '   ierror', ierror
 
     end subroutine check_error
 

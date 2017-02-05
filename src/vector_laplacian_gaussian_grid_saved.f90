@@ -235,11 +235,11 @@
 !               l1 = min(nlat, (nlon+2)/2) if nlon is even or
 !               l1 = min(nlat, (nlon+1)/2) if nlon is odd
 !
-!            if ityp .le. 2 then
+!            if ityp <= 2 then
 !
 !               (2*nt+1)*nlat*nlon + nlat*(4*nt*l1+1)
 !
-!            or if ityp .gt. 2 then
+!            or if ityp > 2 then
 !
 !               (2*nt+1)*l2*nlon + nlat*(4*nt*l1+1)
 !

@@ -86,13 +86,13 @@ contains
         ! Dummy arguments
         class(AdvectionSolver), intent(inout) :: self
         real(wp),               intent(in)    :: t
-        real(wp),               intent(out)   :: geopot(:,:)
+        real(wp),               intent(out)   :: geopot(:, :)
 
         ! Local variables
         integer(ip) :: i, j
         real(wp)    :: xc, yc, zc, x1, y1, z1
-        real(wp)    :: lambda, theta, cost, sint, sth ,cthclh
-        real(wp)    :: cthslh,lhat,cosl,sinl,cth ,that, r
+        real(wp)    :: lambda, theta, cost, sint, sth , cthclh
+        real(wp)    :: cthslh, lhat, cosl, sinl, cth , that, r
 
 
         associate( &
@@ -102,7 +102,7 @@ contains
             beta => self%LATITUDE_OF_COSINE_BELL, &
             re => self%RADIUS_OF_EARTH_IN_METERS, &
             alpha => self%TILT_ANGLE, &
-            hzero => self%MAXIMUM_VALUE_OF_COSINE_BELL,&
+            hzero => self%MAXIMUM_VALUE_OF_COSINE_BELL, &
             colat => self%grid%latitudes &
             )
 
@@ -114,24 +114,24 @@ contains
                 cosa => cos(alpha), &
                 sina => sin(alpha) &
                 )
-                do j=1,nlon
+                do j=1, nlon
                     lambda = self%grid%longitudes(j)
                     associate( &
                         cosp => cos(lambda), &
                         sinp => sin(lambda) &
                         )
-                        do i=1,nlat
+                        do i=1, nlat
                             theta = colat(i)
                             cost = cos(theta)
                             sint = sin(theta)
                             sth = cosa*cost+sina*sint*cosp
                             cthclh = cosa*sint*cosp-sina*cost
                             cthslh = sint*sinp
-                            lhat = atanxy(cthclh,cthslh)
+                            lhat = atanxy(cthclh, cthslh)
                             cosl = cos(lhat)
                             sinl = sin(lhat)
                             cth = cosl*cthclh+sinl*cthslh
-                            that = atanxy(sth,cth)
+                            that = atanxy(sth, cth)
 
                             ! Compute scaled radial unit vector
                             call sph2cart(ONE, that, lhat, x1, y1, z1)
@@ -140,7 +140,7 @@ contains
                             associate( dist => norm2([x1-xc, y1-yc, z1-zc]) )
 
                                 !  Initialize geopotential
-                                geopot(i,j) = ZERO
+                                geopot(i, j) = ZERO
 
                                 if (dist >= re) cycle
 
@@ -151,7 +151,7 @@ contains
                             if (r >= re) cycle
 
                             !  Set geopotential
-                            geopot(i,j) = hzero * (cos(r*PI/re)+ONE)/2
+                            geopot(i, j) = hzero * (cos(r*PI/re)+ONE)/2
                         end do
                     end associate
                 end do
@@ -164,8 +164,8 @@ contains
 
         ! Dummy arguments
         class(AdvectionSolver), intent(inout)  :: self
-        real(wp),               intent(out)    :: u(:,:)
-        real(wp),               intent(out)    :: v(:,:)
+        real(wp),               intent(out)    :: u(:, :)
+        real(wp),               intent(out)    :: v(:, :)
 
         ! Local variables
         integer(ip) :: i, j
@@ -180,11 +180,11 @@ contains
             alpha => self%TILT_ANGLE &
             )
 
-            do j=1,nlons
+            do j=1, nlons
                 associate( xlm => self%grid%longitudes(j) )
                     sinp = sin(xlm)
                     cosp = cos(xlm)
-                    do i=1,nlats
+                    do i=1, nlats
                         cost = cos(colat(i))
                         sint = sin(colat(i))
                         associate( &
@@ -193,13 +193,13 @@ contains
                             cthslh => sint*sinp &
                             )
 
-                            xlhat = self%atanxy(cthclh,cthslh)
+                            xlhat = self%atanxy(cthclh, cthslh)
                             cosl = cos(xlhat)
                             sinl = sin(xlhat)
                             cth = cosl*cthclh+sinl*cthslh
                             uhat = omega*cth
-                            u(i,j) = (cos(alpha)*sinp*sinl+cosp*cosl)*uhat
-                            v(i,j) = (cos(alpha)*cost*cosp*sinl &
+                            u(i, j) = (cos(alpha)*sinp*sinl+cosp*cosl)*uhat
+                            v(i, j) = (cos(alpha)*cost*cosp*sinl &
                                 -cost*sinp*cosl+sin(alpha)*sint*sinl)*uhat
 
                         end associate
@@ -210,7 +210,7 @@ contains
 
     end subroutine get_vector_velocities
 
-    pure function atanxy(x,y) result (return_value)
+    pure function atanxy(x, y) result (return_value)
 
         ! Dummy arguments
         real(wp), intent(in) :: x
@@ -221,7 +221,7 @@ contains
 
         if (x == ZERO .and. y == ZERO) return
 
-        return_value = atan2(y,x)
+        return_value = atan2(y, x)
 
     end function atanxy
 

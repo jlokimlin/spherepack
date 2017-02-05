@@ -37,9 +37,9 @@
 !     a program for testing all vector analysis and synthesis subroutines
 !
 !     (1) first a scalar stream function and a scalar velocity potential function
-!         are set in st,sv by restricting polys in x,y,z to the sphere surface
+!         are set in st, sv by restricting polys in x, y, z to the sphere surface
 !
-!     (2) the vector vield (v,w) is set by analytically differenting the scalar fields in (1)
+!     (2) the vector vield (v, w) is set by analytically differenting the scalar fields in (1)
 !         using the standard formula relating a vector field and the stream and velocity
 !         potential scalar fields in colatitude X longitude spherical coordinates
 !
@@ -47,13 +47,13 @@
 !
 !          w =  1/sin(theta)*d(sv)/dphi + d(st)/dtheta
 !
-!     (3) a vector analysis is performed on (v,w)
+!     (3) a vector analysis is performed on (v, w)
 !
 !     (4) a vector synthesis is performed using coeffs from (3)
 !
 !     (5) the synthesized vector field from (4) is compared with the vector field from (2)
 !
-!     note:  vhaec,vhaes,vhagc,vhags,vhsec,vhses,vhsgc,vhsgs are all tested!
+!     note:  vhaec, vhaes, vhagc, vhags, vhsec, vhses, vhsgc, vhsgs are all tested!
 !
 program tvha
 
@@ -95,10 +95,10 @@ contains
         integer(ip), parameter        :: NLATS = 25
         integer(ip), parameter        :: NSYNTHS = 2
         integer(ip)                   :: i, j, k ! Counters
-        real(wp)                      :: polar_component(NLATS,NLONS,NSYNTHS)
-        real(wp)                      :: azimuthal_component(NLATS,NLONS,NSYNTHS)
-        real(wp)                      :: synthesized_polar(NLATS,NLONS,NSYNTHS)
-        real(wp)                      :: synthesized_azimuthal(NLATS,NLONS,NSYNTHS)
+        real(wp)                      :: polar_component(NLATS, NLONS, NSYNTHS)
+        real(wp)                      :: azimuthal_component(NLATS, NLONS, NSYNTHS)
+        real(wp)                      :: synthesized_polar(NLATS, NLONS, NSYNTHS)
+        real(wp)                      :: synthesized_azimuthal(NLATS, NLONS, NSYNTHS)
         character(len=:), allocatable :: previous_polar_error, previous_azimuthal_error
 
         !  Set up workspace arrays
@@ -123,8 +123,8 @@ contains
         end select
 
         !
-        !  Set scalar stream and velocity potential fields as polys in x,y,z
-        !    and then set v,w from st,sv scalar fields
+        !  Set scalar stream and velocity potential fields as polys in x, y, z
+        !    and then set v, w from st, sv scalar fields
         !
         associate( &
             ve => polar_component, &
@@ -137,17 +137,17 @@ contains
                 do j=1, NLONS
                     do i=1, NLATS
                         associate( &
-                            x => radial(i,j)%x, & !sint*cosp
-                            y => radial(i,j)%y, & !sint*sinp
-                            z => radial(i,j)%z, & !cost
-                            dxdt => theta(i,j)%x, &! cost*cosp
-                            dxdp => -radial(i,j)%y, & !-sint*sinp
-                            dydt => theta(i,j)%y, &! cost*sinp
-                            dydp => radial(i,j)%x, & ! sint*cosp
-                            dzdt => theta(i,j)%z, & ! -sint
-                            dzdp => phi(i,j)%z,& ! 0.0
-                            cosp => phi(i,j)%y, &
-                            sinp => -phi(i,j)%x &
+                            x => radial(i, j)%x, & !sint*cosp
+                            y => radial(i, j)%y, & !sint*sinp
+                            z => radial(i, j)%z, & !cost
+                            dxdt => theta(i, j)%x, &! cost*cosp
+                            dxdp => -radial(i, j)%y, & !-sint*sinp
+                            dydt => theta(i, j)%y, &! cost*sinp
+                            dydp => radial(i, j)%x, & ! sint*cosp
+                            dzdt => theta(i, j)%z, & ! -sint
+                            dzdp => phi(i, j)%z, & ! 0.0
+                            cosp => phi(i, j)%y, &
+                            sinp => -phi(i, j)%x &
                             )
                             select case (k)
                                 case (1)
@@ -155,8 +155,8 @@ contains
                                         dstdt => x*dydt+y*dxdt, &
                                         dsvdt => y*dzdt+z*dydt &
                                         )
-                                        ve(i,j,k) = -(cosp*dydp+sinp*dxdp) + dsvdt
-                                        we(i,j,k) = sinp*dzdp + dxdt + dstdt
+                                        ve(i, j, k) = -(cosp*dydp+sinp*dxdp) + dsvdt
+                                        we(i, j, k) = sinp*dzdp + dxdt + dstdt
                                     end associate
                                 case (2)
                                     associate( &
@@ -168,8 +168,8 @@ contains
                                         !
                                         !          w =  1/sin(theta)*d(sv)/dphi + d(st)/dtheta
                                         !
-                                        ve(i,j,k) = z*sinp + dsvdt
-                                        we(i,j,k) = cosp*dydp+ sinp*dxdp + dstdt
+                                        ve(i, j, k) = z*sinp + dsvdt
+                                        we(i, j, k) = cosp*dydp+ sinp*dxdp + dstdt
                                     end associate
                             end select
                         end associate
@@ -184,10 +184,10 @@ contains
         !
         do k = 1, NSYNTHS
             associate( &
-                ve => polar_component(:,:,k), &
-                we => azimuthal_component(:,:,k), &
-                v => synthesized_polar(:,:,k), &
-                w => synthesized_azimuthal(:,:,k) &
+                ve => polar_component(:, :, k), &
+                we => azimuthal_component(:, :, k), &
+                v => synthesized_polar(:, :, k), &
+                w => synthesized_azimuthal(:, :, k) &
                 )
 
                 ! Analyse function into (real) coefficients
@@ -221,13 +221,13 @@ contains
                 write( stdout, '(a)') ''
                 write( stdout, '(a)') '     grid type = '//sphere_type%grid%grid_type
                 write( stdout, '(a)') '     Testing vector analysis and synthesis'
-                write( stdout, '(2(a,i3))') '     nlat = ', NLATS,' nlon = ', NLONS
+                write( stdout, '(2(a, i3))') '     nlat = ', NLATS, ' nlon = ', NLONS
                 write( stdout, '(a)') '     Previous 64 bit floating point arithmetic result '
                 write( stdout, '(a)') previous_polar_error
                 write( stdout, '(a)') previous_azimuthal_error
                 write( stdout, '(a)') '     The output from your computer is: '
-                write( stdout, '(a,1pe15.6)') '     polar error     = ', err2v
-                write( stdout, '(a,1pe15.6)') '     azimuthal error = ', err2w
+                write( stdout, '(a, 1pe15.6)') '     polar error     = ', err2v
+                write( stdout, '(a, 1pe15.6)') '     azimuthal error = ', err2w
                 write( stdout, '(a)' ) ''
             end associate
         end associate

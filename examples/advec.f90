@@ -19,13 +19,13 @@
 !     program advec solves the time-dependent linear advection 
 !     equation for geopotential phi using the spherepack software
 !
-!          d(phi)/dt = -(u,v) .dot. gradient(phi)
+!          d(phi)/dt = -(u, v) .dot. gradient(phi)
 !
 !                    = -(u*grad_phi_lon + v*grad_phi_lat)
 !
 ! ... required files
 !
-!     gradgc.f90,shagc.f90,shsgc.f90,vhsgc.f90,type_SpherepackAux.f90 type_RealPeriodicFastFourierTransform.f90,compute_gaussian_latitudes_and_weights.f90
+!     gradgc.f90, shagc.f90, shsgc.f90, vhsgc.f90, type_SpherepackAux.f90 type_RealPeriodicFastFourierTransform.f90, compute_gaussian_latitudes_and_weights.f90
 !
 !
 ! definitions:
@@ -45,43 +45,43 @@
 !     theta         latitude
 !
 !   the first dimension of the following two dimensional arrays
-!   corresponds to the latitude index with values i=1,...,nlat
+!   corresponds to the latitude index with values i=1, ..., nlat
 !   where i=1 is the northern most gaussian point thetag(i)
 !   and i=nlat is the southern most gaussian point thetag(nlat).
-!   the second dimension is longitude with values j=1,...,nlon
+!   the second dimension is longitude with values j=1, ..., nlon
 !   where j=1 corresponds to zero longitude and j=nlon corresponds
 !   to 2pi minus 2pi/nlon.
 !
 !
 !     thetag(i)           vector of gaussian points on the full sphere which
-!                         have north to south orientation as i=1,...,nlat
+!                         have north to south orientation as i=1, ..., nlat
 !
-!     u(i,j)               east longitudinal velocity component
+!     u(i, j)               east longitudinal velocity component
 !
-!     v(i,j)               latitudinal velocity component
+!     v(i, j)               latitudinal velocity component
 !
-!     phi(i,j)             the geopotential at t = time
+!     phi(i, j)             the geopotential at t = time
 !
-!     phi_new(i,j)         the geopotential at t=time+dt
+!     phi_new(i, j)         the geopotential at t=time+dt
 !
-!     phi_old(i,j)         the geopotential at t=time-dt
+!     phi_old(i, j)         the geopotential at t=time-dt
 !
-!     grad_phi_lon(i,j)    the longitudinal derivative component of
+!     grad_phi_lon(i, j)    the longitudinal derivative component of
 !                          the gradient of phi
 !
 !                          grad_phi_lon = 1/(cos(theta))*d(phi)/dlambda
 !
 !
-!     grad_phi_lat(i,j)   the latitudinal derivative component of
+!     grad_phi_lat(i, j)   the latitudinal derivative component of
 !                         the gradient of phi
 !
 !                         grad_phi_lat = d(phi)/dtheta
 !
 !
 !   the following two dimensional arrays are nonzero in the triangle
-!   n=1,...,nlat and m less than or equal to n.
+!   n=1, ..., nlat and m less than or equal to n.
 !
-!     ar(m,n),br(m,n)    spectral coefficients of phi
+!     ar(m, n), br(m, n)    spectral coefficients of phi
 !
 program advec
 
@@ -158,7 +158,7 @@ program advec
         grad_phi = -u * grad_phi_lon + v * grad_phi_lat
 
         ! Write variables to standard output
-        if (mod(ncycle,mprint) == 0) then
+        if (mod(ncycle, mprint) == 0) then
 
             ! Compute exact solution
             call solver%get_geopotential(time, exact_phi)
@@ -198,7 +198,7 @@ program advec
             time = time + dt
             ncycle = ncycle + 1
 
-            ! Update phi_old,phi for next time step
+            ! Update phi_old, phi for next time step
             phi_new = phi_old + 2.0_wp * dt * grad_phi
             phi_old = phi
             phi = phi_new

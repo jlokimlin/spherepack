@@ -41,16 +41,16 @@
 !
 !     (2) set vector laplacian ananlytically
 !         vlap = -2.*cos(phi)=-2.*v, wlap = -2.*w
-!         (i.e., L(v,w) = -2.*(v,w) so (v,w) is an eigenfunction for the
+!         (i.e., L(v, w) = -2.*(v, w) so (v, w) is an eigenfunction for the
 !         vector Laplacian with eigenvalue -2.
 !
-!     (3) compute the coefficients br,bi,cr,ci of (v,w) using vector analysis
+!     (3) compute the coefficients br, bi, cr, ci of (v, w) using vector analysis
 !
-!     (3) compute the vector laplacian of (v,w) using vlapec,vlapes,vlapgc,vlapgs
+!     (3) compute the vector laplacian of (v, w) using vlapec, vlapes, vlapgc, vlapgs
 !
 !     (4) compare (3) with (2)
 !
-!     (5) invert (4) and compare with (v,w)
+!     (5) invert (4) and compare with (v, w)
 !
 program tvlap
 
@@ -91,14 +91,14 @@ contains
         integer(ip), parameter        :: NLONS = 16
         integer(ip), parameter        :: NLATS = 29
         integer(ip)                   :: i, j, k ! Counters
-        real(wp)                      :: original_polar_component(NLATS,NLONS)
-        real(wp)                      :: original_azimuthal_component(NLATS,NLONS)
-        real(wp)                      :: exact_polar_laplacian(NLATS,NLONS)
-        real(wp)                      :: exact_azimuthal_laplacian(NLATS,NLONS)
-        real(wp)                      :: polar_component(NLATS,NLONS)
-        real(wp)                      :: azimuthal_component(NLATS,NLONS)
-        real(wp)                      :: approximate_polar_laplacian(NLATS,NLONS)
-        real(wp)                      :: approximate_azimuthal_laplacian(NLATS,NLONS)
+        real(wp)                      :: original_polar_component(NLATS, NLONS)
+        real(wp)                      :: original_azimuthal_component(NLATS, NLONS)
+        real(wp)                      :: exact_polar_laplacian(NLATS, NLONS)
+        real(wp)                      :: exact_azimuthal_laplacian(NLATS, NLONS)
+        real(wp)                      :: polar_component(NLATS, NLONS)
+        real(wp)                      :: azimuthal_component(NLATS, NLONS)
+        real(wp)                      :: approximate_polar_laplacian(NLATS, NLONS)
+        real(wp)                      :: approximate_azimuthal_laplacian(NLATS, NLONS)
         character(len=:), allocatable :: previous_polar_laplacian_error
         character(len=:), allocatable :: previous_polar_inversion_error
         character(len=:), allocatable :: previous_azimuthal_laplacian_error
@@ -109,7 +109,7 @@ contains
             type is (GaussianSphere)
 
             !  Initialize gaussian sphere object
-            sphere_type = GaussianSphere(NLATS,NLONS)
+            sphere_type = GaussianSphere(NLATS, NLONS)
 
             ! Allocate known error from previous platform
             allocate( previous_polar_laplacian_error, source='     polar laplacian error     = 1.761258e-12' )
@@ -143,20 +143,20 @@ contains
             do j=1, NLONS
                 do i=1, NLATS
                     associate( &
-                        cost => r(i,j)%z, &
-                        cosp => phi(i,j)%y, &
-                        sinp => -phi(i,j)%x &
+                        cost => r(i, j)%z, &
+                        cosp => phi(i, j)%y, &
+                        sinp => -phi(i, j)%x &
                         )
                         !
-                        !  set vector field v,w
+                        !  set vector field v, w
                         !
-                        ve(i,j) = cosp
-                        we(i,j) = -cost*sinp
+                        ve(i, j) = cosp
+                        we(i, j) = -cost*sinp
                         !
                         !  set vector laplacian vlap, wlap
                         !
-                        velap(i,j) = -2.0_wp * ve(i,j)
-                        welap(i,j) = -2.0_wp * we(i,j)
+                        velap(i, j) = -2.0_wp * ve(i, j)
+                        welap(i, j) = -2.0_wp * we(i, j)
                     end associate
                 end do
             end do
@@ -197,17 +197,17 @@ contains
                 write( stdout, '(/a/)') '     tvlap *** TEST RUN *** '
                 write( stdout, '(a)') '     grid type = '//sphere_type%grid%grid_type
                 write( stdout, '(a)') '     Testing vector laplacian'
-                write( stdout, '(2(a,i3))') '     nlat = ', NLATS,' nlon = ', NLONS
+                write( stdout, '(2(a, i3))') '     nlat = ', NLATS, ' nlon = ', NLONS
                 write( stdout, '(a)') '     Previous 64 bit floating point arithmetic result '
                 write( stdout, '(a)') previous_polar_laplacian_error
                 write( stdout, '(a)') previous_azimuthal_laplacian_error
                 write( stdout, '(a)') '     The output from your computer is: '
-                write( stdout, '(a,1pe15.6)') '     polar laplacian error     = ', err2v
-                write( stdout, '(a,1pe15.6/)') '     azimuthal laplacian error = ', err2w
+                write( stdout, '(a, 1pe15.6)') '     polar laplacian error     = ', err2v
+                write( stdout, '(a, 1pe15.6/)') '     azimuthal laplacian error = ', err2w
             end associate
         end associate
         !
-        !  Now recompute (v,w) inverting (velap,welap)
+        !  Now recompute (v, w) inverting (velap, welap)
         !
         associate( &
             v => polar_component, &
@@ -219,7 +219,7 @@ contains
         end associate
 
         !
-        !  compare this v,w with original
+        !  compare this v, w with original
         !
         associate( &
             ve => original_polar_component, &
@@ -238,13 +238,13 @@ contains
                 write( stdout, '(/a/)') '     tvlap *** TEST RUN *** '
                 write( stdout, '(a)') '     grid type = '//sphere_type%grid%grid_type
                 write( stdout, '(a)') '     Testing vector laplacian inversion'
-                write( stdout, '(2(a,i3))') '     nlat = ', NLATS,' nlon = ', NLONS
+                write( stdout, '(2(a, i3))') '     nlat = ', NLATS, ' nlon = ', NLONS
                 write( stdout, '(a)') '     Previous 64 bit floating point arithmetic result '
                 write( stdout, '(a)') previous_polar_inversion_error
                 write( stdout, '(a)') previous_azimuthal_inversion_error
                 write( stdout, '(a)') '     The output from your computer is: '
-                write( stdout, '(a,1pe15.6)') '     polar inversion error     = ', err2v
-                write( stdout, '(a,1pe15.6/)') '     azimuthal inversion error = ', err2w
+                write( stdout, '(a, 1pe15.6)') '     polar inversion error     = ', err2v
+                write( stdout, '(a, 1pe15.6/)') '     azimuthal inversion error = ', err2w
             end associate
         end associate
         !

@@ -360,13 +360,13 @@ contains
         l1 = 1
 
         if (nfm1 /= 0) then
-            do k1=1,nfm1
+            do k1=1, nfm1
                 iip = int(factors(k1+2), kind=ip)
                 ld = 0
                 l2 = l1*iip
                 ido = n/l2
                 ipm = iip-1
-                do j=1,ipm
+                do j=1, ipm
                     ld = ld+l1
                     i = is
                     mesh = real(ld, kind=wp) * d_theta
@@ -479,8 +479,8 @@ contains
         ! Local variables
         integer(ip) :: i, k, m, ic, idp2
 
-        ch(1:mp, 1, 1,:) = cc(1:mp, 1,:, 1)+cc(1:mp, 1,:, 2)
-        ch(1:mp, ido, 2,:) = cc(1:mp, 1,:, 1)-cc(1:mp, 1,:, 2)
+        ch(1:mp, 1, 1, :) = cc(1:mp, 1, :, 1)+cc(1:mp, 1, :, 2)
+        ch(1:mp, ido, 2, :) = cc(1:mp, 1, :, 1)-cc(1:mp, 1, :, 2)
 
         if (ido < 2) then
             return
@@ -511,8 +511,8 @@ contains
             if (mod(ido, 2) == 1) return
         end if
 
-        ch(1:mp, 1, 2, :) = -cc(1:mp, ido,:, 2)
-        ch(1:mp, ido, 1, :) = cc(1:mp, ido,:, 1)
+        ch(1:mp, 1, 2, :) = -cc(1:mp, ido, :, 2)
+        ch(1:mp, ido, 1, :) = cc(1:mp, ido, :, 1)
 
     end subroutine forward_pass_2
 
@@ -693,7 +693,7 @@ contains
                 end do
             end do
 
-            if (mod(ido,2) == 1) return
+            if (mod(ido, 2) == 1) return
 
         end if
 
@@ -1148,8 +1148,8 @@ contains
         ! Local variables
         integer(ip) :: i, k, ic, idp2
 
-        ch(1:mp, 1,:, 1) = cc(1:mp, 1, 1, :)+cc(1:mp, ido, 2, :)
-        ch(1:mp, 1,:, 2) = cc(1:mp, 1, 1, :)-cc(1:mp, ido, 2, :)
+        ch(1:mp, 1, :, 1) = cc(1:mp, 1, 1, :)+cc(1:mp, ido, 2, :)
+        ch(1:mp, 1, :, 2) = cc(1:mp, 1, 1, :)-cc(1:mp, ido, 2, :)
 
         if (ido < 2) then
             return
@@ -1173,11 +1173,11 @@ contains
                         *(cc(1: mp, i-1, 1, k)-cc(1: mp, ic-1, 2, k))
                 end do
             end do
-            if (mod(ido,2) == 1) return
+            if (mod(ido, 2) == 1) return
         end if
 
-        ch(1:mp, ido,:, 1) = cc(1:mp, ido, 1,:)+cc(1:mp, ido, 1,:)
-        ch(1:mp, ido,:, 2) = -(cc(1:mp, 1, 2,:)+cc(1:mp, 1, 2,:))
+        ch(1:mp, ido, :, 1) = cc(1:mp, ido, 1, :)+cc(1:mp, ido, 1, :)
+        ch(1:mp, ido, :, 2) = -(cc(1:mp, 1, 2, :)+cc(1:mp, 1, 2, :))
 
     end subroutine backward_pass_2
 
@@ -1538,13 +1538,13 @@ contains
         ipp2 = iip+2
         ipph = (iip+1)/2
 
-        ch(1:mp,:, :, 1) = cc(1:mp,:, 1, :)
+        ch(1:mp, :, :, 1) = cc(1:mp, :, 1, :)
 
         do j=2, ipph
             jc = ipp2-j
             j2 = 2*j
-            ch(1:mp, 1,:, j) = cc(1:mp, ido, j2-2, :)+cc(1:mp, ido, j2-2, :)
-            ch(1:mp, 1,:, jc) = cc(1:mp, 1, j2-1, :)+cc(1:mp, 1, j2-1, :)
+            ch(1:mp, 1, :, j) = cc(1:mp, ido, j2-2, :)+cc(1:mp, ido, j2-2, :)
+            ch(1:mp, 1, :, jc) = cc(1:mp, 1, j2-1, :)+cc(1:mp, 1, j2-1, :)
         end do
 
         if (ido /= 1) then
@@ -1566,10 +1566,10 @@ contains
                     jc = ipp2-j
                     do i=3, ido, 2
                         ic = idp2-i
-                        ch(1:mp, i-1,:, j) = cc(1:mp, i-1, 2*j-1, :)+cc(1:mp, ic-1, 2*j-2, :)
-                        ch(1:mp, i-1,:, jc) = cc(1:mp, i-1, 2*j-1, :)-cc(1:mp, ic-1, 2*j-2, :)
-                        ch(1:mp, i,:, j) = cc(1:mp, i, 2*j-1, :)-cc(1:mp, ic, 2*j-2, :)
-                        ch(1:mp, i,:, jc) = cc(1:mp, i, 2*j-1, :)+cc(1:mp, ic, 2*j-2, :)
+                        ch(1:mp, i-1, :, j) = cc(1:mp, i-1, 2*j-1, :)+cc(1:mp, ic-1, 2*j-2, :)
+                        ch(1:mp, i-1, :, jc) = cc(1:mp, i-1, 2*j-1, :)-cc(1:mp, ic-1, 2*j-2, :)
+                        ch(1:mp, i, :, j) = cc(1:mp, i, 2*j-1, :)-cc(1:mp, ic, 2*j-2, :)
+                        ch(1:mp, i, :, jc) = cc(1:mp, i, 2*j-1, :)+cc(1:mp, ic, 2*j-2, :)
                     end do
                 end do
             end if

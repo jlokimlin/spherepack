@@ -105,7 +105,7 @@ contains
         call self%destroy()
 
         !  Allocate polymorphic components
-        allocate( self%grid, source=GaussianGrid(nlat,nlon) )
+        allocate( self%grid, source=GaussianGrid(nlat, nlon) )
         allocate( self%workspace, source=GaussianWorkspace(nlat, nlon) )
 
         !  Address optional arguments
@@ -184,7 +184,7 @@ contains
 
         ! Dummy arguments
         class(GaussianSphere), intent(inout) :: self
-        real(wp),              intent(in)    :: scalar_function(:,:)
+        real(wp),              intent(in)    :: scalar_function(:, :)
 
         ! Local variables
         integer(ip)    :: error_flag
@@ -258,7 +258,7 @@ contains
 
         ! Dummy arguments
         class(GaussianSphere), intent(inout) :: self
-        real(wp),              intent(out)   :: scalar_function(:,:)
+        real(wp),              intent(out)   :: scalar_function(:, :)
 
         ! Local variables
         integer(ip)    :: error_flag
@@ -335,8 +335,8 @@ contains
 
         ! Dummy arguments
         class(GaussianSphere), intent(inout)  :: self
-        real(wp),              intent(in)     :: polar_component(:,:)
-        real(wp),              intent(in)     :: azimuthal_component(:,:)
+        real(wp),              intent(in)     :: polar_component(:, :)
+        real(wp),              intent(in)     :: azimuthal_component(:, :)
 
         ! Local variables
         integer(ip)    :: error_flag
@@ -439,8 +439,8 @@ contains
 
         ! Dummy arguments
         class(GaussianSphere), intent(inout)  :: self
-        real(wp),              intent(out)    :: polar_component(:,:)
-        real(wp),              intent(out)    :: azimuthal_component(:,:)
+        real(wp),              intent(out)    :: polar_component(:, :)
+        real(wp),              intent(out)    :: azimuthal_component(:, :)
 
         ! Local variables
         integer(ip)    :: error_flag
@@ -546,7 +546,7 @@ contains
 
         ! Dummy arguments
         class(GaussianSphere), intent(inout) :: self
-        real(wp),              intent(in)    :: scalar_function(:,:)
+        real(wp),              intent(in)    :: scalar_function(:, :)
         real(wp)                             :: return_value
 
         ! Local variables
@@ -591,7 +591,7 @@ contains
 
         ! Dummy arguments
         class(GaussianSphere), intent(inout) :: self
-        real(wp),              intent(in)    :: scalar_function(:,:)
+        real(wp),              intent(in)    :: scalar_function(:, :)
         class(Vector),         intent(out)   :: first_moment
 
         ! Local variables
@@ -623,9 +623,9 @@ contains
             ! Compute first moment
             associate( &
                 m => first_moment, &
-                f1 => integrant(:,:,1), &
-                f2 => integrant(:,:,2), &
-                f3 => integrant(:,:,3) &
+                f1 => integrant(:, :, 1), &
+                f2 => integrant(:, :, 2), &
+                f3 => integrant(:, :, 3) &
                 )
                 m%x = self%compute_surface_integral(f1)
                 m%y = self%compute_surface_integral(f2)

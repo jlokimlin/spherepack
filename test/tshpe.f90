@@ -180,12 +180,12 @@ program tshpe
 437             format(' j=', i5, 1p4e15.6/(8x, 1p4e15.6))
             end do
 
-            discretization_error = maxval(abs(sy(:nlat,:nlon)-gw(:nlat,:nlon,1)))
+            discretization_error = maxval(abs(sy(:nlat, :nlon)-gw(:nlat, :nlon, 1)))
 
             write(stdout, '(/2(a, i5)/)') &
                 'case nlat =', nlat, ' and mtrunc =', mtrunc
 
-            write(stdout, '(3(a,1pe15.6/))') &
+            write(stdout, '(3(a, 1pe15.6/))') &
                 ' error =', discretization_error, &
                 ' tusl  =', tusl, &
                 ' toe   =', toe

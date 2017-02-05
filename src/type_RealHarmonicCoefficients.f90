@@ -17,8 +17,8 @@ module type_RealHarmonicCoefficients
         integer(ip),           public :: NUMBER_OF_LONGITUDES = 0
         integer(ip),           public :: NUMBER_OF_LATITUDES = 0
         integer(ip),           public :: NUMBER_OF_SYNTHESES = 0
-        real(wp), allocatable, public :: real_component(:,:)!,:)
-        real(wp), allocatable, public :: imaginary_component(:,:)!,:)
+        real(wp), allocatable, public :: real_component(:, :)!, :)
+        real(wp), allocatable, public :: imaginary_component(:, :)!, :)
     contains
         ! Type-bound procedures
         procedure, public  :: create => create_real_harmonic_coefficients
@@ -78,7 +78,7 @@ contains
         self%NUMBER_OF_SYNTHESES = nt
 
                 !  Set upper limit for vector m subscript
-        !        select case(mod(nlon,2))
+        !        select case(mod(nlon, 2))
         !            case(0)
         !                mdab = min(nlat, (nlon + 2)/2)
         !            case default

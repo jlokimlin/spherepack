@@ -29,9 +29,6 @@
 !     *                                                               *
 !     * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !
-!
-! ... file type_SpherepackAux.f90
-!
 !     This file must be loaded with all main program files
 !     in spherepack. It includes undocumented subroutines
 !     called by some or all of main programs
@@ -428,7 +425,7 @@ contains
         integer(ip) :: workspace_indices(5)
 
         !  set size of pole to equator gaussian grid
-        late = (nlat+mod(nlat,2))/2
+        late = (nlat+mod(nlat, 2))/2
 
         !  partition w (set pointers for p0n, p1n, abel, bbel, cbel, pmn)
         workspace_indices = get_legin_workspace_indices(l, late, nlat)
@@ -629,8 +626,8 @@ contains
         real(wp),    intent(inout)  :: z(imid, nlat, 3)
         integer(ip), intent(in)     :: imid
         integer(ip), intent(inout)  :: i3
-        real(wp),    intent(inout)  :: zz(imid,*)
-        real(wp),    intent(inout)  :: z1(imid,*)
+        real(wp),    intent(inout)  :: zz(imid, *)
+        real(wp),    intent(inout)  :: z1(imid, *)
         real(wp),    intent(inout)  :: a(*)
         real(wp),    intent(inout)  :: b(*)
         real(wp),    intent(inout)  :: c(*)
@@ -649,14 +646,14 @@ contains
                 i1 = 1
                 i2 = 2
                 i3 = 3
-                z(:,1:nlat, i3) = zz(:,1:nlat)
+                z(:, 1:nlat, i3) = zz(:, 1:nlat)
             case(1)
-                z(:,2:nlat, i3) = z1(:,2:nlat)
+                z(:, 2:nlat, i3) = z1(:, 2:nlat)
             case default
                 ns = ((m-2)*(nlat+nlat-m-1))/2+1
 
                 if (isym /= 1) then
-                    z(:,m+1,i3) = a(ns)*z(:,m-1,i1)-c(ns)*z(:,m+1,i1)
+                    z(:, m+1, i3) = a(ns)*z(:, m-1, i1)-c(ns)*z(:, m+1, i1)
                 end if
 
                 if (m == nlat-1) return
@@ -678,8 +675,8 @@ contains
 
                 do np1=nstrt, nlat, nstp
                     ns = ns+nstp
-                    z(:,np1,i3) = &
-                        a(ns)*z(:,np1-2,i1)+b(ns)*z(:,np1-2,i3)-c(ns)*z(:,np1,i1)
+                    z(:, np1, i3) = &
+                        a(ns)*z(:, np1-2, i1)+b(ns)*z(:, np1-2, i3)-c(ns)*z(:, np1, i1)
                 end do
         end select
 
@@ -807,8 +804,8 @@ contains
 
         call compute_fourier_coefficients(m, n, work)
 
-        if (mod(n,2) <= 0) then
-            if (mod(m,2) <= 0) then
+        if (mod(n, 2) <= 0) then
+            if (mod(m, 2) <= 0) then
                 kdo = n/2+1
                 do idx=1, lc
                     i = 2*idx-2
@@ -837,7 +834,7 @@ contains
                 end do
             end if
         else
-            if (mod(m,2) <= 0) then
+            if (mod(m, 2) <= 0) then
                 !
                 !   n odd, m even
                 !
@@ -1032,11 +1029,11 @@ contains
         integer(ip), intent(in)    :: isym
         integer(ip), intent(in)    :: nlat
         integer(ip), intent(in)    :: m
-        real(wp),    intent(out)   :: p(imid,nlat,3)
+        real(wp),    intent(out)   :: p(imid, nlat, 3)
         integer(ip), intent(in)    :: imid
         integer(ip), intent(inout) :: i3
-        real(wp),    intent(in)    :: pz(imid,*)
-        real(wp),    intent(in)    :: p1(imid,*)
+        real(wp),    intent(in)    :: pz(imid, *)
+        real(wp),    intent(in)    :: p1(imid, *)
         real(wp),    intent(in)    :: a(*)
         real(wp),    intent(in)    :: b(*)
         real(wp),    intent(in)    :: c(*)
@@ -1054,9 +1051,9 @@ contains
             i1 = 1
             i2 = 2
             i3 = 3
-            p(:,:, i3) = pz(:,1:nlat)
+            p(:, :, i3) = pz(:, 1:nlat)
         else if (m == 1) then
-            p(:,2:nlat, i3) = p1(:,2:nlat)
+            p(:, 2:nlat, i3) = p1(:, 2:nlat)
         else
             ns = ((m-2)*(nlat+nlat-m-1))/2+1
 
@@ -1087,10 +1084,10 @@ contains
 
             do np1=nstrt, nlat, nstp
                 ns = ns+nstp
-                p(:,np1,i3) = &
-                    a(ns) * p(:,np1-2,i1) &
-                    + b(ns) * p(:,np1-2,i3) &
-                    - c(ns) * p(:,np1,i1)
+                p(:, np1, i3) = &
+                    a(ns) * p(:, np1-2, i1) &
+                    + b(ns) * p(:, np1-2, i3) &
+                    - c(ns) * p(:, np1, i1)
             end do
         end if
 
@@ -1149,7 +1146,7 @@ contains
         integer(ip), intent(in)   :: nlat
         integer(ip), intent(in)   :: nlon
         integer(ip), intent(in)   :: imid
-        real(wp),    intent(out)  :: p(imid, nlat,2)
+        real(wp),    intent(out)  :: p(imid, nlat, 2)
         real(wp),    intent(out)  :: abc(*)
         real(wp),    intent(out)  :: cp(*)
 
@@ -1269,7 +1266,7 @@ contains
         integer(ip), intent(in)     :: imid
         real(wp),    intent(inout)  :: z(idz, *)
         integer(ip), intent(in)     :: idz
-        real(wp),    intent(inout)  :: zin(imid, nlat,3)
+        real(wp),    intent(inout)  :: zin(imid, nlat, 3)
         real(wp),    intent(inout)  :: wzfin(*)
         real(wp),    intent(inout)  :: dwork(*)
 
@@ -1285,7 +1282,7 @@ contains
             call zfin(0, nlat, nlon, m, zin, i3, wzfin)
             do np1=mp1, nlat
                 mn = m*(nlat-1)-(m*(m-1))/2+np1
-                z(mn,1:imid) = zin(:,np1, i3)
+                z(mn, 1:imid) = zin(:, np1, i3)
             end do
         end do
 
@@ -1297,8 +1294,8 @@ contains
         integer(ip), intent(in)     :: nlat
         integer(ip), intent(in)     :: nlon
         integer(ip), intent(in)     :: imid
-        real(wp),    intent(inout)  :: p(imid,*)
-        real(wp),    intent(inout)  :: pin(imid,nlat,3)
+        real(wp),    intent(inout)  :: p(imid, *)
+        real(wp),    intent(inout)  :: pin(imid, nlat, 3)
         real(wp),    intent(inout)  :: walin(*)
         real(wp),    intent(inout)  :: dwork(*)
 
@@ -1356,13 +1353,13 @@ contains
         integer(ip), intent(in)     :: nlat
         integer(ip), intent(in)     :: nlon
         integer(ip), intent(in)     :: imid
-        real(wp),    intent(inout)  :: zv(imid,nlat,2)
+        real(wp),    intent(inout)  :: zv(imid, nlat, 2)
         real(wp),    intent(inout)  :: abc(*)
         real(wp),    intent(inout)  :: czv(nlat/2+1)
         real(wp),    intent(inout)  :: work(nlat/2+1)
 
         ! Local variables
-        integer(ip)         :: i,m, mdo, mp1, n, np1
+        integer(ip)         :: i, m, mdo, mp1, n, np1
         real(wp)            :: dt, th, zvh
 
 
@@ -1426,7 +1423,7 @@ contains
         integer(ip), intent(in)     :: nlat
         integer(ip), intent(in)     :: nlon
         integer(ip), intent(in)     :: imid
-        real(wp),    intent(inout)  :: zw(imid,nlat,2)
+        real(wp),    intent(inout)  :: zw(imid, nlat, 2)
         real(wp),    intent(inout)  :: abc(*)
         real(wp),    intent(inout)  :: czw(nlat+1)
         real(wp),    intent(inout)  :: work(nlat+1)
@@ -1610,8 +1607,8 @@ contains
         real(wp),    intent(out)    :: zw(imid, nlat, 3)
         integer(ip), intent(in)     :: imid
         integer(ip), intent(inout)  :: i3
-        real(wp),    intent(in)     :: zw1(imid,*)
-        real(wp),    intent(in)     :: zw2(imid,*)
+        real(wp),    intent(in)     :: zw1(imid, *)
+        real(wp),    intent(in)     :: zw2(imid, *)
         real(wp),    intent(in)     :: a(*)
         real(wp),    intent(in)     :: b(*)
         real(wp),    intent(in)     :: c(*)
@@ -1854,8 +1851,8 @@ contains
         real(wp),    intent(out)    :: vb(imid, nlat, 3)
         integer(ip), intent(in)     :: imid
         integer(ip), intent(inout)  :: i3
-        real(wp),    intent(in)     :: vbz(imid,*)
-        real(wp),    intent(in)     :: vb1(imid,*)
+        real(wp),    intent(in)     :: vbz(imid, *)
+        real(wp),    intent(in)     :: vb1(imid, *)
         real(wp),    intent(in)     :: a(*)
         real(wp),    intent(in)     :: b(*)
         real(wp),    intent(in)     :: c(*)
@@ -2353,9 +2350,9 @@ contains
 
         call dwbk(m, n, work, czw)
 
-        select case (mod(n,2))
+        select case (mod(n, 2))
             case (0) ! n even
-                select case (mod(m,2))
+                select case (mod(m, 2))
                     case (0) ! m even
                         !
                         !  n even, m even
@@ -2388,7 +2385,7 @@ contains
                         end do
                 end select
             case (1) ! n odd
-                select case (mod(m,2))
+                select case (mod(m, 2))
                     case (0) ! m even
                         !
                         !  n odd, m even
@@ -2474,11 +2471,11 @@ contains
         cdt = cost**2-sint**2
         sdt = TWO*sint*cost
 
-        select case (mod(nlat,2))
+        select case (mod(nlat, 2))
             case (0) ! nlat even
-                select case (mod(n,2))
+                select case (mod(n, 2))
                     case (0) ! n even
-                        select case (mod(m,2))
+                        select case (mod(m, 2))
                             case (0) ! m even
                                 !
                                 !  nlat even  n even  m even
@@ -2504,7 +2501,7 @@ contains
                     case (1) ! n odd
                         cost = cdt
                         sint = sdt
-                        select case (mod(m,2))
+                        select case (mod(m, 2))
                             case (0) ! m even
                                 !
                                 !  nlat even  n odd  m even
@@ -2529,9 +2526,9 @@ contains
                         end select
                 end select
             case (1) ! nlat odd
-                select case (mod(n,2))
+                select case (mod(n, 2))
                     case (0) ! n even
-                        select case (mod(m,2))
+                        select case (mod(m, 2))
                             case (0) ! m even
                                 !
                                 !  nlat odd  n even  m even
@@ -2556,7 +2553,7 @@ contains
                     case (1) ! n odd
                         cost = cdt
                         sint = sdt
-                        select case (mod(m,2))
+                        select case (mod(m, 2))
                             case (0) ! m even
                                 !
                                 !  nlat odd  n odd  m even
@@ -2609,12 +2606,12 @@ contains
 
         call compute_fourier_coefficients(m, n, work)
 
-        select case (mod(n,2))
+        select case (mod(n, 2))
             case (0) ! n even
                 ncv = n/2
                 if (ncv == 0) return
                 fk = ZERO
-                select case (mod(m,2))
+                select case (mod(m, 2))
                     case (0) ! m even
                         !
                         !  n even m even
@@ -2635,7 +2632,7 @@ contains
             case (1) ! n odd
                 ncv = (n + 1)/2
                 fk = -ONE
-                select case (mod(m,2))
+                select case (mod(m, 2))
                     case (0) ! m even
                         !
                         !     n odd m even
@@ -2685,11 +2682,11 @@ contains
 
         if (m == 0) return
 
-        select case (mod(n,2))
+        select case (mod(n, 2))
             case (0) ! n even
                 l = n/2
                 if (l == 0) return
-                select case (mod(m,2))
+                select case (mod(m, 2))
                     case (0) ! m even
                         !
                         !  n even m even
@@ -2712,7 +2709,7 @@ contains
                         end do
                 end select
             case (1) ! n odd
-                select case (mod(m,2))
+                select case (mod(m, 2))
                     case (0) ! m even
                         l = (n - 1)/2
                         if (l == 0) return
@@ -2767,11 +2764,11 @@ contains
         cdt = cost**2-sint**2
         sdt = TWO*sint*cost
 
-        select case (mod(n,2))
+        select case (mod(n, 2))
             case (0) ! n even
                 cost = cdt
                 sint = sdt
-                select case (mod(m,2))
+                select case (mod(m, 2))
                     case (0) ! m even
                         !
                         !  n even m even
@@ -2796,7 +2793,7 @@ contains
                         end do
                 end select
             case (1) ! n odd
-                select case (mod(m,2))
+                select case (mod(m, 2))
                     case (0) ! m even
                         !
                         !  n odd m even
@@ -2844,9 +2841,9 @@ contains
         cdt = cost*cost-sint*sint
         sdt = TWO*sint*cost
 
-        select case (mod(n,2))
+        select case (mod(n, 2))
             case (0) ! n even
-                select case (mod(m,2))
+                select case (mod(m, 2))
                     case (0) ! m even
                         !
                         !  n even  m even
@@ -2873,7 +2870,7 @@ contains
             case (1) ! n odd
                 cost = cdt
                 sint = sdt
-                select case (mod(m,2))
+                select case (mod(m, 2))
                     case (0) ! m even
                         !
                         !  n odd m even
@@ -3391,12 +3388,12 @@ contains
 
         call compute_fourier_coefficients(m, n, work)
 
-        select case (mod(n,2))
+        select case (mod(n, 2))
             case (0) ! n even
                 ncv = n/2
                 if (ncv == 0) return
                 fk = ZERO
-                select case (mod(m,2))
+                select case (mod(m, 2))
                     case (0) ! m even
                         !
                         !  n even m even
@@ -3417,7 +3414,7 @@ contains
             case (1) ! n odd
                 ncv = (n + 1)/2
                 fk = -ONE
-                select case (mod(m,2))
+                select case (mod(m, 2))
                     case (0) ! m even
                         !
                         !  n odd m even
@@ -3459,11 +3456,11 @@ contains
 
         if (m == 0) return
 
-        select case (mod(n,2))
+        select case (mod(n, 2))
             case (0) ! n even
                 l = n/2
                 if (l == 0) return
-                select case (mod(m,2))
+                select case (mod(m, 2))
                     case (0) ! m even
                         !
                         !     n even m even
@@ -3493,7 +3490,7 @@ contains
                         end do
                 end select
             case (1) ! n odd
-                select case (mod(m,2))
+                select case (mod(m, 2))
                     case (0) ! m even
                         l = (n - 1)/2
                         if (l == 0) return
@@ -3557,11 +3554,11 @@ contains
         cdt = cost**2-sint**2
         sdt = TWO*sint*cost
 
-        select case (mod(n,2))
+        select case (mod(n, 2))
             case (0) ! n even
                 cost = cdt
                 sint = sdt
-                select case (mod(m,2))
+                select case (mod(m, 2))
                     case (0) ! m even
                         !
                         !  n even  m even
@@ -3586,7 +3583,7 @@ contains
                         end do
                 end select
             case (1) ! n odd
-                select case (mod(m,2))
+                select case (mod(m, 2))
                     case (0) ! m even
                         !
                         !     n odd m even
@@ -3633,9 +3630,9 @@ contains
         cdt = cost**2-sint**2
         sdt = TWO*sint*cost
 
-        select case (mod(n,2))
+        select case (mod(n, 2))
             case (0) ! n even
-                select case (mod(m,2))
+                select case (mod(m, 2))
                     case (0) ! m even
                         !
                         !  n even m even
@@ -3662,7 +3659,7 @@ contains
             case (1) ! n odd
                 cost = cdt
                 sint = sdt
-                select case (mod(m,2))
+                select case (mod(m, 2))
                     case (0) ! m even
                         !
                         !  n odd m even
