@@ -39,7 +39,7 @@
 !
 ! ... files which must be loaded with slapec.f
 !
-!     type_SpherepackAux.f, type_RealPeriodicTransform.f, shaes.f, shses.f
+!     type_SpherepackAux.f, type_RealPeriodicFastFourierTransform.f, shaes.f, shses.f
 !
 !
 !

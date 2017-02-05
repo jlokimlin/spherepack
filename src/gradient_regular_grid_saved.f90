@@ -38,7 +38,7 @@
 !
 ! ... files which must be loaded with gradges.f
 !
-!     type_SpherepackAux.f, type_RealPeriodicTransform.f, shaes.f, vhses.f
+!     type_SpherepackAux.f, type_RealPeriodicFastFourierTransform.f, shaes.f, vhses.f
 !
 !     subroutine grades(nlat, nlon, isym, nt, v, w, idvw, jdvw, a, b, mdab, ndab, 
 !    +                  wvhses, lvhses, work, lwork, ierror)

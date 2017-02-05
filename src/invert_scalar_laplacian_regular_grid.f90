@@ -38,7 +38,7 @@
 !
 ! ... files which must be loaded with islapec.f
 !
-!     type_SpherepackAux.f, type_RealPeriodicTransform.f, shaec.f, shsec.f
+!     type_SpherepackAux.f, type_RealPeriodicFastFourierTransform.f, shaec.f, shsec.f
 !
 !     subroutine islapec(nlat, nlon, isym, nt, xlmbda, sf, ids, jds, a, b, 
 !    +mdab, ndab, wshsec, lshsec, work, lwork, pertrb, ierror)

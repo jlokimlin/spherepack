@@ -38,7 +38,7 @@
 !
 ! ... files which must be loaded with ivrtec.f
 !
-!     type_SpherepackAux.f, type_RealPeriodicTransform.f, vhsec.f, shaec.f
+!     type_SpherepackAux.f, type_RealPeriodicFastFourierTransform.f, vhsec.f, shaec.f
 !
 !     subroutine ivrtec(nlat, nlon, isym, nt, v, w, idvw, jdvw, a, b, mdab, ndab, 
 !    +                  wvhsec, lvhsec, work, lwork, pertrb, ierror)

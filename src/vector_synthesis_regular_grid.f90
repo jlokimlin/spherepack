@@ -38,7 +38,7 @@
 !
 ! ... files which must be loaded with vhsec.f
 !
-!     type_SpherepackAux.f, type_RealPeriodicTransform.f
+!     type_SpherepackAux.f, type_RealPeriodicFastFourierTransform.f
 !   
 !     subroutine vhsec(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, 
 !    +                 mdab, ndab, wvhsec, lvhsec, work, lwork, ierror)

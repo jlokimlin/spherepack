@@ -36,7 +36,7 @@
 !
 ! ... required files
 !
-!     type_SpherepackAux.f, type_RealPeriodicTransform.f, compute_gaussian_latitudes_and_weights.f, shaec.f, shsec.f, shagc.f, shsgc.f
+!     type_SpherepackAux.f, type_RealPeriodicFastFourierTransform.f, compute_gaussian_latitudes_and_weights.f, shaec.f, shsec.f, shagc.f, shsgc.f
 !
 !
 !     subroutine trssph(intl, igrida, nlona, nlata, da, igridb, nlonb, nlatb, 

@@ -38,7 +38,7 @@
 !
 ! ... files which must be loaded with vhses.f90
 !
-!     type_SpherepackAux.f90, type_RealPeriodicTransform.f90
+!     type_SpherepackAux.f90, type_RealPeriodicFastFourierTransform.f90
 !
 !   
 !     subroutine vhses(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, 

@@ -38,7 +38,7 @@
 !
 ! ... files which must be loaded with ivrtgc.f
 !
-!     type_SpherepackAux.f, type_RealPeriodicTransform.f, vhsgc.f, shagc.f, compute_gaussian_latitudes_and_weights.f
+!     type_SpherepackAux.f, type_RealPeriodicFastFourierTransform.f, vhsgc.f, shagc.f, compute_gaussian_latitudes_and_weights.f
 !
 !
 !     subroutine ivrtgc(nlat, nlon, isym, nt, v, w, idvw, jdvw, a, b, mdab, ndab, 

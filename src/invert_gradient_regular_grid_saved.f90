@@ -38,7 +38,7 @@
 !
 ! ... files which must be loaded with igradec.f
 !
-!     type_SpherepackAux.f, type_RealPeriodicTransform.f, shses.f, vhaes.f
+!     type_SpherepackAux.f, type_RealPeriodicFastFourierTransform.f, shses.f, vhaes.f
 !
 !     subroutine igrades(nlat, nlon, isym, nt, sf, isf, jsf, br, bi, mdb, ndb, 
 !    +                   wshses, lshses, work, lwork, ierror)

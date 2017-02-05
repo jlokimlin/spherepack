@@ -30,14 +30,14 @@ type_FFTpack.f90
 	$(FC) $(FFLAGS) -c type_FFTpack.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 
-type_RealPeriodicTransform.o: \
+type_RealPeriodicFastFourierTransform.o: \
 spherepack_precision.o \
-type_RealPeriodicTransform.f90
-	$(FC) $(FFLAGS) -c type_RealPeriodicTransform.f90 $(LINKS)\
+type_RealPeriodicFastFourierTransform.f90
+	$(FC) $(FFLAGS) -c type_RealPeriodicFastFourierTransform.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 
 type_SpherepackAux.o: \
-type_RealPeriodicTransform.o \
+type_RealPeriodicFastFourierTransform.o \
 type_SpherepackAux.f90
 	$(FC) $(FFLAGS) -c type_SpherepackAux.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
@@ -238,14 +238,14 @@ colatitudinal_derivative_gaussian_grid_saved.f90
 
 sshifte.o: \
 spherepack_precision.o \
-type_RealPeriodicTransform.o \
+type_RealPeriodicFastFourierTransform.o \
 sshifte.f90
 	$(FC) $(FFLAGS) -c sshifte.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 
 vshifte.o: \
 spherepack_precision.o \
-type_RealPeriodicTransform.o \
+type_RealPeriodicFastFourierTransform.o \
 vshifte.f90
 	$(FC) $(FFLAGS) -c vshifte.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
@@ -260,7 +260,7 @@ trssph.f90
 
 trvsph.o: \
 spherepack_precision.o \
-type_RealPeriodicTransform.o \
+type_RealPeriodicFastFourierTransform.o \
 vector_analysis_routines.o \
 vector_synthesis_routines.o \
 vector_analysis_routines.o \
@@ -792,7 +792,7 @@ vector_laplacian_routines.o \
 vorticity_routines.o \
 vshifte.o \
 colatitudinal_derivative_routines.o \
-type_RealPeriodicTransform.o \
+type_RealPeriodicFastFourierTransform.o \
 type_FFTpack.o \
 type_LegendreAux.o \
 type_Vector3D.o \

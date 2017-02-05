@@ -37,7 +37,7 @@
 !
 ! ... files which must be loaded with shsec.f90
 !
-!     type_SpherepackAux.f90, type_RealPeriodicTransform.f90
+!     type_SpherepackAux.f90, type_RealPeriodicFastFourierTransform.f90
 !
 !     subroutine shsec(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, 
 !    +                    wshsec, lshsec, work, lwork, ierror)
@@ -51,7 +51,7 @@
 !
 !     required files from spherepack
 !
-!     type_SpherepackAux.f90, type_RealPeriodicTransform.f90
+!     type_SpherepackAux.f90, type_RealPeriodicFastFourierTransform.f90
 !
 !
 !     input parameters

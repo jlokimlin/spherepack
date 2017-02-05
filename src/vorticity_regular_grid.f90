@@ -39,7 +39,7 @@
 !
 ! ... files which must be loaded with vrtec.f
 !
-!     type_SpherepackAux.f, type_RealPeriodicTransform.f, vhaec.f, shsec.f
+!     type_SpherepackAux.f, type_RealPeriodicFastFourierTransform.f, vhaec.f, shsec.f
 !
 !     subroutine vrtec(nlat, nlon, isym, nt, vt, ivrt, jvrt, cr, ci, mdc, ndc, 
 !    +                 wshsec, lshsec, work, lwork, ierror)

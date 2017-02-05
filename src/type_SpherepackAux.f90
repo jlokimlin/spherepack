@@ -43,8 +43,8 @@ module type_SpherepackAux
         ip, & ! integer precision
         PI
 
-    use type_RealPeriodicTransform, only: &
-        RealPeriodicTransform
+    use type_RealPeriodicFastFourierTransform, only: &
+        RealPeriodicFastFourierTransform
 
     ! Explicit typing only
     implicit none
@@ -55,7 +55,7 @@ module type_SpherepackAux
 
     type, public :: SpherepackAux
         ! Type components
-        type(RealPeriodicTransform) :: hfft
+        type(RealPeriodicFastFourierTransform) :: hfft
     contains
         ! Type-bound procedures
         procedure, nopass :: compute_legendre_polys_regular_grid

@@ -38,7 +38,7 @@
 !
 ! ... files which must be loaded with ivrtes.f
 !
-!     type_SpherepackAux.f, type_RealPeriodicTransform.f, vhses.f, shaes.f
+!     type_SpherepackAux.f, type_RealPeriodicFastFourierTransform.f, vhses.f, shaes.f
 !
 !
 !     subroutine ivrtes(nlat, nlon, isym, nt, v, w, idvw, jdvw, a, b, mdab, ndab, 

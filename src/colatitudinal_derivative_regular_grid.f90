@@ -38,7 +38,7 @@
 !
 ! ... files which must be loaded with vtsec.f90
 !
-!     type_SpherepackAux.f90, type_RealPeriodicTransform.f90, vhaec.f90, vhsec.f90
+!     type_SpherepackAux.f90, type_RealPeriodicFastFourierTransform.f90, vhaec.f90, vhsec.f90
 !   
 !     subroutine vtsec(nlat, nlon, ityp, nt, vt, wt, idvw, jdvw, br, bi, cr, ci, 
 !    +                 mdab, ndab, wvts, lwvts, work, lwork, ierror)

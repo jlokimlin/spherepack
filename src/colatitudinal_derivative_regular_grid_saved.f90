@@ -38,7 +38,7 @@
 !
 ! ... files which must be loaded with vtses.f
 !
-!     type_SpherepackAux.f, type_RealPeriodicTransform.f, vhaes.f, vhses.f
+!     type_SpherepackAux.f, type_RealPeriodicFastFourierTransform.f, vhaes.f, vhses.f
 !   
 !   
 !     subroutine vtses(nlat, nlon, ityp, nt, vt, wt, idvw, jdvw, br, bi, cr, ci, 

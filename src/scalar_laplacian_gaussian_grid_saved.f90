@@ -39,7 +39,7 @@
 !
 ! ... files which must be loaded with slapgs.f
 !
-!     type_SpherepackAux.f, type_RealPeriodicTransform.f, shags.f, shsgs.f
+!     type_SpherepackAux.f, type_RealPeriodicFastFourierTransform.f, shags.f, shsgs.f
 !
 !
 !

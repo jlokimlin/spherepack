@@ -38,7 +38,7 @@
 !
 ! ... files which must be loaded with vhaes.f90
 !
-!     type_SpherepackAux.f90, type_RealPeriodicTransform.f90
+!     type_SpherepackAux.f90, type_RealPeriodicFastFourierTransform.f90
 !
 !                                                                              
 !     subroutine vhaes(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci,

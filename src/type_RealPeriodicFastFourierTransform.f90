@@ -34,172 +34,7 @@
 !     includes code and documentation for performing fast Fourier
 !     transforms (see subroutines hrffti, hrfftf and hrfftb)
 !
-! **********************************************************************
-!
-!     subroutine hrffti(n, wsave)
-!
-!     subroutine hrffti initializes the array wsave which is used in
-!     both hrfftf and hrfftb. the prime factorization of n together 
-!     with a tabulation of the trigonometric functions are computed and
-!     stored in wsave.
-!
-!     input parameter
-!
-!     n       the length of the sequence to be transformed.
-!
-!     output parameter
-!
-!     wsave   a work array which must be dimensioned at least 2*n+15.
-!             the same work array can be used for both hrfftf and 
-!             hrfftb as long as n remains unchanged. different wsave 
-!             arrays are required for different values of n. the 
-!             contents of wsave must not be changed between calls 
-!             of hrfftf or hrfftb.
-!
-! **********************************************************************
-!
-!     subroutine hrfftf(m, n, r, mdimr, wsave, work)
-!
-!     subroutine hrfftf computes the fourier coefficients of m real
-!     perodic sequences (fourier analysis); i.e. hrfftf computes the
-!     real fft of m sequences each with length n. the transform is 
-!     defined below at output parameter r.
-!
-!     input parameters
-!
-!     m       the number of sequences.
-!
-!     n       the length of all m sequences.  the method is most
-!             efficient when n is a product of small primes. n may
-!             change as long as different work arrays are provided
-!
-!     r       r(m, n) is a two dimensional real array that contains m
-!             sequences each with length n.
-!
-!     mdimr   the first dimension of the r array as it appears
-!             in the program that calls hrfftf. mdimr must be
-!             greater than or equal to m.
-!
-!
-!     wsave   a work array with at least least 2*n+NUMBER_OF_FACTORS locations
-!             in the program that calls hrfftf. the wsave array must be
-!             initialized by calling subroutine hrffti(n, wsave) and a
-!             different wsave array must be used for each different
-!             value of n. this initialization does not have to be
-!             repeated so long as n remains unchanged thus subsequent
-!             transforms can be obtained faster than the first.
-!             the same wsave array can be used by hrfftf and hrfftb.
-!
-!     work    a real work array with m*n locations.
-!
-!
-!     output parameters
-!
-!     r      for all j=1, ..., m
-!  
-!             r(j, 1) = the sum from i=1 to i=n of r(j, i)
-!
-!             if n is even set l =n/2   , if n is odd set l = (n+1)/2
-!
-!               then for k = 2, ..., l
-!
-!                  r(j, 2*k-2) = the sum from i = 1 to i = n of
-!
-!                       r(j, i)*cos((k-1)*(i-1)*2*pi/n)
-!
-!                  r(j, 2*k-1) = the sum from i = 1 to i = n of
-!
-!                      -r(j, i)*sin((k-1)*(i-1)*2*pi/n)
-!
-!             if n is even
-!
-!                  r(j, n) = the sum from i = 1 to i = n of
-!
-!                       (-1)**(i-1)*r(j, i)
-!
-!      *****  note
-!                  this transform is unnormalized since a call of hrfftf
-!                  followed by a call of hrfftb will multiply the input
-!                  sequence by n.
-!
-!     wsave   contains results which must not be destroyed between
-!             calls of hrfftf or hrfftb.
-!
-!     work    a real work array with m*n locations that does
-!             not have to be saved.
-!
-! **********************************************************************
-!
-!     subroutine hrfftb(m, n, r, mdimr, wsave, work)
-!
-!     subroutine hrfftb computes the real perodic sequence of m
-!     sequences from their fourier coefficients (fourier synthesis). 
-!     the transform is defined below at output parameter r.
-!
-!     input parameters
-!
-!     m       the number of sequences.
-!
-!     n       the length of all m sequences.  the method is most
-!             efficient when n is a product of small primes. n may
-!             change as long as different work arrays are provided
-!
-!     r       r(m, n) is a two dimensional real array that contains
-!             the fourier coefficients of m sequences each with 
-!             length n.
-!
-!     mdimr   the first dimension of the r array as it appears
-!             in the program that calls hrfftb. mdimr must be
-!             greater than or equal to m.
-!
-!     wsave   a work array which must be dimensioned at least 2*n+NUMBER_OF_FACTORS.
-!             in the program that calls hrfftb. the wsave array must be
-!             initialized by calling subroutine hrffti(n, wsave) and a
-!             different wsave array must be used for each different
-!             value of n. this initialization does not have to be
-!             repeated so long as n remains unchanged thus subsequent
-!             transforms can be obtained faster than the first.
-!             the same wsave array can be used by hrfftf and hrfftb.
-!
-!     work    a real work array with m*n locations.
-!
-!
-!     output parameters
-!
-!     r      for all j=1, ..., m
-!  
-!             for n even and for i = 1, ..., n
-!
-!                  r(j, i) = r(j, 1)+(-1)**(i-1)*r(j, n)
-!
-!                       plus the sum from k=2 to k=n/2 of
-!
-!                        2.0*r(j, 2*k-2)*cos((k-1)*(i-1)*2*pi/n)
-!
-!                       -2.0*r(j, 2*k-1)*sin((k-1)*(i-1)*2*pi/n)
-!
-!             for n odd and for i = 1, ..., n
-!
-!                  r(j, i) = r(j, 1) plus the sum from k=2 to k=(n+1)/2 of
-!
-!                       2.0*r(j, 2*k-2)*cos((k-1)*(i-1)*2*pi/n)
-!
-!                      -2.0*r(j, 2*k-1)*sin((k-1)*(i-1)*2*pi/n)
-!
-!      *****  note
-!                  this transform is unnormalized since a call of hrfftf
-!                  followed by a call of hrfftb will multiply the input
-!                  sequence by n.
-!
-!     wsave   contains results which must not be destroyed between
-!             calls of hrfftb or hrfftf.
-!
-!     work    a real work array with m*n locations that does not
-!             have to be saved
-!
-!
-!
-module type_RealPeriodicTransform
+module type_RealPeriodicFastFourierTransform
 
     use spherepack_precision, only: &
         wp, & ! working precision
@@ -213,7 +48,7 @@ module type_RealPeriodicTransform
     ! Everything is private unless stated otherwise
     private
     public :: hrffti, hrfftf, hrfftb
-    public :: RealPeriodicTransform
+    public :: RealPeriodicFastFourierTransform
     
     ! Parameters confined to the module
     real(wp),    parameter :: ZERO = 0.0_wp
@@ -221,153 +56,312 @@ module type_RealPeriodicTransform
     real(wp),    parameter :: TWO = 2.0_wp
     integer(ip), parameter :: NUMBER_OF_FACTORS = 15_ip
 
-    type, public :: RealPeriodicTransform
+    type, public :: RealPeriodicFastFourierTransform
     contains
         ! Type-bound procedures
         procedure, nopass :: initialize => hrffti
         procedure, nopass :: forward => hrfftf
         procedure, nopass :: backward => hrfftb
-    end type RealPeriodicTransform
+    end type RealPeriodicFastFourierTransform
 
 contains
 
-    subroutine hrffti(n, wsave)
+    ! Purpose:
+    !
+    !     subroutine hrffti(n, wsave)
+    !
+    !     subroutine hrffti initializes the array wsave which is used in
+    !     both hrfftf and hrfftb. the prime factorization of n together
+    !     with a tabulation of the trigonometric functions are computed and
+    !     stored in wsave.
+    !
+    !     input parameter
+    !
+    !     n       the length of the sequence to be transformed.
+    !
+    !     output parameter
+    !
+    !     wsave   a work array which must be dimensioned at least n+15.
+    !             the same work array can be used for both hrfftf and
+    !             hrfftb as long as n remains unchanged. different wsave
+    !             arrays are required for different values of n. the
+    !             contents of wsave must not be changed between calls
+    !             of hrfftf or hrfftb.
+    !
+    pure subroutine hrffti(n, wsave)
 
         ! Dummy arguments
         integer(ip), intent(in)  :: n
         real(wp),    intent(out) :: wsave(n+NUMBER_OF_FACTORS)
 
-        if (n == 1) return
-
-        call initialize_lower_routine(n, wsave(1), wsave(n+1))
+        if (n > 1) then
+            call precompute_factorization_and_trig_lookup_table(n, wsave(1), wsave(n+1))
+        end if
 
     end subroutine hrffti
 
-    subroutine compute_integer_factors(n, subtransforms, number_of_factors, factors)
+    ! Purpose:
+    !
+    !     subroutine hrfftf(m, n, r, mdimr, wsave, work)
+    !
+    !     Computes the Fourier coefficients of m real
+    !     perodic sequences (Fourier analysis); i.e. hrfftf computes the
+    !     real fft of m sequences each with length n. the transform is
+    !     defined below at output parameter r.
+    !
+    !     input parameters
+    !
+    !     m       the number of sequences.
+    !
+    !     n       the length of all m sequences.  the method is most
+    !             efficient when n is a product of small primes. n may
+    !             change as long as different work arrays are provided
+    !
+    !     r       r(mdimr, n) is a two dimensional real array that contains mdimr
+    !             sequences each with length n.
+    !
+    !     mdimr   the first dimension of the r array as it appears
+    !             in the program that calls hrfftf. mdimr must be
+    !             greater than or equal to m.
+    !
+    !
+    !     wsave   a work array with at least least n+15 locations
+    !             in the program that calls hrfftf. the wsave array must be
+    !             initialized by calling subroutine hrffti(n, wsave) and a
+    !             different wsave array must be used for each different
+    !             value of n. this initialization does not have to be
+    !             repeated so long as n remains unchanged thus subsequent
+    !             transforms can be obtained faster than the first.
+    !             the same wsave array can be used by hrfftf and hrfftb.
+    !
+    !     work    a real work array with m*n locations.
+    !
+    !
+    !     output parameters
+    !
+    !     r      for all j=1, ..., m
+    !
+    !             r(j, 1) = the sum from i=1 to i=n of r(j, i)
+    !
+    !             if n is even set l =n/2   , if n is odd set l = (n+1)/2
+    !
+    !               then for k = 2, ..., l
+    !
+    !                  r(j, 2*k-2) = the sum from i = 1 to i = n of
+    !
+    !                       r(j, i)*cos((k-1)*(i-1)*2*pi/n)
+    !
+    !                  r(j, 2*k-1) = the sum from i = 1 to i = n of
+    !
+    !                      -r(j, i)*sin((k-1)*(i-1)*2*pi/n)
+    !
+    !             if n is even
+    !
+    !                  r(j, n) = the sum from i = 1 to i = n of
+    !
+    !                       (-1)**(i-1)*r(j, i)
+    !
+    !      *****  note
+    !                  this transform is unnormalized since a call of hrfftf
+    !                  followed by a call of hrfftb will multiply the input
+    !                  sequence by n.
+    !
+    !     wsave   contains results which must not be destroyed between
+    !             calls of hrfftf or hrfftb.
+    !
+    !     work    a real work array with m*n locations that does
+    !             not have to be saved.
+    !
+    subroutine hrfftf(m, n, r, mdimr, wsave, work)
+
+        ! Dummy arguments
+        integer(ip), intent(in)     :: m
+        integer(ip), intent(in)     :: n
+        real(wp),    intent(inout)  :: r(mdimr, n)
+        integer(ip), intent(in)     :: mdimr
+        real(wp),    intent(in)     :: wsave(n+NUMBER_OF_FACTORS)
+        real(wp),    intent(out)    :: work(m*n)
+
+        if (n > 1) then
+            call forward_lower_routine(m, n, r, mdimr, work, wsave, wsave(n+1))
+        end if
+
+    end subroutine hrfftf
+
+    ! Purpose:
+    !
+    !     subroutine hrfftb(m, n, r, mdimr, wsave, work)
+    !
+    !     subroutine hrfftb computes the real perodic sequence of m
+    !     sequences from their Fourier coefficients (Fourier synthesis).
+    !     the transform is defined below at output parameter r.
+    !
+    !     input parameters
+    !
+    !     m       the number of sequences.
+    !
+    !     n       the length of all m sequences.  the method is most
+    !             efficient when n is a product of small primes. n may
+    !             change as long as different work arrays are provided
+    !
+    !     r       r(mdimr, n) is a two dimensional real array that contains
+    !             the Fourier coefficients of m sequences each with
+    !             length n.
+    !
+    !     mdimr   the first dimension of the r array as it appears
+    !             in the program that calls hrfftb. mdimr must be
+    !             greater than or equal to m.
+    !
+    !     wsave   a work array which must be dimensioned at least n+15.
+    !             in the program that calls hrfftb. the wsave array must be
+    !             initialized by calling subroutine hrffti(n, wsave) and a
+    !             different wsave array must be used for each different
+    !             value of n. this initialization does not have to be
+    !             repeated so long as n remains unchanged thus subsequent
+    !             transforms can be obtained faster than the first.
+    !             the same wsave array can be used by hrfftf and hrfftb.
+    !
+    !     work    a real work array with m*n locations.
+    !
+    !
+    !     output parameters
+    !
+    !     r      for all j=1, ..., m
+    !
+    !             for n even and for i = 1, ..., n
+    !
+    !                  r(j, i) = r(j, 1)+(-1)**(i-1)*r(j, n)
+    !
+    !                       plus the sum from k=2 to k=n/2 of
+    !
+    !                        2.0*r(j, 2*k-2)*cos((k-1)*(i-1)*2*pi/n)
+    !
+    !                       -2.0*r(j, 2*k-1)*sin((k-1)*(i-1)*2*pi/n)
+    !
+    !             for n odd and for i = 1, ..., n
+    !
+    !                  r(j, i) = r(j, 1) plus the sum from k=2 to k=(n+1)/2 of
+    !
+    !                       2.0*r(j, 2*k-2)*cos((k-1)*(i-1)*2*pi/n)
+    !
+    !                      -2.0*r(j, 2*k-1)*sin((k-1)*(i-1)*2*pi/n)
+    !
+    !      *****  note
+    !                  this transform is unnormalized since a call of hrfftf
+    !                  followed by a call of hrfftb will multiply the input
+    !                  sequence by n.
+    !
+    !     wsave   contains results which must not be destroyed between
+    !             calls of hrfftb or hrfftf.
+    !
+    !     work    a real work array with m*n locations that does not
+    !             have to be saved
+    !
+    subroutine hrfftb(m, n, r, mdimr, wsave, work)
+
+        ! Dummy arguments
+        integer(ip), intent(in)     :: m
+        integer(ip), intent(in)     :: n
+        real(wp),    intent(inout)  :: r(mdimr, n)
+        integer(ip), intent(in)     :: mdimr
+        real(wp),    intent(in)     :: wsave(n+NUMBER_OF_FACTORS)
+        real(wp),    intent(out)    :: work(m*n)
+
+        if (n > 1) then
+            call backward_lower_routine(m, n, r, mdimr, work, wsave, wsave(n+1))
+        end if
+
+    end subroutine hrfftb
+
+    !
+    ! Purpose:
+    !
+    ! Factors of an integer for floating point computations.
+    !
+    pure subroutine compute_factorization(n, subtransforms, number_of_factors, integer_factors)
 
         ! Dummy arguments
         integer(ip), intent(in)  :: n
-        integer(ip), intent(in)  :: subtransforms(0:)
+        integer(ip), intent(in)  :: subtransforms(:)
         integer(ip), intent(out) :: number_of_factors
-        integer(ip), intent(out) :: factors(0:)
+        real(wp),    intent(out) :: integer_factors(:)
 
         ! Local variables
-        integer(ip) :: nf, ntest, i, factor
-
-        ! Initialize
-        nf = 0
-        ntest = n
-        i = 0
-
-        select case(n)
-            case(:0)
-                error stop 'Length n must be a positive integer'
-            case(1)
-                factors(0) = 1
-                number_of_factors = 1
-            case default
-
-                ! Address subtransforms
-                do while (ntest /= 1)
-                    factor = subtransforms(i)
-                    do while (mod(ntest, factor) == 0)
-                        ntest = ntest/factor
-                        factors(nf) = factor
-                        nf = nf + 1
-                    end do
-                    i = i + 1
-                end do
-
-                ! Address even prime factors
-                factor = 2
-                do while ((mod(ntest, factor) == 0) .and. (ntest /= 1))
-                    ntest = ntest/factor
-                    factors(nf) = factor
-                    nf = nf + 1
-                end do
-
-                ! Address other odd prime factors
-                factor = 3
-                do while (ntest /= 1)
-                    do while (mod(ntest, factor) /= 0)
-                        factor = factor + 2
-                    end do
-                    ntest = ntest / factor
-                    factors(nf) = factor
-                    nf = nf + 1
-                end do
-
-                ! Check that factorization is correct
-                print *, n, product(factors), factors
-                if (product(factors) /= n) then
-                    error stop 'Factorization failed'
-                end if
-                number_of_factors = nf
-        end select
-
-    end subroutine compute_integer_factors
-
-    subroutine initialize_lower_routine(n, wa, fac)
-
-        ! Dummy arguments
-        integer(ip), intent(in)  :: n
-        real(wp),    intent(out) :: wa(n)
-        real(wp),    intent(out) :: fac(NUMBER_OF_FACTORS)
-
-        ! Local variables
-        integer(ip)            :: i, ido, ii, iip, ipm, is
-        integer(ip)            :: j, k1, l1, l2, ld
-        integer(ip)            :: nf, nfm1, ntest, nq, nr, factor
-        integer(ip), parameter :: subtransforms(*) = [4, 2, 3, 5]
-        real(wp)               :: arg,  argh, argld, fi
+        integer(ip) :: nf, ntest, j, factor
 
         ! Initialize
         ntest = n
         nf = 0
         j = 0
 
-        factorize_loop: do
-            ! Increment j
-            j = j + 1
+        select case(n)
+            case(:0)
+                error stop 'Length n must be a positive integer'
+            case(1)
+                integer_factors(1) = 1
+                number_of_factors = 1
+            case default
 
-            ! Choose factor
-            if (j <= 4) then
-                factor = subtransforms(j)
-            else
-                factor = factor + 2
-            end if
+                block
+                    integer(ip) :: factors(size(integer_factors))
 
-            do while (ntest /= 1)
-                nq = ntest/factor
-                nr = ntest-factor*nq
-                if (nr == 0) then
-                    nf = nf + 1
-                    fac(nf + 2) = factor
-                    ntest = ntest/factor
+                    do while (1 < ntest)
 
-                    if (factor == 2 .and. nf /= 1) then
-                        do i=2, nf
-                            fac(nf - i + 4) = fac(nf - i + 3)
+                        ! Increment j
+                        j = j + 1
+
+                        ! Choose factor
+                        select case (j)
+                            case(1:4) ! case(1:size(subtransforms))
+                                factor = subtransforms(j)
+                            case default
+                                factor = factor + 2
+                        end select
+
+                        do while ((ntest - factor * (ntest/factor)) == 0)
+                            nf = nf + 1
+                            factors(nf + 2) = factor
+                            ntest = ntest/factor
+                            if (factor == 2 .and. nf /= 1) then
+                                factors(nf+2:4:(-1)) = factors(nf+1:3:(-1))
+                                factors(3) = 2
+                            end if
                         end do
-                        fac(3) = 2
-                    end if
-                else
-                    cycle factorize_loop
-                end if
-            end do
-            exit factorize_loop
-        end do factorize_loop
+                    end do
 
-        fac(1) = n
-        fac(2) = nf
-        argh = TWO_PI/n
+                    factors(1) = n
+                    factors(2) = nf
+                    number_of_factors = nf
+                    integer_factors = real(factors, kind=wp)
+                end block
+        end select
+
+    end subroutine compute_factorization
+
+    pure subroutine precompute_factorization_and_trig_lookup_table(n, trig_lookup_table, factors)
+
+        ! Dummy arguments
+        integer(ip), intent(in)  :: n
+        real(wp),    intent(out) :: trig_lookup_table(n)
+        real(wp),    intent(out) :: factors(NUMBER_OF_FACTORS)
+
+        ! Local variables
+        integer(ip)            :: i, ido, ii, iip, ipm, is
+        integer(ip)            :: j, k1, l1, l2, ld
+        integer(ip)            :: nf, nfm1
+        integer(ip), parameter :: SUBTRANSFORMS(*) = [4, 2, 3, 5]
+        real(wp)               :: theta, d_theta, mesh, product_1
+
+        call compute_factorization(n, SUBTRANSFORMS, nf, factors)
+
+        d_theta = TWO_PI/n
         is = 0
         nfm1 = nf-1
         l1 = 1
 
         if (nfm1 /= 0) then
             do k1=1,nfm1
-                iip = int(fac(k1+2), kind=ip)
+                iip = int(factors(k1+2), kind=ip)
                 ld = 0
                 l2 = l1*iip
                 ido = n/l2
@@ -375,14 +369,14 @@ contains
                 do j=1,ipm
                     ld = ld+l1
                     i = is
-                    argld = real(ld, kind=wp) * argh
-                    fi = ZERO
-                    do ii=3,ido,2
+                    mesh = real(ld, kind=wp) * d_theta
+                    product_1 = ZERO
+                    do ii=3, ido, 2
                         i = i+2
-                        fi = fi + ONE
-                        arg = fi*argld
-                        wa(i-1) = cos(arg)
-                        wa(i) = sin(arg)
+                        product_1 = product_1 + ONE
+                        theta = product_1 * mesh
+                        trig_lookup_table(i-1) = cos(theta)
+                        trig_lookup_table(i) = sin(theta)
                     end do
                     is = is+ido
                 end do
@@ -390,23 +384,7 @@ contains
             end do
         end if
 
-    end subroutine initialize_lower_routine
-
-    subroutine hrfftf(m, n, r, mdimr, whrfft, work)
-
-        ! Dummy arguments
-        integer(ip), intent(in)     :: m
-        integer(ip), intent(in)     :: n
-        real(wp),    intent(inout)  :: r(mdimr, n)
-        integer(ip), intent(in)     :: mdimr
-        real(wp),    intent(in)     :: whrfft(n+NUMBER_OF_FACTORS)
-        real(wp),    intent(out)    :: work(*)
-
-        if (n == 1) return
-
-        call forward_lower_routine(m, n, r, mdimr, work, whrfft, whrfft(n+1))
-
-    end subroutine hrfftf
+    end subroutine precompute_factorization_and_trig_lookup_table
 
     subroutine forward_lower_routine(m, n, c, mdimc, ch, wa, fac)
 
@@ -1082,22 +1060,6 @@ contains
 
     end subroutine forward_pass_n
 
-    subroutine hrfftb(m, n, r, mdimr, whrfft, work)
-
-        ! Dummy arguments
-        integer(ip), intent(in)     :: m
-        integer(ip), intent(in)     :: n
-        real(wp),    intent(inout)  :: r(mdimr, n)
-        integer(ip), intent(in)     :: mdimr
-        real(wp),    intent(in)     :: whrfft(n+NUMBER_OF_FACTORS)
-        real(wp),    intent(out)    :: work(*)
-
-        if (n == 1) return
-
-        call backward_lower_routine(m, n, r, mdimr, work, whrfft, whrfft(n+1))
-
-    end subroutine hrfftb
-
     subroutine backward_lower_routine(m, n, c, mdimc, ch, wa, fac)
 
         ! Dummy arguments
@@ -1711,4 +1673,4 @@ contains
 
     end subroutine backward_pass_n
 
-end module type_RealPeriodicTransform
+end module type_RealPeriodicFastFourierTransform

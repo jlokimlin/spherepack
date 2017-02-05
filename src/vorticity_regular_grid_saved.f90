@@ -38,7 +38,7 @@
 !
 ! ... files which must be loaded with vrtes.f
 !
-!     type_SpherepackAux.f, type_RealPeriodicTransform.f, vhaes.f, shses.f
+!     type_SpherepackAux.f, type_RealPeriodicFastFourierTransform.f, vhaes.f, shses.f
 !
 !     subroutine vrtes(nlat, nlon, isym, nt, vt, ivrt, jvrt, cr, ci, mdc, ndc, 
 !    +                 wshses, lshses, work, lwork, ierror)

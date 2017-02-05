@@ -36,7 +36,7 @@
 !
 ! ... required files
 !
-!     type_SpherepackAux.f, type_RealPeriodicTransform.f, compute_gaussian_latitudes_and_weights.f, vhaec.f, vhsec.f, vhagc.f, vhsgc.f
+!     type_SpherepackAux.f, type_RealPeriodicFastFourierTransform.f, compute_gaussian_latitudes_and_weights.f, vhaec.f, vhsec.f, vhagc.f, vhsgc.f
 !
 !     subroutine trvsph (intl, igrida, nlona, nlata, iveca, ua, va, 
 !    +igridb, nlonb, nlatb, ivecb, ub, vb, wsave, lsave, lsvmin, work, 

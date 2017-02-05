@@ -38,7 +38,7 @@
 !
 ! ... files which must be loaded with shaes.f
 !
-!     type_SpherepackAux.f, type_RealPeriodicTransform.f
+!     type_SpherepackAux.f, type_RealPeriodicFastFourierTransform.f
 !
 !     subroutine shaes(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, 
 !    +                 wshaes, lshaes, work, lwork, ierror)
@@ -50,7 +50,7 @@
 !     as they are in subroutine shaec.  the analysis is described
 !     below at output parameters a, b.
 !
-!     type_SpherepackAux.f, type_RealPeriodicTransform.f
+!     type_SpherepackAux.f, type_RealPeriodicFastFourierTransform.f
 !
 !
 !     input parameters

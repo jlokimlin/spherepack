@@ -38,7 +38,7 @@
 !
 ! ... files which must be loaded with shsgs.f
 !
-!     type_SpherepackAux.f, type_RealPeriodicTransform.f, compute_gaussian_latitudes_and_weights.f
+!     type_SpherepackAux.f, type_RealPeriodicFastFourierTransform.f, compute_gaussian_latitudes_and_weights.f
 !
 !     subroutine shsgs(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, 
 !    1                    wshsgs, lshsgs, work, lwork, ierror)

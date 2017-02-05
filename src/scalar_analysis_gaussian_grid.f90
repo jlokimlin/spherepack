@@ -38,7 +38,7 @@
 !
 ! ... files which must be loaded with shagc.f
 !
-!     type_SpherepackAux.f, type_RealPeriodicTransform.f, compute_gaussian_latitudes_and_weights.f
+!     type_SpherepackAux.f, type_RealPeriodicFastFourierTransform.f, compute_gaussian_latitudes_and_weights.f
 !
 !
 !     subroutine shagc(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, 

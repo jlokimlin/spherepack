@@ -38,7 +38,7 @@
 !
 ! ... files which must be loaded with vhags.f90
 !
-!     type_SpherepackAux.f90, type_RealPeriodicTransform.f90, compute_gaussian_latitudes_and_weights.f90
+!     type_SpherepackAux.f90, type_RealPeriodicFastFourierTransform.f90, compute_gaussian_latitudes_and_weights.f90
 !
 !     subroutine vhags(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci,
 !    +                 mdab, ndab, wvhags, lvhags, work, lwork, ierror)

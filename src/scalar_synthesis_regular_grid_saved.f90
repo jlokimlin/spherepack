@@ -38,7 +38,7 @@
 !
 ! ... files which must be loaded with shses.f90
 !
-!     type_SpherepackAux.f90, type_RealPeriodicTransform.f90
+!     type_SpherepackAux.f90, type_RealPeriodicFastFourierTransform.f90
 !
 !     subroutine shses(nlat,nlon,isym,nt,g,idg,jdg,a,b,mdab,ndab,
 !    +                 wshses,lshses,work,lwork,ierror)
@@ -52,7 +52,7 @@
 !
 ! *** required files from spherepack2
 !
-!     type_SpherepackAux.f90, type_RealPeriodicTransform.f90
+!     type_SpherepackAux.f90, type_RealPeriodicFastFourierTransform.f90
 !
 !
 !     input parameters

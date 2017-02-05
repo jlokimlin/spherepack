@@ -36,7 +36,7 @@
 !
 ! ... required files
 !
-!     type_RealPeriodicTransform.f
+!     type_RealPeriodicFastFourierTransform.f
 !
 !     subroutine vshifte(ioff, nlon, nlat, uoff, voff, ureg, vreg, 
 !    +                   wsave, lsave, work, lwork, ierror)
@@ -254,8 +254,8 @@ module module_vshifte
         ip, & ! integer precision
         PI
 
-    use type_RealPeriodicTransform, only: &
-        RealPeriodicTransform
+    use type_RealPeriodicFastFourierTransform, only: &
+        RealPeriodicFastFourierTransform
 
     ! Explicit typing only
     implicit none
@@ -586,7 +586,7 @@ contains
 
     subroutine vhifth(m, n, r, wsav, work)
 
-        type(RealPeriodicTransform) :: hfft
+        type(RealPeriodicFastFourierTransform) :: hfft
         integer(ip) :: m, n, n2, k, l
         real(wp) :: r(m, n), wsav(*), work(*), r2km2, r2km1
         n2 = (n+1)/2
@@ -620,7 +620,7 @@ contains
         !
         !     initialize wsav for subroutine vhifth
         !
-        type(RealPeriodicTransform) :: hfft
+        type(RealPeriodicFastFourierTransform) :: hfft
         integer(ip) :: n, n2, k
         real(wp) :: wsav(*), dp
 

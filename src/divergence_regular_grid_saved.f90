@@ -38,7 +38,7 @@
 !
 ! ... files which must be loaded with dives.f
 !
-!     type_SpherepackAux.f, type_RealPeriodicTransform.f, vhaes.f, shses.f
+!     type_SpherepackAux.f, type_RealPeriodicFastFourierTransform.f, vhaes.f, shses.f
 !
 !
 !     subroutine dives(nlat, nlon, isym, nt, dv, idv, jdv, br, bi, mdb, ndb, 

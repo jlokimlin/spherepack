@@ -132,8 +132,8 @@ module spherepack_library
     use type_FFTpack, only: &
         FFTpack
 
-    use type_RealPeriodicTransform, only: &
-        RealPeriodicTransform, &
+    use type_RealPeriodicFastFourierTransform, only: &
+        RealPeriodicFastFourierTransform, &
         hrffti, hrfftf, hrfftb
 
     use type_LegendreAux, only: &
@@ -173,7 +173,7 @@ module spherepack_library
 
     ! Derived data types
     public :: FFTpack
-    public :: RealPeriodicTransform
+    public :: RealPeriodicFastFourierTransform
     public :: LegendreAux
     public :: GaussianGrid
     public :: GaussianSphere

@@ -38,7 +38,7 @@
 !
 ! ... files which must be loaded with ivlapgs.f
 !
-!     type_SpherepackAux.f, type_RealPeriodicTransform.f, vhags.f, vhsgs.f, compute_gaussian_latitudes_and_weights.f
+!     type_SpherepackAux.f, type_RealPeriodicFastFourierTransform.f, vhags.f, vhsgs.f, compute_gaussian_latitudes_and_weights.f
 !
 !
 !     subroutine ivlapgs(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, 

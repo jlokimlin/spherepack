@@ -35,7 +35,7 @@
 !
 ! ... required spherepack files 
 !
-!     type_RealPeriodicTransform.f
+!     type_RealPeriodicFastFourierTransform.f
 !
 !     subroutine sshifte(ioff, nlon, nlat, goff, greg, wsav, lsav, work, lwork, ier)
 !
@@ -106,7 +106,7 @@
 !
 ! *** required spherepack files
 !
-!     type_RealPeriodicTransform.f
+!     type_RealPeriodicFastFourierTransform.f
 !
 ! *** argument description
 !
@@ -220,8 +220,8 @@ module module_sshifte
         ip, & ! integer precision
         PI
 
-    use type_RealPeriodicTransform, only: &
-        RealPeriodicTransform
+    use type_RealPeriodicFastFourierTransform, only: &
+        RealPeriodicFastFourierTransform
 
     ! Explicit typing only
     implicit none
@@ -563,7 +563,7 @@ contains
 
     subroutine shifth(m, n, r, wsav, work)
 
-        type(RealPeriodicTransform) :: hfft
+        type(RealPeriodicFastFourierTransform) :: hfft
         integer(ip) :: m, n, n2, k, l
         real(wp) :: r(m, n), wsav(*), work(*), r2km2, r2km1
         n2 = (n+1)/2
@@ -595,7 +595,7 @@ contains
         !     initialize wsav for subroutine shifth
         !
 
-        type(RealPeriodicTransform) :: hfft
+        type(RealPeriodicFastFourierTransform) :: hfft
         integer(ip) :: n, n2, k
         real(wp) :: wsav(*), dp
         n2 = (n+1)/2

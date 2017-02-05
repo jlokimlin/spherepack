@@ -38,7 +38,7 @@
 !
 ! ... files which must be loaded with gradec.f
 !
-!     type_SpherepackAux.f, type_RealPeriodicTransform.f, shaec.f, vhsec.f
+!     type_SpherepackAux.f, type_RealPeriodicFastFourierTransform.f, shaec.f, vhsec.f
 !
 !     subroutine gradec(nlat, nlon, isym, nt, v, w, idvw, jdvw, a, b, mdab, ndab, 
 !    +                  wvhsec, lvhsec, work, lwork, ierror)

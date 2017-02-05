@@ -38,7 +38,7 @@
 !
 ! ... files which must be loaded with idivec.f
 !
-!     type_SpherepackAux.f, type_RealPeriodicTransform.f, vhsgc.f, shagc.f
+!     type_SpherepackAux.f, type_RealPeriodicFastFourierTransform.f, vhsgc.f, shagc.f
 !
 !     subroutine idivgc(nlat, nlon, isym, nt, v, w, idvw, jdvw, a, b, mdab, ndab, 
 !    +                  wvhsgc, lvhsgc, work, lwork, pertrb, ierror)

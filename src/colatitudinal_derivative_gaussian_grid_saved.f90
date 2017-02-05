@@ -38,7 +38,7 @@
 !
 ! ... files which must be loaded with vtsgs.f
 !
-!     type_SpherepackAux.f, type_RealPeriodicTransform.f, vhags.f, vhsgs.f, compute_gaussian_latitudes_and_weights.f
+!     type_SpherepackAux.f, type_RealPeriodicFastFourierTransform.f, vhags.f, vhsgs.f, compute_gaussian_latitudes_and_weights.f
 !   
 !   
 !     subroutine vtsgs(nlat, nlon, ityp, nt, vt, wt, idvw, jdvw, br, bi, cr, ci, 
