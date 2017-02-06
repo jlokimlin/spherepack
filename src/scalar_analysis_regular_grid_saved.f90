@@ -36,6 +36,44 @@ submodule(scalar_analysis_routines) scalar_analysis_regular_grid_saved
 
 contains
 
+!    subroutine regular_grid_to_spec(symmetry_type, gridded_data, spectral_data, wavetable, workspace, error_flag)
+!
+!        ! Dummy arguments
+!        integer(ip),               intent(in)    :: symmetry_type
+!        real(wp),                  intent(in)    :: gridded_data
+!        class(ScalarCoefficients), intent(inout) :: spectral_data
+!        class(RegularWaveTable),   intent(inout) :: wavetable
+!        class(RegularWorkspace),   intent(inout) :: workspace
+!        integer(ip),               intent(out)   :: error_flag
+!
+!        associate( &
+!            nlat => spectral_data%NUMBER_OF_LATITUDES, &
+!            nlon => spectral_data%NUMBER_OF_LONGITUDES, &
+!            isym => symmetry_type, &
+!            nt => spectral_data%NUMBER_OF_SYNTHESES, &
+!            g => gridded_data, &
+!            a => spectral_data%real_component, &
+!            b => spectral_data%imaginary_component, &
+!            wshaes => wavetable%forward_scalar_wavetable, &
+!            work => workspace%forward_scalar_workspace, &
+!            ierror => error_flag &
+!            )
+!            associate( &
+!                idg => size(g, dim=1), &
+!                jdg => size(g, dim=2), &
+!                mdab => min(size(a, dim=1), size(b, dim=1)), &
+!                ndab => min(size(a, dim=2), size(b, dim=2)), &
+!                lshaes => size(wshaes), &
+!                lwork => size(work) &
+!                )
+!
+!                call shaes(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, &
+!                    wshaes, lshaes, work, lwork, ierror)
+!            end associate
+!        end associate
+!
+!    end subroutine regular_grid_to_spec
+
     ! Purpose:
     !
     !     subroutine shaes(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, &
