@@ -56,7 +56,7 @@
 !     note:  vhaec, vhaes, vhagc, vhags, vhsec, vhses, vhsgc, vhsgs are all tested!
 !
 program tvha
-    use spherepack_library
+    use spherepack
     implicit none
     real(wp) :: bi
     real(wp) :: br

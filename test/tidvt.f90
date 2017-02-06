@@ -50,7 +50,7 @@
 !     (5) invert dv, vt with idvt(ec, es, gc, gs) and compare with vector field from (1)
 !
 program tidvt
-use spherepack_library
+use spherepack
     implicit none
     real(wp) :: ad
     real(wp) :: av

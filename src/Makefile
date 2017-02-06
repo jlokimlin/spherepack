@@ -760,7 +760,7 @@ type_RegularSphere.f90
 	$(FC) $(FFLAGS) -c type_RegularSphere.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 
-spherepack_library.o: \
+spherepack.o: \
 spherepack_precision.o \
 divergence_routines.o \
 gaussian_latitudes_and_weights_routines.o \
@@ -798,12 +798,12 @@ type_LegendreAux.o \
 type_Vector3D.o \
 type_GaussianSphere.o \
 type_RegularSphere.o \
-spherepack_library.f90
-	$(FC) $(FFLAGS) -c spherepack_library.f90 $(LINKS)\
+spherepack.f90
+	$(FC) $(FFLAGS) -c spherepack.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 
 main.o: \
-spherepack_library.o \
+spherepack.o \
 main.f90
 	$(FC) $(FFLAGS) -c main.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@

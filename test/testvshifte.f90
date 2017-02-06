@@ -87,7 +87,7 @@
 ! *********************************************
 !
 program testvshifte
-use spherepack_library
+use spherepack
     implicit none
     integer nnlon, nnlat, nnlatp1, nnlat2, llsave, llwork
     !

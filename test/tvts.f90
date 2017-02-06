@@ -46,7 +46,7 @@
 !     (3) compute (vt, wt) using vtses, vtsec, vtsgs, vtsgc and compare with (2)
 !
 program tvts
-    use spherepack_library
+    use spherepack
     implicit none
     real(wp) :: bi
     real(wp) :: br

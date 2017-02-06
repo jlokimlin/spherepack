@@ -51,7 +51,7 @@
 !
 program tgrad
 
-    use spherepack_library
+    use spherepack
 
     implicit none
 

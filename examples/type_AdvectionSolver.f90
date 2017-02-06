@@ -5,7 +5,7 @@ module type_AdvectionSolver
         wp => REAL64, &
         stdout => OUTPUT_UNIT
 
-    use spherepack_library, only: &
+    use spherepack, only: &
         GaussianSphere, &
         PI, &
         TWO_PI

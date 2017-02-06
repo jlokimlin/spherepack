@@ -64,7 +64,7 @@
 ! *** END OF OUTPUT
 !
 program testsshifte
-use spherepack_library
+use spherepack
     implicit none
     integer nnlon, nnlat, nnlatp1, nnlat2, llsave, llwork
     parameter(nnlon=144, nnlat=72)

@@ -1,6 +1,6 @@
 module type_ShallowWaterSolver
 
-    use spherepack_library, only: &
+    use spherepack, only: &
         wp, & ! working precision
         ip, & ! integer precision
         PI, &

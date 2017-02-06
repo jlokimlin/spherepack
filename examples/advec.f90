@@ -88,7 +88,7 @@ program advec
     use, intrinsic :: ISO_Fortran_env, only: &
         stdout => OUTPUT_UNIT
 
-    use spherepack_library, only: &
+    use spherepack, only: &
         wp, & ! Working precision
         ip    ! Integer precision
 

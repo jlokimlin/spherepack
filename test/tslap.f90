@@ -44,7 +44,7 @@
 !     (4) compute the inverse  of (2) and compare with (1)
 !
 program tslap
-use spherepack_library
+use spherepack
     implicit none
     real(wp) :: a
     real(wp) :: b

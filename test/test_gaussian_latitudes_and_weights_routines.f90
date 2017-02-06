@@ -49,7 +49,7 @@ program test_gaussian_latitudes_and_weights_routines
         sp => REAL32, &
         stdout => OUTPUT_UNIT
 
-    use spherepack_library, only: &
+    use spherepack, only: &
         ip, & ! Integer precision
         wp, & ! Working precision
         compute_gaussian_latitudes_and_weights, pi

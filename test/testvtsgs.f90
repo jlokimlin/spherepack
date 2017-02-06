@@ -31,7 +31,7 @@
 !
 !
 !program tvtsgs
-!    use spherepack_library
+!    use spherepack
 !    implicit none
 !    real(wp) :: a
 !    real(wp) :: b

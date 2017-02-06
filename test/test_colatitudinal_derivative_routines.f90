@@ -50,7 +50,7 @@ program tvts
     use, intrinsic :: ISO_Fortran_env, only: &
         stdout => OUTPUT_UNIT
 
-    use spherepack_library
+    use spherepack
 
     ! Explicit typing only
     implicit none

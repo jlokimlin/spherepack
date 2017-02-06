@@ -47,7 +47,7 @@
 !     (5) invert the divergence and compare with the irrotational (v, w)
 !
 program tdiv
-use spherepack_library
+use spherepack
     implicit none
     real(wp) :: a
     real(wp) :: b

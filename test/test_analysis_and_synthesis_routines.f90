@@ -39,7 +39,7 @@ program test_analysis_and_synthesis_routines
     use, intrinsic :: ISO_Fortran_env, only: &
         stdout => OUTPUT_UNIT
 
-    use spherepack_library, only: &
+    use spherepack, only: &
         wp, & ! Working precison
         ip, & ! Integer precision
         Sphere, &

@@ -72,7 +72,7 @@
 ! ***********************************************
 ! ***********************************************
 program helmsph
-use spherepack_library
+use spherepack
     !
     !     set grid size with parameter statements
     !

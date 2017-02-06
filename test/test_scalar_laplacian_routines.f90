@@ -45,7 +45,7 @@ program tslap
     use, intrinsic :: ISO_Fortran_env, only: &
         stdout => OUTPUT_UNIT
 
-    use spherepack_library, only: &
+    use spherepack, only: &
         ip, & ! Integer precision
         wp, & ! Working precision
         Sphere, &

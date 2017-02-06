@@ -53,7 +53,7 @@
 !     (5) invert (4) and compare with (v, w)
 !
 program tvlap
-    use spherepack_library
+    use spherepack
     implicit none
     real(wp) :: bi
     real(wp) :: br

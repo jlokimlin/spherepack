@@ -1,4 +1,4 @@
-module spherepack_library
+module spherepack
 
     use, intrinsic :: ISO_Fortran_env, only: &
         stderr => ERROR_UNIT, &
@@ -335,4 +335,4 @@ contains
 
     end subroutine check_error
 
-end module spherepack_library
+end module spherepack

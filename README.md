@@ -1,10 +1,9 @@
-# **modern\_spherepack - A modern Fortran (2008+) library of spherical harmonic transforms**
+# **modern\_spherepack - A Fortran library of spherical harmonic transforms**
 
-An object-oriented modernization of NCAR's SPHEREPACK3.2. 
+A modernization of NCAR's SPHEREPACK3.2.
 
 * The original work, written in fixed-from FORTRAN 77, was heavily refactored to incorporate features of free-form modern Fortran (2008+). 
 * Dynamic memory allocation procedures for analysis and synthesis are now hidden from the end user.
-* Polymorphic variable declaration **class**(Sphere) allows one to write generic code for both regular (uniform spacing) and Gaussian grids.
 
 -----------------------------------------------------------------------------
 
@@ -22,7 +21,7 @@ Test programs are provided for solving these equations. Each program serves two 
 
 ```fortran
         	
-    use spherepack_library, only: &
+    use spherepack, only: &
         wp, & ! working precision
         GaussianSphere
 

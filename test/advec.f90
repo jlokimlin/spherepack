@@ -83,7 +83,7 @@
 !     ar(m, n), br(m, n)    spectral coefficients of phi
 !
 program advec
-    use spherepack_library
+    use spherepack
     implicit none
     real(wp) :: alpha
     real(wp) :: alphad

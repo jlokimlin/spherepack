@@ -144,7 +144,7 @@
 !
 ! **********************************************************************
 program testrvsph
-use spherepack_library
+use spherepack
     implicit none
     !
     !     set grid sizes with parameter statements

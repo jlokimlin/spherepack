@@ -35,7 +35,7 @@
 !     a program for testing all scalar analysis and synthesis subroutines
 !
 program tsha
-    use spherepack_library
+    use spherepack
     implicit none
     real(wp) :: a
     real(wp) :: b
