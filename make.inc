@@ -14,7 +14,7 @@ LIB_DIRECTORY = ../lib
 
 MOD_DIRECTORY = $(LIB_DIRECTORY)
 
-LIB_NAME = modern_spherepack
+LIB_NAME = spherepack
 
 LIB = $(LIB_DIRECTORY)/lib$(LIB_NAME).a
 
