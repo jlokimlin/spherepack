@@ -34,11 +34,19 @@
 !
 !     a program for testing all scalar analysis and synthesis subroutines
 !
-program tsha
+program test_all_scalar_analysis_and_synthesis_routines
+
     use spherepack
+
     implicit none
-    real(wp) :: a
-    real(wp) :: b
+
+    !
+    !     set dimensions with parameter statements
+    !
+    integer(ip), parameter :: nlat= 15, nlon= 18, nt = 3
+    integer(ip), parameter :: lleng= 5 * nlat * nlat * nlon, llsav = 5*nlat*nlat*nlon
+    integer(ip), parameter :: lldwork = nlat * (nlat + 4)
+
     real(wp) :: cosp
     real(wp) :: cost
     real(wp) :: dlat
@@ -46,54 +54,31 @@ program tsha
     real(wp) :: err2
     integer(ip) :: i
     integer(ip) :: icase
-    integer(ip) :: ier
+    integer(ip) :: error_flag
     integer(ip) :: ierror
     integer(ip) :: isym
     integer(ip) :: j
     integer(ip) :: k
-    integer(ip) :: l
+    
     integer(ip) :: ldwork
-    integer(ip) :: lldwork
-    integer(ip) :: lleng
-    integer(ip) :: llsav
     integer(ip) :: lsave
     integer(ip) :: lwork
-    integer(ip) :: nlat
-    integer(ip) :: nlon
-    integer(ip) :: nnlat
-    integer(ip) :: nnlon
-    integer(ip) :: nnt
-    integer(ip) :: nt
+    
     real(wp) :: phi
-
-    real(wp) :: s
     real(wp) :: sinp
     real(wp) :: sint
     real(wp) :: theta
-    real(wp) :: thetag
-    real(wp) :: work
-    real(wp) :: wsave
     real(wp) :: xyzk
-    !
-    !     set dimensions with parameter statements
-    !
-    parameter(nnlat= 15, nnlon= 18, nnt = 3)
-    !     parameter(nnlat=14, nnlon=20, nnt=3)
-    parameter (lleng= 5*nnlat*nnlat*nnlon, llsav= 5*nnlat*nnlat*nnlon)
-    parameter (lldwork = nnlat*(nnlat+4))
-    real dwork(lldwork)
-    dimension work(lleng), wsave(llsav)
-    dimension a(nnlat, nnlat, nnt), b(nnlat, nnlat, nnt), s(nnlat, nnlon, nnt)
-    dimension thetag(nnlat), dtheta(nnlat), dwts(nnlat)
-    real dtheta, dwts
+
+    real(wp) :: dwork(lldwork), work(lleng), wsave(llsav)
+    real(wp)                          :: s(nlat,nlon,nt)
+    real(wp), dimension(nlat,nlat,nt) :: a, b
+    real(wp), dimension(nlat)         :: gaussian_latitudes, gaussian_weights
     !
     !     set dimension variables
     !
-    nlat = nnlat
-    nlon = nnlon
     lwork = lleng
     lsave = llsav
-    nt = nnt
     call iout(nlat, "nlat")
     call iout(nlon, "nlon")
     call iout(nt, "  nt")
@@ -101,19 +86,17 @@ program tsha
     !
     !     set equally spaced colatitude and longitude increments
     !
-    dphi = (pi+pi)/nlon
+    dphi = TWO_PI/nlon
     dlat = pi/(nlat-1)
     !
     !     compute nlat gaussian points in thetag
     !
     ldwork = lldwork
-    call compute_gaussian_latitudes_and_weights(nlat, dtheta, dwts, ier)
-    do  i=1, nlat
-        thetag(i) = dtheta(i)
-    end do
+    call compute_gaussian_latitudes_and_weights(nlat, gaussian_latitudes, gaussian_weights, error_flag)
+
     call name("gaqd")
-    call iout(ier, " ier")
-    call vecout(thetag, "thtg", nlat)
+    call iout(error_flag, " ier")
+    call vecout(gaussian_latitudes, "thtg", nlat)
     !
     !     test all analysis and synthesis subroutines
     !
@@ -138,7 +121,7 @@ program tsha
                 cosp = cos(phi)
                 do i=1, nlat
                     theta = (i-1)*dlat
-                    if (icase>2) theta=thetag(i)
+                    if (icase>2) theta=gaussian_latitudes(i)
                     cost = cos(theta)
                     sint = sin(theta)
                     xyzk = (sint*(sint*cost*sinp*cosp))**k
@@ -150,110 +133,107 @@ program tsha
         !     call aout(s(1, 1, k), "   s", nlat, nlon)
         end do
 
-        do l=1, lsave
-            wsave(l) = 0.0
-        end do
-        if (icase==1) then
+        wsave(1: lsave) = 0.0
 
-            call name("**ec")
-            call shaeci(nlat, nlon, wsave, lsave, dwork, ldwork, ierror)
-
-            call name("shai")
-            call iout(ierror, "ierr")
-
-            call shaec(nlat, nlon, isym, nt, s, nlat, nlon, a, b, nlat, nlat, wsave, &
-                lsave, work, lwork, ierror)
-
-            call name("sha ")
-            call iout(ierror, "ierr")
-
-            call shseci(nlat, nlon, wsave, lsave, dwork, ldwork, ierror)
-
-            call name("shsi")
-            call iout(ierror, "ierr")
-
-            call shsec(nlat, nlon, isym, nt, s, nlat, nlon, a, b, nlat, nlat, wsave, &
-                lsave, work, lwork, ierror)
-
-            call name("shs ")
-            call iout(ierror, "ierr")
-
-        else if (icase==2) then
-
-            call name("**es")
-            call shaesi(nlat, nlon, wsave, lsave, work, lwork, dwork, ldwork, ierror)
-
-            call name("shai")
-            call iout(ierror, "ierr")
-
-            call shaes(nlat, nlon, isym, nt, s, nlat, nlon, a, b, nlat, nlat, wsave, &
-                lsave, work, lwork, ierror)
-
-            call name("sha ")
-            call iout(ierror, "ierr")
-
-            call shsesi(nlat, nlon, wsave, lsave, work, lwork, dwork, ldwork, ierror)
-
-            call name("shsi")
-            call iout(ierror, "ierr")
-
-            call shses(nlat, nlon, isym, nt, s, nlat, nlon, a, b, nlat, nlat, wsave, &
-                lsave, work, lwork, ierror)
-
-            call name("shs ")
-            call iout(ierror, "ierr")
-
-        else if (icase==3) then
-
-            call name("**gc")
-
-            call shagci(nlat, nlon, wsave, lsave, dwork, ldwork, ierror)
-
-            call name("shai")
-            call iout(ierror, "ierr")
-
-            call shagc(nlat, nlon, isym, nt, s, nlat, nlon, a, b, nlat, nlat, wsave, &
-                lsave, work, lwork, ierror)
-
-            call name("sha ")
-            call iout(ierror, "ierr")
-
-            call shsgci(nlat, nlon, wsave, lsave, dwork, ldwork, ierror)
-
-            call name("shsi")
-            call iout(ierror, "ierr")
-
-            call shsgc(nlat, nlon, isym, nt, s, nlat, nlon, a, b, nlat, nlat, wsave, &
-                lsave, work, lwork, ierror)
-
-            call name("shs ")
-            call iout(ierror, "ierr")
-
-        else if (icase==4) then
-
-            call name("**gs")
-
-            call shagsi(nlat, nlon, wsave, lsave, work, lwork, dwork, ldwork, ierror)
-
-            call name("shai")
-            call iout(ierror, "ierr")
-
-            call shags(nlat, nlon, isym, nt, s, nlat, nlon, a, b, nlat, nlat, wsave, &
-                lsave, work, lwork, ierror)
-
-            call name("sha ")
-            call iout(ierror, "ierr")
-
-            call shsgsi(nlat, nlon, wsave, lsave, work, lwork, dwork, ldwork, ierror)
-            call name("shsi")
-            call iout(ierror, "ierr")
-
-            call shsgs(nlat, nlon, isym, nt, s, nlat, nlon, a, b, nlat, nlat, wsave, &
-                lsave, work, lwork, ierror)
-
-            call name("shs ")
-            call iout(ierror, "ierr")
-        end if
+        select case (icase)
+            case (1)
+        		
+                call name("**ec")
+                call shaeci(nlat, nlon, wsave, lsave, dwork, ldwork, ierror)
+        		
+                call name("shai")
+                call iout(ierror, "ierr")
+        		
+                call shaec(nlat, nlon, isym, nt, s, nlat, nlon, a, b, nlat, nlat, wsave, &
+                    lsave, work, lwork, ierror)
+        		
+                call name("sha ")
+                call iout(ierror, "ierr")
+        		
+                call shseci(nlat, nlon, wsave, lsave, dwork, ldwork, ierror)
+        		
+                call name("shsi")
+                call iout(ierror, "ierr")
+        		
+                call shsec(nlat, nlon, isym, nt, s, nlat, nlon, a, b, nlat, nlat, wsave, &
+                    lsave, work, lwork, ierror)
+        		
+                call name("shs ")
+                call iout(ierror, "ierr")
+            case (2)
+        		
+                call name("**es")
+                call shaesi(nlat, nlon, wsave, lsave, work, lwork, dwork, ldwork, ierror)
+        		
+                call name("shai")
+                call iout(ierror, "ierr")
+        		
+                call shaes(nlat, nlon, isym, nt, s, nlat, nlon, a, b, nlat, nlat, wsave, &
+                    lsave, work, lwork, ierror)
+        		
+                call name("sha ")
+                call iout(ierror, "ierr")
+        		
+                call shsesi(nlat, nlon, wsave, lsave, work, lwork, dwork, ldwork, ierror)
+        		
+                call name("shsi")
+                call iout(ierror, "ierr")
+        		
+                call shses(nlat, nlon, isym, nt, s, nlat, nlon, a, b, nlat, nlat, wsave, &
+                    lsave, work, lwork, ierror)
+        		
+                call name("shs ")
+                call iout(ierror, "ierr")
+            case (3)
+        		
+                call name("**gc")
+        		
+                call shagci(nlat, nlon, wsave, lsave, dwork, ldwork, ierror)
+        		
+                call name("shai")
+                call iout(ierror, "ierr")
+        		
+                call shagc(nlat, nlon, isym, nt, s, nlat, nlon, a, b, nlat, nlat, wsave, &
+                    lsave, work, lwork, ierror)
+        		
+                call name("sha ")
+                call iout(ierror, "ierr")
+        		
+                call shsgci(nlat, nlon, wsave, lsave, dwork, ldwork, ierror)
+        		
+                call name("shsi")
+                call iout(ierror, "ierr")
+        		
+                call shsgc(nlat, nlon, isym, nt, s, nlat, nlon, a, b, nlat, nlat, wsave, &
+                    lsave, work, lwork, ierror)
+        		
+                call name("shs ")
+                call iout(ierror, "ierr")
+            case (4)
+        		
+                call name("**gs")
+        		
+                call shagsi(nlat, nlon, wsave, lsave, work, lwork, dwork, ldwork, ierror)
+        		
+                call name("shai")
+                call iout(ierror, "ierr")
+        		
+                call shags(nlat, nlon, isym, nt, s, nlat, nlon, a, b, nlat, nlat, wsave, &
+                    lsave, work, lwork, ierror)
+        		
+                call name("sha ")
+                call iout(ierror, "ierr")
+        		
+                call shsgsi(nlat, nlon, wsave, lsave, work, lwork, dwork, ldwork, ierror)
+                call name("shsi")
+                call iout(ierror, "ierr")
+        		
+                call shsgs(nlat, nlon, isym, nt, s, nlat, nlon, a, b, nlat, nlat, wsave, &
+                    lsave, work, lwork, ierror)
+        		
+                call name("shs ")
+                call iout(ierror, "ierr")
+        end select
         !
         !     compute "error" in s
         !
@@ -265,7 +245,7 @@ program tsha
                 cosp = cos(phi)
                 do i=1, nlat
                     theta = (i-1)*dlat
-                    if (icase>2) theta = thetag(i)
+                    if (icase > 2) theta = gaussian_latitudes(i)
                     cost = cos(theta)
                     sint = sin(theta)
                     xyzk = (sint*(sint*cost*sinp*cosp))**k
@@ -280,4 +260,4 @@ program tsha
         call vout(err2, "err2")
     end do
 
-end program tsha
+end program test_all_scalar_analysis_and_synthesis_routines

@@ -36,44 +36,6 @@ submodule(scalar_analysis_routines) scalar_analysis_gaussian_grid_saved
 
 contains
 
-!    subroutine gaussian_grid_to_spec(symmetry_type, gridded_data, spectral_data, wavetable, workspace, error_flag)
-!
-!        ! Dummy arguments
-!        integer(ip),               intent(in)    :: symmetry_type
-!        real(wp),                  intent(in)    :: gridded_data
-!        class(ScalarCoefficients), intent(inout) :: spectral_data
-!        class(GaussianWaveTable),  intent(inout) :: wavetable
-!        class(GaussianWorkspace),  intent(inout) :: workspace
-!        integer(ip),               intent(out)   :: error_flag
-!
-!        associate( &
-!            nlat => spectral_data%NUMBER_OF_LATITUDES, &
-!            nlon => spectral_data%NUMBER_OF_LONGITUDES, &
-!            mode => symmetry_type, &
-!            nt => spectral_data%NUMBER_OF_SYNTHESES, &
-!            g => gridded_data, &
-!            a => spectral_data%real_component, &
-!            b => spectral_data%imaginary_component, &
-!            wshags => wavetable%forward_scalar_wavetable, &
-!            work => workspace%forward_scalar_workspace, &
-!            ierror => error_flag &
-!            )
-!            associate( &
-!                idg => size(g, dim=1), &
-!                jdg => size(g, dim=2), &
-!                mdab => min(size(a, dim=1), size(b, dim=1)), &
-!                ndab => min(size(a, dim=2), size(b, dim=2)), &
-!                lshags => size(wshags), &
-!                lwork => size(work) &
-!                )
-!
-!                call shags(nlat, nlon, mode, nt, g, idg, jdg, a, b, mdab, ndab, &
-!                    wshags, lshags, work, lwork, ierror)
-!            end associate
-!        end associate
-!
-!    end subroutine gaussian_grid_to_spec
-
     ! Purpose:
     !
     ! Performs the spherical harmonic analysis on
@@ -349,16 +311,13 @@ contains
             ierror = 0
         end if
 
-        !
-        !  set starting address for gaussian wts , fft values,
-        !    and fully stored legendre polys in wshags
-        !
+        ! Set starting address for gaussian wts , fft values,
+        ! and fully stored legendre polys in wshags
         iwts = 1
         ifft = nlat+2*nlat*late+3*(l*(l-1)/2+(nlat-l)*(l-1))+1
         ipmn = ifft+nlon+15
-        !
-        !  set pointer for internal storage of g
-        !
+
+        ! Set pointer for internal storage of g
         iw = lat*nlon*nt+1
 
         !  Perform analysis
