@@ -353,13 +353,13 @@ contains
         iwk = ifn+nlat
         lwk = lwork-2*mn-nlat
 
-        call islapgc_lower_routine(nlat, nlon, isym, nt, xlmbda, sf, ids, jds, a, b, mdab, ndab, &
+        call islapgc_lower_utility_routine(nlat, nlon, isym, nt, xlmbda, sf, ids, jds, a, b, mdab, ndab, &
             work(ia), work(ib), mmax, work(ifn), wshsgc, lshsgc, work(iwk), lwk, &
             pertrb, ierror)
 
     end subroutine islapgc
 
-    subroutine islapgc_lower_routine(nlat, nlon, isym, nt, xlmbda, sf, ids, jds, a, b, &
+    subroutine islapgc_lower_utility_routine(nlat, nlon, isym, nt, xlmbda, sf, ids, jds, a, b, &
         mdab, ndab, as, bs, mmax, fnn, wsav, lsav, wk, lwk, pertrb, ierror)
 
         real(wp) :: a
@@ -398,6 +398,6 @@ contains
         call shsgc(nlat, nlon, isym, nt, sf, ids, jds, as, bs, mmax, nlat, &
             wsav, lsav, wk, lwk, ierror)
 
-    end subroutine islapgc_lower_routine
+    end subroutine islapgc_lower_utility_routine
 
 end submodule invert_scalar_laplacian_gaussian_grid

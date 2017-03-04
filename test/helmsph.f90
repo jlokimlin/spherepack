@@ -156,7 +156,7 @@ use spherepack
 200     format(' shaeci, ierror = ', i2)
         call exit(0)
     end if
-    call shseci(nlat, nlon, wshsec, lshsec, dwork, ldwork, ierror)
+    call shseci(nlat, nlon, wshsec, ierror)
     if (ierror > 0) then
         write (6, 201) ierror
 201     format(' shseci, ierror = ', i2)

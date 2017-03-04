@@ -452,7 +452,7 @@ contains
             iw3 => workspace_indices(6), &
             iw4 => workspace_indices(7) &
             )
-            call vhsgs_lower_routine(nlat, nlon, ityp, nt, imid, idvw, jdvw, v, w, mdab, ndab, &
+            call vhsgs_lower_utility_routine(nlat, nlon, ityp, nt, imid, idvw, jdvw, v, w, mdab, ndab, &
                 br, bi, cr, ci, idv, work, work(iw1), work(iw2), work(iw3), &
                 work(iw4), idz, wvhsgs(jw1), wvhsgs(jw2), wvhsgs(jw3))
         end associate
@@ -471,7 +471,7 @@ contains
     !     real array dwork must have
     !     3*nlat*(nlat+1)+5*nlat+1 = nlat*(3*nlat+8)+1
     !     locations which is determined by the size of dthet, 
-    !     dwts, dwork, and dpbar in vhsgs_lower_routine
+    !     dwts, dwork, and dpbar in vhsgs_lower_utility_routine
     !
     !     subroutine vhsgsi(nlat, nlon, wvhsgs, lvhsgs, dwork, ldwork, ierror)
     !
@@ -587,7 +587,7 @@ contains
             iw3 = iw2+nlat
             iw4 = iw3+3*imid*nlat
 
-            call vhgsi_lower_routine(nlat, imid, wvhsgs(jw1), wvhsgs(jw2), &
+            call vhgsi_lower_utility_routine(nlat, imid, wvhsgs(jw1), wvhsgs(jw2), &
                 dwork(iw1), dwork(iw2), dwork(iw3), dwork(iw4))
 
             call util%hfft%initialize(nlon, wvhsgs(jw3))
@@ -628,7 +628,7 @@ contains
 
     end function get_vhsgs_workspace_indices
 
-    subroutine vhsgs_lower_routine(nlat, nlon, ityp, nt, imid, idvw, jdvw, v, w, mdab, &
+    subroutine vhsgs_lower_utility_routine(nlat, nlon, ityp, nt, imid, idvw, jdvw, v, w, mdab, &
         ndab, br, bi, cr, ci, idv, ve, vo, we, wo, work, idz, vb, wb, wrfft)
 
         ! Dummy arguments
@@ -1254,9 +1254,9 @@ contains
             end do
         end if
 
-    end subroutine vhsgs_lower_routine
+    end subroutine vhsgs_lower_utility_routine
 
-    subroutine vhgsi_lower_routine(nlat, imid, vb, wb, dthet, dwts, dpbar, work)
+    subroutine vhgsi_lower_utility_routine(nlat, imid, vb, wb, dthet, dwts, dpbar, work)
 
         ! Dummy arguments
         integer(ip), intent(in)  :: nlat
@@ -1376,7 +1376,7 @@ contains
             end do
         end do
 
-    end subroutine vhgsi_lower_routine
+    end subroutine vhgsi_lower_utility_routine
 
     pure function get_index(m, n, nlat) &
         result (return_value)

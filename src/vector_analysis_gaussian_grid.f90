@@ -406,7 +406,7 @@ contains
         jw2 = jw1+lwzvin
         jw3 = jw2+lwzvin
 
-        call vhagc_lower_routine(nlat, nlon, ityp, nt, imid, idvw, jdvw, v, w, mdab, ndab, &
+        call vhagc_lower_utility_routine(nlat, nlon, ityp, nt, imid, idvw, jdvw, v, w, mdab, ndab, &
             br, bi, cr, ci, idv, work, work(iw1), work(iw2), work(iw3), &
             work(iw4), work(iw5), wvhagc, wvhagc(jw1), wvhagc(jw2), wvhagc(jw3))
 
@@ -490,7 +490,7 @@ contains
 
     end subroutine vhagci
 
-    subroutine vhagc_lower_routine(nlat, nlon, ityp, nt, imid, idvw, jdvw, v, w, mdab, &
+    subroutine vhagc_lower_utility_routine(nlat, nlon, ityp, nt, imid, idvw, jdvw, v, w, mdab, &
         ndab, br, bi, cr, ci, idv, ve, vo, we, wo, vb, wb, wts, wvbin, wwbin, wrfft)
 
         real(wp) :: bi
@@ -1357,7 +1357,7 @@ contains
         end select vector_symmetry_cases
 
 
-    end subroutine vhagc_lower_routine
+    end subroutine vhagc_lower_utility_routine
 
     ! Purpose:
     !

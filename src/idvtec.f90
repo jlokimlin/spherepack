@@ -377,13 +377,13 @@ contains
         iwk = is + nlat
         liwk = lwork-4*mn-nlat
 
-        call idvtec_lower_routine(nlat, nlon, isym, nt, v, w, idvw, jdvw, work(ibr), &
+        call idvtec_lower_utility_routine(nlat, nlon, isym, nt, v, w, idvw, jdvw, work(ibr), &
             work(ibi), work(icr), work(ici), mmax, work(is), mdab, ndab, ad, bd, &
             av, bv, wvhsec, lvhsec, work(iwk), liwk, pertbd, pertbv, ierror)
 
     end subroutine idvtec
 
-    subroutine idvtec_lower_routine(nlat, nlon, isym, nt, v, w, idvw, jdvw, br, bi, &
+    subroutine idvtec_lower_utility_routine(nlat, nlon, isym, nt, v, w, idvw, jdvw, br, bi, &
         cr, ci, mmax, sqnn, mdab, ndab, ad, bd, av, bv, wvhsec, lvhsec, wk, lwk, &
         pertbd, pertbv, ierror)
 
@@ -491,6 +491,6 @@ contains
         call vhsec(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
             mmax, nlat, wvhsec, lvhsec, wk, lwk, ierror)
 
-    end subroutine idvtec_lower_routine
+    end subroutine idvtec_lower_utility_routine
 
 end module module_idvtec

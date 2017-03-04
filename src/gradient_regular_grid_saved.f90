@@ -319,13 +319,13 @@ contains
         iwk = iis + nlat
         liwk = lwork-2*mn-nlat
 
-        call grades_lower_routine(nlat, nlon, isym, nt, v, w, idvw, jdvw, work(ibr), work(ibi), &
+        call grades_lower_utility_routine(nlat, nlon, isym, nt, v, w, idvw, jdvw, work(ibr), work(ibi), &
             mmax, work(iis), mdab, ndab, a, b, wvhses, lvhses, work(iwk), liwk, &
             ierror)
 
     end subroutine grades
 
-    subroutine grades_lower_routine(nlat, nlon, isym, nt, v, w, idvw, jdvw, br, bi, mmax, &
+    subroutine grades_lower_utility_routine(nlat, nlon, isym, nt, v, w, idvw, jdvw, br, bi, mmax, &
         sqnn, mdab, ndab, a, b, wvhses, lvhses, wk, lwk, ierror)
 
         real(wp) :: a
@@ -367,6 +367,6 @@ contains
         call vhses(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
             mmax, nlat, wvhses, lvhses, wk, lwk, ierror)
 
-    end subroutine grades_lower_routine
+    end subroutine grades_lower_utility_routine
 
 end submodule gradient_regular_grid_saved

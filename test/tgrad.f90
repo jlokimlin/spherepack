@@ -453,7 +453,7 @@ program tgrad
                 call name("vha ")
                 call iout(ierror, "ierr")
 
-                call shseci(nlat, nlon, wsave, lsave, dwork, ldwork, ierror)
+                call shseci(nlat, nlon, wsave, ierror)
                 call name("shec")
                 call iout(ierror, "ierr")
 
@@ -503,7 +503,7 @@ program tgrad
                 call name("vha ")
                 call iout(ierror, "ierr")
 
-                call shsgci(nlat, nlon, wsave, lsave, dwork, ldwork, ierror)
+                call shsgci(nlat, nlon, wsave, ierror)
                 call name("shgc")
                 call iout(ierror, "ierr")
 
@@ -522,7 +522,7 @@ program tgrad
                 call name("vha ")
                 call iout(ierror, "ierr")
 
-                call shsgsi(nlat, nlon, wsave, lsave, work, lwork, dwork, ldwork, ierror)
+                call shsgsi(nlat, nlon, wsave, ierror)
                 call name("shgs")
                 call iout(ierror, "ierr")
 

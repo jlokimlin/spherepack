@@ -336,7 +336,7 @@ contains
             jw1 => workspace_indices(5), &
             jw2 => workspace_indices(6) &
             )
-            call vhaes_lower_routine(nlat, nlon, ityp, nt, imid, idvw, jdvw, v, w, mdab, ndab, &
+            call vhaes_lower_utility_routine(nlat, nlon, ityp, nt, imid, idvw, jdvw, v, w, mdab, ndab, &
                 br, bi, cr, ci, idv, work, work(iw1), work(iw2), work(iw3), &
                 work(iw4), idz, wvhaes, wvhaes(jw1), wvhaes(jw2))
         end associate
@@ -468,7 +468,7 @@ contains
             iw1 => workspace_indices(3), &
             idz => workspace_indices(4) &
             )
-            call vhaesi_lower_routine(nlat, nlon, imid, wvhaes, wvhaes(jw1), idz, work, work(iw1), dwork)
+            call vhaesi_lower_utility_routine(nlat, nlon, imid, wvhaes, wvhaes(jw1), idz, work, work(iw1), dwork)
 
             call util%hfft%initialize(nlon, wvhaes(jw2))
         end associate
@@ -495,7 +495,7 @@ contains
 
     end function get_vhaes_workspace_indices
 
-    subroutine vhaes_lower_routine(nlat, nlon, ityp, nt, imid, idvw, jdvw, v, w, mdab, &
+    subroutine vhaes_lower_utility_routine(nlat, nlon, ityp, nt, imid, idvw, jdvw, v, w, mdab, &
         ndab, br, bi, cr, ci, idv, ve, vo, we, wo, work, idz, zv, zw, wrfft)
 
         ! Dummy arguments
@@ -1185,7 +1185,7 @@ contains
                 end do
         end select
 
-    end subroutine vhaes_lower_routine
+    end subroutine vhaes_lower_utility_routine
 
     pure function get_vhaesi_workspace_indices(lzimn, nlat, imid, mmax) &
         result (return_value)
@@ -1207,7 +1207,7 @@ contains
 
     end function get_vhaesi_workspace_indices
 
-    subroutine vhaesi_lower_routine(nlat, nlon, imid, zv, zw, idz, zin, wzvin, dwork)
+    subroutine vhaesi_lower_utility_routine(nlat, nlon, imid, zv, zw, idz, zin, wzvin, dwork)
 
         ! Dummy arguments
         integer(ip), intent(in)  :: nlat
@@ -1248,6 +1248,6 @@ contains
             end do
         end do
 
-    end subroutine vhaesi_lower_routine
+    end subroutine vhaesi_lower_utility_routine
 
 end submodule vector_analysis_regular_grid_saved

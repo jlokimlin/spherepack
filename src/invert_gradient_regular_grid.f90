@@ -335,12 +335,12 @@ contains
         iwk = iis + nlat
         liwk = lwork-2*mn-nlat
 
-        call igradec_lower_routine(nlat, nlon, isym, nt, sf, isf, jsf, work(ia), work(ib), mab, &
+        call igradec_lower_utility_routine(nlat, nlon, isym, nt, sf, isf, jsf, work(ia), work(ib), mab, &
             work(iis), mdb, ndb, br, bi, wshsec, lshsec, work(iwk), liwk, ierror)
 
     end subroutine igradec
 
-    subroutine igradec_lower_routine(nlat, nlon, isym, nt, sf, isf, jsf, a, b, mab, &
+    subroutine igradec_lower_utility_routine(nlat, nlon, isym, nt, sf, isf, jsf, a, b, mab, &
         sqnn, mdb, ndb, br, bi, wshsec, lshsec, wk, lwk, ierror)
 
         real(wp) :: a
@@ -379,6 +379,6 @@ contains
         call shsec(nlat, nlon, isym, nt, sf, isf, jsf, a, b, mab, nlat, &
             wshsec, lshsec, wk, lwk, ierror)
 
-    end subroutine igradec_lower_routine
+    end subroutine igradec_lower_utility_routine
 
 end submodule invert_gradient_regular_grid

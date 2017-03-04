@@ -299,13 +299,13 @@ contains
         iwk = is+nlat
         lwk = lwork-2*mn-nlat
 
-        call sfvpgs_lower_routine(nlat, nlon, isym, nt, sf, vp, idv, jdv, br, bi, cr, ci, mdb, ndb, &
+        call sfvpgs_lower_utility_routine(nlat, nlon, isym, nt, sf, vp, idv, jdv, br, bi, cr, ci, mdb, ndb, &
             work(ia), work(ib), mab, work(is), wshsgs, lshsgs, work(iwk), lwk, &
             ierror)
 
     end subroutine sfvpgs
 
-    subroutine sfvpgs_lower_routine(nlat, nlon, isym, nt, sf, vp, idv, jdv, br, bi, cr, ci, &
+    subroutine sfvpgs_lower_utility_routine(nlat, nlon, isym, nt, sf, vp, idv, jdv, br, bi, cr, ci, &
         mdb, ndb, a, b, mab, fnn, wshsgs, lshsgs, wk, lwk, ierror)
 
         integer(ip) :: nlat, nlon, isym, nt, idv, jdv, mdb, ndb, mab, lshsgs, lwk, ierror
@@ -389,6 +389,6 @@ contains
         call shsgs(nlat, nlon, isym, nt, vp, idv, jdv, a, b, &
             mab, nlat, wshsgs, lshsgs, wk, lwk, ierror)
 
-    end subroutine sfvpgs_lower_routine
+    end subroutine sfvpgs_lower_utility_routine
 
 end module module_sfvpgs

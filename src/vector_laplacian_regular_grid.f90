@@ -442,13 +442,13 @@ contains
         iwk = ifn + nlat
         liwk = lwork-4*mn-nlat
 
-        call vlapec_lower_routine(nlat, nlon, ityp, nt, vlap, wlap, idvw, jdvw, work(ibr), &
+        call vlapec_lower_utility_routine(nlat, nlon, ityp, nt, vlap, wlap, idvw, jdvw, work(ibr), &
             work(ibi), work(icr), work(ici), mmax, work(ifn), mdbc, ndbc, br, bi, &
             cr, ci, wvhsec, lvhsec, work(iwk), liwk, ierror)
 
     end subroutine vlapec
 
-    subroutine vlapec_lower_routine(nlat, nlon, ityp, nt, vlap, wlap, idvw, jdvw, brlap, &
+    subroutine vlapec_lower_utility_routine(nlat, nlon, ityp, nt, vlap, wlap, idvw, jdvw, brlap, &
         bilap, crlap, cilap, mmax, fnn, mdb, ndb, br, bi, cr, ci, wsave, lwsav, &
         wk, lwk, ierror)
 
@@ -495,6 +495,6 @@ contains
         call vhsec(nlat, nlon, ityp, nt, vlap, wlap, idvw, jdvw, brlap, bilap, &
             crlap, cilap, mmax, nlat, wsave, lwsav, wk, lwk, ierror)
 
-    end subroutine vlapec_lower_routine
+    end subroutine vlapec_lower_utility_routine
 
 end submodule vector_laplacian_regular_grid

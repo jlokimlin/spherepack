@@ -368,7 +368,7 @@ contains
         jw1 = lwzvin+1
         jw2 = jw1+lwzvin
 
-        call vtsgc_lower_routine(nlat, nlon, ityp, nt, imid, idvw, jdvw, vt, wt, mdab, ndab, &
+        call vtsgc_lower_utility_routine(nlat, nlon, ityp, nt, imid, idvw, jdvw, vt, wt, mdab, ndab, &
             br, bi, cr, ci, idv, work, work(iw1), work(iw2), work(iw3), &
             work(iw4), work(iw5), wvts, wvts(jw1), wvts(jw2))
 
@@ -492,7 +492,7 @@ contains
     end subroutine vtsgci
 
 
-    subroutine vtsgc_lower_routine(nlat, nlon, ityp, nt, imid, idvw, jdvw, vt, wt, mdab, &
+    subroutine vtsgc_lower_utility_routine(nlat, nlon, ityp, nt, imid, idvw, jdvw, vt, wt, mdab, &
         ndab, br, bi, cr, ci, idv, vte, vto, wte, wto, vb, wb, wvbin, wwbin, wrfft)
 
         real(wp) :: bi
@@ -1128,6 +1128,6 @@ contains
             end do
         end if
 
-    end subroutine vtsgc_lower_routine
+    end subroutine vtsgc_lower_utility_routine
 
 end submodule colatitudinal_derivative_gaussian_grid

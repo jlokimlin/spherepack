@@ -420,13 +420,13 @@ contains
                 liwk = lwork-2*mn-nlat
         end select
 
-        call ivlapgs_lower_routine(nlat, nlon, ityp, nt, v, w, idvw, jdvw, work(ibr), &
+        call ivlapgs_lower_utility_routine(nlat, nlon, ityp, nt, v, w, idvw, jdvw, work(ibr), &
             work(ibi), work(icr), work(ici), mmax, work(ifn), mdbc, ndbc, br, bi, &
             cr, ci, wvhsgs, lvhsgs, work(iwk), liwk, ierror)
 
     end subroutine ivlapgs
 
-    subroutine ivlapgs_lower_routine(nlat, nlon, ityp, nt, v, w, idvw, jdvw, brvw, &
+    subroutine ivlapgs_lower_utility_routine(nlat, nlon, ityp, nt, v, w, idvw, jdvw, brvw, &
         bivw, crvw, civw, mmax, fnn, mdbc, ndbc, br, bi, cr, ci, wsave, lsave, &
         wk, lwk, ierror)
 
@@ -473,6 +473,6 @@ contains
         call vhsgs(nlat, nlon, ityp, nt, v, w, idvw, jdvw, brvw, bivw, &
             crvw, civw, mmax, nlat, wsave, lsave, wk, lwk, ierror)
 
-    end subroutine ivlapgs_lower_routine
+    end subroutine ivlapgs_lower_utility_routine
 
 end submodule invert_vector_laplacian_gaussian_grid_saved

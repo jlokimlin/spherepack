@@ -299,13 +299,13 @@ contains
         is = ib+mn
         iwk = is+nlat
         lwk = lwork-2*mn-nlat
-        call sfvpgc_lower_routine(nlat, nlon, isym, nt, sf, vp, idv, jdv, br, bi, cr, ci, mdb, ndb, &
+        call sfvpgc_lower_utility_routine(nlat, nlon, isym, nt, sf, vp, idv, jdv, br, bi, cr, ci, mdb, ndb, &
             work(ia), work(ib), mab, work(is), wshsgc, lshsgc, work(iwk), lwk, &
             ierror)
 
     contains
 
-        subroutine sfvpgc_lower_routine(nlat, nlon, isym, nt, sf, vp, idv, jdv, br, bi, cr, ci, &
+        subroutine sfvpgc_lower_utility_routine(nlat, nlon, isym, nt, sf, vp, idv, jdv, br, bi, cr, ci, &
             mdb, ndb, a, b, mab, fnn, wshsgc, lshsgc, wk, lwk, ierror)
 
             integer(ip) :: nlat, nlon, isym, nt, idv, jdv, mdb, ndb, mab, lshsgc, lwk, ierror
@@ -387,7 +387,7 @@ contains
             call shsgc(nlat, nlon, isym, nt, vp, idv, jdv, a, b, &
                 mab, nlat, wshsgc, lshsgc, wk, lwk, ierror)
 
-        end subroutine sfvpgc_lower_routine
+        end subroutine sfvpgc_lower_utility_routine
 
     end subroutine sfvpgc
 

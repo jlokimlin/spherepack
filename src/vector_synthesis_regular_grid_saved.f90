@@ -448,7 +448,7 @@ contains
             jw1 => workspace_indices(5), &
             jw2 => workspace_indices(6) &
             )
-            call vhses_lower_routine(nlat, nlon, ityp, nt, imid, idvw, jdvw, v, w, mdab, ndab, &
+            call vhses_lower_utility_routine(nlat, nlon, ityp, nt, imid, idvw, jdvw, v, w, mdab, ndab, &
                 br, bi, cr, ci, idv, work, work(iw1), work(iw2), work(iw3), &
                 work(iw4), idz, wvhses, wvhses(jw1), wvhses(jw2))
         end associate
@@ -583,7 +583,7 @@ contains
             jw1 => workspace_indices(3), &
             jw2 => workspace_indices(4) &
             )
-            call vhsesi_lower_routine(nlat, nlon, imid, wvhses, wvhses(jw1), idz, work, work(iw1), dwork)
+            call vhsesi_lower_utility_routine(nlat, nlon, imid, wvhses, wvhses(jw1), idz, work, work(iw1), dwork)
             call util%hfft%initialize(nlon, wvhses(jw2))
         end associate
 
@@ -609,7 +609,7 @@ contains
 
     end function get_vhses_workspace_indices
 
-    subroutine vhses_lower_routine(nlat, nlon, ityp, nt, imid, idvw, jdvw, v, w, mdab, &
+    subroutine vhses_lower_utility_routine(nlat, nlon, ityp, nt, imid, idvw, jdvw, v, w, mdab, &
         ndab, br, bi, cr, ci, idv, ve, vo, we, wo, work, idz, vb, wb, wrfft)
 
         ! Dummy arguments
@@ -1239,7 +1239,7 @@ contains
             end do
         end if
 
-    end subroutine vhses_lower_routine
+    end subroutine vhses_lower_utility_routine
 
     pure function get_vhsesi_workspace_indices(nlat, imid, mmax, lzimn) &
         result (return_value)
@@ -1260,7 +1260,7 @@ contains
 
     end function get_vhsesi_workspace_indices
 
-    subroutine vhsesi_lower_routine(nlat, nlon, imid, vb, wb, idz, vin, wzvin, dwork)
+    subroutine vhsesi_lower_utility_routine(nlat, nlon, imid, vb, wb, idz, vin, wzvin, dwork)
 
         ! Dummy arguments
         integer(ip), intent(in)  :: nlat
@@ -1302,6 +1302,6 @@ contains
             end do
         end do
 
-    end subroutine vhsesi_lower_routine
+    end subroutine vhsesi_lower_utility_routine
 
 end submodule vector_synthesis_regular_grid_saved

@@ -358,7 +358,7 @@ contains
             iw3 => workspace_indices(6), &
             iw4 => workspace_indices(7) &
             )
-            call vhags_lower_routine(nlat, nlon, ityp, nt, imid, idvw, jdvw, v, w, mdab, ndab, &
+            call vhags_lower_utility_routine(nlat, nlon, ityp, nt, imid, idvw, jdvw, v, w, mdab, ndab, &
                 br, bi, cr, ci, idv, work, work(iw1), work(iw2), work(iw3), &
                 work(iw4), idz, wvhags(jw1), wvhags(jw2), wvhags(jw3))
         end associate
@@ -507,7 +507,7 @@ contains
 
     end function get_vhags_workspace_indices
 
-    subroutine vhags_lower_routine(nlat, nlon, ityp, nt, imid, idvw, jdvw, v, w, mdab, &
+    subroutine vhags_lower_utility_routine(nlat, nlon, ityp, nt, imid, idvw, jdvw, v, w, mdab, &
         ndab, br, bi, cr, ci, idv, ve, vo, we, wo, work, idz, vb, wb, wrfft)
 
         real(wp) :: bi
@@ -1218,7 +1218,7 @@ contains
                 end do
         end select vector_symmetry_cases
 
-    end subroutine vhags_lower_routine
+    end subroutine vhags_lower_utility_routine
 
     pure function get_vhagsi_workspace_indices(nlat, imid, lmn) &
         result (return_value)

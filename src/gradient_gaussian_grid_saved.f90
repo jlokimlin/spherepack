@@ -311,13 +311,13 @@ contains
         iis = ibi + mn
         iwk = iis + nlat
         liwk = lwork-2*mn-nlat
-        call gradgs_lower_routine(nlat, nlon, isym, nt, v, w, idvw, jdvw, work(ibr), work(ibi), &
+        call gradgs_lower_utility_routine(nlat, nlon, isym, nt, v, w, idvw, jdvw, work(ibr), work(ibi), &
             mmax, work(iis), mdab, ndab, a, b, wvhsgs, lvhsgs, work(iwk), liwk, &
             ierror)
 
     end subroutine gradgs
 
-    subroutine gradgs_lower_routine(nlat, nlon, isym, nt, v, w, idvw, jdvw, br, bi, mmax, &
+    subroutine gradgs_lower_utility_routine(nlat, nlon, isym, nt, v, w, idvw, jdvw, br, bi, mmax, &
         sqnn, mdab, ndab, a, b, wvhsgs, lvhsgs, wk, lwk, ierror)
 
         real(wp) :: a
@@ -359,6 +359,6 @@ contains
         call vhsgs(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
             mmax, nlat, wvhsgs, lvhsgs, wk, lwk, ierror)
 
-    end subroutine gradgs_lower_routine
+    end subroutine gradgs_lower_utility_routine
 
 end submodule gradient_gaussian_grid_saved

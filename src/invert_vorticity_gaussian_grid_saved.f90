@@ -327,13 +327,13 @@ contains
         iis = ici + mn
         iwk = iis + nlat
         liwk = lwork-2*mn-nlat
-        call ivrtgs_lower_routine(nlat, nlon, isym, nt, v, w, idvw, jdvw, work(icr), work(ici), &
+        call ivrtgs_lower_utility_routine(nlat, nlon, isym, nt, v, w, idvw, jdvw, work(icr), work(ici), &
             mmax, work(iis), mdab, ndab, a, b, wvhsgs, lvhsgs, work(iwk), &
             liwk, pertrb, ierror)
 
     end subroutine ivrtgs
 
-    subroutine ivrtgs_lower_routine(nlat, nlon, isym, nt, v, w, idvw, jdvw, cr, ci, mmax, &
+    subroutine ivrtgs_lower_utility_routine(nlat, nlon, isym, nt, v, w, idvw, jdvw, cr, ci, mmax, &
         sqnn, mdab, ndab, a, b, wsav, lsav, wk, lwk, pertrb, ierror)
 
         real(wp) :: a
@@ -376,6 +376,6 @@ contains
         call vhsgs(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
             mmax, nlat, wsav, lsav, wk, lwk, ierror)
 
-    end subroutine ivrtgs_lower_routine
+    end subroutine ivrtgs_lower_utility_routine
 
 end submodule invert_vorticity_gaussian_grid_saved

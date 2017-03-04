@@ -347,13 +347,13 @@ contains
         ifn = ib+mn
         iwk = ifn+nlat
         lwk = lwork-2*mn-nlat
-        call slapec_lower_routine(nlat, nlon, isym, nt, slap, ids, jds, a, b, mdab, ndab, &
+        call slapec_lower_utility_routine(nlat, nlon, isym, nt, slap, ids, jds, a, b, mdab, ndab, &
             work(ia), work(ib), mmax, work(ifn), wshsec, lshsec, work(iwk), lwk, &
             ierror)
 
     end subroutine slapec
 
-    subroutine slapec_lower_routine(nlat, nlon, isym, nt, slap, ids, jds, a, b, mdab, ndab, &
+    subroutine slapec_lower_utility_routine(nlat, nlon, isym, nt, slap, ids, jds, a, b, mdab, ndab, &
         alap, blap, mmax, fnn, wshsec, lshsec, wk, lwk, ierror)
 
         ! Dummy arguments
@@ -384,6 +384,6 @@ contains
         call shsec(nlat, nlon, isym, nt, slap, ids, jds, alap, blap, &
             mmax, nlat, wshsec, lshsec, wk, lwk, ierror)
 
-    end subroutine slapec_lower_routine
+    end subroutine slapec_lower_utility_routine
 
 end submodule scalar_laplacian_regular_grid

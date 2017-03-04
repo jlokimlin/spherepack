@@ -225,7 +225,7 @@ use spherepack
         		call name("sha ")
         		call iout(ierror, "ierr")
         		
-        		call shseci(nlat, nlon, wsave, lsave, dwork, ldwork, ierror)
+        		call shseci(nlat, nlon, wsave, ierror)
         		call name("shsi")
         		call iout(ierror, "ierr")
         		
@@ -267,7 +267,7 @@ use spherepack
         		call name("sha ")
         		call iout(ierror, "ierr")
         		
-        		call shsgci(nlat, nlon, wsave, lsave, dwork, ldwork, ierror)
+        		call shsgci(nlat, nlon, wsave, ierror)
         		call name("shsi")
         		call iout(ierror, "ierr")
         		
@@ -288,7 +288,7 @@ use spherepack
         		call name("sha ")
         		call iout(ierror, "ierr")
         		
-        		call shsgsi(nlat, nlon, wsave, lsave, work, lwork, dwork, ldwork, ierror)
+        		call shsgsi(nlat, nlon, wsave, ierror)
         		call name("shsi")
         		call iout(ierror, "ierr")
         		
@@ -322,7 +322,7 @@ use spherepack
         		call shaec(nlat, nlon, isym, nt, sclp, nlat, nlon, a, b, mdab, nlat, &
         		wsave, lsave, work, lwork, ierror)
         		
-        		call shseci(nlat, nlon, wsave, lsave, dwork, ldwork, ierror)
+        		call shseci(nlat, nlon, wsave, ierror)
         		call name("shsi")
         		call iout(ierror, "ierr")
         		
@@ -352,7 +352,7 @@ use spherepack
         		call shagc(nlat, nlon, isym, nt, sclp, nlat, nlon, a, b, mdab, nlat, &
         		wsave, lsave, work, lwork, ierror)
         		
-        		call shsgci(nlat, nlon, wsave, lsave, dwork, ldwork, ierror)
+        		call shsgci(nlat, nlon, wsave, ierror)
         		call name("shsi")
         		call iout(ierror, "ierr")
         		
@@ -369,7 +369,7 @@ use spherepack
         		call shags(nlat, nlon, isym, nt, sclp, nlat, nlon, a, b, mdab, nlat, &
         		wsave, lsave, work, lwork, ierror)
         		
-        		call shsgsi(nlat, nlon, wsave, lsave, work, lwork, dwork, ldwork, ierror)
+        		call shsgsi(nlat, nlon, wsave, ierror)
         		call name("shsi")
         		call iout(ierror, "ierr")
         		

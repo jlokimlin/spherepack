@@ -123,7 +123,7 @@ program tshpe
 
             lwshs = lwsha
 
-            call shseci(nlat, nlon, wshsec, lwshs, work, lwrk, ierror)
+            call shseci(nlat, nlon, wshsec, ierror)
             call check_error(ierror)
 
             mode = 0

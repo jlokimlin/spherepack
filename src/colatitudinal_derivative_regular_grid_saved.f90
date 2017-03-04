@@ -426,7 +426,7 @@ contains
         jw1 = lzimn+1
         jw2 = jw1+lzimn
 
-        call vtses_lower_routine(nlat, nlon, ityp, nt, imid, idvw, jdvw, vt, wt, mdab, ndab, &
+        call vtses_lower_utility_routine(nlat, nlon, ityp, nt, imid, idvw, jdvw, vt, wt, mdab, ndab, &
             br, bi, cr, ci, idv, work, work(iw1), work(iw2), work(iw3), &
             work(iw4), idz, wvts, wvts(jw1), wvts(jw2))
 
@@ -473,13 +473,13 @@ contains
         iw1 = 3*nlat*imid+1
         idz = (mmax*(nlat+nlat-mmax+1))/2
 
-        call vtsesi_lower_routine(nlat, nlon, imid, wvts, wvts(lzimn+1), idz, work, work(iw1), dwork)
+        call vtsesi_lower_utility_routine(nlat, nlon, imid, wvts, wvts(lzimn+1), idz, work, work(iw1), dwork)
 
         call util%hfft%initialize(nlon, wvts(2*lzimn+1))
 
     end subroutine vtsesi
 
-    subroutine vtses_lower_routine(nlat, nlon, ityp, nt, imid, idvw, jdvw, vt, wt, mdab, &
+    subroutine vtses_lower_utility_routine(nlat, nlon, ityp, nt, imid, idvw, jdvw, vt, wt, mdab, &
         ndab, br, bi, cr, ci, idv, vte, vto, wte, wto, work, idz, vb, wb, wrfft)
 
         real(wp) :: bi
@@ -1088,9 +1088,9 @@ contains
             end do
         end if
 
-    end subroutine vtses_lower_routine
+    end subroutine vtses_lower_utility_routine
 
-    subroutine vtsesi_lower_routine(nlat, nlon, imid, vb, wb, idz, vin, wzvin, dwork)
+    subroutine vtsesi_lower_utility_routine(nlat, nlon, imid, vb, wb, idz, vin, wzvin, dwork)
         integer(ip) :: i3
         integer(ip) :: idz
         integer(ip) :: imid
@@ -1133,6 +1133,6 @@ contains
             end do
         end do
 
-    end subroutine vtsesi_lower_routine
+    end subroutine vtsesi_lower_utility_routine
 
 end submodule colatitudinal_derivative_regular_grid_saved

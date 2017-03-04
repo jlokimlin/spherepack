@@ -183,7 +183,7 @@ contains
         real(wp),    intent(out)    :: work(m*n)
 
         if (n > 1) then
-            call forward_lower_routine(m, n, r, mdimr, work, wsave, wsave(n+1))
+            call forward_lower_utility_routine(m, n, r, mdimr, work, wsave, wsave(n+1))
         end if
 
     end subroutine hrfftf
@@ -268,7 +268,7 @@ contains
         real(wp),    intent(out)    :: work(m*n)
 
         if (n > 1) then
-            call backward_lower_routine(m, n, r, mdimr, work, wsave, wsave(n+1))
+            call backward_lower_utility_routine(m, n, r, mdimr, work, wsave, wsave(n+1))
         end if
 
     end subroutine hrfftb
@@ -386,7 +386,7 @@ contains
 
     end subroutine precompute_factorization_and_trig_lookup_table
 
-    subroutine forward_lower_routine(m, n, c, mdimc, ch, wa, fac)
+    subroutine forward_lower_utility_routine(m, n, c, mdimc, ch, wa, fac)
 
         ! Dummy arguments
         integer(ip), intent(in)     :: m
@@ -462,7 +462,7 @@ contains
 
         if (na /= 1) c(:m, :n) = ch
 
-    end subroutine forward_lower_routine
+    end subroutine forward_lower_utility_routine
 
     subroutine forward_pass_2(mp, ido, l1, cc, mdimcc, ch, mdimch, wa1)
 
@@ -1060,7 +1060,7 @@ contains
 
     end subroutine forward_pass_n
 
-    subroutine backward_lower_routine(m, n, c, mdimc, ch, wa, fac)
+    subroutine backward_lower_utility_routine(m, n, c, mdimc, ch, wa, fac)
 
         ! Dummy arguments
         integer(ip), intent(in)     :: m
@@ -1131,7 +1131,7 @@ contains
 
         if (na /= 0) c(:m, :n) = ch
 
-    end subroutine backward_lower_routine
+    end subroutine backward_lower_utility_routine
 
     subroutine backward_pass_2(mp, ido, l1, cc, mdimcc, ch, mdimch, wa1)
 

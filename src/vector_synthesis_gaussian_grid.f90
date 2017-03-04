@@ -520,7 +520,7 @@ contains
         jw1 = lwzvin+1
         jw2 = jw1+lwzvin
 
-        call vhsgc_lower_routine(nlat, nlon, ityp, nt, imid, idvw, jdvw, v, w, mdab, ndab, &
+        call vhsgc_lower_utility_routine(nlat, nlon, ityp, nt, imid, idvw, jdvw, v, w, mdab, ndab, &
             br, bi, cr, ci, idv, work, work(iw1), work(iw2), work(iw3), &
             work(iw4), work(iw5), wvhsgc, wvhsgc(jw1), wvhsgc(jw2))
 
@@ -586,7 +586,7 @@ contains
 
     end subroutine vhsgci
 
-    subroutine vhsgc_lower_routine(nlat, nlon, ityp, nt, imid, idvw, jdvw, v, w, mdab, &
+    subroutine vhsgc_lower_utility_routine(nlat, nlon, ityp, nt, imid, idvw, jdvw, v, w, mdab, &
         ndab, br, bi, cr, ci, idv, ve, vo, we, wo, vb, wb, wvbin, wwbin, wrfft)
 
         real(wp) :: bi
@@ -1193,6 +1193,6 @@ contains
             end do
         end if
 
-    end subroutine vhsgc_lower_routine
+    end subroutine vhsgc_lower_utility_routine
 
 end submodule vector_synthesis_gaussian_grid

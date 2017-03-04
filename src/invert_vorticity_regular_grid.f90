@@ -328,13 +328,13 @@ contains
         iis = ici + mn
         iwk = iis + nlat
         liwk = lwork-2*mn-nlat
-        call ivrtec_lower_routine(nlat, nlon, isym, nt, v, w, idvw, jdvw, work(icr), work(ici), &
+        call ivrtec_lower_utility_routine(nlat, nlon, isym, nt, v, w, idvw, jdvw, work(icr), work(ici), &
             mmax, work(iis), mdab, ndab, a, b, wvhsec, lvhsec, work(iwk), &
             liwk, pertrb, ierror)
 
     end subroutine ivrtec
 
-    subroutine ivrtec_lower_routine(nlat, nlon, isym, nt, v, w, idvw, jdvw, cr, ci, mmax, &
+    subroutine ivrtec_lower_utility_routine(nlat, nlon, isym, nt, v, w, idvw, jdvw, cr, ci, mmax, &
         sqnn, mdab, ndab, a, b, wsav, lwsav, wk, lwk, pertrb, ierror)
 
         real(wp) :: a
@@ -377,6 +377,6 @@ contains
         call vhsec(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
             mmax, nlat, wsav, lwsav, wk, lwk, ierror)
 
-    end subroutine ivrtec_lower_routine
+    end subroutine ivrtec_lower_utility_routine
 
 end submodule invert_vorticity_regular_grid

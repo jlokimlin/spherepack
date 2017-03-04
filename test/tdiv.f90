@@ -281,7 +281,7 @@ use spherepack
             !     compute divergence of (v, w) in dv
             !
 
-            call shseci(nlat, nlon, wsave, lsave, dwork, ldwork, ierror)
+            call shseci(nlat, nlon, wsave, ierror)
             call name("shsi")
             call iout(ierror, "ierr")
 
@@ -310,7 +310,7 @@ use spherepack
 
             call name("**gc")
 
-            call shsgci(nlat, nlon, wsave, lsave, dwork, ldwork, ierror)
+            call shsgci(nlat, nlon, wsave, ierror)
             call name("shsi")
             call iout(ierror, "ierr")
 
@@ -323,7 +323,7 @@ use spherepack
 
             call name("**gs")
 
-            call shsgsi(nlat, nlon, wsave, lsave, work, lwork, dwork, ldwork, ierror)
+            call shsgsi(nlat, nlon, wsave, ierror)
             call name("shsi")
             call iout(ierror, "ierr")
 

@@ -334,7 +334,7 @@ contains
         lwzvin = lzz1+labc
         jw1 = lwzvin+1
         jw2 = jw1+lwzvin
-        call vhaec_lower_routine(nlat, nlon, ityp, nt, imid, idvw, jdvw, v, w, mdab, ndab, &
+        call vhaec_lower_utility_routine(nlat, nlon, ityp, nt, imid, idvw, jdvw, v, w, mdab, ndab, &
             br, bi, cr, ci, idv, work, work(iw1), work(iw2), work(iw3), &
             work(iw4), work(iw5), wvhaec, wvhaec(jw1), wvhaec(jw2))
 
@@ -455,7 +455,7 @@ contains
 
     end subroutine vhaeci
 
-    subroutine vhaec_lower_routine(nlat, nlon, ityp, nt, imid, idvw, jdvw, v, w, mdab, &
+    subroutine vhaec_lower_utility_routine(nlat, nlon, ityp, nt, imid, idvw, jdvw, v, w, mdab, &
         ndab, br, bi, cr, ci, idv, ve, vo, we, wo, zv, zw, wzvin, wzwin, wrfft)
 
         real(wp) :: bi
@@ -1145,6 +1145,6 @@ contains
 820     continue
         end do
 
-    end subroutine vhaec_lower_routine
+    end subroutine vhaec_lower_utility_routine
 
 end submodule vector_analysis_regular_grid

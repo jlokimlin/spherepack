@@ -29,9 +29,6 @@
 !     *                                                               *
 !     * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !
-! This file contains code and documentation for subroutines
-! shsgs and shsgsi
-!
 submodule(scalar_synthesis_routines) scalar_synthesis_gaussian_grid_saved
 
 contains
@@ -313,7 +310,7 @@ contains
     ! repeatedly with fixed nlat, nlon.
     !
     !
-    !     subroutine shsgsi(nlat, nlon, wshsgs, lshsgs, work, lwork, dwork, ldwork, ierror)
+    !     subroutine shsgsi(nlat, nlon, wshsgs, ierror)
     !
     !     subroutine shsgsi initializes the array wshsgs which can then
     !     be used repeatedly by subroutines shsgs. it precomputes
@@ -359,16 +356,6 @@ contains
     !
     !            nlat*(3*(l1+l2)-2)+(l1-1)*(l2*(2*nlat-l1)-3*l1)/2+nlon+15
     !
-    !     work   a real work space which need not be saved
-    !
-    !     lwork  the dimension of the array work as it appears in the
-    !            program that calls shsgsi. lwork must be at least
-    !            4*nlat*(nlat+2)+2 in the routine calling shsgsi
-    !
-    !     dwork   a real work array that does not have to be saved.
-    !
-    !     ldwork  the length of dwork in the calling routine.  ldwork must
-    !             be at least nlat*(nlat+4)
     !
     !     output parameter
     !
@@ -381,73 +368,65 @@ contains
     !            = 1  error in the specification of nlat
     !            = 2  error in the specification of nlon
     !            = 3  error in the specification of lshsgs
-    !            = 4  error in the specification of lwork
-    !            = 5  error in the specification of ldwork
-    !            = 5  failure in compute_gaussian_latitudes_and_weights to compute gaussian points
+    !            = 6  failure in compute_gaussian_latitudes_and_weights to compute gaussian points
     !                 (due to failure in eigenvalue routine)
     !
-    module subroutine shsgsi(nlat, nlon, wshsgs, lshsgs, work, lwork, dwork, ldwork, ierror)
+    module subroutine shsgsi(nlat, nlon, wshsgs, ierror)
 
         ! Dummy arguments
         integer(ip), intent(in)   :: nlat
         integer(ip), intent(in)   :: nlon
-        real(wp),    intent(out)  :: wshsgs(lshsgs)
-        integer(ip), intent(in)   :: lshsgs
-        real(wp),    intent(out)  :: work(lwork)
-        integer(ip), intent(in)   :: lwork
-        real(wp),    intent(out)  :: dwork(ldwork)
-        integer(ip), intent(in)   :: ldwork
+        real(wp),    intent(out)  :: wshsgs(:)
         integer(ip), intent(out)  :: ierror
 
         ! Local variables
         integer(ip) :: ntrunc, l1, l2, lp, ldw, late, ipmnf
+        integer(ip) :: lwork, ldwork
 
-        ! Set triangular truncation limit for spherical harmonic basis
-        ntrunc = min((nlon+2)/2, nlat)
+        associate( lshsgs => size(wshsgs) )
 
-        ! Set equator or nearest point (if excluded) pointer
-        late = (nlat+1)/2
-        l1 = ntrunc
-        l2 = late
-        lp = nlat*(3*(l1+l2)-2)+(l1-1)*(l2*(2*nlat-l1)-3*l1)/2+nlon+15
+            ! Set triangular truncation limit for spherical harmonic basis
+            ntrunc = min((nlon+2)/2, nlat)
 
-        !
-        !  Check input arguments
-        !
-        if (nlat < 3) then
-            ierror = 1
-            return
-        else if (nlon < 4) then
-            ierror = 2
-            return
-        else if (lshsgs < lp) then
-            ierror = 3
-            return
-        else if (lwork < 4*nlat*(nlat+2)+2) then
-            ierror = 4
-            return
-        else if (ldwork < nlat*(nlat+4)) then
-            ierror = 5
-            return
-        else
-            ierror = 0
-        end if
+            ! Set equator or nearest point (if excluded) pointer
+            late = (nlat+1)/2
+            l1 = ntrunc
+            l2 = late
+            lp = nlat*(3*(l1+l2)-2)+(l1-1)*(l2*(2*nlat-l1)-3*l1)/2+nlon+15
 
-        !
-        !  set preliminary quantites needed to compute and store legendre polys
-        !
-        ldw = nlat*(nlat+4)
-        call shsgsp(nlat, nlon, wshsgs, lshsgs, dwork, ldwork, ierror)
+            !  Check calling arguments
+            if (nlat < 3) then
+                ierror = 1
+            else if (nlon < 4) then
+                ierror = 2
+            else if (lshsgs < lp) then
+                ierror = 3
+            else
+                ierror = 0
+            end if
 
-        ! Check error flag
-        if (ierror /= 0) return
+            ! Check error flag
+            if (ierror /= 0) return
 
-        !
-        !   set legendre poly pointer in wshsgs
-        !
-        ipmnf = nlat+2*nlat*late+3*(ntrunc*(ntrunc-1)/2+(nlat-ntrunc)*(ntrunc-1))+nlon+16
+            ! Set required workspace sizes
+            lwork = 4 * nlat * (nlat + 2) + 2
+            ldwork = nlat * (nlat + 4)
 
-        call compute_and_store_legendre_polys(nlat, ntrunc, late, wshsgs, work, wshsgs(ipmnf))
+            block
+                real(wp) :: work(lwork), dwork(ldwork)
+
+                !  set preliminary quantites needed to compute and store legendre polys
+                call shsgsp(nlat, nlon, wshsgs, lshsgs, dwork, ldwork, ierror)
+
+                ! Check error flag for lower call routine
+                if (ierror /= 0) return
+
+                ! Set legendre poly index pointer in wshsgs
+                ipmnf = nlat+2*nlat*late+3*(ntrunc*(ntrunc-1)/2+(nlat-ntrunc)*(ntrunc-1))+nlon+16
+
+                call compute_and_store_legendre_polys(nlat, ntrunc, late, wshsgs, work, wshsgs(ipmnf:))
+            end block
+        end associate
 
     end subroutine shsgsi
 
@@ -797,18 +776,16 @@ contains
         idwts = idth+nlat
         iw = idwts+nlat
 
-        call shsgsp_lower_routine(nlat, nlon, ntrunc, late, wshsgs(i1), wshsgs(i2), wshsgs(i3), &
+        call shsgsp_lower_utility_routine(nlat, nlon, ntrunc, late, wshsgs(i1), wshsgs(i2), wshsgs(i3), &
             wshsgs(i4), wshsgs(i5), wshsgs(i6), wshsgs(i7), dwork(idth), &
             dwork(idwts), dwork(iw), ierror)
 
         ! Check error flag
-        if (ierror /= 0) then
-            ierror = 6
-        end if
+        if (ierror /= 0) ierror = 6
 
     end subroutine shsgsp
 
-    subroutine shsgsp_lower_routine(nlat, nlon, l, late, wts, p0n, p1n, abel, bbel, cbel, &
+    subroutine shsgsp_lower_utility_routine(nlat, nlon, l, late, wts, p0n, p1n, abel, bbel, cbel, &
         wfft, dtheta, dwts, work, ier)
 
         ! Dummy arguments
@@ -912,6 +889,6 @@ contains
             end do
         end do
 
-    end subroutine shsgsp_lower_routine
+    end subroutine shsgsp_lower_utility_routine
 
 end submodule scalar_synthesis_gaussian_grid_saved

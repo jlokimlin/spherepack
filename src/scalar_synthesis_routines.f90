@@ -115,17 +115,12 @@ module scalar_synthesis_routines
             integer(ip), intent(out) :: ierror
         end subroutine shsgs
 
-        module subroutine shsgsi(nlat, nlon, wshsgs, lshsgs, work, lwork, dwork, ldwork, ierror)
+        module subroutine shsgsi(nlat, nlon, wshsgs, ierror)
 
             ! Dummy arguments
             integer(ip), intent(in)   :: nlat
             integer(ip), intent(in)   :: nlon
-            real(wp),    intent(out)  :: wshsgs(lshsgs)
-            integer(ip), intent(in)   :: lshsgs
-            real(wp),    intent(out)  :: work(lwork)
-            integer(ip), intent(in)   :: lwork
-            real(wp),    intent(out)  :: dwork(ldwork)
-            integer(ip), intent(in)   :: ldwork
+            real(wp),    intent(out)  :: wshsgs(:)
             integer(ip), intent(out)  :: ierror
         end subroutine shsgsi
 
@@ -151,15 +146,12 @@ module scalar_synthesis_routines
             integer(ip), intent(out) :: ierror
         end subroutine shsec
 
-        module subroutine shseci(nlat, nlon, wshsec, lshsec, dwork, ldwork, ierror)
+        module subroutine shseci(nlat, nlon, wshsec, ierror)
 
             ! Dummy arguments
             integer(ip), intent(in)  :: nlat
             integer(ip), intent(in)  :: nlon
-            real(wp),    intent(out) :: wshsec(lshsec)
-            integer(ip), intent(in)  :: lshsec
-            real(wp),    intent(out) :: dwork(ldwork)
-            integer(ip), intent(in)  :: ldwork
+            real(wp),    intent(out) :: wshsec(:)
             integer(ip), intent(out) :: ierror
         end subroutine shseci
 
@@ -185,15 +177,12 @@ module scalar_synthesis_routines
             integer(ip), intent(out) :: ierror
         end subroutine shsgc
 
-        module subroutine shsgci(nlat, nlon, wshsgc, lshsgc, dwork, ldwork, ierror)
+        module subroutine shsgci(nlat, nlon, wshsgc, ierror)
 
             ! Dummy arguments
             integer(ip), intent(in)  :: nlat
             integer(ip), intent(in)  :: nlon
-            real(wp),    intent(out) :: wshsgc(lshsgc)
-            integer(ip), intent(in)  :: lshsgc
-            real(wp),    intent(out) :: dwork(ldwork)
-            integer(ip), intent(in)  :: ldwork
+            real(wp),    intent(out) :: wshsgc(:)
             integer(ip), intent(out) :: ierror
         end subroutine shsgci
     end interface

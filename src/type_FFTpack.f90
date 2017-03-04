@@ -1026,11 +1026,11 @@ contains
         real(wp) :: wsave(*)
         !-----------------------------------------------
 
-        if (n /= 1) call real_periodic_initialization_lower_routine(n, wsave(2*n+1), wsave(3*n+1))
+        if (n /= 1) call real_periodic_initialization_lower_utility_routine(n, wsave(2*n+1), wsave(3*n+1))
 
     end subroutine ezffti
 
-    subroutine real_periodic_initialization_lower_routine(n, wa, ifac)
+    subroutine real_periodic_initialization_lower_utility_routine(n, wa, ifac)
         !-----------------------------------------------
         ! Dummy arguments
         !-----------------------------------------------
@@ -1125,7 +1125,7 @@ contains
             end do
         end if
 
-    end subroutine real_periodic_initialization_lower_routine
+    end subroutine real_periodic_initialization_lower_utility_routine
 
     subroutine costi(n, wsave)
         !-----------------------------------------------
@@ -1327,7 +1327,7 @@ contains
 
         if (modn /= 0) x(ns2+2) = FOUR * xh(ns2+1)
 
-        call real_forward_lower_routine(np1, x, xh, war, ifac)
+        call real_forward_lower_utility_routine(np1, x, xh, war, ifac)
 
         xh(1) = HALF*x(1)
 
@@ -1610,12 +1610,12 @@ contains
         if (n /= 1) then
             iw1 = 2*n + 1
             iw2 = iw1 + 2*n
-            call complex_initialization_lower_routine(n, wsave(iw1), wsave(iw2))
+            call complex_initialization_lower_utility_routine(n, wsave(iw1), wsave(iw2))
         end if
 
     end subroutine cffti
 
-    subroutine complex_initialization_lower_routine(n, wa, ifac)
+    subroutine complex_initialization_lower_utility_routine(n, wa, ifac)
         !-----------------------------------------------
         ! Dummy arguments
         !-----------------------------------------------
@@ -1707,7 +1707,7 @@ contains
             l1 = l2
         end do
 
-    end subroutine complex_initialization_lower_routine
+    end subroutine complex_initialization_lower_utility_routine
 
     subroutine cfftb(n, c, wsave)
         !-----------------------------------------------
@@ -1725,12 +1725,12 @@ contains
         if (n /= 1) then
             iw1 = 2*n + 1
             iw2 = iw1 + 2*n
-            call complex_backward_lower_routine(n, c, wsave, wsave(iw1), wsave(iw2))
+            call complex_backward_lower_utility_routine(n, c, wsave, wsave(iw1), wsave(iw2))
         end if
 
     end subroutine cfftb
 
-    subroutine complex_backward_lower_routine(n, c, ch, wa, ifac)
+    subroutine complex_backward_lower_utility_routine(n, c, ch, wa, ifac)
         !-----------------------------------------------
         ! Dummy arguments
         !-----------------------------------------------
@@ -1815,7 +1815,7 @@ contains
             c(:n2) = ch(:n2)
         end if
 
-    end subroutine complex_backward_lower_routine
+    end subroutine complex_backward_lower_utility_routine
 
     pure subroutine complex_backward_pass_2(ido, l1, cc, ch, wa1)
         !-----------------------------------------------
@@ -2210,12 +2210,12 @@ contains
         if (n /= 1) then
             iw1 = 2*n + 1
             iw2 = iw1 + 2*n
-            call complex_forward_lower_routine(n, c, wsave, wsave(iw1), wsave(iw2))
+            call complex_forward_lower_utility_routine(n, c, wsave, wsave(iw1), wsave(iw2))
         end if
 
     end subroutine cfftf
 
-    subroutine complex_forward_lower_routine(n, c, ch, wa, ifac)
+    subroutine complex_forward_lower_utility_routine(n, c, ch, wa, ifac)
         !-----------------------------------------------
         ! Dummy arguments
         !-----------------------------------------------
@@ -2294,7 +2294,7 @@ contains
             c(:n2) = ch(:n2)
         end if
 
-    end subroutine complex_forward_lower_routine
+    end subroutine complex_forward_lower_utility_routine
 
 
     pure subroutine complex_forward_pass_2(ido, l1, cc, ch, wa1)
@@ -2688,12 +2688,12 @@ contains
         !-----------------------------------------------
 
         if (n /= 1) then
-            call real_initialization_lower_routine(n, wsave(n+1), wsave(2*n+1))
+            call real_initialization_lower_utility_routine(n, wsave(n+1), wsave(2*n+1))
         end if
 
     end subroutine rffti
 
-    subroutine real_initialization_lower_routine(n, wa, ifac)
+    subroutine real_initialization_lower_utility_routine(n, wa, ifac)
         !-----------------------------------------------
         ! Dummy arguments
         !-----------------------------------------------
@@ -2781,7 +2781,7 @@ contains
             end do
         end if
 
-    end subroutine real_initialization_lower_routine
+    end subroutine real_initialization_lower_utility_routine
 
     subroutine rfftb(n, r, wsave)
         !-----------------------------------------------
@@ -2793,12 +2793,12 @@ contains
         !-----------------------------------------------
 
         if (n /= 1) then
-            call real_backward_lower_routine(n, r, wsave, wsave(n+1), wsave(2*n+1))
+            call real_backward_lower_utility_routine(n, r, wsave, wsave(n+1), wsave(2*n+1))
         end if
 
     end subroutine rfftb
 
-    subroutine real_backward_lower_routine(n, c, ch, wa, ifac)
+    subroutine real_backward_lower_utility_routine(n, c, ch, wa, ifac)
         !-----------------------------------------------
         ! Dummy arguments
         !-----------------------------------------------
@@ -2878,7 +2878,7 @@ contains
 
         if (na /= 0) c(:n) = ch(:n)
 
-    end subroutine real_backward_lower_routine
+    end subroutine real_backward_lower_utility_routine
 
     pure subroutine real_backward_pass_2(ido, l1, cc, ch, wa1)
         !-----------------------------------------------
@@ -3305,12 +3305,12 @@ contains
         !-----------------------------------------------
 
         if (n /= 1) then
-            call real_forward_lower_routine(n, r, wsave, wsave(n+1), wsave(2*n+1))
+            call real_forward_lower_utility_routine(n, r, wsave, wsave(n+1), wsave(2*n+1))
         end if
 
     end subroutine rfftf
 
-    subroutine real_forward_lower_routine(n, c, ch, wa, ifac)
+    subroutine real_forward_lower_utility_routine(n, c, ch, wa, ifac)
         !-----------------------------------------------
         ! Dummy arguments
         !-----------------------------------------------
@@ -3388,7 +3388,7 @@ contains
 
         if (na /= 1) c(:n) = ch(:n)
 
-    end subroutine real_forward_lower_routine
+    end subroutine real_forward_lower_utility_routine
 
     pure subroutine real_forward_pass_2(ido, l1, cc, ch, wa1)
         !-----------------------------------------------

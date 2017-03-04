@@ -362,7 +362,7 @@ contains
         ifft = nlat+2*nlat*late+3*(l*(l-1)/2+(nlat-l)*(l-1))+1
         !     set pointers for internal storage of g and legendre polys
         ipmn = lat*nlon*nt+1
-        call shsgc_lower_routine(nlat, nlon, l, lat, mode, g, idg, jdg, nt, a, b, mdab, ndab, &
+        call shsgc_lower_utility_routine(nlat, nlon, l, lat, mode, g, idg, jdg, nt, a, b, mdab, ndab, &
             wshsgc, wshsgc(ifft), late, work(ipmn), work)
 
     end subroutine shsgc
@@ -373,15 +373,12 @@ contains
     ! fixed nlat, nlon. it precomputes quantites such as the gaussian
     ! points and weights, m=0, m=1 legendre polynomials, recursion
     ! recursion coefficients.
-    module subroutine shsgci(nlat, nlon, wshsgc, lshsgc, dwork, ldwork, ierror)
+    module subroutine shsgci(nlat, nlon, wshsgc, ierror)
 
         ! Dummy arguments
         integer(ip), intent(in)  :: nlat
         integer(ip), intent(in)  :: nlon
-        real(wp),    intent(out) :: wshsgc(lshsgc)
-        integer(ip), intent(in)  :: lshsgc
-        real(wp),    intent(out) :: dwork(ldwork)
-        integer(ip), intent(in)  :: ldwork
+        real(wp),    intent(out) :: wshsgc(:)
         integer(ip), intent(out) :: ierror
 
         ! Local variables
@@ -395,47 +392,64 @@ contains
         integer(ip) :: idth
         integer(ip) :: idwts
         integer(ip) :: iw
-        integer(ip) :: l
+        integer(ip) :: ntrunc
         integer(ip) :: l1
         integer(ip) :: l2
-        integer(ip) :: late
+        integer(ip) :: late, ldwork
 
-        ierror = 1
-        if (nlat < 3) return
-        ierror = 2
-        if (nlon < 4) return
-        !     set triangular truncation limit for spherical harmonic basis
-        l = min((nlon+2)/2, nlat)
-        !     set equator or nearest point (if excluded) pointer
-        late = (nlat+mod(nlat, 2))/2
-        l1 = l
-        l2 = late
-        ierror = 3
-        !     check permanent work space length
-        if (lshsgc < nlat*(2*l2+3*l1-2)+3*l1*(1-l1)/2+nlon+15) return
-        ierror = 4
-        if (ldwork < nlat*(nlat+4)) return
-        ierror = 0
-        !     set pointers
-        i1 = 1
-        i2 = i1+nlat
-        i3 = i2+nlat*late
-        i4 = i3+nlat*late
-        i5 = i4+l*(l-1)/2 +(nlat-l)*(l-1)
-        i6 = i5+l*(l-1)/2 +(nlat-l)*(l-1)
-        i7 = i6+l*(l-1)/2 +(nlat-l)*(l-1)
-        !     set indices in temp work for real gaussian wts and pts
-        idth = 1
-        idwts = idth+nlat
-        iw = idwts+nlat
-        call shsgci_lower_routine(nlat, nlon, l, late, wshsgc(i1), wshsgc(i2), wshsgc(i3), &
-            wshsgc(i4), wshsgc(i5), wshsgc(i6), wshsgc(i7), dwork(idth), &
-            dwork(idwts), dwork(iw), ierror)
-        if (ierror /= 0) ierror = 5
+        associate( lshsgc => size(wshsgc) )
+
+            ! Set triangular truncation limit for spherical harmonic basis
+            ntrunc = min((nlon+2)/2, nlat)
+            ! Set equator or nearest point (if excluded) pointer
+            late = (nlat+mod(nlat, 2))/2
+            l1 = ntrunc
+            l2 = late
+
+            ! Check calling arguments
+            if (nlat < 3) then
+                ierror = 1
+            else if (nlon < 4) then
+                ierror = 2
+            else if (lshsgc < nlat*(2*l2+3*l1-2)+3*l1*(1-l1)/2+nlon+15) then
+                ierror = 3
+            else
+                ierror = 0
+            end if
+
+            ! Check error flag
+            if (ierror /= 0) return
+
+            ! Set index pointers
+            i1 = 1
+            i2 = i1+nlat
+            i3 = i2+nlat*late
+            i4 = i3+nlat*late
+            i5 = i4+ntrunc*(ntrunc-1)/2 +(nlat-ntrunc)*(ntrunc-1)
+            i6 = i5+ntrunc*(ntrunc-1)/2 +(nlat-ntrunc)*(ntrunc-1)
+            i7 = i6+ntrunc*(ntrunc-1)/2 +(nlat-ntrunc)*(ntrunc-1)
+            !     set indices in temp work for real gaussian wts and pts
+            idth = 1
+            idwts = idth+nlat
+            iw = idwts+nlat
+
+            ! Set required workspace size
+            ldwork = nlat * (nlat + 4)
+
+            block
+                real(wp) :: dwork(ldwork)
+                call shsgci_lower_utility_routine(nlat, nlon, ntrunc, late, wshsgc(i1:), &
+                    wshsgc(i2:), wshsgc(i3:), wshsgc(i4:), wshsgc(i5:), wshsgc(i6:), &
+                    wshsgc(i7:), dwork(idth:), dwork(idwts:), dwork(iw:), ierror)
+            end block
+
+            ! Check error flag from lower utility routine
+            if (ierror /= 0) ierror = 5
+        end associate
 
     end subroutine shsgci
 
-    subroutine shsgc_lower_routine(nlat, nlon, l, lat, mode, gs, idg, jdg, nt, a, b, mdab, &
+    subroutine shsgc_lower_utility_routine(nlat, nlon, l, lat, mode, gs, idg, jdg, nt, a, b, mdab, &
         ndab, w, wfft, late, pmn, g)
 
         real(wp) :: a
@@ -643,9 +657,9 @@ contains
             end do
         end do
 
-    end subroutine shsgc_lower_routine
+    end subroutine shsgc_lower_utility_routine
 
-    subroutine shsgci_lower_routine(nlat, nlon, l, late, wts, p0n, p1n, abel, bbel, cbel, &
+    subroutine shsgci_lower_utility_routine(nlat, nlon, l, late, wts, p0n, p1n, abel, bbel, cbel, &
         wfft, dtheta, dwts, work, ier)
 
         real(wp) :: abel
@@ -748,6 +762,6 @@ contains
             end do
         end do
 
-    end subroutine shsgci_lower_routine
+    end subroutine shsgci_lower_utility_routine
 
 end submodule scalar_synthesis_gaussian_grid

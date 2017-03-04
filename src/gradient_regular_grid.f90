@@ -326,13 +326,13 @@ contains
         iis = ibi + mn
         iwk = iis + nlat
         liwk = lwork-2*mn-nlat
-        call gradec_lower_routine(nlat, nlon, isym, nt, v, w, idvw, jdvw, work(ibr), work(ibi), &
+        call gradec_lower_utility_routine(nlat, nlon, isym, nt, v, w, idvw, jdvw, work(ibr), work(ibi), &
             mmax, work(iis), mdab, ndab, a, b, wvhsec, lvhsec, work(iwk), liwk, &
             ierror)
 
     end subroutine gradec
 
-    subroutine gradec_lower_routine(nlat, nlon, isym, nt, v, w, idvw, jdvw, br, bi, mmax, &
+    subroutine gradec_lower_utility_routine(nlat, nlon, isym, nt, v, w, idvw, jdvw, br, bi, mmax, &
         sqnn, mdab, ndab, a, b, wvhsec, lvhsec, wk, lwk, ierror)
 
         real(wp) :: a
@@ -374,6 +374,6 @@ contains
         call vhsec(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
             mmax, nlat, wvhsec, lvhsec, wk, lwk, ierror)
 
-    end subroutine gradec_lower_routine
+    end subroutine gradec_lower_utility_routine
 
 end submodule gradient_regular_grid

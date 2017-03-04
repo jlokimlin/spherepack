@@ -659,7 +659,7 @@ contains
                 !
                 !     initialize wsave for gaussian synthesis
                 !
-                call shsgci(nlatb, nlonb, wsave(jb:), lwb, dwork, ldwork, ier)
+                call shsgci(nlatb, nlonb, wsave(jb:), ier)
                 if (ier/=0) then
                     !
                     !     flag failure in spherepack gaussian software
@@ -671,7 +671,7 @@ contains
                 !
                 !     initialize wsave for equally spaced synthesis
                 !
-                call shseci(nlatb, nlonb, wsave(jb:), lwb, dwork, ldwork, ier)
+                call shseci(nlatb, nlonb, wsave(jb:), ier)
             end if
         !
         !     end of initialization (intl=0) call

@@ -323,12 +323,12 @@ contains
         iwk = iis + nlat
         liwk = lwork-2*mn-nlat
 
-        call igradgc_lower_routine(nlat, nlon, isym, nt, sf, isf, jsf, work(ia), work(ib), mab, &
+        call igradgc_lower_utility_routine(nlat, nlon, isym, nt, sf, isf, jsf, work(ia), work(ib), mab, &
             work(iis), mdb, ndb, br, bi, wshsgc, lshsgc, work(iwk), liwk, ierror)
 
     end subroutine igradgc
 
-    subroutine igradgc_lower_routine(nlat, nlon, isym, nt, sf, isf, jsf, a, b, mab, &
+    subroutine igradgc_lower_utility_routine(nlat, nlon, isym, nt, sf, isf, jsf, a, b, mab, &
         sqnn, mdb, ndb, br, bi, wsav, lsav, wk, lwk, ierror)
 
         real(wp) :: a
@@ -367,6 +367,6 @@ contains
         call shsgc(nlat, nlon, isym, nt, sf, isf, jsf, a, b, mab, nlat, wsav, &
             lsav, wk, lwk, ierror)
 
-    end subroutine igradgc_lower_routine
+    end subroutine igradgc_lower_utility_routine
 
 end submodule invert_gradient_gaussian_grid

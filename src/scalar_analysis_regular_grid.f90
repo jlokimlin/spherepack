@@ -394,7 +394,7 @@ contains
         jw2 = nln + 1
         jw3 = jw2
 
-        call shaec_lower_routine(nlat, isym, nt, g, idg, jdg, a, b, mdab, ndab, imid, ls, nlon, &
+        call shaec_lower_utility_routine(nlat, isym, nt, g, idg, jdg, a, b, mdab, ndab, imid, ls, nlon, &
             work, work(jw1), work(jw2), work(jw3), wshaec, wshaec(iw1))
 
     end subroutine shaec
@@ -452,7 +452,7 @@ contains
 
     end subroutine shaeci
 
-    subroutine shaec_lower_routine(nlat, isym, nt, g, idgs, jdgs, a, b, mdab, ndab, imid, &
+    subroutine shaec_lower_utility_routine(nlat, isym, nt, g, idgs, jdgs, a, b, mdab, ndab, imid, &
         idg, jdg, ge, go, work, zb, wzfin, whrfft)
 
         real(wp) :: a
@@ -661,6 +661,6 @@ contains
             end do
         end if
 
-    end subroutine shaec_lower_routine
+    end subroutine shaec_lower_utility_routine
 
 end submodule scalar_analysis_regular_grid

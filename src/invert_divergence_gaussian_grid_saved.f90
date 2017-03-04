@@ -333,13 +333,13 @@ contains
         iis = ibi + mn
         iwk = iis + nlat
         liwk = lwork-2*mn-nlat
-        call idivgs_lower_routine(nlat, nlon, isym, nt, v, w, idvw, jdvw, work(ibr), work(ibi), &
+        call idivgs_lower_utility_routine(nlat, nlon, isym, nt, v, w, idvw, jdvw, work(ibr), work(ibi), &
             mmax, work(iis), mdab, ndab, a, b, wvhsgs, lvhsgs, work(iwk), &
             liwk, pertrb, ierror)
 
     end subroutine idivgs
 
-    subroutine idivgs_lower_routine(nlat, nlon, isym, nt, v, w, idvw, jdvw, br, bi, mmax, &
+    subroutine idivgs_lower_utility_routine(nlat, nlon, isym, nt, v, w, idvw, jdvw, br, bi, mmax, &
         sqnn, mdab, ndab, a, b, wsav, lwsav, wk, lwk, pertrb, ierror)
 
         real(wp) :: a
@@ -382,6 +382,6 @@ contains
         call vhsgs(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
             mmax, nlat, wsav, lwsav, wk, lwk, ierror)
 
-    end subroutine idivgs_lower_routine
+    end subroutine idivgs_lower_utility_routine
 
 end submodule invert_divergence_gaussian_grid_saved

@@ -290,7 +290,7 @@ contains
             iw2 = nln + 1
             iw3 = lpimn + 1
 
-            call shses_lower_routine(nlat, isym, nt, g, idg, jdg, a, b, mdab, ndab, wshses, imid, &
+            call shses_lower_utility_routine(nlat, isym, nt, g, idg, jdg, a, b, mdab, ndab, wshses, imid, &
                 ls, nlon, work, work(iw1), work(iw2), wshses(iw3))
         end block
 
@@ -434,7 +434,7 @@ contains
 
     end subroutine shsesi
 
-    subroutine shses_lower_routine(nlat, isym, nt, g, idgs, jdgs, a, b, mdab, ndab, p, imid, &
+    subroutine shses_lower_utility_routine(nlat, isym, nt, g, idgs, jdgs, a, b, mdab, ndab, p, imid, &
         idg, jdg, ge, go, work, whrfft)
 
         ! Dummy arguments
@@ -601,6 +601,6 @@ contains
                 end do
         end select
 
-    end subroutine shses_lower_routine
+    end subroutine shses_lower_utility_routine
 
 end submodule scalar_synthesis_regular_grid_saved

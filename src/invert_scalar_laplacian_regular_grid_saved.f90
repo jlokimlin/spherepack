@@ -352,13 +352,13 @@ contains
         iwk = ifn+nlat
         lwk = lwork-2*mn-nlat
 
-        call islapes_lower_routine(nlat, nlon, isym, nt, xlmbda, sf, ids, jds, a, b, mdab, ndab, &
+        call islapes_lower_utility_routine(nlat, nlon, isym, nt, xlmbda, sf, ids, jds, a, b, mdab, ndab, &
             work(ia), work(ib), mmax, work(ifn), wshses, lshses, work(iwk), lwk, &
             pertrb, ierror)
 
     end subroutine islapes
 
-    subroutine islapes_lower_routine(nlat, nlon, isym, nt, xlmbda, sf, ids, jds, a, b, &
+    subroutine islapes_lower_utility_routine(nlat, nlon, isym, nt, xlmbda, sf, ids, jds, a, b, &
         mdab, ndab, as, bs, mmax, fnn, wshses, lshses, wk, lwk, pertrb, ierror)
 
         real(wp) :: a
@@ -397,6 +397,6 @@ contains
         call shses(nlat, nlon, isym, nt, sf, ids, jds, as, bs, mmax, nlat, &
             wshses, lshses, wk, lwk, ierror)
 
-    end subroutine islapes_lower_routine
+    end subroutine islapes_lower_utility_routine
 
 end submodule invert_scalar_laplacian_regular_grid_saved

@@ -401,14 +401,14 @@ contains
             iwk => workspace_indices(6), &
             liwk => workspace_indices(7) &
             )
-            call ivlapgc_lower_routine(nlat, nlon, ityp, nt, v, w, idvw, jdvw, work(ibr), &
+            call ivlapgc_lower_utility_routine(nlat, nlon, ityp, nt, v, w, idvw, jdvw, work(ibr), &
                 work(ibi), work(icr), work(ici), mmax, work(ifn), mdbc, ndbc, br, bi, &
                 cr, ci, wvhsgc, lvhsgc, work(iwk), liwk, ierror)
         end associate
 
     end subroutine ivlapgc
 
-    subroutine ivlapgc_lower_routine(nlat, nlon, ityp, nt, v, w, idvw, jdvw, brvw, &
+    subroutine ivlapgc_lower_utility_routine(nlat, nlon, ityp, nt, v, w, idvw, jdvw, brvw, &
         bivw, crvw, civw, mmax, fnn, mdbc, ndbc, br, bi, cr, ci, wvhsgc, lvhsgc, &
         wk, lwk, ierror)
 
@@ -455,6 +455,6 @@ contains
         call vhsgc(nlat, nlon, ityp, nt, v, w, idvw, jdvw, brvw, bivw, &
             crvw, civw, mmax, nlat, wvhsgc, lvhsgc, wk, lwk, ierror)
 
-    end subroutine ivlapgc_lower_routine
+    end subroutine ivlapgc_lower_utility_routine
 
 end submodule invert_vector_laplacian_gaussian_grid

@@ -318,13 +318,13 @@ contains
         is = ib+mn
         iwk = is+nlat
         lwk = lwork-2*mn-nlat
-        call vrtgc_lower_routine(nlat, nlon, isym, nt, vort, ivrt, jvrt, cr, ci, mdc, ndc, &
+        call vrtgc_lower_utility_routine(nlat, nlon, isym, nt, vort, ivrt, jvrt, cr, ci, mdc, ndc, &
             work(ia), work(ib), mab, work(is), wshsgc, lshsgc, work(iwk), lwk, &
             ierror)
 
     end subroutine vrtgc
 
-    subroutine vrtgc_lower_routine(nlat, nlon, isym, nt, vort, ivrt, jvrt, cr, ci, mdc, ndc, &
+    subroutine vrtgc_lower_utility_routine(nlat, nlon, isym, nt, vort, ivrt, jvrt, cr, ci, mdc, ndc, &
         a, b, mab, sqnn, wsav, lwsav, wk, lwk, ierror)
 
         real(wp) :: a
@@ -362,6 +362,6 @@ contains
         call shsgc(nlat, nlon, isym, nt, vort, ivrt, jvrt, a, b, &
             mab, nlat, wsav, lwsav, wk, lwk, ierror)
 
-    end subroutine vrtgc_lower_routine
+    end subroutine vrtgc_lower_utility_routine
 
 end submodule vorticity_gaussian_grid

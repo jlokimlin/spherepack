@@ -30,15 +30,6 @@
 !     * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !
 !
-! ... file shsec.f90
-!
-!     this file contains code and documentation for subroutines
-!     shsec and shseci
-!
-! ... files which must be loaded with shsec.f90
-!
-!     type_SpherepackUtility.f90, type_RealPeriodicFastFourierTransform.f90
-!
 !     subroutine shsec(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, 
 !    +                    wshsec, lshsec, work, lwork, ierror)
 !
@@ -48,11 +39,6 @@
 !     associated legendre functions are recomputed rather than stored
 !     as they are in subroutine shses.  the synthesis is described
 !     below at output parameter g.
-!
-!     required files from spherepack
-!
-!     type_SpherepackUtility.f90, type_RealPeriodicFastFourierTransform.f90
-!
 !
 !     input parameters
 !
@@ -214,123 +200,8 @@
 !
 !
 ! ****************************************************************
-!     subroutine shseci(nlat, nlon, wshsec, lshsec, dwork, ldwork, ierror)
-!
-!     subroutine shseci initializes the array wshsec which can then
-!     be used repeatedly by subroutine shsec.
-!
-!     input parameters
-!
-!     nlat   the number of colatitudes on the full sphere including the
-!            poles. for example, nlat = 37 for a five degree grid.
-!            nlat determines the grid increment in colatitude as
-!            pi/(nlat-1).  if nlat is odd the equator is located at
-!            grid point i=(nlat+1)/2. if nlat is even the equator is
-!            located half way between points i=nlat/2 and i=nlat/2+1.
-!            nlat must be at least 3. note: on the half sphere, the
-!            number of grid points in the colatitudinal direction is
-!            nlat/2 if nlat is even or (nlat+1)/2 if nlat is odd.
-!
-!     nlon   the number of distinct londitude points.  nlon determines
-!            the grid increment in longitude as 2*pi/nlon. for example
-!            nlon = 72 for a five degree grid. nlon must be greater
-!            than or equal to 4. the efficiency of the computation is
-!            improved when nlon is a product of small prime numbers.
-!
-!     lshsec the dimension of the array wshsec as it appears in the
-!            program that calls shseci. the array wshsec is an output
-!            parameter which is described below. define
-!
-!               l1 = min(nlat, (nlon+2)/2) if nlon is even or
-!               l1 = min(nlat, (nlon+1)/2) if nlon is odd
-!
-!            and
-!
-!               l2 = nlat/2        if nlat is even or
-!               l2 = (nlat+1)/2    if nlat is odd
-!
-!            then lshsec must be at least
-!
-!            2*nlat*l2+3*((l1-2)*(nlat+nlat-l1-1))/2+nlon+15
-!
-!     dwork  a real work array that does not have to be
-!            saved.
-!
-!     ldwork the dimension of array dwork as it appears in the program
-!            that calls shseci.  ldwork must be at least nlat+1.
-!
-!     output parameters
-!
-!     wshsec an array which is initialized for use by subroutine shsec.
-!            once initialized, wshsec can be used repeatedly by shsec
-!            as long as nlon and nlat remain unchanged.  wshsec must
-!            not be altered between calls of shsec.
-!
-!     ierror = 0  no errors
-!            = 1  error in the specification of nlat
-!            = 2  error in the specification of nlon
-!            = 3  error in the specification of lshsec
-!            = 4  error in the specification of ldwork
-!
-!     subroutine shseci(nlat, nlon, wshsec, lshsec, dwork, ldwork, ierror)
-!
-!     subroutine shseci initializes the array wshsec which can then
-!     be used repeatedly by subroutine shsec.
-!
-!     input parameters
-!
-!     nlat   the number of colatitudes on the full sphere including the
-!            poles. for example, nlat = 37 for a five degree grid.
-!            nlat determines the grid increment in colatitude as
-!            pi/(nlat-1).  if nlat is odd the equator is located at
-!            grid point i=(nlat+1)/2. if nlat is even the equator is
-!            located half way between points i=nlat/2 and i=nlat/2+1.
-!            nlat must be at least 3. note: on the half sphere, the
-!            number of grid points in the colatitudinal direction is
-!            nlat/2 if nlat is even or (nlat+1)/2 if nlat is odd.
-!
-!     nlon   the number of distinct londitude points.  nlon determines
-!            the grid increment in longitude as 2*pi/nlon. for example
-!            nlon = 72 for a five degree grid. nlon must be greater
-!            than or equal to 4. the efficiency of the computation is
-!            improved when nlon is a product of small prime numbers.
-!
-!     lshsec the dimension of the array wshsec as it appears in the
-!            program that calls shseci. the array wshsec is an output
-!            parameter which is described below. define
-!
-!               l1 = min(nlat, (nlon+2)/2) if nlon is even or
-!               l1 = min(nlat, (nlon+1)/2) if nlon is odd
-!
-!            and
-!
-!               l2 = nlat/2        if nlat is even or
-!               l2 = (nlat+1)/2    if nlat is odd
-!
-!            then lshsec must be at least
-!
-!            2*nlat*l2+3*((l1-2)*(nlat+nlat-l1-1))/2+nlon+15
-!
-!     dwork  a real work array that does not have to be
-!            saved.
-!
-!     ldwork the dimension of array dwork as it appears in the program
-!            that calls shseci.  ldwork must be at least nlat+1.
-!
-!     output parameters
-!
-!     wshsec an array which is initialized for use by subroutine shsec.
-!            once initialized, wshsec can be used repeatedly by shsec
-!            as long as nlon and nlat remain unchanged.  wshsec must
-!            not be altered between calls of shsec.
-!
-!     ierror = 0  no errors
-!            = 1  error in the specification of nlat
-!            = 2  error in the specification of nlon
-!            = 3  error in the specification of lshsec
-!            = 4  error in the specification of ldwork
-!
-!
+
+
 submodule(scalar_synthesis_routines) scalar_synthesis_regular_grid
 
 contains
@@ -399,54 +270,113 @@ contains
         ist = 0
         if (isym == 0) ist = imid
         iw1 = lzz1+labc+1
-        call shsec_lower_routine(nlat, isym, nt, g, idg, jdg, a, b, mdab, ndab, imid, ls, nlon, &
+        call shsec_lower_utility_routine(nlat, isym, nt, g, idg, jdg, a, b, mdab, ndab, imid, ls, nlon, &
             work, work(ist+1), work(nln+1), work(nln+1), wshsec, wshsec(iw1))
 
     end subroutine shsec
 
-    module subroutine shseci(nlat, nlon, wshsec, lshsec, dwork, ldwork, ierror)
+    !     subroutine shseci(nlat, nlon, wshsec, ierror)
+    !
+    !     subroutine shseci initializes the array wshsec which can then
+    !     be used repeatedly by subroutine shsec.
+    !
+    !     input parameters
+    !
+    !     nlat   the number of colatitudes on the full sphere including the
+    !            poles. for example, nlat = 37 for a five degree grid.
+    !            nlat determines the grid increment in colatitude as
+    !            pi/(nlat-1).  if nlat is odd the equator is located at
+    !            grid point i=(nlat+1)/2. if nlat is even the equator is
+    !            located half way between points i=nlat/2 and i=nlat/2+1.
+    !            nlat must be at least 3. note: on the half sphere, the
+    !            number of grid points in the colatitudinal direction is
+    !            nlat/2 if nlat is even or (nlat+1)/2 if nlat is odd.
+    !
+    !     nlon   the number of distinct londitude points.  nlon determines
+    !            the grid increment in longitude as 2*pi/nlon. for example
+    !            nlon = 72 for a five degree grid. nlon must be greater
+    !            than or equal to 4. the efficiency of the computation is
+    !            improved when nlon is a product of small prime numbers.
+    !
+    !     lshsec the dimension of the array wshsec as it appears in the
+    !            program that calls shseci. the array wshsec is an output
+    !            parameter which is described below. define
+    !
+    !               l1 = min(nlat, (nlon+2)/2) if nlon is even or
+    !               l1 = min(nlat, (nlon+1)/2) if nlon is odd
+    !
+    !            and
+    !
+    !               l2 = nlat/2        if nlat is even or
+    !               l2 = (nlat+1)/2    if nlat is odd
+    !
+    !            then lshsec must be at least
+    !
+    !            2*nlat*l2+3*((l1-2)*(nlat+nlat-l1-1))/2+nlon+15
+    !
+    !     output parameters
+    !
+    !     wshsec an array which is initialized for use by subroutine shsec.
+    !            once initialized, wshsec can be used repeatedly by shsec
+    !            as long as nlon and nlat remain unchanged.  wshsec must
+    !            not be altered between calls of shsec.
+    !
+    !     ierror = 0  no errors
+    !            = 1  error in the specification of nlat
+    !            = 2  error in the specification of nlon
+    !            = 3  error in the specification of lshsec
+    !
+    module subroutine shseci(nlat, nlon, wshsec, ierror)
 
         ! Dummy arguments
         integer(ip), intent(in)  :: nlat
         integer(ip), intent(in)  :: nlon
-        real(wp),    intent(out) :: wshsec(lshsec)
-        integer(ip), intent(in)  :: lshsec
-        real(wp),    intent(out) :: dwork(ldwork)
-        integer(ip), intent(in)  :: ldwork
+        real(wp),    intent(out) :: wshsec(:)
         integer(ip), intent(out) :: ierror
 
         ! Local variables
-        integer(ip) :: imid
-        integer(ip) :: iw1
-        integer(ip) :: labc
-        integer(ip) :: lzz1
-        integer(ip) :: mmax
+        integer(ip) :: imid, iw1
+        integer(ip) :: labc, lzz1, mmax, ldwork
         type(SpherepackUtility) :: util
 
-        ierror = 1
-        if (nlat < 3) return
-        ierror = 2
-        if (nlon < 4) return
-        ierror = 3
-        imid = (nlat+1)/2
-        mmax = min(nlat, nlon/2+1)
-        lzz1 = 2*nlat*imid
-        labc = 3*((mmax-2)*(nlat+nlat-mmax-1))/2
-        if (lshsec < lzz1+labc+nlon+15) return
-        ierror = 4
-        if (ldwork < nlat+1) return
-        ierror = 0
+        associate( lshsec => size(wshsec) )
 
-        call util%initialize_scalar_synthesis_regular_grid(nlat, nlon, wshsec, dwork)
+            imid = (nlat+1)/2
+            mmax = min(nlat, nlon/2+1)
+            lzz1 = 2*nlat*imid
+            labc = 3*((mmax-2)*(nlat+nlat-mmax-1))/2
 
-        ! set workspace index
-        iw1 = lzz1+labc+1
+            ! Check calling arguments
+            if (nlat < 3) then
+                ierror = 1
+            else if (nlon < 4) then
+                ierror = 2
+            else if (lshsec < lzz1+labc+nlon+15) then
+                ierror = 3
+            else
+                ierror = 0
+            end if
 
-        call util%hfft%initialize(nlon, wshsec(iw1))
+            ! Check error flag
+            if (ierror /= 0) return
+
+            ! Set required workspace size
+            ldwork = nlat + 1
+
+            block
+                real(wp) :: dwork(ldwork)
+                call util%initialize_scalar_synthesis_regular_grid(nlat, nlon, wshsec, dwork)
+            end block
+
+            ! set workspace index
+            iw1 = lzz1+labc+1
+
+            call util%hfft%initialize(nlon, wshsec(iw1:))
+        end associate
 
     end subroutine shseci
 
-    subroutine shsec_lower_routine(nlat, isym, nt, g, idgs, jdgs, a, b, mdab, ndab, imid, &
+    subroutine shsec_lower_utility_routine(nlat, isym, nt, g, idgs, jdgs, a, b, mdab, ndab, imid, &
         idg, jdg, ge, go, work, pb, walin, whrfft)
 
 
@@ -636,6 +566,6 @@ contains
                 end do
         end select
 
-    end subroutine shsec_lower_routine
+    end subroutine shsec_lower_utility_routine
 
 end submodule scalar_synthesis_regular_grid

@@ -327,13 +327,13 @@ contains
         iwk = is+nlat
         lwk = lwork-2*mn-nlat
 
-        call divec_lower_routine(nlat, nlon, isym, nt, dv, idv, jdv, br, bi, mdb, ndb, &
+        call divec_lower_utility_routine(nlat, nlon, isym, nt, dv, idv, jdv, br, bi, mdb, ndb, &
             work(ia), work(ib), mab, work(is), wshsec, lshsec, work(iwk), lwk, &
             ierror)
 
     end subroutine divec
 
-    subroutine divec_lower_routine(nlat, nlon, isym, nt, dv, idv, jdv, br, bi, mdb, ndb, &
+    subroutine divec_lower_utility_routine(nlat, nlon, isym, nt, dv, idv, jdv, br, bi, mdb, ndb, &
         a, b, mab, sqnn, wshsec, lshsec, wk, lwk, ierror)
         real(wp) :: a
         real(wp) :: b
@@ -370,6 +370,6 @@ contains
         call shsec(nlat, nlon, isym, nt, dv, idv, jdv, a, b, &
             mab, nlat, wshsec, lshsec, wk, lwk, ierror)
 
-    end subroutine divec_lower_routine
+    end subroutine divec_lower_utility_routine
 
 end submodule divergence_regular_grid

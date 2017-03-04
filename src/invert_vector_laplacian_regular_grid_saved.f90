@@ -429,13 +429,13 @@ contains
                 liwk = lwork-2*mn-nlat
         end select
 
-        call ivlapes_lower_routine(nlat, nlon, ityp, nt, v, w, idvw, jdvw, work(ibr), &
+        call ivlapes_lower_utility_routine(nlat, nlon, ityp, nt, v, w, idvw, jdvw, work(ibr), &
             work(ibi), work(icr), work(ici), mmax, work(ifn), mdbc, ndbc, br, bi, &
             cr, ci, wvhses, lvhses, work(iwk), liwk, ierror)
 
     end subroutine ivlapes
 
-    subroutine ivlapes_lower_routine(nlat, nlon, ityp, nt, v, w, idvw, jdvw, brvw, &
+    subroutine ivlapes_lower_utility_routine(nlat, nlon, ityp, nt, v, w, idvw, jdvw, brvw, &
         bivw, crvw, civw, mmax, fnn, mdbc, ndbc, br, bi, cr, ci, wsave, lsave, &
         wk, lwk, ierror)
 
@@ -482,6 +482,6 @@ contains
         call vhses(nlat, nlon, ityp, nt, v, w, idvw, jdvw, brvw, bivw, &
             crvw, civw, mmax, nlat, wsave, lsave, wk, lwk, ierror)
 
-    end subroutine ivlapes_lower_routine
+    end subroutine ivlapes_lower_utility_routine
 
 end submodule invert_vector_laplacian_regular_grid_saved

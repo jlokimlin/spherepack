@@ -273,7 +273,7 @@ program tvrt
             !     compute vorticity of (v, w) in vt
             !
 
-            call shseci(nlat, nlon, wsave, lsave, dwork, ldwork, ierror)
+            call shseci(nlat, nlon, wsave, ierror)
 
             call name("vrti")
             call iout(ierror, "ierr")
@@ -304,7 +304,7 @@ program tvrt
 
             call name("**gc")
 
-            call shsgci(nlat, nlon, wsave, lsave, dwork, ldwork, ierror)
+            call shsgci(nlat, nlon, wsave, ierror)
 
             call name("vrti")
             call iout(ierror, "ierr")
@@ -319,7 +319,7 @@ program tvrt
 
             call name("**gs")
 
-            call shsgsi(nlat, nlon, wsave, lsave, work, lwork, dwork, ldwork, ierror)
+            call shsgsi(nlat, nlon, wsave, ierror)
 
             call name("vrti")
             call iout(ierror, "ierr")

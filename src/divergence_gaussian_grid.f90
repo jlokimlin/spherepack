@@ -321,13 +321,13 @@ contains
         is = ib+mn
         iwk = is+nlat
         lwk = lwork-2*mn-nlat
-        call divgc_lower_routine(nlat, nlon, isym, nt, dv, idv, jdv, br, bi, mdb, ndb, &
+        call divgc_lower_utility_routine(nlat, nlon, isym, nt, dv, idv, jdv, br, bi, mdb, ndb, &
             work(ia), work(ib), mab, work(is), wshsgc, lshsgc, work(iwk), lwk, &
             ierror)
 
     end subroutine divgc
 
-    subroutine divgc_lower_routine(nlat, nlon, isym, nt, dv, idv, jdv, br, bi, mdb, ndb, &
+    subroutine divgc_lower_utility_routine(nlat, nlon, isym, nt, dv, idv, jdv, br, bi, mdb, ndb, &
         a, b, mab, sqnn, wshsgc, lshsgc, wk, lwk, ierror)
         real(wp) :: a
         real(wp) :: b
@@ -364,6 +364,6 @@ contains
         call shsgc(nlat, nlon, isym, nt, dv, idv, jdv, a, b, &
             mab, nlat, wshsgc, lshsgc, wk, lwk, ierror)
 
-    end subroutine divgc_lower_routine
+    end subroutine divgc_lower_utility_routine
 
 end submodule divergence_gaussian_grid

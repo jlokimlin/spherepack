@@ -316,7 +316,7 @@ contains
             !  Perform analysis
             block
                 real(wp) :: work(lwork)
-                call shags_lower_routine(nlat, nlon, l, lat, isym, g, idg, jdg, nt, &
+                call shags_lower_utility_routine(nlat, nlon, l, lat, isym, g, idg, jdg, nt, &
                     a, b, mdab, ndab, wshags(iwts:), wshags(ifft:), wshags(ipmn:), &
                     late, work, work(iw:))
             end block
@@ -457,7 +457,7 @@ contains
                 real(wp) :: work(lwork), dwork(ldwork)
 
                 ! Call lower routine
-                call shagsi_lower_routine(nlat, nlon, wshags, lshags, dwork, ldwork, ierror)
+                call shagsi_lower_utility_routine(nlat, nlon, wshags, lshags, dwork, ldwork, ierror)
 
                 ! Check error flag from lower routine
                 if (ierror /= 0) return
@@ -472,7 +472,7 @@ contains
 
     end subroutine shagsi
 
-    subroutine shags_lower_routine(nlat, nlon, l, lat, mode, gs, idg, jdg, nt, a, b, mdab, &
+    subroutine shags_lower_utility_routine(nlat, nlon, l, lat, mode, gs, idg, jdg, nt, a, b, mdab, &
         ndab, wts, wfft, pmn, late, g, work)
 
         ! Dummy arguments
@@ -502,7 +502,7 @@ contains
         real(wp)       :: t1, t2, sfn
         type(SpherepackUtility) :: util
 
-        !  set gs array internally in shags_lower_routine
+        !  set gs array internally in shags_lower_utility_routine
         g(1:lat, 1:nlon, :) = gs(1:lat, 1:nlon, :)
 
         ! Perform fourier transform
@@ -710,7 +710,7 @@ contains
             end if
         end if
 
-    end subroutine shags_lower_routine
+    end subroutine shags_lower_utility_routine
 
     subroutine shagsi_compute_and_store_legendre_polys(nlat, l, late, w, pmn, pmnf)
 
@@ -748,7 +748,7 @@ contains
 
     end subroutine shagsi_compute_and_store_legendre_polys
 
-    subroutine shagsi_lower_routine(nlat, nlon, wshags, lshags, dwork, ldwork, ierror)
+    subroutine shagsi_lower_utility_routine(nlat, nlon, wshags, lshags, dwork, ldwork, ierror)
 
         ! Dummy arguments
         integer(ip), intent(in)     :: nlat
@@ -803,7 +803,7 @@ contains
             iw => workspace_indices(10) &
             )
 
-            call shagsp_lower_routine(nlat, nlon, ntrunc, late, wshags(i1), wshags(i2), wshags(i3), &
+            call shagsp_lower_utility_routine(nlat, nlon, ntrunc, late, wshags(i1), wshags(i2), wshags(i3), &
                 wshags(i4), wshags(i5), wshags(i6), wshags(i7), dwork(idth), &
                 dwork(idwts), dwork(iw), ierror)
 
@@ -815,7 +815,7 @@ contains
             return
         end if
 
-    end subroutine shagsi_lower_routine
+    end subroutine shagsi_lower_utility_routine
 
     pure function shags_get_workspace_indices(nlat, late, l) &
         result (return_value)
@@ -844,7 +844,7 @@ contains
 
     end function shags_get_workspace_indices
 
-    subroutine shagsp_lower_routine(nlat, nlon, l, late, wts, p0n, p1n, abel, bbel, cbel, &
+    subroutine shagsp_lower_utility_routine(nlat, nlon, l, late, wts, p0n, p1n, abel, bbel, cbel, &
         wfft, dtheta, dwts, work, ier)
 
         ! Dummy arguments
@@ -944,6 +944,6 @@ contains
             end do
         end do
 
-    end subroutine shagsp_lower_routine
+    end subroutine shagsp_lower_utility_routine
 
 end submodule scalar_analysis_gaussian_grid_saved

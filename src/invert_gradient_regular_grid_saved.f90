@@ -324,12 +324,12 @@ contains
         iwk = iis + nlat
         liwk = lwork-2*mn-nlat
 
-        call igrades_lower_routine(nlat, nlon, isym, nt, sf, isf, jsf, work(ia), work(ib), mab, &
+        call igrades_lower_utility_routine(nlat, nlon, isym, nt, sf, isf, jsf, work(ia), work(ib), mab, &
             work(iis), mdb, ndb, br, bi, wshses, lshses, work(iwk), liwk, ierror)
 
     end subroutine igrades
 
-    subroutine igrades_lower_routine(nlat, nlon, isym, nt, sf, isf, jsf, a, b, mab, &
+    subroutine igrades_lower_utility_routine(nlat, nlon, isym, nt, sf, isf, jsf, a, b, mab, &
         sqnn, mdb, ndb, br, bi, wshses, lshses, wk, lwk, ierror)
 
         real(wp) :: a
@@ -368,6 +368,6 @@ contains
         call shses(nlat, nlon, isym, nt, sf, isf, jsf, a, b, mab, nlat, &
             wshses, lshses, wk, lwk, ierror)
 
-    end subroutine igrades_lower_routine
+    end subroutine igrades_lower_utility_routine
 
 end  submodule invert_gradient_regular_grid_saved

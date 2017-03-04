@@ -321,7 +321,7 @@ contains
             iw3 = lzimn + 1
 
             !  Perform analysis
-            call shaes_lower_routine(nlat, isym, nt, g, idg, jdg, a, b, mdab, ndab, wshaes, idz, &
+            call shaes_lower_utility_routine(nlat, isym, nt, g, idg, jdg, a, b, mdab, ndab, wshaes, idz, &
                 ls, nlon, work, work(iw1), work(iw2), wshaes(iw3))
         end block
 
@@ -470,7 +470,7 @@ contains
 
     end subroutine shaesi
 
-    subroutine shaes_lower_routine(nlat, isym, nt, g, idgs, jdgs, a, b, mdab, ndab, &
+    subroutine shaes_lower_utility_routine(nlat, isym, nt, g, idgs, jdgs, a, b, mdab, ndab, &
         z, idz, idg, jdg, g_even, g_odd, work, whrfft)
 
         ! Dummy arguments
@@ -646,7 +646,7 @@ contains
             end do
         end if
 
-    end subroutine shaes_lower_routine
+    end subroutine shaes_lower_utility_routine
 
     pure function get_workspace_indices(nlat, nlon, mmax, imid, lzimn) &
         result (return_value)

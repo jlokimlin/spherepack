@@ -314,13 +314,13 @@ contains
         iwk = iis+nlat
         lwk = lwork-2*mn-nlat
 
-        call dives_lower_routine(nlat, nlon, isym, nt, dv, idv, jdv, br, bi, mdb, ndb, &
+        call dives_lower_utility_routine(nlat, nlon, isym, nt, dv, idv, jdv, br, bi, mdb, ndb, &
             work(ia), work(ib), mab, work(iis), wshses, lshses, work(iwk), lwk, &
             ierror)
 
     end subroutine dives
 
-    subroutine dives_lower_routine(nlat, nlon, isym, nt, dv, idv, jdv, br, bi, mdb, ndb, &
+    subroutine dives_lower_utility_routine(nlat, nlon, isym, nt, dv, idv, jdv, br, bi, mdb, ndb, &
         a, b, mab, sqnn, wshses, lshses, wk, lwk, ierror)
         implicit none
         real(wp) :: a
@@ -358,6 +358,6 @@ contains
         call shses(nlat, nlon, isym, nt, dv, idv, jdv, a, b, &
             mab, nlat, wshses, lshses, wk, lwk, ierror)
 
-    end subroutine dives_lower_routine
+    end subroutine dives_lower_utility_routine
 
 end submodule divergence_regular_grid_saved

@@ -540,7 +540,7 @@ contains
         workspace_indices = get_legin_workspace_indices(l, late, nlat)
 
         associate( i => workspace_indices )
-            call legin_lower_routine(mode, l, nlat, late, m, &
+            call legin_lower_utility_routine(mode, l, nlat, late, m, &
                 w(i(1)), w(i(2)), w(i(3)), w(i(4)), w(i(5)), pmn, km)
         end associate
 
@@ -550,7 +550,7 @@ contains
     !
     ! Improve computational purity and remove the save attribute for column_indices
     !
-    subroutine legin_lower_routine(mode, l, nlat, late, m, p0n, p1n, abel, bbel, cbel, &
+    subroutine legin_lower_utility_routine(mode, l, nlat, late, m, p0n, p1n, abel, bbel, cbel, &
         pmn, km)
 
         ! Dummy arguments
@@ -633,7 +633,7 @@ contains
         ! Set current m index in output param km
         km = kmt
 
-    end subroutine legin_lower_routine
+    end subroutine legin_lower_utility_routine
 
     pure function get_legin_workspace_indices(l, late, nlat) &
         result (return_value)
@@ -719,14 +719,14 @@ contains
             iw4 => workspace(4) &
             )
 
-            call zfin_lower_routine(isym, nlat, m, z, imid, i3, wzfin, &
+            call zfin_lower_utility_routine(isym, nlat, m, z, imid, i3, wzfin, &
                 wzfin(iw1), wzfin(iw2), wzfin(iw3), wzfin(iw4))
 
         end associate
 
     end subroutine zfin
 
-    subroutine zfin_lower_routine(isym, nlat, m, z, imid, i3, zz, z1, a, b, c)
+    subroutine zfin_lower_utility_routine(isym, nlat, m, z, imid, i3, zz, z1, a, b, c)
 
         ! Dummy arguments
         integer(ip), intent(in)     :: isym
@@ -789,7 +789,7 @@ contains
                 end do
         end select
 
-    end subroutine zfin_lower_routine
+    end subroutine zfin_lower_utility_routine
 
     pure function get_zfin_workspace_indices(nlat, nlon, imid) &
         result (return_value)
@@ -842,7 +842,7 @@ contains
         iw1 = 2*nlat*imid+1
         iw2 = nlat/2+1
 
-        call zfinit_lower_routine(nlat, nlon, imid, wzfin, wzfin(iw1), dwork, dwork(iw2))
+        call zfinit_lower_utility_routine(nlat, nlon, imid, wzfin, wzfin(iw1), dwork, dwork(iw2))
 
     end subroutine initialize_scalar_analysis_regular_grid
 
@@ -853,7 +853,7 @@ contains
     !     where mmax = min(nlat, nlon/2+1)
     !     cz and work must each have nlat+1 locations
     !
-    subroutine zfinit_lower_routine(nlat, nlon, imid, z, abc, cz, work)
+    subroutine zfinit_lower_utility_routine(nlat, nlon, imid, z, abc, cz, work)
 
         ! Dummy arguments
         integer(ip), intent(in)  :: nlat
@@ -886,7 +886,7 @@ contains
 
         call compute_recurrence_relation_coefficients(nlat, nlon, abc)
 
-    end subroutine zfinit_lower_routine
+    end subroutine zfinit_lower_utility_routine
 
     !
     ! Purpose:
@@ -1125,14 +1125,14 @@ contains
             !
             !     the length of walin is ((5*l-7)*l+6)/2
             !
-            call alin_lower_routine(isym, nlat, m, p, imid, i3, walin, walin(iw1), walin(iw2), &
+            call alin_lower_utility_routine(isym, nlat, m, p, imid, i3, walin, walin(iw1), walin(iw2), &
                 walin(iw3), walin(iw4))
 
         end associate
 
     end subroutine compute_legendre_polys_regular_grid
 
-    subroutine alin_lower_routine(isym, nlat, m, p, imid, i3, pz, p1, a, b, c)
+    subroutine alin_lower_utility_routine(isym, nlat, m, p, imid, i3, pz, p1, a, b, c)
 
         ! Dummy arguments
         integer(ip), intent(in)    :: isym
@@ -1200,7 +1200,7 @@ contains
             end do
         end if
 
-    end subroutine alin_lower_routine
+    end subroutine alin_lower_utility_routine
 
     pure function get_alin_workspace_indices(nlat, nlon, imid) &
         result (return_value)
@@ -1245,11 +1245,11 @@ contains
         !     the length of walin is 3*((l-3)*l+2)/2 + 2*l*imid
         !     the length of work is nlat+1
         !
-        call alinit_lower_routine(nlat, nlon, imid, walin, walin(iw1), dwork)
+        call alinit_lower_utility_routine(nlat, nlon, imid, walin, walin(iw1), dwork)
 
     end subroutine initialize_scalar_synthesis_regular_grid
 
-    pure subroutine alinit_lower_routine(nlat, nlon, imid, p, abc, cp)
+    pure subroutine alinit_lower_utility_routine(nlat, nlon, imid, p, abc, cp)
 
         ! Dummy arguments
         integer(ip), intent(in)   :: nlat
@@ -1280,7 +1280,7 @@ contains
 
         call compute_recurrence_relation_coefficients(nlat, nlon, abc)
 
-    end subroutine alinit_lower_routine
+    end subroutine alinit_lower_utility_routine
 
     ! Purpose:
     !
@@ -1304,7 +1304,7 @@ contains
         iw1 = labc+1
         iw2 = iw1+labc
 
-        call rabcp_lower_routine(nlat, nlon, abc, abc(iw1), abc(iw2))
+        call rabcp_lower_utility_routine(nlat, nlon, abc, abc(iw1), abc(iw2))
 
     end subroutine compute_recurrence_relation_coefficients
 
@@ -1314,7 +1314,7 @@ contains
     ! Coefficients a, b, and c for computing pbar(m, n, theta) are
     ! stored in location ((m-2)*(nlat+nlat-m-1))/2+n+1
     !
-    pure subroutine rabcp_lower_routine(nlat, nlon, a, b, c)
+    pure subroutine rabcp_lower_utility_routine(nlat, nlon, a, b, c)
 
         ! Dummy arguments
         integer(ip), intent(in)   :: nlat
@@ -1365,7 +1365,7 @@ contains
             end do
         end do outer_loop
 
-    end subroutine rabcp_lower_routine
+    end subroutine rabcp_lower_utility_routine
 
     subroutine initialize_scalar_analysis_regular_grid_saved(nlat, nlon, imid, z, idz, zin, wzfin, dwork)
 
@@ -1446,7 +1446,7 @@ contains
         !         2*nlat*imid +3*(max(mmax-2, 0)*(2*nlat-mmax-1))/2
         !     the length of dwork is nlat+2
         !
-        call zvinit_lower_routine(nlat, nlon, imid, wzvin, wzvin(iw1), dwork, dwork(iw2))
+        call zvinit_lower_utility_routine(nlat, nlon, imid, wzvin, wzvin(iw1), dwork, dwork(iw2))
 
     end subroutine zvinit
 
@@ -1456,7 +1456,7 @@ contains
     !     locations where mmax = min(nlat, (nlon+1)/2)
     !     czv and work must each have nlat/2+1  locations
     !
-    subroutine zvinit_lower_routine(nlat, nlon, imid, zv, abc, czv, work)
+    subroutine zvinit_lower_utility_routine(nlat, nlon, imid, zv, abc, czv, work)
 
         ! Dummy arguments
         integer(ip), intent(in)     :: nlat
@@ -1490,7 +1490,7 @@ contains
 
         call compute_polar_recurrence_relation_coefficients(nlat, nlon, abc)
 
-    end subroutine zvinit_lower_routine
+    end subroutine zvinit_lower_utility_routine
 
     subroutine zwinit(nlat, nlon, wzwin, dwork)
         !
@@ -1516,7 +1516,7 @@ contains
         iw1 = 2*nlat*imid+1
         iw2 = nlat/2+2
 
-        call zwinit_lower_routine(nlat, nlon, imid, wzwin, wzwin(iw1), dwork, dwork(iw2))
+        call zwinit_lower_utility_routine(nlat, nlon, imid, wzwin, wzwin(iw1), dwork, dwork(iw2))
 
     end subroutine zwinit
 
@@ -1526,7 +1526,7 @@ contains
     ! locations where mmax = min(nlat, (nlon+1)/2)
     ! czw and work must each have nlat+1 locations
     !
-    subroutine zwinit_lower_routine(nlat, nlon, imid, zw, abc, czw, work)
+    subroutine zwinit_lower_utility_routine(nlat, nlon, imid, zw, abc, czw, work)
 
         ! Dummy arguments
         integer(ip), intent(in)     :: nlat
@@ -1562,7 +1562,7 @@ contains
 
         call compute_azimuthal_recurrence_relation_coefficients(nlat, nlon, abc)
 
-    end subroutine zwinit_lower_routine
+    end subroutine zwinit_lower_utility_routine
 
     subroutine zvin(ityp, nlat, nlon, m, zv, i3, wzvin)
 
@@ -1592,12 +1592,12 @@ contains
         !
         !     the length of wzvin is 2*lim+3*labc
         !
-        call zvin_lower_routine(ityp, nlat, m, zv, imid, i3, wzvin, wzvin(iw1), wzvin(iw2), &
+        call zvin_lower_utility_routine(ityp, nlat, m, zv, imid, i3, wzvin, wzvin(iw1), wzvin(iw2), &
             wzvin(iw3), wzvin(iw4))
 
     end subroutine zvin
 
-    subroutine zvin_lower_routine(ityp, nlat, m, zv, imid, i3, zvz, zv1, a, b, c)
+    subroutine zvin_lower_utility_routine(ityp, nlat, m, zv, imid, i3, zvz, zv1, a, b, c)
 
         ! Dummy arguments
         integer(ip), intent(in)     :: ityp
@@ -1673,7 +1673,7 @@ contains
             end do
         end if
 
-    end subroutine zvin_lower_routine
+    end subroutine zvin_lower_utility_routine
 
     subroutine zwin(ityp, nlat, nlon, m, zw, i3, wzwin)
 
@@ -1702,12 +1702,12 @@ contains
         !
         !     the length of wzwin is 2*lim+3*labc
         !
-        call zwin_lower_routine(ityp, nlat, m, zw, imid, i3, wzwin, wzwin(iw1), wzwin(iw2), &
+        call zwin_lower_utility_routine(ityp, nlat, m, zw, imid, i3, wzwin, wzwin(iw1), wzwin(iw2), &
             wzwin(iw3), wzwin(iw4))
 
     end subroutine zwin
 
-    subroutine zwin_lower_routine(ityp, nlat, m, zw, imid, i3, zw1, zw2, a, b, c)
+    subroutine zwin_lower_utility_routine(ityp, nlat, m, zw, imid, i3, zw1, zw2, a, b, c)
 
         ! Dummy arguments
         integer(ip), intent(in)     :: ityp
@@ -1784,7 +1784,7 @@ contains
             end do
         end if
 
-    end subroutine zwin_lower_routine
+    end subroutine zwin_lower_utility_routine
 
     ! Remark:
     !
@@ -1806,7 +1806,7 @@ contains
         iw1 = 2*nlat*imid+1
         iw2 = nlat/2 + 2
 
-        call vbinit_lower_routine(nlat, nlon, imid, wvbin, wvbin(iw1), dwork, dwork(iw2))
+        call vbinit_lower_utility_routine(nlat, nlon, imid, wvbin, wvbin(iw1), dwork, dwork(iw2))
 
     end subroutine initialize_polar_components_for_regular_grids
 
@@ -1816,7 +1816,7 @@ contains
     !     locations where mmax = min(nlat, (nlon+1)/2)
     !     cvb and work must each have nlat+1 locations
     !
-    subroutine vbinit_lower_routine(nlat, nlon, imid, vb, abc, cvb, work)
+    subroutine vbinit_lower_utility_routine(nlat, nlon, imid, vb, abc, cvb, work)
 
         ! Dummy arguments
         integer(ip), intent(in)  :: nlat
@@ -1849,7 +1849,7 @@ contains
 
         call compute_polar_recurrence_relation_coefficients(nlat, nlon, abc)
 
-    end subroutine vbinit_lower_routine
+    end subroutine vbinit_lower_utility_routine
 
     !
     ! Remark:
@@ -1872,7 +1872,7 @@ contains
         iw1 = 2*nlat*imid+1
         iw2 = nlat/2 + 2
 
-        call wbinit_lower_routine(nlat, nlon, imid, wwbin, wwbin(iw1), dwork, dwork(iw2))
+        call wbinit_lower_utility_routine(nlat, nlon, imid, wwbin, wwbin(iw1), dwork, dwork(iw2))
 
     end subroutine initialize_azimuthal_components_for_regular_grids
 
@@ -1882,7 +1882,7 @@ contains
     ! locations where mmax = min(nlat, (nlon+1)/2)
     ! cwb and work must each have nlat/2+1 locations
     !
-    subroutine wbinit_lower_routine(nlat, nlon, imid, wb, abc, cwb, work)
+    subroutine wbinit_lower_utility_routine(nlat, nlon, imid, wb, abc, cwb, work)
 
         ! Dummy arguments
         integer(ip), intent(in)  :: nlat
@@ -1916,7 +1916,7 @@ contains
             call compute_azimuthal_recurrence_relation_coefficients(nlat, nlon, abc)
         end if
 
-    end subroutine wbinit_lower_routine
+    end subroutine wbinit_lower_utility_routine
 
     subroutine compute_polar_component(ityp, nlat, nlon, m, vb, i3, wvbin)
 
@@ -1946,12 +1946,12 @@ contains
         !
         !     the length of wvbin is 2*lim+3*labc
         !
-        call vbin_lower_routine(ityp, nlat, m, vb, imid, i3, wvbin, wvbin(iw1), wvbin(iw2), &
+        call vbin_lower_utility_routine(ityp, nlat, m, vb, imid, i3, wvbin, wvbin(iw1), wvbin(iw2), &
             wvbin(iw3), wvbin(iw4))
 
     end subroutine compute_polar_component
 
-    subroutine vbin_lower_routine(ityp, nlat, m, vb, imid, i3, vbz, vb1, a, b, c)
+    subroutine vbin_lower_utility_routine(ityp, nlat, m, vb, imid, i3, vbz, vb1, a, b, c)
 
         ! Dummy arguments
         integer(ip), intent(in)     :: ityp
@@ -2030,7 +2030,7 @@ contains
                 end do
         end select
 
-    end subroutine vbin_lower_routine
+    end subroutine vbin_lower_utility_routine
 
     subroutine compute_azimuthal_component(ityp, nlat, nlon, m, wb, i3, wwbin)
 
@@ -2066,12 +2066,12 @@ contains
         !
         !     the length of wwbin is 2*lim+3*labc
         !
-        call wbin_lower_routine(ityp, nlat, m, wb, imid, i3, wwbin, wwbin(iw1), wwbin(iw2), &
+        call wbin_lower_utility_routine(ityp, nlat, m, wb, imid, i3, wwbin, wwbin(iw1), wwbin(iw2), &
             wwbin(iw3), wwbin(iw4))
 
     end subroutine compute_azimuthal_component
 
-    subroutine wbin_lower_routine(ityp, nlat, m, wb, imid, i3, wb1, wb2, a, b, c)
+    subroutine wbin_lower_utility_routine(ityp, nlat, m, wb, imid, i3, wb1, wb2, a, b, c)
 
         real(wp) :: a(*)
         real(wp) :: b(*)
@@ -2150,7 +2150,7 @@ contains
                 end do
         end select
 
-    end subroutine wbin_lower_routine
+    end subroutine wbin_lower_utility_routine
 
     subroutine dzvk(nlat, m, n, czv, work)
 
@@ -3034,7 +3034,7 @@ contains
         iw1 = labc+1
         iw2 = iw1+labc
 
-        call rabcv_lower_routine(nlat, nlon, abc, abc(iw1), abc(iw2))
+        call rabcv_lower_utility_routine(nlat, nlon, abc, abc(iw1), abc(iw2))
 
     end subroutine compute_polar_recurrence_relation_coefficients
 
@@ -3043,7 +3043,7 @@ contains
     ! Coefficients a, b, and c for computing vbar(m, n, theta) are
     ! stored in location ((m-2)*(nlat+nlat-m-1))/2+n+1
     !
-    pure subroutine rabcv_lower_routine(nlat, nlon, a, b, c)
+    pure subroutine rabcv_lower_utility_routine(nlat, nlon, a, b, c)
 
         ! Dummy arguments
         integer(ip), intent(in)  :: nlat
@@ -3112,7 +3112,7 @@ contains
             end do
         end do outer_loop
 
-    end subroutine rabcv_lower_routine
+    end subroutine rabcv_lower_utility_routine
 
     ! Purpose:
     !
@@ -3137,7 +3137,7 @@ contains
         labc = (max(mmax-2, 0)*(2*nlat-mmax-1))/2
         iw1 = labc+1
         iw2 = iw1+labc
-        call rabcw_lower_routine(nlat, nlon, abc, abc(iw1), abc(iw2))
+        call rabcw_lower_utility_routine(nlat, nlon, abc, abc(iw1), abc(iw2))
 
     end subroutine compute_azimuthal_recurrence_relation_coefficients
 
@@ -3146,7 +3146,7 @@ contains
     ! Coefficients a, b, and c for computing wbar(m, n, theta) are
     ! stored in location ((m-2)*(nlat+nlat-m-1))/2+n+1
     !
-    pure subroutine rabcw_lower_routine(nlat, nlon, a, b, c)
+    pure subroutine rabcw_lower_utility_routine(nlat, nlon, a, b, c)
 
         ! Dummy arguments
         integer(ip), intent(in)  :: nlat
@@ -3214,7 +3214,7 @@ contains
             end do
         end do outer_loop
 
-    end subroutine rabcw_lower_routine
+    end subroutine rabcw_lower_utility_routine
 
     subroutine initialize_polar_components_regular_colat_deriv(nlat, nlon, wvbin, dwork)
 
@@ -3234,7 +3234,7 @@ contains
         !     the length of wvbin is 2*nlat*imid+3*((nlat-3)*nlat+2)/2
         !     the length of dwork is nlat+2
         !
-        call vtinit_lower_routine(nlat, nlon, imid, wvbin, wvbin(iw1), dwork, dwork(iw2))
+        call vtinit_lower_utility_routine(nlat, nlon, imid, wvbin, wvbin(iw1), dwork, dwork(iw2))
 
     end subroutine initialize_polar_components_regular_colat_deriv
 
@@ -3244,7 +3244,7 @@ contains
     ! locations where mmax = min(nlat, (nlon+1)/2)
     ! cvb and work must each have nlat/2+1 locations
     !
-    subroutine vtinit_lower_routine(nlat, nlon, imid, vb, abc, cvb, work)
+    subroutine vtinit_lower_utility_routine(nlat, nlon, imid, vb, abc, cvb, work)
 
         ! Dummy arguments
         integer(ip), intent(in)  :: nlat
@@ -3283,7 +3283,7 @@ contains
 
         call compute_polar_recurrence_relation_coefficients(nlat, nlon, abc)
 
-    end subroutine vtinit_lower_routine
+    end subroutine vtinit_lower_utility_routine
 
     subroutine initialize_azimuthal_components_regular_colat_deriv(nlat, nlon, wwbin, dwork)
 
@@ -3302,11 +3302,11 @@ contains
         !     the length of wwbin is 2*nlat*imid+3*((nlat-3)*nlat+2)/2
         !     the length of dwork is nlat+2
         !
-        call wtinit_lower_routine(nlat, nlon, imid, wwbin, wwbin(iw1), dwork, dwork(iw2))
+        call wtinit_lower_utility_routine(nlat, nlon, imid, wwbin, wwbin(iw1), dwork, dwork(iw2))
 
     end subroutine initialize_azimuthal_components_regular_colat_deriv
 
-    subroutine wtinit_lower_routine(nlat, nlon, imid, wb, abc, cwb, work)
+    subroutine wtinit_lower_utility_routine(nlat, nlon, imid, wb, abc, cwb, work)
 
         real(wp) :: abc(*)
         integer(ip) :: i
@@ -3346,7 +3346,7 @@ contains
 
         call compute_azimuthal_recurrence_relation_coefficients(nlat, nlon, abc)
 
-    end subroutine wtinit_lower_routine
+    end subroutine wtinit_lower_utility_routine
 
     subroutine initialize_polar_components_gaussian_colat_deriv(nlat, nlon, theta, wvbin, work)
 
@@ -3369,11 +3369,11 @@ contains
         !     the length of wvbin is 2*nlat*imid+3*((nlat-3)*nlat+2)/2
         !     the length of work is nlat+2
         !
-        call vtgint_lower_routine(nlat, nlon, imid, theta, wvbin, wvbin(iw1), work, work(iw2))
+        call vtgint_lower_utility_routine(nlat, nlon, imid, theta, wvbin, wvbin(iw1), work, work(iw2))
 
     end subroutine initialize_polar_components_gaussian_colat_deriv
 
-    subroutine vtgint_lower_routine(nlat, nlon, imid, theta, vb, abc, cvb, work)
+    subroutine vtgint_lower_utility_routine(nlat, nlon, imid, theta, vb, abc, cvb, work)
 
         real(wp) :: abc(*)
         integer(ip) :: i
@@ -3409,7 +3409,7 @@ contains
 
         call compute_polar_recurrence_relation_coefficients(nlat, nlon, abc)
 
-    end subroutine vtgint_lower_routine
+    end subroutine vtgint_lower_utility_routine
 
     subroutine initialize_azimuthal_components_gaussian_colat_deriv(nlat, nlon, theta, wwbin, work)
 
@@ -3431,11 +3431,11 @@ contains
         !     the length of wwbin is 2*nlat*imid+3*((nlat-3)*nlat+2)/2
         !     the length of work is nlat+2
         !
-        call wtgint_lower_routine(nlat, nlon, imid, theta, wwbin, wwbin(iw1), work, work(iw2))
+        call wtgint_lower_utility_routine(nlat, nlon, imid, theta, wwbin, wwbin(iw1), work, work(iw2))
 
     end subroutine initialize_azimuthal_components_gaussian_colat_deriv
 
-    subroutine wtgint_lower_routine(nlat, nlon, imid, theta, wb, abc, cwb, work)
+    subroutine wtgint_lower_utility_routine(nlat, nlon, imid, theta, wb, abc, cwb, work)
 
         real(wp) :: abc(*)
         integer(ip) :: i
@@ -3473,7 +3473,7 @@ contains
 
         call compute_azimuthal_recurrence_relation_coefficients(nlat, nlon, abc)
 
-    end subroutine wtgint_lower_routine
+    end subroutine wtgint_lower_utility_routine
 
     subroutine dvtk(m, n, cv, work)
 
@@ -3820,11 +3820,11 @@ contains
         !     the length of wvbin is 2*nlat*imid+3*((nlat-3)*nlat+2)/2
         !     the length of work is nlat+2
         !
-        call vbgint_lower_routine(nlat, nlon, imid, theta, wvbin, wvbin(iw1), work, work(iw2))
+        call vbgint_lower_utility_routine(nlat, nlon, imid, theta, wvbin, wvbin(iw1), work, work(iw2))
 
     end subroutine initialize_polar_components_gaussian_grid
 
-    subroutine vbgint_lower_routine(nlat, nlon, imid, theta, vb, abc, cvb, work)
+    subroutine vbgint_lower_utility_routine(nlat, nlon, imid, theta, vb, abc, cvb, work)
 
         real(wp) :: abc(*)
         integer(ip) :: i
@@ -3861,7 +3861,7 @@ contains
 
         call compute_polar_recurrence_relation_coefficients(nlat, nlon, abc)
 
-    end subroutine vbgint_lower_routine
+    end subroutine vbgint_lower_utility_routine
 
     subroutine initialize_azimuthal_components_gaussian_grid(nlat, nlon, theta, wwbin, work)
 
@@ -3885,11 +3885,11 @@ contains
         !     the length of wwbin is 2*nlat*imid+3*((nlat-3)*nlat+2)/2
         !     the length of work is nlat+2
         !
-        call wbgint_lower_routine(nlat, nlon, imid, theta, wwbin, wwbin(iw1), work, work(iw2))
+        call wbgint_lower_utility_routine(nlat, nlon, imid, theta, wwbin, wwbin(iw1), work, work(iw2))
 
     end subroutine initialize_azimuthal_components_gaussian_grid
 
-    subroutine wbgint_lower_routine(nlat, nlon, imid, theta, wb, abc, cwb, work)
+    subroutine wbgint_lower_utility_routine(nlat, nlon, imid, theta, wb, abc, cwb, work)
 
         ! Dummy arguments
         integer(ip), intent(in) :: nlat
@@ -3925,6 +3925,6 @@ contains
 
         call compute_azimuthal_recurrence_relation_coefficients(nlat, nlon, abc)
 
-    end subroutine wbgint_lower_routine
+    end subroutine wbgint_lower_utility_routine
 
 end module type_SpherepackUtility

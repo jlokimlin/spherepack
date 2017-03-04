@@ -375,7 +375,7 @@ contains
         ifft = nlat+2*nlat*late+3*(l*(l-1)/2+(nlat-l)*(l-1))+1
         !     set pointers for internal storage of g and legendre polys
         ipmn = lat*nlon*nt+1
-        call shagc_lower_routine(nlat, nlon, l, lat, isym, g, idg, jdg, nt, a, b, mdab, ndab, &
+        call shagc_lower_utility_routine(nlat, nlon, l, lat, isym, g, idg, jdg, nt, a, b, mdab, ndab, &
             wshagc, wshagc(iwts), wshagc(ifft), late, work(ipmn), work)
 
     end subroutine shagc
@@ -453,7 +453,7 @@ contains
             block
                 real(wp) :: dwork(ldwork)
 
-                call shagci_lower_routine(nlat, nlon, ntrunc, late, &
+                call shagci_lower_utility_routine(nlat, nlon, ntrunc, late, &
                     wshagc(i1:), wshagc(i2:), wshagc(i3:), &
                     wshagc(i4:), wshagc(i5:), wshagc(i6:), wshagc(i7:), dwork(idth:), &
                     dwork(idwts:), dwork(iw:), ierror)
@@ -467,7 +467,7 @@ contains
     end subroutine shagci
 
 
-    subroutine shagc_lower_routine(nlat, nlon, l, lat, mode, gs, idg, jdg, nt, a, b, mdab, &
+    subroutine shagc_lower_utility_routine(nlat, nlon, l, lat, mode, gs, idg, jdg, nt, a, b, mdab, &
         ndab, w, wts, wfft, late, pmn, g)
 
         real(wp) :: a
@@ -512,7 +512,7 @@ contains
 
         type(SpherepackUtility) :: util
 
-        !     set gs array internally in shagc_lower_routine
+        !     set gs array internally in shagc_lower_utility_routine
         do k=1, nt
             do j=1, nlon
                 do i=1, lat
@@ -688,9 +688,9 @@ contains
             end if
         end if
 
-    end subroutine shagc_lower_routine
+    end subroutine shagc_lower_utility_routine
 
-    subroutine shagci_lower_routine(nlat, nlon, l, late, wts, p0n, p1n, abel, bbel, cbel, &
+    subroutine shagci_lower_utility_routine(nlat, nlon, l, late, wts, p0n, p1n, abel, bbel, cbel, &
         wfft, dtheta, dwts, work, ier)
         real(wp) :: abel
         real(wp) :: bbel
@@ -800,6 +800,6 @@ contains
             end do
         end do
 
-    end subroutine shagci_lower_routine
+    end subroutine shagci_lower_utility_routine
 
 end submodule scalar_analysis_gaussian_grid

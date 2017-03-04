@@ -337,13 +337,13 @@ contains
         ifn = ib+mn
         iwk = ifn+nlat
         lwk = lwork-2*mn-nlat
-        call slapes_lower_routine(nlat, nlon, isym, nt, slap, ids, jds, a, b, mdab, ndab, &
+        call slapes_lower_utility_routine(nlat, nlon, isym, nt, slap, ids, jds, a, b, mdab, ndab, &
             work(ia), work(ib), mmax, work(ifn), wshses, lshses, work(iwk), lwk, &
             ierror)
 
     end subroutine slapes
 
-    subroutine slapes_lower_routine(nlat, nlon, isym, nt, slap, ids, jds, a, b, mdab, ndab, &
+    subroutine slapes_lower_utility_routine(nlat, nlon, isym, nt, slap, ids, jds, a, b, mdab, ndab, &
         alap, blap, mmax, fnn, wsave, lsave, wk, lwk, ierror)
 
         ! Dummy arguments
@@ -374,6 +374,6 @@ contains
         call shses(nlat, nlon, isym, nt, slap, ids, jds, alap, blap, &
             mmax, nlat, wsave, lsave, wk, lwk, ierror)
 
-    end subroutine slapes_lower_routine
+    end subroutine slapes_lower_utility_routine
 
 end submodule scalar_laplacian_regular_grid_saved

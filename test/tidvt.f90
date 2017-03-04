@@ -259,7 +259,7 @@ use spherepack
             !     compute divergence, vorticity of (v, w) in dv, vt
             !
 
-            call shseci(nlat, nlon, wsave, lsave, dwork, ldwork, ierror)
+            call shseci(nlat, nlon, wsave, ierror)
             call name("shsi")
             call iout(ierror, "ierr")
 
@@ -315,7 +315,7 @@ use spherepack
             call name("vha ")
             call iout(ierror, "ierr")
 
-            call shsgci(nlat, nlon, wsave, lsave, dwork, ldwork, ierror)
+            call shsgci(nlat, nlon, wsave, ierror)
             call name("shsi")
             call iout(ierror, "ierr")
 
@@ -342,7 +342,7 @@ use spherepack
             call name("vha ")
             call iout(ierror, "ierr")
 
-            call shsgsi(nlat, nlon, wsave, lsave, work, lwork, dwork, ldwork, ierror)
+            call shsgsi(nlat, nlon, wsave, ierror)
             call name("shsi")
             call iout(ierror, "ierr")
 

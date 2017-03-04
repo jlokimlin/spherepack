@@ -324,13 +324,13 @@ contains
         iis = ib+mn
         iwk = iis+nlat
         lwk = lwork-2*mn-nlat
-        call vrtec_lower_routine(nlat, nlon, isym, nt, vort, ivrt, jvrt, cr, ci, mdc, ndc, &
+        call vrtec_lower_utility_routine(nlat, nlon, isym, nt, vort, ivrt, jvrt, cr, ci, mdc, ndc, &
             work(ia), work(ib), mab, work(iis), wshsec, lshsec, work(iwk), lwk, &
             ierror)
 
     end subroutine vrtec
 
-    subroutine vrtec_lower_routine(nlat, nlon, isym, nt, vort, ivrt, jvrt, cr, ci, mdc, ndc, &
+    subroutine vrtec_lower_utility_routine(nlat, nlon, isym, nt, vort, ivrt, jvrt, cr, ci, mdc, ndc, &
         a, b, mab, sqnn, wshsec, lshsec, wk, lwk, ierror)
 
         real(wp) :: a
@@ -368,6 +368,6 @@ contains
         call shsec(nlat, nlon, isym, nt, vort, ivrt, jvrt, a, b, &
             mab, nlat, wshsec, lshsec, wk, lwk, ierror)
 
-    end subroutine vrtec_lower_routine
+    end subroutine vrtec_lower_utility_routine
 
 end submodule vorticity_regular_grid

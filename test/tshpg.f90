@@ -121,7 +121,7 @@ program tshpg
             call check_error(ierror)
 
             lwshs = lwsha
-            call shsgci(nlat, nlon, wshsgc, lwshs, work, lwrk, ierror)
+            call shsgci(nlat, nlon, wshsgc, ierror)
             call check_error(ierror)
 
             ! Initiate faster filter

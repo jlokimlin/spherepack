@@ -330,13 +330,13 @@ contains
         is = ib+mn
         iwk = is+nlat
         lwk = lwork-2*mn-nlat
-        call sfvpec_lower_routine(nlat, nlon, isym, nt, sf, vp, idv, jdv, br, bi, cr, ci, mdb, ndb, &
+        call sfvpec_lower_utility_routine(nlat, nlon, isym, nt, sf, vp, idv, jdv, br, bi, cr, ci, mdb, ndb, &
             work(ia), work(ib), mab, work(is), wshsec, lshsec, work(iwk), lwk, &
             ierror)
 
     end subroutine sfvpec
 
-    subroutine sfvpec_lower_routine(nlat, nlon, isym, nt, sf, vp, idv, jdv, br, bi, cr, ci, &
+    subroutine sfvpec_lower_utility_routine(nlat, nlon, isym, nt, sf, vp, idv, jdv, br, bi, cr, ci, &
         mdb, ndb, a, b, mab, fnn, wshsec, lshsec, wk, lwk, ierror)
 
         integer(ip) :: nlat, nlon, isym, nt, idv, jdv, mdb, ndb, mab, lshsec, lwk, ierror
@@ -365,7 +365,7 @@ contains
         call shsec(nlat, nlon, isym, nt, vp, idv, jdv, a, b, &
             mab, nlat, wshsec, lshsec, wk, lwk, ierror)
 
-    end subroutine sfvpec_lower_routine
+    end subroutine sfvpec_lower_utility_routine
 
     pure subroutine compute_coefficient_multipliers(fnn)
 

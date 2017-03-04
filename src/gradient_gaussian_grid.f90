@@ -315,13 +315,13 @@ contains
         iis = ibi + mn
         iwk = iis + nlat
         liwk = lwork-2*mn-nlat
-        call gradgc_lower_routine(nlat, nlon, isym, nt, v, w, idvw, jdvw, work(ibr), work(ibi), &
+        call gradgc_lower_utility_routine(nlat, nlon, isym, nt, v, w, idvw, jdvw, work(ibr), work(ibi), &
             mmax, work(iis), mdab, ndab, a, b, wvhsgc, lvhsgc, work(iwk), liwk, &
             ierror)
 
     end subroutine gradgc
 
-    subroutine gradgc_lower_routine(nlat, nlon, isym, nt, v, w, idvw, jdvw, br, bi, mmax, &
+    subroutine gradgc_lower_utility_routine(nlat, nlon, isym, nt, v, w, idvw, jdvw, br, bi, mmax, &
         sqnn, mdab, ndab, a, b, wvhsgc, lvhsgc, wk, lwk, ierror)
 
         real(wp) :: a
@@ -363,6 +363,6 @@ contains
         call vhsgc(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
             mmax, nlat, wvhsgc, lvhsgc, wk, lwk, ierror)
 
-    end subroutine gradgc_lower_routine
+    end subroutine gradgc_lower_utility_routine
 
 end submodule gradient_gaussian_grid

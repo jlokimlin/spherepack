@@ -281,7 +281,7 @@ contains
         !
         !     compute points
         !
-        call gsqd_lower_routine(nlat, theta, dwork)
+        call gsqd_lower_utility_routine(nlat, theta, dwork)
         !
         !     compute weights
         !
@@ -298,7 +298,7 @@ contains
         return
     end subroutine gsqd
     !
-    subroutine gsqd_lower_routine(nlat, theta, cp)
+    subroutine gsqd_lower_utility_routine(nlat, theta, cp)
 
         real(wp) :: eps
         real(wp) :: summation
@@ -363,7 +363,7 @@ contains
         if (nix<nhalf-1)  zero = zero+zero-theta(nix+2)
         goto 9
 30      return
-    end subroutine gsqd_lower_routine
+    end subroutine gsqd_lower_utility_routine
 
     subroutine egwts(n, theta, wts, work)
 

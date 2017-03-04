@@ -207,7 +207,7 @@ contains
         jw3 = jw2+nloc2
         jw4 = jw3+nloc2
 
-        call shpg_lower_routine(nlat, nlon, isym, mtrunc, y, y, idxy, ierror, &
+        call shpg_lower_utility_routine(nlat, nlon, isym, mtrunc, y, y, idxy, ierror, &
             nte, wshp(iw1), wshp(iw2), wshp(iw3), wshp(iw4), iwshp(jw1), &
             iwshp(jw2), iwshp(jw3), iwshp(jw4), work(jw1), &
             work(jw2), work(jw3), work(jw4))
@@ -385,14 +385,14 @@ contains
         kw11 = kw10+nloc1
         ktot = kw11+nte*nte
 
-        call shpgi_lower_routine(nlat, nlon, isym, mtrunc, nte, ierror, wshp(iw1), wshp(iw2), &
+        call shpgi_lower_utility_routine(nlat, nlon, isym, mtrunc, nte, ierror, wshp(iw1), wshp(iw2), &
             wshp(iw3), wshp(iw4), iwshp(jw1), iwshp(jw2), iwshp(jw3), &
             iwshp(jw4), work(kw1), work(kw2), work(kw3), work(kw4), work(kw5), &
             work(kw6), work(kw7), work(kw8), work(kw9), work(kw10), work(kw11))
 
     end subroutine shpgi
 
-    subroutine shpgi_lower_routine(nlat, nlon, isym, mtrunc, idp, ierror, &
+    subroutine shpgi_lower_utility_routine(nlat, nlon, isym, mtrunc, idp, ierror, &
         pe, po, ze, zo, ipse, jzse, ipso, jzso, &
         cp, wx, thet, gwts, xx, z, a, b, ped, pod, u)
 
@@ -776,9 +776,9 @@ contains
             end do
         end do
 
-    end subroutine shpgi_lower_routine
+    end subroutine shpgi_lower_utility_routine
 
-    subroutine shpg_lower_routine(nlat, nlon, isym, mtrunc, sx, sy, idxy, ierror, &
+    subroutine shpg_lower_utility_routine(nlat, nlon, isym, mtrunc, sx, sy, idxy, ierror, &
         idp, pe, po, ze, zo, ipse, jzse, ipso, jzso, xe, xo, ye, yo)
 
         integer(ip) :: i
@@ -930,7 +930,7 @@ contains
             end do
         end do
 
-    end subroutine shpg_lower_routine
+    end subroutine shpg_lower_utility_routine
 
     subroutine matrix_multiply(lag, lr, lc, ld, a, mc, md, b, x, y, is, js)
 

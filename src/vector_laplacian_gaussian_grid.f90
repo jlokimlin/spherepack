@@ -432,13 +432,13 @@ contains
         iwk = ifn + nlat
         liwk = lwork-4*mn-nlat
 
-        call vlapgc_lower_routine(nlat, nlon, ityp, nt, vlap, wlap, idvw, jdvw, work(ibr), &
+        call vlapgc_lower_utility_routine(nlat, nlon, ityp, nt, vlap, wlap, idvw, jdvw, work(ibr), &
             work(ibi), work(icr), work(ici), mmax, work(ifn), mdbc, ndbc, br, bi, &
             cr, ci, wvhsgc, lvhsgc, work(iwk), liwk, ierror)
 
     end subroutine vlapgc
 
-    subroutine vlapgc_lower_routine(nlat, nlon, ityp, nt, vlap, wlap, idvw, jdvw, brlap, &
+    subroutine vlapgc_lower_utility_routine(nlat, nlon, ityp, nt, vlap, wlap, idvw, jdvw, brlap, &
         bilap, crlap, cilap, mmax, fnn, mdb, ndb, br, bi, cr, ci, wsave, lwsav, &
         wk, lwk, ierror)
 
@@ -485,6 +485,6 @@ contains
         call vhsgc(nlat, nlon, ityp, nt, vlap, wlap, idvw, jdvw, brlap, bilap, &
             crlap, cilap, mmax, nlat, wsave, lwsav, wk, lwk, ierror)
 
-    end subroutine vlapgc_lower_routine
+    end subroutine vlapgc_lower_utility_routine
 
 end submodule vector_laplacian_gaussian_grid

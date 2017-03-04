@@ -361,13 +361,13 @@ contains
         ifn = ib+mn
         iwk = ifn+nlat
         lwk = lwork-2*mn-nlat
-        call islapec_lower_routine(nlat, nlon, isym, nt, xlmbda, sf, ids, jds, a, b, mdab, ndab, &
+        call islapec_lower_utility_routine(nlat, nlon, isym, nt, xlmbda, sf, ids, jds, a, b, mdab, ndab, &
             work(ia), work(ib), mmax, work(ifn), wshsec, lshsec, work(iwk), lwk, &
             pertrb, ierror)
 
     end subroutine islapec
 
-    subroutine islapec_lower_routine(nlat, nlon, isym, nt, xlmbda, sf, ids, jds, a, b, &
+    subroutine islapec_lower_utility_routine(nlat, nlon, isym, nt, xlmbda, sf, ids, jds, a, b, &
         mdab, ndab, as, bs, mmax, fnn, wshsec, lshsec, wk, lwk, pertrb, ierror)
 
         real(wp) :: a
@@ -406,6 +406,6 @@ contains
         call shsec(nlat, nlon, isym, nt, sf, ids, jds, as, bs, mmax, nlat, &
             wshsec, lshsec, wk, lwk, ierror)
 
-    end subroutine islapec_lower_routine
+    end subroutine islapec_lower_utility_routine
 
 end submodule invert_scalar_laplacian_regular_grid

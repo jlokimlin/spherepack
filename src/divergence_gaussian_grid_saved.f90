@@ -323,13 +323,13 @@ contains
         iwk = iis+nlat
         lwk = lwork-2*mn-nlat
 
-        call divgs_lower_routine(nlat, nlon, isym, nt, divg, idiv, jdiv, br, bi, mdb, ndb, &
+        call divgs_lower_utility_routine(nlat, nlon, isym, nt, divg, idiv, jdiv, br, bi, mdb, ndb, &
             work(ia), work(ib), mab, work(iis), wshsgs, lshsgs, work(iwk), lwk, &
             ierror)
 
     end subroutine divgs
 
-    subroutine divgs_lower_routine(nlat, nlon, isym, nt, divg, idiv, jdiv, br, bi, mdb, ndb, &
+    subroutine divgs_lower_utility_routine(nlat, nlon, isym, nt, divg, idiv, jdiv, br, bi, mdb, ndb, &
         a, b, mab, sqnn, wshsgs, lshsgs, wk, lwk, ierror)
         real(wp) :: a
         real(wp) :: b
@@ -366,6 +366,6 @@ contains
         call shsgs(nlat, nlon, isym, nt, divg, idiv, jdiv, a, b, &
             mab, nlat, wshsgs, lshsgs, wk, lwk, ierror)
 
-    end subroutine divgs_lower_routine
+    end subroutine divgs_lower_utility_routine
 
 end submodule divergence_gaussian_grid_saved

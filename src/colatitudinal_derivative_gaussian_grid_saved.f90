@@ -346,7 +346,7 @@ contains
         iw4 = iw2+lnl
         jw1 = lzimn+1
         jw2 = jw1+lzimn
-        call vtsgs_lower_routine(nlat, nlon, ityp, nt, imid, idvw, jdvw, vt, wt, mdab, ndab, &
+        call vtsgs_lower_utility_routine(nlat, nlon, ityp, nt, imid, idvw, jdvw, vt, wt, mdab, ndab, &
             br, bi, cr, ci, idv, work, work(iw1), work(iw2), work(iw3), &
             work(iw4), idz, wvts, wvts(jw1), wvts(jw2))
 
@@ -481,14 +481,14 @@ contains
         iw2 = iw1+lwvbin
         jw1 = nlat+1
         jw2 = jw1+nlat
-        call vtsgsi_lower_routine(nlat, nlon, imid, wvts, wvts(lzimn+1), work, work(iw1), &
+        call vtsgsi_lower_utility_routine(nlat, nlon, imid, wvts, wvts(lzimn+1), work, work(iw1), &
             dwork, dwork(jw1), dwork(jw2), ierror)
         if(ierror /= 0) return
         call util%hfft%initialize(nlon, wvts(2*lzimn+1))
 
     end subroutine vtsgsi
 
-    subroutine vtsgs_lower_routine(nlat, nlon, ityp, nt, imid, idvw, jdvw, vt, wt, mdab, &
+    subroutine vtsgs_lower_utility_routine(nlat, nlon, ityp, nt, imid, idvw, jdvw, vt, wt, mdab, &
         ndab, br, bi, cr, ci, idv, vte, vto, wte, wto, work, idz, vb, wb, wrfft)
         implicit none
         real(wp) :: bi
@@ -1117,9 +1117,9 @@ contains
             end do
         end if
 
-    end subroutine vtsgs_lower_routine
+    end subroutine vtsgs_lower_utility_routine
 
-    subroutine vtsgsi_lower_routine(nlat, nlon, imid, vb, wb, vin, wvbin, &
+    subroutine vtsgsi_lower_utility_routine(nlat, nlon, imid, vb, wb, vin, wvbin, &
         theta, wts, dwork, ierror)
 
         integer(ip) :: i
@@ -1179,6 +1179,6 @@ contains
             end do
         end do
 
-    end subroutine vtsgsi_lower_routine
+    end subroutine vtsgsi_lower_utility_routine
 
 end submodule colatitudinal_derivative_gaussian_grid_saved
