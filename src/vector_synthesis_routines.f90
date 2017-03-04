@@ -169,15 +169,12 @@ module vector_synthesis_routines
             integer(ip), intent(out) :: ierror
         end subroutine vhsgci
 
-        module subroutine vhsgsi(nlat, nlon, wvhsgs, lvhsgs, dwork, ldwork, ierror)
+        module subroutine vhsgsi(nlat, nlon, wvhsgs, ierror)
 
             ! Dummy arguments
             integer(ip), intent(in)  :: nlat
             integer(ip), intent(in)  :: nlon
-            real(wp),    intent(out) :: wvhsgs(lvhsgs)
-            integer(ip), intent(in)  :: lvhsgs
-            real(wp),    intent(out) :: dwork(ldwork)
-            integer(ip), intent(in)  :: ldwork
+            real(wp),    intent(out) :: wvhsgs(:)
             integer(ip), intent(out) :: ierror
         end subroutine vhsgsi
     end interface

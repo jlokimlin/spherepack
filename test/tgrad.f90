@@ -363,7 +363,7 @@ program tgrad
                 !     compute gradient of st in v, w
                 !
 
-                call vhsgsi(nlat, nlon, wsave, lsave, dwork, ldwork, ierror)
+                call vhsgsi(nlat, nlon, wsave, ierror)
                 call name("vhgs")
                 call iout(ierror, "ierr")
 

@@ -356,7 +356,7 @@ program tvha
             !
             !     now synthesize v, w from br, bi, cr, ci and compare with original
             !
-            call vhsgsi(nlat, nlon, wsave, lsave, dwork, ldwork, ierror)
+            call vhsgsi(nlat, nlon, wsave, ierror)
             call name("vhsi")
             call iout(ierror, "ierr")
 

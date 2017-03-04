@@ -315,51 +315,43 @@ contains
         integer(ip),              intent(in)    :: nlon
 
         ! Local variables
-        integer(ip)    :: error_flag
-        integer(ip)    :: ldwork, lvhsgs
+        integer(ip)    :: error_flag, lvhsgs
         type(VhsgsAux) :: aux
 
         ! Compute required workspace sizes
-        ldwork = get_ldwork(nlat)
         lvhsgs = aux%get_lvhsgs(nlat, nlon)
 
         !  Allocate memory
-        if (allocated(self%backward_vector)) deallocate( self%backward_vector )
-        allocate( self%backward_vector(lvhsgs) )
+        if (allocated(self%backward_vector)) deallocate (self%backward_vector)
+        allocate (self%backward_vector(lvhsgs))
 
-        !  Initialize workspace arrays for vector synthesis
-        block
-            real(wp) :: dwork(ldwork)
+        call aux%vhsgsi(nlat, nlon, self%backward_vector, error_flag)
 
-            call aux%vhsgsi( &
-                nlat, nlon, self%backward_vector, lvhsgs, dwork, ldwork, error_flag)
-
-            ! Address error flag
-            select case (error_flag)
-                case(0)
-                    return
-                case(1)
-                    error stop 'Object of class(GaussianWorkspace) '&
-                        //'in initialize_gaussian_vector_synthesis '&
-                        //'error in the specification of NUMBER_OF_LATITUDES'
-                case(2)
-                    error stop 'Object of class(GaussianWorkspace) '&
-                        //'in initialize_gaussian_vector_synthesis '&
-                        //'error in the specification of NUMBER_OF_LONGITUDES'
-                case(3)
-                    error stop 'Object of class(GaussianWorkspace) '&
-                        //'in initialize_gaussian_vector_synthesis '&
-                        //'error in the specification of extent for backward_vector'
-                case(4)
-                    error stop 'Object of class(GaussianWorkspace) '&
-                        //'in initialize_gaussian_vector_synthesis '&
-                        //'error in the specification of extent for dwork'
-                case default
-                    error stop 'Object of class(GaussianWorkspace) '&
-                        //'in initialize_gaussian_vector_synthesis '&
-                        //'Undetermined error flag'
-            end select
-        end block
+        ! Address error flag
+        select case (error_flag)
+            case(0)
+                return
+            case(1)
+                error stop 'Object of class(GaussianWorkspace) '&
+                    //'in initialize_gaussian_vector_synthesis '&
+                    //'error in the specification of NUMBER_OF_LATITUDES'
+            case(2)
+                error stop 'Object of class(GaussianWorkspace) '&
+                    //'in initialize_gaussian_vector_synthesis '&
+                    //'error in the specification of NUMBER_OF_LONGITUDES'
+            case(3)
+                error stop 'Object of class(GaussianWorkspace) '&
+                    //'in initialize_gaussian_vector_synthesis '&
+                    //'error in the specification of extent for backward_vector'
+            case(4)
+                error stop 'Object of class(GaussianWorkspace) '&
+                    //'in initialize_gaussian_vector_synthesis '&
+                    //'error in the specification of extent for dwork'
+            case default
+                error stop 'Object of class(GaussianWorkspace) '&
+                    //'in initialize_gaussian_vector_synthesis '&
+                    //'Undetermined error flag'
+        end select
 
     end subroutine initialize_gaussian_vector_synthesis
 

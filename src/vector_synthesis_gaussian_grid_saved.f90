@@ -473,7 +473,7 @@ contains
     !     locations which is determined by the size of dthet, 
     !     dwts, dwork, and dpbar in vhsgs_lower_utility_routine
     !
-    !     subroutine vhsgsi(nlat, nlon, wvhsgs, lvhsgs, dwork, ldwork, ierror)
+    !     subroutine vhsgsi(nlat, nlon, wvhsgs, ierror)
     !
     !     subroutine vhsgsi initializes the array wvhsgs which can then be
     !     used repeatedly by subroutine vhsgs until nlat or nlon is changed.
@@ -513,13 +513,6 @@ contains
     !
     !                 l1*l2*(nlat+nlat-l1+1)+nlon+15+2*nlat
     !
-    !     dwork a real work array that does not need to be saved
-    !
-    !     ldwork the dimension of the array dwork as it appears in the
-    !            program that calls vhsgsi. ldwork must be at least
-    !
-    !                 (3*nlat*(nlat+3)+2)/2
-
     !
     !     **************************************************************
     !
@@ -535,63 +528,63 @@ contains
     !            = 1  error in the specification of nlat
     !            = 2  error in the specification of nlon
     !            = 3  error in the specification of lvhsgs
-    !            = 4  error in the specification of lwork
     !
-    module subroutine vhsgsi(nlat, nlon, wvhsgs, lvhsgs, dwork, ldwork, ierror)
+    module subroutine vhsgsi(nlat, nlon, wvhsgs, ierror)
 
         ! Dummy arguments
         integer(ip), intent(in)     :: nlat
         integer(ip), intent(in)     :: nlon
-        real(wp),    intent(out)    :: wvhsgs(lvhsgs)
-        integer(ip), intent(in)     :: lvhsgs
-        real(wp),    intent(out)    :: dwork(ldwork)
-        integer(ip), intent(in)     :: ldwork
+        real(wp),    intent(out)    :: wvhsgs(:)
         integer(ip), intent(out)    :: ierror
 
         ! Local variables
-        integer(ip)         :: imid, lmn
+        integer(ip) :: imid, lmn, ldwork
         type(SpherepackUtility) :: util
 
-        imid = (nlat+1)/2
-        lmn = (nlat*(nlat+1))/2
+        associate( lvhsgs => size(wvhsgs) )
 
-        !  Check calling arguments
-        if (nlat < 3) then
-            ierror = 1
-            return
-        else if (nlon < 1) then
-            ierror = 2
-            return
-        else if (lvhsgs < 2*(imid*lmn)+nlon+15) then
-            ierror = 3
-            return
-        else if (ldwork < (nlat*3*(nlat+3)+2)/2) then
-            ierror = 4
-            return
-        else
-            ierror = 0
-        end if
+            imid = (nlat+1)/2
+            lmn = (nlat*(nlat+1))/2
 
-        block
-            integer(ip) :: jw1, jw2, jw3
-            integer(ip) :: iw1, iw2, iw3, iw4
+            !  Check calling arguments
+            if (nlat < 3) then
+                ierror = 1
+            else if (nlon < 1) then
+                ierror = 2
+            else if (lvhsgs < 2*(imid*lmn)+nlon+15) then
+                ierror = 3
+            else
+                ierror = 0
+            end if
 
-            ! Set saved workspace pointer indices
-            jw1 = 1
-            jw2 = jw1+imid*lmn
-            jw3 = jw2+imid*lmn
+            ! Check error flag
+            if (ierror /= 0) return
 
-            ! Set unsaved workspace pointer indices
-            iw1 = 1
-            iw2 = iw1+nlat
-            iw3 = iw2+nlat
-            iw4 = iw3+3*imid*nlat
+            ! Set required workspace size
+            ldwork = (nlat*3*(nlat+3)+2)/2
 
-            call vhgsi_lower_utility_routine(nlat, imid, wvhsgs(jw1), wvhsgs(jw2), &
-                dwork(iw1), dwork(iw2), dwork(iw3), dwork(iw4))
+            block
+                integer(ip) :: jw1, jw2, jw3
+                integer(ip) :: iw1, iw2, iw3, iw4
+                real(wp)    :: dwork(ldwork)
 
-            call util%hfft%initialize(nlon, wvhsgs(jw3))
-        end block
+                ! Set saved workspace pointer indices
+                jw1 = 1
+                jw2 = jw1+imid*lmn
+                jw3 = jw2+imid*lmn
+
+                ! Set unsaved workspace pointer indices
+                iw1 = 1
+                iw2 = iw1+nlat
+                iw3 = iw2+nlat
+                iw4 = iw3+3*imid*nlat
+
+                call vhgsi_lower_utility_routine(nlat, imid, wvhsgs(jw1:), &
+                    wvhsgs(jw2:), dwork(iw1:), dwork(iw2:), dwork(iw3:), dwork(iw4:))
+
+                call util%hfft%initialize(nlon, wvhsgs(jw3:))
+            end block
+        end associate
 
     end subroutine vhsgsi
 

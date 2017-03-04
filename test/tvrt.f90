@@ -520,7 +520,7 @@ program tvrt
                 !
                 !     set vector field (ve, we) with br=bi=0.0 for comparison with inverted vt
                 !
-                call vhsgsi(nlat, nlon, wsave, lsave, dwork, ldwork, ierror)
+                call vhsgsi(nlat, nlon, wsave, ierror)
                 call name("vhsi")
                 call iout(ierror, "ierr")
         		
@@ -540,7 +540,7 @@ program tvrt
                 call iout(lsave, "lsav")
                 call iout(lwork, "lwrk")
         		
-                call vhsgsi(nlat, nlon, wsave, lsave, dwork, ldwork, ierror)
+                call vhsgsi(nlat, nlon, wsave, ierror)
                 call name("ivti")
                 call iout(ierror, "ierr")
         		

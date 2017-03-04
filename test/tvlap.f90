@@ -319,7 +319,7 @@ program tvlap
             !     compute vector laplacian
             !
 
-            call vhsgsi(nlat, nlon, wsave, lsave, dwork, ldwork, ierror)
+            call vhsgsi(nlat, nlon, wsave, ierror)
             call name("vhsgsi")
             call iout(ierror, "ierr")
 
@@ -461,7 +461,7 @@ program tvlap
             call name("vhags")
             call iout(ierror, "ierr")
 
-            call vhsgsi(nlat, nlon, wsave, lsave, dwork, ldwork, ierror)
+            call vhsgsi(nlat, nlon, wsave, ierror)
             call name("vhsgsi")
             call iout(ierror, "ierr")
 

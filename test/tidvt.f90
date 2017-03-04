@@ -492,7 +492,7 @@ use spherepack
         		call iout(lsave, "lsav")
         		call iout(lwork, "lwrk")
         		
-        		call vhsgsi(nlat, nlon, wsave, lsave, dwork, ldwork, ierror)
+        		call vhsgsi(nlat, nlon, wsave, ierror)
         		call name("idvi")
         		call iout(ierror, "ierr")
         		
