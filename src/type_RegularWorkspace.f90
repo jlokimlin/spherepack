@@ -145,52 +145,44 @@ contains
 
         ! Local variables
         integer(ip)    :: error_flag
-        integer(ip)    :: lwork, ldwork, lshaes
+        integer(ip)    :: lshaes
         type(ShaesAux) :: aux
 
         ! Compute dimensions of various workspace arrays
-        lwork = get_lwork(nlat, nlon)
-        ldwork = get_ldwork(nlat)
         lshaes = aux%get_lshaes(nlat, nlon)
 
         ! Allocate memory
         if (allocated(self%forward_scalar)) deallocate( self%forward_scalar )
         allocate( self%forward_scalar(lshaes) )
 
-        ! Initialize workspace for scalar synthesis
-        block
-            real(wp) :: work(lwork)
-            real(wp) :: dwork(ldwork)
+        ! Call procedural routine
+        call aux%shaesi(nlat, nlon, self%forward_scalar, error_flag)
 
-            ! Call procedural routine
-            call aux%shaesi(nlat, nlon, self%forward_scalar, lshaes, work, lwork, dwork, ldwork, error_flag)
-
-            ! Address error flag
-            select case (error_flag)
-                case(0)
-                    return
-                case(1)
-                    error stop 'Object of class(RegularWorkspace): '&
-                        //'in initialize_regular_scalar_analysis '&
-                        //'error in the specification of NUMBER_OF_LATITUDES'
-                case(2)
-                    error stop 'Object of class(RegularWorkspace): '&
-                        //'in initialize_regular_scalar_analysis '&
-                        //'error in the specification of NUMBER_OF_LONGITUDES'
-                case(3)
-                    error stop 'Object of class(RegularWorkspace): '&
-                        //'in initialize_regular_scalar_analysis '&
-                        //'error in the specification of extent for forward_scalar'
-                case(4)
-                    error stop 'Object of class(RegularWorkspace): '&
-                        //'in initialize_regular_scalar_analysis '&
-                        //'error in the specification of extent for legendre_workspace'
-                case default
-                    error stop 'Object of class(RegularWorkspace): '&
-                        //'in initialize_regular_scalar_analysis '&
-                        //'Undetermined error flag'
-            end select
-        end block
+        ! Address error flag
+        select case (error_flag)
+            case(0)
+                return
+            case(1)
+                error stop 'Object of class(RegularWorkspace): '&
+                    //'in initialize_regular_scalar_analysis '&
+                    //'error in the specification of NUMBER_OF_LATITUDES'
+            case(2)
+                error stop 'Object of class(RegularWorkspace): '&
+                    //'in initialize_regular_scalar_analysis '&
+                    //'error in the specification of NUMBER_OF_LONGITUDES'
+            case(3)
+                error stop 'Object of class(RegularWorkspace): '&
+                    //'in initialize_regular_scalar_analysis '&
+                    //'error in the specification of extent for forward_scalar'
+            case(4)
+                error stop 'Object of class(RegularWorkspace): '&
+                    //'in initialize_regular_scalar_analysis '&
+                    //'error in the specification of extent for legendre_workspace'
+            case default
+                error stop 'Object of class(RegularWorkspace): '&
+                    //'in initialize_regular_scalar_analysis '&
+                    //'Undetermined error flag'
+        end select
 
     end subroutine initialize_regular_scalar_analysis
 

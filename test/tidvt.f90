@@ -395,7 +395,7 @@ use spherepack
         		call name("**ec")
         		
         		
-        		call shaeci(nlat, nlon, wsave, lsave, dwork, ldwork, ierror)
+        		call shaeci(nlat, nlon, wsave, ierror)
         		call name("shai")
         		call iout(ierror, "ierr")
         		
@@ -422,7 +422,7 @@ use spherepack
         		
         		call name("**es")
         		
-        		call shaesi(nlat, nlon, wsave, lsave, work, lwork, dwork, ldwork, ierror)
+        		call shaesi(nlat, nlon, wsave, ierror)
         		call name("shai")
         		call iout(ierror, "ierr")
         		

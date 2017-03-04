@@ -293,7 +293,7 @@ program shallow
     !
     !     initialize spherepack routines
     !
-    call shaesi(nlat, nlon, wsha, lwsha, work, lwork, dwork, lwork, ierror)
+    call shaesi(nlat, nlon, wsha, ierror)
     if(ierror /= 0) write(*, 55) ierror
 55  format(' error' i4 ' in shaesi')
     call shsesi(nlat, nlon, wshs, lwshs, work, lwork, dwork, ldwork, ierror)

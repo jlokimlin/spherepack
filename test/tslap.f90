@@ -216,7 +216,7 @@ use spherepack
         		
         		call name("**ec")
         		
-        		call shaeci(nlat, nlon, wsave, lsave, dwork, ldwork, ierror)
+        		call shaeci(nlat, nlon, wsave, ierror)
         		call name("shai")
         		call iout(ierror, "ierr")
         		
@@ -237,7 +237,7 @@ use spherepack
         		
         		call name("**es")
         		
-        		call shaesi(nlat, nlon, wsave, lsave, work, lwork, dwork, ldwork, ierror)
+        		call shaesi(nlat, nlon, wsave, ierror)
         		call name("shai")
         		call iout(ierror, "ierr")
         		
@@ -318,7 +318,7 @@ use spherepack
         select case (icase)
         	case (1)
         		
-        		call shaeci(nlat, nlon, wsave, lsave, dwork, ldwork, ierror)
+        		call shaeci(nlat, nlon, wsave, ierror)
         		call shaec(nlat, nlon, isym, nt, sclp, nlat, nlon, a, b, mdab, nlat, &
         		wsave, lsave, work, lwork, ierror)
         		
@@ -333,7 +333,7 @@ use spherepack
         		call vecout(ptrb, "ptrb", nt)
         	case (2)
         		
-        		call shaesi(nlat, nlon, wsave, lsave, work, lwork, dwork, ldwork, ierror)
+        		call shaesi(nlat, nlon, wsave, ierror)
         		call shaes(nlat, nlon, isym, nt, sclp, nlat, nlon, a, b, mdab, nlat, &
         		wsave, lsave, work, lwork, ierror)
         		

@@ -34,45 +34,10 @@
 !
 submodule(scalar_analysis_routines) scalar_analysis_regular_grid_saved
 
-contains
+! Parameter confined to the module
+integer(ip), parameter :: NUMBER_OF_WORKSPACE_INDICES = 3
 
-!    subroutine regular_grid_to_spec(symmetry_type, gridded_data, spectral_data, wavetable, workspace, error_flag)
-!
-!        ! Dummy arguments
-!        integer(ip),               intent(in)    :: symmetry_type
-!        real(wp),                  intent(in)    :: gridded_data
-!        class(ScalarCoefficients), intent(inout) :: spectral_data
-!        class(RegularWaveTable),   intent(inout) :: wavetable
-!        class(RegularWorkspace),   intent(inout) :: workspace
-!        integer(ip),               intent(out)   :: error_flag
-!
-!        associate( &
-!            nlat => spectral_data%NUMBER_OF_LATITUDES, &
-!            nlon => spectral_data%NUMBER_OF_LONGITUDES, &
-!            isym => symmetry_type, &
-!            nt => spectral_data%NUMBER_OF_SYNTHESES, &
-!            g => gridded_data, &
-!            a => spectral_data%real_component, &
-!            b => spectral_data%imaginary_component, &
-!            wshaes => wavetable%forward_scalar_wavetable, &
-!            work => workspace%forward_scalar_workspace, &
-!            ierror => error_flag &
-!            )
-!            associate( &
-!                idg => size(g, dim=1), &
-!                jdg => size(g, dim=2), &
-!                mdab => min(size(a, dim=1), size(b, dim=1)), &
-!                ndab => min(size(a, dim=2), size(b, dim=2)), &
-!                lshaes => size(wshaes), &
-!                lwork => size(work) &
-!                )
-!
-!                call shaes(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, &
-!                    wshaes, lshaes, work, lwork, ierror)
-!            end associate
-!        end associate
-!
-!    end subroutine regular_grid_to_spec
+contains
 
     ! Purpose:
     !
@@ -445,62 +410,62 @@ contains
     ! size(wshaes) = (l*(l+1)*imid)/2+nlon+15
     ! size(work) = 5*l*imid + 3*((l-3)*l+2)/2
     !
-    module subroutine shaesi(nlat, nlon, wshaes, lshaes, work, lwork, dwork, &
-        ldwork, ierror)
+    module subroutine shaesi(nlat, nlon, wshaes, ierror)
 
         ! Dummy arguments
         integer(ip), intent(in)    :: nlat
         integer(ip), intent(in)    :: nlon
-        real(wp),    intent(out)   :: wshaes(lshaes)
-        integer(ip), intent(in)    :: lshaes
-        real(wp),    intent(out)   :: work(lwork)
-        integer(ip), intent(in)    :: lwork
-        real(wp),    intent(out)   :: dwork(ldwork)
-        integer(ip), intent(in)    :: ldwork
+        real(wp),    intent(out)   :: wshaes(:)
         integer(ip), intent(out)   :: ierror
 
         ! Local variables
-        integer(ip)         :: mmax, imid, labc, lzimn
-        integer(ip)         :: workspace_indices(3)
+        integer(ip) :: mmax, imid, labc, lzimn
+        integer(ip) :: workspace_indices(NUMBER_OF_WORKSPACE_INDICES)
+        integer(ip) :: lwork, ldwork
         type(SpherepackUtility) :: util
 
-        mmax = min(nlat, nlon/2+1)
-        imid = (nlat+1)/2
-        labc = 3*((mmax-2)*(2*nlat-mmax-1))/2
-        lzimn = (imid*mmax*(2*nlat-mmax+1))/2
+        associate( lshaes => size(wshaes) )
 
-        ! Check input arguments
-        if (nlat < 3) then
-            ierror = 1
-            return
-        else if (nlon < 4) then
-            ierror = 2
-            return
-        else if (lshaes < lzimn+nlon+15) then
-            ierror = 3
-            return
-        else if (lwork < 5*nlat*imid + labc) then
-            ierror = 4
-            return
-        else if (ldwork < nlat+1) then
-            ierror = 5
-            return
-        else
-            ierror = 0
-        end if
+            mmax = min(nlat, nlon/2+1)
+            imid = (nlat+1)/2
+            labc = 3*((mmax-2)*(2*nlat-mmax-1))/2
+            lzimn = (imid*mmax*(2*nlat-mmax+1))/2
 
-        !  Set workspace indices
-        workspace_indices = get_workspace_indices(nlat, nlon, mmax, imid, lzimn)
+            ! Check calling arguments
+            if (nlat < 3) then
+                ierror = 1
+            else if (nlon < 4) then
+                ierror = 2
+            else if (lshaes < lzimn+nlon+15) then
+                ierror = 3
+            else
+                ierror = 0
+            end if
 
-        !  Compute workspace
-        associate( &
-            idz => workspace_indices(1), &
-            iw1 => workspace_indices(2), &
-            iw2 => workspace_indices(3) &
-            )
-            call util%initialize_scalar_analysis_regular_grid_saved( &
-                nlat, nlon, imid, wshaes, idz, work, work(iw1), dwork)
-            call util%hfft%initialize(nlon, wshaes(iw2))
+            ! Address error flag
+            if (ierror /= 0) return
+
+            ! Set required workspace sizes
+            lwork = 5*nlat*imid + labc
+            ldwork = nlat+1
+
+            !  Set workspace indices
+            workspace_indices = get_workspace_indices(nlat, nlon, mmax, imid, lzimn)
+
+            !  Compute wavetable
+            block
+                real(wp) :: work(lwork), dwork(ldwork)
+                associate( &
+                    idz => workspace_indices(1), &
+                    iw1 => workspace_indices(2), &
+                    iw2 => workspace_indices(3) &
+                    )
+                    call util%initialize_scalar_analysis_regular_grid_saved( &
+                        nlat, nlon, imid, wshaes, idz, work, work(iw1:), dwork)
+
+                    call util%hfft%initialize(nlon, wshaes(iw2:))
+                end associate
+            end block
         end associate
 
     end subroutine shaesi
@@ -692,7 +657,7 @@ contains
         integer(ip), intent(in) :: mmax
         integer(ip), intent(in) :: imid
         integer(ip), intent(in) :: lzimn
-        integer(ip)             :: return_value(3)
+        integer(ip)             :: return_value(NUMBER_OF_WORKSPACE_INDICES)
 
         associate( i => return_value )
             i(1) = (mmax*(2*nlat-mmax+1))/2

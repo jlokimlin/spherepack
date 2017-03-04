@@ -118,7 +118,7 @@ program tshpe
             nlon = 2*(nlat-1)
             mtrunc = min(mtrunc, nlat-1, nlon/2)
 
-            call shaeci(nlat, nlon, wshaec, lwsha, work, lwrk, ierror)
+            call shaeci(nlat, nlon, wshaec, ierror)
             call check_error(ierror)
 
             lwshs = lwsha

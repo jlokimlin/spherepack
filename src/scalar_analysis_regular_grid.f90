@@ -399,49 +399,56 @@ contains
 
     end subroutine shaec
 
-    module subroutine shaeci(nlat, nlon, wshaec, lshaec, dwork, ldwork, ierror)
+    module subroutine shaeci(nlat, nlon, wshaec, ierror)
 
         ! Dummy arguments
         integer(ip), intent(in)  :: nlat
         integer(ip), intent(in)  :: nlon
-        real(wp),    intent(out) :: wshaec(lshaec)
-        integer(ip), intent(in)  :: lshaec
-        real(wp),    intent(out) :: dwork(ldwork)
-        integer(ip), intent(in)  :: ldwork
+        real(wp),    intent(out) :: wshaec(:)
         integer(ip), intent(out) :: ierror
 
         ! Local variables
-        integer(ip)         :: imid, iw1, labc, lzz1, mmax
+        integer(ip) :: imid, iw1, labc, lzz1, mmax
+        integer(ip) :: ldwork
         type(SpherepackUtility) :: util
 
-        imid = (nlat+1)/2
-        mmax = min(nlat, nlon/2+1)
-        lzz1 = 2*nlat*imid
-        labc = 3*((mmax-2)*(2*nlat-mmax-1))/2
 
-        ! Check validity of input arguments
-        if (nlat < 3) then
-            ierror = 1
-            return
-        else if (nlon < 4) then
-            ierror = 2
-            return
-        else if (lshaec < lzz1+labc+nlon+15) then
-            ierror = 3
-            return
-        else if (ldwork < nlat+1) then
-            ierror = 4
-            return
-        else
-            ierror = 0
-        end if
+        associate( lshaec => size(wshaec) )
+            imid = (nlat+1)/2
+            mmax = min(nlat, nlon/2+1)
+            lzz1 = 2*nlat*imid
+            labc = 3*((mmax-2)*(2*nlat-mmax-1))/2
 
-        call util%initialize_scalar_analysis_regular_grid(nlat, nlon, wshaec, dwork)
+            ! Check validity of input arguments
+            if (nlat < 3) then
+                ierror = 1
+                return
+            else if (nlon < 4) then
+                ierror = 2
+                return
+            else if (lshaec < lzz1+labc+nlon+15) then
+                ierror = 3
+                return
+            else if (ldwork < nlat+1) then
+                ierror = 4
+                return
+            else
+                ierror = 0
+            end if
 
-        ! Set workspace pointer
-        iw1 = lzz1+labc+1
+            ! Set required workspace size
+            ldwork = nlat + 1
 
-        call util%hfft%initialize(nlon, wshaec(iw1))
+            block
+                real(wp) :: dwork(ldwork)
+                call util%initialize_scalar_analysis_regular_grid(nlat, nlon, wshaec, dwork)
+            end block
+
+            ! Set workspace pointer
+            iw1 = lzz1+labc+1
+
+            call util%hfft%initialize(nlon, wshaec(iw1:))
+        end associate
 
     end subroutine shaeci
 

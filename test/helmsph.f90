@@ -150,7 +150,7 @@ use spherepack
     !     initialize saved work space arrays for scalar harmonic
     !     analysis and Helmholtz inversion of r
     !
-    call shaeci(nlat, nlon, wshaec, lshaec, dwork, ldwork, ierror)
+    call shaeci(nlat, nlon, wshaec, ierror)
     if (ierror > 0) then
         write (6, 200) ierror
 200     format(' shaeci, ierror = ', i2)

@@ -145,31 +145,22 @@ module scalar_analysis_routines
             integer(ip), intent(out)  :: ierror
         end subroutine shags
 
-        module subroutine shaeci(nlat, nlon, wshaec, lshaec, dwork, ldwork, ierror)
+        module subroutine shaeci(nlat, nlon, wshaec, ierror)
 
             ! Dummy arguments
             integer(ip), intent(in)  :: nlat
             integer(ip), intent(in)  :: nlon
-            real(wp),    intent(out) :: wshaec(lshaec)
-            integer(ip), intent(in)  :: lshaec
-            real(wp),    intent(out) :: dwork(ldwork)
-            integer(ip), intent(in)  :: ldwork
+            real(wp),    intent(out) :: wshaec(:)
             integer(ip), intent(out) :: ierror
         end subroutine shaeci
 
-        module subroutine shaesi(nlat, nlon, wshaes, lshaes, work, lwork, dwork, &
-            ldwork, ierror)
+        module subroutine shaesi(nlat, nlon, wshaes, ierror)
 
             ! Dummy arguments
-            integer(ip), intent(in)     :: nlat
-            integer(ip), intent(in)     :: nlon
-            real(wp),    intent(out)    :: wshaes(lshaes)
-            integer(ip), intent(in)     :: lshaes
-            real(wp),    intent(out)    :: work(lwork)
-            integer(ip), intent(in)     :: lwork
-            real(wp),    intent(out)    :: dwork(ldwork)
-            integer(ip), intent(in)     :: ldwork
-            integer(ip), intent(out)    :: ierror
+            integer(ip), intent(in)  :: nlat
+            integer(ip), intent(in)  :: nlon
+            real(wp),    intent(out) :: wshaes(:)
+            integer(ip), intent(out) :: ierror
         end subroutine shaesi
 
         module subroutine shagci(nlat, nlon, wshagc, ierror)

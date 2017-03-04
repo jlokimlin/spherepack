@@ -136,7 +136,7 @@ program test_all_scalar_analysis_and_synthesis_routines
             case (1)
         		
                 call name("**ec")
-                call shaeci(nlat, nlon, wsave, lsave, dwork, ldwork, ierror)
+                call shaeci(nlat, nlon, wsave, ierror)
         		
                 call name("shai")
                 call iout(ierror, "ierr")
@@ -160,7 +160,7 @@ program test_all_scalar_analysis_and_synthesis_routines
             case (2)
         		
                 call name("**es")
-                call shaesi(nlat, nlon, wsave, lsave, work, lwork, dwork, ldwork, ierror)
+                call shaesi(nlat, nlon, wsave, ierror)
         		
                 call name("shai")
                 call iout(ierror, "ierr")

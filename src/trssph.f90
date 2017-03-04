@@ -640,7 +640,7 @@ contains
                 !
                 !     initialize wsave for equally spaced analysis
                 !
-                call shaeci(nlata, nlona, wsave, lwa, dwork, ldwork, ier)
+                call shaeci(nlata, nlona, wsave, ier)
             else
                 !
                 !     initialize wsave for gaussian analysis
