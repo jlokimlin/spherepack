@@ -344,7 +344,7 @@ program tgrad
 
                 call name("**gs")
 
-                call shagsi(nlat, nlon, wsave, lsave, work, lwork, dwork, ldwork, ierror)
+                call shagsi(nlat, nlon, wsave, ierror)
                 call name("shai")
                 call iout(ierror, "ierr")
 

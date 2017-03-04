@@ -211,9 +211,9 @@ contains
 
         ! Local variables
         integer(ip)         :: l1, l2
-        type(SpherepackUtility) :: sphere_aux
+        type(SpherepackUtility) :: util
 
-        call sphere_aux%compute_parity(nlat, nlon, l1, l2)
+        call util%compute_parity(nlat, nlon, l1, l2)
 
         return_value = ((nlat+1)**2)*nlat/2+nlon+15
         !return_value = max(3*nlat*(nlat+1)+2, l1*l2*(2*nlat-l1+1)+nlon+15+2*nlat)
@@ -293,10 +293,10 @@ contains
         ! Local variables
 
         integer(ip)         :: l1, l2
-        type(SpherepackUtility) :: sphere_aux
+        type(SpherepackUtility) :: util
 
 
-        call sphere_aux%compute_parity(nlat, nlon, l1, l2)
+        call util%compute_parity(nlat, nlon, l1, l2)
 
         return_value = l1*l2*(2*nlat-l1+1)+nlon+15
 
@@ -313,10 +313,10 @@ contains
         ! Local variables
 
         integer(ip)         :: l1, l2
-        type(SpherepackUtility) :: sphere_aux
+        type(SpherepackUtility) :: util
 
 
-        call sphere_aux%compute_parity(nlat, nlon, l1, l2)
+        call util%compute_parity(nlat, nlon, l1, l2)
 
         return_value = 3*(max(l1-2, 0)*(2*nlat-l1-1))/2+5*l2*nlat
 

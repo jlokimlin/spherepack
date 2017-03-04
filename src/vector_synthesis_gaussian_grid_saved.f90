@@ -550,7 +550,7 @@ contains
 
         ! Local variables
         integer(ip)         :: imid, lmn
-        type(SpherepackUtility) :: sphere_aux
+        type(SpherepackUtility) :: util
 
         imid = (nlat+1)/2
         lmn = (nlat*(nlat+1))/2
@@ -590,7 +590,7 @@ contains
             call vhgsi_lower_routine(nlat, imid, wvhsgs(jw1), wvhsgs(jw2), &
                 dwork(iw1), dwork(iw2), dwork(iw3), dwork(iw4))
 
-            call sphere_aux%hfft%initialize(nlon, wvhsgs(jw3))
+            call util%hfft%initialize(nlon, wvhsgs(jw3))
         end block
 
     end subroutine vhsgsi
@@ -661,7 +661,7 @@ contains
         ! Local variables
         integer(ip)    :: i, imm1, j, k, m, mb, mlat, mlon, mmax
         integer(ip)    :: mn, mp1, mp2, ndo1, ndo2, nlp1, np1
-        type(SpherepackUtility) :: sphere_aux
+        type(SpherepackUtility) :: util
 
         nlp1 = nlat+1
         mlat = mod(nlat, 2)
@@ -1224,8 +1224,8 @@ contains
         end select vector_symmetry_cases
 
         do k=1, nt
-            call sphere_aux%hfft%backward(idv, nlon, ve(1, 1, k), idv, wrfft, work)
-            call sphere_aux%hfft%backward(idv, nlon, we(1, 1, k), idv, wrfft, work)
+            call util%hfft%backward(idv, nlon, ve(1, 1, k), idv, wrfft, work)
+            call util%hfft%backward(idv, nlon, we(1, 1, k), idv, wrfft, work)
         end do
 
         select case(ityp)
@@ -1272,7 +1272,7 @@ contains
         integer(ip)         :: i, id, ierror, ix, iy
         integer(ip)         :: lwk, m, mn, n, nm, np, nz
         real(wp)            :: abel, bbel, cbel, dcf
-        type(SpherepackUtility) :: sphere_aux
+        type(SpherepackUtility) :: util
 
 
         !
@@ -1299,18 +1299,18 @@ contains
             !
             !  Compute dpbar for m=0
             !
-            call sphere_aux%compute_fourier_coefficients(0, n, work)
+            call util%compute_fourier_coefficients(0, n, work)
             mn = get_index(0, n, nlat)
             do i=1, imid
-                call sphere_aux%compute_legendre_polys_from_fourier_coeff(0, n, dthet(i), work, dpbar(i, 1, np))
+                call util%compute_legendre_polys_from_fourier_coeff(0, n, dthet(i), work, dpbar(i, 1, np))
             end do
             !
             !  Compute dpbar for m=1
             !
-            call sphere_aux%compute_fourier_coefficients(1, n, work)
+            call util%compute_fourier_coefficients(1, n, work)
             mn = get_index(1, n, nlat)
             do i=1, imid
-                call sphere_aux%compute_legendre_polys_from_fourier_coeff(1, n, dthet(i), work, dpbar(i, 2, np))
+                call util%compute_legendre_polys_from_fourier_coeff(1, n, dthet(i), work, dpbar(i, 2, np))
             end do
             !
             !  Compute and store dpbar for m=2, n

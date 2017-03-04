@@ -210,10 +210,10 @@ contains
 
         ! Local variables
         integer(ip)         :: l1, l2
-        type(SpherepackUtility) :: sphere_aux
+        type(SpherepackUtility) :: util
 
 
-        call sphere_aux%compute_parity(nlat, nlon, l1, l2)
+        call util%compute_parity(nlat, nlon, l1, l2)
 
         return_value = (l1*l2*(2*nlat-l1+1))/2+nlon+15
 
@@ -229,9 +229,9 @@ contains
 
         ! Local variables
         integer(ip)         :: l1, l2
-        type(SpherepackUtility) :: sphere_aux
+        type(SpherepackUtility) :: util
 
-        call sphere_aux%compute_parity(nlat, nlon, l1, l2)
+        call util%compute_parity(nlat, nlon, l1, l2)
 
         return_value = 5*nlat*l2+3*((l1-2)*(2*nlat-l1-1))/2
 
@@ -307,10 +307,10 @@ contains
         ! Local variables
 
         integer(ip)         :: l1, l2
-        type(SpherepackUtility) :: sphere_aux
+        type(SpherepackUtility) :: util
 
 
-        call sphere_aux%compute_parity(nlat, nlon, l1, l2)
+        call util%compute_parity(nlat, nlon, l1, l2)
 
         return_value = nlat*(3*(l1+l2)-2)+(l1-1)*(l2*(2*nlat-l1)-3*l1)/2+nlon+15
 

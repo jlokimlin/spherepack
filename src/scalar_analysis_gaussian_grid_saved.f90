@@ -29,10 +29,10 @@
 !     *                                                               *
 !     * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !
-! This file contains code and documentation for subroutines
-! shags and shagsi
-!
 submodule(scalar_analysis_routines) scalar_analysis_gaussian_grid_saved
+
+! Parameter confined to the submodule
+integer(ip), parameter :: SIZE_OF_WORKSPACE_INDICES = 10
 
 contains
 
@@ -230,13 +230,13 @@ contains
     !            = 9  error in the specification of lshags
     !            = 10 error in the specification of lwork
     !
-    module subroutine shags(nlat, nlon, mode, nt, g, idg, jdg, a, b, mdab, ndab, &
-        wshags, lshags, work, lwork, ierror)
+    module subroutine shags(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, &
+        wshags, dummy_lshags, dummy_work, dummy_lwork, ierror)
 
         ! Dummy arguments
         integer(ip), intent(in)   :: nlat
         integer(ip), intent(in)   :: nlon
-        integer(ip), intent(in)   :: mode
+        integer(ip), intent(in)   :: isym
         integer(ip), intent(in)   :: nt
         real(wp),    intent(in)   :: g(idg, jdg, nt)
         integer(ip), intent(in)   :: idg
@@ -245,84 +245,82 @@ contains
         real(wp),    intent(out)  :: b(mdab, ndab, nt)
         integer(ip), intent(in)   :: mdab
         integer(ip), intent(in)   :: ndab
-        real(wp),    intent(in)   :: wshags(lshags)
-        integer(ip), intent(in)   :: lshags
-        real(wp),    intent(out)  :: work(lwork)
-        integer(ip), intent(in)   :: lwork
+        real(wp),    intent(in)   :: wshags(:)
+        integer(ip), intent(in)   :: dummy_lshags
+        real(wp),    intent(out)  :: dummy_work(1)
+        integer(ip), intent(in)   :: dummy_lwork
         integer(ip), intent(out)  :: ierror
 
         ! Local variables
-        integer(ip) :: l, l1, l2, lp, iw, lat, late, ifft, ipmn, iwts
+        integer(ip) :: l, l1, l2, lp, iw
+        integer(ip) :: lwork, lat, late, ifft, ipmn, iwts
+        type(SpherepackUtility) :: util
 
-        ! Set m limit for pmn
-        l = min((nlon+2)/2, nlat)
+        associate( lshags => size(wshags) )
 
-        ! Set gaussian point nearest equator pointer
-        late = (nlat+mod(nlat, 2))/2
+            ! Set m limit for pmn
+            l = min((nlon+2)/2, nlat)
 
-        ! Set number of grid points for analysis/synthesis
-        if (mode /= 0) then
-            lat = late
-        else
-            lat = nlat
-        end if
+            ! Set gaussian point nearest equator pointer
+            late = (nlat+mod(nlat, 2))/2
 
-        l1 = l
-        l2 = late
-        lp = nlat*(3*(l1+l2)-2)+(l1-1)*(l2*(2*nlat-l1)-3*l1)/2+nlon+15
+            ! Set number of grid points for analysis/synthesis
+            if (isym /= 0) then
+                lat = late
+            else
+                lat = nlat
+            end if
 
-        ! Check input arguments
-        if (nlat < 3) then
-            ierror = 1
-            return
-        else if (nlon < 4) then
-            ierror = 2
-            return
-        else if (mode < 0 .or. mode > 2) then
-            ierror = 3
-            return
-        else if (nt < 1) then
-            ierror = 4
-            return
-        else if (idg < lat) then
-            ierror = 5
-            return
-        else if (jdg < nlon) then
-            ierror = 6
-            return
-        else if (mdab < l) then
-            ierror = 7
-            return
-        else if (ndab < nlat) then
-            ierror = 8
-            return
-        else if (lshags < lp) then
-            ierror = 9
-            return
-        else if ( &
-            (mode == 0 .and. lwork < nlat*nlon*(nt+1)) &
-            .or. &
-            (mode /= 0 .and. lwork < l2*nlon*(nt+1))  &
-            ) &
-            then
-            ierror = 10
-            return
-        else
-            ierror = 0
-        end if
+            l1 = l
+            l2 = late
+            lp = nlat*(3*(l1+l2)-2)+(l1-1)*(l2*(2*nlat-l1)-3*l1)/2+nlon+15
 
-        ! Set starting address for gaussian wts , fft values,
-        ! and fully stored legendre polys in wshags
-        iwts = 1
-        ifft = nlat+2*nlat*late+3*(l*(l-1)/2+(nlat-l)*(l-1))+1
-        ipmn = ifft+nlon+15
+            ! Check input arguments
+            if (nlat < 3) then
+                ierror = 1
+            else if (nlon < 4) then
+                ierror = 2
+            else if (isym < 0 .or. isym > 2) then
+                ierror = 3
+            else if (nt < 1) then
+                ierror = 4
+            else if (idg < lat) then
+                ierror = 5
+            else if (jdg < nlon) then
+                ierror = 6
+            else if (mdab < l) then
+                ierror = 7
+            else if (ndab < nlat) then
+                ierror = 8
+            else if (lshags < lp) then
+                ierror = 9
+            else
+                ierror = 0
+            end if
 
-        ! Set pointer for internal storage of g
-        iw = lat*nlon*nt+1
+            ! Check error flag
+            if (ierror /= 0) return
 
-        !  Perform analysis
-        call shags_lower_routine(nlat, nlon, l, lat, mode, g, idg, jdg, nt, a, b, mdab, ndab, &
-            wshags(iwts), wshags(ifft), wshags(ipmn), late, work, work(iw))
+            ! Set starting address for gaussian wts , fft values,
+            ! and fully stored legendre polys in wshags
+            iwts = 1
+            ifft = nlat+2*nlat*late+3*(l*(l-1)/2+(nlat-l)*(l-1))+1
+            ipmn = ifft+nlon+15
+
+            ! Set pointer for internal storage of g
+            iw = lat*nlon*nt+1
+
+            ! Compute required workspace size
+            lwork = util%get_lwork_for_gaussian_saved(isym, nt, nlat, nlon)
+
+            !  Perform analysis
+            block
+                real(wp) :: work(lwork)
+                call shags_lower_routine(nlat, nlon, l, lat, isym, g, idg, jdg, nt, &
+                    a, b, mdab, ndab, wshags(iwts:), wshags(ifft:), wshags(ipmn:), &
+                    late, work, work(iw:))
+            end block
+        end associate
 
     end subroutine shags
 
@@ -412,68 +410,65 @@ contains
     !            = 6  failure in compute_gaussian_latitudes_and_weights to compute gaussian points
     !                 (due to failure in eigenvalue routine)
     !
-    module subroutine shagsi(nlat, nlon, wshags, lshags, work, lwork, dwork, ldwork, ierror)
+    module subroutine shagsi(nlat, nlon, wshags, ierror)
 
         ! Dummy arguments
         integer(ip), intent(in)   :: nlat
         integer(ip), intent(in)   :: nlon
-        real(wp),    intent(out)  :: wshags(lshags)
-        integer(ip), intent(in)   :: lshags
-        real(wp),    intent(out)  :: work(lwork)
-        integer(ip), intent(in)   :: lwork
-        real(wp),    intent(out)  :: dwork(ldwork)
-        integer(ip), intent(in)   :: ldwork
+        real(wp),    intent(out)  :: wshags(:)
         integer(ip), intent(out)  :: ierror
 
         ! Local variables
         integer(ip) :: ntrunc, l1, l2, late, lp, ldw, ipmnf
+        integer(ip) :: lwork, ldwork
 
-        ! set triangular truncation limit for spherical harmonic basis
-        ntrunc = min((nlon+2)/2, nlat)
+        associate( lshags => size(wshags) )
 
-        ! set equator or nearest point (if excluded) pointer
-        late = (nlat+1)/2
-        l1 = ntrunc
-        l2 = late
+            ! set triangular truncation limit for spherical harmonic basis
+            ntrunc = min((nlon+2)/2, nlat)
 
-        ! Set permanent work space length
-        lp = nlat*(3*(l1+l2)-2)+(l1-1)*(l2*(2*nlat-l1)-3*l1)/2+nlon+15
+            ! set equator or nearest point (if excluded) pointer
+            late = (nlat+1)/2
+            l1 = ntrunc
+            l2 = late
 
-        ! Set preliminary quantites needed to compute and store legendre polys
-        ldw = nlat*(nlat+4)
+            ! Set permanent work space length
+            lp = nlat*(3*(l1+l2)-2)+(l1-1)*(l2*(2*nlat-l1)-3*l1)/2+nlon+15
 
-        ! Check input arguments
-        if (nlat < 3) then
-            ierror = 1
-            return
-        else if (nlon < 4) then
-            ierror = 2
-            return
-        else if (lshags < lp) then
-            ierror = 3
-            return
-        else if (lwork < 4*nlat*(nlat+2)+2) then
-            ierror = 4
-            return
-        else if (ldwork < nlat*(nlat+4)) then
-            ierror = 5
-            return
-        else
-            ierror = 0
-        end if
+            ! Set preliminary quantites needed to compute and store legendre polys
+            ldw = nlat*(nlat+4)
 
-        ! Call lower routine
-        call shagsp(nlat, nlon, wshags, lshags, dwork, ldwork, ierror)
+            ! Check input arguments
+            if (nlat < 3) then
+                ierror = 1
+            else if (nlon < 4) then
+                ierror = 2
+            else if (lshags < lp) then
+                ierror = 3
+            else
+                ierror = 0
+            end if
 
-        ! Check error flag from lower routine
-        if (ierror /= 0) return
+            ! Set required workspace sizes
+            lwork  = 4 * nlat * (nlat + 2) + 2
+            ldwork = nlat * (nlat + 4)
 
-        !
-        !  set legendre poly pointer in wshags
-        !
-        ipmnf = nlat+2*nlat*late+3*(ntrunc*(ntrunc-1)/2+(nlat-ntrunc)*(ntrunc-1))+nlon+16
+            block
+                real(wp) :: work(lwork), dwork(ldwork)
 
-        call compute_and_store_legendre_polys(nlat, ntrunc, late, wshags, work, wshags(ipmnf))
+                ! Call lower routine
+                call shagsi_lower_routine(nlat, nlon, wshags, lshags, dwork, ldwork, ierror)
+
+                ! Check error flag from lower routine
+                if (ierror /= 0) return
+
+                ! Set legendre poly pointer in wshags
+                ipmnf = nlat+2*nlat*late+3*(ntrunc*(ntrunc-1)/2+(nlat-ntrunc)*(ntrunc-1))+nlon+16
+
+                call shagsi_compute_and_store_legendre_polys(nlat, ntrunc, late, wshags, &
+                    work, wshags(ipmnf:))
+            end block
+        end associate
 
     end subroutine shagsi
 
@@ -505,14 +500,14 @@ contains
         integer(ip)    :: i, j, k, m, mml1
         integer(ip)    :: mn, is, ms, ns, lm1, nl2, lp1, mp1, np1, mp2
         real(wp)       :: t1, t2, sfn
-        type(SpherepackUtility) :: sphere_aux
+        type(SpherepackUtility) :: util
 
         !  set gs array internally in shags_lower_routine
         g(1:lat, 1:nlon, :) = gs(1:lat, 1:nlon, :)
 
         ! Perform fourier transform
         do k=1, nt
-            call sphere_aux%hfft%forward(lat, nlon, g(1, 1, k), lat, wfft, work)
+            call util%hfft%forward(lat, nlon, g(1, 1, k), lat, wfft, work)
         end do
 
         !  scale result
@@ -599,16 +594,13 @@ contains
                 do k=1, nt
                     do i=1, late
                         is = nlat-i+1
-                        !
                         !  (n - m) even
-                        !
                         do np1=mp1, nlat, 2
                             a(mp1, np1, k) = a(mp1, np1, k)+g(i, 2*m, k)*pmn(i, mml1+np1)
                             b(mp1, np1, k) = b(mp1, np1, k)+g(i, 2*m+1, k)*pmn(i, mml1+np1)
                         end do
-                        !
+
                         !  (n - m) odd
-                        !
                         do np1=mp2, nlat, 2
                             a(mp1, np1, k) = a(mp1, np1, k)+g(is, 2*m, k)*pmn(i, mml1+np1)
                             b(mp1, np1, k) = b(mp1, np1, k)+g(is, 2*m+1, k)*pmn(i, mml1+np1)
@@ -618,9 +610,8 @@ contains
             end do
 
             if (nlon == 2*l-2) then
-                !
+
                 !  compute m=l-1, n=l-1, l, ..., nlat-1 coefficients
-                !
                 m = l-1
                 mml1 = m*(2*nlat-m-1)/2
                 do k=1, nt
@@ -630,9 +621,8 @@ contains
                             mn = mml1+np1
                             a(l, np1, k) = a(l, np1, k) + HALF * g(i, nlon, k) * pmn(i, mn)
                         end do
-                        !
+
                         !  (n - m)  odd
-                        !
                         lp1 = l+1
                         do np1=lp1, nlat, 2
                             mn = mml1+np1
@@ -642,10 +632,10 @@ contains
                 end do
             end if
         else
-            !
+
             !  half sphere
-            !    overwrite g(i) with wts(i)*(g(i)+g(i)) for i=1, ..., nlate/2
-            !
+            !  overwrite g(i) with wts(i)*(g(i)+g(i)) for i=1, ..., nlate/2
+
             nl2 = nlat/2
             do  k=1, nt
                 do j=1, nlon
@@ -657,9 +647,8 @@ contains
 
                 end do
             end do
-            !
+
             !  set m = 0 coefficients first
-            !
             mp1 = 1
             m = 0
             mml1 = m*(2*nlat-m-1)/2
@@ -677,9 +666,8 @@ contains
                     end do
                 end do
             end do
-            !
+
             !  compute m >= 1  coefficients next
-            !
             do mp1=2, lm1
                 m = mp1-1
                 mml1 = m*(2*nlat-m-1)/2
@@ -701,21 +689,15 @@ contains
             end do
 
             if (nlon == 2*l-2) then
-                !
                 !  compute n=m=l-1 coefficients last
-                !
                 m = l-1
                 mml1 = m*(2*nlat-m-1)/2
 
                 if (mode == 1) then
-                    !
                     !  set starting n for mode odd
-                    !
                     ns = l+1
                 else
-                    !
                     !  set starting n for mode even
-                    !
                     ns = l
                 end if
 
@@ -730,7 +712,7 @@ contains
 
     end subroutine shags_lower_routine
 
-    subroutine compute_and_store_legendre_polys(nlat, l, late, w, pmn, pmnf)
+    subroutine shagsi_compute_and_store_legendre_polys(nlat, l, late, w, pmn, pmnf)
 
         ! Dummy arguments
         integer(ip), intent(in)     :: nlat
@@ -742,7 +724,7 @@ contains
 
         ! Local variables
         integer(ip)         :: mp1, m, mode, i, np1, km, mml1, mn
-        type(SpherepackUtility) :: sphere_aux
+        type(SpherepackUtility) :: util
 
         !  Compute and store legendre polys for i=1, ..., late, m=0, ..., l-1
         pmn = ZERO
@@ -753,7 +735,7 @@ contains
 
             !  Compute pmn for n=m, ..., nlat-1 and i=1, ..., (l+1)/2
             mode = 0
-            call sphere_aux%compute_legendre_polys_for_gaussian_grids(mode, l, nlat, m, w, pmn, km)
+            call util%compute_legendre_polys_for_gaussian_grids(mode, l, nlat, m, w, pmn, km)
 
             !  Store above in pmnf
             do np1=mp1, nlat
@@ -764,9 +746,9 @@ contains
             end do
         end do
 
-    end subroutine compute_and_store_legendre_polys
+    end subroutine shagsi_compute_and_store_legendre_polys
 
-    subroutine shagsp(nlat, nlon, wshags, lshags, dwork, ldwork, ierror)
+    subroutine shagsi_lower_routine(nlat, nlon, wshags, lshags, dwork, ldwork, ierror)
 
         ! Dummy arguments
         integer(ip), intent(in)     :: nlat
@@ -779,7 +761,7 @@ contains
 
         ! Local variables
         integer(ip) :: ntrunc, l1, l2, late
-        integer(ip) :: workspace_indices(10)
+        integer(ip) :: workspace_indices(SIZE_OF_WORKSPACE_INDICES)
 
         ! Set triangular truncation limit for spherical harmonic basis
         ntrunc = min((nlon+2)/2, nlat)
@@ -792,22 +774,21 @@ contains
         !  Check input arguments
         if (nlat < 3) then
             ierror = 1
-            return
         else if (nlon < 4) then
             ierror = 2
-            return
         else if (lshags < nlat*(2*l2+3*l1-2)+3*l1*(1-l1)/2+nlon+15) then
             ierror = 3
-            return
         else if (ldwork < nlat*(nlat+4)) then
             ierror = 4
-            return
         else
             ierror = 0
         end if
 
+        ! Check error flag
+        if (ierror /= 0) return
+
         !  Compute workspace index pointers
-        workspace_indices = get_workspace_indices(nlat, late, ntrunc)
+        workspace_indices = shags_get_workspace_indices(nlat, late, ntrunc)
 
         associate( &
             i1 => workspace_indices(1), &
@@ -834,16 +815,16 @@ contains
             return
         end if
 
-    end subroutine shagsp
+    end subroutine shagsi_lower_routine
 
-    pure function get_workspace_indices(nlat, late, l) &
+    pure function shags_get_workspace_indices(nlat, late, l) &
         result (return_value)
 
         ! Dummy arguments
         integer(ip), intent(in)  :: nlat
         integer(ip), intent(in)  :: late
         integer(ip), intent(in)  :: l
-        integer(ip)              :: return_value(10)
+        integer(ip)              :: return_value(SIZE_OF_WORKSPACE_INDICES)
 
         associate( i => return_value )
             i(1) = 1
@@ -861,7 +842,7 @@ contains
             i(10) = 2*nlat + 1
         end associate
 
-    end function get_workspace_indices
+    end function shags_get_workspace_indices
 
     subroutine shagsp_lower_routine(nlat, nlon, l, late, wts, p0n, p1n, abel, bbel, cbel, &
         wfft, dtheta, dwts, work, ier)
@@ -886,9 +867,9 @@ contains
         ! Local variables
         integer(ip)         :: i, m, n, lw, np1, imn, mlim
         real(wp)            :: pb
-        type(SpherepackUtility) :: sphere_aux
+        type(SpherepackUtility) :: util
 
-        call sphere_aux%hfft%initialize(nlon, wfft)
+        call util%hfft%initialize(nlon, wfft)
 
         !
         !  Compute real gaussian points and weights
@@ -915,10 +896,10 @@ contains
         np1 = 1
         n = 0
         m = 0
-        call sphere_aux%compute_fourier_coefficients(m, n, work)
+        call util%compute_fourier_coefficients(m, n, work)
 
         do  i=1, late
-            call sphere_aux%compute_legendre_polys_from_fourier_coeff(m, n, dtheta(i), work, pb)
+            call util%compute_legendre_polys_from_fourier_coeff(m, n, dtheta(i), work, pb)
             p0n(1, i) = pb
         end do
         !
@@ -927,18 +908,18 @@ contains
         do np1=2, nlat
             n = np1-1
             m = 0
-            call sphere_aux%compute_fourier_coefficients(m, n, work)
+            call util%compute_fourier_coefficients(m, n, work)
             do i=1, late
-                call sphere_aux%compute_legendre_polys_from_fourier_coeff(m, n, dtheta(i), work, pb)
+                call util%compute_legendre_polys_from_fourier_coeff(m, n, dtheta(i), work, pb)
                 p0n(np1, i) = pb
             end do
             !
             !  compute m=1 legendre polynomials for all n and theta(i)
             !
             m = 1
-            call sphere_aux%compute_fourier_coefficients(m, n, work)
+            call util%compute_fourier_coefficients(m, n, work)
             do i=1, late
-                call sphere_aux%compute_legendre_polys_from_fourier_coeff(m, n, dtheta(i), work, pb)
+                call util%compute_legendre_polys_from_fourier_coeff(m, n, dtheta(i), work, pb)
                 p1n(np1, i) = pb
             end do
         end do

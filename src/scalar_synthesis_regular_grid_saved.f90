@@ -390,7 +390,7 @@ contains
 
         ! Local variables
         integer(ip)         :: imid, labc, lpimn, mmax
-        type(SpherepackUtility) :: sphere_aux
+        type(SpherepackUtility) :: util
 
         mmax = min(nlat, nlon/2+1)
         imid = (nlat+1)/2
@@ -426,10 +426,10 @@ contains
             iw1 = 3*nlat*imid+1
             iw2 = lpimn+1
 
-            call sphere_aux%initialize_scalar_synthesis_regular_grid_saved( &
+            call util%initialize_scalar_synthesis_regular_grid_saved( &
                 nlat, nlon, imid, wshses, work, work(iw1), dwork)
 
-            call sphere_aux%hfft%initialize(nlon, wshses(iw2))
+            call util%hfft%initialize(nlon, wshses(iw2))
         end block
 
     end subroutine shsesi
@@ -460,7 +460,7 @@ contains
         integer(ip)    :: i, j, imid, imm1, k, ls
         integer(ip)    :: m, mb, mdo, mmax, mn, modl, nlon
         integer(ip)    :: mp1, mp2,  ndo, nlp1, np1
-        type(SpherepackUtility) :: sphere_aux
+        type(SpherepackUtility) :: util
 
         ls = idg
         nlon = jdg
@@ -579,7 +579,7 @@ contains
 
         do k=1, nt
             if(mod(nlon, 2) == 0) ge(1:ls, nlon, k) = TWO * ge(1:ls, nlon, k)
-            call sphere_aux%hfft%backward(ls, nlon, ge(1, 1, k), ls, whrfft, work)
+            call util%hfft%backward(ls, nlon, ge(1, 1, k), ls, whrfft, work)
         end do
 
         select case (isym)

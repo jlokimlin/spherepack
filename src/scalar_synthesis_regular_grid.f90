@@ -421,7 +421,7 @@ contains
         integer(ip) :: labc
         integer(ip) :: lzz1
         integer(ip) :: mmax
-        type(SpherepackUtility) :: sphere_aux
+        type(SpherepackUtility) :: util
 
         ierror = 1
         if (nlat < 3) return
@@ -437,12 +437,12 @@ contains
         if (ldwork < nlat+1) return
         ierror = 0
 
-        call sphere_aux%initialize_scalar_synthesis_regular_grid(nlat, nlon, wshsec, dwork)
+        call util%initialize_scalar_synthesis_regular_grid(nlat, nlon, wshsec, dwork)
 
         ! set workspace index
         iw1 = lzz1+labc+1
 
-        call sphere_aux%hfft%initialize(nlon, wshsec(iw1))
+        call util%hfft%initialize(nlon, wshsec(iw1))
 
     end subroutine shseci
 
@@ -496,7 +496,7 @@ contains
             ge(idg, jdg, nt), go(idg, jdg, nt), pb(imid, nlat, 3), walin(*), &
             whrfft(*), work(*)
 
-        type(SpherepackUtility) :: sphere_aux
+        type(SpherepackUtility) :: util
 
         ls = idg
         nlon = jdg
@@ -524,7 +524,7 @@ contains
         if_block: block
 
             if (isym /= 1) then
-                call sphere_aux%compute_legendre_polys_regular_grid(2, nlat, nlon, 0, pb, i3, walin)
+                call util%compute_legendre_polys_regular_grid(2, nlat, nlon, 0, pb, i3, walin)
                 do k=1, nt
                     do np1=1, nlat, 2
                         do i=1, imid
@@ -541,7 +541,7 @@ contains
 
                 do mp1=2, mdo
                     m = mp1-1
-                    call sphere_aux%compute_legendre_polys_regular_grid(2, nlat, nlon, m, pb, i3, walin)
+                    call util%compute_legendre_polys_regular_grid(2, nlat, nlon, m, pb, i3, walin)
                     do np1=mp1, ndo, 2
                         do k=1, nt
                             do i=1, imid
@@ -553,7 +553,7 @@ contains
                 end do
 
                 if (.not.(mdo == mmax .or. mmax > ndo)) then
-                    call sphere_aux%compute_legendre_polys_regular_grid(2, nlat, nlon, mdo, pb, i3, walin)
+                    call util%compute_legendre_polys_regular_grid(2, nlat, nlon, mdo, pb, i3, walin)
                     do np1=mmax, ndo, 2
                         do k=1, nt
                             do i=1, imid
@@ -565,7 +565,7 @@ contains
                 if (isym == 2) exit if_block
             end if
 
-            call sphere_aux%compute_legendre_polys_regular_grid(1, nlat, nlon, 0, pb, i3, walin)
+            call util%compute_legendre_polys_regular_grid(1, nlat, nlon, 0, pb, i3, walin)
 
             do k=1, nt
                 do np1=2, nlat, 2
@@ -585,7 +585,7 @@ contains
             do mp1=2, mdo
                 mp2 = mp1+1
                 m = mp1-1
-                call sphere_aux%compute_legendre_polys_regular_grid(1, nlat, nlon, m, pb, i3, walin)
+                call util%compute_legendre_polys_regular_grid(1, nlat, nlon, m, pb, i3, walin)
                 do np1=mp2, ndo, 2
                     do k=1, nt
                         do i=1, imm1
@@ -600,7 +600,7 @@ contains
 
             if (mdo == mmax .or. mp2 > ndo) exit if_block
 
-            call sphere_aux%compute_legendre_polys_regular_grid(1, nlat, nlon, mdo, pb, i3, walin)
+            call util%compute_legendre_polys_regular_grid(1, nlat, nlon, mdo, pb, i3, walin)
 
             do np1=mp2, ndo, 2
                 do k=1, nt
@@ -616,7 +616,7 @@ contains
 
             if (mod(nlon, 2) == 0) ge(1: ls, nlon, k) = TWO*ge(1: ls, nlon, k)
 
-            call sphere_aux%hfft%backward(ls, nlon, ge(1, 1, k), ls, whrfft, work)
+            call util%hfft%backward(ls, nlon, ge(1, 1, k), ls, whrfft, work)
         end do
 
         select case (isym)

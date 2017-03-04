@@ -145,60 +145,52 @@ contains
 
         ! Local variables
         integer(ip)    :: error_flag
-        integer(ip)    :: lwork, ldwork, lshags
+        integer(ip)    :: lshags
         type(ShagsAux) :: aux
 
         ! Compute dimensions of various workspace arrays
-        lwork = get_lwork(nlat)
-        ldwork = get_ldwork(nlat)
         lshags = aux%get_lshags(nlat, nlon)
 
         !  Allocate memory
         if (allocated(self%forward_scalar)) deallocate(self%forward_scalar )
         allocate( self%forward_scalar(lshags) )
 
-        !  Initialize workspace array for scalar analysis
-        block
-            real(wp) :: work(lwork), dwork(ldwork)
+        call aux%shagsi(nlat, nlon, self%forward_scalar, error_flag)
 
-            call aux%shagsi( &
-                nlat, nlon, self%forward_scalar, lshags, work, lwork, dwork, ldwork, error_flag)
-
-            ! Address error flag
-            select case (error_flag)
-                case(0)
-                    return
-                case(1)
-                    error stop 'Object of class(GaussianWorkspace) '&
-                        //'in initialize_gaussian_scalar_analysis '&
-                        //'error in the specification of NUMBER_OF_LATITUDES'
-                case(2)
-                    error stop 'Object of class(GaussianWorkspace) '&
-                        //'in initialize_gaussian_scalar_analysis '&
-                        //'error in the specification of NUMBER_OF_LONGITUDES'
-                case(3)
-                    error stop 'Object of class(GaussianWorkspace) '&
-                        //'in initialize_gaussian_scalar_analysis '&
-                        //'error in the specification of extent for forward_scalar'
-                case(4)
-                    error stop 'Object of class(GaussianWorkspace) '&
-                        //'in initialize_gaussian_scalar_analysis '&
-                        //'error in the specification of extent for legendre_workspace'
-                case(5)
-                    error stop 'Object of class(GaussianWorkspace) '&
-                        //'in initialize_gaussian_scalar_analysis '&
-                        //'error in the specification of extent for dwork'
-                case(6)
-                    error stop 'Object of class(GaussianWorkspace) '&
-                        //'in initialize_gaussian_scalar_analysis '&
-                        //'error in call to compute_gaussian_latitudes_and_weights to compute gaussian points '&
-                        //'due to failure in eigenvalue routine'
-                case default
-                    error stop 'Object of class(GaussianWorkspace) '&
-                        //'in initialize_gaussian_scalar_analysis '&
-                        //'Undetermined error flag'
-            end select
-        end block
+        ! Address error flag
+        select case (error_flag)
+            case(0)
+                return
+            case(1)
+                error stop 'Object of class(GaussianWorkspace) '&
+                    //'in initialize_gaussian_scalar_analysis '&
+                    //'error in the specification of NUMBER_OF_LATITUDES'
+            case(2)
+                error stop 'Object of class(GaussianWorkspace) '&
+                    //'in initialize_gaussian_scalar_analysis '&
+                    //'error in the specification of NUMBER_OF_LONGITUDES'
+            case(3)
+                error stop 'Object of class(GaussianWorkspace) '&
+                    //'in initialize_gaussian_scalar_analysis '&
+                    //'error in the specification of extent for forward_scalar'
+            case(4)
+                error stop 'Object of class(GaussianWorkspace) '&
+                    //'in initialize_gaussian_scalar_analysis '&
+                    //'error in the specification of extent for legendre_workspace'
+            case(5)
+                error stop 'Object of class(GaussianWorkspace) '&
+                    //'in initialize_gaussian_scalar_analysis '&
+                    //'error in the specification of extent for dwork'
+            case(6)
+                error stop 'Object of class(GaussianWorkspace) '&
+                    //'in initialize_gaussian_scalar_analysis '&
+                    //'error in call to compute_gaussian_latitudes_and_weights to compute gaussian points '&
+                    //'due to failure in eigenvalue routine'
+            case default
+                error stop 'Object of class(GaussianWorkspace) '&
+                    //'in initialize_gaussian_scalar_analysis '&
+                    //'Undetermined error flag'
+        end select
 
     end subroutine initialize_gaussian_scalar_analysis
 

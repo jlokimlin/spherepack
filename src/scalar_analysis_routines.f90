@@ -123,13 +123,13 @@ module scalar_analysis_routines
             integer(ip), intent(out)  :: ierror
         end subroutine shagc
 
-        module subroutine shags(nlat, nlon, mode, nt, g, idg, jdg, a, b, mdab, ndab, &
-            wshags, lshags, work, lwork, ierror)
+        module subroutine shags(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, &
+            wshags, dummy_lshags, dummy_work, dummy_lwork, ierror)
 
             ! Dummy arguments
             integer(ip), intent(in)   :: nlat
             integer(ip), intent(in)   :: nlon
-            integer(ip), intent(in)   :: mode
+            integer(ip), intent(in)   :: isym
             integer(ip), intent(in)   :: nt
             real(wp),    intent(in)   :: g(idg, jdg, nt)
             integer(ip), intent(in)   :: idg
@@ -138,10 +138,10 @@ module scalar_analysis_routines
             real(wp),    intent(out)  :: b(mdab, ndab, nt)
             integer(ip), intent(in)   :: mdab
             integer(ip), intent(in)   :: ndab
-            real(wp),    intent(in)   :: wshags(lshags)
-            integer(ip), intent(in)   :: lshags
-            real(wp),    intent(out)  :: work(lwork)
-            integer(ip), intent(in)   :: lwork
+            real(wp),    intent(in)   :: wshags(:)
+            integer(ip), intent(in)   :: dummy_lshags
+            real(wp),    intent(out)  :: dummy_work(1)
+            integer(ip), intent(in)   :: dummy_lwork
             integer(ip), intent(out)  :: ierror
         end subroutine shags
 
@@ -184,17 +184,12 @@ module scalar_analysis_routines
             integer(ip), intent(out) :: ierror
         end subroutine shagci
 
-        module subroutine shagsi(nlat, nlon, wshags, lshags, work, lwork, dwork, ldwork, ierror)
+        module subroutine shagsi(nlat, nlon, wshags, ierror)
 
             ! Dummy arguments
             integer(ip), intent(in)   :: nlat
             integer(ip), intent(in)   :: nlon
-            real(wp),    intent(out)  :: wshags(lshags)
-            integer(ip), intent(in)   :: lshags
-            real(wp),    intent(out)  :: work(lwork)
-            integer(ip), intent(in)   :: lwork
-            real(wp),    intent(out)  :: dwork(ldwork)
-            integer(ip), intent(in)   :: ldwork
+            real(wp),    intent(out)  :: wshags(:)
             integer(ip), intent(out)  :: ierror
         end subroutine shagsi
     end interface
@@ -210,9 +205,9 @@ contains
 
         ! Local variables
         integer(ip)         :: l1, l2
-        type(SpherepackUtility) :: sphere_aux
+        type(SpherepackUtility) :: util
 
-        call sphere_aux%compute_parity(nlat, nlon, l1, l2)
+        call util%compute_parity(nlat, nlon, l1, l2)
 
         return_value = ( l1 * l2 * (2*nlat-l1+1) )/2 + nlon+15
 
@@ -227,9 +222,9 @@ contains
 
         ! Local variables
         integer(ip)         :: l1, l2
-        type(SpherepackUtility) :: sphere_aux
+        type(SpherepackUtility) :: util
 
-        call sphere_aux%compute_parity(nlat, nlon, l1, l2)
+        call util%compute_parity(nlat, nlon, l1, l2)
 
         return_value = 5*nlat*l2+3*((l1-2)*(2*nlat-l1-1))/2
 
@@ -309,10 +304,10 @@ contains
         ! Local variables
 
         integer(ip)         :: l1, l2
-        type(SpherepackUtility) :: sphere_aux
+        type(SpherepackUtility) :: util
 
 
-        call sphere_aux%compute_parity(nlat, nlon, l1, l2)
+        call util%compute_parity(nlat, nlon, l1, l2)
 
         return_value = nlat*(3*(l1+l2)-2)+(l1-1)*(l2*(2*nlat-l1)-3*l1)/2+nlon+15
 

@@ -462,7 +462,7 @@ contains
         ! Local variables
         integer(ip)         :: mmax, imid, labc, lzimn
         integer(ip)         :: workspace_indices(3)
-        type(SpherepackUtility) :: sphere_aux
+        type(SpherepackUtility) :: util
 
         mmax = min(nlat, nlon/2+1)
         imid = (nlat+1)/2
@@ -498,9 +498,9 @@ contains
             iw1 => workspace_indices(2), &
             iw2 => workspace_indices(3) &
             )
-            call sphere_aux%initialize_scalar_analysis_regular_grid_saved( &
+            call util%initialize_scalar_analysis_regular_grid_saved( &
                 nlat, nlon, imid, wshaes, idz, work, work(iw1), dwork)
-            call sphere_aux%hfft%initialize(nlon, wshaes(iw2))
+            call util%hfft%initialize(nlon, wshaes(iw2))
         end associate
 
     end subroutine shaesi
@@ -532,7 +532,7 @@ contains
         integer(ip)    :: i, k, m, mb, ls, mp1, np1, mp2, mdo, ndo
         integer(ip)    :: imm1, nlp1, imid, modl, mmax, nlon
         real(wp)       :: fsn, tsn
-        type(SpherepackUtility) :: sphere_aux
+        type(SpherepackUtility) :: util
 
         ls = idg
         nlon = jdg
@@ -583,7 +583,7 @@ contains
 
         !  Fast Fourier Transform
         fft_loop: do k=1, nt
-            call sphere_aux%hfft%forward(ls, nlon, g_even(1, 1, k), ls, whrfft, work)
+            call util%hfft%forward(ls, nlon, g_even(1, 1, k), ls, whrfft, work)
             if (mod(nlon, 2) /= 0) exit fft_loop
             g_even(1:ls, nlon, k) = HALF * g_even(1:ls, nlon, k)
         end do fft_loop

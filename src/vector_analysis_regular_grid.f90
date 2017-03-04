@@ -417,7 +417,7 @@ contains
         integer(ip), intent(out) :: ierror
 
         ! Local variables
-        type(SpherepackUtility) :: sphere_aux
+        type(SpherepackUtility) :: util
         integer(ip) :: imid
         integer(ip) :: iw1
         integer(ip) :: iw2
@@ -442,16 +442,16 @@ contains
         if (ldwork < 2*nlat+2) return
         ierror = 0
 
-        call sphere_aux%zvinit(nlat, nlon, wvhaec, dwork)
+        call util%zvinit(nlat, nlon, wvhaec, dwork)
 
         ! Set workspace index pointers
         lwzvin = lzz1+labc
         iw1 = lwzvin+1
         iw2 = iw1+lwzvin
 
-        call sphere_aux%zwinit(nlat, nlon, wvhaec(iw1), dwork)
+        call util%zwinit(nlat, nlon, wvhaec(iw1), dwork)
 
-        call sphere_aux%hfft%initialize(nlon, wvhaec(iw2))
+        call util%hfft%initialize(nlon, wvhaec(iw2))
 
     end subroutine vhaeci
 
@@ -508,7 +508,7 @@ contains
             wo(idv, nlon, *), wzvin(*), wzwin(*), wrfft(*), &
             zv(imid, nlat, 3), zw(imid, nlat, 3)
 
-        type(SpherepackUtility) :: sphere_aux
+        type(SpherepackUtility) :: util
 
         nlp1 = nlat+1
         tsn = TWO/nlon
@@ -548,8 +548,8 @@ contains
             end do
         end do
         7 do k=1, nt
-            call sphere_aux%hfft%forward(idv, nlon, ve(1, 1, k), idv, wrfft, zv)
-            call sphere_aux%hfft%forward(idv, nlon, we(1, 1, k), idv, wrfft, zv)
+            call util%hfft%forward(idv, nlon, ve(1, 1, k), idv, wrfft, zv)
+            call util%hfft%forward(idv, nlon, we(1, 1, k), idv, wrfft, zv)
         end do
         ndo1 = nlat
         ndo2 = nlat
@@ -596,7 +596,7 @@ contains
         !
         ! case ityp=0 ,  no symmetries
         !
-1       call sphere_aux%zvin(0, nlat, nlon, 0, zv, iv, wzvin)
+1       call util%zvin(0, nlat, nlon, 0, zv, iv, wzvin)
         !
         ! case m=0
         !
@@ -623,8 +623,8 @@ contains
         do mp1=2, mmax
             m = mp1-1
             mp2 = mp1+1
-            call sphere_aux%zvin(0, nlat, nlon, m, zv, iv, wzvin)
-            call sphere_aux%zwin(0, nlat, nlon, m, zw, iw, wzwin)
+            call util%zvin(0, nlat, nlon, m, zv, iv, wzvin)
+            call util%zwin(0, nlat, nlon, m, zw, iw, wzwin)
             if (mp1 > ndo1) goto 17
 
             do k=1, nt
@@ -687,7 +687,7 @@ contains
         !
         ! case ityp=1 ,  no symmetries but cr and ci equal zero
         !
-100     call sphere_aux%zvin(0, nlat, nlon, 0, zv, iv, wzvin)
+100     call util%zvin(0, nlat, nlon, 0, zv, iv, wzvin)
         !
         ! case m=0
         !
@@ -713,8 +713,8 @@ contains
         do mp1=2, mmax
             m = mp1-1
             mp2 = mp1+1
-            call sphere_aux%zvin(0, nlat, nlon, m, zv, iv, wzvin)
-            call sphere_aux%zwin(0, nlat, nlon, m, zw, iw, wzwin)
+            call util%zvin(0, nlat, nlon, m, zv, iv, wzvin)
+            call util%zwin(0, nlat, nlon, m, zw, iw, wzwin)
             if (mp1 > ndo1) goto 117
 
             do k=1, nt
@@ -762,7 +762,7 @@ contains
         !
         ! case ityp=2 ,  no symmetries but br and bi equal zero
         !
-200     call sphere_aux%zvin(0, nlat, nlon, 0, zv, iv, wzvin)
+200     call util%zvin(0, nlat, nlon, 0, zv, iv, wzvin)
         !
         ! case m=0
         !
@@ -788,8 +788,8 @@ contains
         do mp1=2, mmax
             m = mp1-1
             mp2 = mp1+1
-            call sphere_aux%zvin(0, nlat, nlon, m, zv, iv, wzvin)
-            call sphere_aux%zwin(0, nlat, nlon, m, zw, iw, wzwin)
+            call util%zvin(0, nlat, nlon, m, zv, iv, wzvin)
+            call util%zwin(0, nlat, nlon, m, zw, iw, wzwin)
             if (mp1 > ndo1) goto 217
             do k=1, nt
                 do i=1, imm1
@@ -834,7 +834,7 @@ contains
         !
         ! case ityp=3 ,  v even , w odd
         !
-300     call sphere_aux%zvin(0, nlat, nlon, 0, zv, iv, wzvin)
+300     call util%zvin(0, nlat, nlon, 0, zv, iv, wzvin)
         !
         ! case m=0
         !
@@ -859,8 +859,8 @@ contains
         do mp1=2, mmax
             m = mp1-1
             mp2 = mp1+1
-            call sphere_aux%zvin(0, nlat, nlon, m, zv, iv, wzvin)
-            call sphere_aux%zwin(0, nlat, nlon, m, zw, iw, wzwin)
+            call util%zvin(0, nlat, nlon, m, zv, iv, wzvin)
+            call util%zwin(0, nlat, nlon, m, zw, iw, wzwin)
             if (mp1 > ndo1) goto 317
             do k=1, nt
                 do i=1, imm1
@@ -903,7 +903,7 @@ contains
         !
         ! case ityp=4 ,  v even, w odd, and cr and ci equal 0.
         !
-400     call sphere_aux%zvin(1, nlat, nlon, 0, zv, iv, wzvin)
+400     call util%zvin(1, nlat, nlon, 0, zv, iv, wzvin)
         !
         ! case m=0
         !
@@ -921,8 +921,8 @@ contains
         do mp1=2, mmax
             m = mp1-1
             mp2 = mp1+1
-            call sphere_aux%zvin(1, nlat, nlon, m, zv, iv, wzvin)
-            call sphere_aux%zwin(1, nlat, nlon, m, zw, iw, wzwin)
+            call util%zvin(1, nlat, nlon, m, zv, iv, wzvin)
+            call util%zwin(1, nlat, nlon, m, zw, iw, wzwin)
             if (mp2 > ndo2) goto 420
             do k=1, nt
                 do i=1, imm1
@@ -947,7 +947,7 @@ contains
         !
         ! case ityp=5   v even, w odd, and br and bi equal zero
         !
-500     call sphere_aux%zvin(2, nlat, nlon, 0, zv, iv, wzvin)
+500     call util%zvin(2, nlat, nlon, 0, zv, iv, wzvin)
         !
         ! case m=0
         !
@@ -965,8 +965,8 @@ contains
         do mp1=2, mmax
             m = mp1-1
             mp2 = mp1+1
-            call sphere_aux%zvin(2, nlat, nlon, m, zv, iv, wzvin)
-            call sphere_aux%zwin(2, nlat, nlon, m, zw, iw, wzwin)
+            call util%zvin(2, nlat, nlon, m, zv, iv, wzvin)
+            call util%zwin(2, nlat, nlon, m, zw, iw, wzwin)
             if (mp1 > ndo1) goto 520
             do k=1, nt
                 do i=1, imm1
@@ -991,7 +991,7 @@ contains
         !
         ! case ityp=6 ,  v odd , w even
         !
-600     call sphere_aux%zvin(0, nlat, nlon, 0, zv, iv, wzvin)
+600     call util%zvin(0, nlat, nlon, 0, zv, iv, wzvin)
         !
         ! case m=0
         !
@@ -1016,8 +1016,8 @@ contains
         do mp1=2, mmax
             m = mp1-1
             mp2 = mp1+1
-            call sphere_aux%zvin(0, nlat, nlon, m, zv, iv, wzvin)
-            call sphere_aux%zwin(0, nlat, nlon, m, zw, iw, wzwin)
+            call util%zvin(0, nlat, nlon, m, zv, iv, wzvin)
+            call util%zwin(0, nlat, nlon, m, zw, iw, wzwin)
             if (mp1 > ndo1) goto 617
             do k=1, nt
                 do i=1, imm1
@@ -1060,7 +1060,7 @@ contains
         !
         ! case ityp=7   v odd, w even, and cr and ci equal zero
         !
-700     call sphere_aux%zvin(2, nlat, nlon, 0, zv, iv, wzvin)
+700     call util%zvin(2, nlat, nlon, 0, zv, iv, wzvin)
         !
         ! case m=0
         !
@@ -1078,8 +1078,8 @@ contains
         do mp1=2, mmax
             m = mp1-1
             mp2 = mp1+1
-            call sphere_aux%zvin(2, nlat, nlon, m, zv, iv, wzvin)
-            call sphere_aux%zwin(2, nlat, nlon, m, zw, iw, wzwin)
+            call util%zvin(2, nlat, nlon, m, zv, iv, wzvin)
+            call util%zwin(2, nlat, nlon, m, zw, iw, wzwin)
             if (mp1 > ndo1) goto 720
             do k=1, nt
                 do i=1, imm1
@@ -1104,7 +1104,7 @@ contains
         !
         ! case ityp=8   v odd, w even, and both br and bi equal zero
         !
-800     call sphere_aux%zvin(1, nlat, nlon, 0, zv, iv, wzvin)
+800     call util%zvin(1, nlat, nlon, 0, zv, iv, wzvin)
         !
         ! case m=0
         !
@@ -1122,8 +1122,8 @@ contains
         do mp1=2, mmax
             m = mp1-1
             mp2 = mp1+1
-            call sphere_aux%zvin(1, nlat, nlon, m, zv, iv, wzvin)
-            call sphere_aux%zwin(1, nlat, nlon, m, zw, iw, wzwin)
+            call util%zvin(1, nlat, nlon, m, zv, iv, wzvin)
+            call util%zwin(1, nlat, nlon, m, zw, iw, wzwin)
             if (mp2 > ndo2) goto 820
             do k=1, nt
                 do i=1, imm1

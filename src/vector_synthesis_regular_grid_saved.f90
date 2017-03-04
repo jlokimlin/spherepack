@@ -544,7 +544,7 @@ contains
         ! Local variables
         integer(ip)    :: imid, labc, lzimn, mmax
         integer(ip)    :: workspace_indices(4)
-        type(SpherepackUtility) :: sphere_aux
+        type(SpherepackUtility) :: util
 
 
         mmax = min(nlat, (nlon+1)/2)
@@ -584,7 +584,7 @@ contains
             jw2 => workspace_indices(4) &
             )
             call vhsesi_lower_routine(nlat, nlon, imid, wvhses, wvhses(jw1), idz, work, work(iw1), dwork)
-            call sphere_aux%hfft%initialize(nlon, wvhses(jw2))
+            call util%hfft%initialize(nlon, wvhses(jw2))
         end associate
 
     end subroutine vhsesi
@@ -642,7 +642,7 @@ contains
         ! Local variables
         integer(ip)    :: i, imm1, j, k, m, mb, mlat, mlon, mmax, mn
         integer(ip)    :: mp1, mp2, ndo1, ndo2, nlp1, np1
-        type(SpherepackUtility) :: sphere_aux
+        type(SpherepackUtility) :: util
 
         nlp1 = nlat+1
         mlat = mod(nlat, 2)
@@ -1208,8 +1208,8 @@ contains
         end select vector_symmetry_cases
 
         do k=1, nt
-            call sphere_aux%hfft%backward(idv, nlon, ve(1, 1, k), idv, wrfft, work)
-            call sphere_aux%hfft%backward(idv, nlon, we(1, 1, k), idv, wrfft, work)
+            call util%hfft%backward(idv, nlon, ve(1, 1, k), idv, wrfft, work)
+            call util%hfft%backward(idv, nlon, we(1, 1, k), idv, wrfft, work)
         end do
 
         if (ityp <= 2) then
@@ -1275,27 +1275,27 @@ contains
 
         ! Local variables
         integer(ip)         :: i3, m, mmax, mn, mp1, np1
-        type(SpherepackUtility) :: sphere_aux
+        type(SpherepackUtility) :: util
 
 
         mmax = min(nlat, (nlon+1)/2)
 
-        call sphere_aux%initialize_polar_components_for_regular_grids(nlat, nlon, wzvin, dwork)
+        call util%initialize_polar_components_for_regular_grids(nlat, nlon, wzvin, dwork)
 
         do mp1=1, mmax
             m = mp1-1
-            call sphere_aux%compute_polar_component(0, nlat, nlon, m, vin, i3, wzvin)
+            call util%compute_polar_component(0, nlat, nlon, m, vin, i3, wzvin)
             do np1=mp1, nlat
                 mn = m*(nlat-1)-(m*(m-1))/2+np1
                 vb(1: imid, mn) = vin(1: imid, np1, i3)
             end do
         end do
 
-        call sphere_aux%initialize_azimuthal_components_for_regular_grids(nlat, nlon, wzvin, dwork)
+        call util%initialize_azimuthal_components_for_regular_grids(nlat, nlon, wzvin, dwork)
 
         do mp1=1, mmax
             m = mp1-1
-            call sphere_aux%compute_azimuthal_component(0, nlat, nlon, m, vin, i3, wzvin)
+            call util%compute_azimuthal_component(0, nlat, nlon, m, vin, i3, wzvin)
             do np1=mp1, nlat
                 mn = m*(nlat-1)-(m*(m-1))/2+np1
                 wb(1: imid, mn) = vin(1: imid, np1, i3)

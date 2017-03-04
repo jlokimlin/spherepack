@@ -484,7 +484,7 @@ contains
         integer(ip)    :: i, k, m, mn, is, ms, ns, lm1, nl2
         integer(ip)    :: lp1, mp1, np1, mp2, meo, mml1
         real(wp)       :: t1, t2, t3, t4
-        type(SpherepackUtility) :: sphere_aux
+        type(SpherepackUtility) :: util
 
         !  initialize to zero
         g = ZERO
@@ -686,7 +686,7 @@ contains
         !  Perform inverse fourier transform
         !
         do k=1, nt
-            call sphere_aux%hfft%backward(lat, nlon, g(1, 1, k), lat, wfft, work)
+            call util%hfft%backward(lat, nlon, g(1, 1, k), lat, wfft, work)
         end do
 
         !
@@ -714,7 +714,7 @@ contains
 
         ! Local variables
         integer(ip)         :: m, km, mn, mp1, np1, mml1, mode
-        type(SpherepackUtility) :: sphere_aux
+        type(SpherepackUtility) :: util
 
         !  Initialize
         pmn = ZERO
@@ -726,7 +726,7 @@ contains
             !  compute pmn for n=m, ..., nlat-1 and i=1, ..., (l+1)/2
             !
             mode = 0
-            call sphere_aux%compute_legendre_polys_for_gaussian_grids(mode, l, nlat, m, w, pmn, km)
+            call util%compute_legendre_polys_for_gaussian_grids(mode, l, nlat, m, w, pmn, km)
             !
             !  store above in pmnf
             !
@@ -831,10 +831,10 @@ contains
         ! Local variables
         integer(ip)         :: i, m, n, lw, np1, imn, mlim
         real(wp)            :: pb
-        type(SpherepackUtility) :: sphere_aux
+        type(SpherepackUtility) :: util
 
         !  Initialize half Fourier transform
-        call sphere_aux%hfft%initialize(nlon, wfft)
+        call util%hfft%initialize(nlon, wfft)
 
         !  compute real gaussian points and weights
         lw = nlat*(nlat+2)
@@ -862,10 +862,10 @@ contains
         np1 = 1
         n = 0
         m = 0
-        call sphere_aux%compute_fourier_coefficients(m, n, work)
+        call util%compute_fourier_coefficients(m, n, work)
 
         do i=1, late
-            call sphere_aux%compute_legendre_polys_from_fourier_coeff(m, n, dtheta(i), work, pb)
+            call util%compute_legendre_polys_from_fourier_coeff(m, n, dtheta(i), work, pb)
             p0n(1, i) = pb
         end do
 
@@ -875,18 +875,18 @@ contains
         do np1=2, nlat
             n = np1-1
             m = 0
-            call sphere_aux%compute_fourier_coefficients(m, n, work)
+            call util%compute_fourier_coefficients(m, n, work)
             do i=1, late
-                call sphere_aux%compute_legendre_polys_from_fourier_coeff(m, n, dtheta(i), work, pb)
+                call util%compute_legendre_polys_from_fourier_coeff(m, n, dtheta(i), work, pb)
                 p0n(np1, i) = pb
             end do
             !
             !  compute m=1 legendre polynomials for all n and theta(i)
             !
             m = 1
-            call sphere_aux%compute_fourier_coefficients(m, n, work)
+            call util%compute_fourier_coefficients(m, n, work)
             do i=1, late
-                call sphere_aux%compute_legendre_polys_from_fourier_coeff(m, n, dtheta(i), work, pb)
+                call util%compute_legendre_polys_from_fourier_coeff(m, n, dtheta(i), work, pb)
                 p1n(np1, i) = pb
             end do
         end do

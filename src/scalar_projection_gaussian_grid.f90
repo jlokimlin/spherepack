@@ -166,7 +166,7 @@ contains
         integer(ip) :: mwrk
         integer(ip) :: nloc1, nte
         integer(ip) :: nloc2
-        type(SpherepackUtility) :: sphere_aux
+        type(SpherepackUtility) :: util
 
         ! Check input arguments
         ierror = 1
@@ -191,7 +191,7 @@ contains
 
         y(1:nlat, :) = x(1:nlat, :)
 
-        call sphere_aux%hfft%forward(nlat, nlon, y, idxy, wshp(lw1+1), work)
+        call util%hfft%forward(nlat, nlon, y, idxy, wshp(lw1+1), work)
 
         ! Set workspace index pointers
         nte = (nlat+1)/2
@@ -212,7 +212,7 @@ contains
             iwshp(jw2), iwshp(jw3), iwshp(jw4), work(jw1), &
             work(jw2), work(jw3), work(jw4))
 
-        call sphere_aux%hfft%backward(nlat, nlon, y, idxy, wshp(lw1+1), work)
+        call util%hfft%backward(nlat, nlon, y, idxy, wshp(lw1+1), work)
 
         y(1: nlat, :) = y(1:nlat, :)/nlon
 
@@ -335,7 +335,7 @@ contains
         integer(ip) :: nloc1
         integer(ip) :: nloc2
         integer(ip) :: nte
-        type(SpherepackUtility) :: sphere_aux
+        type(SpherepackUtility) :: util
 
         ! Check input arguments
         ierror = 1
@@ -358,7 +358,7 @@ contains
         if (lwork <mlwk) return
         ierror = 0
 
-        call sphere_aux%hfft%initialize(nlon, wshp(lw1+1))
+        call util%hfft%initialize(nlon, wshp(lw1+1))
 
         nte = (nlat+1)/2
         nloc1 = 2*nte*nte
@@ -453,7 +453,7 @@ contains
             nshe(2), nsho(2)
         dimension zort(64, 64, 2)
 
-        type(SpherepackUtility) :: sphere_aux
+        type(SpherepackUtility) :: util
 
         ns2 = nlat/2
         modn = nlat-2*ns2
@@ -491,9 +491,9 @@ contains
             if (m <= 1) then
                 do j=1, nem
                     n = 2*j+m-2
-                    call sphere_aux%compute_fourier_coefficients(m, n, cp)
+                    call util%compute_fourier_coefficients(m, n, cp)
                     do i=1, nte
-                        call sphere_aux%compute_legendre_polys_from_fourier_coeff(m, n, thet(i), cp, ped(i, j+nec, iip))
+                        call util%compute_legendre_polys_from_fourier_coeff(m, n, thet(i), cp, ped(i, j+nec, iip))
                     end do
                 end do
             else
@@ -644,9 +644,9 @@ contains
             if (m<=1) then
                 do j=1, nom
                     n = 2*j+m-1
-                    call sphere_aux%compute_fourier_coefficients(m, n, cp)
+                    call util%compute_fourier_coefficients(m, n, cp)
                     do i=1, nte
-                        call sphere_aux%compute_legendre_polys_from_fourier_coeff(m, n, thet(i), cp, pod(i, j+noc, iip))
+                        call util%compute_legendre_polys_from_fourier_coeff(m, n, thet(i), cp, pod(i, j+noc, iip))
                     end do
                     if (modn>0) pod(nte, j+noc, iip) = ZERO
                 end do

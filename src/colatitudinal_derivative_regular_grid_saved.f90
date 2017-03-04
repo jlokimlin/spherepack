@@ -453,7 +453,7 @@ contains
         integer(ip) :: labc
         integer(ip) :: lzimn
         integer(ip) :: mmax
-        type(SpherepackUtility) :: sphere_aux
+        type(SpherepackUtility) :: util
 
         ierror = 1
         if(nlat < 3) return
@@ -475,7 +475,7 @@ contains
 
         call vtsesi_lower_routine(nlat, nlon, imid, wvts, wvts(lzimn+1), idz, work, work(iw1), dwork)
 
-        call sphere_aux%hfft%initialize(nlon, wvts(2*lzimn+1))
+        call util%hfft%initialize(nlon, wvts(2*lzimn+1))
 
     end subroutine vtsesi
 
@@ -528,7 +528,7 @@ contains
 
         integer(ip) :: i, j, k ! Counters
 
-        type(SpherepackUtility) :: sphere_aux
+        type(SpherepackUtility) :: util
 
         nlp1 = nlat+1
         mlat = mod(nlat, 2)
@@ -1052,8 +1052,8 @@ contains
         end select vector_symmetry_cases
 
         do k=1, nt
-            call sphere_aux%hfft%backward(idv, nlon, vte(1, 1, k), idv, wrfft, work)
-            call sphere_aux%hfft%backward(idv, nlon, wte(1, 1, k), idv, wrfft, work)
+            call util%hfft%backward(idv, nlon, vte(1, 1, k), idv, wrfft, work)
+            call util%hfft%backward(idv, nlon, wte(1, 1, k), idv, wrfft, work)
         end do
 
         select case (ityp)
@@ -1107,26 +1107,26 @@ contains
         dimension vb(imid, *), wb(imid, *), vin(imid, nlat, 3), wzvin(*)
         real(wp) :: dwork(*)
 
-        type(SpherepackUtility) :: sphere_aux
+        type(SpherepackUtility) :: util
 
         mmax = min(nlat, (nlon+1)/2)
 
-        call sphere_aux%initialize_polar_components_regular_colat_deriv(nlat, nlon, wzvin, dwork)
+        call util%initialize_polar_components_regular_colat_deriv(nlat, nlon, wzvin, dwork)
 
         do mp1=1, mmax
             m = mp1-1
-            call sphere_aux%compute_polar_component(0, nlat, nlon, m, vin, i3, wzvin)
+            call util%compute_polar_component(0, nlat, nlon, m, vin, i3, wzvin)
             do np1=mp1, nlat
                 mn = m*(nlat-1)-(m*(m-1))/2+np1
                 vb(1:imid, mn) = vin(1:imid, np1, i3)
             end do
         end do
 
-        call sphere_aux%initialize_azimuthal_components_regular_colat_deriv(nlat, nlon, wzvin, dwork)
+        call util%initialize_azimuthal_components_regular_colat_deriv(nlat, nlon, wzvin, dwork)
 
         do mp1=1, mmax
             m = mp1-1
-            call sphere_aux%compute_azimuthal_component(0, nlat, nlon, m, vin, i3, wzvin)
+            call util%compute_azimuthal_component(0, nlat, nlon, m, vin, i3, wzvin)
             do np1=mp1, nlat
                 mn = m*(nlat-1)-(m*(m-1))/2+np1
                 wb(1:imid, mn) = vin(1:imid, np1, i3)

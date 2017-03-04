@@ -478,7 +478,7 @@ contains
         dimension gs(idg, jdg, nt), a(mdab, ndab, nt), b(mdab, ndab, nt)
         dimension w(*), pmn(nlat, late, 3), g(lat, nlon, nt), wfft(*)
 
-        type(SpherepackUtility) :: sphere_aux
+        type(SpherepackUtility) :: util
 
         !     reconstruct fourier coefficients in g on gaussian grid
         !     using coefficients in a, b
@@ -493,7 +493,7 @@ contains
             !     set first column in g
             m = 0
             !     compute pmn for all i and n=m, ..., l-1
-            call sphere_aux%compute_legendre_polys_for_gaussian_grids(mode, l, nlat, m, w, pmn, km)
+            call util%compute_legendre_polys_for_gaussian_grids(mode, l, nlat, m, w, pmn, km)
             do k=1, nt
                 !     n even
                 do np1=1, nlat, 2
@@ -523,7 +523,7 @@ contains
                 m = mp1-1
                 mp2 = m+2
                 !     compute pmn for all i and n=m, ..., l-1
-                call sphere_aux%compute_legendre_polys_for_gaussian_grids(mode, l, nlat, m, w, pmn, km)
+                call util%compute_legendre_polys_for_gaussian_grids(mode, l, nlat, m, w, pmn, km)
                 do k=1, nt
                     !     for n-m even store (g(i, p, k)+g(nlat-i+1, p, k))/2 in g(i, p, k) p=2*m, 
                     !     for i=1, ..., late
@@ -559,7 +559,7 @@ contains
             !     set last column (using a only)
             if (nlon== l+l-2) then
                 m = l-1
-                call sphere_aux%compute_legendre_polys_for_gaussian_grids(mode, l, nlat, m, w, pmn, km)
+                call util%compute_legendre_polys_for_gaussian_grids(mode, l, nlat, m, w, pmn, km)
                 do k=1, nt
                     !     n-m even
                     do np1=l, nlat, 2
@@ -592,7 +592,7 @@ contains
             if (mode == 1) meo = 2
             ms = m+meo
             !     compute pmn for all i and n=m, ..., l-1
-            call sphere_aux%compute_legendre_polys_for_gaussian_grids(mode, l, nlat, m, w, pmn, km)
+            call util%compute_legendre_polys_for_gaussian_grids(mode, l, nlat, m, w, pmn, km)
             do k=1, nt
                 do np1=ms, nlat, 2
                     do i=1, late
@@ -605,7 +605,7 @@ contains
                 m = mp1-1
                 ms = m+meo
                 !     compute pmn for all i and n=m, ..., l-1
-                call sphere_aux%compute_legendre_polys_for_gaussian_grids(mode, l, nlat, m, w, pmn, km)
+                call util%compute_legendre_polys_for_gaussian_grids(mode, l, nlat, m, w, pmn, km)
                 do k=1, nt
                     do np1=ms, nlat, 2
                         do i=1, late
@@ -618,7 +618,7 @@ contains
             if (nlon==l+l-2) then
                 !     set last column
                 m = l-1
-                call sphere_aux%compute_legendre_polys_for_gaussian_grids(mode, l, nlat, m, w, pmn, km)
+                call util%compute_legendre_polys_for_gaussian_grids(mode, l, nlat, m, w, pmn, km)
                 ns = l
                 if (mode == 1) ns = l+1
                 do k=1, nt
@@ -632,7 +632,7 @@ contains
         end if
         !     do inverse fourier transform
         do k=1, nt
-            call sphere_aux%hfft%backward(lat, nlon, g(1, 1, k), lat, wfft, pmn)
+            call util%hfft%backward(lat, nlon, g(1, 1, k), lat, wfft, pmn)
         end do
         !     scale output in gs
         do k=1, nt
@@ -672,7 +672,7 @@ contains
         dimension wts(nlat), p0n(nlat, late), p1n(nlat, late), abel(*), bbel(*), &
             cbel(*), wfft(*)
         real(wp) :: pb, dtheta(nlat), dwts(nlat), work(*)
-        type(SpherepackUtility) :: sphere_aux
+        type(SpherepackUtility) :: util
 
         !     compute the nlat  gaussian points and weights, the
         !     m=0, 1 legendre polys for gaussian points and all n, 
@@ -688,7 +688,7 @@ contains
         !     define index function for l<=n<=nlat
         !imndx(m, n) = l*(l-1)/2+(n-l-1)*(l-1)+m-1
         !     preset quantites for fourier transform
-        call sphere_aux%hfft%initialize(nlon, wfft)
+        call util%hfft%initialize(nlon, wfft)
         !     compute real gaussian points and weights
         !     lw = 4*nlat*(nlat+1)+2
         lw = nlat*(nlat+2)
@@ -705,25 +705,25 @@ contains
         np1 = 1
         n = 0
         m = 0
-        call sphere_aux%compute_fourier_coefficients(m, n, work)
+        call util%compute_fourier_coefficients(m, n, work)
         do i=1, late
-            call sphere_aux%compute_legendre_polys_from_fourier_coeff(m, n, dtheta(i), work, pb)
+            call util%compute_legendre_polys_from_fourier_coeff(m, n, dtheta(i), work, pb)
             p0n(1, i) = pb
         end do
         !     compute p0n, p1n for all theta(i) when n>0
         do np1=2, nlat
             n = np1-1
             m = 0
-            call sphere_aux%compute_fourier_coefficients(m, n, work)
+            call util%compute_fourier_coefficients(m, n, work)
             do i=1, late
-                call sphere_aux%compute_legendre_polys_from_fourier_coeff(m, n, dtheta(i), work, pb)
+                call util%compute_legendre_polys_from_fourier_coeff(m, n, dtheta(i), work, pb)
                 p0n(np1, i) = pb
             end do
             !     compute m=1 legendre polynomials for all n and theta(i)
             m = 1
-            call sphere_aux%compute_fourier_coefficients(m, n, work)
+            call util%compute_fourier_coefficients(m, n, work)
             do i=1, late
-                call sphere_aux%compute_legendre_polys_from_fourier_coeff(m, n, dtheta(i), work, pb)
+                call util%compute_legendre_polys_from_fourier_coeff(m, n, dtheta(i), work, pb)
                 p1n(np1, i) = pb
             end do
         end do

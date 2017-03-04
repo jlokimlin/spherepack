@@ -166,7 +166,7 @@ contains
         integer(ip) :: nloc1
         integer(ip) :: nloc2
         integer(ip) :: nte
-        type(SpherepackUtility) :: sphere_aux
+        type(SpherepackUtility) :: util
 
         ! Check input arguments
         ierror = 1
@@ -191,7 +191,7 @@ contains
 
         y(1:nlat, :) = x(1:nlat, :)
 
-        call sphere_aux%hfft%forward(nlat, nlon, y, idxy, wshp(lw1+1), work)
+        call util%hfft%forward(nlat, nlon, y, idxy, wshp(lw1+1), work)
 
         ! Set workspace index pointers
         nte = (nlat+1)/2
@@ -212,7 +212,7 @@ contains
             iwshp(jw2), iwshp(jw3), iwshp(jw4), work(jw1), &
             work(jw2), work(jw3), work(jw4))
 
-        call sphere_aux%hfft%backward(nlat, nlon, y, idxy, wshp(lw1+1), work)
+        call util%hfft%backward(nlat, nlon, y, idxy, wshp(lw1+1), work)
 
         y(1:nlat, :) = y(1:nlat, :)/nlon
 
@@ -336,7 +336,7 @@ contains
         integer(ip) :: nloc1
         integer(ip) :: nloc2
         integer(ip) :: nte
-        type(SpherepackUtility) :: sphere_aux
+        type(SpherepackUtility) :: util
 
         ! Set contants
         mmax = min(nlat-1, nlon/2)
@@ -366,7 +366,7 @@ contains
         ! Check error flag
         if (ierror /= 0) return
 
-        call sphere_aux%hfft%initialize(nlon, wshp(lw1+1))
+        call util%hfft%initialize(nlon, wshp(lw1+1))
 
         ! Set workspace index pointers
         nte = (nlat+1)/2
@@ -458,7 +458,7 @@ contains
             ipse(idp, 2), jzse(idp, 2), ipso(idp, 2), jzso(idp, 2), &
             nshe(2), nsho(2)
 
-        type(SpherepackUtility) :: sphere_aux
+        type(SpherepackUtility) :: util
 
         ns2 = nlat/2
         modn = nlat-ns2-ns2
@@ -480,9 +480,9 @@ contains
             nem = (mrank+1)/2
             do j=1, nem
                 n = 2*j+m-2
-                call sphere_aux%compute_fourier_coefficients(m, n, cp)
+                call util%compute_fourier_coefficients(m, n, cp)
                 do i=1, nte
-                    call sphere_aux%compute_legendre_polys_from_fourier_coeff(m, n, thet(i), cp, ped(i, j, mp1))
+                    call util%compute_legendre_polys_from_fourier_coeff(m, n, thet(i), cp, ped(i, j, mp1))
                 end do
                 if (m>0) ped(1, j, mp1) = ZERO
             end do
@@ -537,9 +537,9 @@ contains
             if (m <= 1) then
                 do j=1, nem
                     n = 2*j+m-2
-                    call sphere_aux%compute_fourier_coefficients(m, n, cp)
+                    call util%compute_fourier_coefficients(m, n, cp)
                     do i=1, nte
-                        call sphere_aux%compute_legendre_polys_from_fourier_coeff(m, n, thet(i), cp, ped(i, j+ms2, iip))
+                        call util%compute_legendre_polys_from_fourier_coeff(m, n, thet(i), cp, ped(i, j+ms2, iip))
                     end do
                     if (m > 0) ped(1, j+ms2, iip) = ZERO
                 end do
@@ -664,9 +664,9 @@ contains
             nom = mrank-nem
             do j=1, nom
                 n = 2*j+m-1
-                call sphere_aux%compute_fourier_coefficients(m, n, cp)
+                call util%compute_fourier_coefficients(m, n, cp)
                 do i=1, nte
-                    call sphere_aux%compute_legendre_polys_from_fourier_coeff(m, n, thet(i), cp, pod(i, j, mp1))
+                    call util%compute_legendre_polys_from_fourier_coeff(m, n, thet(i), cp, pod(i, j, mp1))
                 end do
                 if (modn == 1) pod(nte, j, mp1) = ZERO
             end do
@@ -715,9 +715,9 @@ contains
             if (m <= 1) then
                 do j=1, nom
                     n = 2*j+m-1
-                    call sphere_aux%compute_fourier_coefficients(m, n, cp)
+                    call util%compute_fourier_coefficients(m, n, cp)
                     do i=1, nte
-                        call sphere_aux%compute_legendre_polys_from_fourier_coeff(m, n, thet(i), cp, pod(i, j+ms2, iip))
+                        call util%compute_legendre_polys_from_fourier_coeff(m, n, thet(i), cp, pod(i, j+ms2, iip))
                     end do
                     if (modn == 1) pod(nte, j+ms2, iip) = ZERO
                     if (m>0) pod(1, j+ms2, iip) = ZERO

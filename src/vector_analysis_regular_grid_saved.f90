@@ -432,7 +432,7 @@ contains
         ! Local variables
         integer(ip)         :: imid, labc, lzimn, mmax
         integer(ip)         :: workspace_indices(4)
-        type(SpherepackUtility) :: sphere_aux
+        type(SpherepackUtility) :: util
 
         mmax = min(nlat, (nlon+1)/2)
         imid = (nlat+1)/2
@@ -470,7 +470,7 @@ contains
             )
             call vhaesi_lower_routine(nlat, nlon, imid, wvhaes, wvhaes(jw1), idz, work, work(iw1), dwork)
 
-            call sphere_aux%hfft%initialize(nlon, wvhaes(jw2))
+            call util%hfft%initialize(nlon, wvhaes(jw2))
         end associate
 
     end subroutine vhaesi
@@ -529,7 +529,7 @@ contains
         integer(ip)         :: i, imm1, k, m, mb, mlat, mlon
         integer(ip)         :: mmax, mp1, mp2, ndo1, ndo2,  nlp1, np1
         real(wp)            :: fsn, tsn
-        type(SpherepackUtility) :: sphere_aux
+        type(SpherepackUtility) :: util
 
 
         nlp1 = nlat+1
@@ -579,8 +579,8 @@ contains
         end if
 
         do k=1, nt
-            call sphere_aux%hfft%forward(idv, nlon, ve(1, 1, k), idv, wrfft, work)
-            call sphere_aux%hfft%forward(idv, nlon, we(1, 1, k), idv, wrfft, work)
+            call util%hfft%forward(idv, nlon, ve(1, 1, k), idv, wrfft, work)
+            call util%hfft%forward(idv, nlon, we(1, 1, k), idv, wrfft, work)
         end do
 
         !
@@ -1222,26 +1222,26 @@ contains
 
         ! Local variables
         integer(ip)         :: i3, m, mn, mp1, np1, mmax
-        type(SpherepackUtility) :: sphere_aux
+        type(SpherepackUtility) :: util
 
         mmax = min(nlat, (nlon+1)/2)
 
-        call sphere_aux%zvinit(nlat, nlon, wzvin, dwork)
+        call util%zvinit(nlat, nlon, wzvin, dwork)
 
         do mp1=1, mmax
             m = mp1-1
-            call sphere_aux%zvin(0, nlat, nlon, m, zin, i3, wzvin)
+            call util%zvin(0, nlat, nlon, m, zin, i3, wzvin)
             do np1=mp1, nlat
                 mn = m*(nlat-1)-(m*(m-1))/2+np1
                 zv(mn, 1:imid) = zin(1:imid, np1, i3)
             end do
         end do
 
-        call sphere_aux%zwinit(nlat, nlon, wzvin, dwork)
+        call util%zwinit(nlat, nlon, wzvin, dwork)
 
         do mp1=1, mmax
             m = mp1-1
-            call sphere_aux%zwin(0, nlat, nlon, m, zin, i3, wzvin)
+            call util%zwin(0, nlat, nlon, m, zin, i3, wzvin)
             do np1=mp1, nlat
                 mn = m*(nlat-1)-(m*(m-1))/2+np1
                 zw(mn, 1:imid) = zin(1:imid, np1, i3)

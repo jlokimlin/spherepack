@@ -79,6 +79,12 @@ module type_SpherepackUtility
         procedure, nopass :: zvinit
         procedure, nopass :: zwin
         procedure, nopass :: zwinit
+        procedure, nopass :: get_lshaes
+        procedure, nopass :: get_lshags
+        procedure, nopass :: get_lshsgs
+        procedure, nopass :: get_lwork_for_gaussian_saved
+        procedure, nopass :: get_lwork_for_shagsi
+        procedure, nopass :: get_ldwork_for_shagsi
     end type SpherepackUtility
 
     ! Parameters confined to the module
@@ -94,6 +100,109 @@ module type_SpherepackUtility
     integer(ip), parameter :: BOTH_ODD = 4
 
 contains
+
+    pure function get_lshaes(nlat, nlon) &
+        result (return_value)
+
+        ! Dummy arguments
+        integer(ip), intent(in)  :: nlat
+        integer(ip), intent(in)  :: nlon
+        integer(ip)               :: return_value
+
+        ! Local variables
+        integer(ip) :: l1, l2
+
+        call compute_parity(nlat, nlon, l1, l2)
+
+        return_value = ( l1 * l2 * (2*nlat-l1+1) )/2 + nlon+15
+
+    end function get_lshaes
+
+    pure function get_lshags(nlat, nlon) &
+        result (return_value)
+
+        ! Dummy arguments
+        integer(ip), intent(in)  :: nlat
+        integer(ip), intent(in)  :: nlon
+        integer(ip)              :: return_value
+
+        ! Local variables
+        integer(ip) :: l1, l2
+
+        call compute_parity(nlat, nlon, l1, l2)
+
+        return_value = nlat*(3*(l1+l2)-2)+(l1-1)*(l2*(2*nlat-l1)-3*l1)/2+nlon+15
+
+    end function get_lshags
+
+    pure function get_lshsgs(nlat, nlon) &
+        result (return_value)
+
+        ! Dummy arguments
+        integer(ip), intent(in) :: nlat
+        integer(ip), intent(in) :: nlon
+        integer(ip)             :: return_value
+
+        ! Local variables
+        integer(ip) :: l1, l2
+
+        call compute_parity(nlat, nlon, l1, l2)
+
+        return_value = nlat*(3*(l1+l2)-2)+(l1-1)*(l2*(2*nlat-l1)-3*l1)/2 + (nlon + 15)
+
+    end function get_lshsgs
+
+    pure function get_lwork_for_shagsi(nlat) &
+        result (return_value)
+
+        ! Dummy arguments
+        integer(ip), intent(in) :: nlat
+        integer(ip)             :: return_value
+
+        return_value = 4 * nlat * (nlat + 2) + 2
+
+    end function get_lwork_for_shagsi
+
+    pure function get_ldwork_for_shagsi(nlat) &
+        result (return_value)
+
+        ! Dummy arguments
+        integer(ip), intent(in) :: nlat
+        integer(ip)             :: return_value
+
+        return_value = nlat * (nlat + 4)
+
+    end function get_ldwork_for_shagsi
+
+    pure function get_lwork_for_gaussian_saved(isym, nt, nlat, nlon) &
+        result (return_value)
+
+        ! Dummy arguments
+        integer(ip), intent(in) :: isym
+        integer(ip), intent(in) :: nt
+        integer(ip), intent(in) :: nlat
+        integer(ip), intent(in) :: nlon
+        integer(ip)             :: return_value
+
+        ! Local variables
+        integer(ip) :: l2
+
+        ! Compute parity in nlat
+        select case (mod(nlat, 2))
+            case (0)
+                l2 = nlat/2
+            case default
+                l2 = (nlat + 1)/2
+        end select
+
+        select case(isym)
+            case(0)
+                return_value = nlat * nlon * (nt + 1)
+            case default
+                return_value = l2 * nlon * (nt + 1)
+        end select
+
+    end function get_lwork_for_gaussian_saved
 
     pure subroutine compute_parity(nlat, nlon, l1, l2)
 

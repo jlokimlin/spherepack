@@ -7,9 +7,9 @@
 !     *                                                               *
 !     *                      all rights reserved                      *
 !     *                                                               *
-!     *                      SPHEREPACK                               *
+!     *                          Spherepack                           *
 !     *                                                               *
-!     *       A Package of Fortran77 Subroutines and Programs         *
+!     *       A Package of Fortran subroutines and programs           *
 !     *                                                               *
 !     *              for Modeling Geophysical Processes               *
 !     *                                                               *
@@ -28,9 +28,6 @@
 !     *              the National Science Foundation                  *
 !     *                                                               *
 !     * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-!
-!
-!
 !
 !     a program for testing all scalar analysis and synthesis subroutines
 !
@@ -213,7 +210,7 @@ program test_all_scalar_analysis_and_synthesis_routines
         		
                 call name("**gs")
         		
-                call shagsi(nlat, nlon, wsave, lsave, work, lwork, dwork, ldwork, ierror)
+                call shagsi(nlat, nlon, wsave, ierror)
         		
                 call name("shai")
                 call iout(ierror, "ierr")

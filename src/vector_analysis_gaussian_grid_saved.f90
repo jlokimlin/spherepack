@@ -434,7 +434,7 @@ contains
         ! Local variables
         integer(ip)    :: imid, lmn
         integer(ip)    :: workspace_indices(7)
-        type(SpherepackUtility) :: sphere_aux
+        type(SpherepackUtility) :: util
 
         imid = (nlat+1)/2
         lmn = (nlat*(nlat+1))/2
@@ -470,7 +470,7 @@ contains
             )
             call precompute_associated_legendre_functions(nlat, imid, wvhags(jw1), wvhags(jw2), &
                 dwork(iw1), dwork(iw2), dwork(iw3), dwork(iw4))
-            call sphere_aux%hfft%initialize(nlon, wvhags(jw3))
+            call util%hfft%initialize(nlon, wvhags(jw3))
         end associate
 
     end subroutine vhagsi
@@ -558,7 +558,7 @@ contains
             wo(idv, nlon, *), work(*), &
             vb(imid, *), wb(imid, *), wrfft(*)
 
-        type(SpherepackUtility) :: sphere_aux
+        type(SpherepackUtility) :: util
 
         nlp1 = nlat+1
         tsn = TWO/nlon
@@ -612,8 +612,8 @@ contains
         end if
 
         do k=1, nt
-            call sphere_aux%hfft%forward(idv, nlon, ve(1, 1, k), idv, wrfft, work)
-            call sphere_aux%hfft%forward(idv, nlon, we(1, 1, k), idv, wrfft, work)
+            call util%hfft%forward(idv, nlon, ve(1, 1, k), idv, wrfft, work)
+            call util%hfft%forward(idv, nlon, we(1, 1, k), idv, wrfft, work)
         end do
 
         !  Set polar coefficients to zero
@@ -1261,7 +1261,7 @@ contains
         integer(ip)         :: i, local_error_flag, id, ix, iy
         integer(ip)         :: m, mn, n, nm, np, nz
         real(wp)            :: abel, bbel, cbel, dcf
-        type(SpherepackUtility) :: sphere_aux
+        type(SpherepackUtility) :: util
 
         !  Compute gaussian grid
         call compute_gaussian_latitudes_and_weights(nlat, dthet, dwts, local_error_flag)
@@ -1279,19 +1279,19 @@ contains
             np = mod(n, 3) + 1
 
             !  Compute dpbar for m=0
-            call sphere_aux%compute_fourier_coefficients(0, n, work)
+            call util%compute_fourier_coefficients(0, n, work)
             mn = get_index(0, n, nlat)
             do i=1, imid
-                call sphere_aux%compute_legendre_polys_from_fourier_coeff(0, n, dthet(i), work, dpbar(i, 1, np))
+                call util%compute_legendre_polys_from_fourier_coeff(0, n, dthet(i), work, dpbar(i, 1, np))
             end do
 
             !  Compute dpbar for m=1
-            call sphere_aux%compute_fourier_coefficients(1, n, work)
+            call util%compute_fourier_coefficients(1, n, work)
 
             mn = get_index(1, n, nlat)
 
             do i=1, imid
-                call sphere_aux%compute_legendre_polys_from_fourier_coeff(1, n, dthet(i), work, dpbar(i, 2, np))
+                call util%compute_legendre_polys_from_fourier_coeff(1, n, dthet(i), work, dpbar(i, 2, np))
             end do
 
             ! Compute and store dpbar for m=2, n

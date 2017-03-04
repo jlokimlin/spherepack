@@ -798,6 +798,7 @@ type_LegendreAux.o \
 type_Vector3D.o \
 type_GaussianSphere.o \
 type_RegularSphere.o \
+type_SpherepackUtility.o \
 spherepack.f90
 	$(FC) $(FFLAGS) -c spherepack.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)

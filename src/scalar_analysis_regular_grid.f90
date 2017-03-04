@@ -412,7 +412,7 @@ contains
 
         ! Local variables
         integer(ip)         :: imid, iw1, labc, lzz1, mmax
-        type(SpherepackUtility) :: sphere_aux
+        type(SpherepackUtility) :: util
 
         imid = (nlat+1)/2
         mmax = min(nlat, nlon/2+1)
@@ -436,12 +436,12 @@ contains
             ierror = 0
         end if
 
-        call sphere_aux%initialize_scalar_analysis_regular_grid(nlat, nlon, wshaec, dwork)
+        call util%initialize_scalar_analysis_regular_grid(nlat, nlon, wshaec, dwork)
 
         ! Set workspace pointer
         iw1 = lzz1+labc+1
 
-        call sphere_aux%hfft%initialize(nlon, wshaec(iw1))
+        call util%hfft%initialize(nlon, wshaec(iw1))
 
     end subroutine shaeci
 
@@ -495,7 +495,7 @@ contains
             ge(idg, jdg, nt), go(idg, jdg, nt), zb(imid, nlat, 3), wzfin(*), &
             whrfft(*), work(*)
 
-        type(SpherepackUtility) :: sphere_aux
+        type(SpherepackUtility) :: util
 
         ls = idg
         nlon = jdg
@@ -552,7 +552,7 @@ contains
 
         ! Fast Fourier transform
         fft_loop: do k=1, nt
-            call sphere_aux%hfft%forward(ls, nlon, ge(1, 1, k), ls, whrfft, work)
+            call util%hfft%forward(ls, nlon, ge(1, 1, k), ls, whrfft, work)
             if (mod(nlon, 2) /= 0) exit fft_loop
             ge(1:ls, nlon, k) = HALF * ge(1:ls, nlon, k)
         end do fft_loop
@@ -568,7 +568,7 @@ contains
 
         if (isym /= 1) then
 
-            call sphere_aux%zfin(2, nlat, nlon, 0, zb, i3, wzfin)
+            call util%zfin(2, nlat, nlon, 0, zb, i3, wzfin)
 
             do k=1, nt
                 do i=1, imid
@@ -587,7 +587,7 @@ contains
 
             do mp1=2, mdo
                 m = mp1-1
-                call sphere_aux%zfin(2, nlat, nlon, m, zb, i3, wzfin)
+                call util%zfin(2, nlat, nlon, m, zb, i3, wzfin)
                 do k=1, nt
                     do i=1, imid
                         do np1=mp1, ndo, 2
@@ -599,7 +599,7 @@ contains
             end do
 
             if (mdo /= mmax .and. mmax <= ndo) then
-                call sphere_aux%zfin(2, nlat, nlon, mdo, zb, i3, wzfin)
+                call util%zfin(2, nlat, nlon, mdo, zb, i3, wzfin)
                 do k=1, nt
                     do i=1, imid
                         do np1=mmax, ndo, 2
@@ -611,7 +611,7 @@ contains
             if (isym == 2) return
         end if
 
-        call sphere_aux%zfin(1, nlat, nlon, 0, zb, i3, wzfin)
+        call util%zfin(1, nlat, nlon, 0, zb, i3, wzfin)
 
         do k=1, nt
             do i=1, imm1
@@ -631,7 +631,7 @@ contains
         do mp1=2, mdo
             m = mp1-1
             mp2 = mp1+1
-            call sphere_aux%zfin(1, nlat, nlon, m, zb, i3, wzfin)
+            call util%zfin(1, nlat, nlon, m, zb, i3, wzfin)
             do k=1, nt
                 do i=1, imm1
                     do np1=mp2, ndo, 2
@@ -644,7 +644,7 @@ contains
 
         mp2 = mmax+1
         if (mdo /= mmax .and. mp2 <= ndo) then
-            call sphere_aux%zfin(1, nlat, nlon, mdo, zb, i3, wzfin)
+            call util%zfin(1, nlat, nlon, mdo, zb, i3, wzfin)
             do k=1, nt
                 do i=1, imm1
                     do np1=mp2, ndo, 2

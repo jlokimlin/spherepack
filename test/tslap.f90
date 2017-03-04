@@ -279,7 +279,7 @@ use spherepack
         		
         		call name("**gs")
         		
-        		call shagsi(nlat, nlon, wsave, lsave, work, lwork, dwork, ldwork, ierror)
+        		call shagsi(nlat, nlon, wsave, ierror)
         		call name("shai")
         		call iout(ierror, "ierr")
         		
@@ -365,7 +365,7 @@ use spherepack
         		
         		call name("**gs")
         		
-        		call shagsi(nlat, nlon, wsave, lsave, work, lwork, dwork, ldwork, ierror)
+        		call shagsi(nlat, nlon, wsave, ierror)
         		call shags(nlat, nlon, isym, nt, sclp, nlat, nlon, a, b, mdab, nlat, &
         		wsave, lsave, work, lwork, ierror)
         		

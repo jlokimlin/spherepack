@@ -456,7 +456,7 @@ contains
         integer(ip) :: lwvbin
         integer(ip) :: lzimn
         integer(ip) :: mmax
-        type(SpherepackUtility) :: sphere_aux
+        type(SpherepackUtility) :: util
 
         ! Check input arguments
         ierror = 1
@@ -484,7 +484,7 @@ contains
         call vtsgsi_lower_routine(nlat, nlon, imid, wvts, wvts(lzimn+1), work, work(iw1), &
             dwork, dwork(jw1), dwork(jw2), ierror)
         if(ierror /= 0) return
-        call sphere_aux%hfft%initialize(nlon, wvts(2*lzimn+1))
+        call util%hfft%initialize(nlon, wvts(2*lzimn+1))
 
     end subroutine vtsgsi
 
@@ -538,7 +538,7 @@ contains
             wto(idv, nlon, nt), work(*), wrfft(*), &
             vb(imid, *), wb(imid, *)
 
-        type(SpherepackUtility) :: sphere_aux
+        type(SpherepackUtility) :: util
 
         nlp1 = nlat+1
         mlat = mod(nlat, 2)
@@ -1081,8 +1081,8 @@ contains
         end select vector_symmetry_cases
 
         do k=1, nt
-            call sphere_aux%hfft%backward(idv, nlon, vte(1, 1, k), idv, wrfft, work)
-            call sphere_aux%hfft%backward(idv, nlon, wte(1, 1, k), idv, wrfft, work)
+            call util%hfft%backward(idv, nlon, vte(1, 1, k), idv, wrfft, work)
+            call util%hfft%backward(idv, nlon, wte(1, 1, k), idv, wrfft, work)
         end do
 
         select case(ityp)
@@ -1141,7 +1141,7 @@ contains
         real(wp) :: wvbin
         dimension vb(imid, *), wb(imid, *), vin(imid, nlat, 3), wvbin(*)
         real(wp) :: dwork(*), theta(*), wts(*)
-        type(SpherepackUtility) :: sphere_aux
+        type(SpherepackUtility) :: util
 
         mmax = min(nlat, nlon/2+1)
 
@@ -1153,11 +1153,11 @@ contains
             return
         end if
 
-        call sphere_aux%initialize_polar_components_gaussian_colat_deriv(nlat, nlon, theta, wvbin, dwork)
+        call util%initialize_polar_components_gaussian_colat_deriv(nlat, nlon, theta, wvbin, dwork)
 
         do mp1=1, mmax
             m = mp1-1
-            call sphere_aux%compute_polar_component(0, nlat, nlon, m, vin, i3, wvbin)
+            call util%compute_polar_component(0, nlat, nlon, m, vin, i3, wvbin)
             do np1=mp1, nlat
                 mn = m*(nlat-1)-(m*(m-1))/2+np1
                 do i=1, imid
@@ -1166,11 +1166,11 @@ contains
             end do
         end do
 
-        call sphere_aux%initialize_azimuthal_components_gaussian_colat_deriv(nlat, nlon, theta, wvbin, dwork)
+        call util%initialize_azimuthal_components_gaussian_colat_deriv(nlat, nlon, theta, wvbin, dwork)
 
         do mp1=1, mmax
             m = mp1-1
-            call sphere_aux%compute_azimuthal_component(0, nlat, nlon, m, vin, i3, wvbin)
+            call util%compute_azimuthal_component(0, nlat, nlon, m, vin, i3, wvbin)
             do np1=mp1, nlat
                 mn = m*(nlat-1)-(m*(m-1))/2+np1
                 do i=1, imid
