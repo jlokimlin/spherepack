@@ -37,7 +37,7 @@
 !
 ! ... files which must be loaded with vlapgc.f
 !
-!     type_SpherepackAux.f, type_RealPeriodicFastFourierTransform.f, vhagc.f, vhsgc.f, compute_gaussian_latitudes_and_weights.f
+!     type_SpherepackUtility.f, type_RealPeriodicFastFourierTransform.f, vhagc.f, vhsgc.f, compute_gaussian_latitudes_and_weights.f
 !
 !
 !     subroutine vlapgc(nlat, nlon, ityp, nt, vlap, wlap, idvw, jdvw, br, bi, cr, ci, 

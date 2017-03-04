@@ -37,7 +37,7 @@
 !
 ! ... files which must be loaded with shsgc.f90
 !
-!     type_SpherepackAux.f90, type_RealPeriodicFastFourierTransform.f90, compute_gaussian_latitudes_and_weights.f90
+!     type_SpherepackUtility.f90, type_RealPeriodicFastFourierTransform.f90, compute_gaussian_latitudes_and_weights.f90
 !
 !     subroutine shsgc(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, 
 !    +                 wshsgc, lshsgc, work, lwork, ierror)
@@ -478,7 +478,7 @@ contains
         dimension gs(idg, jdg, nt), a(mdab, ndab, nt), b(mdab, ndab, nt)
         dimension w(*), pmn(nlat, late, 3), g(lat, nlon, nt), wfft(*)
 
-        type(SpherepackAux) :: sphere_aux
+        type(SpherepackUtility) :: sphere_aux
 
         !     reconstruct fourier coefficients in g on gaussian grid
         !     using coefficients in a, b
@@ -672,7 +672,7 @@ contains
         dimension wts(nlat), p0n(nlat, late), p1n(nlat, late), abel(*), bbel(*), &
             cbel(*), wfft(*)
         real(wp) :: pb, dtheta(nlat), dwts(nlat), work(*)
-        type(SpherepackAux) :: sphere_aux
+        type(SpherepackUtility) :: sphere_aux
 
         !     compute the nlat  gaussian points and weights, the
         !     m=0, 1 legendre polys for gaussian points and all n, 

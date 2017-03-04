@@ -36,10 +36,10 @@ type_RealPeriodicFastFourierTransform.f90
 	$(FC) $(FFLAGS) -c type_RealPeriodicFastFourierTransform.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 
-type_SpherepackAux.o: \
+type_SpherepackUtility.o: \
 type_RealPeriodicFastFourierTransform.o \
-type_SpherepackAux.f90
-	$(FC) $(FFLAGS) -c type_SpherepackAux.f90 $(LINKS)\
+type_SpherepackUtility.f90
+	$(FC) $(FFLAGS) -c type_SpherepackUtility.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 	 	 
 type_LegendreAux.o: \
@@ -58,7 +58,7 @@ gaussian_latitudes_and_weights_routines.f90
 
 scalar_projection_routines.o: \
 spherepack_precision.o \
-type_SpherepackAux.o \
+type_SpherepackUtility.o \
 gaussian_latitudes_and_weights_routines.o \
 scalar_projection_routines.f90
 	$(FC) $(FFLAGS) -c scalar_projection_routines.f90 $(LINKS)\
@@ -78,7 +78,7 @@ scalar_projection_gaussian_grid.f90
 
 scalar_analysis_routines.o: \
 spherepack_precision.o \
-type_SpherepackAux.o\
+type_SpherepackUtility.o\
 gaussian_latitudes_and_weights_routines.o\
 scalar_analysis_routines.f90
 	$(FC) $(FFLAGS) -c scalar_analysis_routines.f90 $(LINKS)\
@@ -110,7 +110,7 @@ scalar_analysis_gaussian_grid_saved.f90
 
 scalar_synthesis_routines.o: \
 spherepack_precision.o \
-type_SpherepackAux.o\
+type_SpherepackUtility.o\
 gaussian_latitudes_and_weights_routines.o\
 scalar_synthesis_routines.f90
 	$(FC) $(FFLAGS) -c scalar_synthesis_routines.f90 $(LINKS)\
@@ -142,7 +142,7 @@ scalar_synthesis_gaussian_grid_saved.f90
 
 vector_analysis_routines.o: \
 spherepack_precision.o \
-type_SpherepackAux.o\
+type_SpherepackUtility.o\
 gaussian_latitudes_and_weights_routines.o\
 vector_analysis_routines.f90
 	$(FC) $(FFLAGS) -c vector_analysis_routines.f90 $(LINKS)\
@@ -174,7 +174,7 @@ vector_analysis_gaussian_grid_saved.f90
 
 vector_synthesis_routines.o: \
 spherepack_precision.o \
-type_SpherepackAux.o\
+type_SpherepackUtility.o\
 gaussian_latitudes_and_weights_routines.o \
 vector_synthesis_routines.f90
 	$(FC) $(FFLAGS) -c vector_synthesis_routines.f90 $(LINKS)\
@@ -206,7 +206,7 @@ vector_synthesis_gaussian_grid_saved.f90
 
 colatitudinal_derivative_routines.o: \
 spherepack_precision.o \
-type_SpherepackAux.o\
+type_SpherepackUtility.o\
 gaussian_latitudes_and_weights_routines.o \
 colatitudinal_derivative_routines.f90
 	$(FC) $(FFLAGS) -c colatitudinal_derivative_routines.f90 $(LINKS)\

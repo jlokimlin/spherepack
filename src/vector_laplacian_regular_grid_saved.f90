@@ -38,7 +38,7 @@
 !
 ! ... files which must be loaded with vlapes.f
 !
-!     type_SpherepackAux.f, type_RealPeriodicFastFourierTransform.f, vhaes.f, vhses.f
+!     type_SpherepackUtility.f, type_RealPeriodicFastFourierTransform.f, vhaes.f, vhses.f
 !
 !
 !

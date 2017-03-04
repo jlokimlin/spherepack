@@ -38,7 +38,7 @@
 !
 ! ... files which must be loaded with vhsec.f
 !
-!     type_SpherepackAux.f, type_RealPeriodicFastFourierTransform.f
+!     type_SpherepackUtility.f, type_RealPeriodicFastFourierTransform.f
 !   
 !     subroutine vhsec(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, 
 !    +                 mdab, ndab, wvhsec, lvhsec, work, lwork, ierror)
@@ -532,7 +532,7 @@ contains
         ! Local variables
         integer(ip)         :: imid, iw1, iw2
         integer(ip)         :: labc, lwvbin, lzz1, mmax
-        type(SpherepackAux) :: sphere_aux
+        type(SpherepackUtility) :: sphere_aux
 
         ! Check input arguments
         imid =(nlat+1)/2
@@ -618,7 +618,7 @@ contains
             wo(idv, nlon, nt), wvbin(*), wwbin(*), wrfft(*), &
             vb(imid, nlat, 3), wb(imid, nlat, 3)
 
-        type(SpherepackAux) :: sphere_aux
+        type(SpherepackUtility) :: sphere_aux
 
         nlp1 = nlat+1
         mlat = mod(nlat, 2)

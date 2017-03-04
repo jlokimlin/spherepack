@@ -550,7 +550,7 @@ contains
 
         ! Local variables
         integer(ip)         :: imid, lmn
-        type(SpherepackAux) :: sphere_aux
+        type(SpherepackUtility) :: sphere_aux
 
         imid = (nlat+1)/2
         lmn = (nlat*(nlat+1))/2
@@ -661,7 +661,7 @@ contains
         ! Local variables
         integer(ip)    :: i, imm1, j, k, m, mb, mlat, mlon, mmax
         integer(ip)    :: mn, mp1, mp2, ndo1, ndo2, nlp1, np1
-        type(SpherepackAux) :: sphere_aux
+        type(SpherepackUtility) :: sphere_aux
 
         nlp1 = nlat+1
         mlat = mod(nlat, 2)
@@ -1272,7 +1272,7 @@ contains
         integer(ip)         :: i, id, ierror, ix, iy
         integer(ip)         :: lwk, m, mn, n, nm, np, nz
         real(wp)            :: abel, bbel, cbel, dcf
-        type(SpherepackAux) :: sphere_aux
+        type(SpherepackUtility) :: sphere_aux
 
 
         !

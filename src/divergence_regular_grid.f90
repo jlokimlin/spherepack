@@ -38,7 +38,7 @@
 !
 ! ... files which must be loaded with divec.f
 !
-!     type_SpherepackAux.f, type_RealPeriodicFastFourierTransform.f, vhaec.f, shsec.f
+!     type_SpherepackUtility.f, type_RealPeriodicFastFourierTransform.f, vhaec.f, shsec.f
 !
 !
 !     subroutine divec(nlat, nlon, isym, nt, dv, idv, jdv, br, bi, mdb, ndb, 

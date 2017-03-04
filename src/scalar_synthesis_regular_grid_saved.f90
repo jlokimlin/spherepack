@@ -390,7 +390,7 @@ contains
 
         ! Local variables
         integer(ip)         :: imid, labc, lpimn, mmax
-        type(SpherepackAux) :: sphere_aux
+        type(SpherepackUtility) :: sphere_aux
 
         mmax = min(nlat, nlon/2+1)
         imid = (nlat+1)/2
@@ -460,7 +460,7 @@ contains
         integer(ip)    :: i, j, imid, imm1, k, ls
         integer(ip)    :: m, mb, mdo, mmax, mn, modl, nlon
         integer(ip)    :: mp1, mp2,  ndo, nlp1, np1
-        type(SpherepackAux) :: sphere_aux
+        type(SpherepackUtility) :: sphere_aux
 
         ls = idg
         nlon = jdg

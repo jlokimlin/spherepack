@@ -434,7 +434,7 @@ contains
         ! Local variables
         integer(ip)    :: imid, lmn
         integer(ip)    :: workspace_indices(7)
-        type(SpherepackAux) :: sphere_aux
+        type(SpherepackUtility) :: sphere_aux
 
         imid = (nlat+1)/2
         lmn = (nlat*(nlat+1))/2
@@ -558,7 +558,7 @@ contains
             wo(idv, nlon, *), work(*), &
             vb(imid, *), wb(imid, *), wrfft(*)
 
-        type(SpherepackAux) :: sphere_aux
+        type(SpherepackUtility) :: sphere_aux
 
         nlp1 = nlat+1
         tsn = TWO/nlon
@@ -1261,7 +1261,7 @@ contains
         integer(ip)         :: i, local_error_flag, id, ix, iy
         integer(ip)         :: m, mn, n, nm, np, nz
         real(wp)            :: abel, bbel, cbel, dcf
-        type(SpherepackAux) :: sphere_aux
+        type(SpherepackUtility) :: sphere_aux
 
         !  Compute gaussian grid
         call compute_gaussian_latitudes_and_weights(nlat, dthet, dwts, local_error_flag)

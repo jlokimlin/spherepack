@@ -38,7 +38,7 @@
 !
 ! ... files which must be loaded with idvtec.f90
 !
-!     type_SpherepackAux.f90, type_RealPeriodicFastFourierTransform.f90, vhsec.f90, shaec.f90
+!     type_SpherepackUtility.f90, type_RealPeriodicFastFourierTransform.f90, vhsec.f90, shaec.f90
 !
 !
 !     subroutine idvtec(nlat, nlon, isym, nt, v, w, idvw, jdvw, ad, bd, av, bv, 

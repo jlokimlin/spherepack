@@ -505,7 +505,7 @@ contains
         integer(ip)    :: i, j, k, m, mml1
         integer(ip)    :: mn, is, ms, ns, lm1, nl2, lp1, mp1, np1, mp2
         real(wp)       :: t1, t2, sfn
-        type(SpherepackAux) :: sphere_aux
+        type(SpherepackUtility) :: sphere_aux
 
         !  set gs array internally in shags_lower_routine
         g(1:lat, 1:nlon, :) = gs(1:lat, 1:nlon, :)
@@ -742,7 +742,7 @@ contains
 
         ! Local variables
         integer(ip)         :: mp1, m, mode, i, np1, km, mml1, mn
-        type(SpherepackAux) :: sphere_aux
+        type(SpherepackUtility) :: sphere_aux
 
         !  Compute and store legendre polys for i=1, ..., late, m=0, ..., l-1
         pmn = ZERO
@@ -886,7 +886,7 @@ contains
         ! Local variables
         integer(ip)         :: i, m, n, lw, np1, imn, mlim
         real(wp)            :: pb
-        type(SpherepackAux) :: sphere_aux
+        type(SpherepackUtility) :: sphere_aux
 
         call sphere_aux%hfft%initialize(nlon, wfft)
 

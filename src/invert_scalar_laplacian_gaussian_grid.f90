@@ -38,7 +38,7 @@
 !
 ! ... files which must be loaded with islapgc.f
 !
-!     type_SpherepackAux.f, type_RealPeriodicFastFourierTransform.f, shagc.f, shsgc.f
+!     type_SpherepackUtility.f, type_RealPeriodicFastFourierTransform.f, shagc.f, shsgc.f
 !
 !     subroutine islapgc(nlat, nlon, isym, nt, xlmbda, sf, ids, jds, a, b, 
 !    +mdab, ndab, wshsgc, lshsgc, work, lwork, pertrb, ierror)

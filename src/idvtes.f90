@@ -38,7 +38,7 @@
 !
 ! ... files which must be loaded with idvtes.f
 !
-!     type_SpherepackAux.f, type_RealPeriodicFastFourierTransform.f, vhses.f, shaes.f
+!     type_SpherepackUtility.f, type_RealPeriodicFastFourierTransform.f, vhses.f, shaes.f
 !
 !
 !     subroutine idvtes(nlat, nlon, isym, nt, v, w, idvw, jdvw, ad, bd, av, bv, 

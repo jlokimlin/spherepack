@@ -37,7 +37,7 @@
 !
 ! ... files which must be loaded with gradgec.f90
 !
-!     type_SpherepackAux.f90, type_RealPeriodicFastFourierTransform.f90, shags.f90, vhsgs.f90
+!     type_SpherepackUtility.f90, type_RealPeriodicFastFourierTransform.f90, shags.f90, vhsgs.f90
 !
 !     subroutine gradgs(nlat, nlon, isym, nt, v, w, idvw, jdvw, a, b, mdab, ndab, 
 !                      wvhsgs, lvhsgs, work, lwork, ierror)

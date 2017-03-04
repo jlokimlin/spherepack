@@ -38,314 +38,249 @@
 !
 ! ... files which must be loaded with vtsgc.f
 !
-!     type_SpherepackAux.f, type_RealPeriodicFastFourierTransform.f, vhagc.f, vhsgc.f, compute_gaussian_latitudes_and_weights.f
+!     type_SpherepackUtility.f, type_RealPeriodicFastFourierTransform.f, vhagc.f, vhsgc.f, compute_gaussian_latitudes_and_weights.f
 !   
-!
-!     subroutine vtsgc(nlat, nlon, ityp, nt, vt, wt, idvw, jdvw, br, bi, cr, ci, 
-!    +                 mdab, ndab, wvts, lwvts, work, lwork, ierror)
-!
-!     given the vector harmonic analysis br, bi, cr, and ci (computed
-!     by subroutine vhagc) of some vector function (v, w), this 
-!     subroutine computes the vector function (vt, wt) which is
-!     the derivative of (v, w) with respect to colatitude theta. vtsgc
-!     is similar to vhsgc except the vector harmonics are replaced by 
-!     their derivative with respect to colatitude with the result that
-!     (vt, wt) is computed instead of (v, w). vt(i, j) is the derivative
-!     of the colatitudinal component v(i, j) at the gaussian colatitude
-!     theta(i) and longitude phi(j) = (j-1)*2*pi/nlon. the spectral
-!     representation of (vt, wt) is given below at the definition of 
-!     output parameters vt, wt.
-!
-!     input parameters
-!
-!     nlat   the number of gaussian colatitudinal grid points theta(i)
-!            such that 0 < theta(1) <...< theta(nlat) < pi. they are
-!            computed by subroutine compute_gaussian_latitudes_and_weights which is called by this
-!            subroutine. if nlat is odd the equator is
-!            theta((nlat+1)/2). if nlat is even the equator lies
-!            half way between theta(nlat/2) and theta(nlat/2+1). nlat
-!            must be at least 3. note: if (v, w) is symmetric about
-!            the equator (see parameter ityp below) the number of
-!            colatitudinal grid points is nlat/2 if nlat is even or
-!            (nlat+1)/2 if nlat is odd.
-!
-!     nlon   the number of distinct londitude points.  nlon determines
-!            the grid increment in longitude as 2*pi/nlon. for example
-!            nlon = 72 for a five degree grid. nlon must be greater
-!            than zero. the axisymmetric case corresponds to nlon=1.
-!            the efficiency of the computation is improved when nlon
-!            is a product of small prime numbers.
-!
-!     ityp   = 0  no symmetries exist about the equator. the synthesis
-!                 is performed on the entire sphere. i.e. the arrays
-!                 vt(i, j), wt(i, j) are computed for i=1, ..., nlat and
-!                 j=1, ..., nlon.   
-!
-!            = 1  no symmetries exist about the equator however the
-!                 the coefficients cr and ci are zero which implies
-!                 that the curl of (v, w) is zero. that is, 
-!                 (d/dtheta (sin(theta) w) - dv/dphi)/sin(theta) = 0. 
-!                 the calculations are performed on the entire sphere.
-!                 i.e. the arrays vt(i, j), wt(i, j) are computed for 
-!                 i=1, ..., nlat and j=1, ..., nlon.
-!
-!            = 2  no symmetries exist about the equator however the
-!                 the coefficients br and bi are zero which implies
-!                 that the divergence of (v, w) is zero. that is, 
-!                 (d/dtheta (sin(theta) v) + dw/dphi)/sin(theta) = 0. 
-!                 the calculations are performed on the entire sphere.
-!                 i.e. the arrays vt(i, j), wt(i, j) are computed for 
-!                 i=1, ..., nlat and j=1, ..., nlon.
-!
-!            = 3  vt is odd and wt is even about the equator. the 
-!                 synthesis is performed on the northern hemisphere
-!                 only.  i.e., if nlat is odd the arrays vt(i, j)
-!                 and wt(i, j) are computed for i=1, ..., (nlat+1)/2
-!                 and j=1, ..., nlon. if nlat is even the arrays 
-!                 are computed for i=1, ..., nlat/2 and j=1, ..., nlon.
-!
-!            = 4  vt is odd and wt is even about the equator and the 
-!                 coefficients cr and ci are zero. the synthesis is
-!                 performed on the northern hemisphere only. i.e. if
-!                 nlat is odd the arrays vt(i, j), wt(i, j) are computed
-!                 for i=1, ..., (nlat+1)/2 and j=1, ..., nlon. if nlat is
-!                 even the arrays vt(i, j), wt(i, j) are computed for 
-!                 i=1, ..., nlat/2 and j=1, ..., nlon.
-!
-!            = 5  vt is odd and wt is even about the equator and the 
-!                 coefficients br and bi are zero. the synthesis is
-!                 performed on the northern hemisphere only. i.e. if
-!                 nlat is odd the arrays vt(i, j), wt(i, j) are computed
-!                 for i=1, ..., (nlat+1)/2 and j=1, ..., nlon. if nlat is
-!                 even the arrays vt(i, j), wt(i, j) are computed for 
-!                 i=1, ..., nlat/2 and j=1, ..., nlon.
-!
-!            = 6  vt is even and wt is odd about the equator. the 
-!                 synthesis is performed on the northern hemisphere
-!                 only.  i.e., if nlat is odd the arrays vt(i, j), wt(i, j)
-!                 are computed for i=1, ..., (nlat+1)/2 and j=1, ..., nlon.
-!                 if nlat is even the arrays vt(i, j), wt(i, j) are computed 
-!                 for i=1, ..., nlat/2 and j=1, ..., nlon.
-!
-!            = 7  vt is even and wt is odd about the equator and the 
-!                 coefficients cr and ci are zero. the synthesis is
-!                 performed on the northern hemisphere only. i.e. if
-!                 nlat is odd the arrays vt(i, j), wt(i, j) are computed
-!                 for i=1, ..., (nlat+1)/2 and j=1, ..., nlon. if nlat is
-!                 even the arrays vt(i, j), wt(i, j) are computed for 
-!                 i=1, ..., nlat/2 and j=1, ..., nlon.
-!
-!            = 8  vt is even and wt is odd about the equator and the 
-!                 coefficients br and bi are zero. the synthesis is
-!                 performed on the northern hemisphere only. i.e. if
-!                 nlat is odd the arrays vt(i, j), wt(i, j) are computed
-!                 for i=1, ..., (nlat+1)/2 and j=1, ..., nlon. if nlat is
-!                 even the arrays vt(i, j), wt(i, j) are computed for 
-!                 i=1, ..., nlat/2 and j=1, ..., nlon.
-!
-!     nt     the number of syntheses.  in the program that calls vtsgc, 
-!            the arrays vt, wt, br, bi, cr, and ci can be three dimensional
-!            in which case multiple syntheses will be performed.
-!            the third index is the synthesis index which assumes the 
-!            values k=1, ..., nt.  for a single synthesis set nt=1. the
-!            discription of the remaining parameters is simplified
-!            by assuming that nt=1 or that all the arrays are two
-!            dimensional.
-!
-!     idvw   the first dimension of the arrays vt, wt as it appears in
-!            the program that calls vtsgc. if ityp <= 2 then idvw
-!            must be at least nlat.  if ityp > 2 and nlat is
-!            even then idvw must be at least nlat/2. if ityp > 2
-!            and nlat is odd then idvw must be at least (nlat+1)/2.
-!
-!     jdvw   the second dimension of the arrays vt, wt as it appears in
-!            the program that calls vtsgc. jdvw must be at least nlon.
-!
-!     br, bi  two or three dimensional arrays (see input parameter nt)
-!     cr, ci  that contain the vector spherical harmonic coefficients
-!            of (v, w) as computed by subroutine vhagc.
-!
-!     mdab   the first dimension of the arrays br, bi, cr, and ci as it
-!            appears in the program that calls vtsgc. mdab must be at
-!            least min(nlat, nlon/2) if nlon is even or at least
-!            min(nlat, (nlon+1)/2) if nlon is odd.
-!
-!     ndab   the second dimension of the arrays br, bi, cr, and ci as it
-!            appears in the program that calls vtsgc. ndab must be at
-!            least nlat.
-!
-!     wvts   an array which must be initialized by subroutine vtsgci.
-!            once initialized, wvts can be used repeatedly by vtsgc
-!            as long as nlon and nlat remain unchanged.  wvts must
-!            not be altered between calls of vtsgc.
-!
-!     lwvts  the dimension of the array wvts as it appears in the
-!            program that calls vtsgc. define
-!
-!               l1 = min(nlat, nlon/2) if nlon is even or
-!               l1 = min(nlat, (nlon+1)/2) if nlon is odd
-!
-!            and
-!
-!               l2 = nlat/2        if nlat is even or
-!               l2 = (nlat+1)/2    if nlat is odd
-!
-!            then lwvts must be at least
-!
-!            4*nlat*l2+3*max(l1-2, 0)*(nlat+nlat-l1-1)+nlon+15
-!
-!
-!     work   a work array that does not have to be saved.
-!
-!     lwork  the dimension of the array work as it appears in the
-!            program that calls vtsgc. define
-!
-!               l2 = nlat/2        if nlat is even or
-!               l2 = (nlat+1)/2    if nlat is odd
-!
-!            if ityp <= 2 then lwork must be at least
-!
-!                    nlat*(2*nt*nlon+max(6*l2, nlon))
-!
-!            if ityp > 2 then lwork must be at least
-!
-!                    l2*(2*nt*nlon+max(6*nlat, nlon))
-!
-!     **************************************************************
-!
-!     output parameters
-!
-!     vt, wt  two or three dimensional arrays (see input parameter nt)
-!            in which the derivative of (v, w) with respect to 
-!            colatitude theta is stored. vt(i, j), wt(i, j) contain the
-!            derivatives at gaussian colatitude points theta(i)
-!            and longitude phi(j) = (j-1)*2*pi/nlon. the index ranges
-!            are defined above at the input parameter ityp. vt and wt
-!            are computed from the formulas for v and w given in 
-!            subroutine vhsgc but with vbar and wbar replaced with
-!            their derivatives with respect to colatitude. these
-!            derivatives are denoted by vtbar and wtbar. 
-!
-!   in terms of real variables this expansion takes the form
-!
-!             for i=1, ..., nlat and  j=1, ..., nlon
-!
-!     vt(i, j) = the sum from n=1 to n=nlat-1 of
-!
-!               .5*br(1, n+1)*vtbar(0, n, theta(i))
-!
-!     plus the sum from m=1 to m=mmax-1 of the sum from n=m to 
-!     n=nlat-1 of the real part of
-!
-!       (br(m+1, n+1)*vtbar(m, n, theta(i))
-!                   -ci(m+1, n+1)*wtbar(m, n, theta(i)))*cos(m*phi(j))
-!      -(bi(m+1, n+1)*vtbar(m, n, theta(i))
-!                   +cr(m+1, n+1)*wtbar(m, n, theta(i)))*sin(m*phi(j))
-!
-!    and for i=1, ..., nlat and  j=1, ..., nlon
-!
-!     wt(i, j) = the sum from n=1 to n=nlat-1 of
-!
-!              -.5*cr(1, n+1)*vtbar(0, n, theta(i))
-!
-!     plus the sum from m=1 to m=mmax-1 of the sum from n=m to
-!     n=nlat-1 of the real part of
-!
-!      -(cr(m+1, n+1)*vtbar(m, n, theta(i))
-!                   +bi(m+1, n+1)*wtbar(m, n, theta(i)))*cos(m*phi(j))
-!      +(ci(m+1, n+1)*vtbar(m, n, theta(i))
-!                   -br(m+1, n+1)*wtbar(m, n, theta(i)))*sin(m*phi(j))
-!
-!
-!      br(m+1, nlat), bi(m+1, nlat), cr(m+1, nlat), and ci(m+1, nlat) are
-!      assumed zero for m even.
-!
-!
-!     ierror = 0  no errors
-!            = 1  error in the specification of nlat
-!            = 2  error in the specification of nlon
-!            = 3  error in the specification of ityp
-!            = 4  error in the specification of nt
-!            = 5  error in the specification of idvw
-!            = 6  error in the specification of jdvw
-!            = 7  error in the specification of mdab
-!            = 8  error in the specification of ndab
-!            = 9  error in the specification of lwvts
-!            = 10 error in the specification of lwork
-!
-!
+
 ! *******************************************************************
 !
-!     subroutine vtsgci(nlat, nlon, wvts, lwvts, dwork, ldwork, ierror)
-!
-!     subroutine vtsgci initializes the array wvts which can then be
-!     used repeatedly by subroutine vtsgc until nlat or nlon is changed.
-!
-!     input parameters
-!
-!     nlat   the number of gaussian colatitudinal grid points theta(i)
-!            such that 0 < theta(1) <...< theta(nlat) < pi. they are
-!            computed by subroutine compute_gaussian_latitudes_and_weights which is called by this
-!            subroutine. if nlat is odd the equator is
-!            theta((nlat+1)/2). if nlat is even the equator lies
-!            half way between theta(nlat/2) and theta(nlat/2+1). nlat
-!            must be at least 3. note: if (v, w) is symmetric about
-!            the equator (see parameter ityp below) the number of
-!            colatitudinal grid points is nlat/2 if nlat is even or
-!            (nlat+1)/2 if nlat is odd.
-!
-!     nlon   the number of distinct londitude points.  nlon determines
-!            the grid increment in longitude as 2*pi/nlon. for example
-!            nlon = 72 for a five degree grid. nlon must be greater
-!            than zero. the axisymmetric case corresponds to nlon=1.
-!            the efficiency of the computation is improved when nlon
-!            is a product of small prime numbers.
-!
-!     lwvts  the dimension of the array wvts as it appears in the
-!            program that calls vtsgc. define
-!
-!               l1 = min(nlat, nlon/2) if nlon is even or
-!               l1 = min(nlat, (nlon+1)/2) if nlon is odd
-!
-!            and
-!
-!               l2 = nlat/2        if nlat is even or
-!               l2 = (nlat+1)/2    if nlat is odd
-!
-!            then lwvts must be at least
-!
-!            4*nlat*l2+3*max(l1-2, 0)*(nlat+nlat-l1-1)+nlon+15
-!
-!
-!     dwork  a real work array that does not have to be saved.
-!
-!     ldwork the dimension of the array dwork as it appears in the
-!            program that calls vtsgc. ldwork must be at least
-!            3*nlat+2
-!
-!     **************************************************************
-!
-!     output parameters
-!
-!     wvts   an array which is initialized for use by subroutine vtsgc.
-!            once initialized, wvts can be used repeatedly by vtsgc
-!            as long as nlat or nlon remain unchanged.  wvts must not
-!            be altered between calls of vtsgc.
-!
-!
-!     ierror = 0  no errors
-!            = 1  error in the specification of nlat
-!            = 2  error in the specification of nlon
-!            = 3  error in the specification of lwvts
-!            = 4  error in the specification of lwork
-!
-!
-!
-! **********************************************************************
-!
-submodule(colatitudinal_derivative_routines) colatitudinal_derivative_gaussian_grid
-contains
 
+submodule(colatitudinal_derivative_routines) colatitudinal_derivative_gaussian_grid
+
+contains
+    !
+    !     subroutine vtsgc(nlat, nlon, ityp, nt, vt, wt, idvw, jdvw, br, bi, cr, ci,
+    !    +                 mdab, ndab, wvts, lwvts, work, lwork, ierror)
+    !
+    !     given the vector harmonic analysis br, bi, cr, and ci (computed
+    !     by subroutine vhagc) of some vector function (v, w), this
+    !     subroutine computes the vector function (vt, wt) which is
+    !     the derivative of (v, w) with respect to colatitude theta. vtsgc
+    !     is similar to vhsgc except the vector harmonics are replaced by
+    !     their derivative with respect to colatitude with the result that
+    !     (vt, wt) is computed instead of (v, w). vt(i, j) is the derivative
+    !     of the colatitudinal component v(i, j) at the gaussian colatitude
+    !     theta(i) and longitude phi(j) = (j-1)*2*pi/nlon. the spectral
+    !     representation of (vt, wt) is given below at the definition of
+    !     output parameters vt, wt.
+    !
+    !     input parameters
+    !
+    !     nlat   the number of gaussian colatitudinal grid points theta(i)
+    !            such that 0 < theta(1) <...< theta(nlat) < pi. they are
+    !            computed by subroutine compute_gaussian_latitudes_and_weights which is called by this
+    !            subroutine. if nlat is odd the equator is
+    !            theta((nlat+1)/2). if nlat is even the equator lies
+    !            half way between theta(nlat/2) and theta(nlat/2+1). nlat
+    !            must be at least 3. note: if (v, w) is symmetric about
+    !            the equator (see parameter ityp below) the number of
+    !            colatitudinal grid points is nlat/2 if nlat is even or
+    !            (nlat+1)/2 if nlat is odd.
+    !
+    !     nlon   the number of distinct londitude points.  nlon determines
+    !            the grid increment in longitude as 2*pi/nlon. for example
+    !            nlon = 72 for a five degree grid. nlon must be greater
+    !            than zero. the axisymmetric case corresponds to nlon=1.
+    !            the efficiency of the computation is improved when nlon
+    !            is a product of small prime numbers.
+    !
+    !     ityp   = 0  no symmetries exist about the equator. the synthesis
+    !                 is performed on the entire sphere. i.e. the arrays
+    !                 vt(i, j), wt(i, j) are computed for i=1, ..., nlat and
+    !                 j=1, ..., nlon.
+    !
+    !            = 1  no symmetries exist about the equator however the
+    !                 the coefficients cr and ci are zero which implies
+    !                 that the curl of (v, w) is zero. that is,
+    !                 (d/dtheta (sin(theta) w) - dv/dphi)/sin(theta) = 0.
+    !                 the calculations are performed on the entire sphere.
+    !                 i.e. the arrays vt(i, j), wt(i, j) are computed for
+    !                 i=1, ..., nlat and j=1, ..., nlon.
+    !
+    !            = 2  no symmetries exist about the equator however the
+    !                 the coefficients br and bi are zero which implies
+    !                 that the divergence of (v, w) is zero. that is,
+    !                 (d/dtheta (sin(theta) v) + dw/dphi)/sin(theta) = 0.
+    !                 the calculations are performed on the entire sphere.
+    !                 i.e. the arrays vt(i, j), wt(i, j) are computed for
+    !                 i=1, ..., nlat and j=1, ..., nlon.
+    !
+    !            = 3  vt is odd and wt is even about the equator. the
+    !                 synthesis is performed on the northern hemisphere
+    !                 only.  i.e., if nlat is odd the arrays vt(i, j)
+    !                 and wt(i, j) are computed for i=1, ..., (nlat+1)/2
+    !                 and j=1, ..., nlon. if nlat is even the arrays
+    !                 are computed for i=1, ..., nlat/2 and j=1, ..., nlon.
+    !
+    !            = 4  vt is odd and wt is even about the equator and the
+    !                 coefficients cr and ci are zero. the synthesis is
+    !                 performed on the northern hemisphere only. i.e. if
+    !                 nlat is odd the arrays vt(i, j), wt(i, j) are computed
+    !                 for i=1, ..., (nlat+1)/2 and j=1, ..., nlon. if nlat is
+    !                 even the arrays vt(i, j), wt(i, j) are computed for
+    !                 i=1, ..., nlat/2 and j=1, ..., nlon.
+    !
+    !            = 5  vt is odd and wt is even about the equator and the
+    !                 coefficients br and bi are zero. the synthesis is
+    !                 performed on the northern hemisphere only. i.e. if
+    !                 nlat is odd the arrays vt(i, j), wt(i, j) are computed
+    !                 for i=1, ..., (nlat+1)/2 and j=1, ..., nlon. if nlat is
+    !                 even the arrays vt(i, j), wt(i, j) are computed for
+    !                 i=1, ..., nlat/2 and j=1, ..., nlon.
+    !
+    !            = 6  vt is even and wt is odd about the equator. the
+    !                 synthesis is performed on the northern hemisphere
+    !                 only.  i.e., if nlat is odd the arrays vt(i, j), wt(i, j)
+    !                 are computed for i=1, ..., (nlat+1)/2 and j=1, ..., nlon.
+    !                 if nlat is even the arrays vt(i, j), wt(i, j) are computed
+    !                 for i=1, ..., nlat/2 and j=1, ..., nlon.
+    !
+    !            = 7  vt is even and wt is odd about the equator and the
+    !                 coefficients cr and ci are zero. the synthesis is
+    !                 performed on the northern hemisphere only. i.e. if
+    !                 nlat is odd the arrays vt(i, j), wt(i, j) are computed
+    !                 for i=1, ..., (nlat+1)/2 and j=1, ..., nlon. if nlat is
+    !                 even the arrays vt(i, j), wt(i, j) are computed for
+    !                 i=1, ..., nlat/2 and j=1, ..., nlon.
+    !
+    !            = 8  vt is even and wt is odd about the equator and the
+    !                 coefficients br and bi are zero. the synthesis is
+    !                 performed on the northern hemisphere only. i.e. if
+    !                 nlat is odd the arrays vt(i, j), wt(i, j) are computed
+    !                 for i=1, ..., (nlat+1)/2 and j=1, ..., nlon. if nlat is
+    !                 even the arrays vt(i, j), wt(i, j) are computed for
+    !                 i=1, ..., nlat/2 and j=1, ..., nlon.
+    !
+    !     nt     the number of syntheses.  in the program that calls vtsgc,
+    !            the arrays vt, wt, br, bi, cr, and ci can be three dimensional
+    !            in which case multiple syntheses will be performed.
+    !            the third index is the synthesis index which assumes the
+    !            values k=1, ..., nt.  for a single synthesis set nt=1. the
+    !            discription of the remaining parameters is simplified
+    !            by assuming that nt=1 or that all the arrays are two
+    !            dimensional.
+    !
+    !     idvw   the first dimension of the arrays vt, wt as it appears in
+    !            the program that calls vtsgc. if ityp <= 2 then idvw
+    !            must be at least nlat.  if ityp > 2 and nlat is
+    !            even then idvw must be at least nlat/2. if ityp > 2
+    !            and nlat is odd then idvw must be at least (nlat+1)/2.
+    !
+    !     jdvw   the second dimension of the arrays vt, wt as it appears in
+    !            the program that calls vtsgc. jdvw must be at least nlon.
+    !
+    !     br, bi  two or three dimensional arrays (see input parameter nt)
+    !     cr, ci  that contain the vector spherical harmonic coefficients
+    !            of (v, w) as computed by subroutine vhagc.
+    !
+    !     mdab   the first dimension of the arrays br, bi, cr, and ci as it
+    !            appears in the program that calls vtsgc. mdab must be at
+    !            least min(nlat, nlon/2) if nlon is even or at least
+    !            min(nlat, (nlon+1)/2) if nlon is odd.
+    !
+    !     ndab   the second dimension of the arrays br, bi, cr, and ci as it
+    !            appears in the program that calls vtsgc. ndab must be at
+    !            least nlat.
+    !
+    !     wvts   an array which must be initialized by subroutine vtsgci.
+    !            once initialized, wvts can be used repeatedly by vtsgc
+    !            as long as nlon and nlat remain unchanged.  wvts must
+    !            not be altered between calls of vtsgc.
+    !
+    !     lwvts  the dimension of the array wvts as it appears in the
+    !            program that calls vtsgc. define
+    !
+    !               l1 = min(nlat, nlon/2) if nlon is even or
+    !               l1 = min(nlat, (nlon+1)/2) if nlon is odd
+    !
+    !            and
+    !
+    !               l2 = nlat/2        if nlat is even or
+    !               l2 = (nlat+1)/2    if nlat is odd
+    !
+    !            then lwvts must be at least
+    !
+    !            4*nlat*l2+3*max(l1-2, 0)*(nlat+nlat-l1-1)+nlon+15
+    !
+    !
+    !     work   a work array that does not have to be saved.
+    !
+    !     lwork  the dimension of the array work as it appears in the
+    !            program that calls vtsgc. define
+    !
+    !               l2 = nlat/2        if nlat is even or
+    !               l2 = (nlat+1)/2    if nlat is odd
+    !
+    !            if ityp <= 2 then lwork must be at least
+    !
+    !                    nlat*(2*nt*nlon+max(6*l2, nlon))
+    !
+    !            if ityp > 2 then lwork must be at least
+    !
+    !                    l2*(2*nt*nlon+max(6*nlat, nlon))
+    !
+    !     **************************************************************
+    !
+    !     output parameters
+    !
+    !     vt, wt  two or three dimensional arrays (see input parameter nt)
+    !            in which the derivative of (v, w) with respect to
+    !            colatitude theta is stored. vt(i, j), wt(i, j) contain the
+    !            derivatives at gaussian colatitude points theta(i)
+    !            and longitude phi(j) = (j-1)*2*pi/nlon. the index ranges
+    !            are defined above at the input parameter ityp. vt and wt
+    !            are computed from the formulas for v and w given in
+    !            subroutine vhsgc but with vbar and wbar replaced with
+    !            their derivatives with respect to colatitude. these
+    !            derivatives are denoted by vtbar and wtbar.
+    !
+    !   in terms of real variables this expansion takes the form
+    !
+    !             for i=1, ..., nlat and  j=1, ..., nlon
+    !
+    !     vt(i, j) = the sum from n=1 to n=nlat-1 of
+    !
+    !               .5*br(1, n+1)*vtbar(0, n, theta(i))
+    !
+    !     plus the sum from m=1 to m=mmax-1 of the sum from n=m to
+    !     n=nlat-1 of the real part of
+    !
+    !       (br(m+1, n+1)*vtbar(m, n, theta(i))
+    !                   -ci(m+1, n+1)*wtbar(m, n, theta(i)))*cos(m*phi(j))
+    !      -(bi(m+1, n+1)*vtbar(m, n, theta(i))
+    !                   +cr(m+1, n+1)*wtbar(m, n, theta(i)))*sin(m*phi(j))
+    !
+    !    and for i=1, ..., nlat and  j=1, ..., nlon
+    !
+    !     wt(i, j) = the sum from n=1 to n=nlat-1 of
+    !
+    !              -.5*cr(1, n+1)*vtbar(0, n, theta(i))
+    !
+    !     plus the sum from m=1 to m=mmax-1 of the sum from n=m to
+    !     n=nlat-1 of the real part of
+    !
+    !      -(cr(m+1, n+1)*vtbar(m, n, theta(i))
+    !                   +bi(m+1, n+1)*wtbar(m, n, theta(i)))*cos(m*phi(j))
+    !      +(ci(m+1, n+1)*vtbar(m, n, theta(i))
+    !                   -br(m+1, n+1)*wtbar(m, n, theta(i)))*sin(m*phi(j))
+    !
+    !
+    !      br(m+1, nlat), bi(m+1, nlat), cr(m+1, nlat), and ci(m+1, nlat) are
+    !      assumed zero for m even.
+    !
+    !
+    !     ierror = 0  no errors
+    !            = 1  error in the specification of nlat
+    !            = 2  error in the specification of nlon
+    !            = 3  error in the specification of ityp
+    !            = 4  error in the specification of nt
+    !            = 5  error in the specification of idvw
+    !            = 6  error in the specification of jdvw
+    !            = 7  error in the specification of mdab
+    !            = 8  error in the specification of ndab
+    !            = 9  error in the specification of lwvts
+    !            = 10 error in the specification of lwork
+    !
+    !
     subroutine vtsgc(nlat, nlon, ityp, nt, vt, wt, idvw, jdvw, br, bi, cr, ci, &
         mdab, ndab, wvts, lwvts, work, lwork, ierror)
 
@@ -439,6 +374,69 @@ contains
 
     end subroutine vtsgc
 
+    !     subroutine vtsgci(nlat, nlon, wvts, lwvts, dwork, ldwork, ierror)
+    !
+    !     subroutine vtsgci initializes the array wvts which can then be
+    !     used repeatedly by subroutine vtsgc until nlat or nlon is changed.
+    !
+    !     input parameters
+    !
+    !     nlat   the number of gaussian colatitudinal grid points theta(i)
+    !            such that 0 < theta(1) <...< theta(nlat) < pi. they are
+    !            computed by subroutine compute_gaussian_latitudes_and_weights which is called by this
+    !            subroutine. if nlat is odd the equator is
+    !            theta((nlat+1)/2). if nlat is even the equator lies
+    !            half way between theta(nlat/2) and theta(nlat/2+1). nlat
+    !            must be at least 3. note: if (v, w) is symmetric about
+    !            the equator (see parameter ityp below) the number of
+    !            colatitudinal grid points is nlat/2 if nlat is even or
+    !            (nlat+1)/2 if nlat is odd.
+    !
+    !     nlon   the number of distinct londitude points.  nlon determines
+    !            the grid increment in longitude as 2*pi/nlon. for example
+    !            nlon = 72 for a five degree grid. nlon must be greater
+    !            than zero. the axisymmetric case corresponds to nlon=1.
+    !            the efficiency of the computation is improved when nlon
+    !            is a product of small prime numbers.
+    !
+    !     lwvts  the dimension of the array wvts as it appears in the
+    !            program that calls vtsgc. define
+    !
+    !               l1 = min(nlat, nlon/2) if nlon is even or
+    !               l1 = min(nlat, (nlon+1)/2) if nlon is odd
+    !
+    !            and
+    !
+    !               l2 = nlat/2        if nlat is even or
+    !               l2 = (nlat+1)/2    if nlat is odd
+    !
+    !            then lwvts must be at least
+    !
+    !            4*nlat*l2+3*max(l1-2, 0)*(nlat+nlat-l1-1)+nlon+15
+    !
+    !
+    !     dwork  a real work array that does not have to be saved.
+    !
+    !     ldwork the dimension of the array dwork as it appears in the
+    !            program that calls vtsgc. ldwork must be at least
+    !            3*nlat+2
+    !
+    !     **************************************************************
+    !
+    !     output parameters
+    !
+    !     wvts   an array which is initialized for use by subroutine vtsgc.
+    !            once initialized, wvts can be used repeatedly by vtsgc
+    !            as long as nlat or nlon remain unchanged.  wvts must not
+    !            be altered between calls of vtsgc.
+    !
+    !
+    !     ierror = 0  no errors
+    !            = 1  error in the specification of nlat
+    !            = 2  error in the specification of nlon
+    !            = 3  error in the specification of lwvts
+    !            = 4  error in the specification of lwork
+    !
     module subroutine vtsgci(nlat, nlon, wvts, lwvts, dwork, ldwork, ierror)
 
         ! Dummy arguments
@@ -460,7 +458,7 @@ contains
         integer(ip) :: lwvbin
         integer(ip) :: lzz1
         integer(ip) :: mmax
-        type(SpherepackAux) :: sphere_aux
+        type(SpherepackUtility) :: sphere_aux
 
         ierror = 1
         if (nlat < 3) return
@@ -546,7 +544,7 @@ contains
             vb(imid, nlat, 3), wb(imid, nlat, 3)
 
         
-        type(SpherepackAux) :: sphere_aux
+        type(SpherepackUtility) :: sphere_aux
 
         nlp1 = nlat+1
         mlat = mod(nlat, 2)

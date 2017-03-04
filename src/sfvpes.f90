@@ -38,7 +38,7 @@
 !
 ! ... files which must be loaded with sfvpes.f
 !
-!     type_SpherepackAux.f, type_RealPeriodicFastFourierTransform.f, vhaes.f, shses.f
+!     type_SpherepackUtility.f, type_RealPeriodicFastFourierTransform.f, vhaes.f, shses.f
 !
 !
 !     subroutine sfvpes(nlat, nlon, isym, nt, sf, vp, idv, jdv, br, bi, cr, ci, 

@@ -38,7 +38,7 @@
 !
 ! ... files which must be loaded with sfvpgc.f
 !
-!     type_SpherepackAux.f, type_RealPeriodicFastFourierTransform.f, vhagc.f, shsgc.f, compute_gaussian_latitudes_and_weights.f
+!     type_SpherepackUtility.f, type_RealPeriodicFastFourierTransform.f, vhagc.f, shsgc.f, compute_gaussian_latitudes_and_weights.f
 !
 !
 !     subroutine sfvpgc(nlat, nlon, isym, nt, sf, vp, idv, jdv, br, bi, cr, ci, 

@@ -37,7 +37,7 @@
 !
 ! ... files which must be loaded with gradgc.f
 !
-!     type_SpherepackAux.f, type_RealPeriodicFastFourierTransform.f, shagc.f, vhsgc.f
+!     type_SpherepackUtility.f, type_RealPeriodicFastFourierTransform.f, shagc.f, vhsgc.f
 !
 !     subroutine gradgc(nlat, nlon, isym, nt, v, w, idvw, jdvw, a, b, mdab, ndab, 
 !    +                  wvhsgc, lvhsgc, work, lwork, ierror)

@@ -417,7 +417,7 @@ contains
         integer(ip), intent(out) :: ierror
 
         ! Local variables
-        type(SpherepackAux) :: sphere_aux
+        type(SpherepackUtility) :: sphere_aux
         integer(ip) :: imid
         integer(ip) :: iw1
         integer(ip) :: iw2
@@ -508,7 +508,7 @@ contains
             wo(idv, nlon, *), wzvin(*), wzwin(*), wrfft(*), &
             zv(imid, nlat, 3), zw(imid, nlat, 3)
 
-        type(SpherepackAux) :: sphere_aux
+        type(SpherepackUtility) :: sphere_aux
 
         nlp1 = nlat+1
         tsn = TWO/nlon

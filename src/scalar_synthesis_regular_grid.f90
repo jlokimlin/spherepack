@@ -37,7 +37,7 @@
 !
 ! ... files which must be loaded with shsec.f90
 !
-!     type_SpherepackAux.f90, type_RealPeriodicFastFourierTransform.f90
+!     type_SpherepackUtility.f90, type_RealPeriodicFastFourierTransform.f90
 !
 !     subroutine shsec(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, 
 !    +                    wshsec, lshsec, work, lwork, ierror)
@@ -51,7 +51,7 @@
 !
 !     required files from spherepack
 !
-!     type_SpherepackAux.f90, type_RealPeriodicFastFourierTransform.f90
+!     type_SpherepackUtility.f90, type_RealPeriodicFastFourierTransform.f90
 !
 !
 !     input parameters
@@ -421,7 +421,7 @@ contains
         integer(ip) :: labc
         integer(ip) :: lzz1
         integer(ip) :: mmax
-        type(SpherepackAux) :: sphere_aux
+        type(SpherepackUtility) :: sphere_aux
 
         ierror = 1
         if (nlat < 3) return
@@ -496,7 +496,7 @@ contains
             ge(idg, jdg, nt), go(idg, jdg, nt), pb(imid, nlat, 3), walin(*), &
             whrfft(*), work(*)
 
-        type(SpherepackAux) :: sphere_aux
+        type(SpherepackUtility) :: sphere_aux
 
         ls = idg
         nlon = jdg

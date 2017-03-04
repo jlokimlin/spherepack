@@ -37,7 +37,7 @@
 !
 ! ... files which must be loaded with islapes.f
 !
-!     type_SpherepackAux.f, type_RealPeriodicFastFourierTransform.f, shaes.f, shses.f
+!     type_SpherepackUtility.f, type_RealPeriodicFastFourierTransform.f, shaes.f, shses.f
 !
 !     subroutine islapes(nlat, nlon, isym, nt, xlmbda, sf, ids, jds, a, b, 
 !    +mdab, ndab, wshses, lshses, work, lwork, pertrb, ierror)

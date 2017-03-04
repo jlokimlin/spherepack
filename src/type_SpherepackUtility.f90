@@ -33,7 +33,7 @@
 !     in spherepack. It includes undocumented subroutines
 !     called by some or all of main programs
 !
-module type_SpherepackAux
+module type_SpherepackUtility
 
     use spherepack_precision, only: &
         wp, & ! working precision
@@ -48,9 +48,9 @@ module type_SpherepackAux
 
     ! Everything is private unless stated otherwise
     private
-    public :: SpherepackAux
+    public :: SpherepackUtility
 
-    type, public :: SpherepackAux
+    type, public :: SpherepackUtility
         ! Type components
         type(RealPeriodicFastFourierTransform) :: hfft
     contains
@@ -79,7 +79,7 @@ module type_SpherepackAux
         procedure, nopass :: zvinit
         procedure, nopass :: zwin
         procedure, nopass :: zwinit
-    end type SpherepackAux
+    end type SpherepackUtility
 
     ! Parameters confined to the module
     real(wp),    parameter :: ZERO = 0.0_wp
@@ -202,9 +202,9 @@ contains
         real(wp)            :: a1, b1, c1, t1, t2
         real(wp)            :: fk, cp2, pm1
         real(wp)            :: fden, fnmh, fnum, fnnp1, fnmsq
-        real(wp), parameter :: SC10=1024_wp
-        real(wp), parameter :: SC20=SC10**2
-        real(wp), parameter :: SC40=SC20**2
+        real(wp), parameter :: SC10 = 1024_wp
+        real(wp), parameter :: SC20 = SC10**2
+        real(wp), parameter :: SC40 = SC20**2
         real(wp), parameter :: SQRT3 = sqrt(THREE)
         real(wp), parameter :: SQRT6 = sqrt(SIX)
 
@@ -3818,4 +3818,4 @@ contains
 
     end subroutine wbgint_lower_routine
 
-end module type_SpherepackAux
+end module type_SpherepackUtility

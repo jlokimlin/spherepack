@@ -38,7 +38,7 @@
 !
 ! ... files which must be loaded with idivgs.f
 !
-!     type_SpherepackAux.f, type_RealPeriodicFastFourierTransform.f, vhsgs.f, shags.f
+!     type_SpherepackUtility.f, type_RealPeriodicFastFourierTransform.f, vhsgs.f, shags.f
 !
 !
 !     subroutine idivgs(nlat, nlon, isym, nt, v, w, idvw, jdvw, a, b, mdab, ndab, 

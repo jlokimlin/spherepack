@@ -38,7 +38,7 @@
 !
 ! ... files which must be loaded with idvtgs.f
 !
-!     type_SpherepackAux.f, type_RealPeriodicFastFourierTransform.f, vhsgs.f, shags.f, compute_gaussian_latitudes_and_weights.f
+!     type_SpherepackUtility.f, type_RealPeriodicFastFourierTransform.f, vhsgs.f, shags.f, compute_gaussian_latitudes_and_weights.f
 !
 !
 !     subroutine idvtgs(nlat, nlon, isym, nt, v, w, idvw, jdvw, ad, bd, av, bv, 

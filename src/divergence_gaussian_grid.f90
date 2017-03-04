@@ -38,7 +38,7 @@
 !
 ! ... files which must be loaded with divgc.f
 !
-!     type_SpherepackAux.f, type_RealPeriodicFastFourierTransform.f, vhagc.f, shsgc.f, compute_gaussian_latitudes_and_weights.f
+!     type_SpherepackUtility.f, type_RealPeriodicFastFourierTransform.f, vhagc.f, shsgc.f, compute_gaussian_latitudes_and_weights.f
 !
 !
 !     subroutine divgc(nlat, nlon, isym, nt, dv, idv, jdv, br, bi, mdb, ndb, 

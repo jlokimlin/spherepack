@@ -166,7 +166,7 @@ contains
         integer(ip) :: mwrk
         integer(ip) :: nloc1, nte
         integer(ip) :: nloc2
-        type(SpherepackAux) :: sphere_aux
+        type(SpherepackUtility) :: sphere_aux
 
         ! Check input arguments
         ierror = 1
@@ -335,7 +335,7 @@ contains
         integer(ip) :: nloc1
         integer(ip) :: nloc2
         integer(ip) :: nte
-        type(SpherepackAux) :: sphere_aux
+        type(SpherepackUtility) :: sphere_aux
 
         ! Check input arguments
         ierror = 1
@@ -453,7 +453,7 @@ contains
             nshe(2), nsho(2)
         dimension zort(64, 64, 2)
 
-        type(SpherepackAux) :: sphere_aux
+        type(SpherepackUtility) :: sphere_aux
 
         ns2 = nlat/2
         modn = nlat-2*ns2

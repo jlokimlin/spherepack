@@ -38,7 +38,7 @@
 !
 ! ... files which must be loaded with vtsec.f90
 !
-!     type_SpherepackAux.f90, type_RealPeriodicFastFourierTransform.f90, vhaec.f90, vhsec.f90
+!     type_SpherepackUtility.f90, type_RealPeriodicFastFourierTransform.f90, vhaec.f90, vhsec.f90
 !   
 !     subroutine vtsec(nlat, nlon, ityp, nt, vt, wt, idvw, jdvw, br, bi, cr, ci, 
 !    +                 mdab, ndab, wvts, lwvts, work, lwork, ierror)
@@ -454,7 +454,7 @@ contains
         integer(ip) :: lwvbin
         integer(ip) :: lzz1
         integer(ip) :: mmax
-        type(SpherepackAux) :: sphere_aux
+        type(SpherepackUtility) :: sphere_aux
 
         ierror = 1
         if (nlat < 3) return
@@ -534,7 +534,7 @@ contains
             wto(idv, nlon, nt), wvbin(*), wwbin(*), wrfft(*), &
             vb(imid, nlat, 3), wb(imid, nlat, 3)
         
-        type(SpherepackAux) :: sphere_aux
+        type(SpherepackUtility) :: sphere_aux
 
         nlp1 = nlat+1
         mlat = mod(nlat, 2)

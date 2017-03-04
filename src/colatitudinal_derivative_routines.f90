@@ -5,8 +5,8 @@ module colatitudinal_derivative_routines
         ip, & ! integer precision
         PI
 
-    use type_SpherepackAux, only: &
-        SpherepackAux
+    use type_SpherepackUtility, only: &
+        SpherepackUtility
 
     use gaussian_latitudes_and_weights_routines, only: &
         compute_gaussian_latitudes_and_weights

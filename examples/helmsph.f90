@@ -38,7 +38,7 @@
 !
 ! ... required spherepack files
 !
-!     islapec.f, shaec.f, shsec.f, type_SpherepackAux.f, type_RealPeriodicFastFourierTransform.f
+!     islapec.f, shaec.f, shsec.f, type_SpherepackUtility.f, type_RealPeriodicFastFourierTransform.f
 !
 ! ... description
 !

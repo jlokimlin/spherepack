@@ -166,7 +166,7 @@ contains
         integer(ip) :: nloc1
         integer(ip) :: nloc2
         integer(ip) :: nte
-        type(SpherepackAux) :: sphere_aux
+        type(SpherepackUtility) :: sphere_aux
 
         ! Check input arguments
         ierror = 1
@@ -336,7 +336,7 @@ contains
         integer(ip) :: nloc1
         integer(ip) :: nloc2
         integer(ip) :: nte
-        type(SpherepackAux) :: sphere_aux
+        type(SpherepackUtility) :: sphere_aux
 
         ! Set contants
         mmax = min(nlat-1, nlon/2)
@@ -458,7 +458,7 @@ contains
             ipse(idp, 2), jzse(idp, 2), ipso(idp, 2), jzso(idp, 2), &
             nshe(2), nsho(2)
 
-        type(SpherepackAux) :: sphere_aux
+        type(SpherepackUtility) :: sphere_aux
 
         ns2 = nlat/2
         modn = nlat-ns2-ns2

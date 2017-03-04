@@ -38,7 +38,7 @@
 !
 ! ... files which must be loaded with igradgs.f
 !
-!     type_SpherepackAux.f, type_RealPeriodicFastFourierTransform.f, shsgs.f, vhags.f
+!     type_SpherepackUtility.f, type_RealPeriodicFastFourierTransform.f, shsgs.f, vhags.f
 !
 !     subroutine igradgs(nlat, nlon, isym, nt, sf, isf, jsf, br, bi, mdb, ndb, 
 !    +                   wshsgs, lshsgs, work, lwork, ierror)

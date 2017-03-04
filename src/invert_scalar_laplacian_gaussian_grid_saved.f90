@@ -37,7 +37,7 @@
 !
 ! ... files which must be loaded with islapec.f
 !
-!     type_SpherepackAux.f, type_RealPeriodicFastFourierTransform.f, shags.f, shsgs.f
+!     type_SpherepackUtility.f, type_RealPeriodicFastFourierTransform.f, shags.f, shsgs.f
 !
 !     subroutine islapgs(nlat, nlon, isym, nt, xlmbda, sf, ids, jds, a, b, 
 !    +mdab, ndab, wshsgs, lshsgs, work, lwork, pertrb, ierror)

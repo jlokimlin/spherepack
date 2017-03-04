@@ -5,8 +5,8 @@ module vector_synthesis_routines
         ip, & ! integer precision
         PI
 
-    use type_SpherepackAux, only: &
-        SpherepackAux
+    use type_SpherepackUtility, only: &
+        SpherepackUtility
 
     use gaussian_latitudes_and_weights_routines, only: &
         compute_gaussian_latitudes_and_weights
@@ -216,7 +216,7 @@ contains
 
         ! Local variables
         integer(ip)         :: l1, l2
-        type(SpherepackAux) :: sphere_aux
+        type(SpherepackUtility) :: sphere_aux
 
         call sphere_aux%compute_parity(nlat, nlon, l1, l2)
 
@@ -292,7 +292,7 @@ contains
         ! Local variables
 
         integer(ip)         :: l1, l2
-        type(SpherepackAux) :: sphere_aux
+        type(SpherepackUtility) :: sphere_aux
 
 
         call sphere_aux%compute_parity(nlat, nlon, l1, l2)
@@ -312,7 +312,7 @@ contains
         ! Local variables
 
         integer(ip)         :: l1, l2
-        type(SpherepackAux) :: sphere_aux
+        type(SpherepackUtility) :: sphere_aux
 
 
         call sphere_aux%compute_parity(nlat, nlon, l1, l2)

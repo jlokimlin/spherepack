@@ -484,7 +484,7 @@ contains
         integer(ip)    :: i, k, m, mn, is, ms, ns, lm1, nl2
         integer(ip)    :: lp1, mp1, np1, mp2, meo, mml1
         real(wp)       :: t1, t2, t3, t4
-        type(SpherepackAux) :: sphere_aux
+        type(SpherepackUtility) :: sphere_aux
 
         !  initialize to zero
         g = ZERO
@@ -714,7 +714,7 @@ contains
 
         ! Local variables
         integer(ip)         :: m, km, mn, mp1, np1, mml1, mode
-        type(SpherepackAux) :: sphere_aux
+        type(SpherepackUtility) :: sphere_aux
 
         !  Initialize
         pmn = ZERO
@@ -831,7 +831,7 @@ contains
         ! Local variables
         integer(ip)         :: i, m, n, lw, np1, imn, mlim
         real(wp)            :: pb
-        type(SpherepackAux) :: sphere_aux
+        type(SpherepackUtility) :: sphere_aux
 
         !  Initialize half Fourier transform
         call sphere_aux%hfft%initialize(nlon, wfft)

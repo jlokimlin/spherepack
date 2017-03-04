@@ -38,7 +38,7 @@
 !
 ! ... files which must be loaded with idivec.f
 !
-!     type_SpherepackAux.f, type_RealPeriodicFastFourierTransform.f, vhses.f, shaes.f
+!     type_SpherepackUtility.f, type_RealPeriodicFastFourierTransform.f, vhses.f, shaes.f
 !
 !
 !     subroutine idives(nlat, nlon, isym, nt, v, w, idvw, jdvw, a, b, mdab, ndab, 

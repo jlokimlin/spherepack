@@ -38,7 +38,7 @@
 !
 ! ... files which must be loaded with vlapec.f
 !
-!     type_SpherepackAux.f, type_RealPeriodicFastFourierTransform.f, vhaec.f, vhsec.f
+!     type_SpherepackUtility.f, type_RealPeriodicFastFourierTransform.f, vhaec.f, vhsec.f
 !
 !
 !     subroutine vlapec(nlat, nlon, ityp, nt, vlap, wlap, idvw, jdvw, br, bi, cr, ci, 

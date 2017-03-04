@@ -38,7 +38,7 @@
 !
 ! ... files which must be loaded with idivec.f
 !
-!     type_SpherepackAux.f, type_RealPeriodicFastFourierTransform.f, vhsec.f, shaec.f
+!     type_SpherepackUtility.f, type_RealPeriodicFastFourierTransform.f, vhsec.f, shaec.f
 !
 !
 !

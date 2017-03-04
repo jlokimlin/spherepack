@@ -29,9 +29,6 @@
 !     *                                                               *
 !     * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !
-! This file includes documentation and code for
-!  subroutines vtsgs and vtsgsi
-!
 submodule(colatitudinal_derivative_routines) colatitudinal_derivative_gaussian_grid_saved
 
 contains
@@ -459,7 +456,7 @@ contains
         integer(ip) :: lwvbin
         integer(ip) :: lzimn
         integer(ip) :: mmax
-        type(SpherepackAux) :: sphere_aux
+        type(SpherepackUtility) :: sphere_aux
 
         ! Check input arguments
         ierror = 1
@@ -541,7 +538,7 @@ contains
             wto(idv, nlon, nt), work(*), wrfft(*), &
             vb(imid, *), wb(imid, *)
 
-        type(SpherepackAux) :: sphere_aux
+        type(SpherepackUtility) :: sphere_aux
 
         nlp1 = nlat+1
         mlat = mod(nlat, 2)
@@ -1144,7 +1141,7 @@ contains
         real(wp) :: wvbin
         dimension vb(imid, *), wb(imid, *), vin(imid, nlat, 3), wvbin(*)
         real(wp) :: dwork(*), theta(*), wts(*)
-        type(SpherepackAux) :: sphere_aux
+        type(SpherepackUtility) :: sphere_aux
 
         mmax = min(nlat, nlon/2+1)
 

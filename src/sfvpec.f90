@@ -38,7 +38,7 @@
 !
 ! ... files which must be loaded with sfvpec.f
 !
-!     type_SpherepackAux.f, type_RealPeriodicFastFourierTransform.f, vhaec.f, shsec.f
+!     type_SpherepackUtility.f, type_RealPeriodicFastFourierTransform.f, vhaec.f, shsec.f
 !
 !
 !     subroutine sfvpec(nlat, nlon, isym, nt, sf, vp, idv, jdv, br, bi, cr, ci, 

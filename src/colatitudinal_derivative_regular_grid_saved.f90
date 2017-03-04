@@ -38,7 +38,7 @@
 !
 ! ... files which must be loaded with vtses.f
 !
-!     type_SpherepackAux.f, type_RealPeriodicFastFourierTransform.f, vhaes.f, vhses.f
+!     type_SpherepackUtility.f, type_RealPeriodicFastFourierTransform.f, vhaes.f, vhses.f
 !   
 !   
 !     subroutine vtses(nlat, nlon, ityp, nt, vt, wt, idvw, jdvw, br, bi, cr, ci, 
@@ -453,7 +453,7 @@ contains
         integer(ip) :: labc
         integer(ip) :: lzimn
         integer(ip) :: mmax
-        type(SpherepackAux) :: sphere_aux
+        type(SpherepackUtility) :: sphere_aux
 
         ierror = 1
         if(nlat < 3) return
@@ -528,7 +528,7 @@ contains
 
         integer(ip) :: i, j, k ! Counters
 
-        type(SpherepackAux) :: sphere_aux
+        type(SpherepackUtility) :: sphere_aux
 
         nlp1 = nlat+1
         mlat = mod(nlat, 2)
@@ -1107,7 +1107,7 @@ contains
         dimension vb(imid, *), wb(imid, *), vin(imid, nlat, 3), wzvin(*)
         real(wp) :: dwork(*)
 
-        type(SpherepackAux) :: sphere_aux
+        type(SpherepackUtility) :: sphere_aux
 
         mmax = min(nlat, (nlon+1)/2)
 

@@ -38,7 +38,7 @@
 !
 ! ... files which must be loaded with vhagc.f
 !
-!     type_SpherepackAux.f, type_RealPeriodicFastFourierTransform.f, compute_gaussian_latitudes_and_weights.f
+!     type_SpherepackUtility.f, type_RealPeriodicFastFourierTransform.f, compute_gaussian_latitudes_and_weights.f
 !
 !                                                                              
 !     subroutine vhagc(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, 
@@ -438,7 +438,7 @@ contains
         integer(ip) :: lwvbin
         integer(ip) :: lzz1
         integer(ip) :: mmax
-        type(SpherepackAux) :: sphere_aux
+        type(SpherepackUtility) :: sphere_aux
 
         ierror = 1
         if (nlat < 3) return
@@ -554,7 +554,7 @@ contains
             wo(idv, nlon, *), wts(*), wvbin(*), wwbin(*), wrfft(*), &
             vb(imid, nlat, 3), wb(imid, nlat, 3)
 
- type(SpherepackAux) :: sphere_aux
+ type(SpherepackUtility) :: sphere_aux
 
         nlp1 = nlat+1
         tsn = TWO/nlon

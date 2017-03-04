@@ -37,7 +37,7 @@
 !
 ! ... files which must be loaded with shaec.f
 !
-!     type_SpherepackAux.f, type_RealPeriodicFastFourierTransform.f
+!     type_SpherepackUtility.f, type_RealPeriodicFastFourierTransform.f
 !
 !     subroutine shaec(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, 
 !    +                 wshaec, lshaec, work, lwork, ierror)
@@ -412,7 +412,7 @@ contains
 
         ! Local variables
         integer(ip)         :: imid, iw1, labc, lzz1, mmax
-        type(SpherepackAux) :: sphere_aux
+        type(SpherepackUtility) :: sphere_aux
 
         imid = (nlat+1)/2
         mmax = min(nlat, nlon/2+1)
@@ -495,7 +495,7 @@ contains
             ge(idg, jdg, nt), go(idg, jdg, nt), zb(imid, nlat, 3), wzfin(*), &
             whrfft(*), work(*)
 
-        type(SpherepackAux) :: sphere_aux
+        type(SpherepackUtility) :: sphere_aux
 
         ls = idg
         nlon = jdg

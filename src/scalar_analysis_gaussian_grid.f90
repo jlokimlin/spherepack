@@ -38,7 +38,7 @@
 !
 ! ... files which must be loaded with shagc.f
 !
-!     type_SpherepackAux.f, type_RealPeriodicFastFourierTransform.f, compute_gaussian_latitudes_and_weights.f
+!     type_SpherepackUtility.f, type_RealPeriodicFastFourierTransform.f, compute_gaussian_latitudes_and_weights.f
 !
 !
 !     subroutine shagc(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, 
@@ -504,7 +504,7 @@ contains
             b(mdab, ndab, nt), g(lat, nlon, nt)
         dimension w(*), wts(nlat), wfft(*), pmn(nlat, late, 3)
 
-        type(SpherepackAux) :: sphere_aux
+        type(SpherepackUtility) :: sphere_aux
 
         !     set gs array internally in shagc_lower_routine
         do k=1, nt
@@ -711,7 +711,7 @@ contains
             cbel(*), wfft(*)
         real(wp) :: pb, dtheta(nlat), dwts(nlat), work(*)
 
-        type(SpherepackAux) :: sphere_aux
+        type(SpherepackUtility) :: sphere_aux
 
         !     compute the nlat  gaussian points and weights, the
         !     m=0, 1 legendre polys for gaussian points and all n, 

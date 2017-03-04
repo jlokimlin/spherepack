@@ -38,7 +38,7 @@
 !
 ! ... files which must be loaded with vhsgc.f
 !
-!     type_SpherepackAux.f, type_RealPeriodicFastFourierTransform.f, compute_gaussian_latitudes_and_weights.f
+!     type_SpherepackUtility.f, type_RealPeriodicFastFourierTransform.f, compute_gaussian_latitudes_and_weights.f
 !
 !     subroutine vhsgc(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, 
 !    +                 mdab, ndab, wvhsgc, lvhsgc, work, lwork, ierror)
@@ -538,7 +538,7 @@ contains
         integer(ip), intent(out) :: ierror
 
         ! Local variables
-        type(SpherepackAux) :: sphere_aux
+        type(SpherepackUtility) :: sphere_aux
         integer(ip) :: imid
         integer(ip) :: iw1
         integer(ip) :: iw2
@@ -636,7 +636,7 @@ contains
             wo(idv, nlon, nt), wvbin(*), wwbin(*), wrfft(*), &
             vb(imid, nlat, 3), wb(imid, nlat, 3)
 
-        type(SpherepackAux) :: sphere_aux
+        type(SpherepackUtility) :: sphere_aux
 
         nlp1 = nlat+1
         mlat = mod(nlat, 2)
