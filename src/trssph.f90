@@ -521,7 +521,7 @@ contains
         integer(ip), intent(out)    :: ier
         real(wp),    intent(inout)  :: da(*)
         real(wp),    intent(out)    :: db(*)
-        real(wp),    intent(inout)  :: wsave(*)
+        real(wp),    intent(inout)  :: wsave(:)
         real(wp),    intent(inout)  :: work(*)
         real(wp),    intent(inout)  :: dwork(*)
 
@@ -645,7 +645,7 @@ contains
                 !
                 !     initialize wsave for gaussian analysis
                 !
-                call shagci(nlata, nlona, wsave, lwa, dwork, ldwork, ier)
+                call shagci(nlata, nlona, wsave, ier)
                 if (ier/=0) then
                     !
                     !     flag failure in spherepack gaussian software
@@ -659,7 +659,7 @@ contains
                 !
                 !     initialize wsave for gaussian synthesis
                 !
-                call shsgci(nlatb, nlonb, wsave(jb), lwb, dwork, ldwork, ier)
+                call shsgci(nlatb, nlonb, wsave(jb:), lwb, dwork, ldwork, ier)
                 if (ier/=0) then
                     !
                     !     flag failure in spherepack gaussian software
@@ -671,7 +671,7 @@ contains
                 !
                 !     initialize wsave for equally spaced synthesis
                 !
-                call shseci(nlatb, nlonb, wsave(jb), lwb, dwork, ldwork, ier)
+                call shseci(nlatb, nlonb, wsave(jb:), lwb, dwork, ldwork, ier)
             end if
         !
         !     end of initialization (intl=0) call
@@ -712,13 +712,13 @@ contains
             !     do spherical harmonic synthesis on nlatb by nlonb equally spaced grid
             !
             call shsec(nlatb, nlonb, isym, nt, db, nlatb, nlonb, work(iab), &
-                work(ibb), lb1, nlatb, wsave(jb), lwb, work(iw), lw, ier)
+                work(ibb), lb1, nlatb, wsave(jb:), lwb, work(iw), lw, ier)
         else
             !
             !     do spherical harmonic synthesis on nlatb by nlonb gaussian grid
             !
             call shsgc(nlatb, nlonb, isym, nt, db, nlatb, nlonb, work(iab), &
-                work(ibb), lb1, nlatb, wsave(jb), lwb, work(iw), lw, ier)
+                work(ibb), lb1, nlatb, wsave(jb:), lwb, work(iw), lw, ier)
         end if
         !
         !     both da, db are currently latitude by longitude north to south arrays

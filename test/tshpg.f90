@@ -117,7 +117,7 @@ program tshpg
             mtrunc = min(mtrunc, nlat-1, nlon/2)
             idimg = idp
             jdimg = kdp
-            call shagci(nlat, nlon, wshagc, lwsha, work, lwrk, ierror)
+            call shagci(nlat, nlon, wshagc, ierror)
             call check_error(ierror)
 
             lwshs = lwsha

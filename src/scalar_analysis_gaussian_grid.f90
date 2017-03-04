@@ -386,15 +386,13 @@ contains
     ! fixed nlat, nlon. it precomputes quantites such as the gaussian
     ! points and weights, m=0, m=1 legendre polynomials, recursion
     ! recursion coefficients.
-    module subroutine shagci(nlat, nlon, wshagc, lshagc, dwork, ldwork, ierror)
+    !
+    module subroutine shagci(nlat, nlon, wshagc, ierror)
 
         ! Dummy arguments
         integer(ip), intent(in)  :: nlat
         integer(ip), intent(in)  :: nlon
-        real(wp),    intent(out) :: wshagc(lshagc)
-        integer(ip), intent(in)  :: lshagc
-        real(wp),    intent(out) :: dwork(ldwork)
-        integer(ip), intent(in)  :: ldwork
+        real(wp),    intent(out) :: wshagc(:)
         integer(ip), intent(out) :: ierror
 
         ! Local variables
@@ -409,43 +407,62 @@ contains
         integer(ip) :: idwts
         integer(ip) :: ierror
         integer(ip) :: iw
-        integer(ip) :: l
+        integer(ip) :: ntrunc
         integer(ip) :: l1
         integer(ip) :: l2
-        integer(ip) :: late
+        integer(ip) :: late, ldwork
 
-        ierror = 1
-        if (nlat < 3) return
-        ierror = 2
-        if (nlon < 4) return
-        !     set triangular truncation limit for spherical harmonic basis
-        l = min((nlon+2)/2, nlat)
-        !     set equator or nearest point (if excluded) pointer
-        late = (nlat+mod(nlat, 2))/2
-        l1 = l
-        l2 = late
-        ierror = 3
-        !     check permanent work space length
-        if (lshagc < nlat*(2*l2+3*l1-2)+3*l1*(1-l1)/2+nlon+15)return
-        ierror = 4
-        if (ldwork<nlat*(nlat+4))return
-        ierror = 0
-        !     set pointers
-        i1 = 1
-        i2 = i1+nlat
-        i3 = i2+nlat*late
-        i4 = i3+nlat*late
-        i5 = i4+l*(l-1)/2 +(nlat-l)*(l-1)
-        i6 = i5+l*(l-1)/2 +(nlat-l)*(l-1)
-        i7 = i6+l*(l-1)/2 +(nlat-l)*(l-1)
-        !     set indices in temp work for real gaussian wts and pts
-        idth = 1
-        idwts = idth+nlat
-        iw = idwts+nlat
-        call shagci_lower_routine(nlat, nlon, l, late, wshagc(i1), wshagc(i2), wshagc(i3), &
-            wshagc(i4), wshagc(i5), wshagc(i6), wshagc(i7), dwork(idth), &
-            dwork(idwts), dwork(iw), ierror)
-        if (ierror /= 0) ierror = 5
+        associate( lshagc => size(wshagc) )
+
+            ! set triangular truncation limit for spherical harmonic basis
+            ntrunc = min((nlon+2)/2, nlat)
+
+            ! set equator or nearest point (if excluded) pointer
+            late = (nlat+mod(nlat, 2))/2
+            l1 = ntrunc
+            l2 = late
+
+            ! Check calling arguments
+            if (nlat < 3) then
+                ierror = 1
+            else if (nlon < 4) then
+                ierror = 2
+            else if (lshagc < nlat*(2*l2+3*l1-2)+3*l1*(1-l1)/2+nlon+15) then
+                ierror = 3
+            else
+                ierror = 0
+            end if
+
+            ! Set pointers
+            i1 = 1
+            i2 = i1+nlat
+            i3 = i2+nlat*late
+            i4 = i3+nlat*late
+            i5 = i4+ntrunc*(ntrunc-1)/2 +(nlat-ntrunc)*(ntrunc-1)
+            i6 = i5+ntrunc*(ntrunc-1)/2 +(nlat-ntrunc)*(ntrunc-1)
+            i7 = i6+ntrunc*(ntrunc-1)/2 +(nlat-ntrunc)*(ntrunc-1)
+
+            ! Set indices in temp work for real gaussian wts and pts
+            idth = 1
+            idwts = idth+nlat
+            iw = idwts+nlat
+
+            ! Set required workspace size
+            ldwork = nlat * (nlat + 4)
+
+            block
+                real(wp) :: dwork(ldwork)
+
+                call shagci_lower_routine(nlat, nlon, ntrunc, late, &
+                    wshagc(i1:), wshagc(i2:), wshagc(i3:), &
+                    wshagc(i4:), wshagc(i5:), wshagc(i6:), wshagc(i7:), dwork(idth:), &
+                    dwork(idwts:), dwork(iw:), ierror)
+            end block
+
+            ! Address error flag from lower routine
+            if (ierror /= 0) ierror = 5
+
+        end associate
 
     end subroutine shagci
 

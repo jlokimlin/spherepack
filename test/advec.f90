@@ -207,7 +207,7 @@ program advec
     call vhsgci(nlat, nlon, wvhsgc, lvhsgc, dwork, ldwork, ierror)
     if(ierror /= 0) write(*, 10) ierror
 10  format(' error in vsgci = ', i5)
-    call shagci(nlat, nlon, wshagc, lshagc, dwork, ldwork, ierror)
+    call shagci(nlat, nlon, wshagc, ierror)
     if(ierror /= 0) write(*, 20) ierror
 20  format(' error in shagci = ', i5)
     call shsgci(nlat, nlon, wshsgc, lshagc, dwork, ldwork, ierror)

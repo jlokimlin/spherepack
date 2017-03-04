@@ -450,7 +450,7 @@ use spherepack
         		
         		call name("**gc")
         		
-        		call shagci(nlat, nlon, wsave, lsave, dwork, ldwork, ierror)
+        		call shagci(nlat, nlon, wsave, ierror)
         		call name("shai")
         		call iout(ierror, "ierr")
         		

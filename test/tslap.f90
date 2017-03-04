@@ -258,7 +258,7 @@ use spherepack
         		
         		call name("**gc")
         		
-        		call shagci(nlat, nlon, wsave, lsave, dwork, ldwork, ierror)
+        		call shagci(nlat, nlon, wsave, ierror)
         		call name("shai")
         		call iout(ierror, "ierr")
         		
@@ -348,7 +348,7 @@ use spherepack
         		call vecout(ptrb, "ptrb", nt)
         	case (3)
         		
-        		call shagci(nlat, nlon, wsave, lsave, dwork, ldwork, ierror)
+        		call shagci(nlat, nlon, wsave, ierror)
         		call shagc(nlat, nlon, isym, nt, sclp, nlat, nlon, a, b, mdab, nlat, &
         		wsave, lsave, work, lwork, ierror)
         		
