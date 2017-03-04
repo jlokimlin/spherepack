@@ -278,7 +278,7 @@ contains
         integer(ip) :: imid, mmax, lzz1, labc, ls, nln, mab, mn
         integer(ip) :: ia, ib, is, lwk, iwk, lwmin
 
-        ! Check input arguments
+        ! Check calling arguments
         ierror = 1
         if (nlat < 3) return
         ierror = 2

@@ -379,7 +379,7 @@ contains
         integer(ip) :: lzz1
         integer(ip) :: mmax
 
-        ! Check input arguments
+        ! Check calling arguments
         ierror = 1
         if (nlat < 3) return
         ierror = 2

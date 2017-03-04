@@ -281,7 +281,7 @@ contains
                 lwkmin = l2*(nt*nlon+max(3*nlat, nlon)) + nlat*(2*nt*l1+1)
         end select
 
-        ! Check input arguments
+        ! Check calling arguments
         if (nlat < 3) then
             ierror = 1
             return

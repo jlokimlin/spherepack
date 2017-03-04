@@ -331,7 +331,7 @@ contains
         dimension av(mdab, ndab, nt), bv(mdab, ndab, nt)
         dimension wvhsec(lvhsec), work(lwork)
         !
-        ! Check input arguments
+        ! Check calling arguments
         !
         ierror = 1
         if (nlat < 3) return

@@ -245,7 +245,7 @@ contains
         integer(ip) :: imid, ls, mab, mn, ia, ib, is, lwk, iwk
         integer(ip) :: lat, late, l1, l2, lp
         !
-        ! Check input arguments
+        ! Check calling arguments
         !
         ierror = 1
         if (nlat < 3) return

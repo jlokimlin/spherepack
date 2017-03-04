@@ -335,7 +335,7 @@ contains
         integer(ip) :: mn
         integer(ip) :: workspace_indices(7)
 
-        ! Check input arguments
+        ! Check calling arguments
         ierror = 1
         if (nlat < 3) return
         ierror = 2

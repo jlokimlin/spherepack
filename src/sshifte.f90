@@ -242,7 +242,7 @@ contains
         integer(ip) :: ioff, nlon, nlat, n2, nr, nlat2, nlatp1, lsav, lwrk, i1, i2, ier
         real(wp) :: goff(nlon, nlat), greg(nlon, *), wsav(lsav), wrk(lwrk)
         !
-        ! Check input arguments
+        ! Check calling arguments
         !
         ier = 1
         if (ioff*(ioff-1)/=0) return

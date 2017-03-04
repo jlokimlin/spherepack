@@ -171,7 +171,7 @@ program test_all_scalar_analysis_and_synthesis_routines
                 call name("sha ")
                 call iout(ierror, "ierr")
         		
-                call shsesi(nlat, nlon, wsave, lsave, work, lwork, dwork, ldwork, ierror)
+                call shsesi(nlat, nlon, wsave, ierror)
         		
                 call name("shsi")
                 call iout(ierror, "ierr")

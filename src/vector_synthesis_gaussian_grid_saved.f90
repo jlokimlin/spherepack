@@ -401,7 +401,7 @@ contains
 
         lnl = nt*idv*nlon
 
-        !  Check input arguments
+        !  Check calling arguments
         if (nlat < 3) then
             ierror = 1
             return
@@ -555,7 +555,7 @@ contains
         imid = (nlat+1)/2
         lmn = (nlat*(nlat+1))/2
 
-        !  Check input arguments
+        !  Check calling arguments
         if (nlat < 3) then
             ierror = 1
             return

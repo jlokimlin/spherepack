@@ -29,9 +29,6 @@
 !     *                                                               *
 !     * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !
-! This file contains code and documentation for subroutines
-! shses and shsesi
-!
 submodule(scalar_synthesis_routines) scalar_synthesis_regular_grid_saved
 
 contains
@@ -298,7 +295,7 @@ contains
 
     ! Purpose:
     !
-    !     subroutine shsesi(nlat, nlon, wshses, lshses, work, lwork, dwork, ldwork, ierror)
+    !     subroutine shsesi(nlat, nlon, wshses, ierror)
     !
     !     subroutine shsesi initializes the array wshses which can then
     !     be used repeatedly by subroutine shses.
@@ -336,30 +333,6 @@ contains
     !
     !               (l1*l2*(nlat+nlat-l1+1))/2+nlon+15
     !
-    !     work   a real   work array that does not have to be saved.
-    !
-    !     lwork  the dimension of the array work as it appears in
-    !            the program that calls shsesi.  define
-    !
-    !               l1 = min(nlat, (nlon+2)/2) if nlon is even or
-    !               l1 = min(nlat, (nlon+1)/2) if nlon is odd
-    !
-    !            and
-    !
-    !               l2 = nlat/2        if nlat is even or
-    !               l2 = (nlat+1)/2    if nlat is odd
-    !
-    !            then lwork must be at least
-    !
-    !               5*nlat*l2+3*((l1-2)*(nlat+nlat-l1-1))/2
-    !
-    !
-    !     dwork  a real work array that does not have to be saved.
-    !
-    !     ldwork the dimension of the array dwork as it appears in the
-    !            program that calls shsesi.  ldwork must be at least nlat+1
-    !
-    !
     !     output parameters
     !
     !     wshses an array which is initialized for use by subroutine shses.
@@ -371,66 +344,58 @@ contains
     !            = 1  error in the specification of nlat
     !            = 2  error in the specification of nlon
     !            = 3  error in the specification of lshses
-    !            = 4  error in the specification of lwork
-    !            = 5  error in the specification of ldwork
     !
-    module subroutine shsesi(nlat, nlon, wshses, lshses, work, lwork, dwork, &
-        ldwork, ierror)
+    module subroutine shsesi(nlat, nlon, wshses, ierror)
 
         ! Dummy arguments
         integer(ip), intent(in)  :: nlat
         integer(ip), intent(in)  :: nlon
-        real(wp),    intent(out) :: wshses(lshses)
-        integer(ip), intent(in)  :: lshses
-        real(wp),    intent(out) :: work(lwork)
-        integer(ip), intent(in)  :: lwork
-        real(wp),    intent(out) :: dwork(ldwork)
-        integer(ip), intent(in)  :: ldwork
+        real(wp),    intent(out) :: wshses(:)
         integer(ip), intent(out) :: ierror
 
         ! Local variables
-        integer(ip)         :: imid, labc, lpimn, mmax
+        integer(ip) :: imid, labc, lpimn, mmax, lwork, ldwork
         type(SpherepackUtility) :: util
 
-        mmax = min(nlat, nlon/2+1)
-        imid = (nlat+1)/2
-        lpimn = (imid*mmax*(2*nlat-mmax+1))/2
-        labc = 3*((mmax-2)*(2*nlat-mmax-1))/2
+        associate( lshses => size(wshses) )
 
-        !
-        !  Check input arguments
-        !
-        if (nlat < 3) then
-            ierror = 1
-            return
-        else if (nlon < 4) then
-            ierror = 2
-            return
-        else if (lshses < lpimn+nlon+15) then
-            ierror = 3
-            return
-        else if (lwork < 5*nlat*imid + labc) then
-            ierror = 4
-            return
-        else if (ldwork < nlat+1) then
-            ierror = 5
-            return
-        else
-            ierror = 0
-        end if
+            mmax = min(nlat, nlon/2+1)
+            imid = (nlat+1)/2
+            lpimn = (imid*mmax*(2*nlat-mmax+1))/2
+            labc = 3*((mmax-2)*(2*nlat-mmax-1))/2
 
-        block
-            integer(ip) :: iw1, iw2
+            !  Check calling arguments
+            if (nlat < 3) then
+                ierror = 1
+            else if (nlon < 4) then
+                ierror = 2
+            else if (lshses < lpimn+nlon+15) then
+                ierror = 3
+            else
+                ierror = 0
+            end if
 
-            ! Set workspace pointer indices
-            iw1 = 3*nlat*imid+1
-            iw2 = lpimn+1
+            ! Check error flag
+            if (ierror /= 0) return
 
-            call util%initialize_scalar_synthesis_regular_grid_saved( &
-                nlat, nlon, imid, wshses, work, work(iw1), dwork)
+            ! Set required workspace sizes
+            lwork = 5*nlat*imid + labc
+            ldwork = nlat+1
 
-            call util%hfft%initialize(nlon, wshses(iw2))
-        end block
+            block
+                integer(ip) :: iw1, iw2
+                real(wp)    :: work(lwork), dwork(ldwork)
+
+                ! Set workspace pointer indices
+                iw1 = 3*nlat*imid+1
+                iw2 = lpimn+1
+
+                call util%initialize_scalar_synthesis_regular_grid_saved( &
+                    nlat, nlon, imid, wshses, work, work(iw1:), dwork)
+
+                call util%hfft%initialize(nlon, wshses(iw2:))
+            end block
+        end associate
 
     end subroutine shsesi
 

@@ -535,7 +535,7 @@ contains
         !
         save
         !
-        !     check input arguments
+        !     Check calling arguments
         !
         ier = 1
         if (intl*(intl-1)/=0) return

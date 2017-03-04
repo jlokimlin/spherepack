@@ -320,7 +320,7 @@ contains
         ! Local variables
         integer(ip) :: ipmn, ifft, l, l1, l2, lat, late
 
-        ! Check input arguments
+        ! Check calling arguments
         ierror = 1
         if (nlat < 3) return
         ierror = 2

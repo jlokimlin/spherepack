@@ -296,7 +296,7 @@ program shallow
     call shaesi(nlat, nlon, wsha, ierror)
     if(ierror /= 0) write(*, 55) ierror
 55  format(' error' i4 ' in shaesi')
-    call shsesi(nlat, nlon, wshs, lwshs, work, lwork, dwork, ldwork, ierror)
+    call shsesi(nlat, nlon, wshs, ierror)
     if(ierror /= 0) write(*, 56) ierror
 56  format(' error' i4 ' in shsesi')
     call vhaesi(nlat, nlon, wvha, lwvha, work, lwork, dwork, ldwork, ierror)

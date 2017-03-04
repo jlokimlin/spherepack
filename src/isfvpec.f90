@@ -263,7 +263,7 @@ contains
         integer(ip) :: mmax, l1, l2, lzz1, labc, mn, is, lwk, iwk, lwmin
         integer(ip) :: ibr, ibi, icr, ici
         !
-        ! Check input arguments
+        ! Check calling arguments
         !
         ierror = 1
         if (nlat < 3) return

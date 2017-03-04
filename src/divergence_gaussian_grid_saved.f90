@@ -276,7 +276,7 @@ contains
         mab = min(nlat, nlon/2+1)
         mn = mab*nlat*nt
 
-        ! Check input arguments
+        ! Check calling arguments
         if (nlat < 3) then
             ierror = 1
             return

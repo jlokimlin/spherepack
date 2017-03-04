@@ -78,18 +78,12 @@ module scalar_synthesis_routines
             integer(ip), intent(out) :: ierror
         end subroutine shses
 
-        module subroutine shsesi(nlat, nlon, wshses, lshses, work, lwork, dwork, &
-            ldwork, ierror)
+        module subroutine shsesi(nlat, nlon, wshses, ierror)
 
             ! Dummy arguments
             integer(ip), intent(in)  :: nlat
             integer(ip), intent(in)  :: nlon
-            real(wp),    intent(out) :: wshses(lshses)
-            integer(ip), intent(in)  :: lshses
-            real(wp),    intent(out) :: work(lwork)
-            integer(ip), intent(in)  :: lwork
-            real(wp),    intent(out) :: dwork(ldwork)
-            integer(ip), intent(in)  :: ldwork
+            real(wp),    intent(out) :: wshses(:)
             integer(ip), intent(out) :: ierror
         end subroutine shsesi
 

@@ -168,7 +168,7 @@ contains
         integer(ip) :: nte
         type(SpherepackUtility) :: util
 
-        ! Check input arguments
+        ! Check calling arguments
         ierror = 1
         if (nlat < 3) return
         ierror = 2
@@ -344,7 +344,7 @@ contains
         log2n = int(log(real(nlon, kind=wp))/log(TWO), kind=ip)
         mlwk = 5*((nlat+1)**2 + 7*nlat + 8)/4
 
-        ! Check input arguments
+        ! Check calling arguments
         if (nlat < 3) then
             ierror = 1
         else if (nlon < 4) then

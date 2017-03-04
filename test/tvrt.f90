@@ -289,7 +289,7 @@ program tvrt
         else if (icase==2) then
 
             call name("**es")
-            call shsesi(nlat, nlon, wsave, lsave, work, lwork, dwork, ldwork, ierror)
+            call shsesi(nlat, nlon, wsave, ierror)
 
             call name("vrti")
             call iout(ierror, "ierr")

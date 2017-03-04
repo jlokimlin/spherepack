@@ -534,7 +534,7 @@ contains
         integer(ip)         :: labc, lwvbin, lzz1, mmax
         type(SpherepackUtility) :: util
 
-        ! Check input arguments
+        ! Check calling arguments
         imid =(nlat+1)/2
         lzz1 = 2*nlat*imid
         mmax = min(nlat, (nlon+1)/2)

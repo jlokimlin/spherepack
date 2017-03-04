@@ -288,7 +288,7 @@ use spherepack
             call name("vha ")
             call iout(ierror, "ierr")
 
-            call shsesi(nlat, nlon, wsave, lsave, work, lwork, dwork, ldwork, ierror)
+            call shsesi(nlat, nlon, wsave, ierror)
             call name("shsi")
             call iout(ierror, "ierr")
 

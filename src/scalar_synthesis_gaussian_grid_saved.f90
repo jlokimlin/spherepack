@@ -249,7 +249,7 @@ contains
         lp=nlat*(3*(l1+l2)-2)+(l1-1)*(l2*(2*nlat-l1)-3*l1)/2+nlon+15
 
         !
-        !  Check input arguments
+        !  Check calling arguments
         !
         if (nlat < 3) then
             ierror = 1
@@ -741,7 +741,7 @@ contains
         l2 = late
 
         !
-        !  Check input arguments
+        !  Check calling arguments
         !
         if (nlat < 3) then
             ierror = 1

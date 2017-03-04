@@ -194,52 +194,43 @@ contains
         integer(ip),             intent(in)     :: nlon
 
         ! Local variables
-        integer(ip)    :: error_flag
-        integer(ip)    :: lwork, ldwork, lshses
+        integer(ip)    :: error_flag, lshses
         type(ShsesAux) :: aux
 
         ! Set up various workspace dimensions
-        lwork = get_lwork(nlat, nlon)
-        ldwork = get_ldwork(nlat)
         lshses = aux%get_lshses(nlat, nlon)
 
         !  Allocate memory
         if (allocated(self%backward_scalar)) deallocate( self%backward_scalar )
         allocate( self%backward_scalar(lshses) )
 
-        ! Initialize workspace for scalar synthesis
-        block
-            real(wp) :: work(lwork), dwork(ldwork)
+        call aux%shsesi(nlat, nlon, self%backward_scalar, error_flag)
 
-            call aux%shsesi( &
-                nlat, nlon, self%backward_scalar, lshses, work, lwork, dwork, ldwork, error_flag)
-
-            !  Address error flag
-            select case (error_flag)
-                case(0)
-                    return
-                case(1)
-                    error stop 'Object of class(RegularWorkspace): '&
-                        //'in initialize_regular_scalar_synthesis '&
-                        //'error in the specification of NUMBER_OF_LATITUDES'
-                case(2)
-                    error stop 'Object of class(RegularWorkspace): '&
-                        //'in initialize_regular_scalar_synthesis '&
-                        //'error in the specification of NUMBER_OF_LONGITUDES'
-                case(3)
-                    error stop 'Object of class(RegularWorkspace): '&
-                        //'in initialize_regular_scalar_synthesis '&
-                        //'error in the specification of extent for forward_scalar'
-                case(4)
-                    error stop 'Object of class(RegularWorkspace): '&
-                        //'in initialize_regular_scalar_synthesis '&
-                        //'error in the specification of extent for legendre_workspace'
-                case default
-                    error stop 'Object of class(RegularWorkspace): '&
-                        //'in initialize_regular_scalar_synthesis '&
-                        //'Undetermined error flag'
-            end select
-        end block
+        !  Address error flag
+        select case (error_flag)
+            case(0)
+                return
+            case(1)
+                error stop 'Object of class(RegularWorkspace): '&
+                    //'in initialize_regular_scalar_synthesis '&
+                    //'error in the specification of NUMBER_OF_LATITUDES'
+            case(2)
+                error stop 'Object of class(RegularWorkspace): '&
+                    //'in initialize_regular_scalar_synthesis '&
+                    //'error in the specification of NUMBER_OF_LONGITUDES'
+            case(3)
+                error stop 'Object of class(RegularWorkspace): '&
+                    //'in initialize_regular_scalar_synthesis '&
+                    //'error in the specification of extent for forward_scalar'
+            case(4)
+                error stop 'Object of class(RegularWorkspace): '&
+                    //'in initialize_regular_scalar_synthesis '&
+                    //'error in the specification of extent for legendre_workspace'
+            case default
+                error stop 'Object of class(RegularWorkspace): '&
+                    //'in initialize_regular_scalar_synthesis '&
+                    //'Undetermined error flag'
+        end select
 
     end subroutine initialize_regular_scalar_synthesis
 

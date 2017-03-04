@@ -237,7 +237,7 @@ contains
         integer(ip) :: mmax
         integer(ip) :: nln
 
-        ! Check input arguments
+        ! Check calling arguments
         ierror = 1
         if (nlat < 3) return
         ierror = 2

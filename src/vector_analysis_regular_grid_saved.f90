@@ -290,7 +290,7 @@ contains
 
         lnl = nt*idv*nlon
 
-        !  Check input arguments
+        !  Check calling arguments
         if (nlat < 3) then
             ierror = 1
             return
@@ -439,7 +439,7 @@ contains
         lzimn = (imid*mmax*(2*nlat-mmax+1))/2
         labc = 3*(max(mmax-2, 0)*(2*nlat-mmax-1))/2
 
-        !  Check input arguments
+        !  Check calling arguments
         if (nlat < 3) then
             ierror = 1
             return

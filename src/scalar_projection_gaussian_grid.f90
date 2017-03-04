@@ -168,7 +168,7 @@ contains
         integer(ip) :: nloc2
         type(SpherepackUtility) :: util
 
-        ! Check input arguments
+        ! Check calling arguments
         ierror = 1
         if (nlat < 1) return
         ierror = 2
@@ -337,7 +337,7 @@ contains
         integer(ip) :: nte
         type(SpherepackUtility) :: util
 
-        ! Check input arguments
+        ! Check calling arguments
         ierror = 1
         if (nlat<1) return
         ierror = 2

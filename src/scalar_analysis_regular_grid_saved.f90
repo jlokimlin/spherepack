@@ -273,7 +273,7 @@ contains
 
         nln = nt*ls*nlon
 
-        !  Check input arguments
+        !  Check calling arguments
         if (nlat < 3) then
             ierror = 1
             return

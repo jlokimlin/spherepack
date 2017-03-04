@@ -275,7 +275,7 @@ contains
             l2 = late
             lp = nlat*(3*(l1+l2)-2)+(l1-1)*(l2*(2*nlat-l1)-3*l1)/2+nlon+15
 
-            ! Check input arguments
+            ! Check calling arguments
             if (nlat < 3) then
                 ierror = 1
             else if (nlon < 4) then
@@ -438,7 +438,7 @@ contains
             ! Set preliminary quantites needed to compute and store legendre polys
             ldw = nlat*(nlat+4)
 
-            ! Check input arguments
+            ! Check calling arguments
             if (nlat < 3) then
                 ierror = 1
             else if (nlon < 4) then
@@ -771,7 +771,7 @@ contains
         l1 = ntrunc
         l2 = late
 
-        !  Check input arguments
+        !  Check calling arguments
         if (nlat < 3) then
             ierror = 1
         else if (nlon < 4) then

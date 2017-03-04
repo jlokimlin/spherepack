@@ -126,7 +126,7 @@ contains
         !----------------------------------------------------------------------
 
         !
-        !  Check input arguments
+        !  Check calling arguments
         !
         if (nlat <= 0) then
             ierror = 1

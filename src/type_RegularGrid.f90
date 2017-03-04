@@ -152,7 +152,7 @@ contains
         ! Local variables
         integer(ip) :: k ! counter
 
-        ! Check input arguments
+        ! Check calling arguments
         if (nlat <= 0) then
             error stop 'Object of class(RegularGrid): '&
                 //'invalid argument nlat <= 0 in '&

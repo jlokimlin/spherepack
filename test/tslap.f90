@@ -246,7 +246,7 @@ use spherepack
         		call name("sha ")
         		call iout(ierror, "ierr")
         		
-        		call shsesi(nlat, nlon, wsave, lsave, work, lwork, dwork, ldwork, ierror)
+        		call shsesi(nlat, nlon, wsave, ierror)
         		call name("shsi")
         		call iout(ierror, "ierr")
         		
@@ -337,7 +337,7 @@ use spherepack
         		call shaes(nlat, nlon, isym, nt, sclp, nlat, nlon, a, b, mdab, nlat, &
         		wsave, lsave, work, lwork, ierror)
         		
-        		call shsesi(nlat, nlon, wsave, lsave, work, lwork, dwork, ldwork, ierror)
+        		call shsesi(nlat, nlon, wsave, ierror)
         		call name("shsi")
         		call iout(ierror, "ierr")
         		

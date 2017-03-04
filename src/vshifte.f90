@@ -278,7 +278,7 @@ contains
         real(wp) :: ureg(nlon, *), vreg(nlon, *)
         real(wp) :: wsav(lsav), wrk(lwrk)
         !
-        ! Check input arguments
+        ! Check calling arguments
         !
         ier = 1
         if (ioff*(ioff-1)/=0) return
