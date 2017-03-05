@@ -374,7 +374,7 @@ contains
 
         ! Vector synthesize cr, ci into divergence free vector field (v, w)
         call vhsgs(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
-            mmax, nlat, wsav, lsav, wk, lwk, ierror)
+            mmax, nlat, wsav, ierror)
 
     end subroutine ivrtgs_lower_utility_routine
 

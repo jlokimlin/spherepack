@@ -380,7 +380,7 @@ contains
 
         ! Vector sythesize br, bi into irrotational (v, w)
         call vhsgs(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
-            mmax, nlat, wsav, lwsav, wk, lwk, ierror)
+            mmax, nlat, wsav, ierror)
 
     end subroutine idivgs_lower_utility_routine
 

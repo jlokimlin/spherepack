@@ -357,7 +357,7 @@ contains
 
         ! Vector synthesize br, bi into (v, w) (cr, ci are dummy variables)
         call vhsgs(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
-            mmax, nlat, wvhsgs, lvhsgs, wk, lwk, ierror)
+            mmax, nlat, wvhsgs, ierror)
 
     end subroutine gradgs_lower_utility_routine
 

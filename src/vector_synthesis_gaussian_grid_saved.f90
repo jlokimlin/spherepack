@@ -29,9 +29,6 @@
 !     *                                                               *
 !     * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !
-! This file contains code and documentation for subroutines
-! vhsgs and vhsgsi
-!
 submodule(vector_synthesis_routines) vector_synthesis_gaussian_saved
 
 contains
@@ -39,8 +36,7 @@ contains
     ! Purpose:
     !
     !     subroutine vhsgs(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
-    !                      mdab, ndab, wvhsgs, lvhsgs, work, lwork, ierror)
-    !
+    !                      mdab, ndab, wvhsgs, ierror)
     !
     !     subroutine vhsgs performs the vector spherical harmonic synthesis
     !     of the arrays br, bi, cr, and ci and stores the result in the
@@ -205,25 +201,6 @@ contains
     !
     !                 l1*l2*(nlat+nlat-l1+1)+nlon+15+2*nlat
     !
-    !
-    !     work   a work array that does not have to be saved.
-    !
-    !     lwork  the dimension of the array work as it appears in the
-    !            program that calls vhsgs. define
-    !
-    !               l2 = nlat/2        if nlat is even or
-    !               l2 = (nlat+1)/2    if nlat is odd
-    !
-    !            if ityp <= 2 then lwork must be at least
-    !
-    !                       (2*nt+1)*nlat*nlon
-    !
-    !            if ityp > 2 then lwork must be at least
-    !
-    !                        (2*nt+1)*l2*nlon
-    !
-    !     **************************************************************
-    !
     !     output parameters
     !
     !     v, w    two or three dimensional arrays (see input parameter nt)
@@ -355,10 +332,9 @@ contains
     !            = 7  error in the specification of mdab
     !            = 8  error in the specification of ndab
     !            = 9  error in the specification of lvhsgs
-    !            = 10 error in the specification of lwork
     !
     module subroutine vhsgs(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
-        mdab, ndab, wvhsgs, lvhsgs, work, lwork, ierror)
+        mdab, ndab, wvhsgs, ierror)
 
         ! Dummy arguments
         integer(ip), intent(in)     :: nlat
@@ -375,86 +351,84 @@ contains
         real(wp),    intent(in)     :: ci(mdab, ndab, nt)
         integer(ip), intent(in)     :: mdab
         integer(ip), intent(in)     :: ndab
-        real(wp),    intent(in)     :: wvhsgs(lvhsgs)
-        integer(ip), intent(in)     :: lvhsgs
-        real(wp),    intent(out)    :: work(lwork)
-        integer(ip), intent(in)     :: lwork
+        real(wp),    intent(in)     :: wvhsgs(:)
         integer(ip), intent(out)    :: ierror
 
         ! Local variables
         integer(ip) :: idv, idz, imid, ist, lnl, lzimn, mmax
-        integer(ip) :: workspace_indices(7)
+        integer(ip) :: lwork, workspace_indices(7)
 
-        imid = (nlat+1)/2
-        mmax = min(nlat, (nlon+1)/2)
-        idz = (mmax*(2*nlat-mmax+1))/2
-        lzimn = idz*imid
+        associate (lvhsgs => size(wvhsgs))
 
-        select case (ityp)
-            case(0:2)
-                ist = imid
-                idv = nlat
-            case default
-                ist = 0
-                idv = imid
-        end select
+            imid = (nlat+1)/2
+            mmax = min(nlat, (nlon+1)/2)
+            idz = (mmax*(2*nlat-mmax+1))/2
+            lzimn = idz*imid
 
-        lnl = nt*idv*nlon
+            select case (ityp)
+                case(0:2)
+                    ist = imid
+                    idv = nlat
+                case default
+                    ist = 0
+                    idv = imid
+            end select
 
-        !  Check calling arguments
-        if (nlat < 3) then
-            ierror = 1
-            return
-        else if (nlon < 1) then
-            ierror = 2
-            return
-        else if (ityp < 0 .or. ityp > 8) then
-            ierror = 3
-            return
-        else if (nt < 0) then
-            ierror = 4
-            return
-        else if ( &
-            (ityp <= 2 .and. idvw < nlat) &
-            .or. &
-            (ityp > 2 .and. idvw < imid) &
-           ) then
-            ierror = 5
-            return
-        else if (jdvw < nlon) then
-            ierror = 6
-            return
-        else if (mdab < mmax) then
-            ierror = 7
-            return
-        else if (ndab < nlat) then
-            ierror = 8
-            return
-        else if (lvhsgs < 2*lzimn+nlon+15) then
-            ierror = 9
-            return
-        else if (lwork < 2*lnl+idv*nlon) then
-            ierror = 10
-            return
-        else
-            ierror = 0
-        end if
+            lnl = nt*idv*nlon
 
-        !  Compute workspace indices
-        workspace_indices = get_vhsgs_workspace_indices(nlat, imid, ist, lnl)
+            ! Check calling arguments
+            if (nlat < 3) then
+                ierror = 1
+            else if (nlon < 1) then
+                ierror = 2
+            else if (ityp < 0 .or. ityp > 8) then
+                ierror = 3
+            else if (nt < 0) then
+                ierror = 4
+            else if ( &
+                (ityp <= 2 .and. idvw < nlat) &
+                .or. &
+                (ityp > 2 .and. idvw < imid)) then
+                ierror = 5
+            else if (jdvw < nlon) then
+                ierror = 6
+            else if (mdab < mmax) then
+                ierror = 7
+            else if (ndab < nlat) then
+                ierror = 8
+            else if (lvhsgs < 2*lzimn+nlon+15) then
+                ierror = 9
+            else
+                ierror = 0
+            end if
 
-        associate (&
-            jw1 => workspace_indices(1), &
-            jw2 => workspace_indices(2), &
-            jw3 => workspace_indices(3), &
-            iw1 => workspace_indices(4), &
-            iw2 => workspace_indices(5), &
-            iw3 => workspace_indices(6), &
-            iw4 => workspace_indices(7) &
-           )
-            call vhsgs_lower_utility_routine(nlat, nlon, ityp, nt, imid, idvw, jdvw, v, w, mdab, ndab, &
-                br, bi, cr, ci, idv, work, work(iw1), work(iw2), work(iw3), &
-                work(iw4), idz, wvhsgs(jw1), wvhsgs(jw2), wvhsgs(jw3))
+            ! Check error flag
+            if (ierror /= 0) return
+
+            ! Set required workspace size
+            lwork = (2 * lnl) + (idv * nlon)
+
+            block
+                real(wp) :: work(lwork)
+
+                !  Compute workspace indices
+                workspace_indices = get_vhsgs_workspace_indices(nlat, imid, ist, lnl)
+
+                associate (&
+                    jw1 => workspace_indices(1), &
+                    jw2 => workspace_indices(2), &
+                    jw3 => workspace_indices(3), &
+                    iw1 => workspace_indices(4), &
+                    iw2 => workspace_indices(5), &
+                    iw3 => workspace_indices(6), &
+                    iw4 => workspace_indices(7) &
+                    )
+                    call vhsgs_lower_utility_routine(nlat, nlon, ityp, nt, imid, idvw, &
+                        jdvw, v, w, mdab, ndab, br, bi, cr, ci, idv, work, work(iw1:), &
+                        work(iw2:), work(iw3:), work(iw4:), idz, wvhsgs(jw1:), &
+                        wvhsgs(jw2:), wvhsgs(jw3:))
+                end associate
+            end block
         end associate
 
     end subroutine vhsgs

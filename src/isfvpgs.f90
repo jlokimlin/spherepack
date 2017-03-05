@@ -418,7 +418,7 @@ contains
             end select
 
             call vhsgs(nlat, nlon, ityp, nt, v, w, idv, jdv, br, bi, cr, ci, &
-                mab, nlat, wvhsgs, lvhsgs, wk, lwk, ierror)
+                mab, nlat, wvhsgs, ierror)
 
         end subroutine isfvpgs1
 

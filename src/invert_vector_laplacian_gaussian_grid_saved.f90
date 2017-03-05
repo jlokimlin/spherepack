@@ -471,7 +471,7 @@ contains
 
         ! Synthesize coefs into vector field (v, w)
         call vhsgs(nlat, nlon, ityp, nt, v, w, idvw, jdvw, brvw, bivw, &
-            crvw, civw, mmax, nlat, wsave, lsave, wk, lwk, ierror)
+            crvw, civw, mmax, nlat, wsave, ierror)
 
     end subroutine ivlapgs_lower_utility_routine
 
