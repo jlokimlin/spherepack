@@ -220,8 +220,7 @@ use spherepack
         		call name("shai")
         		call iout(ierror, "ierr")
         		
-        		call shaec(nlat, nlon, isym, nt, s, nlat, nlon, a, b, mdab, nlat, wsave, &
-        		lsave, work, lwork, ierror)
+        		call shaec(nlat, nlon, isym, nt, s, nlat, nlon, a, b, mdab, nlat, wsave, ierror)
         		call name("sha ")
         		call iout(ierror, "ierr")
         		
@@ -241,8 +240,7 @@ use spherepack
         		call name("shai")
         		call iout(ierror, "ierr")
         		
-        		call shaes(nlat, nlon, isym, nt, s, nlat, nlon, a, b, mdab, nlat, wsave, &
-        		lsave, work, lwork, ierror)
+        		call shaes(nlat, nlon, isym, nt, s, nlat, nlon, a, b, mdab, nlat, wsave, ierror)
         		call name("sha ")
         		call iout(ierror, "ierr")
         		
@@ -262,8 +260,7 @@ use spherepack
         		call name("shai")
         		call iout(ierror, "ierr")
         		
-        		call shagc(nlat, nlon, isym, nt, s, nlat, nlon, a, b, mdab, nlat, wsave, &
-        		lsave, work, lwork, ierror)
+        		call shagc(nlat, nlon, isym, nt, s, nlat, nlon, a, b, mdab, nlat, wsave, ierror)
         		call name("sha ")
         		call iout(ierror, "ierr")
         		
@@ -283,8 +280,7 @@ use spherepack
         		call name("shai")
         		call iout(ierror, "ierr")
         		
-        		call shags(nlat, nlon, isym, nt, s, nlat, nlon, a, b, mdab, nlat, wsave, &
-        		lsave, work, lwork, ierror)
+        		call shags(nlat, nlon, isym, nt, s, nlat, nlon, a, b, mdab, nlat, wsave, ierror)
         		call name("sha ")
         		call iout(ierror, "ierr")
         		
@@ -320,7 +316,7 @@ use spherepack
         		
         		call shaeci(nlat, nlon, wsave, ierror)
         		call shaec(nlat, nlon, isym, nt, sclp, nlat, nlon, a, b, mdab, nlat, &
-        		wsave, lsave, work, lwork, ierror)
+        		wsave, ierror)
         		
         		call shseci(nlat, nlon, wsave, ierror)
         		call name("shsi")
@@ -335,7 +331,7 @@ use spherepack
         		
         		call shaesi(nlat, nlon, wsave, ierror)
         		call shaes(nlat, nlon, isym, nt, sclp, nlat, nlon, a, b, mdab, nlat, &
-        		wsave, lsave, work, lwork, ierror)
+        		wsave, ierror)
         		
         		call shsesi(nlat, nlon, wsave, ierror)
         		call name("shsi")
@@ -349,8 +345,7 @@ use spherepack
         	case (3)
         		
         		call shagci(nlat, nlon, wsave, ierror)
-        		call shagc(nlat, nlon, isym, nt, sclp, nlat, nlon, a, b, mdab, nlat, &
-        		wsave, lsave, work, lwork, ierror)
+        		call shagc(nlat, nlon, isym, nt, sclp, nlat, nlon, a, b, mdab, nlat, wsave, ierror)
         		
         		call shsgci(nlat, nlon, wsave, ierror)
         		call name("shsi")
@@ -367,7 +362,7 @@ use spherepack
         		
         		call shagsi(nlat, nlon, wsave, ierror)
         		call shags(nlat, nlon, isym, nt, sclp, nlat, nlon, a, b, mdab, nlat, &
-        		wsave, lsave, work, lwork, ierror)
+        		wsave, ierror)
         		
         		call shsgsi(nlat, nlon, wsave, ierror)
         		call name("shsi")

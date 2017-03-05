@@ -368,7 +368,7 @@ contains
 
         ! Synthesize a, b into divg
         call shsec(nlat, nlon, isym, nt, dv, idv, jdv, a, b, &
-            mab, nlat, wshsec, lshsec, wk, lwk, ierror)
+            mab, nlat, wshsec, ierror)
 
     end subroutine divec_lower_utility_routine
 

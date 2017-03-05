@@ -315,14 +315,13 @@ contains
         lwk = lwork-2*mn-nlat
 
         call dives_lower_utility_routine(nlat, nlon, isym, nt, dv, idv, jdv, br, bi, mdb, ndb, &
-            work(ia), work(ib), mab, work(iis), wshses, lshses, work(iwk), lwk, &
-            ierror)
+            work(ia), work(ib), mab, work(iis), wshses, lshses, ierror)
 
     end subroutine dives
 
     subroutine dives_lower_utility_routine(nlat, nlon, isym, nt, dv, idv, jdv, br, bi, mdb, ndb, &
-        a, b, mab, sqnn, wshses, lshses, wk, lwk, ierror)
-        implicit none
+        a, b, mab, sqnn, wshses, lshses, ierror)
+
         real(wp) :: a
         real(wp) :: b
         real(wp) :: bi
@@ -335,7 +334,7 @@ contains
         integer(ip) :: jdv
         
         integer(ip) :: lshses
-        integer(ip) :: lwk
+        
         
         integer(ip) :: mab
         integer(ip) :: mdb
@@ -346,17 +345,17 @@ contains
         integer(ip) :: nlon
         integer(ip) :: nt
         real(wp) :: sqnn
-        real(wp) :: wk
+        
         real(wp) :: wshses
         dimension dv(idv, jdv, nt), br(mdb, ndb, nt), bi(mdb, ndb, nt)
         dimension a(mab, nlat, nt), b(mab, nlat, nt), sqnn(nlat)
-        dimension wshses(lshses), wk(lwk)
+        dimension wshses(lshses)
 
         call perform_setup_for_divergence(nlon, a, b, br, bi, sqnn)
 
         ! Synthesize a, b into divg
         call shses(nlat, nlon, isym, nt, dv, idv, jdv, a, b, &
-            mab, nlat, wshses, lshses, wk, lwk, ierror)
+            mab, nlat, wshses, ierror)
 
     end subroutine dives_lower_utility_routine
 

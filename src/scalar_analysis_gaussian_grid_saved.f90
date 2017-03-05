@@ -230,8 +230,7 @@ contains
     !            = 9  error in the specification of lshags
     !            = 10 error in the specification of lwork
     !
-    module subroutine shags(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, &
-        wshags, dummy_lshags, dummy_work, dummy_lwork, ierror)
+    module subroutine shags(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, wshags, ierror)
 
         ! Dummy arguments
         integer(ip), intent(in)   :: nlat
@@ -246,20 +245,16 @@ contains
         integer(ip), intent(in)   :: mdab
         integer(ip), intent(in)   :: ndab
         real(wp),    intent(in)   :: wshags(:)
-        integer(ip), intent(in)   :: dummy_lshags
-        real(wp),    intent(out)  :: dummy_work(1)
-        integer(ip), intent(in)   :: dummy_lwork
         integer(ip), intent(out)  :: ierror
 
         ! Local variables
-        integer(ip) :: l, l1, l2, lp, iw
+        integer(ip) :: ntrunc, l1, l2, lp, iw
         integer(ip) :: lwork, lat, late, ifft, ipmn, iwts
-        type(SpherepackUtility) :: util
-
+        
         associate (lshags => size(wshags))
 
             ! Set m limit for pmn
-            l = min((nlon+2)/2, nlat)
+            ntrunc = min((nlon+2)/2, nlat)
 
             ! Set gaussian point nearest equator pointer
             late = (nlat+mod(nlat, 2))/2
@@ -271,7 +266,7 @@ contains
                 lat = nlat
             end if
 
-            l1 = l
+            l1 = ntrunc
             l2 = late
             lp = nlat*(3*(l1+l2)-2)+(l1-1)*(l2*(2*nlat-l1)-3*l1)/2+nlon+15
 
@@ -288,7 +283,7 @@ contains
                 ierror = 5
             else if (jdg < nlon) then
                 ierror = 6
-            else if (mdab < l) then
+            else if (mdab < ntrunc) then
                 ierror = 7
             else if (ndab < nlat) then
                 ierror = 8
@@ -301,22 +296,26 @@ contains
             ! Check error flag
             if (ierror /= 0) return
 
-            ! Set starting address for gaussian wts , fft values,
-            ! and fully stored legendre polys in wshags
-            iwts = 1
-            ifft = nlat+2*nlat*late+3*(l*(l-1)/2+(nlat-l)*(l-1))+1
-            ipmn = ifft+nlon+15
-
-            ! Set pointer for internal storage of g
-            iw = lat*nlon*nt+1
-
             ! Compute required workspace size
-            lwork = util%get_lwork_for_gaussian_saved(isym, nt, nlat, nlon)
+            select case (isym)
+                case (0)
+                    lwork = nlat * nlon * (nt+1)
+                case default
+                    lwork = l2 * nlon * (nt+1)
+            end select
 
-            !  Perform analysis
             block
                 real(wp) :: work(lwork)
-                call shags_lower_utility_routine(nlat, nlon, l, lat, isym, g, idg, jdg, nt, &
+
+                ! Set starting address for gaussian wts , fft values,
+                ! and fully stored legendre polys in wshags
+                iwts = 1
+                ifft = nlat+2*nlat*late+3*(ntrunc*(ntrunc-1)/2+(nlat-ntrunc)*(ntrunc-1))+1
+                ipmn = ifft+nlon+15
+
+                ! Set pointer for internal storage of g
+                iw = lat*nlon*nt+1
+                call shags_lower_utility_routine(nlat, nlon, ntrunc, lat, isym, g, idg, jdg, nt, &
                     a, b, mdab, ndab, wshags(iwts:), wshags(ifft:), wshags(ipmn:), &
                     late, work, work(iw:))
             end block
@@ -801,7 +800,7 @@ contains
             idth => workspace_indices(8), &
             idwts => workspace_indices(9), &
             iw => workspace_indices(10) &
-           )
+            )
 
             call shagsp_lower_utility_routine(nlat, nlon, ntrunc, late, wshags(i1), wshags(i2), wshags(i3), &
                 wshags(i4), wshags(i5), wshags(i6), wshags(i7), dwork(idth), &

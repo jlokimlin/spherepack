@@ -308,19 +308,18 @@ contains
         lwk = lwork-2*mn-nlat
 
         call sfvpes_lower_utility_routine(nlat, nlon, isym, nt, sf, vp, idv, jdv, br, bi, cr, ci, mdb, ndb, &
-            work(ia), work(ib), mab, work(is), wshses, lshses, work(iwk), lwk, &
-            ierror)
+            work(ia), work(ib), mab, work(is), wshses, lshses, ierror)
 
     end subroutine sfvpes
 
     subroutine sfvpes_lower_utility_routine(nlat, nlon, isym, nt, sf, vp, idv, jdv, br, bi, cr, ci, &
-        mdb, ndb, a, b, mab, fnn, wshses, lshses, wk, lwk, ierror)
+        mdb, ndb, a, b, mab, fnn, wshses, lshses, ierror)
 
-        integer(ip) :: nlat, nlon, isym, nt, idv, jdv, mdb, ndb, mab, lshses, lwk, ierror
+        integer(ip) :: nlat, nlon, isym, nt, idv, jdv, mdb, ndb, mab, lshses, ierror
         real(wp) :: sf(idv, jdv, nt), vp(idv, jdv, nt)
         real(wp) :: br(mdb, ndb, nt), bi(mdb, ndb, nt), cr(mdb, ndb, nt), ci(mdb, ndb, nt)
         real(wp) :: a(mab, nlat, nt), b(mab, nlat, nt)
-        real(wp) :: wshses(lshses), wk(lwk), fnn(nlat)
+        real(wp) :: wshses(lshses), fnn(nlat)
         integer(ip) :: n, m, mmax, k
         !
         !     set coefficient multiplyers
@@ -360,7 +359,7 @@ contains
         !     synthesize a, b into st
         !
         call shses(nlat, nlon, isym, nt, sf, idv, jdv, a, b, &
-            mab, nlat, wshses, lshses, wk, lwk, ierror)
+            mab, nlat, wshses, ierror)
         !
         !    set coefficients for vp from br, bi
         !
@@ -393,7 +392,7 @@ contains
         !     synthesize a, b into vp
         !
         call shses(nlat, nlon, isym, nt, vp, idv, jdv, a, b, &
-            mab, nlat, wshses, lshses, wk, lwk, ierror)
+            mab, nlat, wshses, ierror)
 
     end subroutine sfvpes_lower_utility_routine
 

@@ -41,8 +41,7 @@ contains
 
     ! Purpose:
     !
-    !     subroutine shaes(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, &
-    !                      wshaes, lshaes, work, lwork, ierror)
+    !     subroutine shaes(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, wshaes, ierror)
     !
     !     subroutine shaes performs the spherical harmonic analysis
     !     on the array g and stores the result in the arrays a and b.
@@ -229,10 +228,9 @@ contains
     !            = 7  error in the specification of mdab
     !            = 8  error in the specification of ndab
     !            = 9  error in the specification of lshaes
-    !            = 10 error in the specification of lwork
     !
     module subroutine shaes(nlat, nlon, isym, nt, g, idg, jdg, a, b, &
-        mdab, ndab, wshaes, lshaes, work, lwork, ierror)
+        mdab, ndab, wshaes, ierror)
 
         ! Dummy arguments
         integer(ip), intent(in)   :: nlat
@@ -246,84 +244,79 @@ contains
         real(wp),    intent(out)  :: b(mdab, ndab, nt)
         integer(ip), intent(in)   :: mdab
         integer(ip), intent(in)   :: ndab
-        real(wp),    intent(in)   :: wshaes(lshaes)
-        integer(ip), intent(in)   :: lshaes
-        real(wp),    intent(out)  :: work(lwork)
-        integer(ip), intent(in)   :: lwork
+        real(wp),    intent(in)   :: wshaes(:)
         integer(ip), intent(out)  :: ierror
 
         ! Local variables
-        integer(ip) :: ist, mmax, imid, idz, lzimn, ls, nln
+        integer(ip) :: ist, mmax, imid, idz, lzimn, ls, nln, lwork
 
-        !  Set constants
-        mmax = min(nlat, nlon/2+1)
-        imid = (nlat+1)/2
-        idz = (mmax*(2*nlat-mmax+1))/2
-        lzimn = idz*imid
+        associate (lshaes => size(wshaes))
 
-        !  Set calling argument for analysis
-        select case (isym)
-            case (0)
-                ls = nlat
-                ist = imid
-            case default
-                ls = imid
-                ist = 0
-        end select
+            !  Set constants
+            mmax = min(nlat, nlon/2+1)
+            imid = (nlat+1)/2
+            idz = (mmax*(2*nlat-mmax+1))/2
+            lzimn = idz*imid
 
-        nln = nt*ls*nlon
+            !  Set calling argument for analysis
+            select case (isym)
+                case (0)
+                    ls = nlat
+                    ist = imid
+                case default
+                    ls = imid
+                    ist = 0
+            end select
 
-        !  Check calling arguments
-        if (nlat < 3) then
-            ierror = 1
-            return
-        else if (nlon < 4) then
-            ierror = 2
-            return
-        else if (isym < 0 .or. isym > 2) then
-            ierror = 3
-            return
-        else if (nt < 0) then
-            ierror = 4
-            return
-        else if ( &
-            (isym == 0 .and. idg < nlat) &
-            .or. &
-            (isym /= 0 .and. idg < (nlat+1)/2) &
-           ) then
-            ierror = 5
-            return
-        else if (jdg < nlon) then
-            ierror = 6
-            return
-        else if (mdab < mmax) then
-            ierror = 7
-            return
-        else if (ndab < nlat) then
-            ierror = 8
-            return
-        else if(lshaes < lzimn+nlon+15) then
-            ierror = 9
-            return
-        else if (lwork < nln+ls*nlon) then
-            ierror = 10
-            return
-        else
-            ierror = 0
-        end if
+            nln = nt*ls*nlon
 
-        block
-            integer(ip) :: iw1, iw2, iw3
+            !  Check calling arguments
+            if (nlat < 3) then
+                ierror = 1
+            else if (nlon < 4) then
+                ierror = 2
+            else if (isym < 0 .or. isym > 2) then
+                ierror = 3
+            else if (nt < 0) then
+                ierror = 4
+            else if ( &
+                (isym == 0 .and. idg < nlat) &
+                .or. &
+                (isym /= 0 .and. idg < (nlat+1)/2) &
+                ) then
+                ierror = 5
+            else if (jdg < nlon) then
+                ierror = 6
+            else if (mdab < mmax) then
+                ierror = 7
+            else if (ndab < nlat) then
+                ierror = 8
+            else if(lshaes < lzimn+nlon+15) then
+                ierror = 9
+            else
+                ierror = 0
+            end if
 
-            ! Set workspace pointer indices
-            iw1 = ist + 1
-            iw2 = nln + 1
-            iw3 = lzimn + 1
+            ! Check error flag
+            if (ierror /= 0) return
 
-            !  Perform analysis
-            call shaes_lower_utility_routine(nlat, isym, nt, g, idg, jdg, a, b, mdab, ndab, wshaes, idz, &
-                ls, nlon, work, work(iw1), work(iw2), wshaes(iw3))
-        end block
+            ! Set required workspace size
+            lwork = nln+ls*nlon
+
+            block
+                real(wp)    :: work(lwork)
+                integer(ip) :: iw1, iw2, iw3
+
+                ! Set workspace pointer indices
+                iw1 = ist + 1
+                iw2 = nln + 1
+                iw3 = lzimn + 1
+
+                !  Perform analysis
+                call shaes_lower_utility_routine(nlat, isym, nt, g, idg, jdg, a, b, &
+                    mdab, ndab, wshaes, idz, ls, nlon, work, work(iw1:), work(iw2:), wshaes(iw3:))
+            end block
+        end associate
 
     end subroutine shaes
 
@@ -459,7 +452,7 @@ contains
                     idz => workspace_indices(1), &
                     iw1 => workspace_indices(2), &
                     iw2 => workspace_indices(3) &
-                   )
+                    )
                     call util%initialize_scalar_analysis_regular_grid_saved( &
                         nlat, nlon, imid, wshaes, idz, work, work(iw1:), dwork)
 

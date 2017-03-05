@@ -249,8 +249,7 @@ program tgrad
                 call name("shai")
                 call iout(ierror, "ierr")
 
-                call shaec(nlat, nlon, isym, nt, sf, nlat, nlon, a, b, mdab, nlat, wsave, &
-                    lsave, work, lwork, ierror)
+                call shaec(nlat, nlon, isym, nt, sf, nlat, nlon, a, b, mdab, nlat, wsave, ierror)
                 call name("sha ")
                 call iout(ierror, "ierr")
 
@@ -283,8 +282,7 @@ program tgrad
                 call name("shai")
                 call iout(ierror, "ierr")
 
-                call shaes(nlat, nlon, isym, nt, sf, nlat, nlon, a, b, mdab, nlat, wsave, &
-                    lsave, work, lwork, ierror)
+                call shaes(nlat, nlon, isym, nt, sf, nlat, nlon, a, b, mdab, nlat, wsave, ierror)
                 call name("sha ")
                 call iout(ierror, "ierr")
 
@@ -315,8 +313,7 @@ program tgrad
                 call name("shai")
                 call iout(ierror, "ierr")
 
-                call shagc(nlat, nlon, isym, nt, sf, nlat, nlon, a, b, mdab, nlat, wsave, &
-                    lsave, work, lwork, ierror)
+                call shagc(nlat, nlon, isym, nt, sf, nlat, nlon, a, b, mdab, nlat, wsave, ierror)
                 call name("sha ")
                 call iout(ierror, "ierr")
 
@@ -348,8 +345,7 @@ program tgrad
                 call name("shai")
                 call iout(ierror, "ierr")
 
-                call shags(nlat, nlon, isym, nt, sf, nlat, nlon, a, b, mdab, nlat, wsave, &
-                    lsave, work, lwork, ierror)
+                call shags(nlat, nlon, isym, nt, sf, nlat, nlon, a, b, mdab, nlat, wsave, ierror)
                 call name("sha ")
                 call iout(ierror, "ierr")
 
@@ -471,7 +467,7 @@ program tgrad
                 call iout(ierror, "ierr")
 
                 call vhaes(nlat, nlon, ityp, nt, v, w, nlat, nlon, br, bi, cr, ci, &
-                    mdb, nlat, wsave, lsave, work, lwork, ierror)
+                    mdb, nlat, wsave, ierror)
                 call name("vha ")
                 call iout(ierror, "ierr")
 

@@ -212,15 +212,12 @@ contains
                         mdab => self%NUMBER_OF_LATITUDES, &
                         ndab => self%NUMBER_OF_LATITUDES, &
                         wshaes => workspace%forward_scalar, &
-                        lshaes => size(workspace%forward_scalar), &
-                        work => workspace%legendre_workspace, &
-                        lwork => size(workspace%legendre_workspace), &
                         ierror => error_flag &
                        )
 
                         !  Perform regular (real) spherical harmonic analysis
                         call aux%shaes(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, &
-                            wshaes, lshaes, work, lwork, ierror)
+                            wshaes, ierror)
 
                     end associate
                 end select
@@ -284,15 +281,12 @@ contains
                         mdab => size(workspace%scalar_coefficients%real_component, dim=1), &
                         ndab => size(workspace%scalar_coefficients%real_component, dim=2), &
                         wshses => workspace%backward_scalar, &
-                        lshses => size(workspace%backward_scalar), &
-                        work => workspace%legendre_workspace, &
-                        lwork => size(workspace%legendre_workspace), &
                         ierror => error_flag &
                        )
 
                         !  Perform (real) spherical harmonic scalar synthesis
                         call aux%shses(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, &
-                            wshses, lshses, work, lwork, ierror)
+                            wshses, ierror)
 
                     end associate
                 end select
@@ -360,15 +354,12 @@ contains
                         mdab => size(workspace%vector_coefficients%polar%real_component, dim=1), &
                         ndab => size(workspace%vector_coefficients%polar%real_component, dim=2), &
                         wvhaes => workspace%forward_vector, &
-                        lvhaes => size(workspace%forward_vector), &
-                        work => workspace%legendre_workspace, &
-                        lwork => size(workspace%legendre_workspace), &
                         ierror => error_flag &
                        )
 
                         !  Perform (real) vector spherical harmonic analysis
                         call aux%vhaes(nlat, nlon, ityp, nt, v, w, idvw, jdvw, &
-                            br, bi, cr, ci, mdab, ndab, wvhaes, lvhaes, work, lwork, ierror)
+                            br, bi, cr, ci, mdab, ndab, wvhaes, ierror)
 
                     end associate
                 end select

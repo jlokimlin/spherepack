@@ -250,13 +250,13 @@ program advec
     !     smooth geopotential at t=-dt and t=0. by synthesizing after analysis
     !
     call shagc(nlat, nlon, isym, nt, phold, nlat, nlon, ar, br, nlat, &
-        nlat, wshagc, lshagc, work, lwork, ierror)
+        nlat, wshagc, ierror)
     if ( ierror /=0) write(*, 26) ierror
     call shsgc(nlat, nlon, isym, nt, phold, nlat, nlon, ar, br, nlat, &
         nlat, wshsgc, lshagc, work, lwork, ierror)
     if ( ierror /=0) write(*, 28) ierror
     call shagc(nlat, nlon, isym, nt, phi, nlat, nlon, ar, br, nlat, &
-        nlat, wshagc, lshagc, work, lwork, ierror)
+        nlat, wshagc, ierror)
     if ( ierror /=0) write(*, 26) ierror
     call shsgc(nlat, nlon, isym, nt, phi, nlat, nlon, ar, br, nlat, &
         nlat, wshsgc, lshagc, work, lwork, ierror)
@@ -287,7 +287,7 @@ program advec
         !       compute harmonic coefficients for phi at current time
         !
         call shagc(nlat, nlon, isym, nt, phi, nlat, nlon, ar, br, nlat, &
-            nlat, wshagc, lshagc, work, lwork, ierror)
+            nlat, wshagc, ierror)
         if ( error /=0) write(*, 26) ierror
 26      format(' ierror in shagc = ', i5)
         !

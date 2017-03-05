@@ -412,7 +412,7 @@ use spherepack
             call iout(ierror, "ierr")
 
             call shaec(nlat, nlon, isym, nt, dv, nlat, nlon, a, b, &
-                mdab, nlat, wsave, lsave, work, lwork, ierror)
+                mdab, nlat, wsave, ierror)
             call name("sha ")
             call iout(ierror, "ierr")
             call iout(lsave, "lsav")
@@ -446,7 +446,7 @@ use spherepack
             call iout(ierror, "ierr")
 
             call shaes(nlat, nlon, isym, nt, dv, nlat, nlon, a, b, &
-                mdab, nlat, wsave, lsave, work, lwork, ierror)
+                mdab, nlat, wsave, ierror)
             call name("sha ")
             call iout(ierror, "ierr")
             call iout(lsave, "lsav")
@@ -472,7 +472,7 @@ use spherepack
             call iout(ierror, "ierr")
 
             call shagc(nlat, nlon, isym, nt, dv, nlat, nlon, a, b, &
-                mdab, nlat, wsave, lsave, work, lwork, ierror)
+                mdab, nlat, wsave, ierror)
             call name("sha ")
             call iout(ierror, "ierr")
             call iout(lsave, "lsav")
@@ -498,7 +498,7 @@ use spherepack
             call iout(ierror, "ierr")
 
             call shags(nlat, nlon, isym, nt, dv, nlat, nlon, a, b, &
-                mdab, nlat, wsave, lsave, work, lwork, ierror)
+                mdab, nlat, wsave, ierror)
             call name("sha ")
             call iout(ierror, "ierr")
             call iout(lsave, "lsav")

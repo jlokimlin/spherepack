@@ -241,7 +241,7 @@ program tvlap
             call iout(ierror, "ierr")
 
             call vhaes(nlat, nlon, isym, nt, v, w, nlat, nlon, br, bi, cr, ci, mdbc, &
-                nlat, wsave, lsave, work, lwork, ierror)
+                nlat, wsave, ierror)
             call name("vhaes")
             call iout(ierror, "ierr")
 
@@ -407,7 +407,7 @@ program tvlap
             call iout(ierror, "ierr")
 
             call vhaes(nlat, nlon, isym, nt, vlap, wlap, nlat, nlon, &
-                br, bi, cr, ci, mdbc, nlat, wsave, lsave, work, lwork, ierror)
+                br, bi, cr, ci, mdbc, nlat, wsave, ierror)
             call name("vhaes")
             call iout(ierror, "ierr")
 

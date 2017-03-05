@@ -366,7 +366,7 @@ contains
 
         ! Synthesize a, b into vort
         call shsec(nlat, nlon, isym, nt, vort, ivrt, jvrt, a, b, &
-            mab, nlat, wshsec, lshsec, wk, lwk, ierror)
+            mab, nlat, wshsec, ierror)
 
     end subroutine vrtec_lower_utility_routine
 

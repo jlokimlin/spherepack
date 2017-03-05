@@ -377,7 +377,7 @@ contains
 
         ! Scalar synthesize a, b into sf
         call shsec(nlat, nlon, isym, nt, sf, isf, jsf, a, b, mab, nlat, &
-            wshsec, lshsec, wk, lwk, ierror)
+            wshsec, ierror)
 
     end subroutine igradec_lower_utility_routine
 

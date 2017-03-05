@@ -692,13 +692,13 @@ contains
             !     do spherical harmonic analysis of "adjusted" da on gaussian grid
             !
             call shagc(nlata, nlona, isym, nt, da, nlata, nlona, work(iaa), &
-                work(iba), la1, nlata, wsave, lwa, work(iw), lw, ier)
+                work(iba), la1, nlata, wsave, ier)
         else
             !
             !     do spherical harmonic analysis of "adjusted" da on equally spaced grid
             !
             call shaec(nlata, nlona, isym, nt, da, nlata, nlona, work(iaa), &
-                work(iba), la1, nlata, wsave, lwa, work(iw), lw, ier)
+                work(iba), la1, nlata, wsave, ier)
         end if
         !
         !     transfer da grid coefficients to db grid coefficients
@@ -712,7 +712,7 @@ contains
             !     do spherical harmonic synthesis on nlatb by nlonb equally spaced grid
             !
             call shsec(nlatb, nlonb, isym, nt, db, nlatb, nlonb, work(iab), &
-                work(ibb), lb1, nlatb, wsave(jb:), lwb, work(iw), lw, ier)
+                work(ibb), lb1, nlatb, wsave(jb:), ier)
         else
             !
             !     do spherical harmonic synthesis on nlatb by nlonb gaussian grid

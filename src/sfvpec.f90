@@ -355,7 +355,7 @@ contains
 
         ! Synthesize a, b into sf
         call shsec(nlat, nlon, isym, nt, sf, idv, jdv, a, b, &
-            mab, nlat, wshsec, lshsec, wk, lwk, ierror)
+            mab, nlat, wshsec, ierror)
 
         !  Set coefficients for velocity potential from br, bi
         call compute_vel_pot_scalar_coeff_from_polar_vector_coeff( &
@@ -363,7 +363,7 @@ contains
 
         ! Synthesize a, b into vp
         call shsec(nlat, nlon, isym, nt, vp, idv, jdv, a, b, &
-            mab, nlat, wshsec, lshsec, wk, lwk, ierror)
+            mab, nlat, wshsec, ierror)
 
     end subroutine sfvpec_lower_utility_routine
 

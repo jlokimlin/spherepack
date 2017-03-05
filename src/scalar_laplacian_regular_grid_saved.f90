@@ -372,7 +372,7 @@ contains
 
         ! Synthesize alap, blap into slap
         call shses(nlat, nlon, isym, nt, slap, ids, jds, alap, blap, &
-            mmax, nlat, wsave, lsave, wk, lwk, ierror)
+            mmax, nlat, wsave, ierror)
 
     end subroutine slapes_lower_utility_routine
 

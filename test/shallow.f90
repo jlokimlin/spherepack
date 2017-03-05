@@ -417,7 +417,7 @@ program shallow
     !     analyze the velocity components (u, v)
     !
 90  call vhaesgo(nlat, nlon, isym, nt, u, v, idp, jdp, br, bi, cr, ci, &
-        mdab, ndab, wvha, lwvha, work, lwork, ierror)
+        mdab, ndab, wvha, ierror)
     if(ierror /= 0) write(*, 91) ierror
 91  format(' error' i4 ' in vhaes')
     !
@@ -439,7 +439,7 @@ program shallow
     !     analyze geopotential p
     !
     call shaes(nlat, nlon, isym, nt, p, idp, jdp, a, b, mdab, ndab, &
-        wsha, lwsha, work, lwork, ierror)
+        wsha, ierror)
     if(ierror /= 0) write(*, 93) ierror
 93  format(' error' i4 ' in shaes')
     !
@@ -451,7 +451,7 @@ program shallow
     !     resynthesize the geopotential p
     !
     call shses(nlat, nlon, isym, nt, p, idp, jdp, a, b, mdab, ndab, &
-        wshs, lwshs, work, lwork, ierror)
+        wshs, ierror)
     if(ierror /= 0) write(*, 94) ierror
 94  format(' error' i4 ' in shses')
     !
@@ -740,8 +740,8 @@ contains
     end subroutine trunc
 
     subroutine vhaesgo(nlat, nlon, ityp, nt, u, v, iduv, jduv, &
-        br, bi, cr, ci, mdab, ndab, wsav, lwsav, work, lwork, ierror)
-        implicit none
+        br, bi, cr, ci, mdab, ndab, wsav, ierror)
+
         real(wp) :: bi
         real(wp) :: br
         real(wp) :: ci
@@ -753,8 +753,8 @@ contains
         integer(ip) :: j
         integer(ip) :: jduv
         integer(ip) :: k
-        integer(ip) :: lwork
-        integer(ip) :: lwsav
+        
+        
         integer(ip) :: mdab
         integer(ip) :: ndab
         integer(ip) :: nlat
@@ -762,12 +762,10 @@ contains
         integer(ip) :: nt
         real(wp) :: u
         real(wp) :: v
-        real(wp) :: work
-        real(wp) :: wsav
+        real(wp) :: wsav(:)
         dimension u(iduv, jduv, *), v(iduv, jduv, *), br(mdab, ndab, *), &
-            bi(mdab, ndab, *), cr(mdab, ndab, *), ci(mdab, ndab, *), &
-            work(1), wsav(1)
-        !
+            bi(mdab, ndab, *), cr(mdab, ndab, *), ci(mdab, ndab, *)
+
         !     vhaesgo computes the vector harmonic analysis of (u, v) using vhaes which
         !     assumes the velocity components are given in mathematical coordinates
         !
@@ -780,7 +778,7 @@ contains
         end do
 
         call vhaes(nlat, nlon, ityp, nt, v, u, iduv, jduv, &
-            br, bi, cr, ci, mdab, ndab, wsav, lwsav, work, lwork, ierror)
+            br, bi, cr, ci, mdab, ndab, wsav, ierror)
         !
         !     restore v
         !

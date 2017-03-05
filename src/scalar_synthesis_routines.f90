@@ -57,7 +57,7 @@ module scalar_synthesis_routines
     ! Declare interfaces for submodule implementation
     interface
         module subroutine shses(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, &
-            wshses, lshses, work, lwork, ierror)
+            wshses, ierror)
 
             ! Dummy arguments
             integer(ip), intent(in)  :: nlat
@@ -71,10 +71,7 @@ module scalar_synthesis_routines
             real(wp),    intent(in)  :: b(mdab, ndab, nt)
             integer(ip), intent(in)  :: mdab
             integer(ip), intent(in)  :: ndab
-            real(wp),    intent(in)  :: wshses(lshses)
-            integer(ip), intent(in)  :: lshses
-            real(wp),    intent(out) :: work(lwork)
-            integer(ip), intent(in)  :: lwork
+            real(wp),    intent(in)  :: wshses(:)
             integer(ip), intent(out) :: ierror
         end subroutine shses
 
@@ -118,8 +115,7 @@ module scalar_synthesis_routines
             integer(ip), intent(out)  :: ierror
         end subroutine shsgsi
 
-        module subroutine shsec(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, &
-            wshsec, lshsec, work, lwork, ierror)
+        module subroutine shsec(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, wshsec, ierror)
 
             ! Dummy arguments
             integer(ip), intent(in)  :: nlat
@@ -133,10 +129,7 @@ module scalar_synthesis_routines
             real(wp),    intent(in)  :: b(mdab, ndab, nt)
             integer(ip), intent(in)  :: mdab
             integer(ip), intent(in)  :: ndab
-            real(wp),    intent(in)  :: wshsec(lshsec)
-            integer(ip), intent(in)  :: lshsec
-            real(wp),    intent(out) :: work(lwork)
-            integer(ip), intent(in)  :: lwork
+            real(wp),    intent(in)  :: wshsec(:)
             integer(ip), intent(out) :: ierror
         end subroutine shsec
 

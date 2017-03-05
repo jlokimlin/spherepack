@@ -29,197 +29,7 @@
 !     *                                                               *
 !     * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !
-!
-!     subroutine shagc(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, 
-!    +                 wshagc, lshagc, work, lwork, ierror)
-!
-!     subroutine shagc performs the spherical harmonic analysis
-!     on the array g and stores the result in the arrays a and b.
-!     the analysis is performed on a gaussian grid in colatitude
-!     and an equally spaced grid in longitude.  the associated
-!     legendre functions are recomputed rather than stored as they
-!     are in subroutine shags.  the analysis is described below
-!     at output parameters a, b.
-!
-!     input parameters
-!
-!     nlat   the number of points in the gaussian colatitude grid on the
-!            full sphere. these lie in the interval (0, pi) and are compu
-!            in radians in theta(1), ..., theta(nlat) by subroutine compute_gaussian_latitudes_and_weights.
-!            if nlat is odd the equator will be included as the grid poi
-!            theta((nlat+1)/2).  if nlat is even the equator will be
-!            excluded as a grid point and will lie half way between
-!            theta(nlat/2) and theta(nlat/2+1). nlat must be at least 3.
-!            note: on the half sphere, the number of grid points in the
-!            colatitudinal direction is nlat/2 if nlat is even or
-!            (nlat+1)/2 if nlat is odd.
-!
-!     nlon   the number of distinct londitude points.  nlon determines
-!            the grid increment in longitude as 2*pi/nlon. for example
-!            nlon = 72 for a five degree grid. nlon must be greater
-!            than or equal to 4. the efficiency of the computation is
-!            improved when nlon is a product of small prime numbers.
-!
-!     isym   = 0  no symmetries exist about the equator. the analysis
-!                 is performed on the entire sphere.  i.e. on the
-!                 array g(i, j) for i=1, ..., nlat and j=1, ..., nlon.
-!                 (see description of g below)
-!
-!            = 1  g is antisymmetric about the equator. the analysis
-!                 is performed on the northern hemisphere only.  i.e.
-!                 if nlat is odd the analysis is performed on the
-!                 array g(i, j) for i=1, ..., (nlat+1)/2 and j=1, ..., nlon.
-!                 if nlat is even the analysis is performed on the
-!                 array g(i, j) for i=1, ..., nlat/2 and j=1, ..., nlon.
-!
-!
-!            = 2  g is symmetric about the equator. the analysis is
-!                 performed on the northern hemisphere only.  i.e.
-!                 if nlat is odd the analysis is performed on the
-!                 array g(i, j) for i=1, ..., (nlat+1)/2 and j=1, ..., nlon.
-!                 if nlat is even the analysis is performed on the
-!                 array g(i, j) for i=1, ..., nlat/2 and j=1, ..., nlon.
-!
-!     nt     the number of analyses.  in the program that calls shagc, 
-!            the arrays g, a and b can be three dimensional in which
-!            case multiple analyses will be performed.  the third
-!            index is the analysis index which assumes the values
-!            k=1, ..., nt.  for a single analysis set nt=1. the
-!            discription of the remaining parameters is simplified
-!            by assuming that nt=1 or that the arrays g, a and b
-!            have only two dimensions.
-!
-!     g      a two or three dimensional array (see input parameter
-!            nt) that contains the discrete function to be analyzed.
-!            g(i, j) contains the value of the function at the gaussian
-!            point theta(i) and longitude point phi(j) = (j-1)*2*pi/nlon
-!            the index ranges are defined above at the input parameter
-!            isym.
-!
-!     idg    the first dimension of the array g as it appears in the
-!            program that calls shagc. if isym equals zero then idg
-!            must be at least nlat.  if isym is nonzero then idg must
-!            be at least nlat/2 if nlat is even or at least (nlat+1)/2
-!            if nlat is odd.
-!
-!     jdg    the second dimension of the array g as it appears in the
-!            program that calls shagc. jdg must be at least nlon.
-!
-!     mdab   the first dimension of the arrays a and b as it appears
-!            in the program that calls shagc. mdab must be at least
-!            min((nlon+2)/2, nlat) if nlon is even or at least
-!            min((nlon+1)/2, nlat) if nlon is odd
-!
-!     ndab   the second dimension of the arrays a and b as it appears
-!            in the program that calls shaec. ndab must be at least nlat
-!
-!     wshagc an array which must be initialized by subroutine shagci.
-!            once initialized, wshagc can be used repeatedly by shagc.
-!            as long as nlat and nlon remain unchanged.  wshagc must
-!            not be altered between calls of shagc.
-!
-!     lshagc the dimension of the array wshagc as it appears in the
-!            program that calls shagc. define
-!
-!               l1 = min(nlat, (nlon+2)/2) if nlon is even or
-!               l1 = min(nlat, (nlon+1)/2) if nlon is odd
-!
-!            and
-!
-!               l2 = nlat/2        if nlat is even or
-!               l2 = (nlat+1)/2    if nlat is odd
-!
-!            then lshagc must be at least
-!
-!                  nlat*(2*l2+3*l1-2)+3*l1*(1-l1)/2+nlon+15
-!
-!
-!     work   a work array that does not have to be saved.
-!
-!     lwork  the dimension of the array work as it appears in the
-!            program that calls shagc. define
-!
-!               l1 = min(nlat, (nlon+2)/2) if nlon is even or
-!               l1 = min(nlat, (nlon+1)/2) if nlon is odd
-!
-!            and
-!
-!               l2 = nlat/2        if nlat is even or
-!               l2 = (nlat+1)/2    if nlat is odd
-!
-!            if isym is zero then lwork must be at least
-!
-!                      nlat*(nlon*nt+max(3*l2, nlon))
-!
-!            if isym is not zero then lwork must be at least
-!
-!                      l2*(nlon*nt+max(3*nlat, nlon))
-!
-!     **************************************************************
-!
-!     output parameters
-!
-!     a, b    both a, b are two or three dimensional arrays (see input
-!            parameter nt) that contain the spherical harmonic
-!            coefficients in the representation of g(i, j) given in the
-!            discription of subroutine shagc. for isym=0, a(m, n) and
-!            b(m, n) are given by the equations listed below. symmetric
-!            versions are used when isym is greater than zero.
-!
-!     definitions
-!
-!     1. the normalized associated legendre functions
-!
-!     pbar(m, n, theta) = sqrt((2*n+1)*factorial(n-m)/(2*factorial(n+m)))
-!                       *sin(theta)**m/(2**n*factorial(n)) times the
-!                       (n+m)th derivative of (x**2-1)**n with respect
-!                       to x=cos(theta).
-!
-!     2. the fourier transform of g(i, j).
-!
-!     c(m, i)          = 2/nlon times the sum from j=1 to j=nlon of
-!                       g(i, j)*cos((m-1)*(j-1)*2*pi/nlon)
-!                       (the first and last terms in this sum
-!                       are divided by 2)
-!
-!     s(m, i)          = 2/nlon times the sum from j=2 to j=nlon of
-!                       g(i, j)*sin((m-1)*(j-1)*2*pi/nlon)
-!
-!
-!     3. the gaussian points and weights on the sphere
-!        (computed by subroutine compute_gaussian_latitudes_and_weights).
-!
-!        theta(1), ..., theta(nlat) (gaussian pts in radians)
-!        wts(1), ..., wts(nlat) (corresponding gaussian weights)
-!
-!     4. the maximum (plus one) longitudinal wave number
-!
-!            mmax = min(nlat, (nlon+2)/2) if nlon is even or
-!            mmax = min(nlat, (nlon+1)/2) if nlon is odd.
-!
-!
-!     then for m=0, ..., mmax-1 and n=m, ..., nlat-1 the arrays a, b
-!     are given by
-!
-!     a(m+1, n+1)     =  the sum from i=1 to i=nlat of
-!                       c(m+1, i)*wts(i)*pbar(m, n, theta(i))
-!
-!     b(m+1, n+1)      = the sum from i=1 to nlat of
-!                       s(m+1, i)*wts(i)*pbar(m, n, theta(i))
-!
-!     ierror = 0  no errors
-!            = 1  error in the specification of nlat
-!            = 2  error in the specification of nlon
-!            = 3  error in the specification of isym
-!            = 4  error in the specification of nt
-!            = 5  error in the specification of idg
-!            = 6  error in the specification of jdg
-!            = 7  error in the specification of mdab
-!            = 8  error in the specification of ndab
-!            = 9  error in the specification of lshagc
-!            = 10 error in the specification of lwork
-!
-!
+
 ! ****************************************************************
 !
 !     subroutine shagci(nlat, nlon, wshagc, lshagc, dwork, ldwork, ierror)
@@ -301,8 +111,173 @@ contains
     ! a gaussian grid on the array(s) in g and returns the coefficients
     ! in array(s) a, b. the necessary legendre polynomials are computed
     ! as needed in this version.
+    !
+    !     subroutine shagc(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, &
+    !                      wshagc, ierror)
+    !
+    !     subroutine shagc performs the spherical harmonic analysis
+    !     on the array g and stores the result in the arrays a and b.
+    !     the analysis is performed on a gaussian grid in colatitude
+    !     and an equally spaced grid in longitude.  the associated
+    !     legendre functions are recomputed rather than stored as they
+    !     are in subroutine shags.  the analysis is described below
+    !     at output parameters a, b.
+    !
+    !     input parameters
+    !
+    !     nlat   the number of points in the gaussian colatitude grid on the
+    !            full sphere. these lie in the interval (0, pi) and are compu
+    !            in radians in theta(1), ..., theta(nlat) by subroutine compute_gaussian_latitudes_and_weights.
+    !            if nlat is odd the equator will be included as the grid poi
+    !            theta((nlat+1)/2).  if nlat is even the equator will be
+    !            excluded as a grid point and will lie half way between
+    !            theta(nlat/2) and theta(nlat/2+1). nlat must be at least 3.
+    !            note: on the half sphere, the number of grid points in the
+    !            colatitudinal direction is nlat/2 if nlat is even or
+    !            (nlat+1)/2 if nlat is odd.
+    !
+    !     nlon   the number of distinct londitude points.  nlon determines
+    !            the grid increment in longitude as 2*pi/nlon. for example
+    !            nlon = 72 for a five degree grid. nlon must be greater
+    !            than or equal to 4. the efficiency of the computation is
+    !            improved when nlon is a product of small prime numbers.
+    !
+    !     isym   = 0  no symmetries exist about the equator. the analysis
+    !                 is performed on the entire sphere.  i.e. on the
+    !                 array g(i, j) for i=1, ..., nlat and j=1, ..., nlon.
+    !                 (see description of g below)
+    !
+    !            = 1  g is antisymmetric about the equator. the analysis
+    !                 is performed on the northern hemisphere only.  i.e.
+    !                 if nlat is odd the analysis is performed on the
+    !                 array g(i, j) for i=1, ..., (nlat+1)/2 and j=1, ..., nlon.
+    !                 if nlat is even the analysis is performed on the
+    !                 array g(i, j) for i=1, ..., nlat/2 and j=1, ..., nlon.
+    !
+    !
+    !            = 2  g is symmetric about the equator. the analysis is
+    !                 performed on the northern hemisphere only.  i.e.
+    !                 if nlat is odd the analysis is performed on the
+    !                 array g(i, j) for i=1, ..., (nlat+1)/2 and j=1, ..., nlon.
+    !                 if nlat is even the analysis is performed on the
+    !                 array g(i, j) for i=1, ..., nlat/2 and j=1, ..., nlon.
+    !
+    !     nt     the number of analyses.  in the program that calls shagc,
+    !            the arrays g, a and b can be three dimensional in which
+    !            case multiple analyses will be performed.  the third
+    !            index is the analysis index which assumes the values
+    !            k=1, ..., nt.  for a single analysis set nt=1. the
+    !            discription of the remaining parameters is simplified
+    !            by assuming that nt=1 or that the arrays g, a and b
+    !            have only two dimensions.
+    !
+    !     g      a two or three dimensional array (see input parameter
+    !            nt) that contains the discrete function to be analyzed.
+    !            g(i, j) contains the value of the function at the gaussian
+    !            point theta(i) and longitude point phi(j) = (j-1)*2*pi/nlon
+    !            the index ranges are defined above at the input parameter
+    !            isym.
+    !
+    !     idg    the first dimension of the array g as it appears in the
+    !            program that calls shagc. if isym equals zero then idg
+    !            must be at least nlat.  if isym is nonzero then idg must
+    !            be at least nlat/2 if nlat is even or at least (nlat+1)/2
+    !            if nlat is odd.
+    !
+    !     jdg    the second dimension of the array g as it appears in the
+    !            program that calls shagc. jdg must be at least nlon.
+    !
+    !     mdab   the first dimension of the arrays a and b as it appears
+    !            in the program that calls shagc. mdab must be at least
+    !            min((nlon+2)/2, nlat) if nlon is even or at least
+    !            min((nlon+1)/2, nlat) if nlon is odd
+    !
+    !     ndab   the second dimension of the arrays a and b as it appears
+    !            in the program that calls shaec. ndab must be at least nlat
+    !
+    !     wshagc an array which must be initialized by subroutine shagci.
+    !            once initialized, wshagc can be used repeatedly by shagc.
+    !            as long as nlat and nlon remain unchanged.  wshagc must
+    !            not be altered between calls of shagc.
+    !
+    !     lshagc the dimension of the array wshagc as it appears in the
+    !            program that calls shagc. define
+    !
+    !               l1 = min(nlat, (nlon+2)/2) if nlon is even or
+    !               l1 = min(nlat, (nlon+1)/2) if nlon is odd
+    !
+    !            and
+    !
+    !               l2 = nlat/2        if nlat is even or
+    !               l2 = (nlat+1)/2    if nlat is odd
+    !
+    !            then lshagc must be at least
+    !
+    !                  nlat*(2*l2+3*l1-2)+3*l1*(1-l1)/2+nlon+15
+    !
+    !     output parameters
+    !
+    !     a, b    both a, b are two or three dimensional arrays (see input
+    !            parameter nt) that contain the spherical harmonic
+    !            coefficients in the representation of g(i, j) given in the
+    !            discription of subroutine shagc. for isym=0, a(m, n) and
+    !            b(m, n) are given by the equations listed below. symmetric
+    !            versions are used when isym is greater than zero.
+    !
+    !     definitions
+    !
+    !     1. the normalized associated legendre functions
+    !
+    !     pbar(m, n, theta) = sqrt((2*n+1)*factorial(n-m)/(2*factorial(n+m)))
+    !                       *sin(theta)**m/(2**n*factorial(n)) times the
+    !                       (n+m)th derivative of (x**2-1)**n with respect
+    !                       to x=cos(theta).
+    !
+    !     2. the fourier transform of g(i, j).
+    !
+    !     c(m, i)          = 2/nlon times the sum from j=1 to j=nlon of
+    !                       g(i, j)*cos((m-1)*(j-1)*2*pi/nlon)
+    !                       (the first and last terms in this sum
+    !                       are divided by 2)
+    !
+    !     s(m, i)          = 2/nlon times the sum from j=2 to j=nlon of
+    !                       g(i, j)*sin((m-1)*(j-1)*2*pi/nlon)
+    !
+    !
+    !     3. the gaussian points and weights on the sphere
+    !        (computed by subroutine compute_gaussian_latitudes_and_weights).
+    !
+    !        theta(1), ..., theta(nlat) (gaussian pts in radians)
+    !        wts(1), ..., wts(nlat) (corresponding gaussian weights)
+    !
+    !     4. the maximum (plus one) longitudinal wave number
+    !
+    !            mmax = min(nlat, (nlon+2)/2) if nlon is even or
+    !            mmax = min(nlat, (nlon+1)/2) if nlon is odd.
+    !
+    !
+    !     then for m=0, ..., mmax-1 and n=m, ..., nlat-1 the arrays a, b
+    !     are given by
+    !
+    !     a(m+1, n+1)     =  the sum from i=1 to i=nlat of
+    !                       c(m+1, i)*wts(i)*pbar(m, n, theta(i))
+    !
+    !     b(m+1, n+1)      = the sum from i=1 to nlat of
+    !                       s(m+1, i)*wts(i)*pbar(m, n, theta(i))
+    !
+    !     ierror = 0  no errors
+    !            = 1  error in the specification of nlat
+    !            = 2  error in the specification of nlon
+    !            = 3  error in the specification of isym
+    !            = 4  error in the specification of nt
+    !            = 5  error in the specification of idg
+    !            = 6  error in the specification of jdg
+    !            = 7  error in the specification of mdab
+    !            = 8  error in the specification of ndab
+    !            = 9  error in the specification of lshagc
+    !
     module subroutine shagc(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, &
-        wshagc, lshagc, work, lwork, ierror)
+        wshagc, ierror)
 
         ! Dummy arguments
         integer(ip), intent(in)   :: nlat
@@ -316,67 +291,81 @@ contains
         real(wp),    intent(out)  :: b(mdab, ndab, nt)
         integer(ip), intent(in)   :: mdab
         integer(ip), intent(in)   :: ndab
-        real(wp),    intent(in)   :: wshagc(lshagc)
-        integer(ip), intent(in)   :: lshagc
-        real(wp),    intent(out)  :: work(lwork)
-        integer(ip), intent(in)   :: lwork
+        real(wp),    intent(in)   :: wshagc(:)
         integer(ip), intent(out)  :: ierror
 
         ! Local variables
-        integer(ip) :: ifft
-        integer(ip) :: ipmn
-        integer(ip) :: iwts
-        integer(ip) :: l
-        integer(ip) :: l1
-        integer(ip) :: l2
-        integer(ip) :: lat
-        integer(ip) :: late
+        integer(ip) :: ifft, ipmn, iwts
+        integer(ip) :: ntrunc, l1, l2, lat, late, lwork
 
-        ! Check calling arguments
-        ierror = 1
-        if (nlat < 3) return
-        ierror = 2
-        if (nlon < 4) return
-        ierror = 3
-        if (isym < 0 .or.isym > 2) return
-        ierror = 4
-        if (nt < 1) return
-        !     set upper limit on m for spherical harmonic basis
-        l = min((nlon+2)/2, nlat)
-        !     set gaussian point nearest equator pointer
-        late = (nlat+mod(nlat, 2))/2
-        !     set number of grid points for analysis/synthesis
-        lat = nlat
-        if (isym /= 0) lat = late
-        ierror = 5
-        if (idg < lat) return
-        ierror = 6
-        if (jdg < nlon) return
-        ierror = 7
-        if (mdab < l) return
-        ierror = 8
-        if (ndab < nlat) return
-        l1 = l
-        l2 = late
-        ierror = 9
-        !     check permanent work space length
-        if (lshagc < nlat*(2*l2+3*l1-2)+3*l1*(1-l1)/2+nlon+15)return
-        ierror = 10
-        !     check temporary work space length
-        if (isym == 0) then
-            if (lwork <nlat*(nlon*nt+max(3*l2, nlon))) return
-        else
-            !     isym.ne.0
-            if (lwork <l2*(nlon*nt+max(3*nlat, nlon))) return
-        end if
-        ierror = 0
-        !     starting address for gaussian wts in shigc and fft values
-        iwts = 1
-        ifft = nlat+2*nlat*late+3*(l*(l-1)/2+(nlat-l)*(l-1))+1
-        !     set pointers for internal storage of g and legendre polys
-        ipmn = lat*nlon*nt+1
-        call shagc_lower_utility_routine(nlat, nlon, l, lat, isym, g, idg, jdg, nt, a, b, mdab, ndab, &
-            wshagc, wshagc(iwts), wshagc(ifft), late, work(ipmn), work)
+        associate (lshagc => size(wshagc))
+
+            ! Set upper limit on m for spherical harmonic basis
+            ntrunc = min((nlon+2)/2, nlat)
+
+            ! Set gaussian point nearest equator pointer
+            late = (nlat+mod(nlat, 2))/2
+
+            ! Set number of grid points for analysis/synthesis
+            select case (isym)
+                case (0)
+                    lat = nlat
+                case default
+                    lat = late
+            end select
+
+            l1 = ntrunc
+            l2 = late
+
+            ! Check calling arguments
+            if (nlat < 3) then
+                ierror = 1
+            else if (nlon < 4) then
+                ierror = 2
+            else if (isym < 0 .or.isym > 2) then
+                ierror = 3
+            else if (nt < 1) then
+                ierror = 4
+            else if (idg < lat) then
+                ierror = 5
+            else if (jdg < nlon) then
+                ierror = 6
+            else if (mdab < ntrunc) then
+                ierror = 7
+            else if (ndab < nlat) then
+                ierror = 8
+            else if (lshagc < nlat*(2*l2+3*l1-2)+3*l1*(1-l1)/2+nlon+15) then
+                ierror = 9
+            else
+                ierror = 0
+            end if
+
+            ! Check error flag
+            if (ierror /= 0) return
+
+            ! Set required workspace size
+            select case (isym)
+                case (0)
+                    lwork = nlat*(nlon*nt+max(3*l2, nlon))
+                case default
+                    lwork = l2*(nlon*nt+max(3*nlat, nlon))
+            end select
+
+            block
+                real(wp) :: work(lwork)
+
+                ! Starting address for gaussian wts in shigc and fft values
+                iwts = 1
+                ifft = nlat+2*nlat*late+3*(ntrunc*(ntrunc-1)/2+(nlat-ntrunc)*(ntrunc-1))+1
+
+                ! Set pointers for internal storage of g and legendre polys
+                ipmn = lat*nlon*nt+1
+
+                call shagc_lower_utility_routine(nlat, nlon, ntrunc, lat, isym, &
+                    g, idg, jdg, nt, a, b, mdab, ndab, &
+                    wshagc, wshagc(iwts:), wshagc(ifft:), late, work(ipmn:), work)
+            end block
+        end associate
 
     end subroutine shagc
 

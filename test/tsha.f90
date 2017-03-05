@@ -141,8 +141,7 @@ program test_all_scalar_analysis_and_synthesis_routines
                 call name("shai")
                 call iout(ierror, "ierr")
         		
-                call shaec(nlat, nlon, isym, nt, s, nlat, nlon, a, b, nlat, nlat, wsave, &
-                    lsave, work, lwork, ierror)
+                call shaec(nlat, nlon, isym, nt, s, nlat, nlon, a, b, nlat, nlat, wsave, ierror)
         		
                 call name("sha ")
                 call iout(ierror, "ierr")
@@ -152,8 +151,7 @@ program test_all_scalar_analysis_and_synthesis_routines
                 call name("shsi")
                 call iout(ierror, "ierr")
         		
-                call shsec(nlat, nlon, isym, nt, s, nlat, nlon, a, b, nlat, nlat, wsave, &
-                    lsave, work, lwork, ierror)
+                call shsec(nlat, nlon, isym, nt, s, nlat, nlon, a, b, nlat, nlat, wsave, ierror)
         		
                 call name("shs ")
                 call iout(ierror, "ierr")
@@ -165,8 +163,7 @@ program test_all_scalar_analysis_and_synthesis_routines
                 call name("shai")
                 call iout(ierror, "ierr")
         		
-                call shaes(nlat, nlon, isym, nt, s, nlat, nlon, a, b, nlat, nlat, wsave, &
-                    lsave, work, lwork, ierror)
+                call shaes(nlat, nlon, isym, nt, s, nlat, nlon, a, b, nlat, nlat, wsave, ierror)
         		
                 call name("sha ")
                 call iout(ierror, "ierr")
@@ -176,8 +173,7 @@ program test_all_scalar_analysis_and_synthesis_routines
                 call name("shsi")
                 call iout(ierror, "ierr")
         		
-                call shses(nlat, nlon, isym, nt, s, nlat, nlon, a, b, nlat, nlat, wsave, &
-                    lsave, work, lwork, ierror)
+                call shses(nlat, nlon, isym, nt, s, nlat, nlon, a, b, nlat, nlat, wsave, ierror)
         		
                 call name("shs ")
                 call iout(ierror, "ierr")
@@ -190,8 +186,7 @@ program test_all_scalar_analysis_and_synthesis_routines
                 call name("shai")
                 call iout(ierror, "ierr")
         		
-                call shagc(nlat, nlon, isym, nt, s, nlat, nlon, a, b, nlat, nlat, wsave, &
-                    lsave, work, lwork, ierror)
+                call shagc(nlat, nlon, isym, nt, s, nlat, nlon, a, b, nlat, nlat, wsave, ierror)
         		
                 call name("sha ")
                 call iout(ierror, "ierr")
@@ -215,8 +210,7 @@ program test_all_scalar_analysis_and_synthesis_routines
                 call name("shai")
                 call iout(ierror, "ierr")
         		
-                call shags(nlat, nlon, isym, nt, s, nlat, nlon, a, b, nlat, nlat, wsave, &
-                    lsave, work, lwork, ierror)
+                call shags(nlat, nlon, isym, nt, s, nlat, nlon, a, b, nlat, nlat, wsave, ierror)
         		
                 call name("sha ")
                 call iout(ierror, "ierr")

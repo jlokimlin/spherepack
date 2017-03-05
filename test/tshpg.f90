@@ -141,7 +141,7 @@ program tshpg
             end do
 
             call shagc(nlat, nlon, mode, nt, g, idimg, jdimg, ga, gb, idimg, idimg, &
-                wshagc, lwsha, wrk2, lwork, ierror)
+                wshagc, ierror)
             call check_error(ierror)
 
             if(mtrunc < nlat-1) then

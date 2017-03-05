@@ -395,7 +395,7 @@ contains
 
         ! Synthesize as, bs into sf
         call shses(nlat, nlon, isym, nt, sf, ids, jds, as, bs, mmax, nlat, &
-            wshses, lshses, wk, lwk, ierror)
+            wshses, ierror)
 
     end subroutine islapes_lower_utility_routine
 

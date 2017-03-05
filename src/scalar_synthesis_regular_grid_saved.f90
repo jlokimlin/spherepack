@@ -36,7 +36,7 @@ contains
     ! Purpose:
     !
     !     subroutine shses(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, &
-    !                      wshses, lshses, work, lwork, ierror)
+    !                      wshses, ierror)
     !
     !     subroutine shses performs the spherical harmonic synthesis
     !     on the arrays a and b and stores the result in the array g.
@@ -138,24 +138,6 @@ contains
     !
     !               (l1*l2*(nlat+nlat-l1+1))/2+nlon+15
     !
-    !     work   a work array that does not have to be saved.
-    !
-    !     lwork  the dimension of the array work as it appears in the
-    !            program that calls shses.  define
-    !
-    !               l2 = nlat/2        if nlat is even or
-    !               l2 = (nlat+1)/2    if nlat is odd
-    !
-    !            if isym is zero then lwork must be at least
-    !
-    !               (nt+1)*nlat*nlon
-    !
-    !            if isym is nonzero lwork must be at least
-    !
-    !               (nt+1)*l2*nlon.
-    !
-    !     **************************************************************
-    !
     !     output parameters
     !
     !     g      a two or three dimensional array (see input parameter
@@ -200,10 +182,9 @@ contains
     !            = 7  error in the specification of mdab
     !            = 8  error in the specification of ndab
     !            = 9  error in the specification of lshses
-    !            = 10 error in the specification of lwork
     !
     module subroutine shses(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, &
-        wshses, lshses, work, lwork, ierror)
+        wshses, ierror)
 
         ! Dummy arguments
         integer(ip), intent(in)  :: nlat
@@ -217,79 +198,74 @@ contains
         real(wp),    intent(in)  :: b(mdab, ndab, nt)
         integer(ip), intent(in)  :: mdab
         integer(ip), intent(in)  :: ndab
-        real(wp),    intent(in)  :: wshses(lshses)
-        integer(ip), intent(in)  :: lshses
-        real(wp),    intent(out) :: work(lwork)
-        integer(ip), intent(in)  :: lwork
+        real(wp),    intent(in)  :: wshses(:)
         integer(ip), intent(out) :: ierror
 
         ! Local variables
-        integer(ip) :: imid, ist, lpimn, ls, mmax, nln
+        integer(ip) :: imid, ist, lpimn, ls, mmax, nln, lwork
 
-        mmax = min(nlat, nlon/2+1)
-        imid = (nlat+1)/2
-        lpimn = (imid*mmax*(nlat+nlat-mmax+1))/2
+        associate (lshses => size(wshses))
 
-        select case (isym)
-            case (0)
-                ist = imid
-                ls = nlat
-            case default
-                ist = 0
-                ls = imid
-        end select
+            mmax = min(nlat, nlon/2+1)
+            imid = (nlat+1)/2
+            lpimn = (imid*mmax*(nlat+nlat-mmax+1))/2
 
-        nln = nt*ls*nlon
+            select case (isym)
+                case (0)
+                    ist = imid
+                    ls = nlat
+                case default
+                    ist = 0
+                    ls = imid
+            end select
 
-        if (nlat < 3) then
-            ierror = 1
-            return
-        else if (nlon < 4) then
-            ierror = 2
-            return
-        else if (isym < 0 .or. isym > 2) then
-            ierror = 3
-            return
-        else if (nt < 0) then
-            ierror = 4
-            return
-        else if (&
-            (isym == 0 .and. idg < nlat) &
-            .or. &
-            (isym /= 0 .and. idg < (nlat+1)/2)&
-           ) then
-            ierror = 5
-            return
-        else if (jdg < nlon) then
-            ierror = 6
-            return
-        else if (mdab < mmax) then
-            ierror = 7
-            return
-        else if (ndab < nlat) then
-            ierror = 8
-            return
-        else if (lshses < lpimn+nlon+15) then
-            ierror = 9
-            return
-        else if (lwork < nln+ls*nlon) then
-            ierror = 10
-            return
-        else
-            ierror = 0
-        end if
+            nln = nt*ls*nlon
 
-        block
-            integer(ip) :: iw1, iw2, iw3
+            if (nlat < 3) then
+                ierror = 1
+            else if (nlon < 4) then
+                ierror = 2
+            else if (isym < 0 .or. isym > 2) then
+                ierror = 3
+            else if (nt < 0) then
+                ierror = 4
+            else if (&
+                (isym == 0 .and. idg < nlat) &
+                .or. &
+                (isym /= 0 .and. idg < (nlat+1)/2)&
+                ) then
+                ierror = 5
+            else if (jdg < nlon) then
+                ierror = 6
+            else if (mdab < mmax) then
+                ierror = 7
+            else if (ndab < nlat) then
+                ierror = 8
+            else if (lshses < lpimn+nlon+15) then
+                ierror = 9
+            else
+                ierror = 0
+            end if
 
-            ! Set workspace pointer indices
-            iw1 = ist + 1
-            iw2 = nln + 1
-            iw3 = lpimn + 1
+            ! Check error flag
+            if (ierror /= 0) return
 
-            call shses_lower_utility_routine(nlat, isym, nt, g, idg, jdg, a, b, mdab, ndab, wshses, imid, &
-                ls, nlon, work, work(iw1), work(iw2), wshses(iw3))
-        end block
+            ! Set required workspace size
+            lwork = nln+ls*nlon
+
+            block
+                real(wp)    :: work(lwork)
+                integer(ip) :: iw1, iw2, iw3
+
+                ! Set workspace pointer indices
+                iw1 = ist + 1
+                iw2 = nln + 1
+                iw3 = lpimn + 1
+
+                call shses_lower_utility_routine(nlat, isym, nt, g, idg, jdg, a, b, mdab, ndab, wshses, imid, &
+                    ls, nlon, work, work(iw1:), work(iw2:), wshses(iw3:))
+            end block
+        end associate
 
     end subroutine shses
 

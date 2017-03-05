@@ -171,7 +171,7 @@ use spherepack
     !     compute coefficients of r for input to islapec
     !
     call shaec(nlat, nlon, isym, nt, r, nlat, nlon, a, b, nlat, nlat, &
-        wshaec, lshaec, work, lwork, ierror)
+        wshaec, ierror)
     if (ierror > 0) then
         write(*, 202) ierror
 202     format(' shaec , ierror = ', i2)

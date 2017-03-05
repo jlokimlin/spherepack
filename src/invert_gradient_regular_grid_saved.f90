@@ -366,7 +366,7 @@ contains
 
         ! Scalar synthesize a, b into sf
         call shses(nlat, nlon, isym, nt, sf, isf, jsf, a, b, mab, nlat, &
-            wshses, lshses, wk, lwk, ierror)
+            wshses, ierror)
 
     end subroutine igrades_lower_utility_routine
 

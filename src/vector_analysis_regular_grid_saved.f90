@@ -204,25 +204,6 @@ contains
     !
     !            l1*l2(nlat+nlat-l1+1)+nlon+15
     !
-    !
-    !     work   a work array that does not have to be saved.
-    !
-    !     lwork  the dimension of the array work as it appears in the
-    !            program that calls vhaes. define
-    !
-    !               l2 = nlat/2        if nlat is even or
-    !               l2 = (nlat+1)/2    if nlat is odd
-    !
-    !            if ityp <= 2 then lwork must be at least
-    !
-    !                       (2*nt+1)*nlat*nlon
-    !
-    !            if ityp > 2 then lwork must be at least
-    !
-    !                        (2*nt+1)*l2*nlon
-    !
-    !     **************************************************************
-    !
     !     output parameters
     !
     !     br, bi  two or three dimensional arrays (see input parameter nt)
@@ -244,10 +225,9 @@ contains
     !            = 7  error in the specification of mdab
     !            = 8  error in the specification of ndab
     !            = 9  error in the specification of lvhaes
-    !            = 10 error in the specification of lwork
     !
     module subroutine vhaes(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
-        mdab, ndab, wvhaes, lvhaes, work, lwork, ierror)
+        mdab, ndab, wvhaes, ierror)
 
         ! Dummy arguments
         integer(ip), intent(in)  :: nlat
@@ -264,81 +244,79 @@ contains
         real(wp),    intent(out) :: ci(mdab, ndab, nt)
         integer(ip), intent(in)  :: mdab
         integer(ip), intent(in)  :: ndab
-        real(wp),    intent(in)  :: wvhaes(lvhaes)
-        integer(ip), intent(in)  :: lvhaes
-        real(wp),    intent(out) :: work(lwork)
-        integer(ip), intent(in)  :: lwork
+        real(wp),    intent(in)  :: wvhaes(:)
         integer(ip), intent(out) :: ierror
 
         ! Local variables
         integer(ip) :: idv, imid, idz, ist, lnl, lzimn, mmax
-        integer(ip) :: workspace_indices(6)
+        integer(ip) :: lwork, workspace_indices(6)
 
-        imid = (nlat+1)/2
-        mmax = min(nlat, (nlon+1)/2)
-        idz = (mmax*(2*nlat-mmax+1))/2
-        lzimn = idz*imid
+        associate (lvhaes => size(wvhaes))
 
-        select case (ityp)
-            case(0:2)
-                idv = nlat
-                ist = imid
-            case default
-                idv = imid
-                ist = 0
-        end select
+            imid = (nlat+1)/2
+            mmax = min(nlat, (nlon+1)/2)
+            idz = (mmax*(2*nlat-mmax+1))/2
+            lzimn = idz*imid
 
-        lnl = nt*idv*nlon
+            select case (ityp)
+                case(0:2)
+                    idv = nlat
+                    ist = imid
+                case default
+                    idv = imid
+                    ist = 0
+            end select
 
-        !  Check calling arguments
-        if (nlat < 3) then
-            ierror = 1
-            return
-        else if (nlon < 1) then
-            ierror = 2
-            return
-        else if (ityp < 0 .or. ityp > 8) then
-            ierror = 3
-            return
-        else if (nt < 0) then
-            ierror = 4
-            return
-        else if ((ityp <= 2 .and. idvw < nlat) .or. (ityp > 2 .and. idvw < imid)) then
-            ierror = 5
-            return
-        else if (jdvw < nlon) then
-            ierror = 6
-            return
-        else if (mdab < mmax) then
-            ierror = 7
-            return
-        else if (ndab < nlat) then
-            ierror = 8
-            return
-        else if (lvhaes < 2*lzimn+nlon+15) then
-            ierror = 9
-            return
-        else if (lwork < 2*lnl+idv*nlon) then
-            ierror = 10
-            return
-        else
-            ierror = 0
-        end if
+            lnl = nt*idv*nlon
 
-        !  Set workspace indices
-        workspace_indices = get_vhaes_workspace_indices(ist, lnl, lzimn)
+            !  Check calling arguments
+            if (nlat < 3) then
+                ierror = 1
+            else if (nlon < 1) then
+                ierror = 2
+            else if (ityp < 0 .or. ityp > 8) then
+                ierror = 3
+            else if (nt < 0) then
+                ierror = 4
+            else if ((ityp <= 2 .and. idvw < nlat) .or. (ityp > 2 .and. idvw < imid)) then
+                ierror = 5
+            else if (jdvw < nlon) then
+                ierror = 6
+            else if (mdab < mmax) then
+                ierror = 7
+            else if (ndab < nlat) then
+                ierror = 8
+            else if (lvhaes < 2*lzimn+nlon+15) then
+                ierror = 9
+            else
+                ierror = 0
+            end if
 
-        associate (&
-            iw1 => workspace_indices(1), &
-            iw2 => workspace_indices(2), &
-            iw3 => workspace_indices(3), &
-            iw4 => workspace_indices(4), &
-            jw1 => workspace_indices(5), &
-            jw2 => workspace_indices(6) &
-            )
-            call vhaes_lower_utility_routine(nlat, nlon, ityp, nt, imid, idvw, jdvw, v, w, mdab, ndab, &
-                br, bi, cr, ci, idv, work, work(iw1), work(iw2), work(iw3), &
-                work(iw4), idz, wvhaes, wvhaes(jw1), wvhaes(jw2))
+            ! Check error flag
+            if (ierror /= 0) return
+
+            ! Set required workspace size
+            lwork = 2*lnl+idv*nlon
+
+            block
+                real(wp) :: work(lwork)
+
+                !  Set workspace indices
+                workspace_indices = get_vhaes_workspace_indices(ist, lnl, lzimn)
+
+                associate (&
+                    iw1 => workspace_indices(1), &
+                    iw2 => workspace_indices(2), &
+                    iw3 => workspace_indices(3), &
+                    iw4 => workspace_indices(4), &
+                    jw1 => workspace_indices(5), &
+                    jw2 => workspace_indices(6) &
+                    )
+                    call vhaes_lower_utility_routine(nlat, nlon, ityp, nt, imid, idvw, jdvw, v, w, mdab, ndab, &
+                        br, bi, cr, ci, idv, work, work(iw1:), work(iw2:), work(iw3:), &
+                        work(iw4:), idz, wvhaes, wvhaes(jw1:), wvhaes(jw2:))
+                end associate
+            end block
         end associate
 
     end subroutine vhaes

@@ -284,7 +284,7 @@ use spherepack
             call name("vhai")
             call iout(ierror, "ierr")
             call vhaes(nlat, nlon, isym, nt, v, w, nlat, nlon, br, bi, cr, ci, mdb, &
-                nlat, wsave, lsave, work, lwork, ierror)
+                nlat, wsave, ierror)
             call name("vha ")
             call iout(ierror, "ierr")
 
@@ -400,9 +400,9 @@ use spherepack
         		call iout(ierror, "ierr")
         		
         		call shaec(nlat, nlon, isym, nt, dv, nlat, nlon, ad, bd, &
-        		mdab, nlat, wsave, lsave, work, lwork, ierror)
+        		mdab, nlat, wsave, ierror)
         		call shaec(nlat, nlon, isym, nt, vt, nlat, nlon, av, bv, &
-        		mdab, nlat, wsave, lsave, work, lwork, ierror)
+        		mdab, nlat, wsave, ierror)
         		call name("sha ")
         		call iout(ierror, "ierr")
         		call iout(lsave, "lsav")
@@ -427,9 +427,9 @@ use spherepack
         		call iout(ierror, "ierr")
         		
         		call shaes(nlat, nlon, isym, nt, dv, nlat, nlon, ad, bd, &
-        		mdab, nlat, wsave, lsave, work, lwork, ierror)
+        		mdab, nlat, wsave, ierror)
         		call shaes(nlat, nlon, isym, nt, vt, nlat, nlon, av, bv, &
-        		mdab, nlat, wsave, lsave, work, lwork, ierror)
+        		mdab, nlat, wsave, ierror)
         		
         		call name("sha ")
         		call iout(ierror, "ierr")
@@ -455,9 +455,9 @@ use spherepack
         		call iout(ierror, "ierr")
         		
         		call shagc(nlat, nlon, isym, nt, dv, nlat, nlon, ad, bd, &
-        		mdab, nlat, wsave, lsave, work, lwork, ierror)
+        		mdab, nlat, wsave, ierror)
         		call shagc(nlat, nlon, isym, nt, vt, nlat, nlon, av, bv, &
-        		mdab, nlat, wsave, lsave, work, lwork, ierror)
+        		mdab, nlat, wsave, ierror)
         		
         		call name("sha ")
         		call iout(ierror, "ierr")
@@ -483,9 +483,9 @@ use spherepack
         		call iout(ierror, "ierr")
         		
         		call shags(nlat, nlon, isym, nt, dv, nlat, nlon, ad, bd, &
-        		mdab, nlat, wsave, lsave, work, lwork, ierror)
+        		mdab, nlat, wsave, ierror)
         		call shags(nlat, nlon, isym, nt, vt, nlat, nlon, av, bv, &
-        		mdab, nlat, wsave, lsave, work, lwork, ierror)
+        		mdab, nlat, wsave, ierror)
         		
         		call name("sha ")
         		call iout(ierror, "ierr")

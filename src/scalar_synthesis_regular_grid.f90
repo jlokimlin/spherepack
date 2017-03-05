@@ -206,8 +206,7 @@ submodule(scalar_synthesis_routines) scalar_synthesis_regular_grid
 
 contains
 
-    module subroutine shsec(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, &
-        wshsec, lshsec, work, lwork, ierror)
+    module subroutine shsec(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, wshsec, ierror)
 
         ! Dummy arguments
         integer(ip), intent(in)  :: nlat
@@ -221,57 +220,79 @@ contains
         real(wp),    intent(in)  :: b(mdab, ndab, nt)
         integer(ip), intent(in)  :: mdab
         integer(ip), intent(in)  :: ndab
-        real(wp),    intent(in)  :: wshsec(lshsec)
-        integer(ip), intent(in)  :: lshsec
-        real(wp),    intent(out) :: work(lwork)
-        integer(ip), intent(in)  :: lwork
+        real(wp),    intent(in)  :: wshsec(:)
         integer(ip), intent(out) :: ierror
 
         ! Local variables
-        integer(ip) :: imid
-        integer(ip) :: ist
-        integer(ip) :: iw1
-        integer(ip) :: labc
-        integer(ip) :: ls
-        integer(ip) :: lzz1
-        integer(ip) :: mmax
-        integer(ip) :: nln
+        integer(ip) :: imid, ist, labc, ls
+        integer(ip) :: lzz1, mmax, nln, lwork
 
-        ! Check calling arguments
-        ierror = 1
-        if (nlat < 3) return
-        ierror = 2
-        if (nlon < 4) return
-        ierror = 3
-        if (isym < 0 .or. isym > 2) return
-        ierror = 4
-        if (nt < 0) return
-        ierror = 5
-        if ((isym == 0 .and. idg < nlat) .or. &
-            (isym /= 0 .and. idg < (nlat+1)/2)) return
-        ierror = 6
-        if (jdg < nlon) return
-        ierror = 7
-        mmax = min(nlat, nlon/2+1)
-        if (mdab < mmax) return
-        ierror = 8
-        if (ndab < nlat) return
-        ierror = 9
-        imid = (nlat+1)/2
-        lzz1 = 2*nlat*imid
-        labc = 3*((mmax-2)*(nlat+nlat-mmax-1))/2
-        if (lshsec < lzz1+labc+nlon+15) return
-        ierror = 10
-        ls = nlat
-        if (isym > 0) ls = imid
-        nln = nt*ls*nlon
-        if (lwork < nln+max(ls*nlon, 3*nlat*imid)) return
-        ierror = 0
-        ist = 0
-        if (isym == 0) ist = imid
-        iw1 = lzz1+labc+1
-        call shsec_lower_utility_routine(nlat, isym, nt, g, idg, jdg, a, b, mdab, ndab, imid, ls, nlon, &
-            work, work(ist+1), work(nln+1), work(nln+1), wshsec, wshsec(iw1))
+        associate (lshsec => size(wshsec))
+
+            mmax = min(nlat, nlon/2+1)
+            imid = (nlat+1)/2
+            lzz1 = 2*nlat*imid
+            labc = 3*((mmax-2)*(nlat+nlat-mmax-1))/2
+
+            select case (isym)
+                case (0)
+                    ls = nlat
+                case default
+                    ls = imid
+            end select
+
+            nln = nt*ls*nlon
+
+            select case (isym)
+                case (0)
+                    ist = imid
+                case default
+                    ist = 0
+            end select
+
+            ! Check calling arguments
+            if (nlat < 3) then
+                ierror = 1
+            else if (nlon < 4) then
+                ierror = 2
+            else if (isym < 0 .or. isym > 2) then
+                ierror = 3
+            else if (nt < 0) then
+                ierror = 4
+            else if ((isym == 0 .and. idg < nlat) &
+                .or. &
+                (isym /= 0 .and. idg < (nlat+1)/2)) then
+                ierror = 5
+            else if (jdg < nlon) then
+                ierror = 6
+            else if (mdab < mmax) then
+                ierror = 7
+            else if (ndab < nlat) then
+                ierror = 8
+            else if (lshsec < lzz1+labc+nlon+15) then
+                ierror = 9
+            else
+                ierror = 0
+            end if
+
+            ! Check error flag
+            if (ierror /= 0) return
+
+            ! Set required workspace size
+            lwork = nln+max(ls*nlon, 3*nlat*imid)
+
+            block
+                real(wp)    :: work(lwork)
+                integer(ip) :: jw1, jw2, iw1
+
+                jw1 = ist + 1
+                jw2 = nln + 1
+                iw1 = lzz1+labc+1
+
+                call shsec_lower_utility_routine(nlat, isym, nt, g, idg, jdg, a, b, mdab, ndab, imid, ls, nlon, &
+                    work, work(jw1:), work(jw2:), work(jw2:), wshsec, wshsec(iw1:))
+            end block
+        end associate
 
     end subroutine shsec
 

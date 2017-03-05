@@ -140,7 +140,7 @@ program tshpe
             end do
 
             call shaec(nlat, nlon, mode, nt, g, idimg, jdimg, ga, gb, idimg, idimg, &
-                wshaec, lwsha, wrk2, lwork, ierror)
+                wshaec, ierror)
             call check_error(ierror)
 
             if (mtrunc < nlat-1) then
@@ -153,7 +153,7 @@ program tshpe
             end if
 
             call shsec(nlat, nlon, mode, nt, gw, idimg, jdimg, ga, gb, idimg, idimg, &
-                wshsec, lwshs, wrk2, lwork, ierror)
+                wshsec, ierror)
             call check_error(ierror)
 
             ! faster filter

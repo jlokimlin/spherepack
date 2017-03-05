@@ -404,7 +404,7 @@ contains
 
         ! Synthesize as, bs into sf
         call shsec(nlat, nlon, isym, nt, sf, ids, jds, as, bs, mmax, nlat, &
-            wshsec, lshsec, wk, lwk, ierror)
+            wshsec, ierror)
 
     end subroutine islapec_lower_utility_routine
 

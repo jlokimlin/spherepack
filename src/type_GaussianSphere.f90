@@ -219,7 +219,7 @@ contains
 
                         !  perform the (real) spherical harmonic scalar analysis
                         call aux%shags(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, &
-                            wshags, lshags, work, lwork, ierror)
+                            wshags, ierror)
                     end associate
                 end select
             end associate

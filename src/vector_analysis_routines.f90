@@ -53,7 +53,7 @@ module vector_analysis_routines
         end subroutine vhaec
 
         module subroutine vhaes(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
-            mdab, ndab, wvhaes, lvhaes, work, lwork, ierror)
+            mdab, ndab, wvhaes, ierror)
 
             ! Dummy arguments
             integer(ip), intent(in)  :: nlat
@@ -70,10 +70,7 @@ module vector_analysis_routines
             real(wp),    intent(out) :: ci(mdab, ndab, nt)
             integer(ip), intent(in)  :: mdab
             integer(ip), intent(in)  :: ndab
-            real(wp),    intent(in)  :: wvhaes(lvhaes)
-            integer(ip), intent(in)  :: lvhaes
-            real(wp),    intent(out) :: work(lwork)
-            integer(ip), intent(in)  :: lwork
+            real(wp),    intent(in)  :: wvhaes(:)
             integer(ip), intent(out) :: ierror
         end subroutine vhaes
 

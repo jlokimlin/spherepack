@@ -57,8 +57,7 @@ module scalar_analysis_routines
 
     ! Declare interfaces for submodule implementation
     interface
-        module subroutine shaec(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, &
-            wshaec, lshaec, work, lwork, ierror)
+        module subroutine shaec(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, wshaec, ierror)
 
             ! Dummy arguments
             integer(ip), intent(in)   :: nlat
@@ -72,15 +71,11 @@ module scalar_analysis_routines
             real(wp),    intent(out)  :: b(mdab, ndab, nt)
             integer(ip), intent(in)   :: mdab
             integer(ip), intent(in)   :: ndab
-            real(wp),    intent(in)   :: wshaec(lshaec)
-            integer(ip), intent(in)   :: lshaec
-            real(wp),    intent(out)  :: work(lwork)
-            integer(ip), intent(in)   :: lwork
+            real(wp),    intent(in)   :: wshaec(:)
             integer(ip), intent(out)  :: ierror
         end subroutine shaec
 
-        module subroutine shaes(nlat, nlon, isym, nt, g, idg, jdg, a, b, &
-            mdab, ndab, wshaes, lshaes, work, lwork, ierror)
+        module subroutine shaes(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, wshaes, ierror)
 
             ! Dummy arguments
             integer(ip), intent(in)   :: nlat
@@ -94,15 +89,11 @@ module scalar_analysis_routines
             real(wp),    intent(out)  :: b(mdab, ndab, nt)
             integer(ip), intent(in)   :: mdab
             integer(ip), intent(in)   :: ndab
-            real(wp),    intent(in)   :: wshaes(lshaes)
-            integer(ip), intent(in)   :: lshaes
-            real(wp),    intent(out)  :: work(lwork)
-            integer(ip), intent(in)   :: lwork
+            real(wp),    intent(in)   :: wshaes(:)
             integer(ip), intent(out)  :: ierror
         end subroutine shaes
 
-        module subroutine shagc(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, &
-            wshagc, lshagc, work, lwork, ierror)
+        module subroutine shagc(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, wshagc, ierror)
 
             ! Dummy arguments
             integer(ip), intent(in)   :: nlat
@@ -116,15 +107,11 @@ module scalar_analysis_routines
             real(wp),    intent(out)  :: b(mdab, ndab, nt)
             integer(ip), intent(in)   :: mdab
             integer(ip), intent(in)   :: ndab
-            real(wp),    intent(in)   :: wshagc(lshagc)
-            integer(ip), intent(in)   :: lshagc
-            real(wp),    intent(out)  :: work(lwork)
-            integer(ip), intent(in)   :: lwork
+            real(wp),    intent(in)   :: wshagc(:)
             integer(ip), intent(out)  :: ierror
         end subroutine shagc
 
-        module subroutine shags(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, &
-            wshags, dummy_lshags, dummy_work, dummy_lwork, ierror)
+        module subroutine shags(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, wshags, ierror)
 
             ! Dummy arguments
             integer(ip), intent(in)   :: nlat
@@ -139,9 +126,6 @@ module scalar_analysis_routines
             integer(ip), intent(in)   :: mdab
             integer(ip), intent(in)   :: ndab
             real(wp),    intent(in)   :: wshags(:)
-            integer(ip), intent(in)   :: dummy_lshags
-            real(wp),    intent(out)  :: dummy_work(1)
-            integer(ip), intent(in)   :: dummy_lwork
             integer(ip), intent(out)  :: ierror
         end subroutine shags
 

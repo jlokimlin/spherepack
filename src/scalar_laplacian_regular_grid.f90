@@ -382,7 +382,7 @@ contains
 
         ! Synthesize alap, blap into slap
         call shsec(nlat, nlon, isym, nt, slap, ids, jds, alap, blap, &
-            mmax, nlat, wshsec, lshsec, wk, lwk, ierror)
+            mmax, nlat, wshsec, ierror)
 
     end subroutine slapec_lower_utility_routine
 

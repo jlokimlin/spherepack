@@ -510,7 +510,7 @@ contains
                 real(wp) :: work(lwork)
                 associate (wshags => wavetable%scalar_forward_gaussian_saved)
                     call shags(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, &
-                        wshags, lshags, work, lwork, ierror)
+                        wshags, ierror)
                 end associate
             end block
         end associate

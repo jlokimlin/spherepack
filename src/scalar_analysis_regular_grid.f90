@@ -302,7 +302,7 @@ submodule(scalar_analysis_routines) scalar_analysis_regular_grid
 contains
 
     module subroutine shaec(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, &
-        wshaec, lshaec, work, lwork, ierror)
+        wshaec, ierror)
 
         ! Dummy arguments
         integer(ip), intent(in)   :: nlat
@@ -316,10 +316,7 @@ contains
         real(wp),    intent(out)  :: b(mdab, ndab, nt)
         integer(ip), intent(in)   :: mdab
         integer(ip), intent(in)   :: ndab
-        real(wp),    intent(in)   :: wshaec(lshaec)
-        integer(ip), intent(in)   :: lshaec
-        real(wp),    intent(out)  :: work(lwork)
-        integer(ip), intent(in)   :: lwork
+        real(wp),    intent(in)   :: wshaec(:)
         integer(ip), intent(out)  :: ierror
 
         ! Local variables
@@ -330,72 +327,76 @@ contains
         integer(ip) :: ls
         integer(ip) :: lzz1
         integer(ip) :: mmax
-        integer(ip) :: nln
+        integer(ip) :: nln, lwork
 
-        mmax = min(nlat, nlon/2+1)
-        imid = (nlat+1)/2
-        lzz1 = 2*nlat*imid
-        labc = 3*((mmax-2)*(2*nlat-mmax-1))/2
+        associate (lshaec => size(wshaec))
 
-        if (isym > 0) then
-            ls = imid
-        else
-            ls = nlat
-        end if
+            mmax = min(nlat, nlon/2+1)
+            imid = (nlat+1)/2
+            lzz1 = 2*nlat*imid
+            labc = 3*((mmax-2)*(2*nlat-mmax-1))/2
 
-        nln = nt*ls*nlon
+            select case (isym)
+                case (0)
+                    ls = nlat
+                case default
+                    ls = imid
+            end select
 
-        if (isym == 0) then
-            ist = imid
-        else
-            ist = 0
-        end if
+            nln = nt*ls*nlon
 
-        ! Check validity of input arguments
-        if (nlat < 3) then
-            ierror = 1
-            return
-        else if (nlon < 4) then
-            ierror = 2
-            return
-        else if (isym < 0 .or. isym > 2) then
-            ierror = 3
-            return
-        else if (nt < 0) then
-            ierror = 4
-            return
-        else if ((isym == 0 .and. idg < nlat) &
-            .or. &
-            (isym /= 0 .and. idg < (nlat+1)/2)) then
-            ierror = 5
-            return
-        else if (jdg < nlon) then
-            ierror = 6
-            return
-        else if (mdab < mmax) then
-            ierror = 7
-            return
-        else if (ndab < nlat) then
-            ierror = 8
-            return
-        else if (lshaec < lzz1+labc+nlon+15) then
-            ierror = 9
-            return
-        else if (lwork < nln+max(ls*nlon, 3*nlat*imid)) then
-            ierror = 10
-            return
-        else
-            ierror = 0
-        end if
+            select case (isym)
+                case (0)
+                    ist = imid
+                case default
+                    ist = 0
+            end select
 
-        ! Set workspace pointers
-        iw1 = lzz1+labc+1
-        jw1 = ist + 1
-        jw2 = nln + 1
-        jw3 = jw2
+            ! Check validity of input arguments
+            if (nlat < 3) then
+                ierror = 1
+            else if (nlon < 4) then
+                ierror = 2
+            else if (isym < 0 .or. isym > 2) then
+                ierror = 3
+            else if (nt < 0) then
+                ierror = 4
+            else if ((isym == 0 .and. idg < nlat) &
+                .or. &
+                (isym /= 0 .and. idg < (nlat+1)/2)) then
+                ierror = 5
+            else if (jdg < nlon) then
+                ierror = 6
+            else if (mdab < mmax) then
+                ierror = 7
+            else if (ndab < nlat) then
+                ierror = 8
+            else if (lshaec < lzz1+labc+nlon+15) then
+                ierror = 9
+            else
+                ierror = 0
+            end if
 
-        call shaec_lower_utility_routine(nlat, isym, nt, g, idg, jdg, a, b, mdab, ndab, imid, ls, nlon, &
-            work, work(jw1), work(jw2), work(jw3), wshaec, wshaec(iw1))
+            ! Check error flag
+            if (ierror /= 0) return
+
+            ! Set required workspace size
+            lwork = nln+max(ls*nlon, 3*nlat*imid)
+
+            block
+                real(wp) :: work(lwork)
+
+                ! Set workspace pointers
+                iw1 = lzz1+labc+1
+                jw1 = ist + 1
+                jw2 = nln + 1
+                jw3 = jw2
+
+                call shaec_lower_utility_routine(nlat, isym, nt, g, idg, jdg, a, b, &
+                    mdab, ndab, imid, ls, nlon, &
+                    work, work(jw1:), work(jw2:), work(jw3:), wshaec, wshaec(iw1:))
+            end block
+        end associate
 
     end subroutine shaec
 
