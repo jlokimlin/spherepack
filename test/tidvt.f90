@@ -123,7 +123,7 @@ use spherepack
     parameter(mmdab = (nnlon+2)/2, mmdb = (nnlon+1)/2)
     parameter (lleng= 5*nnlat*nnlat*nnlon, llsav=15*nnlat*nnlat*nnlon)
     dimension work(lleng), wsave(llsav)
-    parameter (lldwork = 4*nnlat*nnlat )
+    parameter (lldwork = 4*nnlat*nnlat)
     real dwork(lldwork)
     dimension br(mmdb, nnlat, nnt), bi(mmdb, nnlat, nnt)
     dimension cr(mmdb, nnlat, nnt), ci(mmdb, nnlat, nnt)
@@ -247,7 +247,7 @@ use spherepack
             !
             !     analyze vector field
             !
-            call vhaeci(nlat, nlon, wsave, lsave, work, lwork, ierror)
+            call vhaeci(nlat, nlon, wsave, ierror)
             call name("vhai")
             call iout(ierror, "ierr")
 
@@ -280,7 +280,7 @@ use spherepack
             !
             !     analyze vector field
             !
-            call vhaesi(nlat, nlon, wsave, lsave, work, lwork, dwork, ldwork, ierror)
+            call vhaesi(nlat, nlon, wsave, ierror)
             call name("vhai")
             call iout(ierror, "ierr")
             call vhaes(nlat, nlon, isym, nt, v, w, nlat, nlon, br, bi, cr, ci, mdb, &
@@ -307,7 +307,7 @@ use spherepack
             !
             !     analyze vector field
             !
-            call vhagci(nlat, nlon, wsave, lsave, dwork, ldwork, ierror)
+            call vhagci(nlat, nlon, wsave, ierror)
             call name("vhai")
             call iout(ierror, "ierr")
             call vhagc(nlat, nlon, isym, nt, v, w, nlat, nlon, br, bi, cr, ci, mdb, &
@@ -334,7 +334,7 @@ use spherepack
             !
             !     analyze vector field
             !
-            call vhagsi(nlat, nlon, wsave, lsave, dwork, ldwork, ierror)
+            call vhagsi(nlat, nlon, wsave, ierror)
             call name("vhai")
             call iout(ierror, "ierr")
             call vhags(nlat, nlon, isym, nt, v, w, nlat, nlon, br, bi, cr, ci, mdb, &
@@ -408,7 +408,7 @@ use spherepack
         		call iout(lsave, "lsav")
         		call iout(lwork, "lwrk")
         		
-        		call vhseci(nlat, nlon, wsave, lsave, dwork, ldwork, ierror)
+        		call vhseci(nlat, nlon, wsave, ierror)
         		call name("idvi")
         		call iout(ierror, "ierr")
         		
@@ -436,7 +436,7 @@ use spherepack
         		call iout(lsave, "lsav")
         		call iout(lwork, "lwrk")
         		
-        		call vhsesi(nlat, nlon, wsave, lsave, work, lwork, dwork, ldwork, ierror)
+        		call vhsesi(nlat, nlon, wsave, ierror)
         		call name("idvi")
         		call iout(ierror, "ierr")
         		
@@ -464,7 +464,7 @@ use spherepack
         		call iout(lsave, "lsav")
         		call iout(lwork, "lwrk")
         		
-        		call vhsgci(nlat, nlon, wsave, lsave, dwork, ldwork, ierror)
+        		call vhsgci(nlat, nlon, wsave, ierror)
         		call name("idvi")
         		call iout(ierror, "ierr")
         		

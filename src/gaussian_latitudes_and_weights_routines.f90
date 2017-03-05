@@ -278,11 +278,11 @@ contains
         real(wp)    :: t1, t2, t3, t4
         !----------------------------------------------------------------------
 
-        associate( &
+        associate (&
             ncp => (n+1)/2, &
             cp => legendre_poly_coeff, &
             dcp => legendre_deriv_coeff &
-            )
+           )
 
             t1 = -ONE
             t2 = real(n + 1, kind=wp)
@@ -363,14 +363,14 @@ contains
         real(wp)    :: cost, sint, temp
         !----------------------------------------------------------------------
 
-        associate( &
+        associate (&
             cos2t => cos(TWO * theta), &
             sin2t => sin(TWO * theta), &
             cp => legendre_poly_coeff, &
             dcp => legendre_deriv_coeff, &
             pb => legendre_poly, &
             dpb => legendre_deriv &
-            )
+           )
 
             select case (mod(n, 2))
                 case (0)

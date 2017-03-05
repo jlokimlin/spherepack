@@ -339,7 +339,7 @@ contains
         integer(ip) :: labc, lzz1, mmax, ldwork
         type(SpherepackUtility) :: util
 
-        associate( lshsec => size(wshsec) )
+        associate (lshsec => size(wshsec))
 
             imid = (nlat+1)/2
             mmax = min(nlat, nlon/2+1)

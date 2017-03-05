@@ -113,7 +113,7 @@ program tvts
     parameter(nnlat= 25, nnlon= 19, nnt = 3)
     parameter (lleng= 5*nnlat*nnlat*nnlon, llsav= 5*nnlat*nnlat*nnlon)
     dimension work(lleng), wsave(llsav)
-    parameter (lldwork = 4*nnlat*nnlat )
+    parameter (lldwork = 4*nnlat*nnlat)
     real dwork(lldwork)
     dimension br(nnlat, nnlat, nnt), bi(nnlat, nnlat, nnt)
     dimension cr(nnlat, nnlat, nnt), ci(nnlat, nnlat, nnt)
@@ -224,7 +224,7 @@ program tvts
         		
                 call name("**ec")
         		
-                call vhaeci(nlat, nlon, wsave, lsave, dwork, ldwork, ierror)
+                call vhaeci(nlat, nlon, wsave, ierror)
                 call name("vhai")
                 call iout(ierror, "ierr")
         		
@@ -249,7 +249,7 @@ program tvts
         		
                 call name("**es")
         		
-                call vhaesi(nlat, nlon, wsave, lsave, work, lwork, dwork, ldwork, ierror)
+                call vhaesi(nlat, nlon, wsave, ierror)
                 call name("vhai")
                 call iout(ierror, "ierr")
         		
@@ -273,7 +273,7 @@ program tvts
                 call name("vhgi")
                 call iout(nlat, "nlat")
         		
-                call vhagci(nlat, nlon, wsave, lsave, dwork, ldwork, ierror)
+                call vhagci(nlat, nlon, wsave, ierror)
                 call name("vhai")
                 call iout(ierror, "ierr")
         		
@@ -296,7 +296,7 @@ program tvts
             case (4)
         		
                 call name("**gs")
-                call vhagsi(nlat, nlon, wsave, lsave, work, lwork, ierror)
+                call vhagsi(nlat, nlon, wsave, ierror)
                 call name("vhai")
                 call iout(ierror, "ierr")
         		

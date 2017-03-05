@@ -70,14 +70,14 @@ program tvrt
     class(Sphere), allocatable :: solver
 
     ! Test gaussian grid
-    allocate( GaussianSphere :: solver )
+    allocate (GaussianSphere :: solver)
     call test_vorticity_routines(solver)
-    deallocate( solver )
+    deallocate (solver)
 
     ! Test regular grid
-    allocate( RegularSphere :: solver )
+    allocate (RegularSphere :: solver)
     call test_vorticity_routines(solver)
-    deallocate( solver )
+    deallocate (solver)
 
 contains
 
@@ -109,9 +109,9 @@ contains
             sphere_type = GaussianSphere(NLATS, NLONS)
 
             ! Allocate known error from previous platform
-            allocate( previous_vorticity_error, source='     vorticity error     = 8.246182e-14' )
-            allocate( previous_polar_inversion_error, source='     polar inversion error     = 2.331468e-15' )
-            allocate( previous_azimuthal_inversion_error, source='     azimuthal inversion error = 4.107825e-15' )
+            allocate (previous_vorticity_error, source='     vorticity error     = 8.246182e-14')
+            allocate (previous_polar_inversion_error, source='     polar inversion error     = 2.331468e-15')
+            allocate (previous_azimuthal_inversion_error, source='     azimuthal inversion error = 4.107825e-15')
 
             type is (RegularSphere)
 
@@ -119,27 +119,27 @@ contains
             sphere_type = RegularSphere(NLATS, NLONS)
 
             ! Allocate known error from previous platform
-            allocate( previous_vorticity_error, source='     vorticity error     = 2.375877e-14' )
-            allocate( previous_polar_inversion_error, source='     polar inversion error     = 1.110223e-15' )
-            allocate( previous_azimuthal_inversion_error, source='     azimuthal inversion error = 1.887379e-15' )
+            allocate (previous_vorticity_error, source='     vorticity error     = 2.375877e-14')
+            allocate (previous_polar_inversion_error, source='     polar inversion error     = 1.110223e-15')
+            allocate (previous_azimuthal_inversion_error, source='     azimuthal inversion error = 1.887379e-15')
         end select
 
         !
         !  set scalar stream and velocity potential fields as polys in x, y, z
         !    and then set v, w from st, sv scalar fields
         !
-        associate( &
+        associate (&
             ve => exact_polar_component, &
             we => exact_azimuthal_component, &
             vte => exact_vorticity, &
             radial => sphere_type%unit_vectors%radial, &
             theta => sphere_type%unit_vectors%polar, &
             phi => sphere_type%unit_vectors%azimuthal &
-            )
+           )
             do k=1, NSYNTHS
                 do j=1, NLONS
                     do i=1, NLATS
-                        associate( &
+                        associate (&
                             x => radial(i, j)%x, & !sint*cosp
                             y => radial(i, j)%y, & !sint*sinp
                             z => radial(i, j)%z, & !cost
@@ -151,7 +151,7 @@ contains
                             dzdp => phi(i, j)%z, & ! 0.0
                             cosp => phi(i, j)%y, &
                             sinp => -phi(i, j)%x &
-                            )
+                           )
                             select case (k)
                                 case (1)
                                     ve(i, j, k) = sinp + dydt !sinp + cost*sinp
@@ -176,22 +176,22 @@ contains
         !  Compute vt from (ve, we)
         !
         do k=1, NSYNTHS
-            associate( &
+            associate (&
                 ve => exact_polar_component(:, :, k), &
                 we => exact_azimuthal_component(:, :, k), &
                 vt => approximate_vorticity(:, :, k) &
-                )
+               )
                 call sphere_type%get_vorticity(ve, we, vt)
             end associate
         end do
         !
         !  Compute vorticity error
         !
-        associate( &
+        associate (&
             vt => approximate_vorticity, &
             vte => exact_vorticity &
-            )
-            associate( err2 => maxval(abs(vt-vte)) )
+           )
+            associate (err2 => maxval(abs(vt-vte)))
                 !
                 !  Print earlier output from platform with 64-bit floating point
                 !    arithmetic followed by the output from this computer
@@ -210,11 +210,11 @@ contains
         !  Now recompute (v, w) inverting vte
         !
         do k=1, NSYNTHS
-            associate( &
+            associate (&
                 v => approximate_polar_component(:, :, k), &
                 w => approximate_azimuthal_component(:, :, k), &
                 vte => exact_vorticity(:, :, k) &
-                )
+               )
                 call sphere_type%invert_vorticity(vte, v, w)
             end associate
         end do
@@ -224,10 +224,10 @@ contains
         !    br = bi = 0.0
         !
         do k = 1, NSYNTHS
-            associate( &
+            associate (&
                 ve => exact_polar_component(:, :, k), &
                 we => exact_azimuthal_component(:, :, k) &
-                )
+               )
                 !
                 !  Get polar coefficients (br, bi) and azimuthal coefficients (cr, ci) from (ve, we)
                 !
@@ -235,10 +235,10 @@ contains
                 !
                 !  Set polar coefficients to zero
                 !
-                associate( &
+                associate (&
                     br => sphere_type%workspace%vector_coefficients%polar%real_component, &
                     bi => sphere_type%workspace%vector_coefficients%polar%imaginary_component &
-                    )
+                   )
                     br = 0.0_wp; bi = 0.0_wp
                 end associate
                 !
@@ -250,16 +250,16 @@ contains
         !
         !  compare this v, w with original
         !
-        associate( &
+        associate (&
             ve => exact_polar_component, &
             we => exact_azimuthal_component, &
             v => approximate_polar_component, &
             w => approximate_azimuthal_component &
-            )
-            associate( &
+           )
+            associate (&
                 err2v => maxval(abs(v-ve)), &
                 err2w => maxval(abs(w-we)) &
-                )
+               )
                 !
                 !  Print earlier output from platform with 64-bit floating point
                 !    arithmetic followed by the output from this computer
@@ -276,14 +276,14 @@ contains
                 write( stdout, '(a)') '     The output from your computer is: '
                 write( stdout, '(a, 1pe15.6)') '     polar inversion error     = ', err2v
                 write( stdout, '(a, 1pe15.6)') '     azimuthal inversion error = ', err2w
-                write( stdout, '(a)' ) ''
+                write( stdout, '(a)') ''
             end associate
         end associate
 
         !  Release memory
-        deallocate( previous_vorticity_error )
-        deallocate( previous_polar_inversion_error )
-        deallocate( previous_azimuthal_inversion_error )
+        deallocate (previous_vorticity_error)
+        deallocate (previous_polar_inversion_error)
+        deallocate (previous_azimuthal_inversion_error)
         call sphere_type%destroy()
 
     end subroutine test_vorticity_routines

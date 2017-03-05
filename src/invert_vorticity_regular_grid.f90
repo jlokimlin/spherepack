@@ -196,7 +196,7 @@
 !
 !               l2 = nlat/2                    if nlat is even or
 !               l2 = (nlat+1)/2                if nlat is odd
-!               l1 = min(nlat, nlon/2  )       if nlon is even or
+!               l1 = min(nlat, nlon/2 )       if nlon is even or
 !               l1 = min(nlat, (nlon+1)/2)     if nlon is odd
 !
 !            if isym = 0 then lwork must be at least

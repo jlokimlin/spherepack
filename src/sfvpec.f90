@@ -375,7 +375,7 @@ contains
         ! Local variables
         integer(ip) :: n
 
-        associate( nlat => size(fnn) )
+        associate (nlat => size(fnn))
             do n=2, nlat
                 fnn(n) = ONE/sqrt(real(n*(n - 1), kind=wp))
             end do
@@ -397,11 +397,11 @@ contains
         ! Local variables
         integer(ip) :: k, n, m, mmax
 
-        associate( &
+        associate (&
             mab => size(a, dim=1), &
             nlat => size(a, dim=2), &
             nt => size(a, dim=3) &
-            )
+           )
 
             mmax = min(nlat, (nlon+1)/2)
 
@@ -442,11 +442,11 @@ contains
         ! Local variables
         integer(ip) :: k, n, m, mmax
 
-        associate( &
+        associate (&
             mab => size(a, dim=1), &
             nlat => size(a, dim=2), &
             nt => size(a, dim=3) &
-            )
+           )
 
             mmax = min(nlat, (nlon+1)/2)
 

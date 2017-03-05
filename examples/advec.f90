@@ -123,7 +123,7 @@ program advec
 
     ! Compute geopotential at t=-dt in phi_old and at t=0.0 in phi
     ! to start up leapfrog scheme
-    associate( dt => solver%TIME_STEP )
+    associate (dt => solver%TIME_STEP)
         call solver%get_geopotential(-dt, phi_old)
         call solver%get_geopotential(ZERO, phi)
     end associate
@@ -139,7 +139,7 @@ program advec
     p0_max = maxval(abs(phi))
 
     ! Set number of time steps for 12 days (time to circumvent the earth)
-    associate( dt => solver%TIME_STEP )
+    associate (dt => solver%TIME_STEP)
         ntime = int(real(TIME_TO_CIRCUMVENT_THE_EARTH, kind=wp)/dt + HALF, kind=ip)
         mprint = ntime/12
         time = ZERO
@@ -164,7 +164,7 @@ program advec
             call solver%get_geopotential(time, exact_phi)
 
             !  Compute errors
-            associate( &
+            associate (&
                 htime => time/3600, &
                 dt => solver%TIME_STEP, &
                 nlats => solver%NUMBER_OF_LATITUDES, &
@@ -174,10 +174,10 @@ program advec
                 alphad => solver%TILT_ANGLE_IN_DEGREES, &
                 errm => maxval(abs(exact_phi-phi))/p0_max, &
                 err2 => norm2(exact_phi-phi)/p0_l2 &
-                )
+               )
 
-                write( stdout, '(/a)' ) ' advecting cosine bell, test case 2'
-                write( stdout, fmt = WRITE_FMT ) &
+                write( stdout, '(/a)') ' advecting cosine bell, test case 2'
+                write( stdout, fmt = WRITE_FMT) &
                     ' exit number              '  , ncycle, &
                     '  model time in  hours      ', htime, &
                     ' time step in seconds      ' , dt, &
@@ -192,7 +192,7 @@ program advec
         end if
 
         !  Update various quantities
-        associate( dt => solver%TIME_STEP )
+        associate (dt => solver%TIME_STEP)
 
             ! Increment
             time = time + dt

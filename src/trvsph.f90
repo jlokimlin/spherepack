@@ -223,22 +223,22 @@
 !
 !     = -1
 !     if the latitude (or colatitude) grid for ua, va is an equally spaced
-!     partition of [-pi/2, pi/2] ( or [0, pi] ) including the poles which
+!     partition of [-pi/2, pi/2] ( or [0, pi]) including the poles which
 !     runs north to south with increasing subscript value
 !
 !     = +1
 !     if the latitude (or colatitude) grid for ua, va is an equally spaced
-!     partition of [-pi/2, pi/2] ( or [0, pi] ) including the poles which
+!     partition of [-pi/2, pi/2] ( or [0, pi]) including the poles which
 !     runs south to north with increasing subscript value
 !
 !     = -2
 !     if the latitude (or colatitude) grid for ua, va is a gaussian partition
-!     of (-pi/2, pi/2) ( or (0, pi) ) excluding the poles which runs north
+!     of (-pi/2, pi/2) ( or (0, pi)) excluding the poles which runs north
 !     to south with increasing subscript value
 !
 !     = +2
 !     if the latitude (or colatitude) grid for ua, va is a gaussian partition
-!     of (-pi/2, pi/2) ( or (0, pi) ) excluding the poles which runs south
+!     of (-pi/2, pi/2) ( or (0, pi)) excluding the poles which runs south
 !     north with increasing subscript value
 !
 !     igrida(2)
@@ -313,22 +313,22 @@
 !
 !     = -1
 !     if the latitude (or colatitude) grid for ub, vb is an equally spaced
-!     partition of [-pi/2, pi/2] ( or [0, pi] ) including the poles which
+!     partition of [-pi/2, pi/2] ( or [0, pi]) including the poles which
 !     north to south
 !
 !     = +1
 !     if the latitude (or colatitude) grid for ub, vb is an equally spaced
-!     partition of [-pi/2, pi/2] ( or [0, pi] ) including the poles which
+!     partition of [-pi/2, pi/2] ( or [0, pi]) including the poles which
 !     south to north
 !
 !     = -2
 !     if the latitude (or colatitude) grid for ub, vb is a gaussian partition
-!     of (-pi/2, pi/2) ( or (0, pi) ) excluding the poles which runs north to
+!     of (-pi/2, pi/2) ( or (0, pi)) excluding the poles which runs north to
 !     south
 !
 !     = +2
 !     if the latitude (or colatitude) grid for ub, vb is a gaussian partition
-!     of (-pi/2, pi/2) ( or (0, pi) ) excluding the poles which runs south to
+!     of (-pi/2, pi/2) ( or (0, pi)) excluding the poles which runs south to
 !     north
 !
 !     igridb(2)
@@ -547,7 +547,7 @@ contains
 
         integer(ip) :: intl, igrida(2), nlona, nlata, igridb(2), nlonb, nlatb
         integer(ip) :: iveca, ivecb, lsave, lsvmin, lwork, lwkmin, ldwork, ier
-        real(wp) :: ua(*), va(*), ub(*), vb(*), wsave(*), work(*)
+        real(wp) :: ua(*), va(*), ub(*), vb(*), wsave(:), work(*)
         real(wp) :: dwork(*)
         integer(ip) :: ig, igrda, igrdb, la1, la2, lb1, lb2, lwa, lwb
         integer(ip) :: iabr, iabi, iacr, iaci, ibbr, ibbi, ibcr, ibci
@@ -653,12 +653,12 @@ contains
                 !
                 !     initialize wsave for equally spaced analysis
                 !
-                call vhaeci(nlata, nlona, wsave, lwa, dwork, ldwork, ier)
+                call vhaeci(nlata, nlona, wsave, ier)
             else
                 !
                 !     initialize wsave for gaussian analysis
                 !
-                call vhagci(nlata, nlona, wsave, lwa, dwork, ldwork, ier)
+                call vhagci(nlata, nlona, wsave, ier)
                 if (ier/=0) then
                     !
                     !     flag failure in spherepack gaussian software
@@ -672,7 +672,7 @@ contains
                 !
                 !     initialize wsave for gaussian synthesis
                 !
-                call vhsgci(nlatb, nlonb, wsave(jb), lwb, dwork, ldwork, ier)
+                call vhsgci(nlatb, nlonb, wsave(jb:), ier)
                 if (ier/=0) then
                     !
                     !     flag failure in spherepack gaussian software
@@ -684,7 +684,7 @@ contains
                 !
                 !     initialize wsave for equally spaced synthesis
                 !
-                call vhseci(nlatb, nlonb, wsave(jb), lwb, dwork, ldwork, ier)
+                call vhseci(nlatb, nlonb, wsave(jb:), ier)
             end if
         !
         !     end of initialization (intl=0) call
@@ -728,11 +728,11 @@ contains
         !
         if (igrdb == 1) then
             call vhsec(nlatb, nlonb, ityp, nt, vb, ub, nlatb, nlonb, work(ibbr), &
-                work(ibbi), work(ibcr), work(ibci), lb1, nlatb, wsave(jb), lwb, &
+                work(ibbi), work(ibcr), work(ibci), lb1, nlatb, wsave(jb:), lwb, &
                 work(iw), lw, ier)
         else
             call vhsgc(nlatb, nlonb, ityp, nt, vb, ub, nlatb, nlonb, work(ibbr), &
-                work(ibbi), work(ibcr), work(ibci), lb1, nlatb, wsave(jb), lwb, work(iw), &
+                work(ibbi), work(ibcr), work(ibci), lb1, nlatb, wsave(jb:), lwb, work(iw), &
                 lw, ier)
         end if
         !

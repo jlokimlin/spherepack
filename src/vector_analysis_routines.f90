@@ -127,53 +127,39 @@ module vector_analysis_routines
             integer(ip), intent(out) :: ierror
         end subroutine vhags
 
-        module subroutine vhaeci(nlat, nlon, wvhaec, lvhaec, dwork, ldwork, ierror)
+        module subroutine vhaeci(nlat, nlon, wvhaec, ierror)
 
             ! Dummy arguments
             integer(ip), intent(in)  :: nlat
             integer(ip), intent(in)  :: nlon
-            real(wp),    intent(out) :: wvhaec(lvhaec)
-            integer(ip), intent(in)  :: lvhaec
-            real(wp),    intent(out) :: dwork(ldwork)
-            integer(ip), intent(in)  :: ldwork
+            real(wp),    intent(out) :: wvhaec(:)
             integer(ip), intent(out) :: ierror
         end subroutine vhaeci
 
-        module subroutine vhaesi(nlat, nlon, wvhaes, lvhaes, work, lwork, dwork, ldwork, ierror)
+        module subroutine vhaesi(nlat, nlon, wvhaes, ierror)
 
             ! Dummy arguments
             integer(ip), intent(in)  :: nlat
             integer(ip), intent(in)  :: nlon
-            real(wp),    intent(out) :: wvhaes(lvhaes)
-            integer(ip), intent(in)  :: lvhaes
-            real(wp),    intent(out) :: work(lwork)
-            integer(ip), intent(in)  :: lwork
-            real(wp),    intent(out) :: dwork(ldwork)
-            integer(ip), intent(in)  :: ldwork
+            real(wp),    intent(out) :: wvhaes(:)
             integer(ip), intent(out) :: ierror
         end subroutine vhaesi
 
-        module subroutine vhagci(nlat, nlon, wvhagc, lvhagc, dwork, ldwork, ierror)
+        module subroutine vhagci(nlat, nlon, wvhagc, ierror)
 
             ! Dummy arguments
             integer(ip), intent(in)  :: nlat
             integer(ip), intent(in)  :: nlon
-            real(wp),    intent(out) :: wvhagc(lvhagc)
-            integer(ip), intent(in)  :: lvhagc
-            real(wp),    intent(out) :: dwork(ldwork)
-            integer(ip), intent(in)  :: ldwork
+            real(wp),    intent(out) :: wvhagc(:)
             integer(ip), intent(out) :: ierror
         end subroutine vhagci
 
-        module subroutine vhagsi(nlat, nlon, wvhags, lvhags, dwork, ldwork, ierror)
+        module subroutine vhagsi(nlat, nlon, wvhags, ierror)
 
             ! Dummy arguments
             integer(ip), intent(in)  :: nlat
             integer(ip), intent(in)  :: nlon
-            real(wp),    intent(out) :: wvhags(lvhags)
-            integer(ip), intent(in)  :: lvhags
-            real(wp),    intent(out) :: dwork(ldwork)
-            integer(ip), intent(in)  :: ldwork
+            real(wp),    intent(out) :: wvhags(:)
             integer(ip), intent(out) :: ierror
         end subroutine vhagsi
     end interface

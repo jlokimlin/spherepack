@@ -84,8 +84,8 @@ contains
 
 
         !  Allocate memory
-        allocate( legfunc((ntrunc+1)*(ntrunc+2)/2) )
-        allocate( cp((ntrunc/2)+1) )
+        allocate (legfunc((ntrunc+1)*(ntrunc+2)/2))
+        allocate (cp((ntrunc/2)+1))
 
         theta = PI/2 - (PI/180)*lat
         nmstrt = 0
@@ -104,7 +104,7 @@ contains
         end do
 
         !  Release memory
-        deallocate( cp )
+        deallocate (cp)
 
     end subroutine get_legendre_function
 
@@ -427,11 +427,11 @@ contains
         workspace_indices = get_workspace_indices(l, nm)
 
 
-        associate( &
+        associate (&
             iw1 => workspace_indices(1), &
             iw2 => workspace_indices(2), &
             iw3 => workspace_indices(3) &
-            )
+           )
 
             call lfim1(init, theta, l, n, nm, id, pb, wlfim, wlfim(iw1), &
                 wlfim(iw2), wlfim(iw3), wlfim(iw2))
@@ -453,7 +453,7 @@ contains
             integer(ip) :: lnx
 
 
-            associate( i => return_value )
+            associate (i => return_value)
 
                 lnx = l*(nm + 1)
                 i(1) = lnx + 1
@@ -678,11 +678,11 @@ contains
         !  total length of wlfin is 4*l*(nm+1)
         workspace_indices = get_workspace_indices(l, nm)
 
-        associate( &
+        associate (&
             iw1=> workspace_indices(1), &
             iw2 => workspace_indices(2), &
             iw3 => workspace_indices(3) &
-            )
+           )
             call lfin1(init, theta, l, m, nm, id, pb, wlfin, wlfin(iw1), &
                 wlfin(iw2), wlfin(iw3), wlfin(iw2))
         end associate
@@ -699,7 +699,7 @@ contains
             ! Local variables
             integer(ip) :: lnx
 
-            associate( i => return_value )
+            associate (i => return_value)
                 lnx = l*(nm + 1)
                 i(1) = lnx + 1
                 i(2) = 2*lnx + 1

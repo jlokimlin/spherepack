@@ -413,7 +413,7 @@ contains
         type(SpherepackUtility) :: util
 
 
-        associate( lshaec => size(wshaec) )
+        associate (lshaec => size(wshaec))
             imid = (nlat+1)/2
             mmax = min(nlat, nlon/2+1)
             lzz1 = 2*nlat*imid

@@ -109,7 +109,7 @@ contains
         self%NUMBER_OF_LONGITUDES = nlon
 
         ! Set the gaussian grid type
-        allocate( self%grid_type, source='gaussian' )
+        allocate (self%grid_type, source='gaussian')
 
         ! Set longitudinal grid: 0 <= phi <= 2*pi
         call self%get_equally_spaced_longitudes(nlon, self%longitudes)
@@ -131,7 +131,7 @@ contains
         if (.not.self%initialized) return
 
         !  Release memory
-        if (allocated(self%gaussian_weights)) deallocate(self%gaussian_weights)
+        if (allocated(self%gaussian_weights)) deallocate (self%gaussian_weights)
 
         call self%destroy_grid()
 
@@ -158,8 +158,8 @@ contains
         end if
 
         ! Allocate memory
-        allocate( gaussian_latitudes(nlat) )
-        allocate( gaussian_weights(nlat) )
+        allocate (gaussian_latitudes(nlat))
+        allocate (gaussian_weights(nlat))
 
         ! Compute gaussian weights and latitudes
         call compute_gaussian_latitudes_and_weights( &
@@ -197,13 +197,13 @@ contains
         call self%print_to_unformatted_binary_files(header)
 
         ! Write gaussian weights
-        associate( wts => self%gaussian_weights )
+        associate (wts => self%gaussian_weights)
             open( newunit=file_unit, &
                 file=header//'gaussian_weights.dat', &
                 status='replace', form='unformatted', &
-                action='write', access='stream' )
-            write( file_unit ) wts
-            close( file_unit )
+                action='write', access='stream')
+            write( file_unit) wts
+            close( file_unit)
         end associate
 
     end subroutine unformatted_print

@@ -249,7 +249,7 @@
 !            sphere at the guassian colatitude theta(i) for i=1, ..., nlat
 !            and east longitude lambda(j)=(j-1)*2*pi/nlon for j = 1, ..., nlon.
 !            let cost and sint be the cosine and sine at colatitude theta.
-!            let d( )/dlambda  and d( )/dtheta be the first order partial
+!            let d()/dlambda  and d()/dtheta be the first order partial
 !            derivatives in longitude and colatitude.  let sf be either v
 !            or w.  define:
 !
@@ -400,7 +400,7 @@ contains
             ifn => workspace_indices(5), &
             iwk => workspace_indices(6), &
             liwk => workspace_indices(7) &
-            )
+           )
             call ivlapgc_lower_utility_routine(nlat, nlon, ityp, nt, v, w, idvw, jdvw, work(ibr), &
                 work(ibi), work(icr), work(ici), mmax, work(ifn), mdbc, ndbc, br, bi, &
                 cr, ci, wvhsgc, lvhsgc, work(iwk), liwk, ierror)

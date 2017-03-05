@@ -192,9 +192,9 @@ program shallow
     !  Allocate memory. Setup spherical harmonic instance
     call solver%create(nlat=NLAT, nlon=NLON, ntrunc=NTRUNC, rsphere=aa)
 
-    allocate( write_fmt, source=&
+    allocate (write_fmt, source=&
         '(a, i10, a, f10.2/, a, f10.0, a, i10/, a, i10, '&
-        //'a, i10/, a, 1pe15.6, a, 1pe15.6, /a, 1pe15.6, a, 1pe15.6)' )
+        //'a, i10/, a, 1pe15.6, a, 1pe15.6, /a, 1pe15.6, a, 1pe15.6)')
 
     ! Compute the derivative of the unrotated geopotential
     ! p as a function of latitude
@@ -320,8 +320,8 @@ program shallow
             p = pg
             htime = time/3600.0_wp
 
-            write( stdout, '(/a)' ) ' steady nonlinear rotated flow:'
-            write( stdout, fmt=write_fmt ) &
+            write( stdout, '(/a)') ' steady nonlinear rotated flow:'
+            write( stdout, fmt=write_fmt) &
                 ' cycle number              ', ncycle, &
                 ' model time in  hours      ', htime, &
                 ' time step in seconds      ', dt, &
@@ -384,7 +384,7 @@ program shallow
 
         call solver%grid_to_spec(scrg1, scrnm)
 
-        associate( lap => solver%LAPLACIAN_COEFFICIENT_MULTIPLIERS )
+        associate (lap => solver%LAPLACIAN_COEFFICIENT_MULTIPLIERS)
             ddivdtnm(:, new) = ddivdtnm(:, new) - lap * scrnm
         end associate
 
@@ -407,17 +407,17 @@ program shallow
         vrtnm = vrtnm + dt * ( &
             (23.0_wp/12) * dvrtdtnm(:, new) &
             - (16.0_wp/12) * dvrtdtnm(:, now) &
-            + (5.0_wp/12) * dvrtdtnm(:, old) )
+            + (5.0_wp/12) * dvrtdtnm(:, old))
 
         divnm = divnm + dt*( &
             (23.0_wp/12) * ddivdtnm(:, new) &
             - (16.0_wp/12) * ddivdtnm(:, now) &
-            + (5.0_wp/12) * ddivdtnm(:, old) )
+            + (5.0_wp/12) * ddivdtnm(:, old))
 
         pnm = pnm + dt*( &
             (23.0_wp/12) * dpdtnm(:, new) &
             - (16.0_wp/12) * dpdtnm(:, now) &
-            + (5.0_wp/12) * dpdtnm(:, old) )
+            + (5.0_wp/12) * dpdtnm(:, old))
 
         !  Switch indices
         temp_save_new = new
@@ -429,6 +429,6 @@ program shallow
 
     !  Release memory
     call solver%destroy()
-    deallocate( write_fmt )
+    deallocate (write_fmt)
 
 end program shallow

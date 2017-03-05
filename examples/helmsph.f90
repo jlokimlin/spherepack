@@ -77,14 +77,14 @@ program helmsph
     class(Sphere), pointer   :: solver
 
     ! Cast to gaussian case
-    allocate( GaussianSphere :: solver )
+    allocate (GaussianSphere :: solver)
     call test_helmholtz_inversion(solver)
-    deallocate( solver )
+    deallocate (solver)
 
     ! Cast to regular case
-    allocate( RegularSphere :: solver )
+    allocate (RegularSphere :: solver)
     call test_helmholtz_inversion(solver)
-    deallocate( solver )
+    deallocate (solver)
 
 contains
 
@@ -114,7 +114,7 @@ contains
             sphere_type = GaussianSphere(NLATS, NLONS)
 
             ! Allocate known error from previous platform
-            allocate( error_previous_platform, source='     discretization error = 2.325553e-14' )
+            allocate (error_previous_platform, source='     discretization error = 2.325553e-14')
 
             type is (RegularSphere)
 
@@ -122,23 +122,23 @@ contains
             sphere_type = RegularSphere(NLATS, NLONS)
 
             ! Allocate known error from previous platform
-            allocate( error_previous_platform, source='     discretization error = 1.202313e-14' )
+            allocate (error_previous_platform, source='     discretization error = 1.202313e-14')
         end select
 
         !  Set right hand side as helmholtz operator
         !  applied to ue = (1+x*y)*exp(z)
-        associate( &
+        associate (&
             ue => exact_solution, &
             rhs => source_term, &
             radial => sphere_type%unit_vectors%radial &
-            )
+           )
             do j=1, NLONS
                 do i=1, NLATS
-                    associate( &
+                    associate (&
                         x => radial(i, j)%x, &
                         y => radial(i, j)%y, &
                         z => radial(i, j)%z &
-                        )
+                       )
                         ue(i, j) = (ONE + x * y) * exp(z)
                         rhs(i, j) = -(x * y * ((z**2) + SIX * (z + ONE)) + z*(z + TWO)) * exp(z)
                     end associate
@@ -147,20 +147,20 @@ contains
         end associate
 
         ! Solve Helmholtz equation on the sphere
-        associate( &
+        associate (&
             xlmbda => HELMHOLTZ_CONSTANT, &
             rhs => source_term, &
             u => approximate_solution &
-            )
+           )
             call sphere_type%invert_helmholtz(xlmbda, rhs, u)
         end associate
 
         !  Compare ue with u
-        associate( &
+        associate (&
             u => approximate_solution, &
             ue => exact_solution &
-            )
-            associate( err2 => norm2(u-ue) )
+           )
+            associate (err2 => norm2(u-ue))
 
                 ! Print earlier output from platform with 64-bit floating point
                 ! arithmetic followed by the output from this computer
@@ -178,7 +178,7 @@ contains
 
         !  Release memory
         call sphere_type%destroy()
-        deallocate( error_previous_platform )
+        deallocate (error_previous_platform)
 
     end subroutine test_helmholtz_inversion
 

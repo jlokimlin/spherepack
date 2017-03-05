@@ -76,25 +76,25 @@ contains
                 //'in create_spherical_unit_vectors'
         end if
 
-        associate( &
+        associate (&
             nlat => grid%NUMBER_OF_LATITUDES, &
             nlon => grid%NUMBER_OF_LONGITUDES &
-            )
+           )
 
             ! Set constants
             self%NUMBER_OF_LATITUDES = nlat
             self%NUMBER_OF_LONGITUDES = nlon
 
             !  Allocate memory
-            allocate(self%radial(nlat, nlon) )
-            allocate(self%polar(nlat, nlon) )
-            allocate(self%azimuthal(nlat, nlon) )
+            allocate(self%radial(nlat, nlon))
+            allocate(self%polar(nlat, nlon))
+            allocate(self%azimuthal(nlat, nlon))
 
             ! Compute required trigonometric functions
             trig_func = TrigonometricTable(grid)
 
             ! Compute spherical unit vectors
-            associate( &
+            associate (&
                 r => self%radial, &
                 theta => self%polar, &
                 phi => self%azimuthal, &
@@ -102,7 +102,7 @@ contains
                 cost => trig_func%cost, &
                 sinp => trig_func%sinp, &
                 cosp => trig_func%cosp &
-                )
+               )
 
                 do j = 1, nlon
                     do i = 1, nlat
@@ -113,7 +113,7 @@ contains
                             sint(i) * cosp(j), &
                             sint(i) * sinp(j), &
                             cost(i) &
-                            )
+                           )
 
                         ! set polar unit vector
                         theta(i, j) = &
@@ -121,7 +121,7 @@ contains
                             cost(i) * cosp(j), &
                             cost(i) * sinp(j), &
                             -sint(i) &
-                            )
+                           )
 
                         ! set azimuthal unit vector
                         phi(i, j) = &
@@ -129,7 +129,7 @@ contains
                             -sinp(j), &
                             cosp(j), &
                             0.0_wp &
-                            )
+                           )
                     end do
                 end do
             end associate
@@ -149,9 +149,9 @@ contains
         if (.not.self%initialized) return
 
         ! Release memory
-        if (allocated(self%radial)) deallocate( self%radial )
-        if (allocated(self%polar)) deallocate( self%polar )
-        if (allocated(self%azimuthal)) deallocate( self%azimuthal )
+        if (allocated(self%radial)) deallocate (self%radial)
+        if (allocated(self%polar)) deallocate (self%polar)
+        if (allocated(self%azimuthal)) deallocate (self%azimuthal)
 
         ! Reset constants
         self%NUMBER_OF_LONGITUDES = 0
@@ -163,7 +163,7 @@ contains
     end subroutine destroy_spherical_unit_vectors
 
     subroutine get_spherical_angle_components(self, &
-        vector_function, polar_component, azimuthal_component )
+        vector_function, polar_component, azimuthal_component)
 
         ! Dummy arguments
         class(SphericalUnitVectors), intent(inout) :: self
@@ -182,18 +182,18 @@ contains
         end if
 
         ! Calculate the spherical angle components
-        associate( &
+        associate (&
             nlat => self%NUMBER_OF_LATITUDES, &
             nlon => self%NUMBER_OF_LONGITUDES &
-            )
+           )
             do l = 1, nlon
                 do k = 1, nlat
                     ! Cast array to vector
                     vector_field = vector_function(:, k, l)
-                    associate( &
+                    associate (&
                         theta => self%polar(k, l), &
                         phi => self%azimuthal(k, l) &
-                        )
+                       )
                         ! set the theta component
                         polar_component(k, l) = theta.dot.vector_field
                         ! set the azimuthal_component
@@ -224,20 +224,20 @@ contains
                 //'uninitialized object in GET_VECTOR_FUNCTION'
         end if
 
-        associate( &
+        associate (&
             nlat => self%NUMBER_OF_LATITUDES, &
             nlon => self%NUMBER_OF_LONGITUDES &
-            )
+           )
             do l = 1, nlon
                 do k = 1, nlat
-                    associate( &
+                    associate (&
                         r => self%radial(k, l), &
                         theta => self%polar(k, l), &
                         phi => self%azimuthal(k, l) &
-                        )
+                       )
 
                         !  Calculate the spherical angle components
-                        vector_function(:, k, l ) = &
+                        vector_function(:, k, l) = &
                             r * radial_component(k, l) &
                             + theta * polar_component(k, l) &
                             + phi * azimuthal_component(k, l)

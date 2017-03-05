@@ -418,11 +418,11 @@ contains
         if (.not.self%initialized) return
 
         if (allocated(self%real_component)) then
-            deallocate( self%real_component )
+            deallocate (self%real_component)
         end if
 
         if (allocated(self%imaginary_component)) then
-            deallocate( self%imaginary_component )
+            deallocate (self%imaginary_component)
         end if
 
         !  Reset constants
@@ -462,7 +462,7 @@ contains
         ! Initialize forward wavetable
         block
             real(wp) :: work(lwork), dwork(ldwork)
-            associate( wshags => self%scalar_forward_gaussian_saved )
+            associate (wshags => self%scalar_forward_gaussian_saved)
                 call shagsi(nlat, nlon, wshags, error_flag)
             end associate
         end block
@@ -483,7 +483,7 @@ contains
             error stop 'Unusable scalar_harmonic in spherepack_shags'
         end if
 
-        associate( &
+        associate (&
             nlat => scalar_harmonic%NUMBER_OF_LATITUDES, &
             nlon => scalar_harmonic%NUMBER_OF_LONGITUDES, &
             nt => scalar_harmonic%NUMBER_OF_SYNTHESES, &
@@ -496,7 +496,7 @@ contains
             jdg => size(scalar_function, dim=2), &
             isym => symmetries, &
             ierror => error_flag &
-            )
+           )
 
             ! Ensure that forward wavetable is usable
             if (wavetable%first_call_scalar_forward_gaussian_saved) then
@@ -508,7 +508,7 @@ contains
 
             block
                 real(wp) :: work(lwork)
-                associate( wshags => wavetable%scalar_forward_gaussian_saved )
+                associate (wshags => wavetable%scalar_forward_gaussian_saved)
                     call shags(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, &
                         wshags, lshags, work, lwork, ierror)
                 end associate

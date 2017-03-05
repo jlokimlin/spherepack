@@ -293,7 +293,7 @@ contains
             (isym == 0 .and. idiv < nlat) &
             .or. &
             (isym > 0 .and. idiv < imid) &
-            ) then
+           ) then
             ierror = 5
             return
         else if (jdiv < nlon) then

@@ -68,14 +68,14 @@ program tidvt
     class(Sphere), allocatable :: solver
 
     ! Test gaussian grid
-    allocate( GaussianSphere :: solver )
+    allocate (GaussianSphere :: solver)
     call test_divergence_vorticity_routines(solver)
-    deallocate( solver )
+    deallocate (solver)
 
     ! Test regular grid
-    allocate( RegularSphere :: solver )
+    allocate (RegularSphere :: solver)
     call test_divergence_vorticity_routines(solver)
-    deallocate( solver )
+    deallocate (solver)
 
 contains
 
@@ -115,10 +115,10 @@ contains
             call sphere_type%create(nlat=NLATS, nlon=NLONS)
 
             ! Allocate known error from previous platform
-            allocate( previous_vorticity_error, source='     vorticity error     = 5.351275e-14' )
-            allocate( previous_divergence_error, source='     divergence error    = 7.149836e-14' )
-            allocate( previous_polar_inversion_error, source='     polar inversion error     = 1.776357e-15' )
-            allocate( previous_azimuthal_inversion_error, source='     azimuthal inversion error = 1.776357e-15' )
+            allocate (previous_vorticity_error, source='     vorticity error     = 5.351275e-14')
+            allocate (previous_divergence_error, source='     divergence error    = 7.149836e-14')
+            allocate (previous_polar_inversion_error, source='     polar inversion error     = 1.776357e-15')
+            allocate (previous_azimuthal_inversion_error, source='     azimuthal inversion error = 1.776357e-15')
             !
             !  For regular sphere
             !
@@ -130,17 +130,17 @@ contains
             call sphere_type%create(nlat=NLATS, nlon=NLONS)
 
             ! Allocate known error from previous platform
-            allocate( previous_vorticity_error, source='     vorticity error     = 3.019807e-14' )
-            allocate( previous_divergence_error, source='     divergence error    = 4.141132e-14' )
-            allocate( previous_polar_inversion_error, source='     polar inversion error     = 1.554312e-15' )
-            allocate( previous_azimuthal_inversion_error, source='     azimuthal inversion error = 1.110223e-15' )
+            allocate (previous_vorticity_error, source='     vorticity error     = 3.019807e-14')
+            allocate (previous_divergence_error, source='     divergence error    = 4.141132e-14')
+            allocate (previous_polar_inversion_error, source='     polar inversion error     = 1.554312e-15')
+            allocate (previous_azimuthal_inversion_error, source='     azimuthal inversion error = 1.110223e-15')
         end select
 
         !
         !  set scalar stream and velocity potential fields as polys in x, y, z
         !    and then set v, w from st, sv scalar fields
         !
-        associate( &
+        associate (&
             ve => exact_polar_component, &
             we => exact_azimuthal_component, &
             vte => exact_vorticity, &
@@ -148,11 +148,11 @@ contains
             radial => sphere_type%unit_vectors%radial, &
             theta => sphere_type%unit_vectors%polar, &
             phi => sphere_type%unit_vectors%azimuthal &
-            )
+           )
             do k=1, NSYNTHS
                 do j=1, NLONS
                     do i=1, NLATS
-                        associate( &
+                        associate (&
                             x => radial(i, j)%x, & !sint*cosp
                             y => radial(i, j)%y, & !sint*sinp
                             z => radial(i, j)%z, & !cost
@@ -164,7 +164,7 @@ contains
                             dzdp => phi(i, j)%z, & ! 0.0
                             cosp => phi(i, j)%y, &
                             sinp => -phi(i, j)%x &
-                            )
+                           )
                             select case (k)
                                 case (1)
                                     !
@@ -212,12 +212,12 @@ contains
         !  Compute vt and dv from (ve, we)
         !
         do k=1, NSYNTHS
-            associate( &
+            associate (&
                 ve => exact_polar_component(:, :, k), &
                 we => exact_azimuthal_component(:, :, k), &
                 vt => approximate_vorticity(:, :, k), &
                 dv => approximate_divergence(:, :, k) &
-                )
+               )
                 !
                 !  Compute vorticity and divergence
                 !
@@ -228,16 +228,16 @@ contains
         !
         !  Compute "error" in dv, vt
         !
-        associate( &
+        associate (&
             vt => approximate_vorticity, &
             dv => approximate_divergence, &
             vte => exact_vorticity,  &
             dve => exact_divergence &
-            )
-            associate( &
+           )
+            associate (&
                 err2vt => maxval(abs(vt-vte)), &
                 err2dv => maxval(abs(dv-dve)) &
-                )
+               )
                 !
                 !  Print earlier output from platform with 64-bit floating point
                 !    arithmetic followed by the output from this computer
@@ -254,7 +254,7 @@ contains
                 write( stdout, '(a)') '     The output from your computer is: '
                 write( stdout, '(a, 1pe15.6)') '     vorticity error     = ', err2vt
                 write( stdout, '(a, 1pe15.6)') '     divergence error    = ', err2dv
-                write( stdout, '(a)' ) ''
+                write( stdout, '(a)') ''
             end associate
         end associate
 
@@ -262,28 +262,28 @@ contains
         !  Now compute (v, w) inverting vte, dve
         !
         do k=1, NSYNTHS
-            associate( &
+            associate (&
                 v => approximate_polar_component(:, :, k), &
                 w => approximate_azimuthal_component(:, :, k), &
                 vte => exact_vorticity(:, :, k), &
                 dve => exact_divergence(:, :, k) &
-                )
+               )
                 call sphere_type%get_velocities_from_vorticity_and_divergence(vte, dve, v, w)
             end associate
         end do
         !
         !  compare this v, w with original
         !
-        associate( &
+        associate (&
             ve => exact_polar_component, &
             we => exact_azimuthal_component, &
             v => approximate_polar_component, &
             w => approximate_azimuthal_component &
-            )
-            associate( &
+           )
+            associate (&
                 err2v => maxval(abs(v-ve)), &
                 err2w => maxval(abs(w-we)) &
-                )
+               )
                 !
                 !  Print earlier output from platform with 64-bit floating point
                 !    arithmetic followed by the output from this computer
@@ -300,15 +300,15 @@ contains
                 write( stdout, '(a)') '     The output from your computer is: '
                 write( stdout, '(a, 1pe15.6)') '     polar inversion error     = ', err2v
                 write( stdout, '(a, 1pe15.6)') '     azimuthal inversion error = ', err2w
-                write( stdout, '(a)' ) ''
+                write( stdout, '(a)') ''
             end associate
         end associate
 
         !  Release memory
-        deallocate( previous_vorticity_error )
-        deallocate( previous_divergence_error )
-        deallocate( previous_polar_inversion_error )
-        deallocate( previous_azimuthal_inversion_error )
+        deallocate (previous_vorticity_error)
+        deallocate (previous_divergence_error)
+        deallocate (previous_polar_inversion_error)
+        deallocate (previous_azimuthal_inversion_error)
         call sphere_type%destroy()
 
     end subroutine test_divergence_vorticity_routines

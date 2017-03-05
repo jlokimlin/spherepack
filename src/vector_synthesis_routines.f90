@@ -130,42 +130,30 @@ module vector_synthesis_routines
             integer(ip), intent(out) :: ierror
         end subroutine vhsgs
 
-        module subroutine vhseci(nlat, nlon, wvhsec, lvhsec, dwork, ldwork, ierror)
+        module subroutine vhseci(nlat, nlon, wvhsec, ierror)
 
             ! Dummy arguments
             integer(ip), intent(in)  :: nlat
             integer(ip), intent(in)  :: nlon
-            real(wp),    intent(out) :: wvhsec(lvhsec)
-            integer(ip), intent(in)  :: lvhsec
-            real(wp),    intent(out) :: dwork(ldwork)
-            integer(ip), intent(in)  :: ldwork
+            real(wp),    intent(out) :: wvhsec(:)
             integer(ip), intent(out) :: ierror
         end subroutine vhseci
 
-        module subroutine vhsesi(nlat, nlon, wvhses, lvhses, work, lwork, dwork, &
-            ldwork, ierror)
+        module subroutine vhsesi(nlat, nlon, wvhses, ierror)
 
             ! Dummy arguments
             integer(ip), intent(in)  :: nlat
             integer(ip), intent(in)  :: nlon
-            real(wp),    intent(out) :: wvhses(lvhses)
-            integer(ip), intent(in)  :: lvhses
-            real(wp),    intent(out) :: work(lwork)
-            integer(ip), intent(in)  :: lwork
-            real(wp),    intent(out) :: dwork(ldwork)
-            integer(ip), intent(in)  :: ldwork
+            real(wp),    intent(out) :: wvhses(:)
             integer(ip), intent(out) :: ierror
         end subroutine vhsesi
 
-        module subroutine vhsgci(nlat, nlon, wvhsgc, lvhsgc, dwork, ldwork, ierror)
+        module subroutine vhsgci(nlat, nlon, wvhsgc, ierror)
 
             ! Dummy arguments
             integer(ip), intent(in)  :: nlat
             integer(ip), intent(in)  :: nlon
-            real(wp),    intent(out) :: wvhsgc(lvhsgc)
-            integer(ip), intent(in)  :: lvhsgc
-            real(wp),    intent(out) :: dwork(ldwork)
-            integer(ip), intent(in)  :: ldwork
+            real(wp),    intent(out) :: wvhsgc(:)
             integer(ip), intent(out) :: ierror
         end subroutine vhsgci
 

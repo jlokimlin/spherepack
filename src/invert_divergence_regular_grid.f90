@@ -328,17 +328,17 @@ contains
         !
         ! Verify unsaved workspace length
         !
-        associate( mn => mmax*nlat*nt )
+        associate (mn => mmax*nlat*nt)
 
-            associate( &
+            associate (&
                 non_zero_case => nlat*(2*nt*nlon+max(6*imid, nlon))+2*mn+nlat, &
                 zero_case => imid*(2*nt*nlon+max(6*nlat, nlon))+2*mn+nlat &
-                )
-                if (isym /= 0 .and. lwork < non_zero_case ) then
+               )
+                if (isym /= 0 .and. lwork < non_zero_case) then
                     return
                 end if
 
-                if (isym == 0 .and. lwork < zero_case ) then
+                if (isym == 0 .and. lwork < zero_case) then
                     return
                 end if
             end associate

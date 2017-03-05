@@ -285,7 +285,7 @@ contains
             (isym == 0 .and. idv < nlat) &
             .or. &
             (isym > 0 .and. idv < l2) &
-            ) then
+           ) then
             ierror = 5
             return
         end if

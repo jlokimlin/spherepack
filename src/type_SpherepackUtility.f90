@@ -114,7 +114,7 @@ contains
 
         call compute_parity(nlat, nlon, l1, l2)
 
-        return_value = ( l1 * l2 * (2*nlat-l1+1) )/2 + nlon+15
+        return_value = ( l1 * l2 * (2*nlat-l1+1))/2 + nlon+15
 
     end function get_lshaes
 
@@ -539,7 +539,7 @@ contains
         !  partition w (set pointers for p0n, p1n, abel, bbel, cbel, pmn)
         workspace_indices = get_legin_workspace_indices(l, late, nlat)
 
-        associate( i => workspace_indices )
+        associate (i => workspace_indices)
             call legin_lower_utility_routine(mode, l, nlat, late, m, &
                 w(i(1)), w(i(2)), w(i(3)), w(i(4)), w(i(5)), pmn, km)
         end associate
@@ -585,11 +585,11 @@ contains
                 ninc = 2
         end select
 
-        associate( &
+        associate (&
             km0 => column_indices(0), &
             km1 => column_indices(1), &
             km2 => column_indices(2) &
-            )
+           )
 
             select case (m)
                 case(0)
@@ -644,7 +644,7 @@ contains
         integer(ip), intent(in) :: nlat
         integer(ip)             :: return_value(5)
 
-        associate( i => return_value )
+        associate (i => return_value)
             i(1) = 1+nlat
             i(2) = i(1)+nlat*late
             i(3) = i(2)+nlat*late
@@ -712,12 +712,12 @@ contains
         !
         workspace = get_zfin_workspace_indices(nlat, nlon, imid)
 
-        associate( &
+        associate (&
             iw1 => workspace(1), &
             iw2 => workspace(2), &
             iw3 => workspace(3), &
             iw4 => workspace(4) &
-            )
+           )
 
             call zfin_lower_utility_routine(isym, nlat, m, z, imid, i3, wzfin, &
                 wzfin(iw1), wzfin(iw2), wzfin(iw3), wzfin(iw4))
@@ -803,7 +803,7 @@ contains
         ! Local variables
         integer(ip) :: mmax, lim, labc
 
-        associate( i => return_value )
+        associate (i => return_value)
 
             mmax = min(nlat, nlon/2+1)
             lim = nlat*imid
@@ -1116,12 +1116,12 @@ contains
 
         workspace_indices = get_alin_workspace_indices(nlat, nlon, imid)
 
-        associate( &
+        associate (&
             iw1 => workspace_indices(1), &
             iw2 => workspace_indices(2), &
             iw3 => workspace_indices(3), &
             iw4 => workspace_indices(4) &
-            )
+           )
             !
             !     the length of walin is ((5*l-7)*l+6)/2
             !
@@ -1214,7 +1214,7 @@ contains
         ! Local variables
         integer(ip) :: lim, mmax, labc
 
-        associate( i => return_value )
+        associate (i => return_value)
 
             lim = nlat*imid
             mmax = min(nlat, nlon/2+1)

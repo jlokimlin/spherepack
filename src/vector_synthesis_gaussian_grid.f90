@@ -29,17 +29,6 @@
 !     *                                                               *
 !     * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !
-!
-!
-! ... file vhsgc.f
-!
-!     this file contains code and documentation for subroutines
-!     vhsgc and vhsgci
-!
-! ... files which must be loaded with vhsgc.f
-!
-!     type_SpherepackUtility.f, type_RealPeriodicFastFourierTransform.f, compute_gaussian_latitudes_and_weights.f
-!
 !     subroutine vhsgc(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, 
 !    +                 mdab, ndab, wvhsgc, lvhsgc, work, lwork, ierror)
 !                                                                              
@@ -353,71 +342,6 @@
 !            = 9  error in the specification of lvhsgc
 !            = 10 error in the specification of lwork
 !
-!*************************************************************
-!
-!     subroutine vhsgci(nlat, nlon, wvhsgc, lvhsgc, dwork, ldwork, ierror)
-!
-!     subroutine vhsgci initializes the array wvhsgc which can then be
-!     used repeatedly by subroutine vhsgc until nlat or nlon is changed.
-!
-!     input parameters
-!
-!     nlat   the number of points in the gaussian colatitude grid on the
-!            full sphere. these lie in the interval (0, pi) and are computed
-!            in radians in theta(1) <...< theta(nlat) by subroutine compute_gaussian_latitudes_and_weights.
-!            if nlat is odd the equator will be included as the grid point
-!            theta((nlat+1)/2).  if nlat is even the equator will be
-!            excluded as a grid point and will lie half way between
-!            theta(nlat/2) and theta(nlat/2+1). nlat must be at least 3.
-!            note: on the half sphere, the number of grid points in the
-!            colatitudinal direction is nlat/2 if nlat is even or
-!            (nlat+1)/2 if nlat is odd.
-!
-!     nlon   the number of distinct londitude points.  nlon determines
-!            the grid increment in longitude as 2*pi/nlon. for example
-!            nlon = 72 for a five degree grid. nlon must be greater
-!            than zero. the axisymmetric case corresponds to nlon=1.
-!            the efficiency of the computation is improved when nlon
-!            is a product of small prime numbers.
-!
-!     lvhsgc the dimension of the array wvhsgc as it appears in the
-!            program that calls vhsgc. define
-!
-!               l1 = min(nlat, nlon/2) if nlon is even or
-!               l1 = min(nlat, (nlon+1)/2) if nlon is odd
-!
-!            and
-!
-!               l2 = nlat/2        if nlat is even or
-!               l2 = (nlat+1)/2    if nlat is odd
-!
-!            then lvhsgc must be at least
-!
-!               4*nlat*l2+3*max(l1-2, 0)*(2*nlat-l1-1)+nlon+15
-!
-!     work  a real work space that does not need to be saved
-!
-!     ldwork the dimension of the array dwork as it appears in the
-!            program that calls vhsgsi. ldwork must be at least
-!
-!               2*nlat*(nlat+1)+1
-!
-!     **************************************************************
-!
-!     output parameters
-!
-!     wvhsgc an array which is initialized for use by subroutine vhsgc.
-!            once initialized, wvhsgc can be used repeatedly by vhsgc
-!            as long as nlat and nlon remain unchanged.  wvhsgc must not
-!            be altered between calls of vhsgc.
-!
-!
-!     ierror = 0  no errors
-!            = 1  error in the specification of nlat
-!            = 2  error in the specification of nlon
-!            = 3  error in the specification of lvhsgc
-!            = 4  error in the specification of ldwork
-!
 submodule(vector_synthesis_routines) vector_synthesis_gaussian_grid
 
 contains
@@ -526,15 +450,67 @@ contains
 
     end subroutine vhsgc
 
-    module subroutine vhsgci(nlat, nlon, wvhsgc, lvhsgc, dwork, ldwork, ierror)
+    !
+    !     subroutine vhsgci(nlat, nlon, wvhsgc, ierror)
+    !
+    !     subroutine vhsgci initializes the array wvhsgc which can then be
+    !     used repeatedly by subroutine vhsgc until nlat or nlon is changed.
+    !
+    !     input parameters
+    !
+    !     nlat   the number of points in the gaussian colatitude grid on the
+    !            full sphere. these lie in the interval (0, pi) and are computed
+    !            in radians in theta(1) <...< theta(nlat) by subroutine compute_gaussian_latitudes_and_weights.
+    !            if nlat is odd the equator will be included as the grid point
+    !            theta((nlat+1)/2).  if nlat is even the equator will be
+    !            excluded as a grid point and will lie half way between
+    !            theta(nlat/2) and theta(nlat/2+1). nlat must be at least 3.
+    !            note: on the half sphere, the number of grid points in the
+    !            colatitudinal direction is nlat/2 if nlat is even or
+    !            (nlat+1)/2 if nlat is odd.
+    !
+    !     nlon   the number of distinct londitude points.  nlon determines
+    !            the grid increment in longitude as 2*pi/nlon. for example
+    !            nlon = 72 for a five degree grid. nlon must be greater
+    !            than zero. the axisymmetric case corresponds to nlon=1.
+    !            the efficiency of the computation is improved when nlon
+    !            is a product of small prime numbers.
+    !
+    !     lvhsgc the dimension of the array wvhsgc as it appears in the
+    !            program that calls vhsgc. define
+    !
+    !               l1 = min(nlat, nlon/2) if nlon is even or
+    !               l1 = min(nlat, (nlon+1)/2) if nlon is odd
+    !
+    !            and
+    !
+    !               l2 = nlat/2        if nlat is even or
+    !               l2 = (nlat+1)/2    if nlat is odd
+    !
+    !            then lvhsgc must be at least
+    !
+    !               4*nlat*l2+3*max(l1-2, 0)*(2*nlat-l1-1)+nlon+15
+    !
+    !
+    !     output parameters
+    !
+    !     wvhsgc an array which is initialized for use by subroutine vhsgc.
+    !            once initialized, wvhsgc can be used repeatedly by vhsgc
+    !            as long as nlat and nlon remain unchanged.  wvhsgc must not
+    !            be altered between calls of vhsgc.
+    !
+    !
+    !     ierror = 0  no errors
+    !            = 1  error in the specification of nlat
+    !            = 2  error in the specification of nlon
+    !            = 3  error in the specification of lvhsgc
+    !
+    module subroutine vhsgci(nlat, nlon, wvhsgc, ierror)
 
         ! Dummy arguments
         integer(ip), intent(in)  :: nlat
         integer(ip), intent(in)  :: nlon
-        real(wp),    intent(out) :: wvhsgc(lvhsgc)
-        integer(ip), intent(in)  :: lvhsgc
-        real(wp),    intent(out) :: dwork(ldwork)
-        integer(ip), intent(in)  :: ldwork
+        real(wp),    intent(out) :: wvhsgc(:)
         integer(ip), intent(out) :: ierror
 
         ! Local variables
@@ -549,40 +525,56 @@ contains
         integer(ip) :: labc
         integer(ip) :: lwvbin
         integer(ip) :: lzz1
-        integer(ip) :: mmax
+        integer(ip) :: mmax, ldwork
 
-        imid = (nlat+1)/2
-        lzz1 = 2*nlat*imid
-        mmax = min(nlat, (nlon+1)/2)
-        labc = 3*(max(mmax-2, 0)*(2*nlat-mmax-1))/2
+        associate (lvhsgc => size(wvhsgc))
 
-        ierror = 1
-        if (nlat < 3) return
-        ierror = 2
-        if (nlon < 1) return
-        ierror = 3
-        if (lvhsgc < 2*(lzz1+labc)+nlon+15) return
-        ierror = 4
-        if (ldwork < 2*nlat*(nlat+1)+1) return
-        ierror = 0
-        !
-        ! Set workspace index pointers
-        !
-        jw1 = 1
-        jw2 = jw1+nlat
-        jw3 = jw2+nlat
-        iwrk = (nlat+1)/2 + 1
-        lwvbin = lzz1+labc
-        iw1 = lwvbin+1
-        iw2 = iw1+lwvbin
+            imid = (nlat+1)/2
+            lzz1 = 2*nlat*imid
+            mmax = min(nlat, (nlon+1)/2)
+            labc = 3*(max(mmax-2, 0)*(2*nlat-mmax-1))/2
 
-        call compute_gaussian_latitudes_and_weights(nlat, dwork(jw1), dwork(jw2), ierror)
+            ! Check calling arguments
+            if (nlat < 3) then
+                ierror = 1
+            else if (nlon < 1) then
+                ierror = 2
+            else if (lvhsgc < 2*(lzz1+labc)+nlon+15) then
+                ierror = 3
+            else
+                ierror = 0
+            end if
 
-        call util%initialize_polar_components_gaussian_grid(nlat, nlon, dwork, wvhsgc, dwork(iwrk))
+            ! Check error flag
+            if (ierror /= 0) return
 
-        call util%initialize_azimuthal_components_gaussian_grid(nlat, nlon, dwork, wvhsgc(iw1), dwork(iwrk))
+            ! Set workspace index pointers
+            jw1 = 1
+            jw2 = jw1+nlat
+            jw3 = jw2+nlat
+            iwrk = (nlat+1)/2 + 1
+            lwvbin = lzz1+labc
+            iw1 = lwvbin+1
+            iw2 = iw1+lwvbin
 
-        call util%hfft%initialize(nlon, wvhsgc(iw2))
+            ! Set required workspace size
+            ldwork = 2 * nlat * (nlat + 1) + 1
+
+            block
+                real(wp) :: dwork(ldwork)
+
+                call compute_gaussian_latitudes_and_weights( &
+                    nlat, dwork(jw1:), dwork(jw2:), ierror)
+
+                call util%initialize_polar_components_gaussian_grid(nlat, nlon, dwork, &
+                    wvhsgc, dwork(iwrk:))
+
+                call util%initialize_azimuthal_components_gaussian_grid(nlat, nlon, &
+                    dwork, wvhsgc(iw1:), dwork(iwrk:))
+
+                call util%hfft%initialize(nlon, wvhsgc(iw2:))
+            end block
+        end associate
 
     end subroutine vhsgci
 

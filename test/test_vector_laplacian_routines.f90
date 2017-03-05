@@ -71,18 +71,18 @@ program tvlap
     class(Sphere), allocatable :: solver
 
     ! Test gaussian grid
-    allocate( GaussianSphere :: solver )
+    allocate (GaussianSphere :: solver)
     call test_vector_laplacian_routines(solver)
-    deallocate( solver )
+    deallocate (solver)
 
     ! Test regular grid
-    allocate( RegularSphere :: solver )
+    allocate (RegularSphere :: solver)
     call test_vector_laplacian_routines(solver)
-    deallocate( solver )
+    deallocate (solver)
 
 contains
 
-    subroutine test_vector_laplacian_routines( sphere_type )
+    subroutine test_vector_laplacian_routines( sphere_type)
 
         ! Dummy arguments
         class(Sphere), intent(inout)  :: sphere_type
@@ -112,10 +112,10 @@ contains
             sphere_type = GaussianSphere(NLATS, NLONS)
 
             ! Allocate known error from previous platform
-            allocate( previous_polar_laplacian_error, source='     polar laplacian error     = 1.761258e-12' )
-            allocate( previous_azimuthal_laplacian_error, source='     azimuthal laplacian error = 8.710810e-13' )
-            allocate( previous_polar_inversion_error, source='     polar inversion error     = 5.551115e-16' )
-            allocate( previous_azimuthal_inversion_error, source='     azimuthal inversion error = 7.216450e-16' )
+            allocate (previous_polar_laplacian_error, source='     polar laplacian error     = 1.761258e-12')
+            allocate (previous_azimuthal_laplacian_error, source='     azimuthal laplacian error = 8.710810e-13')
+            allocate (previous_polar_inversion_error, source='     polar inversion error     = 5.551115e-16')
+            allocate (previous_azimuthal_inversion_error, source='     azimuthal inversion error = 7.216450e-16')
 
             type is (RegularSphere)
 
@@ -123,30 +123,30 @@ contains
             sphere_type = RegularSphere(NLATS, NLONS)
 
             ! Allocate known error from previous platform
-            allocate( previous_polar_laplacian_error, source='     polar laplacian error     = 3.113065e-13' )
-            allocate( previous_azimuthal_laplacian_error, source='     azimuthal laplacian error = 4.702905e-13' )
-            allocate( previous_polar_inversion_error, source='     polar inversion error     = 5.551115e-16' )
-            allocate( previous_azimuthal_inversion_error, source='     azimuthal inversion error = 5.551115e-16' )
+            allocate (previous_polar_laplacian_error, source='     polar laplacian error     = 3.113065e-13')
+            allocate (previous_azimuthal_laplacian_error, source='     azimuthal laplacian error = 4.702905e-13')
+            allocate (previous_polar_inversion_error, source='     polar inversion error     = 5.551115e-16')
+            allocate (previous_azimuthal_inversion_error, source='     azimuthal inversion error = 5.551115e-16')
         end select
 
         !
         !  test all vector laplacian and inverse vector laplacian subroutines
         !
-        associate( &
+        associate (&
             r => sphere_type%unit_vectors%radial, &
             phi => sphere_type%unit_vectors%azimuthal, &
             ve => original_polar_component, &
             we => original_azimuthal_component, &
             velap => exact_polar_laplacian, &
             welap => exact_azimuthal_laplacian &
-            )
+           )
             do j=1, NLONS
                 do i=1, NLATS
-                    associate( &
+                    associate (&
                         cost => r(i, j)%z, &
                         cosp => phi(i, j)%y, &
                         sinp => -phi(i, j)%x &
-                        )
+                       )
                         !
                         !  set vector field v, w
                         !
@@ -163,12 +163,12 @@ contains
         end associate
 
 
-        associate( &
+        associate (&
             ve => original_polar_component, &
             we => original_azimuthal_component, &
             vlap => approximate_polar_laplacian, &
             wlap => approximate_azimuthal_laplacian &
-            )
+           )
             !
             !  Compute vector laplacian
             !
@@ -179,16 +179,16 @@ contains
         !
         !  Compute laplacian error
         !
-        associate( &
+        associate (&
             velap => exact_polar_laplacian, &
             welap => exact_azimuthal_laplacian, &
             vlap => approximate_polar_laplacian, &
             wlap => approximate_azimuthal_laplacian &
-            )
-            associate( &
+           )
+            associate (&
                 err2v => maxval(abs(vlap - velap)), &
                 err2w => maxval(abs(wlap - welap)) &
-                )
+               )
 
                 !
                 !  Print earlier output from platform with 64-bit floating point
@@ -209,28 +209,28 @@ contains
         !
         !  Now recompute (v, w) inverting (velap, welap)
         !
-        associate( &
+        associate (&
             v => polar_component, &
             w => azimuthal_component, &
             velap => exact_polar_laplacian, &
             welap => exact_azimuthal_laplacian &
-            )
-            call sphere_type%invert_laplacian( velap, welap, v, w )
+           )
+            call sphere_type%invert_laplacian( velap, welap, v, w)
         end associate
 
         !
         !  compare this v, w with original
         !
-        associate( &
+        associate (&
             ve => original_polar_component, &
             we => original_azimuthal_component, &
             v => polar_component, &
             w => azimuthal_component &
-            )
-            associate( &
+           )
+            associate (&
                 err2v => maxval(abs(v - ve)), &
                 err2w => maxval(abs(w - we)) &
-                )
+               )
                 !
                 !  Print earlier output from platform with 64-bit floating point
                 !    arithmetic followed by the output from this computer
@@ -249,10 +249,10 @@ contains
         end associate
         !
         !  Release memory
-        deallocate( previous_polar_laplacian_error )
-        deallocate( previous_polar_inversion_error )
-        deallocate( previous_azimuthal_laplacian_error )
-        deallocate( previous_azimuthal_inversion_error )
+        deallocate (previous_polar_laplacian_error)
+        deallocate (previous_polar_inversion_error)
+        deallocate (previous_azimuthal_laplacian_error)
+        deallocate (previous_azimuthal_inversion_error)
         call sphere_type%destroy()
 
     end subroutine test_vector_laplacian_routines

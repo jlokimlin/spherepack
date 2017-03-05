@@ -418,7 +418,7 @@ contains
             (ityp <= 2 .and. idvw < nlat) &
             .or. &
             (ityp > 2 .and. idvw < imid) &
-            ) then
+           ) then
             ierror = 5
             return
         else if (jdvw < nlon) then
@@ -443,7 +443,7 @@ contains
         !  Compute workspace indices
         workspace_indices = get_vhsgs_workspace_indices(nlat, imid, ist, lnl)
 
-        associate( &
+        associate (&
             jw1 => workspace_indices(1), &
             jw2 => workspace_indices(2), &
             jw3 => workspace_indices(3), &
@@ -451,7 +451,7 @@ contains
             iw2 => workspace_indices(5), &
             iw3 => workspace_indices(6), &
             iw4 => workspace_indices(7) &
-            )
+           )
             call vhsgs_lower_utility_routine(nlat, nlon, ityp, nt, imid, idvw, jdvw, v, w, mdab, ndab, &
                 br, bi, cr, ci, idv, work, work(iw1), work(iw2), work(iw3), &
                 work(iw4), idz, wvhsgs(jw1), wvhsgs(jw2), wvhsgs(jw3))
@@ -541,7 +541,7 @@ contains
         integer(ip) :: imid, lmn, ldwork
         type(SpherepackUtility) :: util
 
-        associate( lvhsgs => size(wvhsgs) )
+        associate (lvhsgs => size(wvhsgs))
 
             imid = (nlat+1)/2
             lmn = (nlat*(nlat+1))/2
@@ -601,7 +601,7 @@ contains
         ! Local variables
         integer(ip) :: lmn
 
-        associate( i => return_value )
+        associate (i => return_value)
             !
             !  set wvhsgs pointers
             !

@@ -251,7 +251,7 @@ program tvrt
             !
             !     analyze vector field
             !
-            call vhaeci(nlat, nlon, wsave, lsave, dwork, ldwork, ierror)
+            call vhaeci(nlat, nlon, wsave, ierror)
             call name("vhai")
             call iout(ierror, "ierr")
 
@@ -403,7 +403,7 @@ program tvrt
                 !
                 !     set vector field (ve, we) with br=bi=0.0 for comparison with inverted vt
                 !
-                call vhseci(nlat, nlon, wsave, lsave, dwork, ldwork, ierror)
+                call vhseci(nlat, nlon, wsave, ierror)
                 call name("vhsi")
                 call iout(ierror, "ierr")
         		
@@ -432,7 +432,7 @@ program tvrt
                 !     end do
                 !     end if
         		
-                call vhseci(nlat, nlon, wsave, lsave, dwork, ldwork, ierror)
+                call vhseci(nlat, nlon, wsave, ierror)
                 call name("vhsi")
                 call iout(ierror, "ierr")
         		
@@ -447,7 +447,7 @@ program tvrt
                 !
                 !     set vector field (ve, we) with br=bi=0.0 for comparison with inverted vt
                 !
-                call vhsesi(nlat, nlon, wsave, lsave, work, lwork, dwork, ldwork, ierror)
+                call vhsesi(nlat, nlon, wsave, ierror)
                 call name("vhsi")
                 call iout(ierror, "ierr")
         		
@@ -468,7 +468,7 @@ program tvrt
                 call iout(lsave, "lsav")
                 call iout(lwork, "lwrk")
         		
-                call vhsesi(nlat, nlon, wsave, lsave, work, lwork, dwork, ldwork, ierror)
+                call vhsesi(nlat, nlon, wsave, ierror)
                 call name("ivti")
                 call iout(ierror, "ierr")
         		
@@ -483,7 +483,7 @@ program tvrt
                 !
                 !     set vector field (ve, we) with br=bi=0.0 for comparison with inverted vt
                 !
-                call vhsgci(nlat, nlon, wsave, lsave, dwork, ldwork, ierror)
+                call vhsgci(nlat, nlon, wsave, ierror)
                 call name("vhsi")
                 call iout(ierror, "ierr")
         		
@@ -504,7 +504,7 @@ program tvrt
                 call iout(lsave, "lsav")
                 call iout(lwork, "lwrk")
         		
-                call vhsgci(nlat, nlon, wsave, lsave, dwork, ldwork, ierror)
+                call vhsgci(nlat, nlon, wsave, ierror)
                 call name("ivti")
                 call iout(ierror, "ierr")
         		

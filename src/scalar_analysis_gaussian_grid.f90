@@ -412,7 +412,7 @@ contains
         integer(ip) :: l2
         integer(ip) :: late, ldwork
 
-        associate( lshagc => size(wshagc) )
+        associate (lshagc => size(wshagc))
 
             ! set triangular truncation limit for spherical harmonic basis
             ntrunc = min((nlon+2)/2, nlat)

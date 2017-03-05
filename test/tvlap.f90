@@ -110,7 +110,7 @@ program tvlap
     parameter(nnlat=29 , nnlon= 16, nnt = 1)
     parameter (mmdbc = (nnlon+2)/2)
     parameter (lleng= 5*nnlat*nnlat*nnlon, llsav=15*nnlat*nnlat*nnlon)
-    parameter (lldwork = 4*nnlat*nnlat )
+    parameter (lldwork = 4*nnlat*nnlat)
     real dwork(lldwork)
     dimension work(lleng), wsave(llsav)
     dimension br(mmdbc, nnlat, nnt), bi(mmdbc, nnlat, nnt)
@@ -198,7 +198,7 @@ program tvlap
             !
             !     analyze vector field
             !
-            call vhaeci(nlat, nlon, wsave, lsave, dwork, ldwork, ierror)
+            call vhaeci(nlat, nlon, wsave, ierror)
             call name("vhai")
             call iout(ierror, "ierr")
 
@@ -220,7 +220,7 @@ program tvlap
             !     compute vector laplacian
             !
 
-            call vhseci(nlat, nlon, wsave, lsave, dwork, ldwork, ierror)
+            call vhseci(nlat, nlon, wsave, ierror)
             call name("vhsi")
             call iout(ierror, "ierr")
 
@@ -236,7 +236,7 @@ program tvlap
             !
             !     analyze vector field
             !
-            call vhaesi(nlat, nlon, wsave, lsave, work, lwork, dwork, ldwork, ierror)
+            call vhaesi(nlat, nlon, wsave, ierror)
             call name("vhaesi")
             call iout(ierror, "ierr")
 
@@ -245,7 +245,7 @@ program tvlap
             call name("vhaes")
             call iout(ierror, "ierr")
 
-            call vhsesi(nlat, nlon, wsave, lsave, work, lwork, dwork, ldwork, ierror)
+            call vhsesi(nlat, nlon, wsave, ierror)
             call name("vhsesi")
             call iout(ierror, "ierr")
 
@@ -254,13 +254,13 @@ program tvlap
             call name("vlapes")
             call iout(ierror, "ierr")
 
-        else if (icase ==3 ) then
+        else if (icase ==3) then
 
             call name("**gc")
             !
             !     analyze vector field
             !
-            call vhagci(nlat, nlon, wsave, lsave, dwork, ldwork, ierror)
+            call vhagci(nlat, nlon, wsave, ierror)
             call name("vhagci")
             call iout(ierror, "ierr")
 
@@ -282,7 +282,7 @@ program tvlap
             !     compute vector laplacian
             !
 
-            call vhsgci(nlat, nlon, wsave, lsave, dwork, ldwork, ierror)
+            call vhsgci(nlat, nlon, wsave, ierror)
             call name("vhsgci")
             call iout(ierror, "ierr")
 
@@ -297,7 +297,7 @@ program tvlap
             !
             !     analyze vector field
             !
-            call vhagsi(nlat, nlon, wsave, lsave, dwork, ldwork, ierror)
+            call vhagsi(nlat, nlon, wsave, ierror)
             call name("vhagsi")
             call iout(ierror, "ierr")
 
@@ -378,7 +378,7 @@ program tvlap
             !
             !     analyze vector field (vlap, wlap)
             !
-            call vhaeci(nlat, nlon, wsave, lsave, dwork, ldwork, ierror)
+            call vhaeci(nlat, nlon, wsave, ierror)
             call name("vhaeci")
             call iout(ierror, "ierr")
 
@@ -387,7 +387,7 @@ program tvlap
             call name("vhaec ")
             call iout(ierror, "ierr")
 
-            call vhseci(nlat, nlon, wsave, lsave, dwork, ldwork, ierror)
+            call vhseci(nlat, nlon, wsave, ierror)
             call name("vhseci")
             call iout(ierror, "ierr")
 
@@ -402,7 +402,7 @@ program tvlap
             !
             !     analyze vector field (vlap, wlap)
             !
-            call vhaesi(nlat, nlon, wsave, lsave, work, lwork, dwork, ldwork, ierror)
+            call vhaesi(nlat, nlon, wsave, ierror)
             call name("vhaesi")
             call iout(ierror, "ierr")
 
@@ -411,7 +411,7 @@ program tvlap
             call name("vhaes")
             call iout(ierror, "ierr")
 
-            call vhsesi(nlat, nlon, wsave, lsave, work, lwork, dwork, ldwork, ierror)
+            call vhsesi(nlat, nlon, wsave, ierror)
             call name("vhsesi")
             call iout(ierror, "ierr")
 
@@ -427,7 +427,7 @@ program tvlap
             !
             !     analyze vector field (vlap, wlap)
             !
-            call vhagci(nlat, nlon, wsave, lsave, dwork, ldwork, ierror)
+            call vhagci(nlat, nlon, wsave, ierror)
             call name("vhagci")
             call iout(ierror, "ierr")
 
@@ -436,7 +436,7 @@ program tvlap
             call name("vhagc")
             call iout(ierror, "ierr")
 
-            call vhsgci(nlat, nlon, wsave, lsave, work, ldwork, ierror)
+            call vhsgci(nlat, nlon, wsave, ierror)
             call name("vhsgci")
             call iout(ierror, "ierr")
 
@@ -452,7 +452,7 @@ program tvlap
             !
             !     analyze vector field (vlap, wlap)
             !
-            call vhagsi(nlat, nlon, wsave, lsave, dwork, ldwork, ierror)
+            call vhagsi(nlat, nlon, wsave, ierror)
             call name("vhagsi")
             call iout(ierror, "ierr")
 

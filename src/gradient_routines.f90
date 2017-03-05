@@ -218,7 +218,7 @@ contains
         integer(ip) :: n
         real(wp)    :: fn
 
-        associate( nlat => size(sqnn) )
+        associate (nlat => size(sqnn))
             do n=2, nlat
                 fn = real(n - 1, kind=wp)
                 sqnn(n) = sqrt(fn * (fn + ONE))
@@ -241,11 +241,11 @@ contains
         ! Local variables
         integer(ip) :: k, n, m
 
-        associate( &
+        associate (&
             mmax => size(br, dim=1), &
             nlat => size(br, dim=2), &
             nt => size(br, dim=3) &
-            )
+           )
 
             ! Preset coefficient multiplyers in vector
             call compute_coefficient_multipliers(sqnn)
@@ -296,10 +296,10 @@ contains
         ! Local variables
         integer(ip) :: k, n, m, mmax
 
-        associate( &
+        associate (&
             nlat => size(a, dim=2), &
             nt => size(a, dim=3) &
-            )
+           )
 
             ! Preset coefficient multiplyers in vector
             call compute_coefficient_multipliers(sqnn)

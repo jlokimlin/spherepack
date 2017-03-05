@@ -222,22 +222,22 @@
 !
 !     = -1
 !     if the latitude (or colatitude) grid for da is an equally spaced
-!     partition of [-pi/2, pi/2] ( or [0, pi] ) including the poles which
+!     partition of [-pi/2, pi/2] ( or [0, pi]) including the poles which
 !     runs north to south
 !
 !     = +1
 !     if the latitude (or colatitude) grid for da is an equally spaced
-!     partition of [-pi/2, pi/2] ( or [0, pi] ) including the poles which
+!     partition of [-pi/2, pi/2] ( or [0, pi]) including the poles which
 !     runs south to north
 !
 !     = -2
 !     if the latitude (or colatitude) grid for da is a gaussian partition
-!     of (-pi/2, pi/2) ( or (0, pi) ) excluding the poles which runs north
+!     of (-pi/2, pi/2) ( or (0, pi)) excluding the poles which runs north
 !     to south
 !
 !     = +2
 !     if the latitude (or colatitude) grid for da is a gaussian partition
-!     of (-pi/2, pi/2) ( or (0, pi) ) excluding the poles which runs south
+!     of (-pi/2, pi/2) ( or (0, pi)) excluding the poles which runs south
 !     north
 !
 !     igrida(2)
@@ -292,22 +292,22 @@
 !
 !     = -1
 !     if the latitude (or colatitude) grid for db is an equally spaced
-!     partition of [-pi/2, pi/2] ( or [0, pi] ) including the poles which
+!     partition of [-pi/2, pi/2] ( or [0, pi]) including the poles which
 !     north to south
 !
 !     = +1
 !     if the latitude (or colatitude) grid for db is an equally spaced
-!     partition of [-pi/2, pi/2] ( or [0, pi] ) including the poles which
+!     partition of [-pi/2, pi/2] ( or [0, pi]) including the poles which
 !     south to north
 !
 !     = -2
 !     if the latitude (or colatitude) grid for db is a gaussian partition
-!     of (-pi/2, pi/2) ( or (0, pi) ) excluding the poles which runs north to
+!     of (-pi/2, pi/2) ( or (0, pi)) excluding the poles which runs north to
 !     south
 !
 !     = +2
 !     if the latitude (or colatitude) grid for db is a gaussian partition
-!     of (-pi/2, pi/2) ( or (0, pi) ) excluding the poles which runs south to
+!     of (-pi/2, pi/2) ( or (0, pi)) excluding the poles which runs south to
 !     north
 !
 !

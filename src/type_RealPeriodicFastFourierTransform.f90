@@ -907,17 +907,17 @@ contains
         real(wp)    :: dc2, ai1, ai2, ar1, ar2, ds2
         real(wp)    :: ar1h, ar2h
 
-        associate( &
+        associate (&
             ipph => (iip+1)/2, &
             ipp2 => iip+2, &
             idp2 => ido+2, &
             nbd => (ido-1)/2, &
             arg => TWO_PI/iip &
-            )
-            associate( &
+           )
+            associate (&
                 dcp => cos(arg), &
                 dsp => sin(arg) &
-                )
+               )
 
                 if (ido /= 1) then
                     ch2(:mp, :idl1, 1) = c2(:mp, :idl1, 1)

@@ -349,7 +349,7 @@ contains
         !  Compute workspace pointers
         workspace_indices = get_vhags_workspace_indices(nlat, imid, ist, lnl)
 
-        associate( &
+        associate (&
             jw1 => workspace_indices(1), &
             jw2 => workspace_indices(2), &
             jw3 => workspace_indices(3), &
@@ -367,7 +367,7 @@ contains
 
     ! Purpose:
     !
-    !     subroutine vhagsi(nlat, nlon, wvhags, lvhags, dwork, ldwork, ierror)
+    !     subroutine vhagsi(nlat, nlon, wvhags, ierror)
     !
     !     subroutine vhagsi initializes the array wvhags which can then be
     !     used repeatedly by subroutine vhags until nlat or nlon is changed.
@@ -397,15 +397,6 @@ contains
     !
     !               3*nlat*(nlat+1)+2  (required by vhagsi)
     !
-    !     dwork  a real work space that does not need to be saved
-    !
-    !     ldwork the dimension of the array dwork as it appears in the
-    !            program that calls vhagsi. ldwork must be at least
-    !
-    !                   (3*nlat*(nlat+3)+2)/2
-    !
-    !     **************************************************************
-    !
     !     output parameters
     !
     !     wvhags an array which is initialized for use by subroutine vhags.
@@ -418,59 +409,64 @@ contains
     !            = 1  error in the specification of nlat
     !            = 2  error in the specification of nlon
     !            = 3  error in the specification of lvhags
-    !            = 4  error in the specification of ldwork
     !
-    module subroutine vhagsi(nlat, nlon, wvhags, lvhags, dwork, ldwork, ierror)
+    module subroutine vhagsi(nlat, nlon, wvhags, ierror)
 
         ! Dummy arguments
         integer(ip), intent(in)  :: nlat
         integer(ip), intent(in)  :: nlon
-        real(wp),    intent(out) :: wvhags(lvhags)
-        integer(ip), intent(in)  :: lvhags
-        real(wp),    intent(out) :: dwork(ldwork)
-        integer(ip), intent(in)  :: ldwork
+        real(wp),    intent(out) :: wvhags(:)
         integer(ip), intent(out) :: ierror
 
         ! Local variables
-        integer(ip)    :: imid, lmn
-        integer(ip)    :: workspace_indices(7)
+        integer(ip)  :: imid, lmn, ldwork
+        integer(ip)  :: workspace_indices(7)
         type(SpherepackUtility) :: util
 
-        imid = (nlat+1)/2
-        lmn = (nlat*(nlat+1))/2
+        associate (lvhags => size(wvhags))
 
-        !  Check calling arguments
-        if (nlat < 3) then
-            ierror = 1
-            return
-        else if (nlon < 1) then
-            ierror = 2
-            return
-        else if (lvhags < 2*(imid*lmn)+ nlon + 15) then
-            ierror = 3
-            return
-        else if (ldwork < (nlat*(3*nlat+9)+2)/2) then
-            ierror = 4
-            return
-        else
-            ierror = 0
-        end if
+            imid = (nlat+1)/2
+            lmn = (nlat*(nlat+1))/2
 
-        !  Compute workspace indices
-        workspace_indices = get_vhagsi_workspace_indices(nlat, imid, lmn)
+            !  Check calling arguments
+            if (nlat < 3) then
+                ierror = 1
+            else if (nlon < 1) then
+                ierror = 2
+            else if (lvhags < 2*(imid*lmn)+ nlon + 15) then
+                ierror = 3
+            else
+                ierror = 0
+            end if
 
-        associate( &
-            jw1 => workspace_indices(1), &
-            jw2 => workspace_indices(2), &
-            jw3 => workspace_indices(3), &
-            iw1 => workspace_indices(4), &
-            iw2 => workspace_indices(5), &
-            iw3 => workspace_indices(6), &
-            iw4 => workspace_indices(7) &
-            )
-            call precompute_associated_legendre_functions(nlat, imid, wvhags(jw1), wvhags(jw2), &
-                dwork(iw1), dwork(iw2), dwork(iw3), dwork(iw4))
-            call util%hfft%initialize(nlon, wvhags(jw3))
+            ! Check error flag
+            if (ierror /= 0) return
+
+            !  Compute workspace indices
+            workspace_indices = get_vhagsi_workspace_indices(nlat, imid, lmn)
+
+            associate (&
+                jw1 => workspace_indices(1), &
+                jw2 => workspace_indices(2), &
+                jw3 => workspace_indices(3), &
+                iw1 => workspace_indices(4), &
+                iw2 => workspace_indices(5), &
+                iw3 => workspace_indices(6), &
+                iw4 => workspace_indices(7) &
+                )
+
+                ! Set required workspace size
+                ldwork = (nlat*(3*nlat+9)+2)/2
+                block
+                    real(wp) :: dwork(ldwork)
+
+                    call precompute_associated_legendre_functions( &
+                        nlat, imid, wvhags(jw1:), wvhags(jw2:), &
+                        dwork(iw1:), dwork(iw2:), dwork(iw3:), dwork(iw4:))
+                end block
+
+                call util%hfft%initialize(nlon, wvhags(jw3:))
+            end associate
         end associate
 
     end subroutine vhagsi
@@ -488,7 +484,7 @@ contains
         ! Local variables
         integer(ip) :: lmn
 
-        associate( i => return_value )
+        associate (i => return_value)
             !
             !  set wvhags pointers
             !
@@ -1230,7 +1226,7 @@ contains
         integer(ip)              :: return_value(7)
 
         ! Set workspace pointers for indices
-        associate( i => return_value )
+        associate (i => return_value)
             i(1) = 1
             i(2) = i(1)+imid*lmn
             i(3) = i(2)+imid*lmn

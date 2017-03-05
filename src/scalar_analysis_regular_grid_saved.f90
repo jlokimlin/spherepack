@@ -290,7 +290,7 @@ contains
             (isym == 0 .and. idg < nlat) &
             .or. &
             (isym /= 0 .and. idg < (nlat+1)/2) &
-            ) then
+           ) then
             ierror = 5
             return
         else if (jdg < nlon) then
@@ -424,7 +424,7 @@ contains
         integer(ip) :: lwork, ldwork
         type(SpherepackUtility) :: util
 
-        associate( lshaes => size(wshaes) )
+        associate (lshaes => size(wshaes))
 
             mmax = min(nlat, nlon/2+1)
             imid = (nlat+1)/2
@@ -455,11 +455,11 @@ contains
             !  Compute wavetable
             block
                 real(wp) :: work(lwork), dwork(ldwork)
-                associate( &
+                associate (&
                     idz => workspace_indices(1), &
                     iw1 => workspace_indices(2), &
                     iw2 => workspace_indices(3) &
-                    )
+                   )
                     call util%initialize_scalar_analysis_regular_grid_saved( &
                         nlat, nlon, imid, wshaes, idz, work, work(iw1:), dwork)
 
@@ -659,7 +659,7 @@ contains
         integer(ip), intent(in) :: lzimn
         integer(ip)             :: return_value(NUMBER_OF_WORKSPACE_INDICES)
 
-        associate( i => return_value )
+        associate (i => return_value)
             i(1) = (mmax*(2*nlat-mmax+1))/2
             i(2) = 3*nlat*imid+1
             i(3) = lzimn + 1

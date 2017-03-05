@@ -412,15 +412,12 @@ contains
 
     end subroutine vhagc
 
-    module subroutine vhagci(nlat, nlon, wvhagc, lvhagc, dwork, ldwork, ierror)
+    module subroutine vhagci(nlat, nlon, wvhagc, ierror)
 
         ! Dummy arguments
         integer(ip), intent(in)  :: nlat
         integer(ip), intent(in)  :: nlon
-        real(wp),    intent(out) :: wvhagc(lvhagc)
-        integer(ip), intent(in)  :: lvhagc
-        real(wp),    intent(out) :: dwork(ldwork)
-        integer(ip), intent(in)  :: ldwork
+        real(wp),    intent(out) :: wvhagc(:)
         integer(ip), intent(out) :: ierror
 
         ! Local variables
@@ -433,60 +430,69 @@ contains
         integer(ip) :: jw2
         integer(ip) :: jw3
         integer(ip) :: labc
-
-        integer(ip) :: lwk
         integer(ip) :: lwvbin
         integer(ip) :: lzz1
-        integer(ip) :: mmax
+        integer(ip) :: mmax, ldwork
         type(SpherepackUtility) :: util
 
-        ierror = 1
-        if (nlat < 3) return
-        ierror = 2
-        if (nlon < 1) return
-        ierror = 3
-        imid = (nlat+1)/2
-        lzz1 = 2*nlat*imid
-        mmax = min(nlat, (nlon+1)/2)
-        labc = 3*(max(mmax-2, 0)*(nlat+nlat-mmax-1))/2
-        imid = (nlat+1)/2
-        if (lvhagc < 2*(lzz1+labc)+nlon+imid+15) return
-        ierror = 4
-        if (ldwork < 2*nlat*(nlat+1)+1) return
-        ierror = 0
-        !
-        !     compute gaussian points in first nlat+1 words of dwork
-        !     real
-        !
-        lwk = nlat*(nlat+2)
+        associate (lvhagc => size(wvhagc))
 
-        jw1 = 1
-        !     jw2 = jw1+nlat+nlat
-        !     jw3 = jw2+nlat+nlat
-        jw2 = jw1+nlat
-        jw3 = jw2+nlat
-        call compute_gaussian_latitudes_and_weights(nlat, dwork(jw1), dwork(jw2), ierror)
-        imid = (nlat+1)/2
-        !
-        !     set first imid words of real weights in dwork
-        !     as single precision in first imid words of wvhagc
-        !
-        call copy_gaussian_weights(imid, dwork(nlat+1), wvhagc)
-        !
-        !     first nlat+1 words of dwork contain  double theta
-        !
-        !     iwrk = nlat+2
-        iwrk = (nlat+1)/2 +1
-        iw1 = imid+1
-        lwvbin = lzz1+labc
-        iw2 = iw1+lwvbin
-        iw3 = iw2+lwvbin
+            imid = (nlat+1)/2
+            lzz1 = 2*nlat*imid
+            mmax = min(nlat, (nlon+1)/2)
+            labc = 3*(max(mmax-2, 0)*(nlat+nlat-mmax-1))/2
+            imid = (nlat+1)/2
 
-        call util%initialize_polar_components_gaussian_grid(nlat, nlon, dwork, wvhagc(iw1), dwork(iwrk))
+             ! Check calling arguments
+            if (nlat < 3) then
+                ierror = 1
+            else if (nlon < 1) then
+                ierror = 2
+            else if (lvhagc < 2*(lzz1+labc)+nlon+imid+15) then
+                ierror = 3
+            else
+                ierror = 0
+            end if
 
-        call util%initialize_azimuthal_components_gaussian_grid(nlat, nlon, dwork, wvhagc(iw2), dwork(iwrk))
+            ! Check error flag
+            if (ierror /= 0) return
 
-        call util%hfft%initialize(nlon, wvhagc(iw3))
+            ! Set required workspace size
+            ldwork = 2*nlat*(nlat+1)+1
+
+            block
+                real(wp) :: dwork(ldwork)
+
+                ! Compute gaussian points in first nlat+1 words of dwork
+                jw1 = 1
+                jw2 = jw1+nlat
+                jw3 = jw2+nlat
+
+                call compute_gaussian_latitudes_and_weights( &
+                    nlat, dwork(jw1:), dwork(jw2:), ierror)
+
+                imid = (nlat+1)/2
+
+                ! set first imid words of real weights in dwork
+                ! as single precision in first imid words of wvhagc
+                call copy_gaussian_weights(imid, dwork(nlat+1:), wvhagc)
+
+                ! first nlat+1 words of dwork contain  double theta
+                iwrk = (nlat+1)/2 +1
+                iw1 = imid+1
+                lwvbin = lzz1+labc
+                iw2 = iw1+lwvbin
+                iw3 = iw2+lwvbin
+
+                call util%initialize_polar_components_gaussian_grid( &
+                    nlat, nlon, dwork, wvhagc(iw1:), dwork(iwrk:))
+
+                call util%initialize_azimuthal_components_gaussian_grid( &
+                    nlat, nlon, dwork, wvhagc(iw2:), dwork(iwrk:))
+
+                call util%hfft%initialize(nlon, wvhagc(iw3:))
+            end block
+        end associate
 
     end subroutine vhagci
 
@@ -554,7 +560,7 @@ contains
             wo(idv, nlon, *), wts(*), wvbin(*), wwbin(*), wrfft(*), &
             vb(imid, nlat, 3), wb(imid, nlat, 3)
 
- type(SpherepackUtility) :: util
+        type(SpherepackUtility) :: util
 
         nlp1 = nlat+1
         tsn = TWO/nlon

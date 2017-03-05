@@ -256,7 +256,7 @@ contains
         integer(ip) :: lwork, lat, late, ifft, ipmn, iwts
         type(SpherepackUtility) :: util
 
-        associate( lshags => size(wshags) )
+        associate (lshags => size(wshags))
 
             ! Set m limit for pmn
             l = min((nlon+2)/2, nlat)
@@ -422,7 +422,7 @@ contains
         integer(ip) :: ntrunc, l1, l2, late, lp, ldw, ipmnf
         integer(ip) :: lwork, ldwork
 
-        associate( lshags => size(wshags) )
+        associate (lshags => size(wshags))
 
             ! set triangular truncation limit for spherical harmonic basis
             ntrunc = min((nlon+2)/2, nlat)
@@ -790,7 +790,7 @@ contains
         !  Compute workspace index pointers
         workspace_indices = shags_get_workspace_indices(nlat, late, ntrunc)
 
-        associate( &
+        associate (&
             i1 => workspace_indices(1), &
             i2 => workspace_indices(2), &
             i3 => workspace_indices(3), &
@@ -801,7 +801,7 @@ contains
             idth => workspace_indices(8), &
             idwts => workspace_indices(9), &
             iw => workspace_indices(10) &
-            )
+           )
 
             call shagsp_lower_utility_routine(nlat, nlon, ntrunc, late, wshags(i1), wshags(i2), wshags(i3), &
                 wshags(i4), wshags(i5), wshags(i6), wshags(i7), dwork(idth), &
@@ -826,7 +826,7 @@ contains
         integer(ip), intent(in)  :: l
         integer(ip)              :: return_value(SIZE_OF_WORKSPACE_INDICES)
 
-        associate( i => return_value )
+        associate (i => return_value)
             i(1) = 1
             i(2) = i(1)+nlat
             i(3) = i(2)+nlat*late

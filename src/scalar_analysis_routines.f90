@@ -197,7 +197,7 @@ contains
 
         call util%compute_parity(nlat, nlon, l1, l2)
 
-        return_value = ( l1 * l2 * (2*nlat-l1+1) )/2 + nlon+15
+        return_value = ( l1 * l2 * (2*nlat-l1+1))/2 + nlon+15
 
     end function get_lshaes
 

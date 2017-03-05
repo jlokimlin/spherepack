@@ -235,7 +235,7 @@ contains
         integer(ip) :: n
         real(wp)    :: fn
 
-        associate( nlat => size(fnn) )
+        associate (nlat => size(fnn))
             do n=2, nlat
                 fn = real(n - 1, kind=wp)
                 fnn(n) = -fn * (fn + ONE)
@@ -261,11 +261,11 @@ contains
         ! Local variables
         integer(ip) :: k, n, m
 
-        associate( &
+        associate (&
             mmax => size(brlap, dim=1), &
             nlat => size(brlap, dim=2), &
             nt => size(brlap, dim=3) &
-            )
+           )
 
             ! Preset coefficient multiplyers in vector
             call compute_coefficient_multipliers(fnn)
@@ -359,7 +359,7 @@ contains
         integer(ip), intent(in) :: lwork
         integer(ip)             :: return_values(7)
 
-        associate( i => return_values )
+        associate (i => return_values)
             i(1) = 1
             select case(ityp)
                 case(0, 3, 6)
@@ -407,11 +407,11 @@ contains
         ! Local variables
         integer(ip) :: k, n, m
 
-        associate( &
+        associate (&
             mmax => size(brvw, dim=1), &
             nlat => size(brvw, dim=2), &
             nt => size(brvw, dim=3) &
-            )
+           )
 
             ! Preset coefficient multiplyers in vector
             call compute_coefficient_multipliers(fnn)

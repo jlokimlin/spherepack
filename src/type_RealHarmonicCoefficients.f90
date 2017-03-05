@@ -88,8 +88,8 @@ contains
         ndab = nlat
 
         !  Allocate memory
-        allocate( self%real_component(mdab, ndab) )!, nt) )
-        allocate( self%imaginary_component(mdab, ndab) )!, nt) )
+        allocate (self%real_component(mdab, ndab))!, nt))
+        allocate (self%imaginary_component(mdab, ndab))!, nt))
 
         ! Set flag
         self%initialized = .true.
@@ -127,11 +127,11 @@ contains
         if (.not.self%initialized) return
 
         if (allocated(self%real_component)) then
-            deallocate( self%real_component )
+            deallocate (self%real_component)
         end if
 
         if (allocated(self%imaginary_component)) then
-            deallocate( self%imaginary_component )
+            deallocate (self%imaginary_component)
         end if
 
         !  Reset constants

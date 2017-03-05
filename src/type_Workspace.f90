@@ -84,23 +84,23 @@ contains
 
         !  Release memory
         if (allocated(self%legendre_workspace)) then
-            deallocate(self%legendre_workspace)
+            deallocate (self%legendre_workspace)
         end if
 
         if (allocated(self%forward_scalar)) then
-            deallocate(self%forward_scalar)
+            deallocate (self%forward_scalar)
         end if
 
         if (allocated(self%forward_vector)) then
-            deallocate(self%forward_vector)
+            deallocate (self%forward_vector)
         end if
 
         if (allocated(self%backward_scalar)) then
-            deallocate(self%backward_scalar)
+            deallocate (self%backward_scalar)
         end if
 
         if (allocated(self%backward_vector)) then
-            deallocate(self%backward_vector)
+            deallocate (self%backward_vector)
         end if
 
         ! Release memory from derived data types

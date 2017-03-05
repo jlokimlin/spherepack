@@ -144,16 +144,15 @@ contains
         integer(ip),             intent(in)    :: nlon
 
         ! Local variables
-        integer(ip)    :: error_flag
-        integer(ip)    :: lshaes
+        integer(ip)    :: error_flag, lshaes
         type(ShaesAux) :: aux
 
         ! Compute dimensions of various workspace arrays
         lshaes = aux%get_lshaes(nlat, nlon)
 
         ! Allocate memory
-        if (allocated(self%forward_scalar)) deallocate( self%forward_scalar )
-        allocate( self%forward_scalar(lshaes) )
+        if (allocated(self%forward_scalar)) deallocate (self%forward_scalar)
+        allocate (self%forward_scalar(lshaes))
 
         ! Call procedural routine
         call aux%shaesi(nlat, nlon, self%forward_scalar, error_flag)
@@ -201,8 +200,8 @@ contains
         lshses = aux%get_lshses(nlat, nlon)
 
         !  Allocate memory
-        if (allocated(self%backward_scalar)) deallocate( self%backward_scalar )
-        allocate( self%backward_scalar(lshses) )
+        if (allocated(self%backward_scalar)) deallocate (self%backward_scalar)
+        allocate (self%backward_scalar(lshses))
 
         call aux%shsesi(nlat, nlon, self%backward_scalar, error_flag)
 
@@ -242,57 +241,47 @@ contains
         integer(ip),             intent(in)    :: nlon
 
         ! Local variables
-        integer(ip)     :: error_flag
-        integer(ip)     :: lwork, ldwork, lvhaes
+        integer(ip)     :: error_flag, lvhaes
         type(VhaesAux)  :: aux
 
-
         ! Compute various workspace dimensions
-        lwork = get_lwork(nlat, nlon)
-        ldwork = get_ldwork(nlat)
         lvhaes = aux%get_lvhaes(nlat, nlon)
 
         !  Allocate memory
-        if (allocated(self%forward_vector)) deallocate( self%forward_vector )
-        allocate( self%forward_vector(lvhaes) )
+        if (allocated(self%forward_vector)) deallocate (self%forward_vector)
+        allocate (self%forward_vector(lvhaes))
 
-        ! Initialize workspace for analysis
-        block
-            real(wp) :: work(lwork), dwork(ldwork)
+        call aux%vhaesi(nlat, nlon, self%forward_vector, error_flag)
 
-            call aux%vhaesi( &
-                nlat, nlon, self%forward_vector, lvhaes, work, lwork, dwork, ldwork, error_flag)
-
-            ! Address the error flag
-            select case (error_flag)
-                case(0)
-                    return
-                case(1)
-                    error stop 'Object of class(RegularWorkspace): '&
-                        //'in initialize_regular_vector_analysis'&
-                        //'error in the specification of NUMBER_OF_LATITUDES'
-                case(2)
-                    error stop 'Object of class(RegularWorkspace): '&
-                        //'in initialize_regular_vector_analysis'&
-                        //'error in the specification of NUMBER_OF_LONGITUDES'
-                case(3)
-                    error stop 'Object of class(RegularWorkspace): '&
-                        //'in initialize_regular_vector_analysis'&
-                        //'error in the specification of extent for forward_vector'
-                case(4)
-                    error stop 'Object of class(RegularWorkspace): '&
-                        //'in initialize_regular_vector_analysis'&
-                        //'error in the specification of extent for unsaved work'
-                case(5)
-                    error stop 'Object of class(RegularWorkspace): '&
-                        //'in initialize_regular_vector_analysis'&
-                        //'error in the specification of extent for unsaved dwork'
-                case default
-                    error stop 'Object of class(RegularWorkspace): '&
-                        //'in initialize_regular_vector_analysis'&
-                        //' Undetermined error flag'
-            end select
-        end block
+        ! Address the error flag
+        select case (error_flag)
+            case(0)
+                return
+            case(1)
+                error stop 'Object of class(RegularWorkspace): '&
+                    //'in initialize_regular_vector_analysis'&
+                    //'error in the specification of NUMBER_OF_LATITUDES'
+            case(2)
+                error stop 'Object of class(RegularWorkspace): '&
+                    //'in initialize_regular_vector_analysis'&
+                    //'error in the specification of NUMBER_OF_LONGITUDES'
+            case(3)
+                error stop 'Object of class(RegularWorkspace): '&
+                    //'in initialize_regular_vector_analysis'&
+                    //'error in the specification of extent for forward_vector'
+            case(4)
+                error stop 'Object of class(RegularWorkspace): '&
+                    //'in initialize_regular_vector_analysis'&
+                    //'error in the specification of extent for unsaved work'
+            case(5)
+                error stop 'Object of class(RegularWorkspace): '&
+                    //'in initialize_regular_vector_analysis'&
+                    //'error in the specification of extent for unsaved dwork'
+            case default
+                error stop 'Object of class(RegularWorkspace): '&
+                    //'in initialize_regular_vector_analysis'&
+                    //' Undetermined error flag'
+        end select
 
     end subroutine initialize_regular_vector_analysis
 
@@ -304,56 +293,47 @@ contains
         integer(ip),             intent(in)    :: nlon
 
         ! Local variables
-        integer(ip)    :: error_flag
-        integer(ip)    :: lwork, ldwork, lvhses
+        integer(ip)    :: error_flag, lvhses
         type(VhsesAux) :: aux
 
         ! Compute various workspace dimensions
-        lwork = get_lwork(nlat, nlon)
-        ldwork = get_ldwork(nlat)
         lvhses = aux%get_lvhses(nlat, nlon)
 
         ! Allocate memory
-        if (allocated(self%backward_vector)) deallocate( self%backward_vector )
-        allocate( self%backward_vector(lvhses) )
+        if (allocated(self%backward_vector)) deallocate (self%backward_vector)
+        allocate (self%backward_vector(lvhses))
 
-        ! Initialize workspace for vector synthesis
-        block
-            real(wp) :: work(lwork), dwork(ldwork)
+        call aux%vhsesi(nlat, nlon, self%backward_vector, error_flag)
 
-            call aux%vhsesi( &
-                nlat, nlon, self%backward_vector, lvhses, work, lwork, dwork, ldwork, error_flag)
-
-            ! Address the error flag
-            select case (error_flag)
-                case(0)
-                    return
-                case(1)
-                    error stop 'Object of class(RegularWorkspace): '&
-                        //'in initialize_regular_vector_synthesis '&
-                        //'error in the specification of NUMBER_OF_LATITUDES'
-                case(2)
-                    error stop 'Object of class(RegularWorkspace): '&
-                        //'in initialize_regular_vector_synthesis '&
-                        //'error in the specification of NUMBER_OF_LONGITUDES'
-                case(3)
-                    error stop 'Object of class(RegularWorkspace): '&
-                        //'in initialize_regular_vector_synthesis '&
-                        //'error in the specification of extent for backward_vector'
-                case(4)
-                    error stop 'Object of class(RegularWorkspace): '&
-                        //'in initialize_regular_vector_synthesis'&
-                        //'error in the specification of extent for unsaved work'
-                case(5)
-                    error stop 'Object of class(RegularWorkspace): '&
-                        //'in initialize_regular_vector_synthesis '&
-                        //'error in the specification of extent for unsaved dwork'
-                case default
-                    error stop 'Object of class(RegularWorkspace): '&
-                        //'in initialize_regular_vector_synthesis'&
-                        //' Undetermined error flag'
-            end select
-        end block
+        ! Address the error flag
+        select case (error_flag)
+            case(0)
+                return
+            case(1)
+                error stop 'Object of class(RegularWorkspace): '&
+                    //'in initialize_regular_vector_synthesis '&
+                    //'error in the specification of NUMBER_OF_LATITUDES'
+            case(2)
+                error stop 'Object of class(RegularWorkspace): '&
+                    //'in initialize_regular_vector_synthesis '&
+                    //'error in the specification of NUMBER_OF_LONGITUDES'
+            case(3)
+                error stop 'Object of class(RegularWorkspace): '&
+                    //'in initialize_regular_vector_synthesis '&
+                    //'error in the specification of extent for backward_vector'
+            case(4)
+                error stop 'Object of class(RegularWorkspace): '&
+                    //'in initialize_regular_vector_synthesis'&
+                    //'error in the specification of extent for unsaved work'
+            case(5)
+                error stop 'Object of class(RegularWorkspace): '&
+                    //'in initialize_regular_vector_synthesis '&
+                    //'error in the specification of extent for unsaved dwork'
+            case default
+                error stop 'Object of class(RegularWorkspace): '&
+                    //'in initialize_regular_vector_synthesis'&
+                    //' Undetermined error flag'
+        end select
 
     end subroutine initialize_regular_vector_synthesis
 
@@ -442,7 +422,7 @@ contains
         lwork = maxval(work_size)
 
         !  Allocate memory
-        allocate( workspace(lwork) )
+        allocate (workspace(lwork))
 
     end subroutine get_legendre_workspace
 

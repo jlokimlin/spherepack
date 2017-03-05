@@ -264,7 +264,7 @@ program tgrad
                 !     compute gradient of st in v, w
                 !
 
-                call vhseci(nlat, nlon, wsave, lsave, dwork, ldwork, ierror)
+                call vhseci(nlat, nlon, wsave, ierror)
                 call name("vhci")
                 call iout(ierror, "ierr")
 
@@ -298,7 +298,7 @@ program tgrad
                 !     compute gradient of st in v, w
                 !
 
-                call vhsesi(nlat, nlon, wsave, lsave, work, lwork, dwork, ldwork, ierror)
+                call vhsesi(nlat, nlon, wsave, ierror)
                 call name("vhsi")
                 call iout(ierror, "ierr")
 
@@ -330,7 +330,7 @@ program tgrad
                 !     compute gradient of st in v, w
                 !
 
-                call vhsgci(nlat, nlon, wsave, lsave, dwork, ldwork, ierror)
+                call vhsgci(nlat, nlon, wsave, ierror)
                 call name("vhgc")
                 call iout(ierror, "ierr")
 
@@ -444,7 +444,7 @@ program tgrad
         select case (icase)
             case(1)
 
-                call vhaeci(nlat, nlon, wsave, lsave, dwork, ldwork, ierror)
+                call vhaeci(nlat, nlon, wsave, ierror)
                 call name("vhai")
                 call iout(ierror, "ierr")
 
@@ -466,7 +466,7 @@ program tgrad
                 !
                 !     analyze vector field (v, w)
                 !
-                call vhaesi(nlat, nlon, wsave, lsave, work, lwork, dwork, ldwork, ierror)
+                call vhaesi(nlat, nlon, wsave, ierror)
                 call name("vhai")
                 call iout(ierror, "ierr")
 
@@ -494,7 +494,7 @@ program tgrad
 
             case(3)
 
-                call vhagci(nlat, nlon, wsave, lsave, dwork, ldwork, ierror)
+                call vhagci(nlat, nlon, wsave, ierror)
                 call name("vhai")
                 call iout(ierror, "ierr")
 
@@ -513,7 +513,7 @@ program tgrad
                 call iout(ierror, "ierr")
 
             case(4)
-                call vhagsi(nlat, nlon, wsave, lsave, dwork, ldwork, ierror)
+                call vhagsi(nlat, nlon, wsave, ierror)
                 call name("vhai")
                 call iout(ierror, "ierr")
 

@@ -105,8 +105,8 @@ contains
         call self%destroy()
 
         !  Allocate polymorphic components
-        allocate( self%grid, source=GaussianGrid(nlat, nlon) )
-        allocate( self%workspace, source=GaussianWorkspace(nlat, nlon) )
+        allocate (self%grid, source=GaussianGrid(nlat, nlon))
+        allocate (self%workspace, source=GaussianWorkspace(nlat, nlon))
 
         !  Address optional arguments
         if (present(ntrunc)) then
@@ -195,10 +195,10 @@ contains
 
         select type(self)
             class is (GaussianSphere)
-            associate( workspace => self%workspace )
+            associate (workspace => self%workspace)
                 select type(workspace)
                     class is (GaussianWorkspace)
-                    associate( &
+                    associate (&
                         nlat => self%NUMBER_OF_LATITUDES, &
                         nlon => self%NUMBER_OF_LONGITUDES, &
                         isym => self%SCALAR_SYMMETRIES, &
@@ -215,7 +215,7 @@ contains
                         work => workspace%legendre_workspace, &
                         lwork => size(workspace%legendre_workspace), &
                         ierror => error_flag &
-                        )
+                       )
 
                         !  perform the (real) spherical harmonic scalar analysis
                         call aux%shags(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, &
@@ -269,10 +269,10 @@ contains
 
         select type(self)
             class is (GaussianSphere)
-            associate( workspace => self%workspace )
+            associate (workspace => self%workspace)
                 select type(workspace)
                     class is (GaussianWorkspace)
-                    associate( &
+                    associate (&
                         nlat => self%NUMBER_OF_LATITUDES, &
                         nlon => self%NUMBER_OF_LONGITUDES, &
                         isym => self%SCALAR_SYMMETRIES, &
@@ -289,7 +289,7 @@ contains
                         work => workspace%legendre_workspace, &
                         lwork => size(workspace%legendre_workspace), &
                         ierror => error_flag &
-                        )
+                       )
                         !
                         !  Perform gaussian scalar synthesis
                         !
@@ -347,10 +347,10 @@ contains
 
         select type(self)
             class is (GaussianSphere)
-            associate( workspace => self%workspace )
+            associate (workspace => self%workspace)
                 select type(workspace)
                     class is (GaussianWorkspace)
-                    associate( &
+                    associate (&
                         nlat => self%NUMBER_OF_LATITUDES, &
                         nlon => self%NUMBER_OF_LONGITUDES, &
                         ityp => self%VECTOR_SYMMETRIES, &
@@ -370,7 +370,7 @@ contains
                         work => workspace%legendre_workspace, &
                         lwork => size(workspace%legendre_workspace), &
                         ierror => error_flag &
-                        )
+                       )
 
                         !  Perform gaussian vector analysis
                         call aux%vhags(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
@@ -451,10 +451,10 @@ contains
 
         select type(self)
             class is (GaussianSphere)
-            associate( workspace => self%workspace )
+            associate (workspace => self%workspace)
                 select type(workspace)
                     class is (GaussianWorkspace)
-                    associate( &
+                    associate (&
                         nlat => self%NUMBER_OF_LATITUDES, &
                         nlon => self%NUMBER_OF_LONGITUDES, &
                         ityp => self%VECTOR_SYMMETRIES, &
@@ -474,7 +474,7 @@ contains
                         work => workspace%legendre_workspace, &
                         lwork => size(workspace%legendre_workspace), &
                         ierror => error_flag &
-                        )
+                       )
 
                         !  Perform gaussian vector synthesis
                         call aux%vhsgs(nlat, nlon, ityp, nt, v, w, idvw, jdvw, &
@@ -535,7 +535,7 @@ contains
     ! * Trapezoidal rule    in phi:   0 <=  phi  <= 2*pi
     ! * Gaussian quadrature in theta: 0 <= theta <= pi
     !
-    !   \int_{S^2} f( theta, phi ) dS
+    !   \int_{S^2} f( theta, phi) dS
     !
     !   where
     !
@@ -561,14 +561,14 @@ contains
             real(wp) :: summation(nlat)
 
             !  compute the integrant
-            associate( grid => self%grid )
+            associate (grid => self%grid)
                 select type(grid)
                     class is (GaussianGrid)
-                    associate( &
+                    associate (&
                         dphi => grid%LONGITUDINAL_MESH, &
                         wts => grid%gaussian_weights, &
                         f => scalar_function &
-                        )
+                       )
 
                         !  Apply trapezoidal rule
                         do k = 1, nlat
@@ -581,7 +581,7 @@ contains
                 end select
             end associate
 
-            !  Set integral \int_{S^2} f( theta, phi ) dS
+            !  Set integral \int_{S^2} f( theta, phi) dS
             return_value = sum(summation)
         end block
 
@@ -609,10 +609,10 @@ contains
             ! Compute integrant
             do j = 1, nlon
                 do i = 1, nlat
-                    associate( &
+                    associate (&
                         u => self%unit_vectors%radial(i, j), &
                         f => scalar_function(i, j) &
-                        )
+                       )
                         integrant(i, j, 1) = u%x * f
                         integrant(i, j, 2) = u%y * f
                         integrant(i, j, 3) = u%z * f
@@ -621,12 +621,12 @@ contains
             end do
 
             ! Compute first moment
-            associate( &
+            associate (&
                 m => first_moment, &
                 f1 => integrant(:, :, 1), &
                 f2 => integrant(:, :, 2), &
                 f3 => integrant(:, :, 3) &
-                )
+               )
                 m%x = self%compute_surface_integral(f1)
                 m%y = self%compute_surface_integral(f2)
                 m%z = self%compute_surface_integral(f3)

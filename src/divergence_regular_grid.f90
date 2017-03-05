@@ -298,7 +298,7 @@ contains
             (isym == 0 .and. idv < nlat) &
             .or. &
             (isym > 0 .and. idv < imid) &
-            ) then
+           ) then
             ierror = 5
             return
         else if (jdv < nlon) then

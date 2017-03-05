@@ -257,7 +257,7 @@
 !            vector laplacian follows:
 !
 !            let cost and sint be the cosine and sine at colatitude theta.
-!            let d( )/dlambda  and d( )/dtheta be the first order partial
+!            let d()/dlambda  and d()/dtheta be the first order partial
 !            derivatives in longitude and colatitude.  let del2 be the scalar
 !            laplacian operator
 !

@@ -30,16 +30,6 @@
 !     * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !
 !
-!
-! ... file vhsec.f
-!
-!     this file contains code and documentation for subroutines
-!     vhsec and vhseci
-!
-! ... files which must be loaded with vhsec.f
-!
-!     type_SpherepackUtility.f, type_RealPeriodicFastFourierTransform.f
-!   
 !     subroutine vhsec(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, 
 !    +                 mdab, ndab, wvhsec, lvhsec, work, lwork, ierror)
 !
@@ -356,72 +346,6 @@
 !            = 10 error in the specification of lwork
 !
 !
-! *******************************************************************
-!
-!     subroutine vhseci(nlat, nlon, wvhsec, lvhsec, dwork, ldwork, ierror)
-!
-!     subroutine vhseci initializes the array wvhsec which can then be
-!     used repeatedly by subroutine vhsec until nlat or nlon is changed.
-!
-!     input parameters
-!
-!     nlat   the number of colatitudes on the full sphere including the
-!            poles. for example, nlat = 37 for a five degree grid.
-!            nlat determines the grid increment in colatitude as
-!            pi/(nlat-1).  if nlat is odd the equator is located at
-!            grid point i=(nlat+1)/2. if nlat is even the equator is
-!            located half way between points i=nlat/2 and i=nlat/2+1.
-!            nlat must be at least 3. note: on the half sphere, the
-!            number of grid points in the colatitudinal direction is
-!            nlat/2 if nlat is even or(nlat+1)/2 if nlat is odd.
-!
-!     nlon   the number of distinct londitude points.  nlon determines
-!            the grid increment in longitude as 2*pi/nlon. for example
-!            nlon = 72 for a five degree grid. nlon must be greater
-!            than zero. the axisymmetric case corresponds to nlon=1.
-!            the efficiency of the computation is improved when nlon
-!            is a product of small prime numbers.
-!
-!     lvhsec the dimension of the array wvhsec as it appears in the
-!            program that calls vhsec. define
-!
-!               l1 = min(nlat, nlon/2) if nlon is even or
-!               l1 = min(nlat, (nlon+1)/2) if nlon is odd
-!
-!            and
-!
-!               l2 = nlat/2        if nlat is even or
-!               l2 =(nlat+1)/2    if nlat is odd
-!
-!            then lvhsec must be at least
-!
-!            4*nlat*l2+3*max(l1-2, 0)*(nlat+nlat-l1-1)+nlon+15
-!
-!
-!     dwork  a real work array that does not have to be saved.
-!
-!     ldwork the dimension of the array dwork as it appears in the
-!            program that calls vhsec. ldwork must be at least
-!            2*(nlat+2)
-!
-!     **************************************************************
-!
-!     output parameters
-!
-!     wvhsec an array which is initialized for use by subroutine vhsec.
-!            once initialized, wvhsec can be used repeatedly by vhsec
-!            as long as nlat or nlon remain unchanged.  wvhsec must not
-!            be altered between calls of vhsec.
-!
-!
-!     ierror = 0  no errors
-!            = 1  error in the specification of nlat
-!            = 2  error in the specification of nlon
-!            = 3  error in the specification of lvhsec
-!            = 4  error in the specification of ldwork
-!
-!
-!
 submodule(vector_synthesis_routines) vector_synthesis_regular_grid
 
 contains
@@ -518,52 +442,115 @@ contains
 
     end subroutine vhsec
 
-    module subroutine vhseci(nlat, nlon, wvhsec, lvhsec, dwork, ldwork, ierror)
+    !     subroutine vhseci(nlat, nlon, wvhsec, ierror)
+    !
+    !     subroutine vhseci initializes the array wvhsec which can then be
+    !     used repeatedly by subroutine vhsec until nlat or nlon is changed.
+    !
+    !     input parameters
+    !
+    !     nlat   the number of colatitudes on the full sphere including the
+    !            poles. for example, nlat = 37 for a five degree grid.
+    !            nlat determines the grid increment in colatitude as
+    !            pi/(nlat-1).  if nlat is odd the equator is located at
+    !            grid point i=(nlat+1)/2. if nlat is even the equator is
+    !            located half way between points i=nlat/2 and i=nlat/2+1.
+    !            nlat must be at least 3. note: on the half sphere, the
+    !            number of grid points in the colatitudinal direction is
+    !            nlat/2 if nlat is even or(nlat+1)/2 if nlat is odd.
+    !
+    !     nlon   the number of distinct londitude points.  nlon determines
+    !            the grid increment in longitude as 2*pi/nlon. for example
+    !            nlon = 72 for a five degree grid. nlon must be greater
+    !            than zero. the axisymmetric case corresponds to nlon=1.
+    !            the efficiency of the computation is improved when nlon
+    !            is a product of small prime numbers.
+    !
+    !     lvhsec the dimension of the array wvhsec as it appears in the
+    !            program that calls vhsec. define
+    !
+    !               l1 = min(nlat, nlon/2) if nlon is even or
+    !               l1 = min(nlat, (nlon+1)/2) if nlon is odd
+    !
+    !            and
+    !
+    !               l2 = nlat/2        if nlat is even or
+    !               l2 =(nlat+1)/2    if nlat is odd
+    !
+    !            then lvhsec must be at least
+    !
+    !            4*nlat*l2+3*max(l1-2, 0)*(nlat+nlat-l1-1)+nlon+15
+    !
+    !
+    !     **************************************************************
+    !
+    !     output parameters
+    !
+    !     wvhsec an array which is initialized for use by subroutine vhsec.
+    !            once initialized, wvhsec can be used repeatedly by vhsec
+    !            as long as nlat or nlon remain unchanged.  wvhsec must not
+    !            be altered between calls of vhsec.
+    !
+    !
+    !     ierror = 0  no errors
+    !            = 1  error in the specification of nlat
+    !            = 2  error in the specification of nlon
+    !            = 3  error in the specification of lvhsec
+    !
+    module subroutine vhseci(nlat, nlon, wvhsec, ierror)
 
         ! Dummy arguments
         integer(ip), intent(in)  :: nlat
         integer(ip), intent(in)  :: nlon
-        real(wp),    intent(out) :: wvhsec(lvhsec)
-        integer(ip), intent(in)  :: lvhsec
-        real(wp),    intent(out) :: dwork(ldwork)
-        integer(ip), intent(in)  :: ldwork
+        real(wp),    intent(out) :: wvhsec(:)
         integer(ip), intent(out) :: ierror
 
         ! Local variables
-        integer(ip)         :: imid, iw1, iw2
-        integer(ip)         :: labc, lwvbin, lzz1, mmax
+        integer(ip) :: imid, iw1, iw2, ldwork
+        integer(ip) :: labc, lwvbin, lzz1, mmax
         type(SpherepackUtility) :: util
 
-        ! Check calling arguments
-        imid =(nlat+1)/2
-        lzz1 = 2*nlat*imid
-        mmax = min(nlat, (nlon+1)/2)
-        labc = 3*(max(mmax-2, 0)*(2*nlat-mmax-1))/2
+        associate (lvhsec => size(wvhsec))
 
-        if (nlat < 3) then
-            ierror = 1
-        else if (nlon < 1) then
-            ierror = 2
-        else if (lvhsec < 2*(lzz1+labc)+nlon+15) then
-            ierror = 3
-        else if (ldwork < 2*nlat+2) then
-            ierror = 4
-        else
-            ierror = 0
-        end if
+            imid =(nlat+1)/2
+            lzz1 = 2*nlat*imid
+            mmax = min(nlat, (nlon+1)/2)
+            labc = 3*(max(mmax-2, 0)*(2*nlat-mmax-1))/2
 
-        if (ierror /= 0) return
+            ! Check calling arguments
+            if (nlat < 3) then
+                ierror = 1
+            else if (nlon < 1) then
+                ierror = 2
+            else if (lvhsec < 2*(lzz1+labc)+nlon+15) then
+                ierror = 3
+            else
+                ierror = 0
+            end if
 
-        ! Set workspace index pointers
-        lwvbin = lzz1+labc
-        iw1 = lwvbin+1
-        iw2 = iw1+lwvbin
+            ! Check error flag
+            if (ierror /= 0) return
 
-        call util%initialize_polar_components_for_regular_grids(nlat, nlon, wvhsec, dwork)
+            ! Set required workspace size
+            ldwork = 2 * nlat + 2
 
-        call util%initialize_azimuthal_components_for_regular_grids(nlat, nlon, wvhsec(iw1), dwork)
+            block
+                real(wp) :: dwork(ldwork)
 
-        call util%hfft%initialize(nlon, wvhsec(iw2))
+                ! Set workspace index pointers
+                lwvbin = lzz1+labc
+                iw1 = lwvbin+1
+                iw2 = iw1+lwvbin
+
+                call util%initialize_polar_components_for_regular_grids( &
+                    nlat, nlon, wvhsec, dwork)
+
+                call util%initialize_azimuthal_components_for_regular_grids( &
+                    nlat, nlon, wvhsec(iw1:), dwork)
+
+                call util%hfft%initialize(nlon, wvhsec(iw2:))
+            end block
+        end associate
 
     end subroutine vhseci
 

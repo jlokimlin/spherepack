@@ -259,7 +259,7 @@ use spherepack
             !
             !     analyze vector field
             !
-            call vhaeci(nlat, nlon, wsave, lsave, dwork, ldwork, ierror)
+            call vhaeci(nlat, nlon, wsave, ierror)
             call name("shs ")
             call iout(ierror, "ierr")
 
@@ -426,7 +426,7 @@ use spherepack
             !     end do
             !     end if
 
-            call vhseci(nlat, nlon, wsave, lsave, dwork, ldwork, ierror)
+            call vhseci(nlat, nlon, wsave, ierror)
             call name("idvi")
             call iout(ierror, "ierr")
 
@@ -452,7 +452,7 @@ use spherepack
             call iout(lsave, "lsav")
             call iout(lwork, "lwrk")
 
-            call vhsesi(nlat, nlon, wsave, lsave, work, lwork, dwork, ldwork, ierror)
+            call vhsesi(nlat, nlon, wsave, ierror)
             call name("idvi")
             call iout(ierror, "ierr")
 
@@ -478,7 +478,7 @@ use spherepack
             call iout(lsave, "lsav")
             call iout(lwork, "lwrk")
 
-            call vhsgci(nlat, nlon, wsave, lsave, dwork, ldwork, ierror)
+            call vhsgci(nlat, nlon, wsave, ierror)
             call name("idvi")
             call iout(ierror, "ierr")
 

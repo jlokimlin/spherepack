@@ -219,7 +219,7 @@ contains
         integer(ip) :: n
         real(wp)    :: fn
 
-        associate( nlat => size(fnn) )
+        associate (nlat => size(fnn))
             do n=2, nlat
                 fn = real(n - 1, kind=wp)
                 fnn(n) = fn * (fn + ONE)
@@ -240,11 +240,11 @@ contains
         ! Local variables
         integer(ip) :: k, n, m
 
-        associate( &
+        associate (&
             mmax => size(alap, dim=1), &
             nlat => size(alap, dim=2), &
             nt => size(alap, dim=3) &
-            )
+           )
 
             ! Set coefficient multiplyers
             call compute_coefficient_multipliers(fnn)
@@ -286,11 +286,11 @@ contains
         ! Local variables
         integer(ip) :: k, n, m
 
-        associate( &
+        associate (&
             mmax => size(as, dim=1), &
             nlat => size(as, dim=2), &
             nt => size(as, dim=3) &
-            )
+           )
 
             ! Preset coefficient multiplyers
             call compute_coefficient_multipliers(fnn)

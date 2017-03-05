@@ -197,23 +197,23 @@ contains
         call self%get_vector_symmetries(itype)
 
         !  Allocate memory
-        associate( nm_dim => (ntrunc+1)*(ntrunc+2)/2 )
-            allocate(self%INDEX_ORDER_M(nm_dim) )
-            allocate(self%INDEX_DEGREE_N(nm_dim) )
-            allocate(self%LAPLACIAN_COEFFICIENT_MULTIPLIERS(nm_dim) )
-            allocate(self%INVERSE_LAPLACIAN_COEFFICIENT_MULTIPLIERS(nm_dim) )
-            allocate(self%complex_spectral_coefficients(nm_dim) )
-            allocate(self%COEFFICIENT_MULTIPLIERS(nlat) )
+        associate (nm_dim => (ntrunc+1)*(ntrunc+2)/2)
+            allocate(self%INDEX_ORDER_M(nm_dim))
+            allocate(self%INDEX_DEGREE_N(nm_dim))
+            allocate(self%LAPLACIAN_COEFFICIENT_MULTIPLIERS(nm_dim))
+            allocate(self%INVERSE_LAPLACIAN_COEFFICIENT_MULTIPLIERS(nm_dim))
+            allocate(self%complex_spectral_coefficients(nm_dim))
+            allocate(self%COEFFICIENT_MULTIPLIERS(nlat))
 
             !  Fill arrays
-            associate( &
+            associate (&
                 ntrunc => self%TRIANGULAR_TRUNCATION_LIMIT, &
                 indxm => self%INDEX_ORDER_M, &
                 indxn => self%INDEX_DEGREE_N, &
                 lap => self%LAPLACIAN_COEFFICIENT_MULTIPLIERS, &
                 ilap => self%INVERSE_LAPLACIAN_COEFFICIENT_MULTIPLIERS, &
                 sqnn => self%COEFFICIENT_MULTIPLIERS &
-                )
+               )
 
                 !  Precompute indices of order m
                 indxm = [((m, n=m, ntrunc), m=0, ntrunc)]
@@ -235,11 +235,11 @@ contains
         end associate
 
         !  Initialize derived data types
-        associate( &
+        associate (&
             grid => self%grid, &
             trig_func => self%trigonometric_table, &
             unit_vectors => self%unit_vectors &
-            )
+           )
             trig_func = TrigonometricTable(grid)
             unit_vectors = SphericalUnitVectors(grid)
         end associate
@@ -259,32 +259,32 @@ contains
 
         !  Release memory
         if (allocated(self%INDEX_ORDER_M)) then
-            deallocate( self%INDEX_ORDER_M )
+            deallocate (self%INDEX_ORDER_M)
         end if
 
         if (allocated(self%INDEX_DEGREE_N)) then
-            deallocate( self%INDEX_DEGREE_N )
+            deallocate (self%INDEX_DEGREE_N)
         end if
 
-        if (allocated(self%LAPLACIAN_COEFFICIENT_MULTIPLIERS )) then
-            deallocate( self%LAPLACIAN_COEFFICIENT_MULTIPLIERS )
+        if (allocated(self%LAPLACIAN_COEFFICIENT_MULTIPLIERS)) then
+            deallocate (self%LAPLACIAN_COEFFICIENT_MULTIPLIERS)
         end if
 
         if (allocated(self%INVERSE_LAPLACIAN_COEFFICIENT_MULTIPLIERS)) then
-            deallocate( self%INVERSE_LAPLACIAN_COEFFICIENT_MULTIPLIERS )
+            deallocate (self%INVERSE_LAPLACIAN_COEFFICIENT_MULTIPLIERS)
         end if
 
         if (allocated(self%complex_spectral_coefficients)) then
-            deallocate( self%complex_spectral_coefficients )
+            deallocate (self%complex_spectral_coefficients)
         end if
 
         if (allocated(self%COEFFICIENT_MULTIPLIERS)) then
-            deallocate( self%COEFFICIENT_MULTIPLIERS )
+            deallocate (self%COEFFICIENT_MULTIPLIERS)
         end if
 
         !  Release memory from polymorphic class variables
-        if (allocated(self%grid)) deallocate( self%grid )
-        if (allocated(self%workspace)) deallocate( self%workspace )
+        if (allocated(self%grid)) deallocate (self%grid)
+        if (allocated(self%workspace)) deallocate (self%workspace)
 
         !   Release memory from derived data types
         call self%trigonometric_table%destroy()
@@ -342,16 +342,16 @@ contains
         call self%perform_scalar_analysis(scalar_function)
 
         !  Set complex spherical harmonic coefficients
-        associate( &
+        associate (&
             ntrunc => self%TRIANGULAR_TRUNCATION_LIMIT, &
             a => self%workspace%scalar_coefficients%real_component, &
             b => self%workspace%scalar_coefficients%imaginary_component, &
             psi => self%complex_spectral_coefficients &
-            )
+           )
             psi = HALF * cmplx( &
                 [((a(m+1, n+1), n=m, ntrunc), m=0, ntrunc)], &
                 [((b(m+1, n+1), n=m, ntrunc), m=0, ntrunc)], &
-                kind=wp )
+                kind=wp)
         end associate
 
     end subroutine perform_complex_analysis
@@ -374,13 +374,13 @@ contains
         call self%assert_initialized('perform_complex_synthesis')
 
         !  Convert complex spherical harmonic coefficients to real version
-        associate( &
+        associate (&
             indxn => self%INDEX_DEGREE_N, &
             indxm => self%INDEX_ORDER_M, &
             a => self%workspace%scalar_coefficients%real_component, &
             b => self%workspace%scalar_coefficients%imaginary_component, &
             psi => self%complex_spectral_coefficients &
-            )
+           )
             ! Initialize (real) coefficients
             a = ZERO
             b = ZERO
@@ -404,7 +404,7 @@ contains
     end subroutine perform_complex_synthesis
 
     subroutine analyze_into_complex_spectral_coefficients(self, &
-        scalar_function, spectral_coefficients )
+        scalar_function, spectral_coefficients)
 
         ! Dummy arguments
         class(Sphere), intent(inout)  :: self
@@ -437,13 +437,13 @@ contains
         call self%assert_initialized('synthesize_from_complex_spectral_coefficients')
 
         ! Convert complex coefficients to real version
-        associate( &
+        associate (&
             indxn => self%INDEX_DEGREE_N, &
             indxm => self%INDEX_ORDER_M, &
             a => self%workspace%scalar_coefficients%real_component, &
             b => self%workspace%scalar_coefficients%imaginary_component, &
             psi => spectral_coefficients &
-            )
+           )
             ! Initialize (real) coefficients
             a = ZERO
             b = ZERO
@@ -486,11 +486,11 @@ contains
             real(wp) :: polar_component(nlat, nlon)
             real(wp) :: azimuthal_component(nlat, nlon)
 
-            associate( &
+            associate (&
                 vecF => vector_field, &
                 v => polar_component, &
                 w => azimuthal_component &
-                )
+               )
 
                 ! Get spherical components
                 call self%unit_vectors%get_spherical_angle_components(vecF, v, w)
@@ -516,10 +516,10 @@ contains
         call self%perform_complex_analysis(scalar_function)
 
         ! Associate various quantities
-        associate( &
+        associate (&
             psi => self%complex_spectral_coefficients, &
             lap => self%LAPLACIAN_COEFFICIENT_MULTIPLIERS &
-            )
+           )
             psi = lap * psi
         end associate
 
@@ -542,10 +542,10 @@ contains
         call self%perform_complex_analysis(source)
 
         ! Associate various quantities
-        associate( &
+        associate (&
             psi => self%complex_spectral_coefficients, &
             ilap => self%INVERSE_LAPLACIAN_COEFFICIENT_MULTIPLIERS &
-            )
+           )
             psi = ilap * psi
         end associate
 
@@ -566,7 +566,7 @@ contains
         call self%assert_initialized('compute_vector_laplacian_coefficients')
 
         ! Compute vector laplacian
-        associate( &
+        associate (&
             nlat => self%NUMBER_OF_LATITUDES, &
             ityp => self%VECTOR_SYMMETRIES, &
             lap => self%LAPLACIAN_COEFFICIENT_MULTIPLIERS, &
@@ -574,7 +574,7 @@ contains
             bi => self%workspace%vector_coefficients%polar%imaginary_component, &
             cr => self%workspace%vector_coefficients%azimuthal%real_component, &
             ci => self%workspace%vector_coefficients%azimuthal%imaginary_component &
-            )
+           )
             select case (ityp)
                 case (0, 3, 6)
 
@@ -611,7 +611,7 @@ contains
     end subroutine compute_vector_laplacian_coefficients
 
     subroutine get_vector_laplacian_from_spherical_components(self, &
-        polar_component, azimuthal_component, polar_laplacian, azimuthal_laplacian )
+        polar_component, azimuthal_component, polar_laplacian, azimuthal_laplacian)
 
         ! Dummy arguments
         class(Sphere), intent(inout) :: self
@@ -624,10 +624,10 @@ contains
         call self%assert_initialized('get_vector_laplacian_from_spherical_components')
 
         ! Set vector spherical harmonic coefficients
-        associate( &
+        associate (&
             v => polar_component, &
             w => azimuthal_component &
-            )
+           )
             call self%vector_analysis_from_spherical_components(v, w)
         end associate
 
@@ -635,10 +635,10 @@ contains
         call self%compute_vector_laplacian_coefficients()
 
         ! Synthesize vector laplacian from coefficients
-        associate( &
+        associate (&
             vlap => polar_laplacian, &
             wlap => azimuthal_laplacian &
-            )
+           )
             call self%perform_vector_synthesis(vlap, wlap)
         end associate
 
@@ -660,10 +660,10 @@ contains
         call self%perform_vector_analysis(vector_field)
 
         ! Synthesize vector laplacian from coefficients
-        associate( &
+        associate (&
             vlap => polar_laplacian, &
             wlap => azimuthal_laplacian &
-            )
+           )
             call self%perform_vector_synthesis(vlap, wlap)
         end associate
 
@@ -686,15 +686,15 @@ contains
         call self%assert_initialized('invert_vector_laplacian')
 
         ! Set vector spherical harmonic coefficients
-        associate( &
+        associate (&
             vlap => polar_source, &
             wlap => azimuthal_source &
-            )
+           )
             call self%vector_analysis_from_spherical_components(vlap, wlap)
         end associate
 
         ! compute vector laplacian
-        associate( &
+        associate (&
             nlat => self%NUMBER_OF_LATITUDES, &
             ityp => self%VECTOR_SYMMETRIES, &
             ilap => self%INVERSE_LAPLACIAN_COEFFICIENT_MULTIPLIERS, &
@@ -704,7 +704,7 @@ contains
             ci => self%workspace%vector_coefficients%azimuthal%imaginary_component, &
             v => polar_solution, &
             w => azimuthal_solution &
-            )
+           )
             select case (ityp)
                 case (0, 3, 6)
 
@@ -745,7 +745,7 @@ contains
 
     end subroutine invert_vector_laplacian
 
-    subroutine invert_helmholtz(self, helmholtz_constant, source, solution )
+    subroutine invert_helmholtz(self, helmholtz_constant, source, solution)
 
         ! Dummy arguments
         class(Sphere), target, intent(inout) :: self
@@ -763,13 +763,13 @@ contains
         call self%perform_complex_analysis(source)
 
         ! Associate various quantities
-        associate( &
+        associate (&
             nm_dim => size(self%complex_spectral_coefficients), &
             psi => self%complex_spectral_coefficients, &
             ilap => self%INVERSE_LAPLACIAN_COEFFICIENT_MULTIPLIERS, &
             lap => self%LAPLACIAN_COEFFICIENT_MULTIPLIERS, &
             xlmbda => helmholtz_constant &
-            )
+           )
 
             !  Associate local pointer
             if (xlmbda == ZERO) then
@@ -779,7 +779,7 @@ contains
             else
 
                 ! Allocate memory
-                allocate( iptr(nm_dim) )
+                allocate (iptr(nm_dim))
                 iptr = ONE/(lap - xlmbda)
             end if
 
@@ -790,10 +790,10 @@ contains
             call self%perform_complex_synthesis(solution)
 
             !  Garbage collection
-            if ( xlmbda == ZERO ) then
-                nullify( iptr )
+            if ( xlmbda == ZERO) then
+                nullify( iptr)
             else
-                deallocate( iptr )
+                deallocate (iptr)
             end if
         end associate
 
@@ -818,7 +818,7 @@ contains
         call self%perform_scalar_analysis(scalar_function)
 
         ! Compute gradient
-        associate( &
+        associate (&
             nlat => self%NUMBER_OF_LATITUDES, &
             v => polar_gradient_component, &
             w => azimuthal_gradient_component, &
@@ -829,7 +829,7 @@ contains
             bi => self%workspace%vector_coefficients%polar%imaginary_component, &
             cr => self%workspace%vector_coefficients%azimuthal%real_component, &
             ci => self%workspace%vector_coefficients%azimuthal%imaginary_component &
-            )
+           )
             ! Initialize polar coefficients
             br = ZERO
             bi = ZERO
@@ -851,7 +851,7 @@ contains
     end subroutine get_gradient
 
     subroutine invert_gradient_from_spherical_components(self, &
-        polar_source, azimuthal_source, solution )
+        polar_source, azimuthal_source, solution)
 
         ! Dummy arguments
         class(Sphere), intent(inout) :: self
@@ -866,15 +866,15 @@ contains
         call self%assert_initialized('invert_gradient_from_spherical_components')
 
         ! Set vector spherical harmonic coefficients
-        associate( &
+        associate (&
             v => polar_source, &
             w => azimuthal_source &
-            )
+           )
             call self%vector_analysis_from_spherical_components(v, w)
         end associate
 
         ! Invert gradient
-        associate( &
+        associate (&
             nlat => self%NUMBER_OF_LATITUDES, &
             nlon => self%NUMBER_OF_LONGITUDES, &
             f => solution, &
@@ -883,7 +883,7 @@ contains
             b => self%workspace%scalar_coefficients%imaginary_component, &
             br => self%workspace%vector_coefficients%polar%real_component, &
             bi => self%workspace%vector_coefficients%polar%imaginary_component &
-            )
+           )
 
             ! Initialize (real) coefficients
             a = ZERO
@@ -896,7 +896,7 @@ contains
             end do
 
             !  Set upper limit for vector m subscript
-            associate( mmax => min(nlat, (nlon+1)/2) )
+            associate (mmax => min(nlat, (nlon+1)/2))
 
                 ! Compute m > 0 coefficients
                 do m=2, mmax
@@ -928,7 +928,7 @@ contains
         ! Check if object is usable
         call self%assert_initialized('get_vorticity_from_spherical_components')
 
-        associate( &
+        associate (&
             v => polar_component, &
             w => azimuthal_component, &
             nlat => self%NUMBER_OF_LATITUDES, &
@@ -939,7 +939,7 @@ contains
             b => self%workspace%scalar_coefficients%imaginary_component, &
             cr => self%workspace%vector_coefficients%azimuthal%real_component, &
             ci => self%workspace%vector_coefficients%azimuthal%imaginary_component &
-            )
+           )
 
             !  Perform vector analysis
             call self%vector_analysis_from_spherical_components(v, w)
@@ -949,7 +949,7 @@ contains
             b = ZERO
 
             ! Set upper limit for vector m subscript
-            associate( mmax => min(nlat, (nlon+1)/2) )
+            associate (mmax => min(nlat, (nlon+1)/2))
 
                 ! Compute m > 0 coefficients
                 do m=1, mmax
@@ -986,12 +986,12 @@ contains
             real(wp) :: azimuthal_component(nlat, nlon)
 
             ! Compute vorticity
-            associate( &
+            associate (&
                 vecF => vector_field, &
                 v => polar_component, &
                 w => azimuthal_component, &
                 vort => vorticity &
-                )
+               )
 
                 !  Get spherical components
                 call self%unit_vectors%get_spherical_angle_components(vecF, v, w)
@@ -1022,7 +1022,7 @@ contains
         call self%perform_scalar_analysis(source)
 
         !  Invert vorticity
-        associate( &
+        associate (&
             nlat => self%NUMBER_OF_LATITUDES, &
             nlon => self%NUMBER_OF_LONGITUDES, &
             v => polar_solution, &
@@ -1034,8 +1034,8 @@ contains
             ci => self%workspace%vector_coefficients%azimuthal%imaginary_component, &
             isym => self%SCALAR_SYMMETRIES, &
             ityp => self%VECTOR_SYMMETRIES &
-            )
-            associate( mmax => min(nlat, (nlon+1)/2) )
+           )
+            associate (mmax => min(nlat, (nlon+1)/2))
 
                 !  Initialize coefficients
                 cr = ZERO
@@ -1099,12 +1099,12 @@ contains
             real(wp) :: azimuthal_component(nlat, nlon)
 
             ! Compute vorticity
-            associate( &
+            associate (&
                 vecF => vector_field, &
                 v => polar_component, &
                 w => azimuthal_component, &
                 dv => divergence &
-                )
+               )
 
                 !  Get spherical components
                 call self%unit_vectors%get_spherical_angle_components(vecF, v, w)
@@ -1131,7 +1131,7 @@ contains
          ! Check if object is usable
         call self%assert_initialized('get_divergence_from_spherical_components')
 
-        associate( &
+        associate (&
             v => polar_component, &
             w => azimuthal_component, &
             nlat => self%NUMBER_OF_LATITUDES, &
@@ -1142,7 +1142,7 @@ contains
             b => self%workspace%scalar_coefficients%imaginary_component, &
             br => self%workspace%vector_coefficients%polar%real_component, &
             bi => self%workspace%vector_coefficients%polar%imaginary_component &
-            )
+           )
 
             !  Perform vector analysis
             call self%vector_analysis_from_spherical_components(v, w)
@@ -1152,7 +1152,7 @@ contains
             b = ZERO
 
             !  Set upper limit for vector m subscript
-            associate( mmax => min(nlat, (nlon+1)/2) )
+            associate (mmax => min(nlat, (nlon+1)/2))
 
                 ! Compute m > 0 coefficients
                 do m=1, mmax
@@ -1187,7 +1187,7 @@ contains
         call self%perform_scalar_analysis(source)
 
         ! Invert gradient
-        associate( &
+        associate (&
             nlat => self%NUMBER_OF_LATITUDES, &
             ntrunc => self%TRIANGULAR_TRUNCATION_LIMIT, &
             v => polar_solution, &
@@ -1199,7 +1199,7 @@ contains
             bi => self%workspace%vector_coefficients%polar%imaginary_component, &
             cr => self%workspace%vector_coefficients%azimuthal%real_component, &
             ci => self%workspace%vector_coefficients%azimuthal%imaginary_component &
-            )
+           )
             ! Initialize polar coefficients
             br = ZERO
             bi = ZERO
@@ -1243,12 +1243,12 @@ contains
         ! Check if object is usable
         call self%assert_initialized('get_vorticity_and_divergence_from_velocities')
 
-        associate( &
+        associate (&
             v => polar_component, &
             w => azimuthal_component, &
             vt => vorticity, &
             dv => divergence &
-            )
+           )
 
             ! Compute vorticity
             call self%get_vorticity(v, w, vt)
@@ -1277,7 +1277,7 @@ contains
             'get_velocities_from_vorticity_and_divergence_coefficients')
 
         ! Associate various quantities
-        associate( &
+        associate (&
             v => polar_component, &
             w => azimuthal_component, &
             nlat => self%NUMBER_OF_LATITUDES, &
@@ -1290,7 +1290,7 @@ contains
             bi => self%workspace%vector_coefficients%polar%imaginary_component, &
             cr => self%workspace%vector_coefficients%azimuthal%real_component, &
             ci => self%workspace%vector_coefficients%azimuthal%imaginary_component &
-            )
+           )
 
             ! Preset (real) scalar coefficients
             a = ZERO
@@ -1367,14 +1367,14 @@ contains
             complex(wp) :: vorticity_coefficients(nm_dim)
             complex(wp) :: divergence_coefficients(nm_dim)
 
-            associate( &
+            associate (&
                 v => polar_component, &
                 w => azimuthal_component, &
                 vt_spec => vorticity_coefficients, &
                 dv_spec => divergence_coefficients, &
                 vt => vorticity, &
                 dv => divergence &
-                )
+               )
 
                 ! Compute complex spectral coefficients
                 call self%analyze_into_complex_spectral_coefficients(vt, vt_spec)
@@ -1408,25 +1408,25 @@ contains
             real(wp) :: polar_gradient_component(nlat, nlon)
             real(wp) :: azimuthal_gradient_component(nlat, nlon)
 
-            associate( &
+            associate (&
                 f => scalar_function, &
                 grad_theta => polar_gradient_component, &
                 grad_phi => azimuthal_gradient_component &
-                )
+               )
 
                 !  Calculate the spherical surface gradient components
                 call self%get_gradient(f, grad_theta, grad_phi)
             end associate
 
-            associate( R => angular_momentum )
+            associate (R => angular_momentum)
                 do j = 1, nlon
                     do i = 1, nlat
-                        associate( &
+                        associate (&
                             theta => self%unit_vectors%polar(i, j), &
                             phi => self%unit_vectors%azimuthal(i, j), &
                             grad_theta => polar_gradient_component(i, j), &
                             grad_phi => azimuthal_gradient_component(i, j) &
-                            )
+                           )
 
                             !  Calculate the rotation operator applied to a scalar function
                             R(:, i, j) = phi * grad_theta - theta * grad_phi
@@ -1485,8 +1485,8 @@ contains
         ! Check if object is usable
         call self%assert_initialized('get_index')
 
-        associate( ntrunc => self%TRIANGULAR_TRUNCATION_LIMIT )
-            if ( m <= n .and. max(n, m) <= ntrunc ) then
+        associate (ntrunc => self%TRIANGULAR_TRUNCATION_LIMIT)
+            if ( m <= n .and. max(n, m) <= ntrunc) then
                 return_value = sum ([(i, i=ntrunc+1, ntrunc-m+2, -1)]) + n-m+1
             else
                 return_value = -1
@@ -1507,15 +1507,15 @@ contains
         ! Check if object is usable
         call self%assert_initialized('get_coefficient')
 
-        associate( &
+        associate (&
             ntrunc => self%TRIANGULAR_TRUNCATION_LIMIT, &
             nm  => self%get_index(n, m), &
             nm_conjg => self%get_index(n, -m), &
             psi => self%complex_spectral_coefficients &
-            )
+           )
 
             if (m < 0 .and. nm_conjg > 0) then
-                return_value = ( (-ONE)**(-m) ) * conjg(psi(nm_conjg))
+                return_value = ( (-ONE)**(-m)) * conjg(psi(nm_conjg))
             else if (nm > 0) then
                 return_value = psi(nm)
             else

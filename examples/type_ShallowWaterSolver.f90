@@ -87,7 +87,7 @@ contains
         integer(ip) :: i, j
         real(wp)    :: arg
 
-        associate( n => size(x) )
+        associate (n => size(x))
 
             arg = PI/(n+1)
 
@@ -140,10 +140,10 @@ contains
         ! Local variables
         integer(ip) :: n, m
 
-        associate( &
+        associate (&
             nlat => size(datagrid, dim=2), &
             nlon => size(datagrid, dim=1)  &
-            )
+           )
             block
                 real(wp) :: temp(nlat, nlon)
 
@@ -153,11 +153,11 @@ contains
                 !  spherical harmonic analysis
                 call self%perform_scalar_analysis(temp)
 
-                associate( &
+                associate (&
                     ntrunc => self%TRIANGULAR_TRUNCATION_LIMIT, &
                     a => self%workspace%scalar_coefficients%real_component, &
                     b => self%workspace%scalar_coefficients%imaginary_component &
-                    )
+                   )
 
                     !  Fill complex array dataspec with result.
                     dataspec = HALF * cmplx( &
@@ -189,20 +189,20 @@ contains
         ! Local variables
         integer(ip) :: n, m, nm, i
 
-        associate( &
+        associate (&
             nlat => size(datagrid, dim=2), &
             nlon => size(datagrid, dim=1)  &
-            )
+           )
             block
                 real(wp) :: temp(nlat, nlon)
 
                 !  fill two real arrays (a, b) with contents of dataspec.
-                associate( &
+                associate (&
                     indxn => self%INDEX_DEGREE_N, &
                     indxm => self%INDEX_ORDER_M, &
                     a => self%workspace%scalar_coefficients%real_component, &
                     b => self%workspace%scalar_coefficients%imaginary_component &
-                    )
+                   )
 
                     a = ZERO
                     b = ZERO
@@ -246,10 +246,10 @@ contains
         real(wp)    :: fn
         integer(ip) :: n, m ! Counters
 
-        associate( &
+        associate (&
             nlat => size(ugrid, dim=2), &
             nlon => size(ugrid, dim=1)  &
-            )
+           )
             block
                 real(wp) :: v(nlat, nlon)
                 real(wp) :: w(nlat, nlon)
@@ -267,7 +267,7 @@ contains
                 !  Multiply vector harmonic coefficients of winds by
                 !  appropriate factors to convert into vorticity and
                 !  divergence coefficients.
-                associate( &
+                associate (&
                     ntrunc => self%TRIANGULAR_TRUNCATION_LIMIT, &
                     nlat => self%NUMBER_OF_LATITUDES, &
                     rsphere => self%RADIUS_OF_SPHERE, &
@@ -277,7 +277,7 @@ contains
                     bi => self%workspace%vector_coefficients%polar%imaginary_component, &
                     cr => self%workspace%vector_coefficients%azimuthal%real_component, &
                     ci => self%workspace%vector_coefficients%azimuthal%imaginary_component &
-                    )
+                   )
 
                     do n=1, nlat
                         fn = real(n - 1, kind=wp)
@@ -339,10 +339,10 @@ contains
         real(wp)    :: fn
         integer(ip) :: n, m, nm, i ! Counters
 
-        associate( &
+        associate (&
             nlat => size(ugrid, dim=2), &
             nlon => size(ugrid, dim=1) &
-            )
+           )
             block
                 real(wp) :: v(nlat, nlon)
                 real(wp) :: w(nlat, nlon)
@@ -351,7 +351,7 @@ contains
                 ! Multiply spectral coefficients of vorticity and divergence
                 ! by appropriate factors to convert them into vector harmonic
                 ! coefficients of winds.
-                associate( &
+                associate (&
                     indxn => self%INDEX_DEGREE_N, &
                     indxm => self%INDEX_ORDER_M, &
                     nlat => self%NUMBER_OF_LATITUDES, &
@@ -362,7 +362,7 @@ contains
                     bi => self%workspace%vector_coefficients%polar%imaginary_component, &
                     cr => self%workspace%vector_coefficients%azimuthal%real_component, &
                     ci => self%workspace%vector_coefficients%azimuthal%imaginary_component &
-                    )
+                   )
 
                     isqnn(1) = ZERO
                     do n=2, nlat

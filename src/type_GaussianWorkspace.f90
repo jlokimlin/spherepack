@@ -144,16 +144,15 @@ contains
         integer(ip),              intent(in)    :: nlon
 
         ! Local variables
-        integer(ip)    :: error_flag
-        integer(ip)    :: lshags
+        integer(ip)    :: error_flag, lshags
         type(ShagsAux) :: aux
 
         ! Compute dimensions of various workspace arrays
         lshags = aux%get_lshags(nlat, nlon)
 
         !  Allocate memory
-        if (allocated(self%forward_scalar)) deallocate(self%forward_scalar )
-        allocate( self%forward_scalar(lshags) )
+        if (allocated(self%forward_scalar)) deallocate (self%forward_scalar)
+        allocate (self%forward_scalar(lshags))
 
         call aux%shagsi(nlat, nlon, self%forward_scalar, error_flag)
 
@@ -210,8 +209,8 @@ contains
         lshsgs = aux%get_lshsgs(nlat, nlon)
 
         !  Allocate memory
-        if (allocated(self%backward_scalar)) deallocate(self%backward_scalar )
-        allocate( self%backward_scalar(lshsgs) )
+        if (allocated(self%backward_scalar)) deallocate (self%backward_scalar)
+        allocate (self%backward_scalar(lshsgs))
 
         call aux%shsgsi(nlat, nlon, self%backward_scalar, error_flag)
 
@@ -259,24 +258,17 @@ contains
         integer(ip),              intent(in)     :: nlon
 
         ! Local variables
-        integer(ip)     :: error_flag
-        integer(ip)     :: ldwork, lvhags
+        integer(ip)     :: error_flag, lvhags
         type(VhagsAux)  :: aux
 
         ! Compute dimensions of various workspace arrays
-        ldwork = get_ldwork(nlat)
         lvhags = aux%get_lvhags(nlat, nlon)
 
         !  Allocate memory
-        if (allocated(self%forward_vector)) deallocate( self%forward_vector )
-        allocate(self%forward_vector(lvhags) )
+        if (allocated(self%forward_vector)) deallocate (self%forward_vector)
+        allocate(self%forward_vector(lvhags))
 
-        !  Initialize workspace arrays for vector analysis
-        block
-            real(wp) :: dwork(ldwork)
-
-            call aux%vhagsi( &
-                nlat, nlon, self%forward_vector, lvhags, dwork, ldwork, error_flag)
+            call aux%vhagsi(nlat, nlon, self%forward_vector, error_flag)
 
             ! Address error flag
             select case (error_flag)
@@ -303,7 +295,6 @@ contains
                         //'in initialize_gaussian_vector_analysis'&
                         //'Undetermined error flag'
             end select
-        end block
 
     end subroutine initialize_gaussian_vector_analysis
 
@@ -441,7 +432,7 @@ contains
         lwork = maxval(work_size)
 
         !  Allocate memory
-        allocate( workspace(lwork) )
+        allocate (workspace(lwork))
 
     end subroutine get_legendre_workspace
 

@@ -74,20 +74,20 @@ contains
         self%NUMBER_OF_LONGITUDES = nlon
 
         ! Allocate memory
-        allocate( self%sint(nlat) )
-        allocate( self%cost(nlat) )
-        allocate( self%sinp(nlon) )
-        allocate( self%cosp(nlon) )
+        allocate (self%sint(nlat))
+        allocate (self%cost(nlat))
+        allocate (self%sinp(nlon))
+        allocate (self%cosp(nlon))
 
         ! Compute trigonometric table
-        associate( &
+        associate (&
             theta => grid_type%latitudes, &
             phi => grid_type%longitudes, &
             sint => self%sint, &
             cost => self%cost, &
             sinp => self%sinp, &
             cosp => self%cosp &
-            )
+           )
             sint = sin(theta)
             cost = cos(theta)
             sinp = sin(phi)
@@ -108,10 +108,10 @@ contains
         if (.not.self%initialized) return
 
         ! Release memory
-        if (allocated(self%sint)) deallocate( self%sint )
-        if (allocated(self%cost)) deallocate( self%cost )
-        if (allocated(self%sinp)) deallocate( self%sinp )
-        if (allocated(self%cosp)) deallocate( self%cosp )
+        if (allocated(self%sint)) deallocate (self%sint)
+        if (allocated(self%cost)) deallocate (self%cost)
+        if (allocated(self%sinp)) deallocate (self%sinp)
+        if (allocated(self%cosp)) deallocate (self%cosp)
 
         ! Reset constants
         self%NUMBER_OF_LONGITUDES = 0

@@ -328,7 +328,7 @@ contains
         !  Set workspace indices
         workspace_indices = get_vhaes_workspace_indices(ist, lnl, lzimn)
 
-        associate( &
+        associate (&
             iw1 => workspace_indices(1), &
             iw2 => workspace_indices(2), &
             iw3 => workspace_indices(3), &
@@ -345,7 +345,7 @@ contains
 
     ! Purpose:
     !
-    !     subroutine vhaesi(nlat, nlon, wvhaes, lvhaes, work, lwork, dwork, ldwork, ierror)
+    !     subroutine vhaesi(nlat, nlon, wvhaes, ierror)
     !
     !     subroutine vhaesi initializes the array wvhaes which can then be
     !     used repeatedly by subroutine vhaes until nlat or nlon is changed.
@@ -384,23 +384,6 @@ contains
     !
     !               l1*l2*(nlat+nlat-l1+1)+nlon+15
     !
-    !
-    !     work   a work array that does not have to be saved.
-    !
-    !     lwork  the dimension of the array work as it appears in the
-    !            program that calls vhaes. lwork must be at least
-    !
-    !              3*(max(l1-2, 0)*(nlat+nlat-l1-1))/2+5*l2*nlat
-    !
-    !     dwork  an unsaved real work space
-    !
-    !     ldwork the length of the array dwork as it appears in the
-    !            program that calls vhaesi.  ldwork must be at least
-    !            2*(nlat+1)
-    !
-    !
-    !     **************************************************************
-    !
     !     output parameters
     !
     !     wvhaes an array which is initialized for use by subroutine vhaes.
@@ -413,64 +396,64 @@ contains
     !            = 1  error in the specification of nlat
     !            = 2  error in the specification of nlon
     !            = 3  error in the specification of lvhaes
-    !            = 4  error in the specification of lwork
-    !            = 5  error in the specification of ldwork
     !
-    module subroutine vhaesi(nlat, nlon, wvhaes, lvhaes, work, lwork, dwork, ldwork, ierror)
+    module subroutine vhaesi(nlat, nlon, wvhaes, ierror)
 
         ! Dummy arguments
         integer(ip), intent(in)  :: nlat
         integer(ip), intent(in)  :: nlon
-        real(wp),    intent(out) :: wvhaes(lvhaes)
-        integer(ip), intent(in)  :: lvhaes
-        real(wp),    intent(out) :: work(lwork)
-        integer(ip), intent(in)  :: lwork
-        real(wp),    intent(out) :: dwork(ldwork)
-        integer(ip), intent(in)  :: ldwork
+        real(wp),    intent(out) :: wvhaes(:)
         integer(ip), intent(out) :: ierror
 
         ! Local variables
-        integer(ip)         :: imid, labc, lzimn, mmax
-        integer(ip)         :: workspace_indices(4)
+        integer(ip) :: imid, labc, lzimn, mmax
+        integer(ip) :: workspace_indices(4)
+        integer(ip) :: lwork, ldwork
         type(SpherepackUtility) :: util
 
-        mmax = min(nlat, (nlon+1)/2)
-        imid = (nlat+1)/2
-        lzimn = (imid*mmax*(2*nlat-mmax+1))/2
-        labc = 3*(max(mmax-2, 0)*(2*nlat-mmax-1))/2
+        associate (lvhaes => size(wvhaes))
 
-        !  Check calling arguments
-        if (nlat < 3) then
-            ierror = 1
-            return
-        else if (nlon < 1) then
-            ierror = 2
-            return
-        else if (lvhaes < 2*lzimn+nlon+15) then
-            ierror = 3
-            return
-        else if (lwork < 5*nlat*imid+labc) then
-            ierror = 4
-            return
-        else if (ldwork < 2*(nlat+1)) then
-            ierror = 5
-            return
-        else
-            ierror = 0
-        end if
+            mmax = min(nlat, (nlon+1)/2)
+            imid = (nlat+1)/2
+            lzimn = (imid*mmax*(2*nlat-mmax+1))/2
+            labc = 3*(max(mmax-2, 0)*(2*nlat-mmax-1))/2
 
-        !  Set workspace indices
-        workspace_indices = get_vhaesi_workspace_indices(lzimn, nlat, imid, mmax)
+            !  Check calling arguments
+            if (nlat < 3) then
+                ierror = 1
+            else if (nlon < 1) then
+                ierror = 2
+            else if (lvhaes < 2*lzimn+nlon+15) then
+                ierror = 3
+            else
+                ierror = 0
+            end if
 
-        associate( &
-            jw1 => workspace_indices(1), &
-            jw2 => workspace_indices(2), &
-            iw1 => workspace_indices(3), &
-            idz => workspace_indices(4) &
-            )
-            call vhaesi_lower_utility_routine(nlat, nlon, imid, wvhaes, wvhaes(jw1), idz, work, work(iw1), dwork)
+            ! Check error flag
+            if (ierror /= 0) return
 
-            call util%hfft%initialize(nlon, wvhaes(jw2))
+            !  Set workspace indices
+            workspace_indices = get_vhaesi_workspace_indices(lzimn, nlat, imid, mmax)
+
+            ! Set required workspace sizes
+            lwork = 5*nlat*imid+labc
+            ldwork = 2 * (nlat + 1)
+
+            block
+                real(wp) :: work(lwork), dwork(ldwork)
+
+                associate (&
+                    jw1 => workspace_indices(1), &
+                    jw2 => workspace_indices(2), &
+                    iw1 => workspace_indices(3), &
+                    idz => workspace_indices(4) &
+                    )
+                    call vhaesi_lower_utility_routine( &
+                        nlat, nlon, imid, wvhaes, wvhaes(jw1:), idz, work, work(iw1:), dwork)
+
+                    call util%hfft%initialize(nlon, wvhaes(jw2:))
+                end associate
+            end block
         end associate
 
     end subroutine vhaesi
@@ -484,7 +467,7 @@ contains
         integer(ip), intent(in)  :: lzimn
         integer(ip)              :: return_value(6)
 
-        associate( i => return_value )
+        associate (i => return_value)
             i(1) = ist+1
             i(2) = lnl+1
             i(3) = i(2)+ist
@@ -1198,7 +1181,7 @@ contains
         integer(ip)              :: return_value(4)
 
 
-        associate( i => return_value )
+        associate (i => return_value)
             i(1) = lzimn+1
             i(2) = 2*lzimn+1
             i(3) = 3*nlat*imid+1

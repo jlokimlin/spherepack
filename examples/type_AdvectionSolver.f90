@@ -95,7 +95,7 @@ contains
         real(wp)    :: cthslh, lhat, cosl, sinl, cth , that, r
 
 
-        associate( &
+        associate (&
             nlat => self%NUMBER_OF_LATITUDES, &
             nlon => self%NUMBER_OF_LONGITUDES, &
             omega => self%ROTATION_RATE_OF_EARTH, &
@@ -104,22 +104,22 @@ contains
             alpha => self%TILT_ANGLE, &
             hzero => self%MAXIMUM_VALUE_OF_COSINE_BELL, &
             colat => self%grid%latitudes &
-            )
+           )
 
-            associate( lambdc => omega*t )
+            associate (lambdc => omega*t)
                 call sph2cart(ONE, beta, lambdc, xc, yc, zc)
             end associate
 
-            associate( &
+            associate (&
                 cosa => cos(alpha), &
                 sina => sin(alpha) &
-                )
+               )
                 do j=1, nlon
                     lambda = self%grid%longitudes(j)
-                    associate( &
+                    associate (&
                         cosp => cos(lambda), &
                         sinp => sin(lambda) &
-                        )
+                       )
                         do i=1, nlat
                             theta = colat(i)
                             cost = cos(theta)
@@ -137,7 +137,7 @@ contains
                             call sph2cart(ONE, that, lhat, x1, y1, z1)
 
                             ! Compute distance
-                            associate( dist => norm2([x1-xc, y1-yc, z1-zc]) )
+                            associate (dist => norm2([x1-xc, y1-yc, z1-zc]))
 
                                 !  Initialize geopotential
                                 geopot(i, j) = ZERO
@@ -172,26 +172,26 @@ contains
         real(wp)    :: sinp, cosp, sint, cost, sinl, cosl
         real(wp)    :: cth, xlhat, uhat
 
-        associate( &
+        associate (&
             nlats => self%NUMBER_OF_LATITUDES, &
             nlons => self%NUMBER_OF_LONGITUDES, &
             colat => self%grid%latitudes, &
             omega => self%ROTATION_RATE_OF_EARTH, &
             alpha => self%TILT_ANGLE &
-            )
+           )
 
             do j=1, nlons
-                associate( xlm => self%grid%longitudes(j) )
+                associate (xlm => self%grid%longitudes(j))
                     sinp = sin(xlm)
                     cosp = cos(xlm)
                     do i=1, nlats
                         cost = cos(colat(i))
                         sint = sin(colat(i))
-                        associate( &
+                        associate (&
                             sth => cos(alpha)*cost+sin(alpha)*sint*cosp, &
                             cthclh => cos(alpha)*sint*cosp-sin(alpha)*cost, &
                             cthslh => sint*sinp &
-                            )
+                           )
 
                             xlhat = self%atanxy(cthclh, cthslh)
                             cosl = cos(xlhat)

@@ -381,16 +381,6 @@ contains
     !
     !            4*nlat*l2+3*max(l1-2, 0)*(nlat+nlat-l1-1)+nlon+15
     !
-    !
-    !     dwork  a real work array that does not have to be saved.
-    !
-    !     ldwork the dimension of the array dwork as it appears in the
-    !            program that calls vhaec. ldwork must be at least
-    !            2*(nlat+2)
-    !
-    !
-    !     **************************************************************
-    !
     !     output parameters
     !
     !     wvhaec an array which is initialized for use by subroutine vhaec.
@@ -403,17 +393,13 @@ contains
     !            = 1  error in the specification of nlat
     !            = 2  error in the specification of nlon
     !            = 3  error in the specification of lvhaec
-    !            = 4  error in the specification of ldwork
     !
-    module subroutine vhaeci(nlat, nlon, wvhaec, lvhaec, dwork, ldwork, ierror)
+    module subroutine vhaeci(nlat, nlon, wvhaec, ierror)
 
         ! Dummy arguments
         integer(ip), intent(in)  :: nlat
         integer(ip), intent(in)  :: nlon
-        real(wp),    intent(out) :: wvhaec(lvhaec)
-        integer(ip), intent(in)  :: lvhaec
-        real(wp),    intent(out) :: dwork(ldwork)
-        integer(ip), intent(in)  :: ldwork
+        real(wp),    intent(out) :: wvhaec(:)
         integer(ip), intent(out) :: ierror
 
         ! Local variables
@@ -422,36 +408,49 @@ contains
         integer(ip) :: iw1
         integer(ip) :: iw2
         integer(ip) :: labc
-        integer(ip) :: lvhaec
         integer(ip) :: lwzvin
         integer(ip) :: lzz1
-        integer(ip) :: mmax
+        integer(ip) :: mmax, ldwork
 
-        imid = (nlat+1)/2
-        lzz1 = 2*nlat*imid
-        mmax = min(nlat, (nlon+1)/2)
-        labc = 3*(max(mmax-2, 0)*(2*nlat-mmax-1))/2
+        associate (lvhaec => size(wvhaec))
 
-        ierror = 1
-        if (nlat < 3) return
-        ierror = 2
-        if (nlon < 1) return
-        ierror = 3
-        if (lvhaec < 2*(lzz1+labc)+nlon+15) return
-        ierror = 4
-        if (ldwork < 2*nlat+2) return
-        ierror = 0
+            imid = (nlat+1)/2
+            lzz1 = 2*nlat*imid
+            mmax = min(nlat, (nlon+1)/2)
+            labc = 3*(max(mmax-2, 0)*(2*nlat-mmax-1))/2
 
-        call util%zvinit(nlat, nlon, wvhaec, dwork)
+            ! Check error flag
+            if (nlat < 3) then
+                ierror = 1
+            else if (nlon < 1) then
+                ierror = 2
+            else if (lvhaec < 2*(lzz1+labc)+nlon+15) then
+                ierror = 3
+            else
+                ierror = 0
+            end if
 
-        ! Set workspace index pointers
-        lwzvin = lzz1+labc
-        iw1 = lwzvin+1
-        iw2 = iw1+lwzvin
+            ! Check error flag
+            if (ierror /= 0) return
 
-        call util%zwinit(nlat, nlon, wvhaec(iw1), dwork)
+            ! Set required workspace size
+            ldwork = 2*nlat+2
 
-        call util%hfft%initialize(nlon, wvhaec(iw2))
+            block
+                real(wp) :: dwork(ldwork)
+
+                call util%zvinit(nlat, nlon, wvhaec, dwork)
+
+                ! Set workspace index pointers
+                lwzvin = lzz1+labc
+                iw1 = lwzvin+1
+                iw2 = iw1+lwzvin
+
+                call util%zwinit(nlat, nlon, wvhaec(iw1:), dwork)
+
+                call util%hfft%initialize(nlon, wvhaec(iw2:))
+            end block
+        end associate
 
     end subroutine vhaeci
 

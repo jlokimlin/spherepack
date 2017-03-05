@@ -55,9 +55,9 @@ contains
         if (.not.self%initialized) return
 
         !  Release memory
-        if (allocated(self%grid_type)) deallocate( self%grid_type )
-        if (allocated(self%longitudes)) deallocate( self%longitudes )
-        if (allocated(self%latitudes)) deallocate( self%latitudes )
+        if (allocated(self%grid_type)) deallocate (self%grid_type)
+        if (allocated(self%longitudes)) deallocate (self%longitudes)
+        if (allocated(self%latitudes)) deallocate (self%latitudes)
 
         ! Reset constants
         self%NUMBER_OF_LONGITUDES = 0
@@ -87,10 +87,10 @@ contains
         end if
 
         !  Allocate memory
-        allocate( phi(nlon) )
+        allocate (phi(nlon))
 
         !  Compute equally space (uniform) longitudinal grid
-        associate( dphi => self%LONGITUDINAL_MESH )
+        associate (dphi => self%LONGITUDINAL_MESH)
 
             ! Set equally spaced (uniform) mesh size
             dphi= TWO_PI / nlon
@@ -114,23 +114,23 @@ contains
         call self%assert_initialized('print_to_unformatted_binary_files')
 
         ! Write latitudes
-        associate( theta => self%latitudes )
+        associate (theta => self%latitudes)
             open( newunit=file_unit, &
                 file=header//self%grid_type//'_latitudes.dat', &
                 status='replace', action='write', &
-                form='unformatted', access='stream' )
-            write( file_unit ) theta
-            close( file_unit )
+                form='unformatted', access='stream')
+            write( file_unit) theta
+            close( file_unit)
         end associate
 
         ! Write longitudes
-        associate( phi => self%longitudes )
+        associate (phi => self%longitudes)
             open( newunit=file_unit, &
                 file=header//self%grid_type//'_longitudes.dat', &
                 status='replace', action='write', &
-                form='unformatted', access='stream' )
-            write( file_unit ) phi
-            close( file_unit )
+                form='unformatted', access='stream')
+            write( file_unit) phi
+            close( file_unit)
         end associate
 
     end subroutine print_to_unformatted_binary_files

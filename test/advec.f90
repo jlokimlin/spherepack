@@ -144,7 +144,7 @@ program advec
     !
     parameter (nn15=nnlon+15)
     parameter(llwork=4*nnlat*nnlon+2*nnlat*(nnlat+1))
-    parameter (lldwork = 2*nnlat*(nnlat+1)+1 )
+    parameter (lldwork = 2*nnlat*(nnlat+1)+1)
     parameter (llvhsgc = 7*nnlat*nnlat+nnlon+15)
     parameter (llshagc = 5*nnlat*nnlat + nnlon+15)
     !
@@ -204,7 +204,7 @@ program advec
     !
     !     preset saved work spaces for gradgc and shagc and shsgc
     !
-    call vhsgci(nlat, nlon, wvhsgc, lvhsgc, dwork, ldwork, ierror)
+    call vhsgci(nlat, nlon, wvhsgc, ierror)
     if(ierror /= 0) write(*, 10) ierror
 10  format(' error in vsgci = ', i5)
     call shagci(nlat, nlon, wshagc, ierror)

@@ -299,10 +299,10 @@ program shallow
     call shsesi(nlat, nlon, wshs, ierror)
     if(ierror /= 0) write(*, 56) ierror
 56  format(' error' i4 ' in shsesi')
-    call vhaesi(nlat, nlon, wvha, lwvha, work, lwork, dwork, ldwork, ierror)
+    call vhaesi(nlat, nlon, wvha, ierror)
     if(ierror /= 0) write(*, 57) ierror
 57  format(' error' i4 ' in vhaesi')
-    call vhsesi(nlat, nlon, wvhs, lwvhs, work, lwork, dwork, ldwork, ierror)
+    call vhsesi(nlat, nlon, wvhs, ierror)
     if(ierror /= 0) write(*, 58) ierror
 58  format(' error' i4 ' in vhsesi')
     call vtsesi(nlat, nlon, wvts, lwvts, work, lwork, dwork, ldwork, ierror)

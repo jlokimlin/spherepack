@@ -74,14 +74,14 @@ program tvha
     class(Sphere), allocatable :: solver
 
     ! Test gaussian grid
-    allocate( GaussianSphere :: solver )
+    allocate (GaussianSphere :: solver)
     call test_vector_analysis_and_synthesis_routines(solver)
-    deallocate( solver )
+    deallocate (solver)
 
     ! Test regular grid
-    allocate( RegularSphere :: solver )
+    allocate (RegularSphere :: solver)
     call test_vector_analysis_and_synthesis_routines(solver)
-    deallocate( solver )
+    deallocate (solver)
 
 contains
 
@@ -109,8 +109,8 @@ contains
             sphere_type = GaussianSphere(NLATS, NLONS)
 
             ! Allocate known error from previous platform
-            allocate( previous_polar_error, source='     polar error     = 5.107026e-15' )
-            allocate( previous_azimuthal_error, source='     azimuthal error = 9.325873e-15' )
+            allocate (previous_polar_error, source='     polar error     = 5.107026e-15')
+            allocate (previous_azimuthal_error, source='     azimuthal error = 9.325873e-15')
 
             type is (RegularSphere)
 
@@ -118,25 +118,25 @@ contains
             sphere_type = RegularSphere(NLATS, NLONS)
 
             ! Allocate known error from previous platform
-            allocate( previous_polar_error, source='     polar error     = 5.329071e-15' )
-            allocate( previous_azimuthal_error, source='     azimuthal error = 7.771561e-15' )
+            allocate (previous_polar_error, source='     polar error     = 5.329071e-15')
+            allocate (previous_azimuthal_error, source='     azimuthal error = 7.771561e-15')
         end select
 
         !
         !  Set scalar stream and velocity potential fields as polys in x, y, z
         !    and then set v, w from st, sv scalar fields
         !
-        associate( &
+        associate (&
             ve => polar_component, &
             we => azimuthal_component, &
             radial => sphere_type%unit_vectors%radial, &
             theta => sphere_type%unit_vectors%polar, &
             phi => sphere_type%unit_vectors%azimuthal &
-            )
+           )
             do k=1, NSYNTHS
                 do j=1, NLONS
                     do i=1, NLATS
-                        associate( &
+                        associate (&
                             x => radial(i, j)%x, & !sint*cosp
                             y => radial(i, j)%y, & !sint*sinp
                             z => radial(i, j)%z, & !cost
@@ -148,21 +148,21 @@ contains
                             dzdp => phi(i, j)%z, & ! 0.0
                             cosp => phi(i, j)%y, &
                             sinp => -phi(i, j)%x &
-                            )
+                           )
                             select case (k)
                                 case (1)
-                                    associate( &
+                                    associate (&
                                         dstdt => x*dydt+y*dxdt, &
                                         dsvdt => y*dzdt+z*dydt &
-                                        )
+                                       )
                                         ve(i, j, k) = -(cosp*dydp+sinp*dxdp) + dsvdt
                                         we(i, j, k) = sinp*dzdp + dxdt + dstdt
                                     end associate
                                 case (2)
-                                    associate( &
+                                    associate (&
                                         dstdt => x*dzdt+z*dxdt, &
                                         dsvdt => x*dydt+y*dxdt &
-                                        )
+                                       )
                                         !
                                         !          v = -1/sin(theta)*d(st)/dphi + d(sv)/dtheta
                                         !
@@ -183,12 +183,12 @@ contains
         !  Perform analysis then synthesis
         !
         do k = 1, NSYNTHS
-            associate( &
+            associate (&
                 ve => polar_component(:, :, k), &
                 we => azimuthal_component(:, :, k), &
                 v => synthesized_polar(:, :, k), &
                 w => synthesized_azimuthal(:, :, k) &
-                )
+               )
 
                 ! Analyse function into (real) coefficients
                 call sphere_type%vector_analysis_from_spherical_components(ve, we)
@@ -202,16 +202,16 @@ contains
         !
         !  Compute discretization error
         !
-        associate( &
+        associate (&
             ve => polar_component, &
             we => azimuthal_component, &
             v => synthesized_polar, &
             w => synthesized_azimuthal &
-            )
-            associate( &
+           )
+            associate (&
                 err2v => maxval(abs(v - ve)), &
                 err2w => maxval(abs(w - we)) &
-                )
+               )
                 !
                 !  Print earlier output from platform with 64-bit floating point
                 !    arithmetic followed by the output from this computer
@@ -228,15 +228,15 @@ contains
                 write( stdout, '(a)') '     The output from your computer is: '
                 write( stdout, '(a, 1pe15.6)') '     polar error     = ', err2v
                 write( stdout, '(a, 1pe15.6)') '     azimuthal error = ', err2w
-                write( stdout, '(a)' ) ''
+                write( stdout, '(a)') ''
             end associate
         end associate
         !
         !  Release memory
         !
         call sphere_type%destroy()
-        deallocate( previous_polar_error )
-        deallocate( previous_azimuthal_error )
+        deallocate (previous_polar_error)
+        deallocate (previous_azimuthal_error)
 
     end subroutine test_vector_analysis_and_synthesis_routines
 

@@ -100,8 +100,8 @@ contains
         call self%destroy()
 
         !  Allocate polymorphic components
-        allocate( self%grid, source=RegularGrid(nlat, nlon) )
-        allocate( self%workspace, source=RegularWorkspace(nlat, nlon) )
+        allocate (self%grid, source=RegularGrid(nlat, nlon))
+        allocate (self%workspace, source=RegularWorkspace(nlat, nlon))
 
         !  Address optional arguments
 
@@ -196,10 +196,10 @@ contains
 
         select type(self)
             class is (RegularSphere)
-            associate( workspace => self%workspace )
+            associate (workspace => self%workspace)
                 select type(workspace)
                     class is (RegularWorkspace)
-                    associate( &
+                    associate (&
                         nlat => self%NUMBER_OF_LATITUDES, &
                         nlon => self%NUMBER_OF_LONGITUDES, &
                         isym => self%SCALAR_SYMMETRIES, &
@@ -216,7 +216,7 @@ contains
                         work => workspace%legendre_workspace, &
                         lwork => size(workspace%legendre_workspace), &
                         ierror => error_flag &
-                        )
+                       )
 
                         !  Perform regular (real) spherical harmonic analysis
                         call aux%shaes(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, &
@@ -268,10 +268,10 @@ contains
 
         select type(self)
             class is (RegularSphere)
-            associate( workspace => self%workspace )
+            associate (workspace => self%workspace)
                 select type(workspace)
                     class is (RegularWorkspace)
-                    associate( &
+                    associate (&
                         nlat => self%NUMBER_OF_LATITUDES, &
                         nlon => self%NUMBER_OF_LONGITUDES, &
                         isym => self%SCALAR_SYMMETRIES, &
@@ -288,7 +288,7 @@ contains
                         work => workspace%legendre_workspace, &
                         lwork => size(workspace%legendre_workspace), &
                         ierror => error_flag &
-                        )
+                       )
 
                         !  Perform (real) spherical harmonic scalar synthesis
                         call aux%shses(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, &
@@ -341,10 +341,10 @@ contains
 
         select type(self)
             class is (RegularSphere)
-            associate( workspace => self%workspace )
+            associate (workspace => self%workspace)
                 select type(workspace)
                     class is (RegularWorkspace)
-                    associate( &
+                    associate (&
                         nlat => self%NUMBER_OF_LATITUDES, &
                         nlon => self%NUMBER_OF_LONGITUDES, &
                         ityp => self%VECTOR_SYMMETRIES, &
@@ -364,7 +364,7 @@ contains
                         work => workspace%legendre_workspace, &
                         lwork => size(workspace%legendre_workspace), &
                         ierror => error_flag &
-                        )
+                       )
 
                         !  Perform (real) vector spherical harmonic analysis
                         call aux%vhaes(nlat, nlon, ityp, nt, v, w, idvw, jdvw, &
@@ -434,10 +434,10 @@ contains
 
         select type(self)
             class is (RegularSphere)
-            associate( workspace => self%workspace )
+            associate (workspace => self%workspace)
                 select type(workspace)
                     class is (RegularWorkspace)
-                    associate( &
+                    associate (&
                         nlat => self%NUMBER_OF_LATITUDES, &
                         nlon => self%NUMBER_OF_LONGITUDES, &
                         ityp => self%VECTOR_SYMMETRIES, &
@@ -453,11 +453,11 @@ contains
                         mdab => size(workspace%vector_coefficients%polar%real_component, dim=1), &
                         ndab => size(workspace%vector_coefficients%polar%real_component, dim=2), &
                         wvhses => workspace%backward_vector, &
-                        lvhses => size(workspace%backward_vector ), &
+                        lvhses => size(workspace%backward_vector), &
                         work => workspace%legendre_workspace, &
-                        lwork => size(workspace%legendre_workspace ), &
+                        lwork => size(workspace%legendre_workspace), &
                         ierror => error_flag &
-                        )
+                       )
 
                         !  Perform (real) vector spherical harmonic analysis
                         call aux%vhses(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &

@@ -160,10 +160,10 @@ contains
         end if
 
         !  Allocate memory
-        allocate( theta(nlat) )
+        allocate (theta(nlat))
 
         !  Compute equally spaced latitudinal grid
-        associate( dtheta => self%LATITUDINAL_MESH )
+        associate (dtheta => self%LATITUDINAL_MESH)
 
             ! Set equally spaced (uniform) mesh size
             dtheta = PI / (nlat-1)

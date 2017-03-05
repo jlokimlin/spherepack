@@ -282,7 +282,7 @@ contains
             (mode == 0 .and. lwork < nlat*nlon*(nt+1)) &
             .or. &
             (mode /= 0 .and. lwork < l2*nlon*(nt+1)) &
-            ) then
+           ) then
             ierror = 10
             return
         else
@@ -383,7 +383,7 @@ contains
         integer(ip) :: ntrunc, l1, l2, lp, ldw, late, ipmnf
         integer(ip) :: lwork, ldwork
 
-        associate( lshsgs => size(wshsgs) )
+        associate (lshsgs => size(wshsgs))
 
             ! Set triangular truncation limit for spherical harmonic basis
             ntrunc = min((nlon+2)/2, nlat)

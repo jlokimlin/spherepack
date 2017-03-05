@@ -264,10 +264,10 @@ contains
         class(Vector3D), intent(in) :: self
         class(Vector3D), intent(in) :: other
 
-        associate( &
+        associate (&
             a => [self%x, self%y, self%z], &
             b => [other%x, other%y, other%z] &
-            )
+           )
             return_value = dot_product(a, b)
         end associate
 
@@ -294,7 +294,7 @@ contains
         class(Vector3D), intent(in) :: self
         real(wp)                    :: return_value
 
-        associate( array => [self%x, self%y, self%z] )
+        associate (array => [self%x, self%y, self%z])
             return_value = norm2(array)
         end associate
 

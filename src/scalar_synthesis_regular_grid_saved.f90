@@ -257,7 +257,7 @@ contains
             (isym == 0 .and. idg < nlat) &
             .or. &
             (isym /= 0 .and. idg < (nlat+1)/2)&
-            ) then
+           ) then
             ierror = 5
             return
         else if (jdg < nlon) then
@@ -357,7 +357,7 @@ contains
         integer(ip) :: imid, labc, lpimn, mmax, lwork, ldwork
         type(SpherepackUtility) :: util
 
-        associate( lshses => size(wshses) )
+        associate (lshses => size(wshses))
 
             mmax = min(nlat, nlon/2+1)
             imid = (nlat+1)/2

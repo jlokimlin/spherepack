@@ -2002,7 +2002,7 @@ contains
         real(wp), parameter :: tr11 = (SQRT_5 - ONE)/4 ! 0.309016994374947
         real(wp), parameter :: ti11 = (sqrt(ONE/(FIVE + SQRT_5)))/2 ! 0.951056516295154
         real(wp), parameter :: tr12 = (-ONE - SQRT_5)/4 ! -.809016994374947
-        real(wp), parameter :: ti12 = sqrt( FIVE/(TWO*(FIVE + SQRT_5 ))) ! 0.587785252292473
+        real(wp), parameter :: ti12 = sqrt( FIVE/(TWO*(FIVE + SQRT_5))) ! 0.587785252292473
         real(wp) ::  ti5, ti2, ti4, ti3, tr5, tr2, tr4
         real(wp) :: tr3, cr2, ci2, cr3, ci3, cr5, ci5, cr4, ci4, dr3, dr4, di3
         real(wp) :: di4, dr5, dr2, di5, di2
@@ -2184,7 +2184,7 @@ contains
                     do k = 1, l1
                         idij = idj
                         c1(3:ido-1:2, k, j) = wa(idij+1:ido-3+idij:2)*ch(3:ido-1:2, k, j &
-                            ) - wa(idij+2:ido-2+idij:2)*ch(4:ido:2, k, j)
+                           ) - wa(idij+2:ido-2+idij:2)*ch(4:ido:2, k, j)
                         c1(4:ido:2, k, j) = wa(idij+1:ido-3+idij:2)*ch(4:ido:2, k, j) + &
                             wa(idij+2:ido-2+idij:2)*ch(3:ido-1:2, k, j)
                     end do
@@ -2486,7 +2486,7 @@ contains
         real(wp), parameter :: tr11 = (SQRT_5 - ONE)/4 ! 0.309016994374947
         real(wp), parameter :: ti11 = -sqrt((FIVE + SQRT_5)/2)/2 ! -.951056516295154
         real(wp), parameter :: tr12 = (-ONE - SQRT_5)/4 ! -.809016994374947
-        real(wp), parameter :: ti12 = -sqrt(FIVE/(TWO * (FIVE + SQRT_5)) ) ! -0.587785252292473
+        real(wp), parameter :: ti12 = -sqrt(FIVE/(TWO * (FIVE + SQRT_5))) ! -0.587785252292473
         !-----------------------------------------------
 
         select case(ido)
@@ -2669,7 +2669,7 @@ contains
                     do k = 1, l1
                         idij = idj
                         c1(3:ido-1:2, k, j) = wa(idij+1:ido-3+idij:2)*ch(3:ido-1:2, k, j &
-                            ) + wa(idij+2:ido-2+idij:2)*ch(4:ido:2, k, j)
+                           ) + wa(idij+2:ido-2+idij:2)*ch(4:ido:2, k, j)
                         c1(4:ido:2, k, j) = wa(idij+1:ido-3+idij:2)*ch(4:ido:2, k, j) - &
                             wa(idij+2:ido-2+idij:2)*ch(3:ido-1:2, k, j)
                     end do
@@ -3079,7 +3079,7 @@ contains
         real(wp), parameter :: tr11 = (SQRT_5 - ONE)/4 ! 0.309016994374947
         real(wp), parameter :: ti11 = sqrt((FIVE + SQRT_5)/2)/2 ! 0.951056516295154
         real(wp), parameter :: tr12 = (-ONE - SQRT_5)/4 ! -.809016994374947
-        real(wp), parameter :: ti12 = sqrt(FIVE/(TWO * (FIVE + SQRT_5)) ) ! 0.587785252292473
+        real(wp), parameter :: ti12 = sqrt(FIVE/(TWO * (FIVE + SQRT_5))) ! 0.587785252292473
         !-----------------------------------------------
 
 
@@ -3769,50 +3769,50 @@ contains
                     source = ch(2:ido-1:2, :, 2:iipph)+ch(2:ido-1:2, :, iipp2-2:iipp2-iipph:(-1)), &
                     shape = [(ido-1)/2, iipph-1, l1], &
                     order = [1, 3, 2] &
-                    )
+                   )
                 cc(idp2-4:idp2-1-ido:(-2), 2:(iipph-1)*2:2, :) = &
                     reshape( &
                     source = ch(2:ido-1:2, :, 2:iipph)-ch(2:ido-1:2, :, iipp2-2:iipp2-iipph:(-1)), &
                     shape = [(ido-1)/2, iipph-1, l1], &
                     order = [1, 3, 2] &
-                    )
+                   )
                 cc(3:ido:2, 3:iipph*2-1:2, :) = &
                     reshape(&
                     source = ch(3:ido:2, :, 2:iipph)+ch(3:ido:2, :, iipp2-2:iipp2-iipph:(-1)), &
                     shape = [(ido-1)/2, iipph-1, l1], &
                     order = [1, 3, 2] &
-                    )
+                   )
                 cc(idp2-3:idp2-ido:(-2), 2:(iipph-1)*2:2, :) = &
                     reshape(&
                     source = ch(3:ido:2, :, iipp2-2:iipp2-iipph:(-1))-ch(3:ido:2, :, 2:iipph), &
                     shape = [(ido-1)/2, iipph-1, l1], &
                     order = [1, 3, 2] &
-                    )
+                   )
             else
                 cc(2:ido-1:2, 3:iipph*2-1:2, :) = &
                     reshape( &
                     source = ch(2:ido-1:2, :, 2:iipph)+ch(2:ido-1:2, :, iipp2-2:iipp2-iipph:(-1)), &
                     shape = [(ido-1)/2, iipph-1, l1], &
                     order = [1, 3, 2] &
-                    )
+                   )
                 cc(idp2-4:idp2-1-ido:(-2), 2:(iipph-1)*2:2, :) = &
                     reshape( &
                     source = ch(2:ido-1:2, :, 2:iipph)-ch(2:ido-1:2, :, iipp2-2:iipp2-iipph:(-1)), &
                     shape = [(ido-1)/2, iipph-1, l1], &
                     order = [1, 3, 2] &
-                    )
+                   )
                 cc(3:ido:2, 3:iipph*2-1:2, :) = &
                     reshape( &
                     source = ch(3:ido:2, :, 2:iipph)+ch(3:ido:2, :, iipp2-2:iipp2-iipph:(-1)), &
                     shape = [(ido-1)/2, iipph-1, l1], &
                     order = [1, 3, 2] &
-                    )
+                   )
                 cc(idp2-3:idp2-ido:(-2), 2:(iipph-1)*2:2, :) = &
                     reshape( &
                     source = ch(3:ido:2, :, iipp2-2:iipp2-iipph:(-1))-ch(3:ido:2, :, 2:iipph), &
                     shape = [(ido-1)/2, iipph-1, l1], &
                     order = [1, 3, 2] &
-                    )
+                   )
             end if
         end if
 
