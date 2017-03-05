@@ -711,8 +711,7 @@ contains
         !
         if (igrda == 2) then
             call vhagc(nlata, nlona, ityp, nt, va, ua, nlata, nlona, work(iabr), &
-                work(iabi), work(iacr), work(iaci), la1, nlata, wsave, lwa, work(iw), &
-                lw, ier)
+                work(iabi), work(iacr), work(iaci), la1, nlata, wsave, ier)
         else
             call vhaec(nlata, nlona, ityp, nt, va, ua, nlata, nlona, work(iabr), &
                 work(iabi), work(iacr), work(iaci), la1, nlata, wsave, ier)

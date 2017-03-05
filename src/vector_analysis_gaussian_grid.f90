@@ -29,302 +29,218 @@
 !     *                                                               *
 !     * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !
-!
-!
-! ... file vhagc.f
-!
-!     this file contains code and documentation for subroutines
-!     vhagc and vhagci
-!
-! ... files which must be loaded with vhagc.f
-!
-!     type_SpherepackUtility.f, type_RealPeriodicFastFourierTransform.f, compute_gaussian_latitudes_and_weights.f
-!
-!                                                                              
-!     subroutine vhagc(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, 
-!    +                 mdab, ndab, wvhagc, lvhagc, work, lwork, ierror)
-!
-!     subroutine vhagc performs the vector spherical harmonic analysis
-!     on the vector field (v, w) and stores the result in the arrays
-!     br, bi, cr, and ci. v(i, j) and w(i, j) are the colatitudinal
-!     (measured from the north pole) and east longitudinal components
-!     respectively, located at the gaussian colatitude point theta(i)
-!     and longitude phi(j) = (j-1)*2*pi/nlon. the spectral
-!     representation of (v, w) is given at output parameters v, w in 
-!     subroutine vhsec.  
-!
-!     input parameters
-!
-!     nlat   the number of points in the gaussian colatitude grid on the
-!            full sphere. these lie in the interval (0, pi) and are computed
-!            in radians in theta(1) <...< theta(nlat) by subroutine compute_gaussian_latitudes_and_weights.
-!            if nlat is odd the equator will be included as the grid point
-!            theta((nlat+1)/2).  if nlat is even the equator will be
-!            excluded as a grid point and will lie half way between
-!            theta(nlat/2) and theta(nlat/2+1). nlat must be at least 3.
-!            note: on the half sphere, the number of grid points in the
-!            colatitudinal direction is nlat/2 if nlat is even or
-!            (nlat+1)/2 if nlat is odd.
-!
-!     nlon   the number of distinct londitude points.  nlon determines
-!            the grid increment in longitude as 2*pi/nlon. for example
-!            nlon = 72 for a five degree grid. nlon must be greater
-!            than zero. the axisymmetric case corresponds to nlon=1.
-!            the efficiency of the computation is improved when nlon
-!            is a product of small prime numbers.
-!
-!     ityp   = 0  no symmetries exist about the equator. the analysis
-!                 is performed on the entire sphere.  i.e. on the
-!                 arrays v(i, j), w(i, j) for i=1, ..., nlat and 
-!                 j=1, ..., nlon.   
-!
-!            = 1  no symmetries exist about the equator. the analysis
-!                 is performed on the entire sphere.  i.e. on the
-!                 arrays v(i, j), w(i, j) for i=1, ..., nlat and 
-!                 j=1, ..., nlon. the curl of (v, w) is zero. that is, 
-!                 (d/dtheta (sin(theta) w) - dv/dphi)/sin(theta) = 0. 
-!                 the coefficients cr and ci are zero.
-!
-!            = 2  no symmetries exist about the equator. the analysis
-!                 is performed on the entire sphere.  i.e. on the
-!                 arrays v(i, j), w(i, j) for i=1, ..., nlat and 
-!                 j=1, ..., nlon. the divergence of (v, w) is zero. i.e., 
-!                 (d/dtheta (sin(theta) v) + dw/dphi)/sin(theta) = 0. 
-!                 the coefficients br and bi are zero.
-!
-!            = 3  v is symmetric and w is antisymmetric about the 
-!                 equator. the analysis is performed on the northern
-!                 hemisphere only.  i.e., if nlat is odd the analysis
-!                 is performed on the arrays v(i, j), w(i, j) for 
-!                 i=1, ..., (nlat+1)/2 and j=1, ..., nlon. if nlat is
-!                 even the analysis is performed on the the arrays
-!                 v(i, j), w(i, j) for i=1, ..., nlat/2 and j=1, ..., nlon.
-!
-!            = 4  v is symmetric and w is antisymmetric about the 
-!                 equator. the analysis is performed on the northern
-!                 hemisphere only.  i.e., if nlat is odd the analysis
-!                 is performed on the arrays v(i, j), w(i, j) for 
-!                 i=1, ..., (nlat+1)/2 and j=1, ..., nlon. if nlat is
-!                 even the analysis is performed on the the arrays
-!                 v(i, j), w(i, j) for i=1, ..., nlat/2 and j=1, ..., nlon.
-!                 the curl of (v, w) is zero. that is, 
-!                 (d/dtheta (sin(theta) w) - dv/dphi)/sin(theta) = 0. 
-!                 the coefficients cr and ci are zero.
-!
-!            = 5  v is symmetric and w is antisymmetric about the 
-!                 equator. the analysis is performed on the northern
-!                 hemisphere only.  i.e., if nlat is odd the analysis
-!                 is performed on the arrays v(i, j), w(i, j) for 
-!                 i=1, ..., (nlat+1)/2 and j=1, ..., nlon. if nlat is
-!                 even the analysis is performed on the the arrays
-!                 v(i, j), w(i, j) for i=1, ..., nlat/2 and j=1, ..., nlon.
-!                 the divergence of (v, w) is zero. i.e., 
-!                 (d/dtheta (sin(theta) v) + dw/dphi)/sin(theta) = 0. 
-!                 the coefficients br and bi are zero.
-!
-!            = 6  v is antisymmetric and w is symmetric about the 
-!                 equator. the analysis is performed on the northern
-!                 hemisphere only.  i.e., if nlat is odd the analysis
-!                 is performed on the arrays v(i, j), w(i, j) for 
-!                 i=1, ..., (nlat+1)/2 and j=1, ..., nlon. if nlat is
-!                 even the analysis is performed on the the arrays
-!                 v(i, j), w(i, j) for i=1, ..., nlat/2 and j=1, ..., nlon.
-!
-!            = 7  v is antisymmetric and w is symmetric about the 
-!                 equator. the analysis is performed on the northern
-!                 hemisphere only.  i.e., if nlat is odd the analysis
-!                 is performed on the arrays v(i, j), w(i, j) for 
-!                 i=1, ..., (nlat+1)/2 and j=1, ..., nlon. if nlat is
-!                 even the analysis is performed on the the arrays
-!                 v(i, j), w(i, j) for i=1, ..., nlat/2 and j=1, ..., nlon.
-!                 the curl of (v, w) is zero. that is, 
-!                 (d/dtheta (sin(theta) w) - dv/dphi)/sin(theta) = 0. 
-!                 the coefficients cr and ci are zero.
-!
-!            = 8  v is antisymmetric and w is symmetric about the 
-!                 equator. the analysis is performed on the northern
-!                 hemisphere only.  i.e., if nlat is odd the analysis
-!                 is performed on the arrays v(i, j), w(i, j) for 
-!                 i=1, ..., (nlat+1)/2 and j=1, ..., nlon. if nlat is
-!                 even the analysis is performed on the the arrays
-!                 v(i, j), w(i, j) for i=1, ..., nlat/2 and j=1, ..., nlon.
-!                 the divergence of (v, w) is zero. i.e., 
-!                 (d/dtheta (sin(theta) v) + dw/dphi)/sin(theta) = 0. 
-!                 the coefficients br and bi are zero.
-!
-!
-!     nt     the number of analyses.  in the program that calls vhagc, 
-!            the arrays v, w, br, bi, cr, and ci can be three dimensional
-!            in which case multiple analyses will be performed.
-!            the third index is the analysis index which assumes the 
-!            values k=1, ..., nt.  for a single analysis set nt=1. the
-!            discription of the remaining parameters is simplified
-!            by assuming that nt=1 or that all the arrays are two
-!            dimensional.
-!
-!     v, w    two or three dimensional arrays (see input parameter nt)
-!            that contain the vector function to be analyzed.
-!            v is the colatitudnal component and w is the east 
-!            longitudinal component. v(i, j), w(i, j) contain the
-!            components at colatitude theta(i) = (i-1)*pi/(nlat-1)
-!            and longitude phi(j) = (j-1)*2*pi/nlon. the index ranges
-!            are defined above at the input parameter ityp.
-!
-!     idvw   the first dimension of the arrays v, w as it appears in
-!            the program that calls vhagc. if ityp <= 2 then idvw
-!            must be at least nlat.  if ityp > 2 and nlat is
-!            even then idvw must be at least nlat/2. if ityp > 2
-!            and nlat is odd then idvw must be at least (nlat+1)/2.
-!
-!     jdvw   the second dimension of the arrays v, w as it appears in
-!            the program that calls vhagc. jdvw must be at least nlon.
-!
-!     mdab   the first dimension of the arrays br, bi, cr, and ci as it
-!            appears in the program that calls vhagc. mdab must be at
-!            least min(nlat, nlon/2) if nlon is even or at least
-!            min(nlat, (nlon+1)/2) if nlon is odd.
-!
-!     ndab   the second dimension of the arrays br, bi, cr, and ci as it
-!            appears in the program that calls vhagc. ndab must be at
-!            least nlat.
-!
-!     wvhagc an array which must be initialized by subroutine vhagci.
-!            once initialized, wvhagc can be used repeatedly by vhagc
-!            as long as nlon and nlat remain unchanged.  wvhagc must
-!            not be altered between calls of vhagc.
-!
-!     lvhagc the dimension of the array wvhagc as it appears in the
-!            program that calls vhagc. define
-!
-!               l1 = min(nlat, nlon/2) if nlon is even or
-!               l1 = min(nlat, (nlon+1)/2) if nlon is odd
-!
-!            and
-!
-!               l2 = nlat/2        if nlat is even or
-!               l2 = (nlat+1)/2    if nlat is odd
-!
-!            then lvhagc must be at least
-!
-!               4*nlat*l2+3*max(l1-2, 0)*(2*nlat-l1-1)+nlon+l2+15
-!
-!
-!     work   a work array that does not have to be saved.
-!
-!     lwork  the dimension of the array work as it appears in the
-!            program that calls vhagc. define
-!
-!               l2 = nlat/2        if nlat is even or
-!               l2 = (nlat+1)/2    if nlat is odd
-!
-!            if ityp <= 2 then lwork must be at least
-!
-!               2*nlat*(2*nlon*nt+3*l2)
-!
-!            if ityp > 2 then lwork must be at least
-!
-!               2*l2*(2*nlon*nt+3*nlat)
-!
-!
-!
-!     **************************************************************
-!
-!     output parameters
-!
-!     br, bi  two or three dimensional arrays (see input parameter nt)
-!     cr, ci  that contain the vector spherical harmonic coefficients
-!            in the spectral representation of v(i, j) and w(i, j) given 
-!            in the discription of subroutine vhsec. br(mp1, np1), 
-!            bi(mp1, np1), cr(mp1, np1), and ci(mp1, np1) are computed 
-!            for mp1=1, ..., mmax and np1=mp1, ..., nlat except for np1=nlat
-!            and odd mp1. mmax=min(nlat, nlon/2) if nlon is even or 
-!            mmax=min(nlat, (nlon+1)/2) if nlon is odd. 
-!      
-!     ierror = 0  no errors
-!            = 1  error in the specification of nlat
-!            = 2  error in the specification of nlon
-!            = 3  error in the specification of ityp
-!            = 4  error in the specification of nt
-!            = 5  error in the specification of idvw
-!            = 6  error in the specification of jdvw
-!            = 7  error in the specification of mdab
-!            = 8  error in the specification of ndab
-!            = 9  error in the specification of lvhagc
-!            = 10 error in the specification of lwork
-!
-! ****************************************************************
-!
-!     subroutine vhagci(nlat, nlon, wvhagc, lvhagc, dwork, ldwork, ierror)
-!
-!     subroutine vhagci initializes the array wvhagc which can then be
-!     used repeatedly by subroutine vhagc until nlat or nlon is changed.
-!
-!     input parameters
-!
-!     nlat   the number of points in the gaussian colatitude grid on the
-!            full sphere. these lie in the interval (0, pi) and are computed
-!            in radians in theta(1) <...< theta(nlat) by subroutine compute_gaussian_latitudes_and_weights.
-!            if nlat is odd the equator will be included as the grid point
-!            theta((nlat+1)/2).  if nlat is even the equator will be
-!            excluded as a grid point and will lie half way between
-!            theta(nlat/2) and theta(nlat/2+1). nlat must be at least 3.
-!            note: on the half sphere, the number of grid points in the
-!            colatitudinal direction is nlat/2 if nlat is even or
-!            (nlat+1)/2 if nlat is odd.
-!
-!     nlon   the number of distinct londitude points.  nlon determines
-!            the grid increment in longitude as 2*pi/nlon. for example
-!            nlon = 72 for a five degree grid. nlon must be greater
-!            than zero. the axisymmetric case corresponds to nlon=1.
-!            the efficiency of the computation is improved when nlon
-!            is a product of small prime numbers.
-!
-!     lvhagc the dimension of the array wvhagc as it appears in the
-!            program that calls vhagci.  define
-!
-!               l1 = min(nlat, nlon/2) if nlon is even or
-!               l1 = min(nlat, (nlon+1)/2) if nlon is odd
-!
-!            and
-!
-!               l2 = nlat/2        if nlat is even or
-!               l2 = (nlat+1)/2    if nlat is odd
-!
-!            then lvhagc must be at least
-!
-!               4*nlat*l2+3*max(l1-2, 0)*(2*nlat-l1-1)+nlon+l2+15
-!
-!
-!     dwork  a real work array that does not need to be saved
-!
-!     ldwork the dimension of the array dwork as it appears in the
-!            program that calls vhagci. ldwork must be at least
-!
-!               2*nlat*(nlat+1)+1
-!
-!
-!     **************************************************************
-!
-!     output parameters
-!
-!     wvhagc an array which is initialized for use by subroutine vhagc.
-!            once initialized, wvhagc can be used repeatedly by vhagc
-!            as long as nlat and nlon remain unchanged.  wvhagc must not
-!            be altered between calls of vhagc.
-!
-!
-!     ierror = 0  no errors
-!            = 1  error in the specification of nlat
-!            = 2  error in the specification of nlon
-!            = 3  error in the specification of lvhagc
-!            = 4  error in the specification of lwork
-!
 submodule(vector_analysis_routines) vector_analysis_gaussian_grid
 
 contains
 
+    !     subroutine vhagc(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
+    !                      mdab, ndab, wvhagc, ierror)
+    !
+    !     subroutine vhagc performs the vector spherical harmonic analysis
+    !     on the vector field (v, w) and stores the result in the arrays
+    !     br, bi, cr, and ci. v(i, j) and w(i, j) are the colatitudinal
+    !     (measured from the north pole) and east longitudinal components
+    !     respectively, located at the gaussian colatitude point theta(i)
+    !     and longitude phi(j) = (j-1)*2*pi/nlon. the spectral
+    !     representation of (v, w) is given at output parameters v, w in
+    !     subroutine vhsec.
+    !
+    !     input parameters
+    !
+    !     nlat   the number of points in the gaussian colatitude grid on the
+    !            full sphere. these lie in the interval (0, pi) and are computed
+    !            in radians in theta(1) <...< theta(nlat) by subroutine compute_gaussian_latitudes_and_weights.
+    !            if nlat is odd the equator will be included as the grid point
+    !            theta((nlat+1)/2).  if nlat is even the equator will be
+    !            excluded as a grid point and will lie half way between
+    !            theta(nlat/2) and theta(nlat/2+1). nlat must be at least 3.
+    !            note: on the half sphere, the number of grid points in the
+    !            colatitudinal direction is nlat/2 if nlat is even or
+    !            (nlat+1)/2 if nlat is odd.
+    !
+    !     nlon   the number of distinct londitude points.  nlon determines
+    !            the grid increment in longitude as 2*pi/nlon. for example
+    !            nlon = 72 for a five degree grid. nlon must be greater
+    !            than zero. the axisymmetric case corresponds to nlon=1.
+    !            the efficiency of the computation is improved when nlon
+    !            is a product of small prime numbers.
+    !
+    !     ityp   = 0  no symmetries exist about the equator. the analysis
+    !                 is performed on the entire sphere.  i.e. on the
+    !                 arrays v(i, j), w(i, j) for i=1, ..., nlat and
+    !                 j=1, ..., nlon.
+    !
+    !            = 1  no symmetries exist about the equator. the analysis
+    !                 is performed on the entire sphere.  i.e. on the
+    !                 arrays v(i, j), w(i, j) for i=1, ..., nlat and
+    !                 j=1, ..., nlon. the curl of (v, w) is zero. that is,
+    !                 (d/dtheta (sin(theta) w) - dv/dphi)/sin(theta) = 0.
+    !                 the coefficients cr and ci are zero.
+    !
+    !            = 2  no symmetries exist about the equator. the analysis
+    !                 is performed on the entire sphere.  i.e. on the
+    !                 arrays v(i, j), w(i, j) for i=1, ..., nlat and
+    !                 j=1, ..., nlon. the divergence of (v, w) is zero. i.e.,
+    !                 (d/dtheta (sin(theta) v) + dw/dphi)/sin(theta) = 0.
+    !                 the coefficients br and bi are zero.
+    !
+    !            = 3  v is symmetric and w is antisymmetric about the
+    !                 equator. the analysis is performed on the northern
+    !                 hemisphere only.  i.e., if nlat is odd the analysis
+    !                 is performed on the arrays v(i, j), w(i, j) for
+    !                 i=1, ..., (nlat+1)/2 and j=1, ..., nlon. if nlat is
+    !                 even the analysis is performed on the the arrays
+    !                 v(i, j), w(i, j) for i=1, ..., nlat/2 and j=1, ..., nlon.
+    !
+    !            = 4  v is symmetric and w is antisymmetric about the
+    !                 equator. the analysis is performed on the northern
+    !                 hemisphere only.  i.e., if nlat is odd the analysis
+    !                 is performed on the arrays v(i, j), w(i, j) for
+    !                 i=1, ..., (nlat+1)/2 and j=1, ..., nlon. if nlat is
+    !                 even the analysis is performed on the the arrays
+    !                 v(i, j), w(i, j) for i=1, ..., nlat/2 and j=1, ..., nlon.
+    !                 the curl of (v, w) is zero. that is,
+    !                 (d/dtheta (sin(theta) w) - dv/dphi)/sin(theta) = 0.
+    !                 the coefficients cr and ci are zero.
+    !
+    !            = 5  v is symmetric and w is antisymmetric about the
+    !                 equator. the analysis is performed on the northern
+    !                 hemisphere only.  i.e., if nlat is odd the analysis
+    !                 is performed on the arrays v(i, j), w(i, j) for
+    !                 i=1, ..., (nlat+1)/2 and j=1, ..., nlon. if nlat is
+    !                 even the analysis is performed on the the arrays
+    !                 v(i, j), w(i, j) for i=1, ..., nlat/2 and j=1, ..., nlon.
+    !                 the divergence of (v, w) is zero. i.e.,
+    !                 (d/dtheta (sin(theta) v) + dw/dphi)/sin(theta) = 0.
+    !                 the coefficients br and bi are zero.
+    !
+    !            = 6  v is antisymmetric and w is symmetric about the
+    !                 equator. the analysis is performed on the northern
+    !                 hemisphere only.  i.e., if nlat is odd the analysis
+    !                 is performed on the arrays v(i, j), w(i, j) for
+    !                 i=1, ..., (nlat+1)/2 and j=1, ..., nlon. if nlat is
+    !                 even the analysis is performed on the the arrays
+    !                 v(i, j), w(i, j) for i=1, ..., nlat/2 and j=1, ..., nlon.
+    !
+    !            = 7  v is antisymmetric and w is symmetric about the
+    !                 equator. the analysis is performed on the northern
+    !                 hemisphere only.  i.e., if nlat is odd the analysis
+    !                 is performed on the arrays v(i, j), w(i, j) for
+    !                 i=1, ..., (nlat+1)/2 and j=1, ..., nlon. if nlat is
+    !                 even the analysis is performed on the the arrays
+    !                 v(i, j), w(i, j) for i=1, ..., nlat/2 and j=1, ..., nlon.
+    !                 the curl of (v, w) is zero. that is,
+    !                 (d/dtheta (sin(theta) w) - dv/dphi)/sin(theta) = 0.
+    !                 the coefficients cr and ci are zero.
+    !
+    !            = 8  v is antisymmetric and w is symmetric about the
+    !                 equator. the analysis is performed on the northern
+    !                 hemisphere only.  i.e., if nlat is odd the analysis
+    !                 is performed on the arrays v(i, j), w(i, j) for
+    !                 i=1, ..., (nlat+1)/2 and j=1, ..., nlon. if nlat is
+    !                 even the analysis is performed on the the arrays
+    !                 v(i, j), w(i, j) for i=1, ..., nlat/2 and j=1, ..., nlon.
+    !                 the divergence of (v, w) is zero. i.e.,
+    !                 (d/dtheta (sin(theta) v) + dw/dphi)/sin(theta) = 0.
+    !                 the coefficients br and bi are zero.
+    !
+    !
+    !     nt     the number of analyses.  in the program that calls vhagc,
+    !            the arrays v, w, br, bi, cr, and ci can be three dimensional
+    !            in which case multiple analyses will be performed.
+    !            the third index is the analysis index which assumes the
+    !            values k=1, ..., nt.  for a single analysis set nt=1. the
+    !            discription of the remaining parameters is simplified
+    !            by assuming that nt=1 or that all the arrays are two
+    !            dimensional.
+    !
+    !     v, w    two or three dimensional arrays (see input parameter nt)
+    !            that contain the vector function to be analyzed.
+    !            v is the colatitudnal component and w is the east
+    !            longitudinal component. v(i, j), w(i, j) contain the
+    !            components at colatitude theta(i) = (i-1)*pi/(nlat-1)
+    !            and longitude phi(j) = (j-1)*2*pi/nlon. the index ranges
+    !            are defined above at the input parameter ityp.
+    !
+    !     idvw   the first dimension of the arrays v, w as it appears in
+    !            the program that calls vhagc. if ityp <= 2 then idvw
+    !            must be at least nlat.  if ityp > 2 and nlat is
+    !            even then idvw must be at least nlat/2. if ityp > 2
+    !            and nlat is odd then idvw must be at least (nlat+1)/2.
+    !
+    !     jdvw   the second dimension of the arrays v, w as it appears in
+    !            the program that calls vhagc. jdvw must be at least nlon.
+    !
+    !     mdab   the first dimension of the arrays br, bi, cr, and ci as it
+    !            appears in the program that calls vhagc. mdab must be at
+    !            least min(nlat, nlon/2) if nlon is even or at least
+    !            min(nlat, (nlon+1)/2) if nlon is odd.
+    !
+    !     ndab   the second dimension of the arrays br, bi, cr, and ci as it
+    !            appears in the program that calls vhagc. ndab must be at
+    !            least nlat.
+    !
+    !     wvhagc an array which must be initialized by subroutine vhagci.
+    !            once initialized, wvhagc can be used repeatedly by vhagc
+    !            as long as nlon and nlat remain unchanged.  wvhagc must
+    !            not be altered between calls of vhagc.
+    !
+    !     lvhagc the dimension of the array wvhagc as it appears in the
+    !            program that calls vhagc. define
+    !
+    !               l1 = min(nlat, nlon/2) if nlon is even or
+    !               l1 = min(nlat, (nlon+1)/2) if nlon is odd
+    !
+    !            and
+    !
+    !               l2 = nlat/2        if nlat is even or
+    !               l2 = (nlat+1)/2    if nlat is odd
+    !
+    !            then lvhagc must be at least
+    !
+    !               4*nlat*l2+3*max(l1-2, 0)*(2*nlat-l1-1)+nlon+l2+15
+    !
+    !
+    !     work   a work array that does not have to be saved.
+    !
+    !     lwork  the dimension of the array work as it appears in the
+    !            program that calls vhagc. define
+    !
+    !               l2 = nlat/2        if nlat is even or
+    !               l2 = (nlat+1)/2    if nlat is odd
+    !
+    !            if ityp <= 2 then lwork must be at least
+    !
+    !               2*nlat*(2*nlon*nt+3*l2)
+    !
+    !            if ityp > 2 then lwork must be at least
+    !
+    !               2*l2*(2*nlon*nt+3*nlat)
+    !
+    !     output parameters
+    !
+    !     br, bi  two or three dimensional arrays (see input parameter nt)
+    !     cr, ci  that contain the vector spherical harmonic coefficients
+    !            in the spectral representation of v(i, j) and w(i, j) given
+    !            in the discription of subroutine vhsec. br(mp1, np1),
+    !            bi(mp1, np1), cr(mp1, np1), and ci(mp1, np1) are computed
+    !            for mp1=1, ..., mmax and np1=mp1, ..., nlat except for np1=nlat
+    !            and odd mp1. mmax=min(nlat, nlon/2) if nlon is even or
+    !            mmax=min(nlat, (nlon+1)/2) if nlon is odd.
+    !
+    !     ierror = 0  no errors
+    !            = 1  error in the specification of nlat
+    !            = 2  error in the specification of nlon
+    !            = 3  error in the specification of ityp
+    !            = 4  error in the specification of nt
+    !            = 5  error in the specification of idvw
+    !            = 6  error in the specification of jdvw
+    !            = 7  error in the specification of mdab
+    !            = 8  error in the specification of ndab
+    !            = 9  error in the specification of lvhagc
+    !
     module subroutine vhagc(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
-        mdab, ndab, wvhagc, lvhagc, work, lwork, ierror)
+        mdab, ndab, wvhagc, ierror)
 
         ! Dummy arguments
         integer(ip), intent(in)  :: nlat
@@ -341,77 +257,145 @@ contains
         real(wp),    intent(out) :: ci(mdab, ndab, nt)
         integer(ip), intent(in)  :: mdab
         integer(ip), intent(in)  :: ndab
-        real(wp),    intent(in)  :: wvhagc(lvhagc)
-        integer(ip), intent(in)  :: lvhagc
-        real(wp),    intent(out) :: work(lwork)
-        integer(ip), intent(in)  :: lwork
+        real(wp),    intent(in)  :: wvhagc(:)
         integer(ip), intent(out) :: ierror
 
         ! Local variables
         integer(ip) :: imid, idv
-        integer(ip) :: ist
-        integer(ip) :: iw1
-        integer(ip) :: iw2
-        integer(ip) :: iw3
-        integer(ip) :: iw4
-        integer(ip) :: iw5
-        integer(ip) :: jw1
-        integer(ip) :: jw2
-        integer(ip) :: jw3
-        integer(ip) :: labc
-        integer(ip) :: lnl
-        integer(ip) :: lwzvin
-        integer(ip) :: lzz1
-        integer(ip) :: mmax
+        integer(ip) :: ist, labc, lnl, lzz1
+        integer(ip) :: mmax, lwork
 
-        ierror = 1
-        if (nlat < 3) return
-        ierror = 2
-        if (nlon < 1) return
-        ierror = 3
-        if (ityp<0 .or. ityp>8) return
-        ierror = 4
-        if (nt < 0) return
-        ierror = 5
-        imid = (nlat+1)/2
-        if ((ityp<=2 .and. idvw<nlat) .or. &
-            (ityp>2 .and. idvw<imid)) return
-        ierror = 6
-        if (jdvw < nlon) return
-        ierror = 7
-        mmax = min(nlat, (nlon+1)/2)
-        if (mdab < mmax) return
-        ierror = 8
-        if (ndab < nlat) return
-        ierror = 9
-        lzz1 = 2*nlat*imid
-        labc = 3*(max(mmax-2, 0)*(nlat+nlat-mmax-1))/2
-        if (lvhagc < 2*(lzz1+labc)+nlon+imid+15) return
-        ierror = 10
-        if (ityp<=2 .and. lwork <nlat*(4*nlon*nt+6*imid)) return
-        if (ityp>2 .and. lwork <imid*(4*nlon*nt+6*nlat)) return
-        ierror = 0
-        idv = nlat
-        if (ityp > 2) idv = imid
-        lnl = nt*idv*nlon
-        ist = 0
-        if (ityp <= 2) ist = imid
-        iw1 = ist+1
-        iw2 = lnl+1
-        iw3 = iw2+ist
-        iw4 = iw2+lnl
-        iw5 = iw4+3*imid*nlat
-        lwzvin = lzz1+labc
-        jw1 = (nlat+1)/2+1
-        jw2 = jw1+lwzvin
-        jw3 = jw2+lwzvin
+        associate (lvhagc => size(wvhagc))
 
-        call vhagc_lower_utility_routine(nlat, nlon, ityp, nt, imid, idvw, jdvw, v, w, mdab, ndab, &
-            br, bi, cr, ci, idv, work, work(iw1), work(iw2), work(iw3), &
-            work(iw4), work(iw5), wvhagc, wvhagc(jw1), wvhagc(jw2), wvhagc(jw3))
+            imid = (nlat+1)/2
+            mmax = min(nlat, (nlon+1)/2)
+            lzz1 = 2*nlat*imid
+            labc = 3*(max(mmax-2, 0)*(nlat+nlat-mmax-1))/2
+
+            ! Check calling arguments
+            if (nlat < 3) then
+                ierror = 1
+            else if (nlon < 1) then
+                ierror = 2
+            else if (ityp < 0 .or. ityp > 8) then
+                ierror = 3
+            else if (nt < 0) then
+                ierror = 4
+            else if ((ityp <= 2 .and. idvw < nlat)  &
+                .or. &
+                (ityp > 2 .and. idvw < imid)) then
+                ierror = 5
+            else if (jdvw < nlon) then
+                ierror = 6
+            else if (mdab < mmax) then
+                ierror = 7
+            else if (ndab < nlat) then
+                ierror = 8
+            else if (lvhagc < 2*(lzz1+labc)+nlon+imid+15) then
+                ierror =9
+            else
+                ierror = 0
+            end if
+
+            ! Check error flag
+            if (ierror /= 0) return
+
+            ! Set required workspace size
+            select case (ityp)
+                case (0:2)
+                    lwork = nlat*(4 * nlon * nt + (6 * imid))
+                case default
+                    lwork = imid * (4 * nlon * nt + (6 * nlat))
+            end select
+
+            select case (ityp)
+                case (0:2)
+                    idv = nlat
+                    ist = imid
+                case default
+                    idv = imid
+                    ist = 0
+            end select
+
+            lnl = nt*idv*nlon
+
+            block
+                real(wp) :: work(lwork)
+                integer(ip) :: iw1, iw2, iw3, iw4, iw5
+                integer(ip) :: jw1, jw2, jw3, lwzvin
+
+                iw1 = ist+1
+                iw2 = lnl+1
+                iw3 = iw2+ist
+                iw4 = iw2+lnl
+                iw5 = iw4+3*imid*nlat
+                lwzvin = lzz1+labc
+                jw1 = (nlat+1)/2+1
+                jw2 = jw1+lwzvin
+                jw3 = jw2+lwzvin
+
+                call vhagc_lower_utility_routine(nlat, nlon, ityp, nt, imid, idvw, jdvw, &
+                    v, w, mdab, ndab, br, bi, cr, ci, idv, work, work(iw1:), work(iw2:), &
+                    work(iw3:), work(iw4:), work(iw5:), wvhagc, wvhagc(jw1:), wvhagc(jw2:), wvhagc(jw3:))
+            end block
+
+        end associate
 
     end subroutine vhagc
 
+    !     subroutine vhagci(nlat, nlon, wvhagc, ierror)
+    !
+    !     subroutine vhagci initializes the array wvhagc which can then be
+    !     used repeatedly by subroutine vhagc until nlat or nlon is changed.
+    !
+    !     input parameters
+    !
+    !     nlat   the number of points in the gaussian colatitude grid on the
+    !            full sphere. these lie in the interval (0, pi) and are computed
+    !            in radians in theta(1) <...< theta(nlat) by subroutine compute_gaussian_latitudes_and_weights.
+    !            if nlat is odd the equator will be included as the grid point
+    !            theta((nlat+1)/2).  if nlat is even the equator will be
+    !            excluded as a grid point and will lie half way between
+    !            theta(nlat/2) and theta(nlat/2+1). nlat must be at least 3.
+    !            note: on the half sphere, the number of grid points in the
+    !            colatitudinal direction is nlat/2 if nlat is even or
+    !            (nlat+1)/2 if nlat is odd.
+    !
+    !     nlon   the number of distinct londitude points.  nlon determines
+    !            the grid increment in longitude as 2*pi/nlon. for example
+    !            nlon = 72 for a five degree grid. nlon must be greater
+    !            than zero. the axisymmetric case corresponds to nlon=1.
+    !            the efficiency of the computation is improved when nlon
+    !            is a product of small prime numbers.
+    !
+    !     lvhagc the dimension of the array wvhagc as it appears in the
+    !            program that calls vhagci.  define
+    !
+    !               l1 = min(nlat, nlon/2) if nlon is even or
+    !               l1 = min(nlat, (nlon+1)/2) if nlon is odd
+    !
+    !            and
+    !
+    !               l2 = nlat/2        if nlat is even or
+    !               l2 = (nlat+1)/2    if nlat is odd
+    !
+    !            then lvhagc must be at least
+    !
+    !               4*nlat*l2+3*max(l1-2, 0)*(2*nlat-l1-1)+nlon+l2+15
+    !
+    !     output parameters
+    !
+    !     wvhagc an array which is initialized for use by subroutine vhagc.
+    !            once initialized, wvhagc can be used repeatedly by vhagc
+    !            as long as nlat and nlon remain unchanged.  wvhagc must not
+    !            be altered between calls of vhagc.
+    !
+    !
+    !     ierror = 0  no errors
+    !            = 1  error in the specification of nlat
+    !            = 2  error in the specification of nlon
+    !            = 3  error in the specification of lvhagc
+    !
     module subroutine vhagci(nlat, nlon, wvhagc, ierror)
 
         ! Dummy arguments
@@ -421,17 +405,7 @@ contains
         integer(ip), intent(out) :: ierror
 
         ! Local variables
-        integer(ip) :: imid
-        integer(ip) :: iw1
-        integer(ip) :: iw2
-        integer(ip) :: iw3
-        integer(ip) :: iwrk
-        integer(ip) :: jw1
-        integer(ip) :: jw2
-        integer(ip) :: jw3
-        integer(ip) :: labc
-        integer(ip) :: lwvbin
-        integer(ip) :: lzz1
+        integer(ip) :: imid, labc, lzz1
         integer(ip) :: mmax, ldwork
         type(SpherepackUtility) :: util
 
@@ -461,7 +435,9 @@ contains
             ldwork = 2*nlat*(nlat+1)+1
 
             block
-                real(wp) :: dwork(ldwork)
+                real(wp)    :: dwork(ldwork)
+                integer(ip) :: jw1, jw2, jw3, iw1, iw2, iw3
+                integer(ip) :: iwrk, lwvbin
 
                 ! Compute gaussian points in first nlat+1 words of dwork
                 jw1 = 1

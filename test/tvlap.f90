@@ -265,7 +265,7 @@ program tvlap
             call iout(ierror, "ierr")
 
             call vhagc(nlat, nlon, ityp, nt, v, w, nlat, nlon, br, bi, cr, ci, mdbc, &
-                nlat, wsave, lsave, work, lwork, ierror)
+                nlat, wsave, ierror)
             call name("vhagc")
             call iout(ierror, "ierr")
 
@@ -432,7 +432,7 @@ program tvlap
             call iout(ierror, "ierr")
 
             call vhagc(nlat, nlon, ityp, nt, vlap, wlap, nlat, nlon, &
-                br, bi, cr, ci, mdbc, nlat, wsave, lsave, work, lwork, ierror)
+                br, bi, cr, ci, mdbc, nlat, wsave, ierror)
             call name("vhagc")
             call iout(ierror, "ierr")
 
