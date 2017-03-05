@@ -512,7 +512,7 @@ program tgrad
                 call iout(ierror, "ierr")
 
                 call vhags(nlat, nlon, ityp, nt, v, w, nlat, nlon, br, bi, cr, ci, &
-                    mdb, nlat, wsave, lsave, work, lwork, ierror)
+                    mdb, nlat, wsave, ierror)
                 call name("vha ")
                 call iout(ierror, "ierr")
 

@@ -362,15 +362,12 @@ contains
                         mdab => size(workspace%vector_coefficients%polar%real_component, dim=1), &
                         ndab => size(workspace%vector_coefficients%polar%real_component, dim=2), &
                         wvhags => workspace%forward_vector, &
-                        lvhags => size(workspace%forward_vector), &
-                        work => workspace%legendre_workspace, &
-                        lwork => size(workspace%legendre_workspace), &
                         ierror => error_flag &
                        )
 
                         !  Perform gaussian vector analysis
                         call aux%vhags(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
-                            mdab, ndab, wvhags, lvhags, work, lwork, ierror)
+                            mdab, ndab, wvhags, ierror)
 
                     end associate
                 end select

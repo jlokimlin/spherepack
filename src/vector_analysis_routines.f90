@@ -97,7 +97,7 @@ module vector_analysis_routines
         end subroutine vhagc
 
         module subroutine vhags(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
-            mdab, ndab, wvhags, lvhags, work, lwork, ierror)
+            mdab, ndab, wvhags, ierror)
 
             ! Dummy arguments
             integer(ip), intent(in)  :: nlat
@@ -114,10 +114,7 @@ module vector_analysis_routines
             real(wp),    intent(out) :: ci(..)
             integer(ip), intent(in)  :: mdab
             integer(ip), intent(in)  :: ndab
-            real(wp),    intent(in)  :: wvhags(lvhags)
-            integer(ip), intent(in)  :: lvhags
-            real(wp),    intent(out) :: work(lwork)
-            integer(ip), intent(in)  :: lwork
+            real(wp),    intent(in)  :: wvhags(:)
             integer(ip), intent(out) :: ierror
         end subroutine vhags
 

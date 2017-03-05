@@ -338,7 +338,7 @@ use spherepack
             call name("vhai")
             call iout(ierror, "ierr")
             call vhags(nlat, nlon, isym, nt, v, w, nlat, nlon, br, bi, cr, ci, mdb, &
-                nlat, wsave, lsave, work, lwork, ierror)
+                nlat, wsave, ierror)
             call name("vha ")
             call iout(ierror, "ierr")
 
