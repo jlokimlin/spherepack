@@ -158,10 +158,6 @@ module vector_analysis_routines
         procedure, nopass :: vhaes
         procedure, nopass :: vhaesi
         procedure, nopass :: get_lvhaes
-        procedure, nopass :: get_lwork => get_vhaes_lwork
-        procedure, nopass :: get_ldwork => get_vhaes_ldwork
-        procedure, nopass :: get_legendre_workspace_size => &
-            get_vhaes_legendre_workspace_size
     end type VhaesAux
 
     type, public :: VhagsAux
@@ -170,8 +166,6 @@ module vector_analysis_routines
         procedure, nopass :: vhags
         procedure, nopass :: vhagsi
         procedure, nopass :: get_lvhags
-        procedure, nopass :: get_ldwork
-        procedure, nopass :: get_legendre_workspace_size
     end type VhagsAux
 
 contains
@@ -194,68 +188,6 @@ contains
 
     end function get_lvhags
 
-    pure function get_ldwork(nlat) result (return_value)
-
-        ! Dummy arguments
-
-        integer(ip), intent(in)  :: nlat
-        integer(ip)               :: return_value
-
-
-        return_value = (3*nlat*(nlat+3)+2)/2
-
-    end function get_ldwork
-
-    pure function get_legendre_workspace_size(nlat, nlon, nt, ityp) result (return_value)
-
-        ! Dummy arguments
-
-        integer(ip),           intent(in) :: nlat
-        integer(ip),           intent(in) :: nlon
-        integer(ip), optional, intent(in) :: nt
-        integer(ip), optional, intent(in) :: ityp
-        integer(ip)                        :: return_value
-
-        ! Local variables
-
-        integer(ip) :: nt_op, ityp_op, l2
-
-
-        !
-        !  Address optional arguments
-        !
-        if (present(nt)) then
-            nt_op = nt
-        else
-            nt_op = 1
-        end if
-
-        if (present(ityp)) then
-            ityp_op = ityp
-        else
-            ityp_op = 0
-        end if
-
-        !
-        !  Compute workspace size
-        !
-        if (ityp <= 2) then
-            ! Set workspace size
-            return_value = max(3*nlat*(nlat+1)+2, (2*nt_op+1)*nlat*nlon)
-        else
-            ! Compute parity
-            select case (mod(nlat, 2))
-                case (0)
-                    l2 = nlat/2
-                case default
-                    l2 = (nlat + 1)/2
-            end select
-            ! Set workspace size
-            return_value = max(3*nlat*(nlat+1)+2, (2*nt_op+1)*l2*nlon)
-        end if
-
-    end function get_legendre_workspace_size
-
     pure function get_lvhaes(nlat, nlon) result (return_value)
 
         ! Dummy arguments
@@ -275,87 +207,5 @@ contains
         return_value = l1*l2*(2*nlat-l1+1)+nlon+15
 
     end function get_lvhaes
-
-    pure function get_vhaes_lwork(nlat, nlon) result (return_value)
-
-        ! Dummy arguments
-
-        integer(ip), intent(in)  :: nlat
-        integer(ip), intent(in)  :: nlon
-        integer(ip)               :: return_value
-
-        ! Local variables
-
-        integer(ip)         :: l1, l2
-        type(SpherepackUtility) :: util
-
-
-        call util%compute_parity(nlat, nlon, l1, l2)
-
-        return_value = 3*(max(l1-2, 0)*(2*nlat-l1-1))/2+5*l2*nlat
-
-    end function get_vhaes_lwork
-
-    pure function get_vhaes_ldwork(nlat) result (return_value)
-
-        ! Dummy arguments
-
-        integer(ip), intent(in)  :: nlat
-        integer(ip)               :: return_value
-
-
-        return_value = 2*(nlat+1)
-
-    end function get_vhaes_ldwork
-
-    pure function get_vhaes_legendre_workspace_size(nlat, nlon, nt, ityp) result (return_value)
-
-        ! Dummy arguments
-
-        integer(ip),           intent(in) :: nlat
-        integer(ip),           intent(in) :: nlon
-        integer(ip), optional, intent(in) :: nt
-        integer(ip), optional, intent(in) :: ityp
-        integer(ip)                        :: return_value
-
-        ! Local variables
-
-        integer(ip) :: nt_op, ityp_op, l2
-
-
-        !
-        !  Address optional arguments
-        !
-        if (present(nt)) then
-            nt_op = nt
-        else
-            nt_op = 1
-        end if
-
-        if (present(ityp)) then
-            ityp_op = ityp
-        else
-            ityp_op = 0
-        end if
-
-        !
-        !  Compute workspace size
-        !
-        if (ityp_op <= 2) then
-            ! Set workspace size
-            return_value = (2*nt_op+1)*nlat*nlon
-        else
-            ! Compute parity
-            select case (mod(nlat, 2))
-                case (0)
-                    l2 = nlat/2
-                case default
-                    l2 = (nlat + 1)/2
-            end select
-            ! Set workspace size
-            return_value = (2*nt_op+1)*l2*nlon
-        end if
-
-    end function get_vhaes_legendre_workspace_size
 
 end module vector_analysis_routines

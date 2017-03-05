@@ -444,9 +444,6 @@ contains
                         mdab => size(workspace%vector_coefficients%polar%real_component, dim=1), &
                         ndab => size(workspace%vector_coefficients%polar%real_component, dim=2), &
                         wvhses => workspace%backward_vector, &
-                        lvhses => size(workspace%backward_vector), &
-                        work => workspace%legendre_workspace, &
-                        lwork => size(workspace%legendre_workspace), &
                         ierror => error_flag &
                        )
 

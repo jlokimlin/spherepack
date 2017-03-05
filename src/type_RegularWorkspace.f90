@@ -113,8 +113,6 @@ contains
         ! Set up vector synthesis
         call self%initialize_regular_vector_synthesis(nlat, nlon)
 
-        call get_legendre_workspace(nlat, nlon, self%legendre_workspace)
-
         ! Set flag
         self%initialized = .true.
 
@@ -336,94 +334,5 @@ contains
         end select
 
     end subroutine initialize_regular_vector_synthesis
-
-    pure function get_lwork(nlat, nlon) &
-        result (return_value)
-
-        ! Dummy arguments
-        integer(ip), intent(in) :: nlat
-        integer(ip), intent(in) :: nlon
-        integer(ip)             :: return_value
-
-        ! Local variables
-        type(ShaesAux) :: shaes_aux
-        type(ShsesAux) :: shses_aux
-        type(VhaesAux) :: vhaes_aux
-        type(VhsesAux) :: vhses_aux
-        integer(ip)    :: lwork(4)
-
-        lwork(1) = shaes_aux%get_lwork(nlat, nlon)
-        lwork(2) = shses_aux%get_lwork(nlat, nlon)
-        lwork(3) = vhaes_aux%get_lwork(nlat, nlon)
-        lwork(4) = vhses_aux%get_lwork(nlat, nlon)
-
-        return_value = maxval(lwork)
-
-    end function get_lwork
-
-    pure function get_ldwork(nlat) &
-        result (return_value)
-
-        ! Dummy arguments
-        integer(ip), intent(in) :: nlat
-        integer(ip)             :: return_value
-
-        ! Local variables
-        type(ShaesAux) :: shaes_aux
-        type(ShsesAux) :: shses_aux
-        type(VhaesAux) :: vhaes_aux
-        type(VhsesAux) :: vhses_aux
-        integer(ip)    :: ldwork(4)
-
-        ldwork(1) = shaes_aux%get_ldwork(nlat)
-        ldwork(2) = shses_aux%get_ldwork(nlat)
-        ldwork(3) = vhaes_aux%get_ldwork(nlat)
-        ldwork(4) = vhses_aux%get_ldwork(nlat)
-
-        return_value = maxval(ldwork)
-
-    end function get_ldwork
-
-    pure subroutine get_legendre_workspace(nlat, nlon, workspace, nt, ityp)
-
-        ! Dummy arguments
-        integer(ip),           intent(in)  :: nlat
-        integer(ip),           intent(in)  :: nlon
-        real(wp), allocatable, intent(out) :: workspace(:)
-        integer(ip), optional, intent(in)  :: nt
-        integer(ip), optional, intent(in)  :: ityp
-
-        ! Local variables
-        type(ShaesAux) :: shaes_aux
-        type(ShsesAux) :: shses_aux
-        type(VhaesAux) :: vhaes_aux
-        type(VhsesAux) :: vhses_aux
-        integer(ip)    :: work_size(4)
-        integer(ip)    :: lwork, nt_op, ityp_op
-
-        !  Address optional arguments
-        if (present(nt)) then
-            nt_op = nt
-        else
-            nt_op = 1
-        end if
-
-        if (present(ityp)) then
-            ityp_op = ityp
-        else
-            ityp_op = 0
-        end if
-
-        ! Get required workspace size
-        work_size(1) = shaes_aux%get_legendre_workspace_size(nlat, nlon, nt_op, ityp_op)
-        work_size(2) = shses_aux%get_legendre_workspace_size(nlat, nlon, nt_op, ityp_op)
-        work_size(3) = vhaes_aux%get_legendre_workspace_size(nlat, nlon, nt_op, ityp_op)
-        work_size(4) = vhses_aux%get_legendre_workspace_size(nlat, nlon, nt_op, ityp_op)
-        lwork = maxval(work_size)
-
-        !  Allocate memory
-        allocate (workspace(lwork))
-
-    end subroutine get_legendre_workspace
 
 end module type_RegularWorkspace

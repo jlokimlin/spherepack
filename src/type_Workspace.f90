@@ -20,7 +20,6 @@ module type_Workspace
     type, public, abstract :: Workspace
         ! Type components
         logical,                          public :: initialized = .false.
-        real(wp), allocatable,            public :: legendre_workspace(:)
         real(wp), allocatable,            public :: forward_scalar(:)
         real(wp), allocatable,            public :: forward_vector(:)
         real(wp), allocatable,            public :: backward_scalar(:)
@@ -64,7 +63,6 @@ contains
 
         !  Make copies
         self%initialized = other%initialized
-        self%legendre_workspace = other%legendre_workspace
         self%forward_scalar = other%forward_scalar
         self%forward_vector = other%forward_vector
         self%backward_scalar = other%backward_scalar
@@ -81,11 +79,6 @@ contains
 
         ! Check flag
         if (.not.self%initialized) return
-
-        !  Release memory
-        if (allocated(self%legendre_workspace)) then
-            deallocate (self%legendre_workspace)
-        end if
 
         if (allocated(self%forward_scalar)) then
             deallocate (self%forward_scalar)

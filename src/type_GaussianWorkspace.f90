@@ -57,16 +57,16 @@ contains
         type(GaussianWorkspace)           :: return_value
 
         ! Local variables
-        integer(ip) :: nt_op
+        integer(ip) :: number_of_syntheses
 
         ! Address optional argument
         if (present(nt)) then
-            nt_op = nt
+            number_of_syntheses = nt
         else
-            nt_op = 1
+            number_of_syntheses = 1
         end if
 
-        call return_value%create(nlat, nlon, nt_op)
+        call return_value%create(nlat, nlon, number_of_syntheses)
 
     end function gaussian_workspace_constructor
 
@@ -112,8 +112,6 @@ contains
 
         ! Set up vector analysis
         call self%initialize_gaussian_vector_synthesis(nlat, nlon)
-
-        call get_legendre_workspace(nlat, nlon, self%legendre_workspace)
 
         ! Set flag
         self%initialized = .true.
@@ -345,95 +343,5 @@ contains
         end select
 
     end subroutine initialize_gaussian_vector_synthesis
-
-    pure function get_lwork(nlat) result (return_value)
-
-        ! Dummy arguments
-        integer(ip), intent(in) :: nlat
-        integer(ip)             :: return_value
-
-        ! Local variables
-        type(ShagsAux) :: shags_aux
-        type(ShsgsAux) :: shsgs_aux
-        integer(ip)    :: lwork(2)
-
-        lwork(1) = shags_aux%get_lwork(nlat)
-        lwork(2) = shsgs_aux%get_lwork(nlat)
-
-        return_value = maxval(lwork)
-
-    end function get_lwork
-
-    pure function get_ldwork(nlat) &
-        result (return_value)
-
-        ! Dummy arguments
-        integer(ip), intent(in) :: nlat
-        integer(ip)             :: return_value
-
-        ! Local variables
-        type(ShagsAux) :: shags_aux
-        type(ShsgsAux) :: shsgs_aux
-        type(VhagsAux) :: vhags_aux
-        type(VhsgsAux) :: vhsgs_aux
-        integer(ip)    :: ldwork(4)
-
-        ldwork(1) = shags_aux%get_ldwork(nlat)
-        ldwork(2) = shsgs_aux%get_ldwork(nlat)
-        ldwork(3) = vhags_aux%get_ldwork(nlat)
-        ldwork(4) = vhsgs_aux%get_ldwork(nlat)
-
-        return_value = maxval(ldwork)
-
-    end function get_ldwork
-
-    pure subroutine get_legendre_workspace(nlat, nlon, workspace, nt, ityp, isym)
-
-        ! Dummy arguments
-        integer(ip),           intent(in)  :: nlat
-        integer(ip),           intent(in)  :: nlon
-        real(wp), allocatable, intent(out) :: workspace(:)
-        integer(ip), optional, intent(in)  :: nt
-        integer(ip), optional, intent(in)  :: ityp
-        integer(ip), optional, intent(in)  :: isym
-
-        ! Local variables
-        type(ShagsAux) :: shags_aux
-        type(ShsgsAux) :: shsgs_aux
-        type(VhagsAux) :: vhags_aux
-        type(VhsgsAux) :: vhsgs_aux
-        integer(ip)    :: work_size(4)
-        integer(ip)    :: lwork, nt_op, ityp_op, isym_op
-
-        !  Address optional arguments
-        if (present(nt)) then
-            nt_op = nt
-        else
-            nt_op = 1
-        end if
-
-        if (present(isym)) then
-            isym_op = isym
-        else
-            isym_op = 0
-        end if
-
-        if (present(ityp)) then
-            ityp_op = ityp
-        else
-            ityp_op = 0
-        end if
-
-        ! Compute required workspace size
-        work_size(1) = shags_aux%get_legendre_workspace_size(nlat, nlon, nt_op, isym_op)
-        work_size(2) = shsgs_aux%get_legendre_workspace_size(nlat, nlon, nt_op, isym_op)
-        work_size(3) = vhags_aux%get_legendre_workspace_size(nlat, nlon, nt_op, ityp_op)
-        work_size(4) = vhsgs_aux%get_legendre_workspace_size(nlat, nlon, nt_op, ityp_op)
-        lwork = maxval(work_size)
-
-        !  Allocate memory
-        allocate (workspace(lwork))
-
-    end subroutine get_legendre_workspace
 
 end module type_GaussianWorkspace

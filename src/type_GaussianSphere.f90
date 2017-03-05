@@ -211,9 +211,6 @@ contains
                         mdab => self%NUMBER_OF_LATITUDES, &
                         ndab => self%NUMBER_OF_LATITUDES, &
                         wshags => workspace%forward_scalar, &
-                        lshags => size(workspace%forward_scalar), &
-                        work => workspace%legendre_workspace, &
-                        lwork => size(workspace%legendre_workspace), &
                         ierror => error_flag &
                        )
 
