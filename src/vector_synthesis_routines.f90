@@ -31,7 +31,7 @@ module vector_synthesis_routines
     ! Declare interfaces for submodule implementation
     interface
         module subroutine vhsec(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
-            mdab, ndab, wvhsec, lvhsec, work, lwork, ierror)
+            mdab, ndab, wvhsec, ierror)
 
             ! Dummy arguments
             integer(ip), intent(in)  :: nlat
@@ -48,10 +48,7 @@ module vector_synthesis_routines
             real(wp),    intent(in)  :: ci(mdab, ndab, nt)
             integer(ip), intent(in)  :: mdab
             integer(ip), intent(in)  :: ndab
-            real(wp),    intent(in)  :: wvhsec(lvhsec)
-            integer(ip), intent(in)  :: lvhsec
-            real(wp),    intent(out) :: work(lwork)
-            integer(ip), intent(in)  :: lwork
+            real(wp),    intent(in)  :: wvhsec(:)
             integer(ip), intent(out) :: ierror
         end subroutine vhsec
 

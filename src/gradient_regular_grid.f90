@@ -372,7 +372,7 @@ contains
 
         ! Vector synthesize br, bi into (v, w) (cr, ci are dummy variables)
         call vhsec(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
-            mmax, nlat, wvhsec, lvhsec, wk, lwk, ierror)
+            mmax, nlat, wvhsec, ierror)
 
     end subroutine gradec_lower_utility_routine
 

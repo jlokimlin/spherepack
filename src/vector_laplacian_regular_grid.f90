@@ -493,7 +493,7 @@ contains
 
         ! Synthesize coefs into vector field (v, w)
         call vhsec(nlat, nlon, ityp, nt, vlap, wlap, idvw, jdvw, brlap, bilap, &
-            crlap, cilap, mmax, nlat, wsave, lwsav, wk, lwk, ierror)
+            crlap, cilap, mmax, nlat, wsave, ierror)
 
     end subroutine vlapec_lower_utility_routine
 

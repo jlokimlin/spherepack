@@ -382,7 +382,7 @@ contains
             end select
 
             call vhsec(nlat, nlon, ityp, nt, v, w, idv, jdv, br, bi, cr, ci, &
-                mab, nlat, wvhsec, lvhsec, wk, lwk, ierror)
+                mab, nlat, wvhsec, ierror)
 
         end subroutine isfvpec1
 

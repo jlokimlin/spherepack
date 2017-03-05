@@ -726,8 +726,7 @@ contains
         !
         if (igrdb == 1) then
             call vhsec(nlatb, nlonb, ityp, nt, vb, ub, nlatb, nlonb, work(ibbr), &
-                work(ibbi), work(ibcr), work(ibci), lb1, nlatb, wsave(jb:), lwb, &
-                work(iw), lw, ier)
+                work(ibbi), work(ibcr), work(ibci), lb1, nlatb, wsave(jb:), ier)
         else
             call vhsgc(nlatb, nlonb, ityp, nt, vb, ub, nlatb, nlonb, work(ibbr), &
                 work(ibbi), work(ibcr), work(ibci), lb1, nlatb, wsave(jb:), lwb, work(iw), &

@@ -375,7 +375,7 @@ contains
 
         ! Vector synthesize cr, ci into divergence free vector field (v, w)
         call vhsec(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
-            mmax, nlat, wsav, lwsav, wk, lwk, ierror)
+            mmax, nlat, wsav, ierror)
 
     end subroutine ivrtec_lower_utility_routine
 

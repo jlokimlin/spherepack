@@ -489,7 +489,7 @@ contains
 
         ! Synthesize coefs into vector field (v, w)
         call vhsec(nlat, nlon, ityp, nt, v, w, idvw, jdvw, brvw, bivw, &
-            crvw, civw, mmax, nlat, wsave, lwsav, wk, lwk, ierror)
+            crvw, civw, mmax, nlat, wsave, ierror)
 
     end subroutine ivlapec_lower_utility_routine
 

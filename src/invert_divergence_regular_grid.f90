@@ -402,7 +402,7 @@ contains
 
         ! Vector sythesize br, bi into irrotational (v, w)
         call vhsec(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
-            mmax, nlat, wvhsec, lvhsec, wk, lwk, ierror)
+            mmax, nlat, wvhsec, ierror)
 
     end subroutine idivec_lower_utility_routine
 
