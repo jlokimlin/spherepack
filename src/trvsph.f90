@@ -715,8 +715,7 @@ contains
                 lw, ier)
         else
             call vhaec(nlata, nlona, ityp, nt, va, ua, nlata, nlona, work(iabr), &
-                work(iabi), work(iacr), work(iaci), la1, nlata, wsave, lwa, work(iw), &
-                lw, ier)
+                work(iabi), work(iacr), work(iaci), la1, nlata, wsave, ier)
         end if
         !
         !     transfer a grid coefficients to b grid coefficients

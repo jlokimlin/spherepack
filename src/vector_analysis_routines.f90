@@ -28,7 +28,7 @@ module vector_analysis_routines
     ! Declare interfaces for submodule implementation
     interface
         module subroutine vhaec(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
-            mdab, ndab, wvhaec, lvhaec, work, lwork, ierror)
+            mdab, ndab, wvhaec, ierror)
 
             ! Dummy arguments
             integer(ip), intent(in)  :: nlat
@@ -45,10 +45,7 @@ module vector_analysis_routines
             real(wp),    intent(out) :: ci(mdab, ndab, nt)
             integer(ip), intent(in)  :: mdab
             integer(ip), intent(in)  :: ndab
-            real(wp),    intent(in)  :: wvhaec(lvhaec)
-            integer(ip), intent(in)  :: lvhaec
-            real(wp),    intent(out) :: work(lwork)
-            integer(ip), intent(in)  :: lwork
+            real(wp),    intent(in)  :: wvhaec(:)
             integer(ip), intent(out) :: ierror
         end subroutine vhaec
 

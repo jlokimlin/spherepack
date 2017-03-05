@@ -256,7 +256,7 @@ program tvrt
             call iout(ierror, "ierr")
 
             call vhaec(nlat, nlon, isym, nt, v, w, nlat, nlon, br, bi, cr, ci, mdc, &
-                nlat, wsave, lsave, work, lwork, ierror)
+                nlat, wsave, ierror)
             call name("vha ")
             call iout(ierror, "ierr")
 

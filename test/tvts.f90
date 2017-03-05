@@ -217,7 +217,7 @@ program tvts
                 call iout(ierror, "ierr")
         		
                 call vhaec(nlat, nlon, ityp, nt, v, w, nlat, nlon, br, bi, cr, ci, nlat, &
-                    nlat, wsave, lsave, work, lwork, ierror)
+                    nlat, wsave, ierror)
                 call name("vha ")
                 call iout(ierror, "ierr")
         		

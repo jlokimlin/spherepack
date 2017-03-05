@@ -210,25 +210,6 @@ contains
     !
     !            4*nlat*l2+3*max(l1-2, 0)*(nlat+nlat-l1-1)+nlon+15
     !
-    !
-    !     work   a work array that does not have to be saved.
-    !
-    !     lwork  the dimension of the array work as it appears in the
-    !            program that calls vhaec. define
-    !
-    !               l2 = nlat/2        if nlat is even or
-    !               l2 = (nlat+1)/2    if nlat is odd
-    !
-    !            if ityp <= 2 then lwork must be at least
-    !
-    !                    nlat*(2*nt*nlon+max(6*l2, nlon))
-    !
-    !            if ityp > 2 then lwork must be at least
-    !
-    !                    l2*(2*nt*nlon+max(6*nlat, nlon))
-    !
-    !     **************************************************************
-    !
     !     output parameters
     !
     !     br, bi  two or three dimensional arrays (see input parameter nt)
@@ -250,10 +231,9 @@ contains
     !            = 7  error in the specification of mdab
     !            = 8  error in the specification of ndab
     !            = 9  error in the specification of lvhaec
-    !            = 10 error in the specification of lwork
     !
     module subroutine vhaec(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
-        mdab, ndab, wvhaec, lvhaec, work, lwork, ierror)
+        mdab, ndab, wvhaec, ierror)
 
         ! Dummy arguments
         integer(ip), intent(in)  :: nlat
@@ -270,73 +250,84 @@ contains
         real(wp),    intent(out) :: ci(mdab, ndab, nt)
         integer(ip), intent(in)  :: mdab
         integer(ip), intent(in)  :: ndab
-        real(wp),    intent(in)  :: wvhaec(lvhaec)
-        integer(ip), intent(in)  :: lvhaec
-        real(wp),    intent(out) :: work(lwork)
-        integer(ip), intent(in)  :: lwork
+        real(wp),    intent(in)  :: wvhaec(:)
         integer(ip), intent(out) :: ierror
 
         ! Local variables
-        integer(ip) :: mmax
-        integer(ip) :: lwzvin
-        integer(ip) :: lzz1
-        integer(ip) :: jw1
-        integer(ip) :: jw2
-        integer(ip) :: labc
-        integer(ip) :: lnl
-        integer(ip) :: iw1
-        integer(ip) :: iw2
-        integer(ip) :: iw3
-        integer(ip) :: iw4
-        integer(ip) :: iw5
-        integer(ip) :: imid
-        integer(ip) :: ist, idv
+        integer(ip) :: mmax, lzz1
+        integer(ip) :: labc, lnl, imid
+        integer(ip) :: ist, idv, lwork
 
-        ierror = 1
-        if (nlat < 3) return
-        ierror = 2
-        if (nlon < 1) return
-        ierror = 3
-        if (ityp<0 .or. ityp>8) return
-        ierror = 4
-        if (nt < 0) return
-        ierror = 5
-        imid = (nlat+1)/2
-        if ((ityp<=2 .and. idvw<nlat) .or. &
-            (ityp>2 .and. idvw<imid)) return
-        ierror = 6
-        if (jdvw < nlon) return
-        ierror = 7
-        mmax = min(nlat, (nlon+1)/2)
-        if (mdab < mmax) return
-        ierror = 8
-        if (ndab < nlat) return
-        ierror = 9
-        lzz1 = 2*nlat*imid
-        labc = 3*(max(mmax-2, 0)*(nlat+nlat-mmax-1))/2
-        if (lvhaec < 2*(lzz1+labc)+nlon+15) return
-        ierror = 10
-        if (ityp <= 2 .and. &
-            lwork < nlat*(2*nt*nlon+max(6*imid, nlon))) return
-        if (ityp > 2 .and. &
-            lwork < imid*(2*nt*nlon+max(6*nlat, nlon))) return
-        ierror = 0
-        idv = nlat
-        if (ityp > 2) idv = imid
-        lnl = nt*idv*nlon
-        ist = 0
-        if (ityp <= 2) ist = imid
-        iw1 = ist+1
-        iw2 = lnl+1
-        iw3 = iw2+ist
-        iw4 = iw2+lnl
-        iw5 = iw4+3*imid*nlat
-        lwzvin = lzz1+labc
-        jw1 = lwzvin+1
-        jw2 = jw1+lwzvin
-        call vhaec_lower_utility_routine(nlat, nlon, ityp, nt, imid, idvw, jdvw, v, w, mdab, ndab, &
-            br, bi, cr, ci, idv, work, work(iw1), work(iw2), work(iw3), &
-            work(iw4), work(iw5), wvhaec, wvhaec(jw1), wvhaec(jw2))
+        associate (lvhaec => size(wvhaec))
+
+            imid = (nlat+1)/2
+            mmax = min(nlat, (nlon+1)/2)
+            lzz1 = 2*nlat*imid
+            labc = 3*(max(mmax-2, 0)*(nlat+nlat-mmax-1))/2
+
+            if (nlat < 3) then
+                ierror = 1
+            else if (nlon < 1) then
+                ierror = 2
+            else if (ityp < 0 .or. ityp > 8) then
+                ierror = 4
+            else if (nt < 0) then
+                ierror = 4
+            else if ((ityp <= 2 .and. idvw < nlat) .or. &
+                (ityp > 2 .and. idvw < imid)) then
+                ierror = 5
+            else if (jdvw < nlon) then
+                ierror = 6
+            else if (mdab < mmax) then
+                ierror = 7
+            else if (ndab < nlat) then
+                ierror = 8
+            else if (lvhaec < 2*(lzz1+labc)+nlon+15) then
+                ierror = 9
+            else
+                ierror = 0
+            end if
+
+            ! Check error flag
+            if (ierror /= 0) return
+
+            ! Set required workspace size
+            select case (ityp)
+                case (0:2)
+                    lwork = nlat*(2*nt*nlon+max(6*imid, nlon))
+                case default
+                    lwork = imid*(2*nt*nlon+max(6*nlat, nlon))
+            end select
+
+            select case (ityp)
+                case (0:2)
+                    idv = nlat
+                    ist = imid
+                case default
+                    idv = imid
+                    ist = 0
+            end select
+
+            lnl = nt*idv*nlon
+
+            block
+                real (wp)   :: work(lwork)
+                integer(ip) :: iw1, iw2, iw3, iw4, iw5
+                integer(ip) :: lwzvin, jw1, jw2
+
+                iw1 = ist+1
+                iw2 = lnl+1
+                iw3 = iw2+ist
+                iw4 = iw2+lnl
+                iw5 = iw4+3*imid*nlat
+                lwzvin = lzz1+labc
+                jw1 = lwzvin+1
+                jw2 = jw1+lwzvin
+                call vhaec_lower_utility_routine(nlat, nlon, ityp, nt, imid, idvw, jdvw, &
+                    v, w, mdab, ndab, br, bi, cr, ci, idv, work, work(iw1:), work(iw2:), work(iw3:), &
+                    work(iw4:), work(iw5:), wvhaec, wvhaec(jw1:), wvhaec(jw2:))
+            end block
+        end associate
 
     end subroutine vhaec
 
