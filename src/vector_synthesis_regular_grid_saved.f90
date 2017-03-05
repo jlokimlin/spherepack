@@ -39,7 +39,7 @@ contains
     ! Purpose:
     !
     !     subroutine vhses(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
-    !                      mdab, ndab, wvhses, lvhses, work, lwork, ierror)
+    !                      mdab, ndab, wvhses, ierror)
     !
     !     subroutine vhses performs the vector spherical harmonic synthesis
     !     of the arrays br, bi, cr, and ci and stores the result in the
@@ -200,25 +200,6 @@ contains
     !
     !                 l1*l2*(nlat+nlat-l1+1)+nlon+15
     !
-    !
-    !     work   a work array that does not have to be saved.
-    !
-    !     lwork  the dimension of the array work as it appears in the
-    !            program that calls vhses. define
-    !
-    !               l2 = nlat/2        if nlat is even or
-    !               l2 = (nlat+1)/2    if nlat is odd
-    !
-    !            if ityp <= 2 then lwork must be at least
-    !
-    !                       (2*nt+1)*nlat*nlon
-    !
-    !            if ityp > 2 then lwork must be at least
-    !
-    !                        (2*nt+1)*l2*nlon
-    !
-    !     **************************************************************
-    !
     !     output parameters
     !
     !     v, w    two or three dimensional arrays (see input parameter nt)
@@ -351,10 +332,9 @@ contains
     !            = 7  error in the specification of mdab
     !            = 8  error in the specification of ndab
     !            = 9  error in the specification of lvhses
-    !            = 10 error in the specification of lwork
     !
     module subroutine vhses(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
-        mdab, ndab, wvhses, lvhses, work, lwork, ierror)
+        mdab, ndab, wvhses, ierror)
 
         ! Dummy arguments
         integer(ip), intent(in)  :: nlat
@@ -371,86 +351,82 @@ contains
         real(wp),    intent(in)  :: ci(mdab, ndab, nt)
         integer(ip), intent(in)  :: mdab
         integer(ip), intent(in)  :: ndab
-        real(wp),    intent(in)  :: wvhses(lvhses)
-        integer(ip), intent(in)  :: lvhses
-        real(wp),    intent(out) :: work(lwork)
-        integer(ip), intent(in)  :: lwork
+        real(wp),    intent(in)  :: wvhses(:)
         integer(ip), intent(out) :: ierror
 
         ! Local variables
         integer(ip) :: idv, idz, imid, ist, lnl, lzimn, mmax
-        integer(ip) :: workspace_indices(6)
+        integer(ip) :: lwork, workspace_indices(6)
 
+        associate (lvhses => size(wvhses))
 
-        imid = (nlat+1)/2
-        mmax = min(nlat, (nlon+1)/2)
-        idz = (mmax*(2*nlat-mmax+1))/2
-        lzimn = idz*imid
+            imid = (nlat+1)/2
+            mmax = min(nlat, (nlon+1)/2)
+            idz = (mmax*(2*nlat-mmax+1))/2
+            lzimn = idz*imid
 
-        select case (ityp)
-            case (:2)
-                idv = nlat
-                ist = imid
-            case default
-                idv = imid
-                ist = 0
-        end select
+            select case (ityp)
+                case (0:2)
+                    idv = nlat
+                    ist = imid
+                case default
+                    idv = imid
+                    ist = 0
+            end select
 
-        lnl = nt*idv*nlon
+            lnl = nt*idv*nlon
 
-        !
-        !  Check calling arguments
-        !
-        if (nlat < 3) then
-            ierror = 1
-            return
-        else if (nlon < 1) then
-            ierror = 2
-            return
-        else if (ityp < 0 .or. ityp > 8) then
-            ierror = 3
-            return
-        else if (nt < 0) then
-            ierror = 4
-            return
-        else if ((ityp <= 2 .and. idvw < nlat) .or. (ityp > 2 .and. idvw < imid)) then
-            ierror = 5
-            return
-        else if (jdvw < nlon) then
-            ierror = 6
-            return
-        else if (mdab < mmax) then
-            ierror = 7
-            return
-        else if (ndab < nlat) then
-            ierror = 8
-            return
-        else if (lvhses < 2*lzimn+nlon+15) then
-            ierror = 9
-            return
-        else if (lwork < 2*lnl+idv*nlon) then
-            ierror = 10
-            return
-        else
-            ierror = 0
-        end if
+            !  Check calling arguments
+            if (nlat < 3) then
+                ierror = 1
+            else if (nlon < 1) then
+                ierror = 2
+            else if (ityp < 0 .or. ityp > 8) then
+                ierror = 3
+            else if (nt < 0) then
+                ierror = 4
+            else if ((ityp <= 2 .and. idvw < nlat) &
+                .or. &
+                (ityp > 2 .and. idvw < imid)) then
+                ierror = 5
+            else if (jdvw < nlon) then
+                ierror = 6
+            else if (mdab < mmax) then
+                ierror = 7
+            else if (ndab < nlat) then
+                ierror = 8
+            else if (lvhses < 2*lzimn+nlon+15) then
+                ierror = 9
+            else
+                ierror = 0
+            end if
 
-        !
-        !  Set workspace indices
-        !
-        workspace_indices = get_vhses_workspace_indices(ist, lnl, lzimn)
+            ! Check error flag
+            if (ierror /= 0) return
 
-        associate (&
-            iw1 => workspace_indices(1), &
-            iw2 => workspace_indices(2), &
-            iw3 => workspace_indices(3), &
-            iw4 => workspace_indices(4), &
-            jw1 => workspace_indices(5), &
-            jw2 => workspace_indices(6) &
-            )
-            call vhses_lower_utility_routine(nlat, nlon, ityp, nt, imid, idvw, jdvw, v, w, mdab, ndab, &
-                br, bi, cr, ci, idv, work, work(iw1), work(iw2), work(iw3), &
-                work(iw4), idz, wvhses, wvhses(jw1), wvhses(jw2))
+            ! Set required workspace size
+            lwork = 2*lnl+idv*nlon
+
+            block
+                real(wp) :: work(lwork)
+
+                !  Set workspace indices
+                workspace_indices = get_vhses_workspace_indices(ist, lnl, lzimn)
+
+                associate (&
+                    iw1 => workspace_indices(1), &
+                    iw2 => workspace_indices(2), &
+                    iw3 => workspace_indices(3), &
+                    iw4 => workspace_indices(4), &
+                    jw1 => workspace_indices(5), &
+                    jw2 => workspace_indices(6) &
+                    )
+                    call vhses_lower_utility_routine(nlat, nlon, ityp, nt, imid, idvw, &
+                        jdvw, v, w, mdab, ndab, br, bi, cr, ci, idv, work, work(iw1:), &
+                        work(iw2:), work(iw3:), work(iw4:), idz, wvhses, wvhses(jw1:), &
+                        wvhses(jw2:))
+                end associate
+            end block
         end associate
 
     end subroutine vhses

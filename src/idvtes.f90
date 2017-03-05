@@ -484,7 +484,7 @@ contains
             !     sythesize br, bi, cr, ci into the vector field (v, w)
             !
             call vhses(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
-                mmax, nlat, widvtes, lidvtes, wk, lwk, ierror)
+                mmax, nlat, widvtes, ierror)
 
         end subroutine idvtes1
 

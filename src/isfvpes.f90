@@ -378,7 +378,7 @@ contains
             end select
 
             call vhses(nlat, nlon, ityp, nt, v, w, idv, jdv, br, bi, cr, ci, &
-                mab, nlat, wvhses, lvhses, wk, lwk, ierror)
+                mab, nlat, wvhses, ierror)
 
         end subroutine isfvpes1
 

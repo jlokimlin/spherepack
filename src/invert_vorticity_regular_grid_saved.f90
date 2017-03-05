@@ -381,7 +381,7 @@ contains
 
         ! Vector synthesize cr, ci into divergence free vector field (v, w)
         call vhses(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
-            mmax, nlat, wsav, lwsav, wk, lwk, ierror)
+            mmax, nlat, wsav, ierror)
 
     end subroutine ivrtes_lower_utility_routine
 

@@ -53,7 +53,7 @@ module vector_synthesis_routines
         end subroutine vhsec
 
         module subroutine vhses(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
-            mdab, ndab, wvhses, lvhses, work, lwork, ierror)
+            mdab, ndab, wvhses, ierror)
 
             ! Dummy arguments
             integer(ip), intent(in)  :: nlat
@@ -70,10 +70,7 @@ module vector_synthesis_routines
             real(wp),    intent(in)  :: ci(mdab, ndab, nt)
             integer(ip), intent(in)  :: mdab
             integer(ip), intent(in)  :: ndab
-            real(wp),    intent(in)  :: wvhses(lvhses)
-            integer(ip), intent(in)  :: lvhses
-            real(wp),    intent(out) :: work(lwork)
-            integer(ip), intent(in)  :: lwork
+            real(wp),    intent(in)  :: wvhses(:)
             integer(ip), intent(out) :: ierror
         end subroutine vhses
 

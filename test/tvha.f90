@@ -285,7 +285,7 @@ program tvha
                 call iout(ierror, "ierr")
         		
                 call vhses(nlat, nlon, ityp, nt, v, w, nlat, nlon, br, bi, cr, ci, nlat, &
-                    nlat, wsave, lsave, work, lwork, ierror)
+                    nlat, wsave, ierror)
         		
                 call name("vhs ")
                 call iout(ierror, "ierr")

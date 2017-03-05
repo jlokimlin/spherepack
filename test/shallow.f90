@@ -817,18 +817,18 @@ contains
         integer(ip) :: nt
         real(wp) :: u
         real(wp) :: v
-        real(wp) :: work
-        real(wp) :: wsav
+        real(wp) :: work(..)
+        real(wp) :: wsav(:)
         dimension u(iduv, jduv, *), v(iduv, jduv, *), br(mdab, ndab, *), &
-            bi(mdab, ndab, *), cr(mdab, ndab, *), ci(mdab, ndab, *), &
-            work(1), wsav(1)
+            bi(mdab, ndab, *), cr(mdab, ndab, *), ci(mdab, ndab, *)
         !
         !     vhsesgo computes a vector harmonic synthesis in (u, v) using vhses which
         !     assumes the velocity components are given in mathematical coordinates
         !
         call vhses(nlat, nlon, ityp, nt, v, u, iduv, jduv, &
-            br, bi, cr, ci, mdab, ndab, wsav, lwsav, work, lwork, ierror)
-        if (ierror/=0) return
+            br, bi, cr, ci, mdab, ndab, wsav, ierror)
+        if (ierror /= 0) return
+
         do k=1, nt
             do j=1, nlon
                 do i=1, nlat

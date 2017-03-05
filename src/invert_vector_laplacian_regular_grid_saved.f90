@@ -480,7 +480,7 @@ contains
 
         ! Synthesize coefs into vector field (v, w)
         call vhses(nlat, nlon, ityp, nt, v, w, idvw, jdvw, brvw, bivw, &
-            crvw, civw, mmax, nlat, wsave, lsave, wk, lwk, ierror)
+            crvw, civw, mmax, nlat, wsave, ierror)
 
     end subroutine ivlapes_lower_utility_routine
 

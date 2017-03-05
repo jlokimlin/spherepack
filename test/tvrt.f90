@@ -452,7 +452,7 @@ program tvrt
                 call iout(ierror, "ierr")
         		
                 call vhses(nlat, nlon, ityp, nt, ve, we, nlat, nlon, br, bi, cr, ci, &
-                    mdc, nlat, wsave, lsave, work, lwork, ierror)
+                    mdc, nlat, wsave, ierror)
                 call name("vhs ")
                 call iout(ierror, "ierr")
         		

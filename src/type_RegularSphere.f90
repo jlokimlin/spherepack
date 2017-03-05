@@ -452,7 +452,7 @@ contains
 
                         !  Perform (real) vector spherical harmonic analysis
                         call aux%vhses(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
-                            mdab, ndab, wvhses, lvhses, work, lwork, ierror)
+                            mdab, ndab, wvhses, ierror)
 
                     end associate
                 end select

@@ -365,7 +365,7 @@ contains
 
         ! Vector synthesize br, bi into (v, w) (cr, ci are dummy variables)
         call vhses(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
-            mmax, nlat, wvhses, lvhses, wk, lwk, ierror)
+            mmax, nlat, wvhses, ierror)
 
     end subroutine grades_lower_utility_routine
 
