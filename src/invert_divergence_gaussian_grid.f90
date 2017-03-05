@@ -382,7 +382,7 @@ contains
 
         ! Vector sythesize br, bi into irrotational (v, w)
         call vhsgc(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
-            mmax, nlat, wsav, lwsav, wk, lwk, ierror)
+            mmax, nlat, wsav, ierror)
 
     end subroutine idivgc_lower_utility_routine
 

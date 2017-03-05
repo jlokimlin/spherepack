@@ -481,7 +481,7 @@ contains
             !     sythesize br, bi, cr, ci into the vector field (v, w)
             !
             call vhsgc(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
-                mmax, nlat, wvhsgc, lvhsgc, wk, lwk, ierror)
+                mmax, nlat, wvhsgc, ierror)
 
         end subroutine idvtgc1
 

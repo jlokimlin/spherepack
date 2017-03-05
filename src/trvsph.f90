@@ -729,8 +729,7 @@ contains
                 work(ibbi), work(ibcr), work(ibci), lb1, nlatb, wsave(jb:), ier)
         else
             call vhsgc(nlatb, nlonb, ityp, nt, vb, ub, nlatb, nlonb, work(ibbr), &
-                work(ibbi), work(ibcr), work(ibci), lb1, nlatb, wsave(jb:), lwb, work(iw), &
-                lw, ier)
+                work(ibbi), work(ibcr), work(ibci), lb1, nlatb, wsave(jb:), ier)
         end if
         !
         !     restore a grid and b grid vector fields (now in math coordinates) to

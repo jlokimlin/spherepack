@@ -453,7 +453,7 @@ contains
 
         ! Synthesize coefs into vector field (v, w)
         call vhsgc(nlat, nlon, ityp, nt, v, w, idvw, jdvw, brvw, bivw, &
-            crvw, civw, mmax, nlat, wvhsgc, lvhsgc, wk, lwk, ierror)
+            crvw, civw, mmax, nlat, wvhsgc, ierror)
 
     end subroutine ivlapgc_lower_utility_routine
 

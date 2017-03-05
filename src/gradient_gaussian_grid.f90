@@ -361,7 +361,7 @@ contains
 
         ! Vector synthesize br, bi into (v, w) (cr, ci are dummy variables)
         call vhsgc(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
-            mmax, nlat, wvhsgc, lvhsgc, wk, lwk, ierror)
+            mmax, nlat, wvhsgc, ierror)
 
     end subroutine gradgc_lower_utility_routine
 

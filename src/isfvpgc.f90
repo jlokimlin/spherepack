@@ -365,7 +365,7 @@ contains
             end select
 
             call vhsgc(nlat, nlon, ityp, nt, v, w, idv, jdv, br, bi, cr, ci, &
-                mab, nlat, wvhsgc, lvhsgc, wk, lwk, ierror)
+                mab, nlat, wvhsgc, ierror)
 
         end subroutine isfvpgc1
 

@@ -78,7 +78,7 @@ module vector_synthesis_routines
         end subroutine vhses
 
         module subroutine vhsgc(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
-            mdab, ndab, wvhsgc, lvhsgc, work, lwork, ierror)
+            mdab, ndab, wvhsgc, ierror)
 
             ! Dummy arguments
             integer(ip), intent(in)  :: nlat
@@ -95,10 +95,7 @@ module vector_synthesis_routines
             real(wp),    intent(in)  :: ci(mdab, ndab, nt)
             integer(ip), intent(in)  :: mdab
             integer(ip), intent(in)  :: ndab
-            real(wp),    intent(in)  :: wvhsgc(lvhsgc)
-            integer(ip), intent(in)  :: lvhsgc
-            real(wp),    intent(out) :: work(lwork)
-            integer(ip), intent(in)  :: lwork
+            real(wp),    intent(in)  :: wvhsgc(:)
             integer(ip), intent(out) :: ierror
         end subroutine vhsgc
 
