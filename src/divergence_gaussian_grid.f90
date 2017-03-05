@@ -362,7 +362,7 @@ contains
 
         ! Synthesize a, b into divg
         call shsgc(nlat, nlon, isym, nt, dv, idv, jdv, a, b, &
-            mab, nlat, wshsgc, lshsgc, wk, lwk, ierror)
+            mab, nlat, wshsgc, ierror)
 
     end subroutine divgc_lower_utility_routine
 

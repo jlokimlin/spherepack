@@ -398,8 +398,7 @@ contains
         call perform_setup_for_inversion(a, b, as, bs, fnn, xlmbda, pertrb)
 
         ! Synthesize as, bs into sf
-        call shsgs(nlat, nlon, isym, nt, sf, ids, jds, as, bs, mmax, nlat, &
-            wsav, lsav, wk, lwk, ierror)
+        call shsgs(nlat, nlon, isym, nt, sf, ids, jds, as, bs, mmax, nlat, wsav, ierror)
 
 
     end subroutine islapgs_lower_utility_routine

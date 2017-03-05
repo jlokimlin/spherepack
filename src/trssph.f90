@@ -718,7 +718,7 @@ contains
             !     do spherical harmonic synthesis on nlatb by nlonb gaussian grid
             !
             call shsgc(nlatb, nlonb, isym, nt, db, nlatb, nlonb, work(iab), &
-                work(ibb), lb1, nlatb, wsave(jb:), lwb, work(iw), lw, ier)
+                work(ibb), lb1, nlatb, wsave(jb:), ier)
         end if
         !
         !     both da, db are currently latitude by longitude north to south arrays

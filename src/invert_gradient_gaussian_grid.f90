@@ -364,8 +364,7 @@ contains
         call perform_setup_for_inversion(nlon, a, b, br, bi, sqnn)
 
         ! Scalar synthesize a, b into sf
-        call shsgc(nlat, nlon, isym, nt, sf, isf, jsf, a, b, mab, nlat, wsav, &
-            lsav, wk, lwk, ierror)
+        call shsgc(nlat, nlon, isym, nt, sf, isf, jsf, a, b, mab, nlat, wsav, ierror)
 
     end subroutine igradgc_lower_utility_routine
 

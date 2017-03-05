@@ -67,7 +67,7 @@ program test_all_scalar_analysis_and_synthesis_routines
     real(wp) :: theta
     real(wp) :: xyzk
 
-    real(wp) :: dwork(lldwork), work(lleng), wsave(llsav)
+    real(wp) :: work(lleng), wsave(llsav)
     real(wp)                          :: s(nlat,nlon,nt)
     real(wp), dimension(nlat,nlat,nt) :: a, b
     real(wp), dimension(nlat)         :: gaussian_latitudes, gaussian_weights
@@ -196,8 +196,7 @@ program test_all_scalar_analysis_and_synthesis_routines
                 call name("shsi")
                 call iout(ierror, "ierr")
         		
-                call shsgc(nlat, nlon, isym, nt, s, nlat, nlon, a, b, nlat, nlat, wsave, &
-                    lsave, work, lwork, ierror)
+                call shsgc(nlat, nlon, isym, nt, s, nlat, nlon, a, b, nlat, nlat, wsave, ierror)
         		
                 call name("shs ")
                 call iout(ierror, "ierr")
@@ -219,8 +218,7 @@ program test_all_scalar_analysis_and_synthesis_routines
                 call name("shsi")
                 call iout(ierror, "ierr")
         		
-                call shsgs(nlat, nlon, isym, nt, s, nlat, nlon, a, b, nlat, nlat, wsave, &
-                    lsave, work, lwork, ierror)
+                call shsgs(nlat, nlon, isym, nt, s, nlat, nlon, a, b, nlat, nlat, wsave, ierror)
         		
                 call name("shs ")
                 call iout(ierror, "ierr")

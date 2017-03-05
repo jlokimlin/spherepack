@@ -350,7 +350,7 @@ contains
 
         ! Synthesize a, b into vort
         call shsgs(nlat, nlon, isym, nt, vort, ivrt, jvrt, a, b, &
-            mab, nlat, wsav, lwsav, wk, lwk, ierror)
+            mab, nlat, wsav, ierror)
 
     end subroutine vrtgs_lower_utility_routine
 

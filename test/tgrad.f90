@@ -124,7 +124,7 @@ program tgrad
     parameter  (mmdb=(nnlon+1)/2, mmdab=(nnlon+2)/2)
     parameter (lleng= 5*nnlat*nnlat*nnlon, llsav= 5*nnlat*nnlat*nnlon)
     parameter (lldwork = 4*nnlat*nnlat)
-    real dwork(lldwork)
+    
     dimension work(lleng), wsave(llsav)
     dimension br(mmdb, nnlat, nnt), bi(mmdb, nnlat, nnt)
     dimension cr(mmdb, nnlat, nnt), ci(mmdb, nnlat, nnt)
@@ -157,10 +157,8 @@ program tgrad
     !     compute nlat gaussian points in thetag
     !
     ldwork = lldwork
-    call compute_gaussian_latitudes_and_weights(nlat, dtheta, dwts, ier)
-    do  i=1, nlat
-        gaussian_latitudes(i) = dtheta(i)
-    end do
+    call compute_gaussian_latitudes_and_weights(nlat, gaussian_latitudes, dwts, ier)
+
     call name("gaqd")
     call iout(ier, " ier")
     call vecout(gaussian_latitudes, "thtg", nlat)

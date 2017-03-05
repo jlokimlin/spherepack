@@ -89,7 +89,7 @@ program tvlap
     integer(ip) :: nnlon
     integer(ip) :: nnt
     integer(ip) :: nt
-    real(wp) :: pertrb
+    
     real(wp) :: phi
 
     real(wp) :: sinp
@@ -111,7 +111,7 @@ program tvlap
     parameter (mmdbc = (nnlon+2)/2)
     parameter (lleng= 5*nnlat*nnlat*nnlon, llsav=15*nnlat*nnlat*nnlon)
     parameter (lldwork = 4*nnlat*nnlat)
-    real dwork(lldwork)
+    
     dimension work(lleng), wsave(llsav)
     dimension br(mmdbc, nnlat, nnt), bi(mmdbc, nnlat, nnt)
     dimension cr(mmdbc, nnlat, nnt), ci(mmdbc, nnlat, nnt)

@@ -36,7 +36,7 @@ contains
     ! Purpose:
     !
     !     subroutine shsgs(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, &
-    !                      wshsgs, lshsgs, work, lwork, ierror)
+    !                      wshsgs, ierror)
     !
     !     subroutine shsgs performs the spherical harmonic synthesis
     !     on the arrays a and b and stores the result in the array g.
@@ -143,24 +143,6 @@ contains
     !            nlat*(3*(l1+l2)-2)+(l1-1)*(l2*(2*nlat-l1)-3*l1)/2+nlon+15
     !
     !
-    !     lwork  the dimension of the array work as it appears in the
-    !            program that calls shsgs. define
-    !
-    !               l2 = nlat/2        if nlat is even or
-    !               l2 = (nlat+1)/2    if nlat is odd
-    !
-    !
-    !            if isym is zero then lwork must be at least
-    !
-    !                  nlat*nlon*(nt+1)
-    !
-    !            if isym is nonzero then lwork must be at least
-    !
-    !                  l2*nlon*(nt+1)
-    !
-    !
-    !     **************************************************************
-    !
     !     output parameters
     !
     !     g      a two or three dimensional array (see input parameter nt)
@@ -205,10 +187,8 @@ contains
     !            = 7  error in the specification of mdab
     !            = 8  error in the specification of ndab
     !            = 9  error in the specification of lshsgs
-    !            = 10 error in the specification of lwork
     !
-    module subroutine shsgs(nlat, nlon, mode, nt, g, idg, jdg, a, b, mdab, ndab, &
-        wshsgs, lshsgs, work, lwork, ierror)
+    module subroutine shsgs(nlat, nlon, mode, nt, g, idg, jdg, a, b, mdab, ndab, wshsgs, ierror)
 
         ! Dummy arguments
         integer(ip), intent(in)  :: nlat
@@ -222,82 +202,82 @@ contains
         real(wp),    intent(in)  :: b(mdab, ndab, nt)
         integer(ip), intent(in)  :: mdab
         integer(ip), intent(in)  :: ndab
-        real(wp),    intent(in)  :: wshsgs(lshsgs)
-        integer(ip), intent(in)  :: lshsgs
-        real(wp),    intent(out) :: work(lwork)
-        integer(ip), intent(in)  :: lwork
+        real(wp),    intent(in)  :: wshsgs(:)
         integer(ip), intent(out) :: ierror
 
         ! Local variables
-        integer(ip) :: mtrunc, l1, l2, lp, iw, lat, late, ifft, ipmn
+        integer(ip) :: mtrunc, l1, l2, lp, iw
+        integer(ip) :: lat, late, lwork
 
-        ! Set limit on m subscript
-        mtrunc = min((nlon+2)/2, nlat)
+        associate (lshsgs => size(wshsgs))
 
-        ! Set gaussian point nearest equator pointer
-        late = (nlat+mod(nlat, 2))/2
+            ! Set limit on m subscript
+            mtrunc = min((nlon+2)/2, nlat)
 
-        ! Set number of grid points for analysis/synthesis
-        if (mode /= 0) then
-            lat = late
-        else
-            lat = nlat
-        end if
+            ! Set gaussian point nearest equator pointer
+            late = (nlat+mod(nlat, 2))/2
 
-        l1 = mtrunc
-        l2 = late
-        lp=nlat*(3*(l1+l2)-2)+(l1-1)*(l2*(2*nlat-l1)-3*l1)/2+nlon+15
+            ! Set number of grid points for analysis/synthesis
+            if (mode /= 0) then
+                lat = late
+            else
+                lat = nlat
+            end if
 
-        !
-        !  Check calling arguments
-        !
-        if (nlat < 3) then
-            ierror = 1
-            return
-        else if (nlon < 4) then
-            ierror = 2
-            return
-        else if (mode < 0 .or. mode > 2) then
-            ierror = 3
-            return
-        else if (nt < 1) then
-            ierror = 4
-            return
-        else if (idg < lat) then
-            ierror = 5
-            return
-        else if (jdg < nlon) then
-            ierror = 6
-            return
-        else if (mdab < mtrunc) then
-            ierror = 7
-            return
-        else if (ndab < nlat) then
-            ierror = 8
-            return
-        else if (lshsgs < lp) then
-            ierror = 9
-            return
-        else if ( &
-            (mode == 0 .and. lwork < nlat*nlon*(nt+1)) &
-            .or. &
-            (mode /= 0 .and. lwork < l2*nlon*(nt+1)) &
-           ) then
-            ierror = 10
-            return
-        else
-            ierror = 0
-        end if
+            l1 = mtrunc
+            l2 = late
+            lp=nlat*(3*(l1+l2)-2)+(l1-1)*(l2*(2*nlat-l1)-3*l1)/2+nlon+15
 
-        ! Starting address for fft values and legendre polys in wshsgs
-        ifft = nlat+2*nlat*late+3*(mtrunc*(mtrunc-1)/2+(nlat-mtrunc)*(mtrunc-1))+1
-        ipmn = ifft+nlon+15
+            !  Check calling arguments
+            if (nlat < 3) then
+                ierror = 1
+            else if (nlon < 4) then
+                ierror = 2
+            else if (mode < 0 .or. mode > 2) then
+                ierror = 3
+            else if (nt < 1) then
+                ierror = 4
+            else if (idg < lat) then
+                ierror = 5
+            else if (jdg < nlon) then
+                ierror = 6
+            else if (mdab < mtrunc) then
+                ierror = 7
+            else if (ndab < nlat) then
+                ierror = 8
+            else if (lshsgs < lp) then
+                ierror = 9
+            else
+                ierror = 0
+            end if
 
-        ! set pointer for internal storage of g
-        iw = lat*nlon*nt+1
+            ! Check error flag
+            if (ierror /= 0) return
 
-        call reconstruct_fft_coefficients(nlat, nlon, mtrunc, lat, mode, g, idg, jdg, nt, a, b, mdab, ndab, &
-            wshsgs(ifft), wshsgs(ipmn), late, work, work(iw))
+            ! Set required workspace size
+            select case (mode)
+                case (0)
+                    lwork = nlat*nlon*(nt+1)
+                case default
+                    lwork = l2*nlon*(nt+1)
+            end select
+
+            block
+                real(wp)    :: work(lwork)
+                integer(ip) :: ifft, ipmn
+
+                ! Starting address for fft values and legendre polys in wshsgs
+                ifft = nlat+2*nlat*late+3*(mtrunc*(mtrunc-1)/2+(nlat-mtrunc)*(mtrunc-1))+1
+                ipmn = ifft+nlon+15
+
+                ! set pointer for internal storage of g
+                iw = lat*nlon*nt+1
+
+                call reconstruct_fft_coefficients(nlat, nlon, mtrunc, lat, &
+                    mode, g, idg, jdg, nt, a, b, mdab, ndab, wshsgs(ifft:), &
+                    wshsgs(ipmn:), late, work, work(iw:))
+            end block
+        end associate
 
     end subroutine shsgs
 

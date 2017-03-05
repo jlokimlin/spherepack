@@ -352,8 +352,7 @@ contains
         !
         !     synthesize a, b into st
         !
-        call shsgs(nlat, nlon, isym, nt, sf, idv, jdv, a, b, &
-            mab, nlat, wshsgs, lshsgs, wk, lwk, ierror)
+        call shsgs(nlat, nlon, isym, nt, sf, idv, jdv, a, b, mab, nlat, wshsgs, ierror)
         !
         !    set coefficients for vp from br, bi
         !
@@ -386,8 +385,7 @@ contains
         !
         !     synthesize a, b into vp
         !
-        call shsgs(nlat, nlon, isym, nt, vp, idv, jdv, a, b, &
-            mab, nlat, wshsgs, lshsgs, wk, lwk, ierror)
+        call shsgs(nlat, nlon, isym, nt, vp, idv, jdv, a, b, mab, nlat, wshsgs, ierror)
 
     end subroutine sfvpgs_lower_utility_routine
 

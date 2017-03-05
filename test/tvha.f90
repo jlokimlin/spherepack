@@ -120,7 +120,7 @@ program tvha
     parameter(nnlat= 25, nnlon= 19, nnt = 2)
     parameter (lleng= 5*nnlat*nnlat*nnlon, llsav= 5*nnlat*nnlat*nnlon)
     parameter (lldwork = 4*nnlat*nnlat)
-    real dwork(lldwork)
+    
     dimension work(lleng), wsave(llsav)
     dimension br(nnlat, nnlat, nnt), bi(nnlat, nnlat, nnt)
     dimension cr(nnlat, nnlat, nnt), ci(nnlat, nnlat, nnt)

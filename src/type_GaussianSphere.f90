@@ -285,16 +285,12 @@ contains
                         mdab => size(workspace%scalar_coefficients%real_component, dim=1), &
                         ndab => size(workspace%scalar_coefficients%real_component, dim=2), &
                         wshsgs => workspace%backward_scalar, &
-                        lshsgs => size(workspace%backward_scalar), &
-                        work => workspace%legendre_workspace, &
-                        lwork => size(workspace%legendre_workspace), &
                         ierror => error_flag &
                        )
                         !
                         !  Perform gaussian scalar synthesis
                         !
-                        call aux%shsgs(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, &
-                            wshsgs, lshsgs, work, lwork, ierror)
+                        call aux%shsgs(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, wshsgs, ierror)
 
                     end associate
                 end select

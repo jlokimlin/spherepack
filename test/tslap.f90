@@ -110,7 +110,7 @@ use spherepack
     parameter (lleng=15*nnlat*nnlat*nnlon, llsav=5*nnlat*nnlat*nnlon)
     dimension work(lleng), wsave(llsav)
     parameter (lldwork = nnlat*(nnlat+4))
-    real dwork(lldwork)
+    
     dimension a(mmdab, nnlat, nnt), b(mmdab, nnlat, nnt), s(nnlat, nnlon, nnt)
     dimension sclp(nnlat, nnlon, nnt)
     dimension sclpe(nnlat, nnlon, nnt)

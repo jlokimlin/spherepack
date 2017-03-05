@@ -364,7 +364,7 @@ contains
 
         ! Synthesize a, b into divg
         call shsgs(nlat, nlon, isym, nt, divg, idiv, jdiv, a, b, &
-            mab, nlat, wshsgs, lshsgs, wk, lwk, ierror)
+            mab, nlat, wshsgs, ierror)
 
     end subroutine divgs_lower_utility_routine
 

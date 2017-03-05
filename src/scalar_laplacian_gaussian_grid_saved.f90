@@ -365,8 +365,7 @@ contains
         call perform_setup_for_scalar_laplacian(a, b, alap, blap, fnn)
 
         ! Synthesize alap, blap into slap
-        call shsgs(nlat, nlon, isym, nt, slap, ids, jds, alap, blap, &
-            mmax, nlat, wsave, lsave, wk, lwk, ierror)
+        call shsgs(nlat, nlon, isym, nt, slap, ids, jds, alap, blap, mmax, nlat, wsave, ierror)
 
     end subroutine slapgs_lower_utility_routine
 

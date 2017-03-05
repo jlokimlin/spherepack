@@ -155,7 +155,7 @@ program advec
     real pexact(nnlat, nnlon)
     real dpdt(nnlat, nnlon)
     real gdphl(nnlat, nnlon), gdpht(nnlat, nnlon), work(llwork)
-    real dwork(lldwork)
+    
     real wshagc(llshagc), wvhsgc(llvhsgc), wshsgc(llshagc)
     real ar(nnlat, nnlat), br(nnlat, nnlat)
     real thetag(nnlat), colat(nnlat)
@@ -253,13 +253,13 @@ program advec
         nlat, wshagc, ierror)
     if ( ierror /=0) write(*, 26) ierror
     call shsgc(nlat, nlon, isym, nt, phold, nlat, nlon, ar, br, nlat, &
-        nlat, wshsgc, lshagc, work, lwork, ierror)
+        nlat, wshsgc, ierror)
     if ( ierror /=0) write(*, 28) ierror
     call shagc(nlat, nlon, isym, nt, phi, nlat, nlon, ar, br, nlat, &
         nlat, wshagc, ierror)
     if ( ierror /=0) write(*, 26) ierror
     call shsgc(nlat, nlon, isym, nt, phi, nlat, nlon, ar, br, nlat, &
-        nlat, wshsgc, lshagc, work, lwork, ierror)
+        nlat, wshsgc, ierror)
     if ( ierror /=0) write(*, 28) ierror
 28  format(' ierror in shsgc = ', i5)
     !

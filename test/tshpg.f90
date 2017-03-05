@@ -153,8 +153,7 @@ program tshpg
                 end do
             end if
 
-            call shsgc(nlat, nlon, mode, nt, gh, idimg, jdimg, ga, gb, idimg, idimg, &
-                wshsgc, lwshs, wrk2, lwork, ierror)
+            call shsgc(nlat, nlon, mode, nt, gh, idimg, jdimg, ga, gb, idimg, idimg, wshsgc, ierror)
             call check_error(ierror)
 
             call shpg(nlat, nlon, isym, mtrunc, sx, sy, idp, &

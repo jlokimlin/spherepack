@@ -96,7 +96,7 @@ use spherepack
     real u(nnlat, nnlon), r(nnlat, nnlon)
     real sint(nnlat), cost(nnlat), sinp(nnlon), cosp(nnlon)
     real work(llwork), wshaec(llsave), wshsec(llsave)
-    real dwork(lldwork)
+    
     real a(nnlat, nnlat), b(nnlat, nnlat)
     integer nlat, nlon, i, j, lshaec, lshsec, lwork, ierror, isym, nt
     integer ldwork
