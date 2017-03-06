@@ -55,133 +55,66 @@
 !
 !     note:  vhaec, vhaes, vhagc, vhags, vhsec, vhses, vhsgc, vhsgs are all tested!
 !
-program tvha
-    use spherepack
-    implicit none
-    real(wp) :: bi
-    real(wp) :: br
-    real(wp) :: ci
-    real(wp) :: cosp
-    real(wp) :: cost
-    real(wp) :: cr
-    real(wp) :: dlat
-    real(wp) :: dphi
-    real(wp) :: dstdp
-    real(wp) :: dstdt
-    real(wp) :: dsvdp
-    real(wp) :: dsvdt
-    real(wp) :: dxdp
-    real(wp) :: dxdt
-    real(wp) :: dydp
-    real(wp) :: dydt
-    real(wp) :: dzdp
-    real(wp) :: dzdt
-    real(wp) :: err2v
-    real(wp) :: err2w
-    integer(ip) :: i
-    integer(ip) :: icase
-    integer(ip) :: ier
-    integer(ip) :: ierror
-    integer(ip) :: ityp
-    integer(ip) :: j
-    integer(ip) :: k
-    integer(ip) :: ldwork
-    integer(ip) :: lldwork
-    integer(ip) :: lleng
-    integer(ip) :: llsav
-    integer(ip) :: lsave
-    integer(ip) :: lwork
-    integer(ip) :: nlat
-    integer(ip) :: nlon
-    integer(ip) :: nnlat
-    integer(ip) :: nnlon
-    integer(ip) :: nnt
-    integer(ip) :: nt
-    real(wp) :: phi
+program test_all_vector_analysis_and_synthesis_routines
 
-    real(wp) :: sinp
-    real(wp) :: sint
-    real(wp) :: st
-    real(wp) :: sv
-    real(wp) :: theta
-    real(wp) :: thetag
-    real(wp) :: v
-    real(wp) :: ve
-    real(wp) :: w
-    real(wp) :: we
-    real(wp) :: work
-    real(wp) :: wsave
-    real(wp) :: x
-    real(wp) :: y
-    real(wp) :: z
-    !
-    !     set dimensions with parameter statements
-    !
-    parameter(nnlat= 25, nnlon= 19, nnt = 2)
-    parameter (lleng= 5*nnlat*nnlat*nnlon, llsav= 5*nnlat*nnlat*nnlon)
-    parameter (lldwork = 4*nnlat*nnlat)
+    use spherepack
+
+    ! Explicit typing only
+    implicit none
     
-    dimension work(lleng), wsave(llsav)
-    dimension br(nnlat, nnlat, nnt), bi(nnlat, nnlat, nnt)
-    dimension cr(nnlat, nnlat, nnt), ci(nnlat, nnlat, nnt)
-    dimension st(nnlat, nnlon, nnt), sv(nnlat, nnlon, nnt)
-    dimension thetag(nnlat), dtheta(nnlat), dwts(nnlat)
-    dimension v(nnlat, nnlon, nnt), w(nnlat, nnlon, nnt)
-    real dtheta, dwts
-    !
-    !     set dimension variables
-    !
-    nlat = nnlat
-    nlon = nnlon
-    lwork = lleng
-    lsave = llsav
-    nt = nnt
-    call iout(nlat, "nlat")
-    call iout(nlon, "nlon")
-    call iout(nt, "  nt")
-    ityp = 0
-    !
-    !     set equally spaced colatitude and longitude increments
-    !
-    dphi = (pi+pi)/nlon
-    dlat = pi/(nlat-1)
-    !
-    !     compute nlat gaussian points in thetag
-    !
-    ldwork = lldwork
-    call compute_gaussian_latitudes_and_weights(nlat, dtheta, dwts, ier)
-    do  i=1, nlat
-        thetag(i) = dtheta(i)
-    end do
+    ! Dictionary
+    integer(ip), parameter              :: NLAT= 25, NLON= 19, NT = 2
+    integer(ip), parameter              :: ITYP = 0
+    real(wp), dimension(NLAT, NLAT, NT) :: br, bi, cr, ci
+    real(wp), dimension(NLAT, NLON, NT) :: st, sv, v, w
+    real(wp), dimension(NLAT)           :: gaussian_latitudes, gaussian_weights
+    real(wp), allocatable               :: wavetable(:)
+    real(wp)                            :: cosp, cost, dlat, dphi
+    real(wp)                            :: dstdp, dstdt, dsvdp, dsvdt
+    real(wp)                            :: dxdp, dxdt, dydp, dydt, dzdp, dzdt
+    real(wp)                            :: err2v, err2w
+    integer(ip)                         :: i, j, k, icase
+    integer(ip)                         :: error_flag
+    real(wp)                            :: phi, sinp, sint, theta
+    real(wp)                            :: ve, we, x, y, z
+
+    call name("Testing all vector analysis and synthesis procedures")
+
+    ! Set dimension variables
+    call iout(NLAT, "nlat")
+    call iout(NLON, "nlon")
+    call iout(NT, "  nt")
+
+    ! Set equally spaced colatitude and longitude increments
+    dphi = TWO_PI/NLON
+    dlat = PI/(NLAT-1)
+
+    ! Compute nlat-many gaussian latitudinal points
+    call compute_gaussian_latitudes_and_weights(NLAT, gaussian_latitudes, gaussian_weights, error_flag)
+
     call name("gaqd")
-    call iout(ier, " ier")
-    call vecout(thetag, "thtg", nlat)
-    !
-    !     test all analysis and synthesis subroutines
-    !
+    call iout(error_flag, " ier")
+    call vecout(gaussian_latitudes, "thtg", NLAT)
+
+    ! Test all analysis and synthesis subroutines
     do icase=1, 4
-        !
-        !     icase=1 test vhaec, vhsec
-        !     icase=2 test vhaes, vhses
-        !     icase=3 test vhagc, vhsgc
-        !     icase=4 test vhags, vhsgs
-        !
-        call name("****")
-        call name("****")
-        call iout(icase, "icas")
-        !
-        !
-        !     set scalar stream and velocity potential fields as polys in x, y, z
-        !     and then set v, w from st, sv scalar fields
-        !
-        do k=1, nt
-            do j=1, nlon
-                phi = (j-1)*dphi
+
+        call name("*******************************")
+
+        ! Set scalar stream and velocity potential fields as polys in x, y, z
+        ! and then set v, w from st, sv scalar fields
+        do k=1, NT
+            do j=1, NLON
+                phi = real(j - 1, kind=wp) * dphi
                 sinp = sin(phi)
                 cosp = cos(phi)
-                do i=1, nlat
-                    theta = (i-1)*dlat
-                    if (icase==3 .or. icase==4) theta = thetag(i)
+                do i=1, NLAT
+                    select case (icase)
+                        case (0:2)
+                            theta = real(i-1, kind=wp) * dlat
+                        case default
+                            theta = gaussian_latitudes(i)
+                    end select
                     cost = cos(theta)
                     sint = sin(theta)
                     x = sint*cosp
@@ -192,7 +125,7 @@ program tvha
                     dydt = cost*sinp
                     dydp = sint*cosp
                     dzdt = -sint
-                    dzdp = 0.0
+                    dzdp = 0.0_wp
                     select case (k)
                         case (1)
                             st(i, j, k) = x*y
@@ -210,169 +143,112 @@ program tvha
                             dstdt = x*dzdt+z*dxdt
                             dsvdp = x*dydp+y*dxdp
                             dsvdt = x*dydt+y*dxdt
-                            !
-                            !          v = -1/sin(theta)*d(st)/dphi + d(sv)/dtheta
-                            !
-                            !          w =  1/sin(theta)*d(sv)/dphi + d(st)/dtheta
-                            !
+
+                            ! v = -1/sin(theta)*d(st)/dphi + d(sv)/dtheta
                             v(i, j, k) = z*sinp + dsvdt
+
+                            ! w =  1/sin(theta)*d(sv)/dphi + d(st)/dtheta
                             w(i, j, k) = cosp*dydp+ sinp*dxdp + dstdt
                     end select
                 end do
             end do
         end do
 
-        !     do kk=1, nt
-        !     call iout(kk, "**kk")
-        !     call aout(v(1, 1, kk), "   v", nlat, nlon)
-        !     call aout(w(1, 1, kk), "   w", nlat, nlon)
-        !     end do
-
         select case (icase)
             case (1)
         		
-                call name("**ec")
+                call name("testing vhaec and vhsec")
+                call initialize_vhaec(NLAT, NLON, wavetable, error_flag)
+                call name("initialize_vhaec")
+                call iout(error_flag, "error_flag = ")
+                call vhaec(NLAT, NLON, ITYP, NT, v, w, NLAT, NLON, br, bi, cr, ci, NLAT, &
+                    NLAT, wavetable, error_flag)
+                call name("vhaec")
+                call iout(error_flag, "error_flag = ")
         		
-                call vhaeci(nlat, nlon, wsave, ierror)
-                call name("vhai")
-                call iout(ierror, "ierr")
-        		
-                call vhaec(nlat, nlon, ityp, nt, v, w, nlat, nlon, br, bi, cr, ci, nlat, &
-                    nlat, wsave, ierror)
-                call name("vha ")
-                call iout(ierror, "ierr")
-        		
-                !     call aout(br, "  br", nlat, nlat)
-                !     call aout(bi, "  bi", nlat, nlat)
-                !     call aout(cr, "  cr", nlat, nlat)
-                !     call aout(ci, "  ci", nlat, nlat)
-        		
-                !
-                !     now synthesize v, w from br, bi, cr, ci and compare with original
-                !
-                call vhseci(nlat, nlon, wsave, ierror)
-                call name("vhsi")
-                call iout(ierror, "ierr")
-        		
-                call vhsec(nlat, nlon, ityp, nt, v, w, nlat, nlon, br, bi, cr, ci, nlat, &
-                    nlat, wsave, ierror)
-                call name("vhs ")
-                call iout(ierror, "ierr")
+                !  Now synthesize v, w from br, bi, cr, ci and compare with original
+                call initialize_vhsec(NLAT, NLON, wavetable, error_flag)
+                call name("initialize_vhsec")
+                call iout(error_flag, "error_flag = ")
+                call vhsec(NLAT, NLON, ITYP, NT, v, w, NLAT, NLON, br, bi, cr, ci, NLAT, &
+                    NLAT, wavetable, error_flag)
+                call name("vhsec")
+                call iout(error_flag, "error_flag = ")
             case (2)
         		
-                call name("**es")
+                call name("testing vhaes and vhses")
+                call initialize_vhaes(NLAT, NLON, wavetable, error_flag)
+                call name("initialize_vhaes")
+                call iout(error_flag, "error_flag = ")
+                call vhaes(NLAT, NLON, ITYP, NT, v, w, NLAT, NLON, br, bi, cr, ci, NLAT, &
+                    NLAT, wavetable, error_flag)
+                call name("vhaes")
+                call iout(error_flag, "error_flag = ")
         		
-                call vhaesi(nlat, nlon, wsave, ierror)
-                call name("vhai")
-                call iout(ierror, "ierr")
-        		
-                call vhaes(nlat, nlon, ityp, nt, v, w, nlat, nlon, br, bi, cr, ci, nlat, &
-                    nlat, wsave, ierror)
-        		
-                call name("vha ")
-                call iout(ierror, "ierr")
-        		
-                !     call aout(br, "  br", nlat, nlat)
-                !     call aout(bi, "  bi", nlat, nlat)
-                !     call aout(cr, "  cr", nlat, nlat)
-                !     call aout(ci, "  ci", nlat, nlat)
-        		
-                !
-                !     now synthesize v, w from br, bi, cr, ci and compare with original
-                !
-                call vhsesi(nlat, nlon, wsave, ierror)
-                call name("vhsi")
-                call iout(ierror, "ierr")
-        		
-                call vhses(nlat, nlon, ityp, nt, v, w, nlat, nlon, br, bi, cr, ci, nlat, &
-                    nlat, wsave, ierror)
-        		
-                call name("vhs ")
-                call iout(ierror, "ierr")
+                ! Now synthesize v, w from br, bi, cr, ci and compare with original
+                call initialize_vhses(NLAT, NLON, wavetable, error_flag)
+                call name("initialize_vhses")
+                call iout(error_flag, "error_flag = ")
+                call vhses(NLAT, NLON, ITYP, NT, v, w, NLAT, NLON, br, bi, cr, ci, NLAT, &
+                    NLAT, wavetable, error_flag)
+                call name("vhses")
+                call iout(error_flag, "error_flag = ")
             case (3)
+
+                call name("testing vhagc and vhsgc")
+                call iout(NLAT, "nlat")
+                call initialize_vhagc(NLAT, NLON, wavetable, error_flag)
+                call name("initialize_vhagc")
+                call iout(error_flag, "error_flag = ")
+                call vhagc(NLAT, NLON, ITYP, NT, v, w, NLAT, NLON, br, bi, cr, ci, NLAT, &
+                    NLAT, wavetable, error_flag)
+                call name("vhagc")
+                call iout(error_flag, "error_flag = ")
+
+                ! Now synthesize v, w from br, bi, cr, ci and compare with original
+                call initialize_vhsgc(NLAT, NLON, wavetable, error_flag)
+                call name("initialize_vhsgc")
+                call iout(error_flag, "error_flag = ")
         		
-                call name("**gc")
-        		
-                call name("vhgi")
-                call iout(nlat, "nlat")
-        		
-                call vhagci(nlat, nlon, wsave, ierror)
-                call name("vhai")
-                call iout(ierror, "ierr")
-        		
-                call vhagc(nlat, nlon, ityp, nt, v, w, nlat, nlon, br, bi, cr, ci, nlat, &
-                    nlat, wsave, ierror)
-                call name("vha ")
-                call iout(ierror, "ierr")
-        		
-                !     call aout(br, "  br", nlat, nlat)
-                !     call aout(bi, "  bi", nlat, nlat)
-                !     call aout(cr, "  cr", nlat, nlat)
-                !     call aout(ci, "  ci", nlat, nlat)
-        		
-                !
-                !     now synthesize v, w from br, bi, cr, ci and compare with original
-                !
-                call vhsgci(nlat, nlon, wsave, ierror)
-                call name("vhsi")
-                call iout(ierror, "ierr")
-        		
-                call vhsgc(nlat, nlon, ityp, nt, v, w, nlat, nlon, br, bi, cr, ci, nlat, &
-                    nlat, wsave, ierror)
-                call name("vhs ")
-                call iout(ierror, "ierr")
+                call vhsgc(NLAT, NLON, ITYP, NT, v, w, NLAT, NLON, br, bi, cr, ci, NLAT, &
+                    NLAT, wavetable, error_flag)
+                call name("vhsgc")
+                call iout(error_flag, "error_flag = ")
             case (4)
         		
-                call name("**gs")
-        		
-                call vhagsi(nlat, nlon, wsave, ierror)
-                call name("vhai")
-                call iout(ierror, "ierr")
-        		
-                call vhags(nlat, nlon, ityp, nt, v, w, nlat, nlon, br, bi, cr, ci, nlat, &
-                    nlat, wsave, ierror)
-                call name("vha ")
-                call iout(ierror, "ierr")
-        		
-                !     call aout(br, "  br", nlat, nlat)
-                !     call aout(bi, "  bi", nlat, nlat)
-                !     call aout(cr, "  cr", nlat, nlat)
-                !     call aout(ci, "  ci", nlat, nlat)
-        		
-        		
-                !
-                !     now synthesize v, w from br, bi, cr, ci and compare with original
-                !
-                call vhsgsi(nlat, nlon, wsave, ierror)
-                call name("vhsi")
-                call iout(ierror, "ierr")
-        		
-                call vhsgs(nlat, nlon, ityp, nt, v, w, nlat, nlon, br, bi, cr, ci, nlat, &
-                    nlat, wsave, ierror)
-                call name("vhs ")
-                call iout(ierror, "ierr")
+                call name("testing vhags and vhsgs")
+                call initialize_vhags(NLAT, NLON, wavetable, error_flag)
+                call name("initialize_vhags")
+                call iout(error_flag, "error_flag = ")
+                call vhags(NLAT, NLON, ITYP, NT, v, w, NLAT, NLON, br, bi, cr, ci, NLAT, &
+                    NLAT, wavetable, error_flag)
+                call name("vhags")
+                call iout(error_flag, "error_flag = ")
+
+                ! Now synthesize v, w from br, bi, cr, ci and compare with original
+                call initialize_vhsgs(NLAT, NLON, wavetable, error_flag)
+                call name("initialize_vhsgs")
+                call iout(error_flag, "error_flag = ")
+                call vhsgs(NLAT, NLON, ITYP, NT, v, w, NLAT, NLON, br, bi, cr, ci, NLAT, &
+                    NLAT, wavetable, error_flag)
+                call name("vhsgs")
+                call iout(error_flag, "error_flag = ")
         end select
 
-
-        !     do kk=1, nt
-        !     call iout(kk, "**kk")
-        !     call aout(v(1, 1, kk), "   v", nlat, nlon)
-        !     call aout(w(1, 1, kk), "   w", nlat, nlon)
-        !     end do
-
-        !
-        !     compute "error" in v, w
-        !
-        err2v = 0.0
-        err2w = 0.0
-        do k=1, nt
-            do j=1, nlon
-                phi = (j-1)*dphi
+        err2v = 0.0_wp
+        err2w = 0.0_wp
+        do k=1, NT
+            do j=1, NLON
+                phi = real(j - 1, kind=wp)*dphi
                 sinp = sin(phi)
                 cosp = cos(phi)
-                do i=1, nlat
-                    theta = (i-1)*dlat
-                    if (icase>2) theta=thetag(i)
+                do i=1, NLAT
+                    select case (icase)
+                        case (0:2)
+                            theta = real(i-1, kind=wp) * dlat
+                        case default
+                            theta = gaussian_latitudes(i)
+                    end select
                     cost = cos(theta)
                     sint = sin(theta)
                     x = sint*cosp
@@ -409,16 +285,15 @@ program tvha
                 end do
             end do
         end do
-        !
-        !     set and print least squares error in v, w
-        !
-        err2v = sqrt(err2v/(nt*nlat*nlon))
-        err2w = sqrt(err2w/(nt*nlat*nlon))
+
+        ! Set and print least squares error in v, w
+        err2v = sqrt(err2v/(NT*NLAT*NLON))
+        err2w = sqrt(err2w/(NT*NLAT*NLON))
         call vout(err2v, "errv")
         call vout(err2w, "errw")
-    !
-    !     end of icase loop
-    !
     end do
 
-end program tvha
+    ! Release memory
+    deallocate (wavetable)
+
+end program test_all_vector_analysis_and_synthesis_routines

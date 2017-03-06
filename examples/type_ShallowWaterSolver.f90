@@ -187,7 +187,7 @@ contains
         complex(wp),               intent(in)     :: dataspec(:)
 
         ! Local variables
-        integer(ip) :: n, m, nm, i
+        integer(ip) :: n, m, nm
 
         associate (&
             nlat => size(datagrid, dim=2), &
@@ -337,7 +337,7 @@ contains
 
         ! Local variables
         real(wp)    :: fn
-        integer(ip) :: n, m, nm, i ! Counters
+        integer(ip) :: n, m, nm ! Counters
 
         associate (&
             nlat => size(ugrid, dim=2), &

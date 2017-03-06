@@ -14,10 +14,10 @@ module scalar_analysis_routines
     implicit none
 
     ! Everything is private unless stated otherwise
-    public :: shaec, shaeci
-    public :: shaes, shaesi
-    public :: shagc, shagci
-    public :: shags, shagsi
+    public :: shagc, shagci, initialize_shaec
+    public :: shaes, shaesi, initialize_shaes
+    public :: shaec, shaeci, initialize_shagc
+    public :: shags, shagsi, initialize_shags
     public :: ScalarAnalysisUtility
 
     ! Parameters confined to the module

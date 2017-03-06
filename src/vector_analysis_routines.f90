@@ -15,8 +15,10 @@ module vector_analysis_routines
     implicit none
 
     ! Everything is private unless stated otherwise
-    public :: vhaec, vhaes, vhagc, vhags
-    public :: vhaeci, vhaesi, vhagci, vhagsi
+    public :: vhagc, vhagci, initialize_vhaec
+    public :: vhaes, vhaesi, initialize_vhaes
+    public :: vhaec, vhaeci, initialize_vhagc
+    public :: vhags, vhagsi, initialize_vhags
     public :: VectorAnalysisUtility
 
     ! Parameters confined to the module

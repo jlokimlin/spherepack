@@ -14,10 +14,10 @@ module scalar_synthesis_routines
     implicit none
 
     ! Everything is private unless stated otherwise
-    public :: shses, shsesi
-    public :: shsec, shseci
-    public :: shsgs, shsgsi
-    public :: shsgc, shsgci
+    public :: shsgc, shsgci, initialize_shsec
+    public :: shses, shsesi, initialize_shses
+    public :: shsec, shseci, initialize_shsgc
+    public :: shsgs, shsgsi, initialize_shsgs
     public :: ScalarSynthesisUtility
 
     ! Parameters confined to the module

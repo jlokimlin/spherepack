@@ -12,20 +12,8 @@
 !  .                                                             .
 !  . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 !
-!
-!
-! ... file advec.f90
-!
 !     program advec solves the time-dependent linear advection 
 !     equation for geopotential phi using the spherepack software
-!
-!          d(phi)/dt = -(u, v) .dot. gradient(phi)
-!
-!                    = -(u*grad_phi_lon + v*grad_phi_lat)
-!
-! ... required files
-!
-!     gradgc.f90, shagc.f90, shsgc.f90, vhsgc.f90, type_SpherepackUtility.f90 type_RealPeriodicFastFourierTransform.f90, compute_gaussian_latitudes_and_weights.f90
 !
 !
 ! definitions:
@@ -103,11 +91,10 @@ program advec
     type(AdvectionSolver)             :: solver
     integer(ip), parameter            :: NLONS = 45
     integer(ip), parameter            :: NLATS = 23
-    integer(ip)                       :: i, j ! Counters
     integer(ip)                       :: mprint, ncycle, ntime
     real(wp), dimension(NLATS, NLONS) :: u, v, phi, phi_old, phi_new
     real(wp), dimension(NLATS, NLONS) :: exact_phi, grad_phi, grad_phi_lon, grad_phi_lat
-    real(wp)                          :: p0_l2, p0_max, time, htime
+    real(wp)                          :: p0_l2, p0_max, time
     real(wp),         parameter       :: ZERO = 0.0_wp, HALF = 0.5_wp
     character(len=*), parameter       :: WRITE_FMT = &
         '(a, i10, a, f10.2/, a, f10.0, a, i10/, a, i10, '&

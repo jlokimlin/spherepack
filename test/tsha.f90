@@ -35,218 +35,163 @@ program test_all_scalar_analysis_and_synthesis_routines
 
     use spherepack
 
+    ! Explicit typing only
     implicit none
 
-    !
-    !     set dimensions with parameter statements
-    !
-    integer(ip), parameter :: nlat= 15, nlon= 18, nt = 3
-    integer(ip), parameter :: lleng= 5 * nlat * nlat * nlon, llsav = 5*nlat*nlat*nlon
-    integer(ip), parameter :: lldwork = nlat * (nlat + 4)
+    ! Dictionary
+    integer(ip), parameter            :: NLAT= 15, NLON= 18, NT = 3
+    integer(ip), parameter            :: ISYM = 0
+    real(wp)                          :: cosp, cost, dlat, dphi
+    integer(ip)                       :: i, j, k, icase, error_flag
+    real(wp)                          :: phi, sinp, sint
+    real(wp)                          :: theta, xyzk, err2
+    real(wp)                          :: scalar_function(NLAT,NLON,NT)
+    real(wp), allocatable             :: wavetable(:)
+    real(wp), dimension(NLAT,NLAT,NT) :: a, b
+    real(wp), dimension(NLAT)         :: gaussian_latitudes, gaussian_weights
 
-    real(wp) :: cosp
-    real(wp) :: cost
-    real(wp) :: dlat
-    real(wp) :: dphi
-    real(wp) :: err2
-    integer(ip) :: i
-    integer(ip) :: icase
-    integer(ip) :: error_flag
-    integer(ip) :: ierror
-    integer(ip) :: isym
-    integer(ip) :: j
-    integer(ip) :: k
-    
-    integer(ip) :: ldwork
-    integer(ip) :: lsave
-    integer(ip) :: lwork
-    
-    real(wp) :: phi
-    real(wp) :: sinp
-    real(wp) :: sint
-    real(wp) :: theta
-    real(wp) :: xyzk
+    call name("Testing all scalar analysis and synthesis procedures")
 
-    real(wp) :: work(lleng), wsave(llsav)
-    real(wp)                          :: s(nlat,nlon,nt)
-    real(wp), dimension(nlat,nlat,nt) :: a, b
-    real(wp), dimension(nlat)         :: gaussian_latitudes, gaussian_weights
-    !
-    !     set dimension variables
-    !
-    lwork = lleng
-    lsave = llsav
-    call iout(nlat, "nlat")
-    call iout(nlon, "nlon")
-    call iout(nt, "  nt")
-    isym = 0
-    !
-    !     set equally spaced colatitude and longitude increments
-    !
-    dphi = TWO_PI/nlon
-    dlat = pi/(nlat-1)
-    !
-    !     compute nlat gaussian points in thetag
-    !
-    ldwork = lldwork
-    call compute_gaussian_latitudes_and_weights(nlat, gaussian_latitudes, gaussian_weights, error_flag)
+    ! Print dimension variables
+    call iout(NLAT, "nlat")
+    call iout(NLON, "nlon")
+    call iout(NT, "  nt")
+
+    ! Set equally spaced colatitude and longitude increments
+    dphi = TWO_PI/NLON
+    dlat = pi/(NLAT-1)
+
+    ! Compute nlat-many gaussian points in thetag
+    call compute_gaussian_latitudes_and_weights(NLAT, gaussian_latitudes, gaussian_weights, error_flag)
 
     call name("gaqd")
-    call iout(error_flag, " ier")
-    call vecout(gaussian_latitudes, "thtg", nlat)
-    !
-    !     test all analysis and synthesis subroutines
-    !
+    call iout(error_flag, " error flag")
+    call vecout(gaussian_latitudes, "gaussian_latitudes", NLAT)
+
+    ! Test all analysis and synthesis subroutines
     do icase=1, 4
-        !
-        !     icase=1 test shaec, shsec
-        !     icase=2 test shaes, shses
-        !     icase=3 test shagc, shsgc
-        !     icase=4 test shags, shsgs
-        !
-        call name("****")
-        call name("****")
-        call iout(icase, "icas")
-        !
-        !
-        !     set scalar field as (x*y*z)**k) restricted to the sphere
-        !
-        do k=1, nt
-            do j=1, nlon
-                phi = (j-1)*dphi
+
+        call name("*****************************************")
+
+        ! Set scalar field as (x*y*z)**k) restricted to the sphere
+        do k=1, NT
+            do j=1, NLON
+                phi = real(j - 1, kind=wp) * dphi
                 sinp = sin(phi)
                 cosp = cos(phi)
-                do i=1, nlat
-                    theta = (i-1)*dlat
-                    if (icase>2) theta=gaussian_latitudes(i)
+                do i=1, NLAT
+                    select case (icase)
+                        case (0:2)
+                            theta = real(i-1, kind=wp) * dlat
+                        case default
+                            theta = gaussian_latitudes(i)
+                    end select
                     cost = cos(theta)
                     sint = sin(theta)
                     xyzk = (sint*(sint*cost*sinp*cosp))**k
-                    !           s(i, j, k) = exp(xyzk)
-                    s(i, j, k) = xyzk
+                    ! scalar_function(i, j, k) = exp(xyzk)
+                    scalar_function(i, j, k) = xyzk
                 end do
             end do
-        !     call iout(k, "   k")
-        !     call aout(s(1, 1, k), "   s", nlat, nlon)
         end do
-
-        wsave(1: lsave) = 0.0
 
         select case (icase)
             case (1)
-        		
-                call name("**ec")
-                call shaeci(nlat, nlon, wsave, ierror)
-        		
-                call name("shai")
-                call iout(ierror, "ierr")
-        		
-                call shaec(nlat, nlon, isym, nt, s, nlat, nlon, a, b, nlat, nlat, wsave, ierror)
-        		
-                call name("sha ")
-                call iout(ierror, "ierr")
-        		
-                call shseci(nlat, nlon, wsave, ierror)
-        		
-                call name("shsi")
-                call iout(ierror, "ierr")
-        		
-                call shsec(nlat, nlon, isym, nt, s, nlat, nlon, a, b, nlat, nlat, wsave, ierror)
-        		
-                call name("shs ")
-                call iout(ierror, "ierr")
+
+                call name("testing shaec and shsec")
+                call initialize_shaec(NLAT, NLON, wavetable, error_flag)
+                call name("initialize_shaec")
+                call iout(error_flag, "error_flag")
+                call shaec(NLAT, NLON, ISYM, NT, scalar_function, NLAT, NLON, a, b, NLAT, NLAT, wavetable, error_flag)
+                call name("shaec")
+                call iout(error_flag, "error_flag")
+
+                call initialize_shsec(NLAT, NLON, wavetable, error_flag)
+                call name("initialize_shsec")
+                call iout(error_flag, "error_flag")
+                call shsec(NLAT, NLON, ISYM, NT, scalar_function, NLAT, NLON, a, b, NLAT, NLAT, wavetable, error_flag)
+                call name("shsec")
+                call iout(error_flag, "error_flag")
+
             case (2)
-        		
-                call name("**es")
-                call shaesi(nlat, nlon, wsave, ierror)
-        		
-                call name("shai")
-                call iout(ierror, "ierr")
-        		
-                call shaes(nlat, nlon, isym, nt, s, nlat, nlon, a, b, nlat, nlat, wsave, ierror)
-        		
-                call name("sha ")
-                call iout(ierror, "ierr")
-        		
-                call shsesi(nlat, nlon, wsave, ierror)
-        		
-                call name("shsi")
-                call iout(ierror, "ierr")
-        		
-                call shses(nlat, nlon, isym, nt, s, nlat, nlon, a, b, nlat, nlat, wsave, ierror)
-        		
-                call name("shs ")
-                call iout(ierror, "ierr")
+
+                call name("testing shaes and shses")
+                call initialize_shaes(NLAT, NLON, wavetable, error_flag)
+                call name("initialize_shaes")
+                call iout(error_flag, "error_flag")
+                call shaes(NLAT, NLON, ISYM, NT, scalar_function, NLAT, NLON, a, b, NLAT, NLAT, wavetable, error_flag)
+                call name("shaes")
+                call iout(error_flag, "error_flag")
+
+                call initialize_shses(NLAT, NLON, wavetable, error_flag)
+                call name("initialize_shses")
+                call iout(error_flag, "error_flag")
+                call shses(NLAT, NLON, ISYM, NT, scalar_function, NLAT, NLON, a, b, NLAT, NLAT, wavetable, error_flag)
+                call name("shses")
+                call iout(error_flag, "error_flag")
+
             case (3)
         		
-                call name("**gc")
+                call name("testing shagc and shsgc")
+                call initialize_shagc(NLAT, NLON, wavetable, error_flag)
+                call name("initialize_shagc")
+                call iout(error_flag, "error_flag")
+                call shagc(NLAT, NLON, ISYM, NT, scalar_function, NLAT, NLON, a, b, NLAT, NLAT, wavetable, error_flag)
+                call name("shagc")
+                call iout(error_flag, "error_flag")
         		
-                call shagci(nlat, nlon, wsave, ierror)
-        		
-                call name("shai")
-                call iout(ierror, "ierr")
-        		
-                call shagc(nlat, nlon, isym, nt, s, nlat, nlon, a, b, nlat, nlat, wsave, ierror)
-        		
-                call name("sha ")
-                call iout(ierror, "ierr")
-        		
-                call shsgci(nlat, nlon, wsave, ierror)
-        		
-                call name("shsi")
-                call iout(ierror, "ierr")
-        		
-                call shsgc(nlat, nlon, isym, nt, s, nlat, nlon, a, b, nlat, nlat, wsave, ierror)
-        		
-                call name("shs ")
-                call iout(ierror, "ierr")
+                call initialize_shsgc(NLAT, NLON, wavetable, error_flag)
+                call name("initialize_shsgc")
+                call iout(error_flag, "error_flag")
+                call shsgc(NLAT, NLON, ISYM, NT, scalar_function, NLAT, NLON, a, b, NLAT, NLAT, wavetable, error_flag)
+                call name("shsgc")
+                call iout(error_flag, "error_flag")
+
             case (4)
         		
-                call name("**gs")
+                call name("testing shags and shsgs")
+                call initialize_shags(NLAT, NLON, wavetable, error_flag)
+                call name("initialize_shags")
+                call iout(error_flag, "error_flag")
+                call shags(NLAT, NLON, ISYM, NT, scalar_function, NLAT, NLON, a, b, NLAT, NLAT, wavetable, error_flag)
+                call name("shags")
+                call iout(error_flag, "error_flag")
         		
-                call shagsi(nlat, nlon, wsave, ierror)
-        		
-                call name("shai")
-                call iout(ierror, "ierr")
-        		
-                call shags(nlat, nlon, isym, nt, s, nlat, nlon, a, b, nlat, nlat, wsave, ierror)
-        		
-                call name("sha ")
-                call iout(ierror, "ierr")
-        		
-                call shsgsi(nlat, nlon, wsave, ierror)
-                call name("shsi")
-                call iout(ierror, "ierr")
-        		
-                call shsgs(nlat, nlon, isym, nt, s, nlat, nlon, a, b, nlat, nlat, wsave, ierror)
-        		
-                call name("shs ")
-                call iout(ierror, "ierr")
+                call initialize_shsgs(NLAT, NLON, wavetable, error_flag)
+                call name("initialize_shsgs")
+                call iout(error_flag, "error_flag")
+                call shsgs(NLAT, NLON, ISYM, NT, scalar_function, NLAT, NLON, a, b, NLAT, NLAT, wavetable, error_flag)
+                call name("shsgs")
+                call iout(error_flag, "error_flag")
         end select
-        !
-        !     compute "error" in s
-        !
-        err2 = 0.0
-        do k=1, nt
-            do j=1, nlon
-                phi = (j-1)*dphi
+
+        ! Compute "error" in s
+        err2 = 0.0_wp
+        do k=1, NT
+            do j=1, NLON
+                phi = real(j - 1, kind=wp) * dphi
                 sinp = sin(phi)
                 cosp = cos(phi)
-                do i=1, nlat
-                    theta = (i-1)*dlat
-                    if (icase > 2) theta = gaussian_latitudes(i)
+                do i=1, NLAT
+                    select case (icase)
+                        case (0:2)
+                            theta = real(i-1, kind=wp) * dlat
+                        case default
+                            theta = gaussian_latitudes(i)
+                    end select
                     cost = cos(theta)
                     sint = sin(theta)
                     xyzk = (sint*(sint*cost*sinp*cosp))**k
-                    !           err2 = err2+ (exp(xyzk)-s(i, j, k))**2
-                    err2 = err2 + (xyzk-s(i, j, k))**2
+                    ! err2 = err2 +(exp(xyzk)-s(i, j, k))**2
+                    err2 = err2 + (xyzk-scalar_function(i, j, k))**2
                 end do
             end do
-        !     call iout(k, "   k")
-        !     call aout(s(1, 1, k), "   s", nlat, nlon)
         end do
-        err2 = sqrt(err2/(nt*nlat*nlon))
+        err2 = sqrt(err2/(NT*NLAT*NLON))
         call vout(err2, "err2")
     end do
+
+    ! Release memory
+    deallocate (wavetable)
 
 end program test_all_scalar_analysis_and_synthesis_routines

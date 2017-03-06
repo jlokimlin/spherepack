@@ -227,8 +227,31 @@ module spherepack
     public :: ivlapec, ivlapes, ivlapgc, ivlapgs
 
     public :: sfvpec, sfvpes, sfvpgc, sfvpgs
-    public :: shaec, shaes, shagc, shags
-    public :: shaeci, shaesi, shagci, shagsi
+
+    ! Scalar analysis routines
+    public :: shagc, shagci, initialize_shaec
+    public :: shaes, shaesi, initialize_shaes
+    public :: shaec, shaeci, initialize_shagc
+    public :: shags, shagsi, initialize_shags
+
+    ! Scalar synthesis routines
+    public :: shsgc, shsgci, initialize_shsec
+    public :: shses, shsesi, initialize_shses
+    public :: shsec, shseci, initialize_shsgc
+    public :: shsgs, shsgsi, initialize_shsgs
+
+    ! Vector analysis routines
+    public :: vhagc, vhagci, initialize_vhaec
+    public :: vhaes, vhaesi, initialize_vhaes
+    public :: vhaec, vhaeci, initialize_vhagc
+    public :: vhags, vhagsi, initialize_vhags
+
+    ! Vector synthesis routines
+    public :: vhsgc, vhsgci, initialize_vhsec
+    public :: vhses, vhsesi, initialize_vhses
+    public :: vhsec, vhseci, initialize_vhsgc
+    public :: vhsgs, vhsgsi, initialize_vhsgs
+
     public :: shpe, shpei
     public :: shpg, shpgi
     public :: shsec, shses, shsgc, shsgs
@@ -236,10 +259,6 @@ module spherepack
     public :: slapec, slapes, slapgc, slapgs
     public :: sshifte, sshifti
     public :: trssph, trvsph
-    public :: vhaec, vhaes, vhagc, vhags
-    public :: vhaeci, vhaesi, vhagci, vhagsi
-    public :: vhsec, vhses, vhsgc, vhsgs
-    public :: vhseci, vhsesi, vhsgci, vhsgsi
     !    public :: visequ
     !    public :: visgau
     !    public :: visgeo
