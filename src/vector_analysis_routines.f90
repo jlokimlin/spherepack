@@ -122,9 +122,9 @@ module vector_analysis_routines
             integer(ip), intent(in)  :: idvw
             integer(ip), intent(in)  :: jdvw
             real(wp),    intent(out) :: br(mdab, ndab, nt)
-            real(wp),    intent(out) :: bi(..)
-            real(wp),    intent(out) :: cr(..)
-            real(wp),    intent(out) :: ci(..)
+            real(wp),    intent(out) :: bi(mdab, ndab, nt)
+            real(wp),    intent(out) :: cr(mdab, ndab, nt)
+            real(wp),    intent(out) :: ci(mdab, ndab, nt)
             integer(ip), intent(in)  :: mdab
             integer(ip), intent(in)  :: ndab
             real(wp),    intent(in)  :: wvhags(:)

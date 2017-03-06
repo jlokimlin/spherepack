@@ -144,53 +144,43 @@
 !
 ! **********************************************************************
 program testrvsph
-use spherepack
+
+    use, intrinsic :: ISO_Fortran_env, only: &
+        stdout => OUTPUT_UNIT
+
+    use spherepack
+
+    ! Explicit typing only
     implicit none
-    !
+
     !     set grid sizes with parameter statements
-    !
-    integer nnlatg, nnlong, nnlate, nnlone, llwork, llsave, lldwork
-    parameter (nnlatg=64, nnlong=128, nnlate=19, nnlone=36)
+    integer(ip), parameter :: nlatg=64, nlong=128, nlate=19, nlone=36
     !
     !     set predetermined minimum saved and unsaved work space lengths
     !
-    parameter (llwork =  76000)
-    parameter (llsave = 21814)
-    !
-    !     set real work space length
-    !
-    parameter (lldwork = 2*nnlatg*(nnlatg+1)+1)
+    integer(ip), parameter :: lwork =  76000
+    integer(ip), parameter :: lsave = 21814
+
+    !     set real workspace length
+    integer(ip), parameter :: ldwork = 2*nlatg*(nlatg+1)+1
     !
     !     dimension and type data arrays and grid vectors and internal variables
     !
-    real ue(nnlate, nnlone), ve(nnlate, nnlone)
-    real ug(nnlong, nnlatg), vg(nnlong, nnlatg)
-    real work(llwork), wsave(llsave), thetag(nnlatg)
-    real dtheta(nnlatg), dwts(nnlatg), dwork(lldwork)
-    integer igride(2), igridg(2), ive, ivg
-    integer nlatg, nlong, nlate, nlone, lwork, lsave, ldwork
-    real dlate, dlone, dlong, t, p, cosp, sinp, cost, sint, x, y, z
-    real erru2, errv2, ex, ey, ez, emz, uee, vee
-    integer i, j, ib, intl, ier, lsvmin, lwkmin
-    !
-    !     set grid sizes and dimensions from parameter statements
-    !
-    nlatg = nnlatg
-    nlong = nnlong
-    nlate = nnlate
-    nlone = nnlone
-    lwork = llwork
-    lsave = llsave
-    ldwork = lldwork
-    !
-    !     set equally spaced grid increments
-    !
-    dlate = pi/(nlate-1)
-    dlone = (pi+pi)/nlone
-    dlong = (pi+pi)/nlong
-    !
-    !     set vector data in (ue, ve)
-    !
+    real(wp) :: ue(nlate, nlone), ve(nlate, nlone)
+    real(wp) :: ug(nlong, nlatg), vg(nlong, nlatg)
+    real(wp) :: work(lwork), wsave(lsave), thetag(nlatg)
+    real(wp) :: dtheta(nlatg), dwts(nlatg), dwork(ldwork)
+    integer(ip) :: igride(2), igridg(2), ive, ivg
+    real(wp) :: dlate, dlone, dlong, t, p, cosp, sinp, cost, sint, x, y, z
+    real(wp) :: erru2, errv2, ex, ey, ez, emz, uee, vee
+    integer(ip) :: i, j, ib, intl, error_flag, lsvmin, lwkmin
+
+    ! Set equally spaced grid increments
+    dlate = PI/(nlate-1)
+    dlone = TWO_PI/nlone
+    dlong = TWO_PI/nlong
+
+    ! Set vector data in (ue, ve)
     do  j=1, nlone
         p = (j-1)*dlone
         cosp = cos(p)
@@ -228,7 +218,7 @@ use spherepack
     !
     !     flag (ug, vg) as south to north gaussian
     !
-    igridg(1) = +2
+    igridg(1) = 2
     !
     !     flag (ug, vg) as nlong by nlatg arrays
     !
@@ -239,7 +229,7 @@ use spherepack
     !
     !     print trvsph input arguments
     !
-    write (*, 100) intl, igride(1), igride(2), nlone, nlate, ive, &
+    write (stdout, 100) intl, igride(1), igride(2), nlone, nlate, ive, &
         igridg(1), igridg(2), nlong, nlatg, ivg, lsave, lwork, ldwork
 100 format(//' EQUALLY SPACED TO GAUSSIAN GRID TRANSFER ' , &
         /' trvsph input arguments: ' , &
@@ -256,20 +246,20 @@ use spherepack
     !
     call trvsph(intl, igride, nlone, nlate, ive, ue, ve, igridg, nlong, &
         nlatg, ivg, ug, vg, wsave, lsave, lsvmin, work, lwork, lwkmin, dwork, &
-        ldwork, ier)
+        ldwork, error_flag)
     !
     !     print output arguments
     !
-    write (*, 200) ier, lsvmin, lwkmin
+    write (stdout, 200) error_flag, lsvmin, lwkmin
 200 format(//' trvsph output: ' &
-        / ' ier = ', i8, 2x, 'lsvmin = ', i7, 2x, 'lwkmin = ', i7)
+        / ' error_flag = ', i8, 2x, 'lsvmin = ', i7, 2x, 'lwkmin = ', i7)
 
-    if (ier == 0) then
+    if (error_flag == 0) then
         !
         !     compute nlatg gaussian colatitude points and
         !     set with south to north orientation in thetag
         !
-        call compute_gaussian_latitudes_and_weights(nlatg, dtheta, dwts, ier)
+        call compute_gaussian_latitudes_and_weights(nlatg, dtheta, dwts, error_flag)
         do  i=1, nlatg
             ib = nlatg-i+1
             thetag(i) = dtheta(ib)
@@ -303,20 +293,16 @@ use spherepack
         end do
         erru2 = sqrt(erru2/(nlong*nlatg))
         errv2 = sqrt(errv2/(nlong*nlatg))
-        write (6, 300) erru2, errv2
+        write (stdout, 300) erru2, errv2
 300     format(' least squares error in u = ', e10.3 &
             /' least squares error in v = ', e10.3)
     end if
-    !
-    !     now transfer (ug, vg) back to (ue, ve)
-    !
-    do j=1, nlone
-        do i=1, nlate
-            ue(i, j) = 0.0
-            ve(i, j) = 0.0
-        end do
-    end do
-    write (*, 101) intl, igridg(1), igridg(2), nlong, nlatg, ivg, &
+
+    ! Now transfer (ug, vg) back to (ue, ve)
+    ue = 0.0_wp
+    ve = 0.0_wp
+
+    write (stdout, 101) intl, igridg(1), igridg(2), nlong, nlatg, ivg, &
         igride(1), igride(2), nlone, nlate, ive, lsave, lwork, ldwork
 101 format(//' GAUSSIAN TO EQUALLY SPACED GRID TRANSFER ' , &
         /' trvsph input arguments: ' , &
@@ -329,12 +315,12 @@ use spherepack
         /' ive = ', i2 &
         /' lsave = ', i7, 2x, ' lwork = ', i7, 2x, ' ldwork = ', i5)
     call trvsph(intl, igridg, nlong, nlatg, ivg, ug, vg, igride, nlone, nlate, &
-        ive, ue, ve, wsave, lsave, lsvmin, work, lwork, lwkmin, dwork, ldwork, ier)
+        ive, ue, ve, wsave, lsave, lsvmin, work, lwork, lwkmin, dwork, ldwork, error_flag)
     !
     !     print output arguments
     !
-    write (*, 200) ier, lsvmin, lwkmin
-    if (ier == 0) then
+    write (stdout, 200) error_flag, lsvmin, lwkmin
+    if (error_flag == 0) then
         !
         !     compute the least squares error in (ue, ve)
         !     by comparing with exact mathematical vector
@@ -364,6 +350,7 @@ use spherepack
         end do
         erru2 = sqrt(erru2/(nlone*nlate))
         errv2 = sqrt(errv2/(nlone*nlate))
-        write (6, 300) erru2, errv2
+        write (stdout, 300) erru2, errv2
     end if
+
 end program testrvsph

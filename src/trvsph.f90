@@ -36,11 +36,11 @@
 !
 ! ... required files
 !
-!     type_SpherepackUtility.f, type_RealPeriodicFastFourierTransform.f, compute_gaussian_latitudes_and_weights.f, vhaec.f, vhsec.f, vhagc.f, vhsgc.f
+!     type_SpherepackUtility.f, type_RealPeriodicFastFourierrorTransform.f, compute_gaussian_latitudes_and_weights.f, vhaec.f, vhsec.f, vhagc.f, vhsgc.f
 !
 !     subroutine trvsph (intl, igrida, nlona, nlata, iveca, ua, va, 
 !    +igridb, nlonb, nlatb, ivecb, ub, vb, wsave, lsave, lsvmin, work, 
-!    +lwork, lwkmin, dwork, ldwork, ier)
+!    +lwork, lwkmin, dwork, ldwork, ierror)
 !
 ! *** author
 !
@@ -464,17 +464,17 @@
 ! ... lsvmin
 !
 !     the minimum length of the saved work space in wsave.
-!     lsvmin is computed even if lsave < lsvmin (ier = 10).
+!     lsvmin is computed even if lsave < lsvmin (ierror = 10).
 !
 ! ... lwkmin
 !
 !     the minimum length of the unsaved work space in work.
-!     lwkmin is computed even if lwork < lwkmin (ier = 11).
+!     lwkmin is computed even if lwork < lwkmin (ierror = 11).
 !
 !
 ! *** error argument
 !
-! ... ier = 0  if no errors are detected
+! ... ierror = 0  if no errors are detected
 !
 !         = 1  if intl is not 0 or 1
 !
@@ -518,6 +518,9 @@
 !
 module module_trvsph
 
+    use, intrinsic :: ISO_Fortran_env, only: &
+        stderr => ERROR_UNIT
+
     use spherepack_precision, only: &
         wp, & ! working precision
         ip ! integer precision
@@ -543,76 +546,81 @@ contains
 
     subroutine trvsph(intl, igrida, nlona, nlata, iveca, ua, va, &
         igridb, nlonb, nlatb, ivecb, ub, vb, wsave, lsave, lsvmin, work, &
-        lwork, lwkmin, dwork, ldwork, ier)
+        lwork, lwkmin, dwork, ldwork, ierror)
 
         integer(ip) :: intl, igrida(2), nlona, nlata, igridb(2), nlonb, nlatb
-        integer(ip) :: iveca, ivecb, lsave, lsvmin, lwork, lwkmin, ldwork, ier
+        integer(ip) :: iveca, ivecb, lsave, lsvmin, lwork, lwkmin, ldwork, ierror
         real(wp) :: ua(*), va(*), ub(*), vb(*), wsave(:), work(*)
         real(wp) :: dwork(*)
-        integer(ip) :: ig, igrda, igrdb, la1, la2, lb1, lb2, lwa, lwb
+
+        ! Local variables
+        integer(ip) :: igrda, igrdb, la1, la2, lb1, lb2, lwa, lwb
         integer(ip) :: iabr, iabi, iacr, iaci, ibbr, ibbi, ibcr, ibci
-        integer(ip) :: nlat, lwk1, lwk2, lw, iw, jb, nt, ityp
-        !
+        integer(ip) :: nlat, lwk1, lwk2, lw, iw, jb
+        integer(ip) :: ig1, ig2
+        integer(ip), parameter :: nt = 1
+        integer(ip), parameter :: ityp = 0
+
         !     include a save statement to ensure local variables in trvsph, set during
         !     an intl=0 call, are preserved if trvsph is recalled with intl=1
         !
         save
-        !
-        !     Check calling arguments
-        !
-        ier = 1
-        if (intl*(intl-1)/=0) return
-        ier = 2
-        ig = igrida(1)
-        if ((ig-1)*(ig+1)*(ig-2)*(ig+2)/=0) return
-        ier = 3
-        ig = igrida(2)
-        if (ig*(ig-1)/=0) return
-        ier = 4
-        if (nlona < 4) return
-        ier = 5
-        if (nlata <3) return
-        ier = 6
-        if (iveca*(iveca-1)/=0) return
-        ier = 7
-        ig = igridb(1)
-        if ((ig-1)*(ig+1)*(ig-2)*(ig+2)/=0) return
-        ier = 8
-        ig = igridb(2)
-        if (ig*(ig-1)/=0) return
-        ier = 9
-        if (nlonb <4) return
-        ier = 10
-        if (nlatb <3) return
-        ier = 11
-        if (ivecb*(ivecb-1)/=0) return
-        ier = 0
+
+        ! Check calling arguments
+        ig1 = igrida(1)
+        ig2 = igrida(2)
+
+        if (intl*(intl-1)/=0) then
+            ierror = 1
+        else if ((ig1-1)*(ig1+1)*(ig1-2)*(ig1+2) /= 0) then
+            ierror = 2
+        else if (ig2*(ig2-1) /= 0) then
+            ierror = 3
+        else if (nlona < 4) then
+            ierror = 4
+        else if (nlata < 3) then
+            ierror = 5
+        else if (iveca*(iveca-1)/=0) then
+            ierror = 6
+        else if ((ig1-1)*(ig1+1)*(ig1-2)*(ig1+2)/=0) then
+            ierror = 7
+        else if (ig2*(ig2-1) /= 0) then
+            ierror = 8
+        else if (nlonb < 4) then
+            ierror = 9
+        else if (nlatb < 3) then
+            ierror = 10
+        else if (ivecb*(ivecb-1) /= 0) then
+            ierror = 11
+        else
+            ierror = 0
+        end if
+
+        ! Check error flag
+        if (ierror /= 0) return
+
         igrda = abs(igrida(1))
         igrdb = abs(igridb(1))
-        if (intl==0) then
+
+        if (intl == 0) then
             la1 = min(nlata, (nlona+1)/2)
             la2 = (nlata+1)/2
             lb1 = min(nlatb, (nlonb+1)/2)
             lb2 = (nlatb+1)/2
-            !
-            !     saved space for analysis on a grid
-            !
+
+            ! saved space for analysis on a grid
             lwa = 4*nlata*la2+3*max(la1-2, 0)*(2*nlata-la1-1)+la2+nlona+15
             !
-            !     set saved work space length for synthesis on b grid
-            !
+            ! set saved work space length for synthesis on b grid
             lwb = 4*nlatb*lb2+3*max(lb1-2, 0)*(2*nlatb-lb1-1)+nlonb+15
             !
-            !     set minimum required saved work space length
-            !
+            ! set minimum required saved workspace length
             lsvmin = lwa + lwb
-            !
-            !     set wsave pointer
-            !
+
+            ! set wsave index pointer
             jb = 1+lwa
-            !
-            !     set pointers for vector spherical harmonic coefs in work
-            !
+
+            ! set pointers for vector spherical harmonic coefs in work
             iabr = 1
             iabi = iabr + la1*nlata
             iacr = iabi + la1*nlata
@@ -621,117 +629,106 @@ contains
             ibbi = ibbr + lb1*nlatb
             ibcr = ibbi + lb1*nlatb
             ibci = ibcr + lb1*nlatb
-            !
-            !     set pointers for remaining work
-            !
+
+            ! set pointers for remaining work
             iw = ibci + lb1*nlatb
-            !
-            !     set remaining work space length in lw
-            !
+
+            ! set remaining work space length in lw
             lw = lwork - iw
-            !
-            !     compute unsaved space for analysis and synthesis
-            !
+
+            ! compute unsaved space for analysis and synthesis
             lwk1 = 2*nlata*(2*nlona+max(6*la2, nlona))
             lwk2 = 2*nlatb*(2*nlonb+max(6*lb2, nlonb))
-            !
-            !     set minimum unsaved work space required by trvsph
-            !
+
+            ! set minimum unsaved workspace required by trvsph
             lwkmin = iw + max(lwk1, lwk2)
-            !
-            !     set error flags if saved or unsaved work space is insufficient
-            !
-            ier = 12
-            if (lsave < lsvmin) return
-            ier = 13
-            if (lwork < lwkmin) return
-            ier = 15
+
+            ! Set error flags if saved or unsaved work space is insufficient
             nlat = max(nlata, nlatb)
-            if (ldwork < 2*nlat*(nlat+1)+1) return
-            ier = 0
-            if (igrda == 1) then
-                !
-                !     initialize wsave for equally spaced analysis
-                !
-                call vhaeci(nlata, nlona, wsave, ier)
+
+            if (lsave < lsvmin) then
+                ierror = 12
+            else if (lwork < lwkmin) then
+                ierror = 13
+            else if (ldwork < 2*nlat*(nlat+1)+1) then
+                ierror = 15
             else
-                !
-                !     initialize wsave for gaussian analysis
-                !
-                call vhagci(nlata, nlona, wsave, ier)
-                if (ier/=0) then
-                    !
-                    !     flag failure in spherepack gaussian software
-                    !
-                    ier = 14
-                    return
-                end if
+                ierror = 0
+            end if
+
+            ! Check error flag
+            if (ierror /= 0) return
+
+            if (igrda == 1) then
+                ! Initialize wsave for equally spaced analysis
+                call vhaeci(nlata, nlona, wsave, ierror)
+                call check_error("trvsph- vhaeci", ierror)
+            else
+                ! Initialize wsave for gaussian analysis
+                call vhagci(nlata, nlona, wsave, ierror)
+                call check_error("trvsph- vhagci", ierror)
             end if
 
             if (igrdb == 2) then
-                !
-                !     initialize wsave for gaussian synthesis
-                !
-                call vhsgci(nlatb, nlonb, wsave(jb:), ier)
-                if (ier/=0) then
-                    !
-                    !     flag failure in spherepack gaussian software
-                    !
-                    ier = 14
-                    return
-                end if
+                ! Initialize wsave for gaussian synthesis
+                call vhsgci(nlatb, nlonb, wsave(jb:), ierror)
+                call check_error("trvsph- vhsgci", ierror)
             else
-                !
-                !     initialize wsave for equally spaced synthesis
-                !
-                call vhseci(nlatb, nlonb, wsave(jb:), ier)
+                ! Initialize wsave for equally spaced synthesis
+                call vhseci(nlatb, nlonb, wsave(jb:), ierror)
+                call check_error("trvsph- vhseci", ierror)
             end if
-        !
-        !     end of initialization (intl=0) call
-        !
+
+            ! Address error flag
+            if (ierror /= 0) then
+                ierror = 14
+                return
+            end if
         end if
-        !
-        !     convert the vector field (ua, va) to mathematical spherical coordinates
-        !
-        if (igrida(2)==0) then
+
+        ! Convert the vector field (ua, va) to mathematical spherical coordinates
+        if (igrida(2) == 0) then
             call trvplat(nlona, nlata, ua, work)
             call trvplat(nlona, nlata, va, work)
         end if
+
         if (igrida(1) > 0) then
             call covlat(nlata, nlona, ua)
             call covlat(nlata, nlona, va)
         end if
-        if (iveca == 0) then
-            call negv(nlata, nlona, va)
-        end if
-        nt = 1
-        ityp = 0
-        !
-        !     analyze vector field
-        !
-        if (igrda == 2) then
-            call vhagc(nlata, nlona, ityp, nt, va, ua, nlata, nlona, work(iabr), &
-                work(iabi), work(iacr), work(iaci), la1, nlata, wsave, ier)
-        else
-            call vhaec(nlata, nlona, ityp, nt, va, ua, nlata, nlona, work(iabr), &
-                work(iabi), work(iacr), work(iaci), la1, nlata, wsave, ier)
-        end if
-        !
-        !     transfer a grid coefficients to b grid coefficients
-        !
-        call trvab(la1, nlata, work(iabr), work(iabi), work(iacr), work(iaci), &
-            lb1, nlatb, work(ibbr), work(ibbi), work(ibcr), work(ibci))
-        !
-        !     synthesize on b grid
-        !
-        if (igrdb == 1) then
-            call vhsec(nlatb, nlonb, ityp, nt, vb, ub, nlatb, nlonb, work(ibbr), &
-                work(ibbi), work(ibcr), work(ibci), lb1, nlatb, wsave(jb:), ier)
-        else
-            call vhsgc(nlatb, nlonb, ityp, nt, vb, ub, nlatb, nlonb, work(ibbr), &
-                work(ibbi), work(ibcr), work(ibci), lb1, nlatb, wsave(jb:), ier)
-        end if
-        !
+
+        if (iveca == 0) call negv(nlata, nlona, va)
+
+        ! Analyze vector field
+        block
+            real(wp), dimension(la1, nlata, nt) :: abr, abi, acr, aci
+            real(wp), dimension(lb1, nlatb, nt) :: bbr, bbi, bcr, bci
+
+            if (igrda == 2) then
+                call vhagc(nlata, nlona, ityp, nt, va, ua, nlata, nlona, &
+                    abr, abi, acr, aci, la1, nlata, wsave, ierror)
+                call check_error("trvsph- vhagc", ierror)
+            else
+                call vhaec(nlata, nlona, ityp, nt, va, ua, nlata, nlona, &
+                    abr, abi, acr, aci, la1, nlata, wsave, ierror)
+                call check_error("trvsph- vhaec", ierror)
+            end if
+
+
+            ! Transfer a grid coefficients to b grid coefficients
+            call trvab(la1, nlata, abr, abi, acr, aci, lb1, nlatb, bbr, bbi, bcr, bci)
+
+            ! Synthesize on b grid
+            if (igrdb == 1) then
+                call vhsec(nlatb, nlonb, ityp, nt, vb, ub, nlatb, nlonb, bbr, &
+                    bbi, bcr, bci, lb1, nlatb, wsave(jb:), ierror)
+                call check_error("trvsph- vhsec", ierror)
+            else
+                call vhsgc(nlatb, nlonb, ityp, nt, vb, ub, nlatb, nlonb, bbr, &
+                    bbi, bcr, bci, lb1, nlatb, wsave(jb:), ierror)
+                call check_error("trvsph- vhsgc", ierror)
+            end if
+        end block
         !     restore a grid and b grid vector fields (now in math coordinates) to
         !     agree with grid flags in igrida, iveca, igridb, ivecb
         !
@@ -764,6 +761,16 @@ contains
         end if
 
     end subroutine trvsph
+
+    subroutine check_error(routine, ierror)
+
+        ! Dummy arguments
+        character(len=*), intent(in) :: routine
+        integer(ip),      intent(in) :: ierror
+
+        if (ierror /= 0) write (stderr, '(a, i5)') routine//'   error_flag = ', ierror
+
+    end subroutine check_error
 
     subroutine negv(nlat, nlon, v)
         !
