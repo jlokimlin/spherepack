@@ -31,76 +31,7 @@
 !
 
 ! ****************************************************************
-!
-!     subroutine shagci(nlat, nlon, wshagc, lshagc, dwork, ldwork, ierror)
-!
-!     subroutine shagci initializes the array wshagc which can then
-!     be used repeatedly by subroutines shagc. it precomputes
-!     and stores in wshagc quantities such as gaussian weights, 
-!     legendre polynomial coefficients, and fft trigonometric tables.
-!
-!     input parameters
-!
-!     nlat   the number of points in the gaussian colatitude grid on the
-!            full sphere. these lie in the interval (0, pi) and are compu
-!            in radians in theta(1), ..., theta(nlat) by subroutine compute_gaussian_latitudes_and_weights.
-!            if nlat is odd the equator will be included as the grid poi
-!            theta((nlat+1)/2).  if nlat is even the equator will be
-!            excluded as a grid point and will lie half way between
-!            theta(nlat/2) and theta(nlat/2+1). nlat must be at least 3.
-!            note: on the half sphere, the number of grid points in the
-!            colatitudinal direction is nlat/2 if nlat is even or
-!            (nlat+1)/2 if nlat is odd.
-!
-!     nlon   the number of distinct londitude points.  nlon determines
-!            the grid increment in longitude as 2*pi/nlon. for example
-!            nlon = 72 for a five degree grid. nlon must be greater
-!            than or equal to 4. the efficiency of the computation is
-!            improved when nlon is a product of small prime numbers.
-!
-!     wshagc an array which must be initialized by subroutine shagci.
-!            once initialized, wshagc can be used repeatedly by shagc
-!            as long as nlat and nlon remain unchanged.  wshagc must
-!            not be altered between calls of shagc.
-!
-!     lshagc the dimension of the array wshagc as it appears in the
-!            program that calls shagc. define
-!
-!               l1 = min(nlat, (nlon+2)/2) if nlon is even or
-!               l1 = min(nlat, (nlon+1)/2) if nlon is odd
-!
-!            and
-!
-!               l2 = nlat/2        if nlat is even or
-!               l2 = (nlat+1)/2    if nlat is odd
-!
-!            then lshagc must be at least
-!
-!                  nlat*(2*l2+3*l1-2)+3*l1*(1-l1)/2+nlon+15
-!
-!     dwork   a real work array that does not have to be saved.
-!
-!     ldwork  the dimension of the array dwork as it appears in the
-!            program that calls shagci. ldwork must be at least
-!
-!                nlat*(nlat+4)
-!
-!     output parameter
-!
-!     wshagc an array which must be initialized before calling shagc or
-!            once initialized, wshagc can be used repeatedly by shagc or
-!            as long as nlat and nlon remain unchanged.  wshagc must not
-!            altered between calls of shagc.
-!
-!     ierror = 0  no errors
-!            = 1  error in the specification of nlat
-!            = 2  error in the specification of nlon
-!            = 3  error in the specification of lshagc
-!            = 4  error in the specification of ldwork
-!            = 5  failure in compute_gaussian_latitudes_and_weights to compute gaussian points
-!                 (due to failure in eigenvalue routine)
-!
-!
+
 submodule(scalar_analysis_routines) scalar_analysis_gaussian_grid
 
 contains
@@ -295,7 +226,6 @@ contains
         integer(ip), intent(out)  :: ierror
 
         ! Local variables
-        integer(ip) :: ifft, ipmn, iwts
         integer(ip) :: ntrunc, l1, l2, lat, late, lwork
 
         associate (lshagc => size(wshagc))
@@ -352,7 +282,8 @@ contains
             end select
 
             block
-                real(wp) :: work(lwork)
+                integer(ip) :: iwts, ifft, ipmn
+                real(wp)    :: work(lwork)
 
                 ! Starting address for gaussian wts in shigc and fft values
                 iwts = 1
@@ -362,8 +293,8 @@ contains
                 ipmn = lat*nlon*nt+1
 
                 call shagc_lower_utility_routine(nlat, nlon, ntrunc, lat, isym, &
-                    g, idg, jdg, nt, a, b, mdab, ndab, &
-                    wshagc, wshagc(iwts:), wshagc(ifft:), late, work(ipmn:), work)
+                    g, idg, jdg, nt, a, b, mdab, ndab, wshagc, wshagc(iwts:), &
+                    wshagc(ifft:), late, work(ipmn:), work)
             end block
         end associate
 
@@ -376,6 +307,67 @@ contains
     ! points and weights, m=0, m=1 legendre polynomials, recursion
     ! recursion coefficients.
     !
+    !
+    !     subroutine shagci(nlat, nlon, wshagc, lshagc, dwork, ldwork, ierror)
+    !
+    !     subroutine shagci initializes the array wshagc which can then
+    !     be used repeatedly by subroutines shagc. it precomputes
+    !     and stores in wshagc quantities such as gaussian weights,
+    !     legendre polynomial coefficients, and fft trigonometric tables.
+    !
+    !     input parameters
+    !
+    !     nlat   the number of points in the gaussian colatitude grid on the
+    !            full sphere. these lie in the interval (0, pi) and are compu
+    !            in radians in theta(1), ..., theta(nlat) by subroutine compute_gaussian_latitudes_and_weights.
+    !            if nlat is odd the equator will be included as the grid poi
+    !            theta((nlat+1)/2).  if nlat is even the equator will be
+    !            excluded as a grid point and will lie half way between
+    !            theta(nlat/2) and theta(nlat/2+1). nlat must be at least 3.
+    !            note: on the half sphere, the number of grid points in the
+    !            colatitudinal direction is nlat/2 if nlat is even or
+    !            (nlat+1)/2 if nlat is odd.
+    !
+    !     nlon   the number of distinct londitude points.  nlon determines
+    !            the grid increment in longitude as 2*pi/nlon. for example
+    !            nlon = 72 for a five degree grid. nlon must be greater
+    !            than or equal to 4. the efficiency of the computation is
+    !            improved when nlon is a product of small prime numbers.
+    !
+    !     wshagc an array which must be initialized by subroutine shagci.
+    !            once initialized, wshagc can be used repeatedly by shagc
+    !            as long as nlat and nlon remain unchanged.  wshagc must
+    !            not be altered between calls of shagc.
+    !
+    !     lshagc the dimension of the array wshagc as it appears in the
+    !            program that calls shagc. define
+    !
+    !               l1 = min(nlat, (nlon+2)/2) if nlon is even or
+    !               l1 = min(nlat, (nlon+1)/2) if nlon is odd
+    !
+    !            and
+    !
+    !               l2 = nlat/2        if nlat is even or
+    !               l2 = (nlat+1)/2    if nlat is odd
+    !
+    !            then lshagc must be at least
+    !
+    !                  nlat*(2*l2+3*l1-2)+3*l1*(1-l1)/2+nlon+15
+    !
+    !     output parameter
+    !
+    !     wshagc an array which must be initialized before calling shagc or
+    !            once initialized, wshagc can be used repeatedly by shagc or
+    !            as long as nlat and nlon remain unchanged.  wshagc must not
+    !            altered between calls of shagc.
+    !
+    !     ierror = 0  no errors
+    !            = 1  error in the specification of nlat
+    !            = 2  error in the specification of nlon
+    !            = 3  error in the specification of lshagc
+    !            = 5  failure in compute_gaussian_latitudes_and_weights to compute gaussian points
+    !                 (due to failure in eigenvalue routine)
+    !
     module subroutine shagci(nlat, nlon, wshagc, ierror)
 
         ! Dummy arguments
@@ -385,20 +377,7 @@ contains
         integer(ip), intent(out) :: ierror
 
         ! Local variables
-        integer(ip) :: i1
-        integer(ip) :: i2
-        integer(ip) :: i3
-        integer(ip) :: i4
-        integer(ip) :: i5
-        integer(ip) :: i6
-        integer(ip) :: i7
-        integer(ip) :: idth
-        integer(ip) :: idwts
-        integer(ip) :: ierror
-        integer(ip) :: iw
-        integer(ip) :: ntrunc
-        integer(ip) :: l1
-        integer(ip) :: l2
+        integer(ip) :: ntrunc, n1, n2
         integer(ip) :: late, ldwork
 
         associate (lshagc => size(wshagc))
@@ -408,39 +387,44 @@ contains
 
             ! set equator or nearest point (if excluded) pointer
             late = (nlat+mod(nlat, 2))/2
-            l1 = ntrunc
-            l2 = late
+            n1 = ntrunc
+            n2 = late
 
             ! Check calling arguments
             if (nlat < 3) then
                 ierror = 1
             else if (nlon < 4) then
                 ierror = 2
-            else if (lshagc < nlat*(2*l2+3*l1-2)+3*l1*(1-l1)/2+nlon+15) then
+            else if (lshagc < nlat*(2*n2+3*n1-2)+3*n1*(1-n1)/2+nlon+15) then
                 ierror = 3
             else
                 ierror = 0
             end if
 
-            ! Set pointers
-            i1 = 1
-            i2 = i1+nlat
-            i3 = i2+nlat*late
-            i4 = i3+nlat*late
-            i5 = i4+ntrunc*(ntrunc-1)/2 +(nlat-ntrunc)*(ntrunc-1)
-            i6 = i5+ntrunc*(ntrunc-1)/2 +(nlat-ntrunc)*(ntrunc-1)
-            i7 = i6+ntrunc*(ntrunc-1)/2 +(nlat-ntrunc)*(ntrunc-1)
-
-            ! Set indices in temp work for real gaussian wts and pts
-            idth = 1
-            idwts = idth+nlat
-            iw = idwts+nlat
+            ! Check error flag
+            if (ierror /= 0) return
 
             ! Set required workspace size
             ldwork = nlat * (nlat + 4)
 
             block
-                real(wp) :: dwork(ldwork)
+                integer(ip) :: i1, i2, i3, i4, i5, i6, i7
+                integer(ip) :: idth, idwts, iw
+                real(wp)    :: dwork(ldwork)
+
+                ! Set pointers
+                i1 = 1
+                i2 = i1+nlat
+                i3 = i2+nlat*late
+                i4 = i3+nlat*late
+                i5 = i4+ntrunc*(ntrunc-1)/2 +(nlat-ntrunc)*(ntrunc-1)
+                i6 = i5+ntrunc*(ntrunc-1)/2 +(nlat-ntrunc)*(ntrunc-1)
+                i7 = i6+ntrunc*(ntrunc-1)/2 +(nlat-ntrunc)*(ntrunc-1)
+
+                ! Set indices in temp work for real gaussian wts and pts
+                idth = 1
+                idwts = idth + nlat
+                iw = idwts + nlat
 
                 call shagci_lower_utility_routine(nlat, nlon, ntrunc, late, &
                     wshagc(i1:), wshagc(i2:), wshagc(i3:), &
@@ -454,7 +438,6 @@ contains
         end associate
 
     end subroutine shagci
-
 
     subroutine shagc_lower_utility_routine(nlat, nlon, l, lat, mode, gs, idg, jdg, nt, a, b, mdab, &
         ndab, w, wts, wfft, late, pmn, g)
@@ -542,156 +525,167 @@ contains
                 end do
             end do
         end do
-        !     set m+1 limit on b(m+1) calculation
-        lm1 = l
-        if (nlon == 2*l-2) lm1 = l-1
-        if (mode == 0) then
-            !     for full sphere (mode=0) and even/odd reduction:
-            !     overwrite g(i) with (g(i)+g(nlat-i+1))*wts(i)
-            !     overwrite g(nlat-i+1) with (g(i)-g(nlat-i+1))*wts(i)
-            nl2 = nlat/2
-            do k=1, nt
-                do j=1, nlon
-                    do i=1, nl2
-                        is = nlat-i+1
-                        t1 = g(i, j, k)
-                        t2 = g(is, j, k)
-                        g(i, j, k) = wts(i)*(t1+t2)
-                        g(is, j, k) = wts(i)*(t1-t2)
-                    end do
-                    !     adjust equator if necessary(nlat odd)
-                    if (mod(nlat, 2)/=0) g(late, j, k) = wts(late)*g(late, j, k)
-                end do
-            end do
-            !     set m = 0 coefficients first
-            m = 0
-            call util%compute_legendre_polys_for_gaussian_grids(mode, l, nlat, m, w, pmn, km)
-            do k=1, nt
-                do i=1, late
-                    is = nlat-i+1
-                    do np1=1, nlat, 2
-                        !     n even
-                        a(1, np1, k) = a(1, np1, k)+g(i, 1, k)*pmn(np1, i, km)
-                    end do
-                    do np1=2, nlat, 2
-                        !     n odd
-                        a(1, np1, k) = a(1, np1, k)+g(is, 1, k)*pmn(np1, i, km)
-                    end do
-                end do
-            end do
-            !     compute coefficients for which b(m, n) is available
-            do mp1=2, lm1
-                m = mp1-1
-                mp2 = m+2
-                !     compute pmn for all i and n=m, ..., l-1
-                call util%compute_legendre_polys_for_gaussian_grids(mode, l, nlat, m, w, pmn, km)
-                do k=1, nt
-                    do i=1, late
-                        is = nlat-i+1
-                        !     n-m even
-                        do np1=mp1, nlat, 2
-                            a(mp1, np1, k) = a(mp1, np1, k)+g(i, 2*m, k)*pmn(np1, i, km)
-                            b(mp1, np1, k) = b(mp1, np1, k)+g(i, 2*m+1, k)*pmn(np1, i, km)
-                        end do
-                        !     n-m odd
-                        do np1=mp2, nlat, 2
-                            a(mp1, np1, k) = a(mp1, np1, k)+g(is, 2*m, k)*pmn(np1, i, km)
-                            b(mp1, np1, k) = b(mp1, np1, k)+g(is, 2*m+1, k)*pmn(np1, i, km)
-                        end do
-                    end do
-                end do
-            end do
-            if (nlon == 2*l-2) then
-                !     compute a(l, np1) coefficients only
-                m = l-1
-                call util%compute_legendre_polys_for_gaussian_grids(mode, l, nlat, m, w, pmn, km)
-                do k=1, nt
-                    do i=1, late
-                        is = nlat-i+1
-                        !     n-m even
-                        do np1=l, nlat, 2
-                            a(l, np1, k) = a(l, np1, k)+0.5*g(i, nlon, k)*pmn(np1, i, km)
-                        end do
-                        lp1 = l+1
-                        !     n-m odd
-                        do np1=lp1, nlat, 2
-                            a(l, np1, k) = a(l, np1, k)+0.5*g(is, nlon, k)*pmn(np1, i, km)
-                        end do
-                    end do
-                end do
-            end if
+
+        ! Set m+1 limit on b(m+1) calculation
+        if (nlon == 2*l-2) then
+            lm1 = l-1
         else
-            !     half sphere
-            !     overwrite g(i) with wts(i)*(g(i)+g(i)) for i=1, ..., nlate/2
-            nl2 = nlat/2
-            do  k=1, nt
-                do j=1, nlon
-                    do i=1, nl2
-                        g(i, j, k) = wts(i)*(g(i, j, k)+g(i, j, k))
-                    end do
-                    !     adjust equator separately if a grid point
-                    if (nl2<late) g(late, j, k) = wts(late)*g(late, j, k)
-                end do
-            end do
-            !     set m = 0 coefficients first
-            m = 0
-            call util%compute_legendre_polys_for_gaussian_grids(mode, l, nlat, m, w, pmn, km)
-            ms = 1
-            if (mode == 1) ms = 2
-            do k=1, nt
-                do i=1, late
-                    do np1=ms, nlat, 2
-                        a(1, np1, k) = a(1, np1, k)+g(i, 1, k)*pmn(np1, i, km)
-                    end do
-                end do
-            end do
-            !     compute coefficients for which b(m, n) is available
-            do mp1=2, lm1
-                m = mp1-1
-                ms = mp1
-                if (mode == 1) ms = mp1+1
-                !     compute pmn for all i and n=m, ..., nlat-1
-                call util%compute_legendre_polys_for_gaussian_grids(mode, l, nlat, m, w, pmn, km)
-                do  k=1, nt
-                    do  i=1, late
-                        do np1=ms, nlat, 2
-                            a(mp1, np1, k) = a(mp1, np1, k)+g(i, 2*m, k)*pmn(np1, i, km)
-                            b(mp1, np1, k) = b(mp1, np1, k)+g(i, 2*m+1, k)*pmn(np1, i, km)
+            lm1 = l
+        end if
+
+        select case (mode)
+            case (0)
+                ! For full sphere (mode=0) and even/odd reduction:
+                ! overwrite g(i) with (g(i)+g(nlat-i+1))*wts(i)
+                ! overwrite g(nlat-i+1) with (g(i)-g(nlat-i+1))*wts(i)
+                nl2 = nlat/2
+                do k=1, nt
+                    do j=1, nlon
+                        do i=1, nl2
+                            is = nlat-i+1
+                            t1 = g(i, j, k)
+                            t2 = g(is, j, k)
+                            g(i, j, k) = wts(i)*(t1+t2)
+                            g(is, j, k) = wts(i)*(t1-t2)
                         end do
+                        !  Adjust equator if necessary(nlat odd)
+                        if (mod(nlat, 2)/=0) g(late, j, k) = wts(late)*g(late, j, k)
                     end do
                 end do
-            end do
-            if (nlon==2*l-2) then
-                !     compute coefficient a(l, np1) only
-                m = l-1
+                !     set m = 0 coefficients first
+                m = 0
                 call util%compute_legendre_polys_for_gaussian_grids(mode, l, nlat, m, w, pmn, km)
-                ns = l
-                if (mode == 1) ns = l+1
                 do k=1, nt
                     do i=1, late
-                        do np1=ns, nlat, 2
-                            a(l, np1, k) = a(l, np1, k)+0.5*g(i, nlon, k)*pmn(np1, i, km)
+                        is = nlat-i+1
+                        do np1=1, nlat, 2
+                            !     n even
+                            a(1, np1, k) = a(1, np1, k)+g(i, 1, k)*pmn(np1, i, km)
+                        end do
+                        do np1=2, nlat, 2
+                            !     n odd
+                            a(1, np1, k) = a(1, np1, k)+g(is, 1, k)*pmn(np1, i, km)
                         end do
                     end do
                 end do
-            end if
-        end if
+                !     compute coefficients for which b(m, n) is available
+                do mp1=2, lm1
+                    m = mp1-1
+                    mp2 = m+2
+                    !     compute pmn for all i and n=m, ..., l-1
+                    call util%compute_legendre_polys_for_gaussian_grids(mode, l, nlat, m, w, pmn, km)
+                    do k=1, nt
+                        do i=1, late
+                            is = nlat-i+1
+                            !     n-m even
+                            do np1=mp1, nlat, 2
+                                a(mp1, np1, k) = a(mp1, np1, k)+g(i, 2*m, k)*pmn(np1, i, km)
+                                b(mp1, np1, k) = b(mp1, np1, k)+g(i, 2*m+1, k)*pmn(np1, i, km)
+                            end do
+                            !     n-m odd
+                            do np1=mp2, nlat, 2
+                                a(mp1, np1, k) = a(mp1, np1, k)+g(is, 2*m, k)*pmn(np1, i, km)
+                                b(mp1, np1, k) = b(mp1, np1, k)+g(is, 2*m+1, k)*pmn(np1, i, km)
+                            end do
+                        end do
+                    end do
+                end do
+                if (nlon == 2*l-2) then
+                    ! Compute a(l, np1) coefficients only
+                    m = l-1
+                    call util%compute_legendre_polys_for_gaussian_grids(mode, l, nlat, m, w, pmn, km)
+                    do k=1, nt
+                        do i=1, late
+                            is = nlat-i+1
+                            !     n-m even
+                            do np1=l, nlat, 2
+                                a(l, np1, k) = a(l, np1, k) + HALF * g(i, nlon, k)*pmn(np1, i, km)
+                            end do
+                            lp1 = l+1
+                            !     n-m odd
+                            do np1=lp1, nlat, 2
+                                a(l, np1, k) = a(l, np1, k) + HALF * g(is, nlon, k)*pmn(np1, i, km)
+                            end do
+                        end do
+                    end do
+                end if
+            case default
+                !     half sphere
+                !     overwrite g(i) with wts(i)*(g(i)+g(i)) for i=1, ..., nlate/2
+                nl2 = nlat/2
+                do  k=1, nt
+                    do j=1, nlon
+                        do i=1, nl2
+                            g(i, j, k) = wts(i)*(g(i, j, k)+g(i, j, k))
+                        end do
+                        !     adjust equator separately if a grid point
+                        if (nl2<late) g(late, j, k) = wts(late)*g(late, j, k)
+                    end do
+                end do
+                !     set m = 0 coefficients first
+                m = 0
+                call util%compute_legendre_polys_for_gaussian_grids(mode, l, nlat, m, w, pmn, km)
+                ms = 1
+                if (mode == 1) ms = 2
+                do k=1, nt
+                    do i=1, late
+                        do np1=ms, nlat, 2
+                            a(1, np1, k) = a(1, np1, k)+g(i, 1, k)*pmn(np1, i, km)
+                        end do
+                    end do
+                end do
+                !     compute coefficients for which b(m, n) is available
+                do mp1=2, lm1
+                    m = mp1-1
+                    ms = mp1
+                    if (mode == 1) ms = mp1+1
+                    !     compute pmn for all i and n=m, ..., nlat-1
+                    call util%compute_legendre_polys_for_gaussian_grids(mode, l, nlat, m, w, pmn, km)
+                    do  k=1, nt
+                        do  i=1, late
+                            do np1=ms, nlat, 2
+                                a(mp1, np1, k) = a(mp1, np1, k)+g(i, 2*m, k)*pmn(np1, i, km)
+                                b(mp1, np1, k) = b(mp1, np1, k)+g(i, 2*m+1, k)*pmn(np1, i, km)
+                            end do
+                        end do
+                    end do
+                end do
+                if (nlon == 2*l-2) then
+                    ! Compute coefficient a(l, np1) only
+                    m = l-1
+                    call util%compute_legendre_polys_for_gaussian_grids(mode, l, nlat, m, w, pmn, km)
+
+                    select case (mode)
+                        case (1)
+                            ns = l+1
+                        case default
+                            ns = l
+                    end select
+
+                    do k=1, nt
+                        do i=1, late
+                            do np1 = ns, nlat, 2
+                                a(l, np1, k) = a(l, np1, k) + HALF * g(i, nlon, k) * pmn(np1, i, km)
+                            end do
+                        end do
+                    end do
+                end if
+        end select
 
     end subroutine shagc_lower_utility_routine
 
     subroutine shagci_lower_utility_routine(nlat, nlon, l, late, wts, p0n, p1n, abel, bbel, cbel, &
         wfft, dtheta, dwts, work, ier)
+
+        ! Dummy arguments
         real(wp) :: abel
         real(wp) :: bbel
         real(wp) :: cbel
         integer(ip) :: i
         integer(ip) :: ier
         integer(ip) :: imn
-        
-        
         integer(ip) :: l
         integer(ip) :: late
-        integer(ip) :: lw
         integer(ip) :: m
         integer(ip) :: mlim
         integer(ip) :: n
@@ -706,6 +700,7 @@ contains
             cbel(*), wfft(*)
         real(wp) :: pb, dtheta(nlat), dwts(nlat), work(*)
 
+        ! Local variables
         type(SpherepackUtility) :: util
 
         !     compute the nlat  gaussian points and weights, the
@@ -717,34 +712,30 @@ contains
         !     the pairs (m, n) map to [1, 2, ..., indx(l-1, l-1)] with no
         !     "holes" as m varies from 2 to n and n varies from 2 to l-1.
         !     (m=0, 1 are set from p0n, p1n for all n)
-        !     define for 2<=n<=l-1
+        !
+        ! Define for 2<=n<=l-1
         !indx(m, n) = imn = (n-1)*(n-2)/2+m-1
-        !     define index function for l<=n<=nlat
+        !
+        ! Define index function for l<=n<=nlat
         !imndx(m, n) = l*(l-1)/2+(n-l-1)*(l-1)+m-1
 
-        !     preset quantites for fourier transform
+        ! Preset quantites for fourier transform
         call util%hfft%initialize(nlon, wfft)
 
-        !     compute real gaussian points and weights
-        !     lw = 4*nlat*(nlat+1)+2
-        lw = nlat*(nlat+2)
         call compute_gaussian_latitudes_and_weights(nlat, dtheta, dwts, ier)
 
-        if (ier/=0) return
+        ! Check error flag
+        if (ier /= 0) return
 
-        !     store gaussian weights single precision to save computation
-        !     in inner loops in analysis
-        do i=1, nlat
-            wts(i) = dwts(i)
-        end do
-        !     initialize p0n, p1n using real dnlfk, dnlft
-        do np1=1, nlat
-            do i=1, late
-                p0n(np1, i) = ZERO
-                p1n(np1, i) = ZERO
-            end do
-        end do
-        !     compute m=n=0 legendre polynomials for all theta(i)
+        ! Store gaussian weights single precision to save computation
+        ! in inner loops in analysis
+        wts(1:nlat) = dwts(1:nlat)
+
+        ! Initialize p0n, p1n using real dnlfk, dnlft
+        p0n(1:nlat, 1:late) = ZERO
+        p1n(1:nlat, 1:late) = ZERO
+
+        ! Compute m=n=0 legendre polynomials for all theta(i)
         np1 = 1
         n = 0
         m = 0
@@ -753,7 +744,8 @@ contains
             call util%compute_legendre_polys_from_fourier_coeff(m, n, dtheta(i), work, pb)
             p0n(1, i) = pb
         end do
-        !     compute p0n, p1n for all theta(i) when n>0
+
+        ! Compute p0n, p1n for all theta(i) when n>0
         do np1=2, nlat
             n = np1-1
             m = 0
@@ -762,7 +754,7 @@ contains
                 call util%compute_legendre_polys_from_fourier_coeff(m, n, dtheta(i), work, pb)
                 p0n(np1, i) = pb
             end do
-            !     compute m=1 legendre polynomials for all n and theta(i)
+            ! Compute m=1 legendre polynomials for all n and theta(i)
             m = 1
             call util%compute_fourier_coefficients(m, n, work)
             do i=1, late
@@ -770,12 +762,13 @@ contains
                 p1n(np1, i) = pb
             end do
         end do
-        !     compute and store swarztrauber recursion coefficients
-        !     for 2<=m<=n and 2<=n<=nlat in abel, bbel, cbel
+
+        ! Compute and store swarztrauber recursion coefficients
+        ! for 2 <= m <= n and 2 <= n <= nlat in abel, bbel, cbel
         do n=2, nlat
             mlim = min(n, l)
             do m=2, mlim
-                if (n >= l) then
+                if (l <= n) then
                     imn = l*(l-1)/2+(n-l-1)*(l-1)+m-1
                 else
                     imn = (n-1)*(n-2)/2+m-1

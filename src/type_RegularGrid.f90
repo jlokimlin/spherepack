@@ -64,7 +64,7 @@ contains
         select type(self)
             class is (RegularGrid)
             if (.not.self%initialized) then
-                write(stderr, '(a)') &
+                write (stderr, '(a)') &
                     'Uninitialized object of class(RegularGrid) in '//routine
             end if
         end select

@@ -111,7 +111,7 @@ use spherepack
     !
     !     write input arguments to sshifte
     !
-    write(*, 100) ioff, nlon, nlat, lsave, lwork
+    write (*, 100) ioff, nlon, nlat, lsave, lwork
 100 format(' sshifte arguments', &
         /' ioff = ', i2, ' nlon = ', i3, ' nlat = ', i3, &
         /' lsave = ', i5, ' lwork = ', i5)
@@ -120,7 +120,7 @@ use spherepack
     !
     call sshifte(ioff, nlon, nlat, goff, greg, wsave, lsave, work, lwork, ier)
 
-    write(*, 200) ier
+    write (*, 200) ier
 200 format(' ier = ', i2)
 
     if (ier==0) then
@@ -140,7 +140,7 @@ use spherepack
             end do
         end do
         err2 = sqrt(err2/(nlon*(nlat+1)))
-        write(*, 300) err2
+        write (*, 300) err2
 300     format(' least squares error = ', e10.3)
     end if
     !    initialize wsav for regular to offset shift
@@ -155,9 +155,9 @@ use spherepack
             goff(j, i) = 0.0
         end do
     end do
-    write(*, 100) ioff, nlon, nlat, lsave, lwork
+    write (*, 100) ioff, nlon, nlat, lsave, lwork
     call sshifte(ioff, nlon, nlat, goff, greg, wsave, lsave, work, lwork, ier)
-    write(*, 200) ier
+    write (*, 200) ier
     if (ier == 0) then
         !
         !     compute error in goff by comparing with exp(x+y+z) on offset grid
@@ -175,6 +175,6 @@ use spherepack
             end do
         end do
         err2 = sqrt(err2/(nlon*(nlat+1)))
-        write(*, 300) err2
+        write (*, 300) err2
     end if
 end program testsshifte

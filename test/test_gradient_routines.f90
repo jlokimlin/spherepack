@@ -225,19 +225,19 @@ contains
                 !  Print earlier output from platform with 64-bit floating point
                 !    arithmetic followed by the output from this computer
                 !
-                write( stdout, '(a)') ''
-                write( stdout, '(a)') '     tgrad *** TEST RUN *** '
-                write( stdout, '(a)') ''
-                write( stdout, '(a)') '     grid type = '//sphere_type%grid%grid_type
-                write( stdout, '(a)') '     Testing gradient'
-                write( stdout, '(2(a, i3))') '     nlat = ', NLATS, ' nlon = ', NLONS
-                write( stdout, '(a)') '     Previous 64 bit floating point arithmetic result '
-                write( stdout, '(a)') previous_polar_gradient_error
-                write( stdout, '(a)') previous_azimuthal_gradient_error
-                write( stdout, '(a)') '     The output from your computer is: '
-                write( stdout, '(a, 1pe15.6)') '     polar gradient error     = ', err2v
-                write( stdout, '(a, 1pe15.6)') '     azimuthal gradient error = ', err2w
-                write( stdout, '(a)') ''
+                write (stdout, '(a)') ''
+                write (stdout, '(a)') '     tgrad *** TEST RUN *** '
+                write (stdout, '(a)') ''
+                write (stdout, '(a)') '     grid type = '//sphere_type%grid%grid_type
+                write (stdout, '(a)') '     Testing gradient'
+                write (stdout, '(2(a, i3))') '     nlat = ', NLATS, ' nlon = ', NLONS
+                write (stdout, '(a)') '     Previous 64 bit floating point arithmetic result '
+                write (stdout, '(a)') previous_polar_gradient_error
+                write (stdout, '(a)') previous_azimuthal_gradient_error
+                write (stdout, '(a)') '     The output from your computer is: '
+                write (stdout, '(a, 1pe15.6)') '     polar gradient error     = ', err2v
+                write (stdout, '(a, 1pe15.6)') '     azimuthal gradient error = ', err2w
+                write (stdout, '(a)') ''
             end associate
         end associate
 
@@ -265,17 +265,17 @@ contains
                 !  Print earlier output from platform with 64-bit floating point
                 !    arithmetic followed by the output from this computer
                 !
-                write( stdout, '(a)') ''
-                write( stdout, '(a)') '     test gradient routines *** TEST RUN *** '
-                write( stdout, '(a)') ''
-                write( stdout, '(a)') '     grid type = '//sphere_type%grid%grid_type
-                write( stdout, '(a)') '     Testing gradient inversion'
-                write( stdout, '(2(a, i3))') '     nlat = ', NLATS, ' nlon = ', NLONS
-                write( stdout, '(a)') '     Previous 64 bit floating point arithmetic result '
-                write( stdout, '(a)') previous_gradient_inversion_error
-                write( stdout, '(a)') '     The output from your computer is: '
-                write( stdout, '(a, 1pe15.6)') '     gradient inversion error     = ', err2
-                write( stdout, '(a)') ''
+                write (stdout, '(a)') ''
+                write (stdout, '(a)') '     test gradient routines *** TEST RUN *** '
+                write (stdout, '(a)') ''
+                write (stdout, '(a)') '     grid type = '//sphere_type%grid%grid_type
+                write (stdout, '(a)') '     Testing gradient inversion'
+                write (stdout, '(2(a, i3))') '     nlat = ', NLATS, ' nlon = ', NLONS
+                write (stdout, '(a)') '     Previous 64 bit floating point arithmetic result '
+                write (stdout, '(a)') previous_gradient_inversion_error
+                write (stdout, '(a)') '     The output from your computer is: '
+                write (stdout, '(a, 1pe15.6)') '     gradient inversion error     = ', err2
+                write (stdout, '(a)') ''
             end associate
         end associate
         !

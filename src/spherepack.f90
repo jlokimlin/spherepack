@@ -65,20 +65,20 @@ module spherepack
         sfvpgs
 
     use scalar_analysis_routines, only: &
-        shaes, shaesi, &
-        shaec, shaeci, &
-        shags, shagsi, &
-        shagc, shagci
+        initialize_shaec, shaec, shaeci, &
+        initialize_shaes, shaes,  shaesi, &
+        initialize_shagc, shagc, shagci, &
+        initialize_shags, shags, shagsi
 
     use scalar_projection_routines, only: &
         shpe, shpei, &
         shpg, shpgi
 
     use scalar_synthesis_routines, only: &
-        shsec, shseci, &
-        shses, shsesi, &
-        shsgc, shsgci, &
-        shsgs, shsgsi
+        initialize_shsec, shsec, shseci, &
+        initialize_shses, shses,  shsesi, &
+        initialize_shsgc, shsgc, shsgci, &
+        initialize_shsgs, shsgs, shsgsi
 
     use scalar_laplacian_routines, only: &
         slapec, slapes, slapgc, slapgs, &
@@ -94,16 +94,16 @@ module spherepack
         trvsph
 
     use vector_analysis_routines, only: &
-        vhaec, vhaeci, &
-        vhaes, vhaesi, &
-        vhagc, vhagci, &
-        vhags, vhagsi
+        initialize_vhaec, vhaec, vhaeci, &
+        initialize_vhaes, vhaes,  vhaesi, &
+        initialize_vhagc, vhagc, vhagci, &
+        initialize_vhags, vhags, vhagsi
 
     use vector_synthesis_routines, only: &
-        vhsec, vhseci, &
-        vhses, vhsesi, &
-        vhsgc, vhsgci, &
-        vhsgs, vhsgsi
+        initialize_vhsec, vhsec, vhseci, &
+        initialize_vhses, vhses,  vhsesi, &
+        initialize_vhsgc, vhsgc, vhsgci, &
+        initialize_vhsgs, vhsgs, vhsgsi
 
     !    use module_visequ, only: &
     !        visequ
@@ -496,7 +496,7 @@ contains
             jdg => size(scalar_function, dim=2), &
             isym => symmetries, &
             ierror => error_flag &
-           )
+            )
 
             ! Ensure that forward wavetable is usable
             if (wavetable%first_call_scalar_forward_gaussian_saved) then
@@ -530,7 +530,7 @@ contains
         ! Local variables
         integer(ip) :: i
 
-        write( stdout, 109) nam, (vec(i), i=1, vec_size)
+        write (stdout, 109) nam, (vec(i), i=1, vec_size)
 109     format(1h a4, /(1h 8e11.4))
 
     end subroutine vecout_array
@@ -542,7 +542,7 @@ contains
         integer(ip),      intent(in) :: vec_size
         character(len=*), intent(in) ::  nam
 
-        write( stdout, '(a, 8e11.4)') nam, vec
+        write (stdout, '(a, 8e11.4)') nam, vec
 
     end subroutine vecout_scalar
 
@@ -552,7 +552,7 @@ contains
         real(wp),         intent(in) :: var
         character(len=*), intent(in) :: nam
 
-        write( stdout, '(a, e12.5)') nam, var
+        write (stdout, '(a, e12.5)') nam, var
 
     end subroutine vout_scalar
 
@@ -562,7 +562,7 @@ contains
         real(wp),         intent(in) :: var(:)
         character(len=*), intent(in) :: nam
 
-        write( stdout, *) nam, var
+        write (stdout, *) nam, var
 
     end subroutine vout_array
 
@@ -572,7 +572,7 @@ contains
         integer(ip),      intent(in) :: ivar
         character(len=*), intent(in) :: nam
 
-        write( stdout, '(a, i5)') nam, ivar
+        write (stdout, '(a, i5)') nam, ivar
 
     end subroutine iout
 
@@ -581,7 +581,7 @@ contains
         ! Dummy arguments
         character(len=*), intent(in) :: routine_name
 
-        write(stdout, '(a)') routine_name
+        write (stdout, '(a)') routine_name
 
     end subroutine name
 
@@ -590,7 +590,7 @@ contains
         ! Dummy arguments
         integer(ip), intent(in) :: ierror
 
-        if (ierror /= 0) write(stderr, '(a, i5)') '   ierror', ierror
+        if (ierror /= 0) write (stderr, '(a, i5)') '   ierror', ierror
 
     end subroutine check_error
 

@@ -173,7 +173,7 @@ use spherepack
     call shaec(nlat, nlon, isym, nt, r, nlat, nlon, a, b, nlat, nlat, &
         wshaec, ierror)
     if (ierror > 0) then
-        write(*, 202) ierror
+        write (*, 202) ierror
 202     format(' shaec , ierror = ', i2)
         call exit(0)
     end if
@@ -204,7 +204,7 @@ use spherepack
                 errm = amax1(errm, abs(u(i, j)-ue))
         end do
     end do
-    write(*, 204) xlmbda, pertrb, errm
+    write (*, 204) xlmbda, pertrb, errm
 204 format(' xlmbda = ', f5.2, 2x, ' pertrb = ' , e10.3, &
         /' maximum error = ', e10.3)
 end program helmsph

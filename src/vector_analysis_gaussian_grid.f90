@@ -200,23 +200,6 @@ contains
     !
     !               4*nlat*l2+3*max(l1-2, 0)*(2*nlat-l1-1)+nlon+l2+15
     !
-    !
-    !     work   a work array that does not have to be saved.
-    !
-    !     lwork  the dimension of the array work as it appears in the
-    !            program that calls vhagc. define
-    !
-    !               l2 = nlat/2        if nlat is even or
-    !               l2 = (nlat+1)/2    if nlat is odd
-    !
-    !            if ityp <= 2 then lwork must be at least
-    !
-    !               2*nlat*(2*nlon*nt+3*l2)
-    !
-    !            if ityp > 2 then lwork must be at least
-    !
-    !               2*l2*(2*nlon*nt+3*nlat)
-    !
     !     output parameters
     !
     !     br, bi  two or three dimensional arrays (see input parameter nt)

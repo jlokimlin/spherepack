@@ -8,16 +8,16 @@ module type_GaussianWorkspace
         Workspace
 
     use scalar_analysis_routines, only: &
-        ShagsAux
+        ScalarAnalysisUtility
 
     use scalar_synthesis_routines, only: &
-        ShsgsAux
+        ScalarSynthesisUtility
 
     use vector_analysis_routines, only: &
-        VhagsAux
+        VectorAnalysisUtility
 
     use vector_synthesis_routines, only: &
-        VhsgsAux
+        VectorSynthesisUtility
 
     ! Explicit typing only
     implicit none
@@ -142,17 +142,11 @@ contains
         integer(ip),              intent(in)    :: nlon
 
         ! Local variables
-        integer(ip)    :: error_flag, lshags
-        type(ShagsAux) :: aux
+        integer(ip)                 :: error_flag
+        type(ScalarAnalysisUtility) :: util
 
-        ! Compute dimensions of various workspace arrays
-        lshags = aux%get_lshags(nlat, nlon)
-
-        !  Allocate memory
-        if (allocated(self%forward_scalar)) deallocate (self%forward_scalar)
-        allocate (self%forward_scalar(lshags))
-
-        call aux%shagsi(nlat, nlon, self%forward_scalar, error_flag)
+        ! Allocate memory
+        call util%initialize_shags(nlat, nlon, self%forward_scalar, error_flag)
 
         ! Address error flag
         select case (error_flag)
@@ -199,18 +193,11 @@ contains
         integer(ip),              intent(in)    :: nlon
 
         ! Local variables
-        integer(ip)    :: error_flag
-        integer(ip)    :: lshsgs
-        type(ShsgsAux) :: aux
+        integer(ip)                  :: error_flag
+        type(ScalarSynthesisUtility) :: util
 
-        ! Compute dimensions of various workspace arrays
-        lshsgs = aux%get_lshsgs(nlat, nlon)
-
-        !  Allocate memory
-        if (allocated(self%backward_scalar)) deallocate (self%backward_scalar)
-        allocate (self%backward_scalar(lshsgs))
-
-        call aux%shsgsi(nlat, nlon, self%backward_scalar, error_flag)
+        !  Allocate memory and precompute wavetable
+        call util%initialize_shsgs(nlat, nlon, self%backward_scalar, error_flag)
 
         ! Address error flag
         select case (error_flag)
@@ -251,48 +238,42 @@ contains
     subroutine initialize_gaussian_vector_analysis(self, nlat, nlon)
 
         ! Dummy arguments
-        class(GaussianWorkspace), intent(inout)  :: self
-        integer(ip),              intent(in)     :: nlat
-        integer(ip),              intent(in)     :: nlon
+        class(GaussianWorkspace), intent(inout) :: self
+        integer(ip),              intent(in)    :: nlat
+        integer(ip),              intent(in)    :: nlon
 
         ! Local variables
-        integer(ip)     :: error_flag, lvhags
-        type(VhagsAux)  :: aux
+        integer(ip)                 :: error_flag
+        type(VectorAnalysisUtility) :: util
 
-        ! Compute dimensions of various workspace arrays
-        lvhags = aux%get_lvhags(nlat, nlon)
+        ! Allocate memory
+        call util%initialize_vhags(nlat, nlon, self%forward_vector, error_flag)
 
-        !  Allocate memory
-        if (allocated(self%forward_vector)) deallocate (self%forward_vector)
-        allocate(self%forward_vector(lvhags))
-
-            call aux%vhagsi(nlat, nlon, self%forward_vector, error_flag)
-
-            ! Address error flag
-            select case (error_flag)
-                case(0)
-                    return
-                case(1)
-                    error stop 'Object of class(GaussianWorkspace) '&
-                        //'in initialize_gaussian_vector_analysis'&
-                        //'error in the specification of NUMBER_OF_LATITUDES'
-                case(2)
-                    error stop 'Object of class(GaussianWorkspace) '&
-                        //'in initialize_gaussian_vector_analysis'&
-                        //'error in the specification of NUMBER_OF_LONGITUDES'
-                case(3)
-                    error stop 'Object of class(GaussianWorkspace) '&
-                        //'in initialize_gaussian_vector_analysis'&
-                        //'error in the specification of extent for forward_vector'
-                case(4)
-                    error stop 'Object of class(GaussianWorkspace) '&
-                        //'in initialize_gaussian_vector_analysis'&
-                        //'error in the specification of extent for dwork'
-                case default
-                    error stop 'Object of class(GaussianWorkspace) '&
-                        //'in initialize_gaussian_vector_analysis'&
-                        //'Undetermined error flag'
-            end select
+        ! Address error flag
+        select case (error_flag)
+            case(0)
+                return
+            case(1)
+                error stop 'Object of class(GaussianWorkspace) '&
+                    //'in initialize_gaussian_vector_analysis'&
+                    //'error in the specification of NUMBER_OF_LATITUDES'
+            case(2)
+                error stop 'Object of class(GaussianWorkspace) '&
+                    //'in initialize_gaussian_vector_analysis'&
+                    //'error in the specification of NUMBER_OF_LONGITUDES'
+            case(3)
+                error stop 'Object of class(GaussianWorkspace) '&
+                    //'in initialize_gaussian_vector_analysis'&
+                    //'error in the specification of extent for forward_vector'
+            case(4)
+                error stop 'Object of class(GaussianWorkspace) '&
+                    //'in initialize_gaussian_vector_analysis'&
+                    //'error in the specification of extent for dwork'
+            case default
+                error stop 'Object of class(GaussianWorkspace) '&
+                    //'in initialize_gaussian_vector_analysis'&
+                    //'Undetermined error flag'
+        end select
 
     end subroutine initialize_gaussian_vector_analysis
 
@@ -304,17 +285,11 @@ contains
         integer(ip),              intent(in)    :: nlon
 
         ! Local variables
-        integer(ip)    :: error_flag, lvhsgs
-        type(VhsgsAux) :: aux
+        integer(ip)                  :: error_flag
+        type(VectorSynthesisUtility) :: util
 
-        ! Compute required workspace sizes
-        lvhsgs = aux%get_lvhsgs(nlat, nlon)
-
-        !  Allocate memory
-        if (allocated(self%backward_vector)) deallocate (self%backward_vector)
-        allocate (self%backward_vector(lvhsgs))
-
-        call aux%vhsgsi(nlat, nlon, self%backward_vector, error_flag)
+        !  Allocate memory and precompute wavetable
+        call util%initialize_vhsgs(nlat, nlon, self%backward_vector, error_flag)
 
         ! Address error flag
         select case (error_flag)

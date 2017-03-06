@@ -124,7 +124,7 @@ program tvts
     real dtheta, dwts
     
 
-    write( stdout, '(/a/)') '     tvts *** TEST RUN *** '
+    write (stdout, '(/a/)') '     tvts *** TEST RUN *** '
 
     !
     !     set dimension variables

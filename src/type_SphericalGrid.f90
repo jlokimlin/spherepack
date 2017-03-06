@@ -119,7 +119,7 @@ contains
                 file=header//self%grid_type//'_latitudes.dat', &
                 status='replace', action='write', &
                 form='unformatted', access='stream')
-            write( file_unit) theta
+            write (file_unit) theta
             close( file_unit)
         end associate
 
@@ -129,7 +129,7 @@ contains
                 file=header//self%grid_type//'_longitudes.dat', &
                 status='replace', action='write', &
                 form='unformatted', access='stream')
-            write( file_unit) phi
+            write (file_unit) phi
             close( file_unit)
         end associate
 

@@ -129,7 +129,7 @@ program tshpg
                 work, lwrk, ierror)
             call check_error(ierror)
 
-            if (iprint /= 0) write(stdout, '(3(a, i5))') &
+            if (iprint /= 0) write (stdout, '(3(a, i5))') &
                 ' mode =' , nlon, '  nlat =', nlat, '  nlon =', nlon
 
             ! Initialize with pseudo random field
@@ -160,19 +160,19 @@ program tshpg
                 wshp, lwshp, iwshp, liwshp, wrk1, lwrk1, ierror)
             call check_error(ierror)
 
-            if (iprint > 0) write(stdout, '(/a/)') ' approx and exact solution'
+            if (iprint > 0) write (stdout, '(/a/)') ' approx and exact solution'
 
             do j=1, nlon
-                if(iprint > 0) write(stdout, 437) j, (sy(i, j), gh(i, j, 1), i=1, nlat)
+                if(iprint > 0) write (stdout, 437) j, (sy(i, j), gh(i, j, 1), i=1, nlat)
 437             format(' j=', i5, 1p4e15.6/(8x, 1p4e15.6))
             end do
 
             discretization_error = maxval(abs(sy(:nlat, :nlon)-gh(:nlat, :nlon, 1)))
 
-            write(stdout, '(/2(a, i5)/)') &
+            write (stdout, '(/2(a, i5)/)') &
                 'case nlat =', nlat, ' and mtrunc =', mtrunc
 
-            write(stdout, '(3(a, 1pe15.6/))') &
+            write (stdout, '(3(a, 1pe15.6/))') &
                 ' error =', discretization_error, &
                 ' tusl  =', tusl, &
                 ' toe   =', toe

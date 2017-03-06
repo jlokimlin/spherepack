@@ -30,14 +30,6 @@
 !     * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !
 !
-!
-! ... file vhaec.f
-!
-!     this file contains code and documentation for subroutines
-!     vhaec and vhaeci
-
-! *******************************************************************
-
 submodule(vector_analysis_routines) vector_analysis_regular_grid
 
 contains
@@ -45,7 +37,7 @@ contains
     ! Purpose:
     !
     !     subroutine vhaec(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
-    !                      mdab, ndab, wvhaec, lvhaec, work, lwork, ierror)
+    !                      mdab, ndab, wvhaec, ierror)
     !
     !     subroutine vhaec performs the vector spherical harmonic analysis
     !     on the vector field (v, w) and stores the result in the arrays

@@ -85,7 +85,7 @@ program test_gaussian_latitudes_and_weights_routines
     real     :: sumw
     
     ! Description
-    write( stdout, '(/a/)') &
+    write (stdout, '(/a/)') &
         '     gaussian_latitudes_and_weights_routines *** TEST RUN *** '
 
     lwork = NLAT+1
@@ -96,9 +96,9 @@ program test_gaussian_latitudes_and_weights_routines
     tdoub = t1(1)-hold
 
     ! Check error flag
-    if (ierror /= 0) write( stdout, '(a, i5)') ' ierror = ', ierror
+    if (ierror /= 0) write (stdout, '(a, i5)') ' ierror = ', ierror
 
-    write( stdout, '(a, 1pe15.6)') ' tdoub ', tdoub
+    write (stdout, '(a, 1pe15.6)') ' tdoub ', tdoub
 
     ! Compare double with double
     ldw = NLAT+2
@@ -108,9 +108,9 @@ program test_gaussian_latitudes_and_weights_routines
     tdoub = etime(t1)
     tdoub = t1(1)-hold
 
-    if (ierror /= 0) write( stdout, '(a, i5)') ' ierror = ', ierror
+    if (ierror /= 0) write (stdout, '(a, i5)') ' ierror = ', ierror
 
-    write( stdout, '(a, 1pe15.6)') &
+    write (stdout, '(a, 1pe15.6)') &
         ' tdoub compute_gaussian_latitudes_and_weights', tdoub
 
     dwmx = 0.0
@@ -128,12 +128,12 @@ program test_gaussian_latitudes_and_weights_routines
 
     dtmax = dtmax/tmax
     dwmax = dwmax/dwmx
-    write( stdout, 33) NLAT, dtmax, dwmax
+    write (stdout, 33) NLAT, dtmax, dwmax
 33  format(' nlat', i6, '  points ', 1pd15.6, ' weights ', d15.6)
 
     sumw = sum(wts)
 
-    write( stdout, 638) sumw
+    write (stdout, 638) sumw
 638 format('  sumw ', 1pd39.30)
 
     hold = etime(t2)
@@ -142,12 +142,12 @@ program test_gaussian_latitudes_and_weights_routines
     call sgaqd(NLAT, theta_sp, wts_sp, work_sp, lwork, ierror)
     tsing = etime(t2)
     tsing = t2(1)-hold
-    if (ierror /= 0) write( stdout, 5) ierror
+    if (ierror /= 0) write (stdout, 5) ierror
 5   format(' iserror=', i5)
 
     sums =sum(wts_sp)
 
-    write( stdout, 636) sums
+    write (stdout, 636) sums
 636 format('  sums ', 1pe24.15)
     dmax = 0.0
     wmax = 0.0
@@ -165,10 +165,10 @@ program test_gaussian_latitudes_and_weights_routines
 6       format(' wts ', 1pd15.6, ' swts ', e15.6, ' rpter ', e15.6)
     end do
 
-    !      write( stdout, 7) (diff(i), i=nlat-25, nlat)
+    !      write (stdout, 7) (diff(i), i=nlat-25, nlat)
 7   format(' diff in weights'/(1p8e10.03))
     dmax = dmax/wmax
-    write( stdout, 9) NLAT, irm, dmax, rmax
+    write (stdout, 9) NLAT, irm, dmax, rmax
 9   format(' weights: nlat ', i6, ' irele ', i6, &
         ' dmax ', 1pe15.6, ' rmax ', 1pe15.6)
     dmax = 0.0
@@ -184,10 +184,10 @@ program test_gaussian_latitudes_and_weights_routines
             irm = i
         end if
     end do
-    !      write( stdout, 11) (diff(i), i=nlat-25, nlat)
+    !      write (stdout, 11) (diff(i), i=nlat-25, nlat)
 11  format(' diff in points'/(1p8e10.03))
     dmax = dmax/pmax
-    write( stdout, 12) NLAT, irm, dmax, rmax
+    write (stdout, 12) NLAT, irm, dmax, rmax
 12  format(' points:  nlat ', i6, ' irele ', i6, &
         ' dmax ', 1pe15.6, ' rmax ', 1pe15.6)
 
@@ -198,9 +198,9 @@ program test_gaussian_latitudes_and_weights_routines
     end do
 
     ! format(' diff in points'/(1p8e10.03))
-    write( stdout, 112) dmax
+    write (stdout, 112) dmax
 112 format(' max difference in mu', 1pe15.6)
-    write( stdout, 1) NLAT, tsing, tdoub
+    write (stdout, 1) NLAT, tsing, tdoub
 1   format(' nlat', i6, ' tsing', 1pe15.6, ' tdoub', e15.6)
 
 contains
@@ -351,7 +351,7 @@ contains
         dcor = pb/dpb
         sgnd = 1.0
         if (dcor /= 0.0) sgnd = dcor/abs(dcor)
-        !      write( stdout, 2) nix, zero, theta(nix), dcor, cmax, sgnd
+        !      write (stdout, 2) nix, zero, theta(nix), dcor, cmax, sgnd
 2       format(i7, 1p5d15.6)
         dcor = sgnd*min(abs(dcor), cmax)
         zero = zero-dcor
@@ -702,7 +702,7 @@ contains
         real cn, t1, t2, t3, t4, coef, fi
         !
         cn = 2.0
-        write( stdout, 9) cn
+        write (stdout, 9) cn
 9       format(' check1 on dble cn ', 1pd20.011)
         if (n>0) then
             ic = 0
@@ -712,12 +712,12 @@ contains
                 cn = (1.0-1.0/fi**2)*cn
                 if (abs(cn) > 5.0 .and. ic == 0) then
                     ic = 1
-                    write( stdout, 7) i, cn
+                    write (stdout, 7) i, cn
 7                   format('  i ', i7, ' check3 on cn', 1pd15.6)
                 end if
             end do
         end if
-        write( stdout, 8) cn
+        write (stdout, 8) cn
 8       format(' check2 on dble cn ', 1pd20.011)
         cn = sqrt(cn)
         ncp = n/2+1
@@ -727,7 +727,7 @@ contains
         t4 = n+n+1.0
         cp(ncp) = cn
         coef = 1.0
-        write( stdout, 11) cn
+        write (stdout, 11) cn
 11      format(' check on dble cn ', 1pd20.011)
         !      do j = ncp-1, 1, -1
         j = ncp

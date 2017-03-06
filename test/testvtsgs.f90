@@ -122,16 +122,16 @@
 !    !     initialize spherepack routines
 !    !
 !    call shigs(nlat, nlon, wshi, lwshi, work, lwork, dwork, ldwork, ierror)
-!    if(ierror /= 0) write(6, 55) ierror
+!    if(ierror /= 0) write (6, 55) ierror
 !55  format('testvtsgs:  error' i4 ' in shigs')
 !    call vhagsi(nlat, nlon, wvha, lwvha, dwork, ldwork, ierror)
-!    if(ierror /= 0) write(6, 57) ierror
+!    if(ierror /= 0) write (6, 57) ierror
 !57  format('testvtsgs:  error' i4 ' in vhagsi')
 !    call vhsgsi(nlat, nlon, wvhs, lwvhs, dwork, ldwork, ierror)
-!    if(ierror /= 0) write(6, 58) ierror
+!    if(ierror /= 0) write (6, 58) ierror
 !58  format(' testvtsgs: error' i4 ' in vhsgsi')
 !    call vtsgsi(nlat, nlon, wvts, lwvts, work, lwork, dwork, ldwork, ierror)
-!    if(ierror /= 0) write(6, 59) ierror
+!    if(ierror /= 0) write (6, 59) ierror
 !59  format(' testvtsgs: error' i4 ' in vtsgsi')
 !    !
 !    !     compute gauss points and weights
@@ -198,7 +198,7 @@
 !    !
 !    call vhsgs(nlat, nlon, 0, 1, v, w, idp, jdp, br, bi, &
 !        cr, ci, mdab, ndab, wvhs, lwvhs, work, lwork, ierror)
-!    if(ierror /= 0) write(6, 79) ierror
+!    if(ierror /= 0) write (6, 79) ierror
 !79  format(' testvtsgs: error' i4 ' in vhsgs at point 1')
 !    !
 !    do j=1, nlon
@@ -222,16 +222,16 @@
 !    !
 !    call shags(nlat, nlon, 0, 1, x, idp, jdp, a(1, 1, 1), b(1, 1, 1), &
 !        mdab, ndab, wshi, lwshi, work, lwork, ierror)
-!    if(ierror /= 0) write(6, 16) ierror
+!    if(ierror /= 0) write (6, 16) ierror
 !16  format(' testvtsgs: error' i4 ' in shags at point 2')
 !    !
 !    !     write harmonic coefficients for x
 !    !
-!    !      write(6, 20)
+!    !      write (6, 20)
 !    ! 20   format(//'  harmonic coefficients for x'//)
 !    !      do mp1=1, nlat
 !    !      do np1=mp1, nlat
-!    !      write(6, 5) mp1, np1, a(mp1, np1, 1), b(mp1, np1, 1)
+!    !      write (6, 5) mp1, np1, a(mp1, np1, 1), b(mp1, np1, 1)
 !    ! 5    format(2i5, 1p2e15.6)
 !    !      end do
 !    !      end do
@@ -240,16 +240,16 @@
 !    !
 !    call shags(nlat, nlon, 0, 1, y, idp, jdp, a(1, 1, 2), b(1, 1, 2), &
 !        mdab, ndab, wshi, lwshi, work, lwork, ierror)
-!    if(ierror /= 0) write(6, 17) ierror
+!    if(ierror /= 0) write (6, 17) ierror
 !17  format(' testvtsgs: error' i4 ' in shags at point 3')
 !    !
 !    !     write harmonic coefficients for y
 !    !
-!    !      write(6, 21)
+!    !      write (6, 21)
 !    ! 21   format(//'  harmonic coefficients for y'//)
 !    !      do mp1=1, nlat
 !    !      do np1=mp1, nlat
-!    !      write(6, 5) mp1, np1, a(mp1, np1, 2), b(mp1, np1, 2)
+!    !      write (6, 5) mp1, np1, a(mp1, np1, 2), b(mp1, np1, 2)
 !    !      end do
 !    !      end do
 !    !
@@ -257,16 +257,16 @@
 !    !
 !    call shags(nlat, nlon, 0, 1, z, idp, jdp, a(1, 1, 3), b(1, 1, 3), &
 !        mdab, ndab, wshi, lwshi, work, lwork, ierror)
-!    if(ierror /= 0) write(6, 18) ierror
+!    if(ierror /= 0) write (6, 18) ierror
 !18  format(' testvtsgs: error' i4 ' in shags at point 4')
 !    !
 !    !     write harmonic coefficients for z
 !    !
-!    !      write(6, 22)
+!    !      write (6, 22)
 !    ! 22   format(//'  harmonic coefficients for z'//)
 !    !      do mp1=1, nlat
 !    !      do np1=mp1, nlat
-!    !      write(6, 5) mp1, np1, a(mp1, np1, 3), b(mp1, np1, 3)
+!    !      write (6, 5) mp1, np1, a(mp1, np1, 3), b(mp1, np1, 3)
 !    !      end do
 !    !      end do
 !    !
@@ -292,7 +292,7 @@
 !    !
 !    call shsgs(nlat, nlon, 0, 9, c, idp, jdp, da, db, idp, idp, &
 !        wshi, lwshi, work, lwork, ierror)
-!    if(ierror /= 0) write(6, 19) ierror
+!    if(ierror /= 0) write (6, 19) ierror
 !19  format(' testvtsgs: error' i4 ' in shsgs at point 5')
 !    !
 !    !     convert to jacobian to spherical coordinates
@@ -336,7 +336,7 @@
 !    !
 !    call vtsgs(nlat, nlon, 0, 1, vt, wt, idp, jdp, br, bi, cr, ci, &
 !        mdab, ndab, wvts, lwvts, work, lwork, ierror)
-!    if(ierror /= 0) write(6, 4) ierror
+!    if(ierror /= 0) write (6, 4) ierror
 !4   format(' testvtsgs: error' i4 ' in vtsgs during initialization')
 !    dmax1 = 0.
 !    dmax2 = 0.
@@ -346,7 +346,7 @@
 !            dmax2 = max(dmax2, abs(s(i, j, 3, 2)-wt(i, j)))
 !        end do
 !    end do
-!    write(6, 2) dmax1, dmax2
+!    write (6, 2) dmax1, dmax2
 !2   format(' testvtsgs: error in vt '1pe15.6' error in wt '1pe15.6)
 !end program tvtsgs
 !subroutine ctos(theta, phi, x, y, z, u, v, w)

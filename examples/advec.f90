@@ -113,7 +113,7 @@ program advec
         '(a, i10, a, f10.2/, a, f10.0, a, i10/, a, i10, '&
         //'a, 1pe15.6/, a, 1pe15.6, a, 0pf10.2/a, 1pe15.6, a, 1pe15.6)'
 
-    write( stdout, '(/a)') '     advec *** TEST RUN *** '
+    write (stdout, '(/a)') '     advec *** TEST RUN *** '
 
     ! Allocate memory
     call solver%create(nlat=NLATS, nlon=NLONS)
@@ -176,8 +176,8 @@ program advec
                 err2 => norm2(exact_phi-phi)/p0_l2 &
                )
 
-                write( stdout, '(/a)') ' advecting cosine bell, test case 2'
-                write( stdout, fmt = WRITE_FMT) &
+                write (stdout, '(/a)') ' advecting cosine bell, test case 2'
+                write (stdout, fmt = WRITE_FMT) &
                     ' exit number              '  , ncycle, &
                     '  model time in  hours      ', htime, &
                     ' time step in seconds      ' , dt, &

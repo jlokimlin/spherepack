@@ -63,7 +63,7 @@ contains
         select type(self)
             class is (GaussianGrid)
             if (.not.self%initialized) then
-                write(stderr, '(a)') &
+                write (stderr, '(a)') &
                     'Uninitialized object of class(GaussianGrid) in '//routine
             end if
         end select
@@ -202,7 +202,7 @@ contains
                 file=header//'gaussian_weights.dat', &
                 status='replace', form='unformatted', &
                 action='write', access='stream')
-            write( file_unit) wts
+            write (file_unit) wts
             close( file_unit)
         end associate
 

@@ -152,7 +152,7 @@ use spherepack
     !
     !     write input arguments to vshifte
     !
-    write(*, 100) ioff, nlon, nlat, lsave, lwork
+    write (*, 100) ioff, nlon, nlat, lsave, lwork
 100 format(' vshifte arguments', &
         /' ioff = ', i2, ' nlon = ', i3, ' nlat = ', i3, &
         /' lsave = ', i5, ' lwork = ', i5)
@@ -161,7 +161,7 @@ use spherepack
     !
     call vshifte(ioff, nlon, nlat, uoff, voff, ureg, vreg, &
         wsave, lsave, work, lwork, ier)
-    write(*, 200) ier
+    write (*, 200) ier
 200 format(' ier = ', i2)
     if (ier==0) then
         !
@@ -192,7 +192,7 @@ use spherepack
         end do
         err2u = sqrt(err2u/(nlon*(nlat+1)))
         err2v = sqrt(err2v/(nlon*(nlat+1)))
-        write(*, 300) err2u, err2v
+        write (*, 300) err2u, err2v
 300     format(' least squares error ', &
             /' err2u = ', e10.3, ' err2v = ', e10.3)
     end if
@@ -210,10 +210,10 @@ use spherepack
             voff(j, i) = 0.0
         end do
     end do
-    write(*, 100) ioff, nlon, nlat, lsave, lwork
+    write (*, 100) ioff, nlon, nlat, lsave, lwork
     call vshifte(ioff, nlon, nlat, uoff, voff, ureg, vreg, &
         wsave, lsave, work, lwork, ier)
-    write(*, 200) ier
+    write (*, 200) ier
     if (ier == 0) then
         !
         !     compute error in uoff, voff
@@ -243,6 +243,6 @@ use spherepack
         end do
         err2u = sqrt(err2u/(nlon*(nlat+1)))
         err2v = sqrt(err2v/(nlon*(nlat+1)))
-        write(*, 300) err2u, err2v
+        write (*, 300) err2u, err2v
     end if
 end program testvshifte

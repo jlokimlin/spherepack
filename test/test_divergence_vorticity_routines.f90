@@ -242,19 +242,19 @@ contains
                 !  Print earlier output from platform with 64-bit floating point
                 !    arithmetic followed by the output from this computer
                 !
-                write( stdout, '(a)') ''
-                write( stdout, '(a)') '     tidvt *** TEST RUN *** '
-                write( stdout, '(a)') ''
-                write( stdout, '(a)') '     grid type = '//sphere_type%grid%grid_type
-                write( stdout, '(a)') '     Testing vorticity'
-                write( stdout, '(2(a, i3))') '     nlat = ', NLATS, ' nlon = ', NLONS
-                write( stdout, '(a)') '     Previous 64 bit floating point arithmetic result '
-                write( stdout, '(a)') previous_vorticity_error
-                write( stdout, '(a)') previous_divergence_error
-                write( stdout, '(a)') '     The output from your computer is: '
-                write( stdout, '(a, 1pe15.6)') '     vorticity error     = ', err2vt
-                write( stdout, '(a, 1pe15.6)') '     divergence error    = ', err2dv
-                write( stdout, '(a)') ''
+                write (stdout, '(a)') ''
+                write (stdout, '(a)') '     tidvt *** TEST RUN *** '
+                write (stdout, '(a)') ''
+                write (stdout, '(a)') '     grid type = '//sphere_type%grid%grid_type
+                write (stdout, '(a)') '     Testing vorticity'
+                write (stdout, '(2(a, i3))') '     nlat = ', NLATS, ' nlon = ', NLONS
+                write (stdout, '(a)') '     Previous 64 bit floating point arithmetic result '
+                write (stdout, '(a)') previous_vorticity_error
+                write (stdout, '(a)') previous_divergence_error
+                write (stdout, '(a)') '     The output from your computer is: '
+                write (stdout, '(a, 1pe15.6)') '     vorticity error     = ', err2vt
+                write (stdout, '(a, 1pe15.6)') '     divergence error    = ', err2dv
+                write (stdout, '(a)') ''
             end associate
         end associate
 
@@ -288,19 +288,19 @@ contains
                 !  Print earlier output from platform with 64-bit floating point
                 !    arithmetic followed by the output from this computer
                 !
-                write( stdout, '(a)') ''
-                write( stdout, '(a)') '     test divergence and vorticity *** TEST RUN *** '
-                write( stdout, '(a)') ''
-                write( stdout, '(a)') '     grid type = '//sphere_type%grid%grid_type
-                write( stdout, '(a)') '     Testing vorticity inversion'
-                write( stdout, '(2(a, i3))') '     nlat = ', NLATS, ' nlon = ', NLONS
-                write( stdout, '(a)') '     Previous 64 bit floating point arithmetic result '
-                write( stdout, '(a)') previous_polar_inversion_error
-                write( stdout, '(a)') previous_azimuthal_inversion_error
-                write( stdout, '(a)') '     The output from your computer is: '
-                write( stdout, '(a, 1pe15.6)') '     polar inversion error     = ', err2v
-                write( stdout, '(a, 1pe15.6)') '     azimuthal inversion error = ', err2w
-                write( stdout, '(a)') ''
+                write (stdout, '(a)') ''
+                write (stdout, '(a)') '     test divergence and vorticity *** TEST RUN *** '
+                write (stdout, '(a)') ''
+                write (stdout, '(a)') '     grid type = '//sphere_type%grid%grid_type
+                write (stdout, '(a)') '     Testing vorticity inversion'
+                write (stdout, '(2(a, i3))') '     nlat = ', NLATS, ' nlon = ', NLONS
+                write (stdout, '(a)') '     Previous 64 bit floating point arithmetic result '
+                write (stdout, '(a)') previous_polar_inversion_error
+                write (stdout, '(a)') previous_azimuthal_inversion_error
+                write (stdout, '(a)') '     The output from your computer is: '
+                write (stdout, '(a, 1pe15.6)') '     polar inversion error     = ', err2v
+                write (stdout, '(a, 1pe15.6)') '     azimuthal inversion error = ', err2w
+                write (stdout, '(a)') ''
             end associate
         end associate
 

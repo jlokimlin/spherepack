@@ -365,17 +365,6 @@ contains
             idz = (mmax*(2*nlat-mmax+1))/2
             lzimn = idz*imid
 
-            select case (ityp)
-                case(0:2)
-                    ist = imid
-                    idv = nlat
-                case default
-                    ist = 0
-                    idv = imid
-            end select
-
-            lnl = nt*idv*nlon
-
             ! Check calling arguments
             if (nlat < 3) then
                 ierror = 1
@@ -406,6 +395,16 @@ contains
             if (ierror /= 0) return
 
             ! Set required workspace size
+            select case (ityp)
+                case(0:2)
+                    ist = imid
+                    idv = nlat
+                case default
+                    ist = 0
+                    idv = imid
+            end select
+
+            lnl = nt*idv*nlon
             lwork = (2 * lnl) + (idv * nlon)
 
             block
@@ -487,9 +486,6 @@ contains
     !
     !                 l1*l2*(nlat+nlat-l1+1)+nlon+15+2*nlat
     !
-    !
-    !     **************************************************************
-    !
     !     output parameters
     !
     !     wvhsgs an array which is initialized for use by subroutine vhsgs.
@@ -525,7 +521,7 @@ contains
                 ierror = 1
             else if (nlon < 1) then
                 ierror = 2
-            else if (lvhsgs < 2*(imid*lmn)+nlon+15) then
+            else if (lvhsgs < 2*(imid*lmn) + nlon + 15) then
                 ierror = 3
             else
                 ierror = 0
@@ -576,17 +572,14 @@ contains
         integer(ip) :: lmn
 
         associate (i => return_value)
-            !
+
             !  set wvhsgs pointers
-            !
             lmn = nlat*(nlat+1)/2
             i(1) = 1
             i(2) = i(1)+imid*lmn
             i(3) = i(2)+imid*lmn
 
-            !
             !  set work pointers
-            !
             i(4) = ist+1
             i(5) = lnl+1
             i(6) = i(5)+ist

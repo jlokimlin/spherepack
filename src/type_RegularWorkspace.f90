@@ -8,16 +8,16 @@ module type_RegularWorkspace
         Workspace
 
     use scalar_analysis_routines, only: &
-        ShaesAux
+        ScalarAnalysisUtility
 
     use scalar_synthesis_routines, only: &
-        ShsesAux
+        ScalarSynthesisUtility
 
     use vector_analysis_routines, only: &
-        VhaesAux
+        VectorAnalysisUtility
 
     use vector_synthesis_routines, only: &
-        VhsesAux
+        VectorSynthesisUtility
 
     ! Explicit typing only
     implicit none
@@ -57,16 +57,16 @@ contains
         type(RegularWorkspace)            :: return_value
 
         ! Local variables
-        integer(ip) :: nt_op
+        integer(ip) :: number_of_syntheses
 
         ! Address optional argument
         if (present(nt)) then
-            nt_op = nt
+            number_of_syntheses = nt
         else
-            nt_op = 1
+            number_of_syntheses = 1
         end if
 
-        call return_value%create(nlat, nlon, nt_op)
+        call return_value%create(nlat, nlon, number_of_syntheses)
 
     end function regular_workspace_constructor
 
@@ -142,18 +142,11 @@ contains
         integer(ip),             intent(in)    :: nlon
 
         ! Local variables
-        integer(ip)    :: error_flag, lshaes
-        type(ShaesAux) :: aux
-
-        ! Compute dimensions of various workspace arrays
-        lshaes = aux%get_lshaes(nlat, nlon)
+        integer(ip)                 :: error_flag
+        type(ScalarAnalysisUtility) :: util
 
         ! Allocate memory
-        if (allocated(self%forward_scalar)) deallocate (self%forward_scalar)
-        allocate (self%forward_scalar(lshaes))
-
-        ! Call procedural routine
-        call aux%shaesi(nlat, nlon, self%forward_scalar, error_flag)
+        call util%initialize_shaes(nlat, nlon, self%forward_scalar, error_flag)
 
         ! Address error flag
         select case (error_flag)
@@ -191,19 +184,13 @@ contains
         integer(ip),             intent(in)     :: nlon
 
         ! Local variables
-        integer(ip)    :: error_flag, lshses
-        type(ShsesAux) :: aux
+        integer(ip)                  :: error_flag
+        type(ScalarSynthesisUtility) :: util
 
-        ! Set up various workspace dimensions
-        lshses = aux%get_lshses(nlat, nlon)
+        !  Allocate memory and precompute wavetable
+        call util%initialize_shses(nlat, nlon, self%backward_scalar, error_flag)
 
-        !  Allocate memory
-        if (allocated(self%backward_scalar)) deallocate (self%backward_scalar)
-        allocate (self%backward_scalar(lshses))
-
-        call aux%shsesi(nlat, nlon, self%backward_scalar, error_flag)
-
-        !  Address error flag
+        ! Address error flag
         select case (error_flag)
             case(0)
                 return
@@ -239,17 +226,11 @@ contains
         integer(ip),             intent(in)    :: nlon
 
         ! Local variables
-        integer(ip)     :: error_flag, lvhaes
-        type(VhaesAux)  :: aux
+        integer(ip)                 :: error_flag
+        type(VectorAnalysisUtility) :: util
 
-        ! Compute various workspace dimensions
-        lvhaes = aux%get_lvhaes(nlat, nlon)
-
-        !  Allocate memory
-        if (allocated(self%forward_vector)) deallocate (self%forward_vector)
-        allocate (self%forward_vector(lvhaes))
-
-        call aux%vhaesi(nlat, nlon, self%forward_vector, error_flag)
+        !  Allocate memory and precompute wavetable
+        call util%initialize_vhaes(nlat, nlon, self%forward_vector, error_flag)
 
         ! Address the error flag
         select case (error_flag)
@@ -291,17 +272,11 @@ contains
         integer(ip),             intent(in)    :: nlon
 
         ! Local variables
-        integer(ip)    :: error_flag, lvhses
-        type(VhsesAux) :: aux
-
-        ! Compute various workspace dimensions
-        lvhses = aux%get_lvhses(nlat, nlon)
+        integer(ip)                  :: error_flag
+        type(VectorSynthesisUtility) :: util
 
         ! Allocate memory
-        if (allocated(self%backward_vector)) deallocate (self%backward_vector)
-        allocate (self%backward_vector(lvhses))
-
-        call aux%vhsesi(nlat, nlon, self%backward_vector, error_flag)
+        call util%initialize_vhses(nlat, nlon, self%backward_vector, error_flag)
 
         ! Address the error flag
         select case (error_flag)

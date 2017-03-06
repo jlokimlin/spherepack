@@ -202,7 +202,7 @@ use spherepack
     !
     !     print trssph input parameters
     !
-    write(*, 100) intl, igride(1), igride(2), nlone, nlate, &
+    write (*, 100) intl, igride(1), igride(2), nlone, nlate, &
         igridg(1), igridg(2), nlong, nlatg, lsave, lwork, ldwork
 100 format(//' EQUALLY SPACED TO GAUSSIAN GRID TRANSFER ' , &
         /' trssph input arguments: ' , &
@@ -264,7 +264,7 @@ use spherepack
         end do
     end do
 
-    write(*, 400) intl, igridg(1), igridg(2), nlong, nlatg, igride(1), &
+    write (*, 400) intl, igridg(1), igridg(2), nlong, nlatg, igride(1), &
         igride(2), nlone, nlate, lsave, lwork, ldwork
 400 format(/' GAUSSIAN TO EQUALLY SPACED GRID TRANSFER ' , &
         /' trssph input arguments: ' , &

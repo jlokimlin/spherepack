@@ -173,7 +173,7 @@ program shallow
     type(ShallowWaterSolver)         :: solver
     character(len=:), allocatable    :: write_fmt
 
-    write( stdout, '(/a)') '     shallow *** TEST RUN *** '
+    write (stdout, '(/a)') '     shallow *** TEST RUN *** '
 
     !  Parameters for test
     HALF_PI = PI/2
@@ -320,8 +320,8 @@ program shallow
             p = pg
             htime = time/3600.0_wp
 
-            write( stdout, '(/a)') ' steady nonlinear rotated flow:'
-            write( stdout, fmt=write_fmt) &
+            write (stdout, '(/a)') ' steady nonlinear rotated flow:'
+            write (stdout, fmt=write_fmt) &
                 ' cycle number              ', ncycle, &
                 ' model time in  hours      ', htime, &
                 ' time step in seconds      ', dt, &
@@ -358,7 +358,7 @@ program shallow
                 evmax = evmax/vmax
                 epmax = epmax/pmax
 
-                write( stdout, fmt='(2(a, 1pe15.6)/, a, 1pe15.6)') &
+                write (stdout, fmt='(2(a, 1pe15.6)/, a, 1pe15.6)') &
                     ' max error in velocity', evmax, &
                     ' max error in geopot. ', epmax, &
                     ' l2 error in velocity ', dvmax, &

@@ -25,16 +25,16 @@ module type_RegularSphere
         operator(*)
     
     use scalar_analysis_routines, only: &
-        ShaesAux
+        ScalarAnalysisUtility
 
     use scalar_synthesis_routines, only: &
-        ShsesAux
+        ScalarSynthesisUtility
 
     use vector_analysis_routines, only: &
-        VhaesAux
+        VectorAnalysisUtility
 
     use vector_synthesis_routines, only: &
-        VhsesAux
+        VectorSynthesisUtility
 
     ! Explicit typing only
     implicit none
@@ -90,11 +90,11 @@ contains
         real(wp),    optional, intent(in)    :: rsphere
 
         ! Local variables
-        integer(ip) :: ntrunc_op
-        integer(ip) :: isym_op
-        integer(ip) :: ityp_op
-        integer(ip) :: nt_op
-        real(wp)    :: rsphere_op
+        integer(ip) :: truncation_number
+        integer(ip) :: scalar_symmetries
+        integer(ip) :: vector_symmetries
+        integer(ip) :: number_of_syntheses
+        real(wp)    :: sphere_radius
 
         ! Ensure that object is usable
         call self%destroy()
@@ -107,41 +107,42 @@ contains
 
         ! Set truncation number
         if (present(ntrunc)) then
-            ntrunc_op = ntrunc
+            truncation_number = ntrunc
         else
-            ntrunc_op = nlat - 1
+            truncation_number = nlat - 1
         end if
 
         ! Set scalar symmetries
         if (present(isym)) then
-            isym_op = isym
+            scalar_symmetries = isym
         else
-            isym_op = 0
+            scalar_symmetries = 0
         end if
 
         ! Set vector symmetries
         if (present(itype)) then
-            ityp_op = itype
+            vector_symmetries = itype
         else
-            ityp_op = 0
+            vector_symmetries = 0
         end if
 
         ! Set number of syntheses
         if (present(nt)) then
-            nt_op = nt
+            number_of_syntheses = nt
         else
-            nt_op = 1
+            number_of_syntheses = 1
         end if
 
         ! Set radius of sphere
         if (present(rsphere)) then
-            rsphere_op = rsphere
+            sphere_radius = rsphere
         else
-            rsphere_op = ONE
+            sphere_radius = ONE
         end if
 
         !  Create parent type
-        call self%create_sphere(nlat, nlon, ntrunc_op, isym_op, ityp_op, nt_op, rsphere_op)
+        call self%create_sphere(nlat, nlon, truncation_number, scalar_symmetries, &
+            vector_symmetries, number_of_syntheses, sphere_radius)
 
         ! Set flag
         self%initialized = .true.
@@ -174,7 +175,7 @@ contains
         select type(self)
             class is (RegularSphere)
             if (.not.self%initialized) then
-                write(stderr, '(a)') &
+                write (stderr, '(a)') &
                     'Uninitialized object of class(RegularSphere) in '//routine
             end if
         end select
@@ -189,7 +190,7 @@ contains
 
         ! Local variables
         integer(ip)    :: error_flag
-        type(ShaesAux) :: aux
+        type(ScalarAnalysisUtility) :: aux
 
         ! Check if object is usable
         call self%assert_initialized('regular_scalar_analysis')
@@ -213,7 +214,7 @@ contains
                         ndab => self%NUMBER_OF_LATITUDES, &
                         wshaes => workspace%forward_scalar, &
                         ierror => error_flag &
-                       )
+                        )
 
                         !  Perform regular (real) spherical harmonic analysis
                         call aux%shaes(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, &
@@ -258,7 +259,7 @@ contains
 
         ! Local variables
         integer(ip)    :: error_flag
-        type(ShsesAux) :: aux
+        type(ScalarSynthesisUtility) :: aux
 
         ! Check if object is usable
         call self%assert_initialized('regular_scalar_synthesis')
@@ -282,7 +283,7 @@ contains
                         ndab => size(workspace%scalar_coefficients%real_component, dim=2), &
                         wshses => workspace%backward_scalar, &
                         ierror => error_flag &
-                       )
+                        )
 
                         !  Perform (real) spherical harmonic scalar synthesis
                         call aux%shses(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, &
@@ -328,7 +329,7 @@ contains
 
         ! Local variables
         integer(ip)    :: error_flag
-        type(VhaesAux) :: aux
+        type(VectorAnalysisUtility) :: aux
 
         ! Check if object is usable
         call self%assert_initialized('regular_vector_analysis')
@@ -355,7 +356,7 @@ contains
                         ndab => size(workspace%vector_coefficients%polar%real_component, dim=2), &
                         wvhaes => workspace%forward_vector, &
                         ierror => error_flag &
-                       )
+                        )
 
                         !  Perform (real) vector spherical harmonic analysis
                         call aux%vhaes(nlat, nlon, ityp, nt, v, w, idvw, jdvw, &
@@ -418,7 +419,7 @@ contains
 
         ! Local variables
         integer(ip)    :: error_flag
-        type(VhsesAux) :: aux
+        type(VectorSynthesisUtility) :: aux
 
         ! Check if object is usable
         call self%assert_initialized('regular_vector_synthesis')
@@ -445,7 +446,7 @@ contains
                         ndab => size(workspace%vector_coefficients%polar%real_component, dim=2), &
                         wvhses => workspace%backward_vector, &
                         ierror => error_flag &
-                       )
+                        )
 
                         !  Perform (real) vector spherical harmonic analysis
                         call aux%vhses(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &

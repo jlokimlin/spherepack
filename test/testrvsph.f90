@@ -239,7 +239,7 @@ use spherepack
     !
     !     print trvsph input arguments
     !
-    write(*, 100) intl, igride(1), igride(2), nlone, nlate, ive, &
+    write (*, 100) intl, igride(1), igride(2), nlone, nlate, ive, &
         igridg(1), igridg(2), nlong, nlatg, ivg, lsave, lwork, ldwork
 100 format(//' EQUALLY SPACED TO GAUSSIAN GRID TRANSFER ' , &
         /' trvsph input arguments: ' , &
@@ -316,7 +316,7 @@ use spherepack
             ve(i, j) = 0.0
         end do
     end do
-    write(*, 101) intl, igridg(1), igridg(2), nlong, nlatg, ivg, &
+    write (*, 101) intl, igridg(1), igridg(2), nlong, nlatg, ivg, &
         igride(1), igride(2), nlone, nlate, ive, lsave, lwork, ldwork
 101 format(//' GAUSSIAN TO EQUALLY SPACED GRID TRANSFER ' , &
         /' trvsph input arguments: ' , &

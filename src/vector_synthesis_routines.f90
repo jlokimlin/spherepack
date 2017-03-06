@@ -16,10 +16,12 @@ module vector_synthesis_routines
 
     ! Everything is private unless stated otherwise
     private
-    public :: vhsgc, vhsgci
-    public :: vhses, vhsesi, VhsesAux
-    public :: vhsec, vhseci
-    public :: vhsgs, vhsgsi, VhsgsAux
+    public :: vhsgc, vhsgci, initialize_vhsec
+    public :: vhses, vhsesi, initialize_vhses
+    public :: vhsec, vhseci, initialize_vhsgc
+    public :: vhsgs, vhsgsi, initialize_vhsgs
+    public :: VectorSynthesisUtility
+    public :: get_lvhsgs
     
     ! Parameters confined to the module
     real(wp), parameter :: ZERO = 0.0_wp
@@ -27,6 +29,23 @@ module vector_synthesis_routines
     real(wp), parameter :: ONE = 1.0_wp
     real(wp), parameter :: TWO = 2.0_wp
     real(wp), parameter :: FOUR = 4.0_wp
+
+    type, public :: VectorSynthesisUtility
+    contains
+        ! Type-bound procedures
+        procedure, nopass :: vhsec
+        procedure, nopass :: vhseci
+        procedure, nopass :: vhsgc
+        procedure, nopass :: vhsgci
+        procedure, nopass :: vhses
+        procedure, nopass :: vhsesi
+        procedure, nopass :: vhsgs
+        procedure, nopass :: vhsgsi
+        procedure, nopass :: initialize_vhsec
+        procedure, nopass :: initialize_vhses
+        procedure, nopass :: initialize_vhsgc
+        procedure, nopass :: initialize_vhsgs
+    end type VectorSynthesisUtility
 
     ! Declare interfaces for submodule implementation
     interface
@@ -155,29 +174,112 @@ module vector_synthesis_routines
         end subroutine vhsgsi
     end interface
 
-    type, public :: VhsesAux
-    contains
-        ! Type-bound procedures
-        procedure, nopass :: vhses
-        procedure, nopass :: vhsesi
-        procedure, nopass :: get_lvhses
-        procedure, nopass :: get_lwork => get_vhses_lwork
-        procedure, nopass :: get_ldwork => get_vhses_ldwork
-        procedure, nopass :: get_legendre_workspace_size &
-            => get_vhses_legendre_workspace_size
-    end type VhsesAux
-
-    type, public :: VhsgsAux
-    contains
-        ! Type-bound procedures
-        procedure, nopass :: vhsgs
-        procedure, nopass :: vhsgsi
-        procedure, nopass :: get_lvhsgs
-        procedure, nopass :: get_ldwork
-        procedure, nopass :: get_legendre_workspace_size
-    end type VhsgsAux
-
 contains
+
+    subroutine initialize_vhsec(nlat, nlon, wvhsec, error_flag)
+
+        ! Dummy arguments
+        integer(ip),           intent(in)  :: nlat
+        integer(ip),           intent(in)  :: nlon
+        real(wp), allocatable, intent(out) :: wvhsec(:)
+        integer(ip),           intent(out) :: error_flag
+        ! Local variables
+        integer(ip) :: lvhsec
+
+        ! Get required workspace size
+        lvhsec = get_lvhsec(nlat, nlon)
+
+        ! Allocate memory
+        allocate (wvhsec(lvhsec))
+
+        ! Initialize wavetable
+        call vhseci(nlat, nlon, wvhsec, error_flag)
+
+    end subroutine initialize_vhsec
+
+    subroutine initialize_vhses(nlat, nlon, wvhses, error_flag)
+
+        ! Dummy arguments
+        integer(ip),           intent(in)  :: nlat
+        integer(ip),           intent(in)  :: nlon
+        real(wp), allocatable, intent(out) :: wvhses(:)
+        integer(ip),           intent(out) :: error_flag
+
+        ! Local variables
+        integer(ip) :: lvhses
+
+        ! Get required workspace size
+        lvhses = get_lvhses(nlat, nlon)
+
+        ! Allocate memory
+        allocate (wvhses(lvhses))
+
+        ! Initialize wavetable
+        call vhsesi(nlat, nlon, wvhses, error_flag)
+
+    end subroutine initialize_vhses
+
+    subroutine initialize_vhsgc(nlat, nlon, wvhsgc, error_flag)
+
+        ! Dummy arguments
+        integer(ip),           intent(in)  :: nlat
+        integer(ip),           intent(in)  :: nlon
+        real(wp), allocatable, intent(out) :: wvhsgc(:)
+        integer(ip),           intent(out) :: error_flag
+
+        ! Local variables
+        integer(ip) :: lvhsgc
+
+        ! Get required workspace size
+        lvhsgc = get_lvhsgc(nlat, nlon)
+
+        ! Allocate memory
+        allocate (wvhsgc(lvhsgc))
+
+        ! Initialize wavetable
+        call vhsgci(nlat, nlon, wvhsgc, error_flag)
+
+    end subroutine initialize_vhsgc
+
+    subroutine initialize_vhsgs(nlat, nlon, wvhsgs, error_flag)
+
+        ! Dummy arguments
+        integer(ip),           intent(in)  :: nlat
+        integer(ip),           intent(in)  :: nlon
+        real(wp), allocatable, intent(out) :: wvhsgs(:)
+        integer(ip),           intent(out) :: error_flag
+
+        ! Local variables
+        integer(ip) :: lvhsgs
+
+        ! Get required workspace size
+        lvhsgs = get_lvhsgs(nlat, nlon)
+
+        ! Allocate memory
+        allocate (wvhsgs(lvhsgs))
+
+        ! Initialize wavetable
+        call vhsgsi(nlat, nlon, wvhsgs, error_flag)
+
+    end subroutine initialize_vhsgs
+
+    pure function get_lvhsgc(nlat, nlon) &
+        result (return_value)
+
+        ! Dummy arguments
+        integer(ip), intent(in)  :: nlat
+        integer(ip), intent(in)  :: nlon
+        integer(ip)              :: return_value
+
+        ! Local variables
+        integer(ip)             :: n1, n2
+        type(SpherepackUtility) :: util
+
+        call util%compute_parity(nlat, nlon, n1, n2)
+
+        return_value = 4 * nlat * n2 + 3 * max(n1-2,0)*(2*nlat-n1-1) + nlon + 15
+
+    end function get_lvhsgc
 
     pure function get_lvhsgs(nlat, nlon) &
         result (return_value)
@@ -185,175 +287,51 @@ contains
         ! Dummy arguments
         integer(ip), intent(in)  :: nlat
         integer(ip), intent(in)  :: nlon
-        integer(ip)               :: return_value
+        integer(ip)              :: return_value
 
         ! Local variables
-        integer(ip)         :: l1, l2
-        type(SpherepackUtility) :: util
+        integer(ip)  :: imid, lmn
 
-        call util%compute_parity(nlat, nlon, l1, l2)
-
-        return_value = max(l1*l2*(2*nlat-l1+1)+nlon+15+2*nlat, 5*(nlat**2)*nlon)
+        imid = (nlat+1)/2
+        lmn = (nlat*(nlat+1))/2
+        return_value = 2*(imid*lmn)+nlon+15
 
     end function get_lvhsgs
 
-    pure function get_ldwork(nlat) &
+    pure function get_lvhsec(nlat, nlon) &
         result (return_value)
 
         ! Dummy arguments
-        integer(ip), intent(in)  :: nlat
-        integer(ip)               :: return_value
-
-        return_value = (3*nlat*(nlat+3)+2)/2
-
-    end function get_ldwork
-
-    pure function get_legendre_workspace_size(nlat, nlon, nt, ityp) &
-        result (return_value)
-
-        ! Dummy arguments
-        integer(ip),           intent(in) :: nlat
-        integer(ip),           intent(in) :: nlon
-        integer(ip), optional, intent(in) :: ityp
-        integer(ip), optional, intent(in) :: nt
-        integer(ip)                        :: return_value
-
-        ! Local variables
-        integer(ip) :: nt_op, ityp_op, l2
-
-        !  Address optional arguments
-        if (present(nt)) then
-            nt_op = nt
-        else
-            nt_op = 1
-        end if
-
-        if (present(ityp)) then
-            ityp_op = ityp
-        else
-            ityp_op = 1
-        end if
-
-        !
-        !  Compute workspace size
-        !
-        if (ityp <= 2) then
-            ! Set workspace size
-            return_value = (2*nt_op+1)*nlat*nlon
-        else
-            ! Compute parity
-            select case (mod(nlat, 2))
-                case (0)
-                    l2 = nlat/2
-                case default
-                    l2 = (nlat + 1)/2
-            end select
-            ! Set workspace size
-            return_value = (2*nt+1)*l2*nlon
-        end if
-
-    end function get_legendre_workspace_size
-
-    pure function get_lvhses(nlat, nlon) result (return_value)
-
-        ! Dummy arguments
-
         integer(ip), intent(in)  :: nlat
         integer(ip), intent(in)  :: nlon
-        integer(ip)               :: return_value
+        integer(ip)              :: return_value
 
         ! Local variables
-
-        integer(ip)         :: l1, l2
+        integer(ip)             :: n1, n2
         type(SpherepackUtility) :: util
 
+        call util%compute_parity(nlat, nlon, n1, n2)
 
-        call util%compute_parity(nlat, nlon, l1, l2)
+        return_value = 4*nlat*n2+3*max(n1-2, 0)*(nlat+nlat-n1-1)+nlon+15
 
-        return_value = l1*l2*(2*nlat-l1+1)+nlon+15
+    end function get_lvhsec
+
+    pure function get_lvhses(nlat, nlon) &
+        result (return_value)
+
+        ! Dummy arguments
+        integer(ip), intent(in) :: nlat
+        integer(ip), intent(in) :: nlon
+        integer(ip)             :: return_value
+
+        ! Local variables
+        integer(ip)             :: n1, n2
+        type(SpherepackUtility) :: util
+
+        call util%compute_parity(nlat, nlon, n1, n2)
+
+        return_value = n1 * n2 * ((2*nlat) - n1 + 1) + nlon + 15
 
     end function get_lvhses
-
-    pure function get_vhses_lwork(nlat, nlon) result (return_value)
-
-        ! Dummy arguments
-
-        integer(ip), intent(in)  :: nlat
-        integer(ip), intent(in)  :: nlon
-        integer(ip)               :: return_value
-
-        ! Local variables
-
-        integer(ip)         :: l1, l2
-        type(SpherepackUtility) :: util
-
-
-        call util%compute_parity(nlat, nlon, l1, l2)
-
-        return_value = 3*(max(l1-2, 0)*(2*nlat-l1-1))/2+5*l2*nlat
-
-    end function get_vhses_lwork
-
-    pure function get_vhses_ldwork(nlat) result (return_value)
-
-        ! Dummy arguments
-
-        integer(ip), intent(in)  :: nlat
-        integer(ip)               :: return_value
-
-
-        return_value = 2*(nlat+1)
-
-    end function get_vhses_ldwork
-
-    pure function get_vhses_legendre_workspace_size(nlat, nlon, nt, ityp) result (return_value)
-
-        ! Dummy arguments
-
-        integer(ip),           intent(in) :: nlat
-        integer(ip),           intent(in) :: nlon
-        integer(ip), optional, intent(in) :: nt
-        integer(ip), optional, intent(in) :: ityp
-        integer(ip)                        :: return_value
-
-        ! Local variables
-
-        integer(ip) :: nt_op, ityp_op, l2
-
-
-        !
-        !  Address optional arguments
-        !
-        if (present(nt)) then
-            nt_op = nt
-        else
-            nt_op = 1
-        end if
-
-        if (present(ityp)) then
-            ityp_op = ityp
-        else
-            ityp_op = 0
-        end if
-
-        !
-        !  Compute workspace size
-        !
-        if (ityp_op <= 2) then
-            ! Set workspace size
-            return_value = (2*nt_op+1)*nlat*nlon
-        else
-            ! Compute parity
-            select case (mod(nlat, 2))
-                case (0)
-                    l2 = nlat/2
-                case default
-                    l2 = (nlat + 1)/2
-            end select
-            ! Set workspace size
-            return_value = (2*nt_op+1)*l2*nlon
-        end if
-
-    end function get_vhses_legendre_workspace_size
 
 end module vector_synthesis_routines

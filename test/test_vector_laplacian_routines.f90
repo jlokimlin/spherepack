@@ -194,16 +194,16 @@ contains
                 !  Print earlier output from platform with 64-bit floating point
                 !    arithmetic followed by the output from this computer
                 !
-                write( stdout, '(/a/)') '     tvlap *** TEST RUN *** '
-                write( stdout, '(a)') '     grid type = '//sphere_type%grid%grid_type
-                write( stdout, '(a)') '     Testing vector laplacian'
-                write( stdout, '(2(a, i3))') '     nlat = ', NLATS, ' nlon = ', NLONS
-                write( stdout, '(a)') '     Previous 64 bit floating point arithmetic result '
-                write( stdout, '(a)') previous_polar_laplacian_error
-                write( stdout, '(a)') previous_azimuthal_laplacian_error
-                write( stdout, '(a)') '     The output from your computer is: '
-                write( stdout, '(a, 1pe15.6)') '     polar laplacian error     = ', err2v
-                write( stdout, '(a, 1pe15.6/)') '     azimuthal laplacian error = ', err2w
+                write (stdout, '(/a/)') '     tvlap *** TEST RUN *** '
+                write (stdout, '(a)') '     grid type = '//sphere_type%grid%grid_type
+                write (stdout, '(a)') '     Testing vector laplacian'
+                write (stdout, '(2(a, i3))') '     nlat = ', NLATS, ' nlon = ', NLONS
+                write (stdout, '(a)') '     Previous 64 bit floating point arithmetic result '
+                write (stdout, '(a)') previous_polar_laplacian_error
+                write (stdout, '(a)') previous_azimuthal_laplacian_error
+                write (stdout, '(a)') '     The output from your computer is: '
+                write (stdout, '(a, 1pe15.6)') '     polar laplacian error     = ', err2v
+                write (stdout, '(a, 1pe15.6/)') '     azimuthal laplacian error = ', err2w
             end associate
         end associate
         !
@@ -235,16 +235,16 @@ contains
                 !  Print earlier output from platform with 64-bit floating point
                 !    arithmetic followed by the output from this computer
                 !
-                write( stdout, '(/a/)') '     tvlap *** TEST RUN *** '
-                write( stdout, '(a)') '     grid type = '//sphere_type%grid%grid_type
-                write( stdout, '(a)') '     Testing vector laplacian inversion'
-                write( stdout, '(2(a, i3))') '     nlat = ', NLATS, ' nlon = ', NLONS
-                write( stdout, '(a)') '     Previous 64 bit floating point arithmetic result '
-                write( stdout, '(a)') previous_polar_inversion_error
-                write( stdout, '(a)') previous_azimuthal_inversion_error
-                write( stdout, '(a)') '     The output from your computer is: '
-                write( stdout, '(a, 1pe15.6)') '     polar inversion error     = ', err2v
-                write( stdout, '(a, 1pe15.6/)') '     azimuthal inversion error = ', err2w
+                write (stdout, '(/a/)') '     tvlap *** TEST RUN *** '
+                write (stdout, '(a)') '     grid type = '//sphere_type%grid%grid_type
+                write (stdout, '(a)') '     Testing vector laplacian inversion'
+                write (stdout, '(2(a, i3))') '     nlat = ', NLATS, ' nlon = ', NLONS
+                write (stdout, '(a)') '     Previous 64 bit floating point arithmetic result '
+                write (stdout, '(a)') previous_polar_inversion_error
+                write (stdout, '(a)') previous_azimuthal_inversion_error
+                write (stdout, '(a)') '     The output from your computer is: '
+                write (stdout, '(a, 1pe15.6)') '     polar inversion error     = ', err2v
+                write (stdout, '(a, 1pe15.6/)') '     azimuthal inversion error = ', err2w
             end associate
         end associate
         !

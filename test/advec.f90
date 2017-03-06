@@ -205,13 +205,13 @@ program advec
     !     preset saved work spaces for gradgc and shagc and shsgc
     !
     call vhsgci(nlat, nlon, wvhsgc, ierror)
-    if(ierror /= 0) write(*, 10) ierror
+    if(ierror /= 0) write (*, 10) ierror
 10  format(' error in vsgci = ', i5)
     call shagci(nlat, nlon, wshagc, ierror)
-    if(ierror /= 0) write(*, 20) ierror
+    if(ierror /= 0) write (*, 20) ierror
 20  format(' error in shagci = ', i5)
     call shsgci(nlat, nlon, wshsgc, ierror)
-    if(ierror /= 0) write(*, 21) ierror
+    if(ierror /= 0) write (*, 21) ierror
 21  format(' error in shsgci = ', i5)
     !
     !     set vector velocities and cosine bell in geopotential
@@ -251,16 +251,16 @@ program advec
     !
     call shagc(nlat, nlon, isym, nt, phold, nlat, nlon, ar, br, nlat, &
         nlat, wshagc, ierror)
-    if ( ierror /=0) write(*, 26) ierror
+    if ( ierror /=0) write (*, 26) ierror
     call shsgc(nlat, nlon, isym, nt, phold, nlat, nlon, ar, br, nlat, &
         nlat, wshsgc, ierror)
-    if ( ierror /=0) write(*, 28) ierror
+    if ( ierror /=0) write (*, 28) ierror
     call shagc(nlat, nlon, isym, nt, phi, nlat, nlon, ar, br, nlat, &
         nlat, wshagc, ierror)
-    if ( ierror /=0) write(*, 26) ierror
+    if ( ierror /=0) write (*, 26) ierror
     call shsgc(nlat, nlon, isym, nt, phi, nlat, nlon, ar, br, nlat, &
         nlat, wshsgc, ierror)
-    if ( ierror /=0) write(*, 28) ierror
+    if ( ierror /=0) write (*, 28) ierror
 28  format(' ierror in shsgc = ', i5)
     !
     !     compute l2 and max norms of geopotential at t=0.
@@ -288,14 +288,14 @@ program advec
         !
         call shagc(nlat, nlon, isym, nt, phi, nlat, nlon, ar, br, nlat, &
             nlat, wshagc, ierror)
-        if ( error /=0) write(*, 26) ierror
+        if ( error /=0) write (*, 26) ierror
 26      format(' ierror in shagc = ', i5)
         !
         !       compute gradient of phi at current time
         !
         call gradgc(nlat, nlon, isym, nt, gdpht, gdphl, nlat, nlon, ar, br, &
             nlat, nlat, wvhsgc, lvhsgc, work, lwork, ierror)
-        if ( error /=0) write(*, 27) ierror
+        if ( error /=0) write (*, 27) ierror
 27      format(' ierror in gradgc = ', i5)
                 !
                 !       compute the time derivative of phi, note that the sign
@@ -325,7 +325,7 @@ program advec
             errm = errm/pmax
             err2 = sqrt(err2)/p2
             htime = time/3600.
-            write(*, 390) ncycle, htime, dt, nlat, nlon, omega, hzero, &
+            write (*, 390) ncycle, htime, dt, nlat, nlon, omega, hzero, &
                 alphad, errm, err2
 390         format(//' advecting cosine bell, test case 2', / &
                 , ' cycle number              ', i10 &

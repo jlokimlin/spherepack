@@ -28,16 +28,16 @@ module type_GaussianSphere
         operator(*)
     
     use scalar_analysis_routines, only: &
-        ShagsAux
+        ScalarAnalysisUtility
 
     use scalar_synthesis_routines, only: &
-        ShsgsAux
+        ScalarSynthesisUtility
 
     use vector_analysis_routines, only: &
-        VhagsAux
+        VectorAnalysisUtility
 
     use vector_synthesis_routines, only: &
-        VhsgsAux
+        VectorSynthesisUtility
 
     ! Explicit typing only
     implicit none
@@ -173,7 +173,7 @@ contains
         select type(self)
             class is (GaussianSphere)
             if (.not.self%initialized) then
-                write(stderr, '(a)') &
+                write (stderr, '(a)') &
                     'Uninitialized object of class(RegularSphere) in '//routine
             end if
         end select
@@ -188,7 +188,7 @@ contains
 
         ! Local variables
         integer(ip)    :: error_flag
-        type(ShagsAux) :: aux
+        type(ScalarAnalysisUtility) :: aux
 
         ! Check if object is usable
         call self%assert_initialized('gaussian_scalar_analysis')
@@ -259,7 +259,7 @@ contains
 
         ! Local variables
         integer(ip)    :: error_flag
-        type(ShsgsAux) :: aux
+        type(ScalarSynthesisUtility) :: aux
 
         ! Check if object is usable
         call self%assert_initialized('gaussian_scalar_synthesis')
@@ -333,7 +333,7 @@ contains
 
         ! Local variables
         integer(ip)    :: error_flag
-        type(VhagsAux) :: aux
+        type(VectorAnalysisUtility) :: aux
 
          ! Check if object is usable
         call self%assert_initialized('gaussian_vector_analysis')
@@ -434,7 +434,7 @@ contains
 
         ! Local variables
         integer(ip)    :: error_flag
-        type(VhsgsAux) :: aux
+        type(VectorSynthesisUtility) :: aux
 
         ! Check if object is usable
         call self%assert_initialized('gaussian_vector_synthesis')

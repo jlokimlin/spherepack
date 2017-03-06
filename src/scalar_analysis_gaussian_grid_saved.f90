@@ -44,7 +44,7 @@ contains
     ! stored in this version.
     !
     !     subroutine shags(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, &
-    !                      wshags, lshags, work, lwork, ierror)
+    !                      wshags, ierror)
     !
     !     subroutine shags performs the spherical harmonic analysis
     !     on the array g and stores the result in the arrays a and b.
@@ -147,26 +147,6 @@ contains
     !
     !            nlat*(3*(l1+l2)-2)+(l1-1)*(l2*(2*nlat-l1)-3*l1)/2+nlon+15
     !
-    !     work   a real work space which need not be saved
-    !
-    !
-    !     lwork  the dimension of the array work as it appears in the
-    !            program that calls shags. define
-    !
-    !               l2 = nlat/2        if nlat is even or
-    !               l2 = (nlat+1)/2    if nlat is odd
-    !
-    !
-    !            if isym is zero then lwork must be at least
-    !
-    !                  nlat*nlon*(nt+1)
-    !
-    !            if isym is nonzero then lwork must be at least
-    !
-    !                  l2*nlon*(nt+1)
-    !
-    !     **************************************************************
-    !
     !     output parameters
     !
     !     a, b    both a, b are two or three dimensional arrays (see input
@@ -228,7 +208,6 @@ contains
     !            = 7  error in the specification of mdab
     !            = 8  error in the specification of ndab
     !            = 9  error in the specification of lshags
-    !            = 10 error in the specification of lwork
     !
     module subroutine shags(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, wshags, ierror)
 

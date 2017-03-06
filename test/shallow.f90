@@ -294,19 +294,19 @@ program shallow
     !     initialize spherepack routines
     !
     call shaesi(nlat, nlon, wsha, ierror)
-    if(ierror /= 0) write(*, 55) ierror
+    if(ierror /= 0) write (*, 55) ierror
 55  format(' error' i4 ' in shaesi')
     call shsesi(nlat, nlon, wshs, ierror)
-    if(ierror /= 0) write(*, 56) ierror
+    if(ierror /= 0) write (*, 56) ierror
 56  format(' error' i4 ' in shsesi')
     call vhaesi(nlat, nlon, wvha, ierror)
-    if(ierror /= 0) write(*, 57) ierror
+    if(ierror /= 0) write (*, 57) ierror
 57  format(' error' i4 ' in vhaesi')
     call vhsesi(nlat, nlon, wvhs, ierror)
-    if(ierror /= 0) write(*, 58) ierror
+    if(ierror /= 0) write (*, 58) ierror
 58  format(' error' i4 ' in vhsesi')
     call vtsesi(nlat, nlon, wvts, lwvts, work, lwork, dwork, ldwork, ierror)
-    if(ierror /= 0) write(*, 59) ierror
+    if(ierror /= 0) write (*, 59) ierror
 59  format(' error' i4 ' in vtsesi')
     !
     !
@@ -418,7 +418,7 @@ program shallow
     !
 90  call vhaesgo(nlat, nlon, isym, nt, u, v, idp, jdp, br, bi, cr, ci, &
         mdab, ndab, wvha, ierror)
-    if(ierror /= 0) write(*, 91) ierror
+    if(ierror /= 0) write (*, 91) ierror
 91  format(' error' i4 ' in vhaes')
     !
     !     truncate spectrum to eliminate aliasing of the
@@ -431,7 +431,7 @@ program shallow
     !
     call vhsesgo(nlat, nlon, isym, nt, u, v, idp, jdp, br, bi, cr, ci, &
         mdab, ndab, wvhs, lwvhs, work, lwork, ierror)
-    if(ierror /= 0) write(*, 92) ierror
+    if(ierror /= 0) write (*, 92) ierror
 92  format(' error' i4 ' in vhses')
     !
     !   begin step 2, section 3
@@ -440,7 +440,7 @@ program shallow
     !
     call shaes(nlat, nlon, isym, nt, p, idp, jdp, a, b, mdab, ndab, &
         wsha, ierror)
-    if(ierror /= 0) write(*, 93) ierror
+    if(ierror /= 0) write (*, 93) ierror
 93  format(' error' i4 ' in shaes')
     !
     !     truncate spectrum to eliminate aliasing of the
@@ -452,7 +452,7 @@ program shallow
     !
     call shses(nlat, nlon, isym, nt, p, idp, jdp, a, b, mdab, ndab, &
         wshs, ierror)
-    if(ierror /= 0) write(*, 94) ierror
+    if(ierror /= 0) write (*, 94) ierror
 94  format(' error' i4 ' in shses')
     !
     !
@@ -462,14 +462,14 @@ program shallow
     !
     call vrtes(nlat, nlon, isym, nt, vort, idp, jdp, cr, ci, mdab, ndab, &
         wshs, lwshs, work, lwork, ierror)
-    if(ierror /= 0) write(*, 95) ierror
+    if(ierror /= 0) write (*, 95) ierror
 95  format(' error' i4 ' in vrtes')
     !
     !     compute the divergence of the velocity (u, v)
     !
     call dives(nlat, nlon, isym, nt, divg, idp, jdp, br, bi, mdab, ndab, &
         wshs, lwshs, work, lwork, ierror)
-    if(ierror /= 0) write(*, 96) ierror
+    if(ierror /= 0) write (*, 96) ierror
 96  format(' error' i4 ' in dives')
     !
     !   begin step 4, section 3
@@ -479,7 +479,7 @@ program shallow
     !
     call vtsesgo(nlat, nlon, isym, nt, ut, vt, idp, jdp, br, bi, cr, ci, &
         mdab, ndab, wvts, lwvts, work, lwork, ierror)
-    if(ierror /= 0) write(*, 97) ierror
+    if(ierror /= 0) write (*, 97) ierror
 97  format(' error' i4 ' in vtsesgo')
     !
     !   begin step 5, section 3
@@ -488,7 +488,7 @@ program shallow
     !
     call gradesgo(nlat, nlon, isym, nt, gpdl, gpdt, idp, jdp, a, b, mdab, ndab, &
         wvhs, lwvhs, work, lwork, ierror)
-    if(ierror /= 0) write(*, 98) ierror
+    if(ierror /= 0) write (*, 98) ierror
 98  format(' error' i4 ' in grades')
     !
     !     compute the time derivatives of the velocity (u, v)
@@ -509,7 +509,7 @@ program shallow
     if(mod(ncycle, mprint) /= 0) go to 370
     htime = time/3600.
 
-    write(*, 390) ncycle, htime, dt, nlat, nlon, mmode, omega, pzero, &
+    write (*, 390) ncycle, htime, dt, nlat, nlon, mmode, omega, pzero, &
         uzero, alphad
 390 format(//' steady nonlinear rotated flow, test case 3'/ &
         ' cycle number              ' i10 &
@@ -542,7 +542,7 @@ program shallow
     evmax = evmax/vmax
     epmax = epmax/pmax
 
-    write(*, 391) evmax, epmax, dvmax, dpmax, dvgm
+    write (*, 391) evmax, epmax, dvmax, dpmax, dvgm
 391 format(' max error in velocity' 1pe15.6 &
         ' max error in geopot. ' 1pe15.6/ &
         ' l2 error in velocity ' 1pe15.6 &

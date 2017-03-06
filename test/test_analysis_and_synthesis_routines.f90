@@ -149,17 +149,17 @@ contains
 
                 !  Print earlier output from platform with 64-bit floating point
                 !    arithmetic followed by the output from this computer
-                write( stdout, '(a)') ''
-                write( stdout, '(/a/)') '     test analysis and synthesis routines *** TEST RUN *** '
-                write( stdout, '(a)') ''
-                write( stdout, '(a)') '     grid type = '//sphere_type%grid%grid_type
-                write( stdout, '(a)') '     Testing scalar analysis and synthesis'
-                write( stdout, '(2(a, i3))') '     nlat = ', NLATS, ' nlon = ', NLONS
-                write( stdout, '(a)') '     Previous 64 bit floating point arithmetic result '
-                write( stdout, '(a)') error_previous_platform
-                write( stdout, '(a)') '     The output from your computer is: '
-                write( stdout, '(a, 1pe15.6)') '     discretization error = ', err2
-                write( stdout, '(a)') ''
+                write (stdout, '(a)') ''
+                write (stdout, '(/a/)') '     test analysis and synthesis routines *** TEST RUN *** '
+                write (stdout, '(a)') ''
+                write (stdout, '(a)') '     grid type = '//sphere_type%grid%grid_type
+                write (stdout, '(a)') '     Testing scalar analysis and synthesis'
+                write (stdout, '(2(a, i3))') '     nlat = ', NLATS, ' nlon = ', NLONS
+                write (stdout, '(a)') '     Previous 64 bit floating point arithmetic result '
+                write (stdout, '(a)') error_previous_platform
+                write (stdout, '(a)') '     The output from your computer is: '
+                write (stdout, '(a, 1pe15.6)') '     discretization error = ', err2
+                write (stdout, '(a)') ''
             end associate
         end associate
 
