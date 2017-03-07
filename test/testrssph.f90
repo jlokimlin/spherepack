@@ -29,22 +29,11 @@
 !     *                                                               *
 !     * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !
-!
-!
-!
-! ... file testrssph.f
-!
-!     this file contains a test program for subroutine trssph
+!     Contains a test program for subroutine trssph
 !
 ! ... author
 !
 !     John C Adams (1996, NCAR)
-!
-! ... required files
-!
-!     subroutine trssph and the entire spherepack library
-!
-! ... description (see documentation in file trssph.f)
 !
 !     Subroutine trssph is used to demonstrate data transfer between a coarse
 !     ten degree equally spaced grid and a higher resolution T64 Global Spectral
@@ -128,27 +117,27 @@ program test_trssph
     implicit none
 
     !Set grid sizes with parameter statements
-    integer(ip), parameter :: nlat_gau = 92, nlon_gau = 194
-    integer(ip), parameter :: nlat_reg = 19, nlon_reg = 36
-    real(wp) :: data_reg(nlat_reg, nlon_reg), data_gau(nlon_gau, nlat_gau)
-    real(wp), dimension(nlat_gau) :: colatitudes, gaussian_latitudes, gaussian_weights
+    integer(ip), parameter :: NLAT_GAU = 92, NLON_GAU = 194
+    integer(ip), parameter :: NLAT_REG = 19, NLON_REG = 36
+    real(wp) :: data_reg(NLAT_REG, NLON_REG), data_gau(NLON_GAU, NLAT_GAU)
+    real(wp), dimension(NLAT_GAU) :: colatitudes, gaussian_latitudes, gaussian_weights
     integer(ip) :: igrid_reg(2), igrid_gau(2)
     real(wp)    :: dlat_reg, dlon_reg, dlon_gau
     real(wp)    :: cosp, sinp, cost, sint, xyz, err2, theta, phi, dif
     integer(ip) :: i, j, intl, error_flag
 
     ! Set equally spaced grid increments
-    dlat_reg = PI/(nlat_reg-1)
-    dlon_reg = TWO_PI/nlon_reg
-    dlon_gau = TWO_PI/nlon_gau
+    dlat_reg = PI/(NLAT_REG-1)
+    dlon_reg = TWO_PI/NLON_REG
+    dlon_gau = TWO_PI/NLON_GAU
 
     ! Set given data in data_reg from f(x, y, z)= exp(x*y*z) restricted
     ! to nlat_reg by nlon_reg equally spaced grid on the sphere
-    do  j=1, nlon_reg
+    do  j=1, NLON_REG
         phi = real(j-1, kind=wp)*dlon_reg
         cosp = cos(phi)
         sinp = sin(phi)
-        do i=1, nlat_reg
+        do i=1, NLAT_REG
             ! Set north to south oriented colatitude point
             theta = real(i-1, kind=wp)*dlat_reg
             cost = cos(theta)
@@ -174,8 +163,8 @@ program test_trssph
     igrid_gau(2) = 0
 
     ! Print trssph input parameters
-    write (stdout, 100) intl, igrid_reg(1), igrid_reg(2), nlon_reg, nlat_reg, &
-        igrid_gau(1), igrid_gau(2), nlon_gau, nlat_gau
+    write (stdout, 100) intl, igrid_reg(1), igrid_reg(2), NLON_REG, NLAT_REG, &
+        igrid_gau(1), igrid_gau(2), NLON_GAU, NLAT_GAU
 100 format(//' EQUALLY SPACED TO GAUSSIAN GRID TRANSFER ' , &
         /' trssph input arguments: ' , &
         /' intl = ', i2, &
@@ -185,8 +174,8 @@ program test_trssph
         /' nlon_gau = ', i3, 2x, ' nlat_gau = ', i3)
 
     ! Transfer data from data_reg to data_gau
-    call trssph(intl, igrid_reg, nlon_reg, nlat_reg, data_reg, igrid_gau, nlon_gau, &
-        nlat_gau, data_gau, error_flag)
+    call trssph(intl, igrid_reg, NLON_REG, NLAT_REG, data_reg, igrid_gau, NLON_GAU, &
+        NLAT_GAU, data_gau, error_flag)
 
     if (error_flag == 0) then
         !
@@ -194,17 +183,17 @@ program test_trssph
         ! and set in colatitudes with south to north orientation
         ! for computing error in data_gau
         call compute_gaussian_latitudes_and_weights( &
-            nlat_gau, gaussian_latitudes, gaussian_weights, error_flag)
+            NLAT_GAU, gaussian_latitudes, gaussian_weights, error_flag)
 
         colatitudes = PI - gaussian_latitudes
 
         ! Compute the least squares error in data_gau
         err2 = 0.0_wp
-        do j=1, nlon_gau
+        do j=1, NLON_GAU
             phi = real(j - 1, kind=wp) * dlon_gau
             cosp = cos(phi)
             sinp = sin(phi)
-            do i=1, nlat_gau
+            do i=1, NLAT_GAU
                 theta = colatitudes(i)
                 cost = cos(theta)
                 sint = sin(theta)
@@ -213,7 +202,7 @@ program test_trssph
                 err2 = err2 + dif**2
             end do
         end do
-        err2 = sqrt(err2/(nlon_gau*nlat_gau))
+        err2 = sqrt(err2/(NLON_GAU*NLAT_GAU))
         write (stdout, 300) err2
 300     format(' least squares error = ', e10.3)
     end if
@@ -221,8 +210,8 @@ program test_trssph
     ! Set data_reg to zero
     data_reg = 0.0_wp
 
-    write (stdout, 400) intl, igrid_gau(1), igrid_gau(2), nlon_gau, nlat_gau, igrid_reg(1), &
-        igrid_reg(2), nlon_reg, nlat_reg
+    write (stdout, 400) intl, igrid_gau(1), igrid_gau(2), NLON_GAU, NLAT_GAU, igrid_reg(1), &
+        igrid_reg(2), NLON_REG, NLAT_REG
 400 format(/' GAUSSIAN TO EQUALLY SPACED GRID TRANSFER ' , &
         /' trssph input arguments: ' , &
         /' intl = ', i2, &
@@ -232,18 +221,18 @@ program test_trssph
         /' nlon_reg = ', i3, 2x, ' nlat_reg = ', i3)
 
     ! Transfer data_gau back to data_reg
-    call trssph(intl, igrid_gau, nlon_gau, nlat_gau, data_gau, igrid_reg, nlon_reg, &
-        nlat_reg, data_reg, error_flag)
+    call trssph(intl, igrid_gau, NLON_GAU, NLAT_GAU, data_gau, igrid_reg, NLON_REG, &
+        NLAT_REG, data_reg, error_flag)
 
     if (error_flag == 0) then
 
         ! Compute the least squares error in data_reg
         err2 = 0.0
-        do j=1, nlon_reg
+        do j=1, NLON_REG
             phi = real(j-1, kind=wp)*dlon_reg
             cosp = cos(phi)
             sinp = sin(phi)
-            do i=1, nlat_reg
+            do i=1, NLAT_REG
                 theta = real(i - 1, kind=wp)*dlat_reg
                 cost = cos(theta)
                 sint = sin(theta)
@@ -252,7 +241,7 @@ program test_trssph
                 err2 = err2+dif**2
             end do
         end do
-        err2 = sqrt(err2/(nlat_reg*nlon_reg))
+        err2 = sqrt(err2/(NLAT_REG*NLON_REG))
         write (stdout, 300) err2
     end if
 

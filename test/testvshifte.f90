@@ -30,12 +30,9 @@
 !     * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !
 !
-! ... file tvshifte.f is a test program illustrating the
+! ... A test program illustrating the
 !     use of subroutine vshifte (see documentation for vshifte)
 !
-! ... required spherepack files
-!
-!     hrfft.f, vshifte.f
 !
 !     Let the analytic vector field (u, v) in geophysical coordinates be
 !     given by
@@ -87,50 +84,39 @@
 ! *********************************************
 !
 program testvshifte
-use spherepack
+
+    use, intrinsic :: ISO_Fortran_env, only: &
+        stdout => OUTPUT_UNIT
+
+    use spherepack
+
+    ! Explicit typing only
     implicit none
-    integer nnlon, nnlat, nnlatp1, nnlat2, llsave, llwork
-    !
-    !     set equally spaced grid sizes in nnlat, nnlon
-    !
-    parameter(nnlon=144, nnlat=72)
-    !
-    !     set parameters which depend on nnlat, nnlon
-    !
-    parameter(nnlatp1=nnlat+1, nnlat2=nnlat+nnlat)
-    !     save work space
-    parameter (llsave=2*(2*nnlat+nnlon)+32)
-    !     unsaved work space for nnlon even
-    parameter (llwork = 2*nnlon*(nnlat+1))
-    !     unsaved work space for nnlon odd
-    !     parameter (llwork = nnlon*(5*nnlat+1))
-    integer ioff, nlon, nlat, nlat2, j, i, lsave, lwork, ier
-    real dlat, dlon, dlat2, dlon2, lat, long, x, y, z, ex, ey, ez, emz
-    real err2u, err2v, ue, ve, sint, sinp, cost, cosp
-    real uoff(nnlon, nnlat), voff(nnlon, nnlat)
-    real ureg(nnlon, nnlatp1), vreg(nnlon, nnlatp1)
-    real wsave(llsave), work(llwork)
-    !
-    !     set resolution, work space lengths, and grid increments
-    !
-    nlat = nnlat
-    nlon = nnlon
-    lsave = llsave
-    nlat2 = nnlat2
-    lwork = llwork
-    dlat = pi/nlat
-    dlon = (pi+pi)/nlon
-    dlat2 = 0.5*dlat
-    dlon2 = 0.5*dlon
-    !
-    !     set (uoff, voff) = (u, v) on offset grid
-    !
+
+    ! Dictionary
+    integer(ip), parameter :: nlon = 144, nlat = 72
+    integer(ip), parameter :: nlatp1 = nlat+1
+    integer(ip) :: ioff, i, j, error_flag
+    real(wp) :: dlat, dlon, half_dlat, half_dlon, lat, long, x, y, z, ex, ey, ez, emz
+    real(wp) :: err2u, err2v, ue, ve, sint, sinp, cost, cosp
+    real(wp) :: uoff(nlon, nlat), voff(nlon, nlat)
+    real(wp) :: ureg(nlon, nlatp1), vreg(nlon, nlatp1)
+    real(wp), allocatable :: wavetable(:)
+    real(wp), parameter   :: ZERO = 0.0_wp
+
+    ! Set grid increments
+    dlat = PI/nlat
+    dlon = TWO_PI/nlon
+    half_dlat = dlat/2
+    half_dlon = dlon/2
+
+    ! Set (uoff, voff) = (u, v) on offset grid
     do j=1, nlon
-        long = dlon2+(j-1)*dlon
+        long = half_dlon + real(j - 1, kind=wp) * dlon
         sinp = sin(long)
         cosp = cos(long)
         do i=1, nlat
-            lat = -0.5*pi+dlat2+(i-1)*dlat
+            lat = -HALF_PI + half_dlat + real(i - 1, kind=wp) * dlat
             sint = sin(lat)
             cost = cos(lat)
             x = cost*cosp
@@ -144,37 +130,32 @@ use spherepack
             voff(j, i) = ey*cosp+ez*cost-ex*sint*cosp
         end do
     end do
-    !
-    !    initialize wsav for offset to regular shift
-    !
+
+    ! Initialize wsav for offset to regular shift
     ioff = 0
-    call vshifti(ioff, nlon, nlat, lsave, wsave, ier)
-    !
-    !     write input arguments to vshifte
-    !
-    write (*, 100) ioff, nlon, nlat, lsave, lwork
+    call initialize_vshifte(ioff, nlon, nlat, wavetable, error_flag)
+
+    ! Write input arguments to vshifte
+    write (stdout, 100) ioff, nlon, nlat
 100 format(' vshifte arguments', &
-        /' ioff = ', i2, ' nlon = ', i3, ' nlat = ', i3, &
-        /' lsave = ', i5, ' lwork = ', i5)
-    !
-    !     shift offset to regular grid
-    !
-    call vshifte(ioff, nlon, nlat, uoff, voff, ureg, vreg, &
-        wsave, lsave, work, lwork, ier)
-    write (*, 200) ier
+        /' ioff = ', i2, ' nlon = ', i3, ' nlat = ', i3)
+
+    ! Shift offset to regular grid
+    call vshifte(ioff, nlon, nlat, uoff, voff, ureg, vreg, wavetable, error_flag)
+
+    write (stdout, 200) error_flag
 200 format(' ier = ', i2)
-    if (ier==0) then
-        !
-        !     compute error in ureg, vreg
-        !
-        err2u = 0.0
-        err2v = 0.0
+
+    if (error_flag == 0) then
+        ! Compute error in ureg, vreg
+        err2u = ZERO
+        err2v = ZERO
         do j=1, nlon
-            long = (j-1)*dlon
+            long = real(j - 1, kind=wp) * dlon
             sinp = sin(long)
             cosp = cos(long)
             do i=1, nlat+1
-                lat = -0.5*pi+(i-1)*dlat
+                lat = -HALF_PI + real(i - 1, kind=wp) * dlat
                 sint = sin(lat)
                 cost = cos(lat)
                 x = cost*cosp
@@ -192,40 +173,35 @@ use spherepack
         end do
         err2u = sqrt(err2u/(nlon*(nlat+1)))
         err2v = sqrt(err2v/(nlon*(nlat+1)))
-        write (*, 300) err2u, err2v
+        write (stdout, 300) err2u, err2v
 300     format(' least squares error ', &
             /' err2u = ', e10.3, ' err2v = ', e10.3)
     end if
-    !
-    !    initialize wsav for regular to offset shift
-    !
+
+    ! Initialize wsav for regular to offset shift
     ioff = 1
-    call vshifti(ioff, nlon, nlat, lsave, wsave, ier)
-    !
-    !     transfer regular grid values in (ureg, vreg) to offset grid in (uoff, voff)
-    !
-    do j=1, nlon
-        do i=1, nlat
-            uoff(j, i) = 0.0
-            voff(j, i) = 0.0
-        end do
-    end do
-    write (*, 100) ioff, nlon, nlat, lsave, lwork
-    call vshifte(ioff, nlon, nlat, uoff, voff, ureg, vreg, &
-        wsave, lsave, work, lwork, ier)
-    write (*, 200) ier
-    if (ier == 0) then
-        !
+    call initialize_vshifte(ioff, nlon, nlat, wavetable, error_flag)
+
+    ! Transfer regular grid values in (ureg, vreg) to offset grid in (uoff, voff)
+    uoff = ZERO
+    voff = ZERO
+
+    write (stdout, 100) ioff, nlon, nlat
+
+    call vshifte(ioff, nlon, nlat, uoff, voff, ureg, vreg, wavetable, error_flag)
+
+    write (stdout, 200) error_flag
+
+    if (error_flag == 0) then
         !     compute error in uoff, voff
-        !
-        err2u = 0.0
-        err2v = 0.0
+        err2u = ZERO
+        err2v = ZERO
         do j=1, nlon
-            long = dlon2+(j-1)*dlon
+            long = half_dlon+(j-1)*dlon
             sinp = sin(long)
             cosp = cos(long)
             do i=1, nlat
-                lat = -0.5*pi+dlat2+(i-1)*dlat
+                lat = -HALF_PI + half_dlat + real(i - 1, kind=wp) * dlat
                 sint = sin(lat)
                 cost = cos(lat)
                 x = cost*cosp
@@ -243,6 +219,10 @@ use spherepack
         end do
         err2u = sqrt(err2u/(nlon*(nlat+1)))
         err2v = sqrt(err2v/(nlon*(nlat+1)))
-        write (*, 300) err2u, err2v
+        write (stdout, 300) err2u, err2v
     end if
+
+    ! Release memory
+    deallocate (wavetable)
+
 end program testvshifte

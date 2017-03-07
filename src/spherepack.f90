@@ -21,6 +21,10 @@ module spherepack
     use coordinate_transfer_routines, only: &
         geo2maths, math2geos, geo2mathv, math2geov
 
+    use grid_transfer_routines, only: &
+        trssph, sshifte, sshifti, initialize_sshifte, &
+        trvsph, vshifte, vshifti, initialize_vshifte
+
     use gradient_routines, only: &
         gradec, grades, gradgc, gradgs, &
         igradec, igrades, igradgc, igradgs
@@ -66,7 +70,7 @@ module spherepack
 
     use scalar_analysis_routines, only: &
         initialize_shaec, shaec, shaeci, &
-        initialize_shaes, shaes,  shaesi, &
+        initialize_shaes, shaes, shaesi, &
         initialize_shagc, shagc, shagci, &
         initialize_shags, shags, shagsi
 
@@ -76,7 +80,7 @@ module spherepack
 
     use scalar_synthesis_routines, only: &
         initialize_shsec, shsec, shseci, &
-        initialize_shses, shses,  shsesi, &
+        initialize_shses, shses, shsesi, &
         initialize_shsgc, shsgc, shsgci, &
         initialize_shsgs, shsgs, shsgsi
 
@@ -84,24 +88,15 @@ module spherepack
         slapec, slapes, slapgc, slapgs, &
         islapec, islapes, islapgc, islapgs
 
-    use module_sshifte, only: &
-        sshifte, sshifti
-
-    use module_trssph, only: &
-        trssph
-
-    use module_trvsph, only: &
-        trvsph
-
     use vector_analysis_routines, only: &
         initialize_vhaec, vhaec, vhaeci, &
-        initialize_vhaes, vhaes,  vhaesi, &
+        initialize_vhaes, vhaes, vhaesi, &
         initialize_vhagc, vhagc, vhagci, &
         initialize_vhags, vhags, vhagsi
 
     use vector_synthesis_routines, only: &
         initialize_vhsec, vhsec, vhseci, &
-        initialize_vhses, vhses,  vhsesi, &
+        initialize_vhses, vhses, vhsesi, &
         initialize_vhsgc, vhsgc, vhsgci, &
         initialize_vhsgs, vhsgs, vhsgsi
 
@@ -121,9 +116,6 @@ module spherepack
     use vorticity_routines, only: &
         vrtec, vrtes, vrtgc, vrtgs, &
         ivrtec, ivrtes, ivrtgc, ivrtgs
-
-    use module_vshifte, only: &
-        vshifte, vshifti
 
     use colatitudinal_derivative_routines, only: &
         vtsec, vtses, vtsgc, vtsgs, &
@@ -254,17 +246,13 @@ module spherepack
 
     public :: shpe, shpei
     public :: shpg, shpgi
-    public :: shsec, shses, shsgc, shsgs
-    public :: shseci, shsesi, shsgci, shsgsi
+
     public :: slapec, slapes, slapgc, slapgs
-    public :: sshifte, sshifti
-    public :: trssph, trvsph
-    !    public :: visequ
-    !    public :: visgau
-    !    public :: visgeo
     public :: vlapec, vlapes, vlapgc, vlapgs
 
-    public :: vshifte, vshifti
+    ! Grid transfer routines
+    public :: trssph, sshifte, sshifti, initialize_sshifte
+    public :: trvsph, vshifte, vshifti, initialize_vshifte
 
     public :: alfk, lfp, lfpt, lfim, lfin
 

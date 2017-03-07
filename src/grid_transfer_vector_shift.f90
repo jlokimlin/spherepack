@@ -7,7 +7,7 @@
 !     *                                                               *
 !     *                      all rights reserved                      *
 !     *                                                               *
-!     *                      SPHEREPACK                               *
+!     *                          Spherepack                           *
 !     *                                                               *
 !     *       A Package of Fortran Subroutines and Programs           *
 !     *                                                               *
@@ -29,302 +29,305 @@
 !     *                                                               *
 !     * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !
-!
-!
-! ... file vshifte.f contains code and documentation for subroutine vshifte
-!     and its initialization subroutine vshifti
-!
-! ... required files
-!
-!     type_RealPeriodicFastFourierTransform.f
-!
-!     subroutine vshifte(ioff, nlon, nlat, uoff, voff, ureg, vreg, 
-!    +                   wsave, lsave, work, lwork, ierror)
-!
-! *** purpose
-!
-!     subroutine vshifte does a highly accurate 1/2 grid increment shift
-!     in both longitude and latitude of equally spaced vector data on the
-!     sphere. data is transferred between the nlon by nlat "offset grid"
-!     in (uoff, voff) (which excludes poles) and the nlon by nlat+1 "regular
-!     grid" in (ureg, vreg) (which includes poles).  the transfer can go from
-!     (uoff, voff) to (ureg, vreg) or vice versa (see ioff).  the grids which
-!     underly the vector fields are described below.  the north and south
-!     pole are at HALF*pi and-HALF*pi radians respectively.
-!     uoff and ureg are the east longitudinal vector data components.  voff
-!     and vreg are the latitudinal vector data components.
-!
-!     subroutine sshifte can be used to shift scalar data on the sphere.
-!     notice that scalar and vector quantities are fundamentally different
-!     on the sphere.  for example, vectors are discontinuous and multiple
-!     valued at the poles.  scalars are continuous and single valued at the
-!     poles. erroneous results would be produced if one attempted to shift
-!     vector fields with subroutine sshifte applied to each component of
-!     of the vector.
-!
-! *** grid descriptions
-!
-!     let dlon = (pi+pi)/nlon and dlat = pi/nlat be the uniform grid
-!     increments in longitude and latitude
-!
-!     offset grid
-!
-!     the "1/2 increment offset" grid (long(j), lat(i)) on which uoff(j, i)
-!     and voff(j, i) are given (ioff=0) or generated (ioff=1) is
-!
-!          long(j) =HALF*dlon + (j-1)*dlon  (j=1, ..., nlon)
-!
-!     and
-!
-!          lat(i) = -HALF*pi + HALF*dlat + (i-1)*dlat (i=1, ..., nlat)
-!
-!     the data in (uoff, voff) is "shifted" one half a grid increment in both
-!     longitude and latitude and excludes the poles.  each uoff(j, 1), voff(j, 1)
-!     is given at latitude -pi/2+dlat/2.  uoff(j, nlat), voff(j, nlat) is
-!     given at pi/2-dlat/2 (1/2 a grid increment away from the poles).
-!     uoff(1, i), voff(1, i) is given at longitude dlon/2.  each uoff(nlon, i), 
-!     voff(nlon, i) is given at longitude 2*pi-dlon/2.
-!
-!     regular grid
-!
-!     let dlat, dlon be as above.  then the nlon by nlat+1 grid on which
-!     ureg(j, i), vreg(j, i) are generated (ioff=0) or given (ioff=1) is
-!
-!          lone(j) = (j-1)*dlon (j=1, ..., nlon)
-!
-!      and
-!
-!          late(i) = -HALF*pi + (i-1)*dlat (i=1, ..., nlat+1)
-!
-!     values in ureg, vreg include the poles and start at zero degrees
-!     longitude and at the south pole this is the "usual" equally spaced
-!     grid in geophysical coordinates.
-!
-! *** remark
-!
-!     subroutine vshifte can be used in conjunction with subroutine trvsph
-!     when transferring vector data from an equally spaced "1/2 increment
-!     offset" grid to a gaussian or equally spaced grid (which includes poles)
-!     of any resolution.  this problem (personal communication with dennis
-!     shea) is encountered in geophysical modeling and data analysis.
-!
-! *** method
-!
-!     fast fourier transform software from spherepack2 and trigonometric
-!     identities are used to accurately "shift" periodic vectors half a
-!     grid increment in latitude and longitude.  latitudinal shifts are
-!     accomplished by setting periodic 2*nlat vectors over the pole for each
-!     longitude.  vector values must be negated on one side of the pole
-!     to maintain periodicity prior to the 2*nlat shift over the poles.
-!     when nlon is odd, the 2*nlat latitudinal shift requires an additional
-!     longitude shift to obtain symmetry necessary for full circle shifts
-!     over the poles.  finally longitudinal shifts are executed for each
-!     shifted latitude.
-!
-! *** argument description
-!
-! ... ioff
-!
-!     ioff = 0 if values on the offset grid in (uoff, voff) are given and
-!              values on the regular grid in (ureg, vreg) are to be generated.
-!
-!     ioff = 1 if values on the regular grid in (ureg, vreg) are given and
-!              values on the offset grid in (uoff, voff) are to be generated.
-!
-! ... nlon
-!
-!     the number of longitude points on both the "offset" and "regular"
-!     uniform grid in longitude (see "grid description" above).  nlon
-!     is also the first dimension of uoff, voff, ureg, vreg.  nlon determines
-!     the grid increment in longitude as dlon = 2.*pi/nlon.  for example, 
-!     nlon = 144 for a 2.5 degree grid.  nlon can be even or odd and must
-!     be greater than or equal to 4.  the efficiency of the computation
-!     is improved when nlon is a product of small primes.
-!
-! ... nlat
-!
-!     the number of latitude points on the "offset" uniform grid.  nlat+1
-!     is the number of latitude points on the "regular" uniform grid (see
-!     "grid description" above).  nlat is the second dimension of uoff, voff.
-!     nlat+1 must be the second dimension of ureg, vreg in the program
-!     calling vshifte.  nlat determines the grid in latitude as pi/nlat.
-!     for example, nlat = 36 for a five degree grid.  nlat must be at least 3.
-!
-! ... uoff
-!
-!     a nlon by nlat array that contains the east longitudinal vector
-!     data component on the offset grid described above.  uoff is a
-!     given input argument if ioff=0.  uoff is a generated output
-!     argument if ioff=1.
-!
-! ... voff
-!
-!     a nlon by nlat array that contains the latitudinal vector data
-!     component on the offset grid described above.  voff is a given
-!     input argument if ioff=0.  voff is a generated output argument
-!     if ioff=1.
-!
-! ... ureg
-!
-!     a nlon by nlat+1 array that contains the east longitudinal vector
-!     data component on the regular grid described above.  ureg is a given
-!     input argument if ioff=1.  ureg is a generated output argument
-!     if ioff=0.
-!
-! ... vreg
-!
-!     a nlon by nlat+1 array that contains the latitudinal vector data
-!     component on the regular grid described above.  vreg is a given
-!     input argument if ioff=1.  vreg is a generated output argument
-!     if ioff=0.
-!
-! ... wsav
-!
-!     a real saved work space array that must be initialized by calling
-!     subroutine vshifti(ioff, nlon, nlat, wsav, ier) before calling vshifte.
-!     wsav can then be used repeatedly by vshifte as long as ioff, nlon, 
-!     and nlat do not change.  this bypasses redundant computations and
-!     saves time.  undetectable errors will result if vshifte is called
-!     without initializing wsav whenever ioff, nlon, or nlat change.
-!
-! ... lsav
-!
-!     the length of the saved work space wsav in the routine calling vshifte
-!     and sshifti.  lsave must be greater than or equal to 2*(2*nlat+nlon+16).
-!
-! ... work
-!
-!     a real unsaved work space
-!
-! ... lwork
-!
-!     the length of the unsaved work space in the routine calling vshifte
-!     if nlon is even then lwork must be greater than or equal to
-!
-!          2*nlon*(nlat+1)
-!
-!     if nlon is odd then lwork must be greater than or equal to
-!
-!          nlon*(5*nlat+1)
-!
-! ... ier
-!
-!     indicates errors in input parameters
-!
-!     = 0 if no errors are detected
-!
-!     = 1 if ioff is not equal to 0 or 1
-!
-!     = 2 if nlon < 4
-!
-!     = 3 if nlat < 3
-!
-!     = 4 if lsave < 2*(nlon+2*nlat)+32
-!
-!     = 5 if lwork < 2*nlon*(nlat+1) for nlon even or
-!            lwork < nlon*(5*nlat+1) for nlon odd
-!
-! *** end of vshifte documentation
-!
-!     subroutine vshifti(ioff, nlon, nlat, lsav, wsav, ier)
-!
-!     subroutine vshifti initializes the saved work space wsav
-!     for ioff and nlon and nlat (see documentation for vshifte).
-!     vshifti must be called before vshifte whenever ioff or nlon
-!     or nlat change.
-!
-! ... ier
-!
-!     = 0 if no errors with input arguments
-!
-!     = 1 if ioff is not 0 or 1
-!
-!     = 2 if nlon < 4
-!
-!     = 3 if nlat < 3
-!
-!     = 4 if lsav < 2*(2*nlat+nlon+16)
-!
-! *** end of vshifti documentation
-!
-module module_vshifte
-
-    use spherepack_precision, only: &
-        wp, & ! working precision
-        ip, & ! integer precision
-        PI
-
-    use type_RealPeriodicFastFourierTransform, only: &
-        RealPeriodicFastFourierTransform
-
-    ! Explicit typing only
-    implicit none
-
-    ! Everything is private unless stated otherwise
-    public :: vshifte
-    public :: vshifti
-
-    ! Parameters confined to the module
-    real(wp), parameter :: HALF = 0.5_wp
+submodule(grid_transfer_routines) grid_transfer_vector_shift
 
 contains
 
-    subroutine vshifte(ioff, nlon, nlat, uoff, voff, ureg, vreg, &
-        wsav, lsav, wrk, lwrk, ier)
+    !     subroutine vshifte(ioff, nlon, nlat, uoff, voff, ureg, vreg, wsave, ierror)
+    !
+    ! *** purpose
+    !
+    !     subroutine vshifte does a highly accurate 1/2 grid increment shift
+    !     in both longitude and latitude of equally spaced vector data on the
+    !     sphere. data is transferred between the nlon by nlat "offset grid"
+    !     in (uoff, voff) (which excludes poles) and the nlon by nlat+1 "regular
+    !     grid" in (ureg, vreg) (which includes poles).  the transfer can go from
+    !     (uoff, voff) to (ureg, vreg) or vice versa (see ioff).  the grids which
+    !     underly the vector fields are described below.  the north and south
+    !     pole are at HALF*pi and-HALF*pi radians respectively.
+    !     uoff and ureg are the east longitudinal vector data components.  voff
+    !     and vreg are the latitudinal vector data components.
+    !
+    !     subroutine sshifte can be used to shift scalar data on the sphere.
+    !     notice that scalar and vector quantities are fundamentally different
+    !     on the sphere.  for example, vectors are discontinuous and multiple
+    !     valued at the poles.  scalars are continuous and single valued at the
+    !     poles. erroneous results would be produced if one attempted to shift
+    !     vector fields with subroutine sshifte applied to each component of
+    !     of the vector.
+    !
+    ! *** grid descriptions
+    !
+    !     let dlon = TWO_PI/nlon and dlat = pi/nlat be the uniform grid
+    !     increments in longitude and latitude
+    !
+    !     offset grid
+    !
+    !     the "1/2 increment offset" grid (long(j), lat(i)) on which uoff(j, i)
+    !     and voff(j, i) are given (ioff=0) or generated (ioff=1) is
+    !
+    !          long(j) =HALF*dlon + (j-1)*dlon  (j=1, ..., nlon)
+    !
+    !     and
+    !
+    !          lat(i) = -HALF*pi + HALF*dlat + (i-1)*dlat (i=1, ..., nlat)
+    !
+    !     the data in (uoff, voff) is "shifted" one half a grid increment in both
+    !     longitude and latitude and excludes the poles.  each uoff(j, 1), voff(j, 1)
+    !     is given at latitude -pi/2+dlat/2.  uoff(j, nlat), voff(j, nlat) is
+    !     given at pi/2-dlat/2 (1/2 a grid increment away from the poles).
+    !     uoff(1, i), voff(1, i) is given at longitude dlon/2.  each uoff(nlon, i),
+    !     voff(nlon, i) is given at longitude 2*pi-dlon/2.
+    !
+    !     regular grid
+    !
+    !     let dlat, dlon be as above.  then the nlon by nlat+1 grid on which
+    !     ureg(j, i), vreg(j, i) are generated (ioff=0) or given (ioff=1) is
+    !
+    !          lone(j) = (j-1)*dlon (j=1, ..., nlon)
+    !
+    !      and
+    !
+    !          late(i) = -HALF*pi + (i-1)*dlat (i=1, ..., nlat+1)
+    !
+    !     values in ureg, vreg include the poles and start at zero degrees
+    !     longitude and at the south pole this is the "usual" equally spaced
+    !     grid in geophysical coordinates.
+    !
+    ! *** remark
+    !
+    !     subroutine vshifte can be used in conjunction with subroutine trvsph
+    !     when transferring vector data from an equally spaced "1/2 increment
+    !     offset" grid to a gaussian or equally spaced grid (which includes poles)
+    !     of any resolution.  this problem (personal communication with dennis
+    !     shea) is encountered in geophysical modeling and data analysis.
+    !
+    ! *** method
+    !
+    !     fast fourier transform software from spherepack2 and trigonometric
+    !     identities are used to accurately "shift" periodic vectors half a
+    !     grid increment in latitude and longitude.  latitudinal shifts are
+    !     accomplished by setting periodic 2*nlat vectors over the pole for each
+    !     longitude.  vector values must be negated on one side of the pole
+    !     to maintain periodicity prior to the 2*nlat shift over the poles.
+    !     when nlon is odd, the 2*nlat latitudinal shift requires an additional
+    !     longitude shift to obtain symmetry necessary for full circle shifts
+    !     over the poles.  finally longitudinal shifts are executed for each
+    !     shifted latitude.
+    !
+    ! *** argument description
+    !
+    ! ... ioff
+    !
+    !     ioff = 0 if values on the offset grid in (uoff, voff) are given and
+    !              values on the regular grid in (ureg, vreg) are to be generated.
+    !
+    !     ioff = 1 if values on the regular grid in (ureg, vreg) are given and
+    !              values on the offset grid in (uoff, voff) are to be generated.
+    !
+    ! ... nlon
+    !
+    !     the number of longitude points on both the "offset" and "regular"
+    !     uniform grid in longitude (see "grid description" above).  nlon
+    !     is also the first dimension of uoff, voff, ureg, vreg.  nlon determines
+    !     the grid increment in longitude as dlon = 2.*pi/nlon.  for example,
+    !     nlon = 144 for a 2.5 degree grid.  nlon can be even or odd and must
+    !     be greater than or equal to 4.  the efficiency of the computation
+    !     is improved when nlon is a product of small primes.
+    !
+    ! ... nlat
+    !
+    !     the number of latitude points on the "offset" uniform grid.  nlat+1
+    !     is the number of latitude points on the "regular" uniform grid (see
+    !     "grid description" above).  nlat is the second dimension of uoff, voff.
+    !     nlat+1 must be the second dimension of ureg, vreg in the program
+    !     calling vshifte.  nlat determines the grid in latitude as pi/nlat.
+    !     for example, nlat = 36 for a five degree grid.  nlat must be at least 3.
+    !
+    ! ... uoff
+    !
+    !     a nlon by nlat array that contains the east longitudinal vector
+    !     data component on the offset grid described above.  uoff is a
+    !     given input argument if ioff=0.  uoff is a generated output
+    !     argument if ioff=1.
+    !
+    ! ... voff
+    !
+    !     a nlon by nlat array that contains the latitudinal vector data
+    !     component on the offset grid described above.  voff is a given
+    !     input argument if ioff=0.  voff is a generated output argument
+    !     if ioff=1.
+    !
+    ! ... ureg
+    !
+    !     a nlon by nlat+1 array that contains the east longitudinal vector
+    !     data component on the regular grid described above.  ureg is a given
+    !     input argument if ioff=1.  ureg is a generated output argument
+    !     if ioff=0.
+    !
+    ! ... vreg
+    !
+    !     a nlon by nlat+1 array that contains the latitudinal vector data
+    !     component on the regular grid described above.  vreg is a given
+    !     input argument if ioff=1.  vreg is a generated output argument
+    !     if ioff=0.
+    !
+    ! ... wsav
+    !
+    !     a real saved work space array that must be initialized by calling
+    !     subroutine vshifti(ioff, nlon, nlat, wsav, ier) before calling vshifte.
+    !     wsav can then be used repeatedly by vshifte as long as ioff, nlon,
+    !     and nlat do not change.  this bypasses redundant computations and
+    !     saves time.  undetectable errors will result if vshifte is called
+    !     without initializing wsav whenever ioff, nlon, or nlat change.
+    !
+    ! ... lsav
+    !
+    !     the length of the saved work space wsav in the routine calling vshifte
+    !     and sshifti.  lsave must be greater than or equal to 2*(2*nlat+nlon+16).
+    !
+    ! ... ier
+    !
+    !     indicates errors in input parameters
+    !
+    !     = 0 if no errors are detected
+    !
+    !     = 1 if ioff is not equal to 0 or 1
+    !
+    !     = 2 if nlon < 4
+    !
+    !     = 3 if nlat < 3
+    !
+    !     = 4 if lsave < 2*(2*nlat+nlon+16)
+    !
+    module subroutine vshifte(ioff, nlon, nlat, uoff, voff, ureg, vreg, wsav, ier)
 
-        integer(ip) :: ioff, nlon, nlat, n2, nr, nlat2, nlatp1, lsav, lwrk, ier
-        integer(ip) :: i1, i2, i3
-        real(wp) :: uoff(nlon, nlat), voff(nlon, nlat)
-        real(wp) :: ureg(nlon, *), vreg(nlon, *)
-        real(wp) :: wsav(lsav), wrk(lwrk)
-        !
+        ! Dummy arguments
+        integer(ip), intent(in)    :: ioff
+        integer(ip), intent(in)    :: nlon
+        integer(ip), intent(in)    :: nlat
+        real(wp),    intent(inout) :: uoff(:,:), voff(:,:)
+        real(wp),    intent(inout) :: ureg(:,:), vreg(:,:)
+        real(wp),    intent(in)    :: wsav(:)
+        integer(ip), intent(out)   :: ier
+
+        ! Local variables
+        integer(ip) :: n2, nr, two_nlat, nlatp1
+        integer(ip) :: iw1, iw2, iw3, lwork
+
         ! Check calling arguments
-        !
-        ier = 1
-        if (ioff*(ioff-1)/=0) return
-        ier = 2
-        if (nlon < 4) return
-        ier = 3
-        if (nlat < 3) return
-        ier = 4
-        if (lsav < 2*(2*nlat+nlon+16)) return
-        nlat2 = nlat+nlat
+        call check_calling_arguments(ioff, nlon, nlat, wsav, ier)
+
+        ! Check error flag
+        if (ier /= 0) return
+
+        two_nlat = 2 * nlat
         nlatp1 = nlat+1
         n2 = (nlon+1)/2
-        ier = 5
+
         if (2*n2 == nlon) then
-            if ( lwrk < 2*nlon*(nlat+1)) return
+            lwork = 2*nlon*(nlat+1)
             nr = n2
-            i1 = 1
-            i2 = 1
-            i3 = i2+nlon*nlatp1
+            iw1 = 1
+            iw2 = 1
+            iw3 = iw2+nlon*nlatp1
         else
-            if ( lwrk < nlon*(5*nlat+1)) return
+            lwork = nlon*(5*nlat+1)
             nr = nlon
-            i1 = 1
-            i2 = i1+nlat2*nlon
-            i3 = i2+nlatp1*nlon
-        end if
-        ier = 0
-        if (ioff==0) then
-            !
-            !     shift (uoff, voff) to (ureg, vreg)
-            !
-            call vhftoff(nlon, nlat, uoff, ureg, wsav, nr, nlat2, &
-                nlatp1, wrk(i1), wrk(i2), wrk(i2), wrk(i3))
-            call vhftoff(nlon, nlat, voff, vreg, wsav, nr, nlat2, &
-                nlatp1, wrk(i1), wrk(i2), wrk(i2), wrk(i3))
-        else
-            !
-            !     shift (ureg, vreg) to (uoff, voff)
-            !
-            call vhftreg(nlon, nlat, uoff, ureg, wsav, nr, nlat2, &
-                nlatp1, wrk(i1), wrk(i2), wrk(i2), wrk(i3))
-            call vhftreg(nlon, nlat, voff, vreg, wsav, nr, nlat2, &
-                nlatp1, wrk(i1), wrk(i2), wrk(i2), wrk(i3))
+            iw1 = 1
+            iw2 = iw1+two_nlat*nlon
+            iw3 = iw2+nlatp1*nlon
         end if
 
+        block
+            real(wp) :: work(lwork)
+
+            if (ioff == 0) then
+                ! Shift (uoff, voff) to (ureg, vreg)
+                call vhftoff(nlon, nlat, uoff, ureg, wsav, nr, two_nlat, &
+                    nlatp1, work(iw1:), work(iw2:), work(iw2:), work(iw3:))
+                call vhftoff(nlon, nlat, voff, vreg, wsav, nr, two_nlat, &
+                    nlatp1, work(iw1:), work(iw2:), work(iw2:), work(iw3:))
+            else
+                ! Shift (ureg, vreg) to (uoff, voff)
+                call vhftreg(nlon, nlat, uoff, ureg, wsav, nr, two_nlat, &
+                    nlatp1, work(iw1:), work(iw2:), work(iw2:), work(iw3:))
+                call vhftreg(nlon, nlat, voff, vreg, wsav, nr, two_nlat, &
+                    nlatp1, work(iw1:), work(iw2:), work(iw2:), work(iw3:))
+            end if
+        end block
+
     end subroutine vshifte
+
+    ! Purpose:
+    !
+    !     Initialize wsav for vshifte
+    !
+    !     subroutine vshifti(ioff, nlon, nlat, lsav, wsav, ier)
+    !
+    !     subroutine vshifti initializes the saved work space wsav
+    !     for ioff and nlon and nlat (see documentation for vshifte).
+    !     vshifti must be called before vshifte whenever ioff or nlon
+    !     or nlat change.
+    !
+    ! ... ier
+    !
+    !     = 0 if no errors with input arguments
+    !
+    !     = 1 if ioff is not 0 or 1
+    !
+    !     = 2 if nlon < 4
+    !
+    !     = 3 if nlat < 3
+    !
+    !     = 4 if lsav < 2*(2*nlat+nlon+16)
+    !
+    module subroutine vshifti(ioff, nlon, nlat, wsav, ier)
+
+        ! Dummy arguments
+        integer(ip), intent(in)  :: ioff
+        integer(ip), intent(in)  :: nlon
+        integer(ip), intent(in)  :: nlat
+        real(wp),    intent(out) :: wsav(:)
+        integer(ip), intent(out) :: ier
+
+        ! Local variables
+        integer(ip) :: two_nlat, iw
+        real(wp)    :: dlat, dlon, dp
+
+        ! Check calling arguments
+        call check_calling_arguments(ioff, nlon, nlat, wsav, ier)
+
+        ! Check error flag
+        if (ier /= 0) return
+
+        ! Set lat, lon increments
+        dlat = PI/nlat
+        dlon = TWO_PI/nlon
+
+        ! Set left or right latitude shifts
+        if (ioff == 0) then
+            dp = -HALF * dlat
+        else
+            dp = HALF * dlat
+        end if
+
+        two_nlat = 2 * nlat
+
+        call vhifthi(two_nlat, dp, wsav)
+
+        ! Set left or right longitude shifts
+        if (ioff == 0) then
+            dp = -HALF * dlon
+        else
+            dp = HALF * dlon
+        end if
+
+        iw = (4 * nlat) + 17
+
+        call vhifthi(nlon, dp, wsav(iw:))
+
+    end subroutine vshifti
 
     subroutine vhftoff(nlon, nlat, uoff, ureg, wsav, nr, &
         nlat2, nlatp1, rlatu, rlonu, rlou, wrk)
@@ -335,7 +338,7 @@ contains
         integer(ip) :: nlon, nlat, nlat2, nlatp1, n2, nr, j, i, js, isav
         real(wp) :: uoff(nlon, nlat), ureg(nlon, nlatp1)
         real(wp) :: rlatu(nr, nlat2), rlonu(nlatp1, nlon), rlou(nlat, nlon)
-        real(wp) :: wsav(*), wrk(*)
+        real(wp) :: wsav(:), wrk(:)
         isav = 4*nlat+17
         n2 = (nlon+1)/2
         !
@@ -353,7 +356,7 @@ contains
             !
             !       half shift in longitude
             !
-            call vhifth(nlat, nlon, rlou, wsav(isav), wrk)
+            call vhifth(nlat, nlon, rlou, wsav(isav:), wrk)
                 !
                 !       set full 2*nlat circles in rlatu using shifted values in rlonu
                 !
@@ -421,13 +424,14 @@ contains
                 rlonu(i, j) = ureg(j, i)
             end do
         end do
-        call vhifth(nlatp1, nlon, rlonu, wsav(isav), wrk)
+        call vhifth(nlatp1, nlon, rlonu, wsav(isav:), wrk)
         do j=1, nlon
             do i=1, nlatp1
                 ureg(j, i) = rlonu(i, j)
             end do
         end do
     end subroutine vhftoff
+
     subroutine vhftreg(nlon, nlat, uoff, ureg, wsav, nr, nlat2, &
         nlatp1, rlatu, rlonu, rlou, wrk)
         !
@@ -437,7 +441,7 @@ contains
         integer(ip) :: nlon, nlat, nlat2, nlatp1, n2, nr, j, i, js, isav
         real(wp) :: uoff(nlon, nlat), ureg(nlon, nlatp1)
         real(wp) :: rlatu(nr, nlat2), rlonu(nlatp1, nlon), rlou(nlat, nlon)
-        real(wp) :: wsav(*), wrk(*)
+        real(wp) :: wsav(:), wrk(:)
         isav = 4*nlat+17
         n2 = (nlon+1)/2
         !
@@ -455,7 +459,7 @@ contains
             !
             !       half shift in longitude in rlon
             !
-            call vhifth(nlatp1, nlon, rlonu, wsav(isav), wrk)
+            call vhifth(nlatp1, nlon, rlonu, wsav(isav:), wrk)
                 !
                 !       set full 2*nlat circles in rlat using shifted values in rlon
                 !
@@ -518,122 +522,78 @@ contains
                 end do
             end do
         end if
-        !
-        !     execute full circle longitude shift for all latitude circles
-        !
+
+        !  Execute full circle longitude shift for all latitude circles
         do j=1, nlon
             do i=1, nlat
                 rlou(i, j) = uoff(j, i)
             end do
         end do
-        call vhifth(nlat, nlon, rlou, wsav(isav), wrk)
+
+        call vhifth(nlat, nlon, rlou, wsav(isav:), wrk)
+
         do j=1, nlon
             do i=1, nlat
                 uoff(j, i) = rlou(i, j)
             end do
         end do
+
     end subroutine vhftreg
-
-    subroutine vshifti(ioff, nlon, nlat, lsav, wsav, ier)
-
-        integer(ip) :: lsav
-        !
-        !     initialize wsav for vshifte
-        !
-        integer(ip) :: ioff, nlat, nlon, nlat2, isav, ier
-        real(wp) :: wsav(lsav)
-        real(wp) :: dlat, dlon, dp
-        ier = 1
-        if (ioff*(ioff-1)/=0) return
-        ier = 2
-        if (nlon < 4) return
-        ier = 3
-        if (nlat < 3) return
-        ier = 4
-        if (lsav < 2*(2*nlat+nlon+16)) return
-        ier = 0
-        !
-        !     set lat, long increments
-        !
-        dlat = pi/nlat
-        dlon = (pi+pi)/nlon
-        !
-        !     set left or right latitude shifts
-        !
-        if (ioff==0) then
-            dp = -HALF*dlat
-        else
-            dp = HALF*dlat
-        end if
-
-        nlat2 = nlat+nlat
-
-        call vhifthi(nlat2, dp, wsav)
-        !
-        !     set left or right longitude shifts
-        !
-        if (ioff==0) then
-            dp = -HALF*dlon
-        else
-            dp = HALF*dlon
-        end if
-
-        isav = 4*nlat + 17
-
-        call vhifthi(nlon, dp, wsav(isav))
-
-    end subroutine vshifti
 
     subroutine vhifth(m, n, r, wsav, work)
 
         type(RealPeriodicFastFourierTransform) :: hfft
-        integer(ip) :: m, n, n2, k, l
-        real(wp) :: r(m, n), wsav(*), work(*), r2km2, r2km1
-        n2 = (n+1)/2
-        !
-        !     compute fourier coefficients for r on shifted grid
-        !
-        call hfft%forward(m, n, r, m, wsav(n+2), work)
+        integer(ip) :: m, n, n2, j, i
+        real(wp) :: r(m, n), wsav(:), work(:), r2km2, r2km1
 
-        do l=1, m
-            do k=2, n2
-                r2km2 = r(l, k+k-2)
-                r2km1 = r(l, k+k-1)
-                r(l, k+k-2) = r2km2*wsav(n2+k) - r2km1*wsav(k)
-                r(l, k+k-1) = r2km2*wsav(k) + r2km1*wsav(n2+k)
+        n2 = (n+1)/2
+
+        ! Compute fourier coefficients for r on shifted grid
+        call hfft%forward(m, n, r, m, wsav(n+2:), work)
+
+        do i=1, m
+            do j=2, n2
+                r2km2 = r(i, j+j-2)
+                r2km1 = r(i, j+j-1)
+                r(i, j+j-2) = r2km2 * wsav(n2+j) - r2km1 * wsav(j)
+                r(i, j+j-1) = r2km2 * wsav(j) + r2km1 * wsav(n2+j)
             end do
         end do
-        !
-        !     shift r with fourier synthesis and normalization
-        !
-        call hfft%backward(m, n, r, m, wsav(n+2), work)
 
-        do l=1, m
-            do k=1, n
-                r(l, k) = r(l, k)/n
+        ! Shift r with fourier synthesis and normalization
+        call hfft%backward(m, n, r, m, wsav(n+2:), work)
+
+        do i=1, m
+            do j=1, n
+                r(i, j) = r(i, j)/n
             end do
         end do
 
     end subroutine vhifth
 
+    ! Initialize wsav for subroutine vhifth
     subroutine vhifthi(n, dp, wsav)
-        !
-        !     initialize wsav for subroutine vhifth
-        !
-        type(RealPeriodicFastFourierTransform) :: hfft
-        integer(ip) :: n, n2, k
-        real(wp) :: wsav(*), dp
 
+        ! Dummy arguments
+        integer(ip), intent(in)  :: n
+        real(wp),    intent(in)  :: dp
+        real(wp),    intent(out) :: wsav(:)
+
+        ! Local variables
+        integer(ip) :: n2, i
+        real(wp)    :: arg
+        type(RealPeriodicFastFourierTransform) :: hfft
 
         n2 = (n+1)/2
 
-        do k=2, n2
-            wsav(k) = sin((k-1)*dp)
-            wsav(k+n2) = cos((k-1)*dp)
+        do i=2, n2
+            arg = real(i - 1, kind=wp) * dp
+            wsav(i) = sin(arg)
+            wsav(i+n2) = cos(arg)
         end do
 
-        call hfft%initialize(n, wsav(n+2))
+        call hfft%initialize(n, wsav(n+2:))
 
     end subroutine vhifthi
 
-end module module_vshifte
+end submodule grid_transfer_vector_shift

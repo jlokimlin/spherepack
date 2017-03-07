@@ -7,7 +7,7 @@
 !     *                                                               *
 !     *                      all rights reserved                      *
 !     *                                                               *
-!     *                      SPHEREPACK                               *
+!     *                          Spherepack                           *
 !     *                                                               *
 !     *       A Package of Fortran Subroutines and Programs           *
 !     *                                                               *
@@ -29,30 +29,7 @@
 !     *                                                               *
 !     * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !
-
-
-module module_trssph
-
-    use spherepack_precision, only: &
-        wp, & ! working precision
-        ip ! integer precision
-
-    use scalar_analysis_routines, only: &
-        shaec, initialize_shaec, &
-        shagc, initialize_shagc
-
-    use scalar_synthesis_routines, only: &
-        shsec, initialize_shsec, &
-        shsgc, initialize_shsgc
-
-    ! Explicit typing only
-    implicit none
-
-    ! Everything is private unless stated otherwise
-    public :: trssph
-
-    ! Parameter confined to the module
-    real(wp), parameter :: ZERO = 0.0_wp
+submodule(grid_transfer_routines) grid_transfer_scalar_transform
 
 contains
     !     subroutine trssph(intl, igrida, nlona, nlata, da, igridb, nlonb, nlatb, db, ierror)
@@ -390,7 +367,7 @@ contains
     !         =12  indicates failure in an eigenvalue routine which computes
     !              gaussian weights and points
     !
-    subroutine trssph(intl, igrida, nlona, nlata, da, igridb, nlonb, nlatb, db, ierror)
+    module subroutine trssph(intl, igrida, nlona, nlata, da, igridb, nlonb, nlatb, db, ierror)
 
         ! Dummy arguments
         integer(ip), intent(in)     :: intl
@@ -405,9 +382,11 @@ contains
         integer(ip), intent(out)    :: ierror
 
         ! Local variables
-        integer(ip)            :: igrda, igrdb, mdab_a, mdab_b
-        real(wp), allocatable  :: wavetable_a(:), wavetable_b(:)
-        integer(ip), parameter :: NT = 1, ISYM = 0
+        integer(ip)                  :: igrda, igrdb, mdab_a, mdab_b
+        real(wp), allocatable        :: wavetable_a(:), wavetable_b(:)
+        integer(ip), parameter       :: NT = 1, ISYM = 0
+        type(ScalarAnalysisUtility)  :: analysis_util
+        type(ScalarSynthesisUtility) :: synthesis_util
 
         ! Check calling arguments
         associate( &
@@ -442,24 +421,24 @@ contains
 
         if (igrda == 1) then
             ! Initialize wavetable for equally spaced analysis
-            call initialize_shaec(nlata, nlona, wavetable_a, ierror)
+            call analysis_util%initialize_shaec(nlata, nlona, wavetable_a, ierror)
         else
             ! Initialize wavetable for gaussian analysis
-            call initialize_shagc(nlata, nlona, wavetable_a, ierror)
+            call analysis_util%initialize_shagc(nlata, nlona, wavetable_a, ierror)
         end if
 
         if (igrdb == 2) then
             ! Initialize wavetable for gaussian synthesis
-            call initialize_shsgc(nlatb, nlonb, wavetable_b, ierror)
+            call synthesis_util%initialize_shsgc(nlatb, nlonb, wavetable_b, ierror)
         else
             ! Initialize wsave for equally spaced synthesis
-            call initialize_shsec(nlatb, nlonb, wavetable_b, ierror)
+            call synthesis_util%initialize_shsec(nlatb, nlonb, wavetable_b, ierror)
         end if
 
         ! Transpose and/or reorder (co)latitude if necessary for da
         ! (arrays must have latitude (colatitude) as the first dimension
         ! and run north to south for spherepack software)
-        if (igrida(2) == 0) call transpose(nlona, nlata, da)
+        if (igrida(2) == 0) call transpose_array(nlona, nlata, da)
         if (igrida(1) > 0) call reverse_colatitudes(nlata, nlona, da)
 
         mdab_a = min(nlata, (nlona + 2)/2)
@@ -471,11 +450,11 @@ contains
 
             if (igrda == 2) then
                 ! Spherical harmonic analysis of "adjusted" da on gaussian grid
-                call shagc(nlata, nlona, ISYM, NT, da, nlata, nlona, br_a, &
+                call analysis_util%shagc(nlata, nlona, ISYM, NT, da, nlata, nlona, br_a, &
                     bi_a, mdab_a, nlata, wavetable_a, ierror)
             else
                 ! Spherical harmonic analysis of "adjusted" da on equally spaced grid
-                call shaec(nlata, nlona, ISYM, NT, da, nlata, nlona, br_a, &
+                call analysis_util%shaec(nlata, nlona, ISYM, NT, da, nlata, nlona, br_a, &
                     bi_a, mdab_a, nlata, wavetable_a, ierror)
             end if
 
@@ -486,11 +465,11 @@ contains
 
             if (igrdb == 1) then
                 ! Spherical harmonic synthesis on nlatb by nlonb equally spaced grid
-                call shsec(nlatb, nlonb, ISYM, NT, db, nlatb, nlonb, br_b, &
+                call synthesis_util%shsec(nlatb, nlonb, ISYM, NT, db, nlatb, nlonb, br_b, &
                     bi_b, mdab_b, nlatb, wavetable_b, ierror)
             else
                 ! Spherical harmonic synthesis on nlatb by nlonb gaussian grid
-                call shsgc(nlatb, nlonb, ISYM, NT, db, nlatb, nlonb, br_b, &
+                call synthesis_util%shsgc(nlatb, nlonb, ISYM, NT, db, nlatb, nlonb, br_b, &
                     bi_b, mdab_b, nlatb, wavetable_b, ierror)
             end if
         end block
@@ -501,9 +480,9 @@ contains
 
         if (igridb(1) > 0) call reverse_colatitudes(nlatb, nlonb, db)
 
-        if (igrida(2) == 0) call transpose(nlata, nlona, da)
+        if (igrida(2) == 0) call transpose_array(nlata, nlona, da)
 
-        if (igridb(2) == 0) call transpose(nlatb, nlonb, db)
+        if (igridb(2) == 0) call transpose_array(nlatb, nlonb, db)
 
         ! Release memory
         deallocate (wavetable_a)
@@ -511,96 +490,4 @@ contains
 
     end subroutine trssph
 
-    ! Purpose:
-    !
-    ! Set coefficients for b grid from coefficients for a grid
-    !
-    subroutine transfer_scalar_coeff(ma, na, aa, ba, mb, nb, ab, bb)
-
-        ! Dummy arguments
-        integer(ip), intent(in)  :: ma
-        integer(ip), intent(in)  :: na
-        integer(ip), intent(in)  :: mb
-        integer(ip), intent(in)  :: nb
-        real(wp),    intent(in)  :: aa(ma, na)
-        real(wp),    intent(in)  :: ba(ma, na)
-        real(wp),    intent(out) :: ab(mb, nb)
-        real(wp),    intent(out) :: bb(mb, nb)
-
-        ! Local variables
-        integer(ip) :: m, n ! Counters
-
-        ! Ensure that coefs outside triangle are zero
-        ab = ZERO
-        bb = ZERO
-
-        m = min(ma, mb)
-        n = min(na, nb)
-        ab(1:m, 1:n) = aa(1:m, 1:n)
-        bb(1:m, 1:n) = ba(1:m, 1:n)
-
-    end subroutine transfer_scalar_coeff
-
-    ! Purpose:
-    !
-    !     transpose the n by m array data to a m by n array data
-    !     work must be at least n*m words long
-    !
-    subroutine transpose(n, m, data)
-
-        ! Dummy arguments
-        integer(ip), intent(in)    :: n, m
-        real(wp),    intent(inout) :: data(n*m)
-
-        ! Local variables
-        integer(ip) :: i, j, ij, ji, lwork
-
-        ! Set required workspace size
-        lwork = n * m
-
-        block
-            real(wp) :: work(lwork)
-
-            do j=1, m
-                do i=1, n
-                    ij = (j-1)*n+i
-                    work(ij) = data(ij)
-                end do
-            end do
-
-            do i=1, n
-                do j=1, m
-                    ji = (i-1)*m+j
-                    ij = (j-1)*n+i
-                    data(ji) = work(ij)
-                end do
-            end do
-        end block
-
-    end subroutine transpose
-
-    ! Purpose:
-    !
-    ! Reverse order of latitude (colatitude) grids
-    !
-    subroutine reverse_colatitudes(nlat, nlon, data)
-
-        integer(ip), intent(in)    :: nlat, nlon
-        real(wp),    intent(inout) :: data(nlat, nlon)
-
-        ! Local variables
-        integer(ip) :: i, j, ib
-        real(wp)    :: temp
-
-        do i=1, nlat/2
-            ib = nlat-i+1
-            do j=1, nlon
-                temp = data(i, j)
-                data(i, j) = data(ib, j)
-                data(ib, j) = temp
-            end do
-        end do
-
-    end subroutine reverse_colatitudes
-
-end module module_trssph
+end submodule grid_transfer_scalar_transform

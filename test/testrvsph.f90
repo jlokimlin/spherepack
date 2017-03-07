@@ -144,20 +144,21 @@ program testrvsph
     ! Explicit typing only
     implicit none
 
-    !     set grid sizes with parameter statements
-    integer(ip), parameter :: NLAT_GAU=64, NLON_GAU=128, NLAT_REG=19, NLON_REG=36
-    !
-    !     dimension and type data arrays and grid vectors and internal variables
-    !
+    ! Set grid sizes with parameter statements
+    integer(ip), parameter :: NLAT_GAU = 64, NLON_GAU = 128
+    integer(ip), parameter :: NLAT_REG = 19, NLON_REG = 36
+
+    ! Dimension and type data arrays and grid vectors and internal variables
     real(wp) :: u_reg(NLAT_REG, NLON_REG), v_reg(NLAT_REG, NLON_REG)
     real(wp) :: u_gau(NLON_GAU, NLAT_GAU), v_gau(NLON_GAU, NLAT_GAU)
     real(wp) :: theta_gau(NLAT_GAU)
     real(wp) :: gaussian_latitudes(NLAT_GAU), gaussian_weights(NLAT_GAU)
-    integer(ip) :: igrid_reg(2), igrid_gau(2), iv_reg, iv_gau
+    integer(ip) :: igrid_reg(2), igrid_gau(2), ivec_reg, ivec_gau
     real(wp) :: dlat_reg, dlon_reg, dlon_gau
     real(wp) :: theta, phi, cosp, sinp, cost, sint, x, y, z
     real(wp) :: erru2, errv2, ex, ey, ez, emz, uee, vee
     integer(ip) :: i, j, ib, intl, error_flag
+    real(wp), parameter :: ZERO = 0.0_wp
 
     ! Set equally spaced grid increments
     dlat_reg = PI/(NLAT_REG-1)
@@ -173,7 +174,7 @@ program testrvsph
     ! flag (ue, ve) as nlat_reg by nlon_reg arrays
     igrid_reg(2) = 1
     !     flag ve as colatitude component of vector
-    iv_reg = 1
+    ivec_reg = 1
 
     ! flag (ug, vg) as south to north gaussian
     igrid_gau(1) = 2
@@ -182,7 +183,7 @@ program testrvsph
     igrid_gau(2) = 0
 
     ! flag vg as latitude component of vector
-    iv_gau = 0
+    ivec_gau = 0
 
     ! Set vector data in (ue, ve)
     do  j=1, NLON_REG
@@ -206,41 +207,37 @@ program testrvsph
     end do
 
     ! print trvsph input arguments
-    write (stdout, 100) intl, igrid_reg(1), igrid_reg(2), NLON_REG, NLAT_REG, iv_reg, &
-        igrid_gau(1), igrid_gau(2), NLON_GAU, NLAT_GAU, iv_gau
-100 format(//' EQUALLY SPACED TO GAUSSIAN GRID TRANSFER ' , &
-        /' trvsph input arguments: ' , &
+    write (stdout, 100) intl, igrid_reg(1), igrid_reg(2), NLON_REG, NLAT_REG, ivec_reg, &
+        igrid_gau(1), igrid_gau(2), NLON_GAU, NLAT_GAU, ivec_gau
+100 format(//' equally spaced to gaussian vector grid transfer ' , &
+        /' input arguments: ' , &
         /' intl = ', i2, &
         /' igrid_reg(1) = ', i2, 2x, ' igrid_reg(2) = ', i2, &
         /' nlon_reg = ', i3, 2x, ' nlat_reg = ', i3, &
-        /' ive = ', i2, &
+        /' ivec_reg = ', i2, &
         /' igrid_gau(1) = ', i2, 2x, ' igrid_gau(2) = ', i2, &
         /' nlon_gau = ', i3, 2x, ' nlat_gau = ', i3, &
-        /' ivg = ', i2)
+        /' ivec_gau = ', i2)
 
-    !     transfer  (ue, ve) to (ug, vg)
-    call trvsph(intl, igrid_reg, NLON_REG, NLAT_REG, iv_reg, u_reg, v_reg, igrid_gau, NLON_GAU, &
-        NLAT_GAU, iv_gau, u_gau, v_gau, error_flag)
+    ! Transfer  (u_reg, v_reg) to (u_gau, v_gau)
+    call trvsph(intl, igrid_reg, NLON_REG, NLAT_REG, ivec_reg, u_reg, v_reg, &
+        igrid_gau, NLON_GAU, NLAT_GAU, ivec_gau, u_gau, v_gau, error_flag)
 
     if (error_flag == 0) then
-        !
-        !     compute nlat_gau gaussian colatitude points and
-        !     set with south to north orientation in thetag
-        !
+        ! Compute nlat_gau-many gaussian colatitude points and
+        ! set with south to north orientation in theta_gau
         call compute_gaussian_latitudes_and_weights( &
             NLAT_GAU, gaussian_latitudes, gaussian_weights, error_flag)
-        do  i=1, NLAT_GAU
-            ib = NLAT_GAU-i+1
-            theta_gau(i) = gaussian_latitudes(ib)
-        end do
-          !
-          !     compute the least squares error in (ug, vg)
-          !     by comparing with exact geophysical vector
-          !
-        errv2 = 0.0
-        erru2 = 0.0
+
+        ! Reverse array
+        theta_gau = gaussian_latitudes(NLAT_GAU:1:-1)
+
+        ! Compute the least squares error in (ug, vg)
+        ! by comparing with exact geophysical vector
+        errv2 = ZERO
+        erru2 = ZERO
         do  j=1, NLON_GAU
-            phi = real(j-1, kind=wp)*dlon_gau
+            phi = real(j - 1, kind=wp) * dlon_gau
             cosp = cos(phi)
             sinp = sin(phi)
             do i=1, NLAT_GAU
@@ -265,34 +262,38 @@ program testrvsph
         call print_least_squared_error(erru2, errv2)
     end if
 
-    write (stdout, 101) intl, igrid_gau(1), igrid_gau(2), NLON_GAU, NLAT_GAU, iv_gau, &
-        igrid_reg(1), igrid_reg(2), NLON_REG, NLAT_REG, iv_reg
-101 format(//' GAUSSIAN TO EQUALLY SPACED GRID TRANSFER ' , &
-        /' trvsph input arguments: ' , &
+    ! Now transfer (u_gau, v_gau) back to (u_reg, v_reg)
+    u_reg = ZERO
+    v_reg = ZERO
+
+    write (stdout, 101) intl, igrid_gau(1), igrid_gau(2), NLON_GAU, NLAT_GAU, ivec_gau, &
+        igrid_reg(1), igrid_reg(2), NLON_REG, NLAT_REG, ivec_reg
+101 format(//' gaussian to equally spaced vector grid transfer ' , &
+        /' input arguments: ' , &
         /' intl = ', i2, &
         /' igrid_gau(1) = ', i2, 2x, ' igrid_gau(2) = ', i2, &
         /' nlon_gau = ', i3, 2x, ' nlat_gau = ', i3, &
-        /' iv_gau = ', i2, &
+        /' ivec_gau = ', i2, &
         /' igrid_reg(1) = ', i2, 2x, ' igrid_reg(2) = ', i2, &
         /' nlon_reg = ', i3, 2x, ' nlat_reg = ', i3, &
-        /' iv_reg = ', i2)
+        /' ivec_reg = ', i2)
 
-    call trvsph(intl, igrid_gau, NLON_GAU, NLAT_GAU, iv_gau, u_gau, v_gau, igrid_reg, &
-        NLON_REG, NLAT_REG, iv_reg, u_reg, v_reg, error_flag)
+    call trvsph(intl, igrid_gau, NLON_GAU, NLAT_GAU, ivec_gau, u_gau, v_gau, &
+        igrid_reg, NLON_REG, NLAT_REG, ivec_reg, u_reg, v_reg, error_flag)
 
     if (error_flag == 0) then
         !
         !     compute the least squares error in (ue, ve)
         !     by comparing with exact mathematical vector
         !
-        errv2 = 0.0_wp
-        erru2 = 0.0_wp
+        errv2 = ZERO
+        erru2 = ZERO
         do  j=1, NLON_REG
-            phi = real(j-1, kind=wp)*dlon_reg
+            phi = real(j-1, kind=wp) * dlon_reg
             cosp = cos(phi)
             sinp = sin(phi)
             do i=1, NLAT_REG
-                theta = real(i-1, kind=wp)*dlat_reg
+                theta = real(i - 1, kind=wp) * dlat_reg
                 cost = cos(theta)
                 sint = sin(theta)
                 x = sint*cosp

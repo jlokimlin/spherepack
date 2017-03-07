@@ -236,37 +236,41 @@ colatitudinal_derivative_gaussian_grid_saved.f90
 	$(FC) $(FFLAGS) -c colatitudinal_derivative_gaussian_grid_saved.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 
-sshifte.o: \
+grid_transfer_routines.o: \
 spherepack_precision.o \
 type_RealPeriodicFastFourierTransform.o \
-sshifte.f90
-	$(FC) $(FFLAGS) -c sshifte.f90 $(LINKS)\
-	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
-
-vshifte.o: \
-spherepack_precision.o \
-type_RealPeriodicFastFourierTransform.o \
-vshifte.f90
-	$(FC) $(FFLAGS) -c vshifte.f90 $(LINKS)\
-	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
-
-trssph.o: \
-spherepack_precision.o \
 scalar_analysis_routines.o \
 scalar_synthesis_routines.o \
-trssph.f90
-	$(FC) $(FFLAGS) -c trssph.f90 $(LINKS)\
+vector_analysis_routines.o \
+vector_synthesis_routines.o \
+vector_analysis_routines.o \
+vector_synthesis_routines.o \
+grid_transfer_routines.f90
+	$(FC) $(FFLAGS) -c grid_transfer_routines.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 
-trvsph.o: \
-spherepack_precision.o \
-type_RealPeriodicFastFourierTransform.o \
-vector_analysis_routines.o \
-vector_synthesis_routines.o \
-vector_analysis_routines.o \
-vector_synthesis_routines.o \
-trvsph.f90
-	$(FC) $(FFLAGS) -c trvsph.f90 $(LINKS)\
+grid_transfer_scalar_shift.o: \
+grid_transfer_routines.o \
+grid_transfer_scalar_shift.f90
+	$(FC) $(FFLAGS) -c grid_transfer_scalar_shift.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
+
+grid_transfer_vector_shift.o: \
+grid_transfer_routines.o \
+grid_transfer_vector_shift.f90
+	$(FC) $(FFLAGS) -c grid_transfer_vector_shift.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
+
+grid_transfer_scalar_transform.o: \
+grid_transfer_routines.o \
+grid_transfer_scalar_transform.f90
+	$(FC) $(FFLAGS) -c grid_transfer_scalar_transform.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
+
+grid_transfer_vector_transform.o: \
+grid_transfer_routines.o \
+grid_transfer_vector_transform.f90
+	$(FC) $(FFLAGS) -c grid_transfer_vector_transform.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 
 gradient_routines.o: \
@@ -765,6 +769,7 @@ spherepack_precision.o \
 divergence_routines.o \
 gaussian_latitudes_and_weights_routines.o \
 coordinate_transfer_routines.o \
+grid_transfer_routines.o \
 gradient_routines.o \
 idvtec.o \
 idvtes.o \
@@ -783,14 +788,10 @@ scalar_analysis_routines.o \
 scalar_laplacian_routines.o \
 scalar_projection_routines.o \
 scalar_synthesis_routines.o \
-sshifte.o \
-trssph.o \
-trvsph.o \
 vector_analysis_routines.o \
 vector_synthesis_routines.o \
 vector_laplacian_routines.o \
 vorticity_routines.o \
-vshifte.o \
 colatitudinal_derivative_routines.o \
 type_RealPeriodicFastFourierTransform.o \
 type_FFTpack.o \
