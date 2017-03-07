@@ -49,24 +49,24 @@
 !     Subroutine trssph is used to demonstrate data transfer between a coarse
 !     ten degree equally spaced grid and a higher resolution T64 Global Spectral
 !     Gaussian grid.  The equally spaced data is stored in a 19 X 36 colatitude-
-!     longitude array DATAE which runs north to south with increasing subscript
+!     longitude array data_reg which runs north to south with increasing subscript
 !     values.  The Gaussian grid data is stored in a 192 X 94 longitude-latitude
-!     array DATAG which runs south to north with increasing latitude subscript.
-!     First trssph is used to transfer DATAE to DATAG.  Then trssph is used to
-!     transfer DATAG back to DATAE.
+!     array data_gau which runs south to north with increasing latitude subscript.
+!     First trssph is used to transfer data_reg to data_gau.  Then trssph is used to
+!     transfer data_gau back to data_reg.
 !
-!     For testing purposes, DATAE is set equal the analytic function
+!     For testing purposes, data_reg is set equal the analytic function
 !
 !                       x*y*z
 !           f(x, y, z) = e
 !
 !     in Cartesian coordinates x, y, z restricted to the surface of the sphere.
-!     The same function is used to compute error in DATAG after the data transfer
-!     with trssph.  Finally this is used to compute error in DATAE after the transfer
+!     The same function is used to compute error in data_gau after the data transfer
+!     with trssph.  Finally this is used to compute error in data_reg after the transfer
 !     back with trssph.  Output from executing the test program on machines with
 !     32 bit and 64 bit arithmetic is listed below.  The minimum required saved
 !     and unsaved work space lengths were predetermined by an earlier call to
-!     trssph with nlone=36, nlate=19, nlong=192, nlatg=94, lsave=1, lwork=1 and printout
+!     trssph with nlon_reg=36, nlat_reg=19, nlon_gau=192, nlat_gau=94, lsave=1, lwork=1 and printout
 !     of lsvmin and lwkmin.
 !
 !
@@ -80,10 +80,10 @@
 !
 !     trssph input parameters:
 !     intl =  0
-!     igride(1) = -1   igride(2) =  1
-!     nlone =  36   nlate =  19
-!     igridg(1) =  2   igridg(2) =  0
-!     nlong = 194   nlatg =  92
+!     igrid_reg(1) = -1   igrid_reg(2) =  1
+!     nlon_reg =  36   nlat_reg =  19
+!     igrid_gau(1) =  2   igrid_gau(2) =  0
+!     nlon_gau = 194   nlat_gau =  92
 !     lsave =   22213  lwork =   53347
 !
 !     trssph output:
@@ -98,10 +98,10 @@
 !
 !     trssph input parameters:
 !     intl =  0
-!     igridg(1) =  2   igridg(2) =  0
-!     nlong = 194   nlatg =  92
-!     igride(1) = -1   igride(2) =  1
-!     nlone =  36   nlate =  19
+!     igrid_gau(1) =  2   igrid_gau(2) =  0
+!     nlon_gau = 194   nlat_gau =  92
+!     igrid_reg(1) = -1   igrid_reg(2) =  1
+!     nlon_reg =  36   nlat_reg =  19
 !     lsave =   22213  lwork =   53347
 !
 !     trssph output:
@@ -117,192 +117,143 @@
 !
 ! **********************************************************************
 !
-program testrssph
-use spherepack
+program test_trssph
+
+    use, intrinsic :: ISO_Fortran_env, only: &
+        stdout => OUTPUT_UNIT
+
+    use spherepack
+
+    ! Explicit typing only
     implicit none
-    !
-    !     set grid sizes with parameter statements
-    !
-    integer nnlatg, nnlong, nnlate, nnlone, llwork, llsave, lldwork
-    parameter (nnlatg=92, nnlong=194, nnlate=19, nnlone=36)
-    !
-    !     set predetermined minimum saved and unsaved work space lengths
-    !
-    parameter (llwork = 53347, llsave = 22213)
-    !
-    !     set real work space lengt (see shagci.f documentation)
-    !
-    parameter (lldwork = nnlatg*(nnlatg+4))
-    !
-    !     dimension and type data arrays and grid vectors and internal variables
-    !
-    real datae(nnlate, nnlone), datag(nnlong, nnlatg)
-    real work(llwork), wsave(llsave), thetag(nnlatg)
-    real dwork(lldwork)
-    real dtheta(nnlatg), dwts(nnlatg)
-    integer igride(2), igridg(2)
-    integer nlatg, nlong, nlate, nlone, lwork, lsave, ldwork
-    real dlate, dlone, dlong, cp, sp, ct, st, xyz, err2, t, p, dif
-    integer i, j, intl, ier, lsvmin, lwkmin
-    !
-    !     set grid sizes and dimensions from parameter statements
-    !
-    nlatg = nnlatg
-    nlong = nnlong
-    nlate = nnlate
-    nlone = nnlone
-    lwork = llwork
-    ldwork = lldwork
-    lsave = llsave
-    !
-    !     set equally spaced grid increments
-    !
-    dlate = pi/(nlate-1)
-    dlone = (pi+pi)/nlone
-    dlong = (pi+pi)/nlong
-    !
-    !     set given data in DATAE from f(x, y, z)= exp(x*y*z) restricted
-    !     to nlate by nlone equally spaced grid on the sphere
-    !
-    do  j=1, nlone
-        p = (j-1)*dlone
-        cp = cos(p)
-        sp = sin(p)
-        do i=1, nlate
-            !
-            !     set north to south oriented colatitude point
-            !
-            t = (i-1)*dlate
-            ct = cos(t)
-            st = sin(t)
-            xyz = (st*(st*ct*sp*cp))
-            datae(i, j) = exp(xyz)
-        end do
-    end do
-    !
-    !     set initial call flag
-    !
-    intl = 0
-    !
-    !     flag DATAE grid as north to south equally spaced
-    !
-    igride(1) = -1
-    !
-    !     flag DATAE grid as colatitude by longitude
-    !
-    igride(2) = 1
-    !
-    !     flag DATAG grid as south to north Gaussian
-    !
-    igridg(1) = 2
-    !
-    !     flag DATAG grid as longitude by latitude
-    !
-    igridg(2) = 0
-    !
-    !     print trssph input parameters
-    !
-    write (*, 100) intl, igride(1), igride(2), nlone, nlate, &
-        igridg(1), igridg(2), nlong, nlatg, lsave, lwork, ldwork
-100 format(//' EQUALLY SPACED TO GAUSSIAN GRID TRANSFER ' , &
-        /' trssph input arguments: ' , &
-        /' intl = ', i2, &
-        /' igride(1) = ', i2, 2x, ' igride(2) = ', i2, &
-        /' nlone = ', i3, 2x, ' nlate = ', i3, &
-        /' igridg(1) = ', i2, 2x, ' igridg(2) = ', i2, &
-        /' nlong = ', i3, 2x, ' nlatg = ', i3, &
-        /' lsave = ', i7, 2x, ' lwork = ', i7, 2x, ' ldwork = ', i5)
-    !
-    !     transfer data from DATAE to DATAG
-    !
-    call trssph(intl, igride, nlone, nlate, datae, igridg, nlong, &
-        nlatg, datag, wsave, lsave, lsvmin, work, lwork, lwkmin, dwork, &
-        ldwork, ier)
-    !
-    !     print output parameters
-    !
-    write (*, 200) ier, lsvmin, lwkmin
-200 format(//' trssph output: ' &
-        / ' ier = ', i2, 2x, 'lsvmin = ', i7, 2x, 'lwkmin = ', i7)
-    if (ier == 0) then
-        !
-        !     compute nlatg gaussian colatitude points using spherepack routine "gaqd"
-        !     and set in single precision vector thetag with south to north orientation
-        !     for computing error in DATAG
-        !
-        call compute_gaussian_latitudes_and_weights(nlatg, dtheta, dwts, ier)
-        do  i=1, nlatg
-            thetag(i) = pi-dtheta(i)
-        end do
-        !
-        !     compute the least squares error in DATAG
-        !
-        err2 = 0.0
-        do j=1, nlong
-            p = (j-1)*dlong
-            cp = cos(p)
-            sp = sin(p)
-            do i=1, nlatg
-                t = thetag(i)
-                ct = cos(t)
-                st = sin(t)
-                xyz = (st*(st*ct*sp*cp))
-                dif = abs(DATAG(j, i)-exp(xyz))
-                err2 = err2+dif*dif
-            end do
-        end do
-        err2 = sqrt(err2/(nlong*nlatg))
-        write (6, 300) err2
-300     format(' least squares error = ', e10.3)
-    end if
-    !
-    !     set DATAE to zero
-    !
-    do j=1, nlone
-        do i=1, nlate
-            datae(i, j) = 0.0
+
+    !Set grid sizes with parameter statements
+    integer(ip), parameter :: nlat_gau = 92, nlon_gau = 194
+    integer(ip), parameter :: nlat_reg = 19, nlon_reg = 36
+    real(wp) :: data_reg(nlat_reg, nlon_reg), data_gau(nlon_gau, nlat_gau)
+    real(wp), dimension(nlat_gau) :: colatitudes, gaussian_latitudes, gaussian_weights
+    integer(ip) :: igrid_reg(2), igrid_gau(2)
+    real(wp)    :: dlat_reg, dlon_reg, dlon_gau
+    real(wp)    :: cosp, sinp, cost, sint, xyz, err2, theta, phi, dif
+    integer(ip) :: i, j, intl, error_flag
+
+    ! Set equally spaced grid increments
+    dlat_reg = PI/(nlat_reg-1)
+    dlon_reg = TWO_PI/nlon_reg
+    dlon_gau = TWO_PI/nlon_gau
+
+    ! Set given data in data_reg from f(x, y, z)= exp(x*y*z) restricted
+    ! to nlat_reg by nlon_reg equally spaced grid on the sphere
+    do  j=1, nlon_reg
+        phi = real(j-1, kind=wp)*dlon_reg
+        cosp = cos(phi)
+        sinp = sin(phi)
+        do i=1, nlat_reg
+            ! Set north to south oriented colatitude point
+            theta = real(i-1, kind=wp)*dlat_reg
+            cost = cos(theta)
+            sint = sin(theta)
+            xyz = (sint*(sint*cost*sinp*cosp))
+            data_reg(i, j) = exp(xyz)
         end do
     end do
 
-    write (*, 400) intl, igridg(1), igridg(2), nlong, nlatg, igride(1), &
-        igride(2), nlone, nlate, lsave, lwork, ldwork
+    ! Set initial call flag
+    intl = 0
+
+    ! Flag data_reg grid as north to south equally spaced
+    igrid_reg(1) = -1
+
+    ! Flag data_reg grid as colatitude by longitude
+    igrid_reg(2) = 1
+
+    ! Flag data_gau grid as south to north Gaussian
+    igrid_gau(1) = 2
+
+    ! Flag data_gau grid as longitude by latitude
+    igrid_gau(2) = 0
+
+    ! Print trssph input parameters
+    write (stdout, 100) intl, igrid_reg(1), igrid_reg(2), nlon_reg, nlat_reg, &
+        igrid_gau(1), igrid_gau(2), nlon_gau, nlat_gau
+100 format(//' EQUALLY SPACED TO GAUSSIAN GRID TRANSFER ' , &
+        /' trssph input arguments: ' , &
+        /' intl = ', i2, &
+        /' igrid_reg(1) = ', i2, 2x, ' igrid_reg(2) = ', i2, &
+        /' nlon_reg = ', i3, 2x, ' nlat_reg = ', i3, &
+        /' igrid_gau(1) = ', i2, 2x, ' igrid_gau(2) = ', i2, &
+        /' nlon_gau = ', i3, 2x, ' nlat_gau = ', i3)
+
+    ! Transfer data from data_reg to data_gau
+    call trssph(intl, igrid_reg, nlon_reg, nlat_reg, data_reg, igrid_gau, nlon_gau, &
+        nlat_gau, data_gau, error_flag)
+
+    if (error_flag == 0) then
+        !
+        ! Compute nlat_gau gaussian colatitudinal points
+        ! and set in colatitudes with south to north orientation
+        ! for computing error in data_gau
+        call compute_gaussian_latitudes_and_weights( &
+            nlat_gau, gaussian_latitudes, gaussian_weights, error_flag)
+
+        colatitudes = PI - gaussian_latitudes
+
+        ! Compute the least squares error in data_gau
+        err2 = 0.0_wp
+        do j=1, nlon_gau
+            phi = real(j - 1, kind=wp) * dlon_gau
+            cosp = cos(phi)
+            sinp = sin(phi)
+            do i=1, nlat_gau
+                theta = colatitudes(i)
+                cost = cos(theta)
+                sint = sin(theta)
+                xyz = (sint*(sint*cost*sinp*cosp))
+                dif = abs(data_gau(j, i)-exp(xyz))
+                err2 = err2 + dif**2
+            end do
+        end do
+        err2 = sqrt(err2/(nlon_gau*nlat_gau))
+        write (stdout, 300) err2
+300     format(' least squares error = ', e10.3)
+    end if
+
+    ! Set data_reg to zero
+    data_reg = 0.0_wp
+
+    write (stdout, 400) intl, igrid_gau(1), igrid_gau(2), nlon_gau, nlat_gau, igrid_reg(1), &
+        igrid_reg(2), nlon_reg, nlat_reg
 400 format(/' GAUSSIAN TO EQUALLY SPACED GRID TRANSFER ' , &
         /' trssph input arguments: ' , &
         /' intl = ', i2, &
-        /' igridg(1) = ', i2, 2x, ' igridg(2) = ', i2, &
-        /' nlong = ', i3, 2x, ' nlatg = ', i3, &
-        /' igride(1) = ', i2, 2x, ' igride(2) = ', i2, &
-        /' nlone = ', i3, 2x, ' nlate = ', i3, &
-        /' lsave = ', i7, 2x, 'lwork = ', i7, 2x, 'ldwork = ', i7)
-    !
-    !     transfer DATAG back to DATAE
-    !
-    call TRSSPH(intl, igridg, nlong, nlatg, datag, igride, nlone, &
-        nlate, datae, wsave, lsave, lsvmin, work, lwork, lwkmin, dwork, &
-        ldwork, ier)
-    !
-    !     print output parameters
-    !
-    write (*, 200) ier, lsvmin, lwkmin
-    if (ier == 0) then
-        !
-        !     compute the least squares error in DATAE
-        !
+        /' igrid_gau(1) = ', i2, 2x, ' igrid_gau(2) = ', i2, &
+        /' nlon_gau = ', i3, 2x, ' nlat_gau = ', i3, &
+        /' igrid_reg(1) = ', i2, 2x, ' igrid_reg(2) = ', i2, &
+        /' nlon_reg = ', i3, 2x, ' nlat_reg = ', i3)
+
+    ! Transfer data_gau back to data_reg
+    call trssph(intl, igrid_gau, nlon_gau, nlat_gau, data_gau, igrid_reg, nlon_reg, &
+        nlat_reg, data_reg, error_flag)
+
+    if (error_flag == 0) then
+
+        ! Compute the least squares error in data_reg
         err2 = 0.0
-        do j=1, nlone
-            p = (j-1)*dlone
-            cp = cos(p)
-            sp = sin(p)
-            do i=1, nlate
-                t = (i-1)*dlate
-                ct = cos(t)
-                st = sin(t)
-                xyz = (st*(st*ct*sp*cp))
-                dif = abs(DATAE(i, j)-exp(xyz))
-                err2 = err2+dif*dif
+        do j=1, nlon_reg
+            phi = real(j-1, kind=wp)*dlon_reg
+            cosp = cos(phi)
+            sinp = sin(phi)
+            do i=1, nlat_reg
+                theta = real(i - 1, kind=wp)*dlat_reg
+                cost = cos(theta)
+                sint = sin(theta)
+                xyz = (sint*(sint*cost*sinp*cosp))
+                dif = abs(data_reg(i, j)-exp(xyz))
+                err2 = err2+dif**2
             end do
         end do
-        err2 = sqrt(err2/(nlate*nlone))
-        write (6, 300) err2
+        err2 = sqrt(err2/(nlat_reg*nlon_reg))
+        write (stdout, 300) err2
     end if
-end program testrssph
+
+end program test_trssph

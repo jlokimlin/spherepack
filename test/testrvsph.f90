@@ -30,15 +30,6 @@
 !     * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !
 !
-! ... file testrvsph.f
-!
-!     this file contains a test program for trvsph.f
-!
-! ... required files
-!
-!     trvsph.f, sphcom.f, hrfft.f, gaqd.f, vhaec.f, vhsec.f, vhagc.f, vhsgc.f
-!
-! ... description (see documentation in file trvsph.f)
 !
 !     Subroutine trvsph is used to demonstrate vector data transfer between a coarse
 !     ten degree equally spaced grid and a higher resolution T42 Global Spectral
@@ -88,7 +79,7 @@
 !     Output from executing the test program on separate platforms with 32 bit
 !     and 64 bit floating point arithmetic is listed below.  The minimum required
 !     saved and unsaved work space lengths were predetermined by an earlier call
-!     trvsph with nlone=36, nlate=19, nlong=128, nlatg=64, lsave=0, lwork=0 and printout
+!     trvsph with nlon_reg=36, nlat_reg=19, nlon_gau=128, nlat_gau=64, lsave=0, lwork=0 and printout
 !     of lsvmin and lwkmin.
 !
 !
@@ -101,11 +92,11 @@
 !      EQUALLY SPACED TO GAUSSIAN GRID TRANSFER
 !      trvsph input arguments:
 !      intl =  0
-!      igride(1) = -1   igride(2) =  1
-!      nlone =  36   nlate =  19
+!      igrid_reg(1) = -1   igrid_reg(2) =  1
+!      nlon_reg =  36   nlat_reg =  19
 !      ive =  1
-!      igridg(1) =  2   igridg(2) =  0
-!      nlong = 128   nlatg =  64
+!      igrid_gau(1) =  2   igrid_gau(2) =  0
+!      nlon_gau = 128   nlat_gau =  64
 !      ivg =  0
 !      lsave =   21814   lwork =   75173
 !
@@ -121,11 +112,11 @@
 !      GAUSSIAN TO EQUALLY SPACED GRID TRANSFER
 !      trvsph input arguments:
 !      intl =  0
-!      igridg(1) =  2   igridg(2) =  0
-!      nlong = 128   nlatg =  64
+!      igrid_gau(1) =  2   igrid_gau(2) =  0
+!      nlon_gau = 128   nlat_gau =  64
 !      ivg =  0
-!      igride(1) = -1   igride(2) =  1
-!      nlone =  36   nlate =  19
+!      igrid_reg(1) = -1   igrid_reg(2) =  1
+!      nlon_reg =  36   nlat_reg =  19
 !      ive =  1
 !      lsave =   21814   lwork =   75173
 !
@@ -154,41 +145,54 @@ program testrvsph
     implicit none
 
     !     set grid sizes with parameter statements
-    integer(ip), parameter :: nlatg=64, nlong=128, nlate=19, nlone=36
-    !
-    !     set predetermined minimum saved and unsaved work space lengths
-    !
-    integer(ip), parameter :: lwork =  76000
-    integer(ip), parameter :: lsave = 21814
-
-    !     set real workspace length
-    integer(ip), parameter :: ldwork = 2*nlatg*(nlatg+1)+1
+    integer(ip), parameter :: NLAT_GAU=64, NLON_GAU=128, NLAT_REG=19, NLON_REG=36
     !
     !     dimension and type data arrays and grid vectors and internal variables
     !
-    real(wp) :: ue(nlate, nlone), ve(nlate, nlone)
-    real(wp) :: ug(nlong, nlatg), vg(nlong, nlatg)
-    real(wp) :: work(lwork), wsave(lsave), thetag(nlatg)
-    real(wp) :: dtheta(nlatg), dwts(nlatg), dwork(ldwork)
-    integer(ip) :: igride(2), igridg(2), ive, ivg
-    real(wp) :: dlate, dlone, dlong, t, p, cosp, sinp, cost, sint, x, y, z
+    real(wp) :: u_reg(NLAT_REG, NLON_REG), v_reg(NLAT_REG, NLON_REG)
+    real(wp) :: u_gau(NLON_GAU, NLAT_GAU), v_gau(NLON_GAU, NLAT_GAU)
+    real(wp) :: theta_gau(NLAT_GAU)
+    real(wp) :: gaussian_latitudes(NLAT_GAU), gaussian_weights(NLAT_GAU)
+    integer(ip) :: igrid_reg(2), igrid_gau(2), iv_reg, iv_gau
+    real(wp) :: dlat_reg, dlon_reg, dlon_gau
+    real(wp) :: theta, phi, cosp, sinp, cost, sint, x, y, z
     real(wp) :: erru2, errv2, ex, ey, ez, emz, uee, vee
-    integer(ip) :: i, j, ib, intl, error_flag, lsvmin, lwkmin
+    integer(ip) :: i, j, ib, intl, error_flag
 
     ! Set equally spaced grid increments
-    dlate = PI/(nlate-1)
-    dlone = TWO_PI/nlone
-    dlong = TWO_PI/nlong
+    dlat_reg = PI/(NLAT_REG-1)
+    dlon_reg = TWO_PI/NLON_REG
+    dlon_gau = TWO_PI/NLON_GAU
+
+    ! Set initial call flag
+    intl = 0
+
+    ! flag (ue, ve) grid as north to south equally spaced
+    igrid_reg(1) = -1
+
+    ! flag (ue, ve) as nlat_reg by nlon_reg arrays
+    igrid_reg(2) = 1
+    !     flag ve as colatitude component of vector
+    iv_reg = 1
+
+    ! flag (ug, vg) as south to north gaussian
+    igrid_gau(1) = 2
+
+    ! flag (ug, vg) as nlon_gau by nlat_gau arrays
+    igrid_gau(2) = 0
+
+    ! flag vg as latitude component of vector
+    iv_gau = 0
 
     ! Set vector data in (ue, ve)
-    do  j=1, nlone
-        p = (j-1)*dlone
-        cosp = cos(p)
-        sinp = sin(p)
-        do i=1, nlate
-            t = (i-1)*dlate
-            cost = cos(t)
-            sint = sin(t)
+    do  j=1, NLON_REG
+        phi = real(j - 1, kind=wp)*dlon_reg
+        cosp = cos(phi)
+        sinp = sin(phi)
+        do i=1, NLAT_REG
+            theta = real(i - 1, kind=wp)*dlat_reg
+            cost = cos(theta)
+            sint = sin(theta)
             x = sint*cosp
             y = sint*sinp
             z = cost
@@ -196,73 +200,38 @@ program testrvsph
             ey = exp(y)
             ez = exp(z)
             emz = exp(-z)
-            ve(i, j) = ex*cost*cosp-ey*cosp-ez*sint
-            ue(i, j) = -ex*sinp + emz*sint + ey*cost*sinp
+            v_reg(i, j) = ex*cost*cosp-ey*cosp-ez*sint
+            u_reg(i, j) = -ex*sinp + emz*sint + ey*cost*sinp
         end do
     end do
-    !
-    !     set initial call flag
-    !
-    intl = 0
-    !
-    !     flag (ue, ve) grid as north to south equally spaced
-    !
-    igride(1) = -1
-    !
-    !     flag (ue, ve) as nlate by nlone arrays
-    !
-    igride(2) = 1
-    !
-    !     flag ve as colatitude component of vector
-    ive = 1
-    !
-    !     flag (ug, vg) as south to north gaussian
-    !
-    igridg(1) = 2
-    !
-    !     flag (ug, vg) as nlong by nlatg arrays
-    !
-    igridg(2) = 0
-    !
-    !     flag vg as latitude component of vector
-    ivg = 0
-    !
-    !     print trvsph input arguments
-    !
-    write (stdout, 100) intl, igride(1), igride(2), nlone, nlate, ive, &
-        igridg(1), igridg(2), nlong, nlatg, ivg, lsave, lwork, ldwork
+
+    ! print trvsph input arguments
+    write (stdout, 100) intl, igrid_reg(1), igrid_reg(2), NLON_REG, NLAT_REG, iv_reg, &
+        igrid_gau(1), igrid_gau(2), NLON_GAU, NLAT_GAU, iv_gau
 100 format(//' EQUALLY SPACED TO GAUSSIAN GRID TRANSFER ' , &
         /' trvsph input arguments: ' , &
         /' intl = ', i2, &
-        /' igride(1) = ', i2, 2x, ' igride(2) = ', i2, &
-        /' nlone = ', i3, 2x, ' nlate = ', i3, &
+        /' igrid_reg(1) = ', i2, 2x, ' igrid_reg(2) = ', i2, &
+        /' nlon_reg = ', i3, 2x, ' nlat_reg = ', i3, &
         /' ive = ', i2, &
-        /' igridg(1) = ', i2, 2x, ' igridg(2) = ', i2, &
-        /' nlong = ', i3, 2x, ' nlatg = ', i3, &
-        /' ivg = ', i2 &
-        /' lsave = ', i7, 2x, ' lwork = ', i7, 2x, ' ldwork = ', i5)
-    !
+        /' igrid_gau(1) = ', i2, 2x, ' igrid_gau(2) = ', i2, &
+        /' nlon_gau = ', i3, 2x, ' nlat_gau = ', i3, &
+        /' ivg = ', i2)
+
     !     transfer  (ue, ve) to (ug, vg)
-    !
-    call trvsph(intl, igride, nlone, nlate, ive, ue, ve, igridg, nlong, &
-        nlatg, ivg, ug, vg, wsave, lsave, lsvmin, work, lwork, lwkmin, dwork, &
-        ldwork, error_flag)
-    !
-    !     print output arguments
-    !
-    write (stdout, 200) error_flag, lsvmin, lwkmin
-200 format(//' trvsph output: ' &
-        / ' error_flag = ', i8, 2x, 'lsvmin = ', i7, 2x, 'lwkmin = ', i7)
+    call trvsph(intl, igrid_reg, NLON_REG, NLAT_REG, iv_reg, u_reg, v_reg, igrid_gau, NLON_GAU, &
+        NLAT_GAU, iv_gau, u_gau, v_gau, error_flag)
 
     if (error_flag == 0) then
         !
-        !     compute nlatg gaussian colatitude points and
+        !     compute nlat_gau gaussian colatitude points and
         !     set with south to north orientation in thetag
         !
-        call compute_gaussian_latitudes_and_weights(nlatg, dtheta, dwts, error_flag)
-        do  i=1, nlatg
-            ib = nlatg-i+1
-            thetag(i) = dtheta(ib)
+        call compute_gaussian_latitudes_and_weights( &
+            NLAT_GAU, gaussian_latitudes, gaussian_weights, error_flag)
+        do  i=1, NLAT_GAU
+            ib = NLAT_GAU-i+1
+            theta_gau(i) = gaussian_latitudes(ib)
         end do
           !
           !     compute the least squares error in (ug, vg)
@@ -270,14 +239,14 @@ program testrvsph
           !
         errv2 = 0.0
         erru2 = 0.0
-        do  j=1, nlong
-            p = (j-1)*dlong
-            cosp = cos(p)
-            sinp = sin(p)
-            do i=1, nlatg
-                t = thetag(i)
-                cost = cos(t)
-                sint = sin(t)
+        do  j=1, NLON_GAU
+            phi = real(j-1, kind=wp)*dlon_gau
+            cosp = cos(phi)
+            sinp = sin(phi)
+            do i=1, NLAT_GAU
+                theta = theta_gau(i)
+                cost = cos(theta)
+                sint = sin(theta)
                 x = sint*cosp
                 y = sint*sinp
                 z = cost
@@ -287,54 +256,45 @@ program testrvsph
                 emz = exp(-z)
                 vee = -ex*cost*cosp+ey*cosp+ez*sint
                 uee = -ex*sinp + emz*sint + ey*cost*sinp
-                erru2 = erru2 + (ug(j, i)-uee)**2
-                errv2 = errv2 + (vg(j, i)-vee)**2
+                erru2 = erru2 + (u_gau(j, i)-uee)**2
+                errv2 = errv2 + (v_gau(j, i)-vee)**2
             end do
         end do
-        erru2 = sqrt(erru2/(nlong*nlatg))
-        errv2 = sqrt(errv2/(nlong*nlatg))
-        write (stdout, 300) erru2, errv2
-300     format(' least squares error in u = ', e10.3 &
-            /' least squares error in v = ', e10.3)
+        erru2 = sqrt(erru2/(NLON_GAU*NLAT_GAU))
+        errv2 = sqrt(errv2/(NLON_GAU*NLAT_GAU))
+        call print_least_squared_error(erru2, errv2)
     end if
 
-    ! Now transfer (ug, vg) back to (ue, ve)
-    ue = 0.0_wp
-    ve = 0.0_wp
-
-    write (stdout, 101) intl, igridg(1), igridg(2), nlong, nlatg, ivg, &
-        igride(1), igride(2), nlone, nlate, ive, lsave, lwork, ldwork
+    write (stdout, 101) intl, igrid_gau(1), igrid_gau(2), NLON_GAU, NLAT_GAU, iv_gau, &
+        igrid_reg(1), igrid_reg(2), NLON_REG, NLAT_REG, iv_reg
 101 format(//' GAUSSIAN TO EQUALLY SPACED GRID TRANSFER ' , &
         /' trvsph input arguments: ' , &
         /' intl = ', i2, &
-        /' igridg(1) = ', i2, 2x, ' igridg(2) = ', i2, &
-        /' nlong = ', i3, 2x, ' nlatg = ', i3, &
-        /' ivg = ', i2, &
-        /' igride(1) = ', i2, 2x, ' igride(2) = ', i2, &
-        /' nlone = ', i3, 2x, ' nlate = ', i3, &
-        /' ive = ', i2 &
-        /' lsave = ', i7, 2x, ' lwork = ', i7, 2x, ' ldwork = ', i5)
-    call trvsph(intl, igridg, nlong, nlatg, ivg, ug, vg, igride, nlone, nlate, &
-        ive, ue, ve, wsave, lsave, lsvmin, work, lwork, lwkmin, dwork, ldwork, error_flag)
-    !
-    !     print output arguments
-    !
-    write (stdout, 200) error_flag, lsvmin, lwkmin
+        /' igrid_gau(1) = ', i2, 2x, ' igrid_gau(2) = ', i2, &
+        /' nlon_gau = ', i3, 2x, ' nlat_gau = ', i3, &
+        /' iv_gau = ', i2, &
+        /' igrid_reg(1) = ', i2, 2x, ' igrid_reg(2) = ', i2, &
+        /' nlon_reg = ', i3, 2x, ' nlat_reg = ', i3, &
+        /' iv_reg = ', i2)
+
+    call trvsph(intl, igrid_gau, NLON_GAU, NLAT_GAU, iv_gau, u_gau, v_gau, igrid_reg, &
+        NLON_REG, NLAT_REG, iv_reg, u_reg, v_reg, error_flag)
+
     if (error_flag == 0) then
         !
         !     compute the least squares error in (ue, ve)
         !     by comparing with exact mathematical vector
         !
-        errv2 = 0.0
-        erru2 = 0.0
-        do  j=1, nlone
-            p = (j-1)*dlone
-            cosp = cos(p)
-            sinp = sin(p)
-            do i=1, nlate
-                t = (i-1)*dlate
-                cost = cos(t)
-                sint = sin(t)
+        errv2 = 0.0_wp
+        erru2 = 0.0_wp
+        do  j=1, NLON_REG
+            phi = real(j-1, kind=wp)*dlon_reg
+            cosp = cos(phi)
+            sinp = sin(phi)
+            do i=1, NLAT_REG
+                theta = real(i-1, kind=wp)*dlat_reg
+                cost = cos(theta)
+                sint = sin(theta)
                 x = sint*cosp
                 y = sint*sinp
                 z = cost
@@ -344,13 +304,26 @@ program testrvsph
                 emz = exp(-z)
                 vee =  ex*cost*cosp-ey*cosp-ez*sint
                 uee = -ex*sinp + emz*sint + ey*cost*sinp
-                erru2 = erru2 + (ue(i, j)-uee)**2
-                errv2 = errv2 + (ve(i, j)-vee)**2
+                erru2 = erru2 + (u_reg(i, j)-uee)**2
+                errv2 = errv2 + (v_reg(i, j)-vee)**2
             end do
         end do
-        erru2 = sqrt(erru2/(nlone*nlate))
-        errv2 = sqrt(errv2/(nlone*nlate))
-        write (stdout, 300) erru2, errv2
+        erru2 = sqrt(erru2/(NLON_REG*NLAT_REG))
+        errv2 = sqrt(errv2/(NLON_REG*NLAT_REG))
+        call print_least_squared_error(erru2, errv2)
     end if
+
+contains
+
+    subroutine print_least_squared_error(erru2, errv2)
+
+        ! Dummy arguments
+        real(wp), intent(in) :: erru2, errv2
+
+        write (stdout, '(2(a,e10.3/))') &
+            ' least squares error in u = ', erru2, &
+            ' least squares error in v = ', errv2
+
+    end subroutine print_least_squared_error
 
 end program testrvsph

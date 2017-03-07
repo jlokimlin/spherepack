@@ -526,12 +526,12 @@ module module_trvsph
         ip ! integer precision
 
     use vector_analysis_routines, only: &
-        vhaec, vhaeci, &
-        vhagc, vhagci
+        vhaec, initialize_vhaec, &
+        vhagc, initialize_vhagc
 
     use vector_synthesis_routines, only: &
-        vhsec, vhseci, &
-        vhsgc, vhsgci
+        vhsec, initialize_vhsec, &
+        vhsgc, initialize_vhsgc
 
     ! Explicit typing only
     implicit none
@@ -545,56 +545,54 @@ module module_trvsph
 contains
 
     subroutine trvsph(intl, igrida, nlona, nlata, iveca, ua, va, &
-        igridb, nlonb, nlatb, ivecb, ub, vb, wsave, lsave, lsvmin, work, &
-        lwork, lwkmin, dwork, ldwork, ierror)
+        igridb, nlonb, nlatb, ivecb, ub, vb, ierror)
 
-        integer(ip) :: intl, igrida(2), nlona, nlata, igridb(2), nlonb, nlatb
-        integer(ip) :: iveca, ivecb, lsave, lsvmin, lwork, lwkmin, ldwork, ierror
-        real(wp) :: ua(*), va(*), ub(*), vb(*), wsave(:), work(*)
-        real(wp) :: dwork(*)
+        integer(ip), intent(in)    :: intl
+        integer(ip), intent(in)    :: igrida(2)
+        integer(ip), intent(in)    :: nlona, nlata, iveca
+        real(wp),    intent(inout) :: ua(:,:), va(:,:)
+        integer(ip), intent(in)    :: igridb(2), nlonb, nlatb
+        integer(ip), intent(in)    :: ivecb
+        real(wp),    intent(out)   :: ub(:,:), vb(:,:)
+        integer(ip), intent(out)   :: ierror
 
         ! Local variables
-        integer(ip) :: igrda, igrdb, la1, la2, lb1, lb2, lwa, lwb
-        integer(ip) :: iabr, iabi, iacr, iaci, ibbr, ibbi, ibcr, ibci
-        integer(ip) :: nlat, lwk1, lwk2, lw, iw, jb
-        integer(ip) :: ig1, ig2
-        integer(ip), parameter :: nt = 1
-        integer(ip), parameter :: ityp = 0
-
-        !     include a save statement to ensure local variables in trvsph, set during
-        !     an intl=0 call, are preserved if trvsph is recalled with intl=1
-        !
-        save
+        integer(ip)            :: igrda, igrdb, mdab_a, mdab_b
+        real(wp), allocatable  :: wavetable_a(:), wavetable_b(:)
+        integer(ip), parameter :: nt = 1, ityp = 0
 
         ! Check calling arguments
-        ig1 = igrida(1)
-        ig2 = igrida(2)
+        associate( &
+            ig1 => igrida(1), &
+            ig2 => igrida(2) &
+            )
 
-        if (intl*(intl-1)/=0) then
-            ierror = 1
-        else if ((ig1-1)*(ig1+1)*(ig1-2)*(ig1+2) /= 0) then
-            ierror = 2
-        else if (ig2*(ig2-1) /= 0) then
-            ierror = 3
-        else if (nlona < 4) then
-            ierror = 4
-        else if (nlata < 3) then
-            ierror = 5
-        else if (iveca*(iveca-1)/=0) then
-            ierror = 6
-        else if ((ig1-1)*(ig1+1)*(ig1-2)*(ig1+2)/=0) then
-            ierror = 7
-        else if (ig2*(ig2-1) /= 0) then
-            ierror = 8
-        else if (nlonb < 4) then
-            ierror = 9
-        else if (nlatb < 3) then
-            ierror = 10
-        else if (ivecb*(ivecb-1) /= 0) then
-            ierror = 11
-        else
-            ierror = 0
-        end if
+            if (intl*(intl-1)/=0) then
+                ierror = 1
+            else if ((ig1-1)*(ig1+1)*(ig1-2)*(ig1+2) /= 0) then
+                ierror = 2
+            else if (ig2*(ig2-1) /= 0) then
+                ierror = 3
+            else if (nlona < 4) then
+                ierror = 4
+            else if (nlata < 3) then
+                ierror = 5
+            else if (iveca*(iveca-1)/=0) then
+                ierror = 6
+            else if ((ig1-1)*(ig1+1)*(ig1-2)*(ig1+2)/=0) then
+                ierror = 7
+            else if (ig2*(ig2-1) /= 0) then
+                ierror = 8
+            else if (nlonb < 4) then
+                ierror = 9
+            else if (nlatb < 3) then
+                ierror = 10
+            else if (ivecb*(ivecb-1) /= 0) then
+                ierror = 11
+            else
+                ierror = 0
+            end if
+        end associate
 
         ! Check error flag
         if (ierror /= 0) return
@@ -602,265 +600,196 @@ contains
         igrda = abs(igrida(1))
         igrdb = abs(igridb(1))
 
-        if (intl == 0) then
-            la1 = min(nlata, (nlona+1)/2)
-            la2 = (nlata+1)/2
-            lb1 = min(nlatb, (nlonb+1)/2)
-            lb2 = (nlatb+1)/2
+        if (igrda == 1) then
+            ! Initialize wavetable for equally spaced analysis
+            call initialize_vhaec(nlata, nlona, wavetable_a, ierror)
+        else
+            ! Initialize wavetable for gaussian analysis
+            call initialize_vhagc(nlata, nlona, wavetable_a, ierror)
+        end if
 
-            ! saved space for analysis on a grid
-            lwa = 4*nlata*la2+3*max(la1-2, 0)*(2*nlata-la1-1)+la2+nlona+15
-            !
-            ! set saved work space length for synthesis on b grid
-            lwb = 4*nlatb*lb2+3*max(lb1-2, 0)*(2*nlatb-lb1-1)+nlonb+15
-            !
-            ! set minimum required saved workspace length
-            lsvmin = lwa + lwb
+        if (igrdb == 2) then
+            ! Initialize wavetable for gaussian synthesis
+            call initialize_vhsgc(nlatb, nlonb, wavetable_b, ierror)
+        else
+            ! Initialize wavetable for equally spaced synthesis
+            call initialize_vhsec(nlatb, nlonb, wavetable_b, ierror)
+        end if
 
-            ! set wsave index pointer
-            jb = 1+lwa
-
-            ! set pointers for vector spherical harmonic coefs in work
-            iabr = 1
-            iabi = iabr + la1*nlata
-            iacr = iabi + la1*nlata
-            iaci = iacr + la1*nlata
-            ibbr = iaci + la1*nlata
-            ibbi = ibbr + lb1*nlatb
-            ibcr = ibbi + lb1*nlatb
-            ibci = ibcr + lb1*nlatb
-
-            ! set pointers for remaining work
-            iw = ibci + lb1*nlatb
-
-            ! set remaining work space length in lw
-            lw = lwork - iw
-
-            ! compute unsaved space for analysis and synthesis
-            lwk1 = 2*nlata*(2*nlona+max(6*la2, nlona))
-            lwk2 = 2*nlatb*(2*nlonb+max(6*lb2, nlonb))
-
-            ! set minimum unsaved workspace required by trvsph
-            lwkmin = iw + max(lwk1, lwk2)
-
-            ! Set error flags if saved or unsaved work space is insufficient
-            nlat = max(nlata, nlatb)
-
-            if (lsave < lsvmin) then
-                ierror = 12
-            else if (lwork < lwkmin) then
-                ierror = 13
-            else if (ldwork < 2*nlat*(nlat+1)+1) then
-                ierror = 15
-            else
-                ierror = 0
-            end if
-
-            ! Check error flag
-            if (ierror /= 0) return
-
-            if (igrda == 1) then
-                ! Initialize wsave for equally spaced analysis
-                call vhaeci(nlata, nlona, wsave, ierror)
-                call check_error("trvsph- vhaeci", ierror)
-            else
-                ! Initialize wsave for gaussian analysis
-                call vhagci(nlata, nlona, wsave, ierror)
-                call check_error("trvsph- vhagci", ierror)
-            end if
-
-            if (igrdb == 2) then
-                ! Initialize wsave for gaussian synthesis
-                call vhsgci(nlatb, nlonb, wsave(jb:), ierror)
-                call check_error("trvsph- vhsgci", ierror)
-            else
-                ! Initialize wsave for equally spaced synthesis
-                call vhseci(nlatb, nlonb, wsave(jb:), ierror)
-                call check_error("trvsph- vhseci", ierror)
-            end if
-
-            ! Address error flag
-            if (ierror /= 0) then
-                ierror = 14
-                return
-            end if
+        ! Address error flag
+        if (ierror /= 0) then
+            ierror = 14
+            return
         end if
 
         ! Convert the vector field (ua, va) to mathematical spherical coordinates
         if (igrida(2) == 0) then
-            call trvplat(nlona, nlata, ua, work)
-            call trvplat(nlona, nlata, va, work)
+            call transpose(nlona, nlata, ua)
+            call transpose(nlona, nlata, va)
         end if
 
         if (igrida(1) > 0) then
-            call covlat(nlata, nlona, ua)
-            call covlat(nlata, nlona, va)
+            call reverse_colatitudes(nlata, nlona, ua)
+            call reverse_colatitudes(nlata, nlona, va)
         end if
 
-        if (iveca == 0) call negv(nlata, nlona, va)
+        if (iveca == 0) va = -va !call negate_colatitudinal_vector_component(nlata, nlona, va)
 
         ! Analyze vector field
+        mdab_a = min(nlata, (nlona + 1)/2)
+        mdab_b = min(nlatb, (nlonb + 1)/2)
+
         block
-            real(wp), dimension(la1, nlata, nt) :: abr, abi, acr, aci
-            real(wp), dimension(lb1, nlatb, nt) :: bbr, bbi, bcr, bci
+            real(wp), dimension(mdab_a, nlata, nt) :: br_a, bi_a, cr_a, ci_a
+            real(wp), dimension(mdab_b, nlatb, nt) :: br_b, bi_b, cr_b, ci_b
 
             if (igrda == 2) then
                 call vhagc(nlata, nlona, ityp, nt, va, ua, nlata, nlona, &
-                    abr, abi, acr, aci, la1, nlata, wsave, ierror)
-                call check_error("trvsph- vhagc", ierror)
+                    br_a, bi_a, cr_a, ci_a, mdab_a, nlata, wavetable_a, ierror)
             else
                 call vhaec(nlata, nlona, ityp, nt, va, ua, nlata, nlona, &
-                    abr, abi, acr, aci, la1, nlata, wsave, ierror)
-                call check_error("trvsph- vhaec", ierror)
+                    br_a, bi_a, cr_a, ci_a, mdab_a, nlata, wavetable_a, ierror)
             end if
 
-
             ! Transfer a grid coefficients to b grid coefficients
-            call trvab(la1, nlata, abr, abi, acr, aci, lb1, nlatb, bbr, bbi, bcr, bci)
+            call transfer_vector_coeff(mdab_a, nlata, br_a, bi_a, cr_a, ci_a, &
+                mdab_b, nlatb, br_b, bi_b, cr_b, ci_b)
 
             ! Synthesize on b grid
             if (igrdb == 1) then
-                call vhsec(nlatb, nlonb, ityp, nt, vb, ub, nlatb, nlonb, bbr, &
-                    bbi, bcr, bci, lb1, nlatb, wsave(jb:), ierror)
-                call check_error("trvsph- vhsec", ierror)
+                call vhsec(nlatb, nlonb, ityp, nt, vb, ub, nlatb, nlonb, br_b, &
+                    bi_b, cr_b, ci_b, mdab_b, nlatb, wavetable_b, ierror)
             else
-                call vhsgc(nlatb, nlonb, ityp, nt, vb, ub, nlatb, nlonb, bbr, &
-                    bbi, bcr, bci, lb1, nlatb, wsave(jb:), ierror)
-                call check_error("trvsph- vhsgc", ierror)
+                call vhsgc(nlatb, nlonb, ityp, nt, vb, ub, nlatb, nlonb, br_b, &
+                    bi_b, cr_b, ci_b, mdab_b, nlatb, wavetable_b, ierror)
             end if
         end block
-        !     restore a grid and b grid vector fields (now in math coordinates) to
-        !     agree with grid flags in igrida, iveca, igridb, ivecb
-        !
-        if (iveca == 0) then
-            call negv(nlata, nlona, va)
-        end if
 
-        if (ivecb == 0) then
-            call negv(nlatb, nlonb, vb)
-        end if
+        ! Restore a grid and b grid vector fields (now in math coordinates) to
+        !  agree with grid flags in igrida, iveca, igridb, ivecb
+        if (iveca == 0) va = -va !call negate_colatitudinal_vector_component(nlata, nlona, va)
+        if (ivecb == 0) vb = -vb !call negate_colatitudinal_vector_component(nlatb, nlonb, vb)
 
-        if (igrida(1)> 0) then
-            call covlat(nlata, nlona, ua)
-            call covlat(nlata, nlona, va)
+        if (igrida(1) > 0) then
+            call reverse_colatitudes(nlata, nlona, ua)
+            call reverse_colatitudes(nlata, nlona, va)
         end if
 
         if (igridb(1) > 0) then
-            call covlat(nlatb, nlonb, ub)
-            call covlat(nlatb, nlonb, vb)
+            call reverse_colatitudes(nlatb, nlonb, ub)
+            call reverse_colatitudes(nlatb, nlonb, vb)
         end if
 
         if (igrida(2) == 0) then
-            call trvplat(nlata, nlona, ua, work)
-            call trvplat(nlata, nlona, va, work)
+            call transpose(nlata, nlona, ua)
+            call transpose(nlata, nlona, va)
         end if
 
         if (igridb(2) == 0) then
-            call trvplat(nlatb, nlonb, ub, work)
-            call trvplat(nlatb, nlonb, vb, work)
+            call transpose(nlatb, nlonb, ub)
+            call transpose(nlatb, nlonb, vb)
         end if
+
+        ! Release memory
+        deallocate (wavetable_a)
+        deallocate (wavetable_b)
 
     end subroutine trvsph
 
-    subroutine check_error(routine, ierror)
+    ! Purpose:
+    !
+    ! Set coefficients for b grid from coefficients for a grid
+    !
+    subroutine transfer_scalar_coeff(ma, na, aa, ba, mb, nb, ab, bb)
 
         ! Dummy arguments
-        character(len=*), intent(in) :: routine
-        integer(ip),      intent(in) :: ierror
+        integer(ip), intent(in)  :: ma
+        integer(ip), intent(in)  :: na
+        integer(ip), intent(in)  :: mb
+        integer(ip), intent(in)  :: nb
+        real(wp),    intent(in)  :: aa(ma, na)
+        real(wp),    intent(in)  :: ba(ma, na)
+        real(wp),    intent(out) :: ab(mb, nb)
+        real(wp),    intent(out) :: bb(mb, nb)
 
-        if (ierror /= 0) write (stderr, '(a, i5)') routine//'   error_flag = ', ierror
+        ! Local variables
+        integer(ip) :: m, n ! Counters
 
-    end subroutine check_error
+        ! Ensure that coefs outside triangle are zero
+        ab = ZERO
+        bb = ZERO
 
-    subroutine negv(nlat, nlon, v)
-        !
-        !     negate (co)latitudinal vector componenet
-        !
-
-        integer(ip) :: nlat, nlon
-        real(wp) :: v(nlat, nlon)
-
-        v = -v
-
-    end subroutine negv
-
-    subroutine trvab(ma, na, abr, abi, acr, aci, mb, nb, bbr, bbi, bcr, bci)
-
-        integer(ip) :: ma, na, mb, nb, i, j, m, n
-        real(wp) :: abr(ma, na), abi(ma, na), acr(ma, na), aci(ma, na)
-        real(wp) :: bbr(mb, nb), bbi(mb, nb), bcr(mb, nb), bci(mb, nb)
-        !
-        !     set coefficients for b grid from coefficients for a grid
-        !
         m = min(ma, mb)
         n = min(na, nb)
-        do j=1, n
-            do i=1, m
-                bbr(i, j) = abr(i, j)
-                bbi(i, j) = abi(i, j)
-                bcr(i, j) = acr(i, j)
-                bci(i, j) = aci(i, j)
-            end do
-        end do
-        !
-        !     set coefs outside triangle to zero
-        !
-        do i=m+1, mb
-            do j=1, nb
-                bbr(i, j) = ZERO
-                bbi(i, j) = ZERO
-                bcr(i, j) = ZERO
-                bci(i, j) = ZERO
-            end do
-        end do
-        do j=n+1, nb
-            do i=1, mb
-                bbr(i, j) = ZERO
-                bbi(i, j) = ZERO
-                bcr(i, j) = ZERO
-                bci(i, j) = ZERO
-            end do
-        end do
+        ab(1:m, 1:n) = aa(1:m, 1:n)
+        bb(1:m, 1:n) = ba(1:m, 1:n)
 
-    end subroutine trvab
+    end subroutine transfer_scalar_coeff
 
-    subroutine trvplat(n, m, data, work)
-        !
-        !     transpose the n by m array data to a m by n array data
-        !     work must be at least n*m words long
-        !
+    subroutine transfer_vector_coeff(ma, na, abr, abi, acr, aci, mb, nb, bbr, bbi, bcr, bci)
 
-        integer(ip) :: n, m, i, j, ij, ji
-        real(wp) :: data(*)
-        real(wp) :: work(*)
+        ! Dummy arguments
+        integer(ip), intent(in)  :: ma, na, mb, nb
+        real(wp),    intent(in)  :: abr(ma, na), abi(ma, na), acr(ma, na), aci(ma, na)
+        real(wp),    intent(out) :: bbr(mb, nb), bbi(mb, nb), bcr(mb, nb), bci(mb, nb)
 
-        do j=1, m
-            do i=1, n
-                ij = (j-1)*n+i
-                work(ij) = data(ij)
-            end do
-        end do
+        call transfer_scalar_coeff(ma, na, abr, abi, mb, nb, bbr, bbi)
+        call transfer_scalar_coeff(ma, na, acr, aci, mb, nb, bcr, bci)
 
-        do i=1, n
+    end subroutine transfer_vector_coeff
+
+    ! Purpose:
+    !
+    !     transpose the n by m array data to a m by n array data
+    !     work must be at least n*m words long
+    !
+    subroutine transpose(n, m, data)
+
+        ! Dummy arguments
+        integer(ip), intent(in)    :: n, m
+        real(wp),    intent(inout) :: data(n*m)
+
+        ! Local variables
+        integer(ip) :: i, j, ij, ji, lwork
+
+        ! Set required workspace size
+        lwork = n * m
+
+        block
+            real(wp) :: work(lwork)
+
             do j=1, m
-                ji = (i-1)*m+j
-                ij = (j-1)*n+i
-                data(ji) = work(ij)
+                do i=1, n
+                    ij = (j-1)*n+i
+                    work(ij) = data(ij)
+                end do
             end do
-        end do
 
-    end subroutine trvplat
+            do i=1, n
+                do j=1, m
+                    ji = (i-1)*m+j
+                    ij = (j-1)*n+i
+                    data(ji) = work(ij)
+                end do
+            end do
+        end block
 
-    subroutine covlat(nlat, nlon, data)
-        !
-        !     reverse order of latitude (colatitude) grids
-        !
-        integer(ip) ::  nlat, nlon, nlat2, i, ib, j
-        real(wp) :: data(nlat, nlon)
-        real(wp) :: temp
+    end subroutine transpose
 
-        nlat2 = nlat/2
-        do i=1, nlat2
+    ! Purpose:
+    !
+    ! Reverse order of latitude (colatitude) grids
+    !
+    subroutine reverse_colatitudes(nlat, nlon, data)
+
+        integer(ip), intent(in)    :: nlat, nlon
+        real(wp),    intent(inout) :: data(nlat, nlon)
+
+        ! Local variables
+        integer(ip) :: i, j, ib
+        real(wp)    :: temp
+
+        do i=1, nlat/2
             ib = nlat-i+1
             do j=1, nlon
                 temp = data(i, j)
@@ -869,6 +798,6 @@ contains
             end do
         end do
 
-    end subroutine covlat
+    end subroutine reverse_colatitudes
 
 end module module_trvsph
