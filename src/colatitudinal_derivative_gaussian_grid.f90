@@ -7,7 +7,7 @@
 !     *                                                               *
 !     *                      all rights reserved                      *
 !     *                                                               *
-!     *                      SPHEREPACK                               *
+!     *                         Spherepack                            *
 !     *                                                               *
 !     *       A Package of Fortran Subroutines and Programs           *
 !     *                                                               *
@@ -29,27 +29,12 @@
 !     *                                                               *
 !     * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !
-!
-!
-! ... file vtsgc.f
-!
-!     this file includes documentation and code for
-!     subroutines vtsgc and vtsgci
-!
-! ... files which must be loaded with vtsgc.f
-!
-!     type_SpherepackUtility.f, type_RealPeriodicFastFourierTransform.f, vhagc.f, vhsgc.f, compute_gaussian_latitudes_and_weights.f
-!   
-
-! *******************************************************************
-!
-
 submodule(colatitudinal_derivative_routines) colatitudinal_derivative_gaussian_grid
 
 contains
     !
-    !     subroutine vtsgc(nlat, nlon, ityp, nt, vt, wt, idvw, jdvw, br, bi, cr, ci,
-    !    +                 mdab, ndab, wvts, lwvts, work, lwork, ierror)
+    !     subroutine vtsgc(nlat, nlon, ityp, nt, vt, wt, idvw, jdvw, br, bi, cr, ci, &
+    !                      mdab, ndab, wvts, ierror)
     !
     !     given the vector harmonic analysis br, bi, cr, and ci (computed
     !     by subroutine vhagc) of some vector function (v, w), this
@@ -201,25 +186,6 @@ contains
     !
     !            4*nlat*l2+3*max(l1-2, 0)*(nlat+nlat-l1-1)+nlon+15
     !
-    !
-    !     work   a work array that does not have to be saved.
-    !
-    !     lwork  the dimension of the array work as it appears in the
-    !            program that calls vtsgc. define
-    !
-    !               l2 = nlat/2        if nlat is even or
-    !               l2 = (nlat+1)/2    if nlat is odd
-    !
-    !            if ityp <= 2 then lwork must be at least
-    !
-    !                    nlat*(2*nt*nlon+max(6*l2, nlon))
-    !
-    !            if ityp > 2 then lwork must be at least
-    !
-    !                    l2*(2*nt*nlon+max(6*nlat, nlon))
-    !
-    !     **************************************************************
-    !
     !     output parameters
     !
     !     vt, wt  two or three dimensional arrays (see input parameter nt)
@@ -278,11 +244,9 @@ contains
     !            = 7  error in the specification of mdab
     !            = 8  error in the specification of ndab
     !            = 9  error in the specification of lwvts
-    !            = 10 error in the specification of lwork
-    !
     !
     subroutine vtsgc(nlat, nlon, ityp, nt, vt, wt, idvw, jdvw, br, bi, cr, ci, &
-        mdab, ndab, wvts, lwvts, work, lwork, ierror)
+        mdab, ndab, wvts, ierror)
 
         ! Dummy arguments
         integer(ip), intent(in)  :: nlat
@@ -299,10 +263,7 @@ contains
         real(wp),    intent(in)  :: ci(mdab, ndab, nt)
         integer(ip), intent(in)  :: mdab
         integer(ip), intent(in)  :: ndab
-        real(wp),    intent(in)  :: wvts(lwvts)
-        integer(ip), intent(in)  :: lwvts
-        real(wp),    intent(out) :: work(lwork)
-        integer(ip), intent(in)  :: lwork
+        real(wp),    intent(in)  :: wvts(:)
         integer(ip), intent(out) :: ierror
 
         ! Local variables
@@ -320,7 +281,9 @@ contains
         integer(ip) :: lnl
         integer(ip) :: lwzvin
         integer(ip) :: lzz1
-        integer(ip) :: mmax
+        integer(ip) :: mmax, lwvts, lwork
+
+        lwvts = size(wvts)
 
         ! Check calling arguments
         ierror = 1
@@ -347,10 +310,12 @@ contains
         labc = 3*(max(mmax-2, 0)*(nlat+nlat-mmax-1))/2
         if (lwvts < 2*(lzz1+labc)+nlon+15) return
         ierror = 10
-        if (ityp <= 2 .and. &
-            lwork < nlat*(2*nt*nlon+max(6*imid, nlon))) return
-        if (ityp > 2 .and. &
-            lwork < imid*(2*nt*nlon+max(6*nlat, nlon))) return
+        select case (ityp)
+            case(0:2)
+                lwork = nlat*(2*nt*nlon+max(6*imid, nlon))
+            case default
+                lwork = imid*(2*nt*nlon+max(6*nlat, nlon))
+        end select
         ierror = 0
         idv = nlat
         if (ityp > 2) idv = imid
@@ -368,13 +333,16 @@ contains
         jw1 = lwzvin+1
         jw2 = jw1+lwzvin
 
-        call vtsgc_lower_utility_routine(nlat, nlon, ityp, nt, imid, idvw, jdvw, vt, wt, mdab, ndab, &
-            br, bi, cr, ci, idv, work, work(iw1), work(iw2), work(iw3), &
-            work(iw4), work(iw5), wvts, wvts(jw1), wvts(jw2))
+        block
+            real(wp) :: work(lwork)
+            call vtsgc_lower_utility_routine(nlat, nlon, ityp, nt, imid, idvw, jdvw, vt, wt, mdab, ndab, &
+                br, bi, cr, ci, idv, work, work(iw1), work(iw2), work(iw3), &
+                work(iw4), work(iw5), wvts, wvts(jw1:), wvts(jw2:))
+        end block
 
     end subroutine vtsgc
 
-    !     subroutine vtsgci(nlat, nlon, wvts, lwvts, dwork, ldwork, ierror)
+    !     subroutine vtsgci(nlat, nlon, wvts, ierror)
     !
     !     subroutine vtsgci initializes the array wvts which can then be
     !     used repeatedly by subroutine vtsgc until nlat or nlon is changed.
@@ -414,15 +382,6 @@ contains
     !
     !            4*nlat*l2+3*max(l1-2, 0)*(nlat+nlat-l1-1)+nlon+15
     !
-    !
-    !     dwork  a real work array that does not have to be saved.
-    !
-    !     ldwork the dimension of the array dwork as it appears in the
-    !            program that calls vtsgc. ldwork must be at least
-    !            3*nlat+2
-    !
-    !     **************************************************************
-    !
     !     output parameters
     !
     !     wvts   an array which is initialized for use by subroutine vtsgc.
@@ -435,62 +394,63 @@ contains
     !            = 1  error in the specification of nlat
     !            = 2  error in the specification of nlon
     !            = 3  error in the specification of lwvts
-    !            = 4  error in the specification of lwork
     !
-    module subroutine vtsgci(nlat, nlon, wvts, lwvts, dwork, ldwork, ierror)
+    module subroutine vtsgci(nlat, nlon, wvts, ierror)
 
         ! Dummy arguments
         integer(ip), intent(in)  :: nlat
         integer(ip), intent(in)  :: nlon
-        real(wp),    intent(out) :: wvts(lwvts)
-        integer(ip), intent(in)  :: lwvts
-        real(wp),    intent(out) :: dwork(ldwork)
-        integer(ip), intent(in)  :: ldwork
+        real(wp),    intent(out) :: wvts(:)
         integer(ip), intent(out) :: ierror
 
         ! Local variables
-        integer(ip) :: ierr
-        integer(ip) :: imid
-        integer(ip) :: iw1
-        integer(ip) :: iw2
-        integer(ip) :: labc
-        integer(ip) :: ldwk
-        integer(ip) :: lwvbin
-        integer(ip) :: lzz1
-        integer(ip) :: mmax
+        integer(ip)             :: imid, labc, lzz1, mmax, ldwork
         type(SpherepackUtility) :: util
 
-        ierror = 1
-        if (nlat < 3) return
-        ierror = 2
-        if (nlon < 1) return
-        ierror = 3
+        ! Check calling arguments
+        call check_init_calling_arguments(&
+            nlat, nlon, wvts, ierror, get_wavetable_size(nlat,nlon))
+
+        ! Check error flag
+        if (ierror /= 0) return
+
         imid = (nlat+1)/2
         lzz1 = 2*nlat*imid
         mmax = min(nlat, (nlon+1)/2)
-        labc = 3*(max(mmax-2, 0)*(nlat+nlat-mmax-1))/2
-        if (lwvts < 2*(lzz1+labc)+nlon+15) return
-        ierror = 4
-        if (ldwork < 3*nlat+2) return
-        ldwk = 1
-        call compute_gaussian_latitudes_and_weights(nlat, dwork, dwork(nlat+1), ierr)
-        ierror = 5
-        if (ierr /= 0) return
-        ierror = 0
+        labc = 3*(max(mmax-2, 0)*(2*nlat-mmax-1))/2
 
-        ! Set workspace index pointers
-        lwvbin = lzz1+labc
-        iw1 = lwvbin+1
-        iw2 = iw1+lwvbin
+        ! Set required workspace size
+        ldwork = 3*nlat+2
 
-        call util%initialize_polar_components_gaussian_colat_deriv(nlat, nlon, dwork, wvts, dwork(2*nlat+1))
+        block
+            real(wp)    :: dwork(ldwork)
+            integer(ip) :: lwvbin, iw1, iw2, iw3, iw4
 
-        call util%initialize_azimuthal_components_gaussian_colat_deriv(nlat, nlon, dwork, wvts(iw1), dwork(2*nlat+1))
+            ! Set workspace index pointers
+            lwvbin = lzz1+labc
+            iw1 = lwvbin+1
+            iw2 = iw1+lwvbin
+            iw3 = (2 * nlat) + 1
+            iw4 = nlat + 1
 
-        call util%hfft%initialize(nlon, wvts(iw2))
+            call compute_gaussian_latitudes_and_weights(nlat, dwork, dwork(iw4:), ierror)
+
+            ! Check error flag
+            if (ierror /= 0) then
+                ierror = 5
+                return
+            end if
+
+            call util%initialize_polar_components_gaussian_colat_deriv( &
+                nlat, nlon, dwork, wvts, dwork(iw3:))
+
+            call util%initialize_azimuthal_components_gaussian_colat_deriv( &
+                nlat, nlon, dwork, wvts(iw1:), dwork(iw3:))
+
+            call util%hfft%initialize(nlon, wvts(iw2:))
+        end block
 
     end subroutine vtsgci
-
 
     subroutine vtsgc_lower_utility_routine(nlat, nlon, ityp, nt, imid, idvw, jdvw, vt, wt, mdab, &
         ndab, br, bi, cr, ci, idv, vte, vto, wte, wto, vb, wb, wvbin, wwbin, wrfft)

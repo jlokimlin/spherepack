@@ -144,11 +144,7 @@ program shallow
     real(wp) :: vt
     real(wp) :: vxact
     real(wp) :: work
-    real(wp) :: wsha
-    real(wp) :: wshs
-    real(wp) :: wvha
-    real(wp) :: wvhs
-    real(wp) :: wvts
+    real(wp), allocatable, dimension(:) :: wsha, wshs, wvha, wvhs, wvts
     !
     !     the nonlinear shallow-water equations on the sphere are
     !     solved using a spectral method based on the spherical
@@ -259,9 +255,8 @@ program shallow
     !   the following work arrays are initialized and subsequently
     !   used repeatedly by spherepack routines.
     !
-    dimension wsha(70928), wshs(70928), wvha(141647), wvhs(141647), &
-        wvts(141647), work(40000)
-    real dwork(lldwork)
+    dimension work(40000)
+    
     !
     real lambda, lhat
 
@@ -293,19 +288,19 @@ program shallow
     !
     !     initialize spherepack routines
     !
-    call shaesi(nlat, nlon, wsha, ierror)
+    call initialize_shaes(nlat, nlon, wsha, ierror)
     if(ierror /= 0) write (*, 55) ierror
 55  format(' error' i4 ' in shaesi')
-    call shsesi(nlat, nlon, wshs, ierror)
+    call initialize_shses(nlat, nlon, wshs, ierror)
     if(ierror /= 0) write (*, 56) ierror
 56  format(' error' i4 ' in shsesi')
-    call vhaesi(nlat, nlon, wvha, ierror)
+    call initialize_vhaes(nlat, nlon, wvha, ierror)
     if(ierror /= 0) write (*, 57) ierror
 57  format(' error' i4 ' in vhaesi')
-    call vhsesi(nlat, nlon, wvhs, ierror)
+    call initialize_vhses(nlat, nlon, wvhs, ierror)
     if(ierror /= 0) write (*, 58) ierror
 58  format(' error' i4 ' in vhsesi')
-    call vtsesi(nlat, nlon, wvts, lwvts, work, lwork, dwork, ldwork, ierror)
+    call initialize_vtses(nlat, nlon, wvts, ierror)
     if(ierror /= 0) write (*, 59) ierror
 59  format(' error' i4 ' in vtsesi')
     !
@@ -588,6 +583,13 @@ program shallow
     time = time+dt
     if(ncycle <= itmax) go to 90
 
+    ! Release memory
+    deallocate (wsha)
+    deallocate (wshs)
+    deallocate (wvha)
+    deallocate (wvhs)
+    deallocate (wvts)
+
 contains
 
     subroutine vtsesgo(nlat, nlon, ityp, nt, ut, vt, idvw, jdvw, br, bi, cr, ci, &
@@ -614,7 +616,7 @@ contains
         real(wp) :: ut
         real(wp) :: vt
         real(wp) :: work
-        real(wp) :: wvts
+        real(wp) :: wvts(:)
         !
         !     vtsesgo computes the latitudinal derivatives of the
         !     velocity components using subroutine vtses which
@@ -623,9 +625,9 @@ contains
         !
         dimension ut(idvw, jdvw, 1), vt(idvw, jdvw, 1), br(mdab, ndab, 1), &
             bi(mdab, ndab, 1), cr(mdab, ndab, 1), ci(mdab, ndab, 1), &
-            work(*), wvts(*)
+            work(*)
         call vtses(nlat, nlon, ityp, nt, vt, ut, idvw, jdvw, br, bi, cr, ci, &
-            mdab, ndab, wvts, lwvts, work, lwork, ierror)
+            mdab, ndab, wvts, ierror)
         do k=1, nt
             do j=1, nlon
                 do i=1, nlat

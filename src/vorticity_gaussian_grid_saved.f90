@@ -349,8 +349,7 @@ contains
         call perform_setup_for_vorticity(nlon, a, b, cr, ci, sqnn)
 
         ! Synthesize a, b into vort
-        call shsgs(nlat, nlon, isym, nt, vort, ivrt, jvrt, a, b, &
-            mab, nlat, wsav, ierror)
+        call shsgs(nlat, nlon, isym, nt, vort, ivrt, jvrt, a, b, mab, nlat, wsav, ierror)
 
     end subroutine vrtgs_lower_utility_routine
 

@@ -64,8 +64,8 @@ program test_all_scalar_analysis_and_synthesis_routines
     ! Compute nlat-many gaussian points in thetag
     call compute_gaussian_latitudes_and_weights(NLAT, gaussian_latitudes, gaussian_weights, error_flag)
 
-    call name("gaqd")
-    call iout(error_flag, " error flag")
+   call name("compute_gaussian_latitudes_and_weights")
+    call iout(error_flag, " error flag =")
     call vecout(gaussian_latitudes, "gaussian_latitudes", NLAT)
 
     ! Test all analysis and synthesis subroutines

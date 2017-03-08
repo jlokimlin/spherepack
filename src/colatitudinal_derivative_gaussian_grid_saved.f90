@@ -188,25 +188,6 @@ contains
     !
     !                 l1*l2*(nlat+nlat-l1+1)+nlon+15
     !
-    !
-    !     work   a work array that does not have to be saved.
-    !
-    !     lwork  the dimension of the array work as it appears in the
-    !            program that calls vtsgs. define
-    !
-    !               l2 = nlat/2        if nlat is even or
-    !               l2 = (nlat+1)/2    if nlat is odd
-    !
-    !            if ityp <= 2 then lwork must be at least
-    !
-    !                       (2*nt+1)*nlat*nlon
-    !
-    !            if ityp > 2 then lwork must be at least
-    !
-    !                        (2*nt+1)*l2*nlon
-    !
-    !     **************************************************************
-    !
     !     output parameters
     !
     !     vt, wt  two or three dimensional arrays (see input parameter nt)
@@ -268,10 +249,9 @@ contains
     !            = 7  error in the specification of mdab
     !            = 8  error in the specification of ndab
     !            = 9  error in the specification of lwvts
-    !            = 10 error in the specification of lwork
     !
     module subroutine vtsgs(nlat, nlon, ityp, nt, vt, wt, idvw, jdvw, br, bi, cr, ci, &
-        mdab, ndab, wvts, lwvts, work, lwork, ierror)
+        mdab, ndab, wvts, ierror)
 
         ! Dummy arguments
         integer(ip), intent(in)  :: nlat
@@ -288,67 +268,54 @@ contains
         real(wp),    intent(in)  :: ci(mdab, ndab, nt)
         integer(ip), intent(in)  :: mdab
         integer(ip), intent(in)  :: ndab
-        real(wp),    intent(in)  :: wvts(lwvts)
-        integer(ip), intent(in)  :: lwvts
-        real(wp),    intent(out) :: work(lwork)
-        integer(ip), intent(in)  :: lwork
+        real(wp),    intent(in)  :: wvts(:)
         integer(ip), intent(out) :: ierror
 
         ! Local variables
-        integer(ip) :: idv
-        integer(ip) :: idz
-        integer(ip) :: imid
-        integer(ip) :: ist
-        integer(ip) :: iw1
-        integer(ip) :: iw2
-        integer(ip) :: iw3
-        integer(ip) :: iw4
-        integer(ip) :: jw1
-        integer(ip) :: jw2
-        integer(ip) :: lnl
-        integer(ip) :: lzimn
-        integer(ip) :: mmax
+        integer(ip) :: idv, idz, imid, ist
+        integer(ip) :: lnl, lzimn, lwork, mmax
 
-        ierror = 1
-        if(nlat < 3) return
-        ierror = 2
-        if(nlon < 1) return
-        ierror = 3
-        if(ityp<0 .or. ityp>8) return
-        ierror = 4
-        if(nt < 0) return
-        ierror = 5
+        ! Check calling arguments
+        call check_calling_arguments(nlat, nlon, ityp, nt, &
+            idvw, jdvw, mdab, ndab, wvts, ierror, get_wavetable_size_saved(nlat,nlon))
+
+        ! Check error flag
+        if (ierror /= 0) return
+
         imid = (nlat+1)/2
-        if((ityp<=2 .and. idvw<nlat) .or. &
-            (ityp>2 .and. idvw<imid)) return
-        ierror = 6
-        if(jdvw < nlon) return
-        ierror = 7
         mmax = min(nlat, (nlon+1)/2)
-        if(mdab < mmax) return
-        ierror = 8
-        if(ndab < nlat) return
-        ierror = 9
-        idz = (mmax*(nlat+nlat-mmax+1))/2
+        idz = (mmax*(2*nlat-mmax+1))/2
         lzimn = idz*imid
-        if(lwvts < lzimn+lzimn+nlon+15) return
-        ierror = 10
-        idv = nlat
-        if(ityp > 2) idv = imid
+
+        select case (ityp)
+            case (0:2)
+                idv = nlat
+                ist = imid
+            case default
+                idv = imid
+                ist = 0
+        end select
+
         lnl = nt*idv*nlon
-        if(lwork < lnl+lnl+idv*nlon) return
-        ierror = 0
-        ist = 0
-        if(ityp <= 2) ist = imid
-        iw1 = ist+1
-        iw2 = lnl+1
-        iw3 = iw2+ist
-        iw4 = iw2+lnl
-        jw1 = lzimn+1
-        jw2 = jw1+lzimn
-        call vtsgs_lower_utility_routine(nlat, nlon, ityp, nt, imid, idvw, jdvw, vt, wt, mdab, ndab, &
-            br, bi, cr, ci, idv, work, work(iw1), work(iw2), work(iw3), &
-            work(iw4), idz, wvts, wvts(jw1), wvts(jw2))
+
+        ! Set required workspace size
+        lwork = (2 * lnl) + (idv * nlon)
+
+        block
+            real(wp)    :: work(lwork)
+            integer(ip) :: iw1, iw2, iw3, iw4, jw1, jw2
+
+            ! Set index pointers
+            iw1 = ist+1
+            iw2 = lnl+1
+            iw3 = iw2+ist
+            iw4 = iw2+lnl
+            jw1 = lzimn+1
+            jw2 = jw1+lzimn
+            call vtsgs_lower_utility_routine(nlat, nlon, ityp, nt, imid, idvw, &
+                jdvw, vt, wt, mdab, ndab, br, bi, cr, ci, idv, work, work(iw1:), &
+                work(iw2:), work(iw3:), work(iw4:), idz, wvts, wvts(jw1:), wvts(jw2:))
+        end block
 
     end subroutine vtsgs
 
@@ -394,19 +361,6 @@ contains
     !
     !                  l1*l2*(nlat+nlat-l1+1)+nlon+15
     !
-    !
-    !     work   a work array that does not have to be saved.
-    !
-    !     lwork  the dimension of the array work as it appears in the
-    !            program that calls vtsgs. lwork must be at least
-    !
-    !            3*(max(l1-2, 0)*(nlat+nlat-l1-1))/2+(5*l2+2)*nlat
-    !
-    !     dwork  a real work array that does not have to be saved
-    !
-    !     ldwork the length of dwork.  ldwork must be at least
-    !            3*nlat+2
-    !
     !     **************************************************************
     !
     !     output parameters
@@ -421,8 +375,6 @@ contains
     !            = 1  error in the specification of nlat
     !            = 2  error in the specification of nlon
     !            = 3  error in the specification of lwvts
-    !            = 4  error in the specification of lwork
-    !            = 5  error in the specification of ldwork
     !
     ! Remark:
     !
@@ -431,66 +383,65 @@ contains
     !     and the length of work is labc+5*nlat*imid+2*nlat where
     !     labc = 3*(max(mmax-2, 0)*(nlat+nlat-mmax-1))/2
     !
-    module subroutine vtsgsi(nlat, nlon, wvts, lwvts, work, lwork, dwork, ldwork, ierror)
+    module subroutine vtsgsi(nlat, nlon, wvts, ierror)
 
         ! Dummy arguments
         integer(ip), intent(in)  :: nlat
         integer(ip), intent(in)  :: nlon
-        real(wp),    intent(out) :: wvts(lwvts)
-        integer(ip), intent(in)  :: lwvts
-        real(wp),    intent(out) :: work(lwork)
-        integer(ip), intent(in)  :: lwork
-        real(wp),    intent(out) :: dwork(ldwork)
-        integer(ip), intent(in)  :: ldwork
+        real(wp),    intent(out) :: wvts(:)
         integer(ip), intent(out) :: ierror
 
         ! Local variables
-        integer(ip) :: imid
-        integer(ip) :: iw1
-        integer(ip) :: iw2
-        integer(ip) :: jw1
-        integer(ip) :: jw2
-        integer(ip) :: labc
-        integer(ip) :: ltheta
-        integer(ip) :: lvin
-        integer(ip) :: lwvbin
-        integer(ip) :: lzimn
-        integer(ip) :: mmax
+        integer(ip) :: imid, labc
+        integer(ip) :: ltheta, lvin, lwvbin
+        integer(ip) :: lzimn, mmax, lwork, ldwork
         type(SpherepackUtility) :: util
 
         ! Check calling arguments
-        ierror = 1
-        if(nlat < 3) return
-        ierror = 2
-        if(nlon < 1) return
-        ierror = 3
+        call check_init_calling_arguments(&
+            nlat, nlon, wvts, ierror, get_wavetable_size_saved(nlat,nlon))
+
+        ! Check error flag
+        if (ierror /= 0) return
+
         mmax = min(nlat, nlon/2+1)
         imid = (nlat+1)/2
         lzimn = (imid*mmax*(nlat+nlat-mmax+1))/2
-        if(lwvts < lzimn+lzimn+nlon+15) return
-        ierror = 4
-        labc = 3*(max(mmax-2, 0)*(nlat+nlat-mmax-1))/2
+        labc = 3*(max(mmax-2, 0)*(2*nlat-mmax-1))/2
         lvin = 3*nlat*imid
         lwvbin = 2*nlat*imid+labc
-        ltheta = nlat+nlat
-        if(lwork < lvin+lwvbin+ltheta) return
-        ierror = 5
-        if (ldwork < 3*nlat+2) return
-        ierror = 0
-        iw1 = lvin+1
-        iw2 = iw1+lwvbin
-        jw1 = nlat+1
-        jw2 = jw1+nlat
-        call vtsgsi_lower_utility_routine(nlat, nlon, imid, wvts, wvts(lzimn+1), work, work(iw1), &
-            dwork, dwork(jw1), dwork(jw2), ierror)
-        if(ierror /= 0) return
-        call util%hfft%initialize(nlon, wvts(2*lzimn+1))
+        ltheta = 2 * nlat
+
+        ! Set required workspace sizes
+        lwork = lvin+lwvbin+ltheta
+        ldwork = 3*nlat+2
+
+        block
+            real(wp)    :: work(lwork), dwork(ldwork)
+            integer(ip) :: iw1, iw2, iw3, iw4, iw5, iw6
+
+            ! Set workspace index pointers
+            iw1 = lzimn+1
+            iw2 = lvin+1
+            iw3 = iw2+lwvbin
+            iw4 = nlat+1
+            iw5 = iw4+nlat
+            iw6 = 2*lzimn+1
+
+            call vtsgsi_lower_utility_routine(nlat, nlon, imid, wvts, wvts(iw1:), &
+                work, work(iw2:), dwork, dwork(iw4:), dwork(iw5:), ierror)
+
+            ! Check error flag from lower utility routine
+            if (ierror /= 0) return
+
+            call util%hfft%initialize(nlon, wvts(iw6:))
+        end block
 
     end subroutine vtsgsi
 
     subroutine vtsgs_lower_utility_routine(nlat, nlon, ityp, nt, imid, idvw, jdvw, vt, wt, mdab, &
         ndab, br, bi, cr, ci, idv, vte, vto, wte, wto, work, idz, vb, wb, wrfft)
-        implicit none
+
         real(wp) :: bi
         real(wp) :: br
         real(wp) :: ci
@@ -1122,25 +1073,17 @@ contains
     subroutine vtsgsi_lower_utility_routine(nlat, nlon, imid, vb, wb, vin, wvbin, &
         theta, wts, dwork, ierror)
 
-        integer(ip) :: i
-        integer(ip) :: i3
-        integer(ip) :: ierr
-        integer(ip) :: ierror
-        integer(ip) :: imid
+        ! Dummy arguments
+        integer(ip), intent(in)  :: nlat
+        integer(ip), intent(in)  :: nlon
+        integer(ip), intent(in)  :: imid
+        integer(ip), intent(out) :: ierror
+        real(wp),    intent(out) :: vb(imid, *), wb(imid, *), vin(imid, nlat, 3), wvbin(:)
+        real(wp),    intent(out) :: dwork(:), theta(nlat), wts(nlat)
 
-        integer(ip) :: m
-        integer(ip) :: mmax
-        integer(ip) :: mn
-        integer(ip) :: mp1
-        integer(ip) :: nlat
-        integer(ip) :: nlon
-        integer(ip) :: np1
-        real(wp) :: vb
-        real(wp) :: vin
-        real(wp) :: wb
-        real(wp) :: wvbin
-        dimension vb(imid, *), wb(imid, *), vin(imid, nlat, 3), wvbin(*)
-        real(wp) :: dwork(*), theta(*), wts(*)
+        ! Local variables
+        integer(ip)             :: i, i3, ierr
+        integer(ip)             :: m, mmax, mn, mp1, np1
         type(SpherepackUtility) :: util
 
         mmax = min(nlat, nlon/2+1)

@@ -118,8 +118,10 @@ module spherepack
         ivrtec, ivrtes, ivrtgc, ivrtgs
 
     use colatitudinal_derivative_routines, only: &
-        vtsec, vtses, vtsgc, vtsgs, &
-        vtseci, vtsesi, vtsgci, vtsgsi
+        vtsec, vtseci, initialize_vtsec, &
+        vtses, vtsesi, initialize_vtses, &
+        vtsgc, vtsgci, initialize_vtsgc, &
+        vtsgs, vtsgsi, initialize_vtsgs
     
     use type_FFTpack, only: &
         FFTpack
@@ -181,8 +183,10 @@ module spherepack
     public :: operator(*)
 
     ! Colatitude derivative
-    public :: vtsec, vtses, vtsgc, vtsgs
-    public :: vtseci, vtsesi, vtsgci, vtsgsi
+    public :: vtsec, vtseci, initialize_vtsec
+    public :: vtses, vtsesi, initialize_vtses
+    public :: vtsgc, vtsgci, initialize_vtsgc
+    public :: vtsgs, vtsgsi, initialize_vtsgs
 
     ! Gradient
     public :: gradec, grades, gradgc, gradgs

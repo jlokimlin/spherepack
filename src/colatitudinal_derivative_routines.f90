@@ -15,8 +15,13 @@ module colatitudinal_derivative_routines
     implicit none
 
     ! Everything is private unless stated otherwise
-    public :: vtsec, vtses, vtsgc, vtsgs
-    public :: vtseci, vtsesi, vtsgci, vtsgsi
+    private
+    public :: vtsec, vtseci, initialize_vtsec
+    public :: vtses, vtsesi, initialize_vtses
+    public :: vtsgc, vtsgci, initialize_vtsgc
+    public :: vtsgs, vtsgsi, initialize_vtsgs
+    public :: get_wavetable_size, get_wavetable_size_saved
+    public :: check_calling_arguments, check_init_calling_arguments
 
     ! Parameters confined to the module
     real(wp), parameter :: ZERO = 0.0_wp
@@ -25,7 +30,7 @@ module colatitudinal_derivative_routines
     ! Declare interfaces for submodule implementation
     interface
         module subroutine vtsec(nlat, nlon, ityp, nt, vt, wt, idvw, jdvw, br, bi, cr, ci, &
-            mdab, ndab, wvts, lwvts, work, lwork, ierror)
+            mdab, ndab, wvts, ierror)
 
             ! Dummy arguments
             integer(ip), intent(in)  :: nlat
@@ -42,15 +47,12 @@ module colatitudinal_derivative_routines
             real(wp),    intent(in)  :: ci(mdab, ndab, nt)
             integer(ip), intent(in)  :: mdab
             integer(ip), intent(in)  :: ndab
-            real(wp),    intent(in)  :: wvts(lwvts)
-            integer(ip), intent(in)  :: lwvts
-            real(wp),    intent(out) :: work(lwork)
-            integer(ip), intent(in)  :: lwork
+            real(wp),    intent(in)  :: wvts(:)
             integer(ip), intent(out) :: ierror
         end subroutine vtsec
 
         module subroutine vtses(nlat, nlon, ityp, nt, vt, wt, idvw, jdvw, br, bi, cr, ci, &
-            mdab, ndab, wvts, lwvts, work, lwork, ierror)
+            mdab, ndab, wvts, ierror)
 
             ! Dummy arguments
             integer(ip), intent(in)  :: nlat
@@ -67,15 +69,12 @@ module colatitudinal_derivative_routines
             real(wp),    intent(in)  :: ci(mdab, ndab, nt)
             integer(ip), intent(in)  :: mdab
             integer(ip), intent(in)  :: ndab
-            real(wp),    intent(in)  :: wvts(lwvts)
-            integer(ip), intent(in)  :: lwvts
-            real(wp),    intent(out) :: work(lwork)
-            integer(ip), intent(in)  :: lwork
+            real(wp),    intent(in)  :: wvts(:)
             integer(ip), intent(out) :: ierror
         end subroutine vtses
 
         module subroutine vtsgc(nlat, nlon, ityp, nt, vt, wt, idvw, jdvw, br, bi, cr, ci, &
-            mdab, ndab, wvts, lwvts, work, lwork, ierror)
+            mdab, ndab, wvts, ierror)
 
             ! Dummy arguments
             integer(ip), intent(in)  :: nlat
@@ -92,15 +91,12 @@ module colatitudinal_derivative_routines
             real(wp),    intent(in)  :: ci(mdab, ndab, nt)
             integer(ip), intent(in)  :: mdab
             integer(ip), intent(in)  :: ndab
-            real(wp),    intent(in)  :: wvts(lwvts)
-            integer(ip), intent(in)  :: lwvts
-            real(wp),    intent(out) :: work(lwork)
-            integer(ip), intent(in)  :: lwork
+            real(wp),    intent(in)  :: wvts(:)
             integer(ip), intent(out) :: ierror
         end subroutine vtsgc
 
         module subroutine vtsgs(nlat, nlon, ityp, nt, vt, wt, idvw, jdvw, br, bi, cr, ci, &
-            mdab, ndab, wvts, lwvts, work, lwork, ierror)
+            mdab, ndab, wvts, ierror)
 
             ! Dummy arguments
             integer(ip), intent(in)  :: nlat
@@ -117,65 +113,277 @@ module colatitudinal_derivative_routines
             real(wp),    intent(in)  :: ci(mdab, ndab, nt)
             integer(ip), intent(in)  :: mdab
             integer(ip), intent(in)  :: ndab
-            real(wp),    intent(in)  :: wvts(lwvts)
-            integer(ip), intent(in)  :: lwvts
-            real(wp),    intent(out) :: work(lwork)
-            integer(ip), intent(in)  :: lwork
+            real(wp),    intent(in)  :: wvts(:)
             integer(ip), intent(out) :: ierror
         end subroutine vtsgs
 
-        module subroutine vtseci(nlat, nlon, wvts, lwvts, dwork, ldwork, ierror)
+        module subroutine vtseci(nlat, nlon, wvts, ierror)
 
             ! Dummy arguments
             integer(ip), intent(in)  :: nlat
             integer(ip), intent(in)  :: nlon
-            real(wp),    intent(out) :: wvts(lwvts)
-            integer(ip), intent(in)  :: lwvts
-            real(wp),    intent(out) :: dwork(ldwork)
-            integer(ip), intent(in)  :: ldwork
+            real(wp),    intent(out) :: wvts(:)
             integer(ip), intent(out) :: ierror
         end subroutine vtseci
 
-        module subroutine vtsesi(nlat, nlon, wvts, lwvts, work, lwork, dwork, ldwork, &
-            ierror)
+        module subroutine vtsesi(nlat, nlon, wvts, ierror)
 
             ! Dummy arguments
             integer(ip), intent(in)  :: nlat
             integer(ip), intent(in)  :: nlon
-            real(wp),    intent(out) :: wvts(lwvts)
-            integer(ip), intent(in)  :: lwvts
-            real(wp),    intent(out) :: work(lwork)
-            integer(ip), intent(in)  :: lwork
-            real(wp),    intent(out) :: dwork(ldwork)
-            integer(ip), intent(in)  :: ldwork
+            real(wp),    intent(out) :: wvts(:)
             integer(ip), intent(out) :: ierror
         end subroutine vtsesi
 
-        module subroutine vtsgci(nlat, nlon, wvts, lwvts, dwork, ldwork, ierror)
+        module subroutine vtsgci(nlat, nlon, wvts, ierror)
 
             ! Dummy arguments
             integer(ip), intent(in)  :: nlat
             integer(ip), intent(in)  :: nlon
-            real(wp),    intent(out) :: wvts(lwvts)
-            integer(ip), intent(in)  :: lwvts
-            real(wp),    intent(out) :: dwork(ldwork)
-            integer(ip), intent(in)  :: ldwork
+            real(wp),    intent(out) :: wvts(:)
             integer(ip), intent(out) :: ierror
         end subroutine vtsgci
 
-        module subroutine vtsgsi(nlat, nlon, wvts, lwvts, work, lwork, dwork, ldwork, ierror)
+        module subroutine vtsgsi(nlat, nlon, wvts, ierror)
 
             ! Dummy arguments
             integer(ip), intent(in)  :: nlat
             integer(ip), intent(in)  :: nlon
-            real(wp),    intent(out) :: wvts(lwvts)
-            integer(ip), intent(in)  :: lwvts
-            real(wp),    intent(out) :: work(lwork)
-            integer(ip), intent(in)  :: lwork
-            real(wp),    intent(out) :: dwork(ldwork)
-            integer(ip), intent(in)  :: ldwork
+            real(wp),    intent(out) :: wvts(:)
             integer(ip), intent(out) :: ierror
         end subroutine vtsgsi
     end interface
+
+    interface
+        pure function get_size(nlat, nlon) &
+            result (return_value)
+            import :: ip
+
+            ! Dummy arguments
+            integer(ip), intent(in)  :: nlat
+            integer(ip), intent(in)  :: nlon
+            integer(ip)              :: return_value
+        end function get_size
+
+        subroutine init_routine(nlat, nlon, wavetable, error_flag)
+            import :: ip, wp
+            ! Dummy arguments
+            integer(ip), intent(in)  :: nlat
+            integer(ip), intent(in)  :: nlon
+            real(wp),    intent(out) :: wavetable(:)
+            integer(ip), intent(out) :: error_flag
+        end subroutine init_routine
+    end interface
+
+contains
+
+    subroutine initialize_wavetable(nlat, nlon, wavetable, get_required_size, &
+        init_wavetable_routine, error_flag)
+
+        ! Dummy arguments
+        integer(ip),           intent(in)  :: nlat
+        integer(ip),           intent(in)  :: nlon
+        real(wp), allocatable, intent(out) :: wavetable(:)
+        integer(ip),           intent(out) :: error_flag
+        procedure(get_size)                :: get_required_size
+        procedure(init_routine)            :: init_wavetable_routine
+
+        ! Local variables
+        integer(ip) :: required_size
+
+        ! Get required workspace size
+        required_size = get_required_size(nlat, nlon)
+
+        ! Allocate memory
+        allocate (wavetable(required_size), stat=error_flag)
+
+        ! Check error flag
+        if (error_flag /= 0) return
+
+        ! Initialize wavetable
+        call init_wavetable_routine(nlat, nlon, wavetable, error_flag)
+
+    end subroutine initialize_wavetable
+
+    subroutine initialize_vtses(nlat, nlon, wavetable, error_flag)
+
+        ! Dummy arguments
+        integer(ip),           intent(in)  :: nlat
+        integer(ip),           intent(in)  :: nlon
+        real(wp), allocatable, intent(out) :: wavetable(:)
+        integer(ip),           intent(out) :: error_flag
+
+        call initialize_wavetable(nlat, nlon, wavetable, &
+            get_wavetable_size_saved, vtsesi, error_flag)
+
+        ! Check error flag
+        if (error_flag /= 0) then
+            error stop "Failed to initialize wavetable for vtses"
+        end if
+
+    end subroutine initialize_vtses
+
+    subroutine initialize_vtsgs(nlat, nlon, wavetable, error_flag)
+
+        ! Dummy arguments
+        integer(ip),           intent(in)  :: nlat
+        integer(ip),           intent(in)  :: nlon
+        real(wp), allocatable, intent(out) :: wavetable(:)
+        integer(ip),           intent(out) :: error_flag
+
+        call initialize_wavetable(nlat, nlon, wavetable, &
+            get_wavetable_size_saved, vtsgsi, error_flag)
+
+        ! Check error flag
+        if (error_flag /= 0) then
+            error stop "Failed to initialize wavetable for vtsgs"
+        end if
+
+    end subroutine initialize_vtsgs
+
+    subroutine initialize_vtsec(nlat, nlon, wavetable, error_flag)
+
+        ! Dummy arguments
+        integer(ip),           intent(in)  :: nlat
+        integer(ip),           intent(in)  :: nlon
+        real(wp), allocatable, intent(out) :: wavetable(:)
+        integer(ip),           intent(out) :: error_flag
+
+        call initialize_wavetable(nlat, nlon, wavetable, &
+            get_wavetable_size, vtseci, error_flag)
+
+        ! Check error flag
+        if (error_flag /= 0) then
+            error stop "Failed to initialize wavetable for vtsec"
+        end if
+
+    end subroutine initialize_vtsec
+
+    subroutine initialize_vtsgc(nlat, nlon, wavetable, error_flag)
+
+        ! Dummy arguments
+        integer(ip),           intent(in)  :: nlat
+        integer(ip),           intent(in)  :: nlon
+        real(wp), allocatable, intent(out) :: wavetable(:)
+        integer(ip),           intent(out) :: error_flag
+
+        call initialize_wavetable(nlat, nlon, wavetable, &
+            get_wavetable_size, vtsgci, error_flag)
+
+        ! Check error flag
+        if (error_flag /= 0) then
+            error stop "Failed to initialize wavetable for vtsgc"
+        end if
+
+    end subroutine initialize_vtsgc
+
+    subroutine check_init_calling_arguments(&
+        nlat, nlon, wvts, error_flag, required_size)
+
+        ! Dummy arguments
+        integer(ip), intent(in)  :: nlat
+        integer(ip), intent(in)  :: nlon
+        real(wp),    intent(in)  :: wvts(:)
+        integer(ip), intent(out) :: error_flag
+        integer(ip), intent(in)  :: required_size
+
+        ! Check calling arguments
+        if (nlat < 3) then
+            error_flag = 1
+        else if (nlon < 1) then
+            error_flag = 2
+        else if (size(wvts) < required_size) then
+            error_flag = 3
+        else
+            error_flag = 0
+        end if
+
+    end subroutine check_init_calling_arguments
+
+    subroutine check_calling_arguments( &
+        nlat, nlon, ityp, nt, idvw, jdvw, mdab, ndab, wvts, error_flag, required_size)
+
+        ! Dummy arguments
+        integer(ip), intent(in)  :: nlat
+        integer(ip), intent(in)  :: nlon
+        integer(ip), intent(in)  :: ityp
+        integer(ip), intent(in)  :: nt
+        integer(ip), intent(in)  :: idvw
+        integer(ip), intent(in)  :: jdvw
+        integer(ip), intent(in)  :: mdab
+        integer(ip), intent(in)  :: ndab
+        real(wp),    intent(in)  :: wvts(:)
+        integer(ip), intent(out) :: error_flag
+        integer(ip), intent(in)  :: required_size
+
+        ! Local variable
+        integer(ip) :: imid, mmax
+
+        imid = (nlat+1)/2
+        mmax = min(nlat, (nlon+1)/2)
+
+        ! Check calling arguments
+        if (nlat < 3) then
+            error_flag = 1
+        else if (nlon < 1) then
+            error_flag = 2
+        else if (ityp < 0 .or. ityp > 8) then
+            error_flag = 3
+        else if (nt < 0) then
+            error_flag = 4
+        else if ((ityp <= 2 .and. idvw < nlat) &
+            .or. &
+            (ityp > 2 .and. idvw < imid)) then
+            error_flag = 5
+        else if (jdvw < nlon) then
+            error_flag = 6
+        else if (mdab < mmax) then
+            error_flag = 7
+        else if (ndab < nlat) then
+            error_flag = 8
+        else if (size(wvts) < required_size) then
+            error_flag = 9
+        else
+            error_flag = 0
+        end if
+
+    end subroutine check_calling_arguments
+
+    pure function get_wavetable_size(nlat, nlon) &
+        result (return_value)
+
+        ! Dummy arguments
+        integer(ip), intent(in)  :: nlat
+        integer(ip), intent(in)  :: nlon
+        integer(ip)              :: return_value
+
+        ! Local variables
+        integer(ip) :: imid, lzz1, mmax, labc
+
+        imid = (nlat+1)/2
+        lzz1 = 2*nlat*imid
+        mmax = min(nlat, (nlon+1)/2)
+        labc = 3*(max(mmax-2, 0)*(2 * nlat - mmax - 1))/2
+        return_value = 2*(lzz1 + labc) + nlon + 15
+
+    end function get_wavetable_size
+
+    pure function get_wavetable_size_saved(nlat, nlon) &
+        result (return_value)
+
+        ! Dummy arguments
+        integer(ip), intent(in)  :: nlat
+        integer(ip), intent(in)  :: nlon
+        integer(ip)              :: return_value
+
+        ! Local variables
+        integer(ip) :: imid, lzimn, mmax
+
+        mmax = min(nlat, nlon/2+1)
+        imid = (nlat + 1)/2
+        lzimn = (imid * mmax * (2*nlat - mmax + 1))/2
+        return_value = (2 * lzimn) + nlon + 15
+
+    end function get_wavetable_size_saved
 
 end module colatitudinal_derivative_routines
