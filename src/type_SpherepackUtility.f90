@@ -759,7 +759,7 @@ contains
             case(1)
                 z(:, 2:nlat, i3) = z1(:, 2:nlat)
             case default
-                ns = ((m-2)*(nlat+nlat-m-1))/2+1
+                ns = ((m-2)*(2*nlat-m-1))/2+1
 
                 if (isym /= 1) then
                     z(:, m+1, i3) = a(ns)*z(:, m-1, i1)-c(ns)*z(:, m+1, i1)
@@ -1164,7 +1164,7 @@ contains
         else if (m == 1) then
             p(:, 2:nlat, i3) = p1(:, 2:nlat)
         else
-            ns = ((m-2)*(nlat+nlat-m-1))/2+1
+            ns = ((m-2)*(2*nlat-m-1))/2+1
 
             if (isym /= 1) p(:, m+1, i3) = a(ns)*p(:, m-1, i1)-c(ns)*p(:, m+1, i1)
 
@@ -1312,7 +1312,7 @@ contains
     ! Remark:
     !
     ! Coefficients a, b, and c for computing pbar(m, n, theta) are
-    ! stored in location ((m-2)*(nlat+nlat-m-1))/2+n+1
+    ! stored in location ((m-2)*(2*nlat-m-1))/2+n+1
     !
     pure subroutine rabcp_lower_utility_routine(nlat, nlon, a, b, c)
 
@@ -1333,7 +1333,7 @@ contains
         outer_loop: do mp1=3, mmax
 
             m = mp1-1
-            ns = ((m-2)*(nlat+nlat-m-1))/2+1
+            ns = ((m-2)*(2*nlat-m-1))/2+1
             fm = real(m, kind=wp)
             tm = TWO * fm
             temp = tm*(tm-ONE)
@@ -1637,7 +1637,7 @@ contains
                 end do
             end do
         else
-            ns = ((m-2)*(nlat+nlat-m-1))/2+1
+            ns = ((m-2)*(2*nlat-m-1))/2+1
 
             if (ityp /= 1) then
                 do i=1, imid
@@ -1994,7 +1994,7 @@ contains
                     end do
                 end do
             case default
-                ns = ((m-2)*(nlat+nlat-m-1))/2+1
+                ns = ((m-2)*(2*nlat-m-1))/2+1
 
                 if (ityp /= 1) then
                     do i=1, imid
@@ -2116,7 +2116,7 @@ contains
                 end do
             case default
 
-                ns = ((m-2)*(nlat+nlat-m-1))/2+1
+                ns = ((m-2)*(2*nlat-m-1))/2+1
 
                 if (ityp /= 1) then
                     do i=1, imid
@@ -3041,7 +3041,7 @@ contains
     ! Remark:
     !
     ! Coefficients a, b, and c for computing vbar(m, n, theta) are
-    ! stored in location ((m-2)*(nlat+nlat-m-1))/2+n+1
+    ! stored in location ((m-2)*(2*nlat-m-1))/2+n+1
     !
     pure subroutine rabcv_lower_utility_routine(nlat, nlon, a, b, c)
 
@@ -3144,7 +3144,7 @@ contains
     ! Remark:
     !
     ! Coefficients a, b, and c for computing wbar(m, n, theta) are
-    ! stored in location ((m-2)*(nlat+nlat-m-1))/2+n+1
+    ! stored in location ((m-2)*(2*nlat-m-1))/2+n+1
     !
     pure subroutine rabcw_lower_utility_routine(nlat, nlon, a, b, c)
 
@@ -3180,7 +3180,7 @@ contains
 
         outer_loop: do mp1=4, mmax
             m = mp1-1
-            ns = ((m-2)*(nlat+nlat-m-1))/2+1
+            ns = ((m-2)*(2*nlat-m-1))/2+1
             fm = real(m, kind=wp)
             tm = TWO*fm
             temp = tm*(tm-ONE)

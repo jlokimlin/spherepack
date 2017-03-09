@@ -176,7 +176,7 @@
 !
 !            then lvhses must be greater than or equal to
 !
-!               (l1*l2*(nlat+nlat-l1+1))/2+nlon+15
+!               (l1*l2*(2*nlat-l1+1))/2+nlon+15
 !
 !     work   a work array that does not have to be saved.
 !
@@ -295,7 +295,7 @@ contains
         !
         !     verify minimum saved work space length
         !
-        idz = (mmax*(nlat+nlat-mmax+1))/2
+        idz = (mmax*(2*nlat-mmax+1))/2
         lzimn = idz*imid
         lgdmin = lzimn+lzimn+nlon+15
         if (lvhses < lgdmin) return

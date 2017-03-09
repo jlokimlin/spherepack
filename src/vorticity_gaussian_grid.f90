@@ -283,7 +283,7 @@ contains
         if (ndc < nlat) return
         ierror = 9
         imid = (nlat+1)/2
-        lpimn = (imid*mmax*(nlat+nlat-mmax+1))/2
+        lpimn = (imid*mmax*(2*nlat-mmax+1))/2
         l1 = min(nlat, (nlon+2)/2)
         l2 = (nlat+1)/2
         lwmin = nlat*(2*l2+3*l1-2)+3*l1*(1-l1)/2+nlon+15

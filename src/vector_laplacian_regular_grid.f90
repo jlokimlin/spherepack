@@ -228,7 +228,7 @@
 !
 !            then lvhsec must be at least
 !
-!            4*nlat*l2+3*max(l1-2, 0)*(nlat+nlat-l1-1)+nlon+15
+!            4*nlat*l2+3*max(l1-2, 0)*(2*nlat-l1-1)+nlon+15
 
 !            (see ierror=9 below).
 !
@@ -382,14 +382,14 @@ contains
         ierror = 8
         if (ndbc < nlat) return
         ierror = 9
-        idz = (mmax*(nlat+nlat-mmax+1))/2
+        idz = (mmax*(2*nlat-mmax+1))/2
         lzimn = idz*imid
         !
         !     check saved work space
         !
         l1 = min(nlat, (nlon+1)/2)
         l2 = (nlat+1)/2
-        lwmin = 4*nlat*l2+3*max(l1-2, 0)*(nlat+nlat-l1-1)+nlon+15
+        lwmin = 4*nlat*l2+3*max(l1-2, 0)*(2*nlat-l1-1)+nlon+15
         if (lvhsec < lwmin) return
         !
         ! Verify unsaved workspace length

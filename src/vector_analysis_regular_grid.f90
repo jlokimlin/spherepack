@@ -200,7 +200,7 @@ contains
     !
     !            then lvhaec must be at least
     !
-    !            4*nlat*l2+3*max(l1-2, 0)*(nlat+nlat-l1-1)+nlon+15
+    !            4*nlat*l2+3*max(l1-2, 0)*(2*nlat-l1-1)+nlon+15
     !
     !     output parameters
     !
@@ -255,7 +255,7 @@ contains
             imid = (nlat+1)/2
             mmax = min(nlat, (nlon+1)/2)
             lzz1 = 2*nlat*imid
-            labc = 3*(max(mmax-2, 0)*(nlat+nlat-mmax-1))/2
+            labc = 3*(max(mmax-2, 0)*(2*nlat-mmax-1))/2
 
             if (nlat < 3) then
                 ierror = 1
@@ -362,7 +362,7 @@ contains
     !
     !            then lvhaec must be at least
     !
-    !            4*nlat*l2+3*max(l1-2, 0)*(nlat+nlat-l1-1)+nlon+15
+    !            4*nlat*l2+3*max(l1-2, 0)*(2*nlat-l1-1)+nlon+15
     !
     !     output parameters
     !

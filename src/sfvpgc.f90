@@ -272,7 +272,7 @@ contains
         !
         imid = (nlat+1)/2
         lzz1 = 2*nlat*imid
-        labc = 3*(max(mmax-2, 0)*(nlat+nlat-mmax-1))/2
+        labc = 3*(max(mmax-2, 0)*(2*nlat-mmax-1))/2
         lwmin = lzz1+labc+nlon+15
         l2 = (nlat+1)/2
         l1 = min((nlon+2)/2, nlat)

@@ -214,7 +214,7 @@
 !
 !            then lvhsec must be at least
 !
-!            4*nlat*l2+3*max(l1-2, 0)*(nlat+nlat-l1-1)+nlon+15
+!            4*nlat*l2+3*max(l1-2, 0)*(2*nlat-l1-1)+nlon+15
 !
 !     work   a work array that does not have to be saved.
 !
@@ -374,12 +374,12 @@ contains
         !
         !     set minimum and verify saved workspace length
         !
-        idz = (mmax*(nlat+nlat-mmax+1))/2
+        idz = (mmax*(2*nlat-mmax+1))/2
         lzimn = idz*imid
         !     lsavmin = lzimn+lzimn+nlon+15
         !     if (lvhsec .lt. lsavmin) return
         lzz1 = 2*nlat*imid
-        labc = 3*(max(mmax-2, 0)*(nlat+nlat-mmax-1))/2
+        labc = 3*(max(mmax-2, 0)*(2*nlat-mmax-1))/2
         if (lvhsec < 2*(lzz1+labc)+nlon+15) return
         !
         !     set minimum and verify unsaved work space length

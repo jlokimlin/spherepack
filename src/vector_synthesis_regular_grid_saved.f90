@@ -198,7 +198,7 @@ contains
     !
     !            then lvhses must be at least
     !
-    !                 l1*l2*(nlat+nlat-l1+1)+nlon+15
+    !                 l1*l2*(2*nlat-l1+1)+nlon+15
     !
     !     output parameters
     !
@@ -470,7 +470,7 @@ contains
     !
     !            then lvhses must be at least
     !
-    !                  l1*l2*(nlat+nlat-l1+1)+nlon+15
+    !                  l1*l2*(2*nlat-l1+1)+nlon+15
     !
     !
     !     work   a work array that does not have to be saved.
@@ -478,7 +478,7 @@ contains
     !     lwork  the dimension of the array work as it appears in the
     !            program that calls vhses. lwork must be at least
     !
-    !              3*(max(l1-2, 0)*(nlat+nlat-l1-1))/2+5*l2*nlat
+    !              3*(max(l1-2, 0)*(2*nlat-l1-1))/2+5*l2*nlat
     !
     !     dwork  an unsaved real work space
     !

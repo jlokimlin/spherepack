@@ -136,7 +136,7 @@ contains
     !
     !            then lshses must be at least
     !
-    !               (l1*l2*(nlat+nlat-l1+1))/2+nlon+15
+    !               (l1*l2*(2*nlat-l1+1))/2+nlon+15
     !
     !     output parameters
     !
@@ -208,7 +208,7 @@ contains
 
             mmax = min(nlat, nlon/2+1)
             imid = (nlat+1)/2
-            lpimn = (imid*mmax*(nlat+nlat-mmax+1))/2
+            lpimn = (imid*mmax*(2*nlat-mmax+1))/2
 
             select case (isym)
                 case (0)
@@ -307,7 +307,7 @@ contains
     !
     !            then lshses must be at least
     !
-    !               (l1*l2*(nlat+nlat-l1+1))/2+nlon+15
+    !               (l1*l2*(2*nlat-l1+1))/2+nlon+15
     !
     !     output parameters
     !

@@ -181,7 +181,7 @@
 !
 !            then lvhsgs must be at least
 !
-!               (l1*l2*(nlat+nlat-l1+1))/2+nlon+15
+!               (l1*l2*(2*nlat-l1+1))/2+nlon+15
 !
 !
 !     work   a work array that does not have to be saved.
@@ -304,9 +304,9 @@ contains
         if (ndab < nlat) return
         ierror = 9
         !     lzz1 = 2*nlat*imid
-        !     labc = 3*(max(mmax-2, 0)*(nlat+nlat-mmax-1))/2
+        !     labc = 3*(max(mmax-2, 0)*(2*nlat-mmax-1))/2
         !     if (lvhsgs .lt. 2*(lzz1+labc)+nlon+15) return
-        idz = (mmax*(nlat+nlat-mmax+1))/2
+        idz = (mmax*(2*nlat-mmax+1))/2
         lzimn = idz*imid
         if (lvhsgs < lzimn+lzimn+nlon+15) return
         ierror = 10

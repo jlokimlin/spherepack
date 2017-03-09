@@ -357,7 +357,7 @@ contains
             imid = (nlat+1)/2
             mmax = min(nlat, (nlon+1)/2)
             lzz1 = 2*nlat*imid
-            labc = 3*(max(mmax-2, 0)*(nlat+nlat-mmax-1))/2
+            labc = 3*(max(mmax-2, 0)*(2*nlat-mmax-1))/2
             l1 = min(nlat, (nlon+1)/2)
             l2 = (nlat+1)/2
             lwmin =   4*nlat*l2+3*max(l1-2, 0)*(2*nlat-l1-1)+nlon+15
@@ -415,7 +415,7 @@ contains
                 iw4 = iw2+lnl
                 iw5 = iw4+3*imid*nlat
                 lzz1 = 2*nlat*imid
-                labc = 3*(max(mmax-2, 0)*(nlat+nlat-mmax-1))/2
+                labc = 3*(max(mmax-2, 0)*(2*nlat-mmax-1))/2
                 lwzvin = lzz1+labc
                 jw1 = lwzvin+1
                 jw2 = jw1+lwzvin

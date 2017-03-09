@@ -168,7 +168,7 @@
 !
 !            then lvhsgs must be at least
 !
-!                 l1*l2*(nlat+nlat-l1+1)+nlon+15+2*nlat
+!                 l1*l2*(2*nlat-l1+1)+nlon+15+2*nlat
 !
 !
 !     work   a work array that does not have to be saved.
@@ -310,7 +310,7 @@ contains
             return
         end if
 
-        lwmin = l1*l2*(nlat+nlat-l1+1)+nlon+15+2*nlat
+        lwmin = l1*l2*(2*nlat-l1+1)+nlon+15+2*nlat
 
         ! Check case 9
         if (lvhsgs < lwmin) then

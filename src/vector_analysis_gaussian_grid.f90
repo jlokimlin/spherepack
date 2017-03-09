@@ -253,7 +253,7 @@ contains
             imid = (nlat+1)/2
             mmax = min(nlat, (nlon+1)/2)
             lzz1 = 2*nlat*imid
-            labc = 3*(max(mmax-2, 0)*(nlat+nlat-mmax-1))/2
+            labc = 3*(max(mmax-2, 0)*(2*nlat-mmax-1))/2
 
             ! Check calling arguments
             if (nlat < 3) then
@@ -397,7 +397,7 @@ contains
             imid = (nlat+1)/2
             lzz1 = 2*nlat*imid
             mmax = min(nlat, (nlon+1)/2)
-            labc = 3*(max(mmax-2, 0)*(nlat+nlat-mmax-1))/2
+            labc = 3*(max(mmax-2, 0)*(2*nlat-mmax-1))/2
             imid = (nlat+1)/2
 
              ! Check calling arguments

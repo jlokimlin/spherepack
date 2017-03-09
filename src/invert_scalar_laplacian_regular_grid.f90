@@ -171,7 +171,7 @@
 !
 !            then lsave must be greater than or equal to
 !
-!               2*nlat*l2+3*((l1-2)*(nlat+nlat-l1-1))/2+nlon+15
+!               2*nlat*l2+3*((l1-2)*(2*nlat-l1-1))/2+nlon+15
 !
 !
 !     work   a work array that does not have to be saved.
@@ -327,7 +327,7 @@ contains
         !
         l1 = min(nlat, (nlon+2)/2)
         l2 = (nlat+1)/2
-        lwmin = 2*nlat*l2+3*((l1-2)*(nlat+nlat-l1-1))/2+nlon+15
+        lwmin = 2*nlat*l2+3*((l1-2)*(2*nlat-l1-1))/2+nlon+15
         if (lshsec < lwmin) return
         ierror = 10
         !

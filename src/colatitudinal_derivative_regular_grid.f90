@@ -178,7 +178,7 @@ contains
     !
     !            then lwvts must be at least
     !
-    !            4*nlat*l2+3*max(l1-2, 0)*(nlat+nlat-l1-1)+nlon+15
+    !            4*nlat*l2+3*max(l1-2, 0)*(2*nlat-l1-1)+nlon+15
     !
     !     output parameters
     !
@@ -346,7 +346,7 @@ contains
     !
     !            then lwvts must be at least
     !
-    !            4*nlat*l2+3*max(l1-2, 0)*(nlat+nlat-l1-1)+nlon+15
+    !            4*nlat*l2+3*max(l1-2, 0)*(2*nlat-l1-1)+nlon+15
     !
     !     output parameters
     !

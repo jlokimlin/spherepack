@@ -186,7 +186,7 @@ contains
     !
     !            then lwvts must be at least
     !
-    !                 l1*l2*(nlat+nlat-l1+1)+nlon+15
+    !                 l1*l2*(2*nlat-l1+1)+nlon+15
     !
     !     output parameters
     !
@@ -359,7 +359,7 @@ contains
     !
     !            then lwvts must be at least
     !
-    !                  l1*l2*(nlat+nlat-l1+1)+nlon+15
+    !                  l1*l2*(2*nlat-l1+1)+nlon+15
     !
     !     **************************************************************
     !
@@ -379,9 +379,9 @@ contains
     ! Remark:
     !
     !     define imid = (nlat+1)/2 and mmax = min(nlat, (nlon+1)/2)
-    !     the length of wvts is imid*mmax*(nlat+nlat-mmax+1)+nlon+15
+    !     the length of wvts is imid*mmax*(2*nlat-mmax+1)+nlon+15
     !     and the length of work is labc+5*nlat*imid+2*nlat where
-    !     labc = 3*(max(mmax-2, 0)*(nlat+nlat-mmax-1))/2
+    !     labc = 3*(max(mmax-2, 0)*(2*nlat-mmax-1))/2
     !
     module subroutine vtsgsi(nlat, nlon, wvts, ierror)
 
@@ -406,7 +406,7 @@ contains
 
         mmax = min(nlat, nlon/2+1)
         imid = (nlat+1)/2
-        lzimn = (imid*mmax*(nlat+nlat-mmax+1))/2
+        lzimn = (imid*mmax*(2*nlat-mmax+1))/2
         labc = 3*(max(mmax-2, 0)*(2*nlat-mmax-1))/2
         lvin = 3*nlat*imid
         lwvbin = 2*nlat*imid+labc

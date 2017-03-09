@@ -463,7 +463,7 @@ program shallow
     !     compute the divergence of the velocity (u, v)
     !
     call dives(nlat, nlon, isym, nt, divg, idp, jdp, br, bi, mdab, ndab, &
-        wshs, lwshs, work, lwork, ierror)
+        wshs, ierror)
     if(ierror /= 0) write (*, 96) ierror
 96  format(' error' i4 ' in dives')
     !

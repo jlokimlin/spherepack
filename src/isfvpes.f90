@@ -175,7 +175,7 @@
 !
 !            then lvhses must be at least
 !
-!               l1*l2*(nlat+nlat-l1+1)+nlon+15
+!               l1*l2*(2*nlat-l1+1)+nlon+15
 !
 !
 !
@@ -286,7 +286,7 @@ contains
         if (ndb < nlat) return
         ierror = 9
         l1 = min(nlat, (nlon+2)/2)
-        if (lvhses < l1*l2*(nlat+nlat-l1+1)+nlon+15) return
+        if (lvhses < l1*l2*(2*nlat-l1+1)+nlon+15) return
         ierror = 10
         if (isym == 0) then
             if (lwork < nlat*((2*nt+1)*nlon+4*l1*nt+1)) return

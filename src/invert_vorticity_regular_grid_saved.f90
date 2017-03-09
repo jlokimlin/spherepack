@@ -186,7 +186,7 @@
 !
 !            then lvhses must be at least
 !
-!               (l1*l2*(nlat+nlat-l1+1))/2+nlon+15
+!               (l1*l2*(2*nlat-l1+1))/2+nlon+15
 !
 !
 !     work   a work array that does not have to be saved.
@@ -311,10 +311,10 @@ contains
         if (ndab < nlat) return
         ierror = 9
         lzz1 = 2*nlat*imid
-        labc = 3*(max(mmax-2, 0)*(nlat+nlat-mmax-1))/2
+        labc = 3*(max(mmax-2, 0)*(2*nlat-mmax-1))/2
         l1 = min(nlat, (nlon+2)/2)
         l2 = (nlat+1)/2
-        lwmin = (l1*l2*(nlat+nlat-l1+1))/2+nlon+15
+        lwmin = (l1*l2*(2*nlat-l1+1))/2+nlon+15
         ierror = 10
         !
         ! Verify unsaved workspace length

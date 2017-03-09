@@ -132,7 +132,7 @@ contains
     !
     !            then lshaec must be at least
     !
-    !            2*nlat*l2+3*((l1-2)*(nlat+nlat-l1-1))/2+nlon+15
+    !            2*nlat*l2+3*((l1-2)*(2*nlat-l1-1))/2+nlon+15
     !
     !     output parameters
     !
@@ -343,7 +343,7 @@ contains
     !
     !            then lshaec must be at least
     !
-    !            2*nlat*l2+3*((l1-2)*(nlat+nlat-l1-1))/2+nlon+15
+    !            2*nlat*l2+3*((l1-2)*(2*nlat-l1-1))/2+nlon+15
     !
     !     dwork  a real dwork array that does not have to be saved.
     !

@@ -199,7 +199,7 @@ contains
     !
     !            then lvhsgs must be at least
     !
-    !                 l1*l2*(nlat+nlat-l1+1)+nlon+15+2*nlat
+    !                 l1*l2*(2*nlat-l1+1)+nlon+15+2*nlat
     !
     !     output parameters
     !
@@ -484,7 +484,7 @@ contains
     !
     !            then lvhsgs must be at least
     !
-    !                 l1*l2*(nlat+nlat-l1+1)+nlon+15+2*nlat
+    !                 l1*l2*(2*nlat-l1+1)+nlon+15+2*nlat
     !
     !     output parameters
     !

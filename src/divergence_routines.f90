@@ -29,7 +29,7 @@ module divergence_routines
     ! Declare interfaces for submodule implementation
     interface
         module subroutine divgs(nlat, nlon, isym, nt, divg, idiv, jdiv, br, bi, mdb, ndb, &
-            wshsgs, lshsgs, work, lwork, ierror)
+            wshsgs, ierror)
 
             ! Dummy arguments
             integer(ip), intent(in)  :: nlat
@@ -43,15 +43,12 @@ module divergence_routines
             real(wp),    intent(in)  :: bi(mdb, ndb, nt)
             integer(ip), intent(in)  :: mdb
             integer(ip), intent(in)  :: ndb
-            real(wp),    intent(in)  :: wshsgs(lshsgs)
-            integer(ip), intent(in)  :: lshsgs
-            real(wp),    intent(out) :: work(lwork)
-            integer(ip), intent(in)  :: lwork
+            real(wp),    intent(in)  :: wshsgs(:)
             integer(ip), intent(out) :: ierror
         end subroutine divgs
 
         module subroutine divgc(nlat, nlon, isym, nt, dv, idv, jdv, br, bi, mdb, ndb, &
-            wshsgc, lshsgc, work, lwork, ierror)
+            wshsgc, ierror)
 
             ! Dummy arguments
             integer(ip), intent(in)  :: nlat
@@ -65,15 +62,12 @@ module divergence_routines
             real(wp),    intent(in)  :: bi(mdb, ndb, nt)
             integer(ip), intent(in)  :: mdb
             integer(ip), intent(in)  :: ndb
-            real(wp),    intent(in)  :: wshsgc(lshsgc)
-            integer(ip), intent(in)  :: lshsgc
-            real(wp),    intent(out) :: work(lwork)
-            integer(ip), intent(in)  :: lwork
+            real(wp),    intent(in)  :: wshsgc(:)
             integer(ip), intent(out) :: ierror
         end subroutine divgc
 
         module subroutine dives(nlat, nlon, isym, nt, dv, idv, jdv, br, bi, mdb, ndb, &
-            wshses, lshses, work, lwork, ierror)
+            wshses, ierror)
             
             ! Dummy arguments
             integer(ip), intent(in)  :: nlat
@@ -87,15 +81,12 @@ module divergence_routines
             real(wp),    intent(in)  :: bi(mdb, ndb, nt)
             integer(ip), intent(in)  :: mdb
             integer(ip), intent(in)  :: ndb
-            real(wp),    intent(in)  :: wshses(lshses)
-            integer(ip), intent(in)  :: lshses
-            real(wp),    intent(out) :: work(lwork)
-            integer(ip), intent(in)  :: lwork
+            real(wp),    intent(in)  :: wshses(:)
             integer(ip), intent(out) :: ierror
         end subroutine dives
 
         module subroutine divec(nlat, nlon, isym, nt, dv, idv, jdv, br, bi, mdb, ndb, &
-            wshsec, lshsec, work, lwork, ierror)
+            wshsec, ierror)
 
             ! Dummy arguments
             integer(ip), intent(in)  :: nlat
@@ -109,15 +100,12 @@ module divergence_routines
             real(wp),    intent(in)  :: bi(mdb, ndb, nt)
             integer(ip), intent(in)  :: mdb
             integer(ip), intent(in)  :: ndb
-            real(wp),    intent(in)  :: wshsec(lshsec)
-            integer(ip), intent(in)  :: lshsec
-            real(wp),    intent(out) :: work(lwork)
-            integer(ip), intent(in)  :: lwork
+            real(wp),    intent(in)  :: wshsec(:)
             integer(ip), intent(out) :: ierror
         end subroutine divec
 
         module subroutine idivec(nlat, nlon, isym, nt, v, w, idvw, jdvw, a, b, mdab, ndab, &
-            wvhsec, lvhsec, work, lwork, pertrb, ierror)
+            wvhsec, pertrb, ierror)
 
             ! Dummy arguments
             integer(ip), intent(in)  :: nlat
@@ -132,16 +120,13 @@ module divergence_routines
             real(wp),    intent(in)  :: b(mdab, ndab, nt)
             integer(ip), intent(in)  :: mdab
             integer(ip), intent(in)  :: ndab
-            real(wp),    intent(out) :: wvhsec(lvhsec)
-            integer(ip), intent(in)  :: lvhsec
-            real(wp),    intent(out) :: work(lwork)
-            integer(ip), intent(in)  :: lwork
+            real(wp),    intent(out) :: wvhsec(:)
             real(wp),    intent(out) :: pertrb(nt)
             integer(ip), intent(out) :: ierror
         end subroutine idivec
 
         module subroutine idives(nlat, nlon, isym, nt, v, w, idvw, jdvw, a, b, mdab, ndab, &
-            wvhses, lvhses, work, lwork, pertrb, ierror)
+            wvhses, pertrb, ierror)
 
             ! Dummy arguments
             integer(ip), intent(in)  :: nlat
@@ -156,16 +141,13 @@ module divergence_routines
             real(wp),    intent(in)  :: b(mdab, ndab, nt)
             integer(ip), intent(in)  :: mdab
             integer(ip), intent(in)  :: ndab
-            real(wp),    intent(out) :: wvhses(lvhses)
-            integer(ip), intent(in)  :: lvhses
-            real(wp),    intent(out) :: work(lwork)
-            integer(ip), intent(in)  :: lwork
+            real(wp),    intent(out) :: wvhses(:)
             real(wp),    intent(out) :: pertrb(nt)
             integer(ip), intent(out) :: ierror
         end subroutine idives
 
         module subroutine idivgc(nlat, nlon, isym, nt, v, w, idvw, jdvw, a, b, mdab, ndab, &
-            wvhsgc, lvhsgc, work, lwork, pertrb, ierror)
+            wvhsgc, pertrb, ierror)
 
             ! Dummy arguments
             integer(ip), intent(in)  :: nlat
@@ -180,16 +162,13 @@ module divergence_routines
             real(wp),    intent(in)  :: b(mdab, ndab, nt)
             integer(ip), intent(in)  :: mdab
             integer(ip), intent(in)  :: ndab
-            real(wp),    intent(out) :: wvhsgc(lvhsgc)
-            integer(ip), intent(in)  :: lvhsgc
-            real(wp),    intent(out) :: work(lwork)
-            integer(ip), intent(in)  :: lwork
+            real(wp),    intent(out) :: wvhsgc(:)
             real(wp),    intent(out) :: pertrb(nt)
             integer(ip), intent(out) :: ierror
         end subroutine idivgc
 
         module subroutine idivgs(nlat, nlon, isym, nt, v, w, idvw, jdvw, a, b, mdab, ndab, &
-            wvhsgs, lvhsgs, work, lwork, pertrb, ierror)
+            wvhsgs, pertrb, ierror)
 
             ! Dummy arguments
             integer(ip), intent(in)  :: nlat
@@ -204,10 +183,7 @@ module divergence_routines
             real(wp),    intent(in)  :: b(mdab, ndab, nt)
             integer(ip), intent(in)  :: mdab
             integer(ip), intent(in)  :: ndab
-            real(wp),    intent(out) :: wvhsgs(lvhsgs)
-            integer(ip), intent(in)  :: lvhsgs
-            real(wp),    intent(out) :: work(lwork)
-            integer(ip), intent(in)  :: lwork
+            real(wp),    intent(out) :: wvhsgs(:)
             real(wp),    intent(out) :: pertrb(nt)
             integer(ip), intent(out) :: ierror
         end subroutine idivgs
@@ -222,14 +198,8 @@ contains
 
         ! Local variables
         integer(ip) :: n
-        real(wp)    :: fn
 
-        associate (nlat => size(sqnn))
-            do n=2, nlat
-                fn = real(n - 1, kind=wp)
-                sqnn(n) = sqrt(fn * (fn + ONE))
-            end do
-        end associate
+        sqnn = [(sqrt(real(n - 1, kind=wp) * (real(n - 1, kind=wp) + ONE)), n=1, size(sqnn))]
 
     end subroutine compute_coefficient_multipliers
 
@@ -261,7 +231,7 @@ contains
         associate (&
             nlat => size(sqnn), &
             nt => size(a, dim=3) &
-           )
+            )
 
             ! Set coefficient multiplyers
             call compute_coefficient_multipliers(sqnn)
@@ -309,7 +279,7 @@ contains
             mmax => size(br, dim=1), &
             nlat => size(br, dim=2), &
             nt => size(br, dim=3) &
-           )
+            )
 
             ! Preset coefficient multiplyers in vector
             call compute_coefficient_multipliers(sqnn)

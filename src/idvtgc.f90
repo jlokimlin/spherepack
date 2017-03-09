@@ -345,7 +345,7 @@ contains
         if (ndab < nlat) return
         ierror = 9
         lzz1 = 2*nlat*imid
-        labc = 3*(max(mmax-2, 0)*(nlat+nlat-mmax-1))/2
+        labc = 3*(max(mmax-2, 0)*(2*nlat-mmax-1))/2
         if (lvhsgc < 2*(lzz1+labc)+nlon+15) return
         ierror = 10
         !

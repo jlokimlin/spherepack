@@ -179,7 +179,7 @@ contains
     !
     !            then lwvts must be at least
     !
-    !                 l1*l2*(nlat+nlat-l1+1)+nlon+15
+    !                 l1*l2*(2*nlat-l1+1)+nlon+15
     !
     !     output parameters
     !
@@ -303,7 +303,7 @@ contains
         ierror = 8
         if (ndab < nlat) return
         ierror = 9
-        idz = (mmax*(nlat+nlat-mmax+1))/2
+        idz = (mmax*(2*nlat-mmax+1))/2
         lzimn = idz*imid
         if (lwvts < lzimn+lzimn+nlon+15) return
         ierror = 10
@@ -368,7 +368,7 @@ contains
     !
     !            then lwvts must be at least
     !
-    !                  l1*l2*(nlat+nlat-l1+1)+nlon+15
+    !                  l1*l2*(2*nlat-l1+1)+nlon+15
     !
     !     output parameters
     !

@@ -213,7 +213,7 @@
 !
 !            let
 !
-!               lsavmin = (l1*l2*(nlat+nlat-l1+1))/2+nlon+15
+!               lsavmin = (l1*l2*(2*nlat-l1+1))/2+nlon+15
 !
 !            then lvhsgs must be greater than or equal to lsavmin
 !            (see ierror=9 below).
@@ -368,7 +368,7 @@ contains
         !
         !     set minimum and verify saved workspace length
         !
-        idz = (mmax*(nlat+nlat-mmax+1))/2
+        idz = (mmax*(2*nlat-mmax+1))/2
         lzimn = idz*imid
         lsavmin = lzimn+lzimn+nlon+15
         if (lvhsgs < lsavmin) return

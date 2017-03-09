@@ -178,7 +178,7 @@
 !
 !            then lvhsec must be greater than or equal to
 !
-!               4*nlat*l2+3*max(l1-2, 0)*(nlat+nlat-l1-1)+nlon+15
+!               4*nlat*l2+3*max(l1-2, 0)*(2*nlat-l1-1)+nlon+15
 !
 !
 !     work   a work array that does not have to be saved.
@@ -299,11 +299,11 @@ contains
         !
         !     verify minimum saved work space length
         !
-        idz = (mmax*(nlat+nlat-mmax+1))/2
+        idz = (mmax*(2*nlat-mmax+1))/2
         lzimn = idz*imid
         l1 = min(nlat, (nlon+1)/2)
         l2 = (nlat+1)/2
-        lwmin = 4*nlat*l2+3*max(l1-2, 0)*(nlat+nlat-l1-1)+nlon+15
+        lwmin = 4*nlat*l2+3*max(l1-2, 0)*(2*nlat-l1-1)+nlon+15
         if (lvhsec < lwmin) return
         ierror = 10
         !

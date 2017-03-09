@@ -373,7 +373,7 @@ contains
         ierror = 8
         if (ndbc < nlat) return
         ierror = 9
-        idz = (mmax*(nlat+nlat-mmax+1))/2
+        idz = (mmax*(2*nlat-mmax+1))/2
         lzimn = idz*imid
         !     lsavmin = lzimn+lzimn+nlon+15
         !     if (lsave .lt. lsavmin) return

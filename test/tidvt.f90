@@ -264,7 +264,7 @@ use spherepack
             call iout(ierror, "ierr")
 
             call divec(nlat, nlon, isym, nt, dv, nlat, nlon, br, bi, mdb, nlat, &
-                wsave, lsave, work, lwork, ierror)
+                wsave, ierror)
             call name("div ")
             call iout(ierror, "ierr")
 
@@ -293,7 +293,7 @@ use spherepack
             call iout(ierror, "ierr")
 
             call dives(nlat, nlon, isym, nt, dv, nlat, nlon, br, bi, mdb, nlat, &
-                wsave, lsave, work, lwork, ierror)
+                wsave, ierror)
             call name("div ")
             call iout(ierror, "ierr")
             call vrtes(nlat, nlon, isym, nt, vt, nlat, nlon, cr, ci, mdb, nlat, &
@@ -320,7 +320,7 @@ use spherepack
             call iout(ierror, "ierr")
 
             call divgc(nlat, nlon, isym, nt, dv, nlat, nlon, br, bi, mdb, nlat, &
-                wsave, lsave, work, lwork, ierror)
+                wsave, ierror)
             call name("div ")
             call iout(ierror, "ierr")
             call vrtgc(nlat, nlon, isym, nt, vt, nlat, nlon, cr, ci, mdb, nlat, &
@@ -347,7 +347,7 @@ use spherepack
             call iout(ierror, "ierr")
 
             call divgs(nlat, nlon, isym, nt, dv, nlat, nlon, br, bi, mdb, nlat, &
-                wsave, lsave, work, lwork, ierror)
+                wsave, ierror)
             call name("div ")
             call iout(ierror, "ierr")
             call vrtgs(nlat, nlon, isym, nt, vt, nlat, nlon, cr, ci, mdb, nlat, &

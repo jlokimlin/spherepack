@@ -168,7 +168,7 @@
 !
 !            then lshses must be at least
 !
-!               (l1*l2*(nlat+nlat-l1+1))/2+nlon+15
+!               (l1*l2*(2*nlat-l1+1))/2+nlon+15
 !
 !     work   a work array that does not have to be saved.
 !
@@ -283,7 +283,7 @@ contains
         if (ndc < nlat) return
         ierror = 9
         imid = (nlat+1)/2
-        lpimn = (imid*mmax*(nlat+nlat-mmax+1))/2
+        lpimn = (imid*mmax*(2*nlat-mmax+1))/2
         if (lshses < lpimn+nlon+15) return
         ierror = 10
         !

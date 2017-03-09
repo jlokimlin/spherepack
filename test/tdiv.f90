@@ -7,9 +7,9 @@
 !     *                                                               *
 !     *                      all rights reserved                      *
 !     *                                                               *
-!     *                      SPHEREPACK                               *
+!     *                         Spherepack                            *
 !     *                                                               *
-!     *       A Package of Fortran77 Subroutines and Programs         *
+!     *       A Package of Fortran Subroutines and Programs           *
 !     *                                                               *
 !     *              for Modeling Geophysical Processes               *
 !     *                                                               *
@@ -47,16 +47,14 @@
 !     (5) invert the divergence and compare with the irrotational (v, w)
 !
 program tdiv
-use spherepack
+
+    use spherepack
+
+    ! Explicit typing only
     implicit none
-    real(wp) :: a
-    real(wp) :: b
-    real(wp) :: bi
-    real(wp) :: br
-    real(wp) :: ci
+
     real(wp) :: cosp
     real(wp) :: cost
-    real(wp) :: cr
     real(wp) :: d2xdp2
     real(wp) :: d2xdt2
     real(wp) :: d2ydp2
@@ -67,10 +65,9 @@ use spherepack
     real(wp) :: dphi
     real(wp) :: dsfdp
     real(wp) :: dsfdt
-    real(wp) :: dv
     real(wp) :: dvdt
     real(wp) :: dve
-    real(wp) :: dwork
+    
     real(wp) :: dx2dt2
     real(wp) :: dxdp
     real(wp) :: dxdt
@@ -83,100 +80,47 @@ use spherepack
     real(wp) :: err2w
     integer(ip) :: i
     integer(ip) :: icase
-    integer(ip) :: ier
-    integer(ip) :: ierror
-    integer(ip) :: isym
-    integer(ip) :: ityp
+    integer(ip) :: error_flag
     integer(ip) :: j
     integer(ip) :: k
-    integer(ip) :: kk
-    integer(ip) :: ldwork
-    integer(ip) :: lldwork
-    integer(ip) :: lleng
-    integer(ip) :: llsav
-    integer(ip) :: lsave
-    integer(ip) :: lwork
-    integer(ip) :: mdab
-    integer(ip) :: mdb
-    integer(ip) :: mmdab
-    integer(ip) :: mmdb
-    integer(ip) :: nlat
-    integer(ip) :: nlon
-    integer(ip) :: nmax
-    integer(ip) :: nnlat
-    integer(ip) :: nnlon
-    integer(ip) :: nnt
-    integer(ip) :: nt
-    real(wp) :: pertrb
     real(wp) :: phi
-
     real(wp) :: sf
     real(wp) :: sinp
     real(wp) :: sint
     real(wp) :: theta
-    real(wp) :: thetag
-    real(wp) :: v
     real(wp) :: ve
-    real(wp) :: w
     real(wp) :: we
-    real(wp) :: work
-    real(wp) :: wsave
     real(wp) :: x
     real(wp) :: y
     real(wp) :: z
-    real(wp) :: dtheta, dwts
     !
     !     set dimensions with parameter statements
     !
-    parameter(nnlat= 15, nnlon=  9, nnt = 2)
-    ! *** be sure to set
-    !     mmdb = min(nlat, (nlon+1)/2), mmdab = min(nlat, (nnlon+2)/2)
-    parameter (mmdab = (nnlon+2)/2, mmdb = (nnlon+1)/2)
-    parameter (lleng= 5*nnlat*nnlat*nnlon, llsav=15*nnlat*nnlat*nnlon)
-    parameter (lldwork = 4*nnlat*nnlat)
-    dimension work(lleng), wsave(llsav)
-    dimension br(mmdb, nnlat, nnt), bi(mmdb, nnlat, nnt)
-    dimension dwork(lldwork)
-    dimension cr(mmdb, nnlat, nnt), ci(mmdb, nnlat, nnt)
-    dimension a(mmdab, nnlat, nnt), b(mmdab, nnlat, nnt)
-    dimension dv(nnlat, nnlon, nnt)
-    dimension thetag(nnlat), dtheta(nnlat), dwts(nnlat)
-    dimension v(nnlat, nnlon, nnt), w(nnlat, nnlon, nnt)
-    dimension pertrb(nnt)
+    integer(ip), parameter              :: nlat = 15, nlon =  9, nt = 2
+    integer(ip), parameter              :: isym = 0
+    integer(ip), parameter              :: mdab = (nlon+2)/2, mdb = (nlon+1)/2
+    real(wp), dimension(mdb, nlat, nt)  :: br, bi, cr, ci
+    real(wp), dimension(mdab, nlat, nt) :: a, b
+    real(wp), dimension(nlat, nlon, nt) :: dv, v, w
+    real(wp), dimension(nlat)           :: gaussian_latitudes, gaussian_weights
+    real(wp)                            :: pertrb(nt)
+    real(wp), allocatable               :: wavetable(:)
+    real(wp), parameter                 :: ZERO = 0.0_wp, TWO = 2.0_wp, SIX = 6.0_wp
 
-    !
-    !     set dimension variables
-    !
-    nlat = nnlat
-    nlon = nnlon
-    nmax = max(nlat, nlon)
-    mdab = mmdab
-    mdb = mmdb
-
-    lwork = lleng
-    lsave = llsav
-    nt = nnt
     call iout(nlat, "nlat")
     call iout(nlon, "nlon")
     call iout(nt, "  nt")
-    isym = 0
-    ityp = 0
-    !
-    !     set equally spaced colatitude and longitude increments
-    !
-    dphi = (pi+pi)/nlon
-    dlat = pi/(nlat-1)
-    !
-    !     compute nlat gaussian points in thetag
-    !
-    ldwork = lldwork
-    call compute_gaussian_latitudes_and_weights(nlat, dtheta, dwts, ier)
-    do  i=1, nlat
-        thetag(i) = dtheta(i)
-    end do
-    call name("gaqd")
-    call iout(ier, " ier")
-    call vecout(thetag, "thtg", nlat)
+
+    ! Set equally spaced colatitude and longitude increments
+    dphi = TWO_PI/nlon
+    dlat = PI/(nlat-1)
+
+    ! Compute nlat-many gaussian latitudinal points
+    call compute_gaussian_latitudes_and_weights(nlat, gaussian_latitudes, gaussian_weights, error_flag)
+
+    call name("compute_gaussian_latitudes_and_weights")
+    call iout(error_flag, " ier")
+    call vecout(gaussian_latitudes, "gaussian_latitudes", nlat)
     !
     !     test all divergence and inverse divergence subroutines
     !
@@ -189,12 +133,16 @@ use spherepack
         !
         do k=1, nt
             do j=1, nlon
-                phi = (j-1)*dphi
+                phi = real(j - 1, kind=wp) * dphi
                 sinp = sin(phi)
                 cosp = cos(phi)
                 do i=1, nlat
-                    theta = (i-1)*dlat
-                    if (icase>2) theta=thetag(i)
+                    select case (icase)
+                        case (0:2)
+                            theta = real(i - 1, kind=wp) * dlat
+                        case default
+                            theta = gaussian_latitudes(i)
+                    end select
                     cost = cos(theta)
                     sint = sin(theta)
                     x = sint*cosp
@@ -210,8 +158,8 @@ use spherepack
                     d2ydp2 = -sint*sinp
                     dzdt = -sint
                     d2zdt2 = -cost
-                    dzdp = 0.0
-                    d2zdp2 = 0.0
+                    dzdp = ZERO
+                    d2zdp2 = ZERO
                     if (k==1) then
                         sf = x*y
                         dsfdt = x*dydt+y*dxdt
@@ -219,7 +167,7 @@ use spherepack
                         v(i, j, k) = dsfdt
                         w(i, j, k) = cosp*dydp+sinp*dxdp
                         !              dv = 1/sint*(d(sint*v)/dt + dw/dp)
-                        dvdt = x*d2ydt2 + 2.*dxdt*dydt + y*d2xdt2
+                        dvdt = x*d2ydt2 + TWO * dxdt*dydt + y*d2xdt2
                         !              1/sint*dwdp = 1/sint*(cosp*d2ydp2-sinp*dydp+sinp*d2xdp2+cosp*dxdp)
                         !                          = -4.*sinp*cosp
                         dv(i, j, k) = dvdt + cost*(cosp*dydt+sinp*dxdt) -4.*cosp*sinp
@@ -229,29 +177,20 @@ use spherepack
                         dsfdp = x*dzdp+z*dxdp
                         v(i, j, k) = dsfdt
                         w(i, j, k) = -cost*sinp
-                        dvdt = x*d2zdt2+2.*dzdt*dxdt + z*dx2dt2
+                        dvdt = x*d2zdt2+TWO * dzdt*dxdt + z*dx2dt2
                         !              dv = 1/sint*(d(sint*v)/dt + dw/dp)
-                        dv(i, j, k) = -6.*cost*sint*cosp
+                        dv(i, j, k) = -SIX * cost*sint*cosp
                     else if (k==3) then
                         sf = y*z
                         dsfdt = y*dzdt+z*dydt
                         dsfdp = y*dzdp+z*dydp
                         v(i, j, k) = dsfdt
                         w(i, j, k) = z*cosp
-                        dv(i, j, k) = -6.*cost*sint*sinp
+                        dv(i, j, k) = -SIX * cost*sint*sinp
                     end if
                 end do
             end do
         end do
-
-        !     if (nmax.lt.10) then
-        !     do kk=1, nt
-        !     call iout(kk, "**kk")
-        !     call aout(v(1, 1, kk), "   v", nlat, nlon)
-        !     call aout(w(1, 1, kk), "   w", nlat, nlon)
-        !     call aout(dv(1, 1, kk), "  dv", nlat, nlon)
-        !     end do
-        !     end if
 
         if (icase==1) then
 
@@ -259,36 +198,24 @@ use spherepack
             !
             !     analyze vector field
             !
-            call vhaeci(nlat, nlon, wsave, ierror)
+            call initialize_vhaec(nlat, nlon, wavetable, error_flag)
             call name("shs ")
-            call iout(ierror, "ierr")
+            call iout(error_flag, "error_flag = ")
 
             call vhaec(nlat, nlon, isym, nt, v, w, nlat, nlon, br, bi, cr, ci, mdb, &
-                nlat, wsave, ierror)
+                nlat, wavetable, error_flag)
             call name("vha ")
-            call iout(ierror, "ierr")
+            call iout(error_flag, "error_flag = ")
 
-            !c    if (nmax.lt.10) then
-            !c    do kk=1, nt
-            !c    call iout(kk, "**kk")
-            !c    call aout(br(1, 1, kk), "  br", mdb, nlat)
-            !c    call aout(bi(1, 1, kk), "  bi", mdb, nlat)
-            !c    call aout(cr(1, 1, kk), "  cr", mdb, nlat)
-            !c    call aout(ci(1, 1, kk), "  ci", mdb, nlat)
-            !c    end do
-            !c    end if
-            !
             !     compute divergence of (v, w) in dv
-            !
-
-            call shseci(nlat, nlon, wsave, ierror)
+            call initialize_shsec(nlat, nlon, wavetable, error_flag)
             call name("shsi")
-            call iout(ierror, "ierr")
+            call iout(error_flag, "error_flag = ")
 
             call divec(nlat, nlon, isym, nt, dv, nlat, nlon, br, bi, mdb, nlat, &
-                wsave, lsave, work, lwork, ierror)
+                wavetable, error_flag)
             call name("div ")
-            call iout(ierror, "ierr")
+            call iout(error_flag, "error_flag = ")
             call iout(nlat, "nlat")
             call iout(nlon, "nlon")
 
@@ -296,62 +223,57 @@ use spherepack
         else if (icase==2) then
 
             call name("**es")
-            call shsesi(nlat, nlon, wsave, ierror)
+            call initialize_shses(nlat, nlon, wavetable, error_flag)
             call name("shsi")
-            call iout(ierror, "ierr")
+            call iout(error_flag, "error_flag = ")
 
             call dives(nlat, nlon, isym, nt, dv, nlat, nlon, br, bi, mdb, nlat, &
-                wsave, lsave, work, lwork, ierror)
+                wavetable, error_flag)
 
             call name("div ")
-            call iout(ierror, "ierr")
+            call iout(error_flag, "error_flag = ")
 
         else if (icase == 3) then
 
             call name("**gc")
 
-            call shsgci(nlat, nlon, wsave, ierror)
+            call initialize_shsgc(nlat, nlon, wavetable, error_flag)
             call name("shsi")
-            call iout(ierror, "ierr")
+            call iout(error_flag, "error_flag = ")
 
             call divgc(nlat, nlon, isym, nt, dv, nlat, nlon, br, bi, mdb, nlat, &
-                wsave, lsave, work, lwork, ierror)
+                wavetable, error_flag)
             call name("div ")
-            call iout(ierror, "ierr")
+            call iout(error_flag, "error_flag = ")
 
         else if (icase == 4) then
 
             call name("**gs")
 
-            call shsgsi(nlat, nlon, wsave, ierror)
+            call initialize_shsgs(nlat, nlon, wavetable, error_flag)
             call name("shsi")
-            call iout(ierror, "ierr")
+            call iout(error_flag, "error_flag = ")
 
             call divgs(nlat, nlon, isym, nt, dv, nlat, nlon, br, bi, mdb, nlat, &
-                wsave, lsave, work, lwork, ierror)
+                wavetable, error_flag)
             call name("div ")
-            call iout(ierror, "ierr")
+            call iout(error_flag, "error_flag = ")
 
         end if
 
-        !     if (nmax.lt.10) then
-        !     do kk=1, nt
-        !     call iout(kk, "**kk")
-        !     call aout(dv(1, 1, kk), "  dv", nlat, nlon)
-        !     end do
-        !     end if
-        !
-        !     compute "error" in dv
-        !
-        err2 = 0.0
+        err2 = ZERO
         do k=1, nt
             do j=1, nlon
-                phi = (j-1)*dphi
+                phi = real(j - 1, kind=wp) * dphi
                 sinp = sin(phi)
                 cosp = cos(phi)
                 do i=1, nlat
-                    theta = (i-1)*dlat
-                    if (icase>2) theta=thetag(i)
+                    select case (icase)
+                        case (0:2)
+                            theta = real(i - 1, kind=wp) * dlat
+                        case default
+                            theta = gaussian_latitudes(i)
+                    end select
                     cost = cos(theta)
                     sint = sin(theta)
                     x = sint*cosp
@@ -367,18 +289,18 @@ use spherepack
                     d2ydp2 = -sint*sinp
                     dzdt = -sint
                     d2zdt2 = -cost
-                    dzdp = 0.0
-                    d2zdp2 = 0.0
+                    dzdp = ZERO
+                    d2zdp2 = ZERO
                     if (k==1) then
                         sf = x*y
-                        dvdt = x*d2ydt2 + 2.*dxdt*dydt + y*d2xdt2
+                        dvdt = x*d2ydt2 + TWO * dxdt*dydt + y*d2xdt2
                         dve = dvdt + cost*(cosp*dydt+sinp*dxdt) - 4.*cosp*sinp
                     else if (k==2) then
                         !              sf = x*z
-                        dve = -6.*sint*cost*cosp
+                        dve = -SIX * sint*cost*cosp
                     else if (k==3) then
                         !              sf = y*z
-                        dve = -6.*cost*sint*sinp
+                        dve = -SIX * cost*sint*sinp
                     end if
                     err2 = err2 + (dv(i, j, k)-dve)**2
                 end do
@@ -389,17 +311,10 @@ use spherepack
         !
         err2 = sqrt(err2/(nt*nlat*nlon))
         call vout(err2, "err2")
-        !
+
         !     now recompute (v, w) inverting dv using idiv(ec, es, gc, gs)
-        !
-        do kk=1, nt
-            do j=1, nlon
-                do i=1, nlat
-                    v(i, j, kk) = 0.0
-                    w(i, j, kk) = 0.0
-                end do
-            end do
-        end do
+        v = ZERO
+        w = ZERO
 
 
         if (icase==1) then
@@ -407,33 +322,23 @@ use spherepack
             call name("**ec")
 
 
-            call shaeci(nlat, nlon, wsave, ierror)
+            call initialize_shaec(nlat, nlon, wavetable, error_flag)
             call name("shai")
-            call iout(ierror, "ierr")
+            call iout(error_flag, "error_flag = ")
 
             call shaec(nlat, nlon, isym, nt, dv, nlat, nlon, a, b, &
-                mdab, nlat, wsave, ierror)
+                mdab, nlat, wavetable, error_flag)
             call name("sha ")
-            call iout(ierror, "ierr")
-            call iout(lsave, "lsav")
-            call iout(lwork, "lwrk")
+            call iout(error_flag, "error_flag = ")
 
-            !     if (nmax.lt.10) then
-            !     do kk=1, nt
-            !     call iout(kk, "**kk")
-            !     call aout(a(1, 1, kk), "   a", nlat, nlat)
-            !     call aout(b(1, 1, kk), "   b", nlat, nlat)
-            !     end do
-            !     end if
-
-            call vhseci(nlat, nlon, wsave, ierror)
+            call initialize_vhsec(nlat, nlon, wavetable, error_flag)
             call name("idvi")
-            call iout(ierror, "ierr")
+            call iout(error_flag, "error_flag = ")
 
             call idivec(nlat, nlon, isym, nt, v, w, nlat, nlon, a, b, &
-                mdab, nlat, wsave, lsave, work, lwork, pertrb, ierror)
+                mdab, nlat, wavetable, pertrb, error_flag)
             call name("idiv")
-            call iout(ierror, "ierr")
+            call iout(error_flag, "error_flag = ")
             call vecout(pertrb, "prtb", nt)
 
         else if (icase==2) then
@@ -441,25 +346,23 @@ use spherepack
             call name("**es")
 
 
-            call shaesi(nlat, nlon, wsave, ierror)
+            call initialize_shaes(nlat, nlon, wavetable, error_flag)
             call name("shai")
-            call iout(ierror, "ierr")
+            call iout(error_flag, "error_flag = ")
 
             call shaes(nlat, nlon, isym, nt, dv, nlat, nlon, a, b, &
-                mdab, nlat, wsave, ierror)
+                mdab, nlat, wavetable, error_flag)
             call name("sha ")
-            call iout(ierror, "ierr")
-            call iout(lsave, "lsav")
-            call iout(lwork, "lwrk")
+            call iout(error_flag, "error_flag = ")
 
-            call vhsesi(nlat, nlon, wsave, ierror)
+            call initialize_vhses(nlat, nlon, wavetable, error_flag)
             call name("idvi")
-            call iout(ierror, "ierr")
+            call iout(error_flag, "error_flag = ")
 
             call idives(nlat, nlon, isym, nt, v, w, nlat, nlon, a, b, &
-                mdab, nlat, wsave, lsave, work, lwork, pertrb, ierror)
+                mdab, nlat, wavetable, pertrb, error_flag)
             call name("idiv")
-            call iout(ierror, "ierr")
+            call iout(error_flag, "error_flag = ")
             call vecout(pertrb, "prtb", nt)
 
         else if (icase==3) then
@@ -467,25 +370,23 @@ use spherepack
             call name("**gc")
 
 
-            call shagci(nlat, nlon, wsave, ierror)
+            call initialize_shagc(nlat, nlon, wavetable, error_flag)
             call name("shai")
-            call iout(ierror, "ierr")
+            call iout(error_flag, "error_flag = ")
 
             call shagc(nlat, nlon, isym, nt, dv, nlat, nlon, a, b, &
-                mdab, nlat, wsave, ierror)
+                mdab, nlat, wavetable, error_flag)
             call name("sha ")
-            call iout(ierror, "ierr")
-            call iout(lsave, "lsav")
-            call iout(lwork, "lwrk")
+            call iout(error_flag, "error_flag = ")
 
-            call vhsgci(nlat, nlon, wsave, ierror)
+            call initialize_vhsgc(nlat, nlon, wavetable, error_flag)
             call name("idvi")
-            call iout(ierror, "ierr")
+            call iout(error_flag, "error_flag = ")
 
             call idivgc(nlat, nlon, isym, nt, v, w, nlat, nlon, a, b, &
-                mdab, nlat, wsave, lsave, work, lwork, pertrb, ierror)
+                mdab, nlat, wavetable, pertrb, error_flag)
             call name("idiv")
-            call iout(ierror, "ierr")
+            call iout(error_flag, "error_flag = ")
             call vecout(pertrb, "prtb", nt)
 
         else if (icase==4) then
@@ -493,51 +394,42 @@ use spherepack
             call name("**gs")
 
 
-            call shagsi(nlat, nlon, wsave, ierror)
+            call initialize_shags(nlat, nlon, wavetable, error_flag)
             call name("shai")
-            call iout(ierror, "ierr")
+            call iout(error_flag, "error_flag = ")
 
             call shags(nlat, nlon, isym, nt, dv, nlat, nlon, a, b, &
-                mdab, nlat, wsave, ierror)
+                mdab, nlat, wavetable, error_flag)
             call name("sha ")
-            call iout(ierror, "ierr")
-            call iout(lsave, "lsav")
-            call iout(lwork, "lwrk")
+            call iout(error_flag, "error_flag = ")
 
-            call vhsgsi(nlat, nlon, wsave, ierror)
+            call initialize_vhsgs(nlat, nlon, wavetable, error_flag)
             call name("idvi")
-            call iout(ierror, "ierr")
+            call iout(error_flag, "error_flag = ")
 
             call idivgs(nlat, nlon, isym, nt, v, w, nlat, nlon, a, b, &
-                mdab, nlat, wsave, lsave, work, lwork, pertrb, ierror)
+                mdab, nlat, wavetable, pertrb, error_flag)
             call name("idiv")
-            call iout(ierror, "ierr")
+            call iout(error_flag, "error_flag = ")
             call vecout(pertrb, "prtb", nt)
 
         end if
 
-
-        !     if (nmax.lt.10) then
-        !     do kk=1, nt
-        !     call iout(kk, "**kk")
-        !     call aout(v(1, 1, kk), "   v", nlat, nlon)
-        !     call aout(w(1, 1, kk), "   w", nlat, nlon)
-        !     end do
-        !     end if
-
-        !
         !     compare this v, w with original
-        !
-        err2v = 0.0
-        err2w = 0.0
+        err2v = ZERO
+        err2w = ZERO
         do k=1, nt
             do j=1, nlon
-                phi = (j-1)*dphi
+                phi = real(j - 1, kind=wp) * dphi
                 sinp = sin(phi)
                 cosp = cos(phi)
                 do i=1, nlat
-                    theta = (i-1)*dlat
-                    if (icase>2) theta=thetag(i)
+                    select case (icase)
+                        case (0:2)
+                            theta = real(i - 1, kind=wp) * dlat
+                        case default
+                            theta = gaussian_latitudes(i)
+                    end select
                     cost = cos(theta)
                     sint = sin(theta)
                     x = sint*cosp
@@ -548,7 +440,7 @@ use spherepack
                     dydt = cost*sinp
                     dydp = sint*cosp
                     dzdt = -sint
-                    dzdp = 0.0
+                    dzdp = ZERO
                     if (k==1) then
                         sf = x*y
                         dsfdt = x*dydt+y*dxdt
@@ -578,11 +470,10 @@ use spherepack
         err2w = sqrt(err2w/(nlat*nlon*nt))
         call vout(err2v, "errv")
         call vout(err2w, "errw")
-
-    !
-    !     end of icase loop
-    !
     end do
+
+    ! Release memory
+    deallocate (wavetable)
 
 end program tdiv
 

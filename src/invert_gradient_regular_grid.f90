@@ -185,7 +185,7 @@
 !
 !            then lshsec must be greater than or equal to
 !
-!               2*nlat*l2+3*((l1-2)*(nlat+nlat-l1-1))/2+nlon+15
+!               2*nlat*l2+3*((l1-2)*(2*nlat-l1-1))/2+nlon+15
 !
 !     work   a work array that does not have to be saved.
 !
@@ -298,13 +298,13 @@ contains
         if (ndb < nlat) return
         ierror = 9
         imid = (nlat+1)/2
-        lpimn = (imid*mmax*(nlat+nlat-mmax+1))/2
+        lpimn = (imid*mmax*(2*nlat-mmax+1))/2
         !
         !     verify saved work space length
         !
         l1 = min(nlat, (nlon+2)/2)
         l2 = (nlat+1)/2
-        lwkmin=2*nlat*l2+3*((l1-2)*(nlat+nlat-l1-1))/2+nlon+15
+        lwkmin=2*nlat*l2+3*((l1-2)*(2*nlat-l1-1))/2+nlon+15
         if (lshsec < lwkmin) return
         ierror = 10
         !

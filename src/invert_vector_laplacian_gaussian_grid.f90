@@ -359,7 +359,7 @@ contains
         !
         !     set minimum and verify saved workspace length
         !
-        idz = (mmax*(nlat+nlat-mmax+1))/2
+        idz = (mmax*(2*nlat-mmax+1))/2
         lzimn = idz*imid
         lsavmin = lzimn+lzimn+nlon+15
         if (lvhsgc < lsavmin) return

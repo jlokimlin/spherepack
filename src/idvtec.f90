@@ -191,7 +191,7 @@
 !
 !            then lvhsec must be at least
 !
-!               4*nlat*l2+3*max(l1-2, 0)*(nlat+nlat-l1-1)+nlon+15
+!               4*nlat*l2+3*max(l1-2, 0)*(2*nlat-l1-1)+nlon+15
 !
 !
 !     work   a work array that does not have to be saved.
@@ -354,7 +354,7 @@ contains
         if (ndab < nlat) return
         ierror = 9
         lzz1 = 2*nlat*imid
-        labc = 3*(max(mmax-2, 0)*(nlat+nlat-mmax-1))/2
+        labc = 3*(max(mmax-2, 0)*(2*nlat-mmax-1))/2
         if (lvhsec < 2*(lzz1+labc)+nlon+15) return
         ierror = 10
         !

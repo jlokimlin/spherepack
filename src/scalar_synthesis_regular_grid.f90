@@ -135,7 +135,7 @@ contains
     !
     !            then lshsec must be at least
     !
-    !            2*nlat*l2+3*((l1-2)*(nlat+nlat-l1-1))/2+nlon+15
+    !            2*nlat*l2+3*((l1-2)*(2*nlat-l1-1))/2+nlon+15
     !
     !     output parameters
     !
@@ -208,7 +208,7 @@ contains
             mmax = min(nlat, nlon/2+1)
             imid = (nlat+1)/2
             lzz1 = 2*nlat*imid
-            labc = 3*((mmax-2)*(nlat+nlat-mmax-1))/2
+            labc = 3*((mmax-2)*(2*nlat-mmax-1))/2
 
             select case (isym)
                 case (0)
@@ -309,7 +309,7 @@ contains
     !
     !            then lshsec must be at least
     !
-    !            2*nlat*l2+3*((l1-2)*(nlat+nlat-l1-1))/2+nlon+15
+    !            2*nlat*l2+3*((l1-2)*(2*nlat-l1-1))/2+nlon+15
     !
     !     output parameters
     !
@@ -341,7 +341,7 @@ contains
             imid = (nlat+1)/2
             mmax = min(nlat, nlon/2+1)
             lzz1 = 2*nlat*imid
-            labc = 3*((mmax-2)*(nlat+nlat-mmax-1))/2
+            labc = 3*((mmax-2)*(2*nlat-mmax-1))/2
 
             ! Check calling arguments
             if (nlat < 3) then

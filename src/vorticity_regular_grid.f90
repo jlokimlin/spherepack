@@ -169,7 +169,7 @@
 !
 !            then lshsec must be at least
 !
-!            2*nlat*l2+3*((l1-2)*(nlat+nlat-l1-1))/2+nlon+15
+!            2*nlat*l2+3*((l1-2)*(2*nlat-l1-1))/2+nlon+15
 !
 !     work   a work array that does not have to be saved.
 !
@@ -292,7 +292,7 @@ contains
         !     verify saved work space (same as shec)
         !
         lzz1 = 2*nlat*imid
-        labc = 3*(max(mmax-2, 0)*(nlat+nlat-mmax-1))/2
+        labc = 3*(max(mmax-2, 0)*(2*nlat-mmax-1))/2
         if (lshsec < lzz1+labc+nlon+15) return
         ierror = 10
         !

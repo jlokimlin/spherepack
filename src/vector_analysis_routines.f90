@@ -301,7 +301,7 @@ contains
 
         call util%compute_parity(nlat, nlon, n1, n2)
 
-        return_value = 4*nlat*n2+3*max(n1-2, 0)*(nlat+nlat-n1-1)+nlon+15
+        return_value = 4*nlat*n2+3*max(n1-2, 0)*(2*nlat-n1-1)+nlon+15
 
     end function get_lvhaec
 
