@@ -54,7 +54,7 @@
 !     with trssph.  Finally this is used to compute error in data_reg after the transfer
 !     back with trssph.  Output from executing the test program on machines with
 !     32 bit and 64 bit arithmetic is listed below.  The minimum required saved
-!     and unsaved work space lengths were predetermined by an earlier call to
+!     and unsaved workspace lengths were predetermined by an earlier call to
 !     trssph with nlon_reg=36, nlat_reg=19, nlon_gau=192, nlat_gau=94, lsave=1, lwork=1 and printout
 !     of lsvmin and lwkmin.
 !

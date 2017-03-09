@@ -314,14 +314,14 @@ contains
         if (ndab < nlat) return
         ierror = 9
         !
-        !     set and verify saved work space length
+        !     set and verify saved workspace length
         !
         imid = (nlat+1)/2
         lpimn = (imid*mmax*(2*nlat-mmax+1))/2
         if (lshses < lpimn+nlon+15) return
         ierror = 10
         !
-        !     set and verify unsaved work space length
+        !     set and verify unsaved workspace length
         !
         ls = nlat
         if (isym > 0) ls = imid

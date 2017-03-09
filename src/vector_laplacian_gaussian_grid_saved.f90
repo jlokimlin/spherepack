@@ -375,7 +375,7 @@ contains
         ierror = 9
         idz = (mmax*(2*nlat-mmax+1))/2
         lzimn = idz*imid
-        lsavmin = lzimn+lzimn+nlon+15
+        lsavmin = 2*lzimn+nlon+15
         if (lvhsgs < lsavmin) return
         !
         ! Verify unsaved workspace length

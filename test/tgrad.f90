@@ -7,9 +7,9 @@
 !     *                                                               *
 !     *                      all rights reserved                      *
 !     *                                                               *
-!     *                      SPHEREPACK                               *
+!     *                         Spherepack                            *
 !     *                                                               *
-!     *       A Package of Fortran77 Subroutines and Programs         *
+!     *       A Package of Fortran Subroutines and Programs           *
 !     *                                                               *
 !     *              for Modeling Geophysical Processes               *
 !     *                                                               *
@@ -28,9 +28,6 @@
 !     *              the National Science Foundation                  *
 !     *                                                               *
 !     * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-!
-!
-!
 !
 !     12/96
 !
@@ -53,16 +50,11 @@ program tgrad
 
     use spherepack
 
+    ! Explicit typing only
     implicit none
 
-    real(wp) :: a
-    real(wp) :: b
-    real(wp) :: bi
-    real(wp) :: br
-    real(wp) :: ci
     real(wp) :: cosp
     real(wp) :: cost
-    real(wp) :: cr
     real(wp) :: dlat
     real(wp) :: dphi
     real(wp) :: dsfdp
@@ -78,90 +70,45 @@ program tgrad
     real(wp) :: err2w
     integer(ip) :: i
     integer(ip) :: icase
-    integer(ip) :: ier
     integer(ip) :: ierror
-    integer(ip) :: isym
-    integer(ip) :: ityp
     integer(ip) :: j
     integer(ip) :: k
-    integer(ip) :: ldwork
-    integer(ip) :: lldwork
-    integer(ip) :: lleng
-    integer(ip) :: llsav
-    integer(ip) :: lsave
-    integer(ip) :: lwork
-    integer(ip) :: mdab
-    integer(ip) :: mdb
-    integer(ip) :: mmdab
-    integer(ip) :: mmdb
-    integer(ip) :: nlat
-    integer(ip) :: nlon
-    integer(ip) :: nnlat
-    integer(ip) :: nnlon
-    integer(ip) :: nnt
-    integer(ip) :: nt
     real(wp) :: phi
-
     real(wp) :: se
-    real(wp) :: sf
     real(wp) :: sinp
     real(wp) :: sint
     real(wp) :: theta
-    real(wp) :: gaussian_latitudes
-    real(wp) :: v
     real(wp) :: ve
-    real(wp) :: w
     real(wp) :: we
-    real(wp) :: work
-    real(wp) :: wsave
     real(wp) :: x
     real(wp) :: y
     real(wp) :: z
     !
     !     set dimensions with parameter statements
     !
-    parameter(nnlat= 33, nnlon= 18, nnt = 4)
-    parameter  (mmdb=(nnlon+1)/2, mmdab=(nnlon+2)/2)
-    parameter (lleng= 5*nnlat*nnlat*nnlon, llsav= 5*nnlat*nnlat*nnlon)
-    parameter (lldwork = 4*nnlat*nnlat)
-    
-    dimension work(lleng), wsave(llsav)
-    dimension br(mmdb, nnlat, nnt), bi(mmdb, nnlat, nnt)
-    dimension cr(mmdb, nnlat, nnt), ci(mmdb, nnlat, nnt)
-    dimension a(mmdab, nnlat, nnt), b(mmdab, nnlat, nnt)
-    dimension sf(nnlat, nnlon, nnt)
-    dimension gaussian_latitudes(nnlat), dtheta(nnlat), dwts(nnlat)
-    dimension v(nnlat, nnlon, nnt), w(nnlat, nnlon, nnt)
-    real dtheta, dwts
-    !
-    !     set dimension variables
-    !
-    nlat = nnlat
-    nlon = nnlon
-    lwork = lleng
-    lsave = llsav
-    mdb = mmdb
-    mdab = mmdab
-    nt = nnt
+    integer(ip), parameter              :: nlat = 33, nlon = 18, nt = 4
+    integer(ip), parameter              :: isym = 0, ityp = 0
+    integer(ip), parameter              :: mdb = (nlon+1)/2, mdab = (nlon+2)/2
+    real(wp), dimension(mdb, nlat, nt)  :: br, bi, cr, ci
+    real(wp), dimension(mdab, nlat, nt) :: a, b
+    real(wp), dimension(nlat, nlon, nt) :: sf, v, w
+    real(wp), dimension(nlat)           :: gaussian_latitudes, gaussian_weights
+    real(wp), allocatable               :: wavetable(:)
+
     call iout(nlat, "nlat")
     call iout(nlon, "nlon")
     call iout(nt, "  nt")
-    isym = 0
-    ityp = 0
-    !
-    !     set equally spaced colatitude and longitude increments
-    !
+
+    ! Set equally spaced colatitude and longitude increments
     dphi = TWO_PI/nlon
     dlat = PI/(nlat-1)
-    !
-    !     compute nlat gaussian points in thetag
-    !
-    ldwork = lldwork
-    call compute_gaussian_latitudes_and_weights(nlat, gaussian_latitudes, dwts, ier)
+
+    ! Compute nlat-many gaussian latitudinal points
+    call compute_gaussian_latitudes_and_weights(nlat, gaussian_latitudes, gaussian_weights, ierror)
 
     call name("gaqd")
-    call iout(ier, " ier")
-    call vecout(gaussian_latitudes, "thtg", nlat)
+    call iout(ierror, " error_flag")
+    call vecout(gaussian_latitudes, "gaussian_latitudes", nlat)
     !
     !     test all analysis and synthesis subroutines
     !
@@ -229,13 +176,6 @@ program tgrad
             end do
         end do
 
-        !     do kk=1, nt
-        !     call iout(kk, "**kk")
-        !     call aout(sf(1, 1, kk), "  sf", nlat, nlon)
-        !     call aout(v(1, 1, kk), "   v", nlat, nlon)
-        !     call aout(w(1, 1, kk), "   w", nlat, nlon)
-        !     end do
-
         select case(icase)
             case(1)
 
@@ -243,32 +183,22 @@ program tgrad
                 !
                 !     analyze scalar field st
                 !
-                call shaeci(nlat, nlon, wsave, ierror)
+                call initialize_shaec(nlat, nlon, wavetable, ierror)
                 call name("shai")
-                call iout(ierror, "ierr")
+                call iout(ierror, "error_flag = ")
 
-                call shaec(nlat, nlon, isym, nt, sf, nlat, nlon, a, b, mdab, nlat, wsave, ierror)
+                call shaec(nlat, nlon, isym, nt, sf, nlat, nlon, a, b, mdab, nlat, wavetable, ierror)
                 call name("sha ")
-                call iout(ierror, "ierr")
+                call iout(ierror, "error_flag = ")
 
-                !     do kk=1, nt
-                !     call iout(kk, "**kk")
-                !     call aout(a(1, 1, kk), "   a", nlat, nlat)
-                !     call aout(b(1, 1, kk), "   b", nlat, nlat)
-                !     end do
-
-                !
                 !     compute gradient of st in v, w
-                !
-
-                call vhseci(nlat, nlon, wsave, ierror)
+                call initialize_vhsec(nlat, nlon, wavetable, ierror)
                 call name("vhci")
-                call iout(ierror, "ierr")
+                call iout(ierror, "error_flag = ")
 
-                call gradec(nlat, nlon, isym, nt, v, w, nlat, nlon, a, b, mdab, nlat, wsave, &
-                    lsave, work, lwork, ierror)
+                call gradec(nlat, nlon, isym, nt, v, w, nlat, nlon, a, b, mdab, nlat, wavetable, ierror)
                 call name("grad")
-                call iout(ierror, "ierr")
+                call iout(ierror, "error_flag = ")
 
             case(2)
 
@@ -276,107 +206,69 @@ program tgrad
                 !
                 !     analyze scalar field st
                 !
-                call shaesi(nlat, nlon, wsave, ierror)
+                call initialize_shaes(nlat, nlon, wavetable, ierror)
                 call name("shai")
-                call iout(ierror, "ierr")
+                call iout(ierror, "error_flag = ")
 
-                call shaes(nlat, nlon, isym, nt, sf, nlat, nlon, a, b, mdab, nlat, wsave, ierror)
+                call shaes(nlat, nlon, isym, nt, sf, nlat, nlon, a, b, mdab, nlat, wavetable, ierror)
                 call name("sha ")
-                call iout(ierror, "ierr")
+                call iout(ierror, "error_flag = ")
 
-                !     do kk=1, nt
-                !     call iout(kk, "**kk")
-                !     call aout(a(1, 1, kk), "   a", nlat, nlat)
-                !     call aout(b(1, 1, kk), "   b", nlat, nlat)
-                !     end do
-
-                !
                 !     compute gradient of st in v, w
-                !
-
-                call vhsesi(nlat, nlon, wsave, ierror)
+                call initialize_vhses(nlat, nlon, wavetable, ierror)
                 call name("vhsi")
-                call iout(ierror, "ierr")
+                call iout(ierror, "error_flag = ")
 
-                call grades(nlat, nlon, isym, nt, v, w, nlat, nlon, a, b, mdab, nlat, wsave, &
-                    lsave, work, lwork, ierror)
+                call grades(nlat, nlon, isym, nt, v, w, nlat, nlon, a, b, mdab, nlat, wavetable, ierror)
                 call name("grad")
-                call iout(ierror, "ierr")
+                call iout(ierror, "error_flag = ")
 
             case(3)
 
 
                 call name("**gc")
-                call shagci(nlat, nlon, wsave, ierror)
+                call initialize_shagc(nlat, nlon, wavetable, ierror)
                 call name("shai")
-                call iout(ierror, "ierr")
+                call iout(ierror, "error_flag = ")
 
-                call shagc(nlat, nlon, isym, nt, sf, nlat, nlon, a, b, mdab, nlat, wsave, ierror)
+                call shagc(nlat, nlon, isym, nt, sf, nlat, nlon, a, b, mdab, nlat, wavetable, ierror)
                 call name("sha ")
-                call iout(ierror, "ierr")
+                call iout(ierror, "error_flag = ")
 
-                !     do kk=1, nt
-                !     call iout(kk, "**kk")
-                !     call aout(a(1, 1, kk), "   a", nlat, nlat)
-                !     call aout(b(1, 1, kk), "   b", nlat, nlat)
-                !     end do
 
-                !
                 !     compute gradient of st in v, w
-                !
-
-                call vhsgci(nlat, nlon, wsave, ierror)
+                call initialize_vhsgc(nlat, nlon, wavetable, ierror)
                 call name("vhgc")
-                call iout(ierror, "ierr")
+                call iout(ierror, "error_flag = ")
 
-                call gradgc(nlat, nlon, isym, nt, v, w, nlat, nlon, a, b, mdab, nlat, wsave, &
-                    lsave, work, lwork, ierror)
+                call gradgc(nlat, nlon, isym, nt, v, w, nlat, nlon, a, b, mdab, nlat, wavetable, ierror)
                 call name("grad")
-                call iout(ierror, "ierr")
+                call iout(ierror, "error_flag = ")
 
 
             case(4)
 
                 call name("**gs")
 
-                call shagsi(nlat, nlon, wsave, ierror)
+                call initialize_shags(nlat, nlon, wavetable, ierror)
                 call name("shai")
-                call iout(ierror, "ierr")
+                call iout(ierror, "error_flag = ")
 
-                call shags(nlat, nlon, isym, nt, sf, nlat, nlon, a, b, mdab, nlat, wsave, ierror)
+                call shags(nlat, nlon, isym, nt, sf, nlat, nlon, a, b, mdab, nlat, wavetable, ierror)
                 call name("sha ")
-                call iout(ierror, "ierr")
+                call iout(ierror, "error_flag = ")
 
-                !     do kk=1, nt
-                !     call iout(kk, "**kk")
-                !     call aout(a(1, 1, kk), "   a", nlat, nlat)
-                !     call aout(b(1, 1, kk), "   b", nlat, nlat)
-                !     end do
-
-                !
                 !     compute gradient of st in v, w
-                !
-
-                call vhsgsi(nlat, nlon, wsave, ierror)
+                call initialize_vhsgs(nlat, nlon, wavetable, ierror)
                 call name("vhgs")
-                call iout(ierror, "ierr")
+                call iout(ierror, "error_flag = ")
 
-                call gradgs(nlat, nlon, isym, nt, v, w, nlat, nlon, a, b, mdab, nlat, wsave, &
-                    lsave, work, lwork, ierror)
+                call gradgs(nlat, nlon, isym, nt, v, w, nlat, nlon, a, b, mdab, nlat, wavetable, ierror)
                 call name("grad")
-                call iout(ierror, "ierr")
+                call iout(ierror, "error_flag = ")
         end select
 
-
-        !     do kk=1, nt
-        !     call iout(kk, "**kk")
-        !     call aout(v(1, 1, kk), "   v", nlat, nlon)
-        !     call aout(w(1, 1, kk), "   w", nlat, nlon)
-        !     end do
-
-        !
         !     compute "error" in v, w
-        !
         err2v = 0.0
         err2w = 0.0
         do k=1, nt
@@ -438,101 +330,87 @@ program tgrad
         select case (icase)
             case(1)
 
-                call vhaeci(nlat, nlon, wsave, ierror)
+                call initialize_vhaec(nlat, nlon, wavetable, ierror)
                 call name("vhai")
-                call iout(ierror, "ierr")
+                call iout(ierror, "error_flag = ")
 
                 call vhaec(nlat, nlon, ityp, nt, v, w, nlat, nlon, br, bi, cr, ci, &
-                    mdb, nlat, wsave, ierror)
+                    mdb, nlat, wavetable, ierror)
                 call name("vha ")
-                call iout(ierror, "ierr")
+                call iout(ierror, "error_flag = ")
 
-                call shseci(nlat, nlon, wsave, ierror)
+                call initialize_shsec(nlat, nlon, wavetable, ierror)
                 call name("shec")
-                call iout(ierror, "ierr")
+                call iout(ierror, "error_flag = ")
 
                 call igradec(nlat, nlon, isym, nt, sf, nlat, nlon, br, bi, &
-                    mdb, nlat, wsave, lsave, work, lwork, ierror)
+                    mdb, nlat, wavetable, ierror)
                 call name("igra")
-                call iout(ierror, "ierr")
+                call iout(ierror, "error_flag = ")
 
             case(2)
                 !
                 !     analyze vector field (v, w)
                 !
-                call vhaesi(nlat, nlon, wsave, ierror)
+                call initialize_vhaes(nlat, nlon, wavetable, ierror)
                 call name("vhai")
-                call iout(ierror, "ierr")
+                call iout(ierror, "error_flag = ")
 
                 call vhaes(nlat, nlon, ityp, nt, v, w, nlat, nlon, br, bi, cr, ci, &
-                    mdb, nlat, wsave, ierror)
+                    mdb, nlat, wavetable, ierror)
                 call name("vha ")
-                call iout(ierror, "ierr")
+                call iout(ierror, "error_flag = ")
 
-                !     do kk=1, nt
-                !     call iout(kk, "**kk")
-                !     call aout(br(1, 1, kk), "  br", nlat, nlat)
-                !     call aout(bi(1, 1, kk), "  bi", nlat, nlat)
-                !     call aout(cr(1, 1, kk), "  cr", nlat, nlat)
-                !     call aout(ci(1, 1, kk), "  ci", nlat, nlat)
-                !     end do
-
-                call shsesi(nlat, nlon, wsave, ierror)
+                call initialize_shses(nlat, nlon, wavetable, ierror)
                 call name("shes")
-                call iout(ierror, "ierr")
+                call iout(ierror, "error_flag = ")
 
                 call igrades(nlat, nlon, isym, nt, sf, nlat, nlon, br, bi, &
-                    mdb, nlat, wsave, lsave, work, lwork, ierror)
+                    mdb, nlat, wavetable, ierror)
                 call name("igra")
-                call iout(ierror, "ierr")
+                call iout(ierror, "error_flag = ")
 
             case(3)
 
-                call vhagci(nlat, nlon, wsave, ierror)
+                call initialize_vhagc(nlat, nlon, wavetable, ierror)
                 call name("vhai")
-                call iout(ierror, "ierr")
+                call iout(ierror, "error_flag = ")
 
                 call vhagc(nlat, nlon, ityp, nt, v, w, nlat, nlon, br, bi, cr, ci, &
-                    mdb, nlat, wsave, ierror)
+                    mdb, nlat, wavetable, ierror)
                 call name("vha ")
-                call iout(ierror, "ierr")
+                call iout(ierror, "error_flag = ")
 
-                call shsgci(nlat, nlon, wsave, ierror)
+                call initialize_shsgc(nlat, nlon, wavetable, ierror)
                 call name("shgc")
-                call iout(ierror, "ierr")
+                call iout(ierror, "error_flag = ")
 
                 call igradgc(nlat, nlon, isym, nt, sf, nlat, nlon, br, bi, &
-                    mdb, nlat, wsave, lsave, work, lwork, ierror)
+                    mdb, nlat, wavetable, ierror)
                 call name("igra")
-                call iout(ierror, "ierr")
+                call iout(ierror, "error_flag = ")
 
             case(4)
-                call vhagsi(nlat, nlon, wsave, ierror)
+                call initialize_vhags(nlat, nlon, wavetable, ierror)
                 call name("vhai")
-                call iout(ierror, "ierr")
+                call iout(ierror, "error_flag = ")
 
                 call vhags(nlat, nlon, ityp, nt, v, w, nlat, nlon, br, bi, cr, ci, &
-                    mdb, nlat, wsave, ierror)
+                    mdb, nlat, wavetable, ierror)
                 call name("vha ")
-                call iout(ierror, "ierr")
+                call iout(ierror, "error_flag = ")
 
-                call shsgsi(nlat, nlon, wsave, ierror)
+                call initialize_shsgs(nlat, nlon, wavetable, ierror)
                 call name("shgs")
-                call iout(ierror, "ierr")
+                call iout(ierror, "error_flag = ")
 
                 call igradgs(nlat, nlon, isym, nt, sf, nlat, nlon, br, bi, &
-                    mdb, nlat, wsave, lsave, work, lwork, ierror)
+                    mdb, nlat, wavetable, ierror)
                 call name("igra")
-                call iout(ierror, "ierr")
+                call iout(ierror, "error_flag = ")
 
         end select
 
-        !     do kk=1, nt
-        !     call iout(kk, "**kk")
-        !     call aout(sf(1, 1, kk), "  sf", nlat, nlon)
-        !     end do
-
-        !
         !     compare this sf with original
         !
         err2s = 0.0
@@ -565,10 +443,10 @@ program tgrad
         end do
         err2s = sqrt(err2s/(nlat*nlon*nt))
         call vout(err2s, "errs")
-    !
-    !     end of icase loop
-    !
     end do
+
+    ! Release memory
+    deallocate (wavetable)
 
 end program tgrad
 

@@ -268,7 +268,7 @@ contains
         if (ndb < nlat) return
         ierror = 9
         !
-        !     verify saved work space (same as shsgc)
+        !     verify saved workspace (same as shsgc)
         !
         imid = (nlat+1)/2
         lzz1 = 2*nlat*imid
@@ -278,21 +278,21 @@ contains
         l1 = min((nlon+2)/2, nlat)
         if (lshsgc < nlat*(2*l2+3*l1-2)+3*l1*(1-l1)/2+nlon+15)return
         !
-        !     verify unsaved work space (add to what shsgc requires)
+        !     verify unsaved workspace (add to what shsgc requires)
         !
         ierror = 10
         ls = nlat
         if (isym> 0) ls = imid
         nln = nt*ls*nlon
         !
-        !     set first dimension for a, b (as requried by shsgc)
+        !     set first dimension for a, b (as required by shsgc)
         !
         mab = min(nlat, nlon/2+1)
         mn = mab*nlat*nt
         if (lwork < nln+max(ls*nlon, 3*nlat*imid)+2*mn+nlat) return
         ierror = 0
         !
-        !     set work space pointers
+        ! Set workspace pointer indices
         !
         ia = 1
         ib = ia+mn

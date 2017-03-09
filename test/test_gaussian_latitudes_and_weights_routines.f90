@@ -232,9 +232,9 @@ contains
         !     nlat    the number of gaussian colatitudes in the interval (0, pi)
         !             (between the two poles).  nlat must be greater than zero.
         !
-        !     dwork   a real temporary work space.
+        !     dwork   a real temporary workspace.
         !
-        !     ldwork  the length of the work space  in the routine calling gsqd
+        !     ldwork  the length of the workspace  in the routine calling gsqd
         !             ldwork must be at least nlat+1.
         !
         !     output parameters
@@ -256,7 +256,7 @@ contains
         real HALF_PI, x, theta, wts, dwork
         ierror = 1
         !
-        !     check work space length
+        !     check workspace length
         !
         if (ldwork<nlat+1) return
         ierror = 2
@@ -817,7 +817,7 @@ contains
         dimension theta(nlat), wts(nlat), w(*)
         real(wp) :: summation
         !
-        !     check work space length
+        !     check workspace length
         !
         ierror = 1
         if (nlat<=0) return

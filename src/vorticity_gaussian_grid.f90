@@ -290,10 +290,10 @@ contains
         if (lshsgc < lwmin) return
         ierror = 10
         !
-        !     verify unsaved work space (add to what shses requires, file f3)
+        !     verify unsaved workspace (add to what shses requires, file f3)
         !
         !
-        !     set first dimension for a, b (as requried by shses)
+        !     set first dimension for a, b (as required by shses)
         !
         mab = min(nlat, nlon/2+1)
         mn = mab*nlat*nt
@@ -311,7 +311,7 @@ contains
         if (lwork < lwkmin) return
         ierror = 0
         !
-        !     set work space pointers
+        ! Set workspace pointer indices
         !
         ia = 1
         ib = ia+mn

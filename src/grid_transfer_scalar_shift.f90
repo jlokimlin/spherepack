@@ -147,7 +147,7 @@ contains
     !
     ! ... wsav
     !
-    !     a real saved work space array that must be initialized by calling
+    !     a real saved workspace array that must be initialized by calling
     !     subroutine sshifti(ioff, nlon, nlat, wsav, ier) before calling sshifte.
     !     wsav can then be used repeatedly by sshifte as long as ioff, nlon,
     !     and nlat do not change.  this bypasses redundant computations and
@@ -156,16 +156,16 @@ contains
     !
     ! ... lsav
     !
-    !     the length of the saved work space wsav in the routine calling sshifte
+    !     the length of the saved workspace wsav in the routine calling sshifte
     !     and sshifti.  lsave must be greater than or equal to 2*(2*nlat+nlon+16).
     !
     ! ... work
     !
-    !     a real unsaved work space
+    !     a real unsaved workspace
     !
     ! ... lwork
     !
-    !     the length of the unsaved work space in the routine calling sshifte
+    !     the length of the unsaved workspace in the routine calling sshifte
     !     lwork must be greater than or equal to 2*nlon*(nlat+1) if nlon is even.
     !     lwork must be greater than or equal to nlon*(5*nlat+1) if nlon is odd.
     !
@@ -239,7 +239,7 @@ contains
 
     !     subroutine sshifti(ioff, nlon, nlat, wsav, ier)
     !
-    !     subroutine sshifti initializes the saved work space wsav
+    !     subroutine sshifti initializes the saved workspace wsav
     !     for ioff and nlon and nlat (see documentation for sshifte).
     !     sshifti must be called before sshifte whenever ioff or nlon
     !     or nlat change.

@@ -281,12 +281,12 @@ contains
         end if
         if (lwork < lwmin) return
         !
-        !     set first dimension for br, bi, cr, ci (as requried by vhsgc)
+        !     set first dimension for br, bi, cr, ci (as required by vhsgc)
         !
         mn = l1*nlat*nt
         ierror = 0
         !
-        !     set work space pointers
+        ! Set workspace pointer indices
         !
         ibr = 1
         ibi = ibr+mn

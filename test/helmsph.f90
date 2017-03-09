@@ -80,14 +80,14 @@ use spherepack
     integer nnlat, nnlon, nn15, llsave, llwork, lldwork
     parameter (nnlat=19, nnlon=36)
     !
-    !     set saved and unsaved work space lengths in terms of nnlat, nnlon
+    !     set saved and unsaved workspace lengths in terms of nnlat, nnlon
     !     (see documentation for shaec, shsec, islapec)
     !
     parameter (nn15=nnlon+15)
     parameter (llsave=nnlat*(nnlat+1)+3*((nnlat-2)*(nnlat-1)+nn15))
     parameter (llwork=nnlat*(2*nnlon+3*(nnlat+1)+2*nnlat+1))
     !
-    !     set real work space length for initializations
+    !     set real workspace length for initializations
     !
     parameter (lldwork = nnlat+1)
     !
@@ -107,7 +107,7 @@ use spherepack
     !
     xlmbda = 1.0
     !
-    !     set work space length arguments
+    !     set workspace length arguments
     !
     lwork = llwork
     ldwork = lldwork
@@ -147,7 +147,7 @@ use spherepack
         end do
     end do
     !
-    !     initialize saved work space arrays for scalar harmonic
+    !     initialize saved workspace arrays for scalar harmonic
     !     analysis and Helmholtz inversion of r
     !
     call shaeci(nlat, nlon, wshaec, ierror)

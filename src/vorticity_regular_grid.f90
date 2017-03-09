@@ -289,20 +289,20 @@ contains
         if (ndc < nlat) return
         ierror = 9
         !
-        !     verify saved work space (same as shec)
+        !     verify saved workspace (same as shec)
         !
         lzz1 = 2*nlat*imid
         labc = 3*(max(mmax-2, 0)*(2*nlat-mmax-1))/2
         if (lshsec < lzz1+labc+nlon+15) return
         ierror = 10
         !
-        !     verify unsaved work space (add to what shec requires)
+        !     verify unsaved workspace (add to what shec requires)
         !
         ls = nlat
         if (isym > 0) ls = imid
         nln = nt*ls*nlon
         !
-        !     set first dimension for a, b (as requried by shsec)
+        !     set first dimension for a, b (as required by shsec)
         !
         mab = min(nlat, nlon/2+1)
         mn = mab*nlat*nt
@@ -317,7 +317,7 @@ contains
         if (lwork < lwkmin) return
         ierror = 0
         !
-        !     set work space pointers
+        ! Set workspace pointer indices
         !
         ia = 1
         ib = ia+mn

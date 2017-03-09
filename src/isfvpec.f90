@@ -296,13 +296,13 @@ contains
         end if
         if (lwork < lwmin) return
         !
-        !     set first dimension for br, bi, cr, ci (as requried by vhsec)
+        !     set first dimension for br, bi, cr, ci (as required by vhsec)
         !
         mmax = min(nlat, (nlon+1)/2)
         mn = mmax*nlat*nt
         ierror = 0
         !
-        !     set work space pointers
+        ! Set workspace pointer indices
         !
         ibr = 1
         ibi = ibr+mn

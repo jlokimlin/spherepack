@@ -308,7 +308,7 @@ contains
         !     if (lvhsgs .lt. 2*(lzz1+labc)+nlon+15) return
         idz = (mmax*(2*nlat-mmax+1))/2
         lzimn = idz*imid
-        if (lvhsgs < lzimn+lzimn+nlon+15) return
+        if (lvhsgs < 2*lzimn+nlon+15) return
         ierror = 10
         !
         ! Verify unsaved workspace length
@@ -320,7 +320,7 @@ contains
             imid*(2*nt*nlon+max(6*nlat, nlon))+2*mn+nlat) return
         ierror = 0
         !
-        !     set work space pointers
+        ! Set workspace pointer indices
         !
         icr = 1
         ici = icr + mn

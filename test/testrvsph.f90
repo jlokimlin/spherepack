@@ -78,7 +78,7 @@
 !     used to transfer (ug, vg) back to (ue, vg) and this is compared with (u, v).
 !     Output from executing the test program on separate platforms with 32 bit
 !     and 64 bit floating point arithmetic is listed below.  The minimum required
-!     saved and unsaved work space lengths were predetermined by an earlier call
+!     saved and unsaved workspace lengths were predetermined by an earlier call
 !     trvsph with nlon_reg=36, nlat_reg=19, nlon_gau=128, nlat_gau=64, lsave=0, lwork=0 and printout
 !     of lsvmin and lwkmin.
 !

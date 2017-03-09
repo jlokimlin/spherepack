@@ -1237,7 +1237,7 @@ contains
 
         !
         !  Compute gauss points and weights
-        !    use dpbar (length 3*nnlat*(nnlat+1)) as work space for compute_gaussian_latitudes_and_weights
+        !    use dpbar (length 3*nnlat*(nnlat+1)) as workspace for compute_gaussian_latitudes_and_weights
         !
         lwk = nlat*(nlat+2)
         call compute_gaussian_latitudes_and_weights(nlat, dthet, dwts, ierror)

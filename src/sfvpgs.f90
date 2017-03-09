@@ -271,19 +271,19 @@ contains
         lat = nlat
         if (isym /= 0) lat = late
         l2 = late
-        !     check permanent work space length
+        !     check permanent workspace length
         l2 = (nlat+mod(nlat, 2))/2
         l1 = min((nlon+2)/2, nlat)
         lp=nlat*(3*(l1+l2)-2)+(l1-1)*(l2*(2*nlat-l1)-3*l1)/2+nlon+15
         if (lshsgs < lp) return
         !
-        !     verify unsaved work space
+        !     verify unsaved workspace
         !
         ierror = 10
         ls = nlat
         if (isym> 0) ls = imid
         !
-        !     set first dimension for a, b (as requried by shsgs)
+        !     set first dimension for a, b (as required by shsgs)
         !
         mab = min(nlat, nlon/2+1)
         mn = mab*nlat*nt
@@ -291,7 +291,7 @@ contains
 
         ierror = 0
         !
-        !     set work space pointers
+        ! Set workspace pointer indices
         !
         ia = 1
         ib = ia+mn

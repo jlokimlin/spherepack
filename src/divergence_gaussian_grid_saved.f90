@@ -220,7 +220,7 @@ contains
             n1 = min((nlon+2)/2, nlat)
             required_wavetable_size=nlat*(3*(n1+n2)-2)+(n1-1)*(n2*(2*nlat-n1)-3*n1)/2+nlon+15
 
-            !  verify unsaved work space (add to what shses requires, file f3)
+            !  verify unsaved workspace (add to what shses requires, file f3)
             select case (isym)
                 case (0)
                     ls = nlat
@@ -271,7 +271,7 @@ contains
                 real(wp) :: work(lwork)
                 integer(ip) :: ia, ib, iis, iwk, lwk
 
-                ! Set work space pointers
+                ! Set workspace pointers
                 ia = 1
                 ib = ia+mn
                 iis = ib+mn

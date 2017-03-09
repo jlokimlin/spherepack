@@ -361,7 +361,7 @@ contains
     !
     !            nlat*(3*(l1+l2)-2)+(l1-1)*(l2*(2*nlat-l1)-3*l1)/2+nlon+15
     !
-    !     work   a real work space which need not be saved
+    !     work   a real workspace which need not be saved
     !
     !     lwork  the dimension of the array work as it appears in the
     !            program that calls shagsi. lwork must be at least
@@ -410,7 +410,7 @@ contains
             l1 = ntrunc
             l2 = late
 
-            ! Set permanent work space length
+            ! Set permanent workspace length
             lp = nlat*(3*(l1+l2)-2)+(l1-1)*(l2*(2*nlat-l1)-3*l1)/2+nlon+15
 
             ! Set preliminary quantites needed to compute and store legendre polys

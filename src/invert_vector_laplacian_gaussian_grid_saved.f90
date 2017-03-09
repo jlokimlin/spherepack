@@ -370,10 +370,10 @@ contains
         !
         idz = (mmax*(2*nlat-mmax+1))/2
         lzimn = idz*imid
-        lsavmin = lzimn+lzimn+nlon+15
+        lsavmin = 2*lzimn+nlon+15
         if (lvhsgs < lsavmin) return
         !
-        !     set minimum and verify unsaved work space length
+        !     set minimum and verify unsaved workspace length
         !
         mn = mmax*nlat*nt
         l2 = (nlat+1)/2

@@ -234,7 +234,7 @@ contains
             ierror = 9
             imid = (nlat+1)/2
             lpimn = (imid*mmax*(2*nlat-mmax+1))/2
-            !     check permanent work space length
+            !     check permanent workspace length
             n1 = min(nlat, (nlon+2)/2)
             n2 = (nlat+1)/2
             required_wavetable_size = nlat*(2*n2+3*n1-2)+3*n1*(1-n1)/2+nlon+15
@@ -242,13 +242,13 @@ contains
             if (lshsgc < required_wavetable_size) return
             ierror = 10
             !
-            !     verify unsaved work space (add to what shsgc requires)
+            !     verify unsaved workspace (add to what shsgc requires)
             !
             ls = nlat
             if (isym > 0) ls = imid
             nln = nt*ls*nlon
             !
-            !     set first dimension for a, b (as requried by shsgc)
+            !     set first dimension for a, b (as required by shsgc)
             !
             mab = min(nlat, nlon/2+1)
             mn = mab*nlat*nt

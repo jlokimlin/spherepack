@@ -385,7 +385,7 @@ contains
         idz = (mmax*(2*nlat-mmax+1))/2
         lzimn = idz*imid
         !
-        !     check saved work space
+        !     check saved workspace
         !
         l1 = min(nlat, (nlon+1)/2)
         l2 = (nlat+1)/2

@@ -308,7 +308,7 @@ contains
         lzz1 = 2*nlat*imid
         labc = 3*(max(mmax-2, 0)*(2*nlat-mmax-1))/2
         !
-        !     check save work space length
+        !     check save workspace length
         !
         l1 = min(nlat, (nlon+1)/2)
         l2 = (nlat+1)/2
@@ -326,7 +326,7 @@ contains
             imid*(2*nt*nlon+max(6*nlat, nlon))+2*mn+nlat) return
         ierror = 0
         !
-        !     set work space pointers
+        ! Set workspace pointer indices
         !
         icr = 1
         ici = icr + mn

@@ -148,7 +148,7 @@ contains
     !            wshses can be used repeatedly by dives as long as nlon
     !            and nlat remain unchanged.  wshses must not be altered
     !            between calls of dives.  wdives is identical to the saved
-    !            work space initialized by subroutine shsesi and can be
+    !            workspace initialized by subroutine shsesi and can be
     !            set by calling that subroutine instead of divesi.
     !
     !
@@ -236,20 +236,20 @@ contains
             if (ndb < nlat) return
             ierror = 9
             !
-            !     verify save work space (same as shes, file f3)
+            !     verify save workspace (same as shes, file f3)
             !
             imid = (nlat+1)/2
             lpimn = (imid*mmax*(2*nlat-mmax+1))/2
             if (lshses < lpimn+nlon+15) return
             ierror = 10
             !
-            !     verify unsaved work space (add to what shses requires, file f3)
+            !     verify unsaved workspace (add to what shses requires, file f3)
             !
             ls = nlat
             if (isym > 0) ls = imid
             nln = nt*ls*nlon
             !
-            !     set first dimension for a, b (as requried by shses)
+            !     set first dimension for a, b (as required by shses)
             !
             mab = min(nlat, nlon/2+1)
             mn = mab*nlat*nt
@@ -261,7 +261,7 @@ contains
             block
                 real(wp)    :: work(lwork)
                 integer(ip) :: ia, ib, iis, iwk, lwk
-                ! Set work space pointers
+                ! Set workspace pointers
                 ia = 1
                 ib = ia+mn
                 iis = ib+mn

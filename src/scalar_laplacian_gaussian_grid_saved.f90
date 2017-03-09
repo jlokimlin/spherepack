@@ -297,7 +297,7 @@ contains
         if (ndab < nlat) return
         ierror = 9
         !
-        !     set and verify saved work space length
+        !     set and verify saved workspace length
         !
         imid = (nlat+1)/2
         l2 = (nlat+mod(nlat, 2))/2
@@ -306,7 +306,7 @@ contains
         if (lshsgs < lp) return
         ierror = 10
         !
-        !     set and verify unsaved work space length
+        !     set and verify unsaved workspace length
         !
         ls = nlat
         if (isym > 0) ls = imid
@@ -324,7 +324,7 @@ contains
         if (lwork < lwkmin) return
         ierror = 0
         !
-        !     set work space pointers
+        ! Set workspace pointer indices
         !
         ia = 1
         ib = ia+mn

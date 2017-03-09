@@ -179,7 +179,7 @@
 !     sg(j, i) or ug(j, i), vg(j, i) are values at (phi(j), lat(ib)) if ig = 1
 !     sm(i, j) or vm(i, j), wm(i, j) are values at (colat(i), phi(j))
 !
-! ... work is an unsaved real work space of length at least nlon*nlat
+! ... work is an unsaved real workspace of length at least nlon*nlat
 !     in the routine calling (1), (2), (3), or (4).  It is used to simplify
 !     a nonsquare array transposition in case it is required.
 !

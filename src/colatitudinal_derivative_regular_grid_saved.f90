@@ -305,7 +305,7 @@ contains
         ierror = 9
         idz = (mmax*(2*nlat-mmax+1))/2
         lzimn = idz*imid
-        if (lwvts < lzimn+lzimn+nlon+15) return
+        if (lwvts < 2*lzimn+nlon+15) return
         ierror = 10
         idv = nlat
         if (ityp > 2) idv = imid

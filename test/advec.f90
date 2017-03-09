@@ -139,7 +139,7 @@ program advec
     parameter (nnlat=23, nnlon=45, ddt=600.)
     !     parameter (nnlat=45, nnlon=90, ddt=300.)
     !
-    !     set saved and unsaved work space lengths in terms of nnlat, nnlon
+    !     set saved and unsaved workspace lengths in terms of nnlat, nnlon
     !     (see documentation for shagc, vhsgc, vhsgci, gradgc for estimates)
     !
     parameter (nn15=nnlon+15)
@@ -181,7 +181,7 @@ program advec
     dt = ddt
     tdt = dt+dt
     !
-    !     set work space length arguments
+    !     set workspace length arguments
     !
     lwork = llwork
     ldwork = lldwork
@@ -202,7 +202,7 @@ program advec
         colat(i) = dtheta(i)
     end do
     !
-    !     preset saved work spaces for gradgc and shagc and shsgc
+    !     preset saved workspaces for gradgc and shagc and shsgc
     !
     call vhsgci(nlat, nlon, wvhsgc, ierror)
     if(ierror /= 0) write (*, 10) ierror
@@ -294,7 +294,7 @@ program advec
         !       compute gradient of phi at current time
         !
         call gradgc(nlat, nlon, isym, nt, gdpht, gdphl, nlat, nlon, ar, br, &
-            nlat, nlat, wvhsgc, lvhsgc, work, lwork, ierror)
+            nlat, nlat, wvhsgc, ierror)
         if ( error /=0) write (*, 27) ierror
 27      format(' ierror in gradgc = ', i5)
                 !

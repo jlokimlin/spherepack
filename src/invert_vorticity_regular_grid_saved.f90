@@ -326,7 +326,7 @@ contains
             imid*(2*nt*nlon+max(6*nlat, nlon))+2*mn+nlat) return
         ierror = 0
         !
-        !     set work space pointers
+        ! Set workspace pointer indices
         !
         icr = 1
         ici = icr + mn

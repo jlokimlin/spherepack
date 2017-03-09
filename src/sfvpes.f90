@@ -280,26 +280,26 @@ contains
         if (ndb < nlat) return
         ierror = 9
         !
-        !     verify saved work space (same as shses)
+        !     verify saved workspace (same as shses)
         !
         imid = (nlat+1)/2
         lpimn = (imid*mmax*(2*nlat-mmax+1))/2
         if (lshses < lpimn+nlon+15) return
         !
-        !     verify unsaved work space (add to what shec requires)
+        !     verify unsaved workspace (add to what shec requires)
         !
         ierror = 10
         ls = nlat
         if (isym> 0) ls = imid
         !
-        !     set first dimension for a, b (as requried by shses)
+        !     set first dimension for a, b (as required by shses)
         !
         mab = min(nlat, nlon/2+1)
         mn = mab*nlat*nt
         if (lwork < ls*(nt+1)*nlon +nlat*(2*imid+1)) return
         ierror = 0
         !
-        !     set work space pointers
+        ! Set workspace pointer indices
         !
         ia = 1
         ib = ia+mn

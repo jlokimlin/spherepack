@@ -294,12 +294,12 @@ contains
             if (lwork < (2*nt+1)*nlon+nlat*(4*l1*nt+1)) return
         end if
         !
-        !     set first dimension for br, bi, cr, ci (as requried by vhses)
+        !     set first dimension for br, bi, cr, ci (as required by vhses)
         !
         mn = l1*nlat*nt
         ierror = 0
         !
-        !     set work space pointers
+        ! Set workspace pointer indices
         !
         ibr = 1
         ibi = ibr+mn

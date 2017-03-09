@@ -345,7 +345,7 @@ contains
         ierror = 9
         idz = (mmax*(2*nlat-mmax+1))/2
         lzimn = idz*imid
-        if (lvhsgs < lzimn+lzimn+nlon+15) return
+        if (lvhsgs < 2*lzimn+nlon+15) return
         ierror = 10
         !
         ! Verify unsaved workspace length
@@ -357,7 +357,7 @@ contains
             (2*nt+1)*nlat*nlon+4*mn+nlat) return
         ierror = 0
         !
-        !     set work space pointers
+        ! Set workspace pointer indices
         !
         ibr = 1
         ibi = ibr+mn

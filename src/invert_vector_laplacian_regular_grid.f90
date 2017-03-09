@@ -376,13 +376,13 @@ contains
         !
         idz = (mmax*(2*nlat-mmax+1))/2
         lzimn = idz*imid
-        !     lsavmin = lzimn+lzimn+nlon+15
+        !     lsavmin = 2*lzimn+nlon+15
         !     if (lvhsec .lt. lsavmin) return
         lzz1 = 2*nlat*imid
         labc = 3*(max(mmax-2, 0)*(2*nlat-mmax-1))/2
         if (lvhsec < 2*(lzz1+labc)+nlon+15) return
         !
-        !     set minimum and verify unsaved work space length
+        !     set minimum and verify unsaved workspace length
         !
         ierror = 10
         mn = mmax*nlat*nt

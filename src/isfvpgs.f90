@@ -331,11 +331,11 @@ contains
             return
         end if
         !
-        !  set first dimension for br, bi, cr, ci (as requried by vhsgs)
+        !  set first dimension for br, bi, cr, ci (as required by vhsgs)
         !
         mn = l1*nlat*nt
         !
-        !  set work space pointers
+        !  set workspace pointers
         !
         ibr = 1
         ibi = ibr+mn

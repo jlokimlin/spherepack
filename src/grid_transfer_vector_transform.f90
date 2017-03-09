@@ -367,14 +367,14 @@ contains
     !
     ! ... wsave
     !
-    !     a saved work space array that can be utilized repeatedly by trvsph
+    !     a saved workspace array that can be utilized repeatedly by trvsph
     !     as long as the arguments nlata, nlona, nlatb, nlonb remain unchanged.
     !     wsave is set by a intl=0 call to trvsph.  wsave must not be altered
     !     when trvsph is being recalled with intl=1.
     !
     ! ... lsave
     !
-    !     the dimension of the work space wsave as it appears in the program
+    !     the dimension of the workspace wsave as it appears in the program
     !     that calls trvsph.  the minimum required value of lsave for the
     !     current set of input arguments is set in the output argument lsvmin.
     !     it can be determined by calling trvsph with lsave=0 and printing lsvmin.
@@ -391,7 +391,7 @@ contains
     !
     !          lsvmin = lwa + lwb
     !
-    !      is the minimal required work space length of wsave
+    !      is the minimal required workspace length of wsave
     !
     !
     ! ... work
@@ -410,7 +410,7 @@ contains
     !
     !            2*nlat*(8*l1 + 4*nlon + 3)
     !
-    !     will suffice as a length for the unsaved work space.  this formula
+    !     will suffice as a length for the unsaved workspace.  this formula
     !     may overestimate the required minimum value for lwork.  the exact
     !     minimum value can be predetermined by calling trvsph wtih lwork=0
     !     and printout of lwkmin.
@@ -457,12 +457,12 @@ contains
     !
     ! ... lsvmin
     !
-    !     the minimum length of the saved work space in wsave.
+    !     the minimum length of the saved workspace in wsave.
     !     lsvmin is computed even if lsave < lsvmin (ierror = 10).
     !
     ! ... lwkmin
     !
-    !     the minimum length of the unsaved work space in work.
+    !     the minimum length of the unsaved workspace in work.
     !     lwkmin is computed even if lwork < lwkmin (ierror = 11).
     !
     !

@@ -27,7 +27,7 @@ module gradient_routines
         ! Declare interfaces for submodule implementation
     interface
         module subroutine gradec(nlat, nlon, isym, nt, v, w, idvw, jdvw, a, b, mdab, ndab, &
-            wvhsec, lvhsec, work, lwork, ierror)
+            wvhsec, ierror)
 
             ! Dummy arguments
             integer(ip), intent(in)  :: nlat
@@ -42,15 +42,12 @@ module gradient_routines
             real(wp),    intent(in)  :: b(mdab, ndab, nt)
             integer(ip), intent(in)  :: mdab
             integer(ip), intent(in)  :: ndab
-            real(wp),    intent(in)  :: wvhsec(lvhsec)
-            integer(ip), intent(in)  :: lvhsec
-            real(wp),    intent(out) :: work(lwork)
-            integer(ip), intent(in)  :: lwork
+            real(wp),    intent(in)  :: wvhsec(:)
             integer(ip), intent(out) :: ierror
         end subroutine gradec
 
         module subroutine grades(nlat, nlon, isym, nt, v, w, idvw, jdvw, a, b, mdab, ndab, &
-            wvhses, lvhses, work, lwork, ierror)
+            wvhses, ierror)
 
             ! Dummy arguments
             integer(ip), intent(in)  :: nlat
@@ -65,15 +62,12 @@ module gradient_routines
             real(wp),    intent(in)  :: b(mdab, ndab, nt)
             integer(ip), intent(in)  :: mdab
             integer(ip), intent(in)  :: ndab
-            real(wp),    intent(in)  :: wvhses(lvhses)
-            integer(ip), intent(in)  :: lvhses
-            real(wp),    intent(out) :: work(lwork)
-            integer(ip), intent(in)  :: lwork
+            real(wp),    intent(in)  :: wvhses(:)
             integer(ip), intent(out) :: ierror
         end subroutine grades
 
         module subroutine gradgc(nlat, nlon, isym, nt, v, w, idvw, jdvw, a, b, mdab, ndab, &
-            wvhsgc, lvhsgc, work, lwork, ierror)
+            wvhsgc, ierror)
 
             ! Dummy arguments
             integer(ip), intent(in)  :: nlat
@@ -88,15 +82,12 @@ module gradient_routines
             real(wp),    intent(in)  :: b(mdab, ndab, nt)
             integer(ip), intent(in)  :: mdab
             integer(ip), intent(in)  :: ndab
-            real(wp),    intent(in)  :: wvhsgc(lvhsgc)
-            integer(ip), intent(in)  :: lvhsgc
-            real(wp),    intent(out) :: work(lwork)
-            integer(ip), intent(in)  :: lwork
+            real(wp),    intent(in)  :: wvhsgc(:)
             integer(ip), intent(out) :: ierror
         end subroutine gradgc
 
         module subroutine gradgs(nlat, nlon, isym, nt, v, w, idvw, jdvw, a, b, mdab, ndab, &
-            wvhsgs, lvhsgs, work, lwork, ierror)
+            wvhsgs, ierror)
 
             ! Dummy arguments
             integer(ip), intent(in)  :: nlat
@@ -111,15 +102,12 @@ module gradient_routines
             real(wp),    intent(in)  :: b(mdab, ndab, nt)
             integer(ip), intent(in)  :: mdab
             integer(ip), intent(in)  :: ndab
-            real(wp),    intent(in)  :: wvhsgs(lvhsgs)
-            integer(ip), intent(in)  :: lvhsgs
-            real(wp),    intent(out) :: work(lwork)
-            integer(ip), intent(in)  :: lwork
+            real(wp),    intent(in)  :: wvhsgs(:)
             integer(ip), intent(out) :: ierror
         end subroutine gradgs
 
         module subroutine igradec(nlat, nlon, isym, nt, sf, isf, jsf, br, bi, mdb, ndb, &
-            wshsec, lshsec, work, lwork, ierror)
+            wshsec, ierror)
 
             ! Dummy arguments
             integer(ip), intent(in)  :: nlat
@@ -133,15 +121,12 @@ module gradient_routines
             real(wp),    intent(in)  :: bi(mdb, ndb, nt)
             integer(ip), intent(in)  :: mdb
             integer(ip), intent(in)  :: ndb
-            real(wp),    intent(in)  :: wshsec(lshsec)
-            integer(ip), intent(in)  :: lshsec
-            real(wp),    intent(out) :: work(lwork)
-            integer(ip), intent(in)  :: lwork
+            real(wp),    intent(in)  :: wshsec(:)
             integer(ip), intent(out) :: ierror
         end subroutine igradec
 
         module subroutine igrades(nlat, nlon, isym, nt, sf, isf, jsf, br, bi, mdb, ndb, &
-            wshses, lshses, work, lwork, ierror)
+            wshses, ierror)
 
             ! Dummy arguments
             integer(ip), intent(in)  :: nlat
@@ -155,15 +140,12 @@ module gradient_routines
             real(wp),    intent(in)  :: bi(mdb, ndb, nt)
             integer(ip), intent(in)  :: mdb
             integer(ip), intent(in)  :: ndb
-            real(wp),    intent(in)  :: wshses(lshses)
-            integer(ip), intent(in)  :: lshses
-            real(wp),    intent(out) :: work(lwork)
-            integer(ip), intent(in)  :: lwork
+            real(wp),    intent(in)  :: wshses(:)
             integer(ip), intent(out) :: ierror
         end subroutine igrades
 
         module subroutine igradgc(nlat, nlon, isym, nt, sf, isf, jsf, br, bi, mdb, ndb, &
-            wshsgc, lshsgc, work, lwork, ierror)
+            wshsgc, ierror)
 
             ! Dummy arguments
             integer(ip), intent(in)  :: nlat
@@ -177,15 +159,12 @@ module gradient_routines
             real(wp),    intent(in)  :: bi(mdb, ndb, nt)
             integer(ip), intent(in)  :: mdb
             integer(ip), intent(in)  :: ndb
-            real(wp),    intent(in)  :: wshsgc(lshsgc)
-            integer(ip), intent(in)  :: lshsgc
-            real(wp),    intent(out) :: work(lwork)
-            integer(ip), intent(in)  :: lwork
+            real(wp),    intent(in)  :: wshsgc(:)
             integer(ip), intent(out) :: ierror
         end subroutine igradgc
 
         module subroutine igradgs(nlat, nlon, isym, nt, sf, isf, jsf, br, bi, mdb, ndb, &
-            wshsgs, lshsgs, work, lwork, ierror)
+            wshsgs, ierror)
 
             ! Dummy arguments
             integer(ip), intent(in)  :: nlat
@@ -199,10 +178,7 @@ module gradient_routines
             real(wp),    intent(in)  :: bi(mdb, ndb, nt)
             integer(ip), intent(in)  :: mdb
             integer(ip), intent(in)  :: ndb
-            real(wp),    intent(in)  :: wshsgs(lshsgs)
-            integer(ip), intent(in)  :: lshsgs
-            real(wp),    intent(out) :: work(lwork)
-            integer(ip), intent(in)  :: lwork
+            real(wp),    intent(in)  :: wshsgs(:)
             integer(ip), intent(out) :: ierror
         end subroutine igradgs
     end interface
@@ -216,14 +192,8 @@ contains
 
         ! Local variables
         integer(ip) :: n
-        real(wp)    :: fn
 
-        associate (nlat => size(sqnn))
-            do n=2, nlat
-                fn = real(n - 1, kind=wp)
-                sqnn(n) = sqrt(fn * (fn + ONE))
-            end do
-        end associate
+        sqnn = [(sqrt(real(n - 1, kind=wp) * (real(n - 1, kind=wp) + ONE)), n=1, size(sqnn))]
 
     end subroutine compute_coefficient_multipliers
 
@@ -245,7 +215,7 @@ contains
             mmax => size(br, dim=1), &
             nlat => size(br, dim=2), &
             nt => size(br, dim=3) &
-           )
+            )
 
             ! Preset coefficient multiplyers in vector
             call compute_coefficient_multipliers(sqnn)
@@ -299,7 +269,7 @@ contains
         associate (&
             nlat => size(a, dim=2), &
             nt => size(a, dim=3) &
-           )
+            )
 
             ! Preset coefficient multiplyers in vector
             call compute_coefficient_multipliers(sqnn)
@@ -307,12 +277,12 @@ contains
             ! Set upper limit for vector m subscript
             mmax = min(nlat, (nlon+1)/2)
 
+            ! Preset to 0.0
+            a = ZERO
+            b = ZERO
+
             ! Compute multiple scalar field coefficients
             do k=1, nt
-
-                ! Preset to 0.0
-                a(:, :, k) = ZERO
-                b(:, :, k) = ZERO
 
                 ! Compute m=0 coefficients
                 do n=2, nlat

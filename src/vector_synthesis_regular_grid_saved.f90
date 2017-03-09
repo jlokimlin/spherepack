@@ -480,7 +480,7 @@ contains
     !
     !              3*(max(l1-2, 0)*(2*nlat-l1-1))/2+5*l2*nlat
     !
-    !     dwork  an unsaved real work space
+    !     dwork  an unsaved real workspace
     !
     !     ldwork the length of the array dwork as it appears in the
     !            program that calls vhsesi.  ldwork must be at least
