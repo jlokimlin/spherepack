@@ -102,7 +102,7 @@ contains
 
     ! Purpose:
     !
-    !     subroutine hrfftf(m, n, r, mdimr, wsave, work)
+    !     subroutine hrfftf(m, n, r, mdimr, wsave)
     !
     !     Computes the Fourier coefficients of m real
     !     perodic sequences (Fourier analysis); i.e. hrfftf computes the
@@ -169,10 +169,7 @@ contains
     !     wsave   contains results which must not be destroyed between
     !             calls of hrfftf or hrfftb.
     !
-    !     work    a real work array with m*n locations that does
-    !             not have to be saved.
-    !
-    subroutine hrfftf(m, n, r, mdimr, wsave, work)
+    subroutine hrfftf(m, n, r, mdimr, wsave)
 
         ! Dummy arguments
         integer(ip), intent(in)     :: m
@@ -180,10 +177,24 @@ contains
         real(wp),    intent(inout)  :: r(mdimr, n)
         integer(ip), intent(in)     :: mdimr
         real(wp),    intent(in)     :: wsave(n+NUMBER_OF_FACTORS)
-        real(wp),    intent(out)    :: work(m*n)
+
+        ! Local variables
+        integer(ip) :: lwork
 
         if (n > 1) then
-            call forward_lower_utility_routine(m, n, r, mdimr, work, wsave, wsave(n+1))
+
+            ! Set required workspace size
+            lwork = m * n
+
+            block
+                real(wp)    :: work(m*n)
+                integer(ip) :: iw
+
+                ! Set workspace index pointer
+                iw = n + 1
+
+                call forward_lower_utility_routine(m, n, r, mdimr, work, wsave, wsave(iw:))
+            end block
         end if
 
     end subroutine hrfftf
@@ -290,6 +301,7 @@ contains
         integer(ip) :: nf, ntest, j, factor
 
         ! Initialize
+        factor = 0
         ntest = n
         nf = 0
         j = 0
@@ -913,11 +925,11 @@ contains
             idp2 => ido+2, &
             nbd => (ido-1)/2, &
             arg => TWO_PI/iip &
-           )
+            )
             associate (&
                 dcp => cos(arg), &
                 dsp => sin(arg) &
-               )
+                )
 
                 if (ido /= 1) then
                     ch2(:mp, :idl1, 1) = c2(:mp, :idl1, 1)

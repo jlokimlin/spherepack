@@ -360,7 +360,7 @@ contains
         integer(ip), intent(out)  :: ierror
 
         ! Local variables
-        integer(ip) :: ntrunc, l1, l2, lp, ldw, late, ipmnf
+        integer(ip) :: ntrunc, l1, l2, lp, late, ipmnf
         integer(ip) :: lwork, ldwork
 
         associate (lshsgs => size(wshsgs))

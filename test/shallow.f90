@@ -376,7 +376,7 @@ program shallow
         !     compute the vorticity of the velocity (u, v)
         !
         call vrtes(nlat, nlon, isym, nt, vort, idp, jdp, cr, ci, mdab, ndab, &
-            wshs, lwshs, work, lwork, ierror)
+            wshs, ierror)
         if (ierror /= 0) write (*, 95) ierror
 95      format(' error' i4 ' in vrtes')
         !

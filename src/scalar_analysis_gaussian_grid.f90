@@ -494,7 +494,7 @@ contains
         end do
         !     do fourier transform
         do k=1, nt
-            call util%hfft%forward(lat, nlon, g(1, 1, k), lat, wfft, pmn)
+            call util%hfft%forward(lat, nlon, g(1, 1, k), lat, wfft)
         end do
         !     scale result
         sfn = 2.0/real(nlon)

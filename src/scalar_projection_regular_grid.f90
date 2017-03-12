@@ -191,7 +191,7 @@ contains
 
         y(1:nlat, :) = x(1:nlat, :)
 
-        call util%hfft%forward(nlat, nlon, y, idxy, wshp(lw1+1), work)
+        call util%hfft%forward(nlat, nlon, y, idxy, wshp(lw1+1))
 
         ! Set workspace index pointers
         nte = (nlat+1)/2

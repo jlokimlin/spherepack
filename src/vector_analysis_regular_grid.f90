@@ -530,8 +530,8 @@ contains
             end do
         end do
         7 do k=1, nt
-            call util%hfft%forward(idv, nlon, ve(1, 1, k), idv, wrfft, zv)
-            call util%hfft%forward(idv, nlon, we(1, 1, k), idv, wrfft, zv)
+            call util%hfft%forward(idv, nlon, ve(1, 1, k), idv, wrfft)
+            call util%hfft%forward(idv, nlon, we(1, 1, k), idv, wrfft)
         end do
         ndo1 = nlat
         ndo2 = nlat

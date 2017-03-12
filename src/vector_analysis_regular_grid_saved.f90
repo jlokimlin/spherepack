@@ -540,8 +540,8 @@ contains
         end if
 
         do k=1, nt
-            call util%hfft%forward(idv, nlon, ve(1, 1, k), idv, wrfft, work)
-            call util%hfft%forward(idv, nlon, we(1, 1, k), idv, wrfft, work)
+            call util%hfft%forward(idv, nlon, ve(1, 1, k), idv, wrfft)
+            call util%hfft%forward(idv, nlon, we(1, 1, k), idv, wrfft)
         end do
 
         !

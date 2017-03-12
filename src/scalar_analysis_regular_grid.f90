@@ -517,7 +517,7 @@ contains
 
         ! Fast Fourier transform
         fft_loop: do k=1, nt
-            call util%hfft%forward(ls, nlon, ge(1, 1, k), ls, whrfft, work)
+            call util%hfft%forward(ls, nlon, ge(1, 1, k), ls, whrfft)
             if (mod(nlon, 2) /= 0) exit fft_loop
             ge(1:ls, nlon, k) = HALF * ge(1:ls, nlon, k)
         end do fft_loop

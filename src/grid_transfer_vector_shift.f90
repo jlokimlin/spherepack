@@ -549,7 +549,7 @@ contains
         n2 = (n+1)/2
 
         ! Compute fourier coefficients for r on shifted grid
-        call hfft%forward(m, n, r, m, wsav(n+2:), work)
+        call hfft%forward(m, n, r, m, wsav(n+2:))
 
         do i=1, m
             do j=2, n2

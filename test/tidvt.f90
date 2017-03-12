@@ -269,7 +269,7 @@ use spherepack
             call iout(ierror, "ierr")
 
             call vrtec(nlat, nlon, isym, nt, vt, nlat, nlon, cr, ci, mdb, nlat, &
-                wsave, lsave, work, lwork, ierror)
+                wsave, ierror)
             call name("vrt ")
             call iout(ierror, "ierr")
 
@@ -297,7 +297,7 @@ use spherepack
             call name("div ")
             call iout(ierror, "ierr")
             call vrtes(nlat, nlon, isym, nt, vt, nlat, nlon, cr, ci, mdb, nlat, &
-                wsave, lsave, work, lwork, ierror)
+                wsave, ierror)
             call name("vrt ")
             call iout(ierror, "ierr")
 
@@ -324,7 +324,7 @@ use spherepack
             call name("div ")
             call iout(ierror, "ierr")
             call vrtgc(nlat, nlon, isym, nt, vt, nlat, nlon, cr, ci, mdb, nlat, &
-                wsave, lsave, work, lwork, ierror)
+                wsave, ierror)
             call name("vrt ")
             call iout(ierror, "ierr")
 
@@ -351,7 +351,7 @@ use spherepack
             call name("div ")
             call iout(ierror, "ierr")
             call vrtgs(nlat, nlon, isym, nt, vt, nlat, nlon, cr, ci, mdb, nlat, &
-                wsave, lsave, work, lwork, ierror)
+                wsave, ierror)
             call name("vrt ")
             call iout(ierror, "ierr")
 

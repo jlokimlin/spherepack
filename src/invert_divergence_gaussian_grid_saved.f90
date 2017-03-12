@@ -7,7 +7,7 @@
 !     *                                                               *
 !     *                      all rights reserved                      *
 !     *                                                               *
-!     *                      SPHEREPACK                               *
+!     *                         Spherepack                            *
 !     *                                                               *
 !     *       A Package of Fortran Subroutines and Programs           *
 !     *                                                               *
@@ -29,19 +29,6 @@
 !     *                                                               *
 !     * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !
-!
-!
-! ... file idivec.f
-!
-!     this file includes documentation and code for
-!     subroutine idivgs          i
-!
-! ... files which must be loaded with idivgs.f
-!
-!     type_SpherepackUtility.f, type_RealPeriodicFastFourierTransform.f, vhsgs.f, shags.f
-!
-!
-
 submodule(divergence_routines) invert_divergence_gaussian_grid_saved
 
 contains

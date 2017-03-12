@@ -541,7 +541,7 @@ contains
 
         !  Fast Fourier Transform
         fft_loop: do k=1, nt
-            call util%hfft%forward(ls, nlon, g_even(1, 1, k), ls, whrfft, work)
+            call util%hfft%forward(ls, nlon, g_even(1, 1, k), ls, whrfft)
             if (mod(nlon, 2) /= 0) exit fft_loop
             g_even(1:ls, nlon, k) = HALF * g_even(1:ls, nlon, k)
         end do fft_loop

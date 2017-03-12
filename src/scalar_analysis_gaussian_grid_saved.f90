@@ -485,7 +485,7 @@ contains
 
         ! Perform fourier transform
         do k=1, nt
-            call util%hfft%forward(lat, nlon, g(1, 1, k), lat, wfft, work)
+            call util%hfft%forward(lat, nlon, g(1, 1, k), lat, wfft)
         end do
 
         !  scale result

@@ -7,9 +7,9 @@
 !     *                                                               *
 !     *                      all rights reserved                      *
 !     *                                                               *
-!     *                      SPHEREPACK                               *
+!     *                         Spherepack                            *
 !     *                                                               *
-!     *       A Package of Fortran77 Subroutines and Programs         *
+!     *       A Package of Fortran Subroutines and Programs           *
 !     *                                                               *
 !     *              for Modeling Geophysical Processes               *
 !     *                                                               *
@@ -29,9 +29,6 @@
 !     *                                                               *
 !     * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !
-!
-!
-!
 !     6/98
 !
 !     a program for testing all vorticity and ivnerse vorticity routines
@@ -50,18 +47,15 @@
 !
 !     (5) invert the vorticity in (3) and compare with (4)
 !
-
 program tvrt
+
     use spherepack
+
+    ! Explicit typing only
     implicit none
-    real(wp) :: a
-    real(wp) :: b
-    real(wp) :: bi
-    real(wp) :: br
-    real(wp) :: ci
+
     real(wp) :: cosp
     real(wp) :: cost
-    real(wp) :: cr
     real(wp) :: d2xdp2
     real(wp) :: d2xdt2
     real(wp) :: d2ydp2
@@ -70,7 +64,7 @@ program tvrt
     real(wp) :: d2zdt2
     real(wp) :: dlat
     real(wp) :: dphi
-    real(wp) :: dwork
+    
     real(wp) :: dxdp
     real(wp) :: dxdt
     real(wp) :: dydp
@@ -82,97 +76,50 @@ program tvrt
     real(wp) :: err2w
     integer(ip) :: i
     integer(ip) :: icase
-    integer(ip) :: ier
     integer(ip) :: ierror
-    integer(ip) :: isym
-    integer(ip) :: ityp
     integer(ip) :: j
     integer(ip) :: k
-    integer(ip) :: ldwork
-    integer(ip) :: lldwork
-    integer(ip) :: lleng
-    integer(ip) :: llsav
-    integer(ip) :: lsave
-    integer(ip) :: lwork
-    integer(ip) :: mdab
-    integer(ip) :: mdc
-    integer(ip) :: mmdab
-    integer(ip) :: mmdc
-    integer(ip) :: nlat
-    integer(ip) :: nlon
     integer(ip) :: nmax
-    integer(ip) :: nnlat
-    integer(ip) :: nnlon
-    integer(ip) :: nnt
-    integer(ip) :: nt
-    real(wp) :: pertrb
     real(wp) :: phi
 
     real(wp) :: sinp
     real(wp) :: sint
     real(wp) :: theta
-    real(wp) :: thetag
-    real(wp) :: v
-    real(wp) :: ve
-    real(wp) :: vt
     real(wp) :: vte
-    real(wp) :: w
-    real(wp) :: we
-    real(wp) :: work
-    real(wp) :: wsave
     real(wp) :: x
     real(wp) :: y
     real(wp) :: z
     !
     !     set dimensions with parameter statements
-    !
-    parameter(nnlat= 24, nnlon= 14, nnt = 3)
-    parameter (mmdab = (nnlon+2)/2, mmdc = (nnlon+1)/2)
-    parameter (lleng= 5*nnlat*nnlat*nnlon, llsav=5*nnlat*nnlat*nnlon)
-    dimension work(lleng), wsave(llsav)
-    parameter (lldwork = 4*nnlat*nnlat)
-    dimension dwork(lldwork)
-    dimension br(mmdc, nnlat, nnt), bi(mmdc, nnlat, nnt)
-    dimension cr(mmdc, nnlat, nnt), ci(mmdc, nnlat, nnt)
-    dimension a(mmdab, nnlat, nnt), b(mmdab, nnlat, nnt)
-    dimension vt(nnlat, nnlon, nnt)
-    dimension thetag(nnlat), dtheta(nnlat), dwts(nnlat)
-    dimension v(nnlat, nnlon, nnt), w(nnlat, nnlon, nnt)
-    dimension ve(nnlat, nnlon, nnt), we(nnlat, nnlon, nnt)
-    dimension pertrb(nnt)
-    real dtheta, dwts
-    !
-    !     set dimension variables
-    !
-    nlat = nnlat
-    nlon = nnlon
+    integer(ip), parameter :: nlat= 24, nlon= 14, nt = 3
+    integer(ip), parameter :: isym = 0, ityp = 0
+    integer(ip), parameter :: mdab = (nlon+2)/2, mdc = (nlon+1)/2
+    real(wp), dimension(mdc, nlat, nt)  :: br, bi, cr, ci
+    real(wp), dimension(mdab, nlat, nt) :: a, b
+    real(wp), dimension(nlat, nlon, nt) :: vt, v, w, ve, we
+    real(wp), dimension(nlat)           :: thetag, dwts
+    real(wp)                            :: pertrb(nt)
+    real(wp), allocatable               :: wavetable(:)
+    real(wp), parameter                 :: ZERO = 0.0_wp, TWO = 2.0_wp
+
+    ! Set dimension variables
     nmax = max(nlat, nlon)
-    mdab = mmdab
-    mdc = mmdc
-    lwork = lleng
-    lsave = llsav
-    ldwork = lldwork
-    nt = nnt
     call iout(nlat, "nlat")
     call iout(nlon, "nlon")
     call iout(nt, "  nt")
-    isym = 0
-    ityp = 0
     !
     !     set equally spaced colatitude and longitude increments
     !
-    dphi = (pi+pi)/nlon
-    dlat = pi/(nlat-1)
+    dphi = TWO_PI/nlon
+    dlat = PI/(nlat-1)
     !
     !     compute nlat gaussian points in thetag
     !
-    call compute_gaussian_latitudes_and_weights(nlat, dtheta, dwts, ier)
-    do  i=1, nlat
-        thetag(i) = dtheta(i)
-    end do
+    call compute_gaussian_latitudes_and_weights(nlat, thetag, dwts, ierror)
+
     call name("gaqd")
-    call iout(ier, " ier")
-    call vecout(thetag, "thtg", nlat)
+    call iout(ierror, " error_flag = ")
+    call vecout(thetag, "gaussian_latitudes", nlat)
     !
     !     test all vorticity subroutines
     !
@@ -187,12 +134,16 @@ program tvrt
         !
         do k=1, nt
             do j=1, nlon
-                phi = (j-1)*dphi
+                phi = real(j - 1, kind=wp) * dphi
                 sinp = sin(phi)
                 cosp = cos(phi)
                 do i=1, nlat
-                    theta = (i-1)*dlat
-                    if (icase>2) theta=thetag(i)
+                    select case (icase)
+                        case (0:2)
+                            theta = real(i -1, kind=wp) * dlat
+                        case default
+                            theta=thetag(i)
+                    end select
                     cost = cos(theta)
                     sint = sin(theta)
                     x = sint*cosp
@@ -203,7 +154,7 @@ program tvrt
                     dydt = cost*sinp
                     dydp = sint*cosp
                     dzdt = -sint
-                    dzdp = 0.0
+                    dzdp = ZERO
                     select case (k)
                         case (1)
                             !              st(i, j, k) = x
@@ -213,37 +164,30 @@ program tvrt
                             !
                             !          w =  1/sin(theta)*dsvdp + dstdt
                             !
-                            v(i, j, k) = sinp + cost*sinp
-                            w(i, j, k) = cosp + cost*cosp
-                            vt(i, j, k) = -2.0*sint*cosp
+                            v(i, j, k) = sinp + cost * sinp
+                            w(i, j, k) = cosp + cost * cosp
+                            vt(i, j, k) = -TWO * sint * cosp
                         case (2)
                             !              st = y
                             !              sv = z
                             v(i, j, k) = -cosp-sint
-                            w(i, j, k) = cost*sinp
+                            w(i, j, k) = cost * sinp
                             !         sint*vt = -dvdp + sint*dwdt + cost*w
                             !                 = sinp + sint*(-sint*sinp)+cost*cost*sinp
                             !                 = sinp + (cost**2-sint**2)*sinp
-                            vt(i, j, k) = -2.*sint*sinp
+                            vt(i, j, k) = -TWO * sint * sinp
                         case (3)
                             !           st = x
                             !           sv = z
                             v(i, j, k) = sinp - sint
-                            w(i, j, k) = cost*cosp
+                            w(i, j, k) = cost * cosp
                             !     sint*vt = -cosp-sint*sint*sinp+cost*cost*cosp
                             !             = -cosp + (1-2.*sint**2)*cosp =
-                            vt(i, j, k) = -2.*sint*cosp
+                            vt(i, j, k) = -TWO * sint * cosp
                     end select
                 end do
             end do
         end do
-
-        !     do kk=1, nt
-        !     call iout(kk, "**kk")
-        !     call aout(v(1, 1, kk), "   v", nlat, nlon)
-        !     call aout(w(1, 1, kk), "   w", nlat, nlon)
-        !     call aout(vt(1, 1, kk), "  vt", nlat, nlon)
-        !     end do
 
         if (icase==1) then
 
@@ -251,104 +195,91 @@ program tvrt
             !
             !     analyze vector field
             !
-            call vhaeci(nlat, nlon, wsave, ierror)
+            call initialize_vhaec(nlat, nlon, wavetable, ierror)
             call name("vhai")
-            call iout(ierror, "ierr")
+            call iout(ierror, "error_flag = ")
 
             call vhaec(nlat, nlon, isym, nt, v, w, nlat, nlon, br, bi, cr, ci, mdc, &
-                nlat, wsave, ierror)
+                nlat, wavetable, ierror)
             call name("vha ")
-            call iout(ierror, "ierr")
+            call iout(ierror, "error_flag = ")
 
-            !     if (nmax.lt.10) then
-            !     do kk=1, nt
-            !     call iout(kk, "**kk")
-            !     call aout(br(1, 1, kk), "  br", mdc, nlat)
-            !     call aout(bi(1, 1, kk), "  bi", mdc, nlat)
-            !     call aout(cr(1, 1, kk), "  cr", mdc, nlat)
-            !     call aout(ci(1, 1, kk), "  ci", mdc, nlat)
-            !     end do
-            !     end if
-            !
             !     compute vorticity of (v, w) in vt
             !
 
-            call shseci(nlat, nlon, wsave, ierror)
+            call initialize_shsec(nlat, nlon, wavetable, ierror)
 
             call name("vrti")
-            call iout(ierror, "ierr")
+            call iout(ierror, "error_flag = ")
 
             call vrtec(nlat, nlon, isym, nt, vt, nlat, nlon, cr, ci, mdc, nlat, &
-                wsave, lsave, work, lwork, ierror)
+                wavetable, ierror)
 
             call name("vrt ")
-            call iout(ierror, "ierr")
+            call iout(ierror, "error_flag = ")
             call iout(nlat, "nlat")
             call iout(nlon, "nlon")
 
         else if (icase==2) then
 
             call name("**es")
-            call shsesi(nlat, nlon, wsave, ierror)
+            call initialize_shses(nlat, nlon, wavetable, ierror)
 
             call name("vrti")
-            call iout(ierror, "ierr")
+            call iout(ierror, "error_flag = ")
 
             call vrtes(nlat, nlon, isym, nt, vt, nlat, nlon, cr, ci, mdc, nlat, &
-                wsave, lsave, work, lwork, ierror)
+                wavetable, ierror)
 
             call name("vrt ")
-            call iout(ierror, "ierr")
+            call iout(ierror, "error_flag = ")
 
         else if (icase == 3) then
 
             call name("**gc")
 
-            call shsgci(nlat, nlon, wsave, ierror)
+            call initialize_shsgc(nlat, nlon, wavetable, ierror)
 
             call name("vrti")
-            call iout(ierror, "ierr")
+            call iout(ierror, "error_flag = ")
 
             call vrtgc(nlat, nlon, isym, nt, vt, nlat, nlon, cr, ci, mdc, nlat, &
-                wsave, lsave, work, lwork, ierror)
+                wavetable, ierror)
 
             call name("vrt ")
-            call iout(ierror, "ierr")
+            call iout(ierror, "error_flag = ")
 
         else if (icase == 4) then
 
             call name("**gs")
 
-            call shsgsi(nlat, nlon, wsave, ierror)
+            call initialize_shsgs(nlat, nlon, wavetable, ierror)
 
             call name("vrti")
-            call iout(ierror, "ierr")
+            call iout(ierror, "error_flag = ")
 
             call vrtgs(nlat, nlon, isym, nt, vt, nlat, nlon, cr, ci, mdc, nlat, &
-                wsave, lsave, work, lwork, ierror)
+                wavetable, ierror)
 
             call name("vrt ")
-            call iout(ierror, "ierr")
+            call iout(ierror, "error_flag = ")
         end if
 
-        !     if (nmax.lt.10) then
-        !     do kk=1, nt
-        !     call iout(kk, "**kk")
-        !     call aout(vt(1, 1, kk), "  vt", nlat, nlon)
-        !     end do
-        !     end if
-        !
         !     compute "error" in vt
         !
-        err2 = 0.0
+        err2 = ZERO
         do k=1, nt
             do j=1, nlon
-                phi = (j-1)*dphi
+                phi = real(j - 1, kind=wp) * dphi
                 sinp = sin(phi)
                 cosp = cos(phi)
                 do i=1, nlat
-                    theta = (i-1)*dlat
-                    if (icase>2) theta=thetag(i)
+                    select case (icase)
+                        case (0:2)
+                            theta = real(i - 1, kind=wp) * dlat
+                        case default
+                            theta=thetag(i)
+                    end select
                     cost = cos(theta)
                     sint = sin(theta)
                     x = sint*cosp
@@ -364,15 +295,13 @@ program tvrt
                     d2ydp2 = -sint*sinp
                     dzdt = -sint
                     d2zdt2 = -cost
-                    dzdp = 0.0
-                    d2zdp2 = 0.0
+                    dzdp = ZERO
+                    d2zdp2 = ZERO
                     select case (k)
-                        case (1)
-                            vte = -2.0*sint*cosp
+                        case (1, 3)
+                            vte = -TWO * sint * cosp
                         case (2)
-                            vte = -2.*sint*sinp
-                        case (3)
-                            vte = -2.*sint*cosp
+                            vte = -TWO * sint * sinp
                     end select
                     err2 = err2 + (vt(i, j, k)-vte)**2
                 end do
@@ -380,20 +309,12 @@ program tvrt
         end do
         err2 = sqrt(err2/(nt*nlat*nlon))
         call vout(err2, "err2")
-        !
+
         !     now recompute (v, w) inverting vt using ivrt(ec, es, gc, gs)
         !     and compare with (ve, we) generated by synthesizing br, bi, cr, ci
         !     with br=bi=0.0
-        !
-
-        do k=1, nt
-            do i=1, mdc
-                do j=1, nlat
-                    br(i, j, k) = 0.0
-                    bi(i, j, k) = 0.0
-                end do
-            end do
-        end do
+        br = ZERO
+        bi = ZERO
 
         select case (icase)
             case (1)
@@ -403,43 +324,36 @@ program tvrt
                 !
                 !     set vector field (ve, we) with br=bi=0.0 for comparison with inverted vt
                 !
-                call vhseci(nlat, nlon, wsave, ierror)
-                call name("vhsi")
-                call iout(ierror, "ierr")
+                call initialize_vhsec(nlat, nlon, wavetable, ierror)
+                call name("initialize_vhsec")
+                call iout(ierror, "error_flag = ")
         		
                 call vhsec(nlat, nlon, ityp, nt, ve, we, nlat, nlon, br, bi, cr, ci, &
-                    mdc, nlat, wsave, ierror)
+                    mdc, nlat, wavetable, ierror)
         		
-                call name("vhs ")
-                call iout(ierror, "ierr")
+                call name("vhsec")
+                call iout(ierror, "error_flag = ")
         		
-                call shaeci(nlat, nlon, wsave, ierror)
-                call name("shai")
-                call iout(ierror, "ierr")
+                call initialize_shaec(nlat, nlon, wavetable, ierror)
+                call name("initialize_shaec")
+                call iout(ierror, "error_flag = ")
         		
                 call shaec(nlat, nlon, isym, nt, vt, nlat, nlon, a, b, &
-                    mdab, nlat, wsave, ierror)
-                call name("sha ")
-                call iout(ierror, "ierr")
-                call iout(lsave, "lsav")
-                call iout(lwork, "lwrk")
+                    mdab, nlat, wavetable, ierror)
+                call name("shaec")
+                call iout(ierror, "error_flag = ")
+
+
         		
-                !     if (nmax.lt.10) then
-                !     do kk=1, nt
-                !     call iout(kk, "**kk")
-                !     call aout(a(1, 1, kk), "   a", nlat, nlat)
-                !     call aout(b(1, 1, kk), "   b", nlat, nlat)
-                !     end do
-                !     end if
         		
-                call vhseci(nlat, nlon, wsave, ierror)
-                call name("vhsi")
-                call iout(ierror, "ierr")
+                call initialize_vhsec(nlat, nlon, wavetable, ierror)
+                call name("initialize_vhsec")
+                call iout(ierror, "error_flag = ")
         		
                 call ivrtec(nlat, nlon, isym, nt, v, w, nlat, nlon, a, b, &
-                    mdab, nlat, wsave, lsave, work, lwork, pertrb, ierror)
-                call name("ivrt")
-                call iout(ierror, "ierr")
+                    mdab, nlat, wavetable, pertrb, ierror)
+                call name("ivrtec")
+                call iout(ierror, "error_flag = ")
                 call vout(pertrb, "prtb")
             case (2)
         		
@@ -447,35 +361,35 @@ program tvrt
                 !
                 !     set vector field (ve, we) with br=bi=0.0 for comparison with inverted vt
                 !
-                call vhsesi(nlat, nlon, wsave, ierror)
+                call initialize_vhses(nlat, nlon, wavetable, ierror)
                 call name("vhsi")
-                call iout(ierror, "ierr")
+                call iout(ierror, "error_flag = ")
         		
                 call vhses(nlat, nlon, ityp, nt, ve, we, nlat, nlon, br, bi, cr, ci, &
-                    mdc, nlat, wsave, ierror)
+                    mdc, nlat, wavetable, ierror)
                 call name("vhs ")
-                call iout(ierror, "ierr")
+                call iout(ierror, "error_flag = ")
         		
         		
-                call shaesi(nlat, nlon, wsave, ierror)
+                call initialize_shaes(nlat, nlon, wavetable, ierror)
                 call name("shai")
-                call iout(ierror, "ierr")
+                call iout(ierror, "error_flag = ")
         		
                 call shaes(nlat, nlon, isym, nt, vt, nlat, nlon, a, b, &
-                    mdab, nlat, wsave, ierror)
+                    mdab, nlat, wavetable, ierror)
                 call name("sha ")
-                call iout(ierror, "ierr")
-                call iout(lsave, "lsav")
-                call iout(lwork, "lwrk")
+                call iout(ierror, "error_flag = ")
+
+
         		
-                call vhsesi(nlat, nlon, wsave, ierror)
+                call initialize_vhses(nlat, nlon, wavetable, ierror)
                 call name("ivti")
-                call iout(ierror, "ierr")
+                call iout(ierror, "error_flag = ")
         		
                 call ivrtes(nlat, nlon, isym, nt, v, w, nlat, nlon, a, b, &
-                    mdab, nlat, wsave, lsave, work, lwork, pertrb, ierror)
+                    mdab, nlat, wavetable, pertrb, ierror)
                 call name("ivrt")
-                call iout(ierror, "ierr")
+                call iout(ierror, "error_flag = ")
                 call vout(pertrb, "prtb")
             case (3)
         		
@@ -483,36 +397,36 @@ program tvrt
                 !
                 !     set vector field (ve, we) with br=bi=0.0 for comparison with inverted vt
                 !
-                call vhsgci(nlat, nlon, wsave, ierror)
-                call name("vhsi")
-                call iout(ierror, "ierr")
+                call initialize_vhsgc(nlat, nlon, wavetable, ierror)
+                call name("initialize_vhsgc")
+                call iout(ierror, "error_flag = ")
         		
                 call vhsgc(nlat, nlon, ityp, nt, ve, we, nlat, nlon, br, bi, cr, ci, &
-                    mdc, nlat, wsave, ierror)
+                    mdc, nlat, wavetable, ierror)
         		
-                call name("vhs ")
-                call iout(ierror, "ierr")
+                call name("vhsgc")
+                call iout(ierror, "error_flag = ")
         		
-                call shagci(nlat, nlon, wsave, ierror)
-                call name("shai")
-                call iout(ierror, "ierr")
+                call initialize_shagc(nlat, nlon, wavetable, ierror)
+                call name("initialize_shagc")
+                call iout(ierror, "error_flag = ")
         		
                 call shagc(nlat, nlon, isym, nt, vt, nlat, nlon, a, b, &
-                    mdab, nlat, wsave, ierror)
-                call name("sha ")
-                call iout(ierror, "ierr")
-                call iout(lsave, "lsav")
-                call iout(lwork, "lwrk")
+                    mdab, nlat, wavetable, ierror)
+                call name("shagc")
+                call iout(ierror, "error_flag = ")
+
+
         		
-                call vhsgci(nlat, nlon, wsave, ierror)
-                call name("ivti")
-                call iout(ierror, "ierr")
+                call initialize_vhsgc(nlat, nlon, wavetable, ierror)
+                call name("initialize_vhsgc")
+                call iout(ierror, "error_flag = ")
         		
                 call ivrtgc(nlat, nlon, isym, nt, v, w, nlat, nlon, a, b, &
-                    mdab, nlat, wsave, lsave, work, lwork, pertrb, ierror)
+                    mdab, nlat, wavetable, pertrb, ierror)
         		
-                call name("ivrt")
-                call iout(ierror, "ierr")
+                call name("ivrtgc")
+                call iout(ierror, "error_flag = ")
                 call vout(pertrb, "prtb")
             case (4)
         		
@@ -520,51 +434,42 @@ program tvrt
                 !
                 !     set vector field (ve, we) with br=bi=0.0 for comparison with inverted vt
                 !
-                call vhsgsi(nlat, nlon, wsave, ierror)
+                call initialize_vhsgs(nlat, nlon, wavetable, ierror)
                 call name("vhsi")
-                call iout(ierror, "ierr")
+                call iout(ierror, "error_flag = ")
         		
                 call vhsgs(nlat, nlon, ityp, nt, ve, we, nlat, nlon, br, bi, cr, ci, &
-                    mdc, nlat, wsave, ierror)
+                    mdc, nlat, wavetable, ierror)
                 call name("vhs ")
-                call iout(ierror, "ierr")
+                call iout(ierror, "error_flag = ")
         		
-                call shagsi(nlat, nlon, wsave, ierror)
+                call initialize_shags(nlat, nlon, wavetable, ierror)
                 call name("shai")
-                call iout(ierror, "ierr")
+                call iout(ierror, "error_flag = ")
         		
                 call shags(nlat, nlon, isym, nt, vt, nlat, nlon, a, b, &
-                    mdab, nlat, wsave, ierror)
+                    mdab, nlat, wavetable, ierror)
                 call name("sha ")
-                call iout(ierror, "ierr")
-                call iout(lsave, "lsav")
-                call iout(lwork, "lwrk")
+                call iout(ierror, "error_flag = ")
+
+
         		
-                call vhsgsi(nlat, nlon, wsave, ierror)
+                call initialize_vhsgs(nlat, nlon, wavetable, ierror)
                 call name("ivti")
-                call iout(ierror, "ierr")
+                call iout(ierror, "error_flag = ")
         		
                 call ivrtgs(nlat, nlon, isym, nt, v, w, nlat, nlon, a, b, &
-                    mdab, nlat, wsave, lsave, work, lwork, pertrb, ierror)
+                    mdab, nlat, wavetable, pertrb, ierror)
                 call name("ivrt")
-                call iout(ierror, "ierr")
+                call iout(ierror, "error_flag = ")
                 call vout(pertrb, "prtb")
         end select
-
-
-        !     if (nmax.lt.10) then
-        !     do kk=1, nt
-        !     call iout(kk, "**kk")
-        !     call aout(v(1, 1, kk), "   v", nlat, nlon)
-        !     call aout(w(1, 1, kk), "   w", nlat, nlon)
-        !     end do
-        !     end if
 
         !
         !     compare this v, w with ve, we
         !
-        err2v = 0.0
-        err2w = 0.0
+        err2v = ZERO
+        err2w = ZERO
         do k=1, nt
             do j=1, nlon
                 do i=1, nlat
@@ -581,5 +486,8 @@ program tvrt
     !     end of icase loop
     !
     end do
+
+    ! Release memory
+    deallocate (wavetable)
 
 end program tvrt

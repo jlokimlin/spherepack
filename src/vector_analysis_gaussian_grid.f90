@@ -573,8 +573,8 @@ contains
         end if
 
         do k=1, nt
-            call util%hfft%forward(idv, nlon, ve(1, 1, k), idv, wrfft, vb)
-            call util%hfft%forward(idv, nlon, we(1, 1, k), idv, wrfft, vb)
+            call util%hfft%forward(idv, nlon, ve(1, 1, k), idv, wrfft)
+            call util%hfft%forward(idv, nlon, we(1, 1, k), idv, wrfft)
         end do
 
         !  Set polar coefficients to zero

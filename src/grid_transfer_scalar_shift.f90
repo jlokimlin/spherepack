@@ -550,7 +550,7 @@ contains
         !
         !     compute fourier coefficients for r on shifted grid
         !
-        call hfft%forward(m, n, r, m, wsav(n+2), work)
+        call hfft%forward(m, n, r, m, wsav(n+2))
         do l=1, m
             do k=2, n2
                 r2km2 = r(l, k+k-2)
