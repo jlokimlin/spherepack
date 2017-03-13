@@ -484,95 +484,18 @@ contains
         integer(ip), intent(in)  :: idz
         real(wp),    intent(in)  :: zv(idz, *)
         real(wp),    intent(in)  :: zw(idz, *)
-        real(wp),    intent(in)  :: wrfft(*)
+        real(wp),    intent(in)  :: wrfft(:)
 
         ! Local variables
-        integer(ip)         :: i, imm1, k, m, mb, mlat, mlon
-        integer(ip)         :: mmax, mp1, mp2, ndo1, ndo2,  nlp1, np1
-        real(wp)            :: fsn, tsn
-        type(SpherepackUtility) :: util
+        integer(ip) :: i, imm1, k, m, mb
+        integer(ip) :: mmax, mp1, mp2, odd_stride, even_stride, np1
+        type(VectorAnalysisUtility) :: util
 
+        call util%analysis_setup(idvw, jdvw, mdab, ndab, &
+            bi, br, ci, cr, even_stride, idv, imid, imm1, ityp, &
+            mmax, nlat, nlon, nt, odd_stride,  v, ve, vo, w, we, wo, wrfft)
 
-        nlp1 = nlat+1
-        tsn = TWO/nlon
-        fsn = FOUR/nlon
-        mlat = mod(nlat, 2)
-        mlon = mod(nlon, 2)
-        mmax = min(nlat, (nlon+1)/2)
-
-        select case (mlat)
-            case (0)
-                imm1 = imid
-                ndo1 = nlat
-                ndo2 = nlat-1
-            case default
-                imm1 = imid-1
-                ndo1 = nlat-1
-                ndo2 = nlat
-        end select
-
-        select case (ityp)
-            case (:2)
-                do k=1, nt
-                    do i=1, imm1
-                        ve(i, :, k) = tsn*(v(i, 1:nlon, k)+v(nlp1-i, 1:nlon, k))
-                        vo(i, :, k) = tsn*(v(i, 1:nlon, k)-v(nlp1-i, 1:nlon, k))
-                        we(i, :, k) = tsn*(w(i, 1:nlon, k)+w(nlp1-i, 1:nlon, k))
-                        wo(i, :, k) = tsn*(w(i, 1:nlon, k)-w(nlp1-i, 1:nlon, k))
-                    end do
-                end do
-            case default
-                do k=1, nt
-                    do i=1, imm1
-                        ve(i, :, k) = fsn*v(i, 1:nlon, k)
-                        vo(i, :, k) = fsn*v(i, 1:nlon, k)
-                        we(i, :, k) = fsn*w(i, 1:nlon, k)
-                        wo(i, :, k) = fsn*w(i, 1:nlon, k)
-                    end do
-                end do
-        end select
-
-        if (mlat /= 0) then
-            do k=1, nt
-                ve(imid, :, k) = tsn*v(imid, 1:nlon, k)
-                we(imid, :, k) = tsn*w(imid, 1:nlon, k)
-            end do
-        end if
-
-        do k=1, nt
-            call util%hfft%forward(idv, nlon, ve(1, 1, k), idv, wrfft)
-            call util%hfft%forward(idv, nlon, we(1, 1, k), idv, wrfft)
-        end do
-
-        !
-        !  Set polar coefficients to zero
-        !
-        select case (ityp)
-            case (0:1, 3:4, 6:7)
-                do k=1, nt
-                    do mp1=1, mmax
-                        br(mp1, mp1: nlat, k) = ZERO
-                        bi(mp1, mp1: nlat, k) = ZERO
-                    end do
-                end do
-        end select
-
-        !
-        !  Set azimuthal coefficients to zero
-        !
-        select case (ityp)
-            case (0, 2:3, 5:6, 8)
-                do k=1, nt
-                    do mp1=1, mmax
-                        cr(mp1, mp1: nlat, k) = ZERO
-                        ci(mp1, mp1: nlat, k) = ZERO
-                    end do
-                end do
-        end select
-
-        !
         !  Compute coefficients br, bi, cr, ci
-        !
         select case (ityp)
             case (0)
                 !
@@ -582,7 +505,7 @@ contains
                 !
                 do k=1, nt
                     do i=1, imid
-                        do np1=2, ndo2, 2
+                        do np1=2, even_stride, 2
                             br(1, np1, k) = br(1, np1, k)+zv(np1, i)*ve(i, 1, k)
                             cr(1, np1, k) = cr(1, np1, k)-zv(np1, i)*we(i, 1, k)
                         end do
@@ -591,7 +514,7 @@ contains
 
                 do k=1, nt
                     do i=1, imm1
-                        do np1=3, ndo1, 2
+                        do np1=3, odd_stride, 2
                             br(1, np1, k) = br(1, np1, k)+zv(np1, i)*vo(i, 1, k)
                             cr(1, np1, k) = cr(1, np1, k)-zv(np1, i)*wo(i, 1, k)
                         end do
@@ -607,10 +530,10 @@ contains
                     mb = m*(nlat-1)-(m*(m-1))/2
                     mp2 = mp1+1
 
-                    if (mp1 <= ndo1) then
+                    if (mp1 <= odd_stride) then
                         do k=1, nt
                             do i=1, imm1
-                                do np1=mp1, ndo1, 2
+                                do np1=mp1, odd_stride, 2
                                     br(mp1, np1, k) = br(mp1, np1, k)+zv(np1+mb, i)*vo(i, 2*mp1-2, k) &
                                         +zw(np1+mb, i)*we(i, 2*mp1-1, k)
                                     bi(mp1, np1, k) = bi(mp1, np1, k)+zv(np1+mb, i)*vo(i, 2*mp1-1, k) &
@@ -623,9 +546,9 @@ contains
                             end do
                         end do
 
-                        if (mlat /= 0) then
+                        if (mod(nlat, 2) /= 0) then
                             do k=1, nt
-                                do np1=mp1, ndo1, 2
+                                do np1=mp1, odd_stride, 2
                                     br(mp1, np1, k) = br(mp1, np1, k)+zw(np1+mb, imid)*we(imid, 2*mp1-1, k)
                                     bi(mp1, np1, k) = bi(mp1, np1, k)-zw(np1+mb, imid)*we(imid, 2*mp1-2, k)
                                     cr(mp1, np1, k) = cr(mp1, np1, k)+zw(np1+mb, imid)*ve(imid, 2*mp1-1, k)
@@ -635,11 +558,11 @@ contains
                         end if
                     end if
 
-                    if (mp2 > ndo2) exit
+                    if (mp2 > even_stride) exit
 
                     do k=1, nt
                         do i=1, imm1
-                            do np1=mp2, ndo2, 2
+                            do np1=mp2, even_stride, 2
                                 br(mp1, np1, k) = br(mp1, np1, k)+zv(np1+mb, i)*ve(i, 2*mp1-2, k) &
                                     +zw(np1+mb, i)*wo(i, 2*mp1-1, k)
                                 bi(mp1, np1, k) = bi(mp1, np1, k)+zv(np1+mb, i)*ve(i, 2*mp1-1, k) &
@@ -652,10 +575,10 @@ contains
                         end do
                     end do
 
-                    if (mlat == 0) exit
+                    if (mod(nlat, 2) == 0) exit
 
                     do k=1, nt
-                        do np1=mp2, ndo2, 2
+                        do np1=mp2, even_stride, 2
                             br(mp1, np1, k) = br(mp1, np1, k)+zv(np1+mb, imid)*ve(imid, 2*mp1-2, k)
                             bi(mp1, np1, k) = bi(mp1, np1, k)+zv(np1+mb, imid)*ve(imid, 2*mp1-1, k)
                             cr(mp1, np1, k) = cr(mp1, np1, k)-zv(np1+mb, imid)*we(imid, 2*mp1-2, k)
@@ -671,7 +594,7 @@ contains
                 !
                 do k=1, nt
                     do i=1, imid
-                        do np1=2, ndo2, 2
+                        do np1=2, even_stride, 2
                             br(1, np1, k) = br(1, np1, k)+zv(np1, i)*ve(i, 1, k)
                         end do
                     end do
@@ -679,7 +602,7 @@ contains
 
                 do k=1, nt
                     do i=1, imm1
-                        do np1=3, ndo1, 2
+                        do np1=3, odd_stride, 2
                             br(1, np1, k) = br(1, np1, k)+zv(np1, i)*vo(i, 1, k)
                         end do
                     end do
@@ -694,10 +617,10 @@ contains
                     mb = m*(nlat-1)-(m*(m-1))/2
                     mp2 = mp1+1
 
-                    if (mp1 <= ndo1) then
+                    if (mp1 <= odd_stride) then
                         do k=1, nt
                             do i=1, imm1
-                                do np1=mp1, ndo1, 2
+                                do np1=mp1, odd_stride, 2
                                     br(mp1, np1, k) = br(mp1, np1, k)+zv(np1+mb, i)*vo(i, 2*mp1-2, k) &
                                         +zw(np1+mb, i)*we(i, 2*mp1-1, k)
                                     bi(mp1, np1, k) = bi(mp1, np1, k)+zv(np1+mb, i)*vo(i, 2*mp1-1, k) &
@@ -706,9 +629,9 @@ contains
                             end do
                         end do
 
-                        if (mlat /= 0) then
+                        if (mod(nlat, 2) /= 0) then
                             do k=1, nt
-                                do np1=mp1, ndo1, 2
+                                do np1=mp1, odd_stride, 2
                                     br(mp1, np1, k) = br(mp1, np1, k)+zw(np1+mb, imid)*we(imid, 2*mp1-1, k)
                                     bi(mp1, np1, k) = bi(mp1, np1, k)-zw(np1+mb, imid)*we(imid, 2*mp1-2, k)
                                 end do
@@ -716,11 +639,11 @@ contains
                         end if
                     end if
 
-                    if (mp2 > ndo2) exit
+                    if (mp2 > even_stride) exit
 
                     do k=1, nt
                         do i=1, imm1
-                            do np1=mp2, ndo2, 2
+                            do np1=mp2, even_stride, 2
                                 br(mp1, np1, k) = br(mp1, np1, k)+zv(np1+mb, i)*ve(i, 2*mp1-2, k) &
                                     +zw(np1+mb, i)*wo(i, 2*mp1-1, k)
                                 bi(mp1, np1, k) = bi(mp1, np1, k)+zv(np1+mb, i)*ve(i, 2*mp1-1, k) &
@@ -729,10 +652,10 @@ contains
                         end do
                     end do
 
-                    if (mlat == 0) exit
+                    if (mod(nlat, 2) == 0) exit
 
                     do k=1, nt
-                        do np1=mp2, ndo2, 2
+                        do np1=mp2, even_stride, 2
                             br(mp1, np1, k) = br(mp1, np1, k)+zv(np1+mb, imid)*ve(imid, 2*mp1-2, k)
                             bi(mp1, np1, k) = bi(mp1, np1, k)+zv(np1+mb, imid)*ve(imid, 2*mp1-1, k)
                         end do
@@ -746,7 +669,7 @@ contains
                 !
                 do k=1, nt
                     do i=1, imid
-                        do np1=2, ndo2, 2
+                        do np1=2, even_stride, 2
                             cr(1, np1, k) = cr(1, np1, k)-zv(np1, i)*we(i, 1, k)
                         end do
                     end do
@@ -754,7 +677,7 @@ contains
 
                 do k=1, nt
                     do i=1, imm1
-                        do np1=3, ndo1, 2
+                        do np1=3, odd_stride, 2
                             cr(1, np1, k) = cr(1, np1, k)-zv(np1, i)*wo(i, 1, k)
                         end do
                     end do
@@ -769,10 +692,10 @@ contains
                     mb = m*(nlat-1)-(m*(m-1))/2
                     mp2 = mp1+1
 
-                    if (mp1 <= ndo1) then
+                    if (mp1 <= odd_stride) then
                         do k=1, nt
                             do i=1, imm1
-                                do np1=mp1, ndo1, 2
+                                do np1=mp1, odd_stride, 2
                                     cr(mp1, np1, k) = cr(mp1, np1, k)-zv(np1+mb, i)*wo(i, 2*mp1-2, k) &
                                         +zw(np1+mb, i)*ve(i, 2*mp1-1, k)
                                     ci(mp1, np1, k) = ci(mp1, np1, k)-zv(np1+mb, i)*wo(i, 2*mp1-1, k) &
@@ -781,9 +704,9 @@ contains
                             end do
                         end do
 
-                        if (mlat /= 0) then
+                        if (mod(nlat, 2) /= 0) then
                             do k=1, nt
-                                do np1=mp1, ndo1, 2
+                                do np1=mp1, odd_stride, 2
                                     cr(mp1, np1, k) = cr(mp1, np1, k)+zw(np1+mb, imid)*ve(imid, 2*mp1-1, k)
                                     ci(mp1, np1, k) = ci(mp1, np1, k)-zw(np1+mb, imid)*ve(imid, 2*mp1-2, k)
                                 end do
@@ -791,11 +714,11 @@ contains
                         end if
                     end if
 
-                    if (mp2 > ndo2) exit
+                    if (mp2 > even_stride) exit
 
                     do k=1, nt
                         do i=1, imm1
-                            do np1=mp2, ndo2, 2
+                            do np1=mp2, even_stride, 2
                                 cr(mp1, np1, k) = cr(mp1, np1, k)-zv(np1+mb, i)*we(i, 2*mp1-2, k) &
                                     +zw(np1+mb, i)*vo(i, 2*mp1-1, k)
                                 ci(mp1, np1, k) = ci(mp1, np1, k)-zv(np1+mb, i)*we(i, 2*mp1-1, k) &
@@ -804,10 +727,10 @@ contains
                         end do
                     end do
 
-                    if (mlat == 0) exit
+                    if (mod(nlat, 2) == 0) exit
 
                     do k=1, nt
-                        do np1=mp2, ndo2, 2
+                        do np1=mp2, even_stride, 2
                             cr(mp1, np1, k) = cr(mp1, np1, k)-zv(np1+mb, imid)*we(imid, 2*mp1-2, k)
                             ci(mp1, np1, k) = ci(mp1, np1, k)-zv(np1+mb, imid)*we(imid, 2*mp1-1, k)
                         end do
@@ -821,7 +744,7 @@ contains
                 !
                 do k=1, nt
                     do i=1, imid
-                        do np1=2, ndo2, 2
+                        do np1=2, even_stride, 2
                             br(1, np1, k) = br(1, np1, k)+zv(np1, i)*ve(i, 1, k)
                         end do
                     end do
@@ -829,7 +752,7 @@ contains
 
                 do k=1, nt
                     do i=1, imm1
-                        do np1=3, ndo1, 2
+                        do np1=3, odd_stride, 2
                             cr(1, np1, k) = cr(1, np1, k)-zv(np1, i)*wo(i, 1, k)
                         end do
                     end do
@@ -844,10 +767,10 @@ contains
                     mb = m*(nlat-1)-(m*(m-1))/2
                     mp2 = mp1+1
 
-                    if (mp1 <= ndo1) then
+                    if (mp1 <= odd_stride) then
                         do k=1, nt
                             do i=1, imm1
-                                do np1=mp1, ndo1, 2
+                                do np1=mp1, odd_stride, 2
                                     cr(mp1, np1, k) = cr(mp1, np1, k)-zv(np1+mb, i)*wo(i, 2*mp1-2, k) &
                                         +zw(np1+mb, i)*ve(i, 2*mp1-1, k)
                                     ci(mp1, np1, k) = ci(mp1, np1, k)-zv(np1+mb, i)*wo(i, 2*mp1-1, k) &
@@ -856,9 +779,9 @@ contains
                             end do
                         end do
 
-                        if (mlat /= 0) then
+                        if (mod(nlat, 2) /= 0) then
                             do k=1, nt
-                                do np1=mp1, ndo1, 2
+                                do np1=mp1, odd_stride, 2
                                     cr(mp1, np1, k) = cr(mp1, np1, k)+zw(np1+mb, imid)*ve(imid, 2*mp1-1, k)
                                     ci(mp1, np1, k) = ci(mp1, np1, k)-zw(np1+mb, imid)*ve(imid, 2*mp1-2, k)
                                 end do
@@ -866,11 +789,11 @@ contains
                         end if
                     end if
 
-                    if (mp2 > ndo2) exit
+                    if (mp2 > even_stride) exit
 
                     do k=1, nt
                         do i=1, imm1
-                            do np1=mp2, ndo2, 2
+                            do np1=mp2, even_stride, 2
                                 br(mp1, np1, k) = br(mp1, np1, k)+zv(np1+mb, i)*ve(i, 2*mp1-2, k) &
                                     +zw(np1+mb, i)*wo(i, 2*mp1-1, k)
                                 bi(mp1, np1, k) = bi(mp1, np1, k)+zv(np1+mb, i)*ve(i, 2*mp1-1, k) &
@@ -879,10 +802,10 @@ contains
                         end do
                     end do
 
-                    if (mlat == 0) exit
+                    if (mod(nlat, 2) == 0) exit
 
                     do  k=1, nt
-                        do  np1=mp2, ndo2, 2
+                        do  np1=mp2, even_stride, 2
                             br(mp1, np1, k) = br(mp1, np1, k)+zv(np1+mb, imid)*ve(imid, 2*mp1-2, k)
                             bi(mp1, np1, k) = bi(mp1, np1, k)+zv(np1+mb, imid)*ve(imid, 2*mp1-1, k)
                         end do
@@ -896,7 +819,7 @@ contains
                 !
                 do k=1, nt
                     do i=1, imid
-                        do np1=2, ndo2, 2
+                        do np1=2, even_stride, 2
                             br(1, np1, k) = br(1, np1, k)+zv(np1, i)*ve(i, 1, k)
                         end do
                     end do
@@ -911,11 +834,11 @@ contains
                     mb = m*(nlat-1)-(m*(m-1))/2
                     mp2 = mp1+1
 
-                    if (mp2 > ndo2) exit
+                    if (mp2 > even_stride) exit
 
                     do k=1, nt
                         do i=1, imm1
-                            do np1=mp2, ndo2, 2
+                            do np1=mp2, even_stride, 2
                                 br(mp1, np1, k) = br(mp1, np1, k)+zv(np1+mb, i)*ve(i, 2*mp1-2, k) &
                                     +zw(np1+mb, i)*wo(i, 2*mp1-1, k)
                                 bi(mp1, np1, k) = bi(mp1, np1, k)+zv(np1+mb, i)*ve(i, 2*mp1-1, k) &
@@ -924,10 +847,10 @@ contains
                         end do
                     end do
 
-                    if (mlat == 0) exit
+                    if (mod(nlat, 2) == 0) exit
 
                     do k=1, nt
-                        do np1=mp2, ndo2, 2
+                        do np1=mp2, even_stride, 2
                             br(mp1, np1, k) = br(mp1, np1, k)+zv(np1+mb, imid)*ve(imid, 2*mp1-2, k)
                             bi(mp1, np1, k) = bi(mp1, np1, k)+zv(np1+mb, imid)*ve(imid, 2*mp1-1, k)
                         end do
@@ -941,7 +864,7 @@ contains
                 !
                 do k=1, nt
                     do i=1, imm1
-                        do np1=3, ndo1, 2
+                        do np1=3, odd_stride, 2
                             cr(1, np1, k) = cr(1, np1, k)-zv(np1, i)*wo(i, 1, k)
                         end do
                     end do
@@ -956,11 +879,11 @@ contains
                     mb = m*(nlat-1)-(m*(m-1))/2
                     mp2 = mp1+1
 
-                    if (mp1 > ndo1) exit
+                    if (mp1 > odd_stride) exit
 
                     do k=1, nt
                         do i=1, imm1
-                            do np1=mp1, ndo1, 2
+                            do np1=mp1, odd_stride, 2
                                 cr(mp1, np1, k) = cr(mp1, np1, k)-zv(np1+mb, i)*wo(i, 2*mp1-2, k) &
                                     +zw(np1+mb, i)*ve(i, 2*mp1-1, k)
                                 ci(mp1, np1, k) = ci(mp1, np1, k)-zv(np1+mb, i)*wo(i, 2*mp1-1, k) &
@@ -969,10 +892,10 @@ contains
                         end do
                     end do
 
-                    if (mlat == 0) exit
+                    if (mod(nlat, 2) == 0) exit
 
                     do k=1, nt
-                        do np1=mp1, ndo1, 2
+                        do np1=mp1, odd_stride, 2
                             cr(mp1, np1, k) = cr(mp1, np1, k)+zw(np1+mb, imid)*ve(imid, 2*mp1-1, k)
                             ci(mp1, np1, k) = ci(mp1, np1, k)-zw(np1+mb, imid)*ve(imid, 2*mp1-2, k)
                         end do
@@ -986,7 +909,7 @@ contains
                 !
                 do k=1, nt
                     do i=1, imid
-                        do np1=2, ndo2, 2
+                        do np1=2, even_stride, 2
                             cr(1, np1, k) = cr(1, np1, k)-zv(np1, i)*we(i, 1, k)
                         end do
                     end do
@@ -994,7 +917,7 @@ contains
 
                 do k=1, nt
                     do i=1, imm1
-                        do np1=3, ndo1, 2
+                        do np1=3, odd_stride, 2
                             br(1, np1, k) = br(1, np1, k)+zv(np1, i)*vo(i, 1, k)
                         end do
                     end do
@@ -1009,11 +932,11 @@ contains
                     mb = m*(nlat-1)-(m*(m-1))/2
                     mp2 = mp1+1
 
-                    if (mp1 <= ndo1) then
+                    if (mp1 <= odd_stride) then
 
                         do  k=1, nt
                             do  i=1, imm1
-                                do  np1=mp1, ndo1, 2
+                                do  np1=mp1, odd_stride, 2
                                     br(mp1, np1, k) = br(mp1, np1, k)+zv(np1+mb, i)*vo(i, 2*mp1-2, k) &
                                         +zw(np1+mb, i)*we(i, 2*mp1-1, k)
                                     bi(mp1, np1, k) = bi(mp1, np1, k)+zv(np1+mb, i)*vo(i, 2*mp1-1, k) &
@@ -1022,9 +945,9 @@ contains
                             end do
                         end do
 
-                        if (mlat /= 0) then
+                        if (mod(nlat, 2) /= 0) then
                             do  k=1, nt
-                                do  np1=mp1, ndo1, 2
+                                do  np1=mp1, odd_stride, 2
                                     br(mp1, np1, k) = br(mp1, np1, k)+zw(np1+mb, imid)*we(imid, 2*mp1-1, k)
                                     bi(mp1, np1, k) = bi(mp1, np1, k)-zw(np1+mb, imid)*we(imid, 2*mp1-2, k)
                                 end do
@@ -1032,11 +955,11 @@ contains
                         end if
                     end if
 
-                    if (mp2 > ndo2) exit
+                    if (mp2 > even_stride) exit
 
                     do k=1, nt
                         do  i=1, imm1
-                            do  np1=mp2, ndo2, 2
+                            do  np1=mp2, even_stride, 2
                                 cr(mp1, np1, k) = cr(mp1, np1, k)-zv(np1+mb, i)*we(i, 2*mp1-2, k) &
                                     +zw(np1+mb, i)*vo(i, 2*mp1-1, k)
                                 ci(mp1, np1, k) = ci(mp1, np1, k)-zv(np1+mb, i)*we(i, 2*mp1-1, k) &
@@ -1045,10 +968,10 @@ contains
                         end do
                     end do
 
-                    if (mlat == 0) exit
+                    if (mod(nlat, 2) == 0) exit
 
                     do k=1, nt
-                        do np1=mp2, ndo2, 2
+                        do np1=mp2, even_stride, 2
                             cr(mp1, np1, k) = cr(mp1, np1, k)-zv(np1+mb, imid)*we(imid, 2*mp1-2, k)
                             ci(mp1, np1, k) = ci(mp1, np1, k)-zv(np1+mb, imid)*we(imid, 2*mp1-1, k)
                         end do
@@ -1062,7 +985,7 @@ contains
                 !
                 do k=1, nt
                     do i=1, imm1
-                        do np1=3, ndo1, 2
+                        do np1=3, odd_stride, 2
                             br(1, np1, k) = br(1, np1, k)+zv(np1, i)*vo(i, 1, k)
                         end do
                     end do
@@ -1077,11 +1000,11 @@ contains
                     mb = m*(nlat-1)-(m*(m-1))/2
                     mp2 = mp1+1
 
-                    if (mp1 > ndo1) exit
+                    if (mp1 > odd_stride) exit
 
                     do  k=1, nt
                         do  i=1, imm1
-                            do  np1=mp1, ndo1, 2
+                            do  np1=mp1, odd_stride, 2
                                 br(mp1, np1, k) = br(mp1, np1, k)+zv(np1+mb, i)*vo(i, 2*mp1-2, k) &
                                     +zw(np1+mb, i)*we(i, 2*mp1-1, k)
                                 bi(mp1, np1, k) = bi(mp1, np1, k)+zv(np1+mb, i)*vo(i, 2*mp1-1, k) &
@@ -1090,10 +1013,10 @@ contains
                         end do
                     end do
 
-                    if (mlat == 0) exit
+                    if (mod(nlat, 2) == 0) exit
 
                     do k=1, nt
-                        do np1=mp1, ndo1, 2
+                        do np1=mp1, odd_stride, 2
                             br(mp1, np1, k) = br(mp1, np1, k)+zw(np1+mb, imid)*we(imid, 2*mp1-1, k)
                             bi(mp1, np1, k) = bi(mp1, np1, k)-zw(np1+mb, imid)*we(imid, 2*mp1-2, k)
                         end do
@@ -1107,7 +1030,7 @@ contains
                 !
                 do k=1, nt
                     do i=1, imid
-                        do np1=2, ndo2, 2
+                        do np1=2, even_stride, 2
                             cr(1, np1, k) = cr(1, np1, k)-zv(np1, i)*we(i, 1, k)
                         end do
                     end do
@@ -1122,11 +1045,11 @@ contains
                     mb = m*(nlat-1)-(m*(m-1))/2
                     mp2 = mp1+1
 
-                    if (mp2 > ndo2) exit
+                    if (mp2 > even_stride) exit
 
                     do k=1, nt
                         do i=1, imm1
-                            do np1=mp2, ndo2, 2
+                            do np1=mp2, even_stride, 2
                                 cr(mp1, np1, k) = cr(mp1, np1, k)-zv(np1+mb, i)*we(i, 2*mp1-2, k) &
                                     +zw(np1+mb, i)*vo(i, 2*mp1-1, k)
                                 ci(mp1, np1, k) = ci(mp1, np1, k)-zv(np1+mb, i)*we(i, 2*mp1-1, k) &
@@ -1135,10 +1058,10 @@ contains
                         end do
                     end do
 
-                    if (mlat == 0) exit
+                    if (mod(nlat, 2) == 0) exit
 
                     do k=1, nt
-                        do np1=mp2, ndo2, 2
+                        do np1=mp2, even_stride, 2
                             cr(mp1, np1, k) = cr(mp1, np1, k)-zv(np1+mb, imid)*we(imid, 2*mp1-2, k)
                             ci(mp1, np1, k) = ci(mp1, np1, k)-zv(np1+mb, imid)*we(imid, 2*mp1-1, k)
                         end do

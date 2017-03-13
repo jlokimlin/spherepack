@@ -31,7 +31,7 @@ module type_RegularSphere
         ScalarSynthesisUtility
 
     use vector_analysis_routines, only: &
-        VectorAnalysisUtility
+        VectorForwardTransform
 
     use vector_synthesis_routines, only: &
         VectorBackwardTransform
@@ -329,7 +329,7 @@ contains
 
         ! Local variables
         integer(ip)    :: error_flag
-        type(VectorAnalysisUtility) :: aux
+        type(VectorForwardTransform) :: aux
 
         ! Check if object is usable
         call self%assert_initialized('regular_vector_analysis')

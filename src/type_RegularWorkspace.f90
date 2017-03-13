@@ -14,7 +14,7 @@ module type_RegularWorkspace
         ScalarSynthesisUtility
 
     use vector_analysis_routines, only: &
-        VectorAnalysisUtility
+        VectorForwardTransform
 
     use vector_synthesis_routines, only: &
         VectorBackwardTransform
@@ -227,7 +227,7 @@ contains
 
         ! Local variables
         integer(ip)                 :: error_flag
-        type(VectorAnalysisUtility) :: util
+        type(VectorForwardTransform) :: util
 
         !  Allocate memory and precompute wavetable
         call util%initialize_vhaes(nlat, nlon, self%forward_vector, error_flag)

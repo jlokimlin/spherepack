@@ -19,6 +19,7 @@ module vector_analysis_routines
     public :: vhaes, vhaesi, initialize_vhaes
     public :: vhaec, vhaeci, initialize_vhagc
     public :: vhags, vhagsi, initialize_vhags
+    public :: VectorForwardTransform
     public :: VectorAnalysisUtility
 
     ! Parameters confined to the module
@@ -28,7 +29,7 @@ module vector_analysis_routines
     real(wp), parameter :: TWO = 2.0_wp
     real(wp), parameter :: FOUR = 4.0_wp
 
-    type, public :: VectorAnalysisUtility
+    type, public :: VectorForwardTransform
     contains
         ! Type-bound procedures
         procedure, nopass :: vhaec
@@ -39,6 +40,11 @@ module vector_analysis_routines
         procedure, nopass :: initialize_vhaes
         procedure, nopass :: initialize_vhagc
         procedure, nopass :: initialize_vhags
+    end type VectorForwardTransform
+
+    type, public, extends(SpherepackUtility) :: VectorAnalysisUtility
+    contains
+        procedure :: analysis_setup
     end type VectorAnalysisUtility
 
     ! Declare interfaces for submodule implementation
@@ -169,6 +175,117 @@ module vector_analysis_routines
     end interface
 
 contains
+
+    subroutine analysis_setup(self, idvw, jdvw, mdab, ndab, &
+        bi, br, ci, cr, even_stride, idv, imid, imm1, ityp, &
+        mmax, nlat, nlon, nt, odd_stride,  v, ve, vo, w, we, wo, wrfft)
+
+        class(VectorAnalysisUtility), intent(inout) :: self
+        integer(ip), intent(in)  :: idvw
+        integer(ip), intent(in)  :: jdvw
+        integer(ip), intent(in)  :: mdab
+        integer(ip), intent(in)  :: ndab
+        real(wp),    intent(out) :: bi(mdab, ndab, nt)
+        real(wp),    intent(out) :: br(mdab, ndab, nt)
+        real(wp),    intent(out) :: ci(mdab, ndab, nt)
+        real(wp),    intent(out) :: cr(mdab, ndab, nt)
+        integer(ip), intent(out) :: even_stride
+        integer(ip), intent(in)  :: idv
+        integer(ip), intent(in)  :: imid
+        integer(ip), intent(out) :: imm1
+        integer(ip), intent(in)  :: ityp
+        integer(ip), intent(out) :: mmax
+        integer(ip), intent(in)  :: nlat
+        integer(ip), intent(in)  :: nlon
+        integer(ip), intent(in)  :: nt
+        integer(ip), intent(out) :: odd_stride
+        real(wp),    intent(in)  :: v(idvw, jdvw, nt)
+        real(wp),    intent(out) :: ve(idv, nlon, nt)
+        real(wp),    intent(out) :: vo(idv, nlon, nt)
+        real(wp),    intent(in)  :: w(idvw, jdvw, nt)
+        real(wp),    intent(out) :: we(idv, nlon, nt)
+        real(wp),    intent(out) :: wo(idv, nlon, nt)
+        real(wp),    intent(in)  :: wrfft(:)
+
+        ! Local variables
+        integer(ip) :: k, i, mp1
+        real(wp)    :: tsn, fsn
+
+        mmax = min(nlat, (nlon+1)/2)
+
+        select case (mod(nlat, 2))
+            case (0)
+                imm1 = imid
+                odd_stride = nlat
+                even_stride = nlat-1
+            case default
+                imm1 = imid-1
+                odd_stride = nlat-1
+                even_stride = nlat
+        end select
+
+        ! Set multipliers
+        tsn = TWO/nlon
+        fsn = FOUR/nlon
+
+        select case (ityp)
+            case (0:2)
+                do k=1, nt
+                    do i=1, imm1
+                        ve(i, :, k) = tsn*(v(i, :nlon, k)+v((nlat+1)-i, :nlon, k))
+                        vo(i, :, k) = tsn*(v(i, :nlon, k)-v((nlat+1)-i, :nlon, k))
+                        we(i, :, k) = tsn*(w(i, :nlon, k)+w((nlat+1)-i, :nlon, k))
+                        wo(i, :, k) = tsn*(w(i, :nlon, k)-w((nlat+1)-i, :nlon, k))
+                    end do
+                end do
+            case default
+
+
+                do k=1, nt
+                    do i=1, imm1
+                        ve(i, :, k) = fsn * v(i, :nlon, k)
+                        vo(i, :, k) = fsn * v(i, :nlon, k)
+                        we(i, :, k) = fsn * w(i, :nlon, k)
+                        wo(i, :, k) = fsn * w(i, :nlon, k)
+                    end do
+                end do
+        end select
+
+        if (mod(nlat, 2) /= 0) then
+            do k=1, nt
+                ve(imid, :, k) = tsn * v(imid, 1:nlon, k)
+                we(imid, :, k) = tsn * w(imid, 1:nlon, k)
+            end do
+        end if
+
+        do k=1, nt
+            call self%hfft%forward(idv, nlon, ve(:, :, k), idv, wrfft)
+            call self%hfft%forward(idv, nlon, we(:, :, k), idv, wrfft)
+        end do
+
+        !  Set polar coefficients to zero
+        select case (ityp)
+            case (0:1, 3:4, 6:7)
+                do k=1, nt
+                    do mp1=1, mmax
+                        br(mp1, mp1:nlat, k) = ZERO
+                        bi(mp1, mp1:nlat, k) = ZERO
+                    end do
+                end do
+        end select
+
+        !  Set azimuthal coefficients to zero
+        select case (ityp)
+            case (0, 2:3, 5:6, 8)
+                do k=1, nt
+                    do mp1=1, mmax
+                        cr(mp1, mp1: nlat, k) = ZERO
+                        ci(mp1, mp1: nlat, k) = ZERO
+                    end do
+                end do
+        end select
+
+    end subroutine analysis_setup
 
     subroutine initialize_vhaec(nlat, nlon, wvhaec, error_flag)
 

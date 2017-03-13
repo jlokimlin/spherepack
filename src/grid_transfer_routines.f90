@@ -15,7 +15,7 @@ module grid_transfer_routines
         ScalarSynthesisUtility
 
     use vector_analysis_routines, only: &
-        VectorAnalysisUtility
+        VectorForwardTransform
 
     use vector_synthesis_routines, only: &
         VectorBackwardTransform

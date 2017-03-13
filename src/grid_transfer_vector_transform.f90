@@ -511,7 +511,7 @@ contains
         integer(ip)                  :: igrda, igrdb, mdab_a, mdab_b
         real(wp), allocatable        :: wavetable_a(:), wavetable_b(:)
         integer(ip), parameter       :: NT = 1, ITYP = 0
-        type(VectorAnalysisUtility)  :: analysis_util
+        type(VectorForwardTransform)  :: analysis_util
         type(VectorBackwardTransform) :: synthesis_util
 
         ! Check calling arguments

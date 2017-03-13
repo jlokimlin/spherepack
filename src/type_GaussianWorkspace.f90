@@ -14,7 +14,7 @@ module type_GaussianWorkspace
         ScalarSynthesisUtility
 
     use vector_analysis_routines, only: &
-        VectorAnalysisUtility
+        VectorForwardTransform
 
     use vector_synthesis_routines, only: &
         VectorBackwardTransform
@@ -244,7 +244,7 @@ contains
 
         ! Local variables
         integer(ip)                 :: error_flag
-        type(VectorAnalysisUtility) :: util
+        type(VectorForwardTransform) :: util
 
         ! Allocate memory
         call util%initialize_vhags(nlat, nlon, self%forward_vector, error_flag)
