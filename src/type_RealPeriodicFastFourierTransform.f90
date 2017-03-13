@@ -187,13 +187,15 @@ contains
             lwork = m * n
 
             block
-                real(wp)    :: work(m*n)
-                integer(ip) :: iw
+                integer(ip) :: iw1, iw2
+                real(wp)    :: work(lwork)
 
-                ! Set workspace index pointer
-                iw = n + 1
+                ! Set workspace index pointers
+                iw1 = 1
+                iw2 = n + 1
 
-                call forward_lower_utility_routine(m, n, r, mdimr, work, wsave, wsave(iw:))
+                call forward_lower_utility_routine(m, n, r, mdimr, work, &
+                    wsave(iw1:), wsave(iw2:))
             end block
         end if
 
@@ -265,10 +267,7 @@ contains
     !     wsave   contains results which must not be destroyed between
     !             calls of hrfftb or hrfftf.
     !
-    !     work    a real work array with m*n locations that does not
-    !             have to be saved
-    !
-    subroutine hrfftb(m, n, r, mdimr, wsave, work)
+    subroutine hrfftb(m, n, r, mdimr, wsave)
 
         ! Dummy arguments
         integer(ip), intent(in)     :: m
@@ -276,10 +275,25 @@ contains
         real(wp),    intent(inout)  :: r(mdimr, n)
         integer(ip), intent(in)     :: mdimr
         real(wp),    intent(in)     :: wsave(n+NUMBER_OF_FACTORS)
-        real(wp),    intent(out)    :: work(m*n)
+
+        ! Local variables
+        integer(ip) :: lwork
 
         if (n > 1) then
-            call backward_lower_utility_routine(m, n, r, mdimr, work, wsave, wsave(n+1))
+
+            ! Set required workspace size
+            lwork = m * n
+
+            block
+                integer(ip) :: iw1, iw2
+                real(wp)    :: work(lwork)
+
+                ! Set wavetable index pointers
+                iw1 = 1
+                iw2 = n + 1
+                call backward_lower_utility_routine(m, n, r, mdimr, work, &
+                    wsave(iw1:), wsave(iw2:))
+            end block
         end if
 
     end subroutine hrfftb

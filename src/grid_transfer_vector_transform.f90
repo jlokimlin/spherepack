@@ -512,7 +512,7 @@ contains
         real(wp), allocatable        :: wavetable_a(:), wavetable_b(:)
         integer(ip), parameter       :: NT = 1, ITYP = 0
         type(VectorAnalysisUtility)  :: analysis_util
-        type(VectorSynthesisUtility) :: synthesis_util
+        type(VectorBackwardTransform) :: synthesis_util
 
         ! Check calling arguments
         associate( &

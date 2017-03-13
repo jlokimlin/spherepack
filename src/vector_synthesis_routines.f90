@@ -20,6 +20,7 @@ module vector_synthesis_routines
     public :: vhses, vhsesi, initialize_vhses
     public :: vhsec, vhseci, initialize_vhsgc
     public :: vhsgs, vhsgsi, initialize_vhsgs
+    public :: VectorBackwardTransform
     public :: VectorSynthesisUtility
     public :: get_lvhsgs
     
@@ -30,7 +31,7 @@ module vector_synthesis_routines
     real(wp), parameter :: TWO = 2.0_wp
     real(wp), parameter :: FOUR = 4.0_wp
 
-    type, public :: VectorSynthesisUtility
+    type, public :: VectorBackwardTransform
     contains
         ! Type-bound procedures
         procedure, nopass :: vhsec
@@ -45,6 +46,12 @@ module vector_synthesis_routines
         procedure, nopass :: initialize_vhses
         procedure, nopass :: initialize_vhsgc
         procedure, nopass :: initialize_vhsgs
+    end type VectorBackwardTransform
+
+    type, public, extends(SpherepackUtility) :: VectorSynthesisUtility
+    contains
+        procedure         :: assemble_transform
+        procedure, nopass :: synthesis_setup
     end type VectorSynthesisUtility
 
     ! Declare interfaces for submodule implementation
@@ -175,6 +182,102 @@ module vector_synthesis_routines
     end interface
 
 contains
+
+    pure subroutine synthesis_setup(even_stride, imid, imm1, mmax, nlat, &
+        odd_stride, ve, vo, we, wo)
+
+        ! Dummy arguments
+        integer(ip), intent(out) :: even_stride
+        integer(ip), intent(in)  :: imid
+        integer(ip), intent(out) :: imm1
+        integer(ip), intent(out) :: mmax
+        integer(ip), intent(in)  :: nlat
+        integer(ip), intent(out) :: odd_stride
+        real(wp),    intent(out) :: ve(:,:,:)
+        real(wp),    intent(out) :: vo(:,:,:)
+        real(wp),    intent(out) :: we(:,:,:)
+        real(wp),    intent(out) :: wo(:,:,:)
+
+        ! Local variables
+        integer(ip) :: nlon
+
+        nlon = size(ve, dim=2)
+
+        mmax = min(nlat, (nlon+1)/2)
+
+        select case (mod(nlat, 2))
+            case (0)
+                imm1 = imid
+                odd_stride = nlat
+                even_stride = nlat-1
+            case default
+                imm1 = imid-1
+                odd_stride = nlat-1
+                even_stride = nlat
+        end select
+
+        ! Set even spherical components equal to 0.0
+        ve = ZERO
+        we = ZERO
+        vo = ZERO
+        wo = ZERO
+
+    end subroutine synthesis_setup
+
+    subroutine assemble_transform(self, idvw, jdvw, idv, imid, &
+        imm1, ityp, nlat, nlon, nt, v, ve, vo, w, we, wo, wrfft)
+
+        class(VectorSynthesisUtility), intent(inout) :: self
+        integer(ip), intent(in)    :: idvw
+        integer(ip), intent(in)    :: jdvw
+        integer(ip), intent(in)    :: idv
+        integer(ip), intent(in)    :: imid
+        integer(ip), intent(in)    :: imm1
+        integer(ip), intent(in)    :: ityp
+        integer(ip), intent(in)    :: nlat
+        integer(ip), intent(in)    :: nlon
+        integer(ip), intent(in)    :: nt
+        real(wp),    intent(out)   :: v(idvw, jdvw, nt)
+        real(wp),    intent(inout) :: ve(idv, nlon, nt)
+        real(wp),    intent(in)    :: vo(idv, nlon, nt)
+        real(wp),    intent(out)   :: w(idvw, jdvw, nt)
+        real(wp),    intent(inout) :: we(idv, nlon, nt)
+        real(wp),    intent(in)    :: wo(idv, nlon, nt)
+        real(wp),    intent(in)    :: wrfft(..)
+
+        ! Local variables
+        integer(ip) :: k, i
+
+        do k=1, nt
+            call self%hfft%backward(idv, nlon, ve(:, :, k), idv, wrfft)
+            call self%hfft%backward(idv, nlon, we(:, :, k), idv, wrfft)
+        end do
+
+        select case (ityp)
+            case(0:2)
+                do k=1, nt
+                    do i=1, imm1
+                        v(i, :, k) = HALF * (ve(i, :, k) + vo(i, :, k))
+                        w(i, :, k) = HALF * (we(i, :, k) + wo(i, :, k))
+                        v((nlat+1)-i, :, k) = HALF * (ve(i, :, k) - vo(i, :, k))
+                        w((nlat+1)-i, :, k) = HALF * (we(i, :, k) - wo(i, :, k))
+                    end do
+                end do
+            case default
+                do k=1, nt
+                    v(1:imm1, :, k) = HALF * ve(1:imm1, :, k)
+                    w(1:imm1, :, k) = HALF * we(1:imm1, :, k)
+                end do
+        end select
+
+        if (mod(nlat, 2) /= 0) then
+            do k=1, nt
+                v(imid, :, k) = HALF * ve(imid, :, k)
+                w(imid, :, k) = HALF * we(imid, :, k)
+            end do
+        end if
+
+    end subroutine assemble_transform
 
     subroutine initialize_vhsec(nlat, nlon, wvhsec, error_flag)
 

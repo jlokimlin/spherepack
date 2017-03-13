@@ -18,7 +18,7 @@ module grid_transfer_routines
         VectorAnalysisUtility
 
     use vector_synthesis_routines, only: &
-        VectorSynthesisUtility
+        VectorBackwardTransform
 
     ! Explicit typing only
     implicit none

@@ -17,7 +17,7 @@ module type_RegularWorkspace
         VectorAnalysisUtility
 
     use vector_synthesis_routines, only: &
-        VectorSynthesisUtility
+        VectorBackwardTransform
 
     ! Explicit typing only
     implicit none
@@ -273,7 +273,7 @@ contains
 
         ! Local variables
         integer(ip)                  :: error_flag
-        type(VectorSynthesisUtility) :: util
+        type(VectorBackwardTransform) :: util
 
         ! Allocate memory
         call util%initialize_vhses(nlat, nlon, self%backward_vector, error_flag)

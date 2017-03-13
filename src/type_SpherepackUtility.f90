@@ -82,9 +82,14 @@ module type_SpherepackUtility
         procedure, nopass :: get_lshaes
         procedure, nopass :: get_lshags
         procedure, nopass :: get_lshsgs
+        procedure, nopass :: get_lvhsgc
+        procedure, nopass :: get_lvhsec
+        procedure, nopass :: get_lvhsgs
+        procedure, nopass :: get_lvhses
         procedure, nopass :: get_lwork_for_gaussian_saved
         procedure, nopass :: get_lwork_for_shagsi
         procedure, nopass :: get_ldwork_for_shagsi
+        procedure, nopass :: check_vector_transform_inputs
     end type SpherepackUtility
 
     ! Parameters confined to the module
@@ -100,6 +105,118 @@ module type_SpherepackUtility
     integer(ip), parameter :: BOTH_ODD = 4
 
 contains
+
+    pure subroutine check_vector_transform_inputs(ityp, idvw, jdvw, &
+        mdab, ndab, nlat, nlon, nt, required_wavetable_size, &
+        wavetable, error_flag)
+
+        ! Dummy arguments
+        integer(ip), intent(in)  :: ityp
+        integer(ip), intent(in)  :: idvw
+        integer(ip), intent(in)  :: jdvw
+        integer(ip), intent(in)  :: mdab
+        integer(ip), intent(in)  :: ndab
+        integer(ip), intent(in)  :: nlat
+        integer(ip), intent(in)  :: nlon
+        integer(ip), intent(in)  :: nt
+        integer(ip), intent(in)  :: required_wavetable_size
+        real(wp),    intent(in)  :: wavetable(:)
+        integer(ip), intent(out) :: error_flag
+
+        ! Check calling arguments
+        if (nlat < 3) then
+            error_flag = 1
+        else if (nlon < 1) then
+            error_flag = 2
+        else if (ityp < 0 .or. ityp > 8) then
+            error_flag = 3
+        else if (nt < 0) then
+            error_flag = 4
+        else if ((ityp <= 2 .and. idvw < nlat) &
+            .or. &
+            (ityp > 2 .and. idvw < (nlat+1)/2)) then
+            error_flag = 5
+        else if (jdvw < nlon) then
+            error_flag = 6
+        else if (mdab < min(nlat, (nlon+1)/2)) then
+            error_flag = 7
+        else if (ndab < nlat) then
+            error_flag = 8
+        else if (size(wavetable) < required_wavetable_size) then
+            error_flag = 9
+        else
+            error_flag = 0
+        end if
+
+    end subroutine check_vector_transform_inputs
+
+    pure function get_lvhsgc(nlat, nlon) &
+        result (return_value)
+
+        ! Dummy arguments
+        integer(ip), intent(in)  :: nlat
+        integer(ip), intent(in)  :: nlon
+        integer(ip)              :: return_value
+
+        ! Local variables
+        integer(ip) :: n1, n2
+
+        call compute_parity(nlat, nlon, n1, n2)
+
+        return_value = 4 * nlat * n2 + 3 * max(n1-2,0)*(2*nlat-n1-1) + nlon + 15
+
+    end function get_lvhsgc
+
+    pure function get_lvhsgs(nlat, nlon) &
+        result (return_value)
+
+        ! Dummy arguments
+        integer(ip), intent(in)  :: nlat
+        integer(ip), intent(in)  :: nlon
+        integer(ip)              :: return_value
+
+        ! Local variables
+        integer(ip)  :: imid, lmn
+
+        imid = (nlat+1)/2
+        lmn = (nlat*(nlat+1))/2
+        return_value = 2*(imid*lmn)+nlon+15
+
+    end function get_lvhsgs
+
+    pure function get_lvhsec(nlat, nlon) &
+        result (return_value)
+
+        ! Dummy arguments
+        integer(ip), intent(in)  :: nlat
+        integer(ip), intent(in)  :: nlon
+        integer(ip)              :: return_value
+
+        ! Local variables
+        integer(ip) :: n1, n2
+
+        call compute_parity(nlat, nlon, n1, n2)
+
+        return_value = 4*nlat*n2+3*max(n1-2, 0)*(2*nlat-n1-1)+nlon+15
+
+    end function get_lvhsec
+
+    pure function get_lvhses(nlat, nlon) &
+        result (return_value)
+
+        ! Dummy arguments
+        integer(ip), intent(in) :: nlat
+        integer(ip), intent(in) :: nlon
+        integer(ip)             :: return_value
+
+        ! Local variables
+        integer(ip) :: n1, n2
+
+        call compute_parity(nlat, nlon, n1, n2)
+
+        return_value = n1 * n2 * ((2*nlat) - n1 + 1) + nlon + 15
+
+    end function get_lvhses
 
     pure function get_lshaes(nlat, nlon) &
         result (return_value)
@@ -589,7 +706,7 @@ contains
             km0 => column_indices(0), &
             km1 => column_indices(1), &
             km2 => column_indices(2) &
-           )
+            )
 
             select case (m)
                 case(0)
@@ -717,7 +834,7 @@ contains
             iw2 => workspace(2), &
             iw3 => workspace(3), &
             iw4 => workspace(4) &
-           )
+            )
 
             call zfin_lower_utility_routine(isym, nlat, m, z, imid, i3, wzfin, &
                 wzfin(iw1), wzfin(iw2), wzfin(iw3), wzfin(iw4))
@@ -1121,7 +1238,7 @@ contains
             iw2 => workspace_indices(2), &
             iw3 => workspace_indices(3), &
             iw4 => workspace_indices(4) &
-           )
+            )
             !
             !     the length of walin is ((5*l-7)*l+6)/2
             !

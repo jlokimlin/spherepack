@@ -545,7 +545,7 @@ contains
 
             if (mod(nlon, 2) == 0) ge(1: ls, nlon, k) = TWO*ge(1: ls, nlon, k)
 
-            call util%hfft%backward(ls, nlon, ge(1, 1, k), ls, whrfft, work)
+            call util%hfft%backward(ls, nlon, ge(:, :, k), ls, whrfft)
         end do
 
         select case (isym)

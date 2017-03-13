@@ -17,7 +17,7 @@ module type_GaussianWorkspace
         VectorAnalysisUtility
 
     use vector_synthesis_routines, only: &
-        VectorSynthesisUtility
+        VectorBackwardTransform
 
     ! Explicit typing only
     implicit none
@@ -286,7 +286,7 @@ contains
 
         ! Local variables
         integer(ip)                  :: error_flag
-        type(VectorSynthesisUtility) :: util
+        type(VectorBackwardTransform) :: util
 
         !  Allocate memory and precompute wavetable
         call util%initialize_vhsgs(nlat, nlon, self%backward_vector, error_flag)

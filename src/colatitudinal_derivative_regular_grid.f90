@@ -994,8 +994,8 @@ contains
         end select vector_symmetry_cases
 
         do k=1, nt
-            call util%hfft%backward(idv, nlon, vte(1, 1, k), idv, wrfft, vb)
-            call util%hfft%backward(idv, nlon, wte(1, 1, k), idv, wrfft, vb)
+            call util%hfft%backward(idv, nlon, vte(:, :, k), idv, wrfft)
+            call util%hfft%backward(idv, nlon, wte(:, :, k), idv, wrfft)
         end do
 
         select case (ityp)

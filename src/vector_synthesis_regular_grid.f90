@@ -559,17 +559,15 @@ contains
         integer(ip) :: k
         integer(ip) :: m
         integer(ip) :: mdab
-        integer(ip) :: mlat
-        integer(ip) :: mlon
+
         integer(ip) :: mmax
         integer(ip) :: mp1
         integer(ip) :: mp2
         integer(ip) :: ndab
-        integer(ip) :: ndo1
-        integer(ip) :: ndo2
+        integer(ip) :: odd_stride
+        integer(ip) :: even_stride
         integer(ip) :: nlat
         integer(ip) :: nlon
-        integer(ip) :: nlp1
         integer(ip) :: np1
         integer(ip) :: nt
         real(wp) :: v
@@ -589,27 +587,10 @@ contains
             wo(idv, nlon, nt), wvbin(*), wwbin(*), wrfft(*), &
             vb(imid, nlat, 3), wb(imid, nlat, 3)
 
-        type(SpherepackUtility) :: util
+        type(VectorSynthesisUtility) :: util
 
-        nlp1 = nlat+1
-        mlat = mod(nlat, 2)
-        mlon = mod(nlon, 2)
-        mmax = min(nlat, (nlon+1)/2)
-
-        select case (mlat)
-            case (0)
-                imm1 = imid
-                ndo1 = nlat
-                ndo2 = nlat-1
-            case default
-                imm1 = imid-1
-                ndo1 = nlat-1
-                ndo2 = nlat
-        end select
-
-        ! Preset even spherical components to 0.0
-        ve = ZERO
-        we = ZERO
+       call util%synthesis_setup(even_stride, imid, imm1, mmax, nlat, &
+            odd_stride, ve, vo, we, wo)
 
         vector_symmetry_cases: select case (ityp)
             case(0)
@@ -621,7 +602,7 @@ contains
                 call util%compute_polar_component(0, nlat, nlon, 0, vb, iv, wvbin)
 
                 do k=1, nt
-                    do np1=2, ndo2, 2
+                    do np1=2, even_stride, 2
                         do i=1, imid
                             ve(i, 1, k)=ve(i, 1, k)+br(1, np1, k)*vb(i, np1, iv)
                             we(i, 1, k)=we(i, 1, k)-cr(1, np1, k)*vb(i, np1, iv)
@@ -630,7 +611,7 @@ contains
                 end do
 
                 do k=1, nt
-                    do np1=3, ndo1, 2
+                    do np1=3, odd_stride, 2
                         do i=1, imm1
                             vo(i, 1, k)=vo(i, 1, k)+br(1, np1, k)*vb(i, np1, iv)
                             wo(i, 1, k)=wo(i, 1, k)-cr(1, np1, k)*vb(i, np1, iv)
@@ -650,9 +631,9 @@ contains
                     call util%compute_polar_component(0, nlat, nlon, m, vb, iv, wvbin)
                     call util%compute_azimuthal_component(0, nlat, nlon, m, wb, iw, wwbin)
 
-                    if (mp1 <= ndo1) then
+                    if (mp1 <= odd_stride) then
                         do k=1, nt
-                            do np1=mp1, ndo1, 2
+                            do np1=mp1, odd_stride, 2
                                 do i=1, imm1
                                     vo(i, 2*mp1-2, k) = vo(i, 2*mp1-2, k)+br(mp1, np1, k)*vb(i, np1, iv)
                                     ve(i, 2*mp1-2, k) = ve(i, 2*mp1-2, k)-ci(mp1, np1, k)*wb(i, np1, iw)
@@ -663,7 +644,7 @@ contains
                                     wo(i, 2*mp1-1, k) = wo(i, 2*mp1-1, k)-ci(mp1, np1, k)*vb(i, np1, iv)
                                     we(i, 2*mp1-1, k) = we(i, 2*mp1-1, k)+br(mp1, np1, k)*wb(i, np1, iw)
                                 end do
-                                if (mlat /= 0) then
+                                if (mod(nlat, 2) /= 0) then
                                     ve(imid, 2*mp1-2, k) = ve(imid, 2*mp1-2, k) &
                                         -ci(mp1, np1, k)*wb(imid, np1, iw)
                                     ve(imid, 2*mp1-1, k) = ve(imid, 2*mp1-1, k) &
@@ -677,9 +658,9 @@ contains
                         end do
                     end if
 
-                    if (mp2 <= ndo2) then
+                    if (mp2 <= even_stride) then
                         do k=1, nt
-                            do np1=mp2, ndo2, 2
+                            do np1=mp2, even_stride, 2
                                 do i=1, imm1
                                     ve(i, 2*mp1-2, k) = ve(i, 2*mp1-2, k)+br(mp1, np1, k)*vb(i, np1, iv)
                                     vo(i, 2*mp1-2, k) = vo(i, 2*mp1-2, k)-ci(mp1, np1, k)*wb(i, np1, iw)
@@ -690,7 +671,7 @@ contains
                                     we(i, 2*mp1-1, k) = we(i, 2*mp1-1, k)-ci(mp1, np1, k)*vb(i, np1, iv)
                                     wo(i, 2*mp1-1, k) = wo(i, 2*mp1-1, k)+br(mp1, np1, k)*wb(i, np1, iw)
                                 end do
-                                if (mlat /= 0) then
+                                if (mod(nlat, 2) /= 0) then
                                     ve(imid, 2*mp1-2, k) = ve(imid, 2*mp1-2, k) &
                                         +br(mp1, np1, k)*vb(imid, np1, iv)
                                     ve(imid, 2*mp1-1, k) = ve(imid, 2*mp1-1, k) &
@@ -713,14 +694,14 @@ contains
                 ! case m = 0
                 !
                 do k=1, nt
-                    do np1=2, ndo2, 2
+                    do np1=2, even_stride, 2
                         do i=1, imid
                             ve(i, 1, k)=ve(i, 1, k)+br(1, np1, k)*vb(i, np1, iv)
                         end do
                     end do
                 end do
                 do k=1, nt
-                    do np1=3, ndo1, 2
+                    do np1=3, odd_stride, 2
                         do i=1, imm1
                             vo(i, 1, k)=vo(i, 1, k)+br(1, np1, k)*vb(i, np1, iv)
                         end do
@@ -735,16 +716,16 @@ contains
                     mp2 = mp1+1
                     call util%compute_polar_component(0, nlat, nlon, m, vb, iv, wvbin)
                     call util%compute_azimuthal_component(0, nlat, nlon, m, wb, iw, wwbin)
-                    if (mp1 <= ndo1) then
+                    if (mp1 <= odd_stride) then
                         do k=1, nt
-                            do np1=mp1, ndo1, 2
+                            do np1=mp1, odd_stride, 2
                                 do i=1, imm1
                                     vo(i, 2*mp1-2, k) = vo(i, 2*mp1-2, k)+br(mp1, np1, k)*vb(i, np1, iv)
                                     vo(i, 2*mp1-1, k) = vo(i, 2*mp1-1, k)+bi(mp1, np1, k)*vb(i, np1, iv)
                                     we(i, 2*mp1-2, k) = we(i, 2*mp1-2, k)-bi(mp1, np1, k)*wb(i, np1, iw)
                                     we(i, 2*mp1-1, k) = we(i, 2*mp1-1, k)+br(mp1, np1, k)*wb(i, np1, iw)
                                 end do
-                                if (mlat /= 0) then
+                                if (mod(nlat, 2) /= 0) then
                                     we(imid, 2*mp1-2, k) = we(imid, 2*mp1-2, k) &
                                         -bi(mp1, np1, k)*wb(imid, np1, iw)
                                     we(imid, 2*mp1-1, k) = we(imid, 2*mp1-1, k) &
@@ -754,16 +735,16 @@ contains
                         end do
                     end if
 
-                    if (mp2 <= ndo2) then
+                    if (mp2 <= even_stride) then
                         do k=1, nt
-                            do np1=mp2, ndo2, 2
+                            do np1=mp2, even_stride, 2
                                 do i=1, imm1
                                     ve(i, 2*mp1-2, k) = ve(i, 2*mp1-2, k)+br(mp1, np1, k)*vb(i, np1, iv)
                                     ve(i, 2*mp1-1, k) = ve(i, 2*mp1-1, k)+bi(mp1, np1, k)*vb(i, np1, iv)
                                     wo(i, 2*mp1-2, k) = wo(i, 2*mp1-2, k)-bi(mp1, np1, k)*wb(i, np1, iw)
                                     wo(i, 2*mp1-1, k) = wo(i, 2*mp1-1, k)+br(mp1, np1, k)*wb(i, np1, iw)
                                 end do
-                                if (mlat /= 0) then
+                                if (mod(nlat, 2) /= 0) then
                                     ve(imid, 2*mp1-2, k) = ve(imid, 2*mp1-2, k) &
                                         +br(mp1, np1, k)*vb(imid, np1, iv)
                                     ve(imid, 2*mp1-1, k) = ve(imid, 2*mp1-1, k) &
@@ -782,7 +763,7 @@ contains
                 ! case m = 0
                 !
                 do k=1, nt
-                    do np1=2, ndo2, 2
+                    do np1=2, even_stride, 2
                         do i=1, imid
                             we(i, 1, k)=we(i, 1, k)-cr(1, np1, k)*vb(i, np1, iv)
                         end do
@@ -790,7 +771,7 @@ contains
                 end do
 
                 do k=1, nt
-                    do np1=3, ndo1, 2
+                    do np1=3, odd_stride, 2
                         do i=1, imm1
                             wo(i, 1, k)=wo(i, 1, k)-cr(1, np1, k)*vb(i, np1, iv)
                         end do
@@ -806,16 +787,16 @@ contains
                     mp2 = mp1+1
                     call util%compute_polar_component(0, nlat, nlon, m, vb, iv, wvbin)
                     call util%compute_azimuthal_component(0, nlat, nlon, m, wb, iw, wwbin)
-                    if (mp1 <= ndo1) then
+                    if (mp1 <= odd_stride) then
                         do k=1, nt
-                            do np1=mp1, ndo1, 2
+                            do np1=mp1, odd_stride, 2
                                 do i=1, imm1
                                     ve(i, 2*mp1-2, k) = ve(i, 2*mp1-2, k)-ci(mp1, np1, k)*wb(i, np1, iw)
                                     ve(i, 2*mp1-1, k) = ve(i, 2*mp1-1, k)+cr(mp1, np1, k)*wb(i, np1, iw)
                                     wo(i, 2*mp1-2, k) = wo(i, 2*mp1-2, k)-cr(mp1, np1, k)*vb(i, np1, iv)
                                     wo(i, 2*mp1-1, k) = wo(i, 2*mp1-1, k)-ci(mp1, np1, k)*vb(i, np1, iv)
                                 end do
-                                if (mlat /= 0) then
+                                if (mod(nlat, 2) /= 0) then
                                     ve(imid, 2*mp1-2, k) = ve(imid, 2*mp1-2, k) &
                                         -ci(mp1, np1, k)*wb(imid, np1, iw)
                                     ve(imid, 2*mp1-1, k) = ve(imid, 2*mp1-1, k) &
@@ -825,16 +806,16 @@ contains
                         end do
                     end if
 
-                    if (mp2 <= ndo2) then
+                    if (mp2 <= even_stride) then
                         do k=1, nt
-                            do np1=mp2, ndo2, 2
+                            do np1=mp2, even_stride, 2
                                 do i=1, imm1
                                     vo(i, 2*mp1-2, k) = vo(i, 2*mp1-2, k)-ci(mp1, np1, k)*wb(i, np1, iw)
                                     vo(i, 2*mp1-1, k) = vo(i, 2*mp1-1, k)+cr(mp1, np1, k)*wb(i, np1, iw)
                                     we(i, 2*mp1-2, k) = we(i, 2*mp1-2, k)-cr(mp1, np1, k)*vb(i, np1, iv)
                                     we(i, 2*mp1-1, k) = we(i, 2*mp1-1, k)-ci(mp1, np1, k)*vb(i, np1, iv)
                                 end do
-                                if (mlat /= 0) then
+                                if (mod(nlat, 2) /= 0) then
                                     we(imid, 2*mp1-2, k) = we(imid, 2*mp1-2, k) &
                                         -cr(mp1, np1, k)*vb(imid, np1, iv)
                                     we(imid, 2*mp1-1, k) = we(imid, 2*mp1-1, k) &
@@ -853,7 +834,7 @@ contains
                 ! case m = 0
                 !
                 do k=1, nt
-                    do np1=2, ndo2, 2
+                    do np1=2, even_stride, 2
                         do i=1, imid
                             ve(i, 1, k)=ve(i, 1, k)+br(1, np1, k)*vb(i, np1, iv)
                         end do
@@ -861,7 +842,7 @@ contains
                 end do
 
                 do k=1, nt
-                    do np1=3, ndo1, 2
+                    do np1=3, odd_stride, 2
                         do i=1, imm1
                             wo(i, 1, k)=wo(i, 1, k)-cr(1, np1, k)*vb(i, np1, iv)
                         end do
@@ -880,16 +861,16 @@ contains
                     call util%compute_polar_component(0, nlat, nlon, m, vb, iv, wvbin)
                     call util%compute_azimuthal_component(0, nlat, nlon, m, wb, iw, wwbin)
 
-                    if (mp1 <= ndo1) then
+                    if (mp1 <= odd_stride) then
                         do k=1, nt
-                            do np1=mp1, ndo1, 2
+                            do np1=mp1, odd_stride, 2
                                 do i=1, imm1
                                     ve(i, 2*mp1-2, k) = ve(i, 2*mp1-2, k)-ci(mp1, np1, k)*wb(i, np1, iw)
                                     ve(i, 2*mp1-1, k) = ve(i, 2*mp1-1, k)+cr(mp1, np1, k)*wb(i, np1, iw)
                                     wo(i, 2*mp1-2, k) = wo(i, 2*mp1-2, k)-cr(mp1, np1, k)*vb(i, np1, iv)
                                     wo(i, 2*mp1-1, k) = wo(i, 2*mp1-1, k)-ci(mp1, np1, k)*vb(i, np1, iv)
                                 end do
-                                if (mlat /= 0) then
+                                if (mod(nlat, 2) /= 0) then
                                     ve(imid, 2*mp1-2, k) = ve(imid, 2*mp1-2, k) &
                                         -ci(mp1, np1, k)*wb(imid, np1, iw)
                                     ve(imid, 2*mp1-1, k) = ve(imid, 2*mp1-1, k) &
@@ -899,16 +880,16 @@ contains
                         end do
                     end if
 
-                    if (mp2 <= ndo2) then
+                    if (mp2 <= even_stride) then
                         do k=1, nt
-                            do np1=mp2, ndo2, 2
+                            do np1=mp2, even_stride, 2
                                 do i=1, imm1
                                     ve(i, 2*mp1-2, k) = ve(i, 2*mp1-2, k)+br(mp1, np1, k)*vb(i, np1, iv)
                                     ve(i, 2*mp1-1, k) = ve(i, 2*mp1-1, k)+bi(mp1, np1, k)*vb(i, np1, iv)
                                     wo(i, 2*mp1-2, k) = wo(i, 2*mp1-2, k)-bi(mp1, np1, k)*wb(i, np1, iw)
                                     wo(i, 2*mp1-1, k) = wo(i, 2*mp1-1, k)+br(mp1, np1, k)*wb(i, np1, iw)
                                 end do
-                                if (mlat /= 0) then
+                                if (mod(nlat, 2) /= 0) then
                                     ve(imid, 2*mp1-2, k) = ve(imid, 2*mp1-2, k) &
                                         +br(mp1, np1, k)*vb(imid, np1, iv)
                                     ve(imid, 2*mp1-1, k) = ve(imid, 2*mp1-1, k) &
@@ -927,7 +908,7 @@ contains
                 ! case m = 0
                 !
                 do k=1, nt
-                    do np1=2, ndo2, 2
+                    do np1=2, even_stride, 2
                         do i=1, imid
                             ve(i, 1, k)=ve(i, 1, k)+br(1, np1, k)*vb(i, np1, iv)
                         end do
@@ -946,16 +927,16 @@ contains
                     call util%compute_polar_component(1, nlat, nlon, m, vb, iv, wvbin)
                     call util%compute_azimuthal_component(1, nlat, nlon, m, wb, iw, wwbin)
 
-                    if (mp2 <= ndo2) then
+                    if (mp2 <= even_stride) then
                         do k=1, nt
-                            do np1=mp2, ndo2, 2
+                            do np1=mp2, even_stride, 2
                                 do i=1, imm1
                                     ve(i, 2*mp1-2, k) = ve(i, 2*mp1-2, k)+br(mp1, np1, k)*vb(i, np1, iv)
                                     ve(i, 2*mp1-1, k) = ve(i, 2*mp1-1, k)+bi(mp1, np1, k)*vb(i, np1, iv)
                                     wo(i, 2*mp1-2, k) = wo(i, 2*mp1-2, k)-bi(mp1, np1, k)*wb(i, np1, iw)
                                     wo(i, 2*mp1-1, k) = wo(i, 2*mp1-1, k)+br(mp1, np1, k)*wb(i, np1, iw)
                                 end do
-                                if (mlat /= 0) then
+                                if (mod(nlat, 2) /= 0) then
                                     ve(imid, 2*mp1-2, k) = ve(imid, 2*mp1-2, k) &
                                         +br(mp1, np1, k)*vb(imid, np1, iv)
                                     ve(imid, 2*mp1-1, k) = ve(imid, 2*mp1-1, k) &
@@ -974,7 +955,7 @@ contains
                 ! case m = 0
                 !
                 do k=1, nt
-                    do np1=3, ndo1, 2
+                    do np1=3, odd_stride, 2
                         do i=1, imm1
                             wo(i, 1, k)=wo(i, 1, k)-cr(1, np1, k)*vb(i, np1, iv)
                         end do
@@ -989,16 +970,16 @@ contains
                     mp2 = mp1+1
                     call util%compute_polar_component(2, nlat, nlon, m, vb, iv, wvbin)
                     call util%compute_azimuthal_component(2, nlat, nlon, m, wb, iw, wwbin)
-                    if (mp1 <= ndo1) then
+                    if (mp1 <= odd_stride) then
                         do k=1, nt
-                            do np1=mp1, ndo1, 2
+                            do np1=mp1, odd_stride, 2
                                 do i=1, imm1
                                     ve(i, 2*mp1-2, k) = ve(i, 2*mp1-2, k)-ci(mp1, np1, k)*wb(i, np1, iw)
                                     ve(i, 2*mp1-1, k) = ve(i, 2*mp1-1, k)+cr(mp1, np1, k)*wb(i, np1, iw)
                                     wo(i, 2*mp1-2, k) = wo(i, 2*mp1-2, k)-cr(mp1, np1, k)*vb(i, np1, iv)
                                     wo(i, 2*mp1-1, k) = wo(i, 2*mp1-1, k)-ci(mp1, np1, k)*vb(i, np1, iv)
                                 end do
-                                if (mlat /= 0) then
+                                if (mod(nlat, 2) /= 0) then
                                     ve(imid, 2*mp1-2, k) = ve(imid, 2*mp1-2, k) &
                                         -ci(mp1, np1, k)*wb(imid, np1, iw)
                                     ve(imid, 2*mp1-1, k) = ve(imid, 2*mp1-1, k) &
@@ -1017,7 +998,7 @@ contains
                 ! case m = 0
                 !
                 do k=1, nt
-                    do np1=2, ndo2, 2
+                    do np1=2, even_stride, 2
                         do i=1, imid
                             we(i, 1, k)=we(i, 1, k)-cr(1, np1, k)*vb(i, np1, iv)
                         end do
@@ -1025,7 +1006,7 @@ contains
                 end do
 
                 do k=1, nt
-                    do np1=3, ndo1, 2
+                    do np1=3, odd_stride, 2
                         do i=1, imm1
                             vo(i, 1, k)=vo(i, 1, k)+br(1, np1, k)*vb(i, np1, iv)
                         end do
@@ -1044,16 +1025,16 @@ contains
                     call util%compute_polar_component(0, nlat, nlon, m, vb, iv, wvbin)
                     call util%compute_azimuthal_component(0, nlat, nlon, m, wb, iw, wwbin)
 
-                    if (mp1 <= ndo1) then
+                    if (mp1 <= odd_stride) then
                         do k=1, nt
-                            do np1=mp1, ndo1, 2
+                            do np1=mp1, odd_stride, 2
                                 do i=1, imm1
                                     vo(i, 2*mp1-2, k) = vo(i, 2*mp1-2, k)+br(mp1, np1, k)*vb(i, np1, iv)
                                     vo(i, 2*mp1-1, k) = vo(i, 2*mp1-1, k)+bi(mp1, np1, k)*vb(i, np1, iv)
                                     we(i, 2*mp1-2, k) = we(i, 2*mp1-2, k)-bi(mp1, np1, k)*wb(i, np1, iw)
                                     we(i, 2*mp1-1, k) = we(i, 2*mp1-1, k)+br(mp1, np1, k)*wb(i, np1, iw)
                                 end do
-                                if (mlat /= 0) then
+                                if (mod(nlat, 2) /= 0) then
                                     we(imid, 2*mp1-2, k) = we(imid, 2*mp1-2, k) &
                                         -bi(mp1, np1, k)*wb(imid, np1, iw)
                                     we(imid, 2*mp1-1, k) = we(imid, 2*mp1-1, k) &
@@ -1063,16 +1044,16 @@ contains
                         end do
                     end if
 
-                    if (mp2 <= ndo2) then
+                    if (mp2 <= even_stride) then
                         do k=1, nt
-                            do np1=mp2, ndo2, 2
+                            do np1=mp2, even_stride, 2
                                 do i=1, imm1
                                     vo(i, 2*mp1-2, k) = vo(i, 2*mp1-2, k)-ci(mp1, np1, k)*wb(i, np1, iw)
                                     vo(i, 2*mp1-1, k) = vo(i, 2*mp1-1, k)+cr(mp1, np1, k)*wb(i, np1, iw)
                                     we(i, 2*mp1-2, k) = we(i, 2*mp1-2, k)-cr(mp1, np1, k)*vb(i, np1, iv)
                                     we(i, 2*mp1-1, k) = we(i, 2*mp1-1, k)-ci(mp1, np1, k)*vb(i, np1, iv)
                                 end do
-                                if (mlat /= 0) then
+                                if (mod(nlat, 2) /= 0) then
                                     we(imid, 2*mp1-2, k) = we(imid, 2*mp1-2, k) &
                                         -cr(mp1, np1, k)*vb(imid, np1, iv)
                                     we(imid, 2*mp1-1, k) = we(imid, 2*mp1-1, k) &
@@ -1091,7 +1072,7 @@ contains
                 ! case m = 0
                 !
                 do k=1, nt
-                    do np1=3, ndo1, 2
+                    do np1=3, odd_stride, 2
                         do i=1, imm1
                             vo(i, 1, k)=vo(i, 1, k)+br(1, np1, k)*vb(i, np1, iv)
                         end do
@@ -1110,16 +1091,16 @@ contains
                     call util%compute_polar_component(2, nlat, nlon, m, vb, iv, wvbin)
                     call util%compute_azimuthal_component(2, nlat, nlon, m, wb, iw, wwbin)
 
-                    if (mp1 <= ndo1) then
+                    if (mp1 <= odd_stride) then
                         do k=1, nt
-                            do np1=mp1, ndo1, 2
+                            do np1=mp1, odd_stride, 2
                                 do i=1, imm1
                                     vo(i, 2*mp1-2, k) = vo(i, 2*mp1-2, k)+br(mp1, np1, k)*vb(i, np1, iv)
                                     vo(i, 2*mp1-1, k) = vo(i, 2*mp1-1, k)+bi(mp1, np1, k)*vb(i, np1, iv)
                                     we(i, 2*mp1-2, k) = we(i, 2*mp1-2, k)-bi(mp1, np1, k)*wb(i, np1, iw)
                                     we(i, 2*mp1-1, k) = we(i, 2*mp1-1, k)+br(mp1, np1, k)*wb(i, np1, iw)
                                 end do
-                                if (mlat /= 0) then
+                                if (mod(nlat, 2) /= 0) then
                                     we(imid, 2*mp1-2, k) = we(imid, 2*mp1-2, k) &
                                         -bi(mp1, np1, k)*wb(imid, np1, iw)
                                     we(imid, 2*mp1-1, k) = we(imid, 2*mp1-1, k) &
@@ -1138,7 +1119,7 @@ contains
                 ! case m = 0
                 !
                 do k=1, nt
-                    do np1=2, ndo2, 2
+                    do np1=2, even_stride, 2
                         do i=1, imid
                             we(i, 1, k)=we(i, 1, k)-cr(1, np1, k)*vb(i, np1, iv)
                         end do
@@ -1157,16 +1138,16 @@ contains
                     call util%compute_polar_component(1, nlat, nlon, m, vb, iv, wvbin)
                     call util%compute_azimuthal_component(1, nlat, nlon, m, wb, iw, wwbin)
 
-                    if (mp2 <= ndo2) then
+                    if (mp2 <= even_stride) then
                         do k=1, nt
-                            do np1=mp2, ndo2, 2
+                            do np1=mp2, even_stride, 2
                                 do i=1, imm1
                                     vo(i, 2*mp1-2, k) = vo(i, 2*mp1-2, k)-ci(mp1, np1, k)*wb(i, np1, iw)
                                     vo(i, 2*mp1-1, k) = vo(i, 2*mp1-1, k)+cr(mp1, np1, k)*wb(i, np1, iw)
                                     we(i, 2*mp1-2, k) = we(i, 2*mp1-2, k)-cr(mp1, np1, k)*vb(i, np1, iv)
                                     we(i, 2*mp1-1, k) = we(i, 2*mp1-1, k)-ci(mp1, np1, k)*vb(i, np1, iv)
                                 end do
-                                if (mlat /= 0) then
+                                if (mod(nlat, 2) /= 0) then
                                     we(imid, 2*mp1-2, k) = we(imid, 2*mp1-2, k) &
                                         -cr(mp1, np1, k)*vb(imid, np1, iv)
                                     we(imid, 2*mp1-1, k) = we(imid, 2*mp1-1, k) &
@@ -1178,42 +1159,8 @@ contains
                 end do
         end select vector_symmetry_cases
 
-        do k=1, nt
-            call util%hfft%backward(idv, nlon, ve(1, 1, k), idv, wrfft, vb)
-            call util%hfft%backward(idv, nlon, we(1, 1, k), idv, wrfft, vb)
-        end do
-
-        select case (ityp)
-            case(0:2)
-                do k=1, nt
-                    do j=1, nlon
-                        do i=1, imm1
-                            v(i, j, k) = HALF *(ve(i, j, k)+vo(i, j, k))
-                            w(i, j, k) = HALF *(we(i, j, k)+wo(i, j, k))
-                            v(nlp1-i, j, k) = HALF *(ve(i, j, k)-vo(i, j, k))
-                            w(nlp1-i, j, k) = HALF *(we(i, j, k)-wo(i, j, k))
-                        end do
-                    end do
-                end do
-            case default
-                do k=1, nt
-                    do j=1, nlon
-                        do i=1, imm1
-                            v(i, j, k) = HALF * ve(i, j, k)
-                            w(i, j, k) = HALF * we(i, j, k)
-                        end do
-                    end do
-                end do
-        end select
-
-        if (mlat /= 0) then
-            do k=1, nt
-                do j=1, nlon
-                    v(imid, j, k) = HALF * ve(imid, j, k)
-                    w(imid, j, k) = HALF * we(imid, j, k)
-                end do
-            end do
-        end if
+        call util%assemble_transform(idvw, jdvw, idv, imid, &
+        imm1, ityp, nlat, nlon, nt, v, ve, vo, w, we, wo, wrfft)
 
     end subroutine vhsec_lower_utility_routine
 

@@ -543,13 +543,16 @@ contains
     subroutine vhifth(m, n, r, wsav, work)
 
         type(RealPeriodicFastFourierTransform) :: hfft
-        integer(ip) :: m, n, n2, j, i
+        integer(ip) :: m, n, n2, j, i, iw1
         real(wp) :: r(m, n), wsav(:), work(:), r2km2, r2km1
 
         n2 = (n+1)/2
 
+        ! Set workspace index pointer
+        iw1 = n + 2
+
         ! Compute fourier coefficients for r on shifted grid
-        call hfft%forward(m, n, r, m, wsav(n+2:))
+        call hfft%forward(m, n, r, m, wsav(iw1:))
 
         do i=1, m
             do j=2, n2
@@ -561,7 +564,7 @@ contains
         end do
 
         ! Shift r with fourier synthesis and normalization
-        call hfft%backward(m, n, r, m, wsav(n+2:), work)
+        call hfft%backward(m, n, r, m, wsav(iw1:))
 
         do i=1, m
             do j=1, n
@@ -580,7 +583,7 @@ contains
         real(wp),    intent(out) :: wsav(:)
 
         ! Local variables
-        integer(ip) :: n2, i
+        integer(ip) :: n2, i, iw1
         real(wp)    :: arg
         type(RealPeriodicFastFourierTransform) :: hfft
 
@@ -592,7 +595,10 @@ contains
             wsav(i+n2) = cos(arg)
         end do
 
-        call hfft%initialize(n, wsav(n+2:))
+        ! Set workspace index pointer
+        iw1 = n + 2
+
+        call hfft%initialize(n, wsav(iw1:))
 
     end subroutine vhifthi
 

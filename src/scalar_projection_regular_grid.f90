@@ -212,7 +212,7 @@ contains
             iwshp(jw2), iwshp(jw3), iwshp(jw4), work(jw1), &
             work(jw2), work(jw3), work(jw4))
 
-        call util%hfft%backward(nlat, nlon, y, idxy, wshp(lw1+1), work)
+        call util%hfft%backward(nlat, nlon, y, idxy, wshp(lw1+1))
 
         y(1:nlat, :) = y(1:nlat, :)/nlon
 

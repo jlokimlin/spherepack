@@ -624,7 +624,7 @@ contains
         end if
         !     do inverse fourier transform
         do k=1, nt
-            call util%hfft%backward(lat, nlon, g(1, 1, k), lat, wfft, pmn)
+            call util%hfft%backward(lat, nlon, g(:, :, k), lat, wfft)
         end do
         !     scale output in gs
         do k=1, nt

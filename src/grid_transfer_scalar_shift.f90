@@ -543,25 +543,35 @@ contains
 
     subroutine shifth(m, n, r, wsav, work)
 
+        ! Dummy arguments
+        integer(ip), intent(in)    :: m, n
+        real(wp),    intent(inout) :: r(m,n)
+        real(wp),    intent(in)    :: wsav(*)
+        real(wp),    intent(out)   :: work(*)
+
+        ! Local variables
         type(RealPeriodicFastFourierTransform) :: hfft
-        integer(ip) :: m, n, n2, k, l
-        real(wp) :: r(m, n), wsav(*), work(*), r2km2, r2km1
+        integer(ip)  :: m, n, n2, k, l, iw1
+        real(wp)     :: r2km2, r2km1
+
         n2 = (n+1)/2
-        !
+
+        ! Set wavetable index pointer
+        iw1 = n+2
+
         !     compute fourier coefficients for r on shifted grid
-        !
-        call hfft%forward(m, n, r, m, wsav(n+2))
+        call hfft%forward(m, n, r, m, wsav(iw1))
         do l=1, m
             do k=2, n2
                 r2km2 = r(l, k+k-2)
                 r2km1 = r(l, k+k-1)
-                r(l, k+k-2)   =  r2km2*wsav(n2+k) - r2km1*wsav(k)
-                r(l, k+k-1)   =  r2km2*wsav(k)    + r2km1*wsav(n2+k)
+                r(l, k+k-2) = r2km2*wsav(n2+k) - r2km1*wsav(k)
+                r(l, k+k-1) = r2km2*wsav(k) + r2km1*wsav(n2+k)
             end do
         end do
+
         !     shift r with fourier synthesis and normalization
-        !
-        call hfft%backward(m, n, r, m, wsav(n+2), work)
+        call hfft%backward(m, n, r, m, wsav(iw1))
         do l=1, m
             do k=1, n
                 r(l, k) = r(l, k)/n

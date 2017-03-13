@@ -37,7 +37,7 @@ module type_GaussianSphere
         VectorAnalysisUtility
 
     use vector_synthesis_routines, only: &
-        VectorSynthesisUtility
+        VectorBackwardTransform
 
     ! Explicit typing only
     implicit none
@@ -434,7 +434,7 @@ contains
 
         ! Local variables
         integer(ip)    :: error_flag
-        type(VectorSynthesisUtility) :: aux
+        type(VectorBackwardTransform) :: aux
 
         ! Check if object is usable
         call self%assert_initialized('gaussian_vector_synthesis')
