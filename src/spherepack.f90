@@ -130,8 +130,8 @@ module spherepack
         RealPeriodicFastFourierTransform, &
         hrffti, hrfftf, hrfftb
 
-    use type_LegendreAux, only: &
-        LegendreAux, &
+    use type_AssociatedLegendrePolynomialGenerator, only: &
+        AssociatedLegendrePolynomialGenerator, &
         alfk, lfp, lfpt, lfim, lfin
 
     use type_Vector3D, only: &
@@ -171,7 +171,7 @@ module spherepack
     ! Derived data types
     public :: FFTpack
     public :: RealPeriodicFastFourierTransform
-    public :: LegendreAux
+    public :: AssociatedLegendrePolynomialGenerator
     public :: GaussianGrid
     public :: GaussianSphere
     public :: RegularGrid

@@ -416,7 +416,7 @@ contains
     !               n odd  m odd           (n+1)/2
     !
     !
-    pure subroutine compute_fourier_coefficients(m, n, cp)
+    pure subroutine compute_fourier_coefficients(m, n, cp) !alfk(n, m, cp)
 
         ! Dummy arguments
         integer(ip), intent(in)  :: m

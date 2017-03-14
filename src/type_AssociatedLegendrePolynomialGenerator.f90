@@ -7,7 +7,7 @@
 !     *                                                               *
 !     *                      all rights reserved                      *
 !     *                                                               *
-!     *                      SPHEREPACK                               *
+!     *                         Spherepack                            *
 !     *                                                               *
 !     *       A Package of Fortran Subroutines and Programs           *
 !     *                                                               *
@@ -29,22 +29,12 @@
 !     *                                                               *
 !     * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !
-!
-!
-!     file type_LegendreAux.f90 contains the derived data type LegendreAux
-!
-!     with type-bound procedures
-!
-!     alfk, lfim, lfin, lfp, lfpt
-!
-!     for computing normalized associated legendre polynomials
-!
-module type_LegendreAux
+module type_AssociatedLegendrePolynomialGenerator
 
     use spherepack_precision, only: &
         wp, & ! working precision
         ip, & ! integer precision
-        PI
+        PI, HALF_PI
 
     use type_FFTpack, only: &
         FFTpack
@@ -54,10 +44,10 @@ module type_LegendreAux
 
     ! Everything is private unless stated otherwise
     private
-    public :: LegendreAux
+    public :: AssociatedLegendrePolynomialGenerator
     public :: alfk, lfp, lfpt, lfim, lfin, get_legendre_function
     
-    type, public :: LegendreAux
+    type, public :: AssociatedLegendrePolynomialGenerator
     contains
         ! Type-bound procedures
         procedure, nopass :: alfk
@@ -66,7 +56,7 @@ module type_LegendreAux
         procedure, nopass :: lfp
         procedure, nopass :: lfpt
         procedure, nopass :: get_legendre_function
-    end type LegendreAux
+    end type AssociatedLegendrePolynomialGenerator
 
 contains
 
@@ -78,33 +68,40 @@ contains
         real(wp), allocatable, intent(out) :: legfunc(:)
 
         ! Local variables
-        real(wp)              :: theta
-        real(wp), allocatable :: cp(:)
-        integer(ip)           :: n, m, nm, nmstrt ! Counters
-
+        integer(ip)  :: alloc_stat, required_size, workspace_size
 
         !  Allocate memory
-        allocate (legfunc((ntrunc+1)*(ntrunc+2)/2))
-        allocate (cp((ntrunc/2)+1))
+        required_size = (ntrunc + 1) * (ntrunc + 2)/2
+        allocate (legfunc(required_size), stat=alloc_stat)
 
-        theta = PI/2 - (PI/180)*lat
-        nmstrt = 0
+        ! Check allocation status
+        if (alloc_stat /= 0) then
+            error stop "Failed to allocate legfunc in get_legendre_function"
+        end if
 
-        do m=1, ntrunc+1
-            do n=m, ntrunc+1
-                nm = nmstrt + n - m + 1
-                !
-                !  Compute normalized associate Legendre function at theta
-                !
-                call alfk(n-1, m-1, cp)
-                call lfpt(n-1, m-1, theta, cp, legfunc(nm))
+        ! Compute required workspace size
+        workspace_size = (ntrunc/2)+1
 
+        block
+            real(wp), parameter :: DEGREE_TO_RADIAN = PI/180
+            real(wp)            :: cp(workspace_size), theta
+            integer(ip)         :: n, m, nm, nmstrt ! Counters
+
+            theta = HALF_PI - (DEGREE_TO_RADIAN * lat)
+            nmstrt = 0
+
+            do m=1, ntrunc+1
+                do n=m, ntrunc+1
+                    nm = nmstrt + n - m + 1
+
+                    !  Compute normalized associate Legendre function at theta
+                    call alfk(n - 1, m - 1, cp)
+                    call lfpt(n - 1, m - 1, theta, cp, legfunc(nm))
+
+                end do
+                nmstrt = nmstrt + ntrunc - m + 2
             end do
-            nmstrt = nmstrt + ntrunc - m + 2
-        end do
-
-        !  Release memory
-        deallocate (cp)
+        end block
 
     end subroutine get_legendre_function
 
@@ -431,7 +428,7 @@ contains
             iw1 => workspace_indices(1), &
             iw2 => workspace_indices(2), &
             iw3 => workspace_indices(3) &
-           )
+            )
 
             call lfim1(init, theta, l, n, nm, id, pb, wlfim, wlfim(iw1), &
                 wlfim(iw2), wlfim(iw3), wlfim(iw2))
@@ -682,7 +679,7 @@ contains
             iw1=> workspace_indices(1), &
             iw2 => workspace_indices(2), &
             iw3 => workspace_indices(3) &
-           )
+            )
             call lfin1(init, theta, l, m, nm, id, pb, wlfin, wlfin(iw1), &
                 wlfin(iw2), wlfin(iw3), wlfin(iw2))
         end associate
@@ -1222,4 +1219,4 @@ contains
 
     end subroutine lfpt
 
-end module type_LegendreAux
+end module type_AssociatedLegendrePolynomialGenerator
