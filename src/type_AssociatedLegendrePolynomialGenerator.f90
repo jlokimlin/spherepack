@@ -36,8 +36,8 @@ module type_AssociatedLegendrePolynomialGenerator
         ip, & ! integer precision
         PI, HALF_PI
 
-    use type_FFTpack, only: &
-        FFTpack
+    use type_FastFourierTransform, only: &
+        FastFourierTransform
 
     ! Explicit typing only
     implicit none
@@ -430,7 +430,7 @@ contains
             iw3 => workspace_indices(3) &
             )
 
-            call lfim1(init, theta, l, n, nm, id, pb, wlfim, wlfim(iw1), &
+            call lfim_lower_utility_routine(init, theta, l, n, nm, id, pb, wlfim, wlfim(iw1), &
                 wlfim(iw2), wlfim(iw3), wlfim(iw2))
 
         end associate
@@ -462,7 +462,7 @@ contains
         end function get_workspace_indices
 
 
-        subroutine lfim1(init, theta, l, n, nm, id, p3, phz, ph1, p1, p2, cp)
+        subroutine lfim_lower_utility_routine(init, theta, l, n, nm, id, p3, phz, ph1, p1, p2, cp)
 
             ! Dummy arguments
 
@@ -561,7 +561,7 @@ contains
                     end if
             end select
 
-        end subroutine lfim1
+        end subroutine lfim_lower_utility_routine
 
     end subroutine lfim
 
@@ -680,7 +680,7 @@ contains
             iw2 => workspace_indices(2), &
             iw3 => workspace_indices(3) &
             )
-            call lfin1(init, theta, l, m, nm, id, pb, wlfin, wlfin(iw1), &
+            call lfin_lower_utility_routine(init, theta, l, m, nm, id, pb, wlfin, wlfin(iw1), &
                 wlfin(iw2), wlfin(iw3), wlfin(iw2))
         end associate
 
@@ -705,7 +705,7 @@ contains
 
         end function get_workspace_indices
 
-        subroutine lfin1(init, theta, l, m, nm, id, p3, phz, ph1, p1, p2, cp)
+        subroutine lfin_lower_utility_routine(init, theta, l, m, nm, id, p3, phz, ph1, p1, p2, cp)
 
             ! Dummy arguments
             integer(ip), intent(in)  :: init
@@ -798,7 +798,7 @@ contains
                     end if
             end select
 
-        end subroutine lfin1
+        end subroutine lfin_lower_utility_routine
 
     end subroutine lfin
 
@@ -946,11 +946,11 @@ contains
         iw1 = 2*l+12
         iw2 = iw1+3*(l+1)/2+15
 
-        call lfp1(init, n, ma, l, cp, pb, w, w(iw1), w(iw2))
+        call lfp_lower_utility_routine(init, n, ma, l, cp, pb, w, w(iw1), w(iw2))
 
     contains
 
-        subroutine lfp1(init, n, m, l, cp, p, wsave1, wsave2, wsave3)
+        subroutine lfp_lower_utility_routine(init, n, m, l, cp, p, wsave1, wsave2, wsave3)
 
             ! Dummy arguments
 
@@ -970,7 +970,7 @@ contains
             integer(ip)         :: lm1, np1, ls2, kdp, lmi
             real(wp)            :: dt
             real(wp), parameter :: ONE_OVER_SQRT2 = 1.0_wp/sqrt(2.0_wp)
-            type(FFTpack)       :: fft
+            type(FastFourierTransform)       :: fft
 
 
             select case (init)
@@ -1050,7 +1050,7 @@ contains
                     end if
             end select
 
-        end subroutine lfp1
+        end subroutine lfp_lower_utility_routine
 
     end subroutine lfp
 

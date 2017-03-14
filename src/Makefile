@@ -24,10 +24,10 @@ icosahedral_geodesic_routines.f90
 	$(FC) $(FFLAGS) -c icosahedral_geodesic_routines.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 
-type_FFTpack.o: \
+type_FastFourierTransform.o: \
 spherepack_precision.o \
-type_FFTpack.f90
-	$(FC) $(FFLAGS) -c type_FFTpack.f90 $(LINKS)\
+type_FastFourierTransform.f90
+	$(FC) $(FFLAGS) -c type_FastFourierTransform.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 
 type_RealPeriodicFastFourierTransform.o: \
@@ -42,13 +42,12 @@ type_SpherepackUtility.f90
 	$(FC) $(FFLAGS) -c type_SpherepackUtility.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 	 	 
-type_LegendreAux.o: \
+type_AssociatedLegendrePolynomialGenerator.o: \
 spherepack_precision.o \
-type_FFTpack.o \
-type_LegendreAux.f90
-	$(FC) $(FFLAGS) -c type_LegendreAux.f90 $(LINKS)\
+type_FastFourierTransform.o \
+type_AssociatedLegendrePolynomialGenerator.f90
+	$(FC) $(FFLAGS) -c type_AssociatedLegendrePolynomialGenerator.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
-
 
 gaussian_latitudes_and_weights_routines.o: \
 spherepack_precision.o \
@@ -794,8 +793,8 @@ vector_laplacian_routines.o \
 vorticity_routines.o \
 colatitudinal_derivative_routines.o \
 type_RealPeriodicFastFourierTransform.o \
-type_FFTpack.o \
-type_LegendreAux.o \
+type_FastFourierTransform.o \
+type_AssociatedLegendrePolynomialGenerator.o \
 type_Vector3D.o \
 type_GaussianSphere.o \
 type_RegularSphere.o \

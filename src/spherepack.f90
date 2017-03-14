@@ -123,8 +123,8 @@ module spherepack
         vtsgc, vtsgci, initialize_vtsgc, &
         vtsgs, vtsgsi, initialize_vtsgs
     
-    use type_FFTpack, only: &
-        FFTpack
+    use type_FastFourierTransform, only: &
+        FastFourierTransform
 
     use type_RealPeriodicFastFourierTransform, only: &
         RealPeriodicFastFourierTransform, &
@@ -169,7 +169,7 @@ module spherepack
     public :: HALF_PI, PI, TWO_PI
 
     ! Derived data types
-    public :: FFTpack
+    public :: FastFourierTransform
     public :: RealPeriodicFastFourierTransform
     public :: AssociatedLegendrePolynomialGenerator
     public :: GaussianGrid
