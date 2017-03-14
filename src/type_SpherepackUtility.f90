@@ -7,7 +7,7 @@
 !     *                                                               *
 !     *                      all rights reserved                      *
 !     *                                                               *
-!     *                      SPHEREPACK                               *
+!     *                         Spherepack                            *
 !     *                                                               *
 !     *       A Package of Fortran Subroutines and Programs           *
 !     *                                                               *
@@ -99,12 +99,34 @@ module type_SpherepackUtility
     real(wp),    parameter :: TWO = 2.0_wp
     real(wp),    parameter :: THREE = 3.0_wp
     real(wp),    parameter :: SIX = 6.0_wp
-    integer(ip), parameter :: BOTH_EVEN = 0
-    integer(ip), parameter :: N_EVEN_M_ODD = 1
-    integer(ip), parameter :: N_ODD_M_EVEN = 3
-    integer(ip), parameter :: BOTH_ODD = 4
+!    integer(ip), parameter :: BOTH_EVEN = 0
+!    integer(ip), parameter :: N_EVEN_M_ODD = 1
+!    integer(ip), parameter :: N_ODD_M_EVEN = 3
+!    integer(ip), parameter :: BOTH_ODD = 4
 
 contains
+
+    pure function odd(i) &
+        result (return_value)
+
+        ! Dummy arguments
+        integer(ip), intent(in) :: i
+        logical                 :: return_value
+
+        return_value = btest(i, 0)
+
+    end function odd
+
+    pure function even(i) &
+        result (return_value)
+
+        ! Dummy arguments
+        integer(ip), intent(in) :: i
+        logical                 :: return_value
+
+        return_value = .not. odd(i)
+
+    end function even
 
     pure subroutine check_vector_transform_inputs(ityp, idvw, jdvw, &
         mdab, ndab, nlat, nlon, nt, required_wavetable_size, &
@@ -302,48 +324,45 @@ contains
         integer(ip)             :: return_value
 
         ! Local variables
-        integer(ip) :: l2
+        integer(ip) :: n2
 
         ! Compute parity in nlat
-        select case (mod(nlat, 2))
-            case (0)
-                l2 = nlat/2
-            case default
-                l2 = (nlat + 1)/2
-        end select
+        if (even(nlat)) then
+            n2 = nlat/2
+        else
+            n2 = (nlat + 1)/2
+        end if
 
         select case(isym)
             case(0)
                 return_value = nlat * nlon * (nt + 1)
             case default
-                return_value = l2 * nlon * (nt + 1)
+                return_value = n2 * nlon * (nt + 1)
         end select
 
     end function get_lwork_for_gaussian_saved
 
-    pure subroutine compute_parity(nlat, nlon, l1, l2)
+    pure subroutine compute_parity(nlat, nlon, n1, n2)
 
         ! Dummy arguments
         integer(ip), intent(in)  :: nlat
         integer(ip), intent(in)  :: nlon
-        integer(ip), intent(out) :: l1
-        integer(ip), intent(out) :: l2
+        integer(ip), intent(out) :: n1
+        integer(ip), intent(out) :: n2
 
         ! Compute parity in nlon
-        select case (mod(nlon, 2))
-            case (0)
-                l1 = min(nlat, (nlon+2)/2)
-            case default
-                l1 = min(nlat, (nlon + 1)/2)
-        end select
+        if (even(nlon)) then
+            n1 = min(nlat, (nlon+2)/2)
+        else
+            n1 = min(nlat, (nlon + 1)/2)
+        end if
 
         ! Compute parity in nlat
-        select case (mod(nlat, 2))
-            case (0)
-                l2 = nlat/2
-            case default
-                l2 = (nlat + 1)/2
-        end select
+        if (even(nlat)) then
+            n2 = nlat/2
+        else
+            n2 = (nlat + 1)/2
+        end if
 
     end subroutine compute_parity
 
