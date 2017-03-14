@@ -896,7 +896,7 @@ contains
             end do
 
             !  Set upper limit for vector m subscript
-            associate (mmax => min(nlat, (nlon+1)/2))
+            associate (mmax => min(nlat, (nlon + 1)/2))
 
                 ! Compute m > 0 coefficients
                 do m=2, mmax
@@ -949,7 +949,7 @@ contains
             b = ZERO
 
             ! Set upper limit for vector m subscript
-            associate (mmax => min(nlat, (nlon+1)/2))
+            associate (mmax => min(nlat, (nlon + 1)/2))
 
                 ! Compute m > 0 coefficients
                 do m=1, mmax
@@ -1035,7 +1035,7 @@ contains
             isym => self%SCALAR_SYMMETRIES, &
             ityp => self%VECTOR_SYMMETRIES &
            )
-            associate (mmax => min(nlat, (nlon+1)/2))
+            associate (mmax => min(nlat, (nlon + 1)/2))
 
                 !  Initialize coefficients
                 cr = ZERO
@@ -1152,7 +1152,7 @@ contains
             b = ZERO
 
             !  Set upper limit for vector m subscript
-            associate (mmax => min(nlat, (nlon+1)/2))
+            associate (mmax => min(nlat, (nlon + 1)/2))
 
                 ! Compute m > 0 coefficients
                 do m=1, mmax

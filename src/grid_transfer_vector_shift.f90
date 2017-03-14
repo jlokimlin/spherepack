@@ -223,10 +223,10 @@ contains
 
         two_nlat = 2 * nlat
         nlatp1 = nlat+1
-        n2 = (nlon+1)/2
+        n2 = (nlon + 1)/2
 
         if (2*n2 == nlon) then
-            lwork = 2*nlon*(nlat+1)
+            lwork = 2*nlon*(nlat + 1)
             nr = n2
             iw1 = 1
             iw2 = 1
@@ -340,7 +340,7 @@ contains
         real(wp) :: rlatu(nr, nlat2), rlonu(nlatp1, nlon), rlou(nlat, nlon)
         real(wp) :: wsav(:), wrk(:)
         isav = 4*nlat+17
-        n2 = (nlon+1)/2
+        n2 = (nlon + 1)/2
         !
         !     execute full circle latitude shifts for nlon odd or even
         !
@@ -400,7 +400,7 @@ contains
                 end do
             end do
             !
-            !       shift the n2=(nlon+1)/2 rlat vectors one half latitude grid
+            !       shift the n2=(nlon + 1)/2 rlat vectors one half latitude grid
             !
             call vhifth(n2, nlat2, rlatu, wsav, wrk)
             !
@@ -443,7 +443,7 @@ contains
         real(wp) :: rlatu(nr, nlat2), rlonu(nlatp1, nlon), rlou(nlat, nlon)
         real(wp) :: wsav(:), wrk(:)
         isav = 4*nlat+17
-        n2 = (nlon+1)/2
+        n2 = (nlon + 1)/2
         !
         !     execute full circle latitude shifts for nlon odd or even
         !
@@ -508,7 +508,7 @@ contains
                 rlatu(j, nlat+1) = ureg(j, nlat+1)
             end do
             !
-            !       shift the n2=(nlon+1)/2 rlat vectors one half latitude grid
+            !       shift the n2=(nlon + 1)/2 rlat vectors one half latitude grid
             !
             call vhifth(n2, nlat2, rlatu, wsav, wrk)
                 !

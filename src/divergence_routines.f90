@@ -248,7 +248,7 @@ contains
                 end do
 
                 ! Compute m > 0 coefficients using vector spherepack value for mmax
-                mmax = min(nlat, (nlon+1)/2)
+                mmax = min(nlat, (nlon + 1)/2)
                 do m=2, mmax
                     do n=m, nlat
                         a(m, n, k) = -sqnn(n)*br(m, n, k)

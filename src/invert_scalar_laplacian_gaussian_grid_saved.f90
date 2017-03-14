@@ -67,12 +67,12 @@
 !            full sphere. these lie in the interval (0, pi) and are computed
 !            in radians in theta(1) <...< theta(nlat) by subroutine compute_gaussian_latitudes_and_weights.
 !            if nlat is odd the equator will be included as the grid point
-!            theta((nlat+1)/2).  if nlat is even the equator will be
+!            theta((nlat + 1)/2).  if nlat is even the equator will be
 !            excluded as a grid point and will lie half way between
 !            theta(nlat/2) and theta(nlat/2+1). nlat must be at least 3.
 !            note: on the half sphere, the number of grid points in the
 !            colatitudinal direction is nlat/2 if nlat is even or
-!            (nlat+1)/2 if nlat is odd.
+!            (nlat + 1)/2 if nlat is odd.
 !
 !     nlon   the number of distinct longitude points.  nlon determines
 !            the grid increment in longitude as 2*pi/nlon. for example
@@ -93,7 +93,7 @@
 !           = 1  sf and slap are antisymmetric about the equator. the
 !                synthesis used to compute sf is performed on the
 !                northern hemisphere only.  if nlat is odd, sf(i, j) is
-!                computed for i=1, ..., (nlat+1)/2 and j=1, ..., nlon.  if
+!                computed for i=1, ..., (nlat + 1)/2 and j=1, ..., nlon.  if
 !                nlat is even, sf(i, j) is computed for i=1, ..., nlat/2
 !                and j=1, ..., nlon.
 !
@@ -101,7 +101,7 @@
 !           = 2  sf and slap are symmetric about the equator. the
 !                synthesis used to compute sf is performed on the
 !                northern hemisphere only.  if nlat is odd, sf(i, j) is
-!                computed for i=1, ..., (nlat+1)/2 and j=1, ..., nlon.  if
+!                computed for i=1, ..., (nlat + 1)/2 and j=1, ..., nlon.  if
 !                nlat is even, sf(i, j) is computed for i=1, ..., nlat/2
 !                and j=1, ..., nlon.
 !
@@ -126,7 +126,7 @@
 !            program that calls islapgs.  if isym = 0 then ids must be at
 !            least nlat.  if isym > 0 and nlat is even then ids must be
 !            at least nlat/2. if isym > 0 and nlat is odd then ids must
-!            be at least (nlat+1)/2.
+!            be at least (nlat + 1)/2.
 !
 !   jds      the second dimension of the array sf as it appears in the
 !            program that calls islapgs. jds must be at least nlon.
@@ -141,7 +141,7 @@
 !    mdab    the first dimension of the arrays a and b as it appears
 !            in the program that calls islapgs.  mdab must be at
 !            least min(nlat, (nlon+2)/2) if nlon is even or at least
-!            min(nlat, (nlon+1)/2) if nlon is odd.
+!            min(nlat, (nlon + 1)/2) if nlon is odd.
 !
 !    ndab    the second dimension of the arrays a and b as it appears
 !            in the program that calls islapgs. ndbc must be at least
@@ -161,12 +161,12 @@
 !            program that calls islapgs.  let
 !
 !               l1 = min(nlat, (nlon+2)/2) if nlon is even or
-!               l1 = min(nlat, (nlon+1)/2) if nlon is odd
+!               l1 = min(nlat, (nlon + 1)/2) if nlon is odd
 !
 !            and
 !
 !               l2 = nlat/2        if nlat is even or
-!               l2 = (nlat+1)/2    if nlat is odd
+!               l2 = (nlat + 1)/2    if nlat is odd
 !
 !            then lshsgs must be at least
 !
@@ -178,9 +178,9 @@
 !            program that calls islapgs. define
 !
 !               l2 = nlat/2                    if nlat is even or
-!               l2 = (nlat+1)/2                if nlat is odd
+!               l2 = (nlat + 1)/2                if nlat is odd
 !               l1 = min(nlat, (nlon+2)/2) if nlon is even or
-!               l1 = min(nlat, (nlon+1)/2) if nlon is odd
+!               l1 = min(nlat, (nlon + 1)/2) if nlon is odd
 !
 !            if isym is zero then lwork must be at least
 !
@@ -304,7 +304,7 @@ contains
         ierror = 4
         if (nt < 0) return
         ierror = 5
-        imid = (nlat+1)/2
+        imid = (nlat + 1)/2
         if ((isym == 0 .and. ids<nlat) .or. &
             (isym>0 .and. ids<imid)) return
         ierror = 6
@@ -318,7 +318,7 @@ contains
         !
         !     set and verify saved workspace length
         !
-        imid = (nlat+1)/2
+        imid = (nlat + 1)/2
         l2 = (nlat+mod(nlat, 2))/2
         l1 = min((nlon+2)/2, nlat)
         lp=nlat*(3*(l1+l2)-2)+(l1-1)*(l2*(2*nlat-l1)-3*l1)/2+nlon+15
@@ -333,7 +333,7 @@ contains
         mn = mmax*nlat*nt
         !     lwkmin = nln+ls*nlon+2*mn+nlat
         !     if (lwork .lt. lwkmin) return
-        l2 = (nlat+1)/2
+        l2 = (nlat + 1)/2
         l1 = min(nlat, nlon/2+1)
         if (isym == 0) then
             lwkmin = (nt+1)*nlat*nlon + nlat*(2*nt*l1+1)

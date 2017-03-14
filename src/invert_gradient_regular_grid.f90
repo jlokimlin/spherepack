@@ -77,11 +77,11 @@ contains
     !            poles. for example, nlat = 37 for a five degree grid.
     !            nlat determines the grid increment in colatitude as
     !            pi/(nlat-1).  if nlat is odd the equator is located at
-    !            grid point i=(nlat+1)/2. if nlat is even the equator is
+    !            grid point i=(nlat + 1)/2. if nlat is even the equator is
     !            located half way between points i=nlat/2 and i=nlat/2+1.
     !            nlat must be at least 3. note: on the half sphere, the
     !            number of grid points in the colatitudinal direction is
-    !            nlat/2 if nlat is even or (nlat+1)/2 if nlat is odd.
+    !            nlat/2 if nlat is even or (nlat + 1)/2 if nlat is odd.
     !
     !     nlon   the number of distinct londitude points.  nlon determines
     !            the grid increment in longitude as 2*pi/nlon. for example
@@ -107,7 +107,7 @@ contains
     !            in this case sf is antisymmetyric about the equator and
     !            is computed for the northern hemisphere only.  i.e.,
     !            if nlat is odd sf is computed in the array sf(i, j) for
-    !            i=1, ..., (nlat+1)/2 and for j=1, ..., nlon.  if nlat is even
+    !            i=1, ..., (nlat + 1)/2 and for j=1, ..., nlon.  if nlat is even
     !            sf is computed in the array sf(i, j) for i=1, ..., nlat/2
     !            and j=1, ..., nlon.
     !
@@ -117,7 +117,7 @@ contains
     !            in this case sf is symmetyric about the equator and
     !            is computed for the northern hemisphere only.  i.e.,
     !            if nlat is odd sf is computed in the array sf(i, j) for
-    !            i=1, ..., (nlat+1)/2 and for j=1, ..., nlon.  if nlat is even
+    !            i=1, ..., (nlat + 1)/2 and for j=1, ..., nlon.  if nlat is even
     !            sf is computed in the array sf(i, j) for i=1, ..., nlat/2
     !            and j=1, ..., nlon.
     !
@@ -137,7 +137,7 @@ contains
     !            the program that calls igradec. if isym = 0 then isf
     !            must be at least nlat.  if isym = 1 or 2 and nlat is
     !            even then isf must be at least nlat/2. if isym = 1 or 2
-    !            and nlat is odd then isf must be at least (nlat+1)/2.
+    !            and nlat is odd then isf must be at least (nlat + 1)/2.
     !
     !     jsf    the second dimension of the array sf as it appears in
     !            the program that calls igradec. jsf must be at least nlon.
@@ -150,7 +150,7 @@ contains
     !     mdb    the first dimension of the arrays br and bi as it appears in
     !            the program that calls igradec (and vhaec). mdb must be at
     !            least min(nlat, nlon/2) if nlon is even or at least
-    !            min(nlat, (nlon+1)/2) if nlon is odd.
+    !            min(nlat, (nlon + 1)/2) if nlon is odd.
     !
     !     ndb    the second dimension of the arrays br and bi as it appears in
     !            the program that calls igradec (and vhaec). ndb must be at
@@ -168,12 +168,12 @@ contains
     !            program that calls igradec. define
     !
     !               l1 = min(nlat, (nlon+2)/2) if nlon is even or
-    !               l1 = min(nlat, (nlon+1)/2) if nlon is odd
+    !               l1 = min(nlat, (nlon + 1)/2) if nlon is odd
     !
     !            and
     !
     !               l2 = nlat/2        if nlat is even or
-    !               l2 = (nlat+1)/2    if nlat is odd.
+    !               l2 = (nlat + 1)/2    if nlat is odd.
     !
     !
     !            then lshsec must be greater than or equal to
@@ -238,24 +238,24 @@ contains
             ierror = 4
             if (nt < 0) return
             ierror = 5
-            imid = (nlat+1)/2
+            imid = (nlat + 1)/2
             if ((isym == 0 .and. isf<nlat) .or. &
                 (isym /= 0 .and. isf<imid)) return
             ierror = 6
             if (jsf < nlon) return
             ierror = 7
             mmax = min(nlat, (nlon+2)/2)
-            if (mdb < min(nlat, (nlon+1)/2)) return
+            if (mdb < min(nlat, (nlon + 1)/2)) return
             ierror = 8
             if (ndb < nlat) return
             ierror = 9
-            imid = (nlat+1)/2
+            imid = (nlat + 1)/2
             lpimn = (imid*mmax*(2*nlat-mmax+1))/2
             !
             !     verify saved workspace length
             !
             n1 = min(nlat, (nlon+2)/2)
-            n2 = (nlat+1)/2
+            n2 = (nlat + 1)/2
             required_wavetable_size = 2*nlat*n2+3*((n1-2)*(2*nlat-n1-1))/2+nlon+15
             if (lshsec < required_wavetable_size) return
             ierror = 0

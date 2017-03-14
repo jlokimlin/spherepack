@@ -29,9 +29,6 @@
 !     *                                                               *
 !     * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !
-! This file contains code and documentation for subroutines
-! vhaes and vhaesi
-!
 submodule(vector_analysis_routines) vector_analysis_regular_grid_saved
 
 contains
@@ -56,11 +53,11 @@ contains
     !            poles. for example, nlat = 37 for a five degree grid.
     !            nlat determines the grid increment in colatitude as
     !            pi/(nlat-1).  if nlat is odd the equator is located at
-    !            grid point i=(nlat+1)/2. if nlat is even the equator is
+    !            grid point i=(nlat + 1)/2. if nlat is even the equator is
     !            located half way between points i=nlat/2 and i=nlat/2+1.
     !            nlat must be at least 3. note: on the half sphere, the
     !            number of grid points in the colatitudinal direction is
-    !            nlat/2 if nlat is even or (nlat+1)/2 if nlat is odd.
+    !            nlat/2 if nlat is even or (nlat + 1)/2 if nlat is odd.
     !
     !     nlon   the number of distinct londitude points.  nlon determines
     !            the grid increment in longitude as 2*pi/nlon. for example
@@ -92,7 +89,7 @@ contains
     !                 equator. the analysis is performed on the northern
     !                 hemisphere only.  i.e., if nlat is odd the analysis
     !                 is performed on the arrays v(i, j), w(i, j) for
-    !                 i=1, ..., (nlat+1)/2 and j=1, ..., nlon. if nlat is
+    !                 i=1, ..., (nlat + 1)/2 and j=1, ..., nlon. if nlat is
     !                 even the analysis is performed on the the arrays
     !                 v(i, j), w(i, j) for i=1, ..., nlat/2 and j=1, ..., nlon.
     !
@@ -100,7 +97,7 @@ contains
     !                 equator. the analysis is performed on the northern
     !                 hemisphere only.  i.e., if nlat is odd the analysis
     !                 is performed on the arrays v(i, j), w(i, j) for
-    !                 i=1, ..., (nlat+1)/2 and j=1, ..., nlon. if nlat is
+    !                 i=1, ..., (nlat + 1)/2 and j=1, ..., nlon. if nlat is
     !                 even the analysis is performed on the the arrays
     !                 v(i, j), w(i, j) for i=1, ..., nlat/2 and j=1, ..., nlon.
     !                 the curl of (v, w) is zero. that is,
@@ -111,7 +108,7 @@ contains
     !                 equator. the analysis is performed on the northern
     !                 hemisphere only.  i.e., if nlat is odd the analysis
     !                 is performed on the arrays v(i, j), w(i, j) for
-    !                 i=1, ..., (nlat+1)/2 and j=1, ..., nlon. if nlat is
+    !                 i=1, ..., (nlat + 1)/2 and j=1, ..., nlon. if nlat is
     !                 even the analysis is performed on the the arrays
     !                 v(i, j), w(i, j) for i=1, ..., nlat/2 and j=1, ..., nlon.
     !                 the divergence of (v, w) is zero. i.e.,
@@ -122,7 +119,7 @@ contains
     !                 equator. the analysis is performed on the northern
     !                 hemisphere only.  i.e., if nlat is odd the analysis
     !                 is performed on the arrays v(i, j), w(i, j) for
-    !                 i=1, ..., (nlat+1)/2 and j=1, ..., nlon. if nlat is
+    !                 i=1, ..., (nlat + 1)/2 and j=1, ..., nlon. if nlat is
     !                 even the analysis is performed on the the arrays
     !                 v(i, j), w(i, j) for i=1, ..., nlat/2 and j=1, ..., nlon.
     !
@@ -130,7 +127,7 @@ contains
     !                 equator. the analysis is performed on the northern
     !                 hemisphere only.  i.e., if nlat is odd the analysis
     !                 is performed on the arrays v(i, j), w(i, j) for
-    !                 i=1, ..., (nlat+1)/2 and j=1, ..., nlon. if nlat is
+    !                 i=1, ..., (nlat + 1)/2 and j=1, ..., nlon. if nlat is
     !                 even the analysis is performed on the the arrays
     !                 v(i, j), w(i, j) for i=1, ..., nlat/2 and j=1, ..., nlon.
     !                 the curl of (v, w) is zero. that is,
@@ -141,7 +138,7 @@ contains
     !                 equator. the analysis is performed on the northern
     !                 hemisphere only.  i.e., if nlat is odd the analysis
     !                 is performed on the arrays v(i, j), w(i, j) for
-    !                 i=1, ..., (nlat+1)/2 and j=1, ..., nlon. if nlat is
+    !                 i=1, ..., (nlat + 1)/2 and j=1, ..., nlon. if nlat is
     !                 even the analysis is performed on the the arrays
     !                 v(i, j), w(i, j) for i=1, ..., nlat/2 and j=1, ..., nlon.
     !                 the divergence of (v, w) is zero. i.e.,
@@ -170,7 +167,7 @@ contains
     !            the program that calls vhaes. if ityp <= 2 then idvw
     !            must be at least nlat.  if ityp > 2 and nlat is
     !            even then idvw must be at least nlat/2. if ityp > 2
-    !            and nlat is odd then idvw must be at least (nlat+1)/2.
+    !            and nlat is odd then idvw must be at least (nlat + 1)/2.
     !
     !     jdvw   the second dimension of the arrays v, w as it appears in
     !            the program that calls vhaes. jdvw must be at least nlon.
@@ -178,7 +175,7 @@ contains
     !     mdab   the first dimension of the arrays br, bi, cr, and ci as it
     !            appears in the program that calls vhaes. mdab must be at
     !            least min(nlat, nlon/2) if nlon is even or at least
-    !            min(nlat, (nlon+1)/2) if nlon is odd.
+    !            min(nlat, (nlon + 1)/2) if nlon is odd.
     !
     !     ndab   the second dimension of the arrays br, bi, cr, and ci as it
     !            appears in the program that calls vhaes. ndab must be at
@@ -193,12 +190,12 @@ contains
     !            program that calls vhaes. define
     !
     !               l1 = min(nlat, nlon/2) if nlon is even or
-    !               l1 = min(nlat, (nlon+1)/2) if nlon is odd
+    !               l1 = min(nlat, (nlon + 1)/2) if nlon is odd
     !
     !            and
     !
     !               l2 = nlat/2        if nlat is even or
-    !               l2 = (nlat+1)/2    if nlat is odd
+    !               l2 = (nlat + 1)/2    if nlat is odd
     !
     !            then lvhaes must be at least
     !
@@ -213,7 +210,7 @@ contains
     !            bi(mp1, np1), cr(mp1, np1), and ci(mp1, np1) are computed
     !            for mp1=1, ..., mmax and np1=mp1, ..., nlat except for np1=nlat
     !            and odd mp1. mmax=min(nlat, nlon/2) if nlon is even or
-    !            mmax=min(nlat, (nlon+1)/2) if nlon is odd.
+    !            mmax=min(nlat, (nlon + 1)/2) if nlon is odd.
     !
     !     ierror = 0  no errors
     !            = 1  error in the specification of nlat
@@ -249,75 +246,56 @@ contains
 
         ! Local variables
         integer(ip) :: idv, imid, idz, ist, lnl, lzimn, mmax
+        integer(ip) :: required_wavetable_size
         integer(ip) :: lwork, workspace_indices(6)
+        type(VectorAnalysisUtility) :: util
 
-        associate (lvhaes => size(wvhaes))
+        imid = (nlat + 1)/2
+        mmax = min(nlat, (nlon + 1)/2)
+        idz = (mmax*(2*nlat-mmax+1))/2
+        lzimn = idz*imid
+        required_wavetable_size = (2 * lzimn) + nlon + 15
 
-            imid = (nlat+1)/2
-            mmax = min(nlat, (nlon+1)/2)
-            idz = (mmax*(2*nlat-mmax+1))/2
-            lzimn = idz*imid
+        ! Check calling arguments
+        call util%check_vector_analysis_inputs(nlat, nlon, ityp, idvw, jdvw, &
+            mdab, ndab, nt, required_wavetable_size, wvhaes, ierror)
 
-            select case (ityp)
-                case(0:2)
-                    idv = nlat
-                    ist = imid
-                case default
-                    idv = imid
-                    ist = 0
-            end select
+        ! Check error flag
+        if (ierror /= 0) return
 
-            lnl = nt*idv*nlon
+        select case (ityp)
+            case(0:2)
+                idv = nlat
+                ist = imid
+            case default
+                idv = imid
+                ist = 0
+        end select
 
-            !  Check calling arguments
-            if (nlat < 3) then
-                ierror = 1
-            else if (nlon < 1) then
-                ierror = 2
-            else if (ityp < 0 .or. ityp > 8) then
-                ierror = 3
-            else if (nt < 0) then
-                ierror = 4
-            else if ((ityp <= 2 .and. idvw < nlat) .or. (ityp > 2 .and. idvw < imid)) then
-                ierror = 5
-            else if (jdvw < nlon) then
-                ierror = 6
-            else if (mdab < mmax) then
-                ierror = 7
-            else if (ndab < nlat) then
-                ierror = 8
-            else if (lvhaes < 2*lzimn+nlon+15) then
-                ierror = 9
-            else
-                ierror = 0
-            end if
+        lnl = nt*idv*nlon
 
-            ! Check error flag
-            if (ierror /= 0) return
+        ! Set required workspace size
+        lwork = 2*lnl+idv*nlon
 
-            ! Set required workspace size
-            lwork = 2*lnl+idv*nlon
+        block
+            real(wp) :: work(lwork)
 
-            block
-                real(wp) :: work(lwork)
+            !  Set workspace indices
+            workspace_indices = get_vhaes_workspace_indices(ist, lnl, lzimn)
 
-                !  Set workspace indices
-                workspace_indices = get_vhaes_workspace_indices(ist, lnl, lzimn)
-
-                associate (&
-                    iw1 => workspace_indices(1), &
-                    iw2 => workspace_indices(2), &
-                    iw3 => workspace_indices(3), &
-                    iw4 => workspace_indices(4), &
-                    jw1 => workspace_indices(5), &
-                    jw2 => workspace_indices(6) &
-                    )
-                    call vhaes_lower_utility_routine(nlat, nlon, ityp, nt, imid, idvw, jdvw, v, w, mdab, ndab, &
-                        br, bi, cr, ci, idv, work, work(iw1:), work(iw2:), work(iw3:), &
-                        work(iw4:), idz, wvhaes, wvhaes(jw1:), wvhaes(jw2:))
-                end associate
-            end block
-        end associate
+            associate (&
+                iw1 => workspace_indices(1), &
+                iw2 => workspace_indices(2), &
+                iw3 => workspace_indices(3), &
+                iw4 => workspace_indices(4), &
+                jw1 => workspace_indices(5), &
+                jw2 => workspace_indices(6) &
+                )
+                call vhaes_lower_utility_routine(nlat, nlon, ityp, nt, imid, idvw, jdvw, v, w, mdab, ndab, &
+                    br, bi, cr, ci, idv, work, work(iw1:), work(iw2:), work(iw3:), &
+                    work(iw4:), idz, wvhaes, wvhaes(jw1:), wvhaes(jw2:))
+            end associate
+        end block
 
     end subroutine vhaes
 
@@ -334,11 +312,11 @@ contains
     !            poles. for example, nlat = 37 for a five degree grid.
     !            nlat determines the grid increment in colatitude as
     !            pi/(nlat-1).  if nlat is odd the equator is located at
-    !            grid point i=(nlat+1)/2. if nlat is even the equator is
+    !            grid point i=(nlat + 1)/2. if nlat is even the equator is
     !            located half way between points i=nlat/2 and i=nlat/2+1.
     !            nlat must be at least 3. note: on the half sphere, the
     !            number of grid points in the colatitudinal direction is
-    !            nlat/2 if nlat is even or (nlat+1)/2 if nlat is odd.
+    !            nlat/2 if nlat is even or (nlat + 1)/2 if nlat is odd.
     !
     !     nlon   the number of distinct londitude points.  nlon determines
     !            the grid increment in longitude as 2*pi/nlon. for example
@@ -351,12 +329,12 @@ contains
     !            program that calls vhaes. define
     !
     !               l1 = min(nlat, nlon/2) if nlon is even or
-    !               l1 = min(nlat, (nlon+1)/2) if nlon is odd
+    !               l1 = min(nlat, (nlon + 1)/2) if nlon is odd
     !
     !            and
     !
     !               l2 = nlat/2        if nlat is even or
-    !               l2 = (nlat+1)/2    if nlat is odd
+    !               l2 = (nlat + 1)/2    if nlat is odd
     !
     !            then lvhaes must be at least
     !
@@ -385,54 +363,53 @@ contains
 
         ! Local variables
         integer(ip) :: imid, labc, lzimn, mmax
+        integer(ip) :: required_wavetable_size
         integer(ip) :: workspace_indices(4)
         integer(ip) :: lwork, ldwork
         type(SpherepackUtility) :: util
 
-        associate (lvhaes => size(wvhaes))
+        mmax = min(nlat, (nlon + 1)/2)
+        imid = (nlat + 1)/2
+        lzimn = (imid*mmax*(2*nlat-mmax+1))/2
+        labc = 3*(max(mmax-2, 0)*(2*nlat-mmax-1))/2
+        required_wavetable_size = 2*lzimn+nlon+15
 
-            mmax = min(nlat, (nlon+1)/2)
-            imid = (nlat+1)/2
-            lzimn = (imid*mmax*(2*nlat-mmax+1))/2
-            labc = 3*(max(mmax-2, 0)*(2*nlat-mmax-1))/2
+        ! Check calling arguments
+        if (nlat < 3) then
+            ierror = 1
+        else if (nlon < 1) then
+            ierror = 2
+        else if (size(wvhaes) < required_wavetable_size) then
+            ierror = 3
+        else
+            ierror = 0
+        end if
 
-            !  Check calling arguments
-            if (nlat < 3) then
-                ierror = 1
-            else if (nlon < 1) then
-                ierror = 2
-            else if (lvhaes < 2*lzimn+nlon+15) then
-                ierror = 3
-            else
-                ierror = 0
-            end if
+        ! Check error flag
+        if (ierror /= 0) return
 
-            ! Check error flag
-            if (ierror /= 0) return
+        !  Set workspace indices
+        workspace_indices = get_vhaesi_workspace_indices(lzimn, nlat, imid, mmax)
 
-            !  Set workspace indices
-            workspace_indices = get_vhaesi_workspace_indices(lzimn, nlat, imid, mmax)
+        ! Set required workspace sizes
+        lwork = 5*nlat*imid+labc
+        ldwork = 2 * (nlat + 1)
 
-            ! Set required workspace sizes
-            lwork = 5*nlat*imid+labc
-            ldwork = 2 * (nlat + 1)
+        block
+            real(wp) :: work(lwork), dwork(ldwork)
 
-            block
-                real(wp) :: work(lwork), dwork(ldwork)
+            associate (&
+                jw1 => workspace_indices(1), &
+                jw2 => workspace_indices(2), &
+                iw1 => workspace_indices(3), &
+                idz => workspace_indices(4) &
+                )
+                call vhaesi_lower_utility_routine( &
+                    nlat, nlon, imid, wvhaes, wvhaes(jw1:), idz, work, work(iw1:), dwork)
 
-                associate (&
-                    jw1 => workspace_indices(1), &
-                    jw2 => workspace_indices(2), &
-                    iw1 => workspace_indices(3), &
-                    idz => workspace_indices(4) &
-                    )
-                    call vhaesi_lower_utility_routine( &
-                        nlat, nlon, imid, wvhaes, wvhaes(jw1:), idz, work, work(iw1:), dwork)
-
-                    call util%hfft%initialize(nlon, wvhaes(jw2:))
-                end associate
-            end block
-        end associate
+                call util%hfft%initialize(nlon, wvhaes(jw2:))
+            end associate
+        end block
 
     end subroutine vhaesi
 
@@ -498,11 +475,10 @@ contains
         !  Compute coefficients br, bi, cr, ci
         select case (ityp)
             case (0)
-                !
+
                 !  case ityp=0,  no symmetries
-                !
+
                 ! case m=0
-                !
                 do k=1, nt
                     do i=1, imid
                         do np1=2, even_stride, 2
@@ -520,12 +496,11 @@ contains
                         end do
                     end do
                 end do
-                !
+
                 ! case m = 1 through nlat-1
-                !
                 if (mmax < 2) return
 
-                do mp1=2, mmax
+                main_loop_case_0: do mp1=2, mmax
                     m = mp1-1
                     mb = m*(nlat-1)-(m*(m-1))/2
                     mp2 = mp1+1
@@ -545,7 +520,6 @@ contains
                                 end do
                             end do
                         end do
-
                         if (mod(nlat, 2) /= 0) then
                             do k=1, nt
                                 do np1=mp1, odd_stride, 2
@@ -558,7 +532,7 @@ contains
                         end if
                     end if
 
-                    if (mp2 > even_stride) exit
+                    if (mp2 > even_stride) cycle main_loop_case_0
 
                     do k=1, nt
                         do i=1, imm1
@@ -575,7 +549,7 @@ contains
                         end do
                     end do
 
-                    if (mod(nlat, 2) == 0) exit
+                    if (mod(nlat, 2) == 0) cycle main_loop_case_0
 
                     do k=1, nt
                         do np1=mp2, even_stride, 2
@@ -585,7 +559,7 @@ contains
                             ci(mp1, np1, k) = ci(mp1, np1, k)-zv(np1+mb, imid)*we(imid, 2*mp1-1, k)
                         end do
                     end do
-                end do
+                end do main_loop_case_0
             case (1)
                 !
                 !  case ityp=1 ,  no symmetries but cr and ci equal zero
@@ -639,7 +613,7 @@ contains
                         end if
                     end if
 
-                    if (mp2 > even_stride) exit
+                    if (mp2 > even_stride) return
 
                     do k=1, nt
                         do i=1, imm1
@@ -652,7 +626,7 @@ contains
                         end do
                     end do
 
-                    if (mod(nlat, 2) == 0) exit
+                    if (mod(nlat, 2) == 0) return
 
                     do k=1, nt
                         do np1=mp2, even_stride, 2
@@ -714,7 +688,7 @@ contains
                         end if
                     end if
 
-                    if (mp2 > even_stride) exit
+                    if (mp2 > even_stride) return
 
                     do k=1, nt
                         do i=1, imm1
@@ -727,7 +701,7 @@ contains
                         end do
                     end do
 
-                    if (mod(nlat, 2) == 0) exit
+                    if (mod(nlat, 2) == 0) return
 
                     do k=1, nt
                         do np1=mp2, even_stride, 2
@@ -789,7 +763,7 @@ contains
                         end if
                     end if
 
-                    if (mp2 > even_stride) exit
+                    if (mp2 > even_stride) return
 
                     do k=1, nt
                         do i=1, imm1
@@ -802,7 +776,7 @@ contains
                         end do
                     end do
 
-                    if (mod(nlat, 2) == 0) exit
+                    if (mod(nlat, 2) == 0) return
 
                     do  k=1, nt
                         do  np1=mp2, even_stride, 2
@@ -847,7 +821,7 @@ contains
                         end do
                     end do
 
-                    if (mod(nlat, 2) == 0) exit
+                    if (mod(nlat, 2) == 0) return
 
                     do k=1, nt
                         do np1=mp2, even_stride, 2
@@ -955,7 +929,7 @@ contains
                         end if
                     end if
 
-                    if (mp2 > even_stride) exit
+                    if (mp2 > even_stride) return
 
                     do k=1, nt
                         do  i=1, imm1
@@ -968,7 +942,7 @@ contains
                         end do
                     end do
 
-                    if (mod(nlat, 2) == 0) exit
+                    if (mod(nlat, 2) == 0) return
 
                     do k=1, nt
                         do np1=mp2, even_stride, 2
@@ -1000,7 +974,7 @@ contains
                     mb = m*(nlat-1)-(m*(m-1))/2
                     mp2 = mp1+1
 
-                    if (mp1 > odd_stride) exit
+                    if (mp1 > odd_stride) return
 
                     do  k=1, nt
                         do  i=1, imm1
@@ -1013,7 +987,7 @@ contains
                         end do
                     end do
 
-                    if (mod(nlat, 2) == 0) exit
+                    if (mod(nlat, 2) == 0) return
 
                     do k=1, nt
                         do np1=mp1, odd_stride, 2
@@ -1045,7 +1019,7 @@ contains
                     mb = m*(nlat-1)-(m*(m-1))/2
                     mp2 = mp1+1
 
-                    if (mp2 > even_stride) exit
+                    if (mp2 > even_stride) return
 
                     do k=1, nt
                         do i=1, imm1
@@ -1058,7 +1032,7 @@ contains
                         end do
                     end do
 
-                    if (mod(nlat, 2) == 0) exit
+                    if (mod(nlat, 2) == 0) return
 
                     do k=1, nt
                         do np1=mp2, even_stride, 2
@@ -1108,7 +1082,7 @@ contains
         integer(ip)         :: i3, m, mn, mp1, np1, mmax
         type(SpherepackUtility) :: util
 
-        mmax = min(nlat, (nlon+1)/2)
+        mmax = min(nlat, (nlon + 1)/2)
 
         call util%zvinit(nlat, nlon, wzvin, dwork)
 

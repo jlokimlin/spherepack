@@ -59,12 +59,12 @@ contains
     !            full sphere. these lie in the interval (0, pi) and are computed
     !            in radians in theta(1) <...< theta(nlat) by subroutine compute_gaussian_latitudes_and_weights.
     !            if nlat is odd the equator will be included as the grid point
-    !            theta((nlat+1)/2).  if nlat is even the equator will be
+    !            theta((nlat + 1)/2).  if nlat is even the equator will be
     !            excluded as a grid point and will lie half way between
     !            theta(nlat/2) and theta(nlat/2+1). nlat must be at least 3.
     !            note: on the half sphere, the number of grid points in the
     !            colatitudinal direction is nlat/2 if nlat is even or
-    !            (nlat+1)/2 if nlat is odd.
+    !            (nlat + 1)/2 if nlat is odd.
     !
     !     nlon   the number of distinct londitude points.  nlon determines
     !            the grid increment in longitude as 2*pi/nlon. for example
@@ -92,7 +92,7 @@ contains
     !            in this case the divergence is antisymmetyric about
     !            the equator and is computed for the northern hemisphere
     !            only.  i.e., if nlat is odd the divergence is computed
-    !            in the array divg(i, j) for i=1, ..., (nlat+1)/2 and for
+    !            in the array divg(i, j) for i=1, ..., (nlat + 1)/2 and for
     !            j=1, ..., nlon.  if nlat is even the divergence is computed
     !            in the array divg(i, j) for i=1, ..., nlat/2 and j=1, ..., nlon.
     !
@@ -101,7 +101,7 @@ contains
     !            in this case the divergence is symmetyric about the
     !            equator and is computed for the northern hemisphere
     !            only.  i.e., if nlat is odd the divergence is computed
-    !            in the array divg(i, j) for i=1, ..., (nlat+1)/2 and for
+    !            in the array divg(i, j) for i=1, ..., (nlat + 1)/2 and for
     !            j=1, ..., nlon.  if nlat is even the divergence is computed
     !            in the array divg(i, j) for i=1, ..., nlat/2 and j=1, ..., nlon.
     !
@@ -121,7 +121,7 @@ contains
     !            the program that calls divgs. if isym = 0 then idiv
     !            must be at least nlat.  if isym = 1 or 2 and nlat is
     !            even then idiv must be at least nlat/2. if isym = 1 or 2
-    !            and nlat is odd then idiv must be at least (nlat+1)/2.
+    !            and nlat is odd then idiv must be at least (nlat + 1)/2.
     !
     !     jdiv   the second dimension of the array divg as it appears in
     !            the program that calls divgs. jdiv must be at least nlon.
@@ -135,7 +135,7 @@ contains
     !     mdb    the first dimension of the arrays br and bi as it
     !            appears in the program that calls divgs. mdb must be at
     !            least min(nlat, nlon/2) if nlon is even or at least
-    !            min(nlat, (nlon+1)/2) if nlon is odd.
+    !            min(nlat, (nlon + 1)/2) if nlon is odd.
     !
     !     ndb    the second dimension of the arrays br and bi as it
     !            appears in the program that calls divgs. ndb must be at
@@ -153,12 +153,12 @@ contains
     !            program that calls divgs. define
     !
     !               l1 = min(nlat, (nlon+2)/2) if nlon is even or
-    !               l1 = min(nlat, (nlon+1)/2) if nlon is odd
+    !               l1 = min(nlat, (nlon + 1)/2) if nlon is odd
     !
     !            and
     !
     !               l2 = nlat/2        if nlat is even or
-    !               l2 = (nlat+1)/2    if nlat is odd
+    !               l2 = (nlat + 1)/2    if nlat is odd
     !
     !            then lshsgs must be at least
     !
@@ -213,10 +213,10 @@ contains
         associate (lshsgs => size(wshsgs))
 
             !  Compute constants
-            imid = (nlat+1)/2
+            imid = (nlat + 1)/2
             mmax = min(nlat, (nlon+2)/2)
             lpimn = (imid*mmax*(2*nlat-mmax+1))/2
-            n2 = (nlat+1)/2
+            n2 = (nlat + 1)/2
             n1 = min((nlon+2)/2, nlat)
             required_wavetable_size=nlat*(3*(n1+n2)-2)+(n1-1)*(n2*(2*nlat-n1)-3*n1)/2+nlon+15
 
@@ -251,7 +251,7 @@ contains
                 ierror = 5
             else if (jdiv < nlon) then
                 ierror = 6
-            else if (mdb < min(nlat, (nlon+1)/2)) then
+            else if (mdb < min(nlat, (nlon + 1)/2)) then
                 ierror = 7
             else if (ndb < nlat) then
                 ierror = 8

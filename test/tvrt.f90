@@ -93,7 +93,7 @@ program tvrt
     !     set dimensions with parameter statements
     integer(ip), parameter :: nlat= 24, nlon= 14, nt = 3
     integer(ip), parameter :: isym = 0, ityp = 0
-    integer(ip), parameter :: mdab = (nlon+2)/2, mdc = (nlon+1)/2
+    integer(ip), parameter :: mdab = (nlon+2)/2, mdc = (nlon + 1)/2
     real(wp), dimension(mdc, nlat, nt)  :: br, bi, cr, ci
     real(wp), dimension(mdab, nlat, nt) :: a, b
     real(wp), dimension(nlat, nlon, nt) :: vt, v, w, ve, we

@@ -166,7 +166,7 @@ contains
     ! ... lwork
     !
     !     the length of the unsaved workspace in the routine calling sshifte
-    !     lwork must be greater than or equal to 2*nlon*(nlat+1) if nlon is even.
+    !     lwork must be greater than or equal to 2*nlon*(nlat + 1) if nlon is even.
     !     lwork must be greater than or equal to nlon*(5*nlat+1) if nlon is odd.
     !
     ! ... ier
@@ -183,7 +183,7 @@ contains
     !
     !     = 3 if lsave < 2*(nlon+2*nlat+16)
     !
-    !     = 4 if lwork < 2*nlon*(nlat+1) for nlon even or
+    !     = 4 if lwork < 2*nlon*(nlat + 1) for nlon even or
     !            lwork < nlon*(5*nlat+1) for nlon odd
     !
     module subroutine sshifte(ioff, nlon, nlat, goff, greg, wsav, ier)
@@ -316,7 +316,7 @@ contains
         real(wp) :: wsav(*), wrk(*)
         real(wp) :: gnorth, gsouth
         isav = 4*nlat+17
-        n2 = (nlon+1)/2
+        n2 = (nlon + 1)/2
         !
         !     execute full circle latitude shifts for nlon odd or even
         !
@@ -382,7 +382,7 @@ contains
                 end do
             end do
             !
-            !       shift the n2=(nlon+1)/2 rlat vectors one half latitude grid
+            !       shift the n2=(nlon + 1)/2 rlat vectors one half latitude grid
             !
             call shifth(n2, nlat2, rlat, wsav, wrk)
             !
@@ -441,7 +441,7 @@ contains
         real(wp) :: rlat(nr, nlat2), rlon(nlatp1, nlon)
         real(wp) :: wsav(*), wrk(*)
         isav = 4*nlat+17
-        n2 = (nlon+1)/2
+        n2 = (nlon + 1)/2
         !
         !     execute full circle latitude shifts for nlon odd or even
         !
@@ -507,7 +507,7 @@ contains
                 rlat(j, nlat+1) = greg(j, nlat+1)
             end do
             !
-            !       shift the n2=(nlon+1)/2 rlat vectors one half latitude grid
+            !       shift the n2=(nlon + 1)/2 rlat vectors one half latitude grid
             !
             call shifth(n2, nlat2, rlat, wsav, wrk)
             !

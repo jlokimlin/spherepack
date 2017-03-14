@@ -171,8 +171,8 @@ program testvshifte
                 err2v = err2v + (vreg(j, i)-ve)**2
             end do
         end do
-        err2u = sqrt(err2u/(nlon*(nlat+1)))
-        err2v = sqrt(err2v/(nlon*(nlat+1)))
+        err2u = sqrt(err2u/(nlon*(nlat + 1)))
+        err2v = sqrt(err2v/(nlon*(nlat + 1)))
         write (stdout, 300) err2u, err2v
 300     format(' least squares error ', &
             /' err2u = ', e10.3, ' err2v = ', e10.3)
@@ -217,8 +217,8 @@ program testvshifte
                 err2v = err2v + (voff(j, i)-ve)**2
             end do
         end do
-        err2u = sqrt(err2u/(nlon*(nlat+1)))
-        err2v = sqrt(err2v/(nlon*(nlat+1)))
+        err2u = sqrt(err2u/(nlon*(nlat + 1)))
+        err2v = sqrt(err2v/(nlon*(nlat + 1)))
         write (stdout, 300) err2u, err2v
     end if
 

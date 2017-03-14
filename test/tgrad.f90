@@ -88,7 +88,7 @@ program tgrad
     !
     integer(ip), parameter              :: nlat = 33, nlon = 18, nt = 4
     integer(ip), parameter              :: isym = 0, ityp = 0
-    integer(ip), parameter              :: mdb = (nlon+1)/2, mdab = (nlon+2)/2
+    integer(ip), parameter              :: mdb = (nlon + 1)/2, mdab = (nlon+2)/2
     real(wp), dimension(mdb, nlat, nt)  :: br, bi, cr, ci
     real(wp), dimension(mdab, nlat, nt) :: a, b
     real(wp), dimension(nlat, nlon, nt) :: sf, v, w

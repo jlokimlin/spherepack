@@ -54,12 +54,12 @@ contains
     !            such that 0 < theta(1) <...< theta(nlat) < pi. they are
     !            computed by subroutine compute_gaussian_latitudes_and_weights which is called by this
     !            subroutine. if nlat is odd the equator is
-    !            theta((nlat+1)/2). if nlat is even the equator lies
+    !            theta((nlat + 1)/2). if nlat is even the equator lies
     !            half way between theta(nlat/2) and theta(nlat/2+1). nlat
     !            must be at least 3. note: if (v, w) is symmetric about
     !            the equator (see parameter ityp below) the number of
     !            colatitudinal grid points is nlat/2 if nlat is even or
-    !            (nlat+1)/2 if nlat is odd.
+    !            (nlat + 1)/2 if nlat is odd.
     !
     !     nlon   the number of distinct londitude points.  nlon determines
     !            the grid increment in longitude as 2*pi/nlon. for example
@@ -92,7 +92,7 @@ contains
     !            = 3  vt is odd and wt is even about the equator. the
     !                 synthesis is performed on the northern hemisphere
     !                 only.  i.e., if nlat is odd the arrays vt(i, j)
-    !                 and wt(i, j) are computed for i=1, ..., (nlat+1)/2
+    !                 and wt(i, j) are computed for i=1, ..., (nlat + 1)/2
     !                 and j=1, ..., nlon. if nlat is even the arrays
     !                 are computed for i=1, ..., nlat/2 and j=1, ..., nlon.
     !
@@ -100,7 +100,7 @@ contains
     !                 coefficients cr and ci are zero. the synthesis is
     !                 performed on the northern hemisphere only. i.e. if
     !                 nlat is odd the arrays vt(i, j), wt(i, j) are computed
-    !                 for i=1, ..., (nlat+1)/2 and j=1, ..., nlon. if nlat is
+    !                 for i=1, ..., (nlat + 1)/2 and j=1, ..., nlon. if nlat is
     !                 even the arrays vt(i, j), wt(i, j) are computed for
     !                 i=1, ..., nlat/2 and j=1, ..., nlon.
     !
@@ -108,14 +108,14 @@ contains
     !                 coefficients br and bi are zero. the synthesis is
     !                 performed on the northern hemisphere only. i.e. if
     !                 nlat is odd the arrays vt(i, j), wt(i, j) are computed
-    !                 for i=1, ..., (nlat+1)/2 and j=1, ..., nlon. if nlat is
+    !                 for i=1, ..., (nlat + 1)/2 and j=1, ..., nlon. if nlat is
     !                 even the arrays vt(i, j), wt(i, j) are computed for
     !                 i=1, ..., nlat/2 and j=1, ..., nlon.
     !
     !            = 6  vt is even and wt is odd about the equator. the
     !                 synthesis is performed on the northern hemisphere
     !                 only.  i.e., if nlat is odd the arrays vt(i, j), wt(i, j)
-    !                 are computed for i=1, ..., (nlat+1)/2 and j=1, ..., nlon.
+    !                 are computed for i=1, ..., (nlat + 1)/2 and j=1, ..., nlon.
     !                 if nlat is even the arrays vt(i, j), wt(i, j) are computed
     !                 for i=1, ..., nlat/2 and j=1, ..., nlon.
     !
@@ -123,7 +123,7 @@ contains
     !                 coefficients cr and ci are zero. the synthesis is
     !                 performed on the northern hemisphere only. i.e. if
     !                 nlat is odd the arrays vt(i, j), wt(i, j) are computed
-    !                 for i=1, ..., (nlat+1)/2 and j=1, ..., nlon. if nlat is
+    !                 for i=1, ..., (nlat + 1)/2 and j=1, ..., nlon. if nlat is
     !                 even the arrays vt(i, j), wt(i, j) are computed for
     !                 i=1, ..., nlat/2 and j=1, ..., nlon.
     !
@@ -131,7 +131,7 @@ contains
     !                 coefficients br and bi are zero. the synthesis is
     !                 performed on the northern hemisphere only. i.e. if
     !                 nlat is odd the arrays vt(i, j), wt(i, j) are computed
-    !                 for i=1, ..., (nlat+1)/2 and j=1, ..., nlon. if nlat is
+    !                 for i=1, ..., (nlat + 1)/2 and j=1, ..., nlon. if nlat is
     !                 even the arrays vt(i, j), wt(i, j) are computed for
     !                 i=1, ..., nlat/2 and j=1, ..., nlon.
     !
@@ -148,7 +148,7 @@ contains
     !            the program that calls vtsgc. if ityp <= 2 then idvw
     !            must be at least nlat.  if ityp > 2 and nlat is
     !            even then idvw must be at least nlat/2. if ityp > 2
-    !            and nlat is odd then idvw must be at least (nlat+1)/2.
+    !            and nlat is odd then idvw must be at least (nlat + 1)/2.
     !
     !     jdvw   the second dimension of the arrays vt, wt as it appears in
     !            the program that calls vtsgc. jdvw must be at least nlon.
@@ -160,7 +160,7 @@ contains
     !     mdab   the first dimension of the arrays br, bi, cr, and ci as it
     !            appears in the program that calls vtsgc. mdab must be at
     !            least min(nlat, nlon/2) if nlon is even or at least
-    !            min(nlat, (nlon+1)/2) if nlon is odd.
+    !            min(nlat, (nlon + 1)/2) if nlon is odd.
     !
     !     ndab   the second dimension of the arrays br, bi, cr, and ci as it
     !            appears in the program that calls vtsgc. ndab must be at
@@ -175,12 +175,12 @@ contains
     !            program that calls vtsgc. define
     !
     !               l1 = min(nlat, nlon/2) if nlon is even or
-    !               l1 = min(nlat, (nlon+1)/2) if nlon is odd
+    !               l1 = min(nlat, (nlon + 1)/2) if nlon is odd
     !
     !            and
     !
     !               l2 = nlat/2        if nlat is even or
-    !               l2 = (nlat+1)/2    if nlat is odd
+    !               l2 = (nlat + 1)/2    if nlat is odd
     !
     !            then lwvts must be at least
     !
@@ -295,13 +295,13 @@ contains
         ierror = 4
         if (nt < 0) return
         ierror = 5
-        imid = (nlat+1)/2
+        imid = (nlat + 1)/2
         if ((ityp<=2 .and. idvw<nlat) .or. &
             (ityp>2 .and. idvw<imid)) return
         ierror = 6
         if (jdvw < nlon) return
         ierror = 7
-        mmax = min(nlat, (nlon+1)/2)
+        mmax = min(nlat, (nlon + 1)/2)
         if (mdab < mmax) return
         ierror = 8
         if (ndab < nlat) return
@@ -353,12 +353,12 @@ contains
     !            such that 0 < theta(1) <...< theta(nlat) < pi. they are
     !            computed by subroutine compute_gaussian_latitudes_and_weights which is called by this
     !            subroutine. if nlat is odd the equator is
-    !            theta((nlat+1)/2). if nlat is even the equator lies
+    !            theta((nlat + 1)/2). if nlat is even the equator lies
     !            half way between theta(nlat/2) and theta(nlat/2+1). nlat
     !            must be at least 3. note: if (v, w) is symmetric about
     !            the equator (see parameter ityp below) the number of
     !            colatitudinal grid points is nlat/2 if nlat is even or
-    !            (nlat+1)/2 if nlat is odd.
+    !            (nlat + 1)/2 if nlat is odd.
     !
     !     nlon   the number of distinct londitude points.  nlon determines
     !            the grid increment in longitude as 2*pi/nlon. for example
@@ -371,12 +371,12 @@ contains
     !            program that calls vtsgc. define
     !
     !               l1 = min(nlat, nlon/2) if nlon is even or
-    !               l1 = min(nlat, (nlon+1)/2) if nlon is odd
+    !               l1 = min(nlat, (nlon + 1)/2) if nlon is odd
     !
     !            and
     !
     !               l2 = nlat/2        if nlat is even or
-    !               l2 = (nlat+1)/2    if nlat is odd
+    !               l2 = (nlat + 1)/2    if nlat is odd
     !
     !            then lwvts must be at least
     !
@@ -414,9 +414,9 @@ contains
         ! Check error flag
         if (ierror /= 0) return
 
-        imid = (nlat+1)/2
+        imid = (nlat + 1)/2
         lzz1 = 2*nlat*imid
-        mmax = min(nlat, (nlon+1)/2)
+        mmax = min(nlat, (nlon + 1)/2)
         labc = 3*(max(mmax-2, 0)*(2*nlat-mmax-1))/2
 
         ! Set required workspace size
@@ -509,7 +509,7 @@ contains
         nlp1 = nlat+1
         mlat = mod(nlat, 2)
         mlon = mod(nlon, 2)
-        mmax = min(nlat, (nlon+1)/2)
+        mmax = min(nlat, (nlon + 1)/2)
 
         select case(mlat)
             case(0)

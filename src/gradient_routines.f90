@@ -275,7 +275,7 @@ contains
             call compute_coefficient_multipliers(sqnn)
 
             ! Set upper limit for vector m subscript
-            mmax = min(nlat, (nlon+1)/2)
+            mmax = min(nlat, (nlon + 1)/2)
 
             ! Preset to 0.0
             a = ZERO

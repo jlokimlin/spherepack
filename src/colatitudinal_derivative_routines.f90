@@ -319,8 +319,8 @@ contains
         ! Local variable
         integer(ip) :: imid, mmax
 
-        imid = (nlat+1)/2
-        mmax = min(nlat, (nlon+1)/2)
+        imid = (nlat + 1)/2
+        mmax = min(nlat, (nlon + 1)/2)
 
         ! Check calling arguments
         if (nlat < 3) then
@@ -360,9 +360,9 @@ contains
         ! Local variables
         integer(ip) :: imid, lzz1, mmax, labc
 
-        imid = (nlat+1)/2
+        imid = (nlat + 1)/2
         lzz1 = 2*nlat*imid
-        mmax = min(nlat, (nlon+1)/2)
+        mmax = min(nlat, (nlon + 1)/2)
         labc = 3*(max(mmax-2, 0)*(2 * nlat - mmax - 1))/2
         return_value = 2*(lzz1 + labc) + nlon + 15
 

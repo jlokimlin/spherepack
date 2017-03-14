@@ -125,7 +125,7 @@ program testsshifte
                 err2 = err2 + (greg(j, i)-gexact)**2
             end do
         end do
-        err2 = sqrt(err2/(nlon*(nlat+1)))
+        err2 = sqrt(err2/(nlon*(nlat + 1)))
         write (stdout, 300) err2
 300     format(' least squares error = ', e10.3)
     end if
@@ -158,7 +158,7 @@ program testsshifte
                 err2 = err2 + (goff(j, i) - gexact)**2
             end do
         end do
-        err2 = sqrt(err2/(nlon*(nlat+1)))
+        err2 = sqrt(err2/(nlon*(nlat + 1)))
         write (stdout, 300) err2
     end if
 

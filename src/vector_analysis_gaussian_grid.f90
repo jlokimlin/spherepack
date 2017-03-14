@@ -7,7 +7,7 @@
 !     *                                                               *
 !     *                      all rights reserved                      *
 !     *                                                               *
-!     *                      SPHEREPACK                               *
+!     *                          Spherepack                           *
 !     *                                                               *
 !     *       A Package of Fortran Subroutines and Programs           *
 !     *                                                               *
@@ -51,12 +51,12 @@ contains
     !            full sphere. these lie in the interval (0, pi) and are computed
     !            in radians in theta(1) <...< theta(nlat) by subroutine compute_gaussian_latitudes_and_weights.
     !            if nlat is odd the equator will be included as the grid point
-    !            theta((nlat+1)/2).  if nlat is even the equator will be
+    !            theta((nlat + 1)/2).  if nlat is even the equator will be
     !            excluded as a grid point and will lie half way between
     !            theta(nlat/2) and theta(nlat/2+1). nlat must be at least 3.
     !            note: on the half sphere, the number of grid points in the
     !            colatitudinal direction is nlat/2 if nlat is even or
-    !            (nlat+1)/2 if nlat is odd.
+    !            (nlat + 1)/2 if nlat is odd.
     !
     !     nlon   the number of distinct londitude points.  nlon determines
     !            the grid increment in longitude as 2*pi/nlon. for example
@@ -88,7 +88,7 @@ contains
     !                 equator. the analysis is performed on the northern
     !                 hemisphere only.  i.e., if nlat is odd the analysis
     !                 is performed on the arrays v(i, j), w(i, j) for
-    !                 i=1, ..., (nlat+1)/2 and j=1, ..., nlon. if nlat is
+    !                 i=1, ..., (nlat + 1)/2 and j=1, ..., nlon. if nlat is
     !                 even the analysis is performed on the the arrays
     !                 v(i, j), w(i, j) for i=1, ..., nlat/2 and j=1, ..., nlon.
     !
@@ -96,7 +96,7 @@ contains
     !                 equator. the analysis is performed on the northern
     !                 hemisphere only.  i.e., if nlat is odd the analysis
     !                 is performed on the arrays v(i, j), w(i, j) for
-    !                 i=1, ..., (nlat+1)/2 and j=1, ..., nlon. if nlat is
+    !                 i=1, ..., (nlat + 1)/2 and j=1, ..., nlon. if nlat is
     !                 even the analysis is performed on the the arrays
     !                 v(i, j), w(i, j) for i=1, ..., nlat/2 and j=1, ..., nlon.
     !                 the curl of (v, w) is zero. that is,
@@ -107,7 +107,7 @@ contains
     !                 equator. the analysis is performed on the northern
     !                 hemisphere only.  i.e., if nlat is odd the analysis
     !                 is performed on the arrays v(i, j), w(i, j) for
-    !                 i=1, ..., (nlat+1)/2 and j=1, ..., nlon. if nlat is
+    !                 i=1, ..., (nlat + 1)/2 and j=1, ..., nlon. if nlat is
     !                 even the analysis is performed on the the arrays
     !                 v(i, j), w(i, j) for i=1, ..., nlat/2 and j=1, ..., nlon.
     !                 the divergence of (v, w) is zero. i.e.,
@@ -118,7 +118,7 @@ contains
     !                 equator. the analysis is performed on the northern
     !                 hemisphere only.  i.e., if nlat is odd the analysis
     !                 is performed on the arrays v(i, j), w(i, j) for
-    !                 i=1, ..., (nlat+1)/2 and j=1, ..., nlon. if nlat is
+    !                 i=1, ..., (nlat + 1)/2 and j=1, ..., nlon. if nlat is
     !                 even the analysis is performed on the the arrays
     !                 v(i, j), w(i, j) for i=1, ..., nlat/2 and j=1, ..., nlon.
     !
@@ -126,7 +126,7 @@ contains
     !                 equator. the analysis is performed on the northern
     !                 hemisphere only.  i.e., if nlat is odd the analysis
     !                 is performed on the arrays v(i, j), w(i, j) for
-    !                 i=1, ..., (nlat+1)/2 and j=1, ..., nlon. if nlat is
+    !                 i=1, ..., (nlat + 1)/2 and j=1, ..., nlon. if nlat is
     !                 even the analysis is performed on the the arrays
     !                 v(i, j), w(i, j) for i=1, ..., nlat/2 and j=1, ..., nlon.
     !                 the curl of (v, w) is zero. that is,
@@ -137,7 +137,7 @@ contains
     !                 equator. the analysis is performed on the northern
     !                 hemisphere only.  i.e., if nlat is odd the analysis
     !                 is performed on the arrays v(i, j), w(i, j) for
-    !                 i=1, ..., (nlat+1)/2 and j=1, ..., nlon. if nlat is
+    !                 i=1, ..., (nlat + 1)/2 and j=1, ..., nlon. if nlat is
     !                 even the analysis is performed on the the arrays
     !                 v(i, j), w(i, j) for i=1, ..., nlat/2 and j=1, ..., nlon.
     !                 the divergence of (v, w) is zero. i.e.,
@@ -166,7 +166,7 @@ contains
     !            the program that calls vhagc. if ityp <= 2 then idvw
     !            must be at least nlat.  if ityp > 2 and nlat is
     !            even then idvw must be at least nlat/2. if ityp > 2
-    !            and nlat is odd then idvw must be at least (nlat+1)/2.
+    !            and nlat is odd then idvw must be at least (nlat + 1)/2.
     !
     !     jdvw   the second dimension of the arrays v, w as it appears in
     !            the program that calls vhagc. jdvw must be at least nlon.
@@ -174,7 +174,7 @@ contains
     !     mdab   the first dimension of the arrays br, bi, cr, and ci as it
     !            appears in the program that calls vhagc. mdab must be at
     !            least min(nlat, nlon/2) if nlon is even or at least
-    !            min(nlat, (nlon+1)/2) if nlon is odd.
+    !            min(nlat, (nlon + 1)/2) if nlon is odd.
     !
     !     ndab   the second dimension of the arrays br, bi, cr, and ci as it
     !            appears in the program that calls vhagc. ndab must be at
@@ -189,12 +189,12 @@ contains
     !            program that calls vhagc. define
     !
     !               l1 = min(nlat, nlon/2) if nlon is even or
-    !               l1 = min(nlat, (nlon+1)/2) if nlon is odd
+    !               l1 = min(nlat, (nlon + 1)/2) if nlon is odd
     !
     !            and
     !
     !               l2 = nlat/2        if nlat is even or
-    !               l2 = (nlat+1)/2    if nlat is odd
+    !               l2 = (nlat + 1)/2    if nlat is odd
     !
     !            then lvhagc must be at least
     !
@@ -209,7 +209,7 @@ contains
     !            bi(mp1, np1), cr(mp1, np1), and ci(mp1, np1) are computed
     !            for mp1=1, ..., mmax and np1=mp1, ..., nlat except for np1=nlat
     !            and odd mp1. mmax=min(nlat, nlon/2) if nlon is even or
-    !            mmax=min(nlat, (nlon+1)/2) if nlon is odd.
+    !            mmax=min(nlat, (nlon + 1)/2) if nlon is odd.
     !
     !     ierror = 0  no errors
     !            = 1  error in the specification of nlat
@@ -244,52 +244,36 @@ contains
         integer(ip), intent(out) :: ierror
 
         ! Local variables
-        integer(ip) :: imid, idv
-        integer(ip) :: ist, labc, lnl, lzz1
-        integer(ip) :: mmax, lwork
+        integer(ip) :: imid, labc, lzz1
+        integer(ip) :: required_wavetable_size, mmax, lwork
+        type(VectorAnalysisUtility) :: util
 
-        associate (lvhagc => size(wvhagc))
+        imid = (nlat + 1)/2
+        mmax = min(nlat, (nlon + 1)/2)
+        lzz1 = 2 * nlat * imid
+        labc = 3 * (max(mmax - 2, 0) * ((2 * nlat) - mmax - 1))/2
+        required_wavetable_size= 2 * (lzz1 + labc) + nlon + imid + 15
 
-            imid = (nlat+1)/2
-            mmax = min(nlat, (nlon+1)/2)
-            lzz1 = 2*nlat*imid
-            labc = 3*(max(mmax-2, 0)*(2*nlat-mmax-1))/2
+        ! Check calling arguments
+        call util%check_vector_analysis_inputs(nlat, nlon, ityp, idvw, jdvw, &
+            mdab, ndab, nt, required_wavetable_size, wvhagc, ierror)
 
-            ! Check calling arguments
-            if (nlat < 3) then
-                ierror = 1
-            else if (nlon < 1) then
-                ierror = 2
-            else if (ityp < 0 .or. ityp > 8) then
-                ierror = 3
-            else if (nt < 0) then
-                ierror = 4
-            else if ((ityp <= 2 .and. idvw < nlat)  &
-                .or. &
-                (ityp > 2 .and. idvw < imid)) then
-                ierror = 5
-            else if (jdvw < nlon) then
-                ierror = 6
-            else if (mdab < mmax) then
-                ierror = 7
-            else if (ndab < nlat) then
-                ierror = 8
-            else if (lvhagc < 2*(lzz1+labc)+nlon+imid+15) then
-                ierror =9
-            else
-                ierror = 0
-            end if
+        ! Check error flag
+        if (ierror /= 0) return
 
-            ! Check error flag
-            if (ierror /= 0) return
+        ! Set required workspace size
+        select case (ityp)
+            case (0:2)
+                lwork = nlat * (4 * nlon * nt + (6 * imid))
+            case default
+                lwork = imid * (4 * nlon * nt + (6 * nlat))
+        end select
 
-            ! Set required workspace size
-            select case (ityp)
-                case (0:2)
-                    lwork = nlat*(4 * nlon * nt + (6 * imid))
-                case default
-                    lwork = imid * (4 * nlon * nt + (6 * nlat))
-            end select
+        block
+            integer(ip) :: idv, ist, lnl
+            integer(ip) :: iw1, iw2, iw3, iw4, iw5
+            integer(ip) :: jw1, jw2, jw3, lwzvin
+            real(wp)    :: work(lwork)
 
             select case (ityp)
                 case (0:2)
@@ -302,27 +286,23 @@ contains
 
             lnl = nt*idv*nlon
 
-            block
-                real(wp) :: work(lwork)
-                integer(ip) :: iw1, iw2, iw3, iw4, iw5
-                integer(ip) :: jw1, jw2, jw3, lwzvin
+            ! Set workspace index pointers
+            iw1 = ist+1
+            iw2 = lnl+1
+            iw3 = iw2+ist
+            iw4 = iw2+lnl
+            iw5 = iw4+3*imid*nlat
 
-                iw1 = ist+1
-                iw2 = lnl+1
-                iw3 = iw2+ist
-                iw4 = iw2+lnl
-                iw5 = iw4+3*imid*nlat
-                lwzvin = lzz1+labc
-                jw1 = (nlat+1)/2+1
-                jw2 = jw1+lwzvin
-                jw3 = jw2+lwzvin
+            ! Set wavetable index pointers
+            lwzvin = lzz1+labc
+            jw1 = (nlat + 1)/2+1
+            jw2 = jw1+lwzvin
+            jw3 = jw2+lwzvin
 
-                call vhagc_lower_utility_routine(nlat, nlon, ityp, nt, imid, idvw, jdvw, &
-                    v, w, mdab, ndab, br, bi, cr, ci, idv, work, work(iw1:), work(iw2:), &
-                    work(iw3:), work(iw4:), work(iw5:), wvhagc, wvhagc(jw1:), wvhagc(jw2:), wvhagc(jw3:))
-            end block
-
-        end associate
+            call vhagc_lower_utility_routine(nlat, nlon, ityp, nt, imid, idvw, jdvw, &
+                v, w, mdab, ndab, br, bi, cr, ci, idv, work, work(iw1:), work(iw2:), &
+                work(iw3:), work(iw4:), work(iw5:), wvhagc, wvhagc(jw1:), wvhagc(jw2:), wvhagc(jw3:))
+        end block
 
     end subroutine vhagc
 
@@ -337,12 +317,12 @@ contains
     !            full sphere. these lie in the interval (0, pi) and are computed
     !            in radians in theta(1) <...< theta(nlat) by subroutine compute_gaussian_latitudes_and_weights.
     !            if nlat is odd the equator will be included as the grid point
-    !            theta((nlat+1)/2).  if nlat is even the equator will be
+    !            theta((nlat + 1)/2).  if nlat is even the equator will be
     !            excluded as a grid point and will lie half way between
     !            theta(nlat/2) and theta(nlat/2+1). nlat must be at least 3.
     !            note: on the half sphere, the number of grid points in the
     !            colatitudinal direction is nlat/2 if nlat is even or
-    !            (nlat+1)/2 if nlat is odd.
+    !            (nlat + 1)/2 if nlat is odd.
     !
     !     nlon   the number of distinct londitude points.  nlon determines
     !            the grid increment in longitude as 2*pi/nlon. for example
@@ -355,12 +335,12 @@ contains
     !            program that calls vhagci.  define
     !
     !               l1 = min(nlat, nlon/2) if nlon is even or
-    !               l1 = min(nlat, (nlon+1)/2) if nlon is odd
+    !               l1 = min(nlat, (nlon + 1)/2) if nlon is odd
     !
     !            and
     !
     !               l2 = nlat/2        if nlat is even or
-    !               l2 = (nlat+1)/2    if nlat is odd
+    !               l2 = (nlat + 1)/2    if nlat is odd
     !
     !            then lvhagc must be at least
     !
@@ -389,69 +369,66 @@ contains
 
         ! Local variables
         integer(ip) :: imid, labc, lzz1
-        integer(ip) :: mmax, ldwork
+        integer(ip) :: mmax, ldwork, required_wavetable_size
         type(SpherepackUtility) :: util
 
-        associate (lvhagc => size(wvhagc))
+        imid = (nlat + 1)/2
+        lzz1 = 2*nlat*imid
+        mmax = min(nlat, (nlon + 1)/2)
+        labc = 3*(max(mmax-2, 0)*(2*nlat-mmax-1))/2
+        imid = (nlat + 1)/2
+        required_wavetable_size = 2*(lzz1+labc)+nlon+imid+15
 
-            imid = (nlat+1)/2
-            lzz1 = 2*nlat*imid
-            mmax = min(nlat, (nlon+1)/2)
-            labc = 3*(max(mmax-2, 0)*(2*nlat-mmax-1))/2
-            imid = (nlat+1)/2
+         ! Check calling arguments
+        if (nlat < 3) then
+            ierror = 1
+        else if (nlon < 1) then
+            ierror = 2
+        else if (size(wvhagc) < required_wavetable_size) then
+            ierror = 3
+        else
+            ierror = 0
+        end if
 
-             ! Check calling arguments
-            if (nlat < 3) then
-                ierror = 1
-            else if (nlon < 1) then
-                ierror = 2
-            else if (lvhagc < 2*(lzz1+labc)+nlon+imid+15) then
-                ierror = 3
-            else
-                ierror = 0
-            end if
+        ! Check error flag
+        if (ierror /= 0) return
 
-            ! Check error flag
-            if (ierror /= 0) return
+        ! Set required workspace size
+        ldwork = (2 * nlat * (nlat + 1)) + 1
 
-            ! Set required workspace size
-            ldwork = 2*nlat*(nlat+1)+1
+        block
+            real(wp)    :: dwork(ldwork)
+            integer(ip) :: jw1, jw2, jw3, iw1, iw2, iw3
+            integer(ip) :: iwrk, lwvbin
 
-            block
-                real(wp)    :: dwork(ldwork)
-                integer(ip) :: jw1, jw2, jw3, iw1, iw2, iw3
-                integer(ip) :: iwrk, lwvbin
+            ! Compute gaussian points in first nlat+1 words of dwork
+            jw1 = 1
+            jw2 = jw1 + nlat
+            jw3 = jw2 + nlat
 
-                ! Compute gaussian points in first nlat+1 words of dwork
-                jw1 = 1
-                jw2 = jw1+nlat
-                jw3 = jw2+nlat
+            call compute_gaussian_latitudes_and_weights( &
+                nlat, dwork(jw1:), dwork(jw2:), ierror)
 
-                call compute_gaussian_latitudes_and_weights( &
-                    nlat, dwork(jw1:), dwork(jw2:), ierror)
+            ! Set first imid words of real weights in dwork
+            ! in first imid words of wvhagc
+            imid = (nlat + 1)/2
+            wvhagc(:imid) = dwork(jw2:imid)
 
-                imid = (nlat+1)/2
+            ! first nlat+1 words of dwork contain  double theta
+            iwrk = imid + 1
+            iw1 = iwrk
+            lwvbin = lzz1 + labc
+            iw2 = iw1 + lwvbin
+            iw3 = iw2 + lwvbin
 
-                ! set first imid words of real weights in dwork
-                ! as single precision in first imid words of wvhagc
-                call copy_gaussian_weights(imid, dwork(nlat+1:), wvhagc)
+            call util%initialize_polar_components_gaussian_grid( &
+                nlat, nlon, dwork, wvhagc(iw1:), dwork(iwrk:))
 
-                ! first nlat+1 words of dwork contain  double theta
-                iwrk = (nlat+1)/2 +1
-                iw1 = imid+1
-                lwvbin = lzz1+labc
-                iw2 = iw1+lwvbin
-                iw3 = iw2+lwvbin
+            call util%initialize_azimuthal_components_gaussian_grid( &
+                nlat, nlon, dwork, wvhagc(iw2:), dwork(iwrk:))
 
-                call util%initialize_polar_components_gaussian_grid( &
-                    nlat, nlon, dwork, wvhagc(iw1:), dwork(iwrk:))
-
-                call util%initialize_azimuthal_components_gaussian_grid( &
-                    nlat, nlon, dwork, wvhagc(iw2:), dwork(iwrk:))
-
-                call util%hfft%initialize(nlon, wvhagc(iw3:))
-            end block
-        end associate
+            call util%hfft%initialize(nlon, wvhagc(iw3:))
+        end block
 
     end subroutine vhagci
 
@@ -533,8 +510,8 @@ contains
                 ! Case m=0
                 do k=1, nt
                     do i=1, imid
-                        tv = ve(i, 1, k)*wts(i)
-                        tw = we(i, 1, k)*wts(i)
+                        tv = ve(i, 1, k) * wts(i)
+                        tw = we(i, 1, k) * wts(i)
                         do np1=2, even_stride, 2
                             br(1, np1, k) = br(1, np1, k)+vb(i, np1, iv)*tv
                             cr(1, np1, k) = cr(1, np1, k)-vb(i, np1, iv)*tw
@@ -556,7 +533,7 @@ contains
                 ! Case m = 1 through nlat-1
                 if (mmax < 2) return
 
-                do mp1=2, mmax
+                main_loop_case_0: do mp1=2, mmax
                     m = mp1-1
                     mp2 = mp1+1
                     call util%compute_polar_component(0, nlat, nlon, m, vb, iv, wvbin)
@@ -601,7 +578,7 @@ contains
                         end if
                     end if
 
-                    if (mp2 > even_stride) return
+                    if (mp2 > even_stride) cycle main_loop_case_0
 
                     do k=1, nt
                         do i=1, imm1
@@ -626,7 +603,7 @@ contains
                         end do
                     end do
 
-                    if (mod(nlat, 2) == 0) return
+                    if (mod(nlat, 2) == 0) cycle main_loop_case_0
 
                     i = imid
 
@@ -638,7 +615,7 @@ contains
                             ci(mp1, np1, k)=ci(mp1, np1, k)-vb(i, np1, iv)*we(i, 2*mp1-1, k)*wts(i)
                         end do
                     end do
-                end do
+                end do main_loop_case_0
             case(1)
                 !
                 ! case ityp=1 ,  no symmetries but cr and ci equal zero
@@ -664,12 +641,11 @@ contains
                         end do
                     end do
                 end do
-                !
+
                 ! case m = 1 through nlat-1
-                !
                 if (mmax < 2) return
 
-                do mp1=2, mmax
+                main_loop_case_1: do mp1=2, mmax
 
                     m = mp1-1
                     mp2 = mp1+1
@@ -703,7 +679,7 @@ contains
                         end if
                     end if
 
-                    if (mp2 > even_stride) return
+                    if (mp2 > even_stride) cycle main_loop_case_1
 
                     do k=1, nt
                         do i=1, imm1
@@ -720,7 +696,7 @@ contains
                         end do
                     end do
 
-                    if (mod(nlat, 2) == 0) return
+                    if (mod(nlat, 2) == 0) cycle main_loop_case_1
 
                     i = imid
 
@@ -730,8 +706,7 @@ contains
                             bi(mp1, np1, k) = bi(mp1, np1, k)+vb(i, np1, iv)*ve(i, 2*mp1-1, k)*wts(i)
                         end do
                     end do
-                end do
-
+                end do main_loop_case_1
             case(2)
                 !
                 ! case ityp=2 ,  no symmetries but br and bi equal zero
@@ -757,12 +732,11 @@ contains
                         end do
                     end do
                 end do
-                !
+
                 ! case m = 1 through nlat-1
-                !
                 if (mmax < 2) return
 
-                do mp1=2, mmax
+                main_loop_case_2: do mp1=2, mmax
 
                     m = mp1-1
                     mp2 = mp1+1
@@ -796,7 +770,7 @@ contains
                         end if
                     end if
 
-                    if (mp2 > even_stride) return
+                    if (mp2 > even_stride) cycle main_loop_case_2
 
                     do k=1, nt
                         do i=1, imm1
@@ -813,7 +787,7 @@ contains
                         end do
                     end do
 
-                    if (mod(nlat, 2) == 0) return
+                    if (mod(nlat, 2) == 0) cycle main_loop_case_2
 
                     i = imid
 
@@ -823,8 +797,7 @@ contains
                             ci(mp1, np1, k) = ci(mp1, np1, k)-vb(i, np1, iv)*we(i, 2*mp1-1, k)*wts(i)
                         end do
                     end do
-                end do
-
+                end do main_loop_case_2
             case(3)
                 !
                 ! case ityp=3 ,  v even , w odd
@@ -850,12 +823,11 @@ contains
                         end do
                     end do
                 end do
-                !
+
                 ! case m = 1 through nlat-1
-                !
                 if (mmax < 2) return
 
-                do mp1=2, mmax
+                main_loop_case_3: do mp1=2, mmax
 
                     m = mp1-1
                     mp2 = mp1+1
@@ -889,7 +861,7 @@ contains
                         end if
                     end if
 
-                    if (mp2 > even_stride) return
+                    if (mp2 > even_stride) cycle main_loop_case_3
 
                     do k=1, nt
                         do i=1, imm1
@@ -906,7 +878,7 @@ contains
                         end do
                     end do
 
-                    if (mod(nlat, 2) == 0) return
+                    if (mod(nlat, 2) == 0) cycle main_loop_case_3
 
                     i = imid
 
@@ -916,8 +888,7 @@ contains
                             bi(mp1, np1, k) = bi(mp1, np1, k)+vb(i, np1, iv)*ve(i, 2*mp1-1, k)*wts(i)
                         end do
                     end do
-                end do
-
+                end do main_loop_case_3
             case(4)
                 !
                 ! case ityp=4 ,  v even, w odd, and cr and ci equal 0.
@@ -939,7 +910,7 @@ contains
                 !
                 if (mmax < 2) return
 
-                do mp1=2, mmax
+                main_loop_case_4: do mp1=2, mmax
 
                     m = mp1-1
                     mp2 = mp1+1
@@ -947,7 +918,7 @@ contains
                     call util%compute_polar_component(1, nlat, nlon, m, vb, iv, wvbin)
                     call util%compute_azimuthal_component(1, nlat, nlon, m, wb, iw, wwbin)
 
-                    if (mp2 > even_stride) return
+                    if (mp2 > even_stride) cycle main_loop_case_4
 
                     do k=1, nt
                         do i=1, imm1
@@ -964,7 +935,7 @@ contains
                         end do
                     end do
 
-                    if (mod(nlat, 2) == 0) return
+                    if (mod(nlat, 2) == 0) cycle main_loop_case_4
 
                     i = imid
 
@@ -974,8 +945,7 @@ contains
                             bi(mp1, np1, k) = bi(mp1, np1, k)+vb(i, np1, iv)*ve(i, 2*mp1-1, k)*wts(i)
                         end do
                     end do
-                end do
-
+                end do main_loop_case_4
             case(5)
                 !
                 ! case ityp=5   v even, w odd, and br and bi equal zero
@@ -992,12 +962,11 @@ contains
                         end do
                     end do
                 end do
-                !
+
                 ! case m = 1 through nlat-1
-                !
                 if (mmax < 2) return
 
-                do mp1=2, mmax
+                main_loop_case_5: do mp1=2, mmax
 
                     m = mp1-1
                     mp2 = mp1+1
@@ -1005,7 +974,7 @@ contains
                     call util%compute_polar_component(2, nlat, nlon, m, vb, iv, wvbin)
                     call util%compute_azimuthal_component(2, nlat, nlon, m, wb, iw, wwbin)
 
-                    if (mp1 > odd_stride) return
+                    if (mp1 > odd_stride) cycle main_loop_case_5
 
                     do k=1, nt
                         do i=1, imm1
@@ -1022,7 +991,7 @@ contains
                         end do
                     end do
 
-                    if (mod(nlat, 2) == 0) return
+                    if (mod(nlat, 2) == 0) cycle main_loop_case_5
 
                     i = imid
 
@@ -1032,8 +1001,7 @@ contains
                             ci(mp1, np1, k) = ci(mp1, np1, k)-wb(i, np1, iw)*ve(i, 2*mp1-2, k)*wts(i)
                         end do
                     end do
-                end do
-
+                end do main_loop_case_5
             case(6)
                 !
                 ! case ityp=6 ,  v odd , w even
@@ -1064,7 +1032,7 @@ contains
                 !
                 if (mmax < 2) return
 
-                do mp1=2, mmax
+                main_loop_case_6: do mp1=2, mmax
                     m = mp1-1
                     mp2 = mp1+1
                     call util%compute_polar_component(0, nlat, nlon, m, vb, iv, wvbin)
@@ -1096,7 +1064,7 @@ contains
                         end if
                     end if
 
-                    if (mp2 > even_stride) return
+                    if (mp2 > even_stride) cycle main_loop_case_6
 
                     do k=1, nt
                         do i=1, imm1
@@ -1113,7 +1081,7 @@ contains
                         end do
                     end do
 
-                    if (mod(nlat, 2) == 0) return
+                    if (mod(nlat, 2) == 0) cycle main_loop_case_6
 
                     i = imid
 
@@ -1123,16 +1091,13 @@ contains
                             ci(mp1, np1, k) = ci(mp1, np1, k)-vb(i, np1, iv)*we(i, 2*mp1-1, k)*wts(i)
                         end do
                     end do
-                end do
-
+                end do main_loop_case_6
             case(7)
-                !
+
                 ! case ityp=7   v odd, w even, and cr and ci equal zero
-                !
                 call util%compute_polar_component(2, nlat, nlon, 0, vb, iv, wvbin)
-                !
+
                 ! case m=0
-                !
                 do k=1, nt
                     do i=1, imm1
                         tv = vo(i, 1, k)*wts(i)
@@ -1141,12 +1106,11 @@ contains
                         end do
                     end do
                 end do
-                !
+
                 ! case m = 1 through nlat-1
-                !
                 if (mmax < 2) return
 
-                do mp1=2, mmax
+                main_loop_case_7: do mp1=2, mmax
 
                     m = mp1-1
                     mp2 = mp1+1
@@ -1154,7 +1118,7 @@ contains
                     call util%compute_polar_component(2, nlat, nlon, m, vb, iv, wvbin)
                     call util%compute_azimuthal_component(2, nlat, nlon, m, wb, iw, wwbin)
 
-                    if (mp1 > odd_stride) return
+                    if (mp1 > odd_stride) cycle main_loop_case_7
 
                     do k=1, nt
                         do i=1, imm1
@@ -1171,7 +1135,7 @@ contains
                         end do
                     end do
 
-                    if (mod(nlat, 2) == 0) return
+                    if (mod(nlat, 2) == 0) cycle main_loop_case_7
 
                     i = imid
 
@@ -1181,16 +1145,13 @@ contains
                             bi(mp1, np1, k) = bi(mp1, np1, k)-wb(i, np1, iw)*we(i, 2*mp1-2, k)*wts(i)
                         end do
                     end do
-                end do
-
+                end do main_loop_case_7
             case(8)
-                !
+
                 ! case ityp=8   v odd, w even, and both br and bi equal zero
-                !
                 call util%compute_polar_component(1, nlat, nlon, 0, vb, iv, wvbin)
-                !
+
                 ! case m=0
-                !
                 do k=1, nt
                     do i=1, imid
                         tw = we(i, 1, k)*wts(i)
@@ -1199,11 +1160,11 @@ contains
                         end do
                     end do
                 end do
-                !
+
                 ! case m = 1 through nlat-1
-                !
                 if (mmax < 2) return
-                do mp1=2, mmax
+
+                main_loop_case_8: do mp1=2, mmax
 
                     m = mp1-1
                     mp2 = mp1+1
@@ -1211,7 +1172,7 @@ contains
                     call util%compute_polar_component(1, nlat, nlon, m, vb, iv, wvbin)
                     call util%compute_azimuthal_component(1, nlat, nlon, m, wb, iw, wwbin)
 
-                    if (mp2 > even_stride) return
+                    if (mp2 > even_stride) cycle main_loop_case_8
 
                     do k=1, nt
                         do i=1, imm1
@@ -1228,36 +1189,19 @@ contains
                         end do
                     end do
 
-                    if (mod(nlat, 2) == 0) return
-
-                    i = imid
+                    if (mod(nlat, 2) == 0) cycle main_loop_case_8
 
                     do k=1, nt
                         do  np1=mp2, even_stride, 2
-                            cr(mp1, np1, k) = cr(mp1, np1, k)-vb(i, np1, iv)*we(i, 2*mp1-2, k)*wts(i)
-                            ci(mp1, np1, k) = ci(mp1, np1, k)-vb(i, np1, iv)*we(i, 2*mp1-1, k)*wts(i)
+                            cr(mp1, np1, k) = cr(mp1, np1, k) &
+                                - vb(imid, np1, iv) * we(imid, 2*mp1-2, k) * wts(imid)
+                            ci(mp1, np1, k) = ci(mp1, np1, k) &
+                                - vb(imid, np1, iv) * we(imid, 2*mp1-1, k) * wts(imid)
                         end do
                     end do
-                end do
+                end do main_loop_case_8
         end select vector_symmetry_cases
 
-
     end subroutine vhagc_lower_utility_routine
-
-    ! Purpose:
-    !
-    ! Set first imid =(nlat+1)/2 of real weights in dwts
-    ! as single precision in wts.
-    !
-    subroutine copy_gaussian_weights(imid, dwts, wts)
-
-        ! Dummy arguments
-        integer(ip), intent(in)  :: imid
-        real(wp),    intent(in)  :: dwts(imid)
-        real(wp),    intent(out) :: wts(imid)
-
-        wts(1:imid) = dwts(1:imid)
-
-    end subroutine copy_gaussian_weights
 
 end submodule vector_analysis_gaussian_grid

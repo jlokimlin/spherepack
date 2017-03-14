@@ -60,12 +60,12 @@
 !            full sphere. these lie in the interval (0, pi) and are computed
 !            in radians in theta(1) <...< theta(nlat) by subroutine compute_gaussian_latitudes_and_weights.
 !            if nlat is odd the equator will be included as the grid point
-!            theta((nlat+1)/2).  if nlat is even the equator will be
+!            theta((nlat + 1)/2).  if nlat is even the equator will be
 !            excluded as a grid point and will lie half way between
 !            theta(nlat/2) and theta(nlat/2+1). nlat must be at least 3.
 !            note: on the half sphere, the number of grid points in the
 !            colatitudinal direction is nlat/2 if nlat is even or
-!            (nlat+1)/2 if nlat is odd.
+!            (nlat + 1)/2 if nlat is odd.
 !
 !     nlon   the number of distinct longitude points.  nlon determines
 !            the grid increment in longitude as 2*pi/nlon. for example
@@ -101,7 +101,7 @@
 !                 equator. consequently w is antisymmetric and v is symmetric.
 !                 (v, w) is computed and stored on the northern hemisphere
 !                 only.  if nlat is odd, storage is in the arrays v(i, j), 
-!                 w(i, j) for i=1, ..., (nlat+1)/2 and j=1, ..., nlon.  if nlat
+!                 w(i, j) for i=1, ..., (nlat + 1)/2 and j=1, ..., nlon.  if nlat
 !                 is even, storage is in the arrays v(i, j), w(i, j) for
 !                 i=1, ..., nlat/2 and j=1, ..., nlon.
 !
@@ -109,7 +109,7 @@
 !                 equator. consequently w is antisymmetric and v is symmetric.
 !                 (v, w) is computed and stored on the northern hemisphere
 !                 only.  if nlat is odd, storage is in the arrays v(i, j), 
-!                 w(i, j) for i=1, ..., (nlat+1)/2 and j=1, ..., nlon.  if nlat
+!                 w(i, j) for i=1, ..., (nlat + 1)/2 and j=1, ..., nlon.  if nlat
 !                 is even, storage is in the arrays v(i, j), w(i, j) for
 !                 i=1, ..., nlat/2 and j=1, ..., nlon.  the vorticity of (vlap, 
 !                 wlap) is zero so the coefficients cr, ci are zero and
@@ -119,7 +119,7 @@
 !                 equator. consequently w is antisymmetric and v is symmetric.
 !                 (v, w) is computed and stored on the northern hemisphere
 !                 only.  if nlat is odd, storage is in the arrays w(i, j), 
-!                 v(i, j) for i=1, ..., (nlat+1)/2 and j=1, ..., nlon.  if nlat
+!                 v(i, j) for i=1, ..., (nlat + 1)/2 and j=1, ..., nlon.  if nlat
 !                 is even, storage is in the arrays w(i, j), v(i, j) for
 !                 i=1, ..., nlat/2 and j=1, ..., nlon.  the divergence of (vlap, 
 !                 wlap) is zero so the coefficients br, bi are zero and
@@ -130,7 +130,7 @@
 !                 equator. consequently w is symmetric and v is antisymmetric.
 !                 (v, w) is computed and stored on the northern hemisphere
 !                 only.  if nlat is odd, storage is in the arrays w(i, j), 
-!                 v(i, j) for i=1, ..., (nlat+1)/2 and j=1, ..., nlon.  if nlat
+!                 v(i, j) for i=1, ..., (nlat + 1)/2 and j=1, ..., nlon.  if nlat
 !                 is even, storage is in the arrays w(i, j), v(i, j) for
 !                 i=1, ..., nlat/2 and j=1, ..., nlon.
 !
@@ -138,7 +138,7 @@
 !                 equator. consequently w is symmetric and v is antisymmetric.
 !                 (v, w) is computed and stored on the northern hemisphere
 !                 only.  if nlat is odd, storage is in the arrays w(i, j), 
-!                 v(i, j) for i=1, ..., (nlat+1)/2 and j=1, ..., nlon.  if nlat
+!                 v(i, j) for i=1, ..., (nlat + 1)/2 and j=1, ..., nlon.  if nlat
 !                 is even, storage is in the arrays w(i, j), v(i, j) for
 !                 i=1, ..., nlat/2 and j=1, ..., nlon.  the vorticity of (vlap, 
 !                 wlap) is zero so the coefficients cr, ci are zero and
@@ -148,7 +148,7 @@
 !                 equator. consequently w is symmetric and v is antisymmetric.
 !                 (v, w) is computed and stored on the northern hemisphere
 !                 only.  if nlat is odd, storage is in the arrays w(i, j), 
-!                 v(i, j) for i=1, ..., (nlat+1)/2 and j=1, ..., nlon.  if nlat
+!                 v(i, j) for i=1, ..., (nlat + 1)/2 and j=1, ..., nlon.  if nlat
 !                 is even, storage is in the arrays w(i, j), v(i, j) for
 !                 i=1, ..., nlat/2 and j=1, ..., nlon.  the divergence of (vlap, 
 !                 wlap) is zero so the coefficients br, bi are zero and
@@ -170,7 +170,7 @@
 !            the program that calls ivlapgc.  if ityp=0, 1, or 2  then idvw
 !            must be at least nlat.  if ityp > 2 and nlat is even then idvw
 !            must be at least nlat/2. if ityp > 2 and nlat is odd then idvw
-!            must be at least (nlat+1)/2.
+!            must be at least (nlat + 1)/2.
 !
 !   jdvw     the second dimension of the arrays w and v as it appears in
 !            the program that calls ivlapgc. jdvw must be at least nlon.
@@ -187,7 +187,7 @@
 !    mdbc    the first dimension of the arrays br, bi, cr and ci as it
 !            appears in the program that calls ivlapgc.  mdbc must be
 !            at least min(nlat, nlon/2) if nlon is even or at least
-!            min(nlat, (nlon+1)/2) if nlon is odd.
+!            min(nlat, (nlon + 1)/2) if nlon is odd.
 !
 !    ndbc    the second dimension of the arrays br, bi, cr and ci as it
 !            appears in the program that calls ivlapgc. ndbc must be at
@@ -203,12 +203,12 @@
 !            program that calls ivlapgc.  let
 !
 !               l1 = min(nlat, nlon/2) if nlon is even or
-!               l1 = min(nlat, (nlon+1)/2) if nlon is odd
+!               l1 = min(nlat, (nlon + 1)/2) if nlon is odd
 !
 !            and
 !
 !               l2 = nlat/2        if nlat is even or
-!               l2 = (nlat+1)/2    if nlat is odd.
+!               l2 = (nlat + 1)/2    if nlat is odd.
 !
 !            then lvhsgc must be at least
 !
@@ -222,9 +222,9 @@
 !            program that calls ivlapgc. define
 !
 !               l2 = nlat/2                    if nlat is even or
-!               l2 = (nlat+1)/2                if nlat is odd
+!               l2 = (nlat + 1)/2                if nlat is odd
 !               l1 = min(nlat, nlon/2) if nlon is even or
-!               l1 = min(nlat, (nlon+1)/2) if nlon is odd
+!               l1 = min(nlat, (nlon + 1)/2) if nlon is odd
 !
 !            if ityp <= 2 then
 !
@@ -345,13 +345,13 @@ contains
         ierror = 4
         if (nt < 0) return
         ierror = 5
-        imid = (nlat+1)/2
+        imid = (nlat + 1)/2
         if ((ityp<=2 .and. idvw<nlat) .or. &
             (ityp>2 .and. idvw<imid)) return
         ierror = 6
         if (jdvw < nlon) return
         ierror = 7
-        mmax = min(nlat, (nlon+1)/2)
+        mmax = min(nlat, (nlon + 1)/2)
         if (mdbc < mmax) return
         ierror = 8
         if (ndbc < nlat) return

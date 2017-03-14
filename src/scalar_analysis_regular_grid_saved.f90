@@ -56,11 +56,11 @@ contains
     !            poles. for example, nlat = 37 for a five degree grid.
     !            nlat determines the grid increment in colatitude as
     !            pi/(nlat-1).  if nlat is odd the equator is located at
-    !            grid point i=(nlat+1)/2. if nlat is even the equator is
+    !            grid point i=(nlat + 1)/2. if nlat is even the equator is
     !            located half way between points i=nlat/2 and i=nlat/2+1.
     !            nlat must be at least 3. note: on the half sphere, the
     !            number of grid points in the colatitudinal direction is
-    !            nlat/2 if nlat is even or (nlat+1)/2 if nlat is odd.
+    !            nlat/2 if nlat is even or (nlat + 1)/2 if nlat is odd.
     !
     !     nlon   the number of distinct londitude points.  nlon determines
     !            the grid increment in longitude as 2*pi/nlon. for example
@@ -76,7 +76,7 @@ contains
     !            = 1  g is antisymmetric about the equator. the analysis
     !                 is performed on the northern hemisphere only.  i.e.
     !                 if nlat is odd the analysis is performed on the
-    !                 array g(i, j) for i=1, ..., (nlat+1)/2 and j=1, ..., nlon.
+    !                 array g(i, j) for i=1, ..., (nlat + 1)/2 and j=1, ..., nlon.
     !                 if nlat is even the analysis is performed on the
     !                 array g(i, j) for i=1, ..., nlat/2 and j=1, ..., nlon.
     !
@@ -84,7 +84,7 @@ contains
     !            = 2  g is symmetric about the equator. the analysis is
     !                 performed on the northern hemisphere only.  i.e.
     !                 if nlat is odd the analysis is performed on the
-    !                 array g(i, j) for i=1, ..., (nlat+1)/2 and j=1, ..., nlon.
+    !                 array g(i, j) for i=1, ..., (nlat + 1)/2 and j=1, ..., nlon.
     !                 if nlat is even the analysis is performed on the
     !                 array g(i, j) for i=1, ..., nlat/2 and j=1, ..., nlon.
     !
@@ -109,7 +109,7 @@ contains
     !            program that calls shaes.  if isym equals zero then idg
     !            must be at least nlat.  if isym is nonzero then idg
     !            must be at least nlat/2 if nlat is even or at least
-    !            (nlat+1)/2 if nlat is odd.
+    !            (nlat + 1)/2 if nlat is odd.
     !
     !     jdg    the second dimension of the array g as it appears in the
     !            program that calls shaes.  jdg must be at least nlon.
@@ -117,7 +117,7 @@ contains
     !     mdab   the first dimension of the arrays a and b as it appears
     !            in the program that calls shaes. mdab must be at least
     !            min(nlat, (nlon+2)/2) if nlon is even or at least
-    !            min(nlat, (nlon+1)/2) if nlon is odd.
+    !            min(nlat, (nlon + 1)/2) if nlon is odd.
     !
     !     ndab   the second dimension of the arrays a and b as it appears
     !            in the program that calls shaes. ndab must be at least nlat
@@ -131,12 +131,12 @@ contains
     !            program that calls shaes. define
     !
     !               l1 = min(nlat, (nlon+2)/2) if nlon is even or
-    !               l1 = min(nlat, (nlon+1)/2) if nlon is odd
+    !               l1 = min(nlat, (nlon + 1)/2) if nlon is odd
     !
     !            and
     !
     !               l2 = nlat/2        if nlat is even or
-    !               l2 = (nlat+1)/2    if nlat is odd
+    !               l2 = (nlat + 1)/2    if nlat is odd
     !
     !            then lshaes must be at least
     !
@@ -148,7 +148,7 @@ contains
     !            program that calls shaes.  define
     !
     !               l2 = nlat/2        if nlat is even or
-    !               l2 = (nlat+1)/2    if nlat is odd
+    !               l2 = (nlat + 1)/2    if nlat is odd
     !
     !            if isym is zero then lwork must be at least
     !            (nt+1)*nlat*nlon. if isym is not zero then
@@ -204,7 +204,7 @@ contains
     !     5. the maximum (plus one) longitudinal wave number
     !
     !            mmax = min(nlat, (nlon+2)/2) if nlon is even or
-    !            mmax = min(nlat, (nlon+1)/2) if nlon is odd.
+    !            mmax = min(nlat, (nlon + 1)/2) if nlon is odd.
     !
     !     then for m=0, ..., mmax-1 and  n=m, ..., nlat-1  the arrays a, b are
     !     given by
@@ -254,7 +254,7 @@ contains
 
             !  Set constants
             mmax = min(nlat, nlon/2+1)
-            imid = (nlat+1)/2
+            imid = (nlat + 1)/2
             idz = (mmax*(2*nlat-mmax+1))/2
             lzimn = idz*imid
 
@@ -282,7 +282,7 @@ contains
             else if ( &
                 (isym == 0 .and. idg < nlat) &
                 .or. &
-                (isym /= 0 .and. idg < (nlat+1)/2) &
+                (isym /= 0 .and. idg < (nlat + 1)/2) &
                 ) then
                 ierror = 5
             else if (jdg < nlon) then
@@ -333,11 +333,11 @@ contains
     !            poles. for example, nlat = 37 for a five degree grid.
     !            nlat determines the grid increment in colatitude as
     !            pi/(nlat-1).  if nlat is odd the equator is located at
-    !            grid point i=(nlat+1)/2. if nlat is even the equator is
+    !            grid point i=(nlat + 1)/2. if nlat is even the equator is
     !            located half way between points i=nlat/2 and i=nlat/2+1.
     !            nlat must be at least 3. note: on the half sphere, the
     !            number of grid points in the colatitudinal direction is
-    !            nlat/2 if nlat is even or (nlat+1)/2 if nlat is odd.
+    !            nlat/2 if nlat is even or (nlat + 1)/2 if nlat is odd.
     !
     !     nlon   the number of distinct londitude points.  nlon determines
     !            the grid increment in longitude as 2*pi/nlon. for example
@@ -349,12 +349,12 @@ contains
     !            program that calls shaesi. define
     !
     !               l1 = min(nlat, (nlon+2)/2) if nlon is even or
-    !               l1 = min(nlat, (nlon+1)/2) if nlon is odd
+    !               l1 = min(nlat, (nlon + 1)/2) if nlon is odd
     !
     !            and
     !
     !               l2 = nlat/2        if nlat is even or
-    !               l2 = (nlat+1)/2    if nlat is odd
+    !               l2 = (nlat + 1)/2    if nlat is odd
     !
     !            then lshaes must be at least
     !
@@ -366,12 +366,12 @@ contains
     !            program that calls shaesi.  define
     !
     !               l1 = min(nlat, (nlon+2)/2) if nlon is even or
-    !               l1 = min(nlat, (nlon+1)/2) if nlon is odd
+    !               l1 = min(nlat, (nlon + 1)/2) if nlon is odd
     !
     !            and
     !
     !               l2 = nlat/2        if nlat is even or
-    !               l2 = (nlat+1)/2    if nlat is odd
+    !               l2 = (nlat + 1)/2    if nlat is odd
     !
     !            then lwork must be at least
     !
@@ -420,7 +420,7 @@ contains
         associate (lshaes => size(wshaes))
 
             mmax = min(nlat, nlon/2+1)
-            imid = (nlat+1)/2
+            imid = (nlat + 1)/2
             labc = 3*((mmax-2)*(2*nlat-mmax-1))/2
             lzimn = (imid*mmax*(2*nlat-mmax+1))/2
 
@@ -505,7 +505,7 @@ contains
         nlp1 = nlat+1
         tsn = TWO/nlon
         fsn = FOUR/nlon
-        imid = (nlat+1)/2
+        imid = (nlat + 1)/2
         modl = mod(nlat, 2)
 
         select case (modl)

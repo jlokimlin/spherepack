@@ -78,11 +78,11 @@ contains
     !            poles. for example, nlat = 37 for a five degree grid.
     !            nlat determines the grid increment in colatitude as
     !            pi/(nlat-1).  if nlat is odd the equator is located at
-    !            grid point i=(nlat+1)/2. if nlat is even the equator is
+    !            grid point i=(nlat + 1)/2. if nlat is even the equator is
     !            located half way between points i=nlat/2 and i=nlat/2+1.
     !            nlat must be at least 3. note: on the half sphere, the
     !            number of grid points in the colatitudinal direction is
-    !            nlat/2 if nlat is even or (nlat+1)/2 if nlat is odd.
+    !            nlat/2 if nlat is even or (nlat + 1)/2 if nlat is odd.
     !
     !     nlon   the number of distinct londitude points.  nlon determines
     !            the grid increment in longitude as 2*pi/nlon. for example
@@ -108,7 +108,7 @@ contains
     !           dv is antisymmetric about the equator. in this case w is
     !           antisymmetric and v is symmetric about the equator. w
     !           and v are computed on the northern hemisphere only.  i.e.,
-    !           if nlat is odd they are computed for i=1, ..., (nlat+1)/2
+    !           if nlat is odd they are computed for i=1, ..., (nlat + 1)/2
     !           and j=1, ..., nlon.  if nlat is even they are computed for
     !           i=1, ..., nlat/2 and j=1, ..., nlon.
     !
@@ -117,7 +117,7 @@ contains
     !           dv is symmetric about the equator. in this case w is
     !           symmetric and v is antisymmetric about the equator. w
     !           and v are computed on the northern hemisphere only.  i.e.,
-    !           if nlat is odd they are computed for i=1, ..., (nlat+1)/2
+    !           if nlat is odd they are computed for i=1, ..., (nlat + 1)/2
     !           and j=1, ..., nlon.  if nlat is even they are computed for
     !           i=1, ..., nlat/2 and j=1, ..., nlon.
     !
@@ -138,7 +138,7 @@ contains
     !            the program that calls idives. if isym = 0 then idvw
     !            must be at least nlat.  if isym = 1 or 2 and nlat is
     !            even then idvw must be at least nlat/2. if isym = 1 or 2
-    !            and nlat is odd then idvw must be at least (nlat+1)/2.
+    !            and nlat is odd then idvw must be at least (nlat + 1)/2.
     !
     !     jdvw   the second dimension of the arrays v, w as it appears in
     !            the program that calls idives. jdvw must be at least nlon.
@@ -151,7 +151,7 @@ contains
     !     mdab   the first dimension of the arrays a and b as it appears in
     !            the program that calls idives (and shaes). mdab must be at
     !            least min(nlat, (nlon+2)/2) if nlon is even or at least
-    !            min(nlat, (nlon+1)/2) if nlon is odd.
+    !            min(nlat, (nlon + 1)/2) if nlon is odd.
     !
     !     ndab   the second dimension of the arrays a and b as it appears in
     !            the program that calls idives (and shaes). ndab must be at
@@ -169,12 +169,12 @@ contains
     !            program that calls idives. define
     !
     !               l1 = min(nlat, nlon/2) if nlon is even or
-    !               l1 = min(nlat, (nlon+1)/2) if nlon is odd
+    !               l1 = min(nlat, (nlon + 1)/2) if nlon is odd
     !
     !            and
     !
     !               l2 = nlat/2        if nlat is even or
-    !               l2 = (nlat+1)/2    if nlat is odd
+    !               l2 = (nlat + 1)/2    if nlat is odd
     !
     !            then lvhses must be at least
     !
@@ -255,13 +255,13 @@ contains
             ierror = 4
             if (nt < 0) return
             ierror = 5
-            imid = (nlat+1)/2
+            imid = (nlat + 1)/2
             if ((isym == 0 .and. idvw<nlat) .or. &
                 (isym /= 0 .and. idvw<imid)) return
             ierror = 6
             if (jdvw < nlon) return
             ierror = 7
-            mmax = min(nlat, (nlon+1)/2)
+            mmax = min(nlat, (nlon + 1)/2)
             if (mdab < min(nlat, (nlon+2)/2)) return
             ierror = 8
             if (ndab < nlat) return

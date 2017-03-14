@@ -150,7 +150,7 @@ contains
                 eps = sqrt(epsilon(ONE))
                 eps = eps * sqrt(eps)
                 half_nlat = nlat/2
-                nhalf = (nlat+1)/2
+                nhalf = (nlat + 1)/2
                 idx = half_nlat+2
 
                 call compute_fourier_coefficients(nlat, cz, theta(half_nlat+1), wts(half_nlat+1))

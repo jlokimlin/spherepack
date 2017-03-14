@@ -79,7 +79,7 @@ program test_gaussian_latitudes_and_weights_routines
     real(wp) :: theta(NLAT), wts(NLAT), work(NLAT+2)
     real(wp) :: dtheta(NLAT), dwts(NLAT)
     real(wp) :: dwmx, tmax, dwmax, dtmax
-    real     :: theta_sp(NLAT), wts_sp(NLAT), work_sp(NLAT+1)
+    real     :: theta_sp(NLAT), wts_sp(NLAT), work_sp(nlat + 1)
     real     :: diff(NLAT)
     real(sp) :: t1(2), t2(2)
     real     :: sumw
@@ -117,7 +117,7 @@ program test_gaussian_latitudes_and_weights_routines
     tmax = 0.0
     dwmax = 0.0
     dtmax = 0.0
-    ido = (NLAT+1)/2
+    ido = (nlat + 1)/2
 
     do i=1, ido
         dtmax = max(dtmax, abs(theta(i)-dtheta(i)))
@@ -152,7 +152,7 @@ program test_gaussian_latitudes_and_weights_routines
     dmax = 0.0
     wmax = 0.0
     rmax = 0.0
-    ido = (NLAT+1)/2
+    ido = (nlat + 1)/2
     do i=1, ido
         diff(i) = wts(i)-wts_sp(i)
         dmax = max(dmax, abs(diff(i)))
@@ -252,7 +252,7 @@ contains
         !
         !  *****************************************************************
         !
-        dimension dwork(nlat+1), theta(nlat), wts(nlat)
+        dimension dwork(nlat + 1), theta(nlat), wts(nlat)
         real HALF_PI, x, theta, wts, dwork
         ierror = 1
         !
@@ -308,7 +308,7 @@ contains
         integer(ip) :: nix
         integer(ip) :: nlat
         integer(ip) :: ns2
-        real  theta((nlat+1)/2), cp(nlat/2+1)
+        real  theta((nlat + 1)/2), cp(nlat/2+1)
         real pi, HALF_PI, dtheta, dthalf, &
             cmax, dcor, pb, dpb, sgnd, zero, zlast
         !
@@ -319,7 +319,7 @@ contains
         theta(1) = HALF_PI
         if (nlat==1) goto 30
         ns2 = nlat/2
-        nhalf = (nlat+1)/2
+        nhalf = (nlat + 1)/2
         !
         call dlfcz (nlat, cp)
         !
@@ -844,7 +844,7 @@ contains
         pi = HALF_PI+HALF_PI
         mnlat = mod(nlat, 2)
         ns2 = nlat/2
-        nhalf = (nlat+1)/2
+        nhalf = (nlat + 1)/2
         idx = ns2+2
         !
         call lfcz (nlat, cz, theta(ns2+1), wts(ns2+1))

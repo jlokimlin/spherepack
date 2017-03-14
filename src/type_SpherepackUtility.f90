@@ -134,11 +134,11 @@ contains
             error_flag = 4
         else if ((ityp <= 2 .and. idvw < nlat) &
             .or. &
-            (ityp > 2 .and. idvw < (nlat+1)/2)) then
+            (ityp > 2 .and. idvw < (nlat + 1)/2)) then
             error_flag = 5
         else if (jdvw < nlon) then
             error_flag = 6
-        else if (mdab < min(nlat, (nlon+1)/2)) then
+        else if (mdab < min(nlat, (nlon + 1)/2)) then
             error_flag = 7
         else if (ndab < nlat) then
             error_flag = 8
@@ -178,8 +178,8 @@ contains
         ! Local variables
         integer(ip)  :: imid, lmn
 
-        imid = (nlat+1)/2
-        lmn = (nlat*(nlat+1))/2
+        imid = (nlat + 1)/2
+        lmn = (nlat*(nlat + 1))/2
         return_value = 2*(imid*lmn)+nlon+15
 
     end function get_lvhsgs
@@ -334,7 +334,7 @@ contains
             case (0)
                 l1 = min(nlat, (nlon+2)/2)
             case default
-                l1 = min(nlat, (nlon+1)/2)
+                l1 = min(nlat, (nlon + 1)/2)
         end select
 
         ! Compute parity in nlat
@@ -823,7 +823,7 @@ contains
         integer(ip) :: imid
         integer(ip) :: workspace(4)
 
-        imid = (nlat+1)/2
+        imid = (nlat + 1)/2
         !
         !  The length of wzfin is 2*lim+3*labc
         !
@@ -946,7 +946,7 @@ contains
         integer(ip) :: imid
         integer(ip) :: iw1, iw2
 
-        imid = (nlat+1)/2
+        imid = (nlat + 1)/2
 
         !
         ! Remarks:
@@ -978,8 +978,8 @@ contains
         integer(ip), intent(in)  :: imid
         real(wp),    intent(out) :: z(imid, nlat, 2)
         real(wp),    intent(out) :: abc(*)
-        real(wp),    intent(out) :: cz(nlat+1)
-        real(wp),    intent(out) :: work(nlat+1)
+        real(wp),    intent(out) :: cz(nlat + 1)
+        real(wp),    intent(out) :: work(nlat + 1)
 
         ! Local variables
         integer(ip) :: i, m, n, mp1, np1
@@ -1025,7 +1025,7 @@ contains
         integer(ip) :: i, k, lc, kp1, kdo, idx
         real(wp)    :: summation, sc1, t1, t2
 
-        lc = (nlat+1)/2
+        lc = (nlat + 1)/2
         sc1 = TWO/(nlat-1)
 
         call compute_fourier_coefficients(m, n, work)
@@ -1161,7 +1161,7 @@ contains
                 end if
             end if
         else
-            lc = (nlat+1)/2
+            lc = (nlat + 1)/2
             lq = lc-1
             ls = lc-2
             if (mod(n, 2) <= 0) then
@@ -1229,7 +1229,7 @@ contains
         integer(ip) :: imid
         integer(ip) :: workspace_indices(4)
 
-        imid = (nlat+1)/2
+        imid = (nlat + 1)/2
 
         workspace_indices = get_alin_workspace_indices(nlat, nlon, imid)
 
@@ -1351,12 +1351,12 @@ contains
         integer(ip), intent(in)   :: nlat
         integer(ip), intent(in)   :: nlon
         real(wp),    intent(out)  :: walin(*)
-        real(wp),    intent(out)  :: dwork(nlat+1)
+        real(wp),    intent(out)  :: dwork(nlat + 1)
 
         ! Local variables
         integer(ip) :: imid, iw1
 
-        imid = (nlat+1)/2
+        imid = (nlat + 1)/2
         iw1 = 2*nlat*imid+1
 
         !     the length of walin is 3*((l-3)*l+2)/2 + 2*l*imid
@@ -1555,7 +1555,7 @@ contains
         integer(ip) :: imid, iw1, iw2
 
 
-        imid = (nlat+1)/2
+        imid = (nlat + 1)/2
         iw1 = 2*nlat*imid+1
         iw2 = nlat/2+2
         !
@@ -1570,7 +1570,7 @@ contains
     ! Remark:
     !
     !     abc must have 3*(max(mmax-2, 0)*(2*nlat-mmax-1))/2
-    !     locations where mmax = min(nlat, (nlon+1)/2)
+    !     locations where mmax = min(nlat, (nlon + 1)/2)
     !     czv and work must each have nlat/2+1  locations
     !
     subroutine zvinit_lower_utility_routine(nlat, nlon, imid, zv, abc, czv, work)
@@ -1590,7 +1590,7 @@ contains
 
 
         dt = PI/(nlat-1)
-        mdo = min(2, nlat, (nlon+1)/2)
+        mdo = min(2, nlat, (nlon + 1)/2)
         do mp1=1, mdo
             m = mp1-1
             do np1=mp1, nlat
@@ -1621,7 +1621,7 @@ contains
 
         integer(ip), intent(in)     :: nlat
         integer(ip), intent(in)     :: nlon
-        real(wp),    intent(inout)  :: wzwin(2*nlat*((nlat+1)/2)+3*((nlat-3)*nlat+2)/2)
+        real(wp),    intent(inout)  :: wzwin(2*nlat*((nlat + 1)/2)+3*((nlat-3)*nlat+2)/2)
         real(wp),    intent(inout)  :: dwork(nlat+2)
 
         ! Dummy arguments
@@ -1629,7 +1629,7 @@ contains
         integer(ip) :: imid, iw1, iw2
 
 
-        imid = (nlat+1)/2
+        imid = (nlat + 1)/2
         iw1 = 2*nlat*imid+1
         iw2 = nlat/2+2
 
@@ -1640,7 +1640,7 @@ contains
     ! Remark:
     !
     ! abc must have 3*(max(mmax-2, 0)*(2*nlat-mmax-1))/2
-    ! locations where mmax = min(nlat, (nlon+1)/2)
+    ! locations where mmax = min(nlat, (nlon + 1)/2)
     ! czw and work must each have nlat+1 locations
     !
     subroutine zwinit_lower_utility_routine(nlat, nlon, imid, zw, abc, czw, work)
@@ -1651,15 +1651,15 @@ contains
         integer(ip), intent(in)     :: imid
         real(wp),    intent(inout)  :: zw(imid, nlat, 2)
         real(wp),    intent(inout)  :: abc(*)
-        real(wp),    intent(inout)  :: czw(nlat+1)
-        real(wp),    intent(inout)  :: work(nlat+1)
+        real(wp),    intent(inout)  :: czw(nlat + 1)
+        real(wp),    intent(inout)  :: work(nlat + 1)
 
         ! Local variables
         integer(ip) :: i, m, mdo, mp1, n, np1
         real(wp)    :: dt, th, zwh
 
         dt = PI/(nlat-1)
-        mdo = min(3, nlat, (nlon+1)/2)
+        mdo = min(3, nlat, (nlon + 1)/2)
 
         if (mdo < 2) return
 
@@ -1698,9 +1698,9 @@ contains
         integer(ip) :: labc, lim, mmax
 
 
-        imid = (nlat+1)/2
+        imid = (nlat + 1)/2
         lim = nlat*imid
-        mmax = min(nlat, (nlon+1)/2)
+        mmax = min(nlat, (nlon + 1)/2)
         labc = (max(mmax-2, 0)*(2*nlat-mmax-1))/2
         iw1 = lim+1
         iw2 = iw1+lim
@@ -1808,9 +1808,9 @@ contains
         integer(ip) :: labc, lim, mmax
 
 
-        imid = (nlat+1)/2
+        imid = (nlat + 1)/2
         lim = nlat*imid
-        mmax = min(nlat, (nlon+1)/2)
+        mmax = min(nlat, (nlon + 1)/2)
         labc = (max(mmax-2, 0)*(2*nlat-mmax-1))/2
         iw1 = lim+1
         iw2 = iw1+lim
@@ -1913,13 +1913,13 @@ contains
         ! Dummy arguments
         integer(ip), intent(in)  :: nlat
         integer(ip), intent(in)  :: nlon
-        real(wp),    intent(out) :: wvbin(2*nlat*((nlat+1)/2)+3*((nlat-3)*nlat+2)/2)
+        real(wp),    intent(out) :: wvbin(2*nlat*((nlat + 1)/2)+3*((nlat-3)*nlat+2)/2)
         real(wp),    intent(out) :: dwork(nlat+2)
 
         ! Local variables
         integer(ip) :: imid, iw1, iw2
 
-        imid = (nlat+1)/2
+        imid = (nlat + 1)/2
         iw1 = 2*nlat*imid+1
         iw2 = nlat/2 + 2
 
@@ -1930,7 +1930,7 @@ contains
     ! Remarks:
     !
     !     abc must have 3*(max(mmax-2, 0)*(2*nlat-mmax-1))/2
-    !     locations where mmax = min(nlat, (nlon+1)/2)
+    !     locations where mmax = min(nlat, (nlon + 1)/2)
     !     cvb and work must each have nlat+1 locations
     !
     subroutine vbinit_lower_utility_routine(nlat, nlon, imid, vb, abc, cvb, work)
@@ -1941,8 +1941,8 @@ contains
         integer(ip), intent(in)  :: imid
         real(wp),    intent(out) :: vb(imid, nlat, 2)
         real(wp),    intent(out) :: abc(*)
-        real(wp),    intent(out) :: cvb(nlat+1)
-        real(wp),    intent(out) :: work(nlat+1)
+        real(wp),    intent(out) :: cvb(nlat + 1)
+        real(wp),    intent(out) :: work(nlat + 1)
 
         ! Local variables
         integer(ip)    :: i, m, mdo, mp1, n, np1
@@ -1950,7 +1950,7 @@ contains
 
 
         dth = pi/(nlat-1)
-        mdo = min(2, nlat, (nlon+1)/2)
+        mdo = min(2, nlat, (nlon + 1)/2)
         do mp1=1, mdo
             m = mp1-1
             do np1=mp1, nlat
@@ -1979,13 +1979,13 @@ contains
         ! Dummy arguments
         integer(ip), intent(in)  :: nlat
         integer(ip), intent(in)  :: nlon
-        real(wp),    intent(out) :: wwbin(2*nlat*((nlat+1)/2)+3*((nlat-3)*nlat+2)/2)
+        real(wp),    intent(out) :: wwbin(2*nlat*((nlat + 1)/2)+3*((nlat-3)*nlat+2)/2)
         real(wp),    intent(out) :: dwork(nlat+2)
 
         ! Local variables
         integer(ip) :: imid, iw1, iw2
 
-        imid = (nlat+1)/2
+        imid = (nlat + 1)/2
         iw1 = 2*nlat*imid+1
         iw2 = nlat/2 + 2
 
@@ -1996,7 +1996,7 @@ contains
     ! Remarks:
     !
     ! abc must have 3*(max(mmax-2, 0)*(2*nlat-mmax-1))/2
-    ! locations where mmax = min(nlat, (nlon+1)/2)
+    ! locations where mmax = min(nlat, (nlon + 1)/2)
     ! cwb and work must each have nlat/2+1 locations
     !
     subroutine wbinit_lower_utility_routine(nlat, nlon, imid, wb, abc, cwb, work)
@@ -2015,7 +2015,7 @@ contains
         real(wp)    :: dth, wbh, theta
 
         dth = pi/(nlat-1)
-        mdo = min(3, nlat, (nlon+1)/2)
+        mdo = min(3, nlat, (nlon + 1)/2)
 
         if (2 <= mdo) then
             do mp1=2, mdo
@@ -2052,9 +2052,9 @@ contains
         integer(ip) :: labc, lim, mmax
 
 
-        imid = (nlat+1)/2
+        imid = (nlat + 1)/2
         lim = nlat*imid
-        mmax = min(nlat, (nlon+1)/2)
+        mmax = min(nlat, (nlon + 1)/2)
         labc = (max(mmax-2, 0)*(2*nlat-mmax-1))/2
         iw1 = lim+1
         iw2 = iw1+lim
@@ -2170,9 +2170,9 @@ contains
         integer(ip) :: lim
         integer(ip) :: mmax
 
-        imid = (nlat+1)/2
+        imid = (nlat + 1)/2
         lim = nlat*imid
-        mmax = min(nlat, (nlon+1)/2)
+        mmax = min(nlat, (nlon + 1)/2)
         labc = (max(mmax-2, 0)*(2*nlat-mmax-1))/2
 
         ! Set workspace index pointers
@@ -2303,7 +2303,7 @@ contains
 
         if (n <= 0) return
 
-        lc = (nlat+1)/2
+        lc = (nlat + 1)/2
         sc1 = TWO/(nlat-1)
 
         call dvbk(m, n, work, czv)
@@ -2417,7 +2417,7 @@ contains
 
         if (n <= 0) return
 
-        lc = (nlat+1)/2
+        lc = (nlat + 1)/2
         lq = lc-1
         ls = lc-2
         cost = cos(th)
@@ -2571,7 +2571,7 @@ contains
 
         if (n <= 0) return
 
-        lc = (nlat+1)/2
+        lc = (nlat + 1)/2
         sc1 = TWO/(nlat-1)
 
         call dwbk(m, n, work, czw)
@@ -2689,7 +2689,7 @@ contains
 
         if (n <= 0) return
 
-        lc = (nlat+1)/2
+        lc = (nlat + 1)/2
         lq = lc-1
         ls = lc-2
         cost = cos(th)
@@ -3146,7 +3146,7 @@ contains
         integer(ip) :: iw1, iw2, labc, mmax
 
         ! Compute workspace index pointers
-        mmax = min(nlat, (nlon+1)/2)
+        mmax = min(nlat, (nlon + 1)/2)
         labc = (max(mmax-2, 0)*(2*nlat-mmax-1))/2
         iw1 = labc+1
         iw2 = iw1+labc
@@ -3187,7 +3187,7 @@ contains
         real(wp) :: tn
         real(wp) :: tpn
 
-        mmax = min(nlat, (nlon+1)/2)
+        mmax = min(nlat, (nlon + 1)/2)
 
         if (mmax < 3) return
 
@@ -3250,7 +3250,7 @@ contains
         integer(ip) :: labc
         integer(ip) :: mmax
 
-        mmax = min(nlat, (nlon+1)/2)
+        mmax = min(nlat, (nlon + 1)/2)
         labc = (max(mmax-2, 0)*(2*nlat-mmax-1))/2
         iw1 = labc+1
         iw2 = iw1+labc
@@ -3291,7 +3291,7 @@ contains
         real(wp) :: tph
         real(wp) :: tpn
 
-        mmax = min(nlat, (nlon+1)/2)
+        mmax = min(nlat, (nlon + 1)/2)
 
         if (mmax < 4) return
 
@@ -3344,7 +3344,7 @@ contains
         real(wp) :: dwork(nlat+2)
 
 
-        imid = (nlat+1)/2
+        imid = (nlat + 1)/2
         iw1 = 2*nlat*imid+1
         iw2 = nlat/2+2
         !
@@ -3358,7 +3358,7 @@ contains
     ! Remark:
     !
     ! abc must have 3*(max(mmax-2, 0)*(2*nlat-mmax-1))/2
-    ! locations where mmax = min(nlat, (nlon+1)/2)
+    ! locations where mmax = min(nlat, (nlon + 1)/2)
     ! cvb and work must each have nlat/2+1 locations
     !
     subroutine vtinit_lower_utility_routine(nlat, nlon, imid, vb, abc, cvb, work)
@@ -3383,7 +3383,7 @@ contains
         real(wp) :: th, vbh
 
         dt = PI/(nlat-1)
-        mdo = min(2, nlat, (nlon+1)/2)
+        mdo = min(2, nlat, (nlon + 1)/2)
 
         do mp1=1, mdo
             m = mp1-1
@@ -3412,7 +3412,7 @@ contains
         real(wp) :: wwbin(*)
         real(wp) :: dwork(nlat+2)
 
-        imid = (nlat+1)/2
+        imid = (nlat + 1)/2
         iw1 = 2*nlat*imid+1
         iw2 = nlat/2+2
         !
@@ -3441,12 +3441,12 @@ contains
         real(wp) :: work(nlat/2+1)
         !
         !     abc must have 3*(max(mmax-2, 0)*(2*nlat-mmax-1))/2
-        !     locations where mmax = min(nlat, (nlon+1)/2)
+        !     locations where mmax = min(nlat, (nlon + 1)/2)
         !     cwb and work must each have nlat/2+1 locations
         !
 
         dt = PI/(nlat-1)
-        mdo = min(3, nlat, (nlon+1)/2)
+        mdo = min(3, nlat, (nlon + 1)/2)
         if (mdo < 2) return
         do mp1=2, mdo
             m = mp1-1
@@ -3473,15 +3473,15 @@ contains
         integer(ip), intent(in) :: nlat
         integer(ip), intent(in) :: nlon
         real(wp) :: wvbin(*)
-        real(wp) :: theta(*)!(nlat+1)/2)
+        real(wp) :: theta(*)!(nlat + 1)/2)
         real(wp) :: work(*)!nlat+2)
 
 
-        imid = (nlat+1)/2
+        imid = (nlat + 1)/2
         iw1 = 2*nlat*imid+1
         iw2 = nlat/2+2
         !
-        !     theta is a real array with (nlat+1)/2 locations
+        !     theta is a real array with (nlat + 1)/2 locations
         !     nlat is the maximum value of n+1
         !     the length of wvbin is 2*nlat*imid+3*((nlat-3)*nlat+2)/2
         !     the length of work is nlat+2
@@ -3507,11 +3507,11 @@ contains
         !real(wp) :: theta(*), cvb(nlat/2+1), work(nlat/2+1), vbh
         !
         !     abc must have 3*(max(mmax-2, 0)*(2*nlat-mmax-1))/2
-        !     locations where mmax = min(nlat, (nlon+1)/2)
+        !     locations where mmax = min(nlat, (nlon + 1)/2)
         !     cvb and work must each have nlat/2+1   locations
         !
 
-        mdo = min(2, nlat, (nlon+1)/2)
+        mdo = min(2, nlat, (nlon + 1)/2)
         do mp1=1, mdo
             m = mp1-1
             do np1=mp1, nlat
@@ -3539,11 +3539,11 @@ contains
         real(wp) :: theta(*)
         real(wp) :: work(*)
 
-        imid = (nlat+1)/2
+        imid = (nlat + 1)/2
         iw1 = 2*nlat*imid+1
         iw2 = nlat/2+2
         !
-        !     theta is a real array with (nlat+1)/2 locations
+        !     theta is a real array with (nlat + 1)/2 locations
         !     nlat is the maximum value of n+1
         !     the length of wwbin is 2*nlat*imid+3*((nlat-3)*nlat+2)/2
         !     the length of work is nlat+2
@@ -3574,7 +3574,7 @@ contains
         !     cwb and work must each have nlat/2+1 locations
         !
 
-        mdo = min(3, nlat, (nlon+1)/2)
+        mdo = min(3, nlat, (nlon + 1)/2)
         if (mdo < 2) return
         do mp1=2, mdo
             m = mp1-1
@@ -3925,14 +3925,14 @@ contains
         integer(ip), intent(in) :: nlat
         integer(ip), intent(in) :: nlon
         real(wp) :: wvbin(*)
-        real(wp) :: theta((nlat+1)/2)
+        real(wp) :: theta((nlat + 1)/2)
         real(wp) :: work(nlat+2)
 
-        imid = (nlat+1)/2
+        imid = (nlat + 1)/2
         iw1 = 2*nlat*imid+1
         iw2 = nlat/2+2
         !
-        !     theta is a real array with (nlat+1)/2 locations
+        !     theta is a real array with (nlat + 1)/2 locations
         !     nlat is the maximum value of n+1
         !     the length of wvbin is 2*nlat*imid+3*((nlat-3)*nlat+2)/2
         !     the length of work is nlat+2
@@ -3959,11 +3959,11 @@ contains
         real(wp) :: work(nlat/2+1)
         !
         !     abc must have 3*(max(mmax-2, 0)*(2*nlat-mmax-1))/2
-        !     locations where mmax = min(nlat, (nlon+1)/2)
+        !     locations where mmax = min(nlat, (nlon + 1)/2)
         !     cvb and work must each have nlat/2+1 locations
         !
 
-        mdo = min(2, nlat, (nlon+1)/2)
+        mdo = min(2, nlat, (nlon + 1)/2)
         do mp1=1, mdo
             m = mp1-1
             do np1=mp1, nlat
@@ -3985,19 +3985,19 @@ contains
         ! Dummy arguments
         integer(ip), intent(in) :: nlat
         integer(ip), intent(in) :: nlon
-        real(wp),    intent(in) :: theta((nlat+1)/2)
-        real(wp)                 :: wwbin(2*nlat*((nlat+1)/2)+3*((nlat-3)*nlat+2)/2)
+        real(wp),    intent(in) :: theta((nlat + 1)/2)
+        real(wp)                 :: wwbin(2*nlat*((nlat + 1)/2)+3*((nlat-3)*nlat+2)/2)
         real(wp)                 :: work(nlat+2)
 
         ! Local variables
         integer(ip) :: imid, iw1, iw2
 
 
-        imid = (nlat+1)/2
+        imid = (nlat + 1)/2
         iw1 = 2*nlat*imid+1
         iw2 = nlat/2+2
         !
-        !     theta is a real array with (nlat+1)/2 locations
+        !     theta is a real array with (nlat + 1)/2 locations
         !     nlat is the maximum value of n+1
         !     the length of wwbin is 2*nlat*imid+3*((nlat-3)*nlat+2)/2
         !     the length of work is nlat+2
@@ -4026,7 +4026,7 @@ contains
         !     abc must have 3*((nlat-3)*nlat+2)/2 locations
         !     cwb and work must each have nlat/2+1 locations
         !
-        mdo = min(3, nlat, (nlon+1)/2)
+        mdo = min(3, nlat, (nlon + 1)/2)
         if (mdo < 2) return
         do mp1=2, mdo
             m = mp1-1

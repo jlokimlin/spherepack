@@ -60,7 +60,7 @@ contains
     !            poles. for example, nlat = 37 for a five degree grid.
     !            nlat determines the grid increment in colatitude as
     !            pi/(nlat-1).  if nlat is odd the equator is located at
-    !            grid point i=(nlat+1)/2. if nlat is even the equator is
+    !            grid point i=(nlat + 1)/2. if nlat is even the equator is
     !            located half way between points i=nlat/2 and i=nlat/2+1.
     !            nlat must be at least 3.
     !
@@ -95,7 +95,7 @@ contains
     !
     !     lwshp  the dimension of the array wshp as it appears in the
     !            program that calls shpgi. It must be at least
-    !            2*(nlat+1)**2+nlon+log2(nlon)
+    !            2*(nlat + 1)**2+nlon+log2(nlon)
     !
     !     iwshp  an integer array that must be saved for repeated
     !            use by subroutine shpg.
@@ -103,14 +103,14 @@ contains
     !
     !     liwshp the dimension of the array iwshp as it appears in the
     !            program that calls shpgi. It must be at least
-    !            4*(nlat+1).
+    !            4*(nlat + 1).
     !
     !     work   a single precision work array that does
     !            not have to be saved.
     !
     !     lwork  the dimension of the array work as it appears in the
     !            program that calls shpg. It must be at least
-    !            max(nlat*nlon, 4*(nlat+1)).
+    !            max(nlat*nlon, 4*(nlat + 1)).
     !
     !     **************************************************************
     !
@@ -180,12 +180,12 @@ contains
         if (mtrunc<0 .or. mtrunc>mmax) return
         ierror = 5
         log2n = int(log(real(nlon, kind=wp))/log(TWO), kind=ip)
-        lw1 = 2*(nlat+1)**2
+        lw1 = 2*(nlat + 1)**2
         if (lwshp<lw1+nlon+log2n) return
         ierror = 6
-        if (liwshp<4*(nlat+1)) return
+        if (liwshp<4*(nlat + 1)) return
         ierror = 7
-        mwrk = max(nlat*nlon, 4*(nlat+1))
+        mwrk = max(nlat*nlon, 4*(nlat + 1))
         if (lwork <mwrk) return
         ierror = 0
 
@@ -194,10 +194,10 @@ contains
         call util%hfft%forward(nlat, nlon, y, idxy, wshp(lw1+1))
 
         ! Set workspace index pointers
-        nte = (nlat+1)/2
+        nte = (nlat + 1)/2
         nloc1 = 2*(nte**2)
         nloc2 = nlat+1
-        lw1 = 2*(nlat+1)**2
+        lw1 = 2*(nlat + 1)**2
         iw1 = 1
         iw2 = iw1+nloc1
         iw3 = iw2+nloc1
@@ -237,7 +237,7 @@ contains
     !            poles. for example, nlat = 37 for a five degree grid.
     !            nlat determines the grid increment in colatitude as
     !            pi/(nlat-1).  if nlat is odd the equator is located at
-    !            grid point i=(nlat+1)/2. if nlat is even the equator is
+    !            grid point i=(nlat + 1)/2. if nlat is even the equator is
     !            located half way between points i=nlat/2 and i=nlat/2+1.
     !            nlat must be at least 3.
     !
@@ -259,15 +259,15 @@ contains
     !
     !     lwshp  the dimension of the array wshp as it appears in the
     !            program that calls shpgi. It must be at least
-    !            2*(nlat+1)**2+nlon+log2(nlon)
+    !            2*(nlat + 1)**2+nlon+log2(nlon)
     !
     !     liwshp the dimension of the array iwshp as it appears in the
     !            program that calls shpgi. It must be at least
-    !            4*(nlat+1).
+    !            4*(nlat + 1).
     !
     !     lwork  the dimension of the array work as it appears in the
     !            program that calls shpgi. It must be at least
-    !            1.25*(nlat+1)**2+7*nlat+8.
+    !            1.25*(nlat + 1)**2+7*nlat+8.
     !
     !     **************************************************************
     !
@@ -348,22 +348,22 @@ contains
         mmax = min(nlat-1, nlon/2)
         if (mtrunc<0 .or. mtrunc>mmax) return
         ierror = 5
-        lw1 = 2*((nlat+1)**2)
+        lw1 = 2*((nlat + 1)**2)
         log2n = int(log(real(nlon, kind=wp))/log(TWO), kind=ip)
         if (lwshp<lw1+nlon+log2n) return
         ierror = 6
-        if (liwshp<4*(nlat+1)) return
+        if (liwshp<4*(nlat + 1)) return
         ierror = 7
-        mlwk = (5*((nlat+1)**2+7*nlat+8))/4
+        mlwk = (5*((nlat + 1)**2+7*nlat+8))/4
         if (lwork <mlwk) return
         ierror = 0
 
         call util%hfft%initialize(nlon, wshp(lw1+1))
 
-        nte = (nlat+1)/2
+        nte = (nlat + 1)/2
         nloc1 = 2*nte*nte
         nloc2 = nlat+1
-        lw1 = 2*((nlat+1)**2)
+        lw1 = 2*((nlat + 1)**2)
         iw1 = 1
         iw2 = iw1+nloc1
         iw3 = iw2+nloc1
@@ -457,7 +457,7 @@ contains
 
         ns2 = nlat/2
         modn = nlat-2*ns2
-        nte = (nlat+1)/2
+        nte = (nlat + 1)/2
         nto = nlat-nte
         tusl = ZERO
         toe = ZERO
@@ -831,7 +831,7 @@ contains
         !
         ns2 = nlat/2
         modn = nlat-ns2-ns2
-        nte = (nlat+1)/2
+        nte = (nlat + 1)/2
         nto = nlat-nte
         !
         mxtr = min(nlat-1, nlon/2, mtrunc)

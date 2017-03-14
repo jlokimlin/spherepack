@@ -426,7 +426,7 @@ contains
     !
     !       nlat = max(nlata, nlatb)
     !
-    !     ldwork must be at least 2*nlat*(nlat+1)+1
+    !     ldwork must be at least 2*nlat*(nlat + 1)+1
     !
     !
     ! *** output arguments

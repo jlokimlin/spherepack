@@ -44,7 +44,8 @@ module vector_analysis_routines
 
     type, public, extends(SpherepackUtility) :: VectorAnalysisUtility
     contains
-        procedure :: analysis_setup
+        procedure, nopass :: check_vector_analysis_inputs
+        procedure         :: analysis_setup
     end type VectorAnalysisUtility
 
     ! Declare interfaces for submodule implementation
@@ -176,6 +177,52 @@ module vector_analysis_routines
 
 contains
 
+    pure subroutine check_vector_analysis_inputs(nlat, nlon, vector_symmetries, &
+        idvw, jdvw, order_m, degree_n, number_of_syntheses, &
+        required_wavetable_size, wavetable, error_flag)
+
+        ! Dummy arguments
+        integer(ip), intent(in)  :: nlat
+        integer(ip), intent(in)  :: nlon
+        integer(ip), intent(in)  :: vector_symmetries
+        integer(ip), intent(in)  :: idvw
+        integer(ip), intent(in)  :: jdvw
+        integer(ip), intent(in)  :: order_m
+        integer(ip), intent(in)  :: degree_n
+        integer(ip), intent(in)  :: number_of_syntheses
+        integer(ip), intent(in)  :: required_wavetable_size
+        real(wp),    intent(in)  :: wavetable(:)
+        integer(ip), intent(out) :: error_flag
+
+        !  Check calling arguments
+        if (nlat < 3) then
+            error_flag = 1
+        else if (nlon < 1) then
+            error_flag = 2
+        else if (vector_symmetries < 0 .or. vector_symmetries > 8) then
+            error_flag = 3
+        else if (number_of_syntheses < 0) then
+            error_flag = 4
+        else if ( &
+            (vector_symmetries <= 2 .and. idvw < nlat) &
+            .or. &
+            (vector_symmetries > 2 .and. idvw < (nlat + 1)/2) &
+            ) then
+            error_flag = 5
+        else if (jdvw < nlon) then
+            error_flag = 6
+        else if (order_m < min(nlat, (nlon + 1)/2)) then
+            error_flag = 7
+        else if (degree_n < nlat) then
+            error_flag = 8
+        else if (size(wavetable) < required_wavetable_size) then
+            error_flag = 9
+        else
+            error_flag = 0
+        end if
+
+    end subroutine check_vector_analysis_inputs
+
     subroutine analysis_setup(self, idvw, jdvw, mdab, ndab, &
         bi, br, ci, cr, even_stride, idv, imid, imm1, ityp, &
         mmax, nlat, nlon, nt, odd_stride,  v, ve, vo, w, we, wo, wrfft)
@@ -211,7 +258,7 @@ contains
         integer(ip) :: k, i, mp1
         real(wp)    :: tsn, fsn
 
-        mmax = min(nlat, (nlon+1)/2)
+        mmax = min(nlat, (nlon + 1)/2)
 
         select case (mod(nlat, 2))
             case (0)
@@ -232,29 +279,25 @@ contains
             case (0:2)
                 do k=1, nt
                     do i=1, imm1
-                        ve(i, :, k) = tsn*(v(i, :nlon, k)+v((nlat+1)-i, :nlon, k))
-                        vo(i, :, k) = tsn*(v(i, :nlon, k)-v((nlat+1)-i, :nlon, k))
-                        we(i, :, k) = tsn*(w(i, :nlon, k)+w((nlat+1)-i, :nlon, k))
-                        wo(i, :, k) = tsn*(w(i, :nlon, k)-w((nlat+1)-i, :nlon, k))
+                        ve(i, :, k) = tsn * (v(i, :nlon, k) + v((nlat + 1)-i, :nlon, k))
+                        vo(i, :, k) = tsn * (v(i, :nlon, k) - v((nlat + 1)-i, :nlon, k))
+                        we(i, :, k) = tsn * (w(i, :nlon, k) + w((nlat + 1)-i, :nlon, k))
+                        wo(i, :, k) = tsn * (w(i, :nlon, k) - w((nlat + 1)-i, :nlon, k))
                     end do
                 end do
             case default
-
-
                 do k=1, nt
-                    do i=1, imm1
-                        ve(i, :, k) = fsn * v(i, :nlon, k)
-                        vo(i, :, k) = fsn * v(i, :nlon, k)
-                        we(i, :, k) = fsn * w(i, :nlon, k)
-                        wo(i, :, k) = fsn * w(i, :nlon, k)
-                    end do
+                    ve(:imm1, :, k) = fsn * v(:imm1, :nlon, k)
+                    vo(:imm1, :, k) = fsn * v(:imm1, :nlon, k)
+                    we(:imm1, :, k) = fsn * w(:imm1, :nlon, k)
+                    wo(:imm1, :, k) = fsn * w(:imm1, :nlon, k)
                 end do
         end select
 
         if (mod(nlat, 2) /= 0) then
             do k=1, nt
-                ve(imid, :, k) = tsn * v(imid, 1:nlon, k)
-                we(imid, :, k) = tsn * w(imid, 1:nlon, k)
+                ve(imid, :, k) = tsn * v(imid, :nlon, k)
+                we(imid, :, k) = tsn * w(imid, :nlon, k)
             end do
         end if
 
@@ -263,27 +306,13 @@ contains
             call self%hfft%forward(idv, nlon, we(:, :, k), idv, wrfft)
         end do
 
-        !  Set polar coefficients to zero
-        select case (ityp)
-            case (0:1, 3:4, 6:7)
-                do k=1, nt
-                    do mp1=1, mmax
-                        br(mp1, mp1:nlat, k) = ZERO
-                        bi(mp1, mp1:nlat, k) = ZERO
-                    end do
-                end do
-        end select
+        ! Set polar coefficients to zero
+        br = ZERO
+        bi = ZERO
 
-        !  Set azimuthal coefficients to zero
-        select case (ityp)
-            case (0, 2:3, 5:6, 8)
-                do k=1, nt
-                    do mp1=1, mmax
-                        cr(mp1, mp1: nlat, k) = ZERO
-                        ci(mp1, mp1: nlat, k) = ZERO
-                    end do
-                end do
-        end select
+        ! Set azimuthal coefficients to zero
+        cr = ZERO
+        ci = ZERO
 
     end subroutine analysis_setup
 

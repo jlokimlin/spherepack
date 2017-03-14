@@ -203,7 +203,7 @@ contains
 
         nlon = size(ve, dim=2)
 
-        mmax = min(nlat, (nlon+1)/2)
+        mmax = min(nlat, (nlon + 1)/2)
 
         select case (mod(nlat, 2))
             case (0)
@@ -259,8 +259,8 @@ contains
                     do i=1, imm1
                         v(i, :, k) = HALF * (ve(i, :, k) + vo(i, :, k))
                         w(i, :, k) = HALF * (we(i, :, k) + wo(i, :, k))
-                        v((nlat+1)-i, :, k) = HALF * (ve(i, :, k) - vo(i, :, k))
-                        w((nlat+1)-i, :, k) = HALF * (we(i, :, k) - wo(i, :, k))
+                        v((nlat + 1)-i, :, k) = HALF * (ve(i, :, k) - vo(i, :, k))
+                        w((nlat + 1)-i, :, k) = HALF * (we(i, :, k) - wo(i, :, k))
                     end do
                 end do
             case default
@@ -395,8 +395,8 @@ contains
         ! Local variables
         integer(ip)  :: imid, lmn
 
-        imid = (nlat+1)/2
-        lmn = (nlat*(nlat+1))/2
+        imid = (nlat + 1)/2
+        lmn = (nlat*(nlat + 1))/2
         return_value = 2*(imid*lmn)+nlon+15
 
     end function get_lvhsgs

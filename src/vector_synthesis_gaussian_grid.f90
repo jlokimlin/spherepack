@@ -49,12 +49,12 @@ contains
     !            full sphere. these lie in the interval (0, pi) and are computed
     !            in radians in theta(1) <...< theta(nlat) by subroutine compute_gaussian_latitudes_and_weights.
     !            if nlat is odd the equator will be included as the grid point
-    !            theta((nlat+1)/2).  if nlat is even the equator will be
+    !            theta((nlat + 1)/2).  if nlat is even the equator will be
     !            excluded as a grid point and will lie half way between
     !            theta(nlat/2) and theta(nlat/2+1). nlat must be at least 3.
     !            note: on the half sphere, the number of grid points in the
     !            colatitudinal direction is nlat/2 if nlat is even or
-    !            (nlat+1)/2 if nlat is odd.
+    !            (nlat + 1)/2 if nlat is odd.
     !
     !     nlon   the number of distinct londitude points.  nlon determines
     !            the grid increment in longitude as 2*pi/nlon. for example
@@ -86,7 +86,7 @@ contains
     !                 equator. the synthesis is performed on the northern
     !                 hemisphere only.  i.e., if nlat is odd the synthesis
     !                 is performed on the arrays v(i, j), w(i, j) for
-    !                 i=1, ..., (nlat+1)/2 and j=1, ..., nlon. if nlat is
+    !                 i=1, ..., (nlat + 1)/2 and j=1, ..., nlon. if nlat is
     !                 even the synthesis is performed on the the arrays
     !                 v(i, j), w(i, j) for i=1, ..., nlat/2 and j=1, ..., nlon.
     !
@@ -94,7 +94,7 @@ contains
     !                 equator. the synthesis is performed on the northern
     !                 hemisphere only.  i.e., if nlat is odd the synthesis
     !                 is performed on the arrays v(i, j), w(i, j) for
-    !                 i=1, ..., (nlat+1)/2 and j=1, ..., nlon. if nlat is
+    !                 i=1, ..., (nlat + 1)/2 and j=1, ..., nlon. if nlat is
     !                 even the synthesis is performed on the the arrays
     !                 v(i, j), w(i, j) for i=1, ..., nlat/2 and j=1, ..., nlon.
     !                 the curl of (v, w) is zero. that is,
@@ -105,7 +105,7 @@ contains
     !                 equator. the synthesis is performed on the northern
     !                 hemisphere only.  i.e., if nlat is odd the synthesis
     !                 is performed on the arrays v(i, j), w(i, j) for
-    !                 i=1, ..., (nlat+1)/2 and j=1, ..., nlon. if nlat is
+    !                 i=1, ..., (nlat + 1)/2 and j=1, ..., nlon. if nlat is
     !                 even the synthesis is performed on the the arrays
     !                 v(i, j), w(i, j) for i=1, ..., nlat/2 and j=1, ..., nlon.
     !                 the divergence of (v, w) is zero. i.e.,
@@ -116,7 +116,7 @@ contains
     !                 equator. the synthesis is performed on the northern
     !                 hemisphere only.  i.e., if nlat is odd the synthesis
     !                 is performed on the arrays v(i, j), w(i, j) for
-    !                 i=1, ..., (nlat+1)/2 and j=1, ..., nlon. if nlat is
+    !                 i=1, ..., (nlat + 1)/2 and j=1, ..., nlon. if nlat is
     !                 even the synthesis is performed on the the arrays
     !                 v(i, j), w(i, j) for i=1, ..., nlat/2 and j=1, ..., nlon.
     !
@@ -124,7 +124,7 @@ contains
     !                 equator. the synthesis is performed on the northern
     !                 hemisphere only.  i.e., if nlat is odd the synthesis
     !                 is performed on the arrays v(i, j), w(i, j) for
-    !                 i=1, ..., (nlat+1)/2 and j=1, ..., nlon. if nlat is
+    !                 i=1, ..., (nlat + 1)/2 and j=1, ..., nlon. if nlat is
     !                 even the synthesis is performed on the the arrays
     !                 v(i, j), w(i, j) for i=1, ..., nlat/2 and j=1, ..., nlon.
     !                 the curl of (v, w) is zero. that is,
@@ -135,7 +135,7 @@ contains
     !                 equator. the synthesis is performed on the northern
     !                 hemisphere only.  i.e., if nlat is odd the synthesis
     !                 is performed on the arrays v(i, j), w(i, j) for
-    !                 i=1, ..., (nlat+1)/2 and j=1, ..., nlon. if nlat is
+    !                 i=1, ..., (nlat + 1)/2 and j=1, ..., nlon. if nlat is
     !                 even the synthesis is performed on the the arrays
     !                 v(i, j), w(i, j) for i=1, ..., nlat/2 and j=1, ..., nlon.
     !                 the divergence of (v, w) is zero. i.e.,
@@ -156,7 +156,7 @@ contains
     !            the program that calls vhsgc. if ityp <= 2 then idvw
     !            must be at least nlat.  if ityp > 2 and nlat is
     !            even then idvw must be at least nlat/2. if ityp > 2
-    !            and nlat is odd then idvw must be at least (nlat+1)/2.
+    !            and nlat is odd then idvw must be at least (nlat + 1)/2.
     !
     !     jdvw   the second dimension of the arrays v, w as it appears in
     !            the program that calls vhsgc. jdvw must be at least nlon.
@@ -169,7 +169,7 @@ contains
     !     mdab   the first dimension of the arrays br, bi, cr, and ci as it
     !            appears in the program that calls vhsgc. mdab must be at
     !            least min(nlat, nlon/2) if nlon is even or at least
-    !            min(nlat, (nlon+1)/2) if nlon is odd.
+    !            min(nlat, (nlon + 1)/2) if nlon is odd.
     !
     !     ndab   the second dimension of the arrays br, bi, cr, and ci as it
     !            appears in the program that calls vhsgc. ndab must be at
@@ -184,12 +184,12 @@ contains
     !            program that calls vhsgc. define
     !
     !               l1 = min(nlat, nlon/2) if nlon is even or
-    !               l1 = min(nlat, (nlon+1)/2) if nlon is odd
+    !               l1 = min(nlat, (nlon + 1)/2) if nlon is odd
     !
     !            and
     !
     !               l2 = nlat/2        if nlat is even or
-    !               l2 = (nlat+1)/2    if nlat is odd
+    !               l2 = (nlat + 1)/2    if nlat is odd
     !
     !            then lvhsgc must be at least
     !
@@ -251,7 +251,7 @@ contains
     !     the maximum (plus one) longitudinal wave number
     !
     !     8.     mmax = min(nlat, nlon/2) if nlon is even or
-    !            mmax = min(nlat, (nlon+1)/2) if nlon is odd.
+    !            mmax = min(nlat, (nlon + 1)/2) if nlon is odd.
     !
     !    if we further define the output vector as
     !
@@ -353,12 +353,12 @@ contains
         integer(ip) :: mmax, lzz1, lwork
         type(SpherepackUtility) :: util
 
-        imid = (nlat+1)/2
-        mmax = min(nlat, (nlon+1)/2)
+        imid = (nlat + 1)/2
+        mmax = min(nlat, (nlon + 1)/2)
         lzz1 = 2*nlat*imid
         labc = 3*(max(mmax-2, 0)*(2*nlat-mmax-1))/2
-        n1 = min(nlat, (nlon+1)/2)
-        n2 = (nlat+1)/2
+        n1 = min(nlat, (nlon + 1)/2)
+        n2 = (nlat + 1)/2
         required_wavetable_size = util%get_lvhsgc(nlat, nlon)
 
         call util%check_vector_transform_inputs(ityp, idvw, jdvw, &
@@ -418,12 +418,12 @@ contains
     !            full sphere. these lie in the interval (0, pi) and are computed
     !            in radians in theta(1) <...< theta(nlat) by subroutine compute_gaussian_latitudes_and_weights.
     !            if nlat is odd the equator will be included as the grid point
-    !            theta((nlat+1)/2).  if nlat is even the equator will be
+    !            theta((nlat + 1)/2).  if nlat is even the equator will be
     !            excluded as a grid point and will lie half way between
     !            theta(nlat/2) and theta(nlat/2+1). nlat must be at least 3.
     !            note: on the half sphere, the number of grid points in the
     !            colatitudinal direction is nlat/2 if nlat is even or
-    !            (nlat+1)/2 if nlat is odd.
+    !            (nlat + 1)/2 if nlat is odd.
     !
     !     nlon   the number of distinct londitude points.  nlon determines
     !            the grid increment in longitude as 2*pi/nlon. for example
@@ -436,12 +436,12 @@ contains
     !            program that calls vhsgc. define
     !
     !               l1 = min(nlat, nlon/2) if nlon is even or
-    !               l1 = min(nlat, (nlon+1)/2) if nlon is odd
+    !               l1 = min(nlat, (nlon + 1)/2) if nlon is odd
     !
     !            and
     !
     !               l2 = nlat/2        if nlat is even or
-    !               l2 = (nlat+1)/2    if nlat is odd
+    !               l2 = (nlat + 1)/2    if nlat is odd
     !
     !            then lvhsgc must be at least
     !
@@ -485,9 +485,9 @@ contains
 
         associate (lvhsgc => size(wvhsgc))
 
-            imid = (nlat+1)/2
+            imid = (nlat + 1)/2
             lzz1 = 2*nlat*imid
-            mmax = min(nlat, (nlon+1)/2)
+            mmax = min(nlat, (nlon + 1)/2)
             labc = 3*(max(mmax-2, 0)*(2*nlat-mmax-1))/2
 
             ! Check calling arguments
@@ -508,7 +508,7 @@ contains
             jw1 = 1
             jw2 = jw1+nlat
             jw3 = jw2+nlat
-            iwrk = (nlat+1)/2 + 1
+            iwrk = (nlat + 1)/2 + 1
             lwvbin = lzz1+labc
             iw1 = lwvbin+1
             iw2 = iw1+lwvbin

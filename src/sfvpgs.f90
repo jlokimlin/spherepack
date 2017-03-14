@@ -68,12 +68,12 @@
 !            full sphere. these lie in the interval (0, pi) and are computed
 !            in radians in theta(1) <...< theta(nlat) by subroutine compute_gaussian_latitudes_and_weights.
 !            if nlat is odd the equator will be included as the grid point
-!            theta((nlat+1)/2).  if nlat is even the equator will be
+!            theta((nlat + 1)/2).  if nlat is even the equator will be
 !            excluded as a grid point and will lie half way between
 !            theta(nlat/2) and theta(nlat/2+1). nlat must be at least 3.
 !            note: on the half sphere, the number of grid points in the
 !            colatitudinal direction is nlat/2 if nlat is even or
-!            (nlat+1)/2 if nlat is odd.
+!            (nlat + 1)/2 if nlat is odd.
 !
 !     nlon   the number of distinct londitude points.  nlon determines
 !            the grid increment in longitude as 2*pi/nlon. for example
@@ -101,7 +101,7 @@
 !            in this case sf is symmetric and vp antisymmetric about
 !            the equator and are computed for the northern hemisphere
 !            only.  i.e., if nlat is odd the sf(i, j), vp(i, j) are computed
-!            for i=1, ..., (nlat+1)/2 and for j=1, ..., nlon.  if nlat is
+!            for i=1, ..., (nlat + 1)/2 and for j=1, ..., nlon.  if nlat is
 !            even then sf(i, j), vp(i, j) are computed for i=1, ..., nlat/2
 !            and j=1, ..., nlon.
 !
@@ -111,7 +111,7 @@
 !            in this case sf is antisymmetric and vp symmetric about
 !            the equator and are computed for the northern hemisphere
 !            only.  i.e., if nlat is odd the sf(i, j), vp(i, j) are computed
-!            for i=1, ..., (nlat+1)/2 and for j=1, ..., nlon.  if nlat is
+!            for i=1, ..., (nlat + 1)/2 and for j=1, ..., nlon.  if nlat is
 !            even then sf(i, j), vp(i, j) are computed for i=1, ..., nlat/2
 !            and j=1, ..., nlon.
 !
@@ -129,7 +129,7 @@
 !            the program that calls sfvpgs. if isym = 0 then idv
 !            must be at least nlat.  if isym = 1 or 2 and nlat is
 !            even then idv must be at least nlat/2. if isym = 1 or 2
-!            and nlat is odd then idv must be at least (nlat+1)/2.
+!            and nlat is odd then idv must be at least (nlat + 1)/2.
 !
 !     jdv    the second dimension of the arrays sf, vp as it appears in
 !            the program that calls sfvpgs. jdv must be at least nlon.
@@ -141,7 +141,7 @@
 !     mdb    the first dimension of the arrays br, bi, cr, ci as it
 !            appears in the program that calls sfvpgs. mdb must be at
 !            least min(nlat, nlon/2) if nlon is even or at least
-!            min(nlat, (nlon+1)/2) if nlon is odd.
+!            min(nlat, (nlon + 1)/2) if nlon is odd.
 !
 !     ndb    the second dimension of the arrays br, bi, cr, ci as it
 !            appears in the program that calls sfvpgs. ndb must be at
@@ -157,12 +157,12 @@
 !            program that calls sfvpgs. define
 !
 !               l1 = min(nlat, (nlon+2)/2) if nlon is even or
-!               l1 = min(nlat, (nlon+1)/2) if nlon is odd
+!               l1 = min(nlat, (nlon + 1)/2) if nlon is odd
 !
 !            and
 !
 !               l2 = nlat/2        if nlat is even or
-!               l2 = (nlat+1)/2    if nlat is odd
+!               l2 = (nlat + 1)/2    if nlat is odd
 !
 !            then lshsgs must be at least
 !
@@ -175,12 +175,12 @@
 !            program that calls sfvpgs. define
 !
 !               l1 = min(nlat, (nlon+2)/2) if nlon is even or
-!               l1 = min(nlat, (nlon+1)/2) if nlon is odd
+!               l1 = min(nlat, (nlon + 1)/2) if nlon is odd
 !
 !            and
 !
 !               l2 = nlat/2                    if nlat is even or
-!               l2 = (nlat+1)/2                if nlat is odd
+!               l2 = (nlat + 1)/2                if nlat is odd
 !
 !            if isym is zero then lwork must be at least
 !
@@ -256,13 +256,13 @@ contains
         ierror = 4
         if (nt < 0) return
         ierror = 5
-        imid = (nlat+1)/2
+        imid = (nlat + 1)/2
         if ((isym == 0 .and. idv<nlat) .or. &
             (isym>0 .and. idv<imid)) return
         ierror = 6
         if (jdv < nlon) return
         ierror = 7
-        if (mdb < min(nlat, (nlon+1)/2)) return
+        if (mdb < min(nlat, (nlon + 1)/2)) return
         ierror = 8
         if (ndb < nlat) return
         ierror = 9
@@ -321,7 +321,7 @@ contains
             fnn(n) = 1.0_wp/sqrt(real(n*(n-1), kind=wp))
         end do
 
-        mmax = min(nlat, (nlon+1)/2)
+        mmax = min(nlat, (nlon + 1)/2)
         !
         !     compute st scalar coefficients from cr, ci
         !
@@ -373,7 +373,7 @@ contains
                 !
                 !     compute m>0 coefficients using vector spherepack value for mmax
                 !
-            mmax = min(nlat, (nlon+1)/2)
+            mmax = min(nlat, (nlon + 1)/2)
             do m=2, mmax
                 do n=m, nlat
                     a(m, n, k) = fnn(n)*br(m, n, k)

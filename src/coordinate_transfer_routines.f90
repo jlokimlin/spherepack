@@ -113,7 +113,7 @@
 !        lat(i) = -0.5*pi + thetag(i) (i=1, ..., nlat)
 !
 !     In either case lat(i) = colat(nlat-i+1) for all i.
-!     If nlat is odd the equator is located at the (nlat+1)/2
+!     If nlat is odd the equator is located at the (nlat + 1)/2
 !     latitude or colatitude point.  If nlat is even the equator is
 !     half way between the nlat/2 and nlat/2+1 latitude or colatitude
 !     points.  The equally spaced (co)latitude grid includes the poles.
