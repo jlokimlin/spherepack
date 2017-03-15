@@ -24,8 +24,6 @@ module vector_analysis_routines
 
     ! Parameters confined to the module
     real(wp), parameter :: ZERO = 0.0_wp
-    real(wp), parameter :: HALF = 0.5_wp
-    real(wp), parameter :: ONE = 1.0_wp
     real(wp), parameter :: TWO = 2.0_wp
     real(wp), parameter :: FOUR = 4.0_wp
 
@@ -255,7 +253,7 @@ contains
         real(wp),    intent(in)  :: wrfft(:)
 
         ! Local variables
-        integer(ip) :: k, i, mp1
+        integer(ip) :: k, i
         real(wp)    :: tsn, fsn
 
         mmax = min(nlat, (nlon + 1)/2)

@@ -572,73 +572,67 @@ contains
         cos2t = cos(TWO * theta)
         sin2t = sin(TWO * theta)
 
-        if (mod(n, 2) <= 0) then
-            if (mod(m, 2) <= 0) then
-                !
-                !   n even, m even
-                !
-                kdo = n/2
-                pb = HALF * cp(1)
+        if (even(n) .and. even(m)) then
 
-                if (n == 0) return
+            !   n even, m even
+            kdo = n/2
+            pb = HALF * cp(1)
 
-                cost = cos2t
-                sint = sin2t
+            if (n == 0) return
 
-                do k=1, kdo
-                    pb = pb+cp(k+1)*cost
-                    temp = cos2t*cost-sin2t*sint
-                    sint = sin2t*cost+cos2t*sint
-                    cost = temp
-                end do
-            else
-                !
-                !  n even, m odd
-                !
-                kdo = n/2
-                pb = ZERO
-                cost = cos2t
-                sint = sin2t
+            cost = cos2t
+            sint = sin2t
 
-                do k=1, kdo
-                    pb = pb+cp(k)*sint
-                    temp = cos2t*cost-sin2t*sint
-                    sint = sin2t*cost+cos2t*sint
-                    cost = temp
-                end do
-            end if
+            do k=1, kdo
+                pb = pb+cp(k+1)*cost
+                temp = cos2t*cost-sin2t*sint
+                sint = sin2t*cost+cos2t*sint
+                cost = temp
+            end do
+
+        else if (even(n) .and. odd(m)) then
+
+            !  n even, m odd
+            kdo = n/2
+            pb = ZERO
+            cost = cos2t
+            sint = sin2t
+
+            do k=1, kdo
+                pb = pb+cp(k)*sint
+                temp = cos2t*cost-sin2t*sint
+                sint = sin2t*cost+cos2t*sint
+                cost = temp
+            end do
+
+        else if (odd(n) .and. even(m)) then
+
+            !  n odd, m even
+            kdo = (n + 1)/2
+            pb = ZERO
+            cost = cos(theta)
+            sint = sin(theta)
+
+            do k=1, kdo
+                pb = pb+cp(k)*cost
+                temp = cos2t*cost-sin2t*sint
+                sint = sin2t*cost+cos2t*sint
+                cost = temp
+            end do
+
         else
-            if (mod(m, 2) <= 0) then
-                !
-                !  n odd, m even
-                !
-                kdo = (n + 1)/2
-                pb = ZERO
-                cost = cos(theta)
-                sint = sin(theta)
+            !   n odd, m odd
+            kdo = (n + 1)/2
+            pb = ZERO
+            cost = cos(theta)
+            sint = sin(theta)
 
-                do k=1, kdo
-                    pb = pb+cp(k)*cost
-                    temp = cos2t*cost-sin2t*sint
-                    sint = sin2t*cost+cos2t*sint
-                    cost = temp
-                end do
-            else
-                !
-                !   n odd, m odd
-                !
-                kdo = (n + 1)/2
-                pb = ZERO
-                cost = cos(theta)
-                sint = sin(theta)
-
-                do k=1, kdo
-                    pb = pb+cp(k)*sint
-                    temp = cos2t*cost-sin2t*sint
-                    sint = sin2t*cost+cos2t*sint
-                    cost = temp
-                end do
-            end if
+            do k=1, kdo
+                pb = pb+cp(k)*sint
+                temp = cos2t*cost-sin2t*sint
+                sint = sin2t*cost+cos2t*sint
+                cost = temp
+            end do
         end if
 
     end subroutine compute_legendre_polys_from_fourier_coeff
@@ -1055,7 +1049,7 @@ contains
                 do idx=1, lc
                     i = 2*idx-2
                     summation = work(1)/(ONE-real(i**2, kind=wp))
-                    if (kdo >= 2) then
+                    if (2 <= kdo) then
                         do kp1=2, kdo
                             k = kp1-1
                             t1 = ONE-real((2*k+i)**2, kind=wp)
@@ -2327,79 +2321,70 @@ contains
 
         call dvbk(m, n, work, czv)
 
-        select case (mod(n, 2))
-            case (0)
-                select case (mod(m, 2))
-                    case (0)
-                        !
-                        !  n even, m even
-                        !
-                        kdo = n/2
-                        do id=1, lc
-                            i = id+id-2
-                            summation = ZERO
-                            do k=1, kdo
-                                t1 = ONE-(k+k+i)**2
-                                t2 = ONE-(k+k-i)**2
-                                summation = summation+work(k)*(t1-t2)/(t1*t2)
-                            end do
-                            czv(id) = sc1*summation
-                        end do
-                    case (1)
-                        !
-                        !  n even, m odd
-                        !
-                        kdo = n/2
-                        do id=1, lc
-                            i = 2*id-2
-                            summation = ZERO
-                            do k=1, kdo
-                                t1 = ONE-(k+k+i)**2
-                                t2 = ONE-(k+k-i)**2
-                                summation = summation+work(k)*(t1+t2)/(t1*t2)
-                            end do
-                            czv(id) = sc1*summation
-                        end do
-                        return
-                end select
-            case default
-                select case (mod(m, 2))
-                    case (0)
-                        !
-                        !  n odd, m even
-                        !
-                        kdo = (n + 1)/2
-                        do id=1, lc
-                            i = 2*id-3
-                            summation = ZERO
-                            do k=1, kdo
-                                t1 = ONE-(k+k-1+i)**2
-                                t2 = ONE-(k+k-1-i)**2
-                                summation = summation+work(k)*(t1-t2)/(t1*t2)
-                            end do
-                            czv(id) = sc1*summation
-                        end do
-                    case (1)
-                        !
-                        !  n odd, m odd
-                        !
-                        kdo = (n + 1)/2
-                        do id=1, lc
-                            i = 2*id-1
-                            summation = ZERO
-                            do k=1, kdo
-                                t1 = ONE-(k+k-1+i)**2
-                                t2 = ONE-(k+k-1-i)**2
-                                summation = summation+work(k)*(t1+t2)/(t1*t2)
-                            end do
-                            czv(id) = sc1*summation
-                        end do
-                end select
-        end select
+        if (even(n) .and. even(m)) then
+
+            !  n even, m even
+            kdo = n/2
+            do id=1, lc
+                i = id+id-2
+                summation = ZERO
+                do k=1, kdo
+                    t1 = ONE-(2*k+i)**2
+                    t2 = ONE-(2*k-i)**2
+                    summation = summation+work(k)*(t1-t2)/(t1*t2)
+                end do
+                czv(id) = sc1*summation
+            end do
+        else if (even(n) .and. odd(m)) then
+
+            !  n even, m odd
+            kdo = n/2
+
+            do id=1, lc
+                i = 2*id-2
+                summation = ZERO
+                do k=1, kdo
+                    t1 = ONE-(2*k+i)**2
+                    t2 = ONE-(2*k-i)**2
+                    summation = summation+work(k)*(t1+t2)/(t1*t2)
+                end do
+                czv(id) = sc1*summation
+            end do
+
+        else if (odd(n) .and. even(m)) then
+
+            !  n odd, m even
+            kdo = (n + 1)/2
+
+            do id=1, lc
+                i = 2*id-3
+                summation = ZERO
+                do k=1, kdo
+                    t1 = ONE-(k+k-1+i)**2
+                    t2 = ONE-(k+k-1-i)**2
+                    summation = summation+work(k)*(t1-t2)/(t1*t2)
+                end do
+                czv(id) = sc1*summation
+            end do
+
+        else
+
+            !  n odd, m odd
+            kdo = (n + 1)/2
+
+            do id=1, lc
+                i = 2*id-1
+                summation = ZERO
+                do k=1, kdo
+                    t1 = ONE-(k+k-1+i)**2
+                    t2 = ONE-(k+k-1-i)**2
+                    summation = summation+work(k)*(t1+t2)/(t1*t2)
+                end do
+                czv(id) = sc1*summation
+            end do
+        end if
 
     end subroutine dzvk
-
-
 
     subroutine dzvt(nlat, m, n, th, czv, zvh)
 
@@ -2595,82 +2580,73 @@ contains
 
         call dwbk(m, n, work, czw)
 
-        select case (mod(n, 2))
-            case (0) ! n even
-                select case (mod(m, 2))
-                    case (0) ! m even
-                        !
-                        !  n even, m even
-                        !
-                        kdo = n/2
-                        do id=1, lc
-                            i = 2*id-3
-                            summation = ZERO
-                            do k=1, kdo
-                                t1 = ONE-(k+k-1+i)**2
-                                t2 = ONE-(k+k-1-i)**2
-                                summation = summation+work(k)*(t1-t2)/(t1*t2)
-                            end do
-                            czw(id) = sc1*summation
-                        end do
-                    case (1) ! m odd
-                        !
-                        !  n even, m odd
-                        !
-                        kdo = n/2
-                        do id=1, lc
-                            i = 2*id-1
-                            summation = ZERO
-                            do k=1, kdo
-                                t1 = ONE-(k+k-1+i)**2
-                                t2 = ONE-(k+k-1-i)**2
-                                summation = summation+work(k)*(t1+t2)/(t1*t2)
-                            end do
-                            czw(id) = sc1*summation
-                        end do
-                end select
-            case (1) ! n odd
-                select case (mod(m, 2))
-                    case (0) ! m even
-                        !
-                        !  n odd, m even
-                        !
-                        kdo = (n - 1)/2
-                        do id=1, lc
-                            i = 2*id-2
-                            summation = ZERO
-                            do k=1, kdo
-                                t1 = ONE-(k+k+i)**2
-                                t2 = ONE-(k+k-i)**2
-                                summation = summation+work(k)*(t1-t2)/(t1*t2)
-                            end do
-                            czw(id) = sc1*summation
-                        end do
-                    case (1) ! m odd
-                        !
-                        !  n odd, m odd
-                        !
-                        kdo = (n + 1)/2
-                        do id=1, lc
-                            i = 2*id-2
-                            summation = work(1)/(ONE-i**2)
+        if (even(n) .and. even(m)) then
 
-                            if (kdo >= 2) then
-                                do kp1=2, kdo
-                                    k = kp1-1
-                                    t1 = ONE-(2*k+i)**2
-                                    t2 = ONE-(2*k-i)**2
-                                    summation = summation+work(kp1)*(t1+t2)/(t1*t2)
-                                end do
-                            end if
+            !  n even, m even
+            kdo = n/2
+            do id=1, lc
+                i = 2*id-3
+                summation = ZERO
+                do k=1, kdo
+                    t1 = ONE-(k+k-1+i)**2
+                    t2 = ONE-(k+k-1-i)**2
+                    summation = summation+work(k)*(t1-t2)/(t1*t2)
+                end do
+                czw(id) = sc1*summation
+            end do
 
-                            czw(id) = sc1*summation
-                        end do
-                end select
-        end select
+        else if (even(n) .and. odd(m)) then
+
+            !  n even, m odd
+            kdo = n/2
+            do id=1, lc
+                i = 2*id-1
+                summation = ZERO
+                do k=1, kdo
+                    t1 = ONE-(k+k-1+i)**2
+                    t2 = ONE-(k+k-1-i)**2
+                    summation = summation+work(k)*(t1+t2)/(t1*t2)
+                end do
+                czw(id) = sc1*summation
+            end do
+
+        else if (odd(n) .and. even(m)) then
+
+            !  n odd, m even
+            kdo = (n - 1)/2
+
+            do id=1, lc
+                i = 2*id-2
+                summation = ZERO
+                do k=1, kdo
+                    t1 = ONE-(2*k+i)**2
+                    t2 = ONE-(2*k-i)**2
+                    summation = summation+work(k)*(t1-t2)/(t1*t2)
+                end do
+                czw(id) = sc1*summation
+            end do
+        else
+
+            !  n odd, m odd
+            kdo = (n + 1)/2
+
+            do id=1, lc
+                i = 2*id-2
+                summation = work(1)/(ONE-i**2)
+
+                if (2 <= kdo) then
+                    do kp1=2, kdo
+                        k = kp1-1
+                        t1 = ONE-(2*k+i)**2
+                        t2 = ONE-(2*k-i)**2
+                        summation = summation+work(kp1)*(t1+t2)/(t1*t2)
+                    end do
+                end if
+                czw(id) = sc1*summation
+            end do
+        end if
 
     end subroutine dzwk
-
 
     subroutine dzwt(nlat, m, n, th, czw, zwh)
 
@@ -3235,7 +3211,7 @@ contains
             do np1=mp3, nlat
                 n = np1-1
                 ns = ns+1
-                fn = real(n)
+                fn = real(n, kind=wp)
                 tn = TWO*fn
                 cn = (tn+ONE)/(tn-THREE)
                 tpn = (fn-TWO)*(fn-ONE)/(fn*(fn + ONE))
