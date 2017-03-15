@@ -1043,64 +1043,71 @@ contains
 
         call compute_fourier_coefficients(m, n, work)
 
-        if (mod(n, 2) <= 0) then
-            if (mod(m, 2) <= 0) then
-                kdo = n/2+1
-                do idx=1, lc
-                    i = 2*idx-2
-                    summation = work(1)/(ONE-real(i**2, kind=wp))
-                    if (2 <= kdo) then
-                        do kp1=2, kdo
-                            k = kp1-1
-                            t1 = ONE-real((2*k+i)**2, kind=wp)
-                            t2 = ONE-real((2*k-i)**2, kind=wp)
-                            summation = summation+work(kp1)*(t1+t2)/(t1*t2)
-                        end do
-                    end if
-                    cz(idx) = sc1*summation
-                end do
-            else
-                kdo = n/2
-                do idx=1, lc
-                    i = 2*idx-2
-                    summation = ZERO
-                    do k=1, kdo
+        if (even(n) .and. even(m)) then
+
+            ! n even, m even
+            kdo = n/2+1
+
+            do idx=1, lc
+                i = 2*idx-2
+                summation = work(1)/(ONE-real(i**2, kind=wp))
+                if (2 <= kdo) then
+                    do kp1=2, kdo
+                        k = kp1-1
                         t1 = ONE-real((2*k+i)**2, kind=wp)
                         t2 = ONE-real((2*k-i)**2, kind=wp)
-                        summation=summation+work(k)*(t1-t2)/(t1*t2)
+                        summation = summation+work(kp1)*(t1+t2)/(t1*t2)
                     end do
-                    cz(idx) = sc1*summation
+                end if
+                cz(idx) = sc1*summation
+            end do
+
+        else if (even(n) .and. odd(m)) then
+
+            ! n even, m odd
+            kdo = n/2
+
+            do idx=1, lc
+                i = 2*idx-2
+                summation = ZERO
+                do k=1, kdo
+                    t1 = ONE-real((2*k+i)**2, kind=wp)
+                    t2 = ONE-real((2*k-i)**2, kind=wp)
+                    summation=summation+work(k)*(t1-t2)/(t1*t2)
                 end do
-            end if
+                cz(idx) = sc1*summation
+            end do
+
+        else if (odd(n) .and. even(m)) then
+
+            ! n odd, m even
+            kdo = (n + 1)/2
+
+            do idx=1, lc
+                i = 2*idx-1
+                summation = ZERO
+                do k=1, kdo
+                    t1 = ONE-real((2*k-1+i)**2, kind=wp)
+                    t2 = ONE-real((2*k-1-i)**2, kind=wp)
+                    summation=summation+work(k)*(t1+t2)/(t1*t2)
+                end do
+                cz(idx)=sc1*summation
+            end do
         else
-            if (mod(m, 2) <= 0) then
-                !
-                !   n odd, m even
-                !
-                kdo = (n + 1)/2
-                do idx=1, lc
-                    i = 2*idx-1
-                    summation = ZERO
-                    do k=1, kdo
-                        t1 = ONE-real((2*k-1+i)**2, kind=wp)
-                        t2 = ONE-real((2*k-1-i)**2, kind=wp)
-                        summation=summation+work(k)*(t1+t2)/(t1*t2)
-                    end do
-                    cz(idx)=sc1*summation
+
+            ! n odd, m odd
+            kdo = (n + 1)/2
+
+            do idx=1, lc
+                i = 2*idx-3
+                summation=ZERO
+                do k=1, kdo
+                    t1 = ONE-real((2*k-1+i)**2, kind=wp)
+                    t2 = ONE-real((2*k-1-i)**2, kind=wp)
+                    summation=summation+work(k)*(t1-t2)/(t1*t2)
                 end do
-            else
-                kdo = (n + 1)/2
-                do idx=1, lc
-                    i = 2*idx-3
-                    summation=ZERO
-                    do k=1, kdo
-                        t1 = ONE-real((2*k-1+i)**2, kind=wp)
-                        t2 = ONE-real((2*k-1-i)**2, kind=wp)
-                        summation=summation+work(k)*(t1-t2)/(t1*t2)
-                    end do
-                    cz(idx)=sc1*summation
-                end do
-            end if
+                cz(idx)=sc1*summation
+            end do
         end if
 
     end subroutine dnzfk
@@ -2886,10 +2893,8 @@ contains
         real(wp),    intent(out) :: work(*)
 
         ! Local variables
-
         integer(ip) :: l
         real(wp)    :: fn, cf, srnp1
-
 
         cw(1) = ZERO
 
@@ -3677,79 +3682,77 @@ contains
 
         if (m == 0) return
 
-        select case (mod(n, 2))
-            case (0) ! n even
-                l = n/2
-                if (l == 0) return
-                select case (mod(m, 2))
-                    case (0) ! m even
-                        !
-                        !     n even m even
-                        !
-                        cw(l) = -cf*work(l+1)
-                        do
-                            l = l-1
-                            if (l <= 0) exit
-                            cw(l) = cw(l+1)-cf*work(l+1)
-                            cw(l+1) = (2*l+1)*cw(l+1)
-                        end do
-                    case (1) ! m odd
-                        !
-                        !  n even m odd
-                        !
-                        cw(l) = cf*work(l)
-                        do
-                            l = l-1
-                            if (l < 0) then
-                                exit
-                            else if (l == 0) then
-                                cw(l+1) = -(2*l+1)*cw(l+1)
-                            else
-                                cw(l) = cw(l+1)+cf*work(l)
-                                cw(l+1) = -(2*l+1)*cw(l+1)
-                            end if
-                        end do
-                end select
-            case (1) ! n odd
-                select case (mod(m, 2))
-                    case (0) ! m even
-                        l = (n - 1)/2
-                        if (l == 0) return
-                        !
-                        !  n odd m even
-                        !
-                        cw(l) = -cf*work(l+1)
-                        do
-                            l = l-1
-                            if (l < 0) then
-                                exit
-                            else if (l == 0) then
-                                !cw(l) = cw(l+1)-cf*work(l+1)
-                                cw(l+1) = (2*l+2)*cw(l+1)
-                            else
-                                cw(l) = cw(l+1)-cf*work(l+1)
-                                cw(l+1) = (2*l+2)*cw(l+1)
-                            end if
-                        end do
-                    case (1) ! m odd
-                        !
-                        !  n odd m odd
-                        !
-                        l = (n + 1)/2
-                        cw(l) = cf*work(l)
-                        do
-                            l = l-1
-                            if (l < 0) then
-                                exit
-                            else if (l == 0) then
-                                cw(l+1) = -(2*l)*cw(l+1)
-                            else
-                                cw(l) = cw(l+1)+cf*work(l)
-                                cw(l+1) = -(2*l)*cw(l+1)
-                            end if
-                        end do
-                end select
-        end select
+        if (even(n) .and. even(m)) then
+
+            !     n even m even
+            l = n/2
+            if (l == 0) return
+            cw(l) = -cf*work(l+1)
+
+            do
+                l = l-1
+                if (l <= 0) exit
+                cw(l) = cw(l+1)-cf*work(l+1)
+                cw(l+1) = (2*l+1)*cw(l+1)
+            end do
+
+        else if (even(n) .and. odd(m)) then
+
+            !  n even m odd
+            l = n/2
+            if (l == 0) return
+            cw(l) = cf*work(l)
+
+            do
+                l = l-1
+                if (l < 0) then
+                    exit
+                else if (l == 0) then
+                    cw(l+1) = -(2*l+1)*cw(l+1)
+                else
+                    cw(l) = cw(l+1)+cf*work(l)
+                    cw(l+1) = -(2*l+1)*cw(l+1)
+                end if
+            end do
+
+        else if (odd(n) .and. even(m)) then
+
+            l = (n - 1)/2
+            if (l == 0) return
+            !
+            !  n odd m even
+            !
+            cw(l) = -cf*work(l+1)
+            do
+                l = l-1
+                if (l < 0) then
+                    exit
+                else if (l == 0) then
+                    cw(l+1) = (2*l+2)*cw(l+1)
+                else
+                    cw(l) = cw(l+1)-cf*work(l+1)
+                    cw(l+1) = (2*l+2)*cw(l+1)
+                end if
+            end do
+
+        else
+
+            !  n odd, m odd
+            l = (n + 1)/2
+            cw(l) = cf*work(l)
+
+            do
+                l = l-1
+                if (l < 0) then
+                    exit
+                else if (l == 0) then
+                    cw(l+1) = -(2*l)*cw(l+1)
+                else
+                    cw(l) = cw(l+1)+cf*work(l)
+                    cw(l+1) = -(2*l)*cw(l+1)
+                end if
+            end do
+        end if
 
     end subroutine dwtk
 
@@ -3775,60 +3778,58 @@ contains
         cdt = cost**2-sint**2
         sdt = TWO*sint*cost
 
-        select case (mod(n, 2))
-            case (0) ! n even
-                cost = cdt
-                sint = sdt
-                select case (mod(m, 2))
-                    case (0) ! m even
-                        !
-                        !  n even  m even
-                        !
-                        ncv = n/2
-                        do k=1, ncv
-                            vh = vh+cv(k)*cost
-                            temp = cdt*cost-sdt*sint
-                            sint = sdt*cost+cdt*sint
-                            cost = temp
-                        end do
-                    case (1) ! m odd
-                         !
-                         !  n even  m odd
-                         !
-                        ncv = n/2
-                        do k=1, ncv
-                            vh = vh+cv(k)*sint
-                            temp = cdt*cost-sdt*sint
-                            sint = sdt*cost+cdt*sint
-                            cost = temp
-                        end do
-                end select
-            case (1) ! n odd
-                select case (mod(m, 2))
-                    case (0) ! m even
-                        !
-                        !     n odd m even
-                        !
-                        ncv = (n + 1)/2
-                        do k=1, ncv
-                            vh = vh+cv(k)*cost
-                            temp = cdt*cost-sdt*sint
-                            sint = sdt*cost+cdt*sint
-                            cost = temp
-                        end do
-                    case (1) ! m odd
-                         !
-                         !  n odd m odd
-                         !
-                        ncv = (n + 1)/2
-                        do k=1, ncv
-                            vh = vh+cv(k)*sint
-                            temp = cdt*cost-sdt*sint
-                            sint = sdt*cost+cdt*sint
-                            cost = temp
-                        end do
-                end select
-        end select
+        if (even(n) .and. even(m)) then
+
+            !  n even, m even
+            cost = cdt
+            sint = sdt
+            ncv = n/2
+
+            do k=1, ncv
+                vh = vh+cv(k)*cost
+                temp = cdt*cost-sdt*sint
+                sint = sdt*cost+cdt*sint
+                cost = temp
+            end do
+
+        else if (even(n) .and. odd(m)) then
+
+            !  n even, m odd
+            cost = cdt
+            sint = sdt
+            ncv = n/2
+
+            do k=1, ncv
+                vh = vh+cv(k)*sint
+                temp = cdt*cost-sdt*sint
+                sint = sdt*cost+cdt*sint
+                cost = temp
+            end do
+
+        else if (odd(n) .and. even(m)) then
+
+            ! n odd, m even
+            ncv = (n + 1)/2
+
+            do k=1, ncv
+                vh = vh+cv(k)*cost
+                temp = cdt*cost-sdt*sint
+                sint = sdt*cost+cdt*sint
+                cost = temp
+            end do
+
+        else
+
+            !  n odd, m odd
+            ncv = (n + 1)/2
+
+            do k=1, ncv
+                vh = vh+cv(k)*sint
+                temp = cdt*cost-sdt*sint
+                sint = sdt*cost+cdt*sint
+                cost = temp
+            end do
+        end if
 
     end subroutine dvtt
 
@@ -3848,67 +3849,64 @@ contains
 
         cost = cos(theta)
         sint = sin(theta)
-        cdt = cost**2-sint**2
-        sdt = TWO*sint*cost
+        cdt = (cost**2) - (sint**2)
+        sdt = TWO * sint * cost
 
-        select case (mod(n, 2))
-            case (0) ! n even
-                select case (mod(m, 2))
-                    case (0) ! m even
-                        !
-                        !  n even m even
-                        !
-                        ncw = n/2
-                        do k=1, ncw
-                            wh = wh+cw(k)*cost
-                            temp = cdt*cost-sdt*sint
-                            sint = sdt*cost+cdt*sint
-                            cost = temp
-                        end do
-                    case (1) ! m odd
-                          !
-                          !  n even m odd
-                          !
-                        ncw = n/2
-                        do k=1, ncw
-                            wh = wh+cw(k)*sint
-                            temp = cdt*cost-sdt*sint
-                            sint = sdt*cost+cdt*sint
-                            cost = temp
-                        end do
-                end select
-            case (1) ! n odd
-                cost = cdt
-                sint = sdt
-                select case (mod(m, 2))
-                    case (0) ! m even
-                        !
-                        !  n odd m even
-                        !
-                        ncw = (n - 1)/2
-                        do k=1, ncw
-                            wh = wh+cw(k)*cost
-                            temp = cdt*cost-sdt*sint
-                            sint = sdt*cost+cdt*sint
-                            cost = temp
-                        end do
-                    case (1) ! m odd
-                          !
-                          !  n odd m odd
-                          !
-                        ncw = (n + 1)/2
-                        wh = ZERO
+        if (even(n) .and. even(m)) then
 
-                        if (ncw < 2) return
+            !  n even m even
+            ncw = n/2
 
-                        do k=2, ncw
-                            wh = wh+cw(k)*sint
-                            temp = cdt*cost-sdt*sint
-                            sint = sdt*cost+cdt*sint
-                            cost = temp
-                        end do
-                end select
-        end select
+            do k=1, ncw
+                wh = wh+cw(k)*cost
+                temp = cdt*cost-sdt*sint
+                sint = sdt*cost+cdt*sint
+                cost = temp
+            end do
+
+        else if (even(n) .and. odd(m)) then
+
+            !  n even m odd
+            ncw = n/2
+
+            do k=1, ncw
+                wh = wh+cw(k)*sint
+                temp = cdt*cost-sdt*sint
+                sint = sdt*cost+cdt*sint
+                cost = temp
+            end do
+
+        else if (odd(n) .and. even(m)) then
+
+            !  n odd m even
+            cost = cdt
+            sint = sdt
+            ncw = (n - 1)/2
+
+            do k=1, ncw
+                wh = wh+cw(k)*cost
+                temp = cdt*cost-sdt*sint
+                sint = sdt*cost+cdt*sint
+                cost = temp
+            end do
+
+        else
+
+            !  n odd m odd
+            cost = cdt
+            sint = sdt
+            ncw = (n + 1)/2
+            wh = ZERO
+
+            if (ncw < 2) return
+
+            do k=2, ncw
+                wh = wh+cw(k)*sint
+                temp = cdt*cost-sdt*sint
+                sint = sdt*cost+cdt*sint
+                cost = temp
+            end do
+        end if
 
     end subroutine dwtt
 
