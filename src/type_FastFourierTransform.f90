@@ -2312,7 +2312,7 @@ contains
 
         integer(ip) :: k, i
         real(wp), parameter :: taur = -HALF
-        real(wp), parameter :: taui = -sqrt(THREE)/2 !  - 0.866025403784439
+        real(wp), parameter :: taui = -SQRT_3/2 !  - 0.866025403784439
         real(wp) :: tr2, cr2, ti2, ci2, cr3, ci3, dr2, dr3, di2, di3
 
 
@@ -2901,7 +2901,7 @@ contains
 
         integer(ip) :: k, idp2, i, ic
         real(wp), parameter :: taur = -HALF
-        real(wp), parameter :: taui = sqrt(THREE)/TWO ! 0.866025403784439
+        real(wp), parameter :: taui = SQRT_3/TWO ! 0.866025403784439
         real(wp)            :: tr2, cr2, ci3, ti2, ci2, cr3, dr2, dr3, di2, di3
 
 
@@ -3411,7 +3411,7 @@ contains
 
         integer(ip)         :: k, idp2, i, ic
         real(wp), parameter :: taur = -HALF
-        real(wp), parameter :: taui = sqrt(THREE)/TWO ! 0.866025403784439
+        real(wp), parameter :: taui = SQRT_3/TWO ! 0.866025403784439
         real(wp)            :: cr2, dr2, di2, dr3, di3, ci2, tr2, ti2, tr3, ti3
 
 

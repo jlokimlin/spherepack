@@ -314,157 +314,72 @@ contains
 
     end subroutine analysis_setup
 
-    subroutine initialize_vhaec(nlat, nlon, wvhaec, error_flag)
+        subroutine initialize_vhaec(nlat, nlon, wavetable, error_flag)
 
         ! Dummy arguments
         integer(ip),           intent(in)  :: nlat
         integer(ip),           intent(in)  :: nlon
-        real(wp), allocatable, intent(out) :: wvhaec(:)
+        real(wp), allocatable, intent(out) :: wavetable(:)
         integer(ip),           intent(out) :: error_flag
+
         ! Local variables
-        integer(ip) :: lvhaec
-
-        ! Get required workspace size
-        lvhaec = get_lvhaec(nlat, nlon)
-
-        ! Allocate memory
-        allocate (wvhaec(lvhaec))
+        type(SpherepackUtility) :: util
 
         ! Initialize wavetable
-        call vhaeci(nlat, nlon, wvhaec, error_flag)
+        call util%initialize_wavetable(nlat, nlon, wavetable, &
+            util%get_lvhaec, vhaeci)
 
     end subroutine initialize_vhaec
 
-    subroutine initialize_vhaes(nlat, nlon, wvhaes, error_flag)
+    subroutine initialize_vhaes(nlat, nlon, wavetable, error_flag)
 
         ! Dummy arguments
         integer(ip),           intent(in)  :: nlat
         integer(ip),           intent(in)  :: nlon
-        real(wp), allocatable, intent(out) :: wvhaes(:)
+        real(wp), allocatable, intent(out) :: wavetable(:)
         integer(ip),           intent(out) :: error_flag
 
         ! Local variables
-        integer(ip) :: lvhaes
-
-        ! Get required workspace size
-        lvhaes = get_lvhaes(nlat, nlon)
-
-        ! Allocate memory
-        allocate (wvhaes(lvhaes))
+        type(SpherepackUtility) :: util
 
         ! Initialize wavetable
-        call vhaesi(nlat, nlon, wvhaes, error_flag)
+        call util%initialize_wavetable(nlat, nlon, wavetable, &
+            util%get_lvhaes, vhaesi)
 
     end subroutine initialize_vhaes
 
-    subroutine initialize_vhagc(nlat, nlon, wvhagc, error_flag)
+    subroutine initialize_vhagc(nlat, nlon, wavetable, error_flag)
 
         ! Dummy arguments
         integer(ip),           intent(in)  :: nlat
         integer(ip),           intent(in)  :: nlon
-        real(wp), allocatable, intent(out) :: wvhagc(:)
+        real(wp), allocatable, intent(out) :: wavetable(:)
         integer(ip),           intent(out) :: error_flag
 
         ! Local variables
-        integer(ip) :: lvhagc
-
-        ! Get required workspace size
-        lvhagc = get_lvhagc(nlat, nlon)
-
-        ! Allocate memory
-        allocate (wvhagc(lvhagc))
+        type(SpherepackUtility) :: util
 
         ! Initialize wavetable
-        call vhagci(nlat, nlon, wvhagc, error_flag)
+        call util%initialize_wavetable(nlat, nlon, wavetable, &
+            util%get_lvhagc, vhagci)
 
     end subroutine initialize_vhagc
 
-    subroutine initialize_vhags(nlat, nlon, wvhags, error_flag)
+    subroutine initialize_vhags(nlat, nlon, wavetable, error_flag)
 
         ! Dummy arguments
         integer(ip),           intent(in)  :: nlat
         integer(ip),           intent(in)  :: nlon
-        real(wp), allocatable, intent(out) :: wvhags(:)
+        real(wp), allocatable, intent(out) :: wavetable(:)
         integer(ip),           intent(out) :: error_flag
 
         ! Local variables
-        integer(ip) :: lvhags
-
-        ! Get required workspace size
-        lvhags = get_lvhags(nlat, nlon)
-
-        ! Allocate memory
-        allocate (wvhags(lvhags))
+        type(SpherepackUtility) :: util
 
         ! Initialize wavetable
-        call vhagsi(nlat, nlon, wvhags, error_flag)
+        call util%initialize_wavetable(nlat, nlon, wavetable, &
+            util%get_lvhags, vhagsi)
 
     end subroutine initialize_vhags
-
-    pure function get_lvhagc(nlat, nlon) &
-        result (return_value)
-
-        ! Dummy arguments
-        integer(ip), intent(in) :: nlat
-        integer(ip), intent(in) :: nlon
-        integer(ip)             :: return_value
-
-        ! Local variables
-        integer(ip)             :: n1, n2
-        type(SpherepackUtility) :: util
-
-        call util%compute_parity(nlat, nlon, n1, n2)
-
-        return_value = 4*nlat*n2+3*max(n1-2, 0)*(2*nlat-n1-1)+nlon+n2+15
-
-    end function get_lvhagc
-
-    pure function get_lvhags(nlat, nlon) &
-        result (return_value)
-
-        ! Dummy arguments
-        integer(ip), intent(in) :: nlat
-        integer(ip), intent(in) :: nlon
-        integer(ip)             :: return_value
-
-        return_value = (((nlat + 1)**2) * nlat)/2 + nlon + 15
-
-    end function get_lvhags
-
-    pure function get_lvhaec(nlat, nlon) &
-        result (return_value)
-
-        ! Dummy arguments
-        integer(ip), intent(in) :: nlat
-        integer(ip), intent(in) :: nlon
-        integer(ip)             :: return_value
-
-        ! Local variables
-        integer(ip)             :: n1, n2
-        type(SpherepackUtility) :: util
-
-        call util%compute_parity(nlat, nlon, n1, n2)
-
-        return_value = 4*nlat*n2+3*max(n1-2, 0)*(2*nlat-n1-1)+nlon+15
-
-    end function get_lvhaec
-
-    pure function get_lvhaes(nlat, nlon) &
-        result (return_value)
-
-        ! Dummy arguments
-        integer(ip), intent(in) :: nlat
-        integer(ip), intent(in) :: nlon
-        integer(ip)             :: return_value
-
-        ! Local variables
-        integer(ip)         :: n1, n2
-        type(SpherepackUtility) :: util
-
-        call util%compute_parity(nlat, nlon, n1, n2)
-
-        return_value = n1*n2*(2*nlat-n1+1)+nlon+15
-
-    end function get_lvhaes
 
 end module vector_analysis_routines

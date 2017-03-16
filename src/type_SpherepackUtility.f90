@@ -38,7 +38,11 @@ module type_SpherepackUtility
     use spherepack_precision, only: &
         wp, & ! working precision
         ip, & ! integer precision
-        PI
+        PI, &
+        even, odd
+
+    use type_WavetableUtility, only: &
+        WavetableUtility
 
     use type_RealPeriodicFastFourierTransform, only: &
         RealPeriodicFastFourierTransform
@@ -50,14 +54,13 @@ module type_SpherepackUtility
     private
     public :: SpherepackUtility
 
-    type, public :: SpherepackUtility
+    type, public, extends(WavetableUtility) :: SpherepackUtility
         ! Type components
         type(RealPeriodicFastFourierTransform) :: hfft
     contains
         ! Type-bound procedures
         procedure, nopass :: compute_legendre_polys_regular_grid
         procedure, nopass :: compute_legendre_polys_for_gaussian_grids
-        procedure, nopass :: compute_parity
         procedure, nopass :: compute_fourier_coefficients
         procedure, nopass :: compute_legendre_polys_from_fourier_coeff
         procedure, nopass :: initialize_scalar_analysis_regular_grid
@@ -79,17 +82,6 @@ module type_SpherepackUtility
         procedure, nopass :: zvinit
         procedure, nopass :: zwin
         procedure, nopass :: zwinit
-        procedure, nopass :: get_lshaes
-        procedure, nopass :: get_lshags
-        procedure, nopass :: get_lshsgs
-        procedure, nopass :: get_lvhsgc
-        procedure, nopass :: get_lvhsec
-        procedure, nopass :: get_lvhsgs
-        procedure, nopass :: get_lvhses
-        procedure, nopass :: get_lwork_for_gaussian_saved
-        procedure, nopass :: get_lwork_for_shagsi
-        procedure, nopass :: get_ldwork_for_shagsi
-        procedure, nopass :: check_vector_transform_inputs
     end type SpherepackUtility
 
     ! Parameters confined to the module
@@ -99,273 +91,8 @@ module type_SpherepackUtility
     real(wp),    parameter :: TWO = 2.0_wp
     real(wp),    parameter :: THREE = 3.0_wp
     real(wp),    parameter :: SIX = 6.0_wp
-!    integer(ip), parameter :: BOTH_EVEN = 0
-!    integer(ip), parameter :: N_EVEN_M_ODD = 1
-!    integer(ip), parameter :: N_ODD_M_EVEN = 3
-!    integer(ip), parameter :: BOTH_ODD = 4
 
 contains
-
-    pure function odd(i) &
-        result (return_value)
-
-        ! Dummy arguments
-        integer(ip), intent(in) :: i
-        logical                 :: return_value
-
-        return_value = btest(i, 0)
-
-    end function odd
-
-    pure function even(i) &
-        result (return_value)
-
-        ! Dummy arguments
-        integer(ip), intent(in) :: i
-        logical                 :: return_value
-
-        return_value = .not. odd(i)
-
-    end function even
-
-    pure subroutine check_vector_transform_inputs(ityp, idvw, jdvw, &
-        mdab, ndab, nlat, nlon, nt, required_wavetable_size, &
-        wavetable, error_flag)
-
-        ! Dummy arguments
-        integer(ip), intent(in)  :: ityp
-        integer(ip), intent(in)  :: idvw
-        integer(ip), intent(in)  :: jdvw
-        integer(ip), intent(in)  :: mdab
-        integer(ip), intent(in)  :: ndab
-        integer(ip), intent(in)  :: nlat
-        integer(ip), intent(in)  :: nlon
-        integer(ip), intent(in)  :: nt
-        integer(ip), intent(in)  :: required_wavetable_size
-        real(wp),    intent(in)  :: wavetable(:)
-        integer(ip), intent(out) :: error_flag
-
-        ! Check calling arguments
-        if (nlat < 3) then
-            error_flag = 1
-        else if (nlon < 1) then
-            error_flag = 2
-        else if (ityp < 0 .or. ityp > 8) then
-            error_flag = 3
-        else if (nt < 0) then
-            error_flag = 4
-        else if ((ityp <= 2 .and. idvw < nlat) &
-            .or. &
-            (ityp > 2 .and. idvw < (nlat + 1)/2)) then
-            error_flag = 5
-        else if (jdvw < nlon) then
-            error_flag = 6
-        else if (mdab < min(nlat, (nlon + 1)/2)) then
-            error_flag = 7
-        else if (ndab < nlat) then
-            error_flag = 8
-        else if (size(wavetable) < required_wavetable_size) then
-            error_flag = 9
-        else
-            error_flag = 0
-        end if
-
-    end subroutine check_vector_transform_inputs
-
-    pure function get_lvhsgc(nlat, nlon) &
-        result (return_value)
-
-        ! Dummy arguments
-        integer(ip), intent(in)  :: nlat
-        integer(ip), intent(in)  :: nlon
-        integer(ip)              :: return_value
-
-        ! Local variables
-        integer(ip) :: n1, n2
-
-        call compute_parity(nlat, nlon, n1, n2)
-
-        return_value = 4 * nlat * n2 + 3 * max(n1-2,0)*(2*nlat-n1-1) + nlon + 15
-
-    end function get_lvhsgc
-
-    pure function get_lvhsgs(nlat, nlon) &
-        result (return_value)
-
-        ! Dummy arguments
-        integer(ip), intent(in)  :: nlat
-        integer(ip), intent(in)  :: nlon
-        integer(ip)              :: return_value
-
-        ! Local variables
-        integer(ip)  :: imid, lmn
-
-        imid = (nlat + 1)/2
-        lmn = (nlat*(nlat + 1))/2
-        return_value = 2*(imid*lmn)+nlon+15
-
-    end function get_lvhsgs
-
-    pure function get_lvhsec(nlat, nlon) &
-        result (return_value)
-
-        ! Dummy arguments
-        integer(ip), intent(in)  :: nlat
-        integer(ip), intent(in)  :: nlon
-        integer(ip)              :: return_value
-
-        ! Local variables
-        integer(ip) :: n1, n2
-
-        call compute_parity(nlat, nlon, n1, n2)
-
-        return_value = 4*nlat*n2+3*max(n1-2, 0)*(2*nlat-n1-1)+nlon+15
-
-    end function get_lvhsec
-
-    pure function get_lvhses(nlat, nlon) &
-        result (return_value)
-
-        ! Dummy arguments
-        integer(ip), intent(in) :: nlat
-        integer(ip), intent(in) :: nlon
-        integer(ip)             :: return_value
-
-        ! Local variables
-        integer(ip) :: n1, n2
-
-        call compute_parity(nlat, nlon, n1, n2)
-
-        return_value = n1 * n2 * ((2*nlat) - n1 + 1) + nlon + 15
-
-    end function get_lvhses
-
-    pure function get_lshaes(nlat, nlon) &
-        result (return_value)
-
-        ! Dummy arguments
-        integer(ip), intent(in)  :: nlat
-        integer(ip), intent(in)  :: nlon
-        integer(ip)               :: return_value
-
-        ! Local variables
-        integer(ip) :: l1, l2
-
-        call compute_parity(nlat, nlon, l1, l2)
-
-        return_value = ( l1 * l2 * (2*nlat-l1+1))/2 + nlon+15
-
-    end function get_lshaes
-
-    pure function get_lshags(nlat, nlon) &
-        result (return_value)
-
-        ! Dummy arguments
-        integer(ip), intent(in)  :: nlat
-        integer(ip), intent(in)  :: nlon
-        integer(ip)              :: return_value
-
-        ! Local variables
-        integer(ip) :: l1, l2
-
-        call compute_parity(nlat, nlon, l1, l2)
-
-        return_value = nlat*(3*(l1+l2)-2)+(l1-1)*(l2*(2*nlat-l1)-3*l1)/2+nlon+15
-
-    end function get_lshags
-
-    pure function get_lshsgs(nlat, nlon) &
-        result (return_value)
-
-        ! Dummy arguments
-        integer(ip), intent(in) :: nlat
-        integer(ip), intent(in) :: nlon
-        integer(ip)             :: return_value
-
-        ! Local variables
-        integer(ip) :: l1, l2
-
-        call compute_parity(nlat, nlon, l1, l2)
-
-        return_value = nlat*(3*(l1+l2)-2)+(l1-1)*(l2*(2*nlat-l1)-3*l1)/2 + (nlon + 15)
-
-    end function get_lshsgs
-
-    pure function get_lwork_for_shagsi(nlat) &
-        result (return_value)
-
-        ! Dummy arguments
-        integer(ip), intent(in) :: nlat
-        integer(ip)             :: return_value
-
-        return_value = 4 * nlat * (nlat + 2) + 2
-
-    end function get_lwork_for_shagsi
-
-    pure function get_ldwork_for_shagsi(nlat) &
-        result (return_value)
-
-        ! Dummy arguments
-        integer(ip), intent(in) :: nlat
-        integer(ip)             :: return_value
-
-        return_value = nlat * (nlat + 4)
-
-    end function get_ldwork_for_shagsi
-
-    pure function get_lwork_for_gaussian_saved(isym, nt, nlat, nlon) &
-        result (return_value)
-
-        ! Dummy arguments
-        integer(ip), intent(in) :: isym
-        integer(ip), intent(in) :: nt
-        integer(ip), intent(in) :: nlat
-        integer(ip), intent(in) :: nlon
-        integer(ip)             :: return_value
-
-        ! Local variables
-        integer(ip) :: n2
-
-        ! Compute parity in nlat
-        if (even(nlat)) then
-            n2 = nlat/2
-        else
-            n2 = (nlat + 1)/2
-        end if
-
-        select case(isym)
-            case(0)
-                return_value = nlat * nlon * (nt + 1)
-            case default
-                return_value = n2 * nlon * (nt + 1)
-        end select
-
-    end function get_lwork_for_gaussian_saved
-
-    pure subroutine compute_parity(nlat, nlon, n1, n2)
-
-        ! Dummy arguments
-        integer(ip), intent(in)  :: nlat
-        integer(ip), intent(in)  :: nlon
-        integer(ip), intent(out) :: n1
-        integer(ip), intent(out) :: n2
-
-        ! Compute parity in nlon
-        if (even(nlon)) then
-            n1 = min(nlat, (nlon+2)/2)
-        else
-            n1 = min(nlat, (nlon + 1)/2)
-        end if
-
-        ! Compute parity in nlat
-        if (even(nlat)) then
-            n2 = nlat/2
-        else
-            n2 = (nlat + 1)/2
-        end if
-
-    end subroutine compute_parity
-
 
     ! Purpose:
     !
@@ -947,32 +674,27 @@ contains
 
     end function get_zfin_workspace_indices
 
-    subroutine initialize_scalar_analysis_regular_grid(nlat, nlon, wzfin, dwork)
+    ! Remarks:
+    !
+    !     the length of wzfin is 3*((l-3)*l+2)/2 + 2*l*imid
+    !
+    subroutine initialize_scalar_analysis_regular_grid(nlat, nlon, wzfin)
 
         ! Dummy arguments
         integer(ip), intent(in)   :: nlat
         integer(ip), intent(in)   :: nlon
         real(wp),    intent(out)  :: wzfin(*)
-        real(wp),    intent(out)  :: dwork(nlat+2)
 
         ! Local variables
-        integer(ip) :: imid
-        integer(ip) :: iw1, iw2
+        integer(ip) :: imid, iw1
 
         imid = (nlat + 1)/2
 
-        !
-        ! Remarks:
-        !
-        !     the length of wzfin is 3*((l-3)*l+2)/2 + 2*l*imid
-        !     the length of dwork is nlat+2
-        !
+        ! Set wavetable index pointer
+        iw1 = (2 * nlat * imid) + 1
 
-        ! Set workspace indices
-        iw1 = 2*nlat*imid+1
-        iw2 = nlat/2+1
+        call zfinit_lower_utility_routine(nlat, nlon, imid, wzfin, wzfin(iw1))
 
-        call zfinit_lower_utility_routine(nlat, nlon, imid, wzfin, wzfin(iw1), dwork, dwork(iw2))
 
     end subroutine initialize_scalar_analysis_regular_grid
 
@@ -983,7 +705,7 @@ contains
     !     where mmax = min(nlat, nlon/2+1)
     !     cz and work must each have nlat+1 locations
     !
-    subroutine zfinit_lower_utility_routine(nlat, nlon, imid, z, abc, cz, work)
+    subroutine zfinit_lower_utility_routine(nlat, nlon, imid, z, abc)
 
         ! Dummy arguments
         integer(ip), intent(in)  :: nlat
@@ -991,28 +713,35 @@ contains
         integer(ip), intent(in)  :: imid
         real(wp),    intent(out) :: z(imid, nlat, 2)
         real(wp),    intent(out) :: abc(*)
-        real(wp),    intent(out) :: cz(nlat + 1)
-        real(wp),    intent(out) :: work(nlat + 1)
 
         ! Local variables
-        integer(ip) :: i, m, n, mp1, np1
-        real(wp)    :: dt, th, zh
+        integer(ip) :: required_workspace_size
+        real(wp)    :: dt
 
         dt = PI/(nlat-1)
 
-        do mp1=1, 2
-            m = mp1-1
-            do np1=mp1, nlat
-                n = np1-1
-                call dnzfk(nlat, m, n, cz, work)
-                do i=1, imid
-                    th = real(i-1, kind=wp)*dt
-                    call dnzft(nlat, m, n, th, cz, zh)
-                    z(i, np1, mp1) = zh
+        ! Set required workspace size
+        required_workspace_size = nlat + 1
+
+        block
+            integer(ip) :: i, m, n, mp1, np1
+            real(wp)    :: th, zh
+            real(wp), dimension(required_workspace_size) :: cz, work
+
+            do mp1=1, 2
+                m = mp1-1
+                do np1=mp1, nlat
+                    n = np1-1
+                    call dnzfk(nlat, m, n, cz, work)
+                    do i=1, imid
+                        th = real(i - 1, kind=wp) * dt
+                        call dnzft(nlat, m, n, th, cz, zh)
+                        z(i, np1, mp1) = zh
+                    end do
+                    z(1, np1, mp1) = HALF * z(1, np1, mp1)
                 end do
-                z(1, np1, mp1) = HALF*z(1, np1, mp1)
             end do
-        end do
+        end block
 
         call compute_recurrence_relation_coefficients(nlat, nlon, abc)
 
@@ -1108,6 +837,7 @@ contains
                 end do
                 cz(idx)=sc1*summation
             end do
+
         end if
 
     end subroutine dnzfk
@@ -1119,7 +849,7 @@ contains
         integer(ip), intent(in)   :: m
         integer(ip), intent(in)   :: n
         real(wp),    intent(in)   :: th
-        real(wp),    intent(in)   :: cz(*)
+        real(wp),    intent(in)   :: cz(:)
         real(wp),    intent(out)  :: zh
 
         ! Local variables
@@ -1130,106 +860,132 @@ contains
         cos2t = cos(TWO*th)
         sin2t = sin(TWO*th)
 
-        if (mod(nlat, 2) <= 0) then
+        if (even(nlat) .and. even(n) .and. even(m)) then
+
+            ! nlat even, n even, m even
             lc = nlat/2
             lq = lc-1
-            if (mod(n, 2) <= 0) then
-                if (mod(m, 2) <= 0) then
-                    zh = HALF*cz(1)
-                    cost = cos2t
-                    sint = sin2t
-                    do k=2, lc
-                        !     zh = zh+cz(k)*cos(2*(k-1)*th)
-                        zh = zh+cz(k)*cost
-                        temp = cos2t*cost-sin2t*sint
-                        sint = sin2t*cost+cos2t*sint
-                        cost = temp
-                    end do
-                else
-                    cost = cos2t
-                    sint = sin2t
-                    do k=1, lq
-                        !     zh = zh+cz(k+1)*sin(2*k*th)
-                        zh = zh+cz(k+1)*sint
-                        temp = cos2t*cost-sin2t*sint
-                        sint = sin2t*cost+cos2t*sint
-                        cost = temp
-                    end do
-                end if
-            else
-                if (mod(m, 2) <= 0) then
-                    zh = HALF*cz(lc)*cos((nlat-1)*th)
-                    cost = cos(th)
-                    sint = sin(th)
-                    do k=1, lq
-                        !     zh = zh+cz(k)*cos((2*k-1)*th)
-                        zh = zh+cz(k)*cost
-                        temp = cos2t*cost-sin2t*sint
-                        sint = sin2t*cost+cos2t*sint
-                        cost = temp
-                    end do
-                else
-                    cost = cos(th)
-                    sint = sin(th)
-                    do k=1, lq
-                        !     zh = zh+cz(k+1)*sin((2*k-1)*th)
-                        zh = zh+cz(k+1)*sint
-                        temp = cos2t*cost-sin2t*sint
-                        sint = sin2t*cost+cos2t*sint
-                        cost = temp
-                    end do
-                end if
-            end if
-        else
+            zh = HALF*cz(1)
+            cost = cos2t
+            sint = sin2t
+
+            do k=2, lc
+                zh = zh+cz(k)*cost
+                temp = cos2t*cost-sin2t*sint
+                sint = sin2t*cost+cos2t*sint
+                cost = temp
+            end do
+
+        else if (even(nlat) .and. even(n) .and. odd(m)) then
+
+            ! nlat even, n even, m odd
+
+            lc = nlat/2
+            lq = lc-1
+            cost = cos2t
+            sint = sin2t
+
+            do k=1, lq
+                zh = zh+cz(k+1)*sint
+                temp = cos2t*cost-sin2t*sint
+                sint = sin2t*cost+cos2t*sint
+                cost = temp
+            end do
+
+        else if (even(nlat) .and. odd(n) .and. even(m)) then
+
+            ! nlat even, n odd, m even
+            lc = nlat/2
+            lq = lc-1
+            zh = HALF*cz(lc)*cos((nlat-1)*th)
+            cost = cos(th)
+            sint = sin(th)
+
+            do k=1, lq
+                zh = zh+cz(k)*cost
+                temp = cos2t*cost-sin2t*sint
+                sint = sin2t*cost+cos2t*sint
+                cost = temp
+            end do
+
+        else if (even(nlat) .and. odd(n) .and. odd(m)) then
+
+            ! nlat even, n odd, m odd
+            lc = nlat/2
+            lq = lc-1
+            cost = cos(th)
+            sint = sin(th)
+            do k=1, lq
+                zh = zh+cz(k+1)*sint
+                temp = cos2t*cost-sin2t*sint
+                sint = sin2t*cost+cos2t*sint
+                cost = temp
+            end do
+
+        else if (odd(nlat) .and. even(n) .and. even(m)) then
+
+            ! nlat odd, n even, m even
             lc = (nlat + 1)/2
             lq = lc-1
             ls = lc-2
-            if (mod(n, 2) <= 0) then
-                if (mod(m, 2) <= 0) then
-                    zh = HALF*(cz(1)+cz(lc)*cos(2*lq*th))
-                    cost = cos2t
-                    sint = sin2t
-                    do k=2, lq
-                        !     zh = zh+cz(k)*cos(2*(k-1)*th)
-                        zh = zh+cz(k)*cost
-                        temp = cos2t*cost-sin2t*sint
-                        sint = sin2t*cost+cos2t*sint
-                        cost = temp
-                    end do
-                else
-                    cost = cos2t
-                    sint = sin2t
-                    do k=1, ls
-                        !     zh = zh+cz(k+1)*sin(2*k*th)
-                        zh = zh+cz(k+1)*sint
-                        temp = cos2t*cost-sin2t*sint
-                        sint = sin2t*cost+cos2t*sint
-                        cost = temp
-                    end do
-                end if
-            else
-                if (mod(m, 2) <= 0) then
-                    cost = cos(th)
-                    sint = sin(th)
-                    do k=1, lq
-                        !     zh = zh+cz(k)*cos((2*k-1)*th)
-                        zh = zh+cz(k)*cost
-                        temp = cos2t*cost-sin2t*sint
-                        sint = sin2t*cost+cos2t*sint
-                        cost = temp
-                    end do
-                else
-                    cost = cos(th)
-                    sint = sin(th)
-                    do k=1, lq
-                        !     zh = zh+cz(k+1)*sin((2*k-1)*th)
-                        zh = zh+cz(k+1)*sint
-                        temp = cos2t*cost-sin2t*sint
-                        sint = sin2t*cost+cos2t*sint
-                        cost = temp
-                    end do
-                end if
-            end if
+            zh = HALF*(cz(1)+cz(lc)*cos(2*lq*th))
+            cost = cos2t
+            sint = sin2t
+
+            do k=2, lq
+                zh = zh+cz(k)*cost
+                temp = cos2t*cost-sin2t*sint
+                sint = sin2t*cost+cos2t*sint
+                cost = temp
+            end do
+
+        else if (odd(nlat) .and. even(n) .and. odd(m)) then
+
+            ! nlat odd, n even, m odd
+            lc = (nlat + 1)/2
+            lq = lc-1
+            ls = lc-2
+            cost = cos2t
+            sint = sin2t
+
+            do k=1, ls
+                zh = zh+cz(k+1)*sint
+                temp = cos2t*cost-sin2t*sint
+                sint = sin2t*cost+cos2t*sint
+                cost = temp
+            end do
+
+        else if (odd(nlat) .and. odd(n) .and. even(m)) then
+
+            ! nlat odd, n odd, m even
+            lc = (nlat + 1)/2
+            lq = lc-1
+            ls = lc-2
+            cost = cos(th)
+            sint = sin(th)
+
+            do k=1, lq
+                zh = zh+cz(k)*cost
+                temp = cos2t*cost-sin2t*sint
+                sint = sin2t*cost+cos2t*sint
+                cost = temp
+            end do
+
+        else
+
+            ! nlat odd, n odd, m odd
+            lc = (nlat + 1)/2
+            lq = lc-1
+            ls = lc-2
+            cost = cos(th)
+            sint = sin(th)
+
+            do k=1, lq
+                zh = zh+cz(k+1)*sint
+                temp = cos2t*cost-sin2t*sint
+                sint = sin2t*cost+cos2t*sint
+                cost = temp
+            end do
         end if
 
     end subroutine dnzft
@@ -1504,22 +1260,21 @@ contains
 
     end subroutine rabcp_lower_utility_routine
 
-    subroutine initialize_scalar_analysis_regular_grid_saved(nlat, nlon, imid, z, idz, zin, wzfin, dwork)
+    subroutine initialize_scalar_analysis_regular_grid_saved(nlat, nlon, imid, z, idz, zin, wzfin)
 
         ! Dummy arguments
-        integer(ip), intent(in)     :: nlat
-        integer(ip), intent(in)     :: nlon
-        integer(ip), intent(in)     :: imid
-        real(wp),    intent(inout)  :: z(idz, *)
-        integer(ip), intent(in)     :: idz
-        real(wp),    intent(inout)  :: zin(imid, nlat, 3)
-        real(wp),    intent(inout)  :: wzfin(*)
-        real(wp),    intent(inout)  :: dwork(*)
+        integer(ip), intent(in)   :: nlat
+        integer(ip), intent(in)   :: nlon
+        integer(ip), intent(in)   :: imid
+        real(wp),    intent(out)  :: z(idz, *)
+        integer(ip), intent(in)   :: idz
+        real(wp),    intent(out)  :: zin(imid, nlat, 3)
+        real(wp),    intent(out)  :: wzfin(*)
 
         ! Local variables
         integer(ip) :: m, i3, mn, mp1, np1, mmax
 
-        call initialize_scalar_analysis_regular_grid(nlat, nlon, wzfin, dwork)
+        call initialize_scalar_analysis_regular_grid(nlat, nlon, wzfin)
 
         mmax = min(nlat, nlon/2+1)
 
@@ -2436,112 +2191,104 @@ contains
         cdt = cost**2-sint**2
         sdt = TWO*sint*cost
 
-        select case (mod(nlat, 2))
-            case(0) ! nlat even
-                select case (mod(n, 2))
-                    case (0) ! n even
-                        cost = cdt
-                        sint = sdt
-                        select case (mod(m, 2))
-                            case (0) ! m even
-                                !
-                                !  nlat even n even  m even
-                                !
-                                do k=1, lq
-                                    zvh = zvh+czv(k+1)*sint
-                                    temp = cdt*cost-sdt*sint
-                                    sint = sdt*cost+cdt*sint
-                                    cost = temp
-                                end do
-                            case (1) ! m odd
-                                !
-                                !  nlat even n even m odd
-                                !
-                                zvh = HALF*czv(1)
-                                do k=2, lc
-                                    zvh = zvh+czv(k)*cost
-                                    temp = cdt*cost-sdt*sint
-                                    sint = sdt*cost+cdt*sint
-                                    cost = temp
-                                end do
-                        end select
-                    case (1) ! n odd
-                        select case (mod(m, 2))
-                            case (0) ! m even
-                                !
-                                !  nlat even n odd  m even
-                                !
-                                do k=1, lq
-                                    zvh = zvh+czv(k+1)*sint
-                                    temp = cdt*cost-sdt*sint
-                                    sint = sdt*cost+cdt*sint
-                                    cost = temp
-                                end do
-                            case (1) ! m odd
-                                !
-                                !  nlat even  n odd  m odd
-                                !
-                                zvh = HALF*czv(lc)*cos(real(nlat-1)*th)
+        if (even(nlat) .and. even(n) .and. even(m)) then
 
-                                do k=1, lq
-                                    zvh = zvh+czv(k)*cost
-                                    temp = cdt*cost-sdt*sint
-                                    sint = sdt*cost+cdt*sint
-                                    cost = temp
-                                end do
-                        end select
-                end select
-            case (1) ! nlat odd
-                select case (mod(n, 2))
-                    case (0) ! n even
-                        cost = cdt
-                        sint = sdt
-                        select case (mod(m, 2))
-                            case (0) ! m even
-                                !
-                                !  nlat odd  n even  m even
-                                !
-                                do k=1, ls
-                                    zvh = zvh+czv(k+1)*sint
-                                    temp = cdt*cost-sdt*sint
-                                    sint = sdt*cost+cdt*sint
-                                    cost = temp
-                                end do
-                            case (1) ! m odd
-                                zvh = HALF*czv(1)
-                                do k=2, lq
-                                    zvh = zvh+czv(k)*cost
-                                    temp = cdt*cost-sdt*sint
-                                    sint = sdt*cost+cdt*sint
-                                    cost = temp
-                                end do
-                                zvh = zvh+HALF*czv(lc)*cos((nlat-1)*th)
-                        end select
-                    case (1) ! n odd
-                        select case (mod(m, 2))
-                            case (0) ! m even
-                                !
-                                !  nlat odd n odd m even
-                                !
-                                do k=1, lq
-                                    zvh = zvh+czv(k+1)*sint
-                                    temp = cdt*cost-sdt*sint
-                                    sint = sdt*cost+cdt*sint
-                                    cost = temp
-                                end do
-                            case (1) ! m odd
-                                !
-                                !  nlat odd n odd m odd
-                                !
-                                do k=1, lq
-                                    zvh = zvh+czv(k)*cost
-                                    temp = cdt*cost-sdt*sint
-                                    sint = sdt*cost+cdt*sint
-                                    cost = temp
-                                end do
-                        end select
-                end select
-        end select
+            !  nlat even n even  m even
+            cost = cdt
+            sint = sdt
+
+            do k=1, lq
+                zvh = zvh+czv(k+1)*sint
+                temp = cdt*cost-sdt*sint
+                sint = sdt*cost+cdt*sint
+                cost = temp
+            end do
+
+        else if (even(nlat) .and. even(n) .and. odd(m)) then
+
+            !  nlat even n even m odd
+            cost = cdt
+            sint = sdt
+
+            zvh = HALF*czv(1)
+            do k=2, lc
+                zvh = zvh+czv(k)*cost
+                temp = cdt*cost-sdt*sint
+                sint = sdt*cost+cdt*sint
+                cost = temp
+            end do
+
+        else if (even(nlat) .and. odd(n) .and. even(m)) then
+
+            !  nlat even n odd  m even
+            do k=1, lq
+                zvh = zvh+czv(k+1)*sint
+                temp = cdt*cost-sdt*sint
+                sint = sdt*cost+cdt*sint
+                cost = temp
+            end do
+
+        else if (even(nlat) .and. odd(n) .and. odd(m)) then
+
+            !  nlat even  n odd  m odd
+            zvh = HALF*czv(lc)*cos(real(nlat-1)*th)
+
+            do k=1, lq
+                zvh = zvh+czv(k)*cost
+                temp = cdt*cost-sdt*sint
+                sint = sdt*cost+cdt*sint
+                cost = temp
+            end do
+
+        else if (odd(nlat) .and. even(n) .and. even(m)) then
+
+            !  nlat odd  n even  m even
+            cost = cdt
+            sint = sdt
+
+            do k=1, ls
+                zvh = zvh+czv(k+1)*sint
+                temp = cdt*cost-sdt*sint
+                sint = sdt*cost+cdt*sint
+                cost = temp
+            end do
+
+        else if (odd(nlat) .and. even(n) .and. odd(m)) then
+
+            !  nlat odd  n even  m odd
+            cost = cdt
+            sint = sdt
+            zvh = HALF*czv(1)
+
+            do k=2, lq
+                zvh = zvh+czv(k)*cost
+                temp = cdt*cost-sdt*sint
+                sint = sdt*cost+cdt*sint
+                cost = temp
+            end do
+            zvh = zvh+HALF*czv(lc)*cos((nlat-1)*th)
+
+        else if (odd(nlat) .and. odd(n) .and. even(m)) then
+
+            !  nlat odd n odd m even
+            do k=1, lq
+                zvh = zvh+czv(k+1)*sint
+                temp = cdt*cost-sdt*sint
+                sint = sdt*cost+cdt*sint
+                cost = temp
+            end do
+
+        else
+
+            !  nlat odd n odd m odd
+            do k=1, lq
+                zvh = zvh+czv(k)*cost
+                temp = cdt*cost-sdt*sint
+                sint = sdt*cost+cdt*sint
+                cost = temp
+            end do
+
+        end if
 
     end subroutine dzvt
 
@@ -2655,6 +2402,26 @@ contains
 
     end subroutine dzwk
 
+    !
+    !     subroutine dzwt tabulates the function zwbar(n, m, theta)
+    !     at theta = th in real
+    !
+    !     input parameters
+    !
+    !     nlat      the number of colatitudes including the poles.
+    !            nlat must be an odd integer
+    !
+    !     n      the degree (subscript) of zwbar(n, m, theta)
+    !
+    !     m      the order (superscript) of zwbar(n, m, theta)
+    !
+    !     czw     the fourier coefficients of zwbar(n, m, theta)
+    !             as computed by subroutine zwk.
+    !
+    !     output parameter
+    !
+    !     zwh     zwbar(m, n, theta) evaluated at theta = th
+    !
     subroutine dzwt(nlat, m, n, th, czw, zwh)
 
         integer(ip) :: k
@@ -2666,26 +2433,6 @@ contains
         integer(ip), intent(in) :: nlat
         real(wp) :: czw(*)
         real(wp) :: zwh, th, cost, sint, cdt, sdt, temp
-        !
-        !     subroutine dzwt tabulates the function zwbar(n, m, theta)
-        !     at theta = th in real
-        !
-        !     input parameters
-        !
-        !     nlat      the number of colatitudes including the poles.
-        !            nlat must be an odd integer
-        !
-        !     n      the degree (subscript) of zwbar(n, m, theta)
-        !
-        !     m      the order (superscript) of zwbar(n, m, theta)
-        !
-        !     czw     the fourier coefficients of zwbar(n, m, theta)
-        !             as computed by subroutine zwk.
-        !
-        !     output parameter
-        !
-        !     zwh     zwbar(m, n, theta) evaluated at theta = th
-        !
 
         zwh = ZERO
 
@@ -2699,114 +2446,104 @@ contains
         cdt = cost**2-sint**2
         sdt = TWO*sint*cost
 
-        select case (mod(nlat, 2))
-            case (0) ! nlat even
-                select case (mod(n, 2))
-                    case (0) ! n even
-                        select case (mod(m, 2))
-                            case (0) ! m even
-                                !
-                                !  nlat even  n even  m even
-                                !
-                                do k=1, lq
-                                    zwh = zwh+czw(k+1)*sint
-                                    temp = cdt*cost-sdt*sint
-                                    sint = sdt*cost+cdt*sint
-                                    cost = temp
-                                end do
-                            case (1) ! m odd
-                                   !
-                                   !     nlat even  n even  m odd
-                                   !
-                                zwh = HALF*czw(lc)*cos(real(nlat-1)*th)
-                                do k=1, lq
-                                    zwh = zwh+czw(k)*cost
-                                    temp = cdt*cost-sdt*sint
-                                    sint = sdt*cost+cdt*sint
-                                    cost = temp
-                                end do
-                        end select
-                    case (1) ! n odd
-                        cost = cdt
-                        sint = sdt
-                        select case (mod(m, 2))
-                            case (0) ! m even
-                                !
-                                !  nlat even  n odd  m even
-                                !
-                                do k=1, lq
-                                    zwh = zwh+czw(k+1)*sint
-                                    temp = cdt*cost-sdt*sint
-                                    sint = sdt*cost+cdt*sint
-                                    cost = temp
-                                end do
-                            case (1) ! m odd
-                                   !
-                                   !  nlat even  n odd  m odd
-                                   !
-                                zwh = HALF*czw(1)
-                                do k=2, lc
-                                    zwh = zwh+czw(k)*cost
-                                    temp = cdt*cost-sdt*sint
-                                    sint = sdt*cost+cdt*sint
-                                    cost = temp
-                                end do
-                        end select
-                end select
-            case (1) ! nlat odd
-                select case (mod(n, 2))
-                    case (0) ! n even
-                        select case (mod(m, 2))
-                            case (0) ! m even
-                                !
-                                !  nlat odd  n even  m even
-                                !
-                                do k=1, lq
-                                    zwh = zwh+czw(k+1)*sint
-                                    temp = cdt*cost-sdt*sint
-                                    sint = sdt*cost+cdt*sint
-                                    cost = temp
-                                end do
-                            case (1) ! m odd
-                                !
-                                !  nlat odd  n even  m odd
-                                !
-                                do k=1, lq
-                                    zwh = zwh+czw(k)*cost
-                                    temp = cdt*cost-sdt*sint
-                                    sint = sdt*cost+cdt*sint
-                                    cost = temp
-                                end do
-                        end select
-                    case (1) ! n odd
-                        cost = cdt
-                        sint = sdt
-                        select case (mod(m, 2))
-                            case (0) ! m even
-                                !
-                                !  nlat odd  n odd  m even
-                                !
-                                do k=1, ls
-                                    zwh = zwh+czw(k+1)*sint
-                                    temp = cdt*cost-sdt*sint
-                                    sint = sdt*cost+cdt*sint
-                                    cost = temp
-                                end do
-                            case (1) ! m odd
-                                 !
-                                 !  nlat odd  n odd  m odd
-                                 !
-                                zwh = HALF*czw(1)
-                                do k=2, lq
-                                    zwh = zwh+czw(k)*cost
-                                    temp = cdt*cost-sdt*sint
-                                    sint = sdt*cost+cdt*sint
-                                    cost = temp
-                                end do
-                                zwh = zwh+HALF*czw(lc)*cos(real(nlat-1)*th)
-                        end select
-                end select
-        end select
+        if (even(nlat) .and. even(n) .and. even(m)) then
+
+            !  nlat even  n even  m even
+            do k=1, lq
+                zwh = zwh+czw(k+1)*sint
+                temp = cdt*cost-sdt*sint
+                sint = sdt*cost+cdt*sint
+                cost = temp
+            end do
+
+        else if (even(nlat) .and. even(n) .and. odd(m)) then
+
+            !     nlat even  n even  m odd
+            zwh = HALF*czw(lc)*cos(real(nlat-1)*th)
+
+            do k=1, lq
+                zwh = zwh+czw(k)*cost
+                temp = cdt*cost-sdt*sint
+                sint = sdt*cost+cdt*sint
+                cost = temp
+            end do
+
+        else if (even(nlat) .and. odd(n) .and. even(m)) then
+
+            !  nlat even  n odd  m even
+            cost = cdt
+            sint = sdt
+
+            do k=1, lq
+                zwh = zwh+czw(k+1)*sint
+                temp = cdt*cost-sdt*sint
+                sint = sdt*cost+cdt*sint
+                cost = temp
+            end do
+
+        else if (even(nlat) .and. odd(n) .and. odd(m)) then
+
+            !  nlat even  n odd  m odd
+            cost = cdt
+            sint = sdt
+            zwh = HALF*czw(1)
+
+            do k=2, lc
+                zwh = zwh+czw(k)*cost
+                temp = cdt*cost-sdt*sint
+                sint = sdt*cost+cdt*sint
+                cost = temp
+            end do
+
+        else if (odd(nlat) .and. even(n) .and. even(m)) then
+
+            !  nlat odd  n even  m even
+            do k=1, lq
+                zwh = zwh+czw(k+1)*sint
+                temp = cdt*cost-sdt*sint
+                sint = sdt*cost+cdt*sint
+                cost = temp
+            end do
+
+        else if (odd(nlat) .and. even(n) .and. odd(m)) then
+            !  nlat odd  n even  m odd
+            !
+            do k=1, lq
+                zwh = zwh+czw(k)*cost
+                temp = cdt*cost-sdt*sint
+                sint = sdt*cost+cdt*sint
+                cost = temp
+            end do
+
+        else if (odd(nlat) .and. odd(n) .and. even(m)) then
+
+            !  nlat odd  n odd  m even
+            cost = cdt
+            sint = sdt
+
+            do k=1, ls
+                zwh = zwh+czw(k+1)*sint
+                temp = cdt*cost-sdt*sint
+                sint = sdt*cost+cdt*sint
+                cost = temp
+            end do
+
+        else
+
+            !  nlat odd  n odd  m odd
+            cost = cdt
+            sint = sdt
+            zwh = HALF*czw(1)
+
+            do k=2, lq
+                zwh = zwh+czw(k)*cost
+                temp = cdt*cost-sdt*sint
+                sint = sdt*cost+cdt*sint
+                cost = temp
+            end do
+            zwh = zwh+HALF*czw(lc)*cos(real(nlat-1, kind=wp) * th)
+
+        end if
 
     end subroutine dzwt
 
@@ -2819,10 +2556,8 @@ contains
         real(wp),    intent(out) :: work(*)
 
         ! Local variables
-
-        integer(ip) :: l, ncv
+        integer(ip) :: i, ncv
         real(wp)    :: srnp1, fn, fk, cf
-
 
         cv(1) = ZERO
 
@@ -2834,59 +2569,57 @@ contains
 
         call compute_fourier_coefficients(m, n, work)
 
-        select case (mod(n, 2))
-            case (0) ! n even
-                ncv = n/2
-                if (ncv == 0) return
-                fk = ZERO
-                select case (mod(m, 2))
-                    case (0) ! m even
-                        !
-                        !  n even m even
-                        !
-                        do l=1, ncv
-                            fk = fk+TWO
-                            cv(l) = -fk*work(l+1)/srnp1
-                        end do
-                    case (1) ! m odd
-                        !
-                        !  n even m odd
-                        !
-                        do l=1, ncv
-                            fk = fk+TWO
-                            cv(l) = fk*work(l)/srnp1
-                        end do
-                end select
-            case (1) ! n odd
-                ncv = (n + 1)/2
-                fk = -ONE
-                select case (mod(m, 2))
-                    case (0) ! m even
-                        !
-                        !     n odd m even
-                        !
-                        do l=1, ncv
-                            fk = fk+TWO
-                            cv(l) = -fk*work(l)/srnp1
-                        end do
-                    case (1) ! m odd
-                        !
-                        !      n odd m odd
-                        !
-                        do l=1, ncv
-                            fk = fk+TWO
-                            cv(l) = fk*work(l)/srnp1
-                        end do
-                end select
-        end select
+        if (even(n) .and. even(m)) then
+
+            !  n even, m even
+            ncv = n/2
+            if (ncv == 0) return
+            fk = ZERO
+
+            do i=1, ncv
+                fk = fk+TWO
+                cv(i) = -fk*work(i+1)/srnp1
+            end do
+
+        else if (even(n) .and. odd(m)) then
+
+            !  n even, m odd
+            ncv = n/2
+            if (ncv == 0) return
+            fk = ZERO
+
+            do i=1, ncv
+                fk = fk+TWO
+                cv(i) = fk*work(i)/srnp1
+            end do
+
+        else if (odd(n) .and. even(m)) then
+
+            ! n odd, m even
+            ncv = (n + 1)/2
+            fk = -ONE
+
+            do i=1, ncv
+                fk = fk+TWO
+                cv(i) = -fk*work(i)/srnp1
+            end do
+        else
+
+            !  n odd, m odd
+            ncv = (n + 1)/2
+            fk = -ONE
+            do i=1, ncv
+                fk = fk+TWO
+                cv(i) = fk*work(i)/srnp1
+            end do
+
+        end if
 
     end subroutine dvbk
-
 
     subroutine dwbk(m, n, cw, work)
 
         ! Dummy arguments
-
         integer(ip), intent(in)  :: m
         integer(ip), intent(in)  :: n
         real(wp),    intent(out) :: cw(*)
@@ -2908,62 +2641,59 @@ contains
 
         if (m == 0) return
 
-        select case (mod(n, 2))
-            case (0) ! n even
-                l = n/2
-                if (l == 0) return
-                select case (mod(m, 2))
-                    case (0) ! m even
-                        !
-                        !  n even m even
-                        !
-                        cw(l) = -cf*work(l+1)
-                        do
-                            l = l-1
-                            if (l <= 0) exit
-                            cw(l) = cw(l+1)-cf*work(l+1)
-                        end do
-                    case (1) ! m odd
-                             !
-                             !     n even m odd
-                             !
-                        cw(l) = cf*work(l)
-                        do
-                            l = l-1
-                            if (l <= 0) exit
-                            cw(l) = cw(l+1)+cf*work(l)
-                        end do
-                end select
-            case (1) ! n odd
-                select case (mod(m, 2))
-                    case (0) ! m even
-                        l = (n - 1)/2
-                        if (l == 0) return
-                        !
-                        !  n odd m even
-                        !
-                        cw(l) = -cf*work(l+1)
-                        do
-                            l = l-1
-                            if (l <= 0) exit
-                            cw(l) = cw(l+1)-cf*work(l+1)
-                        end do
-                    case (1) ! m odd
-                        !
-                        !  n odd m odd
-                        !
-                        l = (n + 1)/2
-                        cw(l) = cf*work(l)
-                        do
-                            l = l-1
-                            if (l <= 0) exit
-                            cw(l) = cw(l+1)+cf*work(l)
-                        end do
-                end select
-        end select
+        if (even(n) .and. even(m)) then
+
+            !  n even m even
+            l = n/2
+            if (l == 0) return
+            cw(l) = -cf*work(l+1)
+
+            do
+                l = l-1
+                if (l <= 0) exit
+                cw(l) = cw(l+1)-cf*work(l+1)
+            end do
+
+        else if (even(n) .and. odd(m)) then
+
+            ! n even, m odd
+            l = n/2
+            if (l == 0) return
+            cw(l) = cf*work(l)
+
+            do
+                l = l-1
+                if (l <= 0) exit
+                cw(l) = cw(l+1)+cf*work(l)
+            end do
+
+        else if (odd(n) .and. even(m)) then
+
+            !  n odd m even
+            l = (n - 1)/2
+            if (l == 0) return
+            cw(l) = -cf*work(l+1)
+
+            do
+                l = l-1
+                if (l <= 0) exit
+                cw(l) = cw(l+1)-cf*work(l+1)
+            end do
+
+        else
+
+            !  n odd, m odd
+            l = (n + 1)/2
+            cw(l) = cf*work(l)
+
+            do
+                l = l-1
+                if (l <= 0) exit
+                cw(l) = cw(l+1)+cf*work(l)
+            end do
+        end if
 
     end subroutine dwbk
-
 
     subroutine dvbt(m, n, theta, cv, vh)
 
@@ -2990,60 +2720,57 @@ contains
         cdt = cost**2-sint**2
         sdt = TWO*sint*cost
 
-        select case (mod(n, 2))
-            case (0) ! n even
-                cost = cdt
-                sint = sdt
-                select case (mod(m, 2))
-                    case (0) ! m even
-                        !
-                        !  n even m even
-                        !
-                        ncv = n/2
-                        do k=1, ncv
-                            vh = vh+cv(k)*sint
-                            temp = cdt*cost-sdt*sint
-                            sint = sdt*cost+cdt*sint
-                            cost = temp
-                        end do
-                    case (1) ! m odd
-                        !
-                        !  n even  m odd
-                        !
-                        ncv = n/2
-                        do k=1, ncv
-                            vh = vh+cv(k)*cost
-                            temp = cdt*cost-sdt*sint
-                            sint = sdt*cost+cdt*sint
-                            cost = temp
-                        end do
-                end select
-            case (1) ! n odd
-                select case (mod(m, 2))
-                    case (0) ! m even
-                        !
-                        !  n odd m even
-                        !
-                        ncv = (n + 1)/2
-                        do k=1, ncv
-                            vh = vh+cv(k)*sint
-                            temp = cdt*cost-sdt*sint
-                            sint = sdt*cost+cdt*sint
-                            cost = temp
-                        end do
-                    case (1) ! m odd
-                        !
-                        !  n odd m odd
-                        !
-                        ncv = (n + 1)/2
-                        do k=1, ncv
-                            vh = vh+cv(k)*cost
-                            temp = cdt*cost-sdt*sint
-                            sint = sdt*cost+cdt*sint
-                            cost = temp
-                        end do
-                end select
-        end select
+        if (even(n) .and. even(m)) then
+
+            !  n even, m even
+            cost = cdt
+            sint = sdt
+            ncv = n/2
+
+            do k=1, ncv
+                vh = vh+cv(k)*sint
+                temp = cdt*cost-sdt*sint
+                sint = sdt*cost+cdt*sint
+                cost = temp
+            end do
+
+        else if (even(n) .and. odd(m)) then
+            !  n even, m odd
+            cost = cdt
+            sint = sdt
+            ncv = n/2
+
+            do k=1, ncv
+                vh = vh+cv(k)*cost
+                temp = cdt*cost-sdt*sint
+                sint = sdt*cost+cdt*sint
+                cost = temp
+            end do
+
+        else if (odd(n) .and. even(m)) then
+
+            !  n odd, m even
+            ncv = (n + 1)/2
+
+            do k=1, ncv
+                vh = vh+cv(k)*sint
+                temp = cdt*cost-sdt*sint
+                sint = sdt*cost+cdt*sint
+                cost = temp
+            end do
+
+        else
+            !  n odd, m odd
+            ncv = (n + 1)/2
+
+            do k=1, ncv
+                vh = vh+cv(k)*cost
+                temp = cdt*cost-sdt*sint
+                sint = sdt*cost+cdt*sint
+                cost = temp
+            end do
+
+        end if
 
     end subroutine dvbt
 
@@ -3067,65 +2794,62 @@ contains
         cdt = cost*cost-sint*sint
         sdt = TWO*sint*cost
 
-        select case (mod(n, 2))
-            case (0) ! n even
-                select case (mod(m, 2))
-                    case (0) ! m even
-                        !
-                        !  n even  m even
-                        !
-                        ncw = n/2
-                        do k=1, ncw
-                            wh = wh+cw(k)*sint
-                            temp = cdt*cost-sdt*sint
-                            sint = sdt*cost+cdt*sint
-                            cost = temp
-                        end do
-                    case (1) ! m odd
-                         !
-                         !  n even m odd
-                         !
-                        ncw = n/2
-                        do k=1, ncw
-                            wh = wh+cw(k)*cost
-                            temp = cdt*cost-sdt*sint
-                            sint = sdt*cost+cdt*sint
-                            cost = temp
-                        end do
-                end select
-            case (1) ! n odd
-                cost = cdt
-                sint = sdt
-                select case (mod(m, 2))
-                    case (0) ! m even
-                        !
-                        !  n odd m even
-                        !
-                        ncw = (n - 1)/2
-                        do k=1, ncw
-                            wh = wh+cw(k)*sint
-                            temp = cdt*cost-sdt*sint
-                            sint = sdt*cost+cdt*sint
-                            cost = temp
-                        end do
-                    case (1) ! m odd
-                        !
-                        !  n odd m odd
-                        !
-                        ncw = (n + 1)/2
-                        wh = HALF*cw(1)
+        if (even(n) .and. even(m)) then
 
-                        if (ncw < 2) return
+            ! n even, m even
+            ncw = n/2
 
-                        do k=2, ncw
-                            wh = wh+cw(k)*cost
-                            temp = cdt*cost-sdt*sint
-                            sint = sdt*cost+cdt*sint
-                            cost = temp
-                        end do
+            do k=1, ncw
+                wh = wh+cw(k)*sint
+                temp = cdt*cost-sdt*sint
+                sint = sdt*cost+cdt*sint
+                cost = temp
+            end do
 
-                end select
-        end select
+        else if (even(n) .and. odd(m)) then
+
+            ! n even, m odd
+            ncw = n/2
+
+            do k=1, ncw
+                wh = wh+cw(k)*cost
+                temp = cdt*cost-sdt*sint
+                sint = sdt*cost+cdt*sint
+                cost = temp
+            end do
+
+        else if (odd(n) .and. even(m)) then
+
+            ! n odd, m even
+            cost = cdt
+            sint = sdt
+            ncw = (n - 1)/2
+
+            do k=1, ncw
+                wh = wh+cw(k)*sint
+                temp = cdt*cost-sdt*sint
+                sint = sdt*cost+cdt*sint
+                cost = temp
+            end do
+
+        else
+
+            ! n odd, m odd
+            cost = cdt
+            sint = sdt
+            ncw = (n + 1)/2
+            wh = HALF*cw(1)
+
+            if (ncw < 2) return
+
+            do k=2, ncw
+                wh = wh+cw(k)*cost
+                temp = cdt*cost-sdt*sint
+                sint = sdt*cost+cdt*sint
+                cost = temp
+            end do
+
+        end if
 
     end subroutine dwbt
 
@@ -3601,7 +3325,7 @@ contains
         real(wp),    intent(out) :: work(*)
 
         ! Local variables
-        integer(ip) :: l, ncv
+        integer(ip) :: i, ncv
         real(wp)    :: fn, fk, cf, srnp1
 
         cv(1) = ZERO
@@ -3614,70 +3338,72 @@ contains
 
         call compute_fourier_coefficients(m, n, work)
 
-        select case (mod(n, 2))
-            case (0) ! n even
-                ncv = n/2
-                if (ncv == 0) return
-                fk = ZERO
-                select case (mod(m, 2))
-                    case (0) ! m even
-                        !
-                        !  n even m even
-                        !
-                        do l=1, ncv
-                            fk = fk+TWO
-                            cv(l) = -(fk**2)*work(l+1)/srnp1
-                        end do
-                    case (1) ! m odd
-                        !
-                        !  n even m odd
-                        !
-                        do l=1, ncv
-                            fk = fk+TWO
-                            cv(l) = -(fk**2)*work(l)/srnp1
-                        end do
-                end select
-            case (1) ! n odd
-                ncv = (n + 1)/2
-                fk = -ONE
-                select case (mod(m, 2))
-                    case (0) ! m even
-                        !
-                        !  n odd m even
-                        !
-                        do l=1, ncv
-                            fk = fk+TWO
-                            cv(l) = -(fk**2)*work(l)/srnp1
-                        end do
-                    case (1) ! m odd
-                        !
-                        !  n odd m odd
-                        !
-                        do l=1, ncv
-                            fk = fk+TWO
-                            cv(l) = -(fk**2)*work(l)/srnp1
-                        end do
-                end select
-        end select
+        if (even(n) .and. even(m)) then
+            !  n even m even
+            ncv = n/2
+            if (ncv == 0) return
+            fk = ZERO
+
+            do i=1, ncv
+                fk = fk+TWO
+                cv(i) = -(fk**2)*work(i+1)/srnp1
+            end do
+
+        else if (even(n) .and. odd(m)) then
+
+            !  n even m odd
+            ncv = n/2
+            if (ncv == 0) return
+            fk = ZERO
+
+            do i=1, ncv
+                fk = fk+TWO
+                cv(i) = -(fk**2)*work(i)/srnp1
+            end do
+
+        else if (odd(n) .and. even(m)) then
+
+            !  n odd m even
+            ncv = (n + 1)/2
+            fk = -ONE
+
+            do i=1, ncv
+                fk = fk+TWO
+                cv(i) = -(fk**2)*work(i)/srnp1
+            end do
+
+        else
+
+            !  n odd m odd
+            ncv = (n + 1)/2
+            fk = -ONE
+
+            do i=1, ncv
+                fk = fk+TWO
+                cv(i) = -(fk**2)*work(i)/srnp1
+            end do
+        end if
 
     end subroutine dvtk
 
     subroutine dwtk(m, n, cw, work)
 
-        integer(ip) :: l
-        integer(ip) :: m
-        integer(ip) :: n
-        real(wp) :: cw(*), work(*)
-        real(wp) :: fn, cf, srnp1
+        integer(ip), intent(in)  :: m
+        integer(ip), intent(in)  :: n
+        real(wp),    intent(out) :: cw(*)
+        real(wp),    intent(out) :: work(*)
+
+        ! Local variables
+        integer(ip) :: i
+        real(wp)    :: fn, cf, srnp1
 
         cw(1) = ZERO
 
         if (n <= 0 .or. m <= 0) return
 
-        fn = n
+        fn = real(n, kind=wp)
         srnp1 = sqrt(fn * (fn + ONE))
         cf = TWO * real(m, kind=wp)/srnp1
-
         call compute_fourier_coefficients(m, n, work)
 
         if (m == 0) return
@@ -3685,71 +3411,70 @@ contains
         if (even(n) .and. even(m)) then
 
             !     n even m even
-            l = n/2
-            if (l == 0) return
-            cw(l) = -cf*work(l+1)
+            i = n/2
+            if (i == 0) return
+            cw(i) = -cf*work(i+1)
 
             do
-                l = l-1
-                if (l <= 0) exit
-                cw(l) = cw(l+1)-cf*work(l+1)
-                cw(l+1) = (2*l+1)*cw(l+1)
+                i = i-1
+                if (i <= 0) exit
+                cw(i) = cw(i+1)-cf*work(i+1)
+                cw(i+1) = (2*i+1)*cw(i+1)
             end do
 
         else if (even(n) .and. odd(m)) then
 
             !  n even m odd
-            l = n/2
-            if (l == 0) return
-            cw(l) = cf*work(l)
+            i = n/2
+            if (i == 0) return
+            cw(i) = cf*work(i)
 
             do
-                l = l-1
-                if (l < 0) then
+                i = i-1
+                if (i < 0) then
                     exit
-                else if (l == 0) then
-                    cw(l+1) = -(2*l+1)*cw(l+1)
+                else if (i == 0) then
+                    cw(i+1) = -(2*i+1)*cw(i+1)
                 else
-                    cw(l) = cw(l+1)+cf*work(l)
-                    cw(l+1) = -(2*l+1)*cw(l+1)
+                    cw(i) = cw(i+1)+cf*work(i)
+                    cw(i+1) = -(2*i+1)*cw(i+1)
                 end if
             end do
 
         else if (odd(n) .and. even(m)) then
 
-            l = (n - 1)/2
-            if (l == 0) return
-            !
+            i = (n - 1)/2
+            if (i == 0) return
+
             !  n odd m even
-            !
-            cw(l) = -cf*work(l+1)
+            cw(i) = -cf*work(i+1)
             do
-                l = l-1
-                if (l < 0) then
+                i = i-1
+                if (i < 0) then
                     exit
-                else if (l == 0) then
-                    cw(l+1) = (2*l+2)*cw(l+1)
+                else if (i == 0) then
+                    cw(i+1) = (2*i+2)*cw(i+1)
                 else
-                    cw(l) = cw(l+1)-cf*work(l+1)
-                    cw(l+1) = (2*l+2)*cw(l+1)
+                    cw(i) = cw(i+1)-cf*work(i+1)
+                    cw(i+1) = (2*i+2)*cw(i+1)
                 end if
             end do
 
         else
 
             !  n odd, m odd
-            l = (n + 1)/2
-            cw(l) = cf*work(l)
+            i = (n + 1)/2
+            cw(i) = cf*work(i)
 
             do
-                l = l-1
-                if (l < 0) then
+                i = i-1
+                if (i < 0) then
                     exit
-                else if (l == 0) then
-                    cw(l+1) = -(2*l)*cw(l+1)
+                else if (i == 0) then
+                    cw(i+1) = -(2*i)*cw(i+1)
                 else
-                    cw(l) = cw(l+1)+cf*work(l)
-                    cw(l+1) = -(2*l)*cw(l+1)
+                    cw(i) = cw(i+1)+cf*work(i)
+                    cw(i+1) = -(2*i)*cw(i+1)
                 end if
             end do
         end if
@@ -3984,7 +3709,6 @@ contains
 
         ! Local variables
         integer(ip) :: imid, iw1, iw2
-
 
         imid = (nlat + 1)/2
         iw1 = 2*nlat*imid+1

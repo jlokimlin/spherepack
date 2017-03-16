@@ -9,6 +9,7 @@ module spherepack_precision
     public :: ip ! Integer precision
     public :: PI, TWO_PI, HALF_PI, MACHINE_EPSILON
     public :: get_pi
+    public :: even, odd
 
     ! Floating point precision constants
     integer, parameter :: FLOAT128 = selected_real_kind(p=33, r=4931) ! 33 digits, range [10^(-4931), 10^(+4931) - 1], 128 bits
@@ -34,6 +35,28 @@ module spherepack_precision
     real(wp), parameter :: MACHINE_EPSILON = epsilon(ONE)
 
 contains
+
+    pure function odd(i) &
+        result (return_value)
+
+        ! Dummy arguments
+        integer(ip), intent(in) :: i
+        logical                 :: return_value
+
+        return_value = btest(i, 0)
+
+    end function odd
+
+    pure function even(i) &
+        result (return_value)
+
+        ! Dummy arguments
+        integer(ip), intent(in) :: i
+        logical                 :: return_value
+
+        return_value = .not. odd(i)
+
+    end function even
 
     pure function get_pi() &
         result (return_value)

@@ -414,52 +414,49 @@ contains
         ! Local variables
         integer(ip) :: mmax, imid, labc, lzimn
         integer(ip) :: workspace_indices(NUMBER_OF_WORKSPACE_INDICES)
-        integer(ip) :: lwork, ldwork
+        integer(ip) :: lwork, required_wavetable_size
         type(SpherepackUtility) :: util
 
-        associate (lshaes => size(wshaes))
+        mmax = min(nlat, nlon/2+1)
+        imid = (nlat + 1)/2
+        labc = 3*((mmax-2)*(2*nlat-mmax-1))/2
+        lzimn = (imid*mmax*(2*nlat-mmax+1))/2
+        required_wavetable_size = lzimn+nlon+15
 
-            mmax = min(nlat, nlon/2+1)
-            imid = (nlat + 1)/2
-            labc = 3*((mmax-2)*(2*nlat-mmax-1))/2
-            lzimn = (imid*mmax*(2*nlat-mmax+1))/2
+        ! Check calling arguments
+        if (nlat < 3) then
+            ierror = 1
+        else if (nlon < 4) then
+            ierror = 2
+        else if (size(wshaes) < required_wavetable_size) then
+            ierror = 3
+        else
+            ierror = 0
+        end if
 
-            ! Check calling arguments
-            if (nlat < 3) then
-                ierror = 1
-            else if (nlon < 4) then
-                ierror = 2
-            else if (lshaes < lzimn+nlon+15) then
-                ierror = 3
-            else
-                ierror = 0
-            end if
+        ! Address error flag
+        if (ierror /= 0) return
 
-            ! Address error flag
-            if (ierror /= 0) return
+        ! Set required workspace sizes
+        lwork = 5*nlat*imid + labc
 
-            ! Set required workspace sizes
-            lwork = 5*nlat*imid + labc
-            ldwork = nlat+1
+        !  Set workspace indices
+        workspace_indices = get_workspace_indices(nlat, nlon, mmax, imid, lzimn)
 
-            !  Set workspace indices
-            workspace_indices = get_workspace_indices(nlat, nlon, mmax, imid, lzimn)
+        !  Compute wavetable
+        block
+            real(wp) :: work(lwork)
+            associate (&
+                idz => workspace_indices(1), &
+                iw1 => workspace_indices(2), &
+                iw2 => workspace_indices(3) &
+                )
+                call util%initialize_scalar_analysis_regular_grid_saved( &
+                    nlat, nlon, imid, wshaes, idz, work, work(iw1:))
 
-            !  Compute wavetable
-            block
-                real(wp) :: work(lwork), dwork(ldwork)
-                associate (&
-                    idz => workspace_indices(1), &
-                    iw1 => workspace_indices(2), &
-                    iw2 => workspace_indices(3) &
-                    )
-                    call util%initialize_scalar_analysis_regular_grid_saved( &
-                        nlat, nlon, imid, wshaes, idz, work, work(iw1:), dwork)
-
-                    call util%hfft%initialize(nlon, wshaes(iw2:))
-                end associate
-            end block
-        end associate
+                call util%hfft%initialize(nlon, wshaes(iw2:))
+            end associate
+        end block
 
     end subroutine shaesi
 

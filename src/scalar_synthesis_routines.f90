@@ -14,6 +14,7 @@ module scalar_synthesis_routines
     implicit none
 
     ! Everything is private unless stated otherwise
+    private
     public :: shsgc, shsgci, initialize_shsec
     public :: shses, shsesi, initialize_shses
     public :: shsec, shseci, initialize_shsgc
@@ -156,163 +157,72 @@ module scalar_synthesis_routines
 
 contains
 
-    subroutine initialize_shsec(nlat, nlon, wshsec, error_flag)
+    subroutine initialize_shsec(nlat, nlon, wavetable, error_flag)
 
         ! Dummy arguments
         integer(ip),           intent(in)  :: nlat
         integer(ip),           intent(in)  :: nlon
-        real(wp), allocatable, intent(out) :: wshsec(:)
+        real(wp), allocatable, intent(out) :: wavetable(:)
         integer(ip),           intent(out) :: error_flag
+
         ! Local variables
-        integer(ip) :: lshsec
-
-        ! Get required workspace size
-        lshsec = get_lshsec(nlat, nlon)
-
-        ! Allocate memory
-        allocate (wshsec(lshsec))
+        type(SpherepackUtility) :: util
 
         ! Initialize wavetable
-        call shseci(nlat, nlon, wshsec, error_flag)
+        call util%initialize_wavetable(nlat, nlon, wavetable, &
+            util%get_lshsec, shseci)
 
     end subroutine initialize_shsec
 
-    subroutine initialize_shses(nlat, nlon, wshses, error_flag)
+    subroutine initialize_shses(nlat, nlon, wavetable, error_flag)
 
         ! Dummy arguments
         integer(ip),           intent(in)  :: nlat
         integer(ip),           intent(in)  :: nlon
-        real(wp), allocatable, intent(out) :: wshses(:)
+        real(wp), allocatable, intent(out) :: wavetable(:)
         integer(ip),           intent(out) :: error_flag
 
         ! Local variables
-        integer(ip) :: lshses
-
-        ! Get required workspace size
-        lshses = get_lshses(nlat, nlon)
-
-        ! Allocate memory
-        allocate (wshses(lshses))
+        type(SpherepackUtility) :: util
 
         ! Initialize wavetable
-        call shsesi(nlat, nlon, wshses, error_flag)
+        call util%initialize_wavetable(nlat, nlon, wavetable, &
+            util%get_lshses, shsesi)
 
     end subroutine initialize_shses
 
-    subroutine initialize_shsgc(nlat, nlon, wshsgc, error_flag)
+    subroutine initialize_shsgc(nlat, nlon, wavetable, error_flag)
 
         ! Dummy arguments
         integer(ip),           intent(in)  :: nlat
         integer(ip),           intent(in)  :: nlon
-        real(wp), allocatable, intent(out) :: wshsgc(:)
+        real(wp), allocatable, intent(out) :: wavetable(:)
         integer(ip),           intent(out) :: error_flag
 
         ! Local variables
-        integer(ip) :: lshsgc
-
-        ! Get required workspace size
-        lshsgc = get_lshsgc(nlat, nlon)
-
-        ! Allocate memory
-        allocate (wshsgc(lshsgc))
+        type(SpherepackUtility) :: util
 
         ! Initialize wavetable
-        call shsgci(nlat, nlon, wshsgc, error_flag)
+        call util%initialize_wavetable(nlat, nlon, wavetable, &
+            util%get_lshsgc, shsgci)
 
     end subroutine initialize_shsgc
 
-    subroutine initialize_shsgs(nlat, nlon, wshsgs, error_flag)
+    subroutine initialize_shsgs(nlat, nlon, wavetable, error_flag)
 
         ! Dummy arguments
         integer(ip),           intent(in)  :: nlat
         integer(ip),           intent(in)  :: nlon
-        real(wp), allocatable, intent(out) :: wshsgs(:)
+        real(wp), allocatable, intent(out) :: wavetable(:)
         integer(ip),           intent(out) :: error_flag
 
         ! Local variables
-        integer(ip) :: lshsgs
-
-        ! Get required workspace size
-        lshsgs = get_lshsgs(nlat, nlon)
-
-        ! Allocate memory
-        allocate (wshsgs(lshsgs))
+        type(SpherepackUtility) :: util
 
         ! Initialize wavetable
-        call shsgsi(nlat, nlon, wshsgs, error_flag)
+        call util%initialize_wavetable(nlat, nlon, wavetable, &
+            util%get_lshsgs, shsgsi)
 
     end subroutine initialize_shsgs
-
-    pure function get_lshsec(nlat, nlon) &
-        result (return_value)
-
-        ! Dummy arguments
-        integer(ip), intent(in) :: nlat
-        integer(ip), intent(in) :: nlon
-        integer(ip)             :: return_value
-
-        ! Local variables
-        integer(ip)             :: n1, n2
-        type(SpherepackUtility) :: util
-
-        call util%compute_parity(nlat, nlon, n1, n2)
-
-        return_value = 2*nlat*n2+3*((n1-2)*(2*nlat-n1-1))/2+nlon+15
-
-    end function get_lshsec
-
-    pure function get_lshsgc(nlat, nlon) &
-        result (return_value)
-
-        ! Dummy arguments
-        integer(ip), intent(in) :: nlat
-        integer(ip), intent(in) :: nlon
-        integer(ip)             :: return_value
-
-        ! Local variables
-        integer(ip)             :: n1, n2
-        type(SpherepackUtility) :: util
-
-        call util%compute_parity(nlat, nlon, n1, n2)
-
-        return_value = nlat*(2*n2+3*n1-2)+3*n1*(1-n1)/2+nlon+15
-
-    end function get_lshsgc
-
-    pure function get_lshses(nlat, nlon) &
-        result (return_value)
-
-        ! Dummy arguments
-        integer(ip), intent(in) :: nlat
-        integer(ip), intent(in) :: nlon
-        integer(ip)             :: return_value
-
-        ! Local variables
-        integer(ip)             :: n1, n2
-        type(SpherepackUtility) :: util
-
-        call util%compute_parity(nlat, nlon, n1, n2)
-
-        return_value = (n1 * n2 * (2*nlat-n1+1))/2 + (nlon + 15)
-
-    end function get_lshses
-
-    pure function get_lshsgs(nlat, nlon) &
-        result (return_value)
-
-        ! Dummy arguments
-        integer(ip), intent(in) :: nlat
-        integer(ip), intent(in) :: nlon
-        integer(ip)             :: return_value
-
-        ! Local variables
-        integer(ip)             :: n1, n2
-        type(SpherepackUtility) :: util
-
-        call util%compute_parity(nlat, nlon, n1, n2)
-
-        return_value = nlat*(3*(n1+n2)-2)+(n1-1)*(n2*(2*nlat-n1)-3*n1)/2+nlon+15
-
-    end function get_lshsgs
 
 end module scalar_synthesis_routines

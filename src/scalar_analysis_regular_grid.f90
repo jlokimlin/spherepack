@@ -374,39 +374,32 @@ contains
 
         ! Local variables
         integer(ip)             :: imid, iw1, labc, lzz1, mmax
-        integer(ip)             :: ldwork
+        integer(ip)             :: required_wavetable_size
         type(SpherepackUtility) :: util
 
-        associate (lshaec => size(wshaec))
-            imid = (nlat + 1)/2
-            mmax = min(nlat, nlon/2+1)
-            lzz1 = 2*nlat*imid
-            labc = 3*((mmax-2)*(2*nlat-mmax-1))/2
+        imid = (nlat + 1)/2
+        mmax = min(nlat, nlon/2+1)
+        lzz1 = 2*nlat*imid
+        labc = 3*((mmax-2)*(2*nlat-mmax-1))/2
+        required_wavetable_size = lzz1+labc+nlon+15
 
-            ! Check validity of input arguments
-            if (nlat < 3) then
-                ierror = 1
-            else if (nlon < 4) then
-                ierror = 2
-            else if (lshaec < lzz1+labc+nlon+15) then
-                ierror = 3
-            else
-                ierror = 0
-            end if
+        ! Check validity of input arguments
+        if (nlat < 3) then
+            ierror = 1
+        else if (nlon < 4) then
+            ierror = 2
+        else if (size(wshaec) < required_wavetable_size) then
+            ierror = 3
+        else
+            ierror = 0
+        end if
 
-            ! Set required workspace size
-            ldwork = nlat + 1
+        call util%initialize_scalar_analysis_regular_grid(nlat, nlon, wshaec)
 
-            block
-                real(wp) :: dwork(ldwork)
-                call util%initialize_scalar_analysis_regular_grid(nlat, nlon, wshaec, dwork)
-            end block
+        ! Set wavetable index pointer
+        iw1 = lzz1+labc+1
 
-            ! Set workspace pointer
-            iw1 = lzz1+labc+1
-
-            call util%hfft%initialize(nlon, wshaec(iw1:))
-        end associate
+        call util%hfft%initialize(nlon, wshaec(iw1:))
 
     end subroutine shaeci
 

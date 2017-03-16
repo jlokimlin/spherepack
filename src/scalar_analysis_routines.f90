@@ -4,6 +4,9 @@ module scalar_analysis_routines
         wp, & ! working precision
         ip ! integer precision
 
+    use type_ScalarHarmonic, only: &
+        ScalarHarmonic
+
     use type_SpherepackUtility, only: &
         SpherepackUtility
 
@@ -155,165 +158,162 @@ module scalar_analysis_routines
         end subroutine shagsi
     end interface
 
+    abstract interface
+        subroutine analysis_sub(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, wavetable, ierror)
+            import :: ip, wp
+            ! Dummy arguments
+            integer(ip), intent(in)   :: nlat
+            integer(ip), intent(in)   :: nlon
+            integer(ip), intent(in)   :: isym
+            integer(ip), intent(in)   :: nt
+            real(wp),    intent(in)   :: g(idg, jdg, nt)
+            integer(ip), intent(in)   :: idg
+            integer(ip), intent(in)   :: jdg
+            real(wp),    intent(out)  :: a(mdab, ndab, nt)
+            real(wp),    intent(out)  :: b(mdab, ndab, nt)
+            integer(ip), intent(in)   :: mdab
+            integer(ip), intent(in)   :: ndab
+            real(wp),    intent(in)   :: wavetable(:)
+            integer(ip), intent(out)  :: ierror
+        end subroutine analysis_sub
+    end interface
+
+    ! Overload subroutine
+    interface perform_scalar_analysis
+        module procedure perform_scalar_analysis_2d
+        module procedure perform_scalar_analysis_3d
+    end interface
+
 contains
 
-    subroutine initialize_shaec(nlat, nlon, wshaec, error_flag)
+    subroutine perform_scalar_analysis_2d(nlat, nlon, scalar_symmetries, scalar_function, &
+        harmonic, wavetable, error_flag, analysis_routine)
+
+        ! Dummy arguments
+        integer(ip),         intent(in)    :: nlat
+        integer(ip),         intent(in)    :: nlon
+        integer(ip),         intent(in)    :: scalar_symmetries
+        real(wp),            intent(in)    :: scalar_function(:,:)
+        class(ScalarHarmonic), intent(inout) :: harmonic
+        real(wp),            intent(in)    :: wavetable(:)
+        integer(ip),         intent(out)   :: error_flag
+        procedure(analysis_sub)            :: analysis_routine
+
+        associate (&
+            isym => scalar_symmetries, &
+            g => scalar_function, &
+            idg => size(scalar_function, dim=1), &
+            jdg => size(scalar_function, dim=2), &
+            nt => harmonic%NUMBER_OF_SYNTHESES, &
+            a => harmonic%real_component, &
+            b => harmonic%imaginary_component, &
+            mdab => harmonic%ORDER_M, &
+            ndab => harmonic%DEGREE_N, &
+            ierror => error_flag &
+            )
+
+            call analysis_routine(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, wavetable, ierror)
+        end associate
+
+    end subroutine perform_scalar_analysis_2d
+
+    subroutine perform_scalar_analysis_3d(nlat, nlon, scalar_symmetries, scalar_function, &
+        harmonic, wavetable, error_flag, analysis_routine)
+
+        ! Dummy arguments
+        integer(ip),         intent(in)    :: nlat
+        integer(ip),         intent(in)    :: nlon
+        integer(ip),         intent(in)    :: scalar_symmetries
+        real(wp),            intent(in)    :: scalar_function(:,:,:)
+        class(ScalarHarmonic), intent(inout) :: harmonic
+        real(wp),            intent(in)    :: wavetable(:)
+        integer(ip),         intent(out)   :: error_flag
+        procedure(analysis_sub)            :: analysis_routine
+
+        associate (&
+            isym => scalar_symmetries, &
+            g => scalar_function, &
+            idg => size(scalar_function, dim=1), &
+            jdg => size(scalar_function, dim=2), &
+            nt => size(scalar_function, dim=3), &
+            a => harmonic%real_component, &
+            b => harmonic%imaginary_component, &
+            mdab => harmonic%ORDER_M, &
+            ndab => harmonic%DEGREE_N, &
+            ierror => error_flag &
+            )
+
+            call analysis_routine(nlat, nlon, isym, nt, g, idg, jdg, a, b, mdab, ndab, wavetable, ierror)
+        end associate
+
+    end subroutine perform_scalar_analysis_3d
+
+    subroutine initialize_shaec(nlat, nlon, wavetable, error_flag)
 
         ! Dummy arguments
         integer(ip),           intent(in)  :: nlat
         integer(ip),           intent(in)  :: nlon
-        real(wp), allocatable, intent(out) :: wshaec(:)
+        real(wp), allocatable, intent(out) :: wavetable(:)
         integer(ip),           intent(out) :: error_flag
+
         ! Local variables
-        integer(ip) :: lshaec
-
-        ! Get required workspace size
-        lshaec = get_lshaec(nlat, nlon)
-
-        ! Allocate memory
-        allocate (wshaec(lshaec))
+        type(SpherepackUtility) :: util
 
         ! Initialize wavetable
-        call shaeci(nlat, nlon, wshaec, error_flag)
+        call util%initialize_wavetable(nlat, nlon, wavetable, &
+            util%get_lshaec, shaeci)
 
     end subroutine initialize_shaec
 
-    subroutine initialize_shaes(nlat, nlon, wshaes, error_flag)
+    subroutine initialize_shaes(nlat, nlon, wavetable, error_flag)
 
         ! Dummy arguments
         integer(ip),           intent(in)  :: nlat
         integer(ip),           intent(in)  :: nlon
-        real(wp), allocatable, intent(out) :: wshaes(:)
+        real(wp), allocatable, intent(out) :: wavetable(:)
         integer(ip),           intent(out) :: error_flag
 
         ! Local variables
-        integer(ip) :: lshaes
-
-        ! Get required workspace size
-        lshaes = get_lshaes(nlat, nlon)
-
-        ! Allocate memory
-        allocate (wshaes(lshaes))
+        type(SpherepackUtility) :: util
 
         ! Initialize wavetable
-        call shaesi(nlat, nlon, wshaes, error_flag)
+        call util%initialize_wavetable(nlat, nlon, wavetable, &
+            util%get_lshaes, shaesi)
 
     end subroutine initialize_shaes
 
-    subroutine initialize_shagc(nlat, nlon, wshagc, error_flag)
+    subroutine initialize_shagc(nlat, nlon, wavetable, error_flag)
 
         ! Dummy arguments
         integer(ip),           intent(in)  :: nlat
         integer(ip),           intent(in)  :: nlon
-        real(wp), allocatable, intent(out) :: wshagc(:)
+        real(wp), allocatable, intent(out) :: wavetable(:)
         integer(ip),           intent(out) :: error_flag
 
         ! Local variables
-        integer(ip) :: lshagc
-
-        ! Get required workspace size
-        lshagc = get_lshagc(nlat, nlon)
-
-        ! Allocate memory
-        allocate (wshagc(lshagc))
+        type(SpherepackUtility) :: util
 
         ! Initialize wavetable
-        call shagci(nlat, nlon, wshagc, error_flag)
+        call util%initialize_wavetable(nlat, nlon, wavetable, &
+            util%get_lshagc, shagci)
 
     end subroutine initialize_shagc
 
-    subroutine initialize_shags(nlat, nlon, wshags, error_flag)
+    subroutine initialize_shags(nlat, nlon, wavetable, error_flag)
 
         ! Dummy arguments
         integer(ip),           intent(in)  :: nlat
         integer(ip),           intent(in)  :: nlon
-        real(wp), allocatable, intent(out) :: wshags(:)
+        real(wp), allocatable, intent(out) :: wavetable(:)
         integer(ip),           intent(out) :: error_flag
 
         ! Local variables
-        integer(ip) :: lshags
-
-        ! Get required workspace size
-        lshags = get_lshags(nlat, nlon)
-
-        ! Allocate memory
-        allocate (wshags(lshags))
+        type(SpherepackUtility) :: util
 
         ! Initialize wavetable
-        call shagsi(nlat, nlon, wshags, error_flag)
+        call util%initialize_wavetable(nlat, nlon, wavetable, &
+            util%get_lshags, shagsi)
 
     end subroutine initialize_shags
-
-    pure function get_lshaec(nlat, nlon) &
-        result (return_value)
-
-        ! Dummy arguments
-        integer(ip), intent(in) :: nlat
-        integer(ip), intent(in) :: nlon
-        integer(ip)             :: return_value
-
-        ! Local variables
-        integer(ip)             :: n1, n2
-        type(SpherepackUtility) :: util
-
-        call util%compute_parity(nlat, nlon, n1, n2)
-
-        return_value = 2*nlat*n2+3*((n1-2)*(2*nlat-n1-1))/2+nlon+15
-
-    end function get_lshaec
-
-    pure function get_lshagc(nlat, nlon) &
-        result (return_value)
-
-        ! Dummy arguments
-        integer(ip), intent(in) :: nlat
-        integer(ip), intent(in) :: nlon
-        integer(ip)             :: return_value
-
-        ! Local variables
-        integer(ip)             :: n1, n2
-        type(SpherepackUtility) :: util
-
-        call util%compute_parity(nlat, nlon, n1, n2)
-
-        return_value = nlat*(2*n2+3*n1-2)+3*n1*(1-n1)/2+nlon+15
-
-    end function get_lshagc
-
-    pure function get_lshaes(nlat, nlon) &
-        result (return_value)
-
-        ! Dummy arguments
-        integer(ip), intent(in) :: nlat
-        integer(ip), intent(in) :: nlon
-        integer(ip)             :: return_value
-
-        ! Local variables
-        integer(ip)             :: n1, n2
-        type(SpherepackUtility) :: util
-
-        call util%compute_parity(nlat, nlon, n1, n2)
-
-        return_value = (n1 * n2 * (2*nlat-n1+1))/2 + (nlon + 15)
-
-    end function get_lshaes
-
-    pure function get_lshags(nlat, nlon) &
-        result (return_value)
-
-        ! Dummy arguments
-        integer(ip), intent(in) :: nlat
-        integer(ip), intent(in) :: nlon
-        integer(ip)             :: return_value
-
-        ! Local variables
-        integer(ip)             :: n1, n2
-        type(SpherepackUtility) :: util
-
-        call util%compute_parity(nlat, nlon, n1, n2)
-
-        return_value = nlat*(3*(n1+n2)-2)+(n1-1)*(n2*(2*nlat-n1)-3*n1)/2+nlon+15
-
-    end function get_lshags
 
 end module scalar_analysis_routines

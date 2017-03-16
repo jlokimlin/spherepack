@@ -12,6 +12,24 @@ spherepack_precision.f90
 	$(FC) $(FFLAGS) -c spherepack_precision.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 
+spherepack_interfaces.o: \
+spherepack_interfaces.f90
+	$(FC) $(FFLAGS) -c spherepack_interfaces.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
+
+type_ScalarHarmonic.o: \
+spherepack_precision.o \
+type_ScalarHarmonic.f90
+	$(FC) $(FFLAGS) -c type_ScalarHarmonic.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
+
+type_VectorHarmonic.o: \
+spherepack_precision.o \
+type_ScalarHarmonic.o \
+type_VectorHarmonic.f90
+	$(FC) $(FFLAGS) -c type_VectorHarmonic.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
+
 coordinate_transfer_routines.o: \
 spherepack_precision.o \
 coordinate_transfer_routines.f90
@@ -36,7 +54,16 @@ type_RealPeriodicFastFourierTransform.f90
 	$(FC) $(FFLAGS) -c type_RealPeriodicFastFourierTransform.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
 
+type_WavetableUtility.o: \
+spherepack_precision.o \
+spherepack_interfaces.o \
+type_WavetableUtility.f90
+	$(FC) $(FFLAGS) -c type_WavetableUtility.f90 $(LINKS)\
+	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
+
 type_SpherepackUtility.o: \
+spherepack_precision.o \
+type_WavetableUtility.o \
 type_RealPeriodicFastFourierTransform.o \
 type_SpherepackUtility.f90
 	$(FC) $(FFLAGS) -c type_SpherepackUtility.f90 $(LINKS)\
@@ -77,6 +104,7 @@ scalar_projection_gaussian_grid.f90
 
 scalar_analysis_routines.o: \
 spherepack_precision.o \
+type_ScalarHarmonic.o \
 type_SpherepackUtility.o\
 gaussian_latitudes_and_weights_routines.o\
 scalar_analysis_routines.f90
