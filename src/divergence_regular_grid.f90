@@ -211,124 +211,46 @@ contains
         integer(ip) :: lzz1, labc, imid
         integer(ip) :: mmax, required_wavetable_size, lwork
 
-        associate (lshsec => size(wshsec))
+        imid = (nlat + 1)/2
+        mmax = min(nlat, (nlon+2)/2)
+        imid = (nlat + 1)/2
+        lzz1 = 2*nlat*imid
+        labc = 3*(max(mmax-2, 0)*(2*nlat-mmax-1))/2
+        required_wavetable_size = lzz1+labc+nlon+15
 
-            imid = (nlat + 1)/2
-            mmax = min(nlat, (nlon+2)/2)
-            imid = (nlat + 1)/2
-            lzz1 = 2*nlat*imid
-            labc = 3*(max(mmax-2, 0)*(2*nlat-mmax-1))/2
-            required_wavetable_size = lzz1+labc+nlon+15
+        ! Check calling arguments
+        if (nlat < 3) then
+            ierror = 1
+        else if (nlon < 4) then
+            ierror = 2
+        else if (isym < 0 .or. isym > 2) then
+            ierror = 3
+        else if (nt < 0) then
+            ierror = 4
+        else if ( &
+            (isym == 0 .and. idv < nlat) &
+            .or. &
+            (isym > 0 .and. idv < imid) &
+            ) then
+            ierror = 5
+        else if (jdv < nlon) then
+            ierror = 6
+        else if (mdb < min(nlat, (nlon + 1)/2)) then
+            ierror = 7
+        else if  (ndb < nlat) then
+            ierror = 8
+        else if  (size(wshsec) < required_wavetable_size) then
+            ierror = 9
+        else
+            ierror = 0
+        end if
 
-            select case (isym)
-                case (1:)
-                    ls = imid
-                case default
-                    ls = nlat
-            end select
+        ! Check error flag
+        if (ierror /= 0) return
 
-            nln = nt*ls*nlon
-
-            !  Set first dimension for a, b (as requiried by shsec)
-            mab = min(nlat, nlon/2+1)
-            mn = mab*nlat*nt
-            n1 = min(nlat, (nlon+2)/2)
-            n2 = (nlat + 1)/2
-
-            ! Check calling arguments
-            if (nlat < 3) then
-                ierror = 1
-            else if (nlon < 4) then
-                ierror = 2
-            else if (isym < 0 .or. isym > 2) then
-                ierror = 3
-            else if (nt < 0) then
-                ierror = 4
-            else if ( &
-                (isym == 0 .and. idv < nlat) &
-                .or. &
-                (isym > 0 .and. idv < imid) &
-                ) then
-                ierror = 5
-            else if (jdv < nlon) then
-                ierror = 6
-            else if (mdb < min(nlat, (nlon + 1)/2)) then
-                ierror = 7
-            else if  (ndb < nlat) then
-                ierror = 8
-            else if  (lshsec < required_wavetable_size) then
-                ierror = 9
-            else
-                ierror = 0
-            end if
-
-            ! Check error flag
-            if (ierror /= 0) return
-
-            ! Set required workspace size
-            select case (isym)
-                case (0)
-                    lwork =  nlat*(nt*nlon+max(3*n2, nlon)+2*nt*n1+1)
-                case default
-                    lwork = n2*(nt*nlon+max(3*nlat, nlon)) + nlat*(2*nt*n1+1)
-            end select
-
-            block
-                real(wp)    :: work(lwork)
-                integer(ip) :: ia, ib, iis, iwk, lwk
-
-                ! Set workspace points
-                ia = 1
-                ib = ia+mn
-                iis = ib+mn
-                iwk = iis+nlat
-                lwk = lwork-2*mn-nlat
-
-                call divec_lower_utility_routine(nlat, nlon, isym, nt, dv, idv, jdv, &
-                    br, bi, mdb, ndb, work(ia:), work(ib:), mab, work(iis:), wshsec, lshsec, &
-                    work(iwk:), lwk, ierror)
-            end block
-        end associate
+        call divergence_lower_utility_routine(nlat, nlon, isym, nt, dv, &
+            idv, jdv, br, bi, wshsec, shsec, ierror)
 
     end subroutine divec
-
-    subroutine divec_lower_utility_routine(nlat, nlon, isym, nt, dv, idv, jdv, br, bi, mdb, ndb, &
-        a, b, mab, sqnn, wshsec, lshsec, wk, lwk, ierror)
-        real(wp) :: a
-        real(wp) :: b
-        real(wp) :: bi
-        real(wp) :: br
-        real(wp) :: dv
-        
-        integer(ip) :: idv
-        integer(ip) :: ierror
-        integer(ip) :: isym
-        integer(ip) :: jdv
-        
-        integer(ip) :: lshsec
-        integer(ip) :: lwk
-        
-        integer(ip) :: mab
-        integer(ip) :: mdb
-        
-        
-        integer(ip) :: ndb
-        integer(ip) :: nlat
-        integer(ip) :: nlon
-        integer(ip) :: nt
-        real(wp) :: sqnn
-        real(wp) :: wk
-        real(wp) :: wshsec
-        dimension dv(idv, jdv, nt), br(mdb, ndb, nt), bi(mdb, ndb, nt)
-        dimension a(mab, nlat, nt), b(mab, nlat, nt), sqnn(nlat)
-        dimension wshsec(lshsec), wk(lwk)
-
-        call perform_setup_for_divergence(nlon, a, b, br, bi, sqnn)
-
-        ! Synthesize a, b into divg
-        call shsec(nlat, nlon, isym, nt, dv, idv, jdv, a, b, &
-            mab, nlat, wshsec, ierror)
-
-    end subroutine divec_lower_utility_routine
 
 end submodule divergence_regular_grid

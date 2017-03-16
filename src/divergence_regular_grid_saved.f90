@@ -212,107 +212,38 @@ contains
         integer(ip) :: imid, lpimn, lwork
         integer(ip) :: ls, mab, mmax, mn, nln
 
-        associate (lshses => size(wshses))
+        ! Check calling arguments
+        ierror = 1
+        if (nlat < 3) return
+        ierror = 2
+        if (nlon < 4) return
+        ierror = 3
+        if (isym < 0 .or. isym > 2) return
+        ierror = 4
+        if (nt < 0) return
+        ierror = 5
+        imid = (nlat + 1)/2
+        if ((isym == 0 .and. idv<nlat) .or. &
+            (isym>0 .and. idv<imid)) return
+        ierror = 6
+        if (jdv < nlon) return
+        ierror = 7
+        if (mdb < min(nlat, (nlon + 1)/2)) return
+        mmax = min(nlat, (nlon+2)/2)
+        ierror = 8
+        if (ndb < nlat) return
+        ierror = 9
+        !
+        !     verify save workspace (same as shes, file f3)
+        !
+        imid = (nlat + 1)/2
+        lpimn = (imid*mmax*(2*nlat-mmax+1))/2
+        if (size(wshses) < lpimn+nlon+15) return
+        ierror = 0
 
-            ! Check calling arguments
-            ierror = 1
-            if (nlat < 3) return
-            ierror = 2
-            if (nlon < 4) return
-            ierror = 3
-            if (isym < 0 .or. isym > 2) return
-            ierror = 4
-            if (nt < 0) return
-            ierror = 5
-            imid = (nlat + 1)/2
-            if ((isym == 0 .and. idv<nlat) .or. &
-                (isym>0 .and. idv<imid)) return
-            ierror = 6
-            if (jdv < nlon) return
-            ierror = 7
-            if (mdb < min(nlat, (nlon + 1)/2)) return
-            mmax = min(nlat, (nlon+2)/2)
-            ierror = 8
-            if (ndb < nlat) return
-            ierror = 9
-            !
-            !     verify save workspace (same as shes, file f3)
-            !
-            imid = (nlat + 1)/2
-            lpimn = (imid*mmax*(2*nlat-mmax+1))/2
-            if (lshses < lpimn+nlon+15) return
-            ierror = 10
-            !
-            !     verify unsaved workspace (add to what shses requires, file f3)
-            !
-            ls = nlat
-            if (isym > 0) ls = imid
-            nln = nt*ls*nlon
-            !
-            !     set first dimension for a, b (as required by shses)
-            !
-            mab = min(nlat, nlon/2+1)
-            mn = mab*nlat*nt
-            ierror = 0
-
-            ! Set required workspace size
-            lwork = nln+ls*nlon+2*mn+nlat
-
-            block
-                real(wp)    :: work(lwork)
-                integer(ip) :: ia, ib, iis, iwk, lwk
-                ! Set workspace pointers
-                ia = 1
-                ib = ia+mn
-                iis = ib+mn
-                iwk = iis+nlat
-                lwk = lwork-2*mn-nlat
-
-                call dives_lower_utility_routine(nlat, nlon, isym, nt, dv, idv, jdv, br, &
-                    bi, mdb, ndb, work(ia:), work(ib:), mab, work(iis:), wshses, lshses, ierror)
-            end block
-        end associate
+        call divergence_lower_utility_routine(nlat, nlon, isym, nt, dv, &
+        idv, jdv, br, bi, wshses, shses, ierror)
 
     end subroutine dives
-
-    subroutine dives_lower_utility_routine(nlat, nlon, isym, nt, dv, idv, jdv, br, bi, mdb, ndb, &
-        a, b, mab, sqnn, wshses, lshses, ierror)
-
-        real(wp) :: a
-        real(wp) :: b
-        real(wp) :: bi
-        real(wp) :: br
-        real(wp) :: dv
-        
-        integer(ip) :: idv
-        integer(ip) :: ierror
-        integer(ip) :: isym
-        integer(ip) :: jdv
-        
-        integer(ip) :: lshses
-        
-        
-        integer(ip) :: mab
-        integer(ip) :: mdb
-        
-        
-        integer(ip) :: ndb
-        integer(ip) :: nlat
-        integer(ip) :: nlon
-        integer(ip) :: nt
-        real(wp) :: sqnn
-        
-        real(wp) :: wshses
-        dimension dv(idv, jdv, nt), br(mdb, ndb, nt), bi(mdb, ndb, nt)
-        dimension a(mab, nlat, nt), b(mab, nlat, nt), sqnn(nlat)
-        dimension wshses(lshses)
-
-        call perform_setup_for_divergence(nlon, a, b, br, bi, sqnn)
-
-        ! Synthesize a, b into divg
-        call shses(nlat, nlon, isym, nt, dv, idv, jdv, a, b, &
-            mab, nlat, wshses, ierror)
-
-    end subroutine dives_lower_utility_routine
 
 end submodule divergence_regular_grid_saved

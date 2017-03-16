@@ -265,7 +265,7 @@ contains
 
         ! Check calling arguments
         call check_calling_arguments(nlat, nlon, ityp, nt, &
-            idvw, jdvw, mdab, ndab, wvts, ierror, get_wavetable_size(nlat,nlon))
+            idvw, jdvw, mdab, ndab, wvts, ierror, get_lwvts(nlat,nlon))
 
         ! Check error flag
         if (ierror /= 0) return
@@ -376,7 +376,7 @@ contains
 
         ! Check calling arguments
         call check_init_calling_arguments(&
-            nlat, nlon, wvts, ierror, get_wavetable_size(nlat,nlon))
+            nlat, nlon, wvts, ierror, get_lwvts(nlat,nlon))
 
         ! Check error flag
         if (ierror /= 0) return

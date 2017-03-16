@@ -20,8 +20,8 @@ module colatitudinal_derivative_routines
     public :: vtses, vtsesi, initialize_vtses
     public :: vtsgc, vtsgci, initialize_vtsgc
     public :: vtsgs, vtsgsi, initialize_vtsgs
-    public :: get_wavetable_size, get_wavetable_size_saved
     public :: check_calling_arguments, check_init_calling_arguments
+    public :: get_lwvts, get_lwvts_saved
 
     ! Parameters confined to the module
     real(wp), parameter :: ZERO = 0.0_wp
@@ -154,92 +154,7 @@ module colatitudinal_derivative_routines
         end subroutine vtsgsi
     end interface
 
-    interface
-        pure function get_size(nlat, nlon) &
-            result (return_value)
-            import :: ip
-
-            ! Dummy arguments
-            integer(ip), intent(in)  :: nlat
-            integer(ip), intent(in)  :: nlon
-            integer(ip)              :: return_value
-        end function get_size
-
-        subroutine init_routine(nlat, nlon, wavetable, error_flag)
-            import :: ip, wp
-            ! Dummy arguments
-            integer(ip), intent(in)  :: nlat
-            integer(ip), intent(in)  :: nlon
-            real(wp),    intent(out) :: wavetable(:)
-            integer(ip), intent(out) :: error_flag
-        end subroutine init_routine
-    end interface
-
 contains
-
-    subroutine initialize_wavetable(nlat, nlon, wavetable, get_required_size, &
-        init_wavetable_routine, error_flag)
-
-        ! Dummy arguments
-        integer(ip),           intent(in)  :: nlat
-        integer(ip),           intent(in)  :: nlon
-        real(wp), allocatable, intent(out) :: wavetable(:)
-        integer(ip),           intent(out) :: error_flag
-        procedure(get_size)                :: get_required_size
-        procedure(init_routine)            :: init_wavetable_routine
-
-        ! Local variables
-        integer(ip) :: required_size
-
-        ! Get required workspace size
-        required_size = get_required_size(nlat, nlon)
-
-        ! Allocate memory
-        allocate (wavetable(required_size), stat=error_flag)
-
-        ! Check error flag
-        if (error_flag /= 0) return
-
-        ! Initialize wavetable
-        call init_wavetable_routine(nlat, nlon, wavetable, error_flag)
-
-    end subroutine initialize_wavetable
-
-    subroutine initialize_vtses(nlat, nlon, wavetable, error_flag)
-
-        ! Dummy arguments
-        integer(ip),           intent(in)  :: nlat
-        integer(ip),           intent(in)  :: nlon
-        real(wp), allocatable, intent(out) :: wavetable(:)
-        integer(ip),           intent(out) :: error_flag
-
-        call initialize_wavetable(nlat, nlon, wavetable, &
-            get_wavetable_size_saved, vtsesi, error_flag)
-
-        ! Check error flag
-        if (error_flag /= 0) then
-            error stop "Failed to initialize wavetable for vtses"
-        end if
-
-    end subroutine initialize_vtses
-
-    subroutine initialize_vtsgs(nlat, nlon, wavetable, error_flag)
-
-        ! Dummy arguments
-        integer(ip),           intent(in)  :: nlat
-        integer(ip),           intent(in)  :: nlon
-        real(wp), allocatable, intent(out) :: wavetable(:)
-        integer(ip),           intent(out) :: error_flag
-
-        call initialize_wavetable(nlat, nlon, wavetable, &
-            get_wavetable_size_saved, vtsgsi, error_flag)
-
-        ! Check error flag
-        if (error_flag /= 0) then
-            error stop "Failed to initialize wavetable for vtsgs"
-        end if
-
-    end subroutine initialize_vtsgs
 
     subroutine initialize_vtsec(nlat, nlon, wavetable, error_flag)
 
@@ -249,8 +164,12 @@ contains
         real(wp), allocatable, intent(out) :: wavetable(:)
         integer(ip),           intent(out) :: error_flag
 
-        call initialize_wavetable(nlat, nlon, wavetable, &
-            get_wavetable_size, vtseci, error_flag)
+        ! Local variables
+        type(SpherepackUtility) :: util
+
+        ! Initialize wavetable
+        call util%initialize_wavetable(nlat, nlon, wavetable, &
+            get_lwvts, vtseci, error_flag)
 
         ! Check error flag
         if (error_flag /= 0) then
@@ -267,8 +186,12 @@ contains
         real(wp), allocatable, intent(out) :: wavetable(:)
         integer(ip),           intent(out) :: error_flag
 
-        call initialize_wavetable(nlat, nlon, wavetable, &
-            get_wavetable_size, vtsgci, error_flag)
+        ! Local variables
+        type(SpherepackUtility) :: util
+
+        ! Initialize wavetable
+        call util%initialize_wavetable(nlat, nlon, wavetable, &
+            get_lwvts, vtsgci, error_flag)
 
         ! Check error flag
         if (error_flag /= 0) then
@@ -276,6 +199,50 @@ contains
         end if
 
     end subroutine initialize_vtsgc
+
+    subroutine initialize_vtses(nlat, nlon, wavetable, error_flag)
+
+        ! Dummy arguments
+        integer(ip),           intent(in)  :: nlat
+        integer(ip),           intent(in)  :: nlon
+        real(wp), allocatable, intent(out) :: wavetable(:)
+        integer(ip),           intent(out) :: error_flag
+
+        ! Local variables
+        type(SpherepackUtility) :: util
+
+        ! Initialize wavetable
+        call util%initialize_wavetable(nlat, nlon, wavetable, &
+            get_lwvts_saved, vtsesi, error_flag)
+
+        ! Check error flag
+        if (error_flag /= 0) then
+            error stop "Failed to initialize wavetable for vtses"
+        end if
+
+    end subroutine initialize_vtses
+
+    subroutine initialize_vtsgs(nlat, nlon, wavetable, error_flag)
+
+        ! Dummy arguments
+        integer(ip),           intent(in)  :: nlat
+        integer(ip),           intent(in)  :: nlon
+        real(wp), allocatable, intent(out) :: wavetable(:)
+        integer(ip),           intent(out) :: error_flag
+
+        ! Local variables
+        type(SpherepackUtility) :: util
+
+        ! Initialize wavetable
+        call util%initialize_wavetable(nlat, nlon, wavetable, &
+            get_lwvts_saved, vtsgsi, error_flag)
+
+        ! Check error flag
+        if (error_flag /= 0) then
+            error stop "Failed to initialize wavetable for vtsgs"
+        end if
+
+    end subroutine initialize_vtsgs
 
     subroutine check_init_calling_arguments(&
         nlat, nlon, wvts, error_flag, required_size)
@@ -349,7 +316,7 @@ contains
 
     end subroutine check_calling_arguments
 
-    pure function get_wavetable_size(nlat, nlon) &
+    pure function get_lwvts(nlat, nlon) &
         result (return_value)
 
         ! Dummy arguments
@@ -366,9 +333,9 @@ contains
         labc = 3*(max(mmax-2, 0)*(2 * nlat - mmax - 1))/2
         return_value = 2*(lzz1 + labc) + nlon + 15
 
-    end function get_wavetable_size
+    end function get_lwvts
 
-    pure function get_wavetable_size_saved(nlat, nlon) &
+    pure function get_lwvts_saved(nlat, nlon) &
         result (return_value)
 
         ! Dummy arguments
@@ -384,6 +351,6 @@ contains
         lzimn = (imid * mmax * (2*nlat - mmax + 1))/2
         return_value = (2 * lzimn) + nlon + 15
 
-    end function get_wavetable_size_saved
+    end function get_lwvts_saved
 
 end module colatitudinal_derivative_routines

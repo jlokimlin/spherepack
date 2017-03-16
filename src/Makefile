@@ -360,6 +360,7 @@ divergence_routines.o: \
 spherepack_precision.o \
 scalar_synthesis_routines.o \
 vector_synthesis_routines.o \
+type_ScalarHarmonic.o \
 divergence_routines.f90
 	$(FC) $(FFLAGS) -c divergence_routines.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)

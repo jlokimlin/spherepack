@@ -210,108 +210,61 @@ contains
         integer(ip) :: ls, mab, nln, lwork
         integer(ip) :: imid, mmax, lpimn
 
-        associate (lshsgs => size(wshsgs))
+        !  Compute constants
+        imid = (nlat + 1)/2
+        mmax = min(nlat, (nlon+2)/2)
+        lpimn = (imid*mmax*(2*nlat-mmax+1))/2
+        n2 = (nlat + 1)/2
+        n1 = min((nlon+2)/2, nlat)
+        required_wavetable_size=nlat*(3*(n1+n2)-2)+(n1-1)*(n2*(2*nlat-n1)-3*n1)/2+nlon+15
 
-            !  Compute constants
-            imid = (nlat + 1)/2
-            mmax = min(nlat, (nlon+2)/2)
-            lpimn = (imid*mmax*(2*nlat-mmax+1))/2
-            n2 = (nlat + 1)/2
-            n1 = min((nlon+2)/2, nlat)
-            required_wavetable_size=nlat*(3*(n1+n2)-2)+(n1-1)*(n2*(2*nlat-n1)-3*n1)/2+nlon+15
+        !  verify unsaved workspace (add to what shses requires, file f3)
+        select case (isym)
+            case (0)
+                ls = nlat
+            case default
+                ls = imid
+        end select
 
-            !  verify unsaved workspace (add to what shses requires, file f3)
-            select case (isym)
-                case (0)
-                    ls = nlat
-                case default
-                    ls = imid
-            end select
+        nln = nt*ls*nlon
 
-            nln = nt*ls*nlon
+        !  set first dimension for a, b (as required by shses)
+        mab = min(nlat, nlon/2+1)
+        mn = mab*nlat*nt
 
-            !  set first dimension for a, b (as required by shses)
-            mab = min(nlat, nlon/2+1)
-            mn = mab*nlat*nt
+        ! Check calling arguments
+        if (nlat < 3) then
+            ierror = 1
+        else if (nlon < 4) then
+            ierror = 2
+        else if (isym < 0 .or. isym > 2) then
+            ierror = 3
+        else if (nt < 0) then
+            ierror = 4
+        else if (&
+            (isym == 0 .and. idiv < nlat) &
+            .or. &
+            (isym > 0 .and. idiv < imid) &
+            ) then
+            ierror = 5
+        else if (jdiv < nlon) then
+            ierror = 6
+        else if (mdb < min(nlat, (nlon + 1)/2)) then
+            ierror = 7
+        else if (ndb < nlat) then
+            ierror = 8
+        else if (size(wshsgs) < required_wavetable_size) then
+            ierror = 9
+        else
+            ierror = 0
+        end if
 
-            ! Check calling arguments
-            if (nlat < 3) then
-                ierror = 1
-            else if (nlon < 4) then
-                ierror = 2
-            else if (isym < 0 .or. isym > 2) then
-                ierror = 3
-            else if (nt < 0) then
-                ierror = 4
-            else if (&
-                (isym == 0 .and. idiv < nlat) &
-                .or. &
-                (isym > 0 .and. idiv < imid) &
-                ) then
-                ierror = 5
-            else if (jdiv < nlon) then
-                ierror = 6
-            else if (mdb < min(nlat, (nlon + 1)/2)) then
-                ierror = 7
-            else if (ndb < nlat) then
-                ierror = 8
-            else if (lshsgs < required_wavetable_size) then
-                ierror = 9
-            else
-                ierror = 0
-            end if
+        ! Check error flag
+        if (ierror /= 0) return
 
-            ! Check error flag
-            if (ierror /= 0) return
-
-            ! Set required workspace size
-            lwork = nln+ls*nlon+2*mn+nlat
-
-            block
-                real(wp) :: work(lwork)
-                integer(ip) :: ia, ib, iis, iwk, lwk
-
-                ! Set workspace pointers
-                ia = 1
-                ib = ia+mn
-                iis = ib+mn
-                iwk = iis+nlat
-                lwk = lwork-2*mn-nlat
-
-                call divgs_lower_utility_routine(nlat, nlon, isym, nt, divg, idiv, &
-                    jdiv, br, bi, mdb, ndb, work(ia:), work(ib:), mab, work(iis:), &
-                    wshsgs, lshsgs, work(iwk:), lwk, ierror)
-            end block
-        end associate
+        call divergence_lower_utility_routine(nlat, nlon, isym, nt, divg, &
+            idiv, jdiv, br, bi, wshsgs, shsgs, ierror)
 
     end subroutine divgs
-
-    subroutine divgs_lower_utility_routine(nlat, nlon, isym, nt, divg, idiv, jdiv, br, bi, mdb, ndb, &
-        a, b, mab, sqnn, wshsgs, lshsgs, wk, lwk, ierror)
-        
-        ! Dummy arguments
-        real(wp) :: divg(idiv, jdiv, nt), br(mdb, ndb, nt), bi(mdb, ndb, nt)
-        real(wp) :: a(mab, nlat, nt), b(mab, nlat, nt), sqnn(nlat)
-        integer(ip) :: idiv
-        integer(ip) :: ierror
-        integer(ip) :: isym
-        integer(ip) :: jdiv
-        integer(ip) :: lshsgs
-        integer(ip) :: lwk
-        integer(ip) :: mab
-        integer(ip) :: mdb
-        integer(ip) :: ndb
-        integer(ip) :: nlat
-        integer(ip) :: nlon
-        integer(ip) :: nt
-        real(wp)    :: wshsgs(lshsgs), wk(lwk)
-
-        call perform_setup_for_divergence(nlon, a, b, br, bi, sqnn)
-
-        ! Synthesize a, b into divg
-        call shsgs(nlat, nlon, isym, nt, divg, idiv, jdiv, a, b, &
-            mab, nlat, wshsgs, ierror)
-
-    end subroutine divgs_lower_utility_routine
 
 end submodule divergence_gaussian_grid_saved

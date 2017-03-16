@@ -398,7 +398,7 @@ contains
 
         ! Check calling arguments
         call check_init_calling_arguments(&
-            nlat, nlon, wvts, ierror, get_wavetable_size_saved(nlat,nlon))
+            nlat, nlon, wvts, ierror, get_lwvts_saved(nlat,nlon))
 
         ! Check error flag
         if (ierror /= 0) return

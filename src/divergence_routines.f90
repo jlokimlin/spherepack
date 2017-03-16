@@ -4,11 +4,18 @@ module divergence_routines
         wp, & ! working precision
         ip ! integer precision
 
+    use spherepack_interfaces, only: &
+        scalar_synthesis, &
+        vector_synthesis
+
     use scalar_synthesis_routines, only: &
         shsec, shses, shsgc, shsgs
 
     use vector_synthesis_routines, only: &
         vhses, vhsec, vhsgc, vhsgs
+
+    use type_ScalarHarmonic, only: &
+        ScalarHarmonic
 
     ! Explicit typing only
     implicit none
@@ -19,6 +26,7 @@ module divergence_routines
     public :: idivec, idives, idivgc, idivgs
     public :: perform_setup_for_inversion
     public :: perform_setup_for_divergence
+    public :: divergence_lower_utility_routine
 
     ! Parameters confined to the module
     real(wp), parameter :: ZERO = 0.0_wp
@@ -325,5 +333,49 @@ contains
         end associate
 
     end subroutine perform_setup_for_inversion
+
+    subroutine divergence_lower_utility_routine(nlat, nlon, isym, nt, dv, &
+        idv, jdv, br, bi, wavetable, synth_routine, error_flag)
+
+        ! Dummy arguments
+        integer(ip), intent(in)     :: nlat
+        integer(ip), intent(in)     :: nlon
+        integer(ip), intent(in)     :: isym
+        integer(ip), intent(in)     :: nt
+        real(wp),    intent(out)    :: dv(idv, jdv, nt)
+        integer(ip), intent(in)     :: idv
+        integer(ip), intent(in)     :: jdv
+        real(wp),    intent(in)     :: br(:,:,:)
+        real(wp),    intent(in)     :: bi(:,:,:)
+        real(wp),    intent(in)     :: wavetable(:)
+        procedure(scalar_synthesis) :: synth_routine
+        integer(ip), intent(out)    :: error_flag
+
+        block
+            real(wp)             :: sqnn(nlat)
+            type(ScalarHarmonic) :: harmonic
+
+            ! Allocate memory
+            harmonic = ScalarHarmonic(nlat, nlon, nt)
+
+            associate( &
+                a => harmonic%real_component, &
+                b => harmonic%imaginary_component, &
+                mab => harmonic%ORDER_M &
+                )
+
+                call perform_setup_for_divergence(nlon, a, b, br, bi, sqnn)
+
+                ! Synthesize a, b into divg
+                call synth_routine(nlat, nlon, isym, nt, dv, idv, jdv, a, b, &
+                    mab, nlat, wavetable, error_flag)
+            end associate
+
+            ! Release memory
+            call harmonic%destroy()
+
+        end block
+
+    end subroutine divergence_lower_utility_routine
 
 end module divergence_routines
