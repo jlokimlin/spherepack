@@ -6,7 +6,11 @@ module vector_analysis_routines
         PI
 
     use type_SpherepackUtility, only: &
-        SpherepackUtility
+        SpherepackUtility, &
+        get_lvhaec, &
+        get_lvhagc, &
+        get_lvhaes, &
+        get_lvhags
 
     use gaussian_latitudes_and_weights_routines, only: &
         compute_gaussian_latitudes_and_weights
@@ -314,7 +318,7 @@ contains
 
     end subroutine analysis_setup
 
-        subroutine initialize_vhaec(nlat, nlon, wavetable, error_flag)
+    subroutine initialize_vhaec(nlat, nlon, wavetable, error_flag)
 
         ! Dummy arguments
         integer(ip),           intent(in)  :: nlat
@@ -327,7 +331,7 @@ contains
 
         ! Initialize wavetable
         call util%initialize_wavetable(nlat, nlon, wavetable, &
-            util%get_lvhaec, vhaeci)
+            get_lvhaec, vhaeci, error_flag)
 
     end subroutine initialize_vhaec
 
@@ -344,7 +348,7 @@ contains
 
         ! Initialize wavetable
         call util%initialize_wavetable(nlat, nlon, wavetable, &
-            util%get_lvhaes, vhaesi)
+            get_lvhaes, vhaesi, error_flag)
 
     end subroutine initialize_vhaes
 
@@ -361,7 +365,7 @@ contains
 
         ! Initialize wavetable
         call util%initialize_wavetable(nlat, nlon, wavetable, &
-            util%get_lvhagc, vhagci)
+            get_lvhagc, vhagci, error_flag)
 
     end subroutine initialize_vhagc
 
@@ -378,7 +382,7 @@ contains
 
         ! Initialize wavetable
         call util%initialize_wavetable(nlat, nlon, wavetable, &
-            util%get_lvhags, vhagsi)
+            get_lvhags, vhagsi, error_flag)
 
     end subroutine initialize_vhags
 

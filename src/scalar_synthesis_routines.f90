@@ -5,7 +5,11 @@ module scalar_synthesis_routines
         ip ! integer precision
 
     use type_SpherepackUtility, only: &
-        SpherepackUtility
+        SpherepackUtility, &
+        get_lshsec, &
+        get_lshsgc, &
+        get_lshses, &
+        get_lshsgs
 
     use gaussian_latitudes_and_weights_routines, only: &
         compute_gaussian_latitudes_and_weights
@@ -170,7 +174,7 @@ contains
 
         ! Initialize wavetable
         call util%initialize_wavetable(nlat, nlon, wavetable, &
-            util%get_lshsec, shseci)
+            get_lshsec, shseci, error_flag)
 
     end subroutine initialize_shsec
 
@@ -187,7 +191,7 @@ contains
 
         ! Initialize wavetable
         call util%initialize_wavetable(nlat, nlon, wavetable, &
-            util%get_lshses, shsesi)
+            get_lshses, shsesi, error_flag)
 
     end subroutine initialize_shses
 
@@ -204,7 +208,7 @@ contains
 
         ! Initialize wavetable
         call util%initialize_wavetable(nlat, nlon, wavetable, &
-            util%get_lshsgc, shsgci)
+            get_lshsgc, shsgci, error_flag)
 
     end subroutine initialize_shsgc
 
@@ -221,7 +225,7 @@ contains
 
         ! Initialize wavetable
         call util%initialize_wavetable(nlat, nlon, wavetable, &
-            util%get_lshsgs, shsgsi)
+            get_lshsgs, shsgsi, error_flag)
 
     end subroutine initialize_shsgs
 

@@ -42,7 +42,11 @@ module type_SpherepackUtility
         even, odd
 
     use type_WavetableUtility, only: &
-        WavetableUtility
+        WavetableUtility, &
+        get_lshaec, get_lshagc, get_lshaes, get_lshags, &
+        get_lshsec, get_lshsgc, get_lshses, get_lshsgs, &
+        get_lvhaec, get_lvhagc, get_lvhaes, get_lvhags, &
+        get_lvhsec, get_lvhsgc, get_lvhses, get_lvhsgs
 
     use type_RealPeriodicFastFourierTransform, only: &
         RealPeriodicFastFourierTransform
@@ -53,6 +57,18 @@ module type_SpherepackUtility
     ! Everything is private unless stated otherwise
     private
     public :: SpherepackUtility
+    public :: get_lshaec, get_lshagc, get_lshaes, get_lshags
+    public :: get_lshsec, get_lshsgc, get_lshses, get_lshsgs
+    public :: get_lvhaec, get_lvhagc, get_lvhaes, get_lvhags
+    public :: get_lvhsec, get_lvhsgc, get_lvhses, get_lvhsgs
+
+    ! Parameters confined to the module
+    real(wp), parameter :: ZERO = 0.0_wp
+    real(wp), parameter :: HALF = 0.5_wp
+    real(wp), parameter :: ONE = 1.0_wp
+    real(wp), parameter :: TWO = 2.0_wp
+    real(wp), parameter :: THREE = 3.0_wp
+    real(wp), parameter :: SIX = 6.0_wp
 
     type, public, extends(WavetableUtility) :: SpherepackUtility
         ! Type components
@@ -83,14 +99,6 @@ module type_SpherepackUtility
         procedure, nopass :: zwin
         procedure, nopass :: zwinit
     end type SpherepackUtility
-
-    ! Parameters confined to the module
-    real(wp),    parameter :: ZERO = 0.0_wp
-    real(wp),    parameter :: HALF = 0.5_wp
-    real(wp),    parameter :: ONE = 1.0_wp
-    real(wp),    parameter :: TWO = 2.0_wp
-    real(wp),    parameter :: THREE = 3.0_wp
-    real(wp),    parameter :: SIX = 6.0_wp
 
 contains
 

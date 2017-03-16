@@ -14,6 +14,10 @@ module type_WavetableUtility
     ! Everything is private unless stated otherwise
     private
     public :: WavetableUtility
+    public :: get_lshaec, get_lshagc, get_lshaes, get_lshags
+    public :: get_lshsec, get_lshsgc, get_lshses, get_lshsgs
+    public :: get_lvhaec, get_lvhagc, get_lvhaes, get_lvhags
+    public :: get_lvhsec, get_lvhsgc, get_lvhses, get_lvhsgs
 
     type, public :: WavetableUtility
     contains

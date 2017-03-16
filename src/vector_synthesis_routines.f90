@@ -6,7 +6,11 @@ module vector_synthesis_routines
         PI
 
     use type_SpherepackUtility, only: &
-        SpherepackUtility
+        SpherepackUtility, &
+        get_lvhsec, &
+        get_lvhsgc, &
+        get_lvhses, &
+        get_lvhsgs
 
     use gaussian_latitudes_and_weights_routines, only: &
         compute_gaussian_latitudes_and_weights
@@ -292,7 +296,7 @@ contains
 
         ! Initialize wavetable
         call util%initialize_wavetable(nlat, nlon, wavetable, &
-            util%get_lvhsec, vhseci)
+            get_lvhsec, vhseci, error_flag)
 
     end subroutine initialize_vhsec
 
@@ -309,7 +313,7 @@ contains
 
         ! Initialize wavetable
         call util%initialize_wavetable(nlat, nlon, wavetable, &
-            util%get_lvhses, vhsesi)
+            get_lvhses, vhsesi, error_flag)
 
     end subroutine initialize_vhses
 
@@ -326,7 +330,7 @@ contains
 
         ! Initialize wavetable
         call util%initialize_wavetable(nlat, nlon, wavetable, &
-            util%get_lvhsgc, vhsgci)
+            get_lvhsgc, vhsgci, error_flag)
 
     end subroutine initialize_vhsgc
 
@@ -343,7 +347,7 @@ contains
 
         ! Initialize wavetable
         call util%initialize_wavetable(nlat, nlon, wavetable, &
-            util%get_lvhsgs, vhsgsi)
+            get_lvhsgs, vhsgsi, error_flag)
 
     end subroutine initialize_vhsgs
 

@@ -8,7 +8,11 @@ module scalar_analysis_routines
         ScalarHarmonic
 
     use type_SpherepackUtility, only: &
-        SpherepackUtility
+        SpherepackUtility, &
+        get_lshaec, &
+        get_lshagc, &
+        get_lshaes, &
+        get_lshags
 
     use gaussian_latitudes_and_weights_routines, only: &
         compute_gaussian_latitudes_and_weights
@@ -261,7 +265,7 @@ contains
 
         ! Initialize wavetable
         call util%initialize_wavetable(nlat, nlon, wavetable, &
-            util%get_lshaec, shaeci)
+            get_lshaec, shaeci, error_flag)
 
     end subroutine initialize_shaec
 
@@ -278,7 +282,7 @@ contains
 
         ! Initialize wavetable
         call util%initialize_wavetable(nlat, nlon, wavetable, &
-            util%get_lshaes, shaesi)
+            get_lshaes, shaesi, error_flag)
 
     end subroutine initialize_shaes
 
@@ -295,7 +299,7 @@ contains
 
         ! Initialize wavetable
         call util%initialize_wavetable(nlat, nlon, wavetable, &
-            util%get_lshagc, shagci)
+            get_lshagc, shagci, error_flag)
 
     end subroutine initialize_shagc
 
@@ -312,7 +316,7 @@ contains
 
         ! Initialize wavetable
         call util%initialize_wavetable(nlat, nlon, wavetable, &
-            util%get_lshags, shagsi)
+            get_lshags, shagsi, error_flag)
 
     end subroutine initialize_shags
 
