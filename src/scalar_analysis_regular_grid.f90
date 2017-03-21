@@ -226,7 +226,14 @@ contains
         integer(ip), intent(out)  :: ierror
 
         ! Local variables
-        integer(ip)             :: imid, labc, ls, lzz1, mmax
+        integer(ip) :: imid
+        integer(ip) :: ist
+        
+        integer(ip) :: labc
+        integer(ip) :: ls
+        integer(ip) :: lzz1
+        integer(ip) :: mmax
+        integer(ip) :: nln, lwork
         integer(ip)             :: required_wavetable_size
         type(SpherepackUtility) :: util
 
@@ -237,9 +244,6 @@ contains
             mdab, ndab, nlat, nlon, nt, required_wavetable_size, &
             wshaec, ierror)
 
-        ! Check error flag
-        if (ierror /= 0) return
-
         mmax = min(nlat, nlon/2+1)
         imid = (nlat + 1)/2
         lzz1 = 2*nlat*imid
@@ -248,19 +252,30 @@ contains
         select case (isym)
             case (0)
                 ls = nlat
+                ist = imid
             case default
                 ls = imid
+                ist = 0
         end select
 
+        nln = nt*ls*nlon
+
+        ! Set required workspace size
+        lwork = nln+max(ls*nlon, 3*nlat*imid)
+
         block
-            integer(ip) :: iw1, iw2
-            
+            integer(ip) :: iw1, jw1, jw2, jw3
+            real(wp)    :: work(lwork)
+
             ! Set workspace pointers
-            iw1 = 1
-            iw2 = lzz1+labc+1
+            iw1 = lzz1+labc+1
+            jw1 = ist + 1
+            jw2 = nln + 1
+            jw3 = jw2
 
             call shaec_lower_utility_routine(nlat, isym, nt, g, idg, jdg, a, b, &
-                mdab, ndab, imid, ls, nlon, wshaec(iw1:), wshaec(iw2:))
+                mdab, ndab, imid, ls, nlon, &
+                work, work(jw1:), work(jw3:), wshaec, wshaec(iw1:))
         end block
 
     end subroutine shaec
@@ -362,199 +377,212 @@ contains
 
     end subroutine shaeci
 
-    subroutine shaec_lower_utility_routine(nlat, isym, nt, g, idgs, jdgs, a, b, &
-        mdab, ndab, imid, idg, jdg, wzfin, whrfft)
+    !
+    !     whrfft must have at least nlon+15 locations
+    !     wzfin must have 2*l*(nlat + 1)/2 + ((l-3)*l+2)/2 locations
+    !     zb must have 3*l*(nlat + 1)/2 locations
+    !     work must have ls*nlon locations
+    !
+    subroutine shaec_lower_utility_routine(nlat, isym, nt, g, idgs, jdgs, a, b, mdab, ndab, imid, &
+        idg, jdg, ge, go, zb, wzfin, whrfft)
 
-        real(wp) :: a
-        real(wp) :: b
-        real(wp) :: fsn
-        real(wp) :: g
+        ! Dummy arguments
+        integer(ip), intent(in)  :: nlat
+        integer(ip), intent(in)  :: isym
+        integer(ip), intent(in)  :: nt
+        real(wp),    intent(in)  :: g(idgs, jdgs, nt)
+        integer(ip), intent(in)  :: idgs
+        integer(ip), intent(in)  :: jdgs
+        real(wp),    intent(out) :: a(mdab, ndab, nt)
+        real(wp),    intent(out) :: b(mdab, ndab, nt)
+        integer(ip), intent(in)  :: mdab
+        integer(ip), intent(in)  :: ndab
+        integer(ip), intent(in)  :: imid
+        integer(ip), intent(in)  :: idg
+        integer(ip), intent(in)  :: jdg
+        real(wp),    intent(out) :: ge(idg, jdg, nt)
+        real(wp),    intent(out) :: go(idg, jdg, nt)
+        real(wp),    intent(out) :: zb(imid, nlat, 3)
+        real(wp),    intent(in)  :: wzfin(:)
+        real(wp),    intent(in)  :: whrfft(:)
+
+        ! Local variables
         integer(ip) :: i
         integer(ip) :: i3
-        integer(ip) :: idg
-        integer(ip) :: idgs
-        integer(ip) :: imid
         integer(ip) :: imm1
-        integer(ip) :: isym
         integer(ip) :: j
-        integer(ip) :: jdg
-        integer(ip) :: jdgs
         integer(ip) :: k
         integer(ip) :: ls
         integer(ip) :: m
-        integer(ip) :: mdab
         integer(ip) :: mdo
         integer(ip) :: mmax
         integer(ip) :: modl
         integer(ip) :: mp1
         integer(ip) :: mp2
-        integer(ip) :: ndab
         integer(ip) :: ndo
-        integer(ip) :: nlat
         integer(ip) :: nlon
         integer(ip) :: nlp1
         integer(ip) :: np1
         integer(ip) :: nt
-        real(wp) :: tsn
-        real(wp) :: whrfft
-        real(wp) :: wzfin
-        !
-        !     whrfft must have at least nlon+15 locations
-        !     wzfin must have 2*l*(nlat + 1)/2 + ((l-3)*l+2)/2 locations
-        !     zb must have 3*l*(nlat + 1)/2 locations
-        !     work must have ls*nlon locations
-        !
-        dimension g(idgs, jdgs, nt), a(mdab, ndab, nt), b(mdab, ndab, nt), &
-            wzfin(:), whrfft(:)
+        real(wp) :: tsn, fsn
         type(SpherepackUtility) :: util
 
-        block
-            real(wp), dimension(idg, jdg, nt)  :: g_even, g_odd
-            real(wp), dimension(imid, nlat, 3) :: zb
+        ls = idg
+        nlon = jdg
+        mmax = min(nlat, nlon/2+1)
 
-            ls = idg
-            nlon = jdg
-            mmax = min(nlat, nlon/2+1)
+        if (2*mmax-1 > nlon) then
+            mdo = mmax-1
+        else
+            mdo = mmax
+        end if
 
-            if (2*mmax-1 > nlon) then
-                mdo = mmax-1
-            else
-                mdo = mmax
-            end if
+        nlp1 = nlat+1
+        tsn = TWO/nlon
+        fsn = FOUR/nlon
+        modl = mod(nlat, 2)
 
-            nlp1 = nlat+1
-            tsn = TWO/nlon
-            fsn = FOUR/nlon
-            modl = mod(nlat, 2)
+        select case (modl)
+            case(0)
+                imm1 = imid
+            case default
+                imm1 = imid-1
+        end select
 
-            select case (modl)
-                case(0)
-                    imm1 = imid
-                case default
-                    imm1 = imid-1
-            end select
-
+        block_construct: block
             select case(isym)
                 case(0)
                     do k=1, nt
                         do i=1, imm1
                             do j=1, nlon
-                                g_even(i, j, k) = tsn*(g(i, j, k)+g(nlp1-i, j, k))
-                                g_odd(i, j, k) = tsn*(g(i, j, k)-g(nlp1-i, j, k))
+                                ge(i, j, k) = tsn*(g(i, j, k)+g(nlp1-i, j, k))
+                                go(i, j, k) = tsn*(g(i, j, k)-g(nlp1-i, j, k))
                             end do
                         end do
                     end do
                 case default
-                    g_even(1:imm1, 1:nlon, :) = fsn * g(1:imm1, 1:nlon, :)
+                    do k=1, nt
+                        do i=1, imm1
+                            do j=1, nlon
+                                ge(i, j, k) = fsn*g(i, j, k)
+                            end do
+                        end do
+                    end do
+                    if (isym == 1) exit block_construct
             end select
 
-            if ((isym /= 1) .and. odd(nlat)) then
-                g_even(1:imid, 1:nlon, :) = tsn * g(1:imid, 1:nlon, :)
-            end if
-
-            ! Fast Fourier transform
-            fft_loop: do k=1, nt
-
-                call util%hfft%forward(ls, nlon, g_even(:,:, k), ls, whrfft)
-
-                if (odd(nlon)) exit fft_loop
-
-                g_even(1:ls, nlon, k) = HALF * g_even(1:ls, nlon, k)
-
-            end do fft_loop
-
-            ! Preset coefficients to zero
-            a = ZERO
-            b = ZERO
-
-            if (isym /= 1) then
-
-                call util%zfin(2, nlat, nlon, 0, zb, i3, wzfin)
-
+            if (modl /= 0) then
                 do k=1, nt
-                    do i=1, imid
-                        do np1=1, nlat, 2
-                            a(1, np1, k) = a(1, np1, k)+zb(i, np1, i3)*g_even(i, 1, k)
-                        end do
+                    do j=1, nlon
+                        ge(imid, j, k) = tsn*g(imid, j, k)
                     end do
                 end do
-
-                select case (mod(nlat, 2))
-                    case(0)
-                        ndo = nlat-1
-                    case default
-                        ndo = nlat
-                end select
-
-                do mp1=2, mdo
-                    m = mp1-1
-                    call util%zfin(2, nlat, nlon, m, zb, i3, wzfin)
-                    do k=1, nt
-                        do i=1, imid
-                            do np1=mp1, ndo, 2
-                                a(mp1, np1, k) = a(mp1, np1, k)+zb(i, np1, i3)*g_even(i, 2*mp1-2, k)
-                                b(mp1, np1, k) = b(mp1, np1, k)+zb(i, np1, i3)*g_even(i, 2*mp1-1, k)
-                            end do
-                        end do
-                    end do
-                end do
-
-                if (mdo /= mmax .and. mmax <= ndo) then
-                    call util%zfin(2, nlat, nlon, mdo, zb, i3, wzfin)
-                    do k=1, nt
-                        do i=1, imid
-                            do np1=mmax, ndo, 2
-                                a(mmax, np1, k) = a(mmax, np1, k)+zb(i, np1, i3)*g_even(i, 2*mmax-2, k)
-                            end do
-                        end do
-                    end do
-                end if
-                if (isym == 2) return
             end if
+        end block block_construct
 
-            call util%zfin(1, nlat, nlon, 0, zb, i3, wzfin)
+        ! Fast Fourier transform
+        fft_loop: do k=1, nt
+            call util%hfft%forward(ls, nlon, ge(1, 1, k), ls, whrfft)
+            if (mod(nlon, 2) /= 0) exit fft_loop
+            ge(1:ls, nlon, k) = HALF * ge(1:ls, nlon, k)
+        end do fft_loop
+
+        do k=1, nt
+            do mp1=1, mmax
+                do np1=mp1, nlat
+                    a(mp1, np1, k) = ZERO
+                    b(mp1, np1, k) = ZERO
+                end do
+            end do
+        end do
+
+        if (isym /= 1) then
+
+            call util%zfin(2, nlat, nlon, 0, zb, i3, wzfin)
 
             do k=1, nt
-                do i=1, imm1
-                    do np1=2, nlat, 2
-                        a(1, np1, k) = a(1, np1, k)+zb(i, np1, i3)*g_odd(i, 1, k)
+                do i=1, imid
+                    do np1=1, nlat, 2
+                        a(1, np1, k) = a(1, np1, k)+zb(i, np1, i3)*ge(i, 1, k)
                     end do
                 end do
             end do
 
             select case (mod(nlat, 2))
                 case(0)
-                    ndo = nlat
-                case default
                     ndo = nlat-1
+                case default
+                    ndo = nlat
             end select
 
             do mp1=2, mdo
                 m = mp1-1
-                mp2 = mp1+1
-                call util%zfin(1, nlat, nlon, m, zb, i3, wzfin)
+                call util%zfin(2, nlat, nlon, m, zb, i3, wzfin)
                 do k=1, nt
-                    do i=1, imm1
-                        do np1=mp2, ndo, 2
-                            a(mp1, np1, k) = a(mp1, np1, k)+zb(i, np1, i3)*g_odd(i, 2*mp1-2, k)
-                            b(mp1, np1, k) = b(mp1, np1, k)+zb(i, np1, i3)*g_odd(i, 2*mp1-1, k)
+                    do i=1, imid
+                        do np1=mp1, ndo, 2
+                            a(mp1, np1, k) = a(mp1, np1, k)+zb(i, np1, i3)*ge(i, 2*mp1-2, k)
+                            b(mp1, np1, k) = b(mp1, np1, k)+zb(i, np1, i3)*ge(i, 2*mp1-1, k)
                         end do
                     end do
                 end do
             end do
 
-            mp2 = mmax+1
-            if (mdo /= mmax .and. mp2 <= ndo) then
-                call util%zfin(1, nlat, nlon, mdo, zb, i3, wzfin)
+            if (mdo /= mmax .and. mmax <= ndo) then
+                call util%zfin(2, nlat, nlon, mdo, zb, i3, wzfin)
                 do k=1, nt
-                    do i=1, imm1
-                        do np1=mp2, ndo, 2
-                            a(mmax, np1, k) = a(mmax, np1, k)+zb(i, np1, i3)*g_odd(i, 2*mmax-2, k)
+                    do i=1, imid
+                        do np1=mmax, ndo, 2
+                            a(mmax, np1, k) = a(mmax, np1, k)+zb(i, np1, i3)*ge(i, 2*mmax-2, k)
                         end do
                     end do
                 end do
             end if
-        end block
+            if (isym == 2) return
+        end if
+
+        call util%zfin(1, nlat, nlon, 0, zb, i3, wzfin)
+
+        do k=1, nt
+            do i=1, imm1
+                do np1=2, nlat, 2
+                    a(1, np1, k) = a(1, np1, k)+zb(i, np1, i3)*go(i, 1, k)
+                end do
+            end do
+        end do
+
+        select case (mod(nlat, 2))
+            case(0)
+                ndo = nlat
+            case default
+                ndo = nlat-1
+        end select
+
+        do mp1=2, mdo
+            m = mp1-1
+            mp2 = mp1+1
+            call util%zfin(1, nlat, nlon, m, zb, i3, wzfin)
+            do k=1, nt
+                do i=1, imm1
+                    do np1=mp2, ndo, 2
+                        a(mp1, np1, k) = a(mp1, np1, k)+zb(i, np1, i3)*go(i, 2*mp1-2, k)
+                        b(mp1, np1, k) = b(mp1, np1, k)+zb(i, np1, i3)*go(i, 2*mp1-1, k)
+                    end do
+                end do
+            end do
+        end do
+
+        mp2 = mmax+1
+        if (mdo /= mmax .and. mp2 <= ndo) then
+            call util%zfin(1, nlat, nlon, mdo, zb, i3, wzfin)
+            do k=1, nt
+                do i=1, imm1
+                    do np1=mp2, ndo, 2
+                        a(mmax, np1, k) = a(mmax, np1, k)+zb(i, np1, i3)*go(i, 2*mmax-2, k)
+                    end do
+                end do
+            end do
+        end if
 
     end subroutine shaec_lower_utility_routine
 

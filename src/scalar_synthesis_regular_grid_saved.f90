@@ -203,69 +203,49 @@ contains
 
         ! Local variables
         integer(ip) :: imid, ist, lpimn, ls, mmax, nln, lwork
+        integer(ip)             :: required_wavetable_size
+        type(SpherepackUtility) :: util
 
-        associate (lshses => size(wshses))
+        ! Check input arguments
+        required_wavetable_size = util%get_lshses(nlat, nlon)
 
-            mmax = min(nlat, nlon/2+1)
-            imid = (nlat + 1)/2
-            lpimn = (imid*mmax*(2*nlat-mmax+1))/2
+        call util%check_scalar_transform_inputs(isym, idg, jdg, &
+            mdab, ndab, nlat, nlon, nt, required_wavetable_size, &
+            wshses, ierror)
 
-            select case (isym)
-                case (0)
-                    ist = imid
-                    ls = nlat
-                case default
-                    ist = 0
-                    ls = imid
-            end select
+        ! Check error flag
+        if (ierror /= 0) return
 
-            nln = nt*ls*nlon
+        mmax = min(nlat, nlon/2+1)
+        imid = (nlat + 1)/2
+        lpimn = (imid*mmax*(2*nlat-mmax+1))/2
 
-            if (nlat < 3) then
-                ierror = 1
-            else if (nlon < 4) then
-                ierror = 2
-            else if (isym < 0 .or. isym > 2) then
-                ierror = 3
-            else if (nt < 0) then
-                ierror = 4
-            else if (&
-                (isym == 0 .and. idg < nlat) &
-                .or. &
-                (isym /= 0 .and. idg < (nlat + 1)/2)&
-                ) then
-                ierror = 5
-            else if (jdg < nlon) then
-                ierror = 6
-            else if (mdab < mmax) then
-                ierror = 7
-            else if (ndab < nlat) then
-                ierror = 8
-            else if (lshses < lpimn+nlon+15) then
-                ierror = 9
-            else
-                ierror = 0
-            end if
+        select case (isym)
+            case (0)
+                ist = imid
+                ls = nlat
+            case default
+                ist = 0
+                ls = imid
+        end select
 
-            ! Check error flag
-            if (ierror /= 0) return
+        nln = nt*ls*nlon
 
-            ! Set required workspace size
-            lwork = nln+ls*nlon
+        ! Set required workspace size
+        lwork = nln+ls*nlon
 
-            block
-                real(wp)    :: work(lwork)
-                integer(ip) :: iw1, iw2, iw3
+        block
+            real(wp)    :: work(lwork)
+            integer(ip) :: iw1, iw2, iw3
 
-                ! Set workspace pointer indices
-                iw1 = ist + 1
-                iw2 = nln + 1
-                iw3 = lpimn + 1
+            ! Set workspace pointer indices
+            iw1 = ist + 1
+            iw2 = nln + 1
+            iw3 = lpimn + 1
 
-                call shses_lower_utility_routine(nlat, isym, nt, g, idg, jdg, a, b, mdab, ndab, wshses, imid, &
-                    ls, nlon, work, work(iw1:), work(iw2:), wshses(iw3:))
-            end block
-        end associate
+            call shses_lower_utility_routine(nlat, isym, nt, g, idg, jdg, a, b, mdab, ndab, wshses, imid, &
+                ls, nlon, work, work(iw1:), work(iw2:), wshses(iw3:))
+        end block
 
     end subroutine shses
 

@@ -7,7 +7,7 @@
 !     *                                                               *
 !     *                      all rights reserved                      *
 !     *                                                               *
-!     *                      SPHEREPACK                               *
+!     *                          Spherepack                           *
 !     *                                                               *
 !     *       A Package of Fortran Subroutines and Programs           *
 !     *                                                               *
@@ -210,74 +210,57 @@ contains
 
         ! Local variables
         integer(ip) :: mtrunc, l1, l2, lat, late, lwork
+        integer(ip)             :: required_wavetable_size
+        type(SpherepackUtility) :: util
 
-        associate (lshsgc => size(wshsgc))
+        ! Check input arguments
+        required_wavetable_size = util%get_lshsgc(nlat, nlon)
 
-            ! Set limit for m in a(m, n), b(m, n) computation
-            mtrunc = min((nlon+2)/2, nlat)
+        call util%check_scalar_transform_inputs(mode, idg, jdg, &
+            mdab, ndab, nlat, nlon, nt, required_wavetable_size, &
+            wshsgc, ierror)
 
-            ! Set gaussian point nearest equator pointer
-            late = (nlat+mod(nlat, 2))/2
+        ! Check error flag
+        if (ierror /= 0) return
 
-            ! Set number of grid points for analysis/synthesis
-            select case (mode)
-                case (0)
-                    lat = nlat
-                case default
-                    lat = late
-            end select
+        ! Set limit for m in a(m, n), b(m, n) computation
+        mtrunc = min((nlon+2)/2, nlat)
 
-            l1 = mtrunc
-            l2 = late
+        ! Set gaussian point nearest equator pointer
+        late = (nlat+mod(nlat, 2))/2
 
-            ! Check calling arguments
-            if (nlat < 3) then
-                ierror = 1
-            else if (nlon < 4) then
-                ierror = 2
-            else if (mode < 0 .or. mode > 2) then
-                ierror = 3
-            else if (nt < 1) then
-                ierror = 4
-            else if (idg < lat) then
-                ierror = 5
-            else if (jdg < nlon) then
-                ierror = 6
-            else if (mdab < mtrunc) then
-                ierror = 7
-            else if (ndab < nlat) then
-                ierror = 8
-            else if (lshsgc < nlat*(2*l2+3*l1-2)+3*l1*(1-l1)/2+nlon+15) then
-                ierror = 9
-            else
-                ierror = 0
-            end if
+        ! Set number of grid points for analysis/synthesis
+        select case (mode)
+            case (0)
+                lat = nlat
+            case default
+                lat = late
+        end select
 
-            ! Check error flag
-            if (ierror /= 0) return
+        l1 = mtrunc
+        l2 = late
 
-            ! Set required workspace size
-            select case (mode)
-                case (0)
-                    lwork = nlat * (nlon * nt + max(3*l2, nlon))
-                case default
-                    lwork = l2 * (nlon * nt + max(3*nlat, nlon))
-            end select
+        ! Set required workspace size
+        select case (mode)
+            case (0)
+                lwork = nlat * (nlon * nt + max(3*l2, nlon))
+            case default
+                lwork = l2 * (nlon * nt + max(3*nlat, nlon))
+        end select
 
-            block
-                real(wp)    :: work(lwork)
-                integer(ip) :: ipmn, ifft
+        block
+            real(wp)    :: work(lwork)
+            integer(ip) :: ipmn, ifft
 
-                ! Starting address  fft values
-                ifft = nlat+2*nlat*late+3*(mtrunc*(mtrunc-1)/2+(nlat-mtrunc)*(mtrunc-1))+1
+            ! Starting address  fft values
+            ifft = nlat+2*nlat*late+3*(mtrunc*(mtrunc-1)/2+(nlat-mtrunc)*(mtrunc-1))+1
 
-                ! Set pointers for internal storage of g and legendre polys
-                ipmn = lat*nlon*nt+1
+            ! Set pointers for internal storage of g and legendre polys
+            ipmn = lat*nlon*nt+1
 
-                call shsgc_lower_utility_routine(nlat, nlon, mtrunc, lat, mode, g, idg, &
-                    jdg, nt, a, b, mdab, ndab, wshsgc, wshsgc(ifft:), late, work(ipmn:), work)
-            end block
-        end associate
+            call shsgc_lower_utility_routine(nlat, nlon, mtrunc, lat, mode, g, idg, &
+                jdg, nt, a, b, mdab, ndab, wshsgc, wshsgc(ifft:), late)
+        end block
 
     end subroutine shsgc
 
@@ -427,13 +410,13 @@ contains
 
     end subroutine shsgci
 
-    subroutine shsgc_lower_utility_routine(nlat, nlon, l, lat, mode, gs, idg, jdg, nt, a, b, mdab, &
-        ndab, w, wfft, late, pmn, g)
+    subroutine shsgc_lower_utility_routine(nlat, nlon, l, lat, mode, gs, idg, jdg, &
+        nt, a, b, mdab, ndab, w, wfft, late)
 
-        real(wp) :: a
-        real(wp) :: b
-        real(wp) :: g
-        real(wp) :: gs
+        ! Dummy arguments
+        real(wp) :: a(mdab, ndab, nt), b(mdab, ndab, nt)
+        real(wp) :: gs(idg, jdg, nt)
+        real(wp) :: w(:), wfft(:)
         integer(ip) :: i
         integer(ip) :: idg
         integer(ip) :: is
@@ -460,180 +443,188 @@ contains
         integer(ip) :: np1
         integer(ip) :: ns
         integer(ip) :: nt
-        real(wp) :: pmn
         real(wp) :: t1
         real(wp) :: t2
         real(wp) :: t3
         real(wp) :: t4
-        real(wp) :: w
-        real(wp) :: wfft
-        dimension gs(idg, jdg, nt), a(mdab, ndab, nt), b(mdab, ndab, nt)
-        dimension w(*), pmn(nlat, late, 3), g(lat, nlon, nt), wfft(*)
-
         type(SpherepackUtility) :: util
 
         !     reconstruct fourier coefficients in g on gaussian grid
         !     using coefficients in a, b
         !     set m+1 limit for b coefficient calculation
-        lm1 = l
-        if (nlon == 2*l-2) lm1 = l-1
 
-        !     initialize to zero
-        g = ZERO
+        block
+            real(wp) :: pmn(nlat, late, 3), g(lat, nlon, nt)
 
-        if (mode == 0) then
-            !     set first column in g
-            m = 0
-            !     compute pmn for all i and n=m, ..., l-1
-            call util%compute_legendre_polys_for_gaussian_grids(mode, l, nlat, m, w, pmn, km)
-            do k=1, nt
-                !     n even
-                do np1=1, nlat, 2
-                    do i=1, late
-                        g(i, 1, k) = g(i, 1, k)+a(1, np1, k)*pmn(np1, i, km)
-                    end do
-                end do
-                !     n odd
-                nl2 = nlat/2
-                do np1=2, nlat, 2
-                    do i=1, nl2
-                        is = nlat-i+1
-                        g(is, 1, k) = g(is, 1, k)+a(1, np1, k)*pmn(np1, i, km)
-                    end do
-                end do
-                !     restore m=0 coefficents (reverse implicit even/odd reduction)
-                do i=1, nl2
-                    is = nlat-i+1
-                    t1 = g(i, 1, k)
-                    t3 = g(is, 1, k)
-                    g(i, 1, k) = t1+t3
-                    g(is, 1, k) = t1-t3
-                end do
-            end do
-            !     sweep  columns of g for which b is available
-            do mp1=2, lm1
-                m = mp1-1
-                mp2 = m+2
-                !     compute pmn for all i and n=m, ..., l-1
-                call util%compute_legendre_polys_for_gaussian_grids(mode, l, nlat, m, w, pmn, km)
-                do k=1, nt
-                    !     for n-m even store (g(i, p, k)+g(nlat-i+1, p, k))/2 in g(i, p, k) p=2*m, 
-                    !     for i=1, ..., late
-                    do np1=mp1, nlat, 2
-                        do i=1, late
-                            g(i, 2*m, k) = g(i, 2*m, k)+a(mp1, np1, k)*pmn(np1, i, km)
-                            g(i, 2*m+1, k) = g(i, 2*m+1, k)+b(mp1, np1, k)*pmn(np1, i, km)
+            if (nlon == 2*l-2) then
+                lm1 = l-1
+            else
+                lm1 = l
+            end if
+
+            ! Initialize to zero
+            g = ZERO
+
+            select case (mode)
+                case (0)
+                    ! Set first column in g
+                    m = 0
+
+                    ! Compute pmn for all i and n=m, ..., l-1
+                    call util%compute_legendre_polys_for_gaussian_grids(mode, l, nlat, m, w, pmn, km)
+
+                    do k=1, nt
+                        !     n even
+                        do np1=1, nlat, 2
+                            do i=1, late
+                                g(i, 1, k) = g(i, 1, k)+a(1, np1, k)*pmn(np1, i, km)
+                            end do
                         end do
-                    end do
-                    !     for n-m odd store g(i, p, k)-g(nlat-i+1, p, k) in g(nlat-i+1, p, k)
-                    !     for i=1, ..., nlat/2 (p=2*m, p=2*m+1)
-                    do np1=mp2, nlat, 2
+                        !     n odd
+                        nl2 = nlat/2
+                        do np1=2, nlat, 2
+                            do i=1, nl2
+                                is = nlat-i+1
+                                g(is, 1, k) = g(is, 1, k)+a(1, np1, k)*pmn(np1, i, km)
+                            end do
+                        end do
+                        !     restore m=0 coefficents (reverse implicit even/odd reduction)
                         do i=1, nl2
                             is = nlat-i+1
-                            g(is, 2*m, k) = g(is, 2*m, k)+a(mp1, np1, k)*pmn(np1, i, km)
-                            g(is, 2*m+1, k) = g(is, 2*m+1, k)+b(mp1, np1, k)*pmn(np1, i, km)
+                            t1 = g(i, 1, k)
+                            t3 = g(is, 1, k)
+                            g(i, 1, k) = t1+t3
+                            g(is, 1, k) = t1-t3
                         end do
                     end do
-                    !     now set fourier coefficients using even-odd reduction above
-                    do i=1, nl2
-                        is = nlat-i+1
-                        t1 = g(i, 2*m, k)
-                        t2 = g(i, 2*m+1, k)
-                        t3 = g(is, 2*m, k)
-                        t4 = g(is, 2*m+1, k)
-                        g(i, 2*m, k) = t1+t3
-                        g(i, 2*m+1, k) = t2+t4
-                        g(is, 2*m, k) = t1-t3
-                        g(is, 2*m+1, k) = t2-t4
-                    end do
-                end do
-            end do
-            !     set last column (using a only)
-            if (nlon== l+l-2) then
-                m = l-1
-                call util%compute_legendre_polys_for_gaussian_grids(mode, l, nlat, m, w, pmn, km)
-                do k=1, nt
-                    !     n-m even
-                    do np1=l, nlat, 2
-                        do i=1, late
-                            g(i, nlon, k) = g(i, nlon, k)+TWO*a(l, np1, k)*pmn(np1, i, km)
+
+                    ! Sweep  columns of g for which b is available
+                    do mp1=2, lm1
+                        m = mp1-1
+                        mp2 = m+2
+                        !     compute pmn for all i and n=m, ..., l-1
+                        call util%compute_legendre_polys_for_gaussian_grids(mode, l, nlat, m, w, pmn, km)
+                        do k=1, nt
+                            !     for n-m even store (g(i, p, k)+g(nlat-i+1, p, k))/2 in g(i, p, k) p=2*m,
+                            !     for i=1, ..., late
+                            do np1=mp1, nlat, 2
+                                do i=1, late
+                                    g(i, 2*m, k) = g(i, 2*m, k)+a(mp1, np1, k)*pmn(np1, i, km)
+                                    g(i, 2*m+1, k) = g(i, 2*m+1, k)+b(mp1, np1, k)*pmn(np1, i, km)
+                                end do
+                            end do
+                            !     for n-m odd store g(i, p, k)-g(nlat-i+1, p, k) in g(nlat-i+1, p, k)
+                            !     for i=1, ..., nlat/2 (p=2*m, p=2*m+1)
+                            do np1=mp2, nlat, 2
+                                do i=1, nl2
+                                    is = nlat-i+1
+                                    g(is, 2*m, k) = g(is, 2*m, k)+a(mp1, np1, k)*pmn(np1, i, km)
+                                    g(is, 2*m+1, k) = g(is, 2*m+1, k)+b(mp1, np1, k)*pmn(np1, i, km)
+                                end do
+                            end do
+                            !     now set fourier coefficients using even-odd reduction above
+                            do i=1, nl2
+                                is = nlat-i+1
+                                t1 = g(i, 2*m, k)
+                                t2 = g(i, 2*m+1, k)
+                                t3 = g(is, 2*m, k)
+                                t4 = g(is, 2*m+1, k)
+                                g(i, 2*m, k) = t1+t3
+                                g(i, 2*m+1, k) = t2+t4
+                                g(is, 2*m, k) = t1-t3
+                                g(is, 2*m+1, k) = t2-t4
+                            end do
                         end do
                     end do
-                    lp1 = l+1
-                    !     n-m odd
-                    do np1=lp1, nlat, 2
-                        do i=1, nl2
-                            is = nlat-i+1
-                            g(is, nlon, k) = g(is, nlon, k)+TWO*a(l, np1, k)*pmn(np1, i, km)
+                    !     set last column (using a only)
+                    if (nlon== l+l-2) then
+                        m = l-1
+                        call util%compute_legendre_polys_for_gaussian_grids(mode, l, nlat, m, w, pmn, km)
+                        do k=1, nt
+                            !     n-m even
+                            do np1=l, nlat, 2
+                                do i=1, late
+                                    g(i, nlon, k) = g(i, nlon, k)+TWO*a(l, np1, k)*pmn(np1, i, km)
+                                end do
+                            end do
+                            lp1 = l+1
+                            !     n-m odd
+                            do np1=lp1, nlat, 2
+                                do i=1, nl2
+                                    is = nlat-i+1
+                                    g(is, nlon, k) = g(is, nlon, k)+TWO*a(l, np1, k)*pmn(np1, i, km)
+                                end do
+                            end do
+                            do i=1, nl2
+                                is = nlat-i+1
+                                t1 = g(i, nlon, k)
+                                t3 = g(is, nlon, k)
+                                g(i, nlon, k)= t1+t3
+                                g(is, nlon, k)= t1-t3
+                            end do
+                        end do
+                    end if
+                case default
+                    !     half sphere
+                    !     set first column in g
+                    m = 0
+                    meo = 1
+                    if (mode == 1) meo = 2
+                    ms = m+meo
+                    !     compute pmn for all i and n=m, ..., l-1
+                    call util%compute_legendre_polys_for_gaussian_grids(mode, l, nlat, m, w, pmn, km)
+                    do k=1, nt
+                        do np1=ms, nlat, 2
+                            do i=1, late
+                                g(i, 1, k) = g(i, 1, k)+a(1, np1, k)*pmn(np1, i, km)
+                            end do
                         end do
                     end do
-                    do i=1, nl2
-                        is = nlat-i+1
-                        t1 = g(i, nlon, k)
-                        t3 = g(is, nlon, k)
-                        g(i, nlon, k)= t1+t3
-                        g(is, nlon, k)= t1-t3
+                    !     sweep interior columns of g
+                    do mp1=2, lm1
+                        m = mp1-1
+                        ms = m+meo
+                        !     compute pmn for all i and n=m, ..., l-1
+                        call util%compute_legendre_polys_for_gaussian_grids(mode, l, nlat, m, w, pmn, km)
+                        do k=1, nt
+                            do np1=ms, nlat, 2
+                                do i=1, late
+                                    g(i, 2*m, k) = g(i, 2*m, k)+a(mp1, np1, k)*pmn(np1, i, km)
+                                    g(i, 2*m+1, k) = g(i, 2*m+1, k)+b(mp1, np1, k)*pmn(np1, i, km)
+                                end do
+                            end do
+                        end do
                     end do
-                end do
-            end if
-        else
-            !     half sphere (mode.ne.0)
-            !     set first column in g
-            m = 0
-            meo = 1
-            if (mode == 1) meo = 2
-            ms = m+meo
-            !     compute pmn for all i and n=m, ..., l-1
-            call util%compute_legendre_polys_for_gaussian_grids(mode, l, nlat, m, w, pmn, km)
+                    if (nlon==l+l-2) then
+                        !     set last column
+                        m = l-1
+                        call util%compute_legendre_polys_for_gaussian_grids(mode, l, nlat, m, w, pmn, km)
+
+                        select case (mode)
+                            case (1)
+                                ns = l+1
+                            case default
+                                ns = l
+                        end select
+
+                        do k=1, nt
+                            do i=1, late
+                                do np1=ns, nlat, 2
+                                    g(i, nlon, k) = g(i, nlon, k) + TWO * a(l, np1, k) * pmn(np1, i, km)
+                                end do
+                            end do
+                        end do
+                    end if
+            end select
+
+            ! Do inverse fourier transform
             do k=1, nt
-                do np1=ms, nlat, 2
-                    do i=1, late
-                        g(i, 1, k) = g(i, 1, k)+a(1, np1, k)*pmn(np1, i, km)
-                    end do
-                end do
+                call util%hfft%backward(lat, nlon, g(:, :, k), lat, wfft)
             end do
-            !     sweep interior columns of g
-            do mp1=2, lm1
-                m = mp1-1
-                ms = m+meo
-                !     compute pmn for all i and n=m, ..., l-1
-                call util%compute_legendre_polys_for_gaussian_grids(mode, l, nlat, m, w, pmn, km)
-                do k=1, nt
-                    do np1=ms, nlat, 2
-                        do i=1, late
-                            g(i, 2*m, k) = g(i, 2*m, k)+a(mp1, np1, k)*pmn(np1, i, km)
-                            g(i, 2*m+1, k) = g(i, 2*m+1, k)+b(mp1, np1, k)*pmn(np1, i, km)
-                        end do
-                    end do
-                end do
-            end do
-            if (nlon==l+l-2) then
-                !     set last column
-                m = l-1
-                call util%compute_legendre_polys_for_gaussian_grids(mode, l, nlat, m, w, pmn, km)
-                ns = l
-                if (mode == 1) ns = l+1
-                do k=1, nt
-                    do i=1, late
-                        do np1=ns, nlat, 2
-                            g(i, nlon, k) = g(i, nlon, k)+TWO*a(l, np1, k)*pmn(np1, i, km)
-                        end do
-                    end do
-                end do
-            end if
-        end if
-        !     do inverse fourier transform
-        do k=1, nt
-            call util%hfft%backward(lat, nlon, g(:, :, k), lat, wfft)
-        end do
-        !     scale output in gs
-        do k=1, nt
-            do j=1, nlon
-                do i=1, lat
-                    gs(i, j, k) = HALF * g(i, j, k)
-                end do
-            end do
-        end do
+
+            !  scale output in gs
+            gs(1:lat, 1:nlon, :) = HALF * g(1:lat, 1:nlon, :)
+        end block
 
     end subroutine shsgc_lower_utility_routine
 

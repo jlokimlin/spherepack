@@ -29,9 +29,6 @@
 !     *                                                               *
 !     * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !
-! This file contains code and documentation for subroutines
-! shaes and shaesi
-!
 submodule(scalar_analysis_routines) scalar_analysis_regular_grid_saved
 
 ! Parameter confined to the module
@@ -473,45 +470,38 @@ contains
                 imm1 = imid-1
         end select
 
-        block_construct: block
-            select case (isym)
-                case(0)
-                    do k=1, nt
-                        do i=1, imm1
-                            g_even(i, 1:nlon, k) = tsn*(g(i, 1:nlon, k)+g(nlp1-i, 1:nlon, k))
-                            g_odd(i, 1:nlon, k) = tsn*(g(i, 1:nlon, k)-g(nlp1-i, 1:nlon, k))
-                        end do
-                    end do
-                case default
-                    do k=1, nt
-                        g_even(1:imm1, 1:nlon, k) = fsn*g(1:imm1, 1:nlon, k)
-                    end do
-
-                    if (isym == 1) exit block_construct
-            end select
-
-            if (modl /= 0) then
+        select case (isym)
+            case(0)
                 do k=1, nt
-                    g_even(imid, 1:nlon, k) = tsn*g(imid, 1:nlon, k)
+                    do i=1, imm1
+                        g_even(i, 1:nlon, k) = tsn*(g(i, 1:nlon, k)+g(nlp1-i, 1:nlon, k))
+                        g_odd(i, 1:nlon, k) = tsn*(g(i, 1:nlon, k)-g(nlp1-i, 1:nlon, k))
+                    end do
                 end do
-            end if
-        end block block_construct
+            case default
+                g_even(1:imm1, 1:nlon, :) = fsn * g(1:imm1, 1:nlon, :)
+        end select
+
+        if ((isym /= 1) .and. odd(nlat)) then
+            do k=1, nt
+                g_even(imid, 1:nlon, k) = tsn*g(imid, 1:nlon, k)
+            end do
+        end if
 
         !  Fast Fourier Transform
         fft_loop: do k=1, nt
-            call util%hfft%forward(ls, nlon, g_even(1, 1, k), ls, whrfft)
-            if (mod(nlon, 2) /= 0) exit fft_loop
+
+            call util%hfft%forward(ls, nlon, g_even(:, :, k), ls, whrfft)
+
+            if (odd(nlon)) exit fft_loop
+
             g_even(1:ls, nlon, k) = HALF * g_even(1:ls, nlon, k)
+
         end do fft_loop
 
-        do k=1, nt
-            do mp1=1, mmax
-                do np1=mp1, nlat
-                    a(mp1, np1, k) = ZERO
-                    b(mp1, np1, k) = ZERO
-                end do
-            end do
-        end do
+        ! Preset coefficients to zero
+        a = ZERO
+        b = ZERO
 
         if (isym /= 1) then
 

@@ -7,7 +7,7 @@
 !     *                                                               *
 !     *                      all rights reserved                      *
 !     *                                                               *
-!     *                           Spherepack                          *
+!     *                          Spherepack                           *
 !     *                                                               *
 !     *       A Package of Fortran Subroutines and Programs           *
 !     *                                                               *
@@ -206,78 +206,46 @@ contains
         integer(ip), intent(out) :: ierror
 
         ! Local variables
-        integer(ip) :: mtrunc, l1, l2, lp, iw
-        integer(ip) :: lat, late, lwork
+        integer(ip)             :: mtrunc, lat, late
+        integer(ip)             :: required_wavetable_size
+        type(SpherepackUtility) :: util
 
-        associate (lshsgs => size(wshsgs))
+        ! Check input arguments
+        required_wavetable_size = util%get_lshsgs(nlat, nlon)
 
-            ! Set limit on m subscript
-            mtrunc = min((nlon+2)/2, nlat)
+        call util%check_scalar_transform_inputs(mode, idg, jdg, &
+            mdab, ndab, nlat, nlon, nt, required_wavetable_size, &
+            wshsgs, ierror)
 
-            ! Set gaussian point nearest equator pointer
-            late = (nlat+mod(nlat, 2))/2
+        ! Check error flag
+        if (ierror /= 0) return
 
-            ! Set number of grid points for analysis/synthesis
-            if (mode /= 0) then
-                lat = late
-            else
+        ! Set limit on m subscript
+        mtrunc = min((nlon+2)/2, nlat)
+
+        ! Set gaussian point nearest equator pointer
+        late = (nlat+mod(nlat, 2))/2
+
+        ! Set number of grid points for analysis/synthesis
+        select case (mode)
+            case (0)
                 lat = nlat
-            end if
+            case default
+                lat = late
+        end select
 
-            l1 = mtrunc
-            l2 = late
-            lp=nlat*(3*(l1+l2)-2)+(l1-1)*(l2*(2*nlat-l1)-3*l1)/2+nlon+15
+        block
+            real(wp)    :: g_work(lat, nlon, nt)
+            integer(ip) :: ifft, ipmn
 
-            !  Check calling arguments
-            if (nlat < 3) then
-                ierror = 1
-            else if (nlon < 4) then
-                ierror = 2
-            else if (mode < 0 .or. mode > 2) then
-                ierror = 3
-            else if (nt < 1) then
-                ierror = 4
-            else if (idg < lat) then
-                ierror = 5
-            else if (jdg < nlon) then
-                ierror = 6
-            else if (mdab < mtrunc) then
-                ierror = 7
-            else if (ndab < nlat) then
-                ierror = 8
-            else if (lshsgs < lp) then
-                ierror = 9
-            else
-                ierror = 0
-            end if
+            ! Starting address for fft values and legendre polys in wshsgs
+            ifft = nlat+2*nlat*late+3*(mtrunc*(mtrunc-1)/2+(nlat-mtrunc)*(mtrunc-1))+1
+            ipmn = ifft+nlon+15
 
-            ! Check error flag
-            if (ierror /= 0) return
-
-            ! Set required workspace size
-            select case (mode)
-                case (0)
-                    lwork = nlat*nlon*(nt+1)
-                case default
-                    lwork = l2*nlon*(nt+1)
-            end select
-
-            block
-                real(wp)    :: work(lwork)
-                integer(ip) :: ifft, ipmn
-
-                ! Starting address for fft values and legendre polys in wshsgs
-                ifft = nlat+2*nlat*late+3*(mtrunc*(mtrunc-1)/2+(nlat-mtrunc)*(mtrunc-1))+1
-                ipmn = ifft+nlon+15
-
-                ! set pointer for internal storage of g
-                iw = lat*nlon*nt+1
-
-                call reconstruct_fft_coefficients(nlat, nlon, mtrunc, lat, &
-                    mode, g, idg, jdg, nt, a, b, mdab, ndab, wshsgs(ifft:), &
-                    wshsgs(ipmn:), late, work, work(iw:))
-            end block
-        end associate
+            call reconstruct_fft_coefficients(nlat, nlon, mtrunc, lat, &
+                mode, g, idg, jdg, nt, a, b, mdab, ndab, wshsgs(ifft:), &
+                wshsgs(ipmn:), late, g_work)
+        end block
 
     end subroutine shsgs
 
@@ -294,7 +262,7 @@ contains
     !
     !     subroutine shsgsi initializes the array wshsgs which can then
     !     be used repeatedly by subroutines shsgs. it precomputes
-    !     and stores in wshsgs quantities such as gaussian weights, 
+    !     and stores in wshsgs quantities such as gaussian weights,
     !     legendre polynomial coefficients, and fft trigonometric tables.
     !
     !     input parameters
@@ -417,7 +385,7 @@ contains
     ! using coefficients in a, b
     !
     subroutine reconstruct_fft_coefficients(nlat, nlon, l, lat, mode, gs, idg, jdg, nt, a, b, mdab, &
-        ndab, wfft, pmn, late, g, work)
+        ndab, wfft, pmn, late, g)
 
         ! Dummy arguments
         integer(ip), intent(in)     :: nlat
@@ -433,11 +401,10 @@ contains
         real(wp),    intent(in)     :: b(mdab, ndab, nt)
         integer(ip), intent(in)     :: mdab
         integer(ip), intent(in)     :: ndab
-        real(wp),    intent(in)     :: wfft(*)
+        real(wp),    intent(in)     :: wfft(:)
         real(wp),    intent(in)     :: pmn(late, *)
         integer(ip), intent(in)     :: late
         real(wp),    intent(out)    :: g(lat, nlon, nt)
-        real(wp),    intent(out)    :: work(*)
 
         ! Local variables
         integer(ip)    :: i, k, m, mn, is, ms, ns, lm1, nl2
@@ -445,7 +412,7 @@ contains
         real(wp)       :: t1, t2, t3, t4
         type(SpherepackUtility) :: util
 
-        !  initialize to zero
+        ! Initialize to zero
         g = ZERO
 
         if (nlon == 2*l-2) then
@@ -454,203 +421,206 @@ contains
             lm1 = l
         end if
 
-        if (mode == 0) then
-            !
-            !  set first column in g
-            !
-            m = 0
-            mml1 = m*(2*nlat-m-1)/2
-            do k=1, nt
-                !
-                !   n even
-                !
-                do np1=1, nlat, 2
-                    mn = mml1+np1
-                    do i=1, late
-                        g(i, 1, k) = g(i, 1, k)+a(1, np1, k)*pmn(i, mn)
-                    end do
-                end do
-                !
-                !  n odd
-                !
-                nl2 = nlat/2
-                do np1=2, nlat, 2
-                    mn = mml1+np1
-                    do i=1, nl2
-                        is = nlat-i+1
-                        g(is, 1, k) = g(is, 1, k)+a(1, np1, k)*pmn(i, mn)
-                    end do
-                end do
-            end do
+        select case (mode)
+            case (0)
 
-            !
-            !  restore m=0 coefficients from odd/even
-            !
-            do k=1, nt
-                do i=1, nl2
-                    is = nlat-i+1
-                    t1 = g(i, 1, k)
-                    t3 = g(is, 1, k)
-                    g(i, 1, k) = t1+t3
-                    g(is, 1, k) = t1-t3
-                end do
-            end do
-
-            !
-            !  sweep interior columns of g
-            !
-            do mp1=2, lm1
-                m = mp1-1
-                mml1 = m*(2*nlat-m-1)/2
-                mp2 = m+2
-                do k=1, nt
-                    !
-                    !  for n-m even store (g(i, p, k)+g(nlat-i+1, p, k))/2 in g(i, p, k) p=2*m, 2*m+1
-                    !    for i=1, ..., late
-                    !
-                    do np1=mp1, nlat, 2
-                        mn = mml1+np1
-                        do i=1, late
-                            g(i, 2*m, k) = g(i, 2*m, k)+a(mp1, np1, k)*pmn(i, mn)
-                            g(i, 2*m+1, k) = g(i, 2*m+1, k)+b(mp1, np1, k)*pmn(i, mn)
-                        end do
-                    end do
-                    !
-                    !  for n-m odd store g(i, p, k)-g(nlat-i+1, p, k) in g(nlat-i+1, p, k)
-                    !    for i=1, ..., nlat/2 (p=2*m, p=2*m+1)
-                    !
-                    do np1=mp2, nlat, 2
-                        mn = mml1+np1
-                        do i=1, nl2
-                            is = nlat-i+1
-                            g(is, 2*m, k) = g(is, 2*m, k)+a(mp1, np1, k)*pmn(i, mn)
-                            g(is, 2*m+1, k) = g(is, 2*m+1, k)+b(mp1, np1, k)*pmn(i, mn)
-                        end do
-                    end do
-
-                    !
-                    !  now set fourier coefficients using even-odd reduction above
-                    !
-                    do i=1, nl2
-                        is = nlat-i+1
-                        t1 = g(i, 2*m, k)
-                        t2 = g(i, 2*m+1, k)
-                        t3 = g(is, 2*m, k)
-                        t4 = g(is, 2*m+1, k)
-                        g(i, 2*m, k) = t1+t3
-                        g(i, 2*m+1, k) = t2+t4
-                        g(is, 2*m, k) = t1-t3
-                        g(is, 2*m+1, k) = t2-t4
-                    end do
-                end do
-            end do
-
-            !
-            !  set last column (using a only) if necessary
-            !
-            if (nlon== l+l-2) then
-                m = l-1
+                !  set first column in g
+                m = 0
                 mml1 = m*(2*nlat-m-1)/2
                 do k=1, nt
                     !
-                    !  (n - m) even
+                    !   n even
                     !
-                    do np1=l, nlat, 2
+                    do np1=1, nlat, 2
                         mn = mml1+np1
                         do i=1, late
-                            g(i, nlon, k) = g(i, nlon, k)+TWO *a(l, np1, k)*pmn(i, mn)
+                            g(i, 1, k) = g(i, 1, k)+a(1, np1, k)*pmn(i, mn)
                         end do
                     end do
-
-                    lp1 = l+1
                     !
-                    !  (n - m) odd
+                    !  n odd
                     !
-                    do np1=lp1, nlat, 2
+                    nl2 = nlat/2
+                    do np1=2, nlat, 2
                         mn = mml1+np1
                         do i=1, nl2
                             is = nlat-i+1
-                            g(is, nlon, k) = g(is, nlon, k)+TWO *a(l, np1, k)*pmn(i, mn)
+                            g(is, 1, k) = g(is, 1, k)+a(1, np1, k)*pmn(i, mn)
                         end do
                     end do
+                end do
 
+                !
+                !  restore m=0 coefficients from odd/even
+                !
+                do k=1, nt
                     do i=1, nl2
                         is = nlat-i+1
-                        t1 = g(i, nlon, k)
-                        t3 = g(is, nlon, k)
-                        g(i, nlon, k)= t1+t3
-                        g(is, nlon, k)= t1-t3
+                        t1 = g(i, 1, k)
+                        t3 = g(is, 1, k)
+                        g(i, 1, k) = t1+t3
+                        g(is, 1, k) = t1-t3
                     end do
                 end do
-            end if
-        else
-            !     half sphere (mode.ne.0)
-            !     set first column in g
-            m = 0
-            mml1 = m*(2*nlat-m-1)/2
-            meo = 1
-            if (mode == 1) meo = 2
-            ms = m+meo
-            do k=1, nt
-                do np1=ms, nlat, 2
-                    mn = mml1+np1
-                    do i=1, late
-                        g(i, 1, k) = g(i, 1, k)+a(1, np1, k)*pmn(i, mn)
+
+                !
+                !  sweep interior columns of g
+                !
+                do mp1=2, lm1
+                    m = mp1-1
+                    mml1 = m*(2*nlat-m-1)/2
+                    mp2 = m+2
+                    do k=1, nt
+                        !
+                        !  for n-m even store (g(i, p, k)+g(nlat-i+1, p, k))/2 in g(i, p, k) p=2*m, 2*m+1
+                        !    for i=1, ..., late
+                        !
+                        do np1=mp1, nlat, 2
+                            mn = mml1+np1
+                            do i=1, late
+                                g(i, 2*m, k) = g(i, 2*m, k)+a(mp1, np1, k)*pmn(i, mn)
+                                g(i, 2*m+1, k) = g(i, 2*m+1, k)+b(mp1, np1, k)*pmn(i, mn)
+                            end do
+                        end do
+                        !
+                        !  for n-m odd store g(i, p, k)-g(nlat-i+1, p, k) in g(nlat-i+1, p, k)
+                        !    for i=1, ..., nlat/2 (p=2*m, p=2*m+1)
+                        !
+                        do np1=mp2, nlat, 2
+                            mn = mml1+np1
+                            do i=1, nl2
+                                is = nlat-i+1
+                                g(is, 2*m, k) = g(is, 2*m, k)+a(mp1, np1, k)*pmn(i, mn)
+                                g(is, 2*m+1, k) = g(is, 2*m+1, k)+b(mp1, np1, k)*pmn(i, mn)
+                            end do
+                        end do
+
+                        !
+                        !  now set fourier coefficients using even-odd reduction above
+                        !
+                        do i=1, nl2
+                            is = nlat-i+1
+                            t1 = g(i, 2*m, k)
+                            t2 = g(i, 2*m+1, k)
+                            t3 = g(is, 2*m, k)
+                            t4 = g(is, 2*m+1, k)
+                            g(i, 2*m, k) = t1+t3
+                            g(i, 2*m+1, k) = t2+t4
+                            g(is, 2*m, k) = t1-t3
+                            g(is, 2*m+1, k) = t2-t4
+                        end do
                     end do
                 end do
-            end do
 
-            !     sweep interior columns of g
+                !
+                !  set last column (using a only) if necessary
+                !
+                if (nlon== l+l-2) then
+                    m = l-1
+                    mml1 = m*(2*nlat-m-1)/2
+                    do k=1, nt
+                        !
+                        !  (n - m) even
+                        !
+                        do np1=l, nlat, 2
+                            mn = mml1+np1
+                            do i=1, late
+                                g(i, nlon, k) = g(i, nlon, k)+TWO *a(l, np1, k)*pmn(i, mn)
+                            end do
+                        end do
 
-            do mp1=2, lm1
-                m = mp1-1
+                        lp1 = l+1
+                        !
+                        !  (n - m) odd
+                        !
+                        do np1=lp1, nlat, 2
+                            mn = mml1+np1
+                            do i=1, nl2
+                                is = nlat-i+1
+                                g(is, nlon, k) = g(is, nlon, k)+TWO *a(l, np1, k)*pmn(i, mn)
+                            end do
+                        end do
+
+                        do i=1, nl2
+                            is = nlat-i+1
+                            t1 = g(i, nlon, k)
+                            t3 = g(is, nlon, k)
+                            g(i, nlon, k)= t1+t3
+                            g(is, nlon, k)= t1-t3
+                        end do
+                    end do
+                end if
+            case default
+                !     half sphere
+                !     set first column in g
+                m = 0
                 mml1 = m*(2*nlat-m-1)/2
+
+                select case (mode)
+                    case (1)
+                        meo = 2
+                    case default
+                        meo = 1
+                end select
+
                 ms = m+meo
                 do k=1, nt
                     do np1=ms, nlat, 2
                         mn = mml1+np1
                         do i=1, late
-                            g(i, 2*m, k) = g(i, 2*m, k)+a(mp1, np1, k)*pmn(i, mn)
-                            g(i, 2*m+1, k) = g(i, 2*m+1, k)+b(mp1, np1, k)*pmn(i, mn)
+                            g(i, 1, k) = g(i, 1, k)+a(1, np1, k)*pmn(i, mn)
                         end do
                     end do
                 end do
-            end do
 
-            if (nlon == 2*l-2) then
-                !
-                !  set last column
-                !
-                m = l-1
-                mml1 = m*(2*nlat-m-1)/2
+                !     sweep interior columns of g
 
-                if (mode == 1) then
-                    ns = l+1
-                else
-                    ns = l
+                do mp1=2, lm1
+                    m = mp1-1
+                    mml1 = m*(2*nlat-m-1)/2
+                    ms = m+meo
+                    do k=1, nt
+                        do np1=ms, nlat, 2
+                            mn = mml1+np1
+                            do i=1, late
+                                g(i, 2*m, k) = g(i, 2*m, k)+a(mp1, np1, k)*pmn(i, mn)
+                                g(i, 2*m+1, k) = g(i, 2*m+1, k)+b(mp1, np1, k)*pmn(i, mn)
+                            end do
+                        end do
+                    end do
+                end do
+
+                if (nlon == 2*l-2) then
+                    !
+                    !  set last column
+                    !
+                    m = l-1
+                    mml1 = m*(2*nlat-m-1)/2
+
+                    select case (mode)
+                        case (1)
+                            ns = l+1
+                        case default
+                            ns = l
+                    end select
+
+                    do k=1, nt
+                        do np1=ns, nlat, 2
+                            mn = mml1+np1
+                            do i=1, late
+                                g(i, nlon, k) = g(i, nlon, k)+TWO *a(l, np1, k)*pmn(i, mn)
+                            end do
+                        end do
+                    end do
                 end if
+        end select
 
-                do k=1, nt
-                    do np1=ns, nlat, 2
-                        mn = mml1+np1
-                        do i=1, late
-                            g(i, nlon, k) = g(i, nlon, k)+TWO *a(l, np1, k)*pmn(i, mn)
-                        end do
-                    end do
-                end do
-            end if
-        end if
-
-        !
         !  Perform inverse fourier transform
-        !
         do k=1, nt
             call util%hfft%backward(lat, nlon, g(:, :, k), lat, wfft)
         end do
 
-        !
         !  scale output in gs
-        !
         gs(1:lat, 1:nlon, :) = HALF *g(1:lat, 1:nlon, :)
 
     end subroutine reconstruct_fft_coefficients

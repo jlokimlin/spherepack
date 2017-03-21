@@ -7,7 +7,7 @@
 !     *                                                               *
 !     *                      all rights reserved                      *
 !     *                                                               *
-!     *                      SPHEREPACK                               *
+!     *                          Spherepack                           *
 !     *                                                               *
 !     *       A Package of Fortran Subroutines and Programs           *
 !     *                                                               *
@@ -202,73 +202,49 @@ contains
         ! Local variables
         integer(ip) :: imid, ist, labc, ls
         integer(ip) :: lzz1, mmax, nln, lwork
+        integer(ip)             :: required_wavetable_size
+        type(SpherepackUtility) :: util
 
-        associate (lshsec => size(wshsec))
+        ! Check input arguments
+        required_wavetable_size = util%get_lshsec(nlat, nlon)
 
-            mmax = min(nlat, nlon/2+1)
-            imid = (nlat + 1)/2
-            lzz1 = 2*nlat*imid
-            labc = 3*((mmax-2)*(2*nlat-mmax-1))/2
+        call util%check_scalar_transform_inputs(isym, idg, jdg, &
+            mdab, ndab, nlat, nlon, nt, required_wavetable_size, &
+            wshsec, ierror)
 
-            select case (isym)
-                case (0)
-                    ls = nlat
-                case default
-                    ls = imid
-            end select
+        ! Check error flag
+        if (ierror /= 0) return
 
-            nln = nt*ls*nlon
+        mmax = min(nlat, nlon/2+1)
+        imid = (nlat + 1)/2
+        lzz1 = 2*nlat*imid
+        labc = 3*((mmax-2)*(2*nlat-mmax-1))/2
 
-            select case (isym)
-                case (0)
-                    ist = imid
-                case default
-                    ist = 0
-            end select
+        select case (isym)
+            case (0)
+                ls = nlat
+                ist = imid
+            case default
+                ls = imid
+                ist = 0
+        end select
 
-            ! Check calling arguments
-            if (nlat < 3) then
-                ierror = 1
-            else if (nlon < 4) then
-                ierror = 2
-            else if (isym < 0 .or. isym > 2) then
-                ierror = 3
-            else if (nt < 0) then
-                ierror = 4
-            else if ((isym == 0 .and. idg < nlat) &
-                .or. &
-                (isym /= 0 .and. idg < (nlat + 1)/2)) then
-                ierror = 5
-            else if (jdg < nlon) then
-                ierror = 6
-            else if (mdab < mmax) then
-                ierror = 7
-            else if (ndab < nlat) then
-                ierror = 8
-            else if (lshsec < lzz1+labc+nlon+15) then
-                ierror = 9
-            else
-                ierror = 0
-            end if
+        nln = nt*ls*nlon
 
-            ! Check error flag
-            if (ierror /= 0) return
+        ! Set required workspace size
+        lwork = nln+max(ls*nlon, 3*nlat*imid)
 
-            ! Set required workspace size
-            lwork = nln+max(ls*nlon, 3*nlat*imid)
+        block
+            real(wp)    :: work(lwork)
+            integer(ip) :: jw1, jw2, iw1
 
-            block
-                real(wp)    :: work(lwork)
-                integer(ip) :: jw1, jw2, iw1
+            jw1 = ist + 1
+            jw2 = nln + 1
+            iw1 = lzz1+labc+1
 
-                jw1 = ist + 1
-                jw2 = nln + 1
-                iw1 = lzz1+labc+1
-
-                call shsec_lower_utility_routine(nlat, isym, nt, g, idg, jdg, a, b, mdab, ndab, imid, ls, nlon, &
-                    work, work(jw1:), work(jw2:), work(jw2:), wshsec, wshsec(iw1:))
-            end block
-        end associate
+            call shsec_lower_utility_routine(nlat, isym, nt, g, idg, jdg, a, b, &
+                mdab, ndab, imid, ls, nlon, work, work(jw1:), work(jw2:), work(jw2:), wshsec, wshsec(iw1:))
+        end block
 
     end subroutine shsec
 
