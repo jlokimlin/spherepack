@@ -25,10 +25,10 @@ module type_RegularSphere
         operator(*)
     
     use scalar_analysis_routines, only: &
-        ScalarAnalysisUtility
+        ScalarForwardTransform
 
     use scalar_synthesis_routines, only: &
-        ScalarSynthesisUtility
+        ScalarBackwardTransform
 
     use vector_analysis_routines, only: &
         VectorForwardTransform
@@ -190,7 +190,7 @@ contains
 
         ! Local variables
         integer(ip)    :: error_flag
-        type(ScalarAnalysisUtility) :: aux
+        type(ScalarForwardTransform) :: aux
 
         ! Check if object is usable
         call self%assert_initialized('regular_scalar_analysis')
@@ -259,7 +259,7 @@ contains
 
         ! Local variables
         integer(ip)    :: error_flag
-        type(ScalarSynthesisUtility) :: aux
+        type(ScalarBackwardTransform) :: aux
 
         ! Check if object is usable
         call self%assert_initialized('regular_scalar_synthesis')

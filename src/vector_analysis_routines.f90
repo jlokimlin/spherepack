@@ -3,7 +3,8 @@ module vector_analysis_routines
     use spherepack_precision, only: &
         wp, & ! working precision
         ip, & ! integer precision
-        PI
+        PI, &
+        even, odd
 
     use type_SpherepackUtility, only: &
         SpherepackUtility, &

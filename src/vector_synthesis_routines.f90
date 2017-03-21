@@ -3,14 +3,12 @@ module vector_synthesis_routines
     use spherepack_precision, only: &
         wp, & ! working precision
         ip, & ! integer precision
-        PI
+        PI, &
+        odd
 
     use type_SpherepackUtility, only: &
         SpherepackUtility, &
-        get_lvhsec, &
-        get_lvhsgc, &
-        get_lvhses, &
-        get_lvhsgs
+        get_lvhsec, get_lvhsgc, get_lvhses, get_lvhsgs
 
     use gaussian_latitudes_and_weights_routines, only: &
         compute_gaussian_latitudes_and_weights
@@ -26,7 +24,6 @@ module vector_synthesis_routines
     public :: vhsgs, vhsgsi, initialize_vhsgs
     public :: VectorBackwardTransform
     public :: VectorSynthesisUtility
-    public :: get_lvhsgs
     
     ! Parameters confined to the module
     real(wp), parameter :: ZERO = 0.0_wp

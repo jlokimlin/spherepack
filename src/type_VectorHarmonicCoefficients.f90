@@ -70,7 +70,7 @@ contains
         integer(ip),                       intent(in)    :: nt
 
         ! Local variables
-        integer(ip) :: mdab, ndab
+        
 
         ! Ensure that object is usable
         call self%destroy()

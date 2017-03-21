@@ -358,7 +358,7 @@ contains
         integer(ip) :: idv, idz, imid, ist, lnl, lzimn, mmax
         integer(ip) :: lwork, workspace_indices(6)
         integer(ip) :: required_wavetable_size
-        type(SpherepackUtility) :: util
+        type(VectorSynthesisUtility) :: util
 
         required_wavetable_size = util%get_lvhsgc(nlat, nlon)
 

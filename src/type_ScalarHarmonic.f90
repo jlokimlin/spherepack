@@ -77,9 +77,9 @@ contains
         integer(ip)             :: return_value
 
         if (even(nlon)) then
-            return_value = min(nlat,(nlon+2)/2)
+            return_value = min(nlat,(nlon + 2)/2)
         else
-            return_value = min(nlat,(nlon+1)/2)
+            return_value = min(nlat,(nlon + 1)/2)
         end if
 
     end function determine_scalar_order_m

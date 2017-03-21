@@ -206,58 +206,15 @@ contains
         integer(ip), intent(out) :: ierror
 
         ! Local variables
-        integer(ip) :: n1, n2, mn, required_wavetable_size
-        integer(ip) :: ls, mab, nln, lwork
-        integer(ip) :: imid, mmax, lpimn
+        integer(ip) :: required_wavetable_size
+        type(ScalarSynthesisUtility) :: util
 
-        !  Compute constants
-        imid = (nlat + 1)/2
-        mmax = min(nlat, (nlon+2)/2)
-        lpimn = (imid*mmax*(2*nlat-mmax+1))/2
-        n2 = (nlat + 1)/2
-        n1 = min((nlon+2)/2, nlat)
-        required_wavetable_size=nlat*(3*(n1+n2)-2)+(n1-1)*(n2*(2*nlat-n1)-3*n1)/2+nlon+15
+        ! Check input arguments
+        required_wavetable_size = util%get_lshsgs(nlat, nlon)
 
-        !  verify unsaved workspace (add to what shses requires, file f3)
-        select case (isym)
-            case (0)
-                ls = nlat
-            case default
-                ls = imid
-        end select
-
-        nln = nt*ls*nlon
-
-        !  set first dimension for a, b (as required by shses)
-        mab = min(nlat, nlon/2+1)
-        mn = mab*nlat*nt
-
-        ! Check calling arguments
-        if (nlat < 3) then
-            ierror = 1
-        else if (nlon < 4) then
-            ierror = 2
-        else if (isym < 0 .or. isym > 2) then
-            ierror = 3
-        else if (nt < 0) then
-            ierror = 4
-        else if (&
-            (isym == 0 .and. idiv < nlat) &
-            .or. &
-            (isym > 0 .and. idiv < imid) &
-            ) then
-            ierror = 5
-        else if (jdiv < nlon) then
-            ierror = 6
-        else if (mdb < min(nlat, (nlon + 1)/2)) then
-            ierror = 7
-        else if (ndb < nlat) then
-            ierror = 8
-        else if (size(wshsgs) < required_wavetable_size) then
-            ierror = 9
-        else
-            ierror = 0
-        end if
+        call util%check_scalar_transform_inputs(isym, idiv, jdiv, &
+            mdb, ndb, nlat, nlon, nt, required_wavetable_size, &
+            wshsgs, ierror)
 
         ! Check error flag
         if (ierror /= 0) return

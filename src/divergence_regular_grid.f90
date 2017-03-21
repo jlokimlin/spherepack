@@ -207,43 +207,15 @@ contains
         integer(ip), intent(out) :: ierror
 
         ! Local variables
-        integer(ip) :: n1, n2, mn, ls, mab, nln
-        integer(ip) :: lzz1, labc, imid
-        integer(ip) :: mmax, required_wavetable_size, lwork
+        integer(ip) :: required_wavetable_size
+        type(ScalarSynthesisUtility) :: util
 
-        imid = (nlat + 1)/2
-        mmax = min(nlat, (nlon+2)/2)
-        imid = (nlat + 1)/2
-        lzz1 = 2*nlat*imid
-        labc = 3*(max(mmax-2, 0)*(2*nlat-mmax-1))/2
-        required_wavetable_size = lzz1+labc+nlon+15
+        ! Check input arguments
+        required_wavetable_size = util%get_lshsec(nlat, nlon)
 
-        ! Check calling arguments
-        if (nlat < 3) then
-            ierror = 1
-        else if (nlon < 4) then
-            ierror = 2
-        else if (isym < 0 .or. isym > 2) then
-            ierror = 3
-        else if (nt < 0) then
-            ierror = 4
-        else if ( &
-            (isym == 0 .and. idv < nlat) &
-            .or. &
-            (isym > 0 .and. idv < imid) &
-            ) then
-            ierror = 5
-        else if (jdv < nlon) then
-            ierror = 6
-        else if (mdb < min(nlat, (nlon + 1)/2)) then
-            ierror = 7
-        else if  (ndb < nlat) then
-            ierror = 8
-        else if  (size(wshsec) < required_wavetable_size) then
-            ierror = 9
-        else
-            ierror = 0
-        end if
+        call util%check_scalar_transform_inputs(isym, idv, jdv, &
+            mdb, ndb, nlat, nlon, nt, required_wavetable_size, &
+            wshsec, ierror)
 
         ! Check error flag
         if (ierror /= 0) return

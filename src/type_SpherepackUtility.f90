@@ -563,9 +563,9 @@ contains
         integer(ip), intent(in)     :: nlat
         integer(ip), intent(in)     :: nlon
         integer(ip), intent(in)     :: m
-        real(wp),    intent(inout)  :: z(*)
+        real(wp),    intent(out)    :: z(:,:,:)
         integer(ip), intent(inout)  :: i3
-        real(wp),    intent(inout)  :: wzfin(*)
+        real(wp),    intent(in)     :: wzfin(*)
 
         ! Local variables
         integer(ip) :: imid
@@ -597,14 +597,14 @@ contains
         integer(ip), intent(in)     :: isym
         integer(ip), intent(in)     :: nlat
         integer(ip), intent(in)     :: m
-        real(wp),    intent(inout)  :: z(imid, nlat, 3)
+        real(wp),    intent(out)    :: z(imid, nlat, 3)
         integer(ip), intent(in)     :: imid
         integer(ip), intent(inout)  :: i3
-        real(wp),    intent(inout)  :: zz(imid, *)
-        real(wp),    intent(inout)  :: z1(imid, *)
-        real(wp),    intent(inout)  :: a(*)
-        real(wp),    intent(inout)  :: b(*)
-        real(wp),    intent(inout)  :: c(*)
+        real(wp),    intent(in)     :: zz(imid, *)
+        real(wp),    intent(in)     :: z1(imid, *)
+        real(wp),    intent(in)     :: a(*)
+        real(wp),    intent(in)     :: b(*)
+        real(wp),    intent(in)     :: c(*)
 
         ! Local variables
         integer(ip), save :: i1, i2
@@ -1005,7 +1005,7 @@ contains
         integer(ip), intent(in)    :: nlat
         integer(ip), intent(in)    :: nlon
         integer(ip), intent(in)    :: m
-        real(wp),    intent(out)   :: p(*)
+        real(wp),    intent(out)   :: p(:,:,:)
         integer(ip), intent(inout) :: i3
         real(wp),    intent(in)    :: walin(*)
 
@@ -1026,8 +1026,8 @@ contains
             !
             !     the length of walin is ((5*l-7)*l+6)/2
             !
-            call alin_lower_utility_routine(isym, nlat, m, p, imid, i3, walin, walin(iw1), walin(iw2), &
-                walin(iw3), walin(iw4))
+            call alin_lower_utility_routine(isym, nlat, m, p, imid, i3, walin, &
+                walin(iw1), walin(iw2), walin(iw3), walin(iw4))
 
         end associate
 

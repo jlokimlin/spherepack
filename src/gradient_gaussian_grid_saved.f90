@@ -209,114 +209,42 @@ contains
         integer(ip), intent(out) :: ierror
 
         ! Local variables
-        integer(ip) :: idv, idz, imid, required_wavetable_size
-        integer(ip) :: lnl, lwork, lzimn, mmax, mn
+        integer(ip) :: idz, imid, required_wavetable_size
+        integer(ip) :: lzimn, mmax
 
-        associate (lvhsgs => size(wvhsgs))
+        ! Check calling arguments
+        ierror = 1
+        if (nlat < 3) return
+        ierror = 2
+        if (nlon < 4) return
+        ierror = 3
+        if (isym < 0 .or. isym > 2) return
+        ierror = 4
+        if (nt < 0) return
+        ierror = 5
+        imid = (nlat + 1)/2
+        if ((isym == 0 .and. idvw<nlat) .or. &
+            (isym /= 0 .and. idvw<imid)) return
+        ierror = 6
+        if (jdvw < nlon) return
+        ierror = 7
+        mmax = min(nlat, (nlon + 1)/2)
+        if (mdab < min(nlat, (nlon+2)/2)) return
+        ierror = 8
+        if (ndab < nlat) return
+        ierror = 9
+        !
+        !     verify minimum saved workspace length
+        !
+        idz = (mmax*(2*nlat-mmax+1))/2
+        lzimn = idz*imid
+        required_wavetable_size = 2*lzimn+nlon+15
+        if (size(wvhsgs) < required_wavetable_size) return
+        ierror = 0
 
-            ! Check calling arguments
-            ierror = 1
-            if (nlat < 3) return
-            ierror = 2
-            if (nlon < 4) return
-            ierror = 3
-            if (isym < 0 .or. isym > 2) return
-            ierror = 4
-            if (nt < 0) return
-            ierror = 5
-            imid = (nlat + 1)/2
-            if ((isym == 0 .and. idvw<nlat) .or. &
-                (isym /= 0 .and. idvw<imid)) return
-            ierror = 6
-            if (jdvw < nlon) return
-            ierror = 7
-            mmax = min(nlat, (nlon + 1)/2)
-            if (mdab < min(nlat, (nlon+2)/2)) return
-            ierror = 8
-            if (ndab < nlat) return
-            ierror = 9
-            !
-            !     verify minimum saved workspace length
-            !
-            idz = (mmax*(2*nlat-mmax+1))/2
-            lzimn = idz*imid
-            required_wavetable_size = 2*lzimn+nlon+15
-            if (lvhsgs < required_wavetable_size) return
-            ierror = 0
-
-            ! Set required workspace size
-            mn = mmax*nlat*nt
-            select case (isym)
-                case (0)
-                    idv = nlat
-                case default
-                    idv = imid
-            end select
-
-            lnl = nt*idv*nlon
-            lwork =  2*lnl+idv*nlon+2*mn+nlat
-
-            block
-                real(wp)    :: work(lwork)
-                integer(ip) :: ibr, ibi, iis, iwk, liwk
-
-                ! Set workspace index pointers
-                ibr = 1
-                ibi = ibr + mn
-                iis = ibi + mn
-                iwk = iis + nlat
-                liwk = lwork-2*mn-nlat
-
-                call gradgs_lower_utility_routine(nlat, nlon, isym, nt, v, w, idvw, &
-                    jdvw, work(ibr:), work(ibi:), mmax, work(iis:), mdab, ndab, a, b, &
-                    wvhsgs, lvhsgs, work(iwk:), liwk, ierror)
-            end block
-        end associate
+        call gradient_lower_utility_routine(nlat, nlon, isym, nt, v, w, idvw, jdvw, a, b, &
+            wvhsgs, vhsgs, ierror)
 
     end subroutine gradgs
-
-    subroutine gradgs_lower_utility_routine(nlat, nlon, isym, nt, v, w, idvw, jdvw, br, bi, mmax, &
-        sqnn, mdab, ndab, a, b, wvhsgs, lvhsgs, wk, lwk, ierror)
-
-        real(wp) :: a
-        real(wp) :: b
-        real(wp) :: bi
-        real(wp) :: br
-        real(wp) :: ci(mmax, nlat, nt)
-        real(wp) :: cr(mmax, nlat, nt)
-        
-        integer(ip) :: idvw
-        integer(ip) :: ierror
-        integer(ip) :: isym
-        integer(ip) :: ityp
-        integer(ip) :: jdvw
-        
-        integer(ip) :: lvhsgs
-        integer(ip) :: lwk
-        
-        integer(ip) :: mdab
-        integer(ip) :: mmax
-        
-        integer(ip) :: ndab
-        integer(ip) :: nlat
-        integer(ip) :: nlon
-        integer(ip) :: nt
-        real(wp) :: sqnn
-        real(wp) :: v
-        real(wp) :: w
-        real(wp) :: wk
-        real(wp) :: wvhsgs
-        dimension v(idvw, jdvw, nt), w(idvw, jdvw, nt)
-        dimension br(mmax, nlat, nt), bi(mmax, nlat, nt), sqnn(nlat)
-        dimension a(mdab, ndab, nt), b(mdab, ndab, nt)
-        dimension wvhsgs(lvhsgs), wk(lwk)
-
-        call perform_setup_for_gradient(isym, ityp, a, b, br, bi, sqnn)
-
-        ! Vector synthesize br, bi into (v, w) (cr, ci are dummy variables)
-        call vhsgs(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
-            mmax, nlat, wvhsgs, ierror)
-
-    end subroutine gradgs_lower_utility_routine
 
 end submodule gradient_gaussian_grid_saved

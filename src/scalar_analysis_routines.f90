@@ -2,7 +2,8 @@ module scalar_analysis_routines
 
     use spherepack_precision, only: &
         wp, & ! working precision
-        ip ! integer precision
+        ip, & ! integer precision
+        even, odd
 
     use type_ScalarHarmonic, only: &
         ScalarHarmonic
@@ -25,7 +26,7 @@ module scalar_analysis_routines
     public :: shaes, shaesi, initialize_shaes
     public :: shaec, shaeci, initialize_shagc
     public :: shags, shagsi, initialize_shags
-    public :: ScalarAnalysisUtility
+    public :: ScalarForwardTransform
 
     ! Parameters confined to the module
     real(wp), parameter :: ZERO = 0.0_wp
@@ -34,7 +35,7 @@ module scalar_analysis_routines
     real(wp), parameter :: TWO = 2.0_wp
     real(wp), parameter :: FOUR = 4.0_wp
 
-    type, public :: ScalarAnalysisUtility
+    type, public :: ScalarForwardTransform
     contains
         ! Type-bound procedures
         procedure, nopass :: shaec
@@ -49,7 +50,7 @@ module scalar_analysis_routines
         procedure, nopass :: initialize_shaes
         procedure, nopass :: initialize_shagc
         procedure, nopass :: initialize_shags
-    end type ScalarAnalysisUtility
+    end type ScalarForwardTransform
 
     ! Declare interfaces for submodule implementation
     interface

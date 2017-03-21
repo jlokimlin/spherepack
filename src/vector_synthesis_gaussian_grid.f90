@@ -353,12 +353,7 @@ contains
         integer(ip) :: mmax, lzz1, lwork
         type(SpherepackUtility) :: util
 
-        imid = (nlat + 1)/2
-        mmax = min(nlat, (nlon + 1)/2)
-        lzz1 = 2*nlat*imid
-        labc = 3*(max(mmax-2, 0)*(2*nlat-mmax-1))/2
-        n1 = min(nlat, (nlon + 1)/2)
-        n2 = (nlat + 1)/2
+        ! Check input arguments
         required_wavetable_size = util%get_lvhsgc(nlat, nlon)
 
         call util%check_vector_transform_inputs(ityp, idvw, jdvw, &
@@ -367,6 +362,13 @@ contains
 
         ! Check error flag
         if (ierror /= 0) return
+
+        imid = (nlat + 1)/2
+        mmax = min(nlat, (nlon + 1)/2)
+        lzz1 = 2*nlat*imid
+        labc = 3*(max(mmax-2, 0)*(2*nlat-mmax-1))/2
+        n1 = min(nlat, (nlon + 1)/2)
+        n2 = (nlat + 1)/2
 
         ! Set required workspace size
         select case (ityp)
@@ -630,7 +632,7 @@ contains
                                     wo(i, 2*mp1-1, k) = wo(i, 2*mp1-1, k)-ci(mp1, np1, k)*vb(i, np1, iv)
                                     we(i, 2*mp1-1, k) = we(i, 2*mp1-1, k)+br(mp1, np1, k)*wb(i, np1, iw)
                                 end do
-                                if (mod(nlat, 2) /= 0) then
+                                if (odd(nlat)) then
                                     ve(imid, 2*mp1-2, k) = ve(imid, 2*mp1-2, k) &
                                         -ci(mp1, np1, k)*wb(imid, np1, iw)
                                     ve(imid, 2*mp1-1, k) = ve(imid, 2*mp1-1, k) &
@@ -656,7 +658,7 @@ contains
                                     we(i, 2*mp1-1, k) = we(i, 2*mp1-1, k)-ci(mp1, np1, k)*vb(i, np1, iv)
                                     wo(i, 2*mp1-1, k) = wo(i, 2*mp1-1, k)+br(mp1, np1, k)*wb(i, np1, iw)
                                 end do
-                                if (mod(nlat, 2) /= 0) then
+                                if (odd(nlat)) then
                                     ve(imid, 2*mp1-2, k) = ve(imid, 2*mp1-2, k) &
                                         +br(mp1, np1, k)*vb(imid, np1, iv)
                                     ve(imid, 2*mp1-1, k) = ve(imid, 2*mp1-1, k) &
@@ -706,7 +708,7 @@ contains
                                     we(i, 2*mp1-2, k) = we(i, 2*mp1-2, k)-bi(mp1, np1, k)*wb(i, np1, iw)
                                     we(i, 2*mp1-1, k) = we(i, 2*mp1-1, k)+br(mp1, np1, k)*wb(i, np1, iw)
                                 end do
-                                if (mod(nlat, 2) /= 0) then
+                                if (odd(nlat)) then
                                     we(imid, 2*mp1-2, k) = we(imid, 2*mp1-2, k) &
                                         -bi(mp1, np1, k)*wb(imid, np1, iw)
                                     we(imid, 2*mp1-1, k) = we(imid, 2*mp1-1, k) &
@@ -724,7 +726,7 @@ contains
                                     wo(i, 2*mp1-2, k) = wo(i, 2*mp1-2, k)-bi(mp1, np1, k)*wb(i, np1, iw)
                                     wo(i, 2*mp1-1, k) = wo(i, 2*mp1-1, k)+br(mp1, np1, k)*wb(i, np1, iw)
                                 end do
-                                if (mod(nlat, 2) /= 0) then
+                                if (odd(nlat)) then
                                     ve(imid, 2*mp1-2, k) = ve(imid, 2*mp1-2, k) &
                                         +br(mp1, np1, k)*vb(imid, np1, iv)
                                     ve(imid, 2*mp1-1, k) = ve(imid, 2*mp1-1, k) &
@@ -770,7 +772,7 @@ contains
                                     wo(i, 2*mp1-2, k) = wo(i, 2*mp1-2, k)-cr(mp1, np1, k)*vb(i, np1, iv)
                                     wo(i, 2*mp1-1, k) = wo(i, 2*mp1-1, k)-ci(mp1, np1, k)*vb(i, np1, iv)
                                 end do
-                                if (mod(nlat, 2) /= 0) then
+                                if (odd(nlat)) then
                                     ve(imid, 2*mp1-2, k) = ve(imid, 2*mp1-2, k) &
                                         -ci(mp1, np1, k)*wb(imid, np1, iw)
                                     ve(imid, 2*mp1-1, k) = ve(imid, 2*mp1-1, k) &
@@ -788,7 +790,7 @@ contains
                                     we(i, 2*mp1-2, k) = we(i, 2*mp1-2, k)-cr(mp1, np1, k)*vb(i, np1, iv)
                                     we(i, 2*mp1-1, k) = we(i, 2*mp1-1, k)-ci(mp1, np1, k)*vb(i, np1, iv)
                                 end do
-                                if (mod(nlat, 2) /= 0) then
+                                if (odd(nlat)) then
                                     we(imid, 2*mp1-2, k) = we(imid, 2*mp1-2, k) &
                                         -cr(mp1, np1, k)*vb(imid, np1, iv)
                                     we(imid, 2*mp1-1, k) = we(imid, 2*mp1-1, k) &
@@ -835,7 +837,7 @@ contains
                                     wo(i, 2*mp1-2, k) = wo(i, 2*mp1-2, k)-cr(mp1, np1, k)*vb(i, np1, iv)
                                     wo(i, 2*mp1-1, k) = wo(i, 2*mp1-1, k)-ci(mp1, np1, k)*vb(i, np1, iv)
                                 end do
-                                if (mod(nlat, 2) /= 0) then
+                                if (odd(nlat)) then
                                     ve(imid, 2*mp1-2, k) = ve(imid, 2*mp1-2, k) &
                                         -ci(mp1, np1, k)*wb(imid, np1, iw)
                                     ve(imid, 2*mp1-1, k) = ve(imid, 2*mp1-1, k) &
@@ -853,7 +855,7 @@ contains
                                     wo(i, 2*mp1-2, k) = wo(i, 2*mp1-2, k)-bi(mp1, np1, k)*wb(i, np1, iw)
                                     wo(i, 2*mp1-1, k) = wo(i, 2*mp1-1, k)+br(mp1, np1, k)*wb(i, np1, iw)
                                 end do
-                                if (mod(nlat, 2) /= 0) then
+                                if (odd(nlat)) then
                                     ve(imid, 2*mp1-2, k) = ve(imid, 2*mp1-2, k) &
                                         +br(mp1, np1, k)*vb(imid, np1, iv)
                                     ve(imid, 2*mp1-1, k) = ve(imid, 2*mp1-1, k) &
@@ -892,7 +894,7 @@ contains
                                     wo(i, 2*mp1-2, k) = wo(i, 2*mp1-2, k)-bi(mp1, np1, k)*wb(i, np1, iw)
                                     wo(i, 2*mp1-1, k) = wo(i, 2*mp1-1, k)+br(mp1, np1, k)*wb(i, np1, iw)
                                 end do
-                                if (mod(nlat, 2) /= 0) then
+                                if (odd(nlat)) then
                                     ve(imid, 2*mp1-2, k) = ve(imid, 2*mp1-2, k) &
                                         +br(mp1, np1, k)*vb(imid, np1, iv)
                                     ve(imid, 2*mp1-1, k) = ve(imid, 2*mp1-1, k) &
@@ -931,7 +933,7 @@ contains
                                     wo(i, 2*mp1-2, k) = wo(i, 2*mp1-2, k)-cr(mp1, np1, k)*vb(i, np1, iv)
                                     wo(i, 2*mp1-1, k) = wo(i, 2*mp1-1, k)-ci(mp1, np1, k)*vb(i, np1, iv)
                                 end do
-                                if (mod(nlat, 2) /= 0) then
+                                if (odd(nlat)) then
                                     ve(imid, 2*mp1-2, k) = ve(imid, 2*mp1-2, k) &
                                         -ci(mp1, np1, k)*wb(imid, np1, iw)
                                     ve(imid, 2*mp1-1, k) = ve(imid, 2*mp1-1, k) &
@@ -977,7 +979,7 @@ contains
                                     we(i, 2*mp1-2, k) = we(i, 2*mp1-2, k)-bi(mp1, np1, k)*wb(i, np1, iw)
                                     we(i, 2*mp1-1, k) = we(i, 2*mp1-1, k)+br(mp1, np1, k)*wb(i, np1, iw)
                                 end do
-                                if (mod(nlat, 2) /= 0) then
+                                if (odd(nlat)) then
                                     we(imid, 2*mp1-2, k) = we(imid, 2*mp1-2, k) &
                                         -bi(mp1, np1, k)*wb(imid, np1, iw)
                                     we(imid, 2*mp1-1, k) = we(imid, 2*mp1-1, k) &
@@ -995,7 +997,7 @@ contains
                                     we(i, 2*mp1-2, k) = we(i, 2*mp1-2, k)-cr(mp1, np1, k)*vb(i, np1, iv)
                                     we(i, 2*mp1-1, k) = we(i, 2*mp1-1, k)-ci(mp1, np1, k)*vb(i, np1, iv)
                                 end do
-                                if (mod(nlat, 2) /= 0) then
+                                if (odd(nlat)) then
                                     we(imid, 2*mp1-2, k) = we(imid, 2*mp1-2, k) &
                                         -cr(mp1, np1, k)*vb(imid, np1, iv)
                                     we(imid, 2*mp1-1, k) = we(imid, 2*mp1-1, k) &
@@ -1034,7 +1036,7 @@ contains
                                     we(i, 2*mp1-2, k) = we(i, 2*mp1-2, k)-bi(mp1, np1, k)*wb(i, np1, iw)
                                     we(i, 2*mp1-1, k) = we(i, 2*mp1-1, k)+br(mp1, np1, k)*wb(i, np1, iw)
                                 end do
-                                if (mod(nlat, 2) /= 0) then
+                                if (odd(nlat)) then
                                     we(imid, 2*mp1-2, k) = we(imid, 2*mp1-2, k) &
                                         -bi(mp1, np1, k)*wb(imid, np1, iw)
                                     we(imid, 2*mp1-1, k) = we(imid, 2*mp1-1, k) &
@@ -1073,7 +1075,7 @@ contains
                                     we(i, 2*mp1-2, k) = we(i, 2*mp1-2, k)-cr(mp1, np1, k)*vb(i, np1, iv)
                                     we(i, 2*mp1-1, k) = we(i, 2*mp1-1, k)-ci(mp1, np1, k)*vb(i, np1, iv)
                                 end do
-                                if (mod(nlat, 2) /= 0) then
+                                if (odd(nlat)) then
                                     we(imid, 2*mp1-2, k) = we(imid, 2*mp1-2, k) &
                                         -cr(mp1, np1, k)*vb(imid, np1, iv)
                                     we(imid, 2*mp1-1, k) = we(imid, 2*mp1-1, k) &

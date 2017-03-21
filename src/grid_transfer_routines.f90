@@ -9,10 +9,10 @@ module grid_transfer_routines
         RealPeriodicFastFourierTransform
 
     use scalar_analysis_routines, only: &
-        ScalarAnalysisUtility
+        ScalarForwardTransform
 
     use scalar_synthesis_routines, only: &
-        ScalarSynthesisUtility
+        ScalarBackwardTransform
 
     use vector_analysis_routines, only: &
         VectorForwardTransform

@@ -4,8 +4,15 @@ module vector_laplacian_routines
         wp, & ! working precision
         ip ! integer precision
 
+    use spherepack_interfaces, only: &
+        vector_synthesis
+
     use vector_synthesis_routines, only: &
+        VectorSynthesisUtility, &
         vhses, vhsec, vhsgc, vhsgs
+
+    use type_VectorHarmonic, only: &
+        VectorHarmonic
 
     ! Explicit typing only
     implicit none
@@ -14,8 +21,8 @@ module vector_laplacian_routines
     private
     public :: vlapec, vlapes, vlapgc, vlapgs
     public :: ivlapec, ivlapes, ivlapgc, ivlapgs
-    public :: get_workspace_indices_for_inversion, perform_setup_for_inversion
-    public :: perform_setup_for_vector_laplacian
+    public :: vector_laplacian_lower_utility_routine
+    public :: invert_vector_laplacian_lower_utility_routine
 
     ! Parameters confined to the module
     real(wp), parameter :: ZERO = 0.0_wp
@@ -24,7 +31,7 @@ module vector_laplacian_routines
     ! Declare interfaces for submodule implementation
     interface
         module subroutine vlapec(nlat, nlon, ityp, nt, vlap, wlap, idvw, jdvw, br, bi, &
-            cr, ci, mdbc, ndbc, wvhsec, lvhsec, work, lwork, ierror)
+            cr, ci, mdbc, ndbc, wvhsec, ierror)
 
             ! Dummy arguments
             integer(ip), intent(in)  :: nlat
@@ -41,15 +48,12 @@ module vector_laplacian_routines
             real(wp),    intent(in)  :: ci(mdbc, ndbc, nt)
             integer(ip), intent(in)  :: mdbc
             integer(ip), intent(in)  :: ndbc
-            real(wp),    intent(in)  :: wvhsec(lvhsec)
-            integer(ip), intent(in)  :: lvhsec
-            real(wp),    intent(out) :: work(lwork)
-            integer(ip), intent(in)  :: lwork
+            real(wp),    intent(in)  :: wvhsec(:)
             integer(ip), intent(out) :: ierror
         end subroutine vlapec
 
         module subroutine vlapes(nlat, nlon, ityp, nt, vlap, wlap, idvw, jdvw, br, bi, &
-            cr, ci, mdbc, ndbc, wvhses, lvhses, work, lwork, ierror)
+            cr, ci, mdbc, ndbc, wvhses, ierror)
 
             ! Dummy arguments
             integer(ip), intent(in)  :: nlat
@@ -66,15 +70,12 @@ module vector_laplacian_routines
             real(wp),    intent(in)  :: ci(mdbc, ndbc, nt)
             integer(ip), intent(in)  :: mdbc
             integer(ip), intent(in)  :: ndbc
-            real(wp),    intent(in)  :: wvhses(lvhses)
-            integer(ip), intent(in)  :: lvhses
-            real(wp),    intent(out) :: work(lwork)
-            integer(ip), intent(in)  :: lwork
+            real(wp),    intent(in)  :: wvhses(:)
             integer(ip), intent(out) :: ierror
         end subroutine vlapes
 
         module subroutine vlapgc(nlat, nlon, ityp, nt, vlap, wlap, idvw, jdvw, br, bi, &
-            cr, ci, mdbc, ndbc, wvhsgc, lvhsgc, work, lwork, ierror)
+            cr, ci, mdbc, ndbc, wvhsgc, ierror)
 
             ! Dummy arguments
             integer(ip), intent(in)  :: nlat
@@ -91,15 +92,12 @@ module vector_laplacian_routines
             real(wp),    intent(in)  :: ci(mdbc, ndbc, nt)
             integer(ip), intent(in)  :: mdbc
             integer(ip), intent(in)  :: ndbc
-            real(wp),    intent(in)  :: wvhsgc(lvhsgc)
-            integer(ip), intent(in)  :: lvhsgc
-            real(wp),    intent(out) :: work(lwork)
-            integer(ip), intent(in)  :: lwork
+            real(wp),    intent(in)  :: wvhsgc(:)
             integer(ip), intent(out) :: ierror
         end subroutine vlapgc
 
         module subroutine vlapgs(nlat, nlon, ityp, nt, vlap, wlap, idvw, jdvw, br, bi, &
-            cr, ci, mdbc, ndbc, wvhsgs, lvhsgs, work, lwork, ierror)
+            cr, ci, mdbc, ndbc, wvhsgs, ierror)
 
             ! Dummy arguments
             integer(ip), intent(in)  :: nlat
@@ -116,15 +114,12 @@ module vector_laplacian_routines
             real(wp),    intent(in)  :: ci(mdbc, ndbc, nt)
             integer(ip), intent(in)  :: mdbc
             integer(ip), intent(in)  :: ndbc
-            real(wp),    intent(in)  :: wvhsgs(lvhsgs)
-            integer(ip), intent(in)  :: lvhsgs
-            real(wp),    intent(out) :: work(lwork)
-            integer(ip), intent(in)  :: lwork
+            real(wp),    intent(in)  :: wvhsgs(:)
             integer(ip), intent(out) :: ierror
         end subroutine vlapgs
 
         module subroutine ivlapec(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
-            mdbc, ndbc, wvhsec, lvhsec, work, lwork, ierror)
+            mdbc, ndbc, wvhsec, ierror)
 
             ! Dummy arguments
             integer(ip), intent(in)  :: nlat
@@ -141,15 +136,12 @@ module vector_laplacian_routines
             real(wp),    intent(in)  :: ci(mdbc, ndbc, nt)
             integer(ip), intent(in)  :: mdbc
             integer(ip), intent(in)  :: ndbc
-            real(wp),    intent(in)  :: wvhsec(lvhsec)
-            integer(ip), intent(in)  :: lvhsec
-            real(wp),    intent(out) :: work(lwork)
-            integer(ip), intent(in)  :: lwork
+            real(wp),    intent(in)  :: wvhsec(:)
             integer(ip), intent(out) :: ierror
         end subroutine ivlapec
 
         module subroutine ivlapes(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
-            mdbc, ndbc, wvhses, lvhses, work, lwork, ierror)
+            mdbc, ndbc, wvhses, ierror)
 
             ! Dummy arguments
             integer(ip), intent(in)  :: nlat
@@ -166,15 +158,12 @@ module vector_laplacian_routines
             real(wp),    intent(in)  :: ci(mdbc, ndbc, nt)
             integer(ip), intent(in)  :: mdbc
             integer(ip), intent(in)  :: ndbc
-            real(wp),    intent(in)  :: wvhses(lvhses)
-            integer(ip), intent(in)  :: lvhses
-            real(wp),    intent(out) :: work(lwork)
-            integer(ip), intent(in)  :: lwork
+            real(wp),    intent(in)  :: wvhses(:)
             integer(ip), intent(out) :: ierror
         end subroutine ivlapes
 
         module subroutine ivlapgc(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
-            mdbc, ndbc, wvhsgc, lvhsgc, work, lwork, ierror)
+            mdbc, ndbc, wvhsgc, ierror)
 
             ! Dummy arguments
             integer(ip), intent(in)  :: nlat
@@ -191,15 +180,12 @@ module vector_laplacian_routines
             real(wp),    intent(in)  :: ci(mdbc, ndbc, nt)
             integer(ip), intent(in)  :: mdbc
             integer(ip), intent(in)  :: ndbc
-            real(wp),    intent(in)  :: wvhsgc(lvhsgc)
-            integer(ip), intent(in)  :: lvhsgc
-            real(wp),    intent(out) :: work(lwork)
-            integer(ip), intent(in)  :: lwork
+            real(wp),    intent(in)  :: wvhsgc(:)
             integer(ip), intent(out) :: ierror
         end subroutine ivlapgc
 
         module subroutine ivlapgs(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
-            mdbc, ndbc, wvhsgs, lvhsgs, work, lwork, ierror)
+            mdbc, ndbc, wvhsgs, ierror)
 
             ! Dummy arguments
             integer(ip), intent(in)  :: nlat
@@ -216,10 +202,7 @@ module vector_laplacian_routines
             real(wp),    intent(in)  :: ci(mdbc, ndbc, nt)
             integer(ip), intent(in)  :: mdbc
             integer(ip), intent(in)  :: ndbc
-            real(wp),    intent(in)  :: wvhsgs(lvhsgs)
-            integer(ip), intent(in)  :: lvhsgs
-            real(wp),    intent(out) :: work(lwork)
-            integer(ip), intent(in)  :: lwork
+            real(wp),    intent(in)  :: wvhsgs(:)
             integer(ip), intent(out) :: ierror
         end subroutine ivlapgs
     end interface
@@ -244,249 +227,257 @@ contains
 
     end subroutine compute_coefficient_multipliers
 
-    pure subroutine perform_setup_for_vector_laplacian(ityp, brlap, bilap, crlap, cilap, br, bi, cr, ci, fnn)
+    pure subroutine perform_setup_for_vector_laplacian(ityp, brlap, bilap, crlap, cilap, &
+        br, bi, cr, ci)
 
         ! Dummy arguments
-        integer(ip), intent(out) :: ityp
-        real(wp),    intent(in)  :: br(:, :, :)
-        real(wp),    intent(in)  :: bi(:, :, :)
-        real(wp),    intent(in)  :: cr(:, :, :)
-        real(wp),    intent(in)  :: ci(:, :, :)
-        real(wp),    intent(out) :: brlap(:, :, :)
-        real(wp),    intent(out) :: bilap(:, :, :)
-        real(wp),    intent(out) :: crlap(:, :, :)
-        real(wp),    intent(out) :: cilap(:, :, :)
-        real(wp),    intent(out) :: fnn(:)
+        integer(ip),                intent(in)  :: ityp
+        real(wp), dimension(:,:,:), intent(in)  :: br, bi, cr, ci
+        real(wp), dimension(:,:,:), intent(out) :: brlap, bilap, crlap, cilap
 
-        ! Local variables
-        integer(ip) :: k, n, m
-
-        associate (&
+        associate( &
             mmax => size(brlap, dim=1), &
             nlat => size(brlap, dim=2), &
             nt => size(brlap, dim=3) &
-           )
+            )
 
-            ! Preset coefficient multiplyers in vector
-            call compute_coefficient_multipliers(fnn)
+            block
+                integer(ip) :: k, n, m
+                real(wp)    :: fnn(nlat)
 
-            !  Set vector laplacian coefficients from br, bi, cr, ci
-            select case (ityp)
-                case (0, 3, 6)
-                    !
-                    !     all coefficients needed
-                    !
-                    do k=1, nt
-                        do n=1, nlat
-                            do m=1, mmax
-                                brlap(m, n, k) = ZERO
-                                bilap(m, n, k) = ZERO
-                                crlap(m, n, k) = ZERO
-                                cilap(m, n, k) = ZERO
+                ! Preset coefficient multiplyers in vector
+                call compute_coefficient_multipliers(fnn)
+
+                ! Preset coefficients to 0.0
+                brlap = ZERO
+                bilap = ZERO
+                crlap = ZERO
+                cilap = ZERO
+
+                ! Set vector laplacian coefficients from br, bi, cr, ci
+                select case (ityp)
+                    case (0, 3, 6)
+
+                        ! All coefficients needed
+                        do k=1, nt
+                            do n=2, nlat
+                                brlap(1, n, k) = fnn(n)*br(1, n, k)
+                                bilap(1, n, k) = fnn(n)*bi(1, n, k)
+                                crlap(1, n, k) = fnn(n)*cr(1, n, k)
+                                cilap(1, n, k) = fnn(n)*ci(1, n, k)
+                            end do
+                            do m=2, mmax
+                                do n=m, nlat
+                                    brlap(m, n, k) = fnn(n)*br(m, n, k)
+                                    bilap(m, n, k) = fnn(n)*bi(m, n, k)
+                                    crlap(m, n, k) = fnn(n)*cr(m, n, k)
+                                    cilap(m, n, k) = fnn(n)*ci(m, n, k)
+                                end do
                             end do
                         end do
-                        do n=2, nlat
-                            brlap(1, n, k) = fnn(n)*br(1, n, k)
-                            bilap(1, n, k) = fnn(n)*bi(1, n, k)
-                            crlap(1, n, k) = fnn(n)*cr(1, n, k)
-                            cilap(1, n, k) = fnn(n)*ci(1, n, k)
-                        end do
-                        do m=2, mmax
-                            do n=m, nlat
-                                brlap(m, n, k) = fnn(n)*br(m, n, k)
-                                bilap(m, n, k) = fnn(n)*bi(m, n, k)
-                                crlap(m, n, k) = fnn(n)*cr(m, n, k)
-                                cilap(m, n, k) = fnn(n)*ci(m, n, k)
+                    case (1, 4, 7)
+
+                        ! Vorticity is zero so cr, ci=0 not used
+                        do k=1, nt
+                            do n=2, nlat
+                                brlap(1, n, k) = fnn(n)*br(1, n, k)
+                                bilap(1, n, k) = fnn(n)*bi(1, n, k)
+                            end do
+                            do m=2, mmax
+                                do n=m, nlat
+                                    brlap(m, n, k) = fnn(n)*br(m, n, k)
+                                    bilap(m, n, k) = fnn(n)*bi(m, n, k)
+                                end do
                             end do
                         end do
-                    end do
-                case (1, 4, 7)
-                    !
-                    !     vorticity is zero so cr, ci=0 not used
-                    !
-                    do k=1, nt
-                        do n=1, nlat
-                            do m=1, mmax
-                                brlap(m, n, k) = ZERO
-                                bilap(m, n, k) = ZERO
+                    case default
+
+                        ! Divergence is zero so br, bi=0 not used
+                        do k=1, nt
+                            do n=2, nlat
+                                crlap(1, n, k) = fnn(n)*cr(1, n, k)
+                                cilap(1, n, k) = fnn(n)*ci(1, n, k)
+                            end do
+                            do m=2, mmax
+                                do n=m, nlat
+                                    crlap(m, n, k) = fnn(n)*cr(m, n, k)
+                                    cilap(m, n, k) = fnn(n)*ci(m, n, k)
+                                end do
                             end do
                         end do
-                        do n=2, nlat
-                            brlap(1, n, k) = fnn(n)*br(1, n, k)
-                            bilap(1, n, k) = fnn(n)*bi(1, n, k)
-                        end do
-                        do m=2, mmax
-                            do n=m, nlat
-                                brlap(m, n, k) = fnn(n)*br(m, n, k)
-                                bilap(m, n, k) = fnn(n)*bi(m, n, k)
-                            end do
-                        end do
-                    end do
-                case default
-                    !
-                    !     divergence is zero so br, bi=0 not used
-                    !
-                    do k=1, nt
-                        do n=1, nlat
-                            do m=1, mmax
-                                crlap(m, n, k) = ZERO
-                                cilap(m, n, k) = ZERO
-                            end do
-                        end do
-                        do n=2, nlat
-                            crlap(1, n, k) = fnn(n)*cr(1, n, k)
-                            cilap(1, n, k) = fnn(n)*ci(1, n, k)
-                        end do
-                        do m=2, mmax
-                            do n=m, nlat
-                                crlap(m, n, k) = fnn(n)*cr(m, n, k)
-                                cilap(m, n, k) = fnn(n)*ci(m, n, k)
-                            end do
-                        end do
-                    end do
-            end select
+                end select
+            end block
         end associate
 
     end subroutine perform_setup_for_vector_laplacian
 
-    pure function get_workspace_indices_for_inversion(ityp, nlat, mn, lwork) &
-        result (return_values)
+    subroutine vector_laplacian_lower_utility_routine(nlat, nlon, ityp, nt, vlap, wlap, &
+        br, bi, cr, ci, wavetable, synth_routine, error_flag)
 
         ! Dummy arguments
-        integer(ip), intent(in) :: ityp
-        integer(ip), intent(in) :: nlat
-        integer(ip), intent(in) :: mn
-        integer(ip), intent(in) :: lwork
-        integer(ip)             :: return_values(7)
-
-        associate (i => return_values)
-            i(1) = 1
-            select case(ityp)
-                case(0, 3, 6)
-                    i(2) = i(1) + mn
-                    i(3) = i(2) + mn
-                    i(4) = i(3) + mn
-                case(1, 4, 7)
-                    i(2) = i(1) + mn
-                    i(3) = i(2) + mn
-                    i(4) = i(3)
-                case default
-                    i(2) = i(1)
-                    i(3) = i(2) + mn
-                    i(4) = i(3) + mn
-            end select
-
-            i(5) = i(4) + mn
-            i(6) = i(5) + nlat
-
-            select case(ityp)
-                case(0, 3, 6)
-                    i(7) = lwork - (4 * mn) - nlat
-                case default
-                    i(7) = lwork - (2 * mn) - nlat
-            end select
-        end associate
-
-    end function get_workspace_indices_for_inversion
-
-    pure subroutine perform_setup_for_inversion( &
-        ityp,  br, bi, cr, ci, brvw, bivw, crvw, civw, fnn)
-
-        ! Dummy arguments
-        integer(ip), intent(out) :: ityp
-        real(wp),    intent(in)  :: br(:, :, :)
-        real(wp),    intent(in)  :: bi(:, :, :)
-        real(wp),    intent(in)  :: cr(:, :, :)
-        real(wp),    intent(in)  :: ci(:, :, :)
-        real(wp),    intent(out) :: brvw(:, :, :)
-        real(wp),    intent(out) :: bivw(:, :, :)
-        real(wp),    intent(out) :: crvw(:, :, :)
-        real(wp),    intent(out) :: civw(:, :, :)
-        real(wp),    intent(out) :: fnn(:)
+        integer(ip),                intent(in)  :: nlat
+        integer(ip),                intent(in)  :: nlon
+        integer(ip),                intent(in)  :: ityp
+        integer(ip),                intent(in)  :: nt
+        real(wp), dimension(:,:,:), intent(out) :: vlap, wlap
+        real(wp), dimension(:,:,:), intent(in)  :: br, bi, cr, ci
+        real(wp),                   intent(in)  :: wavetable(:)
+        procedure(vector_synthesis)             :: synth_routine
+        integer(ip), intent(out)                :: error_flag
 
         ! Local variables
-        integer(ip) :: k, n, m
+        type(VectorHarmonic) :: harmonic
+
+        ! Allocate memory
+        harmonic = VectorHarmonic(nlat, nlon, nt)
+
+        associate( &
+            idvw => size(vlap, dim=1), &
+            jdvw => size(vlap, dim=2), &
+            brlap => harmonic%polar%real_component, &
+            bilap => harmonic%polar%imaginary_component, &
+            crlap => harmonic%azimuthal%real_component, &
+            cilap => harmonic%azimuthal%imaginary_component, &
+            order_m => harmonic%ORDER_M, &
+            degree_n => harmonic%DEGREE_N &
+            )
+
+            call perform_setup_for_vector_laplacian(&
+                ityp, brlap, bilap, crlap, cilap, br, bi, cr, ci)
+
+            ! Synthesize coefs into vector field (v, w)
+            call synth_routine(nlat, nlon, ityp, nt, vlap, wlap, idvw, jdvw, brlap, bilap, &
+                crlap, cilap, order_m, degree_n, wavetable, error_flag)
+        end associate
+
+        ! Release memory
+        call harmonic%destroy()
+
+    end subroutine vector_laplacian_lower_utility_routine
+
+    pure subroutine perform_setup_for_inversion( &
+        ityp,  br, bi, cr, ci, brvw, bivw, crvw, civw)
+
+        ! Dummy arguments
+        integer(ip),                intent(in)  :: ityp
+        real(wp), dimension(:,:,:), intent(in)  :: br, bi, cr, ci
+        real(wp), dimension(:,:,:), intent(out) :: brvw, bivw, crvw, civw
 
         associate (&
-            mmax => size(brvw, dim=1), &
-            nlat => size(brvw, dim=2), &
+            order_m => size(brvw, dim=1), &
+            degree_n => size(brvw, dim=2), &
             nt => size(brvw, dim=3) &
-           )
+            )
 
-            ! Preset coefficient multiplyers in vector
-            call compute_coefficient_multipliers(fnn)
+            block
+                integer(ip) :: k, n, m
+                real(wp)    :: fnn(degree_n)
 
-            ! Set (u, v) coefficients from br, bi, cr, ci
-            select case (ityp)
-                case (0, 3, 6)
-                    ! All coefficients needed
-                    do k=1, nt
-                        do n=1, nlat
-                            do m=1, mmax
-                                brvw(m, n, k) = ZERO
-                                bivw(m, n, k) = ZERO
-                                crvw(m, n, k) = ZERO
-                                civw(m, n, k) = ZERO
+                ! Preset coefficient multiplyers in vector
+                call compute_coefficient_multipliers(fnn)
+
+                ! Preset coefficients to zero
+                brvw = ZERO
+                bivw = ZERO
+                crvw = ZERO
+                civw = ZERO
+
+                ! Set (u, v) coefficients from br, bi, cr, ci
+                select case (ityp)
+                    case (0, 3, 6)
+                        ! All coefficients needed
+                        do k=1, nt
+                            do n=2, degree_n
+                                brvw(1, n, k) = br(1, n, k)/fnn(n)
+                                bivw(1, n, k) = bi(1, n, k)/fnn(n)
+                                crvw(1, n, k) = cr(1, n, k)/fnn(n)
+                                civw(1, n, k) = ci(1, n, k)/fnn(n)
+                            end do
+                            do m=2, order_m
+                                do n=m, degree_n
+                                    brvw(m, n, k) = br(m, n, k)/fnn(n)
+                                    bivw(m, n, k) = bi(m, n, k)/fnn(n)
+                                    crvw(m, n, k) = cr(m, n, k)/fnn(n)
+                                    civw(m, n, k) = ci(m, n, k)/fnn(n)
+                                end do
                             end do
                         end do
-                        do n=2, nlat
-                            brvw(1, n, k) = br(1, n, k)/fnn(n)
-                            bivw(1, n, k) = bi(1, n, k)/fnn(n)
-                            crvw(1, n, k) = cr(1, n, k)/fnn(n)
-                            civw(1, n, k) = ci(1, n, k)/fnn(n)
-                        end do
-                        do m=2, mmax
-                            do n=m, nlat
-                                brvw(m, n, k) = br(m, n, k)/fnn(n)
-                                bivw(m, n, k) = bi(m, n, k)/fnn(n)
-                                crvw(m, n, k) = cr(m, n, k)/fnn(n)
-                                civw(m, n, k) = ci(m, n, k)/fnn(n)
+                    case (1, 4, 7)
+                        ! Vorticity is zero so cr, ci=0 not used
+                        do k=1, nt
+                            do n=2, degree_n
+                                brvw(1, n, k) = br(1, n, k)/fnn(n)
+                                bivw(1, n, k) = bi(1, n, k)/fnn(n)
+                            end do
+                            do m=2, order_m
+                                do n=m, degree_n
+                                    brvw(m, n, k) = br(m, n, k)/fnn(n)
+                                    bivw(m, n, k) = bi(m, n, k)/fnn(n)
+                                end do
                             end do
                         end do
-                    end do
-                case (1, 4, 7)
-                    ! Vorticity is zero so cr, ci=0 not used
-                    do k=1, nt
-                        do n=1, nlat
-                            do m=1, mmax
-                                brvw(m, n, k) = ZERO
-                                bivw(m, n, k) = ZERO
+                    case default
+                        ! Divergence is zero so br, bi=0 not used
+                        do k=1, nt
+                            do n=2, degree_n
+                                crvw(1, n, k) = cr(1, n, k)/fnn(n)
+                                civw(1, n, k) = ci(1, n, k)/fnn(n)
+                            end do
+                            do m=2, order_m
+                                do n=m, degree_n
+                                    crvw(m, n, k) = cr(m, n, k)/fnn(n)
+                                    civw(m, n, k) = ci(m, n, k)/fnn(n)
+                                end do
                             end do
                         end do
-                        do n=2, nlat
-                            brvw(1, n, k) = br(1, n, k)/fnn(n)
-                            bivw(1, n, k) = bi(1, n, k)/fnn(n)
-                        end do
-                        do m=2, mmax
-                            do n=m, nlat
-                                brvw(m, n, k) = br(m, n, k)/fnn(n)
-                                bivw(m, n, k) = bi(m, n, k)/fnn(n)
-                            end do
-                        end do
-                    end do
-                case default
-                    ! Divergence is zero so br, bi=0 not used
-                    do k=1, nt
-                        do n=1, nlat
-                            do m=1, mmax
-                                crvw(m, n, k) = ZERO
-                                civw(m, n, k) = ZERO
-                            end do
-                        end do
-                        do n=2, nlat
-                            crvw(1, n, k) = cr(1, n, k)/fnn(n)
-                            civw(1, n, k) = ci(1, n, k)/fnn(n)
-                        end do
-                        do m=2, mmax
-                            do n=m, nlat
-                                crvw(m, n, k) = cr(m, n, k)/fnn(n)
-                                civw(m, n, k) = ci(m, n, k)/fnn(n)
-                            end do
-                        end do
-                    end do
-            end select
+                end select
+            end block
         end associate
 
     end subroutine perform_setup_for_inversion
+
+    subroutine invert_vector_laplacian_lower_utility_routine(nlat, nlon, ityp, nt, v, w, &
+        br, bi, cr, ci, wavetable, synth_routine, error_flag)
+
+        ! Dummy arguments
+        integer(ip),                intent(in)  :: nlat
+        integer(ip),                intent(in)  :: nlon
+        integer(ip),                intent(in)  :: ityp
+        integer(ip),                intent(in)  :: nt
+        real(wp), dimension(:,:,:), intent(out) :: v, w
+        real(wp), dimension(:,:,:), intent(in)  :: br, bi, cr, ci
+        real(wp),                   intent(in)  :: wavetable(:)
+        procedure(vector_synthesis)             :: synth_routine
+        integer(ip),                intent(out) :: error_flag
+
+        ! Local variables
+        type(VectorHarmonic) :: harmonic
+
+        ! Allocate memory
+        harmonic = VectorHarmonic(nlat, nlon, nt)
+
+        associate( &
+            idvw => size(v, dim=1), &
+            jdvw => size(v, dim=2), &
+            brvw => harmonic%polar%real_component, &
+            bivw => harmonic%polar%imaginary_component, &
+            crvw => harmonic%azimuthal%real_component, &
+            civw => harmonic%azimuthal%imaginary_component, &
+            order_m => harmonic%ORDER_M, &
+            degree_n => harmonic%DEGREE_N &
+            )
+
+            call perform_setup_for_inversion( &
+                ityp,  br, bi, cr, ci, brvw, bivw, crvw, civw)
+
+            ! Synthesize coefs into vector field (v, w)
+            call synth_routine(nlat, nlon, ityp, nt, v, w, idvw, jdvw, brvw, bivw, &
+                crvw, civw, order_m, degree_n, wavetable, error_flag)
+        end associate
+
+        ! Release memory
+        call harmonic%destroy()
+
+    end subroutine invert_vector_laplacian_lower_utility_routine
 
 end module vector_laplacian_routines

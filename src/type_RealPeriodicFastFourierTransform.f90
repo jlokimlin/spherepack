@@ -40,7 +40,8 @@ module type_RealPeriodicFastFourierTransform
         wp, & ! working precision
         ip, & ! integer precision
         PI, &
-        TWO_PI
+        TWO_PI, &
+        odd
 
     ! Explicit typing only
     implicit none
@@ -54,6 +55,7 @@ module type_RealPeriodicFastFourierTransform
     real(wp),    parameter :: ZERO = 0.0_wp
     real(wp),    parameter :: ONE = 1.0_wp
     real(wp),    parameter :: TWO = 2.0_wp
+    real(wp),    parameter :: SQRT_2 = sqrt(TWO)
     integer(ip), parameter :: NUMBER_OF_FACTORS = 15_ip
 
     type, public :: RealPeriodicFastFourierTransform
@@ -94,8 +96,16 @@ contains
         integer(ip), intent(in)  :: n
         real(wp),    intent(out) :: wsave(n+NUMBER_OF_FACTORS)
 
+        ! Local variables
+        integer(ip) :: iw1, iw2
+
         if (n > 1) then
-            call precompute_factorization_and_trig_lookup_table(n, wsave(1), wsave(n+1))
+
+            ! Set wavetable index pointers
+            iw1 = 1
+            iw2 = n + 1
+
+            call precompute_factorization_and_trig_lookup_table(n, wsave(iw1:), wsave(iw2:))
         end if
 
     end subroutine hrffti
@@ -179,24 +189,16 @@ contains
         real(wp),    intent(in)     :: wsave(n+NUMBER_OF_FACTORS)
 
         ! Local variables
-        integer(ip) :: lwork
+        integer(ip) :: iw1, iw2
 
         if (n > 1) then
 
-            ! Set required workspace size
-            lwork = m * n
+            ! Set workspace index pointers
+            iw1 = 1
+            iw2 = n + 1
 
-            block
-                integer(ip) :: iw1, iw2
-                real(wp)    :: work(lwork)
-
-                ! Set workspace index pointers
-                iw1 = 1
-                iw2 = n + 1
-
-                call forward_lower_utility_routine(m, n, r, mdimr, work, &
-                    wsave(iw1:), wsave(iw2:))
-            end block
+            call forward_lower_utility_routine(m, n, r, mdimr, &
+                wsave(iw1:), wsave(iw2:))
         end if
 
     end subroutine hrfftf
@@ -277,28 +279,20 @@ contains
         real(wp),    intent(in)     :: wsave(n+NUMBER_OF_FACTORS)
 
         ! Local variables
-        integer(ip) :: lwork
+        integer(ip) :: iw1, iw2
 
         if (n > 1) then
 
-            ! Set required workspace size
-            lwork = m * n
+            ! Set wavetable index pointers
+            iw1 = 1
+            iw2 = n + 1
 
-            block
-                integer(ip) :: iw1, iw2
-                real(wp)    :: work(lwork)
-
-                ! Set wavetable index pointers
-                iw1 = 1
-                iw2 = n + 1
-                call backward_lower_utility_routine(m, n, r, mdimr, work, &
-                    wsave(iw1:), wsave(iw2:))
-            end block
+            call backward_lower_utility_routine(m, n, r, mdimr, &
+                wsave(iw1:), wsave(iw2:))
         end if
 
     end subroutine hrfftb
 
-    !
     ! Purpose:
     !
     ! Factors of an integer for floating point computations.
@@ -368,11 +362,11 @@ contains
 
         ! Dummy arguments
         integer(ip), intent(in)  :: n
-        real(wp),    intent(out) :: trig_lookup_table(n)
-        real(wp),    intent(out) :: factors(NUMBER_OF_FACTORS)
+        real(wp),    intent(out) :: trig_lookup_table(:)
+        real(wp),    intent(out) :: factors(:)
 
         ! Local variables
-        integer(ip)            :: i, ido, ii, iip, ipm, is
+        integer(ip)            :: i, ido, ii, iip, ipm, iis
         integer(ip)            :: j, k1, l1, l2, ld
         integer(ip)            :: nf, nfm1
         integer(ip), parameter :: SUBTRANSFORMS(*) = [4, 2, 3, 5]
@@ -381,7 +375,7 @@ contains
         call compute_factorization(n, SUBTRANSFORMS, nf, factors)
 
         d_theta = TWO_PI/n
-        is = 0
+        iis = 0
         nfm1 = nf-1
         l1 = 1
 
@@ -394,7 +388,7 @@ contains
                 ipm = iip-1
                 do j=1, ipm
                     ld = ld+l1
-                    i = is
+                    i = iis
                     mesh = real(ld, kind=wp) * d_theta
                     product_1 = ZERO
                     do ii=3, ido, 2
@@ -404,7 +398,7 @@ contains
                         trig_lookup_table(i-1) = cos(theta)
                         trig_lookup_table(i) = sin(theta)
                     end do
-                    is = is+ido
+                    iis = iis+ido
                 end do
                 l1 = l2
             end do
@@ -412,81 +406,84 @@ contains
 
     end subroutine precompute_factorization_and_trig_lookup_table
 
-    subroutine forward_lower_utility_routine(m, n, c, mdimc, ch, wa, fac)
+    subroutine forward_lower_utility_routine(m, n, c, mdimc, wa, fac)
 
         ! Dummy arguments
         integer(ip), intent(in)     :: m
         integer(ip), intent(in)     :: n
-        real(wp),    intent(inout)  :: c(mdimc, n)
+        real(wp),    intent(inout)  :: c(:,:)
         integer(ip), intent(in)     :: mdimc
-        real(wp),    intent(out)    :: ch(m, n)
-        real(wp),    intent(in)     :: wa(n)
-        real(wp),    intent(in)     :: fac(NUMBER_OF_FACTORS)
+        real(wp),    intent(in)     :: wa(:)
+        real(wp),    intent(in)     :: fac(:)
 
         ! Local variables
-        integer(ip) :: k1, l1, l2
+        integer(ip) :: k1, n1, n2
         integer(ip) :: na, kh, nf, iip
-        integer(ip) :: iw, ix2, ix3, ix4, ido, idl1
+        integer(ip) :: iw1, iw2, iw3, iw4, ido, idl1
 
         nf = int(fac(2), kind=ip)
         na = 1
-        l2 = n
-        iw = n
+        n2 = n
+        iw1 = n
 
-        do k1=1, nf
-            kh = nf-k1
-            iip = int(fac(kh+3), kind=ip)
-            l1 = l2/iip
-            ido = n/l2
-            idl1 = ido*l1
-            iw = iw-(iip-1)*ido
-            na = 1-na
+        block
+            real(wp) :: ch(m,n)
 
-            select case (iip)
-                case (2)
-                    if (na == 0) then
-                        call forward_pass_2(m, ido, l1, c, mdimc, ch, m, wa(iw))
-                    else
-                        call forward_pass_2(m, ido, l1, ch, m, c, mdimc, wa(iw))
-                    end if
-                case (3)
-                    ix2 = iw+ido
-                    if (na == 0) then
-                        call forward_pass_3(m, ido, l1, c, mdimc, ch, m, wa(iw), wa(ix2))
-                    else
-                        call forward_pass_3(m, ido, l1, ch, m, c, mdimc, wa(iw), wa(ix2))
-                    end if
-                case(4)
-                    ix2 = iw+ido
-                    ix3 = ix2+ido
-                    if (na == 0) then
-                        call forward_pass_4(m, ido, l1, c, mdimc, ch, m, wa(iw), wa(ix2), wa(ix3))
-                    else
-                        call forward_pass_4(m, ido, l1, ch, m, c, mdimc, wa(iw), wa(ix2), wa(ix3))
-                    end if
-                case (5)
-                    ix2 = iw+ido
-                    ix3 = ix2+ido
-                    ix4 = ix3+ido
-                    if (na == 0) then
-                        call forward_pass_5(m, ido, l1, c, mdimc, ch, m, wa(iw), wa(ix2), wa(ix3), wa(ix4))
-                    else
-                        call forward_pass_5(m, ido, l1, ch, m, c, mdimc, wa(iw), wa(ix2), wa(ix3), wa(ix4))
-                    end if
-                case default
-                    if (ido == 1) na = 1-na
-                    if (na == 0) then
-                        call forward_pass_n(m, ido, iip, l1, idl1, c, c, c, mdimc, ch, ch, m, wa(iw))
-                        na = 1
-                    else
-                        call forward_pass_n(m, ido, iip, l1, idl1, ch, ch, ch, m, c, c, mdimc, wa(iw))
-                        na = 0
-                    end if
-            end select
-            l2 = l1
-        end do
+            do k1=1, nf
+                kh = nf-k1
+                iip = int(fac(kh+3), kind=ip)
+                n1 = n2/iip
+                ido = n/n2
+                idl1 = ido*n1
+                iw1 = iw1-(iip-1)*ido
+                na = 1-na
 
-        if (na /= 1) c(:m, :n) = ch
+                select case (iip)
+                    case (2)
+                        if (na == 0) then
+                            call forward_pass_2(m, ido, n1, c, mdimc, ch, m, wa(iw1:))
+                        else
+                            call forward_pass_2(m, ido, n1, ch, m, c, mdimc, wa(iw1:))
+                        end if
+                    case (3)
+                        iw2 = iw1+ido
+                        if (na == 0) then
+                            call forward_pass_3(m, ido, n1, c, mdimc, ch, m, wa(iw1:), wa(iw2:))
+                        else
+                            call forward_pass_3(m, ido, n1, ch, m, c, mdimc, wa(iw1:), wa(iw2:))
+                        end if
+                    case(4)
+                        iw2 = iw1+ido
+                        iw3 = iw2+ido
+                        if (na == 0) then
+                            call forward_pass_4(m, ido, n1, c, mdimc, ch, m, wa(iw1:), wa(iw2:), wa(iw3:))
+                        else
+                            call forward_pass_4(m, ido, n1, ch, m, c, mdimc, wa(iw1:), wa(iw2:), wa(iw3:))
+                        end if
+                    case (5)
+                        iw2 = iw1+ido
+                        iw3 = iw2+ido
+                        iw4 = iw3+ido
+                        if (na == 0) then
+                            call forward_pass_5(m, ido, n1, c, mdimc, ch, m, wa(iw1:), wa(iw2:), wa(iw3:), wa(iw4:))
+                        else
+                            call forward_pass_5(m, ido, n1, ch, m, c, mdimc, wa(iw1:), wa(iw2:), wa(iw3:), wa(iw4:))
+                        end if
+                    case default
+                        if (ido == 1) na = 1-na
+                        if (na == 0) then
+                            call forward_pass_n(m, ido, iip, n1, idl1, c, c, c, mdimc, ch, ch, m, wa(iw1:))
+                            na = 1
+                        else
+                            call forward_pass_n(m, ido, iip, n1, idl1, ch, ch, ch, m, c, c, mdimc, wa(iw1:))
+                            na = 0
+                        end if
+                end select
+                n2 = n1
+            end do
+
+            if (na /= 1) c(:m, :n) = ch
+        end block
 
     end subroutine forward_lower_utility_routine
 
@@ -500,7 +497,7 @@ contains
         integer(ip), intent(in)     :: mdimch
         real(wp),    intent(inout)  :: cc(mdimcc, ido, l1, 2)
         integer(ip), intent(in)     :: mdimcc
-        real(wp),    intent(in)     :: wa1(ido)
+        real(wp),    intent(in)     :: wa1(:)
 
         ! Local variables
         integer(ip) :: i, k, m, ic, idp2
@@ -534,7 +531,7 @@ contains
                     end do
                 end do
             end do
-            if (mod(ido, 2) == 1) return
+            if (odd(ido)) return
         end if
 
         ch(:mp, 1, 2, :) = -cc(:mp, ido, :, 2)
@@ -552,8 +549,8 @@ contains
         integer(ip), intent(in)     :: mdimch
         real(wp),    intent(inout)  :: cc(mdimcc, ido, l1, 3)
         integer(ip), intent(in)     :: mdimcc
-        real(wp),    intent(in)     :: wa1(ido)
-        real(wp),    intent(in)     :: wa2(ido)
+        real(wp),    intent(in)     :: wa1(:)
+        real(wp),    intent(in)     :: wa2(:)
 
         ! Local variables
         integer(ip)         :: i, k, m, ic, idp2
@@ -636,13 +633,13 @@ contains
         integer(ip), intent(in)     :: mdimcc
         real(wp),    intent(inout)  :: ch(mdimch, ido, 4, l1)
         integer(ip), intent(in)     :: mdimch
-        real(wp),    intent(in)     :: wa1(ido)
-        real(wp),    intent(in)     :: wa2(ido)
-        real(wp),    intent(in)     :: wa3(ido)
+        real(wp),    intent(in)     :: wa1(:)
+        real(wp),    intent(in)     :: wa2(:)
+        real(wp),    intent(in)     :: wa3(:)
 
         ! Local variables
         integer(ip)         :: i, k, m, ic, idp2
-        real(wp), parameter :: SQRT2 = sqrt(TWO)/2
+        real(wp), parameter :: HALF_SQRT_2 = SQRT_2/2
 
         do k=1, l1
             do m=1, mp
@@ -719,7 +716,7 @@ contains
                 end do
             end do
 
-            if (mod(ido, 2) == 1) return
+            if (odd(ido)) return
 
         end if
 
@@ -727,19 +724,19 @@ contains
             do m=1, mp
 
                 ch(m, ido, 1, k) = &
-                    (SQRT2*(cc(m, ido, k, 2)-cc(m, ido, k, 4)))+ &
+                    (HALF_SQRT_2*(cc(m, ido, k, 2)-cc(m, ido, k, 4)))+ &
                     cc(m, ido, k, 1)
 
                 ch(m, ido, 3, k) = &
-                    cc(m, ido, k, 1)-(SQRT2*(cc(m, ido, k, 2)- &
+                    cc(m, ido, k, 1)-(HALF_SQRT_2*(cc(m, ido, k, 2)- &
                     cc(m, ido, k, 4)))
 
                 ch(m, 1, 2, k) = &
-                    (-SQRT2*(cc(m, ido, k, 2)+cc(m, ido, k, 4)))- &
+                    (-HALF_SQRT_2*(cc(m, ido, k, 2)+cc(m, ido, k, 4)))- &
                     cc(m, ido, k, 3)
 
                 ch(m, 1, 4, k) = &
-                    (-SQRT2*(cc(m, ido, k, 2)+cc(m, ido, k, 4)))+ &
+                    (-HALF_SQRT_2*(cc(m, ido, k, 2)+cc(m, ido, k, 4)))+ &
                     cc(m, ido, k, 3)
             end do
         end do
@@ -757,10 +754,10 @@ contains
         integer(ip), intent(in)     :: mdimch
         real(wp),    intent(inout)  :: cc(mdimcc, ido, l1, 5)
         integer(ip), intent(in)     :: mdimcc
-        real(wp),    intent(in)     :: wa1(ido)
-        real(wp),    intent(in)     :: wa2(ido)
-        real(wp),    intent(in)     :: wa3(ido)
-        real(wp),    intent(in)     :: wa4(ido)
+        real(wp),    intent(in)     :: wa1(:)
+        real(wp),    intent(in)     :: wa2(:)
+        real(wp),    intent(in)     :: wa3(:)
+        real(wp),    intent(in)     :: wa4(:)
 
         ! Local variables
         integer(ip)         :: i, k, m, ic, idp2
@@ -769,7 +766,6 @@ contains
         real(wp), parameter :: TI11=sin(ARG)
         real(wp), parameter :: TR12=cos(TWO*ARG)
         real(wp), parameter :: TI12=sin(TWO*ARG)
-
 
         do k=1, l1
             do m=1, mp
@@ -926,10 +922,10 @@ contains
         real(wp),    intent(inout)  :: ch(mdimch, ido, l1, iip)
         real(wp),    intent(inout)  :: ch2(mdimch, idl1, iip)
         integer(ip), intent(in)     :: mdimch
-        real(wp),    intent(in)     :: wa(ido)
+        real(wp),    intent(in)     :: wa(:)
 
         ! Local variables
-        integer(ip) :: i, j, k, l, j2, ic, jc, lc, ik, is, idij
+        integer(ip) :: i, j, k, l, j2, ic, jc, lc, ik, iis, idij
         real(wp)    :: dc2, ai1, ai2, ar1, ar2, ds2
         real(wp)    :: ar1h, ar2h
 
@@ -950,10 +946,10 @@ contains
                     ch(:mp, 1, :l1, 2:iip) = c1(:mp, 1, :l1, 2:iip)
 
                     if (nbd <= l1) then
-                        is = -ido
+                        iis = -ido
                         do j=2, iip
-                            is = is+ido
-                            idij = is
+                            iis = iis+ido
+                            idij = iis
                             do i=3, ido, 2
                                 ch(:mp, i-1, :l1, j) = wa(idij+1)*c1(:mp, i-1, :l1, j)+wa(idij+2) &            !
                                     *c1(:mp, i, :l1, j)
@@ -962,11 +958,11 @@ contains
                             end do
                         end do
                     else
-                        is = -ido
+                        iis = -ido
                         do j=2, iip
-                            is = is+ido
+                            iis = iis+ido
                             do k=1, l1
-                                idij = is
+                                idij = iis
                                 do i=3, ido, 2
                                     idij = idij+2
                                     ch(:mp, i-1, k, j) = wa(idij-1)*c1(:mp, i-1, k, j)+wa(idij) &            !
@@ -977,7 +973,7 @@ contains
                             end do
                         end do
                     end if
-                    if (nbd >= l1) then
+                    if (l1 <= nbd) then
                         do j=2, ipph
                             jc = ipp2-j
                             do k=1, l1
@@ -1054,7 +1050,7 @@ contains
 
                 if (ido == 1) return
 
-                if (nbd >= l1) then
+                if (l1 <= nbd) then
                     do j=2, ipph
                         jc = ipp2-j
                         j2 = 2*j
@@ -1086,76 +1082,80 @@ contains
 
     end subroutine forward_pass_n
 
-    subroutine backward_lower_utility_routine(m, n, c, mdimc, ch, wa, fac)
+    subroutine backward_lower_utility_routine(m, n, c, mdimc, wa, fac)
 
         ! Dummy arguments
         integer(ip), intent(in)     :: m
         integer(ip), intent(in)     :: n
-        real(wp),    intent(inout)  :: c(mdimc, n)
+        real(wp),    intent(inout)  :: c(:,:)
         integer(ip), intent(in)     :: mdimc
-        real(wp),    intent(out)    :: ch(m, n)
-        real(wp),    intent(in)     :: wa(n)
-        real(wp),    intent(in)     :: fac(NUMBER_OF_FACTORS)
+        real(wp),    intent(in)     :: wa(:)
+        real(wp),    intent(in)     :: fac(:)
 
         ! Local variables
-        integer(ip) :: k1, l1, l2, na
-        integer(ip) :: nf, iip, iw, ix2, ix3, ix4, ido, idl1
+        integer(ip) :: k1, n1, n2, na
+        integer(ip) :: nf, iip, iw1, iw2, iw3, iw4, ido, idl1
 
         nf = int(fac(2), kind=ip)
         na = 0
-        l1 = 1
-        iw = 1
-        do k1=1, nf
-            iip = int(fac(k1+2), kind=ip)
-            l2 = iip*l1
-            ido = n/l2
-            idl1 = ido*l1
+        n1 = 1
+        iw1 = 1
 
-            select case (iip)
-                case (2)
-                    if (na == 0) then
-                        call backward_pass_2(m, ido, l1, c, mdimc, ch, m, wa(iw))
-                    else
-                        call backward_pass_2(m, ido, l1, ch, m, c, mdimc, wa(iw))
-                    end if
-                case (3)
-                    ix2 = iw+ido
-                    if (na == 0) then
-                        call backward_pass_3(m, ido, l1, c, mdimc, ch, m, wa(iw), wa(ix2))
-                    else
-                        call backward_pass_3(m, ido, l1, ch, m, c, mdimc, wa(iw), wa(ix2))
-                    end if
-                case (4)
-                    ix2 = iw+ido
-                    ix3 = ix2+ido
-                    if (na == 0) then
-                        call backward_pass_4(m, ido, l1, c, mdimc, ch, m, wa(iw), wa(ix2), wa(ix3))
-                    else
-                        call backward_pass_4(m, ido, l1, ch, m, c, mdimc, wa(iw), wa(ix2), wa(ix3))
-                    end if
-                case (5)
-                    ix2 = iw+ido
-                    ix3 = ix2+ido
-                    ix4 = ix3+ido
-                    if (na == 0) then
-                        call backward_pass_5(m, ido, l1, c, mdimc, ch, m, wa(iw), wa(ix2), wa(ix3), wa(ix4))
-                    else
-                        call backward_pass_5(m, ido, l1, ch, m, c, mdimc, wa(iw), wa(ix2), wa(ix3), wa(ix4))
-                    end if
-                case default
-                    if (na == 0) then
-                        call backward_pass_n(m, ido, iip, l1, idl1, c, c, c, mdimc, ch, ch, m, wa(iw))
-                    else
-                        call backward_pass_n(m, ido, iip, l1, idl1, ch, ch, ch, m, c, c, mdimc, wa(iw))
-                    end if
-                    if (ido /= 1) na = 1-na
-            end select
-            na = 1-na
-            l1 = l2
-            iw = iw+(iip-1)*ido
-        end do
+        block
+            real(wp) :: ch(m,n)
 
-        if (na /= 0) c(:m, :n) = ch
+            do k1=1, nf
+                iip = int(fac(k1+2), kind=ip)
+                n2 = iip*n1
+                ido = n/n2
+                idl1 = ido*n1
+
+                select case (iip)
+                    case (2)
+                        if (na == 0) then
+                            call backward_pass_2(m, ido, n1, c, mdimc, ch, m, wa(iw1:))
+                        else
+                            call backward_pass_2(m, ido, n1, ch, m, c, mdimc, wa(iw1:))
+                        end if
+                    case (3)
+                        iw2 = iw1+ido
+                        if (na == 0) then
+                            call backward_pass_3(m, ido, n1, c, mdimc, ch, m, wa(iw1:), wa(iw2:))
+                        else
+                            call backward_pass_3(m, ido, n1, ch, m, c, mdimc, wa(iw1:), wa(iw2:))
+                        end if
+                    case (4)
+                        iw2 = iw1+ido
+                        iw3 = iw2+ido
+                        if (na == 0) then
+                            call backward_pass_4(m, ido, n1, c, mdimc, ch, m, wa(iw1:), wa(iw2:), wa(iw3:))
+                        else
+                            call backward_pass_4(m, ido, n1, ch, m, c, mdimc, wa(iw1:), wa(iw2:), wa(iw3:))
+                        end if
+                    case (5)
+                        iw2 = iw1+ido
+                        iw3 = iw2+ido
+                        iw4 = iw3+ido
+                        if (na == 0) then
+                            call backward_pass_5(m, ido, n1, c, mdimc, ch, m, wa(iw1:), wa(iw2:), wa(iw3:), wa(iw4:))
+                        else
+                            call backward_pass_5(m, ido, n1, ch, m, c, mdimc, wa(iw1:), wa(iw2:), wa(iw3:), wa(iw4:))
+                        end if
+                    case default
+                        if (na == 0) then
+                            call backward_pass_n(m, ido, iip, n1, idl1, c, c, c, mdimc, ch, ch, m, wa(iw1:))
+                        else
+                            call backward_pass_n(m, ido, iip, n1, idl1, ch, ch, ch, m, c, c, mdimc, wa(iw1:))
+                        end if
+                        if (ido /= 1) na = 1-na
+                end select
+                na = 1-na
+                n1 = n2
+                iw1 = iw1+(iip-1)*ido
+            end do
+
+            if (na /= 0) c(:m, :n) = ch
+        end block
 
     end subroutine backward_lower_utility_routine
 
@@ -1169,7 +1169,7 @@ contains
         integer(ip), intent(in)     :: mdimcc
         real(wp),    intent(out)    :: ch(mdimch, ido, l1, 2)
         integer(ip), intent(in)     :: mdimch
-        real(wp),    intent(in)     :: wa1(ido)
+        real(wp),    intent(in)     :: wa1(:)
 
         ! Local variables
         integer(ip) :: i, k, ic, idp2
@@ -1199,7 +1199,7 @@ contains
                         *(cc(:mp, i-1, 1, k)-cc(:mp, ic-1, 2, k))
                 end do
             end do
-            if (mod(ido, 2) == 1) return
+            if (odd(ido)) return
         end if
 
         ch(:mp, ido, :, 1) = cc(:mp, ido, 1, :)+cc(:mp, ido, 1, :)
@@ -1217,8 +1217,8 @@ contains
         integer(ip), intent(in)     :: mdimcc
         real(wp),    intent(out)    :: ch(mdimch, ido, l1, 3)
         integer(ip), intent(in)     :: mdimch
-        real(wp),    intent(in)     :: wa1(ido)
-        real(wp),    intent(in)     :: wa2(ido)
+        real(wp),    intent(in)     :: wa1(:)
+        real(wp),    intent(in)     :: wa2(:)
 
         ! Local variables
         integer(ip)         :: i, k, ic, idp2
@@ -1295,9 +1295,9 @@ contains
         integer(ip), intent(in)     :: mdimcc
         real(wp),    intent(out)    :: ch(mdimch, ido, l1, 4)
         integer(ip), intent(in)     :: mdimch
-        real(wp),    intent(in)     :: wa1(ido)
-        real(wp),    intent(in)     :: wa2(ido)
-        real(wp),    intent(in)     :: wa3(ido)
+        real(wp),    intent(in)     :: wa1(:)
+        real(wp),    intent(in)     :: wa2(:)
+        real(wp),    intent(in)     :: wa3(:)
 
         ! Local variables
         integer(ip)         :: i, k, ic, idp2
@@ -1360,7 +1360,7 @@ contains
                         *((cc(:mp, i-1, 1, k)-cc(:mp, ic-1, 4, k))+(cc(:mp, i, 3, k)+cc(:mp, ic, 2, k)))      !
                 end do
             end do
-            if (mod(ido, 2) == 1) return
+            if (odd(ido)) return
         end if
 
         ch(:mp, ido, :l1, 1) = &
@@ -1392,18 +1392,18 @@ contains
         integer(ip), intent(in)     :: mdimch
         real(wp),    intent(inout)  :: cc(mdimcc, ido, 5, l1)
         integer(ip), intent(in)     :: mdimcc
-        real(wp),    intent(in)     :: wa1(ido)
-        real(wp),    intent(in)     :: wa2(ido)
-        real(wp),    intent(in)     :: wa3(ido)
-        real(wp),    intent(in)     :: wa4(ido)
+        real(wp),    intent(in)     :: wa1(:)
+        real(wp),    intent(in)     :: wa2(:)
+        real(wp),    intent(in)     :: wa3(:)
+        real(wp),    intent(in)     :: wa4(:)
 
         ! Local variables
         integer(ip)         :: i, k, ic, idp2
         real(wp), parameter :: ARG = TWO_PI/5
-        real(wp), parameter :: TR11=cos(ARG)
-        real(wp), parameter :: TI11=sin(ARG)
-        real(wp), parameter :: TR12=cos(TWO *ARG)
-        real(wp), parameter :: TI12=sin(TWO *ARG)
+        real(wp), parameter :: TR11 = cos(ARG)
+        real(wp), parameter :: TI11 = sin(ARG)
+        real(wp), parameter :: TR12 = cos(TWO * ARG)
+        real(wp), parameter :: TI12 = sin(TWO * ARG)
 
         do k=1, l1
             ch(:mp, 1, k, 1) = &
@@ -1438,21 +1438,21 @@ contains
             do i=3, ido, 2
                 ic = idp2-i
                 ch(:mp, i-1, k, 1) = &
-                    cc(:mp, i-1, 1, k)+(cc(:mp, i-1, 3, k)+cc(:mp, ic-1, 2, k)) &    !
+                    cc(:mp, i-1, 1, k)+(cc(:mp, i-1, 3, k)+cc(:mp, ic-1, 2, k)) &
                     +(cc(:mp, i-1, 5, k)+cc(:mp, ic-1, 4, k))
 
                 ch(:mp, i, k, 1) = &
-                    cc(:mp, i, 1, k)+(cc(:mp, i, 3, k)-cc(:mp, ic, 2, k)) &            !
+                    cc(:mp, i, 1, k)+(cc(:mp, i, 3, k)-cc(:mp, ic, 2, k)) &
                     +(cc(:mp, i, 5, k)-cc(:mp, ic, 4, k))
 
                 ch(:mp, i-1, k, 2) = &
                     wa1(i-2)*((cc(:mp, i-1, 1, k)+TR11* &
                     (cc(:mp, i-1, 3, k)+cc(:mp, ic-1, 2, k))+TR12 &
-                    *(cc(:mp, i-1, 5, k)+cc(:mp, ic-1, 4, k)))-(TI11*(cc(:mp, i, 3, k) &             !
+                    *(cc(:mp, i-1, 5, k)+cc(:mp, ic-1, 4, k)))-(TI11*(cc(:mp, i, 3, k) &
                     +cc(:mp, ic, 2, k))+TI12*(cc(:mp, i, 5, k)+cc(:mp, ic, 4, k)))) &
-                    -wa1(i-1)*((cc(:mp, i, 1, k)+TR11*(cc(:mp, i, 3, k)-cc(:mp, ic, 2, k)) &         !
-                    +TR12*(cc(:mp, i, 5, k)-cc(:mp, ic, 4, k)))+(TI11*(cc(:mp, i-1, 3, k) &          !
-                    -cc(:mp, ic-1, 2, k))+TI12*(cc(:mp, i-1, 5, k)-cc(:mp, ic-1, 4, k))))            !
+                    -wa1(i-1)*((cc(:mp, i, 1, k)+TR11*(cc(:mp, i, 3, k)-cc(:mp, ic, 2, k)) &
+                    +TR12*(cc(:mp, i, 5, k)-cc(:mp, ic, 4, k)))+(TI11*(cc(:mp, i-1, 3, k) &
+                    -cc(:mp, ic-1, 2, k))+TI12*(cc(:mp, i-1, 5, k)-cc(:mp, ic-1, 4, k))))
 
                 ch(:mp, i, k, 2) = &
                     wa1(i-2)*((cc(:mp, i, 1, k)+TR11*(cc(:mp, i, 3, k) &          !
@@ -1460,14 +1460,14 @@ contains
                     +(TI11*(cc(:mp, i-1, 3, k)-cc(:mp, ic-1, 2, k))+TI12 &
                     *(cc(:mp, i-1, 5, k)-cc(:mp, ic-1, 4, k))))+wa1(i-1) &
                     *((cc(:mp, i-1, 1, k)+TR11*(cc(:mp, i-1, 3, k) &
-                    +cc(:mp, ic-1, 2, k))+TR12*(cc(:mp, i-1, 5, k)+cc(:mp, ic-1, 4, k))) &           !
+                    +cc(:mp, ic-1, 2, k))+TR12*(cc(:mp, i-1, 5, k)+cc(:mp, ic-1, 4, k))) &
                     -(TI11*(cc(:mp, i, 3, k)+cc(:mp, ic, 2, k))+TI12 &
                     *(cc(:mp, i, 5, k)+cc(:mp, ic, 4, k))))
 
                 ch(:mp, i-1, k, 3) = &
                     wa2(i-2) &
-                    *((cc(:mp, i-1, 1, k)+TR12*(cc(:mp, i-1, 3, k)+cc(:mp, ic-1, 2, k)) &            !
-                    +TR11*(cc(:mp, i-1, 5, k)+cc(:mp, ic-1, 4, k)))-(TI12*(cc(:mp, i, 3, k) &        !
+                    *((cc(:mp, i-1, 1, k)+TR12*(cc(:mp, i-1, 3, k)+cc(:mp, ic-1, 2, k)) &
+                    +TR11*(cc(:mp, i-1, 5, k)+cc(:mp, ic-1, 4, k)))-(TI12*(cc(:mp, i, 3, k) &
                     +cc(:mp, ic, 2, k))-TI11*(cc(:mp, i, 5, k)+cc(:mp, ic, 4, k)))) &
                     -wa2(i-1) &
                     *((cc(:mp, i, 1, k)+TR12*(cc(:mp, i, 3, k)- &
@@ -1482,14 +1482,14 @@ contains
                     +(TI12*(cc(:mp, i-1, 3, k)-cc(:mp, ic-1, 2, k))-TI11 &
                     *(cc(:mp, i-1, 5, k)-cc(:mp, ic-1, 4, k)))) &
                     +wa2(i-1) &
-                    *((cc(:mp, i-1, 1, k)+TR12*(cc(:mp, i-1, 3, k)+cc(:mp, ic-1, 2, k)) &            !
-                    +TR11*(cc(:mp, i-1, 5, k)+cc(:mp, ic-1, 4, k)))-(TI12*(cc(:mp, i, 3, k) &        !
+                    *((cc(:mp, i-1, 1, k)+TR12*(cc(:mp, i-1, 3, k)+cc(:mp, ic-1, 2, k)) &
+                    +TR11*(cc(:mp, i-1, 5, k)+cc(:mp, ic-1, 4, k)))-(TI12*(cc(:mp, i, 3, k) &
                     +cc(:mp, ic, 2, k))-TI11*(cc(:mp, i, 5, k)+cc(:mp, ic, 4, k))))
 
                 ch(:mp, i-1, k, 4) = &
                     wa3(i-2) &
-                    *((cc(:mp, i-1, 1, k)+TR12*(cc(:mp, i-1, 3, k)+cc(:mp, ic-1, 2, k)) &            !
-                    +TR11*(cc(:mp, i-1, 5, k)+cc(:mp, ic-1, 4, k)))+(TI12*(cc(:mp, i, 3, k) &        !
+                    *((cc(:mp, i-1, 1, k)+TR12*(cc(:mp, i-1, 3, k)+cc(:mp, ic-1, 2, k)) &
+                    +TR11*(cc(:mp, i-1, 5, k)+cc(:mp, ic-1, 4, k)))+(TI12*(cc(:mp, i, 3, k) &
                     +cc(:mp, ic, 2, k))-TI11*(cc(:mp, i, 5, k)+cc(:mp, ic, 4, k)))) &
                     -wa3(i-1) &
                     *((cc(:mp, i, 1, k)+TR12*(cc(:mp, i, 3, k)- &
@@ -1504,28 +1504,28 @@ contains
                     -(TI12*(cc(:mp, i-1, 3, k)-cc(:mp, ic-1, 2, k))-TI11 &
                     *(cc(:mp, i-1, 5, k)-cc(:mp, ic-1, 4, k)))) &
                     +wa3(i-1) &
-                    *((cc(:mp, i-1, 1, k)+TR12*(cc(:mp, i-1, 3, k)+cc(:mp, ic-1, 2, k)) &            !
-                    +TR11*(cc(:mp, i-1, 5, k)+cc(:mp, ic-1, 4, k)))+(TI12*(cc(:mp, i, 3, k) &        !
+                    *((cc(:mp, i-1, 1, k)+TR12*(cc(:mp, i-1, 3, k)+cc(:mp, ic-1, 2, k)) &
+                    +TR11*(cc(:mp, i-1, 5, k)+cc(:mp, ic-1, 4, k)))+(TI12*(cc(:mp, i, 3, k) &
                     +cc(:mp, ic, 2, k))-TI11*(cc(:mp, i, 5, k)+cc(:mp, ic, 4, k))))
 
                 ch(:mp, i-1, k, 5) = &
                     wa4(i-2) &
-                    *((cc(:mp, i-1, 1, k)+TR11*(cc(:mp, i-1, 3, k)+cc(:mp, ic-1, 2, k)) &            !
-                    +TR12*(cc(:mp, i-1, 5, k)+cc(:mp, ic-1, 4, k)))+(TI11*(cc(:mp, i, 3, k) &        !
+                    *((cc(:mp, i-1, 1, k)+TR11*(cc(:mp, i-1, 3, k)+cc(:mp, ic-1, 2, k)) &
+                    +TR12*(cc(:mp, i-1, 5, k)+cc(:mp, ic-1, 4, k)))+(TI11*(cc(:mp, i, 3, k) &
                     +cc(:mp, ic, 2, k))+TI12*(cc(:mp, i, 5, k)+cc(:mp, ic, 4, k)))) &
                     -wa4(i-1) &
                     *((cc(:mp, i, 1, k)+TR11*(cc(:mp, i, 3, k)-cc(:mp, ic, 2, k)) &
-                    +TR12*(cc(:mp, i, 5, k)-cc(:mp, ic, 4, k)))-(TI11*(cc(:mp, i-1, 3, k) &          !
-                    -cc(:mp, ic-1, 2, k))+TI12*(cc(:mp, i-1, 5, k)-cc(:mp, ic-1, 4, k))))            !
+                    +TR12*(cc(:mp, i, 5, k)-cc(:mp, ic, 4, k)))-(TI11*(cc(:mp, i-1, 3, k) &
+                    -cc(:mp, ic-1, 2, k))+TI12*(cc(:mp, i-1, 5, k)-cc(:mp, ic-1, 4, k))))
 
                 ch(:mp, i, k, 5) = &
                     wa4(i-2) &
                     *((cc(:mp, i, 1, k)+TR11*(cc(:mp, i, 3, k)-cc(:mp, ic, 2, k)) &
-                    +TR12*(cc(:mp, i, 5, k)-cc(:mp, ic, 4, k)))-(TI11*(cc(:mp, i-1, 3, k) &          !
-                    -cc(:mp, ic-1, 2, k))+TI12*(cc(:mp, i-1, 5, k)-cc(:mp, ic-1, 4, k)))) &          !
+                    +TR12*(cc(:mp, i, 5, k)-cc(:mp, ic, 4, k)))-(TI11*(cc(:mp, i-1, 3, k) &
+                    -cc(:mp, ic-1, 2, k))+TI12*(cc(:mp, i-1, 5, k)-cc(:mp, ic-1, 4, k)))) &
                     +wa4(i-1) &
-                    *((cc(:mp, i-1, 1, k)+TR11*(cc(:mp, i-1, 3, k)+cc(:mp, ic-1, 2, k)) &            !
-                    +TR12*(cc(:mp, i-1, 5, k)+cc(:mp, ic-1, 4, k)))+(TI11*(cc(:mp, i, 3, k) &        !
+                    *((cc(:mp, i-1, 1, k)+TR11*(cc(:mp, i-1, 3, k)+cc(:mp, ic-1, 2, k)) &
+                    +TR12*(cc(:mp, i-1, 5, k)+cc(:mp, ic-1, 4, k)))+(TI11*(cc(:mp, i, 3, k) &
                     +cc(:mp, ic, 2, k))+TI12*(cc(:mp, i, 5, k)+cc(:mp, ic, 4, k))))
             end do
         end do
@@ -1548,10 +1548,10 @@ contains
         real(wp),    intent(inout)  :: ch(mdimch, ido, l1, iip)
         real(wp),    intent(inout)  :: ch2(mdimch, idl1, iip)
         integer(ip), intent(in)     :: mdimch
-        real(wp),    intent(in)     :: wa(ido)
+        real(wp),    intent(in)     :: wa(:)
 
         ! Local variables
-        integer(ip)  :: i, j, k, l, j2, ic, jc, lc, is, nbd
+        integer(ip)  :: i, j, k, l, j2, ic, jc, lc, iis, nbd
         integer(ip)  :: idp2, ipp2, idij, ipph
         real(wp)     :: dc2, ai1, ai2, ar1, ar2, ds2
         real(wp)     :: dcp, arg, dsp, ar1h, ar2h
@@ -1635,7 +1635,7 @@ contains
         end do
 
         if (ido /= 1) then
-            if (nbd >= l1) then
+            if (l1 <= nbd) then
                 do j=2, ipph
                     jc = ipp2-j
                     do k=1, l1
@@ -1664,10 +1664,10 @@ contains
             c2(:mp, :idl1, 1) = ch2(:mp, :idl1, 1)
             c1(:mp, 1, :l1, 2:iip) = ch(:mp, 1, :l1, 2:iip)
             if (nbd <= l1) then
-                is = -ido
+                iis = -ido
                 do j=2, iip
-                    is = is+ido
-                    idij = is
+                    iis = iis+ido
+                    idij = iis
                     do i=3, ido, 2
                         idij = idij+2
                         do k=1, l1
@@ -1681,11 +1681,11 @@ contains
                     end do
                 end do
             else
-                is = -ido
+                iis = -ido
                 do j=2, iip
-                    is = is+ido
+                    iis = iis+ido
                     do k=1, l1
-                        idij = is
+                        idij = iis
                         do i=3, ido, 2
                             idij = idij+2
                             c1(:mp, i-1, k, j) = &

@@ -485,13 +485,13 @@ contains
         real(wp) :: we
         real(wp) :: wo
         real(wp) :: wrfft(:)
-        real(wp) :: wts
+        real(wp) :: wts(nlat)
         real(wp) :: wvbin
         real(wp) :: wwbin
-        dimension v(idvw, jdvw, *), w(idvw, jdvw, *), br(mdab, ndab, *), &
-            bi(mdab, ndab, *), cr(mdab, ndab, *), ci(mdab, ndab, *), &
-            ve(idv, nlon, *), vo(idv, nlon, *), we(idv, nlon, *), &
-            wo(idv, nlon, *), wts(*), wvbin(*), wwbin(*), &
+        dimension v(idvw, jdvw, nt), w(idvw, jdvw, nt), br(mdab, ndab, nt), &
+            bi(mdab, ndab, nt), cr(mdab, ndab, nt), ci(mdab, ndab, nt), &
+            ve(idv, nlon, nt), vo(idv, nlon, nt), we(idv, nlon, nt), &
+            wo(idv, nlon, nt), wvbin(*), wwbin(*), &
             vb(imid, nlat, 3), wb(imid, nlat, 3)
 
         type(VectorAnalysisUtility) :: util
@@ -565,7 +565,7 @@ contains
                                 end do
                             end do
                         end do
-                        if (mod(nlat, 2) /= 0) then
+                        if (odd(nlat))then
                             i = imid
                             do k=1, nt
                                 do np1=mp1, odd_stride, 2
@@ -603,7 +603,7 @@ contains
                         end do
                     end do
 
-                    if (mod(nlat, 2) == 0) cycle main_loop_case_0
+                    if (even(nlat)) cycle main_loop_case_0
 
                     i = imid
 
@@ -668,7 +668,7 @@ contains
                                 end do
                             end do
                         end do
-                        if (mod(nlat, 2) /= 0) then
+                        if (odd(nlat))then
                             i = imid
                             do k=1, nt
                                 do np1=mp1, odd_stride, 2
@@ -696,7 +696,7 @@ contains
                         end do
                     end do
 
-                    if (mod(nlat, 2) == 0) cycle main_loop_case_1
+                    if (even(nlat)) cycle main_loop_case_1
 
                     i = imid
 
@@ -759,7 +759,7 @@ contains
                                 end do
                             end do
                         end do
-                        if (mod(nlat, 2) /= 0) then
+                        if (odd(nlat))then
                             i = imid
                             do k=1, nt
                                 do np1=mp1, odd_stride, 2
@@ -787,7 +787,7 @@ contains
                         end do
                     end do
 
-                    if (mod(nlat, 2) == 0) cycle main_loop_case_2
+                    if (even(nlat)) cycle main_loop_case_2
 
                     i = imid
 
@@ -850,7 +850,7 @@ contains
                                 end do
                             end do
                         end do
-                        if (mod(nlat, 2) /= 0) then
+                        if (odd(nlat))then
                             i = imid
                             do k=1, nt
                                 do np1=mp1, odd_stride, 2
@@ -878,7 +878,7 @@ contains
                         end do
                     end do
 
-                    if (mod(nlat, 2) == 0) cycle main_loop_case_3
+                    if (even(nlat)) cycle main_loop_case_3
 
                     i = imid
 
@@ -935,7 +935,7 @@ contains
                         end do
                     end do
 
-                    if (mod(nlat, 2) == 0) cycle main_loop_case_4
+                    if (even(nlat)) cycle main_loop_case_4
 
                     i = imid
 
@@ -991,7 +991,7 @@ contains
                         end do
                     end do
 
-                    if (mod(nlat, 2) == 0) cycle main_loop_case_5
+                    if (even(nlat)) cycle main_loop_case_5
 
                     i = imid
 
@@ -1053,7 +1053,7 @@ contains
                                 end do
                             end do
                         end do
-                        if (mod(nlat, 2) /= 0) then
+                        if (odd(nlat)) then
                             i = imid
                             do k=1, nt
                                 do np1=mp1, odd_stride, 2
@@ -1081,7 +1081,7 @@ contains
                         end do
                     end do
 
-                    if (mod(nlat, 2) == 0) cycle main_loop_case_6
+                    if (even(nlat)) cycle main_loop_case_6
 
                     i = imid
 
@@ -1135,7 +1135,7 @@ contains
                         end do
                     end do
 
-                    if (mod(nlat, 2) == 0) cycle main_loop_case_7
+                    if (even(nlat)) cycle main_loop_case_7
 
                     i = imid
 
@@ -1189,7 +1189,7 @@ contains
                         end do
                     end do
 
-                    if (mod(nlat, 2) == 0) cycle main_loop_case_8
+                    if (even(nlat)) cycle main_loop_case_8
 
                     do k=1, nt
                         do  np1=mp2, even_stride, 2

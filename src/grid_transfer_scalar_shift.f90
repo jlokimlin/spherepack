@@ -545,7 +545,7 @@ contains
 
         ! Dummy arguments
         integer(ip), intent(in)    :: m, n
-        real(wp),    intent(inout) :: r(m,n)
+        real(wp),    intent(inout) :: r(:,:)
         real(wp),    intent(in)    :: wsav(*)
         real(wp),    intent(out)   :: work(*)
 
@@ -572,6 +572,7 @@ contains
 
         !     shift r with fourier synthesis and normalization
         call hfft%backward(m, n, r, m, wsav(iw1))
+
         do l=1, m
             do k=1, n
                 r(l, k) = r(l, k)/n
@@ -580,20 +581,32 @@ contains
 
     end subroutine shifth
 
-    subroutine shifthi(n, dp, wsav)
-        !
-        !     initialize wsav for subroutine shifth
-        !
+    ! Purpose:
+    !
+    ! Initialize wsav for subroutine shifth
+    !
+    pure subroutine shifthi(n, dp, wavetable)
 
+        ! Dummy arguments
+        integer(ip), intent(in)  :: n
+        real(wp),    intent(in)  :: dp
+        real(wp),    intent(out) :: wavetable(*)
+
+        ! Local variables
         type(RealPeriodicFastFourierTransform) :: hfft
-        integer(ip) :: n, n2, k
-        real(wp) :: wsav(*), dp
+        integer(ip) :: k, n2, iw
+        real(wp)    :: arg
+
         n2 = (n+1)/2
         do k=2, n2
-            wsav(k)    =  sin((k-1)*dp)
-            wsav(k+n2) =  cos((k-1)*dp)
+            arg = real(k - 1, kind=wp) * dp
+            wavetable(k) = sin(arg)
+            wavetable(k+n2) = cos(arg)
         end do
-        call hfft%initialize(n, wsav(n+2))
+
+        ! Set wavetable index pointer
+        iw = n + 2
+        call hfft%initialize(n, wavetable(iw))
 
     end subroutine shifthi
 

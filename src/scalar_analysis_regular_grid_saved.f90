@@ -142,21 +142,6 @@ contains
     !
     !               (l1*l2*(2*nlat-l1+1))/2+nlon+15
     !
-    !     work   a work array that does not have to be saved.
-    !
-    !     lwork  the dimension of the array work as it appears in the
-    !            program that calls shaes.  define
-    !
-    !               l2 = nlat/2        if nlat is even or
-    !               l2 = (nlat + 1)/2    if nlat is odd
-    !
-    !            if isym is zero then lwork must be at least
-    !            (nt+1)*nlat*nlon. if isym is not zero then
-    !            lwork must be at least (nt+1)*l2*nlon.
-    !
-    !
-    !     **************************************************************
-    !
     !     output parameters
     !
     !     a, b    both a, b are two or three dimensional arrays (see input
@@ -248,75 +233,52 @@ contains
         integer(ip), intent(out)  :: ierror
 
         ! Local variables
-        integer(ip) :: ist, mmax, imid, idz, lzimn, ls, nln, lwork
+        integer(ip) :: mmax, imid, idz, lzimn, ls, ifft, ist, lwork, nln
+        integer(ip) :: required_wavetable_size
+        type(SpherepackUtility) :: util
 
-        associate (lshaes => size(wshaes))
+        ! Check input arguments
+        required_wavetable_size = util%get_lshaes(nlat, nlon)
 
-            !  Set constants
-            mmax = min(nlat, nlon/2+1)
-            imid = (nlat + 1)/2
-            idz = (mmax*(2*nlat-mmax+1))/2
-            lzimn = idz*imid
+        call util%check_scalar_transform_inputs(isym, idg, jdg, &
+            mdab, ndab, nlat, nlon, nt, required_wavetable_size, &
+            wshaes, ierror)
 
-            !  Set calling argument for analysis
-            select case (isym)
-                case (0)
-                    ls = nlat
-                    ist = imid
-                case default
-                    ls = imid
-                    ist = 0
-            end select
+        ! Check error flag
+        if (ierror /= 0) return
 
-            nln = nt*ls*nlon
+        mmax = min(nlat, nlon/2+1)
+        imid = (nlat + 1)/2
+        idz = (mmax*(2*nlat-mmax+1))/2
+        lzimn = idz*imid
+        ifft = lzimn + 1
 
-            !  Check calling arguments
-            if (nlat < 3) then
-                ierror = 1
-            else if (nlon < 4) then
-                ierror = 2
-            else if (isym < 0 .or. isym > 2) then
-                ierror = 3
-            else if (nt < 0) then
-                ierror = 4
-            else if ( &
-                (isym == 0 .and. idg < nlat) &
-                .or. &
-                (isym /= 0 .and. idg < (nlat + 1)/2) &
-                ) then
-                ierror = 5
-            else if (jdg < nlon) then
-                ierror = 6
-            else if (mdab < mmax) then
-                ierror = 7
-            else if (ndab < nlat) then
-                ierror = 8
-            else if(lshaes < lzimn+nlon+15) then
-                ierror = 9
-            else
-                ierror = 0
-            end if
+        !  Set calling argument for analysis
+        select case (isym)
+            case (0)
+                ls = nlat
+                ist = imid
+            case default
+                ls = imid
+                ist = 0
+        end select
 
-            ! Check error flag
-            if (ierror /= 0) return
+        nln = nt*ls*nlon
 
-            ! Set required workspace size
-            lwork = nln+ls*nlon
+        ! Set required workspace size
+        lwork = nln+ls*nlon
 
-            block
-                real(wp)    :: work(lwork)
-                integer(ip) :: iw1, iw2, iw3
+        block
+            integer(ip) :: iw1
+            real(wp)    :: work(lwork)
 
-                ! Set workspace pointer indices
-                iw1 = ist + 1
-                iw2 = nln + 1
-                iw3 = lzimn + 1
+            ! Set workspace pointer indices
+            iw1 = ist + 1
 
-                !  Perform analysis
-                call shaes_lower_utility_routine(nlat, isym, nt, g, idg, jdg, a, b, &
-                    mdab, ndab, wshaes, idz, ls, nlon, work, work(iw1:), work(iw2:), wshaes(iw3:))
-            end block
-        end associate
+            !  Perform analysis
+            call shaes_lower_utility_routine(nlat, isym, nt, g, idg, jdg, a, b, &
+                mdab, ndab, wshaes, idz, ls, nlon, work, work(iw1:), wshaes(ifft:))
+        end block
 
     end subroutine shaes
 
@@ -461,7 +423,7 @@ contains
     end subroutine shaesi
 
     subroutine shaes_lower_utility_routine(nlat, isym, nt, g, idgs, jdgs, a, b, mdab, ndab, &
-        z, idz, idg, jdg, g_even, g_odd, work, whrfft)
+        z, idz, idg, jdg, g_even, g_odd, whrfft)
 
         ! Dummy arguments
         integer(ip), intent(in)  :: nlat
@@ -480,7 +442,6 @@ contains
         integer(ip), intent(in)  :: jdg
         real(wp),    intent(out) :: g_even(idg, jdg, nt)
         real(wp),    intent(out) :: g_odd(idg, jdg, nt)
-        real(wp),    intent(out) :: work(*)
         real(wp),    intent(in)  :: whrfft(*)
 
         ! Local variables

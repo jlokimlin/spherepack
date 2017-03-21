@@ -385,8 +385,8 @@ contains
         integer(ip)                  :: igrda, igrdb, mdab_a, mdab_b
         real(wp), allocatable        :: wavetable_a(:), wavetable_b(:)
         integer(ip), parameter       :: NT = 1, ISYM = 0
-        type(ScalarAnalysisUtility)  :: analysis_util
-        type(ScalarSynthesisUtility) :: synthesis_util
+        type(ScalarForwardTransform)  :: analysis_util
+        type(ScalarBackwardTransform) :: synthesis_util
 
         ! Check calling arguments
         associate( &

@@ -7,7 +7,7 @@
 !     *                                                               *
 !     *                      all rights reserved                      *
 !     *                                                               *
-!     *                      SPHEREPACK                               *
+!     *                         Spherepack                            *
 !     *                                                               *
 !     *       A Package of Fortran Subroutines and Programs           *
 !     *                                                               *
@@ -29,9 +29,6 @@
 !     *                                                               *
 !     * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !
-
-! ****************************************************************
-
 submodule(scalar_analysis_routines) scalar_analysis_gaussian_grid
 
 contains
@@ -226,77 +223,46 @@ contains
         integer(ip), intent(out)  :: ierror
 
         ! Local variables
-        integer(ip) :: ntrunc, l1, l2, lat, late, lwork
+        integer(ip) :: ntrunc, lat, late
+        integer(ip) :: required_wavetable_size
+        type(SpherepackUtility) :: util
 
-        associate (lshagc => size(wshagc))
+        ! Check input arguments
+        required_wavetable_size = util%get_lshagc(nlat, nlon)
 
-            ! Set upper limit on m for spherical harmonic basis
-            ntrunc = min((nlon+2)/2, nlat)
+        call util%check_scalar_transform_inputs(isym, idg, jdg, &
+            mdab, ndab, nlat, nlon, nt, required_wavetable_size, &
+            wshagc, ierror)
 
-            ! Set gaussian point nearest equator pointer
-            late = (nlat+mod(nlat, 2))/2
+        ! Check error flag
+        if (ierror /= 0) return
 
-            ! Set number of grid points for analysis/synthesis
-            select case (isym)
-                case (0)
-                    lat = nlat
-                case default
-                    lat = late
-            end select
+        ! Set upper limit on m for spherical harmonic basis
+        ntrunc = min((nlon + 2)/2, nlat)
 
-            l1 = ntrunc
-            l2 = late
+        ! Set gaussian point nearest equator pointer
+        late = (nlat + mod(nlat, 2))/2
 
-            ! Check calling arguments
-            if (nlat < 3) then
-                ierror = 1
-            else if (nlon < 4) then
-                ierror = 2
-            else if (isym < 0 .or.isym > 2) then
-                ierror = 3
-            else if (nt < 1) then
-                ierror = 4
-            else if (idg < lat) then
-                ierror = 5
-            else if (jdg < nlon) then
-                ierror = 6
-            else if (mdab < ntrunc) then
-                ierror = 7
-            else if (ndab < nlat) then
-                ierror = 8
-            else if (lshagc < nlat*(2*l2+3*l1-2)+3*l1*(1-l1)/2+nlon+15) then
-                ierror = 9
-            else
-                ierror = 0
-            end if
+        ! Set number of grid points for analysis/synthesis
+        select case (isym)
+            case (0)
+                lat = nlat
+            case default
+                lat = late
+        end select
 
-            ! Check error flag
-            if (ierror /= 0) return
+        block
+            integer(ip) :: iwts, ifft
+            real(wp)    :: pmn(nlat, late, 3), g_work(lat, nlon, nt)
 
-            ! Set required workspace size
-            select case (isym)
-                case (0)
-                    lwork = nlat*(nlon*nt+max(3*l2, nlon))
-                case default
-                    lwork = l2*(nlon*nt+max(3*nlat, nlon))
-            end select
+            ! Starting address for gaussian wts in shigc and fft values
+            iwts = 1
+            ifft = nlat+2*nlat*late+3*(ntrunc*(ntrunc-1)/2+(nlat-ntrunc)*(ntrunc-1))+1
 
-            block
-                integer(ip) :: iwts, ifft, ipmn
-                real(wp)    :: work(lwork)
-
-                ! Starting address for gaussian wts in shigc and fft values
-                iwts = 1
-                ifft = nlat+2*nlat*late+3*(ntrunc*(ntrunc-1)/2+(nlat-ntrunc)*(ntrunc-1))+1
-
-                ! Set pointers for internal storage of g and legendre polys
-                ipmn = lat*nlon*nt+1
-
-                call shagc_lower_utility_routine(nlat, nlon, ntrunc, lat, isym, &
-                    g, idg, jdg, nt, a, b, mdab, ndab, wshagc, wshagc(iwts:), &
-                    wshagc(ifft:), late, work(ipmn:), work)
-            end block
-        end associate
+            call shagc_lower_utility_routine(nlat, nlon, ntrunc, lat, isym, &
+                g, idg, jdg, nt, a, b, mdab, ndab, wshagc, wshagc(iwts:), &
+                wshagc(ifft:), late, pmn, g_work)
+        end block
 
     end subroutine shagc
 

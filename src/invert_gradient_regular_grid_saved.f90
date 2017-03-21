@@ -220,120 +220,42 @@ contains
         integer(ip), intent(out) :: ierror
 
         ! Local variables
-        integer(ip) :: imid
-        integer(ip) :: lpimn
-        integer(ip) :: ls
-        integer(ip) :: lwork
-        integer(ip) :: mab
-        integer(ip) :: mmax
-        integer(ip) :: mn
-        integer(ip) :: nln, required_wavetable_size
+        integer(ip) :: imid, lpimn, mmax
+        integer(ip) :: required_wavetable_size
 
-        associate (lshses => size(wshses))
+        ! Check calling arguments
+        ierror = 1
+        if (nlat < 3) return
+        ierror = 2
+        if (nlon < 4) return
+        ierror = 3
+        if (isym < 0 .or. isym > 2) return
+        ierror = 4
+        if (nt < 0) return
+        ierror = 5
+        imid = (nlat + 1)/2
+        if ((isym == 0 .and. isf<nlat) .or. &
+            (isym /= 0 .and. isf<imid)) return
+        ierror = 6
+        if (jsf < nlon) return
+        ierror = 7
+        mmax = min(nlat, (nlon+2)/2)
+        if (mdb < min(nlat, (nlon + 1)/2)) return
+        ierror = 8
+        if (ndb < nlat) return
+        ierror = 9
+        !
+        !     verify saved workspace length
+        !
+        imid = (nlat + 1)/2
+        lpimn = (imid*mmax*(2*nlat-mmax+1))/2
+        required_wavetable_size = lpimn+nlon+15
+        if (size(wshses) < required_wavetable_size) return
+        ierror = 0
 
-            ! Check calling arguments
-            ierror = 1
-            if (nlat < 3) return
-            ierror = 2
-            if (nlon < 4) return
-            ierror = 3
-            if (isym < 0 .or. isym > 2) return
-            ierror = 4
-            if (nt < 0) return
-            ierror = 5
-            imid = (nlat + 1)/2
-            if ((isym == 0 .and. isf<nlat) .or. &
-                (isym /= 0 .and. isf<imid)) return
-            ierror = 6
-            if (jsf < nlon) return
-            ierror = 7
-            mmax = min(nlat, (nlon+2)/2)
-            if (mdb < min(nlat, (nlon + 1)/2)) return
-            ierror = 8
-            if (ndb < nlat) return
-            ierror = 9
-            !
-            !     verify saved workspace length
-            !
-            imid = (nlat + 1)/2
-            lpimn = (imid*mmax*(2*nlat-mmax+1))/2
-            required_wavetable_size = lpimn+nlon+15
-            if (lshses < required_wavetable_size) return
-            ierror = 0
-            !
-            !     set minimum and verify unsaved workspace
-            select case (isym)
-                case(0)
-                    ls = nlat
-                case default
-                    ls = imid
-            end select
-
-            nln = nt*ls*nlon
-
-            !     set first dimension for a, b (as required by shses)
-            mab = min(nlat, nlon/2+1)
-            mn = mab*nlat*nt
-            lwork = nln+ls*nlon+2*mn+nlat
-
-            block
-                real(wp)    :: work(lwork)
-                integer(ip) :: ia, ib, iis, iwk, liwk
-
-                ! Set workspace pointer indices
-                ia = 1
-                ib = ia + mn
-                iis = ib + mn
-                iwk = iis + nlat
-                liwk = lwork-2*mn-nlat
-
-                call igrades_lower_utility_routine(nlat, nlon, isym, nt, sf, isf, jsf, &
-                    work(ia:), work(ib:), mab, work(iis:), mdb, ndb, br, bi, wshses, &
-                    lshses, work(iwk:), liwk, ierror)
-            end block
-        end associate
+        call invert_gradient_lower_utility_routine(nlat, nlon, isym, nt, sf, &
+            br, bi, wshses, shses, ierror)
 
     end subroutine igrades
-
-    subroutine igrades_lower_utility_routine(nlat, nlon, isym, nt, sf, isf, jsf, a, b, mab, &
-        sqnn, mdb, ndb, br, bi, wshses, lshses, wk, lwk, ierror)
-
-        real(wp) :: a
-        real(wp) :: b
-        real(wp) :: bi
-        real(wp) :: br
-        
-        integer(ip) :: ierror
-        integer(ip) :: isf
-        integer(ip) :: isym
-        integer(ip) :: jsf
-        
-        integer(ip) :: lshses
-        integer(ip) :: lwk
-        
-        integer(ip) :: mab
-        integer(ip) :: mdb
-        
-        
-        integer(ip) :: ndb
-        integer(ip) :: nlat
-        integer(ip) :: nlon
-        integer(ip) :: nt
-        real(wp) :: sf
-        real(wp) :: sqnn
-        real(wp) :: wk
-        real(wp) :: wshses
-        dimension sf(isf, jsf, nt)
-        dimension br(mdb, ndb, nt), bi(mdb, ndb, nt), sqnn(nlat)
-        dimension a(mab, nlat, nt), b(mab, nlat, nt)
-        dimension wshses(lshses), wk(lwk)
-
-        call perform_setup_for_inversion(nlon, a, b, br, bi, sqnn)
-
-        ! Scalar synthesize a, b into sf
-        call shses(nlat, nlon, isym, nt, sf, isf, jsf, a, b, mab, nlat, &
-            wshses, ierror)
-
-    end subroutine igrades_lower_utility_routine
 
 end  submodule invert_gradient_regular_grid_saved

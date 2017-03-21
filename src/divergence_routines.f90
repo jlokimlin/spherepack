@@ -9,13 +9,18 @@ module divergence_routines
         vector_synthesis
 
     use scalar_synthesis_routines, only: &
+        ScalarSynthesisUtility, &
         shsec, shses, shsgc, shsgs
 
     use vector_synthesis_routines, only: &
+        VectorSynthesisUtility, &
         vhses, vhsec, vhsgc, vhsgs
 
     use type_ScalarHarmonic, only: &
         ScalarHarmonic
+
+    use type_VectorHarmonic, only: &
+        VectorHarmonic
 
     ! Explicit typing only
     implicit none
@@ -24,9 +29,8 @@ module divergence_routines
     private
     public :: divec, dives, divgc, divgs
     public :: idivec, idives, idivgc, idivgs
-    public :: perform_setup_for_inversion
-    public :: perform_setup_for_divergence
     public :: divergence_lower_utility_routine
+    public :: invert_divergence_lower_utility_routine
 
     ! Parameters confined to the module
     real(wp), parameter :: ZERO = 0.0_wp
@@ -292,19 +296,15 @@ contains
             ! Preset coefficient multiplyers in vector
             call compute_coefficient_multipliers(sqnn)
 
+            ! Preset br, bi to 0.0
+            br = ZERO
+            bi = ZERO
+
             ! Compute multiple vector fields coefficients
             do k=1, nt
 
                 ! Set divergence field perturbation adjustment
                 pertrb(k) = get_perturbation(a, k)
-
-                ! Preset br, bi to 0.0
-                do n=1, nlat
-                    do m=1, mmax
-                        br(m, n, k) = ZERO
-                        bi(m, n, k) = ZERO
-                    end do
-                end do
 
                 ! Compute m=0 coefficients
                 do n=2, nlat
@@ -373,9 +373,57 @@ contains
 
             ! Release memory
             call harmonic%destroy()
-
         end block
 
     end subroutine divergence_lower_utility_routine
+
+    subroutine invert_divergence_lower_utility_routine(nlat, nlon, isym, nt, v, w, idvw, jdvw, a, b, &
+        wavetable, pertrb, synth_routine, error_flag)
+
+        ! Dummy arguments
+        integer(ip), intent(in)     :: nlat
+        integer(ip), intent(in)     :: nlon
+        integer(ip), intent(in)     :: isym
+        integer(ip), intent(in)     :: nt
+        real(wp),    intent(out)    :: v(idvw, jdvw, nt)
+        real(wp),    intent(out)    :: w(idvw, jdvw, nt)
+        integer(ip), intent(in)     :: idvw
+        integer(ip), intent(in)     :: jdvw
+        real(wp),    intent(in)     :: a(:,:,:)
+        real(wp),    intent(in)     :: b(:,:,:)
+        real(wp),    intent(in)     :: wavetable(:)
+        real(wp),    intent(out)    :: pertrb(:)
+        procedure(vector_synthesis) :: synth_routine
+        integer(ip), intent(out)    :: error_flag
+
+        block
+            integer(ip)          :: ityp
+            real(wp)             :: sqnn(nlat)
+            type(VectorHarmonic) :: harmonic
+
+            ! Allocate memory
+            harmonic = VectorHarmonic(nlat, nlon, nt)
+
+            associate( &
+                br => harmonic%polar%real_component, &
+                bi => harmonic%polar%imaginary_component, &
+                cr => harmonic%azimuthal%real_component, &
+                ci => harmonic%azimuthal%imaginary_component, &
+                mdab => harmonic%ORDER_M, &
+                ndab => harmonic%DEGREE_N &
+                )
+
+                call perform_setup_for_inversion(isym, ityp, a, b, sqnn, pertrb, br, bi)
+
+                ! Vector synthesize br, bi into irrotational (v, w)
+                call synth_routine(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
+                    mdab, ndab, wavetable, error_flag)
+
+                ! Release memory
+                call harmonic%destroy()
+            end associate
+        end block
+
+    end subroutine invert_divergence_lower_utility_routine
 
 end module divergence_routines

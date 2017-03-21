@@ -8,10 +8,10 @@ module type_GaussianWorkspace
         Workspace
 
     use scalar_analysis_routines, only: &
-        ScalarAnalysisUtility
+        ScalarForwardTransform
 
     use scalar_synthesis_routines, only: &
-        ScalarSynthesisUtility
+        ScalarBackwardTransform
 
     use vector_analysis_routines, only: &
         VectorForwardTransform
@@ -143,7 +143,7 @@ contains
 
         ! Local variables
         integer(ip)                 :: error_flag
-        type(ScalarAnalysisUtility) :: util
+        type(ScalarForwardTransform) :: util
 
         ! Allocate memory
         call util%initialize_shags(nlat, nlon, self%forward_scalar, error_flag)
@@ -194,7 +194,7 @@ contains
 
         ! Local variables
         integer(ip)                  :: error_flag
-        type(ScalarSynthesisUtility) :: util
+        type(ScalarBackwardTransform) :: util
 
         !  Allocate memory and precompute wavetable
         call util%initialize_shsgs(nlat, nlon, self%backward_scalar, error_flag)

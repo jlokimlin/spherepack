@@ -492,7 +492,7 @@ contains
         ! Local variables
         integer(ip) :: imid, iw1, iw2, ldwork
         integer(ip) :: labc, lwvbin, lzz1, mmax
-        type(SpherepackUtility) :: util
+        type(VectorSynthesisUtility) :: util
 
         associate (lvhsec => size(wvhsec))
 

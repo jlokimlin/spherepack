@@ -212,115 +212,42 @@ contains
         integer(ip), intent(out) :: ierror
 
         ! Local variables
-        integer(ip) :: imid, n1, n2, ls
-        integer(ip) :: lwork, mab, mmax, mn
-        integer(ip) :: nln, required_wavetable_size
+        integer(ip) :: imid, n1, n2, mmax
+        integer(ip) :: required_wavetable_size
 
-        associate (lshsgc => size(wshsgc))
+        ! Check calling arguments
+        ierror = 1
+        if (nlat < 3) return
+        ierror = 2
+        if (nlon < 4) return
+        ierror = 3
+        if (isym < 0 .or. isym > 2) return
+        ierror = 4
+        if (nt < 0) return
+        ierror = 5
+        imid = (nlat + 1)/2
+        if ((isym == 0 .and. isf<nlat) .or. &
+            (isym /= 0 .and. isf<imid)) return
+        ierror = 6
+        if (jsf < nlon) return
+        ierror = 7
+        mmax = min(nlat, (nlon+2)/2)
+        if (mdb < min(nlat, (nlon + 1)/2)) return
+        ierror = 8
+        if (ndb < nlat) return
+        ierror = 9
+        !
+        !     verify saved workspace length
+        !
+        n2 = (nlat+mod(nlat, 2))/2
+        n1 = min((nlon+2)/2, nlat)
+        required_wavetable_size = nlat*(2*n2+3*n1-2)+3*n1*(1-n1)/2+nlon+15
+        if (size(wshsgc) < required_wavetable_size) return
+        ierror = 0
 
-            ! Check calling arguments
-            ierror = 1
-            if (nlat < 3) return
-            ierror = 2
-            if (nlon < 4) return
-            ierror = 3
-            if (isym < 0 .or. isym > 2) return
-            ierror = 4
-            if (nt < 0) return
-            ierror = 5
-            imid = (nlat + 1)/2
-            if ((isym == 0 .and. isf<nlat) .or. &
-                (isym /= 0 .and. isf<imid)) return
-            ierror = 6
-            if (jsf < nlon) return
-            ierror = 7
-            mmax = min(nlat, (nlon+2)/2)
-            if (mdb < min(nlat, (nlon + 1)/2)) return
-            ierror = 8
-            if (ndb < nlat) return
-            ierror = 9
-            !
-            !     verify saved workspace length
-            !
-            n2 = (nlat+mod(nlat, 2))/2
-            n1 = min((nlon+2)/2, nlat)
-            required_wavetable_size = nlat*(2*n2+3*n1-2)+3*n1*(1-n1)/2+nlon+15
-            if (lshsgc < required_wavetable_size) return
-            ierror = 0
-            !
-            !     set minimum and verify unsaved workspace
-            !
-            ls = nlat
-            if (isym > 0) ls = imid
-            nln = nt*ls*nlon
-            !
-            !     set first dimension for a, b (as required by shsgc)
-            !
-            mab = min(nlat, nlon/2+1)
-            mn = mab*nlat*nt
-            if (isym == 0) then
-                lwork = nlat*(nt*nlon+max(3*n2, nlon)+2*nt*n1+1)
-            else
-                lwork = n2*(nt*nlon+max(3*nlat, nlon))+nlat*(2*nt*n1+1)
-            end if
-
-            block
-                real(wp)    :: work(lwork)
-                integer(ip) :: ia, ib, iis, iwk, liwk
-
-                ! Set workspace pointer indices
-                ia = 1
-                ib = ia + mn
-                iis = ib + mn
-                iwk = iis + nlat
-                liwk = lwork-2*mn-nlat
-
-                call igradgc_lower_utility_routine(nlat, nlon, isym, nt, sf, isf, jsf, &
-                    work(ia:), work(ib:), mab,  work(iis:), mdb, ndb, br, bi, wshsgc, &
-                    lshsgc, work(iwk:), liwk, ierror)
-            end block
-        end associate
+        call invert_gradient_lower_utility_routine(nlat, nlon, isym, nt, sf, &
+            br, bi, wshsgc, shsgc, ierror)
 
     end subroutine igradgc
-
-    subroutine igradgc_lower_utility_routine(nlat, nlon, isym, nt, sf, isf, jsf, a, b, mab, &
-        sqnn, mdb, ndb, br, bi, wsav, lsav, wk, lwk, ierror)
-
-        real(wp) :: a
-        real(wp) :: b
-        real(wp) :: bi
-        real(wp) :: br
-        
-        integer(ip) :: ierror
-        integer(ip) :: isf
-        integer(ip) :: isym
-        integer(ip) :: jsf
-        
-        integer(ip) :: lsav
-        integer(ip) :: lwk
-        
-        integer(ip) :: mab
-        integer(ip) :: mdb
-        
-        
-        integer(ip) :: ndb
-        integer(ip) :: nlat
-        integer(ip) :: nlon
-        integer(ip) :: nt
-        real(wp) :: sf
-        real(wp) :: sqnn
-        real(wp) :: wk
-        real(wp) :: wsav
-        dimension sf(isf, jsf, nt)
-        dimension br(mdb, ndb, nt), bi(mdb, ndb, nt), sqnn(nlat)
-        dimension a(mab, nlat, nt), b(mab, nlat, nt)
-        dimension wsav(lsav), wk(lwk)
-
-        call perform_setup_for_inversion(nlon, a, b, br, bi, sqnn)
-
-        ! Scalar synthesize a, b into sf
-        call shsgc(nlat, nlon, isym, nt, sf, isf, jsf, a, b, mab, nlat, wsav, ierror)
-
-    end subroutine igradgc_lower_utility_routine
 
 end submodule invert_gradient_gaussian_grid

@@ -96,7 +96,7 @@ program tdiv
     !
     !     set dimensions with parameter statements
     !
-    integer(ip), parameter              :: nlat = 15, nlon =  9, nt = 2
+    integer(ip), parameter              :: nlat = 15, nlon =  8, nt = 2
     integer(ip), parameter              :: isym = 0
     integer(ip), parameter              :: mdab = (nlon+2)/2, mdb = (nlon + 1)/2
     real(wp), dimension(mdb, nlat, nt)  :: br, bi, cr, ci

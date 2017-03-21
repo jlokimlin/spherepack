@@ -240,110 +240,22 @@ contains
         integer(ip), intent(out) :: ierror
 
         ! Local variables
-        integer(ip) :: idz, imid, lzimn, lwork
-        integer(ip) :: mmax, mn, required_wavetable_size
+        integer(ip) :: required_wavetable_size
+        type(VectorSynthesisUtility) :: util
 
-        associate (lvhses => size(wvhses))
+        ! Check input arguments
+        required_wavetable_size = util%get_lvhses(nlat, nlon)
 
-            ! Check calling arguments
-            ierror = 1
-            if (nlat < 3) return
-            ierror = 2
-            if (nlon < 4) return
-            ierror = 3
-            if (isym < 0 .or. isym > 2) return
-            ierror = 4
-            if (nt < 0) return
-            ierror = 5
-            imid = (nlat + 1)/2
-            if ((isym == 0 .and. idvw<nlat) .or. &
-                (isym /= 0 .and. idvw<imid)) return
-            ierror = 6
-            if (jdvw < nlon) return
-            ierror = 7
-            mmax = min(nlat, (nlon + 1)/2)
-            if (mdab < min(nlat, (nlon+2)/2)) return
-            ierror = 8
-            if (ndab < nlat) return
-            ierror = 9
-            idz = (mmax*(2*nlat-mmax+1))/2
-            lzimn = idz*imid
-            required_wavetable_size = 2*lzimn+nlon+15
-            if (lvhses < required_wavetable_size) return
-            ierror = 0
+        call util%check_vector_transform_inputs(isym, idvw, jdvw, &
+            mdab, ndab, nlat, nlon, nt, required_wavetable_size, &
+            wvhses, ierror)
 
-            mn = mmax*nlat*nt
+        ! Check error flag
+        if (ierror /= 0) return
 
-            ! Set required workspace size
-            select case (isym)
-                case (0)
-                    lwork = imid*(2*nt*nlon+max(6*nlat, nlon))+2*mn+nlat
-                case default
-                    lwork = nlat*(2*nt*nlon+max(6*imid, nlon))+2*mn+nlat
-            end select
-
-            block
-                real(wp)    :: work(lwork)
-                integer(ip) :: ibr, ibi, iis, iwk, liwk
-
-                ! Set workspace index pointers
-                ibr = 1
-                ibi = ibr + mn
-                iis = ibi + mn
-                iwk = iis + nlat
-                liwk = lwork-2*mn-nlat
-
-                call idives_lower_utility_routine(nlat, nlon, isym, nt, v, w, idvw, &
-                    jdvw, work(ibr:), work(ibi:), mmax, work(iis:), mdab, ndab, a, b, &
-                    wvhses, lvhses, work(iwk:), liwk, pertrb, ierror)
-            end block
-        end associate
+        call invert_divergence_lower_utility_routine(nlat, nlon, isym, nt, v, w, &
+            idvw, jdvw, a, b, wvhses, pertrb, vhses, ierror)
 
     end subroutine idives
-
-    subroutine idives_lower_utility_routine(nlat, nlon, isym, nt, v, w, idvw, jdvw, br, bi, mmax, &
-        sqnn, mdab, ndab, a, b, wsav, lwsav, wk, lwk, pertrb, ierror)
-
-        real(wp) :: a
-        real(wp) :: b
-        real(wp) :: bi
-        real(wp) :: br
-        real(wp) :: ci(mmax, nlat, nt)
-        real(wp) :: cr(mmax, nlat, nt)
-        
-        integer(ip) :: idvw
-        integer(ip) :: ierror
-        integer(ip) :: isym
-        integer(ip) :: ityp
-        integer(ip) :: jdvw
-        
-        integer(ip) :: lwk
-        integer(ip) :: lwsav
-        
-        integer(ip) :: mdab
-        integer(ip) :: mmax
-        
-        integer(ip) :: ndab
-        integer(ip) :: nlat
-        integer(ip) :: nlon
-        integer(ip) :: nt
-        real(wp) :: pertrb
-        real(wp) :: sqnn
-        real(wp) :: v
-        real(wp) :: w
-        real(wp) :: wk
-        real(wp) :: wsav
-        dimension v(idvw, jdvw, nt), w(idvw, jdvw, nt), pertrb(nt)
-        dimension br(mmax, nlat, nt), bi(mmax, nlat, nt), sqnn(nlat)
-        dimension a(mdab, ndab, nt), b(mdab, ndab, nt)
-        dimension wsav(lwsav), wk(lwk)
-
-        call perform_setup_for_inversion(isym, ityp, a, b, sqnn, pertrb, br, bi)
-
-        ! Vector sythesize br, bi into irrotational (v, w)
-        call vhses(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
-            mmax, nlat, wsav, ierror)
-
-    end subroutine idives_lower_utility_routine
 
 end submodule invert_divergence_regular_grid_saved

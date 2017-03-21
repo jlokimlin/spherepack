@@ -227,78 +227,48 @@ contains
         integer(ip), intent(out)  :: ierror
 
         ! Local variables
-        integer(ip) :: ntrunc, l1, l2, lp, iw
-        integer(ip) :: lwork, lat, late, ifft, ipmn, iwts
+        integer(ip) :: ntrunc, lat, late
+        integer(ip) :: required_wavetable_size
+        type(SpherepackUtility) :: util
+
+        ! Check input arguments
+        required_wavetable_size = util%get_lshags(nlat, nlon)
+
+        call util%check_scalar_transform_inputs(isym, idg, jdg, &
+            mdab, ndab, nlat, nlon, nt, required_wavetable_size, &
+            wshags, ierror)
+
+        ! Check error flag
+        if (ierror /= 0) return
         
-        associate (lshags => size(wshags))
+        ! Set m limit for pmn
+        ntrunc = min((nlon+2)/2, nlat)
 
-            ! Set m limit for pmn
-            ntrunc = min((nlon+2)/2, nlat)
+        ! Set gaussian point nearest equator pointer
+        late = (nlat + mod(nlat, 2))/2
 
-            ! Set gaussian point nearest equator pointer
-            late = (nlat+mod(nlat, 2))/2
-
-            ! Set number of grid points for analysis/synthesis
-            if (isym /= 0) then
-                lat = late
-            else
+        ! Set number of grid points for analysis/synthesis
+        select case (isym)
+            case (0)
                 lat = nlat
-            end if
+            case default
+                lat = late
+        end select
 
-            l1 = ntrunc
-            l2 = late
-            lp = nlat*(3*(l1+l2)-2)+(l1-1)*(l2*(2*nlat-l1)-3*l1)/2+nlon+15
+        block
+            integer(ip) :: iwts, ifft, ipmn
+            real(wp)    :: g_work(lat, nlon, nt)
 
-            ! Check calling arguments
-            if (nlat < 3) then
-                ierror = 1
-            else if (nlon < 4) then
-                ierror = 2
-            else if (isym < 0 .or. isym > 2) then
-                ierror = 3
-            else if (nt < 1) then
-                ierror = 4
-            else if (idg < lat) then
-                ierror = 5
-            else if (jdg < nlon) then
-                ierror = 6
-            else if (mdab < ntrunc) then
-                ierror = 7
-            else if (ndab < nlat) then
-                ierror = 8
-            else if (lshags < lp) then
-                ierror = 9
-            else
-                ierror = 0
-            end if
+            ! Set starting address for gaussian wts , fft values,
+            ! and fully stored legendre polys in wshags
+            iwts = 1
+            ifft = nlat+2*nlat*late+3*(ntrunc*(ntrunc-1)/2+(nlat-ntrunc)*(ntrunc-1))+1
+            ipmn = ifft+nlon+15
 
-            ! Check error flag
-            if (ierror /= 0) return
-
-            ! Compute required workspace size
-            select case (isym)
-                case (0)
-                    lwork = nlat * nlon * (nt+1)
-                case default
-                    lwork = l2 * nlon * (nt+1)
-            end select
-
-            block
-                real(wp) :: work(lwork)
-
-                ! Set starting address for gaussian wts , fft values,
-                ! and fully stored legendre polys in wshags
-                iwts = 1
-                ifft = nlat+2*nlat*late+3*(ntrunc*(ntrunc-1)/2+(nlat-ntrunc)*(ntrunc-1))+1
-                ipmn = ifft+nlon+15
-
-                ! Set pointer for internal storage of g
-                iw = lat*nlon*nt+1
-                call shags_lower_utility_routine(nlat, nlon, ntrunc, lat, isym, g, idg, jdg, nt, &
-                    a, b, mdab, ndab, wshags(iwts:), wshags(ifft:), wshags(ipmn:), &
-                    late, work, work(iw:))
-            end block
-        end associate
+            call shags_lower_utility_routine(nlat, nlon, ntrunc, lat, isym, g, &
+                idg, jdg, nt, a, b, mdab, ndab, wshags(iwts:), wshags(ifft:), &
+                wshags(ipmn:), late, g_work)
+        end block
 
     end subroutine shags
 
@@ -451,7 +421,7 @@ contains
     end subroutine shagsi
 
     subroutine shags_lower_utility_routine(nlat, nlon, l, lat, mode, gs, idg, jdg, nt, a, b, mdab, &
-        ndab, wts, wfft, pmn, late, g, work)
+        ndab, wts, wfft, pmn, late, g)
 
         ! Dummy arguments
         integer(ip), intent(in)  :: nlat
@@ -468,11 +438,10 @@ contains
         integer(ip), intent(in)  :: mdab
         integer(ip), intent(in)  :: ndab
         integer(ip), intent(in)  :: late
-        real(wp),    intent(in)  :: wfft(*)
+        real(wp),    intent(in)  :: wfft(:)
         real(wp),    intent(in)  :: pmn(late, *)
         real(wp),    intent(in)  :: wts(nlat)
         real(wp),    intent(out) :: g(lat, nlon, nt)
-        real(wp),    intent(out) :: work(*)
 
         ! Local variables
         integer(ip)    :: i, j, k, m, mml1
@@ -485,7 +454,7 @@ contains
 
         ! Perform fourier transform
         do k=1, nt
-            call util%hfft%forward(lat, nlon, g(1, 1, k), lat, wfft)
+            call util%hfft%forward(lat, nlon, g(:,:, k), lat, wfft)
         end do
 
         !  scale result
@@ -508,9 +477,7 @@ contains
         a = ZERO
         b = ZERO
 
-        !
         !  set mp1 limit on b(mp1) calculation
-        !
         if (nlon == 2*l-2) then
             lm1 = l-1
         else
@@ -533,15 +500,11 @@ contains
                     end do
                     !
                     !  adjust equator if necessary(nlat odd)
-                    !
-                    if (mod(nlat, 2) /= 0) then
-                        g(late, j, k) = wts(late)*g(late, j, k)
-                    end if
+                    if (odd(nlat)) g(late, j, k) = wts(late) * g(late, j, k)
                 end do
             end do
-            !
+
             !  set m = 0 coefficients first
-            !
             mp1 = 1
             m = 0
             mml1 = m*(2*nlat-m-1)/2
@@ -549,22 +512,19 @@ contains
                 do i=1, late
                     is = nlat-i+1
                     do np1=1, nlat, 2
-                        !
+
                         !  n even
-                        !
                         a(1, np1, k) = a(1, np1, k)+g(i, 1, k)*pmn(i, mml1+np1)
                     end do
                     do np1=2, nlat, 2
-                        !
+
                         !  n odd
-                        !
                         a(1, np1, k) = a(1, np1, k)+g(is, 1, k)*pmn(i, mml1+np1)
                     end do
                 end do
             end do
-            !
+
             !  compute m >= 1  coefficients next
-            !
             do mp1=2, lm1
                 m = mp1-1
                 mml1 = m*(2*nlat-m-1)/2
@@ -572,6 +532,7 @@ contains
                 do k=1, nt
                     do i=1, late
                         is = nlat-i+1
+
                         !  (n - m) even
                         do np1=mp1, nlat, 2
                             a(mp1, np1, k) = a(mp1, np1, k)+g(i, 2*m, k)*pmn(i, mml1+np1)
@@ -631,16 +592,17 @@ contains
             m = 0
             mml1 = m*(2*nlat-m-1)/2
 
-            if (mode == 1) then
-                ms = 2
-            else
-                ms = 1
-            end if
+            select case (mode)
+                case (1)
+                    ms = 2
+                case default
+                    ms = 1
+            end select
 
             do k=1, nt
                 do i=1, late
                     do np1=ms, nlat, 2
-                        a(1, np1, k) = a(1, np1, k)+g(i, 1, k)*pmn(i, mml1+np1)
+                        a(1, np1, k) = a(1, np1, k) + g(i, 1, k) * pmn(i, mml1+np1)
                     end do
                 end do
             end do
@@ -650,17 +612,18 @@ contains
                 m = mp1-1
                 mml1 = m*(2*nlat-m-1)/2
 
-                if (mode == 1) then
-                    ms = mp1+1
-                else
-                    ms = mp1
-                end if
+                select case (mode)
+                    case (1)
+                        ms = mp1+1
+                    case default
+                        ms = mp1
+                end select
 
                 do k=1, nt
                     do  i=1, late
                         do np1=ms, nlat, 2
-                            a(mp1, np1, k) = a(mp1, np1, k)+g(i, 2*m, k)*pmn(i, mml1+np1)
-                            b(mp1, np1, k) = b(mp1, np1, k)+g(i, 2*m+1, k)*pmn(i, mml1+np1)
+                            a(mp1, np1, k) = a(mp1, np1, k) + g(i, 2*m, k) * pmn(i, mml1+np1)
+                            b(mp1, np1, k) = b(mp1, np1, k) + g(i, 2*m+1, k) * pmn(i, mml1+np1)
                         end do
                     end do
                 end do
@@ -671,18 +634,19 @@ contains
                 m = l-1
                 mml1 = m*(2*nlat-m-1)/2
 
-                if (mode == 1) then
-                    !  set starting n for mode odd
-                    ns = l+1
-                else
-                    !  set starting n for mode even
-                    ns = l
-                end if
+                select case (mode)
+                    case (1)
+                        !  set starting n for mode odd
+                        ns = l+1
+                    case default
+                        !  set starting n for mode even
+                        ns = l
+                end select
 
                 do k=1, nt
                     do i=1, late
-                        a(l, ns:nlat:2, k) = &
-                            a(l, ns:nlat:2, k) + HALF * g(i, nlon, k) * pmn(i, mml1+ns:mml1+nlat:2)
+                        a(l, ns:nlat:2, k) = a(l, ns:nlat:2, k) &
+                            + HALF * g(i, nlon, k) * pmn(i, mml1+ns:mml1+nlat:2)
                     end do
                 end do
             end if

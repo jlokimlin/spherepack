@@ -399,8 +399,8 @@ contains
 
         ! Local variables
         integer(ip)    :: i, j, imid, imm1, k, ls
-        integer(ip)    :: m, mb, mdo, mmax, mn, modl, nlon
-        integer(ip)    :: mp1, mp2,  ndo, nlp1, np1
+        integer(ip)    :: m, mb, order_stride, mmax, mn, modl, nlon
+        integer(ip)    :: mp1, mp2,  degree_stride, nlp1, np1
         type(SpherepackUtility) :: util
 
         ls = idg
@@ -408,9 +408,9 @@ contains
         mmax = min(nlat, nlon/2+1)
 
         if (2*mmax-1 > nlon) then
-            mdo = mmax-1
+            order_stride = mmax-1
         else
-            mdo = mmax
+            order_stride = mmax
         end if
 
         nlp1 = nlat+1
@@ -422,7 +422,8 @@ contains
             imm1 = imid
         end if
 
-        ge(1:ls, 1:nlon, 1:nt) = ZERO
+        ge = ZERO
+        go = ZERO
 
         block_construct: block
 
@@ -438,15 +439,15 @@ contains
 
                 select case (mod(nlat, 2))
                     case (0)
-                        ndo = nlat-1
+                        degree_stride = nlat-1
                     case default
-                        ndo = nlat
+                        degree_stride = nlat
                 end select
 
-                do mp1=2, mdo
+                do mp1=2, order_stride
                     m = mp1-1
                     mb = m*(nlat-1)-(m*(m-1))/2
-                    do np1=mp1, ndo, 2
+                    do np1=mp1, degree_stride, 2
                         mn = mb+np1
                         do k=1, nt
                             do i=1, imid
@@ -457,9 +458,9 @@ contains
                     end do
                 end do
 
-                if (.not.(mdo == mmax .or. mmax > ndo)) then
-                    mb = mdo*(nlat-1)-(mdo*(mdo-1))/2
-                    do np1=mmax, ndo, 2
+                if (.not.(order_stride == mmax .or. mmax > degree_stride)) then
+                    mb = order_stride*(nlat-1)-(order_stride*(order_stride-1))/2
+                    do np1=mmax, degree_stride, 2
                         mn = mb+np1
                         do k=1, nt
                             do i=1, imid
@@ -482,16 +483,16 @@ contains
             end do
 
             if(mod(nlat, 2) /= 0) then
-                ndo = nlat-1
+                degree_stride = nlat-1
             else
-                ndo = nlat
+                degree_stride = nlat
             end if
 
-            do mp1=2, mdo
+            do mp1=2, order_stride
                 mp2 = mp1+1
                 m = mp1-1
                 mb = m*(nlat-1)-(m*(m-1))/2
-                do np1=mp2, ndo, 2
+                do np1=mp2, degree_stride, 2
                     mn = mb+np1
                     do k=1, nt
                         do i=1, imm1
@@ -504,9 +505,9 @@ contains
 
             mp2 = mmax+1
 
-            if (.not.(mdo == mmax .or. mp2 > ndo)) then
-                mb = mdo*(nlat-1)-(mdo*(mdo-1))/2
-                do np1=mp2, ndo, 2
+            if (.not.(order_stride == mmax .or. mp2 > degree_stride)) then
+                mb = order_stride*(nlat-1)-(order_stride*(order_stride-1))/2
+                do np1=mp2, degree_stride, 2
                     mn = mb+np1
                     do k=1, nt
                         do i=1, imm1

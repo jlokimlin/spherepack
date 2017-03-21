@@ -304,6 +304,8 @@ gradient_routines.o: \
 spherepack_precision.o \
 scalar_synthesis_routines.o \
 vector_synthesis_routines.o \
+type_ScalarHarmonic.o \
+type_VectorHarmonic.o \
 gradient_routines.f90
 	$(FC) $(FFLAGS) -c gradient_routines.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
@@ -361,6 +363,7 @@ spherepack_precision.o \
 scalar_synthesis_routines.o \
 vector_synthesis_routines.o \
 type_ScalarHarmonic.o \
+type_VectorHarmonic.o \
 divergence_routines.f90
 	$(FC) $(FFLAGS) -c divergence_routines.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)
@@ -526,7 +529,9 @@ invert_scalar_laplacian_gaussian_grid_saved.f90
 
 vector_laplacian_routines.o: \
 spherepack_precision.o \
+spherepack_interfaces.o \
 vector_synthesis_routines.o \
+type_VectorHarmonic.o \
 vector_laplacian_routines.f90
 	$(FC) $(FFLAGS) -c vector_laplacian_routines.f90 $(LINKS)\
 	 -o $(OBJ_DIRECTORY)/$@ -J$(MOD_DIRECTORY)

@@ -23,7 +23,7 @@ module scalar_synthesis_routines
     public :: shses, shsesi, initialize_shses
     public :: shsec, shseci, initialize_shsgc
     public :: shsgs, shsgsi, initialize_shsgs
-    public :: ScalarSynthesisUtility
+    public :: ScalarBackwardTransform
 
     ! Parameters confined to the module
     real(wp), parameter :: ZERO = 0.0_wp
@@ -31,7 +31,7 @@ module scalar_synthesis_routines
     real(wp), parameter :: ONE = 1.0_wp
     real(wp), parameter :: TWO = 2.0_wp
 
-    type, public :: ScalarSynthesisUtility
+    type, public :: ScalarBackwardTransform
     contains
         ! Type-bound procedures
         procedure, nopass :: shsec
@@ -46,6 +46,11 @@ module scalar_synthesis_routines
         procedure, nopass :: initialize_shses
         procedure, nopass :: initialize_shsgc
         procedure, nopass :: initialize_shsgs
+    end type ScalarBackwardTransform
+
+    type, public, extends(SpherepackUtility) :: ScalarSynthesisUtility
+    contains
+        procedure, nopass :: shses
     end type ScalarSynthesisUtility
 
     ! Declare interfaces for submodule implementation

@@ -23,6 +23,7 @@ module type_WavetableUtility
     contains
         ! Type-bound procedures
         procedure, nopass :: initialize_wavetable
+        procedure, nopass :: determine_scalar_order_m
         procedure, nopass :: determine_parity
         ! Scalar forward wavetable size routines
         procedure, nopass :: get_lshaec
@@ -45,6 +46,7 @@ module type_WavetableUtility
         procedure, nopass :: get_lvhses
         procedure, nopass :: get_lvhsgs
         procedure, nopass :: check_vector_transform_inputs
+        procedure, nopass :: check_scalar_transform_inputs
     end type WavetableUtility
 
 contains
@@ -77,6 +79,22 @@ contains
 
     end subroutine initialize_wavetable
 
+    pure function determine_scalar_order_m(nlat, nlon) &
+        result (return_value)
+
+        ! Dummy arguments
+        integer(ip), intent(in) :: nlat
+        integer(ip), intent(in) :: nlon
+        integer(ip)             :: return_value
+
+        if (even(nlon)) then
+            return_value = min(nlat,(nlon + 2)/2)
+        else
+            return_value = min(nlat,(nlon + 1)/2)
+        end if
+
+    end function determine_scalar_order_m
+
     pure subroutine determine_parity(nlat, nlon, n1, n2)
 
         ! Dummy arguments
@@ -86,11 +104,7 @@ contains
         integer(ip), intent(out) :: n2
 
         ! Compute parity in nlon
-        if (even(nlon)) then
-            n1 = min(nlat, (nlon+2)/2)
-        else
-            n1 = min(nlat, (nlon + 1)/2)
-        end if
+        n1 = determine_scalar_order_m(nlat, nlon)
 
         ! Compute parity in nlat
         if (even(nlat)) then
@@ -101,19 +115,19 @@ contains
 
     end subroutine determine_parity
 
-    pure subroutine check_vector_transform_inputs(ityp, idvw, jdvw, &
-        mdab, ndab, nlat, nlon, nt, required_wavetable_size, &
+    pure subroutine check_vector_transform_inputs(vector_symmetries, idvw, jdvw, &
+        order_m, degree_n, nlat, nlon, number_of_syntheses, required_wavetable_size, &
         wavetable, error_flag)
 
         ! Dummy arguments
-        integer(ip), intent(in)  :: ityp
+        integer(ip), intent(in)  :: vector_symmetries
         integer(ip), intent(in)  :: idvw
         integer(ip), intent(in)  :: jdvw
-        integer(ip), intent(in)  :: mdab
-        integer(ip), intent(in)  :: ndab
+        integer(ip), intent(in)  :: order_m
+        integer(ip), intent(in)  :: degree_n
         integer(ip), intent(in)  :: nlat
         integer(ip), intent(in)  :: nlon
-        integer(ip), intent(in)  :: nt
+        integer(ip), intent(in)  :: number_of_syntheses
         integer(ip), intent(in)  :: required_wavetable_size
         real(wp),    intent(in)  :: wavetable(:)
         integer(ip), intent(out) :: error_flag
@@ -123,19 +137,19 @@ contains
             error_flag = 1
         else if (nlon < 1) then
             error_flag = 2
-        else if (ityp < 0 .or. ityp > 8) then
+        else if (vector_symmetries < 0 .or. vector_symmetries > 8) then
             error_flag = 3
-        else if (nt < 0) then
+        else if (number_of_syntheses < 0) then
             error_flag = 4
-        else if ((ityp <= 2 .and. idvw < nlat) &
+        else if ((vector_symmetries <= 2 .and. idvw < nlat) &
             .or. &
-            (ityp > 2 .and. idvw < (nlat + 1)/2)) then
+            (vector_symmetries > 2 .and. idvw < (nlat + 1)/2)) then
             error_flag = 5
         else if (jdvw < nlon) then
             error_flag = 6
-        else if (mdab < min(nlat, (nlon + 1)/2)) then
+        else if (order_m < min(nlat, (nlon + 1)/2)) then
             error_flag = 7
-        else if (ndab < nlat) then
+        else if (degree_n < nlat) then
             error_flag = 8
         else if (size(wavetable) < required_wavetable_size) then
             error_flag = 9
@@ -144,6 +158,65 @@ contains
         end if
 
     end subroutine check_vector_transform_inputs
+
+    pure subroutine check_scalar_transform_inputs(scalar_symmetries, idg, jdg, &
+        order_m, degree_n, nlat, nlon, number_of_syntheses, required_wavetable_size, &
+        wavetable, error_flag)
+
+        ! Dummy arguments
+        integer(ip), intent(in)  :: scalar_symmetries
+        integer(ip), intent(in)  :: idg
+        integer(ip), intent(in)  :: jdg
+        integer(ip), intent(in)  :: order_m
+        integer(ip), intent(in)  :: degree_n
+        integer(ip), intent(in)  :: nlat
+        integer(ip), intent(in)  :: nlon
+        integer(ip), intent(in)  :: number_of_syntheses
+        integer(ip), intent(in)  :: required_wavetable_size
+        real(wp),    intent(in)  :: wavetable(:)
+        integer(ip), intent(out) :: error_flag
+
+        ! Local variables
+        integer(ip) :: ntrunc, lat, late
+
+        ! Set m limit for pmn
+        ntrunc = min(nlat, (nlon + 2)/2)
+
+        ! Set gaussian point nearest equator pointer
+        late = (nlat + mod(nlat, 2))/2
+
+        ! Set number of grid points for analysis/synthesis
+        select case (scalar_symmetries)
+            case (0)
+                lat = nlat
+            case default
+                lat = late
+        end select
+
+        ! Check calling arguments
+        if (nlat < 3) then
+            error_flag = 1
+        else if (nlon < 4) then
+            error_flag = 2
+        else if (scalar_symmetries < 0 .or. scalar_symmetries > 2) then
+            error_flag = 3
+        else if (number_of_syntheses < 1) then
+            error_flag = 4
+        else if (idg < lat) then
+            error_flag = 5
+        else if (jdg < nlon) then
+            error_flag = 6
+        else if (order_m < ntrunc) then
+            error_flag = 7
+        else if (degree_n < nlat) then
+            error_flag = 8
+        else if (size(wavetable) < required_wavetable_size) then
+            error_flag = 9
+        else
+            error_flag = 0
+        end if
+
+    end subroutine check_scalar_transform_inputs
 
     pure function get_lshaec(nlat, nlon) &
         result (return_value)

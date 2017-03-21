@@ -206,39 +206,18 @@ contains
         integer(ip), intent(out) :: ierror
 
         ! Local variables
-        integer(ip) :: imid, n1, n2, lpimn
-        integer(ip) :: mmax, required_wavetable_size
+        integer(ip) :: required_wavetable_size
+        type(ScalarSynthesisUtility) :: util
 
-        ! Check calling arguments
-        ierror = 1
-        if (nlat < 3) return
-        ierror = 2
-        if (nlon < 4) return
-        ierror = 3
-        if (isym < 0 .or. isym > 2) return
-        ierror = 4
-        if (nt < 0) return
-        ierror = 5
-        imid = (nlat + 1)/2
-        if ((isym == 0 .and. idv<nlat) .or. &
-            (isym>0 .and. idv<imid)) return
-        ierror = 6
-        if (jdv < nlon) return
-        ierror = 7
-        if (mdb < min(nlat, (nlon + 1)/2)) return
-        mmax = min(nlat, (nlon+2)/2)
-        ierror = 8
-        if (ndb < nlat) return
-        ierror = 9
-        imid = (nlat + 1)/2
-        lpimn = (imid*mmax*(2*nlat-mmax+1))/2
-        !     check permanent workspace length
-        n1 = min(nlat, (nlon+2)/2)
-        n2 = (nlat + 1)/2
-        required_wavetable_size = nlat*(2*n2+3*n1-2)+3*n1*(1-n1)/2+nlon+15
+        ! Check input arguments
+        required_wavetable_size = util%get_lshsgc(nlat, nlon)
 
-        if (size(wshsgc) < required_wavetable_size) return
-        ierror = 0
+        call util%check_scalar_transform_inputs(isym, idv, jdv, &
+            mdb, ndb, nlat, nlon, nt, required_wavetable_size, &
+            wshsgc, ierror)
+
+        ! Check error flag
+        if (ierror /= 0) return
 
         call divergence_lower_utility_routine(nlat, nlon, isym, nt, dv, &
             idv, jdv, br, bi, wshsgc, shsgc, ierror)

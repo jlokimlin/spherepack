@@ -24,7 +24,7 @@ module vorticity_routines
     real(wp), parameter :: ZERO = 0.0_wp
     real(wp), parameter :: ONE = 1.0_wp
     real(wp), parameter :: TWO = 2.0_wp
-    real(wp), parameter :: SQRT2 = sqrt(TWO)
+    real(wp), parameter :: SQRT_2 = sqrt(TWO)
 
     ! Declare interfaces for submodule implementation
     interface
@@ -211,7 +211,7 @@ contains
         integer(ip), intent(in) :: k
         real(wp)                :: return_value
 
-        return_value = a(1, 1, k)/(TWO * SQRT2)
+        return_value = a(1, 1, k)/(TWO * SQRT_2)
 
     end function get_perturbation
 

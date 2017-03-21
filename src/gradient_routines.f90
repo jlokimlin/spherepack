@@ -4,11 +4,21 @@ module gradient_routines
         wp, & ! working precision
         ip ! integer precision
 
+    use spherepack_interfaces, only: &
+        scalar_synthesis, &
+        vector_synthesis
+
     use scalar_synthesis_routines, only: &
         shsec, shses, shsgc, shsgs
 
     use vector_synthesis_routines, only: &
         vhses, vhsec, vhsgc, vhsgs
+
+    use type_ScalarHarmonic, only: &
+        ScalarHarmonic
+
+    use type_VectorHarmonic, only: &
+        VectorHarmonic
 
     ! Explicit typing only
     implicit none
@@ -17,8 +27,8 @@ module gradient_routines
     private
     public :: gradec, grades, gradgc, gradgs
     public :: igradec, igrades, igradgc, igradgs
-    public :: perform_setup_for_inversion
-    public :: perform_setup_for_gradient
+    public :: gradient_lower_utility_routine
+    public :: invert_gradient_lower_utility_routine
 
     ! Parameters confined to the module
     real(wp), parameter :: ZERO = 0.0_wp
@@ -220,10 +230,12 @@ contains
             ! Preset coefficient multiplyers in vector
             call compute_coefficient_multipliers(sqnn)
 
+            ! Preset br, bi to 0.0
+            br = ZERO
+            bi = ZERO
+
             ! Compute multiple vector fields coefficients
             do k=1, nt
-                br(:, :, k) = ZERO
-                bi(:, :, k) = ZERO
 
                 ! Compute m = 0 coefficients
                 do n=2, nlat
@@ -301,5 +313,96 @@ contains
         end associate
 
     end subroutine perform_setup_for_inversion
+
+    subroutine gradient_lower_utility_routine(nlat, nlon, isym, nt, v, w, idvw, jdvw, a, b, &
+        wavetable, synth_routine, error_flag)
+
+        ! Dummy arguments
+        integer(ip), intent(in)     :: nlat
+        integer(ip), intent(in)     :: nlon
+        integer(ip), intent(in)     :: isym
+        integer(ip), intent(in)     :: nt
+        real(wp),    intent(out)    :: v(idvw, jdvw, nt)
+        real(wp),    intent(out)    :: w(idvw, jdvw, nt)
+        integer(ip), intent(in)     :: idvw
+        integer(ip), intent(in)     :: jdvw
+        real(wp),    intent(in)     :: a(:,:,:)
+        real(wp),    intent(in)     :: b(:,:,:)
+        real(wp),    intent(in)     :: wavetable(:)
+        procedure(vector_synthesis) :: synth_routine
+        integer(ip), intent(out)    :: error_flag
+
+        block
+            integer(ip)          :: ityp
+            real(wp)             :: sqnn(nlat)
+            type(VectorHarmonic) :: harmonic
+
+            ! Allocate memory
+            harmonic = VectorHarmonic(nlat, nlon, nt)
+
+            associate( &
+                br => harmonic%polar%real_component, &
+                bi => harmonic%polar%imaginary_component, &
+                cr => harmonic%azimuthal%real_component, &
+                ci => harmonic%azimuthal%imaginary_component, &
+                mdab => harmonic%ORDER_M, &
+                ndab => harmonic%DEGREE_N &
+                )
+
+                call perform_setup_for_gradient(isym, ityp, a, b, br, bi, sqnn)
+
+                ! Vector synthesize br, bi into irrotational (v, w)
+                call synth_routine(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
+                    mdab, ndab, wavetable, error_flag)
+
+                ! Release memory
+                call harmonic%destroy()
+            end associate
+        end block
+
+    end subroutine gradient_lower_utility_routine
+
+    subroutine invert_gradient_lower_utility_routine(nlat, nlon, isym, nt, sf, &
+        br, bi, wavetable, synth_routine, error_flag)
+
+        ! Dummy arguments
+        integer(ip), intent(in)     :: nlat
+        integer(ip), intent(in)     :: nlon
+        integer(ip), intent(in)     :: isym
+        integer(ip), intent(in)     :: nt
+        real(wp),    intent(out)    :: sf(:,:,:)
+        real(wp),    intent(in)     :: br(:,:,:)
+        real(wp),    intent(in)     :: bi(:,:,:)
+        real(wp),    intent(in)     :: wavetable(:)
+        procedure(scalar_synthesis) :: synth_routine
+        integer(ip), intent(out)    :: error_flag
+
+        block
+            real(wp)             :: sqnn(nlat)
+            type(ScalarHarmonic) :: harmonic
+
+            ! Allocate memory
+            harmonic = ScalarHarmonic(nlat, nlon, nt)
+
+            associate( &
+                a => harmonic%real_component, &
+                b => harmonic%imaginary_component, &
+                mab => harmonic%ORDER_M, &
+                isf => size(sf, dim=1), &
+                jsf => size(sf, dim=2) &
+                )
+
+                call perform_setup_for_inversion(nlon, a, b, br, bi, sqnn)
+
+                ! Synthesize a, b into divg
+                call synth_routine(nlat, nlon, isym, nt, sf, isf, jsf, a, b, &
+                    mab, nlat, wavetable, error_flag)
+            end associate
+
+            ! Release memory
+            call harmonic%destroy()
+        end block
+
+    end subroutine invert_gradient_lower_utility_routine
 
 end module gradient_routines
