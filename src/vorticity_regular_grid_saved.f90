@@ -163,30 +163,6 @@ contains
     !
     !               (l1*l2*(2*nlat-l1+1))/2+nlon+15
     !
-    !     work   a work array that does not have to be saved.
-    !
-    !    lwork   the dimension of the array work as it appears in the
-    !            program that calls vrtes. define
-    !
-    !               l1 = min(nlat, nlon/2) if nlon is even or
-    !               l1 = min(nlat, (nlon + 1)/2) if nlon is odd
-    !
-    !            and
-    !
-    !               l2 = nlat/2        if nlat is even or
-    !               l2 = (nlat + 1)/2    if nlat is odd.
-    !
-    !            if isym = 0 then lwork must be at least
-    !
-    !               nlat*((nt+1)*nlon+2*nt*l1+1)
-    !
-    !            if isym > 0 then lwork must be at least
-    !
-    !               (nt+1)*l2*nlon+nlat*(2*nt*l1+1)
-    !
-    !
-    !     **************************************************************
-    !
     !     output parameters
     !
     !
@@ -231,113 +207,22 @@ contains
         integer(ip), intent(out) :: ierror
 
         ! Local variables
-        integer(ip) :: imid, lpimn, ls, mab, lwork
-        integer(ip) :: mmax, mn, nln, required_wavetable_size
+        integer(ip)                  :: required_wavetable_size
+        type(ScalarSynthesisUtility) :: util
 
-        associate (lshses => size(wshses))
+        ! Check input arguments
+        required_wavetable_size = util%get_lshses(nlat, nlon)
 
-            ! Check calling arguments
-            ierror = 1
-            if (nlat < 3) return
-            ierror = 2
-            if (nlon < 4) return
-            ierror = 3
-            if (isym < 0 .or. isym > 2) return
-            ierror = 4
-            if (nt < 0) return
-            ierror = 5
-            imid = (nlat + 1)/2
-            if ((isym == 0 .and. ivrt<nlat) .or. &
-                (isym>0 .and. ivrt<imid)) return
-            ierror = 6
-            if (jvrt < nlon) return
-            ierror = 7
-            if (mdc < min(nlat, (nlon + 1)/2)) return
-            mmax = min(nlat, (nlon+2)/2)
-            ierror = 8
-            if (ndc < nlat) return
-            ierror = 9
-            imid = (nlat + 1)/2
-            lpimn = (imid*mmax*(2*nlat-mmax+1))/2
-            required_wavetable_size = lpimn+nlon+15
-            if (lshses < required_wavetable_size) return
-            ierror = 0
-            !
-            !     verify unsaved workspace (add to what shses requires, file f3)
-            !
-            !
-            !     set first dimension for a, b (as required by shses)
-            !
-            mab = min(nlat, nlon/2+1)
-            mn = mab*nlat*nt
+        call util%check_vector_transform_inputs(isym, ivrt, jvrt, &
+            mdc, ndc, nlat, nlon, nt, required_wavetable_size, &
+            wshses, ierror)
 
-            select case (isym)
-                case (0)
-                    ls = nlat
-                case default
-                    ls = imid
-            end select
+        ! Check error flag
+        if (ierror /= 0) return
 
-            nln = nt*ls*nlon
-            lwork = nln+ls*nlon+2*mn+nlat
-
-            block
-                integer(ip) :: ia, ib, iis, iwk, lwk
-                real(wp)    :: work(lwork)
-
-                ! Set workspace pointer indices
-                ia = 1
-                ib = ia+mn
-                iis = ib+mn
-                iwk = iis+nlat
-                lwk = lwork-2*mn-nlat
-
-                call vrtes_lower_utility_routine(nlat, nlon, isym, nt, vort, ivrt, &
-                    jvrt, cr, ci, mdc, ndc, work(ia:), work(ib:), mab, work(iis:), &
-                    wshses, lshses, work(iwk:), lwk, ierror)
-            end block
-        end associate
+        call vorticity_lower_utility_routine(nlat, nlon, isym, nt, vort, &
+            cr, ci, wshses, shses, ierror)
 
     end subroutine vrtes
-
-    subroutine vrtes_lower_utility_routine(nlat, nlon, isym, nt, vort, ivrt, jvrt, cr, ci, mdc, ndc, &
-        a, b, mab, sqnn, wsav, lwsav, wk, lwk, ierror)
-
-        real(wp) :: a
-        real(wp) :: b
-        real(wp) :: ci
-        real(wp) :: cr
-        
-        integer(ip) :: ierror
-        integer(ip) :: isym
-        integer(ip) :: ivrt
-        integer(ip) :: jvrt
-        
-        integer(ip) :: lwk
-        integer(ip) :: lwsav
-        
-        integer(ip) :: mab
-        integer(ip) :: mdc
-        
-        
-        integer(ip) :: ndc
-        integer(ip) :: nlat
-        integer(ip) :: nlon
-        integer(ip) :: nt
-        real(wp) :: sqnn
-        real(wp) :: vort
-        real(wp) :: wk
-        real(wp) :: wsav
-        dimension vort(ivrt, jvrt, nt), cr(mdc, ndc, nt), ci(mdc, ndc, nt)
-        dimension a(mab, nlat, nt), b(mab, nlat, nt), sqnn(nlat)
-        dimension wsav(lwsav), wk(lwk)
-
-        call perform_setup_for_vorticity(nlon, a, b, cr, ci, sqnn)
-
-        ! Synthesize a, b into vort
-        call shses(nlat, nlon, isym, nt, vort, ivrt, jvrt, a, b, &
-            mab, nlat, wsav, ierror)
-
-    end subroutine vrtes_lower_utility_routine
 
 end submodule vorticity_regular_grid_saved

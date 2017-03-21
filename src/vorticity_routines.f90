@@ -4,11 +4,23 @@ module vorticity_routines
         wp, & ! working precision
         ip ! integer precision
 
+    use spherepack_interfaces, only: &
+        scalar_synthesis, &
+        vector_synthesis
+
     use scalar_synthesis_routines, only: &
+        ScalarSynthesisUtility, &
         shsec, shses, shsgc, shsgs
 
     use vector_synthesis_routines, only: &
+        VectorSynthesisUtility, &
         vhses, vhsec, vhsgc, vhsgs
+
+    use type_ScalarHarmonic, only: &
+        ScalarHarmonic
+
+    use type_VectorHarmonic, only: &
+        VectorHarmonic
 
     ! Explicit typing only
     implicit none
@@ -17,8 +29,8 @@ module vorticity_routines
     private
     public :: vrtec, vrtes, vrtgc, vrtgs
     public :: ivrtec, ivrtes, ivrtgc, ivrtgs
-    public :: perform_setup_for_inversion
-    public :: perform_setup_for_vorticity
+    public :: vorticity_lower_utility_routine
+    public :: invert_vorticity_lower_utility_routine
 
     ! Parameters confined to the module
     real(wp), parameter :: ZERO = 0.0_wp
@@ -121,7 +133,7 @@ module vorticity_routines
             integer(ip), intent(in)  :: mdab
             integer(ip), intent(in)  :: ndab
             real(wp),    intent(out) :: wvhsec(:)
-            real(wp),    intent(out) :: pertrb(nt)
+            real(wp),    intent(out) :: pertrb(:)
             integer(ip), intent(out) :: ierror
         end subroutine ivrtec
 
@@ -142,7 +154,7 @@ module vorticity_routines
             integer(ip), intent(in)  :: mdab
             integer(ip), intent(in)  :: ndab
             real(wp),    intent(out) :: wvhses(:)
-            real(wp),    intent(out) :: pertrb(nt)
+            real(wp),    intent(out) :: pertrb(:)
             integer(ip), intent(out) :: ierror
         end subroutine ivrtes
 
@@ -163,7 +175,7 @@ module vorticity_routines
             integer(ip), intent(in)  :: mdab
             integer(ip), intent(in)  :: ndab
             real(wp),    intent(out) :: wvhsgc(:)
-            real(wp),    intent(out) :: pertrb(nt)
+            real(wp),    intent(out) :: pertrb(:)
             integer(ip), intent(out) :: ierror
         end subroutine ivrtgc
 
@@ -184,7 +196,7 @@ module vorticity_routines
             integer(ip), intent(in)  :: mdab
             integer(ip), intent(in)  :: ndab
             real(wp),    intent(out) :: wvhsgs(:)
-            real(wp),    intent(out) :: pertrb(nt)
+            real(wp),    intent(out) :: pertrb(:)
             integer(ip), intent(out) :: ierror
         end subroutine ivrtgs
     end interface
@@ -226,31 +238,33 @@ contains
         real(wp),    intent(out) :: sqnn(:)
 
         ! Local variables
-        integer(ip) :: k, n, m, mmax
+        integer(ip) :: k, n, m
 
         associate (&
-            nlat => size(sqnn), &
-            nt => size(a, dim=3) &
+            order_m => size(a, dim=1), &
+            degree_n => size(a, dim=2), &
+            number_of_syntheses => size(a, dim=3) &
             )
 
             ! Set coefficient multiplyers
             call compute_coefficient_multipliers(sqnn)
 
+            ! Preset coefficients to 0.0
+            a = ZERO
+            b = ZERO
+
             ! Compute vorticity scalar coefficients for each vector field
-            do k=1, nt
-                a(:, :, k) = ZERO
-                b(:, :, k) = ZERO
+            do k=1, number_of_syntheses
 
                 ! Compute m=0 coefficients
-                do n=2, nlat
+                do n=2, degree_n
                     a(1, n, k) = sqnn(n) * cr(1, n, k)
                     b(1, n, k) = sqnn(n) * ci(1, n, k)
                 end do
 
-                ! Compute m > 0 coefficients using vector spherepack value for mmax
-                mmax = min(nlat, (nlon + 1)/2)
-                do m=2, mmax
-                    do n=m, nlat
+                ! Compute m > 0 coefficients
+                do m=2, order_m
+                    do n=m, degree_n
                         a(m, n, k) = sqnn(n) * cr(m, n, k)
                         b(m, n, k) = sqnn(n) * ci(m, n, k)
                     end do
@@ -259,6 +273,49 @@ contains
         end associate
 
     end subroutine perform_setup_for_vorticity
+
+    subroutine vorticity_lower_utility_routine(nlat, nlon, isym, nt, vort, &
+        cr, ci, wavetable, synth_routine, error_flag)
+
+        ! Dummy arguments
+        integer(ip),                intent(in)  :: nlat
+        integer(ip),                intent(in)  :: nlon
+        integer(ip),                intent(in)  :: isym
+        integer(ip),                intent(in)  :: nt
+        real(wp), dimension(:,:,:), intent(out) :: vort
+        real(wp), dimension(:,:,:), intent(in)  :: cr, ci
+        real(wp),                   intent(in)  :: wavetable(:)
+        procedure(scalar_synthesis)             :: synth_routine
+        integer(ip),                intent(out) :: error_flag
+
+        block
+            real(wp)             :: sqnn(nlat)
+            type(ScalarHarmonic) :: harmonic
+
+            ! Allocate memory
+            harmonic = ScalarHarmonic(nlat, nlon, nt)
+
+            associate( &
+                ivrt => size(vort, dim=1), &
+                jvrt => size(vort, dim=2), &
+                a => harmonic%real_component, &
+                b => harmonic%imaginary_component, &
+                order_m => harmonic%ORDER_M, &
+                degree_n => harmonic%DEGREE_N &
+                )
+
+                call perform_setup_for_vorticity(nlon, a, b, cr, ci, sqnn)
+
+                ! Synthesize a, b into vort
+                call synth_routine(nlat, nlon, isym, nt, vort, ivrt, jvrt, &
+                    a, b, order_m, degree_n, wavetable, error_flag)
+            end associate
+
+            ! Release memory
+            call harmonic%destroy()
+        end block
+
+    end subroutine vorticity_lower_utility_routine
 
     pure subroutine perform_setup_for_inversion(isym, ityp, a, b, sqnn, pertrb, cr, ci)
 
@@ -276,33 +333,33 @@ contains
         integer(ip) :: k, n, m
 
         associate (&
-            mmax => size(cr, dim=1), &
-            nlat => size(cr, dim=2), &
-            nt => size(cr, dim=3) &
+            order_m => size(cr, dim=1), &
+            degree_n => size(cr, dim=2), &
+            number_of_syntheses => size(cr, dim=3) &
             )
 
             ! Preset coefficient multiplyers in vector
             call compute_coefficient_multipliers(sqnn)
 
+            ! Preset cr, ci to 0.0
+            cr = ZERO
+            ci = ZERO
+
             ! Compute multiple vector fields coefficients
-            do k=1, nt
+            do k=1, number_of_syntheses
 
                 ! Set vorticity field perturbation adjustment
                 pertrb(k) = get_perturbation(a, k)
 
-                ! Preset cr, ci to 0.0
-                cr(:, :, k) = ZERO
-                ci(:, :, k) = ZERO
-
                 ! Compute m = 0 coefficients
-                do n=2, nlat
+                do n=2, degree_n
                     cr(1, n, k) = a(1, n, k)/sqnn(n)
                     ci(1, n, k) = b(1, n, k)/sqnn(n)
                 end do
 
                 ! Compute m > 0 coefficients
-                do m=2, mmax
-                    do n=m, nlat
+                do m=2, order_m
+                    do n=m, degree_n
                         cr(m, n, k) = a(m, n, k)/sqnn(n)
                         ci(m, n, k) = b(m, n, k)/sqnn(n)
                     end do
@@ -321,5 +378,52 @@ contains
         end associate
 
     end subroutine perform_setup_for_inversion
+
+    subroutine invert_vorticity_lower_utility_routine(nlat, nlon, isym, nt, &
+        v, w, a, b, wavetable, perturbation, synth_routine, error_flag)
+
+        ! Dummy arguments
+        integer(ip),                intent(in)  :: nlat
+        integer(ip),                intent(in)  :: nlon
+        integer(ip),                intent(in)  :: isym
+        integer(ip),                intent(in)  :: nt
+        real(wp), dimension(:,:,:), intent(out) :: v, w
+        real(wp), dimension(:,:,:), intent(in)  :: a, b
+        real(wp),                   intent(in)  :: wavetable(:)
+        real(wp),                   intent(out) :: perturbation(:)
+        procedure(vector_synthesis)             :: synth_routine
+        integer(ip),                intent(out) :: error_flag
+
+        block
+            integer(ip)          :: ityp
+            real(wp)             :: sqnn(nlat)
+            type(VectorHarmonic) :: harmonic
+
+            ! Allocate memory
+            harmonic = VectorHarmonic(nlat, nlon, nt)
+
+            associate( &
+                idvw => size(v, dim=1), &
+                jdvw => size(w, dim=2), &
+                br => harmonic%polar%real_component, &
+                bi => harmonic%polar%imaginary_component, &
+                cr => harmonic%azimuthal%real_component, &
+                ci => harmonic%azimuthal%imaginary_component, &
+                order_m => harmonic%ORDER_M, &
+                degree_n => harmonic%DEGREE_N &
+                )
+
+                call perform_setup_for_inversion(isym, ityp, a, b, sqnn, perturbation, cr, ci)
+
+                ! Vector synthesize cr, ci into divergence free vector field (v, w)
+                call synth_routine(nlat, nlon, ityp, nt, v, w, idvw, jdvw, &
+                    br, bi, cr, ci, order_m, degree_n, wavetable, error_flag)
+            end associate
+
+            ! Release memory
+            call harmonic%destroy()
+        end block
+
+    end subroutine invert_vorticity_lower_utility_routine
 
 end module vorticity_routines

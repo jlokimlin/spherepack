@@ -184,7 +184,7 @@ use spherepack
 100 format(' helmholtz approximation on a ten degree grid' &
         /' nlat = ', i3, 2x, ' nlon = ', i3)
     call islapec(nlat, nlon, isym, nt, xlmbda, u, nlat, nlon, a, b, nlat, nlat, &
-        wshsec, lshsec, work, lwork, pertrb, ierror)
+        wshsec, pertrb, ierror)
     if (ierror /= 0) then
         write (6, 103) ierror
 103     format(' islapec, ierror = ', i2)
@@ -201,7 +201,7 @@ use spherepack
             z = sint(i)
             ez = exp(z)
             ue = (1.+x*y)*ez
-                errm = amax1(errm, abs(u(i, j)-ue))
+                errm = max(errm, abs(u(i, j)-ue))
         end do
     end do
     write (*, 204) xlmbda, pertrb, errm

@@ -232,118 +232,26 @@ contains
         integer(ip), intent(in)  :: mdab
         integer(ip), intent(in)  :: ndab
         real(wp),    intent(out) :: wvhses(:)
-        real(wp),    intent(out) :: pertrb(nt)
+        real(wp),    intent(out) :: pertrb(:)
         integer(ip), intent(out) :: ierror
 
         ! Local variables
-        integer(ip) :: imid, n1, n2, labc, lwork
-        integer(ip) :: required_wavetable_size
-        integer(ip) :: lzz1, mmax, mn
+        integer(ip)                  :: required_wavetable_size
+        type(VectorSynthesisUtility) :: util
 
-        associate (lvhses => size(wvhses))
+        ! Check input arguments
+        required_wavetable_size = util%get_lvhses(nlat, nlon)
 
-            ! Check calling arguments
-            ierror = 1
-            if (nlat < 3) return
-            ierror = 2
-            if (nlon < 4) return
-            ierror = 3
-            if (isym < 0 .or. isym > 2) return
-            ierror = 4
-            if (nt < 0) return
-            ierror = 5
-            imid = (nlat + 1)/2
-            if ((isym == 0 .and. idvw < nlat) &
-                .or. &
-                (isym /= 0 .and. idvw < imid)) return
-            ierror = 6
-            if (jdvw < nlon) return
-            ierror = 7
-            mmax = min(nlat, (nlon + 1)/2)
-            if (mdab < min(nlat, (nlon+2)/2)) return
-            ierror = 8
-            if (ndab < nlat) return
-            ierror = 9
-            lzz1 = 2*nlat*imid
-            labc = 3*(max(mmax-2, 0)*(2*nlat-mmax-1))/2
-            n1 = min(nlat, (nlon+2)/2)
-            n2 = (nlat + 1)/2
-            required_wavetable_size = (n1*n2*(2*nlat-n1+1))/2+nlon+15
-            if (lvhses < required_wavetable_size) return
-            ierror = 0
+        call util%check_vector_transform_inputs(isym, idvw, jdvw, &
+            mdab, ndab, nlat, nlon, nt, required_wavetable_size, &
+            wvhses, ierror)
 
-            ! Set required workspace size
-            mn = mmax*nlat*nt
+        ! Check error flag
+        if (ierror /= 0) return
 
-            select case (isym)
-                case (0)
-                    lwork = imid*(2*nt*nlon+max(6*nlat, nlon))+2*mn+nlat
-                case default
-                    lwork = nlat*(2*nt*nlon+max(6*imid, nlon))+2*mn+nlat
-            end select
-
-            block
-                integer(ip) :: icr, ici, iis, iwk, liwk
-                real(wp)    :: work(lwork)
-
-                ! Set workspace pointer indices
-                icr = 1
-                ici = icr + mn
-                iis = ici + mn
-                iwk = iis + nlat
-                liwk = lwork-2*mn-nlat
-
-                call ivrtes_lower_utility_routine(nlat, nlon, isym, nt, v, w, idvw, &
-                    jdvw, work(icr:), work(ici:), mmax, work(iis:), mdab, ndab, a, b, &
-                    wvhses, lvhses, work(iwk:), liwk, pertrb, ierror)
-            end block
-        end associate
+        call invert_vorticity_lower_utility_routine(nlat, nlon, isym, nt, &
+            v, w, a, b, wvhses, pertrb, vhses, ierror)
 
     end subroutine ivrtes
-
-    subroutine ivrtes_lower_utility_routine(nlat, nlon, isym, nt, v, w, idvw, jdvw, cr, ci, mmax, &
-        sqnn, mdab, ndab, a, b, wsav, lwsav, wk, lwk, pertrb, ierror)
-
-        real(wp) :: a
-        real(wp) :: b
-        real(wp) :: bi(mmax, nlat, nt)
-        real(wp) :: br(mmax, nlat, nt)
-        real(wp) :: ci
-        real(wp) :: cr
-        
-        integer(ip) :: idvw
-        integer(ip) :: ierror
-        integer(ip) :: isym
-        integer(ip) :: ityp
-        integer(ip) :: jdvw
-        
-        integer(ip) :: lwk
-        integer(ip) :: lwsav
-        
-        integer(ip) :: mdab
-        integer(ip) :: mmax
-        
-        integer(ip) :: ndab
-        integer(ip) :: nlat
-        integer(ip) :: nlon
-        integer(ip) :: nt
-        real(wp) :: pertrb
-        real(wp) :: sqnn
-        real(wp) :: v
-        real(wp) :: w
-        real(wp) :: wk
-        real(wp) :: wsav
-        dimension v(idvw, jdvw, nt), w(idvw, jdvw, nt), pertrb(nt)
-        dimension cr(mmax, nlat, nt), ci(mmax, nlat, nt), sqnn(nlat)
-        dimension a(mdab, ndab, nt), b(mdab, ndab, nt)
-        dimension wsav(lwsav), wk(lwk)
-
-        call perform_setup_for_inversion(isym, ityp, a, b, sqnn, pertrb, cr, ci)
-
-        ! Vector synthesize cr, ci into divergence free vector field (v, w)
-        call vhses(nlat, nlon, ityp, nt, v, w, idvw, jdvw, br, bi, cr, ci, &
-            mmax, nlat, wsav, ierror)
-
-    end subroutine ivrtes_lower_utility_routine
 
 end submodule invert_vorticity_regular_grid_saved

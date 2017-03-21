@@ -9,7 +9,7 @@
 !     *                                                               *
 !     *                          Spherepack                           *
 !     *                                                               *
-!     *       A Package of Fortran77 Subroutines and Programs         *
+!     *       A Package of Fortran Subroutines and Programs           *
 !     *                                                               *
 !     *              for Modeling Geophysical Processes               *
 !     *                                                               *
@@ -44,10 +44,12 @@
 !     (4) compute the inverse  of (2) and compare with (1)
 !
 program tslap
-use spherepack
+
+    use spherepack
+
+    ! Explicit typing only
     implicit none
-    real(wp) :: a
-    real(wp) :: b
+
     real(wp) :: cosp
     real(wp) :: cost
     real(wp) :: d2xdp2
@@ -68,109 +70,65 @@ use spherepack
     real(wp) :: err2s
     integer(ip) :: i
     integer(ip) :: icase
-    integer(ip) :: ier
-    integer(ip) :: ierror
-    integer(ip) :: isym
+    integer(ip) :: error_flag
     integer(ip) :: j
     integer(ip) :: k
-    integer(ip) :: ldwork
-    integer(ip) :: lldwork
-    integer(ip) :: lleng
-    integer(ip) :: llsav
-    integer(ip) :: lsave
-    integer(ip) :: lwork
-    integer(ip) :: mdab
-    integer(ip) :: mmdab
-    integer(ip) :: nlat
-    integer(ip) :: nlon
-    integer(ip) :: nnlat
-    integer(ip) :: nnlon
-    integer(ip) :: nnt
-    integer(ip) :: nt
     real(wp) :: phi
-
-    real(wp) :: ptrb
-    real(wp) :: s
-    real(wp) :: sclp
-    real(wp) :: sclpe
-    real(wp) :: se
     real(wp) :: sinp
     real(wp) :: sint
     real(wp) :: theta
-    real(wp) :: thetag
-    real(wp) :: work
-    real(wp) :: wsave
     real(wp) :: x
-    real(wp) :: xlm
     real(wp) :: y
     real(wp) :: z
-    parameter(nnlat=15, nnlon= 22, nnt = 3)
-    parameter (mmdab = (nnlon+2)/2)
+    integer(ip), parameter :: nlat=15, nlon= 22, nt = 3
+    integer(ip), parameter :: mdab = (nlon+2)/2
+    integer(ip), parameter :: isym = 0
+    real(wp), allocatable  :: wavetable(:)
+    real(wp), dimension(mdab, nlat, nt) :: a, b
+    real(wp), dimension(nlat, nlon, nt) :: s, se, sclp, sclpe
+    real(wp), dimension(nt)             :: perturbation, xlm
+    real(wp), dimension(nlat)           :: gaussian_latitudes, gaussian_weights
+    real(wp), parameter                 :: ZERO = 0.0_wp, TWO = 2.0_wp
 
-    parameter (lleng=15*nnlat*nnlat*nnlon, llsav=5*nnlat*nnlat*nnlon)
-    dimension work(lleng), wsave(llsav)
-    parameter (lldwork = nnlat*(nnlat+4))
-    
-    dimension a(mmdab, nnlat, nnt), b(mmdab, nnlat, nnt), s(nnlat, nnlon, nnt)
-    dimension sclp(nnlat, nnlon, nnt)
-    dimension sclpe(nnlat, nnlon, nnt)
-    dimension ptrb(nnt), xlm(nnt)
-    dimension thetag(nnlat), dtheta(nnlat), dwts(nnlat)
-    real dtheta, dwts
-    !
-    !     set dimension variables
-    !
-    nlat = nnlat
-    nlon = nnlon
-    mdab = mmdab
-    lwork = lleng
-    lsave = llsav
-    nt = nnt
+    ! Print dimension variables
     call iout(nlat, "nlat")
     call iout(nlon, "nlon")
     call iout(nt, "  nt")
-    isym = 0
-    !
-    !     set equally spaced colatitude and longitude increments
-    !
-    dphi = (pi+pi)/nlon
-    dlat = pi/(nlat-1)
-    !
-    !     compute nlat gaussian points in thetag
-    !
-    ldwork = lldwork
-    call compute_gaussian_latitudes_and_weights(nlat, dtheta, dwts, ier)
-    do  i=1, nlat
-        thetag(i) = dtheta(i)
-    end do
-    call name("gaqd")
-    call iout(ier, " ier")
-    call vecout(thetag, "thtg", nlat)
-    !
-    !     set helmholtz constant zero for laplacian inversion
-    !
-    do k=1, nt
-        xlm(k) = 0.0
-    end do
-    !
-    !     test all analysis and synthesis subroutines
-    !
+
+    ! Set equally spaced colatitude and longitude increments
+    dphi = TWO_PI/nlon
+    dlat = PI/(nlat-1)
+
+    ! Compute nlat-many gaussian points
+    call compute_gaussian_latitudes_and_weights(nlat, &
+        gaussian_latitudes, gaussian_weights, error_flag)
+
+    call name("compute_gaussian_latitudes_and_weights")
+    call iout(error_flag, " error_flag = ")
+    call vecout(gaussian_latitudes, "gaussian_latitudes", nlat)
+
+    ! Set helmholtz constant zero for laplacian inversion
+    xlm = ZERO
+
+    ! Test all laplacian and inversion routines
     do icase=1, 4
         call name("****")
         call name("****")
         call iout(icase, "icas")
-        !
-        !
-        !     set scalar field as poly in x, y, z restricted to the sphere
-        !
+
+        ! Set scalar field as poly in x, y, z restricted to the sphere
         do k=1, nt
             do j=1, nlon
-                phi = (j-1)*dphi
+                phi = real(j - 1, kind=wp) * dphi
                 sinp = sin(phi)
                 cosp = cos(phi)
                 do i=1, nlat
-                    theta = (i-1)*dlat
-                    if (icase>2) theta=thetag(i)
+                    select case (icase)
+                        case(0:2)
+                            theta = real(i - 1, kind=wp) * dlat
+                        case default
+                            theta = gaussian_latitudes(i)
+                    end select
                     cost = cos(theta)
                     sint = sin(theta)
                     x = sint*cosp
@@ -186,232 +144,185 @@ use spherepack
                     d2ydp2 = -y
                     dzdt = -sint
                     d2zdt2 = -z
-                    dzdp = 0.
-                    d2zdp2 = 0.
+                    dzdp = ZERO
+                    d2zdp2 = ZERO
                     select case (k)
-                    	case (1)
-                    		s(i, j, k) = x+y
-                    		sclpe(i, j, k) = -2.*(x+y)
-                    	case (2)
-                    		s(i, j, k) = x+z
-                    		sclpe(i, j, k) = -2.*(x+z)
-                    	case (3)
-                    		s(i, j, k) = y+z
-                    		sclpe(i, j, k) = -2.*(y+z)
+                        case (1)
+                            s(i, j, k) = x+y
+                            sclpe(i, j, k) = -TWO * (x+y)
+                        case (2)
+                            s(i, j, k) = x+z
+                            sclpe(i, j, k) = -TWO * (x+z)
+                        case (3)
+                            s(i, j, k) = y+z
+                            sclpe(i, j, k) = -TWO * (y+z)
                     end select
                 end do
             end do
         end do
-        !     do k=1, nt
-        !     call iout(k, "   k")
-        !     call aout(s(1, 1, k), "   s", nlat, nlon)
-        !     call aout(sclpe(1, 1, k), "sclp", nlat, nlon)
-        !     end do
 
-        !     call aout(s, "   s", nlat, nlon)
-
+        ! Store exact solution
+        se = s
 
         select case (icase)
-        	case (1)
+            case (1)
         		
-        		call name("**ec")
+                call name("**ec")
         		
-        		call shaeci(nlat, nlon, wsave, ierror)
-        		call name("shai")
-        		call iout(ierror, "ierr")
+                call initialize_shaec(nlat, nlon, wavetable, error_flag)
+                call name("shai")
+                call iout(error_flag, "error_flag = ")
         		
-        		call shaec(nlat, nlon, isym, nt, s, nlat, nlon, a, b, mdab, nlat, wsave, ierror)
-        		call name("sha ")
-        		call iout(ierror, "ierr")
+                call shaec(nlat, nlon, isym, nt, s, nlat, nlon, a, b, mdab, nlat, wavetable, error_flag)
+                call name("sha ")
+                call iout(error_flag, "error_flag = ")
         		
-        		call shseci(nlat, nlon, wsave, ierror)
-        		call name("shsi")
-        		call iout(ierror, "ierr")
+                call initialize_shsec(nlat, nlon, wavetable, error_flag)
+                call name("shsi")
+                call iout(error_flag, "error_flag = ")
         		
-        		call slapec(nlat, nlon, isym, nt, sclp, nlat, nlon, a, b, mdab, nlat, &
-        		wsave, lsave, work, lwork, ierror)
-        		call name("slap")
-        		call iout(ierror, "ierr")
-        	case (2)
+                call slapec(nlat, nlon, isym, nt, sclp, nlat, nlon, a, b, mdab, nlat, &
+                    wavetable, error_flag)
+                call name("slap")
+                call iout(error_flag, "error_flag = ")
+            case (2)
         		
-        		call name("**es")
+                call name("**es")
         		
-        		call shaesi(nlat, nlon, wsave, ierror)
-        		call name("shai")
-        		call iout(ierror, "ierr")
+                call initialize_shaes(nlat, nlon, wavetable, error_flag)
+                call name("shai")
+                call iout(error_flag, "error_flag = ")
         		
-        		call shaes(nlat, nlon, isym, nt, s, nlat, nlon, a, b, mdab, nlat, wsave, ierror)
-        		call name("sha ")
-        		call iout(ierror, "ierr")
+                call shaes(nlat, nlon, isym, nt, s, nlat, nlon, a, b, mdab, nlat, wavetable, error_flag)
+                call name("sha ")
+                call iout(error_flag, "error_flag = ")
         		
-        		call shsesi(nlat, nlon, wsave, ierror)
-        		call name("shsi")
-        		call iout(ierror, "ierr")
+                call initialize_shses(nlat, nlon, wavetable, error_flag)
+                call name("shsi")
+                call iout(error_flag, "error_flag = ")
         		
-        		call slapes(nlat, nlon, isym, nt, sclp, nlat, nlon, a, b, mdab, nlat, &
-        		wsave, lsave, work, lwork, ierror)
-        		call name("slap")
-        		call iout(ierror, "ierr")
-        	case (3)
+                call slapes(nlat, nlon, isym, nt, sclp, nlat, nlon, a, b, mdab, nlat, &
+                    wavetable, error_flag)
+                call name("slap")
+                call iout(error_flag, "error_flag = ")
+            case (3)
         		
-        		call name("**gc")
+                call name("**gc")
         		
-        		call shagci(nlat, nlon, wsave, ierror)
-        		call name("shai")
-        		call iout(ierror, "ierr")
+                call initialize_shagc(nlat, nlon, wavetable, error_flag)
+                call name("shai")
+                call iout(error_flag, "error_flag = ")
         		
-        		call shagc(nlat, nlon, isym, nt, s, nlat, nlon, a, b, mdab, nlat, wsave, ierror)
-        		call name("sha ")
-        		call iout(ierror, "ierr")
+                call shagc(nlat, nlon, isym, nt, s, nlat, nlon, a, b, mdab, nlat, wavetable, error_flag)
+                call name("sha ")
+                call iout(error_flag, "error_flag = ")
         		
-        		call shsgci(nlat, nlon, wsave, ierror)
-        		call name("shsi")
-        		call iout(ierror, "ierr")
+                call initialize_shsgc(nlat, nlon, wavetable, error_flag)
+                call name("shsi")
+                call iout(error_flag, "error_flag = ")
         		
-        		call slapgc(nlat, nlon, isym, nt, sclp, nlat, nlon, a, b, mdab, nlat, &
-        		wsave, lsave, work, lwork, ierror)
-        		call name("slap")
-        		call iout(ierror, "ierr")
-        	case (4)
+                call slapgc(nlat, nlon, isym, nt, sclp, nlat, nlon, a, b, mdab, nlat, &
+                    wavetable, error_flag)
+                call name("slap")
+                call iout(error_flag, "error_flag = ")
+            case (4)
         		
-        		call name("**gs")
+                call name("**gs")
         		
-        		call shagsi(nlat, nlon, wsave, ierror)
-        		call name("shai")
-        		call iout(ierror, "ierr")
+                call initialize_shags(nlat, nlon, wavetable, error_flag)
+                call name("shai")
+                call iout(error_flag, "error_flag = ")
         		
-        		call shags(nlat, nlon, isym, nt, s, nlat, nlon, a, b, mdab, nlat, wsave, ierror)
-        		call name("sha ")
-        		call iout(ierror, "ierr")
+                call shags(nlat, nlon, isym, nt, s, nlat, nlon, a, b, mdab, nlat, wavetable, error_flag)
+                call name("sha ")
+                call iout(error_flag, "error_flag = ")
         		
-        		call shsgsi(nlat, nlon, wsave, ierror)
-        		call name("shsi")
-        		call iout(ierror, "ierr")
+                call initialize_shsgs(nlat, nlon, wavetable, error_flag)
+                call name("shsi")
+                call iout(error_flag, "error_flag = ")
         		
-        		call slapgs(nlat, nlon, isym, nt, sclp, nlat, nlon, a, b, mdab, nlat, &
-        		wsave, lsave, work, lwork, ierror)
-        		call name("slap")
-        		call iout(ierror, "ierr")
+                call slapgs(nlat, nlon, isym, nt, sclp, nlat, nlon, a, b, mdab, nlat, &
+                    wavetable, error_flag)
+                call name("slap")
+                call iout(error_flag, "error_flag = ")
         end select
-        !
-        !     compute "error" in sclp
-        !
-        err2 = 0.0
-        do k=1, nt
-            do j=1, nlon
-                do i=1, nlat
-                    err2 = err2 + (sclpe(i, j, k)-sclp(i, j, k))**2
-                end do
-            end do
-        !     call iout(k, "   k")
-        !     call aout(sclp(1, 1, k), "sclp", nlat, nlon)
-        end do
-        err2 = sqrt(err2/(nt*nlat*nlon))
+
+        ! Compute discretization error" in sclp
+        err2 = norm2(sclpe - sclp)
         call vout(err2, "err2")
-        !
-        !     invert sclp
-        !
+
+        ! invert sclp
+        s = ZERO
         select case (icase)
-        	case (1)
+            case (1)
         		
-        		call shaeci(nlat, nlon, wsave, ierror)
-        		call shaec(nlat, nlon, isym, nt, sclp, nlat, nlon, a, b, mdab, nlat, &
-        		wsave, ierror)
+                call initialize_shaec(nlat, nlon, wavetable, error_flag)
+                call shaec(nlat, nlon, isym, nt, sclp, nlat, nlon, a, b, mdab, nlat, &
+                    wavetable, error_flag)
         		
-        		call shseci(nlat, nlon, wsave, ierror)
-        		call name("shsi")
-        		call iout(ierror, "ierr")
+                call initialize_shsec(nlat, nlon, wavetable, error_flag)
+                call name("shsi")
+                call iout(error_flag, "error_flag = ")
         		
-        		call islapec(nlat, nlon, isym, nt, xlm, s, nlat, nlon, a, b, mdab, nlat, &
-        		wsave, lsave, work, lwork, ptrb, ierror)
-        		call name("isla")
-        		call iout(ierror, "ierr")
-        		call vecout(ptrb, "ptrb", nt)
-        	case (2)
+                call islapec(nlat, nlon, isym, nt, xlm, s, nlat, nlon, a, b, mdab, nlat, &
+                    wavetable, perturbation, error_flag)
+                call name("isla")
+                call iout(error_flag, "error_flag = ")
+                call vecout(perturbation, "perturbation = ", nt)
+            case (2)
         		
-        		call shaesi(nlat, nlon, wsave, ierror)
-        		call shaes(nlat, nlon, isym, nt, sclp, nlat, nlon, a, b, mdab, nlat, &
-        		wsave, ierror)
+                call initialize_shaes(nlat, nlon, wavetable, error_flag)
+                call shaes(nlat, nlon, isym, nt, sclp, nlat, nlon, a, b, mdab, nlat, &
+                    wavetable, error_flag)
         		
-        		call shsesi(nlat, nlon, wsave, ierror)
-        		call name("shsi")
-        		call iout(ierror, "ierr")
+                call initialize_shses(nlat, nlon, wavetable, error_flag)
+                call name("shsi")
+                call iout(error_flag, "error_flag = ")
         		
-        		call islapes(nlat, nlon, isym, nt, xlm, s, nlat, nlon, a, b, mdab, nlat, &
-        		wsave, lsave, work, lwork, ptrb, ierror)
-        		call name("isla")
-        		call iout(ierror, "ierr")
-        		call vecout(ptrb, "ptrb", nt)
-        	case (3)
+                call islapes(nlat, nlon, isym, nt, xlm, s, nlat, nlon, a, b, mdab, nlat, &
+                    wavetable, perturbation, error_flag)
+                call name("isla")
+                call iout(error_flag, "error_flag = ")
+                call vecout(perturbation, "perturbation = ", nt)
+            case (3)
         		
-        		call shagci(nlat, nlon, wsave, ierror)
-        		call shagc(nlat, nlon, isym, nt, sclp, nlat, nlon, a, b, mdab, nlat, wsave, ierror)
+                call initialize_shagc(nlat, nlon, wavetable, error_flag)
+                call shagc(nlat, nlon, isym, nt, sclp, nlat, nlon, a, b, mdab, nlat, wavetable, error_flag)
         		
-        		call shsgci(nlat, nlon, wsave, ierror)
-        		call name("shsi")
-        		call iout(ierror, "ierr")
+                call initialize_shsgc(nlat, nlon, wavetable, error_flag)
+                call name("shsi")
+                call iout(error_flag, "error_flag = ")
         		
-        		call islapgc(nlat, nlon, isym, nt, xlm, s, nlat, nlon, a, b, mdab, nlat, &
-        		wsave, lsave, work, lwork, ptrb, ierror)
-        		call name("isla")
-        		call iout(ierror, "ierr")
-        		call vecout(ptrb, "ptrb", nt)
-        	case (4)
+                call islapgc(nlat, nlon, isym, nt, xlm, s, nlat, nlon, a, b, mdab, nlat, &
+                    wavetable, perturbation, error_flag)
+                call name("isla")
+                call iout(error_flag, "error_flag = ")
+                call vecout(perturbation, "perturbation = ", nt)
+            case (4)
         		
-        		call name("**gs")
+                call name("**gs")
         		
-        		call shagsi(nlat, nlon, wsave, ierror)
-        		call shags(nlat, nlon, isym, nt, sclp, nlat, nlon, a, b, mdab, nlat, &
-        		wsave, ierror)
+                call initialize_shags(nlat, nlon, wavetable, error_flag)
+                call shags(nlat, nlon, isym, nt, sclp, nlat, nlon, a, b, mdab, nlat, &
+                    wavetable, error_flag)
         		
-        		call shsgsi(nlat, nlon, wsave, ierror)
-        		call name("shsi")
-        		call iout(ierror, "ierr")
+                call initialize_shsgs(nlat, nlon, wavetable, error_flag)
+                call name("shsi")
+                call iout(error_flag, "error_flag = ")
         		
-        		call islapgs(nlat, nlon, isym, nt, xlm, s, nlat, nlon, a, b, mdab, nlat, &
-        		wsave, lsave, work, lwork, ptrb, ierror)
-        		call name("isla")
-        		call iout(ierror, "ierr")
-        		call vecout(ptrb, "ptrb", nt)
+                call islapgs(nlat, nlon, isym, nt, xlm, s, nlat, nlon, a, b, mdab, nlat, &
+                    wavetable, perturbation, error_flag)
+                call name("isla")
+                call iout(error_flag, "error_flag = ")
+                call vecout(perturbation, "perturbation = ", nt)
         end select
 
-        !     call aout(s, "   s", nlat, nlon)
-
-
-        !
-        !     compare s with original
-        !
-        err2s = 0.0
-        do k=1, nt
-            do j=1, nlon
-                phi = (j-1)*dphi
-                sinp = sin(phi)
-                cosp = cos(phi)
-                do i=1, nlat
-                    theta = (i-1)*dlat
-                    if (icase>2) theta=thetag(i)
-                    cost = cos(theta)
-                    sint = sin(theta)
-                    x = sint*cosp
-                    y = sint*sinp
-                    z = cost
-                    select case (k)
-                    	case (1)
-                    		se = x+y
-                    	case (2)
-                    		se = x+z
-                    	case (3)
-                    		se = y+z
-                    end select
-                    err2s = err2s+(s(i, j, k) - se)**2
-                end do
-            end do
-        end do
-        err2s = sqrt(err2s/(nlat*nlon*nt))
+        ! Compare s with original
+        err2s = norm2(se - s)
         call vout(err2s, "errs")
-    !
-    !     end of icase loop
-    !
     end do
+
+    ! Release memory
+    deallocate (wavetable)
 
 end program tslap

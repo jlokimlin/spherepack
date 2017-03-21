@@ -551,7 +551,7 @@ contains
         integer(ip) :: ityp
         integer(ip) :: iv
         integer(ip) :: iw
-        integer(ip) :: j
+        
         integer(ip) :: jdvw
         integer(ip) :: k
         integer(ip) :: m

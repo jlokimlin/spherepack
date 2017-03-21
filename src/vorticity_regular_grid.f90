@@ -207,123 +207,22 @@ contains
         integer(ip), intent(out) :: ierror
 
         ! Local variables
-        integer(ip) :: imid, n1, n2, labc
-        integer(ip) :: ls, lwork, lzz1, mab
-        integer(ip) :: mmax, mn, nln, required_wavetable_size
+        integer(ip)                  :: required_wavetable_size
+        type(ScalarSynthesisUtility) :: util
 
-        associate (lshsec => size(wshsec))
+        ! Check input arguments
+        required_wavetable_size = util%get_lshsec(nlat, nlon)
 
-            ! Check calling arguments
-            ierror = 1
-            if (nlat < 3) return
-            ierror = 2
-            if (nlon < 4) return
-            ierror = 3
-            if (isym < 0 .or. isym > 2) return
-            ierror = 4
-            if (nt < 0) return
-            ierror = 5
-            imid = (nlat + 1)/2
-            if ((isym == 0 .and. ivrt<nlat) .or. &
-                (isym>0 .and. ivrt<imid)) return
-            ierror = 6
-            if (jvrt < nlon) return
-            ierror = 7
-            if (mdc < min(nlat, (nlon + 1)/2)) return
-            mmax = min(nlat, (nlon+2)/2)
-            ierror = 8
-            if (ndc < nlat) return
-            ierror = 9
-            !
-            !     verify saved workspace (same as shec)
-            !
-            lzz1 = 2*nlat*imid
-            labc = 3*(max(mmax-2, 0)*(2*nlat-mmax-1))/2
-            required_wavetable_size = lzz1+labc+nlon+15
-            if (lshsec < required_wavetable_size) return
-            ierror = 0
-            !
-            !     verify unsaved workspace (add to what shec requires)
-            select case (isym)
-                case (0)
-                    ls = nlat
-                case default
-                    ls = imid
-            end select
+        call util%check_vector_transform_inputs(isym, ivrt, jvrt, &
+            mdc, ndc, nlat, nlon, nt, required_wavetable_size, &
+            wshsec, ierror)
 
-            nln = nt*ls*nlon
-            !
-            !     set first dimension for a, b (as required by shsec)
-            !
-            mab = min(nlat, nlon/2+1)
-            mn = mab*nlat*nt
-            n1 = min(nlat, (nlon+2)/2)
-            n2 = (nlat + 1)/2
+        ! Check error flag
+        if (ierror /= 0) return
 
-            select case (isym)
-                case (0)
-                    lwork = nlat*(nt*nlon+max(3*n2, nlon)+2*nt*n1+1)
-                case default
-                    lwork = n2*(nt*nlon+max(3*nlat, nlon)) + nlat*(2*nt*n1+1)
-            end select
-
-            block
-                integer(ip) :: ia, ib, iis, iwk, lwk
-                real(wp)    :: work(lwork)
-
-                ! Set workspace pointer indices
-                ia = 1
-                ib = ia+mn
-                iis = ib+mn
-                iwk = iis+nlat
-                lwk = lwork-2*mn-nlat
-
-                call vrtec_lower_utility_routine(nlat, nlon, isym, nt, vort, ivrt, &
-                    jvrt, cr, ci, mdc, ndc, work(ia:), work(ib:), mab, work(iis:), &
-                    wshsec, lshsec, work(iwk:), lwk, ierror)
-            end block
-        end associate
+        call vorticity_lower_utility_routine(nlat, nlon, isym, nt, vort, &
+            cr, ci, wshsec, shsec, ierror)
 
     end subroutine vrtec
-
-    subroutine vrtec_lower_utility_routine(nlat, nlon, isym, nt, vort, ivrt, jvrt, cr, ci, mdc, ndc, &
-        a, b, mab, sqnn, wshsec, lshsec, wk, lwk, ierror)
-
-        real(wp) :: a
-        real(wp) :: b
-        real(wp) :: ci
-        real(wp) :: cr
-        
-        integer(ip) :: ierror
-        integer(ip) :: isym
-        integer(ip) :: ivrt
-        integer(ip) :: jvrt
-        
-        integer(ip) :: lshsec
-        integer(ip) :: lwk
-        
-        integer(ip) :: mab
-        integer(ip) :: mdc
-        
-        
-        integer(ip) :: ndc
-        integer(ip) :: nlat
-        integer(ip) :: nlon
-        integer(ip) :: nt
-        real(wp) :: sqnn
-        real(wp) :: vort
-        real(wp) :: wk
-        real(wp) :: wshsec
-        dimension vort(ivrt, jvrt, nt), cr(mdc, ndc, nt), ci(mdc, ndc, nt)
-        dimension a(mab, nlat, nt), b(mab, nlat, nt), sqnn(nlat)
-        dimension wshsec(lshsec), wk(lwk)
-
-        call perform_setup_for_vorticity(nlon, a, b, cr, ci, sqnn)
-
-        ! Synthesize a, b into vort
-        call shsec(nlat, nlon, isym, nt, vort, ivrt, jvrt, a, b, &
-            mab, nlat, wshsec, ierror)
-
-    end subroutine vrtec_lower_utility_routine
 
 end submodule vorticity_regular_grid

@@ -212,7 +212,7 @@ contains
         ! Check input arguments
         required_wavetable_size = util%get_lshsgc(nlat, nlon)
 
-        call util%check_scalar_transform_inputs(isym, idv, jdv, &
+        call util%check_vector_transform_inputs(isym, idv, jdv, &
             mdb, ndb, nlat, nlon, nt, required_wavetable_size, &
             wshsgc, ierror)
 
