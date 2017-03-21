@@ -419,8 +419,8 @@ contains
 
     end subroutine shaesi
 
-    subroutine shaes_lower_utility_routine(nlat, isym, nt, g, idgs, jdgs, a, b, mdab, ndab, &
-        z, idz, idg, jdg, g_even, g_odd, whrfft)
+    subroutine shaes_lower_utility_routine(nlat, isym, nt, g, idgs, jdgs, &
+        a, b, mdab, ndab, z, idz, idg, jdg, g_even, g_odd, whrfft)
 
         ! Dummy arguments
         integer(ip), intent(in)  :: nlat
@@ -439,53 +439,47 @@ contains
         integer(ip), intent(in)  :: jdg
         real(wp),    intent(out) :: g_even(idg, jdg, nt)
         real(wp),    intent(out) :: g_odd(idg, jdg, nt)
-        real(wp),    intent(in)  :: whrfft(*)
+        real(wp),    intent(in)  :: whrfft(:)
 
         ! Local variables
-        integer(ip)    :: i, k, m, mb, ls, mp1, np1, mp2, mdo, ndo
-        integer(ip)    :: imm1, nlp1, imid, modl, mmax, nlon
-        real(wp)       :: fsn, tsn
+        integer(ip)             :: i, k, m, mb, ls, mp1, np1, mp2
+        integer(ip)             :: order_stride, degree_stride
+        integer(ip)             :: imm1, imid, m_trunc, nlon
+        real(wp)                :: fsn, tsn
         type(SpherepackUtility) :: util
 
         ls = idg
         nlon = jdg
-        mmax = min(nlat, nlon/2+1)
+        m_trunc = min(nlat, nlon/2+1)
 
-        if (2*mmax-1 > nlon) then
-            mdo = mmax-1
+        if (2*m_trunc-1 > nlon) then
+            order_stride = m_trunc-1
         else
-            mdo = mmax
+            order_stride = m_trunc
         end if
 
-        nlp1 = nlat+1
         tsn = TWO/nlon
         fsn = FOUR/nlon
         imid = (nlat + 1)/2
-        modl = mod(nlat, 2)
 
-        select case (modl)
-            case(0)
-                imm1 = imid
-            case default
-                imm1 = imid-1
-        end select
+        if (even(nlat)) then
+            imm1 = imid
+        else
+            imm1 = imid-1
+        end if
 
         select case (isym)
             case(0)
-                do k=1, nt
-                    do i=1, imm1
-                        g_even(i, 1:nlon, k) = tsn*(g(i, 1:nlon, k)+g(nlp1-i, 1:nlon, k))
-                        g_odd(i, 1:nlon, k) = tsn*(g(i, 1:nlon, k)-g(nlp1-i, 1:nlon, k))
-                    end do
+                do i=1, imm1
+                    g_even(i, 1:nlon, :) = tsn * (g(i, 1:nlon, :) + g((nlat + 1)-i, 1:nlon, :))
+                    g_odd(i, 1:nlon, :) = tsn * (g(i, 1:nlon, :) - g((nlat + 1)-i, 1:nlon, :))
                 end do
             case default
                 g_even(1:imm1, 1:nlon, :) = fsn * g(1:imm1, 1:nlon, :)
         end select
 
         if ((isym /= 1) .and. odd(nlat)) then
-            do k=1, nt
-                g_even(imid, 1:nlon, k) = tsn*g(imid, 1:nlon, k)
-            end do
+            g_even(imid, 1:nlon, :) = tsn * g(imid, 1:nlon, :)
         end if
 
         !  Fast Fourier Transform
@@ -513,19 +507,18 @@ contains
                 end do
             end do
 
-            select case (mod(nlat, 2))
-                case(0)
-                    ndo = nlat-1
-                case default
-                    ndo = nlat
-            end select
+            if (even(nlat)) then
+                degree_stride = nlat-1
+            else
+                degree_stride = nlat
+            end if
 
-            do mp1=2, mdo
+            do mp1=2, order_stride
                 m = mp1-1
                 mb = m*(nlat-1)-(m*(m-1))/2
                 do k=1, nt
                     do i=1, imid
-                        do np1=mp1, ndo, 2
+                        do np1=mp1, degree_stride, 2
                             a(mp1, np1, k) = a(mp1, np1, k)+z(np1+mb, i)*g_even(i, 2*mp1-2, k)
                             b(mp1, np1, k) = b(mp1, np1, k)+z(np1+mb, i)*g_even(i, 2*mp1-1, k)
                         end do
@@ -533,12 +526,12 @@ contains
                 end do
             end do
 
-            if (mdo /= mmax .and. mmax <= ndo) then
-                mb = mdo*(nlat-1)-(mdo*(mdo-1))/2
+            if (order_stride /= m_trunc .and. m_trunc <= degree_stride) then
+                mb = order_stride*(nlat-1)-(order_stride*(order_stride-1))/2
                 do k=1, nt
                     do i=1, imid
-                        do np1=mmax, ndo, 2
-                            a(mmax, np1, k) = a(mmax, np1, k)+z(np1+mb, i)*g_even(i, 2*mmax-2, k)
+                        do np1=m_trunc, degree_stride, 2
+                            a(m_trunc, np1, k) = a(m_trunc, np1, k)+z(np1+mb, i)*g_even(i, 2*m_trunc-2, k)
                         end do
                     end do
                 end do
@@ -554,20 +547,19 @@ contains
             end do
         end do
 
-        select case (mod(nlat, 2))
-            case(0)
-                ndo = nlat
-            case default
-                ndo = nlat-1
-        end select
+        if (even(nlat)) then
+            degree_stride = nlat
+        else
+            degree_stride = nlat-1
+        end if
 
-        do mp1=2, mdo
+        do mp1=2, order_stride
             m = mp1-1
             mp2 = mp1+1
             mb = m*(nlat-1)-(m*(m-1))/2
             do k=1, nt
                 do i=1, imm1
-                    do np1=mp2, ndo, 2
+                    do np1=mp2, degree_stride, 2
                         a(mp1, np1, k) = a(mp1, np1, k)+z(np1+mb, i)*g_odd(i, 2*mp1-2, k)
                         b(mp1, np1, k) = b(mp1, np1, k)+z(np1+mb, i)*g_odd(i, 2*mp1-1, k)
                     end do
@@ -575,13 +567,13 @@ contains
             end do
         end do
 
-        mp2 = mmax+1
-        if (mdo /= mmax .and. mp2 <= ndo) then
-            mb = mdo*(nlat-1)-(mdo*(mdo-1))/2
+        mp2 = m_trunc+1
+        if (order_stride /= m_trunc .and. mp2 <= degree_stride) then
+            mb = order_stride*(nlat-1)-(order_stride*(order_stride-1))/2
             do k=1, nt
                 do i=1, imm1
-                    do np1=mp2, ndo, 2
-                        a(mmax, np1, k) = a(mmax, np1, k)+z(np1+mb, i)*g_odd(i, 2*mmax-2, k)
+                    do np1=mp2, degree_stride, 2
+                        a(m_trunc, np1, k) = a(m_trunc, np1, k)+z(np1+mb, i)*g_odd(i, 2*m_trunc-2, k)
                     end do
                 end do
             end do

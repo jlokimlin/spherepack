@@ -556,7 +556,7 @@ contains
 
     end function get_legin_imndx
 
-    subroutine zfin(isym, nlat, nlon, m, z, i3, wzfin)
+    subroutine zfin(isym, nlat, nlon, m, z, indx, wzfin)
 
         ! Dummy arguments
         integer(ip), intent(in)     :: isym
@@ -564,34 +564,30 @@ contains
         integer(ip), intent(in)     :: nlon
         integer(ip), intent(in)     :: m
         real(wp),    intent(out)    :: z(:,:,:)
-        integer(ip), intent(inout)  :: i3
-        real(wp),    intent(in)     :: wzfin(*)
+        integer(ip), intent(inout)  :: indx(:)
+        real(wp),    intent(in)     :: wzfin(*) !  The length of wzfin is 2*lim+3*labc
 
         ! Local variables
-        integer(ip) :: imid
-        integer(ip) :: workspace(4)
+        integer(ip) :: imid, lim, mmax, labc
+        integer(ip) :: iw1, iw2, iw3, iw4
 
         imid = (nlat + 1)/2
-        !
-        !  The length of wzfin is 2*lim+3*labc
-        !
-        workspace = get_zfin_workspace_indices(nlat, nlon, imid)
+        lim = nlat*imid
+        mmax = min(nlat, nlon/2 + 1)
+        labc = ((mmax - 2) * (2*nlat - mmax - 1))/2
 
-        associate (&
-            iw1 => workspace(1), &
-            iw2 => workspace(2), &
-            iw3 => workspace(3), &
-            iw4 => workspace(4) &
-            )
+        ! Set index pointers
+        iw1 = lim + 1
+        iw2 = iw1 + lim
+        iw3 = iw2 + labc
+        iw4 = iw3 + labc
 
-            call zfin_lower_utility_routine(isym, nlat, m, z, imid, i3, wzfin, &
-                wzfin(iw1), wzfin(iw2), wzfin(iw3), wzfin(iw4))
-
-        end associate
+        call zfin_lower_utility_routine(isym, nlat, m, z, imid, indx, wzfin, &
+            wzfin(iw1), wzfin(iw2), wzfin(iw3), wzfin(iw4))
 
     end subroutine zfin
 
-    subroutine zfin_lower_utility_routine(isym, nlat, m, z, imid, i3, zz, z1, a, b, c)
+    subroutine zfin_lower_utility_routine(isym, nlat, m, z, imid, indx, zz, z1, a, b, c)
 
         ! Dummy arguments
         integer(ip), intent(in)     :: isym
@@ -599,7 +595,7 @@ contains
         integer(ip), intent(in)     :: m
         real(wp),    intent(out)    :: z(imid, nlat, 3)
         integer(ip), intent(in)     :: imid
-        integer(ip), intent(inout)  :: i3
+        integer(ip), intent(inout)  :: indx(:)
         real(wp),    intent(in)     :: zz(imid, *)
         real(wp),    intent(in)     :: z1(imid, *)
         real(wp),    intent(in)     :: a(*)
@@ -607,80 +603,59 @@ contains
         real(wp),    intent(in)     :: c(*)
 
         ! Local variables
-        integer(ip), save :: i1, i2
-        integer(ip)       :: ns, np1, nstp, itemp, nstrt
+        integer(ip) :: ns, np1, nstp, itemp, nstrt
 
-        itemp = i1
-        i1 = i2
-        i2 = i3
-        i3 = itemp
+        itemp = indx(1)
+        indx(1) = indx(2)
+        indx(2) = indx(3)
+        indx(3) = itemp
 
         select case (m)
             case(:0)
-                i1 = 1
-                i2 = 2
-                i3 = 3
-                z(:, 1:nlat, i3) = zz(:, 1:nlat)
+                indx(1) = 1
+                indx(2) = 2
+                indx(3) = 3
+                z(:, 1:nlat, indx(3)) = zz(:, 1:nlat)
             case(1)
-                z(:, 2:nlat, i3) = z1(:, 2:nlat)
+                z(:, 2:nlat, indx(3)) = z1(:, 2:nlat)
             case default
                 ns = ((m-2)*(2*nlat-m-1))/2+1
 
                 if (isym /= 1) then
-                    z(:, m+1, i3) = a(ns)*z(:, m-1, i1)-c(ns)*z(:, m+1, i1)
+                    z(:, m+1, indx(3)) = a(ns)*z(:, m-1, indx(1))-c(ns)*z(:, m+1, indx(1))
                 end if
 
                 if (m == nlat-1) return
 
                 if (isym /= 2) then
                     ns = ns+1
-                    z(:, m+2, i3) = a(ns)*z(:, m, i1) -c(ns)*z(:, m+2, i1)
+                    z(:, m+2, indx(3)) = a(ns)*z(:, m, indx(1)) -c(ns)*z(:, m+2, indx(1))
                 end if
 
-                nstrt = m+3
-
-                if (isym == 1) nstrt = m+4
+                if (isym == 1) then
+                    nstrt = m+4
+                else
+                    nstrt = m+3
+                end if
 
                 if (nstrt > nlat) return
 
-                nstp = 2
+                if (isym == 0) then
+                    nstp = 1
+                else
+                    nstp = 2
+                end if
 
-                if (isym == 0) nstp = 1
-
-                do np1=nstrt, nlat, nstp
-                    ns = ns+nstp
-                    z(:, np1, i3) = &
-                        a(ns)*z(:, np1-2, i1)+b(ns)*z(:, np1-2, i3)-c(ns)*z(:, np1, i1)
+                do np1 = nstrt, nlat, nstp
+                    ns = ns + nstp
+                    z(:, np1, indx(3)) = &
+                        a(ns) * z(:, np1-2, indx(1)) &
+                        + b(ns) * z(:, np1-2, indx(3)) &
+                        - c(ns) * z(:, np1, indx(1))
                 end do
         end select
 
     end subroutine zfin_lower_utility_routine
-
-    pure function get_zfin_workspace_indices(nlat, nlon, imid) &
-        result (return_value)
-
-        ! Dummy arguments
-        integer(ip), intent(in) :: nlat
-        integer(ip), intent(in) :: nlon
-        integer(ip), intent(in) :: imid
-        integer(ip)              :: return_value(4)
-
-        ! Local variables
-        integer(ip) :: mmax, lim, labc
-
-        associate (i => return_value)
-
-            mmax = min(nlat, nlon/2+1)
-            lim = nlat*imid
-            labc = ((mmax-2)*(2*nlat-mmax-1))/2
-            i(1) = lim+1
-            i(2) = i(1)+lim
-            i(3) = i(2)+labc
-            i(4) = i(3)+labc
-
-        end associate
-
-    end function get_zfin_workspace_indices
 
     ! Remarks:
     !
@@ -1280,7 +1255,8 @@ contains
         real(wp),    intent(out)  :: wzfin(*)
 
         ! Local variables
-        integer(ip) :: m, i3, mn, mp1, np1, mmax
+        integer(ip) :: m, mn, mp1, np1, mmax
+        integer(ip) :: i3(3)
 
         call initialize_scalar_analysis_regular_grid(nlat, nlon, wzfin)
 
@@ -1291,7 +1267,7 @@ contains
             call zfin(0, nlat, nlon, m, zin, i3, wzfin)
             do np1=mp1, nlat
                 mn = m*(nlat-1)-(m*(m-1))/2+np1
-                z(mn, 1:imid) = zin(:, np1, i3)
+                z(mn, 1:imid) = zin(:, np1, i3(3))
             end do
         end do
 

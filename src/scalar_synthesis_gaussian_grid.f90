@@ -209,7 +209,7 @@ contains
         integer(ip), intent(out) :: ierror
 
         ! Local variables
-        integer(ip) :: mtrunc, l1, l2, lat, late, lwork
+        integer(ip)             :: mtrunc, lat, late
         integer(ip)             :: required_wavetable_size
         type(SpherepackUtility) :: util
 
@@ -237,26 +237,11 @@ contains
                 lat = late
         end select
 
-        l1 = mtrunc
-        l2 = late
-
-        ! Set required workspace size
-        select case (mode)
-            case (0)
-                lwork = nlat * (nlon * nt + max(3*l2, nlon))
-            case default
-                lwork = l2 * (nlon * nt + max(3*nlat, nlon))
-        end select
-
         block
-            real(wp)    :: work(lwork)
-            integer(ip) :: ipmn, ifft
+            integer(ip) :: ifft
 
             ! Starting address  fft values
             ifft = nlat+2*nlat*late+3*(mtrunc*(mtrunc-1)/2+(nlat-mtrunc)*(mtrunc-1))+1
-
-            ! Set pointers for internal storage of g and legendre polys
-            ipmn = lat*nlon*nt+1
 
             call shsgc_lower_utility_routine(nlat, nlon, mtrunc, lat, mode, g, idg, &
                 jdg, nt, a, b, mdab, ndab, wshsgc, wshsgc(ifft:), late)
@@ -420,7 +405,7 @@ contains
         integer(ip) :: i
         integer(ip) :: idg
         integer(ip) :: is
-        integer(ip) :: j
+        
         integer(ip) :: jdg
         integer(ip) :: k
         integer(ip) :: km
